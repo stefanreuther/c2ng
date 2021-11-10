@@ -364,9 +364,8 @@ interpreter::vmio::AssemblerSaveContext::formatLiteral(const afl::data::Value* v
                     try {
                         TagNode tag;
                         afl::io::NullStream aux;
-                        afl::charset::Utf8Charset cs;
                         NullSaveContext ctx;
-                        bv->store(tag, aux, cs, ctx);
+                        bv->store(tag, aux, ctx);
                         if (aux.getSize() != 0) {
                             // FIXME: log: tag with aux value
                         }

@@ -210,18 +210,18 @@ interpreter::vmio::FileSaveContext::getNumPreparedObjects() const
 
 // Add process object.
 void
-interpreter::vmio::FileSaveContext::addProcess(Process& proc)
+interpreter::vmio::FileSaveContext::addProcess(const Process& proc)
 {
     // ex IntVMSaveContext::addProcess
     class ProcessSaver : public Saver {
      public:
-        ProcessSaver(Process& p)
+        ProcessSaver(const Process& p)
             : m_process(p)
             { }
         virtual void save(afl::io::Stream& out, FileSaveContext& parent)
             { parent.saveProcess(out, m_process); }
      private:
-        Process& m_process;
+        const Process& m_process;
     };
     addPlanNew(new ProcessSaver(proc));
 }
@@ -622,7 +622,7 @@ interpreter::vmio::FileSaveContext::saveProcess(afl::io::Stream& out, const Proc
     // Property 4: contexts (data segment)
     const afl::container::PtrVector<Context>& contexts = proc.getContexts();
     so.startProperty(uint32_t(contexts.size()));
-    SaveVisitor::saveContexts(out, contexts, m_charset, childContext);
+    SaveVisitor::saveContexts(out, contexts, childContext);
     so.endProperty();
 
     // Property 5: exceptions (counts = number, size = 16xcount)

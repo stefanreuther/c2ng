@@ -8,7 +8,6 @@
 
 #include "t_interpreter.hpp"
 #include "afl/io/internalsink.hpp"
-#include "afl/charset/utf8charset.hpp"
 #include "interpreter/savecontext.hpp"
 
 /** Simple test. */
@@ -47,9 +46,8 @@ TestInterpreterStructureType::testIt()
         
         interpreter::TagNode out;
         afl::io::InternalSink aux;
-        afl::charset::Utf8Charset cs;
         TestSaveContext ctx;
-        TS_ASSERT_THROWS_NOTHING(testee.store(out, aux, cs, ctx));
+        TS_ASSERT_THROWS_NOTHING(testee.store(out, aux, ctx));
         TS_ASSERT_EQUALS(out.tag, interpreter::TagNode::Tag_StructType);
         TS_ASSERT_EQUALS(out.value, 42U);
     }

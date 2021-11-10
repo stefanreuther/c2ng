@@ -20,7 +20,7 @@ namespace client { namespace si {
 
         virtual game::map::Object* getObject();
         virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext& ctx) const;
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
         const WidgetReference& getValue() const;
 

@@ -146,7 +146,7 @@ game::interface::IonStormContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::IonStormContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::IonStormContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntIonContext::store
     out.tag = out.Tag_Ion;

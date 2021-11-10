@@ -156,7 +156,7 @@ game::interface::DrawingContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::DrawingContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::DrawingContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntDrawingContext::store
     throw interpreter::Error::notSerializable();

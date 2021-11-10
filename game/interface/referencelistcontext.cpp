@@ -117,8 +117,8 @@ class game::interface::ReferenceListContext::IterableReferenceContext : public i
         { return m_child->enumProperties(acceptor); }
     virtual String_t toString(bool readable) const
         { return m_child->toString(readable); }
-    virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext& ctx) const
-        { return m_child->store(out, aux, cs, ctx); }
+    virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
+        { return m_child->store(out, aux, ctx); }
 
     /* Implementation of next() to iterate through the ref::List */
     virtual bool next()
@@ -201,7 +201,7 @@ class game::interface::ReferenceListContext::ObjectArrayValue : public interpret
     // BaseValue:
     virtual String_t toString(bool /*readable*/) const
         { return "#<array>"; }
-    virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+    virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
         { throw interpreter::Error::notSerializable(); }
 
  private:
@@ -270,7 +270,7 @@ game::interface::ReferenceListContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::ReferenceListContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::ReferenceListContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     throw interpreter::Error::notSerializable();
 }

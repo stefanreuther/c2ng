@@ -393,7 +393,7 @@ game::interface::ShipContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::ShipContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::ShipContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntShipContext::store
     out.tag = out.Tag_Ship;

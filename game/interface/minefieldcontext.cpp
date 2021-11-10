@@ -162,7 +162,7 @@ game::interface::MinefieldContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::MinefieldContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::MinefieldContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntMinefieldContext::store
     out.tag   = out.Tag_Minefield;

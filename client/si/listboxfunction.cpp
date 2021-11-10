@@ -32,7 +32,7 @@ client::si::ListboxFunction::toString(bool /*readable*/) const
 }
 
 void
-client::si::ListboxFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+client::si::ListboxFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     throw interpreter::Error::notSerializable();
 }

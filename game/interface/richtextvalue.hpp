@@ -21,7 +21,7 @@ namespace game { namespace interface {
 
         // BaseValue:
         virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext& ctx) const;
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
         // Value:
         virtual RichTextValue* clone() const;

@@ -82,7 +82,7 @@ TestInterpreterValues::testOtherToString()
      public:
         virtual String_t toString(bool readable) const
             { return readable ? "READ" : "NON"; }
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
             { }
         virtual TheBaseValue* clone() const
             { return new TheBaseValue(); }

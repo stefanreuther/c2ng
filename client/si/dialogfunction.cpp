@@ -27,7 +27,7 @@ client::si::DialogFunction::toString(bool /*readable*/) const
 }
 
 void
-client::si::DialogFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+client::si::DialogFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     throw interpreter::Error::notSerializable();
 }

@@ -85,7 +85,7 @@ namespace {
         // BaseValue:
         virtual String_t toString(bool /*readable*/) const
             { return "#<hashIterator>"; }
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
             { throw interpreter::Error::notSerializable(); }
 
         // Value:
@@ -168,7 +168,7 @@ interpreter::HashValue::toString(bool /*readable*/) const
 }
 
 void
-interpreter::HashValue::store(TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext& ctx) const
+interpreter::HashValue::store(TagNode& out, afl::io::DataSink& /*aux*/, SaveContext& ctx) const
 {
     // ex IntHash::store
     out.tag = TagNode::Tag_Hash;

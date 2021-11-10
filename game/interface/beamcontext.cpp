@@ -123,7 +123,7 @@ game::interface::BeamContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::BeamContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::BeamContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     out.tag = out.Tag_Beam;
     out.value = m_number;

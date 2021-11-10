@@ -23,7 +23,7 @@ namespace {
         virtual game::map::Object* getObject();
         virtual void enumProperties(interpreter::PropertyAcceptor& acceptor);
         virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext& ctx) const;
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
      private:
         size_t m_index;
@@ -88,7 +88,7 @@ InboxSubsetContext::toString(bool /*readable*/) const
 }
 
 void
-InboxSubsetContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+InboxSubsetContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     throw interpreter::Error::notSerializable();
 }
@@ -177,7 +177,7 @@ game::interface::InboxSubsetValue::toString(bool /*readable*/) const
 }
 
 void
-game::interface::InboxSubsetValue::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::InboxSubsetValue::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     throw interpreter::Error::notSerializable();
 }

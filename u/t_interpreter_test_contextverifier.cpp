@@ -78,7 +78,7 @@ namespace {
         virtual String_t toString(bool /*readable*/) const
             { return "#<TestContext>"; }
 
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
             { TS_FAIL("unexpected: store"); }
      private:
         String_t m_name;

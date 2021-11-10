@@ -21,7 +21,7 @@ namespace interpreter {
 
         // BaseValue:
         virtual String_t toString(bool readable) const;
-        virtual void store(TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, SaveContext& ctx) const;
+        virtual void store(TagNode& out, afl::io::DataSink& aux, SaveContext& ctx) const;
 
         // Value:
         virtual BlobValue* clone() const;

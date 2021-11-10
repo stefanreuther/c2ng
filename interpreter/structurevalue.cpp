@@ -37,7 +37,7 @@ interpreter::StructureValue::toString(bool /*readable*/) const
 }
 
 void
-interpreter::StructureValue::store(TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext& ctx) const
+interpreter::StructureValue::store(TagNode& out, afl::io::DataSink& /*aux*/, SaveContext& ctx) const
 {
     // ex IntStructureValue::store
     out.tag   = TagNode::Tag_Struct;

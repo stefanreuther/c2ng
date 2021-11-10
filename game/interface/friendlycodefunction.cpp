@@ -85,7 +85,7 @@ game::interface::FriendlyCodeFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::FriendlyCodeFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::FriendlyCodeFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     throw interpreter::Error::notSerializable();
 }

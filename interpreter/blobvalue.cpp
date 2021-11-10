@@ -23,7 +23,7 @@ interpreter::BlobValue::toString(bool /*readable*/) const
 }
 
 void
-interpreter::BlobValue::store(TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& /*cs*/, SaveContext& /*ctx*/) const
+interpreter::BlobValue::store(TagNode& out, afl::io::DataSink& aux, SaveContext& /*ctx*/) const
 {
     // ex IntBlobValue::store
     // Limit to 4G to avoid messing up file formats.

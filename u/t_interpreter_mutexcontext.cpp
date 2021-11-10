@@ -6,7 +6,6 @@
 #include "interpreter/mutexcontext.hpp"
 
 #include "t_interpreter.hpp"
-#include "afl/charset/utf8charset.hpp"
 #include "afl/io/internalsink.hpp"
 #include "interpreter/mutexlist.hpp"
 #include "interpreter/propertyacceptor.hpp"
@@ -45,10 +44,9 @@ TestInterpreterMutexContext::testSave()
     // Save it
     interpreter::TagNode tag;
     afl::io::InternalSink aux;
-    afl::charset::Utf8Charset cs;
     MySaveContext sc;
 
-    TS_ASSERT_THROWS_NOTHING(testee.store(tag, aux, cs, sc));
+    TS_ASSERT_THROWS_NOTHING(testee.store(tag, aux, sc));
 
     TS_ASSERT_EQUALS(tag.tag, interpreter::TagNode::Tag_Mutex);
     TS_ASSERT_EQUALS(tag.value, 0U);

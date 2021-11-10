@@ -32,7 +32,7 @@ namespace interpreter {
 
         // BaseValue:
         virtual String_t toString(bool readable) const;
-        virtual void store(TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, SaveContext& ctx) const;
+        virtual void store(TagNode& out, afl::io::DataSink& aux, SaveContext& ctx) const;
         virtual GenericValue* clone() const;
 
         /** Access contained value.
@@ -64,7 +64,7 @@ interpreter::GenericValue<T>::toString(bool /*readable*/) const
 
 template<typename T>
 void
-interpreter::GenericValue<T>::store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext& /*ctx*/) const
+interpreter::GenericValue<T>::store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, SaveContext& /*ctx*/) const
 {
     throw Error::notSerializable();
 }

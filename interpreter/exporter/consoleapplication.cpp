@@ -60,7 +60,7 @@ namespace {
 
         // BaseValue:
         virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext& ctx) const;
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
         // PropertyAcceptor:
         virtual void addProperty(const String_t& name, interpreter::TypeHint th);
@@ -154,7 +154,7 @@ namespace {
         return "#<meta>";
     }
 
-    void MetaContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+    void MetaContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
     {
         throw interpreter::Error::notSerializable();
     }

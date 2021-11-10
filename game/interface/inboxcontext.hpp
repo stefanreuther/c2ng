@@ -36,7 +36,7 @@ namespace game { namespace interface {
         virtual game::map::Object* getObject();
         virtual void enumProperties(interpreter::PropertyAcceptor& acceptor);
         virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext& ctx) const;
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
      private:
         const game::msg::Mailbox& mailbox();

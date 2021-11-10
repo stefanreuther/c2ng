@@ -76,7 +76,7 @@ class interpreter::test::ExpressionVerifier::TestContext : public SingleContext,
         { }
     virtual TestContext* clone() const
         { return new TestContext(m_parent); }
-    virtual void store(TagNode&, afl::io::DataSink&, afl::charset::Charset&, SaveContext&) const
+    virtual void store(TagNode&, afl::io::DataSink&, SaveContext&) const
         { throw Error::notSerializable(); }
 
  private:

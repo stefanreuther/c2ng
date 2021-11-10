@@ -1014,7 +1014,7 @@ TestInterpreterUnaryExecution::testIsProcedure()
             { return new TestCV(m_isProc); }
         virtual String_t toString(bool) const
             { TS_FAIL("toString"); return String_t(); }
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
             { TS_FAIL("store"); }
      private:
         bool m_isProc;
@@ -1097,7 +1097,7 @@ TestInterpreterUnaryExecution::testIsArray()
             { return new TestCV(m_numDims); }
         virtual String_t toString(bool) const
             { TS_FAIL("toString"); return String_t(); }
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
             { TS_FAIL("store"); }
      private:
         int32_t m_numDims;

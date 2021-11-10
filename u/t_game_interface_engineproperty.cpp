@@ -7,7 +7,6 @@
 
 #include <memory>
 #include "t_game_interface.hpp"
-#include "afl/charset/utf8charset.hpp"
 #include "afl/data/access.hpp"
 #include "afl/data/integervalue.hpp"
 #include "afl/io/internalsink.hpp"
@@ -56,9 +55,8 @@ TestGameInterfaceEngineProperty::testGet()
     {
         interpreter::TagNode n;
         afl::io::InternalSink sink;
-        afl::charset::Utf8Charset cs;
         interpreter::vmio::NullSaveContext ctx;
-        TS_ASSERT_THROWS(iv->store(n, sink, cs, ctx), interpreter::Error);
+        TS_ASSERT_THROWS(iv->store(n, sink, ctx), interpreter::Error);
     }
 
     // - accessing values

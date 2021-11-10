@@ -87,7 +87,7 @@ interpreter::MutexContext::toString(bool /*readable*/) const
 
 /* Store implementation. */
 void
-interpreter::MutexContext::store(TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& /*cs*/, SaveContext& ctx) const
+interpreter::MutexContext::store(TagNode& out, afl::io::DataSink& aux, SaveContext& ctx) const
 {
     // Storage format is:
     //   tag is flag

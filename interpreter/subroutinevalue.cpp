@@ -67,7 +67,7 @@ interpreter::SubroutineValue::toString(bool /*readable*/) const
 }
 
 void
-interpreter::SubroutineValue::store(TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext& ctx) const
+interpreter::SubroutineValue::store(TagNode& out, afl::io::DataSink& /*aux*/, SaveContext& ctx) const
 {
     // ex IntSubroutineValue::store
     out.tag   = TagNode::Tag_BCO;

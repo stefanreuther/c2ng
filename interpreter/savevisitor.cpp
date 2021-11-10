@@ -5,14 +5,14 @@
 #include <algorithm>
 #include <math.h>               // import into global namespace
 #include "interpreter/savevisitor.hpp"
-#include "interpreter/tagnode.hpp"
-#include "interpreter/error.hpp"
-#include "interpreter/basevalue.hpp"
-#include "afl/io/internalsink.hpp"
-#include "afl/bits/value.hpp"
 #include "afl/bits/int16le.hpp"
 #include "afl/bits/int32le.hpp"
+#include "afl/bits/value.hpp"
+#include "afl/io/internalsink.hpp"
+#include "interpreter/basevalue.hpp"
 #include "interpreter/context.hpp"
+#include "interpreter/error.hpp"
+#include "interpreter/tagnode.hpp"
 #include "util/io.hpp"
 
 /* Fallback implementation of isnan.
@@ -191,7 +191,7 @@ interpreter::SaveVisitor::visitOther(const afl::data::Value& other)
     if (bv == 0) {
         throw Error(Error::notSerializable());
     }
-    bv->store(m_out, m_aux, m_charset, m_context);
+    bv->store(m_out, m_aux, m_context);
 }
 
 void
@@ -237,18 +237,11 @@ interpreter::SaveVisitor::save(afl::io::DataSink& out,
     out.handleFullData(aux.getContent());
 }
 
-// /** Save context list into stream.
-//     \param out      [out] Stream
-//     \param contexts [in] Contexts to save
-//     \throws FileProblemException upon I/O error
-//     \throws IntError if a context cannot be serialized
-
-//     This is a very stripped-down version of IntDataSegment::save,
-//     which assumes contexts are never null. */
+// Save contexts.
 void
 interpreter::SaveVisitor::saveContexts(afl::io::DataSink& out,
                                        const afl::container::PtrVector<interpreter::Context>& contexts,
-                                       afl::charset::Charset& cs, SaveContext& ctx)
+                                       SaveContext& ctx)
 {
     // ex int/contextio.h:saveContexts
     // Collect headers in one sink, aux data in another
@@ -258,7 +251,7 @@ interpreter::SaveVisitor::saveContexts(afl::io::DataSink& out,
     for (size_t i = 0, n = contexts.size(); i < n; ++i) {
         // Generate single entry
         TagNode node;
-        contexts[i]->store(node, aux, cs, ctx);
+        contexts[i]->store(node, aux, ctx);
 
         // Serialize tag node
         afl::bits::Value<afl::bits::Int16LE> packedTag;
@@ -274,9 +267,7 @@ interpreter::SaveVisitor::saveContexts(afl::io::DataSink& out,
     out.handleFullData(aux.getContent());
 }
 
-// /** Store name list to stream.
-//     \param s Stream to save to
-//     \param count Number of names to save. Must be <= getNumNames(). */
+// Save name list.
 void
 interpreter::SaveVisitor::saveNames(afl::io::DataSink& out, const afl::data::NameMap& names, size_t slots, afl::charset::Charset& cs)
 {

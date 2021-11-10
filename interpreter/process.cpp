@@ -119,7 +119,7 @@ class interpreter::Process::FrameContext : public SingleContext, public Context:
     // BaseValue:
     virtual String_t toString(bool /*readable*/) const
         { return "#<stack-frame>"; }
-    virtual void store(TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext& /*ctx*/) const
+    virtual void store(TagNode& out, afl::io::DataSink& /*aux*/, SaveContext& /*ctx*/) const
         {
             uint32_t packedSP = static_cast<uint32_t>(m_frame.frameSP);
             if (packedSP != m_frame.frameSP) {

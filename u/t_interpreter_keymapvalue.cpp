@@ -9,7 +9,6 @@
 #include "t_interpreter.hpp"
 #include "util/keymap.hpp"
 #include "afl/io/internalsink.hpp"
-#include "afl/charset/utf8charset.hpp"
 #include "interpreter/vmio/nullsavecontext.hpp"
 #include "interpreter/error.hpp"
 
@@ -42,9 +41,8 @@ TestInterpreterKeymapValue::testIt()
     // Store
     interpreter::TagNode out;
     afl::io::InternalSink aux;
-    afl::charset::Utf8Charset cs;
     interpreter::vmio::NullSaveContext ctx;
-    TS_ASSERT_THROWS(testee.store(out, aux, cs, ctx), interpreter::Error);
+    TS_ASSERT_THROWS(testee.store(out, aux, ctx), interpreter::Error);
 }
 
 /** Test makeKeymapValue(). */

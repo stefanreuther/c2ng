@@ -35,7 +35,7 @@ namespace game { namespace interface {
         virtual interpreter::Context* makeFirstContext();
         virtual InboxSubsetValue* clone() const;
         virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext& ctx) const;
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
         static InboxSubsetValue* create(const std::vector<size_t>& indexes, afl::string::Translator& tx, afl::base::Ref<const Root> root, afl::base::Ref<const Game> game);
 

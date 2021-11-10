@@ -7,7 +7,6 @@
 
 #include <memory>
 #include "t_interpreter.hpp"
-#include "afl/charset/utf8charset.hpp"
 #include "afl/io/internalsink.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/tagnode.hpp"
@@ -27,9 +26,8 @@ TestInterpreterGenericValue::testIt()
     {
         interpreter::TagNode n;
         afl::io::InternalSink sink;
-        afl::charset::Utf8Charset cs;
         interpreter::vmio::NullSaveContext sc;
-        TS_ASSERT_THROWS(testee.store(n, sink, cs, sc), interpreter::Error);
+        TS_ASSERT_THROWS(testee.store(n, sink, sc), interpreter::Error);
     }
 
     // Clone, receiving base class

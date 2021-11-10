@@ -46,7 +46,7 @@ namespace {
 
         // BaseValue:
         virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext& ctx) const;
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
         // Value:
         virtual PlanetArrayProperty* clone() const;
@@ -134,7 +134,7 @@ PlanetArrayProperty::toString(bool /*readable*/) const
 }
 
 void
-PlanetArrayProperty::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+PlanetArrayProperty::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex PlanetArrayProperty::store
     throw Error::notSerializable();

@@ -107,7 +107,7 @@ interpreter::Closure::toString(bool /*readable*/) const
 }
 
 void
-interpreter::Closure::store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext& /*ctx*/) const
+interpreter::Closure::store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, SaveContext& /*ctx*/) const
 {
     // ex IntClosure::store
     throw Error::notSerializable();

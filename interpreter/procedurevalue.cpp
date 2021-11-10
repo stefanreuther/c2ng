@@ -43,7 +43,7 @@ interpreter::ProcedureValue::toString(bool /*readable*/) const
 }
 
 void
-interpreter::ProcedureValue::store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext& /*ctx*/) const
+interpreter::ProcedureValue::store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, SaveContext& /*ctx*/) const
 {
     throw Error::notSerializable();
 }

@@ -192,7 +192,7 @@ game::interface::VcrContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::VcrContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::VcrContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntVcrContext::store
     throw interpreter::Error::notAssignable();

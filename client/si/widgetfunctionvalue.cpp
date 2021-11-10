@@ -22,7 +22,7 @@ client::si::WidgetFunctionValue::toString(bool /*readable*/) const
 }
 
 void
-client::si::WidgetFunctionValue::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+client::si::WidgetFunctionValue::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     throw interpreter::Error::notSerializable();
 }

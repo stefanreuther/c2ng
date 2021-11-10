@@ -125,7 +125,7 @@ game::interface::TorpedoContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::TorpedoContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::TorpedoContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntTorpedoContext::store, IntLauncherContext::store
     out.tag = m_useLauncher ? out.Tag_Launcher : out.Tag_Torpedo;

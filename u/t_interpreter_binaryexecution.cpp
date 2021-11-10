@@ -1160,7 +1160,7 @@ TestInterpreterBinaryExecution::testArrayDim()
             { TS_ASSERT(!"clone"); return 0; }
         virtual String_t toString(bool /*readable*/) const
             { TS_ASSERT(!"toString"); return String_t(); }
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
             { TS_ASSERT(!"store"); }
         virtual void visit(afl::data::Visitor& /*visitor*/) const
             { TS_ASSERT(!"visit"); }

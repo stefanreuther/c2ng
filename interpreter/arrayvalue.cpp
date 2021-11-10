@@ -74,7 +74,7 @@ interpreter::ArrayValue::toString(bool /*readable*/) const
 }
 
 void
-interpreter::ArrayValue::store(TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext& ctx) const
+interpreter::ArrayValue::store(TagNode& out, afl::io::DataSink& /*aux*/, SaveContext& ctx) const
 {
     // ex IntArray::store
     out.tag   = TagNode::Tag_Array;

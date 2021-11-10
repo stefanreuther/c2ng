@@ -7,7 +7,6 @@
 #include "interpreter/procedurevalue.hpp"
 
 #include "t_interpreter.hpp"
-#include "afl/charset/utf8charset.hpp"
 #include "afl/io/internalsink.hpp"
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
@@ -56,9 +55,8 @@ TestInterpreterProcedureValue::testIt()
     {
         interpreter::TagNode node;
         afl::io::InternalSink sink;
-        afl::charset::Utf8Charset cs;
         interpreter::vmio::NullSaveContext ctx;
-        TS_ASSERT_THROWS(t.store(node, sink, cs, ctx), interpreter::Error);
+        TS_ASSERT_THROWS(t.store(node, sink, ctx), interpreter::Error);
     }
 
     // - clone

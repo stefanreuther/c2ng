@@ -77,7 +77,7 @@ game::interface::VcrSideFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::VcrSideFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::VcrSideFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntVcrSideArray::store
     throw interpreter::Error::notSerializable();

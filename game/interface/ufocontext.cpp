@@ -166,7 +166,7 @@ game::interface::UfoContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::UfoContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::UfoContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntUfoContext::store
     // FIXME?

@@ -54,7 +54,7 @@ namespace {
         virtual ShipArrayProperty* clone() const;
 
         virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext& ctx) const;
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
      private:
         const Type m_type;
@@ -261,7 +261,7 @@ ShipArrayProperty::toString(bool /*readable*/) const
 }
 
 void
-ShipArrayProperty::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+ShipArrayProperty::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntShipArrayProperty::store
     throw interpreter::Error::notSerializable();

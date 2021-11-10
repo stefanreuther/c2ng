@@ -8,7 +8,6 @@
 
 #include "t_interpreter.hpp"
 #include "afl/io/internalsink.hpp"
-#include "afl/charset/utf8charset.hpp"
 #include "interpreter/vmio/nullsavecontext.hpp"
 
 /** Simple test. */
@@ -38,8 +37,7 @@ TestInterpreterBlobValue::testIt()
     afl::io::InternalSink sink;
     interpreter::TagNode node;
     interpreter::vmio::NullSaveContext sc;
-    afl::charset::Utf8Charset cs;
-    clone->store(node, sink, cs, sc);
+    clone->store(node, sink, sc);
     TS_ASSERT_EQUALS(node.tag, node.Tag_Blob);
     TS_ASSERT_EQUALS(node.value, 3U);
     TS_ASSERT_EQUALS(sink.getContent().size(), 3U);

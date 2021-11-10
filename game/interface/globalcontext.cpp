@@ -235,7 +235,7 @@ game::interface::GlobalContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::GlobalContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::GlobalContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntGlobalContext::store
     out.tag = out.Tag_Global;

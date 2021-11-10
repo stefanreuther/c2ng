@@ -87,7 +87,7 @@ namespace {
         virtual String_t toString(bool /*readable*/) const
             { return "#<array>"; }
 
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
             { throw Error::notSerializable(); }
 
         virtual MessageTextValue* clone() const
@@ -123,7 +123,7 @@ namespace {
         virtual interpreter::Context* makeFirstContext()
             { throw Error::typeError(Error::ExpectIterable); }
 
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
             { throw Error::notSerializable(); }
 
         virtual String_t toString(bool /*readable*/) const
@@ -296,7 +296,7 @@ game::interface::InboxContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::InboxContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::InboxContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntMessageContext::store
     throw Error::notSerializable();

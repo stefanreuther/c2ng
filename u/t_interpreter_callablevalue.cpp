@@ -25,7 +25,7 @@ TestInterpreterCallableValue::testInterface()
             { return 0; }
         virtual String_t toString(bool /*readable*/) const
             { return String_t(); }
-        virtual void store(interpreter::TagNode&, afl::io::DataSink&, afl::charset::Charset&, interpreter::SaveContext&) const
+        virtual void store(interpreter::TagNode&, afl::io::DataSink&, interpreter::SaveContext&) const
             { }
     };
     Tester t;

@@ -352,7 +352,7 @@ game::interface::PlanetContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::PlanetContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::PlanetContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntPlanetContext::store
     out.tag = out.Tag_Planet;

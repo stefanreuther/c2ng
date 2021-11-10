@@ -11,6 +11,7 @@
 #include "afl/base/uncopyable.hpp"
 #include "interpreter/process.hpp"
 #include "afl/container/ptrvector.hpp"
+#include "afl/charset/charset.hpp"
 
 namespace interpreter { namespace vmio {
 
@@ -44,7 +45,7 @@ namespace interpreter { namespace vmio {
             hence we don't offer a way to unify processes.
             Loading will then create multiple copies of it.
             \param proc The process object */
-        void addProcess(Process& proc);
+        void addProcess(const Process& proc);
 
         /** Save as object file.
             An object file is just an object pool with a minimum header, with no reference to game data.

@@ -72,7 +72,7 @@ interpreter::SimpleIndexableValue::toString(bool /*readable*/) const
 }
 
 void
-interpreter::SimpleIndexableValue::store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext& /*ctx*/) const
+interpreter::SimpleIndexableValue::store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, SaveContext& /*ctx*/) const
 {
     throw Error::notSerializable();
 }

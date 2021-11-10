@@ -49,7 +49,7 @@ namespace {
                 { return new StateSetter(m_state); }
             virtual String_t toString(bool) const
                 { return "#<state>"; }
-            virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+            virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
                 { TS_FAIL("store unexpected"); }
 
          private:
@@ -836,7 +836,7 @@ TestInterpreterProcessList::testObject()
             { }
         virtual String_t toString(bool) const
             { return "#<MyObject>"; }
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
             { TS_FAIL("store unexpected"); }
      private:
         MyObject& m_obj;

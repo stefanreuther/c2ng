@@ -83,7 +83,7 @@ interpreter::ProcessObserverContext::toString(bool /*readable*/) const
 }
 
 void
-interpreter::ProcessObserverContext::store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext& /*ctx*/) const
+interpreter::ProcessObserverContext::store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, SaveContext& /*ctx*/) const
 {
     throw interpreter::Error::notSerializable();
 }

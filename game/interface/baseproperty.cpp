@@ -39,7 +39,7 @@ namespace {
 
         // BaseValue:
         virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext& ctx) const;
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
         // Value:
         virtual BaseArrayProperty* clone() const;
@@ -183,7 +183,7 @@ BaseArrayProperty::toString(bool /*readable*/) const
 }
 
 void
-BaseArrayProperty::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+BaseArrayProperty::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntBaseArrayProperty::store
     throw Error::notSerializable();

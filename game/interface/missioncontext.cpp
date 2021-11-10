@@ -99,7 +99,7 @@ game::interface::MissionContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::MissionContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::MissionContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     throw interpreter::Error::notAssignable();
 }

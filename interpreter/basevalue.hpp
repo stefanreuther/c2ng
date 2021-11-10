@@ -9,7 +9,6 @@
 #include "afl/string/string.hpp"
 #include "interpreter/tagnode.hpp"
 #include "afl/io/datasink.hpp"
-#include "afl/charset/charset.hpp"
 
 namespace interpreter {
 
@@ -32,13 +31,10 @@ namespace interpreter {
         /** Store data for serialization.
             \param out [out] Tag node
             \param aux [out] Auxiliary data
-            \param cs [in] Character set to encode string data
             \param ctx [in,optional] Context to save structured data.
                    Serialization may fail if this object represents structured data and no context is given.
             \throw Error if object cannot be serialized */
-        // FIXME: consider changing this function's signature:
-        //   - drop the cs parameter and let the SaveContext handle it(?)
-        virtual void store(TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, SaveContext& ctx) const = 0;
+        virtual void store(TagNode& out, afl::io::DataSink& aux, SaveContext& ctx) const = 0;
 
         // afl::data::Value:
         virtual void visit(afl::data::Visitor& visitor) const;

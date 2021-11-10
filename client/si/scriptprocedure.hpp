@@ -54,7 +54,7 @@ namespace client { namespace si {
 
         // BaseValue:
         virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext& ctx) const;
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
         // CallableValue:
         virtual void call(interpreter::Process& proc, afl::data::Segment& args, bool want_result);

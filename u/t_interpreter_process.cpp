@@ -88,7 +88,7 @@ namespace {
             { TS_FAIL("SingularObjectContext::enumProperties unexpected"); }
         virtual String_t toString(bool /*readable*/) const
             { TS_FAIL("SingularObjectContext::toString unexpected"); return String_t(); }
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
             { TS_FAIL("SingularObjectContext::store unexpected"); }
      private:
         game::map::Object* m_pObject;
@@ -137,7 +137,7 @@ namespace {
             { TS_FAIL("SingularVariableContext::enumProperties unexpected"); }
         virtual String_t toString(bool /*readable*/) const
             { TS_FAIL("SingularVariableContext::toString unexpected"); return String_t(); }
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
             { TS_FAIL("SingularVariableContext::store unexpected"); }
      private:
         String_t m_name;
@@ -178,7 +178,7 @@ namespace {
             { TS_FAIL("CountingContext::enumProperties unexpected"); }
         virtual String_t toString(bool /*readable*/) const
             { TS_FAIL("CountingContext::toString unexpected"); return String_t(); }
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
             { TS_FAIL("CountingContext::store unexpected"); }
      private:
         String_t m_name;
@@ -224,7 +224,7 @@ namespace {
             { return new SimpleCallable(*this); }
         virtual String_t toString(bool /*readable*/) const
             { return "#<SimpleCallable:" + m_value + ">"; }
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
             { throw interpreter::Error::notSerializable(); }
      private:
         String_t m_value;
@@ -257,7 +257,7 @@ namespace {
             { return new SimpleIndexable(*this); }
         virtual String_t toString(bool /*readable*/) const
             { return "#<SimpleIndexable>"; }
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
             { throw interpreter::Error::notSerializable(); }
      private:
         String_t& m_value;

@@ -104,7 +104,7 @@ game::interface::PlayerContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::PlayerContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::PlayerContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntPlayerContext::store
     out.tag = out.Tag_Player;

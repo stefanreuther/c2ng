@@ -7,7 +7,6 @@
 #include "interpreter/closure.hpp"
 
 #include "t_interpreter.hpp"
-#include "afl/charset/utf8charset.hpp"
 #include "afl/io/internalsink.hpp"
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
@@ -58,7 +57,7 @@ namespace {
         // IntValue:
         virtual String_t toString(bool /*readable*/) const
             { return "#<MyCallable>"; }
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
             { throw interpreter::Error::notSerializable(); }
         virtual MyCallable* clone() const
             { return new MyCallable(); }
@@ -108,9 +107,8 @@ TestInterpreterClosure::testClosure()
     {
         interpreter::TagNode out;
         afl::io::InternalSink aux;
-        afl::charset::Utf8Charset cs;
         interpreter::vmio::NullSaveContext ctx;
-        TS_ASSERT_THROWS(c->store(out, aux, cs, ctx), interpreter::Error);
+        TS_ASSERT_THROWS(c->store(out, aux, ctx), interpreter::Error);
     }
 
     // Clone the closure

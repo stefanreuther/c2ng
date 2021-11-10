@@ -137,7 +137,7 @@ game::interface::HullContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::HullContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::HullContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntHullContext::store
     out.tag = out.Tag_Hull;

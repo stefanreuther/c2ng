@@ -65,7 +65,7 @@ game::interface::SimpleFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::SimpleFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::SimpleFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntSimpleIndexableValue::store
     throw interpreter::Error::notSerializable();

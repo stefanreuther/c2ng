@@ -123,7 +123,7 @@ game::interface::EngineContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::EngineContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::EngineContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntEngineContext::store
     out.tag = out.Tag_Engine;

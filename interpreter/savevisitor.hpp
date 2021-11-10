@@ -5,11 +5,11 @@
 #ifndef C2NG_INTERPRETER_SAVEVISITOR_HPP
 #define C2NG_INTERPRETER_SAVEVISITOR_HPP
 
+#include "afl/charset/charset.hpp"
+#include "afl/data/namemap.hpp"
+#include "afl/data/segment.hpp"
 #include "afl/data/visitor.hpp"
 #include "afl/io/datasink.hpp"
-#include "afl/charset/charset.hpp"
-#include "afl/data/segment.hpp"
-#include "afl/data/namemap.hpp"
 
 namespace interpreter {
 
@@ -59,15 +59,20 @@ namespace interpreter {
 
         /** Save contexts.
             \param out [out] Data goes here
-            \param data [in] Data segment to save
-            \param cs [in] Character set
-            \param ctx [in,optional] Save context to save structured data */
-        // FIXME: here?
+            \param contexts [in] Contexts to save
+            \param ctx [in] Save context to save structured data
+
+            This is a stripped-down version of save().
+            It assumes that contexts are never null. */
         static void saveContexts(afl::io::DataSink& out,
                                  const afl::container::PtrVector<interpreter::Context>& contexts,
-                                 afl::charset::Charset& cs, SaveContext& ctx);
+                                 SaveContext& ctx);
 
-        // FIXME: here?
+        /** Save name list.
+            \param out Data goes here
+            \param names Names to save
+            \param slots Number of names to save. Must be <= getNumNames().
+            \param cs Character set */
         static void saveNames(afl::io::DataSink& out, const afl::data::NameMap& names, size_t slots, afl::charset::Charset& cs);
 
      private:

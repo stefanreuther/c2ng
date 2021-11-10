@@ -30,7 +30,7 @@ interpreter::FileValue::clone() const
 }
 
 void
-interpreter::FileValue::store(TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext& /*ctx*/) const
+interpreter::FileValue::store(TagNode& out, afl::io::DataSink& /*aux*/, SaveContext& /*ctx*/) const
 {
     // ex IntFileValue::store(IntTagNode& sv, Stream& /*aux*/)
     out.tag   = TagNode::Tag_FileHandle;

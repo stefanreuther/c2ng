@@ -9,7 +9,6 @@
 #include "t_interpreter.hpp"
 #include "afl/io/internalsink.hpp"
 #include "interpreter/vmio/nullsavecontext.hpp"
-#include "afl/charset/utf8charset.hpp"
 
 /** Simple test. */
 void
@@ -29,8 +28,7 @@ TestInterpreterFileValue::testIt()
     afl::io::InternalSink sink;
     interpreter::TagNode node;
     interpreter::vmio::NullSaveContext sc;
-    afl::charset::Utf8Charset cs;
-    copy->store(node, sink, cs, sc);
+    copy->store(node, sink, sc);
     TS_ASSERT_EQUALS(node.tag, node.Tag_FileHandle);
     TS_ASSERT_EQUALS(node.value, 42U);
 }

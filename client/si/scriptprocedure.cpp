@@ -26,7 +26,7 @@ client::si::ScriptProcedure::toString(bool /*readable*/) const
 }
 
 void
-client::si::ScriptProcedure::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+client::si::ScriptProcedure::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     throw interpreter::Error::notSerializable();
 }

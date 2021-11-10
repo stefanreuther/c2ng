@@ -31,7 +31,7 @@ interpreter::KeymapValue::toString(bool /*readable*/) const
 }
 
 void
-interpreter::KeymapValue::store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext& /*ctx*/) const
+interpreter::KeymapValue::store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, SaveContext& /*ctx*/) const
 {
     // ex IntKeymapValue::store
     throw Error::notSerializable();

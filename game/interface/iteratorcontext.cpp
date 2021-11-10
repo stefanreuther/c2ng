@@ -265,7 +265,7 @@ namespace {
                 return "#<array>";
             }
 
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
             {
                 // ex IntIteratorFunction::store
                 throw interpreter::Error::notSerializable();
@@ -387,7 +387,7 @@ game::interface::IteratorContext::toString(bool readable) const
 }
 
 void
-game::interface::IteratorContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::IteratorContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntIteratorContext::store
     m_provider->store(out);
