@@ -591,7 +591,8 @@ game::vcr::flak::Algorithm::Algorithm(const Setup& b, const Environment& env)
       m_alternativeCombat(env.getConfiguration(Environment::AllowAlternativeCombat)),
       m_fireOnAttackFighters(env.getConfiguration(Environment::FireOnAttackFighters)),
       m_unusedObjects(), m_objectId(),
-      m_seed(b.getSeed()), m_originalSeed(b.getSeed()), m_time(0), m_isTerminated(false)
+      m_seed(b.getSeed()), m_originalSeed(b.getSeed()), m_time(0), m_isTerminated(false),
+      m_fleetGCTorpedoes()
 {
     // ex FlakBattle::FlakBattle
     /* copy fleets */
@@ -613,6 +614,13 @@ game::vcr::flak::Algorithm::Algorithm(const Setup& b, const Environment& env)
         assert(f);
         m_ships.pushBackNew(new Ship(i, *f, b.getShipByIndex(i), env));
     }
+
+    /* determine number of torpedo types */
+    int maxTorpType = 0;
+    for (size_t i = 0; i < m_ships.size(); ++i) {
+        maxTorpType = std::max(m_ships[i]->data.torpedoType, maxTorpType);
+    }
+    m_fleetGCTorpedoes.resize(maxTorpType);
 }
 
 game::vcr::flak::Algorithm::~Algorithm()
@@ -1724,7 +1732,6 @@ game::vcr::flak::Algorithm::doFleetGC(Fleet& fleet, const Environment& env, Visu
     const int limit = env.getPlayerRaceNumber(fleet.data.player) == 2 ? 150 : 99;
     bool alive = false;
     bool any_torps = false;
-    int torps[NUM_TORPS];
     for (size_t i = 0; i < fleet.data.numShips; ++i) {
         Ship& sh = *m_ships[i + fleet.data.firstShipIndex];
         if (sh.isAlive()) {
@@ -1733,14 +1740,14 @@ game::vcr::flak::Algorithm::doFleetGC(Fleet& fleet, const Environment& env, Visu
                 sh.status.isAlive = false;
                 --m_playerStatus[sh.data.player-1]->num_live_ships;
                 m_playerStatus[sh.data.player-1]->sum_strength -= sh.data.compensation;
-                if (sh.data.torpedoType > 0 && sh.data.torpedoType <= NUM_TORPS && sh.status.numTorpedoes > 0) {
+                if (sh.data.torpedoType > 0 && sh.status.numTorpedoes > 0) {
                     if (!any_torps) {
-                        for (int x = 0; x < NUM_TORPS; ++x) {
-                            torps[x] = 0;
+                        for (size_t x = 0, n = m_fleetGCTorpedoes.size(); x < n; ++x) {
+                            m_fleetGCTorpedoes[x] = 0;
                         }
                     }
                     any_torps = true;
-                    torps[sh.data.torpedoType-1] += sh.status.numTorpedoes;
+                    m_fleetGCTorpedoes[sh.data.torpedoType-1] += sh.status.numTorpedoes;
                 }
             } else {
                 alive = true;
@@ -1754,8 +1761,8 @@ game::vcr::flak::Algorithm::doFleetGC(Fleet& fleet, const Environment& env, Visu
     if (alive && any_torps) {
         for (size_t i = 0; i < fleet.data.numShips; ++i) {
             Ship& sh = *m_ships[i + fleet.data.firstShipIndex];
-            if (sh.isAlive() && sh.data.torpedoType > 0 && sh.data.torpedoType <= NUM_TORPS) {
-                sh.status.numReceivedTorpedoes += torps[sh.data.torpedoType-1] / int(fleet.data.numShips);
+            if (sh.isAlive() && sh.data.torpedoType > 0) {
+                sh.status.numReceivedTorpedoes += m_fleetGCTorpedoes[sh.data.torpedoType-1] / int(fleet.data.numShips);
             }
         }
     }

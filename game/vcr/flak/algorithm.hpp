@@ -6,6 +6,7 @@
 #define C2NG_GAME_VCR_FLAK_ALGORITHM_HPP
 
 #include <iosfwd>
+#include <vector>
 #include "afl/container/ptrvector.hpp"
 #include "game/vcr/flak/definitions.hpp"
 #include "game/vcr/flak/object.hpp"
@@ -182,6 +183,10 @@ namespace game { namespace vcr { namespace flak {
         /* Time/status */
         int32_t m_time;
         bool m_isTerminated;
+
+        /* Torpedo status for doFleetGC.
+           Used as instance variable to avoid allocations in the inner loop. */
+        std::vector<int> m_fleetGCTorpedoes;
 
 
         /* Random number generator */

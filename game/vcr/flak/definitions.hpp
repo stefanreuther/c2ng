@@ -39,10 +39,6 @@ namespace game { namespace vcr { namespace flak {
     const int FLAK_MAXIMUM_MFL                      = 50;     ///< Maximum fighters launched.
     const int FLAK_MINIMUM_MFL                      = 1;      ///< Minimum number of fighters allowed for a ship.
 
-    /* Assumptions about the ship list.
-       FIXME: REMOVE THOSE */
-    const int NUM_TORPS = 10;
-
 } } }
 
 #endif
