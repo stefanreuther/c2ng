@@ -148,6 +148,8 @@ class TestServerHostHostKey : public CxxTest::TestSuite {
     void testNormal();
     void testFileError();
     void testReg();
+    void testEmpty();
+    void testGenerate();
 };
 
 class TestServerHostHostPlayer : public CxxTest::TestSuite {

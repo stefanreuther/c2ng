@@ -1,12 +1,10 @@
 /**
   *  \file game/v3/registrationkey.cpp
   *  \brief Class game::v3::RegistrationKey
-  *
-  *  This contains only code to *read* registrations, none to
-  *  create them. Do not add more modificators.
   */
 
 #include "game/v3/registrationkey.hpp"
+#include "afl/base/growablememory.hpp"
 #include "afl/base/staticassert.hpp"
 #include "afl/bits/fixedstring.hpp"
 #include "afl/bits/pack.hpp"
@@ -168,6 +166,27 @@ game::v3::RegistrationKey::initFromDirectory(afl::io::Directory& dir, afl::sys::
         log.write(log.Warn, "game.v3.reg", e.getFileName(), 0, e.what());
         log.write(log.Warn, "game.v3.reg", tx("No usable registration key found, assuming unregistered player"));
     }
+}
+
+// Initialize from given values.
+void
+game::v3::RegistrationKey::initFromValues(String_t t1, String_t t2)
+{
+    uint32_t sum = 668;
+    afl::base::GrowableBytes_t enc1 = m_charset->encode(afl::string::toMemory(t1));
+    afl::base::GrowableBytes_t enc2 = m_charset->encode(afl::string::toMemory(t2));
+    for (uint32_t i = 0, fac = 13; i < 25; ++i, fac += 13) {
+        uint8_t* pc1 = enc1.at(i);
+        uint8_t* pc2 = enc2.at(i);
+        uint32_t w1 = (pc1 != 0 ? *pc1 : 32) * fac;
+        uint32_t w2 = (pc2 != 0 ? *pc2 : 32) * fac;
+        sum += w1;
+        sum += w2;
+        m_fizz[i] = w1;
+        m_fizz[i+25] = w2;
+    }
+    m_fizz[KEY_SIZE_WORDS-1] = sum;
+    m_isValid = true;
 }
 
 // Save to given stream.

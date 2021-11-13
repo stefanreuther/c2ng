@@ -141,3 +141,26 @@ TestGameV3RegistrationKey::testSetLine()
     TS_ASSERT_EQUALS(testee.getLine(RegistrationKey::Line4), "n4");
 }
 
+void
+TestGameV3RegistrationKey::testInitRoundTrip()
+{
+    // Create a key
+    RegistrationKey testee(makeCharset());
+    testee.initUnregistered();
+
+    // Create a copy by re-encoding
+    RegistrationKey clone(makeCharset());
+    testee.initFromValues(testee.getLine(RegistrationKey::Line1),
+                          testee.getLine(RegistrationKey::Line2));
+
+    // Extract
+    uint8_t out1[RegistrationKey::KEY_SIZE_BYTES];
+    testee.packIntoBytes(out1);
+
+    uint8_t out2[RegistrationKey::KEY_SIZE_BYTES];
+    clone.packIntoBytes(out2);
+
+    // Verify
+    TS_ASSERT_SAME_DATA(out1, out2, sizeof(out1));
+}
+

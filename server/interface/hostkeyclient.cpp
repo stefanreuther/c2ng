@@ -43,6 +43,7 @@ server::interface::HostKeyClient::unpackInfo(const Value_t* p)
     Access a(p);
     result.keyId        = a("id").toString();
     result.isRegistered = a("reg").toInteger() != 0;
+    result.isServerKey  = a("server").toInteger() != 0;
     result.label1       = a("key1").toString();
     result.label2       = a("key2").toString();
 

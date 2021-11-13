@@ -26,6 +26,7 @@ namespace server { namespace interface {
             // Header
             String_t keyId;                             /**< Key Id (id). */
             bool isRegistered;                          /**< true for registered key (reg). */
+            bool isServerKey;                           /**< true for server-generated key (server). */
             String_t label1;                            /**< Key first line (key1). */
             String_t label2;                            /**< Key second line (key2). */
 
@@ -40,7 +41,7 @@ namespace server { namespace interface {
             afl::base::Optional<Time_t> gameLastUsed;   /**< Time when last used on host (gameLastUsed). */
 
             Info()
-                : keyId(), isRegistered(false), label1(), label2(),
+                : keyId(), isRegistered(false), isServerKey(false), label1(), label2(),
                   filePathName(), fileUseCount(),
                   lastGame(), lastGameName(), gameUseCount(), gameLastUsed()
                 { }

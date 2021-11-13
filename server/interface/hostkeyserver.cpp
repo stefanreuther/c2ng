@@ -70,6 +70,7 @@ server::interface::HostKeyServer::packInfo(const HostKey::Info& info)
 
        @key id:Str             (key Id)
        @key reg:Int            (0=unregistered, 1=registered)
+       @key server:Int         (0=user-provided key, 1=server-generated key)
        @key key1:Str           (registration key first line)
        @key key2:Str           (registration key second line)
        @key filePathName:Str   (optional; path on file server)
@@ -82,6 +83,7 @@ server::interface::HostKeyServer::packInfo(const HostKey::Info& info)
 
     hv->setNew("id", makeStringValue(info.keyId));
     hv->setNew("reg", makeIntegerValue(info.isRegistered));
+    hv->setNew("server", makeIntegerValue(info.isServerKey));
     hv->setNew("key1", makeStringValue(info.label1));
     hv->setNew("key2", makeStringValue(info.label2));
 

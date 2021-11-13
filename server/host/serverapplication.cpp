@@ -247,6 +247,21 @@ server::host::ServerApplication::handleConfiguration(const String_t& key, const 
             throw afl::except::CommandLineException(afl::string::Format("Invalid value for '%s'", key));
         }
         return true;
+    } else if (key == "HOST.KEYTITLE") {
+        /* @q Host.KeyTitle:Str (Config)
+           Title of registration keys issued to players.
+
+           @since PCC2 2.40.12 */
+        m_config.keyTitle = value;
+        return true;
+    } else if (key == "HOST.KEYSECRET") {
+        /* @q Host.KeySecret:Str (Config)
+           Secret for registration keys issued to players.
+           This is used to avoid trivial collision attacks by players using their own keygen.
+
+           @since PCC2 2.40.12 */
+        m_config.keySecret = value;
+        return true;
     } else if (key == "BINDIR") {
         /* @q BinDir:Str (Config)
            Pointer to directory containing binary files.

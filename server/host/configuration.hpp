@@ -57,6 +57,13 @@ namespace server { namespace host {
         /** Number of keys to store per user. */
         int maxStoredKeys;
 
+        /** Title (Line1) for generated keys.
+            Empty to disable. */
+        String_t keyTitle;
+
+        /** Secret for generated keys. */
+        String_t keySecret;
+
         /** Convert time.
             On the wire, times are always given in minutes-since-epoch.
             If the system internally runs on a higher rate for testing,

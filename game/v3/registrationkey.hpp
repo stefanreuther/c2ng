@@ -21,9 +21,6 @@ namespace game { namespace v3 {
         Complete registration information. The actual reg key (player name and town in DOS, serial and reg date in Winplan)
         is read from FIZZ.BIN, the additional information (name/address in Winplan) is read from REG.KEY.
 
-        This does not include more knowledge than absolutely needed to fetch the above values from files.
-        In particular, we don't check checksums; invalid keys are accepted and sent to host (which will then reject them).
-
         This class' invariant is that it always contains a syntactically valid registration key,
         even if it reports its status as unknown.
         This means it can always be used to create syntactically valid turn files. */
@@ -60,6 +57,11 @@ namespace game { namespace v3 {
             Change to PCC2: the "verbose" parameter has been replaced by a "log" parameter.
             To get non-verbose output, pass a Log instance with no listeners. */
         void initFromDirectory(afl::io::Directory& dir, afl::sys::LogListener& log, afl::string::Translator& tx);
+
+        /** Initialize from given values.
+            \param t1 Title (Line1)
+            \param t2 Subtitle (Line2) */
+        void initFromValues(String_t t1, String_t t2);
 
         /** Save to given stream.
             Used to create a key file from given content.

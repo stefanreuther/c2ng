@@ -17,7 +17,9 @@ server::host::Configuration::Configuration()
       numMissedTurnsForKick(0),
       hostFileAddress(DEFAULT_ADDRESS, HOSTFILE_PORT),
       initialSuspend(0),
-      maxStoredKeys(10)
+      maxStoredKeys(10),
+      keyTitle(),
+      keySecret()
 { }
 
 // Convert time.

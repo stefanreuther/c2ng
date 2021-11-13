@@ -5,7 +5,10 @@
 
 #include <map>
 #include "server/host/hostkey.hpp"
+#include "afl/checksums/sha1.hpp"
 #include "afl/io/internalstream.hpp"
+#include "afl/string/format.hpp"
+#include "game/v3/registrationkey.hpp"
 #include "server/errors.hpp"
 #include "server/host/keystore.hpp"
 #include "server/host/root.hpp"
@@ -17,10 +20,34 @@
 
 const char*const LOG_NAME = "host.key";
 
+using afl::string::Format;
+using game::v3::RegistrationKey;
+using server::host::Root;
+using server::host::Session;
 using server::interface::BaseClient;
 using server::interface::FileBaseClient;
-using server::interface::FileGameClient;
 using server::interface::FileGame;
+using server::interface::FileGameClient;
+
+namespace {
+    std::auto_ptr<RegistrationKey> makeServerKey(Session& session, Root& root)
+    {
+        std::auto_ptr<RegistrationKey> result;
+        if (!session.getUser().empty() && !root.config().keyTitle.empty()) {
+            // Build line 2 for the key
+            afl::checksums::SHA1 hasher;
+            hasher.add(afl::string::toBytes(session.getUser()));
+            hasher.add(afl::string::toBytes(root.config().keySecret));
+            const String_t line2 = Format("%s-%.12s", session.getUser(), hasher.getHashAsHexString());
+
+            // Build the key
+            result.reset(new RegistrationKey(std::auto_ptr<afl::charset::Charset>(root.defaultCharacterSet().clone())));
+            result->initFromValues(root.config().keyTitle, line2);
+        }
+        return result;
+    }
+}
+
 
 server::host::HostKey::HostKey(Session& session, Root& root)
     : m_session(session),
@@ -56,6 +83,30 @@ server::host::HostKey::listKeys(Infos_t& out)
 
         seenKeyIndexes[outKey.keyId] = out.size();
         out.push_back(outKey);
+    }
+
+    // Merge server-generated user key
+    std::auto_ptr<RegistrationKey> serverKey(makeServerKey(m_session, m_root));
+    if (serverKey.get() != 0) {
+        String_t keyId = serverKey->getKeyId();
+        std::map<String_t, size_t>::iterator it = seenKeyIndexes.find(keyId);
+        Info* p;
+        if (it == seenKeyIndexes.end()) {
+            // New (never used) key
+            Info outKey;
+            outKey.keyId        = keyId;
+            outKey.isRegistered = (serverKey->getStatus() == RegistrationKey::Registered);
+            outKey.label1       = serverKey->getLine(RegistrationKey::Line1);
+            outKey.label2       = serverKey->getLine(RegistrationKey::Line2);
+
+            seenKeyIndexes[outKey.keyId] = out.size();
+            out.push_back(outKey);
+            p = &out.back();
+        } else {
+            // Found, update the slot.
+            p = &out[it->second];
+        }
+        p->isServerKey = true;
     }
 
     // Merge file information
@@ -116,6 +167,16 @@ server::host::HostKey::getKey(String_t keyId)
         afl::io::InternalStream out;
         key.saveToStream(out);
         return afl::string::fromBytes(out.getContent());
+    }
+
+    // Try to fetch server-generated key
+    std::auto_ptr<RegistrationKey> serverKey(makeServerKey(m_session, m_root));
+    if (serverKey.get() != 0) {
+        if (keyId == serverKey->getKeyId()) {
+            afl::io::InternalStream out;
+            serverKey->saveToStream(out);
+            return afl::string::fromBytes(out.getContent());
+        }
     }
 
     // Try to fetch from filer
