@@ -1,0 +1,6 @@
+/*!
+     \namespace util::doc
+     \brief Documentation Store
+
+     This namespace contains classes to manage a documentation store.
+ */

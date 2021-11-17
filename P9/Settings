@@ -12,10 +12,19 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = util/systeminformation.cpp util/systeminformation.hpp \
-    game/proxy/buildammoproxy.cpp game/proxy/buildammoproxy.hpp \
-    interpreter/context.cpp game/spec/info/utils.cpp \
-    game/spec/info/utils.hpp game/vcr/flak/visualisationsettings.cpp \
+FILES_gamelib = util/doc/singleblobstore.cpp util/doc/singleblobstore.hpp \
+    util/doc/textimport.cpp util/doc/textimport.hpp \
+    util/doc/htmlrenderer.cpp util/doc/renderoptions.cpp \
+    util/doc/renderoptions.hpp util/doc/htmlrenderer.hpp \
+    util/doc/internalblobstore.cpp util/doc/internalblobstore.hpp \
+    util/doc/helpimport.cpp util/doc/helpimport.hpp util/doc/application.cpp \
+    util/doc/application.hpp util/doc/index.cpp util/doc/index.hpp \
+    util/doc/fileblobstore.cpp util/doc/fileblobstore.hpp \
+    util/doc/blobstore.hpp util/systeminformation.cpp \
+    util/systeminformation.hpp game/proxy/buildammoproxy.cpp \
+    game/proxy/buildammoproxy.hpp interpreter/context.cpp \
+    game/spec/info/utils.cpp game/spec/info/utils.hpp \
+    game/vcr/flak/visualisationsettings.cpp \
     game/vcr/flak/visualisationsettings.hpp \
     game/vcr/flak/visualisationstate.hpp \
     game/vcr/flak/visualisationstate.cpp game/proxy/flakvcrplayerproxy.cpp \
@@ -1518,6 +1527,11 @@ FILES_c2gfxgen = main/c2gfxgen.cpp
 TYPE_c2gfxgen = app
 DEPEND_c2gfxgen = guilib gamelib afl
 
+TARGETS += c2docmanager
+FILES_c2docmanager = main/c2docmanager.cpp
+TYPE_c2docmanager = app
+DEPEND_c2docmanager = gamelib afl
+
 # Servers
 TARGETS += c2file-server
 FILES_c2file-server = main/c2fileserver.cpp
@@ -1602,12 +1616,16 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_map_objecttype.cpp u/t_game_v3_utils.cpp \
-    u/t_game_v3_directoryscanner.cpp u/t_game_v3_turnfile.cpp \
-    u/t_game_v3_specificationloader.cpp u/t_game_v3_inboxfile.cpp \
-    u/t_game_map_universe.cpp u/t_util_systeminformation.cpp \
-    u/t_game_proxy_buildammoproxy.cpp u/t_game_spec_info_utils.cpp \
-    u/t_game_vcr_flak_visualisationsettings.cpp \
+FILES_testsuite = u/t_util_doc_singleblobstore.cpp u/t_util_doc_textimport.cpp \
+    u/t_util_doc_htmlrenderer.cpp u/t_util_doc_renderoptions.cpp \
+    u/t_util_doc_helpimport.cpp u/t_util_doc_fileblobstore.cpp \
+    u/t_util_doc_internalblobstore.cpp u/t_util_doc_index.cpp \
+    u/t_util_doc_blobstore.cpp u/t_util_doc.hpp u/t_game_map_objecttype.cpp \
+    u/t_game_v3_utils.cpp u/t_game_v3_directoryscanner.cpp \
+    u/t_game_v3_turnfile.cpp u/t_game_v3_specificationloader.cpp \
+    u/t_game_v3_inboxfile.cpp u/t_game_map_universe.cpp \
+    u/t_util_systeminformation.cpp u/t_game_proxy_buildammoproxy.cpp \
+    u/t_game_spec_info_utils.cpp u/t_game_vcr_flak_visualisationsettings.cpp \
     u/t_game_vcr_flak_visualisationstate.cpp \
     u/t_game_proxy_flakvcrplayerproxy.cpp \
     u/t_game_vcr_flak_eventrecorder.cpp u/t_gfx_keyeventconsumer.cpp \
