@@ -1089,7 +1089,14 @@ DEPEND_guilib = afl
 PROJ_AUTO += guilib:gfx/*.cpp,gfx/*.hpp,ui/*.cpp,ui/*.hpp,client/*.cpp,client/*.hpp
 
 TARGETS += serverlib
-FILES_serverlib = server/play/fs/session.cpp server/play/fs/directory.cpp \
+FILES_serverlib = server/interface/documentationclient.cpp \
+    server/interface/documentationclient.hpp \
+    server/doc/documentationimpl.cpp server/doc/documentationimpl.hpp \
+    server/interface/documentationserver.cpp \
+    server/interface/documentationserver.hpp \
+    server/interface/documentation.hpp server/doc/root.hpp \
+    server/doc/serverapplication.cpp server/doc/serverapplication.hpp \
+    server/play/fs/session.cpp server/play/fs/directory.cpp \
     server/play/fs/session.hpp server/play/fs/directory.hpp \
     server/play/flakconfigurationpacker.cpp \
     server/play/flakconfigurationpacker.hpp server/test/terminalverifier.hpp \
@@ -1598,10 +1605,15 @@ FILES_c2router-server = main/c2routerserver.cpp
 TYPE_c2router-server = app
 DEPEND_c2router-server = serverlib gamelib afl
 
-TARGETS += c2user	-server
+TARGETS += c2user-server
 FILES_c2user-server = main/c2userserver.cpp
 TYPE_c2user-server = app
 DEPEND_c2user-server = serverlib gamelib afl
+
+TARGETS += c2doc-server
+FILES_c2doc-server = main/c2docserver.cpp
+TYPE_c2doc-server = app
+DEPEND_c2doc-server = serverlib gamelib afl
 
 TARGETS += c2logger
 FILES_c2logger = main/c2logger.cpp
@@ -1616,16 +1628,20 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_util_doc_singleblobstore.cpp u/t_util_doc_textimport.cpp \
-    u/t_util_doc_htmlrenderer.cpp u/t_util_doc_renderoptions.cpp \
-    u/t_util_doc_helpimport.cpp u/t_util_doc_fileblobstore.cpp \
-    u/t_util_doc_internalblobstore.cpp u/t_util_doc_index.cpp \
-    u/t_util_doc_blobstore.cpp u/t_util_doc.hpp u/t_game_map_objecttype.cpp \
-    u/t_game_v3_utils.cpp u/t_game_v3_directoryscanner.cpp \
-    u/t_game_v3_turnfile.cpp u/t_game_v3_specificationloader.cpp \
-    u/t_game_v3_inboxfile.cpp u/t_game_map_universe.cpp \
-    u/t_util_systeminformation.cpp u/t_game_proxy_buildammoproxy.cpp \
-    u/t_game_spec_info_utils.cpp u/t_game_vcr_flak_visualisationsettings.cpp \
+FILES_testsuite = u/t_server_doc_documentationimpl.cpp u/t_server_doc.hpp \
+    u/t_server_interface_documentationserver.cpp \
+    u/t_server_interface_documentationclient.cpp \
+    u/t_server_interface_documentation.cpp u/t_util_doc_singleblobstore.cpp \
+    u/t_util_doc_textimport.cpp u/t_util_doc_htmlrenderer.cpp \
+    u/t_util_doc_renderoptions.cpp u/t_util_doc_helpimport.cpp \
+    u/t_util_doc_fileblobstore.cpp u/t_util_doc_internalblobstore.cpp \
+    u/t_util_doc_index.cpp u/t_util_doc_blobstore.cpp u/t_util_doc.hpp \
+    u/t_game_map_objecttype.cpp u/t_game_v3_utils.cpp \
+    u/t_game_v3_directoryscanner.cpp u/t_game_v3_turnfile.cpp \
+    u/t_game_v3_specificationloader.cpp u/t_game_v3_inboxfile.cpp \
+    u/t_game_map_universe.cpp u/t_util_systeminformation.cpp \
+    u/t_game_proxy_buildammoproxy.cpp u/t_game_spec_info_utils.cpp \
+    u/t_game_vcr_flak_visualisationsettings.cpp \
     u/t_game_vcr_flak_visualisationstate.cpp \
     u/t_game_proxy_flakvcrplayerproxy.cpp \
     u/t_game_vcr_flak_eventrecorder.cpp u/t_gfx_keyeventconsumer.cpp \

@@ -1,0 +1,51 @@
+##
+##  c2doc
+##
+
+
+@q Documentation (Service)
+@noproto
+The documentation server serves a documentation repository.
+The repository is created using <tt>c2docmanager</tt>.
+
+<h2>Domain Model</h2>
+
+The server offers a hierarchical list of <b>documents and pages</b>,
+{@type DocNodeId|node Id} which resembles path name.
+As far as the server interface is concerned, path names have no particular meaning.
+In particular, a structured file names "a/b/c/d" does not imply that a document "a/b/c" exists and is the parent.
+As a special case, the empty file name "" addresses the root node.
+
+In addition, the server offers <b>blobs</b> which can contain assets (=images).
+A blob is addressed using an Id (typically, a sequence of alphanumeric characters).
+
+<h2>Storage</h2>
+
+The data served by the doc server does not change and the server has no means of modifying it.
+If new documentation is added, it is recreated from scratch.
+
+<h2>Security</h2>
+
+All documentation is assumed to be public.
+No user management or permission checks are implemented in this server.
+
+@uses Doc.Host
+@uses Doc.Port
+@uses Doc.Dir
+---
+
+
+@group Documentation Command
+This {pcc:resp|RESP} interface is the interface to the {Documentation (Service)|Documentation} service.
+---
+### TODO: API
+
+
+@type DocNodeId
+Document Node Id.
+
+A Node Id is a string which points at a document or page.
+It resembles a path name but does not imply a particular structure.
+In particular, a structured file names "a/b/c/d" does not imply that a document "a/b/c" exists and is the parent.
+As a special case, the empty file name "" addresses the root node.
+---

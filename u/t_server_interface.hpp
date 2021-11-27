@@ -22,6 +22,23 @@ class TestServerInterfaceComposableCommandHandler : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestServerInterfaceDocumentation : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
+class TestServerInterfaceDocumentationClient : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestServerInterfaceDocumentationServer : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testErrors();
+    void testRoundtrip();
+};
+
 class TestServerInterfaceFileBase : public CxxTest::TestSuite {
  public:
     void testInterface();

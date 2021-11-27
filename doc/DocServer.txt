@@ -1,0 +1,374 @@
+c2doc-server
+============
+
+General
+-------
+
+  c2doc-server serves a documentation repository; c2docmanager creates it.
+  The repository consists of an index and a blob store.
+
+  The repository is re-created on every update. Data formats therefore
+  need not be 100% stable.
+
+
+
+### Index
+
+  Stored in `index.xml`:
+
+    <index>
+      <doc id="global Id,global Id,global Id"
+           tag="tag,tag"
+           title="user-visible name"
+           content="path-to-content">
+        (children are <doc> or <page>)
+        <page id="relative Id"
+              tag="tag,tag"
+              title="user-visible name"
+              content="path to content">
+          (children are <page>)
+
+  Example:
+
+    <index>
+      <doc id="pcc2" title="PCC2">
+        <doc id="pcc2-current,pcc-2.0.12" title="PCC 2.0.12" tag="lang=en">
+          <page id="index" title="Help" content="658156f3f645e5bf892b3dfeb32fce02c75631c6">
+            <page id="playerscreen" title="Player Screen" content="8a3648da53908cbb0cc44e9588b362798a38d647" />
+            <page id="playerscreen/keys" title="Player Screen Keys" content="f603c1595f6462366a2722ab88b3f195a2bdbbf2" />
+          </page>
+        </doc
+      </doc>
+    </index>
+
+  A document's address is it's first (primary) Id, e.g.
+  "pcc2-current", but the other Ids can also be used to refer to it.
+
+  A page's address consists of its document's address + "/" + its
+  first Id, e.g. "pcc2-current/playerscreen/keys", but other Id
+  combinations can also be used to refer to it.
+
+
+### Blob Store
+
+  A blob store must be content-addressable (=same content mapped to
+  same name), and produce alphanumerical names; otherwise, its
+  behaviour is not contractual.
+
+  Supported formats:
+
+  - FileBlobStore: files in a `content/` directory, organized by
+    SHA-1, not unlike git (but without compression etc.). Advantage:
+    fast to access/amend.
+
+  - SingleBlobStore: files in a `content.tar` file, organized by
+    SHA-1. Advantage: resource-efficient to deploy/use.
+
+  Blobs referenced by the index contain XML tag soup (=sequence of
+  elements, not standalone documents!).
+
+  Other blobs may contain images.
+
+
+
+Link Syntax
+-----------
+
+    site:xxxx                  e.g. site:host/game.cgi                                       --> $(html_CGI_RELROOT)host/game.cgi
+    xxxx                       e.g. index                                                    --> doc.cgi/doc/pcc2-current/index
+    /xxxx                      e.g. /pcc2-current/page                                       --> doc.cgi/doc/pcc2-current/page
+    asset:xxxx/yyyy            e.g. asset:602bb18debab6d361b34e121001b571cd310419c/nice.png  --> asset.cgi/602bb18debab6d361b34e121001b571cd310419c/nice.png
+    http://...                 unchanged
+
+  The point of formatting an `asset:` link as `asset:id/file.png`
+  gives the file a nicer name on the user side, and allows the
+  front-end to invent a matching MIME type without us having to store
+  metadata.
+
+
+
+Tag List
+--------
+
+  The following tags are supported to different extent
+  - in XML files to import (Import, util::doc::HelpImport)
+  - in the documentation repository (Render, util::doc::HtmlRenderer)
+  - by the built-in help renderer (Help, ui::rich::DocumentParser, util::HelpIndex)
+  - by the CCScript rich-text functions (Rich, util::rich::Parser)
+
+  This list contains all the tags and their interpretation.
+
+
+  <a href="link"> - link
+    Part of group: text
+    Contains: text
+    Import: transform 'href'
+    Render: <a href...>, transform link
+    Help, Rich: link
+
+  <align width="n" align="left|right|center"> - text box
+    Part of group: text
+    Contains: text
+    Import, Render: -
+    Help, Rich: box of given width containing the text
+
+  <b> - bold
+    Part of group: text
+    Contains: text
+    Render as: <b>
+    Import: as-is
+    Render: <b>
+    Help, Rich: bold
+
+  <big> - bigger text
+    Part of group: text
+    Contains: text
+    Import: as-is
+    Render: <big>
+    Help, Rich: size +1
+
+  <br> - line break
+    Part of group: nestedBlock
+    Import: as-is
+    Render: <br />
+    Help: line break
+    Rich: -
+
+  <cfg> - link to pconfig
+    Part of group: text
+    Contains: plaintext
+    Import: as-is
+    Render: <tt>
+    Help, Rich: -
+
+  <dd id="id"> - definition in a <dl>
+    Contains: text, nestedBlock
+    Import: as-is
+    Render: <dd>, with optional id
+    Help, Rich: -
+
+  <dt id="id"> - definition term in a <dl>
+    Contains: text, nestedBlock
+    Import: as-is
+    Render: <dt>, with optional id
+    Help, Rich: -
+
+  <di term="term" id="id"> - definition in a <dl>
+    Contains: text, nestedBlock
+    Import: as-is
+    Render: <dt>, <dd>, with optional id
+    Help: term in boldface, followed by definition
+    Rich: -
+
+  <dl id="id"> - definition list
+    Part of group: block, nestedBlock
+    Contains: dd, dt, dl
+    Import: as-is
+    Render: <dl>, with optional id
+    Help: definition list
+    Rich: -
+
+  <em> - emphasis
+    Part of group: text
+    Contains: text
+    Import: as-is
+    Render: <em>
+    Help, Rich: bold (no italic yet)
+
+  <font color="name"> - font attributes
+    Part of group: text
+    Contains: text
+    Import: as-is
+    Render: <span class="color-NAME">
+    Help, Rich: color specifies a color name: static/green/yellow/red/white/blue/dim
+
+  <group priority="id"> - group container
+    Contains: group, page
+    Import: ignore
+    Render: -
+    Help: handle priority for pages that amend/replace each other
+    Rich: -
+
+  <h1 id="id"> - heading
+    Part of group: block
+    Contains: plaintext
+    Import: placed in page-title
+    Render: <h2>, with optional id (shouldn't happen)
+    Help: big+bold
+    Rich: -
+
+  <h2 id="id"> - heading
+    Part of group: block
+    Contains: plaintext
+    Import: as-is
+    Render: <h3>, with optional id
+    Help: ">>"+bold
+    Rich: -
+
+  <h3 id="id"> - heading
+    Part of group: block
+    Contains: plaintext
+    Import: as-is
+    Render: <h4>, with optional id
+    Help: ">>"+underline
+    Rich: -
+
+  <help priority="id"> - root tag
+    Contains: group, page
+    Import: ignore
+    Render: -
+    Help: handle priority for pages that amend/replace each other
+    Rich: -
+
+  <img src="url" align="left|right|center" width="w" height="h" top="t" left="l"> - image
+    Part of group: block, nestedBlock
+    Import: transform 'src'
+    Render: with w/h/t/l: crop; with w/h: scale, otherwise plain <img src>
+    Help: evaluates src, align; produce float object
+    Rich: -
+
+  <infobox class="type" id="id"> - various types of infoboxes
+    Part of group: block
+    Contains: text, nestedBlock
+    Import: as-is
+    Render: <p class="infobox-type">, with optional id
+    Help, Rich: -
+
+  <key>/<kbd> - keycaps
+    Part of group: text
+    Contains: plaintext
+    Import: as-is
+    Render: keycaps using <kbd>
+    Help, Rich: keycaps
+
+  <ki key="k"> - item in key list
+    Contains: text, nestedBlock
+    Import: as-is
+    Render: <li>, <kbd>
+    Help: indented list (tabTo)
+    Rich: -
+
+  <kl id="id"> - key list
+    Part of group: block, nestedBlock
+    Contains: ki
+    Import: as-is
+    Render: <ul>, with optional id
+    Help: see <ki>
+    Rich: -
+
+  <li bullet="b"> - list item
+    Contains: text, nestedBlock
+    Import: as-is
+    Render: <li>
+    Help: in unnumbered list, use the specified bullet
+    Rich: -
+
+  <ol class="c" id="id"> - numbered list
+    Part of group: block, nestedBlock
+    Contains: li
+    Import: as-is
+    Render: <ol>, with optional id
+    Help: numbered list; less spacing if class="compact"
+    Rich: -
+
+  <p> - paragraph
+    Part of group: block
+    Contains: text, img, br
+    Import: as-is
+    Render: <p>, with optional id
+    Help: paragraph
+    Rich: -
+
+  <p-info> - right-justified, small paragraph
+    Part of group: block
+    Contains: text
+    Import: as-is
+    Render: -
+    Help: TODO: right-justified, small paragraph; this tag is internally created by the help file indexer
+    Rich: -
+
+  <page id="id"> - page
+    Contains: page, block
+    Import: extract page boundaries
+    Render: -
+    Help: extract page boundaries
+    Rich: -
+
+  <pre class="type"> - preformatted code/formula
+    Part of group: block, nestedBlock
+    Contains: text
+    Import: as-is; presence of <pre> affects whitespace normalisation
+    Render: <pre>
+    - use class="formula" if type=formula
+    - use no class        if type=bare
+    - use class="code"    otherwise
+    Help: syntax-highlighting, using class as syntax name
+    Rich: -
+
+  <small> - smaller text size
+    Part of group: text
+    Contains: text
+    Import: as-is
+    Render: <small>
+    Help, Rich: size -1
+
+  <table align="left|right|center" class="c"> - table
+    Part of group: block, nestedBlock
+    Contains: tr
+    Import: as-is
+    Render: <table align="a" class="c">, with optional Id
+    - align defaults to "center"
+    - class defaults to "normaltable"; omitted if class="bare"
+    Help: table
+    Rich: -
+
+  <td align="left|right|center" width="N" rowspan= colspan=> - regular table cell
+    Contains: text
+    Import: as-is
+    Render: <td valign=top align= colspan= rowspan= width=16*N>, with optional id
+    Help: table cell, handle align= and width=, width is in ems
+    Rich: -
+
+  <th align="left|right|center" width="N" colspan= rowspan=> - table header cell
+    Contains: text
+    Import: as-is
+    Render: <td valign=top align= colspan= rowspan= width=16*N>, with optional id
+    Help: table cell, handle align= and width=, width is in ems
+    Rich: -
+
+  <tn align="left|right|center" width="N" colspan= rowspan=> - numeric table cell
+    Contains: text
+    Import: as-is
+    Render: <td valign=top align=right colspan= rowspan= width=16*N>, with optional id
+    Help: table cell, handle align= and width=, width is in ems
+    Rich: -
+
+  <tr> - table row
+    Contains: td, th, tn
+    Import: as-is
+    Render: <tr>
+    Help: table row
+    Rich: -
+
+  <tt> - fixed-width font
+    Part of group: text
+    Contains: text
+    Import: as-is
+    Render: <tt>
+    Help, Rich: fixed-width font
+
+  <u> - underlined text
+    Part of group: text
+    Contains: text
+    Import: as-is
+    Render: <u>
+    Help, Rich: underline
+
+  <ul id="id" class="c"> - unnumbered list
+    Part of group: block, nestedBlock
+    Contains: li
+    Import: as-is
+    Render: <ul>, with optional id
+    Help: list; less spacing if class="compact"
+    Rich: -
+

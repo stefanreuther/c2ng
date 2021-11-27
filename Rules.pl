@@ -43,7 +43,7 @@ my $IN = $V{IN};
 # Targets (previously maintained in P9/Settings as 'TARGETS' variable)
 if (get_variable('ENABLE_BUILD')) {
     my @GUI_APPS     = qw(c2ng c2pluginw);
-    my @SERVER_APPS  = qw(c2file-server c2format-server c2host-server c2talk-server c2fileclient c2mailin c2console c2dbexport c2nntp-server c2mailout-server c2monitor-server c2play-server c2router-server c2user-server c2logger);
+    my @SERVER_APPS  = qw(c2file-server c2format-server c2host-server c2talk-server c2fileclient c2mailin c2console c2dbexport c2nntp-server c2mailout-server c2monitor-server c2play-server c2router-server c2doc-server c2user-server c2logger);
     my @CONSOLE_APPS = qw(c2check c2configtool c2docmanager c2export c2mgrep c2mkturn c2plugin c2rater c2script c2simtool c2sweep c2unpack c2untrn c2gfxgen);
     my @LIBS         = qw(guilib serverlib gamelib);
 

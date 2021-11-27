@@ -55,6 +55,8 @@ namespace server {
     const char*const ITEM_NOT_FOUND              = "404 Not found";
     const char*const GAME_NOT_FOUND              = "404 Not found";
     const char*const USER_NOT_FOUND              = "404 Not found";
+    const char*const BLOB_NOT_FOUND              = "404 Not found";
+    const char*const NODE_NOT_FOUND              = "404 Not found";
 
     // 405 Method not allowed
     const char*const NOT_A_DIRECTORY             = "405 Not a directory";

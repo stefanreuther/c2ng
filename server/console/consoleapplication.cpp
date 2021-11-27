@@ -146,6 +146,7 @@ server::console::ConsoleApplication::ConsoleApplication(afl::sys::Environment& e
     m_contextStack.pushBackNew(new RootContext(*this));
 
     // Available contexts
+    m_availableContexts.pushBackNew(new ConnectionContextFactory("doc", DOC_PORT, m_networkStack));
     m_availableContexts.pushBackNew(new ConnectionContextFactory("file", FILE_PORT, m_networkStack));
     m_availableContexts.pushBackNew(new ConnectionContextFactory("format", FORMAT_PORT, m_networkStack));
     m_availableContexts.pushBackNew(new ConnectionContextFactory("host", HOST_PORT, m_networkStack));
