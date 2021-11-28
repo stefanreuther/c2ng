@@ -141,6 +141,7 @@ class TestGameSpecHullFunctionAssignmentList : public CxxTest::TestSuite {
     void testDefaulted();
     void testRemove();
     void testSequence();
+    void testFilter();
 };
 
 class TestGameSpecHullFunctionList : public CxxTest::TestSuite {

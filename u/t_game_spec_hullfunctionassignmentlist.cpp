@@ -11,6 +11,19 @@
 
 using game::spec::ModifiedHullFunctionList;
 
+namespace {
+    const game::spec::HullFunction* findEntry(const game::spec::HullFunctionList& list, int fcn)
+    {
+        for (game::spec::HullFunctionList::Iterator_t it = list.begin(); it != list.end(); ++it) {
+            if (it->getBasicFunctionId() == fcn) {
+                return &*it;
+            }
+        }
+        return 0;
+    }
+}
+
+
 /** Accessor tests. */
 void
 TestGameSpecHullFunctionAssignmentList::testIt()
@@ -268,5 +281,34 @@ TestGameSpecHullFunctionAssignmentList::testSequence()
     TS_ASSERT(p != 0);
     TS_ASSERT_EQUALS(p->m_addedPlayers, game::PlayerSet_t(1));
     TS_ASSERT_EQUALS(p->m_removedPlayers, game::PlayerSet_t(2) + 3);
+}
+
+void
+TestGameSpecHullFunctionAssignmentList::testFilter()
+{
+    // Add some functions
+    game::spec::HullFunctionAssignmentList testee;
+    testee.change(ModifiedHullFunctionList::Function_t(100), game::PlayerSet_t::allUpTo(20), game::PlayerSet_t());
+    testee.change(ModifiedHullFunctionList::Function_t(101), game::PlayerSet_t(5), game::PlayerSet_t());
+    testee.change(ModifiedHullFunctionList::Function_t(102), game::PlayerSet_t(7), game::PlayerSet_t());
+
+    // Query, limited to one player
+    game::spec::HullFunctionList out;
+    game::spec::ModifiedHullFunctionList definitions;
+    game::config::HostConfiguration config;
+    game::spec::Hull hull(33);
+    testee.getAll(out, definitions, config, hull, game::PlayerSet_t(7), game::ExperienceLevelSet_t::allUpTo(game::MAX_EXPERIENCE_LEVELS), game::spec::HullFunction::AssignedToHull);
+
+    // Validate
+    const game::spec::HullFunction* p = findEntry(out, ModifiedHullFunctionList::Function_t(100));
+    TS_ASSERT(p != 0);
+    TS_ASSERT_EQUALS(p->getPlayers(), game::PlayerSet_t::allUpTo(20));
+
+    p = findEntry(out, ModifiedHullFunctionList::Function_t(101));
+    TS_ASSERT(p == 0);
+
+    p = findEntry(out, ModifiedHullFunctionList::Function_t(102));
+    TS_ASSERT(p != 0);
+    TS_ASSERT_EQUALS(p->getPlayers(), game::PlayerSet_t(7));
 }
 

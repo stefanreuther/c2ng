@@ -123,8 +123,7 @@ game::spec::HullFunctionAssignmentList::getAll(HullFunctionList& out,
         }
         players += m_entries[i].m_addedPlayers;
         players -= m_entries[i].m_removedPlayers;
-        players &= playerLimit;
-        if (!players.empty()) {
+        if (players.containsAnyOf(playerLimit)) {
             HullFunction function;
             if (definitions.getFunctionDefinition(m_entries[i].m_function, function)) {
                 if (function.getLevels().containsAnyOf(levelLimit)) {
