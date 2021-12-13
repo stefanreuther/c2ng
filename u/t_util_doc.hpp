@@ -61,6 +61,11 @@ class TestUtilDocInternalBlobStore : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestUtilDocLoggingVerifier : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestUtilDocRenderOptions : public CxxTest::TestSuite {
  public:
     void testSet();
@@ -76,9 +81,36 @@ class TestUtilDocSingleBlobStore : public CxxTest::TestSuite {
     void testZero();
 };
 
+class TestUtilDocSummarizingVerifier : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestUtilDocTextImport : public CxxTest::TestSuite {
  public:
     void testIt();
+};
+
+class TestUtilDocVerifier : public CxxTest::TestSuite {
+ public:
+    void testStatic();
+    void testGetNodeName();
+    void testWarnNodeHasNoId();
+    void testWarnNodeHasNoTitle();
+    void testWarnNodeIsEmpty();
+    void testWarnUnresolvableContent();
+    void testWarnUniqueSecondaryId();
+    void testWarnDuplicateAddress();
+    void testWarnInvalidComment();
+    void testWarnAssetLink();
+    void testWarnDocumentImage();
+    void testWarnInvalidAsset();
+    void testWarnDeadLink();
+    void testWarnBadAnchor();
+    void testInfoUsedTags();
+    void testInfoUsedClasses();
+    void testInfoExternalLinks();
+    void testInfoSiteLinks();
 };
 
 #endif

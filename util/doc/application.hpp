@@ -45,6 +45,7 @@ namespace util { namespace doc {
         void listContent(DataParameters& data, afl::sys::CommandLineParser& parser);
         void getContent(DataParameters& data, afl::sys::CommandLineParser& parser);
         void renderContent(DataParameters& data, afl::sys::CommandLineParser& parser);
+        void verifyContent(DataParameters& data, afl::sys::CommandLineParser& parser);
 
         void help();
 

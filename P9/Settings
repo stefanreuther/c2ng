@@ -12,12 +12,15 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = util/doc/singleblobstore.cpp util/doc/singleblobstore.hpp \
-    util/doc/textimport.cpp util/doc/textimport.hpp \
-    util/doc/htmlrenderer.cpp util/doc/renderoptions.cpp \
-    util/doc/renderoptions.hpp util/doc/htmlrenderer.hpp \
-    util/doc/internalblobstore.cpp util/doc/internalblobstore.hpp \
-    util/doc/helpimport.cpp util/doc/helpimport.hpp util/doc/application.cpp \
+FILES_gamelib = util/doc/loggingverifier.cpp util/doc/loggingverifier.hpp \
+    util/doc/summarizingverifier.cpp util/doc/summarizingverifier.hpp \
+    util/doc/verifier.cpp util/doc/verifier.hpp util/doc/singleblobstore.cpp \
+    util/doc/singleblobstore.hpp util/doc/textimport.cpp \
+    util/doc/textimport.hpp util/doc/htmlrenderer.cpp \
+    util/doc/renderoptions.cpp util/doc/renderoptions.hpp \
+    util/doc/htmlrenderer.hpp util/doc/internalblobstore.cpp \
+    util/doc/internalblobstore.hpp util/doc/helpimport.cpp \
+    util/doc/helpimport.hpp util/doc/application.cpp \
     util/doc/application.hpp util/doc/index.cpp util/doc/index.hpp \
     util/doc/fileblobstore.cpp util/doc/fileblobstore.hpp \
     util/doc/blobstore.hpp util/systeminformation.cpp \
@@ -1628,7 +1631,9 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_server_doc_documentationimpl.cpp u/t_server_doc.hpp \
+FILES_testsuite = u/t_util_doc_verifier.cpp \
+    u/t_util_doc_summarizingverifier.cpp u/t_util_doc_loggingverifier.cpp \
+    u/t_server_doc_documentationimpl.cpp u/t_server_doc.hpp \
     u/t_server_interface_documentationserver.cpp \
     u/t_server_interface_documentationclient.cpp \
     u/t_server_interface_documentation.cpp u/t_util_doc_singleblobstore.cpp \

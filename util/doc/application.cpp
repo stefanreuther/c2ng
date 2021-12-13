@@ -25,8 +25,10 @@
 #include "util/doc/helpimport.hpp"
 #include "util/doc/htmlrenderer.hpp"
 #include "util/doc/index.hpp"
+#include "util/doc/loggingverifier.hpp"
 #include "util/doc/renderoptions.hpp"
 #include "util/doc/singleblobstore.hpp"
+#include "util/doc/summarizingverifier.hpp"
 #include "util/doc/textimport.hpp"
 #include "util/string.hpp"
 #include "version.hpp"
@@ -141,6 +143,8 @@ util::doc::Application::appMain()
         getContent(data, parser);
     } else if (*pc == "render") {
         renderContent(data, parser);
+    } else if (*pc == "verify") {
+        verifyContent(data, parser);
     } else {
         errorExit(Format(tx("unknown command specified. Use \"%s -h\" for help"), environment().getInvocationName()));
     }
@@ -554,6 +558,56 @@ util::doc::Application::renderContent(DataParameters& data, afl::sys::CommandLin
 }
 
 void
+util::doc::Application::verifyContent(DataParameters& data, afl::sys::CommandLineParser& parser)
+{
+    // Parse
+    String_t text;
+    bool option;
+    bool all = false;
+    bool verbose = false;
+    Verifier::Messages_t msg = Verifier::allMessages();
+    while (parser.getNext(option, text)) {
+        if (option) {
+            if (handleDataOption(data, text, parser)) {
+                // ok
+            } else if (text == "all") {
+                all = true;
+            } else if (text == "v") {
+                verbose = true;
+            } else if (text == "warn-only") {
+                msg = Verifier::warningMessages();
+            } else if (text == "info-only") {
+                msg = Verifier::infoMessages();
+            } else {
+                errorExitBadOption();
+            }
+        } else {
+            errorExit(translator()("too many arguments"));
+        }
+    }
+
+    // Operate
+    DataReference ref;
+    loadData(ref, data);
+    if (all) {
+        LoggingVerifier log(translator(), standardOutput());
+        log.setEnabledMessages(msg);
+        log.verify(ref.index, *ref.blobStore);
+    } else {
+        SummarizingVerifier sum;
+        sum.setEnabledMessages(msg);
+        sum.verify(ref.index, *ref.blobStore);
+        for (size_t i = 0; i < Verifier::MAX_MESSAGE; ++i) {
+            const Verifier::Message msg = static_cast<Verifier::Message>(i);
+            if (sum.hasMessage(msg)) {
+                bool brief = Verifier::summaryMessages().contains(msg) && !verbose;
+                sum.printMessage(msg, ref.index, brief, translator(), standardOutput());
+            }
+        }
+    }
+}
+
+void
 util::doc::Application::help()
 {
     TextWriter& out = standardOutput();
@@ -578,6 +632,7 @@ util::doc::Application::help()
                                                 "  import-text [OPTIONS...] FILE...\n\tImport plain-text file\n"
                                                 "  ls [-l|-t|-f|-r|-d...] [URL...]\n\tList content, recursively\n"
                                                 "  render [OPTIONS...] URL...\n\tRender page content as HTML\n"
+                                                "  verify [OPTIONS...]\n\tVerify repository content\n"
                                                 "\n"
                                                 "Command options:\n"
                                                 "--below=ID\t(import, add) Set parent group (default=root)\n"
@@ -587,6 +642,10 @@ util::doc::Application::help()
                                                 "--page\t(import, add) Create a page\n"
                                                 "--document\t(import, add) Create a document\n"
                                                 "--charset=CS\t(import-text) Set character set\n"
+                                                "--all\t(verify) Report all individual messages (default=summarize)\n"
+                                                "-v\t(verify) Do not abbreviate messages\n"
+                                                "--warn-only\t(verify) Show only warnings\n"
+                                                "--info-only\t(verify) Show only information messages\n"
                                                 "-l, --long\t(ls) Long format\n"
                                                 "-t, --title\t(ls) Show titles\n"
                                                 "-f, --forest, --tree\t(ls) Indent to show tree structure\n"
@@ -594,7 +653,8 @@ util::doc::Application::help()
                                                 "-d, --self, --directory\t(ls) Show element itself, not content\n"
                                                 "--site=PFX\t(render) Set URL prefix for \"site:\" links\n"
                                                 "--assets=PFX\t(render) Set URL prefix for \"asset:\" links\n"
-                                                "--doc=PFX\t(render) Set URL prefix for document links\n"))));
+                                                "--doc=PFX\t(render) Set URL prefix for document links\n"
+))));
     exit(0);
 }
 
