@@ -14,6 +14,11 @@ namespace util { namespace doc {
 
     class BlobStore;
 
+    /** Flag for importHelp: remove source notes.
+        PCC2 includes source notices in the script manual: "(from foo/bar.cc:123)".
+        These defeat duplicate elimination and are not required for the web interface. */
+    const int ImportHelp_RemoveSource = 1;
+
     /** Import PCC2 Help Files.
         Loads a help file and imports it into pages below a given root.
 
@@ -32,9 +37,10 @@ namespace util { namespace doc {
         @param [in]     root       Root page
         @param [in/out] blobStore  Blob store to store transformed pages
         @param [in]     file       XML file
+        @param [in]     flags      Flags
         @param [in/out] log        Log listener (warning messages)
         @param [in]     tx         Translator (warning messages) */
-    void importHelp(Index& idx, Index::Handle_t root, BlobStore& blobStore, afl::io::Stream& file, afl::sys::LogListener& log, afl::string::Translator& tx);
+    void importHelp(Index& idx, Index::Handle_t root, BlobStore& blobStore, afl::io::Stream& file, int flags, afl::sys::LogListener& log, afl::string::Translator& tx);
 
 } }
 

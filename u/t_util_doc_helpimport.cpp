@@ -57,7 +57,7 @@ TestUtilDocHelpImport::testIt()
     Index::Handle_t doc = idx.addDocument(idx.root(), "doc-url", "Doc", "");
 
     // Do it
-    importHelp(idx, doc, blobStore, ms, log, tx);
+    importHelp(idx, doc, blobStore, ms, 0, log, tx);
 
     // Verify
     TS_ASSERT_EQUALS(idx.getNumNodeChildren(doc), 3U);
@@ -119,7 +119,7 @@ TestUtilDocHelpImport::testIt2()
     Index::Handle_t doc = idx.addDocument(idx.root(), "doc-url", "Doc", "");
 
     // Do it
-    importHelp(idx, doc, blobStore, ms, log, tx);
+    importHelp(idx, doc, blobStore, ms, 0, log, tx);
 
     // Verify
     TS_ASSERT_EQUALS(idx.getNumNodeChildren(doc), 1U);
@@ -161,7 +161,7 @@ TestUtilDocHelpImport::testIt3()
     Index::Handle_t doc = idx.addDocument(idx.root(), "doc-url", "Doc", "");
 
     // Do it
-    importHelp(idx, doc, blobStore, ms, log, tx);
+    importHelp(idx, doc, blobStore, ms, 0, log, tx);
 
     // Verify
     TS_ASSERT_EQUALS(idx.getNumNodeChildren(doc), 1U);
@@ -214,7 +214,7 @@ TestUtilDocHelpImport::testIt4()
     Index::Handle_t doc = idx.addDocument(idx.root(), "doc-url", "Doc", "");
 
     // Do it
-    importHelp(idx, doc, blobStore, ms, log, tx);
+    importHelp(idx, doc, blobStore, ms, 0, log, tx);
 
     // Verify
     TS_ASSERT_EQUALS(idx.getNumNodeChildren(doc), 1U);
@@ -232,3 +232,55 @@ TestUtilDocHelpImport::testIt4()
                      "<p><b>m</b> <b>n</b></p>");
 }
 
+void
+TestUtilDocHelpImport::testRemoveSource()
+{
+    // Environment
+    ConstMemoryStream ms(afl::string::toBytes("<?xml version=\"1.0\"?>\n"
+                                              "<!DOCTYPE help SYSTEM \"pcc2help.dtd\">\n"
+                                              "<help priority=\"99\">\n"
+                                              " <page id=\"p\">\n"
+                                              "  <h1>H</h1>\n"
+                                              "  <p>text...</p>\n"
+                                              "  <p><b>See also: </b><a href=\"q\">Hooks</a></p>\n"
+                                              "  <p><font color=\"dim\"><small>(from doc/interpreter_manual.txt:2083)</small></font></p>\n"
+                                              " </page>\n"
+                                              "</help>\n"));
+    InternalBlobStore blobStore;
+    Log log;
+    NullTranslator tx;
+    Index idx;
+
+    // Do it
+    ms.setPos(0);
+    importHelp(idx, idx.addDocument(idx.root(), "off", "Doc", ""), blobStore, ms, 0, log, tx);
+    ms.setPos(0);
+    importHelp(idx, idx.addDocument(idx.root(), "on", "Doc", ""), blobStore, ms, util::doc::ImportHelp_RemoveSource, log, tx);
+
+    // Verify
+    {
+        Index::Handle_t page;
+        String_t tmp;
+        TS_ASSERT(idx.findNodeByAddress("off/p", page, tmp));
+        TS_ASSERT(idx.isNodePage(page));
+        TS_ASSERT_EQUALS(idx.getNodeTitle(page), "H");
+
+        String_t content = afl::string::fromBytes(blobStore.getObject(idx.getNodeContentId(page))->get());
+        TS_ASSERT_EQUALS(content,
+                         "<p>text...</p>"
+                         "<p><b>See also: </b><a href=\"q\">Hooks</a></p>"
+                         "<p><font color=\"dim\"><small>(from doc/interpreter_manual.txt:2083)</small></font></p>");
+    }
+    {
+        Index::Handle_t page;
+        String_t tmp;
+        TS_ASSERT(idx.findNodeByAddress("on/p", page, tmp));
+        TS_ASSERT(idx.isNodePage(page));
+        TS_ASSERT_EQUALS(idx.getNodeTitle(page), "H");
+
+        String_t content = afl::string::fromBytes(blobStore.getObject(idx.getNodeContentId(page))->get());
+        TS_ASSERT_EQUALS(content,
+                         "<p>text...</p>"
+                         "<p><b>See also: </b><a href=\"q\">Hooks</a></p>");
+    }
+}

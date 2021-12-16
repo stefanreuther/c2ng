@@ -336,11 +336,14 @@ util::doc::Application::importHelp(DataParameters& data, afl::sys::CommandLinePa
     NodeParameters np;
     std::vector<String_t> fileNames;
     String_t text;
+    int flags = 0;
     bool option;
     while (parser.getNext(option, text)) {
         if (option) {
             if (handleNodeOption(np, text, parser) || handleDataOption(data, text, parser)) {
                 // ok
+            } else if (text == "remove-source") {
+                flags |= ImportHelp_RemoveSource;
             } else {
                 errorExitBadOption();
             }
@@ -359,7 +362,7 @@ util::doc::Application::importHelp(DataParameters& data, afl::sys::CommandLinePa
     Index::Handle_t hdl = addDocument(ref, np, false);
     for (size_t i = 0; i < fileNames.size(); ++i) {
         Ref<Stream> file = fileSystem().openFile(fileNames[i], FileSystem::OpenRead);
-        util::doc::importHelp(ref.index, hdl, *ref.blobStore, *file, log(), translator());
+        util::doc::importHelp(ref.index, hdl, *ref.blobStore, *file, flags, log(), translator());
     }
     saveData(ref, data);
 }
@@ -642,6 +645,7 @@ util::doc::Application::help()
                                                 "--page\t(import, add) Create a page\n"
                                                 "--document\t(import, add) Create a document\n"
                                                 "--charset=CS\t(import-text) Set character set\n"
+                                                "--remove-source\t(import-help) Remove source notes\n"
                                                 "--all\t(verify) Report all individual messages (default=summarize)\n"
                                                 "-v\t(verify) Do not abbreviate messages\n"
                                                 "--warn-only\t(verify) Show only warnings\n"

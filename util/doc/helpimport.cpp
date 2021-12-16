@@ -215,9 +215,46 @@ namespace {
             || nn == "tr";
     }
 
-    // Finish a page: save its content.
-    void finishPage(Index& idx, BlobStore& blobStore, State& st)
+    // Check for source note: <p><font color="dim"><small>(from FILE:LINE)</small></font></p>
+    bool isSourceNote(const Node* n)
     {
+        const TagNode* t1 = dynamic_cast<const TagNode*>(n);
+        if (t1 == 0 || t1->getName() != "p" || t1->getChildren().size() != 1) {
+            return false;
+        }
+
+        const TagNode* t2 = dynamic_cast<const TagNode*>(t1->getChildren()[0]);
+        if (t2 == 0 || t2->getName() != "font" || t2->getChildren().size() != 1 || t2->getAttributeByName("color") != "dim") {
+            return false;
+        }
+
+        const TagNode* t3 = dynamic_cast<const TagNode*>(t2->getChildren()[0]);
+        if (t3 == 0 || t3->getName() != "small" || t3->getChildren().size() != 1) {
+            return false;
+        }
+
+        const TextNode* t = dynamic_cast<const TextNode*>(t3->getChildren()[0]);
+        if (t == 0 || t->get().substr(0, 6) != "(from ") {
+            return false;
+        }
+        return true;
+    }
+
+    // Finish a page: save its content.
+    void finishPage(Index& idx, BlobStore& blobStore, State& st, int flags)
+    {
+        // Remove source note
+        if ((flags & util::doc::ImportHelp_RemoveSource) != 0) {
+            for (size_t i = 0; i < st.result.size();) {
+                if (isSourceNote(st.result[i])) {
+                    st.result.erase(st.result.begin() + i);
+                } else {
+                    ++i;
+                }
+            }
+        }
+
+        // Write
         InternalSink sink;
         Writer(sink).visit(st.result);
         if (!sink.getContent().empty()) {
@@ -228,7 +265,7 @@ namespace {
 
 
 void
-util::doc::importHelp(Index& idx, Index::Handle_t root, BlobStore& blobStore, afl::io::Stream& file, afl::sys::LogListener& log, afl::string::Translator& tx)
+util::doc::importHelp(Index& idx, Index::Handle_t root, BlobStore& blobStore, afl::io::Stream& file, int flags, afl::sys::LogListener& log, afl::string::Translator& tx)
 {
     // XML reader
     CharsetFactory csFactory;
@@ -301,7 +338,7 @@ util::doc::importHelp(Index& idx, Index::Handle_t root, BlobStore& blobStore, af
                     }
                 }
 
-                finishPage(idx, blobStore, me);
+                finishPage(idx, blobStore, me, flags);
                 state.popBack();
             } else {
                 // Validate
@@ -368,7 +405,7 @@ util::doc::importHelp(Index& idx, Index::Handle_t root, BlobStore& blobStore, af
 
     // Finish remainder
     while (!state.empty()) {
-        finishPage(idx, blobStore, *state.back());
+        finishPage(idx, blobStore, *state.back(), flags);
         state.popBack();
     }
 }
