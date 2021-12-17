@@ -209,9 +209,6 @@ namespace {
             || nn == "ol"
             || nn == "ul"
             || nn == "table"
-            || nn == "td"
-            || nn == "th"
-            || nn == "tn"
             || nn == "tr";
     }
 
