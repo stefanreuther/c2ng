@@ -518,7 +518,7 @@ TestUtilDocVerifier::testInfoExternalLinks()
     // Link
     {
         TestHarness h;
-        Index::Handle_t doc = h.idx.addDocument(h.idx.root(), "a", "Title", h.addBlob("<p><a href=\"http://phost.de/\">link</a></p>"));
+        Index::Handle_t doc = h.idx.addDocument(h.idx.root(), "a", "Title", h.addBlob("<p><a class=\"bare\" href=\"http://phost.de/\">link</a></p>"));
         h.verify();
 
         TS_ASSERT_EQUALS(h.tester.msgs.size(), 1U);
@@ -547,7 +547,7 @@ TestUtilDocVerifier::testInfoSiteLinks()
     // Link
     {
         TestHarness h;
-        Index::Handle_t doc = h.idx.addDocument(h.idx.root(), "a", "Title", h.addBlob("<p><a href=\"site:login.cgi\">link</a></p>"));
+        Index::Handle_t doc = h.idx.addDocument(h.idx.root(), "a", "Title", h.addBlob("<p><a class=\"bare\" href=\"site:login.cgi\">link</a></p>"));
         h.verify();
 
         TS_ASSERT_EQUALS(h.tester.msgs.size(), 1U);

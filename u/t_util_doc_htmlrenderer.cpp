@@ -56,6 +56,79 @@ TestUtilDocHtmlRenderer::testLink()
     TS_ASSERT_EQUALS(result, "<p>link: <a href=\"/doc/id/other\">click</a></p>");
 }
 
+/** Rendering a site link. */
+void
+TestUtilDocHtmlRenderer::testSiteLink()
+{
+    // <p>link: <a href="site:file.cgi">click</a></p>
+    Nodes_t nodes;
+    TagNode* p = new TagNode("p");
+    nodes.pushBackNew(p);
+    p->addNewChild(new TextNode("link: "));
+
+    TagNode* link = new TagNode("a");
+    p->addNewChild(link);
+    link->setAttribute("href", "site:file.cgi");
+    link->addNewChild(new TextNode("click"));
+
+    RenderOptions opts;
+    opts.setSiteRoot("/site/");
+    opts.setDocumentRoot("/doc/");
+    opts.setDocumentId("id");
+    String_t result = renderHTML(nodes, opts);
+
+    TS_ASSERT_EQUALS(result, "<p>link: <a href=\"/site/file.cgi\" class=\"site-link\">click</a></p>");
+}
+
+/** Rendering an external link. */
+void
+TestUtilDocHtmlRenderer::testExternalLink()
+{
+    // <p>link: <a href="http://rcworld.de">click</a></p>
+    Nodes_t nodes;
+    TagNode* p = new TagNode("p");
+    nodes.pushBackNew(p);
+    p->addNewChild(new TextNode("link: "));
+
+    TagNode* link = new TagNode("a");
+    p->addNewChild(link);
+    link->setAttribute("href", "http://rcworld.de");
+    link->addNewChild(new TextNode("click"));
+
+    RenderOptions opts;
+    opts.setSiteRoot("/site/");
+    opts.setDocumentRoot("/doc/");
+    opts.setDocumentId("id");
+    String_t result = renderHTML(nodes, opts);
+
+    TS_ASSERT_EQUALS(result, "<p>link: <a href=\"http://rcworld.de\" class=\"external-link\">click</a></p>");
+}
+
+/** Rendering a classified link. */
+void
+TestUtilDocHtmlRenderer::testClassLink()
+{
+    // <p>link: <a class="userlink" href="site:userinfo.cgi/a">click</a></p>
+    Nodes_t nodes;
+    TagNode* p = new TagNode("p");
+    nodes.pushBackNew(p);
+    p->addNewChild(new TextNode("link: "));
+
+    TagNode* link = new TagNode("a");
+    p->addNewChild(link);
+    link->setAttribute("class", "userlink");
+    link->setAttribute("href", "site:userinfo.cgi/a");
+    link->addNewChild(new TextNode("click"));
+
+    RenderOptions opts;
+    opts.setSiteRoot("/site/");
+    opts.setDocumentRoot("/doc/");
+    opts.setDocumentId("id");
+    String_t result = renderHTML(nodes, opts);
+
+    TS_ASSERT_EQUALS(result, "<p>link: <a href=\"/site/userinfo.cgi/a\" class=\"userlink\">click</a></p>");
+}
+
 /** Rendering a key list (custom tag). */
 void
 TestUtilDocHtmlRenderer::testKeyList()

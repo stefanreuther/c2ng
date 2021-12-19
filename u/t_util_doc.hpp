@@ -31,6 +31,9 @@ class TestUtilDocHtmlRenderer : public CxxTest::TestSuite {
  public:
     void testSimple();
     void testLink();
+    void testSiteLink();
+    void testExternalLink();
+    void testClassLink();
     void testKeyList();
     void testImage();
     void testImageScaled();

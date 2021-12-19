@@ -49,6 +49,37 @@ namespace {
         void renderTableCell(const String_t& tagName, const String_t& defaultAlign, const TagNode& t);
         void renderPreformatted(const TagNode& t);
     };
+
+    const char* startsWith(const String_t& str, const char* pfx)
+    {
+        size_t len = std::strlen(pfx);
+        if (str.compare(0, len, pfx, len) == 0) {
+            return str.data() + len;
+        } else {
+            return 0;
+        }
+    }
+
+    String_t getLinkClass(const TagNode& t)
+    {
+        const String_t& klass = t.getAttributeByName("class");
+        if (klass == "bare") {
+            return String_t();
+        } else if (!klass.empty()) {
+            return klass;
+        } else {
+            const String_t& s = t.getAttributeByName("href");
+            if (startsWith(s, "http:") || startsWith(s, "https:") || startsWith(s, "mailto:") || startsWith(s, "ftp:")
+                || startsWith(s, "news:") || startsWith(s, "nntp:") || startsWith(s, "data:"))
+            {
+                return "external-link";
+            } else if (startsWith(s, "site:")) {
+                return "site-link";
+            } else {
+                return String_t();
+            }
+        }
+    }
 }
 
 void
@@ -258,6 +289,7 @@ HtmlRenderer::renderLink(const TagNode& t)
     } else {
         m_result += "<a";
         addAttribute("href", m_options.transformLink(link));
+        addAttribute("class", getLinkClass(t));
         m_result += ">";
         visit(t.getChildren());
         m_result += "</a>";

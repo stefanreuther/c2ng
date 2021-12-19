@@ -99,11 +99,16 @@ Tag List
   This list contains all the tags and their interpretation.
 
 
-  <a href="link"> - link
+  <a href="link" class="class"> - link
     Part of group: text
     Contains: text
     Import: transform 'href'
     Render: <a href...>, transform link
+    - use no class if class=bare
+    - otherwise, use given class if any
+    - otherwise, use class="external-link" if external link given
+    - otherwise, use class="site-link" if site: link given
+    - otherwise, use no class
     Help, Rich: link
 
   <align width="n" align="left|right|center"> - text box
