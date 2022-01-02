@@ -11,7 +11,7 @@
 void
 interpreter::SelectionExpression::compile(Tokenizer& tok, String_t& expr)
 {
-    // ex int/selexpr.h:compileSelectionExpression
+    // ex int/selexpr.h:compileSelectionExpression, search.pas:CompileExpr
     compileSummand(tok, expr);
     while (1) {
         if (tok.checkAdvance(tok.tOR) || tok.checkAdvance(tok.tPlus)) {
@@ -60,8 +60,7 @@ interpreter::SelectionExpression::compileOptionalTypeMask(Tokenizer& tok, String
 void
 interpreter::SelectionExpression::compileFactor(Tokenizer& tok, String_t& expr)
 {
-    // ex search.pas::CompileFactor
-    // ex int/selexpr.cc:compileFactor
+    // ex search.pas::CompileFactor, int/selexpr.cc:compileFactor
     if (tok.checkAdvance(tok.tNOT) || tok.checkAdvance(tok.tMinus)) {
         compileFactor(tok, expr);
         expr += opNot;
@@ -113,7 +112,7 @@ interpreter::SelectionExpression::compileFactor(Tokenizer& tok, String_t& expr)
 void
 interpreter::SelectionExpression::compileSummand(Tokenizer& tok, String_t& expr)
 {
-    // ex int/selexpr.cc:compileSummand
+    // ex int/selexpr.cc:compileSummand, search.pas:CompileSummand
     compileFactor(tok, expr);
     while (1) {
         if (tok.checkAdvance(tok.tAND) || tok.checkAdvance(tok.tMultiply)) {

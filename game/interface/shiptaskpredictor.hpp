@@ -91,6 +91,7 @@ namespace game { namespace interface {
         game::map::ShipPredictor m_predictor;
         const game::map::Universe& m_universe;
         const game::spec::ShipList& m_shipList;
+        const game::config::HostConfiguration& m_config;
 
         enum { MAX_XYS = 30 };
         game::map::Point m_positions[MAX_XYS];     // ex positions

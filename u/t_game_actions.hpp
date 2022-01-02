@@ -149,7 +149,9 @@ class TestGameActionsCargoTransferSetup : public CxxTest::TestSuite {
     void testInit();
     void testCreateNonexistant();
     void testOwnShipOwnShip();
+    void testOwnShipOwnShipDirect();
     void testOwnShipAlliedShip();
+    void testOwnShipAlliedShipDirect();
     void testOwnShipForeignShip();
     void testForeignShipOwnShip();
     void testForeignShipForeignShip();
@@ -159,7 +161,9 @@ class TestGameActionsCargoTransferSetup : public CxxTest::TestSuite {
     void testJettisonNormal();
     void testJettisonFail();
     void testJettisonFailPlanet();
+    void testJettisonDirect();
     void testOwnPlanetOwnShip();
+    void testOwnPlanetOwnShipDirect();
     void testOwnPlanetAlliedShip();
     void testOwnPlanetForeignShip();
     void testForeignPlanetOwnShip();

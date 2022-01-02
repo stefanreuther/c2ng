@@ -723,7 +723,7 @@ EndSub
 % Starbase mission [M]
 % @since PCC 2.40.1
 Sub CCUI.Base.SetMission
-  % ex client/act-planet.cc:doBaseChangeMission (part)
+  % ex client/act-planet.cc:doBaseChangeMission (part), bdata.pas:ChangeStarbaseMission
   Local UI.Result
   If Played Then
     CCUI.Base.ChooseMission Mission$

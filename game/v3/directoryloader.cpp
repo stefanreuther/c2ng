@@ -25,6 +25,7 @@
 #include "game/v3/writer.hpp"
 #include "util/backupfile.hpp"
 
+using afl::base::Ptr;
 using afl::base::Ref;
 using afl::except::checkAssertion;
 using afl::io::Directory;
@@ -235,6 +236,13 @@ game::v3::DirectoryLoader::loadCurrentTurn(Turn& turn, Game& game, int player, R
         Ref<Stream> s = dir.openFile(Format("target%d.dat", player), FileSystem::OpenRead);
         s->fullRead(rawCount.m_bytes);
         ldr.loadTargets(turn.universe(), *s, rawCount, Loader::TargetPlaintext, source, gen.getTurnNumber());
+    }
+    {
+        Ptr<Stream> s = dir.openFileNT(Format("target%d.ext", player), FileSystem::OpenRead);
+        if (s.get() != 0) {
+            s->fullRead(rawCount.m_bytes);
+            ldr.loadTargets(turn.universe(), *s, rawCount, Loader::TargetPlaintext, source, gen.getTurnNumber());
+        }
     }
 
     // Planets

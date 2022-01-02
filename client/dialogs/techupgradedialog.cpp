@@ -84,7 +84,7 @@ TechUpgradeDialog::TechUpgradeDialog(ui::Root& root, afl::string::Translator& tx
 void
 TechUpgradeDialog::run()
 {
-    // ex WTechUpgradeWindow::doWindow
+    // ex WTechUpgradeWindow::doWindow, bdata.pas:UpgradeTech
     // Initialize and query initial state.
     // Caller has checked preconditions; if they didn't, this will create a dialog that's not useful.
     // However, that's easy to detect because max=0.

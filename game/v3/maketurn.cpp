@@ -162,6 +162,7 @@ namespace {
                     }
                 } else if (verb.size() == 0 || verb[0] == '$') {
                     // meta-verb or invalid
+                    // FIXME: $send-file
                 } else {
                     // command
                     if (accum.size() != 0 && accum.size() + line.size() > 500) {

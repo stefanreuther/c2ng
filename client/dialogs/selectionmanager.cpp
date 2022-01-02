@@ -98,6 +98,7 @@ namespace {
         afl::base::SignalConnection conn_selectionChange;
 
         void onSelectionChange(const SelectionProxy::Info& info);
+        void onOK();
         void doCopy();
         void doSave(String_t title, String_t flags);
         void doLoad(String_t title, String_t flags);
@@ -194,7 +195,7 @@ SelectionList::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
 void
 SelectionList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {
-    // ex WSelectionLayerInfo::drawContent
+    // ex WSelectionLayerInfo::drawContent, CSelectionView.Draw
     afl::base::Deleter del;
     gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
     prepareColorListItem(ctx, area, state, m_root.colorScheme(), del);
@@ -357,6 +358,7 @@ SelectionManager::run()
 
     win.pack();
     m_list.requestFocus();
+    m_list.sig_itemDoubleClick.add(this, &SelectionManager::onOK);
     m_root.centerWidget(win);
     m_root.add(win);
     m_loop.run();
@@ -372,8 +374,7 @@ SelectionManager::handleKey(util::Key_t key, int /*prefix*/)
         return true;
 
      case util::Key_Return:
-        m_proxy.setCurrentLayer(m_list.getCurrentItem());
-        m_loop.stop(0);
+        onOK();
         return true;
 
      case 'c':
@@ -428,6 +429,8 @@ SelectionManager::handleKey(util::Key_t key, int /*prefix*/)
 
      case 'l':
      case 'l' + util::KeyMod_Ctrl:
+     case 'r':                           // PCC1 compatibility
+     case 'r' + util::KeyMod_Ctrl:       // PCC1 compatibility
         // Load
         doLoad(m_translator("Load Selection"), afl::string::Format("u%d", m_list.getCurrentItem()));
         return true;
@@ -458,6 +461,13 @@ void
 SelectionManager::onSelectionChange(const SelectionProxy::Info& info)
 {
     m_list.setContent(info);
+}
+
+void
+SelectionManager::onOK()
+{
+    m_proxy.setCurrentLayer(m_list.getCurrentItem());
+    m_loop.stop(0);
 }
 
 void
@@ -548,7 +558,7 @@ client::dialogs::doSelectionManager(client::si::UserSide& iface,
                                     client::si::Control& ctl,
                                     client::si::OutputState& out)
 {
-    // ex doSelectionManager
+    // ex doSelectionManager, search.pas:SelectionManager
     // Set up proxy
     SelectionProxy proxy(iface.gameSender(), ctl.root().engine().dispatcher());
     SelectionProxy::Info info;

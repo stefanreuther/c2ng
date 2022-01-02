@@ -302,6 +302,7 @@ SearchDialog::SearchDialog(const SearchQuery& initialQuery, game::Reference curr
     m_options.sig_click.add(this, &SearchDialog::onOptionClick);
     m_btnSearch.sig_fire.add(this, &SearchDialog::onSearch);
     m_btnHistory.sig_fire.add(this, &SearchDialog::onHistory);
+    m_refList.sig_itemDoubleClick.add(this, &SearchDialog::onReturn);
 }
 
 void

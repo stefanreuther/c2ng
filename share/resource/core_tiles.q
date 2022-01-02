@@ -58,7 +58,7 @@ EndSub
 % - call SetContent with a 30x12 rich-text string
 % @since PCC2 2.40.1
 Sub Tile.ShipOverview
-  % ex WShipOverviewTile::drawData
+  % ex WShipOverviewTile::drawData, CStarshipWindow.DrawData
   Local s, t
 
   % Line 1: Hull
@@ -171,7 +171,7 @@ EndSub
 % - call SetContent with a 30x10 rich-text string
 % @since PCC2 2.40.1
 Sub Tile.BaseOverview
-  % ex WBaseOverviewTile::drawData
+  % ex WBaseOverviewTile::drawData, CStarbaseWindow.DrawData
   Local t
 
   % Line 1: Funds
@@ -550,7 +550,7 @@ EndSub
 % - call SetButton to configure button "f" if desired
 % @since PCC2 2.40.1
 Sub Tile.PlanetFCode
-  % ex WPlanetFCodeTile::drawData
+  % ex WPlanetFCodeTile::drawData, cscreen.pas:CPlanetaryFCodeTile
   Local t
   t := RAdd(   Translate("Funds:"), " ", RStyle("green", CCVP.NumberToString(Money), " ", Translate("mc")), "\n")
   t := RAdd(t, Translate("Friendly Code:"), " ", RStyle("green", FCode), "\n")

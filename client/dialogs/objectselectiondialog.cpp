@@ -311,7 +311,7 @@ client::dialogs::doObjectSelectionDialog(const ObjectSelectionDialog& def,
                                          client::si::Control& parentControl,
                                          client::si::OutputState& outputState)
 {
-    // ex WObjectSelectionDialog (sort-of)
+    // ex WObjectSelectionDialog (sort-of), CSelectWindow.Init (sort-of), cscreen.pas:RunSelectWindow
     ui::Root& root = parentControl.root();
     afl::string::Translator& tx = parentControl.translator();
 

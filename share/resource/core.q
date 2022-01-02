@@ -266,6 +266,7 @@ EndSub
 % Run as high-priority process during startup.
 % @since PCC2 2.40.1
 Sub C2$RunLoadHook
+  % ex cc.pas:InitVM
   % Internal initialisation
   % FIXME: use actual Chart.Geo configuration
   Chart.X := 2000

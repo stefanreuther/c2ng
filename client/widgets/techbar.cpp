@@ -25,6 +25,7 @@ client::widgets::TechBar::~TechBar()
 void
 client::widgets::TechBar::draw(gfx::Canvas& can)
 {
+    // ex CTechbar.Draw
     static const int dif[7] = { -9, -6, -3, 0, +4, +7, +10 };
 
     // Metrics

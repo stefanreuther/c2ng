@@ -7,6 +7,16 @@
 #include "afl/string/format.hpp"
 #include "afl/string/parse.hpp"
 #include "util/math.hpp"
+#include "util/stringparser.hpp"
+
+namespace {
+    bool parseWhitespace(util::StringParser& p)
+    {
+        while (p.parseCharacter(' ') || p.parseCharacter('\t'))
+            ;
+        return true;
+    }
+}
 
 // Get component.
 int
@@ -33,14 +43,30 @@ game::map::Point::set(Component c, int v)
 bool
 game::map::Point::parseCoordinates(const String_t& str)
 {
-    // ex GPoint::parseCoordinates
+    // ex GPoint::parseCoordinates, search.pas:ParseXY
+    util::StringParser p(str);
     int x, y;
-    String_t::size_type p = str.find(',');
-    if (p == str.npos) {
+
+    // Initial whitespace
+    parseWhitespace(p);
+
+    // Optional opening paren
+    bool ok = p.parseCharacter('(');
+
+    // X coordinate, comma, Y coordinate
+    if (!p.parseInt(x)
+        || !parseWhitespace(p)
+        || !p.parseCharacter(',')
+        || !p.parseInt(y)
+        || !parseWhitespace(p))
+    {
         return false;
     }
 
-    if (!afl::string::strToInteger(str.substr(0, p), x) || !afl::string::strToInteger(str.substr(p+1), y)) {
+    // Closing paren
+    if ((ok && (!p.parseCharacter(')') || !parseWhitespace(p)))
+        || !p.parseEnd())
+    {
         return false;
     }
 

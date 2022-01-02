@@ -411,7 +411,7 @@ game::vcr::flak::Setup::initAfterSetup(const Configuration& config, const Enviro
 void
 game::vcr::flak::Setup::removePassiveObjects()
 {
-    // ex FlakBattle::removePassiveObjects
+    // ex FlakBattle::removePassiveObjects, flak.pas:RemovePassiveObjects
     // temporary array
     std::vector<int> new_ids(m_objects.size());
 
@@ -495,7 +495,7 @@ game::vcr::flak::Setup::removePassiveObjects()
 void
 game::vcr::flak::Setup::computeFleetSpeeds(const Environment& env)
 {
-    // ex FlakBattle::computeFleetSpeeds
+    // ex FlakBattle::computeFleetSpeeds, flak.pas:ComputeFleetSpeeds
     for (FleetIndex_t i = 0; i < m_fleets.size(); ++i) {
         int speed = 0;
         for (size_t j = 0; j < m_fleets[i]->numShips; ++j) {
@@ -520,7 +520,7 @@ game::vcr::flak::Setup::computeFleetSpeeds(const Environment& env)
 void
 game::vcr::flak::Setup::computeInitialPositions(const Configuration& config, util::RandomNumberGenerator& rng)
 {
-    // ex FlakBattle::computeInitialPositions
+    // ex FlakBattle::computeInitialPositions, flak.pas:ComputeInitialPositions
     /* do we have a planet? */
     int planet_owner = 0;
     int num_players = 0;
@@ -582,7 +582,7 @@ game::vcr::flak::Setup::computeInitialPositions(const Configuration& config, uti
 void
 game::vcr::flak::Setup::assignInitialPositions(const int player, double angle, int32_t dist, const Configuration& config)
 {
-    // ex FlakBattle::assignInitialPositions
+    // ex FlakBattle::assignInitialPositions, flak.pas:AssignInitialPositions
     int offset = config.StartingDistancePerFleet;
     for (FleetIndex_t i = 0; i < m_fleets.size(); ++i) {
         Fleet& this_fleet = *m_fleets[i];
@@ -604,7 +604,7 @@ game::vcr::flak::Setup::assignInitialPositions(const int player, double angle, i
 void
 game::vcr::flak::Setup::adjustStrengths(int adj_to, const Configuration& config)
 {
-    // ex FlakBattle::adjustStrengths
+    // ex FlakBattle::adjustStrengths, flak.pas:AdjustStrengths
     int32_t total_strength = 0;
     for (ShipIndex_t i = 0; i < m_objects.size(); ++i) {
         total_strength += m_objects[i]->getCompensation();
@@ -621,21 +621,3 @@ game::vcr::flak::Setup::adjustStrengths(int adj_to, const Configuration& config)
         }
     }
 }
-
-
-// FIXME: retire
-// // /** Get unit by Id.
-// //     \param id Id number
-// //     \param want_planet True if we want a planet, false if we want a ship
-// //     \return requested unit; 0 if not found */
-// game::vcr::flak::Object*
-// game::vcr::flak::Setup::getShipById(int id, bool want_planet)
-// {
-//     // ex FlakBattle::getShipById
-//     for (ShipIndex_t i = 0; i < m_objects.size(); ++i) {
-//         if (m_objects[i]->getId() == id && m_objects[i]->isPlanet() == want_planet) {
-//             return m_objects[i];
-//         }
-//     }
-//     return 0;
-// }

@@ -244,10 +244,11 @@ game::sim::Object::setFlakCompensationOverride(int r)
 void
 game::sim::Object::setRandomFriendlyCode(util::RandomNumberGenerator& rng)
 {
-    // ex GSimObject::assignRandomFCode
+    // ex GSimObject::assignRandomFCode, ccsim.pas:AssignRandomFCs
     if (m_flags & fl_RandomFC) {
         int32_t which = m_flags & fl_RandomDigits;
         if (which == 0) {
+            // FIXME? PCC1 only assigns [200,799] for this case
             which = fl_RandomDigits;
         }
         for (size_t i = 0; i < 3; ++i) {

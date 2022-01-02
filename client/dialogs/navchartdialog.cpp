@@ -125,7 +125,7 @@ NavChartOverlay::NavChartOverlay(NavChartDialog& parent)
 void
 NavChartOverlay::drawBefore(gfx::Canvas& can, const client::map::Renderer& ren)
 {
-    // ex WShipNavigationChart::drawPre(GfxCanvas& can)
+    // ex WShipNavigationChart::drawPre, CAimChart.PreDraw
     if (m_parent.m_state.chunnelMode) {
         // Chunnel mode
         gfx::Context<uint8_t> ctx(can, m_parent.m_root.colorScheme());
@@ -175,7 +175,7 @@ NavChartOverlay::drawCursor(gfx::Canvas& /*can*/, const client::map::Renderer& /
 bool
 NavChartOverlay::handleKey(util::Key_t key, int /*prefix*/, const client::map::Renderer& /*ren*/)
 {
-    // ex WShipNavigationChart::handleEvent(const UIEvent& event, bool second_pass)
+    // ex WShipNavigationChart::handleEvent, CAimChart.Handle
     NavChartState& st = m_parent.m_state;
     switch (key) {
      case util::Key_Tab:
@@ -505,6 +505,7 @@ NavChartDialog::onShipSelect(game::Id_t id, game::map::Point pos)
 game::Id_t
 NavChartDialog::chooseChunnelMate()
 {
+    // ex CAimChart.PickFirecloud (sort-of)
     game::ref::UserList list;
     client::Downlink link(m_root, m_translator);
     game::proxy::ChunnelProxy(m_userSide.gameSender(), m_root.engine().dispatcher()).getCandidates(link, m_state.shipId, m_state.target, list);

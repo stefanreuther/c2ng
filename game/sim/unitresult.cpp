@@ -111,7 +111,7 @@ game::sim::UnitResult::changeWeight(int32_t oldWeight, int32_t newWeight)
 void
 game::sim::UnitResult::addResult(const Ship& oldShip, const Ship& newShip, const game::vcr::Statistic& stat, const Result& res)
 {
-    // ex GSimResultSummary::UnitResult::addResult
+    // ex GSimResultSummary::UnitResult::addResult, ccsim.pas:ComputePerShipResult
     /* Overall result */
     if (stat.getNumFights() != 0) {
         m_numFights += res.this_battle_weight;

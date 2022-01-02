@@ -197,6 +197,7 @@ game::actions::CargoTransferSetup::fromShipBeamUp(const game::Turn& turn, int sh
     }
 
     // Validate ship Id: must exist and be playable
+    // FIXME: PCC1 checks registration status; ship must not be member of a towing fleet
     const game::map::Universe& univ = turn.universe();
     const Ship* pShip = univ.ships().get(shipId);
     game::map::Point shipPos;
@@ -247,6 +248,29 @@ bool
 game::actions::CargoTransferSetup::isValid() const
 {
     return getStatus() == Ready;
+}
+
+// Check for direct transfer.
+bool
+game::actions::CargoTransferSetup::isDirect() const
+{
+    for (size_t i = 0; i < 2; ++i) {
+        switch (m_actions[i]) {
+         case UsePlanetStorage:
+         case UseShipStorage:
+            // accept
+            break;
+         case Invalid:
+         case UseOtherUnload:
+         case UseBeamUpShip:
+         case UseBeamUpPlanet:
+         case UseOtherTransfer:
+         case UseProxyTransfer:
+            // reject
+            return false;
+        }
+    }
+    return true;
 }
 
 // Check valid proxy.
@@ -379,6 +403,42 @@ game::actions::CargoTransferSetup::build(CargoTransfer& action,
          case UseBeamUpPlanet:
             action.addNew(new game::map::BeamUpPlanetTransfer(getPlanet(univ, thisId), getShip(univ, otherId), turn, config));
             break;
+        }
+    }
+}
+
+// Build CargoTransfer action for direct transfer.
+void
+game::actions::CargoTransferSetup::buildDirect(CargoTransfer& action,
+                         game::map::Universe& univ,
+                         const game::config::HostConfiguration& config,
+                         const game::spec::ShipList& shipList,
+                         afl::string::Translator& tx)
+{
+    // Deflect call if setup is invalid and user didn't notice.
+    if (getStatus() != Ready || getConflictingTransferShipId(univ) != 0) {
+        throw Exception(Exception::ePerm);
+    }
+
+    // Produce result
+    for (size_t i = 0; i < 2; ++i) {
+        const Id_t thisId = m_ids[i];
+        switch (m_actions[i]) {
+         case UsePlanetStorage:
+            action.addNew(new game::map::PlanetStorage(getPlanet(univ, thisId), config, tx));
+            break;
+
+         case UseShipStorage:
+            action.addNew(new game::map::ShipStorage(getShip(univ, thisId), shipList, tx));
+            break;
+
+         case Invalid:
+         case UseOtherUnload:
+         case UseOtherTransfer:
+         case UseProxyTransfer:
+         case UseBeamUpShip:
+         case UseBeamUpPlanet:
+            throw Exception(Exception::ePerm);
         }
     }
 }

@@ -91,6 +91,10 @@ client::doCargoTransfer(ui::Root& root,
     // ex doCargoTransfer (sort-of)
     // FIXME: handle "proxy required" case
     // FIXME: handle "must cancel a transfer" case
+    // FIXME: PCC1: IF (pus^.Neutronium=0) AND (NOT ActiveTransfer(pus^.Unload))
+    //               AND (NOT ActiveTransfer(pus^.Transfer)) THEN BEGIN  { - no fuel, no transfer }
+    //                IF NOT NYesNo('You do not have fuel to use the Cargo Transporter. Continue anyway (cargo will be destroyed)?', 'Cargo Transfer') THEN Exit;
+    //              END;
     if (!setup.isValid()) {
         return;
     }

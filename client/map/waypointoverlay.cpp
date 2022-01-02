@@ -41,7 +41,7 @@ client::map::WaypointOverlay::drawBefore(gfx::Canvas& /*can*/, const Renderer& /
 void
 client::map::WaypointOverlay::drawAfter(gfx::Canvas& can, const Renderer& ren)
 {
-    // ex WShipScannerChartWidget::drawPost (part), WShipScannerChartWidget::drawScanner
+    // ex WShipScannerChartWidget::drawPost (part), WShipScannerChartWidget::drawScanner, ship.pas:DrawTowingInfo, ship.pas:DrawChunnelInfo
     gfx::Context<uint8_t> ctx(can, m_root.colorScheme());
 
     for (size_t i = 0, n = m_infos.size(); i < n; ++i) {

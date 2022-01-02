@@ -429,7 +429,7 @@ namespace {
     /* Check whether a ship is immune from planet attacks. */
     bool isImmune(const Ship& sh, const Configuration& opts, const ShipList& list, const HostConfiguration& config)
     {
-        // ex isImmune(const GSimShip& sh, const GSimOptions& opts)
+        // ex isImmune(const GSimShip& sh, const GSimOptions& opts), ccsim.pas:ImmuneShipPlanet
         /* Conditions in Host 3.22.40:
            - immune if owned by Rebel and !PlanetsAttackRebels [handled by hasShipFunction]
            - immune if owned by Klingons and !PlanetsAttackKlingons [handled by hasShipFunction]
@@ -2102,6 +2102,7 @@ namespace {
                             const Configuration& opts,
                             const ShipList& shipList, const HostConfiguration& config)
     {
+        // ex flak.pas:CanAttackThisFleet
         // shortcut
         if (&me == &them) {
             return false;
@@ -2127,6 +2128,7 @@ namespace {
                            const game::vcr::flak::Configuration& flakConfig,
                            util::RandomNumberGenerator& rng)
     {
+        // ex flak.pas:ComputeAttackList
         /* Fleet/fleet attack relations must be symmetrical. If any ship
            from a fleet can attack/be attacked by us, we must be allowed
            to attack all ships from that fleet. Otherwise, it could happen

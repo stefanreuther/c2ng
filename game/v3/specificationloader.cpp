@@ -572,7 +572,7 @@ game::v3::SpecificationLoader::loadFriendlyCodes(game::spec::ShipList& list, afl
 void
 game::v3::SpecificationLoader::loadMissions(game::spec::ShipList& list, afl::io::Directory& dir)
 {
-    // ex game/mission.cc:initMissions
+    // ex game/mission.cc:initMissions, mission.pas:LoadMissions
     game::spec::MissionList& msns = list.missions();
     msns.clear();
 

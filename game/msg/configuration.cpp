@@ -47,7 +47,7 @@ game::msg::Configuration::~Configuration()
 bool
 game::msg::Configuration::isHeadingFiltered(const String_t& heading) const
 {
-    // ex GMessageFilter::isFiltered
+    // ex GMessageFilter::isFiltered, readmsg.pas:IsKilled
     return m_filteredHeadings.find(heading) != m_filteredHeadings.end();
 }
 
@@ -66,7 +66,7 @@ game::msg::Configuration::toggleHeadingFiltered(const String_t& heading)
 void
 game::msg::Configuration::setHeadingFiltered(const String_t& heading, bool flag)
 {
-    // ex GMessageFilter::addToFilter, GMessageFilter::removeFromFilter
+    // ex GMessageFilter::addToFilter, GMessageFilter::removeFromFilter, readmsg.pas:AddKillfile, readmsg.pas:RemoveKillfile
     Filter_t::const_iterator it = m_filteredHeadings.find(heading);
     if (it != m_filteredHeadings.end()) {
         // It's filtered. If it should not, remove it.

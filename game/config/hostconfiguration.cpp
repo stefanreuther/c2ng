@@ -1739,7 +1739,7 @@ game::config::HostConfiguration::getPlayerRaceNumber(int player) const
 int32_t
 game::config::HostConfiguration::getPlayerMissionNumber(int player) const
 {
-    // ex game/config.h::raceMissionId
+    // ex game/config.h::raceMissionId, mission.pas:PlayerMission
     if (player > 0 && player <= MAX_PLAYERS) {
         return (*this)[PlayerSpecialMission](player);
     } else {

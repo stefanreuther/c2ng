@@ -18,6 +18,7 @@ game::interface::ShipTaskPredictor::ShipTaskPredictor(const game::map::Universe&
     : m_predictor(univ, id, scoreDefinitions, shipList, config, hostVersion, key),
       m_universe(univ),
       m_shipList(shipList),
+      m_config(config),
       m_numPositions(0),
       m_numFuelPositions(0),
       m_numFuelTurns(0),
@@ -137,7 +138,7 @@ game::interface::ShipTaskPredictor::advanceTurn()
 bool
 game::interface::ShipTaskPredictor::predictInstruction(const String_t& name, interpreter::Arguments& args)
 {
-    // ex IntShipPredictor::predictInstruction
+    // ex IntShipPredictor::predictInstruction, shipint.pas:ShipPredictor
     if (name == "MOVETO") {
         setWaypoint(args);
         int n = 0;
@@ -176,7 +177,7 @@ game::interface::ShipTaskPredictor::predictInstruction(const String_t& name, int
         interpreter::checkIntegerArg(t, args.getNext(), 0, MAX_NUMBER);
         m_predictor.setMission(m, i, t);
 
-        const game::spec::Mission* msn = m_shipList.missions().getMissionByNumber(m, PlayerSet_t(m_predictor.getRealOwner()));
+        const game::spec::Mission* msn = m_shipList.missions().getMissionByNumber(m, PlayerSet_t(m_config.getPlayerMissionNumber(m_predictor.getRealOwner())));
         if (msn != 0 && msn->hasFlag(game::spec::Mission::WaypointMission)) {
             const game::map::Ship* sh = m_universe.ships().get(i);
             game::map::Point shipPos;

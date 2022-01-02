@@ -56,7 +56,7 @@ game::map::SelectionVector::mergeFrom(const SelectionVector& other)
 void
 game::map::SelectionVector::copyFrom(ObjectType& type)
 {
-    // ex GSelection::copyFrom [part]
+    // ex GSelection::copyFrom [part], search.pas:StoreSelectionLayer
     afl::base::Memory<Word_t>(m_data).fill(0);
     for (Id_t i = type.getNextIndex(0); i != 0; i = type.getNextIndex(i)) {
         if (const Object* p = type.getObjectByIndex(i)) {
@@ -71,7 +71,7 @@ game::map::SelectionVector::copyFrom(ObjectType& type)
 void
 game::map::SelectionVector::copyTo(ObjectType& type) const
 {
-    // ex GSelection::copyTo [part]
+    // ex GSelection::copyTo [part], search.pas:GetSelectionLayer
     for (Id_t i = type.getNextIndex(0); i != 0; i = type.getNextIndex(i)) {
         if (Object* p = type.getObjectByIndex(i)) {
             p->setIsMarked(get(i));
@@ -83,7 +83,7 @@ game::map::SelectionVector::copyTo(ObjectType& type) const
 void
 game::map::SelectionVector::limitToExistingObjects(ObjectType& type)
 {
-    // ex GSelection::limitToExistingObjects [part]
+    // ex GSelection::limitToExistingObjects [part], search.pas:FilterSelections
     size_t limit = m_data.size() * NUM_BITS_PER_WORD;
     for (size_t i = 0; i < limit; ++i) {
         if (type.getObjectByIndex(Id_t(i)) == 0) {
@@ -151,7 +151,7 @@ game::map::SelectionVector::executeCompiledExpression(const String_t& compiledEx
                                                       size_t limit,
                                                       bool isPlanet)
 {
-    // ex GMultiSelection::executeSelectionExpression
+    // ex GMultiSelection::executeSelectionExpression, search.pas:SelectionExec
     using interpreter::SelectionExpression;
 
     // Determine size

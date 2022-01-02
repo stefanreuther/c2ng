@@ -24,6 +24,7 @@ namespace {
         \return Id of fleet this ship was removed from (new Id if fleet Id changed) */
     Id_t removeFleetMember(game::map::Universe& univ, const Id_t sid)
     {
+        // ex fleet.pas:LeaveFleet
         game::map::Ship* pShip = univ.ships().get(sid);
         if (!pShip) {
             return 0;

@@ -71,7 +71,7 @@ game::msg::Inbox::getMessageText(size_t index, afl::string::Translator& /*tx*/, 
 String_t
 game::msg::Inbox::getMessageHeading(size_t index, afl::string::Translator& tx, const PlayerList& players) const
 {
-    // ex GInbox::getHeading
+    // ex GInbox::getHeading, sendmsg.pas:MessageSubject
     // This is the same algorithm as in PCC 1.x.
     // c2ng change: use only one parenized letter.
     String_t line = afl::string::strTrim(afl::string::strFirst(getMessageText(index, tx, players), "\n"));

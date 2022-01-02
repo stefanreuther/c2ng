@@ -180,7 +180,7 @@ RevertDialog::onList()
 void
 client::dialogs::doRevertLocation(ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx, game::map::Point pos)
 {
-    // ex doResetDialog(GReset& reset) (sort-of)
+    // ex doResetDialog(GReset& reset) (sort-of), ship.pas:ResetXY
 
     // Set up
     Downlink link(root, tx);

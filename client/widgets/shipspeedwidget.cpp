@@ -51,7 +51,7 @@ client::widgets::ShipSpeedWidget::getLayoutInfo() const
 bool
 client::widgets::ShipSpeedWidget::handleKey(util::Key_t key, int prefix)
 {
-    // ex WShipSpeedSelector::handleEvent
+    // ex WShipSpeedSelector::handleEvent, ship.pas:NSetWarpSpeed [part]
     if (hasState(FocusedState)) {
         if (key >= '0' && key <= '9') {
             requestActive();
@@ -63,6 +63,12 @@ client::widgets::ShipSpeedWidget::handleKey(util::Key_t key, int prefix)
             setValue(m_hyp);
             return true;
         }
+        // FIXME: new in PCC2; PCC1 even does setOptimumWarp() considering all movement effects
+        // if (e.key.code == ' ') {
+        //     const GEngine& e = getEngine(ship.getEngineType());
+        //     setValue(e.getMaxEfficientWarp());
+        //     return true;
+        // }
     }
     return defaultHandleKey(key, prefix);
 }

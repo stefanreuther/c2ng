@@ -48,7 +48,7 @@ client::map::MinefieldMissionOverlay::drawBefore(gfx::Canvas& /*can*/, const Ren
 void
 client::map::MinefieldMissionOverlay::drawAfter(gfx::Canvas& can, const Renderer& ren)
 {
-    // ex WShipScannerChartWidget::drawPost
+    // ex WShipScannerChartWidget::drawPost, ship.pas:DrawMinelayerInfo, ship.pas:DrawScoopInfo
     gfx::Context<uint8_t> ctx(can, m_root.colorScheme());
     ctx.useFont(*m_root.provider().getFont(gfx::FontRequest().addSize(-1)));
 

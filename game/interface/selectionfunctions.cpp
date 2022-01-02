@@ -80,7 +80,7 @@ namespace {
         \retval false file format error */
     bool readSelection(afl::io::TextFile& tf, Selections& sel, const game::map::Universe& univ)
     {
-        // ex game/selio.cc:readSelection
+        // ex game/selio.cc:readSelection, search.pas:LoadSelectionFromFile
         const size_t NUM_LAYERS = sel.getNumLayers();
         const int MASK = (1 << NUM_LAYERS);
         String_t line;
@@ -173,6 +173,7 @@ namespace {
     
     void saveSelection(afl::io::TextFile& tf, game::Game& g, int layer, bool timeless)
     {
+        // ex search.pas:ScriptSaveSelection
         /* Make sure selection is consistent with universe */
         game::map::Universe& univ = g.currentTurn().universe();
         g.selections().copyFrom(univ, g.selections().getCurrentLayer());
@@ -202,7 +203,6 @@ namespace {
                 tf.writeLine(Format("p%d %d", pid, val));
             }
         }
-
     }
 }
 

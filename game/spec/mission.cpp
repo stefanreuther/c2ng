@@ -278,7 +278,7 @@ game::spec::Mission::setSetCommand(String_t cmd)
 bool
 game::spec::Mission::worksOn(const game::map::Ship& ship, const game::config::HostConfiguration& config, const HostVersion& host, const RegistrationKey& key) const
 {
-    // ex GMission::worksOn
+    // ex GMission::worksOn, mission.pas:CanDoMission
     // @change We do not check the condition; that is done in script code.
     // FIXME: Consider retiring this function.
     // Ship owner needs to be known and valid.
@@ -317,7 +317,7 @@ game::spec::Mission::worksOn(const game::map::Ship& ship, const game::config::Ho
 void
 game::spec::Mission::parseDescription(const String_t& descriptionLine)
 {
-    // ex GMission::parseDescription
+    // ex GMission::parseDescription, mission.pas:ReadMissionCC (part)
     String_t::size_type n = 0;
 
     ParameterType paramType = IntegerParameter;

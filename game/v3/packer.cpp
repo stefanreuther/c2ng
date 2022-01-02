@@ -8,13 +8,27 @@
 namespace {
     void unpackTransfer(game::map::ShipData::Transfer& out, const game::v3::structures::ShipTransfer& in)
     {
+        // ex ccmain.pas:FrobShipRecord (part)
         out.neutronium = in.ore[game::v3::structures::Neutronium];
         out.tritanium  = in.ore[game::v3::structures::Tritanium];
         out.duranium   = in.ore[game::v3::structures::Duranium];
         out.molybdenum = in.ore[game::v3::structures::Molybdenum];
         out.colonists  = in.colonists;
         out.supplies   = in.supplies;
-        out.targetId   = in.targetId;
+
+        // Handle dull transfers: sometimes a transfer has a nonempty target,
+        // but no content, which can confuse things.
+        if (in.ore[game::v3::structures::Neutronium] == 0
+            && in.ore[game::v3::structures::Tritanium] == 0
+            && in.ore[game::v3::structures::Duranium] == 0
+            && in.ore[game::v3::structures::Molybdenum] == 0
+            && in.colonists == 0
+            && in.supplies == 0)
+        {
+            out.targetId = 0;
+        } else {
+            out.targetId = in.targetId;
+        }
     }
 
     void copyOut(game::v3::structures::Int16_t& out, const game::IntegerProperty_t& in)
@@ -56,7 +70,7 @@ game::v3::Packer::unpackShip(game::map::ShipData& out, const game::v3::structure
     // FIXME: must validate data so we don't accidentally see an unknown value
     out.owner               = in.owner;
     out.friendlyCode        = m_charset.decode(in.friendlyCode);
-    out.warpFactor          = in.warpFactor;
+    out.warpFactor          = std::max(0, int(in.warpFactor));      // Lizard ships with >100% damage have negative warp
     out.waypointDX          = in.waypointDX;
     out.waypointDY          = in.waypointDY;
     out.x                   = in.x;

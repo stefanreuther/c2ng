@@ -102,6 +102,11 @@ namespace game { namespace actions {
             \return validity */
         bool isValid() const;
 
+        /** Check for direct transfer.
+            A direct transfer is executed immediately at client-side, not using and "beam up" or "beam down" commands.
+            \return validity */
+        bool isDirect() const;
+
         /** Check valid proxy.
             \param univ Universe
             \param shipId Ship Id
@@ -142,6 +147,21 @@ namespace game { namespace actions {
                    const game::spec::ShipList& shipList,
                    const game::HostVersion& version,
                    afl::string::Translator& tx);
+
+        /** Build CargoTransfer action for direct transfer.
+            This is a "light" version of build() with fewer required parameters.
+            \param action   [out] Target action. Must be constructed and empty.
+            \param univ     [in/out] Universe
+            \param config   [in] Host configuration (needed to construct CargoContainer descendants)
+            \param shipList [in] Ship list (needed to construct CargoContainer descendants)
+            \param tx       [in] Translator (for error messages)
+            \pre isValid() && isDirect()
+            \throw Exception if setup is incomplete/impossible (precondition not satisfied) */
+        void buildDirect(CargoTransfer& action,
+                         game::map::Universe& univ,
+                         const game::config::HostConfiguration& config,
+                         const game::spec::ShipList& shipList,
+                         afl::string::Translator& tx);
 
      private:
         enum Action {

@@ -70,7 +70,7 @@ void
 game::map::Fleet::synchronize(const game::config::HostConfiguration& config,
                               const game::spec::ShipList& shipList)
 {
-    // ex game/fleet.h:synchronizeFleet
+    // ex game/fleet.h:synchronizeFleet, fleet.pas:SynchFleet
     AnyShipType ships(m_universe.ships());
     const int fleetNumber = m_ship.getId();
     for (Id_t i = ships.getNextIndex(0); i != 0; i = ships.getNextIndex(i)) {
@@ -128,7 +128,7 @@ game::map::Fleet::synchronizeFleetMember(Universe& univ, Id_t sid,
                                          const game::config::HostConfiguration& config,
                                          const game::spec::ShipList& shipList)
 {
-    // ex game/fleet.h:synchronizeFleetMember
+    // ex game/fleet.h:synchronizeFleetMember, fleet.pas:SynchWaypoint
     const game::spec::MissionList& missions = shipList.missions();
 
     // Fetch ship

@@ -89,7 +89,7 @@ game::spec::MissionList::at(size_t i) const
 bool
 game::spec::MissionList::addMission(const Mission& msn)
 {
-    // ex GMissionList::addMission
+    // ex GMissionList::addMission, mission.pas:AllocMission (part)
 
     /* do not add if it's already there. A mission is considered
        already there if its race mask is not disjoint to ours. (This
@@ -177,7 +177,7 @@ game::spec::MissionList::getIndexByNumber(int id, PlayerSet_t raceMask, size_t& 
 void
 game::spec::MissionList::loadFromFile(afl::io::Stream& in, afl::sys::LogListener& log, afl::string::Translator& tx)
 {
-    // ex GMissionList::loadFromFile
+    // ex GMissionList::loadFromFile, mission.pas:ReadMissionCC (part)
     afl::io::TextFile tf(in);
     String_t line;
     bool have_mission = false;
@@ -242,7 +242,7 @@ game::spec::MissionList::loadFromFile(afl::io::Stream& in, afl::sys::LogListener
 void
 game::spec::MissionList::loadFromIniFile(afl::io::Stream& in, afl::charset::Charset& cs)
 {
-    // ex GMissionList::loadFromIniFile
+    // ex GMissionList::loadFromIniFile, mission.pas:ReadMissionINI
     afl::io::TextFile tf(in);
     tf.setCharsetNew(cs.clone());
     String_t line;

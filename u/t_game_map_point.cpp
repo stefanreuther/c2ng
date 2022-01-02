@@ -100,6 +100,14 @@ TestGameMapPoint::testParse()
     TS_ASSERT_EQUALS(a.getX(), 500);
     TS_ASSERT_EQUALS(a.getY(), 600);
 
+    TS_ASSERT_EQUALS(a.parseCoordinates("(501,601)"), true);
+    TS_ASSERT_EQUALS(a.getX(), 501);
+    TS_ASSERT_EQUALS(a.getY(), 601);
+
+    TS_ASSERT_EQUALS(a.parseCoordinates("  (  502\t ,  602  )  "), true);
+    TS_ASSERT_EQUALS(a.getX(), 502);
+    TS_ASSERT_EQUALS(a.getY(), 602);
+
     TS_ASSERT_EQUALS(a.parseCoordinates("  200 ,   300"), true);
     TS_ASSERT_EQUALS(a.getX(), 200);
     TS_ASSERT_EQUALS(a.getY(), 300);
@@ -132,6 +140,10 @@ TestGameMapPoint::testParseFail()
     TS_ASSERT_EQUALS(a.parseCoordinates("1,2,"), false);
     TS_ASSERT_EQUALS(a.parseCoordinates("1a,2b"), false);
     TS_ASSERT_EQUALS(a.parseCoordinates("0x10,0x20"), false);
+    TS_ASSERT_EQUALS(a.parseCoordinates("(500,600"), false);
+    TS_ASSERT_EQUALS(a.parseCoordinates("500,600)"), false);
+    TS_ASSERT_EQUALS(a.parseCoordinates("(500), 600"), false);
+    TS_ASSERT_EQUALS(a.parseCoordinates("10 20"), false);
 
     // Still not modified
     TS_ASSERT_EQUALS(a.getX(), 333);
