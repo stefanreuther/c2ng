@@ -132,7 +132,7 @@ game::v3::MaketurnApplication::help()
 {
     afl::io::TextWriter& out = standardOutput();
     afl::string::Translator& tx = translator();
-    out.writeLine(afl::string::Format(tx("PCC2 Turn File Compiler v%s - (c) 2010-2021 Stefan Reuther"), PCC2_VERSION));
+    out.writeLine(afl::string::Format(tx("PCC2 Turn File Compiler v%s - (c) 2010-2022 Stefan Reuther"), PCC2_VERSION));
     out.writeLine();
     out.writeLine(afl::string::Format(tx("Usage:\n"
                                          "  %s [-h]\n"

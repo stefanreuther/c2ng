@@ -154,7 +154,7 @@ gfx::gen::Application::showHelp()
 {
     afl::string::Translator& tx = translator();
     afl::io::TextWriter& w = standardOutput();
-    w.writeLine(Format(tx("PCC2 Procedural Graphics Generator v%s - (c) 2017-2021 Stefan Reuther"), PCC2_VERSION));
+    w.writeLine(Format(tx("PCC2 Procedural Graphics Generator v%s - (c) 2017-2022 Stefan Reuther"), PCC2_VERSION));
     w.writeText(Format(tx("\n"
                           "Usage:\n"
                           "  %s [-h]\n"

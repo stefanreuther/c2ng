@@ -186,7 +186,7 @@ server::mailout::ServerApplication::handleConfiguration(const String_t& key, con
 String_t
 server::mailout::ServerApplication::getApplicationName() const
 {
-    return afl::string::Format("PCC2 Mail Queue Server v%s - (c) 2017-2021 Stefan Reuther", PCC2_VERSION);
+    return afl::string::Format("PCC2 Mail Queue Server v%s - (c) 2017-2022 Stefan Reuther", PCC2_VERSION);
 }
 
 String_t

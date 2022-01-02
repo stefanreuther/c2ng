@@ -344,7 +344,7 @@ game::sim::ConsoleApplication::help()
 {
     afl::string::Translator& tx = translator();
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(Format(tx("PCC2 Battle Simulation Utility v%s - (c) 2020-2021 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(Format(tx("PCC2 Battle Simulation Utility v%s - (c) 2020-2022 Stefan Reuther").c_str(), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(tx("Usage:\n"
                             "  %s [-h]\n"

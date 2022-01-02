@@ -229,7 +229,7 @@ server::router::ServerApplication::handleCommandLineOption(const String_t& /*opt
 String_t
 server::router::ServerApplication::getApplicationName() const
 {
-    return afl::string::Format("PCC2 Router Server v%s - (c) 2019-2021 Stefan Reuther", PCC2_VERSION);
+    return afl::string::Format("PCC2 Router Server v%s - (c) 2019-2022 Stefan Reuther", PCC2_VERSION);
 }
 
 String_t
