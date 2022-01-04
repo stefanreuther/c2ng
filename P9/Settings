@@ -12,9 +12,10 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = util/doc/loggingverifier.cpp util/doc/loggingverifier.hpp \
-    util/doc/summarizingverifier.cpp util/doc/summarizingverifier.hpp \
-    util/doc/verifier.cpp util/doc/verifier.hpp util/doc/singleblobstore.cpp \
+FILES_gamelib = version.hpp util/doc/loggingverifier.cpp \
+    util/doc/loggingverifier.hpp util/doc/summarizingverifier.cpp \
+    util/doc/summarizingverifier.hpp util/doc/verifier.cpp \
+    util/doc/verifier.hpp util/doc/singleblobstore.cpp \
     util/doc/singleblobstore.hpp util/doc/textimport.cpp \
     util/doc/textimport.hpp util/doc/htmlrenderer.cpp \
     util/doc/renderoptions.cpp util/doc/renderoptions.hpp \
@@ -713,7 +714,8 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/dialogs/buildqueuesummary.cpp \
+FILES_guilib = ui/res/engineimageloader.hpp \
+    client/dialogs/buildqueuesummary.cpp \
     client/dialogs/buildqueuesummary.hpp client/dialogs/buildammo.cpp \
     client/dialogs/buildammo.hpp client/dialogs/hullfunctionview.cpp \
     client/dialogs/hullfunctionview.hpp client/dialogs/hullspecification.cpp \
@@ -1092,7 +1094,9 @@ DEPEND_guilib = afl
 PROJ_AUTO += guilib:gfx/*.cpp,gfx/*.hpp,ui/*.cpp,ui/*.hpp,client/*.cpp,client/*.hpp
 
 TARGETS += serverlib
-FILES_serverlib = server/interface/documentationclient.cpp \
+FILES_serverlib = server/monitor/statusobserver.hpp \
+    server/host/file/historyitem.hpp \
+    server/interface/documentationclient.cpp \
     server/interface/documentationclient.hpp \
     server/doc/documentationimpl.cpp server/doc/documentationimpl.hpp \
     server/interface/documentationserver.cpp \
