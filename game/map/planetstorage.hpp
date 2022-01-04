@@ -16,9 +16,7 @@ namespace game { namespace map {
 
     class PlanetStorage : public CargoContainer {
      public:
-        PlanetStorage(Planet& pl,
-                      const game::config::HostConfiguration& config,
-                      afl::string::Translator& tx);
+        PlanetStorage(Planet& pl, const game::config::HostConfiguration& config);
         ~PlanetStorage();
 
         virtual String_t getName(afl::string::Translator& tx) const;

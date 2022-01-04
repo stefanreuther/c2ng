@@ -15,16 +15,14 @@ namespace {
     const int32_t MAX_OVERLOAD = 20000;
 }
 
-game::map::ShipStorage::ShipStorage(Ship& sh,
-                                    const game::spec::ShipList& shipList,
-                                    afl::string::Translator& tx)
+game::map::ShipStorage::ShipStorage(Ship& sh, const game::spec::ShipList& shipList)
     : CargoContainer(),
       m_ship(sh),
       m_shipList(shipList),
       m_changeConnection(sh.sig_change.add(&sig_change, &afl::base::Signal<void()>::raise))
 {
     // ex GShipTransfer::GShipTransfer
-    game::actions::mustBePlayed(sh, tx);
+    game::actions::mustBePlayed(sh);
 }
 
 game::map::ShipStorage::~ShipStorage()

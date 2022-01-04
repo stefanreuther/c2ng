@@ -8,8 +8,6 @@
 #include "game/actions/cargotransfersetup.hpp"
 #include "game/map/fleetmember.hpp"
 #include "game/map/planetformula.hpp"
-#include "game/map/planetstorage.hpp"
-#include "game/map/shipstorage.hpp"
 #include "game/sim/configuration.hpp"
 #include "game/sim/planet.hpp"
 #include "game/sim/ship.hpp"
@@ -239,13 +237,12 @@ game::sim::Transfer::copyShipToGame(game::map::Ship& out, const Ship& in, game::
         && (planet = univ.planets().get(univ.findPlanetAt(pt))) != 0
         && planet->isPlayable(game::map::Object::Playable))
     {
-        // Preconditions for client-side transfer are fulfilled.
-        // Use CargoTransfer to check correctness of the transfer.
-        // Otherwise, we build the transfer manually because CargoTransferSetup has larger dependencies than we offer.
+        // Preconditions for client-side transfer are fulfilled, set up transfer normally.
+        // This checks additional preconditions.
         try {
             game::actions::CargoTransfer tr;
-            tr.addNew(new game::map::PlanetStorage(*planet, m_config, m_translator));
-            tr.addNew(new game::map::ShipStorage(out, m_shipList, m_translator));
+            game::actions::CargoTransferSetup::fromPlanetShip(univ, planet->getId(), out.getId())
+                .buildDirect(tr, univ, m_config, m_shipList);
 
             if (out.getNumBays().orElse(0) != 0) {
                 tr.move(Element::Fighters, simAmmo - shipAmmo, 0, 1, true, false);

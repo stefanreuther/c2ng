@@ -264,13 +264,12 @@ client::map::DistanceOverlay::setWaypoint()
 
         virtual void handle(game::Session& session)
             {
-                afl::string::Translator& tx = session.translator();
                 game::Game& g = game::actions::mustHaveGame(session);
                 game::Root& r = game::actions::mustHaveRoot(session);
                 game::spec::ShipList& sl = game::actions::mustHaveShipList(session);
                 if (game::Turn* t = g.getViewpointTurn().get()) {
-                    game::map::Ship& sh = game::actions::mustExist(t->universe().ships().get(m_shipId), tx);
-                    game::actions::mustBePlayed(sh, tx);
+                    game::map::Ship& sh = game::actions::mustExist(t->universe().ships().get(m_shipId));
+                    game::actions::mustBePlayed(sh);
 
                     // FIXME: shouldn't call this if FleetMember will refuse (bug also in PCC2)
                     game::map::FleetMember(t->universe(), sh).setWaypoint(m_waypoint, r.hostConfiguration(), sl);

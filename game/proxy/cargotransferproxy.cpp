@@ -97,8 +97,7 @@ game::proxy::CargoTransferProxy::init(const game::actions::CargoTransferSetup& s
                               turn,
                               root.hostConfiguration(),
                               game::actions::mustHaveShipList(obs.session),
-                              root.hostVersion(),
-                              obs.session.translator());
+                              root.hostVersion());
             }
      private:
         game::actions::CargoTransferSetup m_setup;

@@ -20,19 +20,18 @@ class game::proxy::BuildStarbaseProxy::Trampoline {
 
     void init(Id_t id, Status& status)
         {
-            afl::string::Translator& tx = m_session.translator();
             try {
                 // Preconditions
                 Root& root = game::actions::mustHaveRoot(m_session);
                 Game& game = game::actions::mustHaveGame(m_session);
 
                 // Fetch planet
-                game::map::Planet& planet = game::actions::mustExist(game.currentTurn().universe().planets().get(id), tx);
+                game::map::Planet& planet = game::actions::mustExist(game.currentTurn().universe().planets().get(id));
 
                 // Construct stuff
                 bool wantBase = !planet.isBuildingBase();
-                m_container.reset(new game::map::PlanetStorage(planet, root.hostConfiguration(), tx));
-                m_action.reset(new game::actions::BuildStarbase(planet, *m_container, wantBase, tx, root.hostConfiguration()));
+                m_container.reset(new game::map::PlanetStorage(planet, root.hostConfiguration()));
+                m_action.reset(new game::actions::BuildStarbase(planet, *m_container, wantBase, root.hostConfiguration()));
 
                 // Produce result
                 if (wantBase) {
@@ -44,10 +43,6 @@ class game::proxy::BuildStarbaseProxy::Trampoline {
                 } else {
                     status.mode = CanCancel;
                 }
-            }
-            catch (Exception& e) {
-                status.mode = Error;
-                status.errorMessage = e.getUserError();
             }
             catch (std::exception& e) {
                 status.mode = Error;

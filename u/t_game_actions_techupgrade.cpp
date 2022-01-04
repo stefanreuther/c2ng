@@ -184,7 +184,7 @@ TestGameActionsTechUpgrade::testFail()
     h.planet.setPlayability(game::map::Object::Playable);
 
     game::test::CargoContainer container;
-    TS_ASSERT_THROWS((game::actions::TechUpgrade(h.planet, container, *h.shipList, *h.root, h.tx)), game::Exception);
+    TS_ASSERT_THROWS((game::actions::TechUpgrade(h.planet, container, *h.shipList, *h.root)), game::Exception);
 }
 
 /** Test simple success case.
@@ -214,7 +214,7 @@ TestGameActionsTechUpgrade::testSimple()
 
     // Make an action
     game::test::CargoContainer container;
-    game::actions::TechUpgrade a(h.planet, container, *h.shipList, *h.root, h.tx);
+    game::actions::TechUpgrade a(h.planet, container, *h.shipList, *h.root);
     TS_ASSERT(a.isValid());
     TS_ASSERT(a.costAction().getCost().isZero());
     TS_ASSERT_EQUALS(a.getStatus(), game::actions::BaseBuildAction::Success);
@@ -279,7 +279,7 @@ TestGameActionsTechUpgrade::testRevertable()
 
     // Test
     game::test::CargoContainer container;
-    game::actions::TechUpgrade a(h.planet, container, *h.shipList, *h.root, h.tx);
+    game::actions::TechUpgrade a(h.planet, container, *h.shipList, *h.root);
     a.setUndoInformation(h.univ);
 
     TS_ASSERT_EQUALS(a.getMinTechLevel(game::HullTech), 1);
@@ -310,7 +310,7 @@ TestGameActionsTechUpgrade::testRevertableChange()
 
     // Test
     game::test::CargoContainer container;
-    game::actions::TechUpgrade a(h.planet, container, *h.shipList, *h.root, h.tx);
+    game::actions::TechUpgrade a(h.planet, container, *h.shipList, *h.root);
     a.setUndoInformation(h.univ);
     TS_ASSERT_EQUALS(a.getMinTechLevel(game::BeamTech), 1);
 
@@ -342,7 +342,7 @@ TestGameActionsTechUpgrade::testRevertableShip()
 
     // Test
     game::test::CargoContainer container;
-    game::actions::TechUpgrade a(h.planet, container, *h.shipList, *h.root, h.tx);
+    game::actions::TechUpgrade a(h.planet, container, *h.shipList, *h.root);
     a.setUndoInformation(h.univ);
     TS_ASSERT_EQUALS(a.getMinTechLevel(game::TorpedoTech), 1);
 
@@ -374,7 +374,7 @@ TestGameActionsTechUpgrade::testRevertableNoSignal()
 
     // Test
     game::test::CargoContainer container;
-    game::actions::TechUpgrade a(h.planet, container, *h.shipList, *h.root, h.tx);
+    game::actions::TechUpgrade a(h.planet, container, *h.shipList, *h.root);
     a.setUndoInformation(h.univ);
 
     // Request tech downgrade

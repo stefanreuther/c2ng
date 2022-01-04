@@ -34,7 +34,7 @@ TestGameMapShipStorage::testIt()
     h.hull().setName("REMMLER");
     afl::string::NullTranslator tx;
 
-    game::map::ShipStorage testee(sh, h.shipList(), tx);
+    game::map::ShipStorage testee(sh, h.shipList());
 
     /*
      *  Ship has a fuel tank of 100 with 10N (=100 max).

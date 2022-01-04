@@ -20,8 +20,7 @@ namespace game { namespace map {
                         Ship::Transporter type,
                         Id_t targetId,
                         const Universe& univ,
-                        HostVersion hostVersion,
-                        afl::string::Translator& tx);
+                        HostVersion hostVersion);
 
         virtual String_t getName(afl::string::Translator& tx) const;
         virtual String_t getInfo1(afl::string::Translator& tx) const;

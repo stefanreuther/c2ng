@@ -665,7 +665,7 @@ game::interface::IFHistoryShowTurn(interpreter::Process& /*proc*/, game::Session
     Game* g = session.getGame().get();
     game::spec::ShipList* sl = session.getShipList().get();
     if (g == 0 || r == 0 || sl == 0) {
-        throw Exception(Exception::eUser, Exception::eUser);
+        throw Exception(Exception::eUser);
     }
 
     // Check turn number

@@ -50,13 +50,11 @@ namespace game { namespace actions {
             \param planet    Planet to work on. Must have a played starbase.
             \param container Container to bill the builds on. Usually a PlanetStorage for the same planet.
             \param shipList  Ship list. Needed to access component costs and hull slots.
-            \param root      Game root. Needed to access host configuration and registration key.
-            \param tx        Translator. Needed for error messages during construction. */
+            \param root      Game root. Needed to access host configuration and registration key. */
         BaseBuildAction(game::map::Planet& planet,
                         CargoContainer& container,
                         game::spec::ShipList& shipList,
-                        Root& root,
-                        afl::string::Translator& tx);
+                        Root& root);
 
         /** Destructor. */
         ~BaseBuildAction();
@@ -104,8 +102,9 @@ namespace game { namespace actions {
 
         /** Get cost summary.
             Adds all items for the currently-selected build order to the given CostSummary.
-            \param [out] result Result */
-        void getCostSummary(game::spec::CostSummary& result);
+            \param [out] result Result
+            \param [in]  tx Translator */
+        void getCostSummary(game::spec::CostSummary& result, afl::string::Translator& tx);
 
         /** Access underlying ship list.
             \return ship list */
@@ -138,7 +137,6 @@ namespace game { namespace actions {
         game::spec::ShipList& m_shipList;
         Root& m_root;
         CargoCostAction m_costAction;
-        afl::string::Translator& m_translator;
         int m_impediments;
         bool m_useTechUpgrades;
         bool m_inUpdate;

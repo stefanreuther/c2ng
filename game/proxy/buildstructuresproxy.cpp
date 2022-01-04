@@ -32,9 +32,9 @@ class game::proxy::BuildStructuresProxy::Trampoline {
                 Game& game = game::actions::mustHaveGame(m_session);
 
                 // Fetch planet
-                Planet& planet = game::actions::mustExist(game.currentTurn().universe().planets().get(id), tx);
-                m_container.reset(new game::map::PlanetStorage(planet, root.hostConfiguration(), tx));
-                m_action.reset(new BuildStructures(planet, *m_container, root.hostConfiguration(), tx));
+                Planet& planet = game::actions::mustExist(game.currentTurn().universe().planets().get(id));
+                m_container.reset(new game::map::PlanetStorage(planet, root.hostConfiguration()));
+                m_action.reset(new BuildStructures(planet, *m_container, root.hostConfiguration()));
                 m_action->setUndoInformation(game.currentTurn().universe());
 
                 // Produce output

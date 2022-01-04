@@ -16,16 +16,7 @@
 using game::spec::ShipList;
 using game::spec::Cost;
 using afl::base::Ptr;
-
-namespace {
-    // FIXME: elsewhere?
-    template<typename T>
-    T& mustExist(T* p, const char* what)
-    {
-        afl::except::checkAssertion(p != 0, what);
-        return *p;
-    }
-}
+using game::actions::mustExist;
 
 
 /*
@@ -72,11 +63,11 @@ game::proxy::TechUpgradeProxy::Trampoline::Trampoline(Session& session, util::Re
       m_pRoot(session.getRoot()),
 
       // Readymade objects
-      m_turn(mustExist(m_pTurn.get(), "<Trampoline:Turn>")),
+      m_turn(mustExist(m_pTurn.get())),
       m_root(game::actions::mustHaveRoot(session)),
-      m_planet(mustExist(m_turn.universe().planets().get(planetId), "<Trampoline:Planet>")),
-      m_container(m_planet, m_root.hostConfiguration(), session.translator()),
-      m_action(m_planet, m_container, game::actions::mustHaveShipList(session), m_root, session.translator())
+      m_planet(mustExist(m_turn.universe().planets().get(planetId))),
+      m_container(m_planet, m_root.hostConfiguration()),
+      m_action(m_planet, m_container, game::actions::mustHaveShipList(session), m_root)
 {
     m_action.setUndoInformation(m_pTurn->universe());
     m_action.sig_change.add(this, &Trampoline::onChange);

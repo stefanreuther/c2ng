@@ -289,87 +289,81 @@ interpreter::exporter::ConsoleApplication::appMain()
         }
     }
 
-    try {
-        // Set up game directories
-        afl::io::FileSystem& fs = fileSystem();
-        String_t defaultRoot = fs.makePathName(fs.makePathName(environment().getInstallationDirectoryName(), "share"), "specs");
-        game::v3::RootLoader loader(fs.openDirectory(arg_rootdir.orElse(defaultRoot)), &profile, translator(), log(), fs);
+    // Set up game directories
+    afl::io::FileSystem& fs = fileSystem();
+    String_t defaultRoot = fs.makePathName(fs.makePathName(environment().getInstallationDirectoryName(), "share"), "specs");
+    game::v3::RootLoader loader(fs.openDirectory(arg_rootdir.orElse(defaultRoot)), &profile, translator(), log(), fs);
 
-        // Check game data
-        // FIXME: load correct config!
-        const String_t usedGameDir = arg_gamedir.orElse(".");
-        const game::config::UserConfiguration uc;
-        afl::base::Ptr<game::Root> root = loader.load(fs.openDirectory(usedGameDir), *gameCharset, uc, false);
-        if (root.get() == 0 || root->getTurnLoader().get() == 0) {
-            errorExit(afl::string::Format(tx("no game data found in directory \"%s\""), usedGameDir));
+    // Check game data
+    // FIXME: load correct config!
+    const String_t usedGameDir = arg_gamedir.orElse(".");
+    const game::config::UserConfiguration uc;
+    afl::base::Ptr<game::Root> root = loader.load(fs.openDirectory(usedGameDir), *gameCharset, uc, false);
+    if (root.get() == 0 || root->getTurnLoader().get() == 0) {
+        errorExit(afl::string::Format(tx("no game data found in directory \"%s\""), usedGameDir));
+    }
+
+    // Check player number
+    if (arg_race != 0) {
+        String_t extra;
+        if (!root->getTurnLoader()->getPlayerStatus(arg_race, extra, translator()).contains(game::TurnLoader::Available)) {
+            errorExit(afl::string::Format(tx("no game data available for player %d"), arg_race));
         }
+    } else {
+        arg_race = root->getTurnLoader()->getDefaultPlayer(root->playerList().getAllPlayers());
+        if (arg_race == 0) {
+            errorExit(tx("please specify the player number"));
+        }
+    }
 
-        // Check player number
-        if (arg_race != 0) {
-            String_t extra;
-            if (!root->getTurnLoader()->getPlayerStatus(arg_race, extra, translator()).contains(game::TurnLoader::Available)) {
-                errorExit(afl::string::Format(tx("no game data available for player %d"), arg_race));
+    // Make a session and load it
+    game::Session session(translator(), fs);
+    session.setGame(new game::Game());
+    session.setRoot(root);
+    session.setShipList(new game::spec::ShipList());
+    root->specificationLoader().loadShipList(*session.getShipList(), *root);
+
+    root->getTurnLoader()->loadCurrentTurn(session.getGame()->currentTurn(), *session.getGame(), arg_race, *root, session);
+    session.getGame()->currentTurn().universe().postprocess(game::PlayerSet_t(arg_race), game::PlayerSet_t(arg_race), game::map::Object::ReadOnly,
+                                                            root->hostVersion(), root->hostConfiguration(),
+                                                            session.getGame()->currentTurn().getTurnNumber(),
+                                                            *session.getShipList(),
+                                                            translator(), log());
+
+    // What do we want to export?
+    std::auto_ptr<Context> array(findArray(arg_array2, session.world()));
+    if (opt_fields) {
+        std::auto_ptr<MetaContext> meta(new MetaContext());
+        array->enumProperties(*meta);
+        array = meta;
+    }
+
+    // Do it.
+    if (config.getFormat() == interpreter::exporter::DBaseFormat) {
+        // Output to DBF file. Requires file name.
+        String_t outfile;
+        if (!arg_outfile.get(outfile)) {
+            errorExit(tx("output to DBF file needs an output file name ('-o')"));
+        }
+        afl::base::Ref<afl::io::Stream> s = fs.openFile(outfile, afl::io::FileSystem::Create);
+        DbfExporter(*s).doExport(*array, util::ConstantAnswerProvider::sayYes, config.fieldList());
+    } else {
+        String_t outfile;
+        if (!arg_outfile.get(outfile)) {
+            // Output to console. The console performs character set conversion.
+            if (hadCharsetOption) {
+                log().write(afl::sys::LogListener::Warn, "export", tx("WARNING: Option '-O' has been ignored because standard output is being used."));
             }
+            doTextExport(config.getFormat(), config.fieldList(), *array, standardOutput());
         } else {
-            arg_race = root->getTurnLoader()->getDefaultPlayer(root->playerList().getAllPlayers());
-            if (arg_race == 0) {
-                errorExit(tx("please specify the player number"));
-            }
-        }
-
-        // Make a session and load it
-        game::Session session(translator(), fs);
-        session.setGame(new game::Game());
-        session.setRoot(root);
-        session.setShipList(new game::spec::ShipList());
-        root->specificationLoader().loadShipList(*session.getShipList(), *root);
-
-        root->getTurnLoader()->loadCurrentTurn(session.getGame()->currentTurn(), *session.getGame(), arg_race, *root, session);
-        session.getGame()->currentTurn().universe().postprocess(game::PlayerSet_t(arg_race), game::PlayerSet_t(arg_race), game::map::Object::ReadOnly,
-                                                                root->hostVersion(), root->hostConfiguration(),
-                                                                session.getGame()->currentTurn().getTurnNumber(),
-                                                                *session.getShipList(),
-                                                                translator(), log());
-
-        // What do we want to export?
-        std::auto_ptr<Context> array(findArray(arg_array2, session.world()));
-        if (opt_fields) {
-            std::auto_ptr<MetaContext> meta(new MetaContext());
-            array->enumProperties(*meta);
-            array = meta;
-        }
-
-        // Do it.
-        if (config.getFormat() == interpreter::exporter::DBaseFormat) {
-            // Output to DBF file. Requires file name.
-            String_t outfile;
-            if (!arg_outfile.get(outfile)) {
-                errorExit(tx("output to DBF file needs an output file name ('-o')"));
-            }
+            // Output to file
             afl::base::Ref<afl::io::Stream> s = fs.openFile(outfile, afl::io::FileSystem::Create);
-            DbfExporter(*s).doExport(*array, util::ConstantAnswerProvider::sayYes, config.fieldList());
-        } else {
-            String_t outfile;
-            if (!arg_outfile.get(outfile)) {
-                // Output to console. The console performs character set conversion.
-                if (hadCharsetOption) {
-                    log().write(afl::sys::LogListener::Warn, "export", tx("WARNING: Option '-O' has been ignored because standard output is being used."));
-                }
-                doTextExport(config.getFormat(), config.fieldList(), *array, standardOutput());
-            } else {
-                // Output to file
-                afl::base::Ref<afl::io::Stream> s = fs.openFile(outfile, afl::io::FileSystem::Create);
-                afl::io::TextFile tf(*s);
-                tf.setCharsetNew(config.createCharset());
-                doTextExport(config.getFormat(), config.fieldList(), *array, tf);
-                tf.flush();
-            }
+            afl::io::TextFile tf(*s);
+            tf.setCharsetNew(config.createCharset());
+            doTextExport(config.getFormat(), config.fieldList(), *array, tf);
+            tf.flush();
         }
     }
-    catch (game::Exception& ge) {
-        errorExit(ge.getUserError());
-    }
-    // Other exceptions handled by caller.
 }
 
 void

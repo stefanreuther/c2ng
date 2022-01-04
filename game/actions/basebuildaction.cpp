@@ -295,13 +295,11 @@ BillingExecutor::accountFighterBay(int count)
 game::actions::BaseBuildAction::BaseBuildAction(game::map::Planet& planet,
                                                 CargoContainer& container,
                                                 game::spec::ShipList& shipList,
-                                                Root& root,
-                                                afl::string::Translator& tx)
+                                                Root& root)
     : m_planet(planet),
       m_shipList(shipList),
       m_root(root),
       m_costAction(container),
-      m_translator(tx),
       m_impediments(0),
       m_useTechUpgrades(true),
       m_inUpdate(false),
@@ -311,7 +309,7 @@ game::actions::BaseBuildAction::BaseBuildAction(game::map::Planet& planet,
 {
     // ex GStarbaseBuildTransaction::GStarbaseBuildTransaction
     // FIXME: reconsider this constraint check. Move to commit to allow people asking for costs without a played base?
-    mustHavePlayedBase(planet, tx);
+    mustHavePlayedBase(planet);
 }
 
 game::actions::BaseBuildAction::~BaseBuildAction()
@@ -384,16 +382,12 @@ game::actions::BaseBuildAction::commit()
     // Status check
     switch (getStatus()) {
      case MissingResources:
-        throw Exception(Exception::eNoResource, m_translator("Not enough resources to perform this action"));
+        throw Exception(Exception::eNoResource);
 
      case DisallowedTech:
-        throw Exception(Exception::ePerm, m_translator("Tech level not accessible"));
-
      case ForeignHull:
-        throw Exception(Exception::ePerm, m_translator("Hull not accessible"));
-
      case DisabledTech:
-        throw Exception(Exception::ePerm, m_translator("Tech upgrade required"));
+        throw Exception(Exception::ePerm);
 
      case Success:
         break;
@@ -436,8 +430,8 @@ game::actions::BaseBuildAction::setReservedAmount(game::spec::Cost cost)
 }
 
 void
-game::actions::BaseBuildAction::getCostSummary(game::spec::CostSummary& result)
+game::actions::BaseBuildAction::getCostSummary(game::spec::CostSummary& result, afl::string::Translator& tx)
 {
-    BillingExecutor ex(m_planet, result, m_shipList, m_root.hostConfiguration(), m_useTechUpgrades, m_translator);
+    BillingExecutor ex(m_planet, result, m_shipList, m_root.hostConfiguration(), m_useTechUpgrades, tx);
     perform(ex);
 }

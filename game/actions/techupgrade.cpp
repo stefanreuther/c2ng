@@ -14,15 +14,14 @@
 game::actions::TechUpgrade::TechUpgrade(game::map::Planet& planet,
                                         CargoContainer& container,
                                         game::spec::ShipList& shipList,
-                                        Root& root,
-                                        afl::string::Translator& tx)
-    : BaseBuildAction(planet, container, shipList, root, tx),
+                                        Root& root)
+    : BaseBuildAction(planet, container, shipList, root),
       conn_undoChange(),
       m_pUniverse(0)
 {
     // ex GStarbaseTechUpgradeAction::GStarbaseTechUpgradeAction
     // Preconditions (redundant, actually)
-    mustHavePlayedBase(planet, tx);
+    mustHavePlayedBase(planet);
 
     for (size_t i = 0; i < NUM_TECH_AREAS; ++i) {
         m_newTechLevels[i] = m_minTechLevels[i] = planet.getBaseTechLevel(TechLevel(i)).orElse(1);

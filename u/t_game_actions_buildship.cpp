@@ -163,7 +163,7 @@ TestGameActionsBuildShip::testError()
     h.planet.setPlayability(game::map::Object::Playable);
 
     game::test::CargoContainer container;
-    TS_ASSERT_THROWS((game::actions::BuildShip(h.planet, container, *h.shipList, *h.root, h.tx)), game::Exception);
+    TS_ASSERT_THROWS((game::actions::BuildShip(h.planet, container, *h.shipList, *h.root)), game::Exception);
 }
 
 /** Test success, simple case.
@@ -176,7 +176,7 @@ TestGameActionsBuildShip::testSuccess()
     prepare(h);
 
     game::test::CargoContainer container;
-    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
 
     // Check initial build order selected by BuildShip:
     // Must have tech 1 components, hull #9 (slot #12).
@@ -227,7 +227,7 @@ TestGameActionsBuildShip::testNoBeams()
     prepare(h);
 
     game::test::CargoContainer container;
-    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
 
     // Set number of beams to zero
     game::ShipBuildOrder sbo = a.getBuildOrder();
@@ -264,7 +264,7 @@ TestGameActionsBuildShip::testInitialTech()
 
     // Make action
     game::test::CargoContainer container;
-    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
 
     // Check initial build order selected by BuildShip:
     // Must have selected components according to tech levels
@@ -294,7 +294,7 @@ TestGameActionsBuildShip::testTechUpgrade()
     prepare(h);
 
     game::test::CargoContainer container;
-    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
 
     // Set component types
     game::ShipBuildOrder sbo = a.getBuildOrder();
@@ -345,7 +345,7 @@ TestGameActionsBuildShip::testTechUpgradeFail()
     prepare(h);
 
     game::test::CargoContainer container;
-    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
 
     // Set component types: try tech 9, but our key only allows tech 5.
     game::ShipBuildOrder sbo = a.getBuildOrder();
@@ -377,7 +377,7 @@ TestGameActionsBuildShip::testUseParts()
     h.planet.setBaseStorage(game::TorpedoTech, 1, 10);
 
     game::test::CargoContainer container;
-    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
 
     // Initial state: do not use parts from storage
     TS_ASSERT_EQUALS(a.isUsePartsFromStorage(), false);
@@ -404,7 +404,7 @@ TestGameActionsBuildShip::testUsePartsPartial()
     h.planet.setBaseStorage(game::TorpedoTech, 1, 1);
 
     game::test::CargoContainer container;
-    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
 
     // Initial state: do not use parts from storage
     TS_ASSERT_EQUALS(a.isUsePartsFromStorage(), false);
@@ -467,7 +467,7 @@ TestGameActionsBuildShip::testPreexistingOrder()
 
     // Create action
     game::test::CargoContainer container;
-    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
 
     // Verify initial order
     TS_ASSERT_EQUALS(a.getBuildOrder().getHullIndex(), HULL_TYPE);
@@ -503,7 +503,7 @@ TestGameActionsBuildShip::testForeignShip()
     hh->cost() = game::spec::Cost::fromString("100T 150$");
 
     game::test::CargoContainer container;
-    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
 
     // Check initial build order selected by BuildShip: must have hull 9
     game::ShipBuildOrder order = a.getBuildOrder();
@@ -524,7 +524,7 @@ TestGameActionsBuildShip::testForeignShip()
 
     // Verify cost summary
     game::spec::CostSummary summary;
-    a.getCostSummary(summary);
+    a.getCostSummary(summary, h.tx);
 
     TS_ASSERT_EQUALS(summary.getNumItems(), 5U);
     const game::spec::CostSummary::Item* p;
@@ -556,7 +556,7 @@ TestGameActionsBuildShip::testTechDisabled()
     prepare(h);
 
     game::test::CargoContainer container;
-    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
 
     // Set component types (same as testTechUpgrade)
     game::ShipBuildOrder sbo = a.getBuildOrder();
@@ -599,7 +599,7 @@ TestGameActionsBuildShip::testModify()
 
     // Make action
     game::test::CargoContainer container;
-    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
 
     // Check initial build order selected by BuildShip:
     // Must have tech 1 components, hull #9 (slot #12).
@@ -653,25 +653,25 @@ TestGameActionsBuildShip::testBadId()
     game::test::CargoContainer container;
 
     {
-        game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+        game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
         TS_ASSERT_THROWS(a.setPart(game::HullTech, 77), std::exception);
         TS_ASSERT_THROWS_NOTHING(a.setPart(game::BeamTech, 9));
     }
 
     {
-        game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+        game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
         TS_ASSERT_THROWS(a.setPart(game::EngineTech, 77), std::exception);
         TS_ASSERT_THROWS_NOTHING(a.setPart(game::BeamTech, 9));
     }
 
     {
-        game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+        game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
         TS_ASSERT_THROWS(a.setPart(game::BeamTech, 77), std::exception);
         TS_ASSERT_THROWS_NOTHING(a.setPart(game::EngineTech, 9));
     }
 
     {
-        game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+        game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
         TS_ASSERT_THROWS(a.setPart(game::TorpedoTech, 77), std::exception);
         TS_ASSERT_THROWS_NOTHING(a.setPart(game::EngineTech, 9));
     }
@@ -692,7 +692,7 @@ TestGameActionsBuildShip::testBadHull()
     o.setEngineType(9);
     h.planet.setBaseBuildOrder(o);
 
-    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
 
     TS_ASSERT_EQUALS(a.getBuildOrder().getHullIndex(), HULL_TYPE);
 }
@@ -712,7 +712,7 @@ TestGameActionsBuildShip::testBadEngine()
     o.setEngineType(19);       // Invalid type
     h.planet.setBaseBuildOrder(o);
 
-    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
 
     TS_ASSERT_EQUALS(a.getBuildOrder().getEngineType(), 1);
 }
@@ -734,7 +734,7 @@ TestGameActionsBuildShip::testBadBeam()
     o.setBeamType(20);        // Invalid type
     h.planet.setBaseBuildOrder(o);
 
-    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
 
     TS_ASSERT_EQUALS(a.getBuildOrder().getBeamType(), 1);
 }
@@ -756,7 +756,7 @@ TestGameActionsBuildShip::testBadLauncher()
     o.setLauncherType(20);        // Invalid type
     h.planet.setBaseBuildOrder(o);
 
-    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
 
     TS_ASSERT_EQUALS(a.getBuildOrder().getLauncherType(), 1);
 }
@@ -777,7 +777,7 @@ TestGameActionsBuildShip::testCostSummary()
     h.planet.setBaseStorage(game::TorpedoTech, 1, 1);
 
     game::test::CargoContainer container;
-    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
 
     // Initial state: do not use parts from storage
     a.setUsePartsFromStorage(true);
@@ -792,7 +792,7 @@ TestGameActionsBuildShip::testCostSummary()
     //   4x Launcher
     //   1x From storage: launcher
     game::spec::CostSummary summary;
-    a.getCostSummary(summary);
+    a.getCostSummary(summary, h.tx);
 
     TS_ASSERT_EQUALS(summary.getNumItems(), 7U);
 

@@ -6,7 +6,6 @@
 #define C2NG_GAME_ACTIONS_CONVERTSUPPLIES_HPP
 
 #include "afl/base/types.hpp"
-#include "afl/string/translator.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/universe.hpp"
 
@@ -23,8 +22,9 @@ namespace game { namespace actions {
         This action has no dynamic behaviour, i.e. it does not track state and does not forward changes on the planet. */
     class ConvertSupplies {
      public:
-        /** Constructor. */
-        ConvertSupplies(game::map::Planet& pl, afl::string::Translator& tx);
+        /** Constructor.
+            \param pl Planet to work on */
+        explicit ConvertSupplies(game::map::Planet& pl);
 
         /** Set undo information.
             This enables the action to buy supplies.

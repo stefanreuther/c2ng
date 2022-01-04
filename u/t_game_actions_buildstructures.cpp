@@ -6,7 +6,6 @@
 #include "game/actions/buildstructures.hpp"
 
 #include "t_game_actions.hpp"
-#include "afl/string/nulltranslator.hpp"
 #include "game/exception.hpp"
 #include "game/map/planetstorage.hpp"
 #include "game/test/cargocontainer.hpp"
@@ -34,7 +33,6 @@ namespace {
     struct TestHarness {
         game::config::HostConfiguration config;
         game::map::Planet planet;
-        afl::string::NullTranslator tx;
         game::map::PlanetStorage container;
 
         TestHarness();
@@ -43,8 +41,7 @@ namespace {
     TestHarness::TestHarness()
         : config(),
           planet(99),
-          tx(),
-          container(preparePlanet(planet), config, tx)
+          container(preparePlanet(planet), config)
     {
         config.setDefaultValues();
     }
@@ -58,9 +55,8 @@ TestGameActionsBuildStructures::testError()
     game::map::Planet planet(99);
     game::test::CargoContainer container;
     game::config::HostConfiguration config;
-    afl::string::NullTranslator tx;
 
-    TS_ASSERT_THROWS((game::actions::BuildStructures(planet, container, config, tx)), game::Exception);
+    TS_ASSERT_THROWS((game::actions::BuildStructures(planet, container, config)), game::Exception);
 }
 
 /** Test standard success case.
@@ -69,7 +65,7 @@ void
 TestGameActionsBuildStructures::testSuccess()
 {
     TestHarness h;
-    game::actions::BuildStructures a(h.planet, h.container, h.config, h.tx);
+    game::actions::BuildStructures a(h.planet, h.container, h.config);
 
     // Verify
     // - ranges
@@ -102,7 +98,7 @@ TestGameActionsBuildStructures::testModify()
     TestHarness h;
 
     // Action: build 15
-    game::actions::BuildStructures a(h.planet, h.container, h.config, h.tx);
+    game::actions::BuildStructures a(h.planet, h.container, h.config);
     TS_ASSERT_EQUALS(a.add(game::MineBuilding, 15, false), 15);
 
     // In the background, build 10
@@ -123,7 +119,7 @@ void
 TestGameActionsBuildStructures::testMulti()
 {
     TestHarness h;
-    game::actions::BuildStructures a(h.planet, h.container, h.config, h.tx);
+    game::actions::BuildStructures a(h.planet, h.container, h.config);
 
     // Add 3 of each
     TS_ASSERT_EQUALS(a.add(game::MineBuilding,    3, false), 3);
@@ -140,7 +136,7 @@ void
 TestGameActionsBuildStructures::testResourceLimit()
 {
     TestHarness h;
-    game::actions::BuildStructures a(h.planet, h.container, h.config, h.tx);
+    game::actions::BuildStructures a(h.planet, h.container, h.config);
 
     // Check how callbacks are suppressed
     int counter = 0;
@@ -181,7 +177,7 @@ void
 TestGameActionsBuildStructures::testAutoBuild()
 {
     TestHarness h;
-    game::actions::BuildStructures a(h.planet, h.container, h.config, h.tx);
+    game::actions::BuildStructures a(h.planet, h.container, h.config);
 
     // Set autobuild goals. (These are defaults.)
     h.planet.setAutobuildGoal(game::MineBuilding,        1000);
@@ -224,7 +220,7 @@ void
 TestGameActionsBuildStructures::testAutoBuildGroup()
 {
     TestHarness h;
-    game::actions::BuildStructures a(h.planet, h.container, h.config, h.tx);
+    game::actions::BuildStructures a(h.planet, h.container, h.config);
 
     // Set autobuild goals. Factories and defense form a group.
     h.planet.setAutobuildGoal(game::MineBuilding,        1000);
@@ -265,7 +261,7 @@ void
 TestGameActionsBuildStructures::testBuildFailure()
 {
     TestHarness h;
-    game::actions::BuildStructures a(h.planet, h.container, h.config, h.tx);
+    game::actions::BuildStructures a(h.planet, h.container, h.config);
 
     // Add 15 defense. These cost 150$ which we do not have
     TS_ASSERT_EQUALS(a.add(game::DefenseBuilding, 15, false), 15);

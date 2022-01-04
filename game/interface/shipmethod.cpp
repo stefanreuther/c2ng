@@ -15,7 +15,7 @@
 using game::Exception;
 
 namespace {
-    void setBaseShipyardOrder(game::map::Ship& ship, game::Turn& turn, game::ShipyardAction action, afl::string::Translator& tx)
+    void setBaseShipyardOrder(game::map::Ship& ship, game::Turn& turn, game::ShipyardAction action)
     {
         // ex int/if/shipif.h:setBaseOrder, game/action/basefix.cc:checkBaseAction
 
@@ -33,7 +33,7 @@ namespace {
         }
 
         // Execute
-        if (!game::actions::BaseFixRecycle(*planet, tx).set(action, turn.universe(), &ship)) {
+        if (!game::actions::BaseFixRecycle(*planet).set(action, turn.universe(), &ship)) {
             throw Exception(Exception::ePerm);
         }
     }
@@ -154,7 +154,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
         // ex int/if/shipif.h:IFShipFixShip
         // ex shipint.pas:Ship_FixShip
         args.checkArgumentCount(0);
-        setBaseShipyardOrder(sh, turn, FixShipyardAction, session.translator());
+        setBaseShipyardOrder(sh, turn, FixShipyardAction);
         break;
 
      case ismRecycleShip:
@@ -166,7 +166,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
         // ex int/if/shipif.h:IFShipRecycleShip
         // ex shipint.pas:Ship_RecycleShip
         args.checkArgumentCount(0);
-        setBaseShipyardOrder(sh, turn, RecycleShipyardAction, session.translator());
+        setBaseShipyardOrder(sh, turn, RecycleShipyardAction);
         break;
 
      case ismSetWaypoint: {

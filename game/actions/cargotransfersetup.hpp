@@ -138,15 +138,13 @@ namespace game { namespace actions {
             \param config   [in] Host configuration (needed to construct CargoContainer descendants)
             \param shipList [in] Ship list (needed to construct CargoContainer descendants)
             \param version  [in] Host version (needed to construct CargoContainer descendants)
-            \param tx       [in] Translator (for error messages)
             \pre isValid()
             \throw Exception if setup is incomplete/impossible (precondition not satisfied) */
         void build(CargoTransfer& action,
                    Turn& turn,
                    const game::config::HostConfiguration& config,
                    const game::spec::ShipList& shipList,
-                   const game::HostVersion& version,
-                   afl::string::Translator& tx);
+                   const game::HostVersion& version);
 
         /** Build CargoTransfer action for direct transfer.
             This is a "light" version of build() with fewer required parameters.
@@ -154,14 +152,12 @@ namespace game { namespace actions {
             \param univ     [in/out] Universe
             \param config   [in] Host configuration (needed to construct CargoContainer descendants)
             \param shipList [in] Ship list (needed to construct CargoContainer descendants)
-            \param tx       [in] Translator (for error messages)
             \pre isValid() && isDirect()
             \throw Exception if setup is incomplete/impossible (precondition not satisfied) */
         void buildDirect(CargoTransfer& action,
                          game::map::Universe& univ,
                          const game::config::HostConfiguration& config,
-                         const game::spec::ShipList& shipList,
-                         afl::string::Translator& tx);
+                         const game::spec::ShipList& shipList);
 
      private:
         enum Action {

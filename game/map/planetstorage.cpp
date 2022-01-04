@@ -8,16 +8,14 @@
 #include "game/limits.hpp"
 #include "game/map/planet.hpp"
 
-game::map::PlanetStorage::PlanetStorage(Planet& pl,
-                                        const game::config::HostConfiguration& config,
-                                        afl::string::Translator& tx)
+game::map::PlanetStorage::PlanetStorage(Planet& pl, const game::config::HostConfiguration& config)
     : CargoContainer(),
       m_planet(pl),
       m_hostConfiguration(config),
       m_changeConnection(pl.sig_change.add(&sig_change, &afl::base::Signal<void()>::raise))
 {
     // ex GPlanetTransfer::GPlanetTransfer
-    game::actions::mustBePlayed(pl, tx);
+    game::actions::mustBePlayed(pl);
 }
 
 game::map::PlanetStorage::~PlanetStorage()

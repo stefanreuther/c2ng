@@ -29,9 +29,9 @@ class game::proxy::ConvertSuppliesProxy::Trampoline {
             try {
                 Game& g = game::actions::mustHaveGame(m_session);
                 game::map::Universe& univ = g.currentTurn().universe();
-                game::map::Planet& pl = game::actions::mustExist(univ.planets().get(planetId), m_session.translator());
+                game::map::Planet& pl = game::actions::mustExist(univ.planets().get(planetId));
 
-                m_action.reset(new ConvertSupplies(pl, m_session.translator()));
+                m_action.reset(new ConvertSupplies(pl));
                 m_action->setUndoInformation(univ);
                 m_action->setReservedSupplies(reservedSupplies);
                 m_action->setReservedMoney(reservedMoney);

@@ -65,12 +65,11 @@ void
 TestGameActionsConvertSupplies::testNormal()
 {
     // Environment
-    NullTranslator tx;
     Planet p(77);
     prepare(p);
 
     // Testee
-    game::actions::ConvertSupplies testee(p, tx);
+    game::actions::ConvertSupplies testee(p);
     TS_ASSERT_EQUALS(testee.getMaxSuppliesToSell(), 1000);
     TS_ASSERT_EQUALS(testee.getMaxSuppliesToBuy(), 0);
 
@@ -96,12 +95,11 @@ void
 TestGameActionsConvertSupplies::testReserved()
 {
     // Environment
-    NullTranslator tx;
     Planet p(77);
     prepare(p);
 
     // Testee
-    game::actions::ConvertSupplies testee(p, tx);
+    game::actions::ConvertSupplies testee(p);
     testee.setReservedSupplies(300);
     TS_ASSERT_EQUALS(testee.getMaxSuppliesToSell(), 700);
     TS_ASSERT_EQUALS(testee.getMaxSuppliesToBuy(), 0);
@@ -118,7 +116,6 @@ void
 TestGameActionsConvertSupplies::testBuy()
 {
     // Environment
-    afl::string::NullTranslator tx;
     Planet p(77);
     prepare(p);
 
@@ -126,7 +123,7 @@ TestGameActionsConvertSupplies::testBuy()
     univ.setNewReverter(new TestReverter());
 
     // Testee
-    game::actions::ConvertSupplies testee(p, tx);
+    game::actions::ConvertSupplies testee(p);
     testee.setUndoInformation(univ);
     testee.setReservedMoney(100);
     TS_ASSERT_EQUALS(testee.getMaxSuppliesToSell(), 1000);

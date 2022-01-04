@@ -983,7 +983,7 @@ game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, const af
             int i = (isp == ispMissionIntercept ? iv : sh.getMissionParameter(InterceptParameter).orElse(0));
             int t = (isp == ispMissionTow       ? iv : sh.getMissionParameter(TowParameter).orElse(0));
             if (!game::map::FleetMember(turn.universe(), sh).setMission(m, i, t, root.hostConfiguration(), shipList)) {
-                throw Exception(Exception::eFleet, Exception::eFleet);
+                throw Exception(Exception::eFleet);
             }
         }
         break;
@@ -998,7 +998,7 @@ game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, const af
      case ispSpeedId:
         if (checkIntegerArg(iv, value, 0, game::spec::Engine::MAX_WARP)) {
             if (!game::map::FleetMember(turn.universe(), sh).setWarpFactor(iv, root.hostConfiguration(), shipList)) {
-                throw Exception(Exception::eFleet, Exception::eFleet);
+                throw Exception(Exception::eFleet);
             }
         }
         break;

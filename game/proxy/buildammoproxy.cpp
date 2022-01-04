@@ -56,11 +56,11 @@ game::proxy::BuildAmmoProxy::Trampoline::Trampoline(util::RequestSender<BuildAmm
       // Obtain turn and keep it alive
       m_pTurn(game::actions::mustHaveGame(session).getViewpointTurn()),
       // Obtain planet
-      m_planet(mustExist(mustExist(m_pTurn.get(), session.translator()).universe().planets().get(planetId), session.translator())),
+      m_planet(mustExist(mustExist(m_pTurn.get()).universe().planets().get(planetId))),
       m_targetName(),
       conn_targetChange()
 {
-    game::actions::mustHavePlayedBase(m_planet, m_session.translator());
+    game::actions::mustHavePlayedBase(m_planet);
 }
 
 void
@@ -68,12 +68,11 @@ game::proxy::BuildAmmoProxy::Trampoline::setPlanet()
 {
     reset();
 
-    afl::string::Translator& tx = m_session.translator();
     Root& r = game::actions::mustHaveRoot(m_session);
     game::spec::ShipList& sl = game::actions::mustHaveShipList(m_session);
 
-    game::map::PlanetStorage& ps = m_deleter.addNew(new game::map::PlanetStorage(m_planet, r.hostConfiguration(), tx));
-    m_pAction.reset(new game::actions::BuildAmmo(m_planet, ps, ps, sl, r, tx));
+    game::map::PlanetStorage& ps = m_deleter.addNew(new game::map::PlanetStorage(m_planet, r.hostConfiguration()));
+    m_pAction.reset(new game::actions::BuildAmmo(m_planet, ps, ps, sl, r));
     finishAction(m_planet.getName(m_session.translator()), ps);
 }
 
@@ -82,15 +81,14 @@ game::proxy::BuildAmmoProxy::Trampoline::setShip(Id_t shipId)
 {
     reset();
 
-    afl::string::Translator& tx = m_session.translator();
     Root& r = game::actions::mustHaveRoot(m_session);
     game::spec::ShipList& sl = game::actions::mustHaveShipList(m_session);
 
-    game::map::Ship& ship = mustExist(mustExist(m_pTurn.get(), tx).universe().ships().get(shipId), tx);
+    game::map::Ship& ship = mustExist(mustExist(m_pTurn.get()).universe().ships().get(shipId));
     if (isValidReceiver(ship)) {
-        game::map::ShipStorage& ss = m_deleter.addNew(new game::map::ShipStorage(ship, sl, tx));
-        game::map::PlanetStorage& ps = m_deleter.addNew(new game::map::PlanetStorage(m_planet, r.hostConfiguration(), tx));
-        m_pAction.reset(new game::actions::BuildAmmo(m_planet, ps, ss, sl, r, tx));
+        game::map::ShipStorage& ss = m_deleter.addNew(new game::map::ShipStorage(ship, sl));
+        game::map::PlanetStorage& ps = m_deleter.addNew(new game::map::PlanetStorage(m_planet, r.hostConfiguration()));
+        m_pAction.reset(new game::actions::BuildAmmo(m_planet, ps, ss, sl, r));
         finishAction(ship.getName(), ss);
     }
 }

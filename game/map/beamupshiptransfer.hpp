@@ -22,8 +22,7 @@ namespace game { namespace map {
         BeamUpShipTransfer(Ship& sh,
                            const game::spec::ShipList& shipList,
                            Turn& turn,
-                           const game::config::HostConfiguration& config,
-                           afl::string::Translator& tx);
+                           const game::config::HostConfiguration& config);
 
         ~BeamUpShipTransfer();
 

@@ -22,13 +22,11 @@ namespace game { namespace actions {
             \param planet    Planet to work on. Must have a played starbase.
             \param container Container to bill the builds on. Usually a PlanetStorage for the same planet.
             \param shipList  Ship list. Needed to access component costs and hull slots.
-            \param root      Game root. Needed to access host configuration and registration key.
-            \param tx        Translator. Needed for error messages during construction. */
+            \param root      Game root. Needed to access host configuration and registration key. */
         BuildParts(game::map::Planet& planet,
                    CargoContainer& container,
                    game::spec::ShipList& shipList,
-                   Root& root,
-                   afl::string::Translator& tx);
+                   Root& root);
 
         /** Destructor. */
         ~BuildParts();

@@ -36,8 +36,7 @@ namespace {
 game::map::BeamUpShipTransfer::BeamUpShipTransfer(Ship& sh,
                                                   const game::spec::ShipList& shipList,
                                                   Turn& turn,
-                                                  const game::config::HostConfiguration& config,
-                                                  afl::string::Translator& tx)
+                                                  const game::config::HostConfiguration& config)
     : CargoContainer(),
       m_ship(sh),
       m_shipList(shipList),
@@ -46,7 +45,7 @@ game::map::BeamUpShipTransfer::BeamUpShipTransfer(Ship& sh,
       m_amount()
 {
     // ex GShipBumTransfer::GShipBumTransfer
-    game::actions::mustBePlayed(sh, tx);
+    game::actions::mustBePlayed(sh);
     parseBeamUpCommand(m_amount, turn, sh, +1);
 }
 

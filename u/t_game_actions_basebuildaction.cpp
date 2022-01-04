@@ -67,7 +67,7 @@ namespace {
     class TestAction : public game::actions::BaseBuildAction {
      public:
         explicit TestAction(TestHarness& h)
-            : BaseBuildAction(h.planet, h.container, h.shipList, h.root, h.tx),
+            : BaseBuildAction(h.planet, h.container, h.shipList, h.root),
               m_tech(1)
             { }
 
@@ -176,7 +176,7 @@ TestGameActionsBaseBuildAction::testCostSummary()
     // Retrieve and verify CostSummary
     {
         game::spec::CostSummary result;
-        a.getCostSummary(result);
+        a.getCostSummary(result, h.tx);
 
         TS_ASSERT_EQUALS(result.getNumItems(), 1U);
         const game::spec::CostSummary::Item* p = result.get(0);
@@ -191,7 +191,7 @@ TestGameActionsBaseBuildAction::testCostSummary()
     TS_ASSERT_EQUALS(a.isUseTechUpgrade(), false);
     {
         game::spec::CostSummary result;
-        a.getCostSummary(result);
+        a.getCostSummary(result, h.tx);
         TS_ASSERT_EQUALS(result.getNumItems(), 0U);
     }
     TS_ASSERT(!a.isValid());
@@ -201,7 +201,7 @@ TestGameActionsBaseBuildAction::testCostSummary()
     a.update();
     {
         game::spec::CostSummary result;
-        a.getCostSummary(result);
+        a.getCostSummary(result, h.tx);
         TS_ASSERT_EQUALS(result.getNumItems(), 0U);
     }
     TS_ASSERT(a.isValid());

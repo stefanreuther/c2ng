@@ -35,19 +35,19 @@ TestGameMapShipTransporter::testNames()
 
     afl::string::NullTranslator tx;
 
-    TS_ASSERT_EQUALS(ShipTransporter(sourceShip, Ship::UnloadTransporter, 0, h.universe(), host, tx).getName(tx),
+    TS_ASSERT_EQUALS(ShipTransporter(sourceShip, Ship::UnloadTransporter, 0, h.universe(), host).getName(tx),
                      "Jettison");
-    TS_ASSERT_EQUALS(ShipTransporter(sourceShip, Ship::UnloadTransporter, 30, h.universe(), host, tx).getName(tx),
+    TS_ASSERT_EQUALS(ShipTransporter(sourceShip, Ship::UnloadTransporter, 30, h.universe(), host).getName(tx),
                      "Uranus");
-    TS_ASSERT_EQUALS(ShipTransporter(sourceShip, Ship::UnloadTransporter, 99, h.universe(), host, tx).getName(tx),
+    TS_ASSERT_EQUALS(ShipTransporter(sourceShip, Ship::UnloadTransporter, 99, h.universe(), host).getName(tx),
                      "Planet 99");
-    TS_ASSERT_EQUALS(ShipTransporter(sourceShip, Ship::TransferTransporter, 20, h.universe(), host, tx).getName(tx),
+    TS_ASSERT_EQUALS(ShipTransporter(sourceShip, Ship::TransferTransporter, 20, h.universe(), host).getName(tx),
                      "Target");
-    TS_ASSERT_EQUALS(ShipTransporter(sourceShip, Ship::TransferTransporter, 99, h.universe(), host, tx).getName(tx),
+    TS_ASSERT_EQUALS(ShipTransporter(sourceShip, Ship::TransferTransporter, 99, h.universe(), host).getName(tx),
                      "Ship 99");
 
     // Info not currently set
-    TS_ASSERT_EQUALS(ShipTransporter(sourceShip, Ship::UnloadTransporter, 0, h.universe(), host, tx).getInfo1(tx), "");
-    TS_ASSERT_EQUALS(ShipTransporter(sourceShip, Ship::UnloadTransporter, 0, h.universe(), host, tx).getInfo2(tx), "");
+    TS_ASSERT_EQUALS(ShipTransporter(sourceShip, Ship::UnloadTransporter, 0, h.universe(), host).getInfo1(tx), "");
+    TS_ASSERT_EQUALS(ShipTransporter(sourceShip, Ship::UnloadTransporter, 0, h.universe(), host).getInfo2(tx), "");
 }
 

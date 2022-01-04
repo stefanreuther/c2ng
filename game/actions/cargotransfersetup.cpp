@@ -348,8 +348,7 @@ game::actions::CargoTransferSetup::build(CargoTransfer& action,
                                          Turn& turn,
                                          const game::config::HostConfiguration& config,
                                          const game::spec::ShipList& shipList,
-                                         const game::HostVersion& version,
-                                         afl::string::Translator& tx)
+                                         const game::HostVersion& version)
 {
     game::map::Universe& univ = turn.universe();
 
@@ -377,27 +376,27 @@ game::actions::CargoTransferSetup::build(CargoTransfer& action,
             throw Exception(Exception::ePerm);
 
          case UsePlanetStorage:
-            action.addNew(new game::map::PlanetStorage(getPlanet(univ, thisId), config, tx));
+            action.addNew(new game::map::PlanetStorage(getPlanet(univ, thisId), config));
             break;
 
          case UseShipStorage:
-            action.addNew(new game::map::ShipStorage(getShip(univ, thisId), shipList, tx));
+            action.addNew(new game::map::ShipStorage(getShip(univ, thisId), shipList));
             break;
 
          case UseOtherUnload:
-            action.addNew(new game::map::ShipTransporter(getShip(univ, otherId), Ship::UnloadTransporter, thisId, univ, version, tx));
+            action.addNew(new game::map::ShipTransporter(getShip(univ, otherId), Ship::UnloadTransporter, thisId, univ, version));
             break;
 
          case UseOtherTransfer:
-            action.addNew(new game::map::ShipTransporter(getShip(univ, otherId), Ship::TransferTransporter, thisId, univ, version, tx));
+            action.addNew(new game::map::ShipTransporter(getShip(univ, otherId), Ship::TransferTransporter, thisId, univ, version));
             break;
 
          case UseProxyTransfer:
-            action.addNew(new game::map::ShipTransporter(getShip(univ, m_ids[Proxy]), Ship::TransferTransporter, thisId, univ, version, tx));
+            action.addNew(new game::map::ShipTransporter(getShip(univ, m_ids[Proxy]), Ship::TransferTransporter, thisId, univ, version));
             break;
 
          case UseBeamUpShip:
-            action.addNew(new game::map::BeamUpShipTransfer(getShip(univ, thisId), shipList, turn, config, tx));
+            action.addNew(new game::map::BeamUpShipTransfer(getShip(univ, thisId), shipList, turn, config));
             break;
 
          case UseBeamUpPlanet:
@@ -412,8 +411,7 @@ void
 game::actions::CargoTransferSetup::buildDirect(CargoTransfer& action,
                          game::map::Universe& univ,
                          const game::config::HostConfiguration& config,
-                         const game::spec::ShipList& shipList,
-                         afl::string::Translator& tx)
+                         const game::spec::ShipList& shipList)
 {
     // Deflect call if setup is invalid and user didn't notice.
     if (getStatus() != Ready || getConflictingTransferShipId(univ) != 0) {
@@ -425,11 +423,11 @@ game::actions::CargoTransferSetup::buildDirect(CargoTransfer& action,
         const Id_t thisId = m_ids[i];
         switch (m_actions[i]) {
          case UsePlanetStorage:
-            action.addNew(new game::map::PlanetStorage(getPlanet(univ, thisId), config, tx));
+            action.addNew(new game::map::PlanetStorage(getPlanet(univ, thisId), config));
             break;
 
          case UseShipStorage:
-            action.addNew(new game::map::ShipStorage(getShip(univ, thisId), shipList, tx));
+            action.addNew(new game::map::ShipStorage(getShip(univ, thisId), shipList));
             break;
 
          case Invalid:

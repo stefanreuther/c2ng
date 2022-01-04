@@ -18,8 +18,7 @@ game::map::ShipTransporter::ShipTransporter(Ship& sh,
                                             Ship::Transporter type,
                                             Id_t targetId,
                                             const Universe& univ,
-                                            HostVersion hostVersion,
-                                            afl::string::Translator& tx)
+                                            HostVersion hostVersion)
     : CargoContainer(),
       m_ship(sh),
       m_type(type),
@@ -29,7 +28,7 @@ game::map::ShipTransporter::ShipTransporter(Ship& sh,
       m_changeConnection(sh.sig_change.add(&sig_change, &afl::base::Signal<void()>::raise))
 {
     // ex GShipTransporterTransfer::GShipTransporterTransfer
-    game::actions::mustBePlayed(sh, tx);
+    game::actions::mustBePlayed(sh);
 }
 
 String_t

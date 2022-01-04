@@ -393,7 +393,7 @@ namespace {
                 }
             }
         } else {
-            throw game::Exception(game::Exception::eUser, session.translator().translateString("No race loaded"));
+            throw game::Exception(game::Exception::eUser);
         }
     }
 
@@ -753,7 +753,10 @@ client::si::IFCCBuildShip(game::Session& session, ScriptSide& si, RequestLink1 l
     game::actions::mustHaveGame(session);
 
     game::map::Planet* pl = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
-    game::actions::mustHavePlayedBase(*pl, session.translator());
+    if (pl == 0) {
+        throw interpreter::Error::contextError();
+    }
+    game::actions::mustHavePlayedBase(*pl);
     si.postNewTask(link, new Task(pl->getId()));
 }
 
@@ -784,15 +787,15 @@ client::si::IFCCBuildStructures(game::Session& session, ScriptSide& si, RequestL
     session.notifyListeners();
     game::actions::mustHaveGame(session);
 
-    game::map::Planet& pl = game::actions::mustExist(dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject()), session.translator());
-    game::actions::mustBePlayed(pl, session.translator());
+    game::map::Planet& pl = game::actions::mustExist(dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject()));
+    game::actions::mustBePlayed(pl);
 
     si.postNewTask(link, new Task(pl.getId(), page));
 }
 
 // @since PCC2 2.40.8
 void
-client::si::IFCCBuySupplies(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+client::si::IFCCBuySupplies(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     // ex IFCCBuySupplies
     args.checkArgumentCount(0);
@@ -802,7 +805,7 @@ client::si::IFCCBuySupplies(game::Session& session, ScriptSide& si, RequestLink1
     if (pPlanet == 0) {
         throw interpreter::Error::contextError();
     }
-    game::actions::mustBePlayed(*pPlanet, session.translator());
+    game::actions::mustBePlayed(*pPlanet);
 
     // Do it
     class DialogTask : public UserTask {
@@ -984,7 +987,7 @@ client::si::IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLi
                 game::spec::ShipList& sl = game::actions::mustHaveShipList(session);
                 game::Game& g = game::actions::mustHaveGame(session);
                 game::map::Universe& univ = g.currentTurn().universe();
-                game::map::Ship& sh = game::actions::mustExist(univ.ships().get(m_id), session.translator());
+                game::map::Ship& sh = game::actions::mustExist(univ.ships().get(m_id));
                 game::map::FleetMember fm(univ, sh);
 
                 fm.setWaypoint(m_position, r.hostConfiguration(), sl);
@@ -1425,7 +1428,7 @@ client::si::IFCCReset(game::Session& /*session*/, ScriptSide& si, RequestLink1 l
 
 // @since PCC2 2.40.8
 void
-client::si::IFCCSellSupplies(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+client::si::IFCCSellSupplies(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     // ex IFCCSellSupplies
     args.checkArgumentCount(0);
@@ -1435,7 +1438,7 @@ client::si::IFCCSellSupplies(game::Session& session, ScriptSide& si, RequestLink
     if (pPlanet == 0) {
         throw interpreter::Error::contextError();
     }
-    game::actions::mustBePlayed(*pPlanet, session.translator());
+    game::actions::mustBePlayed(*pPlanet);
 
     // Do it
     class DialogTask : public UserTask {
@@ -1591,7 +1594,7 @@ client::si::IFCCTransferMulti(game::Session& session, ScriptSide& si, RequestLin
     if (pShip == 0) {
         throw interpreter::Error::contextError();
     }
-    game::actions::mustBePlayed(*pShip, session.translator());
+    game::actions::mustBePlayed(*pShip);
 
     // Other preconditions
     game::Game& g = game::actions::mustHaveGame(session);
@@ -1599,7 +1602,7 @@ client::si::IFCCTransferMulti(game::Session& session, ScriptSide& si, RequestLin
 
     // Validate fleet request
     if (flag && pShip->getFleetNumber() == 0) {
-        throw game::Exception(game::Exception::eRange, session.translator()("Ship is not member of a fleet."));
+        throw game::Exception(game::Exception::eNotFleet);
     }
 
     // Prepare initial MultiTransferSetup object
@@ -1654,7 +1657,7 @@ client::si::IFCCTransferMulti(game::Session& session, ScriptSide& si, RequestLin
 
 // @since PCC2 2.40.6
 void
-client::si::IFCCTransferPlanet(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+client::si::IFCCTransferPlanet(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     // ex IFCCTransferPlanet
     bool unload;
@@ -1668,7 +1671,7 @@ client::si::IFCCTransferPlanet(game::Session& session, ScriptSide& si, RequestLi
     if (pPlanet == 0) {
         throw interpreter::Error::contextError();
     }
-    game::actions::mustBePlayed(*pPlanet, session.translator());
+    game::actions::mustBePlayed(*pPlanet);
 
     // Do it
     class DialogTask : public UserTask {
@@ -1708,7 +1711,7 @@ client::si::IFCCTransferShip(game::Session& session, ScriptSide& si, RequestLink
     if (pShip == 0) {
         throw interpreter::Error::contextError();
     }
-    game::actions::mustBePlayed(*pShip, session.translator());
+    game::actions::mustBePlayed(*pShip);
 
     // Parse mode/target
     game::map::Universe& univ = game::actions::mustHaveGame(session).currentTurn().universe();
@@ -1762,7 +1765,7 @@ client::si::IFCCTransferUnload(game::Session& session, ScriptSide& si, RequestLi
     if (pShip == 0) {
         throw interpreter::Error::contextError();
     }
-    game::actions::mustBePlayed(*pShip, session.translator());
+    game::actions::mustBePlayed(*pShip);
 
     // Ship must have a position
     game::map::Point shipPos;
@@ -1773,7 +1776,7 @@ client::si::IFCCTransferUnload(game::Session& session, ScriptSide& si, RequestLi
     game::map::Universe& univ = game::actions::mustHaveGame(session).currentTurn().universe();
     game::Id_t pid = univ.findPlanetAt(shipPos);
     if (pid == 0) {
-        throw game::Exception(game::Exception::ePos, session.translator()("Ship is not orbiting a planet."));
+        throw game::Exception(game::Exception::ePos);
     }
 
     // Do it
@@ -2215,7 +2218,7 @@ client::si::IFUIChooseTurn(game::Session& session, ScriptSide& si, RequestLink1 
         session.notifyListeners();
         si.postNewTask(link, new Task(delta));
     } else {
-        throw game::Exception(game::Exception::eUser, session.translator().translateString("No race loaded"));
+        throw game::Exception(game::Exception::eUser);
     }
 }
 

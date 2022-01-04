@@ -44,72 +44,67 @@ namespace {
 void
 TestGameActionsPreconditions::testShip()
 {
-    afl::string::NullTranslator tx;
-
     // Uninitialized object throws
     game::map::Ship ship(42);
-    TS_ASSERT_THROWS(game::actions::mustBePlayed(ship, tx), game::Exception);
+    TS_ASSERT_THROWS(game::actions::mustBePlayed(ship), game::Exception);
 
     // ReadOnly is not sufficient
     ship.setPlayability(ship.ReadOnly);
-    TS_ASSERT_THROWS(game::actions::mustBePlayed(ship, tx), game::Exception);
+    TS_ASSERT_THROWS(game::actions::mustBePlayed(ship), game::Exception);
 
     // Playable is sufficient
     ship.setPlayability(ship.Playable);
-    TS_ASSERT_THROWS_NOTHING(game::actions::mustBePlayed(ship, tx));
+    TS_ASSERT_THROWS_NOTHING(game::actions::mustBePlayed(ship));
 }
 
 /** Test planet. */
 void
 TestGameActionsPreconditions::testPlanet()
 {
-    afl::string::NullTranslator tx;
-
     // Uninitialized object throws
     game::map::Planet planet(42);
-    TS_ASSERT_THROWS(game::actions::mustBePlayed(planet, tx), game::Exception);
+    TS_ASSERT_THROWS(game::actions::mustBePlayed(planet), game::Exception);
 
     // ReadOnly is not sufficient
     planet.setPlayability(planet.ReadOnly);
-    TS_ASSERT_THROWS(game::actions::mustBePlayed(planet, tx), game::Exception);
+    TS_ASSERT_THROWS(game::actions::mustBePlayed(planet), game::Exception);
 
     // Playable is sufficient
     planet.setPlayability(planet.Playable);
-    TS_ASSERT_THROWS_NOTHING(game::actions::mustBePlayed(planet, tx));
+    TS_ASSERT_THROWS_NOTHING(game::actions::mustBePlayed(planet));
 }
 
 /** Test base. */
 void
 TestGameActionsPreconditions::testBase()
 {
-    afl::string::NullTranslator tx;
     {
         // Uninitialized object throws
         game::map::Planet planet(42);
-        TS_ASSERT_THROWS(game::actions::mustHavePlayedBase(planet, tx), game::Exception);
+        TS_ASSERT_THROWS(game::actions::mustHavePlayedBase(planet), game::Exception);
 
         // Give it a base. Still not sufficient
         addBase(planet);
-        TS_ASSERT_THROWS(game::actions::mustHavePlayedBase(planet, tx), game::Exception);
+        TS_ASSERT_THROWS(game::actions::mustHavePlayedBase(planet), game::Exception);
 
         // ReadOnly is not sufficient
         planet.setPlayability(planet.ReadOnly);
-        TS_ASSERT_THROWS(game::actions::mustHavePlayedBase(planet, tx), game::Exception);
+        TS_ASSERT_THROWS(game::actions::mustHavePlayedBase(planet), game::Exception);
 
         // Playable is sufficient
         planet.setPlayability(planet.Playable);
-        TS_ASSERT_THROWS_NOTHING(game::actions::mustHavePlayedBase(planet, tx));
+        TS_ASSERT_THROWS_NOTHING(game::actions::mustHavePlayedBase(planet));
     }
 
     {
         // Playable planet throws if it has no base
         game::map::Planet planet(42);
         planet.setPlayability(planet.Playable);
-        TS_ASSERT_THROWS(game::actions::mustHavePlayedBase(planet, tx), game::Exception);
+        TS_ASSERT_THROWS(game::actions::mustHavePlayedBase(planet), game::Exception);
 
         // Add base
         addBase(planet);
-        TS_ASSERT_THROWS_NOTHING(game::actions::mustHavePlayedBase(planet, tx));
+        TS_ASSERT_THROWS_NOTHING(game::actions::mustHavePlayedBase(planet));
     }
 }
 

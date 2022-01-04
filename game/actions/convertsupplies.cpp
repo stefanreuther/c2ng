@@ -16,13 +16,13 @@ namespace {
 }
 
 // Constructor.
-game::actions::ConvertSupplies::ConvertSupplies(game::map::Planet& pl, afl::string::Translator& tx)
+game::actions::ConvertSupplies::ConvertSupplies(game::map::Planet& pl)
     : m_planet(pl),
       m_pUniverse(0),
       m_reservedSupplies(0),
       m_reservedMoney(0)
 {
-    mustBePlayed(pl, tx);
+    mustBePlayed(pl);
 }
 
 // Set undo information.

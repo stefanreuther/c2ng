@@ -67,9 +67,9 @@ game::proxy::BuildShipProxy::Trampoline::Trampoline(Session& session, util::Requ
       m_game(game::actions::mustHaveGame(session)),
       m_root(game::actions::mustHaveRoot(session)),
       m_shipList(game::actions::mustHaveShipList(session)),
-      m_planet(game::actions::mustExist(m_game.currentTurn().universe().planets().get(id), session.translator())),
-      m_container(m_planet, m_root.hostConfiguration(), session.translator()),
-      m_action(m_planet, m_container, m_shipList, m_root, session.translator()),
+      m_planet(game::actions::mustExist(m_game.currentTurn().universe().planets().get(id))),
+      m_container(m_planet, m_root.hostConfiguration()),
+      m_action(m_planet, m_container, m_shipList, m_root),
       m_partArea(HullTech),
       m_partId(m_action.getBuildOrder().getHullIndex())
 {
@@ -161,7 +161,7 @@ game::proxy::BuildShipProxy::Trampoline::packStatus(Status& st) /*const - cannot
 void
 game::proxy::BuildShipProxy::Trampoline::getCostSummary(game::spec::CostSummary& result)
 {
-    m_action.getCostSummary(result);
+    m_action.getCostSummary(result, m_session.translator());
 }
 
 inline void

@@ -214,7 +214,7 @@ game::actions::ChangeBuildQueue::describe(Infos_t& result, afl::string::Translat
     for (size_t i = 0, n = m_info.size(); i < n; ++i) {
         // Input
         const LocalInfo& in = m_info[i];
-        const Planet& pl = mustExist(m_universe.planets().get(in.planetId), tx);
+        const Planet& pl = mustExist(m_universe.planets().get(in.planetId));
         int player = 0;
         pl.getOwner(player);
 
@@ -252,7 +252,7 @@ game::actions::ChangeBuildQueue::describe(Infos_t& result, afl::string::Translat
                 pointsRequired = pHull->getPointsToBuild(player, m_host, m_config);
             }
         } else {
-            const Ship& sh = mustExist(m_universe.ships().get(in.cloningShipId), tx);
+            const Ship& sh = mustExist(m_universe.ships().get(in.cloningShipId));
             String_t shipName = sh.getName();
             if (shipName.empty()) {
                 shipName = Format(tx("Ship #%d"), sh.getId());

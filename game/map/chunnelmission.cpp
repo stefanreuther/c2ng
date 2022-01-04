@@ -6,7 +6,6 @@
 #include "game/map/chunnelmission.hpp"
 #include "afl/base/countof.hpp"
 #include "afl/string/format.hpp"
-#include "afl/string/nulltranslator.hpp"
 #include "afl/string/parse.hpp"
 #include "game/actions/cargotransfer.hpp"
 #include "game/actions/cargotransfersetup.hpp"
@@ -18,7 +17,6 @@
 #include "util/math.hpp"
 #include "util/translation.hpp"
 
-using afl::string::NullTranslator;
 using game::spec::BasicHullFunction;
 using game::config::HostConfiguration;
 using game::map::ChunnelMission;
@@ -240,9 +238,8 @@ game::map::setupChunnel(Ship& initiator, Ship& mate, Universe& univ,
         if (mate.getCargo(Element::Neutronium).orElse(-1) == 0) {
             CargoTransferSetup setup = CargoTransferSetup::fromPlanetShip(univ, univ.findPlanetAt(pt), mate.getId());
             if (setup.isValid() && setup.isDirect()) {
-                NullTranslator tx;    // used to translate PlanetStorage/ShipStorage's "mustBePlayed" exception
                 CargoTransfer tr;
-                setup.buildDirect(tr, univ, config, shipList, tx);
+                setup.buildDirect(tr, univ, config, shipList);
                 tr.move(Element::Neutronium, /* amount: */ 1, /* from: */ 0, /* to: */ 1, /* partial: */ true, /* sellSupplies: */ false);
                 tr.commit();
             }

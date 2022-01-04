@@ -39,14 +39,12 @@ namespace game { namespace actions {
             \param financier Container that pays the transaction.
             \param receiver Container that receives the result. Can be the same as financier.
             \param shipList Ship list. Needed for unit costs and tech.
-            \param root Root. Needed for host configuration and key.
-            \param tx Translator (for error messages during construction) */
+            \param root Root. Needed for host configuration and key. */
         BuildAmmo(game::map::Planet& planet,
                   CargoContainer& financier,
                   CargoContainer& receiver,
                   game::spec::ShipList& shipList,
-                  Root& root,
-                  afl::string::Translator& tx);
+                  const Root& root);
 
         /** Destructor. */
         ~BuildAmmo();
@@ -135,8 +133,7 @@ namespace game { namespace actions {
         CargoCostAction m_costAction;
         CargoContainer& m_receiver;
         game::spec::ShipList& m_shipList;
-        Root& m_root;
-        afl::string::Translator& m_translator;
+        const Root& m_root;
         bool m_mustCommitReceiver;
         int m_totalTechLevel;
 

@@ -34,8 +34,7 @@ namespace {
     void setBaseShipyardOrder(game::map::Planet& pl,
                               game::ShipyardAction action,
                               interpreter::Arguments& args,
-                              game::Turn& turn,
-                              afl::string::Translator& tx)
+                              game::Turn& turn)
     {
         // Parse args
         // ex planint.pas:sb_order
@@ -58,13 +57,13 @@ namespace {
         }
 
         // Try it
-        if (!game::actions::BaseFixRecycle(pl, tx).set(action, turn.universe(), ship)) {
+        if (!game::actions::BaseFixRecycle(pl).set(action, turn.universe(), ship)) {
             // FIXME: PCC2 would also generate ePos if positions are different
             throw Exception(Exception::ePerm);
         }
     }
 
-    void doBuildBase(game::map::Planet& planet, interpreter::Arguments& args, game::Session& session, game::Root& root)
+    void doBuildBase(game::map::Planet& planet, interpreter::Arguments& args, game::Root& root)
     {
         // ex IFPlanetBuildBase
         // ex planint.pas:Planet_BuildBase
@@ -79,20 +78,20 @@ namespace {
 
         // Do it
         game::config::HostConfiguration& config = root.hostConfiguration();
-        game::map::PlanetStorage container(planet, config, session.translator());
-        game::actions::BuildStarbase action(planet, container, wantBase, session.translator(), config);
+        game::map::PlanetStorage container(planet, config);
+        game::actions::BuildStarbase action(planet, container, wantBase, config);
         action.commit();
     }
 
-    void doAutobuild(game::map::Planet& planet, interpreter::Arguments& args, game::Root& root, afl::string::Translator& tx)
+    void doAutobuild(game::map::Planet& planet, interpreter::Arguments& args, game::Root& root)
     {
         // ex IFPlanetAutoBuild
         // ex planint.pas:Planet_Autobuild
         args.checkArgumentCount(0);
 
         game::config::HostConfiguration& config = root.hostConfiguration();
-        game::map::PlanetStorage container(planet, config, tx);
-        game::actions::BuildStructures action(planet, container, config, tx);
+        game::map::PlanetStorage container(planet, config);
+        game::actions::BuildStructures action(planet, container, config);
         action.doStandardAutoBuild();
         action.commit();
     }
@@ -102,8 +101,7 @@ namespace {
                            interpreter::Arguments& args,
                            game::Turn& turn,
                            game::Root& root,
-                           const game::PlanetaryBuilding type,
-                           afl::string::Translator& tx)
+                           const game::PlanetaryBuilding type)
     {
         // ex int/if/planetif.cc:doStructureBuild
         // ex planint.pas:BuildStructuresS
@@ -116,8 +114,8 @@ namespace {
         interpreter::checkFlagArg(flag, 0, args.getNext(), "N");
 
         game::config::HostConfiguration& config = root.hostConfiguration();
-        game::map::PlanetStorage container(planet, config, tx);
-        game::actions::BuildStructures action(planet, container, config, tx);
+        game::map::PlanetStorage container(planet, config);
+        game::actions::BuildStructures action(planet, container, config);
         action.setUndoInformation(turn.universe());
 
         int32_t built = action.addLimitCash(type, count);
@@ -138,8 +136,7 @@ namespace {
     void doSellSupplies(game::map::Planet& pl,
                         interpreter::Process& process,
                         interpreter::Arguments& args,
-                        game::Turn& turn,
-                        afl::string::Translator& tx)
+                        game::Turn& turn)
     {
         // ex int/if/planetif.cc:IFPlanetSellSupplies
         // ex planint.pas:Planet_SellSupplies
@@ -155,7 +152,7 @@ namespace {
         interpreter::checkFlagArg(flag, 0, args.getNext(), "N");
 
         // Do it
-        game::actions::ConvertSupplies a(pl, tx);
+        game::actions::ConvertSupplies a(pl);
         a.setUndoInformation(turn.universe());
 
         int32_t did = a.sellSupplies(amount, (flag != 0));
@@ -195,8 +192,8 @@ namespace {
         game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
 
         // Create tech upgrade action (checks preconditions)
-        game::map::PlanetStorage container(pl, root.hostConfiguration(), session.translator());
-        game::actions::TechUpgrade action(pl, container, shipList, root, session.translator());
+        game::map::PlanetStorage container(pl, root.hostConfiguration());
+        game::actions::TechUpgrade action(pl, container, shipList, root);
         action.setUndoInformation(turn.universe());
 
         // Do the rules permit this?
@@ -223,8 +220,8 @@ namespace {
         game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
 
         // Create action
-        game::map::PlanetStorage container(pl, root.hostConfiguration(), session.translator());
-        game::actions::BuildParts action(pl, container, shipList, root, session.translator());
+        game::map::PlanetStorage container(pl, root.hostConfiguration());
+        game::actions::BuildParts action(pl, container, shipList, root);
         action.setUndoInformation(turn.universe());
 
         // Do it
@@ -391,7 +388,7 @@ namespace {
         }
 
         // Get planet
-        game::actions::mustHavePlayedBase(pl, session.translator());
+        game::actions::mustHavePlayedBase(pl);
 
         // Check for cancellation
         if (o.getHullIndex() == 0) {
@@ -400,8 +397,8 @@ namespace {
         }
 
         // Make a transaction and fire it
-        game::map::PlanetStorage container(pl, root.hostConfiguration(), session.translator());
-        game::actions::BuildShip a(pl, container, shipList, root, session.translator());
+        game::map::PlanetStorage container(pl, root.hostConfiguration());
+        game::actions::BuildShip a(pl, container, shipList, root);
         a.setUsePartsFromStorage(true);
         a.setBuildOrder(o);
         a.commit();
@@ -421,7 +418,7 @@ namespace {
         std::auto_ptr<game::CargoContainer> pReceiver;
         if (shipId != 0) {
             // Ship must exist
-            game::map::Ship& ship = game::actions::mustExist(turn.universe().ships().get(shipId), session.translator());
+            game::map::Ship& ship = game::actions::mustExist(turn.universe().ships().get(shipId));
 
             // Verify preconditions
             Exception ex("");
@@ -430,15 +427,15 @@ namespace {
             }
 
             // ok
-            pReceiver.reset(new game::map::ShipStorage(ship, game::actions::mustHaveShipList(session), session.translator()));
+            pReceiver.reset(new game::map::ShipStorage(ship, game::actions::mustHaveShipList(session)));
         } else {
             // No ship; use planet
-            pReceiver.reset(new game::map::PlanetStorage(pl, root.hostConfiguration(), session.translator()));
+            pReceiver.reset(new game::map::PlanetStorage(pl, root.hostConfiguration()));
         }
 
         // Build remainder
-        game::map::PlanetStorage financier(pl, root.hostConfiguration(), session.translator());
-        game::actions::BuildAmmo action(pl, financier, *pReceiver, game::actions::mustHaveShipList(session), root, session.translator());
+        game::map::PlanetStorage financier(pl, root.hostConfiguration());
+        game::actions::BuildAmmo action(pl, financier, *pReceiver, game::actions::mustHaveShipList(session), root);
         action.setUndoInformation(turn.universe());
 
         // Do it
@@ -509,10 +506,10 @@ namespace {
         doBuildAmmo(pl, process, session, turn, root, game::Element::Fighters, amount, (flag != 0), sid);
     }
 
-    void doAutoTaxColonists(game::map::Planet& pl, const game::Root& root, afl::string::Translator& tx)
+    void doAutoTaxColonists(game::map::Planet& pl, const game::Root& root)
     {
         // ex IFPlanetAutoTaxColonists
-        game::actions::mustBePlayed(pl, tx);
+        game::actions::mustBePlayed(pl);
         int mines, factories;
         if (pl.getNumBuildings(game::MineBuilding).get(mines) && pl.getNumBuildings(game::FactoryBuilding).get(factories)) {
             int tax;
@@ -522,10 +519,10 @@ namespace {
         }
     }
 
-    void doAutoTaxNatives(game::map::Planet& pl, const game::Root& root, afl::string::Translator& tx)
+    void doAutoTaxNatives(game::map::Planet& pl, const game::Root& root)
     {
         // ex IFPlanetAutoTaxNatives
-        game::actions::mustBePlayed(pl, tx);
+        game::actions::mustBePlayed(pl);
         int mines, factories;
         if (pl.getNumBuildings(game::MineBuilding).get(mines) && pl.getNumBuildings(game::FactoryBuilding).get(factories)) {
             int tax;
@@ -576,7 +573,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            @since PCC2 1.99.9, PCC 1.0.5, PCC2 2.40.1 */
         // ex IFBaseFixShip
         // ex planint.pas:Planet_FixShip
-        setBaseShipyardOrder(pl, FixShipyardAction, args, turn, session.translator());
+        setBaseShipyardOrder(pl, FixShipyardAction, args, turn);
         break;
 
      case ipmRecycleShip:
@@ -585,7 +582,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            @since PCC2 1.99.9, PCC 1.0.5, PCC2 2.40.1 */
         // ex IFBaseRecycleShip
         // ex planint.pas:Planet_RecycleShip
-        setBaseShipyardOrder(pl, RecycleShipyardAction, args, turn, session.translator());
+        setBaseShipyardOrder(pl, RecycleShipyardAction, args, turn);
         break;
 
      case ipmBuildBase:
@@ -594,14 +591,14 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            If the parameter is specified as True or not at all, builds the base.
            If the parameter is specified as False, cancels a previous build order.
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.3 */
-        doBuildBase(pl, args, session, root);
+        doBuildBase(pl, args, root);
         break;
 
      case ipmAutoBuild:
         /* @q AutoBuild (Planet Command)
            Perform a standard auto-build operation.
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.3 */
-        doAutobuild(pl, args, root, session.translator());
+        doAutobuild(pl, args, root);
         break;
 
      case ipmBuildDefense:
@@ -618,7 +615,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.3 */
         // ex IFPlanetBuildDefense
         // ex planint.pas:Planet_BuildDefense
-        doBuildStructures(pl, process, args, turn, root, DefenseBuilding, session.translator());
+        doBuildStructures(pl, process, args, turn, root, DefenseBuilding);
         break;
 
      case ipmBuildFactories:
@@ -635,7 +632,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.3 */
         // ex IFPlanetBuildFactories
         // ex planint.pas:Planet_BuildFactories
-        doBuildStructures(pl, process, args, turn, root, FactoryBuilding, session.translator());
+        doBuildStructures(pl, process, args, turn, root, FactoryBuilding);
         break;
 
      case ipmBuildMines:
@@ -652,7 +649,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.3 */
         // ex IFPlanetBuildMines
         // ex planint.pas:Planet_BuildMines
-        doBuildStructures(pl, process, args, turn, root, MineBuilding, session.translator());
+        doBuildStructures(pl, process, args, turn, root, MineBuilding);
         break;
 
      case ipmSetColonistTax:
@@ -712,7 +709,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.3 */
         // ex IFPlanetBuildBaseDefense
         // ex planint.pas:Planet_BuildBaseDefense
-        doBuildStructures(pl, process, args, turn, root, BaseDefenseBuilding, session.translator());
+        doBuildStructures(pl, process, args, turn, root, BaseDefenseBuilding);
         break;
 
      case ipmSetTech:
@@ -840,7 +837,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            For example, if the planet on which you run the above command only has 650 supplies,
            %Build.Remainder will be set to 350.
            @since PCC 1.0.19, PCC2 1.99.9, PCC2 2.40.3 */
-        doSellSupplies(pl, process, args, turn, session.translator());
+        doSellSupplies(pl, process, args, turn);
         break;
 
      case ipmBuildShip:
@@ -866,7 +863,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            Auto-tax for colonists.
            @since PCC2 1.99.15, PCC2 2.40.3 */
         args.checkArgumentCount(0);
-        doAutoTaxColonists(pl, root, session.translator());
+        doAutoTaxColonists(pl, root);
         break;
 
      case ipmAutoTaxNatives:
@@ -874,7 +871,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            Auto-tax for natives.
            @since PCC2 1.99.15, PCC2 2.40.3 */
         args.checkArgumentCount(0);
-        doAutoTaxNatives(pl, root, session.translator());
+        doAutoTaxNatives(pl, root);
         break;
     }
 }

@@ -10,7 +10,6 @@
 #include "afl/except/assertionfailedexception.hpp"
 
 namespace {
-
     int findFirstHull(const game::config::HostConfiguration& config,
                       const game::spec::ShipList& shipList,
                       const game::map::Planet& pl)
@@ -75,15 +74,14 @@ namespace {
 game::actions::BuildShip::BuildShip(game::map::Planet& planet,
                                     CargoContainer& container,
                                     game::spec::ShipList& shipList,
-                                    Root& root,
-                                    afl::string::Translator& tx)
-    : BaseBuildAction(planet, container, shipList, root, tx),
+                                    Root& root)
+    : BaseBuildAction(planet, container, shipList, root),
       m_order(),
       m_usePartsFromStorage(true)
 {
     // ex GStarbaseBuildShipAction::GStarbaseBuildShipAction
     // Must have a base (redundant, BaseBuildAction also checks it).
-    mustHavePlayedBase(planet, tx);
+    mustHavePlayedBase(planet);
 
     // Fetch build order from planet.
     // The planet will have a ship INDEX, not TYPE.

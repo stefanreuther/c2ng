@@ -24,7 +24,7 @@ TestGameMapPlanetStorage::testPlanet()
     pl.setFriendlyCode(String_t("fgh"));
     afl::string::NullTranslator tx;
 
-    game::map::PlanetStorage testee(pl, h.config(), tx);
+    game::map::PlanetStorage testee(pl, h.config());
 
     /*
      *  Planet has 1000 of each mineral.

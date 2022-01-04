@@ -16,9 +16,7 @@ namespace game { namespace map {
 
     class ShipStorage : public CargoContainer {
      public:
-        ShipStorage(Ship& sh,
-                    const game::spec::ShipList& shipList,
-                    afl::string::Translator& tx);
+        ShipStorage(Ship& sh, const game::spec::ShipList& shipList);
         ~ShipStorage();
 
         virtual String_t getName(afl::string::Translator& tx) const;

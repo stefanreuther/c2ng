@@ -4,7 +4,6 @@
   */
 
 #include "game/actions/multitransfersetup.hpp"
-#include "afl/string/nulltranslator.hpp"
 #include "game/actions/cargotransfer.hpp"
 #include "game/actions/preconditions.hpp"
 #include "game/map/planetstorage.hpp"
@@ -85,13 +84,12 @@ game::ElementTypes_t
 game::actions::MultiTransferSetup::getSupportedElementTypes(const game::map::Universe& univ,
                                                             const game::spec::ShipList& shipList) const
 {
-    afl::string::NullTranslator tx;
     ElementTypes_t result;
     if (const Ship* sh = univ.ships().get(m_shipId)) {
         game::map::Point shipPos;
         int shipOwner;
         if (sh->isPlayable(Object::Playable) && sh->getPosition(shipPos) && sh->getOwner(shipOwner)) {
-            ShipStorage storage(*const_cast<Ship*>(sh), shipList, tx);
+            ShipStorage storage(*const_cast<Ship*>(sh), shipList);
             for (Element::Type ty = Element::begin(), last = Element::end(shipList); ty != last; ++ty) {
                 if (storage.canHaveElement(ty)) {
                     result += ty;
@@ -140,7 +138,7 @@ game::actions::MultiTransferSetup::build(CargoTransfer& action, game::map::Unive
                         if (s2->getId() == m_shipId) {
                             result.thisShipIndex = action.getNumContainers();
                         }
-                        tryAdd(action, m_element, new ShipStorage(*s2, shipList, tx));
+                        tryAdd(action, m_element, new ShipStorage(*s2, shipList));
                     }
                 }
             }
@@ -151,7 +149,7 @@ game::actions::MultiTransferSetup::build(CargoTransfer& action, game::map::Unive
                     int planetOwner;
                     if (pl->isPlayable(Object::Playable) && pl->getOwner(planetOwner) && planetOwner == shipOwner) {
                         // We play this planet, so use it.
-                        if (tryAdd(action, m_element, new PlanetStorage(*pl, root.hostConfiguration(), tx))) {
+                        if (tryAdd(action, m_element, new PlanetStorage(*pl, root.hostConfiguration()))) {
                             result.extensionIndex = action.getNumContainers() - 1;
                         }
                     }

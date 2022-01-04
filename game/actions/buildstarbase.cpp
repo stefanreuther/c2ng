@@ -11,7 +11,6 @@
 game::actions::BuildStarbase::BuildStarbase(game::map::Planet& planet,
                                             CargoContainer& container,
                                             bool wantBase,
-                                            afl::string::Translator& tx,
                                             game::config::HostConfiguration& config)
     : m_planet(planet),
       m_wantBase(wantBase),
@@ -23,19 +22,15 @@ game::actions::BuildStarbase::BuildStarbase(game::map::Planet& planet,
 {
     // ex GPlanetBuildStarbaseAction::GPlanetBuildStarbaseAction
     // ex planint.pas:BuildBase (sort-of)
-    mustBePlayed(planet, tx);
+    mustBePlayed(planet);
 
     if (wantBase == m_planet.isBuildingBase()) {
         // Null operation. It is an error to start with a null action,
         // but it's ok if a later change makes this action pointless.
-        if (wantBase) {
-            throw Exception(Exception::eDone, tx.translateString("Starbase building already in progress"));
-        } else {
-            throw Exception(Exception::eDone, tx.translateString("No starbase being built"));
-        }
+        throw Exception(Exception::eDone);
     } else if (m_planet.hasBase()) {
         // base present
-        throw Exception(Exception::ePerm, tx.translateString("Starbase already present"));
+        throw Exception(Exception::ePerm);
     } else {
         // no base; build action is ok.
     }

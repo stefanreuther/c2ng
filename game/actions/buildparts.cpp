@@ -12,9 +12,8 @@
 game::actions::BuildParts::BuildParts(game::map::Planet& planet,
                                       CargoContainer& container,
                                       game::spec::ShipList& shipList,
-                                      Root& root,
-                                      afl::string::Translator& tx)
-    : BaseBuildAction(planet, container, shipList, root, tx),
+                                      Root& root)
+    : BaseBuildAction(planet, container, shipList, root),
       m_elements(),
       m_pUniverse(0),
       conn_universeChange()

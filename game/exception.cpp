@@ -16,20 +16,13 @@ const char game::Exception::eFacility[] = "Facility not available",
     game::Exception::ePartial[] = "Partial argument specification",
     game::Exception::eUser[] = "No race loaded",
     game::Exception::eFleet[] = "Fleet member",
+    game::Exception::eNotFleet[] = "Not a fleet member",
     game::Exception::eGraph[] = "Not in graphics mode",
     game::Exception::eDone[] = "Action already performed",
     game::Exception::eNotPlaying[] = "Race not being played";
 
-game::Exception::Exception(String_t scriptError, String_t userError)
-    : m_scriptError(scriptError),
-      m_userError(userError)
-{
-    // ex GError::GError
-}
-
 game::Exception::Exception(String_t error)
-    : m_scriptError(error),
-      m_userError(error)
+    : m_scriptError(error)
 { }
 
 game::Exception::~Exception() throw()
@@ -42,16 +35,9 @@ game::Exception::getScriptError() const
     return m_scriptError;
 }
 
-const String_t&
-game::Exception::getUserError() const
-{
-    // ex GError::getUserError
-    return m_userError;
-}
-
 const char*
 game::Exception::what() const throw()
 {
     // ex GError::what
-    return m_userError.c_str();
+    return m_scriptError.c_str();
 }

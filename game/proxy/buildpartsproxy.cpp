@@ -65,9 +65,9 @@ game::proxy::BuildPartsProxy::Trampoline::Trampoline(Session& session, util::Req
       m_game(game::actions::mustHaveGame(session)),
       m_root(game::actions::mustHaveRoot(session)),
       m_shipList(game::actions::mustHaveShipList(session)),
-      m_planet(game::actions::mustExist(m_game.currentTurn().universe().planets().get(id), session.translator())),
-      m_storage(m_planet, m_root.hostConfiguration(), session.translator()),
-      m_action(m_planet, m_storage, m_shipList, m_root, session.translator()),
+      m_planet(game::actions::mustExist(m_game.currentTurn().universe().planets().get(id))),
+      m_storage(m_planet, m_root.hostConfiguration()),
+      m_action(m_planet, m_storage, m_shipList, m_root),
       m_currentArea(HullTech),
       m_currentId(0),
       m_currentPart(0)

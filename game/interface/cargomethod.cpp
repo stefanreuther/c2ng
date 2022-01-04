@@ -36,7 +36,7 @@ namespace {
         // Build cargo transfer from template
         const game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
         game::actions::CargoTransfer action;
-        setup.build(action, turn, root.hostConfiguration(), shipList, root.hostVersion(), session.translator());
+        setup.build(action, turn, root.hostConfiguration(), shipList, root.hostVersion());
 
         // Configure
         if ((flags & flagOverload) != 0) {

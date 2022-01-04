@@ -7,7 +7,6 @@
 
 #include "t_game_actions.hpp"
 #include "game/test/cargocontainer.hpp"
-#include "afl/string/nulltranslator.hpp"
 #include "game/exception.hpp"
 #include "game/element.hpp"
 #include "game/map/planetstorage.hpp"
@@ -33,7 +32,6 @@ namespace {
     struct TestHarness {
         game::config::HostConfiguration config;
         game::map::Planet planet;
-        afl::string::NullTranslator tx;
         game::map::PlanetStorage container;
 
         TestHarness();
@@ -42,8 +40,7 @@ namespace {
     TestHarness::TestHarness()
         : config(),
           planet(99),
-          tx(),
-          container(preparePlanet(planet), config, tx)
+          container(preparePlanet(planet), config)
     {
         config.setDefaultValues();
     }
@@ -56,10 +53,9 @@ TestGameActionsBuildStarbase::testError()
 {
     game::map::Planet somePlanet(77);
     game::test::CargoContainer container;
-    afl::string::NullTranslator tx;
     game::config::HostConfiguration config;
 
-    TS_ASSERT_THROWS((game::actions::BuildStarbase(somePlanet, container, true, tx, config)), game::Exception);
+    TS_ASSERT_THROWS((game::actions::BuildStarbase(somePlanet, container, true, config)), game::Exception);
 }
 
 /** Test null operation.
@@ -68,7 +64,7 @@ void
 TestGameActionsBuildStarbase::testErrorNullOp()
 {
     TestHarness h;
-    TS_ASSERT_THROWS((game::actions::BuildStarbase(h.planet, h.container, false, h.tx, h.config)), game::Exception);
+    TS_ASSERT_THROWS((game::actions::BuildStarbase(h.planet, h.container, false, h.config)), game::Exception);
 }
 
 /** Test normal case.
@@ -77,7 +73,7 @@ void
 TestGameActionsBuildStarbase::testNormal()
 {
     TestHarness h;
-    game::actions::BuildStarbase a(h.planet, h.container, true, h.tx, h.config);
+    game::actions::BuildStarbase a(h.planet, h.container, true, h.config);
 
     // Verify cost
     TS_ASSERT_EQUALS(a.costAction().getCost().toCargoSpecString(), "402T 120D 340M 900$");
@@ -97,7 +93,7 @@ void
 TestGameActionsBuildStarbase::testModify()
 {
     TestHarness h;
-    game::actions::BuildStarbase a(h.planet, h.container, true, h.tx, h.config);
+    game::actions::BuildStarbase a(h.planet, h.container, true, h.config);
 
     // Parallel action
     h.planet.setBuildBaseFlag(true);
@@ -117,7 +113,7 @@ void
 TestGameActionsBuildStarbase::testConfigChange()
 {
     TestHarness h;
-    game::actions::BuildStarbase a(h.planet, h.container, true, h.tx, h.config);
+    game::actions::BuildStarbase a(h.planet, h.container, true, h.config);
 
     // Parallel action
     h.config[game::config::HostConfiguration::StarbaseCost].set("T100 D100 M100");
@@ -137,7 +133,7 @@ void
 TestGameActionsBuildStarbase::testConfigChangeSignal()
 {
     TestHarness h;
-    game::actions::BuildStarbase a(h.planet, h.container, true, h.tx, h.config);
+    game::actions::BuildStarbase a(h.planet, h.container, true, h.config);
 
     // Parallel action
     h.config[game::config::HostConfiguration::StarbaseCost].set("T100 D100 M100");
@@ -154,7 +150,7 @@ TestGameActionsBuildStarbase::testTooExpensive()
 {
     TestHarness h;
     h.config[game::config::HostConfiguration::StarbaseCost].set("T2000 D100 M100");
-    game::actions::BuildStarbase a(h.planet, h.container, true, h.tx, h.config);
+    game::actions::BuildStarbase a(h.planet, h.container, true, h.config);
 
     // Verify
     TS_ASSERT_EQUALS(a.costAction().getCost().toCargoSpecString(), "2000T 100D 100M");

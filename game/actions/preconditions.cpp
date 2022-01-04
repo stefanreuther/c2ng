@@ -9,56 +9,47 @@
 #include "game/root.hpp"
 
 void
-game::actions::mustBePlayed(const game::map::Ship& ship, afl::string::Translator& tx)
+game::actions::mustBePlayed(const game::map::Object& obj)
 {
     // ex game/actions/preconditions.h:mustBePlayed
-    if (!ship.isPlayable(game::map::Object::Playable)) {
-        throw Exception(Exception::eNotPlaying, tx("You do not play this ship"));
+    if (!obj.isPlayable(game::map::Object::Playable)) {
+        throw Exception(Exception::eNotPlaying);
     }
 }
 
 void
-game::actions::mustBePlayed(const game::map::Planet& planet, afl::string::Translator& tx)
-{
-    // ex game/actions/preconditions.h:mustBePlayed
-    if (!planet.isPlayable(game::map::Object::Playable)) {
-        throw Exception(Exception::eNotPlaying, tx("You do not play this planet"));
-    }
-}
-
-void
-game::actions::mustHavePlayedBase(const game::map::Planet& planet, afl::string::Translator& tx)
+game::actions::mustHavePlayedBase(const game::map::Planet& planet)
 {
     // ex game/actions/preconditions.h:mustHavePlayedBase
-    mustBePlayed(planet, tx);
+    mustBePlayed(planet);
     if (!planet.hasBase()) {
-        throw Exception(Exception::eNoBase, tx("The planet does not have a starbase"));
+        throw Exception(Exception::eNoBase);
     }
 }
 
 game::map::Planet&
-game::actions::mustExist(game::map::Planet* planet, afl::string::Translator& tx)
+game::actions::mustExist(game::map::Planet* planet)
 {
     if (planet == 0) {
-        throw Exception(Exception::eRange, tx("The planet does not exist"));
+        throw Exception(Exception::eRange);
     }
     return *planet;
 }
 
 game::map::Ship&
-game::actions::mustExist(game::map::Ship* ship, afl::string::Translator& tx)
+game::actions::mustExist(game::map::Ship* ship)
 {
     if (ship == 0) {
-        throw Exception(Exception::eRange, tx("The ship does not exist"));
+        throw Exception(Exception::eRange);
     }
     return *ship;
 }
 
 game::Turn&
-game::actions::mustExist(Turn* turn, afl::string::Translator& tx)
+game::actions::mustExist(Turn* turn)
 {
     if (turn == 0) {
-        throw Exception(Exception::eRange, tx("No turn loaded"));
+        throw Exception(Exception::eRange);
     }
     return *turn;
 }
@@ -68,7 +59,7 @@ game::actions::mustHaveShipList(game::Session& session)
 {
     game::spec::ShipList* sl = session.getShipList().get();
     if (sl == 0) {
-        throw Exception(Exception::eUser, session.translator()("No ship list loaded"));
+        throw Exception(Exception::eUser);
     }
     return *sl;
 }
@@ -78,7 +69,7 @@ game::actions::mustHaveRoot(game::Session& session)
 {
     Root* r = session.getRoot().get();
     if (r == 0) {
-        throw Exception(Exception::eUser, session.translator()("No game configuration loaded"));
+        throw Exception(Exception::eUser);
     }
     return *r;
 }
@@ -88,7 +79,7 @@ game::actions::mustHaveGame(game::Session& session)
 {
     Game* g = session.getGame().get();
     if (g == 0) {
-        throw Exception(Exception::eUser, session.translator()("No game loaded"));
+        throw Exception(Exception::eUser);
     }
     return *g;
 }

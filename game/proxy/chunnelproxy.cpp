@@ -111,8 +111,8 @@ namespace {
         const ShipList& sl = game::actions::mustHaveShipList(session);
 
         Universe& univ = g.currentTurn().universe();
-        Ship& initiator = game::actions::mustExist(univ.ships().get(fromShipId), session.translator());
-        Ship& mate = game::actions::mustExist(univ.ships().get(toShipId), session.translator());
+        Ship& initiator = game::actions::mustExist(univ.ships().get(fromShipId));
+        Ship& mate = game::actions::mustExist(univ.ships().get(toShipId));
 
         game::map::setupChunnel(initiator, mate, univ, r.hostConfiguration(), sl);
 

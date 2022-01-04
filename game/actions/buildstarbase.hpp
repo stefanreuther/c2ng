@@ -5,7 +5,6 @@
 #ifndef C2NG_GAME_ACTIONS_BUILDSTARBASE_HPP
 #define C2NG_GAME_ACTIONS_BUILDSTARBASE_HPP
 
-#include "afl/string/translator.hpp"
 #include "game/actions/cargocostaction.hpp"
 #include "game/cargocontainer.hpp"
 #include "game/config/hostconfiguration.hpp"
@@ -27,12 +26,10 @@ namespace game { namespace actions {
             \param planet Target planet (that receives the starbase)
             \param container Cost are billed to this container
             \param wantBase true to build a base, false to cancel it
-            \param tx Translator
             \param config Host configuration (for starbase cost). */
         BuildStarbase(game::map::Planet& planet,
                       CargoContainer& container,
                       bool wantBase,
-                      afl::string::Translator& tx,
                       game::config::HostConfiguration& config);
 
         /** Destructor. */

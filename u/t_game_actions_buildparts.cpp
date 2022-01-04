@@ -142,7 +142,7 @@ TestGameActionsBuildParts::testBuild()
     prepare(h);
 
     // Build the action
-    game::actions::BuildParts a(h.planet, h.container, h.shipList, h.root, h.tx);
+    game::actions::BuildParts a(h.planet, h.container, h.shipList, h.root);
 
     // Add components, verifying each step
     // - 3 hulls = 30T 45$, plus 100$ for tech
@@ -186,7 +186,7 @@ TestGameActionsBuildParts::testAdd()
     prepare(h);
 
     // Build the action
-    game::actions::BuildParts a(h.planet, h.container, h.shipList, h.root, h.tx);
+    game::actions::BuildParts a(h.planet, h.container, h.shipList, h.root);
     h.planet.setBaseStorage(game::HullTech, 12, 100);
 
     // Add 5 hulls. Must end with 105.
@@ -205,7 +205,7 @@ TestGameActionsBuildParts::testModify()
     prepare(h);
 
     // Build the action
-    game::actions::BuildParts a(h.planet, h.container, h.shipList, h.root, h.tx);
+    game::actions::BuildParts a(h.planet, h.container, h.shipList, h.root);
     h.planet.setBaseStorage(game::HullTech, 12, 100);
 
     // Modify, verifying each step
@@ -247,7 +247,7 @@ TestGameActionsBuildParts::testModifyTech()
     prepare(h);
 
     // Build the action
-    game::actions::BuildParts a(h.planet, h.container, h.shipList, h.root, h.tx);
+    game::actions::BuildParts a(h.planet, h.container, h.shipList, h.root);
     h.planet.setBaseStorage(game::HullTech, 12, 100);
 
     // Modify, verifying each step
@@ -289,7 +289,7 @@ TestGameActionsBuildParts::testRevert()
     h.planet.setBaseStorage(game::BeamTech, 4, 10);
 
     // Build the action
-    game::actions::BuildParts a(h.planet, h.container, h.shipList, h.root, h.tx);
+    game::actions::BuildParts a(h.planet, h.container, h.shipList, h.root);
 
     // Beam count must not be revertible so far
     TS_ASSERT_EQUALS(a.getMinParts(game::BeamTech, 4), 10);
@@ -327,7 +327,7 @@ TestGameActionsBuildParts::testShipBuild()
     h.planet.setBaseStorage(game::TorpedoTech, 3, 10);
 
     // Build the action. Everything revertible so far.
-    game::actions::BuildParts a(h.planet, h.container, h.shipList, h.root, h.tx);
+    game::actions::BuildParts a(h.planet, h.container, h.shipList, h.root);
     a.setUndoInformation(h.univ);
     TS_ASSERT_EQUALS(a.getMinParts(game::HullTech,   12), 0);
     TS_ASSERT_EQUALS(a.getMinParts(game::EngineTech,  1), 0);
@@ -379,7 +379,7 @@ TestGameActionsBuildParts::testShipBuildMin()
     h.planet.setBaseBuildOrder(sbo);
 
     // Build the action. Check that it protects the ship build order.
-    game::actions::BuildParts a(h.planet, h.container, h.shipList, h.root, h.tx);
+    game::actions::BuildParts a(h.planet, h.container, h.shipList, h.root);
     a.setUndoInformation(h.univ);
     TS_ASSERT_EQUALS(a.getMinParts(game::HullTech,   12), 1);
     TS_ASSERT_EQUALS(a.getMinParts(game::EngineTech,  1), 3);
@@ -417,7 +417,7 @@ TestGameActionsBuildParts::testShipBuildOther()
     h.planet.setBaseBuildOrder(sbo);
 
     // Build the action. Does not match ship being built, so this goes through.
-    game::actions::BuildParts a(h.planet, h.container, h.shipList, h.root, h.tx);
+    game::actions::BuildParts a(h.planet, h.container, h.shipList, h.root);
     a.setUndoInformation(h.univ);
     TS_ASSERT_EQUALS(a.getMinParts(game::HullTech,   12), 0);
     TS_ASSERT_EQUALS(a.getMinParts(game::EngineTech,  1), 0);
@@ -434,7 +434,7 @@ TestGameActionsbuildParts::testBuildMultiCommit()
     prepare(h);
 
     // Build the action
-    game::actions::BuildParts a(h.planet, h.container, h.shipList, h.root, h.tx);
+    game::actions::BuildParts a(h.planet, h.container, h.shipList, h.root);
 
     // Add components, verifying each step
     // - 3 hulls = 30T 45$, plus 100$ for tech

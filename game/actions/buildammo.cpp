@@ -14,7 +14,6 @@
 #include "game/registrationkey.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/spec/torpedolauncher.hpp"
-#include "util/translation.hpp"
 
 using game::spec::Cost;
 
@@ -37,14 +36,12 @@ game::actions::BuildAmmo::BuildAmmo(game::map::Planet& planet,
                                     CargoContainer& financier,
                                     CargoContainer& receiver,
                                     game::spec::ShipList& shipList,
-                                    Root& root,
-                                    afl::string::Translator& tx)
+                                    const Root& root)
     : m_planet(planet),
       m_costAction(financier),
       m_receiver(receiver),
       m_shipList(shipList),
       m_root(root),
-      m_translator(tx),
       m_mustCommitReceiver(&financier != &receiver),
       m_costActionChangeConnection(m_costAction.sig_change.add(this, &BuildAmmo::update)),
       m_receiverChangeConnection(m_receiver.sig_change.add(this, &BuildAmmo::update)),
@@ -53,7 +50,7 @@ game::actions::BuildAmmo::BuildAmmo(game::map::Planet& planet,
       m_universeChangeConnection(),
       m_pUniverse(0)
 {
-    mustHavePlayedBase(planet, tx);
+    mustHavePlayedBase(planet);
     update();
 }
 
@@ -216,13 +213,11 @@ game::actions::BuildAmmo::commit()
 {
     switch (getStatus()) {
      case MissingResources:
-        throw Exception(Exception::eNoResource, m_translator("Not enough resources to perform this action"));
+        throw Exception(Exception::eNoResource);
 
      case DisallowedTech:
-        throw Exception(Exception::ePerm, m_translator("Tech level not accessible"));
-
      case MissingRoom:
-        throw Exception(Exception::ePerm, m_translator("Target unit overloaded"));
+        throw Exception(Exception::ePerm);
 
      case Success:
         break;
@@ -303,7 +298,7 @@ game::actions::BuildAmmo::getItemCost(Element::Type type, game::spec::Cost& cost
         techLevel = 1;
         return true;
     } else if (Element::isTorpedoType(type, torpType)) {
-        if (game::spec::TorpedoLauncher* pTL = m_shipList.launchers().get(torpType)) {
+        if (const game::spec::TorpedoLauncher* pTL = m_shipList.launchers().get(torpType)) {
             cost = pTL->torpedoCost();
             techLevel = pTL->getTechLevel();
             return true;
