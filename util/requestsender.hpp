@@ -235,7 +235,8 @@ util::RequestSender<ObjectType>::postRequest(void (ObjectType::*fcn)(PT1), PT1 p
 {
     class Task : public Request_t {
      public:
-        Task(void (ObjectType::*fcn)(PT1), const PT1& p1)
+        // p1 is intentionally not const to allow construction from an auto_ptr. It's guaranteed to point at a copy.
+        Task(void (ObjectType::*fcn)(PT1), PT1& p1)
             : m_fcn(fcn), m_p1(p1)
             { }
         virtual void handle(ObjectType& obj)
@@ -254,7 +255,7 @@ util::RequestSender<ObjectType>::postRequest(void (ObjectType::*fcn)(PT1, PT2), 
 {
     class Task : public Request_t {
      public:
-        Task(void (ObjectType::*fcn)(PT1, PT2), const PT1& p1, const PT2& p2)
+        Task(void (ObjectType::*fcn)(PT1, PT2), PT1& p1, PT2& p2)
             : m_fcn(fcn), m_p1(p1), m_p2(p2)
             { }
         virtual void handle(ObjectType& obj)
@@ -274,7 +275,7 @@ util::RequestSender<ObjectType>::postRequest(void (ObjectType::*fcn)(PT1, PT2, P
 {
     class Task : public Request_t {
      public:
-        Task(void (ObjectType::*fcn)(PT1, PT2, PT3), const PT1& p1, const PT2& p2, const PT3& p3)
+        Task(void (ObjectType::*fcn)(PT1, PT2, PT3), PT1& p1, PT2& p2, PT3& p3)
             : m_fcn(fcn), m_p1(p1), m_p2(p2), m_p3(p3)
             { }
         virtual void handle(ObjectType& obj)
