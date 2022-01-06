@@ -21,12 +21,12 @@ namespace {
 }
 
 
-client::si::Control::Control(UserSide& us, ui::Root& root, afl::string::Translator& tx)
+client::si::Control::Control(UserSide& us)
     : m_interface(us),
       m_id(m_interface.allocateWaitId()),
-      m_loop(root),
-      m_root(root),
-      m_translator(tx)
+      m_loop(us.root()),
+      m_root(us.root()),
+      m_translator(us.translator())
 {
     m_interface.mainLog().write(LogListener::Trace, LOG_NAME, Format("<c%d> create", m_id));
     m_interface.addControl(*this);

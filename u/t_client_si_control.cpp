@@ -22,8 +22,8 @@
 namespace {
     class Tester : public client::si::Control {
      public:
-        Tester(client::si::UserSide& iface, ui::Root& root, afl::string::Translator& tx)
-            : Control(iface, root, tx)
+        Tester(client::si::UserSide& iface)
+            : Control(iface)
             { }
         virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target /*target*/)
             { interface().continueProcessWithFailure(link, "doesn't work"); }
@@ -65,7 +65,7 @@ TestClientSiControl::testMulti()
     client::si::UserSide iface(root, sessionReceiver.getSender(), tx, engine.dispatcher(), collector, log);
 
     // Build a tester and execute a command.
-    Tester t(iface, root, tx);
+    Tester t(iface);
     t.executeCommandWait("Print 'hi'", false, "testMulti");
 }
 
@@ -89,6 +89,6 @@ TestClientSiControl::testSingle()
     client::si::UserSide iface(root, sessionReceiver.getSender(), tx, engine.dispatcher(), collector, log);
 
     // Build a tester and execute a command.
-    Tester t(iface, root, tx);
+    Tester t(iface);
     t.executeCommandWait("Print 'hi'", false, "testSingle");
 }

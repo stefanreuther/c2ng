@@ -15,7 +15,7 @@ namespace {
 
 
 client::si::KeymapHandler::KeymapHandler(Control& parentControl, String_t name, int prefix)
-    : Control(parentControl.interface(), parentControl.root(), parentControl.translator()),
+    : Control(parentControl.interface()),
       m_parentControl(parentControl),
       m_timer(parentControl.root().engine().createTimer()),
       m_keymapName(name),

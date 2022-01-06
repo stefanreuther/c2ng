@@ -32,10 +32,8 @@ namespace client { namespace si {
     class Control : public afl::base::Uncopyable {
      public:
         /** Constructor.
-            @param us       UserSide
-            @param root     Root
-            @param tx       Translator */
-        Control(UserSide& us, ui::Root& root, afl::string::Translator& tx);
+            @param us       UserSide */
+        Control(UserSide& us);
 
         /** Destructor. */
         virtual ~Control();

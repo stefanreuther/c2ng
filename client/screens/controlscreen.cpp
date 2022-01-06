@@ -529,7 +529,7 @@ class client::screens::ControlScreen::ProprietorFromSession : public afl::base::
  */
 
 client::screens::ControlScreen::ControlScreen(Session& session, int nr, const Definition& def)
-    : Control(session.interface(), session.root(), session.translator()),
+    : Control(session.interface()),
       m_session(session),
       m_number(nr),
       m_definition(def),

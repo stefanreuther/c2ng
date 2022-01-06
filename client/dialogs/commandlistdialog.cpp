@@ -102,7 +102,7 @@ namespace {
     class CommandListDialog : public client::si::Control {
      public:
         CommandListDialog(client::si::UserSide& side, ui::Root& root, afl::string::Translator& tx, client::si::OutputState& outputState)
-            : Control(side, root, tx),
+            : Control(side),
               m_loop(root),
               m_outputState(outputState),
               m_proxy(side.gameSender()),

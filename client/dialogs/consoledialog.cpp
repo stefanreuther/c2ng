@@ -513,7 +513,7 @@ namespace {
     class ConsoleDialog : private client::si::Control {
      public:
         ConsoleDialog(client::si::UserSide& iface, client::si::Control& parentControl, client::si::OutputState& outputState)
-            : Control(iface, parentControl.root(), parentControl.translator()),
+            : Control(iface),
               m_parentControl(parentControl),
               m_loop(parentControl.root()),
               m_window(translator()("Console"), parentControl.root().provider(), parentControl.root().colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5),

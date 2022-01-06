@@ -198,8 +198,8 @@ namespace {
 
     class ExtraControl : public client::si::Control {
      public:
-        ExtraControl(client::si::UserSide& iface, ui::Root& root, afl::string::Translator& tx, client::si::OutputState& out)
-            : Control(iface, root, tx),
+        ExtraControl(client::si::UserSide& iface, ui::Root& root, client::si::OutputState& out)
+            : Control(iface),
               m_outputState(out),
               m_loop(root)
             { }
@@ -589,7 +589,7 @@ ProcessListDialog::ProcessListDialog(client::si::UserSide& iface,
                                      MutexListProxy& mProxy,
                                      afl::string::Translator& tx,
                                      client::si::OutputState& out)
-    : Control(iface, root, tx),
+    : Control(iface),
       m_root(root),
       m_outputState(out),
       m_proxy(proxy),
@@ -796,7 +796,7 @@ client::dialogs::doProcessListDialog(game::Reference invokingObject,
     // Also, we can only produce a process in OutputState, not a process group;
     // performChanges will end the wait with a process.
     {
-        ExtraControl extra(iface, ctl.root(), ctl.translator(), out2);
+        ExtraControl extra(iface, ctl.root(), out2);
         performChanges(link, proxy, extra);
     }
 

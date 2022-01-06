@@ -822,7 +822,7 @@ client::dialogs::VisualScanDialog::SpecPeer::SpecPeer(ui::Root& root, Window& pa
  */
 
 client::dialogs::VisualScanDialog::Window::Window(client::si::UserSide& us, ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx, const game::ref::List& list, CargoSummaryBuilder* csb, OutputState& outputState)
-    : Control(us, root, tx),
+    : Control(us),
       m_root(root),
       m_gameSender(gameSender),
       m_translator(tx),

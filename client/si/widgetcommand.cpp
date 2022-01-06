@@ -94,8 +94,8 @@ client::si::IFWidgetRun(game::Session& session, ScriptSide& ss, const WidgetRefe
     // Control
     class RunControl : public Control {
      public:
-        RunControl(UserSide& iface, ui::Root& root, afl::string::Translator& tx, RequestLink2 link)
-            : Control(iface, root, tx),
+        RunControl(UserSide& iface, ui::Root& root, RequestLink2 link)
+            : Control(iface),
               m_link(link),
               m_loop(root),
               m_outputState(),
@@ -159,7 +159,7 @@ client::si::IFWidgetRun(game::Session& session, ScriptSide& ss, const WidgetRefe
                         g->pack();
                     }
 
-                    RunControl dlg(us, ctl.root(), ctl.translator(), link);
+                    RunControl dlg(us, ctl.root(), link);
                     if (m_ref.getHolder().attachControl(dlg)) {
                         dlg.run(ctl.root(), *theWidget);
                         m_ref.getHolder().detachControl(dlg);

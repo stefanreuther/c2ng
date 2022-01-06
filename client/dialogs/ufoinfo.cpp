@@ -108,7 +108,7 @@ UfoInfoDialog::UfoInfoDialog(client::si::UserSide& iface,
                              ui::Root& root,
                              afl::string::Translator& tx,
                              client::si::OutputState& out)
-    : Control(iface, root, tx),
+    : Control(iface),
       m_userSide(iface),
       m_root(root),
       m_translator(tx),

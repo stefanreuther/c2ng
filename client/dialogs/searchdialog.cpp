@@ -270,7 +270,7 @@ namespace {
 
 inline
 SearchDialog::SearchDialog(const SearchQuery& initialQuery, game::Reference currentObject, client::si::UserSide& iface, ui::Root& root, afl::string::Translator& tx, util::NumberFormatter fmt, client::si::OutputState& out)
-    : Control(iface, root, tx),
+    : Control(iface),
       m_root(root),
       m_translator(tx),
       m_format(fmt),

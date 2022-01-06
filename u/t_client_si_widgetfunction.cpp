@@ -30,8 +30,8 @@ namespace {
 
     class NullControl : public client::si::Control {
      public:
-        NullControl(client::si::UserSide& iface, ui::Root& root, afl::string::Translator& tx)
-            : Control(iface, root, tx)
+        NullControl(client::si::UserSide& iface)
+            : Control(iface)
             { }
         virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target /*target*/)
             { interface().continueProcessWithFailure(link, "doesn't work"); }
@@ -88,7 +88,7 @@ WidgetVerifier::run()
         // ScriptSide/UserSide/Control. A Control is needed because UserSide does not process callbacks without one.
         util::MessageCollector console;
         client::si::UserSide user(root, gameReceiver.getSender(), tx, userThread, console, log);
-        NullControl ctl(user, root, tx);
+        NullControl ctl(user);
 
         // WidgetReference. We're operating in lock-step, so it doesn't matter that I cheat on the thread that creates it.
         afl::base::Ref<client::si::WidgetHolder> h(*new client::si::WidgetHolder(user.userSender()));

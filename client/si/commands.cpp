@@ -1932,7 +1932,7 @@ client::si::IFCCViewCombat(game::Session& session, ScriptSide& si, RequestLink1 
     class JoiningControl : public Control {
      public:
         JoiningControl(Control& parent, RequestLink2 link)
-            : Control(parent.interface(), parent.root(), parent.translator()),
+            : Control(parent.interface()),
               m_parent(parent),
               m_link(link)
             { }

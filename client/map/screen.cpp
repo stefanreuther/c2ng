@@ -201,7 +201,7 @@ client::map::Screen::Screen(client::si::UserSide& userSide,
                             afl::string::Translator& tx,
                             util::RequestSender<game::Session> gameSender)
     : Widget(),
-      Control(userSide, root, tx),
+      Control(userSide),
       m_root(root),
       m_gameSender(gameSender),
       m_replyReceiver(root.engine().dispatcher(), *this),

@@ -122,8 +122,8 @@ namespace {
                 // Create a parent Control
                 class TheControl : public client::si::Control {
                  public:
-                    TheControl(client::si::UserSide& ui, ui::Root& root, afl::string::Translator& tx)
-                        : Control(ui, root, tx)
+                    TheControl(client::si::UserSide& ui)
+                        : Control(ui)
                         { }
                     virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target target)
                         {
@@ -167,7 +167,7 @@ namespace {
                             return 0;
                         }
                 };
-                TheControl parentControl(clientSession.interface(), root, tx);
+                TheControl parentControl(clientSession.interface());
 
                 // Do the test
                 doTest(clientSession, engine, parentControl);

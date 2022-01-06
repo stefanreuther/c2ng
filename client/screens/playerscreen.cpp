@@ -77,7 +77,7 @@ namespace {
     class PlayerScreen : private client::si::Control {
      public:
         PlayerScreen(client::Session& session)
-            : Control(session.interface(), session.root(), session.translator()),
+            : Control(session.interface()),
               m_session(session),
               m_loop(session.root()),
               m_docView(gfx::Point(200, 200), 0, session.root().provider()),

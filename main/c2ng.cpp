@@ -85,7 +85,7 @@ namespace {
     class NullControl : public client::si::Control {
      public:
         NullControl(client::Session& session)
-            : Control(session.interface(), session.root(), session.translator())
+            : Control(session.interface())
             { }
         virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target /*target*/)
             { interface().continueProcessWithFailure(link, "Context error"); }

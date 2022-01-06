@@ -246,7 +246,7 @@ SelectionList::getFont() const
  */
 
 SelectionManager::SelectionManager(client::si::UserSide& ui, ui::Root& root, SelectionProxy& proxy, const SelectionProxy::Info& initialInfo, afl::string::Translator& tx)
-    : Control(ui, root, tx),
+    : Control(ui),
       m_root(root),
       m_translator(tx),
       m_proxy(proxy),

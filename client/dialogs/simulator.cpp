@@ -302,9 +302,7 @@ namespace {
 }
 
 SimulatorDialog::SimulatorDialog(Control& parentControl, util::RequestSender<game::Session> gameSender, SimulationSetupProxy& proxy, ui::Root& root, OutputState& outputState, afl::string::Translator& tx)
-    : Control(parentControl.interface(),
-              parentControl.root(),
-              parentControl.translator()),
+    : Control(parentControl.interface()),
       m_gameSender(gameSender),
       m_proxy(proxy),
       m_root(root),

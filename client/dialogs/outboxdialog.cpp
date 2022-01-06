@@ -27,7 +27,7 @@
 using client::widgets::MessageActionPanel;
 
 client::dialogs::OutboxDialog::OutboxDialog(String_t title, client::si::UserSide& iface, ui::Root& root, String_t helpPage, afl::string::Translator& tx)
-    : Control(iface, root, tx),
+    : Control(iface),
       m_link(root, tx),
       m_title(title),
       m_state(),

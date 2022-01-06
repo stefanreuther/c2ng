@@ -21,7 +21,7 @@ using client::widgets::MessageActionPanel;
 /****************************** InboxDialog ******************************/
 
 client::dialogs::InboxDialog::InboxDialog(String_t title, util::RequestSender<game::proxy::MailboxAdaptor> sender, client::si::UserSide& iface, ui::Root& root, afl::string::Translator& tx)
-    : Control(iface, root, tx),
+    : Control(iface),
       m_link(root, tx),
       m_title(title),
       m_state(),

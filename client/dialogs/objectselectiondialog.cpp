@@ -142,8 +142,8 @@ namespace {
      */
     class DialogControl : public client::si::Control {
      public:
-        DialogControl(client::si::UserSide& side, ui::Root& root, afl::string::Translator& tx, ui::EventLoop& loop, afl::base::Ref<CommonState> state, client::si::OutputState& outputState)
-            : Control(side, root, tx),
+        DialogControl(client::si::UserSide& side, ui::Root& root, ui::EventLoop& loop, afl::base::Ref<CommonState> state, client::si::OutputState& outputState)
+            : Control(side),
               m_currentId(0),
               m_loop(loop),
               m_state(state),
@@ -323,7 +323,7 @@ client::dialogs::doObjectSelectionDialog(const ObjectSelectionDialog& def,
 
     // Set up script controls
     ui::EventLoop loop(root);
-    DialogControl ctl(iface, root, tx, loop, state, outputState);
+    DialogControl ctl(iface, root, loop, state, outputState);
     util::RequestSender<DialogUserInterfaceProperties> dialogUIP(iface.gameSender().makeTemporary(new DialogUIPFromSession(state)));
 
     // Set up GUI
