@@ -16,17 +16,21 @@ namespace {
 }
 
 // Constructor.
-client::si::ScriptSide::ScriptSide(util::RequestSender<UserSide> reply)
-    : conn_processGroupFinish(),
+client::si::ScriptSide::ScriptSide(util::RequestSender<UserSide> reply, game::Session& session)
+    : m_session(session),
+      conn_processGroupFinish(),
       m_reply(reply),
       m_waits()
 {
-    // TODO: make a m_session parameter; get rid of the other Session parameters
+    conn_processGroupFinish = session.processList().sig_processGroupFinish.add(this, &ScriptSide::onProcessGroupFinish);
+    // FIXME: set break handler?
 }
 
 // Destructor.
 client::si::ScriptSide::~ScriptSide()
-{ }
+{
+    conn_processGroupFinish.disconnect();
+}
 
 // Access the underlying RequestSender.
 util::RequestSender<client::si::UserSide>
@@ -42,24 +46,24 @@ client::si::ScriptSide::sender()
 
 // Execute a script-based task.
 void
-client::si::ScriptSide::executeTaskWait(uint32_t waitId, std::auto_ptr<ScriptTask> task, game::Session& session)
+client::si::ScriptSide::executeTaskWait(uint32_t waitId, std::auto_ptr<ScriptTask> task)
 {
     // Populate process group
-    interpreter::ProcessList& processList = session.processList();
+    interpreter::ProcessList& processList = m_session.processList();
     const uint32_t pgid = processList.allocateProcessGroup();
-    task->execute(pgid, session);
+    task->execute(pgid, m_session);
 
     // Run it
     m_waits.push_back(Wait(waitId, pgid));
     processList.startProcessGroup(pgid);
-    runProcesses(session);
+    runProcesses();
 }
 
 // Continue a detached process.
 void
-client::si::ScriptSide::continueProcessWait(uint32_t waitId, game::Session& session, RequestLink2 link)
+client::si::ScriptSide::continueProcessWait(uint32_t waitId, RequestLink2 link)
 {
-    interpreter::ProcessList& list = session.processList();
+    interpreter::ProcessList& list = m_session.processList();
     uint32_t pid;
     if (!link.getProcessId(pid)) {
         // Null link > signal completion immediately
@@ -71,7 +75,7 @@ client::si::ScriptSide::continueProcessWait(uint32_t waitId, game::Session& sess
             p->pushNewValue(0);
         }
         list.continueProcess(*p);
-        runProcesses(session);
+        runProcesses();
     } else {
         // Link to dead process > signal completion immediately
         onTaskComplete(waitId);
@@ -213,9 +217,9 @@ client::si::ScriptSide::callAsyncNew(UserCall* t)
 
 // Manipulating a running process.
 void
-client::si::ScriptSide::continueProcess(game::Session& session, RequestLink2 link)
+client::si::ScriptSide::continueProcess(RequestLink2 link)
 {
-    interpreter::ProcessList& list = session.processList();
+    interpreter::ProcessList& list = m_session.processList();
     uint32_t pid;
     if (link.getProcessId(pid)) {
         if (interpreter::Process* p = list.getProcessById(pid)) {
@@ -223,17 +227,17 @@ client::si::ScriptSide::continueProcess(game::Session& session, RequestLink2 lin
                 p->pushNewValue(0);
             }
             list.continueProcess(*p);
-            runProcesses(session);
+            runProcesses();
         }
     }
 }
 
 // Join processes into a process group.
 void
-client::si::ScriptSide::joinProcess(game::Session& session, RequestLink2 link, RequestLink2 other)
+client::si::ScriptSide::joinProcess(RequestLink2 link, RequestLink2 other)
 {
     // FIXME: it is an error if link is invalid but other is valid.
-    interpreter::ProcessList& list = session.processList();
+    interpreter::ProcessList& list = m_session.processList();
     uint32_t linkPid, otherPid;
     if (link.getProcessId(linkPid) && other.getProcessId(otherPid)) {
         if (interpreter::Process* p = list.getProcessById(linkPid)) {
@@ -249,10 +253,10 @@ client::si::ScriptSide::joinProcess(game::Session& session, RequestLink2 link, R
 
 // Join process group.
 void
-client::si::ScriptSide::joinProcessGroup(game::Session& session, RequestLink2 link, uint32_t oldGroup)
+client::si::ScriptSide::joinProcessGroup(RequestLink2 link, uint32_t oldGroup)
 {
     // It is an error if link is invalid
-    interpreter::ProcessList& list = session.processList();
+    interpreter::ProcessList& list = m_session.processList();
     uint32_t linkPid;
     if (link.getProcessId(linkPid)) {
         if (interpreter::Process* p = list.getProcessById(linkPid)) {
@@ -263,23 +267,23 @@ client::si::ScriptSide::joinProcessGroup(game::Session& session, RequestLink2 li
 
 // Continue process with an error.
 void
-client::si::ScriptSide::continueProcessWithFailure(game::Session& session, RequestLink2 link, String_t error)
+client::si::ScriptSide::continueProcessWithFailure(RequestLink2 link, String_t error)
 {
-    interpreter::ProcessList& list = session.processList();
+    interpreter::ProcessList& list = m_session.processList();
     uint32_t pid;
     if (link.getProcessId(pid)) {
         if (interpreter::Process* p = list.getProcessById(pid)) {
             list.continueProcessWithFailure(*p, error);
-            runProcesses(session);
+            runProcesses();
         }
     }
 }
 
 // Detach process.
 void
-client::si::ScriptSide::detachProcess(game::Session& session, RequestLink2 link)
+client::si::ScriptSide::detachProcess(RequestLink2 link)
 {
-    interpreter::ProcessList& list = session.processList();
+    interpreter::ProcessList& list = m_session.processList();
     uint32_t pid;
     if (link.getProcessId(pid)) {
         if (interpreter::Process* p = list.getProcessById(pid)) {
@@ -293,9 +297,9 @@ client::si::ScriptSide::detachProcess(game::Session& session, RequestLink2 link)
 
 // Set variable in a process.
 void
-client::si::ScriptSide::setVariable(game::Session& session, RequestLink2 link, String_t name, std::auto_ptr<afl::data::Value> value)
+client::si::ScriptSide::setVariable(RequestLink2 link, String_t name, std::auto_ptr<afl::data::Value> value)
 {
-    interpreter::ProcessList& list = session.processList();
+    interpreter::ProcessList& list = m_session.processList();
     uint32_t pid;
     if (link.getProcessId(pid)) {
         if (interpreter::Process* p = list.getProcessById(pid)) {
@@ -311,43 +315,16 @@ client::si::ScriptSide::setVariable(game::Session& session, RequestLink2 link, S
 
 // Run processes.
 void
-client::si::ScriptSide::runProcesses(game::Session& session)
+client::si::ScriptSide::runProcesses()
 {
-    interpreter::ProcessList& processList = session.processList();
+    interpreter::ProcessList& processList = m_session.processList();
 
     // Run processes. This will execute onProcessGroupFinish() callbacks that process waits.
     processList.run();
     processList.removeTerminatedProcesses();
 
     // Clean up messages
-    session.notifications().removeOrphanedMessages();
-}
-
-void
-client::si::ScriptSide::init(game::Session& session)
-{
-    // Closure for associating the session with the callback
-    // TODO: replace by ctor/dtor
-    class Relay : public afl::base::Closure<void(uint32_t)> {
-     public:
-        Relay(game::Session& session, ScriptSide& self)
-            : m_session(session), m_self(self)
-            { }
-        void call(uint32_t n)
-            { m_self.onProcessGroupFinish(m_session, n); }
-     private:
-        game::Session& m_session;
-        ScriptSide& m_self;
-    };
-    conn_processGroupFinish = session.processList().sig_processGroupFinish.addNewClosure(new Relay(session, *this));
-
-    // FIXME: set break handler?
-}
-
-void
-client::si::ScriptSide::done(game::Session& /*session*/)
-{
-    conn_processGroupFinish.disconnect();
+    m_session.notifications().removeOrphanedMessages();
 }
 
 
@@ -364,7 +341,7 @@ client::si::ScriptSide::onTaskComplete(uint32_t waitId)
 
 // Process group completion callback.
 void
-client::si::ScriptSide::onProcessGroupFinish(game::Session& session, uint32_t pgid)
+client::si::ScriptSide::onProcessGroupFinish(uint32_t pgid)
 {
     // Signal everyone who waits on us
     // (Should only be one, but supporting multiple isn't hard here.)
@@ -374,7 +351,7 @@ client::si::ScriptSide::onProcessGroupFinish(game::Session& session, uint32_t pg
     }
 
     // Notify listeners about changes by the terminated process group
-    session.notifyListeners();
+    m_session.notifyListeners();
 
     // Caller is (indirectly) runProcesses() who will clean up.
 }

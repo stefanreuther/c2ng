@@ -14,6 +14,42 @@ const size_t SCREEN_HISTORY_SIZE = 50;
 
 const game::ExtraIdentifier<game::Session, client::si::ScriptSide> client::si::SCRIPTSIDE_ID = {{}};
 
+
+/*
+ *  ScriptSenderImpl - Adaptor to send to a ScriptSide
+ */
+class client::si::UserSide::ScriptSenderImpl : public util::RequestSender<ScriptSide>::Impl {
+ public:
+    ScriptSenderImpl(const util::RequestSender<game::Session>& gameSender)
+        : m_gameSender(gameSender)
+        { }
+    virtual void postNewRequest(util::Request<client::si::ScriptSide>* req)
+        {
+            class Task : public util::Request<game::Session> {
+             public:
+                Task(std::auto_ptr<ScriptRequest>& p)
+                    : m_p(p)
+                    { }
+                virtual void handle(game::Session& session)
+                    {
+                        if (ScriptSide* ss = session.extra().get(SCRIPTSIDE_ID)) {
+                            if (m_p.get() != 0) {
+                                m_p->handle(*ss);
+                            }
+                        }
+                    }
+             private:
+                std::auto_ptr<ScriptRequest> m_p;
+            };
+            std::auto_ptr<ScriptRequest> p(req);
+            m_gameSender.postNewRequest(new Task(p));
+        }
+ private:
+    util::RequestSender<game::Session> m_gameSender;
+};
+
+
+
 // Constructor.
 client::si::UserSide::UserSide(ui::Root& root,
                                util::RequestSender<game::Session> gameSender,
@@ -22,6 +58,7 @@ client::si::UserSide::UserSide(ui::Root& root,
                                util::MessageCollector& console,
                                afl::sys::Log& mainLog)
     : m_gameSender(gameSender),
+      m_scriptSender(*new ScriptSenderImpl(gameSender)),
       m_receiver(self, *this),
       m_console(console),
       m_mainLog(mainLog),
@@ -42,8 +79,7 @@ client::si::UserSide::UserSide(ui::Root& root,
             {
                 ScriptSide* ss = session.extra().get(SCRIPTSIDE_ID);
                 if (!ss) {
-                    ss = session.extra().setNew(SCRIPTSIDE_ID, new ScriptSide(m_reply));
-                    ss->init(session);
+                    ss = session.extra().setNew(SCRIPTSIDE_ID, new ScriptSide(m_reply, session));
                 }
             }
      private:
@@ -63,12 +99,7 @@ client::si::UserSide::~UserSide()
     class Task : public util::Request<game::Session> {
      public:
         virtual void handle(game::Session& session)
-            {
-                if (ScriptSide* ss = session.extra().get(SCRIPTSIDE_ID)) {
-                    ss->done(session);
-                    session.extra().setNew(SCRIPTSIDE_ID, (ScriptSide*)0);
-                }
-            }
+            { session.extra().setNew(SCRIPTSIDE_ID, (ScriptSide*)0); }
     };
     m_gameSender.postNewRequest(new Task());
 }
@@ -96,24 +127,7 @@ client::si::UserSide::reset()
 void
 client::si::UserSide::postNewRequest(ScriptRequest* request)
 {
-    class Task : public util::Request<game::Session> {
-     public:
-        Task(std::auto_ptr<ScriptRequest>& p)
-            : m_p(p)
-            { }
-        virtual void handle(game::Session& session)
-            {
-                if (ScriptSide* ss = session.extra().get(SCRIPTSIDE_ID)) {
-                    if (m_p.get() != 0) {
-                        m_p->handle(session, *ss);
-                    }
-                }
-            }
-     private:
-        std::auto_ptr<ScriptRequest> m_p;
-    };
-    std::auto_ptr<ScriptRequest> p(request);
-    m_gameSender.postNewRequest(new Task(p));
+    m_scriptSender.postNewRequest(request);
 }
 
 
@@ -125,114 +139,42 @@ client::si::UserSide::postNewRequest(ScriptRequest* request)
 void
 client::si::UserSide::continueProcess(RequestLink2 link)
 {
-    class Task : public ScriptRequest {
-     public:
-        Task(RequestLink2 link)
-            : m_link(link)
-            { }
-        void handle(game::Session& session, ScriptSide& t)
-            { t.continueProcess(session, m_link); }
-     private:
-        RequestLink2 m_link;
-    };
-    postNewRequest(new Task(link));
+    m_scriptSender.postRequest(&ScriptSide::continueProcess, link);
 }
 
 // Join processes into a process group.
 void
 client::si::UserSide::joinProcess(RequestLink2 link, RequestLink2 other)
 {
-    class Task : public ScriptRequest {
-     public:
-        Task(RequestLink2 link, RequestLink2 other)
-            : m_link(link),
-              m_other(other)
-            { }
-        void handle(game::Session& session, ScriptSide& t)
-            { t.joinProcess(session, m_link, m_other); }
-     private:
-        RequestLink2 m_link;
-        RequestLink2 m_other;
-    };
-    if (other.isValid()) {
-        postNewRequest(new Task(link, other));
-    }
+    m_scriptSender.postRequest(&ScriptSide::joinProcess, link, other);
 }
 
 // Join process group.
 void
 client::si::UserSide::joinProcessGroup(RequestLink2 link, uint32_t oldGroup)
 {
-    class Task : public ScriptRequest {
-     public:
-        Task(RequestLink2 link, uint32_t oldGroup)
-            : m_link(link),
-              m_oldGroup(oldGroup)
-            { }
-        void handle(game::Session& session, ScriptSide& t)
-            { t.joinProcessGroup(session, m_link, m_oldGroup); }
-     private:
-        RequestLink2 m_link;
-        uint32_t m_oldGroup;
-    };
-    postNewRequest(new Task(link, oldGroup));
+    m_scriptSender.postRequest(&ScriptSide::joinProcessGroup, link, oldGroup);
 }
 
 // Continue a process after UI callout with error.
 void
 client::si::UserSide::continueProcessWithFailure(RequestLink2 link, String_t error)
 {
-    class Task : public ScriptRequest {
-     public:
-        Task(RequestLink2 link, String_t error)
-            : m_link(link),
-              m_error(error)
-            { }
-        void handle(game::Session& session, ScriptSide& t)
-            { t.continueProcessWithFailure(session, m_link, m_error); }
-     private:
-        RequestLink2 m_link;
-        String_t m_error;
-    };
-    postNewRequest(new Task(link, error));
+    m_scriptSender.postRequest(&ScriptSide::continueProcessWithFailure, link, error);
 }
 
 // Detach from process after UI callout.
 void
 client::si::UserSide::detachProcess(RequestLink2 link)
 {
-    class Task : public ScriptRequest {
-     public:
-        Task(RequestLink2 link)
-            : m_link(link)
-            { }
-        void handle(game::Session& session, ScriptSide& t)
-            { t.detachProcess(session, m_link); }
-     private:
-        RequestLink2 m_link;
-    };
-    postNewRequest(new Task(link));
+    m_scriptSender.postRequest(&ScriptSide::detachProcess, link);
 }
 
 // Set variable in process.
 void
 client::si::UserSide::setVariable(RequestLink2 link, String_t name, std::auto_ptr<afl::data::Value> value)
 {
-    class Task : public ScriptRequest {
-     public:
-        Task(RequestLink2 link, String_t name, std::auto_ptr<afl::data::Value> value)
-            : m_link(link),
-              m_name(name),
-              m_value(value)
-            { }
-        void handle(game::Session& session, ScriptSide& t)
-            { t.setVariable(session, m_link, m_name, m_value); }
-     private:
-        RequestLink2 m_link;
-        String_t m_name;
-        std::auto_ptr<afl::data::Value> m_value;
-    };
-    postNewRequest(new Task(link, name, value));
+    m_scriptSender.postRequest(&ScriptSide::setVariable, link, name, value);
 }
 
 /*
@@ -250,37 +192,14 @@ client::si::UserSide::allocateWaitId()
 void
 client::si::UserSide::continueProcessWait(uint32_t waitId, RequestLink2 link)
 {
-    class ContinueTask : public ScriptRequest {
-     public:
-        ContinueTask(uint32_t waitId, RequestLink2 link)
-            : m_waitId(waitId),
-              m_link(link)
-            { }
-        void handle(game::Session& s, ScriptSide& t)
-            { t.continueProcessWait(m_waitId, s, m_link); }
-     private:
-        uint32_t m_waitId;
-        RequestLink2 m_link;
-    };
-    postNewRequest(new ContinueTask(waitId, link));
+    m_scriptSender.postRequest(&ScriptSide::continueProcessWait, waitId, link);
 }
 
 // Execute a task.
 void
 client::si::UserSide::executeTaskWait(uint32_t id, std::auto_ptr<ScriptTask> task)
 {
-    class StartTask : public ScriptRequest {
-     public:
-        StartTask(uint32_t id, std::auto_ptr<ScriptTask> task)
-            : m_id(id), m_task(task)
-            { }
-        void handle(game::Session& s, ScriptSide& t)
-            { t.executeTaskWait(m_id, m_task, s); }
-     private:
-        uint32_t m_id;
-        std::auto_ptr<ScriptTask> m_task;
-    };
-    postNewRequest(new StartTask(id, task));
+    m_scriptSender.postRequest(&ScriptSide::executeTaskWait, id, task);
 }
 
 // Create ContextProvider.

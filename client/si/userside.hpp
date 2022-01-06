@@ -44,10 +44,7 @@ namespace client { namespace si {
         These patterns are implemented in class Control. */
     class UserSide {
      public:
-        class ScriptRequest : public afl::base::Deletable {
-         public:
-            virtual void handle(game::Session& s, ScriptSide& si) = 0;
-        };
+        typedef util::Request<ScriptSide> ScriptRequest;
 
         /** Constructor.
             @param root         UI root
@@ -310,7 +307,10 @@ namespace client { namespace si {
         ///@}
 
      private:
+        class ScriptSenderImpl;
+
         util::RequestSender<game::Session> m_gameSender;
+        util::RequestSender<ScriptSide> m_scriptSender;
         util::RequestReceiver<UserSide> m_receiver;
         util::MessageCollector& m_console;
         afl::sys::Log& m_mainLog;

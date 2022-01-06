@@ -11,6 +11,7 @@
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/semaphore.hpp"
 #include "client/si/control.hpp"
+#include "client/si/scriptside.hpp"
 #include "client/si/userside.hpp"
 #include "client/si/widgetholder.hpp"
 #include "client/si/widgetreference.hpp"
@@ -104,9 +105,9 @@ WidgetVerifier::run()
                   const client::si::WidgetReference& ref)
                 : m_parent(parent), m_semaphore(sem), m_result(result), m_ref(ref)
                 { }
-            void handle(game::Session& session, client::si::ScriptSide& ss)
+            void handle(client::si::ScriptSide& ss)
                 {
-                    m_result.reset(m_parent.create(session, ss, m_ref));
+                    m_result.reset(m_parent.create(ss.session(), ss, m_ref));
                     m_semaphore.post();
                 }
          private:

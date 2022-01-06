@@ -42,7 +42,7 @@ namespace client { namespace si {
      public:
         /** Constructor.
             @param reply RequestSender to send requests back to UserSide */
-        ScriptSide(util::RequestSender<UserSide> reply);
+        ScriptSide(util::RequestSender<UserSide> reply, game::Session& session);
 
         /** Destructor. */
         ~ScriptSide();
@@ -53,6 +53,11 @@ namespace client { namespace si {
             Because this obviously lacks the integration with process statuses, it can be only used for quick fire-and-forget tasks.
             @return Sender */
         util::RequestSender<UserSide> sender();
+
+        /** Access underlying session.
+            @return session */
+        game::Session& session()
+            { return m_session; }
 
 
         /*
@@ -68,9 +73,8 @@ namespace client { namespace si {
             Those will be run; completion of the process group will be signalled with onTaskComplete() for the given waitId.
 
             @param waitId   Wait Id for the onTaskComplete() callback
-            @param task     The task; must not be null
-            @param session  Session to work on */
-        void executeTaskWait(uint32_t waitId, std::auto_ptr<ScriptTask> task, game::Session& session);
+            @param task     The task; must not be null */
+        void executeTaskWait(uint32_t waitId, std::auto_ptr<ScriptTask> task);
 
         /** Continue a detached process.
             Executes the process identified by the given RequestLink2 (and all other processes in the same process group).
@@ -79,9 +83,8 @@ namespace client { namespace si {
 
             This function is intended to resume a detached process (detachProcess()) with a new wait Id.
             @param waitId   Wait Id
-            @param session  Session to work on
             @param link     Process identification */
-        void continueProcessWait(uint32_t waitId, game::Session& session, RequestLink2 link);
+        void continueProcessWait(uint32_t waitId, RequestLink2 link);
 
 
         /*
@@ -147,62 +150,56 @@ namespace client { namespace si {
             This will execute the process and produce appropriate callbacks.
             The process will see a regular return (empty/no result) from the function that stopped it using postNewTask().
 
-            @param session Session
             @param link    Process identification
 
             @see interpreter::ProcessList::continueProcess  */
-        void continueProcess(game::Session& session, RequestLink2 link);
+        void continueProcess(RequestLink2 link);
 
         /** Join processes into a process group.
             Moves process @c other into the same process group as @c link.
             Call continueProcess(link) next.
 
-            @param session Session
             @param link    Target process identification
             @param other   Other process identification
 
             @see interpreter::ProcessList::joinProcess  */
-        void joinProcess(game::Session& session, RequestLink2 link, RequestLink2 other);
+        void joinProcess(RequestLink2 link, RequestLink2 other);
 
         /** Join process group.
             Moves content of @c oldGroup into the same process group as @c link.
             Call continueProcess(link) next.
 
-            @param session Session
             @param link    Target process identification
             @param oldGroup Old process group
 
             @see interpreter::ProcessList::joinProcessGroup */
-        void joinProcessGroup(game::Session& session, RequestLink2 link, uint32_t oldGroup);
+        void joinProcessGroup(RequestLink2 link, uint32_t oldGroup);
 
         /** Continue process with an error.
             This will execute the process and produce appropriate callbacks.
             The process will see an error return (exception) from the function that stopped it using postNewTask().
 
-            @param session Session
             @param link    Process identification
             @param error   Error message
 
             @see interpreter::ProcessList::continueProcessWithFailure */
-        void continueProcessWithFailure(game::Session& session, RequestLink2 link, String_t error);
+        void continueProcessWithFailure(RequestLink2 link, String_t error);
 
         /** Detach process.
             This will (temporarily) release the process from our control,
             and satisfy the existing wait (onTaskComplete()).
             You must continue it later using continueProcessWait().
 
-            @param session Session
             @param link    Process identification */
-        void detachProcess(game::Session& session, RequestLink2 link);
+        void detachProcess(RequestLink2 link);
 
         /** Set variable in a process.
-            @param session Session
             @param link    Process identification
             @param name    Variable name
             @param value   Value
 
             @see interpreter::Process::setVariable */
-        void setVariable(game::Session& session, RequestLink2 link, String_t name, std::auto_ptr<afl::data::Value> value);
+        void setVariable(RequestLink2 link, String_t name, std::auto_ptr<afl::data::Value> value);
 
 
         /*
@@ -212,19 +209,14 @@ namespace client { namespace si {
         /** Run processes.
             Executes all pending processes.
 
-            For now, this function is exported to run processes that are not managed by ScriptSide/UserSide.
+            For now, this function is exported to run processes that are not managed by ScriptSide/UserSide. */
+        void runProcesses();
 
-            @param session Session */
-        void runProcesses(game::Session& session);
-
-
-        /*
-         *  Setup and shutdown
-         */
-        void init(game::Session& session);
-        void done(game::Session& session);
 
      private:
+        /** Containing session. */
+        game::Session& m_session;
+
         /** SignalConnection for interpreter::ProcessList::sig_processGroupFinish */
         afl::base::SignalConnection conn_processGroupFinish;
 
@@ -251,9 +243,8 @@ namespace client { namespace si {
 
         /** Process group completion callback.
             Signals the appropriate waits.
-            @param session Session
             @param pgid    Completed process group */
-        void onProcessGroupFinish(game::Session& session, uint32_t pgid);
+        void onProcessGroupFinish(uint32_t pgid);
 
         /** Look up a wait for a process group.
             @param [in] pgid Process Group Id

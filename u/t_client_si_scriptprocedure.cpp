@@ -29,13 +29,13 @@ namespace {
 void
 TestClientSiScriptProcedure::testIt()
 {
-    // Make a dummy ScriptSide
-    client::si::ScriptSide ss((util::RequestSender<client::si::UserSide>()));
-
     // Make a session
     afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
     game::Session session(tx, fs);
+
+    // Make a dummy ScriptSide
+    client::si::ScriptSide ss((util::RequestSender<client::si::UserSide>()), session);
 
     // Make a ScriptProcedure
     client::si::ScriptProcedure testee(session, &ss, theFunction);

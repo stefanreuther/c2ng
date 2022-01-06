@@ -3586,8 +3586,10 @@ client::si::registerCommands(UserSide& ui)
     // ex int/if/guiif.cc:initInterpreterGuiInterface
     class Task : public UserSide::ScriptRequest {
      public:
-        void handle(game::Session& s, ScriptSide& si)
+        void handle(ScriptSide& si)
             {
+                game::Session& s = si.session();
+
                 // Values
                 /* @q System.GUI:Bool (Global Property)
                    Graphical interface flag.

@@ -36,7 +36,7 @@ namespace {
                 // FIXME: can we log errors if this process fails?
                 if (client::si::ScriptSide* ss = session.extra().get(client::si::SCRIPTSIDE_ID)) {
                     session.processList().startProcessGroup(m_pgid);
-                    ss->runProcesses(session);
+                    ss->runProcesses();
                 }
             }
      private:
