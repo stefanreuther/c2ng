@@ -543,9 +543,9 @@ class client::dialogs::VisualScanDialog::Window : public client::si::Control {
     virtual void handleEndDialog(client::si::RequestLink2 link, int code);
     virtual void handlePopupConsole(client::si::RequestLink2 link);
     virtual void handleScanKeyboardMode(client::si::RequestLink2 link);
-    virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap);
-    virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix);
-    virtual void handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text);
+    virtual void handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap);
+    virtual void handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix);
+    virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text);
     virtual client::si::ContextProvider* createContextProvider();
 
     afl::base::Signal<void(Reference)> sig_referenceChange;
@@ -1281,21 +1281,21 @@ client::dialogs::VisualScanDialog::Window::handleScanKeyboardMode(client::si::Re
 }
 
 void
-client::dialogs::VisualScanDialog::Window::handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)
+client::dialogs::VisualScanDialog::Window::handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap)
 {
-    defaultHandleSetViewRequest(link, name, withKeymap);
+    defaultHandleSetView(link, name, withKeymap);
 }
 
 void
-client::dialogs::VisualScanDialog::Window::handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)
+client::dialogs::VisualScanDialog::Window::handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix)
 {
-    defaultHandleUseKeymapRequest(link, name, prefix);
+    defaultHandleUseKeymap(link, name, prefix);
 }
 
 void
-client::dialogs::VisualScanDialog::Window::handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text)
+client::dialogs::VisualScanDialog::Window::handleOverlayMessage(client::si::RequestLink2 link, String_t text)
 {
-    defaultHandleOverlayMessageRequest(link, text);
+    defaultHandleOverlayMessage(link, text);
 }
 
 client::si::ContextProvider*

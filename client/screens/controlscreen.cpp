@@ -661,21 +661,21 @@ client::screens::ControlScreen::handleEndDialog(client::si::RequestLink2 link, i
 }
 
 void
-client::screens::ControlScreen::handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)
+client::screens::ControlScreen::handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap)
 {
-    defaultHandleSetViewRequest(link, name, withKeymap);
+    defaultHandleSetView(link, name, withKeymap);
 }
 
 void
-client::screens::ControlScreen::handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)
+client::screens::ControlScreen::handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix)
 {
-    defaultHandleUseKeymapRequest(link, name, prefix);
+    defaultHandleUseKeymap(link, name, prefix);
 }
 
 void
-client::screens::ControlScreen::handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text)
+client::screens::ControlScreen::handleOverlayMessage(client::si::RequestLink2 link, String_t text)
 {
-    defaultHandleOverlayMessageRequest(link, text);
+    defaultHandleOverlayMessage(link, text);
 }
 
 client::si::ContextProvider*

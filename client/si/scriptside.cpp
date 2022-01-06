@@ -1,110 +1,144 @@
 /**
   *  \file client/si/scriptside.cpp
+  *  \brief Class client::si::ScriptSide
   */
 
 #include "client/si/scriptside.hpp"
-#include "client/si/contextprovider.hpp"
+#include "afl/sys/semaphore.hpp"
 #include "client/si/requestlink1.hpp"
 #include "client/si/requestlink2.hpp"
-#include "client/si/scriptprocedure.hpp"
 #include "client/si/usercall.hpp"
 #include "client/si/userside.hpp"
 #include "client/si/usertask.hpp"
-#include "interpreter/bytecodeobject.hpp"
-#include "interpreter/defaultstatementcompilationcontext.hpp"
-#include "interpreter/memorycommandsource.hpp"
-#include "interpreter/statementcompiler.hpp"
-#include "interpreter/values.hpp"
-#include "afl/sys/semaphore.hpp"
-#include "client/si/contextreceiver.hpp"
 
 namespace {
-    using interpreter::makeBooleanValue;
+    const char*const LOG_NAME = "script.si";
 }
 
+// Constructor.
 client::si::ScriptSide::ScriptSide(util::RequestSender<UserSide> reply)
     : conn_processGroupFinish(),
       m_reply(reply),
       m_waits()
-{ }
+{
+    // TODO: make a m_session parameter; get rid of the other Session parameters
+}
 
+// Destructor.
 client::si::ScriptSide::~ScriptSide()
 { }
 
-void
-client::si::ScriptSide::executeTask(uint32_t waitId, std::auto_ptr<ScriptTask> task, game::Session& session)
-{
-    interpreter::ProcessList& processList = session.processList();
-    uint32_t pgid = processList.allocateProcessGroup();
-    task->execute(pgid, session);
-
-    m_waits.push_back(Wait(waitId, pgid));
-    processList.startProcessGroup(pgid);
-    runProcesses(session);
-}
-
-void
-client::si::ScriptSide::continueProcessWait(uint32_t id, game::Session& session, RequestLink2 link)
-{
-    interpreter::ProcessList& list = session.processList();
-    uint32_t pid;
-    if (!link.getProcessId(pid)) {
-        handleWait(id);
-    } else if (interpreter::Process* p = list.getProcessById(pid)) {
-        m_waits.push_back(Wait(id, p->getProcessGroupId()));
-        if (link.isWantResult()) {
-            p->pushNewValue(0);
-        }
-        list.continueProcess(*p);
-        runProcesses(session);
-    } else {
-        handleWait(id);
-    }
-}
-
-
-void
-client::si::ScriptSide::handleWait(uint32_t id)
-{
-    class Request : public util::Request<UserSide> {
-     public:
-        Request(uint32_t id)
-            : m_id(id)
-            { }
-        void handle(UserSide& ui)
-            { ui.handleWait(m_id); }
-     private:
-        uint32_t m_id;
-    };
-    m_reply.postNewRequest(new Request(id));
-}
-
-void
-client::si::ScriptSide::postNewTask(RequestLink1 link, UserTask* t)
-{
-    class Proxy : public util::Request<UserSide> {
-     public:
-        Proxy(std::auto_ptr<UserTask> t, RequestLink2 link)
-            : m_task(t), m_link(link)
-            { }
-        void handle(UserSide& ui)
-            { ui.processTask(*m_task, m_link); }
-     private:
-        std::auto_ptr<UserTask> m_task;
-        RequestLink2 m_link;
-    };
-
-    std::auto_ptr<UserTask> tt(t);
-    m_reply.postNewRequest(new Proxy(tt, link));
-    link.getProcess().suspendForUI();
-}
-
+// Access the underlying RequestSender.
 util::RequestSender<client::si::UserSide>
 client::si::ScriptSide::sender()
 {
     return m_reply;
 }
 
+
+/*
+ *  Starting new processes
+ */
+
+// Execute a script-based task.
+void
+client::si::ScriptSide::executeTaskWait(uint32_t waitId, std::auto_ptr<ScriptTask> task, game::Session& session)
+{
+    // Populate process group
+    interpreter::ProcessList& processList = session.processList();
+    const uint32_t pgid = processList.allocateProcessGroup();
+    task->execute(pgid, session);
+
+    // Run it
+    m_waits.push_back(Wait(waitId, pgid));
+    processList.startProcessGroup(pgid);
+    runProcesses(session);
+}
+
+// Continue a detached process.
+void
+client::si::ScriptSide::continueProcessWait(uint32_t waitId, game::Session& session, RequestLink2 link)
+{
+    interpreter::ProcessList& list = session.processList();
+    uint32_t pid;
+    if (!link.getProcessId(pid)) {
+        // Null link > signal completion immediately
+        onTaskComplete(waitId);
+    } else if (interpreter::Process* p = list.getProcessById(pid)) {
+        // Valid link > run it normally
+        m_waits.push_back(Wait(waitId, p->getProcessGroupId()));
+        if (link.isWantResult()) {
+            p->pushNewValue(0);
+        }
+        list.continueProcess(*p);
+        runProcesses(session);
+    } else {
+        // Link to dead process > signal completion immediately
+        onTaskComplete(waitId);
+    }
+}
+
+
+/*
+ *  Request Submission
+ */
+
+// Post a task to the UserSide.
+void
+client::si::ScriptSide::postNewTask(RequestLink1 link, UserTask* t)
+{
+    // Adaptor to wrap the UserTask/RequestLink1 into a Request;
+    // executed as interaction on UserSide.
+    class Proxy : public util::Request<UserSide> {
+     public:
+        Proxy(std::auto_ptr<UserTask> t, RequestLink2 link)
+            : m_task(t), m_link(link)
+            { }
+        void handle(UserSide& us)
+            {
+                if (Control* ctl = us.getControl()) {
+                    try {
+                        m_task->handle(*ctl, m_link);
+                    }
+                    catch (std::exception& e) {
+                        us.continueProcessWithFailure(m_link, e.what());
+                    }
+                } else {
+                    us.continueProcessWithFailure(m_link, interpreter::Error::contextError().what());
+                }
+            }
+     private:
+        std::auto_ptr<UserTask> m_task;
+        RequestLink2 m_link;
+    };
+
+    // Post request
+    std::auto_ptr<UserTask> tt(t);
+    postNewInteraction(new Proxy(tt, link));
+
+    // Mark process suspended (afterwards, so if the above throws, the request will be properly aborted)
+    link.getProcess().suspendForUI();
+}
+
+// Post an interaction request to the UserSide.
+void
+client::si::ScriptSide::postNewInteraction(util::Request<UserSide>* req)
+{
+    class Adaptor : public util::Request<UserSide> {
+     public:
+        Adaptor(std::auto_ptr<util::Request<UserSide> > t)
+            : m_task(t)
+            { }
+        void handle(UserSide& us)
+            { us.processInteraction(*m_task); }
+     private:
+        std::auto_ptr<util::Request<UserSide> > m_task;
+    };
+    std::auto_ptr<util::Request<UserSide> > tt(req);
+    m_reply.postNewRequest(new Adaptor(tt));
+}
+
+// Execute command on UserSide.
 void
 client::si::ScriptSide::call(UserCall& t)
 {
@@ -144,6 +178,7 @@ client::si::ScriptSide::call(UserCall& t)
     }
 }
 
+// Execute command on UserSide, asynchronously.
 void
 client::si::ScriptSide::callAsyncNew(UserCall* t)
 {
@@ -154,14 +189,13 @@ client::si::ScriptSide::callAsyncNew(UserCall* t)
             { }
         ~Proxy()
             { }
-        void handle(UserSide& ui)
+        void handle(UserSide& us)
             {
                 try {
-                    ui.processCall(*m_task);
+                    us.processCall(*m_task);
                 }
                 catch (std::exception& e) {
-                    // boom.
-                    // FIXME: log it?
+                    us.mainLog().write(afl::sys::LogListener::Error, LOG_NAME, us.translator()("Error in user-interface thread"), e);
                 }
             }
      private:
@@ -172,6 +206,12 @@ client::si::ScriptSide::callAsyncNew(UserCall* t)
     m_reply.postNewRequest(new Proxy(tt));
 }
 
+
+/*
+ *  Manipulating a running process
+ */
+
+// Manipulating a running process.
 void
 client::si::ScriptSide::continueProcess(game::Session& session, RequestLink2 link)
 {
@@ -188,6 +228,7 @@ client::si::ScriptSide::continueProcess(game::Session& session, RequestLink2 lin
     }
 }
 
+// Join processes into a process group.
 void
 client::si::ScriptSide::joinProcess(game::Session& session, RequestLink2 link, RequestLink2 other)
 {
@@ -206,6 +247,7 @@ client::si::ScriptSide::joinProcess(game::Session& session, RequestLink2 link, R
     }
 }
 
+// Join process group.
 void
 client::si::ScriptSide::joinProcessGroup(game::Session& session, RequestLink2 link, uint32_t oldGroup)
 {
@@ -219,7 +261,7 @@ client::si::ScriptSide::joinProcessGroup(game::Session& session, RequestLink2 li
     }
 }
 
-
+// Continue process with an error.
 void
 client::si::ScriptSide::continueProcessWithFailure(game::Session& session, RequestLink2 link, String_t error)
 {
@@ -233,6 +275,7 @@ client::si::ScriptSide::continueProcessWithFailure(game::Session& session, Reque
     }
 }
 
+// Detach process.
 void
 client::si::ScriptSide::detachProcess(game::Session& session, RequestLink2 link)
 {
@@ -242,12 +285,13 @@ client::si::ScriptSide::detachProcess(game::Session& session, RequestLink2 link)
         if (interpreter::Process* p = list.getProcessById(pid)) {
             Wait w;
             while (extractWait(p->getProcessGroupId(), w)) {
-                handleWait(w.waitId);
+                onTaskComplete(w.waitId);
             }
         }
     }
 }
 
+// Set variable in a process.
 void
 client::si::ScriptSide::setVariable(game::Session& session, RequestLink2 link, String_t name, std::auto_ptr<afl::data::Value> value)
 {
@@ -260,6 +304,12 @@ client::si::ScriptSide::setVariable(game::Session& session, RequestLink2 link, S
     }
 }
 
+
+/*
+ *  Running Processes
+ */
+
+// Run processes.
 void
 client::si::ScriptSide::runProcesses(game::Session& session)
 {
@@ -277,6 +327,7 @@ void
 client::si::ScriptSide::init(game::Session& session)
 {
     // Closure for associating the session with the callback
+    // TODO: replace by ctor/dtor
     class Relay : public afl::base::Closure<void(uint32_t)> {
      public:
         Relay(game::Session& session, ScriptSide& self)
@@ -290,7 +341,7 @@ client::si::ScriptSide::init(game::Session& session)
     };
     conn_processGroupFinish = session.processList().sig_processGroupFinish.addNewClosure(new Relay(session, *this));
 
-    // IntExecutionContext::setBreakHandler(checkBreak);
+    // FIXME: set break handler?
 }
 
 void
@@ -299,13 +350,27 @@ client::si::ScriptSide::done(game::Session& /*session*/)
     conn_processGroupFinish.disconnect();
 }
 
+
+/*
+ *  Private
+ */
+
+// Wait callback.
+void
+client::si::ScriptSide::onTaskComplete(uint32_t waitId)
+{
+    m_reply.postRequest(&UserSide::onTaskComplete, waitId);
+}
+
+// Process group completion callback.
 void
 client::si::ScriptSide::onProcessGroupFinish(game::Session& session, uint32_t pgid)
 {
     // Signal everyone who waits on us
+    // (Should only be one, but supporting multiple isn't hard here.)
     Wait w;
     while (extractWait(pgid, w)) {
-        handleWait(w.waitId);
+        onTaskComplete(w.waitId);
     }
 
     // Notify listeners about changes by the terminated process group
@@ -314,6 +379,7 @@ client::si::ScriptSide::onProcessGroupFinish(game::Session& session, uint32_t pg
     // Caller is (indirectly) runProcesses() who will clean up.
 }
 
+// Look up a wait for a process group.
 bool
 client::si::ScriptSide::extractWait(uint32_t pgid, Wait& out)
 {

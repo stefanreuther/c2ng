@@ -25,7 +25,8 @@ namespace ui {
         An EventLoop can be used multiple times in sequence.
 
         Limitations:
-        - stop() does not stack; calling stop() twice does not cause two run() calls to return
+        - stop() does not stack; calling stop() twice does not cause two run() calls to return.
+          However, stop() CAN be called before run() and will cause run() to immediately exit.
         - like all UI stuff, this is single-threaded and stop() must be called from the UI thread */
     class EventLoop : public afl::base::Uncopyable {
      public:

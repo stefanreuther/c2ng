@@ -397,7 +397,7 @@ client::map::Screen::handleScanKeyboardMode(client::si::RequestLink2 link)
 }
 
 void
-client::map::Screen::handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)
+client::map::Screen::handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap)
 {
     setViewName(name);
     if (name.empty()) {
@@ -412,7 +412,7 @@ client::map::Screen::handleSetViewRequest(client::si::RequestLink2 link, String_
 }
 
 void
-client::map::Screen::handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)
+client::map::Screen::handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix)
 {
     // ex WKeymapChartMode::startKeymapMode (sort-of)
     setNewOverlay(PrefixLayer, new KeymapOverlay(*this, name, prefix));
@@ -420,7 +420,7 @@ client::map::Screen::handleUseKeymapRequest(client::si::RequestLink2 link, Strin
 }
 
 void
-client::map::Screen::handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text)
+client::map::Screen::handleOverlayMessage(client::si::RequestLink2 link, String_t text)
 {
     // ex WMessageChartMode::showMessage (sort-of)
     setNewOverlay(MessageLayer, new MessageOverlay(*this, text));

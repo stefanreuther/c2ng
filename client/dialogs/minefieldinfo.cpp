@@ -62,9 +62,9 @@ namespace {
         virtual void handleEndDialog(client::si::RequestLink2 link, int code);
         virtual void handlePopupConsole(client::si::RequestLink2 link);
         virtual void handleScanKeyboardMode(client::si::RequestLink2 link);
-        virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap);
-        virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix);
-        virtual void handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text);
+        virtual void handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap);
+        virtual void handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix);
+        virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text);
         virtual client::si::ContextProvider* createContextProvider();
 
      private:
@@ -303,7 +303,7 @@ MinefieldInfoDialog::handleKey(util::Key_t key, int /*prefix*/)
 
      case 'p':
         if (m_planetId != 0) {
-            executeGoToReference("(Controlling Planet)", game::Reference(game::Reference::Planet, m_planetId));
+            executeGoToReferenceWait("(Controlling Planet)", game::Reference(game::Reference::Planet, m_planetId));
         }
         return true;
 
@@ -341,21 +341,21 @@ MinefieldInfoDialog::handleScanKeyboardMode(client::si::RequestLink2 link)
 }
 
 void
-MinefieldInfoDialog::handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)
+MinefieldInfoDialog::handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap)
 {
-    defaultHandleSetViewRequest(link, name, withKeymap);
+    defaultHandleSetView(link, name, withKeymap);
 }
 
 void
-MinefieldInfoDialog::handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)
+MinefieldInfoDialog::handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix)
 {
-    defaultHandleUseKeymapRequest(link, name, prefix);
+    defaultHandleUseKeymap(link, name, prefix);
 }
 
 void
-MinefieldInfoDialog::handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text)
+MinefieldInfoDialog::handleOverlayMessage(client::si::RequestLink2 link, String_t text)
 {
-    defaultHandleOverlayMessageRequest(link, text);
+    defaultHandleOverlayMessage(link, text);
 }
 
 client::si::ContextProvider*
@@ -440,7 +440,7 @@ void
 MinefieldInfoDialog::onGoto()
 {
     if (m_minefieldCenter.getX() != 0) {
-        executeGoToReference("(Minefield)", m_minefieldCenter);
+        executeGoToReferenceWait("(Minefield)", m_minefieldCenter);
     }
 }
 

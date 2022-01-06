@@ -9,6 +9,8 @@
 #include "game/proxy/keymapproxy.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/simplewidget.hpp"
+#include "gfx/timer.hpp"
+#include "gfx/font.hpp"
 
 namespace client { namespace si {
 
@@ -90,9 +92,9 @@ namespace client { namespace si {
         virtual void handleEndDialog(RequestLink2 link, int code);
         virtual void handlePopupConsole(RequestLink2 link);
         virtual void handleScanKeyboardMode(RequestLink2 link);
-        virtual void handleSetViewRequest(RequestLink2 link, String_t name, bool withKeymap);
-        virtual void handleUseKeymapRequest(RequestLink2 link, String_t name, int prefix);
-        virtual void handleOverlayMessageRequest(RequestLink2 link, String_t text);
+        virtual void handleSetView(RequestLink2 link, String_t name, bool withKeymap);
+        virtual void handleUseKeymap(RequestLink2 link, String_t name, int prefix);
+        virtual void handleOverlayMessage(RequestLink2 link, String_t text);
         virtual ContextProvider* createContextProvider();
 
      private:

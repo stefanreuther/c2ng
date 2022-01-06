@@ -13,6 +13,7 @@
 #include "client/si/widgetfunction.hpp"
 #include "client/si/widgetcommand.hpp"
 #include "interpreter/typehint.hpp"
+#include "ui/root.hpp"
 
 client::si::DialogFunction::DialogFunction(game::Session& session, ScriptSide* pScriptSide)
     : m_session(session),

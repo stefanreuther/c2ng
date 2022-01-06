@@ -1,15 +1,15 @@
 /**
   *  \file client/si/scriptside.hpp
+  *  \brief Class client::si::ScriptSide
   */
 #ifndef C2NG_CLIENT_SI_SCRIPTSIDE_HPP
 #define C2NG_CLIENT_SI_SCRIPTSIDE_HPP
 
-#include <vector>
 #include <set>
+#include <vector>
 #include "afl/base/signalconnection.hpp"
 #include "afl/base/weaktarget.hpp"
 #include "afl/data/value.hpp"
-#include "client/si/requestlink2.hpp"
 #include "client/si/scripttask.hpp"
 #include "game/extra.hpp"
 #include "game/session.hpp"
@@ -22,72 +22,110 @@ namespace client { namespace si {
     class RequestLink1;
     class RequestLink2;
     class ScriptProcedure;
+    class UserCall;
     class UserSide;
     class UserTask;
-    class UserCall;
 
+    /** Script/UI Interaction: Script Side.
+
+        This object is accessible as a Session extra.
+        It can receive requests from UserSide, and send requests to it.
+        See UserSide and Control for main documentation.
+
+        Essentially, ScriptSide is to UserSide what a Trampoline is to most proxy classes.
+        However, ScriptSide needs to be accessible from scripts.
+
+        One major pattern is
+        - call executeTaskWait or continueProcessWait to start a script process and associate a waitId with it
+        - receive onTaskComplete() callback with the waitId */
     class ScriptSide : public game::Extra, public afl::base::WeakTarget {
      public:
+        /** Constructor.
+            @param reply RequestSender to send requests back to UserSide */
         ScriptSide(util::RequestSender<UserSide> reply);
+
+        /** Destructor. */
         ~ScriptSide();
+
+        /** Access the underlying RequestSender.
+            You should normally use call() or postNewTask() to talk to the UserSide.
+            This method is available as an escape mechanism if you cannot use these.
+            Because this obviously lacks the integration with process statuses, it can be only used for quick fire-and-forget tasks.
+            @return Sender */
+        util::RequestSender<UserSide> sender();
+
 
         /*
          *  Starting new processes
          *
-         *  These functions execute the given request, and call back handleWait() with the wait Id.
-         *  handleWait() will reflect the result to the UserSide.
+         *  These functions execute the given request, and call back onTaskComplete() with the wait Id.
+         *  onTaskComplete() will reflect the result to the UserSide.
+         *  These functions are invoked via UserSide.
          */
 
-        /** Execute a task.
-            This will provide the given task with a new process group to run in and run it.
-            \param waitId   Wait Id for the handleWait() callback
-            \param task     The task
-            \param session  Session to work on */
-        void executeTask(uint32_t waitId, std::auto_ptr<ScriptTask> task, game::Session& session);
+        /** Execute a script-based task.
+            The task will be given a new process group, and can populate that with processes.
+            Those will be run; completion of the process group will be signalled with onTaskComplete() for the given waitId.
+
+            @param waitId   Wait Id for the onTaskComplete() callback
+            @param task     The task; must not be null
+            @param session  Session to work on */
+        void executeTaskWait(uint32_t waitId, std::auto_ptr<ScriptTask> task, game::Session& session);
 
         /** Continue a detached process.
             Executes the process identified by the given RequestLink2 (and all other processes in the same process group).
             After execution finishes (and possibly generates callbacks to the UserSide),
-            it will eventually call handleWait() which will reflect the result to the UserSide.
+            it will eventually call onTaskComplete() which will reflect the result to the UserSide.
 
             This function is intended to resume a detached process (detachProcess()) with a new wait Id.
-            \param id       Wait Id
-            \param session  Session to work on
-            \param link     Process identification */
-        void continueProcessWait(uint32_t id, game::Session& session, RequestLink2 link);
+            @param waitId   Wait Id
+            @param session  Session to work on
+            @param link     Process identification */
+        void continueProcessWait(uint32_t waitId, game::Session& session, RequestLink2 link);
 
-        /** Wait callback.
-            Signals the wait result to the UserSide.
-            \param id       Wait Id */
-        void handleWait(uint32_t id);
 
         /*
          *  Request Submission
+         *
+         *  These functions are invoked from script code on the script side,
+         *  and submit tasks to the user side.
          */
 
         /** Post a task to the UserSide.
             This will suspend the specified process.
-            The UserTask must eventually call continueProcess() or continueProcessWithFailure().
+            The UserTask will be executed as an interaction on the user-interface side.
+            It must eventually call continueProcess() or continueProcessWithFailure(),
+            by using the corresponding functions of UserSide (which will call back into ScriptSide).
 
-            This does not report the task or its wait finished. */
+            This does not report the task or its wait finished.
+
+            @param link  Initiating process
+            @param t     Task (not null; newly-allocated; ownership transferred to ScriptSide)
+
+            @see postNewInteraction */
         void postNewTask(RequestLink1 link, UserTask* t);
 
-        /** USE WITH CARE: Access the underlying RequestSender.
-            You should normally use call() or postNewTask() to talk to the UserSide.
-            This method is available as an escape mechanism if you cannot use these.
-            Because this obviously lacks the integration with process statuses, it can be only used for quick fire-and-forget tasks.
-            \return Sender */
-        util::RequestSender<UserSide> sender();
+        /** Post an interaction request to the UserSide.
+            An interaction is allowed to do user-interface interactions.
 
-        /** Execute command on user side.
-            Synchronously executes the given UserCall.
+            @param req   Task */
+        void postNewInteraction(util::Request<UserSide>* req);
+
+        /** Execute command on UserSide.
+            Synchronously executes the given UserCall on the user-interface side.
             This means you can pass parameters into the call and results out of the call using the UserCall object.
-            Since user side is not allowed to block, this will not block.
-            \param t Command
-            \throw interpreter::Error if t.handle() throws */
+
+            The task is not allowed to block.
+            It can, for example, retrieve widget content, retrieve font metrics, update a widget, etc.
+
+            To execute a blocking task (e.g. a dialog), use postNewTask() and have the task continue your process,
+            or use postNewInteraction().
+
+            @param t Command
+            @throw interpreter::Error if t.handle() throws */
         void call(UserCall& t);
 
-        /** Execute command on user side, asynchronously.
+        /** Execute command on UserSide, asynchronously.
             Executes the given UserCall without waiting for completion.
             This means you cannot pass parameters by reference, nor can you pass results back; exceptions are swallowed.
 
@@ -95,21 +133,88 @@ namespace client { namespace si {
             Note that requests are processed in sequence anyway, so even if this call is asynchronously,
             the UserCall will be guaranteed to have been processed before the next call().
 
-            \param t Newly-allocated UserCall descendant. Will become owned by the ScriptSide. */
+            @param t Newly-allocated UserCall descendant. Will become owned by the ScriptSide. */
         void callAsyncNew(UserCall* t);
 
 
         /*
          *  Manipulating a running process
+         *
+         *  These functions are invoked via UserSide.
          */
 
+        /** Continue process.
+            This will execute the process and produce appropriate callbacks.
+            The process will see a regular return (empty/no result) from the function that stopped it using postNewTask().
+
+            @param session Session
+            @param link    Process identification
+
+            @see interpreter::ProcessList::continueProcess  */
         void continueProcess(game::Session& session, RequestLink2 link);
+
+        /** Join processes into a process group.
+            Moves process @c other into the same process group as @c link.
+            Call continueProcess(link) next.
+
+            @param session Session
+            @param link    Target process identification
+            @param other   Other process identification
+
+            @see interpreter::ProcessList::joinProcess  */
         void joinProcess(game::Session& session, RequestLink2 link, RequestLink2 other);
+
+        /** Join process group.
+            Moves content of @c oldGroup into the same process group as @c link.
+            Call continueProcess(link) next.
+
+            @param session Session
+            @param link    Target process identification
+            @param oldGroup Old process group
+
+            @see interpreter::ProcessList::joinProcessGroup */
         void joinProcessGroup(game::Session& session, RequestLink2 link, uint32_t oldGroup);
+
+        /** Continue process with an error.
+            This will execute the process and produce appropriate callbacks.
+            The process will see an error return (exception) from the function that stopped it using postNewTask().
+
+            @param session Session
+            @param link    Process identification
+            @param error   Error message
+
+            @see interpreter::ProcessList::continueProcessWithFailure */
         void continueProcessWithFailure(game::Session& session, RequestLink2 link, String_t error);
+
+        /** Detach process.
+            This will (temporarily) release the process from our control,
+            and satisfy the existing wait (onTaskComplete()).
+            You must continue it later using continueProcessWait().
+
+            @param session Session
+            @param link    Process identification */
         void detachProcess(game::Session& session, RequestLink2 link);
+
+        /** Set variable in a process.
+            @param session Session
+            @param link    Process identification
+            @param name    Variable name
+            @param value   Value
+
+            @see interpreter::Process::setVariable */
         void setVariable(game::Session& session, RequestLink2 link, String_t name, std::auto_ptr<afl::data::Value> value);
 
+
+        /*
+         *  Running Processes
+         */
+
+        /** Run processes.
+            Executes all pending processes.
+
+            For now, this function is exported to run processes that are not managed by ScriptSide/UserSide.
+
+            @param session Session */
         void runProcesses(game::Session& session);
 
 
@@ -120,12 +225,13 @@ namespace client { namespace si {
         void done(game::Session& session);
 
      private:
-        void onProcessGroupFinish(game::Session& session, uint32_t pgid);
-
+        /** SignalConnection for interpreter::ProcessList::sig_processGroupFinish */
         afl::base::SignalConnection conn_processGroupFinish;
 
+        /** Sender to UserSide. */
         util::RequestSender<UserSide> m_reply;
 
+        /** An active waitId/processGroupId association. */
         struct Wait {
             uint32_t waitId;
             uint32_t processGroupId;
@@ -138,6 +244,22 @@ namespace client { namespace si {
         };
         std::vector<Wait> m_waits;
 
+        /** Wait callback.
+            Signals the wait result to the UserSide.
+            @param id       Wait Id */
+        void onTaskComplete(uint32_t waitId);
+
+        /** Process group completion callback.
+            Signals the appropriate waits.
+            @param session Session
+            @param pgid    Completed process group */
+        void onProcessGroupFinish(game::Session& session, uint32_t pgid);
+
+        /** Look up a wait for a process group.
+            @param [in] pgid Process Group Id
+            @param [out] out Wait
+            @retval true  wait request found and removed
+            @retval false no wait found */
         bool extractWait(uint32_t pgid, Wait& out);
     };
 

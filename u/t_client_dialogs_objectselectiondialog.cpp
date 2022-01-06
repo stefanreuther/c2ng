@@ -146,17 +146,17 @@ namespace {
                             // We do not expect a ScanKeyboardMode directed at this control
                             TS_ASSERT(0);
                         }
-                    virtual void handleSetViewRequest(client::si::RequestLink2 /*link*/, String_t /*name*/, bool /*withKeymap*/)
+                    virtual void handleSetView(client::si::RequestLink2 /*link*/, String_t /*name*/, bool /*withKeymap*/)
                         {
                             // We do not expect a Chart.SetView directed at this control
                             TS_ASSERT(0);
                         }
-                    virtual void handleUseKeymapRequest(client::si::RequestLink2 /*link*/, String_t /*name*/, int /*prefix*/)
+                    virtual void handleUseKeymap(client::si::RequestLink2 /*link*/, String_t /*name*/, int /*prefix*/)
                         {
                             // We do not expect a UseKeymap directed at this control
                             TS_ASSERT(0);
                         }
-                    virtual void handleOverlayMessageRequest(client::si::RequestLink2 /*link*/, String_t /*text*/)
+                    virtual void handleOverlayMessage(client::si::RequestLink2 /*link*/, String_t /*text*/)
                         {
                             // We do not expect a UI.OverlayMessage directed at this control
                             TS_ASSERT(0);

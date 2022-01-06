@@ -160,9 +160,9 @@ namespace {
         virtual void handleEndDialog(client::si::RequestLink2 link, int code);
         virtual void handlePopupConsole(client::si::RequestLink2 link);
         virtual void handleScanKeyboardMode(client::si::RequestLink2 link);
-        virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap);
-        virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix);
-        virtual void handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text);
+        virtual void handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap);
+        virtual void handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix);
+        virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text);
         virtual client::si::ContextProvider* createContextProvider();
 
         void onListChange(const ProcessListProxy::Infos_t& content);
@@ -222,14 +222,14 @@ namespace {
         virtual void handleScanKeyboardMode(client::si::RequestLink2 link)
             { defaultHandleScanKeyboardMode(link); }
 
-        virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)
-            { defaultHandleSetViewRequest(link, name, withKeymap); }
+        virtual void handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap)
+            { defaultHandleSetView(link, name, withKeymap); }
 
-        virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)
-            { defaultHandleUseKeymapRequest(link, name, prefix); }
+        virtual void handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix)
+            { defaultHandleUseKeymap(link, name, prefix); }
 
-        virtual void handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text)
-            { defaultHandleOverlayMessageRequest(link, text); }
+        virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text)
+            { defaultHandleOverlayMessage(link, text); }
 
         virtual client::si::ContextProvider* createContextProvider()
             { return 0; }
@@ -628,21 +628,21 @@ ProcessListDialog::handleScanKeyboardMode(client::si::RequestLink2 link)
 }
 
 void
-ProcessListDialog::handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)
+ProcessListDialog::handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap)
 {
-    defaultHandleSetViewRequest(link, name, withKeymap);
+    defaultHandleSetView(link, name, withKeymap);
 }
 
 void
-ProcessListDialog::handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)
+ProcessListDialog::handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix)
 {
-    defaultHandleUseKeymapRequest(link, name, prefix);
+    defaultHandleUseKeymap(link, name, prefix);
 }
 
 void
-ProcessListDialog::handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text)
+ProcessListDialog::handleOverlayMessage(client::si::RequestLink2 link, String_t text)
 {
-    defaultHandleOverlayMessageRequest(link, text);
+    defaultHandleOverlayMessage(link, text);
 }
 
 client::si::ContextProvider*

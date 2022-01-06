@@ -129,21 +129,21 @@ client::dialogs::InboxDialog::handleScanKeyboardMode(client::si::RequestLink2 li
 }
 
 void
-client::dialogs::InboxDialog::handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)
+client::dialogs::InboxDialog::handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap)
 {
-    defaultHandleSetViewRequest(link, name, withKeymap);
+    defaultHandleSetView(link, name, withKeymap);
 }
 
 void
-client::dialogs::InboxDialog::handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)
+client::dialogs::InboxDialog::handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix)
 {
-    defaultHandleUseKeymapRequest(link, name, prefix);
+    defaultHandleUseKeymap(link, name, prefix);
 }
 
 void
-client::dialogs::InboxDialog::handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text)
+client::dialogs::InboxDialog::handleOverlayMessage(client::si::RequestLink2 link, String_t text)
 {
-    defaultHandleOverlayMessageRequest(link, text);
+    defaultHandleOverlayMessage(link, text);
 }
 
 client::si::ContextProvider*
@@ -201,13 +201,13 @@ client::dialogs::InboxDialog::onAction(client::widgets::MessageActionPanel::Acti
     switch (a) {
      case MessageActionPanel::GoTo1:
         if (m_data.goto1.isSet()) {
-            executeGoToReference("(Message)", m_data.goto1);
+            executeGoToReferenceWait("(Message)", m_data.goto1);
         }
         break;
 
      case MessageActionPanel::GoTo2:
         if (m_data.goto2.isSet()) {
-            executeGoToReference("(Message)", m_data.goto2);
+            executeGoToReferenceWait("(Message)", m_data.goto2);
         }
         break;
 

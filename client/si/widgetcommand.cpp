@@ -112,12 +112,12 @@ client::si::IFWidgetRun(game::Session& session, ScriptSide& ss, const WidgetRefe
             }
         virtual void handleScanKeyboardMode(client::si::RequestLink2 link)
             { defaultHandleScanKeyboardMode(link); }
-        virtual void handleSetViewRequest(RequestLink2 link, String_t name, bool withKeymap)
-            { defaultHandleSetViewRequest(link, name, withKeymap); }
-        virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)
-            { defaultHandleUseKeymapRequest(link, name, prefix); }
-        virtual void handleOverlayMessageRequest(RequestLink2 link, String_t text)
-            { defaultHandleOverlayMessageRequest(link, text); }
+        virtual void handleSetView(RequestLink2 link, String_t name, bool withKeymap)
+            { defaultHandleSetView(link, name, withKeymap); }
+        virtual void handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix)
+            { defaultHandleUseKeymap(link, name, prefix); }
+        virtual void handleOverlayMessage(RequestLink2 link, String_t text)
+            { defaultHandleOverlayMessage(link, text); }
         virtual ContextProvider* createContextProvider()
             {
                 return new RunContextProvider(m_link);

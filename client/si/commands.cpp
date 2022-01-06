@@ -1842,7 +1842,7 @@ client::si::IFCCUseKeymap(game::Session& session, ScriptSide& si, RequestLink1 l
             : m_keymapName(keymapName), m_prefix(prefix)
             { }
         virtual void handle(Control& ctl, RequestLink2 link)
-            { ctl.handleUseKeymapRequest(link, m_keymapName, m_prefix); }
+            { ctl.handleUseKeymap(link, m_keymapName, m_prefix); }
      private:
         String_t m_keymapName;
         int m_prefix;
@@ -1952,12 +1952,12 @@ client::si::IFCCViewCombat(game::Session& session, ScriptSide& si, RequestLink1 
             { interface().continueProcess(link); }
         virtual void handleScanKeyboardMode(client::si::RequestLink2 link)
             { defaultHandleScanKeyboardMode(link); }
-        virtual void handleSetViewRequest(RequestLink2 link, String_t name, bool withKeymap)
-            { defaultHandleSetViewRequest(link, name, withKeymap); }
-        virtual void handleUseKeymapRequest(RequestLink2 link, String_t name, int prefix)
-            { defaultHandleUseKeymapRequest(link, name, prefix); }
-        void handleOverlayMessageRequest(RequestLink2 link, String_t text)
-            { defaultHandleOverlayMessageRequest(link, text); }
+        virtual void handleSetView(RequestLink2 link, String_t name, bool withKeymap)
+            { defaultHandleSetView(link, name, withKeymap); }
+        virtual void handleUseKeymap(RequestLink2 link, String_t name, int prefix)
+            { defaultHandleUseKeymap(link, name, prefix); }
+        void handleOverlayMessage(RequestLink2 link, String_t text)
+            { defaultHandleOverlayMessage(link, text); }
         virtual ContextProvider* createContextProvider()
             { return 0; }
      private:
@@ -1972,9 +1972,9 @@ client::si::IFCCViewCombat(game::Session& session, ScriptSide& si, RequestLink1 
                 client::si::UserSide& us = ctl.interface();
                 game::Reference ref = client::dialogs::playCombat(ctl.root(), ctl.translator(), us.gameSender().makeTemporary(new AdaptorFromSession()), us.gameSender(), us.mainLog());
                 if (ref.isSet()) {
-                    // Re-using the existing executeGoToReference function requires use of a Control,
+                    // Re-using the existing executeGoToReferenceWait function requires use of a Control,
                     // and will produce a potential second process that we need to join with ours.
-                    JoiningControl(ctl, link).executeGoToReference("(Battle Simulator)", ref);
+                    JoiningControl(ctl, link).executeGoToReferenceWait("(Battle Simulator)", ref);
                 }
                 us.continueProcess(link);
             }
@@ -2081,7 +2081,7 @@ client::si::IFChartSetView(game::Session& session, ScriptSide& si, RequestLink1 
             : m_name(name), m_hasKeymap(hasKeymap)
             { }
         virtual void handle(Control& ctl, RequestLink2 link)
-            { ctl.handleSetViewRequest(link, m_name, m_hasKeymap); }
+            { ctl.handleSetView(link, m_name, m_hasKeymap); }
      private:
         String_t m_name;
         bool m_hasKeymap;
@@ -3312,7 +3312,7 @@ client::si::IFUIOverlayMessage(game::Session& session, ScriptSide& si, RequestLi
             : m_message(msg)
             { }
         virtual void handle(Control& ctl, RequestLink2 link)
-            { ctl.handleOverlayMessageRequest(link, m_message); }
+            { ctl.handleOverlayMessage(link, m_message); }
      private:
         String_t m_message;
     };

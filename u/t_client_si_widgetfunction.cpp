@@ -40,11 +40,11 @@ namespace {
             { interface().continueProcess(link); }
         virtual void handleScanKeyboardMode(client::si::RequestLink2 link)
             { interface().continueProcessWithFailure(link, "Context error"); }
-        virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t /*name*/, bool /*withKeymap*/)
+        virtual void handleSetView(client::si::RequestLink2 link, String_t /*name*/, bool /*withKeymap*/)
             { interface().continueProcessWithFailure(link, "Context error"); }
-        virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t /*name*/, int /*prefix*/)
+        virtual void handleUseKeymap(client::si::RequestLink2 link, String_t /*name*/, int /*prefix*/)
             { interface().continueProcessWithFailure(link, "Context error"); }
-        virtual void handleOverlayMessageRequest(client::si::RequestLink2 link, String_t /*text*/)
+        virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t /*text*/)
             { interface().continueProcessWithFailure(link, "Context error"); }
         virtual client::si::ContextProvider* createContextProvider()
             { return 0; }
@@ -86,7 +86,7 @@ WidgetVerifier::run()
 
         // ScriptSide/UserSide/Control. A Control is needed because UserSide does not process callbacks without one.
         util::MessageCollector console;
-        client::si::UserSide user(gameReceiver.getSender(), userThread, console, log);
+        client::si::UserSide user(root, gameReceiver.getSender(), tx, userThread, console, log);
         NullControl ctl(user, root, tx);
 
         // WidgetReference. We're operating in lock-step, so it doesn't matter that I cheat on the thread that creates it.

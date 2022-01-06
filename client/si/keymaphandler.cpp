@@ -180,13 +180,13 @@ client::si::KeymapHandler::handleScanKeyboardMode(RequestLink2 link)
 }
 
 void
-client::si::KeymapHandler::handleSetViewRequest(RequestLink2 link, String_t name, bool withKeymap)
+client::si::KeymapHandler::handleSetView(RequestLink2 link, String_t name, bool withKeymap)
 {
-    defaultHandleSetViewRequest(link, name, withKeymap);
+    defaultHandleSetView(link, name, withKeymap);
 }
 
 void
-client::si::KeymapHandler::handleUseKeymapRequest(RequestLink2 link, String_t name, int prefix)
+client::si::KeymapHandler::handleUseKeymap(RequestLink2 link, String_t name, int prefix)
 {
     // Handle internally
     // This is called if UseKeymap, UseKeymap is called twice
@@ -198,16 +198,13 @@ client::si::KeymapHandler::handleUseKeymapRequest(RequestLink2 link, String_t na
     show();
 
     // Continue inbound process.
-    // This is tricky; see comment in continueProcessWait().
-    // If we are already waiting, this will not actually wait to avoid recursive frames
-    // of handleUseKeymapRequest > continueProcessWait piling up.
-    continueProcessWait(link);
+    interface().continueProcess(link);
 }
 
 void
-client::si::KeymapHandler::handleOverlayMessageRequest(RequestLink2 link, String_t text)
+client::si::KeymapHandler::handleOverlayMessage(RequestLink2 link, String_t text)
 {
-    defaultHandleOverlayMessageRequest(link, text);
+    defaultHandleOverlayMessage(link, text);
 }
 
 client::si::ContextProvider*

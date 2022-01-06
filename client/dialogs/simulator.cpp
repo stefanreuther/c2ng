@@ -230,9 +230,9 @@ namespace {
         virtual void handleEndDialog(RequestLink2 link, int code);
         virtual void handlePopupConsole(RequestLink2 link);
         virtual void handleScanKeyboardMode(RequestLink2 link);
-        virtual void handleSetViewRequest(RequestLink2 link, String_t name, bool withKeymap);
-        virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix);
-        virtual void handleOverlayMessageRequest(RequestLink2 link, String_t text);
+        virtual void handleSetView(RequestLink2 link, String_t name, bool withKeymap);
+        virtual void handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix);
+        virtual void handleOverlayMessage(RequestLink2 link, String_t text);
         virtual client::si::ContextProvider* createContextProvider();
 
         // Event handlers
@@ -459,21 +459,21 @@ SimulatorDialog::handleScanKeyboardMode(RequestLink2 link)
 }
 
 void
-SimulatorDialog::handleSetViewRequest(RequestLink2 link, String_t name, bool withKeymap)
+SimulatorDialog::handleSetView(RequestLink2 link, String_t name, bool withKeymap)
 {
-    defaultHandleSetViewRequest(link, name, withKeymap);
+    defaultHandleSetView(link, name, withKeymap);
 }
 
 void
-SimulatorDialog::handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)
+SimulatorDialog::handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix)
 {
-    defaultHandleUseKeymapRequest(link, name, prefix);
+    defaultHandleUseKeymap(link, name, prefix);
 }
 
 void
-SimulatorDialog::handleOverlayMessageRequest(RequestLink2 link, String_t text)
+SimulatorDialog::handleOverlayMessage(RequestLink2 link, String_t text)
 {
-    defaultHandleOverlayMessageRequest(link, text);
+    defaultHandleOverlayMessage(link, text);
 }
 
 client::si::ContextProvider*
@@ -1487,7 +1487,7 @@ SimulatorDialog::onGoToBase()
 void
 SimulatorDialog::onGoToReference(game::Reference ref)
 {
-    executeGoToReference("(Battle Simulator)", ref);
+    executeGoToReferenceWait("(Battle Simulator)", ref);
 }
 
 void

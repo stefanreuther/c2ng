@@ -32,7 +32,7 @@ namespace client { namespace dialogs {
         ~FlakVcrDialog();
 
         /** Run dialog.
-            If user chooses to go to an object, returns a reference that you should pass to Control::executeGoToReference.
+            If user chooses to go to an object, returns a reference that you should pass to Control::executeGoToReferenceWait.
             \return reference (!isSet() if dialog was closed without choosing an object) */
         game::Reference run();
 

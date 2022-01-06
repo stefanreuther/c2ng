@@ -6,11 +6,8 @@
 #include "client/si/userside.hpp"
 #include "afl/string/format.hpp"
 #include "client/si/control.hpp"
-#include "client/si/requestlink1.hpp"
-#include "client/si/requestlink2.hpp"
 #include "client/si/scriptside.hpp"
 #include "client/si/usercall.hpp"
-#include "client/si/usertask.hpp"
 #include "game/extraidentifier.hpp"
 
 const size_t SCREEN_HISTORY_SIZE = 50;
@@ -18,15 +15,23 @@ const size_t SCREEN_HISTORY_SIZE = 50;
 const game::ExtraIdentifier<game::Session, client::si::ScriptSide> client::si::SCRIPTSIDE_ID = {{}};
 
 // Constructor.
-client::si::UserSide::UserSide(util::RequestSender<game::Session> gameSender, util::RequestDispatcher& self,
-                               util::MessageCollector& console, afl::sys::Log& mainLog)
+client::si::UserSide::UserSide(ui::Root& root,
+                               util::RequestSender<game::Session> gameSender,
+                               afl::string::Translator& tx,
+                               util::RequestDispatcher& self,
+                               util::MessageCollector& console,
+                               afl::sys::Log& mainLog)
     : m_gameSender(gameSender),
       m_receiver(self, *this),
       m_console(console),
       m_mainLog(mainLog),
       m_history(SCREEN_HISTORY_SIZE),
-      m_waitIdCounter(0)
+      m_blocker(root, tx("Working...")),
+      m_root(root),
+      m_translator(tx),
+      m_waitIdCounter(3000)
 {
+    // TODO: remove the 'RequestDispatcher' parameter; right now, this is required by test (WidgetVerifier::run)
     // Create the ScriptSide
     class Task : public util::Request<game::Session> {
      public:
@@ -45,6 +50,10 @@ client::si::UserSide::UserSide(util::RequestSender<game::Session> gameSender, ut
         util::RequestSender<UserSide> m_reply;
     };
     m_gameSender.postNewRequest(new Task(m_receiver.getSender()));
+
+    // Place the Blocker
+    m_blocker.setExtent(gfx::Rectangle(gfx::Point(), m_blocker.getLayoutInfo().getPreferredSize()));
+    m_root.moveWidgetToEdge(m_blocker, gfx::CenterAlign, gfx::BottomAlign, 10);
 }
 
 // Destructor.
@@ -64,7 +73,26 @@ client::si::UserSide::~UserSide()
     m_gameSender.postNewRequest(new Task());
 }
 
-// Post a request to execute on the ScriptSide.
+// Reset UI state.
+void
+client::si::UserSide::reset()
+{
+    m_history.clear();
+
+    // FIXME: here?
+    class Task : public util::Request<game::Session> {
+     public:
+        void handle(game::Session& session)
+            { session.authCache().clear(); }
+    };
+    m_gameSender.postNewRequest(new Task());
+}
+
+/*
+ *  Requests to Script Side
+ */
+
+// Post a request to execute on the ScriptSide (low-level version).
 void
 client::si::UserSide::postNewRequest(ScriptRequest* request)
 {
@@ -88,19 +116,10 @@ client::si::UserSide::postNewRequest(ScriptRequest* request)
     m_gameSender.postNewRequest(new Task(p));
 }
 
-void
-client::si::UserSide::reset()
-{
-    m_history.clear();
 
-    // FIXME: here?
-    class Task : public util::Request<game::Session> {
-     public:
-        void handle(game::Session& session)
-            { session.authCache().clear(); }
-    };
-    m_gameSender.postNewRequest(new Task());
-}
+/*
+ *  Process Functions
+ */
 
 // Continue a process after UI callout.
 void
@@ -119,6 +138,7 @@ client::si::UserSide::continueProcess(RequestLink2 link)
     postNewRequest(new Task(link));
 }
 
+// Join processes into a process group.
 void
 client::si::UserSide::joinProcess(RequestLink2 link, RequestLink2 other)
 {
@@ -139,6 +159,7 @@ client::si::UserSide::joinProcess(RequestLink2 link, RequestLink2 other)
     }
 }
 
+// Join process group.
 void
 client::si::UserSide::joinProcessGroup(RequestLink2 link, uint32_t oldGroup)
 {
@@ -156,7 +177,6 @@ client::si::UserSide::joinProcessGroup(RequestLink2 link, uint32_t oldGroup)
     };
     postNewRequest(new Task(link, oldGroup));
 }
-
 
 // Continue a process after UI callout with error.
 void
@@ -194,33 +214,6 @@ client::si::UserSide::detachProcess(RequestLink2 link)
     postNewRequest(new Task(link));
 }
 
-// Process a UserTask.
-void
-client::si::UserSide::processTask(UserTask& t, RequestLink2 link)
-{
-    if (m_controls.empty()) {
-        continueProcessWithFailure(link, interpreter::Error::contextError().what());
-    } else {
-        Control& ctl = *m_controls.back();
-        ctl.setInteracting(true);
-        try {
-            t.handle(ctl, link);
-        }
-        catch (std::exception& e) {
-            continueProcessWithFailure(link, e.what());
-        }
-        ctl.setInteracting(false);
-    }
-}
-
-void
-client::si::UserSide::processCall(UserCall& t)
-{
-    if (!m_controls.empty()) {
-        t.handle(*m_controls.back());
-    }
-}
-
 // Set variable in process.
 void
 client::si::UserSide::setVariable(RequestLink2 link, String_t name, std::auto_ptr<afl::data::Value> value)
@@ -242,6 +235,10 @@ client::si::UserSide::setVariable(RequestLink2 link, String_t name, std::auto_pt
     postNewRequest(new Task(link, name, value));
 }
 
+/*
+ *  Process Group / Wait Functions
+ */
+
 // Allocate a wait Id.
 uint32_t
 client::si::UserSide::allocateWaitId()
@@ -249,25 +246,26 @@ client::si::UserSide::allocateWaitId()
     return ++m_waitIdCounter;
 }
 
-// Continue a detached process and setup wait.
+// Continue a detached process.
 void
-client::si::UserSide::continueProcessWait(uint32_t id, RequestLink2 link)
+client::si::UserSide::continueProcessWait(uint32_t waitId, RequestLink2 link)
 {
     class ContinueTask : public ScriptRequest {
      public:
-        ContinueTask(uint32_t id, RequestLink2 link)
-            : m_id(id),
+        ContinueTask(uint32_t waitId, RequestLink2 link)
+            : m_waitId(waitId),
               m_link(link)
             { }
         void handle(game::Session& s, ScriptSide& t)
-            { t.continueProcessWait(m_id, s, m_link); }
+            { t.continueProcessWait(m_waitId, s, m_link); }
      private:
-        uint32_t m_id;
+        uint32_t m_waitId;
         RequestLink2 m_link;
     };
-    postNewRequest(new ContinueTask(id, link));
+    postNewRequest(new ContinueTask(waitId, link));
 }
 
+// Execute a task.
 void
 client::si::UserSide::executeTaskWait(uint32_t id, std::auto_ptr<ScriptTask> task)
 {
@@ -277,21 +275,12 @@ client::si::UserSide::executeTaskWait(uint32_t id, std::auto_ptr<ScriptTask> tas
             : m_id(id), m_task(task)
             { }
         void handle(game::Session& s, ScriptSide& t)
-            { t.executeTask(m_id, m_task, s); }
+            { t.executeTaskWait(m_id, m_task, s); }
      private:
         uint32_t m_id;
         std::auto_ptr<ScriptTask> m_task;
     };
     postNewRequest(new StartTask(id, task));
-}
-
-// Handle successful wait.
-void
-client::si::UserSide::handleWait(uint32_t id)
-{
-    for (size_t i = m_controls.size(); i > 0; --i) {
-        m_controls[i-1]->handleWait(id);
-    }
 }
 
 // Create ContextProvider.
@@ -304,6 +293,10 @@ client::si::UserSide::createContextProvider()
         return m_controls.back()->createContextProvider();
     }
 }
+
+/*
+ *  Listener Functions
+ */
 
 // Add listener.
 void
@@ -322,4 +315,76 @@ client::si::UserSide::removeControl(Control& p)
             break;
         }
     }
+}
+
+// Get current (=topmost) control.
+client::si::Control*
+client::si::UserSide::getControl()
+{
+    return m_controls.empty() ? 0 : m_controls.back();
+}
+
+// Handle successful wait.
+void
+client::si::UserSide::onTaskComplete(uint32_t id)
+{
+    for (size_t i = m_controls.size(); i > 0; --i) {
+        m_controls[i-1]->onTaskComplete(id);
+    }
+}
+
+/*
+ *  Script-side Actions
+ */
+
+// Process an interaction.
+void
+client::si::UserSide::processInteraction(util::Request<UserSide>& req)
+{
+    // Because UI is single-threaded, and all setWaiting(WHAT), setWaiting(prev) calls happen in the same stack frame,
+    // there's no risk of on setWaiting(prev) reverting the wrong call or getting lost.
+    const bool prev = setWaiting(false);
+    try {
+        req.handle(*this);
+    }
+    catch (...) {
+        setWaiting(prev);
+        throw;
+    }
+    setWaiting(prev);
+}
+
+// Process a synchronous script call.
+void
+client::si::UserSide::processCall(UserCall& t)
+{
+    if (!m_controls.empty()) {
+        t.handle(*m_controls.back());
+    }
+}
+
+
+/*
+ *  Wait Indicator
+ */
+
+// Set visibility of wait-indicator.
+bool
+client::si::UserSide::setWaiting(bool enable)
+{
+    bool previous = (m_blocker.getParent() != 0);
+    if (enable) {
+        if (m_blocker.getPreviousSibling() != 0) {
+            m_root.remove(m_blocker);
+        }
+        if (m_blocker.getParent() == 0) {
+            m_root.add(m_blocker);
+        }
+    } else {
+        if (m_blocker.getParent() != 0) {
+            m_root.remove(m_blocker);
+            m_blocker.replayEvents();
+        }
+    }
+    return previous;
 }

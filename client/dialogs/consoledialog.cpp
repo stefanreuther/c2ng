@@ -588,12 +588,12 @@ namespace {
                 interface().continueProcess(link);
             }
 
-        virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)
-            { m_parentControl.handleSetViewRequest(link, name, withKeymap); }
-        virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)
-            { defaultHandleUseKeymapRequest(link, name, prefix); }
-        virtual void handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text)
-            { defaultHandleOverlayMessageRequest(link, text); }
+        virtual void handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap)
+            { m_parentControl.handleSetView(link, name, withKeymap); }
+        virtual void handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix)
+            { defaultHandleUseKeymap(link, name, prefix); }
+        virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text)
+            { defaultHandleOverlayMessage(link, text); }
         virtual client::si::ContextProvider* createContextProvider()
             {
                 return m_parentControl.createContextProvider();

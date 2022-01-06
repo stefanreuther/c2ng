@@ -194,7 +194,7 @@ namespace {
             {
                 // ex WCommandEditDialog::onGoto
                 if (const game::proxy::CommandListProxy::Info* p = m_listbox.getCurrentCommand()) {
-                    executeGoToReference("Auxiliary Commands", p->ref);
+                    executeGoToReferenceWait("Auxiliary Commands", p->ref);
                 }
             }
 
@@ -276,12 +276,12 @@ namespace {
             { defaultHandleScanKeyboardMode(link); }
         virtual void handleEndDialog(client::si::RequestLink2 link, int code)
             { dialogHandleEndDialog(link, code, m_outputState, m_loop, 0); }
-        virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)
-            { defaultHandleSetViewRequest(link, name, withKeymap); }
-        virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)
-            { defaultHandleUseKeymapRequest(link, name, prefix); }
-        virtual void handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text)
-            { defaultHandleOverlayMessageRequest(link, text); }
+        virtual void handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap)
+            { defaultHandleSetView(link, name, withKeymap); }
+        virtual void handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix)
+            { defaultHandleUseKeymap(link, name, prefix); }
+        virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text)
+            { defaultHandleOverlayMessage(link, text); }
         virtual client::si::ContextProvider* createContextProvider()
             { return 0; }
 

@@ -29,9 +29,9 @@ namespace client { namespace dialogs {
         virtual void handleEndDialog(client::si::RequestLink2 link, int code);
         virtual void handlePopupConsole(client::si::RequestLink2 link);
         virtual void handleScanKeyboardMode(client::si::RequestLink2 link);
-        virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap);
-        virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix);
-        virtual void handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text);
+        virtual void handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap);
+        virtual void handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix);
+        virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text);
         virtual client::si::ContextProvider* createContextProvider();
 
      private:

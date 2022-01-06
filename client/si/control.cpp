@@ -1,5 +1,6 @@
 /**
   *  \file client/si/control.cpp
+  *  \brief Class client::si::Control
   */
 
 #include "client/si/control.hpp"
@@ -20,39 +21,35 @@ namespace {
 }
 
 
-client::si::Control::Control(UserSide& iface, ui::Root& root, afl::string::Translator& tx)
-    : m_waiting(false),
-      m_interacting(false),
-      m_active(false),
-      m_interface(iface),
-      m_id(0),
-      m_blocker(root, tx.translateString("Script working...")),
+client::si::Control::Control(UserSide& us, ui::Root& root, afl::string::Translator& tx)
+    : m_interface(us),
+      m_id(m_interface.allocateWaitId()),
       m_loop(root),
       m_root(root),
       m_translator(tx)
 {
-    m_interface.mainLog().write(LogListener::Trace, LOG_NAME, Format("<%p> create", this));
-    m_blocker.setExtent(gfx::Rectangle(gfx::Point(), m_blocker.getLayoutInfo().getPreferredSize()));
-    m_root.moveWidgetToEdge(m_blocker, gfx::CenterAlign, gfx::BottomAlign, 10);
+    m_interface.mainLog().write(LogListener::Trace, LOG_NAME, Format("<c%d> create", m_id));
     m_interface.addControl(*this);
 }
 
 client::si::Control::~Control()
 {
-    m_interface.mainLog().write(LogListener::Trace, LOG_NAME, Format("<%p> remove", this));
+    m_interface.mainLog().write(LogListener::Trace, LOG_NAME, Format("<c%d> remove", m_id));
     m_interface.removeControl(*this);
 }
 
+// Execute a script command.
 void
 client::si::Control::executeCommandWait(String_t command, bool verbose, String_t name)
 {
     // replaces int/simple.h:runHook (using command "RunHook ...")
     // replaces int/simple.h:executeStatement (using command "C2$Eval atom, prefix" or similar)
-    std::auto_ptr<ContextProvider> ctxp(m_interface.createContextProvider());
+    std::auto_ptr<ContextProvider> ctxp(createContextProvider());
     std::auto_ptr<ScriptTask> t(new CommandTask(command, verbose, name, ctxp));
     executeTaskInternal(t, Format("executeCommandWait('%s')", name));
 }
 
+// Execute a key command.
 void
 client::si::Control::executeKeyCommandWait(String_t keymapName, util::Key_t key, int prefix)
 {
@@ -79,13 +76,14 @@ client::si::Control::executeKeyCommandWait(String_t keymapName, util::Key_t key,
         int m_prefix;
         std::auto_ptr<ContextProvider> m_contextProvider;
     };
-    std::auto_ptr<ContextProvider> ctxp(m_interface.createContextProvider());
+    std::auto_ptr<ContextProvider> ctxp(createContextProvider());
     std::auto_ptr<ScriptTask> t(new Task(keymapName, key, prefix, ctxp));
     executeTaskInternal(t, Format("executeKeyCommandWait('%s')", util::formatKey(key)));
 }
 
+// Execute a "UI.GotoReference" command with the given game::Reference.
 void
-client::si::Control::executeGoToReference(String_t taskName, game::Reference ref)
+client::si::Control::executeGoToReferenceWait(String_t taskName, game::Reference ref)
 {
     class ReferenceTask : public client::si::ScriptTask {
      public:
@@ -116,62 +114,45 @@ client::si::Control::executeGoToReference(String_t taskName, game::Reference ref
 
     if (ref.isSet()) {
         std::auto_ptr<client::si::ScriptTask> t(new ReferenceTask(taskName, ref));
-        executeTaskWait(t);
+        executeTaskInternal(t, "executeGoToReferenceWait()");
     }
 }
 
-
+// Execute a script task.
 void
 client::si::Control::executeTaskWait(std::auto_ptr<ScriptTask> task)
 {
-    executeTaskInternal(task, "executeTask()");
+    executeTaskInternal(task, "executeTaskWait()");
 }
 
+// Continue a detached process.
 void
 client::si::Control::continueProcessWait(RequestLink2 link)
 {
     if (link.isValid()) {
-        m_interacting = false;
-        if (m_waiting) {
-            // If I am already waiting, re-use the wait Id, and do NOT re-enter m_loop.run().
-            // This happens when someone does continueProcessWait from a Control virtual,
-            // e.g. KeymapHandler::handleUseKeymapRequest when a process does two UseKeymap in a row.
-            // Failure to do this will cause KeymapHandler::run() to hang.
-            // This means continueProcessWait will not actually wait for recursive waits.
-            // (quick fix, not 100% sure about it)
-            m_interface.mainLog().write(LogListener::Trace, LOG_NAME, Format("<%p> continueProcessWait => %d (nested)", this, m_id));
-            m_interface.continueProcessWait(m_id, link);
-            updateBlocker();
-        } else {
-            m_waiting = true;
-            m_id = m_interface.allocateWaitId();
-            m_interface.mainLog().write(LogListener::Trace, LOG_NAME, Format("<%p> continueProcessWait => %d", this, m_id));
-            m_interface.continueProcessWait(m_id, link);
-            updateBlocker();
-            m_loop.run();
-        }
+        bool prev = m_interface.setWaiting(true);
+        m_interface.mainLog().write(LogListener::Trace, LOG_NAME, Format("<c%d> continueProcessWait", m_id));
+        m_interface.continueProcessWait(m_id, link);
+        m_loop.run();
+        m_interface.setWaiting(prev);
     }
 }
 
+// Handle successful wait.
 void
-client::si::Control::handleWait(uint32_t id)
+client::si::Control::onTaskComplete(uint32_t waitId)
 {
-    if (id == m_id) {
-        m_interface.mainLog().write(LogListener::Trace, LOG_NAME, Format("<%p> handleWait <= %d", this, m_id));
-        m_waiting = false;
-        updateBlocker();
+    if (waitId == m_id) {
+        m_interface.mainLog().write(LogListener::Trace, LOG_NAME, Format("<c%d> onTaskComplete", m_id));
         m_loop.stop(0);
     }
 }
 
-void
-client::si::Control::setInteracting(bool state)
-{
-    m_interface.mainLog().write(LogListener::Trace, LOG_NAME, Format("<%p> setInteracting(%d)", this, int(state)));
-    m_interacting = state;
-    updateBlocker();
-}
+/*
+ *  User-Interface Callouts
+ */
 
+// Default implementation of handlePopupConsole().
 void
 client::si::Control::defaultHandlePopupConsole(RequestLink2 link)
 {
@@ -185,6 +166,7 @@ client::si::Control::defaultHandlePopupConsole(RequestLink2 link)
     handleStateChange(output.getProcess(), output.getTarget());
 }
 
+// Default implementation of handleScanKeyboardMode().
 void
 client::si::Control::defaultHandleScanKeyboardMode(RequestLink2 link)
 {
@@ -192,15 +174,17 @@ client::si::Control::defaultHandleScanKeyboardMode(RequestLink2 link)
     interface().continueProcessWithFailure(link, "Context error");
 }
 
+// Default implementation of handleSetView().
 void
-client::si::Control::defaultHandleSetViewRequest(RequestLink2 link, String_t /*name*/, bool /*withKeymap*/)
+client::si::Control::defaultHandleSetView(RequestLink2 link, String_t /*name*/, bool /*withKeymap*/)
 {
     // Default behaviour for Chart.SetView is to reject it
     interface().continueProcessWithFailure(link, "Context error");
 }
 
+// Default implementation of handleUseKeymap().
 void
-client::si::Control::defaultHandleUseKeymapRequest(RequestLink2 link, String_t name, int prefix)
+client::si::Control::defaultHandleUseKeymap(RequestLink2 link, String_t name, int prefix)
 {
     KeymapHandler::Result r = KeymapHandler(*this, name, prefix).run(link);
     switch (r.action) {
@@ -224,16 +208,19 @@ client::si::Control::defaultHandleUseKeymapRequest(RequestLink2 link, String_t n
     }
 }
 
+// Default implementation of handleOverlayMessage().
 void
-client::si::Control::defaultHandleOverlayMessageRequest(RequestLink2 link, String_t text)
+client::si::Control::defaultHandleOverlayMessage(RequestLink2 link, String_t text)
 {
     client::widgets::showDecayingMessage(root(), text);
     interface().continueProcess(link);
 }
 
+// Implementation of handleStateChange() for dialogs.
 void
 client::si::Control::dialogHandleStateChange(RequestLink2 link, OutputState::Target target, OutputState& out, ui::EventLoop& loop, int n)
 {
+    m_interface.mainLog().write(LogListener::Trace, LOG_NAME, Format("<c%d> dialogHandleStateChange %s", m_id, OutputState::toString(out.getTarget())));
     if (target == OutputState::NoChange) {
         m_interface.continueProcess(link);
     } else {
@@ -243,6 +230,7 @@ client::si::Control::dialogHandleStateChange(RequestLink2 link, OutputState::Tar
     }
 }
 
+// Implementation of handleEndDialog() for dialogs.
 void
 client::si::Control::dialogHandleEndDialog(RequestLink2 link, int /*code*/, OutputState& out, ui::EventLoop& loop, int n)
 {
@@ -252,28 +240,11 @@ client::si::Control::dialogHandleEndDialog(RequestLink2 link, int /*code*/, Outp
 }
 
 void
-client::si::Control::updateBlocker()
-{
-    bool newState = m_waiting && !m_interacting;
-    if (newState != m_active) {
-        m_active = newState;
-        if (newState) {
-            m_root.add(m_blocker);
-        } else {
-            m_root.remove(m_blocker);
-            m_blocker.replayEvents();
-        }
-    }
-}
-
-void
 client::si::Control::executeTaskInternal(std::auto_ptr<ScriptTask> task, String_t name)
 {
-    m_waiting = true;
-    m_interacting = false;
-    m_id = m_interface.allocateWaitId();
-    m_interface.mainLog().write(LogListener::Trace, LOG_NAME, Format("<%p> %s => %d", this, name, m_id));
+    bool prev = m_interface.setWaiting(true);
+    m_interface.mainLog().write(LogListener::Trace, LOG_NAME, Format("<c%d> %s", m_id, name));
     m_interface.executeTaskWait(m_id, task);
-    updateBlocker();
     m_loop.run();
+    m_interface.setWaiting(prev);
 }

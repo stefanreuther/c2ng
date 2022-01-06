@@ -66,9 +66,9 @@ namespace {
         virtual void handleEndDialog(client::si::RequestLink2 link, int code);
         virtual void handlePopupConsole(client::si::RequestLink2 link);
         virtual void handleScanKeyboardMode(client::si::RequestLink2 link);
-        virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap);
-        virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix);
-        virtual void handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text);
+        virtual void handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap);
+        virtual void handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix);
+        virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text);
         virtual client::si::ContextProvider* createContextProvider();
 
      private:
@@ -280,21 +280,21 @@ UfoInfoDialog::handleScanKeyboardMode(client::si::RequestLink2 link)
 }
 
 void
-UfoInfoDialog::handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)
+UfoInfoDialog::handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap)
 {
-    defaultHandleSetViewRequest(link, name, withKeymap);
+    defaultHandleSetView(link, name, withKeymap);
 }
 
 void
-UfoInfoDialog::handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)
+UfoInfoDialog::handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix)
 {
-    defaultHandleUseKeymapRequest(link, name, prefix);
+    defaultHandleUseKeymap(link, name, prefix);
 }
 
 void
-UfoInfoDialog::handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text)
+UfoInfoDialog::handleOverlayMessage(client::si::RequestLink2 link, String_t text)
 {
-    defaultHandleOverlayMessageRequest(link, text);
+    defaultHandleOverlayMessage(link, text);
 }
 
 client::si::ContextProvider*
@@ -392,7 +392,7 @@ void
 UfoInfoDialog::onGoto()
 {
     if (m_ufoCenter.getX() != 0) {
-        executeGoToReference("(Ufo)", m_ufoCenter);
+        executeGoToReferenceWait("(Ufo)", m_ufoCenter);
     }
 }
 

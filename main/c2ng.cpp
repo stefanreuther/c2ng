@@ -95,11 +95,11 @@ namespace {
             { interface().continueProcessWithFailure(link, "Context error"); }
         virtual void handleScanKeyboardMode(client::si::RequestLink2 link)
             { interface().continueProcessWithFailure(link, "Context error"); }
-        virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t /*name*/, bool /*withKeymap*/)
+        virtual void handleSetView(client::si::RequestLink2 link, String_t /*name*/, bool /*withKeymap*/)
             { interface().continueProcessWithFailure(link, "Context error"); }
-        virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t /*name*/, int /*prefix*/)
+        virtual void handleUseKeymap(client::si::RequestLink2 link, String_t /*name*/, int /*prefix*/)
             { interface().continueProcessWithFailure(link, "Context error"); }
-        virtual void handleOverlayMessageRequest(client::si::RequestLink2 link, String_t /*text*/)
+        virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t /*text*/)
             { interface().continueProcessWithFailure(link, "Context error"); }
         virtual client::si::ContextProvider* createContextProvider()
             { return 0; }
