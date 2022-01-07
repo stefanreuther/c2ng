@@ -29,7 +29,6 @@
 #include "client/si/control.hpp"
 #include "client/si/genericwidgetvalue.hpp"
 #include "client/si/scriptside.hpp"
-#include "client/si/usercall.hpp"
 #include "client/si/values.hpp"
 #include "client/si/widgetcommand.hpp"
 #include "client/si/widgetholder.hpp"
@@ -270,7 +269,7 @@ client::si::Factory::run(game::Session& session, ScriptSide& ss, const WidgetRef
         return 0;
     }
 
-    class Creator : public UserCall {
+    class Creator : public util::Request<Control> {
      public:
         Creator(const WidgetReference& container, Factory& parent, size_t& result)
             : m_container(container),

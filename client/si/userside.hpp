@@ -15,6 +15,7 @@
 #include "interpreter/process.hpp"
 #include "ui/root.hpp"
 #include "util/messagecollector.hpp"
+#include "util/request.hpp"
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
@@ -24,7 +25,6 @@ namespace client { namespace si {
     class Control;
     class RequestLink2;
     class ScriptSide;
-    class UserCall;
     class ContextProvider;
 
     extern const game::ExtraIdentifier<game::Session, ScriptSide> SCRIPTSIDE_ID;
@@ -290,7 +290,7 @@ namespace client { namespace si {
             The call is not allowed to interact with the user.
             @param t Task
             @see ScriptSide::call, ScriptSide::callAsyncNew */
-        void processCall(UserCall& t);
+        void processCall(util::Request<Control>& t);
 
 
         /*!

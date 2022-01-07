@@ -3,21 +3,21 @@
   */
 
 #include "client/si/listboxfunction.hpp"
-#include "client/si/widgetholder.hpp"
-#include "interpreter/arguments.hpp"
-#include "ui/widgets/stringlistbox.hpp"
-#include "client/si/scriptside.hpp"
-#include "client/si/usercall.hpp"
 #include "client/si/control.hpp"
-#include "interpreter/singlecontext.hpp"
-#include "interpreter/nametable.hpp"
-#include "interpreter/typehint.hpp"
-#include "interpreter/propertyacceptor.hpp"
+#include "client/si/genericwidgetvalue.hpp"
+#include "client/si/scriptside.hpp"
+#include "client/si/stringlistdialogwidget.hpp"
 #include "client/si/widgetcommand.hpp"
 #include "client/si/widgetcommandvalue.hpp"
-#include "client/si/stringlistdialogwidget.hpp"
-#include "client/si/genericwidgetvalue.hpp"
 #include "client/si/widgetfunction.hpp"
+#include "client/si/widgetholder.hpp"
+#include "interpreter/arguments.hpp"
+#include "interpreter/nametable.hpp"
+#include "interpreter/propertyacceptor.hpp"
+#include "interpreter/singlecontext.hpp"
+#include "interpreter/typehint.hpp"
+#include "ui/widgets/stringlistbox.hpp"
+#include "util/request.hpp"
 
 client::si::ListboxFunction::ListboxFunction(game::Session& session, ScriptSide* pScriptSide)
     : m_session(session),
@@ -100,7 +100,7 @@ client::si::ListboxFunction::get(interpreter::Arguments& args)
     }
 
     // Parse args and populate Creator
-    class Creator : public UserCall {
+    class Creator : public util::Request<Control> {
      public:
         Creator(afl::base::Ref<WidgetHolder> wh, size_t& result)
             : m_wh(wh),

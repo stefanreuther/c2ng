@@ -6,7 +6,6 @@
 #include "client/si/widgetextraproperty.hpp"
 #include "client/si/scriptside.hpp"
 #include "client/widgets/controlscreenheader.hpp"
-#include "client/si/usercall.hpp"
 #include "client/si/widgetreference.hpp"
 #include "ui/rich/document.hpp"
 #include "game/interface/richtextfunctions.hpp"
@@ -88,8 +87,7 @@ client::si::setWidgetProperty(WidgetExtraProperty p, const afl::data::Value* val
 void
 client::si::setWidgetProperty(WidgetExtraProperty p, const afl::data::Value* value, ScriptSide& ss, const WidgetReference& ref)
 {
-    // UserCall for the thread transition.
-    class Setter : public UserCall {
+    class Setter : public util::Request<Control> {
      public:
         Setter(WidgetExtraProperty p, const WidgetReference& ref, const afl::data::Value* value)
             : m_property(p), m_ref(ref), m_value(value)

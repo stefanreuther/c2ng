@@ -7,7 +7,6 @@
 #include "afl/string/format.hpp"
 #include "client/si/control.hpp"
 #include "client/si/scriptside.hpp"
-#include "client/si/usercall.hpp"
 #include "game/extraidentifier.hpp"
 
 const size_t SCREEN_HISTORY_SIZE = 50;
@@ -275,7 +274,7 @@ client::si::UserSide::processInteraction(util::Request<UserSide>& req)
 
 // Process a synchronous script call.
 void
-client::si::UserSide::processCall(UserCall& t)
+client::si::UserSide::processCall(util::Request<Control>& t)
 {
     if (!m_controls.empty()) {
         t.handle(*m_controls.back());

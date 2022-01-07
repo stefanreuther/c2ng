@@ -40,11 +40,6 @@ class TestClientSiScriptProcedure : public CxxTest::TestSuite {
     void testNull();
 };
 
-class TestClientSiUserCall : public CxxTest::TestSuite {
- public:
-    void testIt();
-};
-
 class TestClientSiUserTask : public CxxTest::TestSuite {
  public:
     void testIt();

@@ -1005,12 +1005,11 @@ FILES_guilib = ui/res/engineimageloader.hpp \
     client/si/widgetvalue.hpp client/si/widgetfunction.cpp \
     client/si/widgetfunction.hpp client/si/widgetcommand.cpp \
     client/si/widgetcommand.hpp client/si/widgetholder.cpp \
-    client/si/widgetholder.hpp client/si/usercall.hpp \
-    ui/res/winplanbitmapprovider.cpp ui/res/winplanbitmapprovider.hpp \
-    ui/res/factory.cpp ui/res/factory.hpp ui/res/resourcefileprovider.cpp \
-    ui/res/resourcefileprovider.hpp ui/res/resourcefile.cpp \
-    ui/res/resourcefile.hpp ui/res/resid.cpp ui/res/resid.hpp \
-    client/plugins.cpp client/plugins.hpp \
+    client/si/widgetholder.hpp ui/res/winplanbitmapprovider.cpp \
+    ui/res/winplanbitmapprovider.hpp ui/res/factory.cpp ui/res/factory.hpp \
+    ui/res/resourcefileprovider.cpp ui/res/resourcefileprovider.hpp \
+    ui/res/resourcefile.cpp ui/res/resourcefile.hpp ui/res/resid.cpp \
+    ui/res/resid.hpp client/plugins.cpp client/plugins.hpp \
     client/widgets/controlscreenheader.cpp \
     client/widgets/controlscreenheader.hpp \
     client/tiles/shipscreenheadertile.cpp \
@@ -2089,10 +2088,9 @@ FILES_testsuite = u/t_util_doc_verifier.cpp \
     u/t_util_messagenotifier.cpp u/t_util_messagecollector.cpp \
     u/t_util_messagematcher.cpp u/t_util_filenamepattern.cpp \
     u/t_gfx_types.cpp u/t_gfx_gen_perlinnoise.cpp u/t_gfx_gen.hpp \
-    u/t_client_si_scriptprocedure.cpp u/t_client_si_usercall.cpp \
-    u/t_game_sim_loader.cpp u/t_game_sim_planet.cpp u/t_game_sim_ship.cpp \
-    u/t_game_sim_object.cpp u/t_game_sim.hpp \
-    u/t_game_actions_preconditions.cpp u/t_game_actions.hpp \
+    u/t_client_si_scriptprocedure.cpp u/t_game_sim_loader.cpp \
+    u/t_game_sim_planet.cpp u/t_game_sim_ship.cpp u/t_game_sim_object.cpp \
+    u/t_game_sim.hpp u/t_game_actions_preconditions.cpp u/t_game_actions.hpp \
     u/t_util_runlengthexpandtransform.cpp u/t_util_stringparser.cpp \
     u/t_ui_res_resid.cpp u/t_game_interface_explosioncontext.cpp \
     u/t_game_map_explosion.cpp u/t_interpreter_procedurevalue.cpp \

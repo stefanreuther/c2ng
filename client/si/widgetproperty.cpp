@@ -7,7 +7,6 @@
 #include "client/si/compoundwidget.hpp"
 #include "client/si/control.hpp"
 #include "client/si/scriptside.hpp"
-#include "client/si/usercall.hpp"
 #include "client/si/values.hpp"
 #include "client/si/widgetreference.hpp"
 #include "interpreter/arguments.hpp"
@@ -172,8 +171,7 @@ client::si::setWidgetProperty(WidgetProperty p, const afl::data::Value* value, u
 afl::data::Value*
 client::si::getWidgetProperty(WidgetProperty p, ScriptSide& ss, const WidgetReference& ref)
 {
-    // UserCall for the thread transition
-    class Getter : public UserCall {
+    class Getter : public util::Request<Control> {
      public:
         Getter(WidgetProperty p, const WidgetReference& ref, std::auto_ptr<afl::data::Value>& result)
             : m_property(p), m_ref(ref), m_result(result)
@@ -197,8 +195,7 @@ client::si::getWidgetProperty(WidgetProperty p, ScriptSide& ss, const WidgetRefe
 void
 client::si::setWidgetProperty(WidgetProperty p, const afl::data::Value* value, ScriptSide& ss, const WidgetReference& ref)
 {
-    // UserCall for the thread transition.
-    class Setter : public UserCall {
+    class Setter : public util::Request<Control> {
      public:
         Setter(WidgetProperty p, const WidgetReference& ref, const afl::data::Value* value)
             : m_property(p), m_ref(ref), m_value(value)

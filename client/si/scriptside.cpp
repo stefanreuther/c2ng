@@ -7,7 +7,6 @@
 #include "afl/sys/semaphore.hpp"
 #include "client/si/requestlink1.hpp"
 #include "client/si/requestlink2.hpp"
-#include "client/si/usercall.hpp"
 #include "client/si/userside.hpp"
 #include "client/si/usertask.hpp"
 
@@ -144,11 +143,11 @@ client::si::ScriptSide::postNewInteraction(util::Request<UserSide>* req)
 
 // Execute command on UserSide.
 void
-client::si::ScriptSide::call(UserCall& t)
+client::si::ScriptSide::call(util::Request<Control>& t)
 {
     class Proxy : public util::Request<UserSide> {
      public:
-        Proxy(UserCall& t, afl::sys::Semaphore& result, std::auto_ptr<interpreter::Error>& error)
+        Proxy(util::Request<Control>& t, afl::sys::Semaphore& result, std::auto_ptr<interpreter::Error>& error)
             : m_task(t),
               m_result(result),
               m_error(error)
@@ -168,7 +167,7 @@ client::si::ScriptSide::call(UserCall& t)
                 }
             }
      private:
-        UserCall& m_task;
+        util::Request<Control>& m_task;
         afl::sys::Semaphore& m_result;
         std::auto_ptr<interpreter::Error>& m_error;
     };
@@ -184,11 +183,11 @@ client::si::ScriptSide::call(UserCall& t)
 
 // Execute command on UserSide, asynchronously.
 void
-client::si::ScriptSide::callAsyncNew(UserCall* t)
+client::si::ScriptSide::callAsyncNew(util::Request<Control>* t)
 {
     class Proxy : public util::Request<UserSide> {
      public:
-        Proxy(std::auto_ptr<UserCall>& t)
+        Proxy(std::auto_ptr<util::Request<Control> >& t)
             : m_task(t)
             { }
         ~Proxy()
@@ -203,10 +202,10 @@ client::si::ScriptSide::callAsyncNew(UserCall* t)
                 }
             }
      private:
-        std::auto_ptr<UserCall> m_task;
+        std::auto_ptr<util::Request<Control> > m_task;
     };
 
-    std::auto_ptr<UserCall> tt(t);
+    std::auto_ptr<util::Request<Control> > tt(t);
     m_reply.postNewRequest(new Proxy(tt));
 }
 

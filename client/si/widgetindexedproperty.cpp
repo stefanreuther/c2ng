@@ -3,7 +3,6 @@
   */
 
 #include "client/si/widgetindexedproperty.hpp"
-#include "client/si/usercall.hpp"
 #include "client/si/widgetreference.hpp"
 #include "client/widgets/controlscreenheader.hpp"
 #include "interpreter/error.hpp"
@@ -175,8 +174,7 @@ client::si::setWidgetProperty(WidgetIndexedProperty p, const afl::data::Value* i
 void
 client::si::setWidgetProperty(WidgetIndexedProperty p, const afl::data::Value* index, const afl::data::Value* value, ScriptSide& ss, const WidgetReference& ref)
 {
-    // UserCall for the thread transition.
-    class Setter : public UserCall {
+    class Setter : public util::Request<Control> {
      public:
         Setter(WidgetIndexedProperty p, const WidgetReference& ref, const afl::data::Value* index, const afl::data::Value* value)
             : m_property(p), m_ref(ref), m_index(index), m_value(value)

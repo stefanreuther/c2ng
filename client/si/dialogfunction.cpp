@@ -5,7 +5,6 @@
 #include "client/si/dialogfunction.hpp"
 #include "client/si/scriptside.hpp"
 #include "client/si/widgetholder.hpp"
-#include "client/si/usercall.hpp"
 #include "ui/window.hpp"
 #include "client/si/control.hpp"
 #include "ui/layout/vbox.hpp"
@@ -60,7 +59,7 @@ client::si::DialogFunction::get(interpreter::Arguments& args)
         afl::base::Ref<WidgetHolder> wh(*new WidgetHolder(ss->sender()));
 
         // Create a window object
-        class Creator : public UserCall {
+        class Creator : public util::Request<Control> {
          public:
             Creator(afl::base::Ref<WidgetHolder> wh, String_t title, size_t& result)
                 : m_wh(wh),

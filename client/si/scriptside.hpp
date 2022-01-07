@@ -14,15 +14,16 @@
 #include "game/extra.hpp"
 #include "game/session.hpp"
 #include "interpreter/process.hpp"
+#include "util/request.hpp"
 #include "util/requestsender.hpp"
 
 namespace client { namespace si {
 
     class ContextProvider;
+    class Control;
     class RequestLink1;
     class RequestLink2;
     class ScriptProcedure;
-    class UserCall;
     class UserSide;
     class UserTask;
 
@@ -115,8 +116,8 @@ namespace client { namespace si {
         void postNewInteraction(util::Request<UserSide>* req);
 
         /** Execute command on UserSide.
-            Synchronously executes the given UserCall on the user-interface side.
-            This means you can pass parameters into the call and results out of the call using the UserCall object.
+            Synchronously executes the given Request on the user-interface side.
+            This means you can pass parameters into the call and results out of the call using the Request object.
 
             The task is not allowed to block.
             It can, for example, retrieve widget content, retrieve font metrics, update a widget, etc.
@@ -126,18 +127,18 @@ namespace client { namespace si {
 
             @param t Command
             @throw interpreter::Error if t.handle() throws */
-        void call(UserCall& t);
+        void call(util::Request<Control>& t);
 
         /** Execute command on UserSide, asynchronously.
-            Executes the given UserCall without waiting for completion.
+            Executes the given Request without waiting for completion.
             This means you cannot pass parameters by reference, nor can you pass results back; exceptions are swallowed.
 
             This can be used as a higher-throughput version of call() in places where no results are needed.
             Note that requests are processed in sequence anyway, so even if this call is asynchronously,
-            the UserCall will be guaranteed to have been processed before the next call().
+            the Request will be guaranteed to have been processed before the next call().
 
-            @param t Newly-allocated UserCall descendant. Will become owned by the ScriptSide. */
-        void callAsyncNew(UserCall* t);
+            @param t Newly-allocated Request descendant. Will become owned by the ScriptSide. */
+        void callAsyncNew(util::Request<Control>* t);
 
 
         /*

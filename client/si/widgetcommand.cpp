@@ -8,7 +8,6 @@
 #include "client/si/control.hpp"
 #include "client/si/requestlink2.hpp"
 #include "client/si/scriptside.hpp"
-#include "client/si/usercall.hpp"
 #include "client/si/userside.hpp"
 #include "client/si/usertask.hpp"
 #include "client/si/widgetproperty.hpp"
@@ -186,7 +185,7 @@ void
 client::si::IFWidgetFocus(ScriptSide& ss, const WidgetReference& ref, interpreter::Arguments& args)
 {
     // A call
-    class Focuser : public UserCall {
+    class Focuser : public util::Request<Control> {
      public:
         Focuser(const WidgetReference& ref)
             : m_ref(ref)
@@ -211,7 +210,7 @@ void
 client::si::IFKeyboardFocusAdd(ScriptSide& ss, const WidgetReference& ref, interpreter::Arguments& args)
 {
     // A call
-    class Adder : public UserCall {
+    class Adder : public util::Request<Control> {
      public:
         Adder(const WidgetReference& ref)
             : m_ref(ref), m_widgets()
@@ -290,7 +289,7 @@ client::si::IFListboxAddItem(ScriptSide& ss, const WidgetReference& ref, interpr
     }
 
     // Do it
-    class Adder : public UserCall {
+    class Adder : public util::Request<Control> {
      public:
         Adder(const WidgetReference& ref, int32_t id, const String_t& text)
             : m_ref(ref), m_id(id), m_text(text)
