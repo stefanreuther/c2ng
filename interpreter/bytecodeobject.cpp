@@ -100,6 +100,15 @@ interpreter::BytecodeObject::BytecodeObject()
 interpreter::BytecodeObject::~BytecodeObject()
 { }
 
+// Create a BytecodeObject, convenience function.
+interpreter::BCORef_t
+interpreter::BytecodeObject::create(bool isProcedure)
+{
+    BCORef_t ret = *new BytecodeObject();
+    ret->setIsProcedure(isProcedure);
+    return ret;
+}
+
 // Add named argument.
 void
 interpreter::BytecodeObject::addArgument(String_t name, bool optional)

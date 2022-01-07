@@ -293,9 +293,7 @@ namespace {
 
     BCORef_t makeBCO()
     {
-        BCORef_t result = *new BytecodeObject();
-        result->setIsProcedure(false);
-        return result;
+        return BytecodeObject::create(false);
     }
 
     afl::base::Ref<ArrayData> make2DArray()

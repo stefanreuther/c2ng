@@ -35,8 +35,7 @@ namespace {
         s.session().setShipList(new game::spec::ShipList());
 
         // We need a CC$AUTOEXEC procedure
-        BCORef_t bco = *new BytecodeObject();
-        bco->setIsProcedure(true);
+        BCORef_t bco = BytecodeObject::create(true);
         bco->addArgument("A", false);
         bco->addInstruction(Opcode::maPush, Opcode::sLocal, 0);
         bco->addInstruction(Opcode::maSpecial, Opcode::miSpecialEvalStatement, 1);

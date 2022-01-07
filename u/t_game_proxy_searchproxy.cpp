@@ -48,8 +48,7 @@ namespace {
 
     BCORef_t createSearchFunction(SessionThread& s)
     {
-        BCORef_t bco = *new BytecodeObject();
-        bco->setIsProcedure(false);
+        BCORef_t bco = BytecodeObject::create(false);
         bco->addArgument("A", false);
         bco->addArgument("B", false);
         s.session().world().setNewGlobalValue("CCUI$SEARCH", new interpreter::SubroutineValue(bco));

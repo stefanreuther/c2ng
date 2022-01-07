@@ -209,7 +209,7 @@ namespace {
 
                             // Create a task to run the 'Load' and 'NewTurn' hooks, with high priority
                             {
-                                interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
+                                interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
                                 bco->addInstruction(interpreter::Opcode::maPush,
                                                     interpreter::Opcode::sNamedShared,
                                                     bco->addName("C2$RUNLOADHOOK"));
@@ -227,7 +227,7 @@ namespace {
 
                             // Create task to show notifications, with low priority
                             {
-                                interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
+                                interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
                                 bco->addInstruction(interpreter::Opcode::maPush,
                                                     interpreter::Opcode::sNamedShared,
                                                     bco->addName("C2$SHOWINITIALNOTIFICATIONS"));

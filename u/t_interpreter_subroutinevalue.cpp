@@ -15,8 +15,7 @@ void
 TestInterpreterSubroutineValue::testIt()
 {
     // Create testee
-    interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
-    bco->setIsProcedure(true);
+    interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
     bco->setSubroutineName("SUB");
     interpreter::SubroutineValue testee(bco);
 

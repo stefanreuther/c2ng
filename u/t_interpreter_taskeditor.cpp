@@ -129,7 +129,7 @@ TestInterpreterTaskEditor::testFormat()
     TestHarness h;
 
     // Create a BCO and push a frame
-    interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
+    interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
     bco->addInstruction(interpreter::Opcode::maPush, interpreter::Opcode::sInteger, 42);
     h.proc.pushFrame(bco, true);
 

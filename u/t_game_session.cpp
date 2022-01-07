@@ -276,8 +276,7 @@ TestGameSession::testTask()
     TS_ASSERT_EQUALS(testee.getTaskStatus(p, interpreter::Process::pkBaseTask, true),    game::Session::NoTask);
 
     // Create CC$AUTOEXEC mock (we only want the process to suspend)
-    interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
-    bco->setIsProcedure(true);
+    interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
     bco->addArgument("A", false);
     bco->addInstruction(interpreter::Opcode::maSpecial, interpreter::Opcode::miSpecialSuspend, 0);
     testee.world().setNewGlobalValue("CC$AUTOEXEC", new interpreter::SubroutineValue(bco));

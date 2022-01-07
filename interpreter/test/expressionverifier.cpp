@@ -143,7 +143,7 @@ interpreter::test::ExpressionVerifier::verifyFile(const char* expr, int result)
         std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(tok).parse());
         me.check("parse complete", tok.getCurrentToken() == tok.tEnd);
 
-        BCORef_t bco = *new BytecodeObject();
+        BCORef_t bco = BytecodeObject::create(true);
         node->compileValue(*bco, CompilationContext(world));
 
         Process exec(world, "verifyFile", 9);
@@ -182,7 +182,7 @@ interpreter::test::ExpressionVerifier::verifyNull(const char* expr)
         std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(tok).parse());
         me.check("parse complete", tok.getCurrentToken() == tok.tEnd);
 
-        BCORef_t bco = *new BytecodeObject();
+        BCORef_t bco = BytecodeObject::create(true);
         node->compileValue(*bco, CompilationContext(world));
 
         Process exec(world, "verifyNull", 9);
@@ -215,7 +215,7 @@ interpreter::test::ExpressionVerifier::verifyString(const char* expr, const char
         std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(tok).parse());
         me.check("parse complete", tok.getCurrentToken() == tok.tEnd);
 
-        BCORef_t bco = *new BytecodeObject();
+        BCORef_t bco = BytecodeObject::create(true);
         node->compileValue(*bco, CompilationContext(world));
 
         Process exec(world, "verifyString", 9);
@@ -256,7 +256,7 @@ interpreter::test::ExpressionVerifier::verifyFloat(const char* expr, double resu
         std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(tok).parse());
         me.check("parse complete", tok.getCurrentToken() == tok.tEnd);
 
-        BCORef_t bco = *new BytecodeObject();
+        BCORef_t bco = BytecodeObject::create(true);
         node->compileValue(*bco, CompilationContext(world));
 
         Process exec(world, "verifyFloat", 9);
@@ -297,7 +297,7 @@ interpreter::test::ExpressionVerifier::verifyExecutionError(const char* expr)
         std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(tok).parse());
         me.check("parse complete", tok.getCurrentToken() == tok.tEnd);
 
-        BCORef_t bco = *new BytecodeObject();
+        BCORef_t bco = BytecodeObject::create(true);
         node->compileValue(*bco, CompilationContext(world));
         compiled = true;
 
@@ -336,7 +336,7 @@ interpreter::test::ExpressionVerifier::verifyCompileError(const char* expr)
     }
     me.check("parse complete", tok.getCurrentToken() == tok.tEnd);
 
-    BCORef_t bco = *new BytecodeObject();
+    BCORef_t bco = BytecodeObject::create(true);
     bool threw = false;
     try {
         node->compileValue(*bco, CompilationContext(world));
@@ -394,7 +394,7 @@ interpreter::test::ExpressionVerifier::verifyStatement(const char* stmt)
         scc.withFlag(scc.LinearExecution);
         scc.withFlag(scc.ExpressionsAreStatements);
 
-        BCORef_t bco = *new BytecodeObject();
+        BCORef_t bco = BytecodeObject::create(true);
         StatementCompiler::Result result = StatementCompiler(mcs).compileList(*bco, scc);
 
         me.check("compile result", result != StatementCompiler::CompiledExpression);
@@ -426,7 +426,7 @@ interpreter::test::ExpressionVerifier::verifyScalar(const char* expr, int result
         std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(tok).parse());
         me.check("parse complete", tok.getCurrentToken() == tok.tEnd);
 
-        BCORef_t bco = *new BytecodeObject();
+        BCORef_t bco = BytecodeObject::create(true);
         node->compileValue(*bco, CompilationContext(world));
 
         Process exec(world, "verifyScalar", 9);

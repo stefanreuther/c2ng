@@ -36,7 +36,7 @@ void
 TestInterpreterVmioFileSaveContext::testIt()
 {
     // Create a BCO; push some literals
-    interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
+    interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
     {
         afl::data::StringValue sv("h\xc3\xb6");  // c3b6 = U+00F6 = small o with diarrhoe
         bco->addPushLiteral(&sv);
@@ -204,7 +204,7 @@ void
 TestInterpreterVmioFileSaveContext::testCycle()
 {
     // Create a BCO; push some literals
-    interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
+    interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
 
     // - three arrays
     afl::base::Ref<interpreter::ArrayData> aa(*new interpreter::ArrayData());

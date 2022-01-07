@@ -87,8 +87,7 @@ namespace {
                 return 0; /* expression incorrectly terminated */
             }
 
-            interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
-            bco->setIsProcedure(false);
+            interpreter::BCORef_t bco = interpreter::BytecodeObject::create(false);
             expr->compileValue(*bco, cc);
             bco->relocate();
             return bco.asPtr();

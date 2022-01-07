@@ -79,6 +79,10 @@ namespace interpreter {
         /** Destructor. */
         ~BytecodeObject();
 
+        /** Create a BytecodeObject, convenience function.
+            @param isProcedure true if this is a procedure */
+        static BCORef_t create(bool isProcedure);
+
         /*
          *  Locals
          */

@@ -1734,7 +1734,7 @@ interpreter::Process::handleEvalStatement(uint16_t nargs)
     }
 
     // Compile
-    BCORef_t bco = *new BytecodeObject();
+    BCORef_t bco = BytecodeObject::create(true);
     StatementCompiler sc(mcs);
     sc.compileList(*bco, scc);
     sc.finishBCO(*bco, scc);
@@ -1766,9 +1766,8 @@ interpreter::Process::handleEvalExpression()
     }
     m_valueStack.popBack();
 
-    BCORef_t bco = *new BytecodeObject();
+    BCORef_t bco = BytecodeObject::create(false);
     expr->compileValue(*bco, CompilationContext(m_world));
-    bco->setIsProcedure(false);
     bco->addInstruction(Opcode::maSpecial, Opcode::miSpecialReturn, 1);
     optimize(m_world, *bco, 1);
     bco->relocate();
@@ -1802,8 +1801,7 @@ interpreter::Process::handleAddHook()
     BCOPtr_t hook; // FIXME: can we make this use BCORef?
     if (m_world.globalValues()[pos] == 0) {
         /* Create it */
-        hook = new BytecodeObject();
-        hook->setIsProcedure(true);
+        hook = BytecodeObject::create(true).asPtr();
         hook->setSubroutineName(hookName);
         m_world.globalValues().setNew(pos, new SubroutineValue(*hook));
     } else {

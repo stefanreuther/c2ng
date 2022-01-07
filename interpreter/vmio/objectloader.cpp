@@ -362,7 +362,7 @@ interpreter::vmio::ObjectLoader::getBCO(uint32_t id)
     // ex IntVMLoadContext::getBCO
     SubroutineValue* sv = m_BCOsById[id];
     if (sv == 0) {
-        sv = m_BCOsById.insertNew(id, new SubroutineValue(*new BytecodeObject()));
+        sv = m_BCOsById.insertNew(id, new SubroutineValue(BytecodeObject::create(true)));
     }
     return sv->getBytecodeObject();
 }

@@ -97,7 +97,7 @@ client::si::CommandTask::execute(uint32_t pgid, game::Session& session)
     interpreter::Process& proc = processList.create(session.world(), m_name);
 
     // Create BCO
-    interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
+    interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
     if (m_contextProvider.get() != 0) {
         ProcessContextReceiver recv(proc);
         m_contextProvider->createContext(session, recv);

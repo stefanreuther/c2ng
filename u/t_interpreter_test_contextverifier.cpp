@@ -120,15 +120,13 @@ TestInterpreterTestContextVerifier::testVerifyTypesSuccess()
         TS_ASSERT_THROWS_NOTHING(testee.verifyTypes());
     }
     {
-        interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
-        bco->setIsProcedure(true);
+        interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
         TestContext ctx("SUB", interpreter::thProcedure, new interpreter::SubroutineValue(bco));
         interpreter::test::ContextVerifier testee(ctx, "testVerifyTypesSuccess: Procedure");
         TS_ASSERT_THROWS_NOTHING(testee.verifyTypes());
     }
     {
-        interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
-        bco->setIsProcedure(false);
+        interpreter::BCORef_t bco = interpreter::BytecodeObject::create(false);
         TestContext ctx("FXN", interpreter::thFunction, new interpreter::SubroutineValue(bco));
         interpreter::test::ContextVerifier testee(ctx, "testVerifyTypesSuccess: Function");
         TS_ASSERT_THROWS_NOTHING(testee.verifyTypes());
@@ -189,8 +187,7 @@ TestInterpreterTestContextVerifier::testVerifyTypesTypeCheck()
 
     // Given procedure, expect function
     {
-        interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
-        bco->setIsProcedure(true);
+        interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
         TestContext ctx("SUB", interpreter::thFunction, new interpreter::SubroutineValue(bco));
         interpreter::test::ContextVerifier testee(ctx, "testVerifyTypesTypeCheck: Function");
         TS_ASSERT_THROWS(testee.verifyTypes(), AssertionFailedException);
@@ -198,8 +195,7 @@ TestInterpreterTestContextVerifier::testVerifyTypesTypeCheck()
 
     // Given function, expect procedure
     {
-        interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
-        bco->setIsProcedure(false);
+        interpreter::BCORef_t bco = interpreter::BytecodeObject::create(false);
         TestContext ctx("FXN", interpreter::thProcedure, new interpreter::SubroutineValue(bco));
         interpreter::test::ContextVerifier testee(ctx, "testVerifyTypesTypeCheck: SubroutineValue");
         TS_ASSERT_THROWS(testee.verifyTypes(), AssertionFailedException);

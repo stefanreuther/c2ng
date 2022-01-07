@@ -241,7 +241,7 @@ namespace {
 
             // Push frame into process.
             // Normally the BCO should be complete before this, but there's no reason we cannot push an incomplete BCO.
-            interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
+            interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
             m_pProcess->pushFrame(bco, false);
 
 #ifdef DEBUG_DISASSEMBLY
@@ -270,7 +270,7 @@ namespace {
 
             // Push frame into process.
             // Normally the BCO should be complete before this, but there's no reason we cannot push an incomplete BCO.
-            interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
+            interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
             bco->setIsProcedure(false);
             m_pProcess->pushFrame(bco, true);
 
@@ -2406,7 +2406,7 @@ TestInterpreterStatementCompiler::testPreexecLoad()
     interpreter::Process p(world, "testPreexecLoad", 32);
     p.pushNewContext(new MinGlobalContext(world));
 
-    interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
+    interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
     interpreter::DefaultStatementCompilationContext scc(world);
     scc.withFlag(scc.LinearExecution);
     scc.withFlag(scc.ExpressionsAreStatements);
@@ -2662,7 +2662,7 @@ TestInterpreterStatementCompiler::testCompileList()
     interpreter::DefaultStatementCompilationContext scc(world);
     scc.withFlag(scc.LinearExecution);
 
-    interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
+    interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
     StatementCompiler::Result r = StatementCompiler(mcs).compileList(*bco, scc);
     TS_ASSERT_EQUALS(r, StatementCompiler::EndOfInput);
 

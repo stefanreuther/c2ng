@@ -36,9 +36,7 @@ namespace {
 
     BCORef_t makeBCO()
     {
-        BCORef_t result = *new interpreter::BytecodeObject();
-        result->setIsProcedure(false);
-        return result;
+        return interpreter::BytecodeObject::create(false);
     }
 
     /* Compile a 'With Lock(<lockName>) Do Stop' command */

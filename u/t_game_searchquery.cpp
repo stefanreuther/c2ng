@@ -260,8 +260,7 @@ TestGameSearchQuery::testCompile()
     interpreter::World world(log, tx, fs);
 
     // Create a binary function CCUI$Search that returns a constant value
-    interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
-    bco->setIsProcedure(false);
+    interpreter::BCORef_t bco = interpreter::BytecodeObject::create(false);
     bco->addArgument("A", false);
     bco->addArgument("B", false);
     bco->addInstruction(interpreter::Opcode::maPush, interpreter::Opcode::sInteger, 42);

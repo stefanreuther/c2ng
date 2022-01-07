@@ -335,7 +335,7 @@ interpreter::World::compileFile(afl::io::Stream& file, const String_t& origin, i
     // Generate compilation objects
     afl::io::TextFile tf(file);
     FileCommandSource fcs(tf);
-    BCORef_t nbco = *new BytecodeObject();
+    BCORef_t nbco = BytecodeObject::create(true);
     nbco->setFileName(file.getName());
     nbco->setOrigin(origin);
 
@@ -371,7 +371,7 @@ interpreter::World::compileCommand(String_t command, bool wantResult, bool& hasR
 {
     // Create compilation context
     MemoryCommandSource mcs(command);
-    BCORef_t bco = *new BytecodeObject();
+    BCORef_t bco = BytecodeObject::create(true);
 
     // Compile
     StatementCompiler sc(mcs);

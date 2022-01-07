@@ -115,7 +115,7 @@ namespace {
         scc.withFlag(scc.LinearExecution);
         scc.withFlag(scc.ExpressionsAreStatements);
 
-        interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
+        interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
         interpreter::StatementCompiler::Result result = interpreter::StatementCompiler(mcs).compileList(*bco, scc);
 
         TSM_ASSERT_DIFFERS(stmt, result, interpreter::StatementCompiler::CompiledExpression);

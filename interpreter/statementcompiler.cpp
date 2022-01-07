@@ -1840,8 +1840,7 @@ interpreter::StatementCompiler::compileOn(BytecodeObject& bco, const StatementCo
     };
 
     /* Compile embedded command */
-    BCORef_t nbco = *new BytecodeObject();
-    nbco->setIsProcedure(true);
+    BCORef_t nbco = BytecodeObject::create(true);
     nbco->setFileName(bco.getFileName());
     nbco->setOrigin(bco.getOrigin());
 
@@ -2551,8 +2550,7 @@ interpreter::StatementCompiler::compileSub(BytecodeObject& bco, const StatementC
     tok.readNextToken();
 
     /* Create new BCO */
-    BCORef_t nbco = *new BytecodeObject();
-    nbco->setIsProcedure(proc);
+    BCORef_t nbco = BytecodeObject::create(proc);
     nbco->setSubroutineName(name);
     nbco->setFileName(bco.getFileName());
     nbco->setOrigin(bco.getOrigin());
@@ -2683,8 +2681,7 @@ interpreter::StatementCompiler::compileStruct(BytecodeObject& bco, const Stateme
 
     /* We create a structure and a constructor function */
     StructureType typeValue(*new StructureTypeData());
-    BCORef_t ctorBCO = *new BytecodeObject();
-    ctorBCO->setIsProcedure(false);
+    BCORef_t ctorBCO = BytecodeObject::create(false);
     ctorBCO->setFileName(bco.getFileName());
     ctorBCO->setOrigin(bco.getOrigin());
     ctorBCO->addLineNumber(m_commandSource.getLineNumber());

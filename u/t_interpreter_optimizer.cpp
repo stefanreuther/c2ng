@@ -90,7 +90,7 @@ namespace {
         std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(tok).parse());
         TSM_ASSERT_EQUALS(expr, tok.getCurrentToken(), tok.tEnd);
 
-        interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
+        interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
         node->compileValue(*bco, interpreter::CompilationContext(world));
 
         optimize(world, *bco, level);

@@ -63,14 +63,14 @@ namespace {
 
     BCORef_t makeSuspendBCO()
     {
-        BCORef_t bco = *new interpreter::BytecodeObject();
+        BCORef_t bco = interpreter::BytecodeObject::create(true);
         bco->addInstruction(Opcode::maSpecial, Opcode::miSpecialSuspend, 0);
         return bco;
     }
 
     BCORef_t makeFailBCO()
     {
-        BCORef_t bco = *new interpreter::BytecodeObject();
+        BCORef_t bco = interpreter::BytecodeObject::create(true);
         bco->addInstruction(Opcode::maPush,    Opcode::sInteger, 0);
         bco->addInstruction(Opcode::maSpecial, Opcode::miSpecialThrow, 0);
         return bco;
@@ -78,14 +78,14 @@ namespace {
 
     BCORef_t makeEmptyBCO()
     {
-        BCORef_t bco = *new interpreter::BytecodeObject();
+        BCORef_t bco = interpreter::BytecodeObject::create(true);
         return bco;
     }
 
     // Make a BCO that first sets state st, then pushes integer n.
     BCORef_t makeStateBCO(Process::State st, uint16_t n)
     {
-        BCORef_t bco = *new interpreter::BytecodeObject();
+        BCORef_t bco = interpreter::BytecodeObject::create(true);
         addStateSetter(*bco, st);
         bco->addInstruction(Opcode::maPush, Opcode::sInteger, n);
         return bco;

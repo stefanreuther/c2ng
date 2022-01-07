@@ -92,7 +92,7 @@ client::createPluginLoader(const util::plugin::Plugin& plugin)
     // ex client/main.cc:loadPlugin (sort-of)
 
     // Create a BCO
-    interpreter::BCORef_t result(*new interpreter::BytecodeObject());
+    interpreter::BCORef_t result(interpreter::BytecodeObject::create(true));
     interpreter::BytecodeObject& bco = *result;
     bco.setFileName(plugin.getDefinitionFileName());
     bco.setSubroutineName(plugin.getId());
@@ -142,7 +142,7 @@ client::createLoaderForUnloadedPlugins(util::plugin::Manager& manager)
     // ex client/main.cc:loadPlugins
 
     // Create a BCO
-    interpreter::BCORef_t result(*new interpreter::BytecodeObject());
+    interpreter::BCORef_t result(interpreter::BytecodeObject::create(true));
     interpreter::BytecodeObject& bco = *result;
     bco.setSubroutineName("<PluginLoader>");
 
@@ -176,7 +176,7 @@ interpreter::BCORef_t
 client::createFileLoader(const String_t& fileName, const String_t& origin)
 {
     // Create a BCO
-    interpreter::BCORef_t result(*new interpreter::BytecodeObject());
+    interpreter::BCORef_t result(interpreter::BytecodeObject::create(true));
     interpreter::BytecodeObject& bco = *result;
     bco.setSubroutineName(afl::string::Format("<FileLoader:%s>", fileName));
     bco.setOrigin(origin);

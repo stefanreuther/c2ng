@@ -325,9 +325,8 @@ game::SearchQuery::compileExpression(interpreter::World& world) const
     // ex client/search.cc:prepareSearchQuery
     // Create function:
     //    Function match(obj)
-    interpreter::BCORef_t fun = *new interpreter::BytecodeObject();
+    interpreter::BCORef_t fun = interpreter::BytecodeObject::create(false);
     fun->addArgument("OBJ", false);
-    fun->setIsProcedure(false);
     fun->setSubroutineName("(Search Query)");
 
     // Create function body according to search type.
@@ -375,8 +374,7 @@ game::SearchQuery::compile(interpreter::World& world) const
 {
     // Build a subroutine that executes CCUI$Search(flags, match).
     // CCUI$Search is defined in core.q.
-    interpreter::BCORef_t fun = *new BytecodeObject();
-    fun->setIsProcedure(false);
+    interpreter::BCORef_t fun = BytecodeObject::create(false);
     fun->setSubroutineName("(Search Query)");
 
     afl::data::StringValue flagValue(getSearchObjectsAsString());

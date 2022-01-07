@@ -169,13 +169,12 @@ namespace {
         // Commands or files?
         if (params.opt_commands) {
             // Commands: compile everything into one single BCO
-            BCORef_t bco = *new interpreter::BytecodeObject();
+            BCORef_t bco = interpreter::BytecodeObject::create(true);
             interpreter::MemoryCommandSource cs;
             for (size_t i = 0, n = params.job.size(); i < n; ++i) {
                 cs.addLine(params.job[i]);
             }
 
-            bco->setIsProcedure(true);
             interpreter::StatementCompiler sc(cs);
             interpreter::DefaultStatementCompilationContext scc(session.world());
             scc.withFlag(scc.ExpressionsAreStatements);
@@ -201,13 +200,12 @@ namespace {
                     interpreter::vmio::ObjectLoader loader(*params.gameCharset, session.translator(), lc);
                     result.push_back(loader.loadObjectFile(stream).asPtr());
                 } else {
-                    BCORef_t bco = *new interpreter::BytecodeObject();
+                    BCORef_t bco = interpreter::BytecodeObject::create(true);
                     afl::io::TextFile tf(*stream);
                     interpreter::FileCommandSource cs(tf);
                     bco->setFileName(params.job[i]);
 
                     try {
-                        bco->setIsProcedure(true);
                         interpreter::StatementCompiler sc(cs);
                         interpreter::DefaultStatementCompilationContext scc(session.world());
                         scc.withFlag(scc.ExpressionsAreStatements);
@@ -245,7 +243,7 @@ namespace {
         if (result.size() == 1) {
             return *result[0];
         } else {
-            BCORef_t bco = *new interpreter::BytecodeObject();
+            BCORef_t bco = interpreter::BytecodeObject::create(true);
             for (size_t i = 0, n = result.size(); i < n; ++i) {
                 // pushlit BCO
                 // callind 0

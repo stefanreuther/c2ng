@@ -78,7 +78,7 @@ namespace {
                     interpreter::Process& proc = processList.create(session.world(), "Initializer");
 
                     // Create BCO
-                    interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
+                    interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
 
                     // Create script
                     interpreter::MemoryCommandSource mcs;

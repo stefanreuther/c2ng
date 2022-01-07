@@ -519,8 +519,7 @@ SelectionManager::executeScriptOperationWait(String_t funcName, String_t title, 
         virtual void execute(uint32_t pgid, game::Session& session)
             {
                 // Create bytecode
-                interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
-                bco->setIsProcedure(true);
+                interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
 
                 afl::data::StringValue title(m_title);
                 bco->addPushLiteral(&title);

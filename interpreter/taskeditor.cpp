@@ -455,8 +455,7 @@ interpreter::TaskEditor::save() const
 {
     // ex IntAutoTaskEditor::saveToProcess
     // Generate new BCO
-    BCORef_t bco = *new BytecodeObject();
-    bco->setIsProcedure(true);
+    BCORef_t bco = BytecodeObject::create(true);
     bco->setSubroutineName(m_process.getName());
     BytecodeObject::PC_t new_pc = 0;
     for (size_t i = 0; i < m_code.size(); ++i) {

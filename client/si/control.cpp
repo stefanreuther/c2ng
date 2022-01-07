@@ -93,10 +93,9 @@ client::si::Control::executeGoToReferenceWait(String_t taskName, game::Reference
         virtual void execute(uint32_t pgid, game::Session& session)
             {
                 // Create BCO
-                interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
+                interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
                 game::interface::ReferenceContext ctx(m_ref, session);
                 bco->setSubroutineName(m_taskName);
-                bco->setIsProcedure(true);
                 bco->addPushLiteral(&ctx);
                 bco->addInstruction(interpreter::Opcode::maPush, interpreter::Opcode::sNamedShared, bco->addName("UI.GOTOREFERENCE"));
                 bco->addInstruction(interpreter::Opcode::maIndirect, interpreter::Opcode::miIMCall, 1);

@@ -1021,11 +1021,8 @@ TestInterpreterUnaryExecution::testIsProcedure()
     };
 
     // Some BCOs
-    interpreter::BCORef_t procBCO = *new interpreter::BytecodeObject();
-    procBCO->setIsProcedure(true);
-    interpreter::BCORef_t funcBCO = *new interpreter::BytecodeObject();
-    funcBCO->setIsProcedure(false);
-
+    interpreter::BCORef_t procBCO = interpreter::BytecodeObject::create(true);
+    interpreter::BCORef_t funcBCO = interpreter::BytecodeObject::create(false);
 
     TestHarness h;
     std::auto_ptr<Value> p;
