@@ -1031,11 +1031,11 @@ FILES_guilib = ui/res/engineimageloader.hpp \
     client/dialogs/objectselectiondialog.hpp gfx/nullengine.cpp \
     gfx/nullengine.hpp client/tiles/selectionheadertile.cpp \
     client/tiles/selectionheadertile.hpp client/si/contextprovider.hpp \
-    client/session.cpp client/session.hpp client/marker.cpp \
-    client/marker.hpp client/si/commands.cpp client/si/commands.hpp \
-    client/widgets/keymapwidget.cpp client/widgets/keymapwidget.hpp \
-    client/si/control.cpp client/si/control.hpp client/si/userside.cpp \
-    client/si/usertask.hpp client/si/userside.hpp client/si/scriptside.cpp \
+    client/marker.cpp client/marker.hpp client/si/commands.cpp \
+    client/si/commands.hpp client/widgets/keymapwidget.cpp \
+    client/widgets/keymapwidget.hpp client/si/control.cpp \
+    client/si/control.hpp client/si/userside.cpp client/si/usertask.hpp \
+    client/si/userside.hpp client/si/scriptside.cpp \
     client/si/requestlink2.hpp client/si/requestlink1.hpp \
     client/si/scriptprocedure.cpp client/si/scriptprocedure.hpp \
     client/si/scriptside.hpp ui/dialogs/messagebox.cpp \

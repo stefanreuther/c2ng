@@ -9,7 +9,7 @@
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/format.hpp"
 #include "afl/string/nulltranslator.hpp"
-#include "client/session.hpp"
+#include "client/si/commands.hpp"
 #include "client/si/control.hpp"
 #include "game/game.hpp"
 #include "game/map/planet.hpp"
@@ -38,7 +38,7 @@ namespace {
     class DialogTester : public afl::base::Deletable {
      public:
         /* Implementation of the test goes here: */
-        virtual void doTest(client::Session& session, gfx::NullEngine& engine, client::si::Control& parentControl) = 0;
+        virtual void doTest(client::si::UserSide& us, gfx::NullEngine& engine, client::si::Control& parentControl) = 0;
 
         void run()
             {
@@ -117,7 +117,8 @@ namespace {
                 session.log().addListener(log);
 
                 // Create a client session. This is required to make UI commands work.
-                client::Session clientSession(root, sessionReceiver.getSender(), tx, collector, log);
+                client::si::UserSide us(root, sessionReceiver.getSender(), tx, root.engine().dispatcher(), collector, log);
+                registerCommands(us);
 
                 // Create a parent Control
                 class TheControl : public client::si::Control {
@@ -167,10 +168,10 @@ namespace {
                             return 0;
                         }
                 };
-                TheControl parentControl(clientSession.interface());
+                TheControl parentControl(us);
 
                 // Do the test
-                doTest(clientSession, engine, parentControl);
+                doTest(us, engine, parentControl);
             }
     };
 
@@ -197,7 +198,7 @@ TestClientDialogsObjectSelectionDialog::testOK()
 {
     class OKTester : public DialogTester {
      public:
-        virtual void doTest(client::Session& session, gfx::NullEngine& engine, client::si::Control& parentControl)
+        virtual void doTest(client::si::UserSide& us, gfx::NullEngine& engine, client::si::Control& parentControl)
             {
                 // After opening the dialog, there will be some inter-thread communication to set things up
                 // (negotiate keymap, receive data).
@@ -207,7 +208,7 @@ TestClientDialogsObjectSelectionDialog::testOK()
                 afl::base::Ref<gfx::Timer> t = engine.createTimer();
                 t->sig_fire.addNewClosure(new KeyCallback(engine, util::Key_Return));
                 t->setInterval(100);
-                int result = client::dialogs::doObjectSelectionDialog(client::dialogs::PLANET_SELECTION_DIALOG, session.interface(), parentControl, output);
+                int result = client::dialogs::doObjectSelectionDialog(client::dialogs::PLANET_SELECTION_DIALOG, us, parentControl, output);
 
                 // Verify result: must be ID of our planet.
                 TS_ASSERT_EQUALS(result, PLANET_ID);
@@ -222,14 +223,14 @@ TestClientDialogsObjectSelectionDialog::testCancel()
 {
     class CancelTester : public DialogTester {
      public:
-        virtual void doTest(client::Session& session, gfx::NullEngine& engine, client::si::Control& parentControl)
+        virtual void doTest(client::si::UserSide& us, gfx::NullEngine& engine, client::si::Control& parentControl)
             {
                 // Open the dialog
                 client::si::OutputState output;
                 afl::base::Ref<gfx::Timer> t = engine.createTimer();
                 t->sig_fire.addNewClosure(new KeyCallback(engine, util::Key_Escape));
                 t->setInterval(100);
-                int result = client::dialogs::doObjectSelectionDialog(client::dialogs::PLANET_SELECTION_DIALOG, session.interface(), parentControl, output);
+                int result = client::dialogs::doObjectSelectionDialog(client::dialogs::PLANET_SELECTION_DIALOG, us, parentControl, output);
 
                 // Verify result: must be 0
                 TS_ASSERT_EQUALS(result, 0);

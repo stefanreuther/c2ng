@@ -346,9 +346,10 @@
 
     <h2 id="ui">User Interface</h2>
     <p>A GUI program can be built starting with a ui::Root.
-      A GUI program that operates on VGAP data uses a client::Session which implements the proper thread separation (UserSide / ScriptSide).</p>
+      A GUI program that operates on VGAP data uses a UserSide / ScriptSide pair to talk to the VGAP data.
+      (There used to be a <tt>client::Session</tt>, which essentially wrapped just a UserSide.)</p>
     <div class="tree">
-      <div class="root"><b>client::Session</b>
+      <div class="root"><b>UserSide</b> <em>: client::si::UserSide</em>
         <div class="ref"><b>Root</b> <em>: ui::Root</em>
           <div class="ref virtual">Engine <em>: gfx::Engine</em>
             <div class="owned virtual">Dispatcher <em>: util::RequestDispatcher</em></div>
@@ -370,18 +371,14 @@
             <div class="virtual ref">ChildWidget <em>: ui::Widget[]...</em></div>
           </div>
         </div>
-        <div class="owned">UserSide <em>: client::si::UserSide</em>
-          <div class="owned">GameSender <em>: util::RequestSender</em></div>
-          <div class="owned">ScriptSideSender <em>: util::SlaveRequestSender</em></div>
-          <div class="owned">Console <em>: util::MessageCollector</em></div>
-          <div class="ref">Log <em>: afl::sys::Log</em></div>
-          <div class="ref">Control <em>: client::si::Control</em>
-            <div class="ref">Root <em>: ui::Root</em></div>
-            <div class="ref">UserSide <em>: client::si::UserSide</em></div>
-            <div class="ref">Translator <em>: afl::string::Translator</em></div>
-          </div>
+        <div class="ref"><b>GameSender</b> <em>: util::RequestSender</em>
+          <div class="ref"><b>Session</b> <em>: game::Session</em></div>
         </div>
+        <div class="owned">ScriptSideSender <em>: util::RequestSender</em></div>
         <div class="ref">Translator <em>: afl::string::Translator</em></div>
+        <div class="owned">Console <em>: util::MessageCollector</em></div>
+        <div class="ref">Log <em>: afl::sys::Log</em></div>
+        <div class="virtual ref">Control <em>: client::si::Control[]</em></div>
       </div>
     </div>
     <h2 id="fileserver">File Server</h2>

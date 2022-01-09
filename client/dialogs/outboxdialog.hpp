@@ -6,7 +6,6 @@
 #define C2NG_CLIENT_DIALOGS_OUTBOXDIALOG_HPP
 
 #include "client/downlink.hpp"
-#include "client/session.hpp"
 #include "client/si/control.hpp"
 #include "client/si/outputstate.hpp"
 #include "client/si/userside.hpp"

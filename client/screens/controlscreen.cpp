@@ -528,24 +528,23 @@ class client::screens::ControlScreen::ProprietorFromSession : public afl::base::
  *  Control Screen
  */
 
-client::screens::ControlScreen::ControlScreen(Session& session, int nr, const Definition& def)
-    : Control(session.interface()),
-      m_session(session),
+client::screens::ControlScreen::ControlScreen(client::si::UserSide& us, int nr, const Definition& def)
+    : Control(us),
       m_number(nr),
       m_definition(def),
       m_state(*new State(nr, def.target, def.taskType, def.keymapName)),
       m_deleter(),
-      m_loop(m_session.root()),
+      m_loop(us.root()),
       m_outputState(),
       m_panel(ui::layout::HBox::instance5, 2),
       m_mapWidget(interface().gameSender(), root(), gfx::Point(300, 300)),
       m_scannerOverlay(root().colorScheme()),
-      m_movementOverlay(root().engine().dispatcher(), interface().gameSender(), m_mapWidget, session.translator()),
-      m_minefieldOverlay(root(), session.translator()),
+      m_movementOverlay(root().engine().dispatcher(), interface().gameSender(), m_mapWidget, us.translator()),
+      m_minefieldOverlay(root(), us.translator()),
       m_scanResult(root(), interface().gameSender(), translator()),
       m_center(),
-      m_reply(m_session.root().engine().dispatcher(), *this),
-      m_proprietor(m_session.gameSender().makeTemporary(new ProprietorFromSession(m_state, m_reply.getSender())))
+      m_reply(us.root().engine().dispatcher(), *this),
+      m_proprietor(us.gameSender().makeTemporary(new ProprietorFromSession(m_state, m_reply.getSender())))
 { }
 
 void
@@ -553,16 +552,16 @@ client::screens::ControlScreen::run(client::si::InputState& in, client::si::Outp
 {
     // Set up common state
     afl::base::Deleter deleter;
-    ui::Root& root = m_session.root();
+    ui::Root& root = interface().root();
 
     // Build it
     ControlScreenColorScheme panelColors(root.provider(), "bg.cscreen", m_panel, ui::DARK_COLOR_SET, root.colorScheme());
     m_panel.setColorScheme(panelColors);
-    client::widgets::KeymapWidget keys(m_session.gameSender(), root.engine().dispatcher(), *this);
-    game::proxy::CursorObserverProxy oop(m_session.gameSender(), std::auto_ptr<game::map::ObjectCursorFactory>(new ScreenCursorFactory(m_state)));
+    client::widgets::KeymapWidget keys(interface().gameSender(), root.engine().dispatcher(), *this);
+    game::proxy::CursorObserverProxy oop(interface().gameSender(), std::auto_ptr<game::map::ObjectCursorFactory>(new ScreenCursorFactory(m_state)));
 
     ui::Group tileGroup(ui::layout::VBox::instance5);
-    client::tiles::TileFactory(root, m_session.interface(), m_session.translator(), keys, oop).createLayout(tileGroup, m_definition.layoutName, deleter);
+    client::tiles::TileFactory(root, interface(), translator(), keys, oop).createLayout(tileGroup, m_definition.layoutName, deleter);
     tileGroup.add(deleter.addNew(new ui::Spacer()));
     m_panel.add(tileGroup);
 
@@ -688,7 +687,7 @@ void
 client::screens::ControlScreen::setId(game::Id_t id)
 {
     // ex WControlScreen::onCurrentChanged (sort-of)
-    m_session.interface().history().push(ScreenHistory::Reference(m_definition.historyType, id, 0));
+    interface().history().push(ScreenHistory::Reference(m_definition.historyType, id, 0));
 }
 
 void
@@ -750,7 +749,7 @@ client::screens::ControlScreen::onDoubleClick(game::map::Point /*target*/)
 
        For regular events, we automatically discount shift
        (xref ui/window.cc:simplifyEvent). */
-    util::Key_t mods = m_session.root().engine().getKeyboardModifierState();
+    util::Key_t mods = root().engine().getKeyboardModifierState();
     if (!m_panel.handleKey(util::Key_DoubleClick | mods, 0)) {
         if (!m_panel.handleKey(util::Key_DoubleClick | (mods & ~util::KeyMod_Shift), 0)) {
             m_panel.handleKey(util::Key_DoubleClick, 0);

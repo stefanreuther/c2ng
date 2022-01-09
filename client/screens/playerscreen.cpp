@@ -76,13 +76,12 @@ namespace {
 
     class PlayerScreen : private client::si::Control {
      public:
-        PlayerScreen(client::Session& session)
-            : Control(session.interface()),
-              m_session(session),
-              m_loop(session.root()),
-              m_docView(gfx::Point(200, 200), 0, session.root().provider()),
-              m_receiver(session.dispatcher(), *this),
-              m_updateTrampoline(session.gameSender().makeTemporary(new TrampolineFromSession(m_receiver.getSender()))),
+        PlayerScreen(client::si::UserSide& us)
+            : Control(us),
+              m_loop(us.root()),
+              m_docView(gfx::Point(200, 200), 0, us.root().provider()),
+              m_receiver(us.root().engine().dispatcher(), *this),
+              m_updateTrampoline(us.gameSender().makeTemporary(new TrampolineFromSession(m_receiver.getSender()))),
               m_outputState()
             { }
 
@@ -101,15 +100,15 @@ namespace {
                 //       DocView
                 //       Spacer
                 //       Buttons...
-                afl::string::Translator& tx = m_session.translator();
+                afl::string::Translator& tx = translator();
                 afl::base::Deleter del;
-                ui::Root& root = m_session.root();
+                ui::Root& root = interface().root();
 
                 ui::LayoutableGroup& panel = del.addNew(new ui::widgets::Panel(ui::layout::HBox::instance5, 10));
                 panel.setColorScheme(colorScheme);
 
                 // Keymap handler
-                client::widgets::KeymapWidget& keys = del.addNew(new client::widgets::KeymapWidget(m_session.gameSender(), root.engine().dispatcher(), *this));
+                client::widgets::KeymapWidget& keys = del.addNew(new client::widgets::KeymapWidget(interface().gameSender(), root.engine().dispatcher(), *this));
 
                 // Left group containing list of image buttons
                 ui::LayoutableGroup& leftGroup = del.addNew(new ui::Group(ui::layout::VBox::instance5));
@@ -183,7 +182,7 @@ namespace {
                 panel.add(rightGroup);
 
                 // Publish UI properties
-                util::RequestSender<Proprietor> prop(m_session.gameSender().makeTemporary(new ProprietorFromSession()));
+                util::RequestSender<Proprietor> prop(interface().gameSender().makeTemporary(new ProprietorFromSession()));
 
                 // Finish and display it
                 keys.setKeymapName(KEYMAP_NAME);
@@ -302,7 +301,6 @@ namespace {
             { return 0; }
 
      private:
-        client::Session& m_session;
         ui::EventLoop m_loop;
         ui::rich::DocumentView m_docView;
         util::RequestReceiver<PlayerScreen> m_receiver;
@@ -487,7 +485,7 @@ namespace {
 }
 
 void
-client::screens::doPlayerScreen(Session& session, client::si::InputState& in, client::si::OutputState& out, gfx::ColorScheme<util::SkinColor::Color>& colorScheme, bool first)
+client::screens::doPlayerScreen(client::si::UserSide& us, client::si::InputState& in, client::si::OutputState& out, gfx::ColorScheme<util::SkinColor::Color>& colorScheme, bool first)
 {
-    PlayerScreen(session).run(in, out, colorScheme, first);
+    PlayerScreen(us).run(in, out, colorScheme, first);
 }

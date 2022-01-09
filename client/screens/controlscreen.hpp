@@ -8,10 +8,10 @@
 #include "client/map/movementoverlay.hpp"
 #include "client/map/scanneroverlay.hpp"
 #include "client/map/widget.hpp"
-#include "client/session.hpp"
 #include "client/si/control.hpp"
 #include "client/si/inputstate.hpp"
 #include "client/si/outputstate.hpp"
+#include "client/si/userside.hpp"
 #include "client/widgets/scanresult.hpp"
 #include "game/map/object.hpp"
 #include "game/map/objectcursor.hpp"
@@ -39,7 +39,7 @@ namespace client { namespace screens {
         static const Definition PlanetTaskScreen;
         static const Definition BaseTaskScreen;
 
-        ControlScreen(Session& session, int nr, const Definition& def);
+        ControlScreen(client::si::UserSide& us, int nr, const Definition& def);
 
         void run(client::si::InputState& in, client::si::OutputState& out);
 
@@ -67,7 +67,6 @@ namespace client { namespace screens {
         class Proprietor;
         class ProprietorFromSession;
 
-        Session& m_session;
         int m_number;
         const Definition& m_definition;
         afl::base::Ref<client::screens::ControlScreen::State> m_state;

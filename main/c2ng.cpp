@@ -34,11 +34,11 @@
 #include "client/screens/browserscreen.hpp"
 #include "client/screens/controlscreen.hpp"
 #include "client/screens/playerscreen.hpp"
-#include "client/session.hpp"
+#include "client/si/commands.hpp"
 #include "client/si/control.hpp"
 #include "client/si/inputstate.hpp"
 #include "client/si/outputstate.hpp"
-#include "client/si/scriptside.hpp"
+#include "client/si/userside.hpp"
 #include "game/browser/accountmanager.hpp"
 #include "game/browser/browser.hpp"
 #include "game/browser/directoryhandler.hpp"
@@ -84,8 +84,8 @@ namespace {
 
     class NullControl : public client::si::Control {
      public:
-        NullControl(client::Session& session)
-            : Control(session.interface())
+        NullControl(client::si::UserSide& us)
+            : Control(us)
             { }
         virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target /*target*/)
             { interface().continueProcessWithFailure(link, "Context error"); }
@@ -698,11 +698,11 @@ namespace {
         return result;
     }
 
-    void play(client::Session& session)
+    void play(client::si::UserSide& us)
     {
         using client::si::OutputState;
         using client::si::InputState;
-        ui::PixmapColorScheme colorScheme(session.root(), generateGameBackground(session.interface().mainLog(), session.root().getExtent().getSize(), session.translator()));
+        ui::PixmapColorScheme colorScheme(us.root(), generateGameBackground(us.mainLog(), us.root().getExtent().getSize(), us.translator()));
         OutputState::Target state = OutputState::PlayerScreen;
         InputState in;
         bool running = true;
@@ -720,7 +720,7 @@ namespace {
                 break;
 
              case OutputState::PlayerScreen:
-                client::screens::doPlayerScreen(session, in, out, colorScheme, first);
+                client::screens::doPlayerScreen(us, in, out, colorScheme, first);
                 first = false;
                 in = InputState();
                 in.setProcess(out.getProcess());
@@ -728,52 +728,52 @@ namespace {
                 break;
 
              case OutputState::ShipScreen:
-                client::screens::ControlScreen(session, game::map::Cursors::ShipScreen, client::screens::ControlScreen::ShipScreen).run(in, out);
+                client::screens::ControlScreen(us, game::map::Cursors::ShipScreen, client::screens::ControlScreen::ShipScreen).run(in, out);
                 in = InputState();
                 in.setProcess(out.getProcess());
                 state = out.getTarget();
                 break;
 
              case OutputState::PlanetScreen:
-                client::screens::ControlScreen(session, game::map::Cursors::PlanetScreen, client::screens::ControlScreen::PlanetScreen).run(in, out);
+                client::screens::ControlScreen(us, game::map::Cursors::PlanetScreen, client::screens::ControlScreen::PlanetScreen).run(in, out);
                 in = InputState();
                 in.setProcess(out.getProcess());
                 state = out.getTarget();
                 break;
 
              case OutputState::BaseScreen:
-                client::screens::ControlScreen(session, game::map::Cursors::BaseScreen, client::screens::ControlScreen::BaseScreen).run(in, out);
+                client::screens::ControlScreen(us, game::map::Cursors::BaseScreen, client::screens::ControlScreen::BaseScreen).run(in, out);
                 in = InputState();
                 in.setProcess(out.getProcess());
                 state = out.getTarget();
                 break;
 
              case OutputState::ShipTaskScreen:
-                client::screens::ControlScreen(session, game::map::Cursors::ShipScreen, client::screens::ControlScreen::ShipTaskScreen).run(in, out);
+                client::screens::ControlScreen(us, game::map::Cursors::ShipScreen, client::screens::ControlScreen::ShipTaskScreen).run(in, out);
                 in = InputState();
                 in.setProcess(out.getProcess());
                 state = out.getTarget();
                 break;
 
              case OutputState::PlanetTaskScreen:
-                client::screens::ControlScreen(session, game::map::Cursors::PlanetScreen, client::screens::ControlScreen::PlanetTaskScreen).run(in, out);
+                client::screens::ControlScreen(us, game::map::Cursors::PlanetScreen, client::screens::ControlScreen::PlanetTaskScreen).run(in, out);
                 in = InputState();
                 in.setProcess(out.getProcess());
                 state = out.getTarget();
                 break;
 
              case OutputState::BaseTaskScreen:
-                client::screens::ControlScreen(session, game::map::Cursors::BaseScreen, client::screens::ControlScreen::BaseTaskScreen).run(in, out);
+                client::screens::ControlScreen(us, game::map::Cursors::BaseScreen, client::screens::ControlScreen::BaseTaskScreen).run(in, out);
                 in = InputState();
                 in.setProcess(out.getProcess());
                 state = out.getTarget();
                 break;
 
              case OutputState::Starchart:
-                client::map::Screen(session.interface(),
-                                    session.root(),
-                                    session.translator(),
-                                    session.gameSender()).run(in, out);
+                client::map::Screen(us,
+                                    us.root(),
+                                    us.translator(),
+                                    us.gameSender()).run(in, out);
                 in = InputState();
                 in.setProcess(out.getProcess());
                 state = out.getTarget();
@@ -881,7 +881,8 @@ namespace {
                 util::RequestReceiver<game::Session> gameReceiver(backgroundThread, gameSession);
 
                 // Set up foreground thread.
-                client::Session clientSession(root, gameReceiver.getSender(), translator(), collector, log());
+                client::si::UserSide userSide(root, gameReceiver.getSender(), translator(), root.engine().dispatcher(), collector, log());
+                registerCommands(userSide);
 
                 // Initialize by posting requests to the background thread.
                 // (This will not take time.)
@@ -897,7 +898,7 @@ namespace {
                 // Script initialisation, wait for completion
                 // (The NullControl will make us essentially responsive to UI from scripts.)
                 {
-                    NullControl ctl(clientSession);
+                    NullControl ctl(userSide);
                     std::auto_ptr<client::si::ScriptTask> t(new ScriptInitializer(resourceDirectory));
                     ctl.executeTaskWait(t);
                 }
@@ -931,8 +932,8 @@ namespace {
                     int result = browserScreen.run(docColors);
                     if (result != 0) {
                         // OK, play
-                        play(clientSession);
-                        clientSession.interface().reset();
+                        play(userSide);
+                        userSide.reset();
                     } else {
                         // Close
                         break;

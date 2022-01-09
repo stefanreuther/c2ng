@@ -6,7 +6,6 @@
 
 #include "afl/base/deleter.hpp"
 #include "afl/string/translator.hpp"
-#include "client/session.hpp"
 #include "client/widgets/alliancelevelgrid.hpp"
 #include "client/widgets/alliancestatuslist.hpp"
 #include "game/alliance/container.hpp"
