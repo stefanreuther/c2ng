@@ -99,7 +99,8 @@ namespace {
 }
 
 game::Session::Session(afl::string::Translator& tx, afl::io::FileSystem& fs)
-    : m_log(),
+    : sig_runRequest(),
+      m_log(),
       m_root(),
       m_shipList(),
       m_game(),

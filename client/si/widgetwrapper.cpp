@@ -5,17 +5,17 @@
 
 #include "client/si/widgetwrapper.hpp"
 #include "afl/string/format.hpp"
-#include "game/proxy/objectlistener.hpp"
 #include "client/si/genericwidgetvalue.hpp"
 #include "client/si/scriptside.hpp"
 #include "client/si/userside.hpp"
 #include "client/si/widgetholder.hpp"
+#include "client/si/widgetreference.hpp"
+#include "game/interface/iteratorcontext.hpp"
 #include "game/interface/planetcontext.hpp"
 #include "game/interface/shipcontext.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/ship.hpp"
-#include "client/si/widgetreference.hpp"
-#include "game/interface/iteratorcontext.hpp"
+#include "game/proxy/objectlistener.hpp"
 
 namespace {
     // FIXME: if updates happen faster than scripts are executed, this will spam the queue.
@@ -34,10 +34,8 @@ namespace {
         virtual void handle(game::Session& session)
             {
                 // FIXME: can we log errors if this process fails?
-                if (client::si::ScriptSide* ss = session.extra().get(client::si::SCRIPTSIDE_ID)) {
-                    session.processList().startProcessGroup(m_pgid);
-                    ss->runProcesses();
-                }
+                session.processList().startProcessGroup(m_pgid);
+                session.sig_runRequest.raise();
             }
      private:
         const uint32_t m_pgid;

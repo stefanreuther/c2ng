@@ -22,14 +22,13 @@ client::si::ScriptSide::ScriptSide(util::RequestSender<UserSide> reply, game::Se
       m_waits()
 {
     conn_processGroupFinish = session.processList().sig_processGroupFinish.add(this, &ScriptSide::onProcessGroupFinish);
+    conn_runRequest = session.sig_runRequest.add(this, &ScriptSide::runProcesses);
     // FIXME: set break handler?
 }
 
 // Destructor.
 client::si::ScriptSide::~ScriptSide()
-{
-    conn_processGroupFinish.disconnect();
-}
+{ }
 
 // Access the underlying RequestSender.
 util::RequestSender<client::si::UserSide>

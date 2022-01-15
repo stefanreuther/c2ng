@@ -5,14 +5,16 @@
 #ifndef C2NG_INTERPRETER_PROCESS_HPP
 #define C2NG_INTERPRETER_PROCESS_HPP
 
+#include <memory>
+#include "afl/base/closure.hpp"
 #include "afl/base/deletable.hpp"
 #include "afl/base/signal.hpp"
 #include "afl/data/namemap.hpp"
 #include "afl/data/segment.hpp"
+#include "afl/string/translator.hpp"
 #include "interpreter/bytecodeobject.hpp"
 #include "interpreter/contextprovider.hpp"
 #include "interpreter/error.hpp"
-#include "afl/string/translator.hpp"
 
 namespace interpreter {
 
@@ -118,6 +120,10 @@ namespace interpreter {
             virtual ~Freezer()
                 { }
         };
+
+        /** Task to execute while a process suspends.
+            @see suspend() */
+        typedef afl::base::Closure<void()> Task_t;
 
 
         /** Create process.
@@ -405,6 +411,23 @@ namespace interpreter {
         /** Suspend this process to perform UI operations (set state to Waiting). */
         void suspendForUI();
 
+        /** Suspend this process to execute a task.
+            This sets the status to Waiting and executes the task.
+            The task needs to schedule an external event which resumes the task
+            (using ProcessList::continueProcess or ProcessList::continueProcessWithFailure).
+
+            suspend() needs to be the last call in a command implementation.
+            Likewise, continueProcess() must be the last call in the task implementation
+            because it causes the task to be deleted.
+
+            If the process is destroyed in the meantime, the task will be deleted
+            and must make sure to not resume the process.
+
+            The task's destructor therefore must not change the process' state.
+
+            \param task Task. Can be null in which case the external event must be scheduled separately */
+        void suspend(std::auto_ptr<Task_t> task);
+
         /** Look up value.
             This is an interface method of ContextProvider.
             \param name [in] Name query
@@ -551,7 +574,12 @@ namespace interpreter {
             If non-null, the task is in state Frozen, and the pointee is responsible for unfreezing it. */
         Freezer* m_pFreezer;
 
+        /** Finalizer, if non-null. */
         std::auto_ptr<Finalizer> m_finalizer;
+
+        /** Task being executed if process is in status Waiting.
+            Can be null. */
+        std::auto_ptr<Task_t> m_task;
     };
 
     /** Format Process::State to string.

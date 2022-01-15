@@ -156,7 +156,8 @@ interpreter::Process::Process(World& world, String_t name, uint32_t processId)
       m_processGroupId(0),
       m_processId(processId),
       m_pFreezer(0),
-      m_finalizer()
+      m_finalizer(),
+      m_task()
 {
     // ex IntExecutionContext::IntExecutionContext
     const afl::container::PtrVector<Context>& globalContexts = world.globalContexts();
@@ -172,6 +173,8 @@ interpreter::Process::Process(World& world, String_t name, uint32_t processId)
 interpreter::Process::~Process()
 {
     // ex IntExecutionContext::~IntExecutionContext
+    // Clear task so if it accesses some process properties, it still sees them
+    m_task.reset();
 
     // Disown all my mutexes
     m_world.mutexList().disownLocksByProcess(this);
@@ -423,6 +426,9 @@ void
 interpreter::Process::setState(State ps)
 {
     // ex IntExecutionContext::setState
+    if (m_state == Waiting && ps != Waiting) {
+        m_task.reset();
+    }
     m_state = ps;
 }
 
@@ -1468,7 +1474,27 @@ interpreter::Process::suspendForUI()
     // FIXME: pre-execute jumps and frame terminations to cause the process to execute prematurely
     // - be careful with frames catching UI.RESULT
     // - be careful with return values
+    suspend(std::auto_ptr<Task_t>());
+}
+
+// Suspend this process to execute a task.
+void
+interpreter::Process::suspend(std::auto_ptr<Task_t> task)
+{
+    // Clear old task, if any, to not have overlap. Task shouldn't be set here.
+    m_task.reset();
+
+    // State change
     m_state = Waiting;
+    m_task = task;
+
+    // Invoke the task
+    if (m_task.get() != 0) {
+        m_task->call();
+    }
+
+    // Call listeners as last operation so if it has something to say about our task,
+    // it sees the final state.
     m_world.notifyListeners();
 }
 

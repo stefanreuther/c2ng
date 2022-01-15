@@ -7,6 +7,7 @@
 
 #include <memory>
 #include "afl/base/ptr.hpp"
+#include "afl/base/signal.hpp"
 #include "afl/base/signalconnection.hpp"
 #include "afl/bits/smallset.hpp"
 #include "afl/io/filesystem.hpp"
@@ -221,6 +222,13 @@ namespace game {
         /** Save current status.
             \return true on success */
         bool save();
+
+        /** Signal: request ProcessList::run() to be run.
+            Code that sets a process to runnable should raise this signal.
+            This signal will be handled by a component that can pick a good point to run processes
+            and perform necessary pre- and post-processing.
+            As a minimum implementation, this signal can be hooked to ProcessList::run(). */
+        afl::base::Signal<void()> sig_runRequest;
 
      private:
         afl::sys::Log m_log;

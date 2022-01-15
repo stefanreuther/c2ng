@@ -557,6 +557,7 @@ interpreter::ConsoleApplication::appMain()
     FileSystem& fs = fileSystem();
     game::Session session(tx, fs);
     session.log().addListener(log());
+    session.sig_runRequest.add(&session.processList(), &ProcessList::run);
 
     // If we are in exec mode, inject core.q
     if (!params.opt_nostdlib && params.mode == ExecMode) {
