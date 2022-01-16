@@ -26,7 +26,7 @@ namespace game { namespace nu {
 
         virtual PlayerStatusSet_t getPlayerStatus(int player, String_t& extra, afl::string::Translator& tx) const;
         virtual void loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session);
-        virtual void saveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session);
+        virtual std::auto_ptr<Task_t> saveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
         virtual void getHistoryStatus(int player, int turn, afl::base::Memory<HistoryStatus> status, const Root& root);
         virtual void loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root);
         virtual String_t getProperty(Property p);

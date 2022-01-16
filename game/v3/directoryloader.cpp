@@ -348,11 +348,101 @@ game::v3::DirectoryLoader::loadCurrentTurn(Turn& turn, Game& game, int player, R
     ldr.loadFlakBattles(turn, dir, player);
 }
 
-void
-game::v3::DirectoryLoader::saveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& /*session*/)
+std::auto_ptr<game::TurnLoader::Task_t>
+game::v3::DirectoryLoader::saveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then)
 {
     // ex saveDirectory
     // @change: saveDirectory took a PlayerSet_t
+    try {
+        doSaveCurrentTurn(turn, game, player, root);
+        return makeConfirmationTask(true, then);
+    }
+    catch (std::exception& e) {
+        session.log().write(afl::sys::LogListener::Error, LOG_NAME, session.translator().translateString("Unable to save game"), e);
+        return makeConfirmationTask(false, then);
+    }
+}
+
+void
+game::v3::DirectoryLoader::getHistoryStatus(int player, int turn, afl::base::Memory<HistoryStatus> status, const Root& root)
+{
+    // FIXME: same as ResultLoader?
+    while (HistoryStatus* p = status.eat()) {
+        // Prepare template
+        util::BackupFile tpl;
+        tpl.setGameDirectoryName(root.gameDirectory().getDirectoryName());
+        tpl.setPlayerNumber(player);
+        tpl.setTurnNumber(turn);
+
+        // Do we have a history file?
+        if (tpl.hasFile(m_fileSystem, root.userConfiguration()[UserConfiguration::Backup_Result]())) {
+            *p = StronglyPositive;
+        } else {
+            *p = Negative;
+        }
+
+        ++turn;
+    }
+}
+
+void
+game::v3::DirectoryLoader::loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root)
+{
+    // FIXME: same as ResultLoader?
+    Loader ldr(*m_charset, m_translator, m_log);
+    ldr.prepareUniverse(turn.universe());
+
+    // FIXME: backup these files?
+    ldr.loadCommonFiles(root.gameDirectory(), *m_specificationDirectory, turn.universe(), player);
+
+    // load turn file backup
+    util::BackupFile tpl;
+    tpl.setGameDirectoryName(root.gameDirectory().getDirectoryName());
+    tpl.setPlayerNumber(player);
+    tpl.setTurnNumber(turnNumber);
+
+    {
+        Ref<Stream> file = tpl.openFile(m_fileSystem, root.userConfiguration()[UserConfiguration::Backup_Result]());
+        m_log.write(m_log.Info, LOG_NAME, Format(m_translator.translateString("Loading %s backup file...").c_str(), root.playerList().getPlayerName(player, Player::AdjectiveName)));
+        ldr.loadResult(turn, root, game, *file, player);
+    }
+
+    // if (have_trn) {
+    //     Ptr<Stream> trnfile = game_file_dir->openFile(Format("player%d.trn", player), Stream::C_READ);
+    //     loadTurn(trn, *trnfile, player);
+    // }
+
+    // FIXME: history fleets not loaded here
+    // FIXME: alliances not loaded until here; would need message/util.dat parsing
+    // FIXME: load FLAK
+}
+
+String_t
+game::v3::DirectoryLoader::getProperty(Property p)
+{
+    switch (p) {
+     case LocalFileFormatProperty:
+        // igpFileFormatLocal: DOS, Windows
+        if (m_playersWithDosOutbox.empty()) {
+            return "Windows";
+        } else {
+            return "DOS";
+        }
+
+     case RemoteFileFormatProperty:
+        // igpFileFormatRemote: turn file format
+        return "Windows";
+
+     case RootDirectoryProperty:
+        // igpRootDirectory:
+        return m_defaultSpecificationDirectory->getDirectoryName();
+    }
+    return String_t();
+}
+
+void
+game::v3::DirectoryLoader::doSaveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root)
+{
     Directory& dir = root.gameDirectory();
 
     FizzFile fizz;
@@ -445,83 +535,6 @@ game::v3::DirectoryLoader::saveCurrentTurn(const Turn& turn, const Game& game, i
     if (m_pProfile != 0) {
         game.expressionLists().saveRecentFiles(*m_pProfile, m_log, m_translator);
     }
-}
-
-void
-game::v3::DirectoryLoader::getHistoryStatus(int player, int turn, afl::base::Memory<HistoryStatus> status, const Root& root)
-{
-    // FIXME: same as ResultLoader?
-    while (HistoryStatus* p = status.eat()) {
-        // Prepare template
-        util::BackupFile tpl;
-        tpl.setGameDirectoryName(root.gameDirectory().getDirectoryName());
-        tpl.setPlayerNumber(player);
-        tpl.setTurnNumber(turn);
-
-        // Do we have a history file?
-        if (tpl.hasFile(m_fileSystem, root.userConfiguration()[UserConfiguration::Backup_Result]())) {
-            *p = StronglyPositive;
-        } else {
-            *p = Negative;
-        }
-
-        ++turn;
-    }
-}
-
-void
-game::v3::DirectoryLoader::loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root)
-{
-    // FIXME: same as ResultLoader?
-    Loader ldr(*m_charset, m_translator, m_log);
-    ldr.prepareUniverse(turn.universe());
-
-    // FIXME: backup these files?
-    ldr.loadCommonFiles(root.gameDirectory(), *m_specificationDirectory, turn.universe(), player);
-
-    // load turn file backup
-    util::BackupFile tpl;
-    tpl.setGameDirectoryName(root.gameDirectory().getDirectoryName());
-    tpl.setPlayerNumber(player);
-    tpl.setTurnNumber(turnNumber);
-
-    {
-        Ref<Stream> file = tpl.openFile(m_fileSystem, root.userConfiguration()[UserConfiguration::Backup_Result]());
-        m_log.write(m_log.Info, LOG_NAME, Format(m_translator.translateString("Loading %s backup file...").c_str(), root.playerList().getPlayerName(player, Player::AdjectiveName)));
-        ldr.loadResult(turn, root, game, *file, player);
-    }
-
-    // if (have_trn) {
-    //     Ptr<Stream> trnfile = game_file_dir->openFile(Format("player%d.trn", player), Stream::C_READ);
-    //     loadTurn(trn, *trnfile, player);
-    // }
-
-    // FIXME: history fleets not loaded here
-    // FIXME: alliances not loaded until here; would need message/util.dat parsing
-    // FIXME: load FLAK
-}
-
-String_t
-game::v3::DirectoryLoader::getProperty(Property p)
-{
-    switch (p) {
-     case LocalFileFormatProperty:
-        // igpFileFormatLocal: DOS, Windows
-        if (m_playersWithDosOutbox.empty()) {
-            return "Windows";
-        } else {
-            return "DOS";
-        }
-
-     case RemoteFileFormatProperty:
-        // igpFileFormatRemote: turn file format
-        return "Windows";
-
-     case RootDirectoryProperty:
-        // igpRootDirectory:
-        return m_defaultSpecificationDirectory->getDirectoryName();
-    }
-    return String_t();
 }
 
 void

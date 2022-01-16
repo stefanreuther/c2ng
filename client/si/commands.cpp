@@ -128,6 +128,9 @@ using game::interface::SimpleProcedure;
 namespace {
     const char*const LOG_NAME = "client.si";
 
+    typedef interpreter::Process::Task_t Task_t;
+    typedef afl::base::Closure<void(bool)> PostSaveTask_t;
+
     class StateChangeTask : public UserTask {
      public:
         StateChangeTask(OutputState::Target target)
@@ -291,19 +294,77 @@ namespace {
         return result;
     }
 
+    /*
+     *  Save & Exit
+     */
 
-    void trySaveSession(game::Session& session)
-    {
-        try {
-            session.save();
+    class PostSaveStateChangeAction : public util::Request<Control> {
+     public:
+        PostSaveStateChangeAction(OutputState::Target target, RequestLink2 link)
+            : m_target(target),
+              m_link(link)
+            { }
+        void handle(Control& ctl)
+            { StateChangeTask(m_target).handle(ctl, m_link); }
+     private:
+        OutputState::Target m_target;
+        RequestLink2 m_link;
+    };
 
-            if (session.getGame().get() != 0)  {
-                game::interface::saveVM(session, session.getGame()->getViewpointPlayer());
+    class PostSaveAction : public PostSaveTask_t {
+     public:
+        PostSaveAction(game::Session& session, ScriptSide& si, RequestLink1 link, OutputState::Target target)
+            : m_session(session), m_scriptSide(si), m_link(link), m_target(target)
+            { }
+
+        virtual void call(bool flag)
+            {
+                // Ignore flag for now - failure to save does not prevent exiting
+                (void) flag;
+
+                // Save VM.
+                // TODO: check whether this should be after saving?
+                try {
+                    if (m_session.getGame().get() != 0)  {
+                        game::interface::saveVM(m_session, m_session.getGame()->getViewpointPlayer());
+                    }
+                }
+                catch (std::exception& e) {
+                    m_session.log().write(afl::sys::LogListener::Error, LOG_NAME, m_session.translator().translateString("Unable to save game"), e);
+                }
+
+                // Perform state change. This will eventually continue the process.
+                m_scriptSide.callAsyncNew(new PostSaveStateChangeAction(m_target, m_link));
             }
+
+        static std::auto_ptr<PostSaveTask_t> make(game::Session& session, ScriptSide& si, RequestLink1 link, OutputState::Target target)
+            { return std::auto_ptr<PostSaveTask_t>(new PostSaveAction(session, si, link, target)); }
+
+     private:
+        game::Session& m_session;
+        ScriptSide& m_scriptSide;
+        RequestLink1 m_link;
+        OutputState::Target m_target;
+    };
+
+    class NullSaveAction : public Task_t {
+     public:
+        NullSaveAction(std::auto_ptr<PostSaveTask_t> then)
+            : m_then(then)
+            { }
+        virtual void call()
+            { m_then->call(true); }
+     private:
+        std::auto_ptr<PostSaveTask_t> m_then;
+    };
+
+    void trySaveSession(game::Session& session, ScriptSide& si, RequestLink1 link, OutputState::Target target)
+    {
+        std::auto_ptr<Task_t> action(session.save(PostSaveAction::make(session, si, link, target)));
+        if (action.get() == 0) {
+            action.reset(new NullSaveAction(PostSaveAction::make(session, si, link, target)));
         }
-        catch (std::exception& e) {
-            session.log().write(afl::sys::LogListener::Error, LOG_NAME, session.translator().translateString("Unable to save game"), e);
-        }
+        link.getProcess().suspend(action);
     }
 
     void doConfiguredTransfer(ScriptSide& si, RequestLink1 link, game::actions::CargoTransferSetup setup)
@@ -609,8 +670,7 @@ client::si::IFSystemExitClient(game::Session& session, ScriptSide& si, RequestLi
 {
     // ex IFSystemExitClient
     args.checkArgumentCount(0);
-    trySaveSession(session);
-    si.postNewTask(link, new StateChangeTask(OutputState::ExitProgram));
+    trySaveSession(session, si, link, OutputState::ExitProgram);
 }
 
 /* @q System.ExitRace (Global Command)
@@ -622,8 +682,7 @@ client::si::IFSystemExitRace(game::Session& session, ScriptSide& si, RequestLink
 {
     // ex IFSystemExitRace
     args.checkArgumentCount(0);
-    trySaveSession(session);
-    si.postNewTask(link, new StateChangeTask(OutputState::ExitGame));
+    trySaveSession(session, si, link, OutputState::ExitGame);
 }
 
 // @since PCC2 2.40.10

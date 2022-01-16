@@ -206,147 +206,18 @@ game::v3::ResultLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game
     ldr.loadFlakBattles(turn, root.gameDirectory(), player);
 }
 
-void
-game::v3::ResultLoader::saveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session)
+std::auto_ptr<game::TurnLoader::Task_t>
+game::v3::ResultLoader::saveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then)
 {
     // ex saveTurns
     // FIXME: saveTurns took a PlayerSet
-    const char*const LOCATION = "ResultLoader::saveCurrentTurn";
-    if (session.getEditableAreas().contains(Session::CommandArea)) {
-        game::v3::trn::FileSet turns(root.gameDirectory(), *m_charset);
-        m_log.write(m_log.Info, LOG_NAME, m_translator("Generating turn commands..."));
-
-        // Create turn file
-        TurnFile& thisTurn = turns.create(player, turn.getTimestamp(), turn.getTurnNumber());
-
-        // Obtain reverter
-        const game::map::Universe& u = turn.universe();
-        Reverter* rev = dynamic_cast<Reverter*>(u.getReverter());
-        checkAssertion(rev != 0, "Reverter exists", LOCATION);
-
-        // Obtain key
-        const RegistrationKey* key = dynamic_cast<const RegistrationKey*>(&root.registrationKey());
-        checkAssertion(key != 0, "Key exists", LOCATION);
-
-        thisTurn.setFeatures(TurnFile::FeatureSet_t(TurnFile::WinplanFeature));
-        thisTurn.setRegistrationKey(*key, turn.getTurnNumber());
-
-        // Make commands
-        const game::map::Ship* pAllianceShip = 0;
-        Packer pack(*m_charset);
-        const bool remapExplore = !root.hostVersion().isMissionAllowed(1);
-        for (int i = 1; i <= structures::NUM_SHIPS; ++i) {
-            const game::map::Ship* pShip = u.ships().get(i);
-            const game::map::ShipData* pOldShip = rev->getShipData(i);
-            if (pShip != 0 && pOldShip != 0 && pShip->getShipSource().contains(player)) {
-                if (pAllianceShip == 0) {
-                    pAllianceShip = pShip;
-                }
-
-                // Get ship data
-                game::map::ShipData newShip;
-                pShip->getCurrentShipData(newShip);
-
-                // Convert into blobs
-                structures::Ship rawOldShip, rawNewShip;
-                pack.packShip(rawOldShip, i, *pOldShip, remapExplore);
-                pack.packShip(rawNewShip, i,   newShip, remapExplore);
-
-                // Make commands
-                thisTurn.makeShipCommands(i, rawOldShip, rawNewShip);
-            }
-        }
-        for (int i = 1; i <= structures::NUM_PLANETS; ++i) {
-            const game::map::Planet* pPlanet = u.planets().get(i);
-            const game::map::PlanetData* pOldPlanet = rev->getPlanetData(i);
-            if (pPlanet != 0 && pOldPlanet != 0 && pPlanet->getPlanetSource().contains(player)) {
-                // Get planet data
-                game::map::PlanetData newPlanet;
-                pPlanet->getCurrentPlanetData(newPlanet);
-
-                // Convert into blobs
-                structures::Planet rawOldPlanet, rawNewPlanet;
-                pack.packPlanet(rawOldPlanet, i, *pOldPlanet);
-                pack.packPlanet(rawNewPlanet, i,   newPlanet);
-
-                // Make commands
-                thisTurn.makePlanetCommands(i, rawOldPlanet, rawNewPlanet);
-            }
-        }
-        for (int i = 1; i <= structures::NUM_PLANETS; ++i) {
-            const game::map::Planet* pPlanet = u.planets().get(i);
-            const game::map::BaseData* pOldBase = rev->getBaseData(i);
-            if (pPlanet != 0 && pOldBase != 0 && pPlanet->getBaseSource().contains(player)) {
-                // Get starbase data
-                game::map::BaseData newBase;
-                pPlanet->getCurrentBaseData(newBase);
-
-                // Convert into blobs
-                structures::Base rawOldBase, rawNewBase;
-                pack.packBase(rawOldBase, i, *pOldBase);
-                pack.packBase(rawNewBase, i,   newBase);
-
-                // Make commands
-                thisTurn.makeBaseCommands(i, rawOldBase, rawNewBase);
-            }
-        }
-
-        // Messages
-        thisTurn.sendOutbox(turn.outbox(), player, m_translator, root.playerList(), *m_charset);
-
-        // Command messages
-        if (const CommandExtra* cx = CommandExtra::get(turn)) {
-            if (const CommandContainer* cc = cx->get(player)) {
-                String_t accum;
-                for (CommandContainer::ConstIterator_t i = cc->begin(); i != cc->end(); ++i) {
-                    if (const Command* pc = *i) {
-                        if (pc->getCommand() == Command::TAlliance) {
-                            if (pAllianceShip == 0) {
-                                m_log.write(m_log.Warn, LOG_NAME, Format(m_translator("Player %d has no ship; alliance changes not transmitted"), player));
-                            } else {
-                                thisTurn.sendTHostAllies(pc->getArg(), pAllianceShip->getId(), pAllianceShip->getFriendlyCode().orElse(""));
-                            }
-                        } else {
-                            const String_t text = pc->getCommandText();
-                            if (!text.empty() && text[0] != '$') {
-                                if (accum.size() + text.size() > 500) {
-                                    thisTurn.sendMessage(player, player, accum, *m_charset);
-                                    accum.clear();
-                                }
-                                accum += text;
-                                accum += '\n';
-                            }
-                        }
-                    }
-                }
-                if (!accum.empty()) {
-                    thisTurn.sendMessage(player, player, accum, *m_charset);
-                }
-            }
-        }
-
-        // FIXME: load password
-        // char new_password[10];
-        // if (gen.getNewPasswordData(new_password)) {
-        //     trns[pid-1]->addCommand(tcm_ChangePassword, 0, new_password, sizeof(new_password));
-        // }
-
-        // Generate turn
-        thisTurn.update();        // FIXME: in FileSet?
-        turns.updateTrailers();
-        turns.saveAll(m_log, root.playerList(), m_fileSystem, root.userConfiguration(), m_translator);
+    try {
+        doSaveCurrentTurn(turn, game, player, root, session);
+        return makeConfirmationTask(true, then);
     }
-
-    if (session.getEditableAreas().contains(Session::LocalDataArea)) {
-        // chart.cc
-        saveCurrentDatabases(turn, game, player, root, session, *m_charset);
-
-        // Fleets
-        game::db::FleetLoader(*m_charset).save(root.gameDirectory(), turn.universe(), player);
-    }
-
-    if (m_pProfile != 0) {
-        game.expressionLists().saveRecentFiles(*m_pProfile, m_log, m_translator);
+    catch (std::exception& e) {
+        session.log().write(afl::sys::LogListener::Error, LOG_NAME, session.translator().translateString("Unable to save game"), e);
+        return makeConfirmationTask(false, then);
     }
 }
 
@@ -570,6 +441,148 @@ game::v3::ResultLoader::loadTurnfile(Turn& trn, Root& root, afl::io::Stream& fil
 
     const bool remapExplore = !root.hostVersion().isMissionAllowed(1);
     LocalTurnProcessor(trn, root, file, player, remapExplore, *this).handleTurnFile(f, *m_charset);
+}
+
+void
+game::v3::ResultLoader::doSaveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session)
+{
+    const char*const LOCATION = "ResultLoader::saveCurrentTurn";
+    if (session.getEditableAreas().contains(Session::CommandArea)) {
+        game::v3::trn::FileSet turns(root.gameDirectory(), *m_charset);
+        m_log.write(m_log.Info, LOG_NAME, m_translator("Generating turn commands..."));
+
+        // Create turn file
+        TurnFile& thisTurn = turns.create(player, turn.getTimestamp(), turn.getTurnNumber());
+
+        // Obtain reverter
+        const game::map::Universe& u = turn.universe();
+        Reverter* rev = dynamic_cast<Reverter*>(u.getReverter());
+        checkAssertion(rev != 0, "Reverter exists", LOCATION);
+
+        // Obtain key
+        const RegistrationKey* key = dynamic_cast<const RegistrationKey*>(&root.registrationKey());
+        checkAssertion(key != 0, "Key exists", LOCATION);
+
+        thisTurn.setFeatures(TurnFile::FeatureSet_t(TurnFile::WinplanFeature));
+        thisTurn.setRegistrationKey(*key, turn.getTurnNumber());
+
+        // Make commands
+        const game::map::Ship* pAllianceShip = 0;
+        Packer pack(*m_charset);
+        const bool remapExplore = !root.hostVersion().isMissionAllowed(1);
+        for (int i = 1; i <= structures::NUM_SHIPS; ++i) {
+            const game::map::Ship* pShip = u.ships().get(i);
+            const game::map::ShipData* pOldShip = rev->getShipData(i);
+            if (pShip != 0 && pOldShip != 0 && pShip->getShipSource().contains(player)) {
+                if (pAllianceShip == 0) {
+                    pAllianceShip = pShip;
+                }
+
+                // Get ship data
+                game::map::ShipData newShip;
+                pShip->getCurrentShipData(newShip);
+
+                // Convert into blobs
+                structures::Ship rawOldShip, rawNewShip;
+                pack.packShip(rawOldShip, i, *pOldShip, remapExplore);
+                pack.packShip(rawNewShip, i,   newShip, remapExplore);
+
+                // Make commands
+                thisTurn.makeShipCommands(i, rawOldShip, rawNewShip);
+            }
+        }
+        for (int i = 1; i <= structures::NUM_PLANETS; ++i) {
+            const game::map::Planet* pPlanet = u.planets().get(i);
+            const game::map::PlanetData* pOldPlanet = rev->getPlanetData(i);
+            if (pPlanet != 0 && pOldPlanet != 0 && pPlanet->getPlanetSource().contains(player)) {
+                // Get planet data
+                game::map::PlanetData newPlanet;
+                pPlanet->getCurrentPlanetData(newPlanet);
+
+                // Convert into blobs
+                structures::Planet rawOldPlanet, rawNewPlanet;
+                pack.packPlanet(rawOldPlanet, i, *pOldPlanet);
+                pack.packPlanet(rawNewPlanet, i,   newPlanet);
+
+                // Make commands
+                thisTurn.makePlanetCommands(i, rawOldPlanet, rawNewPlanet);
+            }
+        }
+        for (int i = 1; i <= structures::NUM_PLANETS; ++i) {
+            const game::map::Planet* pPlanet = u.planets().get(i);
+            const game::map::BaseData* pOldBase = rev->getBaseData(i);
+            if (pPlanet != 0 && pOldBase != 0 && pPlanet->getBaseSource().contains(player)) {
+                // Get starbase data
+                game::map::BaseData newBase;
+                pPlanet->getCurrentBaseData(newBase);
+
+                // Convert into blobs
+                structures::Base rawOldBase, rawNewBase;
+                pack.packBase(rawOldBase, i, *pOldBase);
+                pack.packBase(rawNewBase, i,   newBase);
+
+                // Make commands
+                thisTurn.makeBaseCommands(i, rawOldBase, rawNewBase);
+            }
+        }
+
+        // Messages
+        thisTurn.sendOutbox(turn.outbox(), player, m_translator, root.playerList(), *m_charset);
+
+        // Command messages
+        if (const CommandExtra* cx = CommandExtra::get(turn)) {
+            if (const CommandContainer* cc = cx->get(player)) {
+                String_t accum;
+                for (CommandContainer::ConstIterator_t i = cc->begin(); i != cc->end(); ++i) {
+                    if (const Command* pc = *i) {
+                        if (pc->getCommand() == Command::TAlliance) {
+                            if (pAllianceShip == 0) {
+                                m_log.write(m_log.Warn, LOG_NAME, Format(m_translator("Player %d has no ship; alliance changes not transmitted"), player));
+                            } else {
+                                thisTurn.sendTHostAllies(pc->getArg(), pAllianceShip->getId(), pAllianceShip->getFriendlyCode().orElse(""));
+                            }
+                        } else {
+                            const String_t text = pc->getCommandText();
+                            if (!text.empty() && text[0] != '$') {
+                                if (accum.size() + text.size() > 500) {
+                                    thisTurn.sendMessage(player, player, accum, *m_charset);
+                                    accum.clear();
+                                }
+                                accum += text;
+                                accum += '\n';
+                            }
+                        }
+                    }
+                }
+                if (!accum.empty()) {
+                    thisTurn.sendMessage(player, player, accum, *m_charset);
+                }
+            }
+        }
+
+        // FIXME: load password
+        // char new_password[10];
+        // if (gen.getNewPasswordData(new_password)) {
+        //     trns[pid-1]->addCommand(tcm_ChangePassword, 0, new_password, sizeof(new_password));
+        // }
+
+        // Generate turn
+        thisTurn.update();        // FIXME: in FileSet?
+        turns.updateTrailers();
+        turns.saveAll(m_log, root.playerList(), m_fileSystem, root.userConfiguration(), m_translator);
+    }
+
+    if (session.getEditableAreas().contains(Session::LocalDataArea)) {
+        // chart.cc
+        saveCurrentDatabases(turn, game, player, root, session, *m_charset);
+
+        // Fleets
+        game::db::FleetLoader(*m_charset).save(root.gameDirectory(), turn.universe(), player);
+    }
+
+    if (m_pProfile != 0) {
+        game.expressionLists().saveRecentFiles(*m_pProfile, m_log, m_translator);
+    }
 }
 
 /** Add message from message file.

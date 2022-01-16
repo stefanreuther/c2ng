@@ -47,6 +47,23 @@ game::TurnLoader::getDefaultPlayer(PlayerSet_t baseSet) const
     return foundPlayer > 0 ? foundPlayer : 0;
 }
 
+std::auto_ptr<game::TurnLoader::Task_t>
+game::TurnLoader::makeConfirmationTask(bool flag, std::auto_ptr<StatusTask_t> then)
+{
+    class Task : public Task_t {
+     public:
+        Task(bool flag, std::auto_ptr<StatusTask_t> then)
+            : m_flag(flag), m_then(then)
+            { }
+        void call()
+            { m_then->call(m_flag); }
+     private:
+        bool m_flag;
+        std::auto_ptr<StatusTask_t> m_then;
+    };
+    return std::auto_ptr<Task_t>(new Task(flag, then));
+}
+
 
 void
 game::TurnLoader::loadCurrentDatabases(Turn& turn, Game& game, int player, Root& root, Session& session)

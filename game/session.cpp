@@ -480,23 +480,24 @@ game::Session::getReferenceName(Reference ref, ObjectName which, String_t& resul
     return false;
 }
 
-bool
-game::Session::save()
+std::auto_ptr<afl::base::Closure<void()> >
+game::Session::save(std::auto_ptr<afl::base::Closure<void(bool)> > then)
 {
+    std::auto_ptr<afl::base::Closure<void()> > result;
+
     // Check environment
     afl::base::Ptr<Root> pRoot = getRoot();
     afl::base::Ptr<Game> pGame = getGame();
     if (pRoot.get() == 0 || pGame.get() == 0) {
-        return false;
+        return result;
     }
 
     afl::base::Ptr<TurnLoader> pLoader = pRoot->getTurnLoader();
     if (pLoader.get() == 0) {
-        return false;
+        return result;
     }
 
-    pLoader->saveCurrentTurn(pGame->currentTurn(), *pGame, pGame->getViewpointPlayer(), *pRoot, *this);
-    return true;
+    return pLoader->saveCurrentTurn(pGame->currentTurn(), *pGame, pGame->getViewpointPlayer(), *pRoot, *this, then);
 }
 
 afl::data::Value*

@@ -287,8 +287,8 @@ game::nu::TurnLoader::loadCurrentTurn(Turn& turn, Game& game, int player, Root& 
     loadVcrs(turn, rst("rst")("vcrs"));
 }
 
-void
-game::nu::TurnLoader::saveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session)
+std::auto_ptr<game::TurnLoader::Task_t>
+game::nu::TurnLoader::saveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then)
 {
     // FIXME
     (void) turn;
@@ -297,6 +297,8 @@ game::nu::TurnLoader::saveCurrentTurn(const Turn& turn, const Game& game, int pl
     (void) session;
 
     game.expressionLists().saveRecentFiles(m_profile, m_log, m_translator);
+
+    return makeConfirmationTask(true, then);
 }
 
 void

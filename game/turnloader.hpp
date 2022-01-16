@@ -5,6 +5,8 @@
 #ifndef C2NG_GAME_TURNLOADER_HPP
 #define C2NG_GAME_TURNLOADER_HPP
 
+#include <memory>
+#include "afl/base/closure.hpp"
 #include "afl/base/deletable.hpp"
 #include "afl/base/refcounted.hpp"
 #include "afl/bits/smallset.hpp"
@@ -20,9 +22,34 @@ namespace game {
     class Session;
 
     /** Turn loader.
-        Provides an interface to load and save current and historic turns and databases. */
+        Provides an interface to load and save current and historic turns and databases.
+
+        <b>Functions returning a Task:</b>
+
+        The returned Task object is intended to perform the required task, and then emit a callback with the result.
+
+        These functions are permitted to execute the actual operation ahead of time and just return a dummy task.
+        However, they must not confirm the operation before the return value has been invoked.
+
+        If the Task requires some interaction, it is permitted to suspend and later resume.
+        How this resumption is achieved is out of the scope of TurnLoader.
+        The task must be resumed in the same thread that started it.
+
+        Caller may decide to abort the task by destroying it.
+        In this case, it needs to stop operating and drop all references.
+
+        For now (20220116), the ability to suspend is primarily intended for user interactions, NOT for I/O.
+        Should we enable that for I/O, we'd need to enable console/server programs to support resumption of a task.
+        Those currently assume that local I/O does not suspend. */
     class TurnLoader : public afl::base::Deletable, public afl::base::RefCounted {
      public:
+        /** Shortcut for asynchronous task. */
+        typedef afl::base::Closure<void()> Task_t;
+
+        /** Shortcut for post-I/O status reporting task. */
+        typedef afl::base::Closure<void(bool)> StatusTask_t;
+
+
         /** Player status.
             \see getPlayerStatus() */
         enum PlayerStatus {
@@ -92,15 +119,19 @@ namespace game {
         virtual void loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session) = 0;
 
         /** Save current turn.
-            This will save the current game, create and/or upload a turn file, etc.
-            This function must honor read/write mode restrictions defined by session.getEditableAreas().
+            This function produces a task that will save the current game, create and/or upload a turn file, etc.
+            It must honor read/write mode restrictions defined by session.getEditableAreas().
+            After completion, the task must emit a callback on \c then reporting success/failure.
 
             \param turn [in] Turn to save.
             \param game [in] Game object.
             \param player [in] Player number.
             \param root [in] Root.
-            \param session [in/out] Session. */
-        virtual void saveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session) = 0;
+            \param session [in/out] Session.
+            \param then [in] Task to execute after saving; never null.
+
+            \return Newly-allocated task to perform the operation; never null. */
+        virtual std::auto_ptr<Task_t> saveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then) = 0;
 
         /** Get history status.
             This function determines whether a number of turns have history information.
@@ -142,6 +173,12 @@ namespace game {
             \param baseSet set of players to check; pass in PlayerList::getAllPlayers().
             \return default player number if there is one; 0 if there is none or it's ambiguous */
         int getDefaultPlayer(PlayerSet_t baseSet) const;
+
+        /** Create a dummy task that confirms an operation.
+            Can be used when you execute saveCurrentTurn() ahead of time.
+            \param flag Result to report
+            \param then Task to receive status */
+        static std::auto_ptr<Task_t> makeConfirmationTask(bool flag, std::auto_ptr<StatusTask_t> then);
 
      protected:
         /** Load current turn databases.

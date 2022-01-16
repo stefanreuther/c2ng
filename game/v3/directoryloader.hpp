@@ -43,7 +43,7 @@ namespace game { namespace v3 {
 
         virtual PlayerStatusSet_t getPlayerStatus(int player, String_t& extra, afl::string::Translator& tx) const;
         virtual void loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session);
-        virtual void saveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session);
+        virtual std::auto_ptr<Task_t> saveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
         virtual void getHistoryStatus(int player, int turn, afl::base::Memory<HistoryStatus> status, const Root& root);
         virtual void loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root);
         virtual String_t getProperty(Property p);
@@ -73,6 +73,14 @@ namespace game { namespace v3 {
             Let Windows be the default, so this is the set of DOS format files.
             Another DOS/Windows switch is the control.dat file, which is handled internally by ControlFile. */
         PlayerSet_t m_playersWithDosOutbox;
+
+        /** Implementation of saveCurrentTurn.
+            Can throw on error.
+            \param turn Turn
+            \param game Game
+            \param player Player
+            \param root Root */
+        void doSaveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root);
 
         /** Load KORE file.
             \param file File

@@ -24,6 +24,29 @@ using interpreter::checkStringArg;
 using game::MAX_NUMBER;
 
 namespace {
+    class PostSaveAction : public afl::base::Closure<void(bool)> {
+     public:
+        PostSaveAction(interpreter::Process& proc, game::Session& session)
+            : m_process(proc), m_session(session)
+            { }
+
+        virtual void call(bool flag)
+            {
+                // continueProcess will delete the task, so save m_session first
+                game::Session& s = m_session;
+                if (!flag) {
+                    s.processList().continueProcessWithFailure(m_process, "Save error");
+                } else {
+                    s.processList().continueProcess(m_process);
+                }
+                s.sig_runRequest.raise();
+            }
+
+     private:
+        interpreter::Process& m_process;
+        game::Session& m_session;
+    };
+
     void drawLineOrRectangle(game::Session& session,
                              interpreter::Arguments& args,
                              game::map::Drawing::Type drawingType,
@@ -721,13 +744,20 @@ game::interface::IFHistoryShowTurn(interpreter::Process& /*proc*/, game::Session
 
    @since PCC 1.0.17, PCC2 1.99.12, PCC2 2.40.5 */
 void
-game::interface::IFSaveGame(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+game::interface::IFSaveGame(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args)
 {
     // ex int/if/globalif.cc:IFSaveGame, globint.pas:Global_SaveGame
     args.checkArgumentCount(0);
-    if (!session.save()) {
+
+    // Create deferred save action
+    std::auto_ptr<afl::base::Closure<void()> > action =
+        session.save(std::auto_ptr<afl::base::Closure<void(bool)> >(new PostSaveAction(proc, session)));
+
+    if (action.get() == 0) {
         throw interpreter::Error("No game loaded");
     }
+
+    proc.suspend(action);
 }
 
 /** @q SendMessage player:Int, text:Str... (Global Command)

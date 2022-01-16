@@ -50,7 +50,35 @@ server::play::GameAccess::GameAccess(game::Session& session, util::MessageCollec
 void
 server::play::GameAccess::save()
 {
-    if (!m_session.save()) {
+    // Save status tracking
+    bool result = false;
+    class SaveStatusReporter : public afl::base::Closure<void(bool)> {
+     public:
+        SaveStatusReporter(bool& result)
+            : m_result(result)
+            { }
+        void call(bool flag)
+            { m_result = flag; }
+     private:
+        bool& m_result;
+    };
+
+    // Create action
+    std::auto_ptr<afl::base::Closure<void()> > action = m_session.save(std::auto_ptr<afl::base::Closure<void(bool)> >(new SaveStatusReporter(result)));
+
+    // Invoke action if any (should always exit)
+    if (action.get() != 0) {
+        action->call();
+    }
+
+    // Discard action.
+    // If this action pended some background task, this will kill it.
+    // For now, we know that there cannot be such a background task,
+    // because we don't have a RequestDispatcher that could be used to revive it.
+    action.reset();
+
+    // Error reporting
+    if (!result) {
         throw std::runtime_error("Unable to save");
     }
 }
