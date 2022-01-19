@@ -441,3 +441,14 @@ util::strCollate(const String_t& a, const String_t& b)
         }
     }
 }
+
+const char*
+util::strStartsWith(const String_t& str, const char* pfx)
+{
+    size_t len = std::strlen(pfx);
+    if (str.compare(0, len, pfx, len) == 0) {
+        return str.data() + len;
+    } else {
+        return 0;
+    }
+}

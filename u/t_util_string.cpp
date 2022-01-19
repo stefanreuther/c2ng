@@ -84,7 +84,7 @@ TestUtilString::testParseRange()
         { "   x", 0 /* was 3, now 0 because string is entirely invalid */ },
         { "   -x", 0 /* was 4, now 0 because string is entirely invalid */ },
         // { "   -2x", 5 },
-        
+
         // standard cases
         { "42x", 2 },
         { "42-x", 3 },
@@ -104,7 +104,7 @@ TestUtilString::testParseRange()
         { "23  -42  x", 9 },
         { "23  -  42  x", 11 },
     };
-    
+
     for (size_t i = 0; i < sizeof(failure_cases)/sizeof(failure_cases[0]); ++i) {
         min = 0, max = 100;
         TSM_ASSERT(failure_cases[i].value, !util::parseRange(failure_cases[i].value, min, max, pos));
@@ -230,7 +230,7 @@ TestUtilString::testEncodeMimeHeader()
     // No word wrapping for unencoded stuff!
     const char LOREM[] = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Duis sem velit, ultrices et, fermentum auctor, rhoncus ut, ligula. Phasellus at purus sed purus cursus iaculis. Suspendisse fermentum. Pellentesque et arcu.";
     TS_ASSERT_EQUALS(util::encodeMimeHeader(LOREM, "us-ascii"), LOREM);
-                                            
+
     // Single unicode characters
     TS_ASSERT_EQUALS(util::encodeMimeHeader("die bl\xc3\xb6""den \xc3\xb6sen", "UTF-8"), "die =?UTF-8?B?YmzDtmRlbg==?= =?UTF-8?B?w7ZzZW4=?=");
 
@@ -366,5 +366,25 @@ TestUtilString::testFormatAge()
     TS_ASSERT_EQUALS(formatAge(100, 99, tx), "previous turn");
     TS_ASSERT_EQUALS(formatAge(100, 100, tx), "current turn");
     TS_ASSERT_EQUALS(formatAge(100, 777, tx), "turn 777");
+}
+
+/** Test strStartsWith. */
+void
+TestUtilString::testStrStartsWith()
+{
+    using util::strStartsWith;
+
+    // Long-lived string
+    String_t a = "foobar";
+    TS_ASSERT(strStartsWith(a, "foo")    == a.c_str() + 3);
+    TS_ASSERT(strStartsWith(a, "foobar") == a.c_str() + 6);
+    TS_ASSERT(strStartsWith(a, "")       == a.c_str());
+    TS_ASSERT(strStartsWith(a, "bar")    == 0);
+    TS_ASSERT(strStartsWith(a, "foobarx") == 0);
+
+    // Short-lived string
+    TS_ASSERT_EQUALS(String_t(strStartsWith("foobar", "foo")), "bar");
+    TS_ASSERT_EQUALS(String_t(strStartsWith("foobar", "")),    "foobar");
+    TS_ASSERT(strStartsWith("foobar", "bar") == 0);
 }
 

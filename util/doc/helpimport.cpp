@@ -15,6 +15,7 @@
 #include "afl/io/xml/writer.hpp"
 #include "afl/string/format.hpp"
 #include "util/charsetfactory.hpp"
+#include "util/string.hpp"
 
 using afl::container::PtrVector;
 using afl::io::InternalSink;
@@ -32,6 +33,7 @@ using afl::string::Translator;
 using afl::sys::LogListener;
 using util::doc::BlobStore;
 using util::doc::Index;
+using util::strStartsWith;
 
 namespace {
     // Log channel name
@@ -54,25 +56,15 @@ namespace {
             { }
     };
 
-    const char* startsWith(const String_t& str, const char* pfx)
-    {
-        size_t len = std::strlen(pfx);
-        if (str.compare(0, len, pfx, len) == 0) {
-            return str.data() + len;
-        } else {
-            return 0;
-        }
-    }
-
     // Check for absolute link.
     // Those are not transformed.
     bool isAbsoluteLink(const String_t& s)
     {
-        return (startsWith(s, "http:") || startsWith(s, "https:") || startsWith(s, "mailto:") || startsWith(s, "ftp:")
-                || startsWith(s, "news:") || startsWith(s, "nntp:") || startsWith(s, "data:")
-                || startsWith(s, "site:")
-                || startsWith(s, "asset:")
-                || startsWith(s, "/"));
+        return (strStartsWith(s, "http:") || strStartsWith(s, "https:") || strStartsWith(s, "mailto:") || strStartsWith(s, "ftp:")
+                || strStartsWith(s, "news:") || strStartsWith(s, "nntp:") || strStartsWith(s, "data:")
+                || strStartsWith(s, "site:")
+                || strStartsWith(s, "asset:")
+                || strStartsWith(s, "/"));
     }
 
     // Transform page name.

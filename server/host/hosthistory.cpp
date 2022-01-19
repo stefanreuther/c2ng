@@ -13,9 +13,11 @@
 #include "server/host/root.hpp"
 #include "server/host/session.hpp"
 #include "server/host/user.hpp"
+#include "util/string.hpp"
 #include "util/stringparser.hpp"
 
 using server::interface::HostGame;
+using util::strStartsWith;
 
 namespace {
     /*
@@ -58,14 +60,6 @@ namespace {
     const int HasState = 2;
     const int HasUser  = 4;
     const int HasSlot  = 8;
-
-    bool strStartsWith(const String_t& big, const char* small)
-    {
-        // FIXME: should be in library
-        size_t n = std::strlen(small);
-        return big.size() >= n
-            && big.compare(0, n, small, n) == 0;
-    }
 
     int getEventParameters(const String_t& eventType)
     {

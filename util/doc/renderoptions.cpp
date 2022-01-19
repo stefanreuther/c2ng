@@ -5,18 +5,7 @@
 
 #include <cstring>
 #include "util/doc/renderoptions.hpp"
-
-namespace {
-    const char* startsWith(const String_t& str, const char* pfx)
-    {
-        size_t len = std::strlen(pfx);
-        if (str.compare(0, len, pfx, len) == 0) {
-            return str.data() + len;
-        } else {
-            return 0;
-        }
-    }
-}
+#include "util/string.hpp"
 
 void
 util::doc::RenderOptions::setSiteRoot(const String_t& s)
@@ -81,18 +70,18 @@ util::doc::RenderOptions::getDocumentId() const
 String_t
 util::doc::RenderOptions::transformLink(String_t s) const
 {
-    if (startsWith(s, "http:") || startsWith(s, "https:") || startsWith(s, "mailto:") || startsWith(s, "ftp:")
-        || startsWith(s, "news:") || startsWith(s, "nntp:") || startsWith(s, "data:"))
+    if (strStartsWith(s, "http:") || strStartsWith(s, "https:") || strStartsWith(s, "mailto:") || strStartsWith(s, "ftp:")
+        || strStartsWith(s, "news:") || strStartsWith(s, "nntp:") || strStartsWith(s, "data:"))
     {
         // Verbatim
         return s;
-    } else if (const char* p = startsWith(s, "site:")) {
+    } else if (const char* p = strStartsWith(s, "site:")) {
         // Site URL ("site:foo", same as "$(html_CGI_RELROOT)foo" in a template)
         return m_siteRoot + p;
-    } else if (const char* p = startsWith(s, "asset:")) {
+    } else if (const char* p = strStartsWith(s, "asset:")) {
         // Asset URL ("asset:foo")
         return m_assetRoot + p;
-    } else if (startsWith(s, "#")) {
+    } else if (strStartsWith(s, "#")) {
         // Fragment ("#frag")
         return s;
     } else {
@@ -103,7 +92,7 @@ util::doc::RenderOptions::transformLink(String_t s) const
             frag = s.substr(p);
             s.erase(p);
         }
-        if (const char* p = startsWith(s, "/")) {
+        if (const char* p = strStartsWith(s, "/")) {
             // Global document URL (e.g. "/pcc2-current/toc")
             return m_docRoot + p + m_docLinkSuffix + frag;
         } else {

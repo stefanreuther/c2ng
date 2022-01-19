@@ -148,6 +148,14 @@ namespace util {
         \return negative value if a sorts before b, positive value if a sorts after b, zero if a equals b. */
     int strCollate(const String_t& a, const String_t& b);
 
+    /** Check whether strings starts with another string.
+        This function can either be used as a boolean predicate,
+        or (if the big string lives sufficiently long) to retrieve the text after the prefix.
+        \param str Big string
+        \param pfx Prefix to look for
+        \return if correct prefix present, pointer to first character after it. If prefix not present, null. */
+    const char* strStartsWith(const String_t& str, const char* pfx);
+
 }
 
 #endif

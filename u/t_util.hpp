@@ -282,6 +282,7 @@ class TestUtilString : public CxxTest::TestSuite {
     void testTrailing();
     void testCollate();
     void testFormatAge();
+    void testStrStartsWith();
 };
 
 class TestUtilStringInstructionList : public CxxTest::TestSuite {

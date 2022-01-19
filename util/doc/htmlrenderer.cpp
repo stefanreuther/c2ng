@@ -19,6 +19,7 @@ using afl::io::xml::TextNode;
 using afl::io::xml::Visitor;
 using afl::string::Format;
 using util::doc::RenderOptions;
+using util::strStartsWith;
 
 namespace {
     class HtmlRenderer : public Visitor {
@@ -50,16 +51,6 @@ namespace {
         void renderPreformatted(const TagNode& t);
     };
 
-    const char* startsWith(const String_t& str, const char* pfx)
-    {
-        size_t len = std::strlen(pfx);
-        if (str.compare(0, len, pfx, len) == 0) {
-            return str.data() + len;
-        } else {
-            return 0;
-        }
-    }
-
     String_t getLinkClass(const TagNode& t)
     {
         const String_t& klass = t.getAttributeByName("class");
@@ -69,11 +60,11 @@ namespace {
             return klass;
         } else {
             const String_t& s = t.getAttributeByName("href");
-            if (startsWith(s, "http:") || startsWith(s, "https:") || startsWith(s, "mailto:") || startsWith(s, "ftp:")
-                || startsWith(s, "news:") || startsWith(s, "nntp:") || startsWith(s, "data:"))
+            if (strStartsWith(s, "http:") || strStartsWith(s, "https:") || strStartsWith(s, "mailto:") || strStartsWith(s, "ftp:")
+                || strStartsWith(s, "news:") || strStartsWith(s, "nntp:") || strStartsWith(s, "data:"))
             {
                 return "external-link";
-            } else if (startsWith(s, "site:")) {
+            } else if (strStartsWith(s, "site:")) {
                 return "site-link";
             } else {
                 return String_t();

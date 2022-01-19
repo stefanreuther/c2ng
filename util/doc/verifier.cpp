@@ -16,6 +16,7 @@
 #include "util/doc/blobstore.hpp"
 #include "util/doc/htmlrenderer.hpp"
 #include "util/doc/renderoptions.hpp"
+#include "util/string.hpp"
 
 using afl::base::Ref;
 using afl::io::ConstMemoryStream;
@@ -32,16 +33,6 @@ using afl::string::Format;
 namespace {
     const size_t Address_Used = 1;
     const size_t Address_Defined = 2;
-
-    const char* startsWith(const String_t& str, const char* pfx)
-    {
-        size_t len = std::strlen(pfx);
-        if (str.compare(0, len, pfx, len) == 0) {
-            return str.data() + len;
-        } else {
-            return 0;
-        }
-    }
 }
 
 /*
@@ -101,15 +92,15 @@ class util::doc::Verifier::Visitor : public afl::io::xml::Visitor {
 void
 util::doc::Verifier::Visitor::verifyLink(String_t s, bool isLink)
 {
-    if (startsWith(s, "http:") || startsWith(s, "https:") || startsWith(s, "mailto:") || startsWith(s, "ftp:")
-        || startsWith(s, "news:") || startsWith(s, "nntp:") || startsWith(s, "data:"))
+    if (strStartsWith(s, "http:") || strStartsWith(s, "https:") || strStartsWith(s, "mailto:") || strStartsWith(s, "ftp:")
+        || strStartsWith(s, "news:") || strStartsWith(s, "nntp:") || strStartsWith(s, "data:"))
     {
         // Verbatim
         m_parent.addMessage(Info_ExternalLinks, m_index, m_node, s);
-    } else if (const char* p = startsWith(s, "site:")) {
+    } else if (const char* p = strStartsWith(s, "site:")) {
         // Site URL ("site:foo", same as "$(html_CGI_RELROOT)foo" in a template)
         m_parent.addMessage(Info_SiteLinks, m_index, m_node, p);
-    } else if (const char* p = startsWith(s, "asset:")) {
+    } else if (const char* p = strStartsWith(s, "asset:")) {
         // Asset URL ("asset:foo")
         String_t link = p;
         String_t::size_type x = link.find_first_of("#/");
@@ -132,7 +123,7 @@ util::doc::Verifier::Visitor::verifyLink(String_t s, bool isLink)
         if (!isLink) {
             // Link used in <img src>
             m_parent.addMessage(Warn_DocumentImage, m_index, m_node, s);
-        } else if (const char* id = startsWith(s, "#")) {
+        } else if (const char* id = strStartsWith(s, "#")) {
             // Fragment ("#frag")
             String_t key = m_index.getNodeContentId(m_node) + "#" + id;
             AnchorInfo& info = m_parent.m_usedAnchors.insert(std::make_pair(key, AnchorInfo(m_node, "#" + String_t(id)))).first->second;
@@ -148,7 +139,7 @@ util::doc::Verifier::Visitor::verifyLink(String_t s, bool isLink)
 
             // Resolve to full link
             String_t fullName;
-            if (const char* p = startsWith(s, "/")) {
+            if (const char* p = strStartsWith(s, "/")) {
                 // Global document URL (e.g. "/pcc2-current/toc")
                 fullName = p;
             } else {
