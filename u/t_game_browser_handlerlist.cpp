@@ -10,6 +10,11 @@
 #include "game/browser/account.hpp"
 #include "afl/io/internaldirectory.hpp"
 
+namespace {
+    void dummy(afl::base::Ptr<game::Root>)
+    { }
+}
+
 /** Ultra-simple test. */
 void
 TestGameBrowserHandlerList::testIt()
@@ -20,8 +25,8 @@ TestGameBrowserHandlerList::testIt()
             { return false; }
         virtual game::browser::Folder* createAccountFolder(game::browser::Account& /*acc*/)
             { return 0; }
-        virtual afl::base::Ptr<game::Root> loadGameRoot(afl::base::Ref<afl::io::Directory> /*dir*/, const game::config::UserConfiguration& /*config*/)
-            { return 0; }
+        virtual std::auto_ptr<game::browser::Task_t> loadGameRootMaybe(afl::base::Ref<afl::io::Directory> /*dir*/, const game::config::UserConfiguration& /*config*/, std::auto_ptr<game::browser::LoadGameRootTask_t>& /*then*/)
+            { return std::auto_ptr<game::browser::Task_t>(); }
     };
 
     game::browser::HandlerList testee;
@@ -29,13 +34,16 @@ TestGameBrowserHandlerList::testIt()
     afl::container::PtrVector<game::browser::Folder> result;
     const game::config::UserConfiguration uc;
     afl::base::Ref<afl::io::Directory> dir(afl::io::InternalDirectory::create("test"));
+    std::auto_ptr<game::browser::LoadGameRootTask_t> then = std::auto_ptr<game::browser::LoadGameRootTask_t>(game::browser::LoadGameRootTask_t::makeStatic(dummy));
     TS_ASSERT(!testee.handleFolderName("foo", result));
     TS_ASSERT(testee.createAccountFolder(acc) == 0);
-    TS_ASSERT(testee.loadGameRoot(dir, uc).get() == 0);
+    TS_ASSERT(testee.loadGameRootMaybe(dir, uc, then).get() == 0);
+    TS_ASSERT(then.get() != 0);
 
     testee.addNewHandler(new Tester());
     TS_ASSERT(!testee.handleFolderName("foo", result));
     TS_ASSERT(testee.createAccountFolder(acc) == 0);
-    TS_ASSERT(testee.loadGameRoot(dir, uc).get() == 0);
+    TS_ASSERT(testee.loadGameRootMaybe(dir, uc, then).get() == 0);
+    TS_ASSERT(then.get() != 0);
 }
 

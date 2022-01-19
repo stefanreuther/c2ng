@@ -30,6 +30,10 @@ namespace game { namespace browser {
         - game:<id> (local game folders for games on that server)
         Use of these attributes is at the implementation's discretion.
 
+        This is a plain data class that does not contain any account logic ("how to talk to PlanetsCentral?").
+        Account logic is Handler objects known to the browser,
+        in particular, its Handler::createAccountFolder() and Handler::loadGameRootMaybe().
+
         <b>Relation between host, url, and what actually happens:</b>
 
         \c host is the name users casually use to refer to the server ("I play at planetscentral.com").
@@ -137,17 +141,13 @@ namespace game { namespace browser {
 
         /** Set game folder name.
             \param gameId Game identifier. Typically an alphanumeric string.
-            \param folderName Folder name. See class description. */
+            \param folderName Folder name; empty to remove. See class description. */
         void setGameFolderName(String_t gameId, String_t folderName);
 
         /** Get game folder name.
             \param gameId Game identifier. Typically an alphanumeric string.
             \return Game folder name; null if none set. */
         const String_t* getGameFolderName(String_t gameId) const;
-
-        /** Remove game folder name.
-            \param gameId Game identifier. Typically an alphanumeric string. */
-        void removeGameFolderName(String_t gameId);
 
         /** Save this account's data to a text file.
             This is used to create the accounts.ini file.

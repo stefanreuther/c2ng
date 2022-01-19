@@ -21,13 +21,13 @@
 #include "afl/string/posixfilenames.hpp"
 #include "game/browser/account.hpp"
 #include "game/browser/usercallback.hpp"
+#include "game/pcc/accountfolder.hpp"
+#include "game/pcc/gamefolder.hpp"
+#include "game/pcc/serverdirectory.hpp"
 #include "game/v3/registrationkey.hpp"
 #include "game/v3/rootloader.hpp"
 #include "game/v3/specificationloader.hpp"
 #include "game/v3/stringverifier.hpp"
-#include "game/pcc/serverdirectory.hpp"
-#include "game/pcc/gamefolder.hpp"
-#include "game/pcc/accountfolder.hpp"
 
 namespace {
     const char LOG_NAME[] = "game.pcc";
@@ -58,6 +58,8 @@ game::pcc::BrowserHandler::BrowserHandler(game::browser::Browser& b,
       m_manager(mgr),
       m_defaultSpecificationDirectory(defaultSpecificationDirectory),
       m_profile(profile),
+      m_nullFS(),
+      m_v3Loader(defaultSpecificationDirectory, &profile, b.translator(), b.log(), m_nullFS),
       m_gameList(),
       m_gameListAccount()
 { }
@@ -80,11 +82,11 @@ game::pcc::BrowserHandler::createAccountFolder(game::browser::Account& acc)
     }
 }
 
-afl::base::Ptr<game::Root>
-game::pcc::BrowserHandler::loadGameRoot(afl::base::Ref<afl::io::Directory> /*dir*/, const game::config::UserConfiguration& /*config*/)
+std::auto_ptr<game::browser::Task_t>
+game::pcc::BrowserHandler::loadGameRootMaybe(afl::base::Ref<afl::io::Directory> /*dir*/, const game::config::UserConfiguration& /*config*/, std::auto_ptr<game::browser::LoadGameRootTask_t>& /*then*/)
 {
-    // FIXME: do we need this? If folder is linked with server, process that.
-    return 0;
+    // FIXME: If this folder is linked with a server game, load that.
+    return std::auto_ptr<game::browser::Task_t>();
 }
 
 bool
@@ -283,4 +285,10 @@ util::ProfileDirectory&
 game::pcc::BrowserHandler::profile()
 {
     return m_profile;
+}
+
+game::v3::RootLoader&
+game::pcc::BrowserHandler::loader()
+{
+    return m_v3Loader;
 }

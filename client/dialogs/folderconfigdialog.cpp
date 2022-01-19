@@ -97,7 +97,7 @@ namespace {
                             opt.set(m_state.readOnly);
                             opt.setSource(ConfigurationOption::Game);
                         }
-                        p->updateConfiguration();
+                        session.addTask(p->updateConfiguration(std::auto_ptr<game::browser::Task_t>(game::browser::Task_t::makeBound(&session, &game::browser::Session::finishTask))));
                     }
                 }
             }

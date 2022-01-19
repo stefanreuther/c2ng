@@ -1,5 +1,6 @@
 /**
   *  \file game/browser/filesystemfolder.cpp
+  *  \brief Class game::browser::FileSystemFolder
   */
 
 #include "game/browser/filesystemfolder.hpp"
@@ -15,6 +16,9 @@
 #include "game/browser/browser.hpp"
 
 namespace {
+
+    const char*const LOG_NAME = "game.browser";
+
     /*
      *  Definition of the gamestat.dat file
      */
@@ -67,47 +71,52 @@ game::browser::FileSystemFolder::loadContent(afl::container::PtrVector<Folder>& 
     using afl::io::DirectoryEntry;
     using afl::io::Stream;
 
-    // Try to load gamestat file
-    if (!m_ignoreIndex) {
-        try {
-            // Assume Western Windows character set
-            afl::charset::CodepageCharset charset(afl::charset::g_codepage1252);
+    try {
+        // Try to load gamestat file
+        if (!m_ignoreIndex) {
+            try {
+                // Assume Western Windows character set
+                afl::charset::CodepageCharset charset(afl::charset::g_codepage1252);
 
-            // Read gamestat file. If file does not exist or cannot be read, it is ignored.
-            GameStatFile index;
-            m_directory->openFile("gamestat.dat", afl::io::FileSystem::OpenRead)
-                ->fullRead(afl::base::fromObject(index));
+                // Read gamestat file. If file does not exist or cannot be read, it is ignored.
+                GameStatFile index;
+                m_directory->openFile("gamestat.dat", afl::io::FileSystem::OpenRead)
+                    ->fullRead(afl::base::fromObject(index));
 
-            // Build content
-            for (int i = 0; i < NUM_SLOTS; ++i) {
-                result.pushBackNew(new FileSystemFolder(m_parent,
-                                                        m_directory->openDirectory(afl::string::Format("vpwork%d", i+1)),
-                                                        charset.decode(index.slots[i].name),
-                                                        true));
+                // Build content
+                for (int i = 0; i < NUM_SLOTS; ++i) {
+                    result.pushBackNew(new FileSystemFolder(m_parent,
+                                                            m_directory->openDirectory(afl::string::Format("vpwork%d", i+1)),
+                                                            charset.decode(index.slots[i].name),
+                                                            true));
+                }
+                result.pushBackNew(new FileSystemFolder(m_parent, m_directory, m_parent.translator()("[Directory content]"), true));
+                return;
             }
-            result.pushBackNew(new FileSystemFolder(m_parent, m_directory, m_parent.translator()("[Directory content]"), true));
-            return;
+            catch (...) { }
+            result.clear();
         }
-        catch (...) { }
-        result.clear();
-    }
 
-    // Enumerate directory
-    Ref<Enumerator<Ptr<DirectoryEntry> > > content = m_directory->getDirectoryEntries();
+        // Enumerate directory
+        Ref<Enumerator<Ptr<DirectoryEntry> > > content = m_directory->getDirectoryEntries();
 
-    // Build list
-    Ptr<DirectoryEntry> elem;
-    while (content->getNextElement(elem)) {
-        if (elem.get() != 0
-            && (elem->getFileType() == DirectoryEntry::tDirectory || elem->getFileType() == DirectoryEntry::tRoot)
-            && !elem->getFlags().contains(DirectoryEntry::Hidden))
-        {
-            result.pushBackNew(new FileSystemFolder(m_parent, elem->openDirectory(), elem->getTitle(), false));
+        // Build list
+        Ptr<DirectoryEntry> elem;
+        while (content->getNextElement(elem)) {
+            if (elem.get() != 0
+                && (elem->getFileType() == DirectoryEntry::tDirectory || elem->getFileType() == DirectoryEntry::tRoot)
+                && !elem->getFlags().contains(DirectoryEntry::Hidden))
+            {
+                result.pushBackNew(new FileSystemFolder(m_parent, elem->openDirectory(), elem->getTitle(), false));
+            }
         }
-    }
 
-    // Sort
-    result.sort(sortFolders);
+        // Sort
+        result.sort(sortFolders);
+    }
+    catch (std::exception& e) {
+        m_parent.log().write(afl::sys::LogListener::Warn, LOG_NAME, String_t(), e);
+    }
 }
 
 bool
@@ -129,10 +138,10 @@ game::browser::FileSystemFolder::setLocalDirectoryName(String_t /*directoryName*
     return false;
 }
 
-afl::base::Ptr<game::Root>
-game::browser::FileSystemFolder::loadGameRoot(const game::config::UserConfiguration& config)
+std::auto_ptr<game::browser::Task_t>
+game::browser::FileSystemFolder::loadGameRoot(const game::config::UserConfiguration& config, std::auto_ptr<LoadGameRootTask_t> then)
 {
-    return m_parent.loadGameRoot(m_directory, config);
+    return m_parent.loadGameRoot(m_directory, config, then);
 }
 
 String_t

@@ -1,5 +1,6 @@
 /**
   *  \file game/browser/rootfolder.cpp
+  *  \brief Class game::browser::RootFolder
   */
 
 #include "game/browser/rootfolder.hpp"
@@ -45,16 +46,18 @@ game::browser::RootFolder::setLocalDirectoryName(String_t /*directoryName*/)
     return false;
 }
 
-afl::base::Ptr<game::Root>
-game::browser::RootFolder::loadGameRoot(const game::config::UserConfiguration& /*config*/)
+
+std::auto_ptr<game::browser::Task_t>
+game::browser::RootFolder::loadGameRoot(const game::config::UserConfiguration& /*config*/, std::auto_ptr<LoadGameRootTask_t> then)
 {
     // No game in root
-    return 0;
+    return defaultLoadGameRoot(then);
 }
 
 String_t
 game::browser::RootFolder::getName() const
 {
+    // User should never see this
     return "<Root>";
 }
 

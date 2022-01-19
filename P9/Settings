@@ -12,10 +12,11 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = version.hpp util/doc/loggingverifier.cpp \
-    util/doc/loggingverifier.hpp util/doc/summarizingverifier.cpp \
-    util/doc/summarizingverifier.hpp util/doc/verifier.cpp \
-    util/doc/verifier.hpp util/doc/singleblobstore.cpp \
+FILES_gamelib = game/browser/folder.cpp game/browser/types.hpp \
+    game/browser/synchronousfolder.cpp game/browser/synchronousfolder.hpp \
+    version.hpp util/doc/loggingverifier.cpp util/doc/loggingverifier.hpp \
+    util/doc/summarizingverifier.cpp util/doc/summarizingverifier.hpp \
+    util/doc/verifier.cpp util/doc/verifier.hpp util/doc/singleblobstore.cpp \
     util/doc/singleblobstore.hpp util/doc/textimport.cpp \
     util/doc/textimport.hpp util/doc/htmlrenderer.cpp \
     util/doc/renderoptions.cpp util/doc/renderoptions.hpp \

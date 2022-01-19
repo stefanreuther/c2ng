@@ -23,7 +23,7 @@ namespace game { namespace nu {
         // Handler:
         virtual bool handleFolderName(String_t name, afl::container::PtrVector<game::browser::Folder>& result);
         virtual game::browser::Folder* createAccountFolder(game::browser::Account& acc);
-        virtual afl::base::Ptr<Root> loadGameRoot(afl::base::Ref<afl::io::Directory> dir, const game::config::UserConfiguration& config);
+        virtual std::auto_ptr<game::browser::Task_t> loadGameRootMaybe(afl::base::Ref<afl::io::Directory> dir, const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t>& then);
 
         // nu::BrowserHandler
         bool login(game::browser::Account& acc);

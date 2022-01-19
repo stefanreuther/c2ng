@@ -6,6 +6,14 @@
 #include "game/pcc/browserhandler.hpp"
 #include "game/pcc/gamefolder.hpp"
 
+namespace {
+    struct SortByName {
+        bool operator()(const game::browser::Folder& a, const game::browser::Folder& b)
+            { return a.getName() < b.getName(); }
+    };
+}
+
+
 game::pcc::AccountFolder::AccountFolder(BrowserHandler& handler, game::browser::Account& acc)
     : m_handler(handler),
       m_account(acc)
@@ -18,6 +26,7 @@ game::pcc::AccountFolder::loadContent(afl::container::PtrVector<Folder>& result)
     for (size_t i = 0, n = p.getArraySize(); i < n; ++i) {
         result.pushBackNew(new GameFolder(m_handler, m_account, p[i]("path").toString(), i));
     }
+    result.sort(SortByName());
 }
 
 bool
@@ -36,10 +45,10 @@ game::pcc::AccountFolder::setLocalDirectoryName(String_t /*directoryName*/)
     return false;
 }
 
-afl::base::Ptr<game::Root>
-game::pcc::AccountFolder::loadGameRoot(const game::config::UserConfiguration& /*config*/)
+std::auto_ptr<game::browser::Task_t>
+game::pcc::AccountFolder::loadGameRoot(const game::config::UserConfiguration& /*config*/, std::auto_ptr<game::browser::LoadGameRootTask_t> then)
 {
-    return 0;
+    return defaultLoadGameRoot(then);
 }
 
 String_t

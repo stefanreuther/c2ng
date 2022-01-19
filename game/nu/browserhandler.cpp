@@ -61,26 +61,26 @@ game::nu::BrowserHandler::createAccountFolder(game::browser::Account& acc)
     }
 }
 
-afl::base::Ptr<game::Root>
-game::nu::BrowserHandler::loadGameRoot(afl::base::Ref<afl::io::Directory> dir, const game::config::UserConfiguration& config)
+std::auto_ptr<game::browser::Task_t>
+game::nu::BrowserHandler::loadGameRootMaybe(afl::base::Ref<afl::io::Directory> dir, const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t>& then)
 {
     if (config.getGameType() == "nu") {
         game::browser::Account* a = m_browser.accounts().findAccount(config[config.Game_User](), config.getGameType(), config[config.Game_Host]());
         if (!a) {
-            return 0;
+            return std::auto_ptr<game::browser::Task_t>();
         }
         int32_t gameId;
         if (!afl::string::strToInteger(config[config.Game_Id](), gameId)) {
-            return 0;
+            return std::auto_ptr<game::browser::Task_t>();
         }
 
         // FIXME: verify that the game Id is valid
 
         a->setGameFolderName(afl::string::Format("%d", gameId), dir->getDirectoryName());
 
-        return GameFolder(*this, *a, gameId, 0).loadGameRoot(config);
+        return GameFolder(*this, *a, gameId, 0).loadGameRoot(config, then);
     } else {
-        return 0;
+        return std::auto_ptr<game::browser::Task_t>();
     }
 }
 

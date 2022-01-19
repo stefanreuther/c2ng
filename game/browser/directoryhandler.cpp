@@ -1,47 +1,55 @@
 /**
   *  \file game/browser/directoryhandler.cpp
+  *  \brief Class game::browser::DirectoryHandler
   */
 
 #include "game/browser/directoryhandler.hpp"
-#include "game/browser/browser.hpp"
-#include "game/browser/folder.hpp"
-#include "game/browser/filesystemrootfolder.hpp"
-#include "game/browser/filesystemfolder.hpp"
-#include "afl/except/fileproblemexception.hpp"
 #include "afl/charset/codepage.hpp"
 #include "afl/charset/codepagecharset.hpp"
+#include "afl/except/fileproblemexception.hpp"
+#include "game/browser/browser.hpp"
+#include "game/browser/filesystemfolder.hpp"
+#include "game/browser/filesystemrootfolder.hpp"
+#include "game/browser/folder.hpp"
 #include "util/charsetfactory.hpp"
 
+using afl::sys::LogListener;
+using afl::base::Ref;
+using afl::base::Ptr;
+using afl::io::Directory;
+using afl::container::PtrVector;
+
 namespace {
-    // FIXME: duplicate to browser.cpp
-    const char LOG_NAME[] = "game.browser";
+    const char*const LOG_NAME = "game.browser";
 }
 
-game::browser::DirectoryHandler::DirectoryHandler(Browser& b, afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory, util::ProfileDirectory& profile, afl::io::FileSystem& fs)
+// Constructor.
+game::browser::DirectoryHandler::DirectoryHandler(Browser& b, afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory, util::ProfileDirectory& profile)
     : m_browser(b),
-      m_v3Loader(defaultSpecificationDirectory, &profile, b.translator(), b.log(), fs)
+      m_v3Loader(defaultSpecificationDirectory, &profile, b.translator(), b.log(), b.fileSystem())
 { }
 
+// Handle folder name or URL.
 bool
 game::browser::DirectoryHandler::handleFolderName(String_t name, afl::container::PtrVector<Folder>& result)
 {
     // Is this actually a local folder?
     try {
-        afl::base::Ref<afl::io::Directory> dir = m_browser.fileSystem().openDirectory(name);
+        Ref<Directory> dir = m_browser.fileSystem().openDirectory(name);
         dir->getDirectoryEntries();
     }
     catch (...) {
         return false;
     }
 
-    afl::container::PtrVector<Folder> folders;
+    PtrVector<Folder> folders;
     try {
         // Get list of roots
-        afl::container::PtrVector<Folder> roots;
+        PtrVector<Folder> roots;
         FileSystemRootFolder(m_browser).loadContent(roots);
 
         // Process the provided folder
-        afl::base::Ptr<afl::io::Directory> dir = m_browser.fileSystem().openDirectory(m_browser.fileSystem().getAbsolutePathName(name)).asPtr();
+        Ptr<Directory> dir = m_browser.fileSystem().openDirectory(m_browser.fileSystem().getAbsolutePathName(name)).asPtr();
         while (dir.get() != 0) {
             // Create this folder.
             // This produces "Winplan > vpwork3" and "Winplan > bmp" instead of "Winplan > Game 3" and "Winplan > [Directory Contents] > bmp", respectively.
@@ -71,7 +79,7 @@ game::browser::DirectoryHandler::handleFolderName(String_t name, afl::container:
         }
     }
     catch (std::exception& e) {
-        m_browser.log().write(afl::sys::LogListener::Warn, LOG_NAME, String_t(), e);
+        m_browser.log().write(LogListener::Warn, LOG_NAME, String_t(), e);
     }
 
     // Build result
@@ -82,6 +90,7 @@ game::browser::DirectoryHandler::handleFolderName(String_t name, afl::container:
     return true;
 }
 
+// Create account folder.
 game::browser::Folder*
 game::browser::DirectoryHandler::createAccountFolder(Account& /*acc*/)
 {
@@ -89,17 +98,41 @@ game::browser::DirectoryHandler::createAccountFolder(Account& /*acc*/)
     return 0;
 }
 
-afl::base::Ptr<game::Root>
-game::browser::DirectoryHandler::loadGameRoot(afl::base::Ref<afl::io::Directory> dir, const game::config::UserConfiguration& config)
+// Load game root for physical folder.
+std::auto_ptr<game::browser::Task_t>
+game::browser::DirectoryHandler::loadGameRootMaybe(afl::base::Ref<afl::io::Directory> dir, const game::config::UserConfiguration& config, std::auto_ptr<LoadGameRootTask_t>& then)
 {
-    String_t gameType = config.getGameType();
+    const String_t gameType = config.getGameType();
     if (gameType.empty() || gameType == "local") {
-        std::auto_ptr<afl::charset::Charset> cs(util::CharsetFactory().createCharset(config[config.Game_Charset]()));
-        if (cs.get() == 0) {
-            cs.reset(new afl::charset::CodepageCharset(afl::charset::g_codepageLatin1));
-        }
-        return m_v3Loader.load(dir, *cs, config, false);
+        class Task : public Task_t {
+         public:
+            Task(DirectoryHandler& parent, Ref<Directory> dir, const game::config::UserConfiguration& config, std::auto_ptr<LoadGameRootTask_t>& then)
+                : m_parent(parent), m_dir(dir), m_config(config), m_then(then)
+                { }
+            virtual void call()
+                {
+                    Ptr<Root> result;
+                    try {
+                        m_parent.m_browser.log().write(LogListener::Trace, LOG_NAME, "DirectoryHandler.loadGameRootMaybe.Task");
+                        std::auto_ptr<afl::charset::Charset> cs(util::CharsetFactory().createCharset(m_config[m_config.Game_Charset]()));
+                        if (cs.get() == 0) {
+                            cs.reset(new afl::charset::CodepageCharset(afl::charset::g_codepageLatin1));
+                        }
+                        result = m_parent.m_v3Loader.load(m_dir, *cs, m_config, false);
+                    }
+                    catch (std::exception& e) {
+                        m_parent.m_browser.log().write(LogListener::Warn, LOG_NAME, String_t(), e);
+                    }
+                    m_then->call(result);
+                }
+         private:
+            DirectoryHandler& m_parent;
+            const Ref<Directory> m_dir;
+            const game::config::UserConfiguration& m_config;
+            const std::auto_ptr<LoadGameRootTask_t> m_then;
+        };
+        return std::auto_ptr<Task_t>(new Task(*this, dir, config, then));
     } else {
-        return 0;
+        return std::auto_ptr<Task_t>();
     }
 }

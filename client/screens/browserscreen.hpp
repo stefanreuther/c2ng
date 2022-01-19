@@ -58,7 +58,7 @@ namespace client { namespace screens {
         util::RequestSender<BrowserScreen> getSender();
 
         /** Signal: game selected.
-            At this time, the browser will have a selected child and root (game::browser::Browser::getSelectedChild(), game::browser::Browser::getSelectedRoot())
+            At this time, the browser will have a selected child and root (game::browser::Browser::getSelectedChildIndex(), game::browser::Browser::getSelectedRoot())
             which identify the game to play, and that game will have the given player number.
             The BrowserScreen will still be running.
             \param player Player number */
@@ -68,6 +68,7 @@ namespace client { namespace screens {
         class LoadTask;
         class UpdateInfoTask;
         class UpdateTask;
+        class PostLoadTask;
         class InitTask;
         class EnterTask;
         class UpTask;

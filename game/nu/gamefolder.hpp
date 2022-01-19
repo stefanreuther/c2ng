@@ -4,7 +4,7 @@
 #ifndef C2NG_GAME_NU_GAMEFOLDER_HPP
 #define C2NG_GAME_NU_GAMEFOLDER_HPP
 
-#include "game/browser/folder.hpp"
+#include "game/browser/synchronousfolder.hpp"
 #include "game/browser/account.hpp"
 #include "afl/data/access.hpp"
 #include "game/nu/gamestate.hpp"
@@ -15,7 +15,7 @@ namespace game { namespace nu {
 
     /** Game folder on a Nu server.
         This is a virtual folder representing a single game. */
-    class GameFolder : public game::browser::Folder {
+    class GameFolder : public game::browser::SynchronousFolder {
      public:
         /** Constructor.
             \param handler BrowserHandler Main browser handler
@@ -33,7 +33,7 @@ namespace game { namespace nu {
         virtual bool loadConfiguration(game::config::UserConfiguration& config);
         virtual void saveConfiguration(const game::config::UserConfiguration& config);
         virtual bool setLocalDirectoryName(String_t directoryName);
-        virtual afl::base::Ptr<Root> loadGameRoot(const game::config::UserConfiguration& config);
+        virtual std::auto_ptr<game::browser::Task_t> loadGameRoot(const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t> then);
         virtual String_t getName() const;
         virtual util::rich::Text getDescription() const;
         virtual bool isSame(const Folder& other) const;

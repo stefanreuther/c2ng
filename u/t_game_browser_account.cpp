@@ -49,7 +49,7 @@ TestGameBrowserAccount::testBasic()
     TS_ASSERT(f != 0);
     TS_ASSERT_EQUALS(*f, "/home/games/1+1");
 
-    testee.removeGameFolderName("1+1");
+    testee.setGameFolderName("1+1", "");
     f = testee.get("game:1%2B1");
     TS_ASSERT(f == 0);
 }

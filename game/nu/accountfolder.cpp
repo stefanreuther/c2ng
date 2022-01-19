@@ -36,10 +36,10 @@ game::nu::AccountFolder::setLocalDirectoryName(String_t /*directoryName*/)
     return false;
 }
 
-afl::base::Ptr<game::Root>
-game::nu::AccountFolder::loadGameRoot(const game::config::UserConfiguration& /*config*/)
+std::auto_ptr<game::browser::Task_t>
+game::nu::AccountFolder::loadGameRoot(const game::config::UserConfiguration& /*config*/, std::auto_ptr<game::browser::LoadGameRootTask_t> then)
 {
-    return 0;
+    return defaultLoadGameRoot(then);
 }
 
 String_t

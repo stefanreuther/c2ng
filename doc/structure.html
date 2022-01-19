@@ -327,6 +327,8 @@
       It will also contain a set of actions that can be applied to the directory associated with it.</p>
     <div class="tree">
       <div class="root hasnotify"><b>game::browser::Session</b>
+        <div class="ref">Translator <em>: afl::string::Translator</em></div>
+        <div class="ref">Log <em>: afl::sys::LogListener</em></div>
         <div class="owned">AccountManager <em>: game::browser::AccountManager</em>
           <div class="owned">Account <em>: game::browser::Account[]</em></div>
         </div>
@@ -341,6 +343,7 @@
           <div class="owned virtual">Origin <em>: game::browser::Folder</em></div>
           <div class="optional ptr">ChildRoot <em>: game::Root</em></div>
         </div>
+        <div class="owned virtual">Tasks <em>game::browser::Task_t[]</em></div>
       </div>
     </div>
 

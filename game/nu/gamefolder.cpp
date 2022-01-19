@@ -15,10 +15,21 @@
 #include "afl/charset/utf8charset.hpp"
 #include "util/translation.hpp"
 
-namespace {
-    using afl::string::Format;
+using afl::string::Format;
+using afl::sys::LogListener;
 
+namespace {
     const char* LOG_NAME = "game.nu";
+
+    String_t getGameIdAsString(int32_t gameNr)
+    {
+        return Format("%d", gameNr);
+    }
+
+    const String_t* getGameFolderName(const game::browser::Account& account, int32_t gameNr)
+    {
+        return account.getGameFolderName(getGameIdAsString(gameNr));
+    }
 }
 
 game::nu::GameFolder::GameFolder(BrowserHandler& handler,
@@ -71,85 +82,108 @@ game::nu::GameFolder::saveConfiguration(const game::config::UserConfiguration& c
 bool
 game::nu::GameFolder::setLocalDirectoryName(String_t directoryName)
 {
-    if (directoryName.empty()) {
-        m_account.removeGameFolderName(getGameIdAsString());
-    } else {
-        m_account.setGameFolderName(getGameIdAsString(), directoryName);
-    }
+    m_account.setGameFolderName(getGameIdAsString(), directoryName);
     return true;
 }
 
-afl::base::Ptr<game::Root>
-game::nu::GameFolder::loadGameRoot(const game::config::UserConfiguration& config)
+std::auto_ptr<game::browser::Task_t>
+game::nu::GameFolder::loadGameRoot(const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t> then)
 {
-    // Current data
-    afl::data::Access a = m_state->loadGameListEntry();
+    class Task : public game::browser::Task_t {
+     public:
+        Task(BrowserHandler& handler, game::browser::Account& account, int32_t gameNr, afl::base::Ref<GameState> state,
+             const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t>& then)
+            : m_handler(handler), m_account(account), m_gameNr(gameNr), m_state(state), m_config(config), m_then(then)
+            { }
+        virtual void call()
+            {
+                m_handler.log().write(LogListener::Trace, LOG_NAME, "GameFolder.loadGameRoot.Task");
+                afl::base::Ptr<Root> result;
+                try {
+                    // Current data
+                    afl::data::Access a = m_state->loadGameListEntry();
 
-    // Actions
-    Root::Actions_t actions;
+                    // Actions
+                    Root::Actions_t actions;
 
-    // Game directory
-    afl::base::Ptr<afl::io::Directory> dir;
-    if (const String_t* pFolderName = getGameFolderName()) {
-        try {
-            afl::base::Ref<afl::io::Directory> p = m_handler.browser().fileSystem().openDirectory(m_handler.browser().expandGameDirectoryName(*pFolderName));
-            p->getDirectoryEntries();
-            dir = p.asPtr();
-            actions += Root::aLoadEditable;
-        }
-        catch (std::exception& e) {
-            m_handler.log().write(afl::sys::Log::Warn, LOG_NAME, _("Game directory lost"), e);
-            m_account.removeGameFolderName(getGameIdAsString());
-        }
-    }
-    if (dir.get() == 0) {
-        dir = afl::io::InternalDirectory::create("<Internal>").asPtr();
-    }
-    actions += Root::aLocalSetup;
-    actions += Root::aConfigureReadOnly;
+                    // Game directory
+                    afl::base::Ptr<afl::io::Directory> dir;
+                    if (const String_t* pFolderName = ::getGameFolderName(m_account, m_gameNr)) {
+                        try {
+                            afl::base::Ref<afl::io::Directory> p = m_handler.browser().fileSystem().openDirectory(m_handler.browser().expandGameDirectoryName(*pFolderName));
+                            p->getDirectoryEntries();
+                            dir = p.asPtr();
+                            actions += Root::aLoadEditable;
+                        }
+                        catch (std::exception& e) {
+                            m_handler.log().write(LogListener::Warn, LOG_NAME, _("Game directory lost"), e);
+                            m_account.setGameFolderName(::getGameIdAsString(m_gameNr), String_t());
+                        }
+                    }
+                    if (dir.get() == 0) {
+                        dir = afl::io::InternalDirectory::create("<Internal>").asPtr();
+                    }
+                    actions += Root::aLocalSetup;
+                    actions += Root::aConfigureReadOnly;
 
-    // Root
-    afl::base::Ptr<Root> root = new Root(*dir,
-                                         *new SpecificationLoader(m_state, m_handler.translator(), m_handler.log()),
-                                         HostVersion(HostVersion::NuHost, MKVERSION(3,2,0)),
-                                         std::auto_ptr<game::RegistrationKey>(new RegistrationKey(a("player"))),
-                                         std::auto_ptr<game::StringVerifier>(new StringVerifier()),
-                                         std::auto_ptr<afl::charset::Charset>(new afl::charset::Utf8Charset()),
-                                         actions);
+                    // Root
+                    afl::base::Ptr<Root> root = new Root(*dir,
+                                                     *new SpecificationLoader(m_state, m_handler.translator(), m_handler.log()),
+                                                     HostVersion(HostVersion::NuHost, MKVERSION(3,2,0)),
+                                                     std::auto_ptr<game::RegistrationKey>(new RegistrationKey(a("player"))),
+                                                     std::auto_ptr<game::StringVerifier>(new StringVerifier()),
+                                                     std::auto_ptr<afl::charset::Charset>(new afl::charset::Utf8Charset()),
+                                                     actions);
 
-    // FIXME -> root->userConfiguration().loadUserConfiguration(m_profile, m_log, m_translator);
-    root->userConfiguration().merge(config);
+                    // FIXME -> root->userConfiguration().loadUserConfiguration(m_parent.m_profile, m_parent.m_log, m_parent.m_translator);
+                    root->userConfiguration().merge(m_config);
 
-    // FIXME:
-    // + hostConfiguration()
+                    // FIXME:
+                    // + hostConfiguration()
 
-    // Player list: from the game list entry, we know
-    // - how many players there are (.game.slots)
-    // - the player's slot (.player.id)
-    // - the player's race (.player.raceid)
-    PlayerList& players = root->playerList();
-    int thisPlayer = a("player")("id").toInteger();
-    int thisRace   = a("player")("raceid").toInteger();
-    for (int player = 1, n = a("game")("slots").toInteger(); player <= n; ++player) {
-        if (Player* pl = players.create(player)) {
-            if (player == thisPlayer && GameState::setRaceName(*pl, thisRace)) {
-                // ok
-            } else {
-                String_t pseudo = afl::string::Format("#%d", player);
-                pl->setName(Player::LongName, pseudo);
-                pl->setName(Player::ShortName, pseudo);
-                pl->setName(Player::AdjectiveName, pseudo);
-            }
-            pl->setOriginalNames();
-            pl->setIsReal(true);
-        }
-    }
+                    // Player list: from the game list entry, we know
+                    // - how many players there are (.game.slots)
+                    // - the player's slot (.player.id)
+                    // - the player's race (.player.raceid)
+                    PlayerList& players = root->playerList();
+                    int thisPlayer = a("player")("id").toInteger();
+                    int thisRace   = a("player")("raceid").toInteger();
+                    for (int player = 1, n = a("game")("slots").toInteger(); player <= n; ++player) {
+                        if (Player* pl = players.create(player)) {
+                            if (player == thisPlayer && GameState::setRaceName(*pl, thisRace)) {
+                                // ok
+                            } else {
+                                String_t pseudo = afl::string::Format("#%d", player);
+                                pl->setName(Player::LongName, pseudo);
+                                pl->setName(Player::ShortName, pseudo);
+                                pl->setName(Player::AdjectiveName, pseudo);
+                            }
+                            pl->setOriginalNames();
+                            pl->setIsReal(true);
+                        }
+                    }
 
-    // Turn loader
-    root->setTurnLoader(new TurnLoader(m_state, m_handler.translator(), m_handler.log(), m_handler.browser().profile(), m_handler.getDefaultSpecificationDirectory()));
+                    // Turn loader
+                    root->setTurnLoader(new TurnLoader(m_state, m_handler.translator(), m_handler.log(), m_handler.browser().profile(), m_handler.getDefaultSpecificationDirectory()));
     
-    // + playerList
-    return root;
+                    // + playerList
+
+                    result = root;
+                }
+                catch (std::exception& e) {
+                    m_handler.log().write(LogListener::Warn, LOG_NAME, String_t(), e);
+                }
+                m_then->call(result);
+            }
+     private:
+        BrowserHandler& m_handler;
+        game::browser::Account& m_account;
+        int32_t m_gameNr;
+        afl::base::Ref<GameState> m_state;
+        const game::config::UserConfiguration& m_config;
+        std::auto_ptr<game::browser::LoadGameRootTask_t> m_then;
+    };
+    return std::auto_ptr<game::browser::Task_t>(new Task(m_handler, m_account, m_gameNr, m_state, config, then));
 }
 
 String_t
@@ -189,11 +223,11 @@ game::nu::GameFolder::getKind() const
 const String_t*
 game::nu::GameFolder::getGameFolderName() const
 {
-    return m_account.getGameFolderName(getGameIdAsString());
+    return ::getGameFolderName(m_account, m_gameNr);
 }
 
 String_t
 game::nu::GameFolder::getGameIdAsString() const
 {
-    return Format("%d", m_gameNr);
+    return ::getGameIdAsString(m_gameNr);
 }

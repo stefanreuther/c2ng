@@ -4,14 +4,14 @@
 #ifndef C2NG_GAME_PCC_ACCOUNTFOLDER_HPP
 #define C2NG_GAME_PCC_ACCOUNTFOLDER_HPP
 
-#include "game/browser/folder.hpp"
+#include "game/browser/synchronousfolder.hpp"
 #include "game/browser/account.hpp"
 
 namespace game { namespace pcc {
 
     class BrowserHandler;
 
-    class AccountFolder : public game::browser::Folder {
+    class AccountFolder : public game::browser::SynchronousFolder {
      public:
         AccountFolder(BrowserHandler& handler, game::browser::Account& acc);
 
@@ -19,7 +19,7 @@ namespace game { namespace pcc {
         virtual bool loadConfiguration(game::config::UserConfiguration& config);
         virtual void saveConfiguration(const game::config::UserConfiguration& config);
         virtual bool setLocalDirectoryName(String_t directoryName);
-        virtual afl::base::Ptr<game::Root> loadGameRoot(const game::config::UserConfiguration& config);
+        virtual std::auto_ptr<game::browser::Task_t> loadGameRoot(const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t> then);
         virtual String_t getName() const;
         virtual util::rich::Text getDescription() const;
         virtual bool isSame(const Folder& other) const;

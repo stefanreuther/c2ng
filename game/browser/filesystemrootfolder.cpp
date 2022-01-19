@@ -1,14 +1,19 @@
 /**
   *  \file game/browser/filesystemrootfolder.cpp
+  *  \brief Class game::browser::FileSystemRootFolder
   */
 
 #include "game/browser/filesystemrootfolder.hpp"
-#include "afl/io/filesystem.hpp"
 #include "afl/io/directory.hpp"
 #include "afl/io/directoryentry.hpp"
-#include "game/browser/filesystemfolder.hpp"
+#include "afl/io/filesystem.hpp"
 #include "afl/string/translator.hpp"
 #include "game/browser/browser.hpp"
+#include "game/browser/filesystemfolder.hpp"
+
+namespace {
+    const char*const LOG_NAME = "game.browser";
+}
 
 game::browser::FileSystemRootFolder::FileSystemRootFolder(Browser& parent)
     : m_parent(parent)
@@ -24,18 +29,23 @@ game::browser::FileSystemRootFolder::loadContent(afl::container::PtrVector<Folde
     using afl::io::Directory;
     using afl::io::DirectoryEntry;
 
-    // Open root list
-    Ref<Directory> dir = m_parent.fileSystem().openRootDirectory();
+    try {
+        // Open root list
+        Ref<Directory> dir = m_parent.fileSystem().openRootDirectory();
 
-    // Enumerate root
-    Ref<Enumerator<Ptr<DirectoryEntry> > > content = dir->getDirectoryEntries();
+        // Enumerate root
+        Ref<Enumerator<Ptr<DirectoryEntry> > > content = dir->getDirectoryEntries();
 
-    // Build list
-    Ptr<DirectoryEntry> elem;
-    while (content->getNextElement(elem)) {
-        if (elem.get() != 0 && (elem->getFileType() == DirectoryEntry::tDirectory || elem->getFileType() == DirectoryEntry::tRoot)) {
-            result.pushBackNew(new FileSystemFolder(m_parent, elem->openDirectory(), elem->getTitle(), false));
+        // Build list
+        Ptr<DirectoryEntry> elem;
+        while (content->getNextElement(elem)) {
+            if (elem.get() != 0 && (elem->getFileType() == DirectoryEntry::tDirectory || elem->getFileType() == DirectoryEntry::tRoot)) {
+                result.pushBackNew(new FileSystemFolder(m_parent, elem->openDirectory(), elem->getTitle(), false));
+            }
         }
+    }
+    catch (std::exception& e) {
+        m_parent.log().write(afl::sys::LogListener::Warn, LOG_NAME, String_t(), e);
     }
 }
 
@@ -56,23 +66,23 @@ game::browser::FileSystemRootFolder::setLocalDirectoryName(String_t /*directoryN
     return false;
 }
 
-afl::base::Ptr<game::Root>
-game::browser::FileSystemRootFolder::loadGameRoot(const game::config::UserConfiguration& /*config*/)
+std::auto_ptr<game::browser::Task_t>
+game::browser::FileSystemRootFolder::loadGameRoot(const game::config::UserConfiguration& /*config*/, std::auto_ptr<LoadGameRootTask_t> then)
 {
     // No games in file system root
-    return 0;
+    return defaultLoadGameRoot(then);
 }
 
 String_t
 game::browser::FileSystemRootFolder::getName() const
 {
-    return m_parent.translator().translateString("My Computer");
+    return m_parent.translator()("My Computer");
 }
 
 util::rich::Text
 game::browser::FileSystemRootFolder::getDescription() const
 {
-    return m_parent.translator().translateString("Browse folders on this computer");
+    return m_parent.translator()("Browse folders on this computer");
 }
 
 bool

@@ -204,9 +204,9 @@ namespace {
                 t.accountManager().reset(new game::browser::AccountManager(m_profile, t.translator(), t.log()));
                 t.accountManager()->load();
                 b.reset(new game::browser::Browser(m_fileSystem, t.translator(), t.log(), *t.accountManager(), m_profile, t.userCallbackProxy()));
-                b->handlers().addNewHandler(new game::browser::DirectoryHandler(*b, m_defaultSpecDirectory, m_profile, m_fileSystem));
-                b->handlers().addNewHandler(new game::pcc::BrowserHandler(*b, m_httpManager, m_defaultSpecDirectory, m_profile));
-                b->handlers().addNewHandler(new game::nu::BrowserHandler(*b, m_httpManager, m_defaultSpecDirectory));
+                b->addNewHandler(new game::browser::DirectoryHandler(*b, m_defaultSpecDirectory, m_profile));
+                b->addNewHandler(new game::pcc::BrowserHandler(*b, m_httpManager, m_defaultSpecDirectory, m_profile));
+                b->addNewHandler(new game::nu::BrowserHandler(*b, m_httpManager, m_defaultSpecDirectory));
             }
 
      private:
@@ -223,10 +223,23 @@ namespace {
             { }
         void handle(game::browser::Session& session)
             {
+                class Then : public game::browser::Task_t {
+                 public:
+                    Then(game::browser::Session& session)
+                        : m_session(session)
+                        { }
+                    virtual void call()
+                        {
+                            m_session.browser()->openParent();
+                            m_session.finishTask();
+                        }
+                 private:
+                    game::browser::Session& m_session;
+                };
+
                 if (game::browser::Browser* b = session.browser().get()) {
                     b->openFolder(m_path);
-                    b->loadContent();
-                    b->openParent();
+                    session.addTask(b->loadContent(std::auto_ptr<game::browser::Task_t>(new Then(session))));
                 }
             }
      private:
@@ -264,8 +277,26 @@ namespace {
             void handle(game::browser::Session& session)
                 {
                     if (game::browser::Browser* p = session.browser().get()) {
-                        p->loadChildRoot();
-                        m_gameSender.postNewRequest(new LoadRequest2(m_player, p->getSelectedRoot(), m_uiSender));
+                        class Then : public game::browser::Task_t {
+                         public:
+                            Then(game::browser::Session& session, int player, util::RequestSender<client::screens::BrowserScreen> uiSender, util::RequestSender<game::Session> gameSender)
+                                : m_session(session), m_player(player), m_uiSender(uiSender), m_gameSender(gameSender)
+                                { }
+                            virtual void call()
+                                {
+                                    if (game::browser::Browser* p = m_session.browser().get()) {
+                                        m_gameSender.postNewRequest(new LoadRequest2(m_player, p->getSelectedRoot(), m_uiSender));
+                                    }
+                                    m_session.finishTask();
+                                }
+                         private:
+                            game::browser::Session& m_session;
+                            int m_player;
+                            util::RequestSender<client::screens::BrowserScreen> m_uiSender;
+                            util::RequestSender<game::Session> m_gameSender;
+                        };
+
+                        session.addTask(p->loadChildRoot(std::auto_ptr<game::browser::Task_t>(new Then(session, m_player, m_uiSender, m_gameSender))));
                     }
                 }
 

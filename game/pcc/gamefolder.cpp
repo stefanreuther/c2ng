@@ -8,20 +8,20 @@
 #include "afl/charset/codepagecharset.hpp"
 #include "afl/charset/codepage.hpp"
 
+using afl::sys::LogListener;
+
+namespace {
+    const char*const LOG_NAME = "game.pcc";
+}
+
 game::pcc::GameFolder::GameFolder(BrowserHandler& handler, game::browser::Account& acc, String_t path, size_t hint)
     : m_handler(handler),
       m_account(acc),
       m_path(path),
-      m_hint(hint),
-      m_nullFS(),
-      m_v3Loader(handler.getDefaultSpecificationDirectory(),
-                 &handler.profile(),
-                 handler.translator(),
-                 handler.log(),
-                 m_nullFS)
+      m_hint(hint)
 { }
 
-        // Folder:
+// Folder:
 void
 game::pcc::GameFolder::loadContent(afl::container::PtrVector<Folder>& /*result*/)
 {
@@ -47,48 +47,38 @@ game::pcc::GameFolder::setLocalDirectoryName(String_t /*directoryName*/)
     return false;
 }
 
-afl::base::Ptr<game::Root>
-game::pcc::GameFolder::loadGameRoot(const game::config::UserConfiguration& config)
+std::auto_ptr<game::browser::Task_t>
+game::pcc::GameFolder::loadGameRoot(const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t> then)
 {
-#if 1
-    // Quick and dirty solution: pretend this to be a local folder and work with that.
-    // FIXME: this needs a lot of optimisation (and quite a number of protocol improvements on server side).
-    afl::charset::CodepageCharset cs(afl::charset::g_codepageLatin1);
-    return m_v3Loader.load(*new ServerDirectory(m_handler, m_account, m_path), cs, config, false);
-#else
-    afl::base::Ptr<afl::io::Directory> gameDirectory(new ServerDirectory(m_handler, m_account, m_path));
+    class Task : public game::browser::Task_t {
+     public:
+        Task(String_t pathName, BrowserHandler& handler, game::browser::Account& account, const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t>& then)
+            : m_pathName(pathName), m_handler(handler), m_account(account), m_config(config), m_then(then)
+            { }
+        virtual void call()
+            {
+                m_handler.log().write(LogListener::Trace, LOG_NAME, "GameFolder.loadGameRoot.Task");
+                afl::base::Ptr<Root> result;
+                try {
+                    // Quick and dirty solution: pretend this to be a local folder and work with that.
+                    // FIXME: this needs a lot of optimisation (and quite a number of protocol improvements on server side).
+                    afl::charset::CodepageCharset cs(afl::charset::g_codepageLatin1);
+                    result = m_handler.loader().load(*new ServerDirectory(m_handler, m_account, m_pathName), cs, m_config, false);
+                }
+                catch (std::exception& e) {
+                    m_handler.log().write(LogListener::Error, LOG_NAME, String_t(), e);
+                }
+                m_then->call(result);
+            }
 
-    // FIXME: Charset
-    afl::charset::CodepageCharset charset(afl::charset::g_codepageLatin1);
-
-    // Specification directory
-    afl::base::Ptr<afl::io::MultiDirectory> spec = afl::io::MultiDirectory::create();
-    spec->addDirectory(gameDirectory);
-    spec->addDirectory(m_handler.getDefaultSpecificationDirectory());
-                
-    // Registration key
-    std::auto_ptr<game::v3::RegistrationKey> key(new game::v3::RegistrationKey(charset));
-    key->initFromDirectory(*gameDirectory, m_handler.log(), m_handler.translator());
-
-    // Specification loader
-    afl::base::Ptr<game::SpecificationLoader> specLoader(new game::v3::SpecificationLoader(spec, charset, m_handler.translator(), m_handler.log()));
-
-    // FIXME: host version should be determined by server
-    game::HostVersion version(game::HostVersion::PHost, MKVERSION(4,0,0));
-
-    // Result
-    afl::base::Ptr<game::Root> result =
-        new game::Root(spec, gameDirectory, specLoader, version,
-                       std::auto_ptr<game::RegistrationKey>(key),
-                       std::auto_ptr<game::StringVerifier>(new game::v3::StringVerifier(std::auto_ptr<afl::charset::Charset>(charset.clone()))));
-
-    // FIXME: hostConfiguration
-    // FIXME: userConfiguration
-    // FIXME: playerList
-    // FIXME: turnLoader
-
-    return result;
-#endif
+     private:
+        const String_t m_pathName;
+        BrowserHandler& m_handler;
+        game::browser::Account& m_account;
+        const game::config::UserConfiguration& m_config;
+        std::auto_ptr<game::browser::LoadGameRootTask_t> m_then;
+    };
+    return std::auto_ptr<game::browser::Task_t>(new Task(m_path, m_handler, m_account, config, then));
 }
 
 String_t

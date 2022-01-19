@@ -4,14 +4,19 @@
   */
 
 #include "game/browser/account.hpp"
-#include "afl/charset/urlencoding.hpp"
 #include "afl/charset/base64.hpp"
+#include "afl/charset/urlencoding.hpp"
+
+using afl::charset::Base64;
+using afl::charset::UrlEncoding;
+using afl::string::fromBytes;
+using afl::string::toMemory;
 
 namespace {
-    const char USER_KEY[] = "user";
-    const char TYPE_KEY[] = "type";
-    const char HOST_KEY[] = "host";
-    const char GAME_KEY_PREFIX[] = "game:";
+    const char*const USER_KEY = "user";
+    const char*const TYPE_KEY = "type";
+    const char*const HOST_KEY = "host";
+    const char*const GAME_KEY_PREFIX = "game:";
 }
 
 // Default constructor.
@@ -72,7 +77,7 @@ game::browser::Account::get(String_t key, String_t defaultValue) const
 void
 game::browser::Account::setEncoded(String_t key, String_t value, bool persistent)
 {
-    set(key, afl::string::fromBytes(afl::charset::Base64().encode(afl::string::toMemory(value))), persistent);
+    set(key, fromBytes(Base64().encode(toMemory(value))), persistent);
 }
 
 // Get encoded attribute.
@@ -80,7 +85,7 @@ bool
 game::browser::Account::getEncoded(String_t key, String_t& result) const
 {
     if (const String_t* p = get(key)) {
-        result = afl::charset::Base64().decode(afl::string::toBytes(*p));
+        result = Base64().decode(afl::string::toBytes(*p));
         return true;
     } else {
         return false;
@@ -143,21 +148,19 @@ game::browser::Account::setHost(String_t host)
 void
 game::browser::Account::setGameFolderName(String_t gameId, String_t folderName)
 {
-    set(GAME_KEY_PREFIX + afl::string::fromBytes(afl::charset::UrlEncoding().encode(afl::string::toMemory(gameId))), folderName, true);
+    const String_t key = GAME_KEY_PREFIX + fromBytes(UrlEncoding().encode(toMemory(gameId)));
+    if (!folderName.empty()) {
+        set(key, folderName, true);
+    } else {
+        m_data.erase(key);
+    }
 }
 
 // Get game folder name.
 const String_t*
 game::browser::Account::getGameFolderName(String_t gameId) const
 {
-    return get(GAME_KEY_PREFIX + afl::string::fromBytes(afl::charset::UrlEncoding().encode(afl::string::toMemory(gameId))));
-}
-
-// Remove game folder name.
-void
-game::browser::Account::removeGameFolderName(String_t gameId)
-{
-    m_data.erase(GAME_KEY_PREFIX + afl::string::fromBytes(afl::charset::UrlEncoding().encode(afl::string::toMemory(gameId))));
+    return get(GAME_KEY_PREFIX + fromBytes(UrlEncoding().encode(toMemory(gameId))));
 }
 
 // Save this account's data to a text file.

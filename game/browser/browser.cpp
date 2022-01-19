@@ -1,19 +1,23 @@
 /**
   *  \file game/browser/browser.cpp
+  *  \brief Class game::browser::Browser
   */
 
-#include <cstring>
 #include "game/browser/browser.hpp"
 #include "afl/except/fileproblemexception.hpp"
+#include "afl/io/directoryentry.hpp"
+#include "afl/string/char.hpp"
+#include "afl/string/format.hpp"
 #include "game/browser/folder.hpp"
 #include "game/browser/handler.hpp"
 #include "game/browser/unsupportedaccountfolder.hpp"
-#include "afl/string/char.hpp"
-#include "afl/io/directoryentry.hpp"
-#include "afl/string/format.hpp"
+#include "util/string.hpp"
+
+using afl::string::Format;
+using afl::sys::LogListener;
 
 namespace {
-    const char LOG_NAME[] = "game.browser";
+    const char*const LOG_NAME = "game.browser";
 
     const char* GAMES_DIR_NAME = "games";
     const char* GAME_PREFIX = "game:";
@@ -111,12 +115,6 @@ game::browser::Browser::callback()
     return m_callback;
 }
 
-game::browser::HandlerList&
-game::browser::Browser::handlers()
-{
-    return m_handlers;
-}
-
 util::ProfileDirectory&
 game::browser::Browser::profile()
 {
@@ -124,17 +122,25 @@ game::browser::Browser::profile()
 }
 
 void
+game::browser::Browser::addNewHandler(Handler* h)
+{
+    m_handlers.addNewHandler(h);
+}
+
+bool
 game::browser::Browser::openFolder(String_t name)
 {
     afl::container::PtrVector<Folder> result;
     if (m_handlers.handleFolderName(name, result)) {
+        m_log.write(LogListener::Trace, LOG_NAME, Format("Browser.openFolder('%s') ok", name));
         m_path.swap(result);
         m_pathOrigin.reset();
         clearContent();
-        // return true;
+        return true;
     } else {
         // FIXME: Handle result
-        // return false;
+        m_log.write(LogListener::Trace, LOG_NAME, Format("Browser.openFolder('%s') failed", name));
+        return false;
     }
 }
 
@@ -142,6 +148,7 @@ void
 game::browser::Browser::openChild(size_t n)
 {
     if (n < m_content.size()) {
+        m_log.write(LogListener::Trace, LOG_NAME, Format("Browser.openChild(%d)", n));
         m_path.pushBackNew(m_content.extractElement(n));
         m_pathOrigin.reset();
         clearContent();
@@ -152,6 +159,7 @@ void
 game::browser::Browser::openParent()
 {
     if (!m_path.empty()) {
+        m_log.write(LogListener::Trace, LOG_NAME, "Browser.openParent");
         m_pathOrigin.reset(m_path.extractLast());
         clearContent();
     }
@@ -178,73 +186,6 @@ game::browser::Browser::currentFolder()
     }
 }
 
-void
-game::browser::Browser::loadContent()
-{
-    try {
-        // If we have a selected element, but not a previous path element, select that element
-        size_t n;
-        if (m_pathOrigin.get() == 0 && m_selectedChild.get(n) && n < m_content.size()) {
-            m_pathOrigin.reset(m_content.extractElement(n));
-        }
-
-        // Replace content with newly-loaded values
-        clearContent();
-        currentFolder().loadContent(m_content);
-
-        // If we have a previous path element, attempt to locate and select that
-        if (m_pathOrigin.get() != 0) {
-            for (size_t i = 0, n = m_content.size(); i < n; ++i) {
-                if (m_content[i]->isSame(*m_pathOrigin)) {
-                    selectChild(i);
-                    break;
-                }
-            }
-            m_pathOrigin.reset();
-        }
-    }
-    catch (std::exception& e) {
-        m_log.write(m_log.Warn, LOG_NAME, String_t(), e);
-    }
-}
-
-void
-game::browser::Browser::loadChildRoot()
-{
-    size_t n;
-    if (!m_childLoaded && m_selectedChild.get(n) && n < m_content.size()) {
-        m_childLoaded = true;
-        m_childConfig.reset(new game::config::UserConfiguration());
-
-        // Load configuration
-        try {
-            // FIXME: can we do anything with the return value?
-            m_content[n]->loadConfiguration(*m_childConfig);
-        }
-        catch (std::exception& e) {
-            m_log.write(m_log.Warn, LOG_NAME, String_t(), e);
-        }
-
-        // Load root
-        try {
-            m_childRoot = m_content[n]->loadGameRoot(*m_childConfig);
-        }
-        catch (std::exception& e) {
-            m_log.write(m_log.Warn, LOG_NAME, String_t(), e);
-        }
-    }
-}
-
-void
-game::browser::Browser::clearContent()
-{
-    m_content.clear();
-    m_selectedChild = afl::base::Nothing;
-    m_childLoaded = false;
-    m_childRoot.reset();
-    m_childConfig.reset();
-}
-
 const afl::container::PtrVector<game::browser::Folder>&
 game::browser::Browser::path()
 {
@@ -257,8 +198,29 @@ game::browser::Browser::content()
     return m_content;
 }
 
-game::browser::Browser::OptionalIndex_t
+void
+game::browser::Browser::clearContent()
+{
+    m_content.clear();
+    m_selectedChild = afl::base::Nothing;
+    m_childLoaded = false;
+    m_childRoot.reset();
+    m_childConfig.reset();
+}
+
+game::browser::Folder*
 game::browser::Browser::getSelectedChild() const
+{
+    size_t pos;
+    if (m_selectedChild.get(pos) && pos < m_content.size()) {
+        return m_content[pos];
+    } else {
+        return 0;
+    }
+}
+
+game::browser::Browser::OptionalIndex_t
+game::browser::Browser::getSelectedChildIndex() const
 {
     return m_selectedChild;
 }
@@ -275,30 +237,151 @@ game::browser::Browser::getSelectedConfiguration() const
     return m_childConfig.get();
 }
 
-void
-game::browser::Browser::updateConfiguration()
+std::auto_ptr<game::browser::Task_t>
+game::browser::Browser::loadContent(std::auto_ptr<Task_t> then)
 {
-    // Update configuration after user modified it:
-    // - save to disk
-    // - reload the root to let the new configuration take effect
-    size_t n;
-    if (m_childLoaded && m_selectedChild.get(n) && n < m_content.size() && m_childConfig.get() != 0) {
-        // Save configuration
-        try {
-            m_content[n]->saveConfiguration(*m_childConfig);
-        }
-        catch (std::exception& e) {
-            m_log.write(m_log.Warn, LOG_NAME, String_t(), e);
-        }
+    // Task to receive result and replace content with newly-loaded values
+    class Then : public LoadContentTask_t {
+     public:
+        Then(Browser& browser, std::auto_ptr<Task_t> then)
+            : m_browser(browser), m_then(then)
+            { }
+        virtual void call(afl::container::PtrVector<Folder>& result)
+            {
+                m_browser.m_log.write(LogListener::Trace, LOG_NAME, "Browser.loadContent.Then");
 
-        // Load root
-        try {
-            m_childRoot = m_content[n]->loadGameRoot(*m_childConfig);
-        }
-        catch (std::exception& e) {
-            m_log.write(m_log.Warn, LOG_NAME, String_t(), e);
-        }
+                // If we have a previous path element, attempt to locate and select that
+                m_browser.m_content.swap(result);
+                if (m_browser.m_pathOrigin.get() != 0) {
+                    for (size_t i = 0, n = m_browser.m_content.size(); i < n; ++i) {
+                        if (m_browser.m_content[i]->isSame(*m_browser.m_pathOrigin)) {
+                            m_browser.selectChild(i);
+                            break;
+                        }
+                    }
+                    m_browser.m_pathOrigin.reset();
+                }
+
+                m_then->call();
+            }
+     private:
+        Browser& m_browser;
+        std::auto_ptr<Task_t> m_then;
+    };
+
+    // Main task (to allow creation of task ahead of time)
+    class Task : public Task_t {
+     public:
+        Task(Browser& parent, std::auto_ptr<Task_t>& then)
+            : m_parent(parent), m_then(then)
+            { }
+        virtual void call()
+            {
+                m_parent.m_log.write(LogListener::Trace, LOG_NAME, "Browser.loadContent");
+
+                // If we have a selected element, but not a previous path element, select that element
+                size_t n;
+                if (m_parent.m_pathOrigin.get() == 0 && m_parent.m_selectedChild.get(n) && n < m_parent.m_content.size()) {
+                    m_parent.m_pathOrigin.reset(m_parent.m_content.extractElement(n));
+                }
+
+                // Start task
+                m_parent.clearContent();
+                m_then = m_parent.currentFolder().loadContent(std::auto_ptr<LoadContentTask_t>(new Then(m_parent, m_then)));
+                m_then->call();
+            }
+     private:
+        Browser& m_parent;
+        std::auto_ptr<Task_t> m_then;
+    };
+    return std::auto_ptr<Task_t>(new Task(*this, then));
+}
+
+std::auto_ptr<game::browser::Task_t>
+game::browser::Browser::loadChildRoot(std::auto_ptr<Task_t> then)
+{
+    // Separate task to allow sequential execution
+    class Task : public Task_t {
+     public:
+        Task(Browser& parent, std::auto_ptr<Task_t> then)
+            : m_parent(parent), m_then(then)
+            { }
+        virtual void call()
+            {
+                m_parent.m_log.write(LogListener::Trace, LOG_NAME, "Browser.loadChildRoot");
+
+                size_t n;
+                if (!m_parent.m_childLoaded && m_parent.m_selectedChild.get(n) && n < m_parent.m_content.size()) {
+                    m_parent.m_childLoaded = true;
+                    m_parent.m_childConfig.reset(new game::config::UserConfiguration());
+
+                    // Load configuration
+                    try {
+                        // FIXME: can we do anything with the return value?
+                        m_parent.m_content[n]->loadConfiguration(*m_parent.m_childConfig);
+                    }
+                    catch (std::exception& e) {
+                        m_parent.m_log.write(LogListener::Warn, LOG_NAME, String_t(), e);
+                    }
+
+                    // Load root
+                    m_then = m_parent.loadGameRoot(n, m_then);
+                }
+                m_then->call();
+            }
+     private:
+        Browser& m_parent;
+        std::auto_ptr<Task_t> m_then;
+    };
+    return std::auto_ptr<Task_t>(new Task(*this, then));
+}
+
+std::auto_ptr<game::browser::Task_t>
+game::browser::Browser::updateConfiguration(std::auto_ptr<Task_t> then)
+{
+    // Separate task to allow sequential execution
+    class Task : public Task_t {
+     public:
+        Task(Browser& parent, std::auto_ptr<Task_t> then)
+            : m_parent(parent), m_then(then)
+            { }
+        virtual void call()
+            {
+                m_parent.m_log.write(LogListener::Trace, LOG_NAME, "Browser.updateConfiguration");
+
+                // Update configuration after user modified it:
+                // - save to disk
+                // - reload the root to let the new configuration take effect
+                size_t n;
+                if (m_parent.m_childLoaded && m_parent.m_selectedChild.get(n) && n < m_parent.m_content.size() && m_parent.m_childConfig.get() != 0) {
+                    // Save configuration
+                    try {
+                        m_parent.m_content[n]->saveConfiguration(*m_parent.m_childConfig);
+                    }
+                    catch (std::exception& e) {
+                        m_parent.m_log.write(LogListener::Warn, LOG_NAME, String_t(), e);
+                    }
+
+                    // Load root
+                    m_then = m_parent.loadGameRoot(n, m_then);
+                }
+                m_then->call();
+            }
+     private:
+        Browser& m_parent;
+        std::auto_ptr<Task_t> m_then;
+    };
+    return std::auto_ptr<Task_t>(new Task(*this, then));
+}
+
+std::auto_ptr<game::browser::Task_t>
+game::browser::Browser::loadGameRoot(afl::base::Ref<afl::io::Directory> dir, const game::config::UserConfiguration& config, std::auto_ptr<LoadGameRootTask_t>& then)
+{
+    std::auto_ptr<Task_t> t = m_handlers.loadGameRootMaybe(dir, config, then);
+    if (t.get() == 0) {
+        t = Folder::defaultLoadGameRoot(then);
     }
+    return t;
 }
 
 game::browser::Folder*
@@ -311,17 +394,11 @@ game::browser::Browser::createAccountFolder(Account& account)
     return result;
 }
 
-afl::base::Ptr<game::Root>
-game::browser::Browser::loadGameRoot(afl::base::Ref<afl::io::Directory> dir, const game::config::UserConfiguration& config)
-{
-    return m_handlers.loadGameRoot(dir, config);
-}
-
 String_t
 game::browser::Browser::expandGameDirectoryName(String_t directoryName) const
 {
-    if (directoryName.compare(0, std::strlen(GAME_PREFIX), GAME_PREFIX, std::strlen(GAME_PREFIX)) == 0) {
-        return m_fileSystem.makePathName(m_fileSystem.makePathName(m_profile.open()->getDirectoryName(), GAMES_DIR_NAME), directoryName.substr(5));
+    if (const char* suffix = util::strStartsWith(directoryName, GAME_PREFIX)) {
+        return m_fileSystem.makePathName(m_fileSystem.makePathName(m_profile.open()->getDirectoryName(), GAMES_DIR_NAME), suffix);
     } else {
         return directoryName;
     }
@@ -333,7 +410,6 @@ game::browser::Browser::setSelectedLocalDirectoryName(String_t directoryName)
     size_t n;
     if (m_selectedChild.get(n) && n < m_content.size()) {
         m_content[n]->setLocalDirectoryName(directoryName);
-        updateConfiguration();
     }
 }
 
@@ -367,7 +443,7 @@ game::browser::Browser::setSelectedLocalDirectoryAutomatically()
 
         // ...try "zz_a_b_c" with numeric index
         for (int i = 1; i <= 10000; ++i) {
-            if (trySetLocalDirectoryName(*gamesDir, simplifyFileName(afl::string::Format("%s %d", gameName, i)))) {
+            if (trySetLocalDirectoryName(*gamesDir, simplifyFileName(Format("%s %d", gameName, i)))) {
                 return;
             }
         }
@@ -386,7 +462,7 @@ game::browser::Browser::trySetLocalDirectoryName(afl::io::Directory& gamesDir, S
                 return false;
             } else {
                 child->createAsDirectory();
-                m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator.translateString("Using directory \"%s\"").c_str(), directoryName));
+                m_log.write(LogListener::Info, LOG_NAME, Format(m_translator("Using directory \"%s\""), directoryName));
                 setSelectedLocalDirectoryName(GAME_PREFIX + directoryName);
                 return true;
             }
@@ -395,4 +471,25 @@ game::browser::Browser::trySetLocalDirectoryName(afl::io::Directory& gamesDir, S
             return false;
         }
     }
+}
+
+std::auto_ptr<game::browser::Task_t>
+game::browser::Browser::loadGameRoot(size_t n, std::auto_ptr<Task_t>& then)
+{
+    class Then : public LoadGameRootTask_t {
+     public:
+        Then(Browser& parent, std::auto_ptr<Task_t>& then)
+            : m_parent(parent), m_then(then)
+            { }
+        virtual void call(afl::base::Ptr<Root> root)
+            {
+                m_parent.m_log.write(LogListener::Trace, LOG_NAME, "Browser.loadGameRoot.Then");
+                m_parent.m_childRoot = root;
+                m_then->call();
+            }
+     private:
+        Browser& m_parent;
+        std::auto_ptr<Task_t> m_then;
+    };
+    return m_content[n]->loadGameRoot(*m_childConfig, std::auto_ptr<LoadGameRootTask_t>(new Then(*this, then)));
 }

@@ -23,6 +23,9 @@
 #include "afl/net/http/manager.hpp"
 #include "afl/net/http/defaultconnectionprovider.hpp"
 
+using game::browser::Task_t;
+using game::browser::LoadGameRootTask_t;
+
 namespace {
     class MyUserCallback : public game::browser::UserCallback {
      public:
@@ -68,6 +71,8 @@ int main(int, char** argv)
     afl::string::NullTranslator tx;
     util::ConsoleLogger log;
     MyUserCallback userCB;
+    log.attachWriter(false, env.attachTextWriter(env.Output).asPtr());
+    log.attachWriter(true,  env.attachTextWriter(env.Error).asPtr());
 
     afl::net::http::Client client;
     afl::sys::Thread clientThread("http", client);
@@ -81,9 +86,9 @@ int main(int, char** argv)
     acc.load();
     game::browser::Browser b(fs, tx, log, acc, profile, userCB);
     afl::base::Ref<afl::io::Directory> defaultSpecDirectory = fs.openDirectory(fs.makePathName(fs.makePathName(env.getInstallationDirectoryName(), "share"), "specs"));
-    b.handlers().addNewHandler(new game::browser::DirectoryHandler(b, defaultSpecDirectory, profile, fs));
-    b.handlers().addNewHandler(new game::pcc::BrowserHandler(b, httpManager, defaultSpecDirectory, profile));
-    b.handlers().addNewHandler(new game::nu::BrowserHandler(b, httpManager, defaultSpecDirectory));
+    b.addNewHandler(new game::browser::DirectoryHandler(b, defaultSpecDirectory, profile));
+    b.addNewHandler(new game::pcc::BrowserHandler(b, httpManager, defaultSpecDirectory, profile));
+    b.addNewHandler(new game::nu::BrowserHandler(b, httpManager, defaultSpecDirectory));
     String_t cmd;
     size_t n;
     while (std::cout << b.currentFolder().getName() << "> ", getline(std::cin, cmd)) {
@@ -95,7 +100,7 @@ int main(int, char** argv)
                 std::cout << afl::string::Format("%3d. %s", i, path[i]->getName()) << "\n";
             }
         } else if (cmd == "ls") {
-            b.loadContent();
+            b.loadContent(std::auto_ptr<Task_t>(Task_t::makeNull()))->call();
             const afl::container::PtrVector<game::browser::Folder>& content = b.content();
             for (size_t i = 0, n = content.size(); i < n; ++i) {
                 std::cout << afl::string::Format("%3d. %s", i, content[i]->getName()) << "\n";
@@ -109,7 +114,19 @@ int main(int, char** argv)
         } else if (cmd == "info") {
             game::config::UserConfiguration config;
             b.currentFolder().loadConfiguration(config);
-            afl::base::Ptr<game::Root> root = b.currentFolder().loadGameRoot(config);
+            afl::base::Ptr<game::Root> root;
+
+            class Task : public LoadGameRootTask_t {
+             public:
+                Task(afl::base::Ptr<game::Root>& root)
+                    : m_root(root)
+                    { }
+                void call(afl::base::Ptr<game::Root> root)
+                    { m_root = root; }
+             private:
+                afl::base::Ptr<game::Root>& m_root;
+            };
+            b.currentFolder().loadGameRoot(config, std::auto_ptr<LoadGameRootTask_t>(new Task(root)))->call();
             if (root.get() != 0) {
                 if (root->getTurnLoader().get() != 0) {
                     std::cout << "Turn loader present.\n";
