@@ -186,31 +186,30 @@ namespace {
         const std::vector<String_t>& m_commandLineResources;
     };
 
-    class BrowserInitializer : public util::Request<game::browser::Session> {
+    class BrowserInitializer : public afl::base::Closure<game::browser::Session*(game::Session&)> {
      public:
-        BrowserInitializer(afl::io::FileSystem& fileSystem,
-                           afl::base::Ref<afl::io::Directory> defaultSpecDirectory,
+        BrowserInitializer(afl::base::Ref<afl::io::Directory> defaultSpecDirectory,
                            util::ProfileDirectory& profile,
                            afl::net::http::Manager& httpManager)
-            : m_fileSystem(fileSystem),
-              m_defaultSpecDirectory(defaultSpecDirectory),
+            : m_defaultSpecDirectory(defaultSpecDirectory),
               m_profile(profile),
               m_httpManager(httpManager)
             { }
 
-        virtual void handle(game::browser::Session& t)
+        virtual game::browser::Session* call(game::Session& session)
             {
-                std::auto_ptr<game::browser::Browser>& b = t.browser();
-                t.accountManager().reset(new game::browser::AccountManager(m_profile, t.translator(), t.log()));
-                t.accountManager()->load();
-                b.reset(new game::browser::Browser(m_fileSystem, t.translator(), t.log(), *t.accountManager(), m_profile, t.userCallbackProxy()));
-                b->addNewHandler(new game::browser::DirectoryHandler(*b, m_defaultSpecDirectory, m_profile));
-                b->addNewHandler(new game::pcc::BrowserHandler(*b, m_httpManager, m_defaultSpecDirectory, m_profile));
-                b->addNewHandler(new game::nu::BrowserHandler(*b, m_httpManager, m_defaultSpecDirectory));
+                std::auto_ptr<game::browser::Session> t(new game::browser::Session(session.world().fileSystem(), session.translator(), session.log(), m_profile));
+
+                game::browser::Browser& b = t->browser();
+                t->accountManager().load();
+                b.addNewHandler(new game::browser::DirectoryHandler(b, m_defaultSpecDirectory, m_profile));
+                b.addNewHandler(new game::pcc::BrowserHandler(b, m_httpManager, m_defaultSpecDirectory, m_profile));
+                b.addNewHandler(new game::nu::BrowserHandler(b, m_httpManager, m_defaultSpecDirectory));
+
+                return t.release();
             }
 
      private:
-        afl::io::FileSystem& m_fileSystem;
         afl::base::Ref<afl::io::Directory> m_defaultSpecDirectory;
         util::ProfileDirectory& m_profile;
         afl::net::http::Manager& m_httpManager;
@@ -230,17 +229,16 @@ namespace {
                         { }
                     virtual void call()
                         {
-                            m_session.browser()->openParent();
+                            m_session.browser().openParent();
                             m_session.finishTask();
                         }
                  private:
                     game::browser::Session& m_session;
                 };
 
-                if (game::browser::Browser* b = session.browser().get()) {
-                    b->openFolder(m_path);
-                    session.addTask(b->loadContent(std::auto_ptr<game::browser::Task_t>(new Then(session))));
-                }
+                game::browser::Browser& b = session.browser();
+                b.openFolder(m_path);
+                session.addTask(b.loadContent(std::auto_ptr<game::browser::Task_t>(new Then(session))));
             }
      private:
         String_t m_path;
@@ -276,28 +274,24 @@ namespace {
 
             void handle(game::browser::Session& session)
                 {
-                    if (game::browser::Browser* p = session.browser().get()) {
-                        class Then : public game::browser::Task_t {
-                         public:
-                            Then(game::browser::Session& session, int player, util::RequestSender<client::screens::BrowserScreen> uiSender, util::RequestSender<game::Session> gameSender)
-                                : m_session(session), m_player(player), m_uiSender(uiSender), m_gameSender(gameSender)
-                                { }
-                            virtual void call()
-                                {
-                                    if (game::browser::Browser* p = m_session.browser().get()) {
-                                        m_gameSender.postNewRequest(new LoadRequest2(m_player, p->getSelectedRoot(), m_uiSender));
-                                    }
-                                    m_session.finishTask();
-                                }
-                         private:
-                            game::browser::Session& m_session;
-                            int m_player;
-                            util::RequestSender<client::screens::BrowserScreen> m_uiSender;
-                            util::RequestSender<game::Session> m_gameSender;
-                        };
+                    class Then : public game::browser::Task_t {
+                     public:
+                        Then(game::browser::Session& session, int player, util::RequestSender<client::screens::BrowserScreen> uiSender, util::RequestSender<game::Session> gameSender)
+                            : m_session(session), m_player(player), m_uiSender(uiSender), m_gameSender(gameSender)
+                            { }
+                        virtual void call()
+                            {
+                                m_gameSender.postNewRequest(new LoadRequest2(m_player, m_session.browser().getSelectedRoot(), m_uiSender));
+                                m_session.finishTask();
+                            }
+                     private:
+                        game::browser::Session& m_session;
+                        int m_player;
+                        util::RequestSender<client::screens::BrowserScreen> m_uiSender;
+                        util::RequestSender<game::Session> m_gameSender;
+                    };
 
-                        session.addTask(p->loadChildRoot(std::auto_ptr<game::browser::Task_t>(new Then(session, m_player, m_uiSender, m_gameSender))));
-                    }
+                    session.addTask(session.browser().loadChildRoot(std::auto_ptr<game::browser::Task_t>(new Then(session, m_player, m_uiSender, m_gameSender))));
                 }
 
          private:
@@ -897,7 +891,6 @@ namespace {
                 // All I/O accesses must from now on go through a background thread.
                 // Set up session objects. None of these constructors block (I hope).
                 log().write(afl::sys::Log::Debug, LOG_NAME, translator()("Starting background thread..."));
-                game::browser::Session browserSession(translator(), log());
                 game::Session gameSession(translator(), fs);
                 gameSession.log().addListener(log());
                 gameSession.setSystemInformation(util::getSystemInformation());
@@ -908,8 +901,8 @@ namespace {
                 // Set up background thread and request receivers.
                 // These must be after the session objects so that they die before them, allowing final requests to finish.
                 util::RequestThread backgroundThread("game.background", log(), translator(), params.getRequestThreadDelay());
-                util::RequestReceiver<game::browser::Session> browserReceiver(backgroundThread, browserSession);
                 util::RequestReceiver<game::Session> gameReceiver(backgroundThread, gameSession);
+                util::RequestSender<game::browser::Session> browserSender = gameReceiver.getSender().makeTemporary(new BrowserInitializer(defaultSpecDirectory, profile, httpManager));
 
                 // Set up foreground thread.
                 client::si::UserSide userSide(root, gameReceiver.getSender(), translator(), root.engine().dispatcher(), collector, log());
@@ -918,11 +911,10 @@ namespace {
                 // Initialize by posting requests to the background thread.
                 // (This will not take time.)
                 gameReceiver.getSender().postNewRequest(new PluginInitializer(resourceDirectory, profile, params.getCommandLineResources()));
-                browserReceiver.getSender().postNewRequest(new BrowserInitializer(fs, defaultSpecDirectory, profile, httpManager));
                 {
                     String_t initialGameDirectory;
                     if (params.getGameDirectory(initialGameDirectory)) {
-                        browserReceiver.getSender().postNewRequest(new BrowserPositioner(initialGameDirectory));
+                        browserSender.postNewRequest(new BrowserPositioner(initialGameDirectory));
                     }
                 }
 
@@ -958,8 +950,8 @@ namespace {
                     root.add(docView);
 
                     // Browser
-                    client::screens::BrowserScreen browserScreen(root, translator(), browserReceiver.getSender(), gameReceiver.getSender());
-                    browserScreen.sig_gameSelection.addNewClosure(new BrowserListener(browserScreen, browserReceiver.getSender(), gameReceiver.getSender()));
+                    client::screens::BrowserScreen browserScreen(root, translator(), browserSender, gameReceiver.getSender());
+                    browserScreen.sig_gameSelection.addNewClosure(new BrowserListener(browserScreen, browserSender, gameReceiver.getSender()));
                     int result = browserScreen.run(docColors);
                     if (result != 0) {
                         // OK, play

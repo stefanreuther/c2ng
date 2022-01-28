@@ -7,24 +7,29 @@
 
 #include <memory>
 #include "afl/container/ptrqueue.hpp"
+#include "afl/io/filesystem.hpp"
 #include "afl/string/translator.hpp"
 #include "afl/sys/loglistener.hpp"
 #include "game/browser/accountmanager.hpp"
 #include "game/browser/browser.hpp"
 #include "game/browser/usercallbackproxy.hpp"
+#include "util/profiledirectory.hpp"
 
 namespace game { namespace browser {
 
     class Session {
      public:
-        Session(afl::string::Translator& tx, afl::sys::LogListener& log);
+        Session(afl::io::FileSystem& fileSystem,
+                afl::string::Translator& tx,
+                afl::sys::LogListener& log,
+                util::ProfileDirectory& profile);
         ~Session();
 
         afl::string::Translator& translator();
         afl::sys::LogListener& log();
 
-        std::auto_ptr<Browser>& browser();
-        std::auto_ptr<AccountManager>& accountManager();
+        Browser& browser();
+        AccountManager& accountManager();
         UserCallbackProxy& userCallbackProxy();
 
         void addTask(std::auto_ptr<Task_t> task);
@@ -36,10 +41,13 @@ namespace game { namespace browser {
         afl::sys::LogListener& m_log;
 
         // Data
-        std::auto_ptr<Browser> m_browser;
-        std::auto_ptr<AccountManager> m_accountManager;
+        AccountManager m_accountManager;
         UserCallbackProxy m_userCallbackProxy;
 
+        // Browser (after other objects because it refers to them)
+        Browser m_browser;
+
+        // Tasks (last, so it is deleted first and causes tasks to take their hands off other objects)
         afl::container::PtrQueue<Task_t> m_tasks;
     };
 

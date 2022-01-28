@@ -11,12 +11,15 @@ namespace {
     const char*const LOG_NAME = "game.browser";
 }
 
-game::browser::Session::Session(afl::string::Translator& tx, afl::sys::LogListener& log)
+game::browser::Session::Session(afl::io::FileSystem& fileSystem,
+                                afl::string::Translator& tx,
+                                afl::sys::LogListener& log,
+                                util::ProfileDirectory& profile)
     : m_translator(tx),
       m_log(log),
-      m_browser(),
-      m_accountManager(),
+      m_accountManager(profile, tx, log),
       m_userCallbackProxy(tx, log),
+      m_browser(fileSystem, tx, log, m_accountManager, profile, m_userCallbackProxy),
       m_tasks()
 { }
 
@@ -35,13 +38,13 @@ game::browser::Session::log()
     return m_log;
 }
 
-std::auto_ptr<game::browser::Browser>&
+game::browser::Browser&
 game::browser::Session::browser()
 {
     return m_browser;
 }
 
-std::auto_ptr<game::browser::AccountManager>&
+game::browser::AccountManager&
 game::browser::Session::accountManager()
 {
     return m_accountManager;

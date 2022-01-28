@@ -80,16 +80,15 @@ namespace {
             { }
         virtual void handle(game::browser::Session& session)
             {
-                if (game::browser::Browser* b = session.browser().get()) {
-                    m_result.reset(new DirectoryBrowser(b->fileSystem()));
-                    m_result->openDirectory(m_folderName);
-                    if (m_result->getErrorText().empty()) {
-                        m_result->openParent();
-                    } else {
-                        m_result->openRoot();
-                    }
-                    setState(m_state, *m_result, session.translator());
+                game::browser::Browser& b = session.browser();
+                m_result.reset(new DirectoryBrowser(b.fileSystem()));
+                m_result->openDirectory(m_folderName);
+                if (m_result->getErrorText().empty()) {
+                    m_result->openParent();
+                } else {
+                    m_result->openRoot();
                 }
+                setState(m_state, *m_result, session.translator());
             }
      private:
         std::auto_ptr<DirectoryBrowser>& m_result;

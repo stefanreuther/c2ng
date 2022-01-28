@@ -139,19 +139,18 @@ namespace {
                                     m_host = "planetscentral.com";
                                 }
                             }
-                            if (game::browser::AccountManager* mgr = session.accountManager().get()) {
-                                if (mgr->findAccount(m_user, m_type, m_host) != 0) {
-                                    // FIXME: handle duplicate
-                                } else {
-                                    // New account
-                                    std::auto_ptr<game::browser::Account> acc(new game::browser::Account());
-                                    acc->setName(Format("%s @ %s", m_user, m_host));
-                                    acc->setUser(m_user);
-                                    acc->setType(m_type);
-                                    acc->setHost(m_host);
-                                    mgr->addNewAccount(acc.release());
-                                    mgr->save();
-                                }
+                            game::browser::AccountManager& mgr = session.accountManager();
+                            if (mgr.findAccount(m_user, m_type, m_host) != 0) {
+                                // FIXME: handle duplicate
+                            } else {
+                                // New account
+                                std::auto_ptr<game::browser::Account> acc(new game::browser::Account());
+                                acc->setName(Format("%s @ %s", m_user, m_host));
+                                acc->setUser(m_user);
+                                acc->setType(m_type);
+                                acc->setHost(m_host);
+                                mgr.addNewAccount(acc.release());
+                                mgr.save();
                             }
                         }
                  private:
@@ -230,15 +229,14 @@ namespace {
             virtual void handle(game::browser::Session& s)
                 {
                     using game::Root;
-                    if (Browser* b = s.browser().get()) {
-                        afl::base::Ptr<Root> root = b->getSelectedRoot();
-                        game::config::UserConfiguration* config = b->getSelectedConfiguration();
-                        if (root.get() != 0 && config != 0) {
-                            Root::Actions_t as = root->getPossibleActions();
-                            if (as.contains(Root::aLocalSetup) && !as.contains(Root::aLoadEditable)) {
-                                if (!as.contains(Root::aConfigureReadOnly) || !(*config)[game::config::UserConfiguration::Game_ReadOnly]()) {
-                                    m_result = true;
-                                }
+                    Browser& b = s.browser();
+                    afl::base::Ptr<Root> root = b.getSelectedRoot();
+                    game::config::UserConfiguration* config = b.getSelectedConfiguration();
+                    if (root.get() != 0 && config != 0) {
+                        Root::Actions_t as = root->getPossibleActions();
+                        if (as.contains(Root::aLocalSetup) && !as.contains(Root::aLoadEditable)) {
+                            if (!as.contains(Root::aConfigureReadOnly) || !(*config)[game::config::UserConfiguration::Game_ReadOnly]()) {
+                                m_result = true;
                             }
                         }
                     }
@@ -258,9 +256,7 @@ namespace {
             { }
         virtual void call()
             {
-                if (game::browser::AccountManager* a = m_session.accountManager().get()) {
-                    a->save();
-                }
+                m_session.accountManager().save();
                 m_then->call();
             }
      private:
@@ -274,16 +270,16 @@ namespace {
          public:
             virtual void handle(game::browser::Session& session)
                 {
-                    if (Browser* b = session.browser().get()) {
-                        // Update configuration
-                        // This is invoked with call(), so I assume that no other task is active on the browser session.
-                        b->setSelectedLocalDirectoryAutomatically();
+                    Browser& b = session.browser();
 
-                        // Save network.ini and pcc2.ini
-                        std::auto_ptr<Task_t> t3(Task_t::makeBound(&session, &game::browser::Session::finishTask));
-                        std::auto_ptr<Task_t> t2(new SaveAccountsTask(session, t3));
-                        session.addTask(b->updateConfiguration(t2));
-                    }
+                    // Update configuration
+                    // This is invoked with call(), so I assume that no other task is active on the browser session.
+                    b.setSelectedLocalDirectoryAutomatically();
+
+                    // Save network.ini and pcc2.ini
+                    std::auto_ptr<Task_t> t3(Task_t::makeBound(&session, &game::browser::Session::finishTask));
+                    std::auto_ptr<Task_t> t2(new SaveAccountsTask(session, t3));
+                    session.addTask(b.updateConfiguration(t2));
                 }
         };
         client::Downlink link(root, tx);
@@ -300,16 +296,16 @@ namespace {
                 { }
             virtual void handle(game::browser::Session& session)
                 {
-                    if (Browser* b = session.browser().get()) {
-                        // Update configuration
-                        // This is invoked with call(), so I assume that no other task is active on the browser session.
-                        b->setSelectedLocalDirectoryName(m_dirName);
+                    Browser& b = session.browser();
 
-                        // Save network.ini and pcc2.ini
-                        std::auto_ptr<Task_t> t3(Task_t::makeBound(&session, &game::browser::Session::finishTask));
-                        std::auto_ptr<Task_t> t2(new SaveAccountsTask(session, t3));
-                        session.addTask(b->updateConfiguration(t2));
-                    }
+                    // Update configuration
+                    // This is invoked with call(), so I assume that no other task is active on the browser session.
+                    b.setSelectedLocalDirectoryName(m_dirName);
+
+                    // Save network.ini and pcc2.ini
+                    std::auto_ptr<Task_t> t3(Task_t::makeBound(&session, &game::browser::Session::finishTask));
+                    std::auto_ptr<Task_t> t2(new SaveAccountsTask(session, t3));
+                    session.addTask(b.updateConfiguration(t2));
                 }
          private:
             String_t m_dirName;
@@ -326,15 +322,14 @@ namespace {
             virtual void handle(game::browser::Session& session)
                 {
                     using game::config::UserConfiguration;
-                    if (Browser* b = session.browser().get()) {
-                        if (UserConfiguration* config = b->getSelectedConfiguration()) {
-                            (*config)[UserConfiguration::Game_ReadOnly].set(1);
+                    Browser& b = session.browser();
+                    if (UserConfiguration* config = b.getSelectedConfiguration()) {
+                        (*config)[UserConfiguration::Game_ReadOnly].set(1);
 
-                            // Save network.ini and pcc2.ini
-                            std::auto_ptr<Task_t> t3(Task_t::makeBound(&session, &game::browser::Session::finishTask));
-                            std::auto_ptr<Task_t> t2(new SaveAccountsTask(session, t3));
-                            session.addTask(b->updateConfiguration(t2));
-                        }
+                        // Save network.ini and pcc2.ini
+                        std::auto_ptr<Task_t> t3(Task_t::makeBound(&session, &game::browser::Session::finishTask));
+                        std::auto_ptr<Task_t> t2(new SaveAccountsTask(session, t3));
+                        session.addTask(b.updateConfiguration(t2));
                     }
                 }
         };
@@ -359,39 +354,38 @@ namespace {
                 { }
             virtual void handle(game::browser::Session& session)
                 {
-                    if (Browser* b = session.browser().get()) {
-                        try {
-                            afl::io::FileSystem& fs = b->fileSystem();
-                            afl::base::Ref<afl::io::Directory> dir = fs.openDirectory(m_dirName);
+                    Browser& b = session.browser();
+                    try {
+                        afl::io::FileSystem& fs = b.fileSystem();
+                        afl::base::Ref<afl::io::Directory> dir = fs.openDirectory(m_dirName);
 
-                            // Try creating files
-                            bool ok = false;
-                            for (int i = 0; i < 1000; ++i) {
-                                String_t fileName = Format("_%d.tmp", i);
-                                if (dir->openFileNT(fileName, afl::io::FileSystem::CreateNew).get() != 0) {
-                                    dir->eraseNT(fileName);
-                                    ok = true;
-                                    break;
-                                }
+                        // Try creating files
+                        bool ok = false;
+                        for (int i = 0; i < 1000; ++i) {
+                            String_t fileName = Format("_%d.tmp", i);
+                            if (dir->openFileNT(fileName, afl::io::FileSystem::CreateNew).get() != 0) {
+                                dir->eraseNT(fileName);
+                                ok = true;
+                                break;
                             }
-                            if (!ok) {
-                                m_result = NotWritable;
-                                return;
-                            }
-
-                            // Check content
-                            afl::base::Ptr<afl::io::DirectoryEntry> e;
-                            if (dir->getDirectoryEntries()->getNextElement(e)) {
-                                m_result = NotEmpty;
-                                return;
-                            }
-
-                            // Success
-                            m_result = Success;
                         }
-                        catch (...) {
-                            m_result = Missing;
+                        if (!ok) {
+                            m_result = NotWritable;
+                            return;
                         }
+
+                        // Check content
+                        afl::base::Ptr<afl::io::DirectoryEntry> e;
+                        if (dir->getDirectoryEntries()->getNextElement(e)) {
+                            m_result = NotEmpty;
+                            return;
+                        }
+
+                        // Success
+                        m_result = Success;
+                    }
+                    catch (...) {
+                        m_result = Missing;
                     }
                 }
             Result getResult() const
@@ -481,72 +475,70 @@ class client::screens::BrowserScreen::LoadTask : public util::Request<Session> {
         { }
     void handle(Session& t)
         {
-            if (Browser* b = t.browser().get()) {
-                game::browser::Folder* f;
-                if (m_current) {
-                    f = &b->currentFolder();
+            Browser& b = t.browser();
+            game::browser::Folder* f;
+            if (m_current) {
+                f = &b.currentFolder();
+            } else {
+                if (m_pos < b.content().size()) {
+                    f = b.content()[m_pos];
                 } else {
-                    if (m_pos < b->content().size()) {
-                        f = b->content()[m_pos];
-                    } else {
-                        f = 0;
-                    }
+                    f = 0;
                 }
+            }
 
-                if (f != 0) {
-                    // Info
-                    if (!m_current) {
-                        b->selectChild(m_pos);
+            if (f != 0) {
+                // Info
+                if (!m_current) {
+                    b.selectChild(m_pos);
 
-                        class ChildBuilder : public Task_t {
-                         public:
-                            ChildBuilder(util::RequestSender<BrowserScreen> reply, Session& session)
-                                : m_reply(reply), m_session(session)
-                                { }
-                            virtual void call()
-                                {
-                                    if (Browser* b = m_session.browser().get()) {
-                                        if (game::browser::Folder* f = b->getSelectedChild()) {
-                                            PtrVector<InfoItem> info;
-                                            Ptr<game::Root> root = b->getSelectedRoot();
-                                            Ptr<game::TurnLoader> loader = root.get() != 0 ? root->getTurnLoader() : 0;
-                                            if (loader.get() != 0) {
-                                                const game::config::StringOption& name = root->hostConfiguration()[game::config::HostConfiguration::GameName];
-                                                info.pushBackNew(new InfoItem(Text(name.wasSet() ? name() : f->getName()).withStyle(StyleAttribute::Big).withStyle(StyleAttribute::Bold),
-                                                                              String_t(),
-                                                                              NoAction, 0));
-                                                info.pushBackNew(new InfoItem(Text(Format(m_session.translator()("A %s game"), root->hostVersion().toString(m_session.translator()))),
-                                                                              String_t(),
-                                                                              NoAction, 0));
-                                                buildPlayerList(*root, *loader, info, m_session.translator());
-                                                if (f->canEnter()) {
-                                                    info.pushBackNew(new InfoItem(m_session.translator()("Change into this folder"), String_t(), FolderAction, 0));
-                                                }
-                                                buildActionInfo(*root, info, m_session.translator());
-                                            } else {
-                                                buildFolderInfo(*f, info);
-                                            }
-                                            m_reply.postNewRequest(new UpdateInfoTask(false /*m_current*/, b->getSelectedChildIndex().orElse(0) /*m_pos*/, info));
+                    class ChildBuilder : public Task_t {
+                     public:
+                        ChildBuilder(util::RequestSender<BrowserScreen> reply, Session& session)
+                            : m_reply(reply), m_session(session)
+                            { }
+                        virtual void call()
+                            {
+                                Browser& b = m_session.browser();
+                                if (game::browser::Folder* f = b.getSelectedChild()) {
+                                    PtrVector<InfoItem> info;
+                                    Ptr<game::Root> root = b.getSelectedRoot();
+                                    Ptr<game::TurnLoader> loader = root.get() != 0 ? root->getTurnLoader() : 0;
+                                    if (loader.get() != 0) {
+                                        const game::config::StringOption& name = root->hostConfiguration()[game::config::HostConfiguration::GameName];
+                                        info.pushBackNew(new InfoItem(Text(name.wasSet() ? name() : f->getName()).withStyle(StyleAttribute::Big).withStyle(StyleAttribute::Bold),
+                                                                      String_t(),
+                                                                      NoAction, 0));
+                                        info.pushBackNew(new InfoItem(Text(Format(m_session.translator()("A %s game"), root->hostVersion().toString(m_session.translator()))),
+                                                                      String_t(),
+                                                                      NoAction, 0));
+                                        buildPlayerList(*root, *loader, info, m_session.translator());
+                                        if (f->canEnter()) {
+                                            info.pushBackNew(new InfoItem(m_session.translator()("Change into this folder"), String_t(), FolderAction, 0));
                                         }
+                                        buildActionInfo(*root, info, m_session.translator());
+                                    } else {
+                                        buildFolderInfo(*f, info);
                                     }
-                                    m_session.finishTask();
+                                    m_reply.postNewRequest(new UpdateInfoTask(false /*m_current*/, b.getSelectedChildIndex().orElse(0) /*m_pos*/, info));
                                 }
-                         private:
-                            util::RequestSender<BrowserScreen> m_reply;
-                            Session& m_session;
-                        };
+                                m_session.finishTask();
+                            }
+                     private:
+                        util::RequestSender<BrowserScreen> m_reply;
+                        Session& m_session;
+                    };
 
-                        t.addTask(b->loadChildRoot(std::auto_ptr<Task_t>(new ChildBuilder(m_reply, t))));
-                    } else {
-                        // FIXME: unselect in browser?
-                        PtrVector<InfoItem> info;
-                        buildFolderInfo(*f, info);
-                        m_reply.postNewRequest(new UpdateInfoTask(m_current, m_pos, info));
-                    }
+                    t.addTask(b.loadChildRoot(std::auto_ptr<Task_t>(new ChildBuilder(m_reply, t))));
                 } else {
+                    // FIXME: unselect in browser?
                     PtrVector<InfoItem> info;
+                    buildFolderInfo(*f, info);
                     m_reply.postNewRequest(new UpdateInfoTask(m_current, m_pos, info));
                 }
+            } else {
+                PtrVector<InfoItem> info;
+                m_reply.postNewRequest(new UpdateInfoTask(m_current, m_pos, info));
             }
         }
 
@@ -683,7 +675,7 @@ class client::screens::BrowserScreen::PostLoadTask : public Task_t {
         { }
     virtual void call()
         {
-            Browser& bro = *m_session.browser();
+            Browser& bro = m_session.browser();
             m_reply.postNewRequest(new UpdateTask(bro.path(), bro.content(), bro.getSelectedChildIndex(), m_session.translator()));
             m_session.finishTask();
         }
@@ -703,7 +695,7 @@ class client::screens::BrowserScreen::InitTask : public util::Request<Session> {
         : m_reply(reply)
         { }
     void handle(Session& t)
-        { t.addTask(t.browser()->loadContent(PostLoadTask::make(m_reply, t))); }
+        { t.addTask(t.browser().loadContent(PostLoadTask::make(m_reply, t))); }
  private:
     util::RequestSender<BrowserScreen> m_reply;
 };
@@ -719,10 +711,9 @@ class client::screens::BrowserScreen::EnterTask : public util::Request<Session> 
         { }
     void handle(Session& t)
         {
-            if (Browser* b = t.browser().get()) {
-                b->openChild(m_number);
-                t.addTask(b->loadContent(PostLoadTask::make(m_reply, t)));
-            }
+            Browser& b = t.browser();
+            b.openChild(m_number);
+            t.addTask(b.loadContent(PostLoadTask::make(m_reply, t)));
         }
  private:
     size_t m_number;
@@ -740,12 +731,11 @@ class client::screens::BrowserScreen::UpTask : public util::Request<Session> {
         { }
     void handle(Session& t)
         {
-            if (Browser* b = t.browser().get()) {
-                for (size_t i = 0; i < m_number; ++i) {
-                    b->openParent();
-                }
-                t.addTask(b->loadContent(PostLoadTask::make(m_reply, t)));
+            Browser& b = t.browser();
+            for (size_t i = 0; i < m_number; ++i) {
+                b.openParent();
             }
+            t.addTask(b.loadContent(PostLoadTask::make(m_reply, t)));
         }
  private:
     size_t m_number;
@@ -1045,11 +1035,10 @@ client::screens::BrowserScreen::onRootAction(size_t index)
      public:
         virtual void handle(game::browser::Session& s)
             {
-                if (Browser* b = s.browser().get()) {
-                    afl::base::Ptr<game::Root> root = b->getSelectedRoot();
-                    if (root.get() != 0) {
-                        m_actions = getActions(*root);
-                    }
+                Browser& b = s.browser();
+                afl::base::Ptr<game::Root> root = b.getSelectedRoot();
+                if (root.get() != 0) {
+                    m_actions = getActions(*root);
                 }
             }
         Actions_t m_actions;

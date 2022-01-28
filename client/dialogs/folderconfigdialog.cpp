@@ -41,23 +41,22 @@ namespace {
             {
                 using game::Root;
                 using game::config::UserConfiguration;
-                if (const game::browser::Browser* p = session.browser().get()) {
-                    const Root* root = p->getSelectedRoot().get();
-                    const UserConfiguration* config = p->getSelectedConfiguration();
-                    if (root != 0 && config != 0) {
-                        Root::Actions_t as = root->getPossibleActions();
-                        if (as.contains(Root::aConfigureCharset)) {
-                            m_state.charsetAvailable = true;
-                            m_state.charsetId = (*config)[UserConfiguration::Game_Charset]();
-                        }
-                        if (as.contains(Root::aConfigureFinished)) {
-                            m_state.finishedAvailable = true;
-                            m_state.finished = (*config)[UserConfiguration::Game_Finished]();
-                        }
-                        if (as.contains(Root::aConfigureReadOnly)) {
-                            m_state.readOnlyAvailable = true;
-                            m_state.readOnly = (*config)[UserConfiguration::Game_ReadOnly]();
-                        }
+                const game::browser::Browser& p = session.browser();
+                const Root* root = p.getSelectedRoot().get();
+                const UserConfiguration* config = p.getSelectedConfiguration();
+                if (root != 0 && config != 0) {
+                    Root::Actions_t as = root->getPossibleActions();
+                    if (as.contains(Root::aConfigureCharset)) {
+                        m_state.charsetAvailable = true;
+                        m_state.charsetId = (*config)[UserConfiguration::Game_Charset]();
+                    }
+                    if (as.contains(Root::aConfigureFinished)) {
+                        m_state.finishedAvailable = true;
+                        m_state.finished = (*config)[UserConfiguration::Game_Finished]();
+                    }
+                    if (as.contains(Root::aConfigureReadOnly)) {
+                        m_state.readOnlyAvailable = true;
+                        m_state.readOnly = (*config)[UserConfiguration::Game_ReadOnly]();
                     }
                 }
             }
@@ -80,25 +79,24 @@ namespace {
                 using game::config::StringOption;
                 using game::config::IntegerOption;
                 using game::config::ConfigurationOption;
-                if (game::browser::Browser* p = session.browser().get()) {
-                    if (UserConfiguration* config = p->getSelectedConfiguration()) {
-                        if (m_state.charsetAvailable) {
-                            StringOption& opt = (*config)[UserConfiguration::Game_Charset];
-                            opt.set(m_state.charsetId);
-                            opt.setSource(ConfigurationOption::Game);
-                        }
-                        if (m_state.finishedAvailable) {
-                            IntegerOption& opt = (*config)[UserConfiguration::Game_Finished];
-                            opt.set(m_state.finished);
-                            opt.setSource(ConfigurationOption::Game);
-                        }
-                        if (m_state.readOnlyAvailable) {
-                            IntegerOption& opt = (*config)[UserConfiguration::Game_ReadOnly];
-                            opt.set(m_state.readOnly);
-                            opt.setSource(ConfigurationOption::Game);
-                        }
-                        session.addTask(p->updateConfiguration(std::auto_ptr<game::browser::Task_t>(game::browser::Task_t::makeBound(&session, &game::browser::Session::finishTask))));
+                game::browser::Browser& p = session.browser();
+                if (UserConfiguration* config = p.getSelectedConfiguration()) {
+                    if (m_state.charsetAvailable) {
+                        StringOption& opt = (*config)[UserConfiguration::Game_Charset];
+                        opt.set(m_state.charsetId);
+                        opt.setSource(ConfigurationOption::Game);
                     }
+                    if (m_state.finishedAvailable) {
+                        IntegerOption& opt = (*config)[UserConfiguration::Game_Finished];
+                        opt.set(m_state.finished);
+                        opt.setSource(ConfigurationOption::Game);
+                    }
+                    if (m_state.readOnlyAvailable) {
+                        IntegerOption& opt = (*config)[UserConfiguration::Game_ReadOnly];
+                        opt.set(m_state.readOnly);
+                        opt.setSource(ConfigurationOption::Game);
+                    }
+                    session.addTask(p.updateConfiguration(std::auto_ptr<game::browser::Task_t>(game::browser::Task_t::makeBound(&session, &game::browser::Session::finishTask))));
                 }
             }
      private:
