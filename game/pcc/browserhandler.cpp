@@ -1,33 +1,20 @@
 /**
   *  \file game/pcc/browserhandler.cpp
+  *  \brief Class game::pcc::BrowserHandler
   */
 
 #include "game/pcc/browserhandler.hpp"
-#include "afl/charset/codepage.hpp"
-#include "afl/charset/codepagecharset.hpp"
 #include "afl/data/defaultvaluefactory.hpp"
 #include "afl/data/segment.hpp"
-#include "afl/except/fileproblemexception.hpp"
 #include "afl/io/constmemorystream.hpp"
-#include "afl/io/directoryentry.hpp"
-#include "afl/io/internalstream.hpp"
 #include "afl/io/json/parser.hpp"
-#include "afl/io/multidirectory.hpp"
-#include "afl/io/nullfilesystem.hpp"
 #include "afl/net/http/simpledownloadlistener.hpp"
 #include "afl/net/parameterencoder.hpp"
 #include "afl/string/format.hpp"
-#include "afl/string/messages.hpp"
-#include "afl/string/posixfilenames.hpp"
 #include "game/browser/account.hpp"
 #include "game/browser/usercallback.hpp"
 #include "game/pcc/accountfolder.hpp"
-#include "game/pcc/gamefolder.hpp"
-#include "game/pcc/serverdirectory.hpp"
-#include "game/v3/registrationkey.hpp"
 #include "game/v3/rootloader.hpp"
-#include "game/v3/specificationloader.hpp"
-#include "game/v3/stringverifier.hpp"
 
 namespace {
     const char LOG_NAME[] = "game.pcc";
@@ -37,7 +24,7 @@ namespace {
 
     String_t buildUrl(const game::browser::Account& acc)
     {
-        String_t url = acc.get("url", "http://" + acc.get("host", "planetscentral.com") + "/api/");
+        String_t url = acc.get("url", "https://" + acc.get("host", "planetscentral.com") + "/api/");
         if (url.empty() || url[url.size()-1] != '/') {
             url += '/';
         }
@@ -56,8 +43,6 @@ game::pcc::BrowserHandler::BrowserHandler(game::browser::Browser& b,
                                           util::ProfileDirectory& profile)
     : m_browser(b),
       m_manager(mgr),
-      m_defaultSpecificationDirectory(defaultSpecificationDirectory),
-      m_profile(profile),
       m_nullFS(),
       m_v3Loader(defaultSpecificationDirectory, &profile, b.translator(), b.log(), m_nullFS),
       m_gameList(),
@@ -68,7 +53,7 @@ game::pcc::BrowserHandler::BrowserHandler(game::browser::Browser& b,
 bool
 game::pcc::BrowserHandler::handleFolderName(String_t /*name*/, afl::container::PtrVector<game::browser::Folder>& /*result*/)
 {
-    // FIXME: do we need this? When given a virtual folder name, construct matching path.
+    // TODO: if we have some URL scheme to invoke a PCC game, build the appropriate path.
     return false;
 }
 
@@ -85,41 +70,71 @@ game::pcc::BrowserHandler::createAccountFolder(game::browser::Account& acc)
 std::auto_ptr<game::browser::Task_t>
 game::pcc::BrowserHandler::loadGameRootMaybe(afl::base::Ref<afl::io::Directory> /*dir*/, const game::config::UserConfiguration& /*config*/, std::auto_ptr<game::browser::LoadGameRootTask_t>& /*then*/)
 {
-    // FIXME: If this folder is linked with a server game, load that.
+    // TODO: if this is the local directory for a server game, load that.
+    // (For now, we have no local directories.)
     return std::auto_ptr<game::browser::Task_t>();
 }
 
-bool
-game::pcc::BrowserHandler::login(game::browser::Account& acc)
+std::auto_ptr<game::pcc::BrowserHandler::Task_t>
+game::pcc::BrowserHandler::login(game::browser::Account& acc, std::auto_ptr<Task_t> then)
 {
-    // Ask for password
-    afl::data::Segment answer;
-    std::vector<game::browser::UserCallback::Element> vec(1);
-    vec[0].type = game::browser::UserCallback::AskPassword;
-    vec[0].prompt = Format(translator().translateString("Password for %s").c_str(), acc.getName());
-    if (!m_browser.callback().askInput(Format/*<-FIXME?*/("planetscentral.com"), vec, answer)) {
-        return false;
-    }
+    class Task : public Task_t {
+     public:
+        Task(BrowserHandler& parent, game::browser::Account& acc, std::auto_ptr<Task_t>& then)
+            : m_parent(parent),
+              m_account(acc),
+              m_then(then)
+            { }
+        virtual void call()
+            {
+                // Already logged in?
+                if (m_account.get("api_token") != 0 && m_account.get("api_user") != 0) {
+                    m_parent.log().write(LogListener::Trace, LOG_NAME, "BrowserHandler.login: already logged in");
+                    m_then->call();
+                    return;
+                }
+                m_parent.log().write(LogListener::Trace, LOG_NAME, "BrowserHandler.login");
 
-    // Try to log in
-    afl::net::HeaderTable tab;
-    tab.set("api_user", acc.getUser());
-    tab.set("api_password", afl::data::Access(answer[0]).toString());
-    tab.set("action", "whoami");
-    std::auto_ptr<afl::data::Value> result(callServer(acc, "user", tab));
-    if (result.get() == 0) {
-        log().write(LogListener::Error, LOG_NAME, translator().translateString("Login failed"));
-        return false;
-    }
+                // Ask for password
+                afl::data::Segment answer;
+                std::vector<game::browser::UserCallback::Element> vec(1);
+                vec[0].type = game::browser::UserCallback::AskPassword;
+                vec[0].prompt = Format(m_parent.translator()("Password for %s"), m_account.getName());
+                if (!m_parent.m_browser.callback().askInput("planetscentral.com", vec, answer)) {
+                    m_parent.log().write(LogListener::Error, LOG_NAME, m_parent.translator()("Login canceled"));
+                    m_then->call();
+                    return;
+                }
 
-    afl::data::Access parsedResult(result);
-    if (!parsedResult("result").toInteger()) {
-        log().write(LogListener::Error, LOG_NAME, translator().translateString("Login did not succeed; wrong password?"));
-        return false;
-    }
-    acc.setEncoded("api_token", parsedResult("api_token").toString(), false);
-    acc.setEncoded("api_user",  parsedResult("username").toString(), false);
-    return true;
+                // Try to log in
+                afl::net::HeaderTable tab;
+                tab.set("api_user", m_account.getUser());
+                tab.set("api_password", afl::data::Access(answer[0]).toString());
+                tab.set("action", "whoami");
+                std::auto_ptr<afl::data::Value> result(m_parent.callServer(m_account, "user", tab));
+                if (result.get() == 0) {
+                    m_parent.log().write(LogListener::Error, LOG_NAME, m_parent.translator()("Login failed"));
+                    m_then->call();
+                    return;
+                }
+
+                afl::data::Access parsedResult(result);
+                if (!parsedResult("result").toInteger()) {
+                    m_parent.log().write(LogListener::Error, LOG_NAME, m_parent.translator()("Login did not succeed; wrong password?"));
+                    m_then->call();
+                    return;
+                }
+
+                m_account.setEncoded("api_token", parsedResult("api_token").toString(), false);
+                m_account.setEncoded("api_user",  parsedResult("username").toString(), false);
+                m_then->call();
+            }
+     private:
+        BrowserHandler& m_parent;
+        game::browser::Account& m_account;
+        std::auto_ptr<Task_t> m_then;
+    };
+    return std::auto_ptr<Task_t>(new Task(*this, acc, then));
 }
 
 std::auto_ptr<afl::data::Value>
@@ -134,10 +149,10 @@ game::pcc::BrowserHandler::callServer(game::browser::Account& acc,
 
     afl::net::Url parsedUrl;
     if (!parsedUrl.parse(url)) {
-        log().write(LogListener::Error, LOG_NAME, Format(translator().translateString("Malformed URL \"%s\"").c_str(), url));
+        log().write(LogListener::Error, LOG_NAME, Format(translator()("Malformed URL \"%s\""), url));
         return std::auto_ptr<afl::data::Value>();
     }
-    log().write(LogListener::Trace, LOG_NAME, Format(translator().translateString("Calling \"%s\"").c_str(), url));
+    log().write(LogListener::Trace, LOG_NAME, Format(translator()("Calling \"%s\""), url));
 
     // Build query
     String_t query;
@@ -151,13 +166,13 @@ game::pcc::BrowserHandler::callServer(game::browser::Account& acc,
      case afl::net::http::SimpleDownloadListener::Succeeded:
         break;
      case afl::net::http::SimpleDownloadListener::Failed:
-        log().write(LogListener::Error, LOG_NAME, Format(translator().translateString("%s: network access failed").c_str(), url));
+        log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: network access failed"), url));
         return std::auto_ptr<afl::data::Value>();
      case afl::net::http::SimpleDownloadListener::TimedOut:
-        log().write(LogListener::Error, LOG_NAME, Format(translator().translateString("%s: network access timed out").c_str(), url));
+        log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: network access timed out"), url));
         return std::auto_ptr<afl::data::Value>();
      case afl::net::http::SimpleDownloadListener::LimitExceeded:
-        log().write(LogListener::Error, LOG_NAME, Format(translator().translateString("%s: network access exceeded limit").c_str(), url));
+        log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: network access exceeded limit"), url));
         return std::auto_ptr<afl::data::Value>();
     }
 
@@ -169,8 +184,8 @@ game::pcc::BrowserHandler::callServer(game::browser::Account& acc,
         return std::auto_ptr<afl::data::Value>(afl::io::json::Parser(buf, factory).parseComplete());
     }
     catch (std::exception& e) {
-        log().write(LogListener::Error, LOG_NAME, Format(translator().translateString("%s: received invalid data from network").c_str(), url));
-        log().write(LogListener::Info,  LOG_NAME, translator().translateString("Parse error"), e);
+        log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: received invalid data from network"), url));
+        log().write(LogListener::Info,  LOG_NAME, translator()("Parse error"), e);
 
         // Log failing fragment
         afl::io::Stream::FileSize_t pos = buf.getPos();
@@ -182,27 +197,24 @@ game::pcc::BrowserHandler::callServer(game::browser::Account& acc,
         afl::base::Bytes_t bytes(tmp);
         bytes.trim(buf.read(bytes));
 
-        log().write(LogListener::Trace, LOG_NAME, Format(translator().translateString("at byte %d, \"%s\"").c_str(), pos, afl::string::fromBytes(bytes)));
+        log().write(LogListener::Trace, LOG_NAME, Format(translator()("at byte %d, \"%s\""), pos, afl::string::fromBytes(bytes)));
         return std::auto_ptr<afl::data::Value>();
     }
 }
 
 afl::data::Access
-game::pcc::BrowserHandler::getGameList(game::browser::Account& acc)
+game::pcc::BrowserHandler::getGameListPreAuthenticated(game::browser::Account& acc)
 {
     // Cached?
-    if (m_gameList.get() != 0 && m_gameListAccount == buildUrl(acc)) {
+    if (m_gameList.get() != 0 && m_gameListAccount == &acc) {
         return m_gameList;
     }
 
     m_gameList.reset();
-    m_gameListAccount = buildUrl(acc);
+    m_gameListAccount = &acc;
 
     String_t token;
     String_t user;
-    if (!acc.getEncoded("api_token", token) || !acc.getEncoded("api_user", user)) {
-        login(acc);
-    }
     if (acc.getEncoded("api_token", token) && acc.getEncoded("api_user", user)) {
         afl::net::HeaderTable tab;
         tab.set("api_token", token);
@@ -214,19 +226,14 @@ game::pcc::BrowserHandler::getGameList(game::browser::Account& acc)
 }
 
 std::auto_ptr<afl::data::Value>
-game::pcc::BrowserHandler::getDirectoryContent(game::browser::Account& acc, String_t name)
+game::pcc::BrowserHandler::getDirectoryContentPreAuthenticated(game::browser::Account& acc, String_t dirName)
 {
     String_t token;
-    String_t user;
-    if (!acc.getEncoded("api_token", token) || !acc.getEncoded("api_user", user)) {
-        login(acc);
-    }
-
     std::auto_ptr<afl::data::Value> result;
-    if (acc.getEncoded("api_token", token) && acc.getEncoded("api_user", user)) {
+    if (acc.getEncoded("api_token", token)) {
         afl::net::HeaderTable tab;
         tab.set("api_token", token);
-        tab.set("dir", name);
+        tab.set("dir", dirName);
         tab.set("action", "ls");
         result = callServer(acc, "file", tab);
     }
@@ -234,22 +241,19 @@ game::pcc::BrowserHandler::getDirectoryContent(game::browser::Account& acc, Stri
 }
 
 void
-game::pcc::BrowserHandler::getFile(game::browser::Account& acc, String_t name, afl::net::http::DownloadListener& listener)
+game::pcc::BrowserHandler::getFilePreAuthenticated(game::browser::Account& acc, String_t fileName, afl::net::http::DownloadListener& listener)
 {
     // Build URL to download
     afl::net::Url mainUrl;
     afl::net::Url fileUrl;
-    if (!mainUrl.parse(buildUrl(acc)) || !fileUrl.parse(name)) {
-        listener.handleFailure(afl::net::http::ClientRequest::UnsupportedProtocol, translator().translateString("Invalid URL"));
+    if (!mainUrl.parse(buildUrl(acc)) || !fileUrl.parse(fileName)) {
+        listener.handleFailure(afl::net::http::ClientRequest::UnsupportedProtocol, translator()("Invalid URL"));
         return;
     }
     fileUrl.mergeFrom(mainUrl);
-    log().write(LogListener::Trace, LOG_NAME, Format(translator().translateString("Downloading \"%s\"").c_str(), fileUrl.toString()));
+    log().write(LogListener::Trace, LOG_NAME, Format(translator()("Downloading \"%s\""), fileUrl.toString()));
 
     String_t token;
-    if (!acc.getEncoded("api_token", token)) {
-        login(acc);
-    }
     if (acc.getEncoded("api_token", token)) {
         // Attach token to URL
         String_t filePath(fileUrl.getPath());
@@ -259,7 +263,8 @@ game::pcc::BrowserHandler::getFile(game::browser::Account& acc, String_t name, a
         // Download the file
         m_manager.getFile(fileUrl, listener);
     } else {
-        listener.handleFailure(afl::net::http::ClientRequest::ServerError, translator().translateString("Not logged in"));
+        // Immediately fail non-logged-in request
+        listener.handleFailure(afl::net::http::ClientRequest::ServerError, translator()("Not logged in"));
     }
 }
 
@@ -273,18 +278,6 @@ afl::sys::LogListener&
 game::pcc::BrowserHandler::log()
 {
     return m_browser.log();
-}
-
-afl::base::Ref<afl::io::Directory>
-game::pcc::BrowserHandler::getDefaultSpecificationDirectory()
-{
-    return m_defaultSpecificationDirectory;
-}
-
-util::ProfileDirectory&
-game::pcc::BrowserHandler::profile()
-{
-    return m_profile;
 }
 
 game::v3::RootLoader&

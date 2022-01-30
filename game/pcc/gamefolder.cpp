@@ -1,14 +1,16 @@
 /**
   *  \file game/pcc/gamefolder.cpp
+  *  \brief Class game::pcc::GameFolder
   */
 
 #include "game/pcc/gamefolder.hpp"
+#include "afl/charset/codepage.hpp"
+#include "afl/charset/codepagecharset.hpp"
 #include "game/pcc/browserhandler.hpp"
 #include "game/pcc/serverdirectory.hpp"
-#include "afl/charset/codepagecharset.hpp"
-#include "afl/charset/codepage.hpp"
 
 using afl::sys::LogListener;
+using game::browser::Task_t;
 
 namespace {
     const char*const LOG_NAME = "game.pcc";
@@ -50,7 +52,7 @@ game::pcc::GameFolder::setLocalDirectoryName(String_t /*directoryName*/)
 std::auto_ptr<game::browser::Task_t>
 game::pcc::GameFolder::loadGameRoot(const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t> then)
 {
-    class Task : public game::browser::Task_t {
+    class Task : public Task_t {
      public:
         Task(String_t pathName, BrowserHandler& handler, game::browser::Account& account, const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t>& then)
             : m_pathName(pathName), m_handler(handler), m_account(account), m_config(config), m_then(then)
@@ -78,7 +80,9 @@ game::pcc::GameFolder::loadGameRoot(const game::config::UserConfiguration& confi
         const game::config::UserConfiguration& m_config;
         std::auto_ptr<game::browser::LoadGameRootTask_t> m_then;
     };
-    return std::auto_ptr<game::browser::Task_t>(new Task(m_path, m_handler, m_account, config, then));
+
+    // Log in, then build the root.
+    return m_handler.login(m_account, std::auto_ptr<Task_t>(new Task(m_path, m_handler, m_account, config, then)));
 }
 
 String_t
@@ -96,7 +100,7 @@ game::pcc::GameFolder::getName() const
 util::rich::Text
 game::pcc::GameFolder::getDescription() const
 {
-    return m_handler.translator().translateString("Server-side game directory");
+    return m_handler.translator()("Server-side game directory");
 }
 
 bool
@@ -123,7 +127,7 @@ game::pcc::GameFolder::getKind() const
 afl::data::Access
 game::pcc::GameFolder::getGameListEntry() const
 {
-    afl::data::Access a = m_handler.getGameList(m_account);
+    afl::data::Access a = m_handler.getGameListPreAuthenticated(m_account);
 
     // Try the hint
     {

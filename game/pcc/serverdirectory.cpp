@@ -1,5 +1,6 @@
 /**
   *  \file game/pcc/serverdirectory.cpp
+  *  \brief Class game::pcc::ServerDirectory
   */
 
 #include "game/pcc/serverdirectory.hpp"
@@ -8,10 +9,10 @@
 #include "afl/io/internalstream.hpp"
 #include "afl/net/http/downloadlistener.hpp"
 #include "afl/net/http/simpledownloadlistener.hpp"
+#include "afl/string/format.hpp"
 #include "afl/string/messages.hpp"
 #include "afl/string/posixfilenames.hpp"
 #include "game/pcc/browserhandler.hpp"
-#include "afl/string/format.hpp"
 
 /*
  *  DirectoryEntry implementation
@@ -65,7 +66,7 @@ class game::pcc::ServerDirectory::Entry : public afl::io::DirectoryEntry {
 
             // Download the file
             afl::net::http::SimpleDownloadListener listener;
-            m_container->m_handler.getFile(m_container->m_account, m_url, listener);
+            m_container->m_handler.getFilePreAuthenticated(m_container->m_account, m_url, listener);
 
             switch (listener.wait()) {
              case afl::net::http::SimpleDownloadListener::Succeeded:
@@ -219,7 +220,7 @@ game::pcc::ServerDirectory::load()
     m_loaded = true;
     m_entries = new ContentVector_t();
 
-    std::auto_ptr<afl::data::Value> content(m_handler.getDirectoryContent(m_account, m_name));
+    std::auto_ptr<afl::data::Value> content(m_handler.getDirectoryContentPreAuthenticated(m_account, m_name));
     afl::data::Access a(content);
     if (a("result").toInteger()) {
         for (size_t i = 0, n = a("reply").getArraySize(); i < n; ++i) {
@@ -230,7 +231,7 @@ game::pcc::ServerDirectory::load()
         if (error.empty()) {
             throw afl::except::FileProblemException(m_name, afl::string::Messages::networkError());
         } else {
-            throw afl::except::FileProblemException(m_name, afl::string::Format(m_handler.translator().translateString("The server reported an error: %s").c_str(), error));
+            throw afl::except::FileProblemException(m_name, afl::string::Format(m_handler.translator()("The server reported an error: %s").c_str(), error));
         }
     }
 }

@@ -1,5 +1,6 @@
 /**
   *  \file game/pcc/accountfolder.cpp
+  *  \brief Class game::pcc::AccountFolder
   */
 
 #include "game/pcc/accountfolder.hpp"
@@ -13,25 +14,43 @@ namespace {
     };
 }
 
-
 game::pcc::AccountFolder::AccountFolder(BrowserHandler& handler, game::browser::Account& acc)
     : m_handler(handler),
       m_account(acc)
 { }
 
-void
-game::pcc::AccountFolder::loadContent(afl::container::PtrVector<Folder>& result)
+std::auto_ptr<game::browser::Task_t>
+game::pcc::AccountFolder::loadContent(std::auto_ptr<game::browser::LoadContentTask_t> then)
 {
-    afl::data::Access p = m_handler.getGameList(m_account)("reply");
-    for (size_t i = 0, n = p.getArraySize(); i < n; ++i) {
-        result.pushBackNew(new GameFolder(m_handler, m_account, p[i]("path").toString(), i));
-    }
-    result.sort(SortByName());
+    // Load after logging in.
+    // login() is mandatory here, this is usually the first call for an account.
+    class Task : public game::browser::Task_t {
+     public:
+        Task(BrowserHandler& handler, game::browser::Account& account, std::auto_ptr<game::browser::LoadContentTask_t>& then)
+            : m_handler(handler), m_account(account), m_then(then)
+            { }
+        virtual void call()
+            {
+                afl::container::PtrVector<Folder> result;
+                afl::data::Access p = m_handler.getGameListPreAuthenticated(m_account)("reply");
+                for (size_t i = 0, n = p.getArraySize(); i < n; ++i) {
+                    result.pushBackNew(new GameFolder(m_handler, m_account, p[i]("path").toString(), i));
+                }
+                result.sort(SortByName());
+                m_then->call(result);
+            }
+     private:
+        BrowserHandler& m_handler;
+        game::browser::Account& m_account;
+        std::auto_ptr<game::browser::LoadContentTask_t> m_then;
+    };
+    return m_handler.login(m_account, std::auto_ptr<game::browser::Task_t>(new Task(m_handler, m_account, then)));
 }
 
 bool
 game::pcc::AccountFolder::loadConfiguration(game::config::UserConfiguration& /*config*/)
 {
+    // No game in this folder
     return false;
 }
 
@@ -42,12 +61,14 @@ game::pcc::AccountFolder::saveConfiguration(const game::config::UserConfiguratio
 bool
 game::pcc::AccountFolder::setLocalDirectoryName(String_t /*directoryName*/)
 {
+    // No game in this folder
     return false;
 }
 
 std::auto_ptr<game::browser::Task_t>
 game::pcc::AccountFolder::loadGameRoot(const game::config::UserConfiguration& /*config*/, std::auto_ptr<game::browser::LoadGameRootTask_t> then)
 {
+    // No game in this folder
     return defaultLoadGameRoot(then);
 }
 
@@ -60,7 +81,7 @@ game::pcc::AccountFolder::getName() const
 util::rich::Text
 game::pcc::AccountFolder::getDescription() const
 {
-    return m_handler.translator().translateString("planetscentral.com account");
+    return m_handler.translator()("planetscentral.com account");
 }
 
 bool
