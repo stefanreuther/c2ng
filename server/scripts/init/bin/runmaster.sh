@@ -182,5 +182,13 @@ else
   "$game_master_path/$game_master_program" $game_master_options "$gamedir/data" "$game_master_path" || exit 1
 fi
 
+# In case master didn't generate grey.hst, do so. PHost for x64 will crash if we don't.
+grey="$gamedir/data/grey.hst"
+if ! test -f "$grey"; then
+  echo "Creating grey.hst..." >>$logfile
+  dd if=/dev/zero bs=1822 count=1 of="$grey"
+fi
+
 # No post-master backup; that would be the the same as the next pre-host backup
 exit 0
+
