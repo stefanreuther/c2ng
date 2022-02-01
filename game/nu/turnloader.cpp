@@ -204,7 +204,7 @@ game::TurnLoader::PlayerStatusSet_t
 game::nu::TurnLoader::getPlayerStatus(int player, String_t& extra, afl::string::Translator& tx) const
 {
     PlayerStatusSet_t result;
-    afl::data::Access entry = m_gameState->loadGameListEntry();
+    afl::data::Access entry = m_gameState->loadGameListEntryPreAuthenticated();
     if (player == entry("player")("id").toInteger()) {
         result += Available;
         result += Playable;
@@ -232,7 +232,7 @@ game::nu::TurnLoader::loadCurrentTurn(Turn& turn, Game& game, int player, Root& 
     // FIXME: validate player
 
     // Load result
-    afl::data::Access rst(m_gameState->loadResult());
+    afl::data::Access rst(m_gameState->loadResultPreAuthenticated());
     if (rst.isNull() || rst("success").toInteger() == 0) {
         throw std::runtime_error(m_translator.translateString("Unable to download result file"));
     }
@@ -311,7 +311,7 @@ game::nu::TurnLoader::getHistoryStatus(int /*player*/, int turn, afl::base::Memo
      */
 
     // Fetch the result. This should not produce a network access, we already have it.
-    afl::data::Access rst(m_gameState->loadResult());
+    afl::data::Access rst(m_gameState->loadResultPreAuthenticated());
     if (rst.isNull() || rst("success").toInteger() == 0) {
         // Bad result
         status.fill(Negative);

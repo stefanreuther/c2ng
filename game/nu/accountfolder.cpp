@@ -1,5 +1,6 @@
 /**
   *  \file game/nu/accountfolder.cpp
+  *  \brief Class game::nu::AccountFolder
   */
 
 #include "game/nu/accountfolder.hpp"
@@ -11,18 +12,35 @@ game::nu::AccountFolder::AccountFolder(BrowserHandler& handler, game::browser::A
       m_account(acc)
 { }
 
-void
-game::nu::AccountFolder::loadContent(afl::container::PtrVector<Folder>& result)
+std::auto_ptr<game::browser::Task_t>
+game::nu::AccountFolder::loadContent(std::auto_ptr<game::browser::LoadContentTask_t> then)
 {
-    afl::data::Access parsedResult = m_handler.getGameList(m_account);
-    for (size_t i = 0, n = parsedResult("games").getArraySize(); i < n; ++i) {
-        result.pushBackNew(new GameFolder(m_handler, m_account, parsedResult("games")[i]("game")("id").toInteger(), 0*i));
-    }
+    class Task : public game::browser::Task_t {
+     public:
+        Task(BrowserHandler& handler, game::browser::Account& acc, std::auto_ptr<game::browser::LoadContentTask_t>& then)
+            : m_handler(handler), m_account(acc), m_then(then)
+            { }
+        virtual void call()
+            {
+                afl::container::PtrVector<Folder> result;
+                afl::data::Access parsedResult = m_handler.getGameListPreAuthenticated(m_account);
+                for (size_t i = 0, n = parsedResult("games").getArraySize(); i < n; ++i) {
+                    result.pushBackNew(new GameFolder(m_handler, m_account, parsedResult("games")[i]("game")("id").toInteger(), 0*i));
+                }
+                m_then->call(result);
+            }
+     private:
+        BrowserHandler& m_handler;
+        game::browser::Account& m_account;
+        std::auto_ptr<game::browser::LoadContentTask_t> m_then;
+    };
+    return m_handler.login(m_account, std::auto_ptr<game::browser::Task_t>(new Task(m_handler, m_account, then)));
 }
 
 bool
 game::nu::AccountFolder::loadConfiguration(game::config::UserConfiguration& /*config*/)
 {
+    // No game in this folder
     return false;
 }
 
@@ -33,12 +51,14 @@ game::nu::AccountFolder::saveConfiguration(const game::config::UserConfiguration
 bool
 game::nu::AccountFolder::setLocalDirectoryName(String_t /*directoryName*/)
 {
+    // No game in this folder
     return false;
 }
 
 std::auto_ptr<game::browser::Task_t>
 game::nu::AccountFolder::loadGameRoot(const game::config::UserConfiguration& /*config*/, std::auto_ptr<game::browser::LoadGameRootTask_t> then)
 {
+    // No game in this folder
     return defaultLoadGameRoot(then);
 }
 

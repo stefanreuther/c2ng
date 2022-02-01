@@ -1,21 +1,30 @@
 /**
   *  \file game/nu/accountfolder.hpp
+  *  \brief Class game::nu::AccountFolder
   */
 #ifndef C2NG_GAME_NU_ACCOUNTFOLDER_HPP
 #define C2NG_GAME_NU_ACCOUNTFOLDER_HPP
 
-#include "game/browser/synchronousfolder.hpp"
+#include "game/browser/folder.hpp"
 #include "game/browser/account.hpp"
 
 namespace game { namespace nu {
 
     class BrowserHandler;
 
-    class AccountFolder : public game::browser::SynchronousFolder {
+    /** Account folder.
+        Displays the games in one account.
+        For now, a flat structure.
+        It would probably be possible to group by state, type, etc. */
+    class AccountFolder : public game::browser::Folder {
      public:
+        /** Constructor.
+            @param handle Parent BrowserHandler
+            @param acc    Account */
         AccountFolder(BrowserHandler& handler, game::browser::Account& acc);
 
-        virtual void loadContent(afl::container::PtrVector<Folder>& result);
+        // Folder:
+        virtual std::auto_ptr<game::browser::Task_t> loadContent(std::auto_ptr<game::browser::LoadContentTask_t> then);
         virtual bool loadConfiguration(game::config::UserConfiguration& config);
         virtual void saveConfiguration(const game::config::UserConfiguration& config);
         virtual bool setLocalDirectoryName(String_t directoryName);

@@ -1,5 +1,6 @@
 /**
   *  \file game/nu/gamefolder.hpp
+  *  \brief Class game::nu::GameFolder
   */
 #ifndef C2NG_GAME_NU_GAMEFOLDER_HPP
 #define C2NG_GAME_NU_GAMEFOLDER_HPP

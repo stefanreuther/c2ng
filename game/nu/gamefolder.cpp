@@ -1,22 +1,26 @@
 /**
   *  \file game/nu/gamefolder.cpp
+  *  \brief Class game::nu::GameFolder
   */
 
 #include "game/nu/gamefolder.hpp"
-#include "afl/string/format.hpp"
-#include "game/nu/browserhandler.hpp"
+#include "afl/charset/utf8charset.hpp"
 #include "afl/io/internaldirectory.hpp"
-#include "game/nu/specificationloader.hpp"
-#include "game/nu/gamestate.hpp"
+#include "afl/string/format.hpp"
 #include "game/hostversion.hpp"
+#include "game/nu/browserhandler.hpp"
+#include "game/nu/gamestate.hpp"
 #include "game/nu/registrationkey.hpp"
+#include "game/nu/specificationloader.hpp"
 #include "game/nu/stringverifier.hpp"
 #include "game/nu/turnloader.hpp"
-#include "afl/charset/utf8charset.hpp"
 #include "util/translation.hpp"
 
 using afl::string::Format;
 using afl::sys::LogListener;
+using game::browser::Browser;
+using game::config::ConfigurationOption;
+using game::config::UserConfiguration;
 
 namespace {
     const char* LOG_NAME = "game.nu";
@@ -51,30 +55,28 @@ game::nu::GameFolder::loadContent(afl::container::PtrVector<Folder>& /*result*/)
 bool
 game::nu::GameFolder::loadConfiguration(game::config::UserConfiguration& config)
 {
-    using game::config::UserConfiguration;
     if (const String_t* pFolderName = getGameFolderName()) {
-        game::browser::Browser& b = m_handler.browser();
+        Browser& b = m_handler.browser();
         config.loadGameConfiguration(*b.fileSystem().openDirectory(b.expandGameDirectoryName(*pFolderName)), b.log(), b.translator());
     }
     config[UserConfiguration::Game_Type].set(m_account.getType());
-    config[UserConfiguration::Game_Type].setSource(game::config::ConfigurationOption::Game);
+    config[UserConfiguration::Game_Type].setSource(ConfigurationOption::Game);
     config[UserConfiguration::Game_User].set(m_account.getUser());
-    config[UserConfiguration::Game_User].setSource(game::config::ConfigurationOption::Game);
+    config[UserConfiguration::Game_User].setSource(ConfigurationOption::Game);
     config[UserConfiguration::Game_Host].set(m_account.getHost());
-    config[UserConfiguration::Game_Host].setSource(game::config::ConfigurationOption::Game);
+    config[UserConfiguration::Game_Host].setSource(ConfigurationOption::Game);
     config[UserConfiguration::Game_Id].set(getGameIdAsString());
-    config[UserConfiguration::Game_Id].setSource(game::config::ConfigurationOption::Game);
-    config[UserConfiguration::Game_Finished].set(m_state->loadGameListEntry()("game")("status").toInteger() == 3);
-    config[UserConfiguration::Game_Finished].setSource(game::config::ConfigurationOption::Game);
+    config[UserConfiguration::Game_Id].setSource(ConfigurationOption::Game);
+    config[UserConfiguration::Game_Finished].set(m_state->loadGameListEntryPreAuthenticated()("game")("status").toInteger() == 3);
+    config[UserConfiguration::Game_Finished].setSource(ConfigurationOption::Game);
     return true;
 }
 
 void
 game::nu::GameFolder::saveConfiguration(const game::config::UserConfiguration& config)
 {
-    using game::config::UserConfiguration;
     if (const String_t* pFolderName = getGameFolderName()) {
-        game::browser::Browser& b = m_handler.browser();
+        Browser& b = m_handler.browser();
         config.saveGameConfiguration(*b.fileSystem().openDirectory(b.expandGameDirectoryName(*pFolderName)), b.log(), b.translator());
     }
 }
@@ -92,7 +94,7 @@ game::nu::GameFolder::loadGameRoot(const game::config::UserConfiguration& config
     class Task : public game::browser::Task_t {
      public:
         Task(BrowserHandler& handler, game::browser::Account& account, int32_t gameNr, afl::base::Ref<GameState> state,
-             const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t>& then)
+             const UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t>& then)
             : m_handler(handler), m_account(account), m_gameNr(gameNr), m_state(state), m_config(config), m_then(then)
             { }
         virtual void call()
@@ -101,7 +103,7 @@ game::nu::GameFolder::loadGameRoot(const game::config::UserConfiguration& config
                 afl::base::Ptr<Root> result;
                 try {
                     // Current data
-                    afl::data::Access a = m_state->loadGameListEntry();
+                    afl::data::Access a = m_state->loadGameListEntryPreAuthenticated();
 
                     // Actions
                     Root::Actions_t actions;
@@ -180,23 +182,23 @@ game::nu::GameFolder::loadGameRoot(const game::config::UserConfiguration& config
         game::browser::Account& m_account;
         int32_t m_gameNr;
         afl::base::Ref<GameState> m_state;
-        const game::config::UserConfiguration& m_config;
+        const UserConfiguration& m_config;
         std::auto_ptr<game::browser::LoadGameRootTask_t> m_then;
     };
-    return std::auto_ptr<game::browser::Task_t>(new Task(m_handler, m_account, m_gameNr, m_state, config, then));
+    return m_handler.login(m_account, std::auto_ptr<game::browser::Task_t>(new Task(m_handler, m_account, m_gameNr, m_state, config, then)));
 }
 
 String_t
 game::nu::GameFolder::getName() const
 {
-    afl::data::Access a = m_state->loadGameListEntry();
+    afl::data::Access a = m_state->loadGameListEntryPreAuthenticated();
     return afl::string::Format("%s (%d)", a("game")("name").toString(), a("game")("id").toInteger());
 }
 
 util::rich::Text
 game::nu::GameFolder::getDescription() const
 {
-    return m_state->loadGameListEntry()("game")("description").toString();
+    return m_state->loadGameListEntryPreAuthenticated()("game")("description").toString();
 }
 
 bool

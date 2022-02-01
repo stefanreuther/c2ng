@@ -1,12 +1,13 @@
 /**
   *  \file game/nu/gamestate.cpp
+  *  \brief Class game::nu::GameState
   */
 
 #include "game/nu/gamestate.hpp"
-#include "afl/net/headertable.hpp"
-#include "game/nu/browserhandler.hpp"
-#include "afl/string/format.hpp"
 #include "afl/base/countof.hpp"
+#include "afl/net/headertable.hpp"
+#include "afl/string/format.hpp"
+#include "game/nu/browserhandler.hpp"
 
 namespace {
     // Race names. Nu has these built-in to its JavaScript.
@@ -41,11 +42,11 @@ game::nu::GameState::~GameState()
 { }
 
 afl::data::Access
-game::nu::GameState::loadResult()
+game::nu::GameState::loadResultPreAuthenticated()
 {
     if (!m_resultValid) {
         // Try to load the result
-        if (const String_t* key = m_account.get("apikey")) {
+        if (const String_t* key = m_account.get("api_key")) {
             afl::net::HeaderTable tab;
             tab.add("gameid", afl::string::Format("%d", m_gameNr));
             tab.add("apikey", *key);
@@ -62,9 +63,9 @@ game::nu::GameState::loadResult()
 }
 
 afl::data::Access
-game::nu::GameState::loadGameListEntry()
+game::nu::GameState::loadGameListEntryPreAuthenticated()
 {
-    afl::data::Access a = m_handler.getGameList(m_account);
+    afl::data::Access a = m_handler.getGameListPreAuthenticated(m_account);
 
     // Try the hint
     {
@@ -91,7 +92,6 @@ game::nu::GameState::invalidateResult()
     m_resultValid = false;
     m_result.reset();
 }
-
 
 bool
 game::nu::GameState::setRaceName(Player& pl, int race)

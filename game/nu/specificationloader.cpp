@@ -82,7 +82,7 @@ game::nu::SpecificationLoader::~SpecificationLoader()
 void
 game::nu::SpecificationLoader::loadShipList(game::spec::ShipList& list, Root& root)
 {
-    afl::data::Access rst(m_gameState->loadResult());
+    afl::data::Access rst(m_gameState->loadResultPreAuthenticated());
 
     loadRaceNames(root, rst("rst")("players"), rst("rst")("races"));
 
