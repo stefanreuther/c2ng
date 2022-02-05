@@ -12,101 +12,11 @@
 #include "util/charsetfactory.hpp"
 
 namespace {
-    struct State {
-        bool charsetAvailable;
-        String_t charsetId;
-
-        bool finishedAvailable;
-        bool finished;
-
-        bool readOnlyAvailable;
-        bool readOnly;
-
-        State()
-            : charsetAvailable(false), charsetId(),
-              finishedAvailable(false), finished(false),
-              readOnlyAvailable(false), readOnly(false)
-            { }
-    };
-
-    /*
-     *  InitializeRequest: initialize a State from the current configuration
-     */
-    class InitializeRequest : public util::Request<game::browser::Session> {
-     public:
-        InitializeRequest(State& st)
-            : m_state(st)
-            { }
-        virtual void handle(game::browser::Session& session)
-            {
-                using game::Root;
-                using game::config::UserConfiguration;
-                const game::browser::Browser& p = session.browser();
-                const Root* root = p.getSelectedRoot().get();
-                const UserConfiguration* config = p.getSelectedConfiguration();
-                if (root != 0 && config != 0) {
-                    Root::Actions_t as = root->getPossibleActions();
-                    if (as.contains(Root::aConfigureCharset)) {
-                        m_state.charsetAvailable = true;
-                        m_state.charsetId = (*config)[UserConfiguration::Game_Charset]();
-                    }
-                    if (as.contains(Root::aConfigureFinished)) {
-                        m_state.finishedAvailable = true;
-                        m_state.finished = (*config)[UserConfiguration::Game_Finished]();
-                    }
-                    if (as.contains(Root::aConfigureReadOnly)) {
-                        m_state.readOnlyAvailable = true;
-                        m_state.readOnly = (*config)[UserConfiguration::Game_ReadOnly]();
-                    }
-                }
-            }
-     private:
-        State& m_state;
-    };
-
-    /*
-     *  UpdateRequest: update configuration from State and write back to file
-     */
-    class UpdateRequest : public util::Request<game::browser::Session> {
-     public:
-        explicit UpdateRequest(const State& st)
-            : m_state(st)
-            { }
-        virtual void handle(game::browser::Session& session)
-            {
-                using game::Root;
-                using game::config::UserConfiguration;
-                using game::config::StringOption;
-                using game::config::IntegerOption;
-                using game::config::ConfigurationOption;
-                game::browser::Browser& p = session.browser();
-                if (UserConfiguration* config = p.getSelectedConfiguration()) {
-                    if (m_state.charsetAvailable) {
-                        StringOption& opt = (*config)[UserConfiguration::Game_Charset];
-                        opt.set(m_state.charsetId);
-                        opt.setSource(ConfigurationOption::Game);
-                    }
-                    if (m_state.finishedAvailable) {
-                        IntegerOption& opt = (*config)[UserConfiguration::Game_Finished];
-                        opt.set(m_state.finished);
-                        opt.setSource(ConfigurationOption::Game);
-                    }
-                    if (m_state.readOnlyAvailable) {
-                        IntegerOption& opt = (*config)[UserConfiguration::Game_ReadOnly];
-                        opt.set(m_state.readOnly);
-                        opt.setSource(ConfigurationOption::Game);
-                    }
-                    session.addTask(p.updateConfiguration(std::auto_ptr<game::browser::Task_t>(game::browser::Task_t::makeBound(&session, &game::browser::Session::finishTask))));
-                }
-            }
-     private:
-        const State& m_state;
-    };
-    
+    typedef game::proxy::BrowserProxy::Configuration State_t;
 
     class Dialog {
      public:
-        Dialog(ui::Root& root, State& state, afl::string::Translator& tx);
+        Dialog(ui::Root& root, State_t& state, afl::string::Translator& tx);
 
         bool run();
 
@@ -115,7 +25,7 @@ namespace {
 
      private:
         ui::Root& m_root;
-        State& m_state;
+        State_t& m_state;
         ui::widgets::OptionGrid m_grid;
         afl::string::Translator& m_translator;
     };
@@ -155,12 +65,6 @@ namespace {
         afl::string::Translator& m_translator;
     };
 
-    // /** Simple list. Displays a StringTable as a list and lets the user select an item.
-    //     \param title [in] Dialog title
-    //     \param current [in/out] Current value
-    //     \param tab [in] String table
-    //     \retval true User selected a new item; current was updated
-    //     \retval false User canceled */
     bool doList(ui::Root& root, afl::string::Translator& tx, const String_t title, int32_t& current, const afl::functional::StringTable_t& tab)
     {
         // ex client/widgets/expformat.cc:doList
@@ -176,24 +80,24 @@ namespace {
     }
 }
 
-Dialog::Dialog(ui::Root& root, State& state, afl::string::Translator& tx)
+Dialog::Dialog(ui::Root& root, State_t& state, afl::string::Translator& tx)
     : m_root(root),
       m_state(state),
       m_grid(0, 0, root),
       m_translator(tx)
 {
     // Populate the OptionGrid
-    if (m_state.charsetAvailable) {
+    if (m_state.charsetId.isValid()) {
         m_grid.addItem(ID_CHARSET, 'c', tx("Character set"))
             .addPossibleValue(tx("yes"))
             .addPossibleValue(tx("no"));
     }
-    if (m_state.finishedAvailable) {
+    if (m_state.finished.isValid()) {
         m_grid.addItem(ID_FINISHED, 'f', tx("Game is finished"))
             .addPossibleValue(tx("yes"))
             .addPossibleValue(tx("no"));
     }
-    if (m_state.readOnlyAvailable) {
+    if (m_state.readOnly.isValid()) {
         m_grid.addItem(ID_READONLY, 'r', tx("Open game read-only"))
             .addPossibleValues(CharsetNames(false, tx));
     }
@@ -211,26 +115,26 @@ void
 Dialog::updateData()
 {
     afl::string::Translator& tx = m_translator;
-    if (m_state.charsetAvailable) {
+    if (const String_t* p = m_state.charsetId.get()) {
         String_t name;
-        if (m_state.charsetId.empty()) {
+        if (p->empty()) {
             name = tx("default");
         } else {
             util::CharsetFactory::Index_t index;
             util::CharsetFactory f;
-            if (f.findIndexByKey(m_state.charsetId, index)) {
+            if (f.findIndexByKey(*p, index)) {
                 name = f.getCharsetName(index, m_translator);
             } else {
-                name = m_state.charsetId;
+                name = *p;
             }
         }
         m_grid.findItem(ID_CHARSET).setValue(name);
     }
-    if (m_state.readOnlyAvailable) {
-        m_grid.findItem(ID_READONLY).setValue(m_state.readOnly ? tx("yes") : tx("no"));
+    if (const bool* p = m_state.readOnly.get()) {
+        m_grid.findItem(ID_READONLY).setValue(*p ? tx("yes") : tx("no"));
     }
-    if (m_state.finishedAvailable) {
-        m_grid.findItem(ID_FINISHED).setValue(m_state.finished ? tx("yes") : tx("no"));
+    if (const bool* p = m_state.finished.get()) {
+        m_grid.findItem(ID_FINISHED).setValue(*p ? tx("yes") : tx("no"));
     }
 }
 
@@ -242,7 +146,7 @@ Dialog::onOptionClick(int id)
         // Convert name to proper index
         using util::CharsetFactory;
         CharsetFactory::Index_t index = CharsetFactory::LATIN1_INDEX;
-        CharsetFactory().findIndexByKey(m_state.charsetId, index);
+        CharsetFactory().findIndexByKey(m_state.charsetId.orElse(""), index);
 
         // List dialog uses int32_t
         int32_t i = int32_t(index);
@@ -254,29 +158,24 @@ Dialog::onOptionClick(int id)
      }
 
      case ID_READONLY:
-        m_state.readOnly = !m_state.readOnly;
+        m_state.readOnly = !m_state.readOnly.orElse(false);
         updateData();
         break;
 
      case ID_FINISHED:
-        m_state.finished = !m_state.finished;
+        m_state.finished = !m_state.finished.orElse(false);
         updateData();
         break;
     }
 }
 
 void
-client::dialogs::doFolderConfigDialog(ui::Root& root,
-                                      util::RequestSender<game::browser::Session> sender,
-                                      afl::string::Translator& tx)
+client::dialogs::doFolderConfigDialog(ui::Root& root, game::proxy::BrowserProxy& proxy, afl::string::Translator& tx)
 {
     // Initialize
     Downlink link(root, tx);
-    State state;
-    {
-        InitializeRequest rq(state);
-        link.call(sender, rq);
-    }
+    State_t state;
+    proxy.getConfiguration(link, state);
 
     // Build dialog
     Dialog dlg(root, state, tx);
@@ -284,7 +183,6 @@ client::dialogs::doFolderConfigDialog(ui::Root& root,
     // Run and evaluate
     bool ok = dlg.run();
     if (ok) {
-        UpdateRequest rq(state);
-        link.call(sender, rq);
+        proxy.setConfiguration(link, state);
     }
 }

@@ -183,6 +183,11 @@ namespace game { namespace browser {
                     If loadChildRoot() has not yet been called successfully, null. */
         game::config::UserConfiguration* getSelectedConfiguration() const;
 
+        /** Check whether to suggest setting up a local folder.
+            Examines the folder previously loaded using loadChildRoot().
+            @return true UI should suggest configuring a local folder */
+        bool isSelectedFolderSetupSuggested() const;
+
 
         /*
          *  Tasks

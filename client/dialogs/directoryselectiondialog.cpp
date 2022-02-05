@@ -7,7 +7,6 @@
 #include "afl/string/format.hpp"
 #include "client/downlink.hpp"
 #include "client/widgets/folderlistbox.hpp"
-#include "game/browser/browser.hpp"
 #include "ui/dialogs/messagebox.hpp"
 #include "ui/layout/hbox.hpp"
 #include "ui/layout/vbox.hpp"
@@ -70,86 +69,92 @@ namespace {
         // FIXME: do something with error reports
     }
 
-    
-    class InitTask : public util::Request<game::browser::Session> {
+
+    class InitTask : public util::Request<afl::io::FileSystem> {
      public:
-        InitTask(std::auto_ptr<DirectoryBrowser>& result, String_t folderName, State& state)
+        InitTask(std::auto_ptr<DirectoryBrowser>& result, String_t folderName, afl::string::Translator& tx, State& state)
             : m_result(result),
               m_folderName(folderName),
+              m_translator(tx),
               m_state(state)
             { }
-        virtual void handle(game::browser::Session& session)
+        virtual void handle(afl::io::FileSystem& fs)
             {
-                game::browser::Browser& b = session.browser();
-                m_result.reset(new DirectoryBrowser(b.fileSystem()));
+                m_result.reset(new DirectoryBrowser(fs));
                 m_result->openDirectory(m_folderName);
                 if (m_result->getErrorText().empty()) {
                     m_result->openParent();
                 } else {
                     m_result->openRoot();
                 }
-                setState(m_state, *m_result, session.translator());
+                setState(m_state, *m_result, m_translator);
             }
      private:
         std::auto_ptr<DirectoryBrowser>& m_result;
         String_t m_folderName;
+        afl::string::Translator& m_translator;
         State& m_state;
     };
 
-    class UpTask : public util::Request<game::browser::Session> {
+    class UpTask : public util::Request<afl::io::FileSystem> {
      public:
-        UpTask(std::auto_ptr<DirectoryBrowser>& browser, size_t n, State& state)
+        UpTask(std::auto_ptr<DirectoryBrowser>& browser, size_t n, afl::string::Translator& tx, State& state)
             : m_browser(browser),
               m_count(n),
+              m_translator(tx),
               m_state(state)
             { }
-        virtual void handle(game::browser::Session& session)
+        virtual void handle(afl::io::FileSystem& /*fs*/)
             {
                 if (DirectoryBrowser* b = m_browser.get()) {
                     for (size_t i = 0; i < m_count; ++i) {
                         b->openParent();
                     }
-                    setState(m_state, *b, session.translator());
+                    setState(m_state, *b, m_translator);
                 }
             }
      private:
         std::auto_ptr<DirectoryBrowser>& m_browser;
         size_t m_count;
+        afl::string::Translator& m_translator;
         State& m_state;
     };
 
-    class DownTask : public util::Request<game::browser::Session> {
+    class DownTask : public util::Request<afl::io::FileSystem> {
      public:
-        DownTask(std::auto_ptr<DirectoryBrowser>& browser, size_t index, State& state)
+        DownTask(std::auto_ptr<DirectoryBrowser>& browser, size_t index, afl::string::Translator& tx, State& state)
             : m_browser(browser),
               m_index(index),
+              m_translator(tx),
               m_state(state)
             { }
-        virtual void handle(game::browser::Session& session)
+        virtual void handle(afl::io::FileSystem& /*fs*/)
             {
                 if (DirectoryBrowser* b = m_browser.get()) {
                     b->openChild(m_index);
-                    setState(m_state, *b, session.translator());
+                    setState(m_state, *b, m_translator);
                 }
             }
      private:
         std::auto_ptr<DirectoryBrowser>& m_browser;
         size_t m_index;
+        afl::string::Translator& m_translator;
         State& m_state;
     };
 
-    class NewTask : public util::Request<game::browser::Session> {
+    class NewTask : public util::Request<afl::io::FileSystem> {
      public:
-        NewTask(std::auto_ptr<DirectoryBrowser>& browser, String_t name, State& state)
+        NewTask(std::auto_ptr<DirectoryBrowser>& browser, String_t name, afl::string::Translator& tx, State& state)
             : m_browser(browser),
               m_name(name),
+              m_translator(tx),
               m_state(state)
             { }
-        virtual void handle(game::browser::Session& session)
+        virtual void handle(afl::io::FileSystem& /*fs*/)
             {
                 if (DirectoryBrowser* b = m_browser.get()) {
                     m_result = b->createDirectory(m_name);
-                    setState(m_state, *b, session.translator());
+                    setState(m_state, *b, m_translator);
                 }
             }
         const String_t& getResult() const
@@ -158,13 +163,14 @@ namespace {
         std::auto_ptr<DirectoryBrowser>& m_browser;
         String_t m_name;
         String_t m_result;
+        afl::string::Translator& m_translator;
         State& m_state;
     };
 
 
     class Dialog {
      public:
-        Dialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::browser::Session> session)
+        Dialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<afl::io::FileSystem> session)
             : m_root(root),
               m_translator(tx),
               m_sender(session),
@@ -182,7 +188,7 @@ namespace {
         bool init(String_t folderName)
             {
                 State state;
-                InitTask t(m_browser, folderName, state);
+                InitTask t(m_browser, folderName, m_translator, state);
                 m_link.call(m_sender, t);
                 if (m_browser.get() != 0) {
                     loadState(state);
@@ -240,7 +246,7 @@ namespace {
         void onKeyLeft()
             {
                 State state;
-                UpTask t(m_browser, 1, state);
+                UpTask t(m_browser, 1, m_translator, state);
                 m_link.call(m_sender, t);
                 loadState(state);
             }
@@ -252,7 +258,7 @@ namespace {
                     m_loop.stop(1);
                 } else {
                     State state;
-                    DownTask t(m_browser, index - m_contentOffset, state);
+                    DownTask t(m_browser, index - m_contentOffset, m_translator, state);
                     m_link.call(m_sender, t);
                     loadState(state);
                 }
@@ -266,7 +272,7 @@ namespace {
                 }
 
                 State state;
-                NewTask t(m_browser, input.getText(), state);
+                NewTask t(m_browser, input.getText(), m_translator, state);
                 m_link.call(m_sender, t);
                 if (!t.getResult().empty()) {
                     ui::dialogs::MessageBox(afl::string::Format(m_translator("Creation of directory \"%s\" failed: %s").c_str(),
@@ -284,7 +290,7 @@ namespace {
                 size_t numItems = m_crumbs.getNumItems();
                 if (n+1 < numItems) {
                     State state;
-                    UpTask t(m_browser, numItems-n-1, state);
+                    UpTask t(m_browser, numItems-n-1, m_translator, state);
                     m_link.call(m_sender, t);
                     loadState(state);
                 }
@@ -296,7 +302,7 @@ namespace {
      private:
         ui::Root& m_root;
         afl::string::Translator& m_translator;
-        util::RequestSender<game::browser::Session> m_sender;
+        util::RequestSender<afl::io::FileSystem> m_sender;
         client::Downlink m_link;
         client::widgets::FolderListbox m_list;
         ui::widgets::SimpleIconBox m_crumbs;
@@ -310,12 +316,10 @@ namespace {
     };
 }
 
-
-// FIXME: this is currently tied to the browser session due to lack of ideas how to make it more general
 bool
-client::dialogs::doDirectorySelectionDialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::browser::Session> session, String_t& folderName)
+client::dialogs::doDirectorySelectionDialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<afl::io::FileSystem> fs, String_t& folderName)
 {
-    Dialog dlg(root, tx, session);
+    Dialog dlg(root, tx, fs);
     if (!dlg.init(folderName)) {
         return false;
     }

@@ -12,7 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/browser/folder.cpp game/browser/types.hpp \
+FILES_gamelib = game/proxy/browserproxy.cpp game/proxy/browserproxy.hpp \
+    game/browser/folder.cpp game/browser/types.hpp \
     game/browser/synchronousfolder.cpp game/browser/synchronousfolder.hpp \
     version.hpp util/doc/loggingverifier.cpp util/doc/loggingverifier.hpp \
     util/doc/summarizingverifier.cpp util/doc/summarizingverifier.hpp \

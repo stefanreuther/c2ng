@@ -154,7 +154,7 @@ game::PlayerList::getFirstPlayer() const
 
 // Get next player.
 game::Player*
-game::PlayerList::getNextPlayer(Player* p) const
+game::PlayerList::getNextPlayer(const Player* p) const
 {
     return p
         ? findNextPlayer(p->getId())

@@ -39,6 +39,7 @@
 #include "client/si/inputstate.hpp"
 #include "client/si/outputstate.hpp"
 #include "client/si/userside.hpp"
+#include "client/usercallback.hpp"
 #include "game/browser/accountmanager.hpp"
 #include "game/browser/browser.hpp"
 #include "game/browser/directoryhandler.hpp"
@@ -46,6 +47,7 @@
 #include "game/interface/vmfile.hpp"
 #include "game/nu/browserhandler.hpp"
 #include "game/pcc/browserhandler.hpp"
+#include "game/proxy/browserproxy.hpp"
 #include "game/session.hpp"
 #include "game/specificationloader.hpp"
 #include "game/turn.hpp"
@@ -213,35 +215,6 @@ namespace {
         afl::base::Ref<afl::io::Directory> m_defaultSpecDirectory;
         util::ProfileDirectory& m_profile;
         afl::net::http::Manager& m_httpManager;
-    };
-
-    class BrowserPositioner : public util::Request<game::browser::Session> {
-     public:
-        BrowserPositioner(String_t path)
-            : m_path(path)
-            { }
-        void handle(game::browser::Session& session)
-            {
-                class Then : public game::browser::Task_t {
-                 public:
-                    Then(game::browser::Session& session)
-                        : m_session(session)
-                        { }
-                    virtual void call()
-                        {
-                            m_session.browser().openParent();
-                            m_session.finishTask();
-                        }
-                 private:
-                    game::browser::Session& m_session;
-                };
-
-                game::browser::Browser& b = session.browser();
-                b.openFolder(m_path);
-                session.addTask(b.loadContent(std::auto_ptr<game::browser::Task_t>(new Then(session))));
-            }
-     private:
-        String_t m_path;
     };
 
     class BrowserListener : public afl::base::Closure<void(int)> {
@@ -908,13 +881,17 @@ namespace {
                 client::si::UserSide userSide(root, gameReceiver.getSender(), translator(), root.engine().dispatcher(), collector, log());
                 registerCommands(userSide);
 
+                // Browser proxy
+                game::proxy::BrowserProxy browserProxy(browserSender, root.engine().dispatcher());
+
                 // Initialize by posting requests to the background thread.
                 // (This will not take time.)
                 gameReceiver.getSender().postNewRequest(new PluginInitializer(resourceDirectory, profile, params.getCommandLineResources()));
                 {
                     String_t initialGameDirectory;
                     if (params.getGameDirectory(initialGameDirectory)) {
-                        browserSender.postNewRequest(new BrowserPositioner(initialGameDirectory));
+                        browserProxy.openFolder(initialGameDirectory);
+                        browserProxy.openParent(1);
                     }
                 }
 
@@ -950,8 +927,11 @@ namespace {
                     root.add(docView);
 
                     // Browser
-                    client::screens::BrowserScreen browserScreen(root, translator(), browserSender, gameReceiver.getSender());
+                    client::screens::BrowserScreen browserScreen(root, translator(), browserProxy, gameReceiver.getSender());
                     browserScreen.sig_gameSelection.addNewClosure(new BrowserListener(browserScreen, browserSender, gameReceiver.getSender()));
+
+                    client::UserCallback cb(root, translator(), browserSender);
+
                     int result = browserScreen.run(docColors);
                     if (result != 0) {
                         // OK, play

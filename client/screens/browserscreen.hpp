@@ -9,6 +9,7 @@
 #include "afl/string/translator.hpp"
 #include "client/widgets/folderlistbox.hpp"
 #include "game/browser/session.hpp"
+#include "game/proxy/browserproxy.hpp"
 #include "game/session.hpp"
 #include "gfx/timer.hpp"
 #include "ui/eventloop.hpp"
@@ -22,7 +23,7 @@
 namespace client { namespace screens {
 
     /** Browser screen.
-        Operates on a game::browser::Session to select a game.
+        Operates on a game::proxy::BrowserProxy to select a game.
 
         The browser session must have been pre-initialized by the caller:
         - configure the browser instance
@@ -36,9 +37,9 @@ namespace client { namespace screens {
             Prepares a BrowserScreen.
             \param root User interface root
             \param tx Translator
-            \param sender Sender to communicate with the browser session
+            \param proxy Browser proxy for most operations
             \param gameSender Sender to communicate with the game session (required for plugins/help) */
-        BrowserScreen(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::browser::Session> sender, util::RequestSender<game::Session> gameSender);
+        BrowserScreen(ui::Root& root, afl::string::Translator& tx, game::proxy::BrowserProxy& proxy, util::RequestSender<game::Session> gameSender);
 
         /** Display this screen.
             Returns when the user cancels the dialog.
@@ -65,14 +66,6 @@ namespace client { namespace screens {
         afl::base::Signal<void(int)> sig_gameSelection;
 
      private:
-        class LoadTask;
-        class UpdateInfoTask;
-        class UpdateTask;
-        class PostLoadTask;
-        class InitTask;
-        class EnterTask;
-        class UpTask;
-
         enum State {
             Working,            // Folder list is working, info is current
             WorkingLoad,        // Folder list is working, loading info
@@ -86,7 +79,7 @@ namespace client { namespace screens {
             FolderAction,
             RootAction
         };
-        
+
         struct InfoItem {
             util::rich::Text text;
             String_t iconName;
@@ -99,6 +92,7 @@ namespace client { namespace screens {
 
         bool isUpLink(size_t index) const;
         size_t getIndex(size_t index) const;
+        game::proxy::BrowserProxy::OptionalIndex_t getEffectiveIndex(size_t index) const;
 
         void requestLoad();
 
@@ -121,16 +115,16 @@ namespace client { namespace screens {
                      ui::widgets::SimpleIconBox::Items_t& crumbs,
                      size_t index,
                      bool hasUp);
+        void onUpdate(const game::proxy::BrowserProxy::Info& info);
+        void onSelectedInfoUpdate(game::proxy::BrowserProxy::OptionalIndex_t index, const game::proxy::BrowserProxy::FolderInfo& info);
 
-        void setCurrentInfo(afl::container::PtrVector<InfoItem>& info);
-        void setChildInfo(size_t pos, afl::container::PtrVector<InfoItem>& info);
         void buildInfo();
 
         ui::Root& m_root;
         afl::string::Translator& m_translator;
-        util::RequestSender<game::browser::Session> m_sender;
         util::RequestSender<game::Session> m_gameSender;
         util::RequestReceiver<BrowserScreen> m_receiver;
+        game::proxy::BrowserProxy& m_proxy;
 
         client::widgets::FolderListbox m_list;
         ui::widgets::SimpleIconBox m_crumbs;
@@ -138,12 +132,16 @@ namespace client { namespace screens {
         ui::widgets::Button m_optionButton;
         afl::container::PtrVector<InfoItem> m_infoItems;
         size_t m_infoIndex;
+        game::Root::Actions_t m_infoActions;
         ui::EventLoop m_loop;
 
         bool m_hasUp;
         State m_state;
         bool m_blockState;
         afl::base::Ref<gfx::Timer> m_timer;
+
+        afl::base::SignalConnection conn_browserUpdate;
+        afl::base::SignalConnection conn_browserSelectedInfoUpdate;
     };
 
 } }

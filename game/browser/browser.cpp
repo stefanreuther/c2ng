@@ -237,6 +237,27 @@ game::browser::Browser::getSelectedConfiguration() const
     return m_childConfig.get();
 }
 
+bool
+game::browser::Browser::isSelectedFolderSetupSuggested() const
+{
+    /* This function is used to suggest configuring a local folder.
+       We suggest that if
+       - the game reports aLocalSetup (=a local folder can be configured)
+       - the game is not aLoadEditable (=local folder may make it editable)
+       - read-onlyness cannot be configured (=game cannot become editable by configuring away read-onlyness) */
+    using game::Root;
+    bool result = false;
+    if (m_childRoot.get() != 0 && m_childConfig.get() != 0) {
+        const Root::Actions_t as = m_childRoot->getPossibleActions();
+        if (as.contains(Root::aLocalSetup) && !as.contains(Root::aLoadEditable)) {
+            if (!as.contains(Root::aConfigureReadOnly) || !(*m_childConfig)[game::config::UserConfiguration::Game_ReadOnly]()) {
+                result = true;
+            }
+        }
+    }
+    return result;
+}
+
 std::auto_ptr<game::browser::Task_t>
 game::browser::Browser::loadContent(std::auto_ptr<Task_t> then)
 {

@@ -83,7 +83,7 @@ namespace game {
         /** Get next player.
             \param p Player to start search from
             \return first slot after the given one. Null if end of list reached. */
-        Player* getNextPlayer(Player* p) const;
+        Player* getNextPlayer(const Player* p) const;
 
         /** Get next player.
             \param id Player number to start search from
