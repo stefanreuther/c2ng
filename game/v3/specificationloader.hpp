@@ -22,7 +22,7 @@ namespace game { namespace v3 {
                             afl::string::Translator& tx,
                             afl::sys::LogListener& log);
 
-        virtual void loadShipList(game::spec::ShipList& list, game::Root& root);
+        virtual std::auto_ptr<Task_t> loadShipList(game::spec::ShipList& list, game::Root& root, std::auto_ptr<StatusTask_t> then);
 
         void loadBeams(game::spec::ShipList& list, afl::io::Directory& dir);
         void loadLaunchers(game::spec::ShipList& list, afl::io::Directory& dir);

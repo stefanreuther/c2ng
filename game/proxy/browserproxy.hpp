@@ -12,6 +12,7 @@
 #include "game/browser/browser.hpp"
 #include "game/browser/folder.hpp"
 #include "game/browser/session.hpp"
+#include "game/browser/usercallback.hpp"
 #include "game/playerarray.hpp"
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
@@ -29,6 +30,8 @@ namespace game { namespace proxy {
         - browsing
         - configuration
         - information inquiry
+
+        Game-side UserCallback requests will be reflected into the UI side.
 
         As of 20220205, this proxy's behaviour is a direct port of the original ad-hoc code
         with almost no changes to semantics. */
@@ -86,8 +89,9 @@ namespace game { namespace proxy {
 
         /** Constructor.
             @param sender Requests to game side
-            @param reply  Responses to UI side */
-        BrowserProxy(util::RequestSender<game::browser::Session> sender, util::RequestDispatcher& reply);
+            @param reply  Responses to UI side
+            @param callback Callback for user actions */
+        BrowserProxy(util::RequestSender<game::browser::Session> sender, util::RequestDispatcher& reply, game::browser::UserCallback& callback);
 
         /** Destructor. */
         ~BrowserProxy();
@@ -190,8 +194,15 @@ namespace game { namespace proxy {
         afl::base::Signal<void(OptionalIndex_t, const FolderInfo&)> sig_selectedInfoUpdate;
 
      private:
-        util::RequestSender<game::browser::Session> m_sender;
+        class Trampoline;
+        class TrampolineFromSession;
+
+        game::browser::UserCallback& m_callback;
         util::RequestReceiver<BrowserProxy> m_reply;
+        util::RequestSender<Trampoline> m_sender;
+        afl::base::SignalConnection conn_passwordResult;
+
+        void onPasswordResult(game::browser::UserCallback::PasswordResponse resp);
     };
 
 } }

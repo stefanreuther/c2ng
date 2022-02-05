@@ -7,21 +7,26 @@
 #include "game/nu/browserhandler.hpp"
 #include "game/nu/gamefolder.hpp"
 
+namespace {
+    const char*const LOG_NAME = "game.nu";
+}
+
 game::nu::AccountFolder::AccountFolder(BrowserHandler& handler, game::browser::Account& acc)
     : m_handler(handler),
       m_account(acc)
 { }
 
-std::auto_ptr<game::browser::Task_t>
+std::auto_ptr<game::Task_t>
 game::nu::AccountFolder::loadContent(std::auto_ptr<game::browser::LoadContentTask_t> then)
 {
-    class Task : public game::browser::Task_t {
+    class Task : public Task_t {
      public:
         Task(BrowserHandler& handler, game::browser::Account& acc, std::auto_ptr<game::browser::LoadContentTask_t>& then)
             : m_handler(handler), m_account(acc), m_then(then)
             { }
         virtual void call()
             {
+                m_handler.log().write(afl::sys::LogListener::Trace, LOG_NAME, "Task: AccountFolder.loadContent");
                 afl::container::PtrVector<Folder> result;
                 afl::data::Access parsedResult = m_handler.getGameListPreAuthenticated(m_account);
                 for (size_t i = 0, n = parsedResult("games").getArraySize(); i < n; ++i) {
@@ -34,7 +39,7 @@ game::nu::AccountFolder::loadContent(std::auto_ptr<game::browser::LoadContentTas
         game::browser::Account& m_account;
         std::auto_ptr<game::browser::LoadContentTask_t> m_then;
     };
-    return m_handler.login(m_account, std::auto_ptr<game::browser::Task_t>(new Task(m_handler, m_account, then)));
+    return m_handler.login(m_account, std::auto_ptr<Task_t>(new Task(m_handler, m_account, then)));
 }
 
 bool
@@ -55,7 +60,7 @@ game::nu::AccountFolder::setLocalDirectoryName(String_t /*directoryName*/)
     return false;
 }
 
-std::auto_ptr<game::browser::Task_t>
+std::auto_ptr<game::Task_t>
 game::nu::AccountFolder::loadGameRoot(const game::config::UserConfiguration& /*config*/, std::auto_ptr<game::browser::LoadGameRootTask_t> then)
 {
     // No game in this folder

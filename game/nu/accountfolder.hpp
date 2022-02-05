@@ -24,11 +24,11 @@ namespace game { namespace nu {
         AccountFolder(BrowserHandler& handler, game::browser::Account& acc);
 
         // Folder:
-        virtual std::auto_ptr<game::browser::Task_t> loadContent(std::auto_ptr<game::browser::LoadContentTask_t> then);
+        virtual std::auto_ptr<Task_t> loadContent(std::auto_ptr<game::browser::LoadContentTask_t> then);
         virtual bool loadConfiguration(game::config::UserConfiguration& config);
         virtual void saveConfiguration(const game::config::UserConfiguration& config);
         virtual bool setLocalDirectoryName(String_t directoryName);
-        virtual std::auto_ptr<game::browser::Task_t> loadGameRoot(const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t> then);
+        virtual std::auto_ptr<Task_t> loadGameRoot(const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t> then);
         virtual String_t getName() const;
         virtual util::rich::Text getDescription() const;
         virtual bool isSame(const Folder& other) const;

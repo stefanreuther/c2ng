@@ -10,7 +10,7 @@
 #include "game/pcc/serverdirectory.hpp"
 
 using afl::sys::LogListener;
-using game::browser::Task_t;
+using game::Task_t;
 
 namespace {
     const char*const LOG_NAME = "game.pcc";
@@ -49,7 +49,7 @@ game::pcc::GameFolder::setLocalDirectoryName(String_t /*directoryName*/)
     return false;
 }
 
-std::auto_ptr<game::browser::Task_t>
+std::auto_ptr<game::Task_t>
 game::pcc::GameFolder::loadGameRoot(const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t> then)
 {
     class Task : public Task_t {
@@ -59,7 +59,7 @@ game::pcc::GameFolder::loadGameRoot(const game::config::UserConfiguration& confi
             { }
         virtual void call()
             {
-                m_handler.log().write(LogListener::Trace, LOG_NAME, "GameFolder.loadGameRoot.Task");
+                m_handler.log().write(LogListener::Trace, LOG_NAME, "Task: GameFolder.loadGameRoot");
                 afl::base::Ptr<Root> result;
                 try {
                     // Quick and dirty solution: pretend this to be a local folder and work with that.

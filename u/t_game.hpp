@@ -228,6 +228,14 @@ class TestGameStringVerifier : public CxxTest::TestSuite {
     void testDefaultIsValidString();
 };
 
+class TestGameTask : public CxxTest::TestSuite {
+ public:
+    void testMakeResultTask();
+    void testMakeConfirmationTask();
+    void testMakeConditionalTask1();
+    void testMakeConditionalTask2();
+};
+
 class TestGameTeamSettings : public CxxTest::TestSuite {
  public:
     void testInit();

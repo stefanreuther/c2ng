@@ -26,8 +26,6 @@ namespace game { namespace nu {
         The login() flow should therefore be invoked at all places where possible. */
     class BrowserHandler : public game::browser::Handler {
      public:
-        typedef game::browser::Task_t Task_t;
-
         /** Constructor.
             @param b        Owning Browser
             @param mgr      HTTP Manager
@@ -39,7 +37,7 @@ namespace game { namespace nu {
         // Handler:
         virtual bool handleFolderName(String_t name, afl::container::PtrVector<game::browser::Folder>& result);
         virtual game::browser::Folder* createAccountFolder(game::browser::Account& acc);
-        virtual std::auto_ptr<game::browser::Task_t> loadGameRootMaybe(afl::base::Ref<afl::io::Directory> dir, const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t>& then);
+        virtual std::auto_ptr<Task_t> loadGameRootMaybe(afl::base::Ref<afl::io::Directory> dir, const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t>& then);
 
         /*
          *  Nu specific functions
@@ -87,6 +85,8 @@ namespace game { namespace nu {
         afl::base::Ref<afl::io::Directory> getDefaultSpecificationDirectory();
 
      private:
+        class LoginTask;
+
         game::browser::Browser& m_browser;
         afl::net::http::Manager& m_manager;
         afl::base::Ref<afl::io::Directory> m_defaultSpecificationDirectory;

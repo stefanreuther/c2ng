@@ -6,7 +6,7 @@
 #include "game/browser/folder.hpp"
 
 // Default (dummy) implementation of loadGameRoot().
-std::auto_ptr<game::browser::Task_t>
+std::auto_ptr<game::Task_t>
 game::browser::Folder::defaultLoadGameRoot(std::auto_ptr<LoadGameRootTask_t> t)
 {
     class Task : public Task_t {

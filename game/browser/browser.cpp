@@ -258,7 +258,7 @@ game::browser::Browser::isSelectedFolderSetupSuggested() const
     return result;
 }
 
-std::auto_ptr<game::browser::Task_t>
+std::auto_ptr<game::Task_t>
 game::browser::Browser::loadContent(std::auto_ptr<Task_t> then)
 {
     // Task to receive result and replace content with newly-loaded values
@@ -269,7 +269,7 @@ game::browser::Browser::loadContent(std::auto_ptr<Task_t> then)
             { }
         virtual void call(afl::container::PtrVector<Folder>& result)
             {
-                m_browser.m_log.write(LogListener::Trace, LOG_NAME, "Browser.loadContent.Then");
+                m_browser.m_log.write(LogListener::Trace, LOG_NAME, "Task: Browser.loadContent.Then");
 
                 // If we have a previous path element, attempt to locate and select that
                 m_browser.m_content.swap(result);
@@ -298,7 +298,7 @@ game::browser::Browser::loadContent(std::auto_ptr<Task_t> then)
             { }
         virtual void call()
             {
-                m_parent.m_log.write(LogListener::Trace, LOG_NAME, "Browser.loadContent");
+                m_parent.m_log.write(LogListener::Trace, LOG_NAME, "Task: Browser.loadContent");
 
                 // If we have a selected element, but not a previous path element, select that element
                 size_t n;
@@ -318,7 +318,7 @@ game::browser::Browser::loadContent(std::auto_ptr<Task_t> then)
     return std::auto_ptr<Task_t>(new Task(*this, then));
 }
 
-std::auto_ptr<game::browser::Task_t>
+std::auto_ptr<game::Task_t>
 game::browser::Browser::loadChildRoot(std::auto_ptr<Task_t> then)
 {
     // Separate task to allow sequential execution
@@ -329,7 +329,7 @@ game::browser::Browser::loadChildRoot(std::auto_ptr<Task_t> then)
             { }
         virtual void call()
             {
-                m_parent.m_log.write(LogListener::Trace, LOG_NAME, "Browser.loadChildRoot");
+                m_parent.m_log.write(LogListener::Trace, LOG_NAME, "Task: Browser.loadChildRoot");
 
                 size_t n;
                 if (!m_parent.m_childLoaded && m_parent.m_selectedChild.get(n) && n < m_parent.m_content.size()) {
@@ -357,7 +357,7 @@ game::browser::Browser::loadChildRoot(std::auto_ptr<Task_t> then)
     return std::auto_ptr<Task_t>(new Task(*this, then));
 }
 
-std::auto_ptr<game::browser::Task_t>
+std::auto_ptr<game::Task_t>
 game::browser::Browser::updateConfiguration(std::auto_ptr<Task_t> then)
 {
     // Separate task to allow sequential execution
@@ -395,7 +395,7 @@ game::browser::Browser::updateConfiguration(std::auto_ptr<Task_t> then)
     return std::auto_ptr<Task_t>(new Task(*this, then));
 }
 
-std::auto_ptr<game::browser::Task_t>
+std::auto_ptr<game::Task_t>
 game::browser::Browser::loadGameRoot(afl::base::Ref<afl::io::Directory> dir, const game::config::UserConfiguration& config, std::auto_ptr<LoadGameRootTask_t>& then)
 {
     std::auto_ptr<Task_t> t = m_handlers.loadGameRootMaybe(dir, config, then);
@@ -494,7 +494,7 @@ game::browser::Browser::trySetLocalDirectoryName(afl::io::Directory& gamesDir, S
     }
 }
 
-std::auto_ptr<game::browser::Task_t>
+std::auto_ptr<game::Task_t>
 game::browser::Browser::loadGameRoot(size_t n, std::auto_ptr<Task_t>& then)
 {
     class Then : public LoadGameRootTask_t {
@@ -504,7 +504,7 @@ game::browser::Browser::loadGameRoot(size_t n, std::auto_ptr<Task_t>& then)
             { }
         virtual void call(afl::base::Ptr<Root> root)
             {
-                m_parent.m_log.write(LogListener::Trace, LOG_NAME, "Browser.loadGameRoot.Then");
+                m_parent.m_log.write(LogListener::Trace, LOG_NAME, "Task: Browser.loadGameRoot.Then");
                 m_parent.m_childRoot = root;
                 m_then->call();
             }

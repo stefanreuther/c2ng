@@ -23,8 +23,11 @@
 namespace gs = game::spec;
 namespace gt = game::v3::structures;
 using afl::io::FileSystem;
+using afl::sys::LogListener;
 
 namespace {
+    const char*const LOG_NAME = "game.v3";
+
     void unpackCost(gs::Cost& out, const gt::Cost& in)
     {
         out.set(out.Money,      in.money);
@@ -341,21 +344,44 @@ game::v3::SpecificationLoader::SpecificationLoader(afl::base::Ref<afl::io::Direc
       m_log(log)
 { }
 
-void
-game::v3::SpecificationLoader::loadShipList(game::spec::ShipList& list, game::Root& root)
+std::auto_ptr<game::Task_t>
+game::v3::SpecificationLoader::loadShipList(game::spec::ShipList& list, game::Root& root, std::auto_ptr<StatusTask_t> then)
 {
     // ex game/spec.cc:loadSpecification, ccinit.pas:LoadEquipment (sort-of)
-    loadBeams(list, *m_directory);
-    loadLaunchers(list, *m_directory);
-    loadEngines(list, *m_directory);
-    loadHulls(list, *m_directory);
-    loadHullAssignments(list, *m_directory);
-    loadHullFunctions(list, *m_directory, root.hostVersion(), root.hostConfiguration());
-    list.componentNamer().load(*m_directory, m_translator, m_log);
-    loadFriendlyCodes(list, *m_directory);
-    loadMissions(list, *m_directory);
+    class Task : public Task_t {
+     public:
+        Task(SpecificationLoader& parent, game::spec::ShipList& list, game::Root& root, std::auto_ptr<StatusTask_t>& then)
+            : m_parent(parent), m_shipList(list), m_root(root), m_then(then)
+            { }
+        virtual void call()
+            {
+                try {
+                    m_parent.m_log.write(LogListener::Trace, LOG_NAME, "Task: SpecificationLoader.loadShipList");
+                    m_parent.loadBeams(m_shipList, *m_parent.m_directory);
+                    m_parent.loadLaunchers(m_shipList, *m_parent.m_directory);
+                    m_parent.loadEngines(m_shipList, *m_parent.m_directory);
+                    m_parent.loadHulls(m_shipList, *m_parent.m_directory);
+                    m_parent.loadHullAssignments(m_shipList, *m_parent.m_directory);
+                    m_parent.loadHullFunctions(m_shipList, *m_parent.m_directory, m_root.hostVersion(), m_root.hostConfiguration());
+                    m_shipList.componentNamer().load(*m_parent.m_directory, m_parent.m_translator, m_parent.m_log);
+                    m_parent.loadFriendlyCodes(m_shipList, *m_parent.m_directory);
+                    m_parent.loadMissions(m_shipList, *m_parent.m_directory);
 
-    list.sig_change.raise();
+                    m_shipList.sig_change.raise();
+                    m_then->call(true);
+                }
+                catch (std::exception& e) {
+                    m_parent.m_log.write(LogListener::Error, LOG_NAME, String_t(), e);
+                    m_then->call(false);
+                }
+            }
+     private:
+        SpecificationLoader& m_parent;
+        game::spec::ShipList& m_shipList;
+        const game::Root& m_root;
+        std::auto_ptr<StatusTask_t> m_then;
+    };
+    return std::auto_ptr<Task_t>(new Task(*this, list, root, then));
 }
 
 void

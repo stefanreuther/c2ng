@@ -91,7 +91,7 @@ main(int, char** argv)
 
         // Specification
         game::spec::ShipList shipList;
-        root->specificationLoader().loadShipList(shipList, *root);
+        root->specificationLoader().loadShipList(shipList, *root, std::auto_ptr<game::StatusTask_t>(game::StatusTask_t::makeNull()))->call();
 
         // Load VCRs
         afl::base::Ptr<game::vcr::classic::Database> vcrs = loadVcrs(file, *root);

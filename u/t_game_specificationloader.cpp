@@ -13,8 +13,8 @@ TestGameSpecificationLoader::testIt()
 {
     class Tester : public game::SpecificationLoader {
      public:
-        virtual void loadShipList(game::spec::ShipList& /*list*/, game::Root& /*root*/)
-            { }
+        virtual std::auto_ptr<game::Task_t> loadShipList(game::spec::ShipList& /*list*/, game::Root& /*root*/, std::auto_ptr<game::StatusTask_t> /*then*/)
+            { return std::auto_ptr<game::Task_t>(); }
     };
     Tester t;
 }

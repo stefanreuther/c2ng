@@ -88,10 +88,10 @@ game::nu::GameFolder::setLocalDirectoryName(String_t directoryName)
     return true;
 }
 
-std::auto_ptr<game::browser::Task_t>
+std::auto_ptr<game::Task_t>
 game::nu::GameFolder::loadGameRoot(const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t> then)
 {
-    class Task : public game::browser::Task_t {
+    class Task : public Task_t {
      public:
         Task(BrowserHandler& handler, game::browser::Account& account, int32_t gameNr, afl::base::Ref<GameState> state,
              const UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t>& then)
@@ -99,7 +99,7 @@ game::nu::GameFolder::loadGameRoot(const game::config::UserConfiguration& config
             { }
         virtual void call()
             {
-                m_handler.log().write(LogListener::Trace, LOG_NAME, "GameFolder.loadGameRoot.Task");
+                m_handler.log().write(LogListener::Trace, LOG_NAME, "Task: GameFolder.loadGameRoot");
                 afl::base::Ptr<Root> result;
                 try {
                     // Current data
@@ -185,7 +185,7 @@ game::nu::GameFolder::loadGameRoot(const game::config::UserConfiguration& config
         const UserConfiguration& m_config;
         std::auto_ptr<game::browser::LoadGameRootTask_t> m_then;
     };
-    return m_handler.login(m_account, std::auto_ptr<game::browser::Task_t>(new Task(m_handler, m_account, m_gameNr, m_state, config, then)));
+    return m_handler.login(m_account, std::auto_ptr<Task_t>(new Task(m_handler, m_account, m_gameNr, m_state, config, then)));
 }
 
 String_t

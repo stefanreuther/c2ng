@@ -4,20 +4,23 @@
   */
 
 #include "game/proxy/browserproxy.hpp"
+#include "afl/base/uncopyable.hpp"
 #include "afl/string/format.hpp"
 #include "game/browser/account.hpp"
 #include "game/proxy/waitindicator.hpp"
 #include "game/turnloader.hpp"
+#include "game/types.hpp"
 
 using afl::base::Ptr;
 using afl::container::PtrVector;
+using afl::sys::LogListener;
 using game::Player;
 using game::PlayerList;
 using game::Root;
 using game::TurnLoader;
 using game::browser::Browser;
 using game::browser::Folder;
-using game::browser::Task_t;
+using game::Task_t;
 using game::config::ConfigurationOption;
 using game::config::IntegerOption;
 using game::config::StringOption;
@@ -25,6 +28,8 @@ using game::config::UserConfiguration;
 using game::proxy::BrowserProxy;
 
 namespace {
+    const char* LOG_NAME = "game.proxy";
+
     /* Pack folders for output */
     void packFolders(std::vector<BrowserProxy::Item>& out, const PtrVector<Folder>& in)
     {
@@ -81,6 +86,7 @@ namespace {
             { }
         virtual void call()
             {
+                m_session.log().write(LogListener::Trace, LOG_NAME, "Task: PostLoadTask");
                 Browser& bro = m_session.browser();
                 m_reply.postNewRequest(new UpdateTask(bro.path(), bro.content(), bro.getSelectedChildIndex()));
                 m_session.finishTask();
@@ -100,6 +106,7 @@ namespace {
             { }
         virtual void call()
             {
+                m_session.log().write(LogListener::Trace, LOG_NAME, "Task: SaveAccountsTask");
                 m_session.accountManager().save();
                 m_then->call();
             }
@@ -137,6 +144,7 @@ namespace {
         virtual void call()
             {
                 // Build information
+                m_session.log().write(LogListener::Trace, LOG_NAME, "Task: ChildBuilder");
                 Browser& b = m_session.browser();
                 if (Folder* f = b.getSelectedChild()) {
                     Ptr<Root> root = b.getSelectedRoot();
@@ -166,10 +174,66 @@ namespace {
     };
 }
 
+class game::proxy::BrowserProxy::Trampoline : public game::browser::UserCallback,
+                                              private afl::base::Uncopyable {
+ public:
+    Trampoline(game::browser::Session& session, util::RequestSender<BrowserProxy> reply)
+        : m_session(session), m_reply(reply)
+        { m_session.callback().setInstance(this); }
+
+    ~Trampoline()
+        { m_session.callback().setInstance(0); }
+
+    virtual void askPassword(const PasswordRequest& req)
+        {
+            class Task : public util::Request<BrowserProxy> {
+             public:
+                Task(const PasswordRequest& req)
+                    : m_req(req)
+                    { }
+                virtual void handle(BrowserProxy& proxy)
+                    { proxy.m_callback.askPassword(m_req); }
+             private:
+                const PasswordRequest m_req;
+            };
+            m_reply.postNewRequest(new Task(req));
+        }
+
+    game::browser::Session& session()
+        { return m_session; }
+
+ private:
+    game::browser::Session& m_session;
+    util::RequestSender<BrowserProxy> m_reply;
+};
+
+
+/*
+ *  TrampolineFromSession
+ */
+
+class game::proxy::BrowserProxy::TrampolineFromSession : public afl::base::Closure<Trampoline*(game::browser::Session&)> {
+ public:
+    TrampolineFromSession(util::RequestSender<BrowserProxy> reply)
+        : m_reply(reply)
+        { }
+    virtual Trampoline* call(game::browser::Session& session)
+        { return new Trampoline(session, m_reply); }
+ private:
+    util::RequestSender<BrowserProxy> m_reply;
+};
+
+
+/*
+ *  BrowserProxy
+ */
+
 // Constructor.
-game::proxy::BrowserProxy::BrowserProxy(util::RequestSender<game::browser::Session> sender, util::RequestDispatcher& reply)
-    : m_sender(sender),
-      m_reply(reply, *this)
+game::proxy::BrowserProxy::BrowserProxy(util::RequestSender<game::browser::Session> sender, util::RequestDispatcher& reply, game::browser::UserCallback& callback)
+    : m_callback(callback),
+      m_reply(reply, *this),
+      m_sender(sender.makeTemporary(new TrampolineFromSession(m_reply.getSender()))),
+      conn_passwordResult(m_callback.sig_passwordResult.add(this, &BrowserProxy::onPasswordResult))
 { }
 
 // Destructor.
@@ -180,13 +244,13 @@ game::proxy::BrowserProxy::~BrowserProxy()
 void
 game::proxy::BrowserProxy::loadContent()
 {
-    class InitTask : public util::Request<game::browser::Session> {
+    class InitTask : public util::Request<Trampoline> {
      public:
         InitTask(util::RequestSender<BrowserProxy> reply)
             : m_reply(reply)
             { }
-        void handle(game::browser::Session& t)
-            { t.addTask(t.browser().loadContent(PostLoadTask::make(m_reply, t))); }
+        void handle(Trampoline& t)
+            { t.session().addTask(t.session().browser().loadContent(PostLoadTask::make(m_reply, t.session()))); }
      private:
         util::RequestSender<BrowserProxy> m_reply;
     };
@@ -197,17 +261,17 @@ game::proxy::BrowserProxy::loadContent()
 void
 game::proxy::BrowserProxy::openChild(size_t nr)
 {
-    class EnterTask : public util::Request<game::browser::Session> {
+    class EnterTask : public util::Request<Trampoline> {
      public:
         EnterTask(size_t nr, util::RequestSender<BrowserProxy> reply)
             : m_number(nr),
               m_reply(reply)
             { }
-        void handle(game::browser::Session& t)
+        void handle(Trampoline& t)
             {
-                Browser& b = t.browser();
+                Browser& b = t.session().browser();
                 b.openChild(m_number);
-                t.addTask(b.loadContent(PostLoadTask::make(m_reply, t)));
+                t.session().addTask(b.loadContent(PostLoadTask::make(m_reply, t.session())));
             }
      private:
         size_t m_number;
@@ -220,19 +284,19 @@ game::proxy::BrowserProxy::openChild(size_t nr)
 void
 game::proxy::BrowserProxy::openParent(size_t nr)
 {
-    class UpTask : public util::Request<game::browser::Session> {
+    class UpTask : public util::Request<Trampoline> {
      public:
         UpTask(size_t nr, util::RequestSender<BrowserProxy> reply)
             : m_number(nr),
               m_reply(reply)
             { }
-        void handle(game::browser::Session& t)
+        void handle(Trampoline& t)
             {
-                Browser& b = t.browser();
+                Browser& b = t.session().browser();
                 for (size_t i = 0; i < m_number; ++i) {
                     b.openParent();
                 }
-                t.addTask(b.loadContent(PostLoadTask::make(m_reply, t)));
+                t.session().addTask(b.loadContent(PostLoadTask::make(m_reply, t.session())));
             }
      private:
         size_t m_number;
@@ -245,17 +309,17 @@ game::proxy::BrowserProxy::openParent(size_t nr)
 void
 game::proxy::BrowserProxy::openFolder(String_t name)
 {
-    class Task : public util::Request<game::browser::Session> {
+    class Task : public util::Request<Trampoline> {
      public:
         Task(const String_t& name, util::RequestSender<BrowserProxy> reply)
             : m_name(name),
               m_reply(reply)
             { }
-        void handle(game::browser::Session& t)
+        void handle(Trampoline& t)
             {
-                game::browser::Browser& b = t.browser();
+                game::browser::Browser& b = t.session().browser();
                 b.openFolder(m_name);
-                t.addTask(b.loadContent(PostLoadTask::make(m_reply, t)));
+                t.session().addTask(b.loadContent(PostLoadTask::make(m_reply, t.session())));
             }
      private:
         String_t m_name;
@@ -268,15 +332,15 @@ game::proxy::BrowserProxy::openFolder(String_t name)
 void
 game::proxy::BrowserProxy::selectFolder(OptionalIndex_t index)
 {
-    class LoadTask : public util::Request<game::browser::Session> {
+    class LoadTask : public util::Request<Trampoline> {
      public:
         LoadTask(OptionalIndex_t index, util::RequestSender<BrowserProxy> reply)
             : m_index(index),
               m_reply(reply)
             { }
-        void handle(game::browser::Session& t)
+        void handle(Trampoline& t)
             {
-                Browser& b = t.browser();
+                Browser& b = t.session().browser();
                 Folder* f;
                 size_t pos = 0;
                 bool current = !m_index.get(pos);
@@ -295,7 +359,7 @@ game::proxy::BrowserProxy::selectFolder(OptionalIndex_t index)
                     // Info
                     if (!current) {
                         b.selectChild(pos);
-                        t.addTask(b.loadChildRoot(std::auto_ptr<Task_t>(new ChildBuilder(m_reply, t, result))));
+                        t.session().addTask(b.loadChildRoot(std::auto_ptr<Task_t>(new ChildBuilder(m_reply, t.session(), result))));
                     } else {
                         // FIXME: focusing on the browser, not on an item - unselect current item in t.browser()?
                         buildFolderInfo(*f, *result);
@@ -317,13 +381,13 @@ game::proxy::BrowserProxy::selectFolder(OptionalIndex_t index)
 bool
 game::proxy::BrowserProxy::isSelectedFolderSetupSuggested(WaitIndicator& ind)
 {
-    struct Task : public util::Request<game::browser::Session> {
+    struct Task : public util::Request<Trampoline> {
      public:
         Task()
             : m_result(false)
             { }
-        virtual void handle(game::browser::Session& s)
-            { m_result = s.browser().isSelectedFolderSetupSuggested(); }
+        virtual void handle(Trampoline& t)
+            { m_result = t.session().browser().isSelectedFolderSetupSuggested(); }
         bool m_result;
     };
     Task q;
@@ -340,19 +404,19 @@ game::proxy::BrowserProxy::setLocalDirectoryAutomatically()
     // If the reload actually occurs asynchronously, upper world has no way to know when to proceed.
     // Original code called this using call(), but that only synchronized this Task,
     // not the trail of browser tasks that follow it.
-    class Task : public util::Request<game::browser::Session> {
+    class Task : public util::Request<Trampoline> {
      public:
-        virtual void handle(game::browser::Session& session)
+        virtual void handle(Trampoline& t)
             {
-                Browser& b = session.browser();
+                Browser& b = t.session().browser();
 
                 // Update configuration
                 b.setSelectedLocalDirectoryAutomatically();
 
                 // Save network.ini and pcc2.ini and reload
-                std::auto_ptr<Task_t> t3(Task_t::makeBound(&session, &game::browser::Session::finishTask));
-                std::auto_ptr<Task_t> t2(new SaveAccountsTask(session, t3));
-                session.addTask(b.updateConfiguration(t2));
+                std::auto_ptr<Task_t> t3(Task_t::makeBound(&t.session(), &game::browser::Session::finishTask));
+                std::auto_ptr<Task_t> t2(new SaveAccountsTask(t.session(), t3));
+                t.session().addTask(b.updateConfiguration(t2));
             }
     };
     m_sender.postNewRequest(new Task());
@@ -362,22 +426,22 @@ game::proxy::BrowserProxy::setLocalDirectoryAutomatically()
 void
 game::proxy::BrowserProxy::setLocalDirectoryName(const String_t& dirName)
 {
-    class Task : public util::Request<game::browser::Session> {
+    class Task : public util::Request<Trampoline> {
      public:
         Task(const String_t& dirName)
             : m_dirName(dirName)
             { }
-        virtual void handle(game::browser::Session& session)
+        virtual void handle(Trampoline& t)
             {
-                Browser& b = session.browser();
+                Browser& b = t.session().browser();
 
                 // Update configuration
                 b.setSelectedLocalDirectoryName(m_dirName);
 
                 // Save network.ini and pcc2.ini and reload
-                std::auto_ptr<Task_t> t3(Task_t::makeBound(&session, &game::browser::Session::finishTask));
-                std::auto_ptr<Task_t> t2(new SaveAccountsTask(session, t3));
-                session.addTask(b.updateConfiguration(t2));
+                std::auto_ptr<Task_t> t3(Task_t::makeBound(&t.session(), &game::browser::Session::finishTask));
+                std::auto_ptr<Task_t> t2(new SaveAccountsTask(t.session(), t3));
+                t.session().addTask(b.updateConfiguration(t2));
             }
      private:
         String_t m_dirName;
@@ -389,18 +453,18 @@ game::proxy::BrowserProxy::setLocalDirectoryName(const String_t& dirName)
 void
 game::proxy::BrowserProxy::setLocalDirectoryNone()
 {
-    class Task : public util::Request<game::browser::Session> {
+    class Task : public util::Request<Trampoline> {
      public:
-        virtual void handle(game::browser::Session& session)
+        virtual void handle(Trampoline& t)
             {
-                Browser& b = session.browser();
+                Browser& b = t.session().browser();
                 if (UserConfiguration* config = b.getSelectedConfiguration()) {
                     (*config)[UserConfiguration::Game_ReadOnly].set(1);
 
                     // Save network.ini and pcc2.ini and reload
-                    std::auto_ptr<Task_t> t3(Task_t::makeBound(&session, &game::browser::Session::finishTask));
-                    std::auto_ptr<Task_t> t2(new SaveAccountsTask(session, t3));
-                    session.addTask(b.updateConfiguration(t2));
+                    std::auto_ptr<Task_t> t3(Task_t::makeBound(&t.session(), &game::browser::Session::finishTask));
+                    std::auto_ptr<Task_t> t2(new SaveAccountsTask(t.session(), t3));
+                    t.session().addTask(b.updateConfiguration(t2));
                 }
             }
     };
@@ -411,14 +475,14 @@ game::proxy::BrowserProxy::setLocalDirectoryNone()
 void
 game::proxy::BrowserProxy::getConfiguration(WaitIndicator& ind, Configuration& config)
 {
-    class Task : public util::Request<game::browser::Session> {
+    class Task : public util::Request<Trampoline> {
      public:
         Task(Configuration& config)
             : m_config(config)
             { }
-        virtual void handle(game::browser::Session& session)
+        virtual void handle(Trampoline& t)
             {
-                const Browser& p = session.browser();
+                const Browser& p = t.session().browser();
                 const Root* root = p.getSelectedRoot().get();
                 const UserConfiguration* config = p.getSelectedConfiguration();
                 if (root != 0 && config != 0) {
@@ -446,14 +510,14 @@ void
 game::proxy::BrowserProxy::setConfiguration(WaitIndicator& ind, const Configuration& config)
 {
     // TODO: should probably reload
-    class Task : public util::Request<game::browser::Session> {
+    class Task : public util::Request<Trampoline> {
      public:
         explicit Task(const Configuration& config)
             : m_config(config)
             { }
-        virtual void handle(game::browser::Session& session)
+        virtual void handle(Trampoline& t)
             {
-                Browser& p = session.browser();
+                Browser& p = t.session().browser();
                 if (UserConfiguration* config = p.getSelectedConfiguration()) {
                     if (const String_t* p = m_config.charsetId.get()) {
                         StringOption& opt = (*config)[UserConfiguration::Game_Charset];
@@ -470,7 +534,7 @@ game::proxy::BrowserProxy::setConfiguration(WaitIndicator& ind, const Configurat
                         opt.set(*p);
                         opt.setSource(ConfigurationOption::Game);
                     }
-                    session.addTask(p.updateConfiguration(std::auto_ptr<game::browser::Task_t>(game::browser::Task_t::makeBound(&session, &game::browser::Session::finishTask))));
+                    t.session().addTask(p.updateConfiguration(std::auto_ptr<Task_t>(Task_t::makeBound(&t.session(), &game::browser::Session::finishTask))));
                 }
             }
      private:
@@ -485,14 +549,14 @@ bool
 game::proxy::BrowserProxy::addAccount(WaitIndicator& ind, String_t user, String_t type, String_t host)
 {
     // TODO: should probably automatically reload
-    class Task : public util::Request<game::browser::Session> {
+    class Task : public util::Request<Trampoline> {
      public:
         Task(String_t user, String_t type, String_t host)
             : m_user(user), m_type(type), m_host(host), m_result()
             { }
-        void handle(game::browser::Session& session)
+        void handle(Trampoline& t)
             {
-                game::browser::AccountManager& mgr = session.accountManager();
+                game::browser::AccountManager& mgr = t.session().accountManager();
                 if (mgr.findAccount(m_user, m_type, m_host) != 0) {
                     // Duplicate
                     m_result = false;
@@ -525,11 +589,27 @@ game::proxy::BrowserProxy::addAccount(WaitIndicator& ind, String_t user, String_
 util::RequestSender<afl::io::FileSystem>
 game::proxy::BrowserProxy::fileSystem()
 {
-    class Adaptor : public afl::base::Closure<afl::io::FileSystem&(game::browser::Session&)> {
+    class Adaptor : public afl::base::Closure<afl::io::FileSystem&(Trampoline&)> {
      public:
-        virtual afl::io::FileSystem& call(game::browser::Session& s)
-            { return s.browser().fileSystem(); }
+        virtual afl::io::FileSystem& call(Trampoline& t)
+            { return t.session().browser().fileSystem(); }
     };
     return m_sender.convert(new Adaptor());
 }
 
+// Password result: forward into game thread.
+void
+game::proxy::BrowserProxy::onPasswordResult(game::browser::UserCallback::PasswordResponse resp)
+{
+    class Task : public util::Request<Trampoline> {
+     public:
+        Task(const game::browser::UserCallback::PasswordResponse& resp)
+            : m_resp(resp)
+            { }
+        virtual void handle(Trampoline& t)
+            { t.sig_passwordResult.raise(m_resp); }
+     private:
+        const game::browser::UserCallback::PasswordResponse m_resp;
+    };
+    m_sender.postNewRequest(new Task(resp));
+}

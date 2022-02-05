@@ -30,6 +30,7 @@
 #include "util/stopsignal.hpp"
 #include "util/string.hpp"
 #include "version.hpp"
+#include "game/exception.hpp"
 
 using afl::base::Optional;
 using afl::base::Ptr;
@@ -184,7 +185,7 @@ game::sim::ConsoleApplication::ConsoleApplication(afl::sys::Environment& env, af
     : Application(env, fs),
       m_verbose(true)
 {
-    consoleLogger().setConfiguration("*=hide");
+    consoleLogger().setConfiguration("*@Error=raw:*=hide");
 }
 
 void
@@ -437,8 +438,12 @@ game::sim::ConsoleApplication::loadSession(Session& session, const Parameters& p
         }
 
         // Load spec
+        bool ok = false;
         session.shipList = new game::spec::ShipList();
-        session.root->specificationLoader().loadShipList(*session.shipList, *session.root);
+        session.root->specificationLoader().loadShipList(*session.shipList, *session.root, makeResultTask(ok))->call();
+        if (!ok) {
+            throw Exception(tx("unable to load ship list"));
+        }
     }
 }
 

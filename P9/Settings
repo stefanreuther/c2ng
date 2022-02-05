@@ -12,10 +12,13 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/proxy/browserproxy.cpp game/proxy/browserproxy.hpp \
-    game/browser/folder.cpp game/browser/types.hpp \
-    game/browser/synchronousfolder.cpp game/browser/synchronousfolder.hpp \
-    version.hpp util/doc/loggingverifier.cpp util/doc/loggingverifier.hpp \
+FILES_gamelib = game/task.cpp game/task.hpp \
+    game/browser/optionalusercallback.cpp \
+    game/browser/optionalusercallback.hpp game/proxy/browserproxy.cpp \
+    game/proxy/browserproxy.hpp game/browser/folder.cpp \
+    game/browser/types.hpp game/browser/synchronousfolder.cpp \
+    game/browser/synchronousfolder.hpp version.hpp \
+    util/doc/loggingverifier.cpp util/doc/loggingverifier.hpp \
     util/doc/summarizingverifier.cpp util/doc/summarizingverifier.hpp \
     util/doc/verifier.cpp util/doc/verifier.hpp util/doc/singleblobstore.cpp \
     util/doc/singleblobstore.hpp util/doc/textimport.cpp \
@@ -493,9 +496,8 @@ FILES_gamelib = game/proxy/browserproxy.cpp game/proxy/browserproxy.hpp \
     game/interface/shipproperty.hpp game/browser/handlerlist.cpp \
     game/browser/handlerlist.hpp game/msg/inbox.cpp game/msg/inbox.hpp \
     game/msg/mailbox.hpp game/exception.cpp game/exception.hpp \
-    game/browser/session.cpp game/browser/session.hpp \
-    game/browser/usercallbackproxy.cpp game/browser/usercallbackproxy.hpp \
-    util/rich/parser.cpp util/rich/parser.hpp game/nu/browserhandler.cpp \
+    game/browser/session.cpp game/browser/session.hpp util/rich/parser.cpp \
+    util/rich/parser.hpp game/nu/browserhandler.cpp \
     game/nu/browserhandler.hpp game/browser/usercallback.hpp \
     game/browser/unsupportedaccountfolder.cpp \
     game/browser/unsupportedaccountfolder.hpp util/rich/linkattribute.cpp \
@@ -1636,7 +1638,7 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_util_doc_verifier.cpp \
+FILES_testsuite = u/t_game_task.cpp u/t_util_doc_verifier.cpp \
     u/t_util_doc_summarizingverifier.cpp u/t_util_doc_loggingverifier.cpp \
     u/t_server_doc_documentationimpl.cpp u/t_server_doc.hpp \
     u/t_server_interface_documentationserver.cpp \

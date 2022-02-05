@@ -5,7 +5,7 @@
 
 #include "game/browser/synchronousfolder.hpp"
 
-std::auto_ptr<game::browser::Task_t>
+std::auto_ptr<game::Task_t>
 game::browser::SynchronousFolder::loadContent(std::auto_ptr<LoadContentTask_t> then)
 {
     class Task : public Task_t {

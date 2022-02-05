@@ -136,12 +136,21 @@ server::play::ConsoleApplication::appMain()
     }
 
     // Make a session and load it
+    bool ok = false;
     session.setGame(new game::Game());
     session.setRoot(root);
     session.setShipList(new game::spec::ShipList());
-    root->specificationLoader().loadShipList(*session.getShipList(), *root);
+    root->specificationLoader().loadShipList(*session.getShipList(), *root, game::makeResultTask(ok))->call();
+    if (!ok) {
+        errorExit(tx("unable to load ship list"));
+    }
 
-    root->getTurnLoader()->loadCurrentTurn(session.getGame()->currentTurn(), *session.getGame(), params.playerNumber, *root, session);
+    ok = false;
+    root->getTurnLoader()->loadCurrentTurn(session.getGame()->currentTurn(), *session.getGame(), params.playerNumber, *root, session, game::makeResultTask(ok))->call();
+    if (!ok) {
+        errorExit(tx("unable to load turn"));
+    }
+
     session.getGame()->setViewpointPlayer(params.playerNumber);
     // FIXME? sync teams from alliances
     session.setEditableAreas(game::Session::AreaSet_t(session.LocalDataArea) + session.CommandArea);

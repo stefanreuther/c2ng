@@ -320,7 +320,7 @@ namespace {
         virtual void call(bool flag)
             {
                 // Ignore flag for now - failure to save does not prevent exiting
-                (void) flag;
+                m_session.log().write(afl::sys::LogListener::Trace, LOG_NAME, afl::string::Format("Task: PostSaveAction(%d)", int(flag)));
 
                 // Save VM.
                 // TODO: check whether this should be after saving?
@@ -330,7 +330,7 @@ namespace {
                     }
                 }
                 catch (std::exception& e) {
-                    m_session.log().write(afl::sys::LogListener::Error, LOG_NAME, m_session.translator().translateString("Unable to save game"), e);
+                    m_session.log().write(afl::sys::LogListener::Error, LOG_NAME, m_session.translator()("Unable to save game"), e);
                 }
 
                 // Perform state change. This will eventually continue the process.

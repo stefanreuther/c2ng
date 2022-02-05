@@ -312,12 +312,14 @@ namespace {
         void addStream(const char* name, ConstBytes_t data)
             { dir->addStream(name, *new ConstMemoryStream(data)); }
 
-        void load()
+        bool load()
             {
                 std::auto_ptr<Charset> charset(new CodepageCharset(afl::charset::g_codepage437));
                 NullTranslator tx;
                 Log log;
-                SpecificationLoader(dir, charset, tx, log).loadShipList(list, root);
+                bool result = false;
+                SpecificationLoader(dir, charset, tx, log).loadShipList(list, root, std::auto_ptr<game::StatusTask_t>(game::makeResultTask(result)))->call();
+                return result;
             }
     };
 
@@ -340,7 +342,7 @@ TestGameV3SpecificationLoader::testStandard()
     env.addStream("engspec.dat", ENGSPEC);
     env.addStream("hullspec.dat", SHORTENED_HULLSPEC);
     env.addStream("truehull.dat", SHORTENED_TRUEHULL);
-    env.load();
+    TS_ASSERT_EQUALS(env.load(), true);
 
     TS_ASSERT_EQUALS(env.list.beams().size(), 10);
     TS_ASSERT_EQUALS(env.list.launchers().size(), 10);
@@ -372,7 +374,7 @@ TestGameV3SpecificationLoader::testTruehullVerification()
     env.addStream("hullspec.dat", SHORTENED_HULLSPEC);
     env.addStream("truehull.dat", TRUEHULL);
 
-    TS_ASSERT_THROWS(env.load(), FileFormatException);
+    TS_ASSERT_EQUALS(env.load(), false);
 }
 
 /** Test loading with hullfuncs.
@@ -388,7 +390,7 @@ TestGameV3SpecificationLoader::testLoadHullfunc()
     env.addStream("hullspec.dat", SHORTENED_HULLSPEC);
     env.addStream("truehull.dat", SHORTENED_TRUEHULL);
     env.addStream("hullfunc.cc",  HULLFUNC);
-    env.load();
+    TS_ASSERT_EQUALS(env.load(), true);
 
     // Verify hull functions (already mostly tested in BasicHullFunctionList test)
     TS_ASSERT(env.list.basicHullFunctions().getFunctionById(3) != 0);
@@ -432,7 +434,7 @@ TestGameV3SpecificationLoader::testMissing()
         env.addStream("engspec.dat", ENGSPEC);
         env.addStream("hullspec.dat", SHORTENED_HULLSPEC);
         env.addStream("truehull.dat", SHORTENED_TRUEHULL);
-        TS_ASSERT_THROWS(env.load(), FileProblemException);
+        TS_ASSERT_EQUALS(env.load(), false);
     }
     {
         Environment env;
@@ -441,7 +443,7 @@ TestGameV3SpecificationLoader::testMissing()
         env.addStream("engspec.dat", ENGSPEC);
         env.addStream("hullspec.dat", SHORTENED_HULLSPEC);
         env.addStream("truehull.dat", SHORTENED_TRUEHULL);
-        TS_ASSERT_THROWS(env.load(), FileProblemException);
+        TS_ASSERT_EQUALS(env.load(), false);
     }
     {
         Environment env;
@@ -450,7 +452,7 @@ TestGameV3SpecificationLoader::testMissing()
         // no engspec
         env.addStream("hullspec.dat", SHORTENED_HULLSPEC);
         env.addStream("truehull.dat", SHORTENED_TRUEHULL);
-        TS_ASSERT_THROWS(env.load(), FileProblemException);
+        TS_ASSERT_EQUALS(env.load(), false);
     }
     {
         Environment env;
@@ -459,7 +461,7 @@ TestGameV3SpecificationLoader::testMissing()
         env.addStream("engspec.dat", ENGSPEC);
         // no hullspec
         env.addStream("truehull.dat", SHORTENED_TRUEHULL);
-        TS_ASSERT_THROWS(env.load(), FileProblemException);
+        TS_ASSERT_EQUALS(env.load(), false);
     }
     {
         Environment env;
@@ -468,7 +470,7 @@ TestGameV3SpecificationLoader::testMissing()
         env.addStream("engspec.dat", ENGSPEC);
         env.addStream("hullspec.dat", SHORTENED_HULLSPEC);
         // no truehull
-        TS_ASSERT_THROWS(env.load(), FileProblemException);
+        TS_ASSERT_EQUALS(env.load(), false);
     }
 }
 
@@ -552,7 +554,7 @@ TestGameV3SpecificationLoader::testHullfuncAssignment()
         env.addStream("truehull.dat", SHORTENED_TRUEHULL);
         env.addStream("hullfunc.cc",  HULLFUNC);
         env.addStream("hullfunc.txt", afl::string::toBytes(TESTCASES[i].fileContent));
-        env.load();
+        TS_ASSERT_EQUALS(env.load(), true);
 
         const Hull& hull = *env.list.hulls().get(3);
         TSM_ASSERT_EQUALS(TESTCASES[i].fileContent,
@@ -590,7 +592,7 @@ TestGameV3SpecificationLoader::testHullfuncAssignmentShip()
     env.addStream("truehull.dat", SHORTENED_TRUEHULL);
     env.addStream("hullfunc.cc",  HULLFUNC);
     env.addStream("shiplist.txt", afl::string::toBytes(FILE_CONTENT));
-    env.load();
+    TS_ASSERT_EQUALS(env.load(), true);
 
     const Hull& hull = *env.list.hulls().get(3);
     TS_ASSERT_EQUALS(hull.getHullFunctions(true).getPlayersThatCan(
@@ -659,7 +661,7 @@ TestGameV3SpecificationLoader::testHullfuncAssignmentPlayerRace()
         env.addStream("truehull.dat", SHORTENED_TRUEHULL);
         env.addStream("hullfunc.cc",  HULLFUNC);
         env.addStream("hullfunc.txt", afl::string::toBytes(TESTCASES[i].fileContent));
-        env.load();
+        TS_ASSERT_EQUALS(env.load(), true);
 
         const Hull& hull = *env.list.hulls().get(3);
         TSM_ASSERT_EQUALS(TESTCASES[i].fileContent,
@@ -748,7 +750,7 @@ TestGameV3SpecificationLoader::testHullfuncAssignmentLevel()
         env.addStream("truehull.dat", SHORTENED_TRUEHULL);
         env.addStream("hullfunc.cc",  HULLFUNC);
         env.addStream("hullfunc.txt", afl::string::toBytes(TESTCASES[i].fileContent));
-        env.load();
+        TS_ASSERT_EQUALS(env.load(), true);
 
         const Hull& hull = *env.list.hulls().get(3);
         HullFunctionList out;
@@ -789,7 +791,7 @@ TestGameV3SpecificationLoader::testLoadFCodes()
     env.addStream("truehull.dat", SHORTENED_TRUEHULL);
     env.addStream("fcodes.cc", afl::string::toBytes(FC_FILE));
     env.addStream("xtrfcode.txt", afl::string::toBytes(XTRA_FILE));
-    env.load();
+    TS_ASSERT_EQUALS(env.load(), true);
 
     // Verify: given codes need to be special
     // (parsing details are checked in FriendlyCodeList test)
@@ -820,7 +822,7 @@ TestGameV3SpecificationLoader::testLoadMissions()
     env.addStream("hullspec.dat", SHORTENED_HULLSPEC);
     env.addStream("truehull.dat", SHORTENED_TRUEHULL);
     env.addStream("mission.cc", afl::string::toBytes(MSN_FILE));
-    env.load();
+    TS_ASSERT_EQUALS(env.load(), true);
 
     const Mission* p = env.list.missions().getMissionByNumber(1, PlayerSet_t::allUpTo(game::MAX_PLAYERS));
     TS_ASSERT(p != 0);

@@ -13,6 +13,7 @@
 #include "afl/charset/charset.hpp"
 #include "afl/string/translator.hpp"
 #include "game/playerset.hpp"
+#include "game/task.hpp"
 
 namespace game {
 
@@ -43,13 +44,6 @@ namespace game {
         Those currently assume that local I/O does not suspend. */
     class TurnLoader : public afl::base::Deletable, public afl::base::RefCounted {
      public:
-        /** Shortcut for asynchronous task. */
-        typedef afl::base::Closure<void()> Task_t;
-
-        /** Shortcut for post-I/O status reporting task. */
-        typedef afl::base::Closure<void(bool)> StatusTask_t;
-
-
         /** Player status.
             \see getPlayerStatus() */
         enum PlayerStatus {
@@ -115,8 +109,11 @@ namespace game {
             \param game [in/out] Game object. May be updated with planet/ship score definitions, turn scores.
             \param player [in] Player number.
             \param root [in/out] Root. May be updated with configuration.
-            \param session [in/out] Session. */
-        virtual void loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session) = 0;
+            \param session [in/out] Session.
+            \param then [in] Task to execute after saving; never null.
+
+            \return Newly-allocated task to perform the operation; never null. */
+        virtual std::auto_ptr<Task_t> loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t> then) = 0;
 
         /** Save current turn.
             This function produces a task that will save the current game, create and/or upload a turn file, etc.
@@ -173,12 +170,6 @@ namespace game {
             \param baseSet set of players to check; pass in PlayerList::getAllPlayers().
             \return default player number if there is one; 0 if there is none or it's ambiguous */
         int getDefaultPlayer(PlayerSet_t baseSet) const;
-
-        /** Create a dummy task that confirms an operation.
-            Can be used when you execute saveCurrentTurn() ahead of time.
-            \param flag Result to report
-            \param then Task to receive status */
-        static std::auto_ptr<Task_t> makeConfirmationTask(bool flag, std::auto_ptr<StatusTask_t> then);
 
      protected:
         /** Load current turn databases.

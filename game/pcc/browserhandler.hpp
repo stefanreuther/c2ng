@@ -31,8 +31,6 @@ namespace game { namespace pcc {
         In theory, in the future, actions could also detect expired tokens and re-invoke the login() flow. */
     class BrowserHandler : public game::browser::Handler {
      public:
-        typedef game::browser::Task_t Task_t;
-
         /** Constructor.
             @param b        Owning Browser
             @param mgr      HTTP Manager
@@ -43,7 +41,7 @@ namespace game { namespace pcc {
         // Handler:
         virtual bool handleFolderName(String_t name, afl::container::PtrVector<game::browser::Folder>& result);
         virtual game::browser::Folder* createAccountFolder(game::browser::Account& acc);
-        virtual std::auto_ptr<game::browser::Task_t> loadGameRootMaybe(afl::base::Ref<afl::io::Directory> dir, const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t>& then);
+        virtual std::auto_ptr<Task_t> loadGameRootMaybe(afl::base::Ref<afl::io::Directory> dir, const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t>& then);
 
         /*
          *  PlanetsCentral-specific functions
@@ -108,6 +106,8 @@ namespace game { namespace pcc {
         game::v3::RootLoader& loader();
 
      private:
+        class LoginTask;
+
         game::browser::Browser& m_browser;
         afl::net::http::Manager& m_manager;
         afl::io::NullFileSystem m_nullFS;

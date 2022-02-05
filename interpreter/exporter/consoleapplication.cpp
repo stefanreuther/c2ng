@@ -317,13 +317,22 @@ interpreter::exporter::ConsoleApplication::appMain()
     }
 
     // Make a session and load it
+    bool ok = false;
     game::Session session(translator(), fs);
     session.setGame(new game::Game());
     session.setRoot(root);
     session.setShipList(new game::spec::ShipList());
-    root->specificationLoader().loadShipList(*session.getShipList(), *root);
+    root->specificationLoader().loadShipList(*session.getShipList(), *root, game::makeResultTask(ok))->call();
+    if (!ok) {
+        throw game::Exception(tx("unable to load ship list"));
+    }
 
-    root->getTurnLoader()->loadCurrentTurn(session.getGame()->currentTurn(), *session.getGame(), arg_race, *root, session);
+    ok = false;
+    root->getTurnLoader()->loadCurrentTurn(session.getGame()->currentTurn(), *session.getGame(), arg_race, *root, session, game::makeResultTask(ok))->call();
+    if (!ok) {
+        throw game::Exception(tx("unable to load turn"));
+    }
+
     session.getGame()->currentTurn().universe().postprocess(game::PlayerSet_t(arg_race), game::PlayerSet_t(arg_race), game::map::Object::ReadOnly,
                                                             root->hostVersion(), root->hostConfiguration(),
                                                             session.getGame()->currentTurn().getTurnNumber(),

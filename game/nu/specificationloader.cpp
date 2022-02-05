@@ -12,6 +12,8 @@
 #include "game/root.hpp"
 
 namespace gs = game::spec;
+using afl::string::Format;
+using afl::sys::LogListener;
 
 namespace {
     /*
@@ -79,28 +81,52 @@ game::nu::SpecificationLoader::SpecificationLoader(afl::base::Ref<GameState> gam
 game::nu::SpecificationLoader::~SpecificationLoader()
 { }
 
-void
-game::nu::SpecificationLoader::loadShipList(game::spec::ShipList& list, Root& root)
+std::auto_ptr<game::Task_t>
+game::nu::SpecificationLoader::loadShipList(game::spec::ShipList& list, Root& root, std::auto_ptr<StatusTask_t> then)
 {
-    afl::data::Access rst(m_gameState->loadResultPreAuthenticated());
+    class Task : public Task_t {
+     public:
+        Task(SpecificationLoader& parent, game::spec::ShipList& list, Root& root, std::auto_ptr<StatusTask_t>& then)
+            : m_parent(parent), m_shipList(list), m_root(root), m_then(then)
+            { }
+        virtual void call()
+            {
+                try {
+                    m_parent.m_log.write(LogListener::Trace, LOG_NAME, "Task: loadShipList");
+                    afl::data::Access rst(m_parent.m_gameState->loadResultPreAuthenticated());
 
-    loadRaceNames(root, rst("rst")("players"), rst("rst")("races"));
+                    m_parent.loadRaceNames(m_root, rst("rst")("players"), rst("rst")("races"));
 
-    loadHulls(list, rst("rst")("hulls"));
-    loadBeams(list, rst("rst")("beams"));
-    loadTorpedoes(list, rst("rst")("torpedos"));
-    loadEngines(list, rst("rst")("engines"));
+                    m_parent.loadHulls    (m_shipList, rst("rst")("hulls"));
+                    m_parent.loadBeams    (m_shipList, rst("rst")("beams"));
+                    m_parent.loadTorpedoes(m_shipList, rst("rst")("torpedos"));
+                    m_parent.loadEngines  (m_shipList, rst("rst")("engines"));
 
-    loadDefaultHullAssignments(list, rst("rst")("players"), rst("rst")("races"));
-    loadRaceHullAssignments(list, rst("rst")("racehulls"), rst("rst")("player")("id").toInteger());
+                    m_parent.loadDefaultHullAssignments(m_shipList, rst("rst")("players"),   rst("rst")("races"));
+                    m_parent.loadRaceHullAssignments   (m_shipList, rst("rst")("racehulls"), rst("rst")("player")("id").toInteger());
 
-    // FIXME: process these attributes:
-    // BasicHullFunctionList& basicHullFunctions();
-    // ModifiedHullFunctionList& modifiedHullFunctions();
-    // HullFunctionAssignmentList& racialAbilities();
-    // StandardComponentNameProvider& componentNamer();
-    // FriendlyCodeList& friendlyCodes();
-    // MissionList& missions();
+                    // FIXME: process these attributes:
+                    // BasicHullFunctionList& basicHullFunctions();
+                    // ModifiedHullFunctionList& modifiedHullFunctions();
+                    // HullFunctionAssignmentList& racialAbilities();
+                    // StandardComponentNameProvider& componentNamer();
+                    // FriendlyCodeList& friendlyCodes();
+                    // MissionList& missions();
+
+                    return m_then->call(true);
+                }
+                catch (std::exception& e) {
+                    m_parent.m_log.write(LogListener::Error, LOG_NAME, String_t(), e);
+                    return m_then->call(false);
+                }
+            }
+     private:
+        SpecificationLoader& m_parent;
+        game::spec::ShipList& m_shipList;
+        Root& m_root;
+        std::auto_ptr<StatusTask_t> m_then;
+    };
+    return m_gameState->login(std::auto_ptr<Task_t>(new Task(*this, list, root, then)));
 }
 
 void
@@ -110,7 +136,7 @@ game::nu::SpecificationLoader::loadHulls(game::spec::ShipList& list, afl::data::
         afl::data::Access in = p[i];
         int nr = in("id").toInteger();
         if (nr <= 0 || nr > MAX_HULLS) {
-            m_log.write(m_log.Warn, LOG_NAME, afl::string::Format(m_translator.translateString("Invalid hull number %d, component has been ignored").c_str(), nr));
+            m_log.write(LogListener::Warn, LOG_NAME, Format(m_translator("Invalid hull number %d, component has been ignored"), nr));
         } else if (gs::Hull* out = list.hulls().create(nr)) {
             // Component:
             out->setMass(in("mass").toInteger());
@@ -167,7 +193,7 @@ game::nu::SpecificationLoader::loadHulls(game::spec::ShipList& list, afl::data::
             //   isbase                       - true if default hull of any race
             //   academy                      - available in "academy game" (?)
         } else {
-            m_log.write(m_log.Warn, LOG_NAME, afl::string::Format(m_translator.translateString("Invalid hull number %d, component has been ignored").c_str(), nr));
+            m_log.write(LogListener::Warn, LOG_NAME, Format(m_translator("Invalid hull number %d, component has been ignored"), nr));
         }
     }
 }
@@ -179,7 +205,7 @@ game::nu::SpecificationLoader::loadBeams(game::spec::ShipList& list, afl::data::
         afl::data::Access in = p[i];
         int nr = in("id").toInteger();
         if (nr <= 0 || nr > MAX_BEAMS) {
-            m_log.write(m_log.Warn, LOG_NAME, afl::string::Format(m_translator.translateString("Invalid beam number %d, component has been ignored").c_str(), nr));
+            m_log.write(LogListener::Warn, LOG_NAME, Format(m_translator("Invalid beam number %d, component has been ignored"), nr));
         } else if (gs::Beam* out = list.beams().create(nr)) {
             // Component:
             out->setMass(in("mass").toInteger());
@@ -194,7 +220,7 @@ game::nu::SpecificationLoader::loadBeams(game::spec::ShipList& list, afl::data::
             out->setKillPower(in("crewkill").toInteger());
             out->setDamagePower(in("damage").toInteger());
         } else {
-            m_log.write(m_log.Warn, LOG_NAME, afl::string::Format(m_translator.translateString("Invalid beam number %d, component has been ignored").c_str(), nr));
+            m_log.write(LogListener::Warn, LOG_NAME, Format(m_translator("Invalid beam number %d, component has been ignored"), nr));
         }
     }
 }
@@ -206,7 +232,7 @@ game::nu::SpecificationLoader::loadTorpedoes(game::spec::ShipList& list, afl::da
         afl::data::Access in = p[i];
         int nr = in("id").toInteger();
         if (nr <= 0 || nr > MAX_TORPEDOES) {
-            m_log.write(m_log.Warn, LOG_NAME, afl::string::Format(m_translator.translateString("Invalid torpedo number %d, component has been ignored").c_str(), nr));
+            m_log.write(LogListener::Warn, LOG_NAME, Format(m_translator("Invalid torpedo number %d, component has been ignored"), nr));
         } else if (gs::TorpedoLauncher* out = list.launchers().create(nr)) {
             // Component:
             out->setMass(in("mass").toInteger());
@@ -227,7 +253,7 @@ game::nu::SpecificationLoader::loadTorpedoes(game::spec::ShipList& list, afl::da
             out->torpedoCost().set(gs::Cost::Duranium, 1);
             out->torpedoCost().set(gs::Cost::Molybdenum, 1);
         } else {
-            m_log.write(m_log.Warn, LOG_NAME, afl::string::Format(m_translator.translateString("Invalid torpedo number %d, component has been ignored").c_str(), nr));
+            m_log.write(LogListener::Warn, LOG_NAME, Format(m_translator("Invalid torpedo number %d, component has been ignored"), nr));
         }
     }
 }
@@ -239,7 +265,7 @@ game::nu::SpecificationLoader::loadEngines(game::spec::ShipList& list, afl::data
         afl::data::Access in = p[i];
         int nr = in("id").toInteger();
         if (nr <= 0 || nr > MAX_ENGINES) {
-            m_log.write(m_log.Warn, LOG_NAME, afl::string::Format(m_translator.translateString("Invalid engine number %d, component has been ignored").c_str(), nr));
+            m_log.write(LogListener::Warn, LOG_NAME, Format(m_translator("Invalid engine number %d, component has been ignored"), nr));
         } else if (gs::Engine* out = list.engines().create(nr)) {
             // Component:
             out->setMass(0);
@@ -252,10 +278,10 @@ game::nu::SpecificationLoader::loadEngines(game::spec::ShipList& list, afl::data
 
             // Engine
             for (int i = 1; i <= 9; ++i) {
-                out->setFuelFactor(i, in(afl::string::Format("warp%d", i)).toInteger());
+                out->setFuelFactor(i, in(Format("warp%d", i)).toInteger());
             }
         } else {
-            m_log.write(m_log.Warn, LOG_NAME, afl::string::Format(m_translator.translateString("Invalid engine number %d, component has been ignored").c_str(), nr));
+            m_log.write(LogListener::Warn, LOG_NAME, Format(m_translator("Invalid engine number %d, component has been ignored"), nr));
         }
     }
 }
@@ -363,7 +389,7 @@ game::nu::SpecificationLoader::loadRaceNames(Root& root, afl::data::Access playe
             // "molybdenum":0,
             // "id":1
         } else {
-            m_log.write(m_log.Warn, LOG_NAME, afl::string::Format(m_translator.translateString("Invalid player number %d, entry has been ignored").c_str(), nr));
+            m_log.write(LogListener::Warn, LOG_NAME, Format(m_translator("Invalid player number %d, entry has been ignored"), nr));
         }
     }
     root.playerList().notifyListeners();

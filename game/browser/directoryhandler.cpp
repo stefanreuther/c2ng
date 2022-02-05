@@ -99,7 +99,7 @@ game::browser::DirectoryHandler::createAccountFolder(Account& /*acc*/)
 }
 
 // Load game root for physical folder.
-std::auto_ptr<game::browser::Task_t>
+std::auto_ptr<game::Task_t>
 game::browser::DirectoryHandler::loadGameRootMaybe(afl::base::Ref<afl::io::Directory> dir, const game::config::UserConfiguration& config, std::auto_ptr<LoadGameRootTask_t>& then)
 {
     const String_t gameType = config.getGameType();
@@ -113,7 +113,7 @@ game::browser::DirectoryHandler::loadGameRootMaybe(afl::base::Ref<afl::io::Direc
                 {
                     Ptr<Root> result;
                     try {
-                        m_parent.m_browser.log().write(LogListener::Trace, LOG_NAME, "DirectoryHandler.loadGameRootMaybe.Task");
+                        m_parent.m_browser.log().write(LogListener::Trace, LOG_NAME, "Task: DirectoryHandler.loadGameRootMaybe");
                         std::auto_ptr<afl::charset::Charset> cs(util::CharsetFactory().createCharset(m_config[m_config.Game_Charset]()));
                         if (cs.get() == 0) {
                             cs.reset(new afl::charset::CodepageCharset(afl::charset::g_codepageLatin1));

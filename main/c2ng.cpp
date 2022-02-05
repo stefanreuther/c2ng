@@ -78,6 +78,8 @@
 #include "util/string.hpp"
 #include "util/stringparser.hpp"
 #include "version.hpp"
+#include "game/actions/preconditions.hpp"
+#include "game/interface/simpleprocedure.hpp"
 
 namespace {
     const char LOG_NAME[] = "main";
@@ -217,6 +219,10 @@ namespace {
         afl::net::http::Manager& m_httpManager;
     };
 
+    /*
+     *  The BrowserListener is invoked when the user wants to open a game.
+     *  This is currently pretty ugly spaghetti code waiting to be factored into nice re-usable methods.
+     */
     class BrowserListener : public afl::base::Closure<void(int)> {
      public:
         BrowserListener(client::screens::BrowserScreen& screen,
@@ -247,13 +253,14 @@ namespace {
 
             void handle(game::browser::Session& session)
                 {
-                    class Then : public game::browser::Task_t {
+                    class Then : public game::Task_t {
                      public:
                         Then(game::browser::Session& session, int player, util::RequestSender<client::screens::BrowserScreen> uiSender, util::RequestSender<game::Session> gameSender)
                             : m_session(session), m_player(player), m_uiSender(uiSender), m_gameSender(gameSender)
                             { }
                         virtual void call()
                             {
+                                m_session.log().write(afl::sys::LogListener::Trace, LOG_NAME, "Task: LoadRequest");
                                 m_gameSender.postNewRequest(new LoadRequest2(m_player, m_session.browser().getSelectedRoot(), m_uiSender));
                                 m_session.finishTask();
                             }
@@ -264,7 +271,7 @@ namespace {
                         util::RequestSender<game::Session> m_gameSender;
                     };
 
-                    session.addTask(session.browser().loadChildRoot(std::auto_ptr<game::browser::Task_t>(new Then(session, m_player, m_uiSender, m_gameSender))));
+                    session.addTask(session.browser().loadChildRoot(std::auto_ptr<game::Task_t>(new Then(session, m_player, m_uiSender, m_gameSender))));
                 }
 
          private:
@@ -272,6 +279,106 @@ namespace {
             util::RequestSender<client::screens::BrowserScreen> m_uiSender;
             util::RequestSender<game::Session> m_gameSender;
         };
+
+        static void IFLoadTurn(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args)
+            {
+                args.checkArgumentCount(1);
+                int32_t player;
+                if (!interpreter::checkIntegerArg(player, args.getNext())) {
+                    throw interpreter::Error::typeError(interpreter::Error::ExpectInteger);
+                }
+
+                class Fail : public game::Task_t {
+                 public:
+                    Fail(interpreter::Process& proc, game::Session& session)
+                        : m_process(proc), m_session(session)
+                        { }
+                    virtual void call()
+                        {
+                            // Make a copy of m_session.
+                            // The continueProcessWithFailure() will destroy the Task.
+                            game::Session& session = m_session;
+                            session.log().write(afl::sys::LogListener::Trace, LOG_NAME, "LoadRequest.Fail");
+                            session.processList().continueProcessWithFailure(m_process, "Load error");
+                            session.sig_runRequest.raise();
+                        }
+                 private:
+                    interpreter::Process& m_process;
+                    game::Session& m_session;
+                };
+
+                class Task : public game::Task_t {
+                 public:
+                    Task(interpreter::Process& proc, game::Session& session, int player)
+                        : m_process(proc), m_session(session), m_player(player)
+                        { }
+                    virtual void call()
+                        {
+                            m_session.log().write(afl::sys::LogListener::Trace, LOG_NAME, "LoadRequest.Task");
+                            game::Root& root = game::actions::mustHaveRoot(m_session);
+                            m_session.getGame()->setViewpointPlayer(m_player);
+
+                            if (root.userConfiguration()[game::config::UserConfiguration::Team_AutoSync]()) {
+                                m_session.getGame()->synchronizeTeamsFromAlliances();
+                            }
+
+                            game::map::Object::Playability playability;
+                            game::Session::AreaSet_t editableAreas;
+                            if (root.getPossibleActions().contains(game::Root::aLoadEditable) && !root.userConfiguration()[game::config::UserConfiguration::Game_ReadOnly]()) {
+                                if (root.userConfiguration()[game::config::UserConfiguration::Game_Finished]()) {
+                                    // Finished game
+                                    playability = game::map::Object::ReadOnly;
+                                } else {
+                                    // Active game
+                                    playability = game::map::Object::Playable;
+                                    editableAreas += game::Session::CommandArea;
+                                }
+                                editableAreas += game::Session::LocalDataArea;
+                            } else {
+                                // View only
+                                playability = game::map::Object::ReadOnly;
+                            }
+
+                            m_session.setEditableAreas(editableAreas);
+                            m_session.log().write(afl::sys::LogListener::Error, LOG_NAME, m_session.translator()("Compiling starchart..."));
+                            m_session.getGame()->currentTurn().universe().postprocess(game::PlayerSet_t(m_player), game::PlayerSet_t(m_player), playability,
+                                                                                      root.hostVersion(), root.hostConfiguration(),
+                                                                                      m_session.getGame()->currentTurn().getTurnNumber(),
+                                                                                      *m_session.getShipList(),
+                                                                                      m_session.translator(), m_session.log());
+                            m_session.getGame()->currentTurn().alliances().postprocess();
+
+                            // Load VM
+                            try {
+                                game::interface::loadVM(m_session, m_player);
+                            }
+                            catch (std::exception& e) {
+                                m_session.log().write(afl::sys::LogListener::Error, LOG_NAME, m_session.translator()("Unable to scripts and auto-tasks"), e);
+                            }
+
+                            // Resume
+                            // Make a copy of m_session.
+                            // The continueProcessWithFailure() will destroy the Task.
+                            game::Session& session = m_session;
+                            session.processList().continueProcess(m_process);
+                            session.sig_runRequest.raise();
+                        }
+                 private:
+                    interpreter::Process& m_process;
+                    game::Session& m_session;
+                    int m_player;
+                };
+
+                game::Root& root = game::actions::mustHaveRoot(session);
+                proc.suspend(root.specificationLoader().loadShipList(
+                                 *session.getShipList(), root,
+                                 game::makeConditionalTask(
+                                     root.getTurnLoader()->loadCurrentTurn(
+                                         session.getGame()->currentTurn(), *session.getGame(), player, root, session,
+                                         game::makeConditionalTask(std::auto_ptr<game::Task_t>(new Task(proc, session, player)),
+                                                                   std::auto_ptr<game::Task_t>(new Fail(proc, session)))),
+                                     std::auto_ptr<game::Task_t>(new Fail(proc, session)))));
+            }
 
         class LoadRequest2 : public util::Request<game::Session> {
          public:
@@ -288,62 +395,45 @@ namespace {
                         afl::base::Ptr<game::TurnLoader> loader = m_root->getTurnLoader();
                         if (loader.get() != 0) {
                             // Everything fine: make a new session
-                            try {
-                                session.setGame(new game::Game());
-                                session.setRoot(m_root);
-                                session.setShipList(new game::spec::ShipList());
-                                m_root->specificationLoader().loadShipList(*session.getShipList(), *m_root);
-
-                                m_root->getTurnLoader()->loadCurrentTurn(session.getGame()->currentTurn(), *session.getGame(), m_player, *m_root, session);
-                                session.getGame()->setViewpointPlayer(m_player);
-
-                                if (m_root->userConfiguration()[game::config::UserConfiguration::Team_AutoSync]()) {
-                                    session.getGame()->synchronizeTeamsFromAlliances();
-                                }
-
-                                game::map::Object::Playability playability;
-                                game::Session::AreaSet_t editableAreas;
-                                if (m_root->getPossibleActions().contains(game::Root::aLoadEditable) && !m_root->userConfiguration()[game::config::UserConfiguration::Game_ReadOnly]()) {
-                                    if (m_root->userConfiguration()[game::config::UserConfiguration::Game_Finished]()) {
-                                        // Finished game
-                                        playability = game::map::Object::ReadOnly;
-                                    } else {
-                                        // Active game
-                                        playability = game::map::Object::Playable;
-                                        editableAreas += game::Session::CommandArea;
+                            // We need a process context to be able to suspend, so we do the bulk in a function IFLoadTurn,
+                            // and use a dummy process to invoke that.
+                            // (An alternative would have been to run this as a browser task.)
+                            class Finalizer : public interpreter::Process::Finalizer {
+                             public:
+                                Finalizer(util::RequestSender<client::screens::BrowserScreen> uiSender)
+                                    : m_uiSender(uiSender)
+                                    { }
+                                ~Finalizer()
+                                    { /* TODO: unexpected stop */ }
+                                virtual void finalizeProcess(interpreter::Process& p)
+                                    {
+                                        if (p.getState() == interpreter::Process::Ended) {
+                                            m_uiSender.postNewRequest(new ConfirmRequest(true));
+                                        } else {
+                                            m_uiSender.postNewRequest(new ConfirmRequest(false));
+                                        }
                                     }
-                                    editableAreas += game::Session::LocalDataArea;
-                                } else {
-                                    // View only
-                                    playability = game::map::Object::ReadOnly;
-                                }
+                             private:
+                                util::RequestSender<client::screens::BrowserScreen> m_uiSender;
+                            };
 
-                                session.setEditableAreas(editableAreas);
-                                session.log().write(afl::sys::LogListener::Error, LOG_NAME, session.translator()("Compiling starchart..."));
-                                session.getGame()->currentTurn().universe().postprocess(game::PlayerSet_t(m_player), game::PlayerSet_t(m_player), playability,
-                                                                                        m_root->hostVersion(), m_root->hostConfiguration(),
-                                                                                        session.getGame()->currentTurn().getTurnNumber(),
-                                                                                        *session.getShipList(),
-                                                                                        session.translator(), session.log());
-                                session.getGame()->currentTurn().alliances().postprocess();
+                            session.setGame(new game::Game());
+                            session.setRoot(m_root);
+                            session.setShipList(new game::spec::ShipList());
 
-                                // Load VM
-                                try {
-                                    game::interface::loadVM(session, m_player);
-                                }
-                                catch (std::exception& e) {
-                                    session.log().write(afl::sys::LogListener::Error, LOG_NAME, session.translator()("Unable to scripts and auto-tasks"), e);
-                                }
+                            interpreter::Process& proc = session.processList().create(session.world(), "<Loader>");
+                            interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
+                            proc.pushNewValue(interpreter::makeIntegerValue(m_player));
+                            proc.pushNewValue(new game::interface::SimpleProcedure(session, IFLoadTurn));
+                            bco->addInstruction(interpreter::Opcode::maIndirect, interpreter::Opcode::miIMCall, 1);
+                            proc.pushFrame(bco, false);
+                            proc.setNewFinalizer(new Finalizer(m_uiSender));
 
-                                ok = true;
-                            }
-                            catch (std::exception& e) {
-                                session.log().write(afl::sys::LogListener::Error, LOG_NAME, session.translator()("Unable to load turn"), e);
-                                session.setGame(0);
-                                session.setRoot(0);
-                                session.setShipList(0);
-                                ok = false;
-                            }
+                            uint32_t pgid = session.processList().allocateProcessGroup();
+                            session.processList().resumeProcess(proc, pgid);
+                            session.processList().startProcessGroup(pgid);
+                            session.processList().run();
+                            session.processList().removeTerminatedProcesses();
                         } else {
                             // Don't have a turn loader
                             ok = false;
@@ -882,7 +972,8 @@ namespace {
                 registerCommands(userSide);
 
                 // Browser proxy
-                game::proxy::BrowserProxy browserProxy(browserSender, root.engine().dispatcher());
+                client::UserCallback browserCallback(userSide);
+                game::proxy::BrowserProxy browserProxy(browserSender, root.engine().dispatcher(), browserCallback);
 
                 // Initialize by posting requests to the background thread.
                 // (This will not take time.)
@@ -929,8 +1020,6 @@ namespace {
                     // Browser
                     client::screens::BrowserScreen browserScreen(root, translator(), browserProxy, gameReceiver.getSender());
                     browserScreen.sig_gameSelection.addNewClosure(new BrowserListener(browserScreen, browserSender, gameReceiver.getSender()));
-
-                    client::UserCallback cb(root, translator(), browserSender);
 
                     int result = browserScreen.run(docColors);
                     if (result != 0) {

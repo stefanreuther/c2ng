@@ -8,6 +8,8 @@
 #include "game/pcc/gamefolder.hpp"
 
 namespace {
+    const char*const LOG_NAME = "game.pcc";
+
     struct SortByName {
         bool operator()(const game::browser::Folder& a, const game::browser::Folder& b)
             { return a.getName() < b.getName(); }
@@ -19,18 +21,19 @@ game::pcc::AccountFolder::AccountFolder(BrowserHandler& handler, game::browser::
       m_account(acc)
 { }
 
-std::auto_ptr<game::browser::Task_t>
+std::auto_ptr<game::Task_t>
 game::pcc::AccountFolder::loadContent(std::auto_ptr<game::browser::LoadContentTask_t> then)
 {
     // Load after logging in.
     // login() is mandatory here, this is usually the first call for an account.
-    class Task : public game::browser::Task_t {
+    class Task : public Task_t {
      public:
         Task(BrowserHandler& handler, game::browser::Account& account, std::auto_ptr<game::browser::LoadContentTask_t>& then)
             : m_handler(handler), m_account(account), m_then(then)
             { }
         virtual void call()
             {
+                m_handler.log().write(afl::sys::LogListener::Trace, LOG_NAME, "Task: loadContent");
                 afl::container::PtrVector<Folder> result;
                 afl::data::Access p = m_handler.getGameListPreAuthenticated(m_account)("reply");
                 for (size_t i = 0, n = p.getArraySize(); i < n; ++i) {
@@ -44,7 +47,7 @@ game::pcc::AccountFolder::loadContent(std::auto_ptr<game::browser::LoadContentTa
         game::browser::Account& m_account;
         std::auto_ptr<game::browser::LoadContentTask_t> m_then;
     };
-    return m_handler.login(m_account, std::auto_ptr<game::browser::Task_t>(new Task(m_handler, m_account, then)));
+    return m_handler.login(m_account, std::auto_ptr<Task_t>(new Task(m_handler, m_account, then)));
 }
 
 bool
@@ -65,7 +68,7 @@ game::pcc::AccountFolder::setLocalDirectoryName(String_t /*directoryName*/)
     return false;
 }
 
-std::auto_ptr<game::browser::Task_t>
+std::auto_ptr<game::Task_t>
 game::pcc::AccountFolder::loadGameRoot(const game::config::UserConfiguration& /*config*/, std::auto_ptr<game::browser::LoadGameRootTask_t> then)
 {
     // No game in this folder

@@ -3,19 +3,21 @@
   */
 
 #include "game/nu/turnloader.hpp"
-#include "game/map/planet.hpp"
-#include "game/game.hpp"
-#include "game/turn.hpp"
 #include "afl/base/countof.hpp"
 #include "afl/except/fileformatexception.hpp"
-#include "afl/string/format.hpp"
 #include "afl/except/invaliddataexception.hpp"
-#include "game/map/ship.hpp"
+#include "afl/string/format.hpp"
 #include "afl/string/string.hpp"
+#include "game/game.hpp"
+#include "game/map/planet.hpp"
+#include "game/map/ship.hpp"
 #include "game/timestamp.hpp"
-#include "game/vcr/classic/database.hpp"
+#include "game/turn.hpp"
 #include "game/vcr/classic/battle.hpp"
+#include "game/vcr/classic/database.hpp"
 #include "game/vcr/object.hpp"
+
+using afl::sys::LogListener;
 
 namespace {
 
@@ -226,68 +228,39 @@ game::nu::TurnLoader::getPlayerStatus(int player, String_t& extra, afl::string::
     return result;
 }
 
-void
-game::nu::TurnLoader::loadCurrentTurn(Turn& turn, Game& game, int player, Root& /*root*/, Session& /*session*/)
+std::auto_ptr<game::Task_t>
+game::nu::TurnLoader::loadCurrentTurn(Turn& turn, Game& game, int player, Root& /*root*/, Session& /*session*/, std::auto_ptr<StatusTask_t> then)
 {
     // FIXME: validate player
+    class Task : public Task_t {
+     public:
+        Task(TurnLoader& parent, Turn& turn, Game& game, int player, std::auto_ptr<StatusTask_t>& then)
+            : m_parent(parent), m_turn(turn), m_game(game), m_player(player), m_then(then)
+            { }
 
-    // Load result
-    afl::data::Access rst(m_gameState->loadResultPreAuthenticated());
-    if (rst.isNull() || rst("success").toInteger() == 0) {
-        throw std::runtime_error(m_translator.translateString("Unable to download result file"));
-    }
-
-    // rst attributes:
-    // - settings
-    // - game
-    // - player
-    // - players
-    // - scores
-    // - maps
-    // - planets
-    // - ships
-    // - ionstorms
-    // - nebulas
-    // - stars
-    // - artifacts
-    // - wormholes
-    // - starbases
-    // - stock
-    // - minefields
-    // - relations
-    // - messages
-    // - mymessages
-    // - cutscenes
-    // - notes
-    // - vcrs
-    // - races
-    // - hulls
-    // - racehulls
-    // - beams
-    // - engines
-    // - torpedos
-    // - advantages
-    // - activebadges
-    // - badgechange
-
-    turn.setTurnNumber(rst("rst")("game")("turn").toInteger());
-    turn.setTimestamp(convertTime(rst("rst")("settings")("hostcompleted").toString()));
-
-    // FIXME: loadCurrentDatabases()
-    // must create all planets/ships before.
-
-    // expression lists
-    game.expressionLists().loadRecentFiles(m_profile, m_log, m_translator);
-    game.expressionLists().loadPredefinedFiles(m_profile, *m_defaultSpecificationDirectory, m_log, m_translator);
-
-    loadPlanets(turn.universe(), rst("rst")("planets"), PlayerSet_t(player));
-    loadStarbases(turn.universe(), rst("rst")("starbases"), PlayerSet_t(player));
-    loadShips(turn.universe(), rst("rst")("ships"), PlayerSet_t(player));
-    loadMinefields(turn.universe(), rst("rst")("minefields"));
-    loadVcrs(turn, rst("rst")("vcrs"));
+        virtual void call()
+            {
+                m_parent.m_log.write(LogListener::Trace, LOG_NAME, "Task: loadCurrentTurn");
+                try {
+                    m_parent.doLoadCurrentTurn(m_turn, m_game, m_player);
+                    m_then->call(true);
+                }
+                catch (std::exception& e) {
+                    m_parent.m_log.write(LogListener::Error, LOG_NAME, String_t(), e);
+                    m_then->call(false);
+                }
+            }
+     private:
+        TurnLoader& m_parent;
+        Turn& m_turn;
+        Game& m_game;
+        int m_player;
+        std::auto_ptr<StatusTask_t> m_then;
+    };
+    return m_gameState->login(std::auto_ptr<Task_t>(new Task(*this, turn, game, player, then)));
 }
 
-std::auto_ptr<game::TurnLoader::Task_t>
+std::auto_ptr<game::Task_t>
 game::nu::TurnLoader::saveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then)
 {
     // FIXME
@@ -354,6 +327,65 @@ game::nu::TurnLoader::getProperty(Property p)
         return String_t();
     }
     return String_t();
+}
+
+void
+game::nu::TurnLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player)
+{
+    // Load result
+    afl::data::Access rst(m_gameState->loadResultPreAuthenticated());
+    if (rst.isNull() || rst("success").toInteger() == 0) {
+        throw std::runtime_error(m_translator("Unable to download result file"));
+    }
+
+    // rst attributes:
+    // - settings
+    // - game
+    // - player
+    // - players
+    // - scores
+    // - maps
+    // - planets
+    // - ships
+    // - ionstorms
+    // - nebulas
+    // - stars
+    // - artifacts
+    // - wormholes
+    // - starbases
+    // - stock
+    // - minefields
+    // - relations
+    // - messages
+    // - mymessages
+    // - cutscenes
+    // - notes
+    // - vcrs
+    // - races
+    // - hulls
+    // - racehulls
+    // - beams
+    // - engines
+    // - torpedos
+    // - advantages
+    // - activebadges
+    // - badgechange
+
+    turn.setTurnNumber(rst("rst")("game")("turn").toInteger());
+    turn.setTimestamp(convertTime(rst("rst")("settings")("hostcompleted").toString()));
+
+    // FIXME: loadCurrentDatabases()
+    // must create all planets/ships before.
+
+    // expression lists
+    game.expressionLists().loadRecentFiles(m_profile, m_log, m_translator);
+    game.expressionLists().loadPredefinedFiles(m_profile, *m_defaultSpecificationDirectory, m_log, m_translator);
+
+    loadPlanets(turn.universe(), rst("rst")("planets"), PlayerSet_t(player));
+    loadStarbases(turn.universe(), rst("rst")("starbases"), PlayerSet_t(player));
+    loadShips(turn.universe(), rst("rst")("ships"), PlayerSet_t(player));
+    loadMinefields(turn.universe(), rst("rst")("minefields"));
+    loadVcrs(turn, rst("rst")("vcrs"));
 }
 
 void

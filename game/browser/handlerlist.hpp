@@ -7,6 +7,7 @@
 
 #include "afl/container/ptrvector.hpp"
 #include "game/browser/handler.hpp"
+#include "game/task.hpp"
 
 namespace game { namespace browser {
 

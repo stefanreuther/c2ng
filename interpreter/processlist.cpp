@@ -380,32 +380,36 @@ interpreter::ProcessList::removeTerminatedProcesses()
     // ex int/process.h:killTerminatedProcesses
     // ex ccexec.pas:KillTerminatedProcesses
 
-    // Select processes and remove them one-by-one.
-    // Efficiency-wise, this is the same as run(), i.e. a O(n**2) algorithm.
-    // We originally ran through this list once, moving the terminated processes to the end, deleting them all at once in O(n).
-    // That fails if a terminating process causes other processes to terminate, and this function being entered recursively.
-    // This happens when a process dies that has a TaskEditorContext on stack, e.g. user entering 'AutoTask(1,Id)' at a console.
-    // (The alternative would have been to make this function reentrancy-save in a similar way as run().)
-    while (1) {
-        bool found = false;
-        for (Vector_t::iterator i = m_processes.begin(); i != m_processes.end(); ++i) {
-            Process* p = *i;
-            if (isTerminatedState(p->getState())) {
-                // Killing a process invoked from an object marks that object dirty,
-                // in order to remove the "there's a process here" marker.
-                if (game::map::Object* obj = p->getInvokingObject()) {
-                    obj->markDirty();
+    // Do not garbage-collect while running; this might be a resumption handler of a process about to suspend
+    // (i.e. process does suspend(), task does continueProcessWithFailure(), run(), removeTerminatedProcesses().)
+    if (!m_running) {
+        // Select processes and remove them one-by-one.
+        // Efficiency-wise, this is the same as run(), i.e. a O(n**2) algorithm.
+        // We originally ran through this list once, moving the terminated processes to the end, deleting them all at once in O(n).
+        // That fails if a terminating process causes other processes to terminate, and this function being entered recursively.
+        // This happens when a process dies that has a TaskEditorContext on stack, e.g. user entering 'AutoTask(1,Id)' at a console.
+        // (The alternative would have been to make this function reentrancy-save in a similar way as run().)
+        while (1) {
+            bool found = false;
+            for (Vector_t::iterator i = m_processes.begin(); i != m_processes.end(); ++i) {
+                Process* p = *i;
+                if (isTerminatedState(p->getState())) {
+                    // Killing a process invoked from an object marks that object dirty,
+                    // in order to remove the "there's a process here" marker.
+                    if (game::map::Object* obj = p->getInvokingObject()) {
+                        obj->markDirty();
+                    }
+
+                    // Remove it
+                    m_processes.erase(i);
+
+                    found = true;
+                    break;
                 }
-
-                // Remove it
-                m_processes.erase(i);
-
-                found = true;
+            }
+            if (!found) {
                 break;
             }
-        }
-        if (!found) {
-            break;
         }
     }
 }

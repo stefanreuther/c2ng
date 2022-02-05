@@ -1481,6 +1481,10 @@ interpreter::Process::suspendForUI()
 void
 interpreter::Process::suspend(std::auto_ptr<Task_t> task)
 {
+    // Remember the world for later.
+    // m_task->call() might resume and destroy the process.
+    World& world = m_world;
+
     // Clear old task, if any, to not have overlap. Task shouldn't be set here.
     m_task.reset();
 
@@ -1495,7 +1499,7 @@ interpreter::Process::suspend(std::auto_ptr<Task_t> task)
 
     // Call listeners as last operation so if it has something to say about our task,
     // it sees the final state.
-    m_world.notifyListeners();
+    world.notifyListeners();
 }
 
 // Look up value.

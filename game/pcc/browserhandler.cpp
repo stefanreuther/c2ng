@@ -4,6 +4,7 @@
   */
 
 #include "game/pcc/browserhandler.hpp"
+#include "afl/base/signalconnection.hpp"
 #include "afl/data/defaultvaluefactory.hpp"
 #include "afl/data/segment.hpp"
 #include "afl/io/constmemorystream.hpp"
@@ -16,11 +17,12 @@
 #include "game/pcc/accountfolder.hpp"
 #include "game/v3/rootloader.hpp"
 
+using afl::string::Format;
+using afl::sys::LogListener;
+using game::browser::UserCallback;
+
 namespace {
     const char LOG_NAME[] = "game.pcc";
-
-    using afl::sys::LogListener;
-    using afl::string::Format;
 
     String_t buildUrl(const game::browser::Account& acc)
     {
@@ -33,9 +35,69 @@ namespace {
 }
 
 
-namespace {
+class game::pcc::BrowserHandler::LoginTask : public Task_t {
+ public:
+    LoginTask(BrowserHandler& parent, game::browser::Account& acc, std::auto_ptr<Task_t>& then)
+        : m_parent(parent),
+          m_account(acc),
+          m_then(then),
+          conn_passwordResult(parent.m_browser.callback().sig_passwordResult.add(this, &LoginTask::onPasswordResult))
+        { }
+    virtual void call()
+        {
+            // Already logged in?
+            if (m_account.get("api_token") != 0 && m_account.get("api_user") != 0) {
+                m_parent.log().write(LogListener::Trace, LOG_NAME, "Task: BrowserHandler.login: already logged in");
+                m_then->call();
+                return;
+            }
+            m_parent.log().write(LogListener::Trace, LOG_NAME, "Task: BrowserHandler.login");
 
-}
+            // Ask for password
+            UserCallback::PasswordRequest req;
+            req.accountName = m_account.getName();
+            req.hasFailed = false;
+            m_parent.m_browser.callback().askPassword(req);
+        }
+
+    void onPasswordResult(UserCallback::PasswordResponse resp)
+        {
+            if (resp.canceled) {
+                m_parent.log().write(LogListener::Error, LOG_NAME, m_parent.translator()("Login canceled"));
+                m_then->call();
+                return;
+            }
+
+            // Try to log in
+            afl::net::HeaderTable tab;
+            tab.set("api_user", m_account.getUser());
+            tab.set("api_password", resp.password);
+            tab.set("action", "whoami");
+            std::auto_ptr<afl::data::Value> result(m_parent.callServer(m_account, "user", tab));
+            if (result.get() == 0) {
+                m_parent.log().write(LogListener::Error, LOG_NAME, m_parent.translator()("Login failed"));
+                m_then->call();
+                return;
+            }
+
+            afl::data::Access parsedResult(result);
+            if (!parsedResult("result").toInteger()) {
+                m_parent.log().write(LogListener::Error, LOG_NAME, m_parent.translator()("Login did not succeed; wrong password?"));
+                m_then->call();
+                return;
+            }
+
+            m_account.setEncoded("api_token", parsedResult("api_token").toString(), false);
+            m_account.setEncoded("api_user",  parsedResult("username").toString(), false);
+            m_then->call();
+        }
+
+ private:
+    BrowserHandler& m_parent;
+    game::browser::Account& m_account;
+    std::auto_ptr<Task_t> m_then;
+    afl::base::SignalConnection conn_passwordResult;
+};
 
 game::pcc::BrowserHandler::BrowserHandler(game::browser::Browser& b,
                                           afl::net::http::Manager& mgr,
@@ -67,74 +129,18 @@ game::pcc::BrowserHandler::createAccountFolder(game::browser::Account& acc)
     }
 }
 
-std::auto_ptr<game::browser::Task_t>
+std::auto_ptr<game::Task_t>
 game::pcc::BrowserHandler::loadGameRootMaybe(afl::base::Ref<afl::io::Directory> /*dir*/, const game::config::UserConfiguration& /*config*/, std::auto_ptr<game::browser::LoadGameRootTask_t>& /*then*/)
 {
     // TODO: if this is the local directory for a server game, load that.
     // (For now, we have no local directories.)
-    return std::auto_ptr<game::browser::Task_t>();
+    return std::auto_ptr<Task_t>();
 }
 
-std::auto_ptr<game::pcc::BrowserHandler::Task_t>
+std::auto_ptr<game::Task_t>
 game::pcc::BrowserHandler::login(game::browser::Account& acc, std::auto_ptr<Task_t> then)
 {
-    class Task : public Task_t {
-     public:
-        Task(BrowserHandler& parent, game::browser::Account& acc, std::auto_ptr<Task_t>& then)
-            : m_parent(parent),
-              m_account(acc),
-              m_then(then)
-            { }
-        virtual void call()
-            {
-                // Already logged in?
-                if (m_account.get("api_token") != 0 && m_account.get("api_user") != 0) {
-                    m_parent.log().write(LogListener::Trace, LOG_NAME, "BrowserHandler.login: already logged in");
-                    m_then->call();
-                    return;
-                }
-                m_parent.log().write(LogListener::Trace, LOG_NAME, "BrowserHandler.login");
-
-                // Ask for password
-                afl::data::Segment answer;
-                std::vector<game::browser::UserCallback::Element> vec(1);
-                vec[0].type = game::browser::UserCallback::AskPassword;
-                vec[0].prompt = Format(m_parent.translator()("Password for %s"), m_account.getName());
-                if (!m_parent.m_browser.callback().askInput("planetscentral.com", vec, answer)) {
-                    m_parent.log().write(LogListener::Error, LOG_NAME, m_parent.translator()("Login canceled"));
-                    m_then->call();
-                    return;
-                }
-
-                // Try to log in
-                afl::net::HeaderTable tab;
-                tab.set("api_user", m_account.getUser());
-                tab.set("api_password", afl::data::Access(answer[0]).toString());
-                tab.set("action", "whoami");
-                std::auto_ptr<afl::data::Value> result(m_parent.callServer(m_account, "user", tab));
-                if (result.get() == 0) {
-                    m_parent.log().write(LogListener::Error, LOG_NAME, m_parent.translator()("Login failed"));
-                    m_then->call();
-                    return;
-                }
-
-                afl::data::Access parsedResult(result);
-                if (!parsedResult("result").toInteger()) {
-                    m_parent.log().write(LogListener::Error, LOG_NAME, m_parent.translator()("Login did not succeed; wrong password?"));
-                    m_then->call();
-                    return;
-                }
-
-                m_account.setEncoded("api_token", parsedResult("api_token").toString(), false);
-                m_account.setEncoded("api_user",  parsedResult("username").toString(), false);
-                m_then->call();
-            }
-     private:
-        BrowserHandler& m_parent;
-        game::browser::Account& m_account;
-        std::auto_ptr<Task_t> m_then;
-    };
-    return std::auto_ptr<Task_t>(new Task(*this, acc, then));
+    return std::auto_ptr<Task_t>(new LoginTask(*this, acc, then));
 }
 
 std::auto_ptr<afl::data::Value>

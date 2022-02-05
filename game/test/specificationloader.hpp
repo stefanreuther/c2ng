@@ -13,7 +13,7 @@ namespace game { namespace test {
         This SpecificationLoader just does nothing. */
     class SpecificationLoader : public game::SpecificationLoader {
      public:
-        virtual void loadShipList(game::spec::ShipList& list, game::Root& root);
+        virtual std::auto_ptr<Task_t> loadShipList(game::spec::ShipList& list, game::Root& root, std::auto_ptr<StatusTask_t> then);
     };
 
 } }

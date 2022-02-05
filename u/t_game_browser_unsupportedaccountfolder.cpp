@@ -44,7 +44,7 @@ TestGameBrowserUnsupportedAccountFolder::testIt()
     TS_ASSERT(!testee.canEnter());
 
     Receiver recv;
-    std::auto_ptr<game::browser::Task_t> t = testee.loadGameRoot(uc, std::auto_ptr<game::browser::LoadGameRootTask_t>(game::browser::LoadGameRootTask_t::makeBound(&recv, &Receiver::take)));
+    std::auto_ptr<game::Task_t> t = testee.loadGameRoot(uc, std::auto_ptr<game::browser::LoadGameRootTask_t>(game::browser::LoadGameRootTask_t::makeBound(&recv, &Receiver::take)));
     TS_ASSERT(t.get() != 0);
     t->call();
     TS_ASSERT(recv.beenHere());

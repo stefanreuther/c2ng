@@ -8,15 +8,11 @@
 #include "afl/container/ptrvector.hpp"
 #include "afl/base/ptr.hpp"
 #include "game/root.hpp"
+#include "game/task.hpp"
 
 namespace game { namespace browser {
 
     class Folder;
-
-    /** Browser task type.
-        Generic type for a pending task.
-        Must not throw. */
-    typedef afl::base::Closure<void()> Task_t;
 
     /** Task: result of loadContent().
         Must not throw. */

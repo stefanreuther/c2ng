@@ -12,7 +12,7 @@
 #include "afl/sys/loglistener.hpp"
 #include "game/browser/accountmanager.hpp"
 #include "game/browser/browser.hpp"
-#include "game/browser/usercallbackproxy.hpp"
+#include "game/browser/optionalusercallback.hpp"
 #include "util/profiledirectory.hpp"
 
 namespace game { namespace browser {
@@ -30,7 +30,7 @@ namespace game { namespace browser {
 
         Browser& browser();
         AccountManager& accountManager();
-        UserCallbackProxy& userCallbackProxy();
+        OptionalUserCallback& callback();
 
         void addTask(std::auto_ptr<Task_t> task);
         void finishTask();
@@ -42,7 +42,7 @@ namespace game { namespace browser {
 
         // Data
         AccountManager m_accountManager;
-        UserCallbackProxy m_userCallbackProxy;
+        OptionalUserCallback m_callback;
 
         // Browser (after other objects because it refers to them)
         Browser m_browser;

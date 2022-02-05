@@ -10,6 +10,7 @@
 #include "afl/data/access.hpp"
 #include "game/browser/account.hpp"
 #include "game/player.hpp"
+#include "game/task.hpp"
 
 namespace game { namespace nu {
 
@@ -46,6 +47,12 @@ namespace game { namespace nu {
             If the account is not or no longer logged in, the request will fail (return null).
             @return Handle to result JSON */
         afl::data::Access loadGameListEntryPreAuthenticated();
+
+        /** Log in.
+            Shortcut for BrowserHandler::login().
+            @param then Task to execute after logging in
+            @return Task */
+        std::auto_ptr<Task_t> login(std::auto_ptr<Task_t> then);
 
         /** Invalidate previously downloaded result.
             The next call to loadResultPreAuthenticated() will again hit the network. */

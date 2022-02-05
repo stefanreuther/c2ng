@@ -86,6 +86,12 @@ game::nu::GameState::loadGameListEntryPreAuthenticated()
     return afl::data::Access();
 }
 
+std::auto_ptr<game::Task_t>
+game::nu::GameState::login(std::auto_ptr<Task_t> then)
+{
+    return m_handler.login(m_account, then);
+}
+
 void
 game::nu::GameState::invalidateResult()
 {

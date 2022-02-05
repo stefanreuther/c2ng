@@ -41,7 +41,7 @@ namespace game { namespace v3 {
                      util::ProfileDirectory* pProfile);
 
         virtual PlayerStatusSet_t getPlayerStatus(int player, String_t& extra, afl::string::Translator& tx) const;
-        virtual void loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session);
+        virtual std::auto_ptr<Task_t> loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
         virtual std::auto_ptr<Task_t> saveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
         virtual void getHistoryStatus(int player, int turn, afl::base::Memory<HistoryStatus> status, const Root& root);
         virtual void loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root);
@@ -60,6 +60,7 @@ namespace game { namespace v3 {
 
         PlayerArray<DirectoryScanner::PlayerFlags_t> m_playerFlags;
 
+        void doLoadCurrentTurn(Turn& turn, Game& game, int player, game::Root& root, Session& session);
         void doSaveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session);
 
         void addMessage(Turn& trn, String_t text, int sender, PlayerSet_t receiver) const;

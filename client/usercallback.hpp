@@ -5,30 +5,24 @@
 #ifndef C2NG_CLIENT_USERCALLBACK_HPP
 #define C2NG_CLIENT_USERCALLBACK_HPP
 
+#include "client/si/userside.hpp"
 #include "game/browser/usercallback.hpp"
-#include "ui/root.hpp"
-#include "util/requestreceiver.hpp"
-#include "game/browser/session.hpp"
 
 namespace client {
 
     /** Implementation of game::browser::UserCallback using UI.
         This implements the callbacks using real dialogs.
-        
-        Creating an object of this type will automatically register it with the BrowserSession's UserCallbackProxy, destroying it will unregister it.
-        Therefore, if you anticipate background browser callbacks, create a UserCallback object in the UI thread. */
+
+        This class does not implement the UI/game thread transition. */
     class UserCallback : public game::browser::UserCallback {
      public:
-        UserCallback(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::browser::Session> sender);
+        UserCallback(client::si::UserSide& us);
         ~UserCallback();
 
-        virtual bool askInput(String_t title, const std::vector<Element>& question, afl::data::Segment& values);
+        virtual void askPassword(const PasswordRequest& req);
 
      private:
-        util::RequestReceiver<game::browser::UserCallback> m_receiver;
-        ui::Root& m_root;
-        afl::string::Translator& m_translator;
-        util::RequestSender<game::browser::Session> m_sender;
+        client::si::UserSide& m_userSide;
     };
 
 }

@@ -15,10 +15,10 @@ TestGameTurnLoader::testInterface()
      public:
         virtual PlayerStatusSet_t getPlayerStatus(int /*player*/, String_t& /*extra*/, afl::string::Translator& /*tx*/) const
             { return PlayerStatusSet_t(); }
-        virtual void loadCurrentTurn(game::Turn& /*turn*/, game::Game& /*game*/, int /*player*/, game::Root& /*root*/, game::Session& /*session*/)
-            { }
-        virtual std::auto_ptr<Task_t> saveCurrentTurn(const game::Turn& /*turn*/, const game::Game& /*game*/, int /*player*/, const game::Root& /*root*/, game::Session& /*session*/, std::auto_ptr<StatusTask_t> then)
-            { return makeConfirmationTask(false, then); }
+        virtual std::auto_ptr<game::Task_t> loadCurrentTurn(game::Turn& /*turn*/, game::Game& /*game*/, int /*player*/, game::Root& /*root*/, game::Session& /*session*/, std::auto_ptr<game::StatusTask_t> then)
+            { return game::makeConfirmationTask(false, then); }
+        virtual std::auto_ptr<game::Task_t> saveCurrentTurn(const game::Turn& /*turn*/, const game::Game& /*game*/, int /*player*/, const game::Root& /*root*/, game::Session& /*session*/, std::auto_ptr<game::StatusTask_t> then)
+            { return game::makeConfirmationTask(false, then); }
         virtual void getHistoryStatus(int /*player*/, int /*turn*/, afl::base::Memory<HistoryStatus> /*status*/, const game::Root& /*root*/)
             { }
         virtual void loadHistoryTurn(game::Turn& /*turn*/, game::Game& /*game*/, int /*player*/, int /*turnNumber*/, game::Root& /*root*/)
@@ -47,10 +47,10 @@ TestGameTurnLoader::testDefault()
                     return PlayerStatusSet_t();
                 }
             }
-        virtual void loadCurrentTurn(game::Turn& /*turn*/, game::Game& /*game*/, int /*player*/, game::Root& /*root*/, game::Session& /*session*/)
-            { }
-        virtual std::auto_ptr<Task_t> saveCurrentTurn(const game::Turn& /*turn*/, const game::Game& /*game*/, int /*player*/, const game::Root& /*root*/, game::Session& /*session*/, std::auto_ptr<StatusTask_t> then)
-            { return makeConfirmationTask(false, then); }
+        virtual std::auto_ptr<game::Task_t> loadCurrentTurn(game::Turn& /*turn*/, game::Game& /*game*/, int /*player*/, game::Root& /*root*/, game::Session& /*session*/, std::auto_ptr<game::StatusTask_t> then)
+            { return game::makeConfirmationTask(false, then); }
+        virtual std::auto_ptr<game::Task_t> saveCurrentTurn(const game::Turn& /*turn*/, const game::Game& /*game*/, int /*player*/, const game::Root& /*root*/, game::Session& /*session*/, std::auto_ptr<game::StatusTask_t> then)
+            { return game::makeConfirmationTask(false, then); }
         virtual void getHistoryStatus(int /*player*/, int /*turn*/, afl::base::Memory<HistoryStatus> /*status*/, const game::Root& /*root*/)
             { }
         virtual void loadHistoryTurn(game::Turn& /*turn*/, game::Game& /*game*/, int /*player*/, int /*turnNumber*/, game::Root& /*root*/)

@@ -66,7 +66,7 @@ game::browser::FileSystemRootFolder::setLocalDirectoryName(String_t /*directoryN
     return false;
 }
 
-std::auto_ptr<game::browser::Task_t>
+std::auto_ptr<game::Task_t>
 game::browser::FileSystemRootFolder::loadGameRoot(const game::config::UserConfiguration& /*config*/, std::auto_ptr<LoadGameRootTask_t> then)
 {
     // No games in file system root

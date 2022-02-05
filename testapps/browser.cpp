@@ -23,44 +23,26 @@
 #include "afl/net/http/manager.hpp"
 #include "afl/net/http/defaultconnectionprovider.hpp"
 
-using game::browser::Task_t;
+using game::Task_t;
 using game::browser::LoadGameRootTask_t;
 
 namespace {
     class MyUserCallback : public game::browser::UserCallback {
      public:
-        virtual bool askInput(String_t title, const std::vector<Element>& question, afl::data::Segment& values)
+        virtual void askPassword(const PasswordRequest& req)
             {
-                std::string n;
-                std::cout << "-- Input request: " << title << " --\n";
-             again:
-                size_t index = 0;
-                for (size_t i = 0; i < question.size(); ++i) {
-                    switch (question[i].type) {
-                     case AskString:
-                     case AskPassword:
-                        std::cout << question[i].prompt << "? " << std::flush;
-                        if (getline(std::cin, n)) {
-                            values.setNew(index++, new afl::data::StringValue(n));
-                        }
-                        break;
-                     case ShowInfo:
-                        std::cout << question[i].prompt << "\n";
-                        break;
-                    }
+                std::cout << "-- Password request: " << req.accountName << "\n";
+                std::cout << "Password? " << std::flush;
+
+                PasswordResponse resp;
+                String_t str;
+                if (getline(std::cin, str)) {
+                    resp.canceled = false;
+                    resp.password = str;
+                } else {
+                    resp.canceled = true;
                 }
-                while (1) {
-                    std::cout << "Accept (y=yes, n=no and start again, c=cancel) " << std::flush;
-                    if (!getline(std::cin, n) || n == "c") {
-                        return false;
-                    } else if (n == "y") {
-                        return true;
-                    } else if (n == "n") {
-                        goto again;
-                    } else {
-                        // again
-                    }
-                }
+                sig_passwordResult.raise(resp);
             }
     };
 }

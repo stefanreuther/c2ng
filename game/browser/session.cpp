@@ -18,8 +18,8 @@ game::browser::Session::Session(afl::io::FileSystem& fileSystem,
     : m_translator(tx),
       m_log(log),
       m_accountManager(profile, tx, log),
-      m_userCallbackProxy(tx, log),
-      m_browser(fileSystem, tx, log, m_accountManager, profile, m_userCallbackProxy),
+      m_callback(),
+      m_browser(fileSystem, tx, log, m_accountManager, profile, m_callback),
       m_tasks()
 { }
 
@@ -50,10 +50,10 @@ game::browser::Session::accountManager()
     return m_accountManager;
 }
 
-game::browser::UserCallbackProxy&
-game::browser::Session::userCallbackProxy()
+game::browser::OptionalUserCallback&
+game::browser::Session::callback()
 {
-    return m_userCallbackProxy;
+    return m_callback;
 }
 
 void

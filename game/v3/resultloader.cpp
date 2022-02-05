@@ -133,80 +133,41 @@ game::v3::ResultLoader::getPlayerStatus(int player, String_t& extra, afl::string
     return result;
 }
 
-void
-game::v3::ResultLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game::Root& root, Session& session)
+std::auto_ptr<game::Task_t>
+game::v3::ResultLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game::Root& root, Session& session, std::auto_ptr<StatusTask_t> then)
 {
     // ex game/load.h:loadCommon
-    // Initialize
-    Loader ldr(*m_charset, m_translator, m_log);
-    ldr.prepareUniverse(turn.universe());
-    ldr.prepareTurn(turn, root, session, player);
+    class Task : public Task_t {
+     public:
+        Task(ResultLoader& parent, Turn& turn, Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t>& then)
+            : m_parent(parent), m_turn(turn), m_game(game), m_player(player), m_root(root), m_session(session), m_then(then)
+            { }
 
-    // Load common files
-    ldr.loadCommonFiles(root.gameDirectory(), *m_specificationDirectory, turn.universe(), player);
-
-    // load database
-    loadCurrentDatabases(turn, game, player, root, session);
-
-    // expression lists
-    if (m_pProfile != 0) {
-        game.expressionLists().loadRecentFiles(*m_pProfile, m_log, m_translator);
-        game.expressionLists().loadPredefinedFiles(*m_pProfile, *m_specificationDirectory, m_log, m_translator);
-    }
-
-    // ex GGameResultStorage::load(GGameTurn& trn)
-    {
-        Ref<Stream> file = root.gameDirectory().openFile(Format("player%d.rst", player), afl::io::FileSystem::OpenRead);
-        m_log.write(m_log.Info, LOG_NAME, Format(m_translator("Loading %s RST file..."), root.playerList().getPlayerName(player, Player::AdjectiveName)));
-        ldr.loadResult(turn, root, game, *file, player);
-
-        // Backup
-        try {
-            file->setPos(0);
-            util::BackupFile tpl;
-            tpl.setPlayerNumber(player);
-            tpl.setTurnNumber(turn.getTurnNumber());
-            tpl.setGameDirectoryName(root.gameDirectory().getDirectoryName());
-            tpl.copyFile(m_fileSystem, root.userConfiguration()[UserConfiguration::Backup_Result](), *file);
-        }
-        catch (std::exception& e) {
-            m_log.write(m_log.Warn, LOG_NAME, m_translator("Unable to create backup file"), e);
-        }
-    }
-
-    if (m_playerFlags.get(player).contains(DirectoryScanner::HaveTurn)) {
-        Ref<Stream> file = root.gameDirectory().openFile(Format("player%d.trn", player), afl::io::FileSystem::OpenRead);
-        loadTurnfile(turn, root, *file, player);
-    }
-
-    // Backup
-
-    // Load fleets.
-    // Must be after loading the result/turn because it requires shipsource flags
-    game::db::FleetLoader(*m_charset).load(root.gameDirectory(), turn.universe(), player);
-
-    // Util
-    Parser mp(m_translator, m_log, game, player, root, game::actions::mustHaveShipList(session));
-    {
-        Ptr<Stream> file = root.gameDirectory().openFileNT(Format("util%d.dat", player), afl::io::FileSystem::OpenRead);
-        if (file.get() != 0) {
-            mp.loadUtilData(*file, *m_charset);
-        }
-    }
-
-    // Message parser
-    {
-        Ptr<Stream> file = m_specificationDirectory->openFileNT("msgparse.ini", afl::io::FileSystem::OpenRead);
-        if (file.get() != 0) {
-            mp.parseMessages(*file, turn.inbox());
-        }
-    }
-
-    // FLAK
-    ldr.loadFlakBattles(turn, root.gameDirectory(), player);
+        virtual void call()
+            {
+                m_parent.m_log.write(afl::sys::LogListener::Trace, LOG_NAME, "Task: loadCurrentTurn");
+                try {
+                    m_parent.doLoadCurrentTurn(m_turn, m_game, m_player, m_root, m_session);
+                    m_then->call(true);
+                }
+                catch (std::exception& e) {
+                    m_session.log().write(afl::sys::LogListener::Error, LOG_NAME, String_t(), e);
+                    m_then->call(false);
+                }
+            }
+     private:
+        ResultLoader& m_parent;
+        Turn& m_turn;
+        Game& m_game;
+        int m_player;
+        Root& m_root;
+        Session& m_session;
+        std::auto_ptr<StatusTask_t> m_then;
+    };
+    return std::auto_ptr<Task_t>(new Task(*this, turn, game, player, root, session, then));
 }
 
-std::auto_ptr<game::TurnLoader::Task_t>
+std::auto_ptr<game::Task_t>
 game::v3::ResultLoader::saveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then)
 {
     // ex saveTurns
@@ -441,6 +402,78 @@ game::v3::ResultLoader::loadTurnfile(Turn& trn, Root& root, afl::io::Stream& fil
 
     const bool remapExplore = !root.hostVersion().isMissionAllowed(1);
     LocalTurnProcessor(trn, root, file, player, remapExplore, *this).handleTurnFile(f, *m_charset);
+}
+
+void
+game::v3::ResultLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, game::Root& root, Session& session)
+{
+    // Initialize
+    Loader ldr(*m_charset, m_translator, m_log);
+    ldr.prepareUniverse(turn.universe());
+    ldr.prepareTurn(turn, root, session, player);
+
+    // Load common files
+    ldr.loadCommonFiles(root.gameDirectory(), *m_specificationDirectory, turn.universe(), player);
+
+    // load database
+    loadCurrentDatabases(turn, game, player, root, session);
+
+    // expression lists
+    if (m_pProfile != 0) {
+        game.expressionLists().loadRecentFiles(*m_pProfile, m_log, m_translator);
+        game.expressionLists().loadPredefinedFiles(*m_pProfile, *m_specificationDirectory, m_log, m_translator);
+    }
+
+    // ex GGameResultStorage::load(GGameTurn& trn)
+    {
+        Ref<Stream> file = root.gameDirectory().openFile(Format("player%d.rst", player), afl::io::FileSystem::OpenRead);
+        m_log.write(m_log.Info, LOG_NAME, Format(m_translator("Loading %s RST file..."), root.playerList().getPlayerName(player, Player::AdjectiveName)));
+        ldr.loadResult(turn, root, game, *file, player);
+
+        // Backup
+        try {
+            file->setPos(0);
+            util::BackupFile tpl;
+            tpl.setPlayerNumber(player);
+            tpl.setTurnNumber(turn.getTurnNumber());
+            tpl.setGameDirectoryName(root.gameDirectory().getDirectoryName());
+            tpl.copyFile(m_fileSystem, root.userConfiguration()[UserConfiguration::Backup_Result](), *file);
+        }
+        catch (std::exception& e) {
+            m_log.write(m_log.Warn, LOG_NAME, m_translator("Unable to create backup file"), e);
+        }
+    }
+
+    if (m_playerFlags.get(player).contains(DirectoryScanner::HaveTurn)) {
+        Ref<Stream> file = root.gameDirectory().openFile(Format("player%d.trn", player), afl::io::FileSystem::OpenRead);
+        loadTurnfile(turn, root, *file, player);
+    }
+
+    // Backup
+
+    // Load fleets.
+    // Must be after loading the result/turn because it requires shipsource flags
+    game::db::FleetLoader(*m_charset).load(root.gameDirectory(), turn.universe(), player);
+
+    // Util
+    Parser mp(m_translator, m_log, game, player, root, game::actions::mustHaveShipList(session));
+    {
+        Ptr<Stream> file = root.gameDirectory().openFileNT(Format("util%d.dat", player), afl::io::FileSystem::OpenRead);
+        if (file.get() != 0) {
+            mp.loadUtilData(*file, *m_charset);
+        }
+    }
+
+    // Message parser
+    {
+        Ptr<Stream> file = m_specificationDirectory->openFileNT("msgparse.ini", afl::io::FileSystem::OpenRead);
+        if (file.get() != 0) {
+            mp.parseMessages(*file, turn.inbox());
+        }
+    }
+
+    // FLAK
+    ldr.loadFlakBattles(turn, root.gameDirectory(), player);
 }
 
 void

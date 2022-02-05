@@ -20,7 +20,7 @@ namespace game { namespace nu {
 
         ~SpecificationLoader();
 
-        virtual void loadShipList(game::spec::ShipList& list, Root& root);
+        virtual std::auto_ptr<Task_t> loadShipList(game::spec::ShipList& list, Root& root, std::auto_ptr<StatusTask_t> then);
 
      private:
         afl::base::Ref<GameState> m_gameState;
