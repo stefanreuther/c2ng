@@ -29,6 +29,18 @@ util::RequestThread::~RequestThread()
         stop();
         m_thread->join();
     }
+
+    // Make sure tasks are destroyed in correct order (FIFO).
+    // PtrVector would destroy them from back to front.
+    // Tasks might reference temporaries (RequestSender::makeTemporary) that refer to each other,
+    // so destroying them in the wrong order means a task referring to the temporary overtakes one that destroys it.
+    while (!m_taskQueue.empty()) {
+        afl::container::PtrVector<afl::base::Runnable> tasks;
+        tasks.swap(m_taskQueue);
+        for (size_t i = 0, n = tasks.size(); i < n; ++i) {
+            tasks.replaceElementNew(i, 0);
+        }
+    }
 }
 
 // Post new Runnable.
@@ -54,10 +66,11 @@ util::RequestThread::run()
         afl::container::PtrVector<afl::base::Runnable> tasks;
         {
             afl::sys::MutexGuard g(m_taskMutex);
-            tasks.swap(m_taskQueue);
             if (m_stop) {
+                // Do not modify m_taskQueue when stopped, to guarantee that unexecuted tasks are destroyed in order!
                 break;
             }
+            tasks.swap(m_taskQueue);
         }
 
         // Process tasks
@@ -73,6 +86,9 @@ util::RequestThread::run()
             catch (std::exception& e) {
                 m_log.write(m_log.Error, m_name, m_translator("Exception in background thread"), e);
             }
+
+            // Destroy in correct order
+            tasks.replaceElementNew(i, 0);
         }
     }
     m_log.write(m_log.Trace, m_name, m_translator("Thread terminates"));
