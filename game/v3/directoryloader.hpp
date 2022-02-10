@@ -45,7 +45,7 @@ namespace game { namespace v3 {
         virtual std::auto_ptr<Task_t> loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
         virtual std::auto_ptr<Task_t> saveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
         virtual void getHistoryStatus(int player, int turn, afl::base::Memory<HistoryStatus> status, const Root& root);
-        virtual void loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root);
+        virtual std::auto_ptr<Task_t> loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, std::auto_ptr<StatusTask_t> then);
         virtual String_t getProperty(Property p);
 
      private:
@@ -82,6 +82,15 @@ namespace game { namespace v3 {
             \param root Root
             \param session Session */
         void doLoadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session);
+
+        /** Implementation of loadHistoryTurn.
+            Can throw on error.
+            \param turn Turn
+            \param game Game
+            \param player Player
+            \param turnNumber Turn number to load
+            \param root Root */
+        void doLoadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root);
 
         /** Implementation of saveCurrentTurn.
             Can throw on error.

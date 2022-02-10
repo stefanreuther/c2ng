@@ -664,12 +664,14 @@ game::Session::initWorld()
     m_world.setNewGlobalValue("ADDFCODE",         new game::interface::SimpleProcedure(*this, game::interface::IFAddFCode));
     m_world.setNewGlobalValue("ADDPREF",          new game::interface::SimpleProcedure(*this, game::interface::IFAddPref));
     m_world.setNewGlobalValue("AUTHPLAYER",       new game::interface::SimpleProcedure(*this, game::interface::IFAuthPlayer));
+    m_world.setNewGlobalValue("CC$HISTORY.SHOWTURN", new game::interface::SimpleProcedure(*this, game::interface::IFCCHistoryShowTurn));
     m_world.setNewGlobalValue("CC$NOTIFY",        new game::interface::SimpleProcedure(*this, game::interface::IFCCNotify));
     m_world.setNewGlobalValue("CC$NUMNOTIFICATIONS", new game::interface::SimpleFunction(*this, game::interface::IFCCNumNotifications));
     m_world.setNewGlobalValue("CC$SELECTIONEXEC", new game::interface::SimpleProcedure(*this, game::interface::IFCCSelectionExec));
     m_world.setNewGlobalValue("CREATECONFIGOPTION", new game::interface::SimpleProcedure(*this, game::interface::IFCreateConfigOption));
     m_world.setNewGlobalValue("CREATEPREFOPTION", new game::interface::SimpleProcedure(*this, game::interface::IFCreatePrefOption));
     m_world.setNewGlobalValue("DELETECOMMAND",    new game::interface::SimpleProcedure(*this, game::interface::IFDeleteCommand));
+    m_world.setNewGlobalValue("HISTORY.LOADTURN", new game::interface::SimpleProcedure(*this, game::interface::IFHistoryLoadTurn));
     m_world.setNewGlobalValue("NEWCANNEDMARKER",  new game::interface::SimpleProcedure(*this, game::interface::IFNewCannedMarker));
     m_world.setNewGlobalValue("NEWCIRCLE",        new game::interface::SimpleProcedure(*this, game::interface::IFNewCircle));
     m_world.setNewGlobalValue("NEWLINE",          new game::interface::SimpleProcedure(*this, game::interface::IFNewLine));
@@ -679,7 +681,6 @@ game::Session::initWorld()
     m_world.setNewGlobalValue("NEWRECTANGLERAW",  new game::interface::SimpleProcedure(*this, game::interface::IFNewRectangleRaw));
     m_world.setNewGlobalValue("SAVEGAME",         new game::interface::SimpleProcedure(*this, game::interface::IFSaveGame));
     m_world.setNewGlobalValue("SENDMESSAGE",      new game::interface::SimpleProcedure(*this, game::interface::IFSendMessage));
-    m_world.setNewGlobalValue("HISTORY.SHOWTURN", new game::interface::SimpleProcedure(*this, game::interface::IFHistoryShowTurn));
 
     // Add global context (=properties)
     m_world.addNewGlobalContext(new game::interface::GlobalContext(*this));

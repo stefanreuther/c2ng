@@ -380,6 +380,45 @@ game::interface::IFCCSelectionExec(interpreter::Process& /*proc*/, game::Session
     g.selections().executeCompiledExpression(code, effLayer, g.currentTurn().universe());
 }
 
+/* @q CC$History.ShowTurn n:Int (Internal)
+   Activate the given turn; back-end to {History.ShowTurn}.
+
+   @since PCC2 2.40.12 */
+void
+game::interface::IFCCHistoryShowTurn(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+{
+    // Split off original IFHistoryShowTurn
+    // Check parameters
+    args.checkArgumentCount(1);
+    int32_t turnNumber;
+    if (!interpreter::checkIntegerArg(turnNumber, args.getNext(), 0, MAX_NUMBER)) {
+        return;
+    }
+
+    // Do we have a game loaded?
+    Game& g = game::actions::mustHaveGame(session);
+
+    // Check turn number
+    int currentTurn = g.currentTurn().getTurnNumber();
+    if (turnNumber == 0) {
+        turnNumber = currentTurn;
+    }
+    if (turnNumber <= 0 || turnNumber > currentTurn) {
+        throw interpreter::Error::rangeError();
+    }
+
+    // Verify
+    if (turnNumber < currentTurn) {
+        HistoryTurn* ht = g.previousTurns().get(turnNumber);
+        if (ht == 0 || ht->getStatus() != HistoryTurn::Loaded) {
+            throw interpreter::Error("Turn not available");
+        }
+    }
+
+    // Activate
+    g.setViewpointTurnNumber(turnNumber);
+}
+
 /* @q CreateConfigOption key:Str, type:Str (Global Command)
    Create a new game configuration option (PConfig/HConfig).
    Use this to track configuration options that PCC2 does not support internally.
@@ -665,21 +704,23 @@ game::interface::IFNewMarker(interpreter::Process& /*proc*/, game::Session& sess
     g.currentTurn().universe().drawings().addNew(drawing.release());
 }
 
-/* @q History.ShowTurn nr:Int (Global Command)
-   Show turn from history database.
+/* @q History.LoadTurn nr:Int (Global Command)
+   Load turn from history database.
 
    The parameter specifies the turn number to load.
    The special case "0" will load the current turn.
    PCC2 will load the specified turn's result file, if available.
+   The turn will be loaded but not shown.
 
-   @since PCC2 2.40 */
+   @see History.ShowTurn
+   @since PCC2 2.40.12 */
 void
-game::interface::IFHistoryShowTurn(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+game::interface::IFHistoryLoadTurn(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args)
 {
     // Check parameters
     args.checkArgumentCount(1);
-    int32_t turn;
-    if (!interpreter::checkIntegerArg(turn, args.getNext(), 0, MAX_NUMBER)) {
+    int32_t turnNumber;
+    if (!interpreter::checkIntegerArg(turnNumber, args.getNext(), 0, MAX_NUMBER)) {
         return;
     }
 
@@ -693,49 +734,73 @@ game::interface::IFHistoryShowTurn(interpreter::Process& /*proc*/, game::Session
 
     // Check turn number
     int currentTurn = g->currentTurn().getTurnNumber();
-    if (turn == 0) {
-        turn = currentTurn;
+    if (turnNumber == 0) {
+        turnNumber = currentTurn;
     }
-    if (turn <= 0 || turn > currentTurn) {
+    if (turnNumber <= 0 || turnNumber > currentTurn) {
         throw interpreter::Error::rangeError();
     }
 
     // Load if required
-    if (turn < currentTurn) {
+    if (turnNumber < currentTurn) {
         // If turn is not known at all, update metainformation
-        if (g->previousTurns().getTurnStatus(turn) == HistoryTurn::Unknown) {
-            g->previousTurns().initFromTurnScores(g->scores(), turn, 1);
+        if (g->previousTurns().getTurnStatus(turnNumber) == HistoryTurn::Unknown) {
+            g->previousTurns().initFromTurnScores(g->scores(), turnNumber, 1);
             if (TurnLoader* tl = r->getTurnLoader().get()) {
-                g->previousTurns().initFromTurnLoader(*tl, *r, g->getViewpointPlayer(), turn, 1);
+                g->previousTurns().initFromTurnLoader(*tl, *r, g->getViewpointPlayer(), turnNumber, 1);
             }
         }
 
         // If turn is loadable, load
-        HistoryTurn* ht = g->previousTurns().get(turn);
+        HistoryTurn* ht = g->previousTurns().get(turnNumber);
         if (ht != 0 && ht->isLoadable() && r->getTurnLoader().get() != 0) {
-            // FIXME: code duplication to turnlistdialog.cpp
-            try {
-                afl::base::Ref<Turn> t = *new Turn();
-                int player = g->getViewpointPlayer();
-                r->getTurnLoader()->loadHistoryTurn(*t, *g, player, turn, *r);
-                t->universe().postprocess(game::PlayerSet_t(player), game::PlayerSet_t(player), game::map::Object::ReadOnly,
-                                          r->hostVersion(), r->hostConfiguration(),
-                                          turn, *sl,
-                                          session.translator(), session.log());
-                ht->handleLoadSucceeded(t);
-            }
-            catch (std::exception& e) {
-                ht->handleLoadFailed();
-            }
+            // Load asynchronously; suspend this task until completion.
+            class Task : public StatusTask_t {
+             public:
+                Task(interpreter::Process& proc, Session& session, afl::base::Ref<Turn> turn, int turnNr, HistoryTurn* ht)
+                    : m_process(proc), m_session(session), m_turn(turn), m_turnNumber(turnNr), m_historyTurn(ht)
+                    { }
+                void call(bool flag)
+                    {
+                        bool ok = flag;
+                        if (ok) {
+                            try {
+                                Root& root = game::actions::mustHaveRoot(m_session);
+                                Game& game = game::actions::mustHaveGame(m_session);
+
+                                int player = game.getViewpointPlayer();
+                                m_turn->universe().postprocess(game::PlayerSet_t(player), game::PlayerSet_t(player), game::map::Object::ReadOnly,
+                                                               root.hostVersion(), root.hostConfiguration(),
+                                                               m_turnNumber, *m_session.getShipList(),
+                                                               m_session.translator(), m_session.log());
+                                m_historyTurn->handleLoadSucceeded(*m_turn);
+                                m_session.processList().continueProcess(m_process);
+                            }
+                            catch (std::exception& e) {
+                                ok = false;
+                            }
+                        }
+                        if (!ok) {
+                            m_historyTurn->handleLoadFailed();
+                            m_session.processList().continueProcessWithFailure(m_process, "Turn not available");
+                        }
+                    }
+             private:
+                interpreter::Process& m_process;
+                Session& m_session;
+                afl::base::Ref<Turn> m_turn;
+                const int m_turnNumber;
+                HistoryTurn* m_historyTurn;
+            };
+            afl::base::Ref<Turn> turn = *new Turn();
+            proc.suspend(r->getTurnLoader()->loadHistoryTurn(*turn, *g, g->getViewpointPlayer(), turnNumber, *r, std::auto_ptr<StatusTask_t>(new Task(proc, session, turn, turnNumber, ht))));
+            return;
         }
 
         if (ht == 0 || ht->getStatus() != HistoryTurn::Loaded) {
             throw interpreter::Error("Turn not available");
         }
     }
-
-    // Do it
-    g->setViewpointTurnNumber(turn);
 }
 
 /* @q SaveGame (Global Command)
@@ -780,7 +845,7 @@ game::interface::IFSendMessage(interpreter::Process& /*proc*/, game::Session& se
     if (!checkPlayerSetArg(receivers, args.getNext())) {
         return;
     }
-    
+
     String_t text;
     while (args.getNumArgs() > 0) {
         String_t line;

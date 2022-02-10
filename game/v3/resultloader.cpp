@@ -204,38 +204,36 @@ game::v3::ResultLoader::getHistoryStatus(int player, int turn, afl::base::Memory
     }
 }
 
-void
-game::v3::ResultLoader::loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root)
+std::auto_ptr<game::Task_t>
+game::v3::ResultLoader::loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, std::auto_ptr<StatusTask_t> then)
 {
-    // Initialize planets and bases
-    Loader ldr(*m_charset, m_translator, m_log);
-    ldr.prepareUniverse(turn.universe());
-
-    // FIXME: backup these files?
-    ldr.loadCommonFiles(root.gameDirectory(), *m_specificationDirectory, turn.universe(), player);
-
-    // load turn file backup
-    util::BackupFile tpl;
-    tpl.setGameDirectoryName(root.gameDirectory().getDirectoryName());
-    tpl.setPlayerNumber(player);
-    tpl.setTurnNumber(turnNumber);
-
-    {
-        Ref<Stream> file = tpl.openFile(m_fileSystem, root.userConfiguration()[UserConfiguration::Backup_Result]());
-        m_log.write(m_log.Info, LOG_NAME, Format(m_translator("Loading %s backup file..."), root.playerList().getPlayerName(player, Player::AdjectiveName)));
-        ldr.loadResult(turn, root, game, *file, player);
-    }
-
-    // FIXME: load turn
-    // if (have_trn) {
-    //     Ptr<Stream> trnfile = game_file_dir->openFile(format("player%d.trn", player), Stream::C_READ);
-    //     loadTurn(trn, *trnfile, player);
-    // }
-
-    // FIXME: history fleets not loaded here
-    // loadFleets(trn, *game_file_dir, player);
-    // FIXME: alliances not loaded until here; would need message/util.dat parsing
-    // FIXME: load FLAK
+    class Task : public Task_t {
+     public:
+        Task(ResultLoader& parent, Turn& turn, Game& game, int player, int turnNumber, Root& root, std::auto_ptr<StatusTask_t>& then)
+            : m_parent(parent), m_turn(turn), m_game(game), m_player(player), m_turnNumber(turnNumber), m_root(root), m_then(then)
+            { }
+        virtual void call()
+            {
+                m_parent.m_log.write(afl::sys::LogListener::Trace, LOG_NAME, "Task: loadHistoryTurn");
+                try {
+                    m_parent.doLoadHistoryTurn(m_turn, m_game, m_player, m_turnNumber, m_root);
+                    m_then->call(true);
+                }
+                catch (std::exception& e) {
+                    m_parent.m_log.write(afl::sys::LogListener::Error, LOG_NAME, String_t(), e);
+                    m_then->call(false);
+                }
+            }
+     private:
+        ResultLoader& m_parent;
+        Turn& m_turn;
+        Game& m_game;
+        int m_player;
+        int m_turnNumber;
+        Root& m_root;
+        std::auto_ptr<StatusTask_t> m_then;
+    };
+    return std::auto_ptr<Task_t>(new Task(*this, turn, game, player, turnNumber, root, then));
 }
 
 String_t
@@ -474,6 +472,40 @@ game::v3::ResultLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, ga
 
     // FLAK
     ldr.loadFlakBattles(turn, root.gameDirectory(), player);
+}
+
+void
+game::v3::ResultLoader::doLoadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root)
+{
+    // Initialize planets and bases
+    Loader ldr(*m_charset, m_translator, m_log);
+    ldr.prepareUniverse(turn.universe());
+
+    // FIXME: backup these files?
+    ldr.loadCommonFiles(root.gameDirectory(), *m_specificationDirectory, turn.universe(), player);
+
+    // load turn file backup
+    util::BackupFile tpl;
+    tpl.setGameDirectoryName(root.gameDirectory().getDirectoryName());
+    tpl.setPlayerNumber(player);
+    tpl.setTurnNumber(turnNumber);
+
+    {
+        Ref<Stream> file = tpl.openFile(m_fileSystem, root.userConfiguration()[UserConfiguration::Backup_Result]());
+        m_log.write(m_log.Info, LOG_NAME, Format(m_translator("Loading %s backup file..."), root.playerList().getPlayerName(player, Player::AdjectiveName)));
+        ldr.loadResult(turn, root, game, *file, player);
+    }
+
+    // FIXME: load turn
+    // if (have_trn) {
+    //     Ptr<Stream> trnfile = game_file_dir->openFile(format("player%d.trn", player), Stream::C_READ);
+    //     loadTurn(trn, *trnfile, player);
+    // }
+
+    // FIXME: history fleets not loaded here
+    // loadFleets(trn, *game_file_dir, player);
+    // FIXME: alliances not loaded until here; would need message/util.dat parsing
+    // FIXME: load FLAK
 }
 
 void

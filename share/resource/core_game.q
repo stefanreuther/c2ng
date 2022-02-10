@@ -319,6 +319,19 @@ Sub BuildBaseDefenseWait (amount)
   Loop
 EndSub
 
+% @q History.ShowTurn nr:Int (Global Command)
+% Show turn from history database.
+%
+% The parameter specifies the turn number to load.
+% The special case "0" will load the current turn.
+% PCC2 will load the specified turn's result file, if available.
+%
+% @since PCC2 2.40
+Sub History.ShowTurn (nr)
+  % This used to be a built-in function doing both the "load" and "show" parts; split in 2.40.12.
+  History.LoadTurn nr
+  CC$History.ShowTurn nr
+EndSub
 
 %%% More Game Functions
 

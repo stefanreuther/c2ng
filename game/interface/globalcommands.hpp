@@ -16,6 +16,7 @@ namespace game { namespace interface {
     void IFAddFCode(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
     void IFAddPref(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
     void IFAuthPlayer(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
+    void IFCCHistoryShowTurn(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
     void IFCCSelectionExec(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
     void IFCreateConfigOption(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
     void IFCreatePrefOption(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
@@ -26,7 +27,7 @@ namespace game { namespace interface {
     void IFNewLine(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
     void IFNewLineRaw(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
     void IFNewMarker(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
-    void IFHistoryShowTurn(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
+    void IFHistoryLoadTurn(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
     void IFSaveGame(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
     void IFSendMessage(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
 

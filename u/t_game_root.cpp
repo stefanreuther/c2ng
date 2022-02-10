@@ -73,8 +73,8 @@ TestGameRoot::testIt()
             { return game::makeConfirmationTask(false, then); }
         virtual void getHistoryStatus(int /*player*/, int /*turn*/, afl::base::Memory<HistoryStatus> /*status*/, const game::Root& /*root*/)
             { }
-        virtual void loadHistoryTurn(game::Turn& /*turn*/, game::Game& /*game*/, int /*player*/, int /*turnNumber*/, game::Root& /*root*/)
-            { }
+        virtual std::auto_ptr<game::Task_t> loadHistoryTurn(game::Turn& /*turn*/, game::Game& /*game*/, int /*player*/, int /*turnNumber*/, game::Root& /*root*/, std::auto_ptr<game::StatusTask_t> then)
+            { return game::makeConfirmationTask(false, then); }
         virtual String_t getProperty(Property /*p*/)
             { return String_t(); }
     };

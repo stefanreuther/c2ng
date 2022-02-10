@@ -149,10 +149,12 @@ namespace game {
             \param player [in] Player number
             \param turnNumber [in] Turn number
             \param root [in] Root object. Should not need updating.
+            \param then [in] Task to execute after loading; never null.
 
-            If this function fails to load history data, it can throw an exception.
-            Caller must deal with that. */
-        virtual void loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root) = 0;
+            If the task produced by this function fails to load history data, it shall report failure through then \c then task.
+
+            \return Newly-allocated task to perform the operation; never null. */
+        virtual std::auto_ptr<Task_t> loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, std::auto_ptr<StatusTask_t> then) = 0;
 
         /** Get property for script interface.
             These values are published on the script interface (GlobalContext) and are not intended to be used in C++.

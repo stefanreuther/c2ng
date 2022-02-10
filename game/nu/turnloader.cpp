@@ -302,15 +302,16 @@ game::nu::TurnLoader::getHistoryStatus(int /*player*/, int turn, afl::base::Memo
     }
 }
 
-void
-game::nu::TurnLoader::loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root)
+std::auto_ptr<game::Task_t>
+game::nu::TurnLoader::loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, std::auto_ptr<StatusTask_t> then)
 {
     (void) turn;
     (void) game;
     (void) player;
     (void) turnNumber;
     (void) root;
-    throw std::runtime_error("!FIXME: not implemented");
+    m_log.write(LogListener::Error, LOG_NAME, "!FIXME: loadHistoryTurn not implemented");
+    return makeConfirmationTask(false, then);
 }
 
 String_t

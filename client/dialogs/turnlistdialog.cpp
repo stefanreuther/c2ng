@@ -7,8 +7,15 @@
 #include "afl/base/deleter.hpp"
 #include "game/game.hpp"
 #include "game/historyturn.hpp"
+#include "game/interface/globalcommands.hpp"
+#include "game/interface/simpleprocedure.hpp"
 #include "game/root.hpp"
 #include "game/turn.hpp"
+#include "game/turnloader.hpp"
+#include "interpreter/bytecodeobject.hpp"
+#include "interpreter/opcode.hpp"
+#include "interpreter/process.hpp"
+#include "interpreter/values.hpp"
 #include "ui/dialogs/messagebox.hpp"
 #include "ui/group.hpp"
 #include "ui/layout/hbox.hpp"
@@ -17,7 +24,6 @@
 #include "ui/widgets/button.hpp"
 #include "ui/window.hpp"
 #include "util/rich/parser.hpp"
-#include "game/turnloader.hpp"
 
 using client::widgets::TurnListbox;
 using game::HistoryTurn;
@@ -192,32 +198,40 @@ namespace {
             { }
         void handle(game::Session& s)
             {
-                std::vector<TurnListbox::Item> content;
-                game::Game* g = s.getGame().get();
-                game::Root* r = s.getRoot().get();
-                game::spec::ShipList* sl = s.getShipList().get();
-                if (g != 0 && r != 0 && sl != 0 && r->getTurnLoader().get() != 0) {
-                    game::HistoryTurn* ht = g->previousTurns().get(m_turnNumber);
-                    if (ht != 0 && ht->isLoadable()) {
-                        // FIXME: code duplication to globalcommands.cpp
-                        try {
-                            afl::base::Ref<game::Turn> t = *new game::Turn();
-                            int player = g->getViewpointPlayer();
-                            r->getTurnLoader()->loadHistoryTurn(*t, *g, player, m_turnNumber, *r);
-                            t->universe().postprocess(game::PlayerSet_t(player), game::PlayerSet_t(player), game::map::Object::ReadOnly,
-                                                      r->hostVersion(), r->hostConfiguration(),
-                                                      m_turnNumber, *sl,
-                                                      s.translator(), s.log());
-                            ht->handleLoadSucceeded(t);
+                // Implemented as a helper process to re-use the IFHistoryLoadTurn command and its ability to suspend/interact;
+                // otherwise, we'd have to implement storage for a suspended process.
+                class Finalizer : public interpreter::Process::Finalizer {
+                 public:
+                    Finalizer(util::RequestSender<client::dialogs::TurnListDialog> response, game::Session& session, int turnNumber)
+                        : m_response(response), m_session(session), m_turnNumber(turnNumber)
+                        { }
+                    void finalizeProcess(interpreter::Process& /*proc*/)
+                        {
+                            std::vector<TurnListbox::Item> content;
+                            if (game::Game* g = m_session.getGame().get()) {
+                                prepareListItem(content, *g, m_turnNumber);
+                            }
+                            m_response.postNewRequest(new UpdateResponse(content));
                         }
-                        catch (std::exception& e) {
-                            ht->handleLoadFailed();
-                        }
+                 private:
+                    util::RequestSender<client::dialogs::TurnListDialog> m_response;
+                    game::Session& m_session;
+                    const int m_turnNumber;
+                };
 
-                        prepareListItem(content, *g, m_turnNumber);
-                    }
-                }
-                m_response.postNewRequest(new UpdateResponse(content));
+                interpreter::Process& proc = s.processList().create(s.world(), "<LoadRequest>");
+                interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
+                proc.pushNewValue(interpreter::makeIntegerValue(m_turnNumber));
+                proc.pushNewValue(new game::interface::SimpleProcedure(s, game::interface::IFHistoryLoadTurn));
+                bco->addInstruction(interpreter::Opcode::maIndirect, interpreter::Opcode::miIMCall, 1);
+                proc.pushFrame(bco, false);
+                proc.setNewFinalizer(new Finalizer(m_response, s, m_turnNumber));
+
+                uint32_t pgid = s.processList().allocateProcessGroup();
+                s.processList().resumeProcess(proc, pgid);
+                s.processList().startProcessGroup(pgid);
+                s.processList().run();
+                s.processList().removeTerminatedProcesses();
             }
      private:
         util::RequestSender<client::dialogs::TurnListDialog> m_response;
