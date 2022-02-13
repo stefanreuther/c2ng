@@ -241,6 +241,7 @@ class TestServerHostResultSender : public CxxTest::TestSuite {
     void testProfileOverride();
     void testGameOverride();
     void testGameDefault();
+    void testExtraFiles();
 };
 
 class TestServerHostSchedule : public CxxTest::TestSuite {

@@ -8,27 +8,31 @@
 #include "afl/net/redis/stringfield.hpp"
 #include "afl/net/redis/stringlistkey.hpp"
 #include "afl/net/redis/subtree.hpp"
+#include "afl/string/char.hpp"
 #include "afl/string/format.hpp"
 #include "afl/sys/parsedtime.hpp"
 #include "server/host/game.hpp"
 #include "server/host/installer.hpp"
 #include "server/host/root.hpp"
 #include "server/host/schedule.hpp"
+#include "server/host/user.hpp"
 #include "server/interface/baseclient.hpp"
 #include "server/interface/filebaseclient.hpp"
 #include "server/interface/hostschedule.hpp"
 #include "server/interface/mailqueue.hpp"
-#include "afl/string/char.hpp"
-#include "server/host/user.hpp"
 
+using afl::string::Format;
 using server::host::Game;
+using server::interface::BaseClient;
+using server::interface::FileBase;
+using server::interface::FileBaseClient;
 using server::interface::HostGame;
 
 namespace {
     // FIXME: Merge with server::talk::LinkFormatter somehow?
     String_t makeGameUrl(int32_t gameId, String_t gameName)
     {
-        String_t raw = afl::string::Format("%d-%s", gameId, gameName);
+        String_t raw = Format("%d-%s", gameId, gameName);
         String_t result;
         bool needDash = false;
         for (String_t::size_type i = 0; i < raw.size(); ++i) {
@@ -142,13 +146,13 @@ namespace {
 
     void ResultMailInfo::describeGame(server::host::Root& root, server::interface::MailQueue& mailer) const
     {
-        mailer.addParameter("gameid", afl::string::Format("%d", gameId));
+        mailer.addParameter("gameid", Format("%d", gameId));
         mailer.addParameter("gamename", gameName);
         mailer.addParameter("gameurl", gameUrl);
-        mailer.addParameter("gameturn", afl::string::Format("%d", gameTurn));
-        mailer.addParameter("endChanged", afl::string::Format("%d", int(endChanged)));
-        mailer.addParameter("configChanged", afl::string::Format("%d", int(configChanged)));
-        mailer.addParameter("scheduleChanged", afl::string::Format("%d", int(scheduleChanged)));
+        mailer.addParameter("gameturn", Format("%d", gameTurn));
+        mailer.addParameter("endChanged", Format("%d", int(endChanged)));
+        mailer.addParameter("configChanged", Format("%d", int(configChanged)));
+        mailer.addParameter("scheduleChanged", Format("%d", int(scheduleChanged)));
         describeNextHostDate(root, mailer, nextHostTime, nextHostEarly, nextHostType);
     }
 
@@ -163,7 +167,7 @@ namespace {
         };
 
         for (int fmt = 0; fmt < NumFormats; ++fmt) {
-            String_t id = afl::string::Format("result-%d-%d%s", gameId, slot, suffixes[fmt]);
+            String_t id = Format("result-%d-%d%s", gameId, slot, suffixes[fmt]);
             if (playersByFormat[fmt].empty()) {
                 // Nobody wants this format, just cancel the previous mail.
                 mailer.cancelMessage(id);
@@ -179,47 +183,50 @@ namespace {
                     tpl += "result";
                 }
                 mailer.startMessage(tpl, id);
-                mailer.addParameter("slot", afl::string::Format("%d", slot));
+                mailer.addParameter("slot", Format("%d", slot));
                 describeGame(root, mailer);
 
                 if (finalTurn) {
                     // A slot is marked dead only when the last player resigns.
                     // That is, if we actually have a player here, the slot is alive,
                     // and the slot will have a nonzero rank assigned.
-                    mailer.addParameter("rank", afl::string::Format("%d", game.getSlot(slot).rank().get()));
+                    mailer.addParameter("rank", Format("%d", game.getSlot(slot).rank().get()));
                 }
 
                 if (fmt == Zip || fmt == ZipPlayerFiles) {
-                    mailer.addAttachment(afl::string::Format("c2file://%s:%s/%s/out/%d/player%d.zip")
+                    mailer.addAttachment(Format("c2file://%s:%s/%s/out/%d/player%d.zip")
                                          << root.config().hostFileAddress.getName()
                                          << root.config().hostFileAddress.getService()
                                          << gameDir << slot << slot);
                 }
                 if (fmt == Result || fmt == ResultPlayerFiles) {
-                    // xref runhost.sh
-                    static const char* const files[] = {
-                        "player%d.rst",
-                        "util%d.dat",
-                        "xyplan%d.dat",
-                    };
-                    for (size_t i = 0; i < countof(files); ++i) {
-                        String_t baseName = afl::string::Format(files[i], slot);
-                        String_t name = afl::string::Format("%s/out/%d/%s", gameDir, slot, baseName);
-                        try {
-                            server::interface::BaseClient(root.hostFile()).setUserContext(String_t());
-                            server::interface::FileBaseClient(root.hostFile()).getFileInformation(name);
-                            mailer.addAttachment(afl::string::Format("c2file://%s:%s/%s")
-                                                 << root.config().hostFileAddress.getName()
-                                                 << root.config().hostFileAddress.getService()
-                                                 << name);
+                    // Send everything but the ZIP file.
+                    // Compare actions.cpp:importFileHistory which intersects out/<pl> with backups/pre-<turn> to effectively suppress the .zip.
+                    try {
+                        const String_t pathName = Format("%s/out/%d", gameDir, slot);
+                        FileBase::ContentInfoMap_t files;
+                        BaseClient(root.hostFile()).setUserContext(String_t());
+                        FileBaseClient(root.hostFile()).getDirectoryContent(pathName, files);
+                        for (FileBase::ContentInfoMap_t::iterator it = files.begin(); it != files.end(); ++it) {
+                            if (const FileBase::Info* p = it->second) {
+                                if (p->type == FileBase::IsFile
+                                    && (it->first.size() <= 4 || it->first.compare(it->first.size()-4, 4, ".zip", 4) != 0))
+                                {
+                                    mailer.addAttachment(Format("c2file://%s:%s/%s/%s")
+                                                         << root.config().hostFileAddress.getName()
+                                                         << root.config().hostFileAddress.getService()
+                                                         << pathName
+                                                         << it->first);
+                                }
+                            }
                         }
-                        catch (std::exception&) {
-                            // The point is to end up here if the getFileInformation() throws and thus skip the addAttachment().
-                        }
+                    }
+                    catch (std::exception&) {
+                        // Ignore errors accessing the file server
                     }
                 }
                 if (fmt == ZipPlayerFiles || fmt == ResultPlayerFiles) {
-                    mailer.addAttachment(afl::string::Format("c2file://%s:%s/%s/out/all/playerfiles.zip")
+                    mailer.addAttachment(Format("c2file://%s:%s/%s/out/all/playerfiles.zip")
                                          << root.config().hostFileAddress.getName()
                                          << root.config().hostFileAddress.getService()
                                          << gameDir);

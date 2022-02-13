@@ -232,6 +232,7 @@ TestServerHostResultSender::testSimple()
     MailMock::Message* p = h.mailQueue().extract("user:q");
     TS_ASSERT(p->hasAttachment("c2file://127.0.0.1:7776/games/0001/out/5/player5.zip"));
     TS_ASSERT(p->hasAttachment("c2file://127.0.0.1:7776/games/0001/out/all/playerfiles.zip"));
+    TS_ASSERT(!p->hasAttachment("c2file://127.0.0.1:7776/games/0001/out/5/player5.rst"));
 
     TS_ASSERT(h.mailQueue().empty());
 }
@@ -260,14 +261,17 @@ TestServerHostResultSender::testMulti()
     MailMock::Message* p = h.mailQueue().extract("user:p1");
     TS_ASSERT(p->hasAttachment("c2file://127.0.0.1:7776/games/0001/out/5/player5.zip"));
     TS_ASSERT(p->hasAttachment("c2file://127.0.0.1:7776/games/0001/out/all/playerfiles.zip"));
+    TS_ASSERT(!p->hasAttachment("c2file://127.0.0.1:7776/games/0001/out/5/player5.rst"));
 
     p = h.mailQueue().extract("user:p2");
     TS_ASSERT(p->hasAttachment("c2file://127.0.0.1:7776/games/0001/out/5/player5.zip"));
     TS_ASSERT(p->hasAttachment("c2file://127.0.0.1:7776/games/0001/out/all/playerfiles.zip"));
+    TS_ASSERT(!p->hasAttachment("c2file://127.0.0.1:7776/games/0001/out/5/player5.rst"));
 
     p = h.mailQueue().extract("user:b");
     TS_ASSERT(p->hasAttachment("c2file://127.0.0.1:7776/games/0001/out/6/player6.zip"));
     TS_ASSERT(p->hasAttachment("c2file://127.0.0.1:7776/games/0001/out/all/playerfiles.zip"));
+    TS_ASSERT(!p->hasAttachment("c2file://127.0.0.1:7776/games/0001/out/6/player6.rst"));
 
     TS_ASSERT(h.mailQueue().empty());
 }
@@ -312,6 +316,7 @@ TestServerHostResultSender::testConfig()
     // Verify.
     MailMock::Message* p = h.mailQueue().extract("user:a");
     TS_ASSERT(p->hasAttachment("c2file://127.0.0.1:7776/games/0001/out/1/player1.zip"));
+    TS_ASSERT(!p->hasAttachment("c2file://127.0.0.1:7776/games/0001/out/1/player1.rst"));
     TS_ASSERT_EQUALS(p->parameters["gameid"], "1");
     TS_ASSERT_EQUALS(p->parameters["gameurl"], "1-test-config");
     TS_ASSERT_EQUALS(p->attachments.size(), 1U);
@@ -471,6 +476,42 @@ TestServerHostResultSender::testGameDefault()
     TS_ASSERT(p->hasAttachment("c2file://127.0.0.1:7776/games/0001/out/5/player5.rst"));
     TS_ASSERT(p->hasAttachment("c2file://127.0.0.1:7776/games/0001/out/5/util5.dat"));
     TS_ASSERT(p->hasAttachment("c2file://127.0.0.1:7776/games/0001/out/all/playerfiles.zip"));
+
+    TS_ASSERT(h.mailQueue().empty());
+}
+
+/** Test sending extra files.
+    Mail in "rst" format must also include files that are not explicitly known to c2host. */
+void
+TestServerHostResultSender::testExtraFiles()
+{
+    TestHarness h;
+
+    // Add a game and join a user to it
+    int32_t gid = h.addGame();
+    TS_ASSERT_EQUALS(gid, 1);
+    h.addUser("q");
+    Game g(h.root(), gid);
+    g.pushPlayerSlot(5, "q", h.root());
+    HashKey(h.db(), "default:profile").stringField("mailgametype").set("rst");
+
+    // Add extra files
+    FileBaseClient(h.hostFile()).putFile("games/0001/out/5/flak5.dat", "flak...");
+    FileBaseClient(h.hostFile()).putFile("games/0001/out/5/extra.txt", "extra");
+    FileBaseClient(h.hostFile()).putFile("games/0001/out/5/x", "x");
+
+    // Send results
+    server::host::ResultSender(h.root(), g).sendAllResults();
+
+    // Verify.
+    MailMock::Message* p = h.mailQueue().extract("user:q");
+    TS_ASSERT(p->hasAttachment("c2file://127.0.0.1:7776/games/0001/out/5/extra.txt"));
+    TS_ASSERT(p->hasAttachment("c2file://127.0.0.1:7776/games/0001/out/5/flak5.dat"));
+    TS_ASSERT(p->hasAttachment("c2file://127.0.0.1:7776/games/0001/out/5/player5.rst"));
+    TS_ASSERT(p->hasAttachment("c2file://127.0.0.1:7776/games/0001/out/5/util5.dat"));
+    TS_ASSERT(p->hasAttachment("c2file://127.0.0.1:7776/games/0001/out/5/x"));
+    TS_ASSERT(p->hasAttachment("c2file://127.0.0.1:7776/games/0001/out/all/playerfiles.zip"));
+    TS_ASSERT(!p->hasAttachment("c2file://127.0.0.1:7776/games/0001/out/5/player5.zip"));
 
     TS_ASSERT(h.mailQueue().empty());
 }
