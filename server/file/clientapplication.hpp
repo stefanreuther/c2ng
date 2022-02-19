@@ -36,6 +36,7 @@ namespace server { namespace file {
         void doList(DirectoryHandler& in, String_t name, bool recursive, bool longFormat, bool withHeader);
         void doClear(afl::sys::CommandLineParser& cmdl);
         void doServe(afl::sys::CommandLineParser& cmdl);
+        void doGC(afl::sys::CommandLineParser& cmdl);
         void help();
 
         afl::net::NetworkStack& m_serverNetworkStack;

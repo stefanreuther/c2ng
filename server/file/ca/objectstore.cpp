@@ -24,8 +24,10 @@ namespace {
     const char*const BAD_OBJECT_TYPE = "500 Bad object type";
     const char*const BAD_OBJECT_SIZE = "500 Bad object size";
     const char*const BAD_OBJECT_CONTENT = "500 Bad object content";
+    const char*const BAD_COMMIT = "500 Bad commit";
     const char*const MISSING_OBJECT = "500 Missing object";
     const char*const HASH_COLLISION = "500 Hash collision";
+
 
     const char KEYWORDS[][8] = { "blob ", "tree ", "commit " };
 
@@ -130,6 +132,25 @@ server::file::ca::ObjectStore::getObject(const ObjectId& id, Type expectedType)
         throw afl::except::FileProblemException(id.toHex(), MISSING_OBJECT);
     }
     return *result;
+}
+
+// Get object content as commit.
+server::file::ca::ObjectId
+server::file::ca::ObjectStore::getCommit(const ObjectId& id)
+{
+    afl::base::Ref<afl::io::FileMapping> p(getObject(id, CommitObject));
+    afl::base::ConstBytes_t bytes(p->get());
+
+    if (bytes.empty()) {
+        // Empty commit means empty tree
+        return ObjectId::nil;
+    } else {
+        Commit commit;
+        if (!commit.parse(bytes)) {
+            throw std::runtime_error(BAD_COMMIT);
+        }
+        return commit.getTreeId();
+    }
 }
 
 // Get object size.
@@ -242,6 +263,17 @@ server::file::ca::ObjectStore::unlinkObject(Type type, const ObjectId& id)
             // Remove from cache
             m_cache->removeObject(id);
         }
+    }
+}
+
+// Get directory for a first-byte directory.
+server::file::DirectoryHandler*
+server::file::ca::ObjectStore::getObjectDirectory(size_t prefix)
+{
+    if (prefix < m_subdirectories.size()) {
+        return m_subdirectories[prefix];
+    } else {
+        return 0;
     }
 }
 

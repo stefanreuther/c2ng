@@ -1,17 +1,16 @@
 /**
   *  \file server/file/ca/root.cpp
+  *  \brief Class server::file::ca::Root
   */
 
 #include "server/file/ca/root.hpp"
-#include "server/file/directoryhandler.hpp"
+#include "server/file/ca/commit.hpp"
+#include "server/file/ca/directoryhandler.hpp"
 #include "server/file/ca/objectid.hpp"
 #include "server/file/ca/objectstore.hpp"
-#include "server/file/ca/directoryhandler.hpp"
-#include "server/file/ca/commit.hpp"
+#include "server/file/directoryhandler.hpp"
 
 namespace {
-    const char BAD_COMMIT[] = "500 Bad commit";
-
     server::file::DirectoryHandler* getCreateDirectory(server::file::DirectoryHandler& parent, String_t name)
     {
         server::file::DirectoryHandler::Info info;
@@ -20,24 +19,11 @@ namespace {
         }
         return parent.getDirectory(info);
     }
-
-    server::file::ca::ObjectId readCommit(server::file::ca::ObjectStore& store, server::file::ca::ObjectId id)
-    {
-        afl::base::Ref<afl::io::FileMapping> p(store.getObject(id, server::file::ca::ObjectStore::CommitObject));
-        afl::base::ConstBytes_t bytes(p->get());
-
-        if (bytes.empty()) {
-            // Empty commit means empty tree
-            return server::file::ca::ObjectId::nil;
-        } else {
-            server::file::ca::Commit commit;
-            if (!commit.parse(bytes)) {
-                throw std::runtime_error(BAD_COMMIT);
-            }
-            return commit.getTreeId();
-        }
-    }
 }
+
+/*
+ *  RootUpdater: create a commit and rewrite the `refs/heads/master` file
+ */
 
 class server::file::ca::Root::RootUpdater : public server::file::ca::ReferenceUpdater {
  public:
@@ -67,7 +53,11 @@ class server::file::ca::Root::RootUpdater : public server::file::ca::ReferenceUp
     ObjectId m_commitId;
 };
 
+/*
+ *  Root
+ */
 
+// Constructor.
 server::file::ca::Root::Root(server::file::DirectoryHandler& root)
     : m_root(root),
       m_refs(),
@@ -78,13 +68,14 @@ server::file::ca::Root::Root(server::file::DirectoryHandler& root)
     init();
 }
 
+// Destructor.
 server::file::ca::Root::~Root()
 { }
 
-server::file::DirectoryHandler*
-server::file::ca::Root::createRootHandler()
+// Get ObjectId of the `master` commit.
+server::file::ca::ObjectId
+server::file::ca::Root::getMasterCommitId()
 {
-    // Read Id of master
     DirectoryHandler::Info info;
     ObjectId masterCommitId = ObjectId::nil;
     if (m_refsHeads->findItem("master", info)) {
@@ -100,14 +91,31 @@ server::file::ca::Root::createRootHandler()
             masterCommitId = id;
         }
     }
+    return masterCommitId;
+}
+
+// Create DirectoryHandler for root directory.
+server::file::DirectoryHandler*
+server::file::ca::Root::createRootHandler()
+{
+    // Read Id of master
+    ObjectId masterCommitId = getMasterCommitId();
 
     // Master is a commit. Read its tree.
-    ObjectId masterTreeId = readCommit(*m_store, masterCommitId);
+    ObjectId masterTreeId = m_store->getCommit(masterCommitId);
 
     // Create root directory item
     return new DirectoryHandler(*m_store, masterTreeId, "(ca-root)", *new RootUpdater(*this, masterCommitId));
 }
 
+// Access the ObjectStore instance.
+server::file::ca::ObjectStore&
+server::file::ca::Root::objectStore()
+{
+    return *m_store;
+}
+
+// Initialize.
 void
 server::file::ca::Root::init()
 {

@@ -34,6 +34,16 @@ class TestServerFileCaDirectoryHandler : public CxxTest::TestSuite {
     void testCopy();
 };
 
+class TestServerFileCaGarbageCollector : public CxxTest::TestSuite {
+ public:
+    void testNormal();
+    void testGarbage();
+    void testSliced();
+    void testModified();
+    void testErrorCommit();
+    void testErrorTree();
+};
+
 class TestServerFileCaInternalObjectCache : public CxxTest::TestSuite {
  public:
     void testIt();

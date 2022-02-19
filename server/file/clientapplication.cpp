@@ -11,11 +11,20 @@
 #include "afl/net/server.hpp"
 #include "afl/string/format.hpp"
 #include "afl/sys/standardcommandlineparser.hpp"
+#include "server/file/ca/garbagecollector.hpp"
+#include "server/file/ca/root.hpp"
 #include "server/file/directoryhandler.hpp"
 #include "server/file/directoryhandlerfactory.hpp"
 #include "server/file/directorypage.hpp"
+#include "server/file/filesystemhandler.hpp"
 #include "server/file/utils.hpp"
 #include "version.hpp"
+
+// For debugging/memory optimisation
+// #define MALLOC_STATS
+#ifdef MALLOC_STATS
+# include <malloc.h>
+#endif
 
 void
 server::file::ClientApplication::appMain()
@@ -58,6 +67,8 @@ server::file::ClientApplication::appMain()
         doSync(commandLine);
     } else if (*pCommand == "serve") {
         doServe(commandLine);
+    } else if (*pCommand == "gc") {
+        doGC(commandLine);
     } else {
         errorExit(afl::string::Format(tx("invalid command '%s'. Use '%s -h' for help.").c_str(), *pCommand, environment().getInvocationName()));
     }
@@ -89,7 +100,7 @@ server::file::ClientApplication::doCopy(afl::sys::CommandLineParser& cmdl)
                 out = &dhf.createDirectoryHandler(p);
             } else {
                 errorExit(afl::string::Format(tx("too many directory names specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
-            }                
+            }
         }
     }
 
@@ -123,7 +134,7 @@ server::file::ClientApplication::doSync(afl::sys::CommandLineParser& cmdl)
                 out = &dhf.createDirectoryHandler(p);
             } else {
                 errorExit(afl::string::Format(tx("too many directory names specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
-            }                
+            }
         }
     }
 
@@ -294,6 +305,76 @@ server::file::ClientApplication::doServe(afl::sys::CommandLineParser& cmdl)
 }
 
 void
+server::file::ClientApplication::doGC(afl::sys::CommandLineParser& cmdl)
+{
+    // Parse parameters
+    afl::string::Translator& tx = translator();
+    afl::base::Optional<String_t> dir;
+
+    String_t p;
+    bool opt;
+    bool dryRun = false;
+    bool force = false;
+    while (cmdl.getNext(opt, p)) {
+        if (opt) {
+            if (p == "n") {
+                dryRun = true;
+            } else if (p == "f") {
+                force = true;
+            } else {
+                errorExit(afl::string::Format(tx("invalid option specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
+            }
+        } else if (!dir.isValid()) {
+            dir = p;
+        } else {
+            errorExit(afl::string::Format(tx("too many parameters. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
+        }
+    }
+
+    const String_t* pDir = dir.get();
+    if (pDir == 0) {
+        errorExit(afl::string::Format(tx("too few parameters. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
+    }
+
+    // Objects
+    // (Intentionally do not use DirectoryHandlerFactory; we don't want to use 'ca:DIR' here.)
+    FileSystemHandler handler(fileSystem(), *pDir);
+    server::file::ca::Root root(handler);
+    server::file::ca::GarbageCollector gc(root.objectStore(), log());
+
+    // Do it!
+#ifdef MALLOC_STATS
+    int prevMem = mallinfo().arena;
+#endif
+    gc.addCommit(root.getMasterCommitId());
+    size_t n = 0;
+    while (gc.checkObject()) {
+        if (++n % 512 == 0) {
+            standardOutput().writeLine(afl::string::Format("... to check: %d, reachable: %d", gc.getNumObjectsToCheck(), gc.getNumObjectsToKeep()));
+            standardOutput().flush();
+        }
+    }
+    standardOutput().writeLine(afl::string::Format("Total reachable objects: %d", gc.getNumObjectsToKeep()));
+    standardOutput().flush();
+#ifdef MALLOC_STATS
+    int postMem = mallinfo().arena;
+    standardOutput().writeLine(afl::string::Format("malloc: %d to %d = %d [%dk]", prevMem, postMem, (postMem-prevMem), (postMem-prevMem) / 1024));
+    standardOutput().flush();
+#endif
+    if (gc.getNumErrors() != 0 && !force) {
+        errorOutput().writeLine(afl::string::Format("%d error%!1{s%} found, aborted (use \"-f\" to force)", gc.getNumErrors()));
+        exit(1);
+    }
+
+    // Remove
+    if (!dryRun) {
+        while (gc.removeGarbageObjects())
+            ;
+        standardOutput().writeLine(afl::string::Format("Total objects removed: %d", gc.getNumObjectsRemoved()));
+    }
+}
+
+void
 server::file::ClientApplication::help()
 {
     afl::string::Translator& tx = translator();
@@ -315,17 +396,19 @@ server::file::ClientApplication::help()
                                          "                      Remove content of DIRs\n"
                                          "  %$0s serve SOURCE HOST:PORT\n"
                                          "                      Serve SOURCE via HTTP for testing\n"
+                                         "  %$0s gc [-n] [-f] PATH\n"
+                                         "                      Garbage-collect a CA file system\n"
                                          "\n"
                                          "Command Options:\n"
-                                         "  -r                  Recursive\n"
+                                         "  -f                  Force garbage-collection even on error\n"
                                          "  -l                  Long format\n"
+                                         "  -n                  Dry run (do not delete anything)\n"
+                                         "  -r                  Recursive\n"
                                          "  -x                  Expand *.tgz/*.tar.gz files\n"
                                          "\n"
                                          "File specifications:\n"
                                          "  PATH                Access files within unmanaged file system\n"
                                          "  [PATH@]ca:SPEC      Access files within unmanaged content-addressable file system\n"
-                                         // "  [PATH@]c2file:SPEC  Access files within managed file system\n"
-                                         // "  [PATH@]ro:SPEC      Prevent write access\n"
                                          "  [PATH@]int:[UNIQ]   Internal (RAM, not persistent) file space\n"
                                          "  c2file://[USER@]HOST:PORT/PATH\n"
                                          "                      Access in a remote managed file system (c2file server)\n"

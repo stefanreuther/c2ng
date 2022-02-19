@@ -77,3 +77,59 @@ Content-Adressable Storage (aka "git backend", server::file::ca)
 
 Last backup before switch:  1524368k  20180427-hostdata.tar.gz
 First backup after switch:   746796k  20180504-data.tar.gz
+
+
+Garbage Collection for CA backend
+----------------------------------
+
+Problem: restart loses reference counts, causing objects to not be deleted
+
+Basic idea: build set of all reachable SHA1's, delete everything not covered
+
+Can we build the set of all reachable SHA1's in RAM? Take a
+std::map<ObjectId,int> or std::set<ObjectId>, populate with random
+ObjectIds.
+
+    # elems   VmSize/64bit       VmSize/32bit
+               map or set      set          map
+      100000    18764 kB       7364 kB    8156 kB
+      200000    24968 kB      11324 kB   12908 kB
+      300000    31304 kB      15152 kB   17528 kB
+     1000000    74966 kB      42476 kB   50396 kB
+
+     per node   64 bytes      40 bytes   48 bytes
+     payload   20-24 bytes    20 bytes   24 bytes
+     overhead  40-44 bytes    20 bytes   24 bytes
+
+Memory usage is the same for set/map on 64-bit because the map's
+additional int fills a position in the node that would otherwise be
+padding.
+
+Actual stats: PlanetsCentral-20220218 backup, "c2fileclient gc":
+
+                   size objects/     # files in objects/
+    before          2409412k             315414
+    after           2349860k             308142
+    removed           59552k               7272
+    removed %          2.4%               2.3%
+
+    measured RAM (delta VmSize, delta mallinfo().arena): 39700k
+    - of that, approx 308142 * 64 = 19258k for sets
+    - InternalObjectCache contains 9447 objects = approx. 1200k
+      and 18303176 payload bytes = approx 17875k; not counting
+      overhead.
+
+    time taken (real time):
+    - PlanetsCentral, hot cache: 27s
+    - local, hot cache: 3.5s
+
+Actual stats: PlanetsCentral local test installation, "c2fileclient gc":
+
+                   size objects/     # files in objects/
+    before           456084k              99842
+    after            432604k              95346
+    removed           23480k               4496
+    removed %          5.1%               4.5%
+
+    measured RAM (delta VmSize, delta mallinfo().arena): 18048k
+    - of that, approx 308142 * 64 = 5959k for sets

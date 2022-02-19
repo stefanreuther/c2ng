@@ -37,6 +37,8 @@ TestServerFileCaRoot::testEmpty()
     // Store some files
     {
         server::file::ca::Root t(rootHandler);
+        TS_ASSERT_EQUALS(t.getMasterCommitId(), server::file::ca::ObjectId::nil);
+
         server::file::DirectoryItem rootItem("(ca-root)", 0, std::auto_ptr<server::file::DirectoryHandler>(t.createRootHandler()));
         rootItem.createDirectory("d");
         rootItem.createFile("f", afl::string::toBytes("text"));

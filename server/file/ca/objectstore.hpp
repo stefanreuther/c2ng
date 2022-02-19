@@ -62,6 +62,15 @@ namespace server { namespace file { namespace ca {
             - object has wrong type */
         afl::base::Ref<afl::io::FileMapping> getObject(const ObjectId& id, Type expectedType);
 
+        /** Read object as commit.
+            \param id Commit Id
+            \return tree Id associated with commit
+            \throw afl::except::FileProblemException on errors:
+            - object does not exist
+            - object is not a commit
+            - object has wrong format */
+        ObjectId getCommit(const ObjectId& id);
+
         /** Get object size.
             This function returns the same as getObject(...)->get().size(), but possibly more efficient.
             \param id Object Id
@@ -70,7 +79,7 @@ namespace server { namespace file { namespace ca {
             \throw afl::except::FileProblemException on errors:
             - object does not exist
             - object has wrong format/bad content
-            - object has wrong type */            
+            - object has wrong type */
         size_t getObjectSize(const ObjectId& id, Type expectedType);
 
         /** Add an object.
@@ -97,6 +106,11 @@ namespace server { namespace file { namespace ca {
             \param type Object type
             \param id Object Id */
         void unlinkObject(Type type, const ObjectId& id);
+
+        /** Get directory for a first-byte directory.
+            \param prefix Number of directory (0..255)
+            \return DirectoryHandler if one exists, null if this directory does not exist (=has no objects) */
+        DirectoryHandler* getObjectDirectory(size_t prefix);
 
      private:
         bool loadObject(const ObjectId& id, Type expectedType, size_t* pSize, afl::base::Ptr<afl::io::FileMapping>* pContent);
