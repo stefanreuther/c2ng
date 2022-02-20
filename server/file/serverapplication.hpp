@@ -40,6 +40,7 @@ namespace server { namespace file {
         String_t m_rootDirectory;                    // ex arg_basedir
         afl::io::Stream::FileSize_t m_maxFileSize;   // ex arg_file_size_limit
         afl::async::Interrupt& m_interrupt;
+        bool m_gcEnabled;
     };
 
 } }

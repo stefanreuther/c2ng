@@ -4,18 +4,25 @@
   */
 
 #include "server/file/directoryhandlerfactory.hpp"
-#include "afl/except/fileproblemexception.hpp"
-#include "server/file/ca/root.hpp"
-#include "server/file/filesystemhandler.hpp"
-#include "server/file/internaldirectoryhandler.hpp"
 #include "afl/base/deletable.hpp"
-#include "afl/net/url.hpp"
+#include "afl/except/fileproblemexception.hpp"
 #include "afl/net/networkstack.hpp"
 #include "afl/net/resp/client.hpp"
+#include "afl/net/url.hpp"
+#include "afl/string/format.hpp"
+#include "server/file/ca/garbagecollector.hpp"
+#include "server/file/ca/root.hpp"
 #include "server/file/clientdirectoryhandler.hpp"
+#include "server/file/filesystemhandler.hpp"
+#include "server/file/internaldirectoryhandler.hpp"
 #include "server/interface/baseclient.hpp"
 
+using afl::string::Format;
+using afl::sys::LogListener;
+
 namespace {
+    const char*const LOG_NAME = "file";
+
     struct InternalRoot : public afl::base::Deletable {
         server::file::InternalDirectoryHandler::Directory dir;
         server::file::InternalDirectoryHandler handler;
@@ -34,6 +41,28 @@ namespace {
             return 0;
         }
     }
+
+    void doGarbageCollection(server::file::ca::Root& root, afl::sys::LogListener& log, const String_t& name)
+    {
+        // Perform GC
+        server::file::ca::GarbageCollector gc(root.objectStore(), log);
+        gc.addCommit(root.getMasterCommitId());
+        log.write(LogListener::Info, LOG_NAME, "Garbage collection...");
+        while (gc.checkObject())
+            ;
+
+        // Report status
+        if (gc.getNumErrors() != 0) {
+            log.write(LogListener::Error, LOG_NAME, Format("%d error%!1{s%} found, aborting", gc.getNumErrors()));
+            throw afl::except::FileProblemException(name, "GC error");
+        }
+        log.write(LogListener::Info, LOG_NAME, Format("Total reachable objects: %d", gc.getNumObjectsToKeep()));
+
+        // Remove objects
+        while (gc.removeGarbageObjects())
+            ;
+        log.write(LogListener::Info, LOG_NAME, Format("Total objects removed: %d", gc.getNumObjectsRemoved()));
+    }
 }
 
 // Constructor.
@@ -42,12 +71,20 @@ server::file::DirectoryHandlerFactory::DirectoryHandlerFactory(afl::io::FileSyst
       m_cache(),
       m_clientCache(),
       m_fs(fs),
-      m_networkStack(net)
+      m_networkStack(net),
+      m_gcEnabled(false)
 { }
+
+// Set garbage collection mode.
+void
+server::file::DirectoryHandlerFactory::setGarbageCollection(bool enabled)
+{
+    m_gcEnabled = enabled;
+}
 
 // Create a DirectoryHandler.
 server::file::DirectoryHandler&
-server::file::DirectoryHandlerFactory::createDirectoryHandler(const String_t& str)
+server::file::DirectoryHandlerFactory::createDirectoryHandler(const String_t& str, afl::sys::LogListener& log)
 {
     // Check cache
     Cache_t::iterator it = m_cache.find(str);
@@ -99,7 +136,7 @@ server::file::DirectoryHandlerFactory::createDirectoryHandler(const String_t& st
             result = &handler;
         } else if ((p = str.find('@')) != String_t::npos) {
             // PATH @ BACKEND form
-            DirectoryHandler& backend = createDirectoryHandler(str.substr(p+1));
+            DirectoryHandler& backend = createDirectoryHandler(str.substr(p+1), log);
             result = &backend;
 
             // Walk the path
@@ -116,8 +153,11 @@ server::file::DirectoryHandlerFactory::createDirectoryHandler(const String_t& st
             // Just a path or URL
             if (str.size() > 3 && str.compare(0, 3, "ca:", 3) == 0) {
                 // Content-addressable
-                DirectoryHandler& backend = createDirectoryHandler(str.substr(3));
+                DirectoryHandler& backend = createDirectoryHandler(str.substr(3), log);
                 server::file::ca::Root& root = m_deleter.addNew(new server::file::ca::Root(backend));
+                if (m_gcEnabled) {
+                    doGarbageCollection(root, log, str.substr(3));
+                }
                 result = &m_deleter.addNew(root.createRootHandler());
             } else if (str.size() >= 4 && str.compare(0, 4, "int:", 4) == 0) {
                 // Internal

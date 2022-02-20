@@ -95,9 +95,9 @@ server::file::ClientApplication::doCopy(afl::sys::CommandLineParser& cmdl)
             }
         } else {
             if (in == 0) {
-                in = &dhf.createDirectoryHandler(p);
+                in = &dhf.createDirectoryHandler(p, log());
             } else if (out == 0) {
-                out = &dhf.createDirectoryHandler(p);
+                out = &dhf.createDirectoryHandler(p, log());
             } else {
                 errorExit(afl::string::Format(tx("too many directory names specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
             }
@@ -129,9 +129,9 @@ server::file::ClientApplication::doSync(afl::sys::CommandLineParser& cmdl)
             }
         } else {
             if (in == 0) {
-                in = &dhf.createDirectoryHandler(p);
+                in = &dhf.createDirectoryHandler(p, log());
             } else if (out == 0) {
-                out = &dhf.createDirectoryHandler(p);
+                out = &dhf.createDirectoryHandler(p, log());
             } else {
                 errorExit(afl::string::Format(tx("too many directory names specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
             }
@@ -175,7 +175,7 @@ server::file::ClientApplication::doList(afl::sys::CommandLineParser& cmdl)
     DirectoryHandlerFactory dhf(fileSystem(), networkStack());
     bool withHeader = (args.size() > 1 || opt_recursive);
     for (size_t i = 0, n = args.size(); i < n; ++i) {
-        doList(dhf.createDirectoryHandler(args[i]), args[i], opt_recursive, opt_long, withHeader);
+        doList(dhf.createDirectoryHandler(args[i], log()), args[i], opt_recursive, opt_long, withHeader);
     }
 }
 
@@ -250,7 +250,7 @@ server::file::ClientApplication::doClear(afl::sys::CommandLineParser& cmdl)
 
     DirectoryHandlerFactory dhf(fileSystem(), networkStack());
     for (size_t i = 0, n = args.size(); i < n; ++i) {
-        removeDirectoryContent(dhf.createDirectoryHandler(args[i]));
+        removeDirectoryContent(dhf.createDirectoryHandler(args[i], log()));
     }
 }
 
@@ -296,7 +296,7 @@ server::file::ClientApplication::doServe(afl::sys::CommandLineParser& cmdl)
 
     // Set up
     DirectoryHandlerFactory dhf(fileSystem(), networkStack());
-    DirectoryHandler& dh(dhf.createDirectoryHandler(*pSource));
+    DirectoryHandler& dh(dhf.createDirectoryHandler(*pSource, log()));
     afl::net::http::PageDispatcher disp;
     disp.addNewPage("", new DirectoryPage(dh));
     MyProtocolHandlerFactory phf(disp);

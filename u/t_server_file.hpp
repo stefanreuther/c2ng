@@ -43,6 +43,10 @@ class TestServerFileDirectoryHandlerFactory : public CxxTest::TestSuite {
     void testCreateSubdir();
     void testCreateErrors();
     void testCreateRemote();
+    void testCreateCAPreload();
+    void testCreateCAFail();
+    void testCreateCAFail2();
+    void testCreateCAFailNoGC();
 };
 
 class TestServerFileDirectoryWrapper : public CxxTest::TestSuite {

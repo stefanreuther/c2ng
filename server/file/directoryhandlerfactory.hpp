@@ -6,10 +6,11 @@
 #define C2NG_SERVER_FILE_DIRECTORYHANDLERFACTORY_HPP
 
 #include <map>
-#include "afl/io/filesystem.hpp"
 #include "afl/base/deleter.hpp"
-#include "afl/net/networkstack.hpp"
+#include "afl/io/filesystem.hpp"
 #include "afl/net/commandhandler.hpp"
+#include "afl/net/networkstack.hpp"
+#include "afl/sys/loglistener.hpp"
 
 namespace server { namespace file {
 
@@ -29,10 +30,18 @@ namespace server { namespace file {
             \param net Network Stack */
         explicit DirectoryHandlerFactory(afl::io::FileSystem& fs, afl::net::NetworkStack& net);
 
+        /** Set garbage collection mode.
+            \param enabled Set status.
+                           If true, garbage collection is run before a CA backend is created, and an error
+                           If false (default), no garbage collection is run */
+        void setGarbageCollection(bool enabled);
+
         /** Create a DirectoryHandler.
             \param str Descriptor
-            \return DirectoryHandler instance. This object lives as long as the DirectoryHandlerFactory. */
-        DirectoryHandler& createDirectoryHandler(const String_t& str);
+            \param log Logger (for GC)
+            \return DirectoryHandler instance. This object lives as long as the DirectoryHandlerFactory.
+            \throw FileProblemException on error (in particular, error in GC) */
+        DirectoryHandler& createDirectoryHandler(const String_t& str, afl::sys::LogListener& log);
 
         /** Build a path name.
             Assuming \c backendPath is a path describing a file space, and \c child names a directory in it,
@@ -54,6 +63,7 @@ namespace server { namespace file {
         ClientCache_t m_clientCache;
         afl::io::FileSystem& m_fs;
         afl::net::NetworkStack& m_networkStack;
+        bool m_gcEnabled;
     };
 
 } }

@@ -119,7 +119,8 @@ server::file::ServerApplication::ServerApplication(afl::sys::Environment& env, a
       m_instanceName("FILE"),
       m_rootDirectory("."),
       m_maxFileSize(10UL*1024*1024),
-      m_interrupt(intr)
+      m_interrupt(intr),
+      m_gcEnabled(true)
 { }
 
 server::file::ServerApplication::~ServerApplication()
@@ -132,6 +133,9 @@ server::file::ServerApplication::handleCommandLineOption(const String_t& option,
         // @change was "-I" in PCC2
         m_instanceName = afl::string::strUCase(parser.getRequiredParameter("instance"));
         return true;
+    } else if (option == "nogc") {
+        m_gcEnabled = false;
+        return true;
     } else {
         return false;
     }
@@ -143,7 +147,8 @@ server::file::ServerApplication::serverMain()
     // Set up file access
     afl::io::FileSystem& fs = fileSystem();
     DirectoryHandlerFactory dhFactory(fs, networkStack());
-    DirectoryItem item("(root)", 0, std::auto_ptr<DirectoryHandler>(new ProxyDirectoryHandler(dhFactory.createDirectoryHandler(m_rootDirectory))));
+    dhFactory.setGarbageCollection(m_gcEnabled);
+    DirectoryItem item("(root)", 0, std::auto_ptr<DirectoryHandler>(new ProxyDirectoryHandler(dhFactory.createDirectoryHandler(m_rootDirectory, log()))));
 
     afl::base::Ref<afl::io::Directory> defaultSpecDirectory = fs.openDirectory(fs.makePathName(fs.makePathName(environment().getInstallationDirectoryName(), "share"), "specs"));
 
@@ -223,6 +228,7 @@ server::file::ServerApplication::getApplicationName() const
 String_t
 server::file::ServerApplication::getCommandLineOptionHelp() const
 {
-    return "--instance=NAME\tInstance name (default: \"FILE\")\n";
+    return "--instance=NAME\tInstance name (default: \"FILE\")\n"
+        "--nogc\tDisable garbage collection\n";
 }
 
