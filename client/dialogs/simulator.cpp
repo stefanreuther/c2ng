@@ -9,6 +9,7 @@
 #include "client/dialogs/simulationabilities.hpp"
 #include "client/dialogs/simulationbasetorpedoes.hpp"
 #include "client/dialogs/simulationconfiguration.hpp"
+#include "client/dialogs/simulationflakratings.hpp"
 #include "client/dialogs/simulationfleetcost.hpp"
 #include "client/dialogs/simulationresult.hpp"
 #include "client/downlink.hpp"
@@ -270,6 +271,7 @@ namespace {
         void onEditBaseBeamLevel();
         void onEditCrew();
         void onEditId();
+        void onEditFlakRatings();
         void onEditExperienceLevel();
         void onEditMass();
         void onEditName();
@@ -385,7 +387,7 @@ SimulatorDialog::run()
     m_keyDispatcher.add('F', this, &SimulatorDialog::onSetSequentialFriendlyCode);
     m_keyDispatcher.add('g', this, &SimulatorDialog::onEditBaseFighters);
     m_keyDispatcher.add('i', this, &SimulatorDialog::onEditId);
-    // 'k' -> ship/planet flak ratings
+    m_keyDispatcher.add('k', this, &SimulatorDialog::onEditFlakRatings);
     m_keyDispatcher.add('l', this, &SimulatorDialog::onEditExperienceLevel);
     m_keyDispatcher.add('m', this, &SimulatorDialog::onEditMass);
     m_keyDispatcher.add('n', this, &SimulatorDialog::onEditName);
@@ -1086,6 +1088,38 @@ SimulatorDialog::onEditId()
             MessageBox(m_translator("This Id number is already in use in this simulation setup. Please choose another one."),
                        m_translator("Battle Simulator"),
                        m_root).doOkDialog(m_translator);
+        }
+    }
+}
+
+void
+SimulatorDialog::onEditFlakRatings()
+{
+    if (isAtShip()) {
+        // Set up
+        client::dialogs::SimulationFlakRatings values;
+        values.defaultFlakRating       = m_currentObject.defaultFlakRating;
+        values.defaultFlakCompensation = m_currentObject.defaultFlakCompensation;
+        if ((m_currentObject.flags & game::sim::Object::fl_RatingOverride) != 0) {
+            values.useDefaults      = false;
+            values.flakRating       = m_currentObject.flakRatingOverride;
+            values.flakCompensation = m_currentObject.flakCompensationOverride;
+        } else {
+            values.useDefaults      = true;
+            values.flakRating       = values.defaultFlakRating;
+            values.flakCompensation = values.defaultFlakCompensation;
+        }
+
+        // Edit
+        if (client::dialogs::editSimulationFlakRatings(m_root, values, m_translator)) {
+            // Write back
+            if (values.useDefaults) {
+                m_proxy.setFlags(m_currentSlot, ~game::sim::Object::fl_RatingOverride, 0);
+            } else {
+                m_proxy.setFlags(m_currentSlot, ~game::sim::Object::fl_RatingOverride, game::sim::Object::fl_RatingOverride);
+                m_proxy.setFlakRatingOverride(m_currentSlot, values.flakRating);
+                m_proxy.setFlakCompensationOverride(m_currentSlot, values.flakCompensation);
+            }
         }
     }
 }

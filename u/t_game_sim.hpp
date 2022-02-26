@@ -134,6 +134,7 @@ class TestGameSimRun : public CxxTest::TestSuite {
     void testPlanetPrimaryEnemy();
     void testPlanetNuk();
     void testFLAK();
+    void testFLAKESB();
     void testFLAKMulti();
     void testOrderHostShip();
     void testOrderHostPlanet();

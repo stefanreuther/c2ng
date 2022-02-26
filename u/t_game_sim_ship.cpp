@@ -163,7 +163,7 @@ TestGameSimShip::testShipList()
         list.launchers().create(i);
     }
     for (int i = 1; i <= 7; ++i) {
-        list.engines().create(i);
+        list.engines().create(i)->cost().set(game::spec::Cost::Money, 100*i);
     }
 
     // Test
@@ -184,6 +184,31 @@ TestGameSimShip::testShipList()
     TS_ASSERT_EQUALS(testee.getNumLaunchersRange(list).max(), 10);
     TS_ASSERT_EQUALS(testee.getNumBaysRange(list).min(), 0);
     TS_ASSERT_EQUALS(testee.getNumBaysRange(list).max(), 0);
+    TS_ASSERT_EQUALS(testee.getEngineType(), 1);
+
+    // Derived attributes
+    {
+        game::config::HostConfiguration config;
+        game::vcr::flak::Configuration flakConfiguration;
+        game::sim::Configuration opts;
+        opts.setEngineShieldBonus(20);
+
+        TS_ASSERT_EQUALS(testee.getEffectiveMass(opts, list, config), 3020);                               // +20 from ESB
+        TS_ASSERT_EQUALS(testee.getDefaultFlakRating(flakConfiguration, opts, list, config), 3115);
+        TS_ASSERT_EQUALS(testee.getDefaultFlakCompensation(flakConfiguration, opts, list, config), 500);   // actually, 1050, but limited by CompensationLimit
+
+        // Alternative FLAK configuration
+        flakConfiguration.RatingMassScale = 0;
+        flakConfiguration.CompensationLimit = 9999;
+        flakConfiguration.CompensationMass100KTScale = 30;
+        TS_ASSERT_EQUALS(testee.getDefaultFlakRating(flakConfiguration, opts, list, config), 95);
+        TS_ASSERT_EQUALS(testee.getDefaultFlakCompensation(flakConfiguration, opts, list, config), 1956);  // +906 from CompensationMass100KTScale
+
+        // Alternative sim configuration
+        opts.setEngineShieldBonus(0);
+        TS_ASSERT_EQUALS(testee.getDefaultFlakRating(flakConfiguration, opts, list, config), 95);
+        TS_ASSERT_EQUALS(testee.getDefaultFlakCompensation(flakConfiguration, opts, list, config), 1950);  // -20*0.3 from ESB
+    }
 
     // Vary attributes
     testee.setNumBeams(3);

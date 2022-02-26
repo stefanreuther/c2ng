@@ -365,6 +365,8 @@ TestGameProxySimulationSetupProxy::testGetObject()
     TS_ASSERT_EQUALS(si.shield, 100);
     TS_ASSERT_EQUALS(si.owner.first, 12);
     TS_ASSERT_EQUALS(si.owner.second, "Player 12");
+    TS_ASSERT_EQUALS(si.defaultFlakRating, 110);
+    TS_ASSERT_EQUALS(si.defaultFlakCompensation, 30);
 
     // Verify planet
     SimulationSetupProxy::ObjectInfo pi;
@@ -377,6 +379,8 @@ TestGameProxySimulationSetupProxy::testGetObject()
     TS_ASSERT_EQUALS(pi.shield, 100);
     TS_ASSERT_EQUALS(pi.owner.first, 12);
     TS_ASSERT_EQUALS(pi.owner.second, "Player 12");
+    TS_ASSERT_EQUALS(pi.defaultFlakRating, 0);
+    TS_ASSERT_EQUALS(pi.defaultFlakCompensation, 0);
 }
 
 /** Test getObject().

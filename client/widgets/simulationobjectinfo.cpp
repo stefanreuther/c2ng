@@ -106,7 +106,7 @@ class client::widgets::SimulationObjectInfo::Header : public CollapsibleDataView
           m_translator(tx), m_isPlanet(isPlanet),
           m_imageButton("", 0, root, gfx::Point(105, 93)),
           m_imageFrame(ui::layout::VBox::instance5, root.colorScheme(), ui::LoweredFrame),
-          m_firstTable(root, 2, 5),
+          m_firstTable(root, 2, 6),
           m_secondTable(root, 2, 3)
         {
             init(keyHandler);
@@ -166,6 +166,15 @@ class client::widgets::SimulationObjectInfo::Header : public CollapsibleDataView
             m_firstTable.cell(1, 2).setText(info.name);
             m_firstTable.cell(1, 3).setText(afl::string::Format("%d", info.id));
             m_firstTable.cell(1, 4).setText(info.friendlyCode);
+            if (!m_isPlanet) {
+                if ((info.flags & game::sim::Object::fl_RatingOverride) != 0) {
+                    m_firstTable.cell(1, 5).setText(afl::string::Format("%d / %d", info.flakRatingOverride, info.flakCompensationOverride))
+                        .setColor(YELLOW_COLOR);
+                } else {
+                    m_firstTable.cell(1, 5).setText(afl::string::Format("%d / %d", info.defaultFlakRating, info.defaultFlakCompensation))
+                        .setColor(GREEN_COLOR);
+                }
+            }
 
             // Colors
             String_t fcColors;
@@ -247,6 +256,9 @@ client::widgets::SimulationObjectInfo::Header::init(ui::Widget& keyHandler)
     m_firstTable.cell(0, 2).setText(tx("Name:"));
     m_firstTable.cell(0, 3).setText(tx("Id:"));
     m_firstTable.cell(0, 4).setText(tx("FCode:"));
+    if (!m_isPlanet) {
+        m_firstTable.cell(0, 5).setText(tx("Rating:"));
+    }
     m_firstTable.setColumnWidth(1, 20*em);
     m_firstTable.setColumnPadding(0, 5);
 
@@ -281,6 +293,9 @@ client::widgets::SimulationObjectInfo::Header::init(ui::Widget& keyHandler)
     firstMaker.add(0, 3, "I", 'i');
     firstMaker.add(0, 4, "F", 'f');
     firstMaker.add(1, 4, "R", 'r');
+    if (!m_isPlanet) {
+        firstMaker.add(0, 5, "K", 'k');
+    }
 
     ButtonMaker secondMaker(root(), keyHandler, *this, m_secondButtons, m_deleter);
     if (m_isPlanet) {

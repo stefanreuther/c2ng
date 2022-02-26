@@ -1823,6 +1823,14 @@ TestGameSimRun::testFLAK()
     // - statistics
     TS_ASSERT_EQUALS(h.stats.size(), 2U);
 
+    // - battle content
+    TS_ASSERT(h.result.battles->getBattle(0) != 0);
+    TS_ASSERT_EQUALS(h.result.battles->getBattle(0)->getNumObjects(), 2U);
+    TS_ASSERT(h.result.battles->getBattle(0)->getObject(0, false) != 0);
+    TS_ASSERT_EQUALS(h.result.battles->getBattle(0)->getObject(0, false)->getMass(), 75);
+    TS_ASSERT(h.result.battles->getBattle(0)->getObject(1, false) != 0);
+    TS_ASSERT_EQUALS(h.result.battles->getBattle(0)->getObject(1, false)->getMass(), 75);
+
     // - ship 1
     TS_ASSERT_EQUALS(s1->getDamage(), 71);
     TS_ASSERT_EQUALS(s1->getShield(), 0);
@@ -1833,6 +1841,60 @@ TestGameSimRun::testFLAK()
     TS_ASSERT_EQUALS(s2->getDamage(), 103);
     TS_ASSERT_EQUALS(s2->getShield(), 0);
     TS_ASSERT_EQUALS(s2->getCrew(), 109);
+    TS_ASSERT_EQUALS(s2->getOwner(), 0);
+}
+
+/** Test basic FLAK simulation, with ESB.
+    A: prepare two ships, FLAK simulation.
+    E: expected results and metadata produced. This is a regression test to ensure constant behaviour. */
+void
+TestGameSimRun::testFLAKESB()
+{
+    // Environment
+    TestHarness h;
+    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrFLAK, game::sim::Configuration::BalanceNone);
+    h.opts.setEngineShieldBonus(20);
+
+    // Setup
+    Ship* s1 = addOutrider(h.setup, 1, 12, h.list);
+    Ship* s2 = addOutrider(h.setup, 2, 11, h.list);
+    h.result.init(h.opts, 0);
+
+    // Do it
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+
+    // Verify result
+    // FIXME? Other algos verify that rng has not been touched because we use seed control, but FLAK does touch it.
+
+    // - a battle has been created
+    TS_ASSERT(h.result.battles.get() != 0);
+    TS_ASSERT_EQUALS(h.result.battles->getNumBattles(), 1U);
+    TS_ASSERT_EQUALS(h.result.this_battle_weight, 1);
+    TS_ASSERT_EQUALS(h.result.total_battle_weight, 1);
+    TS_ASSERT_EQUALS(h.result.series_length, 110);
+    TS_ASSERT_EQUALS(h.result.this_battle_index, 0);
+
+    // - battle content
+    TS_ASSERT(h.result.battles->getBattle(0) != 0);
+    TS_ASSERT_EQUALS(h.result.battles->getBattle(0)->getNumObjects(), 2U);
+    TS_ASSERT(h.result.battles->getBattle(0)->getObject(0, false) != 0);
+    TS_ASSERT_EQUALS(h.result.battles->getBattle(0)->getObject(0, false)->getMass(), 135);  // 75 kt + 300 mc * 20%
+    TS_ASSERT(h.result.battles->getBattle(0)->getObject(1, false) != 0);
+    TS_ASSERT_EQUALS(h.result.battles->getBattle(0)->getObject(1, false)->getMass(), 135);
+
+    // - statistics
+    TS_ASSERT_EQUALS(h.stats.size(), 2U);
+
+    // - ship 1
+    TS_ASSERT_EQUALS(s1->getDamage(), 96);
+    TS_ASSERT_EQUALS(s1->getShield(), 0);
+    TS_ASSERT_EQUALS(s1->getCrew(), 76);
+    TS_ASSERT_EQUALS(s1->getOwner(), 12);
+
+    // - ship 2
+    TS_ASSERT_EQUALS(s2->getDamage(), 107);
+    TS_ASSERT_EQUALS(s2->getShield(), 0);
+    TS_ASSERT_EQUALS(s2->getCrew(), 64);
     TS_ASSERT_EQUALS(s2->getOwner(), 0);
 }
 

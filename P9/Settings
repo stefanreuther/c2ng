@@ -718,7 +718,8 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = ui/res/engineimageloader.hpp \
+FILES_guilib = client/dialogs/simulationflakratings.cpp \
+    client/dialogs/simulationflakratings.hpp ui/res/engineimageloader.hpp \
     client/dialogs/buildqueuesummary.cpp \
     client/dialogs/buildqueuesummary.hpp client/dialogs/buildammo.cpp \
     client/dialogs/buildammo.hpp client/dialogs/hullfunctionview.cpp \

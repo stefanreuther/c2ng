@@ -128,6 +128,10 @@ namespace game { namespace proxy {
             Element_t aggressiveness;
             Element_t interceptId;
 
+            // Rating defaults
+            int32_t defaultFlakRating;
+            int defaultFlakCompensation;
+
             // Planet:
             int defense;
             int baseDefense;

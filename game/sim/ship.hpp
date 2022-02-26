@@ -8,6 +8,7 @@
 #include "afl/string/translator.hpp"
 #include "game/sim/object.hpp"
 #include "game/spec/shiplist.hpp"
+#include "game/vcr/flak/configuration.hpp"
 #include "util/range.hpp"
 
 namespace game { namespace sim {
@@ -170,6 +171,32 @@ namespace game { namespace sim {
             \param shipList Ship List
             \return Range */
         util::Range<int> getNumBaysRange(const game::spec::ShipList& shipList) const;
+
+        /** Get effective mass.
+            Computes the mass of this ship, including ESB and scotty bonus.
+            \param opts      Simulation options (base ESB, scotty bonus)
+            \param shipList  Ship list (engines for ESB)
+            \param config    Host configuration (experience levels, PlayerRace)
+            \return effective mass */
+        int getEffectiveMass(const Configuration& opts, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const;
+
+        /** Get default FLAK targeting rating.
+            Computes the default targeting FLAK rating which is used when fl_RatingOverride is not set.
+            \param flakConfig FLAK configuration
+            \param opts       Simulation options (base ESB, scotty bonus)
+            \param shipList   Ship list (engines for ESB)
+            \param config     Host configuration (experience levels, PlayerRace)
+            \return rating */
+        int32_t getDefaultFlakRating(const game::vcr::flak::Configuration& flakConfig, const Configuration& opts, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const;
+
+        /** Get default FLAK compensation rating.
+            Computes the default compensation FLAK rating which is used when fl_RatingOverride is not set.
+            \param flakConfig FLAK configuration
+            \param opts       Simulation options (base ESB, scotty bonus)
+            \param shipList   Ship list (engines for ESB)
+            \param config     Host configuration (experience levels, PlayerRace)
+            \return rating */
+        int getDefaultFlakCompensation(const game::vcr::flak::Configuration& flakConfig, const Configuration& opts, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const;
 
         /** Check whether this ship matches a ship list.
             \param shipList ship list

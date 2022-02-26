@@ -1956,7 +1956,9 @@ namespace {
         /** Link to original unit. */
         const game::sim::Object* orig;
 
-        ShipInfo& initFromShip(const Ship& sh, const ShipList& shipList,
+        ShipInfo& initFromShip(const Ship& sh,
+                               const Configuration& opts,
+                               const ShipList& shipList,
                                const HostConfiguration& config,
                                const game::vcr::flak::Configuration& flakConfig);
         ShipInfo& initFromPlanet(const Planet& pl, const ShipList& shipList,
@@ -1970,7 +1972,9 @@ namespace {
 
 
     /** Initialize data for a ship. */
-    ShipInfo& ShipInfo::initFromShip(const Ship& sh, const ShipList& shipList,
+    ShipInfo& ShipInfo::initFromShip(const Ship& sh,
+                                     const Configuration& opts,
+                                     const ShipList& shipList,
                                      const HostConfiguration& config,
                                      const game::vcr::flak::Configuration& flakConfig)
     {
@@ -1984,7 +1988,7 @@ namespace {
         data.setId(sh.getId());
         data.setOwner(sh.getOwner());
         data.setHull(sh.getHullType());
-        data.setExperienceLevel(sh.getExperienceLevel());
+        data.setExperienceLevel(level);
         data.setNumBeams(sh.getNumBeams());
         data.setBeamType(sh.getBeamType());
         data.setNumLaunchers(sh.getNumLaunchers());
@@ -1992,32 +1996,13 @@ namespace {
         data.setTorpedoType(sh.getTorpedoType());
         data.setNumBays(sh.getNumBays());
         data.setNumFighters(sh.getNumLaunchers() != 0 ? 0 : sh.getAmmo());
-        data.setMass(sh.getMass());
+        data.setMass(sh.getEffectiveMass(opts, shipList, config));
         data.setShield(sh.getShield());
 
         /* NTP */
         if (sh.getFriendlyCode() == "NTP") {
             data.setNumFighters(0);
             data.setNumTorpedoes(0);
-        }
-
-        /* ESB */
-        int esb = 0;
-        if (config[HostConfiguration::AllowEngineShieldBonus]() != 0) {
-            esb += config[HostConfiguration::EngineShieldBonusRate](data.getOwner());
-        }
-        if (level != 0) {
-            esb += config[HostConfiguration::EModEngineShieldBonusRate](level);
-        }
-        if (esb) {
-            if (const game::spec::Engine* e = shipList.engines().get(sh.getEngineType())) {
-                data.addMass(e->cost().get(Cost::Money) * esb / 100);
-            }
-        }
-
-        /* Fed crew bonus */
-        if (config[HostConfiguration::AllowFedCombatBonus]() && config.getPlayerRaceNumber(data.getOwner()) == 1) {
-            data.addMass(50);
         }
 
         /* extra bays */
@@ -2341,7 +2326,7 @@ namespace {
         // Build list of ships
         std::vector<ShipInfo> ships;
         for (size_t i = 0, n = setup.getNumShips(); i < n; ++i) {
-            ships.push_back(ShipInfo().initFromShip(*setup.getShip(i), shipList, config, flakConfig));
+            ships.push_back(ShipInfo().initFromShip(*setup.getShip(i), opts, shipList, config, flakConfig));
         }
         if (const Planet* pl = setup.getPlanet()) {
             ships.push_back(ShipInfo().initFromPlanet(*pl, shipList, config, flakConfig));

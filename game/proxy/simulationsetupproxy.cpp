@@ -393,6 +393,19 @@ game::proxy::SimulationSetupProxy::Trampoline::packObject(ObjectInfo& out, const
     out.aggressiveness = sh != 0 && m_root.get() != 0     ? describeAggressiveness(sh->getAggressiveness(), *m_root,  tx) : Element_t();
     out.interceptId    = sh != 0                          ? describeInterceptId(sh->getInterceptId(), m_sim->setup(), tx) : Element_t();
 
+    // Rating defaults
+    if (sh != 0
+        && (in.getFlags() & Object::fl_RatingOverride) == 0
+        && m_root.get() != 0
+        && m_shipList.get() != 0)
+    {
+        out.defaultFlakRating       = sh->getDefaultFlakRating      (m_root->flakConfiguration(), m_sim->configuration(), *m_shipList, m_root->hostConfiguration());
+        out.defaultFlakCompensation = sh->getDefaultFlakCompensation(m_root->flakConfiguration(), m_sim->configuration(), *m_shipList, m_root->hostConfiguration());
+    } else {
+        out.defaultFlakRating = 0;
+        out.defaultFlakCompensation = 0;
+    }
+
     // Primary weapons: editable if range is not unit range (=[0,0] range)
     out.allowPrimaryWeapons   = (sh != 0 && m_shipList.get() != 0 && !sh->getNumBeamsRange(*m_shipList).isUnit());
 

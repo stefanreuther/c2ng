@@ -8,6 +8,8 @@
 #include "game/sim/configuration.hpp"
 #include "game/spec/basichullfunction.hpp"
 
+using game::config::HostConfiguration;
+using game::spec::Cost;
 using game::spec::Hull;
 
 namespace {
@@ -396,6 +398,61 @@ game::sim::Ship::getNumBaysRange(const game::spec::ShipList& shipList) const
             return util::Range<int>::fromValue(0);
         }
     }
+}
+
+// Get effective mass.
+int
+game::sim::Ship::getEffectiveMass(const Configuration& opts, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const
+{
+    // ex ccsim.pas:ComputeMass
+    const int level = getExperienceLevel();
+    int mass = getMass();
+
+    /* ESB */
+    int esb = opts.getEngineShieldBonus() + config.getExperienceBonus(HostConfiguration::EModEngineShieldBonusRate, level);
+    if (esb != 0) {
+        if (const game::spec::Engine* e = shipList.engines().get(getEngineType())) {
+            mass += e->cost().get(Cost::Money) * esb / 100;
+        }
+    }
+
+    /* Fed crew bonus */
+    if (opts.hasScottyBonus() && config.getPlayerRaceNumber(getOwner()) == 1) {
+        mass += 50;
+    }
+
+    return mass;
+}
+
+// Get default FLAK targeting rating.
+int32_t
+game::sim::Ship::getDefaultFlakRating(const game::vcr::flak::Configuration& flakConfig, const Configuration& opts, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const
+{
+    // ex ccsim.pas:ComputeTargetingRating
+    // Also in game/vcr/flak/object.cpp, operating on FLAK VCR objects
+    const int mass = getEffectiveMass(opts, shipList, config);
+    return mass * flakConfig.RatingMassScale
+        + getNumLaunchers() * getTorpedoType() * flakConfig.RatingTorpScale
+        + getNumBeams() * getBeamType() * flakConfig.RatingBeamScale
+        + getNumBays() * flakConfig.RatingBayScale;
+}
+
+// Get default FLAK compensation rating.
+int
+game::sim::Ship::getDefaultFlakCompensation(const game::vcr::flak::Configuration& flakConfig, const Configuration& opts, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const
+{
+    // ex ccsim.pas:ComputeCompensationRating
+    // Also in game/vcr/flak/object.cpp, operating on FLAK VCR objects
+    const int32_t strength = flakConfig.CompensationShipScale
+        + getNumLaunchers() * flakConfig.CompensationTorpScale
+        + getNumBeams() * flakConfig.CompensationBeamScale
+        + getNumBays() * flakConfig.CompensationFighterScale
+        + getEffectiveMass(opts, shipList, config) * flakConfig.CompensationMass100KTScale / 100;
+    return (strength > flakConfig.CompensationLimit
+            ? flakConfig.CompensationLimit
+            : strength < 0
+            ? 0
+            : strength);
 }
 
 // Check whether this ship matches a ship list.
