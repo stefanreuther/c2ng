@@ -205,8 +205,7 @@ namespace {
     {
         const int SHIP_ID = 59;
 
-        afl::string::NullTranslator tx;
-        String_t label = afl::string::Format("%s fc=%s s=%d", host.toString(tx), friendlyCode, suppliesBefore);
+        String_t label = afl::string::Format("%s fc=%s s=%d", host.toString(), friendlyCode, suppliesBefore);
 
         TestHarness t;
         t.hostVersion = host;
@@ -241,8 +240,7 @@ namespace {
     {
         const int SHIP_ID = 59;
 
-        afl::string::NullTranslator tx;
-        String_t label = afl::string::Format("%s fc=%s s=%d", host.toString(tx), friendlyCode, suppliesBefore);
+        String_t label = afl::string::Format("%s fc=%s s=%d", host.toString(), friendlyCode, suppliesBefore);
 
         TestHarness t;
         t.hostVersion = host;
@@ -278,8 +276,7 @@ namespace {
     {
         const int SHIP_ID = 59;
 
-        afl::string::NullTranslator tx;
-        String_t label = afl::string::Format("%s fc=%s s=%d", host.toString(tx), friendlyCode, suppliesBefore);
+        String_t label = afl::string::Format("%s fc=%s s=%d", host.toString(), friendlyCode, suppliesBefore);
 
         TestHarness t;
         t.hostVersion = host;
@@ -314,8 +311,7 @@ namespace {
     {
         const int SHIP_ID = 77;
 
-        afl::string::NullTranslator tx;
-        String_t label = afl::string::Format("%s %d,%d", host.toString(tx), waypointDX, waypointDY);
+        String_t label = afl::string::Format("%s %d,%d", host.toString(), waypointDX, waypointDY);
 
         TestHarness t;
         t.hostVersion = host;

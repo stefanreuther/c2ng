@@ -117,6 +117,7 @@ class TestGameHostVersion : public CxxTest::TestSuite {
     void testProperties();
     void testSetImpliedHostConfiguration();
     void testSetImpliedHostConfigurationMine();
+    void testFromString();
 };
 
 class TestGameInterpreterInterface : public CxxTest::TestSuite {

@@ -44,7 +44,7 @@ int main(int /*argc*/, char** argv)
             scanner.scan(*dir, charset);
             std::cout << dirName << ":\n"
                       << "  directory flags = " << formatFlags(scanner.getDirectoryFlags()) << "\n"
-                      << "  host version = " << scanner.getDirectoryHostVersion().toString(tx) << "\n";
+                      << "  host version = " << scanner.getDirectoryHostVersion().toString() << "\n";
             for (int i = 1; i <= scanner.NUM_PLAYERS; ++i) {
                 if (!scanner.getPlayerFlags(i).empty()) {
                     std::cout << "  player " << i << ": " << formatFlags(scanner.getPlayerFlags(i)) << "\n";

@@ -9,7 +9,6 @@
 #include "afl/charset/utf8charset.hpp"
 #include "afl/io/internaldirectory.hpp"
 #include "afl/string/format.hpp"
-#include "afl/string/nulltranslator.hpp"
 #include "game/test/registrationkey.hpp"
 #include "game/test/simpleturn.hpp"
 #include "game/test/specificationloader.hpp"
@@ -20,8 +19,7 @@ using game::spec::BasicHullFunction;
 namespace {
     void checkRange(game::HostVersion host, int dx, int dy, int fuel, bool expectSetup, bool expectMission)
     {
-        afl::string::NullTranslator tx;
-        String_t name = afl::string::Format("host=%s, d=(%d,%d), fuel=%d", host.toString(tx), dx, dy, fuel);
+        String_t name = afl::string::Format("host=%s, d=(%d,%d), fuel=%d", host.toString(), dx, dy, fuel);
 
         game::test::SimpleTurn t;   // univ, config, shipList, version
         game::UnitScoreDefinitionList shipScores;

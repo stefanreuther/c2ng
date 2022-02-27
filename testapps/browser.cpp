@@ -143,7 +143,7 @@ int main(int, char** argv)
                  case game::RegistrationKey::Unregistered: std::cout << "Unregistered.\n"; break;
                  case game::RegistrationKey::Registered:   std::cout << "Registered: " << root->registrationKey().getLine(game::RegistrationKey::Line1) << ".\n"; break;
                 }
-                std::cout << "Host version: " << root->hostVersion().toString(tx) << "\n";
+                std::cout << "Host version: " << root->hostVersion().toString() << "\n";
             } else {
                 std::cout << "No game.\n";
             }

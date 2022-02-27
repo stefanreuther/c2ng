@@ -7,6 +7,7 @@
 #include "afl/string/format.hpp"
 #include "game/limits.hpp"
 #include "util/math.hpp"
+#include "util/stringparser.hpp"
 
 using game::config::HostConfiguration;
 
@@ -25,6 +26,49 @@ namespace {
                 return afl::string::Format("%s %d.%d.%03d", hostName, version/100000, version%100000/1000, patch);
             }
         }
+    }
+
+    int32_t parseHostVersion(const String_t& text, bool host)
+    {
+        // ex game/storage/overview.cc:parseHostVersion, readmsg.pas::ParseHostVersion
+        util::StringParser p(text);
+        while (p.parseCharacter(' ') || p.parseCharacter('v'))
+            ;
+
+        // Major number
+        int val;
+        if (!p.parseInt(val) || val < 0) {
+            return 0;
+        }
+        int major = val;
+        int minor = 0;
+        int patch = 0;
+
+        // Minor number
+        if (p.parseCharacter('.')) {
+            if (!p.parseInt(val) || val < 0) {
+                return 0;
+            }
+            // THost: 3.0, 3.1, 3.14, 3.2, 3.21
+            // PHost: 2.7, 2.8, 2.9, 2.10, ...
+            minor = val;
+            if (host && minor < 10) {
+                minor *= 10;
+            }
+        }
+
+        // Patchlevel
+        if (p.parseCharacter('.')) {
+            if (p.parseInt(val) && val >= 0) {
+                patch = val;
+            }
+        } else {
+            char ch;
+            if (p.getCurrentCharacter(ch) && ch >= 'a' && ch <= 'z') {
+                patch = (ch - 'a' + 1);
+            }
+        }
+        return MKVERSION(major, minor, patch);
     }
 }
 
@@ -72,31 +116,69 @@ game::HostVersion::isPHost() const
 
 // Format as string.
 String_t
-game::HostVersion::toString(afl::string::Translator& tx) const
+game::HostVersion::toString() const
 {
+    // Host names are proper names and are also used on the fromString interface; thus they should not be translated.
+    // Users should normally not see "unknown", so not translating that is reasonable.
     switch (m_kind) {
      case Unknown:
-        return tx("unknown");
+        return "unknown";
 
      case Host:
-        return formatVersion(tx("Host"), m_version, true);
+        return formatVersion("Host", m_version, true);
 
      case SRace:
-        return formatVersion(tx("SRace"), m_version, true);
+        return formatVersion("SRace", m_version, true);
 
      case PHost:
-        return formatVersion(tx("PHost"), m_version, false);
+        return formatVersion("PHost", m_version, false);
 
      case NuHost:
-        return formatVersion(tx("NuHost"), m_version, true);
+        return formatVersion("NuHost", m_version, true);
     }
     return String_t();
+}
+
+// Parse from strings.
+bool
+game::HostVersion::fromString(String_t hostType, String_t hostVersion)
+{
+    hostType = afl::string::strLCase(hostType);
+    if (!hostVersion.empty()) {
+        if (hostType == "host") {
+            set(Host, parseHostVersion(hostVersion, true));
+            return true;
+        }
+        if (hostType == "srace") {
+            set(SRace, parseHostVersion(hostVersion, true));
+            return true;
+        }
+        if (hostType == "phost") {
+            set(PHost, parseHostVersion(hostVersion, false));
+            return true;
+        }
+        if (hostType == "nuhost") {
+            set(NuHost, parseHostVersion(hostVersion, true));
+            return true;
+        }
+    }
+    return false;
+}
+
+// Parse from single string.
+bool
+game::HostVersion::fromString(String_t str)
+{
+    String_t::size_type p = str.find(' ');
+    return p != String_t::npos
+        && fromString(str.substr(0, p), str.substr(p+1));
 }
 
 // Get ship command argument limit.
 int32_t
 game::HostVersion::getCommandArgumentLimit() const
 {
+    // ex mission.pas:MissionArgLimit
     // \change This differs from PCC2, but is consistent with PCC1.
     if (m_kind == PHost) {
         if (m_version >= MKVERSION(3,3,2)) {

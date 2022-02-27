@@ -9,57 +9,56 @@
 #include "afl/string/nulltranslator.hpp"
 #include "game/config/hostconfiguration.hpp"
 
+using game::HostVersion;
+
 /** Test formatting. */
 void
 TestGameHostVersion::testFormat()
 {
-    afl::string::NullTranslator tx;
-    using game::HostVersion;
-
     // Unknown
-    TS_ASSERT_EQUALS(HostVersion().toString(tx), "unknown");
-    TS_ASSERT_EQUALS(HostVersion(HostVersion::Unknown, MKVERSION(3,0,0)).toString(tx), "unknown");
+    TS_ASSERT_EQUALS(HostVersion().toString(), "unknown");
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::Unknown, MKVERSION(3,0,0)).toString(), "unknown");
 
     // Tim-Host
-    TS_ASSERT_EQUALS(HostVersion(HostVersion::Host, 0).toString(tx), "Host");
-    TS_ASSERT_EQUALS(HostVersion(HostVersion::Host, MKVERSION(3,0,0)).toString(tx), "Host 3.0");
-    TS_ASSERT_EQUALS(HostVersion(HostVersion::Host, MKVERSION(3,16,1)).toString(tx), "Host 3.16.001");
-    TS_ASSERT_EQUALS(HostVersion(HostVersion::Host, MKVERSION(3,20,0)).toString(tx), "Host 3.20");
-    TS_ASSERT_EQUALS(HostVersion(HostVersion::Host, MKVERSION(3,22,27)).toString(tx), "Host 3.22.027");
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::Host, 0).toString(), "Host");
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::Host, MKVERSION(3,0,0)).toString(), "Host 3.0");
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::Host, MKVERSION(3,16,1)).toString(), "Host 3.16.001");
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::Host, MKVERSION(3,20,0)).toString(), "Host 3.20");
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::Host, MKVERSION(3,22,27)).toString(), "Host 3.22.027");
 
     // PHost
-    TS_ASSERT_EQUALS(HostVersion(HostVersion::PHost, 0).toString(tx), "PHost");
-    TS_ASSERT_EQUALS(HostVersion(HostVersion::PHost, MKVERSION(3,0,0)).toString(tx), "PHost 3.0");
-    TS_ASSERT_EQUALS(HostVersion(HostVersion::PHost, MKVERSION(3,16,1)).toString(tx), "PHost 3.16a");
-    TS_ASSERT_EQUALS(HostVersion(HostVersion::PHost, MKVERSION(3,20,0)).toString(tx), "PHost 3.20");
-    TS_ASSERT_EQUALS(HostVersion(HostVersion::PHost, MKVERSION(3,4,5)).toString(tx), "PHost 3.4e");
-    TS_ASSERT_EQUALS(HostVersion(HostVersion::PHost, MKVERSION(3,22,27)).toString(tx), "PHost 3.22.027");
-    TS_ASSERT_EQUALS(HostVersion(HostVersion::PHost, MKVERSION(3,4,13)).toString(tx), "PHost 3.4m");
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::PHost, 0).toString(), "PHost");
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::PHost, MKVERSION(3,0,0)).toString(), "PHost 3.0");
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::PHost, MKVERSION(3,16,1)).toString(), "PHost 3.16a");
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::PHost, MKVERSION(3,20,0)).toString(), "PHost 3.20");
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::PHost, MKVERSION(3,4,5)).toString(), "PHost 3.4e");
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::PHost, MKVERSION(3,22,27)).toString(), "PHost 3.22.027");
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::PHost, MKVERSION(3,4,13)).toString(), "PHost 3.4m");
 
     // SRace (Tim-Host variant)
-    TS_ASSERT_EQUALS(HostVersion(HostVersion::SRace, 0).toString(tx), "SRace");
-    TS_ASSERT_EQUALS(HostVersion(HostVersion::SRace, MKVERSION(3,0,0)).toString(tx), "SRace 3.0");
-    TS_ASSERT_EQUALS(HostVersion(HostVersion::SRace, MKVERSION(3,16,1)).toString(tx), "SRace 3.16.001");
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::SRace, 0).toString(), "SRace");
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::SRace, MKVERSION(3,0,0)).toString(), "SRace 3.0");
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::SRace, MKVERSION(3,16,1)).toString(), "SRace 3.16.001");
 
     // NuHost
-    TS_ASSERT_EQUALS(HostVersion(HostVersion::NuHost, 0).toString(tx), "NuHost");
-    TS_ASSERT_EQUALS(HostVersion(HostVersion::NuHost, MKVERSION(3,0,0)).toString(tx), "NuHost 3.0");
-    TS_ASSERT_EQUALS(HostVersion(HostVersion::NuHost, MKVERSION(3,16,1)).toString(tx), "NuHost 3.16.001");
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::NuHost, 0).toString(), "NuHost");
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::NuHost, MKVERSION(3,0,0)).toString(), "NuHost 3.0");
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::NuHost, MKVERSION(3,16,1)).toString(), "NuHost 3.16.001");
 }
 
 /** Test accessors. */
 void
 TestGameHostVersion::testAccessor()
 {
-    game::HostVersion t;
-    TS_ASSERT_EQUALS(t.getKind(), game::HostVersion::Unknown);
+    HostVersion t;
+    TS_ASSERT_EQUALS(t.getKind(), HostVersion::Unknown);
     TS_ASSERT_EQUALS(t.getVersion(), 0);
 
-    t.set(game::HostVersion::PHost, MKVERSION(4,1,0));
-    TS_ASSERT_EQUALS(t.getKind(), game::HostVersion::PHost);
+    t.set(HostVersion::PHost, MKVERSION(4,1,0));
+    TS_ASSERT_EQUALS(t.getKind(), HostVersion::PHost);
     TS_ASSERT_EQUALS(t.getVersion(), MKVERSION(4,1,0));
 
-    TS_ASSERT_EQUALS(game::HostVersion(game::HostVersion::Host, MKVERSION(3,22,0)).getKind(), game::HostVersion::Host);
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::Host, MKVERSION(3,22,0)).getKind(), HostVersion::Host);
 }
 
 /** Test MKVERSION.
@@ -76,7 +75,6 @@ TestGameHostVersion::testVersion()
 void
 TestGameHostVersion::testProperties()
 {
-    using game::HostVersion;
     game::config::HostConfiguration config;
 
     // getCommandArgumentLimit
@@ -485,7 +483,6 @@ void
 TestGameHostVersion::testSetImpliedHostConfiguration()
 {
     using game::config::HostConfiguration;
-    using game::HostVersion;
 
     // Base case
     {
@@ -533,7 +530,6 @@ void
 TestGameHostVersion::testSetImpliedHostConfigurationMine()
 {
     using game::config::HostConfiguration;
-    using game::HostVersion;
 
     {
         HostConfiguration c;
@@ -558,5 +554,96 @@ TestGameHostVersion::testSetImpliedHostConfigurationMine()
         TS_ASSERT_EQUALS(c[HostConfiguration::UnitsPerWebRate](6), 100);
         TS_ASSERT_EQUALS(c[HostConfiguration::UnitsPerWebRate](9), 400);
     }
+}
+
+/** Test fromString(). */
+void
+TestGameHostVersion::testFromString()
+{
+    HostVersion v;
+
+    // Unknown
+    TS_ASSERT(!v.fromString("unknown"));
+
+    // Tim-Host
+    TS_ASSERT(!v.fromString("Host"));
+
+    TS_ASSERT(v.fromString("Host 3.0"));
+    TS_ASSERT_EQUALS(v.getKind(), HostVersion::Host);
+    TS_ASSERT_EQUALS(v.getVersion(), MKVERSION(3,0,0));
+
+    TS_ASSERT(v.fromString("Host 3.16.001"));
+    TS_ASSERT_EQUALS(v.getKind(), HostVersion::Host);
+    TS_ASSERT_EQUALS(v.getVersion(), MKVERSION(3,16,1));
+
+    TS_ASSERT(v.fromString("Host 3.2"));
+    TS_ASSERT_EQUALS(v.getKind(), HostVersion::Host);
+    TS_ASSERT_EQUALS(v.getVersion(), MKVERSION(3,20,0));
+
+    TS_ASSERT(v.fromString("Host 3.20"));
+    TS_ASSERT_EQUALS(v.getKind(), HostVersion::Host);
+    TS_ASSERT_EQUALS(v.getVersion(), MKVERSION(3,20,0));
+
+    TS_ASSERT(v.fromString("Host 3.20a"));
+    TS_ASSERT_EQUALS(v.getKind(), HostVersion::Host);
+    TS_ASSERT_EQUALS(v.getVersion(), MKVERSION(3,20,1));
+
+    TS_ASSERT(v.fromString("Host 3.22.027"));
+    TS_ASSERT_EQUALS(v.getKind(), HostVersion::Host);
+    TS_ASSERT_EQUALS(v.getVersion(), MKVERSION(3,22,27));
+
+    // - 2-arg variant
+    TS_ASSERT(v.fromString("host", "3.0"));
+    TS_ASSERT_EQUALS(v.getKind(), HostVersion::Host);
+    TS_ASSERT_EQUALS(v.getVersion(), MKVERSION(3,0,0));
+
+    // PHost
+    TS_ASSERT(!v.fromString("PHost"));
+
+    TS_ASSERT(v.fromString("PHost 3.0"));
+    TS_ASSERT_EQUALS(v.getKind(), HostVersion::PHost);
+    TS_ASSERT_EQUALS(v.getVersion(), MKVERSION(3,0,0));
+
+    TS_ASSERT(v.fromString("PHost 3.16a"));
+    TS_ASSERT_EQUALS(v.getKind(), HostVersion::PHost);
+    TS_ASSERT_EQUALS(v.getVersion(), MKVERSION(3,16,1));
+
+    TS_ASSERT(v.fromString("PHost 3.20"));
+    TS_ASSERT_EQUALS(v.getKind(), HostVersion::PHost);
+    TS_ASSERT_EQUALS(v.getVersion(), MKVERSION(3,20,0));
+
+    TS_ASSERT(v.fromString("PHost 3.4e"));
+    TS_ASSERT_EQUALS(v.getKind(), HostVersion::PHost);
+    TS_ASSERT_EQUALS(v.getVersion(), MKVERSION(3,4,5));
+
+    TS_ASSERT(v.fromString("PHost 3.22.027"));
+    TS_ASSERT_EQUALS(v.getKind(), HostVersion::PHost);
+    TS_ASSERT_EQUALS(v.getVersion(), MKVERSION(3,22,27));
+
+    TS_ASSERT(v.fromString("PHost 3.4m"));
+    TS_ASSERT_EQUALS(v.getKind(), HostVersion::PHost);
+    TS_ASSERT_EQUALS(v.getVersion(), MKVERSION(3,4,13));
+
+    // SRace (Tim-Host variant)
+    TS_ASSERT(!v.fromString("SRace"));
+
+    TS_ASSERT(v.fromString("SRace 3.0"));
+    TS_ASSERT_EQUALS(v.getKind(), HostVersion::SRace);
+    TS_ASSERT_EQUALS(v.getVersion(), MKVERSION(3,0,0));
+
+    TS_ASSERT(v.fromString("SRace 3.16.001"));
+    TS_ASSERT_EQUALS(v.getKind(), HostVersion::SRace);
+    TS_ASSERT_EQUALS(v.getVersion(), MKVERSION(3,16,1));
+
+    // NuHost
+    TS_ASSERT(!v.fromString("NuHost"));
+
+    TS_ASSERT(v.fromString("NuHost 3.0"));
+    TS_ASSERT_EQUALS(v.getKind(), HostVersion::NuHost);
+    TS_ASSERT_EQUALS(v.getVersion(), MKVERSION(3,0,0));
+
+    TS_ASSERT(v.fromString("NuHost 3.16.001"));
+    TS_ASSERT_EQUALS(v.getKind(), HostVersion::NuHost);
+    TS_ASSERT_EQUALS(v.getVersion(), MKVERSION(3,16,1));
 }
 

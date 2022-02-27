@@ -25,50 +25,6 @@ namespace gt = game::v3::structures;
 
 namespace {
     const char LOG_NAME[] = "game.v3.scan";
-
-    int32_t parseHostVersion(const String_t& text, bool host)
-    {
-        // ex game/storage/overview.cc:parseHostVersion, readmsg.pas::ParseHostVersion
-        // FIXME: use util::StringParser?
-        util::StringParser p(text);
-        while (p.parseCharacter(' ') || p.parseCharacter('v'))
-            ;
-
-        // Major number
-        int val;
-        if (!p.parseInt(val) || val < 0) {
-            return 0;
-        }
-        int major = val;
-        int minor = 0;
-        int patch = 0;
-
-        // Minor number
-        if (p.parseCharacter('.')) {
-            if (!p.parseInt(val) || val < 0) {
-                return 0;
-            }
-            // THost: 3.0, 3.1, 3.14, 3.2, 3.21
-            // PHost: 2.7, 2.8, 2.9, 2.10, ...
-            minor = val;
-            if (host && minor < 10) {
-                minor *= 10;
-            }
-        }
-
-        // Patchlevel
-        if (p.parseCharacter('.')) {
-            if (p.parseInt(val) && val >= 0) {
-                patch = val;
-            }
-        } else {
-            char ch;
-            if (p.getCurrentCharacter(ch) && ch >= 'a' && ch <= 'z') {
-                patch = (ch - 'a' + 1);
-            }
-        }
-        return MKVERSION(major, minor, patch);
-    }
 }
 
 // Construct empty overview.
@@ -415,17 +371,7 @@ game::v3::DirectoryScanner::checkHostVersion(afl::io::Stream& stream, afl::chars
     }
 
     // Evaluate the result
-    if (!hostVersion.empty()) {
-         if (hostType == "host") {
-             version.set(game::HostVersion::Host, parseHostVersion(hostVersion, true));
-         }
-         if (hostType == "srace") {
-             version.set(game::HostVersion::SRace, parseHostVersion(hostVersion, true));
-         }
-         if (hostType == "phost") {
-             version.set(game::HostVersion::PHost, parseHostVersion(hostVersion, false));
-         }
-    }
+    version.fromString(hostType, hostVersion);
 }
 
 void

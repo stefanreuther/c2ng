@@ -153,7 +153,7 @@ namespace {
                         // Folder contains a game
                         const StringOption& name = root->hostConfiguration()[game::config::HostConfiguration::GameName];
                         m_result->title = name.wasSet() ? name() : f->getName();
-                        m_result->subtitle = util::rich::Text(afl::string::Format(m_session.translator()("A %s game"), root->hostVersion().toString(m_session.translator())));
+                        m_result->subtitle = util::rich::Text(afl::string::Format(m_session.translator()("A %s game"), root->hostVersion().toString()));
                         buildPlayerList(*root, *loader, *m_result, m_session.translator());
                         m_result->canEnter = f->canEnter();
                         m_result->possibleActions = root->getPossibleActions();

@@ -6,7 +6,6 @@
 #define C2NG_GAME_HOSTVERSION_HPP
 
 #include "game/config/hostconfiguration.hpp"
-#include "afl/string/translator.hpp"
 
 /** \define MKVERSION
     Make version code from three numbers.
@@ -69,9 +68,24 @@ namespace game {
         bool isPHost() const;
 
         /** Format as string.
-            \param tx Translator to generate strings
             \return host version formatted as a string */
-        String_t toString(afl::string::Translator& tx) const;
+        String_t toString() const;
+
+        /** Parse from strings.
+            If the given pair represents a recognized host version,
+            set this object's content to it.
+            \param hostType     Host type
+            \param hostVersion  Version
+            \return true if version recognized and set; false if not recognized and object unchanged */
+        bool fromString(String_t hostType, String_t hostVersion);
+
+        /** Parse from single string.
+            If the given string represents a recognized host version,
+            set this object's content to it.
+            This is an inverse to toString().
+            \param str String consisting of type and version
+            \return true if version recognized and set; false if not recognized and object unchanged */
+        bool fromString(String_t str);
 
         /** Get ship command argument limit.
             Many versions have this limited to 500, PHost 3.3b raised it to 10000. */

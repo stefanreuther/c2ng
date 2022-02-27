@@ -568,7 +568,7 @@ game::v3::Loader::loadPConfig(Root& root, afl::io::Stream& pconfig, afl::base::P
     HostVersion& host = root.hostVersion();
     if (host.getKind() == HostVersion::Unknown) {
         host.set(HostVersion::PHost, DEFAULT_PHOST_VERSION);
-        m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator("Host version not known, assuming %s"), host.toString(m_translator)));
+        m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator("Host version not known, assuming %s"), host.toString()));
     }
 }
 
@@ -596,7 +596,7 @@ game::v3::Loader::loadHConfig(Root& root, afl::io::Stream& hconfig, game::config
     HostVersion& host = root.hostVersion();
     if (host.getKind() == HostVersion::Unknown) {
         host.set(HostVersion::Host, DEFAULT_HOST_VERSION);
-        m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator.translateString("Host version not known, assuming %s").c_str(), host.toString(m_translator)));
+        m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator.translateString("Host version not known, assuming %s").c_str(), host.toString()));
     }
 }
 
@@ -619,7 +619,7 @@ game::v3::Loader::loadRaceMapping(Root& root, afl::io::Stream& file, game::confi
         HostVersion& host = root.hostVersion();
         if (host.getKind() == HostVersion::Unknown) {
             host.set(HostVersion::SRace, DEFAULT_HOST_VERSION);
-            m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator.translateString("Host version not known, assuming %s").c_str(), host.toString(m_translator)));
+            m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator.translateString("Host version not known, assuming %s").c_str(), host.toString()));
         }
     }
 }
