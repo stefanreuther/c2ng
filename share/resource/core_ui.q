@@ -432,8 +432,10 @@ Function CCUI$Ship.ChooseOneMissionParameter (title, label, type, flags, value, 
 
     Case 's'
       % ShipParameter
-      % FIXME: deal with "notThis" and "ownOnly" parameters
-      CC$ChooseInterceptTarget title
+      Local dialogFlags = ''
+      If Not ownOnly Then dialogFlags := dialogFlags & 'f'
+      If notThis And sid Then dialogFlags := dialogFlags & sid
+      CC$ChooseInterceptTarget title, dialogFlags
       Return UI.Result
 
     Case 'h'

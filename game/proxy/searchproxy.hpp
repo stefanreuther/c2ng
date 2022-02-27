@@ -31,8 +31,9 @@ namespace game { namespace proxy {
         /** Submit a search query.
             The search query is executed asynchronously on the game thread.
             You can (but don't have to) block UI.
-            \param q Query */
-        void search(const SearchQuery& q);
+            \param q Query
+            \param saveQuery true to save the query; see savedQuery() */
+        void search(const SearchQuery& q, bool saveQuery);
 
         /** Signal: successful search result.
             \param list Search result */
@@ -43,7 +44,7 @@ namespace game { namespace proxy {
         afl::base::Signal<void(String_t)> sig_error;
 
         /** Access a session's saved query.
-            Each search() operation will store the query in the session.
+            Each search() operation with saveQuery=true will store the query in the session.
             Use this call to access it.
             \param session the session
             \return saved query */

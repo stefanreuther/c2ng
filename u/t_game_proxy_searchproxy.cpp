@@ -89,7 +89,7 @@ TestGameProxySearchProxy::testSuccess()
 
     SuccessReceiver recv;
     proxy.sig_success.add(&recv, &SuccessReceiver::onSuccess);
-    proxy.search(SearchQuery(SearchQuery::MatchName, objects(), "a"));
+    proxy.search(SearchQuery(SearchQuery::MatchName, objects(), "a"), true);
 
     while (recv.list.size() == 0) {
         TS_ASSERT(disp.wait(1000));
@@ -117,7 +117,7 @@ TestGameProxySearchProxy::testFailCompile()
 
     ErrorReceiver recv;
     proxy.sig_error.add(&recv, &ErrorReceiver::onError);
-    proxy.search(SearchQuery(SearchQuery::MatchTrue, objects(), "*"));
+    proxy.search(SearchQuery(SearchQuery::MatchTrue, objects(), "*"), true);
 
     while (recv.error.empty()) {
         TS_ASSERT(disp.wait(1000));
@@ -142,7 +142,7 @@ TestGameProxySearchProxy::testFailSuspend()
 
     ErrorReceiver recv;
     proxy.sig_error.add(&recv, &ErrorReceiver::onError);
-    proxy.search(SearchQuery(SearchQuery::MatchName, objects(), "a"));
+    proxy.search(SearchQuery(SearchQuery::MatchName, objects(), "a"), true);
 
     while (recv.error.empty()) {
         TS_ASSERT(disp.wait(1000));
@@ -168,7 +168,7 @@ TestGameProxySearchProxy::testFailEndString()
 
     ErrorReceiver recv;
     proxy.sig_error.add(&recv, &ErrorReceiver::onError);
-    proxy.search(SearchQuery(SearchQuery::MatchName, objects(), "a"));
+    proxy.search(SearchQuery(SearchQuery::MatchName, objects(), "a"), true);
 
     while (recv.error.empty()) {
         TS_ASSERT(disp.wait(1000));
@@ -195,7 +195,7 @@ TestGameProxySearchProxy::testFailEndOther()
 
     ErrorReceiver recv;
     proxy.sig_error.add(&recv, &ErrorReceiver::onError);
-    proxy.search(SearchQuery(SearchQuery::MatchName, objects(), "a"));
+    proxy.search(SearchQuery(SearchQuery::MatchName, objects(), "a"), true);
 
     while (recv.error.empty()) {
         TS_ASSERT(disp.wait(1000));
@@ -220,7 +220,7 @@ TestGameProxySearchProxy::testFailTerminate()
 
     ErrorReceiver recv;
     proxy.sig_error.add(&recv, &ErrorReceiver::onError);
-    proxy.search(SearchQuery(SearchQuery::MatchName, objects(), "a"));
+    proxy.search(SearchQuery(SearchQuery::MatchName, objects(), "a"), true);
 
     while (recv.error.empty()) {
         TS_ASSERT(disp.wait(1000));
@@ -250,10 +250,59 @@ TestGameProxySearchProxy::testFailException()
 
     ErrorReceiver recv;
     proxy.sig_error.add(&recv, &ErrorReceiver::onError);
-    proxy.search(SearchQuery(SearchQuery::MatchName, objects(), "a"));
+    proxy.search(SearchQuery(SearchQuery::MatchName, objects(), "a"), true);
 
     while (recv.error.empty()) {
         TS_ASSERT(disp.wait(1000));
     }
+}
+
+/** Test search, optional saving of the query. */
+void
+TestGameProxySearchProxy::testSave()
+{
+    SessionThread s;
+    CxxTest::setAbortTestOnFail(true);
+
+    // CC$SEARCH that produces a one-element ReferenceList (nonzero just that we recognize that we got a result)
+    {
+        Ref<ReferenceListContext::Data> data = *new ReferenceListContext::Data();
+        data->list.add(game::Reference());
+        ReferenceListContext value(data, s.session());
+
+        BCORef_t ref = createSearchFunction(s);
+        ref->addPushLiteral(&value);
+    }
+
+    // Invoke search
+    SimpleRequestDispatcher disp;
+    SearchProxy proxy(s.gameSender(), disp);
+
+    SuccessReceiver recv;
+    proxy.sig_success.add(&recv, &SuccessReceiver::onSuccess);
+    proxy.search(SearchQuery(SearchQuery::MatchName, objects(), "a"), true);
+
+    while (recv.list.size() == 0) {
+        TS_ASSERT(disp.wait(1000));
+    }
+
+    // Verify that query has been stored
+    TS_ASSERT_EQUALS(SearchProxy::savedQuery(s.session()).getQuery(), "a");
+
+    // Same thing again, now don't store
+    recv.list.clear();
+    proxy.search(SearchQuery(SearchQuery::MatchName, objects(), "b"), false);
+    while (recv.list.size() == 0) {
+        TS_ASSERT(disp.wait(1000));
+    }
+    TS_ASSERT_EQUALS(SearchProxy::savedQuery(s.session()).getQuery(), "a");
+
+    // Now, store again
+    recv.list.clear();
+    proxy.search(SearchQuery(SearchQuery::MatchName, objects(), "c"), true);
+    while (recv.list.size() == 0) {
+        TS_ASSERT(disp.wait(1000));
+    }
+    TS_ASSERT_EQUALS(SearchProxy::savedQuery(s.session()).getQuery(), "c");
 }
 

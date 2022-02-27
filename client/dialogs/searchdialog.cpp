@@ -465,7 +465,7 @@ SearchDialog::onSearch()
     m_query.setQuery(m_input.getText());
 
     // Execute query; this will answer with onSuccess or onError.
-    m_searchProxy.search(m_query);
+    m_searchProxy.search(m_query, true);
 }
 
 void

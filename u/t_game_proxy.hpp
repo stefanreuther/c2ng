@@ -348,6 +348,7 @@ class TestGameProxySearchProxy : public CxxTest::TestSuite {
     void testFailEndOther();
     void testFailTerminate();
     void testFailException();
+    void testSave();
 };
 
 class TestGameProxySelectionProxy : public CxxTest::TestSuite {

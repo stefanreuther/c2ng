@@ -33,9 +33,13 @@ namespace client { namespace dialogs {
         bool acceptShip;                                  ///< If true, dialog can produce a NavChartResult::Ship result.
         bool acceptChunnel;                               ///< If true, dialog can produce a NavChartResult::Chunnel result.
 
+        // Ship limits
+        bool requireOwnShip;
+        game::Id_t excludeShip;
+
         NavChartState()
             : title(), center(), origin(), target(), hyperjumping(false), speed(0), chunnelMode(false),
-              acceptLocation(false), acceptShip(false), acceptChunnel(false)
+              acceptLocation(false), acceptShip(false), acceptChunnel(false), requireOwnShip(false), excludeShip(0)
             { }
     };
 

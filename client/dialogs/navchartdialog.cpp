@@ -18,7 +18,9 @@
 #include "game/map/ship.hpp"
 #include "game/map/universe.hpp"
 #include "game/proxy/chunnelproxy.hpp"
+#include "game/proxy/searchproxy.hpp"
 #include "game/root.hpp"
+#include "game/searchquery.hpp"
 #include "game/turn.hpp"
 #include "gfx/complex.hpp"
 #include "ui/dialogs/messagebox.hpp"
@@ -29,6 +31,7 @@
 #include "ui/spacer.hpp"
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/framegroup.hpp"
+#include "ui/widgets/inputline.hpp"
 #include "ui/widgets/quit.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/widgets/statictext.hpp"
@@ -37,6 +40,7 @@
 
 using client::dialogs::NavChartState;
 using client::dialogs::NavChartResult;
+using game::SearchQuery;
 
 namespace {
     const size_t MAX_OLD_POS = 20;
@@ -81,12 +85,13 @@ namespace {
         void setInitialZoom();
         void setPositions();
         void doListShips();
+        void doSearchShips();
         void onToggleChunnel();
         void updateChunnelButton();
         void onOK();
         void onDoubleClick(game::map::Point pt);
         void onMove(game::map::Point pt);
-        void onShipSelect(game::Id_t id, game::map::Point pos);
+        void onShipSelect(game::proxy::WaitIndicator& ind, game::Id_t id);
         game::Id_t chooseChunnelMate();
 
      private:
@@ -103,6 +108,93 @@ namespace {
         client::widgets::ScanResult m_scanResult;
         NavChartOverlay m_navChartOverlay;
         ui::widgets::Button* m_chunnelButton;
+    };
+
+    /*
+     *  Synchronous Wrapper for SearchProxy
+     *
+     *  SearchProxy is entirely asynchronous.
+     *  We do not display a search result, so we need a synchronous version.
+     */
+    class SyncSearchProxy {
+     public:
+        SyncSearchProxy(util::RequestSender<game::Session> gameSender, util::RequestDispatcher& reply, game::proxy::WaitIndicator& ind)
+            : m_proxy(gameSender, reply), m_waitIndicator(ind)
+            {
+                m_proxy.sig_success.add(this, &SyncSearchProxy::onSuccess);
+                m_proxy.sig_error.add(this, &SyncSearchProxy::onError);
+            }
+
+        bool search(const SearchQuery& q, bool saveQuery)
+            {
+                m_proxy.search(q, saveQuery);
+                return m_waitIndicator.wait();
+            }
+
+        const game::ref::List& result() const
+            { return m_result; }
+
+     private:
+        void onSuccess(const game::ref::List& result)
+            {
+                m_result = result;
+                m_waitIndicator.post(true);
+            }
+        void onError(String_t /*err*/)
+            { m_waitIndicator.post(false); }
+
+        game::proxy::SearchProxy m_proxy;
+        game::proxy::WaitIndicator& m_waitIndicator;
+        game::ref::List m_result;
+    };
+
+    /*
+     *  Simple one-trick-pony to query a ship's status
+     */
+    class ShipStatusProxy {
+     public:
+        ShipStatusProxy()
+            : m_owner(), m_position()
+            { }
+
+        void getShipStatus(game::proxy::WaitIndicator& ind, util::RequestSender<game::Session> gameSender, game::Id_t id)
+            {
+                // Clear status
+                m_owner = 0;
+                m_position = game::map::Point();
+
+                // Task
+                class Task : public util::Request<game::Session> {
+                 public:
+                    Task(ShipStatusProxy& parent, game::Id_t id)
+                        : m_parent(parent), m_id(id)
+                        { }
+                    void handle(game::Session& session)
+                        {
+                            if (const game::Game* g = session.getGame().get()) {
+                                if (const game::Turn* t = g->getViewpointTurn().get()) {
+                                    if (const game::map::Ship* s = t->universe().ships().get(m_id)) {
+                                        s->getOwner(m_parent.m_owner);
+                                        s->getPosition(m_parent.m_position);
+                                    }
+                                }
+                            }
+                        }
+                 private:
+                    ShipStatusProxy& m_parent;
+                    game::Id_t m_id;
+                };
+                Task t(*this, id);
+                ind.call(gameSender, t);
+            }
+
+        int getOwner() const
+            { return m_owner; }
+        game::map::Point getPosition() const
+            { return m_position; }
+     private:
+        int m_owner;
+        game::map::Point m_position;
     };
 }
 
@@ -223,6 +315,12 @@ NavChartOverlay::handleKey(util::Key_t key, int /*prefix*/, const client::map::R
      case 'L':
         // List ships
         m_parent.doListShips();
+        return true;
+
+     case 's':
+     case util::Key_F7:
+        // Search
+        m_parent.doSearchShips();
         return true;
 
      case util::Key_F5:
@@ -352,6 +450,11 @@ NavChartDialog::run()
     g22.add(g222);
 
     ui::Widget& helper = del.addNew(new client::widgets::HelpWidget(m_root, tx, m_userSide.gameSender(), "pcc2:navchart"));
+    if (m_state.acceptShip) {
+        ui::widgets::Button& btnSearch = del.addNew(new ui::widgets::Button("S", 's', m_root));
+        g222.add(btnSearch);
+        btnSearch.dispatchKeyTo(m_mapWidget);   // will be handled by NavChartOverlay
+    }
     ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(tx("F10 - OK"), util::Key_F10,    m_root));
     ui::widgets::Button& btnCancel = del.addNew(new ui::widgets::Button(tx("ESC"),      util::Key_Escape, m_root));
     ui::widgets::Button& btnHelp   = del.addNew(new ui::widgets::Button("H",            'h',              m_root));
@@ -405,17 +508,58 @@ NavChartDialog::doListShips()
     client::dialogs::VisualScanDialog dlg(m_userSide, m_root, m_translator);
     dlg.setTitle(m_translator("List Ships"));
     dlg.setOkName(m_translator("OK"));
-    dlg.setAllowForeignShips(true);
-    if (dlg.loadCurrent(link, m_state.target, game::ref::List::Options_t(game::ref::List::IncludeForeignShips), 0)) {
+    dlg.setAllowForeignShips(!m_state.requireOwnShip);
+
+    if (dlg.loadCurrent(link, m_state.target, game::ref::List::Options_t(game::ref::List::IncludeForeignShips), m_state.excludeShip)) {
         game::Reference ref = dlg.run();
         m_result.outputState = dlg.outputState();
         if (ref.isSet()) {
-            onShipSelect(ref.getId(), m_state.target);
+            onShipSelect(link, ref.getId());
         }
 
         // If the dialog caused a script-side context change, but the above didn't yet confirm the dialog, cancel it.
         if (m_result.result == NavChartResult::Canceled && m_result.outputState.isValid()) {
             m_loop.stop(0);
+        }
+    }
+}
+
+void
+NavChartDialog::doSearchShips()
+{
+    // ex mission.pas:SearchForShip
+    if (m_state.acceptShip) {
+        ui::widgets::InputLine input(30, 20, m_root);
+        if (!input.doStandardDialog(m_translator("Search for ship"), m_translator("Enter ship name or Id#:"), m_translator)) {
+            return;
+        }
+
+        String_t qStr = afl::string::strTrim(input.getText());
+        if (qStr.empty()) {
+            return;
+        }
+
+        // Make a search query
+        SearchQuery q(SearchQuery::MatchName, SearchQuery::SearchObjects_t(SearchQuery::SearchShips), qStr);
+        q.setPlayedOnly(m_state.requireOwnShip);
+
+        // Search and pick first result
+        client::Downlink link(m_root, m_translator);
+        SyncSearchProxy proxy(m_userSide.gameSender(), m_root.engine().dispatcher(), link);
+        bool ok = false;
+        if (proxy.search(q, false)) {
+            const game::ref::List& list = proxy.result();
+            for (size_t i = 0, n = list.size(); i < n; ++i) {
+                if (list[i].getType() == game::Reference::Ship && list[i].getId() != m_state.excludeShip) {
+                    ok = true;
+                    onShipSelect(link, list[i].getId());
+                }
+            }
+        }
+
+        if (!ok) {
+            ui::dialogs::MessageBox(m_translator("No matching ship found."), m_translator("Search for ship"), m_root)
+                .doOkDialog(m_translator);
         }
     }
 }
@@ -481,24 +625,37 @@ NavChartDialog::onMove(game::map::Point pt)
 }
 
 void
-NavChartDialog::onShipSelect(game::Id_t id, game::map::Point pos)
+NavChartDialog::onShipSelect(game::proxy::WaitIndicator& ind, game::Id_t id)
 {
     // ex WShipArgWindow::onShipSelect
     // FIXME: handle exceptions
     // FIXME: handle chunnelMode?
     if (m_state.acceptShip) {
-        // if ((flags & GMission::ma_NotThis) != 0 && id == sid) {
-        //     // invalid: this ship selected, but not allowed
-        // } else if ((flags & GMission::ma_Own) != 0
-        //            && (!univ.ty_played_ships.isValidIndex(id)
-        //                || univ.getShip(id).getOwner() != univ.getShip(sid).getOwner())) {
-        //     // invalid: foreign ship selected, but not allowed
-        // } else {
+        if (id == m_state.excludeShip) {
+            // Invalid: this ship selected, but not allowed
+            return;
+        }
+
+        // Query ship status
+        ShipStatusProxy proxy;
+        proxy.getShipStatus(ind, m_userSide.gameSender(), id);
+        game::map::Point target = proxy.getPosition();
+        int owner = proxy.getOwner();
+
+        // Verify owner
+        if (m_state.requireOwnShip) {
+            proxy.getShipStatus(ind, m_userSide.gameSender(), m_state.shipId);
+            if (proxy.getOwner() != owner) {
+                // Invalid: foreign ship selected, but not allowed
+                return;
+            }
+        }
+
+        // Preconditions passed
         m_result.result = NavChartResult::Ship;
-        m_result.position = pos;
+        m_result.position = target;
         m_result.shipId = id;
         m_loop.stop(0);
-        // }
     }
 }
 

@@ -1160,8 +1160,16 @@ client::si::IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLi
     }
 }
 
-// @since PCC2 2.40.8
-// CC$ChooseInterceptTarget title
+/* @q CC$ChooseInterceptTarget title:Str, Optional flags:Str (Internal)
+   Choose intercept target on mini-map.
+
+   Flags can include
+   - a ship id: do not allow choosing this ship
+   - "F": allow choosing foreign ships (default: only playable)
+
+   The flags parameter is supported since 2.40.12.
+
+   @since PCC2 2.40.8 */
 void
 client::si::IFCCChooseInterceptTarget(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
@@ -1190,12 +1198,22 @@ client::si::IFCCChooseInterceptTarget(game::Session& session, ScriptSide& si, Re
         client::dialogs::NavChartState m_state;
     };
 
-    args.checkArgumentCount(1);
+    // Parameters
+    args.checkArgumentCount(1, 2);
+
+    // - Title
     String_t title;
     if (!interpreter::checkStringArg(title, args.getNext())) {
         return;
     }
 
+    // - Flags
+    int32_t flags = 0;
+    int32_t excludeShip = 0;
+    interpreter::checkFlagArg(flags, &excludeShip, args.getNext(), "F");
+    enum { AllShipFlag = 1 };
+
+    // Do it
     session.notifyListeners();
     game::actions::mustHaveShipList(session);
     game::actions::mustHaveRoot(session);
@@ -1215,6 +1233,8 @@ client::si::IFCCChooseInterceptTarget(game::Session& session, ScriptSide& si, Re
         in.acceptLocation = false;
         in.acceptShip = true;
         in.acceptChunnel = false;
+        in.excludeShip = excludeShip;
+        in.requireOwnShip = (flags & AllShipFlag) == 0;
         si.postNewTask(link, new Task(in));
     } else {
         throw interpreter::Error::contextError();

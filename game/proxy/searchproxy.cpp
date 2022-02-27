@@ -139,12 +139,12 @@ game::proxy::SearchProxy::SearchProxy(util::RequestSender<Session> gameSender, u
 { }
 
 void
-game::proxy::SearchProxy::search(const SearchQuery& q)
+game::proxy::SearchProxy::search(const SearchQuery& q, bool saveQuery)
 {
     class Task : public util::Request<Session> {
      public:
-        Task(const SearchQuery& q, util::RequestSender<SearchProxy> reply)
-            : m_query(q), m_reply(reply)
+        Task(const SearchQuery& q, bool saveQuery, util::RequestSender<SearchProxy> reply)
+            : m_query(q), m_saveQuery(saveQuery), m_reply(reply)
             { }
 
         void handle(Session& session)
@@ -152,7 +152,9 @@ game::proxy::SearchProxy::search(const SearchQuery& q)
                 afl::string::Translator& tx = session.translator();
                 try {
                     // Save it
-                    savedQuery(session) = m_query;
+                    if (m_saveQuery) {
+                        savedQuery(session) = m_query;
+                    }
 
                     // Start search driver in a process
                     interpreter::ProcessList& processList = session.processList();
@@ -172,9 +174,10 @@ game::proxy::SearchProxy::search(const SearchQuery& q)
             }
      private:
         SearchQuery m_query;
+        bool m_saveQuery;
         util::RequestSender<SearchProxy> m_reply;
     };
-    m_gameSender.postNewRequest(new Task(q, m_reply.getSender()));
+    m_gameSender.postNewRequest(new Task(q, saveQuery, m_reply.getSender()));
 }
 
 game::SearchQuery&
