@@ -149,9 +149,14 @@ server::Application::createClient(const afl::net::Name& name, afl::base::Deleter
     // ex Connection::connectRetry
     // This used to do 5 loops x 1 second.
     // Doing the first loops in just 100 ms gives us faster automatic system tests.
-    int i = 15;
+    // Service initialisation might take some time now, so timing regime now is:
+    //    5 x 0.1 second
+    //   10 x   1 second
+    //   10 x   5 seconds
+    //   10 x  20 seconds
+    // -> 260 seconds (similar to waitReady), 35 tries
+    int count = 0;
     while (1) {
-        --i;
         try {
             afl::net::resp::Client& result = del.addNew(new afl::net::resp::Client(clientNetworkStack(), name));
             log().write(afl::sys::LogListener::Info, m_logName, afl::string::Format("Connected to %s", name.toString()));
@@ -162,11 +167,13 @@ server::Application::createClient(const afl::net::Name& name, afl::base::Deleter
             return result;
         }
         catch (std::exception& e) {
-            if (i == 0) {
+            if (count > 35) {
                 throw;
             }
-            afl::sys::Thread::sleep(i < 5 ? 1000 : 100);
         }
+        int sleepTime = count > 25 ? 20000 : count > 15 ? 5000 : count > 5 ? 1000 : 100;
+        ++count;
+        afl::sys::Thread::sleep(sleepTime);
     }
 }
 
@@ -248,6 +255,7 @@ server::Application::waitReady(afl::net::CommandHandler& handler)
             }
         }
         int sleepTime = count > 20 ? 20 : count > 10 ? 5 : 1;
+        ++count;
         log().write(afl::sys::LogListener::Trace, m_logName, afl::string::Format("Server not ready yet, sleeping %d seconds...", sleepTime));
         afl::sys::Thread::sleep(sleepTime * 1000);
     }
