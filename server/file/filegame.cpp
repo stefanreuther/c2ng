@@ -40,6 +40,7 @@ namespace {
     {
         out.pathName     = path;
         out.gameName     = dir.getProperty("prop:name");
+        out.hostVersion  = in.hostVersion;
         out.gameId       = safeToInteger(dir.getProperty("prop:game"));
         out.hostTime     = safeToInteger(dir.getProperty("prop:hosttime"));
         out.isFinished   = safeToInteger(dir.getProperty("prop:finished")) != 0;

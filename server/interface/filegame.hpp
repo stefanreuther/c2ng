@@ -31,6 +31,7 @@ namespace server { namespace interface {
         struct GameInfo {
             String_t pathName;                          /**< Path name (path). */
             String_t gameName;                          /**< Game name (name). */
+            String_t hostVersion;                       /**< Host version if known (hostversion). */
             int32_t gameId;                             /**< Game Id if known (game). */
             int32_t hostTime;                           /**< Next host time (hosttime). */
             bool isFinished;                            /**< true if game is finished (finished). */
@@ -39,7 +40,7 @@ namespace server { namespace interface {
             afl::data::IntegerList_t conflictSlots;     /**< List of conflicting races (conflict). */
 
             GameInfo()
-                : pathName(), gameName(), gameId(0), hostTime(0), isFinished(false), slots(),
+                : pathName(), gameName(), hostVersion(), gameId(0), hostTime(0), isFinished(false), slots(),
                   missingFiles(), conflictSlots()
                 { }
         };

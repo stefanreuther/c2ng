@@ -65,6 +65,7 @@ TestServerInterfaceFileGameServer::testIt()
         FileGame::GameInfo gi;
         gi.pathName = "p";
         gi.gameName = "g";
+        gi.hostVersion = "Gh 3";
         gi.gameId = 99;
         gi.hostTime = 13579;
         gi.isFinished = false;
@@ -84,6 +85,7 @@ TestServerInterfaceFileGameServer::testIt()
         Access a(p);
         TS_ASSERT_EQUALS(a("path").toString(), "p");
         TS_ASSERT_EQUALS(a("name").toString(), "g");
+        TS_ASSERT_EQUALS(a("hostversion").toString(), "Gh 3");
         TS_ASSERT_EQUALS(a("game").toInteger(), 99);
         TS_ASSERT_EQUALS(a("hosttime").toInteger(), 13579);
         TS_ASSERT_EQUALS(a("finished").toInteger(), 0);
@@ -291,6 +293,7 @@ TestServerInterfaceFileGameServer::testRoundtrip()
         FileGame::GameInfo gi;
         gi.pathName = "p";
         gi.gameName = "g";
+        gi.hostVersion = "HV 2.0";
         gi.gameId = 99;
         gi.hostTime = 13579;
         gi.isFinished = false;
@@ -305,6 +308,7 @@ TestServerInterfaceFileGameServer::testRoundtrip()
         TS_ASSERT_THROWS_NOTHING(level4.getGameInfo("pp", out));
         TS_ASSERT_EQUALS(out.pathName, "p");
         TS_ASSERT_EQUALS(out.gameName, "g");
+        TS_ASSERT_EQUALS(out.hostVersion, "HV 2.0");
         TS_ASSERT_EQUALS(out.gameId, 99);
         TS_ASSERT_EQUALS(out.hostTime, 13579);
         TS_ASSERT_EQUALS(out.isFinished, false);

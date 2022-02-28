@@ -28,6 +28,7 @@ namespace {
         Hash::Ref_t h = Hash::create();
         h->setNew("path", new StringValue(path));
         h->setNew("name", new StringValue(name));
+        h->setNew("hostversion", new StringValue("Host 2.0"));
         h->setNew("game", new StringValue("7"));
         h->setNew("finished", new StringValue("0"));
         h->setNew("hosttime", new StringValue("12324"));
@@ -89,6 +90,7 @@ TestServerInterfaceFileGameClient::testIt()
         TS_ASSERT_THROWS_NOTHING(testee.getGameInfo("x/y/z", gi));
         TS_ASSERT_EQUALS(gi.gameName, "Game A");
         TS_ASSERT_EQUALS(gi.pathName, "x/y/z/a");
+        TS_ASSERT_EQUALS(gi.hostVersion, "Host 2.0");
         TS_ASSERT_EQUALS(gi.gameId, 7);
         TS_ASSERT_EQUALS(gi.missingFiles.size(), 1U);
         TS_ASSERT_EQUALS(gi.missingFiles[0], "xyplan.dat");
@@ -113,6 +115,7 @@ TestServerInterfaceFileGameClient::testIt()
         TS_ASSERT_THROWS_NOTHING(testee.getGameInfo("x/y/z", gi));
         TS_ASSERT_EQUALS(gi.gameName, "Game A");
         TS_ASSERT_EQUALS(gi.pathName, "x/y/z/a");
+        TS_ASSERT_EQUALS(gi.hostVersion, "Host 2.0");
         TS_ASSERT_EQUALS(gi.gameId, 0);
         TS_ASSERT_EQUALS(gi.missingFiles.size(), 1U);
         TS_ASSERT_EQUALS(gi.conflictSlots.size(), 1U);

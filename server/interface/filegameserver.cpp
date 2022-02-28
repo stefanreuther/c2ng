@@ -124,6 +124,7 @@ server::interface::FileGameServer::packGameInfo(const FileGame::GameInfo& info)
        Game information
        @key path:Str         (game directory name)
        @key name:Str         (game name**)
+       @key hostversion:Str  (host version in format "PHost 3.4e")
        @key game:GID         (game ID**)
        @key finished:Int     (0=running, 1=finished**)
        @key hosttime:Int     (next host time**)
@@ -136,6 +137,7 @@ server::interface::FileGameServer::packGameInfo(const FileGame::GameInfo& info)
     Hash::Ref_t h = Hash::create();
     h->setNew("path", makeStringValue(info.pathName));
     h->setNew("name", makeStringValue(info.gameName));
+    h->setNew("hostversion", makeStringValue(info.hostVersion));
     h->setNew("game", makeIntegerValue(info.gameId));
     h->setNew("hosttime", makeIntegerValue(info.hostTime));
     h->setNew("finished", makeIntegerValue(info.isFinished));

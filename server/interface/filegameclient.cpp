@@ -85,6 +85,7 @@ server::interface::FileGameClient::unpackGameInfo(GameInfo& result, const afl::d
     Access a(p);
     result.pathName   = a("path").toString();
     result.gameName   = a("name").toString();
+    result.hostVersion = a("hostversion").toString();
     result.gameId     = safeToInteger(a("game"));
     result.hostTime   = safeToInteger(a("hosttime"));
     result.isFinished = safeToInteger(a("finished")) != 0;

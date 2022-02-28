@@ -27,6 +27,7 @@ namespace server { namespace file {
             // gameName, gameId, hostTime, isFinished: taken from properties when creating the external GameInfo
             Slots_t slots;
             afl::data::StringList_t missingFiles;
+            String_t hostVersion;
             // conflictSlots: not implemented currently
         };
 

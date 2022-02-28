@@ -73,6 +73,7 @@ server::file::GameStatus::load(Root& root, DirectoryItem& dir)
             // Start with a local object in case anything below throws.
             // (Could be loadRaceNames.)
             std::auto_ptr<GameInfo> g(new GameInfo());
+            g->hostVersion = scanner.getDirectoryHostVersion().toString();
 
             // Load race names and generate slot list
             if (FileItem* it = dir.findFile("race.nm")) {
