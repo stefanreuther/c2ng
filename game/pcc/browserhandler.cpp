@@ -5,21 +5,37 @@
 
 #include "game/pcc/browserhandler.hpp"
 #include "afl/base/signalconnection.hpp"
+#include "afl/charset/codepage.hpp"
+#include "afl/charset/codepagecharset.hpp"
 #include "afl/data/defaultvaluefactory.hpp"
-#include "afl/data/segment.hpp"
 #include "afl/io/constmemorystream.hpp"
+#include "afl/io/internaldirectory.hpp"
+#include "afl/io/internalsink.hpp"
 #include "afl/io/json/parser.hpp"
-#include "afl/net/http/simpledownloadlistener.hpp"
+#include "afl/io/multidirectory.hpp"
+#include "afl/net/mimebuilder.hpp"
 #include "afl/net/parameterencoder.hpp"
 #include "afl/string/format.hpp"
+#include "afl/string/parse.hpp"
+#include "afl/string/posixfilenames.hpp"
 #include "game/browser/account.hpp"
 #include "game/browser/usercallback.hpp"
 #include "game/pcc/accountfolder.hpp"
-#include "game/v3/rootloader.hpp"
+#include "game/pcc/serverdirectory.hpp"
+#include "game/pcc/turnloader.hpp"
+#include "game/v3/loader.hpp"
+#include "game/v3/registrationkey.hpp"
+#include "game/v3/resultloader.hpp"
+#include "game/v3/specificationloader.hpp"
+#include "game/v3/stringverifier.hpp"
+#include "game/v3/utils.hpp"
 
+using afl::base::Ref;
+using afl::io::Directory;
 using afl::string::Format;
 using afl::sys::LogListener;
 using game::browser::UserCallback;
+using afl::net::http::SimpleDownloadListener;
 
 namespace {
     const char LOG_NAME[] = "game.pcc";
@@ -32,8 +48,22 @@ namespace {
         }
         return url;
     }
-}
 
+    game::PlayerSet_t getAvailablePlayers(afl::data::Access a)
+    {
+        afl::data::StringList_t keys;
+        a.getHashKeys(keys);
+
+        game::PlayerSet_t result;
+        for (size_t i = 0, n = keys.size(); i < n; ++i) {
+            int playerNr = 0;
+            if (afl::string::strToInteger(keys[i], playerNr) && playerNr > 0 && playerNr <= game::v3::structures::NUM_PLAYERS) {
+                result += playerNr;
+            }
+        }
+        return result;
+    }
+}
 
 class game::pcc::BrowserHandler::LoginTask : public Task_t {
  public:
@@ -105,8 +135,8 @@ game::pcc::BrowserHandler::BrowserHandler(game::browser::Browser& b,
                                           util::ProfileDirectory& profile)
     : m_browser(b),
       m_manager(mgr),
-      m_nullFS(),
-      m_v3Loader(defaultSpecificationDirectory, &profile, b.translator(), b.log(), m_nullFS),
+      m_defaultSpecificationDirectory(defaultSpecificationDirectory),
+      m_profile(profile),
       m_gameList(),
       m_gameListAccount()
 { }
@@ -166,46 +196,44 @@ game::pcc::BrowserHandler::callServer(game::browser::Account& acc,
     args.enumerateHeaders(fmt);
 
     // Call it
-    afl::net::http::SimpleDownloadListener listener;
+    SimpleDownloadListener listener;
     m_manager.postFile(parsedUrl, query, "application/x-www-form-urlencoded; charset=UTF-8", listener);
-    switch (listener.wait()) {
-     case afl::net::http::SimpleDownloadListener::Succeeded:
-        break;
-     case afl::net::http::SimpleDownloadListener::Failed:
-        log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: network access failed"), url));
-        return std::auto_ptr<afl::data::Value>();
-     case afl::net::http::SimpleDownloadListener::TimedOut:
-        log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: network access timed out"), url));
-        return std::auto_ptr<afl::data::Value>();
-     case afl::net::http::SimpleDownloadListener::LimitExceeded:
-        log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: network access exceeded limit"), url));
+    return processResult(url, listener);
+}
+
+std::auto_ptr<afl::data::Value>
+game::pcc::BrowserHandler::callServerWithFile(game::browser::Account& acc, String_t endpoint, const afl::net::HeaderTable& args, String_t fileParam, String_t fileName, afl::base::ConstBytes_t fileContent)
+{
+    // Build URL
+    String_t url = buildUrl(acc);
+    url += endpoint;
+    url += ".cgi";
+
+    afl::net::Url parsedUrl;
+    if (!parsedUrl.parse(url)) {
+        log().write(LogListener::Error, LOG_NAME, Format(translator()("Malformed URL \"%s\""), url));
         return std::auto_ptr<afl::data::Value>();
     }
+    log().write(LogListener::Trace, LOG_NAME, Format(translator()("Calling \"%s\""), url));
 
-    // Parse JSON
-    afl::data::DefaultValueFactory factory;
-    afl::io::ConstMemoryStream cms(listener.getResponseData());
-    afl::io::BufferedStream buf(cms);
-    try {
-        return std::auto_ptr<afl::data::Value>(afl::io::json::Parser(buf, factory).parseComplete());
-    }
-    catch (std::exception& e) {
-        log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: received invalid data from network"), url));
-        log().write(LogListener::Info,  LOG_NAME, translator()("Parse error"), e);
+    // Build query
+    afl::net::MimeBuilder builder("");
+    builder.addFormFields(args);
+    builder.addFormFile(fileParam, fileName);
+    builder.addHeader("Content-Type", "application/octet-stream");
+    builder.addRawData(fileContent);
+    builder.addBoundary();
+    String_t boundary = builder.finish();
+    builder.removeInitialHeaders();
 
-        // Log failing fragment
-        afl::io::Stream::FileSize_t pos = buf.getPos();
-        if (pos > 0) {
-            --pos;
-            buf.setPos(pos);
-        }
-        uint8_t tmp[30];
-        afl::base::Bytes_t bytes(tmp);
-        bytes.trim(buf.read(bytes));
+    // Serialize
+    afl::io::InternalSink query;
+    builder.write(query, false);
 
-        log().write(LogListener::Trace, LOG_NAME, Format(translator()("at byte %d, \"%s\""), pos, afl::string::fromBytes(bytes)));
-        return std::auto_ptr<afl::data::Value>();
-    }
+    // Call it
+    SimpleDownloadListener listener;
+    m_manager.postFile(parsedUrl, afl::string::fromBytes(query.getContent()), "multipart/form-data; boundary=" + boundary, listener);
+    return processResult(url, listener);
 }
 
 afl::data::Access
@@ -274,6 +302,54 @@ game::pcc::BrowserHandler::getFilePreAuthenticated(game::browser::Account& acc, 
     }
 }
 
+std::auto_ptr<afl::data::Value>
+game::pcc::BrowserHandler::putFilePreAuthenticated(game::browser::Account& acc, String_t fileName, afl::base::ConstBytes_t content)
+{
+    String_t token;
+    if (acc.getEncoded("api_token", token)) {
+        afl::net::HeaderTable tab;
+        tab.set("api_token", token);
+        tab.set("action", "put");
+        tab.set("file", fileName);
+
+        return callServerWithFile(acc, "file", tab, "data", afl::string::PosixFileNames().getFileName(fileName), content);
+    } else {
+        return std::auto_ptr<afl::data::Value>();
+    }
+}
+
+std::auto_ptr<afl::data::Value>
+game::pcc::BrowserHandler::uploadTurnPreAuthenticated(game::browser::Account& acc, int32_t hostGameNumber, int slot, afl::base::ConstBytes_t content)
+{
+    String_t token;
+    if (acc.getEncoded("api_token", token)) {
+        afl::net::HeaderTable tab;
+        tab.set("api_token", token);
+        tab.set("action", "trn");
+        tab.set("gid", Format("%d", hostGameNumber));
+        tab.set("slot", Format("%d", slot));
+
+        return callServerWithFile(acc, "host", tab, "data", Format("player%d.trn", slot), content);
+    } else {
+        return std::auto_ptr<afl::data::Value>();
+    }
+}
+
+void
+game::pcc::BrowserHandler::markTurnTemporaryPreAuthenticated(game::browser::Account& acc, int32_t hostGameNumber, int slot, int flag)
+{
+    String_t token;
+    if (acc.getEncoded("api_token", token)) {
+        afl::net::HeaderTable tab;
+        tab.set("api_token", token);
+        tab.set("action", "trnmarktemp");
+        tab.set("gid", Format("%d", hostGameNumber));
+        tab.set("slot", Format("%d", slot));
+        tab.set("istemp", Format("%d", flag));
+        callServer(acc, "host", tab);
+    }
+}
+
 afl::string::Translator&
 game::pcc::BrowserHandler::translator()
 {
@@ -286,8 +362,134 @@ game::pcc::BrowserHandler::log()
     return m_browser.log();
 }
 
-game::v3::RootLoader&
-game::pcc::BrowserHandler::loader()
+afl::base::Ptr<game::Root>
+game::pcc::BrowserHandler::loadRoot(game::browser::Account& account, afl::data::Access gameListEntry, const game::config::UserConfiguration& config)
 {
-    return m_v3Loader;
+    afl::string::Translator& tx = m_browser.translator();
+    afl::sys::LogListener& log = m_browser.log();
+    afl::charset::CodepageCharset charset(afl::charset::g_codepageLatin1);
+
+    // gameListEntry:
+    //    {
+    //      conflict: [],
+    //      finished: 0,
+    //      game: 2,
+    //      hosttime: 0,
+    //      hostversion: "PHost 4.1h",
+    //      missing: [],
+    //      name: "My Other New Game",
+    //      path: "u/streu/games/2-my-other-new-game",
+    //      races: {
+    //        1: "The Solar Federation",
+    //        2: "The Lizard Alliance",
+    //        3: "The Empire of the Birds",
+    //        11: "The Missing Colonies of Man"
+    //      }
+    //    },
+
+    PlayerSet_t availablePlayers = getAvailablePlayers(gameListEntry("races"));
+
+    afl::base::Ptr<Root> result;
+    if (!availablePlayers.empty()) {
+        // Server directory
+        Ref<ServerDirectory> serverDirectory(*new ServerDirectory(*this, account, gameListEntry("path").toString()));
+
+        // Local directory
+        Ref<Directory> localDirectory(afl::io::InternalDirectory::create("<internal>"));
+
+        // Specification directory
+        Ref<afl::io::MultiDirectory> spec = afl::io::MultiDirectory::create();
+        spec->addDirectory(serverDirectory);
+        spec->addDirectory(m_defaultSpecificationDirectory);
+
+        // Registration key: load from server
+        std::auto_ptr<game::v3::RegistrationKey> key(new game::v3::RegistrationKey(std::auto_ptr<afl::charset::Charset>(charset.clone())));
+        key->initFromDirectory(*serverDirectory, log, tx);
+
+        // Specification loader: load from spec (server, then default)
+        Ref<game::v3::SpecificationLoader> specLoader(*new game::v3::SpecificationLoader(spec, std::auto_ptr<afl::charset::Charset>(charset.clone()), tx, log));
+
+        // Actions
+        Root::Actions_t actions;
+        actions += Root::aLoadEditable;         // TODO...
+        actions += Root::aConfigureCharset;
+        actions += Root::aConfigureFinished;
+        actions += Root::aConfigureReadOnly;
+        actions += Root::aSweep;
+
+        // Host version: default to PHost 4.0
+        HostVersion host(HostVersion::PHost, MKVERSION(4, 0, 0));
+        host.fromString(gameListEntry("hostversion").toString());
+
+        // Produce result
+        result = new Root(localDirectory, specLoader, host,
+                          std::auto_ptr<game::RegistrationKey>(key),
+                          std::auto_ptr<game::StringVerifier>(new game::v3::StringVerifier(std::auto_ptr<afl::charset::Charset>(charset.clone()))),
+                          std::auto_ptr<afl::charset::Charset>(charset.clone()),
+                          Root::Actions_t(actions));
+
+        // Configuration: load from server
+        game::v3::Loader(charset, tx, log).loadConfiguration(*result, *serverDirectory);
+
+        // Race names: load from spec (server, then default)
+        game::v3::loadRaceNames(result->playerList(), *spec, charset);
+
+        // Preferences: load from profile
+        result->userConfiguration().loadUserConfiguration(m_profile, log, tx);
+        result->userConfiguration().merge(config);
+
+        // Turn loader
+        result->setTurnLoader(new TurnLoader(localDirectory,
+                                             m_defaultSpecificationDirectory,
+                                             serverDirectory,
+                                             gameListEntry("game").toInteger(),
+                                             std::auto_ptr<afl::charset::Charset>(charset.clone()),
+                                             tx, log,
+                                             availablePlayers,
+                                             m_profile));
+    }
+    return result;
+}
+
+std::auto_ptr<afl::data::Value>
+game::pcc::BrowserHandler::processResult(const String_t& url, afl::net::http::SimpleDownloadListener& listener)
+{
+    switch (listener.wait()) {
+     case SimpleDownloadListener::Succeeded:
+        break;
+     case SimpleDownloadListener::Failed:
+        log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: network access failed"), url));
+        return std::auto_ptr<afl::data::Value>();
+     case SimpleDownloadListener::TimedOut:
+        log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: network access timed out"), url));
+        return std::auto_ptr<afl::data::Value>();
+     case SimpleDownloadListener::LimitExceeded:
+        log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: network access exceeded limit"), url));
+        return std::auto_ptr<afl::data::Value>();
+    }
+
+    // Parse JSON
+    afl::data::DefaultValueFactory factory;
+    afl::io::ConstMemoryStream cms(listener.getResponseData());
+    afl::io::BufferedStream buf(cms);
+    try {
+        return std::auto_ptr<afl::data::Value>(afl::io::json::Parser(buf, factory).parseComplete());
+    }
+    catch (std::exception& e) {
+        log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: received invalid data from network"), url));
+        log().write(LogListener::Info,  LOG_NAME, translator()("Parse error"), e);
+
+        // Log failing fragment
+        afl::io::Stream::FileSize_t pos = buf.getPos();
+        if (pos > 0) {
+            --pos;
+            buf.setPos(pos);
+        }
+        uint8_t tmp[30];
+        afl::base::Bytes_t bytes(tmp);
+        bytes.trim(buf.read(bytes));
+
+        log().write(LogListener::Trace, LOG_NAME, Format(translator()("at byte %d, \"%s\""), pos, afl::string::fromBytes(bytes)));
+        return std::auto_ptr<afl::data::Value>();
+    }
 }

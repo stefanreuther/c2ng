@@ -12,8 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/task.cpp game/task.hpp \
-    game/browser/optionalusercallback.cpp \
+FILES_gamelib = game/pcc/turnloader.cpp game/pcc/turnloader.hpp \
+    game/task.cpp game/task.hpp game/browser/optionalusercallback.cpp \
     game/browser/optionalusercallback.hpp game/proxy/browserproxy.cpp \
     game/proxy/browserproxy.hpp game/browser/folder.cpp \
     game/browser/types.hpp game/browser/synchronousfolder.cpp \

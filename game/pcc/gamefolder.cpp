@@ -6,6 +6,7 @@
 #include "game/pcc/gamefolder.hpp"
 #include "afl/charset/codepage.hpp"
 #include "afl/charset/codepagecharset.hpp"
+#include "afl/string/format.hpp"
 #include "game/pcc/browserhandler.hpp"
 #include "game/pcc/serverdirectory.hpp"
 
@@ -54,18 +55,22 @@ game::pcc::GameFolder::loadGameRoot(const game::config::UserConfiguration& confi
 {
     class Task : public Task_t {
      public:
-        Task(String_t pathName, BrowserHandler& handler, game::browser::Account& account, const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t>& then)
-            : m_pathName(pathName), m_handler(handler), m_account(account), m_config(config), m_then(then)
+        Task(String_t pathName, size_t hint, BrowserHandler& handler, game::browser::Account& account, const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t>& then)
+            : m_pathName(pathName), m_hint(hint), m_handler(handler), m_account(account), m_config(config), m_then(then)
             { }
         virtual void call()
             {
                 m_handler.log().write(LogListener::Trace, LOG_NAME, "Task: GameFolder.loadGameRoot");
                 afl::base::Ptr<Root> result;
                 try {
+#if 0
                     // Quick and dirty solution: pretend this to be a local folder and work with that.
                     // FIXME: this needs a lot of optimisation (and quite a number of protocol improvements on server side).
                     afl::charset::CodepageCharset cs(afl::charset::g_codepageLatin1);
                     result = m_handler.loader().load(*new ServerDirectory(m_handler, m_account, m_pathName), cs, m_config, false);
+#else
+                    result = m_handler.loadRoot(m_account, GameFolder(m_handler, m_account, m_pathName, m_hint).getGameListEntry(), m_config);
+#endif
                 }
                 catch (std::exception& e) {
                     m_handler.log().write(LogListener::Error, LOG_NAME, String_t(), e);
@@ -75,6 +80,7 @@ game::pcc::GameFolder::loadGameRoot(const game::config::UserConfiguration& confi
 
      private:
         const String_t m_pathName;
+        size_t m_hint;
         BrowserHandler& m_handler;
         game::browser::Account& m_account;
         const game::config::UserConfiguration& m_config;
@@ -82,7 +88,7 @@ game::pcc::GameFolder::loadGameRoot(const game::config::UserConfiguration& confi
     };
 
     // Log in, then build the root.
-    return m_handler.login(m_account, std::auto_ptr<Task_t>(new Task(m_path, m_handler, m_account, config, then)));
+    return m_handler.login(m_account, std::auto_ptr<Task_t>(new Task(m_path, m_hint, m_handler, m_account, config, then)));
 }
 
 String_t
@@ -91,10 +97,13 @@ game::pcc::GameFolder::getName() const
     afl::data::Access a = getGameListEntry();
     String_t name = a("name").toString();
     if (name.empty()) {
-        return m_path;
-    } else {
-        return name;
+        name = m_path;
     }
+    int32_t hostGameNumber = a("game").toInteger();
+    if (hostGameNumber != 0) {
+        name += afl::string::Format(" (#%d)", hostGameNumber);
+    }
+    return name;
 }
 
 util::rich::Text

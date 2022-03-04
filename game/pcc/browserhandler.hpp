@@ -8,12 +8,11 @@
 #include "afl/base/closure.hpp"
 #include "afl/data/access.hpp"
 #include "afl/data/value.hpp"
-#include "afl/io/nullfilesystem.hpp"
 #include "afl/net/http/downloadlistener.hpp"
 #include "afl/net/http/manager.hpp"
+#include "afl/net/http/simpledownloadlistener.hpp"
 #include "game/browser/browser.hpp"
 #include "game/browser/handler.hpp"
-#include "game/v3/rootloader.hpp"
 
 namespace game { namespace pcc {
 
@@ -64,6 +63,16 @@ namespace game { namespace pcc {
             @return Raw result; null on error */
         std::auto_ptr<afl::data::Value> callServer(game::browser::Account& acc, String_t endpoint, const afl::net::HeaderTable& args);
 
+        /** Call server with a file attachment.
+            @param acc         Account (for API endpoint address)
+            @param endpoint    Endpoint name (e.g. 'file')
+            @param args        Parameters to pass (including `api_key` etc.)
+            @param fileParam   File parameter
+            @param fileName    File name
+            @param fileContent File content
+            @return Raw result; null on error */
+        std::auto_ptr<afl::data::Value> callServerWithFile(game::browser::Account& acc, String_t endpoint, const afl::net::HeaderTable& args, String_t fileParam, String_t fileName, afl::base::ConstBytes_t fileContent);
+
         /** Get game list, pre-authenticated.
             The account must have been logged in already.
             If the account is not or no longer logged in, the request will fail.
@@ -89,8 +98,25 @@ namespace game { namespace pcc {
             If the account is not or no longer logged in, the request will fail.
             @param acc      Account
             @param fileName Path name of file
-            @param listener Receives result */
+            @param listener Receives result
+            @throw FileProblemException on error */
         void getFilePreAuthenticated(game::browser::Account& acc, String_t fileName, afl::net::http::DownloadListener& listener);
+
+        /** Download a file, pre-authenticated.
+            The account must have been logged in already.
+            If the account is not or no longer logged in, the request will fail.
+            @param acc      Account
+            @param fileName Path name of file
+            @param content  Content
+            @return Result tree from API, hash:
+            - result (success flag)
+            - error (on failure, error message)
+            If not logged in, null. */
+        std::auto_ptr<afl::data::Value> putFilePreAuthenticated(game::browser::Account& acc, String_t fileName, afl::base::ConstBytes_t content);
+
+        std::auto_ptr<afl::data::Value> uploadTurnPreAuthenticated(game::browser::Account& acc, int32_t hostGameNumber, int slot, afl::base::ConstBytes_t content);
+
+        void markTurnTemporaryPreAuthenticated(game::browser::Account& acc, int32_t hostGameNumber, int slot, int flag);
 
         /** Access translator.
             @return translator */
@@ -100,22 +126,24 @@ namespace game { namespace pcc {
             @return logger */
         afl::sys::LogListener& log();
 
-        /** Access RootLoader.
-            Persistent state in this object is the host version number parser definition (hostver.ini).
-            @return RootLoader */
-        game::v3::RootLoader& loader();
+        afl::base::Ptr<Root> loadRoot(game::browser::Account& account,
+                                      afl::data::Access gameListEntry,
+                                      const game::config::UserConfiguration& config);
 
      private:
         class LoginTask;
 
         game::browser::Browser& m_browser;
         afl::net::http::Manager& m_manager;
-        afl::io::NullFileSystem m_nullFS;
-        game::v3::RootLoader m_v3Loader;
+
+        afl::base::Ref<afl::io::Directory> m_defaultSpecificationDirectory;
+        util::ProfileDirectory& m_profile;
 
         // Cache:
         std::auto_ptr<afl::data::Value> m_gameList;
         game::browser::Account* m_gameListAccount;
+
+        std::auto_ptr<afl::data::Value> processResult(const String_t& url, afl::net::http::SimpleDownloadListener& listener);
     };
 
 } }

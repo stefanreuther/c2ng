@@ -141,6 +141,26 @@ game::pcc::ServerDirectory::ServerDirectory(BrowserHandler& handler,
 game::pcc::ServerDirectory::~ServerDirectory()
 { }
 
+void
+game::pcc::ServerDirectory::putFile(String_t name, afl::base::ConstBytes_t content)
+{
+    // Sanity check
+    if (name.empty() || name.find('/') != String_t::npos || name[0] == '.') {
+        throw afl::except::FileProblemException(name, afl::string::Messages::invalidFileName());
+    }
+
+    // Invalidate cache
+    m_entries = 0;
+    m_loaded = false;
+
+    // Store
+    std::auto_ptr<afl::data::Value> result(m_handler.putFilePreAuthenticated(m_account, afl::string::PosixFileNames().makePathName(m_name, name), content));
+    afl::data::Access a(result);
+    if (!a("result").toInteger()) {
+        throw afl::except::FileProblemException(name, a("error").toString());
+    }
+}
+
 afl::base::Ref<afl::io::DirectoryEntry>
 game::pcc::ServerDirectory::getDirectoryEntryByName(String_t name)
 {

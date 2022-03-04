@@ -28,7 +28,22 @@ namespace game { namespace pcc {
             @param acc    Account instance (mutable; might eventually invalidate tokens or update caches)
             @param name   Name */
         ServerDirectory(BrowserHandler& handler, game::browser::Account& acc, String_t name);
+
+        /** Destructor. */
         virtual ~ServerDirectory();
+
+        /** Store a file.
+            @param name File name
+            @param content File content */
+        void putFile(String_t name, afl::base::ConstBytes_t content);
+
+        /** Access underlying BrowserHandler.
+            @return BrowserHandler */
+        BrowserHandler& handler();
+
+        /** Access underlying Account.
+            @return Account */
+        game::browser::Account& account();
 
         // Directory virtuals:
         virtual afl::base::Ref<afl::io::DirectoryEntry> getDirectoryEntryByName(String_t name);
@@ -51,5 +66,17 @@ namespace game { namespace pcc {
     };
 
 } }
+
+inline game::pcc::BrowserHandler&
+game::pcc::ServerDirectory::handler()
+{
+    return m_handler;
+}
+
+inline game::browser::Account&
+game::pcc::ServerDirectory::account()
+{
+    return m_account;
+}
 
 #endif
