@@ -160,6 +160,19 @@ class TestGameV3Loader : public CxxTest::TestSuite {
     void testLoadPlanets();
     void testLoadShips();
     void testLoadBases();
+    void testLoadTurnFile();
+    void testMissingShip();
+    void testMissingPlanet();
+    void testMissingBase();
+    void testUnplayedShip();
+    void testUnplayedPlanet();
+    void testUnplayedBase();
+    void testNoBase();
+    void testInvalidCommand();
+    void testInvalidFile();
+    void testInvalidPlayer();
+    void testAllianceCommand();
+    void testMessageCommand();
 };
 
 class TestGameV3OutboxReader : public CxxTest::TestSuite {
@@ -202,18 +215,7 @@ class TestGameV3ResultFile : public CxxTest::TestSuite {
 class TestGameV3ResultLoader : public CxxTest::TestSuite {
  public:
     void testLoadTurnFile();
-    void testMissingShip();
-    void testMissingPlanet();
-    void testMissingBase();
-    void testUnplayedShip();
-    void testUnplayedPlanet();
-    void testUnplayedBase();
-    void testNoBase();
-    void testInvalidCommand();
     void testInvalidFile();
-    void testInvalidPlayer();
-    void testAllianceCommand();
-    void testMessageCommand();
 };
 
 class TestGameV3Reverter : public CxxTest::TestSuite {

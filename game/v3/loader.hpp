@@ -20,6 +20,8 @@
 
 namespace game { namespace v3 {
 
+    class TurnFile;
+
     /** v3 Loader Utilities.
         Conventions for v3:
         - most objects are created beforehand: ships, planets, ion storms (prepareUniverse() function)
@@ -214,6 +216,22 @@ namespace game { namespace v3 {
             \param player Player */
         void loadResult(Turn& turn, const Root& root, Game& game, afl::io::Stream& file, int player) const;
 
+        /** Load turn file.
+            \param turn Target turn
+            \param root Associated root
+            \param file File to read from
+            \param player Player */
+        void loadTurnfile(Turn& turn, const Root& root, afl::io::Stream& file, int player) const;
+
+        /** Save turn file.
+            Caller must prepare the turn file before calling this function,
+            and update the trailers and save it to the file system afterwards.
+            \param thisTurn  Output turn file
+            \param turn      Turn
+            \param player    Player number
+            \param root      Root */
+        void saveTurnFile(TurnFile& thisTurn, const Turn& turn, int player, const Root& root) const;
+
         /** Load configuration.
             - pconfig.src
             - shiplist.txt (config part)
@@ -228,6 +246,8 @@ namespace game { namespace v3 {
         afl::charset::Charset& m_charset;
         afl::string::Translator& m_translator;
         afl::sys::LogListener& m_log;
+
+        void addMessage(Turn& turn, String_t text, int sender, PlayerSet_t receiver) const;
     };
 
 } }

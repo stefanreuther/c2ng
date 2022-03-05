@@ -47,7 +47,7 @@ namespace game { namespace v3 {
         virtual std::auto_ptr<Task_t> loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, std::auto_ptr<StatusTask_t> then);
         virtual String_t getProperty(Property p);
 
-        void loadTurnfile(Turn& trn, Root& root, afl::io::Stream& file, int player) const;
+        void loadTurnfile(Turn& trn, const Root& root, afl::io::Stream& file, int player) const;
 
      private:
         afl::base::Ref<afl::io::Directory> m_specificationDirectory;
@@ -63,8 +63,6 @@ namespace game { namespace v3 {
         void doLoadCurrentTurn(Turn& turn, Game& game, int player, game::Root& root, Session& session);
         void doLoadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root);
         void doSaveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session);
-
-        void addMessage(Turn& trn, String_t text, int sender, PlayerSet_t receiver) const;
     };
 
 } }
