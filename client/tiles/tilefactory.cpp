@@ -543,12 +543,15 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
         tile.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
         return &tile;
     }
-//     if (name == "NARROWSHIPEQUIPMENT")
-//         return new WNarrowShipEquipmentTile(selection);
-//     if (name == "NARROWSHIPCARGO")
-//         return new WNarrowShipCargoTile(selection);
-//     if (name == "NARROWSHIPMISSION")
-//         return new WNarrowShipMissionTile(selection);
+    if (name == "NARROWSHIPEQUIPMENT") {
+        return NullFactory().run(m_root, m_keys, 25, 5, "Tile.NarrowShipEquipment", deleter, m_userSide, m_observer);
+    }
+    if (name == "NARROWSHIPCARGO") {
+        return NullFactory().run(m_root, m_keys, 25, 4, "Tile.NarrowShipCargo", deleter, m_userSide, m_observer);
+    }
+    if (name == "NARROWSHIPMISSION") {
+        return NullFactory().run(m_root, m_keys, 25, 6, "Tile.NarrowShipMission", deleter, m_userSide, m_observer);
+    }
     if (name == "NARROWPLANETMINERAL") {
         return NullFactory().run(m_root, m_keys, 25, 5, "Tile.NarrowPlanetMinerals", deleter, m_userSide, m_observer);
     }
@@ -564,11 +567,12 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
     if (name == "NARROWPLANETFCODE") {
         return NullFactory().run(m_root, m_keys, 25, 2, "Tile.NarrowPlanetFCode", deleter, m_userSide, m_observer);
     }
-//     if (name == "NARROWBASETECH")
-//         return new WNarrowBaseTechTile(selection);
-//     if (name == "NARROWBASEORDER")
-//         return new WNarrowBaseOrderTile(selection);
-
+    if (name == "NARROWBASETECH") {
+        return NullFactory().run(m_root, m_keys, 25, 4, "Tile.NarrowBaseTech", deleter, m_userSide, m_observer);
+    }
+    if (name == "NARROWBASEORDER") {
+        return NullFactory().run(m_root, m_keys, 25, 4, "Tile.NarrowBaseOrder", deleter, m_userSide, m_observer);
+    }
     return 0;
 }
 

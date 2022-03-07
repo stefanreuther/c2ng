@@ -9,9 +9,41 @@
 %  The connection between tile widgets and functions is done in C++ code and currently not configurable.
 %
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Headers %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 Option LocalSubs(1)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Utilities %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Format ship build order. Returns rich text. inact=text for inactive order
+Function Tile$BaseBuildOrder(inact)
+  Local c = Z(FindShipCloningAt(Id))
+  If Build.YesNo Then
+    If IsEmpty(c) Then
+      Return RStyle("yellow", Format(Translate("Building a %s"), Build))
+    Else
+      Return RStyle("red", Format(Translate("Cloning, and building a %s"), Build))
+    EndIf
+  Else
+    If IsEmpty(c) Then
+      Return inact
+    Else
+      Return RStyle("yellow", Format(Translate("Cloning %s"), ShipName(c)))
+    EndIf
+  EndIf
+EndFunction
+
+% Format shipyard order. Returns rich text. inact=text for inactive order
+Function Tile$BaseShipyardOrder(inact)
+  If Shipyard.Action = 'Fix' Then
+    Return RStyle("yellow", Format(Translate("Repairing %s"), ShipName(Shipyard.Id)))
+  Else If Shipyard.Action = 'Recycle' Then
+    Return RStyle("yellow", Format(Translate("Recycling %s"), ShipName(Shipyard.Id)))
+  Else
+    Return inact
+  EndIf
+EndFunction
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Headers %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Still unused
 % @since PCC2 2.40.1
@@ -257,6 +289,80 @@ Sub Tile.ShipMission
   SetButton "b", bc
 EndSub
 
+% Narrow ship mission
+% - called in ship context
+% - call SetContent with 25x6 rich-text string
+Sub Tile.NarrowShipMission
+  % ex WNarrowShipMissionTile::drawData
+  Local Function Row(left, right)
+    Return RAdd(RAlign(left, 80), right, "\n")
+  EndFunction
+
+  Local t, s, n, c, e
+
+  % PE
+  t :=         Row(Translate("Enemy:"), If(Not IsEmpty(Enemy$), RStyle("green", If(Enemy, Enemy, Translate("none"))), ""))
+
+  % FC
+  t := RAdd(t, Row(Translate("FCode:"), If(Not IsEmpty(FCode), RStyle("green", FCode), "")))
+
+  % Mission
+  t := RAdd(t, Row(Translate("Mission:"), If(Not IsEmpty(Mission$), RStyle("green", CCVP.ShipMissionLabel()), "")))
+
+  % Course
+  s := ''
+  If Not IsEmpty(Waypoint.X) And Not IsEmpty(Waypoint.Y) Then
+    n := Waypoint.Dist
+    If Speed<>"Hyperdrive" Then
+      c := "green"
+    Else If n<20 Then
+      c := "red"
+    Else
+      % FIXME: : !host.isExactHyperjumpDistance2(int32(dist*dist+.1)) /* FIXME: this may lose precision, hence the +.1 */ ? UIColor::tc_Yellow
+      c := "green"
+    EndIf
+    s := RStyle(c, Format(Translate("%.2f ly"), n))
+  Else If Not IsEmpty(Heading$) Then
+    s := RStyle("green", Format(Translate("%d"+Chr(176)+", %s"), Heading$, Heading))
+  Else
+    s := ''
+  EndIf
+  t := RAdd(t, Row(Translate("Course:"), s))
+
+  % Warp
+  If Not IsEmpty(Speed$) Then
+    If Speed$=0 Then
+      s := RStyle(If(Waypoint.Dist, "red", "green"), Translate("not moving"))
+    Else
+      s := RStyle("green", Speed)
+    EndIf
+  Else
+    s := ''
+  EndIf
+  t := RAdd(t, Row(Translate("Speed:"), s))
+
+  % Fuel usage
+  n := Move.Fuel
+  e := Move.ETA
+  If Not IsEmpty(n) Then
+    If Waypoint.DX=0 And Waypoint.DY=0 Then
+      s := RStyle("green", Translate("at waypoint"))
+    Else If Speed='Hyperdrive' Then
+      s := RStyle("green", Translate("Hyperdrive"))
+    Else If Speed$=0 Then
+      s := RStyle("red", Translate("not moving"))
+    Else If e>=30 Then          % FIXME: 30 is replacement for 'if (crystal_ball.isAtTurnLimit())'
+      s := RStyle("yellow", Translate("too long"))
+    Else
+      s := RStyle(If(n > Cargo.N, "red", "green"), Format(Translate("%d turn%!1{s%}, %d kt fuel"), CCVP.NumberToString(e), CCVP.NumberToString(n)))
+    EndIf
+  Else
+    s := ''
+  EndIf
+  t := RAdd(t, Row(Translate("Usage:"), s))
+
+  SetContent t
+EndSub
 
 Sub Tile$ShipEquipment.Common(forHistory)
   % ex WShipEquipmentTile::drawShipEquipmentTile
@@ -440,7 +546,6 @@ Sub Tile$ShipEquipment.Common(forHistory)
 
   SetContent t
 
-
   % Buttons
   If forHistory Then
     SetButton "g", ""
@@ -474,6 +579,145 @@ Sub Tile.ShipEquipment
   Tile$ShipEquipment.Common False
 EndSub
 
+% Narrow ship equipment
+% - called in ship context
+% - call SetContent with 25x5 rich-text string
+Sub Tile.NarrowShipEquipment
+  % ex WNarrowShipEquipmentTile::drawData
+  Local t, s
+
+  % Engines
+  If Not IsEmpty(Engine$) Then
+    s := Engine
+    If HasFunction("HardenedEngines") Then s := Format(Translate("Hard. %s"), s)
+    If HasFunction("Gravitonic") Then s := Format(Translate("Grav. %s"), s)
+    If Engine.Count>1 Then s := Format(Translate("%d "&Chr(215)&" %s"), Engine.Count, s)
+    t := RStyle('green', s)
+  Else If Hull$ Then
+    % FIXME: Hardened? (missing in PCC2 as well)
+    If HasFunction("Gravitonic") Then
+      t := Format(Translate("%d grav. engine%!1{s%}"), Engine.Count)
+    Else
+      t := Format(Translate("%d engine%!1{s%}"), Engine.Count)
+    EndIf
+  Else
+    t := ''
+  EndIf
+  t := RAdd(t, "\n")
+
+  % Beams
+  If Not IsEmpty(Beam$) Then
+    If Beam$=0 Or Beam.Count=0 Then
+      t := RAdd(t, RStyle("green", Translate("no beam weapons")))
+    Else If Not IsEmpty(Beam.Count) Then
+      % type and count
+      t := RAdd(t, RStyle("green", Format(Translate("%!d%!1{%0$d "+Chr(215)+" %}%1$s"), Beam.Count, Beam)))
+    Else If Not IsEmpty(Beam.Max) Then
+      % just type known
+      t := RAdd(t, Format(Translate("up to %d %s"), Beam.Max, Beam))
+    Else
+      t := RAdd(t, Beam)
+    EndIf
+  Else If Not IsEmpty(Beam.Max) Then
+    If Beam.Max Then
+      t := RAdd(t, Format(Translate("up to %d beam%!1{s%}"), Beam.Max))
+    Else
+      t := RAdd(t, Translate("no beam weapons"))
+    EndIf
+  Else
+    t := RAdd(t, " ")
+  EndIf
+  t := RAdd(t, "\n")
+
+  % Torps/Fighters
+  If Torp.LCount Then
+    % Ship has torpedoes
+    If Not IsEmpty(Torp$) Then
+      If Not IsEmpty(Torp.Count) Then
+        t := RAdd(t, RStyle("green", Format(Translate("%!d%!1{%0$d "+Chr(215)+" %}%1$s, %d torpedo%!1{es%}"), Torp.LCount, Torp, CCVP.NumberToString(Torp.Count))))
+      Else
+        t := RAdd(t, RStyle("green", Format(Translate("%!d%!1{%0$d "+Chr(215)+" %}%1$s"), Torp.LCount, Torp)))
+      EndIf
+    Else
+      If Not IsEmpty(Torp.Count) Then
+        t := RAdd(t, Format(Translate(Translate("%d launcher%!1{s%}, %d torpedo%!1{es%}"), Torp.LCount, CCVP.NumberToString(Torp.Count))))
+      Else
+        t := RAdd(t, Format(Translate(Translate("%d torpedo launcher%!1{s%}"), Torp.LCount)))
+      EndIf
+    EndIf
+  Else If Fighter.Bays Then
+    % Ship has fighters
+    If Not IsEmpty(Fighter.Count) Then
+      t := RAdd(t, RStyle("green", Format(Translate("%d bay%!1{s%}, %d fighter%!1{s%}"), Fighter.Bays, CCVP.NumberToString(Fighter.Count))))
+    Else
+      t := RAdd(t, RStyle("green", Format(Translate("%d fighter bay%!1{s%}"), Fighter.Bays)))
+    EndIf
+  Else If Torp.LCount=0 And Fighter.Bays=0 Then
+    % No torpedo launchers or fighters
+    t := RAdd(t, RStyle("green", Translate("no secondary weapons")))
+  Else If Hull$ Then
+    % Hull is known
+    If Torp.LMax Then
+      t := RAdd(t, Format(Translate("up to %d torpedo launcher%!1{s%}"), Torp.LMax))
+    Else If Global.Hull(Hull$).Fighter.Bays Then
+      t := RAdd(t, Format(Translate("%d fighter bay%!1{s%}"), Global.Hull(Hull$).Fighter.Bays))
+    Else
+      t := RAdd(t, Translate("no secondary weapons"))
+    EndIf
+  Else
+    % Nothing known
+    t := RAdd(t, " ")
+  EndIf
+  t := RAdd(t, "\n")
+
+  % Crew [of Crew]
+  If Not IsEmpty(Crew) Then
+    If Not IsEmpty(Crew.Normal) And Crew<>Crew.Normal Then
+      t := RAdd(t, RStyle("red", Format(Translate("%d crew (of %d)"), CCVP.NumberToString(Crew), CCVP.NumberToString(Crew.Normal))))
+    Else
+      t := RAdd(t, RStyle("green", Format(Translate("%d crew"), CCVP.NumberToString(Crew))))
+    EndIf
+  Else If Not IsEmpty(Crew.Normal) Then
+    t := RAdd(t, Format(Translate("up to %d crew"), CCVP.NumberToString(Crew.Normal)))
+  Else
+    t := RAdd(t, " ")
+  EndIf
+  t := RAdd(t, "\n")
+
+  % Damage
+  If Not IsEmpty(Damage) Then
+    t := RAdd(t, RStyle(If(Damage, "yellow", "green"), Format(Translate("%d%% damage"), Damage)))
+  Else
+    % nix
+  EndIf
+
+  SetContent t
+EndSub
+
+% Narrow ship cargo
+% - called in ship context
+% - call SetContent with 25x4 rich-text string
+Sub Tile.NarrowShipCargo
+  Local t, kt
+  Local Function Column(n, v, u)
+    If IsEmpty(v) Then
+      Return RAdd(RAlign(n, 40), RAlign(" ",                                     50, 2), RAlign(" ", 30))
+    Else
+      Return RAdd(RAlign(n, 40), RAlign(RStyle("green", CCVP.NumberToString(v)), 50, 2), RAlign(RStyle("green", " " + u), 30))
+    EndIf
+  EndFunction
+  Local Function Row(n1, v1, u1, n2, v2, u2)
+    Return RAdd(Column(n1, v1, u1), " ", Column(n2, v2, u2), "\n")
+  EndFunction
+
+  kt := Translate("kt")
+  t :=         Row(Translate("Neu:"), Cargo.N, kt, Translate("Sup:"),  Cargo.Supplies, kt)
+  t := RAdd(t, Row(Translate("Tri:"), Cargo.T, kt, Translate("Col:"),  Cargo.Colonists, Translate("cl.")))
+  t := RAdd(t, Row(Translate("Dur:"), Cargo.D, kt, Translate("Cash:"), Cargo.Money, Translate("mc")))
+  t := RAdd(t, Row(Translate("Mol:"), Cargo.M, kt, "", Z(0), ""))
+
+  SetContent t
+EndSub
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Planet Data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -516,7 +760,6 @@ EndSub
 % @since PCC2 2.40.1
 Sub Tile.PlanetEconomy
   % ex WPlanetEconomyTile::drawPlanetEconomyTile, CPlanetaryEconomyTile
-  Option LocalSubs(1)
   Local Function Row(key, value, unit)
     Return RAdd(RAlign(key, 120), RAlign(RStyle("green", CCVP.NumberToString(value)), 50, 2), RStyle("green", " " & unit), "\n")
   EndFunction
@@ -579,7 +822,6 @@ EndSub
 % @since PCC2 2.40.6
 Sub Tile.NarrowPlanetMinerals
   % ex WNarrowPlanetMineralTile::drawData
-  Option LocalSubs(1)
   Local Function Green(t)
     Return RStyle("green", t)
   EndFunction
@@ -617,7 +859,6 @@ EndSub
 % @since PCC2 2.40.6
 Sub Tile.NarrowPlanetEconomy
   % ex WNarrowPlanetEconomyTile::drawData
-  Option LocalSubs(1)
   Local Function Green(t)
     Return RStyle("green", t)
   EndFunction
@@ -796,6 +1037,11 @@ Sub Tile.BaseTech
   SetContent t
 EndSub
 
+% Narrow base tech tile
+% For now, the same as Tile.BaseTech; it has no buttons and in PCC2 slightly different text
+Sub Tile.NarrowBaseTech
+  Tile.BaseTech
+EndSub
 
 % Base orders
 % - called in starbase context
@@ -803,23 +1049,8 @@ EndSub
 % - call SetButton for these buttons if desired
 Sub Tile.BaseOrder
   % ex WBaseOrderTile::drawData
-  Local c = Z(FindShipCloningAt(Id))
-
   % Ship building
-  If Build.YesNo Then
-    If IsEmpty(c) Then
-      SetLeftText 'b', RStyle("yellow", Format(Translate("Building a %s"), Build))
-    Else
-      SetLeftText 'b', RStyle("red", Format(Translate("Cloning, and building a %s"), Build))
-    EndIf
-  Else
-    If IsEmpty(c) Then
-      SetLeftText 'b', Translate("Build a new ship...")
-    Else
-      SetLeftText 'b', RStyle("yellow", Format(Translate("Cloning %s"), ShipName(c)))
-      
-    EndIf
-  EndIf
+  SetLeftText 'b', Tile$BaseBuildOrder(Translate("Build a new ship..."))
   If Not IsEmpty(Build.QPos)
     SetRightText 'b', RStyle("yellow", Format(" Q:%d", Build.QPos))
   Else
@@ -827,19 +1058,34 @@ Sub Tile.BaseOrder
   EndIf
 
   % Fix/Recycle
-  If Shipyard.Action = 'Fix' Then
-    SetLeftText 'r', RStyle("yellow", Format(Translate("Repairing %s"), ShipName(Shipyard.Id)))
-  Else If Shipyard.Action = 'Recycle' Then
-    SetLeftText 'r', RStyle("yellow", Format(Translate("Recycling %s"), ShipName(Shipyard.Id)))
-  Else
-    SetLeftText 'r', Translate("Repair/recycle a starship...")
-  EndIf
-  
+  SetLeftText 'r', Tile$BaseShipyardOrder(Translate("Repair/recycle a starship..."))
+
   % Mission
   SetLeftText 'm', RAdd(Translate("Mission: "), RStyle("green", Mission))
 
   % Ammo
   SetLeftText 'a', Translate("Build Fighters/Torpedoes...")
+EndSub
+
+% Base orders
+% - called in starbase context
+% - 4 lines of text
+% @since PCC2 2.40.12
+Sub Tile.NarrowBaseOrder
+  % ex WNarrowBaseOrderTile::drawData
+  Local t, _ = Translate
+  Local c = Z(FindShipCloningAt(Id))
+
+  t := RAdd(Tile$BaseBuildOrder(Translate('Not building a ship')), "\n")
+
+  % Shipyard
+  t := RAdd(t, Tile$BaseShipyardOrder(Translate("Not working on a starship")), "\n")
+
+  % Mission/FCode
+  t := RAdd(t, Translate("Mission: "), RStyle("green", Mission), "\n")
+  t := RAdd(t, Translate("Friendly Code: "), RStyle("green", FCode), "\n")
+
+  SetContent t
 EndSub
 
 % Base link
