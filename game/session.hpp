@@ -22,6 +22,7 @@
 #include "game/interpreterinterface.hpp"
 #include "game/reference.hpp"
 #include "game/spec/shiplist.hpp"
+#include "game/turnloader.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/processlist.hpp"
 #include "interpreter/taskeditor.hpp"
@@ -220,9 +221,10 @@ namespace game {
         bool getReferenceName(Reference ref, ObjectName which, String_t& result);
 
         /** Save current status.
+            \param opts Options, see TurnLoader::saveCurrentTurn()
             \param then Closure to execute after saving; will receive success/failure status
             \return Save action; null if no turn loaded */
-        std::auto_ptr<afl::base::Closure<void()> > save(std::auto_ptr<afl::base::Closure<void(bool)> > then);
+        std::auto_ptr<afl::base::Closure<void()> > save(TurnLoader::SaveOptions_t opts, std::auto_ptr<afl::base::Closure<void(bool)> > then);
 
         /** Signal: request ProcessList::run() to be run.
             Code that sets a process to runnable should raise this signal.

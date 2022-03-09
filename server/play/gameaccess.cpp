@@ -52,21 +52,11 @@ server::play::GameAccess::save()
 {
     // Save status tracking
     bool result = false;
-    class SaveStatusReporter : public afl::base::Closure<void(bool)> {
-     public:
-        SaveStatusReporter(bool& result)
-            : m_result(result)
-            { }
-        void call(bool flag)
-            { m_result = flag; }
-     private:
-        bool& m_result;
-    };
 
     // Create action
-    std::auto_ptr<afl::base::Closure<void()> > action = m_session.save(std::auto_ptr<afl::base::Closure<void(bool)> >(new SaveStatusReporter(result)));
+    std::auto_ptr<afl::base::Closure<void()> > action = m_session.save(game::TurnLoader::SaveOptions_t(), game::makeResultTask(result));
 
-    // Invoke action if any (should always exit)
+    // Invoke action if any (should always exist)
     if (action.get() != 0) {
         action->call();
     }

@@ -207,12 +207,11 @@ game::v3::DirectoryLoader::loadCurrentTurn(Turn& turn, Game& game, int player, R
 }
 
 std::auto_ptr<game::Task_t>
-game::v3::DirectoryLoader::saveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then)
+game::v3::DirectoryLoader::saveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t players, SaveOptions_t /*opts*/, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then)
 {
     // ex saveDirectory
-    // @change: saveDirectory took a PlayerSet_t
     try {
-        doSaveCurrentTurn(turn, game, player, root);
+        doSaveCurrentTurn(turn, game, players, root);
         return makeConfirmationTask(true, then);
     }
     catch (std::exception& e) {
@@ -506,94 +505,100 @@ game::v3::DirectoryLoader::doLoadHistoryTurn(Turn& turn, Game& game, int player,
 }
 
 void
-game::v3::DirectoryLoader::doSaveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root)
+game::v3::DirectoryLoader::doSaveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t players, const Root& root)
 {
     Directory& dir = root.gameDirectory();
 
     FizzFile fizz;
-    ControlFile control;
     fizz.load(dir);
-    control.load(dir, player, m_translator, m_log);
     if (!fizz.isValid()) {
         m_log.write(m_log.Warn, LOG_NAME, m_translator.translateString("File \"fizz.bin\" not found. Game data may not be usable with other programs."));
     }
-    m_log.write(m_log.Info, LOG_NAME, Format(m_translator.translateString("Writing %s data...").c_str(), root.playerList().getPlayerName(player, Player::AdjectiveName)));
 
-    // Load GenFile
-    GenFile gen;
-    gen.loadFromFile(*dir.openFile(Format("gen%d.dat", player), FileSystem::OpenRead));
+    for (int player = 1; player <= MAX_PLAYERS; ++player) {
+        if (players.contains(player)) {
+            m_log.write(m_log.Info, LOG_NAME, Format(m_translator.translateString("Writing %s data...").c_str(), root.playerList().getPlayerName(player, Player::AdjectiveName)));
+            ControlFile control;
+            control.load(dir, player, m_translator, m_log);
 
-    const uint32_t sigCheck = computeChecksum(gen.getSignature2());
-    uint32_t shipChecksum = sigCheck, planetChecksum = sigCheck, baseChecksum = sigCheck;
+            // Load GenFile
+            GenFile gen;
+            gen.loadFromFile(*dir.openFile(Format("gen%d.dat", player), FileSystem::OpenRead));
 
-    // Ships
-    {
-        Ref<Stream> s = dir.openFile(Format("ship%d.dat", player), FileSystem::Create);
-        shipChecksum += saveShips(*s, turn.universe(), player, control, !root.hostVersion().isMissionAllowed(1));
-        s->fullWrite(gen.getSignature2());
-    }
+            const uint32_t sigCheck = computeChecksum(gen.getSignature2());
+            uint32_t shipChecksum = sigCheck, planetChecksum = sigCheck, baseChecksum = sigCheck;
 
-    // Planets
-    {
-        Ref<Stream> s = dir.openFile(Format("pdata%d.dat", player), FileSystem::Create);
-        planetChecksum += savePlanets(*s, turn.universe(), player, control);
-        s->fullWrite(gen.getSignature2());
-    }
+            // Ships
+            {
+                Ref<Stream> s = dir.openFile(Format("ship%d.dat", player), FileSystem::Create);
+                shipChecksum += saveShips(*s, turn.universe(), player, control, !root.hostVersion().isMissionAllowed(1));
+                s->fullWrite(gen.getSignature2());
+            }
 
-    // Bases
-    {
-        Ref<Stream> s = dir.openFile(Format("bdata%d.dat", player), FileSystem::Create);
-        baseChecksum += saveBases(*s, turn.universe(), player, control);
-        s->fullWrite(gen.getSignature2());
-    }
+            // Planets
+            {
+                Ref<Stream> s = dir.openFile(Format("pdata%d.dat", player), FileSystem::Create);
+                planetChecksum += savePlanets(*s, turn.universe(), player, control);
+                s->fullWrite(gen.getSignature2());
+            }
 
-    // Messages and commands. We add the commands to the message box, save that, and remove them again.
-    // FIXME: can we do without this modifying operation?
-    game::msg::Outbox& out = const_cast<game::msg::Outbox&>(turn.outbox());
-    size_t marker = out.getNumMessages();
-    try {
-        // Commands
-        if (const CommandContainer* cc = CommandExtra::get(turn, player)) {
-            saveCommands(dir, *cc, out, player, m_translator, turn.getTimestamp());
+            // Bases
+            {
+                Ref<Stream> s = dir.openFile(Format("bdata%d.dat", player), FileSystem::Create);
+                baseChecksum += saveBases(*s, turn.universe(), player, control);
+                s->fullWrite(gen.getSignature2());
+            }
+
+            // Messages and commands. We add the commands to the message box, save that, and remove them again.
+            // FIXME: can we do without this modifying operation?
+            game::msg::Outbox& out = const_cast<game::msg::Outbox&>(turn.outbox());
+            size_t marker = out.getNumMessages();
+            try {
+                // Commands
+                if (const CommandContainer* cc = CommandExtra::get(turn, player)) {
+                    saveCommands(dir, *cc, out, player, m_translator, turn.getTimestamp());
+                }
+
+                // Messages
+                if (!m_playersWithDosOutbox.contains(player)) {
+                    // Windows
+                    Ref<Stream> file = dir.openFile(Format("mess35%d.dat", player), FileSystem::Create);
+                    Writer(*m_charset, m_translator, m_log).saveOutbox35(out, player, *file);
+                } else {
+                    // DOS
+                    Ref<Stream> file = dir.openFile(Format("mess%d.dat", player), FileSystem::Create);
+                    Writer(*m_charset, m_translator, m_log).saveOutbox(out, player, root.playerList(), *file);
+                }
+                out.deleteMessagesAfter(marker);
+            }
+            catch (...) {
+                out.deleteMessagesAfter(marker);
+                throw;
+            }
+
+            // Add DIS checksums
+            shipChecksum   += computeFileChecksum(dir, Format("ship%d.dis",  player));
+            planetChecksum += computeFileChecksum(dir, Format("pdata%d.dis", player));
+            baseChecksum   += computeFileChecksum(dir, Format("bdata%d.dis", player));
+
+            gen.setSectionChecksum(gt::ShipSection,   shipChecksum);
+            gen.setSectionChecksum(gt::PlanetSection, planetChecksum);
+            gen.setSectionChecksum(gt::BaseSection,   baseChecksum);
+            fizz.set(gt::ShipSection,   player, shipChecksum);
+            fizz.set(gt::PlanetSection, player, planetChecksum);
+            fizz.set(gt::BaseSection,   player, baseChecksum);
+
+            // Save GenFile
+            gt::Gen genData;
+            gen.getData(genData);
+            dir.openFile(Format("gen%d.dat", player), FileSystem::Create)
+                ->fullWrite(afl::base::fromObject(genData));
+
+            control.save(dir, m_translator, m_log);
         }
-
-        // Messages
-        if (!m_playersWithDosOutbox.contains(player)) {
-            // Windows
-            Ref<Stream> file = dir.openFile(Format("mess35%d.dat", player), FileSystem::Create);
-            Writer(*m_charset, m_translator, m_log).saveOutbox35(out, player, *file);
-        } else {
-            // DOS
-            Ref<Stream> file = dir.openFile(Format("mess%d.dat", player), FileSystem::Create);
-            Writer(*m_charset, m_translator, m_log).saveOutbox(out, player, root.playerList(), *file);
-        }
-        out.deleteMessagesAfter(marker);
     }
-    catch (...) {
-        out.deleteMessagesAfter(marker);
-        throw;
-    }
-
-    // Add DIS checksums
-    shipChecksum   += computeFileChecksum(dir, Format("ship%d.dis",  player));
-    planetChecksum += computeFileChecksum(dir, Format("pdata%d.dis", player));
-    baseChecksum   += computeFileChecksum(dir, Format("bdata%d.dis", player));
-
-    gen.setSectionChecksum(gt::ShipSection,   shipChecksum);
-    gen.setSectionChecksum(gt::PlanetSection, planetChecksum);
-    gen.setSectionChecksum(gt::BaseSection,   baseChecksum);
-    fizz.set(gt::ShipSection,   player, shipChecksum);
-    fizz.set(gt::PlanetSection, player, planetChecksum);
-    fizz.set(gt::BaseSection,   player, baseChecksum);
-
-    // Save GenFile
-    gt::Gen genData;
-    gen.getData(genData);
-    dir.openFile(Format("gen%d.dat", player), FileSystem::Create)
-        ->fullWrite(afl::base::fromObject(genData));
 
     updateGameRegistry(dir, turn.getTimestamp());
-    control.save(dir, m_translator, m_log);
     fizz.save(dir);
 
     // Recent

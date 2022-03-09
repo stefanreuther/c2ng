@@ -360,7 +360,8 @@ namespace {
 
     void trySaveSession(game::Session& session, ScriptSide& si, RequestLink1 link, OutputState::Target target)
     {
-        std::auto_ptr<Task_t> action(session.save(PostSaveAction::make(session, si, link, target)));
+        // TODO: for now, always saves a final turn. Should make some UI!
+        std::auto_ptr<Task_t> action(session.save(game::TurnLoader::SaveOptions_t(), PostSaveAction::make(session, si, link, target)));
         if (action.get() == 0) {
             action.reset(new NullSaveAction(PostSaveAction::make(session, si, link, target)));
         }

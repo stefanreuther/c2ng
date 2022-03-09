@@ -110,12 +110,11 @@ game::v3::ResultLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game
 }
 
 std::auto_ptr<game::Task_t>
-game::v3::ResultLoader::saveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then)
+game::v3::ResultLoader::saveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t players, SaveOptions_t /*opts*/, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then)
 {
     // ex saveTurns
-    // FIXME: saveTurns took a PlayerSet
     try {
-        doSaveCurrentTurn(turn, game, player, root, session);
+        doSaveCurrentTurn(turn, game, players, root, session);
         return makeConfirmationTask(true, then);
     }
     catch (std::exception& e) {
@@ -313,15 +312,19 @@ game::v3::ResultLoader::doLoadHistoryTurn(Turn& turn, Game& game, int player, in
 }
 
 void
-game::v3::ResultLoader::doSaveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session)
+game::v3::ResultLoader::doSaveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t players, const Root& root, Session& session)
 {
     if (session.getEditableAreas().contains(Session::CommandArea)) {
         game::v3::trn::FileSet turns(root.gameDirectory(), *m_charset);
         m_log.write(m_log.Info, LOG_NAME, m_translator("Generating turn commands..."));
 
-        // Create turn file
-        TurnFile& thisTurn = turns.create(player, turn.getTimestamp(), turn.getTurnNumber());
-        Loader(*m_charset, m_translator, m_log).saveTurnFile(thisTurn, turn, player, root);
+        // Create turn files
+        for (int player = 1; player <= MAX_PLAYERS; ++player) {
+            if (players.contains(player)) {
+                TurnFile& thisTurn = turns.create(player, turn.getTimestamp(), turn.getTurnNumber());
+                Loader(*m_charset, m_translator, m_log).saveTurnFile(thisTurn, turn, player, root);
+            }
+        }
 
         // Generate turn
         turns.updateTrailers();
@@ -329,11 +332,15 @@ game::v3::ResultLoader::doSaveCurrentTurn(const Turn& turn, const Game& game, in
     }
 
     if (session.getEditableAreas().contains(Session::LocalDataArea)) {
-        // chart.cc
-        saveCurrentDatabases(turn, game, player, root, session, *m_charset);
+        for (int player = 1; player <= MAX_PLAYERS; ++player) {
+            if (players.contains(player)) {
+                // chart.cc
+                saveCurrentDatabases(turn, game, player, root, session, *m_charset);
 
-        // Fleets
-        game::db::FleetLoader(*m_charset).save(root.gameDirectory(), turn.universe(), player);
+                // Fleets
+                game::db::FleetLoader(*m_charset).save(root.gameDirectory(), turn.universe(), player);
+            }
+        }
     }
 
     if (m_pProfile != 0) {

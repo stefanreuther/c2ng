@@ -481,7 +481,7 @@ game::Session::getReferenceName(Reference ref, ObjectName which, String_t& resul
 }
 
 std::auto_ptr<afl::base::Closure<void()> >
-game::Session::save(std::auto_ptr<afl::base::Closure<void(bool)> > then)
+game::Session::save(TurnLoader::SaveOptions_t opts, std::auto_ptr<afl::base::Closure<void(bool)> > then)
 {
     std::auto_ptr<afl::base::Closure<void()> > result;
 
@@ -497,7 +497,7 @@ game::Session::save(std::auto_ptr<afl::base::Closure<void(bool)> > then)
         return result;
     }
 
-    return pLoader->saveCurrentTurn(pGame->currentTurn(), *pGame, pGame->getViewpointPlayer(), *pRoot, *this, then);
+    return pLoader->saveCurrentTurn(pGame->currentTurn(), *pGame, PlayerSet_t(pGame->getViewpointPlayer()), opts, *pRoot, *this, then);
 }
 
 afl::data::Value*

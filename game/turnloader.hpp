@@ -80,6 +80,16 @@ namespace game {
             StronglyPositive
         };
 
+
+        /** Options for saveCurrentTurn. */
+        enum SaveOption {
+            /** Mark turn temporary.
+                Default is to save a final turn. */
+            MarkTurnTemporary
+        };
+        typedef afl::bits::SmallSet<SaveOption> SaveOptions_t;
+
+
         /** Property identifier. */
         enum Property {
             LocalFileFormatProperty,           ///< Local file format (System.Local).
@@ -122,13 +132,14 @@ namespace game {
 
             \param turn [in] Turn to save.
             \param game [in] Game object.
-            \param player [in] Player number.
+            \param players [in] Players to save. Can be multiple to save multiple turns in a group.
+            \param opts [in] Options.
             \param root [in] Root.
             \param session [in/out] Session.
             \param then [in] Task to execute after saving; never null.
 
             \return Newly-allocated task to perform the operation; never null. */
-        virtual std::auto_ptr<Task_t> saveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then) = 0;
+        virtual std::auto_ptr<Task_t> saveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t players, SaveOptions_t opts, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then) = 0;
 
         /** Get history status.
             This function determines whether a number of turns have history information.

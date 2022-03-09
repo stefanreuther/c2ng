@@ -261,11 +261,12 @@ game::nu::TurnLoader::loadCurrentTurn(Turn& turn, Game& game, int player, Root& 
 }
 
 std::auto_ptr<game::Task_t>
-game::nu::TurnLoader::saveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then)
+game::nu::TurnLoader::saveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t players, SaveOptions_t opts, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then)
 {
     // FIXME
     (void) turn;
-    (void) player;
+    (void) players;
+    (void) opts;
     (void) root;
     (void) session;
 

@@ -803,20 +803,34 @@ game::interface::IFHistoryLoadTurn(interpreter::Process& proc, game::Session& se
     }
 }
 
-/* @q SaveGame (Global Command)
+/* @q SaveGame [flags:Str] (Global Command)
    Save current game.
    Depending on the game type, this will create and/or upload the turn file.
+
+   Valid flags:
+   - "f": make a final turn file. Default is to mark the turn file temporary if possible.
+
+   The flags parameter is supported since PCC2 2.40.12.
 
    @since PCC 1.0.17, PCC2 1.99.12, PCC2 2.40.5 */
 void
 game::interface::IFSaveGame(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args)
 {
     // ex int/if/globalif.cc:IFSaveGame, globint.pas:Global_SaveGame
-    args.checkArgumentCount(0);
+    args.checkArgumentCount(0, 1);
+
+    int32_t flags = 0;
+    interpreter::checkFlagArg(flags, 0, args.getNext(), "F");
+
+    // Build flags parameter
+    TurnLoader::SaveOptions_t opts;
+    if ((flags & 1) == 0) {
+        opts += TurnLoader::MarkTurnTemporary;
+    }
 
     // Create deferred save action
     std::auto_ptr<afl::base::Closure<void()> > action =
-        session.save(std::auto_ptr<afl::base::Closure<void(bool)> >(new PostSaveAction(proc, session)));
+        session.save(opts, std::auto_ptr<afl::base::Closure<void(bool)> >(new PostSaveAction(proc, session)));
 
     if (action.get() == 0) {
         throw interpreter::Error("No game loaded");

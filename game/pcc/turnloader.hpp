@@ -51,7 +51,7 @@ namespace game { namespace pcc {
         // TurnLoader:
         virtual PlayerStatusSet_t getPlayerStatus(int player, String_t& extra, afl::string::Translator& tx) const;
         virtual std::auto_ptr<Task_t> loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
-        virtual std::auto_ptr<Task_t> saveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
+        virtual std::auto_ptr<Task_t> saveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t player, SaveOptions_t opts, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
         virtual void getHistoryStatus(int player, int turn, afl::base::Memory<HistoryStatus> status, const Root& root);
         virtual std::auto_ptr<Task_t> loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, std::auto_ptr<StatusTask_t> then);
         virtual String_t getProperty(Property p);
@@ -69,7 +69,7 @@ namespace game { namespace pcc {
         PlayerSet_t m_availablePlayers;
 
         void doLoadCurrentTurn(Turn& turn, Game& game, int player, game::Root& root, Session& session);
-        void doSaveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session);
+        void doSaveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t players, SaveOptions_t opts, const Root& root, Session& session);
     };
 
 } }
