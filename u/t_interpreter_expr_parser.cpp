@@ -122,6 +122,10 @@ TestInterpreterExprParser::testOr()
     TS_ASSERT_EQUALS(h.get(0), 4);
     TS_ASSERT_EQUALS(h.get(1), 4);
 
+    h.verifyInteger("(a:=5; 0) or (b:=5; 0); a:=6", 6);
+    TS_ASSERT_EQUALS(h.get(0), 6);
+    TS_ASSERT_EQUALS(h.get(1), 5);
+
     // Test 'if'
     h.verifyInteger("if((a:=5; 0) or (b:=5; 0),    333, 444)", 444);
     TS_ASSERT_EQUALS(h.get(0), 5);
@@ -197,6 +201,10 @@ TestInterpreterExprParser::testAnd()
     h.verifyNull("(a:=5; z(0)) and (b:=5; 77)");
     TS_ASSERT_EQUALS(h.get(0), 5);
     TS_ASSERT_EQUALS(h.get(1), 5);
+
+    h.verifyInteger("(a:=6) and (b:=6; 0); a:=7", 7);
+    TS_ASSERT_EQUALS(h.get(0), 7);
+    TS_ASSERT_EQUALS(h.get(1), 6);
 
     // Test 'if'
     h.clear();
@@ -345,6 +353,7 @@ TestInterpreterExprParser::testComparison()
 {
     // ex IntParseExprTestSuite::testComparison
     ExpressionVerifier h("testComparison");
+
     // "="
     h.verifyBoolean("1=1", true);
     h.verifyBoolean("1=2", false);
@@ -376,6 +385,9 @@ TestInterpreterExprParser::testComparison()
     h.verifyNull("StrCase(z(0)=z(0))");
     h.verifyExecutionError("StrCase(1='a')");
     h.verifyExecutionError("StrCase('a'=1)");
+
+    h.verifyInteger("strcase('a'='A');3", 3);
+    h.verifyInteger("'a'='A';3", 3);
     
     // "<>"
     h.verifyBoolean("1<>1", false);
@@ -557,6 +569,12 @@ TestInterpreterExprParser::testAdd()
     // Errors
     h.verifyExecutionError("'a' + 1");
     h.verifyExecutionError("1 + 'a'");
+
+    // In 'ignore' position
+    h.verifyInteger("1 + 2; 9", 9);
+
+    // In 'condition' position
+    h.verifyInteger("If(1+2, 7, 8)", 7);
 }
 
 /** Test subtraction operator: "-".
@@ -753,6 +771,14 @@ TestInterpreterExprParser::testNegation()
     h.verifyNull("++z(0)");
     h.verifyNull("+-z(0)");
     h.verifyNull("--z(0)");
+
+    // In 'ignore' position
+    h.verifyInteger("+1; 9", 9);
+    h.verifyExecutionError("+'a'; 9");
+
+    // In 'condition' position
+    h.verifyInteger("If(+2, 7, 8)", 7);
+    h.verifyExecutionError("If(+'a', 7, 8)");
 }
 
 /** Test exponentiation operator "^".
@@ -848,6 +874,8 @@ TestInterpreterExprParser::testErrors()
     h.verifyNull("z(0)->foo");
     h.verifyParseError("z(0).'x'");
     h.verifyParseError("z(0)->3");
+    h.verifyInteger("z(0).foo; 3", 3);
+    h.verifyInteger("if(z(0).foo, 7, 8)", 8);
 
     // Bad syntax
     h.verifyParseError(",");

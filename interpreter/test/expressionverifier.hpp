@@ -5,7 +5,11 @@
 #ifndef C2NG_INTERPRETER_TEST_EXPRESSIONVERIFIER_HPP
 #define C2NG_INTERPRETER_TEST_EXPRESSIONVERIFIER_HPP
 
+#include <memory>
 #include "afl/test/assert.hpp"
+#include "interpreter/context.hpp"
+#include "interpreter/process.hpp"
+#include "util/keymap.hpp"
 
 namespace interpreter { namespace test {
 
@@ -23,6 +27,16 @@ namespace interpreter { namespace test {
         /** Constructor.
             \param a Location information */
         ExpressionVerifier(afl::test::Assert a);
+
+        /** Set extra context.
+            (A clone of) this context will be active for every evaluation.
+            \param ctx Context, will become owned by ExpressionVerifier; null to remove */
+        void setNewExtraContext(Context* ctx);
+
+        /** Set extra keymap.
+            (A clon of) this keymap will be active for every evaluation.
+            \param km Keymap, will become owned by ExpressionVerifier; null to remove */
+        void setNewExtraKeymap(util::Keymap* km);
 
         /** Get variable value.
             \param index Index [0,2]
@@ -97,8 +111,11 @@ namespace interpreter { namespace test {
 
         afl::test::Assert m_assert;
         int32_t m_values[NUM_VALUES];
+        std::auto_ptr<Context> m_extraContext;
+        std::auto_ptr<util::Keymap> m_extraKeymap;
 
         void verifyScalar(const char* expr, int result, bool isBool);
+        void setupContexts(Process& exec);
     };
 
 } }

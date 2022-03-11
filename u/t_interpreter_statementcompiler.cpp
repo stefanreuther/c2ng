@@ -1238,6 +1238,30 @@ TestInterpreterStatementCompiler::testSub()
         TS_ASSERT_EQUALS(h.process().getState(), Process::Failed);
     }
 
+    // Runtime error: failed disambiguation - should have created warning ahead
+    {
+        TestHarness h;
+        CountingLogListener ll;
+        h.log().addListener(ll);
+        h.checkCompile("sub tt(x)\n"
+                       "  a:=3*x\n"
+                       "endsub\n"
+                       "call tt +6\n");
+        TS_ASSERT_EQUALS(ll.get(), 1);
+    }
+
+    // Same thing, for "#" operator
+    {
+        TestHarness h;
+        CountingLogListener ll;
+        h.log().addListener(ll);
+        h.checkCompile("sub tt(x)\n"
+                       "  a:=3*x\n"
+                       "endsub\n"
+                       "call tt #6\n");
+        TS_ASSERT_EQUALS(ll.get(), 1);
+    }
+
     // Optional args (missing)
     {
         TestHarness h;

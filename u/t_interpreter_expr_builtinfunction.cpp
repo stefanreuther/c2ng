@@ -12,6 +12,9 @@
 
 #include "t_interpreter_expr.hpp"
 #include "interpreter/test/expressionverifier.hpp"
+#include "interpreter/singlecontext.hpp"
+#include "interpreter/values.hpp"
+#include "interpreter/indexablevalue.hpp"
 
 using interpreter::test::ExpressionVerifier;
 
@@ -271,6 +274,10 @@ TestInterpreterExprBuiltinFunction::testMinMax()
     h.verifyNull("max(1.0,z(0))");
     h.verifyNull("max(z(0),1.0)");
     h.verifyNull("max(z(0))");
+    h.verifyInteger("max(false,9)", 9);
+    h.verifyInteger("max(9,false)", 9);
+    h.verifyBoolean("min(true,9)", true);
+    h.verifyBoolean("min(9,true)", true);
     h.verifyInteger("if(min(-1,0),99,22)", 99);
     h.verifyInteger("if(min(-1,0);0,99,22)", 22);
     h.verifyCompileError("min(1,2):=3");
@@ -300,6 +307,9 @@ TestInterpreterExprBuiltinFunction::testMinMax()
     h.verifyInteger("if(strcase(max(-1,0));1,99,22)", 99);
     h.verifyCompileError("strcase(max(1,2)):=3");
 
+    h.verifyInteger("max(1,2);9", 9);
+    h.verifyInteger("strcase(max(1,2));3", 3);
+
     // Strings
     h.verifyString("min('h','a','l','l','o')", "a");
     h.verifyString("max('h','a','l','l','o')", "o");
@@ -318,6 +328,16 @@ TestInterpreterExprBuiltinFunction::testMinMax()
     h.verifyInteger("strcase(if(min(-1,0),99,22))", 99);
     h.verifyInteger("if(strcase(min(-1,0));0,99,22)", 22);
     h.verifyCompileError("strcase(min(1,2):=3)");
+
+    // Mixed types
+    h.verifyExecutionError("min('H', 3)");
+    h.verifyExecutionError("max('H', 3)");
+    h.verifyExecutionError("min('H', 3.5)");
+    h.verifyExecutionError("max('H', 3.5)");
+    h.verifyExecutionError("min(3, 'H')");
+    h.verifyExecutionError("max(3, 'H')");
+    h.verifyExecutionError("min(3.5, 'H')");
+    h.verifyExecutionError("max(3.5, 'H')");
 }
 
 /** Test Chr/Chr$ function (two names for the same function).
@@ -1122,4 +1142,196 @@ TestInterpreterExprBuiltinFunction::testMisc()
     h.verifyCompileError("ByName('a'):=2");
     h.verifyCompileError("If(ByName('a'),1,2)");
     h.verifyCompileError("If(ByName('a');1,1,2)");
+
+    // Special error handling branch
+    h.verifyParseError("a:=1;");
 }
+
+/** Test iteration functions (find/count). */
+void
+TestInterpreterExprBuiltinFunction::testIteration()
+{
+    /* Mock for an array element: returns a sequence VAL=1..10, with ID=10..100 */
+    class ElementMock : public interpreter::Context, private interpreter::Context::ReadOnlyAccessor {
+     public:
+        ElementMock()
+            : m_value(1)
+            { }
+        virtual interpreter::Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
+            {
+                if (name.match("VAL")) {
+                    result = 1;
+                    return this;
+                } else if (name.match("ID")) {
+                    result = 2;
+                    return this;
+                } else {
+                    return 0;
+                }
+            }
+
+        virtual bool next()
+            {
+                if (m_value < 10) {
+                    ++m_value;
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+        virtual Context* clone() const
+            { return new ElementMock(*this); }
+        virtual game::map::Object* getObject()
+            { return 0; }
+        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/)
+            { }
+        virtual afl::data::Value* get(PropertyIndex_t index)
+            { return interpreter::makeIntegerValue(index == 1 ? m_value : m_value*10); }
+        virtual String_t toString(bool /*readable*/) const
+            { return "#<ElementMock>"; }
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+            { }
+     private:
+        int m_value;
+    };
+
+    /* Mock for an array */
+    class ArrayMock : public interpreter::IndexableValue {
+     public:
+        virtual afl::data::Value* get(interpreter::Arguments& /*args*/)
+            { throw interpreter::Error("not invokable"); }
+        virtual void set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
+            { throw interpreter::Error("not assignable"); }
+        virtual int32_t getDimension(int32_t /*which*/) const
+            { return 0; }
+        virtual interpreter::Context* makeFirstContext()
+            { return new ElementMock(); }
+        virtual ArrayMock* clone() const
+            { return new ArrayMock(); }
+        virtual String_t toString(bool /*readable*/) const
+            { return "#<ArrayMock>"; }
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+            { }
+
+    };
+
+    /* Provide a ArrayMock as CONT. */
+    class ContainerMock : public interpreter::SingleContext, private interpreter::Context::ReadOnlyAccessor {
+     public:
+        ContainerMock()
+            { }
+        virtual interpreter::Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
+            {
+                if (name.match("CONT")) {
+                    result = 1;
+                    return this;
+                } else {
+                    return 0;
+                }
+            }
+        virtual Context* clone() const
+            { return new ContainerMock(); }
+        virtual game::map::Object* getObject()
+            { return 0; }
+        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/)
+            { }
+        virtual afl::data::Value* get(PropertyIndex_t /*index*/)
+            { return new ArrayMock(); }
+        virtual String_t toString(bool /*readable*/) const
+            { return "#<ContainerMock>"; }
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+            { }
+    };
+
+    ExpressionVerifier h("testIteration");
+    h.setNewExtraContext(new ContainerMock());
+
+    // Count
+    // - 1 argument: count everything
+    h.verifyInteger("Count(Cont)", 10);
+
+    // - 2 arguments: match condition
+    h.verifyInteger("Count(Cont, Val>3)", 7);
+    h.verifyInteger("Count(Cont, Val<=3)", 3);
+    h.verifyInteger("Count(Cont, Val>30)", 0);
+
+    // - errors
+    h.verifyExecutionError("Count(1)");
+    h.verifyParseError("Count()");
+    h.verifyParseError("Count(Cont, 1, 2)");
+
+    // - varying compilation context
+    h.verifyCompileError("Count(Cont, Val>3) := 2");
+    h.verifyInteger("Count(Cont, Val>3); 9", 9);
+    h.verifyInteger("If(Count(Cont, Val>3), 33, 44)", 33);
+
+    // Find
+    // - requires 3 arguments
+    h.verifyInteger("Find(Cont, Val=4, Id)", 40);
+    h.verifyInteger("Find(Cont, True, Id)", 10);
+    h.verifyNull("Find(Cont, Val=99, Id)");
+    h.verifyNull("Find(Cont, False, Id)");
+
+    // - Errors
+    h.verifyParseError("Find(Cont, Val=4)");  // might someday become legal?
+    h.verifyParseError("Find(Cont, Val=4, X, Y)");
+    h.verifyParseError("Find()");
+
+    // - Invalid name in the 'return' position is not fatal if we don't find anything
+    h.verifyNull("Find(Cont, False, Whatever)");
+    h.verifyExecutionError("Find(Cont, True, Whatever)");
+
+    // - varying compilation context
+    h.verifyCompileError("Find(Cont, Val=4, Id) := 2");
+    h.verifyInteger("Find(Cont, Val=4, Id); 77", 77);
+    h.verifyInteger("Find(Cont, Val=99, Id); 77", 77);
+    h.verifyInteger("If(Find(Cont, Val=4, Id), 55, 66)", 55);
+    h.verifyInteger("If(Find(Cont, Val=99, Id), 55, 66)", 66);
+    h.verifyInteger("If(Find(Cont, Val=4, 7), 55, 66)", 55);       // constant in 'return' position is handled specially
+    h.verifyInteger("If(Find(Cont, Val=99, 7), 55, 66)", 66);
+}
+
+/** Test Key() function. */
+void
+TestInterpreterExprBuiltinFunction::testKey()
+{
+    // Prepare a keymap
+    ExpressionVerifier h("testKey");
+    std::auto_ptr<util::Keymap> kk(new util::Keymap("KK"));
+    kk->addKey('x', 44, 55);
+    h.setNewExtraKeymap(kk.release());
+
+    // Success cases
+    // - bound
+    h.verifyInteger("Key(KK, 'x')", 44);
+    h.verifyInteger("Key(ByName(String(2, 'k')), 'x')", 44);
+
+    // - not bound
+    h.verifyNull("Key(KK, 'y')");
+    h.verifyNull("Key(ByName(String(2, 'k')), 'y')");
+
+    // - null keymap
+    h.verifyNull("Key(ByName(Z(0)), 'x')");
+
+    // - null key
+    h.verifyNull("Key(KK, Z(0))");
+
+    // - codegen variations
+    h.verifyInteger("If(Key(KK, 'x'), 111, 222)", 111);
+    h.verifyInteger("If(Key(KK, 'y'), 111, 222)", 222);
+    h.verifyInteger("Key(KK, 'x'); 111", 111);
+
+    // Errors
+    // - wrong keymap
+    h.verifyCompileError("Key(Z(0), 'x')");
+    h.verifyCompileError("Key(9, 'x')");
+
+    // - wrong arity
+    h.verifyParseError("Key(KK)");
+    h.verifyParseError("Key(KK, 'x', 'y')");
+
+    // - invalid key
+    h.verifyExecutionError("Key(KK, 'whatwhatwhat')");
+}
+

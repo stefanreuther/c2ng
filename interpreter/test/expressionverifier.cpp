@@ -86,10 +86,24 @@ class interpreter::test::ExpressionVerifier::TestContext : public SingleContext,
 
 
 interpreter::test::ExpressionVerifier::ExpressionVerifier(afl::test::Assert a)
-    : m_assert(a)
+    : m_assert(a),
+      m_extraContext(),
+      m_extraKeymap()
 {
     // ex ExpressionTestHelper::ExpressionTestHelper
     clear();
+}
+
+void
+interpreter::test::ExpressionVerifier::setNewExtraContext(Context* ctx)
+{
+    m_extraContext.reset(ctx);
+}
+
+void
+interpreter::test::ExpressionVerifier::setNewExtraKeymap(util::Keymap* km)
+{
+    m_extraKeymap.reset(km);
 }
 
 int32_t
@@ -147,7 +161,7 @@ interpreter::test::ExpressionVerifier::verifyFile(const char* expr, int result)
         node->compileValue(*bco, CompilationContext(world));
 
         Process exec(world, "verifyFile", 9);
-        exec.pushNewContext(new TestContext(*this));
+        setupContexts(exec);
         exec.pushFrame(bco, false);
         bool ok = exec.runTemporary();
         me.check("run succeeds", ok);
@@ -161,6 +175,9 @@ interpreter::test::ExpressionVerifier::verifyFile(const char* expr, int result)
     }
     catch (AssertionFailedException&) {
         throw;
+    }
+    catch (std::exception& e) {
+        me.fail(std::string("exception: ") + e.what());
     }
     catch (...) {
         me.fail("exception");
@@ -186,7 +203,7 @@ interpreter::test::ExpressionVerifier::verifyNull(const char* expr)
         node->compileValue(*bco, CompilationContext(world));
 
         Process exec(world, "verifyNull", 9);
-        exec.pushNewContext(new TestContext(*this));
+        setupContexts(exec);
         exec.pushFrame(bco, false);
         bool ok = exec.runTemporary();
         me.check("run succeeds", ok);
@@ -194,6 +211,9 @@ interpreter::test::ExpressionVerifier::verifyNull(const char* expr)
     }
     catch (AssertionFailedException&) {
         throw;
+    }
+    catch (std::exception& e) {
+        me.fail(std::string("exception: ") + e.what());
     }
     catch (...) {
         me.fail("exception");
@@ -219,7 +239,7 @@ interpreter::test::ExpressionVerifier::verifyString(const char* expr, const char
         node->compileValue(*bco, CompilationContext(world));
 
         Process exec(world, "verifyString", 9);
-        exec.pushNewContext(new TestContext(*this));
+        setupContexts(exec);
         exec.pushFrame(bco, false);
         bool ok = exec.runTemporary();
         me.check("run succeeds", ok);
@@ -233,6 +253,9 @@ interpreter::test::ExpressionVerifier::verifyString(const char* expr, const char
     }
     catch (AssertionFailedException&) {
         throw;
+    }
+    catch (std::exception& e) {
+        me.fail(std::string("exception: ") + e.what());
     }
     catch (...) {
         me.fail("exception");
@@ -260,7 +283,7 @@ interpreter::test::ExpressionVerifier::verifyFloat(const char* expr, double resu
         node->compileValue(*bco, CompilationContext(world));
 
         Process exec(world, "verifyFloat", 9);
-        exec.pushNewContext(new TestContext(*this));
+        setupContexts(exec);
         exec.pushFrame(bco, false);
         bool ok = exec.runTemporary();
         me.check("run succeeds", ok);
@@ -275,6 +298,9 @@ interpreter::test::ExpressionVerifier::verifyFloat(const char* expr, double resu
     }
     catch (AssertionFailedException&) {
         throw;
+    }
+    catch (std::exception& e) {
+        me.fail(std::string("exception: ") + e.what());
     }
     catch (...) {
         me.fail("exception");
@@ -302,7 +328,7 @@ interpreter::test::ExpressionVerifier::verifyExecutionError(const char* expr)
         compiled = true;
 
         Process exec(world, "verifyExecutionError", 9);
-        exec.pushNewContext(new TestContext(*this));
+        setupContexts(exec);
         exec.pushFrame(bco, false);
         bool ok = exec.runTemporary();
         me.check("run fails", !ok);
@@ -387,7 +413,7 @@ interpreter::test::ExpressionVerifier::verifyStatement(const char* stmt)
 
         // Build compilation environment
         Process exec(world, "checkStatement", 9);
-        exec.pushNewContext(new TestContext(*this));
+        setupContexts(exec);
 
         DefaultStatementCompilationContext scc(world);
         scc.withContextProvider(&exec);
@@ -405,6 +431,9 @@ interpreter::test::ExpressionVerifier::verifyStatement(const char* stmt)
     }
     catch (AssertionFailedException&) {
         throw;
+    }
+    catch (std::exception& e) {
+        me.fail(std::string("exception: ") + e.what());
     }
     catch (...) {
         me.fail("exception");
@@ -430,7 +459,7 @@ interpreter::test::ExpressionVerifier::verifyScalar(const char* expr, int result
         node->compileValue(*bco, CompilationContext(world));
 
         Process exec(world, "verifyScalar", 9);
-        exec.pushNewContext(new TestContext(*this));
+        setupContexts(exec);
         exec.pushFrame(bco, false);
         bool ok = exec.runTemporary();
         me.check("run ok", ok);
@@ -450,7 +479,33 @@ interpreter::test::ExpressionVerifier::verifyScalar(const char* expr, int result
     catch (AssertionFailedException&) {
         throw;
     }
+    catch (std::exception& e) {
+        me.fail(std::string("exception: ") + e.what());
+    }
     catch (...) {
         me.fail("exception");
+    }
+}
+
+void
+interpreter::test::ExpressionVerifier::setupContexts(Process& exec)
+{
+    exec.pushNewContext(new TestContext(*this));
+    if (m_extraContext.get() != 0) {
+        exec.pushNewContext(m_extraContext->clone());
+    }
+    if (m_extraKeymap.get() != 0) {
+        // Manually copy the keymap: an actual keymap is not copyable.
+        // - create target (owned by process' world)
+        util::KeymapRef_t km = exec.world().keymaps().createKeymap(m_extraKeymap->getName());
+
+        // - get set of keys
+        util::KeySet_t set;
+        m_extraKeymap->enumKeys(set);
+
+        // - copy keys
+        for (util::KeySet_t::const_iterator it = set.begin(); it != set.end(); ++it) {
+            km->addKey(*it, m_extraKeymap->lookupCommand(*it), m_extraKeymap->lookupCondition(*it));
+        }
     }
 }
