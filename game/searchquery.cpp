@@ -153,7 +153,8 @@ namespace {
 
         // Parse expression
         interpreter::Tokenizer tok(expr);
-        std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(tok).parse());
+        afl::base::Deleter del;
+        const interpreter::expr::Node& node(interpreter::expr::Parser(tok, del).parse());
         if (tok.getCurrentToken() != interpreter::Tokenizer::tEnd) {
             throw interpreter::Error::garbageAtEnd(true);
         }
@@ -162,7 +163,7 @@ namespace {
         BytecodeObject::Label_t catchLabel = startTry(bco);
         bco.addInstruction(Opcode::maPush, Opcode::sLocal, OBJARG_ADDR);
         bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialWith, 0);
-        node->compileValue(bco, interpreter::CompilationContext(world));
+        node.compileValue(bco, interpreter::CompilationContext(world));
 
         // Negate if necessary
         if (negate) {

@@ -1789,15 +1789,16 @@ interpreter::Process::handleEvalExpression()
     }
 
     // Compile
+    afl::base::Deleter del;
     Tokenizer tok(toString(m_valueStack.top(), false));
-    std::auto_ptr<interpreter::expr::Node> expr(interpreter::expr::Parser(tok).parse());
+    const interpreter::expr::Node& expr(interpreter::expr::Parser(tok, del).parse());
     if (tok.getCurrentToken() != tok.tEnd) {
         throw Error::garbageAtEnd(true);
     }
     m_valueStack.popBack();
 
     BCORef_t bco = BytecodeObject::create(false);
-    expr->compileValue(*bco, CompilationContext(m_world));
+    expr.compileValue(*bco, CompilationContext(m_world));
     bco->addInstruction(Opcode::maSpecial, Opcode::miSpecialReturn, 1);
     optimize(m_world, *bco, 1);
     bco->relocate();

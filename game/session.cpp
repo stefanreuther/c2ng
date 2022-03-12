@@ -77,18 +77,19 @@ namespace {
         // ex int/simple.h:compileExpression
         // FIXME: can we find a better home for this function?
         try {
+            afl::base::Deleter del;
             interpreter::Tokenizer tok(expr);
             if (tok.getCurrentToken() == tok.tEnd) {
                 return 0; /* empty expression */
             }
 
-            std::auto_ptr<interpreter::expr::Node> expr(interpreter::expr::Parser(tok).parse());
+            const interpreter::expr::Node& expr(interpreter::expr::Parser(tok, del).parse());
             if (tok.getCurrentToken() != tok.tEnd) {
                 return 0; /* expression incorrectly terminated */
             }
 
             interpreter::BCORef_t bco = interpreter::BytecodeObject::create(false);
-            expr->compileValue(*bco, cc);
+            expr.compileValue(*bco, cc);
             bco->relocate();
             return bco.asPtr();
         }

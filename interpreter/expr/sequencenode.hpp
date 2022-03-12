@@ -1,19 +1,26 @@
 /**
   *  \file interpreter/expr/sequencenode.hpp
+  *  \brief Class interpreter::expr::SequenceNode
   */
 #ifndef C2NG_INTERPRETER_EXPR_SEQUENCENODE_HPP
 #define C2NG_INTERPRETER_EXPR_SEQUENCENODE_HPP
 
-#include "interpreter/expr/simplervaluenode.hpp"
+#include "interpreter/expr/rvaluenode.hpp"
 
 namespace interpreter { namespace expr {
 
     /** Sequence node. Evaluates a, then b. */
-    class SequenceNode : public SimpleRValueNode {
+    class SequenceNode : public RValueNode {
      public:
-        void compileValue(BytecodeObject& bco, const CompilationContext& cc);
-        void compileEffect(BytecodeObject& bco, const interpreter::CompilationContext& cc);
-        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff);
+        SequenceNode(const Node& a, const Node& b)
+            : m_a(a), m_b(b)
+            { }
+        void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
+        void compileEffect(BytecodeObject& bco, const interpreter::CompilationContext& cc) const;
+        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const;
+     private:
+        const Node& m_a;
+        const Node& m_b;
     };
 
 } }

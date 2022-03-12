@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/expr/indirectcallnode.hpp
+  *  \brief Class interpreter::expr::IndirectCallNode
   */
 #ifndef C2NG_INTERPRETER_EXPR_INDIRECTCALLNODE_HPP
 #define C2NG_INTERPRETER_EXPR_INDIRECTCALLNODE_HPP
@@ -12,19 +13,21 @@ namespace interpreter { namespace expr {
         Implements general "someexpr(args)". */
     class IndirectCallNode : public FunctionCallNode {
      public:
-        IndirectCallNode();
-        ~IndirectCallNode();
-        void setNewFunction(Node* func);
+        /** Constructor.
+            @param func Function to call */
+        IndirectCallNode(const Node& func);
 
-        // FIXME: can we implement all these members or do we have some already up-tree?
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc);
-        void compileValue(BytecodeObject& bco, const CompilationContext& cc);
-        void compileStore(BytecodeObject& bco, const CompilationContext& cc, Node& rhs);
-        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff);
-        void compileRead(BytecodeObject& bco, const CompilationContext& cc);
-        void compileWrite(BytecodeObject& bco, const CompilationContext& cc);
+        // Node:
+        // FIXME: this overrides functions already implemented uptree in RValueNode (compileStore, compileRead, compileWrite)
+        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const;
+        void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
+        void compileStore(BytecodeObject& bco, const CompilationContext& cc, const Node& rhs) const;
+        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const;
+        void compileRead(BytecodeObject& bco, const CompilationContext& cc) const;
+        void compileWrite(BytecodeObject& bco, const CompilationContext& cc) const;
+
      private:
-        Node* func;
+        const Node& m_function;
     };
 
 } }

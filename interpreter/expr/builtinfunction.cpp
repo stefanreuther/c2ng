@@ -33,10 +33,10 @@ namespace {
         evaluate all its arguments. */
     class IntIfFunctionCallNode : public FunctionCallNode {
      public:
-        void compileValue(BytecodeObject& bco, const CompilationContext& cc);
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc)
+        void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
+        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
             { defaultCompileEffect(bco, cc); }
-        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff)
+        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
             { defaultCompileCondition(bco, cc, ift, iff); }
     };
 
@@ -53,10 +53,10 @@ namespace {
         IntFoldFunctionCallNode(uint8_t minor)
             : minor(minor)
             { }
-        void compileValue(BytecodeObject& bco, const CompilationContext& cc);
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc)
+        void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
+        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
             { defaultCompileEffect(bco, cc); }
-        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff)
+        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
             { defaultCompileCondition(bco, cc, ift, iff); }
     };
 
@@ -68,10 +68,10 @@ namespace {
         IntBuiltinFunctionNode(uint8_t minor)
             : minor(minor)
             { }
-        void compileValue(BytecodeObject& bco, const CompilationContext& cc);
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc)
+        void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
+        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
             { defaultCompileEffect(bco, cc); }
-        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff)
+        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
             { defaultCompileCondition(bco, cc, ift, iff); }
     };
 
@@ -83,10 +83,10 @@ namespace {
         IntCaseFunctionNode(uint8_t minor)
             : minor(minor)
             { }
-        void compileValue(BytecodeObject& bco, const CompilationContext& cc);
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc)
+        void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
+        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
             { defaultCompileEffect(bco, cc); }
-        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff)
+        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
             { defaultCompileCondition(bco, cc, ift, iff); }
     };
 
@@ -99,10 +99,10 @@ namespace {
         IntFindFunctionCallNode(uint8_t which)
             : which(which)
             { }
-        void compileValue(BytecodeObject& bco, const CompilationContext& cc);
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc)
+        void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
+        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
             { defaultCompileEffect(bco, cc); }
-        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff)
+        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
             { defaultCompileCondition(bco, cc, ift, iff); }
     };
 
@@ -115,10 +115,10 @@ namespace {
         IntCountFunctionCallNode(uint8_t which)
             : which(which)
             { }
-        void compileValue(BytecodeObject& bco, const CompilationContext& cc);
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc)
+        void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
+        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
             { defaultCompileEffect(bco, cc); }
-        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff)
+        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
             { defaultCompileCondition(bco, cc, ift, iff); }
     };
 
@@ -130,10 +130,10 @@ namespace {
         IntOneTwoFunctionCallNode(uint8_t minor)
             : minor(minor)
             { }
-        void compileValue(BytecodeObject& bco, const CompilationContext& cc);
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc)
+        void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
+        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
             { defaultCompileEffect(bco, cc); }
-        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff)
+        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
             { defaultCompileCondition(bco, cc, ift, iff); }
     };
 
@@ -141,10 +141,10 @@ namespace {
         is implemented as one or two binary operations. */
     class IntMidFunctionCallNode : public FunctionCallNode {
      public:
-        void compileValue(BytecodeObject& bco, const CompilationContext& cc);
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc)
+        void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
+        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
             { defaultCompileEffect(bco, cc); }
-        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff)
+        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
             { defaultCompileCondition(bco, cc, ift, iff); }
     };
 
@@ -152,10 +152,10 @@ namespace {
         environment for its argument. */
     class IntStrCaseFunctionCallNode : public FunctionCallNode {
      public:
-        void compileValue(BytecodeObject& bco, const CompilationContext& cc);
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc)
+        void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
+        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
             { defaultCompileEffect(bco, cc); }
-        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff)
+        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
             { defaultCompileCondition(bco, cc, ift, iff); }
     };
 
@@ -163,10 +163,10 @@ namespace {
         keymap, not an expression. */
     class IntKeyFunctionCallNode : public FunctionCallNode {
      public:
-        void compileValue(BytecodeObject& bco, const CompilationContext& cc);
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc)
+        void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
+        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
             { defaultCompileEffect(bco, cc); }
-        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff)
+        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
             { defaultCompileCondition(bco, cc, ift, iff); }
     };
 
@@ -174,13 +174,13 @@ namespace {
         keymap, not an expression. */
     class IntByNameFunctionCallNode : public FunctionCallNode {
      public:
-        void compileValue(BytecodeObject& /*bco*/, const CompilationContext& /*cc*/)
+        void compileValue(BytecodeObject& /*bco*/, const CompilationContext& /*cc*/) const
             { throw interpreter::Error("\"ByName\" not allowed here"); }
-        void compileEffect(BytecodeObject& /*bco*/, const CompilationContext& /*cc*/)
+        void compileEffect(BytecodeObject& /*bco*/, const CompilationContext& /*cc*/) const
             { throw interpreter::Error("\"ByName\" not allowed here"); }
-        void compileCondition(BytecodeObject& /*bco*/, const CompilationContext& /*cc*/, BytecodeObject::Label_t /*ift*/, BytecodeObject::Label_t /*iff*/)
+        void compileCondition(BytecodeObject& /*bco*/, const CompilationContext& /*cc*/, BytecodeObject::Label_t /*ift*/, BytecodeObject::Label_t /*iff*/) const
             { throw interpreter::Error("\"ByName\" not allowed here"); }
-        void compileName(BytecodeObject& bco, const CompilationContext& cc)
+        void compileName(BytecodeObject& bco, const CompilationContext& cc) const
             {
                 args[0]->compileValue(bco, cc);
                 bco.addInstruction(Opcode::maUnary, interpreter::unUCase, 0);
@@ -191,10 +191,10 @@ namespace {
         argument as an expression. */
     class IntEvalFunctionCallNode : public FunctionCallNode {
      public:
-        void compileValue(BytecodeObject& bco, const CompilationContext& cc);
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc)
+        void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
+        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
             { defaultCompileEffect(bco, cc); }
-        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff)
+        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
             { defaultCompileCondition(bco, cc, ift, iff); }
     };
 
@@ -209,7 +209,7 @@ namespace {
 /************************* IntIfFunctionCallNode *************************/
 
 void
-IntIfFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationContext& cc)
+IntIfFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationContext& cc) const
 {
     BytecodeObject::Label_t ift = bco.makeLabel();
     BytecodeObject::Label_t iff = bco.makeLabel();
@@ -228,7 +228,7 @@ IntIfFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationContex
 }
 
 void
-IntFoldFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationContext& cc)
+IntFoldFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationContext& cc) const
 {
     if (args.size() == 0) {
         // Special case (does not appear)
@@ -258,7 +258,7 @@ IntFoldFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationCont
 }
 
 void
-IntBuiltinFunctionNode::compileValue(BytecodeObject& bco, const CompilationContext& cc)
+IntBuiltinFunctionNode::compileValue(BytecodeObject& bco, const CompilationContext& cc) const
 {
     if (args.size() == 1) {
         args[0]->compileValue(bco, cc);
@@ -275,7 +275,7 @@ IntBuiltinFunctionNode::compileValue(BytecodeObject& bco, const CompilationConte
 }
 
 void
-IntCaseFunctionNode::compileValue(BytecodeObject& bco, const CompilationContext& cc)
+IntCaseFunctionNode::compileValue(BytecodeObject& bco, const CompilationContext& cc) const
 {
     assert(args.size() == 2);
     if (minor == interpreter::biFirstStr || minor == interpreter::biRestStr) {
@@ -301,7 +301,7 @@ IntCaseFunctionNode::compileValue(BytecodeObject& bco, const CompilationContext&
     \param which Which flavour of Find/Count we're compiling (FC_xxx)
     \param args  Arguments */
 static void
-compileFCArray(BytecodeObject& bco, const CompilationContext& cc, uint8_t which, afl::container::PtrVector<interpreter::expr::Node>& args)
+compileFCArray(BytecodeObject& bco, const CompilationContext& cc, uint8_t which, const std::vector<const interpreter::expr::Node*>& args)
 {
     switch (which) {
      case FC_Generic:
@@ -327,7 +327,7 @@ compileFCArray(BytecodeObject& bco, const CompilationContext& cc, uint8_t which,
 static void
 compileFCCondition(BytecodeObject& bco, const CompilationContext& cc,
                    BytecodeObject::Label_t ift, BytecodeObject::Label_t iff,
-                   uint8_t which, afl::container::PtrVector<interpreter::expr::Node>& args)
+                   uint8_t which, const std::vector<const interpreter::expr::Node*>& args)
 {
     switch (which) {
      case FC_Generic:
@@ -350,7 +350,7 @@ compileFCCondition(BytecodeObject& bco, const CompilationContext& cc,
     \param which Which flavour of Find we're compiling (FC_xxx)
     \param args  Arguments */
 static void
-compileFCValue(BytecodeObject& bco, const CompilationContext& cc, uint8_t which, afl::container::PtrVector<interpreter::expr::Node>& args)
+compileFCValue(BytecodeObject& bco, const CompilationContext& cc, uint8_t which, const std::vector<const interpreter::expr::Node*>& args)
 {
     switch (which) {
      case FC_Generic:
@@ -366,7 +366,7 @@ compileFCValue(BytecodeObject& bco, const CompilationContext& cc, uint8_t which,
 }
 
 void
-IntFindFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationContext& cc)
+IntFindFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationContext& cc) const
 {
     // ex ccexpr.pas:find_func (sort-of)
     //     <array>
@@ -402,7 +402,7 @@ IntFindFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationCont
     bco.addPushLiteral(0);
     bco.addJump(Opcode::jAlways, end);
     bco.addLabel(ift);
-    if (which == FC_Generic && dynamic_cast<interpreter::expr::LiteralNode*>(args[2]) != 0) {
+    if (which == FC_Generic && dynamic_cast<const interpreter::expr::LiteralNode*>(args[2]) != 0) {
         // Find(whatever, const): generate the constant after the endindex command, so it can merge with a possible following operation
         bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialEndIndex, 0);
         args[2]->compileValue(bco, cc);
@@ -415,7 +415,7 @@ IntFindFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationCont
 }
 
 void
-IntCountFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationContext& cc)
+IntCountFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationContext& cc) const
 {
     // ex ccexpr.pas:count_func (sort-of)
     //     pushint 0
@@ -454,7 +454,7 @@ IntCountFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationCon
 }
 
 void
-IntOneTwoFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationContext& cc)
+IntOneTwoFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationContext& cc) const
 {
     args[0]->compileValue(bco, cc);
     if (args.size() < 2) {
@@ -481,7 +481,7 @@ IntOneTwoFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationCo
 }
 
 void
-IntMidFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationContext& cc)
+IntMidFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationContext& cc) const
 {
     args[0]->compileValue(bco, cc);
     args[1]->compileValue(bco, cc);
@@ -493,7 +493,7 @@ IntMidFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationConte
 }
 
 void
-IntStrCaseFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationContext& cc)
+IntStrCaseFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationContext& cc) const
 {
     CompilationContext ncc = cc;
     ncc.withoutFlag(CompilationContext::CaseBlind);
@@ -501,15 +501,15 @@ IntStrCaseFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationC
 }
 
 void
-IntKeyFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationContext& cc)
+IntKeyFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationContext& cc) const
 {
     // ex ccexpr.pas:op_KEY_func
     // Push keymap
-    if (interpreter::expr::IdentifierNode* id = dynamic_cast<interpreter::expr::IdentifierNode*>(args[0])) {
+    if (const interpreter::expr::IdentifierNode* id = dynamic_cast<const interpreter::expr::IdentifierNode*>(args[0])) {
         // Keymap literal (classic)
         afl::data::StringValue keymap(id->getIdentifier());
         bco.addPushLiteral(&keymap);
-    } else if (IntByNameFunctionCallNode* bcn = dynamic_cast<IntByNameFunctionCallNode*>(args[0])) {
+    } else if (const IntByNameFunctionCallNode* bcn = dynamic_cast<const IntByNameFunctionCallNode*>(args[0])) {
         // ByName(xx) syntax
         bcn->compileName(bco, cc);
     } else {
@@ -524,7 +524,7 @@ IntKeyFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationConte
 }
 
 void
-IntEvalFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationContext& cc)
+IntEvalFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationContext& cc) const
 {
     if (args.size() == 1) {
         // Eval(x):

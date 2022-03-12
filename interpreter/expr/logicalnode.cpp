@@ -1,23 +1,23 @@
 /**
   *  \file interpreter/expr/logicalnode.cpp
+  *  \brief Class interpreter::expr::LogicalNode
   */
 
 #include "interpreter/expr/logicalnode.hpp"
 #include "interpreter/unaryoperation.hpp"
 #include "interpreter/binaryoperation.hpp"
 
-/** Constructor.
-    \param shortcut_jump Condition for the shortcut jump
-    \param binary_op     Minor opcode for the binary operation */
-interpreter::expr::LogicalNode::LogicalNode(uint8_t shortcut_jump, uint8_t binary_op)
-    : shortcut_jump(shortcut_jump),
-      binary_op(binary_op)
+interpreter::expr::LogicalNode::LogicalNode(uint8_t shortcutJump, BinaryOperation binaryOp, const Node& left, const Node& right)
+    : m_shortcutJump(shortcutJump),
+      m_binaryOp(binaryOp),
+      m_left(left),
+      m_right(right)
 {
     // ex IntLogicalNode::IntLogicalNode
 }
 
 void
-interpreter::expr::LogicalNode::compileValue(BytecodeObject& bco, const CompilationContext& cc)
+interpreter::expr::LogicalNode::compileValue(BytecodeObject& bco, const CompilationContext& cc) const
 {
     // ex IntLogicalNode::compileValue
 
@@ -34,18 +34,18 @@ interpreter::expr::LogicalNode::compileValue(BytecodeObject& bco, const Compilat
 
     BytecodeObject::Label_t fini = bco.makeLabel();
 
-    a->compileValue(bco, cc);
-    if (binary_op != biXor) {
+    m_left.compileValue(bco, cc);
+    if (m_binaryOp != biXor) {
         bco.addInstruction(Opcode::maUnary, unBool, 0);
     }
-    bco.addJump(shortcut_jump, fini);
-    b->compileValue(bco, cc);
-    bco.addInstruction(Opcode::maBinary, binary_op, 0);
+    bco.addJump(m_shortcutJump, fini);
+    m_right.compileValue(bco, cc);
+    bco.addInstruction(Opcode::maBinary, m_binaryOp, 0);
     bco.addLabel(fini);
 }
 
 void
-interpreter::expr::LogicalNode::compileEffect(BytecodeObject& bco, const CompilationContext& cc)
+interpreter::expr::LogicalNode::compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
 {
     BytecodeObject::Label_t lab = bco.makeLabel();
     compileCondition(bco, cc, lab, lab);
@@ -53,7 +53,7 @@ interpreter::expr::LogicalNode::compileEffect(BytecodeObject& bco, const Compila
 }
 
 void
-interpreter::expr::LogicalNode::compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff)
+interpreter::expr::LogicalNode::compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
 {
     // ex IntLogicalNode::compileCondition
 
@@ -65,30 +65,30 @@ interpreter::expr::LogicalNode::compileCondition(BytecodeObject& bco, const Comp
     //    j ift         j iff      skip: jtp ift
     //                                j iff
 
-    if (binary_op == biAnd) {
+    if (m_binaryOp == biAnd) {
         // FIXME(?): this generates different side-effects from compileValue().
         // compileValue() will evaluate RHS if LHS is Empty (to distinguish Empty and False),
         // whereas this implementation will not. If we wish to keep efficient short-circuit
         // evaluation, it probably makes sense to keep this undefined.
         BytecodeObject::Label_t x = bco.makeLabel();
-        a->compileCondition(bco, cc, x, iff);
+        m_left.compileCondition(bco, cc, x, iff);
         bco.addLabel(x);
-        b->compileCondition(bco, cc, ift, iff);
-    } else if (binary_op == biOr) {
+        m_right.compileCondition(bco, cc, ift, iff);
+    } else if (m_binaryOp == biOr) {
         BytecodeObject::Label_t x = bco.makeLabel();
-        a->compileCondition(bco, cc, ift, x);
+        m_left.compileCondition(bco, cc, ift, x);
         bco.addLabel(x);
-        b->compileCondition(bco, cc, ift, iff);
-    } else if (binary_op == biXor) {
+        m_right.compileCondition(bco, cc, ift, iff);
+    } else if (m_binaryOp == biXor) {
         // This is harder than the others because we cannot use compileCondition here.
         // Jump threading also does not work, because we have no 'jump and pop only if
         // condition true' instruction. Since Xor is comparatively rare, I hope this
         // isn't too much of a problem.
         BytecodeObject::Label_t x = bco.makeLabel();
-        a->compileValue(bco, cc);
-        bco.addJump(shortcut_jump, x);
-        b->compileValue(bco, cc);
-        bco.addInstruction(Opcode::maBinary, binary_op, 0);
+        m_left.compileValue(bco, cc);
+        bco.addJump(m_shortcutJump, x);
+        m_right.compileValue(bco, cc);
+        bco.addInstruction(Opcode::maBinary, m_binaryOp, 0);
         bco.addLabel(x);
         bco.addJump(Opcode::jIfTrue | Opcode::jPopAlways, ift);
         bco.addJump(Opcode::jAlways, iff);

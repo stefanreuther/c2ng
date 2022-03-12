@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/expr/literalnode.hpp
+  *  \brief Class interpreter::expr::LiteralNode
   */
 #ifndef C2NG_INTERPRETER_EXPR_LITERALNODE_HPP
 #define C2NG_INTERPRETER_EXPR_LITERALNODE_HPP
@@ -13,13 +14,22 @@ namespace interpreter { namespace expr {
     /** Literal expression node. Generates code to return a literal value. */
     class LiteralNode : public RValueNode {
      public:
+        /** Constructor. */
         LiteralNode();
         ~LiteralNode();
-        void setNewValue(afl::data::Value* value) throw();
-        void compileValue(BytecodeObject& bco, const CompilationContext& cc);
-        void compileEffect(BytecodeObject& bco, const interpreter::CompilationContext& cc);
-        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff);
 
+        /** Set value.
+            For now, we use two-step construction to ensure exception safety.
+            @param value New value. LiteralNode will take ownership. */
+        void setNewValue(afl::data::Value* value) throw();
+
+        // Node:
+        void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
+        void compileEffect(BytecodeObject& bco, const interpreter::CompilationContext& cc) const;
+        void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const;
+
+        /** Get value.
+            @return value */
         afl::data::Value* getValue() const
             { return m_value.get(); }
 

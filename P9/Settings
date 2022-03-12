@@ -12,8 +12,11 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/pcc/turnloader.cpp game/pcc/turnloader.hpp \
-    game/task.cpp game/task.hpp game/browser/optionalusercallback.cpp \
+FILES_gamelib = interpreter/expr/binarynode.cpp \
+    interpreter/expr/binarynode.hpp interpreter/expr/unarynode.cpp \
+    interpreter/expr/unarynode.hpp game/pcc/turnloader.cpp \
+    game/pcc/turnloader.hpp game/task.cpp game/task.hpp \
+    game/browser/optionalusercallback.cpp \
     game/browser/optionalusercallback.hpp game/proxy/browserproxy.cpp \
     game/proxy/browserproxy.hpp game/browser/folder.cpp \
     game/browser/types.hpp game/browser/synchronousfolder.cpp \
@@ -625,15 +628,13 @@ FILES_gamelib = game/pcc/turnloader.cpp game/pcc/turnloader.hpp \
     interpreter/expr/sequencenode.cpp interpreter/expr/sequencenode.hpp \
     interpreter/expr/assignmentnode.cpp interpreter/expr/assignmentnode.hpp \
     interpreter/expr/casenode.cpp interpreter/expr/casenode.hpp \
-    interpreter/expr/simplenode.cpp interpreter/expr/simplenode.hpp \
-    interpreter/expr/simplervaluenode.cpp \
-    interpreter/expr/simplervaluenode.hpp interpreter/expr/literalnode.cpp \
-    interpreter/expr/literalnode.hpp interpreter/expr/rvaluenode.hpp \
-    interpreter/expr/rvaluenode.cpp interpreter/expr/node.cpp \
-    interpreter/expr/node.hpp interpreter/compilationcontext.hpp \
-    interpreter/bytecodeobject.cpp interpreter/bytecodeobject.hpp \
-    interpreter/opcode.cpp interpreter/opcode.hpp util/math.cpp \
-    interpreter/error.cpp interpreter/error.hpp interpreter/tokenizer.cpp \
+    interpreter/expr/literalnode.cpp interpreter/expr/literalnode.hpp \
+    interpreter/expr/rvaluenode.hpp interpreter/expr/rvaluenode.cpp \
+    interpreter/expr/node.cpp interpreter/expr/node.hpp \
+    interpreter/compilationcontext.hpp interpreter/bytecodeobject.cpp \
+    interpreter/bytecodeobject.hpp interpreter/opcode.cpp \
+    interpreter/opcode.hpp util/math.cpp interpreter/error.cpp \
+    interpreter/error.hpp interpreter/tokenizer.cpp \
     interpreter/tokenizer.hpp game/config/userconfiguration.cpp \
     game/config/userconfiguration.hpp game/map/anyplanettype.cpp \
     game/map/playedbasetype.cpp game/map/playedbasetype.hpp \

@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/expr/parser.cpp
+  *  \brief Class interpreter::expr::Parser
   *
   *  \todo FIXME: PCC 1.x has "#n" in the Assignment production. If we want to make
   *  it part of regular expressions, it probably makes more sense to have it
@@ -9,141 +10,141 @@
   */
 
 #include "interpreter/expr/parser.hpp"
-#include "interpreter/expr/sequencenode.hpp"
-#include "interpreter/expr/assignmentnode.hpp"
-#include "interpreter/expr/logicalnode.hpp"
-#include "interpreter/opcode.hpp"
-#include "interpreter/unaryoperation.hpp"
+#include "afl/string/format.hpp"
 #include "interpreter/binaryoperation.hpp"
-#include "interpreter/expr/simplenode.hpp"
-#include "interpreter/expr/casenode.hpp"
-#include "interpreter/expr/literalnode.hpp"
+#include "interpreter/error.hpp"
+#include "interpreter/expr/assignmentnode.hpp"
+#include "interpreter/expr/binarynode.hpp"
 #include "interpreter/expr/builtinfunction.hpp"
+#include "interpreter/expr/casenode.hpp"
 #include "interpreter/expr/functioncallnode.hpp"
 #include "interpreter/expr/identifiernode.hpp"
 #include "interpreter/expr/indirectcallnode.hpp"
+#include "interpreter/expr/literalnode.hpp"
+#include "interpreter/expr/logicalnode.hpp"
 #include "interpreter/expr/membernode.hpp"
-#include "interpreter/error.hpp"
-#include "afl/string/format.hpp"
+#include "interpreter/expr/sequencenode.hpp"
+#include "interpreter/expr/unarynode.hpp"
+#include "interpreter/opcode.hpp"
+#include "interpreter/unaryoperation.hpp"
 #include "interpreter/values.hpp"
 
-/** Constructor. */
-interpreter::expr::Parser::Parser(Tokenizer& tok)
+using afl::string::Format;
+
+// Constructor.
+interpreter::expr::Parser::Parser(Tokenizer& tok, afl::base::Deleter& del)
     : tok(tok),
-      stack()
+      m_deleter(del)
 { }
 
-/** Parse expression. Parses a Sequence production.
-    \return parsed expression tree. Caller is responsible for freeing it. */
-interpreter::expr::Node*
+// Parse expression.
+const interpreter::expr::Node&
 interpreter::expr::Parser::parse()
 {
     // ex ccexpr.pas:GetExpr
-    parseSequence();
-    return stack.extractLast();
+    return parseSequence();
 }
 
-/** Parse expression. Parses an Or-Expr production (=no assignment, no sequence).
-    \return parsed expression tree. Caller is responsible for freeing it. */
-interpreter::expr::Node*
+// Parse expression.
+const interpreter::expr::Node&
 interpreter::expr::Parser::parseNA()
 {
     // ex ccexpr.pas:GetExprNA
-    parseOr();
-    return stack.extractLast();
+    return parseOr();
 }
 
-void
+const interpreter::expr::Node&
 interpreter::expr::Parser::parseSequence()
 {
     // ex ccexpr.pas:NParse0
     // sequence ::= assignment
     //            | sequence ';' assignment
-    parseAssignment();
-    while (tok.checkAdvance(tok.tSemicolon)) {
+    const Node* p = &parseAssignment();
+    while (tok.checkAdvance(Tokenizer::tSemicolon)) {
         // A line 'a := b;' will produce the error message "Expected operand" by default.
         // It is easy to generate a more helpful error message for this case (same as in PCC1),
         // this is not an additional grammar restriction.
-        if (tok.getCurrentToken() == tok.tEnd) {
+        if (tok.getCurrentToken() == Tokenizer::tEnd) {
             throw Error("Lone \";\" at end of line is not allowed");
         }
 
-        parseAssignment();
-        makeBinary(new SequenceNode());
+        p = &m_deleter.addNew(new SequenceNode(*p, parseAssignment()));
     }
+    return *p;
 }
 
-void
+const interpreter::expr::Node&
 interpreter::expr::Parser::parseAssignment()
 {
     // ex ccexpr.pas:NParse0b
     // @diff Different handling of file numbers, see parsePrimary().
     // assignment ::= or-expr
     //              | or-expr ':=' assignment
-    parseOr();
-    if (tok.checkAdvance(tok.tAssign)) {
-        parseAssignment();
-        makeBinary(new AssignmentNode());
+    const Node* p = &parseOr();
+    if (tok.checkAdvance(Tokenizer::tAssign)) {
+        p = &m_deleter.addNew(new AssignmentNode(*p, parseAssignment()));
     }
+    return *p;
 }
 
-void
+const interpreter::expr::Node&
 interpreter::expr::Parser::parseOr()
 {
     // ex ccexpr.pas:NParse0a
     // or-expr ::= and-expr
     //           | or-expr 'Or' and-expr
     //           | or-expr 'Xor' and-expr
-    parseAnd();
+    const Node* p = &parseAnd();
     while (1) {
-        if (tok.checkAdvance(tok.tOR)) {
-            parseAnd();
-            makeBinary(new LogicalNode(Opcode::jIfTrue, interpreter::biOr));
-        } else if (tok.checkAdvance(tok.tXOR)) {
-            parseAnd();
-            makeBinary(new LogicalNode(Opcode::jIfEmpty, interpreter::biXor));
+        if (tok.checkAdvance(Tokenizer::tOR)) {
+            p = &m_deleter.addNew(new LogicalNode(Opcode::jIfTrue, biOr, *p, parseAnd()));
+        } else if (tok.checkAdvance(Tokenizer::tXOR)) {
+            p = &m_deleter.addNew(new LogicalNode(Opcode::jIfEmpty, biXor, *p, parseAnd()));
         } else {
             break;
         }
     }
+    return *p;
 }
 
-void
+const interpreter::expr::Node&
 interpreter::expr::Parser::parseAnd()
 {
     // ex ccexpr.pas:NParse1
     // and-expr ::= not-expr
     //            | and-expr 'And' not-expr
-    parseNot();
-    while (tok.checkAdvance(tok.tAND)) {
-        parseNot();
-        makeBinary(new LogicalNode(Opcode::jIfFalse, interpreter::biAnd));
+    const Node* p = &parseNot();
+    while (tok.checkAdvance(Tokenizer::tAND)) {
+        p = &m_deleter.addNew(new LogicalNode(Opcode::jIfFalse, biAnd, *p, parseNot()));
     }
+    return *p;
 }
 
-void
+const interpreter::expr::Node&
 interpreter::expr::Parser::parseNot()
 {
     // ex ccexpr.pas:NParse2
     // not-expr ::= comparison
     //            | 'Not' not-expr
     int n = 0;
-    while (tok.checkAdvance(tok.tNOT)) {
+    while (tok.checkAdvance(Tokenizer::tNOT)) {
         ++n;
     }
-    parseComparison();
+    const Node& result = parseComparison();
     if (n > 0) {
         if (n & 1) {
             // Negation
-            makeUnary(new SimpleNode(Opcode::maUnary, interpreter::unNot));
+            return m_deleter.addNew(new UnaryNode(unNot, result));
         } else {
             // Cast to bool
-            makeUnary(new SimpleNode(Opcode::maUnary, interpreter::unBool));
+            return m_deleter.addNew(new UnaryNode(unBool, result));
         }
+    } else {
+        return result;
     }
 }
 
-void
+const interpreter::expr::Node&
 interpreter::expr::Parser::parseComparison()
 {
     // ex ccexpr.pas:NParse3
@@ -154,74 +155,74 @@ interpreter::expr::Parser::parseComparison()
     //              | comparison '<=' concat-expr
     //              | comparison '>=' concat-expr
     //              | comparison '<>' concat-expr
-    parseConcat();
+    const Node* p = &parseConcat();
     while (1) {
         uint8_t mode;
-        if (tok.checkAdvance(tok.tEQ)) {
-            mode = interpreter::biCompareEQ;
-        } else if (tok.checkAdvance(tok.tLT)) {
-            mode = interpreter::biCompareLT;
-        } else if (tok.checkAdvance(tok.tGT)) {
-            mode = interpreter::biCompareGT;
-        } else if (tok.checkAdvance(tok.tLE)) {
-            mode = interpreter::biCompareLE;
-        } else if (tok.checkAdvance(tok.tGE)) {
-            mode = interpreter::biCompareGE;
-        } else if (tok.checkAdvance(tok.tNE)) {
-            mode = interpreter::biCompareNE;
+        if (tok.checkAdvance(Tokenizer::tEQ)) {
+            mode = biCompareEQ;
+        } else if (tok.checkAdvance(Tokenizer::tLT)) {
+            mode = biCompareLT;
+        } else if (tok.checkAdvance(Tokenizer::tGT)) {
+            mode = biCompareGT;
+        } else if (tok.checkAdvance(Tokenizer::tLE)) {
+            mode = biCompareLE;
+        } else if (tok.checkAdvance(Tokenizer::tGE)) {
+            mode = biCompareGE;
+        } else if (tok.checkAdvance(Tokenizer::tNE)) {
+            mode = biCompareNE;
         } else {
             break;
         }
-        parseConcat();
-        makeBinary(new CaseNode(mode));
+        p = &m_deleter.addNew(new CaseNode(mode, *p, parseConcat()));
     }
+    return *p;
 }
 
-void
+const interpreter::expr::Node&
 interpreter::expr::Parser::parseConcat()
 {
     // ex ccexpr.pas:NParse4
     // concat-expr ::= add-expr
     //               | concat-expr "#" add-expr
     //               | concat-expr "&" add-expr
-    parseAdd();
+    const Node* p = &parseAdd();
     while (1) {
-        uint8_t mode;
-        if (tok.checkAdvance(tok.tHash)) {
-            mode = interpreter::biConcat;
-        } else if (tok.checkAdvance(tok.tAmpersand)) {
-            mode = interpreter::biConcatEmpty;
+        BinaryOperation mode;
+        if (tok.checkAdvance(Tokenizer::tHash)) {
+            mode = biConcat;
+        } else if (tok.checkAdvance(Tokenizer::tAmpersand)) {
+            mode = biConcatEmpty;
         } else {
             break;
         }
-        parseAdd();
-        makeBinary(new SimpleNode(Opcode::maBinary, mode));
+        p = &m_deleter.addNew(new BinaryNode(mode, *p, parseAdd()));
     }
+    return *p;
 }
 
-void
+const interpreter::expr::Node&
 interpreter::expr::Parser::parseAdd()
 {
     // ex ccexpr.pas:NParse5
     // add-expr ::= mult-expr
     //            | add-expr "+" mult-expr
     //            | add-expr "-" mult-expr
-    parseMult();
+    const Node* p = &parseMult();
     while (1) {
-        uint8_t mode;
-        if (tok.checkAdvance(tok.tPlus)) {
-            mode = interpreter::biAdd;
-        } else if (tok.checkAdvance(tok.tMinus)) {
-            mode = interpreter::biSub;
+        BinaryOperation mode;
+        if (tok.checkAdvance(Tokenizer::tPlus)) {
+            mode = biAdd;
+        } else if (tok.checkAdvance(Tokenizer::tMinus)) {
+            mode = biSub;
         } else {
             break;
         }
-        parseMult();
-        makeBinary(new SimpleNode(Opcode::maBinary, mode));
+        p = &m_deleter.addNew(new BinaryNode(mode, *p, parseMult()));
     }
+    return *p;
 }
 
-void
+const interpreter::expr::Node&
 interpreter::expr::Parser::parseMult()
 {
     // ex ccexpr.pas:NParse6
@@ -230,26 +231,26 @@ interpreter::expr::Parser::parseMult()
     //             | mult-expr "/" neg-expr
     //             | mult-expr "\" neg-expr
     //             | mult-expr "Mod" neg-expr
-    parseNeg();
+    const Node* p = &parseNeg();
     while (1) {
-        uint8_t mode;
-        if (tok.checkAdvance(tok.tMultiply)) {
-            mode = interpreter::biMult;
-        } else if (tok.checkAdvance(tok.tSlash)) {
-            mode = interpreter::biDivide;
-        } else if (tok.checkAdvance(tok.tBackslash)) {
-            mode = interpreter::biIntegerDivide;
-        } else if (tok.checkAdvance(tok.tMOD)) {
-            mode = interpreter::biRemainder;
+        BinaryOperation mode;
+        if (tok.checkAdvance(Tokenizer::tMultiply)) {
+            mode = biMult;
+        } else if (tok.checkAdvance(Tokenizer::tSlash)) {
+            mode = biDivide;
+        } else if (tok.checkAdvance(Tokenizer::tBackslash)) {
+            mode = biIntegerDivide;
+        } else if (tok.checkAdvance(Tokenizer::tMOD)) {
+            mode = biRemainder;
         } else {
             break;
         }
-        parseNeg();
-        makeBinary(new SimpleNode(Opcode::maBinary, mode));
+        p = &m_deleter.addNew(new BinaryNode(mode, *p, parseNeg()));
     }
+    return *p;
 }
 
-void
+const interpreter::expr::Node&
 interpreter::expr::Parser::parseNeg()
 {
     // ex ccexpr.pas:NParse7
@@ -259,143 +260,145 @@ interpreter::expr::Parser::parseNeg()
     bool neg = false;
     bool had = false;
     while (1) {
-        if (tok.checkAdvance(tok.tMinus)) {
+        if (tok.checkAdvance(Tokenizer::tMinus)) {
             neg = !neg;
             had = true;
-        } else if (tok.checkAdvance(tok.tPlus)) {
+        } else if (tok.checkAdvance(Tokenizer::tPlus)) {
             had = true;
         } else {
             break;
         }
     }
 
-    if (tok.checkAdvance(tok.tNOT)) {
-        /* This rule makes PCC accept "-not x". This isn't part of the
-           original grammar, yet it's sensible in some way. Because it's
-           rare, we don't optimize here. */
-        parseNeg();
-        makeUnary(new SimpleNode(Opcode::maUnary, interpreter::unNot));
-    } else {
-        parsePow();
-    }
+    const Node& p = (tok.checkAdvance(Tokenizer::tNOT)
+                     ? /* This rule makes PCC accept "-not x". This isn't part of the
+                          original grammar, yet it's sensible in some way. Because it's
+                          rare, we don't optimize here. */
+                       m_deleter.addNew(new UnaryNode(unNot, parseNeg()))
+                     : parsePow());
 
     if (had) {
         if (neg) {
-            makeUnary(new SimpleNode(Opcode::maUnary, interpreter::unNeg));
+            return m_deleter.addNew(new UnaryNode(unNeg, p));
         } else {
-            makeUnary(new SimpleNode(Opcode::maUnary, interpreter::unPos));
+            return m_deleter.addNew(new UnaryNode(unPos, p));
         }
+    } else {
+        return p;
     }
 }
 
-void
+const interpreter::expr::Node&
 interpreter::expr::Parser::parsePow()
 {
     // ex ccexpr.pas:NParse8
     // pow-expr ::= primary-expr
     //            | primary-expr "^" neg-expr
-    parsePrimary();
-    if (tok.checkAdvance(tok.tCaret)) {
-        parseNeg();
-        makeBinary(new SimpleNode(Opcode::maBinary, interpreter::biPow));
+    const Node& p = parsePrimary();
+    if (tok.checkAdvance(Tokenizer::tCaret)) {
+        return m_deleter.addNew(new BinaryNode(biPow, p, parseNeg()));
+    } else {
+        return p;
     }
 }
 
-/* primary-expr ::= "(" sequence ")"
-                  | literal
-                  | identifier {["(" arglist ")"] | ["." field]}*
-
-   This grammar allows "a .b", but not "(a).b" for field references.
-   Although inconsistent with other programming languages, this is
-   actually a good thing, because it serves to disambiguate code like
-   "Ship(sid).Name := 'xxx'" (which would otherwise be ambiguous to
-   a procedure call with an assignment-expression as parameter:
-   "Ship (sid .Name := 'xxx')" */
-void
+const interpreter::expr::Node&
 interpreter::expr::Parser::parsePrimary()
 {
     // ex ccexpr.pas:NParse9
+
+    // primary-expr ::= "(" sequence ")"
+    //                | literal
+    //                | identifier {["(" arglist ")"] | ["." field]}*
+    //
+    // This grammar allows "a .b", but not "(a).b" for field references.
+    // Although inconsistent with other programming languages, this is
+    // actually a good thing, because it serves to disambiguate code like
+    // "Ship(sid).Name := 'xxx'" (which would otherwise be ambiguous to
+    // a procedure call with an assignment-expression as parameter:
+    // "Ship (sid .Name := 'xxx')" */
+
     // @diff Different handling of file numbers between PCC 1.x and PCC2:
     // PCC 1.x parenthesizes "#a:=b" as "#(a:=b)", we parenthesize it as "(#a) := b".
     // Neither makes much sense so we accept that difference for now.
-    if (tok.checkAdvance(tok.tLParen)) {
+    if (tok.checkAdvance(Tokenizer::tLParen)) {
         // Parenthesized expression
-        parseSequence();
-        if (!tok.checkAdvance(tok.tRParen)) {
-            throw interpreter::Error::expectSymbol(")");
+        const Node& p = parseSequence();
+        if (!tok.checkAdvance(Tokenizer::tRParen)) {
+            throw Error::expectSymbol(")");
         }
-    } else if (tok.getCurrentToken() == tok.tInteger || tok.getCurrentToken() == tok.tBoolean) {
+        return p;
+    } else if (tok.getCurrentToken() == Tokenizer::tInteger || tok.getCurrentToken() == Tokenizer::tBoolean) {
         // Integer literal
-        LiteralNode* lit = new LiteralNode;
-        stack.pushBackNew(lit);
-        lit->setNewValue(tok.getCurrentToken() == tok.tBoolean
-                         ? makeBooleanValue(tok.getCurrentInteger())
-                         : makeIntegerValue(tok.getCurrentInteger()));
+        LiteralNode& lit = m_deleter.addNew(new LiteralNode());
+        lit.setNewValue(tok.getCurrentToken() == Tokenizer::tBoolean
+                        ? makeBooleanValue(tok.getCurrentInteger())
+                        : makeIntegerValue(tok.getCurrentInteger()));
         tok.readNextToken();
-    } else if (tok.getCurrentToken() == tok.tFloat) {
+        return lit;
+    } else if (tok.getCurrentToken() == Tokenizer::tFloat) {
         // Float literal
-        LiteralNode* lit = new LiteralNode;
-        stack.pushBackNew(lit);
-        lit->setNewValue(makeFloatValue(tok.getCurrentFloat()));
+        LiteralNode& lit = m_deleter.addNew(new LiteralNode());
+        lit.setNewValue(makeFloatValue(tok.getCurrentFloat()));
         tok.readNextToken();
-    } else if (tok.getCurrentToken() == tok.tString) {
+        return lit;
+    } else if (tok.getCurrentToken() == Tokenizer::tString) {
         // String literal
-        LiteralNode* lit = new LiteralNode;
-        stack.pushBackNew(lit);
-        lit->setNewValue(makeStringValue(tok.getCurrentString()));
+        LiteralNode& lit = m_deleter.addNew(new LiteralNode);
+        lit.setNewValue(makeStringValue(tok.getCurrentString()));
         tok.readNextToken();
-    } else if (tok.getCurrentToken() == tok.tIdentifier) {
+        return lit;
+    } else if (tok.getCurrentToken() == Tokenizer::tIdentifier) {
         // Identifier
         String_t fname = tok.getCurrentString();
 
         // Special handling for builtin functions
         // ex ccexpr.pas:ParseCall
         const BuiltinFunctionDescriptor* bif;
-        if (tok.readNextToken() == tok.tLParen && (bif = lookupBuiltinFunction(fname)) != 0) {
+        const Node* p;
+        if (tok.readNextToken() == Tokenizer::tLParen && (bif = lookupBuiltinFunction(fname)) != 0) {
             // Builtin function
             tok.readNextToken();
-            FunctionCallNode* fcn = bif->generator(*bif);
-            stack.pushBackNew(fcn);
+            FunctionCallNode& fcn = m_deleter.addNew(bif->generator(*bif));
             parseArglist(fcn);
             // Basic checks
-            if (fcn->getNumArgs() < bif->min_args) {
-                throw interpreter::Error(afl::string::Format("Too few arguments for \"%s\"", fname)); // FIXME
+            if (fcn.getNumArgs() < bif->min_args) {
+                throw Error(Format("Too few arguments for \"%s\"", fname));
             }
-            if (fcn->getNumArgs() > bif->max_args) {
-                throw interpreter::Error(afl::string::Format("Too many arguments for \"%s\"", fname)); // FIXME
+            if (fcn.getNumArgs() > bif->max_args) {
+                throw Error(Format("Too many arguments for \"%s\"", fname));
             }
+            p = &fcn;
         } else {
             // Regular function
-            stack.pushBackNew(new IdentifierNode(fname));
+            p = &m_deleter.addNew(new IdentifierNode(fname));
         }
+
         while (1) {
-            if (tok.checkAdvance(tok.tLParen)) {
+            if (tok.checkAdvance(Tokenizer::tLParen)) {
                 // Array index / function call
-                IndirectCallNode* fcn = new IndirectCallNode();
-                fcn->setNewFunction(stack.extractLast());
-                stack.pushBackNew(fcn);
+                IndirectCallNode& fcn = m_deleter.addNew(new IndirectCallNode(*p));
                 parseArglist(fcn);
-            } else if (tok.checkAdvance(tok.tDot) || tok.checkAdvance(tok.tArrow)) {
+                p = &fcn;
+            } else if (tok.checkAdvance(Tokenizer::tDot) || tok.checkAdvance(Tokenizer::tArrow)) {
                 // Member reference
-                if (tok.getCurrentToken() != tok.tIdentifier) {
-                    throw interpreter::Error::expectIdentifier("field name");
+                if (tok.getCurrentToken() != Tokenizer::tIdentifier) {
+                    throw Error::expectIdentifier("field name");
                 }
-                MemberNode* mem = new MemberNode(tok.getCurrentString());
-                mem->setNewExpression(stack.extractLast());
-                stack.pushBackNew(mem);
+                p = &m_deleter.addNew(new MemberNode(tok.getCurrentString(), *p));
                 tok.readNextToken();
             } else {
                 break;
             }
         }
-    } else if (tok.checkAdvance(tok.tHash)) {
+        return *p;
+    } else if (tok.checkAdvance(Tokenizer::tHash)) {
         // File number
-        parsePrimary();
-        makeUnary(new SimpleNode(Opcode::maUnary, interpreter::unFileNr));
-    } else if (tok.getCurrentToken() == tok.tEnd) {
-        throw interpreter::Error("Expected operand");
+        return m_deleter.addNew(new UnaryNode(unFileNr, parsePrimary()));
+    } else if (tok.getCurrentToken() == Tokenizer::tEnd) {
+        throw Error("Expected operand");
     } else {
-        throw interpreter::Error("Invalid expression");
+        throw Error("Invalid expression");
     }
 }
 
@@ -403,39 +406,17 @@ interpreter::expr::Parser::parsePrimary()
     \c fcn must already be on the stack, for exception safety.
     \param fcn Function call node to receive arguments */
 void
-interpreter::expr::Parser::parseArglist(FunctionCallNode* fcn)
+interpreter::expr::Parser::parseArglist(FunctionCallNode& fcn)
 {
-    if (tok.checkAdvance(tok.tRParen)) {
+    if (tok.checkAdvance(Tokenizer::tRParen)) {
         // "foo()"
     } else {
         // "foo(args...)"
         do {
-            parseSequence();
-            fcn->addNewArgument(stack.extractLast());
-        } while (tok.checkAdvance(tok.tComma));
-        if (!tok.checkAdvance(tok.tRParen)) {
-            throw interpreter::Error::expectSymbol(")");
+            fcn.addArgument(parseSequence());
+        } while (tok.checkAdvance(Tokenizer::tComma));
+        if (!tok.checkAdvance(Tokenizer::tRParen)) {
+            throw Error::expectSymbol(")");
         }
     }
-}
-
-/** Make unary operation. Expects one tree node on the stack.
-    \param n Tree node, will be pushed onto the stack */
-void
-interpreter::expr::Parser::makeUnary(SimpleRValueNode* n)
-{
-    Node* a = stack.extractLast();
-    n->setUnary(a);
-    stack.pushBackNew(n);
-}
-
-/** Make binary operation. Expects two tree nodes on the stack.
-    \param n Tree node, will be pushed onto the stack */
-void
-interpreter::expr::Parser::makeBinary(SimpleRValueNode* n)
-{
-    Node* b = stack.extractLast();
-    Node* a = stack.extractLast();
-    n->setBinary(a, b);
-    stack.pushBackNew(n);
 }

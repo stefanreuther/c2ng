@@ -1,11 +1,12 @@
 /**
   *  \file interpreter/expr/node.cpp
+  *  \brief Base class interpreter::expr::Node
   */
 
 #include "interpreter/expr/node.hpp"
 
 void
-interpreter::expr::Node::defaultCompileEffect(BytecodeObject& bco, const CompilationContext& cc)
+interpreter::expr::Node::defaultCompileEffect(BytecodeObject& bco, const CompilationContext& cc) const
 {
     // ex IntExprNode::compileEffect
     // Compute value and discard it
@@ -14,7 +15,7 @@ interpreter::expr::Node::defaultCompileEffect(BytecodeObject& bco, const Compila
 }
 
 void
-interpreter::expr::Node::defaultCompileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff)
+interpreter::expr::Node::defaultCompileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
 {
     // ex IntExprNode::compileCondition
     // Generate two-way jump

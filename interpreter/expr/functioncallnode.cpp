@@ -1,14 +1,13 @@
 /**
   *  \file interpreter/expr/functioncallnode.cpp
+  *  \brief Class interpreter::expr::FunctionCallNode
   */
 
 #include "interpreter/expr/functioncallnode.hpp"
 
-/** Append argument.
-    \param arg Argument, newly-allocated */
 void
-interpreter::expr::FunctionCallNode::addNewArgument(Node* arg)
+interpreter::expr::FunctionCallNode::addArgument(const Node& arg)
 {
     // ex IntFunctionCallNode::addArgument
-    args.pushBackNew(arg);
+    args.push_back(&arg);
 }

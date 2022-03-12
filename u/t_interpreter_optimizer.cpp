@@ -85,13 +85,14 @@ namespace {
         afl::string::NullTranslator tx;
         afl::io::NullFileSystem fs;
         interpreter::World world(logger, tx, fs);
+        afl::base::Deleter del;
 
         interpreter::Tokenizer tok(expr);
-        std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(tok).parse());
+        const interpreter::expr::Node& node(interpreter::expr::Parser(tok, del).parse());
         TSM_ASSERT_EQUALS(expr, tok.getCurrentToken(), tok.tEnd);
 
         interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
-        node->compileValue(*bco, interpreter::CompilationContext(world));
+        node.compileValue(*bco, interpreter::CompilationContext(world));
 
         optimize(world, *bco, level);
 

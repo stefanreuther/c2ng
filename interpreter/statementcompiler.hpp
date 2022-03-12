@@ -5,7 +5,8 @@
 #ifndef C2NG_INTERPRETER_STATEMENTCOMPILER_HPP
 #define C2NG_INTERPRETER_STATEMENTCOMPILER_HPP
 
-#include "afl/container/ptrvector.hpp"
+#include <vector>
+#include "afl/base/deleter.hpp"
 #include "interpreter/bytecodeobject.hpp"
 #include "interpreter/expr/node.hpp"
 #include "interpreter/opcode.hpp"
@@ -115,10 +116,10 @@ namespace interpreter {
         void compileSelectCondition(BytecodeObject& bco, const StatementCompilationContext& scc, BytecodeObject::Label_t ldo);
         void compileNameString(BytecodeObject& bco, const StatementCompilationContext& scc, const char* ttl);
         void compileSubroutineDefinition(BytecodeObject& bco, const StatementCompilationContext& scc, BCORef_t sub, const String_t& name, Opcode::Scope scope);
-        void parseArgumentList(afl::container::PtrVector<interpreter::expr::Node>& args);
+        void parseArgumentList(std::vector<const interpreter::expr::Node*>& args, afl::base::Deleter& del);
         void parseEndOfLine();
         void validateName(const StatementCompilationContext& scc, const String_t& name);
-    
+
         CommandSource& m_commandSource;
         bool m_allowLocalTypes;
         bool m_allowLocalSubs;
@@ -130,8 +131,9 @@ namespace interpreter {
         Terminates successfully when finding end of line.
         Note that this only parses, it does not compile the expressions.
         \param tok  [in] Tokenizer
-        \param args [out] Arguments expression trees are accumulated here */
-    void parseCommandArgumentList(Tokenizer& tok, afl::container::PtrVector<interpreter::expr::Node>& args);
+        \param args [out] Arguments expression trees are accumulated here
+        \param del  [out] Deleter that owns the produced objects */
+    void parseCommandArgumentList(Tokenizer& tok, std::vector<const interpreter::expr::Node*>& args, afl::base::Deleter& del);
 }
 
 #endif

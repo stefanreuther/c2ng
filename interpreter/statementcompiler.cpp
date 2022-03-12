@@ -15,11 +15,12 @@
 #include "interpreter/contextprovider.hpp"
 #include "interpreter/defaultstatementcompilationcontext.hpp"
 #include "interpreter/error.hpp"
+#include "interpreter/expr/binarynode.hpp"
 #include "interpreter/expr/builtinfunction.hpp"
 #include "interpreter/expr/casenode.hpp"
 #include "interpreter/expr/literalnode.hpp"
 #include "interpreter/expr/parser.hpp"
-#include "interpreter/expr/simplenode.hpp"
+#include "interpreter/expr/unarynode.hpp"
 #include "interpreter/keywords.hpp"
 #include "interpreter/optimizer.hpp"
 #include "interpreter/selectionexpression.hpp"
@@ -737,9 +738,10 @@ interpreter::StatementCompiler::compileAbort(BytecodeObject& bco, const Statemen
        @since PCC2 1.99.9, PCC 1.0.6 */
 
     /* Parse args */
-    afl::container::PtrVector<interpreter::expr::Node> args;
+    afl::base::Deleter del;
+    std::vector<const interpreter::expr::Node*> args;
     m_commandSource.tokenizer().readNextToken();
-    parseArgumentList(args);
+    parseArgumentList(args, del);
     checkArgumentCount(args.size(), 0, 1);
 
     /* Compile */
@@ -831,17 +833,17 @@ interpreter::StatementCompiler::compileBind(BytecodeObject& bco, const Statement
 
     /* Parse assignments */
     while (1) {
-        std::auto_ptr<interpreter::expr::Node> expr(interpreter::expr::Parser(m_commandSource.tokenizer()).parseNA());
-        expr->compileValue(bco, scc);
+        afl::base::Deleter del;
+        interpreter::expr::Parser(m_commandSource.tokenizer(), del).parseNA()
+            .compileValue(bco, scc);
 
         /* Here, we only accept ":=", because "=" is swallowed by parseNA anyway. */
         if (!tok.checkAdvance(tok.tAssign)) {
             throw Error::expectSymbol(":=");
         }
 
-        expr.reset(interpreter::expr::Parser(m_commandSource.tokenizer()).parseNA());
-        expr->compileValue(bco, scc);
-
+        interpreter::expr::Parser(m_commandSource.tokenizer(), del).parseNA()
+            .compileValue(bco, scc);
         bco.addInstruction(Opcode::maTernary, teKeyAdd, 0);
 
         if (!parseNext(tok)) {
@@ -893,14 +895,15 @@ interpreter::StatementCompiler::compileCall(BytecodeObject& bco, const Statement
     tok.readNextToken();
 
     /* Procedure */
-    std::auto_ptr<interpreter::expr::Node> procedure(interpreter::expr::Parser(tok).parse());
+    afl::base::Deleter del;
+    const interpreter::expr::Node& procedure(interpreter::expr::Parser(tok, del).parse());
 
     /* Skip comma */
     tok.checkAdvance(tok.tComma);
 
     /* Arguments */
-    afl::container::PtrVector<interpreter::expr::Node> args;
-    parseArgumentList(args);
+    std::vector<const interpreter::expr::Node*> args;
+    parseArgumentList(args, del);
     for (size_t i = 0; i != args.size(); ++i) {
         args[i]->compileValue(bco, scc);
     }
@@ -909,8 +912,8 @@ interpreter::StatementCompiler::compileCall(BytecodeObject& bco, const Statement
          Call Foo +1
        which would be an ambiguous-but-eventually-correctly-executed runtime switch without 'Call',
        but is always a binary operator that fails execution with 'Call'. */
-    if (interpreter::expr::SimpleNode* n = dynamic_cast<interpreter::expr::SimpleNode*>(procedure.get())) {
-        if (n->is(Opcode::maBinary, biConcat) || n->is(Opcode::maBinary, biAdd) || n->is(Opcode::maBinary, biSub)) {
+    if (const interpreter::expr::BinaryNode* n = dynamic_cast<const interpreter::expr::BinaryNode*>(&procedure)) {
+        if (n->is(biConcat) || n->is(biAdd) || n->is(biSub)) {
             Error e("Binary operator in first operand to 'Call' is most likely not what you want");
             m_commandSource.addTraceTo(e, afl::string::Translator::getSystemInstance());
             scc.world().logError(afl::sys::LogListener::Warn, e);
@@ -918,7 +921,7 @@ interpreter::StatementCompiler::compileCall(BytecodeObject& bco, const Statement
     }
 
     /* Call */
-    procedure->compileValue(bco, scc);
+    procedure.compileValue(bco, scc);
     bco.addInstruction(Opcode::maIndirect, Opcode::miIMCall + Opcode::miIMRefuseFunctions, uint16_t(args.size()));
 
     return CompiledStatement;
@@ -1239,8 +1242,9 @@ interpreter::StatementCompiler::compileEval(BytecodeObject& bco, const Statement
     m_commandSource.tokenizer().readNextToken();
 
     /* Read arguments */
-    afl::container::PtrVector<interpreter::expr::Node> args;
-    parseArgumentList(args);
+    afl::base::Deleter del;
+    std::vector<const interpreter::expr::Node*> args;
+    parseArgumentList(args, del);
     if (args.size() == 0)
         throw Error("Too few arguments to 'Eval'");
 
@@ -1331,13 +1335,14 @@ interpreter::StatementCompiler::compileFor(BytecodeObject& bco, const StatementC
     }
 
     /* ...start expression... */
-    std::auto_ptr<interpreter::expr::Node> start(interpreter::expr::Parser(tok).parse());
+    afl::base::Deleter del;
+    const interpreter::expr::Node& start(interpreter::expr::Parser(tok, del).parse());
     if (!tok.checkAdvance("TO")) {
         throw Error::expectKeyword("To");
     }
 
     /* ...end expression... */
-    std::auto_ptr<interpreter::expr::Node> end(interpreter::expr::Parser(tok).parse());
+    const interpreter::expr::Node& end(interpreter::expr::Parser(tok, del).parse());
 
     /* Generate code for head */
     /*
@@ -1386,18 +1391,18 @@ interpreter::StatementCompiler::compileFor(BytecodeObject& bco, const StatementC
     BytecodeObject::Label_t lout      = bco.makeLabel();
     BytecodeObject::Label_t lbreak    = bco.makeLabel();
 
-    bool endIsLiteral = (dynamic_cast<interpreter::expr::LiteralNode*>(end.get()) != 0) && m_optimisationLevel >= 0;
+    bool endIsLiteral = (dynamic_cast<const interpreter::expr::LiteralNode*>(&end) != 0) && m_optimisationLevel >= 0;
 
     if (!endIsLiteral) {
-        end->compileValue(bco, scc);
+        end.compileValue(bco, scc);
         bco.addInstruction(Opcode::maUnary, unPos, 0);
     }
-    start->compileValue(bco, scc);
+    start.compileValue(bco, scc);
     bco.addInstruction(Opcode::maUnary, unPos, 0);
     bco.addLabel(lagain);
     bco.addVariableReferenceInstruction(Opcode::maStore, var, scc);
     if (endIsLiteral) {
-        end->compileValue(bco, scc);
+        end.compileValue(bco, scc);
     } else {
         bco.addInstruction(Opcode::maStack, Opcode::miStackDup, 1);
     }
@@ -1477,6 +1482,7 @@ interpreter::StatementCompiler::compileForEach(BytecodeObject& bco, const Statem
      end: */
 
     Tokenizer& tok = m_commandSource.tokenizer();
+    afl::base::Deleter del;
 
     /* Make labels */
     const BytecodeObject::Label_t lagain    = bco.makeLabel();
@@ -1485,7 +1491,7 @@ interpreter::StatementCompiler::compileForEach(BytecodeObject& bco, const Statem
 
     /* Compile scope expression */
     tok.readNextToken();
-    std::auto_ptr<interpreter::expr::Node> scope_expr(interpreter::expr::Parser(tok).parse());
+    const interpreter::expr::Node& scope_expr(interpreter::expr::Parser(tok, del).parse());
     if (tok.checkAdvance("AS")) {
         /* Named iteration variable */
         /*     <expr>             break: j end
@@ -1540,7 +1546,7 @@ interpreter::StatementCompiler::compileForEach(BytecodeObject& bco, const Statem
         ForEachStatementCompilationContext subcc(scc, lcontinue, lend);
 
         /* Compile loop head */
-        scope_expr->compileValue(bco, scc);
+        scope_expr.compileValue(bco, scc);
         bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialFirst, 0);
         bco.addLabel(lagain);
         bco.addVariableReferenceInstruction(Opcode::maStore, name, scc);
@@ -1591,7 +1597,7 @@ interpreter::StatementCompiler::compileForEach(BytecodeObject& bco, const Statem
         ForEachStatementCompilationContext subcc(scc, lcontinue, lend);
 
         /* Compile loop head */
-        scope_expr->compileValue(bco, scc);
+        scope_expr.compileValue(bco, scc);
         bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialFirstIndex, 0);
         bco.addJump(Opcode::jIfFalse | Opcode::jIfEmpty | Opcode::jPopAlways, lend);
         bco.addLabel(lagain);
@@ -1742,13 +1748,14 @@ interpreter::StatementCompiler::compileLoad(BytecodeObject& bco, const Statement
 
     /* Parse it */
     m_commandSource.tokenizer().readNextToken();
-    std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(m_commandSource.tokenizer()).parse());
+    afl::base::Deleter del;
+    const interpreter::expr::Node& node(interpreter::expr::Parser(m_commandSource.tokenizer(), del).parse());
     parseEndOfLine();
 
     /* Precompilation */
     bool precompiled = false;
     if (scc.hasFlag(scc.PreexecuteLoad)) {
-        if (interpreter::expr::LiteralNode* lit = dynamic_cast<interpreter::expr::LiteralNode*>(node.get())) {
+        if (const interpreter::expr::LiteralNode* lit = dynamic_cast<const interpreter::expr::LiteralNode*>(&node)) {
             if (afl::data::Value* value = lit->getValue()) {
                 String_t fileName(toString(value, false));
                 afl::base::Ptr<afl::io::Stream> file = scc.world().openLoadFile(fileName);
@@ -1768,7 +1775,7 @@ interpreter::StatementCompiler::compileLoad(BytecodeObject& bco, const Statement
 
     /* Generate code */
     if (!precompiled) {
-        node->compileValue(bco, scc);
+        node.compileValue(bco, scc);
         bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialLoad, 0);
         if (mustSucceed) {
             BytecodeObject::Label_t lab = bco.makeLabel();
@@ -2050,16 +2057,17 @@ interpreter::StatementCompiler::compilePrint(BytecodeObject& bco, const Statemen
        @since PCC2 1.99.9, PCC 1.0.6 */
 
     /* Parse it */
-    afl::container::PtrVector<interpreter::expr::Node> nodes;
+    std::vector<const interpreter::expr::Node*> nodes;
+    afl::base::Deleter del;
     m_commandSource.tokenizer().readNextToken();
-    parseArgumentList(nodes);
+    parseArgumentList(nodes, del);
 
     /* Check for "#fd" argument */
     size_t first = 0;
-    interpreter::expr::SimpleNode* ex;
+    const interpreter::expr::UnaryNode* ex;
     if (nodes.size() != 0
-        && (ex = dynamic_cast<interpreter::expr::SimpleNode*>(nodes[0])) != 0
-        && ex->is(Opcode::maUnary, unFileNr))
+        && (ex = dynamic_cast<const interpreter::expr::UnaryNode*>(nodes[0])) != 0
+        && ex->is(unFileNr))
     {
         first = 1;
         nodes[0]->compileValue(bco, scc);
@@ -2996,16 +3004,15 @@ interpreter::StatementCompiler::compileExpressionStatement(BytecodeObject& bco, 
 {
     // ex IntStatementCompiler::compileExpressionStatement(BytecodeObject& bco, const IntStatementCompilationContext& scc)
     /* Parse expression */
-    std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(m_commandSource.tokenizer()).parse());
+    afl::base::Deleter del;
+    const interpreter::expr::Node* node = &interpreter::expr::Parser(m_commandSource.tokenizer(), del).parse();
     if (m_commandSource.tokenizer().getCurrentToken() != Tokenizer::tEnd) {
         throw Error::garbageAtEnd(true);
     }
 
     /* If the topmost node is a comparison for equality, compile an assignment instead. */
-    if (interpreter::expr::CaseNode* cen = dynamic_cast<interpreter::expr::CaseNode*>(node.get())) {
-        if (interpreter::expr::Node* nn = cen->convertToAssignment()) {
-            node.reset(nn);
-        }
+    if (const interpreter::expr::CaseNode* cen = dynamic_cast<const interpreter::expr::CaseNode*>(node)) {
+        node = &cen->convertToAssignment(del);
     }
 
     /* Compile it */
@@ -3031,8 +3038,9 @@ interpreter::StatementCompiler::compileProcedureCall(BytecodeObject& bco, const 
     tok.readNextToken();
 
     /* Compile args */
-    afl::container::PtrVector<interpreter::expr::Node> args;
-    parseArgumentList(args);
+    afl::base::Deleter del;
+    std::vector<const interpreter::expr::Node*> args;
+    parseArgumentList(args, del);
     for (size_t i = 0; i != args.size(); ++i) {
         args[i]->compileValue(bco, scc);
     }
@@ -3305,8 +3313,9 @@ void
 interpreter::StatementCompiler::compileArgumentExpression(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileArgumentExpression
-    std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(m_commandSource.tokenizer()).parse());
-    node->compileValue(bco, scc);
+    afl::base::Deleter del;
+    interpreter::expr::Parser(m_commandSource.tokenizer(), del).parse()
+        .compileValue(bco, scc);
 }
 
 /** Compile argument condition. Parse one expression, and compile it
@@ -3320,8 +3329,9 @@ void
 interpreter::StatementCompiler::compileArgumentCondition(BytecodeObject& bco, const StatementCompilationContext& scc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff)
 {
     // ex IntStatementCompiler::compileArgumentCondition
-    std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(m_commandSource.tokenizer()).parse());
-    node->compileCondition(bco, scc, ift, iff);
+    afl::base::Deleter del;
+    interpreter::expr::Parser(m_commandSource.tokenizer(), del).parse()
+        .compileCondition(bco, scc, ift, iff);
 }
 
 /** Compile condition in "Case". Expects current token being the one following "Case".
@@ -3405,11 +3415,12 @@ interpreter::StatementCompiler::compileNameString(BytecodeObject& bco, const Sta
     if (tok.getCurrentToken() == tok.tLParen && name == "BYNAME") {
         // ByName(expr) syntax
         tok.readNextToken();
-        std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(m_commandSource.tokenizer()).parse());
+        afl::base::Deleter del;
+        const interpreter::expr::Node& node(interpreter::expr::Parser(m_commandSource.tokenizer(), del).parse());
         if (!tok.checkAdvance(tok.tRParen)) {
             throw Error::expectSymbol(")");
         }
-        node->compileValue(bco, scc);
+        node.compileValue(bco, scc);
         bco.addInstruction(Opcode::maUnary, unUCase, 0);
     } else {
         // Leave it at the name
@@ -3465,10 +3476,10 @@ interpreter::StatementCompiler::compileSubroutineDefinition(BytecodeObject& bco,
     \see parseCommandArgumentList
     \param args [out] Arguments expression trees are accumulated here */
 void
-interpreter::StatementCompiler::parseArgumentList(afl::container::PtrVector<interpreter::expr::Node>& args)
+interpreter::StatementCompiler::parseArgumentList(std::vector<const interpreter::expr::Node*>& args, afl::base::Deleter& del)
 {
     // ex IntStatementCompiler::parseArgumentList(ptr_vector<IntExprNode>& args)
-    parseCommandArgumentList(m_commandSource.tokenizer(), args);
+    parseCommandArgumentList(m_commandSource.tokenizer(), args, del);
 }
 
 /** Ensure that line ends here. */
@@ -3497,12 +3508,12 @@ interpreter::StatementCompiler::validateName(const StatementCompilationContext& 
 
 // Parse argument list.
 void
-interpreter::parseCommandArgumentList(Tokenizer& tok, afl::container::PtrVector<interpreter::expr::Node>& args)
+interpreter::parseCommandArgumentList(Tokenizer& tok, std::vector<const interpreter::expr::Node*>& args, afl::base::Deleter& del)
 {
     if (tok.getCurrentToken() != tok.tEnd) {
         /* We have some arguments */
         while (1) {
-            args.pushBackNew(interpreter::expr::Parser(tok).parse());
+            args.push_back(&interpreter::expr::Parser(tok, del).parse());
             if (!parseNext(tok)) {
                 break;
             }

@@ -81,9 +81,10 @@ namespace {
             {
                 // ex int/file.cc:SFGet
                 // Read arguments
-                afl::container::PtrVector<Node> xn;
+                afl::base::Deleter del;
+                std::vector<const Node*> xn;
                 line.readNextToken();
-                parseCommandArgumentList(line, xn);
+                parseCommandArgumentList(line, xn, del);
                 checkArgumentCount(xn.size(), 3, 3);
 
                 // Generate code. We must generate a read-modify-write cycle, because if
@@ -113,9 +114,10 @@ namespace {
             {
                 // ex int/file.cc:SFInput
                 // Read arguments
-                afl::container::PtrVector<Node> xn;
+                afl::base::Deleter del;
+                std::vector<const Node*> xn;
                 line.readNextToken();
-                parseCommandArgumentList(line, xn);
+                parseCommandArgumentList(line, xn, del);
                 checkArgumentCount(xn.size(), 2, 3);
 
                 // Generate code. We must generate a read-modify-write cycle, because if
@@ -154,10 +156,11 @@ namespace {
                 // ex fileint.pas:File_Open (part)
                 // Read file name argument
                 tok.readNextToken();
-                std::auto_ptr<Node> fileName(interpreter::expr::Parser(tok).parse());
+                afl::base::Deleter del;
+                const Node& fileName(interpreter::expr::Parser(tok, del).parse());
 
                 // Read keyword arguments
-                std::auto_ptr<Node> fd;
+                const Node* fd = 0;
                 int mode = -1;
                 while (tok.getCurrentToken() != tok.tEnd) {
                     if (tok.checkAdvance("FOR")) {
@@ -175,10 +178,10 @@ namespace {
                             throw interpreter::Error("Invalid mode for 'Open'");
                         }
                     } else if (tok.checkAdvance("AS")) {
-                        if (fd.get()) {
+                        if (fd != 0) {
                             throw interpreter::Error("Duplicate file number for 'Open'");
                         }
-                        fd.reset(interpreter::expr::Parser(tok).parse());
+                        fd = &interpreter::expr::Parser(tok, del).parse();
                     } else {
                         throw interpreter::Error("Syntax error");
                     }
@@ -188,13 +191,13 @@ namespace {
                 if (mode == -1) {
                     throw interpreter::Error("Missing mode for 'Open'");
                 }
-                if (!fd.get()) {
+                if (fd == 0) {
                     throw interpreter::Error("Missing file number for 'Open'");
                 }
 
                 // Generate code
                 fd->compileValue(bco, scc);
-                fileName->compileValue(bco, scc);
+                fileName.compileValue(bco, scc);
                 bco.addInstruction(Opcode::maPush, Opcode::sInteger, static_cast<uint16_t>(mode));
                 bco.addInstruction(Opcode::maPush, Opcode::sNamedShared, bco.addName("CC$OPEN"));
                 bco.addInstruction(Opcode::maIndirect, Opcode::miIMCall, 3);
@@ -241,9 +244,10 @@ namespace {
                 // ex fileint.pas:setxxx_internal (part)
 
                 // Read arguments
-                afl::container::PtrVector<Node> xn;
+                afl::base::Deleter del;
+                std::vector<const Node*> xn;
                 tok.readNextToken();
-                parseCommandArgumentList(tok, xn);
+                parseCommandArgumentList(tok, xn, del);
                 checkArgumentCount(xn.size(), 3, 0xFFFE);
 
                 // Read cycle for first arg
@@ -290,9 +294,10 @@ namespace {
                 // ex int/file.cc:SFSetStr
                 // ex fileint.pas:File_SetStr (part)
                 // Read arguments
-                afl::container::PtrVector<Node> xn;
+                afl::base::Deleter del;
+                std::vector<const Node*> xn;
                 tok.readNextToken();
-                parseCommandArgumentList(tok, xn);
+                parseCommandArgumentList(tok, xn, del);
                 checkArgumentCount(xn.size(), 4, 4);
 
                 // Read cycle for first arg

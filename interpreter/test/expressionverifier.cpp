@@ -4,6 +4,7 @@
   */
 
 #include "interpreter/test/expressionverifier.hpp"
+#include "afl/base/deleter.hpp"
 #include "afl/data/booleanvalue.hpp"
 #include "afl/data/floatvalue.hpp"
 #include "afl/data/integervalue.hpp"
@@ -11,6 +12,7 @@
 #include "afl/data/stringvalue.hpp"
 #include "afl/except/assertionfailedexception.hpp"
 #include "afl/io/nullfilesystem.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/compilationcontext.hpp"
@@ -26,7 +28,6 @@
 #include "interpreter/tokenizer.hpp"
 #include "interpreter/values.hpp"
 #include "interpreter/world.hpp"
-#include "afl/string/nulltranslator.hpp"
 
 using afl::test::Assert;
 using afl::except::AssertionFailedException;
@@ -152,13 +153,14 @@ interpreter::test::ExpressionVerifier::verifyFile(const char* expr, int result)
         afl::string::NullTranslator tx;
         afl::io::NullFileSystem fs;
         World world(logger, tx, fs);
+        afl::base::Deleter del;
 
         Tokenizer tok(expr);
-        std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(tok).parse());
+        const interpreter::expr::Node& node(interpreter::expr::Parser(tok, del).parse());
         me.check("parse complete", tok.getCurrentToken() == tok.tEnd);
 
         BCORef_t bco = BytecodeObject::create(true);
-        node->compileValue(*bco, CompilationContext(world));
+        node.compileValue(*bco, CompilationContext(world));
 
         Process exec(world, "verifyFile", 9);
         setupContexts(exec);
@@ -194,13 +196,14 @@ interpreter::test::ExpressionVerifier::verifyNull(const char* expr)
         afl::string::NullTranslator tx;
         afl::io::NullFileSystem fs;
         World world(logger, tx, fs);
+        afl::base::Deleter del;
 
         Tokenizer tok(expr);
-        std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(tok).parse());
+        const interpreter::expr::Node& node(interpreter::expr::Parser(tok, del).parse());
         me.check("parse complete", tok.getCurrentToken() == tok.tEnd);
 
         BCORef_t bco = BytecodeObject::create(true);
-        node->compileValue(*bco, CompilationContext(world));
+        node.compileValue(*bco, CompilationContext(world));
 
         Process exec(world, "verifyNull", 9);
         setupContexts(exec);
@@ -230,13 +233,14 @@ interpreter::test::ExpressionVerifier::verifyString(const char* expr, const char
         afl::string::NullTranslator tx;
         afl::io::NullFileSystem fs;
         World world(logger, tx, fs);
+        afl::base::Deleter del;
 
         Tokenizer tok(expr);
-        std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(tok).parse());
+        const interpreter::expr::Node& node(interpreter::expr::Parser(tok, del).parse());
         me.check("parse complete", tok.getCurrentToken() == tok.tEnd);
 
         BCORef_t bco = BytecodeObject::create(true);
-        node->compileValue(*bco, CompilationContext(world));
+        node.compileValue(*bco, CompilationContext(world));
 
         Process exec(world, "verifyString", 9);
         setupContexts(exec);
@@ -274,13 +278,14 @@ interpreter::test::ExpressionVerifier::verifyFloat(const char* expr, double resu
         afl::string::NullTranslator tx;
         afl::io::NullFileSystem fs;
         World world(logger, tx, fs);
+        afl::base::Deleter del;
 
         Tokenizer tok(expr);
-        std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(tok).parse());
+        const interpreter::expr::Node& node(interpreter::expr::Parser(tok, del).parse());
         me.check("parse complete", tok.getCurrentToken() == tok.tEnd);
 
         BCORef_t bco = BytecodeObject::create(true);
-        node->compileValue(*bco, CompilationContext(world));
+        node.compileValue(*bco, CompilationContext(world));
 
         Process exec(world, "verifyFloat", 9);
         setupContexts(exec);
@@ -318,13 +323,14 @@ interpreter::test::ExpressionVerifier::verifyExecutionError(const char* expr)
         afl::string::NullTranslator tx;
         afl::io::NullFileSystem fs;
         World world(logger, tx, fs);
+        afl::base::Deleter del;
 
         Tokenizer tok(expr);
-        std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(tok).parse());
+        const interpreter::expr::Node& node(interpreter::expr::Parser(tok, del).parse());
         me.check("parse complete", tok.getCurrentToken() == tok.tEnd);
 
         BCORef_t bco = BytecodeObject::create(true);
-        node->compileValue(*bco, CompilationContext(world));
+        node.compileValue(*bco, CompilationContext(world));
         compiled = true;
 
         Process exec(world, "verifyExecutionError", 9);
@@ -351,11 +357,12 @@ interpreter::test::ExpressionVerifier::verifyCompileError(const char* expr)
     afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
     World world(logger, tx, fs);
+    afl::base::Deleter del;
 
     Tokenizer tok(expr);
-    std::auto_ptr<interpreter::expr::Node> node;
+    const interpreter::expr::Node* node = 0;
     try {
-        node.reset(interpreter::expr::Parser(tok).parse());
+        node = &interpreter::expr::Parser(tok, del).parse();
     }
     catch (...) {
         me.fail("exception during parse");
@@ -381,11 +388,11 @@ interpreter::test::ExpressionVerifier::verifyParseError(const char* expr)
     // ex ExpressionTestHelper::checkRejectedExpression
     Assert me(m_assert(expr));
 
+    afl::base::Deleter del;
     Tokenizer tok(expr);
-    std::auto_ptr<interpreter::expr::Node> node;
     bool threw = false;
     try {
-        node.reset(interpreter::expr::Parser(tok).parse());
+        interpreter::expr::Parser(tok, del).parse();
     }
     catch (Error&) {
         threw = true;
@@ -450,13 +457,14 @@ interpreter::test::ExpressionVerifier::verifyScalar(const char* expr, int result
         afl::string::NullTranslator tx;
         afl::io::NullFileSystem fs;
         World world(logger, tx, fs);
+        afl::base::Deleter del;
 
         Tokenizer tok(expr);
-        std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(tok).parse());
+        const interpreter::expr::Node& node(interpreter::expr::Parser(tok, del).parse());
         me.check("parse complete", tok.getCurrentToken() == tok.tEnd);
 
         BCORef_t bco = BytecodeObject::create(true);
-        node->compileValue(*bco, CompilationContext(world));
+        node.compileValue(*bco, CompilationContext(world));
 
         Process exec(world, "verifyScalar", 9);
         setupContexts(exec);

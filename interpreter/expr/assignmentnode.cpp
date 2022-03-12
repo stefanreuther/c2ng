@@ -1,26 +1,26 @@
 /**
   *  \file interpreter/expr/assignmentnode.cpp
+  *  \brief Class interpreter::expr::AssignmentNode
   */
 
 #include "interpreter/expr/assignmentnode.hpp"
 
 void
-interpreter::expr::AssignmentNode::compileValue(BytecodeObject& bco, const CompilationContext& cc)
+interpreter::expr::AssignmentNode::compileValue(BytecodeObject& bco, const CompilationContext& cc) const
 {
     // ex IntAssignmentNode::compileValue
     // ex ccexpr.pas:op_ASSIGN2 (sort-of)
-    a->compileStore(bco, cc, *b);
+    m_a.compileStore(bco, cc, m_b);
 }
 
 void
-interpreter::expr::AssignmentNode::compileEffect(BytecodeObject& bco, const interpreter::CompilationContext& cc)
+interpreter::expr::AssignmentNode::compileEffect(BytecodeObject& bco, const interpreter::CompilationContext& cc) const
 {
     defaultCompileEffect(bco, cc);
 }
 
 void
-interpreter::expr::AssignmentNode::compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff)
+interpreter::expr::AssignmentNode::compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
 {
     defaultCompileCondition(bco, cc, ift, iff);
 }
-
