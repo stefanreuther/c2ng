@@ -25,6 +25,7 @@
 #include "client/dialogs/helpdialog.hpp"
 #include "client/dialogs/historyship.hpp"
 #include "client/dialogs/hullspecification.hpp"
+#include "client/dialogs/imperialstats.hpp"
 #include "client/dialogs/inboxdialog.hpp"
 #include "client/dialogs/ionstorminfo.hpp"
 #include "client/dialogs/keymapdialog.hpp"
@@ -1316,6 +1317,28 @@ client::si::IFCCIonStormInfo(game::Session& session, ScriptSide& si, RequestLink
                 UserSide& iface = ctl.interface();
                 OutputState out;
                 client::dialogs::doIonStormInfoDialog(iface, ctl.root(), ctl.translator(), out);
+                iface.joinProcess(link, out.getProcess());
+                ctl.handleStateChange(link, out.getTarget());
+            }
+    };
+    session.notifyListeners();
+    si.postNewTask(link, new Task());
+}
+
+// @since PCC2 2.40.12
+void
+client::si::IFCCImperialStats(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    args.checkArgumentCount(0);
+    game::actions::mustHaveGame(session);
+
+    class Task : public UserTask {
+     public:
+        virtual void handle(Control& ctl, RequestLink2 link)
+            {
+                UserSide& iface = ctl.interface();
+                OutputState out;
+                client::dialogs::doImperialStatistics(iface, out);
                 iface.joinProcess(link, out.getProcess());
                 ctl.handleStateChange(link, out.getTarget());
             }
@@ -3695,6 +3718,7 @@ client::si::registerCommands(UserSide& ui)
                 // s.world().setNewGlobalValue("CC$GIVE",               new ScriptProcedure(s, &si, IFCCGive));
                 s.world().setNewGlobalValue("CC$GOTOCOORDINATES",    new ScriptProcedure(s, &si, IFCCGotoCoordinates));
                 s.world().setNewGlobalValue("CC$IONSTORMINFO",       new ScriptProcedure(s, &si, IFCCIonStormInfo));
+                s.world().setNewGlobalValue("CC$IMPERIALSTATS",      new ScriptProcedure(s, &si, IFCCImperialStats));
                 s.world().setNewGlobalValue("CC$LISTSCREENHISTORY",  new ScriptProcedure(s, &si, IFCCListScreenHistory));
                 s.world().setNewGlobalValue("CC$MANAGEBUILDQUEUE",   new ScriptProcedure(s, &si, IFCCManageBuildQueue));
                 s.world().setNewGlobalValue("CC$MINEFIELDINFO",      new ScriptProcedure(s, &si, IFCCMinefieldInfo));

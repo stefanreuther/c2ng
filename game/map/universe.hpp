@@ -261,6 +261,11 @@ namespace game { namespace map {
             \return controlling planet Id; 0 if none */
         Id_t findControllingPlanetId(const Minefield& mf) const;
 
+        /** Find planet with universal minefield friendly code (mfX).
+            \param forPlayer Player; must have played planets
+            \return planet Id; 0 if none */
+        Id_t findUniversalMinefieldFriendlyCodePlanetId(int forPlayer) const;
+
         /** Mark objects within a range of coordinates.
             Coordinates describe a rectangle and can be in any order
             \param a First coordinates

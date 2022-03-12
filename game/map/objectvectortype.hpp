@@ -25,8 +25,12 @@ namespace game { namespace map {
 
         virtual bool isValid(const T& obj) const = 0;
 
+        const T* getObjectByIndex(Id_t index) const;
+
      private:
         ObjectVector<T>& m_vector;
+
+        T* getObjectByIndexInternal(Id_t id) const;
     };
 
 } }
@@ -46,15 +50,14 @@ template<typename T>
 T*
 game::map::ObjectVectorType<T>::getObjectByIndex(Id_t index)
 {
-    if (T* p = m_vector.get(index)) {
-        if (isValid(*p)) {
-            return p;
-        } else {
-            return 0;
-        }
-    } else {
-        return 0;
-    }
+    return getObjectByIndexInternal(index);
+}
+
+template<typename T>
+inline const T*
+game::map::ObjectVectorType<T>::getObjectByIndex(Id_t index) const
+{
+    return getObjectByIndexInternal(index);
 }
 
 template<typename T>
@@ -71,6 +74,21 @@ game::map::ObjectVectorType<T>::getPreviousIndex(Id_t index) const
 {
     // ex GIndexedObjectType::getPreviousIndex
     return index > 0 ? index-1 : m_vector.size();
+}
+
+template<typename T>
+T*
+game::map::ObjectVectorType<T>::getObjectByIndexInternal(Id_t index) const
+{
+    if (T* p = m_vector.get(index)) {
+        if (isValid(*p)) {
+            return p;
+        } else {
+            return 0;
+        }
+    } else {
+        return 0;
+    }
 }
 
 #endif

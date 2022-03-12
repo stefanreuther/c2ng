@@ -15,9 +15,17 @@ namespace game { namespace map {
         Contains all ships that can be played (ReadOnly or better). */
     class PlayedShipType : public ObjectVectorType<Ship> {
      public:
+        /** Constructor.
+            @param vec Ships */
         PlayedShipType(ObjectVector<Ship>& vec);
 
+        // ObjectVectorType:
         virtual bool isValid(const Ship& p) const;
+
+        /** Count capital ships.
+            @return number of capital ships
+            @see Ship::hasWeapons */
+        int countCapitalShips() const;
     };
 
 } }

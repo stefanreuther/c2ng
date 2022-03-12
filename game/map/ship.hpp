@@ -319,6 +319,10 @@ namespace game { namespace map {
             \param count Number */
         void setNumLaunchers(IntegerProperty_t count);
 
+        /** Check for weapons.
+            \return true if ship has weapons, false if not (=it's a freighter) or not known. */
+        bool hasWeapons() const;
+
 
         /*
          *  Mission accessors

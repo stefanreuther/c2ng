@@ -1,0 +1,7 @@
+/*!
+     \namespace game::map::info
+     \brief Information about Map objects (Imperial Statistics)
+
+     This namespace contains functions and classes to generate information about map objects,
+     exposed as "Imperial Statistics" to the user.
+ */

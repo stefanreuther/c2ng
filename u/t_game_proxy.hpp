@@ -180,6 +180,14 @@ class TestGameProxyHullSpecificationProxy : public CxxTest::TestSuite {
     void testSetQuery();
 };
 
+class TestGameProxyImperialStatsProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNonempty();
+    void testOptions();
+    void testContentOptions();
+};
+
 class TestGameProxyInboxAdaptor : public CxxTest::TestSuite {
  public:
     void testInboxAdaptor();

@@ -585,6 +585,29 @@ game::map::Universe::findControllingPlanetId(const Minefield& mf) const
     return pid;
 }
 
+game::Id_t
+game::map::Universe::findUniversalMinefieldFriendlyCodePlanetId(int forPlayer) const
+{
+    Id_t umfPlanet = 0;
+
+    for (Id_t pid = m_playedPlanets.findNextIndex(0); pid != 0; pid = m_playedPlanets.findNextIndex(pid)) {
+        if (const Planet* pl = m_playedPlanets.getObjectByIndex(pid)) {
+            if (pl->isPlayable(Object::Playable)) {
+                int owner;
+                String_t fc;
+                if (pl->getOwner(owner)
+                    && owner == forPlayer
+                    && pl->getFriendlyCode().get(fc)
+                    && util::strStartsWith(fc, "mf"))
+                {
+                    umfPlanet = pid;
+                }
+            }
+        }
+    }
+    return umfPlanet;
+}
+
 int
 game::map::Universe::markObjectsInRange(Point a, Point b)
 {

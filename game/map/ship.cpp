@@ -865,6 +865,14 @@ game::map::Ship::setNumLaunchers(IntegerProperty_t count)
     markDirty();
 }
 
+bool
+game::map::Ship::hasWeapons() const
+{
+    return getNumBeams().orElse(0) > 0
+        || getNumLaunchers().orElse(0) > 0
+        || getNumBays().orElse(0) > 0;
+}
+
 
 /*
  *  Mission accessors
