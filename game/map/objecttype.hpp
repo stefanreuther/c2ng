@@ -28,7 +28,9 @@ namespace game { namespace map {
         which only return valid object indexes, and can optionally filter for marked objects.
 
         If the underlying set changes (as opposed to: the underlying objects change),
-        the implementor must raise sig_setChange. */
+        the implementor must raise sig_setChange.
+
+        Note: uniform ObjectTypes (i.e. most of them) should derive from TypedObjectType. */
     class ObjectType : public afl::base::Deletable {
      public:
         /** Virtual destructor. */
@@ -178,10 +180,10 @@ namespace game { namespace map {
             \retval false No object was dirty, no listeners notified
             \retval true Some objects were dirty */
         bool notifyObjectListeners();
- 
+
         /** Called when the underlying set changes, i.e. objects come and go or are replaced by different objects.
             Called after the change.
- 
+
             For simple changes, the integer can be a hint for users, i.e. the new Id of a renamed object.
             If the emitter doesn't want to give a hint, it can pass 0. */
         afl::base::Signal<void(Id_t)> sig_setChange;

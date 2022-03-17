@@ -7,7 +7,7 @@
 
 #include "afl/container/ptrvector.hpp"
 #include "game/map/explosion.hpp"
-#include "game/map/objecttype.hpp"
+#include "game/map/typedobjecttype.hpp"
 #include "game/parser/messageinformation.hpp"
 
 namespace game { namespace map {
@@ -17,7 +17,7 @@ namespace game { namespace map {
 
         Since explosions have optional Ids, the indexes used for iteration
         have no guaranteed relation to the explosion's Ids. */
-    class ExplosionType : public ObjectType {
+    class ExplosionType : public TypedObjectType<Explosion> {
      public:
         /** Default constructor.
             Makes an empty container. */

@@ -10,7 +10,7 @@
 #include "afl/string/translator.hpp"
 #include "afl/sys/loglistener.hpp"
 #include "game/config/hostconfiguration.hpp"
-#include "game/map/objecttype.hpp"
+#include "game/map/typedobjecttype.hpp"
 #include "game/map/ufo.hpp"
 #include "game/parser/messageinformation.hpp"
 
@@ -57,7 +57,7 @@ namespace game { namespace map {
 
         In addition to managing Ufos, UfoType also manages a temporary list of wormhole reports,
         which are merged into Ufos using postprocess(). */
-    class UfoType : public ObjectType {
+    class UfoType : public TypedObjectType<Ufo> {
      public:
         /** Constructor. */
         UfoType();

@@ -8,13 +8,13 @@
 #ifndef C2NG_GAME_MAP_OBJECTVECTORTYPE_HPP
 #define C2NG_GAME_MAP_OBJECTVECTORTYPE_HPP
 
-#include "game/map/objecttype.hpp"
 #include "game/map/objectvector.hpp"
+#include "game/map/typedobjecttype.hpp"
 
 namespace game { namespace map {
 
     template<typename T>
-    class ObjectVectorType : public ObjectType {
+    class ObjectVectorType : public TypedObjectType<T> {
      public:
         ObjectVectorType(ObjectVector<T>& vec);
         ~ObjectVectorType();

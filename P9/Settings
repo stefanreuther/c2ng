@@ -12,7 +12,7 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = interpreter/expr/binarynode.cpp \
+FILES_gamelib = game/map/typedobjecttype.hpp interpreter/expr/binarynode.cpp \
     interpreter/expr/binarynode.hpp interpreter/expr/unarynode.cpp \
     interpreter/expr/unarynode.hpp game/pcc/turnloader.cpp \
     game/pcc/turnloader.hpp game/task.cpp game/task.hpp \
@@ -1641,7 +1641,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_server_file_ca_garbagecollector.cpp u/t_game_task.cpp \
+FILES_testsuite = u/t_game_map_typedobjecttype.cpp \
+    u/t_server_file_ca_garbagecollector.cpp u/t_game_task.cpp \
     u/t_util_doc_verifier.cpp u/t_util_doc_summarizingverifier.cpp \
     u/t_util_doc_loggingverifier.cpp u/t_server_doc_documentationimpl.cpp \
     u/t_server_doc.hpp u/t_server_interface_documentationserver.cpp \

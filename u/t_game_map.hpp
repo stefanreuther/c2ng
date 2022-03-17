@@ -473,6 +473,11 @@ class TestGameMapShipTransporter : public CxxTest::TestSuite {
     void testNames();
 };
 
+class TestGameMapTypedObjectType : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
 class TestGameMapUfo : public CxxTest::TestSuite {
  public:
     void testAccessor();
