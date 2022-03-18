@@ -1,5 +1,5 @@
 /**
-  *  \file game/point.cpp
+  *  \file game/map/point.cpp
   *  \brief Class game::map::Point
   */
 

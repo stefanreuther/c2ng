@@ -100,7 +100,7 @@ namespace game { namespace config {
         void pack(Items_t& out, Area a, afl::string::Translator& tx) const;
 
         /** Add recent expression.
-            \param area  Area
+            \param a     Area
             \param flags Flags (including brackets)
             \param expr  Expression (used as name and value) */
         void pushRecent(Area a, String_t flags, String_t expr);

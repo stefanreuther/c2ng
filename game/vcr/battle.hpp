@@ -71,6 +71,8 @@ namespace game { namespace vcr {
             - -1 = unit got destroyed
             - 0 = unit survived or fight not playable
             - positive = unit got captured by specified player
+            \param config Host configuration
+            \param shipList Ship list
             \param slot Slot, [0,getNumObjects()) */
         virtual int getOutcome(const game::config::HostConfiguration& config,
                                const game::spec::ShipList& shipList,
@@ -124,7 +126,7 @@ namespace game { namespace vcr {
         /** Compute scores for one unit.
             Requires the result to be prepared at NeedCompleteResult level (will honor damage taken in computation).
             Accumulates the resulting scores in the given Score object.
-            \param [in/out] score    Scores are added here
+            \param [in,out] score    Scores are added here
             \param [in]     slot     Compute scores for this side
             \param [in]     config   Configuration to use
             \param [in]     shipList Ship list to use

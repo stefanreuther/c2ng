@@ -12,9 +12,6 @@ using interpreter::makeIntegerValue;
 using interpreter::makeOptionalIntegerValue;
 using game::score::CompoundScore;
 
-/** Get player property.
-    \param pid Player to query (out of range values are handled properly)
-    \param ipl Player property to query */
 afl::data::Value*
 game::interface::getPlayerProperty(int pid, PlayerProperty ipl,
                                    const PlayerList& list,

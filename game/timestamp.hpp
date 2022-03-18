@@ -55,7 +55,7 @@ namespace game {
         ConstData_t getRawData() const;
 
         /** Store raw data in data field (array of 18 chars).
-            \param out data goes here */
+            \param data data goes here */
         void storeRawData(Data_t data) const;
 
         /** Compare for equality.
@@ -85,7 +85,7 @@ namespace game {
         /** Check validity.
             A timestamp is valid if it is not the null timestamp (default constructor). */
         bool isValid() const;
-        
+
      private:
         uint8_t m_data[SIZE];
     };

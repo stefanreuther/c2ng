@@ -25,7 +25,7 @@ namespace ui {
     class LayoutableGroup : public Widget {
      public:
         /** Constructor.
-            \param layout Layout manager. Needs to live at least as long as the widget. */
+            \param mgr Layout manager. Needs to live at least as long as the widget. */
         explicit LayoutableGroup(ui::layout::Manager& mgr) throw();
 
         // virtual void draw(gfx::Canvas& can);

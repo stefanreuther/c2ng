@@ -104,7 +104,7 @@ namespace game { namespace proxy {
 
         /** Constructor.
             \param sender     Sender
-            \param receiver   RequestDispatcher to receive updates in this thread
+            \param recv       RequestDispatcher to receive updates in this thread
             \param tx         Translator
             \param picNamer   Picture Namer. Can be null, then you won't get picture names. */
         VcrDatabaseProxy(util::RequestSender<VcrDatabaseAdaptor> sender, util::RequestDispatcher& recv, afl::string::Translator& tx, std::auto_ptr<game::spec::info::PictureNamer> picNamer);

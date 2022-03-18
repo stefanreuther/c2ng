@@ -63,7 +63,7 @@ namespace game { namespace v3 {
 
         /** Get score.
             \param player Player to query
-            \param score Score to query
+            \param what Score to query
             \return Score. -1 if parameters are out of range */
         int getScore(int player, Score what) const;
 

@@ -137,7 +137,7 @@ namespace ui { namespace widgets {
         void addNewIcon(int id, gfx::Point pos, ui::icons::Icon* pIcon);
 
         /** Remove overlay icon.
-            \param Id Id of icon */
+            \param id Id of icon */
         void removeIcon(int id);
 
         // SimpleWidget:

@@ -47,7 +47,7 @@ namespace server { namespace console {
 
         /** Evaluate a string.
             Interprets the string as a sequence of commands.
-            \param in     [in] String
+            \param str    [in] String
             \param result [out] Result of last command */
         void evaluateString(const String_t& str, std::auto_ptr<afl::data::Value>& result);
 

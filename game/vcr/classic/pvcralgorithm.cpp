@@ -1513,7 +1513,7 @@ game::vcr::classic::PVCRAlgorithm::initActivityDetector()
 
 /** Compare inactivity detector status for one side.
     \param a     DetectorStatus object
-    \param side  Side to compare with
+    \param st    Side to compare with
     \return true iff DetectorStatus represents current status */
 inline bool
 game::vcr::classic::PVCRAlgorithm::compareDetectorStatus(const DetectorStatus& a, const Status& st)
@@ -1534,8 +1534,8 @@ game::vcr::classic::PVCRAlgorithm::compareDetectorStatus(const DetectorStatus& a
 }
 
 /** Fill in inactivity detector status for one side.
-    \param a     [out] DetectorStatus object
-    \param side  Side to fill in */
+    \param [out] a     DetectorStatus object
+    \param [in]  st    Side to fill in */
 void
 game::vcr::classic::PVCRAlgorithm::setDetectorStatus(DetectorStatus& a, const Status& st)
 {

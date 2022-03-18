@@ -5,17 +5,6 @@
 
 #include "game/config/configurationoption.hpp"
 
-// FIXME: remove
-// /** Constructor. Constructs an object and adds it to the container.
-//     \param container Config object
-//     \param name Name of option. Lifetime must be the same or longer as
-//                 this ConfigOption object's, i.e. static. */
-// ConfigOption::ConfigOption(Config& container, const char* name)
-//     : name(name), source(srcDefault)
-// {
-//     container.addConfigOption(*this);
-// }
-
 // Constructor.
 game::config::ConfigurationOption::ConfigurationOption()
     : m_source(Default),

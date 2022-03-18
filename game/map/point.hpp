@@ -1,5 +1,5 @@
 /**
-  *  \file game/point.hpp
+  *  \file game/map/point.hpp
   *  \brief Class game::map::Point
   */
 #ifndef C2NG_GAME_POINT_HPP

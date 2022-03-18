@@ -32,7 +32,7 @@ namespace util { namespace syntax {
             - "}" (cancel last keyprefix)
             Lines starting with ";" or "#" are comments.
             \param in File
-            \parm log Logger */
+            \param log Logger */
         void load(afl::io::Stream& in, afl::sys::LogListener& log);
 
         /** Add or replace key.

@@ -79,8 +79,9 @@ server::talk::UserFolder::getHeader(String_t key, Root& root)
     return toString(result.get());
 }
 
-// /** Describe this folder.
-//     \param isUser true iff this is a user folder */
+/** Describe this folder.
+    \param isUser true iff this is a user folder
+    \param root Server root */
 server::interface::TalkFolder::Info
 server::talk::UserFolder::describe(bool isUser, Root& root)
 {

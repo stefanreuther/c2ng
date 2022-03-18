@@ -45,7 +45,7 @@ namespace game { namespace sim {
             \param [in]     list    Ship list
             \param [in]     config  Host configuration
             \param [in]     flakConfig FLAK configuration
-            \param [in/out] rng     Random number generator */
+            \param [in,out] rng     Random number generator */
         Runner(const Setup& setup,
                const Configuration& opts,
                const game::spec::ShipList& list,
@@ -62,7 +62,7 @@ namespace game { namespace sim {
             or the StopSignal signals stop.
 
             \param [in]     limit    Count limit. Use makeSeriesLimit(), makeNoLimit(), makeFiniteLimit() to create.
-            \param [in/out] stopper  Can be signaled by another thread to stop early
+            \param [in,out] stopper  Can be signaled by another thread to stop early
 
             Implementations must repeatedly
             - call makeJob() with the given parameters

@@ -49,8 +49,8 @@ namespace game { namespace proxy {
         };
 
         /** Constructor.
+            \param reply      RequestDispatcher to receive replies
             \param gameSender Game sender
-            \param receiver   RequestDispatcher to receive replies
             \param planetId   Planet Id*/
         PlanetPredictorProxy(util::RequestDispatcher& reply,
                              util::RequestSender<Session> gameSender,

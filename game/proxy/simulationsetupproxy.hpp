@@ -427,7 +427,7 @@ namespace game { namespace proxy {
 
         /** Set ship beam type.
             \param slot      Slot number
-            \param beamTypes New beam type
+            \param beamType  New beam type
             \see game::sim::Ship::setBeamType */
         void setBeamType(Slot_t slot, int beamType);
 
@@ -462,8 +462,8 @@ namespace game { namespace proxy {
         void setAmmo(Slot_t slot, int ammo);
 
         /** Set ship engine type.
-            \param slot  Slot number
-            \param r     New engine type
+            \param slot       Slot number
+            \param engineType New engine type
             \see game::sim::Ship::setEngineType */
         void setEngineType(Slot_t slot, int engineType);
 
@@ -546,7 +546,6 @@ namespace game { namespace proxy {
 
         /** Get choices for setExperienceLevel().
             \param [in]  ind    WaitIndicator for UI synchronisation
-            \param [in]  slot   Slot number
             \param [out] result Result (experience level/name pairs) */
         void getExperienceLevelChoices(WaitIndicator& ind, Elements_t& result);
 

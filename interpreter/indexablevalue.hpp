@@ -17,19 +17,15 @@ namespace interpreter {
      public:
         /** Call.
             This implements "a := value(args)".
-            \param dseg  Data segment containing parameters
-            \param index Index of first parameter
-            \param nargs Number of parameters
-            \return obtained value. Throws IntError if request is invalid */
+            \param args Parameters
+            \return obtained value, newly-allocated. Throws Error if request is invalid */
         virtual afl::data::Value* get(Arguments& args) = 0;
 
         /** Set indexed value.
             This implements "value(args) := a".
-            \param dseg  Data segment containing parameters
-            \param index Index of first parameter
-            \param nargs Number of parameters
-            \param value Value to assign.
-            \return obtained value. Throws IntError if request is invalid */
+            \param args Parameters
+            \param value Value to assign, owned by caller.
+            \return obtained value. Throws Error if request is invalid */
         virtual void set(Arguments& args, afl::data::Value* value) = 0;
 
         virtual bool isProcedureCall() const;

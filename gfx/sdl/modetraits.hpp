@@ -16,7 +16,7 @@ namespace gfx { namespace sdl {
     /** \defgroup gfx_mode_traits Graphics Mode Traits
         These define access to surfaces of various depths.
         Each type supports the following expressions:
-    
+
         - T::pix_type      = type which can hold a pixel
         - T::peek(ptr)     = read video memory at specified address
         - T::poke(ptr,val) = modify video memory at specified address
@@ -27,7 +27,7 @@ namespace gfx { namespace sdl {
     struct ModeTraits8 {
         typedef uint8_t Pixel_t;
         typedef uint8_t Data_t;
-        
+
         Data_t* get(int x, int y) const                               { return add((Data_t*)sfc->pixels, x, y); }
         static inline Pixel_t peek(Data_t* ptr)                       { return *ptr; }
         static inline void poke(Data_t* ptr, Pixel_t val)             { *ptr = val; }
@@ -145,13 +145,8 @@ gfx::sdl::ModeTraits32::mix(Pixel_t a, Pixel_t b, Alpha_t balpha) const
 }
 
 /** Pixel Format Switch.
-    \param function name of a function defined as
-                    `template<class T> void func(args)'
-    \param args     arguments to use for call
-
-    Calls the correct function with the appropriate mode traits filled
-    in. The surface being examined must be in scope under the name
-    `sfc'. */
+    \param sfc      surface
+    \param call     function call to invoke on the appropriate ModeTraits */
 #define GFX_MODE_SWITCH(sfc, call)                             \
     do switch(sfc->format->BytesPerPixel) {                    \
      case 1:                                                   \

@@ -24,9 +24,9 @@ namespace game { namespace pcc {
     class ServerDirectory : public afl::io::Directory {
      public:
         /** Constructor.
-            @param handle BrowserHandler instance
-            @param acc    Account instance (mutable; might eventually invalidate tokens or update caches)
-            @param name   Name */
+            @param handler BrowserHandler instance
+            @param acc     Account instance (mutable; might eventually invalidate tokens or update caches)
+            @param name    Name */
         ServerDirectory(BrowserHandler& handler, game::browser::Account& acc, String_t name);
 
         /** Destructor. */

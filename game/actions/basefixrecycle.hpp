@@ -32,7 +32,7 @@ namespace game { namespace actions {
         explicit BaseFixRecycle(game::map::Planet& planet);
 
         /** Get valid actions for a ship.
-            \param ship Ship to check
+            \param sh Ship to check
             \return Set of actions that are valid for this ship */
         ShipyardActionSet_t getValidActions(const game::map::Ship& sh) const;
 

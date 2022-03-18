@@ -58,7 +58,7 @@ namespace server { namespace interface {
 
         /** Get RFC message header for multiple posting (NNTPPOSTMHEAD).
             \param [in] messageIds Message Ids
-            \param [out] Segment containing result hashes */
+            \param [out] results Segment containing result hashes */
         virtual void getMessageHeader(afl::base::Memory<const int32_t> messageIds, afl::data::Segment& results) = 0;
 
         /** List forum group as newsgroup list (NNTPGROUPLS).

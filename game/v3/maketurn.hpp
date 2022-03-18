@@ -39,13 +39,15 @@ namespace game { namespace v3 {
             The turn is generated in memory; this function does not write anything to the disk.
             Call this exactly once for every player in the game directory.
 
-            \param pid Player number [1,NUM_PLAYERS]
+            \param playerNr Player number [1,NUM_PLAYERS]
             \param log Logger
             \return Number of commands in that turn*/
         size_t makeTurn(int playerNr, afl::sys::LogListener& log);
 
         /** Finish and write out turn files.
-            \param log Logger */
+            \param log Logger
+            \param fs File system (for backups)
+            \param config User configuration (for backups) */
         void saveAll(afl::sys::LogListener& log, afl::io::FileSystem& fs, const game::config::UserConfiguration& config);
 
         /** Get number of prepared turn files.

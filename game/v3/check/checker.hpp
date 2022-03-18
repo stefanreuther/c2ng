@@ -1,5 +1,5 @@
 /**
-  *  \file game/v3/checker/checker.hpp
+  *  \file game/v3/check/checker.hpp
   */
 #ifndef C2NG_GAME_V3_CHECK_CHECKER_HPP
 #define C2NG_GAME_V3_CHECK_CHECKER_HPP

@@ -67,7 +67,7 @@ namespace gfx { namespace threed {
         /** Add vertex.
             A convenience method for adding a single vertex.
             \param point   Point in 3D space
-            \param noraml  Normal
+            \param normal  Normal
             \param color   Color
             \return Index under which point was stored. */
         size_t addVertex(Vec3f point, Vec3f normal, ColorQuad_t color);

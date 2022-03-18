@@ -57,7 +57,7 @@ namespace interpreter { namespace vmio {
 
         /** Load context value.
             This loads all sorts of contexts.
-            \param id Object Id
+            \param tag Tag node
             \param aux Auxiliary data can be read here
             \return context value or null */
         virtual Context* loadContext(const TagNode& tag, afl::io::Stream& aux) = 0;

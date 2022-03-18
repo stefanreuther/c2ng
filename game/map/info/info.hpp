@@ -309,7 +309,7 @@ namespace game { namespace map { namespace info {
         @param [in]   shipList     Ship list (for hulls)
         @param [in]   fmt          Number formatter
         @param [in]   tx           Translator */
-    void renderShipTypeSummary(TagNode& out,
+    void renderShipTypeSummary(TagNode& tab,
                                const Universe& univ,
                                uint8_t sortOrder,
                                bool withFreighters,
@@ -324,7 +324,6 @@ namespace game { namespace map { namespace info {
         @param [in]   t            StarchartInfo object produced by computeStarchartInfo()
         @param [in]   univ         Universe
         @param [in]   teams        Teams (viewpoint player, player relations)
-        @param [in]   players      Player names
         @param [in]   fmt          Number formatter
         @param [in]   tx           Translator */
     void renderStarchartEmpireSummary(TagNode& tab,

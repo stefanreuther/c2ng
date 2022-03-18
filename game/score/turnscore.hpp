@@ -26,7 +26,8 @@ namespace game { namespace score {
         typedef afl::base::InlineOptional<int32_t,-1> Value_t;
 
         /** Constructor.
-            \param turn Turn number. */
+            \param turnNumber Turn number
+            \param time       Timestamp */
         TurnScore(int turnNumber, Timestamp time);
 
         /** Destructor. */

@@ -47,7 +47,7 @@ namespace game { namespace spec {
         void setMass(int mass);
 
         /** Get tech level of this component.
-            \param tech level (defaults to 1) */
+            \return tech level (defaults to 1) */
         int getTechLevel() const;
 
         /** Set tech level of this component.
@@ -78,7 +78,7 @@ namespace game { namespace spec {
         String_t getShortName(const ComponentNameProvider& provider) const;
 
         /** Set short name of this component.
-            \param name New short name */
+            \param shortName New short name */
         void setShortName(String_t shortName);
 
      private:

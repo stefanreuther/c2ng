@@ -25,7 +25,8 @@ namespace util {
         explicit KeyString(const String_t& s);
 
         /** Construct from explicit paramters.
-            \param s string */
+            \param s string
+            \param key Key */
         KeyString(const String_t& s, Key_t key);
 
         /** Get string.

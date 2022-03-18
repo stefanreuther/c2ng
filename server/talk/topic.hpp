@@ -111,7 +111,6 @@ namespace server { namespace talk {
         bool exists();
 
         /** Describe topic.
-            \param root Service root
             \return information */
         server::interface::TalkThread::Info describe();
 

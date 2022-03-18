@@ -16,9 +16,9 @@ namespace interpreter {
     class ContextProvider : public afl::base::Deletable {
      public:
         /** Look up a symbol by its name.
-            \param name [in] Name query
-            \param result [out] On success, property index
-            \return non-null context if found, null on failure. */
+            \param [in]  q     Name query
+            \param [out] index On success, property index
+            \return non-null PropertyAccessor if found, null on failure. */
         virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& q, Context::PropertyIndex_t& index) = 0;
     };
 

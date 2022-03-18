@@ -69,7 +69,7 @@ namespace game { namespace proxy {
 
         /** Set keymap name.
             This triggers a listener callback and sets the keymap for further synchronous calls.
-            \para, keymap Name of keymap */
+            \param keymap Name of keymap */
         void setKeymapName(String_t keymap);
 
         /** Get description of the current keymap.

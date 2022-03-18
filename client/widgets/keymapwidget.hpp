@@ -17,7 +17,7 @@ namespace client { namespace widgets {
     /** Keymap widget.
         This widget implements script-connected keymaps for the user interface.
 
-        <b>Principle of operation:<b>
+        <b>Principle of operation:</b>
 
         Keymaps live in the script world.
         To avoid having to go to scripts for <em>every</em> key, we fetch a set of bound keys from the keymap.

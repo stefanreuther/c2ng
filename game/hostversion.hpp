@@ -7,7 +7,7 @@
 
 #include "game/config/hostconfiguration.hpp"
 
-/** \define MKVERSION
+/** \def MKVERSION
     Make version code from three numbers.
     For example, MKVERSION(3,22,31) yiels 322031, the version code for THost 3.22.031.
     If the final component is a letter, use its position in the alphabet, e.g. MKVERSION(3,2,5) for 3.2e. */
@@ -128,7 +128,7 @@ namespace game {
         bool hasAutomaticMineIdentity() const;
 
         /** Get post-taxation happiness limit.
-            This is the highest level of happiness \em{after taxation happiness effect} at which you'll still collect taxes */
+            This is the highest level of happiness after taxation happiness effect at which you'll still collect taxes */
         int getPostTaxationHappinessLimit() const;
 
         /** Check whether host allows negative numeric friendly codes.

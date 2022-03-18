@@ -110,6 +110,7 @@ namespace game { namespace map {
             Call instead of getFoundObject() to find a point that minimizes the movement distance to reach the found point.
             \param origin         Origin of movement (minimize movement starting here)
             \param isHyperdriving true for hyperdrive, false for normal movement
+            \param univ           Universe
             \param config         Host configuration (for warp well parameters)
             \param host           Host version (for warp well rules/shape)
             \return point in warp well if applicable, otherwise, same as getFoundPoint(). */

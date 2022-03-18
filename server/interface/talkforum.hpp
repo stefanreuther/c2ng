@@ -87,7 +87,7 @@ namespace server { namespace interface {
 
         /** Get forum permissions (FORUMPERMS).
             \param fid Forum Id
-            \param permissions Permissions to query
+            \param permissionList Permissions to query
             \return Permission bits */
         virtual int32_t getPermissions(int32_t fid, afl::base::Memory<const String_t> permissionList) = 0;
 

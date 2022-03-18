@@ -128,7 +128,7 @@ namespace game { namespace actions {
             For Colonists, returns a two-line string.
             For Natives, returns a three-line string.
             \param a area
-            \return tx Translator
+            \param tx Translator
             \param fmt Number formatter
             \return text */
         String_t describe(Area a, afl::string::Translator& tx, const util::NumberFormatter& fmt) const;

@@ -80,8 +80,8 @@ namespace util { namespace editor {
         - if you decide to handle it as a single-line command, call handleCommand(),
           passing it appropriate values for all parameters.
 
-        \param [in/out]  line         Line of text being edited
-        \param [in/out]  cursor       Cursor position (character index, NOT byte index)
+        \param [in,out]  line         Line of text being edited
+        \param [in,out]  cursor       Cursor position (character index, NOT byte index)
         \param [in]      protectUntil Do not allow editing characters before this index
         \param [in]      flags        Additional status flags
         \param [in]      c            Command
@@ -105,8 +105,8 @@ namespace util { namespace editor {
         Character insertion is not modelled as a Command to allow users to classify characters themselves as needed
         (e.g. allow only ASCII characters to be typed).
 
-        \param [in/out]  line         Line of text being edited
-        \param [in/out]  cursor       Cursor position (character index, NOT byte index)
+        \param [in,out]  line         Line of text being edited
+        \param [in,out]  cursor       Cursor position (character index, NOT byte index)
         \param [in]      protectUntil Do not allow editing characters before this index
         \param [in]      flags        Additional status flags
         \param [in]      text         Text to insert

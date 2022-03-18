@@ -13,7 +13,7 @@ namespace game { namespace v3 { namespace trn {
      public:
         /** Create.
             \param str name we want to match
-            \param wild true to match all commands beginning with that name, false to match exact names */
+            \param wildcard true to match all commands beginning with that name, false to match exact names */
         NameFilter(String_t name, bool wildcard);
 
         virtual bool accept(const TurnFile& trn, size_t index) const;

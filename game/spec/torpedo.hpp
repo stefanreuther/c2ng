@@ -18,7 +18,7 @@ namespace game { namespace spec {
     class Torpedo : public Weapon {
      public:
         /** Constructor.
-            \param torpedo Id */
+            \param launcher Launcher object; data is copied from it */
         explicit Torpedo(const TorpedoLauncher& launcher);
     };
 

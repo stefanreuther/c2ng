@@ -53,7 +53,7 @@ namespace util {
             bool readInstruction(Instruction_t& insn);
 
             /** Read a parameter.
-                \param [out] insn Parameter returned here
+                \param [out] param Parameter returned here
                 \return true if parameter read; false if no more parameters for this instruction */
             bool readParameter(Parameter_t& param);
 

@@ -57,7 +57,14 @@ namespace client { namespace map {
         void setFont(gfx::BaseContext& ctx, gfx::ResourceProvider& provider) const;
     };
 
+    /** Convert user color index into color number.
+        @param color User color number (0..NUM_USER_COLORS)
+        @return palette color number */
     uint8_t getUserColor(int color);
+
+    /** Convert Ufo color into color number.
+        @param color Ufo color number (0..15)
+        @return palette color number */
     uint8_t getUfoColor(int color);
 
 } }

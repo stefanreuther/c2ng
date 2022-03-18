@@ -61,7 +61,7 @@ namespace game { namespace spec { namespace info {
             The existing filters will not be part of the list.
 
             Use Filter::describe() to pack the existing filter into an equivalent list.
-            
+
             \param p Page (object type)
             \param existing Existing filters
             \return newly-allocated information */
@@ -77,7 +77,7 @@ namespace game { namespace spec { namespace info {
 
         /** Use item as filter.
             For example, when looking at player 3 (p=PlayerPage, id=3), this will add a (Value_Player, 3) filter.
-            \param [in/out] f Filter
+            \param [in,out] f Filter
             \param [in] p Page (object type)
             \param [in] id Id */
         void addItemFilter(Filter& f, Page p, Id_t id) const;

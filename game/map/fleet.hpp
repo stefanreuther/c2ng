@@ -17,11 +17,24 @@ namespace game { namespace map {
      public:
         Fleet(Universe& univ, Ship& ship);
 
+        /** Mark a fleet dirty.
+            Marks all fleet members dirty. */
         void markDirty();
 
+        /** Synchronize a fleet.
+            Synchronizes all waypoints of the fleet.
+            \param config Host configuration
+            \param shipList Ship list */
         void synchronize(const game::config::HostConfiguration& config,
                          const game::spec::ShipList& shipList);
 
+        /** Check whether the fleet can do a particular special function.
+            \param basicFunction Function to check
+            \param scoreDefinitions Ship score definitions
+            \param shipList         Ship list
+            \param config           Host configuration
+            \retval true all fleet members can do this function
+            \retval false not all fleet members can do this function */
         bool hasSpecialFunction(int basicFunction,
                                 const UnitScoreDefinitionList& scoreDefinitions,
                                 const game::spec::ShipList& shipList,

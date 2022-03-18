@@ -1,5 +1,5 @@
 /**
-  *  \file tools/c2untrn.cpp
+  *  \file main/c2untrn.cpp
   *  \brief c2untrn utility - Turn File Dumper and Manipulator - main function
   */
 

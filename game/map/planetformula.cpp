@@ -1,5 +1,6 @@
 /**
   *  \file game/map/planetformula.cpp
+  *  \brief Planet formulas
   */
 
 #include <cmath>
@@ -77,9 +78,9 @@ game::map::getMaxBuildings(const Planet& p, PlanetaryBuilding kind, const game::
 }
 
 
-    /*
-     *  Colonist formulas
-     */
+/*
+ *  Colonist formulas
+ */
 
 game::NegativeProperty_t
 game::map::getColonistChange(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int tax, int mifa)
@@ -110,8 +111,6 @@ game::map::getColonistChange(const Planet& pl, const game::config::HostConfigura
     }
 }
 
-/** Colonists happiness change on this planet.
-    \return change on this planet in current situation */
 game::NegativeProperty_t
 game::map::getColonistChange(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host)
 {
@@ -124,10 +123,6 @@ game::map::getColonistChange(const Planet& pl, const game::config::HostConfigura
     }
 }
 
-/** Get colonist tax amount, as requested. This returns the amount we want
-    from the colonists, not the amount we'll finally get.
-    \pre pl.isOwnerKnown()
-    \pre pl.getColonists().isKnown() */
 game::LongProperty_t
 game::map::getColonistDue(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int tax)
 {
@@ -149,13 +144,6 @@ game::map::getColonistDue(const Planet& pl, const game::config::HostConfiguratio
     }
 }
 
-/** Get colonist tax income.
-    \param tax     [in] tax rate
-    \param rem_inc [out] this is set to the amount of taxes which we can
-    still get from the natives (regarding MaxPlanetaryIncome)
-    \return megacredits collected
-    \pre pl.isOwnerKnown()
-    \pre pl.getColonists().isKnown() */
 game::LongProperty_t
 game::map::getColonistDueLimited(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int tax, int32_t& rem_inc)
 {
@@ -177,9 +165,6 @@ game::map::getColonistDueLimited(const Planet& pl, const game::config::HostConfi
     }
 }
 
-/** Get colonist "safe tax" rate.
-    \param mifa Assume this many mines and factories
-    \return Safe tax value, or unknown if preconditions not met */
 game::IntegerProperty_t
 game::map::getColonistSafeTax(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int mifa)
 {
@@ -233,9 +218,6 @@ game::map::getColonistSafeTax(const Planet& pl, const game::config::HostConfigur
     }
 }
 
-/** Maximum population on planet, for a race.
-    \param race player number
-    \return maximum population in clans. */
 game::LongProperty_t
 game::map::getMaxSupportedColonists(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int player)
 {
@@ -295,6 +277,18 @@ game::map::getMaxSupportedColonists(const Planet& pl, const game::config::HostCo
     return limit;
 }
 
+game::LongProperty_t
+game::map::getMaxSupportedColonists(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host)
+{
+    // ex game/planetform.h:getMaxSupportedColonists
+    int owner;
+    if (pl.getOwner(owner)) {
+        return getMaxSupportedColonists(pl, config, host, owner);
+    } else {
+        return afl::base::Nothing;
+    }
+}
+
 int
 game::map::getHissEffect(int shipOwner, int numShips, const game::config::HostConfiguration& config, const HostVersion& host)
 {
@@ -309,24 +303,11 @@ game::map::getHissEffect(int shipOwner, int numShips, const game::config::HostCo
     }
 }
 
-/** Maximum population on planet.
-    \return maximum population in clans. */
-game::LongProperty_t
-game::map::getMaxSupportedColonists(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host)
-{
-    // ex game/planetform.h:getMaxSupportedColonists
-    int owner;
-    if (pl.getOwner(owner)) {
-        return getMaxSupportedColonists(pl, config, host, owner);
-    } else {
-        return afl::base::Nothing;
-    }
-}
 
+/*
+ *  Native formulas
+ */
 
-// /** Native happiness change.
-//     \param tax   desired tax rate
-//     \param mifa  mines plus factories on planet */
 game::NegativeProperty_t
 game::map::getNativeChange(const Planet& pl, const HostVersion& host, int tax, int mifa)
 {
@@ -357,8 +338,6 @@ game::map::getNativeChange(const Planet& pl, const HostVersion& host, int tax, i
     }
 }
 
-/** Native happiness change.
-    \returns happiness change for current situation. */
 game::NegativeProperty_t
 game::map::getNativeChange(const Planet& pl, const HostVersion& host)
 {
@@ -371,9 +350,6 @@ game::map::getNativeChange(const Planet& pl, const HostVersion& host)
     }
 }
 
-/** Get native tax amount, as requested, for this planet. This returns
-    the amount we're asking from them, not what we'll get.
-    \pre native race, government, population, and planet owner known */
 game::LongProperty_t
 game::map::getNativeDue(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int tax)
 {
@@ -387,13 +363,6 @@ game::map::getNativeDue(const Planet& pl, const game::config::HostConfiguration&
     }
 }
 
-/** Get native tax amount, as requested, parameterized. This returns
-    the amount we're asking from them, not what we'll get.
-    \param tax    tax rate
-    \param race   native race
-    \param gov    government factor (SPI)
-    \param pop    native clans
-    \param owner  owner (for production rates) */
 int32_t
 game::map::getNativeDue(int tax, int race, int gov, int32_t pop, int owner, const game::config::HostConfiguration& config, const HostVersion& host)
 {
@@ -412,10 +381,6 @@ game::map::getNativeDue(int tax, int race, int gov, int32_t pop, int owner, cons
     }
 }
 
-/** Get native tax amount, limited. Limits the tax income by income
-    limit and available colonists.
-    \param tax     tax rate
-    \param rem_inc remaining allowed income; output of getColonistDueLimited(). */
 game::LongProperty_t
 game::map::getNativeDueLimited(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int tax, int32_t rem_inc)
 {
@@ -464,9 +429,6 @@ game::map::getNativeDueLimited(const Planet& pl, const game::config::HostConfigu
     }
 }
 
-/** Get native "safe tax" rate.
-    \param mifa Assume this many mines and factories
-    \return Safe tax value, or unknown if preconditions not met */
 game::IntegerProperty_t
 game::map::getNativeSafeTax(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int mifa)
 {
@@ -527,10 +489,6 @@ game::map::getNativeSafeTax(const Planet& pl, const game::config::HostConfigurat
     }
 }
 
-// /** Get native "base tax" rate. The base tax assumes a fixed mines/factories
-//     count to make results comparable between planets.
-//     \param happyTarget Happiness target (0=base tax, -30=max tax)
-//     \return tax rate, unknown if preconditions not met */
 game::IntegerProperty_t
 game::map::getNativeBaseTax(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int happyTarget)
 {
@@ -583,8 +541,6 @@ game::map::getNativeBaseTax(const Planet& pl, int owner, const game::config::Hos
     }
 }
 
-/** Get Bovinoid supply contribution. Contribution is not yet limited by
-    colonists. */
 game::LongProperty_t
 game::map::getBovinoidSupplyContribution(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host)
 {
@@ -603,7 +559,6 @@ game::map::getBovinoidSupplyContribution(const Planet& pl, const game::config::H
     }
 }
 
-/** Get Bovinoid supply contribution, parameterized. */
 int32_t
 game::map::getBovinoidSupplyContribution(int32_t pop, int owner, const game::config::HostConfiguration& config, const HostVersion& host)
 {
@@ -618,8 +573,6 @@ game::map::getBovinoidSupplyContribution(int32_t pop, int owner, const game::con
     }
 }
 
-/** Get Bovinoid supply contribution. This returns the amount of
-    supplies finally collected. */
 game::LongProperty_t
 game::map::getBovinoidSupplyContributionLimited(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host)
 {
@@ -645,9 +598,6 @@ game::map::getBovinoidSupplyContributionLimited(const Planet& pl, const game::co
     }
 }
 
-/** Get Amorphous colonist breakfast. Returns the number of clans
-    eaten by our lovely amorphous natives when they have a happiness
-    as specified. */
 int32_t
 game::map::getAmorphousBreakfast(const HostVersion& host, int happy)
 {
@@ -671,10 +621,6 @@ game::map::getAmorphousBreakfast(const HostVersion& host, int happy)
  *  Mining Formulas
  */
 
-/** Get mining capacity.
-    \param index Mineral index
-    \param mines Number of mines on planet
-    \pre density is known */
 game::IntegerProperty_t
 game::map::getMiningCapacity(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, Element::Type type, int mines)
 {
@@ -746,12 +692,6 @@ game::map::getSensorVisibility(const Planet& pl, const game::config::HostConfigu
     }
 }
 
-/** Compute cost for a tech level upgrade.
-    Returns the cost for upgrading from %fromTech to %toTech.
-    \param player Player to compute this for
-    \param fromTech Old (low) tech
-    \param toTech New (high) tech
-    \return Cost in megacredits */
 int32_t
 game::map::getBaseTechCost(int player, int fromTech, int toTech, const game::config::HostConfiguration& config)
 {

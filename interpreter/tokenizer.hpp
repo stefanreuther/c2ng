@@ -136,7 +136,7 @@ namespace interpreter {
         static bool isIdentifierCharacter(char c);
 
         /** Test for valid uppercase identifier.
-            \param c Candidate to test
+            \param candidate Candidate to test
             \return true on success */
         static bool isValidUppercaseIdentifier(const String_t& candidate);
 

@@ -185,7 +185,7 @@ namespace interpreter {
 
         /** Get process, given a process Id.
             Locates a process with the given Id.
-            \param id process id
+            \param processId process id
             \return process if any, 0 if none */
         Process* getProcessById(uint32_t processId) const;
 

@@ -45,9 +45,6 @@ game::map::Fleet::Fleet(Universe& univ, Ship& ship)
       m_ship(ship)
 { }
 
-// /** Mark a fleet dirty. Marks all fleet members dirty.
-//     \param univ Universe to work on
-//     \param fid Fleet Id */
 void
 game::map::Fleet::markDirty()
 {
@@ -63,9 +60,6 @@ game::map::Fleet::markDirty()
     }
 }
 
-// /** Synchronize a fleet. Synchronizes all waypoints of the fleet.
-//     \param univ Universe to work on
-//     \param fid Fleet Id */
 void
 game::map::Fleet::synchronize(const game::config::HostConfiguration& config,
                               const game::spec::ShipList& shipList)
@@ -82,12 +76,6 @@ game::map::Fleet::synchronize(const game::config::HostConfiguration& config,
     }
 }
 
-// /** Check whether the fleet can do a particular special function.
-//     \param univ Universe to work on
-//     \param fid Fleet Id
-//     \param basic_function Function to check for
-//     \retval true all fleet members can do this function
-//     \retval false not all fleet members can do this function */
 bool
 game::map::Fleet::hasSpecialFunction(int basicFunction,
                                      const UnitScoreDefinitionList& scoreDefinitions,

@@ -227,8 +227,9 @@ namespace server { namespace file {
 
         /** Compute disk usage totals.
             The used resources are added to the parameters, recursively.
-            \param numFiles [out] Number of files and directories
-            \param totalKBytes [out] Disk usage of files, rounding up to full kilobytes for each file */
+            \param [in]  root        Server root
+            \param [out] numFiles    Number of files and directories
+            \param [out] totalKBytes Disk usage of files, rounding up to full kilobytes for each file */
         void computeTotals(Root& root, int32_t& numFiles, int32_t& totalKBytes);
 
      private:

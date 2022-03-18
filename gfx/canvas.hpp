@@ -100,7 +100,7 @@ namespace gfx {
         /** Display pattern (monochrome pixmap).
             \param rect    position, screen coordinates;
             \param pt      position of bit 7, data[0], on the screen;
-            \param bytes_per_line  bytes per line in data;
+            \param bytesPerLine  bytes per line in data;
             \param data    pixel data. bit 7 = left, bit 0 = right (VGA bit order);
             \param color   color of "on" bits;
             \param bg      color of "off" bits, or GFX_TRANSPARENT;
@@ -119,17 +119,11 @@ namespace gfx {
             drawBar(p) and drawBar(r) have the same effect. */
         virtual Rectangle computeClipRect(Rectangle r) = 0;
 
-        // FIXME: retire
-        // /** Get offset transformation to another surface.
-        //     Adjusts #pt such that other.drawPixel(pt) afterwards
-        //     accesses the same pixel as this->drawPixel(pt) before.
-        //     \param other Reference surface
-        //     \param result [in/out] Point to compute
-        //     \return true if transformation can be computed, false otherwise.
-        //     \inv computeOffset(*this,pt) returns true and does not modify pt */
-        // virtual bool computeOffset(GfxCanvas& other, GfxPoint& pt) = 0;
-
-        /** Read one pixel. \return pixel value in target format. */
+        /** Read multiple pixels.
+            Reads one or more pixels, starting at the given position, moving to the right on the same line.
+            (Reading across multiple lines is not supported.)
+            \param [in] pt Position
+            \param [out] colors Room for pixel data. Size determines number of pixels read */
         virtual void getPixels(Point pt, afl::base::Memory<Color_t> colors) = 0;
 
         /** Get size of this surface */

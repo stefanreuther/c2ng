@@ -80,6 +80,7 @@ namespace util {
                 Adds each value of the other row multiplied by the scale factor to the value in the same column of this one.
                 If either value is unset, treats it as 0;
                 only if both values are unset, the resulting value is unset.
+                \param scale Scale factor
                 \param other Other row */
             void add(int scale, const Row& other);
 

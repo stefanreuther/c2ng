@@ -26,7 +26,7 @@ namespace game { namespace proxy {
      public:
         /** Constructor.
             \param gameSender Game sender
-            \param disp RequestDispatcher to receive replies in this thread */
+            \param reply RequestDispatcher to receive replies in this thread */
         HistoryShipListProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& reply);
 
         /** Destructor. */

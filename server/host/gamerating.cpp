@@ -130,7 +130,7 @@ namespace {
 }
 
 // /** Compute rating of a game.
-//     \param conn Database connection
+//     \param root Server root
 //     \param g Game */
 int
 server::host::computeGameRating(Root& root, Game& g)

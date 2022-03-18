@@ -85,7 +85,6 @@ namespace game { namespace pcc {
             If the account is not or no longer logged in, the request will fail.
             @param acc      Account
             @param dirName  Path name of directory
-            @param listener Receives result
             @return Result tree from API, hash:
             - result (success flag)
             - reply (on success, list of items)

@@ -61,11 +61,11 @@ namespace game { namespace map {
 
         /** Constructor.
             \param id Ignored (provided to allow ObjectVector<ShipData> which instantiates using an Id). */
-        ShipData(int = 0);
+        ShipData(int id = 0);
     };
 
     /** Compute ship mass from ship data record.
-        \param [in] ship ship data record
+        \param [in] data     ship data record
         \param [in] shipList ship list (for beams, torpedoes)
         \return mass (unknown if any value is unknown) */
     IntegerProperty_t getShipMass(const ShipData& data, const game::spec::ShipList& shipList);

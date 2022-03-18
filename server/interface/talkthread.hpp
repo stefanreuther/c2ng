@@ -41,12 +41,12 @@ namespace server { namespace interface {
         virtual Info getInfo(int32_t threadId) = 0;
 
         /** Get information about multiple forum threads (THREADMSTAT).
-            \param [in] threadId List of thread Ids
+            \param [in] threadIds List of thread Ids
             \param [out] result Receives information */
         virtual void getInfo(afl::base::Memory<const int32_t> threadIds, afl::container::PtrVector<Info>& result) = 0;
 
         /** List postings in a thread (THREADLSPOST).
-            \param threadIds Thread Ids
+            \param threadId Thread Id
             \param params List parameters
             \return Newly-allocated value, as determined by parameters (can be single value or list) */
         virtual afl::data::Value* getPosts(int32_t threadId, const ListParameters& params) = 0;
@@ -58,7 +58,7 @@ namespace server { namespace interface {
 
         /** Get thread permissions (THREADPERMS).
             \param threadId thread Id
-            \param permissions List of permission names to query
+            \param permissionList List of permission names to query
             \return bitfield */
         virtual int getPermissions(int32_t threadId, afl::base::Memory<const String_t> permissionList) = 0;
 

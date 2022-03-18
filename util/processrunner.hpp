@@ -70,8 +70,8 @@ namespace util {
         ~ProcessRunner();
 
         /** Run child process.
-            \param command [in] Command to run (argv)
-            \param output [out] Output will be collected here
+            \param [in]  cmd    Command to run (argv)
+            \param [out] output Output will be collected here
             \return Return value: 0..255 for regular exit, 1000+ for signal death, 1999 for unknown.
             \throw runtime_error if helper process encounters an API error (e.g. system resources exhausted) */
         int run(const Command& cmd, String_t& output);

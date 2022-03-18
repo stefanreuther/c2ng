@@ -1292,8 +1292,6 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
     { "ZAP",         1, 1,       makeBuiltin, interpreter::unZap },
 };
 
-/** Look up descriptor for a builtin function. Builtin functions are directly
-    encoded into the bytecode, and can thus not be redefined by the user. */
 const BuiltinFunctionDescriptor*
 interpreter::expr::lookupBuiltinFunction(const String_t& name)
 {

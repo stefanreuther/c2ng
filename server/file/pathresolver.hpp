@@ -86,7 +86,7 @@ namespace server { namespace file {
             If this function is called with path="a/b/f.txt", the permission will be checked on "a/b" (file permissions are given per-directory).
             After the call, hasPermission() will check the same permissions.
 
-            \param path complete path
+            \param fileName complete path
             \param priv Permission to check
             \return resulting file
             \throw std::runtime_error 400 (Bad Request) if file name is invalid (as for resolvePath)
@@ -99,7 +99,7 @@ namespace server { namespace file {
             If this function is called with path="a/b/f", the permission will be checked on "a/b" (file permissions are given per-directory).
             After the call, hasPermission() will check the same permissions.
 
-            \param path complete path
+            \param itemName complete path
             \param priv Permission to check
             \return resulting file
             \throw std::runtime_error 400 (Bad Request) if file name is invalid (as for resolvePath)

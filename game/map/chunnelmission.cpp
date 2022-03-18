@@ -118,9 +118,11 @@ game::map::ChunnelMission::check(const Ship& sh, const Universe& univ,
 }
 
 /** Check for possible chunnel failures.
-    \param sh [in] Ship to check
-    \param univ [in] Universe to check
-    \param minFuel [in] Minimum fuel required on this ship */
+    \param [in] sh Ship to check
+    \param [in] univ Universe to check
+    \param [in] minFuel Minimum fuel required on this ship
+    \param [in] root    Root (for host configuration, version)
+    \return bitmask of failures */
 int
 game::map::ChunnelMission::checkChunnelFailures(const Ship& sh, const Universe& univ, const int minFuel, const Root& root)
 {

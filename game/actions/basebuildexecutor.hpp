@@ -30,9 +30,9 @@ namespace game { namespace actions {
 
         /** Account for a foreign hull. Intended for price computations involving hulls the player
             can not build. Such a change cannot be committed.
-            \param index hull slot [1,NUM_HULLS]
-            \param count number of hulls to build
-            \param free additional number of (previously present) hulls consumed by action at no cost */
+            \param number hull slot [1,NUM_HULLS]
+            \param count  number of hulls to build
+            \param free   additional number of (previously present) hulls consumed by action at no cost */
         virtual void accountHull(int number, int count, int free) = 0;
 
         /** Account fighter bays.

@@ -253,10 +253,11 @@ game::v3::DirectoryScanner::getDefaultPlayer() const
  */
 
 /** Check result file.
-    \param dir Directory to look in
-    \param playerId Player Id to look for
-    \param rgen [out] Result turn file information
-    \param pVersion [out,optional] Host version
+    \param [in] dir Directory to look in
+    \param [in] charset Character set
+    \param [in] playerId Player Id to look for
+    \param [out] rgen Result turn file information
+    \param [out] pVersion Host version
     \retval true result file found and valid
     \retval false result file invalid or not found */
 bool

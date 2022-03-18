@@ -64,7 +64,7 @@ namespace gfx { namespace threed {
             The first color will be used for the inside of the particle;
             the last color will be used for the outside.
 
-            @param {Array} cs Colors */
+            @param color Colors */
         virtual void setColors(afl::base::Memory<const ColorQuad_t> color) = 0;
 
         /** Render.

@@ -45,8 +45,8 @@ namespace game { namespace spec {
         const BasicHullFunction* getFunctionById(int id) const;
 
         /** Get definition of a basic function by name.
-            \param name    [in] Name of function
-            \param partial [in] true to accept partial matches (i.e. "cool" matches "CoolsTo50")
+            \param name               [in] Name of function
+            \param acceptPartialMatch [in] true to accept partial matches (i.e. "cool" matches "CoolsTo50")
             \return definition, or null if none matches */
         const BasicHullFunction* getFunctionByName(String_t name, bool acceptPartialMatch) const;
 

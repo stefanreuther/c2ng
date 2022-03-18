@@ -25,7 +25,8 @@ namespace gfx { namespace sdl2 {
      public:
         /** Constructor.
             This will initialize SDL.
-            \param log Logger */
+            \param log Logger
+            \param tx  Translator */
         Engine(afl::sys::LogListener& log, afl::string::Translator& tx);
 
         /** Destructor.

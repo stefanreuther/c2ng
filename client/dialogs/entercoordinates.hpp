@@ -16,7 +16,7 @@ namespace client { namespace dialogs {
 
     /** Show "Go To X/Y" dialog.
         This dialog asks the user for a coordinate.
-        \param [out] out        Returns the coordinate if the user entered one
+        \param [out] result     Returns the coordinate if the user entered one
         \param [in]  config     Map configuration
         \param [in]  root       UI root
         \param [in]  gameSender Game sender (for help)

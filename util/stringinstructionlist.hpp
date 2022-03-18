@@ -60,7 +60,7 @@ namespace util {
 
         /** Add string parameter.
             Must be called after addInstruction(); ignored otherwise.
-            \param param Parameter
+            \param s Parameter
             \return *this */
         StringInstructionList& addStringParameter(const String_t& s);
 

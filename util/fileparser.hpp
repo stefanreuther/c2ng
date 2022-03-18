@@ -30,7 +30,7 @@ namespace util {
         virtual ~FileParser();
 
         /** Parse a file.
-            \param in stream to read from */
+            \param s stream to read from */
         void parseFile(afl::io::Stream& s);
 
         /** Parse an optional file.

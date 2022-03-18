@@ -160,10 +160,10 @@ game::spec::FriendlyCode::isPermitted(const RegistrationKey& key) const
 }
 
 /** Parse a flag list.
-    \param s       [in] string we got from user
-    \param data    [in] allowed options, in caps (e.g., for fcodes, "SPBRAU")
-    \param value   [out] flag result
-    \param races   [out] player set result
+    \param [in]  s       string we got from user
+    \param [in]  data    allowed options, in caps (e.g., for fcodes, "SPBRAU")
+    \param [out] flags   flag result
+    \param [out] races   player set result
     \returns true on success, false on error */
 bool
 game::spec::FriendlyCode::parseFlags(const String_t& s, const char* data, FlagSet_t& flags, PlayerSet_t& races)

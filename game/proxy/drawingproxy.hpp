@@ -48,8 +48,8 @@ namespace game { namespace proxy {
         ~DrawingProxy();
 
         /** Get status, synchronously.
-            \param [in]  ind  WaitIndicator for UI synchronisation
-            \param [out] out  Result */
+            \param [in]  ind     WaitIndicator for UI synchronisation
+            \param [out] status  Result */
         void getStatus(WaitIndicator& ind, Status_t& status);
 
         /** Get list of used tags with names.
@@ -123,7 +123,7 @@ namespace game { namespace proxy {
         void setMarkerKind(int k);
 
         /** Set drawing color.
-            \param color Color
+            \param c Color
             \param adjacent true to set color for adjacent lines as well
             \see game::map::Drawing::setColor, game::map::DrawingContainer::setAdjacentLinesColor*/
         void setColor(uint8_t c, bool adjacent);
@@ -135,7 +135,7 @@ namespace game { namespace proxy {
         void setTag(util::Atom_t tag, bool adjacent);
 
         /** Set drawing tag, by name.
-            \param tagName Tag name. Will be parsed as number or converted to atom.
+            \param tag Tag name. Will be parsed as number or converted to atom.
             \param adjacent true to set tag for adjacent lines as well
             \see game::map::Drawing::setTag, game::map::DrawingContainer::setAdjacentLinesTag*/
         void setTagName(String_t tag, bool adjacent);

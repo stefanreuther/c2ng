@@ -31,7 +31,7 @@ namespace server { namespace format {
 
         /** Unpack binary into structured data.
             Throws std::runtime_error on error.
-            \param binary data
+            \param data binary data
             \param cs Character set
             \return structured data */
         virtual afl::data::Value* unpack(const String_t& data, afl::charset::Charset& cs) = 0;

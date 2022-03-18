@@ -295,7 +295,7 @@ ui::rich::Document::setLeftMargin(int lm)
 }
 
 // /** Set this document's right margin.
-//     \param lm Right margin in pixels. */
+//     \param rm Right margin in pixels. */
 void
 ui::rich::Document::setRightMargin(int rm)
 {

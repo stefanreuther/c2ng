@@ -57,7 +57,10 @@ namespace game { namespace map {
         /** Get name of this object.
             A name can always be produced, even if the object isn't actually known.
             In this case, a synthetic name ("Ship #99") is produced.
-            \param which Which name format to return */
+            \param which Which name format to return
+            \param tx    Translator
+            \param iface Interface to access interpreter properties
+            \return Name */
         virtual String_t getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const = 0;
 
         /** Get Id number of this object.

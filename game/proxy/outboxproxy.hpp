@@ -48,7 +48,7 @@ namespace game { namespace proxy {
         ~OutboxProxy();
 
         /** Get message headers for display.
-            \param [in/out] ind       UI synchronisation
+            \param [in,out] ind       UI synchronisation
             \param [in]     sender    Message sender
             \param [in]     receivers Message receivers
             \return headers (multi-line string, ending in "\n")
@@ -56,7 +56,7 @@ namespace game { namespace proxy {
         String_t getHeadersForDisplay(WaitIndicator& ind, int sender, PlayerSet_t receivers);
 
         /** Get message data.
-            \param [in/out] ind       UI synchronisation
+            \param [in,out] ind       UI synchronisation
             \param [in]     id        Message Id
             \param [out]    result    Message information
             \return true Success */
@@ -64,7 +64,7 @@ namespace game { namespace proxy {
 
         /** Get string verifier.
             Obtains a clone of the game's StringVerifier.
-            \param [in/out] ind       UI synchronisation
+            \param [in,out] ind       UI synchronisation
             \return Newly-allocated StringVerifier. Caller takes ownership. Can be null. */
         StringVerifier* createStringVerifier(WaitIndicator& ind);
 

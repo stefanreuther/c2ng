@@ -1049,9 +1049,6 @@ OptimizerState::removeDeadStores(PC_t pc)
 }
 
 
-/** Optimize the given bytecode object. It must not have been relocated yet.
-    \param bco [in/out] Bytecode object
-    \param level [in] Optimisation level to apply */
 void
 interpreter::optimize(World& world, BytecodeObject& bco, int level)
 {

@@ -40,9 +40,6 @@ namespace {
     }
 }
 
-// /** Constructor.
-//     \param tf Text file to write to
-//     \param boxes true to create boxy table, false to create simple table */
 interpreter::exporter::TextExporter::TextExporter(afl::io::TextWriter& file, bool boxes)
     : m_file(file),
       m_boxes(boxes),

@@ -54,8 +54,7 @@ namespace gfx {
 
         /** Read pixels.
             \param x,y Location
-            \param pixels Pixels
-            \param alpha Transparency */
+            \param pixels Pixels */
         void readPixels(int x, int y, afl::base::Memory<Color_t> pixels);
 
         /** Draw horizontal Line.

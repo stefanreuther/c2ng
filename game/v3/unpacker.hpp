@@ -43,7 +43,8 @@ namespace game { namespace v3 {
         };
 
         /** Constructor.
-            \param tx Translator */
+            \param tx Translator
+            \param specDir Specification file directory (for race names) */
         explicit Unpacker(afl::string::Translator& tx, afl::io::Directory& specDir);
 
         /** Destructor. */
@@ -157,7 +158,7 @@ namespace game { namespace v3 {
 
      private:
         typedef afl::base::GrowableMemory<game::v3::structures::ShipTarget> TargetBuffer_t;
-        
+
         afl::string::Translator& m_translator;
         afl::sys::Log m_log;
 

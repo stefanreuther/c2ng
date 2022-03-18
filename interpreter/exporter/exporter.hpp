@@ -42,7 +42,7 @@ namespace interpreter { namespace exporter {
         /** Start output.
             Create possible headers.
             \param fields Field list
-            \types types  Type hints for each field */
+            \param types  Type hints for each field */
         virtual void startTable(const FieldList& fields, afl::base::Memory<const TypeHint> types) = 0;
 
         /** Start a record.

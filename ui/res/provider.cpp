@@ -4,14 +4,14 @@
 
 #include "ui/res/provider.hpp"
 
-// /** Open a resource file. If the specified file name ends with a dot, this
-//     searches for a file according to the suffix list. Otherwise, only the
-//     exact name specified is attempted.
+/** Open a resource file. If the specified file name ends with a dot, this
+    searches for a file according to the suffix list. Otherwise, only the
+    exact name specified is attempted.
 
-//     \param dir      Directory to look in
-//     \param filename (User-)specified file name
-//     \param suffixes suffix list, null-terminated
-//     \return stream, or null */
+    \param dir      Directory to look in
+    \param fileName (User-)specified file name
+    \param suffixes suffix list, null-terminated
+    \return stream, or null */
 afl::base::Ptr<afl::io::Stream>
 ui::res::Provider::openResourceFile(afl::io::Directory& dir, String_t fileName, afl::base::Memory<const char*const> suffixes)
 {

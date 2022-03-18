@@ -30,7 +30,7 @@ namespace interpreter { namespace expr {
     /** Look up descriptor for a builtin function.
         Builtin functions are directly encoded into the bytecode, and can thus not be redefined by the user.
 
-        \paran name Function name
+        \param name Function name
 
         \return Descriptor, pointing to static storage. Null if this is not a builtin function.
         Call desc.generator(desc) to obtain a FunctionCallNode. */

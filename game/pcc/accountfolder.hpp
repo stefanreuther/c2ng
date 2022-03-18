@@ -18,8 +18,8 @@ namespace game { namespace pcc {
     class AccountFolder : public game::browser::Folder {
      public:
         /** Constructor.
-            @param handle Parent BrowserHandler
-            @param acc    Account */
+            @param handler Parent BrowserHandler
+            @param acc     Account */
         AccountFolder(BrowserHandler& handler, game::browser::Account& acc);
 
         // Folder:

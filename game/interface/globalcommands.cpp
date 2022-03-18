@@ -839,16 +839,16 @@ game::interface::IFSaveGame(interpreter::Process& proc, game::Session& session, 
     proc.suspend(action);
 }
 
-/** @q SendMessage player:Int, text:Str... (Global Command)
-    Send a message.
-    The player number can be a single integer to send to one player,
-    or an array of integers to send to multiple players.
-    For example,
-    | SendMessage Array(3,4), "Hi there"
-    | SendMessage 7, "Knock knock"
-    sends a message to players 3 and 4 and another one to player 7.
+/* @q SendMessage player:Int, text:Str... (Global Command)
+   Send a message.
+   The player number can be a single integer to send to one player,
+   or an array of integers to send to multiple players.
+   For example,
+   | SendMessage Array(3,4), "Hi there"
+   | SendMessage 7, "Knock knock"
+   sends a message to players 3 and 4 and another one to player 7.
 
-    @since PCC2 2.40.8 */
+   @since PCC2 2.40.8 */
 void
 game::interface::IFSendMessage(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
 {

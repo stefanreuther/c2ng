@@ -85,13 +85,13 @@ namespace game { namespace proxy {
 
         /** Select "chart" variant.
             The new content will be reported using sig_chartUpdate.
-            \param Index into list of variants
+            \param index Index into list of variants
             \see game::score::ChartBuilder::setVariantIndex */
         void setChartIndex(size_t index);
 
         /** Select "table" turn index.
             The new content will be reported using sig_tableUpdate.
-            \param Index into list of variants
+            \param index Index into list of variants
             \see game::score::TableBuilder::setTurnIndex */
         void setTableTurnIndex(size_t index);
 

@@ -233,7 +233,7 @@ namespace client { namespace si {
             @param task     The task
 
             @see ScriptSide::executeTaskWait */
-        void executeTaskWait(uint32_t id, std::auto_ptr<ScriptTask> task);
+        void executeTaskWait(uint32_t waitId, std::auto_ptr<ScriptTask> task);
 
         /** Create ContextProvider.
             Calls the current Control's createContextProvider, if any.

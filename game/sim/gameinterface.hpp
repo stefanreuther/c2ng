@@ -58,7 +58,7 @@ namespace game { namespace sim {
         virtual game::Id_t getMaxShipId() const = 0;
 
         /** Update simulation ship from game.
-            \param [in/out] out Ship (identified by its Id)
+            \param [in,out] out Ship (identified by its Id)
             \return true on success */
         virtual bool copyShipFromGame(Ship& out) const = 0;
 
@@ -73,7 +73,7 @@ namespace game { namespace sim {
         virtual Relation getShipRelation(const Ship& in) const = 0;
 
         /** Update simulation planet from game.
-            \param [in/out] out planet (identified by its Id)
+            \param [in,out] out planet (identified by its Id)
             \return true on success */
         virtual bool copyPlanetFromGame(Planet& out) const = 0;
 

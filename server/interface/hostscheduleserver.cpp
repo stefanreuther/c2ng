@@ -170,7 +170,7 @@ server::interface::HostScheduleServer::handleCommand(const String_t& upcasedComm
 }
 
 // /** Pack a schedule into an object.
-//     \param h "game:GID:schedule:ID" object */
+//     \param sch "game:GID:schedule:ID" object */
 server::Value_t*
 server::interface::HostScheduleServer::packSchedule(const HostSchedule::Schedule& sch)
 {
@@ -228,11 +228,9 @@ server::interface::HostScheduleServer::packSchedule(const HostSchedule::Schedule
 }
 
 
-// /** Parse commands for a SCHEDULESET/ADD/MOD command.
-//     \param args [in] Arguments received from user
-//     \param sched [in/out] Schedule to fill in
-//     \param hadDaytime [out] Reports whether the schedule contained a DAYTIME option
-//     \return true on success, false on failure */
+/** Parse commands for a SCHEDULESET/ADD/MOD command.
+    \param args [in] Arguments received from user
+    \return schedule */
 server::interface::HostSchedule::Schedule
 server::interface::HostScheduleServer::parseSchedule(interpreter::Arguments& args)
 {

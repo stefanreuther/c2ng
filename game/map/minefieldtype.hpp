@@ -52,9 +52,9 @@ namespace game { namespace map {
 
         /** Internal check/postprocess.
             Postprocess all minefields (in particular, mine decay) and delete those that are gone.
-            \param turnNr current turn
-            \param host   host version
-            \param config host configuration */
+            \param currentTurn current turn number
+            \param host        host version
+            \param config      host configuration */
         void internalCheck(int currentTurn, const game::HostVersion& host, const game::config::HostConfiguration& config);
 
         /** Add report from a message.

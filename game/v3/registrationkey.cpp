@@ -248,7 +248,8 @@ game::v3::RegistrationKey::parseFizz(afl::io::Stream& s)
 }
 
 /** Initialize from REG.KEY.
-    \param s REG.KEY file, file pointer at beginning. */
+    \param s REG.KEY file, file pointer at beginning.
+    \param tx Translator */
 inline void
 game::v3::RegistrationKey::parseKey(afl::io::Stream& s, afl::string::Translator& tx)
 {

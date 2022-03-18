@@ -22,8 +22,7 @@ namespace game { namespace map {
 
         /** Handle fleet change.
             If a change caused the current fleet to get invalid, this finds a new one.
-            \param hintfid Hint for a possible fleet Id.
-            May or may not be valid. */
+            \param hint Hint for a possible fleet Id. May or may not be valid. */
         void handleFleetChange(Id_t hint);
     };
 

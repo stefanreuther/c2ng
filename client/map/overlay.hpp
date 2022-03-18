@@ -30,14 +30,14 @@ namespace client { namespace map {
         /** Draw below chart.
             Called before the chart has been drawn, bottom-most overlay first (top-most draws last).
             Use for background stuff like predictions/trails.
-            \param Canvas to draw on.
+            \param can Canvas to draw on.
             \param ren Renderer */
         // ex WChartMode::drawBefore, WChartWidget::drawPre, WChartMode::drawBelow
         virtual void drawBefore(gfx::Canvas& can, const Renderer& ren) = 0;
 
         /** Draw above chart.
             Called after the chart has been drawn, bottom-most overlay first (top-most draws last).
-            \param Canvas to draw on.
+            \param can Canvas to draw on.
             \param ren Renderer */
         // ex WChartWidget::drawPost, WChartMode::drawOverlays
         virtual void drawAfter(gfx::Canvas& can, const Renderer& ren) = 0;
@@ -45,7 +45,7 @@ namespace client { namespace map {
         /** Draw cursor.
             Called after the chart has been drawn, top-most overlay first.
             Use for cursors.
-            \param Canvas to draw on.
+            \param can Canvas to draw on.
             \param ren Renderer
             \retval true This is the final cursor, do not draw next overlay's cursor
             \retval false This is not the final cursor, draw next cursor overlay's cursor, too */

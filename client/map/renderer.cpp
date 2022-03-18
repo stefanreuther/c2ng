@@ -74,10 +74,9 @@ namespace {
     }
 
 
-    // /* In addition to the internal<->external conversion, we expose a
-    //    simple color number (0..NUM_USER_COLORS, where 0 isn't selectable
-    //    through dialogs) to the user. The following two functions provide a
-    //    mapping. */
+    /* In addition to the internal<->external conversion, we expose a
+       simple color number (0..NUM_USER_COLORS, where 0 isn't selectable
+       through dialogs) to the user. */
     static const uint8_t user_colors[] = {
         0,
         1,   2,   3,   4,   5,   6,   7,   8,   9,  15,
@@ -739,9 +738,6 @@ client::map::Renderer::setFont(gfx::BaseContext& ctx, gfx::ResourceProvider& pro
     ctx.useFont(*provider.getFont(gfx::FontRequest().setSize(fontSize)));
 }
 
-// /** Convert user color index into color number.
-//     \param user_color User color number (0..NUM_USER_COLORS)
-//     \return color number */
 uint8_t
 client::map::getUserColor(int color)
 {

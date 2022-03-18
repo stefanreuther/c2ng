@@ -20,7 +20,7 @@ namespace client { namespace dialogs {
         Allows the user to perform operations on proxy:
         - toggle filterd status, toggleHeadingFiltered()
         - select a message for display, setCurrentMessage()
-        \param [in/out] proxy       Proxy to work on
+        \param [in,out] proxy       Proxy to work on
         \param [in]     root        UI root
         \param [in]     gameSender  Game sender for related operations
         \param [in]     tx          Translator */

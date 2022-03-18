@@ -87,7 +87,7 @@ namespace game { namespace proxy {
 
         /** Constructor.
             \param gameSender Game sender
-            \param receiver   RequestDispatcher to receive updates in this thread
+            \param reply      RequestDispatcher to receive updates in this thread
             \param planetId   Planet Id */
         BuildAmmoProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& reply, Id_t planetId);
 
@@ -95,7 +95,7 @@ namespace game { namespace proxy {
         ~BuildAmmoProxy();
 
         /** Get status, synchronously.
-            \param [in/out] ind    WaitIndicator for UI synchronisation
+            \param [in,out] ind    WaitIndicator for UI synchronisation
             \param [out]    result Status */
         void getStatus(WaitIndicator& ind, Status& result);
 

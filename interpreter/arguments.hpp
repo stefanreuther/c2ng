@@ -66,10 +66,10 @@ namespace interpreter {
     bool checkIntegerArg(int32_t& out, const afl::data::Value* value);
 
     /** Check integer argument with range.
-        \param out   [out] Result will be placed here
-        \param value [in] Value given by user
-        \param min   [in] Minimum accepted value
-        \param min   [in] Maximum accepted value
+        \param [out] out   Result will be placed here
+        \param [in]  value Value given by user
+        \param [in]  min   Minimum accepted value
+        \param [in]  max   Maximum accepted value
         \return true if value was specified, false if value was null (out not changed)
         \throw Error if value is invalid */
     bool checkIntegerArg(int32_t& out, const afl::data::Value* value, int32_t min, int32_t max);

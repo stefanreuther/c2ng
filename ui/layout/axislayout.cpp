@@ -15,8 +15,6 @@ ui::layout::AxisLayout::AxisLayout()
     \param space      inter-widget space we want to use
     \param outer      outer space we want to leave
     \param have_size  available space
-    \param flex_flag  the flag signifying flexibility in our direction
-                      (li_FlexibleH or li_FlexibleV)
     \returns vector of widget sizes
     \post used_outer = actual outer space to leave
     \post used_space = actual inter-widget space to leave */

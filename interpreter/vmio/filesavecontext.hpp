@@ -128,7 +128,7 @@ namespace interpreter { namespace vmio {
 
         /** Save process.
             \param out Stream to save to
-            \param exc Process to save */
+            \param proc Process to save */
         void saveProcess(afl::io::Stream& out, const Process& proc);
     };
 

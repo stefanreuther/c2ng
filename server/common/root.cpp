@@ -44,7 +44,6 @@ server::common::Root::defaultProfile()
 }
 
 // /** Map login name to user Id.
-//     \param db Database Client
 //     \param login Login name
 //     \return user Id; empty string if invalid */
 // FIXME: here? Give it an Optional<String_t> or return-bool style interface?

@@ -42,7 +42,8 @@ namespace client { namespace si {
     class ScriptSide : public game::Extra, public afl::base::WeakTarget {
      public:
         /** Constructor.
-            @param reply RequestSender to send requests back to UserSide */
+            @param reply RequestSender to send requests back to UserSide
+            @param session Session */
         ScriptSide(util::RequestSender<UserSide> reply, game::Session& session);
 
         /** Destructor. */
@@ -242,7 +243,7 @@ namespace client { namespace si {
 
         /** Wait callback.
             Signals the wait result to the UserSide.
-            @param id       Wait Id */
+            @param waitId  Wait Id */
         void onTaskComplete(uint32_t waitId);
 
         /** Process group completion callback.

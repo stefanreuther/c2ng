@@ -28,10 +28,10 @@ bool
 server::console::IntegerCommandHandler::call(const String_t& cmd, interpreter::Arguments args, Parser& /*parser*/, std::auto_ptr<afl::data::Value>& result)
 {
     if (cmd == "int") {
-        /** @q int VALUE (Global Console Command)
-            Convert the VALUE into an integer and return it.
-            If the value is not convertible to integer, returns nothing.
-            @since PCC2 1.99.18, PCC2 2.40.3 */
+        /* @q int VALUE (Global Console Command)
+           Convert the VALUE into an integer and return it.
+           If the value is not convertible to integer, returns nothing.
+           @since PCC2 1.99.18, PCC2 2.40.3 */
         args.checkArgumentCount(1);
         int32_t n;
         if (strToInteger(toString(args.getNext()), n)) {

@@ -61,7 +61,7 @@ namespace game { namespace config {
             When accessing an option that does not already exist or have the wrong type, it is created or converted.
             Index access is perceived as a read-only operation and thus allowed on const objects, although it may change the underlying data.
 
-            \param Descriptor descriptor type. Must have
+            \tparam Descriptor descriptor type. Must have
             - a member type \c OptionType_t with the actual option type
             - a member function \c create(Configuration&) to create the option instance
             \param desc descriptor instance

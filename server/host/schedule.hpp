@@ -59,7 +59,7 @@ namespace server { namespace host {
 
         /** Set host limit.
             Host is allowed to be delayed at most this many minutes to allow the next event to take place as scheduled.
-            \param hostLimit Host limit in minutes */
+            \param minutes Host limit in minutes */
         void setHostLimit(int32_t minutes);
 
         /** Set condition.
@@ -117,12 +117,12 @@ namespace server { namespace host {
         bool isExpired(int32_t turn, Time_t time) const;
 
         /** Load from database key.
-            \param k Key to load from
+            \param h Key to load from
             \throw std::exception if database content is invalid */
         void loadFrom(afl::net::redis::HashKey h);
 
         /** Save to database key.
-            \param k Key to store to */
+            \param h Key to store to */
         void saveTo(afl::net::redis::HashKey h) const;
 
 

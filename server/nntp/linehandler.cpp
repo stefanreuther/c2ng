@@ -383,11 +383,12 @@ server::nntp::LineHandler::fillGroupListCache(afl::net::line::LineSink& response
     return true;
 }
 
-// /** Resolve sequence number into message number.
-//     \param seq [in] Sequence number
-//     \param rfcMsgId [out] Message Id
-//     \retval nonzero Message number
-//     \retval 0 Error. An error message has been sent, command processing must abort */
+/** Resolve sequence number into message number.
+    \param [in]  seq       Sequence number
+    \param [out] rfcMsgId  Message Id
+    \param [out] response  Write response here
+    \retval nonzero Message number
+    \retval 0 Error. An error message has been sent, command processing must abort */
 int32_t
 server::nntp::LineHandler::resolveSequenceNumber(int32_t seq, String_t& rfcMsgId, afl::net::line::LineSink& response)
 {
@@ -411,12 +412,13 @@ server::nntp::LineHandler::resolveSequenceNumber(int32_t seq, String_t& rfcMsgId
     return it->second;
 }
 
-// /** Parse sequence number range.
-//     \param [in] range Range specified by user
-//     \param [out] min Lower bound
-//     \param [out] max Upper bound
-//     \retval true Success
-//     \retval false Error. An error message has been sent, command processing must abort */
+/** Parse sequence number range.
+    \param [in] range Range specified by user
+    \param [out] min Lower bound
+    \param [out] max Upper bound
+    \param [out] response Write response here
+    \retval true Success
+    \retval false Error. An error message has been sent, command processing must abort */
 bool
 server::nntp::LineHandler::parseRange(const String_t& range, int32_t& min, int32_t& max, afl::net::line::LineSink& response)
 {
@@ -460,11 +462,12 @@ server::nntp::LineHandler::parseRange(const String_t& range, int32_t& min, int32
     }
 }
 
-// /** Enter a newsgroup.
-//     This loads the cache of sequence numbers to message numbers.
-//     \param groupName Name of newsgroup
-//     \retval true Success
-//     \retval false Error. An error message has been sent, command processing must abort */
+/** Enter a newsgroup.
+    This loads the cache of sequence numbers to message numbers.
+    \param groupName Name of newsgroup
+    \param response Write responses here
+    \retval true Success
+    \retval false Error. An error message has been sent, command processing must abort */
 bool
 server::nntp::LineHandler::enterGroup(const String_t& groupName, afl::net::line::LineSink& response)
 {
@@ -500,22 +503,24 @@ server::nntp::LineHandler::enterGroup(const String_t& groupName, afl::net::line:
     return true;
 }
 
-// /** ARTICLE/HEAD/BODY/STAT command.
-//     - References: RFC 977, RFC 3977, hamsrv
-//     - Syntax: <verb> msgid
-//     - Syntax: <verb> sequenceNumber
+/** ARTICLE/HEAD/BODY/STAT command.
+    - References: RFC 977, RFC 3977, hamsrv
+    - Syntax: <verb> msgid
+    - Syntax: <verb> sequenceNumber
 
-//     Responses:
-//     - 220 n message-id Article follows (multi-line)
-//     - 221 n message-id Headers follow (multi-line)
-//     - 222 n message-id Body follows (multi-line)
-//     - 223 n message-id Article exists
-//     - 412 No newsgroup selected
-//     - 423 No article with that number
-//     - 420 Current article number is invalid (is this possible?)
+    Responses:
+    - 220 n message-id Article follows (multi-line)
+    - 221 n message-id Headers follow (multi-line)
+    - 222 n message-id Body follows (multi-line)
+    - 223 n message-id Article exists
+    - 412 No newsgroup selected
+    - 423 No article with that number
+    - 420 Current article number is invalid (is this possible?)
 
-//     \param header true to send the header (HEAD, ARTICLE)
-//     \param body true to send the body (BODY, ARTICLE) */
+    \param args   Parameters
+    \param header true to send the header (HEAD, ARTICLE)
+    \param body   true to send the body (BODY, ARTICLE)
+    \param response Write response here */
 void
 server::nntp::LineHandler::handleArticle(String_t args, bool header, bool body, afl::net::line::LineSink& response)
 {
@@ -927,25 +932,28 @@ server::nntp::LineHandler::handleHelp(afl::net::line::LineSink& response)
     response.handleLine(".");
 }
 
-// /** OVER / XOVER command.
-//     - References: RFC 3977, RFC 2980, hamsrv
-//     - Syntax: OVER [range]
-//     - Syntax: OVER <msgid>
-//     - Syntax: XOVER [range]
+/** OVER / XOVER command.
+    - References: RFC 3977, RFC 2980, hamsrv
+    - Syntax: OVER [range]
+    - Syntax: OVER <msgid>
+    - Syntax: XOVER [range]
 
-//     Responses:
-//     - 224 Overview information follows (multi-line)
-//     - 430 No article with that message-id
-//     - 412 No newsgroup selected
-//     - 423 No articles in that range
-//     - 420 Current article number is invalid
+    Responses:
+    - 224 Overview information follows (multi-line)
+    - 430 No article with that message-id
+    - 412 No newsgroup selected
+    - 423 No articles in that range
+    - 420 Current article number is invalid
 
-//     The response contains a list of header fields: sequence, Subject, From, Date, Message-Id,
-//     References, byte size, line count, and optional fields (Xref).
+    The response contains a list of header fields: sequence, Subject, From, Date, Message-Id,
+    References, byte size, line count, and optional fields (Xref).
 
-//     FIXME: OVER <msgid> is not implemented.
+    FIXME: OVER <msgid> is not implemented.
 
-//     FIXME: special case for OVER with empty range not implemented (should give 423 instead of 224). */
+    FIXME: special case for OVER with empty range not implemented (should give 423 instead of 224).
+
+    \param args Parameters
+    \param response Write response here */
 void
 server::nntp::LineHandler::handleOver(String_t args, afl::net::line::LineSink& response)
 {

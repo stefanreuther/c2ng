@@ -203,12 +203,13 @@ namespace game { namespace map {
 
     /** Compute optimum warp factor.
         \param univ              Universe
-        \param id                Ship Id
+        \param shipId            Ship Id
         \param moveFrom          Starting point of movement (ship position)
         \param moveTo            Target of movement (waypoint)
         \param scoreDefinitions  Unit score definitions (required for experience levels)
         \param shipList          Ship list (required for hull/beam/torp/engine specs)
-        \param root              Root (provides host configuration, version, key) */
+        \param root              Root (provides host configuration, version, key)
+        \return optimum warp factor */
     int getOptimumWarp(const Universe& univ, Id_t shipId,
                        Point moveFrom, Point moveTo,
                        const UnitScoreDefinitionList& scoreDefinitions,

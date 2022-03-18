@@ -140,8 +140,8 @@ namespace interpreter {
             This will enumerate all mutexes as defined by the \c owner filter, and add them to \c data.
             Note that this will not add references to the mutexes.
 
-            \param data [out] List will be produced here
-            \param owner [in] Filter. If non-null, only list mutexes owned by this process. If null, list all mutexes. */
+            \param [out] data     List will be produced here
+            \param [in]  process  Filter. If non-null, only list mutexes owned by this process. If null, list all mutexes. */
         void enumMutexes(std::vector<Mutex*>& data, const Process* process) const;
 
      private:

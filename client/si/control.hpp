@@ -107,7 +107,7 @@ namespace client { namespace si {
         /** Handle successful wait (called UserSide).
             Releases a possible waiting executeTaskWait(), continueProcessWait().
 
-            @param id Wait Id */
+            @param waitId Wait Id */
         void onTaskComplete(uint32_t waitId);
 
 

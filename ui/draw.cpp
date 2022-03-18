@@ -145,17 +145,6 @@ ui::drawFrameDown(gfx::Context<uint8_t>& ctx, gfx::Rectangle r)
     ctx.canvas().drawVLine(Point(x2, r.getTopY()),             y2+1-r.getTopY(), ctx.getRawColor(), gfx::SOLID_LINE, gfx::OPAQUE_ALPHA);
 }
 
-// /** Tile area with pixmap.
-//     \param can    canvas to use
-//     \param r      area to tile with pixmap
-//     \param pix    pixmap to use, may be null
-//     \param color  when /pix/ is null, the image is filled with this color
-//     \param alter  X coordinate alteration. With alteration 0, the area is
-//                   tiled with a regular grid, like on a checkered paper.
-//                   With nonzero alteration, the second row is shifted
-//                   that many pixels to the left, the next one is shifted
-//                   to the right again, etc, to make the pattern look more
-//                   interesting. */
 void
 ui::drawTiledArea(gfx::Context<uint8_t>& ctx, gfx::Rectangle r, const afl::base::Ptr<gfx::Canvas>& pix, uint8_t color, int alter)
 {

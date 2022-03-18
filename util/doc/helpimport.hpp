@@ -33,12 +33,12 @@ namespace util { namespace doc {
         i.e. it doesn't matter when a block is re-indented.
         In addition, it gives a marginal space saving (and effort saving when rendering).
 
-        @param [in/out] idx        Help index
+        @param [in,out] idx        Help index
         @param [in]     root       Root page
-        @param [in/out] blobStore  Blob store to store transformed pages
+        @param [in,out] blobStore  Blob store to store transformed pages
         @param [in]     file       XML file
         @param [in]     flags      Flags
-        @param [in/out] log        Log listener (warning messages)
+        @param [in,out] log        Log listener (warning messages)
         @param [in]     tx         Translator (warning messages) */
     void importHelp(Index& idx, Index::Handle_t root, BlobStore& blobStore, afl::io::Stream& file, int flags, afl::sys::LogListener& log, afl::string::Translator& tx);
 

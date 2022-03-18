@@ -203,10 +203,10 @@ game::spec::Mission::getParameterName(MissionParameter p) const
 }
 
 void
-game::spec::Mission::setParameterName(MissionParameter id, String_t name)
+game::spec::Mission::setParameterName(MissionParameter p, String_t name)
 {
     // ex GMission::setParameterName
-    m_parameterNames[id] = name;
+    m_parameterNames[p] = name;
 }
 
 
@@ -313,7 +313,7 @@ game::spec::Mission::worksOn(const game::map::Ship& ship, const game::config::Ho
 /** Parse mission.cc description line.
     This will set all affected members according to that definition.
 
-    \param desc_line line from mission.cc, sans mission number (i.e. "!h#,Tow a ship") */
+    \param descriptionLine line from mission.cc, sans mission number (i.e. "!h#,Tow a ship") */
 void
 game::spec::Mission::parseDescription(const String_t& descriptionLine)
 {

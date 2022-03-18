@@ -81,7 +81,7 @@ namespace game { namespace map {
         void addMessageInformation(const game::parser::MessageInformation& info, PlayerSet_t source);
 
         /** Get current ship data for storage.
-            \param [out] data */
+            \param [out] out data */
         void getCurrentShipData(ShipData& out) const;
 
         /** Do internal checks for this ship.

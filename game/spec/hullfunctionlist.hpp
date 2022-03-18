@@ -38,7 +38,7 @@ namespace game { namespace spec {
 
         /** Sort list for new ships.
             Brings it into a state that is useful for attaching it with a new (not-yet-built) ship.
-            \param player player who's going to own the ship */
+            \param forPlayer player who's going to own the ship */
         void sortForNewShip(PlayerSet_t forPlayer);
 
         /*
@@ -55,7 +55,7 @@ namespace game { namespace spec {
         Iterator_t end() const;
 
         /** Indexed access.
-            \param i Index, [0,size()) */
+            \param index Index, [0,size()) */
         const HullFunction& operator[](size_t index) const;
 
      private:

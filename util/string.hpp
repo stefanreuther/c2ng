@@ -103,7 +103,8 @@ namespace util {
 
     /** Encode MIME header.
         \param input text to encode
-        \param charset character set */
+        \param charsetName character set
+        \return encoded text */
     String_t encodeMimeHeader(String_t input, String_t charsetName);
 
     /** Encode as HTML.
@@ -122,7 +123,7 @@ namespace util {
     void addTrailingCharacter(String_t& s, char ch);
 
     /** Remove trailing character.
-        If the given string ends in @ch, removes it. (Same as Perl 'chomp').
+        If the given string ends in @c ch, removes it. (Same as Perl 'chomp').
         \param s [in/out] String
         \param ch Character */
     void removeTrailingCharacter(String_t& s, char ch);

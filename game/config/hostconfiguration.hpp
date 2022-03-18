@@ -402,7 +402,9 @@ namespace game { namespace config {
         int32_t getPlayerMissionNumber(int player) const;
 
         /** Get experience level name.
-            \param level level number (normally [0,NUM_EXPERIENCE_LEVELS], but out-of-range values are handled) */
+            \param level level number (normally [0,NUM_EXPERIENCE_LEVELS], but out-of-range values are handled)
+            \param tx Translator (used when config doesn't specify enough names)
+            \return user-friendly name */
         String_t getExperienceLevelName(int level, afl::string::Translator& tx) const;
 
         /** Get experience level, given a number of experience points.

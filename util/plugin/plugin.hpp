@@ -173,7 +173,7 @@ namespace util { namespace plugin {
         void enumMissingFeatures(const FeatureSet_t& have, FeatureSet_t& missing) const;
 
         /** List provided features.
-            \param [in/out] have Features added here */
+            \param [in,out] have Features added here */
         void enumProvidedFeatures(FeatureSet_t& have) const;
 
      private:

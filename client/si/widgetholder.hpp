@@ -38,7 +38,7 @@ namespace client { namespace si {
     class WidgetHolder : public afl::base::RefCounted, public afl::base::WeakTarget {
      public:
         /** Constructor.
-            \param side Script Side */
+            \param userSender Access to UserSide */
         explicit WidgetHolder(util::RequestSender<UserSide> userSender);
 
         /** Destructor. */

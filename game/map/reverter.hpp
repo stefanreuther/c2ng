@@ -51,7 +51,7 @@ namespace game { namespace map {
             Determines how many tech levels can be sold for money back.
             This is the number of parts at the beginning of the turn.
             \param planetId Planet Id
-            \param techLevel Part area
+            \param area Part area
             \param slot Slot (1..)
             \return Minimum number. If unknown, components cannot be sold. */
         virtual afl::base::Optional<int> getMinBaseStorage(int planetId, TechLevel area, int slot) const = 0;
@@ -67,7 +67,6 @@ namespace game { namespace map {
         /** Get number of fighters allowed to be sold.
             This is the number of fighters bought this turn.
             \param planetId Planet Id
-            \param slot Slot
             \return Number of fighters. Return 0 to disable undo.
                     Can be more than fighters on starbase if user already transferred away some. */
         virtual int getNumFightersAllowedToSell(int planetId) const = 0;

@@ -74,6 +74,7 @@ namespace game { namespace map {
             \param m        Mission number
             \param i        Intercept parameter
             \param t        Tow parameter
+            \param config   Host configuration
             \param shipList Ship list (needed to parse missions)
             \retval true success
             \retval false operation declined */
@@ -93,6 +94,7 @@ namespace game { namespace map {
                             - OverrideLocks: accept (=return false) even if there is a script mutex on it
             \param config   Host configuration (needed to parse missions)
             \param shipList Ship list (needed to parse missions)
+            \param mtxl     Mutex list (to check for lock on mission)
             \retval true Mission is locked and should not be changed
             \retval false Mission is not locked and can be changed */
         bool isMissionLocked(int flags,

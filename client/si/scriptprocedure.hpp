@@ -45,6 +45,7 @@ namespace client { namespace si {
     class ScriptProcedure : public interpreter::CallableValue {
      public:
         /** Constructor.
+            \param session     Session
             \param pScriptSide pointer to ScriptSide.
             \param pFunction implementation function; see class description. */
         ScriptProcedure(game::Session& session, ScriptSide* pScriptSide, void (*pFunction)(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args));

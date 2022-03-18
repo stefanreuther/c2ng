@@ -20,7 +20,7 @@ namespace ui { namespace widgets {
         /** Constructor.
             \param image    Image name (for ResourceProvider::getImage)
             \param key      Key
-            \param provider ResourceProvider
+            \param root     UI root
             \param size     Size of this widget */
         ImageButton(String_t image, util::Key_t key, ui::Root& root, gfx::Point size);
 

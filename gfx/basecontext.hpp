@@ -47,7 +47,7 @@ namespace gfx {
 
         /** Set line pattern.
             Line drawing operations will use this pattern.
-            \param n thickness (default: solid/0xFF)
+            \param pat pattern (default: solid/0xFF)
             \return *this */
         BaseContext& setLinePattern(LinePattern_t pat);
 

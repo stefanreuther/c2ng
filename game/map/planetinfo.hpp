@@ -141,7 +141,7 @@ namespace game { namespace map {
         This function describes the climate in textual form.
         It appends XML DOM nodes to a node list, which can eventually be rendered into a ui::rich::Document.
 
-        \param [in/out] nodes  New nodes appended here
+        \param [in,out] nodes  New nodes appended here
         \param pl              Planet
         \param turnNr          Turn number (used to provide age information)
         \param root            Root (used for host configuration, version, user configuration)
@@ -158,7 +158,7 @@ namespace game { namespace map {
         This function describes the native population in textual form.
         It appends XML DOM nodes to a node list, which can eventually be rendered into a ui::rich::Document.
 
-        \param [in/out] nodes  New nodes appended here
+        \param [in,out] nodes  New nodes appended here
         \param pl              Planet
         \param turnNr          Turn number (used to provide age information)
         \param root            Root (used for host configuration, version, user configuration)
@@ -177,7 +177,7 @@ namespace game { namespace map {
         This function describes the colonist population and economy in textual form.
         It appends XML DOM nodes to a node list, which can eventually be rendered into a ui::rich::Document.
 
-        \param [in/out] nodes  New nodes appended here
+        \param [in,out] nodes  New nodes appended here
         \param pl              Planet
         \param turnNr          Turn number (used to provide age information)
         \param root            Root (used for host configuration, version, user configuration)
@@ -195,7 +195,7 @@ namespace game { namespace map {
     /** Retrieve textual information about planet building effects.
         This function describe the effects on sensor visibility and taxation.
 
-        \param [in/out] nodes  New nodes appended here
+        \param [in,out] nodes  New nodes appended here
         \param pl              Planet. To describe a hypothetical situation, make a copy of the real planet and modify it.
         \param root            Root (used for host configuration, version, user configuration)
         \param tx              Translator */
@@ -207,7 +207,7 @@ namespace game { namespace map {
     /** Retrieve textual information about planet defense effects.
         This function describes the effects of planet and starbase defense.
 
-        \param [in/out] result Result appended here
+        \param [in,out] result Result appended here
         \param pl              Planet. To describe a hypothetical situation, make a copy of the real planet and modify it.
         \param root            Root (used for host configuration, version, user configuration)
         \param shipList        Ship list (used for weapon names)

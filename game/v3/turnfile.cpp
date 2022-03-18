@@ -601,7 +601,7 @@ game::v3::TurnFile::findCommandRunLength(size_t index) const
 
 
 // Get command data.
-afl::base::ConstBytes_t 
+afl::base::ConstBytes_t
 game::v3::TurnFile::getCommandData(size_t index) const
 {
     if (uint32_t* p = m_offsets.at(index)) {
@@ -1075,6 +1075,7 @@ game::v3::TurnFile::parseTurnFile(afl::io::Stream& stream, afl::string::Translat
 }
 
 /** Parse headers and trailers directly from a stream.
+    \param stream Stream to read from
     \param offset Starting position into file (nonzero for Taccom).
     \param length Length of turn data. */
 void
@@ -1169,7 +1170,7 @@ game::v3::TurnFile::updateTurnFile(afl::base::GrowableMemory<uint8_t>& data, afl
     \param id         Object Id
     \param low,up     Command range (e.g. tcm_ShipFIRST,tcm_ShipLAST)
     \param oldObject  Old object data
-    \param newOffsets New object data */
+    \param newObject  New object data */
 void
 game::v3::TurnFile::makeCommands(int id, int low, int up, afl::base::ConstBytes_t oldObject, afl::base::ConstBytes_t newObject)
 {

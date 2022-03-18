@@ -63,7 +63,7 @@ namespace game { namespace proxy {
         ~TechUpgradeProxy();
 
         /** Get status, synchronously.
-            \param [in/out] ind    WaitIndicator for UI synchronisation
+            \param [in,out] ind    WaitIndicator for UI synchronisation
             \param [out]    result Result */
         void getStatus(WaitIndicator& ind, Status& result);
 
@@ -76,14 +76,14 @@ namespace game { namespace proxy {
             Invalid requests are silently ignored.
             Otherwise, both upgrades and downgrades will be performed.
             \param area Area
-            \param level New level
+            \param value New level
             \see game::actions::TechUpgrade::setTechLevel */
         void setTechLevel(TechLevel area, int value);
 
         /** Upgrade to new target tech level.
             Like setTechLevel(), but will never lower a tech level.
             \param area Area
-            \param level New level
+            \param value New level
             \see game::actions::TechUpgrade::upgradeTechLevel */
         void upgradeTechLevel(TechLevel area, int value);
 

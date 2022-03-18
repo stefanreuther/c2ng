@@ -46,7 +46,9 @@ namespace game { namespace v3 {
 
         /** Save data to directory.
             If the file owner is set to a valid value (>= 0), creates the file.
-            \param dir Directory */
+            \param dir Directory
+            \param tx  Translator
+            \param log Logger */
         void save(afl::io::Directory& dir, afl::string::Translator& tx, afl::sys::LogListener& log);
 
         /** Set checksum.

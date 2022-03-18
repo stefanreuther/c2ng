@@ -65,7 +65,7 @@ namespace server { namespace interface {
         /** Get information about all players in a game (PLAYERLS).
             \param [in] gameId game Id
             \param [in] all true to return all current slot, false to return all slots ever
-            \param [out] Result */
+            \param [out] result Result */
         virtual void list(int32_t gameId, bool all, std::map<int,Info>& result) = 0;
 
         /** Get information about one player slot (PLAYERSTAT).

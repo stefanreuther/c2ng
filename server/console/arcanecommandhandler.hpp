@@ -18,7 +18,7 @@ namespace server { namespace console {
      public:
         /** Constructor.
             \param env Environment
-            \param CommandHandler Main command handler for recursive command invocation */
+            \param recurse Main command handler for recursive command invocation */
         ArcaneCommandHandler(Environment& env, CommandHandler& recurse);
 
         /** Destructor. */

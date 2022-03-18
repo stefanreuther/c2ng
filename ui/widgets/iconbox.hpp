@@ -59,7 +59,7 @@ namespace ui { namespace widgets {
         afl::base::Signal<void(size_t)> sig_change;
 
         /** Return width of an item.
-            \param number Item, [0,getNumberOfItems()).
+            \param nr Item, [0,getNumberOfItems()).
             \return width in pixels */
         virtual int getItemWidth(size_t nr) = 0;
 
@@ -68,9 +68,9 @@ namespace ui { namespace widgets {
         virtual size_t getNumItems() = 0;
 
         /** Draw an item.
-            \param number Item, [0,getNumberOfItems()).
             \param can Canvas to draw on
-            \param r Position of item (width will be same as getItemWidth(number))
+            \param area Position of item (width will be same as getItemWidth(number))
+            \param item Item, [0,getNumberOfItems()).
             \param state Item state */
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state) = 0;
 

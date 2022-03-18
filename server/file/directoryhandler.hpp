@@ -109,7 +109,7 @@ namespace server { namespace file {
 
         /** Remove a file.
             It is an error if this file does not exist.
-            \param Name of file to remove.
+            \param name Name of file to remove.
             \throw std::runtime_error on errors (e.g. I/O error, bad parameters; conditions and exception type depending on actual derived class) */
         virtual void removeFile(String_t name) = 0;
 

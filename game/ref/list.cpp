@@ -61,16 +61,6 @@ game::ref::List::add(Reference::Type type, const std::vector<Id_t> ids)
     }
 }
 
-// /** Add all objects at a particular location. This is used for certain ship lists.
-//     \param univ  universe
-//     \param pt    location
-//     \param flags ls_IncludePlanet: include planet in list;
-//                  ls_IncludeForeignShips: also list foreign ships
-//                  (default: only list ships we're playing);
-//                  ls_SafeShipsOnly: include only safe ships (not guessed)
-//     \param exclude_ship do not include this ship
-
-//     \todo We need a means to say which player must safely see the ship */
 void
 game::ref::List::addObjectsAt(game::map::Universe& univ, game::map::Point pt, Options_t options, Id_t excludeShipId)
 {

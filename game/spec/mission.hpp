@@ -153,12 +153,12 @@ namespace game { namespace spec {
         /** Get parameter name.
             \param p Which parameter to query
             \return name; never empty */
-        String_t getParameterName(MissionParameter id) const;
+        String_t getParameterName(MissionParameter p) const;
 
         /** Set parameter name.
             \param p Which parameter
             \param name Name; can be blank to invoke default */
-        void setParameterName(MissionParameter id, String_t name);
+        void setParameterName(MissionParameter p, String_t name);
 
         /*
          *  Script accessors

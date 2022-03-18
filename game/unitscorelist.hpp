@@ -43,9 +43,9 @@ namespace game {
         void merge(Index_t index, int16_t value, int16_t turn);
 
         /** Get score value.
-            \param index [in] Score to get
-            \param value [out] Score value
-            \param value [out] Turn number
+            \param [in]  index Score to get
+            \param [out] value Score value
+            \param [out] turn  Turn number
             \retval true Value was found
             \retval false Value not found, value/turn unchanged */
         bool get(Index_t index, int16_t& value, int16_t& turn) const;

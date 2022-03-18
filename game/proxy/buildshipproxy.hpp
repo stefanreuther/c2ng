@@ -84,23 +84,23 @@ namespace game { namespace proxy {
         ~BuildShipProxy();
 
         /** Get status, synchronously.
-            \param [in/out] ind    WaitIndicator for UI synchronisation
+            \param [in,out] ind    WaitIndicator for UI synchronisation
             \param [out]    result Result */
         void getStatus(WaitIndicator& ind, Status& result);
 
         /** Get cost summary, synchronously.
-            \param [in/out] ind    WaitIndicator for UI synchronisation
+            \param [in,out] ind    WaitIndicator for UI synchronisation
             \param [out]    result Result, containing cost breakdown in human-readable form  */
         void getCostSummary(WaitIndicator& ind, game::spec::CostSummary& result);
 
         /** Get order as ShipQuery object.
-            \param [in/out] ind    WaitIndicator for UI synchronisation
+            \param [in,out] ind    WaitIndicator for UI synchronisation
             \return ShipQuery object
             \see game::actions::BuildShip::getQuery */
         ShipQuery getQuery(WaitIndicator& ind);
 
         /** Find ship cloning at this planet.
-            \param [in/out] ind    WaitIndicator for UI synchronisation
+            \param [in,out] ind    WaitIndicator for UI synchronisation
             \param [out]    id     Ship Id
             \param [out]    name   Ship name
             \retval true  Found a ship; id/name updated
@@ -133,7 +133,7 @@ namespace game { namespace proxy {
 
         /** Change number of weapons.
             \param area   Area to change
-            \param amount Amount to add. Out-of-range values will be forced into range.
+            \param delta  Amount to add. Out-of-range values will be forced into range.
             \see game::actions::BuildShip::addParts */
         void addParts(Weapon_t area, int delta);
 

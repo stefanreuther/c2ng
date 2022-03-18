@@ -50,7 +50,8 @@ namespace server { namespace host {
      public:
         /** Constructor.
             \param source Interface to host filer
-            \param fs File system */
+            \param fs File system
+            \param log Logger */
         Exporter(afl::net::CommandHandler& source, afl::io::FileSystem& fs, afl::sys::LogListener& log);
 
         /** Export a game.
@@ -92,7 +93,7 @@ namespace server { namespace host {
         void exportSubdirectory(const String_t& source, const String_t& targetBase, const String_t& targetSub);
 
         /** Store configuration file.
-            \param in     [in] Configuration
+            \param ini    [in] Configuration
             \param parent [in] Target directory */
         void storeConfigurationFile(const ConfigurationBuilder& ini, afl::io::Directory& parent);
 

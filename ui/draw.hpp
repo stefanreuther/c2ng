@@ -55,6 +55,17 @@ namespace ui {
     void drawFrameUp(gfx::Context<uint8_t>& ctx, gfx::Rectangle r);
     void drawFrameDown(gfx::Context<uint8_t>& ctx, gfx::Rectangle r);
 
+    /** Tile area with pixmap.
+        \param ctx    graphics context
+        \param r      area to tile with pixmap
+        \param pix    pixmap to use, may be null
+        \param color  when /pix/ is null, the image is filled with this color
+        \param alter  X coordinate alteration. With alteration 0, the area is
+                      tiled with a regular grid, like on a checkered paper.
+                      With nonzero alteration, the second row is shifted
+                      that many pixels to the left, the next one is shifted
+                      to the right again, etc, to make the pattern look more
+                      interesting. */
     void drawTiledArea(gfx::Context<uint8_t>& ctx, gfx::Rectangle r, const afl::base::Ptr<gfx::Canvas>& pix, uint8_t color, int alter);
 
     void drawWindow(gfx::Context<uint8_t>& ctx,

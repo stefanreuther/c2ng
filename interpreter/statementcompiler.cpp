@@ -996,7 +996,9 @@ interpreter::StatementCompiler::compileCreateKeymap(BytecodeObject& bco, const S
 
 /** Compile "CreateShipProperty" or "CreatePlanetProperty" statement.
     \param bco Bytecode output
-    \param scc Statement compilation context */
+    \param scc Statement compilation context
+    \param minor Minor opcode for creating the properties (miSpecialDefPlanetProperty, miSpecialDefShipProperty)
+    \param prefix Implicit prefix ("PLANET.", "SHIP.") */
 interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileCreateProperty(BytecodeObject& bco, const StatementCompilationContext& /*scc*/, Opcode::Special minor, const char* prefix)
 {
@@ -1721,7 +1723,8 @@ interpreter::StatementCompiler::compileIf(BytecodeObject& bco, const StatementCo
 
 /** Compile "Load" statement.
     \param bco [out] bytecode output
-    \param scc [in] statement compilation context */
+    \param scc [in] statement compilation context
+    \param mustSucceed true for "Load", false for "TryLoad" */
 interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileLoad(BytecodeObject& bco, const StatementCompilationContext& scc, bool mustSucceed)
 {
@@ -2413,8 +2416,7 @@ interpreter::StatementCompiler::compileSelect(BytecodeObject& bco, const Stateme
 
 /** Compile "SelectionExec" statement.
     \param bco [out] bytecode output
-    \param scc [in] statement compilation context
-    \param proc [in] true if this is going to be a procedure (Sub), false if it's a function */
+    \param scc [in] statement compilation context */
 interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileSelectionExec(BytecodeObject& bco, const StatementCompilationContext& /*scc*/)
 {
@@ -3474,7 +3476,8 @@ interpreter::StatementCompiler::compileSubroutineDefinition(BytecodeObject& bco,
 
 /** Parse argument list.
     \see parseCommandArgumentList
-    \param args [out] Arguments expression trees are accumulated here */
+    \param [out] args Arguments expression trees are accumulated here
+    \param [out] del Deleter to control lifetime of new nodes */
 void
 interpreter::StatementCompiler::parseArgumentList(std::vector<const interpreter::expr::Node*>& args, afl::base::Deleter& del)
 {

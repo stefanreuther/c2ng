@@ -167,7 +167,7 @@ namespace server { namespace talk {
             to make sure the message Id is resolvable.
             \param root Service root
             \param id RfC Message Id
-            \param message Id Message Id [the integer] */
+            \param messageId Message Id [the integer] */
         static void addRfcMessageId(Root& root, String_t id, int32_t messageId);
 
         /** Look up a RfC Message Id.

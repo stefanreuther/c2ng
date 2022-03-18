@@ -33,7 +33,9 @@ namespace ui {
             \param mgr Resource manager (responsible for actual resource loading)
             \param dir Resource directory.
             \param mainThreadDispatcher Dispatcher for the main (UI) thread to place callbacks properly.
-                       Must out-live the DefaultResourceProvider. */
+                       Must out-live the DefaultResourceProvider.
+            \param tx Translator
+            \param log Logger */
         DefaultResourceProvider(ui::res::Manager& mgr,
                                 afl::base::Ref<afl::io::Directory> dir,
                                 util::RequestDispatcher& mainThreadDispatcher,

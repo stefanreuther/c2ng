@@ -43,7 +43,7 @@ namespace server { namespace interface {
 
         /** Clear tokens (RESETTOKEN).
             \param userId User Id
-            \param tokenType Token types to clear */
+            \param tokenTypes Token types to clear */
         virtual void clearToken(String_t userId, afl::base::Memory<const String_t> tokenTypes) = 0;
     };
 

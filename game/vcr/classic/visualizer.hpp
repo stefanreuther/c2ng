@@ -35,18 +35,21 @@ namespace game { namespace vcr { namespace classic {
      public:
         /** Start a fighter.
             When this function is called, the fighter's data is already accessible on the Algorithm's accessor interface.
+            \param algo Originating algorithm
             \param side Owning side
             \param track Fighter track (starting at 0) */
         virtual void startFighter(Algorithm& algo, Side side, int track) = 0;
 
         /** Land a fighter.
             When this function is called, the fighter's data is still accessible on the Algorithm's accessor interface.
+            \param algo Originating algorithm
             \param side Owning side
             \param track Fighter track (starting at 0) */
         virtual void landFighter(Algorithm& algo, Side side, int track) = 0;
 
         /** Kill a fighter.
             When this function is called, the fighter's data is still accessible on the Algorithm's accessor interface.
+            \param algo Originating algorithm
             \param side Owning side
             \param track Fighter track (starting at 0) */
         virtual void killFighter(Algorithm& algo, Side side, int track) = 0;
@@ -59,6 +62,7 @@ namespace game { namespace vcr { namespace classic {
             When this function is called, the beam's status has already been updated;
             the unit's status has also been updated and allows you to determine whether damage was done.
 
+            \param algo Originating algorithm
             \param side Firing side
             \param track Origin of the beam: >=0 for a fighter on the given track, <0 for the unit's beams ([-1,-N] for a unit with N beams)
             \param target Target of the beam: >=0 for a fighter on the given track, <0 for unit
@@ -70,6 +74,7 @@ namespace game { namespace vcr { namespace classic {
         /** Fire a torpedo.
             When this function is called, the launcher's status has already been updated;
             the unit's status has also been updated and allows you to determine whether damage was done.
+            \param algo Originating algorithm
             \param side Firing side
             \param hit Nonnegative for hit, negative for miss. You can use this value to modify the visualisation in a deterministic way.
             \param launcher Originating launcher, starting at 0 */
@@ -78,6 +83,7 @@ namespace game { namespace vcr { namespace classic {
         /** Update a beam.
             Called whenever a beam is charged or fired.
             When this function is called, the beam's status has already been updated on the Algorithm's accessor interface.
+            \param algo Originating algorithm
             \param side Side
             \param id Beam number, starting at 0 */
         virtual void updateBeam(Algorithm& algo, Side side, int id) = 0;
@@ -85,12 +91,14 @@ namespace game { namespace vcr { namespace classic {
         /** Update a torpedo launcher.
             Called whenever a torpedo launcher is charged or fired.
             When this function is called, the launcher's status has already been updated on the Algorithm's accessor interface.
+            \param algo Originating algorithm
             \param side Side
             \param id Launcher number, starting at 0 */
         virtual void updateLauncher(Algorithm& algo, Side side, int id) = 0;
 
         /** Kill unit.
             Called at the end of the fight for the losing side(s).
+            \param algo Originating algorithm
             \param side Losing side */
         virtual void killObject(Algorithm& algo, Side side) = 0;
     };

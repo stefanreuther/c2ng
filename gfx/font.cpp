@@ -41,10 +41,6 @@ gfx::Font::getMaxTextWidth(const afl::functional::Mapping<int,String_t>& tab)
 }
 
 
-// /** Output Text, using Alignment Parameters.
-//     \param ctx    Output
-//     \param x,y    Anchor point
-//     \param text   Text to output */
 void
 gfx::outText(BaseContext& ctx, Point pt, String_t text)
 {
@@ -153,16 +149,6 @@ gfx::outTextF(BaseContext& ctx, BaseColorScheme& cs, Point pt, int maxWidth, Str
 //     outTextF(ctx, pt, maxWidth, String_t(text));
 // }
 
-// /** Output Text with fixed area.
-//     See outTextF(GfxContext&,int,int,int,string_t) for more information.
-//     This fills the area above and below the text as well.
-
-//     Note: this does not enforce a maximum height; therefore, the area
-//     should be at least as tall as the text.
-
-//     \param ctx  Context
-//     \param area Area to fill
-//     \param text Text to write */
 void
 gfx::outTextF(BaseContext& ctx, BaseColorScheme& cs, const Rectangle& area, String_t text)
 {

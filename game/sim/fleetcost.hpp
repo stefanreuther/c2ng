@@ -60,6 +60,7 @@ namespace game { namespace sim {
         \param [in]  opts       Fleet cost options
         \param [in]  shipList   Ship list (for component costs)
         \param [in]  config     Configuration (for tech level costs, use of planetary torpedoes)
+        \param [in]  playerList PlayerList (for player names)
         \param [in]  players    Players to consider
         \param [in]  tx         Translator */
     void computeFleetCosts(game::spec::CostSummary& out,

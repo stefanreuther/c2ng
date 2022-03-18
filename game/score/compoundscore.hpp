@@ -91,14 +91,14 @@ namespace game { namespace score {
         Value_t get(const TurnScore& turn, PlayerSet_t players) const;
 
         /** Get score from turn, single player.
-            \param turn TurnScoreList object
+            \param list TurnScoreList object
             \param turnNr Turn number
             \param player Player number
             \return score; unknown if the requested turn does not exist */
         Value_t get(const TurnScoreList& list, int turnNr, int player) const;
 
         /** Get score from turn, player list.
-            \param turn TurnScoreList object
+            \param list TurnScoreList object
             \param turnNr Turn number
             \param players Player set
             \return score; unknown if the requested turn does not exist */

@@ -22,7 +22,7 @@ namespace game { namespace ref {
             SafeShipsOnly
         };
         typedef afl::bits::SmallSet<Option> Options_t;
-        
+
         typedef std::vector<Reference> Vector_t;
         typedef Vector_t::const_iterator Iterator_t;
 
@@ -32,6 +32,12 @@ namespace game { namespace ref {
         void add(Reference ref);
         void add(Reference::Type type, const std::vector<Id_t> ids);
 
+        /** Add all objects at a particular location.
+            This is used for certain ship lists.
+            \param univ          Universe
+            \param pt            Location
+            \param options       Options to select which objects to add
+            \param excludeShipId Do not include this ship Id even if it is otherwise eligible */
         void addObjectsAt(game::map::Universe& univ, game::map::Point pt, Options_t options, Id_t excludeShipId);
 
         void clear();

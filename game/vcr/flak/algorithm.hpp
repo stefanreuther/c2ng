@@ -122,7 +122,7 @@ namespace game { namespace vcr { namespace flak {
         /** Find captor.
             This function shall be called once for each captured ship; when called multiple times, it might return different results.
             \param [in]     shipIndex     Index to a captured ship
-            \param [in/out] rng           Host-side RNG
+            \param [in,out] rng           Host-side RNG
             \param [out]    captorIndex   Index to captor
             \retval true   Captor found, captorIndex has been set
             \retval false  No captor found */
@@ -142,7 +142,7 @@ namespace game { namespace vcr { namespace flak {
             it produces correct owner outputs but loses the identity of the captors which is needed for experience production.
             \param [out]    battle    Battle to update
             \param [in]     env       Environment
-            \param [in/out] rng       Host-side RNG */
+            \param [in,out] rng       Host-side RNG */
         void setEndingStatus(Setup& battle, const Environment& env, util::RandomNumberGenerator& rng) const;
 
         /** Find ending status.
@@ -150,7 +150,7 @@ namespace game { namespace vcr { namespace flak {
             Calls findCaptor(). This function is intended for simulations; see setEndingStatus().
             \param [in]     shipIndex Index to ship
             \param [in]     env       Environment
-            \param [in/out] rng       Host-side RNG
+            \param [in,out] rng       Host-side RNG
             \return ending status (-1: destroyed, 0: survived, otherwise: captured) */
         int findEndingStatus(size_t shipIndex, const Environment& env, util::RandomNumberGenerator& rng) const;
 

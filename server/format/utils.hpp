@@ -11,7 +11,7 @@
 namespace server { namespace format {
 
     /** Unpack a Cost.
-        \param cOst [in] Data
+        \param c [in] Data
         \return Hash containing the cost */
     afl::data::Value* unpackCost(const game::v3::structures::Cost& c);
 

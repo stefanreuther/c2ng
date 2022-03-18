@@ -99,7 +99,6 @@ namespace server { namespace host {
             afl::net::redis::StringSetKey playerFiles(int slot);
 
             /** Access global files (e.g. specification).
-                \param slot Slot number
                 \return key. Content is set of file names */
             afl::net::redis::StringSetKey globalFiles();
 

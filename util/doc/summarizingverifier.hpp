@@ -32,7 +32,11 @@ namespace util { namespace doc {
         bool hasMessage(Message msg) const;
 
         /** Print message to standard output in human-readable form.
-            @param out output */
+            @param msg Message
+            @param idx Index
+            @param brief true: Show just the message; false: also include node names
+            @param tx  Translator
+            @param out Output */
         void printMessage(Message msg, const Index& idx, bool brief, afl::string::Translator& tx, afl::io::TextWriter& out) const;
 
      protected:

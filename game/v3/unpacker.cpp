@@ -583,7 +583,8 @@ game::v3::Unpacker::saveGen(afl::io::Directory& dir)
 /** Save "targetX.ext" file.
     If additional targets have accumulated in our buffer, write them out.
     Otherwise, remove the file.
-    \param dir target directory */
+    \param dir target directory
+    \param targetBuffer Buffer */
 void
 game::v3::Unpacker::saveTargetExt(afl::io::Directory& dir, const TargetBuffer_t& targetBuffer)
 {

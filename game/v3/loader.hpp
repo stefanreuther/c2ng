@@ -59,7 +59,9 @@ namespace game { namespace v3 {
             - alliance handler
             Call before loading data.
             \param turn Target turn
-            \param root Associated root */
+            \param root Associated root
+            \param session Session
+            \param player Player number */
         void prepareTurn(Turn& turn, const Root& root, Session& session, int player) const;
 
         /** Load planets.
@@ -113,6 +115,7 @@ namespace game { namespace v3 {
             \param file File to read from
             \param count Number of ships to load
             \param mode Load mode (load current and/or previous data)
+            \param remapExplore true to perform SRace-remapping of Explore mission
             \param source Source of this information */
         void loadShips(game::map::Universe& univ, afl::io::Stream& file, int count, LoadMode mode, bool remapExplore, PlayerSet_t source) const;
 
@@ -138,7 +141,8 @@ namespace game { namespace v3 {
             \param univ Target universe
             \param file File to read from
             \param count Number of minefields to load
-            \param player Player who owns the KORE file */
+            \param player Player who owns the KORE file
+            \param turnNumber Current turn number */
         void loadKoreMinefields(game::map::Universe& univ, afl::io::Stream& file, int count, int player, int turnNumber) const;
 
         /** Load ion storms from KOREx.DAT.
@@ -159,7 +163,8 @@ namespace game { namespace v3 {
 
         /** Load battles.
             \param turn Target turn
-            \param file File to read from */
+            \param file File to read from
+            \param config Host configuration (PlanetsHaveTubes) */
         void loadBattles(game::Turn& turn, afl::io::Stream& file, const game::config::HostConfiguration& config) const;
 
         /** Load FLAK battles.
@@ -241,13 +246,13 @@ namespace game { namespace v3 {
             \param root Root
             \param dir Directory to read from */
         void loadConfiguration(Root& root, afl::io::Directory& dir);
-        
+
      private:
         afl::charset::Charset& m_charset;
         afl::string::Translator& m_translator;
         afl::sys::LogListener& m_log;
 
-        void addMessage(Turn& turn, String_t text, int sender, PlayerSet_t receiver) const;
+        void addMessage(Turn& turn, String_t text, int sender, PlayerSet_t receivers) const;
     };
 
 } }

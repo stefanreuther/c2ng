@@ -1,5 +1,5 @@
 /**
-  *  \file util/unicodechars.h
+  *  \file util/unicodechars.hpp
   *  \brief Unicode Character Codes
   *
   *  This module contains character codes for Unicode characters used

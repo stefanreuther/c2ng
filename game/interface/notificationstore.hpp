@@ -69,7 +69,7 @@ namespace game { namespace interface {
 
         /** Confirm a message.
             \param msg Message
-            \return flag */
+            \param flag true to confirm, false to un-confirm */
         void confirmMessage(Message* msg, bool flag);
 
         /** Remove orphaned messages.

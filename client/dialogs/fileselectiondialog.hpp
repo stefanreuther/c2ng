@@ -36,16 +36,16 @@ namespace client { namespace dialogs {
         struct Result;
 
         /** Constructor.
-            \param root        Root
-            \param tx          Translator
-            \param gameSender  Access to afl::io::FileSystem
-            \param title       Window title */
+            \param root   Root
+            \param tx     Translator
+            \param fs     Access to afl::io::FileSystem
+            \param title  Window title */
         FileSelectionDialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<afl::io::FileSystem> fs, String_t title);
         ~FileSelectionDialog();
 
         /** Set initial folder name.
             Set an empty string to start with the super-root (list of roots, afl::io::FileSystem::openRootDirectory / util::DirectoryBrowser::openRoot)
-            \param folder Folder name */
+            \param folderName Folder name */
         void setFolder(const String_t& folderName);
 
         /** Get current folder name.

@@ -59,7 +59,7 @@ namespace util { namespace rich {
         Text(SkinColor::Color color, String_t text);
 
         /** Copy Constructor.
-            \param text Other text */
+            \param other Other text */
         Text(const Text& other);
 
         /** Construct sub-string.
@@ -161,7 +161,7 @@ namespace util { namespace rich {
         Text& operator+=(const char* other);
 
         /** Append C++ string.
-            \param other Text to append
+            \param text Text to append
             \return *this */
         Text& operator+=(String_t text);
 

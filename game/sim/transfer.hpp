@@ -90,7 +90,7 @@ namespace game { namespace sim {
             Updates values that can be changed.
             \param [out]    out  Game ship
             \param [in]     in   Simulation ship
-            \param [in/out] univ Universe (for transferring ammo)
+            \param [in,out] univ Universe (for transferring ammo)
             \retval true Copy successful
             \retval false Game ship does not match simulation ship, not copied */
         bool copyShipToGame(game::map::Ship& out, const Ship& in, game::map::Universe& univ) const;

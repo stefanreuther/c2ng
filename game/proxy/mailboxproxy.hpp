@@ -65,8 +65,8 @@ namespace game { namespace proxy {
 
 
         /** Constructor.
-            \param sender     Sender
-            \param receiver   RequestDispatcher to receive updates in this thread */
+            \param sender  Sender
+            \param recv    RequestDispatcher to receive updates in this thread */
         MailboxProxy(util::RequestSender<MailboxAdaptor> sender, util::RequestDispatcher& recv);
 
         /** Destructor. */

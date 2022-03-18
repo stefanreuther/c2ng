@@ -20,7 +20,7 @@ namespace client { namespace widgets {
         ~MarkerKindSelector();
 
         /** Set kind (shape).
-            \param kind Shape, [0,NUM_USER_MARKERS). Call is ignored if value is out of range. */
+            \param k Shape, [0,NUM_USER_MARKERS). Call is ignored if value is out of range. */
         void setMarkerKind(int k);
 
         /** Get kind (shape).

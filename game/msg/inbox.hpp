@@ -50,7 +50,7 @@ namespace game { namespace msg {
          */
 
         /** Add a single message.
-            \param str Complete text of message
+            \param text       Complete text of message
             \param turnNumber Turn number */
         void addMessage(String_t text, int turnNumber);
 

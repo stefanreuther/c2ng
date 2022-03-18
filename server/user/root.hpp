@@ -34,7 +34,8 @@ namespace server { namespace user {
         /** Constructor.
             \param db Database connection
             \param gen Random Id generator
-            \param encrypter Password encrypter */
+            \param encrypter Password encrypter
+            \param config Server configuration */
         Root(afl::net::CommandHandler& db, server::common::IdGenerator& gen, PasswordEncrypter& encrypter, const Configuration& config);
 
         /** Destructor. */

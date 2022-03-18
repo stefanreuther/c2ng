@@ -27,7 +27,7 @@ namespace gfx {
 
         /** Handle mouse movement.
             \param pt Mouse location or movement
-            \param buttonState Button state */
+            \param pressedButtons Button state */
         virtual bool handleMouse(Point pt, MouseButtons_t pressedButtons) = 0;
     };
 

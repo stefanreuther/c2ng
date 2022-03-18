@@ -24,7 +24,9 @@ namespace game { namespace v3 { namespace udata {
             \param playerNr   Player number.
             \param config     Host configuration. Could be updated by received data.
             \param shipList   Ship list. The modified hull function list could be updated by received data.
-            \param cs         Character set. Used for decoding strings. */
+            \param cs         Character set. Used for decoding strings.
+            \param tx         Translator
+            \param log        Logger */
         Parser(Game& game,
                int playerNr,
                game::config::HostConfiguration& config,

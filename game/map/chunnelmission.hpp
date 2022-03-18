@@ -96,7 +96,7 @@ namespace game { namespace map {
     };
 
     /** Format failure reasons into list of strings.
-        \param failure Return value of ChunnelMission::getFailureReasons().
+        \param failures Return value of ChunnelMission::getFailureReasons().
         \param tx Translator
         \return list of failures as strings. Empty if no failures. */
     afl::data::StringList_t formatChunnelFailureReasons(int failures, afl::string::Translator& tx);

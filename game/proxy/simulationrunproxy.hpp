@@ -45,7 +45,8 @@ namespace game { namespace proxy {
         typedef std::vector<UnitInfo_t> UnitInfos_t;
 
         /** Constructor.
-            \param setup SimulationSetupProxy whose setup to simulate */
+            \param setup SimulationSetupProxy whose setup to simulate
+            \param reply RequestDispatcher to receive replies */
         explicit SimulationRunProxy(SimulationSetupProxy& setup, util::RequestDispatcher& reply);
         ~SimulationRunProxy();
 

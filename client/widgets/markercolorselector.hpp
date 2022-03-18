@@ -30,9 +30,9 @@ namespace client { namespace widgets {
         uint8_t getColor() const;
 
         /** Standard dialog.
-            \param [in]           title     Dialog title
-            \param [in]           tx        Translator
-            \param [out,optional] adjacent  If given, offers the user the ability to choose "Adjacent". On output, true if user chose that.
+            \param [in]  title     Dialog title
+            \param [in]  tx        Translator
+            \param [out] adjacent  If given, offers the user the ability to choose "Adjacent". On output, true if user chose that.
             \return true if user confirmed the dialog, false on cancel */
         bool doStandardDialog(String_t title, afl::string::Translator& tx, bool* adjacent);
 

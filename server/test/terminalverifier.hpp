@@ -12,7 +12,7 @@ namespace server { namespace test {
 
     /** Common function to verify an interactive terminal instance.
         \tparam T type to verify
-        \param msg Name (to use in failure messages) */
+        \param a Asserter (to use in failure messages) */
     template<typename T>
     void verifyInteractiveTerminal(afl::test::Assert a)
     {

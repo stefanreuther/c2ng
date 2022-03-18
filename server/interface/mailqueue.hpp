@@ -44,8 +44,8 @@ namespace server { namespace interface {
         virtual void startMessage(String_t templateName, afl::base::Optional<String_t> uniqueId) = 0;
 
         /** Set parameter (PARAM name:Str, val:Str).
-            \param name Parameter name
-            \param val Value */
+            \param parameterName Parameter name
+            \param value Value */
         virtual void addParameter(String_t parameterName, String_t value) = 0;
 
         /** Add attachment (ATTACH url:Str).

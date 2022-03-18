@@ -1087,15 +1087,15 @@ game::v3::Loader::loadConfiguration(Root& root, afl::io::Directory& dir)
     Our Maketurn will make sure that the message comes out as a real text message.
     However, with Winplan's maketurn, the message will be interpreted by PHost.  */
 void
-game::v3::Loader::addMessage(Turn& turn, String_t text, int sender, PlayerSet_t receiver) const
+game::v3::Loader::addMessage(Turn& turn, String_t text, int sender, PlayerSet_t receivers) const
 {
     // ex game/load.cc:addMessageFromFile
-    if (receiver == PlayerSet_t(sender)) {
+    if (receivers == PlayerSet_t(sender)) {
         // It's a message to us. Is it a command message?
         text = extractCommands(turn, text, sender);
         if (text.empty()) {
             return;
         }
     }
-    turn.outbox().addMessageFromFile(sender, text, receiver);
+    turn.outbox().addMessageFromFile(sender, text, receivers);
 }
