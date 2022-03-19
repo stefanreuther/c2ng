@@ -332,7 +332,7 @@ client::dialogs::doObjectSelectionDialog(const ObjectSelectionDialog& def,
     keys.setKeymapName(def.keymapName);
 
     ui::Window& win = del.addNew(new ui::Window(tx.translateString(def.titleUT), root.provider(), root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
-    client::tiles::TileFactory(root, iface, tx, keys, oop).createLayout(win, def.layoutName, del);
+    client::tiles::TileFactory(iface, keys, oop).createLayout(win, def.layoutName, del);
     ctl.attach(oop);
 
     ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(tx.translateString("OK"),     util::Key_Return, root));

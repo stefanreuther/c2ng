@@ -793,7 +793,7 @@ client::map::Screen::setViewName(const String_t& name)
         client::widgets::KeymapWidget& keys = m_tileHolder.addNew(new client::widgets::KeymapWidget(m_gameSender, m_root.engine().dispatcher(), *this));
 
         // Build tiles
-        client::tiles::TileFactory(m_root, interface(), translator(), keys, m_observerProxy)
+        client::tiles::TileFactory(interface(), keys, m_observerProxy)
             .createLayout(m_tileContainer, m_viewName, m_tileHolder);
 
         // Place it
