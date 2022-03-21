@@ -165,8 +165,14 @@ namespace game {
 
         /** Check for exact hyperjump distance.
             340/360 is inclusive in PHost, but not in THost.
-            Note that this is actually version-dependant, too (old host versions never jump exactly). */
+            Note that this is actually version-dependant, too (old host versions never jump exactly).
+            \param distSquared Squared distance to check */
         bool isExactHyperjumpDistance2(int32_t distSquared) const;
+
+        /** Get minimum hyperjump distance, squared.
+            For a hyperjump to be recognized, the waypoint needs to be >= this distance.
+            \return squared distance */
+        int32_t getMinimumHyperjumpDistance2() const;
 
         /** Check mission.
             This allows the host implementation to filter out missions. */

@@ -93,6 +93,12 @@ game::interface::ShipTaskPredictor::getWarpFactor() const
     return m_predictor.getWarpFactor();
 }
 
+bool
+game::interface::ShipTaskPredictor::isHyperdriving() const
+{
+    return m_predictor.isHyperdriving();
+}
+
 game::map::Point
 game::interface::ShipTaskPredictor::getPosition(size_t index) const
 {

@@ -342,9 +342,23 @@ game::HostVersion::isExactHyperjumpDistance2(int32_t distSquared) const
         // and Host < 3.22.019, because those trim waypoints too early.
         return false;
     } else {
+        // PHost tests >=340, <=360; Host tests >340, <360
         int32_t adjust = m_kind == PHost ? 0 : 1;
         return distSquared-adjust >= 340L*340
             && distSquared+adjust <= 360L*360;
+    }
+}
+
+// Get minimum hyperjump distance, squared.
+int32_t
+game::HostVersion::getMinimumHyperjumpDistance2() const
+{
+    if (m_kind == PHost) {
+        // PHost has no minimum distance other than the waypoint needs to be nonzero
+        return 1;
+    } else {
+        // Host requires >20
+        return 20*20+1;
     }
 }
 

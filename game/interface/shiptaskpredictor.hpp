@@ -72,6 +72,10 @@ namespace game { namespace interface {
             \return warp factor */
         int getWarpFactor() const;
 
+        /** Check for hyperdrive.
+            \return true if ship is hyperdriving */
+        bool isHyperdriving() const;
+
         /** Get position.
             \param index Index [0,getNumPositions())
             \return position */

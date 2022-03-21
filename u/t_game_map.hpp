@@ -461,6 +461,10 @@ class TestGameMapShipPredictor : public CxxTest::TestSuite {
     void testTorpedoes();
     void testGetOptimumWarp();
     void testGetOptimumWarpErrorCases();
+    void testHyperjump();
+    void testHyperjumpDirect();
+    void testHyperjumpFailMinDist();
+    void testHyperjumpFailDamage();
 };
 
 class TestGameMapShipStorage : public CxxTest::TestSuite {

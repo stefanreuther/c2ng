@@ -158,6 +158,7 @@ TestGameInterfaceShipTaskPredictor::testMoveToCommand()
     TS_ASSERT_EQUALS(testee.getNumFuelTurns(), 2);
     TS_ASSERT_EQUALS(testee.getNumPositions(), 2U);
     TS_ASSERT_EQUALS(testee.getNumFuelPositions(), 2U);
+    TS_ASSERT_EQUALS(testee.isHyperdriving(), false);
 }
 
 /** Test "SetWaypoint" command.
@@ -320,5 +321,35 @@ TestGameInterfaceShipTaskPredictor::testSetMissionCommand()
     TS_ASSERT_EQUALS(testee.getNumFuelTurns(), 1);
     TS_ASSERT_EQUALS(testee.getNumPositions(), 1U);
     TS_ASSERT_EQUALS(testee.getNumFuelPositions(), 1U);
+}
+
+/** Test "SetFCode" command.
+    A: create ship. Predict "SetFCode" command.
+    E: friendly code taken over */
+void
+TestGameInterfaceShipTaskPredictor::testSetFCodeHyperjump()
+{
+    // Prepare
+    TestHarness h;
+    prepare(h);
+    game::map::Ship& sh = addShip(h, 99);
+    sh.setWarpFactor(7);
+    sh.setCargo(game::Element::Neutronium, 1000);
+    sh.addShipSpecialFunction(h.shipList.modifiedHullFunctions().getFunctionIdFromHostId(game::spec::BasicHullFunction::Hyperdrive));
+
+    afl::data::Segment seg;
+    seg.pushBackString("HYP");
+    interpreter::Arguments args(seg, 0, 1);
+
+    // Object under test
+    game::interface::ShipTaskPredictor testee(h.univ, 99, h.scoreDefinitions, h.shipList, h.config, h.hostVersion, h.key);
+    TS_ASSERT(!testee.isHyperdriving());
+    bool ok = testee.predictInstruction("SETFCODE", args);
+    TS_ASSERT(ok);
+
+    // Verify
+    TS_ASSERT_EQUALS(testee.getNumPositions(), 0U);
+    TS_ASSERT_EQUALS(testee.getFriendlyCode(), "HYP");
+    TS_ASSERT(testee.isHyperdriving());
 }
 

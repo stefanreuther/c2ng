@@ -283,6 +283,13 @@ TestGameHostVersion::testProperties()
     TS_ASSERT( HostVersion(HostVersion::PHost,   MKVERSION(3,15,0)).isExactHyperjumpDistance2(360*360-1));
     TS_ASSERT(!HostVersion(HostVersion::NuHost,  MKVERSION(3,15,0)).isExactHyperjumpDistance2(360*360-1));
 
+    // getMinimumHyperjumpDistance2
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).getMinimumHyperjumpDistance2(), 401);
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).getMinimumHyperjumpDistance2(), 401);
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).getMinimumHyperjumpDistance2(), 401);
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::PHost,   MKVERSION(4, 0,0)).getMinimumHyperjumpDistance2(), 1);
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::NuHost,  MKVERSION(3,22,0)).getMinimumHyperjumpDistance2(), 401);
+
     // isMissionAllowed: SRace cannot have mission 1
     TS_ASSERT( HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).isMissionAllowed(1));
     TS_ASSERT( HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).isMissionAllowed(1));

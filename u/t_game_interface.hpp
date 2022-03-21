@@ -152,6 +152,7 @@ class TestGameInterfaceShipTaskPredictor : public CxxTest::TestSuite {
     void testSetSpeedCommand();
     void testSetFCodeCommand();
     void testSetMissionCommand();
+    void testSetFCodeHyperjump();
 };
 
 class TestGameInterfaceUfoContext : public CxxTest::TestSuite {

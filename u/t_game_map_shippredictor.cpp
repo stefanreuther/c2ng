@@ -15,9 +15,9 @@
 #include "game/spec/hull.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/test/registrationkey.hpp"
+#include "game/test/root.hpp"
 #include "game/test/shiplist.hpp"
 #include "game/unitscoredefinitionlist.hpp"
-#include "game/test/root.hpp"
 
 namespace {
     using game::HostVersion;
@@ -26,6 +26,7 @@ namespace {
     using game::map::ShipPredictor;
     using game::Element;
     using game::config::HostConfiguration;
+    using game::spec::BasicHullFunction;
 
     const int X = 1200;
     const int Y = 1300;
@@ -80,6 +81,59 @@ namespace {
         s.setNumLaunchers(0);
         s.setNumBays(0);
         s.setCargo(Element::Neutronium, 100);
+        s.setCargo(Element::Tritanium, 0);
+        s.setCargo(Element::Duranium, 0);
+        s.setCargo(Element::Molybdenum, 0);
+        s.setCargo(Element::Supplies, 0);
+        s.setCargo(Element::Money, 0);
+        s.setCargo(Element::Colonists, 0);
+        s.setAmmo(0);
+
+        return s;
+    }
+
+    Ship& addJumper(TestHarness& t, int shipId)
+    {
+        /*
+         *  Test case: Hyperjumper (Heart of Gold from Pleiades 7, turn 38, ship #299)
+         */
+        const int HULL_ID = 51;
+        const int ENGINE_ID = 1;
+
+        // Emerald:
+        game::spec::Hull& h = *t.shipList.hulls().create(HULL_ID);
+        h.setMaxFuel(95);
+        h.setMaxCargo(20);
+        h.setMaxCrew(25);
+        h.setNumEngines(1);
+        h.setMass(138);
+        h.changeHullFunction(t.shipList.modifiedHullFunctions().getFunctionIdFromHostId(BasicHullFunction::Hyperdrive),
+                             game::PlayerSet_t::allUpTo(game::MAX_PLAYERS),
+                             game::PlayerSet_t(),
+                             true);
+
+        // Impulse Drive:
+        game::spec::Engine& e = *t.shipList.engines().create(ENGINE_ID);
+        e.setFuelFactor(1, 100);
+        e.setFuelFactor(2, 800);
+
+        // Add a ship
+        // - required properties
+        Ship& s = *t.univ.ships().create(shipId);
+        s.addCurrentShipData(game::map::ShipData(), game::PlayerSet_t(1));
+        s.setOwner(1);
+        s.setHull(HULL_ID);
+        s.setEngineType(ENGINE_ID);
+        s.setPosition(game::map::Point(X, Y));
+        s.setWarpFactor(1);
+
+        // - types and cargo need to be set to be able to compute a mass
+        s.setBeamType(0);
+        s.setNumBeams(0);
+        s.setTorpedoType(0);
+        s.setNumLaunchers(0);
+        s.setNumBays(0);
+        s.setCargo(Element::Neutronium, 60);
         s.setCargo(Element::Tritanium, 0);
         s.setCargo(Element::Duranium, 0);
         s.setCargo(Element::Molybdenum, 0);
@@ -539,6 +593,7 @@ TestGameMapShipPredictor::testMovement()
         TS_ASSERT(!p.isAtTurnLimit());
         TS_ASSERT(p.isAtWaypoint());
         TS_ASSERT_EQUALS(p.getMovementFuelUsed(), 41);
+        TS_ASSERT(!p.isHyperdriving());
     }
 
     // Timeout case (warp 1)
@@ -556,6 +611,7 @@ TestGameMapShipPredictor::testMovement()
         TS_ASSERT(!p.isAtWaypoint());
         TS_ASSERT_EQUALS(p.getMovementFuelUsed(), 0);
         TS_ASSERT_EQUALS(p.getPosition(), Point(X + 30, Y));
+        TS_ASSERT(!p.isHyperdriving());
     }
 
     // Timeout case (warp 0)
@@ -573,6 +629,7 @@ TestGameMapShipPredictor::testMovement()
         TS_ASSERT(!p.isAtWaypoint());
         TS_ASSERT_EQUALS(p.getMovementFuelUsed(), 0);
         TS_ASSERT_EQUALS(p.getPosition(), Point(X, Y));
+        TS_ASSERT(!p.isHyperdriving());
     }
 
     // Out of fuel
@@ -589,6 +646,7 @@ TestGameMapShipPredictor::testMovement()
         TS_ASSERT(!p.isAtTurnLimit());
         TS_ASSERT_EQUALS(p.getMovementFuelUsed(), 29);
         TS_ASSERT_EQUALS(p.getCargo(Element::Neutronium), 0);
+        TS_ASSERT(!p.isHyperdriving());
     }
 
     // Out of fuel (2)
@@ -604,6 +662,7 @@ TestGameMapShipPredictor::testMovement()
 
         TS_ASSERT_EQUALS(p.getMovementFuelUsed(), 29);
         TS_ASSERT_EQUALS(p.getCargo(Element::Neutronium), -19);
+        TS_ASSERT(!p.isHyperdriving());
     }
 
     // Training
@@ -624,6 +683,7 @@ TestGameMapShipPredictor::testMovement()
         TS_ASSERT_EQUALS(p.getCargo(Element::Neutronium), 10);
         TS_ASSERT_EQUALS(p.getWarpFactor(), 0);
         TS_ASSERT_EQUALS(p.getUsedProperties().contains(ShipPredictor::UsedMission), true);
+        TS_ASSERT(!p.isHyperdriving());
     }
 }
 
@@ -899,5 +959,116 @@ TestGameMapShipPredictor::testGetOptimumWarpErrorCases()
         int result = getOptimumWarp(h.univ, SHIP_ID, Point(1000, 1000), Point(1000 + 30*80, 1000), h.shipScores, h.shipList, root);
         TS_ASSERT_EQUALS(result, 5);
     }
+}
+
+/** Test hyperjump: regular jump. */
+void
+TestGameMapShipPredictor::testHyperjump()
+{
+    const int SHIP_ID = 42;
+
+    // Regular jump
+    TestHarness t;
+    t.hostVersion = HostVersion(HostVersion::PHost, MKVERSION(3,3,0));
+
+    Ship& s = addJumper(t, SHIP_ID);
+    s.setCargo(Element::Neutronium, 60);
+    s.setWaypoint(Point(X + 20, Y));
+    s.setWarpFactor(1);
+    s.setFriendlyCode(String_t("HYP"));
+
+    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.config, t.hostVersion, t.key);
+    TS_ASSERT(p.isHyperdriving());
+    p.computeTurn();
+
+    TS_ASSERT_EQUALS(p.getWarpFactor(), 0);     // reset by jump
+    TS_ASSERT(!p.isHyperdriving());             // no longer hyperdriving because speed was reset
+    TS_ASSERT_EQUALS(p.getUsedProperties().contains(ShipPredictor::UsedFCode), true);
+    TS_ASSERT_EQUALS(p.getPosition().getX(), X + 350);
+    TS_ASSERT_EQUALS(p.getPosition().getY(), Y);
+    TS_ASSERT_EQUALS(p.getCargo(Element::Neutronium), 10);
+}
+
+/** Test hyperjump: direct (exact) jump. */
+void
+TestGameMapShipPredictor::testHyperjumpDirect()
+{
+    const int SHIP_ID = 42;
+
+    TestHarness t;
+    t.hostVersion = HostVersion(HostVersion::PHost, MKVERSION(3,3,0));
+
+    Ship& s = addJumper(t, SHIP_ID);
+    s.setCargo(Element::Neutronium, 60);
+    s.setWaypoint(Point(X + 10, Y + 340));
+    s.setWarpFactor(1);
+    s.setFriendlyCode(String_t("HYP"));
+
+    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.config, t.hostVersion, t.key);
+    TS_ASSERT(p.isHyperdriving());
+    p.computeTurn();
+
+    TS_ASSERT_EQUALS(p.getWarpFactor(), 0);
+    TS_ASSERT(!p.isHyperdriving());             // no longer hyperdriving because speed was reset
+    TS_ASSERT_EQUALS(p.getUsedProperties().contains(ShipPredictor::UsedFCode), true);
+    TS_ASSERT_EQUALS(p.getPosition().getX(), X + 10);
+    TS_ASSERT_EQUALS(p.getPosition().getY(), Y + 340);
+    TS_ASSERT_EQUALS(p.getCargo(Element::Neutronium), 10);
+}
+
+/** Test hyperjump: failure due to minimum distance violation. */
+void
+TestGameMapShipPredictor::testHyperjumpFailMinDist()
+{
+    const int SHIP_ID = 42;
+
+    TestHarness t;
+    t.hostVersion = HostVersion(HostVersion::Host, MKVERSION(3,2,0));
+
+    Ship& s = addJumper(t, SHIP_ID);
+    s.setCargo(Element::Neutronium, 60);
+    s.setWaypoint(Point(X + 10, Y));
+    s.setWarpFactor(1);
+    s.setFriendlyCode(String_t("HYP"));
+
+    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.config, t.hostVersion, t.key);
+    TS_ASSERT(p.isHyperdriving());
+    p.computeTurn();
+
+    TS_ASSERT_EQUALS(p.getWarpFactor(), 1);
+    TS_ASSERT(p.isHyperdriving());              // still trying to hyperjump
+    TS_ASSERT_EQUALS(p.getUsedProperties().contains(ShipPredictor::UsedFCode), false);
+    TS_ASSERT_EQUALS(p.getPosition().getX(), X + 1);
+    TS_ASSERT_EQUALS(p.getPosition().getY(), Y);
+    TS_ASSERT_EQUALS(p.getCargo(Element::Neutronium), 60);
+}
+
+/** Test hyperjump: failure due to excess damage. */
+void
+TestGameMapShipPredictor::testHyperjumpFailDamage()
+{
+    const int SHIP_ID = 42;
+
+    TestHarness t;
+    t.hostVersion = HostVersion(HostVersion::PHost, MKVERSION(3,3,0));
+    t.config[HostConfiguration::DamageLevelForHyperjumpFail].set(15);
+
+    Ship& s = addJumper(t, SHIP_ID);
+    s.setCargo(Element::Neutronium, 60);
+    s.setWaypoint(Point(X + 20, Y));
+    s.setWarpFactor(1);
+    s.setFriendlyCode(String_t("HYP"));
+    s.setDamage(15);
+
+    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.config, t.hostVersion, t.key);
+    TS_ASSERT(p.isHyperdriving());
+    p.computeTurn();
+
+    TS_ASSERT_EQUALS(p.getWarpFactor(), 1);
+    TS_ASSERT(p.isHyperdriving());              // still trying to hyperjump
+    TS_ASSERT_EQUALS(p.getUsedProperties().contains(ShipPredictor::UsedFCode), false);
+    TS_ASSERT_EQUALS(p.getPosition().getX(), X + 1);
+    TS_ASSERT_EQUALS(p.getPosition().getY(), Y);
+    TS_ASSERT_EQUALS(p.getCargo(Element::Neutronium), 60);
 }
 

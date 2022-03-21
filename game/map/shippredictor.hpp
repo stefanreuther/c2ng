@@ -166,6 +166,10 @@ namespace game { namespace map {
             \return warp factor */
         int getWarpFactor() const;
 
+        /** Check for hyperdrive.
+            \return true if ship is hyperdriving */
+        bool isHyperdriving() const;
+
         /** Get ship's real owner.
             \return real owner */
         int getRealOwner() const;

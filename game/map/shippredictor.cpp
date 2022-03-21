@@ -856,7 +856,8 @@ game::map::ShipPredictor::computeTurn()
     if (real_ship->hasSpecialFunction(BasicHullFunction::Hyperdrive, m_scoreDefinitions, m_shipList, m_hostConfiguration)
         && shipFCode == "HYP"
         && m_ship.warpFactor.orElse(0) > 0
-        && dist2 >= 20*20)   // FIXME: minimum distance not in PHost?
+        && m_ship.damage.orElse(0) < m_hostConfiguration[HostConfiguration::DamageLevelForHyperjumpFail]()
+        && dist2 >= m_hostVersion.getMinimumHyperjumpDistance2())
     {
         // It's hyperjumping
         m_ship.neutronium = m_ship.neutronium.orElse(0) - 50;      // FIXME: do not produce negative values!!!1
@@ -1165,6 +1166,18 @@ game::map::ShipPredictor::getWarpFactor() const
 {
     // ex GShipTurnPredictor::getSpeed
     return m_ship.warpFactor.orElse(0);
+}
+
+// Check for hyperdrive.
+bool
+game::map::ShipPredictor::isHyperdriving() const
+{
+    // ex WShipTaskScannerChartWidget::lockQueryLocation (part)
+    const Ship* sh = m_universe.ships().get(m_shipId);
+    return sh != 0
+        && sh->hasSpecialFunction(BasicHullFunction::Hyperdrive, m_scoreDefinitions, m_shipList, m_hostConfiguration)
+        && getFriendlyCode() == "HYP"
+        && getWarpFactor() > 0;
 }
 
 // Get this ship's real owner.
