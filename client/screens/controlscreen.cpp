@@ -580,7 +580,9 @@ client::screens::ControlScreen::run(client::si::InputState& in, client::si::Outp
     game::proxy::CursorObserverProxy oop(interface().gameSender(), std::auto_ptr<game::map::ObjectCursorFactory>(new ScreenCursorFactory(m_state)));
 
     ui::Group tileGroup(ui::layout::VBox::instance5);
-    client::tiles::TileFactory(interface(), keys, oop).createLayout(tileGroup, m_definition.layoutName, deleter);
+    client::tiles::TileFactory(interface(), keys, oop)
+        .withTaskEditorProxy(m_taskEditorProxy.get())
+        .createLayout(tileGroup, m_definition.layoutName, deleter);
     tileGroup.add(deleter.addNew(new ui::Spacer()));
     m_panel.add(tileGroup);
 

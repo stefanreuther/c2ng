@@ -1,15 +1,19 @@
 /**
   *  \file client/tiles/taskeditortile.cpp
+  *  \brief Class client::tiles::TaskEditorTile
   */
 
 #include "client/tiles/taskeditortile.hpp"
-#include "game/proxy/objectlistener.hpp"
 #include "gfx/complex.hpp"
 #include "gfx/context.hpp"
 #include "ui/draw.hpp"
 #include "ui/skincolorscheme.hpp"
 #include "ui/widgets/abstractlistbox.hpp"
 #include "ui/widgets/framegroup.hpp"
+
+/*
+ *  List Widget to draw the Task
+ */
 
 class client::tiles::TaskEditorTile::ListWidget : public ui::widgets::AbstractListbox {
  public:
@@ -160,32 +164,31 @@ class client::tiles::TaskEditorTile::ListWidget : public ui::widgets::AbstractLi
 };
 
 
+/*
+ *  TaskEditorTile
+ */
 
-
-
-client::tiles::TaskEditorTile::TaskEditorTile(ui::Root& root,
-                                              client::si::UserSide& userSide,
-                                              interpreter::Process::ProcessKind kind)
+client::tiles::TaskEditorTile::TaskEditorTile(ui::Root& root, game::proxy::TaskEditorProxy* pProxy)
     : Widget(),
       m_deleter(),
-      m_proxy(userSide.gameSender(), root.engine().dispatcher()),
-      m_receiver(root.engine().dispatcher(), *this),
-      m_kind(kind),
+      m_pProxy(pProxy),
       m_listWidget(0),
-      m_childWidget(0)
+      m_childWidget(0),
+      conn_change()
 {
     // ex WAutoTaskEditorTile::WAutoTaskEditorTile
     m_listWidget = &m_deleter.addNew(new ListWidget(root.provider(), root.colorScheme()));
     m_childWidget = &ui::widgets::FrameGroup::wrapWidget(m_deleter, root.colorScheme(), ui::LoweredFrame, *m_listWidget);
     addChild(*m_childWidget, 0);
-    m_proxy.sig_change.add(this, &TaskEditorTile::onChange);
+    if (m_pProxy != 0) {
+        conn_change = m_pProxy->sig_change.add(this, &TaskEditorTile::onChange);
+    }
     m_listWidget->requestFocus();
     m_listWidget->sig_change.add(this, &TaskEditorTile::onListSelectionChange);
 }
 
 client::tiles::TaskEditorTile::~TaskEditorTile()
-{
-}
+{ }
 
 void
 client::tiles::TaskEditorTile::draw(gfx::Canvas& can)
@@ -242,40 +245,6 @@ client::tiles::TaskEditorTile::handleMouse(gfx::Point pt, MouseButtons_t pressed
 }
 
 void
-client::tiles::TaskEditorTile::setId(game::Id_t id)
-{
-    // ex WAutoTaskObjectSelection::loadTask, WAutoTaskObjectSelection::onCurrentChanged (sort-of)
-    m_proxy.selectTask(id, m_kind, true);
-}
-
-void
-client::tiles::TaskEditorTile::attach(game::proxy::ObjectObserver& oop)
-{
-    class Job : public util::Request<TaskEditorTile> {
-     public:
-        Job(game::map::Object* obj)
-            : m_id(obj != 0 ? obj->getId() : 0)
-            { }
-        void handle(TaskEditorTile& t)
-            { t.setId(m_id); }
-     private:
-        game::Id_t m_id;
-    };
-    class Listener : public game::proxy::ObjectListener {
-     public:
-        Listener(util::RequestSender<TaskEditorTile> reply)
-            : m_reply(reply)
-            { }
-        virtual void handle(game::Session& /*s*/, game::map::Object* obj)
-            { m_reply.postNewRequest(new Job(obj)); }
-     private:
-        util::RequestSender<TaskEditorTile> m_reply;
-    };
-
-    oop.addNewListener(new Listener(m_receiver.getSender()));
-}
-
-void
 client::tiles::TaskEditorTile::onChange(const game::proxy::TaskEditorProxy::Status& status)
 {
     m_listWidget->setContent(status);
@@ -284,5 +253,7 @@ client::tiles::TaskEditorTile::onChange(const game::proxy::TaskEditorProxy::Stat
 void
 client::tiles::TaskEditorTile::onListSelectionChange()
 {
-    m_proxy.setCursor(m_listWidget->getCurrentItem());
+    if (m_pProxy != 0) {
+        m_pProxy->setCursor(m_listWidget->getCurrentItem());
+    }
 }

@@ -274,17 +274,28 @@ namespace {
 }
 
 
+/*
+ *  TileFactory
+ */
 
 client::tiles::TileFactory::TileFactory(client::si::UserSide& user,
                                         client::widgets::KeymapWidget& keys,
                                         game::proxy::ObjectObserver& observer)
     : m_userSide(user),
       m_keys(keys),
-      m_observer(observer)
+      m_observer(observer),
+      m_pTaskEditor()
 { }
 
 client::tiles::TileFactory::~TileFactory()
 { }
+
+client::tiles::TileFactory&
+client::tiles::TileFactory::withTaskEditorProxy(game::proxy::TaskEditorProxy* p)
+{
+    m_pTaskEditor = p;
+    return *this;
+}
 
 ui::Widget*
 client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& deleter) const
@@ -509,26 +520,16 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
     }
 
     // Tasks
-    // @change: we need to distinguish between different task types because the tile selects the task
 //     if (name == "SHIPTASKCOMMAND")
 //         return new WShipAutoTaskCommandTile(selection);
 //     if (name == "PLANETTASKCOMMAND")
 //         return new WPlanetAutoTaskCommandTile(selection);
 //     if (name == "BASETASKCOMMAND")
 //         return new WBaseAutoTaskCommandTile(selection);
-    if (name == "SHIPTASKEDITOR") {
-        TaskEditorTile& tile = deleter.addNew(new TaskEditorTile(root, m_userSide, interpreter::Process::pkShipTask));
-        tile.attach(m_observer);
-        return &tile;
-    }
-    if (name == "PLANETTASKEDITOR") {
-        TaskEditorTile& tile = deleter.addNew(new TaskEditorTile(root, m_userSide, interpreter::Process::pkPlanetTask));
-        tile.attach(m_observer);
-        return &tile;
-    }
-    if (name == "BASETASKEDITOR") {
-        TaskEditorTile& tile = deleter.addNew(new TaskEditorTile(root, m_userSide, interpreter::Process::pkBaseTask));
-        tile.attach(m_observer);
+    if (name == "TASKEDITOR" || name == "SHIPTASKEDITOR" || name == "PLANETTASKEDITOR" || name == "BASETASKEDITOR") {
+        // This needed a type distinction for a while in c2ng.
+        // Now it no longer needs that, so we can as well also accept the PCC2 name, TASKEDITORC2,
+        TaskEditorTile& tile = deleter.addNew(new TaskEditorTile(root, m_pTaskEditor));
         return &tile;
     }
 
