@@ -20,6 +20,7 @@
 #include "client/map/minefieldmissionoverlay.hpp"
 #include "interpreter/process.hpp"
 #include "ui/widgets/panel.hpp"
+#include "game/proxy/taskeditorproxy.hpp"
 
 namespace client { namespace screens {
 
@@ -40,6 +41,8 @@ namespace client { namespace screens {
         static const Definition BaseTaskScreen;
 
         ControlScreen(client::si::UserSide& us, int nr, const Definition& def);
+
+        ControlScreen& withTaskEditor(interpreter::Process::ProcessKind kind);
 
         void run(client::si::InputState& in, client::si::OutputState& out);
 
@@ -91,6 +94,7 @@ namespace client { namespace screens {
         void clearPositions();
         void onScannerMove(game::map::Point target);
         void onDoubleClick(game::map::Point target);
+        void onTaskEditorShipChange(const game::proxy::TaskEditorProxy::ShipStatus& st);
 
         ui::widgets::Panel m_panel;
         client::map::Widget m_mapWidget;
@@ -99,6 +103,9 @@ namespace client { namespace screens {
         client::map::MinefieldMissionOverlay m_minefieldOverlay;
         client::widgets::ScanResult m_scanResult;
         game::map::Point m_center;
+
+        std::auto_ptr<game::proxy::TaskEditorProxy> m_taskEditorProxy;
+        interpreter::Process::ProcessKind m_taskKind;
 
         // should be last:
         util::RequestReceiver<ControlScreen> m_reply;

@@ -26,6 +26,29 @@ namespace game { namespace proxy {
             size_t cursor;
             bool isInSubroutineCall;
             bool valid;
+            Status()
+                : commands(), pc(), cursor(), isInSubroutineCall(), valid()
+                { }
+        };
+
+        struct ShipStatus {
+            game::map::Point startPosition;
+            std::vector<game::map::Point> positions;
+            std::vector<long> distances2;
+            size_t numFuelPositions;
+            int currentTurn;
+            int numTurns;
+            int numFuelTurns;
+            int startingFuel;
+            int movementFuel;
+            int cloakFuel;
+            int remainingFuel;
+            bool isHyperdriving;
+            bool valid;
+            ShipStatus()
+                : startPosition(), positions(), distances2(), numFuelPositions(), currentTurn(), numTurns(), numFuelTurns(),
+                  startingFuel(), movementFuel(), cloakFuel(), remainingFuel(), isHyperdriving(), valid()
+                { }
         };
 
         /** Constructor.
@@ -51,6 +74,8 @@ namespace game { namespace proxy {
         /** Signal: change of task text.
             Reported whenever the task changes, or a new task is selected. */
         afl::base::Signal<void(const Status&)> sig_change;
+
+        afl::base::Signal<void(const ShipStatus&)> sig_shipChange;
 
      private:
         class Trampoline;

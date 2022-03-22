@@ -5,9 +5,13 @@
 
 #include "game/proxy/taskeditorproxy.hpp"
 #include "afl/base/signalconnection.hpp"
+#include "game/interface/shiptaskpredictor.hpp"
+#include "game/game.hpp"
+#include "game/turn.hpp"
+#include "game/root.hpp"
 
 using interpreter::Process;
-
+using game::interface::ShipTaskPredictor;
 
 /*
  *  Trampoline
@@ -18,7 +22,9 @@ class game::proxy::TaskEditorProxy::Trampoline {
     Trampoline(Session& session, util::RequestSender<TaskEditorProxy> reply)
         : m_session(session),
           m_reply(reply),
-          m_editor()
+          m_editor(),
+          m_id(),
+          m_kind(Process::pkDefault)
         { }
 
     ~Trampoline()
@@ -29,11 +35,9 @@ class game::proxy::TaskEditorProxy::Trampoline {
         }
 
     void selectTask(Id_t id, Process::ProcessKind kind, bool create);
-
     void setCursor(size_t newCursor);
-
     void describe(Status& out) const;
-
+    void describeShip(ShipStatus& out) const;
     void sendStatus();
 
  private:
@@ -41,6 +45,8 @@ class game::proxy::TaskEditorProxy::Trampoline {
     util::RequestSender<TaskEditorProxy> m_reply;
     afl::base::Ptr<interpreter::TaskEditor> m_editor;
     afl::base::SignalConnection conn_change;
+    Id_t m_id;
+    Process::ProcessKind m_kind;
 };
 
 void
@@ -57,6 +63,8 @@ game::proxy::TaskEditorProxy::Trampoline::selectTask(Id_t id, Process::ProcessKi
 
     // Set up new one
     m_editor = m_session.getAutoTaskEditor(id, kind, create);
+    m_id = id;
+    m_kind = kind;
 
     // Destroy old one
     m_session.releaseAutoTaskEditor(old);
@@ -65,6 +73,7 @@ game::proxy::TaskEditorProxy::Trampoline::selectTask(Id_t id, Process::ProcessKi
     if (m_editor.get() != 0) {
         conn_change = m_editor->sig_change.add(this, &Trampoline::sendStatus);
     }
+
     sendStatus();
 }
 
@@ -75,7 +84,6 @@ game::proxy::TaskEditorProxy::Trampoline::setCursor(size_t newCursor)
         m_editor->setCursor(newCursor);
     }
 }
-
 
 void
 game::proxy::TaskEditorProxy::Trampoline::describe(Status& out) const
@@ -96,8 +104,52 @@ game::proxy::TaskEditorProxy::Trampoline::describe(Status& out) const
 }
 
 void
+game::proxy::TaskEditorProxy::Trampoline::describeShip(ShipStatus& out) const
+{
+    // ex WShipAutoTaskSelection::onTaskChange, sort-of
+    out = ShipStatus();
+
+    const Game* g = m_session.getGame().get();
+    const Root* r = m_session.getRoot().get();
+    const game::spec::ShipList* sl = m_session.getShipList().get();
+    if (m_editor.get() != 0 && m_kind == Process::pkShipTask && g != 0 && r != 0 && sl != 0) {
+        // Predict
+        const game::map::Universe& univ = g->currentTurn().universe();
+        ShipTaskPredictor pred(univ, m_id, g->shipScores(), *sl, r->hostConfiguration(), r->hostVersion(), r->registrationKey());
+        const game::map::Point startPosition = pred.getPosition();
+        const int startFuel = pred.getRemainingFuel();
+        if (/* FIXME: isPredictToEnd() ||*/ m_editor->getCursor() < m_editor->getPC()) {
+            pred.predictTask(*m_editor);
+        } else {
+            pred.predictTask(*m_editor, m_editor->getCursor());
+        }
+
+        // Send status
+        out.startPosition    = startPosition;
+        game::map::Point pt = startPosition;
+        for (size_t i = 0, n = pred.getNumPositions(); i < n; ++i) {
+            game::map::Point npt = univ.config().getSimpleNearestAlias(pred.getPosition(i), startPosition);
+            out.positions.push_back(npt);
+            out.distances2.push_back(pt.getSquaredRawDistance(npt));
+            pt = npt;
+        }
+        out.numFuelPositions = pred.getNumFuelPositions();
+        out.currentTurn      = g->currentTurn().getTurnNumber();
+        out.numTurns         = pred.getNumTurns();
+        out.numFuelTurns     = pred.getNumFuelTurns();
+        out.startingFuel     = startFuel;
+        out.movementFuel     = pred.getMovementFuel();
+        out.cloakFuel        = pred.getCloakFuel();;
+        out.remainingFuel    = pred.getRemainingFuel();
+        out.isHyperdriving   = pred.isHyperdriving();
+        out.valid            = true;
+    }
+}
+
+void
 game::proxy::TaskEditorProxy::Trampoline::sendStatus()
 {
+    // General information
     class Task : public util::Request<TaskEditorProxy> {
      public:
         Task(const Trampoline& self)
@@ -109,6 +161,19 @@ game::proxy::TaskEditorProxy::Trampoline::sendStatus()
         Status m_status;
     };
     m_reply.postNewRequest(new Task(*this));
+
+    // Ship information
+    class ShipTask : public util::Request<TaskEditorProxy> {
+     public:
+        ShipTask(const Trampoline& self)
+            : m_status()
+            { self.describeShip(m_status); }
+        virtual void handle(TaskEditorProxy& proxy)
+            { proxy.sig_shipChange.raise(m_status); }
+     private:
+        ShipStatus m_status;
+    };
+    m_reply.postNewRequest(new ShipTask(*this));
 }
 
 

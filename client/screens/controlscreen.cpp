@@ -6,6 +6,7 @@
 #include "afl/base/optional.hpp"
 #include "afl/base/refcounted.hpp"
 #include "client/map/scanneroverlay.hpp"
+#include "client/map/shiptaskoverlay.hpp"
 #include "client/map/waypointoverlay.hpp"
 #include "client/map/widget.hpp"
 #include "client/si/contextprovider.hpp"
@@ -27,6 +28,7 @@
 #include "game/map/objectcursorfactory.hpp"
 #include "game/proxy/cursorobserverproxy.hpp"
 #include "game/proxy/objectlistener.hpp"
+#include "game/proxy/taskeditorproxy.hpp"
 #include "gfx/complex.hpp"
 #include "interpreter/typehint.hpp"
 #include "interpreter/values.hpp"
@@ -317,6 +319,8 @@ class client::screens::ControlScreen::Updater : public game::proxy::ObjectListen
                         { }
                     virtual void handle(ControlScreen& cs)
                         {
+                            // Note that this will configure m_movementOverlay.setLockOrigin() for the actual ship's value,
+                            // and later update through the TaskEditorProxy again to the task's value.
                             cs.setId(m_id);
                             cs.setPositions(m_point, m_target, m_isHyperdriving);
                         }
@@ -340,7 +344,12 @@ class client::screens::ControlScreen::Updater : public game::proxy::ObjectListen
                         : m_isHyperdriving(isHyperdriving)
                         { }
                     virtual void handle(ControlScreen& cs)
-                        { cs.setIsHyperdriving(m_isHyperdriving); }
+                        {
+                            // Do not update for Ship Task Editor. In that case, the "hyperdriving" flag is controlled by the TaskEditor.
+                            if (cs.m_taskEditorProxy.get() == 0) {
+                                cs.setIsHyperdriving(m_isHyperdriving);
+                            }
+                        }
                  private:
                     bool m_isHyperdriving;
                 };
@@ -543,9 +552,19 @@ client::screens::ControlScreen::ControlScreen(client::si::UserSide& us, int nr, 
       m_minefieldOverlay(root(), us.translator()),
       m_scanResult(root(), interface().gameSender(), translator()),
       m_center(),
+      m_taskEditorProxy(),
+      m_taskKind(interpreter::Process::pkDefault),
       m_reply(us.root().engine().dispatcher(), *this),
       m_proprietor(us.gameSender().makeTemporary(new ProprietorFromSession(m_state, m_reply.getSender())))
 { }
+
+client::screens::ControlScreen&
+client::screens::ControlScreen::withTaskEditor(interpreter::Process::ProcessKind kind)
+{
+    m_taskEditorProxy.reset(new game::proxy::TaskEditorProxy(interface().gameSender(), root().engine().dispatcher()));
+    m_taskKind = kind;
+    return *this;
+}
 
 void
 client::screens::ControlScreen::run(client::si::InputState& in, client::si::OutputState& out)
@@ -588,10 +607,18 @@ client::screens::ControlScreen::run(client::si::InputState& in, client::si::Outp
     m_mapWidget.addOverlay(m_movementOverlay);
     m_mapWidget.addOverlay(m_minefieldOverlay);
 
+    // FIXME: only for ship/fleet
     {
         client::map::WaypointOverlay& wo = m_deleter.addNew(new client::map::WaypointOverlay(root));
         m_mapWidget.addOverlay(wo);
         wo.attach(oop);
+    }
+
+    if (m_taskEditorProxy.get() != 0 && m_taskKind == interpreter::Process::pkShipTask) {
+        client::map::ShipTaskOverlay& ov = m_deleter.addNew(new client::map::ShipTaskOverlay(root));
+        m_mapWidget.addOverlay(ov);
+        m_taskEditorProxy->sig_shipChange.add(&ov, &client::map::ShipTaskOverlay::setStatus);
+        m_taskEditorProxy->sig_shipChange.add(this, &ControlScreen::onTaskEditorShipChange);
     }
 
     m_movementOverlay.sig_move.add(this, &ControlScreen::onScannerMove);
@@ -688,6 +715,9 @@ client::screens::ControlScreen::setId(game::Id_t id)
 {
     // ex WControlScreen::onCurrentChanged (sort-of)
     interface().history().push(ScreenHistory::Reference(m_definition.historyType, id, 0));
+    if (m_taskEditorProxy.get() != 0) {
+        m_taskEditorProxy->selectTask(id, m_taskKind, true);
+    }
 }
 
 void
@@ -755,4 +785,13 @@ client::screens::ControlScreen::onDoubleClick(game::map::Point /*target*/)
             m_panel.handleKey(util::Key_DoubleClick, 0);
         }
     }
+}
+
+void
+client::screens::ControlScreen::onTaskEditorShipChange(const game::proxy::TaskEditorProxy::ShipStatus& st)
+{
+    game::map::Point finalPos = st.positions.empty() ? st.startPosition : st.positions.back();
+    bool isHyperdriving = st.isHyperdriving;
+
+    m_movementOverlay.setLockOrigin(finalPos, isHyperdriving);
 }

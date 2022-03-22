@@ -837,21 +837,27 @@ namespace {
                 break;
 
              case OutputState::ShipTaskScreen:
-                client::screens::ControlScreen(us, game::map::Cursors::ShipScreen, client::screens::ControlScreen::ShipTaskScreen).run(in, out);
+                client::screens::ControlScreen(us, game::map::Cursors::ShipScreen, client::screens::ControlScreen::ShipTaskScreen)
+                    .withTaskEditor(interpreter::Process::pkShipTask)
+                    .run(in, out);
                 in = InputState();
                 in.setProcess(out.getProcess());
                 state = out.getTarget();
                 break;
 
              case OutputState::PlanetTaskScreen:
-                client::screens::ControlScreen(us, game::map::Cursors::PlanetScreen, client::screens::ControlScreen::PlanetTaskScreen).run(in, out);
+                client::screens::ControlScreen(us, game::map::Cursors::PlanetScreen, client::screens::ControlScreen::PlanetTaskScreen)
+                    .withTaskEditor(interpreter::Process::pkPlanetTask)
+                    .run(in, out);
                 in = InputState();
                 in.setProcess(out.getProcess());
                 state = out.getTarget();
                 break;
 
              case OutputState::BaseTaskScreen:
-                client::screens::ControlScreen(us, game::map::Cursors::BaseScreen, client::screens::ControlScreen::BaseTaskScreen).run(in, out);
+                client::screens::ControlScreen(us, game::map::Cursors::BaseScreen, client::screens::ControlScreen::BaseTaskScreen)
+                    .withTaskEditor(interpreter::Process::pkBaseTask)
+                    .run(in, out);
                 in = InputState();
                 in.setProcess(out.getProcess());
                 state = out.getTarget();
