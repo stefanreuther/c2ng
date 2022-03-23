@@ -1646,14 +1646,14 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_proxy_imperialstatsproxy.cpp \
-    u/t_game_map_info_info.cpp u/t_game_map_info_types.cpp \
-    u/t_game_map_info_browser.cpp u/t_game_map_info.hpp \
-    u/t_game_map_typedobjecttype.cpp u/t_server_file_ca_garbagecollector.cpp \
-    u/t_game_task.cpp u/t_util_doc_verifier.cpp \
-    u/t_util_doc_summarizingverifier.cpp u/t_util_doc_loggingverifier.cpp \
-    u/t_server_doc_documentationimpl.cpp u/t_server_doc.hpp \
-    u/t_server_interface_documentationserver.cpp \
+FILES_testsuite = u/t_game_test_files.cpp \
+    u/t_game_proxy_imperialstatsproxy.cpp u/t_game_map_info_info.cpp \
+    u/t_game_map_info_types.cpp u/t_game_map_info_browser.cpp \
+    u/t_game_map_info.hpp u/t_game_map_typedobjecttype.cpp \
+    u/t_server_file_ca_garbagecollector.cpp u/t_game_task.cpp \
+    u/t_util_doc_verifier.cpp u/t_util_doc_summarizingverifier.cpp \
+    u/t_util_doc_loggingverifier.cpp u/t_server_doc_documentationimpl.cpp \
+    u/t_server_doc.hpp u/t_server_interface_documentationserver.cpp \
     u/t_server_interface_documentationclient.cpp \
     u/t_server_interface_documentation.cpp u/t_util_doc_singleblobstore.cpp \
     u/t_util_doc_textimport.cpp u/t_util_doc_htmlrenderer.cpp \

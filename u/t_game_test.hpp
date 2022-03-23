@@ -12,6 +12,11 @@ class TestGameTestCargoContainer : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameTestFiles : public CxxTest::TestSuite {
+ public:
+    void testFiles();
+};
+
 class TestGameTestRegistrationKey : public CxxTest::TestSuite {
  public:
     void testIt();
