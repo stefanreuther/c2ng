@@ -5,15 +5,33 @@
 
 #include "game/proxy/taskeditorproxy.hpp"
 #include "afl/base/signalconnection.hpp"
+#include "game/actions/buildship.hpp"
+#include "game/actions/cargocostaction.hpp"
 #include "game/game.hpp"
+#include "game/interface/basetaskbuildcommandparser.hpp"
 #include "game/interface/notificationstore.hpp"
 #include "game/interface/shiptaskpredictor.hpp"
+#include "game/map/planetstorage.hpp"
 #include "game/root.hpp"
 #include "game/turn.hpp"
 
-using interpreter::Process;
 using game::interface::NotificationStore;
 using game::interface::ShipTaskPredictor;
+using interpreter::Process;
+
+namespace {
+    void addMissingCargo(String_t& out, const char* lbl, int32_t miss, const util::NumberFormatter& fmt)
+    {
+        if (miss > 0) {
+            if (!out.empty()) {
+                out += ' ';
+            }
+            out += fmt.formatNumber(miss);
+            out += lbl;
+        }
+    }
+}
+
 
 /*
  *  Trampoline
@@ -40,6 +58,7 @@ class game::proxy::TaskEditorProxy::Trampoline {
     void setCursor(size_t newCursor);
     void describe(Status& out) const;
     void describeShip(ShipStatus& out) const;
+    void describeBase(BaseStatus& out) const;
     void describeMessage(MessageStatus& out) const;
     void sendStatus();
 
@@ -151,6 +170,49 @@ game::proxy::TaskEditorProxy::Trampoline::describeShip(ShipStatus& out) const
 }
 
 void
+game::proxy::TaskEditorProxy::Trampoline::describeBase(BaseStatus& out) const
+{
+    // ex WBaseAutoTaskCommandTile::drawData (part)
+    out = BaseStatus();
+
+    Game*const g = m_session.getGame().get();
+    Root*const r = m_session.getRoot().get();
+    game::spec::ShipList*const sl = m_session.getShipList().get();
+    if (m_editor.get() != 0 && m_kind == Process::pkBaseTask && g != 0 && r != 0 && sl != 0) {
+        // Parse current command
+        game::interface::BaseTaskBuildCommandParser parser(*sl);
+        parser.predictStatement(*m_editor, m_editor->getCursor());
+
+        if (parser.getOrder().getHullIndex() != 0) {
+            // It's a valid build order, report it
+            parser.getOrder().describe(out.buildOrder, *sl, m_session.translator());
+
+            // Validate cost
+            game::map::Universe& univ = g->currentTurn().universe();
+            try {
+                if (game::map::Planet* pl = univ.planets().get(m_id)) {
+                    game::map::PlanetStorage storage(*pl, r->hostConfiguration());
+                    game::actions::BuildShip a(*pl, storage, *sl, *r);
+                    a.setUsePartsFromStorage(false);
+                    a.setBuildOrder(parser.getOrder());
+
+                    const game::actions::CargoCostAction& cca = a.costAction();
+                    util::NumberFormatter fmt = r->userConfiguration().getNumberFormatter();
+                    addMissingCargo(out.missingMinerals, "T",   cca.getMissingAmount(Element::Tritanium),  fmt);
+                    addMissingCargo(out.missingMinerals, "D",   cca.getMissingAmount(Element::Duranium),   fmt);
+                    addMissingCargo(out.missingMinerals, "M",   cca.getMissingAmount(Element::Molybdenum), fmt);
+                    addMissingCargo(out.missingMinerals, "mc",  cca.getMissingAmount(Element::Money),      fmt);
+                    addMissingCargo(out.missingMinerals, "sup", cca.getMissingAmount(Element::Supplies),   fmt);
+                }
+            }
+            catch (std::exception& e) {
+                // Ignore if planet is not played
+            }
+        }
+    }
+}
+
+void
 game::proxy::TaskEditorProxy::Trampoline::describeMessage(MessageStatus& out) const
 {
     out = MessageStatus();
@@ -192,6 +254,19 @@ game::proxy::TaskEditorProxy::Trampoline::sendStatus()
         ShipStatus m_status;
     };
     m_reply.postNewRequest(new ShipTask(*this));
+
+    // Starbase information
+    class BaseTask : public util::Request<TaskEditorProxy> {
+     public:
+        BaseTask(const Trampoline& self)
+            : m_status()
+            { self.describeBase(m_status); }
+        virtual void handle(TaskEditorProxy& proxy)
+            { proxy.sig_baseChange.raise(m_status); }
+     private:
+        BaseStatus m_status;
+    };
+    m_reply.postNewRequest(new BaseTask(*this));
 
     // Message information
     class MessageTask : public util::Request<TaskEditorProxy> {

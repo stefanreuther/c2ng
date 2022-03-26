@@ -20,7 +20,8 @@ namespace game { namespace proxy {
     /** Task editor proxy.
         Bidirectional, asynchronous proxy for a interpreter::TaskEditor object and some related objects:
         - game::interface::ShipPredictor
-        - game::interface::NotificationStore */
+        - game::interface::NotificationStore
+        - game::actions::BuildShip */
     class TaskEditorProxy {
      public:
         /** Task status. */
@@ -54,6 +55,15 @@ namespace game { namespace proxy {
             ShipStatus()
                 : startPosition(), positions(), distances2(), numFuelPositions(), currentTurn(), numTurns(), numFuelTurns(),
                   startingFuel(), movementFuel(), cloakFuel(), remainingFuel(), numberFormatter(false, false), isHyperdriving(), valid()
+                { }
+        };
+
+        /** Starbase status. */
+        struct BaseStatus {
+            afl::data::StringList_t buildOrder;      ///< Build order in textual form. Empty if there is no build order. See ShipBuildOrder::describe().
+            String_t missingMinerals;                ///< Missing minerals in textual form. Empty if there is nothing missing.
+            BaseStatus()
+                : buildOrder(), missingMinerals()
                 { }
         };
 
@@ -92,6 +102,10 @@ namespace game { namespace proxy {
 
         /** Signal: change of ship prediction. */
         afl::base::Signal<void(const ShipStatus&)> sig_shipChange;
+
+        /** Signal: change of starbase prediction.
+            Reports the build order the cursor is on. */
+        afl::base::Signal<void(const BaseStatus&)> sig_baseChange;
 
         /** Signal: change of notification message status. */
         afl::base::Signal<void(const MessageStatus&)> sig_messageChange;

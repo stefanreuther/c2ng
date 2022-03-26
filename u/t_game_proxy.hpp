@@ -495,6 +495,7 @@ class TestGameProxyTaskEditorProxy : public CxxTest::TestSuite {
     void testNormal();
     void testShipStatus();
     void testMessage();
+    void testBase();
 };
 
 class TestGameProxyTaxationProxy : public CxxTest::TestSuite {

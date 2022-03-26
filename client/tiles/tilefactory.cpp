@@ -9,6 +9,7 @@
 #include "client/si/widgetcommand.hpp"
 #include "client/si/widgetwrapper.hpp"
 #include "client/tiles/basescreenheadertile.hpp"
+#include "client/tiles/basetasktile.hpp"
 #include "client/tiles/errortile.hpp"
 #include "client/tiles/planetscreenheadertile.hpp"
 #include "client/tiles/selectionheadertile.hpp"
@@ -532,8 +533,15 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
     }
 //     if (name == "PLANETTASKCOMMAND")
 //         return new WPlanetAutoTaskCommandTile(selection);
-//     if (name == "BASETASKCOMMAND")
-//         return new WBaseAutoTaskCommandTile(selection);
+    if (name == "BASETASKCOMMAND") {
+        BaseTaskTile& tile = deleter.addNew(new BaseTaskTile(root, m_keys, tx));
+        tile.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
+        if (m_pTaskEditor != 0) {
+            m_pTaskEditor->sig_messageChange.add(&tile, &BaseTaskTile::setMessageStatus);
+            m_pTaskEditor->sig_baseChange.add(&tile, &BaseTaskTile::setBaseStatus);
+        }
+        return &tile;
+    }
     if (name == "TASKEDITOR" || name == "SHIPTASKEDITOR" || name == "PLANETTASKEDITOR" || name == "BASETASKEDITOR") {
         // This needed a type distinction for a while in c2ng.
         // Now it no longer needs that, so we can as well also accept the PCC2 name, TASKEDITORC2,

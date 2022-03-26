@@ -36,6 +36,7 @@ namespace {
         s.session().setShipList(new game::spec::ShipList());
         game::test::addOutrider(*s.session().getShipList());
         game::test::addTranswarp(*s.session().getShipList());
+        s.session().getShipList()->hullAssignments().add(1, 1, game::test::OUTRIDER_HULL_ID);
 
         // We need a CC$AUTOEXEC procedure
         BCORef_t bco = BytecodeObject::create(true);
@@ -58,6 +59,37 @@ namespace {
         game::map::Ship* sh = s.session().getGame()->currentTurn().universe().ships().create(id);
         sh->addCurrentShipData(data, game::PlayerSet_t(1));  // needed to enable ship prediction
         sh->internalCheck();
+    }
+
+    void addBase(SessionThread& s, int id, Point pos)
+    {
+        game::map::Planet* pl = s.session().getGame()->currentTurn().universe().planets().create(id);
+        pl->setPosition(pos);
+        pl->setName("Giedi Prime");
+
+        game::map::PlanetData data;
+        data.owner = 1;
+        data.money = 100;
+        data.supplies = 100;
+        data.minedTritanium = 1000;
+        data.minedDuranium = 1000;
+        data.minedMolybdenum = 1000;
+        data.minedNeutronium = 1000;
+        data.colonistClans = 10;
+        data.colonistHappiness = 100;
+        data.temperature = 50;
+        pl->addCurrentPlanetData(data, game::PlayerSet_t(1));
+
+        game::map::BaseData base;
+        base.owner = 1;
+        for (size_t i = 0; i < game::NUM_TECH_AREAS; ++i) {
+            base.techLevels[i] = 1;
+        }
+        pl->addCurrentBaseData(base, game::PlayerSet_t(1));
+        pl->internalCheck(s.session().getGame()->currentTurn().universe().config(),
+                          s.session().translator(),
+                          s.session().log());
+        pl->setPlayability(game::map::Object::Playable);
     }
 
     template<typename T>
@@ -250,3 +282,47 @@ TestGameProxyTaskEditorProxy::testMessage()
     TS_ASSERT_EQUALS(recv.status.text, "the message body");
 }
 
+/** Test starbase status reporting. */
+void
+TestGameProxyTaskEditorProxy::testBase()
+{
+    const int BASE_ID = 78;
+
+    // Environment
+    CxxTest::setAbortTestOnFail(true);
+    SimpleRequestDispatcher disp;
+    SessionThread s;
+    prepare(s);
+    addBase(s, BASE_ID, Point(1200, 2300));
+
+    // Add a task
+    {
+        Ptr<TaskEditor> ed = s.session().getAutoTaskEditor(BASE_ID, Process::pkBaseTask, true);
+        TS_ASSERT(ed.get());
+
+        String_t code[] = { "stop", "buildship 1, 9" };
+        ed->replace(0, 0, code, TaskEditor::DefaultCursor, TaskEditor::PlacePCBefore);
+
+        s.session().releaseAutoTaskEditor(ed);
+    }
+
+    // Testee
+    TaskEditorProxy testee(s.gameSender(), disp);
+
+    StatusReceiver<TaskEditorProxy::BaseStatus> recv;
+    testee.sig_baseChange.add(&recv, &StatusReceiver<TaskEditorProxy::BaseStatus>::onChange);
+
+    // Wait for status update
+    testee.selectTask(BASE_ID, Process::pkBaseTask, true);
+    testee.setCursor(1);
+    while (!recv.ok || recv.status.buildOrder.empty()) {
+        TS_ASSERT(disp.wait(1000));
+    }
+
+    // Verify
+    TS_ASSERT(recv.ok);
+    TS_ASSERT_EQUALS(recv.status.buildOrder.size(), 2U);
+    TS_ASSERT_EQUALS(recv.status.buildOrder[0], "OUTRIDER CLASS SCOUT");
+    TS_ASSERT_EQUALS(recv.status.buildOrder[1], "Transwarp Drive");
+    TS_ASSERT_EQUALS(recv.status.missingMinerals, "4,650sup");  // FIXME: should be mc; see game::actions::CargoCostAction::getMissingAmount
+}
