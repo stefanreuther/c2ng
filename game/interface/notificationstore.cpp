@@ -102,6 +102,15 @@ game::interface::NotificationStore::isMessageConfirmed(const Message* msg) const
         && msg->confirmed;
 }
 
+// Get message body text.
+String_t
+game::interface::NotificationStore::getMessageBody(const Message* msg) const
+{
+    return msg != 0
+        ? msg->body
+        : String_t();
+}
+
 // Confirm a message.
 void
 game::interface::NotificationStore::confirmMessage(Message* msg, bool flag)

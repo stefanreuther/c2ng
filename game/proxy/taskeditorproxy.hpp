@@ -10,6 +10,7 @@
 #include "game/session.hpp"
 #include "game/types.hpp"
 #include "interpreter/process.hpp"
+#include "util/numberformatter.hpp"
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
@@ -17,37 +18,51 @@
 namespace game { namespace proxy {
 
     /** Task editor proxy.
-        Bidirectional, asynchronous proxy for a interpreter::TaskEditor object. */
+        Bidirectional, asynchronous proxy for a interpreter::TaskEditor object and some related objects:
+        - game::interface::ShipPredictor
+        - game::interface::NotificationStore */
     class TaskEditorProxy {
      public:
+        /** Task status. */
         struct Status {
-            afl::data::StringList_t commands;
-            size_t pc;
-            size_t cursor;
-            bool isInSubroutineCall;
-            bool valid;
+            afl::data::StringList_t commands;        ///< List of commands.
+            size_t pc;                               ///< Program counter.
+            size_t cursor;                           ///< Cursor.
+            bool isInSubroutineCall;                 ///< true if call is in subroutine call, false if at start of instruction.
+            bool valid;                              ///< Validity flag.
             Status()
                 : commands(), pc(), cursor(), isInSubroutineCall(), valid()
                 { }
         };
 
+        /** Ship status. */
         struct ShipStatus {
-            game::map::Point startPosition;
-            std::vector<game::map::Point> positions;
-            std::vector<long> distances2;
-            size_t numFuelPositions;
-            int currentTurn;
-            int numTurns;
-            int numFuelTurns;
-            int startingFuel;
-            int movementFuel;
-            int cloakFuel;
-            int remainingFuel;
-            bool isHyperdriving;
-            bool valid;
+            game::map::Point startPosition;          ///< Starting position.
+            std::vector<game::map::Point> positions; ///< Future positions; see game::interface::ShipTaskPredictor::getPosition().
+            std::vector<long> distances2;            ///< Distances to future positions
+            size_t numFuelPositions;                 ///< Number of positions for which there is enough fuel; see game::interface::ShipTaskPredictor::getNumFuelPositions().
+            int currentTurn;                         ///< Current turn number.
+            int numTurns;                            ///< Number of turns computed; see game::interface::ShipTaskPredictor::getNumTurns().
+            int numFuelTurns;                        ///< Number of turns for which there is fuel; see game::interface::ShipTaskPredictor::getNumFuelTurns().
+            int startingFuel;                        ///< Starting fuel amount.
+            int movementFuel;                        ///< Movement fuel used; see game::interface::ShipTaskPredictor::getMovementFuel().
+            int cloakFuel;                           ///< Cloak fuel used; see game::interface::ShipTaskPredictor::getCloakFuel().
+            int remainingFuel;                       ///< Remaining fuel; see game::interface::ShipTaskPredictor::getRemainingFuel().
+            util::NumberFormatter numberFormatter;   ///< NumberFormatter to use for formatting fuel amounts.
+            bool isHyperdriving;                     ///< true if ship is hyperwarping at end; see game::interface::ShipTaskPredictor::isHyperdriving().
+            bool valid;                              ///< Validity flag.
             ShipStatus()
                 : startPosition(), positions(), distances2(), numFuelPositions(), currentTurn(), numTurns(), numFuelTurns(),
-                  startingFuel(), movementFuel(), cloakFuel(), remainingFuel(), isHyperdriving(), valid()
+                  startingFuel(), movementFuel(), cloakFuel(), remainingFuel(), numberFormatter(false, false), isHyperdriving(), valid()
+                { }
+        };
+
+        /** Notification message status. */
+        struct MessageStatus {
+            bool hasUnconfirmedMessage;              ///< true if unconfirmed message exists (validity flag).
+            String_t text;                           ///< Text of unconfirmed message.
+            MessageStatus()
+                : hasUnconfirmedMessage(), text()
                 { }
         };
 
@@ -75,7 +90,11 @@ namespace game { namespace proxy {
             Reported whenever the task changes, or a new task is selected. */
         afl::base::Signal<void(const Status&)> sig_change;
 
+        /** Signal: change of ship prediction. */
         afl::base::Signal<void(const ShipStatus&)> sig_shipChange;
+
+        /** Signal: change of notification message status. */
+        afl::base::Signal<void(const MessageStatus&)> sig_messageChange;
 
      private:
         class Trampoline;

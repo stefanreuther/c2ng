@@ -15,6 +15,7 @@
 #include "client/tiles/shipcargotile.hpp"
 #include "client/tiles/shipmovementtile.hpp"
 #include "client/tiles/shipscreenheadertile.hpp"
+#include "client/tiles/shiptasktile.hpp"
 #include "client/tiles/starchartheadertile.hpp"
 #include "client/tiles/taskeditortile.hpp"
 #include "client/widgets/commanddataview.hpp"
@@ -520,8 +521,15 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
     }
 
     // Tasks
-//     if (name == "SHIPTASKCOMMAND")
-//         return new WShipAutoTaskCommandTile(selection);
+    if (name == "SHIPTASKCOMMAND") {
+        ShipTaskTile& tile = deleter.addNew(new ShipTaskTile(root, m_keys, tx));
+        tile.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
+        if (m_pTaskEditor != 0) {
+            m_pTaskEditor->sig_messageChange.add(&tile, &ShipTaskTile::setMessageStatus);
+            m_pTaskEditor->sig_shipChange.add(&tile, &ShipTaskTile::setShipStatus);
+        }
+        return &tile;
+    }
 //     if (name == "PLANETTASKCOMMAND")
 //         return new WPlanetAutoTaskCommandTile(selection);
 //     if (name == "BASETASKCOMMAND")

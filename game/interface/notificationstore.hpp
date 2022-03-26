@@ -67,6 +67,12 @@ namespace game { namespace interface {
             \return true if confirmed */
         bool isMessageConfirmed(const Message* msg) const;
 
+        /** Get message body text.
+            The body text does not include explanatory text or headers.
+            \param msg Message
+            \return Text; empty if msg is null */
+        String_t getMessageBody(const Message* msg) const;
+
         /** Confirm a message.
             \param msg Message
             \param flag true to confirm, false to un-confirm */

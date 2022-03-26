@@ -155,6 +155,7 @@ TestGameProxyTaskEditorProxy::testNormal()
     TS_ASSERT_EQUALS(recv.status.cursor, 1U);
 }
 
+/** Test ship status reporting. */
 void
 TestGameProxyTaskEditorProxy::testShipStatus()
 {
@@ -195,10 +196,57 @@ TestGameProxyTaskEditorProxy::testShipStatus()
     }
 
     TS_ASSERT(recv.ok);
+    TS_ASSERT(recv.status.valid);
     TS_ASSERT_EQUALS(recv.status.positions.size(), 2U);
     TS_ASSERT_EQUALS(recv.status.positions[0].getX(), 1000);
     TS_ASSERT_EQUALS(recv.status.positions[0].getY(), 1036);
     TS_ASSERT_EQUALS(recv.status.positions[1].getX(), 1000);
     TS_ASSERT_EQUALS(recv.status.positions[1].getY(), 1050);
+}
+
+/** Test message status reporting. */
+void
+TestGameProxyTaskEditorProxy::testMessage()
+{
+    const int SHIP_ID = 43;
+
+    // Environment
+    CxxTest::setAbortTestOnFail(true);
+    SimpleRequestDispatcher disp;
+    SessionThread s;
+    prepare(s);
+    addShip(s, SHIP_ID, Point(1000,1000));
+
+    // Add a task and a message
+    {
+        Ptr<TaskEditor> ed = s.session().getAutoTaskEditor(SHIP_ID, Process::pkShipTask, true);
+        TS_ASSERT(ed.get());
+
+        // releaseAutoTaskEditor will run the task, so the first command needs to be 'stop'.
+        String_t code[] = { "stop" };
+        ed->replace(0, 0, code, TaskEditor::DefaultCursor, TaskEditor::PlacePCBefore);
+
+        // Message
+        s.session().notifications().addMessage(ed->process().getProcessId(), "header", "the message body");
+
+        s.session().releaseAutoTaskEditor(ed);
+    }
+
+    // Testee
+    TaskEditorProxy testee(s.gameSender(), disp);
+
+    StatusReceiver<TaskEditorProxy::MessageStatus> recv;
+    testee.sig_messageChange.add(&recv, &StatusReceiver<TaskEditorProxy::MessageStatus>::onChange);
+
+    // Wait for status update
+    testee.selectTask(SHIP_ID, Process::pkShipTask, true);
+    while (!recv.ok) {
+        TS_ASSERT(disp.wait(1000));
+    }
+
+    // Verify
+    TS_ASSERT(recv.ok);
+    TS_ASSERT(recv.status.hasUnconfirmedMessage);
+    TS_ASSERT_EQUALS(recv.status.text, "the message body");
 }
 

@@ -5,12 +5,14 @@
 
 #include "game/proxy/taskeditorproxy.hpp"
 #include "afl/base/signalconnection.hpp"
-#include "game/interface/shiptaskpredictor.hpp"
 #include "game/game.hpp"
-#include "game/turn.hpp"
+#include "game/interface/notificationstore.hpp"
+#include "game/interface/shiptaskpredictor.hpp"
 #include "game/root.hpp"
+#include "game/turn.hpp"
 
 using interpreter::Process;
+using game::interface::NotificationStore;
 using game::interface::ShipTaskPredictor;
 
 /*
@@ -38,6 +40,7 @@ class game::proxy::TaskEditorProxy::Trampoline {
     void setCursor(size_t newCursor);
     void describe(Status& out) const;
     void describeShip(ShipStatus& out) const;
+    void describeMessage(MessageStatus& out) const;
     void sendStatus();
 
  private:
@@ -141,8 +144,23 @@ game::proxy::TaskEditorProxy::Trampoline::describeShip(ShipStatus& out) const
         out.movementFuel     = pred.getMovementFuel();
         out.cloakFuel        = pred.getCloakFuel();;
         out.remainingFuel    = pred.getRemainingFuel();
+        out.numberFormatter  = r->userConfiguration().getNumberFormatter();
         out.isHyperdriving   = pred.isHyperdriving();
         out.valid            = true;
+    }
+}
+
+void
+game::proxy::TaskEditorProxy::Trampoline::describeMessage(MessageStatus& out) const
+{
+    out = MessageStatus();
+    if (m_editor.get() != 0) {
+        const NotificationStore& notif = m_session.notifications();
+        const NotificationStore::Message* msg = notif.findMessageByProcessId(m_editor->process().getProcessId());
+        if (msg != 0 && !notif.isMessageConfirmed(msg)) {
+            out.hasUnconfirmedMessage = true;
+            out.text = notif.getMessageBody(msg);
+        }
     }
 }
 
@@ -174,6 +192,19 @@ game::proxy::TaskEditorProxy::Trampoline::sendStatus()
         ShipStatus m_status;
     };
     m_reply.postNewRequest(new ShipTask(*this));
+
+    // Message information
+    class MessageTask : public util::Request<TaskEditorProxy> {
+     public:
+        MessageTask(const Trampoline& self)
+            : m_status()
+            { self.describeMessage(m_status); }
+        virtual void handle(TaskEditorProxy& proxy)
+            { proxy.sig_messageChange.raise(m_status); }
+     private:
+        MessageStatus m_status;
+    };
+    m_reply.postNewRequest(new MessageTask(*this));
 }
 
 

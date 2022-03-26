@@ -42,6 +42,8 @@ TestGameInterfaceNotificationStore::testIt()
     TS_ASSERT_EQUALS(store.getMessageByIndex(0), msg);
     TS_ASSERT_EQUALS(store.getMessageHeading(0, tx, list), "foo");
     TS_ASSERT_EQUALS(store.getMessageText(0, tx, list), "foo\nbar");
+    TS_ASSERT_EQUALS(store.getMessageBody(msg), "bar");
+    TS_ASSERT_EQUALS(store.getMessageBody(0), "");             // 0 is actually NULL
 
     // Add another message, associate that with a process
     interpreter::Process& proc = procList.create(world, "name");
@@ -52,6 +54,7 @@ TestGameInterfaceNotificationStore::testIt()
     TS_ASSERT_EQUALS(store.getMessageByIndex(1), msg2);
     TS_ASSERT_EQUALS(store.getMessageHeading(1, tx, list), "foo2");
     TS_ASSERT_EQUALS(store.getMessageText(1, tx, list).substr(0, 10), "foo2\nbar2\n"); // text is followed by explanation of the process link
+    TS_ASSERT_EQUALS(store.getMessageBody(msg2), "bar2");
 
     TS_ASSERT_EQUALS(store.findMessageByProcessId(proc.getProcessId()), msg2);
     TS_ASSERT(!store.findMessageByProcessId(88888));
