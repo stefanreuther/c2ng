@@ -10,24 +10,26 @@
 #include "interpreter/tokenizer.hpp"
 #include "interpreter/values.hpp"
 
+using interpreter::Tokenizer;
+
 namespace {
-    /** Read a single argument. Returns true on success, returns false or
-        throws IntError on error.
+    /* Read a single argument. Returns true on success, returns false or
+       throws Error on error.
 
-        argument ::= string
-                   | bool
-                   | ["+"|"-"] number
+       argument ::= string
+                  | bool
+                  | ["+"|"-"] number
 
-        \param tok [in] Token stream
-        \param args [in/out] Arguments collected here  */
-    bool readOneArg(interpreter::Tokenizer& tok, afl::data::Segment& args)
+       \param tok [in] Token stream
+       \param args [in/out] Arguments collected here  */
+    bool readOneArg(Tokenizer& tok, afl::data::Segment& args)
     {
-        if (tok.getCurrentToken() == tok.tString) {
+        if (tok.getCurrentToken() == Tokenizer::tString) {
             // String
             args.pushBackString(tok.getCurrentString());
             tok.readNextToken();
             return true;
-        } else if (tok.getCurrentToken() == tok.tBoolean) {
+        } else if (tok.getCurrentToken() == Tokenizer::tBoolean) {
             // Boolean
             args.pushBackNew(interpreter::makeBooleanValue(tok.getCurrentInteger()));
             tok.readNextToken();
@@ -35,20 +37,20 @@ namespace {
         } else {
             // Must be number. Let's accept signed numbers, just in case.
             int sign = +1;
-            if (tok.checkAdvance(tok.tMinus)) {
+            if (tok.checkAdvance(Tokenizer::tMinus)) {
                 sign = -1;
-            } else if (tok.checkAdvance(tok.tPlus)) {
+            } else if (tok.checkAdvance(Tokenizer::tPlus)) {
                 // nix
             } else {
                 // auch nix
             }
 
-            if (tok.getCurrentToken() == tok.tInteger) {
+            if (tok.getCurrentToken() == Tokenizer::tInteger) {
                 // integer
                 args.pushBackInteger(sign * tok.getCurrentInteger());
                 tok.readNextToken();
                 return true;
-            } else if (tok.getCurrentToken() == tok.tFloat) {
+            } else if (tok.getCurrentToken() == Tokenizer::tFloat) {
                 // float
                 args.pushBackNew(interpreter::makeFloatValue(sign * tok.getCurrentFloat()));
                 tok.readNextToken();
@@ -59,13 +61,13 @@ namespace {
         }
     }
 
-    /** Read list of arguments. Returns true on success, returns false or
-        throws interpreter::Error on error.
-        \param tok [in] Token stream
-        \param args [out] Arguments */
-    bool readArgs(interpreter::Tokenizer& tok, afl::data::Segment& args)
+    /* Read list of arguments. Returns true on success, returns false or
+       throws interpreter::Error on error.
+       \param tok [in] Token stream
+       \param args [out] Arguments */
+    bool readArgs(Tokenizer& tok, afl::data::Segment& args)
     {
-        if (tok.getCurrentToken() == tok.tEnd) {
+        if (tok.getCurrentToken() == Tokenizer::tEnd) {
             // No args: valid
             return true;
         }
@@ -77,9 +79,9 @@ namespace {
             }
 
             // Check delimiter
-            if (tok.checkAdvance(tok.tComma)) {
+            if (tok.checkAdvance(Tokenizer::tComma)) {
                 // ok
-            } else if (tok.getCurrentToken() == tok.tEnd) {
+            } else if (tok.getCurrentToken() == Tokenizer::tEnd) {
                 // ok
                 return true;
             } else {
@@ -93,7 +95,7 @@ void
 interpreter::TaskPredictor::predictTask(const TaskEditor& editor, size_t endPC)
 {
     // IntAutoTaskPredictor::predictTask
-    size_t startPC = editor.getPC();
+    const size_t startPC = editor.getPC();
     size_t pc = startPC;
     bool looped = false;
 
@@ -105,13 +107,13 @@ interpreter::TaskPredictor::predictTask(const TaskEditor& editor, size_t endPC)
             ++pc;
 
             // Extract command
-            if (tok.getCurrentToken() == tok.tEnd) {
+            if (tok.getCurrentToken() == Tokenizer::tEnd) {
                 continue;
             }
-            if (tok.getCurrentToken() != tok.tIdentifier) {
+            if (tok.getCurrentToken() != Tokenizer::tIdentifier) {
                 break;
             }
-            String_t command = tok.getCurrentString();
+            const String_t command = tok.getCurrentString();
             tok.readNextToken();
 
             // Build arguments
@@ -152,10 +154,10 @@ interpreter::TaskPredictor::predictStatement(const String_t& statement)
     try {
         // Parse statement. Must start with an identifier; otherwise, it's not a statement.
         Tokenizer tok(statement);
-        if (tok.getCurrentToken() != tok.tIdentifier) {
+        if (tok.getCurrentToken() != Tokenizer::tIdentifier) {
             return;
         }
-        String_t command = tok.getCurrentString();
+        const String_t command = tok.getCurrentString();
         tok.readNextToken();
 
         // Build arguments and call predictor

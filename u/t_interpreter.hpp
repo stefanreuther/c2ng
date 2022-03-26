@@ -591,6 +591,16 @@ class TestInterpreterTaskEditor : public CxxTest::TestSuite {
     void testIsValidCommand();
 };
 
+class TestInterpreterTaskPredictor : public CxxTest::TestSuite {
+ public:
+    void testPredictTask();
+    void testPredictRestart();
+    void testPredictRestart2();
+    void testPredictError();
+    void testPredictStatement();
+    void testPredictStatementError();
+};
+
 class TestInterpreterTernaryExecution : public CxxTest::TestSuite {
  public:
     void testKeyAdd();

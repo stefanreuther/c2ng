@@ -31,7 +31,7 @@ namespace interpreter {
      public:
         /** Predict one instruction.
             This function must store prediction results as a side-effect.
-            \param name Name of command (e.g. "MOVETO")
+            \param name Name of command, in upper-case (e.g. "MOVETO")
             \param args Arguments of command
             \retval true successful interpretation, continue
             \retval false error, stop */
@@ -43,8 +43,8 @@ namespace interpreter {
             - performs at most one RESTART loop
 
             \param editor editor
-            \param endPC stop predicting before this instruction */
-        void predictTask(const TaskEditor& editor, size_t endPC = ~size_t(-1));
+            \param endPC stop predicting before this instruction. If not given, predict to end. */
+        void predictTask(const TaskEditor& editor, size_t endPC = size_t(-1));
 
         /** Predict single statement.
             If the specified program counter points to a valid instruction, calls predictInstruction for it, otherwise does nothing.
