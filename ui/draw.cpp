@@ -306,7 +306,8 @@ ui::drawButton(gfx::Context<uint8_t>& ctx,
         ctx.canvas().drawBar(gfx::Rectangle(ex, ey, ew, eh), ctx.getRawColor(), gfx::TRANSPARENT_COLOR, gfx::FillPattern::SOLID, gfx::OPAQUE_ALPHA);
 
         // draw text
-        int x = ex + ctx.getTextAlign().getX()*(ew-16)/2 + delta + 8;
+        int d = eh*3/5;
+        int x = ex + ctx.getTextAlign().getX()*(ew-d)/2 + delta + d/2;
         int y = ey + ctx.getTextAlign().getY()*eh/2 + delta;
         if (flags.contains(DisabledButton)) {
             // @change PCC2/PCC1 used Color_Black
