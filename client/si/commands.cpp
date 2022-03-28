@@ -78,8 +78,10 @@
 #include "game/interface/plugincontext.hpp"
 #include "game/interface/richtextfunctions.hpp"
 #include "game/interface/richtextvalue.hpp"
+#include "game/interface/shiptaskpredictor.hpp"
 #include "game/interface/simplefunction.hpp"
 #include "game/interface/simpleprocedure.hpp"
+#include "game/interface/taskeditorcontext.hpp"
 #include "game/interface/vmfile.hpp"
 #include "game/map/chunnelmission.hpp"
 #include "game/map/fleetmember.hpp"
@@ -719,6 +721,108 @@ client::si::IFCCAddToSim(game::Session& session, ScriptSide& si, RequestLink1 li
     } else {
         throw interpreter::Error::contextError();
     }
+}
+
+// @since PCC2 2.40.12
+void
+client::si::IFCCAddWaypoint(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // ex WShipAutoTaskCommandTile::createWaypointCommand
+    class WaypointTask : public util::Request<game::Session> {
+     public:
+        WaypointTask(game::Id_t id, String_t verb, int flags, game::map::Point pos)
+            : m_id(id), m_verb(verb), m_flags(flags), m_position(pos)
+            { }
+
+        virtual void handle(game::Session& session)
+            {
+                afl::base::Ptr<interpreter::TaskEditor> ed = session.getAutoTaskEditor(m_id, interpreter::Process::pkShipTask, true);
+                if (ed.get() != 0) {
+                    game::interface::insertMovementCommand(*ed, m_verb, m_position, m_flags, session);
+                    session.releaseAutoTaskEditor(ed);
+                }
+            }
+
+     private:
+        const game::Id_t m_id;
+        const String_t m_verb;
+        const int m_flags;
+        const game::map::Point m_position;
+    };
+
+    class Task : public UserTask {
+     public:
+        Task(const client::dialogs::NavChartState& in, String_t verb, int flags)
+            : m_state(in), m_verb(verb), m_flags(flags)
+            { }
+        virtual void handle(Control& ctl, RequestLink2 link)
+            {
+                UserSide& iface = ctl.interface();
+                afl::string::Translator& tx = ctl.translator();
+                client::dialogs::NavChartResult result;
+                client::dialogs::doNavigationChart(result, m_state, iface, ctl.root(), tx);
+                if (result.result == client::dialogs::NavChartResult::Location) {
+                    Downlink link(ctl.root(), tx);
+                    WaypointTask t(m_state.shipId, m_verb, m_flags, result.position);
+                    link.call(iface.gameSender(), t);
+                }
+                iface.joinProcess(link, result.outputState.getProcess());
+                ctl.handleStateChange(link, result.outputState.getTarget());
+            }
+     private:
+        client::dialogs::NavChartState m_state;
+        const String_t m_verb;
+        const int m_flags;
+    };
+
+    // Parse arguments
+    args.checkArgumentCount(2, 3);
+    String_t title;
+    String_t verb;
+    if (!interpreter::checkStringArg(title, args.getNext()) || !interpreter::checkStringArg(verb, args.getNext())) {
+        return;
+    }
+    int flags = 0;
+    interpreter::checkFlagArg(flags, 0, args.getNext(), "SD");
+    static_assert(game::interface::imc_SetSpeed == 1, "SetSpeed");
+    static_assert(game::interface::imc_AcceptDuplicate == 2, "AcceptDuplicate");
+
+    session.notifyListeners();
+
+    game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
+    game::Root& root = game::actions::mustHaveRoot(session);
+    game::Game& g = game::actions::mustHaveGame(session);
+
+    game::map::Ship* sh = dynamic_cast<game::map::Ship*>(link.getProcess().getCurrentObject());
+    if (sh == 0) {
+        throw interpreter::Error::contextError();
+    }
+
+    // Edit ship task
+    game::interface::ShipTaskPredictor pred(g.currentTurn().universe(), sh->getId(), g.shipScores(), shipList, root.hostConfiguration(), root.hostVersion(), root.registrationKey());
+    afl::base::Ptr<interpreter::TaskEditor> task(session.getAutoTaskEditor(sh->getId(), interpreter::Process::pkShipTask, false));
+    if (task.get() != 0) {
+        pred.predictTask(*task, task->getCursor());
+        session.releaseAutoTaskEditor(task);
+    }
+
+    client::dialogs::NavChartState in;
+    in.title = title;
+    in.center = pred.getPosition();
+    in.origin = pred.getPosition();
+    in.target = (pred.getNumPositions() == 0 ? sh->getWaypoint().orElse(in.origin) : in.origin);
+    in.hyperjumping = pred.isHyperdriving();
+    in.shipId = sh->getId();
+    in.speed = util::squareInteger(pred.getWarpFactor());
+    if (sh->hasSpecialFunction(game::spec::BasicHullFunction::Gravitonic, g.shipScores(), shipList, root.hostConfiguration())) {
+        in.speed *= 2;
+    }
+
+    in.acceptLocation = true;
+    in.acceptShip = false;
+    in.acceptChunnel = false;
+
+    si.postNewTask(link, new Task(in, verb, flags));
 }
 
 // @since PCC2 2.40.11
@@ -3700,6 +3804,7 @@ client::si::registerCommands(UserSide& ui)
 
                 // Procedures
                 s.world().setNewGlobalValue("CC$ADDTOSIM",           new ScriptProcedure(s, &si, IFCCAddToSim));
+                s.world().setNewGlobalValue("CC$ADDWAYPOINT",        new ScriptProcedure(s, &si, IFCCAddWaypoint));
                 s.world().setNewGlobalValue("CC$BUILDAMMO",          new ScriptProcedure(s, &si, IFCCBuildAmmo));
                 s.world().setNewGlobalValue("CC$BUILDBASE",          new ScriptProcedure(s, &si, IFCCBuildBase));
                 s.world().setNewGlobalValue("CC$BUILDSHIP",          new ScriptProcedure(s, &si, IFCCBuildShip));

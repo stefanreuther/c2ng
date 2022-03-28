@@ -64,6 +64,10 @@ namespace game { namespace interface {
             \return fuel */
         int getRemainingFuel() const;
 
+        /** Get final mission.
+            \return mission number */
+        int getMission() const;
+
         /** Get final friendly code.
             \return friendly code */
         String_t getFriendlyCode() const;

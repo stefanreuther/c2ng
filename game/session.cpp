@@ -631,6 +631,7 @@ game::Session::initWorld()
     m_world.setNewGlobalValue("PLANETAT",      new game::interface::SimpleFunction(*this, game::interface::IFPlanetAt));
     m_world.setNewGlobalValue("PLAYER",        new game::interface::PlayerFunction(*this));
     m_world.setNewGlobalValue("PREF",          new game::interface::SimpleFunction(*this, game::interface::IFPref));
+    m_world.setNewGlobalValue("QUOTE",         new game::interface::SimpleFunction(*this, game::interface::IFQuote));
     m_world.setNewGlobalValue("RANDOM",        new game::interface::SimpleFunction(*this, game::interface::IFRandom));
     m_world.setNewGlobalValue("RANDOMFCODE",   new game::interface::SimpleFunction(*this, game::interface::IFRandomFCode));
     m_world.setNewGlobalValue("SHIP",          new game::interface::ShipFunction(*this));

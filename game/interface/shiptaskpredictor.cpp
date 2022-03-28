@@ -79,6 +79,12 @@ game::interface::ShipTaskPredictor::getRemainingFuel() const
     return m_predictor.getCargo(Element::Neutronium);
 }
 
+int
+game::interface::ShipTaskPredictor::getMission() const
+{
+    return m_predictor.getMission();
+}
+
 String_t
 game::interface::ShipTaskPredictor::getFriendlyCode() const
 {

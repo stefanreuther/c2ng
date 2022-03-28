@@ -6,30 +6,44 @@
 
 #include "afl/base/ptr.hpp"
 #include "afl/data/value.hpp"
-#include "interpreter/singlecontext.hpp"
-#include "interpreter/taskeditor.hpp"
 #include "game/session.hpp"
 #include "interpreter/arguments.hpp"
+#include "interpreter/singlecontext.hpp"
+#include "interpreter/taskeditor.hpp"
 
 namespace game { namespace interface {
 
     /** Task editor property identifier. */
     enum TaskEditorProperty {
-        iteLines,               // Lines : Str()
-        iteCursor,              // Cursor : Int
-        itePC,                  // Current : Int
-        iteIsInSubroutine,      // Current.Active : Bool
-        iteTypeStr,             // Type : Str
-        iteTypeInt,             // Type$ : Int
-        iteObjectId             // Id : Int
+        iteLines,                 // Lines : Str()
+        iteCursor,                // Cursor : Int
+        itePC,                    // Current : Int
+        iteIsInSubroutine,        // Current.Active : Bool
+        itePredictedCloakFuel,    // Predicted.Fuel.Cloak : Int
+        itePredictedFCode,        // Predicted.FCode : Str
+        itePredictedFuel,         // Predicted.Fuel : Int
+        itePredictedMission,      // Predicted.Mission$ : Int
+        itePredictedMovementFuel, // Predicted.Fuel.Move : Int
+        itePredictedPositionX,    // Predicted.Loc.X : Int
+        itePredictedPositionY,    // Predicted.Loc.Y : Int
+        itePredictedSpeed,        // Predicted.Speed$ : Int
+        iteTypeStr,               // Type : Str
+        iteTypeInt,               // Type$ : Int
+        iteObjectId               // Id : Int
     };
 
     /** Task editor method identifier. */
     enum TaskEditorMethod {
-        itmAdd,                 // Add at cursor
-        itmInsert,              // Insert at position
-        itmDelete               // Delete range
+        itmAdd,                   // Add at cursor
+        itmAddMovement,           // Add movement command
+        itmConfirmMessage,        // Confirm this task's message
+        itmInsert,                // Insert at position
+        itmDelete                 // Delete range
     };
+
+
+    const int imc_SetSpeed        = 1;   ///< Flag for insertMovementCommand: add SetSpeed command for optimum warp
+    const int imc_AcceptDuplicate = 2;   ///< Flag for insertMovementCommand: force adding command even if it's a duplicate
 
 
     /** Task editor context: publish properties of an interpreter::TaskEditor.
@@ -81,10 +95,20 @@ namespace game { namespace interface {
         \throw interpreter::Error if property cannot be set or value is out of range */
     void setTaskEditorProperty(const afl::base::Ptr<interpreter::TaskEditor>& edit, TaskEditorProperty prop, const afl::data::Value* value);
 
+    /** Call method on TaskEditor.
+        \param edit    TaskEditor
+        \param m       Method Id
+        \param session Session
+        \param args    Parameters */
+    void callTaskEditorMethod(interpreter::TaskEditor& edit, TaskEditorMethod m, Session& session, interpreter::Arguments& args);
 
-    void callTaskEditorMethod(interpreter::TaskEditor& edit, TaskEditorMethod m, interpreter::Arguments& args);
-
-
+    /** Insert a movement command into a ship auto task.
+        \param edit     TaskEditor, must be editing a ship task.
+        \param verb     Verb to use
+        \param pt       Target point
+        \param flags    Flags (imc_XXX)
+        \param session  Session (for predicting the ship's status) */
+    void insertMovementCommand(interpreter::TaskEditor& edit, String_t verb, game::map::Point pt, int flags, Session& session);
 
 } }
 

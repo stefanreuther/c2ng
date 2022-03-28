@@ -1189,6 +1189,13 @@ game::map::ShipPredictor::getRealOwner() const
     return m_ship.owner.orElse(0);
 }
 
+// Get computed current mission.
+int
+game::map::ShipPredictor::getMission() const
+{
+    return m_ship.mission.orElse(0);
+}
+
 // Get computed friendly code.
 String_t
 game::map::ShipPredictor::getFriendlyCode() const

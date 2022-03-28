@@ -174,6 +174,10 @@ namespace game { namespace map {
             \return real owner */
         int getRealOwner() const;
 
+        /** Get computed current mission.
+            \return mission number */
+        int getMission() const;
+
         /** Get computed friendly code.
             \return friendly code */
         String_t getFriendlyCode() const;

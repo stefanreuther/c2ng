@@ -3,24 +3,48 @@
   */
 
 #include "game/interface/taskeditorcontext.hpp"
-#include "interpreter/values.hpp"
-#include "game/map/object.hpp"
-#include "interpreter/indexablevalue.hpp"
-#include "interpreter/error.hpp"
-#include "interpreter/arguments.hpp"
-#include "interpreter/nametable.hpp"
-#include "interpreter/propertyacceptor.hpp"
-#include "interpreter/procedurevalue.hpp"
+#include "afl/base/staticassert.hpp"
 #include "afl/data/stringlist.hpp"
+#include "afl/string/format.hpp"
+#include "game/actions/preconditions.hpp"
+#include "game/game.hpp"
+#include "game/interface/basetaskpredictor.hpp"
+#include "game/interface/shiptaskpredictor.hpp"
+#include "game/limits.hpp"
+#include "game/map/object.hpp"
+#include "game/map/planet.hpp"
+#include "game/map/ship.hpp"
+#include "game/root.hpp"
+#include "game/spec/basichullfunction.hpp"
+#include "game/spec/shiplist.hpp"
+#include "game/turn.hpp"
+#include "interpreter/arguments.hpp"
+#include "interpreter/error.hpp"
+#include "interpreter/indexablevalue.hpp"
+#include "interpreter/nametable.hpp"
+#include "interpreter/procedurevalue.hpp"
+#include "interpreter/propertyacceptor.hpp"
+#include "interpreter/values.hpp"
 
+using afl::string::Format;
+using game::Game;
+using game::Root;
+using game::interface::BaseTaskPredictor;
+using game::interface::ShipTaskPredictor;
+using game::map::Universe;
+using game::spec::BasicHullFunction;
+using game::spec::ShipList;
 using interpreter::Error;
 using interpreter::Process;
 using interpreter::TaskEditor;
-using interpreter::makeBooleanValue;
-using interpreter::makeIntegerValue;
-using interpreter::makeStringValue;
+using interpreter::checkFlagArg;
 using interpreter::checkIntegerArg;
 using interpreter::checkStringArg;
+using interpreter::makeBooleanValue;
+using interpreter::makeIntegerValue;
+using interpreter::makeOptionalIntegerValue;
+using interpreter::makeOptionalStringValue;
+using interpreter::makeStringValue;
 
 namespace {
     /*
@@ -169,7 +193,7 @@ namespace {
         ~TaskEditorClosure()
             { m_session.releaseAutoTaskEditor(m_edit); }
         virtual void call(Process& /*proc*/, interpreter::Arguments& args)
-            { game::interface::callTaskEditorMethod(*m_edit, m_method, args); }
+            { game::interface::callTaskEditorMethod(*m_edit, m_method, m_session, args); }
         virtual ProcedureValue* clone() const
             { return new TaskEditorClosure(m_edit, m_method, m_session); }
      private:
@@ -198,6 +222,56 @@ namespace {
 
         if (!lines.empty()) {
             edit.replace(edit.getCursor(), 0, lines, TaskEditor::PlaceCursorAfter, TaskEditor::DefaultPC);
+        }
+    }
+
+    /* @q AddMovement verb:Str, x:Int, y:Int, Optional flags:Str (Auto Task Command)
+       Add a movement command to the current auto-task at cursor position.
+       The auto-task needs to be a ship task.
+
+       Flags can be:
+       - "s": set speed command if required
+       - "d": accept duplicates
+
+       @since PCC2 2.40.12 */
+    void IFTaskEditor_AddMovement(TaskEditor& edit, interpreter::Arguments& args, game::Session& session)
+    {
+        // ex WShipAutoTaskSelection::insertWaypointCommand
+        args.checkArgumentCount(3, 4);
+
+        // Mandatory args
+        String_t verb;
+        int x, y;
+        if (!checkStringArg(verb, args.getNext())
+            || !checkIntegerArg(x, args.getNext(), 0, game::MAX_NUMBER)
+            || !checkIntegerArg(y, args.getNext(), 0, game::MAX_NUMBER))
+        {
+            return;
+        }
+        const game::map::Point pt(x, y);
+
+        // Optional args
+        int flags = 0;
+        checkFlagArg(flags, 0, args.getNext(), "SD");
+        static_assert(game::interface::imc_SetSpeed == 1, "SetSpeed");
+        static_assert(game::interface::imc_AcceptDuplicate == 2, "AcceptDuplicate");
+        game::interface::insertMovementCommand(edit, verb, game::map::Point(x, y), flags, session);
+    }
+
+    /* @q ConfirmMessage (Auto Task Command)
+       Confirm the task's notification message.
+       This will cause the task to continue executing when the user stops editing it.
+
+       @since PCC2 2.40.12 */
+    void IFTaskEditor_ConfirmMessage(TaskEditor& edit, interpreter::Arguments& args, game::Session& session)
+    {
+        // ex WTaskMessageTile::onConfirm
+        args.checkArgumentCount(0);
+
+        game::interface::NotificationStore& notif = session.notifications();
+        notif.confirmMessage(notif.findMessageByProcessId(edit.process().getProcessId()), true);
+        if (game::map::Object* obj = edit.process().getInvokingObject()) {
+            obj->markDirty();
         }
     }
 
@@ -269,6 +343,64 @@ namespace {
         edit.replace(index, count, afl::base::Nothing, TaskEditor::DefaultCursor, TaskEditor::DefaultPC);
     }
 
+    /*
+     *  Implementation of Predicted.XXX properties
+     */
+
+    enum PredictedValue {
+        pvFriendlyCode,
+        pvMission,
+        pvMovementFuel,
+        pvCloakFuel,
+        pvRemainingFuel,
+        pvWarpFactor,
+        pvPositionX,
+        pvPositionY
+    };
+
+    afl::data::Value* getPredictedValue(TaskEditor& edit, game::Session& session, PredictedValue which)
+    {
+        const Game* g = session.getGame().get();
+        const Root* r = session.getRoot().get();
+        const ShipList* sl = session.getShipList().get();
+        if (g == 0 || r == 0 || sl == 0) {
+            // Missing environment: cannot predict
+            return 0;
+        } else if (const game::map::Ship* sh = dynamic_cast<const game::map::Ship*>(edit.process().getInvokingObject())) {
+            // Ship prediction
+            ShipTaskPredictor pred(g->currentTurn().universe(), sh->getId(), g->shipScores(), *sl, r->hostConfiguration(), r->hostVersion(), r->registrationKey());
+            pred.predictTask(edit, edit.getCursor());
+            switch (which) {
+             case pvFriendlyCode:   return makeStringValue(pred.getFriendlyCode());
+             case pvMission:        return makeIntegerValue(pred.getMission());
+             case pvMovementFuel:   return makeIntegerValue(pred.getMovementFuel());
+             case pvCloakFuel:      return makeIntegerValue(pred.getCloakFuel());
+             case pvRemainingFuel:  return makeIntegerValue(pred.getRemainingFuel());
+             case pvWarpFactor:     return makeIntegerValue(pred.getWarpFactor());
+             case pvPositionX:      return makeIntegerValue(pred.getPosition().getX());
+             case pvPositionY:      return makeIntegerValue(pred.getPosition().getY());
+            }
+            return 0;
+        } else if (const game::map::Planet* pl = dynamic_cast<const game::map::Planet*>(edit.process().getInvokingObject())) {
+            // Planet prediction
+            BaseTaskPredictor pred(*pl, g->currentTurn().universe(), *sl, r->hostConfiguration());
+            pred.predictTask(edit, edit.getCursor());
+            switch (which) {
+             case pvFriendlyCode:   return makeOptionalStringValue(pred.planet().getFriendlyCode());
+             case pvMission:        return makeOptionalIntegerValue(pred.planet().getBaseMission());
+             case pvMovementFuel:   return 0;
+             case pvCloakFuel:      return 0;
+             case pvRemainingFuel:  return 0;
+             case pvWarpFactor:     return 0;
+             case pvPositionX:      return 0;
+             case pvPositionY:      return 0;
+            }
+            return 0;
+        } else {
+            // Wrong type
+            return 0;
+        }
+    }
 
 
     /*
@@ -281,6 +413,9 @@ namespace {
 
     const interpreter::NameTable TASKEDITOR_MAP[] = {
         { "ADD",             game::interface::itmAdd,            TaskEditorMethodDomain,   interpreter::thProcedure },
+        { "ADDMOVEMENT",     game::interface::itmAddMovement,    TaskEditorMethodDomain,   interpreter::thProcedure },
+        { "CONFIRMMESSAGE",  game::interface::itmConfirmMessage, TaskEditorMethodDomain,   interpreter::thProcedure },
+
         /* @q Current:Int (Auto Task Property)
            Index of the current line in the auto-task.
            The index is 0-based, possible values range from 0 to Dim(Lines)-1.
@@ -305,18 +440,74 @@ namespace {
         { "CURSOR",          game::interface::iteCursor,         TaskEditorPropertyDomain, interpreter::thInt },
 
         { "DELETE",          game::interface::itmDelete,         TaskEditorMethodDomain,   interpreter::thProcedure },
+
         /* @q Id:Int (Auto Task Property)
            Id of the object this auto-task is for.
            @since PCC2 2.40.7 */
         { "ID",              game::interface::iteObjectId,       TaskEditorPropertyDomain, interpreter::thInt },
 
         { "INSERT",          game::interface::itmInsert,         TaskEditorMethodDomain,   interpreter::thProcedure },
+
         /* @q Lines:Str() (Auto Task Property)
            Commands in this auto-task.
            Elements in this array can be read and written.
            @assignable
            @since PCC2 2.40.7 */
         { "LINES",           game::interface::iteLines,          TaskEditorPropertyDomain, interpreter::thArray },
+
+        /* @q Predicted.FCode:Str (Auto Task Property)
+           Predicted friendly code at current position.
+           Considers all previous "SetFCode" commands.
+           @since PCC2 2.40.12 */
+        { "PREDICTED.FCODE", game::interface::itePredictedFCode, TaskEditorPropertyDomain, interpreter::thString },
+
+        /* @q Predicted.Fuel:Int (Auto Task Property)
+           Predicted remaining fuel on ship at current position in auto task.
+           Considers all previous commands.
+           EMPTY if the current task is not a ship task.
+           @since PCC2 2.40.12 */
+        { "PREDICTED.FUEL",  game::interface::itePredictedCloakFuel, TaskEditorPropertyDomain, interpreter::thInt },
+
+        /* @q Predicted.Fuel.Cloak:Int (Auto Task Property)
+           Fuel used for cloaking by ship at current position in auto task.
+           Considers all previous commands.
+           EMPTY if the current task is not a ship task.
+           @since PCC2 2.40.12 */
+        { "PREDICTED.FUEL.CLOAK", game::interface::itePredictedCloakFuel, TaskEditorPropertyDomain, interpreter::thInt },
+
+        /* @q Predicted.Fuel.Move:Int (Auto Task Property)
+           Fuel used for movement by ship at current position in auto task.
+           Considers all previous commands.
+           EMPTY if the current task is not a ship task.
+           @since PCC2 2.40.12 */
+        { "PREDICTED.FUEL.MOVE", game::interface::itePredictedMovementFuel, TaskEditorPropertyDomain, interpreter::thInt },
+
+        /* @q Predicted.Loc.X:Int (Auto Task Property)
+           Predicted X location of ship at current position in auto task.
+           Considers all previous commands.
+           EMPTY if the current task is not a ship task.
+           @since PCC2 2.40.12 */
+        { "PREDICTED.LOC.X",  game::interface::itePredictedPositionX, TaskEditorPropertyDomain, interpreter::thInt },
+
+        /* @q Predicted.Loc.Y:Int (Auto Task Property)
+           Predicted Y location of ship at current position in auto task.
+           Considers all previous commands.
+           EMPTY if the current task is not a ship task.
+           @since PCC2 2.40.12 */
+        { "PREDICTED.LOC.Y",  game::interface::itePredictedPositionY, TaskEditorPropertyDomain, interpreter::thInt },
+
+        /* @q Predicted.Mission$:Int (Auto Task Property)
+           Predicted mission number of ship or starbase at current position in auto task.
+           Considers all previous commands.
+           @since PCC2 2.40.12 */
+        { "PREDICTED.MISSION$", game::interface::itePredictedMission, TaskEditorPropertyDomain, interpreter::thInt },
+
+        /* @q Predicted.Speed$:Int (Auto Task Property)
+           Predicted speed of ship at current position in auto task.
+           Considers all previous commands.
+           EMPTY if the current task is not a ship task.
+           @since PCC2 2.40.12 */
+        { "PREDICTED.SPEED$", game::interface::itePredictedSpeed, TaskEditorPropertyDomain, interpreter::thInt },
 
         /* @q Type:Str (Auto Task Property)
            Type of the object this auto-task is for.
@@ -443,6 +634,30 @@ game::interface::getTaskEditorProperty(const afl::base::Ptr<interpreter::TaskEdi
      case iteIsInSubroutine:
         return makeBooleanValue(edit->isInSubroutineCall());
 
+     case itePredictedFCode:
+        return getPredictedValue(*edit, session, pvFriendlyCode);
+
+     case itePredictedCloakFuel:
+        return getPredictedValue(*edit, session, pvCloakFuel);
+
+     case itePredictedFuel:
+        return getPredictedValue(*edit, session, pvRemainingFuel);
+
+     case itePredictedMission:
+        return getPredictedValue(*edit, session, pvMission);
+
+     case itePredictedMovementFuel:
+        return getPredictedValue(*edit, session, pvMovementFuel);
+
+     case itePredictedPositionX:
+        return getPredictedValue(*edit, session, pvPositionX);
+
+     case itePredictedPositionY:
+        return getPredictedValue(*edit, session, pvPositionY);
+
+     case itePredictedSpeed:
+        return getPredictedValue(*edit, session, pvWarpFactor);
+
      case iteTypeStr:
         switch (edit->process().getProcessKind()) {
          case Process::pkDefault:    break;
@@ -490,6 +705,14 @@ game::interface::setTaskEditorProperty(const afl::base::Ptr<interpreter::TaskEdi
 
      case iteIsInSubroutine:
      case iteLines:
+     case itePredictedCloakFuel:
+     case itePredictedFCode:
+     case itePredictedFuel:
+     case itePredictedMission:
+     case itePredictedMovementFuel:
+     case itePredictedPositionX:
+     case itePredictedPositionY:
+     case itePredictedSpeed:
      case iteTypeStr:
      case iteTypeInt:
      case iteObjectId:
@@ -498,11 +721,17 @@ game::interface::setTaskEditorProperty(const afl::base::Ptr<interpreter::TaskEdi
 }
 
 void
-game::interface::callTaskEditorMethod(interpreter::TaskEditor& edit, TaskEditorMethod m, interpreter::Arguments& args)
+game::interface::callTaskEditorMethod(interpreter::TaskEditor& edit, TaskEditorMethod m, Session& session, interpreter::Arguments& args)
 {
     switch (m) {
      case itmAdd:
         IFTaskEditor_Add(edit, args);
+        break;
+     case itmAddMovement:
+        IFTaskEditor_AddMovement(edit, args, session);
+        break;
+     case itmConfirmMessage:
+        IFTaskEditor_ConfirmMessage(edit, args, session);
         break;
      case itmInsert:
         IFTaskEditor_Insert(edit, args);
@@ -511,4 +740,74 @@ game::interface::callTaskEditorMethod(interpreter::TaskEditor& edit, TaskEditorM
         IFTaskEditor_Delete(edit, args);
         break;
     }
+}
+
+void
+game::interface::insertMovementCommand(interpreter::TaskEditor& edit, String_t verb, game::map::Point pt, int flags, Session& session)
+{
+    const bool wantSetSpeed = (flags & imc_SetSpeed) != 0;
+    const bool wantDuplicate = (flags & imc_AcceptDuplicate) != 0;
+
+    // We need a ship to work
+    const game::map::Ship* sh = dynamic_cast<const game::map::Ship*>(edit.process().getInvokingObject());
+    if (sh == 0) {
+        throw Error("Not a ship auto-task");
+    }
+
+    // Ship prediction to find current state
+    const Root& r = game::actions::mustHaveRoot(session);
+    const Game& g = game::actions::mustHaveGame(session);
+    const Universe& u = g.currentTurn().universe();
+    const ShipList& shipList = game::actions::mustHaveShipList(session);
+    ShipTaskPredictor pred(u, sh->getId(), g.shipScores(), shipList, r.hostConfiguration(), r.hostVersion(), r.registrationKey());
+    pred.predictTask(edit, edit.getCursor());
+    if (!wantDuplicate && pred.getPosition() == pt) {
+        return;
+    }
+
+    // Collect commands so we add them all at once
+    afl::data::StringList_t commands;
+
+    // Set speed if desired
+    if (wantSetSpeed) {
+        // Do it
+        const int32_t dist2 = u.config().getSquaredDistance(pred.getPosition(), pt);
+        const bool shipCanJump = sh->hasSpecialFunction(BasicHullFunction::Hyperdrive, g.shipScores(), shipList, r.hostConfiguration());
+        if (shipCanJump && r.hostVersion().isExactHyperjumpDistance2(dist2)) {
+            /* Looks like a hyperjump, so make one. This code is not in the regular
+               auto-warp function, but is's very convenient for planning double-jumps. */
+            if (pred.getWarpFactor() < 2) {
+                commands.push_back("SetSpeed 2");
+            }
+            commands.push_back(Format("SetFCode \"HYP\"   %% %s", session.translator()("hyperjump")));
+        } else {
+            /* Not a hyperjump */
+            if (shipCanJump && pred.getWarpFactor() > 0 && pred.getFriendlyCode() == "HYP" && !r.hostVersion().isExactHyperjumpDistance2(dist2)) {
+                commands.push_back(Format("SetFCode %s   %% %s",
+                                          interpreter::quoteString(shipList.friendlyCodes().generateRandomCode(session.rng(), r.hostVersion())),
+                                          session.translator()("cancel hyperjump")));
+            }
+
+            /* Optimize speed */
+            if (pred.getPosition() != pt) {
+                int n = getOptimumWarp(u, sh->getId(), pred.getPosition(), pt, g.shipScores(), shipList, r);
+                if (n != 0 && n != pred.getWarpFactor()) {
+                    commands.push_back(Format("SetSpeed %d", n));
+                }
+            }
+        }
+    }
+
+    // Finally, add the waypoint command
+    String_t command = Format("%s %d, %d", verb, pt.getX(), pt.getY());
+    validateCommand(command);
+
+    String_t comment = u.findLocationName(pt, Universe::NameGravity | Universe::NameNoSpace, r.hostConfiguration(), r.hostVersion(), session.translator());
+    if (!comment.empty()) {
+        command += "   % ";
+        command += comment;
+    }
+    commands.push_back(command);
+
+    edit.replace(edit.getCursor(), 0, commands, TaskEditor::PlaceCursorAfter, TaskEditor::DefaultPC);
 }

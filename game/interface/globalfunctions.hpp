@@ -23,6 +23,7 @@ namespace game { namespace interface {
     afl::data::Value* IFObjectIsAt(game::Session& session, interpreter::Arguments& args);
     afl::data::Value* IFPlanetAt(game::Session& session, interpreter::Arguments& args);
     afl::data::Value* IFPref(game::Session& session, interpreter::Arguments& args);
+    afl::data::Value* IFQuote(game::Session& session, interpreter::Arguments& args);
     afl::data::Value* IFRandom(game::Session& session, interpreter::Arguments& args);
     afl::data::Value* IFRandomFCode(game::Session& session, interpreter::Arguments& args);
     afl::data::Value* IFTranslate(game::Session& session, interpreter::Arguments& args);

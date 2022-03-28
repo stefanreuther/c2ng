@@ -588,6 +588,57 @@ Function CCUI$Ship.ChooseMissionParameters (newM, args, sid)
   EndIf
 EndFunction
 
+% Prepare mission list for a ship
+% - a: Listbox
+% - i: ship Id
+Sub CCUI$Ship.PrepareMissionList (a, i)
+  ForEach Global.Mission Do
+    Try
+      % Check preconditions
+      % @change SRace check (host.isMissionAllowed) now in mission.cc
+      If BitAnd(Race$, 2^Cfg("PlayerSpecialMission", Ship(i).Owner.Real))=0 Then Abort
+      If InStr(Flags, "r") And System.GameType$ Then Abort
+      If InStr(Flags, "i") And Ship(i).Fleet$ And Ship(i).Fleet$<>i Then Abort
+      If Condition And Not Eval(Condition, Ship(i)) Then Abort
+
+      % All tests passed, add it
+      Call a->AddItem Number, Format("%s - %s", Key, Name)
+    EndTry
+  Next
+  Call a->AddItem, -1, Translate("# - Extended Mission")
+EndSub
+
+% Complete mission selection by asking for parameters
+% Returns Array(m, i, t, onSetCommand)
+Function CCUI$Ship.CompleteMissionSelection (newNr, shipId)
+  Local res
+  If Not IsEmpty(newNr) Then
+    % Tow chain warning
+    If shipId And newNr=7 And FindShip(Mission$=7 And Mission.Tow=shipId) Then
+      UI.Message Translate("This ship is already being towed. Tow chains will not work.\nContinue anyway?"), Translate("Ship Mission"), Translate("Yes No")
+      If UI.Result<>1 Then Return res
+    EndIf
+
+    If newNr=-1 Then
+      % Extended Mission
+      CCUI.Ship.ChooseExtendedMission Mission$, Mission.Intercept, Mission.Tow
+      If Not IsEmpty(UI.Result) Then
+        res := Array(UI.Result(0), UI.Result(1), UI.Result(2), Z(0))
+      EndIf
+    Else
+      % Normal mission
+      Local args(2)
+      Local newM = Global.Mission(newNr,    Owner.Real)
+      Local oldM = Global.Mission(Mission$, Owner.Real)
+      args(0) := If((newNr = Mission$) Or (newM->Intercept.Name = oldM->Intercept.Name), Mission.Intercept, 0)
+      args(1) := If((newNr = Mission$) Or (newM->Tow.Name       = oldM->Tow.Name),       Mission.Tow,       0)
+      If CCUI$Ship.ChooseMissionParameters(newM, args, shipId)
+        res := Array(newNr, args(0), args(1), newM->Command)
+      EndIf
+    EndIf
+  EndIf
+  Return res
+EndFunction
 
 % Ship mission [M]
 % @since PCC2 2.40.1
@@ -604,52 +655,17 @@ Sub CCUI.Ship.SetMission
 
     % Build listbox
     Local a := Listbox(_("Ship Mission"), Mission$, 340, 12, "pcc2:shipscreen")
-    ForEach Global.Mission Do
-      Try
-        % Check preconditions
-        % @change SRace check (host.isMissionAllowed) now in mission.cc
-        If BitAnd(Race$, 2^Cfg("PlayerSpecialMission", Ship(i).Owner.Real))=0 Then Abort
-        If InStr(Flags, "r") And System.GameType$ Then Abort
-        If InStr(Flags, "i") And Ship(i).Fleet$ And Ship(i).Fleet$<>i Then Abort
-        If Condition And Not Eval(Condition, Ship(i)) Then Abort
-
-        % All tests passed, add it
-        Call a->AddItem Number, Format("%s - %s", Key, Name)
-      EndTry
-    Next
-    Call a->AddItem, -1, _("# - Extended Mission")
+    CCUI$Ship.PrepareMissionList a, i
     Call a->Run
 
     % Process result
-    If Not IsEmpty(UI.Result) Then
-      % Tow chain warning
-      Local newNr = UI.Result
-      If newNr=7 And FindShip(Mission$=7 And Mission.Tow=i) Then
-        UI.Message _("This ship is already being towed. Tow chains will not work.\nContinue anyway?"), _("Ship Mission"), _("Yes No")
-        If UI.Result<>1 Then Return
-      EndIf
+    Local r := CCUI$Ship.CompleteMissionSelection(UI.Result, i)
+    If Not IsEmpty(r) Then
+      SetMission r(0), r(1), r(2)
 
-      If newNr=-1 Then
-        % Extended Mission
-        CCUI.Ship.ChooseExtendedMission Mission$, Mission.Intercept, Mission.Tow
-        If Not IsEmpty(UI.Result) Then
-          SetMission UI.Result(0), UI.Result(1), UI.Result(2)
-        EndIf
-      Else
-        % Normal mission
-        Local args(2)
-        Local newM = Global.Mission(newNr,    Owner.Real)
-        Local oldM = Global.Mission(Mission$, Owner.Real)
-        args(0) := If((newNr = Mission$) Or (newM->Intercept.Name = oldM->Intercept.Name), Mission.Intercept, 0)
-        args(1) := If((newNr = Mission$) Or (newM->Tow.Name       = oldM->Tow.Name),       Mission.Tow,       0)
-        If CCUI$Ship.ChooseMissionParameters(newM, args, Id)
-          SetMission newNr, args(0), args(1)
-
-          % Execute 'OnSet=' command
-          i := newM->Command
-          If i Then Eval i
-        EndIf
-      EndIf
+      % Execute 'OnSet=' command
+      i := r(3)
+      If i Then Eval i
     EndIf
   EndIf
 EndSub
@@ -705,10 +721,10 @@ EndSub
 % (This dialog is required for regular ships and for Global Actions / Ship Tasks)
 % Returns UI.Result=mission or empty
 % @since PCC2 2.40.1
-Sub CCUI.Base.ChooseMission (m)
+Sub CCUI.Base.ChooseMission (m, Optional h)
   % ex client/act-planet.cc:doBaseChangeMission (part), pdata.pas:GetStarbaseMission
   Local _ := Translate
-  Local a := Listbox(_("Starbase Mission"), m, 300, 7, "pcc2:basescreen")
+  Local a := Listbox(_("Starbase Mission"), m, 300, 7, If(h, h, "pcc2:basescreen"))
 
   % FIXME: can we access these strings without duplicating them from compiled code?
   Call a->AddItem 0, Format("%X - %s", 0, _("none"))
@@ -1067,6 +1083,14 @@ EndSub
 %  (ex WAutoTaskScreen::handleEvent)
 %
 
+% @since PCC2 2.40.12
+Sub CCUI.Task.AddCommand (cmd)
+  % ex WAutoTaskObjectSelection::insert
+  If Not IsEmpty(cmd) Then
+    Call UI.AutoTask->Add cmd
+  EndIf
+EndSub
+
 % @since PCC2 2.40.7
 Sub CCUI.Task.ToggleComment
   Local cmd = UI.AutoTask->Lines(UI.AutoTask->Cursor)
@@ -1162,6 +1186,153 @@ Sub CCUI.Task.LoadFromFile
   EndIf
 EndSub
 
+% @since PCC2 2.40.12
+Sub CCUI.Task.GoToPredictedLocation
+  % ex WShipAutoTaskCommandTile::handleEvent (part)
+  UI.GotoChart UI.AutoTask->Predicted.Loc.X, UI.AutoTask->Predicted.Loc.Y
+EndSub
+
+% @since PCC2 2.40.12
+Sub CCUI.Task.ConfirmMessage
+  Call UI.AutoTask->ConfirmMessage
+EndSub
+
+
+
+% @since PCC2 2.40.12
+Sub CCUI.Task.AddCargoCommand (title, verb, all)
+  % ex WShipAutoTaskCommandTile::createCargoTransferCommand
+  Local _ = Translate
+  Local i, UI.Result
+  Local types = Array(_("Neutronium"), _("Tritanium"), _("Duranium"), _("Molybdenum"), _("Colonists"), _("Supplies"), _("Money"), _("All cargo"))
+  Local letters = Array('N',             'T',            'D',           'M',             'C',            'S',           '$',        all)
+
+  With Listbox(title, 0, 0, 0, "pcc2:shiptaskscreen") Do
+    For i:=0 To Dim(types)-1 Do AddItem i, types(i)
+    Call Run
+  EndWith
+  If Not IsEmpty(UI.Result) Then CCUI.Task.AddCommand Format("%s \"10000%s\", \"n\"", verb, letters(UI.Result))
+EndSub
+
+% @since PCC2 2.40.12
+Sub CCUI.Task.AddCargoUnload
+  CCUI.Task.AddCargoCommand Translate("Cargo Unload"), "CargoUnload", "TDMCS$"
+EndSub
+
+% @since PCC2 2.40.12
+Sub CCUI.Task.AddCargoUnloadAllShips
+  CCUI.Task.AddCommand "CargoUnloadAllShips"
+EndSub
+
+% @since PCC2 2.40.12
+Sub CCUI.Task.AddCargoUpload
+  CCUI.Task.AddCargoCommand Translate("Cargo Upload"), "CargoUpload", "NTDMS$"
+EndSub
+
+% @since PCC2 2.40.12
+Sub CCUI.Task.AddMoveTo
+  CC$AddWaypoint Translate("Move To"), "MoveTo", "s"
+EndSub
+
+% @since PCC2 2.40.12
+Sub CCUI.Task.AddMoveToScanner
+  % ex WShipTaskScannerChartWidget::onDblClick
+  Call UI.AutoTask->AddMovement "MoveTo", UI.X, UI.Y, "s"
+EndSub
+
+% @since PCC2 2.40.12
+Sub CCUI.Task.AddMoveTowards
+  CC$AddWaypoint Translate("Move Towards"), "MoveTowards"
+EndSub
+
+% @since PCC2 2.40.12
+Sub CCUI.Task.AddNotify
+  Local UI.Result
+  UI.Input Translate("Enter message:"), Translate("Notify"), 255, "30m"
+  If Not IsEmpty(UI.Result) Then CCUI.Task.AddCommand "Notify " + Quote(UI.Result)
+EndSub
+
+% @since PCC2 2.40.12
+Sub CCUI.Task.AddRestart
+  CCUI.Task.AddCommand "Restart"
+EndSub
+
+% @since PCC2 2.40.12
+Sub CCUI.Task.AddSetBaseMission
+  % ex WBaseAutoTaskCommandTile::createSetMissionCommand
+  Local UI.Result
+  % FIXME predicted base mission!
+  CCUI.Base.ChooseMission 0, "pcc2:basetaskscreen"
+  If Not IsEmpty(UI.Result) Then CCUI.Task.AddCommand "SetMission " & UI.Result
+EndSub
+
+% @since PCC2 2.40.12
+Sub CCUI.Task.AddSetComment
+  Local UI.Result
+  UI.Input Translate("Enter new comment:"), Translate("Set Comment"), 255, "30m"
+  If Not IsEmpty(UI.Result) Then CCUI.Task.AddCommand "SetComment " + Quote(UI.Result)
+EndSub
+
+% @since PCC2 2.40.12
+Sub CCUI.Task.AddSetEnemy
+  % ex WShipAutoTaskCommandTile::createSetEnemyCommand
+  Local UI.Result
+  With Listbox(Translate("Change Primary Enemy"), 0, 0, 0, "pcc2:shiptaskscreen") Do
+    AddItem 0, Translate("0 - none")
+    ForEach Player Do AddItem Race$, Format("%X - %s", Race$, Race.Short)
+    Call Run
+  EndWith
+  If Not IsEmpty(UI.Result) Then CCUI.Task.AddCommand "SetEnemy " & UI.Result
+EndSub
+
+% @since PCC2 2.40.12
+Sub CCUI.Task.AddSetFCode
+  % ex WShipAutoTaskCommandTile::createSetFCodeCommand, WPlanetAutoTaskSelection::createSetFCodeCommand
+  Local UI.Result
+  UI.InputFCode "d", UI.AutoTask->Predicted.FCode
+  If Not IsEmpty(UI.Result) Then CCUI.Task.AddCommand "SetFCode " & Quote(UI.Result)
+EndSub
+
+% @since PCC2 2.40.12
+Sub CCUI.Task.AddSetName
+  Local UI.Result
+  UI.Input Translate("Enter new name:"), Translate("Set Name"), 20, "20mg"
+  If Not IsEmpty(UI.Result) Then CCUI.Task.AddCommand "SetName " + Quote(UI.Result)
+EndSub
+
+% @since PCC2 2.40.12
+Sub CCUI.Task.AddSetShipMission
+  % ex WShipAutoTaskCommandTile::createSetMissionCommand
+  Local UI.Result
+  Local a := Listbox(Translate("Ship Mission"), Mission$, 340, 12, "pcc2:shiptaskscreen")
+  CCUI$Ship.PrepareMissionList a, Id
+  Call a->Run
+
+  % Process result
+  Local r := CCUI$Ship.CompleteMissionSelection(UI.Result, 0)
+  If Not IsEmpty(r) Then
+    CCUI.Task.AddCommand Format(If(r(2), "SetMission %d, %d, %d", If(r(1), "SetMission %d, %d", "SetMission %d")), r(0), r(1), r(2))
+  EndIf
+EndSub
+
+% @since PCC2 2.40.12
+Sub CCUI.Task.AddSetSpeed
+  % ex WShipAutoTaskCommandTile::createSetSpeedCommand
+  Local UI.Result
+  UI.InputNumber Translate("Set Speed"), 0, 9, UI.AutoTask->Predicted.Speed$, "pcc2:shiptaskscreen", Translate("Warp Factor:")
+  If Not IsEmpty(UI.Result) Then CCUI.Task.AddCommand "SetSpeed " & UI.Result
+EndSub
+
+% @since PCC2 2.40.12
+Sub CCUI.Task.AddSetWaypoint
+  CC$AddWaypoint Translate("Set Waypoint"), "SetWaypoint"
+EndSub
+
+% @since PCC2 2.40.12
+Sub CCUI.Task.AddWaitOneTurn
+  CCUI.Task.AddCommand "WaitOneTurn"
+EndSub
+
 %
 %  Menus
 %
@@ -1246,3 +1417,52 @@ Sub CCUI.BaseShipyardMenu
     MessageBox Translate("There is no ship at this starbase which could be fixed or recycled."), Translate("Shipyard")
   EndIf
 EndSub
+
+
+On CommonTaskMenu Do
+  % ex WAutoTaskObjectSelection::createCommonCommand
+  AddItem Atom("CCUI.Task.AddNotify"),      Translate("Notify message")
+  AddItem Atom("CCUI.Task.AddSetComment"),  Translate("Set Comment")
+  If UI.AutoTask->Type = 'ship' Then
+    AddItem Atom("CCUI.Task.AddSetName"),   Translate("Set Name")
+  EndIf
+  AddItem Atom("CCUI.Task.AddWaitOneTurn"), Translate("Wait One Turn")
+  AddItem Atom("CCUI.Task.AddRestart"),     Translate("Restart task from beginning")
+EndOn
+
+On ShipTaskMovementMenu Do
+  % ex WShipAutoTaskCommandTile::handleCommand (part)
+  AddItem Atom("CCUI.Task.AddSetSpeed"),    Translate("Set Speed")
+  AddItem Atom("CCUI.Task.AddMoveTo"),      Translate("Move To")
+  AddItem Atom("CCUI.Task.AddMoveTowards"), Translate("Move Towards")
+  AddItem Atom("CCUI.Task.AddSetWaypoint"), Translate("Set Waypoint")
+EndOn
+
+On ShipTaskCargoMenu Do
+  % ex WShipAutoTaskCommandTile::handleCommand (part)
+  AddItem Atom("CCUI.Task.AddCargoUnload"), Translate("Cargo Unload")
+  AddItem Atom("CCUI.Task.AddCargoUpload"), Translate("Cargo Upload")
+EndOn
+
+On ShipTaskMissionMenu Do
+  % ex WShipAutoTaskCommandTile::handleCommand (part)
+  AddItem Atom("CCUI.Task.AddSetEnemy"), Translate("Set Enemy")
+  AddItem Atom("CCUI.Task.AddSetFCode"), Translate("Set FCode")
+  AddItem Atom("CCUI.Task.AddSetShipMission"), Translate("Set Mission")
+EndOn
+
+On PlanetTaskOrdersMenu Do
+  AddItem Atom("CCUI.Task.AddSetFCode"), Translate("Set FCode")
+EndOn
+
+On PlanetTaskCargoMenu Do
+  % ex WPlanetAutoTaskSelection::createCargoCommand
+  AddItem Atom("CCUI.Task.AddCargoUnloadAllShips"), Translate("Unload All Ships")
+EndOn
+
+On BaseTaskOrdersMenu Do
+% FIXME:           sl.add(1, _("Enqueue Ship Build Order"));
+% FIXME:                   createEnqueueShipCommand();
+  AddItem Atom("CCUI.Task.AddSetBaseMission"), Translate("Set Mission")
+  AddItem Atom("CCUI.Task.AddSetFCode"),       Translate("Set FCode")
+EndOn

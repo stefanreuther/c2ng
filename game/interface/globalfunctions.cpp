@@ -522,6 +522,24 @@ game::interface::IFPref(game::Session& session, interpreter::Arguments& args)
     return getConfigValue(session, root->userConfiguration(), optName, index, false);
 }
 
+/* @q Quote(val:Any):Str (Function)
+   Convert to string and quote a value.
+   The value is formatted in a way such that Eval() will produce the value again.
+   This function is guaranteed to work for scalars:
+   - strings;
+   - integers;
+   - booleans;
+   - floats (except for possible precision issues);
+   - EMPTY.
+   It will also work for some non-scalars where possible, e.g. <tt>Quote(Planet(3))</tt> will produce <tt>Planet(3)</tt>.
+
+   @since PCC2 2.40.12 */
+afl::data::Value*
+game::interface::IFQuote(game::Session& /*session*/, interpreter::Arguments& args)
+{
+    args.checkArgumentCount(1);
+    return makeStringValue(interpreter::toString(args.getNext(), true));
+}
 
 /* @q Random(a:Int, Optional b:Int):Int (Function)
    Generate random number.
