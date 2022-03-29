@@ -8,6 +8,7 @@
 #include "afl/base/types.hpp"
 #include "client/si/outputstate.hpp"
 #include "client/si/requestlink2.hpp"
+#include "game/interface/contextprovider.hpp"
 #include "game/reference.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/process.hpp"
@@ -17,7 +18,6 @@
 namespace client { namespace si {
 
     class UserSide;
-    class ContextProvider;
     class ScriptTask;
 
 
@@ -179,7 +179,7 @@ namespace client { namespace si {
         /** Create context provider.
             Used for newly-created processes (e.g. command on ship screen executes in ship context).
             @return ContextProvider, may be null */
-        virtual ContextProvider* createContextProvider() = 0;
+        virtual game::interface::ContextProvider* createContextProvider() = 0;
 
 
      protected:

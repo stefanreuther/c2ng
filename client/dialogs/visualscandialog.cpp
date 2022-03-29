@@ -546,7 +546,7 @@ class client::dialogs::VisualScanDialog::Window : public client::si::Control {
     virtual void handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap);
     virtual void handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix);
     virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text);
-    virtual client::si::ContextProvider* createContextProvider();
+    virtual game::interface::ContextProvider* createContextProvider();
 
     afl::base::Signal<void(Reference)> sig_referenceChange;
 
@@ -1298,7 +1298,7 @@ client::dialogs::VisualScanDialog::Window::handleOverlayMessage(client::si::Requ
     defaultHandleOverlayMessage(link, text);
 }
 
-client::si::ContextProvider*
+game::interface::ContextProvider*
 client::dialogs::VisualScanDialog::Window::createContextProvider()
 {
     // FIXME: should be ship.

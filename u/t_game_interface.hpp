@@ -39,6 +39,11 @@ class TestGameInterfaceCompletionList : public CxxTest::TestSuite {
     void testAddBuildCompletionList();
 };
 
+class TestGameInterfaceContextProvider : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
 class TestGameInterfaceDrawingProperty : public CxxTest::TestSuite {
  public:
     void testGetLine();

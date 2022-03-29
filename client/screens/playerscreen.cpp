@@ -297,7 +297,7 @@ namespace {
             { defaultHandleUseKeymap(link, name, prefix); }
         virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text)
             { defaultHandleOverlayMessage(link, text); }
-        virtual client::si::ContextProvider* createContextProvider()
+        virtual game::interface::ContextProvider* createContextProvider()
             { return 0; }
 
      private:

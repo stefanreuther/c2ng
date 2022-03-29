@@ -423,7 +423,7 @@ interpreter::test::ExpressionVerifier::verifyStatement(const char* stmt)
         setupContexts(exec);
 
         DefaultStatementCompilationContext scc(world);
-        scc.withContextProvider(&exec);
+        scc.withStaticContext(&exec);
         scc.withFlag(scc.LinearExecution);
         scc.withFlag(scc.ExpressionsAreStatements);
 

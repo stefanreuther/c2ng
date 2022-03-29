@@ -12,14 +12,14 @@
 interpreter::StatementCompilationContext::StatementCompilationContext(World& world)
     : CompilationContext(world),
       m_parent(0),
-      m_contextProvider(0)
+      m_staticContext(0)
 { }
 
 // Construct child context.
 interpreter::StatementCompilationContext::StatementCompilationContext(const StatementCompilationContext& parent)
     : CompilationContext(parent),
       m_parent(&parent),
-      m_contextProvider(parent.m_contextProvider)
+      m_staticContext(parent.m_staticContext)
 { }
 
 // Add a flag.
@@ -42,10 +42,10 @@ interpreter::StatementCompilationContext::withoutFlag(Flag flag)
 
 // Set context provider.
 interpreter::StatementCompilationContext&
-interpreter::StatementCompilationContext::withContextProvider(ContextProvider* cp)
+interpreter::StatementCompilationContext::withStaticContext(StaticContext* sc)
 {
     // ex IntStatementCompilationContext::withExecutionContext
-    m_contextProvider = cp;
+    m_staticContext = sc;
     return *this;
 }
 
@@ -66,11 +66,11 @@ interpreter::StatementCompilationContext::setBlockSyntax()
 }
 
 // Get context provider.
-interpreter::ContextProvider*
-interpreter::StatementCompilationContext::getContextProvider() const
+interpreter::StaticContext*
+interpreter::StatementCompilationContext::getStaticContext() const
 {
     // ex IntStatementCompilationContext::getExecutionContext
-    return m_contextProvider;
+    return m_staticContext;
 }
 
 // Generate code for "Break" statement.

@@ -131,7 +131,7 @@ class TestInterpreterContext : public CxxTest::TestSuite {
     void testReadOnlyAccessor();
 };
 
-class TestInterpreterContextProvider : public CxxTest::TestSuite {
+class TestInterpreterContextReceiver : public CxxTest::TestSuite {
  public:
     void testInterface();
 };
@@ -549,6 +549,11 @@ class TestInterpreterStatementCompiler : public CxxTest::TestSuite {
     void testOption();
     void testCompileList();
     void testSpecial();
+};
+
+class TestInterpreterStaticContext : public CxxTest::TestSuite {
+ public:
+    void testInterface();
 };
 
 class TestInterpreterStructureType : public CxxTest::TestSuite {

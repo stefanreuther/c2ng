@@ -65,7 +65,7 @@ namespace {
         virtual void handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap);
         virtual void handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix);
         virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text);
-        virtual client::si::ContextProvider* createContextProvider();
+        virtual game::interface::ContextProvider* createContextProvider();
 
      private:
         client::si::UserSide& m_userSide;
@@ -358,7 +358,7 @@ MinefieldInfoDialog::handleOverlayMessage(client::si::RequestLink2 link, String_
     defaultHandleOverlayMessage(link, text);
 }
 
-client::si::ContextProvider*
+game::interface::ContextProvider*
 MinefieldInfoDialog::createContextProvider()
 {
     return 0;

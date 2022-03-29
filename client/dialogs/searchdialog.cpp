@@ -187,7 +187,7 @@ namespace {
         virtual void handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap);
         virtual void handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix);
         virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text);
-        virtual client::si::ContextProvider* createContextProvider();
+        virtual game::interface::ContextProvider* createContextProvider();
 
      private:
         enum State {
@@ -446,7 +446,7 @@ SearchDialog::handleOverlayMessage(client::si::RequestLink2 link, String_t text)
     defaultHandleOverlayMessage(link, text);
 }
 
-client::si::ContextProvider*
+game::interface::ContextProvider*
 SearchDialog::createContextProvider()
 {
     return 0; // or m_parentControl.createContextProvider()?

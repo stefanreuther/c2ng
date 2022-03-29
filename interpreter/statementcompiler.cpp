@@ -12,7 +12,6 @@
 #include "interpreter/callablevalue.hpp"
 #include "interpreter/commandsource.hpp"
 #include "interpreter/context.hpp"
-#include "interpreter/contextprovider.hpp"
 #include "interpreter/defaultstatementcompilationcontext.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/expr/binarynode.hpp"
@@ -26,6 +25,7 @@
 #include "interpreter/selectionexpression.hpp"
 #include "interpreter/specialcommand.hpp"
 #include "interpreter/statementcompilationcontext.hpp"
+#include "interpreter/staticcontext.hpp"
 #include "interpreter/structuretype.hpp"
 #include "interpreter/subroutinevalue.hpp"
 #include "interpreter/values.hpp"
@@ -484,13 +484,13 @@ interpreter::StatementCompiler::compileAmbiguousStatement(BytecodeObject& bco, c
 {
     // ex IntStatementCompiler::compileAmbiguousStatement
     const String_t name = m_commandSource.tokenizer().getCurrentString();
-    if (ContextProvider* cp = scc.getContextProvider()) {
+    if (StaticContext* sc = scc.getStaticContext()) {
         /* We have an execution context, so we can actually look up the value to see what it is.
-           Note that it is an error to have a ContextProvider and be in multi-line mode;
-           see StatementCompilationContext::withContextProvider. */
+           Note that it is an error to have a StaticContext and be in multi-line mode;
+           see StatementCompilationContext::withStaticContext. */
         bool is_proc;
         Context::PropertyIndex_t index;
-        if (Context::PropertyAccessor* con = cp->lookup(name, index)) {
+        if (Context::PropertyAccessor* con = sc->lookup(name, index)) {
             std::auto_ptr<afl::data::Value> v(con->get(index));
             if (CallableValue* cv = dynamic_cast<CallableValue*>(v.get())) {
                 // Callable builtin
@@ -1577,7 +1577,7 @@ interpreter::StatementCompiler::compileForEach(BytecodeObject& bco, const Statem
                 {
                     withoutFlag(LocalContext);
                     withoutFlag(LinearExecution);
-                    withContextProvider(0);
+                    withStaticContext(0);
                 }
             void compileBreak(BytecodeObject& bco) const
                 {
@@ -2952,7 +2952,7 @@ interpreter::StatementCompiler::compileWith(BytecodeObject& bco, const Statement
             : StatementCompilationContext(parent)
             {
                 withoutFlag(LocalContext);
-                withContextProvider(0);
+                withStaticContext(0);
             }
         void compileContinue(BytecodeObject& bco) const
             {

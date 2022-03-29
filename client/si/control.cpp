@@ -44,7 +44,7 @@ client::si::Control::executeCommandWait(String_t command, bool verbose, String_t
 {
     // replaces int/simple.h:runHook (using command "RunHook ...")
     // replaces int/simple.h:executeStatement (using command "C2$Eval atom, prefix" or similar)
-    std::auto_ptr<ContextProvider> ctxp(createContextProvider());
+    std::auto_ptr<game::interface::ContextProvider> ctxp(createContextProvider());
     std::auto_ptr<ScriptTask> t(new CommandTask(command, verbose, name, ctxp));
     executeTaskInternal(t, Format("executeCommandWait('%s')", name));
 }
@@ -55,7 +55,7 @@ client::si::Control::executeKeyCommandWait(String_t keymapName, util::Key_t key,
 {
     class Task : public ScriptTask {
      public:
-        Task(String_t keymapName, util::Key_t key, int prefix, std::auto_ptr<ContextProvider> ctxp)
+        Task(String_t keymapName, util::Key_t key, int prefix, std::auto_ptr<game::interface::ContextProvider> ctxp)
             : m_keymapName(keymapName), m_key(key), m_prefix(prefix), m_contextProvider(ctxp)
             { }
         virtual void execute(uint32_t pgid, game::Session& session)
@@ -74,9 +74,9 @@ client::si::Control::executeKeyCommandWait(String_t keymapName, util::Key_t key,
         String_t m_keymapName;
         util::Key_t m_key;
         int m_prefix;
-        std::auto_ptr<ContextProvider> m_contextProvider;
+        std::auto_ptr<game::interface::ContextProvider> m_contextProvider;
     };
-    std::auto_ptr<ContextProvider> ctxp(createContextProvider());
+    std::auto_ptr<game::interface::ContextProvider> ctxp(createContextProvider());
     std::auto_ptr<ScriptTask> t(new Task(keymapName, key, prefix, ctxp));
     executeTaskInternal(t, Format("executeKeyCommandWait('%s')", util::formatKey(key)));
 }

@@ -9,8 +9,6 @@
 #include "client/map/shiptaskoverlay.hpp"
 #include "client/map/waypointoverlay.hpp"
 #include "client/map/widget.hpp"
-#include "client/si/contextprovider.hpp"
-#include "client/si/contextreceiver.hpp"
 #include "client/si/control.hpp"
 #include "client/si/genericwidgetvalue.hpp"
 #include "client/si/widgetcommand.hpp"
@@ -20,6 +18,7 @@
 #include "client/tiles/tilefactory.hpp"
 #include "client/widgets/keymapwidget.hpp"
 #include "client/widgets/scanresult.hpp"
+#include "game/interface/contextprovider.hpp"
 #include "game/interface/iteratorcontext.hpp"
 #include "game/interface/planetcontext.hpp"
 #include "game/interface/shipcontext.hpp"
@@ -30,6 +29,7 @@
 #include "game/proxy/objectlistener.hpp"
 #include "game/proxy/taskeditorproxy.hpp"
 #include "gfx/complex.hpp"
+#include "interpreter/contextreceiver.hpp"
 #include "interpreter/typehint.hpp"
 #include "interpreter/values.hpp"
 #include "ui/group.hpp"
@@ -265,17 +265,17 @@ client::screens::ControlScreen::State::getObject(game::Session& session) const
  *  Context Provider
  */
 
-class client::screens::ControlScreen::ContextProvider : public client::si::ContextProvider {
+class client::screens::ControlScreen::ContextProvider : public game::interface::ContextProvider {
  public:
     ContextProvider(afl::base::Ref<State> state)
         : m_state(state)
         { }
-    virtual void createContext(game::Session& session, client::si::ContextReceiver& recv)
+    virtual void createContext(game::Session& session, interpreter::ContextReceiver& recv)
         {
             // FIXME: make a function
             game::map::Object* obj = m_state->getObject(session);
             if (interpreter::Context* ctx = game::interface::createObjectContext(obj, session)) {
-                recv.addNewContext(ctx);
+                recv.pushNewContext(ctx);
             }
         }
  private:
@@ -706,7 +706,7 @@ client::screens::ControlScreen::handleOverlayMessage(client::si::RequestLink2 li
     defaultHandleOverlayMessage(link, text);
 }
 
-client::si::ContextProvider*
+game::interface::ContextProvider*
 client::screens::ControlScreen::createContextProvider()
 {
     return new ContextProvider(m_state);

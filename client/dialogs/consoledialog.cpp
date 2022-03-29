@@ -8,13 +8,13 @@
 #include "afl/string/format.hpp"
 #include "client/dialogs/helpdialog.hpp"
 #include "client/downlink.hpp"
-#include "client/si/contextprovider.hpp"
-#include "client/si/contextreceiver.hpp"
 #include "client/si/control.hpp"
 #include "client/widgets/consoleview.hpp"
 #include "game/interface/completionlist.hpp"
+#include "game/interface/contextprovider.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/ship.hpp"
+#include "interpreter/contextreceiver.hpp"
 #include "interpreter/values.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/group.hpp"
@@ -312,16 +312,16 @@ namespace {
 
                 class Query : public util::Request<game::Session> {
                  public:
-                    Query(game::interface::CompletionList& result, const String_t& text, std::auto_ptr<client::si::ContextProvider> ctxp)
+                    Query(game::interface::CompletionList& result, const String_t& text, std::auto_ptr<game::interface::ContextProvider> ctxp)
                         : m_result(result),
                           m_text(text),
                           m_contextProvider(ctxp)
                         { }
                     virtual void handle(game::Session& session)
                         {
-                            class Collector : public client::si::ContextReceiver {
+                            class Collector : public interpreter::ContextReceiver {
                              public:
-                                virtual void addNewContext(interpreter::Context* p)
+                                virtual void pushNewContext(interpreter::Context* p)
                                     { m_contexts.pushBackNew(p); }
 
                                 afl::container::PtrVector<interpreter::Context>& get()
@@ -338,9 +338,9 @@ namespace {
                  private:
                     game::interface::CompletionList& m_result;
                     String_t m_text;
-                    std::auto_ptr<client::si::ContextProvider> m_contextProvider;
+                    std::auto_ptr<game::interface::ContextProvider> m_contextProvider;
                 };
-                Query q(result, afl::charset::Utf8().substr(m_input.getText(), 0, m_input.getCursorIndex()), std::auto_ptr<client::si::ContextProvider>(m_user.createContextProvider()));
+                Query q(result, afl::charset::Utf8().substr(m_input.getText(), 0, m_input.getCursorIndex()), std::auto_ptr<game::interface::ContextProvider>(m_user.createContextProvider()));
                 link.call(m_user.gameSender(), q);
 
                 String_t stem = result.getStem();
@@ -440,15 +440,15 @@ namespace {
                 class Query : public util::Request<game::Session> {
                  public:
                     Query(PropertyList& result,
-                          std::auto_ptr<client::si::ContextProvider> ctxp)
+                          std::auto_ptr<game::interface::ContextProvider> ctxp)
                         : m_result(result),
                           m_contextProvider(ctxp)
                         { }
                     virtual void handle(game::Session& session)
                         {
-                            class Collector : public client::si::ContextReceiver {
+                            class Collector : public interpreter::ContextReceiver {
                              public:
-                                virtual void addNewContext(interpreter::Context* p)
+                                virtual void pushNewContext(interpreter::Context* p)
                                     { m_contexts.pushBackNew(p); }
 
                                 afl::container::PtrVector<interpreter::Context>& get()
@@ -469,9 +469,9 @@ namespace {
                         }
                  private:
                     PropertyList& m_result;
-                    std::auto_ptr<client::si::ContextProvider> m_contextProvider;
+                    std::auto_ptr<game::interface::ContextProvider> m_contextProvider;
                 };
-                Query q(result, std::auto_ptr<client::si::ContextProvider>(m_user.createContextProvider()));
+                Query q(result, std::auto_ptr<game::interface::ContextProvider>(m_user.createContextProvider()));
                 link.call(m_user.gameSender(), q);
 
                 if (!result.infos.empty()) {
@@ -594,7 +594,7 @@ namespace {
             { defaultHandleUseKeymap(link, name, prefix); }
         virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text)
             { defaultHandleOverlayMessage(link, text); }
-        virtual client::si::ContextProvider* createContextProvider()
+        virtual game::interface::ContextProvider* createContextProvider()
             {
                 return m_parentControl.createContextProvider();
             }

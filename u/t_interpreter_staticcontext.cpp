@@ -1,17 +1,17 @@
 /**
-  *  \file u/t_interpreter_contextprovider.cpp
-  *  \brief Test for interpreter::ContextProvider
+  *  \file u/t_interpreter_staticcontext.cpp
+  *  \brief Test for interpreter::StaticContext
   */
 
-#include "interpreter/contextprovider.hpp"
+#include "interpreter/staticcontext.hpp"
 
 #include "t_interpreter.hpp"
 
 /** Interface test. */
 void
-TestInterpreterContextProvider::testInterface()
+TestInterpreterStaticContext::testInterface()
 {
-    class Tester : public interpreter::ContextProvider {
+    class Tester : public interpreter::StaticContext {
      public:
         virtual interpreter::Context::PropertyAccessor* lookup(const afl::data::NameQuery& /*q*/, interpreter::Context::PropertyIndex_t& /*index*/)
             { return 0; }

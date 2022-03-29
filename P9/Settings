@@ -12,7 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/proxy/imperialstatsproxy.cpp \
+FILES_gamelib = game/interface/contextprovider.hpp \
+    interpreter/contextreceiver.hpp game/proxy/imperialstatsproxy.cpp \
     game/proxy/imperialstatsproxy.hpp game/map/info/browser.cpp \
     game/map/info/browser.hpp game/map/info/info.cpp game/map/info/info.hpp \
     game/map/info/types.hpp game/map/typedobjecttype.hpp \
@@ -602,22 +603,22 @@ FILES_gamelib = game/proxy/imperialstatsproxy.cpp \
     interpreter/commandsource.cpp interpreter/commandsource.hpp \
     interpreter/statementcompilationcontext.cpp \
     interpreter/statementcompilationcontext.hpp \
-    interpreter/contextprovider.hpp interpreter/propertyacceptor.hpp \
-    interpreter/context.hpp game/parser/messageparser.cpp \
-    game/parser/messageparser.hpp game/parser/datainterface.hpp \
-    game/parser/messagetemplate.cpp game/parser/messagetemplate.hpp \
-    game/map/rangeset.cpp game/map/rangeset.hpp game/v3/inboxfile.cpp \
-    game/v3/inboxfile.hpp game/parser/messageinformation.cpp \
-    game/parser/messageinformation.hpp game/parser/messagevalue.cpp \
-    game/parser/messagevalue.hpp game/turnloader.cpp game/v3/loader.cpp \
-    game/v3/loader.hpp game/playerbitmatrix.cpp game/playerbitmatrix.hpp \
-    game/playerarray.hpp game/v3/resultloader.cpp game/v3/resultloader.hpp \
-    game/turnloader.hpp game/turn.cpp game/turn.hpp \
-    game/interpreterinterface.hpp interpreter/optimizer.cpp \
-    interpreter/optimizer.hpp interpreter/fusion.cpp interpreter/fusion.hpp \
-    interpreter/world.cpp interpreter/world.hpp interpreter/values.cpp \
-    interpreter/values.hpp interpreter/expr/parser.cpp \
-    interpreter/expr/parser.hpp interpreter/expr/builtinfunction.cpp \
+    interpreter/propertyacceptor.hpp interpreter/context.hpp \
+    game/parser/messageparser.cpp game/parser/messageparser.hpp \
+    game/parser/datainterface.hpp game/parser/messagetemplate.cpp \
+    game/parser/messagetemplate.hpp game/map/rangeset.cpp \
+    game/map/rangeset.hpp game/v3/inboxfile.cpp game/v3/inboxfile.hpp \
+    game/parser/messageinformation.cpp game/parser/messageinformation.hpp \
+    game/parser/messagevalue.cpp game/parser/messagevalue.hpp \
+    game/turnloader.cpp game/v3/loader.cpp game/v3/loader.hpp \
+    game/playerbitmatrix.cpp game/playerbitmatrix.hpp game/playerarray.hpp \
+    game/v3/resultloader.cpp game/v3/resultloader.hpp game/turnloader.hpp \
+    game/turn.cpp game/turn.hpp game/interpreterinterface.hpp \
+    interpreter/optimizer.cpp interpreter/optimizer.hpp \
+    interpreter/fusion.cpp interpreter/fusion.hpp interpreter/world.cpp \
+    interpreter/world.hpp interpreter/values.cpp interpreter/values.hpp \
+    interpreter/expr/parser.cpp interpreter/expr/parser.hpp \
+    interpreter/expr/builtinfunction.cpp \
     interpreter/expr/builtinfunction.hpp interpreter/ternaryoperation.cpp \
     interpreter/ternaryoperation.hpp interpreter/unaryoperation.cpp \
     interpreter/unaryoperation.hpp interpreter/binaryoperation.cpp \
@@ -962,13 +963,12 @@ FILES_guilib = client/tiles/planettasktile.cpp \
     gfx/anim/controller.cpp gfx/anim/controller.hpp gfx/anim/sprite.cpp \
     gfx/anim/sprite.hpp client/dialogs/classicvcrdialog.cpp \
     client/dialogs/classicvcrdialog.hpp client/widgets/classicvcrinfo.cpp \
-    client/widgets/classicvcrinfo.hpp client/si/contextreceiver.hpp \
-    ui/widgets/panel.cpp ui/widgets/panel.hpp ui/pixmapcolorscheme.cpp \
-    ui/pixmapcolorscheme.hpp gfx/application.cpp gfx/application.hpp \
-    gfx/sdl2/streaminterface.cpp gfx/sdl2/streaminterface.hpp \
-    gfx/sdl2/surface.cpp gfx/sdl2/surface.hpp gfx/sdl2/engine.cpp \
-    gfx/sdl2/engine.hpp gfx/gen/orbitconfig.cpp gfx/gen/orbitconfig.hpp \
-    client/imageloader.cpp client/imageloader.hpp \
+    client/widgets/classicvcrinfo.hpp ui/widgets/panel.cpp \
+    ui/widgets/panel.hpp ui/pixmapcolorscheme.cpp ui/pixmapcolorscheme.hpp \
+    gfx/application.cpp gfx/application.hpp gfx/sdl2/streaminterface.cpp \
+    gfx/sdl2/streaminterface.hpp gfx/sdl2/surface.cpp gfx/sdl2/surface.hpp \
+    gfx/sdl2/engine.cpp gfx/sdl2/engine.hpp gfx/gen/orbitconfig.cpp \
+    gfx/gen/orbitconfig.hpp client/imageloader.cpp client/imageloader.hpp \
     client/dialogs/directoryselectiondialog.cpp \
     client/dialogs/directoryselectiondialog.hpp \
     ui/widgets/standarddialogbuttons.cpp \
@@ -1046,12 +1046,11 @@ FILES_guilib = client/tiles/planettasktile.cpp \
     client/dialogs/objectselectiondialog.cpp \
     client/dialogs/objectselectiondialog.hpp gfx/nullengine.cpp \
     gfx/nullengine.hpp client/tiles/selectionheadertile.cpp \
-    client/tiles/selectionheadertile.hpp client/si/contextprovider.hpp \
-    client/marker.cpp client/marker.hpp client/si/commands.cpp \
-    client/si/commands.hpp client/widgets/keymapwidget.cpp \
-    client/widgets/keymapwidget.hpp client/si/control.cpp \
-    client/si/control.hpp client/si/userside.cpp client/si/usertask.hpp \
-    client/si/userside.hpp client/si/scriptside.cpp \
+    client/tiles/selectionheadertile.hpp client/marker.cpp client/marker.hpp \
+    client/si/commands.cpp client/si/commands.hpp \
+    client/widgets/keymapwidget.cpp client/widgets/keymapwidget.hpp \
+    client/si/control.cpp client/si/control.hpp client/si/userside.cpp \
+    client/si/usertask.hpp client/si/userside.hpp client/si/scriptside.cpp \
     client/si/requestlink2.hpp client/si/requestlink1.hpp \
     client/si/scriptprocedure.cpp client/si/scriptprocedure.hpp \
     client/si/scriptside.hpp ui/dialogs/messagebox.cpp \
@@ -1651,7 +1650,9 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_interpreter_taskpredictor.cpp u/t_game_test_files.cpp \
+FILES_testsuite = u/t_game_interface_contextprovider.cpp \
+    u/t_interpreter_staticcontext.cpp u/t_interpreter_contextreceiver.cpp \
+    u/t_interpreter_taskpredictor.cpp u/t_game_test_files.cpp \
     u/t_game_proxy_imperialstatsproxy.cpp u/t_game_map_info_info.cpp \
     u/t_game_map_info_types.cpp u/t_game_map_info_browser.cpp \
     u/t_game_map_info.hpp u/t_game_map_typedobjecttype.cpp \
@@ -1866,10 +1867,9 @@ FILES_testsuite = u/t_interpreter_taskpredictor.cpp u/t_game_test_files.cpp \
     u/t_game_vcr_classic_eventlistener.cpp \
     u/t_util_stringinstructionlist.cpp u/t_util_instructionlist.cpp \
     u/t_game_map_renderlist.cpp u/t_game_config_userconfiguration.cpp \
-    u/t_client_si_contextreceiver.cpp u/t_client_downlink.cpp \
-    u/t_server_application.cpp u/t_game_v3_resultloader.cpp \
-    u/t_util_digest.cpp u/t_util_configurationfile.cpp \
-    u/t_server_monitor_timeseriesloader.cpp \
+    u/t_client_downlink.cpp u/t_server_application.cpp \
+    u/t_game_v3_resultloader.cpp u/t_util_digest.cpp \
+    u/t_util_configurationfile.cpp u/t_server_monitor_timeseriesloader.cpp \
     u/t_server_monitor_timeserieswriter.cpp u/t_game_v3_hconfig.cpp \
     u/t_server_monitor_statusobserver.cpp u/t_server_monitor_timeseries.cpp \
     u/t_gfx_sdl_streaminterface.cpp u/t_game_map_fleetmember.cpp \
@@ -1963,10 +1963,10 @@ FILES_testsuite = u/t_interpreter_taskpredictor.cpp u/t_game_test_files.cpp \
     u/t_gfx_graphicsexception.cpp u/t_interpreter_filecommandsource.cpp \
     u/t_interpreter_defaultstatementcompilationcontext.cpp \
     u/t_interpreter_compilationcontext.cpp \
-    u/t_interpreter_propertyacceptor.cpp u/t_interpreter_contextprovider.cpp \
-    u/t_interpreter_callablevalue.cpp u/t_interpreter_basevalue.cpp \
-    u/t_interpreter_commandsource.cpp u/t_interpreter_arrayvalue.cpp \
-    u/t_interpreter_arguments.cpp u/t_interpreter_structurevalue.cpp \
+    u/t_interpreter_propertyacceptor.cpp u/t_interpreter_callablevalue.cpp \
+    u/t_interpreter_basevalue.cpp u/t_interpreter_commandsource.cpp \
+    u/t_interpreter_arrayvalue.cpp u/t_interpreter_arguments.cpp \
+    u/t_interpreter_structurevalue.cpp \
     u/t_interpreter_structurevaluedata.cpp u/t_interpreter_structuretype.cpp \
     u/t_interpreter_structuretypedata.cpp \
     u/t_interpreter_objectpropertyvector.cpp u/t_interpreter_world.cpp \
@@ -2145,9 +2145,8 @@ FILES_testsuite = u/t_interpreter_taskpredictor.cpp u/t_game_test_files.cpp \
     u/t_game_tables_mineraldensityclassname.cpp \
     u/t_game_tables_headingname.cpp u/t_game_interface_iteratorprovider.cpp \
     u/t_client_si_control.cpp u/t_gfx_eventconsumer.cpp \
-    u/t_gfx_nullengine.cpp u/t_client_si_contextprovider.cpp \
-    u/t_ui_res_imageloader.cpp u/t_ui_res_manager.cpp u/t_client.hpp \
-    u/t_interpreter_keywords.cpp u/t_game_vcr_score.cpp \
+    u/t_gfx_nullengine.cpp u/t_ui_res_imageloader.cpp u/t_ui_res_manager.cpp \
+    u/t_client.hpp u/t_interpreter_keywords.cpp u/t_game_vcr_score.cpp \
     u/t_game_vcr_object.cpp u/t_game_parser_datainterface.cpp \
     u/t_game_interface_richtextfunctions.cpp u/t_game_v3_stringverifier.cpp \
     u/t_game_stringverifier.cpp u/t_client_si_usertask.cpp \

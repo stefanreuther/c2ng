@@ -7,16 +7,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-class TestClientSiContextProvider : public CxxTest::TestSuite {
- public:
-    void testIt();
-};
-
-class TestClientSiContextReceiver : public CxxTest::TestSuite {
- public:
-    void testInterface();
-};
-
 class TestClientSiControl : public CxxTest::TestSuite {
  public:
     void testMulti();

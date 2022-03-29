@@ -1,16 +1,15 @@
 /**
-  *  \file client/si/contextprovider.hpp
+  *  \file game/interface/contextprovider.hpp
+  *  \brief Interface game::interface::ContextProvider
   */
-#ifndef C2NG_CLIENT_SI_CONTEXTPROVIDER_HPP
-#define C2NG_CLIENT_SI_CONTEXTPROVIDER_HPP
+#ifndef C2NG_GAME_INTERFACE_CONTEXTPROVIDER_HPP
+#define C2NG_GAME_INTERFACE_CONTEXTPROVIDER_HPP
 
 #include "afl/base/deletable.hpp"
 #include "game/session.hpp"
-#include "interpreter/process.hpp"
+#include "interpreter/contextreceiver.hpp"
 
-namespace client { namespace si {
-
-    class ContextReceiver;
+namespace game { namespace interface {
 
     /** Context provider for a script.
         This interface allows creation of contexts for a process or other.
@@ -23,8 +22,8 @@ namespace client { namespace si {
      public:
         /** Create contexts.
             \param session Game session (input)
-            \param recv Context receiver. Call addNewContext(). */
-        virtual void createContext(game::Session& session, ContextReceiver& recv) = 0;
+            \param recv Context receiver. Call pushNewContext(). */
+        virtual void createContext(Session& session, interpreter::ContextReceiver& recv) = 0;
     };
 
 } }

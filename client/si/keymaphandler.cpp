@@ -207,7 +207,7 @@ client::si::KeymapHandler::handleOverlayMessage(RequestLink2 link, String_t text
     defaultHandleOverlayMessage(link, text);
 }
 
-client::si::ContextProvider*
+game::interface::ContextProvider*
 client::si::KeymapHandler::createContextProvider()
 {
     return m_parentControl.createContextProvider();

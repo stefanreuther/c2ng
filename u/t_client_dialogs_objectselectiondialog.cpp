@@ -93,7 +93,7 @@ namespace {
         
                     // Create compilation context
                     interpreter::DefaultStatementCompilationContext scc(session.world());
-                    scc.withContextProvider(&proc);
+                    scc.withStaticContext(&proc);
                     scc.withFlag(scc.LinearExecution);
 
                     // Compile
@@ -162,7 +162,7 @@ namespace {
                             // We do not expect a UI.OverlayMessage directed at this control
                             TS_ASSERT(0);
                         }
-                    virtual client::si::ContextProvider* createContextProvider()
+                    virtual game::interface::ContextProvider* createContextProvider()
                         {
                             // We do not provide context
                             return 0;

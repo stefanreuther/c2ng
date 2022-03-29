@@ -11,6 +11,7 @@
 #include "client/si/scripttask.hpp"
 #include "client/widgets/busyindicator.hpp"
 #include "game/extraidentifier.hpp"
+#include "game/interface/contextprovider.hpp"
 #include "game/session.hpp"
 #include "interpreter/process.hpp"
 #include "ui/root.hpp"
@@ -25,7 +26,6 @@ namespace client { namespace si {
     class Control;
     class RequestLink2;
     class ScriptSide;
-    class ContextProvider;
 
     extern const game::ExtraIdentifier<game::Session, ScriptSide> SCRIPTSIDE_ID;
 
@@ -238,7 +238,7 @@ namespace client { namespace si {
         /** Create ContextProvider.
             Calls the current Control's createContextProvider, if any.
             @return newly-allocated ContextProvider object */
-        ContextProvider* createContextProvider();
+        game::interface::ContextProvider* createContextProvider();
         ///@}
 
 

@@ -111,7 +111,7 @@ namespace {
         // Build compilation environment
         interpreter::Process exec(world, "checkStatement", 9);
         interpreter::DefaultStatementCompilationContext scc(world);
-        scc.withContextProvider(&exec);
+        scc.withStaticContext(&exec);
         scc.withFlag(scc.LinearExecution);
         scc.withFlag(scc.ExpressionsAreStatements);
 

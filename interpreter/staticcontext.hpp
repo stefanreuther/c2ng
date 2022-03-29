@@ -1,9 +1,9 @@
 /**
-  *  \file interpreter/contextprovider.hpp
-  *  \brief Interface interpreter::ContextProvider
+  *  \file interpreter/staticcontext.hpp
+  *  \brief Interface interpreter::StaticContext
   */
-#ifndef C2NG_INTERPRETER_CONTEXTPROVIDER_HPP
-#define C2NG_INTERPRETER_CONTEXTPROVIDER_HPP
+#ifndef C2NG_INTERPRETER_STATICCONTEXT_HPP
+#define C2NG_INTERPRETER_STATICCONTEXT_HPP
 
 #include "afl/data/namequery.hpp"
 #include "afl/base/deletable.hpp"
@@ -11,9 +11,10 @@
 
 namespace interpreter {
 
-    /** Context provider.
-        This is a minimized version of the interface of Context to reduce dependencies in StatementCompilationContext. */
-    class ContextProvider : public afl::base::Deletable {
+    /** Static context.
+        This is a minimized version of the interface of Context that produces a static compilation context to StatementCompilationContext.
+        It has a smaller interface than Context itself. */
+    class StaticContext : public afl::base::Deletable {
      public:
         /** Look up a symbol by its name.
             \param [in]  q     Name query

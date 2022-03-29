@@ -234,7 +234,7 @@ namespace {
         virtual void handleSetView(RequestLink2 link, String_t name, bool withKeymap);
         virtual void handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix);
         virtual void handleOverlayMessage(RequestLink2 link, String_t text);
-        virtual client::si::ContextProvider* createContextProvider();
+        virtual game::interface::ContextProvider* createContextProvider();
 
         // Event handlers
         void onListChange(const SimulationSetupProxy::ListItems_t& list);
@@ -476,7 +476,7 @@ SimulatorDialog::handleOverlayMessage(RequestLink2 link, String_t text)
     defaultHandleOverlayMessage(link, text);
 }
 
-client::si::ContextProvider*
+game::interface::ContextProvider*
 SimulatorDialog::createContextProvider()
 {
     return 0;

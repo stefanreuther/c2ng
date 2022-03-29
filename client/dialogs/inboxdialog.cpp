@@ -146,7 +146,7 @@ client::dialogs::InboxDialog::handleOverlayMessage(client::si::RequestLink2 link
     defaultHandleOverlayMessage(link, text);
 }
 
-client::si::ContextProvider*
+game::interface::ContextProvider*
 client::dialogs::InboxDialog::createContextProvider()
 {
     return 0;

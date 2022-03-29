@@ -13,8 +13,9 @@
 #include "afl/data/segment.hpp"
 #include "afl/string/translator.hpp"
 #include "interpreter/bytecodeobject.hpp"
-#include "interpreter/contextprovider.hpp"
+#include "interpreter/contextreceiver.hpp"
 #include "interpreter/error.hpp"
+#include "interpreter/staticcontext.hpp"
 
 namespace interpreter {
 
@@ -40,7 +41,7 @@ namespace interpreter {
         In PCC1, processes (IntExecutionContext) could also be created on-the-fly
         and executed for a temporary result (runTemporary()).
         In PCC2, this ability is deprecated and retained for testing only. */
-    class Process : public ContextProvider {
+    class Process : public StaticContext, public ContextReceiver {
         // ex IntExecutionContext
      public:
         typedef BytecodeObject::PC_t PC_t;
@@ -429,7 +430,7 @@ namespace interpreter {
         void suspend(std::auto_ptr<Task_t> task);
 
         /** Look up value.
-            This is an interface method of ContextProvider.
+            This is an interface method of StaticContext.
             \param [in]  q      Name query
             \param [out] index  On success, property index
             \return non-null PropertyAccessor if found, null on failure. */

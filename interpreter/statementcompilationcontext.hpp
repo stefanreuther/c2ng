@@ -9,7 +9,7 @@
 
 namespace interpreter {
 
-    class ContextProvider;
+    class StaticContext;
     class BytecodeObject;
     class World;
 
@@ -41,12 +41,12 @@ namespace interpreter {
             \return *this */
         StatementCompilationContext& withoutFlag(Flag flag);
 
-        /** Set context provider.
-            The context provider is used to resolve ambiguous statements.
+        /** Set static context.
+            The static context is used to resolve ambiguous statements.
             It is set to a non-null value if and only if the compiled statement is a one-line statement going to be executed in that context,
             where the context does not yet contain a frame for the BCO we're compiling into.
 
-            If the context provider is not set, some statements (see compileAmbiguousStatement) must be compiled to less
+            If the static context is not set, some statements (see compileAmbiguousStatement) must be compiled to less
             efficient code that determines the context at run-time (originally "evals", now improved).
 
             Rationale: it must not be set if the script can change the context, which is the case when we have anything that can follow a "Sub" or "Dim".
@@ -54,7 +54,7 @@ namespace interpreter {
             It must be set, however, when executing the one-liner that results from the "evals" instruction, so we can guarantee termination.
 
             \return *this */
-        StatementCompilationContext& withContextProvider(ContextProvider* cp);
+        StatementCompilationContext& withStaticContext(StaticContext* sc);
 
         /** Set flags for one-line statement syntax.
             - Add RefuseBlocks because we're a one-liner
@@ -71,9 +71,9 @@ namespace interpreter {
         StatementCompilationContext& setBlockSyntax();
 
         /** Get context provider.
-            \see withContextProvider
+            \see withStaticContext
             \return context provider */
-        ContextProvider* getContextProvider() const;
+        StaticContext* getStaticContext() const;
 
      protected:
         /** Generate code for "Break" statement.
@@ -94,10 +94,10 @@ namespace interpreter {
             Command compilation contexts are chained when nested blocks are used. */
         const StatementCompilationContext* m_parent;
 
-        /** Context provider.
+        /** Static context.
             When this is set, keywords are resolved using its context.
             When this is not set, we generate generic code to resolve the ambiguity at runtime. */
-        ContextProvider* m_contextProvider;
+        StaticContext* m_staticContext;
     };
 
 }

@@ -1754,13 +1754,13 @@ interpreter::Process::handleEvalStatement(uint16_t nargs)
             .withFlag(scc.ExpressionsAreStatements)
             .withFlag(scc.RefuseBlocks)
             .withFlag(scc.LinearExecution)
-            .withContextProvider(this);
+            .withStaticContext(this);
     } else {
         // Multi-line block
         scc.withFlag(scc.LocalContext)
             .withFlag(scc.ExpressionsAreStatements)
             .withFlag(scc.LinearExecution)
-            .withContextProvider(0);
+            .withStaticContext(0);
     }
 
     // Compile

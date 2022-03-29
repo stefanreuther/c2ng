@@ -12,6 +12,7 @@
 #include "afl/data/value.hpp"
 #include "client/si/scripttask.hpp"
 #include "game/extra.hpp"
+#include "game/interface/contextprovider.hpp"
 #include "game/session.hpp"
 #include "interpreter/process.hpp"
 #include "util/request.hpp"
@@ -19,7 +20,6 @@
 
 namespace client { namespace si {
 
-    class ContextProvider;
     class Control;
     class RequestLink1;
     class RequestLink2;

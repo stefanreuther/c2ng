@@ -4,20 +4,20 @@
 
 #include "client/dialogs/objectselectiondialog.hpp"
 #include "afl/base/refcounted.hpp"
-#include "game/proxy/cursorobserverproxy.hpp"
-#include "game/proxy/objectlistener.hpp"
-#include "client/si/contextprovider.hpp"
-#include "client/si/contextreceiver.hpp"
 #include "client/si/control.hpp"
 #include "client/tiles/tilefactory.hpp"
 #include "client/widgets/keymapwidget.hpp"
+#include "game/interface/contextprovider.hpp"
 #include "game/interface/iteratorcontext.hpp"
 #include "game/interface/iteratorprovider.hpp"
 #include "game/interface/planetcontext.hpp"
 #include "game/interface/shipcontext.hpp"
 #include "game/map/objectcursorfactory.hpp"
 #include "game/map/simpleobjectcursor.hpp"
+#include "game/proxy/cursorobserverproxy.hpp"
+#include "game/proxy/objectlistener.hpp"
 #include "game/turn.hpp"
+#include "interpreter/contextreceiver.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/singlecontext.hpp"
 #include "interpreter/values.hpp"
@@ -120,16 +120,16 @@ namespace {
      *  Context Provider.
      *  This class provides contexts to scripts run from the dialog.
      */
-    class DialogContextProvider : public client::si::ContextProvider {
+    class DialogContextProvider : public game::interface::ContextProvider {
      public:
         DialogContextProvider(afl::base::Ref<CommonState> state)
             : m_state(state)
             { }
-        virtual void createContext(game::Session& session, client::si::ContextReceiver& recv)
+        virtual void createContext(game::Session& session, interpreter::ContextReceiver& recv)
             {
                 game::map::Object* obj = m_state->cursor().getCurrentObject();
                 if (interpreter::Context* ctx = game::interface::createObjectContext(obj, session)) {
-                    recv.addNewContext(ctx);
+                    recv.pushNewContext(ctx);
                 }
             }
      private:
@@ -164,7 +164,7 @@ namespace {
             { defaultHandleUseKeymap(link, name, prefix); }
         virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text)
             { defaultHandleOverlayMessage(link, text); }
-        virtual client::si::ContextProvider* createContextProvider()
+        virtual game::interface::ContextProvider* createContextProvider()
             { return new DialogContextProvider(m_state); }
 
         void attach(game::proxy::ObjectObserver& oop)

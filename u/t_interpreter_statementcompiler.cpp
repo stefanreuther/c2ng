@@ -235,7 +235,7 @@ namespace {
             m_pProcess->pushNewContext(new MinGlobalContext(m_world));
 
             interpreter::DefaultStatementCompilationContext scc(m_world);
-            // No ContextProvider, we're in multiline mode
+            // No StaticContext, we're in multiline mode
             scc.withFlag(scc.LinearExecution);
             scc.withFlag(scc.ExpressionsAreStatements);
 
@@ -265,7 +265,7 @@ namespace {
             m_pProcess->pushNewContext(new MinGlobalContext(m_world));
 
             interpreter::DefaultStatementCompilationContext scc(m_world);
-            scc.withContextProvider(&*m_pProcess);
+            scc.withStaticContext(&*m_pProcess);
             scc.withFlag(scc.LinearExecution);
 
             // Push frame into process.
@@ -369,7 +369,7 @@ TestInterpreterStatementCompiler::testExprStatement()
     h.checkIntegerExpressionStatement("'a';99", 99);
     h.checkIntegerExpressionStatement("'a'+'b';98", 98);
 
-    // Unknown identifier fails compile because we have a ContextProvider, so it needs to be known.
+    // Unknown identifier fails compile because we have a StaticContext, so it needs to be known.
     h.checkFailCompileExpression("unk");
 }
 

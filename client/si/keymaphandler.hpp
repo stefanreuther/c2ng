@@ -95,7 +95,7 @@ namespace client { namespace si {
         virtual void handleSetView(RequestLink2 link, String_t name, bool withKeymap);
         virtual void handleUseKeymap(RequestLink2 link, String_t name, int prefix);
         virtual void handleOverlayMessage(RequestLink2 link, String_t text);
-        virtual ContextProvider* createContextProvider();
+        virtual game::interface::ContextProvider* createContextProvider();
 
      private:
         // KeymapProxy::Listener:

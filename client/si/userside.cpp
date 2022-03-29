@@ -202,7 +202,7 @@ client::si::UserSide::executeTaskWait(uint32_t waitId, std::auto_ptr<ScriptTask>
 }
 
 // Create ContextProvider.
-client::si::ContextProvider*
+game::interface::ContextProvider*
 client::si::UserSide::createContextProvider()
 {
     if (m_controls.empty()) {

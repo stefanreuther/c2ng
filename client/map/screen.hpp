@@ -71,7 +71,7 @@ namespace client { namespace map {
         virtual void handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap);
         virtual void handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix);
         virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text);
-        virtual client::si::ContextProvider* createContextProvider();
+        virtual game::interface::ContextProvider* createContextProvider();
 
         // Location::Listener:
         virtual void updateObjectList();

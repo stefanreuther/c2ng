@@ -4,26 +4,26 @@
 
 #include "client/si/widgetcommand.hpp"
 #include "afl/data/booleanvalue.hpp"
-#include "client/si/contextprovider.hpp"
 #include "client/si/control.hpp"
 #include "client/si/requestlink2.hpp"
 #include "client/si/scriptside.hpp"
+#include "client/si/stringlistdialogwidget.hpp"
 #include "client/si/userside.hpp"
 #include "client/si/usertask.hpp"
+#include "client/si/widgetextraproperty.hpp"
+#include "client/si/widgetholder.hpp"
+#include "client/si/widgetindexedproperty.hpp"
 #include "client/si/widgetproperty.hpp"
 #include "client/si/widgetreference.hpp"
 #include "client/si/widgetvalue.hpp"
 #include "client/widgets/controlscreenheader.hpp"
+#include "game/interface/contextprovider.hpp"
+#include "interpreter/contextreceiver.hpp"
 #include "interpreter/processobservercontext.hpp"
+#include "interpreter/values.hpp"
 #include "ui/layoutablegroup.hpp"
 #include "ui/widgets/focusiterator.hpp"
-#include "client/si/widgetholder.hpp"
-#include "client/si/widgetextraproperty.hpp"
-#include "client/si/widgetindexedproperty.hpp"
 #include "ui/widgets/stringlistbox.hpp"
-#include "client/si/stringlistdialogwidget.hpp"
-#include "interpreter/values.hpp"
-#include "client/si/contextreceiver.hpp"
 
 namespace {
     void setBooleanProperty(client::si::WidgetProperty p,
@@ -72,17 +72,17 @@ void
 client::si::IFWidgetRun(game::Session& session, ScriptSide& ss, const WidgetReference& ref, interpreter::Process& proc, interpreter::Arguments& args)
 {
     // ContextProvider that allows child processes to access our local variables:
-    class RunContextProvider : public ContextProvider {
+    class RunContextProvider : public game::interface::ContextProvider {
      public:
         RunContextProvider(RequestLink2 link)
             : m_link(link)
             { }
-        void createContext(game::Session& session, ContextReceiver& recv)
+        void createContext(game::Session& session, interpreter::ContextReceiver& recv)
             {
                 uint32_t pid;
                 if (m_link.getProcessId(pid)) {
                     if (interpreter::Process* parent = session.processList().getProcessById(pid)) {
-                        recv.addNewContext(interpreter::ProcessObserverContext::create(*parent));
+                        recv.pushNewContext(interpreter::ProcessObserverContext::create(*parent));
                     }
                 }
             }
@@ -117,7 +117,7 @@ client::si::IFWidgetRun(game::Session& session, ScriptSide& ss, const WidgetRefe
             { defaultHandleUseKeymap(link, name, prefix); }
         virtual void handleOverlayMessage(RequestLink2 link, String_t text)
             { defaultHandleOverlayMessage(link, text); }
-        virtual ContextProvider* createContextProvider()
+        virtual game::interface::ContextProvider* createContextProvider()
             {
                 return new RunContextProvider(m_link);
             }

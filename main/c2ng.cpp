@@ -105,7 +105,7 @@ namespace {
             { interface().continueProcessWithFailure(link, "Context error"); }
         virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t /*text*/)
             { interface().continueProcessWithFailure(link, "Context error"); }
-        virtual client::si::ContextProvider* createContextProvider()
+        virtual game::interface::ContextProvider* createContextProvider()
             { return 0; }
     };
 

@@ -10,13 +10,12 @@
 #include "client/map/messageoverlay.hpp"
 #include "client/map/prefixoverlay.hpp"
 #include "client/map/starchartoverlay.hpp"
-#include "client/si/contextprovider.hpp"
-#include "client/si/contextreceiver.hpp"
 #include "client/si/userside.hpp"
 #include "client/tiles/tilefactory.hpp"
 #include "client/widgets/keymapwidget.hpp"
 #include "client/widgets/referencelistbox.hpp"
 #include "game/game.hpp"
+#include "game/interface/contextprovider.hpp"
 #include "game/interface/planetcontext.hpp"
 #include "game/interface/shipcontext.hpp"
 #include "game/map/planet.hpp"
@@ -24,6 +23,7 @@
 #include "game/turn.hpp"
 #include "gfx/complex.hpp"
 #include "interpreter/arguments.hpp"
+#include "interpreter/contextreceiver.hpp"
 #include "interpreter/values.hpp"
 #include "ui/draw.hpp"
 #include "ui/layout/vbox.hpp"
@@ -36,24 +36,24 @@ namespace {
      *  ContextProvider implementation for starchart: create context according to a game::Reference
      *  FIXME: should this be in a public place?
      */
-    class ContextProvider : public client::si::ContextProvider {
+    class ContextProvider : public game::interface::ContextProvider {
      public:
         ContextProvider(game::Reference ref)
             : m_ref(ref)
             { }
-        virtual void createContext(game::Session& session, client::si::ContextReceiver& recv)
+        virtual void createContext(game::Session& session, interpreter::ContextReceiver& recv)
             {
                 switch (m_ref.getType()) {
                  case game::Reference::Ship:
                     if (interpreter::Context* ctx = game::interface::ShipContext::create(m_ref.getId(), session)) {
-                        recv.addNewContext(ctx);
+                        recv.pushNewContext(ctx);
                     }
                     break;
 
                  case game::Reference::Planet:
                  case game::Reference::Starbase:
                     if (interpreter::Context* ctx = game::interface::PlanetContext::create(m_ref.getId(), session)) {
-                        recv.addNewContext(ctx);
+                        recv.pushNewContext(ctx);
                     }
                     break;
 
@@ -427,7 +427,7 @@ client::map::Screen::handleOverlayMessage(client::si::RequestLink2 link, String_
     interface().continueProcess(link);
 }
 
-client::si::ContextProvider*
+game::interface::ContextProvider*
 client::map::Screen::createContextProvider()
 {
     // ex StarchartWidget::enumContexts (sort-of)
