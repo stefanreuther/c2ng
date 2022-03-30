@@ -347,6 +347,13 @@ class TestGameProxyScoreProxy : public CxxTest::TestSuite {
     void testOverview();
 };
 
+class TestGameProxyScriptEditorProxy : public CxxTest::TestSuite {
+ public:
+    void testBuildCompletion();
+    void testBuildCompletionForObject();
+    void testBuildPropertyList();
+};
+
 class TestGameProxySearchProxy : public CxxTest::TestSuite {
  public:
     void testSuccess();

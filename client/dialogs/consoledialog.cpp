@@ -12,8 +12,10 @@
 #include "client/widgets/consoleview.hpp"
 #include "game/interface/completionlist.hpp"
 #include "game/interface/contextprovider.hpp"
+#include "game/interface/propertylist.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/ship.hpp"
+#include "game/proxy/scripteditorproxy.hpp"
 #include "interpreter/contextreceiver.hpp"
 #include "interpreter/values.hpp"
 #include "ui/eventloop.hpp"
@@ -32,51 +34,10 @@
 #include "util/string.hpp"
 #include "util/stringparser.hpp"
 
+using game::interface::PropertyList;
+
 namespace {
     const int NLINES = 15;
-
-    struct PropertyList {
-        struct Info {
-            String_t name;
-            String_t value;
-            util::SkinColor::Color valueColor;
-            Info(const String_t& name, const String_t& value, util::SkinColor::Color valueColor)
-                : name(name), value(value), valueColor(valueColor)
-                { }
-        };
-        String_t title;
-        std::vector<Info> infos;
-    };
-
-    void buildPropertyList(PropertyList& out, const game::map::Object* obj, const interpreter::World& world, afl::string::Translator& tx)
-    {
-        // ex console.pas:EnumProperties, CConsoleInput.DoPropertyList
-        const afl::data::Segment* pValues = 0;
-        const afl::data::NameMap* pNames = 0;
-        if (dynamic_cast<const game::map::Ship*>(obj) != 0) {
-            pValues = world.shipProperties().get(obj->getId());
-            pNames = &world.shipPropertyNames();
-            out.title = tx("Ship Properties");
-        } else if (dynamic_cast<const game::map::Planet*>(obj) != 0) {
-            pValues = world.planetProperties().get(obj->getId());
-            pNames = &world.planetPropertyNames();
-            out.title = tx("Planet Properties");
-        } else {
-            // nix
-        }
-
-        if (pNames != 0) {
-            for (afl::data::NameMap::Index_t i = 0, n = pNames->getNumNames(); i < n; ++i) {
-                const afl::data::Value* value = pValues ? pValues->get(i) : 0;
-                String_t name = util::formatName(pNames->getNameByIndex(i));
-                if (value == 0) {
-                    out.infos.push_back(PropertyList::Info(name, "Empty", util::SkinColor::Faded));
-                } else {
-                    out.infos.push_back(PropertyList::Info(name, interpreter::toString(value, true), util::SkinColor::Static));
-                }
-            }
-        }
-    }
 
     const int NAME_EMS = 15;
     const int VALUE_EMS = 25;
@@ -309,39 +270,11 @@ namespace {
             {
                 client::Downlink link(m_root, m_translator);
                 game::interface::CompletionList result;
-
-                class Query : public util::Request<game::Session> {
-                 public:
-                    Query(game::interface::CompletionList& result, const String_t& text, std::auto_ptr<game::interface::ContextProvider> ctxp)
-                        : m_result(result),
-                          m_text(text),
-                          m_contextProvider(ctxp)
-                        { }
-                    virtual void handle(game::Session& session)
-                        {
-                            class Collector : public interpreter::ContextReceiver {
-                             public:
-                                virtual void pushNewContext(interpreter::Context* p)
-                                    { m_contexts.pushBackNew(p); }
-
-                                afl::container::PtrVector<interpreter::Context>& get()
-                                    { return m_contexts; }
-                             private:
-                                afl::container::PtrVector<interpreter::Context> m_contexts;
-                            };
-                            Collector c;
-                            if (m_contextProvider.get() != 0) {
-                                m_contextProvider->createContext(session, c);
-                            }
-                            buildCompletionList(m_result, m_text, session, false, c.get());
-                        }
-                 private:
-                    game::interface::CompletionList& m_result;
-                    String_t m_text;
-                    std::auto_ptr<game::interface::ContextProvider> m_contextProvider;
-                };
-                Query q(result, afl::charset::Utf8().substr(m_input.getText(), 0, m_input.getCursorIndex()), std::auto_ptr<game::interface::ContextProvider>(m_user.createContextProvider()));
-                link.call(m_user.gameSender(), q);
+                game::proxy::ScriptEditorProxy(m_user.gameSender())
+                    .buildCompletionList(link, result,
+                                         afl::charset::Utf8().substr(m_input.getText(), 0, m_input.getCursorIndex()),
+                                         false,
+                                         std::auto_ptr<game::interface::ContextProvider>(m_user.createContextProvider()));
 
                 String_t stem = result.getStem();
                 String_t immediate = result.getImmediateCompletion();
@@ -436,43 +369,8 @@ namespace {
                 // ex WConsoleDialog::doListVariables
                 client::Downlink link(m_root, m_translator);
                 PropertyList result;
-
-                class Query : public util::Request<game::Session> {
-                 public:
-                    Query(PropertyList& result,
-                          std::auto_ptr<game::interface::ContextProvider> ctxp)
-                        : m_result(result),
-                          m_contextProvider(ctxp)
-                        { }
-                    virtual void handle(game::Session& session)
-                        {
-                            class Collector : public interpreter::ContextReceiver {
-                             public:
-                                virtual void pushNewContext(interpreter::Context* p)
-                                    { m_contexts.pushBackNew(p); }
-
-                                afl::container::PtrVector<interpreter::Context>& get()
-                                    { return m_contexts; }
-                             private:
-                                afl::container::PtrVector<interpreter::Context> m_contexts;
-                            };
-                            Collector c;
-                            if (m_contextProvider.get() != 0) {
-                                m_contextProvider->createContext(session, c);
-                            }
-                            for (size_t i = c.get().size(); i > 0; --i) {
-                                if (const game::map::Object* obj = c.get()[i-1]->getObject()) {
-                                    buildPropertyList(m_result, obj, session.world(), session.translator());
-                                    break;
-                                }
-                            }
-                        }
-                 private:
-                    PropertyList& m_result;
-                    std::auto_ptr<game::interface::ContextProvider> m_contextProvider;
-                };
-                Query q(result, std::auto_ptr<game::interface::ContextProvider>(m_user.createContextProvider()));
-                link.call(m_user.gameSender(), q);
+                game::proxy::ScriptEditorProxy(m_user.gameSender())
+                    .buildPropertyList(link, result, std::auto_ptr<game::interface::ContextProvider>(m_user.createContextProvider()));
 
                 if (!result.infos.empty()) {
                     PropertyListbox box(m_root, result);

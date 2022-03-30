@@ -137,6 +137,14 @@ class TestGameInterfaceProcessListEditor : public CxxTest::TestSuite {
     void testReadNotification();
 };
 
+class TestGameInterfacePropertyList : public CxxTest::TestSuite {
+ public:
+    void testShip();
+    void testPlanet();
+    void testEmpty();
+    void testOther();
+};
+
 class TestGameInterfaceRichTextFunctions : public CxxTest::TestSuite {
  public:
     void testRAdd();
