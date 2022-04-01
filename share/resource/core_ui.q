@@ -1122,6 +1122,29 @@ Sub CCUI.Task.DeleteCurrent
   EndTry
 EndSub
 
+% @since PCC2 2.40.12
+Sub CCUI.Task.InsertCommand
+  % ex editCommand (part)
+  Local UI.Result
+  UI.InputCommand Translate("Command:"), Translate("Insert Command"), "ct", "", "pcc2:taskscreen"
+  If Not IsEmpty(UI.Result) Then CCUI.Task.AddCommand UI.Result
+EndSub
+
+% @since PCC2 2.40.12
+Sub CCUI.Task.EditCommand
+  % ex editCommand (part)
+  Local UI.Result
+  If UI.AutoTask->Cursor >= Dim(UI.AutoTask->Lines) Then
+    % at end
+    CCUI.Task.InsertCommand
+  Else
+    % on existing command
+    Local value = UI.AutoTask->Lines(UI.AutoTask->Cursor)
+    UI.InputCommand Translate("Command:"), Translate("Edit Command"), "ct", value, "pcc2:taskscreen"
+    If Not IsEmpty(UI.Result) Then UI.AutoTask->Lines(UI.AutoTask->Cursor) := UI.Result
+  EndIf
+EndSub
+
 % @since PCC2 2.40.7
 Sub CCUI.Task.DeleteAll
   % ex WAutoTaskScreen::handleEvent / case ss_Ctrl + SDLK_DELETE

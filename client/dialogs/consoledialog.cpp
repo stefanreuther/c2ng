@@ -7,16 +7,15 @@
 #include "afl/charset/utf8.hpp"
 #include "afl/string/format.hpp"
 #include "client/dialogs/helpdialog.hpp"
+#include "client/dialogs/scriptcommanddialog.hpp"
 #include "client/downlink.hpp"
 #include "client/si/control.hpp"
 #include "client/widgets/consoleview.hpp"
-#include "game/interface/completionlist.hpp"
 #include "game/interface/contextprovider.hpp"
 #include "game/interface/propertylist.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/ship.hpp"
 #include "game/proxy/scripteditorproxy.hpp"
-#include "interpreter/contextreceiver.hpp"
 #include "interpreter/values.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/group.hpp"
@@ -27,7 +26,6 @@
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/inputline.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
-#include "ui/widgets/stringlistbox.hpp"
 #include "ui/window.hpp"
 #include "util/messagecollector.hpp"
 #include "util/messagenotifier.hpp"
@@ -258,55 +256,8 @@ namespace {
                 }
             }
 
-        void insertCompletion(const String_t& stem, const String_t& completion)
-            {
-                if (completion.size() > stem.size()) {
-                    m_input.setFlag(ui::widgets::InputLine::TypeErase, false);
-                    m_input.insertText(completion.substr(stem.size()));
-                }
-            }
-
         void doCompletion()
-            {
-                client::Downlink link(m_root, m_translator);
-                game::interface::CompletionList result;
-                game::proxy::ScriptEditorProxy(m_user.gameSender())
-                    .buildCompletionList(link, result,
-                                         afl::charset::Utf8().substr(m_input.getText(), 0, m_input.getCursorIndex()),
-                                         false,
-                                         std::auto_ptr<game::interface::ContextProvider>(m_user.createContextProvider()));
-
-                String_t stem = result.getStem();
-                String_t immediate = result.getImmediateCompletion();
-                if (immediate.size() > stem.size()) {
-                    insertCompletion(stem, immediate);
-                } else if (!result.isEmpty()) {
-                    ui::widgets::StringListbox list(m_root.provider(), m_root.colorScheme());
-                    int32_t i = 0;
-                    for (game::interface::CompletionList::Iterator_t it = result.begin(), e = result.end(); it != e; ++it) {
-                        list.addItem(i, *it);
-                        ++i;
-                    }
-                    list.sortItemsAlphabetically();
-                    if (ui::widgets::doStandardDialog(m_translator("Completions"), String_t(), list, true, m_root, m_translator)
-                        && list.getCurrentKey(i))
-                    {
-                        game::interface::CompletionList::Iterator_t it = result.begin(), e = result.end();
-                        while (it != e && i != 0) {
-                            ++it, --i;
-                        }
-                        if (it != e) {
-                            insertCompletion(stem, *it);
-                        }
-                    } else {
-                    }
-                } else {
-                    // no completions available
-                }
-
-                // No matter what happened, should still clear TypeErase to avoid new input overwriting old one.
-                m_input.setFlag(ui::widgets::InputLine::TypeErase, false);
-            }
+            { client::dialogs::doCompletion(m_input, m_user, false); }
 
         void doRecall(int direction)
             {

@@ -70,6 +70,7 @@ namespace client { namespace si {
     void IFUIGotoScreen(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFUIHelp(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFUIInput(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
+    void IFUIInputCommand(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFUIInputFCode(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFUIInputNumber(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFUIKeymapInfo(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);

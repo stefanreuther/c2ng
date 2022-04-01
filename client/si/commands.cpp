@@ -42,6 +42,7 @@
 #include "client/dialogs/revertdialog.hpp"
 #include "client/dialogs/scores.hpp"
 #include "client/dialogs/screenhistorydialog.hpp"
+#include "client/dialogs/scriptcommanddialog.hpp"
 #include "client/dialogs/searchdialog.hpp"
 #include "client/dialogs/selectionmanager.hpp"
 #include "client/dialogs/sellsuppliesdialog.hpp"
@@ -2899,6 +2900,93 @@ client::si::IFUIInput(game::Session& session, ScriptSide& si, RequestLink1 link,
     si.postNewTask(link, new Task(prompt, title, defaultText, maxChars, flags, width));
 }
 
+/* @q UI.InputCommand prompt:Str, Optional title:Str, flags:Any, def:Str, help:Str (Global Command)
+   Command input.
+
+   Displays a text input dialog tailored for a script command.
+   User can enter a command, with Tab completion.
+
+   All but the first parameter are optional, and have the following meaning:
+   - %prompt: the prompt to show in the dialog.
+   - %title: the window title. Defaults to the value of %prompt.
+   - %flags: some additional flags that affect the behaviour of this dialog (see below).
+   - %def: initial contents of text input field.
+   - %help: help page.
+
+   The %flags parameter is a string that can contain the following:
+   - "C": provide completion only for command verbs.
+     Default is to allow completion also for variables, configuration options, and file names.
+   - "T": accept only auto-task commands.
+     This will reject certain commands not allowed in auto-tasks,
+     but does not guarantee that the entered command is actually valid.
+
+   Command completion honors the current user-interface context
+   (i.e. when called from a ship screen, completes ship commands/properties).
+
+   @since PCC2 2.40.12 */
+void
+client::si::IFUIInputCommand(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    args.checkArgumentCount(1, 5);
+
+    String_t prompt;
+    String_t title;
+    int flags = 0;
+    String_t defaultText;
+    String_t helpId;
+
+    // Mandatory argument
+    if (!interpreter::checkStringArg(prompt, args.getNext())) {
+        return;
+    }
+
+    // Optional arguments
+    static const int OnlyCommands = 1;
+    static const int EnforceTask = 2;
+    title = prompt;
+    interpreter::checkStringArg(title, args.getNext());
+    interpreter::checkFlagArg(flags, 0, args.getNext(), "CT");
+    interpreter::checkStringArg(defaultText, args.getNext());
+    interpreter::checkStringArg(helpId, args.getNext());
+
+    // Post command
+    class Task : public UserTask {
+     public:
+        Task(String_t prompt, String_t title, int flags, String_t defaultText, String_t helpId)
+            : m_prompt(prompt), m_title(title), m_flags(flags), m_defaultText(defaultText), m_helpId(helpId)
+            { }
+
+        void handle(Control& ctl, RequestLink2 link)
+            {
+                UserSide& ui = ctl.interface();
+
+                client::dialogs::ScriptCommandDialog dlg(m_prompt, ui);
+                dlg.setTitle(m_title);
+                dlg.setHelp(m_helpId);
+                dlg.setCommand(m_defaultText);
+                dlg.setOnlyCommands((m_flags & OnlyCommands) != 0);
+                dlg.setEnforceTask((m_flags & EnforceTask) != 0);
+
+                std::auto_ptr<afl::data::Value> result;
+                if (dlg.run()) {
+                    result.reset(interpreter::makeStringValue(dlg.getCommand()));
+                }
+
+                ui.setVariable(link, "UI.RESULT", result);
+                ui.continueProcess(link);
+            }
+
+     private:
+        String_t m_prompt;
+        String_t m_title;
+        int m_flags;
+        String_t m_defaultText;
+        String_t m_helpId;
+    };
+    session.notifyListeners();
+    si.postNewTask(link, new Task(prompt, title, flags, defaultText, helpId));
+}
+
 /* @q UI.InputFCode flags:Any, Optional default:Str (Global Command)
    Ask for friendly code input.
    This uses the regular friendly code input window with a list of friendly code.
@@ -3870,6 +3958,7 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("UI.GOTOSCREEN",         new ScriptProcedure(s, &si, IFUIGotoScreen));
                 s.world().setNewGlobalValue("UI.HELP",               new ScriptProcedure(s, &si, IFUIHelp));
                 s.world().setNewGlobalValue("UI.INPUT",              new ScriptProcedure(s, &si, IFUIInput));
+                s.world().setNewGlobalValue("UI.INPUTCOMMAND",       new ScriptProcedure(s, &si, IFUIInputCommand));
                 s.world().setNewGlobalValue("UI.INPUTFCODE",         new ScriptProcedure(s, &si, IFUIInputFCode));
                 s.world().setNewGlobalValue("UI.INPUTNUMBER",        new ScriptProcedure(s, &si, IFUIInputNumber));
                 s.world().setNewGlobalValue("UI.KEYMAPINFO",         new ScriptProcedure(s, &si, IFUIKeymapInfo));

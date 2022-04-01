@@ -725,7 +725,8 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/tiles/planettasktile.cpp \
+FILES_guilib = client/dialogs/scriptcommanddialog.cpp \
+    client/dialogs/scriptcommanddialog.hpp client/tiles/planettasktile.cpp \
     client/tiles/planettasktile.hpp client/tiles/basetasktile.cpp \
     client/tiles/basetasktile.hpp client/tiles/shiptasktile.cpp \
     client/tiles/shiptasktile.hpp client/tiles/taskmessagetile.cpp \
