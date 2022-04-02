@@ -10,6 +10,7 @@
 #include "afl/data/stringlist.hpp"
 #include "afl/string/string.hpp"
 #include "game/actions/buildship.hpp"
+#include "game/proxy/starbaseadaptor.hpp"
 #include "game/session.hpp"
 #include "game/shipquery.hpp"
 #include "game/spec/cost.hpp"
@@ -74,11 +75,16 @@ namespace game { namespace proxy {
                 { }
         };
 
-        /** Constructor.
+        /** Constructor (current planet).
             \param gameSender Game sender
             \param receiver   RequestDispatcher to receive updates in this thread
             \param planetId   Planet Id */
         BuildShipProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& receiver, Id_t planetId);
+
+        /** Constructor (general).
+            \param adaptorSender StarbaseAdaptor sender
+            \param receiver      RequestDispatcher to receive updates in this thread */
+        BuildShipProxy(util::RequestSender<StarbaseAdaptor> adaptorSender, util::RequestDispatcher& receiver);
 
         /** Destructor. */
         ~BuildShipProxy();
@@ -125,6 +131,11 @@ namespace game { namespace proxy {
             \see game::actions::BuildShip::setPart */
         void setPart(TechLevel area, int id);
 
+        /** Set entire ship build order.
+            \param order Order
+            \see game::actions::BuildShip::setBuildOrder */
+        void setBuildOrder(const ShipBuildOrder& order);
+
         /** Set number of weapons.
             \param area   Area to change
             \param amount New number. Out-of-range values will be forced into range.
@@ -157,7 +168,7 @@ namespace game { namespace proxy {
 
      private:
         struct Trampoline;
-        class TrampolineFromSession;
+        class TrampolineFromAdaptor;
         util::RequestReceiver<BuildShipProxy> m_receiver;
         util::RequestSender<Trampoline> m_sender;
     };

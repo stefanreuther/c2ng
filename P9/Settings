@@ -12,17 +12,19 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/interface/propertylist.cpp \
-    game/interface/propertylist.hpp game/proxy/scripteditorproxy.cpp \
-    game/proxy/scripteditorproxy.hpp game/interface/contextprovider.hpp \
-    interpreter/contextreceiver.hpp game/proxy/imperialstatsproxy.cpp \
-    game/proxy/imperialstatsproxy.hpp game/map/info/browser.cpp \
-    game/map/info/browser.hpp game/map/info/info.cpp game/map/info/info.hpp \
-    game/map/info/types.hpp game/map/typedobjecttype.hpp \
-    interpreter/expr/binarynode.cpp interpreter/expr/binarynode.hpp \
-    interpreter/expr/unarynode.cpp interpreter/expr/unarynode.hpp \
-    game/pcc/turnloader.cpp game/pcc/turnloader.hpp game/task.cpp \
-    game/task.hpp game/browser/optionalusercallback.cpp \
+FILES_gamelib = game/proxy/currentstarbaseadaptor.cpp \
+    game/proxy/currentstarbaseadaptor.hpp game/proxy/starbaseadaptor.hpp \
+    game/interface/propertylist.cpp game/interface/propertylist.hpp \
+    game/proxy/scripteditorproxy.cpp game/proxy/scripteditorproxy.hpp \
+    game/interface/contextprovider.hpp interpreter/contextreceiver.hpp \
+    game/proxy/imperialstatsproxy.cpp game/proxy/imperialstatsproxy.hpp \
+    game/map/info/browser.cpp game/map/info/browser.hpp \
+    game/map/info/info.cpp game/map/info/info.hpp game/map/info/types.hpp \
+    game/map/typedobjecttype.hpp interpreter/expr/binarynode.cpp \
+    interpreter/expr/binarynode.hpp interpreter/expr/unarynode.cpp \
+    interpreter/expr/unarynode.hpp game/pcc/turnloader.cpp \
+    game/pcc/turnloader.hpp game/task.cpp game/task.hpp \
+    game/browser/optionalusercallback.cpp \
     game/browser/optionalusercallback.hpp game/proxy/browserproxy.cpp \
     game/proxy/browserproxy.hpp game/browser/folder.cpp \
     game/browser/types.hpp game/browser/synchronousfolder.cpp \
@@ -1653,7 +1655,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_proxy_scripteditorproxy.cpp \
+FILES_testsuite = u/t_game_proxy_currentstarbaseadaptor.cpp \
+    u/t_game_proxy_starbaseadaptor.cpp u/t_game_proxy_scripteditorproxy.cpp \
     u/t_game_interface_propertylist.cpp \
     u/t_game_interface_contextprovider.cpp u/t_interpreter_staticcontext.cpp \
     u/t_interpreter_contextreceiver.cpp u/t_interpreter_taskpredictor.cpp \

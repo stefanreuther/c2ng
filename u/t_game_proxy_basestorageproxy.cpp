@@ -204,3 +204,69 @@ TestGameProxyBaseStorageProxy::testUpdate()
     TS_ASSERT_EQUALS(recv.getResult()[6].name, "Seven");
 }
 
+/** Test custom StarbaseAdaptor.
+    A: create session. Create custom adaptor with custom planet.
+    E: getParts() accesses expected values */
+void
+TestGameProxyBaseStorageProxy::testCustom()
+{
+    // Adaptor implementation for testing
+    class Adaptor : public game::proxy::StarbaseAdaptor {
+     public:
+        Adaptor(game::Session& session)
+            : m_session(session), m_planet(111)
+            {
+                // Prepare planet with bare minimum
+                // - planet
+                game::map::PlanetData pd;
+                pd.owner = PLAYER_NR;
+                m_planet.addCurrentPlanetData(pd, game::PlayerSet_t(PLAYER_NR));
+
+                // - base
+                game::map::BaseData bd;
+                bd.owner = PLAYER_NR;
+                bd.hullStorage.set(3, 333);
+                m_planet.addCurrentBaseData(bd, game::PlayerSet_t(PLAYER_NR));
+
+                // - internal metadata
+                game::map::Configuration config;
+                m_planet.internalCheck(config, session.translator(), session.log());
+                m_planet.setPlayability(game::map::Object::Playable);
+            }
+        virtual game::map::Planet& planet()
+            { return m_planet; }
+        virtual game::Session& session()
+            { return m_session; }
+        virtual bool findShipCloningHere(game::Id_t& /*id*/, String_t& /*name*/)
+            { return false; }
+        virtual void cancelAllCloneOrders()
+            { }
+        virtual void notifyListeners()
+            { }
+     private:
+        game::Session& m_session;
+        game::map::Planet m_planet;
+    };
+
+    // Adaptor-adaptor
+    class Maker : public afl::base::Closure<game::proxy::StarbaseAdaptor*(game::Session&)> {
+     public:
+        virtual Adaptor* call(game::Session& session)
+            { return new Adaptor(session); }
+    };
+
+    // Setup
+    game::test::SessionThread t;
+    prepare(t);
+    game::test::WaitIndicator ind;
+    game::proxy::BaseStorageProxy testee(t.gameSender().makeTemporary(new Maker()), ind);
+
+    // Query hulls. Must return prepared value.
+    game::proxy::BaseStorageProxy::Parts_t list;
+    testee.getParts(ind, game::HullTech, list);
+    TS_ASSERT_EQUALS(list.size(), 1U);
+    TS_ASSERT_EQUALS(list[0].id, game::test::OUTRIDER_HULL_ID);
+    TS_ASSERT_EQUALS(list[0].numParts, 333);
+    TS_ASSERT_EQUALS(list[0].name, "OUTRIDER CLASS SCOUT");
+}
+

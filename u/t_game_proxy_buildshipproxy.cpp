@@ -241,7 +241,42 @@ TestGameProxyBuildShipProxy::testNormal()
     TS_ASSERT_EQUALS(p->getBaseBuildOrder().getNumLaunchers(), 8);
 }
 
-/** Test normal behaviour.
+/** Test normal behaviour, setBuildOrder().
+    A: create BuildShipProxy on session with a planet. Use setBuildOrder().
+    E: verify result */
+void
+TestGameProxyBuildShipProxy::testSetBuildOrder()
+{
+    game::test::SessionThread t;
+    game::test::WaitIndicator ind;
+    prepare(t);
+    game::proxy::BuildShipProxy testee(t.gameSender(), ind, PLANET_ID);
+
+    // Listen for updates
+    UpdateReceiver recv;
+    testee.sig_change.add(&recv, &UpdateReceiver::onUpdate);
+
+    // Modify
+    game::ShipBuildOrder o;
+    o.setHullIndex(game::test::ANNIHILATION_HULL_ID);
+    o.setEngineType(9);
+    o.setBeamType(8);
+    o.setNumBeams(2);
+    o.setLauncherType(10);
+    o.setNumLaunchers(7);
+    testee.setBuildOrder(o);
+
+    t.sync();
+    ind.processQueue();
+
+    TS_ASSERT_EQUALS(recv.getResult().order.getBeamType(), 8);
+    TS_ASSERT_EQUALS(recv.getResult().order.getNumBeams(), 2);
+    TS_ASSERT_EQUALS(recv.getResult().order.getNumLaunchers(), 7);
+    TS_ASSERT_EQUALS(recv.getResult().order.getLauncherType(), 10);
+    TS_ASSERT_EQUALS(recv.getResult().order.getEngineType(), 9);
+}
+
+/** Test normal behaviour, pre-existing build order.
     A: create BuildShipProxy on session with a planet and a pre-existing build order. Exercise modification calls including cancel().
     E: verify result */
 void
@@ -313,5 +348,76 @@ TestGameProxyBuildShipProxy::testClone()
     TS_ASSERT_DIFFERS(univ.ships().get(200)->getFriendlyCode().orElse(""), "cln");
     TS_ASSERT_EQUALS(univ.ships().get(300)->getFriendlyCode().orElse(""), "abc");
     TS_ASSERT_DIFFERS(univ.ships().get(400)->getFriendlyCode().orElse(""), "cln");
+}
+
+/** Test custom StarbaseAdaptor.
+    A: create session. Create custom adaptor with custom findShipCloningHere() method.
+    E: proxy findShipCloningHere() returns expected values */
+void
+TestGameProxyBuildShipProxy::testCustom()
+{
+    // Adaptor implementation for testing
+    class Adaptor : public game::proxy::StarbaseAdaptor {
+     public:
+        Adaptor(game::Session& session)
+            : m_session(session), m_planet(111)
+            {
+                // Prepare planet with bare minimum
+                // - planet
+                game::map::PlanetData pd;
+                pd.owner = PLAYER_NR;
+                m_planet.addCurrentPlanetData(pd, game::PlayerSet_t(PLAYER_NR));
+
+                // - base
+                game::map::BaseData bd;
+                bd.owner = PLAYER_NR;
+                m_planet.addCurrentBaseData(bd, game::PlayerSet_t(PLAYER_NR));
+
+                // - position
+                m_planet.setPosition(game::map::Point(X, Y));
+
+                // - internal metadata
+                game::map::Configuration config;
+                m_planet.internalCheck(config, session.translator(), session.log());
+                m_planet.setPlayability(game::map::Object::Playable);
+            }
+        virtual game::map::Planet& planet()
+            { return m_planet; }
+        virtual game::Session& session()
+            { return m_session; }
+        virtual bool findShipCloningHere(game::Id_t& id, String_t& name)
+            {
+                id = 444;
+                name = "dolly";
+                return true;
+            }
+        virtual void cancelAllCloneOrders()
+            { }
+        virtual void notifyListeners()
+            { }
+     private:
+        game::Session& m_session;
+        game::map::Planet m_planet;
+    };
+
+    // Adaptor-adaptor
+    class Maker : public afl::base::Closure<game::proxy::StarbaseAdaptor*(game::Session&)> {
+     public:
+        virtual Adaptor* call(game::Session& session)
+            { return new Adaptor(session); }
+    };
+
+    // Setup
+    game::test::SessionThread t;
+    game::test::WaitIndicator ind;
+    prepare(t);
+    game::proxy::BuildShipProxy testee(t.gameSender().makeTemporary(new Maker()), ind);
+
+    // Look for cloning ship; must return predefined value
+    game::Id_t id;
+    String_t name;
+    TS_ASSERT_EQUALS(testee.findShipCloningHere(ind, id, name), true);
+    TS_ASSERT_EQUALS(id, 444);
+    TS_ASSERT_EQUALS(name, "dolly");
 }
 

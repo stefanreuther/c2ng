@@ -10,16 +10,18 @@
 #include "game/map/planetstorage.hpp"
 #include "game/map/shiputils.hpp"
 #include "game/map/universe.hpp"
+#include "game/proxy/currentstarbaseadaptor.hpp"
 #include "game/proxy/waitindicator.hpp"
 #include "game/registrationkey.hpp"
 #include "game/turn.hpp"
 
 class game::proxy::BuildShipProxy::Trampoline {
  public:
-    Trampoline(Session& session, util::RequestSender<BuildShipProxy> reply, Id_t id);
+    Trampoline(StarbaseAdaptor& adaptor, util::RequestSender<BuildShipProxy> reply);
 
     void selectPart(TechLevel area, int id);
     void setPart(TechLevel area, int id);
+    void setBuildOrder(ShipBuildOrder order);
     void setNumParts(Weapon_t area, int amount);
     void addParts(Weapon_t area, int delta);
     void setUsePartsFromStorage(bool flag);
@@ -35,17 +37,15 @@ class game::proxy::BuildShipProxy::Trampoline {
     void sendStatus();
 
  private:
+    StarbaseAdaptor& m_adaptor;
     Session& m_session;
     util::RequestSender<BuildShipProxy> m_reply;
-    Id_t m_id;
 
     // We'll be making dumb pointers to these objects, so make smart ones to keep them alive:
-    afl::base::Ptr<Game> m_pGame;
     afl::base::Ptr<Root> m_pRoot;
     afl::base::Ptr<game::spec::ShipList> m_pShipList;
 
     // Working objects:
-    Game& m_game;
     Root& m_root;
     game::spec::ShipList& m_shipList;
     game::map::Planet& m_planet;
@@ -57,17 +57,15 @@ class game::proxy::BuildShipProxy::Trampoline {
     int m_partId;
 };
 
-game::proxy::BuildShipProxy::Trampoline::Trampoline(Session& session, util::RequestSender<BuildShipProxy> reply, Id_t id)
-    : m_session(session),
+game::proxy::BuildShipProxy::Trampoline::Trampoline(StarbaseAdaptor& adaptor, util::RequestSender<BuildShipProxy> reply)
+    : m_adaptor(adaptor),
+      m_session(adaptor.session()),
       m_reply(reply),
-      m_id(id),
-      m_pGame(session.getGame()),
-      m_pRoot(session.getRoot()),
-      m_pShipList(session.getShipList()),
-      m_game(game::actions::mustHaveGame(session)),
-      m_root(game::actions::mustHaveRoot(session)),
-      m_shipList(game::actions::mustHaveShipList(session)),
-      m_planet(game::actions::mustExist(m_game.currentTurn().universe().planets().get(id))),
+      m_pRoot(m_session.getRoot()),
+      m_pShipList(m_session.getShipList()),
+      m_root(game::actions::mustHaveRoot(m_session)),
+      m_shipList(game::actions::mustHaveShipList(m_session)),
+      m_planet(adaptor.planet()),
       m_container(m_planet, m_root.hostConfiguration()),
       m_action(m_planet, m_container, m_shipList, m_root),
       m_partArea(HullTech),
@@ -88,6 +86,12 @@ void
 game::proxy::BuildShipProxy::Trampoline::setPart(TechLevel area, int id)
 {
     m_action.setPart(area, id);
+}
+
+void
+game::proxy::BuildShipProxy::Trampoline::setBuildOrder(ShipBuildOrder order)
+{
+    m_action.setBuildOrder(order);
 }
 
 void
@@ -112,14 +116,14 @@ void
 game::proxy::BuildShipProxy::Trampoline::commit()
 {
     m_action.commit();
-    m_session.notifyListeners();
+    m_adaptor.notifyListeners();
 }
 
 void
 game::proxy::BuildShipProxy::Trampoline::cancel()
 {
     m_planet.setBaseBuildOrder(ShipBuildOrder());
-    m_session.notifyListeners();
+    m_adaptor.notifyListeners();
 }
 
 void
@@ -173,22 +177,14 @@ game::proxy::BuildShipProxy::Trampoline::getQuery(ShipQuery& result)
 inline bool
 game::proxy::BuildShipProxy::Trampoline::findShipCloningHere(Id_t& id, String_t& name)
 {
-    const game::map::Universe& univ = m_game.currentTurn().universe();
-    if (Id_t shipId = univ.findShipCloningAt(m_planet.getId())) {
-        const game::map::Ship* sh = univ.ships().get(shipId);
-        id = shipId;
-        name = (sh != 0 ? sh->getName() : String_t());
-        return true;
-    } else {
-        return false;
-    }
+    return m_adaptor.findShipCloningHere(id, name);
 }
 
 void
 game::proxy::BuildShipProxy::Trampoline::cancelAllCloneOrders()
 {
-    game::map::cancelAllCloneOrders(m_game.currentTurn().universe(), m_planet, m_shipList.friendlyCodes(), m_session.rng());
-    m_session.notifyListeners();
+    m_adaptor.cancelAllCloneOrders();
+    m_adaptor.notifyListeners();
 }
 
 void
@@ -214,21 +210,26 @@ game::proxy::BuildShipProxy::Trampoline::sendStatus()
  *  TrampolineFromSession
  */
 
-class game::proxy::BuildShipProxy::TrampolineFromSession : public afl::base::Closure<Trampoline*(Session&)> {
+class game::proxy::BuildShipProxy::TrampolineFromAdaptor : public afl::base::Closure<Trampoline*(StarbaseAdaptor&)> {
  public:
-    TrampolineFromSession(const util::RequestSender<BuildShipProxy>& reply, Id_t id)
-        : m_reply(reply), m_id(id)
+    TrampolineFromAdaptor(const util::RequestSender<BuildShipProxy>& reply)
+        : m_reply(reply)
         { }
-    virtual Trampoline* call(Session& session)
-        { return new Trampoline(session, m_reply, m_id); }
+    virtual Trampoline* call(StarbaseAdaptor& adaptor)
+        { return new Trampoline(adaptor, m_reply); }
  private:
     util::RequestSender<BuildShipProxy> m_reply;
-    Id_t m_id;
 };
+
 
 game::proxy::BuildShipProxy::BuildShipProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& receiver, Id_t planetId)
     : m_receiver(receiver, *this),
-      m_sender(gameSender.makeTemporary(new TrampolineFromSession(m_receiver.getSender(), planetId)))
+      m_sender(gameSender.makeTemporary(new CurrentStarbaseAdaptorFromSession(planetId)).makeTemporary(new TrampolineFromAdaptor(m_receiver.getSender())))
+{ }
+
+game::proxy::BuildShipProxy::BuildShipProxy(util::RequestSender<StarbaseAdaptor> adaptorSender, util::RequestDispatcher& receiver)
+    : m_receiver(receiver, *this),
+      m_sender(adaptorSender.makeTemporary(new TrampolineFromAdaptor(m_receiver.getSender())))
 { }
 
 game::proxy::BuildShipProxy::~BuildShipProxy()
@@ -326,6 +327,12 @@ void
 game::proxy::BuildShipProxy::setPart(TechLevel area, int id)
 {
     m_sender.postRequest(&Trampoline::setPart, area, id);
+}
+
+void
+game::proxy::BuildShipProxy::setBuildOrder(const ShipBuildOrder& order)
+{
+    m_sender.postRequest(&Trampoline::setBuildOrder, order);
 }
 
 void

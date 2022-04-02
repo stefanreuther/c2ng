@@ -12,6 +12,7 @@ class TestGameProxyBaseStorageProxy : public CxxTest::TestSuite {
     void testEmpty();
     void testGetParts();
     void testUpdate();
+    void testCustom();
 };
 
 class TestGameProxyBuildAmmoProxy : public CxxTest::TestSuite {
@@ -46,8 +47,10 @@ class TestGameProxyBuildShipProxy : public CxxTest::TestSuite {
  public:
     void testEmpty();
     void testNormal();
+    void testSetBuildOrder();
     void testPreexisting();
     void testClone();
+    void testCustom();
 };
 
 class TestGameProxyBuildStarbaseProxy : public CxxTest::TestSuite {
@@ -118,6 +121,13 @@ class TestGameProxyConvertSuppliesProxy : public CxxTest::TestSuite {
     void testEmpty();
     void testSell();
     void testBuy();
+};
+
+class TestGameProxyCurrentStarbaseAdaptor : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormal();
+    void testFindShipCloningHere();
 };
 
 class TestGameProxyCursorObserverProxy : public CxxTest::TestSuite {
@@ -494,6 +504,11 @@ class TestGameProxySpecBrowserProxy : public CxxTest::TestSuite {
     void testFilter();
     void testSort();
     void testSetPageId();
+};
+
+class TestGameProxyStarbaseAdaptor : public CxxTest::TestSuite {
+ public:
+    void testInterface();
 };
 
 class TestGameProxyTaskEditorProxy : public CxxTest::TestSuite {

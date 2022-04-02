@@ -7,6 +7,7 @@
 
 #include <vector>
 #include "afl/string/string.hpp"
+#include "game/proxy/starbaseadaptor.hpp"
 #include "game/session.hpp"
 #include "game/types.hpp"
 #include "util/requestdispatcher.hpp"
@@ -44,11 +45,16 @@ namespace game { namespace proxy {
         typedef std::vector<Part> Parts_t;
 
 
-        /** Constructor.
+        /** Constructor (planet).
             \param gameSender Game sender
             \param receiver   RequestDispatcher to receive updates in this thread
             \param planetId   Planet Id */
         BaseStorageProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& receiver, Id_t planetId);
+
+        /** Constructor (general).
+            \param adaptorSender StarbaseAdaptor sender
+            \param receiver      RequestDispatcher to receive updates in this thread */
+        BaseStorageProxy(util::RequestSender<StarbaseAdaptor> adaptorSender, util::RequestDispatcher& receiver);
 
         /** Destructor. */
         ~BaseStorageProxy();
@@ -67,7 +73,7 @@ namespace game { namespace proxy {
 
      private:
         struct Trampoline;
-        class TrampolineFromSession;
+        class TrampolineFromAdaptor;
         util::RequestReceiver<BaseStorageProxy> m_receiver;
         util::RequestSender<Trampoline> m_sender;
     };
