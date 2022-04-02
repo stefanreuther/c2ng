@@ -1159,7 +1159,7 @@ EndSub
 
 % @since PCC2 2.40.7
 Sub CCUI.Task.SaveToFile
-  % ex WAutoTaskScreen::handleSave
+  % ex WAutoTaskScreen::handleSave, autotask.pas:SaveAutoTask
   Local UI.Result, System.Err, name, fd, i, task
   UI.FileWindow Translate("Save Task"), "*.cct"
   If Not IsEmpty(UI.Result)
@@ -1178,7 +1178,7 @@ EndSub
 
 % @since PCC2 2.40.7
 Sub CCUI.Task.LoadFromFile
-  % ex WAutoTaskScreen::handleLoad
+  % ex WAutoTaskScreen::handleLoad, autotask.pas:ReadAutoTask
   Local UI.Result, System.Err, name, fd, numBadLines, cmd
   UI.FileWindow Translate("Load Task"), "*.cct"
   If Not IsEmpty(UI.Result)
@@ -1443,7 +1443,7 @@ EndSub
 
 
 On CommonTaskMenu Do
-  % ex WAutoTaskObjectSelection::createCommonCommand
+  % ex WAutoTaskObjectSelection::createCommonCommand, CProcessEditor.CommonMenu
   AddItem Atom("CCUI.Task.AddNotify"),      Translate("Notify message")
   AddItem Atom("CCUI.Task.AddSetComment"),  Translate("Set Comment")
   If UI.AutoTask->Type = 'ship' Then

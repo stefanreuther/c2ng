@@ -283,7 +283,7 @@ interpreter::TaskEditor::addAtEnd(Commands_t lines)
 bool
 interpreter::TaskEditor::isValidCommand(const String_t& cmd)
 {
-    // ex IntAutoTaskEditor::isValidCommand
+    // ex IntAutoTaskEditor::isValidCommand, autotask.pas:VerifyCommand
     try {
         Tokenizer tok(cmd);
 

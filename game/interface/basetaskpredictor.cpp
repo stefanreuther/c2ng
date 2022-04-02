@@ -59,7 +59,7 @@ game::interface::BaseTaskPredictor::BaseTaskPredictor(const game::map::Planet& p
 void
 game::interface::BaseTaskPredictor::advanceTurn()
 {
-    // ex WBaseTaskPredictor::advanceTurn
+    // ex WBaseTaskPredictor::advanceTurn, autotask.pas:PredictBaseBuild
     // FIXME: consider merging this with PlanetPredictor
     // Ship building
     if (int hullSlot = m_planet.getBaseBuildOrder().getHullIndex()) {
@@ -112,7 +112,7 @@ game::interface::BaseTaskPredictor::planet()
 bool
 game::interface::BaseTaskPredictor::predictInstruction(const String_t& name, interpreter::Arguments& args)
 {
-    // ex WBaseTaskPredictor::predictInstruction
+    // ex WBaseTaskPredictor::predictInstruction, CBaseTaskScreen.PredictOne
     if (name == "BUILDSHIP" || name == "ENQUEUESHIP") {
         ShipBuildOrder order;
         if (parseBuildShipCommand(args, order, m_shipList)) {
