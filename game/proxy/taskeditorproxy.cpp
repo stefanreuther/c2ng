@@ -67,6 +67,7 @@ class game::proxy::TaskEditorProxy::Trampoline {
     util::RequestSender<TaskEditorProxy> m_reply;
     afl::base::Ptr<interpreter::TaskEditor> m_editor;
     afl::base::SignalConnection conn_change;
+    afl::base::SignalConnection conn_objectChange;
     Id_t m_id;
     Process::ProcessKind m_kind;
 };
@@ -82,6 +83,7 @@ game::proxy::TaskEditorProxy::Trampoline::selectTask(Id_t id, Process::ProcessKi
     // Disconnect the signal. Anything that happens during the change will be ignored,
     // we explicitly send a status at the end.
     conn_change.disconnect();
+    conn_objectChange.disconnect();
 
     // Set up new one
     m_editor = m_session.getAutoTaskEditor(id, kind, create);
@@ -94,6 +96,9 @@ game::proxy::TaskEditorProxy::Trampoline::selectTask(Id_t id, Process::ProcessKi
     // Connect the signal and inform user
     if (m_editor.get() != 0) {
         conn_change = m_editor->sig_change.add(this, &Trampoline::sendStatus);
+        if (game::map::Object* obj = m_editor->process().getInvokingObject()) {
+            conn_objectChange = obj->sig_change.add(this, &Trampoline::sendStatus);
+        }
     }
 
     sendStatus();
