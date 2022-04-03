@@ -1216,6 +1216,14 @@ Sub CCUI.Task.GoToPredictedLocation
 EndSub
 
 % @since PCC2 2.40.12
+Sub CCUI.Task.EditBuildCommand
+  % ex WBaseAutoTaskCommandTile::editCurrentCommand, CBaseTaskScreen.EditEnqueueShip
+  Local UI.Result
+  CC$EditCurrentBuildOrder
+  If Not IsEmpty(UI.Result) Then Try UI.AutoTask->Lines(UI.AutoTask->Cursor) := UI.Result
+EndSub
+
+% @since PCC2 2.40.12
 Sub CCUI.Task.ConfirmMessage
   Call UI.AutoTask->ConfirmMessage
 EndSub
@@ -1250,6 +1258,14 @@ EndSub
 % @since PCC2 2.40.12
 Sub CCUI.Task.AddCargoUpload
   CCUI.Task.AddCargoCommand Translate("Cargo Upload"), "CargoUpload", "NTDMS$"
+EndSub
+
+% @since PCC2 2.40.12
+Sub CCUI.Task.AddEnqueueShip
+  % ex WBaseAutoTaskCommandTile::createEnqueueShipCommand, CBaseTaskScreen.GenerateEnqueueShip
+  Local UI.Result
+  CC$EditNewBuildOrder "EnqueueShip"
+  CCUI.Task.AddCommand UI.Result
 EndSub
 
 % @since PCC2 2.40.12
@@ -1484,8 +1500,7 @@ On PlanetTaskCargoMenu Do
 EndOn
 
 On BaseTaskOrdersMenu Do
-% FIXME:           sl.add(1, _("Enqueue Ship Build Order"));
-% FIXME:                   createEnqueueShipCommand();
+  AddItem Atom("CCUI.Task.AddEnqueueShip"),    Translate("Enqueue Ship Build Order")
   AddItem Atom("CCUI.Task.AddSetBaseMission"), Translate("Set Mission")
   AddItem Atom("CCUI.Task.AddSetFCode"),       Translate("Set FCode")
 EndOn

@@ -325,6 +325,16 @@ class TestGameProxyPlayerProxy : public CxxTest::TestSuite {
     void testNormal();
 };
 
+class TestGameProxyPredictedStarbaseAdaptor : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormalTrue();
+    void testNormalFalse();
+    void testNoTask();
+    void testExtra();
+    void testFactory();
+};
+
 class TestGameProxyProcessListProxy : public CxxTest::TestSuite {
  public:
     void testIt();

@@ -14,6 +14,7 @@
 #include "client/dialogs/buildammo.hpp"
 #include "client/dialogs/buildqueuedialog.hpp"
 #include "client/dialogs/buildship.hpp"
+#include "client/dialogs/buildshiporder.hpp"
 #include "client/dialogs/buildstarbasedialog.hpp"
 #include "client/dialogs/buildstructuresdialog.hpp"
 #include "client/dialogs/buysuppliesdialog.hpp"
@@ -76,6 +77,7 @@
 #include "game/actions/preconditions.hpp"
 #include "game/exception.hpp"
 #include "game/game.hpp"
+#include "game/interface/basetaskbuildcommandparser.hpp"
 #include "game/interface/plugincontext.hpp"
 #include "game/interface/richtextfunctions.hpp"
 #include "game/interface/richtextvalue.hpp"
@@ -95,6 +97,7 @@
 #include "game/proxy/maplocationproxy.hpp"
 #include "game/proxy/outboxproxy.hpp"
 #include "game/proxy/playerproxy.hpp"
+#include "game/proxy/predictedstarbaseadaptor.hpp"
 #include "game/proxy/searchproxy.hpp"
 #include "game/registrationkey.hpp"
 #include "game/root.hpp"
@@ -521,6 +524,70 @@ namespace {
             sel.setMode(sel.getInitialMode(univ, teams));
             si.postNewTask(link, new Task(sel, modes));
         }
+    }
+
+    /*
+     *  Ship Build Order varieties
+     */
+
+    void editBuildOrder(game::Session& session, ScriptSide& si, RequestLink1 link, game::ShipBuildOrder o, String_t verb)
+    {
+        // Must look at a planet with a starbase
+        game::map::Planet* pl = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
+        if (pl == 0) {
+            throw interpreter::Error::contextError();
+        }
+        game::actions::mustHavePlayedBase(*pl);
+
+        // Continuation task: we need to set UI.Result, which requires access to the game. Therefore, we implement this manually.
+        class ContinueTask : public UserSide::ScriptRequest {
+         public:
+            ContinueTask(RequestLink2 link, const game::ShipBuildOrder& o, String_t verb)
+                : m_link(link), m_order(o), m_verb(verb)
+                { }
+            virtual void handle(ScriptSide& si)
+                {
+                    // Build the command
+                    std::auto_ptr<afl::data::Value> result;
+                    if (m_order.getHullIndex() != 0) {
+                        result.reset(interpreter::makeStringValue(m_order.toScriptCommand(m_verb, si.session().getShipList().get())));
+                    }
+
+                    // Set variable and continue process
+                    si.setVariable(m_link, "UI.RESULT", result);
+                    si.continueProcess(m_link);
+                }
+         private:
+            RequestLink2 m_link;
+            game::ShipBuildOrder m_order;
+            String_t m_verb;
+        };
+
+        // Task
+        class Task : public UserTask {
+         public:
+            Task(game::Id_t planetId, const game::ShipBuildOrder& o, String_t verb)
+                : m_planetId(planetId), m_order(o), m_verb(verb)
+                { }
+            virtual void handle(Control& ctl, RequestLink2 link)
+                {
+                    bool ok = client::dialogs::doEditShipBuildOrder(ctl.root(), m_order,
+                                                                    ctl.interface().gameSender().makeTemporary(new game::proxy::PredictedStarbaseAdaptorFromSession(m_planetId, true)),
+                                                                    ctl.interface().gameSender(), m_planetId, ctl.translator());
+                    if (!ok) {
+                        m_order = game::ShipBuildOrder();
+                    }
+                    m_order.canonicalize();
+                    ctl.interface().postNewRequest(new ContinueTask(link, m_order, m_verb));
+                }
+
+         private:
+            game::Id_t m_planetId;
+            game::ShipBuildOrder m_order;
+            String_t m_verb;
+        };
+        session.notifyListeners();
+        si.postNewTask(link, new Task(pl->getId(), o, verb));
     }
 }
 
@@ -1372,6 +1439,59 @@ client::si::IFCCEditCommands(game::Session& session, ScriptSide& si, RequestLink
     game::actions::mustHaveGame(session);
 
     si.postNewTask(link, new Task());
+}
+
+// @since PCC2 2.40.12
+void
+client::si::IFCCEditCurrentBuildOrder(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // ex WBaseAutoTaskCommandTile::editCurrentCommand (part)
+    // No args expected
+    args.checkArgumentCount(0);
+
+    // Are we actually looking at a planet with a supported command?
+    // - check planet
+    game::map::Planet* pl = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
+    if (pl == 0) {
+        throw interpreter::Error::contextError();
+    }
+    game::actions::mustHavePlayedBase(*pl);
+
+    // - check task
+    afl::base::Ptr<interpreter::TaskEditor> ed = session.getAutoTaskEditor(pl->getId(), interpreter::Process::pkBaseTask, false);
+
+    // - predict command
+    game::interface::BaseTaskBuildCommandParser pred(game::actions::mustHaveShipList(session));
+    if (ed.get() != 0) {
+        pred.predictStatement(*ed, ed->getCursor());
+    }
+    session.releaseAutoTaskEditor(ed);
+
+    // If this was a supported command, edit it
+    if (pred.getVerb() == "BUILDSHIP") {
+        editBuildOrder(session, si, link, pred.getOrder(), "BuildShip");
+    } else if (pred.getVerb() == "ENQUEUESHIP") {
+        editBuildOrder(session, si, link, pred.getOrder(), "EnqueueShip");
+    } else {
+        link.getProcess().setVariable("UI.RESULT", 0);
+    }
+}
+
+// @since PCC2 2.40.12
+void
+client::si::IFCCEditNewBuildOrder(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // CC$EditNewBuildOrder 'verb'
+    // Parse args
+    args.checkArgumentCount(1);
+    String_t verb;
+    if (!interpreter::checkStringArg(verb, args.getNext())) {
+        link.getProcess().setVariable("UI.RESULT", 0);
+        return;
+    }
+
+    // Common back-end
+    editBuildOrder(session, si, link, game::ShipBuildOrder(), verb);
 }
 
 // @since PCC2 2.40.10
@@ -3908,6 +4028,8 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("CC$CHOOSEINTERCEPTTARGET", new ScriptProcedure(s, &si, IFCCChooseInterceptTarget));
                 // s.world().setNewGlobalValue("CC$CSBROWSE",           new ScriptProcedure(s, &si, IFCCCSBrowse));
                 s.world().setNewGlobalValue("CC$EDITCOMMANDS",       new ScriptProcedure(s, &si, IFCCEditCommands));
+                s.world().setNewGlobalValue("CC$EDITCURRENTBUILDORDER", new ScriptProcedure(s, &si, IFCCEditCurrentBuildOrder));
+                s.world().setNewGlobalValue("CC$EDITNEWBUILDORDER",  new ScriptProcedure(s, &si, IFCCEditNewBuildOrder));
                 // s.world().setNewGlobalValue("CC$GIVE",               new ScriptProcedure(s, &si, IFCCGive));
                 s.world().setNewGlobalValue("CC$GOTOCOORDINATES",    new ScriptProcedure(s, &si, IFCCGotoCoordinates));
                 s.world().setNewGlobalValue("CC$IONSTORMINFO",       new ScriptProcedure(s, &si, IFCCIonStormInfo));

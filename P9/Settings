@@ -12,7 +12,9 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/proxy/currentstarbaseadaptor.cpp \
+FILES_gamelib = game/proxy/predictedstarbaseadaptor.cpp \
+    game/proxy/predictedstarbaseadaptor.hpp \
+    game/proxy/currentstarbaseadaptor.cpp \
     game/proxy/currentstarbaseadaptor.hpp game/proxy/starbaseadaptor.hpp \
     game/interface/propertylist.cpp game/interface/propertylist.hpp \
     game/proxy/scripteditorproxy.cpp game/proxy/scripteditorproxy.hpp \
@@ -727,7 +729,8 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/dialogs/buildshipmain.cpp \
+FILES_guilib = client/dialogs/buildshiporder.cpp \
+    client/dialogs/buildshiporder.hpp client/dialogs/buildshipmain.cpp \
     client/dialogs/buildshipmain.hpp client/dialogs/scriptcommanddialog.cpp \
     client/dialogs/scriptcommanddialog.hpp client/tiles/planettasktile.cpp \
     client/tiles/planettasktile.hpp client/tiles/basetasktile.cpp \
@@ -1656,7 +1659,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_proxy_currentstarbaseadaptor.cpp \
+FILES_testsuite = u/t_game_proxy_predictedstarbaseadaptor.cpp \
+    u/t_game_proxy_currentstarbaseadaptor.cpp \
     u/t_game_proxy_starbaseadaptor.cpp u/t_game_proxy_scripteditorproxy.cpp \
     u/t_game_interface_propertylist.cpp \
     u/t_game_interface_contextprovider.cpp u/t_interpreter_staticcontext.cpp \

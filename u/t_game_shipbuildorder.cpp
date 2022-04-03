@@ -37,6 +37,7 @@ TestGameShipBuildOrder::testIt()
     TS_ASSERT_EQUALS(testee.getNumBeams(), 18);
     TS_ASSERT_EQUALS(testee.getLauncherType(), 8);
     TS_ASSERT_EQUALS(testee.getNumLaunchers(), 4);
+    TS_ASSERT_EQUALS(testee.toScriptCommand("Make", 0), "Make 15, 9, 3, 18, 8, 4");
 }
 
 /** Test comparison. */
@@ -84,6 +85,7 @@ TestGameShipBuildOrder::testDescribe()
     game::test::initStandardTorpedoes(sl);
     game::test::addNovaDrive(sl);
     game::test::addAnnihilation(sl);
+    sl.hulls().get(game::test::ANNIHILATION_HULL_ID)->setShortName("Annihilation");
 
     game::ShipBuildOrder testee;
     testee.setHullIndex(game::test::ANNIHILATION_HULL_ID);
@@ -102,6 +104,7 @@ TestGameShipBuildOrder::testDescribe()
     TS_ASSERT_EQUALS(result[1], "6 \xC3\x97 Nova Drive 5");
     TS_ASSERT_EQUALS(result[2], "4 \xC3\x97 Plasma Bolt");
     TS_ASSERT_EQUALS(result[3], "Mark 6 Photon");
+    TS_ASSERT_EQUALS(testee.toScriptCommand("Make", &sl), "Make 53, 5, 3, 4, 8, 1   % Annihilation");
 }
 
 void

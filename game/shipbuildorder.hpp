@@ -83,6 +83,12 @@ namespace game {
             \param [in]  tx       Translator */
         void describe(afl::data::StringList_t& result, const game::spec::ShipList& shipList, afl::string::Translator& tx) const;
 
+        /** Convert to script command.
+            \param verb      Verb to use (e.g. "BuildShip")
+            \param shipList  Ship list. Optional; if given, adds a comment describing the ship
+            \return command */
+        String_t toScriptCommand(String_t verb, const game::spec::ShipList* pShipList) const;
+
         /** Canonicalize build order.
             If a weapon count is zero, its type does not matter and is thus set to zero,
             to make the representation unique. */

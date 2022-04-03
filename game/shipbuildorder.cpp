@@ -140,6 +140,28 @@ game::ShipBuildOrder::describe(afl::data::StringList_t& result, const game::spec
     }
 }
 
+String_t
+game::ShipBuildOrder::toScriptCommand(String_t verb, const game::spec::ShipList* pShipList) const
+{
+    // ex makeBuildOrderCommand
+    if (m_hullIndex == 0) {
+        return verb + " 0";
+    } else {
+        String_t result = Format("%s %d, %d, %d, %d, %d, %d")
+            << verb
+            << m_hullIndex
+            << m_engineType
+            << m_beamType << m_numBeams
+            << m_launcherType << m_numLaunchers;
+        if (pShipList != 0) {
+            if (game::spec::Hull* h = pShipList->hulls().get(m_hullIndex)) {
+                result += afl::string::Format("   %% %s", h->getShortName(pShipList->componentNamer()));
+            }
+        }
+        return result;
+    }
+}
+
 bool
 game::ShipBuildOrder::operator==(const ShipBuildOrder& other) const
 {

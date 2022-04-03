@@ -33,6 +33,8 @@ namespace client { namespace si {
     void IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCChooseInterceptTarget(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCEditCommands(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
+    void IFCCEditCurrentBuildOrder(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
+    void IFCCEditNewBuildOrder(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCGotoCoordinates(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCIonStormInfo(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCImperialStats(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
