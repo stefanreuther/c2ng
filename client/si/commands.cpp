@@ -48,6 +48,7 @@
 #include "client/dialogs/selectionmanager.hpp"
 #include "client/dialogs/sellsuppliesdialog.hpp"
 #include "client/dialogs/sessionfileselectiondialog.hpp"
+#include "client/dialogs/shipcostcalculator.hpp"
 #include "client/dialogs/shipspeeddialog.hpp"
 #include "client/dialogs/simulationtransfer.hpp"
 #include "client/dialogs/simulator.hpp"
@@ -93,6 +94,8 @@
 #include "game/map/shippredictor.hpp"
 #include "game/proxy/buildammoproxy.hpp"
 #include "game/proxy/chunnelproxy.hpp"
+#include "game/proxy/currentstarbaseadaptor.hpp"
+#include "game/proxy/fictivestarbaseadaptor.hpp"
 #include "game/proxy/inboxadaptor.hpp"
 #include "game/proxy/maplocationproxy.hpp"
 #include "game/proxy/outboxproxy.hpp"
@@ -1856,6 +1859,52 @@ client::si::IFCCSendMessage(game::Session& session, ScriptSide& si, RequestLink1
     };
     game::Game& g = game::actions::mustHaveGame(session);
     si.postNewTask(link, new DialogTask(g.getViewpointPlayer(), g.currentTurn().outbox().getNumMessages() != 0));
+}
+
+// @since PCC2 1.99.16, PCC2 2.40.12
+void
+client::si::IFCCShipCostCalc(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // ex IFCCShipCostCalc, doShipCostCalculator
+    args.checkArgumentCount(0);
+
+    class Task : public UserTask {
+     public:
+        Task(bool hasBase, game::Id_t planetId)
+            : m_hasBase(hasBase),
+              m_planetId(planetId)
+            { }
+        void handle(Control& ctl, RequestLink2 link)
+            {
+                util::RequestSender<game::proxy::StarbaseAdaptor> adaptor =
+                    m_hasBase
+                    ? ctl.interface().gameSender().makeTemporary(new game::proxy::CurrentStarbaseAdaptorFromSession(m_planetId))
+                    : ctl.interface().gameSender().makeTemporary(new game::proxy::FictiveStarbaseAdaptorFromSession(m_planetId));
+                bool useStorage = m_hasBase;
+
+                client::dialogs::doShipCostCalculator(ctl.root(), adaptor, ctl.interface().gameSender(), useStorage, ctl.translator());
+                ctl.interface().continueProcess(link);
+            }
+     private:
+        bool m_hasBase;
+        game::Id_t m_planetId;
+    };
+
+    game::actions::mustHaveGame(session);
+    bool hasBase;
+    game::Id_t planetId;
+    if (const game::map::Planet* pl = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject())) {
+        // Planet exists
+        planetId = pl->getId();
+        hasBase = pl->isPlayable(game::map::Object::ReadOnly) && pl->hasBase();
+    } else {
+        // Not a planet - use entirely fake data
+        hasBase = false;
+        planetId = 0;
+    }
+
+    session.notifyListeners();
+    si.postNewTask(link, new Task(hasBase, planetId));
 }
 
 // @since PCC2 2.40.11
@@ -4047,7 +4096,7 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("CC$SELLSUPPLIES",       new ScriptProcedure(s, &si, IFCCSellSupplies));
                 s.world().setNewGlobalValue("CC$SENDMESSAGE",        new ScriptProcedure(s, &si, IFCCSendMessage));
                 // s.world().setNewGlobalValue("CC$SETTINGS",           new ScriptProcedure(s, &si, IFCCSettings));
-                // s.world().setNewGlobalValue("CC$SHIPCOSTCALC",       new ScriptProcedure(s, &si, IFCCShipCostCalc),
+                s.world().setNewGlobalValue("CC$SHIPCOSTCALC",       new ScriptProcedure(s, &si, IFCCShipCostCalc));
                 s.world().setNewGlobalValue("CC$SHIPSPEC",           new ScriptProcedure(s, &si, IFCCShipSpec));
                 s.world().setNewGlobalValue("CC$SPECBROWSER",        new ScriptProcedure(s, &si, IFCCSpecBrowser));
                 // s.world().setNewGlobalValue("CC$TOWFLEETMEMBER",     new ScriptProcedure(s, &si, IFCCTowFleetMember));

@@ -27,6 +27,8 @@ namespace {
         game::test::initPListTorpedoes(*shipList);
         game::test::addTranswarp(*shipList);
         game::test::addOutrider(*shipList);
+        game::test::addGorbie(*shipList);
+        game::test::addAnnihilation(*shipList);
         shipList->hullAssignments().add(PLAYER_NR, 3, game::test::OUTRIDER_HULL_ID);
         t.session().setShipList(shipList);
 
@@ -165,6 +167,32 @@ TestGameProxyBaseStorageProxy::testGetParts()
         TS_ASSERT_EQUALS(list[6].techStatus, game::LockedTech);
         TS_ASSERT_EQUALS(list[6].name, "Arkon Bomb");
     }
+}
+
+/** Test getParts(), allHulls=true
+    A: create session and populate with planet and ship list. Call getParts().
+    E: verify returned lists */
+void
+TestGameProxyBaseStorageProxy::testGetAllHulls()
+{
+    game::test::SessionThread t;
+    prepare(t);
+    game::test::WaitIndicator ind;
+    game::proxy::BaseStorageProxy testee(t.gameSender(), ind, PLANET_ID, true);
+
+    // Query hulls: expect 3
+    game::proxy::BaseStorageProxy::Parts_t list;
+    testee.getParts(ind, game::HullTech, list);
+    TS_ASSERT_EQUALS(list.size(), 3U);
+    TS_ASSERT_EQUALS(list[0].id, game::test::ANNIHILATION_HULL_ID);
+    TS_ASSERT_EQUALS(list[0].numParts, 0);  /* not on base */
+    TS_ASSERT_EQUALS(list[0].name, "ANNIHILATION CLASS BATTLESHIP");
+    TS_ASSERT_EQUALS(list[1].id, game::test::GORBIE_HULL_ID);
+    TS_ASSERT_EQUALS(list[1].numParts, 0);  /* not on base */
+    TS_ASSERT_EQUALS(list[1].name, "GORBIE CLASS BATTLECARRIER");
+    TS_ASSERT_EQUALS(list[2].id, game::test::OUTRIDER_HULL_ID);
+    TS_ASSERT_EQUALS(list[2].numParts, 2);  /* Slot 3, masked '&2' */
+    TS_ASSERT_EQUALS(list[2].name, "OUTRIDER CLASS SCOUT");
 }
 
 /** Test update notification.

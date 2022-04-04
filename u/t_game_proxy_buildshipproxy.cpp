@@ -155,6 +155,7 @@ TestGameProxyBuildShipProxy::testEmpty()
     TS_ASSERT_EQUALS(st.maxLaunchers, 0);
     TS_ASSERT_EQUALS(st.isNew, false);
     TS_ASSERT_EQUALS(st.isUsePartsFromStorage, false);
+    TS_ASSERT_EQUALS(st.isUseTechUpgrade, false);
     TS_ASSERT_EQUALS(st.isChange, false);
 
     // Look for cloning ship
@@ -191,6 +192,7 @@ TestGameProxyBuildShipProxy::testNormal()
     TS_ASSERT_EQUALS(st.maxLaunchers, 10);
     TS_ASSERT_EQUALS(st.isNew, true);
     TS_ASSERT_EQUALS(st.isUsePartsFromStorage, false);
+    TS_ASSERT_EQUALS(st.isUseTechUpgrade, true);
     TS_ASSERT_EQUALS(st.isChange, false);
 
     // Look for cloning ship
@@ -297,6 +299,7 @@ TestGameProxyBuildShipProxy::testPreexisting()
     TS_ASSERT_EQUALS(st.totalCost.isZero(), true);
     TS_ASSERT_EQUALS(st.isChange, false);
     TS_ASSERT_EQUALS(st.isUsePartsFromStorage, true);
+    TS_ASSERT_EQUALS(st.isUseTechUpgrade, true);
 
     // Modification is reported
     testee.addParts(game::actions::BuildShip::BeamWeapon, 3);
@@ -419,5 +422,39 @@ TestGameProxyBuildShipProxy::testCustom()
     TS_ASSERT_EQUALS(testee.findShipCloningHere(ind, id, name), true);
     TS_ASSERT_EQUALS(id, 444);
     TS_ASSERT_EQUALS(name, "dolly");
+}
+
+/** Test normal behaviour.
+    A: create BuildShipProxy on session with a planet. Exercise modification calls; disable setUseTechUpgrade()
+    E: verify result */
+void
+TestGameProxyBuildShipProxy::testDisabledTech()
+{
+    game::test::SessionThread t;
+    game::test::WaitIndicator ind;
+    prepare(t);
+    game::proxy::BuildShipProxy testee(t.gameSender(), ind, PLANET_ID);
+
+    // Listen for updates
+    UpdateReceiver recv;
+    testee.sig_change.add(&recv, &UpdateReceiver::onUpdate);
+
+    // Modify (same sequence as testNormal())
+    testee.selectPart(game::BeamTech, 1);
+    testee.setNumParts(game::actions::BuildShip::BeamWeapon, 3);
+    testee.setPart(game::BeamTech, 4);
+    testee.addParts(game::actions::BuildShip::TorpedoWeapon, -2);
+    testee.setUseTechUpgrade(false);
+
+    t.sync();
+    ind.processQueue();
+
+    TS_ASSERT_EQUALS(recv.getResult().status, game::actions::BuildShip::DisabledTech);
+
+    // Verify details
+    game::spec::CostSummary sum;
+    testee.getCostSummary(ind, sum);
+    TS_ASSERT_EQUALS(sum.getNumItems(), 4U);
+    TS_ASSERT_EQUALS(sum.get(0)->name, "ANNIHILATION CLASS BATTLESHIP");
 }
 

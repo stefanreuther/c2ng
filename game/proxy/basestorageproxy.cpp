@@ -16,18 +16,28 @@
 using game::spec::ShipList;
 using game::map::Planet;
 
+namespace {
+    struct ComparePartsByName {
+        bool operator()(const game::proxy::BaseStorageProxy::Part& a,
+                        const game::proxy::BaseStorageProxy::Part& b) const
+            { return a.name < b.name; }
+    };
+}
+
+
 /*
  *  Trampoline
  */
 
 class game::proxy::BaseStorageProxy::Trampoline {
  public:
-    Trampoline(StarbaseAdaptor& adaptor, util::RequestSender<BaseStorageProxy> reply);
+    Trampoline(StarbaseAdaptor& adaptor, util::RequestSender<BaseStorageProxy> reply, bool allHulls);
 
     void packParts(TechLevel area, Parts_t& result) const;
 
     void packComponents(Parts_t& result, TechLevel area, const game::spec::BaseComponentVector& vec, const Planet& planet, const ShipList& sl) const;
     void packHulls(Parts_t& result, const Planet& planet, const ShipList& sl, const Root& root) const;
+    void packAllHulls(Parts_t& result, const Planet& planet, const ShipList& sl, const Root& root) const;
     Part packComponent(TechLevel area, const game::spec::Component& comp, int id, const Planet& planet, const ShipList& sl) const;
     static int getPlanetOwner(const Planet& planet);
     int getAllowedTech(TechLevel area) const;
@@ -38,6 +48,7 @@ class game::proxy::BaseStorageProxy::Trampoline {
     StarbaseAdaptor& m_adaptor;
     Session& m_session;
     util::RequestSender<BaseStorageProxy> m_reply;
+    bool m_allHulls;
 
     afl::base::Ptr<Game> m_game;
     afl::base::Ptr<Root> m_root;
@@ -48,10 +59,11 @@ class game::proxy::BaseStorageProxy::Trampoline {
 };
 
 
-game::proxy::BaseStorageProxy::Trampoline::Trampoline(StarbaseAdaptor& adaptor, util::RequestSender<BaseStorageProxy> reply)
+game::proxy::BaseStorageProxy::Trampoline::Trampoline(StarbaseAdaptor& adaptor, util::RequestSender<BaseStorageProxy> reply, bool allHulls)
     : m_adaptor(adaptor),
       m_session(m_adaptor.session()),
       m_reply(reply),
+      m_allHulls(allHulls),
       m_game(m_session.getGame()),
       m_root(m_session.getRoot()),
       m_shipList(m_session.getShipList())
@@ -69,7 +81,11 @@ game::proxy::BaseStorageProxy::Trampoline::packParts(TechLevel area, Parts_t& re
     if (m_shipList.get() != 0 && m_root.get() != 0) {
         switch (area) {
          case HullTech:
-            packHulls(result, pl, *m_shipList, *m_root);
+            if (m_allHulls) {
+                packAllHulls(result, pl, *m_shipList, *m_root);
+            } else {
+                packHulls(result, pl, *m_shipList, *m_root);
+            }
             break;
 
          case EngineTech:
@@ -106,6 +122,18 @@ game::proxy::BaseStorageProxy::Trampoline::packHulls(Parts_t& result, const Plan
             result.push_back(packComponent(HullTech, *h, i, planet, sl));
         }
     }
+}
+
+inline void
+game::proxy::BaseStorageProxy::Trampoline::packAllHulls(Parts_t& result, const Planet& planet, const ShipList& sl, const Root& root) const
+{
+    const int playerNr = getPlanetOwner(planet);
+    const game::spec::HullAssignmentList& hullAssignments = sl.hullAssignments();
+    const game::spec::BaseComponentVector& vec = sl.hulls();
+    for (game::spec::Component* p = vec.findNext(0); p != 0; p = vec.findNext(p->getId())) {
+        result.push_back(packComponent(HullTech, *p, hullAssignments.getIndexFromHull(root.hostConfiguration(), playerNr, p->getId()), planet, sl));
+    }
+    std::sort(result.begin(), result.end(), ComparePartsByName());
 }
 
 game::proxy::BaseStorageProxy::Part
@@ -171,13 +199,14 @@ game::proxy::BaseStorageProxy::Trampoline::onChange()
 
 class game::proxy::BaseStorageProxy::TrampolineFromAdaptor : public afl::base::Closure<Trampoline*(StarbaseAdaptor&)> {
  public:
-    TrampolineFromAdaptor(const util::RequestSender<BaseStorageProxy>& reply)
-        : m_reply(reply)
+    TrampolineFromAdaptor(const util::RequestSender<BaseStorageProxy>& reply, bool allHulls)
+        : m_reply(reply), m_allHulls(allHulls)
         { }
     virtual Trampoline* call(StarbaseAdaptor& adaptor)
-        { return new Trampoline(adaptor, m_reply); }
+        { return new Trampoline(adaptor, m_reply, m_allHulls); }
  private:
     util::RequestSender<BaseStorageProxy> m_reply;
+    bool m_allHulls;
 };
 
 
@@ -185,14 +214,14 @@ class game::proxy::BaseStorageProxy::TrampolineFromAdaptor : public afl::base::C
  *  BaseStorageProxy
  */
 
-game::proxy::BaseStorageProxy::BaseStorageProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& receiver, Id_t planetId)
+game::proxy::BaseStorageProxy::BaseStorageProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& receiver, Id_t planetId, bool allHulls)
     : m_receiver(receiver, *this),
-      m_sender(gameSender.makeTemporary(new CurrentStarbaseAdaptorFromSession(planetId)).makeTemporary(new TrampolineFromAdaptor(m_receiver.getSender())))
+      m_sender(gameSender.makeTemporary(new CurrentStarbaseAdaptorFromSession(planetId)).makeTemporary(new TrampolineFromAdaptor(m_receiver.getSender(), allHulls)))
 { }
 
-game::proxy::BaseStorageProxy::BaseStorageProxy(util::RequestSender<StarbaseAdaptor> adaptorSender, util::RequestDispatcher& receiver)
+game::proxy::BaseStorageProxy::BaseStorageProxy(util::RequestSender<StarbaseAdaptor> adaptorSender, util::RequestDispatcher& receiver, bool allHulls)
     : m_receiver(receiver, *this),
-      m_sender(adaptorSender.makeTemporary(new TrampolineFromAdaptor(m_receiver.getSender())))
+      m_sender(adaptorSender.makeTemporary(new TrampolineFromAdaptor(m_receiver.getSender(), allHulls)))
 { }
 
 game::proxy::BaseStorageProxy::~BaseStorageProxy()

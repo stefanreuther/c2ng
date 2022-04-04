@@ -67,11 +67,12 @@ namespace game { namespace proxy {
             int maxLaunchers;                         ///< Maximum number of launchers. Actual number is in @c order.
             bool isNew;                               ///< true if this is a new order (base is not currently building).
             bool isUsePartsFromStorage;               ///< Status of use-parts-from-storage flag.
+            bool isUseTechUpgrade;                    ///< Status of use-tech-upgrade flag.
             bool isChange;                            ///< true if this a change to a pre-existing build order.
 
             Status()
                 : status(game::actions::BuildShip::MissingResources), totalCost(), partCost(), available(), remaining(), missing(), partTech(), availableTech(), order(), description(),
-                  numEngines(), maxBeams(), maxLaunchers(), isNew(false), isUsePartsFromStorage(false), isChange(false)
+                  numEngines(), maxBeams(), maxLaunchers(), isNew(false), isUsePartsFromStorage(false), isUseTechUpgrade(false), isChange(false)
                 { }
         };
 
@@ -154,6 +155,14 @@ namespace game { namespace proxy {
             \param flag new setting
             \see game::actions::BuildShip::setUsePartsFromStorage */
         void setUsePartsFromStorage(bool flag);
+
+        /** Set permission to use tech upgrades.
+            By default, this is enabled, and tech upgrades are implicitly performed.
+            When this is disabled, and a tech upgrade is required, the request will fail;
+            tech upgrades will not be included in cost.
+            \param b New status
+            \see game::actions::BuildShip::setUseTechUpgrade*/
+        void setUseTechUpgrade(bool flag);
 
         /** Commit the transaction.
             This will build the parts and set the build order.

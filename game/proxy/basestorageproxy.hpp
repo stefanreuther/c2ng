@@ -22,6 +22,10 @@ namespace game { namespace proxy {
         Provides access to names, status and amounts of starship components on a starbase.
         To use, retrieve data using the synchronous getParts() call; then listen to sig_update for changes.
 
+        It provides two ways to access hulls:
+        - allHulls=false (default): reports all hulls that can be built on the starbase, in specification order
+        - allHulls=true: reports all hulls (those that cannot be built, with count 0), in alphabetical order
+
         Synchronous:
         - retrieve list of parts possibly in storage
 
@@ -48,13 +52,15 @@ namespace game { namespace proxy {
         /** Constructor (planet).
             \param gameSender Game sender
             \param receiver   RequestDispatcher to receive updates in this thread
-            \param planetId   Planet Id */
-        BaseStorageProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& receiver, Id_t planetId);
+            \param planetId   Planet Id
+            \param allHulls   true to report all hulls, false (default) only those buildable on this base */
+        BaseStorageProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& receiver, Id_t planetId, bool allHulls = false);
 
         /** Constructor (general).
             \param adaptorSender StarbaseAdaptor sender
-            \param receiver      RequestDispatcher to receive updates in this thread */
-        BaseStorageProxy(util::RequestSender<StarbaseAdaptor> adaptorSender, util::RequestDispatcher& receiver);
+            \param receiver      RequestDispatcher to receive updates in this thread
+            \param allHulls   true to report all hulls, false (default) only those buildable on this base */
+        BaseStorageProxy(util::RequestSender<StarbaseAdaptor> adaptorSender, util::RequestDispatcher& receiver, bool allHulls = false);
 
         /** Destructor. */
         ~BaseStorageProxy();

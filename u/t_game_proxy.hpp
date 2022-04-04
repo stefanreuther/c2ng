@@ -11,6 +11,7 @@ class TestGameProxyBaseStorageProxy : public CxxTest::TestSuite {
  public:
     void testEmpty();
     void testGetParts();
+    void testGetAllHulls();
     void testUpdate();
     void testCustom();
 };
@@ -51,6 +52,7 @@ class TestGameProxyBuildShipProxy : public CxxTest::TestSuite {
     void testPreexisting();
     void testClone();
     void testCustom();
+    void testDisabledTech();
 };
 
 class TestGameProxyBuildStarbaseProxy : public CxxTest::TestSuite {
@@ -160,6 +162,15 @@ class TestGameProxyExpressionListProxy : public CxxTest::TestSuite {
  public:
     void testEmpty();
     void testNormal();
+};
+
+class TestGameProxyFictiveStarbaseAdaptor : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testZero();
+    void testMixed();
+    void testExtra();
+    void testFactory();
 };
 
 class TestGameProxyFlakVcrPlayerProxy : public CxxTest::TestSuite {

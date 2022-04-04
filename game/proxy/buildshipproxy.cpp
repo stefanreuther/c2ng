@@ -25,6 +25,7 @@ class game::proxy::BuildShipProxy::Trampoline {
     void setNumParts(Weapon_t area, int amount);
     void addParts(Weapon_t area, int delta);
     void setUsePartsFromStorage(bool flag);
+    void setUseTechUpgrade(bool flag);
     void commit();
     void cancel();
 
@@ -113,6 +114,12 @@ game::proxy::BuildShipProxy::Trampoline::setUsePartsFromStorage(bool flag)
 }
 
 void
+game::proxy::BuildShipProxy::Trampoline::setUseTechUpgrade(bool flag)
+{
+    m_action.setUseTechUpgrade(flag);
+}
+
+void
 game::proxy::BuildShipProxy::Trampoline::commit()
 {
     m_action.commit();
@@ -159,6 +166,7 @@ game::proxy::BuildShipProxy::Trampoline::packStatus(Status& st) /*const - cannot
     // Flags
     st.isNew = m_planet.getBaseBuildOrderHullIndex().orElse(0) == 0;
     st.isUsePartsFromStorage = m_action.isUsePartsFromStorage();
+    st.isUseTechUpgrade = m_action.isUseTechUpgrade();
     st.isChange = m_action.isChange();
 }
 
@@ -351,6 +359,12 @@ void
 game::proxy::BuildShipProxy::setUsePartsFromStorage(bool flag)
 {
     m_sender.postRequest(&Trampoline::setUsePartsFromStorage, flag);
+}
+
+void
+game::proxy::BuildShipProxy::setUseTechUpgrade(bool flag)
+{
+    m_sender.postRequest(&Trampoline::setUseTechUpgrade, flag);
 }
 
 void
