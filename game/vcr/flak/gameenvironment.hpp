@@ -36,6 +36,7 @@ namespace game { namespace vcr { namespace flak {
         const game::config::HostConfiguration& m_config;
         const game::spec::BeamVector_t& m_beams;
         const game::spec::TorpedoVector_t& m_torpedos;
+        int m_playerRace[MAX_PLAYERS];
     };
 
 } } }

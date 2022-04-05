@@ -74,6 +74,9 @@ TestGameVcrFlakGameEnvironment::testConfig()
     TS_ASSERT_EQUALS(testee.getPlayerRaceNumber(1), 1);
     TS_ASSERT_EQUALS(testee.getPlayerRaceNumber(2), 1);
     TS_ASSERT_EQUALS(testee.getPlayerRaceNumber(4), 4);
+    TS_ASSERT_EQUALS(testee.getPlayerRaceNumber(game::MAX_PLAYERS), 5);
+    TS_ASSERT_EQUALS(testee.getPlayerRaceNumber(game::MAX_PLAYERS+1), game::MAX_PLAYERS+1);
+    TS_ASSERT_EQUALS(testee.getPlayerRaceNumber(100), 100);
 }
 
 void

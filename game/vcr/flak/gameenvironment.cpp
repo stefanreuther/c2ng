@@ -13,7 +13,16 @@ game::vcr::flak::GameEnvironment::GameEnvironment(const game::config::HostConfig
     : m_config(config),
       m_beams(beams),
       m_torpedos(torps)
-{ }
+{
+    // Cache getPlayerRaceNumber() in a local array.
+    // getPlayerRaceNumber() is called by the algorithm in main loops.
+    // It uses dynamic_cast to type-check the ConfigurationOption, which makes it expensive.
+    // This optimisation saves about 7% total runtime.
+    // (c2simtool -G testgames/pl13 --run 500 --mode=flak --seed=1 11carriers.ccb, 5.7 -> 5.3 seconds)
+    for (int i = 1; i <= MAX_PLAYERS; ++i) {
+        m_playerRace[i-1] = config.getPlayerRaceNumber(i);
+    }
+}
 
 int
 game::vcr::flak::GameEnvironment::getConfiguration(ScalarOption index) const
@@ -130,5 +139,9 @@ game::vcr::flak::GameEnvironment::getTorpedoDamagePower(int type) const
 int
 game::vcr::flak::GameEnvironment::getPlayerRaceNumber(int player) const
 {
-    return m_config.getPlayerRaceNumber(player);
+    if (player > 0 && player <= MAX_PLAYERS) {
+        return m_playerRace[player-1];
+    } else {
+        return player;
+    }
 }
