@@ -134,6 +134,10 @@ namespace game { namespace config {
     const IntegerOptionDescriptor UserConfiguration::Sort_Search           = { "Sort.Search",           &IntegerValueParser::instance };
     const IntegerOptionDescriptor UserConfiguration::Sort_Search_Secondary = { "Sort.Search.Secondary", &IntegerValueParser::instance };
 
+    // Task screen
+    const IntegerOptionDescriptor UserConfiguration::Task_PredictToEnd  = { "Task.PredictToEnd",  &BooleanValueParser::instance };
+    const IntegerOptionDescriptor UserConfiguration::Task_ShowDistances = { "Task.ShowDistances", &BooleanValueParser::instance };
+
     // Simulation
     const IntegerOptionDescriptor UserConfiguration::Sim_NumThreads        = { "Sim.NumThreads",        &IntegerValueParser::instance };
 } }
@@ -245,6 +249,10 @@ game::config::UserConfiguration::setDefaultValues()
         opt.setMarkerKind(desc.m_markerKind);
         opt.setNote(String_t());
     }
+
+    // Task screen
+    me[Task_PredictToEnd].set(0);
+    me[Task_ShowDistances].set(1);
 
     // Simulation
     me[Sim_NumThreads].set(0);

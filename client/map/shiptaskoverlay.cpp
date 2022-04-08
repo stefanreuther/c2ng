@@ -60,7 +60,7 @@ void
 client::map::ShipTaskOverlay::drawAfter(gfx::Canvas& can, const Renderer& ren)
 {
     // ex WShipTaskScannerChartWidget::drawPost(GfxCanvas& can)
-    // FIXME: display of distances is optional (static variable in PCC2, should be preferences option
+    // Display of distances is optional. If it is disabled, TaskEditorProxy doesn't send distances2.
     gfx::Context<uint8_t> ctx(can, m_root.colorScheme());
     ctx.useFont(*m_root.provider().getFont("-"));
     gfx::Point pt = ren.scale(m_status.startPosition);

@@ -7,6 +7,7 @@
 #include "afl/base/signalconnection.hpp"
 #include "game/actions/buildship.hpp"
 #include "game/actions/cargocostaction.hpp"
+#include "game/config/userconfiguration.hpp"
 #include "game/game.hpp"
 #include "game/interface/basetaskbuildcommandparser.hpp"
 #include "game/interface/notificationstore.hpp"
@@ -15,6 +16,7 @@
 #include "game/root.hpp"
 #include "game/turn.hpp"
 
+using game::config::UserConfiguration;
 using game::interface::NotificationStore;
 using game::interface::ShipTaskPredictor;
 using interpreter::Process;
@@ -68,6 +70,7 @@ class game::proxy::TaskEditorProxy::Trampoline {
     afl::base::Ptr<interpreter::TaskEditor> m_editor;
     afl::base::SignalConnection conn_change;
     afl::base::SignalConnection conn_objectChange;
+    afl::base::SignalConnection conn_prefChange;
     Id_t m_id;
     Process::ProcessKind m_kind;
 };
@@ -84,6 +87,7 @@ game::proxy::TaskEditorProxy::Trampoline::selectTask(Id_t id, Process::ProcessKi
     // we explicitly send a status at the end.
     conn_change.disconnect();
     conn_objectChange.disconnect();
+    conn_prefChange.disconnect();
 
     // Set up new one
     m_editor = m_session.getAutoTaskEditor(id, kind, create);
@@ -98,6 +102,10 @@ game::proxy::TaskEditorProxy::Trampoline::selectTask(Id_t id, Process::ProcessKi
         conn_change = m_editor->sig_change.add(this, &Trampoline::sendStatus);
         if (game::map::Object* obj = m_editor->process().getInvokingObject()) {
             conn_objectChange = obj->sig_change.add(this, &Trampoline::sendStatus);
+        }
+
+        if (Root* r = m_session.getRoot().get()) {
+            conn_prefChange = r->userConfiguration().sig_change.add(this, &Trampoline::sendStatus);
         }
     }
 
@@ -140,12 +148,16 @@ game::proxy::TaskEditorProxy::Trampoline::describeShip(ShipStatus& out) const
     const Root* r = m_session.getRoot().get();
     const game::spec::ShipList* sl = m_session.getShipList().get();
     if (m_editor.get() != 0 && m_kind == Process::pkShipTask && g != 0 && r != 0 && sl != 0) {
+        // Configuration
+        bool isPredictToEnd = r->userConfiguration()[UserConfiguration::Task_PredictToEnd]();
+        bool isShowDistances = r->userConfiguration()[UserConfiguration::Task_ShowDistances]();
+
         // Predict
         const game::map::Universe& univ = g->currentTurn().universe();
         ShipTaskPredictor pred(univ, m_id, g->shipScores(), *sl, r->hostConfiguration(), r->hostVersion(), r->registrationKey());
         const game::map::Point startPosition = pred.getPosition();
         const int startFuel = pred.getRemainingFuel();
-        if (/* FIXME: isPredictToEnd() ||*/ m_editor->getCursor() < m_editor->getPC()) {
+        if (isPredictToEnd || m_editor->getCursor() < m_editor->getPC()) {
             pred.predictTask(*m_editor);
         } else {
             pred.predictTask(*m_editor, m_editor->getCursor());
@@ -157,7 +169,9 @@ game::proxy::TaskEditorProxy::Trampoline::describeShip(ShipStatus& out) const
         for (size_t i = 0, n = pred.getNumPositions(); i < n; ++i) {
             game::map::Point npt = univ.config().getSimpleNearestAlias(pred.getPosition(i), startPosition);
             out.positions.push_back(npt);
-            out.distances2.push_back(pt.getSquaredRawDistance(npt));
+            if (isShowDistances) {
+                out.distances2.push_back(pt.getSquaredRawDistance(npt));
+            }
             pt = npt;
         }
         out.numFuelPositions = pred.getNumFuelPositions();

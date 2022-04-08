@@ -1228,6 +1228,16 @@ Sub CCUI.Task.ConfirmMessage
   Call UI.AutoTask->ConfirmMessage
 EndSub
 
+% @since PCC2 2.40.12
+Sub CCUI.Task.TogglePredictToEnd
+  AddPref "Task.PredictToEnd = " & Not Pref("Task.PredictToEnd")
+EndSub
+
+% @since PCC2 2.40.12
+Sub CCUI.Task.ToggleShowDistances
+  AddPref "Task.ShowDistances = " & Not Pref("Task.ShowDistances")
+EndSub
+
 
 
 % @since PCC2 2.40.12
@@ -1488,6 +1498,12 @@ On ShipTaskMissionMenu Do
   AddItem Atom("CCUI.Task.AddSetEnemy"), Translate("Set Enemy")
   AddItem Atom("CCUI.Task.AddSetFCode"), Translate("Set FCode")
   AddItem Atom("CCUI.Task.AddSetShipMission"), Translate("Set Mission")
+EndOn
+
+On ShipTaskOptionsMenu Do
+  % ex WShipAutoTaskCommandTile::handleCommand (part)
+  AddItem Atom("CCUI.Task.TogglePredictToEnd"),  If(Pref("Task.PredictToEnd"),  Translate("Predict to cursor"),         Translate("Predict to end"))
+  AddItem Atom("CCUI.Task.ToggleShowDistances"), If(Pref("Task.ShowDistances"), Translate("Don't show turn distances"), Translate("Show turn distances"))
 EndOn
 
 On PlanetTaskOrdersMenu Do

@@ -129,6 +129,10 @@ namespace game { namespace config {
         static const IntegerOptionDescriptor Sort_Search;
         static const IntegerOptionDescriptor Sort_Search_Secondary;
 
+        // Task screen
+        static const IntegerOptionDescriptor Task_PredictToEnd;
+        static const IntegerOptionDescriptor Task_ShowDistances;
+
         // Simulation
         static const IntegerOptionDescriptor Sim_NumThreads;
     };

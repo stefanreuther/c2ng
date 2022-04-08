@@ -234,6 +234,29 @@ TestGameProxyTaskEditorProxy::testShipStatus()
     TS_ASSERT_EQUALS(recv.status.positions[0].getY(), 1036);
     TS_ASSERT_EQUALS(recv.status.positions[1].getX(), 1000);
     TS_ASSERT_EQUALS(recv.status.positions[1].getY(), 1050);
+    TS_ASSERT_EQUALS(recv.status.distances2.size(), 2U);
+    TS_ASSERT_EQUALS(recv.status.distances2[0], 36*36);
+    TS_ASSERT_EQUALS(recv.status.distances2[1], 14*14);
+
+    // Update configuration: should send update
+    recv.ok = false;
+    class Task : public util::Request<game::Session> {
+     public:
+        virtual void handle(game::Session& session)
+            {
+                session.getRoot()->userConfiguration()[game::config::UserConfiguration::Task_ShowDistances].set(0);
+                session.notifyListeners();
+            }
+    };
+    s.gameSender().postNewRequest(new Task());
+    while (!recv.ok) {
+        TS_ASSERT(disp.wait(1000));
+    }
+
+    TS_ASSERT(recv.ok);
+    TS_ASSERT(recv.status.valid);
+    TS_ASSERT_EQUALS(recv.status.positions.size(), 2U);
+    TS_ASSERT_EQUALS(recv.status.distances2.size(), 0U);  // no longer reported because option disabled
 }
 
 /** Test message status reporting. */
