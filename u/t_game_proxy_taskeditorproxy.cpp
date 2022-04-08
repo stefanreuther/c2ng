@@ -12,6 +12,7 @@
 #include "game/test/root.hpp"
 #include "game/test/sessionthread.hpp"
 #include "game/test/shiplist.hpp"
+#include "game/test/waitindicator.hpp"
 #include "game/turn.hpp"
 #include "interpreter/subroutinevalue.hpp"
 #include "util/simplerequestdispatcher.hpp"
@@ -348,4 +349,63 @@ TestGameProxyTaskEditorProxy::testBase()
     TS_ASSERT_EQUALS(recv.status.buildOrder[0], "OUTRIDER CLASS SCOUT");
     TS_ASSERT_EQUALS(recv.status.buildOrder[1], "Transwarp Drive");
     TS_ASSERT_EQUALS(recv.status.missingMinerals, "4,650sup");  // FIXME: should be mc; see game::actions::CargoCostAction::getMissingAmount
+}
+
+/** Test editing.
+    A: make session containing a ship and a ship task.
+    E: status correctly reported */
+void
+TestGameProxyTaskEditorProxy::testEdit()
+{
+    const int SHIP_ID = 43;
+
+    // Environment
+    CxxTest::setAbortTestOnFail(true);
+    game::test::WaitIndicator ind;          // must be first because SessionThread will post updates into it
+    SessionThread s;
+    prepare(s);
+    addShip(s, SHIP_ID, Point(1000,1000));
+
+    // Add a task
+    {
+        Ptr<TaskEditor> ed = s.session().getAutoTaskEditor(SHIP_ID, Process::pkShipTask, true);
+        TS_ASSERT(ed.get());
+
+        // releaseAutoTaskEditor will run the task, so the first command needs to be 'stop'
+        String_t code[] = { "stop", "hammer", "time" };
+        ed->replace(0, 0, code, TaskEditor::DefaultCursor, TaskEditor::PlacePCBefore);
+
+        s.session().releaseAutoTaskEditor(ed);
+    }
+
+    // Testee
+    TaskEditorProxy testee(s.gameSender(), ind);
+    testee.selectTask(SHIP_ID, Process::pkShipTask, true);
+
+    // Get status, synchronously
+    TaskEditorProxy::Status st;
+    testee.getStatus(ind, st);
+    TS_ASSERT(st.valid);
+    TS_ASSERT_EQUALS(st.commands.size(), 3U);
+    TS_ASSERT_EQUALS(st.commands[0], "stop");
+    TS_ASSERT_EQUALS(st.pc, 0U);
+    TS_ASSERT_EQUALS(st.cursor, 3U);
+    TS_ASSERT_EQUALS(st.isInSubroutineCall, true);
+
+    // Manipulate
+    testee.addAsCurrent("stop %2");
+    testee.addAtEnd("again");
+
+    // Check status again
+    testee.getStatus(ind, st);
+    TS_ASSERT(st.valid);
+    TS_ASSERT_EQUALS(st.commands.size(), 5U);
+    TS_ASSERT_EQUALS(st.commands[0], "stop %2");
+    TS_ASSERT_EQUALS(st.commands[1], "stop");
+    TS_ASSERT_EQUALS(st.commands[2], "hammer");
+    TS_ASSERT_EQUALS(st.commands[3], "time");
+    TS_ASSERT_EQUALS(st.commands[4], "again");
+    TS_ASSERT_EQUALS(st.pc, 0U);
+    TS_ASSERT_EQUALS(st.cursor, 5U);
+    TS_ASSERT_EQUALS(st.isInSubroutineCall, false);
 }

@@ -7,6 +7,7 @@
 
 #include "afl/base/signal.hpp"
 #include "afl/data/stringlist.hpp"
+#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "game/types.hpp"
 #include "interpreter/process.hpp"
@@ -92,9 +93,24 @@ namespace game { namespace proxy {
             \see game::Session::getAutoTaskEditor */
         void selectTask(Id_t id, interpreter::Process::ProcessKind kind, bool create);
 
+        /** Get status, synchronously.
+            \param [in,out] ind  WaitIndicator
+            \param [out]    out  Status */
+        void getStatus(WaitIndicator& ind, Status& out);
+
         /** Set cursor.
             \param newCursor New cursor (0-based line number) */
         void setCursor(size_t newCursor);
+
+        /** Add command as current command.
+            \param cmd Command
+            \see interpreter::TaskEditor::addAsCurrent() */
+        void addAsCurrent(const String_t& cmd);
+
+        /** Add command at end of task.
+            \param cmd Command
+            \see interpreter::TaskEditor::addAtEnd() */
+        void addAtEnd(const String_t& cmd);
 
         /** Signal: change of task text.
             Reported whenever the task changes, or a new task is selected. */

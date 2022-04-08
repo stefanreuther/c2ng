@@ -232,6 +232,9 @@ TestGameProxyBuildShipProxy::testNormal()
     TS_ASSERT_EQUALS(q.getHullType(), game::test::ANNIHILATION_HULL_ID);
     TS_ASSERT_EQUALS(q.getOwner(), PLAYER_NR);
 
+    String_t cmd = testee.toScriptCommand(ind, "Build");
+    TS_ASSERT_EQUALS(cmd, "Build 53, 9, 4, 3, 2, 8   % ANNIHILATION CLASS BATTLESHIP");
+
     // Commit; verify that order is executed
     testee.commit();
 

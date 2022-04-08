@@ -20,6 +20,7 @@ using game::config::UserConfiguration;
 using game::interface::NotificationStore;
 using game::interface::ShipTaskPredictor;
 using interpreter::Process;
+using interpreter::TaskEditor;
 
 namespace {
     void addMissingCargo(String_t& out, const char* lbl, int32_t miss, const util::NumberFormatter& fmt)
@@ -58,6 +59,8 @@ class game::proxy::TaskEditorProxy::Trampoline {
 
     void selectTask(Id_t id, Process::ProcessKind kind, bool create);
     void setCursor(size_t newCursor);
+    void addAsCurrent(String_t cmd);
+    void addAtEnd(String_t cmd);
     void describe(Status& out) const;
     void describeShip(ShipStatus& out) const;
     void describeBase(BaseStatus& out) const;
@@ -67,7 +70,7 @@ class game::proxy::TaskEditorProxy::Trampoline {
  private:
     Session& m_session;
     util::RequestSender<TaskEditorProxy> m_reply;
-    afl::base::Ptr<interpreter::TaskEditor> m_editor;
+    afl::base::Ptr<TaskEditor> m_editor;
     afl::base::SignalConnection conn_change;
     afl::base::SignalConnection conn_objectChange;
     afl::base::SignalConnection conn_prefChange;
@@ -81,7 +84,7 @@ game::proxy::TaskEditorProxy::Trampoline::selectTask(Id_t id, Process::ProcessKi
     // Remember the old editor
     // This means the old one will die no earlier than releaseAutoTaskEditor() below.
     // In particular, when this function is called with the same parameters again, it'll re-use the same instance.
-    afl::base::Ptr<interpreter::TaskEditor> old = m_editor;
+    afl::base::Ptr<TaskEditor> old = m_editor;
 
     // Disconnect the signal. Anything that happens during the change will be ignored,
     // we explicitly send a status at the end.
@@ -117,6 +120,22 @@ game::proxy::TaskEditorProxy::Trampoline::setCursor(size_t newCursor)
 {
     if (m_editor.get() != 0) {
         m_editor->setCursor(newCursor);
+    }
+}
+
+void
+game::proxy::TaskEditorProxy::Trampoline::addAsCurrent(String_t cmd)
+{
+    if (m_editor.get() != 0) {
+        m_editor->addAsCurrent(TaskEditor::Commands_t::fromSingleObject(cmd));
+    }
+}
+
+void
+game::proxy::TaskEditorProxy::Trampoline::addAtEnd(String_t cmd)
+{
+    if (m_editor.get() != 0) {
+        m_editor->addAtEnd(TaskEditor::Commands_t::fromSingleObject(cmd));
     }
 }
 
@@ -334,7 +353,36 @@ game::proxy::TaskEditorProxy::selectTask(Id_t id, interpreter::Process::ProcessK
 }
 
 void
+game::proxy::TaskEditorProxy::getStatus(WaitIndicator& ind, Status& out)
+{
+    class Task : public util::Request<Trampoline> {
+     public:
+        Task(Status& out)
+            : m_out(out)
+            { }
+        virtual void handle(Trampoline& tpl)
+            { tpl.describe(m_out); }
+     private:
+        Status& m_out;
+    };
+    Task t(out);
+    ind.call(m_trampoline, t);
+}
+
+void
 game::proxy::TaskEditorProxy::setCursor(size_t newCursor)
 {
     m_trampoline.postRequest(&Trampoline::setCursor, newCursor);
+}
+
+void
+game::proxy::TaskEditorProxy::addAsCurrent(const String_t& cmd)
+{
+    m_trampoline.postRequest(&Trampoline::addAsCurrent, cmd);
+}
+
+void
+game::proxy::TaskEditorProxy::addAtEnd(const String_t& cmd)
+{
+    m_trampoline.postRequest(&Trampoline::addAtEnd, cmd);
 }

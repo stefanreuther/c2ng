@@ -100,6 +100,16 @@ namespace client { namespace dialogs {
         afl::string::Translator& translator()
             { return m_translator; }
 
+        /** Access game sender.
+            @return game sender */
+        util::RequestSender<game::Session> gameSender()
+            { return m_gameSender; }
+
+        /** Get planet Id.
+            @return planet Id as passed to constructor */
+        game::Id_t getPlanetId() const
+            { return m_planetId; }
+
         /** Signal: change of current build order status.
             Called whenever the status changes, either by an event from the BuildShipProxy, or from init(). */
         afl::base::Signal<void(const game::proxy::BuildShipProxy::Status&)> sig_change;

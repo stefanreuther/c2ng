@@ -32,6 +32,7 @@ class game::proxy::BuildShipProxy::Trampoline {
     void packStatus(Status& st);
     void getCostSummary(game::spec::CostSummary& result);
     void getQuery(ShipQuery& result);
+    String_t toScriptCommand(const String_t& verb);
 
     bool findShipCloningHere(Id_t& id, String_t& name);
     void cancelAllCloneOrders();
@@ -182,6 +183,12 @@ game::proxy::BuildShipProxy::Trampoline::getQuery(ShipQuery& result)
     result = m_action.getQuery();
 }
 
+inline String_t
+game::proxy::BuildShipProxy::Trampoline::toScriptCommand(const String_t& verb)
+{
+    return m_action.getBuildOrder().toScriptCommand(verb, &m_shipList);
+}
+
 inline bool
 game::proxy::BuildShipProxy::Trampoline::findShipCloningHere(Id_t& id, String_t& name)
 {
@@ -293,6 +300,27 @@ game::proxy::BuildShipProxy::getQuery(WaitIndicator& ind)
 
     ShipQuery result;
     Task t(result);
+    ind.call(m_sender, t);
+    return result;
+}
+
+String_t
+game::proxy::BuildShipProxy::toScriptCommand(WaitIndicator& ind, String_t verb)
+{
+    class Task : public util::Request<Trampoline> {
+     public:
+        Task(String_t& result, const String_t& verb)
+            : m_result(result), m_verb(verb)
+            { }
+        virtual void handle(Trampoline& tpl)
+            { m_result = tpl.toScriptCommand(m_verb); }
+     private:
+        String_t& m_result;
+        const String_t& m_verb;
+    };
+
+    String_t result;
+    Task t(result, verb);
     ind.call(m_sender, t);
     return result;
 }

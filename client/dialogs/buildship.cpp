@@ -9,6 +9,7 @@
 #include "client/downlink.hpp"
 #include "game/proxy/basestorageproxy.hpp"
 #include "game/proxy/buildshipproxy.hpp"
+#include "game/proxy/taskeditorproxy.hpp"
 #include "ui/dialogs/messagebox.hpp"
 #include "ui/group.hpp"
 #include "ui/layout/hbox.hpp"
@@ -24,6 +25,7 @@ using afl::string::Format;
 using client::dialogs::BuildShipMain;
 using game::proxy::BaseStorageProxy;
 using game::proxy::BuildShipProxy;
+using game::proxy::TaskEditorProxy;
 using ui::Group;
 using ui::dialogs::MessageBox;
 using ui::widgets::Button;
@@ -59,6 +61,8 @@ namespace {
 
         bool checkClone(game::proxy::WaitIndicator& ind);
         bool checkChange();
+
+        bool addToAutoTask(game::proxy::WaitIndicator& ind, const String_t& cmd);
     };
 }
 
@@ -132,26 +136,34 @@ BuildShipDialog::onBuild()
 
     switch (st.status) {
      case game::actions::BaseBuildAction::MissingResources:
-        // FIXME: special handling for missing resources:
-        //         bool add =
-        //             UIMessageBox(_("You do not have enough resources to build this ship now. "
-        //                            "Do you want to add this build order to this base's Auto Task, "
-        //                            "to build it as soon as resources are available?"),
-        //                          _("Build order rejected")).doYesNoDialog();
-        //         ta.doCancel();
-        //         transfer.doCancel();
-        //         if (add && addToAutoTask(getAutoTaskForObject(planet, IntExecutionContext::pkBaseTask, true),
-        //                                  makeBuildOrderCommand("EnqueueShip", action.getBuildOrder())))
-        //         {
-        //             action.getPlanet().setBaseBuildOrder(blankBuildOrder);
-        //             stop(1);
-        //         }
+        // Missing resources: check change, then add to task
+        if (st.isChange && !checkChange()) {
+            return;
+        }
+        if (MessageBox(tx("You do not have enough resources to build this ship now. "
+                          "Do you want to add this build order to this base's Auto Task, "
+                          "to build it as soon as resources are available?"),
+                       tx("Build Order Rejected"),
+                       root)
+            .doYesNoDialog(tx))
+        {
+            String_t cmd = m_buildProxy.toScriptCommand(link, "EnqueueShip");
+            if (addToAutoTask(link, cmd)) {
+                m_buildProxy.cancel();
+                m_loop.stop(0);
+            }
+        }
+        break;
+
      case game::actions::BaseBuildAction::DisallowedTech:
      case game::actions::BaseBuildAction::ForeignHull:
      case game::actions::BaseBuildAction::DisabledTech:
+        // Cannot build, and adding to task won't help
         MessageBox(tx("You cannot build this ship."), tx("Build Order Rejected"), root).doOkDialog(tx);
         break;
+
      case game::actions::BaseBuildAction::Success:
+        // Normal case: check conflict/change, then submit
         if (!checkClone(link)) {
             return;
         }
@@ -180,6 +192,15 @@ BuildShipDialog::onToggleUseParts()
 {
     // WBaseShipBuildDialog::onToggleUseParts
     m_buildProxy.setUsePartsFromStorage(!m_usePartsFromStorage.getFlags().contains(ui::HighlightedButton));
+}
+
+/* Render "use parts from storage" flag. */
+void
+BuildShipDialog::onBuildOrderChange(const BuildShipProxy::Status& st)
+{
+    // ex WBaseShipBuildDialog::updateUseParts
+    m_isNew = st.isNew;
+    m_usePartsFromStorage.setFlag(ui::HighlightedButton, st.isUsePartsFromStorage);
 }
 
 /* Check for conflicting clone order.
@@ -240,13 +261,58 @@ BuildShipDialog::checkChange()
     return (reply == YES);
 }
 
-/* Render "use parts from storage" flag. */
-void
-BuildShipDialog::onBuildOrderChange(const BuildShipProxy::Status& st)
+/* Add command to auto-task. If task is non-empty, ask what to do first.
+   (This was a general function in PCC2, but only used for base tasks, so I place it here for now.
+   It can probably be moved with little pain if needed.) */
+bool
+BuildShipDialog::addToAutoTask(game::proxy::WaitIndicator& ind, const String_t& cmd)
 {
-    // ex WBaseShipBuildDialog::updateUseParts
-    m_isNew = st.isNew;
-    m_usePartsFromStorage.setFlag(ui::HighlightedButton, st.isUsePartsFromStorage);
+    // ex addToAutoTask(IntExecutionContext* task, string_t cmd)
+    afl::string::Translator& tx = m_widget.translator();
+    ui::Root& root = m_widget.root();
+
+    // Query status
+    TaskEditorProxy ed(m_widget.gameSender(), m_widget.root().engine().dispatcher());
+    TaskEditorProxy::Status st;
+    ed.selectTask(m_widget.getPlanetId(), interpreter::Process::pkBaseTask, true);
+    ed.getStatus(ind, st);
+
+    // Task valid? Invalid means we could not freeze it
+    if (!st.valid) {
+        MessageBox(tx("Unable to modify Auto Task at this point. "
+                      "It might be in use by another part of the program."),
+                   tx("Auto Task"),
+                   root)
+            .doOkDialog(tx);
+        return false;
+    }
+
+    // Determine place to insert
+    enum { Before = 1, End = 2, Cancel = 3 };
+    int action = End;
+    if (st.pc < st.commands.size()) {
+        util::KeyString b(tx("Before")), e(tx("End"));
+        MessageBox msg(Format(tx("This unit is already executing the command \"%s\". "
+                                 "Do you want to execute the new order before that, "
+                                 "or do you want it at the end of its current task?"),
+                              st.commands[st.pc]),
+                       tx("Auto Task"),
+                       root);
+        msg.addButton(Before, b);
+        msg.addButton(End,    e);
+        msg.addButton(Cancel, tx("Cancel"), util::Key_Escape);
+        action = msg.run();
+    }
+
+    if (action == Before) {
+        ed.addAsCurrent(cmd);
+        return true;
+    }
+    if (action == End) {
+        ed.addAtEnd(cmd);
+        return true;
+    }
+    return false;
 }
 
 

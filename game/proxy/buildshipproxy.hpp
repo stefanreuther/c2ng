@@ -106,6 +106,13 @@ namespace game { namespace proxy {
             \see game::actions::BuildShip::getQuery */
         ShipQuery getQuery(WaitIndicator& ind);
 
+        /** Get order as script command.
+            \param [in,out] ind    WaitIndicator for UI synchronisation
+            \param [in]     verb   Command verb to use
+            \return command
+            \see game::ShipBuildOrder::toScriptCommand */
+        String_t toScriptCommand(WaitIndicator& ind, String_t verb);
+
         /** Find ship cloning at this planet.
             \param [in,out] ind    WaitIndicator for UI synchronisation
             \param [out]    id     Ship Id
