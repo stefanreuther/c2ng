@@ -33,6 +33,7 @@ client::widgets::ItemCostDisplay::ItemCostDisplay(ui::Root& root, afl::string::T
     : SimpleTable(root, 5, 7),
       m_formatter(false, false),
       m_available(), m_partCost(), m_totalCost(),
+      m_mode(),
       m_haveTech(), m_needTech()
 {
     buildTable(root, tx);
