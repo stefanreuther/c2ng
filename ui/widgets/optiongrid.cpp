@@ -217,13 +217,14 @@ ui::widgets::OptionGrid::draw(gfx::Canvas& can)
         outText(ctx, gfx::Point(ext.getLeftX() + lineHeight + 5, y), it.label);
 
         // Right side
+        int rightWidth = ext.getWidth() - lineHeight - 5 - ctx.getFont()->getTextWidth(it.label);
         ctx.useFont(*m_root.provider().getFont(it.font));
         ctx.setTextAlign(gfx::RightAlign, gfx::MiddleAlign);
         ctx.setColor(it.button.hasState(DisabledState)
                      ? util::SkinColor::Faded
                      : util::SkinColor::Green);
         ctx.setSolidBackground();
-        outTextF(ctx, gfx::Point(ext.getRightX(), y), m_rightWidth, it.value);
+        outTextF(ctx, gfx::Point(ext.getRightX(), y), rightWidth, it.value);
     }
 
     defaultDrawChildren(can);
