@@ -731,7 +731,8 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/dialogs/shipcostcalculator.cpp \
+FILES_guilib = client/dialogs/choosehull.cpp client/dialogs/choosehull.hpp \
+    client/dialogs/shipcostcalculator.cpp \
     client/dialogs/shipcostcalculator.hpp client/dialogs/buildshiporder.cpp \
     client/dialogs/buildshiporder.hpp client/dialogs/buildshipmain.cpp \
     client/dialogs/buildshipmain.hpp client/dialogs/scriptcommanddialog.cpp \

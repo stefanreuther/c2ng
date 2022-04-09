@@ -7,6 +7,7 @@
 #include "afl/base/deleter.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "afl/string/format.hpp"
+#include "client/dialogs/choosehull.hpp"
 #include "client/downlink.hpp"
 #include "client/picturenamer.hpp"
 #include "client/widgets/filterdisplay.hpp"
@@ -168,83 +169,6 @@ namespace {
         }
     }
 
-
-
-    class EditHullDialog {
-     public:
-        EditHullDialog(ui::Root& root, afl::string::Translator& tx, int current, SpecBrowserProxy& proxy)
-            : m_proxy(proxy),
-              m_root(root),
-              m_translator(tx),
-              m_loop(root),
-              m_list(m_root.provider(), m_root.colorScheme()),
-              m_current(current)
-            {
-                proxy.sig_listChange.add(this, &EditHullDialog::onListChange);
-                m_list.setPreferredHeight(18);
-                m_list.setPreferredWidth(20, false);
-            }
-
-        bool run(const String_t& title)
-            {
-                afl::base::Deleter del;
-                ui::Window& win = del.addNew(new ui::Window(title, m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
-                win.add(ui::widgets::FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame,
-                                                            del.addNew(new ui::widgets::ScrollbarContainer(m_list, m_root))));
-
-                ui::widgets::StandardDialogButtons& btn = del.addNew(new ui::widgets::StandardDialogButtons(m_root, m_translator));
-                win.add(btn);
-                btn.addStop(m_loop);
-
-                win.pack();
-                m_root.centerWidget(win);
-                m_root.add(win);
-                return m_loop.run() != 0;
-            }
-
-        void onListChange(const gsi::ListContent& content, size_t /*index*/)
-            {
-                // Fetch current. If list is still empty, this is a nop.
-                m_list.getCurrentKey(m_current);
-
-                // Replace list
-                util::StringList list;
-                for (size_t i = 0, n = content.content.size(); i < n; ++i) {
-                    list.add(content.content[i].id, content.content[i].name);
-                }
-                m_list.swapItems(list);
-                m_list.setCurrentKey(m_current);
-            }
-
-        int32_t getCurrent()
-            {
-                m_list.getCurrentKey(m_current);
-                return m_current;
-            }
-
-     private:
-        SpecBrowserProxy& m_proxy;
-        ui::Root& m_root;
-        afl::string::Translator& m_translator;
-        ui::EventLoop m_loop;
-        ui::widgets::StringListbox m_list;
-        int m_current;
-    };
-
-
-
-    bool editHull(ui::Root& root, const String_t& title, int32_t& hullNr, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender)
-    {
-        SpecBrowserProxy proxy(gameSender, root.engine().dispatcher(), std::auto_ptr<game::spec::info::PictureNamer>(new client::PictureNamer()));
-        proxy.setPage(gsi::HullPage);
-        EditHullDialog dlg(root, tx, hullNr, proxy);
-        if (dlg.run(title)) {
-            hullNr = dlg.getCurrent();
-            return true;
-        } else {
-            return false;
-        }
-    }
 
     bool editSearch(ui::Root& root, const String_t& title, String_t& value, afl::string::Translator& tx)
     {
@@ -596,7 +520,7 @@ namespace {
                     // Call set()/add().
                     return editPlayer(m_root, f.name, f.elem.value, m_translator, m_gameSender);
                  case gsi::EditValueHull:
-                    return editHull(m_root, f.name, f.elem.value, m_translator, m_gameSender);
+                    return client::dialogs::chooseHull(m_root, f.name, f.elem.value, m_translator, m_gameSender, false);
                  case gsi::EditString:
                     return editSearch(m_root, f.name, f.value, m_translator);
                 }

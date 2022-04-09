@@ -6,6 +6,7 @@
 #include "client/dialogs/buildshipmain.hpp"
 #include "afl/string/format.hpp"
 #include "client/dialogs/buildparts.hpp"
+#include "client/dialogs/choosehull.hpp"
 #include "client/dialogs/hullspecification.hpp"
 #include "client/dialogs/specbrowserdialog.hpp"
 #include "client/dialogs/techupgradedialog.hpp"
@@ -344,6 +345,16 @@ client::dialogs::BuildShipMain::onBuildParts()
     doBuildShipParts(m_root, m_gameSender, m_planetId, area, id, m_translator);
 }
 
+/* "Spc-Select" for ship cost calculator */
+void
+client::dialogs::BuildShipMain::onChooseHull()
+{
+    int32_t hullNr = m_pComponentList[game::HullTech]->getCurrentId();
+    if (chooseHull(m_root, m_translator("Set Hull Type"), hullNr, m_translator, m_gameSender, false)) {
+        m_pComponentList[game::HullTech]->setCurrentId(hullNr);
+    }
+}
+
 /* "+" button for beams. */
 void
 client::dialogs::BuildShipMain::addBeam()
@@ -468,6 +479,12 @@ client::dialogs::BuildShipMain::makeStorageColumn(afl::base::Deleter& del, game:
         g.add(del.addNew(new ui::Spacer()));
         g.add(btnBuild);
         btnBuild.sig_fire.add(this, &BuildShipMain::onBuildParts);
+    } else if (area == game::HullTech && m_storageProxy.hasAllHulls()) {
+        // All hulls displayed: offer a filter
+        Button& btnChoose = del.addNew(new Button(m_translator("Spc-Select"), ' ', m_root));
+        g.add(del.addNew(new ui::Spacer()));
+        g.add(btnChoose);
+        btnChoose.sig_fire.add(this, &BuildShipMain::onChooseHull);
     } else {
         // We do not have a planet: just a spacer
         g.add(del.addNew(new ui::Spacer()));

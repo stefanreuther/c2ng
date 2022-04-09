@@ -71,6 +71,11 @@ namespace game { namespace proxy {
             \param [out] result  Part information */
         void getParts(WaitIndicator& ind, TechLevel level, Parts_t& result);
 
+        /** Check all-hulls status.
+            If true, reports all hulls; if false, only those buildable on this base
+            \return Value of allHulls parameter to constructor */
+        bool hasAllHulls() const;
+
         /** Signal: part list update.
             Sent whenever the part list changes, e.g. by a change to the planet.
             \param area Area
@@ -82,6 +87,7 @@ namespace game { namespace proxy {
         class TrampolineFromAdaptor;
         util::RequestReceiver<BaseStorageProxy> m_receiver;
         util::RequestSender<Trampoline> m_sender;
+        const bool m_allHulls;
     };
 
 } }

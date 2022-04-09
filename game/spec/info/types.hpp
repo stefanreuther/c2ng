@@ -156,37 +156,37 @@ namespace game { namespace spec { namespace info {
      *  Filtering
      */
 
-    /** Attribute to filter on. */
+    /** Attribute to filter on or sort by. */
     enum FilterAttribute {
-        Range_CostD,
-        Range_CostM,
-        Range_CostMC,
-        Range_CostT,
-        Range_DamagePower,
-        Range_HitOdds,
-        Range_IsArmed,
-        Range_IsDeathRay,
-        Range_KillPower,
-        Range_Mass,
-        Range_MaxBeams,
-        Range_MaxCargo,
-        Range_MaxCrew,
-        Range_MaxEfficientWarp,
-        Range_MaxFuel,
-        Range_MaxLaunchers,
-        Range_NumBays,
-        Range_NumEngines,
-        Range_NumMinesSwept,
-        Range_RechargeTime,
-        Range_Tech,
-        Range_TorpCost,
-        Range_Id,
-        Value_Hull,
-        Value_Player,
-        Value_Category,
-        Value_Origin,
-        ValueRange_ShipAbility,
-        String_Name
+        Range_CostD,            ///< Check for Duranium cost in range, sort by Duranium cost.
+        Range_CostM,            ///< Check for Molybdenum cost in range, sort by Molybdenum cost.
+        Range_CostMC,           ///< Check for money cost in rage, sort by money cost.
+        Range_CostT,            ///< Check for Tritanium cost in range, sort by Tritanium cost.
+        Range_DamagePower,      ///< Check for damage power in range, sort by damage power.
+        Range_HitOdds,          ///< Check for hit odds in range, sort by hit odds.
+        Range_IsArmed,          ///< Check for ship-is-armed flag in range, sort by armed status. Range is unit range 0 or 1.
+        Range_IsDeathRay,       ///< Check for weapon-is-death-ray flag in range, sort by death-ray type. Range is unit range 0 or 1.
+        Range_KillPower,        ///< Check for kill power in range, sort by kill power.
+        Range_Mass,             ///< Check for mass in range, sort by mass.
+        Range_MaxBeams,         ///< Check for maximum number of beams in range, sort by maximum number of beams.
+        Range_MaxCargo,         ///< Check for maximum cargo room in range, sort by maximum cargo.
+        Range_MaxCrew,          ///< Check for maximum crew in range, sort by maximum crew.
+        Range_MaxEfficientWarp, ///< Check for maximum efficient warp in range, sort by maximum efficient warp.
+        Range_MaxFuel,          ///< Check for maximum fuel in range, sort by maximum fuel.
+        Range_MaxLaunchers,     ///< Check for maximum number of launchers in range, sort by maximum number of launchers.
+        Range_NumBays,          ///< Check for number of bays in range, sort by number of bays.
+        Range_NumEngines,       ///< Check for number of engines in range, sort by number of engines.
+        Range_NumMinesSwept,    ///< Check for number of mines swept in range, sort by number of mines swept.
+        Range_RechargeTime,     ///< Check for weapon recharge time in range, sort by recharge time.
+        Range_Tech,             ///< Check for tech level in range, sort by tech.
+        Range_TorpCost,         ///< Check for torpedo cost in range, sort by torpedo cost.
+        Range_Id,               ///< Check for Id in range, sort by Id/natural position.
+        Value_Hull,             ///< Check for match of hull Id (player can build, ability of hull, etc.).
+        Value_Player,           ///< Check for match of player number (hull can be built by, etc.).
+        Value_Category,         ///< Check for match on racial ability type (RacialAbilityList::Category), sort by type.
+        Value_Origin,           ///< Check for match on racial ability origin (RacialAbilityList::Origin), sort by origin.
+        ValueRange_ShipAbility, ///< Check for match on hull function, with experience range.
+        String_Name             ///< Check for name substring, sort by name.
     };
 
     /** Set of filter attributes. */
@@ -195,7 +195,8 @@ namespace game { namespace spec { namespace info {
     /** Raw filter element.
         A Range_XXX attribute is filtered for an attribute being in the given range.
         A Value_XXX attribute is filtered for the attribute being exactly the given value.
-        A ValueRange_XXX attribute needs to match both. */
+        A ValueRange_XXX attribute needs to match both.
+        The String_Name attribute is represented as a special case, not using this structure. */
     struct FilterElement {
         FilterAttribute att;       ///< Attribute to filter on.
         int32_t value;             ///< Value filter (for Value_XXX or ValueRange_XXX filter).
@@ -221,32 +222,53 @@ namespace game { namespace spec { namespace info {
     enum FilterEditMode {
         /** Filter is not editable. UI should not offer any edit. */
         NotEditable,
+
         /** Edit range.
             elem.range is current/default range; edit to be subrange of maxRange.
             elem.value is fixed. */
         EditRange,
+
         /** Edit range. Like EditRange, but offer special UI for level range. */
         EditRangeLevel,
+
         /** Edit value. Offer special UI for choosing a player.
             elem.value is current/default value; edit to be element of maxRange.
             elem.range is fixed. */
         EditValuePlayer,
+
         /** Edit value. Like EditValuePlayer, but offer special UI for choosing a hull. */
         EditValueHull,
+
         /** Edit string. The string is not in the filter element, but in FilterInfo::value. */
         EditString,
+
         /** Set fixed values. Should be represented in UI as a toggle. */
         SetValueRange
     };
 
     /** Cooked filter element. */
     struct FilterInfo {
-        String_t name;             ///< Name of filter.
-        String_t value;            ///< Current value of filter.
-        FilterEditMode mode;       ///< Possible edit mode.
-        IntRange_t maxRange;       ///< Maximum range (depends on mode).
-        FilterElement elem;        ///< Current/default filter (depends on mode).
-        bool active;               ///< true if filter is active.
+        /** Name of filter.
+            Typicalls, string representation of FilterAttribute. */
+        String_t name;
+
+        /** Current value.
+            Typically, string representation representation of FilterElement::value and FilterElement::range;
+            for String_Name, the search text. */
+        String_t value;
+
+        /** Possible edit mode. */
+        FilterEditMode mode;
+
+        /** Maximum range (depends on mode). */
+        IntRange_t maxRange;
+
+        /** Current/default filter (depends on mode). */
+        FilterElement elem;
+
+        /** true if filter is active on current page.
+            false if current page does not honor this filter. */
+        bool active;
 
         FilterInfo(const String_t& name, const String_t& value, FilterEditMode mode, IntRange_t maxRange, const FilterElement& elem)
             : name(name), value(value), mode(mode), maxRange(maxRange), elem(elem), active(true)

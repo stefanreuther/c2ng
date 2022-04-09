@@ -1,9 +1,11 @@
 /**
   *  \file client/dialogs/simulator.cpp
+  *  \brief Battle Simulator Main Dialog
   */
 
 #include "client/dialogs/simulator.hpp"
 #include "afl/string/format.hpp"
+#include "client/dialogs/choosehull.hpp"
 #include "client/dialogs/friendlycodedialog.hpp"
 #include "client/dialogs/sessionfileselectiondialog.hpp"
 #include "client/dialogs/simulationabilities.hpp"
@@ -1526,13 +1528,10 @@ void
 SimulatorDialog::editType(bool afterAdd, SimulationSetupProxy::Slot_t slot, int oldValue)
 {
     // ex WSimListWithHandler::editType
-    Downlink link(m_root, m_translator);
-    SimulationSetupProxy::Elements_t elems;
-    m_proxy.getHullTypeChoices(link, elems);
-    sortAlphabetically(elems, 1);
-
+    // For a simple list, SimulationSetupProxy provides hull choices (getHullTypeChoices).
+    // However, chooseHull() provides better UI.
     int32_t value = oldValue;
-    if (doList(m_root, m_gameSender, elems, value, m_translator("Set Hull Type"), "pcc2:bsim", m_translator)) {
+    if (client::dialogs::chooseHull(m_root, m_translator("Set Hull Type"), value, m_translator, m_gameSender, true)) {
         m_proxy.setHullType(slot, value, afterAdd);
     }
 }

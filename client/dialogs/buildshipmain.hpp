@@ -74,7 +74,7 @@ namespace client { namespace dialogs {
         /** Build dialog.
             This will build the main part of the dialog.
             @param del   Deleter to control lifetime of created objects
-            @param titel Window title
+            @param title Window title
             @return ui::Window instance in VBox layout, containing most widgets */
         ui::Window& buildDialog(afl::base::Deleter& del, String_t title);
 
@@ -119,6 +119,7 @@ namespace client { namespace dialogs {
         void onDetailedBill();
         void onHullSpecification();
         void onBuildParts();
+        void onChooseHull();
         void addBeam();
         void removeBeam();
         void addLauncher();

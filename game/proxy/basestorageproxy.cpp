@@ -216,12 +216,14 @@ class game::proxy::BaseStorageProxy::TrampolineFromAdaptor : public afl::base::C
 
 game::proxy::BaseStorageProxy::BaseStorageProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& receiver, Id_t planetId, bool allHulls)
     : m_receiver(receiver, *this),
-      m_sender(gameSender.makeTemporary(new CurrentStarbaseAdaptorFromSession(planetId)).makeTemporary(new TrampolineFromAdaptor(m_receiver.getSender(), allHulls)))
+      m_sender(gameSender.makeTemporary(new CurrentStarbaseAdaptorFromSession(planetId)).makeTemporary(new TrampolineFromAdaptor(m_receiver.getSender(), allHulls))),
+      m_allHulls(allHulls)
 { }
 
 game::proxy::BaseStorageProxy::BaseStorageProxy(util::RequestSender<StarbaseAdaptor> adaptorSender, util::RequestDispatcher& receiver, bool allHulls)
     : m_receiver(receiver, *this),
-      m_sender(adaptorSender.makeTemporary(new TrampolineFromAdaptor(m_receiver.getSender(), allHulls)))
+      m_sender(adaptorSender.makeTemporary(new TrampolineFromAdaptor(m_receiver.getSender(), allHulls))),
+      m_allHulls(allHulls)
 { }
 
 game::proxy::BaseStorageProxy::~BaseStorageProxy()
@@ -243,4 +245,10 @@ game::proxy::BaseStorageProxy::getParts(WaitIndicator& ind, TechLevel level, Par
     };
     Task t(level, result);
     ind.call(m_sender, t);
+}
+
+bool
+game::proxy::BaseStorageProxy::hasAllHulls() const
+{
+    return m_allHulls;
 }

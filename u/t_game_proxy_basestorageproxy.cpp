@@ -113,6 +113,7 @@ TestGameProxyBaseStorageProxy::testGetParts()
     prepare(t);
     game::test::WaitIndicator ind;
     game::proxy::BaseStorageProxy testee(t.gameSender(), ind, PLANET_ID);
+    TS_ASSERT_EQUALS(testee.hasAllHulls(), false);
 
     // Query hulls: expect 1
     {
@@ -179,6 +180,7 @@ TestGameProxyBaseStorageProxy::testGetAllHulls()
     prepare(t);
     game::test::WaitIndicator ind;
     game::proxy::BaseStorageProxy testee(t.gameSender(), ind, PLANET_ID, true);
+    TS_ASSERT_EQUALS(testee.hasAllHulls(), true);
 
     // Query hulls: expect 3
     game::proxy::BaseStorageProxy::Parts_t list;

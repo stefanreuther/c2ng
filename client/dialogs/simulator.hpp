@@ -1,5 +1,6 @@
 /**
   *  \file client/dialogs/simulator.hpp
+  *  \brief Battle Simulator Main Dialog
   */
 #ifndef C2NG_CLIENT_DIALOGS_SIMULATOR_HPP
 #define C2NG_CLIENT_DIALOGS_SIMULATOR_HPP
