@@ -106,6 +106,31 @@ class TestGameInterfaceIteratorProvider : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameInterfaceLabelExtra : public CxxTest::TestSuite {
+ public:
+    void testLink();
+    void testEarly();
+    void testLate();
+    void testSelfModify();
+    void testOtherModify();
+    void testConfig();
+    void testConfigError();
+    void testConfigError2();
+    void testConfigEmpty();
+    void testConfigEmpty2();
+    void testClear();
+    void testBadState();
+};
+
+class TestGameInterfaceLabelVector : public CxxTest::TestSuite {
+ public:
+    void testStorage();
+    void testStatus();
+    void testStatus2();
+    void testStatus3();
+    void testCompile();
+};
+
 class TestGameInterfaceMissionContext : public CxxTest::TestSuite {
  public:
     void testIt();

@@ -101,6 +101,7 @@ namespace {
 
 game::Session::Session(afl::string::Translator& tx, afl::io::FileSystem& fs)
     : sig_runRequest(),
+      sig_connectionChange(),
       m_log(),
       m_root(),
       m_shipList(),
@@ -708,6 +709,8 @@ game::Session::connectSignals()
     } else {
         m_world.setLocalLoadDirectory(0);
     }
+
+    sig_connectionChange.raise();
 }
 
 void

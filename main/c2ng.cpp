@@ -40,10 +40,13 @@
 #include "client/si/outputstate.hpp"
 #include "client/si/userside.hpp"
 #include "client/usercallback.hpp"
+#include "game/actions/preconditions.hpp"
 #include "game/browser/accountmanager.hpp"
 #include "game/browser/browser.hpp"
 #include "game/browser/directoryhandler.hpp"
 #include "game/game.hpp"
+#include "game/interface/labelextra.hpp"
+#include "game/interface/simpleprocedure.hpp"
 #include "game/interface/vmfile.hpp"
 #include "game/nu/browserhandler.hpp"
 #include "game/pcc/browserhandler.hpp"
@@ -78,8 +81,6 @@
 #include "util/string.hpp"
 #include "util/stringparser.hpp"
 #include "version.hpp"
-#include "game/actions/preconditions.hpp"
-#include "game/interface/simpleprocedure.hpp"
 
 namespace {
     const char LOG_NAME[] = "main";
@@ -963,6 +964,7 @@ namespace {
                 game::Session gameSession(translator(), fs);
                 gameSession.log().addListener(log());
                 gameSession.setSystemInformation(util::getSystemInformation());
+                game::interface::LabelExtra::create(gameSession);
 
                 // Set some variables
                 gameSession.world().setNewGlobalValue("C2$RESOURCEDIRECTORY", interpreter::makeStringValue(resourceDirectory->getDirectoryName()));

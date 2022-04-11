@@ -233,6 +233,9 @@ namespace game {
             As a minimum implementation, this signal can be hooked to ProcessList::run(). */
         afl::base::Signal<void()> sig_runRequest;
 
+        /** Signal: change of a connected object (Root, Game, ShipList). */
+        afl::base::Signal<void()> sig_connectionChange;
+
      private:
         afl::sys::Log m_log;
         afl::base::Ptr<Root> m_root;
