@@ -5,12 +5,14 @@
 #include <memory>
 #include "game/proxy/maprendererproxy.hpp"
 #include "afl/base/ptr.hpp"
-#include "game/map/renderer.hpp"
 #include "game/game.hpp"
-#include "game/turn.hpp"
+#include "game/interface/labelextra.hpp"
+#include "game/map/renderer.hpp"
 #include "game/root.hpp"
+#include "game/turn.hpp"
 
 using afl::base::Ptr;
+using game::interface::LabelExtra;
 using game::map::RenderOptions;
 using game::map::Viewport;
 using game::map::Renderer;
@@ -35,6 +37,7 @@ class game::proxy::MapRendererProxy::Trampoline {
     void loadOptions();
 
     util::RequestSender<MapRendererProxy> m_reply;
+    Session& m_session;
     Ptr<Game> m_game;
     Ptr<Turn> m_turn;
     Ptr<Root> m_root;
@@ -47,6 +50,7 @@ class game::proxy::MapRendererProxy::Trampoline {
 
 game::proxy::MapRendererProxy::Trampoline::Trampoline(game::Session& session, const util::RequestSender<MapRendererProxy>& reply)
     : m_reply(reply),
+      m_session(session),
       m_game(),
       m_turn(),
       m_root(),
@@ -75,7 +79,8 @@ game::proxy::MapRendererProxy::Trampoline::attachTurn()
         std::auto_ptr<Viewport> oldViewport(m_viewport);
 
         // Create objects
-        m_viewport.reset(new Viewport(m_turn->universe(), m_turn->getTurnNumber(), m_game->teamSettings(), m_game->shipScores(), *m_shipList, m_root->hostConfiguration()));
+        m_viewport.reset(new Viewport(m_turn->universe(), m_turn->getTurnNumber(), m_game->teamSettings(),
+                                      LabelExtra::get(m_session), m_game->shipScores(), *m_shipList, m_root->hostConfiguration()));
         m_renderer.reset(new Renderer(*m_viewport));
         loadOptions();
 

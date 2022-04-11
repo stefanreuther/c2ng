@@ -8,11 +8,12 @@
 #include "afl/base/signalconnection.hpp"
 #include "afl/base/uncopyable.hpp"
 #include "afl/bits/smallset.hpp"
+#include "game/config/hostconfiguration.hpp"
+#include "game/interface/labelextra.hpp"
 #include "game/map/point.hpp"
+#include "game/spec/shiplist.hpp"
 #include "game/teamsettings.hpp"
 #include "game/unitscoredefinitionlist.hpp"
-#include "game/spec/shiplist.hpp"
-#include "game/config/hostconfiguration.hpp"
 #include "util/atomtable.hpp"
 
 namespace game { namespace map {
@@ -44,6 +45,7 @@ namespace game { namespace map {
         typedef afl::bits::SmallSet<Option> Options_t;
 
         Viewport(Universe& univ, int turnNumber, TeamSettings& teams,
+                 game::interface::LabelExtra* labels,
                  const UnitScoreDefinitionList& shipScoreDefinitions,
                  const game::spec::ShipList& shipList,
                  const game::config::HostConfiguration& config);
@@ -51,6 +53,7 @@ namespace game { namespace map {
 
         Universe& universe() const;
         TeamSettings& teamSettings() const;
+        const game::interface::LabelExtra* labels() const;
         int getTurnNumber() const;
         const UnitScoreDefinitionList& shipScores() const;
         const game::spec::ShipList& shipList() const;
@@ -82,9 +85,11 @@ namespace game { namespace map {
 
      private:
         void onChange();
+        void onLabelChange(bool flag);
 
         Universe& m_universe;
         TeamSettings& m_teamSettings;
+        const game::interface::LabelExtra* m_labels;
         int m_turnNumber;
         const UnitScoreDefinitionList& m_shipScoreDefinitions;
         const game::spec::ShipList& m_shipList;
@@ -101,6 +106,7 @@ namespace game { namespace map {
 
         afl::base::SignalConnection conn_universeChange;
         afl::base::SignalConnection conn_teamChange;
+        afl::base::SignalConnection conn_labelChange;
     };
 
 } }

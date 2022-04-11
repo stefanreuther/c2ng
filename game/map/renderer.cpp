@@ -5,6 +5,7 @@
 #include <cmath>
 #include "game/map/renderer.hpp"
 #include "afl/bits/smallset.hpp"
+#include "game/interface/labelextra.hpp"
 #include "game/map/anyplanettype.hpp"
 #include "game/map/anyshiptype.hpp"
 #include "game/map/boundingbox.hpp"
@@ -16,6 +17,7 @@
 #include "util/math.hpp"
 
 using game::config::HostConfiguration;
+using game::interface::LabelExtra;
 
 class game::map::Renderer::State {
  public:
@@ -764,7 +766,9 @@ game::map::Renderer::renderPlanet(const State& st, const Planet& planet, Point p
 
     String_t label;
     if (m_viewport.hasOption(Viewport::ShowLabels)) {
-        // FIXME: obtain label
+        if (const LabelExtra* ex = m_viewport.labels()) {
+            label = ex->planetLabels().getLabel(planet.getId());
+        }
     }
 
     for (int img = st.getFirstImage(); img >= 0; img = st.getNextImage(img)) {
@@ -890,7 +894,9 @@ game::map::Renderer::renderShips(const State& st) const
 
                 String_t label;
                 if (m_viewport.hasOption(Viewport::ShowLabels)) {
-                    // FIXME: obtain label
+                    if (const LabelExtra* ex = m_viewport.labels()) {
+                        label = ex->shipLabels().getLabel(i);
+                    }
                 }
 
                 for (int img = st.getFirstImage(); img >= 0; img = st.getNextImage(img)) {

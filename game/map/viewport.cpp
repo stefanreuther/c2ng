@@ -7,11 +7,13 @@
 #include "util/math.hpp"
 
 game::map::Viewport::Viewport(Universe& univ, int turnNumber, TeamSettings& teams,
+                              game::interface::LabelExtra* labels,
                               const UnitScoreDefinitionList& shipScoreDefinitions,
                               const game::spec::ShipList& shipList,
                               const game::config::HostConfiguration& config)
     : m_universe(univ),
       m_teamSettings(teams),
+      m_labels(labels),
       m_turnNumber(turnNumber),
       m_shipScoreDefinitions(shipScoreDefinitions),
       m_shipList(shipList),
@@ -23,8 +25,13 @@ game::map::Viewport::Viewport(Universe& univ, int turnNumber, TeamSettings& team
       m_drawingTagFilter(),
       m_shipTrailId(),
       conn_universeChange(univ.sig_universeChange.add(this, &Viewport::onChange)),
-      conn_teamChange(univ.sig_universeChange.add(this, &Viewport::onChange))
-{ }
+      conn_teamChange(univ.sig_universeChange.add(this, &Viewport::onChange)),
+      conn_labelChange()
+{
+    if (labels != 0) {
+        conn_labelChange = labels->sig_change.add(this, &Viewport::onLabelChange);
+    }
+}
 
 game::map::Viewport::~Viewport()
 { }
@@ -39,6 +46,12 @@ game::TeamSettings&
 game::map::Viewport::teamSettings() const
 {
     return m_teamSettings;
+}
+
+const game::interface::LabelExtra*
+game::map::Viewport::labels() const
+{
+    return m_labels;
 }
 
 int
@@ -201,4 +214,12 @@ void
 game::map::Viewport::onChange()
 {
     sig_update.raise();
+}
+
+void
+game::map::Viewport::onLabelChange(bool flag)
+{
+    if (flag) {
+        onChange();
+    }
 }
