@@ -30,6 +30,7 @@
 #include "client/dialogs/inboxdialog.hpp"
 #include "client/dialogs/ionstorminfo.hpp"
 #include "client/dialogs/keymapdialog.hpp"
+#include "client/dialogs/labelconfig.hpp"
 #include "client/dialogs/messageeditor.hpp"
 #include "client/dialogs/messagereceiver.hpp"
 #include "client/dialogs/minefieldinfo.hpp"
@@ -1478,6 +1479,23 @@ client::si::IFCCEditCurrentBuildOrder(game::Session& session, ScriptSide& si, Re
     } else {
         link.getProcess().setVariable("UI.RESULT", 0);
     }
+}
+
+// @since PCC2 2.40.12
+void
+client::si::IFCCEditLabelConfig(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    args.checkArgumentCount(0);
+
+    class Task : public UserTask {
+     public:
+        virtual void handle(Control& ctl, RequestLink2 link)
+            {
+                client::dialogs::editLabelConfiguration(ctl.root(), ctl.translator(), ctl.interface().gameSender());
+                ctl.interface().continueProcess(link);
+            }
+    };
+    si.postNewTask(link, new Task());
 }
 
 // @since PCC2 2.40.12
@@ -4078,6 +4096,7 @@ client::si::registerCommands(UserSide& ui)
                 // s.world().setNewGlobalValue("CC$CSBROWSE",           new ScriptProcedure(s, &si, IFCCCSBrowse));
                 s.world().setNewGlobalValue("CC$EDITCOMMANDS",       new ScriptProcedure(s, &si, IFCCEditCommands));
                 s.world().setNewGlobalValue("CC$EDITCURRENTBUILDORDER", new ScriptProcedure(s, &si, IFCCEditCurrentBuildOrder));
+                s.world().setNewGlobalValue("CC$EDITLABELCONFIG",    new ScriptProcedure(s, &si, IFCCEditLabelConfig));
                 s.world().setNewGlobalValue("CC$EDITNEWBUILDORDER",  new ScriptProcedure(s, &si, IFCCEditNewBuildOrder));
                 // s.world().setNewGlobalValue("CC$GIVE",               new ScriptProcedure(s, &si, IFCCGive));
                 s.world().setNewGlobalValue("CC$GOTOCOORDINATES",    new ScriptProcedure(s, &si, IFCCGotoCoordinates));

@@ -234,6 +234,12 @@ class TestGameProxyKeymapProxy : public CxxTest::TestSuite {
     void testListener();
 };
 
+class TestGameProxyLabelProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormal();
+};
+
 class TestGameProxyLockProxy : public CxxTest::TestSuite {
  public:
     void testEmpty();

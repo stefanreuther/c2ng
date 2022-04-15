@@ -12,7 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/interface/labelextra.cpp game/interface/labelextra.hpp \
+FILES_gamelib = game/proxy/labelproxy.cpp game/proxy/labelproxy.hpp \
+    game/interface/labelextra.cpp game/interface/labelextra.hpp \
     game/interface/labelvector.cpp game/interface/labelvector.hpp \
     game/proxy/fictivestarbaseadaptor.cpp \
     game/proxy/fictivestarbaseadaptor.hpp \
@@ -733,7 +734,8 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/dialogs/choosehull.cpp client/dialogs/choosehull.hpp \
+FILES_guilib = client/dialogs/labelconfig.cpp client/dialogs/labelconfig.hpp \
+    client/dialogs/choosehull.cpp client/dialogs/choosehull.hpp \
     client/dialogs/shipcostcalculator.cpp \
     client/dialogs/shipcostcalculator.hpp client/dialogs/buildshiporder.cpp \
     client/dialogs/buildshiporder.hpp client/dialogs/buildshipmain.cpp \
@@ -1665,8 +1667,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_interface_labelextra.cpp \
-    u/t_game_interface_labelvector.cpp \
+FILES_testsuite = u/t_game_proxy_labelproxy.cpp \
+    u/t_game_interface_labelextra.cpp u/t_game_interface_labelvector.cpp \
     u/t_game_proxy_fictivestarbaseadaptor.cpp \
     u/t_game_proxy_predictedstarbaseadaptor.cpp \
     u/t_game_proxy_currentstarbaseadaptor.cpp \
