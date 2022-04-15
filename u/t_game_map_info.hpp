@@ -58,6 +58,22 @@ class TestGameMapInfoInfo : public CxxTest::TestSuite {
     void testExperience();
 };
 
+class TestGameMapInfoLinkBuilder : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
+class TestGameMapInfoNullLinkBuilder : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestGameMapInfoScriptLinkBuilder : public CxxTest::TestSuite {
+ public:
+    void testPlanet();
+    void testSearch();
+};
+
 class TestGameMapInfoTypes : public CxxTest::TestSuite {
  public:
 };

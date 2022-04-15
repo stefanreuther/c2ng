@@ -9,6 +9,7 @@
 #include "afl/io/internalsink.hpp"
 #include "afl/io/xml/writer.hpp"
 #include "game/game.hpp"
+#include "game/map/info/scriptlinkbuilder.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/test/root.hpp"
 #include "game/test/sessionthread.hpp"
@@ -47,6 +48,12 @@ namespace {
         int m_count;
         ImperialStatsProxy::Nodes_t m_nodes;
     };
+
+    // Shortcut to create LinkBuilder
+    std::auto_ptr<game::map::info::LinkBuilder> makeLinkBuilder()
+    {
+        return std::auto_ptr<game::map::info::LinkBuilder>(new game::map::info::ScriptLinkBuilder());
+    }
 
     // Event handler for sig_pageOptions
     class OptionReceiver {
@@ -90,7 +97,7 @@ TestGameProxyImperialStatsProxy::testEmpty()
 {
     SessionThread t;
     WaitIndicator ind;
-    ImperialStatsProxy testee(t.gameSender(), ind);
+    ImperialStatsProxy testee(t.gameSender(), ind, makeLinkBuilder());
 
     NodeReceiver recv;
     testee.sig_pageContent.add(&recv, &NodeReceiver::onPageContent);
@@ -116,7 +123,7 @@ TestGameProxyImperialStatsProxy::testNonempty()
     t.session().setGame(new game::Game());
 
     WaitIndicator ind;
-    ImperialStatsProxy testee(t.gameSender(), ind);
+    ImperialStatsProxy testee(t.gameSender(), ind, makeLinkBuilder());
 
     NodeReceiver recv;
     testee.sig_pageContent.add(&recv, &NodeReceiver::onPageContent);
@@ -142,7 +149,7 @@ TestGameProxyImperialStatsProxy::testOptions()
 {
     SessionThread t;
     WaitIndicator ind;
-    ImperialStatsProxy testee(t.gameSender(), ind);
+    ImperialStatsProxy testee(t.gameSender(), ind, makeLinkBuilder());
 
     OptionReceiver recv;
     testee.sig_pageOptions.add(&recv, &OptionReceiver::onPageOptions);
@@ -181,7 +188,7 @@ TestGameProxyImperialStatsProxy::testContentOptions()
     t.session().setGame(new game::Game());
 
     WaitIndicator ind;
-    ImperialStatsProxy testee(t.gameSender(), ind);
+    ImperialStatsProxy testee(t.gameSender(), ind, makeLinkBuilder());
 
     NodeReceiver recv;
     testee.sig_pageContent.add(&recv, &NodeReceiver::onPageContent);

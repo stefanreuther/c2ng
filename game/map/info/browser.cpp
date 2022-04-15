@@ -44,8 +44,8 @@ namespace {
 }
 
 
-game::map::info::Browser::Browser(Session& session)
-    : m_session(session)
+game::map::info::Browser::Browser(Session& session, const LinkBuilder& link)
+    : m_session(session), m_link(link)
 {
     afl::base::Memory<PageOptions_t>(m_options).fill(0);
 }
@@ -205,22 +205,22 @@ game::map::info::Browser::renderMineralsPage(Nodes_t& out, PageOptions_t opts)
     bool sortByTotal = (opts & Minerals_SortMask) == Minerals_SortByTotal;
     switch (opts & Minerals_ShowMask) {
      case Minerals_ShowOnlyN:
-        renderTopMineralPlanets(makeTable(out), universe(), sortByTotal, 24, Element::Neutronium, shipList, fmt, tx);
+        renderTopMineralPlanets(makeTable(out), universe(), sortByTotal, 24, Element::Neutronium, shipList, fmt, tx, m_link);
         break;
      case Minerals_ShowOnlyT:
-        renderTopMineralPlanets(makeTable(out), universe(), sortByTotal, 24, Element::Tritanium,  shipList, fmt, tx);
+        renderTopMineralPlanets(makeTable(out), universe(), sortByTotal, 24, Element::Tritanium,  shipList, fmt, tx, m_link);
         break;
      case Minerals_ShowOnlyD:
-        renderTopMineralPlanets(makeTable(out), universe(), sortByTotal, 24, Element::Duranium,   shipList, fmt, tx);
+        renderTopMineralPlanets(makeTable(out), universe(), sortByTotal, 24, Element::Duranium,   shipList, fmt, tx, m_link);
         break;
      case Minerals_ShowOnlyM:
-        renderTopMineralPlanets(makeTable(out), universe(), sortByTotal, 24, Element::Molybdenum, shipList, fmt, tx);
+        renderTopMineralPlanets(makeTable(out), universe(), sortByTotal, 24, Element::Molybdenum, shipList, fmt, tx, m_link);
         break;
      default:
-        renderTopMineralPlanets(makeTable(out), universe(), sortByTotal,  5, Element::Neutronium, shipList, fmt, tx);
-        renderTopMineralPlanets(makeTable(out), universe(), sortByTotal,  5, Element::Tritanium,  shipList, fmt, tx);
-        renderTopMineralPlanets(makeTable(out), universe(), sortByTotal,  5, Element::Duranium,   shipList, fmt, tx);
-        renderTopMineralPlanets(makeTable(out), universe(), sortByTotal,  5, Element::Molybdenum, shipList, fmt, tx);
+        renderTopMineralPlanets(makeTable(out), universe(), sortByTotal,  5, Element::Neutronium, shipList, fmt, tx, m_link);
+        renderTopMineralPlanets(makeTable(out), universe(), sortByTotal,  5, Element::Tritanium,  shipList, fmt, tx, m_link);
+        renderTopMineralPlanets(makeTable(out), universe(), sortByTotal,  5, Element::Duranium,   shipList, fmt, tx, m_link);
+        renderTopMineralPlanets(makeTable(out), universe(), sortByTotal,  5, Element::Molybdenum, shipList, fmt, tx, m_link);
         break;
     }
 }
@@ -240,9 +240,9 @@ game::map::info::Browser::renderPlanetsPage(Nodes_t& out, PageOptions_t opts)
     // Render
     renderPlanetNumber(makeTable(out), univ, fmt, tx);
     if (!univ.playedPlanets().isEmpty()) {
-        renderPlanetNativeSummary(makeTable(out), univ, opts, fmt, tx);
-        renderPlanetClimateSummary(makeTable(out), univ, fmt, tx);
-        renderPlanetDefenseSummary(makeTable(out), univ, root.hostConfiguration(), fmt, tx);
+        renderPlanetNativeSummary(makeTable(out), univ, opts, fmt, tx, m_link);
+        renderPlanetClimateSummary(makeTable(out), univ, fmt, tx, m_link);
+        renderPlanetDefenseSummary(makeTable(out), univ, root.hostConfiguration(), fmt, tx, m_link);
     }
 }
 
@@ -260,21 +260,21 @@ game::map::info::Browser::renderColonyPage(Nodes_t& out, PageOptions_t opts)
     // Render according to options
     switch (opts & Colony_ShowMask) {
      case Colony_ShowOnlyColonists:
-        renderTopResourcePlanets(makeTable(out), universe(), 24, Element::Colonists, shipList, fmt, tx);
+        renderTopResourcePlanets(makeTable(out), universe(), 24, Element::Colonists, shipList, fmt, tx, m_link);
         break;
 
      case Colony_ShowOnlySupplies:
-        renderTopResourcePlanets(makeTable(out), universe(), 24, Element::Supplies,  shipList, fmt, tx);
+        renderTopResourcePlanets(makeTable(out), universe(), 24, Element::Supplies,  shipList, fmt, tx, m_link);
         break;
 
      case Colony_ShowOnlyMoney:
-        renderTopResourcePlanets(makeTable(out), universe(), 24, Element::Money,     shipList, fmt, tx);
+        renderTopResourcePlanets(makeTable(out), universe(), 24, Element::Money,     shipList, fmt, tx, m_link);
         break;
 
      default:
-        renderTopResourcePlanets(makeTable(out), universe(),  5, Element::Colonists, shipList, fmt, tx);
-        renderTopResourcePlanets(makeTable(out), universe(),  5, Element::Supplies,  shipList, fmt, tx);
-        renderTopResourcePlanets(makeTable(out), universe(),  5, Element::Money,     shipList, fmt, tx);
+        renderTopResourcePlanets(makeTable(out), universe(),  5, Element::Colonists, shipList, fmt, tx, m_link);
+        renderTopResourcePlanets(makeTable(out), universe(),  5, Element::Supplies,  shipList, fmt, tx, m_link);
+        renderTopResourcePlanets(makeTable(out), universe(),  5, Element::Money,     shipList, fmt, tx, m_link);
         break;
     }
 }
@@ -294,10 +294,10 @@ game::map::info::Browser::renderStarbasePage(Nodes_t& out, PageOptions_t opts)
 
     // Do it
     if ((opts & Ships_HideTop) == 0) {
-        renderStarbaseSummary(makeTable(out), universe(), fmt, tx);
+        renderStarbaseSummary(makeTable(out), universe(), fmt, tx, m_link);
     }
     if (!univ.playedBases().isEmpty()) {
-        renderStarbaseShipBuildSummary(makeTable(out), univ, opts & Ships_SortMask, shipList, root.hostConfiguration(), fmt, tx);
+        renderStarbaseShipBuildSummary(makeTable(out), univ, opts & Ships_SortMask, shipList, root.hostConfiguration(), fmt, tx, m_link);
     }
 }
 
@@ -318,13 +318,13 @@ game::map::info::Browser::renderStarshipPage(Nodes_t& out, PageOptions_t opts, b
 
     // Do it
     if ((opts & Ships_HideTop) == 0) {
-        renderShipSummary(makeTable(out), univ, withFreighters, g.shipScores(), shipList, root.hostConfiguration(), fmt, tx);
+        renderShipSummary(makeTable(out), univ, withFreighters, g.shipScores(), shipList, root.hostConfiguration(), fmt, tx, m_link);
         if (config[HostConfiguration::NumExperienceLevels]() > 0) {
-            renderShipExperienceSummary(makeTable(out), univ, withFreighters, g.shipScores(), root.hostConfiguration(), fmt, tx);
+            renderShipExperienceSummary(makeTable(out), univ, withFreighters, g.shipScores(), root.hostConfiguration(), fmt, tx, m_link);
         }
     }
     if (!univ.playedShips().isEmpty()) {
-        renderShipTypeSummary(makeTable(out), univ, opts & Ships_SortMask, withFreighters, shipList, fmt, tx);
+        renderShipTypeSummary(makeTable(out), univ, opts & Ships_SortMask, withFreighters, shipList, fmt, tx, m_link);
     }
 }
 
@@ -351,8 +351,8 @@ game::map::info::Browser::renderStarchartPage(Nodes_t& out)
 
     // Render
     renderStarchartEmpireSummary(makeTable(out), t, univ, g.teamSettings(), fmt, tx);
-    renderStarchartForeignSummary(makeTable(out), t, g.teamSettings(), root.playerList(), fmt, tx);
-    renderUniversalFriendlyCode(makeTable(out), univ, g.teamSettings(), tx);
+    renderStarchartForeignSummary(makeTable(out), t, g.teamSettings(), root.playerList(), fmt, tx, m_link);
+    renderUniversalFriendlyCode(makeTable(out), univ, g.teamSettings(), tx, m_link);
 }
 
 void
@@ -370,10 +370,10 @@ game::map::info::Browser::renderWeaponsPage(Nodes_t& out, PageOptions_t opts)
 
     // Do it
     if (opts == 0 || opts == Weapons_ShowOnlyBeams) {
-        renderBeamWeaponSummary(makeTable(out), univ, opts != 0, shipList, fmt, tx);
+        renderBeamWeaponSummary(makeTable(out), univ, opts != 0, shipList, fmt, tx, m_link);
     }
     if (opts == 0 || opts == Weapons_ShowOnlyTorpedoes) {
-        renderTorpedoWeaponSummary(makeTable(out), univ, opts != 0, shipList, fmt, tx);
+        renderTorpedoWeaponSummary(makeTable(out), univ, opts != 0, shipList, fmt, tx, m_link);
     }
     if (opts == 0 || opts == Weapons_ShowOnlyRest) {
         renderOtherWeaponSummary(makeTable(out), univ, fmt, tx);

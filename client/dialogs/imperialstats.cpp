@@ -9,6 +9,7 @@
 #include "afl/io/xml/nodereader.hpp"
 #include "client/si/control.hpp"
 #include "client/widgets/helpwidget.hpp"
+#include "game/map/info/scriptlinkbuilder.hpp"
 #include "game/proxy/imperialstatsproxy.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/group.hpp"
@@ -78,7 +79,7 @@ namespace {
               m_userSide(userSide),
               m_outputState(outputState),
               m_loop(userSide.root()),
-              m_proxy(userSide.gameSender(), userSide.root().engine().dispatcher()),
+              m_proxy(userSide.gameSender(), userSide.root().engine().dispatcher(), std::auto_ptr<game::map::info::LinkBuilder>(new game::map::info::ScriptLinkBuilder())),
               m_docView(userSide.root().provider().getFont(gfx::FontRequest())->getCellSize().scaledBy(10, 10), DocumentView::fl_SingleHyper, userSide.root().provider()),
               m_optionsButton(userSide.translator()("# - Options"), '#', userSide.root()),
               m_pageButtons(),

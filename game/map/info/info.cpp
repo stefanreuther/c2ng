@@ -13,6 +13,7 @@
 #include "game/cargospec.hpp"
 #include "game/map/anyplanettype.hpp"
 #include "game/map/anyshiptype.hpp"
+#include "game/map/info/linkbuilder.hpp"
 #include "game/map/minefield.hpp"
 #include "game/map/planetformula.hpp"
 #include "game/spec/basichullfunction.hpp"
@@ -29,9 +30,11 @@ using afl::string::Format;
 using game::CargoSpec;
 using game::Element;
 using game::Id_t;
+using game::SearchQuery;
 using game::config::HostConfiguration;
 using game::map::Planet;
 using game::map::Ship;
+using game::map::info::LinkBuilder;
 using game::spec::BasicHullFunction;
 using game::spec::Beam;
 using game::spec::Hull;
@@ -113,9 +116,13 @@ namespace {
 
     void makeLink(TagNode& out, const String_t& text, const String_t& target)
     {
-        TagNode& a = makeTag(out, "a");
-        a.setAttribute("href", target);
-        makeText(a, text);
+        if (text.empty() || target.empty()) {
+            makeText(out, text);
+        } else {
+            TagNode& a = makeTag(out, "a");
+            a.setAttribute("href", target);
+            makeText(a, text);
+        }
     }
 
     void makeOptionalLink(TagNode& out, const String_t& text, const String_t& target, bool flag)
@@ -350,7 +357,8 @@ namespace {
         }
     }
 
-    void renderHullList(TagNode& tab, util::Vector<int, int>& counts, int order, const char* linkFormat, const game::spec::ShipList& shipList, util::NumberFormatter& fmt)
+    void renderHullList(TagNode& tab, util::Vector<int, int>& counts, int order, const char* linkFormat, const game::spec::ShipList& shipList, util::NumberFormatter& fmt,
+                        const LinkBuilder& link, SearchQuery::SearchObjects_t searchObj)
     {
         // ex drawHullList(RichDocument& d, std::vector<int>& counts, const int order, const char* query_fmt)
         // Same stupid algorithm as in PCC 1.x - selection sort.
@@ -367,7 +375,9 @@ namespace {
                 if (const Hull* h = shipList.hulls().get(hid)) {
                     const int n = counts.get(hid);
                     TagNode& row = makeRow(tab);
-                    makeOptionalLink(makeLeftCell(row), h->getName(shipList.componentNamer()), Format(linkFormat, hid), n > 0);
+                    makeOptionalLink(makeLeftCell(row), h->getName(shipList.componentNamer()),
+                                     link.makeSearchLink(SearchQuery(SearchQuery::MatchTrue, searchObj, Format(linkFormat, hid))),
+                                     n > 0);
                     makeText(makeGreen(makeRightCell(row)), fmt.formatNumber(n));
                 }
                 counts.set(hid, 0);
@@ -629,7 +639,7 @@ game::map::info::renderProductionTotals(TagNode& tab, const TotalsInfo& t, const
 
 // Render table of top-mineral planets.
 void
-game::map::info::renderTopMineralPlanets(TagNode& tab, const Universe& univ, bool sortByTotal, size_t limit, Element::Type el, const game::spec::ShipList& shipList, util::NumberFormatter fmt, afl::string::Translator& tx)
+game::map::info::renderTopMineralPlanets(TagNode& tab, const Universe& univ, bool sortByTotal, size_t limit, Element::Type el, const game::spec::ShipList& shipList, util::NumberFormatter fmt, afl::string::Translator& tx, const LinkBuilder& link)
 {
     // ex showTopMinerals(RichDocument& d, GUniverse& univ, const int opts, const int count, const GCargoType el)
     // Table:
@@ -670,7 +680,7 @@ game::map::info::renderTopMineralPlanets(TagNode& tab, const Universe& univ, boo
             TagNode& row = makeRow(tab);
             makeLink(makeLeftCell(row),
                      Format("Planet #%d: %s", pid, pl->getName(tx)),     // This is getName(LongName) but we don't have an InterpreterInterface here
-                     Format("q:UI.GotoScreen 2,%d", pid));
+                     link.makePlanetLink(*pl));
             makeText(makeGreen(makeRightCell(row)), fmt.formatNumber(total));
             makeText(makeGreen(makeLeftCell(row)), Element::getUnit(el, tx, shipList));
             makeText(makeGreen(makeRightCell(row)), fmt.formatNumber(mined));
@@ -687,7 +697,8 @@ game::map::info::renderTopResourcePlanets(TagNode& tab,
                                           Element::Type el,
                                           const game::spec::ShipList& shipList,
                                           util::NumberFormatter fmt,
-                                          afl::string::Translator& tx)
+                                          afl::string::Translator& tx,
+                                          const LinkBuilder& link)
 {
     // showTopResources(RichDocument& d, GUniverse& univ, const int opts, const int count, const GCargoType el)
     // Table:
@@ -720,7 +731,7 @@ game::map::info::renderTopResourcePlanets(TagNode& tab,
             TagNode& row = makeRow(tab);
             makeLink(makeLeftCell(row),
                      Format("Planet #%d: %s", pid, pl->getName(tx)),     // This is getName(LongName) but we don't have an InterpreterInterface here
-                     Format("q:UI.GotoScreen 2,%d", pid));
+                     link.makePlanetLink(*pl));
             makeText(makeGreen(makeRightCell(row)), fmt.formatNumber(data[i].value));
         }
     }
@@ -743,7 +754,8 @@ void
 game::map::info::renderPlanetNativeSummary(TagNode& tab, const Universe& univ,
                                            uint8_t sortOrder,
                                            util::NumberFormatter fmt,
-                                           afl::string::Translator& tx)
+                                           afl::string::Translator& tx,
+                                           const LinkBuilder& link)
 {
     // ex drawPlanetsPage(RichDocument& d, GUniverse& univ, int opts), part
     // Data
@@ -789,7 +801,9 @@ game::map::info::renderPlanetNativeSummary(TagNode& tab, const Universe& univ,
         TagNode& row = makeRow(tab);
         makeOptionalLink(makeLeftCell(row),
                          game::tables::NativeRaceName(tx).get(race),
-                         Format("q:UI.Search 'Owner$=My.Race$ And Natives.Race$=%d', 'p2'", race),
+                         link.makeSearchLink(SearchQuery(SearchQuery::MatchTrue,
+                                                         SearchQuery::SearchObjects_t(SearchQuery::SearchPlanets),
+                                                         Format("Owner$=My.Race$ And Natives.Race$=%d", race))),
                          nativePlanets[race] > 0);
         makeText(makeGreen(makeRightCell(row)), fmt.formatNumber(nativePlanets[race]));
         makeText(makeGreen(makeRightCell(row)), fmt.formatPopulation(nativePop[race]));
@@ -800,7 +814,8 @@ game::map::info::renderPlanetNativeSummary(TagNode& tab, const Universe& univ,
 void
 game::map::info::renderPlanetClimateSummary(TagNode& tab, const Universe& univ,
                                             util::NumberFormatter fmt,
-                                            afl::string::Translator& tx)
+                                            afl::string::Translator& tx,
+                                            const LinkBuilder& link)
 {
     // ex drawPlanetsPage(RichDocument& d, GUniverse& univ, int opts), part
     // Data
@@ -833,9 +848,11 @@ game::map::info::renderPlanetClimateSummary(TagNode& tab, const Universe& univ,
         TagNode& row = makeRow(tab);
         makeOptionalLink(makeLeftCell(row),
                          game::tables::TemperatureName(tx).get(CLIMATE_LIMITS[i]),
-                         Format("q:UI.Search 'Temp$>=%d And Temp$<=%d And Owner$=My.Race$', 'p2'",
-                                i == 0 ? 0 : CLIMATE_LIMITS[i-1]+1,
-                                CLIMATE_LIMITS[i]),
+                         link.makeSearchLink(SearchQuery(SearchQuery::MatchTrue,
+                                                         SearchQuery::SearchObjects_t(SearchQuery::SearchPlanets),
+                                                         Format("Temp$>=%d And Temp$<=%d And Owner$=My.Race$",
+                                                                i == 0 ? 0 : CLIMATE_LIMITS[i-1]+1,
+                                                                CLIMATE_LIMITS[i]))),
                          climatePlanets[i] > 0);
         makeText(makeGreen(makeRightCell(row)), fmt.formatNumber(climatePlanets[i]));
     }
@@ -843,7 +860,8 @@ game::map::info::renderPlanetClimateSummary(TagNode& tab, const Universe& univ,
 
 // Render planet defense summary (part of PlanetsPage).
 void
-game::map::info::renderPlanetDefenseSummary(TagNode& tab, const Universe& univ, const game::config::HostConfiguration& config, util::NumberFormatter fmt, afl::string::Translator& tx)
+game::map::info::renderPlanetDefenseSummary(TagNode& tab, const Universe& univ, const game::config::HostConfiguration& config, util::NumberFormatter fmt, afl::string::Translator& tx,
+                                            const LinkBuilder& link)
 {
     const int dfu = config[HostConfiguration::DefenseForUndetectable]();
 
@@ -866,12 +884,20 @@ game::map::info::renderPlanetDefenseSummary(TagNode& tab, const Universe& univ, 
     // Render
     {
         TagNode& row = makeRow(tab);
-        makeOptionalLink(makeLeftCell(row, 15), tx("Nearly undefended:"), "q:UI.Search 'Defense<10 And Owner$=My.Race$', 'p2'", nUndefended > 0);
+        makeOptionalLink(makeLeftCell(row, 15), tx("Nearly undefended:"),
+                         link.makeSearchLink(SearchQuery(SearchQuery::MatchTrue,
+                                                         SearchQuery::SearchObjects_t(SearchQuery::SearchPlanets),
+                                                         "Defense<10 And Owner$=My.Race$")),
+                         nUndefended > 0);
         makeText(makeGreen(makeRightCell(row, 3)), fmt.formatNumber(nUndefended));
     }
     {
         TagNode& row = makeRow(tab);
-        makeOptionalLink(makeLeftCell(row, 15), tx("Visible by sensor scan:"), Format("q:UI.Search 'Defense<%d And Owner$=My.Race$', 'p2'", dfu), nVisible > 0);
+        makeOptionalLink(makeLeftCell(row, 15), tx("Visible by sensor scan:"),
+                         link.makeSearchLink(SearchQuery(SearchQuery::MatchTrue,
+                                                         SearchQuery::SearchObjects_t(SearchQuery::SearchPlanets),
+                                                         Format("Defense<%d And Owner$=My.Race$", dfu))),
+                         nVisible > 0);
         makeText(makeGreen(makeRightCell(row, 3)), fmt.formatNumber(nVisible));
     }
 }
@@ -881,7 +907,8 @@ void
 game::map::info::renderStarbaseSummary(TagNode& tab,
                                        const Universe& univ,
                                        util::NumberFormatter fmt,
-                                       afl::string::Translator& tx)
+                                       afl::string::Translator& tx,
+                                       const LinkBuilder& link)
 {
     // drawStarbasePage(RichDocument& d, GUniverse& univ, int opts), part
     const size_t ITEMS = 8;
@@ -958,7 +985,9 @@ game::map::info::renderStarbaseSummary(TagNode& tab,
             TagNode& row = makeRow(tab);
             makeOptionalLink(makeLeftCell(row),
                              tx(names[i]) + ":",
-                             Format("q:UI.Search '%s', '2b'", expr[i]),
+                             link.makeSearchLink(SearchQuery(SearchQuery::MatchTrue,
+                                                             SearchQuery::SearchObjects_t(SearchQuery::SearchBases),
+                                                             expr[i])),
                              counts[i] > 0);
             makeText(makeGreen(makeRightCell(row)), fmt.formatNumber(counts[i]));
         }
@@ -973,7 +1002,8 @@ game::map::info::renderStarbaseShipBuildSummary(TagNode& tab,
                                                 const game::spec::ShipList& shipList,
                                                 const game::config::HostConfiguration& config,
                                                 util::NumberFormatter fmt,
-                                                afl::string::Translator& tx)
+                                                afl::string::Translator& tx,
+                                                const LinkBuilder& link)
 {
     // drawStarbasePage(RichDocument& d, GUniverse& univ, int opts), part
 
@@ -999,7 +1029,7 @@ game::map::info::renderStarbaseShipBuildSummary(TagNode& tab,
         makeText(makeWhite(makeLeftCell(row, 20)), tx("Ships Being Built"));
         makeRightCell(row, 4);
     }
-    renderHullList(tab, builds, sortOrder, "q:UI.Search 'Build.Hull$=%d', '2b'", shipList, fmt);
+    renderHullList(tab, builds, sortOrder, "Build.Hull$=%d", shipList, fmt, link, SearchQuery::SearchObjects_t(SearchQuery::SearchBases));
     if (!any) {
         TagNode& row = makeRow(tab);
         makeText(makeLeftCell(row), tx("(none)"));
@@ -1016,7 +1046,8 @@ game::map::info::renderShipSummary(TagNode& tab,
                                    const game::spec::ShipList& shipList,
                                    const game::config::HostConfiguration& config,
                                    util::NumberFormatter fmt,
-                                   afl::string::Translator& tx)
+                                   afl::string::Translator& tx,
+                                   const LinkBuilder& link)
 {
     // ex drawStarshipPage(RichDocument& d, GUniverse& univ, const int opts, const bool withFreighters), part
     static const int ITEMS = 8;
@@ -1097,7 +1128,10 @@ game::map::info::renderShipSummary(TagNode& tab,
     for (int i = 0; i < ITEMS; ++i) {
         if (counts[i] > 0) {
             TagNode& row = makeRow(tab);
-            makeLink(makeLeftCell(row), tx(names[i]), Format("q:UI.Search '%s%s', '2s'", exprs[i], makeQuerySuffix(withFreighters)));
+            makeLink(makeLeftCell(row), tx(names[i]),
+                     link.makeSearchLink(SearchQuery(SearchQuery::MatchTrue,
+                                                     SearchQuery::SearchObjects_t(SearchQuery::SearchShips),
+                                                     exprs[i] + makeQuerySuffix(withFreighters))));
             makeText(makeGreen(makeRightCell(row)), fmt.formatNumber(counts[i]));
         }
     }
@@ -1111,7 +1145,8 @@ game::map::info::renderShipExperienceSummary(TagNode& tab,
                                              const UnitScoreDefinitionList& shipScores,
                                              const game::config::HostConfiguration& config,
                                              util::NumberFormatter fmt,
-                                             afl::string::Translator& tx)
+                                             afl::string::Translator& tx,
+                                             const LinkBuilder& link)
 {
     // ex drawStarshipPage(RichDocument& d, GUniverse& univ, const int opts, const bool withFreighters), part
     // Acquire data
@@ -1138,7 +1173,10 @@ game::map::info::renderShipExperienceSummary(TagNode& tab,
         int n = levelCounts.get(i);
         if (n > 0) {
             TagNode& row = makeRow(tab);
-            makeLink(makeLeftCell(row), config.getExperienceLevelName(i, tx), Format("q:UI.Search 'Level=%d%s', '2s'", i, makeQuerySuffix(withFreighters)));
+            makeLink(makeLeftCell(row), config.getExperienceLevelName(i, tx),
+                     link.makeSearchLink(SearchQuery(SearchQuery::MatchTrue,
+                                                     SearchQuery::SearchObjects_t(SearchQuery::SearchShips),
+                                                     Format("Level=%d%s", i, makeQuerySuffix(withFreighters)))));
             makeText(makeGreen(makeRightCell(row)), fmt.formatNumber(n));
         }
     }
@@ -1152,7 +1190,8 @@ game::map::info::renderShipTypeSummary(TagNode& tab,
                                        bool withFreighters,
                                        const game::spec::ShipList& shipList,
                                        util::NumberFormatter fmt,
-                                       afl::string::Translator& tx)
+                                       afl::string::Translator& tx,
+                                       const LinkBuilder& link)
 {
     util::Vector<int, int> hullCounts;
     const PlayedShipType& type = univ.playedShips();
@@ -1171,7 +1210,7 @@ game::map::info::renderShipTypeSummary(TagNode& tab,
         makeText(makeWhite(makeLeftCell(row, 20)), tx("Ships by Hull Type"));
         makeRightCell(row, 4);
     }
-    renderHullList(tab, hullCounts, sortOrder, "q:UI.Search 'Owner$=My.Race$ And Hull$=%d', '2s'", shipList, fmt);
+    renderHullList(tab, hullCounts, sortOrder, "Owner$=My.Race$ And Hull$=%d", shipList, fmt, link, SearchQuery::SearchObjects_t(SearchQuery::SearchShips));
 }
 
 // Render starchart summary, own empire (part of StarchartPage).
@@ -1237,7 +1276,8 @@ game::map::info::renderStarchartForeignSummary(TagNode& tab,
                                                const TeamSettings& teams,
                                                const PlayerList& players,
                                                util::NumberFormatter fmt,
-                                               afl::string::Translator& tx)
+                                               afl::string::Translator& tx,
+                                               const LinkBuilder& link)
 {
     // ex drawStarchartPage(RichDocument& d, GUniverse& univ), part
     // Slightly different layout from PCC2 because we cannot do multi-column cells.
@@ -1270,7 +1310,10 @@ game::map::info::renderStarchartForeignSummary(TagNode& tab,
                 || thisMinefields != 0))
         {
             TagNode& row = makeRow(tab);
-            makeLink(makeLeftCell(row), players.getPlayerName(pl, Player::ShortName), Format("q:UI.Search 'Owner$=%d', '2pso'", pl));
+            makeLink(makeLeftCell(row), players.getPlayerName(pl, Player::ShortName),
+                     link.makeSearchLink(SearchQuery(SearchQuery::MatchTrue,
+                                                     SearchQuery::SearchObjects_t() + SearchQuery::SearchShips + SearchQuery::SearchPlanets + SearchQuery::SearchOthers,
+                                                     Format("Owner$=%d", pl))));
             makeText(makeGreen(makeRightCell(row)), fmt.formatNumber(thisCurrentShips));
             makeText(makeGreen(makeLeftCell(row)), Format(HISTORY_FMT, fmt.formatNumber(thisOldShips)));
             makeText(makeGreen(makeRightCell(row)), fmt.formatNumber(thisCurrentPlanets));
@@ -1309,7 +1352,8 @@ void
 game::map::info::renderUniversalFriendlyCode(TagNode& tab,
                                              const Universe& univ,
                                              const TeamSettings& teams,
-                                             afl::string::Translator& tx)
+                                             afl::string::Translator& tx,
+                                             const LinkBuilder& link)
 {
     // This used to be a <p>, but using a table provides a more uniform interface.
     TagNode& row = makeRow(tab);
@@ -1317,7 +1361,7 @@ game::map::info::renderUniversalFriendlyCode(TagNode& tab,
 
     Id_t umfPlanet = univ.findUniversalMinefieldFriendlyCodePlanetId(teams.getViewpointPlayer());
     if (const Planet* pl = univ.planets().get(umfPlanet)) {
-        makeLink(makeLeftCell(row), pl->getFriendlyCode().orElse(""), Format("q:UI.GotoScreen 2,%d", umfPlanet));
+        makeLink(makeLeftCell(row), pl->getFriendlyCode().orElse(""), link.makePlanetLink(*pl));
     } else {
         makeText(makeGreen(makeLeftCell(row)), tx("none"));
     }
@@ -1330,7 +1374,8 @@ game::map::info::renderBeamWeaponSummary(TagNode& tab,
                                          bool showAll,
                                          const game::spec::ShipList& shipList,
                                          util::NumberFormatter fmt,
-                                         afl::string::Translator& tx)
+                                         afl::string::Translator& tx,
+                                         const LinkBuilder& link)
 {
     // ex drawWeaponPage(RichDocument& d, GUniverse& univ, int opts), part
     util::Vector<int32_t, int> numBeamShips, numBeams;
@@ -1364,7 +1409,11 @@ game::map::info::renderBeamWeaponSummary(TagNode& tab,
     }
     if (showAll || numBeamShips.get(0) != 0) {
         TagNode& row = makeRow(tab);
-        makeOptionalLink(makeLeftCell(row), tx("No beams"), Format("q:UI.Search '%sBeam$=0','2s'", LINK_PREFIX), numBeamShips.get(0) != 0);
+        makeOptionalLink(makeLeftCell(row), tx("No beams"),
+                         link.makeSearchLink(SearchQuery(SearchQuery::MatchTrue,
+                                                         SearchQuery::SearchObjects_t(SearchQuery::SearchShips),
+                                                         Format("%sBeam$=0", LINK_PREFIX))),
+                         numBeamShips.get(0) != 0);
         makeText(makeGreen(makeRightCell(row)), fmt.formatNumber(numBeamShips.get(0)));
         makeRightCell(row);
     }
@@ -1372,7 +1421,11 @@ game::map::info::renderBeamWeaponSummary(TagNode& tab,
         const Beam* b = shipList.beams().get(i);
         if (b != 0 && (showAll || numBeamShips.get(i) != 0)) {
             TagNode& row = makeRow(tab);
-            makeOptionalLink(makeLeftCell(row), b->getName(shipList.componentNamer()), Format("q:UI.Search '%sBeam$=%d','2s'", LINK_PREFIX, i), numBeamShips.get(i));
+            makeOptionalLink(makeLeftCell(row), b->getName(shipList.componentNamer()),
+                             link.makeSearchLink(SearchQuery(SearchQuery::MatchTrue,
+                                                             SearchQuery::SearchObjects_t(SearchQuery::SearchShips),
+                                                             Format("%sBeam$=%d", LINK_PREFIX, i))),
+                             numBeamShips.get(i));
             makeText(makeGreen(makeRightCell(row)), fmt.formatNumber(numBeamShips.get(i)));
             makeText(makeGreen(makeRightCell(row)), fmt.formatNumber(numBeams.get(i)));
         }
@@ -1386,7 +1439,8 @@ game::map::info::renderTorpedoWeaponSummary(TagNode& tab,
                                             bool showAll,
                                             const game::spec::ShipList& shipList,
                                             util::NumberFormatter fmt,
-                                            afl::string::Translator& tx)
+                                            afl::string::Translator& tx,
+                                            const LinkBuilder& link)
 {
     // ex drawWeaponPage(RichDocument& d, GUniverse& univ, int opts), part
     util::Vector<int32_t, int> numTorpedoShips, numTorpedoes;
@@ -1428,7 +1482,11 @@ game::map::info::renderTorpedoWeaponSummary(TagNode& tab,
     }
     if (showAll || numTorpedoShips.get(0) != 0) {
         TagNode& row = makeRow(tab);
-        makeOptionalLink(makeLeftCell(row), tx("No torps/fighters"), Format("q:UI.Search '%sIsEmpty(Aux)','2s'", LINK_PREFIX), numTorpedoShips.get(0) != 0);
+        makeOptionalLink(makeLeftCell(row), tx("No torps/fighters"),
+                         link.makeSearchLink(SearchQuery(SearchQuery::MatchTrue,
+                                                         SearchQuery::SearchObjects_t(SearchQuery::SearchShips),
+                                                         Format("%sIsEmpty(Aux)", LINK_PREFIX))),
+                         numTorpedoShips.get(0) != 0);
         makeText(makeGreen(makeRightCell(row)), fmt.formatNumber(numTorpedoShips.get(0)));
         makeRightCell(row);
     }
@@ -1436,7 +1494,11 @@ game::map::info::renderTorpedoWeaponSummary(TagNode& tab,
         const TorpedoLauncher* tl = shipList.launchers().get(i);
         if (tl != 0 && (showAll || numTorpedoShips.get(i) != 0)) {
             TagNode& row = makeRow(tab);
-            makeOptionalLink(makeLeftCell(row), tl->getName(shipList.componentNamer()), Format("q:UI.Search '%sTorp$=%d','2s'", LINK_PREFIX, i), numTorpedoShips.get(i));
+            makeOptionalLink(makeLeftCell(row), tl->getName(shipList.componentNamer()),
+                             link.makeSearchLink(SearchQuery(SearchQuery::MatchTrue,
+                                                             SearchQuery::SearchObjects_t(SearchQuery::SearchShips),
+                                                             Format("%sTorp$=%d", LINK_PREFIX, i))),
+                             numTorpedoShips.get(i));
             makeText(makeGreen(makeRightCell(row)), fmt.formatNumber(numTorpedoShips.get(i)));
             makeText(makeGreen(makeRightCell(row)), fmt.formatNumber(numTorpedoes.get(i)));
         }

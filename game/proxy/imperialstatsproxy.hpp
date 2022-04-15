@@ -12,6 +12,7 @@
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
 #include "util/stringlist.hpp"
+#include "game/map/info/linkbuilder.hpp"
 
 namespace game { namespace proxy {
 
@@ -27,8 +28,9 @@ namespace game { namespace proxy {
 
         /** Constructor.
             @param gameSender  Game sender (to access game data)
-            @param receiver    Receiver to receive replies */
-        ImperialStatsProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& receiver);
+            @param receiver    Receiver to receive replies
+            @param link        LinkBuilder (will be transferred into game thread) */
+        ImperialStatsProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& receiver, std::auto_ptr<game::map::info::LinkBuilder> link);
 
         /** Destructor. */
         ~ImperialStatsProxy();

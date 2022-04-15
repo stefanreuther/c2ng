@@ -9,12 +9,14 @@
 #include "game/map/info/info.hpp"
 
 #include "t_game_map_info.hpp"
-#include "afl/io/xml/tagnode.hpp"
-#include "game/turn.hpp"
-#include "game/teamsettings.hpp"
-#include "afl/string/nulltranslator.hpp"
 #include "afl/io/internalsink.hpp"
+#include "afl/io/xml/tagnode.hpp"
 #include "afl/io/xml/writer.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "game/map/info/nulllinkbuilder.hpp"
+#include "game/map/info/scriptlinkbuilder.hpp"
+#include "game/teamsettings.hpp"
+#include "game/turn.hpp"
 
 using afl::io::xml::TagNode;
 using afl::string::NullTranslator;
@@ -251,13 +253,28 @@ TestGameMapInfoInfo::testExperience()
         addShip(h, 20 + i, 3);
     }
 
-    TagNode tab("table");
-    gmi::renderShipExperienceSummary(tab, h.univ, true, h.shipScores, h.config, h.fmt, h.tx);
+    // With ScriptLinkBuilder
+    {
+        TagNode tab("table");
+        gmi::renderShipExperienceSummary(tab, h.univ, true, h.shipScores, h.config, h.fmt, h.tx, game::map::info::ScriptLinkBuilder());
 
-    TS_ASSERT_EQUALS(toString(tab),
-                     "<table><tr><td width=\"17\"><font color=\"white\">Ships by Experience Level</font></td><td align=\"right\" width=\"3\"/></tr>"
-                     "<tr><td><a href=\"q:UI.Search \'Level=0 And Owner$=My.Race$\', \'2s\'\">Noob</a></td><td align=\"right\"><font color=\"green\">5</font></td></tr>"
-                     "<tr><td><a href=\"q:UI.Search \'Level=2 And Owner$=My.Race$\', \'2s\'\">Wizard</a></td><td align=\"right\"><font color=\"green\">2</font></td></tr>"
-                     "<tr><td><a href=\"q:UI.Search \'Level=3 And Owner$=My.Race$\', \'2s\'\">God</a></td><td align=\"right\"><font color=\"green\">7</font></td></tr></table>");
+        TS_ASSERT_EQUALS(toString(tab),
+                         "<table><tr><td width=\"17\"><font color=\"white\">Ships by Experience Level</font></td><td align=\"right\" width=\"3\"/></tr>"
+                         "<tr><td><a href=\"q:UI.Search &quot;Level=0 And Owner$=My.Race$&quot;,&quot;s2&quot;\">Noob</a></td><td align=\"right\"><font color=\"green\">5</font></td></tr>"
+                         "<tr><td><a href=\"q:UI.Search &quot;Level=2 And Owner$=My.Race$&quot;,&quot;s2&quot;\">Wizard</a></td><td align=\"right\"><font color=\"green\">2</font></td></tr>"
+                         "<tr><td><a href=\"q:UI.Search &quot;Level=3 And Owner$=My.Race$&quot;,&quot;s2&quot;\">God</a></td><td align=\"right\"><font color=\"green\">7</font></td></tr></table>");
+    }
+
+    // With NullLinkBuilder
+    {
+        TagNode tab("table");
+        gmi::renderShipExperienceSummary(tab, h.univ, true, h.shipScores, h.config, h.fmt, h.tx, game::map::info::NullLinkBuilder());
+
+        TS_ASSERT_EQUALS(toString(tab),
+                         "<table><tr><td width=\"17\"><font color=\"white\">Ships by Experience Level</font></td><td align=\"right\" width=\"3\"/></tr>"
+                         "<tr><td>Noob</td><td align=\"right\"><font color=\"green\">5</font></td></tr>"
+                         "<tr><td>Wizard</td><td align=\"right\"><font color=\"green\">2</font></td></tr>"
+                         "<tr><td>God</td><td align=\"right\"><font color=\"green\">7</font></td></tr></table>");
+    }
 }
 

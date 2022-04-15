@@ -32,6 +32,8 @@
 
 namespace game { namespace map { namespace info {
 
+    class LinkBuilder;
+
     /*
      *  Data Acquisition
      */
@@ -153,7 +155,8 @@ namespace game { namespace map { namespace info {
         @param [in]   el           Mineral to report
         @param [in]   shipList     Ship List (currently required for naming things; Element::getName())
         @param [in]   fmt          Number formatter
-        @param [in]   tx           Translator */
+        @param [in]   tx           Translator
+        @param [in]   link         LinkBuilder */
     void renderTopMineralPlanets(TagNode& tab,
                                  const Universe& univ,
                                  bool sortByTotal,
@@ -161,7 +164,8 @@ namespace game { namespace map { namespace info {
                                  Element::Type el,
                                  const game::spec::ShipList& shipList,
                                  util::NumberFormatter fmt,
-                                 afl::string::Translator& tx);
+                                 afl::string::Translator& tx,
+                                 const LinkBuilder& link);
 
     /** Render table of top-resource planets.
         Builds a table with two: planet name, amount.
@@ -173,14 +177,16 @@ namespace game { namespace map { namespace info {
         @param [in]   el           Resource to report
         @param [in]   shipList     Ship List (currently required for naming things; Element::getName())
         @param [in]   fmt          Number formatter
-        @param [in]   tx           Translator */
+        @param [in]   tx           Translator
+        @param [in]   link         LinkBuilder */
     void renderTopResourcePlanets(TagNode& tab,
                                   const Universe& univ,
                                   size_t limit,
                                   Element::Type el,
                                   const game::spec::ShipList& shipList,
                                   util::NumberFormatter fmt,
-                                  afl::string::Translator& tx);
+                                  afl::string::Translator& tx,
+                                  const LinkBuilder& link);
 
 
     /** Render number of planets (part of PlanetsPage).
@@ -200,11 +206,13 @@ namespace game { namespace map { namespace info {
         @param [in]   univ         Universe
         @param [in]   sortOrder    Sort order (Planets_SortByRace etc.)
         @param [in]   fmt          Number formatter
-        @param [in]   tx           Translator */
+        @param [in]   tx           Translator
+        @param [in]   link         LinkBuilder */
     void renderPlanetNativeSummary(TagNode& tab, const Universe& univ,
                                    uint8_t sortOrder,
                                    util::NumberFormatter fmt,
-                                   afl::string::Translator& tx);
+                                   afl::string::Translator& tx,
+                                   const LinkBuilder& link);
 
     /** Render planet climate summary (part of PlanetsPage).
         Shows planets by climate.
@@ -212,10 +220,12 @@ namespace game { namespace map { namespace info {
         @param [out]  tab          Output target (empty <table> tag)
         @param [in]   univ         Universe
         @param [in]   fmt          Number formatter
-        @param [in]   tx           Translator */
+        @param [in]   tx           Translator
+        @param [in]   link         LinkBuilder */
     void renderPlanetClimateSummary(TagNode& tab, const Universe& univ,
                                     util::NumberFormatter fmt,
-                                    afl::string::Translator& tx);
+                                    afl::string::Translator& tx,
+                                    const LinkBuilder& link);
 
     /** Render planet defense summary (part of PlanetsPage).
         Shows planets by defense status.
@@ -224,12 +234,14 @@ namespace game { namespace map { namespace info {
         @param [in]   univ         Universe
         @param [in]   config       Host configuration (determines DefenseForUndetectable)
         @param [in]   fmt          Number formatter
-        @param [in]   tx           Translator */
+        @param [in]   tx           Translator
+        @param [in]   link         LinkBuilder */
     void renderPlanetDefenseSummary(TagNode& tab,
                                     const Universe& univ,
                                     const game::config::HostConfiguration& config,
                                     util::NumberFormatter fmt,
-                                    afl::string::Translator& tx);
+                                    afl::string::Translator& tx,
+                                    const LinkBuilder& link);
 
     /** Render starbase summary (part of StarbasePage).
         Shows counts of starbases that stand out somehow.
@@ -237,11 +249,13 @@ namespace game { namespace map { namespace info {
         @param [out]  tab          Output target (empty <table> tag)
         @param [in]   univ         Universe
         @param [in]   fmt          Number formatter
-        @param [in]   tx           Translator */
+        @param [in]   tx           Translator
+        @param [in]   link         LinkBuilder */
     void renderStarbaseSummary(TagNode& tab,
                                const Universe& univ,
                                util::NumberFormatter fmt,
-                               afl::string::Translator& tx);
+                               afl::string::Translator& tx,
+                               const LinkBuilder& link);
 
     /** Render starbase ship building summary (part of StarbasePage).
         Shows ships being built by starbases.
@@ -252,14 +266,16 @@ namespace game { namespace map { namespace info {
         @param [in]   shipList     Ship list (for hulls being built)
         @param [in]   config       Host configuration (for resolving truehull)
         @param [in]   fmt          Number formatter
-        @param [in]   tx           Translator */
+        @param [in]   tx           Translator
+        @param [in]   link         LinkBuilder */
     void renderStarbaseShipBuildSummary(TagNode& tab,
                                         const Universe& univ,
                                         uint8_t sortOrder,
                                         const game::spec::ShipList& shipList,
                                         const game::config::HostConfiguration& config,
                                         util::NumberFormatter fmt,
-                                        afl::string::Translator& tx);
+                                        afl::string::Translator& tx,
+                                        const LinkBuilder& link);
 
     /** Render starship summary (part of StarshipPage).
         Shows ships that stand out.
@@ -271,7 +287,8 @@ namespace game { namespace map { namespace info {
         @param [in]   shipList     Ship list (for hulls, hullfuncs)
         @param [in]   config       Host configuration (for resolving hullfuncs)
         @param [in]   fmt          Number formatter
-        @param [in]   tx           Translator */
+        @param [in]   tx           Translator
+        @param [in]   link         LinkBuilder */
     void renderShipSummary(TagNode& tab,
                            const Universe& univ,
                            bool withFreighters,
@@ -279,7 +296,8 @@ namespace game { namespace map { namespace info {
                            const game::spec::ShipList& shipList,
                            const game::config::HostConfiguration& config,
                            util::NumberFormatter fmt,
-                           afl::string::Translator& tx);
+                           afl::string::Translator& tx,
+                           const LinkBuilder& link);
 
     /** Render starship experience level summary (part of StarshipPage).
         Shows ships by experience level.
@@ -290,14 +308,16 @@ namespace game { namespace map { namespace info {
         @param [in]   shipScores   Ship score definitions (for experience levels and for resolving hullfuncs)
         @param [in]   config       Host configuration (for experience levels)
         @param [in]   fmt          Number formatter
-        @param [in]   tx           Translator */
+        @param [in]   tx           Translator
+        @param [in]   link         LinkBuilder */
     void renderShipExperienceSummary(TagNode& tab,
                                      const Universe& univ,
                                      bool withFreighters,
                                      const UnitScoreDefinitionList& shipScores,
                                      const game::config::HostConfiguration& config,
                                      util::NumberFormatter fmt,
-                                     afl::string::Translator& tx);
+                                     afl::string::Translator& tx,
+                                     const LinkBuilder& link);
 
     /** Render starship type summary (part of StarshipPage).
         Shows ships by type.
@@ -308,14 +328,16 @@ namespace game { namespace map { namespace info {
         @param [in]   withFreighters Include freighters in list?
         @param [in]   shipList     Ship list (for hulls)
         @param [in]   fmt          Number formatter
-        @param [in]   tx           Translator */
+        @param [in]   tx           Translator
+        @param [in]   link         LinkBuilder */
     void renderShipTypeSummary(TagNode& tab,
                                const Universe& univ,
                                uint8_t sortOrder,
                                bool withFreighters,
                                const game::spec::ShipList& shipList,
                                util::NumberFormatter fmt,
-                               afl::string::Translator& tx);
+                               afl::string::Translator& tx,
+                               const LinkBuilder& link);
 
     /** Render starchart summary, own empire (part of StarchartPage).
         Reports size and content of starchart.
@@ -341,24 +363,28 @@ namespace game { namespace map { namespace info {
         @param [in]   teams        Teams (viewpoint player, player relations)
         @param [in]   players      Player names
         @param [in]   fmt          Number formatter
-        @param [in]   tx           Translator */
+        @param [in]   tx           Translator
+        @param [in]   link         LinkBuilder */
     void renderStarchartForeignSummary(TagNode& tab,
                                        const StarchartInfo& t,
                                        const TeamSettings& teams,
                                        const PlayerList& players,
                                        util::NumberFormatter fmt,
-                                       afl::string::Translator& tx);
+                                       afl::string::Translator& tx,
+                                       const LinkBuilder& link);
 
     /** Render universal minefield friendly code (part of StarchartPage).
 
         @param [out]  tab          Output target (empty <table> tag)
         @param [in]   univ         Universe
         @param [in]   teams        Teams (viewpoint player)
-        @param [in]   tx           Translator */
+        @param [in]   tx           Translator
+        @param [in]   link         LinkBuilder */
     void renderUniversalFriendlyCode(TagNode& tab,
                                      const Universe& univ,
                                      const TeamSettings& teams,
-                                     afl::string::Translator& tx);
+                                     afl::string::Translator& tx,
+                                     const LinkBuilder& link);
 
     /** Render beam weapon summary (part of WeaponsPage).
         Reports total numbers of ships with beam weapons, and weapons.
@@ -368,13 +394,15 @@ namespace game { namespace map { namespace info {
         @param [in]   showAll      true to show all torpedo types, even those you do not have
         @param [in]   shipList     Ship list (weapon names)
         @param [in]   fmt          Number formatter
-        @param [in]   tx           Translator */
+        @param [in]   tx           Translator
+        @param [in]   link         LinkBuilder */
     void renderBeamWeaponSummary(TagNode& tab,
                                  const Universe& univ,
                                  bool showAll,
                                  const game::spec::ShipList& shipList,
                                  util::NumberFormatter fmt,
-                                 afl::string::Translator& tx);
+                                 afl::string::Translator& tx,
+                                 const LinkBuilder& link);
 
     /** Render torpedo weapon summary (part of WeaponsPage).
         Reports total numbers of torpedo ships and torpedoes.
@@ -384,13 +412,15 @@ namespace game { namespace map { namespace info {
         @param [in]   showAll      true to show all torpedo types, even those you do not have
         @param [in]   shipList     Ship list (weapon names)
         @param [in]   fmt          Number formatter
-        @param [in]   tx           Translator */
+        @param [in]   tx           Translator
+        @param [in]   link         LinkBuilder */
     void renderTorpedoWeaponSummary(TagNode& tab,
                                     const Universe& univ,
                                     bool showAll,
                                     const game::spec::ShipList& shipList,
                                     util::NumberFormatter fmt,
-                                    afl::string::Translator& tx);
+                                    afl::string::Translator& tx,
+                                    const LinkBuilder& link);
 
     /** Render misc weapon summary (part of WeaponsPage).
         Reports carriers and unarmed ships.

@@ -12,10 +12,11 @@ namespace {
 
 class game::proxy::ImperialStatsProxy::Trampoline {
  public:
-    Trampoline(Session& session, util::RequestSender<ImperialStatsProxy> reply)
+    Trampoline(Session& session, util::RequestSender<ImperialStatsProxy> reply, std::auto_ptr<game::map::info::LinkBuilder> link)
         : m_reply(reply),
           m_session(session),
-          m_browser(session)
+          m_link(link),
+          m_browser(session, *m_link)
         { }
 
     void requestPageContent(game::map::info::Page page)
@@ -64,24 +65,26 @@ class game::proxy::ImperialStatsProxy::Trampoline {
  private:
     util::RequestSender<ImperialStatsProxy> m_reply;
     Session& m_session;
+    std::auto_ptr<game::map::info::LinkBuilder> m_link;
     game::map::info::Browser m_browser;
 };
 
 class game::proxy::ImperialStatsProxy::TrampolineFromSession : public afl::base::Closure<Trampoline*(Session&)> {
  public:
-    TrampolineFromSession(util::RequestSender<ImperialStatsProxy> reply)
-        : m_reply(reply)
+    TrampolineFromSession(util::RequestSender<ImperialStatsProxy> reply, std::auto_ptr<game::map::info::LinkBuilder> link)
+        : m_reply(reply), m_link(link)
         { }
     virtual Trampoline* call(Session& session)
-        { return new Trampoline(session, m_reply); }
+        { return new Trampoline(session, m_reply, m_link); }
  private:
     util::RequestSender<ImperialStatsProxy> m_reply;
+    std::auto_ptr<game::map::info::LinkBuilder> m_link;
 };
 
 
-game::proxy::ImperialStatsProxy::ImperialStatsProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& receiver)
+game::proxy::ImperialStatsProxy::ImperialStatsProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& receiver, std::auto_ptr<game::map::info::LinkBuilder> link)
     : m_receiver(receiver, *this),
-      m_sender(gameSender.makeTemporary(new TrampolineFromSession(m_receiver.getSender())))
+      m_sender(gameSender.makeTemporary(new TrampolineFromSession(m_receiver.getSender(), link)))
 { }
 
 game::proxy::ImperialStatsProxy::~ImperialStatsProxy()

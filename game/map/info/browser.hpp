@@ -12,6 +12,8 @@
 
 namespace game { namespace map { namespace info {
 
+    class LinkBuilder;
+
     /** Information browser (Imperial Statistics).
         Ties together the functions from game/map/info/info.hpp into a uniform interface.
 
@@ -22,8 +24,9 @@ namespace game { namespace map { namespace info {
     class Browser {
      public:
         /** Constructor.
-            @param session Session // FIXME: can we use something smaller than a Session? */
-        explicit Browser(Session& session);
+            @param session Session // FIXME: can we use something smaller than a Session?
+            @param link LinkBuilder */
+        Browser(Session& session, const LinkBuilder& link);
 
         /** Set options for a page.
 
@@ -54,6 +57,7 @@ namespace game { namespace map { namespace info {
 
      private:
         Session& m_session;
+        const LinkBuilder& m_link;
         PageOptions_t m_options[NUM_PAGES];
 
         void renderTotalsPage(Nodes_t& out);
