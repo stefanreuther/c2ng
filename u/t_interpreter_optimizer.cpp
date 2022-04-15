@@ -98,8 +98,8 @@ namespace {
 
         interpreter::Process exec(world, "checkScalarExpression", 9);
         exec.pushFrame(bco, false);
-        bool ok = exec.runTemporary();
-        TSM_ASSERT(expr, ok);
+        exec.run();
+        TSM_ASSERT_EQUALS(expr, exec.getState(), interpreter::Process::Ended);
 
         const afl::data::ScalarValue* resv = dynamic_cast<const afl::data::ScalarValue*>(exec.getResult());
         TSM_ASSERT(expr, resv != 0);

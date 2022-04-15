@@ -38,9 +38,7 @@ namespace interpreter {
         it can be suspended to disk (see SaveContext) and later reloaded.
         This is mainly used for auto-tasks.
 
-        In PCC1, processes (IntExecutionContext) could also be created on-the-fly
-        and executed for a temporary result (runTemporary()).
-        In PCC2, this ability is deprecated and retained for testing only. */
+        c2ng no longer includes the ability to execute temporary processes (runTemporary). */
     class Process : public StaticContext, public ContextReceiver {
         // ex IntExecutionContext
      public:
@@ -384,26 +382,6 @@ namespace interpreter {
             - Suspended
             - Waiting */
         void run();
-
-        /** Run temporary process.
-            Runs the given process, which can be a stack object of the caller
-            (not part of a ProcessList, created with ProcessList::create).
-            The process is not permitted to suspend or wait;
-            trying to do so will cause it to receive an error.
-
-            This function is deprecated for most uses.
-            Processes that execute in runTemporary() will escape the regular process state machine.
-            In c2ng, this means they cannot call UI.
-            In c2web, this means they cannot even fetch server data.
-            This function is retained because it is useful for testing.
-
-            \retval true  The process has run till its end and finished normally.
-                          If it contained an expression, that expression's result
-                          is available on the stack (getResult()).
-            \retval false The process has terminated abnormally.
-                          This happens when the process received an error, but also when it executed an 'End' statement.
-                          In this case, it has not produced a result. */
-        bool runTemporary();
 
         /** Execute a single instruction.
             Does not catch errors; caller needs to do that. */

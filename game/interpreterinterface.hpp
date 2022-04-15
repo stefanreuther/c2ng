@@ -26,15 +26,6 @@ namespace game {
         virtual ~InterpreterInterface()
             { }
 
-        /** Evaluate a boolean expression.
-            \param scope Object type
-            \param id Object Id
-            \param expr Expression to evaluate
-            \return Result
-
-            FIXME: this method is deprecated because it requires Process::runTemporary. */
-        virtual afl::data::Value* evaluate(Scope scope, int id, String_t expr) = 0;
-
         /** Get comment for an object.
             \param scope Object type
             \param id Object Id

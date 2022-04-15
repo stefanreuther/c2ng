@@ -226,14 +226,6 @@ TestGameSession::testInterpreterInterface()
     // Verify
     game::InterpreterInterface& iface = testee.interface();
 
-    // - evaluate()
-    std::auto_ptr<afl::data::Value> p;
-    p.reset(iface.evaluate(iface.Ship, 17, "ID"));
-    TS_ASSERT_EQUALS(afl::data::Access(p.get()).toInteger(), 17);
-
-    p.reset(iface.evaluate(iface.Planet, 5, "1+2+3+4"));
-    TS_ASSERT_EQUALS(afl::data::Access(p.get()).toInteger(), 10);
-
     // - getComment(), hasTask() - return defaults because not configured in this test
     TS_ASSERT_EQUALS(iface.getComment(iface.Ship, 17), "");
     TS_ASSERT_EQUALS(iface.hasTask(iface.Ship, 17), false);

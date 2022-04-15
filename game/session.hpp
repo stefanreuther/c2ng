@@ -265,7 +265,6 @@ namespace game {
         afl::base::SignalConnection conn_userConfigToMap;
 
         // InterpreterInterface:
-        virtual afl::data::Value* evaluate(Scope scope, int id, String_t expr);
         virtual String_t getComment(Scope scope, int id);
         virtual bool hasTask(Scope scope, int id);
         virtual bool getHullShortName(int nr, String_t& out);

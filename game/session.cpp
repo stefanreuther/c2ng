@@ -65,38 +65,6 @@ namespace {
         - PCC2: 101, defining a range of allowing 0..100, which are all accessible to the user
           (but slot 0 is never returned by FreeFile()) */
     const size_t MAX_SCRIPT_FILES = 101;
-
-    /** Compile expression, simple interface. Compiles the expression into a byte-code object.
-        Returns the byte-code object, null on failure. This is used when an expression is used
-        behind a regular UI function, where it doesn't really matter what kind of error, if any,
-        we've encountered.
-
-        \todo This would be a nice place to implement caching. */
-    interpreter::BCOPtr_t compileExpression(const String_t& expr, const interpreter::CompilationContext& cc)
-    {
-        // ex int/simple.h:compileExpression
-        // FIXME: can we find a better home for this function?
-        try {
-            afl::base::Deleter del;
-            interpreter::Tokenizer tok(expr);
-            if (tok.getCurrentToken() == tok.tEnd) {
-                return 0; /* empty expression */
-            }
-
-            const interpreter::expr::Node& expr(interpreter::expr::Parser(tok, del).parse());
-            if (tok.getCurrentToken() != tok.tEnd) {
-                return 0; /* expression incorrectly terminated */
-            }
-
-            interpreter::BCORef_t bco = interpreter::BytecodeObject::create(false);
-            expr.compileValue(*bco, cc);
-            bco->relocate();
-            return bco.asPtr();
-        }
-        catch (interpreter::Error& e) {
-            return 0;
-        }
-    }
 }
 
 game::Session::Session(afl::string::Translator& tx, afl::io::FileSystem& fs)
@@ -500,43 +468,6 @@ game::Session::save(TurnLoader::SaveOptions_t opts, std::auto_ptr<afl::base::Clo
     }
 
     return pLoader->saveCurrentTurn(pGame->currentTurn(), *pGame, PlayerSet_t(pGame->getViewpointPlayer()), opts, *pRoot, *this, then);
-}
-
-afl::data::Value*
-game::Session::evaluate(Scope scope, int id, String_t expr)
-{
-    // Compiler
-    interpreter::BCOPtr_t bco = compileExpression(expr, interpreter::CompilationContext(m_world));
-    if (bco.get() == 0) {
-        return 0;
-    }
-
-    // Create process
-    interpreter::Process proc(m_world, "Session.evaluate", 0);
-
-    // Create context
-    switch (scope) {
-     case Ship:
-        // ex shipint.pas:EvalShip
-        if (m_game.get() != 0 && m_root.get() != 0 && m_shipList.get() != 0 && m_game->currentTurn().universe().ships().get(id) != 0) {
-            proc.pushNewContext(new game::interface::ShipContext(id, *this, *m_root, *m_game, *m_shipList));
-        }
-        break;
-     case Base:
-     case Planet:
-        if (m_game.get() != 0 && m_root.get() != 0 && m_game->currentTurn().universe().planets().get(id) != 0) {
-            proc.pushNewContext(new game::interface::PlanetContext(id, *this, *m_root, *m_game));
-        }
-        break;
-    }
-
-    // Populate process group
-    proc.pushFrame(*bco, true);
-    if (proc.runTemporary()) {
-        return afl::data::Value::cloneOf(proc.getResult());
-    } else {
-        return 0;
-    }
 }
 
 String_t

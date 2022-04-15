@@ -5,12 +5,6 @@
 
 #include "game/test/interpreterinterface.hpp"
 
-afl::data::Value*
-game::test::InterpreterInterface::evaluate(Scope /*scope*/, int /*id*/, String_t /*expr*/)
-{
-    return 0;
-}
-
 String_t
 game::test::InterpreterInterface::getComment(Scope /*scope*/, int /*id*/)
 {

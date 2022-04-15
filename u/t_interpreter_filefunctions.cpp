@@ -121,8 +121,7 @@ namespace {
         TSM_ASSERT_DIFFERS(stmt, result, interpreter::StatementCompiler::CompiledExpression);
 
         exec.pushFrame(bco, false);
-        bool ok = exec.runTemporary();
-        TSM_ASSERT(stmt, ok);
+        exec.run();
         TSM_ASSERT_EQUALS(stmt, exec.getState(), interpreter::Process::Ended);
         TSM_ASSERT_EQUALS(stmt, exec.getError().what(), String_t());
     }

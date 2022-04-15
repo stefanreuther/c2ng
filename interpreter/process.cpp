@@ -678,60 +678,6 @@ interpreter::Process::run()
     logProcessState("end");
 }
 
-// Run temporary process.
-bool
-interpreter::Process::runTemporary()
-{
-    // ex int/process.h:runTemporaryProcess
-    while (1) {
-        run();
-
-        bool handled = false;
-        switch (getState()) {
-         case Suspended:
-            // Tries to suspend, this is not allowed for a temporary process.
-            handleException("Cannot suspend temporary process", String_t());
-            handled = true;
-            break;
-
-         case Frozen:
-            // Should not happen; count as error.
-            return false;
-
-         case Runnable:
-         case Running:
-            // Should not happen; count as error. ProcessList::run sets these to Failed.
-            m_processError = "Invalid state";
-            setState(Failed);
-            return false;
-
-         case Waiting:
-            // The process called UI. This counts as failure.
-            // We are a temporary process, the wait has nowhere to return.
-            handleException("Cannot wait from temporary process", String_t());
-            handled = true;
-            break;
-
-         case Ended:
-            // Successful execution.
-            return true;
-
-         case Terminated:
-            // Counts as failure because it did not produce a result.
-            return false;
-
-         case Failed:
-            // Failure
-            return false;
-        }
-
-        if (!handled) {
-            // Fallback (could be the switch's default, but that would suppress the "not all values handled" warning)
-            return false;
-        }
-    }
-}
-
 // Execute a single instruction.
 void
 interpreter::Process::executeInstruction()
