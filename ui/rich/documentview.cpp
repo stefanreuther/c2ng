@@ -31,6 +31,12 @@ ui::rich::DocumentView::getDocument()
     return doc;
 }
 
+const ui::rich::Document&
+ui::rich::DocumentView::getDocument() const
+{
+    return doc;
+}
+
 
 // /** Handle document update. Must be called when the document was updated
 //     while the widget is displayed. */

@@ -34,6 +34,7 @@ namespace ui { namespace rich {
         ~DocumentView();
 
         Document& getDocument();
+        const Document& getDocument() const;
 
         void handleDocumentUpdate();
         void adjustToDocumentSize();

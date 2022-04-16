@@ -7,6 +7,8 @@
 #include "afl/base/deleter.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "afl/io/xml/nodereader.hpp"
+#include "afl/string/format.hpp"
+#include "client/dialogs/planetinfodialog.hpp"
 #include "client/si/control.hpp"
 #include "client/widgets/helpwidget.hpp"
 #include "game/map/info/scriptlinkbuilder.hpp"
@@ -25,10 +27,13 @@
 #include "ui/widgets/stringlistbox.hpp"
 #include "ui/window.hpp"
 #include "util/string.hpp"
+#include "util/stringparser.hpp"
 
+using afl::string::Format;
 using client::si::OutputState;
 using client::si::RequestLink2;
 using client::widgets::HelpWidget;
+using game::Reference;
 using game::map::info::Nodes_t;
 using game::map::info::Page;
 using game::map::info::PageOptions_t;
@@ -40,6 +45,8 @@ using ui::widgets::Button;
 
 namespace {
     class Dialog;
+
+    const char*const TASK_NAME = "(Imperial Statistics)";
 
     /*
      *  Button to select a page
@@ -66,6 +73,48 @@ namespace {
     };
 
     /*
+     *  LinkBuilder
+     *
+     *  We want to offer more than just "activate this link" with planets,
+     *  so we need to associate some metainformation with the links to allow a UI-side decision to be made.
+     */
+    class LinkBuilder : public game::map::info::LinkBuilder {
+     public:
+        virtual String_t makePlanetLink(const game::map::Planet& pl) const
+            {
+                game::map::Point pt;
+                if (pl.isPlayable(game::map::Object::ReadOnly) && pl.getPosition(pt)) {
+                    return Format("pl:%d,%d,%d,%d", pl.getId(), int(pl.hasBase()), pt.getX(), pt.getY());
+                } else {
+                    return String_t();
+                }
+            }
+        virtual String_t makeSearchLink(const game::SearchQuery& q) const
+            {
+                // Keep regular 'q' format for those
+                return game::map::info::ScriptLinkBuilder().makeSearchLink(q);
+            }
+    };
+
+    struct PlanetLink {
+        int id;
+        int hasBase;
+        int x, y;
+    };
+
+    /* Check and parse a link created by LinkBuilder::makePlanetLink() */
+    bool parsePlanetLink(const String_t& str, PlanetLink& out)
+    {
+        util::StringParser p(str);
+        return p.parseString("pl:") && p.parseInt(out.id)
+            && p.parseString(",") && p.parseInt(out.hasBase)
+            && p.parseString(",") && p.parseInt(out.x)
+            && p.parseString(",") && p.parseInt(out.y)
+            && p.parseEnd();
+    }
+
+
+    /*
      *  Imperial Statistics dialog
      *
      *  This hooks together an ImperialStatsProxy and a DocumentView,
@@ -79,7 +128,7 @@ namespace {
               m_userSide(userSide),
               m_outputState(outputState),
               m_loop(userSide.root()),
-              m_proxy(userSide.gameSender(), userSide.root().engine().dispatcher(), std::auto_ptr<game::map::info::LinkBuilder>(new game::map::info::ScriptLinkBuilder())),
+              m_proxy(userSide.gameSender(), userSide.root().engine().dispatcher(), std::auto_ptr<game::map::info::LinkBuilder>(new LinkBuilder())),
               m_docView(userSide.root().provider().getFont(gfx::FontRequest())->getCellSize().scaledBy(10, 10), DocumentView::fl_SingleHyper, userSide.root().provider()),
               m_optionsButton(userSide.translator()("# - Options"), '#', userSide.root()),
               m_pageButtons(),
@@ -142,6 +191,7 @@ namespace {
      private:
         void requestPage();
         void highlightPage();
+        bool parseCurrentPlanetLink(PlanetLink& out) const;
 
         /*
          *  UI components / Plumbing
@@ -283,8 +333,13 @@ void
 Dialog::onLinkClick(String_t link)
 {
     // ex WImperialStatisticsWindow::onLinkClick(string_t link)
-    if (const char* cmd = util::strStartsWith(link, "q:")) {
-        executeCommandWait(cmd, false, "(Imperial Statistics)");
+    PlanetLink pl;
+    if (parsePlanetLink(link, pl)) {
+        executeGoToReferenceWait(TASK_NAME, Reference(Reference::Planet, pl.id));
+    } else if (const char* cmd = util::strStartsWith(link, "q:")) {
+        executeCommandWait(cmd, false, TASK_NAME);
+    } else {
+        // what?
     }
 }
 
@@ -316,6 +371,7 @@ bool
 Dialog::handleKey(util::Key_t key, int /*prefix*/)
 {
     // ex WImperialStatisticsWindow::handleEvent
+    PlanetLink pl;
     switch (key) {
      case util::Key_Up:
      case util::Key_PgUp:
@@ -325,6 +381,32 @@ Dialog::handleKey(util::Key_t key, int /*prefix*/)
      case util::Key_Down:
      case util::Key_PgDn:
         browsePage(true);
+        return true;
+
+     // TODO: PCC1 handles F1, F6, but for now we do not generate links to ships
+
+     case util::Key_F2:
+        if (parseCurrentPlanetLink(pl)) {
+            executeGoToReferenceWait(TASK_NAME, Reference(Reference::Planet, pl.id));
+        }
+        return true;
+
+     case util::Key_F3:
+        if (parseCurrentPlanetLink(pl) && pl.hasBase != 0) {
+            executeGoToReferenceWait(TASK_NAME, Reference(Reference::Starbase, pl.id));
+        }
+        return true;
+
+     case util::Key_F4:
+        if (parseCurrentPlanetLink(pl)) {
+            executeGoToReferenceWait(TASK_NAME, Reference(game::map::Point(pl.x, pl.y)));
+        }
+        return true;
+
+     case util::Key_F5:
+        if (parseCurrentPlanetLink(pl)) {
+            client::dialogs::doPlanetInfoDialog(root(), interface().gameSender(), pl.id, translator());
+        }
         return true;
 
      default:
@@ -387,6 +469,13 @@ Dialog::highlightPage()
     for (size_t i = 0; i < m_pageButtons.size(); ++i) {
         m_pageButtons[i]->setFlag(ui::HighlightedButton, m_pageButtons[i]->getPage() == m_currentPage);
     }
+}
+
+/* Parse current link as planet link */
+bool
+Dialog::parseCurrentPlanetLink(PlanetLink& out) const
+{
+    return parsePlanetLink(m_docView.getDocument().getLinkTarget(m_docView.getSelectedLink()), out);
 }
 
 
