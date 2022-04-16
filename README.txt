@@ -18,10 +18,10 @@ WHAT IS PCC2 (c2ng)?
   PCC2. It is intended to be 100% compatible to PCC2. However, it does
   away with many self-imposed limitations of PCC2.
 
-  As of May 2021, c2ng is still incomplete. End-users should remain
-  with PCC2 or PCC1. However, the back-end code is complete enough
-  that c2ng now runs behind PlanetsCentral.com exclusively. The game
-  engine nears completion.
+  As of April 2022, c2ng is still incomplete, but should be playable.
+  End-users should remain with PCC2 or PCC1. However, the back-end
+  code is complete enough that c2ng now runs behind PlanetsCentral.com
+  exclusively.
 
 
 Project Goals
@@ -53,7 +53,6 @@ Status
   Browsing and loading local and network games ................. done
     Browse your hard disk as well as network.
     Support servers that do not have VGAP binary formats (Nu).
-    Milestone four adds long-needed configuration/setup menus.
 
   Manage multiple turns ........................................ done
     Browse history while playing.
@@ -144,6 +143,8 @@ Program List
   - PlanetsCentral
     . c2console: console
     . c2dbexport: database exporter
+    . c2docmanager: manage documentation for c2doc-server
+    . c2doc-server: documentation server
     . c2fileclient: file client
     . c2file-server: file server
     . c2format-server: format (binary I/O) server
@@ -163,10 +164,9 @@ Near Milestones
 ----------------
 
   - model the complete data and make it available for scripting
-    . most v3 objects done now
+    . v3 objects done now
     . Nu advantages (map to racial abilities and configuration)
   - more server integration
-    . saving for server-based games
   - fancier GUI
   - more graphics resolutions!
 
@@ -178,7 +178,7 @@ Future Milestones
   - implement help
   - can we integrate forums/activities?
   - more operating systems (Android!)
-  - C++11
+  - C++11/17
   - OpenGL
 
 

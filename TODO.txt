@@ -12,7 +12,7 @@ Minor Concept Verification
 ==========================
 
 MAKETURN/SAVE.
-- Still missing for Network play
+- Still missing for Nu.
 
 ABILITIES/ADVANTAGES.
 - Map Nu advantages to racial abilities or configuration.
@@ -33,7 +33,7 @@ MESSAGES. Can we integrate all messages (in-game messages, PMs, activities, foru
 
 FILER NG.
 - Add transaction support: upload many files at once and commit at the end; fork dataspace for backup.
-- fsck/garbage collection.
+- [DONE] fsck/garbage collection.
 
 SDL2/ANDROID.
 - Touch events!
@@ -64,7 +64,7 @@ MISC
 
 INTERPRETER REWORKS.
 - Constant folding. Translate '"foo" & chr(33)' into a string.
-- Rework expressions to reference+deleter style instead of current auto_ptr style.
+- [DONE] Rework expressions to reference+deleter style instead of current auto_ptr style.
 
 HISTORY.
 - When loading history ships, clear the mission settings. Don't say the last mission of a stolen ship forever.

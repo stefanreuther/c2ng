@@ -434,6 +434,7 @@ Source Code Structure
   client         | guilib  | client source code
     dialogs      |         | dialogs
     map          |         | map renderer
+    proxy        |         | client-specific proxies (see game::proxy)
     screens      |         | control screens
     si           |         | script integration
     tiles        |         | tiles (=control screen widgets)

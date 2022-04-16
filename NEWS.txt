@@ -1,6 +1,24 @@
 PCC2ng NEWS FILE
 ================
 
+2.40.12
+-------
+
+  Network play: can now upload turns to PlanetsCentral for managed
+  games.
+
+  General play features: Auto Task editor. Custom FLAK ratings in
+  simulator. Imperial Statistics. Improved hull selection dialog
+  (simulator, starship cost calculator). Object labels. Object
+  properties in starchart (mini control screen). Search ships from Nav
+  Chart. Starship cost calculator.
+
+  Server: Added doc server. Garbage collection for CA file server.
+
+  Internal restructurings, in particular, regarding the browser and
+  interpreter.
+
+
 2.40.11
 -------
 
