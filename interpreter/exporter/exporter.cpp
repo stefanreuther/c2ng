@@ -16,7 +16,7 @@ interpreter::exporter::Exporter::~Exporter()
 { }
 
 void
-interpreter::exporter::Exporter::doExport(Context& ctx, util::AnswerProvider& filter, const FieldList& fields)
+interpreter::exporter::Exporter::doExport(Context& ctx, const FieldList& fields)
 {
     // ex IntExporter::doExport
     // ex export.pas:DoExport (sans GUI)
@@ -56,41 +56,23 @@ interpreter::exporter::Exporter::doExport(Context& ctx, util::AnswerProvider& fi
     // Do it!
     startTable(fields, thc.typeHints);
     do {
-        // Filter objects as requested
-        game::map::Object* obj = ctx.getObject();
-        // FIXME: PCC2/c2ng change: PCC2 would use the object's name in filter.ask.
-        bool use;
-        if (obj == 0) {
-            use = true;
-        } else {
-            util::AnswerProvider::Result result = filter.ask(obj->getId(), String_t());
-            if (result == util::AnswerProvider::Yes) {
-                use = true;
-            } else if (result == util::AnswerProvider::No) {
-                use = false;
-            } else {
-                break;
-            }
-        }
-        if (use) {
-            // Object should be exported
-            startRecord();
-            for (FieldList::Index_t i = 0; i < fields.size(); ++i) {
-                // Obtain value.
-                // If anything throws or the lookup fails, the value is left as null.
-                std::auto_ptr<afl::data::Value> value;
-                try {
-                    Context::PropertyIndex_t adr;
-                    if (Context::PropertyAccessor* foundContext = ctx.lookup(fields.getFieldName(i), adr)) {
-                        value.reset(foundContext->get(adr));
-                    }
+        // Object should be exported
+        startRecord();
+        for (FieldList::Index_t i = 0; i < fields.size(); ++i) {
+            // Obtain value.
+            // If anything throws or the lookup fails, the value is left as null.
+            std::auto_ptr<afl::data::Value> value;
+            try {
+                Context::PropertyIndex_t adr;
+                if (Context::PropertyAccessor* foundContext = ctx.lookup(fields.getFieldName(i), adr)) {
+                    value.reset(foundContext->get(adr));
                 }
-                catch (Error&)
-                { }
-                addField(value.get(), fields.getFieldName(i), thc.typeHints[i]);
             }
-            endRecord();
+            catch (Error&)
+            { }
+            addField(value.get(), fields.getFieldName(i), thc.typeHints[i]);
         }
+        endRecord();
     } while (ctx.next());
     endTable();
 }

@@ -14,8 +14,6 @@
 #include "interpreter/exporter/fieldlist.hpp"
 #include "interpreter/propertyacceptor.hpp"
 #include "interpreter/values.hpp"
-#include "util/answerprovider.hpp"
-#include "util/constantanswerprovider.hpp"
 
 namespace {
     /** Test implementation of Exporter. Concatenates all values as a text. */
@@ -155,7 +153,7 @@ TestInterpreterExporterExporter::testIt()
     TestContext ctx(5, vec);
 
     TestExporter t;
-    t.doExport(ctx, util::ConstantAnswerProvider::sayYes, fields);
+    t.doExport(ctx, fields);
 
     TS_ASSERT_EQUALS(t.getResult(),
                      "ID=5,A=1\n"
@@ -177,101 +175,5 @@ TestInterpreterExporterExporter::testError()
     TestContext ctx(5, vec);
 
     TestExporter t;
-    TS_ASSERT_THROWS(t.doExport(ctx, util::ConstantAnswerProvider::sayYes, fields), std::exception);
+    TS_ASSERT_THROWS(t.doExport(ctx, fields), std::exception);
 }
-
-/** Test doExport() with negative filter but no object. */
-void
-TestInterpreterExporterExporter::testNoObject()
-{
-    interpreter::exporter::FieldList fields;
-    fields.addList("ID,A");
-
-    game::map::ObjectVector<TestObject> vec;
-    TestContext ctx(5, vec);
-
-    // Export with "No" filter. However, because we don't have an object, that filter is not applied.
-    TestExporter t;
-    t.doExport(ctx, util::ConstantAnswerProvider::sayNo, fields);
-
-    TS_ASSERT_EQUALS(t.getResult(),
-                     "ID=5,A=1\n"
-                     "ID=6,A=1\n"
-                     "ID=7,A=1\n"
-                     "ID=8,A=1\n"
-                     "ID=9,A=1\n"
-                     "ID=10,A=1\n");
-}
-
-/** Test doExport() with filter. */
-void
-TestInterpreterExporterExporter::testFilter()
-{
-    // A filter that accepts only odd objects
-    class OddFilter : public util::AnswerProvider {
-     public:
-        virtual Result ask(int questionId, String_t /*question*/)
-            { return (questionId & 1) != 0 ? Yes : No; }
-    };
-    OddFilter f;
-
-    interpreter::exporter::FieldList fields;
-    fields.addList("ID,A");
-
-    // Populate vector with objects. Do not add #6.
-    game::map::ObjectVector<TestObject> vec;
-    for (int i = 1; i < 20; ++i) {
-        if (i != 6) {
-            vec.create(i);
-        }
-    }
-    TestContext ctx(1, vec);
-
-    // Export with filter. This will produce only odd objects.
-    // However, the filter is not applied to #6.
-    TestExporter t;
-    t.doExport(ctx, f, fields);
-
-    TS_ASSERT_EQUALS(t.getResult(),
-                     "ID=1,A=1\n"
-                     "ID=3,A=1\n"
-                     "ID=5,A=1\n"
-                     "ID=6,A=1\n"
-                     "ID=7,A=1\n"
-                     "ID=9,A=1\n");
-}
-
-/** Test doExport() with cancellation. */
-void
-TestInterpreterExporterExporter::testCancel()
-{
-    // A filter that cancels at #4.
-    class CancelFilter : public util::AnswerProvider {
-     public:
-        virtual Result ask(int questionId, String_t /*question*/)
-            { return questionId == 4 ? Cancel : Yes; }
-    };
-    CancelFilter f;
-
-    // For a change, use some more fields.
-    interpreter::exporter::FieldList fields;
-    fields.addList("ID,A,C,B");
-
-    // Populate vector with objects.
-    game::map::ObjectVector<TestObject> vec;
-    for (int i = 1; i < 20; ++i) {
-        vec.create(i);
-    }
-    TestContext ctx(1, vec);
-
-    // Export with filter. This will produce only odd objects.
-    // However, the filter is not applied to #6.
-    TestExporter t;
-    t.doExport(ctx, f, fields);
-
-    TS_ASSERT_EQUALS(t.getResult(),
-                     "ID=1,A=1,C=3,B=2\n"
-                     "ID=2,A=1,C=3,B=2\n"
-                     "ID=3,A=1,C=3,B=2\n");
-}
-

@@ -24,9 +24,6 @@ class TestInterpreterExporterExporter : public CxxTest::TestSuite {
     void testInterface();
     void testIt();
     void testError();
-    void testNoObject();
-    void testFilter();
-    void testCancel();
 };
 
 class TestInterpreterExporterFieldList : public CxxTest::TestSuite {

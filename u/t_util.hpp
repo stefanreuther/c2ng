@@ -7,11 +7,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-class TestUtilAnswerProvider : public CxxTest::TestSuite {
- public:
-    void testIt();
-};
-
 class TestUtilApplication : public CxxTest::TestSuite {
  public:
     void testInit();
@@ -51,13 +46,6 @@ class TestUtilConfigurationFile : public CxxTest::TestSuite {
 class TestUtilConfigurationFileParser : public CxxTest::TestSuite {
  public:
     void testInterface();
-};
-
-class TestUtilConstantAnswerProvider : public CxxTest::TestSuite {
- public:
-    void testIt();
-    void testYes();
-    void testNo();
 };
 
 class TestUtilDataTable : public CxxTest::TestSuite {

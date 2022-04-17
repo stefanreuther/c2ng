@@ -548,18 +548,17 @@ FILES_gamelib = game/map/info/nulllinkbuilder.cpp \
     interpreter/exporter/textexporter.cpp \
     interpreter/exporter/textexporter.hpp \
     interpreter/exporter/dbfexporter.cpp \
-    interpreter/exporter/dbfexporter.hpp util/constantanswerprovider.cpp \
-    util/constantanswerprovider.hpp \
+    interpreter/exporter/dbfexporter.hpp \
     interpreter/exporter/separatedtextexporter.cpp \
     interpreter/exporter/separatedtextexporter.hpp \
     interpreter/exporter/exporter.cpp interpreter/exporter/exporter.hpp \
-    util/answerprovider.hpp interpreter/exporter/fieldlist.cpp \
-    interpreter/exporter/fieldlist.hpp interpreter/processlist.cpp \
-    interpreter/processlist.hpp game/interface/globalcontext.cpp \
-    game/interface/globalcontext.hpp game/interface/globalproperty.cpp \
-    game/interface/globalproperty.hpp game/interface/planetfunction.cpp \
-    game/interface/planetfunction.hpp game/interface/planetcontext.cpp \
-    game/interface/planetcontext.hpp interpreter/objectpropertyvector.cpp \
+    interpreter/exporter/fieldlist.cpp interpreter/exporter/fieldlist.hpp \
+    interpreter/processlist.cpp interpreter/processlist.hpp \
+    game/interface/globalcontext.cpp game/interface/globalcontext.hpp \
+    game/interface/globalproperty.cpp game/interface/globalproperty.hpp \
+    game/interface/planetfunction.cpp game/interface/planetfunction.hpp \
+    game/interface/planetcontext.cpp game/interface/planetcontext.hpp \
+    interpreter/objectpropertyvector.cpp \
     interpreter/objectpropertyvector.hpp game/tables/basemissionname.cpp \
     game/tables/basemissionname.hpp game/interface/baseproperty.cpp \
     game/interface/baseproperty.hpp game/map/historyshiptype.cpp \
@@ -2164,12 +2163,11 @@ FILES_testsuite = u/t_game_map_info_nulllinkbuilder.cpp \
     u/t_ui_colorscheme.cpp u/t_ui_widget.cpp \
     u/t_client_dialogs_objectselectiondialog.cpp u/t_client_dialogs.hpp \
     u/t_game_game.cpp u/t_game_interface_userinterfacepropertystack.cpp \
-    u/t_util_skincolor.cpp u/t_util_math.cpp \
-    u/t_util_constantanswerprovider.cpp u/t_util_answerprovider.cpp \
-    u/t_game_extraidentifier.cpp u/t_game_extracontainer.cpp \
-    u/t_game_map_viewport.cpp u/t_game_map_circularobject.cpp \
-    u/t_game_map_object.cpp u/t_game_tables_basemissionname.cpp \
-    u/t_game_teamsettings.cpp u/t_game_tables_ionstormclassname.cpp \
+    u/t_util_skincolor.cpp u/t_util_math.cpp u/t_game_extraidentifier.cpp \
+    u/t_game_extracontainer.cpp u/t_game_map_viewport.cpp \
+    u/t_game_map_circularobject.cpp u/t_game_map_object.cpp \
+    u/t_game_tables_basemissionname.cpp u/t_game_teamsettings.cpp \
+    u/t_game_tables_ionstormclassname.cpp \
     u/t_game_tables_wormholestabilityname.cpp \
     u/t_game_tables_mineraldensityclassname.cpp \
     u/t_game_tables_headingname.cpp u/t_game_interface_iteratorprovider.cpp \

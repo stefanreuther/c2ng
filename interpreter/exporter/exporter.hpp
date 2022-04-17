@@ -8,7 +8,6 @@
 #include "afl/base/memory.hpp"
 #include "interpreter/context.hpp"
 #include "interpreter/typehint.hpp"
-#include "util/answerprovider.hpp"
 
 namespace interpreter { namespace exporter {
 
@@ -31,12 +30,10 @@ namespace interpreter { namespace exporter {
             - endTable
 
             \param ctx      Context looking at the first object to possibly export.
-            \param filter   Object filter.
-                            Will be called with the object Id as questionId to permit/reject export of an object.
             \param fields   Field list
 
             \throw interpreter::Error on error. */
-        void doExport(Context& ctx, util::AnswerProvider& filter, const FieldList& fields);
+        void doExport(Context& ctx, const FieldList& fields);
 
      protected:
         /** Start output.

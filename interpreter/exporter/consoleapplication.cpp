@@ -31,7 +31,6 @@
 #include "interpreter/propertyacceptor.hpp"
 #include "interpreter/values.hpp"
 #include "util/charsetfactory.hpp"
-#include "util/constantanswerprovider.hpp"
 #include "util/profiledirectory.hpp"
 #include "util/string.hpp"
 #include "version.hpp"
@@ -171,25 +170,25 @@ namespace {
     {
         switch (typ) {
          case interpreter::exporter::TextFormat:
-            interpreter::exporter::TextExporter(tf, false).doExport(ctx, util::ConstantAnswerProvider::sayYes, job);
+            interpreter::exporter::TextExporter(tf, false).doExport(ctx, job);
             break;
          case interpreter::exporter::TableFormat:
-            interpreter::exporter::TextExporter(tf, true).doExport(ctx, util::ConstantAnswerProvider::sayYes, job);
+            interpreter::exporter::TextExporter(tf, true).doExport(ctx, job);
             break;
          case interpreter::exporter::CommaSVFormat:
-            interpreter::exporter::SeparatedTextExporter(tf, ',').doExport(ctx, util::ConstantAnswerProvider::sayYes, job);
+            interpreter::exporter::SeparatedTextExporter(tf, ',').doExport(ctx, job);
             break;
          case interpreter::exporter::TabSVFormat:
-            interpreter::exporter::SeparatedTextExporter(tf, '\t').doExport(ctx, util::ConstantAnswerProvider::sayYes, job);
+            interpreter::exporter::SeparatedTextExporter(tf, '\t').doExport(ctx, job);
             break;
          case interpreter::exporter::SemicolonSVFormat:
-            interpreter::exporter::SeparatedTextExporter(tf, ';').doExport(ctx, util::ConstantAnswerProvider::sayYes, job);
+            interpreter::exporter::SeparatedTextExporter(tf, ';').doExport(ctx, job);
             break;
          case interpreter::exporter::JSONFormat:
-            interpreter::exporter::JsonExporter(tf).doExport(ctx, util::ConstantAnswerProvider::sayYes, job);
+            interpreter::exporter::JsonExporter(tf).doExport(ctx, job);
             break;
          case interpreter::exporter::HTMLFormat:
-            interpreter::exporter::HtmlExporter(tf).doExport(ctx, util::ConstantAnswerProvider::sayYes, job);
+            interpreter::exporter::HtmlExporter(tf).doExport(ctx, job);
             break;
          case interpreter::exporter::DBaseFormat:
             /* handled outside */
@@ -355,7 +354,7 @@ interpreter::exporter::ConsoleApplication::appMain()
             errorExit(tx("output to DBF file needs an output file name ('-o')"));
         }
         afl::base::Ref<afl::io::Stream> s = fs.openFile(outfile, afl::io::FileSystem::Create);
-        DbfExporter(*s).doExport(*array, util::ConstantAnswerProvider::sayYes, config.fieldList());
+        DbfExporter(*s).doExport(*array, config.fieldList());
     } else {
         String_t outfile;
         if (!arg_outfile.get(outfile)) {
