@@ -5,9 +5,10 @@
 #ifndef C2NG_INTERPRETER_EXPORTER_DBFEXPORTER_HPP
 #define C2NG_INTERPRETER_EXPORTER_DBFEXPORTER_HPP
 
-#include "interpreter/exporter/exporter.hpp"
-#include "afl/io/stream.hpp"
 #include "afl/base/growablememory.hpp"
+#include "afl/charset/charset.hpp"
+#include "afl/io/stream.hpp"
+#include "interpreter/exporter/exporter.hpp"
 
 namespace interpreter { namespace exporter {
 
@@ -17,8 +18,9 @@ namespace interpreter { namespace exporter {
     class DbfExporter : public Exporter {
      public:
         /** Constructor.
-            \param file Output file */
-        explicit DbfExporter(afl::io::Stream& file);
+            \param file Output file
+            \param charset Character set for text data */
+        explicit DbfExporter(afl::io::Stream& file, afl::charset::Charset& charset);
 
         // Exporter:
         virtual void startTable(const FieldList& fields, afl::base::Memory<const TypeHint> types);
@@ -29,6 +31,7 @@ namespace interpreter { namespace exporter {
 
      private:
         afl::io::Stream& m_file;             ///< Stream to write to.
+        afl::charset::Charset& m_charset;    ///< Character set.
 
         std::vector<std::size_t> m_widths;   ///< Field widths.
 

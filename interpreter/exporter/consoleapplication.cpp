@@ -353,8 +353,9 @@ interpreter::exporter::ConsoleApplication::appMain()
         if (!arg_outfile.get(outfile)) {
             errorExit(tx("output to DBF file needs an output file name ('-o')"));
         }
+        std::auto_ptr<afl::charset::Charset> cs(config.createCharset());
         afl::base::Ref<afl::io::Stream> s = fs.openFile(outfile, afl::io::FileSystem::Create);
-        DbfExporter(*s).doExport(*array, config.fieldList());
+        DbfExporter(*s, *cs).doExport(*array, config.fieldList());
     } else {
         String_t outfile;
         if (!arg_outfile.get(outfile)) {

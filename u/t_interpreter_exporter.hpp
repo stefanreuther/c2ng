@@ -17,6 +17,7 @@ class TestInterpreterExporterDbfExporter : public CxxTest::TestSuite {
  public:
     void testIt();
     void testIt2();
+    void testCharset();
 };
 
 class TestInterpreterExporterExporter : public CxxTest::TestSuite {

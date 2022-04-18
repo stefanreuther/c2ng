@@ -51,8 +51,9 @@ namespace {
     static_assert(sizeof(FieldDescriptor) == 32, "FieldDescriptor");
 }
 
-interpreter::exporter::DbfExporter::DbfExporter(afl::io::Stream& file)
+interpreter::exporter::DbfExporter::DbfExporter(afl::io::Stream& file, afl::charset::Charset& charset)
     : m_file(file),
+      m_charset(charset),
       m_widths(),
       m_startPosition(0),
       m_numRecords(0),
@@ -119,7 +120,7 @@ interpreter::exporter::DbfExporter::startTable(const FieldList& fields, afl::bas
 
         FieldDescriptor fieldDesc;
         afl::base::fromObject(fieldDesc).fill(0);
-        afl::base::fromObject(fieldDesc).trim(11).copyFrom(afl::string::toBytes(fields.getFieldName(i)));
+        afl::base::fromObject(fieldDesc).trim(11).copyFrom(m_charset.encode(afl::string::toMemory(fields.getFieldName(i))));
         fieldDesc.type = typ;
         fieldDesc.length = static_cast<uint8_t>(width);
         fieldDesc.decimals = static_cast<uint8_t>(decim);
@@ -197,7 +198,7 @@ interpreter::exporter::DbfExporter::addField(afl::data::Value* value, const Stri
         if (rightAlign && s.size() < m_widths[m_fieldNumber]) {
             s.insert(s.begin(), m_widths[m_fieldNumber] - s.size(), ' ');
         }
-        afl::bits::packFixedString(m_recordPosition.split(m_widths[m_fieldNumber]), afl::string::toBytes(s));
+        afl::bits::packFixedString(m_recordPosition.split(m_widths[m_fieldNumber]), m_charset.encode(afl::string::toMemory(s)));
     }
     ++m_fieldNumber;
 }

@@ -6,6 +6,8 @@
 #include "interpreter/exporter/dbfexporter.hpp"
 
 #include "t_interpreter_exporter.hpp"
+#include "afl/charset/codepage.hpp"
+#include "afl/charset/codepagecharset.hpp"
 #include "afl/data/booleanvalue.hpp"
 #include "afl/data/floatvalue.hpp"
 #include "afl/data/integervalue.hpp"
@@ -28,9 +30,10 @@ TestInterpreterExporterDbfExporter::testIt()
 
     // Output receiver
     afl::io::InternalStream outputStream;
+    afl::charset::CodepageCharset cs(afl::charset::g_codepageLatin1);
 
     // Testee
-    interpreter::exporter::DbfExporter testee(outputStream);
+    interpreter::exporter::DbfExporter testee(outputStream, cs);
     static const interpreter::TypeHint hints[] = { interpreter::thInt, interpreter::thString };
 
     // Test sequence
@@ -83,9 +86,10 @@ TestInterpreterExporterDbfExporter::testIt2()
 
     // Output receiver
     afl::io::InternalStream outputStream;
+    afl::charset::CodepageCharset cs(afl::charset::g_codepageLatin1);
 
     // Testee
-    interpreter::exporter::DbfExporter testee(outputStream);
+    interpreter::exporter::DbfExporter testee(outputStream, cs);
     static const interpreter::TypeHint hints[] = { interpreter::thInt, interpreter::thString, interpreter::thBool, interpreter::thFloat };
 
     // Test sequence
@@ -134,6 +138,57 @@ TestInterpreterExporterDbfExporter::testIt2()
         0x20, 0x33, 0x31, 0x2e, 0x36, 0x32, 0x20, 0x20, 0x20, 0x20, 0x32, 0x30, 0x54, 0x77, 0x65, 0x6e,
         0x74, 0x79, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
         0x59, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x30, 0x2e, 0x30, 0x30, 0x00
+    };
+    afl::base::ConstBytes_t bytes = outputStream.getContent();
+    TS_ASSERT_EQUALS(bytes.size(), sizeof(EXPECTED));
+    TS_ASSERT_SAME_DATA(bytes.at(0), EXPECTED, sizeof(EXPECTED));
+}
+
+/** Test character set recoding. */
+void
+TestInterpreterExporterDbfExporter::testCharset()
+{
+    // Prepare a field list
+    // Umlauts in field names are normally rejected by add()/addList(), but can be forced into the list using setFieldName().
+    // Exporter will recode them.
+    interpreter::exporter::FieldList list;
+    list.addList("ID@5,NAME@20");
+    list.setFieldName(1, "N\xC3\x84ME"); // A-umlaut
+
+    // Output receiver
+    // Use Codepage 437 which does not have a 1:1 mapping to Unicode.
+    afl::io::InternalStream outputStream;
+    afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
+
+    // Testee
+    interpreter::exporter::DbfExporter testee(outputStream, cs);
+    static const interpreter::TypeHint hints[] = { interpreter::thInt, interpreter::thString };
+
+    // Test sequence
+    // Use a string field containing an umlaut, which will be transcoded.
+    testee.startTable(list, hints);
+    testee.startRecord();
+    {
+        IntegerValue iv(25);
+        StringValue sv("C\xc3\xb6\xc3\xb6l");   // 2x o-umlaut
+        testee.addField(&iv, "ID", interpreter::thInt);
+        testee.addField(&sv, "NAME", interpreter::thString);
+    }
+    testee.endRecord();
+    testee.endTable();
+
+    // Verify against dbf file created with PCC2 c2export/manually edited for umlauts
+    static const uint8_t EXPECTED[] = {
+        0x03, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x61, 0x00, 0x1a, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x49, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4e, 0x00, 0x00, 0x00, 0x00,
+        0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x4e, 0x8E, 0x4d, 0x45, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x43, 0x00, 0x00, 0x00, 0x00,
+        //    ^^^^ A-umlaut
+        0x14, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x0d, 0x20, 0x20, 0x20, 0x20, 0x32, 0x35, 0x43, 0x94, 0x94, 0x6c, 0x20, 0x20, 0x20, 0x20, 0x20,
+        //                                              ^^^^^^^^^^ o-umlaut
+        0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x00
     };
     afl::base::ConstBytes_t bytes = outputStream.getContent();
     TS_ASSERT_EQUALS(bytes.size(), sizeof(EXPECTED));
