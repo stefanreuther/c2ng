@@ -158,6 +158,28 @@ class TestGameProxyDrawingProxy : public CxxTest::TestSuite {
     void testQueueing();
 };
 
+class TestGameProxyExportProxy : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testSetCharsetIndex();
+    void testSetFormat();
+    void testAdd();
+    void testSwap();
+    void testRemove();
+    void testClear();
+    void testSetFieldName();
+    void testSetFieldWidth();
+    void testChangeFieldWidth();
+    void testToggleFieldAlignment();
+    void testExportFile();
+    void testExportFileNullFS();
+    void testExportFileNullContext();
+    void testLoad();
+    void testLoadError();
+    void testSave();
+    void testSaveError();
+};
+
 class TestGameProxyExpressionListProxy : public CxxTest::TestSuite {
  public:
     void testEmpty();
