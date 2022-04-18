@@ -34,6 +34,19 @@ interpreter::exporter::toString(Format fmt)
     return MAP[fmt].name;
 }
 
+String_t
+interpreter::exporter::getFileNameExtension(Format fmt)
+{
+    // ex WExportFormatControl::getRecommendedFileExtension
+    return MAP[fmt].extension;
+}
+
+String_t
+interpreter::exporter::getFormatDescription(Format fmt, afl::string::Translator& tx)
+{
+    return tx(MAP[fmt].englishDescription);
+}
+
 bool
 interpreter::exporter::parseFormat(const String_t& str, Format& result)
 {

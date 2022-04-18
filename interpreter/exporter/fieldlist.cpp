@@ -83,6 +83,13 @@ interpreter::exporter::FieldList::remove(Index_t index)
     }
 }
 
+// Clear the list.
+void
+interpreter::exporter::FieldList::clear()
+{
+    m_items.clear();
+}
+
 // Change field name.
 void
 interpreter::exporter::FieldList::setFieldName(Index_t index, String_t name)
@@ -100,6 +107,33 @@ interpreter::exporter::FieldList::setFieldWidth(Index_t index, int width)
     // ex IntExportFieldList::setFieldWidth
     if (index < m_items.size()) {
         m_items[index].width = width;
+    }
+}
+
+// Change width of a field, relative.
+void
+interpreter::exporter::FieldList::changeFieldWidth(Index_t index, int delta)
+{
+    // ex WExportFieldList::changeFieldWidth
+    if (index < m_items.size()) {
+        /* New field width. Clip into range [-999,+999]. When we pass 0, set it to 0 first. */
+        Item& it = m_items[index];
+        int ofw = it.width;
+        int nfw = std::max(-999, std::min(+999, ofw + delta));
+        if (ofw != 0 && (ofw < 0) != (nfw < 0)) {
+            nfw = 0;
+        }
+        it.width = nfw;
+    }
+}
+
+// Toggle field's alignment.
+void
+interpreter::exporter::FieldList::toggleFieldAlignment(Index_t index)
+{
+    if (index < m_items.size()) {
+        Item& it = m_items[index];
+        it.width = -it.width;
     }
 }
 

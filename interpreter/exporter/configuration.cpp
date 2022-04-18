@@ -4,9 +4,17 @@
   */
 
 #include "interpreter/exporter/configuration.hpp"
+#include "afl/except/assertionfailedexception.hpp"
 #include "afl/except/fileproblemexception.hpp"
 #include "afl/string/format.hpp"
+#include "interpreter/exporter/dbfexporter.hpp"
+#include "interpreter/exporter/htmlexporter.hpp"
+#include "interpreter/exporter/jsonexporter.hpp"
+#include "interpreter/exporter/separatedtextexporter.hpp"
+#include "interpreter/exporter/textexporter.hpp"
 #include "util/configurationfileparser.hpp"
+#include "afl/io/textfile.hpp"
+#include "util/string.hpp"
 
 namespace {
     class ExportConfigurationParser : public util::ConfigurationFileParser {
@@ -133,4 +141,79 @@ void
 interpreter::exporter::Configuration::load(afl::io::Stream& in, afl::string::Translator& tx)
 {
     ExportConfigurationParser(*this, tx).parseFile(in);
+}
+
+// Write configuration to stream.
+void
+interpreter::exporter::Configuration::save(afl::io::Stream& out)
+{
+    afl::io::TextFile tf(out);
+    for (size_t i = 0, n = m_fieldList.size(); i < n; ++i) {
+        const int fw = m_fieldList.getFieldWidth(i);
+        const String_t name = util::formatName(m_fieldList.getFieldName(i));
+        if (fw != 0) {
+            tf.writeLine(afl::string::Format("Fields=%s@%d", name, fw));
+        } else {
+            tf.writeLine(afl::string::Format("Fields=%s", name));
+        }
+    }
+    tf.writeLine(afl::string::Format("Charset=%s", util::CharsetFactory().getCharsetKey(m_charsetIndex)));
+    tf.writeLine(afl::string::Format("Format=%s", toString(m_format)));
+    tf.flush();
+}
+
+// Perform export in a text format.
+bool
+interpreter::exporter::Configuration::exportText(Context& ctx, afl::io::TextWriter& out) const
+{
+    switch (m_format) {
+     case TextFormat:
+        TextExporter(out, false).doExport(ctx, m_fieldList);
+        return true;
+     case TableFormat:
+        TextExporter(out, true).doExport(ctx, m_fieldList);
+        return true;
+     case CommaSVFormat:
+        SeparatedTextExporter(out, ',').doExport(ctx, m_fieldList);
+        return true;
+     case TabSVFormat:
+        SeparatedTextExporter(out, '\t').doExport(ctx, m_fieldList);
+        return true;
+     case SemicolonSVFormat:
+        SeparatedTextExporter(out, ';').doExport(ctx, m_fieldList);
+        return true;
+     case JSONFormat:
+        JsonExporter(out).doExport(ctx, m_fieldList);
+        return true;
+     case HTMLFormat:
+        HtmlExporter(out).doExport(ctx, m_fieldList);
+        return true;
+     case DBaseFormat:
+        /* not a text format */
+        break;
+    }
+    return false;
+}
+
+// Perform output into a file.
+void
+interpreter::exporter::Configuration::exportFile(Context& ctx, afl::io::Stream& out) const
+{
+    // ex WExportFormatControl::doExport
+    const char*const LOCATION = "<Configuration::exportFile>";
+
+    // Must have a charset
+    std::auto_ptr<afl::charset::Charset> cs(createCharset());
+    afl::except::checkAssertion(cs.get() != 0, "charset", LOCATION);
+
+    // Export
+    if (m_format == DBaseFormat) {
+        DbfExporter(out, *cs).doExport(ctx, m_fieldList);
+    } else {
+        afl::io::TextFile tf(out);
+        tf.setCharsetNew(cs.release());
+        bool ok = exportText(ctx, tf);
+        tf.flush();
+        afl::except::checkAssertion(ok, "ok", LOCATION);
+    }
 }

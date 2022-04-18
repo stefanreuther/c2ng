@@ -23,11 +23,6 @@
 #include "interpreter/callablevalue.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/exporter/configuration.hpp"
-#include "interpreter/exporter/dbfexporter.hpp"
-#include "interpreter/exporter/htmlexporter.hpp"
-#include "interpreter/exporter/jsonexporter.hpp"
-#include "interpreter/exporter/separatedtextexporter.hpp"
-#include "interpreter/exporter/textexporter.hpp"
 #include "interpreter/propertyacceptor.hpp"
 #include "interpreter/values.hpp"
 #include "util/charsetfactory.hpp"
@@ -162,38 +157,6 @@ namespace {
     {
         m_names.push_back(name);
         m_types.push_back(th);
-    }
-
-
-
-    void doTextExport(interpreter::exporter::Format typ, interpreter::exporter::FieldList& job, interpreter::Context& ctx, afl::io::TextWriter& tf)
-    {
-        switch (typ) {
-         case interpreter::exporter::TextFormat:
-            interpreter::exporter::TextExporter(tf, false).doExport(ctx, job);
-            break;
-         case interpreter::exporter::TableFormat:
-            interpreter::exporter::TextExporter(tf, true).doExport(ctx, job);
-            break;
-         case interpreter::exporter::CommaSVFormat:
-            interpreter::exporter::SeparatedTextExporter(tf, ',').doExport(ctx, job);
-            break;
-         case interpreter::exporter::TabSVFormat:
-            interpreter::exporter::SeparatedTextExporter(tf, '\t').doExport(ctx, job);
-            break;
-         case interpreter::exporter::SemicolonSVFormat:
-            interpreter::exporter::SeparatedTextExporter(tf, ';').doExport(ctx, job);
-            break;
-         case interpreter::exporter::JSONFormat:
-            interpreter::exporter::JsonExporter(tf).doExport(ctx, job);
-            break;
-         case interpreter::exporter::HTMLFormat:
-            interpreter::exporter::HtmlExporter(tf).doExport(ctx, job);
-            break;
-         case interpreter::exporter::DBaseFormat:
-            /* handled outside */
-            break;
-        }
     }
 }
 
@@ -347,30 +310,18 @@ interpreter::exporter::ConsoleApplication::appMain()
     }
 
     // Do it.
-    if (config.getFormat() == interpreter::exporter::DBaseFormat) {
-        // Output to DBF file. Requires file name.
-        String_t outfile;
-        if (!arg_outfile.get(outfile)) {
-            errorExit(tx("output to DBF file needs an output file name ('-o')"));
-        }
-        std::auto_ptr<afl::charset::Charset> cs(config.createCharset());
+    String_t outfile;
+    if (arg_outfile.get(outfile)) {
+        // Output to file
         afl::base::Ref<afl::io::Stream> s = fs.openFile(outfile, afl::io::FileSystem::Create);
-        DbfExporter(*s, *cs).doExport(*array, config.fieldList());
+        config.exportFile(*array, *s);
     } else {
-        String_t outfile;
-        if (!arg_outfile.get(outfile)) {
-            // Output to console. The console performs character set conversion.
-            if (hadCharsetOption) {
-                log().write(afl::sys::LogListener::Warn, "export", tx("WARNING: Option '-O' has been ignored because standard output is being used."));
-            }
-            doTextExport(config.getFormat(), config.fieldList(), *array, standardOutput());
-        } else {
-            // Output to file
-            afl::base::Ref<afl::io::Stream> s = fs.openFile(outfile, afl::io::FileSystem::Create);
-            afl::io::TextFile tf(*s);
-            tf.setCharsetNew(config.createCharset());
-            doTextExport(config.getFormat(), config.fieldList(), *array, tf);
-            tf.flush();
+        // Output to console. The console performs character set conversion.
+        if (hadCharsetOption) {
+            log().write(afl::sys::LogListener::Warn, "export", tx("WARNING: Option '-O' has been ignored because standard output is being used."));
+        }
+        if (!config.exportText(*array, standardOutput())) {
+            errorExit(tx("the selected format needs an output file name ('-o')"));
         }
     }
 }

@@ -6,6 +6,7 @@
 #include "interpreter/exporter/format.hpp"
 
 #include "t_interpreter_exporter.hpp"
+#include "afl/string/nulltranslator.hpp"
 
 /** Simple test. */
 void
@@ -20,6 +21,17 @@ TestInterpreterExporterFormat::testIt()
     TS_ASSERT_EQUALS(toString(interpreter::exporter::JSONFormat),        "json");
     TS_ASSERT_EQUALS(toString(interpreter::exporter::HTMLFormat),        "html");
     TS_ASSERT_EQUALS(toString(interpreter::exporter::DBaseFormat),       "dbf");
+
+    // Extensions
+    TS_ASSERT_EQUALS(getFileNameExtension(interpreter::exporter::HTMLFormat),  "html");
+    TS_ASSERT_EQUALS(getFileNameExtension(interpreter::exporter::JSONFormat),  "js");
+    TS_ASSERT_EQUALS(getFileNameExtension(interpreter::exporter::TableFormat), "txt");
+
+    // Description/iteration
+    for (size_t i = 0; i < interpreter::exporter::NUM_FORMATS; ++i) {
+        afl::string::NullTranslator tx;
+        TS_ASSERT_DIFFERS(getFormatDescription(interpreter::exporter::Format(i), tx), "");
+    }
 
     // parseFormat
     interpreter::exporter::Format fmt;

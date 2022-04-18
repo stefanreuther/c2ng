@@ -111,6 +111,13 @@ TestInterpreterExporterFieldList::testModify()
 
     t.setFieldName(3, "f");
     TS_ASSERT_EQUALS(t.toString(), "B,D,E@9,F@5,Y");
+
+    t.toggleFieldAlignment(2);
+    TS_ASSERT_EQUALS(t.toString(), "B,D,E@-9,F@5,Y");
+
+    t.clear();
+    TS_ASSERT_EQUALS(t.size(), 0U);
+    TS_ASSERT_EQUALS(t.toString(), "");
 }
 
 /** Test copying. */
@@ -130,5 +137,27 @@ TestInterpreterExporterFieldList::testCopy()
     TS_ASSERT_EQUALS(a.size(), 3U);
     TS_ASSERT_EQUALS(b.size(), 3U);
     TS_ASSERT_EQUALS(c.size(), 3U);
+}
+
+/** Test changeFieldWidth(). */
+void
+TestInterpreterExporterFieldList::testChangeFieldWidth()
+{
+    interpreter::exporter::FieldList a;
+    a.addList("a,b@2,x");
+
+    TS_ASSERT_EQUALS(a.getFieldWidth(1), 2);
+
+    a.changeFieldWidth(1, 10);
+    TS_ASSERT_EQUALS(a.getFieldWidth(1), 12);
+
+    a.changeFieldWidth(1, -600);
+    TS_ASSERT_EQUALS(a.getFieldWidth(1), 0);
+
+    a.changeFieldWidth(1, -600);
+    TS_ASSERT_EQUALS(a.getFieldWidth(1), -600);
+
+    a.changeFieldWidth(1, -600);
+    TS_ASSERT_EQUALS(a.getFieldWidth(1), -999);
 }
 

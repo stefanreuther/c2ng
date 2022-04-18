@@ -53,6 +53,9 @@ namespace interpreter { namespace exporter {
             \param index Index to delete [0,size()) */
         void remove(Index_t index);
 
+        /** Clear the list. */
+        void clear();
+
         /** Change field name.
             \param index Position of field [0,size())
             \param name New field name */
@@ -62,6 +65,19 @@ namespace interpreter { namespace exporter {
             \param index Position of field [0,size())
             \param width New width (0=use default) */
         void setFieldWidth(Index_t index, int width);
+
+        /** Change width of a field, relative.
+            Essentially, performs setFieldWidth(getFieldWidth() + delta),
+            with some special cases for user-interface handling.
+            \param index Position of field [0,size())
+            \param delta Change */
+        void changeFieldWidth(Index_t index, int delta);
+
+        /** Toggle field's alignment.
+            If the field is left-aligned, makes it right-aligned, and vice-versa.
+            (This negates the field width.)
+            \param index Position of field [0,size()) */
+        void toggleFieldAlignment(Index_t index);
 
         /** Get field by index.
             \param [in] index Position of field [0,size())

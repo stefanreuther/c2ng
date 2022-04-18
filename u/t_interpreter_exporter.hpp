@@ -11,6 +11,17 @@ class TestInterpreterExporterConfiguration : public CxxTest::TestSuite {
  public:
     void testIt();
     void testLoad();
+    void testSave();
+    void testText();
+    void testTextTable();
+    void testTextCSV();
+    void testTextSSV();
+    void testTextTSV();
+    void testTextJSON();
+    void testTextHTML();
+    void testTextDBF();
+    void testFileJSON();
+    void testFileDBF();
 };
 
 class TestInterpreterExporterDbfExporter : public CxxTest::TestSuite {
@@ -33,6 +44,7 @@ class TestInterpreterExporterFieldList : public CxxTest::TestSuite {
     void testAddList();
     void testModify();
     void testCopy();
+    void testChangeFieldWidth();
 };
 
 class TestInterpreterExporterFormat : public CxxTest::TestSuite {
