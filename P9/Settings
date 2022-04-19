@@ -12,14 +12,16 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/proxy/exportproxy.cpp game/proxy/exportadaptor.hpp \
-    game/proxy/exportproxy.hpp game/map/info/nulllinkbuilder.cpp \
-    game/map/info/nulllinkbuilder.hpp game/map/info/scriptlinkbuilder.cpp \
-    game/map/info/scriptlinkbuilder.hpp game/map/info/linkbuilder.hpp \
-    game/proxy/labelproxy.cpp game/proxy/labelproxy.hpp \
-    game/interface/labelextra.cpp game/interface/labelextra.hpp \
-    game/interface/labelvector.cpp game/interface/labelvector.hpp \
-    game/proxy/fictivestarbaseadaptor.cpp \
+FILES_gamelib = game/proxy/costsummaryadaptor.cpp \
+    game/proxy/costsummaryadaptor.hpp game/interface/costsummarycontext.cpp \
+    game/interface/costsummarycontext.hpp game/proxy/exportproxy.cpp \
+    game/proxy/exportadaptor.hpp game/proxy/exportproxy.hpp \
+    game/map/info/nulllinkbuilder.cpp game/map/info/nulllinkbuilder.hpp \
+    game/map/info/scriptlinkbuilder.cpp game/map/info/scriptlinkbuilder.hpp \
+    game/map/info/linkbuilder.hpp game/proxy/labelproxy.cpp \
+    game/proxy/labelproxy.hpp game/interface/labelextra.cpp \
+    game/interface/labelextra.hpp game/interface/labelvector.cpp \
+    game/interface/labelvector.hpp game/proxy/fictivestarbaseadaptor.cpp \
     game/proxy/fictivestarbaseadaptor.hpp \
     game/proxy/predictedstarbaseadaptor.cpp \
     game/proxy/predictedstarbaseadaptor.hpp \
@@ -1670,7 +1672,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_proxy_exportproxy.cpp \
+FILES_testsuite = u/t_game_proxy_costsummaryadaptor.cpp \
+    u/t_game_interface_costsummarycontext.cpp u/t_game_proxy_exportproxy.cpp \
     u/t_game_map_info_nulllinkbuilder.cpp \
     u/t_game_map_info_scriptlinkbuilder.cpp \
     u/t_game_map_info_linkbuilder.cpp u/t_game_proxy_labelproxy.cpp \

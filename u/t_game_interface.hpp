@@ -44,6 +44,12 @@ class TestGameInterfaceContextProvider : public CxxTest::TestSuite {
     void testInterface();
 };
 
+class TestGameInterfaceCostSummaryContext : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormal();
+};
+
 class TestGameInterfaceDrawingProperty : public CxxTest::TestSuite {
  public:
     void testGetLine();

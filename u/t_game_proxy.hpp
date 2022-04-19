@@ -125,6 +125,13 @@ class TestGameProxyConvertSuppliesProxy : public CxxTest::TestSuite {
     void testBuy();
 };
 
+class TestGameProxyCostSummaryAdaptor : public CxxTest::TestSuite {
+ public:
+    void testNormal();
+    void testMake();
+    void testIntegration();
+};
+
 class TestGameProxyCurrentStarbaseAdaptor : public CxxTest::TestSuite {
  public:
     void testEmpty();
