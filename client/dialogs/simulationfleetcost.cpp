@@ -89,7 +89,7 @@ FleetCostDialog::FleetCostDialog(ui::Root& root,
       m_gameSender(gameSender),
       m_translator(tx),
       m_label("", util::SkinColor::Static, "", root.provider()),
-      m_costSummary(20, true, client::widgets::CostSummaryList::TotalsFooter, root.provider(), root.colorScheme(), tx),
+      m_costSummary(20, true, client::widgets::CostSummaryList::TotalsFooter, root, tx),
       m_involvedPlayers(),
       m_involvedTeams(),
       m_playerNames(),
@@ -154,11 +154,11 @@ FleetCostDialog::run()
     ui::Group& buttonGroup = del.addNew(new ui::Group(ui::layout::HBox::instance5));
     ui::widgets::Button& btnClose   = del.addNew(new ui::widgets::Button(m_translator("Close"),       util::Key_Escape, m_root));
     ui::widgets::Button& btnOptions = del.addNew(new ui::widgets::Button(m_translator("O - Options"), 'o',              m_root));
-    // FIXME -> ui::widgets::Button& btnExport = del.addNew(new ui::widgets::Button(m_translator("E - Export"), 'e', m_root));
+    ui::widgets::Button& btnExport  = del.addNew(new ui::widgets::Button(m_translator("E - Export"), 'e', m_root));
     ui::widgets::Button& btnHelp    = del.addNew(new ui::widgets::Button(m_translator("Help"),        'h',              m_root));
     buttonGroup.add(btnClose);
     buttonGroup.add(btnOptions);
-    // FIXME -> buttonGroup.add(btnExport);
+    buttonGroup.add(btnExport);
     buttonGroup.add(del.addNew(new ui::Spacer()));
     buttonGroup.add(btnHelp);
     win.add(buttonGroup);
@@ -176,9 +176,11 @@ FleetCostDialog::run()
     btnPrev.dispatchKeyTo(disp);
     btnNext.dispatchKeyTo(disp);
     btnOptions.dispatchKeyTo(disp);
+    btnExport.dispatchKeyTo(disp);
     btnHelp.dispatchKeyTo(help);
 
     disp.addNewClosure(util::Key_Return, loop.makeStop(0));
+    disp.addNewClosure('e', m_costSummary.makeExporter(m_gameSender));
     disp.add(util::Key_Left,                     this, &FleetCostDialog::onPrevious);
     disp.add(util::Key_Tab | util::KeyMod_Shift, this, &FleetCostDialog::onPrevious);
     disp.add(util::Key_Right,                    this, &FleetCostDialog::onNext);
@@ -213,7 +215,7 @@ FleetCostDialog::onEditOptions()
     client::Downlink link(m_root, m_translator);
     game::sim::FleetCostOptions opts;
     m_costProxy.getOptions(link, opts);
-    bool byTeam = m_teamsActive;    
+    bool byTeam = m_teamsActive;
 
     if (client::dialogs::editSimulationFleetCostOptions(m_root, m_gameSender, opts, m_teamsAvailable ? &byTeam : 0, m_translator)) {
         m_teamsActive = byTeam;

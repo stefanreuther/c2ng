@@ -3,11 +3,13 @@
   */
 
 #include "client/widgets/costsummarylist.hpp"
-#include "util/unicodechars.hpp"
 #include "afl/string/format.hpp"
-#include "gfx/context.hpp"
+#include "client/dialogs/export.hpp"
+#include "game/proxy/costsummaryadaptor.hpp"
 #include "gfx/complex.hpp"
+#include "gfx/context.hpp"
 #include "ui/draw.hpp"
+#include "util/unicodechars.hpp"
 
 namespace {
     String_t numToString(int32_t value)
@@ -36,12 +38,11 @@ namespace {
     }
 }
 
-client::widgets::CostSummaryList::CostSummaryList(int numLines, bool isList, FooterStyle footerStyle, gfx::ResourceProvider& provider, ui::ColorScheme& scheme, afl::string::Translator& tx)
+client::widgets::CostSummaryList::CostSummaryList(int numLines, bool isList, FooterStyle footerStyle, ui::Root& root, afl::string::Translator& tx)
     : AbstractListbox(),
       m_numLines(numLines),
       m_footerStyle(footerStyle),
-      m_provider(provider),
-      m_colorScheme(scheme),
+      m_root(root),
       m_translator(tx),
       m_content(),
       m_available()
@@ -66,6 +67,32 @@ client::widgets::CostSummaryList::setAvailableAmount(game::spec::Cost available)
     // ex WBillTotalDisplay::setAvailableResources
     m_available = available;
     requestRedraw();
+}
+
+void
+client::widgets::CostSummaryList::doExport(util::RequestSender<game::Session> gameSender)
+{
+    // ex WBillDisplay::doExport, doBillExport
+    if (m_content.getNumItems() != 0) {
+        client::dialogs::doExport(m_root, gameSender.makeTemporary(game::proxy::makeCostSummaryAdaptor(m_content)), gameSender, m_translator);
+    }
+}
+
+afl::base::Closure<void(int)>*
+client::widgets::CostSummaryList::makeExporter(util::RequestSender<game::Session> gameSender)
+{
+    class Exporter : public afl::base::Closure<void(int)> {
+     public:
+        Exporter(const util::RequestSender<game::Session> gameSender, CostSummaryList& list)
+            : m_gameSender(gameSender), m_list(list)
+            { }
+        virtual void call(int)
+            { m_list.doExport(m_gameSender); }
+     private:
+        util::RequestSender<game::Session> m_gameSender;
+        CostSummaryList& m_list;
+    };
+    return new Exporter(gameSender, *this);
 }
 
 size_t
@@ -109,7 +136,7 @@ void
 client::widgets::CostSummaryList::drawHeader(gfx::Canvas& can, gfx::Rectangle area)
 {
     // ex WBillDisplay::drawContent, CBillWidget.Draw (part)
-    afl::base::Ref<gfx::Font> font = m_provider.getFont("");
+    afl::base::Ref<gfx::Font> font = m_root.provider().getFont("");
     const int x = area.getLeftX();
     const int y = area.getTopY();
     const int m = font->getEmWidth();
@@ -135,7 +162,7 @@ void
 client::widgets::CostSummaryList::drawFooter(gfx::Canvas& can, gfx::Rectangle area)
 {
     // ex WBillTotalDisplay::drawContent, CBillWidget.Draw (part)
-    afl::base::Ref<gfx::Font> font = m_provider.getFont("");
+    afl::base::Ref<gfx::Font> font = m_root.provider().getFont("");
     const int x = area.getLeftX();
     int y = area.getTopY();
     const int m = font->getEmWidth();
@@ -206,14 +233,14 @@ void
 client::widgets::CostSummaryList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {
     // ex WBillDisplay::drawPart, CBillWidget.Draw (part)
-    afl::base::Ref<gfx::Font> font = m_provider.getFont("");
+    afl::base::Ref<gfx::Font> font = m_root.provider().getFont("");
     const int m = font->getEmWidth();
 
     gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
     ctx.useFont(*font);
 
     afl::base::Deleter del;
-    ui::prepareColorListItem(ctx, area, hasState(DisabledState) ? PassiveItem : state, m_colorScheme, del);
+    ui::prepareColorListItem(ctx, area, hasState(DisabledState) ? PassiveItem : state, m_root.colorScheme(), del);
     if (const game::spec::CostSummary::Item* p = m_content.get(item)) {
         const int x = area.getLeftX();
         const int y = area.getTopY();
@@ -238,7 +265,7 @@ client::widgets::CostSummaryList::handlePositionChange(gfx::Rectangle& oldPositi
 ui::layout::Info
 client::widgets::CostSummaryList::getLayoutInfo() const
 {
-    const int emWidth  = m_provider.getFont("")->getEmWidth();
+    const int emWidth  = m_root.provider().getFont("")->getEmWidth();
     const int numLines = (m_numLines != 0 ? m_numLines : int(m_content.getNumItems()));
     const int height   = numLines * getLineHeight() + getHeaderHeight() + getFooterHeight();
 
@@ -259,5 +286,5 @@ client::widgets::CostSummaryList::handleKey(util::Key_t key, int prefix)
 int
 client::widgets::CostSummaryList::getLineHeight() const
 {
-    return m_provider.getFont("")->getLineHeight();
+    return m_root.provider().getFont("")->getLineHeight();
 }

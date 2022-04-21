@@ -1187,20 +1187,20 @@ client::dialogs::VisualScanDialog::Window::showCargoList()
             new CostSummaryList(int(std::max(size_t(5), std::min(size_t(20), m_cargoSummaryBuilder->m_summary.getNumItems()))),
                                 true,
                                 CostSummaryList::TotalsFooter,
-                                m_root.provider(), m_root.colorScheme(), m_translator));
+                                m_root, m_translator));
         list.setContent(m_cargoSummaryBuilder->m_summary);
         win.add(list);
 
-        // FIXME -> ui::widgets::Button& btnExport = del.addNew(new ui::widgets::Button(m_translator("E - Export"), m_root));
+        ui::widgets::Button& btnExport = del.addNew(new ui::widgets::Button(util::KeyString(m_translator("E - Export")), m_root));
         ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(m_translator("OK"), util::Key_Return, m_root));
         ui::widgets::Button& btnCancel = del.addNew(new ui::widgets::Button(m_translator("Cancel"), util::Key_Escape, m_root));
         ui::EventLoop loop(m_root);
         btnOK.sig_fire.addNewClosure(loop.makeStop(1));
         btnCancel.sig_fire.addNewClosure(loop.makeStop(0));
-        // FIXME -> btnExport.sig_fire.add(&dpy, &WBillDisplay::doExport);
+        btnExport.sig_fire.addNewClosure(list.makeExporter(m_gameSender));
 
         ui::Group& g = del.addNew(new ui::Group(ui::layout::HBox::instance5));
-        // FIXME -> g.add(btnExport);
+        g.add(btnExport);
         g.add(del.addNew(new ui::Spacer()));
         g.add(btnOK);
         g.add(btnCancel);

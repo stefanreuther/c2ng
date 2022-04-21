@@ -4,11 +4,13 @@
 #ifndef C2NG_CLIENT_WIDGETS_COSTSUMMARYLIST_HPP
 #define C2NG_CLIENT_WIDGETS_COSTSUMMARYLIST_HPP
 
-#include "ui/widgets/abstractlistbox.hpp"
-#include "game/spec/costsummary.hpp"
-#include "gfx/resourceprovider.hpp"
-#include "ui/colorscheme.hpp"
+#include "afl/base/closure.hpp"
 #include "afl/string/translator.hpp"
+#include "game/session.hpp"
+#include "game/spec/costsummary.hpp"
+#include "ui/root.hpp"
+#include "ui/widgets/abstractlistbox.hpp"
+#include "util/requestsender.hpp"
 
 namespace client { namespace widgets {
 
@@ -27,15 +29,13 @@ namespace client { namespace widgets {
             TotalsFooter,           ///< Show a single "totals" footer.
             ComparisonFooter        ///< Show "totals" footer and "amount remaining" after consumption.
         };
-        
+
         /** Constructor.
             \param numLines Number of lines for this widget for layout purposes
             \param isList true to exhibit list behaviour, false to exhibit static behaviour
             \param footerStyle Footer style
-            \param provider Resource provider
-            \param scheme Color scheme
             \param tx Translator */
-        CostSummaryList(int numLines, bool isList, FooterStyle footerStyle, gfx::ResourceProvider& provider, ui::ColorScheme& scheme, afl::string::Translator& tx);
+        CostSummaryList(int numLines, bool isList, FooterStyle footerStyle, ui::Root& root, afl::string::Translator& tx);
         ~CostSummaryList();
 
         /** Set content.
@@ -46,6 +46,16 @@ namespace client { namespace widgets {
             \param available Available amount */
         void setAvailableAmount(game::spec::Cost available);
 
+        /** Perform export.
+            \param gameSender Game Sender */
+        void doExport(util::RequestSender<game::Session> gameSender);
+
+        /** Convenience method to make a closure that calls doExport().
+            \param gameSender Game Sender
+            \return newly-allocated closure */
+        afl::base::Closure<void(int)>* makeExporter(util::RequestSender<game::Session> gameSender);
+
+        // AbstractListbox:
         virtual size_t getNumItems();
         virtual bool isItemAccessible(size_t n);
         virtual int getItemHeight(size_t n);
@@ -62,8 +72,7 @@ namespace client { namespace widgets {
      private:
         int m_numLines;
         FooterStyle m_footerStyle;
-        gfx::ResourceProvider& m_provider;
-        ui::ColorScheme& m_colorScheme;
+        ui::Root& m_root;
         afl::string::Translator& m_translator;
         game::spec::CostSummary m_content;
         game::spec::Cost m_available;

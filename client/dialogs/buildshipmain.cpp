@@ -276,18 +276,18 @@ client::dialogs::BuildShipMain::onDetailedBill()
     //       "Help", Spacer, "Export", "Close"
     afl::base::Deleter del;
     ui::Window& win = del.addNew(new ui::Window(m_translator("Cost for building that starship"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
-    CostSummaryList& list = del.addNew(new CostSummaryList(int(result.getNumItems()), false, CostSummaryList::ComparisonFooter, m_root.provider(), m_root.colorScheme(), m_translator));
+    CostSummaryList& list = del.addNew(new CostSummaryList(int(result.getNumItems()), false, CostSummaryList::ComparisonFooter, m_root, m_translator));
     list.setContent(result);
     list.setAvailableAmount(m_availableAmount);
     win.add(list);
 
     Group& g = del.addNew(new Group(ui::layout::HBox::instance5));
     Button& btnHelp = del.addNew(new Button(m_translator("Help"), 'h', m_root));
-    // FIXME: Button& btnExport = del.addNew(new Button(m_translator("E - Export"), 'e', m_root));
+    Button& btnExport = del.addNew(new Button(m_translator("E - Export"), 'e', m_root));
     Button& btnClose = del.addNew(new Button(m_translator("Close"), util::Key_Escape, m_root));
     g.add(btnHelp);
     g.add(del.addNew(new ui::Spacer()));
-    // g.add(btnExport);
+    g.add(btnExport);
     g.add(btnClose);
     win.add(g);
 
@@ -295,6 +295,7 @@ client::dialogs::BuildShipMain::onDetailedBill()
     ui::Widget& help = del.addNew(new HelpWidget(m_root, m_translator, m_gameSender, "pcc2:buildship"));
     ui::widgets::KeyDispatcher& disp = del.addNew(new ui::widgets::KeyDispatcher());
     btnHelp.dispatchKeyTo(help);
+    btnExport.sig_fire.addNewClosure(list.makeExporter(m_gameSender));
     btnClose.sig_fire.addNewClosure(loop.makeStop(0));
     disp.addNewClosure(' ', loop.makeStop(0));
     disp.addNewClosure(util::Key_Return, loop.makeStop(0));
