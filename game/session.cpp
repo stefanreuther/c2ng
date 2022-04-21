@@ -605,6 +605,7 @@ game::Session::initWorld()
     m_world.setNewGlobalValue("CREATECONFIGOPTION", new game::interface::SimpleProcedure(*this, game::interface::IFCreateConfigOption));
     m_world.setNewGlobalValue("CREATEPREFOPTION", new game::interface::SimpleProcedure(*this, game::interface::IFCreatePrefOption));
     m_world.setNewGlobalValue("DELETECOMMAND",    new game::interface::SimpleProcedure(*this, game::interface::IFDeleteCommand));
+    m_world.setNewGlobalValue("EXPORT",           new game::interface::SimpleProcedure(*this, game::interface::IFExport));
     m_world.setNewGlobalValue("HISTORY.LOADTURN", new game::interface::SimpleProcedure(*this, game::interface::IFHistoryLoadTurn));
     m_world.setNewGlobalValue("NEWCANNEDMARKER",  new game::interface::SimpleProcedure(*this, game::interface::IFNewCannedMarker));
     m_world.setNewGlobalValue("NEWCIRCLE",        new game::interface::SimpleProcedure(*this, game::interface::IFNewCircle));

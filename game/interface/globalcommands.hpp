@@ -20,6 +20,7 @@ namespace game { namespace interface {
     void IFCCSelectionExec(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
     void IFCreateConfigOption(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
     void IFCreatePrefOption(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
+    void IFExport(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
     void IFNewCannedMarker(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
     void IFNewCircle(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
     void IFNewRectangle(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);

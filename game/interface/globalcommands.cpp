@@ -3,21 +3,22 @@
   */
 
 #include "game/interface/globalcommands.hpp"
-#include "game/exception.hpp"
-#include "game/game.hpp"
-#include "game/turn.hpp"
-#include "game/root.hpp"
-#include "game/turnloader.hpp"
-#include "game/actions/preconditions.hpp"
-#include "game/config/stringoption.hpp"
-#include "game/config/integeroption.hpp"
-#include "game/config/integervalueparser.hpp"
-#include "game/config/booleanvalueparser.hpp"
-#include "game/limits.hpp"
-#include "interpreter/indexablevalue.hpp"
 #include "afl/data/vector.hpp"
 #include "afl/data/vectorvalue.hpp"
+#include "game/actions/preconditions.hpp"
+#include "game/config/booleanvalueparser.hpp"
+#include "game/config/integeroption.hpp"
+#include "game/config/integervalueparser.hpp"
 #include "game/config/markeroption.hpp"
+#include "game/config/stringoption.hpp"
+#include "game/exception.hpp"
+#include "game/game.hpp"
+#include "game/limits.hpp"
+#include "game/root.hpp"
+#include "game/turn.hpp"
+#include "game/turnloader.hpp"
+#include "interpreter/exporter/configuration.hpp"
+#include "interpreter/indexablevalue.hpp"
 
 using interpreter::checkIntegerArg;
 using interpreter::checkStringArg;
@@ -461,6 +462,69 @@ game::interface::IFCreatePrefOption(interpreter::Process& /*proc*/, game::Sessio
 {
     args.checkArgumentCount(2);
     createConfigOption(game::actions::mustHaveRoot(session).userConfiguration(), args);
+}
+
+/* @q Export array, fields:Str, file:Str, type:Str, Optional charset:Str (Global Command)
+   Export data from an array, into a file.
+
+   The %array must be an object array, such as {Ship|Ship()}, {Planet|Planet()}, {Hull|Hull()}, etc.
+   The array must not be empty.
+
+   The %fields is a string containing a list of fields, separated by commas,
+   each optionally followed by "@" and a width, for example, "Id@5,Name@-20".
+   The widths are used for file formats that support it;
+   a positive number produces a right-justified field, a negative number produces a left-justified field.
+
+   Further parameters:
+   - %file: name of file to create
+   - %type: file type, one of "text", "table", "csv", "tsv", "ssv", "json", "html", "dbf"
+   - %charset: character set name; defaults to Latin-1 if none given.
+
+   @since PCC2 2.40.13 */
+void
+game::interface::IFExport(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+{
+    args.checkArgumentCount(4, 5);
+
+    // First parameter
+    afl::data::Value* array = args.getNext();
+    if (array == 0) {
+        return;
+    }
+
+    // Further mandatory parameters
+    String_t fieldNames, fileName, typeName;
+    if (!checkStringArg(fieldNames, args.getNext())
+        || !checkStringArg(fileName, args.getNext())
+        || !checkStringArg(typeName, args.getNext()))
+    {
+        return;
+    }
+
+    // Create a Configuration
+    interpreter::exporter::Configuration config;
+    config.fieldList().addList(fieldNames);
+    config.setFormatByName(typeName, session.translator());
+
+    // Optional parameter
+    String_t charsetName;
+    if (checkStringArg(charsetName, args.getNext())) {
+        config.setCharsetByName(charsetName, session.translator());
+    }
+
+    // Try to export
+    interpreter::CallableValue* callable = dynamic_cast<interpreter::CallableValue*>(array);
+    if (callable == 0) {
+        throw interpreter::Error::typeError(interpreter::Error::ExpectIterable);
+    }
+
+    std::auto_ptr<interpreter::Context> ctx(callable->makeFirstContext());
+    if (ctx.get() == 0) {
+        throw interpreter::Error("Export set is empty");
+    }
+
+    afl::base::Ref<afl::io::Stream> file = session.world().fileSystem().openFile(fileName, afl::io::FileSystem::Create);
+    config.exportFile(*ctx, *file);
 }
 
 /* @q NewCannedMarker x:Int, y:Int, slot:Int, Optional tag:Int, expire:Int (Global Command)
