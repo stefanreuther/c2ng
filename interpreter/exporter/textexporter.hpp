@@ -34,6 +34,7 @@ namespace interpreter { namespace exporter {
         String_t m_line;                   ///< Current table line.
         size_t m_fieldNumber;              ///< Next field number.
         std::vector<std::size_t> m_widths; ///< Field widths.
+        std::vector<int> m_alignments;     ///< Field alignments.
         size_t m_totalWidth;               ///< Total width of table.
         size_t m_lineNr;                   ///< Current line number.
 

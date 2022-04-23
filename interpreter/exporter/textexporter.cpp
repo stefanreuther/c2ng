@@ -67,6 +67,7 @@ interpreter::exporter::TextExporter::startTable(const FieldList& fields, afl::ba
         }
         m_totalWidth += ele;
         m_widths.push_back(ele);
+        m_alignments.push_back(fields.getFieldWidth(i));
     }
 
     // Write headings
@@ -139,6 +140,11 @@ interpreter::exporter::TextExporter::addValue(String_t value, bool left)
     if (nn != value.npos) {
         value.erase(nn);
         value.append("...");
+    }
+
+    // Update alignment from configuration
+    if (int align = m_alignments[m_fieldNumber]) {
+        left = (align < 0);
     }
 
     // Format into field

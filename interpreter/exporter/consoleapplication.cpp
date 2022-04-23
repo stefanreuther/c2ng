@@ -245,9 +245,9 @@ interpreter::exporter::ConsoleApplication::appMain()
     // Default field set
     if (config.fieldList().size() == 0) {
         if (opt_fields) {
-            config.fieldList().addList("NAME@30,TYPE@10");
+            config.fieldList().addList("NAME@-30,TYPE@-10");
         } else {
-            config.fieldList().addList("ID@5,NAME@30");
+            config.fieldList().addList("ID@5,NAME@-30");
         }
     }
 

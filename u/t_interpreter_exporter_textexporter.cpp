@@ -44,7 +44,7 @@ namespace {
     {
         // Prepare a field list
         interpreter::exporter::FieldList list;
-        list.addList("a@5,b@10,c@5");
+        list.addList("a@5,b@-10,c@5");
 
         // Output receiver
         afl::io::InternalStream outputStream;
