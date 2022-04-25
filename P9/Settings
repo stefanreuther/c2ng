@@ -1674,7 +1674,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_proxy_costsummaryadaptor.cpp \
+FILES_testsuite = u/t_client_map_location.cpp \
+    u/t_game_proxy_costsummaryadaptor.cpp \
     u/t_game_interface_costsummarycontext.cpp u/t_game_proxy_exportproxy.cpp \
     u/t_game_map_info_nulllinkbuilder.cpp \
     u/t_game_map_info_scriptlinkbuilder.cpp \

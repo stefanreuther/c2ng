@@ -12,7 +12,9 @@
 #include "client/si/inputstate.hpp"
 #include "client/si/outputstate.hpp"
 #include "game/map/point.hpp"
+#include "game/proxy/drawingproxy.hpp"
 #include "game/proxy/keymapproxy.hpp"
+#include "game/proxy/lockproxy.hpp"
 #include "game/proxy/maplocationproxy.hpp"
 #include "game/proxy/referencelistproxy.hpp"
 #include "game/proxy/referenceobserverproxy.hpp"
@@ -20,7 +22,6 @@
 #include "ui/group.hpp"
 #include "ui/widget.hpp"
 #include "util/requestsender.hpp"
-#include "game/proxy/drawingproxy.hpp"
 
 namespace client { namespace map {
 
@@ -74,7 +75,8 @@ namespace client { namespace map {
         virtual game::interface::ContextProvider* createContextProvider();
 
         // Location::Listener:
-        virtual void updateObjectList();
+        virtual void requestObjectList(game::map::Point pos);
+        virtual void requestLockObject(game::map::Point pos, game::proxy::LockProxy::Flags_t flags);
 
         // KeymapProxy:
         virtual void updateKeyList(util::KeySet_t& keys);
@@ -89,6 +91,8 @@ namespace client { namespace map {
 
         void setNewOverlay(Layer layer, Overlay* pOverlay);
         void removeOverlay(Overlay* pOverlay);
+
+        void lockObject(game::proxy::LockProxy::Flags_t flags);
 
         void run(client::si::InputState& in, client::si::OutputState& out);
 
@@ -121,6 +125,7 @@ namespace client { namespace map {
         game::proxy::KeymapProxy m_keymapProxy;
         game::proxy::ReferenceObserverProxy m_observerProxy;
         game::proxy::DrawingProxy m_drawingProxy;
+        game::proxy::LockProxy m_lockProxy;
 
         util::RequestSender<Properties> m_propertyProxy;
 

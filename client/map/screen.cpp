@@ -29,6 +29,8 @@
 #include "ui/layout/vbox.hpp"
 #include "util/unicodechars.hpp"
 
+using game::proxy::LockProxy;
+
 namespace {
     const char*const LOG_NAME = "client.map.screen";
 
@@ -216,6 +218,7 @@ client::map::Screen::Screen(client::si::UserSide& userSide,
       m_keymapProxy(gameSender, root.engine().dispatcher()),
       m_observerProxy(gameSender),
       m_drawingProxy(gameSender, root.engine().dispatcher()),
+      m_lockProxy(gameSender, root.engine().dispatcher()),
       m_propertyProxy(gameSender.makeTemporary(new PropertiesFromSession(m_sharedState))),
       m_refList(),
       m_currentObject(),
@@ -237,11 +240,12 @@ client::map::Screen::Screen(client::si::UserSide& userSide,
     m_location.sig_positionChange.add(this, &Screen::onLocationChange);
     m_location.sig_objectChange.add(this, &Screen::onObjectChanged);
     m_keymapProxy.setListener(*this);
+    m_lockProxy.sig_result.add(this, &Screen::onLockResult);
     setColorScheme(*this);
 
     // Initialize
     setContextFromObject();
-    setNewOverlay(BaseLayer, new StarchartOverlay(m_root, tx, m_location, *this, gameSender));
+    setNewOverlay(BaseLayer, new StarchartOverlay(m_root, tx, m_location, *this));
 }
 
 client::map::Screen::~Screen()
@@ -340,13 +344,25 @@ client::map::Screen::handleMouseRelative(gfx::Point pt, MouseButtons_t pressedBu
         }
     }
 
-    m_location.moveRelative(m_widget.renderer().unscale(pt.getX()), -m_widget.renderer().unscale(pt.getY()));
     if (pressedButtons.contains(LeftButton)) {
-        // ...
+        LockProxy::Flags_t flags;
+        flags += LockProxy::Left;
+        if (pressedButtons.contains(CtrlKey)) {
+            flags += LockProxy::MarkedOnly;
+        }
+        lockObject(flags);
     }
     if (pressedButtons.contains(RightButton)) {
-        // ...
+        LockProxy::Flags_t flags;
+        if (pressedButtons.contains(CtrlKey)) {
+            flags += LockProxy::MarkedOnly;
+        }
+        lockObject(flags);
     }
+
+    // FIXME: determine relative location of this and the locking above
+    m_location.moveRelative(m_widget.renderer().unscale(pt.getX()), -m_widget.renderer().unscale(pt.getY()));
+
     return true;
 }
 
@@ -435,7 +451,7 @@ client::map::Screen::createContextProvider()
 }
 
 void
-client::map::Screen::updateObjectList()
+client::map::Screen::requestObjectList(game::map::Point pos)
 {
     class Initializer : public game::proxy::ReferenceListProxy::Initializer_t {
      public:
@@ -462,7 +478,13 @@ client::map::Screen::updateObjectList()
         game::map::Point m_pos;
     };
 
-    m_refListProxy.setContentNew(std::auto_ptr<game::proxy::ReferenceListProxy::Initializer_t>(new Initializer(m_location.getPosition())));
+    m_refListProxy.setContentNew(std::auto_ptr<game::proxy::ReferenceListProxy::Initializer_t>(new Initializer(pos)));
+}
+
+void
+client::map::Screen::requestLockObject(game::map::Point pos, game::proxy::LockProxy::Flags_t flags)
+{
+    m_lockProxy.requestPosition(pos, flags);
 }
 
 void
@@ -634,6 +656,12 @@ client::map::Screen::removeOverlay(Overlay* pOverlay)
 }
 
 void
+client::map::Screen::lockObject(game::proxy::LockProxy::Flags_t flags)
+{
+    m_location.lockObject(flags);
+}
+
+void
 client::map::Screen::run(client::si::InputState& in, client::si::OutputState& out)
 {
     // Proxy to dispatch events we read in relative-movement-mode to the correct methods
@@ -739,6 +767,12 @@ client::map::Screen::onObjectChanged(game::Reference ref)
     if (ref.isSet()) {
         m_locationProxy.setPosition(ref);
     }
+}
+
+void
+client::map::Screen::onLockResult(game::map::Point pt)
+{
+    m_location.setPosition(pt);
 }
 
 void

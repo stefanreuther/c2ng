@@ -8,7 +8,6 @@
 #include "afl/string/translator.hpp"
 #include "client/dialogs/newdrawing.hpp"
 #include "client/map/overlay.hpp"
-#include "game/proxy/lockproxy.hpp"
 #include "ui/root.hpp"
 
 namespace client { namespace map {
@@ -22,8 +21,7 @@ namespace client { namespace map {
         StarchartOverlay(ui::Root& root,
                          afl::string::Translator& tx,
                          Location& loc,
-                         Screen& scr,
-                         util::RequestSender<game::Session> gameSender);
+                         Screen& scr);
 
         // Overlay:
         virtual void drawBefore(gfx::Canvas& can, const Renderer& ren);
@@ -39,7 +37,6 @@ namespace client { namespace map {
         afl::string::Translator& m_translator;
         Location& m_location;
         Screen& m_screen;
-        game::proxy::LockProxy m_lockProxy;
 
         bool m_drawingTagFilterActive;
         util::Atom_t m_drawingTagFilter;
@@ -49,7 +46,6 @@ namespace client { namespace map {
         afl::base::SignalConnection conn_positionChange;
 
         void onChange();
-        void onLockResult(game::map::Point pt);
 
         void editDrawingTagFilter();
         void editMarkerColor();

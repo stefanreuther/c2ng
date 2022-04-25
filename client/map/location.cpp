@@ -1,5 +1,6 @@
 /**
   *  \file client/map/location.cpp
+  *  \brief Class client::map::Location
   */
 
 #include "client/map/location.hpp"
@@ -8,18 +9,29 @@
 
 const char*const LOG_NAME = "client.map.location";
 
+using game::map::Point;
+
 /*
  *  Internal State
  *
- *  This implements the 'State' pattern
+ *  This implements the 'State' pattern.
+ *
+ *  The state machine we implement:
+ *  - on every position change, requests an object list (BuildState),
+ *    making sure that only one such request is active at a time.
+ *  - unless a jump is already active, permits executing a jump (JumpState);
+ *    a jump and a potential build can complete in any order.
+ *  - a lock operation can be requested at any time (LockState);
+ *    if it cannot be executed right now, it will be deferred.
  */
 
 class client::map::Location::State : public afl::base::Deletable {
  public:
     virtual void onPositionChange(Location& parent, bool change) = 0;
     virtual void onObjectList(Location& parent) = 0;
-    virtual void moveRelative(Location& parent, game::map::Point pt) = 0;
+    virtual void moveRelative(Location& parent, Point pt) = 0;
     virtual bool startJump(Location& parent) = 0;
+    virtual void lockObject(Location& parent, Flags_t flags) = 0;
     virtual bool hasFocusedObject() = 0;
     virtual const char* getName() const = 0;
 };
@@ -33,10 +45,12 @@ class client::map::Location::InitState : public State {
         { parent.setBuildState(); }
     virtual void onObjectList(Location& /*parent*/)
         { }
-    virtual void moveRelative(Location& /*parent*/, game::map::Point /*pt*/)
+    virtual void moveRelative(Location& /*parent*/, Point /*pt*/)
         { }
     virtual bool startJump(Location& /*parent*/)
         { return false; }
+    virtual void lockObject(Location& /*parent*/, Flags_t /*flags*/)
+        { }
     virtual bool hasFocusedObject()
         { return false; }
     virtual const char* getName() const
@@ -44,7 +58,8 @@ class client::map::Location::InitState : public State {
 };
 
 /*
- *  Build: wait for reception of onObjectList(). If the position changes, go to BuildAgain.
+ *  Build: wait for reception of onObjectList() that we requested on entry.
+ *  If the position changes, go to BuildAgain because the object list we'll get will be out-of-date.
  */
 class client::map::Location::BuildState : public State {
  public:
@@ -56,10 +71,12 @@ class client::map::Location::BuildState : public State {
         }
     virtual void onObjectList(Location& parent)
         { parent.setIdleState(); }
-    virtual void moveRelative(Location& parent, game::map::Point pt)
+    virtual void moveRelative(Location& parent, Point pt)
         { parent.setPosition(parent.m_cursorPosition + pt); }
     virtual bool startJump(Location& parent)
         { parent.setBuildJumpState(); return true; }
+    virtual void lockObject(Location& parent, Flags_t flags)
+        { parent.setBuildLockState(Point(), flags); }
     virtual bool hasFocusedObject()
         { return false; }
     virtual const char* getName() const
@@ -76,10 +93,12 @@ class client::map::Location::BuildAgainState : public State {
         { }
     virtual void onObjectList(Location& parent)
         { parent.setBuildState(); }
-    virtual void moveRelative(Location& parent, game::map::Point pt)
+    virtual void moveRelative(Location& parent, Point pt)
         { parent.setPosition(parent.m_cursorPosition + pt); }
     virtual bool startJump(Location& parent)
         { parent.setBuildJumpState(); return true; }
+    virtual void lockObject(Location& parent, Flags_t flags)
+        { parent.setBuildLockState(Point(), flags); }
     virtual bool hasFocusedObject()
         { return false; }
     virtual const char* getName() const
@@ -87,7 +106,8 @@ class client::map::Location::BuildAgainState : public State {
 };
 
 /*
- *  BuildJump: wait for reception of onObjectList() -or- completion of jump.
+ *  BuildJump: wait for reception of onObjectList() -or- completion of a jump.
+ *  Proceed with correct following state (BuildAgain, Jump).
  */
 class client::map::Location::BuildJumpState : public State {
  public:
@@ -101,26 +121,83 @@ class client::map::Location::BuildJumpState : public State {
             // Object list completed, but jump did not.
             parent.setJumpState(m_postJumpMove);
         }
-    virtual void moveRelative(Location& /*parent*/, game::map::Point pt)
+    virtual void moveRelative(Location& /*parent*/, Point pt)
         { m_postJumpMove += pt; }
     virtual bool startJump(Location& /*parent*/)
         { return false; }
+    virtual void lockObject(Location& parent, Flags_t flags)
+        { parent.setBuildJumpLockState(m_postJumpMove, flags); }
     virtual bool hasFocusedObject()
         { return false; }
     virtual const char* getName() const
         { return "BuildJump"; }
  private:
-    game::map::Point m_postJumpMove;
+    Point m_postJumpMove;
 };
 
 /*
- *  Jump: we are performing a jump to a still-unknown location (paging, locking).
+ *  BuildJumpLockState: wait for reception of onObjectList() -or- completion of a jump.
+ *  Proceed with correct following state (BuildLockState, JumpLockState) to schedule a lock.
+ */
+class client::map::Location::BuildJumpLockState : public State {
+ public:
+    BuildJumpLockState(Point pt, Flags_t flags)
+        : m_postJumpMove(pt), m_flags(flags)
+        { }
+    virtual void onPositionChange(Location& parent, bool /*change*/)
+        { parent.setBuildLockState(m_postJumpMove, m_flags); }
+    virtual void onObjectList(Location& parent)
+        { parent.setJumpLockState(m_postJumpMove, m_flags); }
+    virtual void moveRelative(Location& /*parent*/, Point pt)
+        { m_postJumpMove += pt; }
+    virtual bool startJump(Location& /*parent*/)
+        { return false; }
+    virtual void lockObject(Location& /*parent*/, Flags_t flags)
+        { m_flags = flags; }
+    virtual bool hasFocusedObject()
+        { return false; }
+    virtual const char* getName() const
+        { return "BuildJumpLock"; }
+ private:
+    Point m_postJumpMove;
+    Flags_t m_flags;
+};
+
+/*
+ *  BuildLockState: wait for reception of object list, then lock.
+ */
+class client::map::Location::BuildLockState : public State {
+ public:
+    BuildLockState(Point pt, Flags_t flags)
+        : m_postJumpMove(pt), m_flags(flags)
+        { }
+    virtual void onPositionChange(Location& /*parent*/, bool /*change*/)
+        { }
+    virtual void onObjectList(Location& parent)
+        { parent.setLockState(m_postJumpMove, m_flags); }
+    virtual void moveRelative(Location& /*parent*/, Point pt)
+        { m_postJumpMove += pt; }
+    virtual bool startJump(Location& /*parent*/)
+        { return false; }
+    virtual void lockObject(Location& /*parent*/, Flags_t flags)
+        { m_flags = flags; }
+    virtual bool hasFocusedObject()
+        { return false; }
+    virtual const char* getName() const
+        { return "BuildLock"; }
+ private:
+    Point m_postJumpMove;
+    Flags_t m_flags;
+};
+
+/*
+ *  Jump: we are performing a jump to a still-unknown location (e.g. paging).
  *  Wait for new location using onPositionChange(). In the meantime, gather relative movement,
- *  so that "lock-then-move" works.
+ *  so that "page-then-move" works.
  */
 class client::map::Location::JumpState : public State {
  public:
-    JumpState(game::map::Point pt)
+    JumpState(Point pt)
         : m_postJumpMove(pt)
         { }
     virtual void onPositionChange(Location& parent, bool /*change*/)
@@ -130,16 +207,105 @@ class client::map::Location::JumpState : public State {
         }
     virtual void onObjectList(Location& /*parent*/)
         { }
-    virtual void moveRelative(Location& /*parent*/, game::map::Point pt)
+    virtual void moveRelative(Location& /*parent*/, Point pt)
         { m_postJumpMove += pt; }
     virtual bool startJump(Location& /*parent*/)
         { return false; }
+    virtual void lockObject(Location& parent, Flags_t flags)
+        { parent.setJumpLockState(m_postJumpMove, flags); }
     virtual bool hasFocusedObject()
         { return false; }
     virtual const char* getName() const
         { return "Jump"; }
  private:
-    game::map::Point m_postJumpMove;
+    Point m_postJumpMove;
+};
+
+/*
+ *  JumpLockState: we are jumping, but user already requested to lock.
+ */
+class client::map::Location::JumpLockState : public State {
+ public:
+    JumpLockState(Point pt, Flags_t flags)
+        : m_postJumpMove(pt), m_flags(flags)
+        { }
+    virtual void onPositionChange(Location& parent, bool /*change*/)
+        { parent.setLockState(m_postJumpMove, m_flags); }
+    virtual void onObjectList(Location& /*parent*/)
+        { }
+    virtual void moveRelative(Location& /*parent*/, Point pt)
+        { m_postJumpMove += pt; }
+    virtual bool startJump(Location& /*parent*/)
+        { return false; }
+    virtual void lockObject(Location& /*parent*/, Flags_t flags)
+        { m_flags = flags; }
+    virtual bool hasFocusedObject()
+        { return false; }
+    virtual const char* getName() const
+        { return "JumpLock"; }
+ private:
+    Point m_postJumpMove;
+    Flags_t m_flags;
+};
+
+/*
+ *  LockState: we are asking for a lock onto an object.
+ *  Wait for new position.
+ */
+class client::map::Location::LockState : public State {
+ public:
+    LockState(Point pt)
+        : m_postJumpMove(pt)
+        { }
+    virtual void onPositionChange(Location& parent, bool /*change*/)
+        {
+            // For now, ignore movement after lock, assuming that it is mouse jitter.
+            // Ignoring this movement makes the "hold mouse button and move mouse" usecase look somewhat acceptable.
+            // parent.m_cursorPosition += m_postJumpMove;
+            parent.setBuildState();
+        }
+    virtual void onObjectList(Location& /*parent*/)
+        { }
+    virtual void moveRelative(Location& /*parent*/, Point pt)
+        { m_postJumpMove += pt; }
+    virtual bool startJump(Location& /*parent*/)
+        { return false; }
+    virtual void lockObject(Location& parent, Flags_t flags)
+        { parent.setLockAgainState(m_postJumpMove, flags); }
+    virtual bool hasFocusedObject()
+        { return false; }
+    virtual const char* getName() const
+        { return "Lock"; }
+ private:
+    Point m_postJumpMove;
+};
+
+/*
+ *  LockAgainState: we are locking on an object, but another lock request already came in.
+ *  Wait until it completes, then submit it.
+ */
+class client::map::Location::LockAgainState : public State {
+ public:
+    LockAgainState(Point pt, Flags_t flags)
+        : m_postJumpMove(pt), m_flags(flags)
+        { }
+    virtual void onPositionChange(Location& parent, bool /*change*/)
+        { parent.setLockState(m_postJumpMove, m_flags); }
+    virtual void onObjectList(Location& /*parent*/)
+        { }
+    virtual void moveRelative(Location& /*parent*/, Point pt)
+        { m_postJumpMove += pt; }
+    virtual bool startJump(Location& /*parent*/)
+        { return false; }
+    virtual void lockObject(Location& /*parent*/, Flags_t flags)
+        { m_flags = flags; }
+    virtual bool hasFocusedObject()
+        { return false; }
+    virtual const char* getName() const
+        { return "LockAgain"; }
+ private:
+    Point m_postJumpMove;
+    Flags_t m_flags;
 };
 
 /*
@@ -156,13 +322,15 @@ class client::map::Location::IdleState : public State {
         }
     virtual void onObjectList(Location& parent)
         { parent.verifyFocusedObject(); }
-    virtual void moveRelative(Location& parent, game::map::Point pt)
+    virtual void moveRelative(Location& parent, Point pt)
         { parent.setPosition(parent.m_cursorPosition + pt); }
     virtual bool startJump(Location& parent)
         {
-            parent.setJumpState(game::map::Point());
+            parent.setJumpState(Point());
             return true;
         }
+    virtual void lockObject(Location& parent, Flags_t flags)
+        { parent.setLockState(Point(), flags); }
     virtual bool hasFocusedObject()
         { return true; }
     virtual const char* getName() const
@@ -311,7 +479,15 @@ client::map::Location::getFocusedObject() const
 void
 client::map::Location::moveRelative(int dx, int dy)
 {
-    m_pState->moveRelative(*this, game::map::Point(dx, dy));
+    m_pState->moveRelative(*this, Point(dx, dy));
+}
+
+void
+client::map::Location::lockObject(Flags_t flags)
+{
+    // FIXME: this means the locked object will flicker if users repeatedly press Enter; that does not happen in PCC2.
+    // We could avoid that by pre-validating the object list whether it already matches our desired object.
+    m_pState->lockObject(*this, flags);
 }
 
 bool
@@ -370,7 +546,7 @@ void
 client::map::Location::setBuildState()
 {
     setStateNew(new BuildState());
-    m_listener.updateObjectList();
+    m_listener.requestObjectList(getPosition());
     sig_objectChange.raise(game::Reference());
 }
 
@@ -387,10 +563,41 @@ client::map::Location::setBuildJumpState()
 }
 
 void
+client::map::Location::setBuildJumpLockState(game::map::Point pt, Flags_t flags)
+{
+    setStateNew(new BuildJumpLockState(pt, flags));
+}
+
+void
+client::map::Location::setBuildLockState(game::map::Point pt, Flags_t flags)
+{
+    setStateNew(new BuildLockState(pt, flags));
+}
+
+void
 client::map::Location::setJumpState(game::map::Point pt)
 {
     setStateNew(new JumpState(pt));
     sig_objectChange.raise(game::Reference());
+}
+
+void
+client::map::Location::setJumpLockState(game::map::Point pt, Flags_t flags)
+{
+    setStateNew(new JumpLockState(pt, flags));
+}
+
+void
+client::map::Location::setLockState(game::map::Point pt, Flags_t flags)
+{
+    setStateNew(new LockState(pt));
+    m_listener.requestLockObject(getPosition() + pt, flags);
+}
+
+void
+client::map::Location::setLockAgainState(game::map::Point pt, Flags_t flags)
+{
+    setStateNew(new LockAgainState(pt, flags));
 }
 
 void

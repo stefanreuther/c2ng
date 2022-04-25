@@ -52,21 +52,17 @@ namespace {
 
 
 
-client::map::StarchartOverlay::StarchartOverlay(ui::Root& root, afl::string::Translator& tx, Location& loc, Screen& scr,
-                                                util::RequestSender<game::Session> gameSender)
+client::map::StarchartOverlay::StarchartOverlay(ui::Root& root, afl::string::Translator& tx, Location& loc, Screen& scr)
     : m_root(root),
       m_translator(tx),
       m_location(loc),
       m_screen(scr),
-      m_lockProxy(gameSender, root.engine().dispatcher()),
       m_drawingTagFilterActive(false),
       m_drawingTagFilter(),
       m_drawingTagFilterName(),
       conn_objectChange(loc.sig_objectChange.add(this, &StarchartOverlay::onChange)),
       conn_positionChange(loc.sig_positionChange.add(this, &StarchartOverlay::onChange))
-{
-    m_lockProxy.sig_result.add(this, &StarchartOverlay::onLockResult);
-}
+{ }
 
 // Overlay:
 void
@@ -176,20 +172,17 @@ client::map::StarchartOverlay::handleKey(util::Key_t key, int prefix, const Rend
      case util::Key_Return:
      case util::Key_Return + util::KeyMod_Ctrl:
      case ' ':
-     case ' ' + util::KeyMod_Ctrl:
-        // FIXME: this means the locked object will flicker if users repeatedly press Enter; that does not happen in PCC2.
-        // We could avoid that by pre-validating the object list whether it already matches our desired object.
-        if (m_location.startJump()) {
-            LockProxy::Flags_t flags;
-            if ((key & util::Key_Mask) == ' ') {
-                flags += LockProxy::Left;
-            }
-            if ((key & util::KeyMod_Ctrl) != 0) {
-                flags += LockProxy::MarkedOnly;
-            }
-            m_lockProxy.requestPosition(m_location.getPosition(), flags);
+     case ' ' + util::KeyMod_Ctrl: {
+        LockProxy::Flags_t flags;
+        if ((key & util::Key_Mask) == ' ') {
+            flags += LockProxy::Left;
         }
+        if ((key & util::KeyMod_Ctrl) != 0) {
+            flags += LockProxy::MarkedOnly;
+        }
+        m_screen.lockObject(flags);
         return true;
+     }
 
      case 'c':
         editMarkerColor();
@@ -236,12 +229,6 @@ void
 client::map::StarchartOverlay::onChange()
 {
     requestRedraw();
-}
-
-void
-client::map::StarchartOverlay::onLockResult(game::map::Point pt)
-{
-    m_location.setPosition(pt);
 }
 
 void
