@@ -11,6 +11,7 @@
 #include "client/si/control.hpp"
 #include "client/si/inputstate.hpp"
 #include "client/si/outputstate.hpp"
+#include "game/map/movementcontroller.hpp"
 #include "game/map/point.hpp"
 #include "game/proxy/drawingproxy.hpp"
 #include "game/proxy/keymapproxy.hpp"
@@ -104,6 +105,8 @@ namespace client { namespace map {
         client::map::Widget& mapWidget()
             { return m_widget; }
 
+        afl::base::Signal<void()> sig_effectTimer;
+
      private:
         class SharedState;
         class Properties;
@@ -116,9 +119,12 @@ namespace client { namespace map {
         ui::Group m_tileContainer;           // ex WStarchartTileContainer
         afl::base::Deleter m_tileHolder;
         afl::base::Ref<SharedState> m_sharedState;
+        afl::base::Ref<gfx::Timer> m_effectTimer;
 
         Location m_location;
         int m_locationCycleBreaker;
+
+        game::map::MovementController m_movement;
 
         game::proxy::MapLocationProxy m_locationProxy;
         game::proxy::ReferenceListProxy m_refListProxy;
@@ -141,6 +147,7 @@ namespace client { namespace map {
 
         std::auto_ptr<Overlay> m_overlays[NUM_LAYERS];
 
+        void updateCenter();
         void onLocationResult(game::Reference ref, game::map::Point pt, game::map::Configuration config);
         void onPositionChange(game::map::Point pt);
         void onListChange(const game::ref::UserList& list);
@@ -148,6 +155,7 @@ namespace client { namespace map {
         void onLocationChange(game::map::Point pt);
         void onObjectChanged(game::Reference ref);
         void onLockResult(game::map::Point pt);
+        void onEffectTimer();
 
         void setContextFromObject();
         void setKeymapName(const String_t& name);

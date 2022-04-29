@@ -2,6 +2,7 @@
   *  \file client/map/starchartoverlay.cpp
   */
 
+#include <cmath>
 #include "client/map/starchartoverlay.hpp"
 #include "afl/string/format.hpp"
 #include "client/dialogs/newdrawingtag.hpp"
@@ -23,7 +24,10 @@
 #include "gfx/complex.hpp"
 #include "gfx/context.hpp"
 #include "ui/draw.hpp"
+#include "ui/icons/balloon.hpp"
+#include "ui/icons/colortext.hpp"
 #include "ui/layout/vbox.hpp"
+#include "ui/skincolorscheme.hpp"
 #include "ui/widgets/quit.hpp"
 #include "ui/widgets/scrollbarcontainer.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
@@ -36,6 +40,7 @@ namespace {
     /* What distance is considered "near" for drawings? */
     const int NEAR_DISTANCE = 21;
 
+    /* Determine distance-to-move from key and prefix argument */
     int determineDistance(util::Key_t key, int prefix)
     {
         // ex CC$ScannerMoveX, CC$ScannerMoveY
@@ -47,6 +52,28 @@ namespace {
             : (key & util::KeyMod_Ctrl) != 0
             ? 100
             : 10;
+    }
+
+
+    /*
+     *  Cursor oscillation
+     */
+
+    const int PHASE_MAX = 80;
+    const int PHASE_REPEAT = 50;
+
+    int getDeltaFromPhase(int phase)
+    {
+        if (phase < 20) {
+            // One falling edge (half period), 20 ticks, amplitude 40
+            return int(0.5 + 20 + 20*std::cos(phase * 3.141592/20));
+        } else if (phase < 50) {
+            // One entire period (rising+falling), 30 ticks, amplitude 5
+            return int(0.5 + 5 - 5*std::cos((phase-20) * 3.141592/15));
+        } else {
+            // One entire period (rising+falling), 30 ticks, amplitude 2
+            return int(0.5 + 2 - 2*std::cos((phase-50) * 3.141592/15));
+        }
     }
 }
 
@@ -60,8 +87,12 @@ client::map::StarchartOverlay::StarchartOverlay(ui::Root& root, afl::string::Tra
       m_drawingTagFilterActive(false),
       m_drawingTagFilter(),
       m_drawingTagFilterName(),
+      m_cursorPosition(),
+      m_cursorArea(),
+      m_cursorPhase(),
       conn_objectChange(loc.sig_objectChange.add(this, &StarchartOverlay::onChange)),
-      conn_positionChange(loc.sig_positionChange.add(this, &StarchartOverlay::onChange))
+      conn_positionChange(loc.sig_positionChange.add(this, &StarchartOverlay::onChange)),
+      conn_effectTimer(scr.sig_effectTimer.add(this, &StarchartOverlay::onEffectTimer))
 { }
 
 // Overlay:
@@ -74,10 +105,6 @@ void
 client::map::StarchartOverlay::drawAfter(gfx::Canvas& can, const Renderer& ren)
 {
     // ex WStandardChartMode::drawOverlays
-    // FIXME: should filter for !PrimaryLayer?
-    m_screen.drawObjectList(can);
-    m_screen.drawTiles(can);
-
     // Coordinates
     game::map::Point pt = m_location.configuration().getSimpleCanonicalLocation(m_location.getPosition());
     game::map::Point pt1 = m_location.configuration().getCanonicalLocation(pt);
@@ -118,6 +145,7 @@ client::map::StarchartOverlay::drawCursor(gfx::Canvas& can, const Renderer& ren)
     gfx::Point sc = ren.scale(m_location.configuration().getSimpleNearestAlias(m_location.getPosition(), ren.getCenter()));
 
     if (!m_location.getFocusedObject().isSet()) {
+        // Nothing focused: draw cross
         gfx::Context<uint8_t> ctx(can, m_screen.root().colorScheme());
         ctx.setColor(ui::Color_Blue);
         drawHLine(ctx, sc.getX()-30, sc.getY(), sc.getX()-6);
@@ -125,8 +153,61 @@ client::map::StarchartOverlay::drawCursor(gfx::Canvas& can, const Renderer& ren)
         drawVLine(ctx, sc.getX(), sc.getY()-30, sc.getY()-6);
         drawVLine(ctx, sc.getX(), sc.getY()+30, sc.getY()+6);
     } else {
-    // FIXME    ::drawCursor(can, sc, cursor_angle);
+        // Object is focused: draw wobbly label
+        // First, determine label and skin color
+        String_t label;
+        util::SkinColor::Color color = util::SkinColor::Static;
+        if (const game::ref::UserList::Item* it = m_location.getObjectByIndex(m_location.getCurrentObjectIndex())) {
+            color = it->color;
+            switch (it->reference.getType()) {
+             case game::Reference::Ship:
+                label = afl::string::Format(m_translator("Ship #%d"), it->reference.getId());
+                break;
+             case game::Reference::Planet:
+                label = afl::string::Format(m_translator("Planet #%d"), it->reference.getId());
+                break;
+             default:
+                break;
+            }
+        }
+
+        if (!label.empty()) {
+            // Determine icon color from skin color
+            uint8_t textColor = ui::Color_Grayscale + 12;
+            uint8_t frameColor = ui::Color_Grayscale + 6;
+            switch (color) {
+             case util::SkinColor::Green:  textColor = ui::Color_Green;  frameColor = ui::Color_GreenScale + 6;      break;
+             case util::SkinColor::Red:    textColor = ui::Color_Red;    frameColor = ui::Color_Fire + 6;            break;
+             case util::SkinColor::Yellow: textColor = ui::Color_Yellow; frameColor = ui::Color_DarkYellowScale + 6; break;
+             default:                                                                                                break;
+            }
+
+            // Icons to draw
+            ui::icons::ColorText text(label, m_root);
+            text.setColor(textColor);
+            ui::icons::Balloon frame(text, m_root, frameColor);
+
+            // Determine position
+            const int delta = getDeltaFromPhase(m_cursorPhase);
+            const int x = sc.getX();
+            const int y = sc.getY() - delta - 6;
+            gfx::Point size = frame.getSize();
+            gfx::Rectangle area(x - size.getX() / 2, y - size.getY(), size.getX(), size.getY());
+
+            // Draw
+            ui::SkinColorScheme scheme(ui::GRAY_COLOR_SET, m_root.colorScheme());
+            gfx::Context<util::SkinColor::Color> ctx(can, scheme);
+            frame.draw(ctx, area, ui::ButtonFlags_t());
+
+            m_cursorArea = area;
+            m_cursorArea.grow(10, 10);
+        }
     }
+
+    // Draw tiles after cursor so they appear above it
+    // FIXME: should filter for !PrimaryLayer?
+    m_screen.drawObjectList(can);
+    m_screen.drawTiles(can);
 
     return true;
 }
@@ -228,7 +309,31 @@ client::map::StarchartOverlay::handleMouse(gfx::Point /*pt*/, MouseButtons_t /*p
 void
 client::map::StarchartOverlay::onChange()
 {
+    if (m_cursorPosition != m_location.getPosition()) {
+        m_cursorPosition = m_location.getPosition();
+        m_cursorPhase = 0;
+    }
     requestRedraw();
+}
+
+void
+client::map::StarchartOverlay::onEffectTimer()
+{
+    if (m_location.getFocusedObject().isSet()) {
+        ++m_cursorPhase;
+        if (m_cursorPhase >= PHASE_MAX) {
+            m_cursorPhase = PHASE_REPEAT;
+        }
+
+        // Instead of invalidating the entire frame, invalidate only the (estimated) area affected by cursor redraw.
+        // This estimate is provided by the last draw() operation.
+        // As of 20220427, this reduces CPU usage from 36% -> 28% on my machine on a 1920x1080 starchart.
+        // Potential error: if we miss some frames, the estimate produced by previous executed draw
+        // may not cover the correct area; this causes a glitch that fixes itself, so probably not worth bothering with.
+        if (Callback* cb = getCallback()) {
+            cb->requestRedraw(m_cursorArea);
+        }
+    }
 }
 
 void

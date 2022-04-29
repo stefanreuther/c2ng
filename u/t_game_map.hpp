@@ -235,6 +235,16 @@ class TestGameMapMinefieldType : public CxxTest::TestSuite {
     void testAllMinefieldsKnown();
 };
 
+class TestGameMapMovementController : public CxxTest::TestSuite {
+ public:
+    void testInit();
+    void testSlowMovement();
+    void testFastMovement();
+    void testFastMovementDiagonal();
+    void testFastMovementFlat();
+    void testFastMovementSteep();
+};
+
 class TestGameMapMovementPredictor : public CxxTest::TestSuite {
  public:
     void testCombinations();

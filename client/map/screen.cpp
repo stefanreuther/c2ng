@@ -3,6 +3,7 @@
   */
 
 #include <algorithm>
+#include <cmath>
 #include "client/map/screen.hpp"
 #include "afl/string/format.hpp"
 #include "afl/sys/mutexguard.hpp"
@@ -27,12 +28,16 @@
 #include "interpreter/values.hpp"
 #include "ui/draw.hpp"
 #include "ui/layout/vbox.hpp"
+#include "util/math.hpp"
 #include "util/unicodechars.hpp"
 
 using game::proxy::LockProxy;
 
 namespace {
     const char*const LOG_NAME = "client.map.screen";
+
+    /* Effect timer interval. 20 ms = 50 Hz */
+    const uint32_t EFFECT_TIMER_INTERVAL = 20;
 
     /*
      *  ContextProvider implementation for starchart: create context according to a game::Reference
@@ -211,8 +216,10 @@ client::map::Screen::Screen(client::si::UserSide& userSide,
       m_tileContainer(ui::layout::VBox::instance5),
       m_tileHolder(),
       m_sharedState(*new SharedState()),
+      m_effectTimer(root.engine().createTimer()),
       m_location(*this, userSide.mainLog()),
       m_locationCycleBreaker(0),
+      m_movement(),
       m_locationProxy(gameSender, root.engine().dispatcher()),
       m_refListProxy(gameSender, root.engine().dispatcher()),
       m_keymapProxy(gameSender, root.engine().dispatcher()),
@@ -241,6 +248,8 @@ client::map::Screen::Screen(client::si::UserSide& userSide,
     m_location.sig_objectChange.add(this, &Screen::onObjectChanged);
     m_keymapProxy.setListener(*this);
     m_lockProxy.sig_result.add(this, &Screen::onLockResult);
+    m_effectTimer->sig_fire.add(this, &Screen::onEffectTimer);
+    m_effectTimer->setInterval(EFFECT_TIMER_INTERVAL);
     setColorScheme(*this);
 
     // Initialize
@@ -700,6 +709,14 @@ client::map::Screen::run(client::si::InputState& in, client::si::OutputState& ou
 }
 
 void
+client::map::Screen::updateCenter()
+{
+    if (m_movement.update(m_location.configuration(), 1)) {
+        m_widget.setCenter(m_movement.getCurrentPosition());
+    }
+}
+
+void
 client::map::Screen::onLocationResult(game::Reference ref, game::map::Point pt, game::map::Configuration config)
 {
     m_location.setConfiguration(config);
@@ -737,8 +754,9 @@ client::map::Screen::onListFinish()
 void
 client::map::Screen::onLocationChange(game::map::Point pt)
 {
-    // FIXME: implement smooth movement
-    m_widget.setCenter(pt);
+    m_movement.setTargetPosition(pt);
+    updateCenter();
+
     interface().history().push(ScreenHistory::Reference(ScreenHistory::Starchart, pt.getX(), pt.getY()));
     m_sharedState->setPosition(pt);
 
@@ -773,6 +791,14 @@ void
 client::map::Screen::onLockResult(game::map::Point pt)
 {
     m_location.setPosition(pt);
+}
+
+void
+client::map::Screen::onEffectTimer()
+{
+    updateCenter();
+    sig_effectTimer.raise();
+    m_effectTimer->setInterval(EFFECT_TIMER_INTERVAL);
 }
 
 void

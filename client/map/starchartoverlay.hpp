@@ -42,10 +42,16 @@ namespace client { namespace map {
         util::Atom_t m_drawingTagFilter;
         String_t m_drawingTagFilterName;
 
+        game::map::Point m_cursorPosition;
+        gfx::Rectangle m_cursorArea;
+        int m_cursorPhase;
+
         afl::base::SignalConnection conn_objectChange;
         afl::base::SignalConnection conn_positionChange;
+        afl::base::SignalConnection conn_effectTimer;
 
         void onChange();
+        void onEffectTimer();
 
         void editDrawingTagFilter();
         void editMarkerColor();
