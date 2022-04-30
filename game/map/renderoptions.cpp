@@ -120,7 +120,7 @@ game::map::RenderOptions::getViewportOptions() const
     }
 
     // Fill
-    if (!m_fill.contains(ShowGrid)) {
+    if (m_show.contains(ShowGrid) && !m_fill.contains(ShowGrid)) {
         result += Viewport::ShowOutsideGrid;
     }
     if (m_fill.contains(ShowIonStorms)) {

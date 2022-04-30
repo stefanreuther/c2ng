@@ -52,8 +52,7 @@ TestGameMapRenderOptions::testTransfer()
                      + Viewport::FillMinefields
                      + Viewport::ShowIonStorms
                      + Viewport::ShowShipDots
-                     + Viewport::ShowWarpWells
-                     + Viewport::ShowOutsideGrid);
+                     + Viewport::ShowWarpWells);
 
     t.storeToConfiguration(config, RenderOptions::Normal);
     game::config::ConfigurationOption* opt = config.getOptionByName("Chart.Normal.Show");
@@ -82,6 +81,8 @@ TestGameMapRenderOptions::testTranslation()
 
     TS_ASSERT(RenderOptions(Rs(RenderOptions::ShowGrid),       Rs()).getViewportOptions().contains(Viewport::ShowOutsideGrid));
     TS_ASSERT(!RenderOptions(Rs(RenderOptions::ShowGrid),      Rs(RenderOptions::ShowGrid)).getViewportOptions().contains(Viewport::ShowOutsideGrid));
+    TS_ASSERT(!RenderOptions(Rs(),                             Rs()).getViewportOptions().contains(Viewport::ShowOutsideGrid));
+    TS_ASSERT(!RenderOptions(Rs(),                             Rs(RenderOptions::ShowGrid)).getViewportOptions().contains(Viewport::ShowOutsideGrid));
 
     TS_ASSERT(RenderOptions(Rs(RenderOptions::ShowIonStorms),  Rs(RenderOptions::ShowIonStorms)).getViewportOptions().contains(Viewport::FillIonStorms));
     TS_ASSERT(RenderOptions(Rs(RenderOptions::ShowMinefields), Rs(RenderOptions::ShowMinefields)).getViewportOptions().contains(Viewport::FillMinefields));
