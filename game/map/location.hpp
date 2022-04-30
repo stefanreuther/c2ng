@@ -5,9 +5,10 @@
 #ifndef C2NG_GAME_MAP_LOCATION_HPP
 #define C2NG_GAME_MAP_LOCATION_HPP
 
-#include "game/reference.hpp"
-#include "game/map/point.hpp"
 #include "afl/base/signal.hpp"
+#include "afl/bits/smallset.hpp"
+#include "game/map/point.hpp"
+#include "game/reference.hpp"
 
 namespace game { namespace map {
 
@@ -20,6 +21,14 @@ namespace game { namespace map {
         If it disappears (because it is not visible in a turn), we remain at the last position. */
     class Location {
      public:
+        /** Flag for browse(). */
+        enum BrowseFlag {
+            Backwards,           ///< Browse backwards (towards lower Ids) instead of forward.
+            MarkedOnly,          ///< Accept only marked objects.
+            PlayedOnly           ///< Accept only played objects (playability ReadOnly or better) if starting from played object.
+        };
+        typedef afl::bits::SmallSet<BrowseFlag> BrowseFlags_t;
+
         /** Default constructor.
             Creates a location that has no position. */
         Location();
@@ -45,6 +54,17 @@ namespace game { namespace map {
         /** Get reference.
             \return reference */
         Reference getReference() const;
+
+        /** Get effective reference.
+            If the reference set using set(Reference) controls the position of this Location,
+            returns that; otherwise, returns an unset reference.
+            \return reference */
+        Reference getEffectiveReference() const;
+
+        /** Browse.
+            If this location is controlled by a Reference, browses to the next object of its type.
+            \param flags Flags to choose direction and object subset to iterate through */
+        void browse(BrowseFlags_t flags);
 
         /** Signal: position change.
             Raised whenever set() sets a new position.

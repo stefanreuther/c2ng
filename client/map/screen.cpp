@@ -242,6 +242,7 @@ client::map::Screen::Screen(client::si::UserSide& userSide,
     // Connect signals
     m_locationProxy.sig_locationResult.add(this, &Screen::onLocationResult);
     m_locationProxy.sig_positionChange.add(this, &Screen::onPositionChange);
+    m_locationProxy.sig_browseResult.add(this, &Screen::onBrowseResult);
     m_refListProxy.sig_listChange.add(this, &Screen::onListChange);
     m_refListProxy.sig_finish.add(this, &Screen::onListFinish);
     m_location.sig_positionChange.add(this, &Screen::onLocationChange);
@@ -666,6 +667,14 @@ client::map::Screen::lockObject(game::proxy::LockProxy::Flags_t flags)
     m_location.lockObject(flags);
 }
 
+void
+client::map::Screen::browse(game::map::Location::BrowseFlags_t flags)
+{
+    if (m_location.startJump()) {
+        m_locationProxy.browse(flags);
+    }
+}
+
 bool
 client::map::Screen::handleKeymapKey(util::Key_t key, int prefix)
 {
@@ -739,6 +748,15 @@ client::map::Screen::onPositionChange(game::map::Point pt)
     if (pt != m_location.getPosition()) {
         ++m_locationCycleBreaker;
         m_location.setPosition(pt);
+    }
+}
+
+void
+client::map::Screen::onBrowseResult(game::Reference ref, game::map::Point pt)
+{
+    m_location.setPosition(pt);
+    if (ref.isSet()) {
+        m_location.setFocusedObject(ref);
     }
 }
 

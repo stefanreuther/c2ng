@@ -48,6 +48,23 @@ namespace {
             { positions.push_back(pt); }
     };
 
+    struct BrowseReceiver {
+        Reference ref;
+        Point point;
+        bool ok;
+
+        void onBrowseResult(Reference ref, Point pt)
+            {
+                this->ref = ref;
+                this->point = pt;
+                this->ok = true;
+            }
+
+        BrowseReceiver()
+            : ref(), point(), ok(false)
+            { }
+    };
+
     void prepare(SessionThread& s)
     {
         s.session().setRoot(new game::test::Root(game::HostVersion(game::HostVersion::PHost, MKVERSION(3,2,0))));
@@ -160,3 +177,58 @@ TestGameProxyMapLocationProxy::testReference()
     TS_ASSERT_EQUALS(recv.point, POS);
     TS_ASSERT_EQUALS(recv.ref, Reference(Reference::Ship, ID));
 }
+
+/** Test browsing.
+    A: create session with multiple ships. Call setPosition(Reference). Call browse().
+    E: sig_browseResult callback created. postQueryLocation() answered correctly */
+void
+TestGameProxyMapLocationProxy::testBrowse()
+{
+    // Environment
+    CxxTest::setAbortTestOnFail(true);
+    SessionThread s;
+    prepare(s);
+    for (int i = 1; i < 10; ++i) {
+        addShip(s, i, Point(1000, 1000+i));
+    }
+    SimpleRequestDispatcher disp;
+    MapLocationProxy testee(s.gameSender(), disp);
+
+    // Callbacks
+    ResultReceiver recv;
+    testee.sig_locationResult.add(&recv, &ResultReceiver::onLocationResult);
+
+    PositionReceiver pos;
+    testee.sig_positionChange.add(&pos, &PositionReceiver::onPositionChange);
+
+    BrowseReceiver bro;
+    testee.sig_browseResult.add(&bro, &BrowseReceiver::onBrowseResult);
+
+    // Set position
+    testee.setPosition(Reference(Reference::Ship, 3));
+    while (pos.positions.empty()) {
+        TS_ASSERT(disp.wait(1000));
+    }
+    TS_ASSERT_EQUALS(pos.positions[0], Point(1000, 1003));
+    TS_ASSERT_EQUALS(bro.ok, false);
+
+    // Browse forward
+    pos.positions.clear();
+    testee.browse(game::map::Location::BrowseFlags_t(game::map::Location::Backwards));
+    while (pos.positions.empty() || !bro.ok) {
+        TS_ASSERT(disp.wait(1000));
+    }
+    TS_ASSERT_EQUALS(pos.positions[0], Point(1000, 1002));
+    TS_ASSERT_EQUALS(bro.ok, true);
+    TS_ASSERT_EQUALS(bro.point, Point(1000, 1002));
+    TS_ASSERT_EQUALS(bro.ref, Reference(Reference::Ship, 2));
+
+    // Post query
+    testee.postQueryLocation();
+    while (!recv.ok) {
+        TS_ASSERT(disp.wait(1000));
+    }
+    TS_ASSERT_EQUALS(recv.point, Point(1000, 1002));
+    TS_ASSERT_EQUALS(recv.ref, Reference(Reference::Ship, 2));
+}
+

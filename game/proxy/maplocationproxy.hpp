@@ -7,6 +7,7 @@
 
 #include "afl/base/signal.hpp"
 #include "game/map/configuration.hpp"
+#include "game/map/location.hpp"
 #include "game/reference.hpp"
 #include "game/session.hpp"
 #include "util/requestdispatcher.hpp"
@@ -41,11 +42,23 @@ namespace game { namespace proxy {
             \see game::map::Location::set() */
         void setPosition(game::Reference ref);
 
+        /** Browse from current object.
+            Will respond with sig_browseResult in addition to sig_locationResult.
+            \param flags Flags
+            \see game::map::Location::browse() */
+        void browse(game::map::Location::BrowseFlags_t flags);
+
         /** Location callback.
             Called in response to postQueryLocation().
             \param ref Reference result
             \param pt Point result */
         afl::base::Signal<void(Reference, game::map::Point, game::map::Configuration)> sig_locationResult;
+
+        /** Browse result callback.
+            Called in response to browse().
+            \param ref Reference
+            \param pt Location */
+        afl::base::Signal<void(Reference, game::map::Point)> sig_browseResult;
 
         /** Position change callback.
             Called if the game-side location reports a sig_positionChange. */
@@ -62,6 +75,7 @@ namespace game { namespace proxy {
         int m_numOutstandingRequests;
 
         void emitPositionChange(game::map::Point pt);
+        void emitBrowseResult(Reference ref, game::map::Point pt);
     };
 
 } }

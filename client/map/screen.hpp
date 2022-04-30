@@ -94,6 +94,7 @@ namespace client { namespace map {
         void removeOverlay(Overlay* pOverlay);
 
         void lockObject(game::proxy::LockProxy::Flags_t flags);
+        void browse(game::map::Location::BrowseFlags_t flags);
         bool handleKeymapKey(util::Key_t key, int prefix);
 
         void run(client::si::InputState& in, client::si::OutputState& out);
@@ -151,6 +152,7 @@ namespace client { namespace map {
         void updateCenter();
         void onLocationResult(game::Reference ref, game::map::Point pt, game::map::Configuration config);
         void onPositionChange(game::map::Point pt);
+        void onBrowseResult(game::Reference ref, game::map::Point pt);
         void onListChange(const game::ref::UserList& list);
         void onListFinish();
         void onLocationChange(game::map::Point pt);

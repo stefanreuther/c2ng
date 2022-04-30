@@ -271,6 +271,28 @@ client::map::StarchartOverlay::handleKey(util::Key_t key, int prefix, const Rend
         return true;
      }
 
+     case util::Key_PgDn:
+     case util::Key_PgDn + util::KeyMod_Ctrl:
+     case util::Key_PgDn + util::KeyMod_Shift:
+     case util::Key_PgDn + util::KeyMod_Shift + util::KeyMod_Ctrl:
+     case util::Key_PgUp:
+     case util::Key_PgUp + util::KeyMod_Ctrl:
+     case util::Key_PgUp + util::KeyMod_Shift:
+     case util::Key_PgUp + util::KeyMod_Shift + util::KeyMod_Ctrl: {
+        game::map::Location::BrowseFlags_t flags;
+        if ((key & util::Key_Mask) == util::Key_PgUp) {
+            flags += game::map::Location::Backwards;
+        }
+        if ((key & util::KeyMod_Ctrl) != 0) {
+            flags += game::map::Location::MarkedOnly;
+        }
+        if ((key & util::KeyMod_Shift) == 0) {
+            flags += game::map::Location::PlayedOnly;
+        }
+        m_screen.browse(flags);
+        return true;
+     }
+
      case '+':
         m_screen.mapWidget().zoomIn();
         return true;

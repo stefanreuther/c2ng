@@ -301,6 +301,7 @@ class TestGameProxyMapLocationProxy : public CxxTest::TestSuite {
     void testEmpty();
     void testPoint();
     void testReference();
+    void testBrowse();
 };
 
 class TestGameProxyMapRendererProxy : public CxxTest::TestSuite {

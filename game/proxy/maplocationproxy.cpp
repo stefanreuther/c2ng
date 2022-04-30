@@ -77,6 +77,20 @@ class game::proxy::MapLocationProxy::Trampoline {
             }
         }
 
+    void browse(game::map::Location::BrowseFlags_t flags)
+        {
+            if (game::Game* pGame = m_session.getGame().get()) {
+                m_inhibitPositionChange = true;
+                pGame->cursors().location().browse(flags);
+                m_inhibitPositionChange = false;
+
+                game::map::Point pt;
+                pGame->cursors().location().getPosition(pt);
+                sendPositionChange(pt);
+                m_reply.postRequest(&MapLocationProxy::emitBrowseResult, pGame->cursors().location().getEffectiveReference(), pt);
+            }
+        }
+
  private:
     util::RequestSender<MapLocationProxy> m_reply;
     Session& m_session;
@@ -124,6 +138,13 @@ game::proxy::MapLocationProxy::setPosition(game::map::Point pt)
     m_trampoline.postRequest(&Trampoline::setPosition<game::map::Point>, pt);
 }
 
+void
+game::proxy::MapLocationProxy::browse(game::map::Location::BrowseFlags_t flags)
+{
+    ++m_numOutstandingRequests;
+    m_trampoline.postRequest(&Trampoline::browse, flags);
+}
+
 // Set location to reference.
 void
 game::proxy::MapLocationProxy::setPosition(Reference ref)
@@ -141,4 +162,10 @@ game::proxy::MapLocationProxy::emitPositionChange(game::map::Point pt)
     if (m_numOutstandingRequests == 0) {
         sig_positionChange.raise(pt);
     }
+}
+
+void
+game::proxy::MapLocationProxy::emitBrowseResult(Reference ref, game::map::Point pt)
+{
+    sig_browseResult.raise(ref, pt);
 }
