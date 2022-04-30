@@ -94,6 +94,7 @@ namespace client { namespace map {
         void removeOverlay(Overlay* pOverlay);
 
         void lockObject(game::proxy::LockProxy::Flags_t flags);
+        bool handleKeymapKey(util::Key_t key, int prefix);
 
         void run(client::si::InputState& in, client::si::OutputState& out);
 

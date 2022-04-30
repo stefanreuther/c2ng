@@ -59,9 +59,11 @@ namespace client { namespace map {
         void createMarker(const client::dialogs::NewDrawingInfo& info);
         void startMarkRange();
         void editMarkerTag();
+        void editMarkerComment();
         void startMovingMarker();
         void startDeleting();
         void startDistance();
+        void moveInsideOut();
 
         void setDrawingTagFilter(util::Atom_t tag, String_t tagName);
         void clearDrawingTagFilter();

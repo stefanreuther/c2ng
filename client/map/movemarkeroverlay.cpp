@@ -120,13 +120,21 @@ client::map::MoveMarkerOverlay::onPositionChange(game::map::Point pt)
 void
 client::map::MoveMarkerOverlay::editComment()
 {
-    // ex editMarkerComment
-    afl::string::Translator& tx = translator();
+    editMarkerComment(root(), drawing(), screen().drawingProxy(), translator());
+}
 
-    ui::widgets::InputLine input(255, root());
+
+void
+client::map::editMarkerComment(ui::Root& root,
+                               const game::map::Drawing& marker,
+                               game::proxy::DrawingProxy& proxy,
+                               afl::string::Translator& tx)
+{
+    // ex editMarkerComment
+    ui::widgets::InputLine input(255, root);
     input.setFlag(ui::widgets::InputLine::GameChars, true);
-    input.setText(drawing().getComment());
+    input.setText(marker.getComment());
     if (input.doStandardDialog(tx("Marker Comment"), tx("Enter new comment for this marker:"), tx)) {
-        screen().drawingProxy().setComment(input.getText());
+        proxy.setComment(input.getText());
     }
 }

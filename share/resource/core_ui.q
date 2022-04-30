@@ -158,18 +158,35 @@ EndSub
 % Go to planet here [Shift-F2]
 % @since PCC2 2.40.1
 Sub CCUI.GotoPlanetHere
+  % CC$PlanetAt (sort-of)
   CCUI$GotoPlanet 2, Loc.X, Loc.Y
 EndSub
 
 % Go to starbase here [Shift-F3]
 % @since PCC2 2.40.1
 Sub CCUI.GotoBaseHere
+  % CC$PlanetAt (sort-of)
   CCUI$GotoPlanet 3, Loc.X, Loc.Y
+EndSub
+
+% Go to planet there [Ctrl-F2]
+% @since PCC2 2.40.13
+Sub CCUI.GotoPlanetThere
+  % CC$PlanetAt (sort-of)
+  CCUI$GotoPlanet 2, UI.X, UI.Y
+EndSub
+
+% Go to starbase here [Ctrl-F3]
+% @since PCC2 2.40.13
+Sub CCUI.GotoBaseThere
+  % CC$PlanetAt (sort-of)
+  CCUI$GotoPlanet 3, UI.X, UI.Y
 EndSub
 
 % L, Shift-L, Shift-F1, etc.
 % @since PCC2 2.40.5
 Sub CCUI.ListShips (X, Y, flags)
+  % CC$ListShips
   Local UI.Result
   UI.ListShips X, Y, flags
   If UI.Result
@@ -324,6 +341,19 @@ Sub CCUI.Planet.SetComment
   UI.Input Translate("Enter new comment for this planet:"), Translate("Edit Comment"), 255, "gm30", Comment
   SetComment UI.Result
 EndSub
+
+% Planet comment here [Shift-F9]
+% @since PCC2 2.40.13
+Sub CCUI.Planet.SetCommentAt (x, y)
+  % ex core.q:CC$SetPlanetCommentAt
+  Local UI.Result
+  Local pid = PlanetAt(x, y, True)
+  If pid Then
+    UI.Input Format(Translate("Enter new comment for %s:"), Planet(pid).Name), Translate("Edit Comment"), 255, "gm30", Planet(pid).Comment
+    Call Planet(pid).SetComment UI.Result
+  EndIf
+EndSub
+
 
 % Build or go to base [F8]
 % @since PCC2 2.40.8

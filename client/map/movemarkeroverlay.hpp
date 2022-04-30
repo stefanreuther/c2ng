@@ -35,6 +35,11 @@ namespace client { namespace map {
         afl::base::SignalConnection conn_positionChange;
     };
 
+    void editMarkerComment(ui::Root& root,
+                           const game::map::Drawing& marker,
+                           game::proxy::DrawingProxy& proxy,
+                           afl::string::Translator& tx);
+
 } }
 
 #endif

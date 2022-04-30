@@ -76,6 +76,18 @@ client::map::DrawCircleOverlay::handleKey(util::Key_t key, int prefix, const Ren
         }
         return true;
 
+     case 'g':
+     case 'w':
+        if (prefix >= 0 && prefix <= 20) {
+            int warp = prefix != 0 ? prefix : 9;
+            warp *= warp;
+            if (key == 'g') {
+                warp *= 2;
+            }
+            screen().drawingProxy().setCircleRadius(warp);
+        }
+        return true;
+
      case 'p':
         screen().removeOverlay(this);
         return true;

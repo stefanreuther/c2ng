@@ -308,12 +308,8 @@ bool
 client::map::Screen::handleKey(util::Key_t key, int prefix)
 {
     if (m_widget.handleKey(key, prefix)) {
-        // This dispatches the keys into the overlays
-        return true;
-    } else if (m_keymapKeys.find(key) != m_keymapKeys.end()) {
-        // Keymap
-        // (ex WStandardChartMode::handleEvent, part)
-        executeKeyCommandWait(m_keymapName, key, prefix);
+        // This dispatches the keys into the overlays.
+        // StarchartOverlay handles keymap keys.
         return true;
     } else {
         // Global keys
@@ -668,6 +664,19 @@ void
 client::map::Screen::lockObject(game::proxy::LockProxy::Flags_t flags)
 {
     m_location.lockObject(flags);
+}
+
+bool
+client::map::Screen::handleKeymapKey(util::Key_t key, int prefix)
+{
+    if (m_keymapKeys.find(key) != m_keymapKeys.end()) {
+        // Keymap
+        // (ex WStandardChartMode::handleEvent, part)
+        executeKeyCommandWait(m_keymapName, key, prefix);
+        return true;
+    } else {
+        return false;
+    }
 }
 
 void

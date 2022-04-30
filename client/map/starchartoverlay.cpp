@@ -217,6 +217,12 @@ bool
 client::map::StarchartOverlay::handleKey(util::Key_t key, int prefix, const Renderer& /*ren*/)
 {
     // ex WStandardChartMode::handleEvent
+    // Keymap keys override default keys, but not other modes' keys.
+    if (m_screen.handleKeymapKey(key, prefix)) {
+        return true;
+    }
+
+    // FIXME: remapWheelKey (PCC 2.0.12, #397)
     switch (key) {
      case util::Key_Left:
      case util::Key_Left + util::KeyMod_Shift:
@@ -265,6 +271,14 @@ client::map::StarchartOverlay::handleKey(util::Key_t key, int prefix, const Rend
         return true;
      }
 
+     case '+':
+        m_screen.mapWidget().zoomIn();
+        return true;
+
+     case '-':
+        m_screen.mapWidget().zoomOut();
+        return true;
+
      case 'c':
         editMarkerColor();
         return true;
@@ -293,9 +307,28 @@ client::map::StarchartOverlay::handleKey(util::Key_t key, int prefix, const Rend
         startMovingMarker();
         return true;
 
+     case 'x':
+        moveInsideOut();
+        return true;
+
      case util::Key_Delete:
         startDeleting();
         return true;
+
+     case util::Key_F9:
+     case util::Key_F9 + util::KeyMod_Alt:
+        editMarkerComment();
+        return true;
+
+     default:
+        if ((key & util::KeyMod_Alt) != 0) {
+            game::map::RenderOptions::Options_t opts = game::map::RenderOptions::getOptionFromKey(key & ~(util::KeyMod_Alt | util::KeyMod_Ctrl));
+            if (!opts.empty()) {
+                m_screen.mapWidget().toggleOptions(opts);
+                return true;
+            }
+        }
+        break;
     }
     return false;
 }
@@ -524,6 +557,21 @@ client::map::StarchartOverlay::editMarkerTag()
 }
 
 void
+client::map::StarchartOverlay::editMarkerComment()
+{
+    // ex tryEditMarkerComment
+    game::proxy::DrawingProxy& proxy = m_screen.drawingProxy();
+    Downlink link(m_root, m_translator);
+    proxy.selectMarkerAt(m_location.getPosition());
+    game::proxy::DrawingProxy::Status_t st;
+    proxy.getStatus(link, st);
+    const game::map::Drawing* p = st.get();
+    if (p != 0) {
+        client::map::editMarkerComment(m_root, *p, proxy, m_translator);
+    }
+}
+
+void
 client::map::StarchartOverlay::startMovingMarker()
 {
     game::proxy::DrawingProxy& proxy = m_screen.drawingProxy();
@@ -570,6 +618,37 @@ client::map::StarchartOverlay::startDistance()
 
     // Add mode
     m_screen.setNewOverlay(Screen::PrimaryLayer, new DistanceOverlay(m_screen, m_location, m_location.getPosition(), shipId));
+}
+
+void
+client::map::StarchartOverlay::moveInsideOut()
+{
+    const game::map::Configuration& config = m_location.configuration();
+    if (config.getMode() == game::map::Configuration::Circular) {
+        // Determine location to jump to
+        bool ok;
+        game::map::Point pt = config.getCanonicalLocation(m_location.getPosition());
+        if (pt != m_location.getPosition()) {
+            // Move outside-in
+            ok = true;
+        } else {
+            // Try to move inside-out
+            game::map::Point pt2;
+            if (config.getPointAlias(pt, pt2, 1, true)) {
+                pt = pt2;
+                ok = true;
+            } else {
+                ok = false;
+            }
+        }
+
+        // Execute the jump
+        if (ok) {
+            if (m_location.startJump()) {
+                m_location.setPosition(pt);
+            }
+        }
+    }
 }
 
 void
