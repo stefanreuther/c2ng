@@ -2249,3 +2249,12 @@ FILES_testsuite = u/t_game_map_movementcontroller.cpp \
 TYPE_testsuite = testapp
 DEPEND_testsuite = serverlib guilib gamelib afl
 PROJ_AUTO += testsuite:u/*.cpp,u/*.hpp
+
+# List text files here so they appear in 'proj9 grep'
+TARGETS += extra
+FILES_extra = share/specs/utildata.ini share/specs/names.cc \
+    share/specs/mission.cc share/specs/msgparse.ini share/specs/hullfunc.cc \
+    share/specs/hostver.ini share/specs/expr.cc share/resource/core_ui.q \
+    share/resource/core_tiles.q share/resource/core.q \
+    share/resource/core_game.q
+TYPE_extra = none
