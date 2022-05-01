@@ -8,6 +8,7 @@
 #include "afl/string/translator.hpp"
 #include "client/dialogs/newdrawing.hpp"
 #include "client/map/overlay.hpp"
+#include "game/map/rangeset.hpp"
 #include "ui/root.hpp"
 
 namespace client { namespace map {
@@ -46,6 +47,8 @@ namespace client { namespace map {
         gfx::Rectangle m_cursorArea;
         int m_cursorPhase;
 
+        std::auto_ptr<game::map::RangeSet> m_visRange;
+
         afl::base::SignalConnection conn_objectChange;
         afl::base::SignalConnection conn_positionChange;
         afl::base::SignalConnection conn_effectTimer;
@@ -63,6 +66,7 @@ namespace client { namespace map {
         void startMovingMarker();
         void startDeleting();
         void startDistance();
+        void editVisibilityRange();
         void moveInsideOut();
 
         void setDrawingTagFilter(util::Atom_t tag, String_t tagName);

@@ -12,9 +12,11 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/map/movementcontroller.cpp \
-    game/map/movementcontroller.hpp game/proxy/costsummaryadaptor.cpp \
-    game/proxy/costsummaryadaptor.hpp game/interface/costsummarycontext.cpp \
+FILES_gamelib = game/map/visibilityrange.cpp game/map/visibilityrange.hpp \
+    game/proxy/visibilityrangeproxy.cpp game/proxy/visibilityrangeproxy.hpp \
+    game/map/movementcontroller.cpp game/map/movementcontroller.hpp \
+    game/proxy/costsummaryadaptor.cpp game/proxy/costsummaryadaptor.hpp \
+    game/interface/costsummarycontext.cpp \
     game/interface/costsummarycontext.hpp game/proxy/exportproxy.cpp \
     game/proxy/exportadaptor.hpp game/proxy/exportproxy.hpp \
     game/map/info/nulllinkbuilder.cpp game/map/info/nulllinkbuilder.hpp \
@@ -740,12 +742,13 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = ui/icons/balloon.cpp ui/icons/balloon.hpp \
-    client/widgets/exportfieldlist.cpp client/widgets/exportfieldlist.hpp \
-    client/dialogs/export.cpp client/dialogs/export.hpp \
-    client/dialogs/labelconfig.cpp client/dialogs/labelconfig.hpp \
-    client/dialogs/choosehull.cpp client/dialogs/choosehull.hpp \
-    client/dialogs/shipcostcalculator.cpp \
+FILES_guilib = client/dialogs/visibilityrange.cpp \
+    client/dialogs/visibilityrange.hpp ui/icons/balloon.cpp \
+    ui/icons/balloon.hpp client/widgets/exportfieldlist.cpp \
+    client/widgets/exportfieldlist.hpp client/dialogs/export.cpp \
+    client/dialogs/export.hpp client/dialogs/labelconfig.cpp \
+    client/dialogs/labelconfig.hpp client/dialogs/choosehull.cpp \
+    client/dialogs/choosehull.hpp client/dialogs/shipcostcalculator.cpp \
     client/dialogs/shipcostcalculator.hpp client/dialogs/buildshiporder.cpp \
     client/dialogs/buildshiporder.hpp client/dialogs/buildshipmain.cpp \
     client/dialogs/buildshipmain.hpp client/dialogs/scriptcommanddialog.cpp \
@@ -1676,7 +1679,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_map_movementcontroller.cpp \
+FILES_testsuite = u/t_game_proxy_visibilityrangeproxy.cpp \
+    u/t_game_map_visibilityrange.cpp u/t_game_map_movementcontroller.cpp \
     u/t_client_map_location.cpp u/t_game_proxy_costsummaryadaptor.cpp \
     u/t_game_interface_costsummarycontext.cpp u/t_game_proxy_exportproxy.cpp \
     u/t_game_map_info_nulllinkbuilder.cpp \

@@ -636,4 +636,10 @@ class TestGameProxyVcrOverviewProxy : public CxxTest::TestSuite {
     void testBuildScores();
 };
 
+class TestGameProxyVisibilityRangeProxy : public CxxTest::TestSuite {
+ public:
+    void testSequence();
+    void testEmpty();
+};
+
 #endif

@@ -526,4 +526,12 @@ class TestGameMapViewport : public CxxTest::TestSuite {
     void testRectangle();
 };
 
+class TestGameMapVisibilityRange : public CxxTest::TestSuite {
+ public:
+    void testToString();
+    void testGetVisibilityRangeSettings();
+    void testBuildVisibilityRange();
+    void testLoadSave();
+};
+
 #endif

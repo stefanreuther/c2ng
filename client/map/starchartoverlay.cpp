@@ -6,6 +6,7 @@
 #include "client/map/starchartoverlay.hpp"
 #include "afl/string/format.hpp"
 #include "client/dialogs/newdrawingtag.hpp"
+#include "client/dialogs/visibilityrange.hpp"
 #include "client/downlink.hpp"
 #include "client/map/callback.hpp"
 #include "client/map/deletedrawingoverlay.hpp"
@@ -97,8 +98,43 @@ client::map::StarchartOverlay::StarchartOverlay(ui::Root& root, afl::string::Tra
 
 // Overlay:
 void
-client::map::StarchartOverlay::drawBefore(gfx::Canvas& /*can*/, const Renderer& /*ren*/)
+client::map::StarchartOverlay::drawBefore(gfx::Canvas& can, const Renderer& ren)
 {
+    // ex WStandardChartMode::drawBelow
+    // Draw ranges
+    if (m_visRange.get() != 0) {
+        gfx::Context<uint8_t> ctx(can, m_root.colorScheme());
+        ctx.setColor(ui::Color_Shield + 4);
+        ctx.fillPattern() = gfx::FillPattern::GRAY50;
+
+        // Make sure the fill pattern moves with scrolling.
+        // This places the GRAY50_FILL just opposite to the web mine field filling
+        // (see renderer.cpp, setMineFillStyle)
+        gfx::Point adj(ren.scale(game::map::Point(0, 0)));
+        if (((adj.getX() + adj.getY()) & 1) == 0) {
+            ctx.fillPattern().shiftUp(1);
+        }
+
+        drawBar(ctx, ren.getExtent());
+
+        ctx.fillPattern() = gfx::FillPattern::SOLID;
+        ctx.setColor(ui::Color_Black);
+
+        const game::map::Configuration& conf = m_location.configuration();
+        for (int img = 0, nimg = conf.getNumRectangularImages(); img < nimg; ++img) {
+            // Check whether this map image is visible
+            gfx::Rectangle a;
+            a.include(ren.scale(conf.getSimplePointAlias(m_visRange->getMin(), img)));
+            a.include(ren.scale(conf.getSimplePointAlias(m_visRange->getMax(), img)));
+            a.intersect(ren.getExtent());
+            if (a.exists()) {
+                // Yes, exists! Draw ranges.
+                for (game::map::RangeSet::Iterator_t it = m_visRange->begin(), e = m_visRange->end(); it != e; ++it) {
+                    drawFilledCircle(ctx, ren.scale(conf.getSimplePointAlias(it->first, img)), ren.scale(it->second));
+                }
+            }
+        }
+    }
 }
 
 void
@@ -319,6 +355,10 @@ client::map::StarchartOverlay::handleKey(util::Key_t key, int prefix, const Rend
 
      case 'r':
         startMarkRange();
+        return true;
+
+     case 'r' + util::KeyMod_Ctrl:
+        editVisibilityRange();
         return true;
 
      case 't':
@@ -640,6 +680,17 @@ client::map::StarchartOverlay::startDistance()
 
     // Add mode
     m_screen.setNewOverlay(Screen::PrimaryLayer, new DistanceOverlay(m_screen, m_location, m_location.getPosition(), shipId));
+}
+
+void
+client::map::StarchartOverlay::editVisibilityRange()
+{
+    if (m_visRange.get() != 0) {
+        m_visRange.reset();
+    } else {
+        m_visRange = client::dialogs::editVisibilityRange(m_root, m_screen.gameSender(), m_translator);
+    }
+    requestRedraw();
 }
 
 void
