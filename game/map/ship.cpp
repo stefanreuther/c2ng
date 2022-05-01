@@ -352,9 +352,12 @@ game::map::Ship::combinedCheck1(Universe& univ, PlayerSet_t availablePlayers, in
     }
 
     // If ship claims to exists, but we don't have current data, it's destroyed. Remove it.
+    // (But don't upgrade a non-existant ship, e.g. explosion-only, to HistoryShip.)
     int owner;
-    if ((getOwner(owner) && availablePlayers.contains(owner) && m_shipSource.empty())
-        || m_currentData.damage.orElse(0) > 150)
+    if (getOwner(owner)
+        && owner != 0
+        && ((availablePlayers.contains(owner) && m_shipSource.empty())
+            || m_currentData.damage.orElse(0) > 150))
     {
         // Clear current data
         m_currentData.x = IntegerProperty_t();
