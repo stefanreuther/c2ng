@@ -39,6 +39,12 @@ namespace {
     /* Effect timer interval. 20 ms = 50 Hz */
     const uint32_t EFFECT_TIMER_INTERVAL = 20;
 
+    bool isShortMovement(gfx::Point pt, int limit)
+    {
+        return util::squareInteger(pt.getX()) + util::squareInteger(pt.getY()) <= util::squareInteger(limit);
+    }
+
+
     /*
      *  ContextProvider implementation for starchart: create context according to a game::Reference
      *  FIXME: should this be in a public place?
@@ -220,6 +226,8 @@ client::map::Screen::Screen(client::si::UserSide& userSide,
       m_location(*this, userSide.mainLog()),
       m_locationCycleBreaker(0),
       m_movement(),
+      m_pendingMovement(),
+      m_mouseStickyness(5),
       m_locationProxy(gameSender, root.engine().dispatcher()),
       m_refListProxy(gameSender, root.engine().dispatcher()),
       m_keymapProxy(gameSender, root.engine().dispatcher()),
@@ -308,6 +316,11 @@ client::map::Screen::getLayoutInfo() const
 bool
 client::map::Screen::handleKey(util::Key_t key, int prefix)
 {
+    // Key reset pending movement/sticky mouse
+    if (util::classifyKey(key) != util::ModifierKey) {
+        m_pendingMovement = gfx::Point();
+    }
+
     if (m_widget.handleKey(key, prefix)) {
         // This dispatches the keys into the overlays.
         // StarchartOverlay handles keymap keys.
@@ -348,8 +361,10 @@ client::map::Screen::handleMouseRelative(gfx::Point pt, MouseButtons_t pressedBu
         if (m_overlays[MessageLayer].get() != 0) {
             setNewOverlay(MessageLayer, 0);
         }
+        m_pendingMovement = gfx::Point();
     }
 
+    // Perform locking
     if (pressedButtons.contains(LeftButton)) {
         LockProxy::Flags_t flags;
         flags += LockProxy::Left;
@@ -357,17 +372,32 @@ client::map::Screen::handleMouseRelative(gfx::Point pt, MouseButtons_t pressedBu
             flags += LockProxy::MarkedOnly;
         }
         lockObject(flags);
-    }
-    if (pressedButtons.contains(RightButton)) {
+    } else if (pressedButtons.contains(RightButton)) {
         LockProxy::Flags_t flags;
         if (pressedButtons.contains(CtrlKey)) {
             flags += LockProxy::MarkedOnly;
         }
         lockObject(flags);
+    } else {
+        // Not locking
     }
 
-    // FIXME: determine relative location of this and the locking above
-    m_location.moveRelative(m_widget.renderer().unscale(pt.getX()), -m_widget.renderer().unscale(pt.getY()));
+    // Perform movement
+    m_pendingMovement += pt;
+    game::map::Point movement(+m_widget.renderer().unscale(m_pendingMovement.getX()),
+                              -m_widget.renderer().unscale(m_pendingMovement.getY()));
+
+    if (m_location.getNumObjects() != 0 && isShortMovement(m_pendingMovement, m_mouseStickyness)) {
+        // Sticky mouse: cancel movement; keep accumulating
+        movement = game::map::Point();
+    }
+
+    if (movement != game::map::Point()) {
+        // Perform movement and reset accumulator.
+        // If accumulated movement did not translate into a move (by sticky-mouse or high zoom factor), keep accumulating.
+        m_location.moveRelative(movement.getX(), movement.getY());
+        m_pendingMovement = gfx::Point();
+    }
 
     return true;
 }

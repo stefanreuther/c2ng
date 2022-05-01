@@ -127,6 +127,8 @@ namespace client { namespace map {
         int m_locationCycleBreaker;
 
         game::map::MovementController m_movement;
+        gfx::Point m_pendingMovement;
+        int m_mouseStickyness;
 
         game::proxy::MapLocationProxy m_locationProxy;
         game::proxy::ReferenceListProxy m_refListProxy;
