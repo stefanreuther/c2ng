@@ -556,7 +556,9 @@ client::screens::ControlScreen::ControlScreen(client::si::UserSide& us, int nr, 
       m_taskKind(interpreter::Process::pkDefault),
       m_reply(us.root().engine().dispatcher(), *this),
       m_proprietor(us.gameSender().makeTemporary(new ProprietorFromSession(m_state, m_reply.getSender())))
-{ }
+{
+    m_mapWidget.setMode(client::map::Widget::ScannerMode);
+}
 
 client::screens::ControlScreen&
 client::screens::ControlScreen::withTaskEditor(interpreter::Process::ProcessKind kind)

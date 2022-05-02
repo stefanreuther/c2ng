@@ -17,6 +17,11 @@ namespace client { namespace map {
 
     class Widget : public ui::SimpleWidget, public Callback {
      public:
+        enum Mode {
+            NormalMode,
+            ScannerMode
+        };
+
         Widget(util::RequestSender<game::Session> gameSender, ui::Root& root, gfx::Point preferredSize);
         ~Widget();
 
@@ -34,6 +39,7 @@ namespace client { namespace map {
         virtual void requestRedraw();
         virtual void requestRedraw(gfx::Rectangle& area);
 
+        void setMode(Mode m);
         void addOverlay(Overlay& over);
         void setZoomToInclude(game::map::Point pt);
         void zoomIn();
@@ -46,15 +52,19 @@ namespace client { namespace map {
         const Renderer& renderer() const;
 
         ui::Root& root();
-        
+
      private:
         void onUpdate(afl::base::Ptr<game::map::RenderList> renderList);
         void maybeRequestNewRange();
+        void updateModeConfiguration(bool force);
 
         Renderer m_renderer;
         game::proxy::MapRendererProxy m_proxy;
         ui::Root& m_root;
         gfx::Point m_preferredSize;
+
+        Mode m_mode;
+        game::map::RenderOptions::Area m_currentConfigurationArea;
 
         game::map::Point m_min;
         game::map::Point m_max;

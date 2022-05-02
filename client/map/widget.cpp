@@ -12,11 +12,14 @@ client::map::Widget::Widget(util::RequestSender<game::Session> gameSender, ui::R
       m_proxy(gameSender, root.engine().dispatcher()),
       m_root(root),
       m_preferredSize(preferredSize),
+      m_mode(NormalMode),
+      m_currentConfigurationArea(),
       m_min(),
       m_max(),
       m_overlays()
 {
     m_proxy.sig_update.add(this, &Widget::onUpdate);
+    updateModeConfiguration(true);
 }
 
 client::map::Widget::~Widget()
@@ -33,7 +36,7 @@ void
 client::map::Widget::setCenter(game::map::Point pt)
 {
     // ex WChartWidget::setCenterPosition
-    // FIXME: isValid 
+    // FIXME: isValid
     m_renderer.setCenter(pt);
     maybeRequestNewRange();
     requestRedraw();
@@ -134,6 +137,28 @@ client::map::Widget::maybeRequestNewRange()
 }
 
 void
+client::map::Widget::updateModeConfiguration(bool force)
+{
+    game::map::RenderOptions::Area area = game::map::RenderOptions::Normal;
+    switch (m_mode) {
+     case NormalMode:
+        area = (m_renderer.scale(100) < 100
+                ? game::map::RenderOptions::Small
+                : game::map::RenderOptions::Normal);
+        break;
+
+     case ScannerMode:
+        area = game::map::RenderOptions::Scanner;
+        break;
+    }
+
+    if (area != m_currentConfigurationArea || force) {
+        m_currentConfigurationArea = area;
+        m_proxy.setConfiguration(area);
+    }
+}
+
+void
 client::map::Widget::removeOverlay(Overlay& over)
 {
     std::vector<Overlay*>::iterator it = std::find(m_overlays.begin(), m_overlays.end(), &over);
@@ -146,13 +171,20 @@ client::map::Widget::removeOverlay(Overlay& over)
 void
 client::map::Widget::requestRedraw()
 {
-    SimpleWidget::requestRedraw();    
+    SimpleWidget::requestRedraw();
 }
 
 void
 client::map::Widget::requestRedraw(gfx::Rectangle& area)
 {
     SimpleWidget::requestRedraw(area);
+}
+
+void
+client::map::Widget::setMode(Mode mode)
+{
+    m_mode = mode;
+    updateModeConfiguration(false);
 }
 
 void
@@ -169,6 +201,7 @@ client::map::Widget::setZoomToInclude(game::map::Point pt)
     while (!getExtent().contains(m_renderer.scale(pt)) && m_renderer.zoomOut()) {
         // nix
     }
+    updateModeConfiguration(false);
     maybeRequestNewRange();
     requestRedraw();
 }
@@ -178,6 +211,7 @@ client::map::Widget::zoomIn()
 {
     // ex WChartWidget::zoomIn
     m_renderer.zoomIn();
+    updateModeConfiguration(false);
     maybeRequestNewRange();
     requestRedraw();
 }
@@ -187,6 +221,7 @@ client::map::Widget::zoomOut()
 {
     // ex WChartWidget::zoomOut
     m_renderer.zoomOut();
+    updateModeConfiguration(false);
     maybeRequestNewRange();
     requestRedraw();
 }
@@ -195,6 +230,7 @@ void
 client::map::Widget::setZoom(int mult, int divi)
 {
     m_renderer.setZoom(mult, divi);
+    updateModeConfiguration(false);
     maybeRequestNewRange();
     requestRedraw();
 }
