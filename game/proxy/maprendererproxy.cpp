@@ -25,6 +25,7 @@ class game::proxy::MapRendererProxy::Trampoline {
 
     void attachTurn();
     void onViewpointTurnChange();
+    void onPreferencesChange();
     void onViewportUpdate();
 
     void setConfiguration(RenderOptions::Area area);
@@ -46,6 +47,7 @@ class game::proxy::MapRendererProxy::Trampoline {
     std::auto_ptr<Renderer> m_renderer;
     RenderOptions::Area m_area;
     afl::base::SignalConnection conn_viewpointTurnChange;
+    afl::base::SignalConnection conn_prefChange;
 };
 
 game::proxy::MapRendererProxy::Trampoline::Trampoline(game::Session& session, const util::RequestSender<MapRendererProxy>& reply)
@@ -58,7 +60,8 @@ game::proxy::MapRendererProxy::Trampoline::Trampoline(game::Session& session, co
       m_viewport(),
       m_renderer(),
       m_area(RenderOptions::Normal),
-      conn_viewpointTurnChange()
+      conn_viewpointTurnChange(),
+      conn_prefChange()
 {
     // Get pointer to game to keep it alive
     m_game = session.getGame();
@@ -68,6 +71,9 @@ game::proxy::MapRendererProxy::Trampoline::Trampoline(game::Session& session, co
         conn_viewpointTurnChange = m_game->sig_viewpointTurnChange.add(this, &Trampoline::onViewpointTurnChange);
         m_turn = m_game->getViewpointTurn();
         attachTurn();
+    }
+    if (m_root.get() != 0) {
+        conn_prefChange = m_root->userConfiguration().sig_change.add(this, &Trampoline::onPreferencesChange);
     }
 }
 
@@ -102,6 +108,12 @@ game::proxy::MapRendererProxy::Trampoline::onViewpointTurnChange()
         m_turn = m_game->getViewpointTurn();
         attachTurn();
     }
+}
+
+void
+game::proxy::MapRendererProxy::Trampoline::onPreferencesChange()
+{
+    loadOptions();
 }
 
 void

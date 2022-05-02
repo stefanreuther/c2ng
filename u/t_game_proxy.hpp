@@ -311,6 +311,7 @@ class TestGameProxyMapRendererProxy : public CxxTest::TestSuite {
     void testTagFilter();
     void testToggleOptions();
     void testSetConfiguration();
+    void testModifyPreferences();
 };
 
 class TestGameProxyMinefieldProxy : public CxxTest::TestSuite {

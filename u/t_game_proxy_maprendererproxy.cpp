@@ -259,7 +259,7 @@ TestGameProxyMapRendererProxy::testSetConfiguration()
     game::config::UserConfiguration& pref = h.session().getRoot()->userConfiguration();
     pref.setOption("Chart.Normal.Show", "ion", game::config::ConfigurationOption::Game);
     pref.setOption("Chart.Small.Show", "drawings", game::config::ConfigurationOption::Game);
-    
+
     MapRendererProxy testee(h.gameSender(), ind);
     ResultReceiver recv(testee);
 
@@ -282,6 +282,56 @@ TestGameProxyMapRendererProxy::testSetConfiguration()
     ind.processQueue();
 
     // Verify drawings shown
+    {
+        TS_ASSERT(recv.hasResult());
+        MarkerCollector coll;
+        recv.replay(coll);
+        TS_ASSERT_EQUALS(coll.getColors(), MarkerCollector::Colors_t() + 7);
+    }
+}
+
+/** Test preferences modification.
+    A: create session with some markers. Create and configure MapRendererProxy. Modify configuration outside the MapRendererProxy.
+    E: callback generated with correct content */
+void
+TestGameProxyMapRendererProxy::testModifyPreferences()
+{
+    SessionThread h;
+    WaitIndicator ind;
+    prepare(h);
+    addMarker(h, 1010, 1010, 7, 1);
+    MapRendererProxy testee(h.gameSender(), ind);
+    ResultReceiver recv(testee);
+
+    // Toggle
+    testee.setRange(Point(1000, 1000), Point(2000, 2000));
+    testee.toggleOptions(game::map::RenderOptions::Options_t(game::map::RenderOptions::ShowDrawings));
+    h.sync();
+    ind.processQueue();
+
+    // Verify drawings disabled
+    {
+        TS_ASSERT(recv.hasResult());
+        MarkerCollector coll;
+        recv.replay(coll);
+        TS_ASSERT_EQUALS(coll.getColors(), MarkerCollector::Colors_t());
+    }
+
+    // Enable by modifying preferences
+    class Task : public util::Request<game::Session> {
+     public:
+        virtual void handle(game::Session& s)
+            {
+                game::config::UserConfiguration& pref = s.getRoot()->userConfiguration();
+                pref.setOption("Chart.Normal.Show", "drawings", game::config::ConfigurationOption::Game);
+                pref.notifyListeners();
+            }
+    };
+    h.gameSender().postNewRequest(new Task());
+    h.sync();
+    ind.processQueue();
+
+    // Verify filter inactive
     {
         TS_ASSERT(recv.hasResult());
         MarkerCollector coll;
