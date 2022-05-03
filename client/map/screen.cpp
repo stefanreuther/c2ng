@@ -15,6 +15,7 @@
 #include "client/tiles/tilefactory.hpp"
 #include "client/widgets/keymapwidget.hpp"
 #include "client/widgets/referencelistbox.hpp"
+#include "game/config/userconfiguration.hpp"
 #include "game/game.hpp"
 #include "game/interface/contextprovider.hpp"
 #include "game/interface/planetcontext.hpp"
@@ -31,6 +32,7 @@
 #include "util/math.hpp"
 #include "util/unicodechars.hpp"
 
+using game::config::UserConfiguration;
 using game::proxy::LockProxy;
 
 namespace {
@@ -43,6 +45,13 @@ namespace {
     {
         return util::squareInteger(pt.getX()) + util::squareInteger(pt.getY()) <= util::squareInteger(limit);
     }
+
+    /* Configuration proxy Ids */
+    enum {
+        IdMouseStickiness,
+        IdMouseWheelMode,
+        IdAnimThreshold
+    };
 
 
     /*
@@ -228,12 +237,14 @@ client::map::Screen::Screen(client::si::UserSide& userSide,
       m_movement(),
       m_pendingMovement(),
       m_mouseStickyness(5),
+      m_mouseWheelMode(UserConfiguration::WheelZoom),
       m_locationProxy(gameSender, root.engine().dispatcher()),
       m_refListProxy(gameSender, root.engine().dispatcher()),
       m_keymapProxy(gameSender, root.engine().dispatcher()),
       m_observerProxy(gameSender),
       m_drawingProxy(gameSender, root.engine().dispatcher()),
       m_lockProxy(gameSender, root.engine().dispatcher()),
+      m_configProxy(gameSender, root.engine().dispatcher()),
       m_propertyProxy(gameSender.makeTemporary(new PropertiesFromSession(m_sharedState))),
       m_refList(),
       m_currentObject(),
@@ -259,7 +270,13 @@ client::map::Screen::Screen(client::si::UserSide& userSide,
     m_lockProxy.sig_result.add(this, &Screen::onLockResult);
     m_effectTimer->sig_fire.add(this, &Screen::onEffectTimer);
     m_effectTimer->setInterval(EFFECT_TIMER_INTERVAL);
+    m_configProxy.sig_intOptionChange.add(this, &Screen::onConfigChange);
     setColorScheme(*this);
+
+    // Request configuration
+    m_configProxy.observeOption(IdMouseStickiness, UserConfiguration::ChartMouseStickiness);
+    m_configProxy.observeOption(IdMouseWheelMode,  UserConfiguration::ChartWheel);
+    m_configProxy.observeOption(IdAnimThreshold,   UserConfiguration::ChartAnimThreshold);
 
     // Initialize
     setContextFromObject();
@@ -718,6 +735,12 @@ client::map::Screen::handleKeymapKey(util::Key_t key, int prefix)
     }
 }
 
+int
+client::map::Screen::getMouseWheelMode() const
+{
+    return m_mouseWheelMode;
+}
+
 void
 client::map::Screen::run(client::si::InputState& in, client::si::OutputState& out)
 {
@@ -856,6 +879,26 @@ client::map::Screen::onEffectTimer()
     updateCenter();
     sig_effectTimer.raise();
     m_effectTimer->setInterval(EFFECT_TIMER_INTERVAL);
+}
+
+void
+client::map::Screen::onConfigChange(int id, int32_t value)
+{
+    switch (id) {
+     case IdMouseStickiness:
+        if (value >= 0 && value <= 1000) {
+            m_mouseStickyness = value;
+        }
+        break;
+
+     case IdMouseWheelMode:
+        m_mouseWheelMode = value;
+        break;
+
+     case IdAnimThreshold:
+        m_movement.setAnimationThreshold(value);
+        break;
+    }
 }
 
 void

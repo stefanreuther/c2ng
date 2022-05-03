@@ -82,10 +82,17 @@ namespace game { namespace config {
     const IntegerOptionDescriptor UserConfiguration::Tax_PredictRelative  = { "Tax.PredictRelative", &BooleanValueParser::instance };
 
     // Chart
+    const IntegerOptionDescriptor UserConfiguration::ChartAnimThreshold    = { "Chart.AnimThreshold", &IntegerValueParser::instance };
+    const IntegerOptionDescriptor UserConfiguration::ChartMouseStickiness  = { "Chart.MouseStickiness", &IntegerValueParser::instance };
+    const IntegerOptionDescriptor UserConfiguration::ChartScannerWarpWells = { "Chart.Scanner.WarpWells", &BooleanValueParser::instance };
+
+    // Order of options must agree with enum WheelMode in header
+    namespace { EnumValueParser parse_chartwheel("zoom,browse,page"); }
+    const IntegerOptionDescriptor UserConfiguration::ChartWheel = { "Chart.Wheel", &parse_chartwheel };
+
     // Order of bits must agree with enum RenderOptions::Option.
     // Order of options must agree with RenderOptions::Area.
     namespace { BitsetValueParser parse_chartopts("ion,mine,ufos,sectors,borders,drawings,selection,labels,trails,shipdots,warpwells,messages"); }
-    const IntegerOptionDescriptor UserConfiguration::ChartScannerWarpWells = { "Chart.Scanner.WarpWells", &BooleanValueParser::instance };
     const IntegerOptionDescriptor UserConfiguration::ChartRenderOptions[3][2] = {
         // Small
         { { "Chart.Small.Show", &parse_chartopts, },
@@ -174,9 +181,6 @@ game::config::UserConfiguration::setDefaultValues()
     //       SoundReverse(*this, "Sound.Reverse", ValueBoolParser::instance),
     //       SoundStereo(*this, "Sound.Stereo", ValueBoolParser::instance),
 
-    //       ChartAnimThreshold(*this, "Chart.AnimThreshold", ValueIntParser::instance),
-    //       ChartMouseStickiness(*this, "Chart.MouseStickiness", ValueIntParser::instance),
-
     // ConfigStringOption opt_UnpackSource  (getUserPreferences(), "Unpack.Source");    // FIXME: not implemented in PCC2
 
     //     CollapseOldMessages.set(false);
@@ -190,9 +194,6 @@ game::config::UserConfiguration::setDefaultValues()
     //     SoundReverse.set(false);
     //     SoundStereo.set(true);
 
-    //     ChartAnimThreshold.set(11);
-    //     ChartMouseStickiness.set(5);
-
     // Game options are not for editing by user
 
     // Display
@@ -201,7 +202,10 @@ game::config::UserConfiguration::setDefaultValues()
     me[Tax_PredictRelative].set(0);
 
     // Starchart
+    me[ChartAnimThreshold].set(11);
+    me[ChartMouseStickiness].set(5);
     me[ChartScannerWarpWells].set(0);
+    me[ChartWheel].set(0);
     me[ChartRenderOptions[RenderOptions::Small  ][0]].set(static_cast<int32_t>(RenderOptions::defaults().toInteger()));
     me[ChartRenderOptions[RenderOptions::Small  ][1]].set(static_cast<int32_t>((RenderOptions::defaults() & RenderOptions::tristate()).toInteger()));
     me[ChartRenderOptions[RenderOptions::Normal ][0]].set(static_cast<int32_t>(RenderOptions::defaults().toInteger()));

@@ -13,6 +13,7 @@
 #include "client/si/outputstate.hpp"
 #include "game/map/movementcontroller.hpp"
 #include "game/map/point.hpp"
+#include "game/proxy/configurationobserverproxy.hpp"
 #include "game/proxy/drawingproxy.hpp"
 #include "game/proxy/keymapproxy.hpp"
 #include "game/proxy/lockproxy.hpp"
@@ -96,6 +97,7 @@ namespace client { namespace map {
         void lockObject(game::proxy::LockProxy::Flags_t flags);
         void browse(game::map::Location::BrowseFlags_t flags);
         bool handleKeymapKey(util::Key_t key, int prefix);
+        int getMouseWheelMode() const;
 
         void run(client::si::InputState& in, client::si::OutputState& out);
 
@@ -129,6 +131,7 @@ namespace client { namespace map {
         game::map::MovementController m_movement;
         gfx::Point m_pendingMovement;
         int m_mouseStickyness;
+        int m_mouseWheelMode;
 
         game::proxy::MapLocationProxy m_locationProxy;
         game::proxy::ReferenceListProxy m_refListProxy;
@@ -136,6 +139,7 @@ namespace client { namespace map {
         game::proxy::ReferenceObserverProxy m_observerProxy;
         game::proxy::DrawingProxy m_drawingProxy;
         game::proxy::LockProxy m_lockProxy;
+        game::proxy::ConfigurationObserverProxy m_configProxy;
 
         util::RequestSender<Properties> m_propertyProxy;
 
@@ -161,6 +165,7 @@ namespace client { namespace map {
         void onObjectChanged(game::Reference ref);
         void onLockResult(game::map::Point pt);
         void onEffectTimer();
+        void onConfigChange(int id, int32_t value);
 
         void setContextFromObject();
         void setKeymapName(const String_t& name);

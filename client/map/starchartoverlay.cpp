@@ -22,6 +22,7 @@
 #include "client/widgets/helpwidget.hpp"
 #include "client/widgets/markercolorselector.hpp"
 #include "client/widgets/markerkindselector.hpp"
+#include "game/config/userconfiguration.hpp"
 #include "gfx/complex.hpp"
 #include "gfx/context.hpp"
 #include "ui/draw.hpp"
@@ -36,6 +37,7 @@
 #include "util/translation.hpp"
 
 using game::proxy::LockProxy;
+using game::config::UserConfiguration;
 
 namespace {
     /* What distance is considered "near" for drawings? */
@@ -53,6 +55,33 @@ namespace {
             : (key & util::KeyMod_Ctrl) != 0
             ? 100
             : 10;
+    }
+
+    /* Remap vk_WheelDown, vk_WheelUp according to user configuration. */
+    util::Key_t remapWheelKey(int mode, util::Key_t key)
+    {
+        util::Key_t ctrlMod = (key & util::KeyMod_Ctrl);
+        switch (key & ~util::KeyMod_Ctrl) {
+         case util::Key_WheelDown:
+            switch (mode) {
+             case UserConfiguration::WheelZoom:   return ctrlMod + '-';
+             case UserConfiguration::WheelBrowse: return ctrlMod + util::Key_Tab;
+             case UserConfiguration::WheelPage:   return ctrlMod + util::Key_PgDn;
+            }
+            break;
+
+         case util::Key_WheelUp:
+            switch (mode) {
+             case UserConfiguration::WheelZoom:   return ctrlMod + '+';
+             case UserConfiguration::WheelBrowse: return ctrlMod + util::KeyMod_Shift + util::Key_Tab;
+             case UserConfiguration::WheelPage:   return ctrlMod + util::Key_PgUp;
+            }
+            break;
+
+         default:
+            break;
+        }
+        return key;
     }
 
 
@@ -258,8 +287,7 @@ client::map::StarchartOverlay::handleKey(util::Key_t key, int prefix, const Rend
         return true;
     }
 
-    // FIXME: remapWheelKey (PCC 2.0.12, #397)
-    switch (key) {
+    switch (remapWheelKey(m_screen.getMouseWheelMode(), key)) {
      case util::Key_Left:
      case util::Key_Left + util::KeyMod_Shift:
      case util::Key_Left + util::KeyMod_Ctrl:

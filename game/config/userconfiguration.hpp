@@ -20,6 +20,13 @@ namespace game { namespace config {
      public:
         static const int NUM_CANNED_MARKERS = 10;
 
+        /** Values for option ChartWheel. */
+        enum WheelMode {
+            WheelZoom,          ///< Zoom in/out. ex cw_Zoom
+            WheelBrowse,        ///< Browse through list. ex cw_Tab
+            WheelPage           ///< Page through objects. ex cw_Page
+        };
+
         UserConfiguration();
         ~UserConfiguration();
 
@@ -93,7 +100,10 @@ namespace game { namespace config {
 
         // Starchart
         // More chart options in game::map::Configuration, those are maintained by session setup and need not be here
+        static const IntegerOptionDescriptor ChartAnimThreshold;
+        static const IntegerOptionDescriptor ChartMouseStickiness;
         static const IntegerOptionDescriptor ChartScannerWarpWells;
+        static const IntegerOptionDescriptor ChartWheel;
         static const IntegerOptionDescriptor ChartRenderOptions[3][2];
 
         // Locking
