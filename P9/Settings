@@ -12,11 +12,12 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/map/visibilityrange.cpp game/map/visibilityrange.hpp \
-    game/proxy/visibilityrangeproxy.cpp game/proxy/visibilityrangeproxy.hpp \
-    game/map/movementcontroller.cpp game/map/movementcontroller.hpp \
-    game/proxy/costsummaryadaptor.cpp game/proxy/costsummaryadaptor.hpp \
-    game/interface/costsummarycontext.cpp \
+FILES_gamelib = game/proxy/configurationobserverproxy.cpp \
+    game/proxy/configurationobserverproxy.hpp game/map/visibilityrange.cpp \
+    game/map/visibilityrange.hpp game/proxy/visibilityrangeproxy.cpp \
+    game/proxy/visibilityrangeproxy.hpp game/map/movementcontroller.cpp \
+    game/map/movementcontroller.hpp game/proxy/costsummaryadaptor.cpp \
+    game/proxy/costsummaryadaptor.hpp game/interface/costsummarycontext.cpp \
     game/interface/costsummarycontext.hpp game/proxy/exportproxy.cpp \
     game/proxy/exportadaptor.hpp game/proxy/exportproxy.hpp \
     game/map/info/nulllinkbuilder.cpp game/map/info/nulllinkbuilder.hpp \
@@ -1679,9 +1680,10 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_proxy_visibilityrangeproxy.cpp \
-    u/t_game_map_visibilityrange.cpp u/t_game_map_movementcontroller.cpp \
-    u/t_client_map_location.cpp u/t_game_proxy_costsummaryadaptor.cpp \
+FILES_testsuite = u/t_game_proxy_configurationobserverproxy.cpp \
+    u/t_game_proxy_visibilityrangeproxy.cpp u/t_game_map_visibilityrange.cpp \
+    u/t_game_map_movementcontroller.cpp u/t_client_map_location.cpp \
+    u/t_game_proxy_costsummaryadaptor.cpp \
     u/t_game_interface_costsummarycontext.cpp u/t_game_proxy_exportproxy.cpp \
     u/t_game_map_info_nulllinkbuilder.cpp \
     u/t_game_map_info_scriptlinkbuilder.cpp \

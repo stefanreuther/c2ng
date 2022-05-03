@@ -111,6 +111,11 @@ class TestGameProxyCommandListProxy : public CxxTest::TestSuite {
     void testFailureUnsupported();
 };
 
+class TestGameProxyConfigurationObserverProxy : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestGameProxyConfigurationProxy : public CxxTest::TestSuite {
  public:
     void testNumberFormatter();
