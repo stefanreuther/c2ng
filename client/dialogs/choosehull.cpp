@@ -71,7 +71,7 @@ ChooseHullDialog::ChooseHullDialog(ui::Root& root, afl::string::Translator& tx, 
       m_list(m_root.provider(), m_root.colorScheme()),
       m_options(0, 0, root),
       m_playerNames(playerNames),
-      m_sortOrder(gsi::Range_Id),
+      m_sortOrder(gsi::String_Name),
       m_playerFilter(0),
       m_current(current),
       m_withCustom(withCustom)
@@ -258,6 +258,7 @@ client::dialogs::chooseHull(ui::Root& root, const String_t& title, int32_t& hull
     // Set up SpecBrowserProxy and dialog.
     // Must be in one go, without intervening wait, so the ChooseHullDialog can connect the SpecBrowserProxy's events before they arrive.
     SpecBrowserProxy proxy(gameSender, root.engine().dispatcher(), std::auto_ptr<gsi::PictureNamer>(new PictureNamer()));
+    proxy.setSortOrder(gsi::String_Name);
     proxy.setPage(gsi::HullPage);
     ChooseHullDialog dlg(root, tx, hullNr, proxy, names, withCustom);
     if (dlg.run(title)) {
