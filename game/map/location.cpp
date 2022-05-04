@@ -55,6 +55,15 @@ game::map::Location::set(Reference ref)
 
     m_reference = ref;
 
+    // Set point to position from reference, unless it already is an alias of the current position
+    Point pt;
+    if (getPositionFromReference(m_pUniverse, m_reference, pt)) {
+        if (!(m_pUniverse != 0 && m_pointValid && m_pUniverse->config().getCanonicalLocation(m_point) == pt)) {
+            m_point = pt;
+            m_pointValid = true;
+        }
+    }
+
     notifyObservers(lastOK, lastPos);
 }
 
@@ -75,9 +84,10 @@ bool
 game::map::Location::getPosition(Point& pt) const
 {
     if (getPositionFromReference(m_pUniverse, m_reference, pt)) {
-        // Note that this means if an object becomes invisible within its universe,
-        // we fall back to the last point, not to the last known position of this object.
-        // I don't expect this to happen normally.
+        // If point represents an alias of the current position, report that instead
+        if (m_pUniverse != 0 && m_pointValid && m_pUniverse->config().getCanonicalLocation(m_point) == pt) {
+            pt = m_point;
+        }
         return true;
     } else if (m_pointValid) {
         pt = m_point;

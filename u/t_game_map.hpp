@@ -149,6 +149,7 @@ class TestGameMapLocation : public CxxTest::TestSuite {
     void testEffectiveRef();
     void testBrowse();
     void testBrowsePlanet();
+    void testWrap();
 };
 
 class TestGameMapLocationReverter : public CxxTest::TestSuite {

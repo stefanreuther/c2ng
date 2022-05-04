@@ -18,7 +18,11 @@ namespace game { namespace map {
 
         Represents a location given either as a coordinate, or an object reference.
         An object reference tracks the object even if it changes position.
-        If it disappears (because it is not visible in a turn), we remain at the last position. */
+        If it disappears (because it is not visible in a turn), we remain at the last position.
+
+        Basic support exists for tracking objects across a wrap border:
+        when you do set(Point) for an alias of an object's position, then set(Reference) for an object reference,
+        the position will be reported as that point alias. */
     class Location {
      public:
         /** Flag for browse(). */

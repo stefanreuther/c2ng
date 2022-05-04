@@ -257,3 +257,40 @@ TestGameMapLocation::testBrowsePlanet()
     TS_ASSERT_EQUALS(testee.getReference(), Reference(Reference::Planet, 4));
 }
 
+/** Test wrap behaviour.
+    A: define wrapped map. Set position to point alias, then to object.
+    E: point alias will be reported as position. */
+void
+TestGameMapLocation::testWrap()
+{
+    // Environment
+    const Point IN(700, 2000);
+    const Point OUT(3500, 2000);
+    game::test::SimpleTurn t;
+    t.setPosition(IN);
+    t.addShip(1, 1, Object::Playable);
+    t.universe().config().setConfiguration(game::map::Configuration::Circular, Point(2000, 2000), Point(1400, 1400));
+
+    // Testee
+    Location testee;
+
+    // Set position by reference
+    Point pt;
+    testee.setUniverse(&t.universe());
+    testee.set(Reference(Reference::Ship, 1));
+    TS_ASSERT_EQUALS(testee.getPosition(pt), true);
+    TS_ASSERT_EQUALS(pt, IN);
+
+    // Set "out" position, then set reference
+    testee.set(OUT);
+    testee.set(Reference(Reference::Ship, 1));
+    TS_ASSERT_EQUALS(testee.getPosition(pt), true);
+    TS_ASSERT_EQUALS(pt, OUT);
+
+    // If position is not exact, it is not kept
+    testee.set(OUT + Point(1,0));
+    testee.set(Reference(Reference::Ship, 1));
+    TS_ASSERT_EQUALS(testee.getPosition(pt), true);
+    TS_ASSERT_EQUALS(pt, IN);
+}
+
