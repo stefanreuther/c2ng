@@ -54,6 +54,14 @@ game::proxy::ConfigurationProxy::getOption(WaitIndicator& link, const game::conf
     return result;
 }
 
+game::config::MarkerOption::Data
+game::proxy::ConfigurationProxy::getOption(WaitIndicator& link, const game::config::MarkerOptionDescriptor& desc)
+{
+    game::config::MarkerOption::Data result;
+    getOptionTemplate(link, desc, result);
+    return result;
+}
+
 void
 game::proxy::ConfigurationProxy::setOption(const game::config::IntegerOptionDescriptor& desc, int32_t value)
 {
@@ -62,6 +70,12 @@ game::proxy::ConfigurationProxy::setOption(const game::config::IntegerOptionDesc
 
 void
 game::proxy::ConfigurationProxy::setOption(const game::config::StringOptionDescriptor& desc, String_t value)
+{
+    setOptionTemplate(desc, value);
+}
+
+void
+game::proxy::ConfigurationProxy::setOption(const game::config::MarkerOptionDescriptor& desc, game::config::MarkerOption::Data value)
 {
     setOptionTemplate(desc, value);
 }

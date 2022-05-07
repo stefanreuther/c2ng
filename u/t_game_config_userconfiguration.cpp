@@ -96,9 +96,9 @@ TestGameConfigUserConfiguration::testCannedMarker()
     TS_ASSERT(testee.getCannedMarker(-1) == 0);
     TS_ASSERT(testee.getCannedMarker(1000) == 0);
 
-    game::config::MarkerOption* opt = testee.getCannedMarker(2);
+    const game::config::MarkerOptionDescriptor* opt = testee.getCannedMarker(2);
     TS_ASSERT(opt != 0);
-    TS_ASSERT_EQUALS(opt->getColor(), 9);
-    TS_ASSERT_EQUALS(opt->getMarkerKind(), 1);
-    TS_ASSERT_EQUALS(opt->getNote(), "");
+    TS_ASSERT_EQUALS(testee[*opt]().color, 9);
+    TS_ASSERT_EQUALS(testee[*opt]().markerKind, 1);
+    TS_ASSERT_EQUALS(testee[*opt]().note, "");
 }

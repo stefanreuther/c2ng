@@ -134,6 +134,7 @@ class TestGameProxyConfigurationProxy : public CxxTest::TestSuite {
     void testNumberFormatter();
     void testIntAccess();
     void testStringAccess();
+    void testMarkerAccess();
 };
 
 class TestGameProxyConvertSuppliesProxy : public CxxTest::TestSuite {

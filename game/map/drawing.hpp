@@ -9,6 +9,7 @@
 #include "afl/string/string.hpp"
 #include "game/map/point.hpp"
 #include "util/atomtable.hpp"           // Atom_t
+#include "game/config/markeroption.hpp"
 
 namespace game { namespace map {
 
@@ -43,6 +44,11 @@ namespace game { namespace map {
             \param pos Position (starting point for line, rectangle; center for circle or marker)
             \param type Type */
         Drawing(Point pos, Type type);
+
+        /** Construct marker from template (canned marker).
+            \param pos Position
+            \param tpl Template */
+        Drawing(Point pos, const game::config::MarkerOption::Data& tpl);
 
         /** Set position.
             \param pos Position (starting point for line, rectangle; center for circle or marker) */

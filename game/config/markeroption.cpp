@@ -17,9 +17,7 @@ using game::map::Drawing;
 
 game::config::MarkerOption::MarkerOption(uint8_t markerKind, uint8_t color)
     : ConfigurationOption(),
-      m_markerKind(markerKind),
-      m_color(color),
-      m_note()
+      m_data(markerKind, color, "")
 {
     // ex ConfigMarkerOption::ConfigMarkerOption
 }
@@ -45,9 +43,7 @@ game::config::MarkerOption::set(String_t value)
         && colorVal >= 0
         && colorVal <= Drawing::NUM_USER_COLORS)
     {
-        m_markerKind  = static_cast<uint8_t>(markerKindVal);
-        m_color = static_cast<uint8_t>(colorVal);
-        m_note  = strTrim(value);
+        set(Data(static_cast<uint8_t>(markerKindVal), static_cast<uint8_t>(colorVal), strTrim(value)));
     }
 }
 
@@ -55,47 +51,31 @@ String_t
 game::config::MarkerOption::toString() const
 {
     // ex ConfigMarkerOption::toString
-    return Format("%d,%d,%s", m_markerKind, m_color, m_note);
+    return Format("%d,%d,%s", m_data.markerKind, m_data.color, m_data.note);
 }
 
-uint8_t
-game::config::MarkerOption::getColor() const
+game::config::MarkerOption::Data&
+game::config::MarkerOption::operator()()
 {
-    // ex ConfigMarkerOption::getColorIndex
-    return m_color;
+    return m_data;
 }
 
-void
-game::config::MarkerOption::setColor(uint8_t color)
+const game::config::MarkerOption::Data&
+game::config::MarkerOption::operator()() const
 {
-    // ex ConfigMarkerOption::setColorIndex
-    m_color = color;
-}
-
-uint8_t
-game::config::MarkerOption::getMarkerKind() const
-{
-    // ex ConfigMarkerOption::getMarkerKind
-    return m_markerKind;
+    // ex ConfigMarkerOption::getColorIndex, ConfigMarkerOption::getMarkerKind, ConfigMarkerOption::getNote
+    return m_data;
 }
 
 void
-game::config::MarkerOption::setMarkerKind(uint8_t markerKind)
+game::config::MarkerOption::set(const Data& data)
 {
-    // ex ConfigMarkerOption::setMarkerKind
-    m_markerKind = markerKind;
-}
-
-String_t
-game::config::MarkerOption::getNote() const
-{
-    // ex ConfigMarkerOption::getNote
-    return m_note;
-}
-
-void
-game::config::MarkerOption::setNote(String_t note)
-{
-    // ex ConfigMarkerOption::setNote
-    m_note = note;
+    // ex ConfigMarkerOption::setColorIndex, ConfigMarkerOption::setMarkerKind, ConfigMarkerOption::setNote
+    if (m_data.markerKind != data.markerKind
+        || m_data.color != data.color
+        || m_data.note != data.note)
+    {
+        m_data = data;
+        markChanged();
+    }
 }

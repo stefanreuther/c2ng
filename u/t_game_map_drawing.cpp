@@ -54,6 +54,13 @@ TestGameMapDrawing::testInit()
     TS_ASSERT_EQUALS(marker.getPos(), Point(1111, 2222));
     TS_ASSERT_EQUALS(marker.getMarkerKind(), 3);
     TS_ASSERT_EQUALS(marker.getComment(), "m");
+
+    // Marker from template
+    Drawing m2(Point(777, 888), game::config::MarkerOption::Data(8, 5, "hu"));
+    TS_ASSERT_EQUALS(m2.getType(), Drawing::MarkerDrawing);
+    TS_ASSERT_EQUALS(m2.getPos(), Point(777, 888));
+    TS_ASSERT_EQUALS(m2.getMarkerKind(), 8);
+    TS_ASSERT_EQUALS(m2.getColor(), 5);
 }
 
 /** Test getDistanceTo(). */

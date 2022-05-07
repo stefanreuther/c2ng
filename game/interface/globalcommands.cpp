@@ -567,15 +567,13 @@ game::interface::IFNewCannedMarker(interpreter::Process& /*proc*/, game::Session
     Game& g = game::actions::mustHaveGame(session);
 
     // Obtain configuration
-    const game::config::MarkerOption* opt = r.userConfiguration().getCannedMarker(shape);
+    const game::config::MarkerOptionDescriptor* opt = game::config::UserConfiguration::getCannedMarker(shape);
     if (opt == 0) {
         throw interpreter::Error::rangeError();
     }
 
     // Draw it
-    std::auto_ptr<Drawing> drawing(new Drawing(game::map::Point(x, y), Drawing::MarkerDrawing));
-    drawing->setMarkerKind(opt->getMarkerKind());
-    drawing->setColor(opt->getColor());
+    std::auto_ptr<Drawing> drawing(new Drawing(game::map::Point(x, y), r.userConfiguration()[*opt]()));
     drawing->setTag(tag);
     drawing->setExpire(expire);
 

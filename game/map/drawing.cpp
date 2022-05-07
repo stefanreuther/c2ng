@@ -53,6 +53,18 @@ game::map::Drawing::Drawing(Point pos, Type type)
     }
 }
 
+// Construct marker from template (canned marker).
+game::map::Drawing::Drawing(Point pos, const game::config::MarkerOption::Data& tpl)
+    : m_pos(pos),
+      m_type(MarkerDrawing),
+      m_color(tpl.color),
+      m_x2(tpl.markerKind),
+      m_y2(0),
+      m_tag(0),
+      m_expire(-1),
+      m_comment()
+{ }
+
 // Set position.
 void
 game::map::Drawing::setPos(Point pos)

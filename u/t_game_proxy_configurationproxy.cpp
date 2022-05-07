@@ -86,3 +86,31 @@ TestGameProxyConfigurationProxy::testStringAccess()
     TS_ASSERT_EQUALS(testee.getOption(ind, desc), "ho");
 }
 
+/** Test accessing marker options. */
+void
+TestGameProxyConfigurationProxy::testMarkerAccess()
+{
+    static const game::config::MarkerOptionDescriptor desc = { "name", 3, 7 };
+
+    // Setup
+    game::test::SessionThread h;
+    h.session().setRoot(new game::test::Root(game::HostVersion()));
+    UserConfiguration& config = h.session().getRoot()->userConfiguration();
+    TS_ASSERT_EQUALS(config[desc]().markerKind, 3);
+    TS_ASSERT_EQUALS(config[desc]().color, 7);
+
+    // Proxy access
+    game::test::WaitIndicator ind;
+    game::proxy::ConfigurationProxy testee(h.gameSender());
+    game::config::MarkerOption::Data d = testee.getOption(ind, desc);
+    TS_ASSERT_EQUALS(d.markerKind, 3);
+    TS_ASSERT_EQUALS(d.color, 7);
+
+    // Modify and read back
+    testee.setOption(desc, game::config::MarkerOption::Data(5, 6, "ho"));
+    d = testee.getOption(ind, desc);
+    TS_ASSERT_EQUALS(d.markerKind, 5);
+    TS_ASSERT_EQUALS(d.color, 6);
+    TS_ASSERT_EQUALS(d.note, "ho");
+}
+

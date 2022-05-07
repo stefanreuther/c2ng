@@ -128,12 +128,10 @@ game::proxy::DrawingProxy::Trampoline::createCannedMarker(game::map::Point pos, 
     if (Turn* t = getTurn()) {
         if (Root* r = m_session.getRoot().get()) {
             // Obtain configuration
-            const game::config::MarkerOption* opt = r->userConfiguration().getCannedMarker(slot);
+            const game::config::MarkerOptionDescriptor* opt = game::config::UserConfiguration::getCannedMarker(slot);
             if (opt != 0) {
                 // Draw it
-                std::auto_ptr<Drawing> drawing(new Drawing(pos, Drawing::MarkerDrawing));
-                drawing->setMarkerKind(opt->getMarkerKind());
-                drawing->setColor(opt->getColor());
+                std::auto_ptr<Drawing> drawing(new Drawing(pos, r->userConfiguration()[*opt]()));
 
                 // Add it
                 setCurrentDrawing(t->universe().drawings().addNew(drawing.release()), t);

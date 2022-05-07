@@ -15,6 +15,20 @@ namespace game { namespace config {
         Stores color, kind (shape), and note for the marker. */
     class MarkerOption : public ConfigurationOption {
      public:
+        /** Data for a marker. */
+        struct Data {
+            uint8_t markerKind;        /**< Marker kind. \see game::map::Drawing::getMarkerKind() */
+            uint8_t color;             /**< Marker color. \see game::map::Drawing::getColor() */
+            String_t note;             /**< Note for this template (NOT marker comment). */
+
+            Data()
+                : markerKind(), color(), note()
+                { }
+            Data(uint8_t markerKind, uint8_t color, const String_t& note)
+                : markerKind(markerKind), color(color), note(note)
+                { }
+        };
+
         /** Constructor.
             \param markerKind Initial kind (shape); see getMarkerKind
             \param color      Color; see getColor */
@@ -25,40 +39,21 @@ namespace game { namespace config {
         virtual void set(String_t value);
         virtual String_t toString() const;
 
-        /** Get color.
-            \return color
-            \see game::map::Drawing::getColor */
-        uint8_t  getColor() const;
+        /** Access content (mutable).
+            Remember to use markChanged() after changing the value this way.
+            \return content */
+        Data& operator()();
 
-        /** Set color.
-            \param color Color
-            \see game::map::Drawing::setColor */
-        void setColor(uint8_t color);
+        /** Access content (constant).
+            \return content */
+        const Data& operator()() const;
 
-        /** Get marker kind (shape).
-            \return Kind [0,game::map::Drawing::NUM_USER_MARKERS)
-            \see game::map::Drawing::getMarkerKind */
-        uint8_t getMarkerKind() const;
-
-        /** Set marker kind (shape).
-            \param markerKind Kind [0,game::map::Drawing::NUM_USER_MARKERS)
-            \see game::map::Drawing::setMarkerKind */
-        void setMarkerKind(uint8_t markerKind);
-
-        /** Get note.
-            The note describes this canned marker slot; it is not used as marker comment!
-            \return note */
-        String_t getNote() const;
-
-        /** Set note.
-            The note describes this canned marker slot; it is not used as marker comment!
-            \param note Note */
-        void setNote(String_t note);
+        /** Set content.
+            \param data New content */
+        void set(const Data& data);
 
      private:
-        uint8_t m_markerKind;
-        uint8_t m_color;
-        String_t m_note;
+        Data m_data;
     };
 
     struct MarkerOptionDescriptor {

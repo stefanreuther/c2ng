@@ -248,10 +248,7 @@ game::config::UserConfiguration::setDefaultValues()
     // Marker
     for (size_t i = 0; i < countof(MARKER_CONFIG); ++i) {
         const MarkerOptionDescriptor& desc = MARKER_CONFIG[i];
-        MarkerOption& opt = me[desc];
-        opt.setColor(desc.m_color);
-        opt.setMarkerKind(desc.m_markerKind);
-        opt.setNote(String_t());
+        me[desc].set(MarkerOption::Data(desc.m_markerKind, desc.m_color, ""));
     }
 
     // Task screen
@@ -337,13 +334,13 @@ game::config::UserConfiguration::formatPopulation(int32_t n) const
     return getNumberFormatter().formatPopulation(n);
 }
 
-game::config::MarkerOption*
+const game::config::MarkerOptionDescriptor*
 game::config::UserConfiguration::getCannedMarker(int slot)
 {
     // ex ConfigMarkerOption::getCannedMarker
     static_assert(countof(MARKER_CONFIG) == NUM_CANNED_MARKERS, "NUM_CANNED_MARKERS");
     if (slot >= 0 && slot < static_cast<int>(countof(MARKER_CONFIG))) {
-        return &(*this)[MARKER_CONFIG[slot]];
+        return &MARKER_CONFIG[slot];
     } else {
         return 0;
     }

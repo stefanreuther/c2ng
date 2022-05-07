@@ -14,7 +14,7 @@
 
 namespace game { namespace config {
 
-    class MarkerOption;
+    struct MarkerOptionDescriptor;
 
     class UserConfiguration : public Configuration {
      public:
@@ -71,7 +71,7 @@ namespace game { namespace config {
         /** Get canned marker configuration.
             \param slot Slot number, starting at 0
             \return Configuration option; null if slot number out of range */
-        MarkerOption* getCannedMarker(int slot);
+        static const MarkerOptionDescriptor* getCannedMarker(int slot);
 
 
         /*
