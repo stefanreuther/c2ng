@@ -24,7 +24,11 @@ void
 game::config::ConfigurationOption::setSource(Source source)
 {
     // ex ConfigOption::setSource
-    m_source = source;
+    // @change A change of m_source counts as modification because configuration editors will show it
+    if (m_source != source) {
+        m_source = source;
+        markChanged();
+    }
 }
 
 // Check whether option was set.

@@ -12,7 +12,11 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/proxy/configurationobserverproxy.cpp \
+FILES_gamelib = game/proxy/configurationeditorproxy.cpp \
+    game/proxy/configurationeditoradaptor.hpp \
+    game/proxy/configurationeditorproxy.hpp \
+    game/config/configurationeditor.cpp game/config/configurationeditor.hpp \
+    game/proxy/configurationobserverproxy.cpp \
     game/proxy/configurationobserverproxy.hpp game/map/visibilityrange.cpp \
     game/map/visibilityrange.hpp game/proxy/visibilityrangeproxy.cpp \
     game/proxy/visibilityrangeproxy.hpp game/map/movementcontroller.cpp \
@@ -1680,7 +1684,10 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_proxy_configurationobserverproxy.cpp \
+FILES_testsuite = u/t_game_proxy_configurationeditoradaptor.cpp \
+    u/t_game_proxy_configurationeditorproxy.cpp \
+    u/t_game_config_configurationeditor.cpp \
+    u/t_game_proxy_configurationobserverproxy.cpp \
     u/t_game_proxy_visibilityrangeproxy.cpp u/t_game_map_visibilityrange.cpp \
     u/t_game_map_movementcontroller.cpp u/t_client_map_location.cpp \
     u/t_game_proxy_costsummaryadaptor.cpp \

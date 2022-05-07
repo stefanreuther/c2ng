@@ -111,6 +111,19 @@ class TestGameProxyCommandListProxy : public CxxTest::TestSuite {
     void testFailureUnsupported();
 };
 
+class TestGameProxyConfigurationEditorAdaptor : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
+class TestGameProxyConfigurationEditorProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormal();
+    void testIntegration();
+    void testObserverIntegration();
+};
+
 class TestGameProxyConfigurationObserverProxy : public CxxTest::TestSuite {
  public:
     void testIt();

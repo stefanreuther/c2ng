@@ -34,6 +34,18 @@ class TestGameConfigConfiguration : public CxxTest::TestSuite {
     void testMerge();
 };
 
+class TestGameConfigConfigurationEditor : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testToggle();
+    void testSetValue();
+    void testSourceSingle();
+    void testSourceEmpty();
+    void testSourceMulti();
+    void testChange();
+    void testAlias();
+};
+
 class TestGameConfigConfigurationOption : public CxxTest::TestSuite {
  public:
     void testIt();
