@@ -5,6 +5,7 @@
 #include <cmath>
 #include "client/map/starchartoverlay.hpp"
 #include "afl/string/format.hpp"
+#include "client/dialogs/chartconfig.hpp"
 #include "client/dialogs/newdrawingtag.hpp"
 #include "client/dialogs/visibilityrange.hpp"
 #include "client/downlink.hpp"
@@ -375,6 +376,10 @@ client::map::StarchartOverlay::handleKey(util::Key_t key, int prefix, const Rend
 
      case 'f' + util::KeyMod_Alt:
         editDrawingTagFilter();
+        return true;
+
+     case 'o' + util::KeyMod_Alt:
+        client::dialogs::doChartConfigDialog(m_root, m_screen.gameSender(), m_translator);
         return true;
 
      case 'p':

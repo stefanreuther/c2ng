@@ -66,9 +66,19 @@ namespace ui { namespace widgets {
         Node* getCurrentNode() const;
 
         /** Get node corresponding to a given list item (line).
-            \param line  Line number (=item index)
+            Returns currently-visible nodes.
+            \param line  Line number (=item index), [0, getNumItems())
             \return Node, null if not found */
         Node* getNodeFromItem(size_t line) const;
+
+        /** Get number of nodes.
+            \return total number of nodes (visible and invisible) */
+        size_t getNumNodes() const;
+
+        /** Get node by index.
+            \param index Index, [0, getNumNodes())
+            \return Node, null if index out of range */
+        Node* getNodeByIndex(size_t index) const;
 
         /** Find node, given an Id.
             \param id Id to look for

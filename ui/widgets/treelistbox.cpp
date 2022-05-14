@@ -126,6 +126,22 @@ ui::widgets::TreeListbox::getNodeFromItem(size_t line) const
     }
 }
 
+size_t
+ui::widgets::TreeListbox::getNumNodes() const
+{
+    return m_nodes.size();
+}
+
+ui::widgets::TreeListbox::Node*
+ui::widgets::TreeListbox::getNodeByIndex(size_t index) const
+{
+    if (index < m_nodes.size()) {
+        return m_nodes[index];
+    } else {
+        return 0;
+    }
+}
+
 ui::widgets::TreeListbox::Node*
 ui::widgets::TreeListbox::findNodeById(int32_t id) const
 {
@@ -239,7 +255,7 @@ ui::widgets::TreeListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t
     afl::base::Deleter del;
     gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
     prepareColorListItem(ctx, area, state, m_root.colorScheme(), del);
-    
+
     if (item < m_itemToNode.size()) {
         /* Find indentation */
         const size_t slot = m_itemToNode[item];

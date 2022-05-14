@@ -749,7 +749,15 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/dialogs/visibilityrange.cpp \
+FILES_guilib = client/widgets/chartmouseconfig.cpp \
+    client/widgets/chartmouseconfig.hpp \
+    client/widgets/markertemplatelist.cpp \
+    client/widgets/markertemplatelist.hpp \
+    client/widgets/chartdisplayconfig.cpp \
+    client/widgets/chartdisplayconfig.hpp \
+    client/widgets/configstoragecontrol.cpp \
+    client/widgets/configstoragecontrol.hpp client/dialogs/chartconfig.cpp \
+    client/dialogs/chartconfig.hpp client/dialogs/visibilityrange.cpp \
     client/dialogs/visibilityrange.hpp ui/icons/balloon.cpp \
     ui/icons/balloon.hpp client/widgets/exportfieldlist.cpp \
     client/widgets/exportfieldlist.hpp client/dialogs/export.cpp \

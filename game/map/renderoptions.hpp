@@ -29,6 +29,7 @@ namespace game { namespace map {
             Normal,             // ex NormalChartOptions
             Scanner             // ex ScannerChartOptions
         };
+        static const size_t NUM_AREAS = 3;
 
         /** Definition of an option. */
         enum Option {
