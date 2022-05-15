@@ -273,12 +273,9 @@ game::config::UserConfiguration::loadUserConfiguration(util::ProfileDirectory& d
         parser.setCharsetNew(new afl::charset::Utf8Charset());
         parser.parseFile(*stream);
 
-        // Set all options to srcUser, no matter where they come from.
-        // This will make sure the main config file always contains all options.
-        // FIXME: port this
-        //         for (Config::iterator i = getUserPreferences().begin(); i != getUserPreferences().end(); ++i) {
-        //             i->setSource(ConfigOption::srcUser);
-        //         }
+        // Set all options to Source=User, no matter where they come from.
+        // This will make sure the main config file always contains all (standard) options.
+        setAllOptionsSource(ConfigurationOption::User);
     }
 }
 
