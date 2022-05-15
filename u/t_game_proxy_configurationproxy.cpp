@@ -53,6 +53,7 @@ TestGameProxyConfigurationProxy::testIntAccess()
     h.session().setRoot(new game::test::Root(game::HostVersion()));
     UserConfiguration& config = h.session().getRoot()->userConfiguration();
     config[desc].set(7);
+    TS_ASSERT_EQUALS(config[desc].getSource(), game::config::ConfigurationOption::Default);
 
     // Proxy access
     game::test::WaitIndicator ind;
@@ -62,6 +63,9 @@ TestGameProxyConfigurationProxy::testIntAccess()
     // Modify and read back
     testee.setOption(desc, 12);
     TS_ASSERT_EQUALS(testee.getOption(ind, desc), 12);
+
+    // Verify placement
+    TS_ASSERT_EQUALS(config[desc].getSource(), game::config::ConfigurationOption::User);
 }
 
 /** Test accessing string options. */
@@ -75,6 +79,7 @@ TestGameProxyConfigurationProxy::testStringAccess()
     h.session().setRoot(new game::test::Root(game::HostVersion()));
     UserConfiguration& config = h.session().getRoot()->userConfiguration();
     config[desc].set("hi");
+    TS_ASSERT_EQUALS(config[desc].getSource(), game::config::ConfigurationOption::Default);
 
     // Proxy access
     game::test::WaitIndicator ind;
@@ -84,6 +89,9 @@ TestGameProxyConfigurationProxy::testStringAccess()
     // Modify and read back
     testee.setOption(desc, "ho");
     TS_ASSERT_EQUALS(testee.getOption(ind, desc), "ho");
+
+    // Verify placement
+    TS_ASSERT_EQUALS(config[desc].getSource(), game::config::ConfigurationOption::User);
 }
 
 /** Test accessing marker options. */
@@ -98,6 +106,7 @@ TestGameProxyConfigurationProxy::testMarkerAccess()
     UserConfiguration& config = h.session().getRoot()->userConfiguration();
     TS_ASSERT_EQUALS(config[desc]().markerKind, 3);
     TS_ASSERT_EQUALS(config[desc]().color, 7);
+    TS_ASSERT_EQUALS(config[desc].getSource(), game::config::ConfigurationOption::Default);
 
     // Proxy access
     game::test::WaitIndicator ind;
@@ -112,5 +121,8 @@ TestGameProxyConfigurationProxy::testMarkerAccess()
     TS_ASSERT_EQUALS(d.markerKind, 5);
     TS_ASSERT_EQUALS(d.color, 6);
     TS_ASSERT_EQUALS(d.note, "ho");
+
+    // Verify placement
+    TS_ASSERT_EQUALS(config[desc].getSource(), game::config::ConfigurationOption::User);
 }
 

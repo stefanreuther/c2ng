@@ -118,7 +118,14 @@ game::proxy::ConfigurationProxy::setOptionTemplate(const Desc& desc, const Value
         virtual void handle(Session& session)
             {
                 if (Root* pRoot = session.getRoot().get()) {
-                    pRoot->userConfiguration()[m_desc].set(m_value);
+                    // Set value
+                    typename Desc::OptionType_t& opt = pRoot->userConfiguration()[m_desc];
+                    opt.set(m_value);
+
+                    // Set storage location
+                    // This is required for options not covered by UserConfiguration::setDefaultValues(),
+                    // and when no configuration file was loaded.
+                    opt.markUpdated(game::config::ConfigurationOption::User);
                 }
             }
      private:
