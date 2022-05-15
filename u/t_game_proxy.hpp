@@ -315,6 +315,13 @@ class TestGameProxyMailboxProxy : public CxxTest::TestSuite {
     void testAction();
 };
 
+class TestGameProxyMapConfigurationProxy : public CxxTest::TestSuite {
+ public:
+    void testMapConfig();
+    void testRenderOptions();
+    void testMarkerConfig();
+};
+
 class TestGameProxyMapLocationProxy : public CxxTest::TestSuite {
  public:
     void testEmpty();

@@ -80,6 +80,12 @@ game::proxy::ConfigurationProxy::setOption(const game::config::MarkerOptionDescr
     setOptionTemplate(desc, value);
 }
 
+util::RequestSender<game::Session>&
+game::proxy::ConfigurationProxy::gameSender()
+{
+    return m_gameSender;
+}
+
 template<typename Desc, typename Value>
 inline void
 game::proxy::ConfigurationProxy::getOptionTemplate(WaitIndicator& link, const Desc& desc, Value& result)

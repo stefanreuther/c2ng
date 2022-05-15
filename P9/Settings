@@ -12,7 +12,9 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/proxy/configurationeditorproxy.cpp \
+FILES_gamelib = game/proxy/mapconfigurationproxy.cpp \
+    game/proxy/mapconfigurationproxy.hpp \
+    game/proxy/configurationeditorproxy.cpp \
     game/proxy/configurationeditoradaptor.hpp \
     game/proxy/configurationeditorproxy.hpp \
     game/config/configurationeditor.cpp game/config/configurationeditor.hpp \
@@ -1684,7 +1686,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_proxy_configurationeditoradaptor.cpp \
+FILES_testsuite = u/t_game_proxy_mapconfigurationproxy.cpp \
+    u/t_game_proxy_configurationeditoradaptor.cpp \
     u/t_game_proxy_configurationeditorproxy.cpp \
     u/t_game_config_configurationeditor.cpp \
     u/t_game_proxy_configurationobserverproxy.cpp \

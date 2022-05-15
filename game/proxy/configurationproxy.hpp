@@ -61,6 +61,10 @@ namespace game { namespace proxy {
             \param value New value */
         void setOption(const game::config::MarkerOptionDescriptor& desc, game::config::MarkerOption::Data value);
 
+        /** Access underlying game sender instance.
+            @return game sender */
+        util::RequestSender<Session>& gameSender();
+
      private:
         util::RequestSender<Session> m_gameSender;
 
