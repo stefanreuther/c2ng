@@ -83,8 +83,10 @@ namespace game { namespace map {
 
         /** Save to configuration.
             This updates the specified user configuration (preferences) object.
-            \param pref User configuration object to update */
-        void saveToConfiguration(game::config::UserConfiguration& pref);
+            \param pref User configuration object to update
+            \param config Host configuration */
+        void saveToConfiguration(game::config::UserConfiguration& pref,
+                                 const game::config::HostConfiguration& config);
 
         /** Set configuration.
             This overrides a previous configuration and marks it "not from host configuration".

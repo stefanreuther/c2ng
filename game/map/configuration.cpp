@@ -12,6 +12,9 @@
 #include "game/config/enumvalueparser.hpp"
 #include "util/math.hpp"
 
+using game::config::ConfigurationOption;
+using game::config::IntegerOption;
+
 namespace {
     /*
      *  Definition of configuration options
@@ -140,6 +143,15 @@ namespace {
             flag = false;
         }
     }
+
+    void setOptionSource(game::config::ConfigurationOption& opt, bool isDefault)
+    {
+        if (opt.getSource() <= game::config::ConfigurationOption::User && isDefault) {
+            opt.setSource(game::config::ConfigurationOption::Default);
+        } else {
+            opt.markUpdated(game::config::ConfigurationOption::Game);
+        }
+    }
 }
 
 game::map::Configuration::Configuration()
@@ -222,20 +234,28 @@ game::map::Configuration::initFromConfiguration(const game::config::HostConfigur
 {
     // ex GChartConfiguration::initFromConfig
 
-    // Invariants (xref chartconfig.cc):
+    // Invariants:
     // - center in range 500..4000
     // - size in range 500..4000
     // - size <= center
 
     // Load config file
     // - coordinates
-    m_center = Point(pref[opt_map_center](1), pref[opt_map_center](2));
-    m_size   = Point(pref[opt_map_size](1),   pref[opt_map_size](2));
+    const game::config::IntegerArrayOption<2>& centerOption = pref[opt_map_center];
+    const game::config::IntegerArrayOption<2>& sizeOption   = pref[opt_map_size];
+    m_center = Point(centerOption(1), centerOption(2));
+    m_size   = Point(sizeOption(1),   sizeOption(2));
 
     // - map kind
-    int mapKind = pref[opt_map_kind]();
+    const game::config::IntegerOption& mapKindOption = pref[opt_map_kind];
+    int mapKind = mapKindOption();
+    ConfigurationOption::Source mapKindSource;
     if (mapKind == Flat || mapKind == Wrapped || mapKind == Circular) {
         m_mode = Mode(mapKind);
+        mapKindSource = mapKindOption.getSource();
+    } else {
+        m_mode = Flat;
+        mapKindSource = ConfigurationOption::Default;
     }
 
     // - circular parameters. Out-of-range values will be corrected by computeDerivedInformation()
@@ -243,29 +263,34 @@ game::map::Configuration::initFromConfiguration(const game::config::HostConfigur
     m_circularExcess = pref[opt_circular_excess]();
 
     // Check host config
-    if (config[config.AllowWraparoundMap]() != 0) {
-        // AllowWraparoundMap option is set. Copy the settings from pconfig.
-        // @change: PCC2 was accepting this only in PHost games, only when option is not at default.
-        // Since the default is "off", that test is redundant.
+    if (config[config.AllowWraparoundMap]() != 0
+        && (m_mode == Wrapped
+            || mapKindSource <= ConfigurationOption::User))
+    {
+        // AllowWraparoundMap option is set and no conflicting setting from game's pcc2.ini. Copy the settings from pconfig.
         m_fromHostConfiguration = true;
         m_mode = Wrapped;
 
         const game::config::IntegerArrayOption<4>& wrap = config[config.WraparoundRectangle];
-        m_center.setX((wrap(3) + wrap(1)) / 2);
-        m_center.setY((wrap(4) + wrap(2)) / 2);
-        m_size.setX(wrap(3) - wrap(1));
-        m_size.setY(wrap(4) - wrap(2));
+        if (centerOption.getSource() <= ConfigurationOption::User) {
+            m_center.setX((wrap(3) + wrap(1)) / 2);
+            m_center.setY((wrap(4) + wrap(2)) / 2);
+        }
+        if (sizeOption.getSource() <= ConfigurationOption::User) {
+            m_size.setX(wrap(3) - wrap(1));
+            m_size.setY(wrap(4) - wrap(2));
+        }
     } else {
-        // AllowWraparoundMap not set or disabled.
-        // It could use external wrap, so don't change anything.
+        // AllowWraparoundMap not set or disabled, or overridden by pcc2.ini,
         m_fromHostConfiguration = false;
     }
+
     computeDerivedInformation();
 }
 
 // Save to configuration.
 void
-game::map::Configuration::saveToConfiguration(game::config::UserConfiguration& pref)
+game::map::Configuration::saveToConfiguration(game::config::UserConfiguration& pref, const game::config::HostConfiguration& config)
 {
     // ex GChartConfiguration::computeDerivedInformation (part)
 
@@ -274,50 +299,27 @@ game::map::Configuration::saveToConfiguration(game::config::UserConfiguration& p
     // However, to avoid creating game configuration files if users never even touched the settings,
     // we downgrade an option to source=Default (which means it is not stored in a config file) if all of the following holds:
     //   - it is source=User (=user did not set it to source=Game)
-    //   - it has the default value
     //   - it is being set to the default value
+    Mode defaultMode = config[config.AllowWraparoundMap]() != 0 ? Wrapped : Flat;
+
     game::config::IntegerOption& map_kind = pref[opt_map_kind];
-    if (map_kind.getSource() <= game::config::ConfigurationOption::User && map_kind() == Flat && m_mode == Flat) {
-        map_kind.setSource(game::config::ConfigurationOption::Default);
-    } else {
-        map_kind.set(m_mode);
-        map_kind.markUpdated(game::config::ConfigurationOption::Game);
-    }
+    map_kind.set(m_mode);
+    setOptionSource(map_kind, m_mode == defaultMode);
 
     game::config::IntegerArrayOption<2>& map_center = pref[opt_map_center];
-    if (map_center.getSource() <= game::config::ConfigurationOption::User
-        && map_center(1) == DEFAULT_MAP_CENTER && map_center(2) == DEFAULT_MAP_CENTER
-        && m_center.getX() == DEFAULT_MAP_CENTER && m_center.getY() == DEFAULT_MAP_CENTER)
-    {
-        map_center.setSource(game::config::ConfigurationOption::Default);
-    } else {
-        map_center.set(1, m_center.getX());
-        map_center.set(2, m_center.getY());
-        map_center.markUpdated(game::config::ConfigurationOption::Game);
-    }
+    map_center.set(1, m_center.getX());
+    map_center.set(2, m_center.getY());
+    setOptionSource(map_center, m_center.getX() == DEFAULT_MAP_CENTER && m_center.getY() == DEFAULT_MAP_CENTER);
 
     game::config::IntegerArrayOption<2>& map_size = pref[opt_map_size];
-    if (map_size.getSource() <= game::config::ConfigurationOption::User
-        && map_size(1) == DEFAULT_MAP_SIZE && map_size(2) == DEFAULT_MAP_SIZE
-        && m_size.getX() == DEFAULT_MAP_SIZE && m_size.getY() == DEFAULT_MAP_SIZE)
-    {
-        map_size.setSource(game::config::ConfigurationOption::Default);
-    } else {
-        map_size.set(1, m_size.getX());
-        map_size.set(2, m_size.getY());
-        map_size.markUpdated(game::config::ConfigurationOption::Game);
-    }
+    map_size.set(1, m_size.getX());
+    map_size.set(2, m_size.getY());
+    setOptionSource(map_size, m_size.getX() == DEFAULT_MAP_SIZE && m_size.getY() == DEFAULT_MAP_SIZE);
 
     // Save circular excess.
-    // Use the same logic as above.
-    // This differs from PCC2.
     game::config::IntegerOption& circular_excess = pref[opt_circular_excess];
-    if (circular_excess.getSource() <= game::config::ConfigurationOption::User && circular_excess() == DEFAULT_CIRCULAR_EXCESS && m_circularExcess == DEFAULT_CIRCULAR_EXCESS) {
-        circular_excess.setSource(game::config::ConfigurationOption::Default);
-    } else {
-        circular_excess.set(m_circularExcess);
-        circular_excess.markUpdated(game::config::ConfigurationOption::Game);
-    }
+    circular_excess.set(m_circularExcess);
+    setOptionSource(circular_excess, m_circularExcess == DEFAULT_CIRCULAR_EXCESS);
 
     // Update circular precision.
     // Do not mark it for the game configuration, so if this was a change because it was out of range,

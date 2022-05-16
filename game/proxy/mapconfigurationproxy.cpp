@@ -60,7 +60,7 @@ game::proxy::MapConfigurationProxy::setMapConfiguration(const game::map::Configu
 
                     // Update user configuration
                     if (Root* r = session.getRoot().get()) {
-                        mapConfig.saveToConfiguration(r->userConfiguration());
+                        mapConfig.saveToConfiguration(r->userConfiguration(), r->hostConfiguration());
                     }
                 }
             }

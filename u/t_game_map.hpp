@@ -73,6 +73,7 @@ class TestGameMapConfiguration : public CxxTest::TestSuite {
     void testSaveToConfigWrap();
     void testSaveToConfigFull();
     void testSaveToConfigUser();
+    void testSaveToConfigWrapDefault();
 };
 
 class TestGameMapDrawing : public CxxTest::TestSuite {

@@ -604,7 +604,7 @@ TestGameMapConfiguration::testSaveToConfig()
     UserConfiguration pref;
 
     game::map::Configuration testee;
-    testee.saveToConfiguration(pref);
+    testee.saveToConfiguration(pref, HostConfiguration());
 
     afl::base::Ref<UserConfiguration::Enumerator_t> e(pref.getOptions());
     UserConfiguration::OptionInfo_t info;
@@ -623,7 +623,7 @@ TestGameMapConfiguration::testSaveToConfigWrap()
 
     game::map::Configuration testee;
     testee.setConfiguration(testee.Wrapped, Point(2000, 2000), Point(2000, 2000));
-    testee.saveToConfiguration(pref);
+    testee.saveToConfiguration(pref, HostConfiguration());
 
     afl::base::Ref<UserConfiguration::Enumerator_t> e(pref.getOptions());
     UserConfiguration::OptionInfo_t info;
@@ -649,7 +649,7 @@ TestGameMapConfiguration::testSaveToConfigFull()
     testee.setConfiguration(testee.Wrapped, Point(1800, 1900), Point(2000, 2100));
     testee.setCircularExcess(200);
     testee.setCircularPrecision(7);
-    testee.saveToConfiguration(pref);
+    testee.saveToConfiguration(pref, HostConfiguration());
 
     ConfigurationOption* opt = pref.getOptionByName("Chart.Geo.Mode");
     TS_ASSERT(opt);
@@ -688,7 +688,7 @@ TestGameMapConfiguration::testSaveToConfigUser()
 
     game::map::Configuration testee;
     testee.setConfiguration(testee.Flat, Point(2000, 2000), Point(2000, 2000));
-    testee.saveToConfiguration(pref);
+    testee.saveToConfiguration(pref, HostConfiguration());
 
     ConfigurationOption* opt = pref.getOptionByName("Chart.Geo.Mode");
     TS_ASSERT(opt);
@@ -696,3 +696,21 @@ TestGameMapConfiguration::testSaveToConfigUser()
     TS_ASSERT_EQUALS(opt->toString(), "flat");
 }
 
+
+/** Test saveToConfiguration.
+    Saving a default configuration should create a Chart.Geo.Mode if game has AllowWraparoundMap=1 */
+void
+TestGameMapConfiguration::testSaveToConfigWrapDefault()
+{
+    UserConfiguration pref;
+    HostConfiguration config;
+    config[HostConfiguration::AllowWraparoundMap].set(1);
+
+    game::map::Configuration testee;
+    testee.saveToConfiguration(pref, config);
+
+    ConfigurationOption* opt = pref.getOptionByName("Chart.Geo.Mode");
+    TS_ASSERT(opt);
+    TS_ASSERT_EQUALS(opt->getSource(), ConfigurationOption::Game);
+    TS_ASSERT_EQUALS(opt->toString(), "flat");
+}
