@@ -7,6 +7,7 @@
 
 #include "t_game_map.hpp"
 #include "afl/base/countof.hpp"
+#include "game/map/configuration.hpp"
 #include "game/map/universe.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/test/registrationkey.hpp"
@@ -96,7 +97,7 @@ TestGameMapMinefieldMission::testLayEmptyShip()
     game::UnitScoreDefinitionList shipScores;     // required for hull functions, which are required to determine FCode availability
     game::spec::ShipList shipList;                // required for fcodes and hull functions
 
-    TS_ASSERT_EQUALS(testee.checkLayMission(ship, univ, root, shipScores, shipList), false);
+    TS_ASSERT_EQUALS(testee.checkLayMission(ship, univ, root, game::map::Configuration(), shipScores, shipList), false);
 }
 
 /** Test mine laying with a freighter.
@@ -111,7 +112,7 @@ TestGameMapMinefieldMission::testLayFreighter()
     Ship& sh = addFreighter(h, 222, 3);
     sh.setMission(3, 0, 0);
     sh.setFriendlyCode(String_t(""));
-    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.config(), h.shipScores, h.turn.shipList()), false);
+    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.mapConfiguration(), h.turn.config(), h.shipScores, h.turn.shipList()), false);
 }
 
 /** Test mine laying with wrong mission.
@@ -126,7 +127,7 @@ TestGameMapMinefieldMission::testLayOther()
     Ship& sh = addTorper(h, 222, 3);
     sh.setMission(1, 0, 0);
     sh.setFriendlyCode(String_t(""));
-    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.config(), h.shipScores, h.turn.shipList()), false);
+    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.mapConfiguration(), h.turn.config(), h.shipScores, h.turn.shipList()), false);
 }
 
 /** Test mine laying (successful base case).
@@ -141,7 +142,7 @@ TestGameMapMinefieldMission::testLayNormal()
     Ship& sh = addTorper(h, 222, 3);
     sh.setMission(3, 0, 0);
     sh.setFriendlyCode(String_t(""));
-    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.config(), h.shipScores, h.turn.shipList()), true);
+    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.mapConfiguration(), h.turn.config(), h.shipScores, h.turn.shipList()), true);
 
     TS_ASSERT_EQUALS(testee.getRequiredMinefieldId(), 0);
     TS_ASSERT_EQUALS(testee.getMinefieldOwner(), 3);
@@ -165,7 +166,7 @@ TestGameMapMinefieldMission::testLayNormalDisabled()
     sh.setMission(3, 0, 0);
     sh.setFriendlyCode(String_t(""));
     h.turn.config()[HostConfiguration::AllowMinefields].set(false);
-    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.config(), h.shipScores, h.turn.shipList()), false);
+    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.mapConfiguration(), h.turn.config(), h.shipScores, h.turn.shipList()), false);
 }
 
 /** Test mine laying as robots.
@@ -181,7 +182,7 @@ TestGameMapMinefieldMission::testLayRobot()
     Ship& sh = addTorper(h, 222, 9);
     sh.setMission(3, 0, 0);
     sh.setFriendlyCode(String_t(""));
-    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.config(), h.shipScores, h.turn.shipList()), true);
+    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.mapConfiguration(), h.turn.config(), h.shipScores, h.turn.shipList()), true);
 
     TS_ASSERT_EQUALS(testee.getRequiredMinefieldId(), 0);
     TS_ASSERT_EQUALS(testee.getMinefieldOwner(), 9);
@@ -216,7 +217,7 @@ TestGameMapMinefieldMission::testLayDropFCode()
         Ship& sh = addTorper(h, 222, 3);
         sh.setMission(3, 0, 0);
         sh.setFriendlyCode(String_t(c.friendlyCode));
-        TSM_ASSERT_EQUALS(c.friendlyCode, testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.config(), h.shipScores, h.turn.shipList()), true);
+        TSM_ASSERT_EQUALS(c.friendlyCode, testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.mapConfiguration(), h.turn.config(), h.shipScores, h.turn.shipList()), true);
 
         TSM_ASSERT_EQUALS(c.friendlyCode, testee.getRequiredMinefieldId(), 0);
         TSM_ASSERT_EQUALS(c.friendlyCode, testee.getMinefieldOwner(), 3);
@@ -242,7 +243,7 @@ TestGameMapMinefieldMission::testLayDropFCodeDisallowed()
     Ship& sh = addTorper(h, 222, 3);
     sh.setMission(3, 0, 0);
     sh.setFriendlyCode(String_t("mdh"));
-    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.config(), h.shipScores, h.turn.shipList()), true);
+    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.mapConfiguration(), h.turn.config(), h.shipScores, h.turn.shipList()), true);
 
     TS_ASSERT_EQUALS(testee.getRequiredMinefieldId(), 0);
     TS_ASSERT_EQUALS(testee.getMinefieldOwner(), 3);
@@ -267,7 +268,7 @@ TestGameMapMinefieldMission::testLayDropFCodeInapplicable()
     Ship& sh = addTorper(h, 222, 3);
     sh.setMission(3, 0, 0);
     sh.setFriendlyCode(String_t("mdh"));
-    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.config(), h.shipScores, h.turn.shipList()), true);
+    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.mapConfiguration(), h.turn.config(), h.shipScores, h.turn.shipList()), true);
 
     TS_ASSERT_EQUALS(testee.getRequiredMinefieldId(), 0);
     TS_ASSERT_EQUALS(testee.getMinefieldOwner(), 3);
@@ -290,7 +291,7 @@ TestGameMapMinefieldMission::testLayIdentityFCode()
     Ship& sh = addTorper(h, 222, 3);
     sh.setMission(3, 0, 0);
     sh.setFriendlyCode(String_t("mi4"));
-    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.config(), h.shipScores, h.turn.shipList()), true);
+    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.mapConfiguration(), h.turn.config(), h.shipScores, h.turn.shipList()), true);
 
     TS_ASSERT_EQUALS(testee.getRequiredMinefieldId(), 0);
     TS_ASSERT_EQUALS(testee.getMinefieldOwner(), 4);
@@ -313,7 +314,7 @@ TestGameMapMinefieldMission::testLayIdentityFCodeRobot()
     Ship& sh = addTorper(h, 222, 9);
     sh.setMission(3, 0, 0);
     sh.setFriendlyCode(String_t("mi4"));
-    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.config(), h.shipScores, h.turn.shipList()), true);
+    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.mapConfiguration(), h.turn.config(), h.shipScores, h.turn.shipList()), true);
 
     TS_ASSERT_EQUALS(testee.getRequiredMinefieldId(), 0);
     TS_ASSERT_EQUALS(testee.getMinefieldOwner(), 4);
@@ -336,7 +337,7 @@ TestGameMapMinefieldMission::testLayWeb()
     Ship& sh = addTorper(h, 222, 7);
     sh.setMission(9, 0, 0);
     sh.setFriendlyCode(String_t(""));
-    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.config(), h.shipScores, h.turn.shipList()), true);
+    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.mapConfiguration(), h.turn.config(), h.shipScores, h.turn.shipList()), true);
 
     TS_ASSERT_EQUALS(testee.getRequiredMinefieldId(), 0);
     TS_ASSERT_EQUALS(testee.getMinefieldOwner(), 7);
@@ -360,7 +361,7 @@ TestGameMapMinefieldMission::testLayWebDisabled()
     sh.setMission(9, 0, 0);
     sh.setFriendlyCode(String_t(""));
     h.turn.config()[HostConfiguration::AllowWebMines].set(false);
-    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.config(), h.shipScores, h.turn.shipList()), false);
+    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.mapConfiguration(), h.turn.config(), h.shipScores, h.turn.shipList()), false);
 }
 
 /** Test laying web mines, other race.
@@ -375,7 +376,7 @@ TestGameMapMinefieldMission::testLayWebWrongRace()
     Ship& sh = addTorper(h, 222, 4);
     sh.setMission(9, 0, 0);
     sh.setFriendlyCode(String_t(""));
-    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.config(), h.shipScores, h.turn.shipList()), false);
+    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.mapConfiguration(), h.turn.config(), h.shipScores, h.turn.shipList()), false);
 }
 
 /** Test laying minefield using "Lay Mines" extended mission.
@@ -390,7 +391,7 @@ TestGameMapMinefieldMission::testLayExtended()
     Ship& sh = addTorper(h, 222, 3);
     sh.setMission(21, 12, 4);                    /* pmsn_LayMines + default ExtMissionsStartAt */
     sh.setFriendlyCode(String_t("mi5"));         /* not relevant here */
-    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.config(), h.shipScores, h.turn.shipList()), true);
+    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.mapConfiguration(), h.turn.config(), h.shipScores, h.turn.shipList()), true);
 
     TS_ASSERT_EQUALS(testee.getRequiredMinefieldId(), 0);
     TS_ASSERT_EQUALS(testee.getMinefieldOwner(), 4); /* from mission */
@@ -413,7 +414,7 @@ TestGameMapMinefieldMission::testLayWebExtended()
     Ship& sh = addTorper(h, 222, 7);
     sh.setMission(22, 12, 9);                    /* pmsn_LayWeb + default ExtMissionsStartAt */
     sh.setFriendlyCode(String_t("mi5"));         /* not relevant here */
-    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.config(), h.shipScores, h.turn.shipList()), true);
+    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.mapConfiguration(), h.turn.config(), h.shipScores, h.turn.shipList()), true);
 
     TS_ASSERT_EQUALS(testee.getRequiredMinefieldId(), 0);
     TS_ASSERT_EQUALS(testee.getMinefieldOwner(), 9); /* from mission */
@@ -436,7 +437,7 @@ TestGameMapMinefieldMission::testLayInExtended()
     Ship& sh = addTorper(h, 222, 3);
     sh.setMission(36, 17, 0);                    /* pmsn_LayMinesIn + default ExtMissionsStartAt */
     sh.setFriendlyCode(String_t("mi5"));
-    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.config(), h.shipScores, h.turn.shipList()), true);
+    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.mapConfiguration(), h.turn.config(), h.shipScores, h.turn.shipList()), true);
 
     TS_ASSERT_EQUALS(testee.getRequiredMinefieldId(), 0);
     TS_ASSERT_EQUALS(testee.getMinefieldOwner(), 5);
@@ -459,7 +460,7 @@ TestGameMapMinefieldMission::testLayWebInExtended()
     Ship& sh = addTorper(h, 222, 7);
     sh.setMission(37, 17, 0);                    /* pmsn_LayWWebIn + default ExtMissionsStartAt */
     sh.setFriendlyCode(String_t("md3"));         /* not relevant */
-    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.config(), h.shipScores, h.turn.shipList()), true);
+    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.mapConfiguration(), h.turn.config(), h.shipScores, h.turn.shipList()), true);
 
     TS_ASSERT_EQUALS(testee.getRequiredMinefieldId(), 0);
     TS_ASSERT_EQUALS(testee.getMinefieldOwner(), 7);
@@ -493,7 +494,7 @@ TestGameMapMinefieldMission::testLayExtendHost()
     addMinefield(h, 30, Point(1005, 1000), 2000, 3, false);
     addMinefield(h, 40, Point(1030, 1000), 2000, 3, false);
 
-    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.config(), h.shipScores, h.turn.shipList()), true);
+    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.mapConfiguration(), h.turn.config(), h.shipScores, h.turn.shipList()), true);
 
     TS_ASSERT_EQUALS(testee.getRequiredMinefieldId(), 30); // closest
     TS_ASSERT_EQUALS(testee.getMinefieldOwner(), 3);
@@ -527,7 +528,7 @@ TestGameMapMinefieldMission::testLayExtendHostFail()
     addMinefield(h, 30, Point(1005, 1000), 20, 3, false);
     addMinefield(h, 40, Point(1030, 1000), 2000, 3, false);
 
-    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.config(), h.shipScores, h.turn.shipList()), true);
+    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.mapConfiguration(), h.turn.config(), h.shipScores, h.turn.shipList()), true);
 
     TS_ASSERT_EQUALS(testee.getRequiredMinefieldId(), 0); // make new field
     TS_ASSERT_EQUALS(testee.getMinefieldOwner(), 3);
@@ -559,7 +560,7 @@ TestGameMapMinefieldMission::testLayExtendPHost()
     addMinefield(h, 30, Point(1005, 1000), 2000, 3, false);
     addMinefield(h, 40, Point(1030, 1000), 2000, 3, false);
 
-    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.config(), h.shipScores, h.turn.shipList()), true);
+    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.mapConfiguration(), h.turn.config(), h.shipScores, h.turn.shipList()), true);
 
     TS_ASSERT_EQUALS(testee.getRequiredMinefieldId(), 10); // first matching
     TS_ASSERT_EQUALS(testee.getMinefieldOwner(), 3);
@@ -591,7 +592,7 @@ TestGameMapMinefieldMission::testLayExtendId()
     addMinefield(h, 30, Point(1005, 1000), 2000, 3, false);
     addMinefield(h, 40, Point(1030, 1000), 2000, 3, false);
 
-    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.config(), h.shipScores, h.turn.shipList()), true);
+    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.mapConfiguration(), h.turn.config(), h.shipScores, h.turn.shipList()), true);
 
     TS_ASSERT_EQUALS(testee.getRequiredMinefieldId(), 20); // selected
     TS_ASSERT_EQUALS(testee.getMinefieldOwner(), 3);
@@ -614,7 +615,7 @@ TestGameMapMinefieldMission::testLayExtendIdMissing()
     Ship& sh = addTorper(h, 222, 3);
     sh.setMission(36, 17, 444);                   /* pmsn_LayMinesIn + default ExtMissionsStartAt */
     sh.setFriendlyCode(String_t(""));
-    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.config(), h.shipScores, h.turn.shipList()), false);
+    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.mapConfiguration(), h.turn.config(), h.shipScores, h.turn.shipList()), false);
 }
 
 /** Test extending a minefield, PHost with extended mission, failure case.
@@ -635,7 +636,7 @@ TestGameMapMinefieldMission::testLayExtendIdMismatch()
     // Far-away minefield
     addMinefield(h, 20, Point(1500, 1000), 20, 3, false);
 
-    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.config(), h.shipScores, h.turn.shipList()), false);
+    TS_ASSERT_EQUALS(testee.checkLayMission(sh, h.turn.universe(), h.turn.version(), h.key, h.turn.mapConfiguration(), h.turn.config(), h.shipScores, h.turn.shipList()), false);
 }
 
 /** Test mine scooping with an empty ship.

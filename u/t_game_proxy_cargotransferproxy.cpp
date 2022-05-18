@@ -84,7 +84,7 @@ namespace {
         p.setPlayability(Planet::Playable);
         p.setName("Melmac");
         p.setFriendlyCode(String_t("alf"));
-        p.internalCheck(g->currentTurn().universe().config(), h.session().translator(), h.session().log());
+        p.internalCheck(g->mapConfiguration(), h.session().translator(), h.session().log());
         TS_ASSERT(p.isVisible());
         return p;
     }

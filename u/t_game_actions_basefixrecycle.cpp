@@ -7,9 +7,10 @@
 #include "game/actions/basefixrecycle.hpp"
 
 #include "t_game_actions.hpp"
-#include "game/test/simpleturn.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
+#include "game/map/configuration.hpp"
+#include "game/test/simpleturn.hpp"
 
 using afl::string::NullTranslator;
 using game::actions::BaseFixRecycle;

@@ -6,6 +6,7 @@
 #include "game/map/location.hpp"
 #include "game/map/anyplanettype.hpp"
 #include "game/map/anyshiptype.hpp"
+#include "game/map/configuration.hpp"
 #include "game/map/playedplanettype.hpp"
 #include "game/map/playedshiptype.hpp"
 #include "game/map/universe.hpp"
@@ -29,13 +30,14 @@ namespace {
 game::map::Location::Location()
     : sig_positionChange(),
       m_pUniverse(0),
+      m_pConfig(0),
       m_point(),
       m_reference(),
       m_pointValid(false)
 { }
 
 void
-game::map::Location::setUniverse(Universe* univ)
+game::map::Location::setUniverse(Universe* univ, const Configuration* mapConfig)
 {
     // Save old position in case the object does not exist in the new universe
     if (getPositionFromReference(m_pUniverse, m_reference, m_point)) {
@@ -44,6 +46,7 @@ game::map::Location::setUniverse(Universe* univ)
 
     // Update
     m_pUniverse = univ;
+    m_pConfig = mapConfig;
 }
 
 void
@@ -58,7 +61,7 @@ game::map::Location::set(Reference ref)
     // Set point to position from reference, unless it already is an alias of the current position
     Point pt;
     if (getPositionFromReference(m_pUniverse, m_reference, pt)) {
-        if (!(m_pUniverse != 0 && m_pointValid && m_pUniverse->config().getCanonicalLocation(m_point) == pt)) {
+        if (!(m_pConfig != 0 && m_pointValid && m_pConfig->getCanonicalLocation(m_point) == pt)) {
             m_point = pt;
             m_pointValid = true;
         }
@@ -85,7 +88,7 @@ game::map::Location::getPosition(Point& pt) const
 {
     if (getPositionFromReference(m_pUniverse, m_reference, pt)) {
         // If point represents an alias of the current position, report that instead
-        if (m_pUniverse != 0 && m_pointValid && m_pUniverse->config().getCanonicalLocation(m_point) == pt) {
+        if (m_pConfig != 0 && m_pointValid && m_pConfig->getCanonicalLocation(m_point) == pt) {
             pt = m_point;
         }
         return true;

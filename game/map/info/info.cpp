@@ -13,6 +13,7 @@
 #include "game/cargospec.hpp"
 #include "game/map/anyplanettype.hpp"
 #include "game/map/anyshiptype.hpp"
+#include "game/map/configuration.hpp"
 #include "game/map/info/linkbuilder.hpp"
 #include "game/map/minefield.hpp"
 #include "game/map/planetformula.hpp"
@@ -1219,6 +1220,7 @@ game::map::info::renderStarchartEmpireSummary(TagNode& tab,
                                               const StarchartInfo& t,
                                               const Universe& univ,
                                               const TeamSettings& teams,
+                                              const Configuration& mapConfig,
                                               util::NumberFormatter fmt,
                                               afl::string::Translator& tx)
 {
@@ -1239,9 +1241,8 @@ game::map::info::renderStarchartEmpireSummary(TagNode& tab,
     }
 
     // Compute size
-    const Configuration& chartConf = univ.config();
-    const Point chartSize = chartConf.getMode() == Configuration::Wrapped
-        ? chartConf.getSize()
+    const Point chartSize = mapConfig.getMode() == Configuration::Wrapped
+        ? mapConfig.getSize()
         : Point();
     int sizeX[2], sizeY[2];
     computeSize(planetXs, chartSize.getX(), sizeX);

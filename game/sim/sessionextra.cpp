@@ -135,7 +135,7 @@ namespace game { namespace sim { namespace {
                     game::map::Ship* sh = univ.ships().get(in.getId());
                     if (sh != 0) {
                         return Transfer(g->shipScores(), g->planetScores(), *sl, r->hostConfiguration(), r->hostVersion(), m_session.translator())
-                            .copyShipToGame(*sh, in, univ);
+                            .copyShipToGame(*sh, in, univ, g->mapConfiguration());
                     }
                 }
                 return false;

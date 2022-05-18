@@ -78,7 +78,7 @@ TestGameMapLocation::testRef()
 
     // Set position by reference
     Point pt;
-    testee.setUniverse(&t.universe());
+    testee.setUniverse(&t.universe(), &t.mapConfiguration());
     testee.set(Reference(Reference::Ship, 1));
     TS_ASSERT_EQUALS(recv.results.size(), 1U);
     TS_ASSERT_EQUALS(recv.results[0], POS1);
@@ -121,18 +121,18 @@ TestGameMapLocation::testUniv()
 
     // Set position by reference
     Point pt;
-    testee.setUniverse(&t1.universe());
+    testee.setUniverse(&t1.universe(), &t1.mapConfiguration());
     testee.set(Reference(Reference::Ship, 1));
     TS_ASSERT_EQUALS(testee.getPosition(pt), true);
     TS_ASSERT_EQUALS(pt, POS1);
 
     // Reset universe, keeps position
-    testee.setUniverse(0);
+    testee.setUniverse(0, 0);
     TS_ASSERT_EQUALS(testee.getPosition(pt), true);
     TS_ASSERT_EQUALS(pt, POS1);
 
     // Set to turn 2, moves position
-    testee.setUniverse(&t2.universe());
+    testee.setUniverse(&t2.universe(), &t2.mapConfiguration());
     TS_ASSERT_EQUALS(testee.getPosition(pt), true);
     TS_ASSERT_EQUALS(pt, POS2);
 }
@@ -151,7 +151,7 @@ TestGameMapLocation::testEffectiveRef()
 
     // Testee
     Location testee;
-    testee.setUniverse(&t.universe());
+    testee.setUniverse(&t.universe(), &t.mapConfiguration());
 
     // Set position to ship; verify
     Point pt;
@@ -193,7 +193,7 @@ TestGameMapLocation::testBrowse()
 
     // Testee
     Location testee;
-    testee.setUniverse(&t.universe());
+    testee.setUniverse(&t.universe(), &t.mapConfiguration());
 
     // Start at ship 9
     testee.set(Reference(Reference::Ship, 9));
@@ -245,7 +245,7 @@ TestGameMapLocation::testBrowsePlanet()
 
     // Testee
     Location testee;
-    testee.setUniverse(&t.universe());
+    testee.setUniverse(&t.universe(), &t.mapConfiguration());
 
     // Start at ship 9
     testee.set(Reference(Reference::Planet, 2));
@@ -269,14 +269,14 @@ TestGameMapLocation::testWrap()
     game::test::SimpleTurn t;
     t.setPosition(IN);
     t.addShip(1, 1, Object::Playable);
-    t.universe().config().setConfiguration(game::map::Configuration::Circular, Point(2000, 2000), Point(1400, 1400));
+    t.mapConfiguration().setConfiguration(game::map::Configuration::Circular, Point(2000, 2000), Point(1400, 1400));
 
     // Testee
     Location testee;
 
     // Set position by reference
     Point pt;
-    testee.setUniverse(&t.universe());
+    testee.setUniverse(&t.universe(), &t.mapConfiguration());
     testee.set(Reference(Reference::Ship, 1));
     TS_ASSERT_EQUALS(testee.getPosition(pt), true);
     TS_ASSERT_EQUALS(pt, IN);

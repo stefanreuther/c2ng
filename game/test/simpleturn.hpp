@@ -4,13 +4,14 @@
 #ifndef C2NG_GAME_TEST_SIMPLETURN_HPP
 #define C2NG_GAME_TEST_SIMPLETURN_HPP
 
-#include "game/turn.hpp"
-#include "game/test/interpreterinterface.hpp"
 #include "game/config/hostconfiguration.hpp"
-#include "game/spec/shiplist.hpp"
 #include "game/hostversion.hpp"
+#include "game/map/configuration.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/ship.hpp"
+#include "game/spec/shiplist.hpp"
+#include "game/test/interpreterinterface.hpp"
+#include "game/turn.hpp"
 
 namespace game { namespace test {
 
@@ -43,6 +44,10 @@ namespace game { namespace test {
         /** Access embedded HostConfiguration object. */
         game::config::HostConfiguration& config()
             { return m_config; }
+
+        /** Access embedded map configuration object. */
+        game::map::Configuration& mapConfiguration()
+            { return m_mapConfiguration; }
 
         /** Access embedded ShipList object. */
         game::spec::ShipList& shipList()
@@ -100,6 +105,7 @@ namespace game { namespace test {
         Turn m_turn;
         InterpreterInterface m_interface;
         game::config::HostConfiguration m_config;
+        game::map::Configuration m_mapConfiguration;
         game::spec::ShipList m_shipList;
         HostVersion m_version;
 

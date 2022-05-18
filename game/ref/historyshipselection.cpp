@@ -129,7 +129,7 @@ game::ref::HistoryShipSelection::buildList(HistoryShipList& list, const Turn& tu
                 while (game::map::ShipHistoryData::Track* e = sh->getHistoryLocation(turn)) {
                     int x, y;
                     if (e->x.get(x) && e->y.get(y)) {
-                        if (isInRange(x, y, univ)) {
+                        if (isInRange(x, y, pGame->mapConfiguration())) {
                             accept = true;
                             break;
                         }
@@ -209,7 +209,7 @@ game::ref::HistoryShipSelection::buildList(HistoryShipList& list, const Turn& tu
 }
 
 game::ref::HistoryShipSelection::Modes_t
-game::ref::HistoryShipSelection::getAvailableModes(const game::map::Universe& univ, const TeamSettings& teams) const
+game::ref::HistoryShipSelection::getAvailableModes(const game::map::Universe& univ, const game::map::Configuration& mapConfig, const TeamSettings& teams) const
 {
     // ex WHistoryShipSelection::getVisibleModes
     Modes_t modes;
@@ -247,7 +247,7 @@ game::ref::HistoryShipSelection::getAvailableModes(const game::map::Universe& un
                 while (game::map::ShipHistoryData::Track* e = sh->getHistoryLocation(t)) {
                     int x, y;
                     if (e->x.get(x) && e->y.get(y)) {
-                        if (isInRange(x, y, univ)) {
+                        if (isInRange(x, y, mapConfig)) {
                             modes += LocalShips;
                         }
                         if (x == m_position.getX() && y == m_position.getY()) {
@@ -278,11 +278,11 @@ game::ref::HistoryShipSelection::getAvailableModes(const game::map::Universe& un
 }
 
 game::ref::HistoryShipSelection::Mode
-game::ref::HistoryShipSelection::getInitialMode(const game::map::Universe& univ, const TeamSettings& teams) const
+game::ref::HistoryShipSelection::getInitialMode(const game::map::Universe& univ, const game::map::Configuration& mapConfig, const TeamSettings& teams) const
 {
     // ex WHistoryShipSelection::getInitialMode
-    Modes_t modes = getAvailableModes(univ, teams);
-    if (modes.contains(ExactShips) && m_positionValid && univ.findPlanetAt(m_position) != 0) {
+    Modes_t modes = getAvailableModes(univ, mapConfig, teams);
+    if (modes.contains(ExactShips) && m_positionValid && univ.findPlanetAt(mapConfig.getCanonicalLocation(m_position)) != 0) {
         return ExactShips;
     } else if (modes.contains(LocalShips)) {
         return LocalShips;
@@ -348,9 +348,9 @@ game::ref::HistoryShipSelection::getSortOrderName(afl::string::Translator& tx) c
 }
 
 bool
-game::ref::HistoryShipSelection::isInRange(int x, int y, const game::map::Universe& univ) const
+game::ref::HistoryShipSelection::isInRange(int x, int y, const game::map::Configuration& mapConfig) const
 {
-    game::map::Point p = univ.config().getSimpleNearestAlias(game::map::Point(x, y), m_position);
+    game::map::Point p = mapConfig.getSimpleNearestAlias(game::map::Point(x, y), m_position);
 
     return (std::abs(p.getX() - m_position.getX()) < 10 && std::abs(p.getY() - m_position.getY()) < 10);
 }

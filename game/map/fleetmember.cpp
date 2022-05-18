@@ -8,6 +8,7 @@
 
 #include "game/map/fleetmember.hpp"
 #include "afl/string/format.hpp"
+#include "game/map/configuration.hpp"
 #include "game/map/fleet.hpp"
 #include "game/map/ship.hpp"
 #include "game/map/shiputils.hpp"
@@ -70,6 +71,7 @@ namespace {
 
     /** Process towee of a ship. */
     void synchronizeTowee(game::map::Universe& univ, const Id_t sid,
+                          const game::map::Configuration& mapConfig,
                           const game::config::HostConfiguration& config,
                           const game::spec::ShipList& shipList)
     {
@@ -78,7 +80,7 @@ namespace {
             int tow = pShip->getMissionParameter(game::TowParameter).orElse(0);
             game::map::Ship* towedShip = univ.ships().get(tow);
             if (towedShip != 0 && towedShip->isPlayable(game::map::Object::Playable)) {
-                game::map::Fleet::synchronizeFleetMember(univ, tow, config, shipList);
+                game::map::Fleet::synchronizeFleetMember(univ, tow, mapConfig, config, shipList);
             }
         }
     }
@@ -88,6 +90,7 @@ namespace {
         \param univ Universe to work on
         \param sid Ship Id */
     void leaveFleet(game::map::Universe& univ, const Id_t sid,
+                    const game::map::Configuration& mapConfig,
                     const game::config::HostConfiguration& config,
                     const game::spec::ShipList& shipList)
     {
@@ -103,7 +106,7 @@ namespace {
             univ.fleets().handleFleetChange(fid);
 
             // If we are towing a fleet member, they may now get free
-            synchronizeTowee(univ, sid, config, shipList);
+            synchronizeTowee(univ, sid, mapConfig, config, shipList);
 
             // Notify
             pShip->markDirty();
@@ -124,9 +127,10 @@ namespace {
 
 
 // Constructor.
-game::map::FleetMember::FleetMember(Universe& univ, Ship& ship)
+game::map::FleetMember::FleetMember(Universe& univ, Ship& ship, const Configuration& mapConfig)
     : m_universe(univ),
-      m_ship(ship)
+      m_ship(ship),
+      m_mapConfig(mapConfig)
 { }
 
 // Set fleet number.
@@ -142,7 +146,7 @@ game::map::FleetMember::setFleetNumber(Id_t nfid,
         return true;
     } else if (nfid == 0) {
         // leave fleet
-        leaveFleet(m_universe, m_ship.getId(), config, shipList);
+        leaveFleet(m_universe, m_ship.getId(), m_mapConfig, config, shipList);
         return true;
     } else {
         game::map::Ship* nsh = m_universe.ships().get(nfid);
@@ -161,19 +165,19 @@ game::map::FleetMember::setFleetNumber(Id_t nfid,
                 m_ship.setFleetNumber(nfid);
                 m_universe.fleets().handleFleetChange(nfid);
                 m_ship.markDirty();                              // FIXME: needed?
-                synchronizeTowee(m_universe, m_ship.getId(), config, shipList);
+                synchronizeTowee(m_universe, m_ship.getId(), m_mapConfig, config, shipList);
                 return true;
             } else if (nsh->getFleetNumber() == nfid) {
                 // join a fleet
                 removeFleetMember(m_universe, m_ship.getId());
                 Fleet(m_universe, m_ship).markDirty();           // FIXME: needed?
                 m_ship.setFleetNumber(nfid);
-                Fleet::synchronizeFleetMember(m_universe, m_ship.getId(), config, shipList);
+                Fleet::synchronizeFleetMember(m_universe, m_ship.getId(), m_mapConfig, config, shipList);
                 Fleet(m_universe, *nsh).markDirty();             // FIXME: needed?
                 m_universe.fleets().handleFleetChange(nfid);
                 m_ship.markDirty();                              // FIXME: needed?
                 nsh->markDirty();                                // FIXME: needed?
-                synchronizeTowee(m_universe, m_ship.getId(), config, shipList);
+                synchronizeTowee(m_universe, m_ship.getId(), m_mapConfig, config, shipList);
                 return true;
             } else {
                 // invalid: not a fleet leader
@@ -216,7 +220,7 @@ game::map::FleetMember::setWaypoint(Point pt,
             // Set waypoint
             Point position;
             if (m_ship.getPosition(position)) {
-                m_ship.setWaypoint(m_universe.config().getSimpleNearestAlias(pt, position));
+                m_ship.setWaypoint(m_mapConfig.getSimpleNearestAlias(pt, position));
             }
 
             // Cancel intercept, if any
@@ -227,7 +231,7 @@ game::map::FleetMember::setWaypoint(Point pt,
 
             // Distribute change
             if (m_ship.isFleetLeader()) {
-                Fleet(m_universe, m_ship).synchronize(config, shipList);
+                Fleet(m_universe, m_ship).synchronize(config, shipList, m_mapConfig);
             }
         }
         return true;
@@ -246,7 +250,7 @@ game::map::FleetMember::setWarpFactor(int speed,
     } else {
         m_ship.setWarpFactor(speed);
         if (m_ship.isFleetLeader()) {
-            Fleet(m_universe, m_ship).synchronize(config, shipList);
+            Fleet(m_universe, m_ship).synchronize(config, shipList, m_mapConfig);
         }
         return true;
     }
@@ -298,26 +302,26 @@ game::map::FleetMember::setMission(int m, int i, int t,
     // Postprocess intercept
     if (xcept) {
         // Set waypoint to intercept target
-        setInterceptWaypoint(m_universe, m_ship);
+        setInterceptWaypoint(m_universe, m_ship, m_mapConfig);
     }
 
     // Propagate to members
     if (m_ship.isFleetLeader()) {
-        Fleet(m_universe, m_ship).synchronize(config, shipList);
+        Fleet(m_universe, m_ship).synchronize(config, shipList, m_mapConfig);
     }
 
     // Postprocess tow
     if (oldMission == Mission::msn_Tow) {
         if (Ship* oldTowee = m_universe.ships().get(oldTow)) {
             if (oldTowee->getFleetNumber() == m_ship.getFleetNumber()) {
-                Fleet::synchronizeFleetMember(m_universe, oldTow, config, shipList);
+                Fleet::synchronizeFleetMember(m_universe, oldTow, m_mapConfig, config, shipList);
             }
         }
     }
     if (m == Mission::msn_Tow) {
         if (Ship* newTowee = m_universe.ships().get(t)) {
             if (newTowee->getFleetNumber() == m_ship.getFleetNumber()) {
-                Fleet::synchronizeFleetMember(m_universe, t, config, shipList);
+                Fleet::synchronizeFleetMember(m_universe, t, m_mapConfig, config, shipList);
             }
         }
     }

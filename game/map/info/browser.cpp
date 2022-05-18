@@ -350,7 +350,7 @@ game::map::info::Browser::renderStarchartPage(Nodes_t& out)
     const StarchartInfo t = computeStarchartInfo(*turn, g.teamSettings());
 
     // Render
-    renderStarchartEmpireSummary(makeTable(out), t, univ, g.teamSettings(), fmt, tx);
+    renderStarchartEmpireSummary(makeTable(out), t, univ, g.teamSettings(), g.mapConfiguration(), fmt, tx);
     renderStarchartForeignSummary(makeTable(out), t, g.teamSettings(), root.playerList(), fmt, tx, m_link);
     renderUniversalFriendlyCode(makeTable(out), univ, g.teamSettings(), tx, m_link);
 }

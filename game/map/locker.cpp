@@ -191,10 +191,10 @@ game::map::Locker::findWarpWellEdge(Point origin, bool isHyperdriving,
 {
     // ex WScannerChartWidget::doItemLock (part)
     // Query current position
-    Id_t originPlanetId = univ.findGravityPlanetAt(origin, config, host);
+    Id_t originPlanetId = univ.findGravityPlanetAt(origin, m_config, config, host);
 
     // Can we optimize warp wells?
-    Id_t foundPlanetId = univ.findPlanetAt(m_foundPoint);
+    Id_t foundPlanetId = univ.findPlanetAt(m_config.getCanonicalLocation(m_foundPoint));
     if (foundPlanetId != 0
         && config[HostConfiguration::AllowGravityWells]()
         && (!isHyperdriving || !host.isPHost() || config[HostConfiguration::AllowHyperjumpGravWells]())
@@ -219,7 +219,7 @@ game::map::Locker::findWarpWellEdge(Point origin, bool isHyperdriving,
                 int32_t newDistance = getWarpWellDistanceMetric(origin, newPoint, isHyperdriving, host);
                 if (newDistance >= 0
                     && (bestDistance < 0 || newDistance < bestDistance)
-                    && univ.findGravityPlanetAt(newPoint, config, host) == foundPlanetId)
+                    && univ.findGravityPlanetAt(newPoint, m_config, config, host) == foundPlanetId)
                 {
                     // Accept new point if it is valid, has a better metric than
                     // the previous one, and it is in the same warp well.

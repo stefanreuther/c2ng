@@ -23,6 +23,7 @@ namespace {
                           int32_t flags,
                           const String_t& cargospec,
                           game::Session& session,
+                          const game::map::Configuration& mapConfig,
                           game::Turn& turn,
                           const game::Root& root)
     {
@@ -36,7 +37,7 @@ namespace {
         // Build cargo transfer from template
         const game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
         game::actions::CargoTransfer action;
-        setup.build(action, turn, root.hostConfiguration(), shipList, root.hostVersion());
+        setup.build(action, turn, mapConfig, root.hostConfiguration(), shipList, root.hostVersion());
 
         // Configure
         if ((flags & flagOverload) != 0) {
@@ -78,7 +79,7 @@ namespace {
 
 
 void
-game::interface::doCargoTransfer(game::map::Planet& pl, interpreter::Process& process, interpreter::Arguments& args, Session& session, Turn& turn, const Root& root)
+game::interface::doCargoTransfer(game::map::Planet& pl, interpreter::Process& process, interpreter::Arguments& args, Session& session, const game::map::Configuration& mapConfig, Turn& turn, const Root& root)
 {
     // ex int/if/planetif.cc:IFPlanetCargoTransfer
     // ex planint.pas:Planet_CargoTransfer
@@ -103,11 +104,11 @@ game::interface::doCargoTransfer(game::map::Planet& pl, interpreter::Process& pr
     setProxyIfRequired(setup, turn, proxyId);
 
     // Do it
-    doScriptTransfer(setup, process, flags, cargospec, session, turn, root);
+    doScriptTransfer(setup, process, flags, cargospec, session, mapConfig, turn, root);
 }
 
 void
-game::interface::doCargoTransfer(game::map::Ship& sh, interpreter::Process& process, interpreter::Arguments& args, Session& session, Turn& turn, const Root& root)
+game::interface::doCargoTransfer(game::map::Ship& sh, interpreter::Process& process, interpreter::Arguments& args, Session& session, const game::map::Configuration& mapConfig, Turn& turn, const Root& root)
 {
     // ex int/if/shipif.cc:IFShipCargoTransfer
     // ex shipint.pas:Ship_CargoTransfer
@@ -128,11 +129,11 @@ game::interface::doCargoTransfer(game::map::Ship& sh, interpreter::Process& proc
     game::actions::CargoTransferSetup setup = game::actions::CargoTransferSetup::fromShipShip(turn.universe(), sh.getId(), target_sid);
 
     // Do it
-    doScriptTransfer(setup, process, flags, cargospec, session, turn, root);
+    doScriptTransfer(setup, process, flags, cargospec, session, mapConfig, turn, root);
 }
 
 void
-game::interface::doCargoUnload(game::map::Ship& sh, bool reverse, interpreter::Process& process, interpreter::Arguments& args, Session& session, Turn& turn, const Root& root)
+game::interface::doCargoUnload(game::map::Ship& sh, bool reverse, interpreter::Process& process, interpreter::Arguments& args, Session& session, const game::map::Configuration& mapConfig, Turn& turn, const Root& root)
 {
     // ex int/if/shipif.cc:doShipCargoUnUpload
     // Args are cargospec, flags O/S/N/J (overload, supply sale, no-fail, jettison permission) + proxy Id
@@ -175,5 +176,5 @@ game::interface::doCargoUnload(game::map::Ship& sh, bool reverse, interpreter::P
     setProxyIfRequired(setup, turn, proxyId);
 
     // Do it
-    doScriptTransfer(setup, process, flags, cargospec, session, turn, root);
+    doScriptTransfer(setup, process, flags, cargospec, session, mapConfig, turn, root);
 }

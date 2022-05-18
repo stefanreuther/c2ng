@@ -91,9 +91,10 @@ namespace game { namespace sim {
             \param [out]    out  Game ship
             \param [in]     in   Simulation ship
             \param [in,out] univ Universe (for transferring ammo)
+            \param [in]     mapConfig Starchart geometry configuration
             \retval true Copy successful
             \retval false Game ship does not match simulation ship, not copied */
-        bool copyShipToGame(game::map::Ship& out, const Ship& in, game::map::Universe& univ) const;
+        bool copyShipToGame(game::map::Ship& out, const Ship& in, game::map::Universe& univ, const game::map::Configuration& mapConfig) const;
 
         /** Copy planet from game into simulation.
             \param [out] out  Simulation planet. Will be overwritten with game planet data.

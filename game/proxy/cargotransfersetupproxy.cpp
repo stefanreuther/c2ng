@@ -83,7 +83,8 @@ game::proxy::CargoTransferSetupProxy::createShipJettison(WaitIndicator& link, in
 
         void handle(Session& session)
             {
-                m_result.setup = CargoTransferSetup::fromShipJettison(mustHaveGame(session).currentTurn().universe(), m_shipId);
+                Game& g = mustHaveGame(session);
+                m_result.setup = CargoTransferSetup::fromShipJettison(g.currentTurn().universe(), m_shipId);
                 checkConflict(session, m_result);
             }
 
@@ -109,7 +110,8 @@ game::proxy::CargoTransferSetupProxy::createShipBeamUp(WaitIndicator& link, int 
 
         void handle(Session& session)
             {
-                m_result.setup = CargoTransferSetup::fromShipBeamUp(mustHaveGame(session).currentTurn(), m_shipId, mustHaveRoot(session).hostConfiguration());
+                Game& g = mustHaveGame(session);
+                m_result.setup = CargoTransferSetup::fromShipBeamUp(g.currentTurn(), m_shipId, mustHaveRoot(session).hostConfiguration());
                 checkConflict(session, m_result);
             }
 

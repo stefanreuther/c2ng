@@ -11,6 +11,7 @@
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 #include "game/actions/cargotransfer.hpp"
+#include "game/map/configuration.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/test/root.hpp"
 #include "game/test/shiplist.hpp"
@@ -54,6 +55,7 @@ namespace {
     {
         afl::string::NullTranslator tx;
         afl::sys::Log log;
+        game::map::Configuration mapConfig;
 
         game::map::Planet* pl = univ.planets().create(id);
         TS_ASSERT(pl != 0);
@@ -71,7 +73,7 @@ namespace {
         pd.supplies = 100;
         pd.money = 100;
         pl->addCurrentPlanetData(pd, game::PlayerSet_t(owner));
-        pl->internalCheck(univ.config(), tx, log);
+        pl->internalCheck(mapConfig, tx, log);
         pl->combinedCheck2(univ, game::PlayerSet_t(owner), 10);
         pl->setPlayability(playability);
         return *pl;

@@ -42,8 +42,9 @@ server::play::ShipCommandHandler::processCommand(const String_t& cmd, interprete
 {
     // ex ServerPlanetCommandHandler::processCommand
     // Preconditions
+    game::Game& g = game::actions::mustHaveGame(m_session);
     game::Root& root = game::actions::mustHaveRoot(m_session);
-    game::Turn& turn = game::actions::mustHaveGame(m_session).currentTurn();
+    game::Turn& turn = g.currentTurn();
     game::spec::ShipList& sl = game::actions::mustHaveShipList(m_session);
 
     game::map::Ship* pShip = turn.universe().ships().get(m_id);
@@ -56,33 +57,33 @@ server::play::ShipCommandHandler::processCommand(const String_t& cmd, interprete
 
     // Missing: mark, unmark, fixship, recycleship
     if (cmd == "setcomment") {
-        gi::callShipMethod(*pShip, gi::ismSetComment, args, process, m_session, root, sl, turn);
+        gi::callShipMethod(*pShip, gi::ismSetComment, args, process, m_session, root, g.mapConfiguration(), sl, turn);
         objs.addNew(new ShipPacker(m_session, m_id));
     } else if (cmd == "setfcode") {
         args.checkArgumentCount(1);
-        gi::setShipProperty(*pShip, gi::ispFCode, args.getNext(), root, sl, turn);
+        gi::setShipProperty(*pShip, gi::ispFCode, args.getNext(), root, sl, g.mapConfiguration(), turn);
         objs.addNew(new ShipPacker(m_session, m_id));
     } else if (cmd == "setname") {
         args.checkArgumentCount(1);
-        gi::setShipProperty(*pShip, gi::ispName, args.getNext(), root, sl, turn);
+        gi::setShipProperty(*pShip, gi::ispName, args.getNext(), root, sl, g.mapConfiguration(), turn);
         objs.addNew(new ShipXYPacker(m_session));
     } else if (cmd == "setwaypoint") {
-        gi::callShipMethod(*pShip, gi::ismSetWaypoint, args, process, m_session, root, sl, turn);
+        gi::callShipMethod(*pShip, gi::ismSetWaypoint, args, process, m_session, root, g.mapConfiguration(), sl, turn);
         objs.addNew(new ShipPacker(m_session, m_id));
     } else if (cmd == "setenemy") {
         args.checkArgumentCount(1);
-        gi::setShipProperty(*pShip, gi::ispEnemyId, args.getNext(), root, sl, turn);
+        gi::setShipProperty(*pShip, gi::ispEnemyId, args.getNext(), root, sl, g.mapConfiguration(), turn);
         objs.addNew(new ShipPacker(m_session, m_id));
     } else if (cmd == "setspeed") {
         args.checkArgumentCount(1);
-        gi::setShipProperty(*pShip, gi::ispSpeedId, args.getNext(), root, sl, turn);
+        gi::setShipProperty(*pShip, gi::ispSpeedId, args.getNext(), root, sl, g.mapConfiguration(), turn);
         objs.addNew(new ShipPacker(m_session, m_id));
     } else if (cmd == "setmission") {
-        gi::callShipMethod(*pShip, gi::ismSetMission, args, process, m_session, root, sl, turn);
+        gi::callShipMethod(*pShip, gi::ismSetMission, args, process, m_session, root, g.mapConfiguration(), sl, turn);
         objs.addNew(new ShipPacker(m_session, m_id));
     } else if (cmd == "cargotransfer") {
         interpreter::Arguments save(args);
-        gi::callShipMethod(*pShip, gi::ismCargoTransfer, args, process, m_session, root, sl, turn);
+        gi::callShipMethod(*pShip, gi::ismCargoTransfer, args, process, m_session, root, g.mapConfiguration(), sl, turn);
         objs.addNew(new ShipPacker(m_session, m_id));
 
         // Add the other ship. If there's anything wrong, the command above will have failed,
@@ -95,11 +96,11 @@ server::play::ShipCommandHandler::processCommand(const String_t& cmd, interprete
             }
         }
     } else if (cmd == "cargoupload") {
-        gi::callShipMethod(*pShip, gi::ismCargoUpload, args, process, m_session, root, sl, turn);
+        gi::callShipMethod(*pShip, gi::ismCargoUpload, args, process, m_session, root, g.mapConfiguration(), sl, turn);
         objs.addNew(new ShipPacker(m_session, m_id));
         addPlanet(objs, m_session, *pShip, turn.universe());
     } else if (cmd == "cargounload") {
-        gi::callShipMethod(*pShip, gi::ismCargoUnload, args, process, m_session, root, sl, turn);
+        gi::callShipMethod(*pShip, gi::ismCargoUnload, args, process, m_session, root, g.mapConfiguration(), sl, turn);
         objs.addNew(new ShipPacker(m_session, m_id));
         addPlanet(objs, m_session, *pShip, turn.universe());
     } else {

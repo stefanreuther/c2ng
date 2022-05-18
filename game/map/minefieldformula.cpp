@@ -3,6 +3,7 @@
   */
 
 #include "game/map/minefieldformula.hpp"
+#include "game/map/configuration.hpp"
 #include "game/map/minefieldmission.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/ship.hpp"
@@ -39,20 +40,20 @@ namespace game { namespace map { namespace {
         return !hasOwnShip;
     }
 
-    void addMinefield(MinefieldEffects_t& result, const Minefield& field, int32_t radiusChange, int numTorps, const Universe& univ, const HostVersion& host, const HostConfiguration& config)
+    void addMinefield(MinefieldEffects_t& result, const Minefield& field, int32_t radiusChange, int numTorps, const Universe& univ, const Configuration& mapConfig, const HostVersion& host, const HostConfiguration& config)
     {
         Point center;
         int owner;
         if (field.getPosition(center) && field.getOwner(owner)) {
             result.push_back(MinefieldEffect(center, field.getId(), radiusChange, field.getUnits(), owner, numTorps, field.isWeb(),
-                                             isMinefieldEndangered(field, univ, host, config)));
+                                             isMinefieldEndangered(field, univ, mapConfig, host, config)));
         }
     }
 
 } } }
 
 bool
-game::map::isMinefieldEndangered(const Minefield& field, const Universe& univ, const HostVersion& host, const game::config::HostConfiguration& config)
+game::map::isMinefieldEndangered(const Minefield& field, const Universe& univ, const Configuration& mapConfig, const HostVersion& host, const game::config::HostConfiguration& config)
 {
     // ex ship.pas:IsMinefieldEndangered
 
@@ -87,7 +88,7 @@ game::map::isMinefieldEndangered(const Minefield& field, const Universe& univ, c
                 && pPlanet->getPosition(pt)
                 && (!pPlanet->getOwner(plOwner) || plOwner != mfOwner)
                 && hasPossibleEnemyShip(univ, pt, mfOwner)
-                && univ.config().getSquaredDistance(mfCenter, pt) <= util::squareFloat(radius + maxRange))
+                && mapConfig.getSquaredDistance(mfCenter, pt) <= util::squareFloat(radius + maxRange))
             {
                 return true;
             }
@@ -104,7 +105,7 @@ game::map::isMinefieldEndangered(const Minefield& field, const Universe& univ, c
             if (pShip->getPosition(shipPos)
                 && pShip->getRealOwner().get(shipOwner)
                 && shipOwner != mfOwner
-                && univ.config().getSquaredDistance(mfCenter, shipPos) <= util::squareFloat(radius + config[range](shipOwner)))
+                && mapConfig.getSquaredDistance(mfCenter, shipPos) <= util::squareFloat(radius + config[range](shipOwner)))
             {
                 return true;
             }
@@ -120,6 +121,7 @@ game::map::computeMineLayEffect(MinefieldEffects_t& result,
                                 const MinefieldMission& mission,
                                 const Ship& ship,
                                 const Universe& univ,
+                                const Configuration& mapConfig,
                                 const Root& root)
 {
     // ex WShipScannerChartWidget::drawPost (part)
@@ -153,11 +155,11 @@ game::map::computeMineLayEffect(MinefieldEffects_t& result,
     mf->setUnits(newUnits);
 
     // Add it
-    addMinefield(result, *mf, radiusChange, mission.getNumTorpedoes(), univ, root.hostVersion(), root.hostConfiguration());
+    addMinefield(result, *mf, radiusChange, mission.getNumTorpedoes(), univ, mapConfig, root.hostVersion(), root.hostConfiguration());
 }
 
 void
-game::map::computeMineScoopEffect(MinefieldEffects_t& result, const MinefieldMission& mission, const Ship& ship, const Universe& univ, const Root& root,
+game::map::computeMineScoopEffect(MinefieldEffects_t& result, const MinefieldMission& mission, const Ship& ship, const Universe& univ, const Configuration& mapConfig, const Root& root,
                                   const game::spec::ShipList& shipList)
 {
     // ex WShipScannerChartWidget::drawPost (part)
@@ -176,7 +178,7 @@ game::map::computeMineScoopEffect(MinefieldEffects_t& result, const MinefieldMis
             && mf->getOwner(mfOwner)
             && mfOwner == mission.getMinefieldOwner()
             && mf->getPosition(mfPos)
-            && univ.config().getSquaredDistance(mfPos, shipPos) <= mf->getUnitsForLaying(root.hostVersion(), root.hostConfiguration()))
+            && mapConfig.getSquaredDistance(mfPos, shipPos) <= mf->getUnitsForLaying(root.hostVersion(), root.hostConfiguration()))
         {
             // Okay, scoop it. First, figure out conversion rate.
             int rate = ((mf->isWeb() ? root.hostConfiguration()[HostConfiguration::UnitsPerWebRate](mfOwner) : root.hostConfiguration()[HostConfiguration::UnitsPerTorpRate](mfOwner))
@@ -217,7 +219,7 @@ game::map::computeMineScoopEffect(MinefieldEffects_t& result, const MinefieldMis
 
                 Minefield newField(*mf);
                 newField.setUnits(newUnits);
-                addMinefield(result, newField, radiusChange, scoopedTorps, univ, root.hostVersion(), root.hostConfiguration());
+                addMinefield(result, newField, radiusChange, scoopedTorps, univ, mapConfig, root.hostVersion(), root.hostConfiguration());
             }
         }
     }

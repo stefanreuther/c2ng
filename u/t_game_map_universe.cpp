@@ -8,6 +8,7 @@
 #include "t_game_map.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
+#include "game/map/configuration.hpp"
 #include "game/test/interpreterinterface.hpp"
 
 using game::Reference;
@@ -35,7 +36,6 @@ TestGameMapUniverse::testBasics()
     TS_ASSERT_EQUALS(&u.ufos(),          &cu.ufos());
     TS_ASSERT_EQUALS(&u.explosions(),    &cu.explosions());
     TS_ASSERT_EQUALS(&u.drawings(),      &cu.drawings());
-    TS_ASSERT_EQUALS(&u.config(),        &cu.config());
 
     TS_ASSERT(cu.getReverter() == 0);
     TS_ASSERT(u.getReverter() == 0);
@@ -92,6 +92,7 @@ void
 TestGameMapUniverse::testFind()
 {
     // Some environment
+    const game::map::Configuration mapConfig;
     game::HostVersion tim(game::HostVersion::Host, MKVERSION(3,22,0));
     game::HostVersion andrew(game::HostVersion::PHost, MKVERSION(3,2,5));
     HostConfiguration noWW, squareWW, roundWW;
@@ -137,66 +138,66 @@ TestGameMapUniverse::testFind()
     s7->setName("Seven");
     s8->setName("Eight");
 
-    u.postprocess(game::PlayerSet_t(5), game::PlayerSet_t(5), game::map::Object::Playable, tim, noWW, 7, sl, tx, log);
+    u.postprocess(game::PlayerSet_t(5), game::PlayerSet_t(5), game::map::Object::Playable, mapConfig, tim, noWW, 7, sl, tx, log);
 
     // findPlanetAt/1
     TS_ASSERT_EQUALS(u.findPlanetAt(Point(1010, 1000)), 30);
     TS_ASSERT_EQUALS(u.findPlanetAt(Point(1020, 1020)), 0);
 
-    // findPlanetAt/4
+    // findPlanetAt/5
     // - exact position, all combinations
     //   (note that squareWW, tim is not a valid combination)
-    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1010, 1000), false, noWW,     tim),    30);
-    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1010, 1000), true,  noWW,     tim),    30);
-    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1010, 1000), false, roundWW,  tim),    30);
-    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1010, 1000), true,  roundWW,  tim),    30);
-    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1010, 1000), false, noWW,     andrew), 30);
-    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1010, 1000), true,  noWW,     andrew), 30);
-    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1010, 1000), false, roundWW,  andrew), 30);
-    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1010, 1000), true,  roundWW,  andrew), 30);
-    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1010, 1000), false, squareWW, andrew), 30);
-    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1010, 1000), true,  squareWW, andrew), 30);
+    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1010, 1000), false, mapConfig, noWW,     tim),    30);
+    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1010, 1000), true,  mapConfig, noWW,     tim),    30);
+    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1010, 1000), false, mapConfig, roundWW,  tim),    30);
+    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1010, 1000), true,  mapConfig, roundWW,  tim),    30);
+    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1010, 1000), false, mapConfig, noWW,     andrew), 30);
+    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1010, 1000), true,  mapConfig, noWW,     andrew), 30);
+    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1010, 1000), false, mapConfig, roundWW,  andrew), 30);
+    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1010, 1000), true,  mapConfig, roundWW,  andrew), 30);
+    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1010, 1000), false, mapConfig, squareWW, andrew), 30);
+    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1010, 1000), true,  mapConfig, squareWW, andrew), 30);
 
     // - inexact position, all combinations
-    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1013, 1000), false, noWW,     tim),     0);
-    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1013, 1000), true,  noWW,     tim),     0);
-    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1013, 1000), false, roundWW,  tim),     0);
-    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1013, 1000), true,  roundWW,  tim),    30);
-    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1013, 1000), false, noWW,     andrew),  0);
-    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1013, 1000), true,  noWW,     andrew),  0);
-    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1013, 1000), false, roundWW,  andrew),  0);
-    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1013, 1000), true,  roundWW,  andrew), 30);
-    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1013, 1000), false, squareWW, andrew),  0);
-    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1013, 1000), true,  squareWW, andrew), 30);
+    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1013, 1000), false, mapConfig, noWW,     tim),     0);
+    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1013, 1000), true,  mapConfig, noWW,     tim),     0);
+    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1013, 1000), false, mapConfig, roundWW,  tim),     0);
+    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1013, 1000), true,  mapConfig, roundWW,  tim),    30);
+    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1013, 1000), false, mapConfig, noWW,     andrew),  0);
+    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1013, 1000), true,  mapConfig, noWW,     andrew),  0);
+    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1013, 1000), false, mapConfig, roundWW,  andrew),  0);
+    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1013, 1000), true,  mapConfig, roundWW,  andrew), 30);
+    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1013, 1000), false, mapConfig, squareWW, andrew),  0);
+    TS_ASSERT_EQUALS(u.findPlanetAt(Point(1013, 1000), true,  mapConfig, squareWW, andrew), 30);
 
     // findGravityPlanetAt
     // - inexact position testcases
-    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1013, 1000), noWW,     tim),     0);
-    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1013, 1000), roundWW,  tim),    30);
-    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1013, 1000), noWW,     andrew),  0);
-    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1013, 1000), roundWW,  andrew), 30);
-    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1013, 1000), squareWW, andrew), 30);
+    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1013, 1000), mapConfig, noWW,     tim),     0);
+    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1013, 1000), mapConfig, roundWW,  tim),    30);
+    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1013, 1000), mapConfig, noWW,     andrew),  0);
+    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1013, 1000), mapConfig, roundWW,  andrew), 30);
+    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1013, 1000), mapConfig, squareWW, andrew), 30);
 
     // - outside round WW
-    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1013, 1003), noWW,     tim),     0);
-    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1013, 1003), roundWW,  tim),     0);
-    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1013, 1003), noWW,     andrew),  0);
-    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1013, 1003), roundWW,  andrew),  0);
-    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1013, 1003), squareWW, andrew), 30);
+    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1013, 1003), mapConfig, noWW,     tim),     0);
+    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1013, 1003), mapConfig, roundWW,  tim),     0);
+    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1013, 1003), mapConfig, noWW,     andrew),  0);
+    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1013, 1003), mapConfig, roundWW,  andrew),  0);
+    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1013, 1003), mapConfig, squareWW, andrew), 30);
 
     // - warp-slide usecase
-    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(999, 999), noWW,     tim),     0);
-    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(999, 999), roundWW,  tim),    20); // warp slide
-    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(999, 999), noWW,     andrew),  0);
-    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(999, 999), roundWW,  andrew), 10);
-    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(999, 999), squareWW, andrew), 10);
+    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(999, 999), mapConfig, noWW,     tim),     0);
+    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(999, 999), mapConfig, roundWW,  tim),    20); // warp slide
+    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(999, 999), mapConfig, noWW,     andrew),  0);
+    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(999, 999), mapConfig, roundWW,  andrew), 10);
+    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(999, 999), mapConfig, squareWW, andrew), 10);
 
     // - in two warp wells
-    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1001, 1001), noWW,     tim),     0);
-    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1001, 1001), roundWW,  tim),    20);
-    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1001, 1001), noWW,     andrew),  0);
-    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1001, 1001), roundWW,  andrew), 20);
-    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1001, 1001), squareWW, andrew), 20);
+    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1001, 1001), mapConfig, noWW,     tim),     0);
+    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1001, 1001), mapConfig, roundWW,  tim),    20);
+    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1001, 1001), mapConfig, noWW,     andrew),  0);
+    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1001, 1001), mapConfig, roundWW,  andrew), 20);
+    TS_ASSERT_EQUALS(u.findGravityPlanetAt(Point(1001, 1001), mapConfig, squareWW, andrew), 20);
 
     // findFirstShipAt
     TS_ASSERT_EQUALS(u.findFirstShipAt(Point(1000, 1000)), 0);
@@ -204,51 +205,51 @@ TestGameMapUniverse::testFind()
 
     // findLocationName
     // - planet
-    TS_ASSERT_EQUALS(u.findLocationName(Point(1000, 1000), 0,                                           roundWW, andrew, tx), "Ten (#10)");
-    TS_ASSERT_EQUALS(u.findLocationName(Point(1000, 1000), Universe::NameVerbose,                       roundWW, andrew, tx), "Ten (Planet #10)");
-    TS_ASSERT_EQUALS(u.findLocationName(Point(1000, 1000), Universe::NameOrbit,                         roundWW, andrew, tx), "Orbit of Ten (#10)");
-    TS_ASSERT_EQUALS(u.findLocationName(Point(1000, 1000), Universe::NameVerbose | Universe::NameOrbit, roundWW, andrew, tx), "Orbit of Ten (Planet #10)");
+    TS_ASSERT_EQUALS(u.findLocationName(Point(1000, 1000), 0,                                           mapConfig, roundWW, andrew, tx), "Ten (#10)");
+    TS_ASSERT_EQUALS(u.findLocationName(Point(1000, 1000), Universe::NameVerbose,                       mapConfig, roundWW, andrew, tx), "Ten (Planet #10)");
+    TS_ASSERT_EQUALS(u.findLocationName(Point(1000, 1000), Universe::NameOrbit,                         mapConfig, roundWW, andrew, tx), "Orbit of Ten (#10)");
+    TS_ASSERT_EQUALS(u.findLocationName(Point(1000, 1000), Universe::NameVerbose | Universe::NameOrbit, mapConfig, roundWW, andrew, tx), "Orbit of Ten (Planet #10)");
 
     // - deep space
-    TS_ASSERT_EQUALS(u.findLocationName(Point(700, 700), 0, roundWW, andrew, tx), "(700,700)");
-    TS_ASSERT_EQUALS(u.findLocationName(Point(700, 700), Universe::NameVerbose, roundWW, andrew, tx), "Deep Space (700,700)");
-    TS_ASSERT_EQUALS(u.findLocationName(Point(700, 700), Universe::NameNoSpace, roundWW, andrew, tx), "");
+    TS_ASSERT_EQUALS(u.findLocationName(Point(700, 700), 0, mapConfig, roundWW, andrew, tx), "(700,700)");
+    TS_ASSERT_EQUALS(u.findLocationName(Point(700, 700), Universe::NameVerbose, mapConfig, roundWW, andrew, tx), "Deep Space (700,700)");
+    TS_ASSERT_EQUALS(u.findLocationName(Point(700, 700), Universe::NameNoSpace, mapConfig, roundWW, andrew, tx), "");
 
     // - gravity
-    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), 0,                                           roundWW, andrew, tx), "(1003,1000)");
-    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameVerbose,                       roundWW, andrew, tx), "Deep Space (1003,1000)");
-    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameOrbit,                         roundWW, andrew, tx), "(1003,1000)");
-    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameVerbose | Universe::NameOrbit, roundWW, andrew, tx), "Deep Space (1003,1000)");
-    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameGravity,                                               roundWW, andrew, tx), "near Ten (#10)");
-    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameGravity | Universe::NameVerbose,                       roundWW, andrew, tx), "near Ten (Planet #10)");
-    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameGravity | Universe::NameOrbit,                         roundWW, andrew, tx), "near Ten (#10)");
-    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameGravity | Universe::NameVerbose | Universe::NameOrbit, roundWW, andrew, tx), "near Ten (Planet #10)");
-    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameShips | 0,                                           roundWW, andrew, tx), "Ship #5: Five");
-    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameShips | Universe::NameVerbose,                       roundWW, andrew, tx), "Ship #5: Five");
-    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameShips | Universe::NameOrbit,                         roundWW, andrew, tx), "Ship #5: Five");
-    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameShips | Universe::NameVerbose | Universe::NameOrbit, roundWW, andrew, tx), "Ship #5: Five");
-    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameShips | Universe::NameGravity,                                               roundWW, andrew, tx), "Ship #5: Five");
-    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameShips | Universe::NameGravity | Universe::NameVerbose,                       roundWW, andrew, tx), "Ship #5: Five");
-    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameShips | Universe::NameGravity | Universe::NameOrbit,                         roundWW, andrew, tx), "Ship #5: Five");
-    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameShips | Universe::NameGravity | Universe::NameVerbose | Universe::NameOrbit, roundWW, andrew, tx), "Ship #5: Five");
+    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), 0,                                           mapConfig, roundWW, andrew, tx), "(1003,1000)");
+    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameVerbose,                       mapConfig, roundWW, andrew, tx), "Deep Space (1003,1000)");
+    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameOrbit,                         mapConfig, roundWW, andrew, tx), "(1003,1000)");
+    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameVerbose | Universe::NameOrbit, mapConfig, roundWW, andrew, tx), "Deep Space (1003,1000)");
+    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameGravity,                                               mapConfig, roundWW, andrew, tx), "near Ten (#10)");
+    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameGravity | Universe::NameVerbose,                       mapConfig, roundWW, andrew, tx), "near Ten (Planet #10)");
+    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameGravity | Universe::NameOrbit,                         mapConfig, roundWW, andrew, tx), "near Ten (#10)");
+    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameGravity | Universe::NameVerbose | Universe::NameOrbit, mapConfig, roundWW, andrew, tx), "near Ten (Planet #10)");
+    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameShips | 0,                                           mapConfig, roundWW, andrew, tx), "Ship #5: Five");
+    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameShips | Universe::NameVerbose,                       mapConfig, roundWW, andrew, tx), "Ship #5: Five");
+    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameShips | Universe::NameOrbit,                         mapConfig, roundWW, andrew, tx), "Ship #5: Five");
+    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameShips | Universe::NameVerbose | Universe::NameOrbit, mapConfig, roundWW, andrew, tx), "Ship #5: Five");
+    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameShips | Universe::NameGravity,                                               mapConfig, roundWW, andrew, tx), "Ship #5: Five");
+    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameShips | Universe::NameGravity | Universe::NameVerbose,                       mapConfig, roundWW, andrew, tx), "Ship #5: Five");
+    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameShips | Universe::NameGravity | Universe::NameOrbit,                         mapConfig, roundWW, andrew, tx), "Ship #5: Five");
+    TS_ASSERT_EQUALS(u.findLocationName(Point(1003, 1000), Universe::NameShips | Universe::NameGravity | Universe::NameVerbose | Universe::NameOrbit, mapConfig, roundWW, andrew, tx), "Ship #5: Five");
 
     // findLocationUnitNames
     // - deep space
-    TS_ASSERT_EQUALS(u.findLocationUnitNames(Point(999, 999), 5, pl, tx, iface), "");
+    TS_ASSERT_EQUALS(u.findLocationUnitNames(Point(999, 999), 5, pl, mapConfig, tx, iface), "");
 
     // - planet
-    TS_ASSERT_EQUALS(u.findLocationUnitNames(Point(1000, 1000), 5, pl, tx, iface), "Planet #10: Ten");
+    TS_ASSERT_EQUALS(u.findLocationUnitNames(Point(1000, 1000), 5, pl, mapConfig, tx, iface), "Planet #10: Ten");
 
     // - multiple ships (foreign/owner viewpoint)
-    TS_ASSERT_EQUALS(u.findLocationUnitNames(Point(1020, 1020), 5, pl, tx, iface), "2 fourish ships");
-    TS_ASSERT_EQUALS(u.findLocationUnitNames(Point(1020, 1020), 4, pl, tx, iface), "Ship #6: Six + 1 own ship");
+    TS_ASSERT_EQUALS(u.findLocationUnitNames(Point(1020, 1020), 5, pl, mapConfig, tx, iface), "2 fourish ships");
+    TS_ASSERT_EQUALS(u.findLocationUnitNames(Point(1020, 1020), 4, pl, mapConfig, tx, iface), "Ship #6: Six + 1 own ship");
 
     // - single ship (foreign/owner viewpoint)
-    TS_ASSERT_EQUALS(u.findLocationUnitNames(Point(1003, 1000), 5, pl, tx, iface), "1 fourish ship");
-    TS_ASSERT_EQUALS(u.findLocationUnitNames(Point(1003, 1000), 4, pl, tx, iface), "Ship #5: Five");
+    TS_ASSERT_EQUALS(u.findLocationUnitNames(Point(1003, 1000), 5, pl, mapConfig, tx, iface), "1 fourish ship");
+    TS_ASSERT_EQUALS(u.findLocationUnitNames(Point(1003, 1000), 4, pl, mapConfig, tx, iface), "Ship #5: Five");
 
     // - ship and planet
-    TS_ASSERT_EQUALS(u.findLocationUnitNames(Point(1020, 1000), 5, pl, tx, iface), "Planet #40: Fourty\n1 fourish ship");
-    TS_ASSERT_EQUALS(u.findLocationUnitNames(Point(1020, 1000), 4, pl, tx, iface), "Planet #40: Fourty\nShip #8: Eight");
+    TS_ASSERT_EQUALS(u.findLocationUnitNames(Point(1020, 1000), 5, pl, mapConfig, tx, iface), "Planet #40: Fourty\n1 fourish ship");
+    TS_ASSERT_EQUALS(u.findLocationUnitNames(Point(1020, 1000), 4, pl, mapConfig, tx, iface), "Planet #40: Fourty\nShip #8: Eight");
 }
 

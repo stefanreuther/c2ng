@@ -7,6 +7,7 @@
 #include "game/config/hostconfiguration.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/hostversion.hpp"
+#include "game/map/configuration.hpp"
 #include "game/map/minefield.hpp"
 #include "game/map/minefieldtype.hpp"
 #include "game/map/ship.hpp"
@@ -32,16 +33,18 @@ bool
 game::map::MinefieldMission::checkLayMission(const Ship& ship,
                                              const Universe& univ,
                                              const Root& root,
+                                             const Configuration& mapConfig,
                                              const UnitScoreDefinitionList& shipScores,
                                              const game::spec::ShipList& shipList)
 {
-    return checkLayMission(ship, univ, root.hostVersion(), root.registrationKey(), root.hostConfiguration(), shipScores, shipList);
+    return checkLayMission(ship, univ, root.hostVersion(), root.registrationKey(), mapConfig, root.hostConfiguration(), shipScores, shipList);
 }
 
 bool
 game::map::MinefieldMission::checkLayMission(const Ship& ship, const Universe& univ,
                                              const HostVersion& hostVersion,
                                              const RegistrationKey& key,
+                                             const Configuration& mapConfig,
                                              const game::config::HostConfiguration& config,
                                              const UnitScoreDefinitionList& shipScores,
                                              const game::spec::ShipList& shipList)
@@ -185,7 +188,7 @@ game::map::MinefieldMission::checkLayMission(const Ship& ship, const Universe& u
         ship.getPosition(shipPos);
         if (mfOwner != race
             || mf->isWeb() != makeweb
-            || univ.config().getSquaredDistance(mfPos, shipPos) > mf->getUnitsForLaying(hostVersion, config))
+            || mapConfig.getSquaredDistance(mfPos, shipPos) > mf->getUnitsForLaying(hostVersion, config))
         {
             return false;
         }
@@ -201,7 +204,7 @@ game::map::MinefieldMission::checkLayMission(const Ship& ship, const Universe& u
                     if (mf->getOwner(mfOwner) && mfOwner == race && mf->isWeb() == makeweb) {
                         Point mfPos;
                         mf->getPosition(mfPos);
-                        int32_t dist = univ.config().getSquaredDistance(mfPos, shipPos);
+                        int32_t dist = mapConfig.getSquaredDistance(mfPos, shipPos);
                         if (reqid == 0 || dist < closest) {
                             // Minefield matches type and is close.
                             // We note its Id only when we're inside;
@@ -222,7 +225,7 @@ game::map::MinefieldMission::checkLayMission(const Ship& ship, const Universe& u
                     if (mf->getOwner(mfOwner) && mfOwner == race && mf->isWeb() == makeweb) {
                         Point mfPos;
                         mf->getPosition(mfPos);
-                        int32_t dist = univ.config().getSquaredDistance(mfPos, shipPos);
+                        int32_t dist = mapConfig.getSquaredDistance(mfPos, shipPos);
                         if (dist <= mf->getUnitsForLaying(hostVersion, config)) {
                             // Minefield matches type and is close, and we're inside
                             reqid = i;

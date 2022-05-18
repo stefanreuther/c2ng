@@ -10,6 +10,7 @@
 
 namespace game { namespace map {
 
+    class Configuration;
     class Universe;
     class Ship;
 
@@ -24,9 +25,11 @@ namespace game { namespace map {
         /** Synchronize a fleet.
             Synchronizes all waypoints of the fleet.
             \param config Host configuration
-            \param shipList Ship list */
+            \param shipList Ship list
+            \param mapConfig Map configuration (for starchart geometry) */
         void synchronize(const game::config::HostConfiguration& config,
-                         const game::spec::ShipList& shipList);
+                         const game::spec::ShipList& shipList,
+                         const Configuration& mapConfig);
 
         /** Check whether the fleet can do a particular special function.
             \param basicFunction Function to check
@@ -47,9 +50,11 @@ namespace game { namespace map {
             Does nothing if the ship is not a fleet member.
             \param univ Universe to work on
             \param sid  Ship Id
+            \param mapConfig Map configuration (for starchart geometry)
             \param config Host configuration (for missions)
             \param shipList Ship list (for missions) */
         static void synchronizeFleetMember(Universe& univ, Id_t sid,
+                                           const Configuration& mapConfig,
                                            const game::config::HostConfiguration& config,
                                            const game::spec::ShipList& shipList);
 

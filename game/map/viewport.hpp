@@ -19,6 +19,7 @@
 namespace game { namespace map {
 
     class Universe;
+    class Configuration;
 
     class Viewport : afl::base::Uncopyable {
      public:
@@ -48,6 +49,7 @@ namespace game { namespace map {
                  game::interface::LabelExtra* labels,
                  const UnitScoreDefinitionList& shipScoreDefinitions,
                  const game::spec::ShipList& shipList,
+                 const Configuration& mapConfig,
                  const game::config::HostConfiguration& config);
         ~Viewport();
 
@@ -57,6 +59,7 @@ namespace game { namespace map {
         int getTurnNumber() const;
         const UnitScoreDefinitionList& shipScores() const;
         const game::spec::ShipList& shipList() const;
+        const Configuration& mapConfiguration() const;
         const game::config::HostConfiguration& hostConfiguration() const;
 
         void setRange(Point min, Point max);
@@ -93,6 +96,7 @@ namespace game { namespace map {
         int m_turnNumber;
         const UnitScoreDefinitionList& m_shipScoreDefinitions;
         const game::spec::ShipList& m_shipList;
+        const Configuration& m_mapConfig;
         const game::config::HostConfiguration& m_hostConfiguration;
 
         Point m_min;

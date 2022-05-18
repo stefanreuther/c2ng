@@ -5,10 +5,10 @@
 #define C2NG_GAME_REF_LIST_HPP
 
 #include <vector>
-#include "game/reference.hpp"
-#include "game/types.hpp"
 #include "afl/bits/smallset.hpp"
 #include "game/map/universe.hpp"
+#include "game/reference.hpp"
+#include "game/types.hpp"
 
 namespace game { namespace ref {
 

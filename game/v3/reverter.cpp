@@ -6,6 +6,7 @@
 #include "game/v3/reverter.hpp"
 #include "afl/except/assertionfailedexception.hpp"
 #include "game/element.hpp"
+#include "game/game.hpp"
 #include "game/map/locationreverter.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/ship.hpp"

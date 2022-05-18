@@ -346,12 +346,14 @@ namespace game { namespace map { namespace info {
         @param [in]   t            StarchartInfo object produced by computeStarchartInfo()
         @param [in]   univ         Universe
         @param [in]   teams        Teams (viewpoint player, player relations)
+        @param [in]   mapConfig    Map configuration
         @param [in]   fmt          Number formatter
         @param [in]   tx           Translator */
     void renderStarchartEmpireSummary(TagNode& tab,
                                       const StarchartInfo& t,
                                       const Universe& univ,
                                       const TeamSettings& teams,
+                                      const Configuration& mapConfig,
                                       util::NumberFormatter fmt,
                                       afl::string::Translator& tx);
 

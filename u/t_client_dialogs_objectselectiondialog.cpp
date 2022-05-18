@@ -61,6 +61,7 @@ namespace {
                 session.getGame()->currentTurn().universe().postprocess(/*playing:*/game::PlayerSet_t(1),
                                                                         /*available:*/game::PlayerSet_t(1),
                                                                         /*plability:*/game::map::Object::Playable,
+                                                                        session.getGame()->mapConfiguration(),
                                                                         game::HostVersion(),
                                                                         config,
                                                                         1, shipList,
@@ -90,7 +91,7 @@ namespace {
                     mcs.addLine("CreateKeymap PlanetSelectionDialog(SelectionDialog)");
                     mcs.addLine("Bind SelectionDialog \"esc\"    := \"UI.EndDialog 0\"");
                     mcs.addLine("Bind SelectionDialog \"enter\"  := \"UI.EndDialog 1\"");
-        
+
                     // Create compilation context
                     interpreter::DefaultStatementCompilationContext scc(session.world());
                     scc.withStaticContext(&proc);

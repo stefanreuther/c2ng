@@ -114,6 +114,7 @@ namespace {
         h.session.getGame()->currentTurn().universe().postprocess(game::PlayerSet_t(7),
                                                                   game::PlayerSet_t(7),
                                                                   game::map::Object::Playable,
+                                                                  h.session.getGame()->mapConfiguration(),
                                                                   h.session.getRoot()->hostVersion(),
                                                                   h.session.getRoot()->hostConfiguration(),
                                                                   61, *h.session.getShipList(), tx, log);

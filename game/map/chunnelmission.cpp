@@ -9,6 +9,7 @@
 #include "afl/string/parse.hpp"
 #include "game/actions/cargotransfer.hpp"
 #include "game/actions/cargotransfersetup.hpp"
+#include "game/map/configuration.hpp"
 #include "game/map/fleetmember.hpp"
 #include "game/map/ship.hpp"
 #include "game/map/universe.hpp"
@@ -59,6 +60,7 @@ game::map::ChunnelMission::ChunnelMission()
 // Parse a ship's chunnel mission.
 bool
 game::map::ChunnelMission::check(const Ship& sh, const Universe& univ,
+                                 const Configuration& mapConfig,
                                  const UnitScoreDefinitionList& scoreDefinitions,
                                  const game::spec::ShipList& shipList,
                                  const Root& root)
@@ -106,7 +108,7 @@ game::map::ChunnelMission::check(const Ship& sh, const Universe& univ,
                 Point shipPosition, matePosition;
                 if (!sh.getPosition(shipPosition)
                     || !mate->getPosition(matePosition)
-                    || !root.hostVersion().isValidChunnelDistance2(univ.config().getSquaredDistance(shipPosition, matePosition), config))
+                    || !root.hostVersion().isValidChunnelDistance2(mapConfig.getSquaredDistance(shipPosition, matePosition), config))
                 {
                     m_failure |= chf_Distance;
                 }
@@ -212,6 +214,7 @@ game::map::isValidChunnelMate(const Ship& initiator,
 // Set up a chunnel.
 void
 game::map::setupChunnel(Ship& initiator, Ship& mate, Universe& univ,
+                        const Configuration& mapConfig,
                         const game::config::HostConfiguration& config,
                         const game::spec::ShipList& shipList)
 {
@@ -220,7 +223,7 @@ game::map::setupChunnel(Ship& initiator, Ship& mate, Universe& univ,
         game::map::Point pt;
         initiator.getPosition(pt);
 
-        FleetMember initFM(univ, initiator);
+        FleetMember initFM(univ, initiator, mapConfig);
         initFM.setWaypoint(pt, config, shipList);
         initFM.setWarpFactor(0, config, shipList);
         initiator.setFriendlyCode(String_t(afl::string::Format("%03d", mate.getId())));
@@ -232,7 +235,7 @@ game::map::setupChunnel(Ship& initiator, Ship& mate, Universe& univ,
         game::map::Point pt;
         mate.getPosition(pt);
 
-        FleetMember mateFM(univ, mate);
+        FleetMember mateFM(univ, mate, mapConfig);
         mateFM.setWaypoint(pt, config, shipList);
         mateFM.setWarpFactor(0, config, shipList);
 

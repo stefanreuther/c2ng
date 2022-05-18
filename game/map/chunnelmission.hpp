@@ -60,12 +60,14 @@ namespace game { namespace map {
 
             \param sh                Ship to check
             \param univ              Containing universe
+            \param mapConfig         Map configuration
             \param scoreDefinitions  Ship score definitions (required for experience/hull functions)
             \param shipList          Ship list (required for hull functions)
             \param root              Root (required for host config/version)
 
             \return true if possible chunnel attempt detected */
         bool check(const Ship& sh, const Universe& univ,
+                   const Configuration& mapConfig,
                    const UnitScoreDefinitionList& scoreDefinitions,
                    const game::spec::ShipList& shipList,
                    const Root& root);
@@ -125,9 +127,11 @@ namespace game { namespace map {
         \param initiator         Initiator
         \param mate              Mate
         \param univ              Universe
+        \param mapConfig         Starchart geometry configuration
         \param config            Host configuration (required for fleet operations)
         \param shipList          Ship list (required for fleet operations) */
     void setupChunnel(Ship& initiator, Ship& mate, Universe& univ,
+                      const Configuration& mapConfig,
                       const game::config::HostConfiguration& config,
                       const game::spec::ShipList& shipList);
 

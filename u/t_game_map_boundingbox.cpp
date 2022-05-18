@@ -6,13 +6,14 @@
 #include "game/map/boundingbox.hpp"
 
 #include "t_game_map.hpp"
-#include "game/map/drawing.hpp"
-#include "afl/sys/log.hpp"
 #include "afl/string/nulltranslator.hpp"
-#include "game/spec/shiplist.hpp"
-#include "game/map/universe.hpp"
+#include "afl/sys/log.hpp"
+#include "game/map/configuration.hpp"
+#include "game/map/drawing.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/ship.hpp"
+#include "game/map/universe.hpp"
+#include "game/spec/shiplist.hpp"
 
 using game::map::Drawing;
 using game::map::Point;
@@ -107,6 +108,7 @@ TestGameMapBoundingBox::testAddUniverse()
     game::PlayerSet_t set(1);
     game::HostVersion host(game::HostVersion::Host, MKVERSION(3,22,44));
     game::config::HostConfiguration config;
+    game::map::Configuration mapConfig;
     game::spec::ShipList shipList;
     shipList.hulls().create(1);
     afl::string::NullTranslator tx;
@@ -116,8 +118,9 @@ TestGameMapBoundingBox::testAddUniverse()
     // East: planet, west: ship. North/south borders determined by map config
     {
         game::map::Universe univ;
-        TS_ASSERT_EQUALS(univ.config().getMinimumCoordinates(), Point(1000, 1000));
-        TS_ASSERT_EQUALS(univ.config().getMaximumCoordinates(), Point(3000, 3000));
+        game::map::Configuration mapConfig;
+        TS_ASSERT_EQUALS(mapConfig.getMinimumCoordinates(), Point(1000, 1000));
+        TS_ASSERT_EQUALS(mapConfig.getMaximumCoordinates(), Point(3000, 3000));
 
         game::map::Planet* p = univ.planets().create(10);
         p->setPosition(Point(500, 2000));
@@ -126,11 +129,11 @@ TestGameMapBoundingBox::testAddUniverse()
         game::map::Ship* sh = univ.ships().create(20);
         sh->addShipXYData(Point(3400, 2000), 2, 500, set);
 
-        univ.postprocess(set, set, game::map::Object::ReadOnly, host, config, TURN, shipList, tx, log);
+        univ.postprocess(set, set, game::map::Object::ReadOnly, mapConfig, host, config, TURN, shipList, tx, log);
 
         // Test
         game::map::BoundingBox t;
-        t.addUniverse(univ);
+        t.addUniverse(univ, mapConfig);
 
         TS_ASSERT_EQUALS(t.getMinimumCoordinates(), Point( 500, 1000));
         TS_ASSERT_EQUALS(t.getMaximumCoordinates(), Point(3401, 3001));
@@ -139,6 +142,7 @@ TestGameMapBoundingBox::testAddUniverse()
     // North: ion storm, south: minefield, east: drawing, west: ufo
     {
         game::map::Universe univ;
+        game::map::Configuration mapConfig;
         game::map::IonStorm* st = univ.ionStorms().create(10);
         st->setPosition(Point(2000, 600));
         st->setRadius(250);
@@ -153,11 +157,11 @@ TestGameMapBoundingBox::testAddUniverse()
         ufo->setPosition(Point(3500, 2000));
         ufo->setRadius(30);
 
-        univ.postprocess(set, set, game::map::Object::ReadOnly, host, config, TURN, shipList, tx, log);
+        univ.postprocess(set, set, game::map::Object::ReadOnly, mapConfig, host, config, TURN, shipList, tx, log);
 
         // Test
         game::map::BoundingBox t;
-        t.addUniverse(univ);
+        t.addUniverse(univ, mapConfig);
 
         // Minimum X: 500 from drawing, -10
         // Minimum Y: 600 from ion storm, -250 radius
@@ -171,14 +175,15 @@ TestGameMapBoundingBox::testAddUniverse()
     // East: explosion
     {
         game::map::Universe univ;
+        game::map::Configuration mapConfig;
 
         univ.explosions().add(game::map::Explosion(0, Point(700, 3000)));
 
-        univ.postprocess(set, set, game::map::Object::ReadOnly, host, config, TURN, shipList, tx, log);
+        univ.postprocess(set, set, game::map::Object::ReadOnly, mapConfig, host, config, TURN, shipList, tx, log);
 
         // Test
         game::map::BoundingBox t;
-        t.addUniverse(univ);
+        t.addUniverse(univ, mapConfig);
 
         TS_ASSERT_EQUALS(t.getMinimumCoordinates(), Point( 700, 1000));
         TS_ASSERT_EQUALS(t.getMaximumCoordinates(), Point(3001, 3001));
@@ -193,7 +198,8 @@ TestGameMapBoundingBox::testAddWrappedUfo()
 {
     // Build universe
     game::map::Universe univ;
-    univ.config().setConfiguration(game::map::Configuration::Wrapped, Point(2000, 2000), Point(2000, 2000));
+    game::map::Configuration mapConfig;
+    mapConfig.setConfiguration(game::map::Configuration::Wrapped, Point(2000, 2000), Point(2000, 2000));
 
     game::map::Ufo* one = univ.ufos().addUfo(1, 2, 3);
     one->setPosition(Point(1100, 2000));
@@ -207,7 +213,7 @@ TestGameMapBoundingBox::testAddWrappedUfo()
 
     // Test
     game::map::BoundingBox t;
-    t.addUniverse(univ);
+    t.addUniverse(univ, mapConfig);
 
     // Nearest alias of 2900 is 900, -40 radius
     TS_ASSERT_EQUALS(t.getMinimumCoordinates(), Point( 860, 1000));

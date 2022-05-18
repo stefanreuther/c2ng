@@ -6,6 +6,7 @@
 #include "afl/base/countof.hpp"
 #include "afl/string/format.hpp"
 #include "game/map/chunnelmission.hpp"
+#include "game/map/configuration.hpp"
 #include "game/map/ship.hpp"
 #include "game/map/universe.hpp"
 #include "util/string.hpp"
@@ -52,6 +53,7 @@ game::map::packShipMovementInfo(ShipMovementInfos_t& result,
                                 const Ship& ship,
                                 const Universe& univ,
                                 const UnitScoreDefinitionList& scoreDefinitions,
+                                const Configuration& mapConfig,
                                 const game::spec::ShipList& shipList,
                                 const Root& root)
 {
@@ -71,9 +73,8 @@ game::map::packShipMovementInfo(ShipMovementInfos_t& result,
     // Chunnel.
     // FIXME: PCC 1.x also parses when this ship goes through another ship's chunnel.
     // To do that, it computes turn movement.
-    const Configuration& config = univ.config();
     ChunnelMission ch;
-    if (ch.check(ship, univ, scoreDefinitions, shipList, root)) {
+    if (ch.check(ship, univ, mapConfig, scoreDefinitions, shipList, root)) {
         const Ship* target = univ.ships().get(ch.getTargetId());
         Point targetPos;
         if (target != 0 && target->getPosition(targetPos)) {
@@ -84,7 +85,7 @@ game::map::packShipMovementInfo(ShipMovementInfos_t& result,
                 ? ShipMovementInfo::InitiatorFails
                 : ShipMovementInfo::MateFails;
 
-            result.push_back(ShipMovementInfo(ShipMovementInfo::Chunnel, st, ch.getTargetId(), pos, config.getSimpleNearestAlias(targetPos, pos)));
+            result.push_back(ShipMovementInfo(ShipMovementInfo::Chunnel, st, ch.getTargetId(), pos, mapConfig.getSimpleNearestAlias(targetPos, pos)));
         }
     }
 
@@ -98,7 +99,7 @@ game::map::packShipMovementInfo(ShipMovementInfos_t& result,
         const Ship* tower = univ.ships().get(i);
         Point towerWaypoint;
         if (tower != 0 && tower->getWaypoint().get(towerWaypoint)) {
-            result.push_back(ShipMovementInfo(ShipMovementInfo::Tow, ShipMovementInfo::Success, i, pos, config.getSimpleNearestAlias(towerWaypoint, pos)));
+            result.push_back(ShipMovementInfo(ShipMovementInfo::Tow, ShipMovementInfo::Success, i, pos, mapConfig.getSimpleNearestAlias(towerWaypoint, pos)));
         }
     }
 }

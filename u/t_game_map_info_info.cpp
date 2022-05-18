@@ -13,6 +13,7 @@
 #include "afl/io/xml/tagnode.hpp"
 #include "afl/io/xml/writer.hpp"
 #include "afl/string/nulltranslator.hpp"
+#include "game/map/configuration.hpp"
 #include "game/map/info/nulllinkbuilder.hpp"
 #include "game/map/info/scriptlinkbuilder.hpp"
 #include "game/teamsettings.hpp"
@@ -39,12 +40,13 @@ namespace {
 
     struct StarchartTestHarness {
         Turn turn;
+        game::map::Configuration mapConfig;
         TeamSettings teams;
         util::NumberFormatter fmt;
         afl::string::NullTranslator tx;
 
         StarchartTestHarness()
-            : turn(), teams(), fmt(true, true), tx()
+            : turn(), mapConfig(), teams(), fmt(true, true), tx()
             { teams.setViewpointPlayer(PLAYER); }
     };
 
@@ -111,7 +113,7 @@ TestGameMapInfoInfo::testEmpireZeroSize()
 {
     StarchartTestHarness h;
     TagNode tab("table");
-    gmi::renderStarchartEmpireSummary(tab, gmi::computeStarchartInfo(h.turn, h.teams), h.turn.universe(), h.teams, h.fmt, h.tx);
+    gmi::renderStarchartEmpireSummary(tab, gmi::computeStarchartInfo(h.turn, h.teams), h.turn.universe(), h.teams, h.mapConfig, h.fmt, h.tx);
 
     TS_ASSERT_EQUALS(toString(tab),
                      "<table><tr><td width=\"18\"><font color=\"white\">Your Empire</font></td><td width=\"22\"/></tr>"
@@ -130,7 +132,7 @@ TestGameMapInfoInfo::testEmpireZeroUnit()
     addPlanet(h, 100, 2300, 2400);
 
     TagNode tab("table");
-    gmi::renderStarchartEmpireSummary(tab, gmi::computeStarchartInfo(h.turn, h.teams), h.turn.universe(), h.teams, h.fmt, h.tx);
+    gmi::renderStarchartEmpireSummary(tab, gmi::computeStarchartInfo(h.turn, h.teams), h.turn.universe(), h.teams, h.mapConfig, h.fmt, h.tx);
 
     TS_ASSERT_EQUALS(toString(tab),
                      "<table><tr><td width=\"18\"><font color=\"white\">Your Empire</font></td><td width=\"22\"/></tr>"
@@ -152,7 +154,7 @@ TestGameMapInfoInfo::testEmpireZeroSameX()
     addPlanet(h, 200, 2300, 2500);
 
     TagNode tab("table");
-    gmi::renderStarchartEmpireSummary(tab, gmi::computeStarchartInfo(h.turn, h.teams), h.turn.universe(), h.teams, h.fmt, h.tx);
+    gmi::renderStarchartEmpireSummary(tab, gmi::computeStarchartInfo(h.turn, h.teams), h.turn.universe(), h.teams, h.mapConfig, h.fmt, h.tx);
 
     TS_ASSERT_EQUALS(toString(tab),
                      "<table><tr><td width=\"18\"><font color=\"white\">Your Empire</font></td><td width=\"22\"/></tr>"
@@ -174,7 +176,7 @@ TestGameMapInfoInfo::testEmpireDifferent()
     addPlanet(h, 200, 2900, 1200);
 
     TagNode tab("table");
-    gmi::renderStarchartEmpireSummary(tab, gmi::computeStarchartInfo(h.turn, h.teams), h.turn.universe(), h.teams, h.fmt, h.tx);
+    gmi::renderStarchartEmpireSummary(tab, gmi::computeStarchartInfo(h.turn, h.teams), h.turn.universe(), h.teams, h.mapConfig, h.fmt, h.tx);
 
     TS_ASSERT_EQUALS(toString(tab),
                      "<table><tr><td width=\"18\"><font color=\"white\">Your Empire</font></td><td width=\"22\"/></tr>"
@@ -194,10 +196,10 @@ TestGameMapInfoInfo::testEmpireWrap()
     StarchartTestHarness h;
     addPlanet(h, 100, 1100, 2800);
     addPlanet(h, 200, 2900, 1200);
-    h.turn.universe().config().setConfiguration(game::map::Configuration::Wrapped, Point(2000, 2000), Point(2000, 2000));
+    h.mapConfig.setConfiguration(game::map::Configuration::Wrapped, Point(2000, 2000), Point(2000, 2000));
 
     TagNode tab("table");
-    gmi::renderStarchartEmpireSummary(tab, gmi::computeStarchartInfo(h.turn, h.teams), h.turn.universe(), h.teams, h.fmt, h.tx);
+    gmi::renderStarchartEmpireSummary(tab, gmi::computeStarchartInfo(h.turn, h.teams), h.turn.universe(), h.teams, h.mapConfig, h.fmt, h.tx);
 
     TS_ASSERT_EQUALS(toString(tab),
                      "<table><tr><td width=\"18\"><font color=\"white\">Your Empire</font></td><td width=\"22\"/></tr>"
@@ -220,10 +222,10 @@ TestGameMapInfoInfo::testEmpireWrap2()
     for (int i = 1; i < 36; ++i) {
         addPlanet(h, 100+i, 1100 + 50*i, 2700);
     }
-    h.turn.universe().config().setConfiguration(game::map::Configuration::Wrapped, Point(2000, 2000), Point(2000, 2000));
+    h.mapConfig.setConfiguration(game::map::Configuration::Wrapped, Point(2000, 2000), Point(2000, 2000));
 
     TagNode tab("table");
-    gmi::renderStarchartEmpireSummary(tab, gmi::computeStarchartInfo(h.turn, h.teams), h.turn.universe(), h.teams, h.fmt, h.tx);
+    gmi::renderStarchartEmpireSummary(tab, gmi::computeStarchartInfo(h.turn, h.teams), h.turn.universe(), h.teams, h.mapConfig, h.fmt, h.tx);
 
     TS_ASSERT_EQUALS(toString(tab),
                      "<table><tr><td width=\"18\"><font color=\"white\">Your Empire</font></td><td width=\"22\"/></tr>"

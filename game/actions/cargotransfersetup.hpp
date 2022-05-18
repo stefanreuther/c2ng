@@ -7,6 +7,7 @@
 
 #include "game/config/hostconfiguration.hpp"
 #include "game/hostversion.hpp"
+#include "game/map/configuration.hpp"
 #include "game/map/object.hpp"
 #include "game/map/universe.hpp"
 #include "game/spec/shiplist.hpp"
@@ -133,15 +134,17 @@ namespace game { namespace actions {
         void cancelConflictingTransfer(game::map::Universe& univ, Id_t shipId);
 
         /** Build CargoTransfer action.
-            \param action   [out] Target action. Must be constructed and empty.
-            \param turn     [in/out] Turn
-            \param config   [in] Host configuration (needed to construct CargoContainer descendants)
-            \param shipList [in] Ship list (needed to construct CargoContainer descendants)
-            \param version  [in] Host version (needed to construct CargoContainer descendants)
+            \param action    [out] Target action. Must be constructed and empty.
+            \param turn      [in/out] Turn
+            \param mapConfig [in] Starchart geometry configuration
+            \param config    [in] Host configuration (needed to construct CargoContainer descendants)
+            \param shipList  [in] Ship list (needed to construct CargoContainer descendants)
+            \param version   [in] Host version (needed to construct CargoContainer descendants)
             \pre isValid()
             \throw Exception if setup is incomplete/impossible (precondition not satisfied) */
         void build(CargoTransfer& action,
                    Turn& turn,
+                   const game::map::Configuration& mapConfig,
                    const game::config::HostConfiguration& config,
                    const game::spec::ShipList& shipList,
                    const game::HostVersion& version);

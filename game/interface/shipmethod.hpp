@@ -36,6 +36,7 @@ namespace game { namespace interface {
                         interpreter::Process& process,                        // needed for cargo transfer which needs it for CARGO.REMAINDER
                         Session& session,                                     // needed for world()
                         Root& root,                                           // needed for setShipProperty() which needs it for config
+                        const game::map::Configuration& mapConfig,            // needed for position lookups, e.g. in cargo transfer setup
                         game::spec::ShipList& shipList,                       // needed for setShipProperty() which needs it for Engines
                         Turn& turn);                                          // needed for setShipProperty() which needs it for universe
 

@@ -6,8 +6,9 @@
 #include "game/map/viewport.hpp"
 
 #include "t_game_map.hpp"
-#include "game/map/universe.hpp"
 #include "game/config/hostconfiguration.hpp"
+#include "game/map/configuration.hpp"
+#include "game/map/universe.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/unitscoredefinitionlist.hpp"
 
@@ -17,11 +18,12 @@ TestGameMapViewport::testRectangle()
 {
     using game::map::Point;
     game::map::Universe univ;
+    game::map::Configuration mapConfig;
     game::TeamSettings teams;
     game::config::HostConfiguration config;
     game::UnitScoreDefinitionList shipScores;
     game::spec::ShipList shipList;
-    game::map::Viewport t(univ, 7, teams, 0, shipScores, shipList, config);
+    game::map::Viewport t(univ, 7, teams, 0, shipScores, shipList, mapConfig, config);
     t.setRange(Point(100, 100), Point(200, 300));
 
     // Borders as lines

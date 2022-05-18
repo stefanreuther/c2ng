@@ -3,6 +3,7 @@
   */
 
 #include "game/map/shiputils.hpp"
+#include "game/map/configuration.hpp"
 #include "game/map/ship.hpp"
 #include "game/map/universe.hpp"
 
@@ -35,7 +36,7 @@ game::map::getShipMissionByNumber(int nr, const Ship& ship, const game::config::
 
 // /** Manipulating: set waypoint for intercepting ship. */
 void
-game::map::setInterceptWaypoint(Universe& univ, Ship& sh)
+game::map::setInterceptWaypoint(Universe& univ, Ship& sh, const Configuration& mapConfig)
 {
     // ex game/fleet.h:setInterceptWaypoint
     int i;
@@ -44,7 +45,7 @@ game::map::setInterceptWaypoint(Universe& univ, Ship& sh)
             // FIXME: handle THost where intercept does not cross the seam?
             Point shipPos, targetPos;
             if (target->getPosition(targetPos) && sh.getPosition(shipPos)) {
-                sh.setWaypoint(univ.config().getSimpleNearestAlias(targetPos, shipPos));
+                sh.setWaypoint(mapConfig.getSimpleNearestAlias(targetPos, shipPos));
             }
         }
     }

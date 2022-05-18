@@ -11,6 +11,7 @@
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "game/exception.hpp"
+#include "game/map/configuration.hpp"
 #include "game/map/universe.hpp"
 #include "game/session.hpp"
 #include "game/test/cargocontainer.hpp"

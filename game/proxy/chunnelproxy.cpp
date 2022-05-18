@@ -67,11 +67,11 @@ namespace {
             const game::map::AnyShipType ty(univ.ships());
             for (Id_t id = ty.findNextIndex(0); id != 0; id = ty.findNextIndex(id)) {
                 if (const Ship* mate = univ.ships().get(id)) {
-                    if (game::map::isValidChunnelMate(*initiator, *mate, univ.config(), r, g.shipScores(), sl)) {
+                    if (game::map::isValidChunnelMate(*initiator, *mate, g.mapConfiguration(), r, g.shipScores(), sl)) {
                         Point initPos, matePos;
                         initiator->getPosition(initPos);
                         mate->getPosition(matePos);
-                        addCandidateLocation(result, ChunnelProxy::Candidate(univ.config().getSimpleNearestAlias(matePos, initPos)));
+                        addCandidateLocation(result, ChunnelProxy::Candidate(g.mapConfiguration().getSimpleNearestAlias(matePos, initPos)));
                     }
                 }
             }
@@ -88,13 +88,13 @@ namespace {
         // Build raw list
         game::ref::List list;
         Universe& univ = g.currentTurn().universe();
-        const Point canonicalPosition = univ.config().getCanonicalLocation(pos);
+        const Point canonicalPosition = g.mapConfiguration().getCanonicalLocation(pos);
         if (const Ship* initiator = univ.ships().get(shipId)) {
             const game::map::AnyShipType ty(univ.ships());
             for (Id_t id = ty.findNextIndex(0); id != 0; id = ty.findNextIndex(id)) {
                 const Ship* mate = univ.ships().get(id);
                 Point matePos;
-                if (mate != 0 && mate->getPosition(matePos) && matePos == canonicalPosition && game::map::isValidChunnelMate(*initiator, *mate, univ.config(), r, g.shipScores(), sl)) {
+                if (mate != 0 && mate->getPosition(matePos) && matePos == canonicalPosition && game::map::isValidChunnelMate(*initiator, *mate, g.mapConfiguration(), r, g.shipScores(), sl)) {
                     list.add(game::Reference(game::Reference::Ship, id));
                 }
             }
@@ -114,11 +114,11 @@ namespace {
         Ship& initiator = game::actions::mustExist(univ.ships().get(fromShipId));
         Ship& mate = game::actions::mustExist(univ.ships().get(toShipId));
 
-        game::map::setupChunnel(initiator, mate, univ, r.hostConfiguration(), sl);
+        game::map::setupChunnel(initiator, mate, univ, g.mapConfiguration(), r.hostConfiguration(), sl);
 
         // Check whether chunnel works
         game::map::ChunnelMission msn;
-        if (msn.check(initiator, univ, g.shipScores(), sl, r)) {
+        if (msn.check(initiator, univ, g.mapConfiguration(), g.shipScores(), sl, r)) {
             return game::map::formatChunnelFailureReasons(msn.getFailureReasons(), session.translator());
         } else {
             afl::data::StringList_t result;

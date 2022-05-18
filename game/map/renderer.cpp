@@ -28,9 +28,9 @@ class game::map::Renderer::State {
           m_visibleImages()
         {
             BoundingBox bbox;
-            bbox.addUniverse(viewport.universe());
+            bbox.addUniverse(viewport.universe(), viewport.mapConfiguration());
 
-            m_maxImage = viewport.universe().config().getNumRectangularImages();
+            m_maxImage = viewport.mapConfiguration().getNumRectangularImages();
             for (int i = 0; i < m_maxImage; ++i) {
                 if (viewport.containsRectangle(bbox.getMinimumCoordinates(), bbox.getMaximumCoordinates())) {
                     m_visibleImages += i;
@@ -150,7 +150,7 @@ void
 game::map::Renderer::renderGrid(const State& st) const
 {
     // ex GChartViewport::drawSectors (sort-of)
-    const Configuration& config = m_viewport.universe().config();
+    const Configuration& config = m_viewport.mapConfiguration();
     switch (config.getMode()) {
      case Configuration::Flat:
      case Configuration::Wrapped:
@@ -167,7 +167,7 @@ game::map::Renderer::renderGrid(const State& st) const
 void
 game::map::Renderer::renderRectangularGrid(const State& st) const
 {
-    const Configuration& config = m_viewport.universe().config();
+    const Configuration& config = m_viewport.mapConfiguration();
     const int dx = std::min(config.getSize().getX() / 200, 10);
     const int dy = std::min(config.getSize().getY() / 200, 10);
 
@@ -207,7 +207,7 @@ game::map::Renderer::renderRectangularGrid(const State& st) const
 void
 game::map::Renderer::renderCircularGrid(const State& st) const
 {
-    const Configuration& config = m_viewport.universe().config();
+    const Configuration& config = m_viewport.mapConfiguration();
 
     const int size = config.getSize().getX();
     const int dx = std::min(int(size / 100), 10);
@@ -290,7 +290,7 @@ game::map::Renderer::renderMinefields(const State& st) const
             int owner;
             int radius;
             if (mf->getPosition(pt) && mf->getOwner(owner) && mf->getRadius(radius)) {
-                const Configuration& config = m_viewport.universe().config();
+                const Configuration& config = m_viewport.mapConfiguration();
                 for (int img = st.getFirstImage(); img >= 0; img = st.getNextImage(img)) {
                     const Point imgPos = config.getSimplePointAlias(pt, img);
                     if (m_viewport.containsCircle(imgPos, radius)) {
@@ -308,7 +308,7 @@ void
 game::map::Renderer::renderUfos(const State& st) const
 {
     // ex GChartViewport::drawUfos
-    const Configuration& config = m_viewport.universe().config();
+    const Configuration& config = m_viewport.mapConfiguration();
     UfoType& ty = m_viewport.universe().ufos();
     for (Id_t i = ty.findNextIndex(0); i != 0; i = ty.findNextIndex(i)) {
         if (const Ufo* ufo = ty.getObjectByIndex(i)) {
@@ -354,7 +354,7 @@ void
 game::map::Renderer::renderIonStorms(const State& st) const
 {
     // ex GChartViewport::drawIons
-    const Configuration& config = m_viewport.universe().config();
+    const Configuration& config = m_viewport.mapConfiguration();
     IonStormType& ty = m_viewport.universe().ionStormType();
     for (Id_t i = ty.findNextIndex(0); i != 0; i = ty.findNextIndex(i)) {
         if (const IonStorm* ion = ty.getObjectByIndex(i)) {
@@ -388,7 +388,7 @@ game::map::Renderer::renderDrawings(const State& st) const
     }
 
     // Explosions
-    const Configuration& config = m_viewport.universe().config();
+    const Configuration& config = m_viewport.mapConfiguration();
     ExplosionType& e = m_viewport.universe().explosions();
     for (Id_t i = e.findNextIndex(0); i != 0; i = e.findNextIndex(i)) {
         if (const Explosion* ex = e.getObjectByIndex(i)) {
@@ -409,7 +409,7 @@ game::map::Renderer::renderDrawings(const State& st) const
 void
 game::map::Renderer::renderDrawing(const State& st, const Drawing& d) const
 {
-    const Configuration& config = m_viewport.universe().config();
+    const Configuration& config = m_viewport.mapConfiguration();
     switch (d.getType()) {
      case Drawing::LineDrawing:
         for (int img = st.getFirstImage(); img >= 0; img = st.getNextImage(img)) {
@@ -469,7 +469,7 @@ void
 game::map::Renderer::renderShipExtras(const State& st) const
 {
     // ex GChartViewport::drawShipSelAndVectors
-    const Configuration& config = m_viewport.universe().config();
+    const Configuration& config = m_viewport.mapConfiguration();
     AnyShipType ty(m_viewport.universe().ships());
 
     // Selections
@@ -590,7 +590,7 @@ game::map::Renderer::renderShipTrail(const State& st, const Ship& sh, int shipOw
     // Therefore, we always draw 16 turns max (stemming from the fact that PCC2 UI uses 8 colors).
     // We draw forward in time, so that a new line overwrites an old one if needed.
     // Unlike PCC2, we do the image loop here, not in the caller, to allow for possible handling of wrap.
-    const Configuration& config = m_viewport.universe().config();
+    const Configuration& config = m_viewport.mapConfiguration();
     const TeamSettings::Relation rel = m_viewport.teamSettings().getPlayerRelation(shipOwner);
 
     const int LIMIT = 16;
@@ -671,7 +671,7 @@ game::map::Renderer::renderShipVector(const State& st, const Ship& sh, int shipO
 {
     // ex GChartViewport::drawShipVector
     // Change to PCC2: this does not call drawShipTrail. This does the image loop internally for possible wrap support.
-    const Configuration& config = m_viewport.universe().config();
+    const Configuration& config = m_viewport.mapConfiguration();
     const TeamSettings::Relation rel = m_viewport.teamSettings().getPlayerRelation(shipOwner);
 
     /* Auto Task */
@@ -759,7 +759,7 @@ game::map::Renderer::renderPlanet(const State& st, const Planet& planet, Point p
     // Setting this too low means a partially-visible icon at the edge disappears a little too quick.
     const int SIZE = 15;
 
-    const Configuration& config = m_viewport.universe().config();
+    const Configuration& config = m_viewport.mapConfiguration();
 
     bool infoKnown = false;
     std::pair<int,bool> info;
@@ -883,7 +883,7 @@ void
 game::map::Renderer::renderShips(const State& st) const
 {
     // ex GChartViewport::drawShips, sort-of
-    const Configuration& config = m_viewport.universe().config();
+    const Configuration& config = m_viewport.mapConfiguration();
     AnyShipType ships(m_viewport.universe().ships());
     for (Id_t i = ships.findNextIndex(0); i != 0; i = ships.findNextIndex(i)) {
         if (Ship* s = ships.getObjectByIndex(i)) {

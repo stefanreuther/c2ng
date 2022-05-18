@@ -19,10 +19,11 @@ game::Game::Game()
       m_scores(),
       m_cursors(),
       m_selections(),
+      m_mapConfiguration(),
       m_messageConfiguration(),
       m_expressionLists()
 {
-    m_cursors.setUniverse(&m_currentTurn->universe());
+    m_cursors.setUniverse(&m_currentTurn->universe(), &m_mapConfiguration);
 }
 
 game::Game::~Game()
@@ -136,7 +137,7 @@ game::Game::setViewpointTurnNumber(int nr)
         }
 
         // Change cursor
-        m_cursors.setUniverse(newTurn != 0 ? &newTurn->universe() : 0);
+        m_cursors.setUniverse(newTurn != 0 ? &newTurn->universe() : 0, &m_mapConfiguration);
         sig_viewpointTurnChange.raise();
     }
 }
@@ -175,6 +176,18 @@ game::map::Selections&
 game::Game::selections()
 {
     return m_selections;
+}
+
+game::map::Configuration&
+game::Game::mapConfiguration()
+{
+    return m_mapConfiguration;
+}
+
+const game::map::Configuration&
+game::Game::mapConfiguration() const
+{
+    return m_mapConfiguration;
 }
 
 game::msg::Configuration&

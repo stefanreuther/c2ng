@@ -539,6 +539,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
                                   interpreter::Arguments& args,
                                   interpreter::Process& process,
                                   Session& session,
+                                  const game::map::Configuration& mapConfig,
                                   Turn& turn,
                                   Root& root)
 {
@@ -855,7 +856,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
         break;
 
      case ipmCargoTransfer:
-        doCargoTransfer(pl, process, args, session, turn, root);
+        doCargoTransfer(pl, process, args, session, mapConfig, turn, root);
         break;
 
      case ipmAutoTaxColonists:

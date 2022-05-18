@@ -13,6 +13,7 @@
 #include "game/session.hpp"
 #include "game/test/root.hpp"
 #include "game/turn.hpp"
+#include "game/map/configuration.hpp"
 
 namespace {
     using afl::string::Format;
@@ -25,13 +26,14 @@ namespace {
 
     struct Environment {
         game::map::Universe univ;
+        game::map::Configuration mapConfig;
         game::spec::ShipList shipList;
         game::config::HostConfiguration config;
         game::HostVersion host;
         util::RandomNumberGenerator rng;
 
         Environment()
-            : univ(), shipList(), config(), host(HostVersion::PHost, MKVERSION(3,4,0)), rng(32)
+            : univ(), mapConfig(), shipList(), config(), host(HostVersion::PHost, MKVERSION(3,4,0)), rng(32)
             { }
     };
 
@@ -126,7 +128,7 @@ namespace {
         afl::string::NullTranslator tx;
         afl::sys::Log log;
         game::PlayerSet_t p(PLAYER);
-        env.univ.postprocess(p, p, game::map::Object::Playable, env.host, env.config, 77, env.shipList, tx, log);
+        env.univ.postprocess(p, p, game::map::Object::Playable, env.mapConfig, env.host, env.config, 77, env.shipList, tx, log);
     }
 }
 
@@ -369,6 +371,7 @@ TestGameActionsChangeBuildQueue::testPlannedBuild()
     addPlanet(univ, 10, PLAYER, "abc");
     addPlanet(univ, 20, PLAYER, "xyz");
     univ.postprocess(game::PlayerSet_t(PLAYER), game::PlayerSet_t(PLAYER), game::map::Object::Playable,
+                     session.getGame()->mapConfiguration(),
                      session.getRoot()->hostVersion(), session.getRoot()->hostConfiguration(),
                      77, *session.getShipList(), session.translator(), session.log());
 

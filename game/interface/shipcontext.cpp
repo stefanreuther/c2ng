@@ -192,12 +192,14 @@ namespace {
                         game::interface::ShipMethod ism,
                         afl::base::Ref<game::Root> root,
                         afl::base::Ref<game::spec::ShipList> shipList,
+                        afl::base::Ref<game::Game> game,
                         afl::base::Ref<game::Turn> turn)
             : m_id(id),
               m_session(session),
               m_method(ism),
               m_root(root),
               m_shipList(shipList),
+              m_game(game),
               m_turn(turn)
             { }
 
@@ -205,12 +207,12 @@ namespace {
         virtual void call(interpreter::Process& proc, interpreter::Arguments& a)
             {
                 if (game::map::Ship* sh = m_turn->universe().ships().get(m_id)) {
-                    game::interface::callShipMethod(*sh, m_method, a, proc, m_session, *m_root, *m_shipList, *m_turn);
+                    game::interface::callShipMethod(*sh, m_method, a, proc, m_session, *m_root, m_game->mapConfiguration(), *m_shipList, *m_turn);
                 }
             }
 
         virtual ShipMethodValue* clone() const
-            { return new ShipMethodValue(m_id, m_session, m_method, m_root, m_shipList, m_turn); }
+            { return new ShipMethodValue(m_id, m_session, m_method, m_root, m_shipList, m_game, m_turn); }
 
      private:
         game::Id_t m_id;
@@ -218,6 +220,7 @@ namespace {
         game::interface::ShipMethod m_method;
         afl::base::Ref<game::Root> m_root;
         afl::base::Ref<game::spec::ShipList> m_shipList;
+        afl::base::Ref<game::Game> m_game;
         afl::base::Ref<game::Turn> m_turn;
     };
 }
@@ -259,7 +262,7 @@ game::interface::ShipContext::set(PropertyIndex_t index, const afl::data::Value*
             // Builtin property
             switch (ShipDomain(ship_mapping[index].domain)) {
              case ShipPropertyDomain:
-                setShipProperty(*sh, ShipProperty(ship_mapping[index].index), value, *m_root, *m_shipList, m_game->currentTurn());
+                setShipProperty(*sh, ShipProperty(ship_mapping[index].index), value, *m_root, *m_shipList, m_game->mapConfiguration(), m_game->currentTurn());
                 break;
              case HullPropertyDomain:
              case ComponentPropertyDomain:
@@ -335,6 +338,7 @@ game::interface::ShipContext::get(PropertyIndex_t index)
                                            ShipMethod(ship_mapping[index].index),
                                            m_root,
                                            m_shipList,
+                                           *m_game,
                                            m_game->currentTurn());
              default:
                 return 0;

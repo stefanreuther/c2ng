@@ -6,18 +6,20 @@
 #include "game/ref/historyshipselection.hpp"
 
 #include "t_game_ref.hpp"
-#include "afl/string/nulltranslator.hpp"
-#include "game/map/universe.hpp"
-#include "game/map/ship.hpp"
 #include "afl/io/nullfilesystem.hpp"
-#include "game/test/root.hpp"
-#include "game/ref/historyshiplist.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "game/game.hpp"
+#include "game/map/configuration.hpp"
+#include "game/map/ship.hpp"
+#include "game/map/universe.hpp"
+#include "game/ref/historyshiplist.hpp"
+#include "game/test/root.hpp"
 
-using game::ref::HistoryShipSelection;
-using game::map::Universe;
-using game::map::Point;
 using game::TeamSettings;
+using game::map::Configuration;
+using game::map::Point;
+using game::map::Universe;
+using game::ref::HistoryShipSelection;
 
 namespace {
     const int TURN_NR = 32;
@@ -106,6 +108,8 @@ TestGameRefHistoryShipSelection::testBasic()
 void
 TestGameRefHistoryShipSelection::testModeSet()
 {
+    const Configuration mapConfig;
+
     // Team settings with no teams
     game::TeamSettings noTeams;
     noTeams.setViewpointPlayer(3);
@@ -140,30 +144,30 @@ TestGameRefHistoryShipSelection::testModeSet()
         HistoryShipSelection t;
 
         // No teams
-        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u3, noTeams)), "ao");
-        TS_ASSERT_EQUALS(t.getInitialMode(u3, noTeams), HistoryShipSelection::AllShips);
+        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u3, mapConfig, noTeams)), "ao");
+        TS_ASSERT_EQUALS(t.getInitialMode(u3, mapConfig, noTeams), HistoryShipSelection::AllShips);
 
-        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u4, noTeams)), "af");
-        TS_ASSERT_EQUALS(t.getInitialMode(u4, noTeams), HistoryShipSelection::AllShips);
+        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u4, mapConfig, noTeams)), "af");
+        TS_ASSERT_EQUALS(t.getInitialMode(u4, mapConfig, noTeams), HistoryShipSelection::AllShips);
 
-        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u5, noTeams)), "af");
-        TS_ASSERT_EQUALS(t.getInitialMode(u5, noTeams), HistoryShipSelection::AllShips);
+        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u5, mapConfig, noTeams)), "af");
+        TS_ASSERT_EQUALS(t.getInitialMode(u5, mapConfig, noTeams), HistoryShipSelection::AllShips);
 
-        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u35, noTeams)), "afo");
-        TS_ASSERT_EQUALS(t.getInitialMode(u35, noTeams), HistoryShipSelection::AllShips);
+        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u35, mapConfig, noTeams)), "afo");
+        TS_ASSERT_EQUALS(t.getInitialMode(u35, mapConfig, noTeams), HistoryShipSelection::AllShips);
 
         // With teams
-        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u3, hasTeams)), "ato");
-        TS_ASSERT_EQUALS(t.getInitialMode(u3, hasTeams), HistoryShipSelection::AllShips);
+        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u3, mapConfig, hasTeams)), "ato");
+        TS_ASSERT_EQUALS(t.getInitialMode(u3, mapConfig, hasTeams), HistoryShipSelection::AllShips);
 
-        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u4, hasTeams)), "aft");
-        TS_ASSERT_EQUALS(t.getInitialMode(u4, hasTeams), HistoryShipSelection::AllShips);
+        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u4, mapConfig, hasTeams)), "aft");
+        TS_ASSERT_EQUALS(t.getInitialMode(u4, mapConfig, hasTeams), HistoryShipSelection::AllShips);
 
-        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u5, hasTeams)), "afe");
-        TS_ASSERT_EQUALS(t.getInitialMode(u5, hasTeams), HistoryShipSelection::AllShips);
+        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u5, mapConfig, hasTeams)), "afe");
+        TS_ASSERT_EQUALS(t.getInitialMode(u5, mapConfig, hasTeams), HistoryShipSelection::AllShips);
 
-        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u35, hasTeams)), "afteo");
-        TS_ASSERT_EQUALS(t.getInitialMode(u35, hasTeams), HistoryShipSelection::AllShips);
+        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u35, mapConfig, hasTeams)), "afteo");
+        TS_ASSERT_EQUALS(t.getInitialMode(u35, mapConfig, hasTeams), HistoryShipSelection::AllShips);
     }
 
     // Verify all combinations against HistoryShipSelection with exact position
@@ -172,30 +176,30 @@ TestGameRefHistoryShipSelection::testModeSet()
         t.setPosition(Point(1000, 1000));
 
         // No teams
-        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u3, noTeams)), "alxo");
-        TS_ASSERT_EQUALS(t.getInitialMode(u3, noTeams), HistoryShipSelection::LocalShips);
+        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u3, mapConfig, noTeams)), "alxo");
+        TS_ASSERT_EQUALS(t.getInitialMode(u3, mapConfig, noTeams), HistoryShipSelection::LocalShips);
 
-        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u4, noTeams)), "alxf");
-        TS_ASSERT_EQUALS(t.getInitialMode(u4, noTeams), HistoryShipSelection::LocalShips);
+        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u4, mapConfig, noTeams)), "alxf");
+        TS_ASSERT_EQUALS(t.getInitialMode(u4, mapConfig, noTeams), HistoryShipSelection::LocalShips);
 
-        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u5, noTeams)), "alxf");
-        TS_ASSERT_EQUALS(t.getInitialMode(u5, noTeams), HistoryShipSelection::LocalShips);
+        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u5, mapConfig, noTeams)), "alxf");
+        TS_ASSERT_EQUALS(t.getInitialMode(u5, mapConfig, noTeams), HistoryShipSelection::LocalShips);
 
-        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u35, noTeams)), "alxfo");
-        TS_ASSERT_EQUALS(t.getInitialMode(u35, noTeams), HistoryShipSelection::LocalShips);
+        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u35, mapConfig, noTeams)), "alxfo");
+        TS_ASSERT_EQUALS(t.getInitialMode(u35, mapConfig, noTeams), HistoryShipSelection::LocalShips);
 
         // With teams
-        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u3, hasTeams)), "alxto");
-        TS_ASSERT_EQUALS(t.getInitialMode(u3, hasTeams), HistoryShipSelection::LocalShips);
+        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u3, mapConfig, hasTeams)), "alxto");
+        TS_ASSERT_EQUALS(t.getInitialMode(u3, mapConfig, hasTeams), HistoryShipSelection::LocalShips);
 
-        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u4, hasTeams)), "alxft");
-        TS_ASSERT_EQUALS(t.getInitialMode(u4, hasTeams), HistoryShipSelection::LocalShips);
+        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u4, mapConfig, hasTeams)), "alxft");
+        TS_ASSERT_EQUALS(t.getInitialMode(u4, mapConfig, hasTeams), HistoryShipSelection::LocalShips);
 
-        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u5, hasTeams)), "alxfe");
-        TS_ASSERT_EQUALS(t.getInitialMode(u5, hasTeams), HistoryShipSelection::LocalShips);
+        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u5, mapConfig, hasTeams)), "alxfe");
+        TS_ASSERT_EQUALS(t.getInitialMode(u5, mapConfig, hasTeams), HistoryShipSelection::LocalShips);
 
-        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u35, hasTeams)), "alxfteo");
-        TS_ASSERT_EQUALS(t.getInitialMode(u35, hasTeams), HistoryShipSelection::LocalShips);
+        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u35, mapConfig, hasTeams)), "alxfteo");
+        TS_ASSERT_EQUALS(t.getInitialMode(u35, mapConfig, hasTeams), HistoryShipSelection::LocalShips);
     }
 
     // Verify all combinations against HistoryShipSelection with a close position
@@ -204,30 +208,30 @@ TestGameRefHistoryShipSelection::testModeSet()
         t.setPosition(Point(1000, 1001));
 
         // No teams
-        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u3, noTeams)), "alo");
-        TS_ASSERT_EQUALS(t.getInitialMode(u3, noTeams), HistoryShipSelection::LocalShips);
+        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u3, mapConfig, noTeams)), "alo");
+        TS_ASSERT_EQUALS(t.getInitialMode(u3, mapConfig, noTeams), HistoryShipSelection::LocalShips);
 
-        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u4, noTeams)), "alf");
-        TS_ASSERT_EQUALS(t.getInitialMode(u4, noTeams), HistoryShipSelection::LocalShips);
+        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u4, mapConfig, noTeams)), "alf");
+        TS_ASSERT_EQUALS(t.getInitialMode(u4, mapConfig, noTeams), HistoryShipSelection::LocalShips);
 
-        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u5, noTeams)), "alf");
-        TS_ASSERT_EQUALS(t.getInitialMode(u5, noTeams), HistoryShipSelection::LocalShips);
+        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u5, mapConfig, noTeams)), "alf");
+        TS_ASSERT_EQUALS(t.getInitialMode(u5, mapConfig, noTeams), HistoryShipSelection::LocalShips);
 
-        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u35, noTeams)), "alfo");
-        TS_ASSERT_EQUALS(t.getInitialMode(u35, noTeams), HistoryShipSelection::LocalShips);
+        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u35, mapConfig, noTeams)), "alfo");
+        TS_ASSERT_EQUALS(t.getInitialMode(u35, mapConfig, noTeams), HistoryShipSelection::LocalShips);
 
         // With teams
-        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u3, hasTeams)), "alto");
-        TS_ASSERT_EQUALS(t.getInitialMode(u3, hasTeams), HistoryShipSelection::LocalShips);
+        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u3, mapConfig, hasTeams)), "alto");
+        TS_ASSERT_EQUALS(t.getInitialMode(u3, mapConfig, hasTeams), HistoryShipSelection::LocalShips);
 
-        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u4, hasTeams)), "alft");
-        TS_ASSERT_EQUALS(t.getInitialMode(u4, hasTeams), HistoryShipSelection::LocalShips);
+        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u4, mapConfig, hasTeams)), "alft");
+        TS_ASSERT_EQUALS(t.getInitialMode(u4, mapConfig, hasTeams), HistoryShipSelection::LocalShips);
 
-        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u5, hasTeams)), "alfe");
-        TS_ASSERT_EQUALS(t.getInitialMode(u5, hasTeams), HistoryShipSelection::LocalShips);
+        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u5, mapConfig, hasTeams)), "alfe");
+        TS_ASSERT_EQUALS(t.getInitialMode(u5, mapConfig, hasTeams), HistoryShipSelection::LocalShips);
 
-        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u35, hasTeams)), "alfteo");
-        TS_ASSERT_EQUALS(t.getInitialMode(u35, hasTeams), HistoryShipSelection::LocalShips);
+        TS_ASSERT_EQUALS(toString(t.getAvailableModes(u35, mapConfig, hasTeams)), "alfteo");
+        TS_ASSERT_EQUALS(t.getInitialMode(u35, mapConfig, hasTeams), HistoryShipSelection::LocalShips);
     }
 }
 
@@ -352,11 +356,11 @@ TestGameRefHistoryShipSelection::testBuildListHist()
     testee.setMode(HistoryShipSelection::ExactShips);
     testee.buildList(list, t, session);
     TS_ASSERT_EQUALS(list.size(), 0U);
-    TS_ASSERT(!testee.getAvailableModes(t.universe(), session.getGame()->teamSettings()).contains(HistoryShipSelection::ExactShips));
+    TS_ASSERT(!testee.getAvailableModes(t.universe(), session.getGame()->mapConfiguration(), session.getGame()->teamSettings()).contains(HistoryShipSelection::ExactShips));
 
     // Exact location: succeeds with different location
     testee.setPosition(Point(1000, 1000));
-    TS_ASSERT(testee.getAvailableModes(t.universe(), session.getGame()->teamSettings()).contains(HistoryShipSelection::ExactShips));
+    TS_ASSERT(testee.getAvailableModes(t.universe(), session.getGame()->mapConfiguration(), session.getGame()->teamSettings()).contains(HistoryShipSelection::ExactShips));
     testee.setSortOrder(HistoryShipSelection::ByOwner);
     testee.buildList(list, t, session);
     TS_ASSERT_EQUALS(list.size(), 6U);

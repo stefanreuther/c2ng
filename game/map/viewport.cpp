@@ -10,6 +10,7 @@ game::map::Viewport::Viewport(Universe& univ, int turnNumber, TeamSettings& team
                               game::interface::LabelExtra* labels,
                               const UnitScoreDefinitionList& shipScoreDefinitions,
                               const game::spec::ShipList& shipList,
+                              const Configuration& mapConfig,
                               const game::config::HostConfiguration& config)
     : m_universe(univ),
       m_teamSettings(teams),
@@ -17,6 +18,7 @@ game::map::Viewport::Viewport(Universe& univ, int turnNumber, TeamSettings& team
       m_turnNumber(turnNumber),
       m_shipScoreDefinitions(shipScoreDefinitions),
       m_shipList(shipList),
+      m_mapConfig(mapConfig),
       m_hostConfiguration(config),
       m_min(),
       m_max(),
@@ -70,6 +72,12 @@ const game::spec::ShipList&
 game::map::Viewport::shipList() const
 {
     return m_shipList;
+}
+
+const game::map::Configuration&
+game::map::Viewport::mapConfiguration() const
+{
+    return m_mapConfig;
 }
 
 const game::config::HostConfiguration&

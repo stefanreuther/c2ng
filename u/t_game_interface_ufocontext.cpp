@@ -33,7 +33,7 @@ TestGameInterfaceUfoContext::testTypes()
     ufo->setShipRange(150);
     ufo->setInfo1("USS Rosswell");
     ufo->setInfo2("New Mexico");
-    ufo->postprocess(42, turn.universe().config());
+    ufo->postprocess(42, session.getGame()->mapConfiguration());
 
     TS_ASSERT_EQUALS(turn.universe().ufos().getObjectByIndex(1), ufo);
 

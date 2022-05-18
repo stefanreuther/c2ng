@@ -169,7 +169,7 @@ game::sim::Transfer::copyShipFromGame(Ship& out, const game::map::Ship& in) cons
 }
 
 bool
-game::sim::Transfer::copyShipToGame(game::map::Ship& out, const Ship& in, game::map::Universe& univ) const
+game::sim::Transfer::copyShipToGame(game::map::Ship& out, const Ship& in, game::map::Universe& univ, const game::map::Configuration& mapConfig) const
 {
     // ex GSimulatorRealGameInterface::updateToGame, ccsim.pas:DoWriteback
     int owner, hullNr;
@@ -184,7 +184,7 @@ game::sim::Transfer::copyShipToGame(game::map::Ship& out, const Ship& in, game::
     // Mission
     // Do not touch fleet leaders/members here for now, but use FleetMember for implicit intercept waypoint propagation
     if (out.getFleetNumber() == 0) {
-        game::map::FleetMember mem(univ, out);
+        game::map::FleetMember mem(univ, out, mapConfig);
         if (in.getAggressiveness() == Ship::agg_Kill) {
             // Aggressiveness Kill -> set Kill mission
             mem.setMission(Mission::msn_Kill, 0, 0, m_config, m_shipList);

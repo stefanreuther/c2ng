@@ -7,6 +7,7 @@
 #include "afl/string/format.hpp"
 #include "game/map/anyplanettype.hpp"
 #include "game/map/anyshiptype.hpp"
+#include "game/map/configuration.hpp"
 #include "game/map/fleet.hpp"
 #include "game/map/objecttype.hpp"
 #include "game/map/planet.hpp"
@@ -45,13 +46,14 @@ namespace {
 
     /* Postprocess a fleet. */
     void postprocessFleet(game::map::Universe& univ, game::map::Ship& leader,
+                          const game::map::Configuration& mapConfig,
                           const game::config::HostConfiguration& config,
                           const game::spec::ShipList& shipList)
     {
         // @change PCC2 did more here; in particular, dissolve fleets with invalid Ids.
         // For c2ng, FleetLoader only produces valid, existing fleets.
         // So all that remains is to synchronize missions/waypoints.
-        game::map::Fleet(univ, leader).synchronize(config, shipList);
+        game::map::Fleet(univ, leader).synchronize(config, shipList, mapConfig);
     }
 
     /* Mark object if it is within a range of coordinates (inclusive). */
@@ -121,7 +123,6 @@ namespace {
 game::map::Universe::Universe()
     : sig_preUpdate(),
       sig_universeChange(),
-      m_config(),
       m_ships(),
       m_planets(),
       m_ionStorms(),
@@ -225,6 +226,7 @@ game::map::Universe::notifyListeners()
 
 void
 game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePlayers, Object::Playability playability,
+                                 const Configuration& mapConfig,
                                  const game::HostVersion& host, const game::config::HostConfiguration& config,
                                  const int turnNumber,
                                  const game::spec::ShipList& shipList,
@@ -235,7 +237,7 @@ game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePl
     // Internal check for ships and planets
     for (Id_t i = 1, n = m_planets.size(); i <= n; ++i) {
         if (Planet* p = m_planets.get(i)) {
-            p->internalCheck(m_config, tx, log);
+            p->internalCheck(mapConfig, tx, log);
 
             int owner;
             if (p->getOwner(owner)) {
@@ -270,7 +272,7 @@ game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePl
     // Internal checks for others
     m_minefields.internalCheck(turnNumber, host, config);
     m_drawings.eraseExpiredDrawings(turnNumber);
-    m_ufos.postprocess(turnNumber, m_config, config, tx, log);
+    m_ufos.postprocess(turnNumber, mapConfig, config, tx, log);
     // FIXME: port: setTypePlayability(ty_minefields, playability);
     // FIXME: port: setTypePlayability(ty_ufos, playability);
 
@@ -300,7 +302,7 @@ game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePl
     for (Id_t i = 1, n = m_ships.size(); i <= n; ++i) {
         if (Ship* s = m_ships.get(i)) {
             if (s->isFleetLeader()) {
-                postprocessFleet(*this, *s, config, shipList);
+                postprocessFleet(*this, *s, mapConfig, config, shipList);
             }
         }
     }
@@ -324,26 +326,28 @@ game::Id_t
 game::map::Universe::findPlanetAt(Point pt) const
 {
     // ex GUniverse::getPlanetAt, global.pas:PlanetAt
-    return AnyPlanetType(const_cast<Universe&>(*this).planets()).findNextObjectAt(m_config.getCanonicalLocation(pt), 0, false);
+    return AnyPlanetType(const_cast<Universe&>(*this).planets()).findNextObjectAt(pt, 0, false);
 }
 
 game::Id_t
 game::map::Universe::findPlanetAt(Point pt,
                                   bool gravityFlag,
+                                  const game::map::Configuration& mapConfig,
                                   const game::config::HostConfiguration& config,
                                   const HostVersion& host) const
 {
     // ex GUniverse::findPlanetAt
     // ex planacc.pas:GravityPlanetAt
-    Id_t rv = findPlanetAt(pt);
+    Id_t rv = findPlanetAt(mapConfig.getCanonicalLocation(pt));
     if (rv == 0 && gravityFlag) {
-        rv = findGravityPlanetAt(pt, config, host);
+        rv = findGravityPlanetAt(pt, mapConfig, config, host);
     }
     return rv;
 }
 
 game::Id_t
 game::map::Universe::findGravityPlanetAt(Point pt,
+                                         const game::map::Configuration& mapConfig,
                                          const game::config::HostConfiguration& config,
                                          const HostVersion& host) const
 {
@@ -365,10 +369,10 @@ game::map::Universe::findGravityPlanetAt(Point pt,
                 Point pos;
                 if (p->getPosition(pos)) {
                     if (config[config.RoundGravityWells]()) {
-                        if (m_config.getSquaredDistance(pos, pt) <= sqs)
+                        if (mapConfig.getSquaredDistance(pos, pt) <= sqs)
                             return i;
                     } else {
-                        Point p2 = m_config.getSimpleNearestAlias(pos, pt);
+                        Point p2 = mapConfig.getSimpleNearestAlias(pos, pt);
                         if (util::squareInteger(p2.getX() - pt.getX()) <= sqs && util::squareInteger(p2.getY() - pt.getY()) <= sqs)
                             return i;
                     }
@@ -387,7 +391,7 @@ game::map::Universe::findGravityPlanetAt(Point pt,
             if (const Planet* p = ty.getObjectByIndex(i)) {
                 Point pos;
                 if (p->getPosition(pos)) {
-                    if (m_config.getSquaredDistance(pos, pt) <= 9) {
+                    if (mapConfig.getSquaredDistance(pos, pt) <= 9) {
                         pt = pos;  // (!)
                         pid = i;
                     }
@@ -405,25 +409,26 @@ game::map::Universe::findFirstShipAt(Point pt) const
 {
     // ex GUniverse::getAnyShipAt
     // ex shipacc.pas:ShipAt
-    return AnyShipType(const_cast<Universe&>(*this).ships()).findNextObjectAt(m_config.getCanonicalLocation(pt), 0, false);
+    return AnyShipType(const_cast<Universe&>(*this).ships()).findNextObjectAt(pt, 0, false);
 }
 
 String_t
 game::map::Universe::findLocationName(Point pt, int flags,
+                                      const game::map::Configuration& mapConfig,
                                       const game::config::HostConfiguration& config,
                                       const HostVersion& host,
                                       afl::string::Translator& tx) const
 {
     // ex GUniverse::getLocationName
     // ex shipacc.pas:LocationStr
-    if (Id_t pid = findPlanetAt(pt)) {
+    if (Id_t pid = findPlanetAt(mapConfig.getCanonicalLocation(pt))) {
         if (const Planet* pl = planets().get(pid)) {
             return formatPlanetName(*pl, tx, flags);
         }
     }
 
     if ((flags & NameShips) != 0) {
-        if (Id_t sid = findFirstShipAt(pt)) {
+        if (Id_t sid = findFirstShipAt(mapConfig.getCanonicalLocation(pt))) {
             if (const Ship* sh = ships().get(sid)) {
                 return formatShipName(*sh, tx);
             }
@@ -431,7 +436,7 @@ game::map::Universe::findLocationName(Point pt, int flags,
     }
 
     if ((flags & NameGravity) != 0) {
-        if (Id_t pid = findGravityPlanetAt(pt, config, host)) {
+        if (Id_t pid = findGravityPlanetAt(pt, mapConfig, config, host)) {
             if (const Planet* pl = planets().get(pid)) {
                 return afl::string::Format(((flags & NameVerbose) != 0
                                             ? tx.translateString("near %s (Planet #%d)")
@@ -453,11 +458,12 @@ String_t
 game::map::Universe::findLocationUnitNames(Point pt,
                                            int viewpointPlayer,
                                            const PlayerList& players,
+                                           const game::map::Configuration& mapConfig,
                                            afl::string::Translator& tx,
                                            InterpreterInterface& iface) const
 {
     // ex WScannerChartWidget::doTooltip (part)
-    const Point realPos = m_config.getCanonicalLocation(pt);
+    const Point realPos = mapConfig.getCanonicalLocation(pt);
     const char*const SEP = "\n";
     String_t desc;
 
@@ -547,7 +553,7 @@ game::map::Universe::findShipCloningAt(Id_t pid, Id_t after) const
 }
 
 game::Id_t
-game::map::Universe::findControllingPlanetId(const Minefield& mf) const
+game::map::Universe::findControllingPlanetId(const Minefield& mf, const Configuration& mapConfig) const
 {
     // ex getAssociatedPlanet, chartdlg.pas:CMinefieldView.SetMinefield
     Id_t pid  = 0;
@@ -571,7 +577,7 @@ game::map::Universe::findControllingPlanetId(const Minefield& mf) const
 
                     /* Choose closest planet */
                     if (maybe) {
-                        int32_t ndist = config().getSquaredDistance(planetPos, minePos);
+                        int32_t ndist = mapConfig.getSquaredDistance(planetPos, minePos);
                         if (pid == 0 || ndist < dist) {
                             pid  = i;
                             dist = ndist;
@@ -609,14 +615,14 @@ game::map::Universe::findUniversalMinefieldFriendlyCodePlanetId(int forPlayer) c
 }
 
 int
-game::map::Universe::markObjectsInRange(Point a, Point b)
+game::map::Universe::markObjectsInRange(Point a, Point b, const game::map::Configuration& mapConfig)
 {
     // ex WSelectChartMode::rebuildSelection, part
     AnyShipType ships(m_ships);
-    int numShips = markTypeObjectsInRange(ships, a, b, m_config);
+    int numShips = markTypeObjectsInRange(ships, a, b, mapConfig);
 
     AnyPlanetType planets(m_planets);
-    int numPlanets = markTypeObjectsInRange(planets, a, b, m_config);
+    int numPlanets = markTypeObjectsInRange(planets, a, b, mapConfig);
 
     return numShips + numPlanets;
 }

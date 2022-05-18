@@ -125,6 +125,7 @@ namespace game { namespace interface {
     void setShipProperty(game::map::Ship& sh, ShipProperty isp, const afl::data::Value* value,
                          Root& root,
                          const game::spec::ShipList& shipList,
+                         const game::map::Configuration& mapConfig,
                          Turn& turn);
 
 } }

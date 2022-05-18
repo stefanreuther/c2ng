@@ -164,7 +164,7 @@ game::proxy::MinefieldProxy::Trampoline::buildMinefieldInfo(MinefieldInfo& out) 
         out.minefieldId = p->getId();
         p->getRadius(out.radius);
         p->getPosition(out.center);
-        out.controllingPlanetId = (t != 0 ? t->universe().findControllingPlanetId(*p) : 0);
+        out.controllingPlanetId = (t != 0 ? t->universe().findControllingPlanetId(*p, g->mapConfiguration()) : 0);
 
         // Textual information
         // - Owner

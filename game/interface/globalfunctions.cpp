@@ -275,7 +275,7 @@ game::interface::IFDistance(game::Session& session, interpreter::Arguments& args
     // Check game
     Game* g = session.getGame().get();
     if (g != 0) {
-        return makeFloatValue(std::sqrt(double(g->currentTurn().universe().config().getSquaredDistance(points[0], points[1]))));
+        return makeFloatValue(std::sqrt(double(g->mapConfiguration().getSquaredDistance(points[0], points[1]))));
     } else {
         return 0;
     }
@@ -423,7 +423,7 @@ game::interface::IFObjectIsAt(game::Session& session, interpreter::Arguments& ar
 
     // Must have a current turn to access map configuration
     const Game& g = game::actions::mustHaveGame(session);
-    const game::map::Configuration& config = g.currentTurn().universe().config();
+    const game::map::Configuration& config = g.mapConfiguration();
 
     // Different handling depending on object type
     game::map::Point thisPoint(x, y);
@@ -481,7 +481,7 @@ game::interface::IFPlanetAt(game::Session& session, interpreter::Arguments& args
         return 0;
     }
 
-    return makeIntegerValue(game->currentTurn().universe().findPlanetAt(game::map::Point(x, y), flag, root->hostConfiguration(), root->hostVersion()));
+    return makeIntegerValue(game->currentTurn().universe().findPlanetAt(game::map::Point(x, y), flag, game->mapConfiguration(), root->hostConfiguration(), root->hostVersion()));
 }
 
 /* @q Pref(key:Str, Optional index:Int):Any (Function)

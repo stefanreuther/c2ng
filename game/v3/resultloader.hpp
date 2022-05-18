@@ -16,6 +16,7 @@
 #include "game/playerset.hpp"
 #include "game/turnloader.hpp"
 #include "game/v3/directoryscanner.hpp"
+#include "util/profiledirectory.hpp"
 
 namespace game { namespace v3 {
 

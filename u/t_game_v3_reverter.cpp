@@ -10,6 +10,7 @@
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
+#include "game/game.hpp"
 #include "game/map/locationreverter.hpp"
 #include "game/ref/list.hpp"
 #include "game/ref/sortbyid.hpp"
@@ -193,7 +194,7 @@ TestGameV3Reverter::testMinBuildings()
     TS_ASSERT_EQUALS(testee.getMinBuildings(200, game::DefenseBuilding).orElse(-1),     -1);
     TS_ASSERT_EQUALS(testee.getMinBuildings(200, game::FactoryBuilding).orElse(-1),     -1);
     TS_ASSERT_EQUALS(testee.getMinBuildings(200, game::BaseDefenseBuilding).orElse(-1), 50);
-    
+
     // Totally out-of-range should not crash
     TS_ASSERT(!testee.getMinBuildings(20000, game::MineBuilding).isValid());
     TS_ASSERT(!testee.getMinBuildings(0,     game::MineBuilding).isValid());
@@ -211,7 +212,7 @@ TestGameV3Reverter::testLocation()
     game::Turn turn;
     afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    game::Session session(tx, fs);         // required for shiplist and root for prepareUndoInformation, i.e. not needed here
+    game::Session session(tx, fs);
     game::map::Universe& univ = turn.universe();
 
     // Add some units
@@ -227,7 +228,7 @@ TestGameV3Reverter::testLocation()
         p1.setPosition(Point(2000, 2000));
         p1.addCurrentPlanetData(pd, PlayerSet_t(3));
         p1.setPlayability(Planet::Playable);
-        p1.internalCheck(univ.config(), tx, log);
+        p1.internalCheck(game::map::Configuration(), tx, log);
 
         PlanetData pd1 = pd;
         pd1.minedNeutronium = 20;
@@ -307,7 +308,7 @@ TestGameV3Reverter::testLocationHalf()
     game::Turn turn;
     afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    game::Session session(tx, fs);         // required for shiplist and root for prepareUndoInformation, i.e. not needed here
+    game::Session session(tx, fs);
     game::map::Universe& univ = turn.universe();
 
     // Add some units
@@ -323,7 +324,7 @@ TestGameV3Reverter::testLocationHalf()
         p1.setPosition(Point(2000, 2000));
         p1.addCurrentPlanetData(pd, PlayerSet_t(3));
         p1.setPlayability(Planet::Playable);
-        p1.internalCheck(univ.config(), tx, log);
+        p1.internalCheck(game::map::Configuration(), tx, log);
 
         PlanetData pd1 = pd;
         pd1.minedNeutronium = 20;

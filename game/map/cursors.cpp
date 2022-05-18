@@ -20,7 +20,7 @@ game::map::Cursors::~Cursors()
 { }
 
 void
-game::map::Cursors::setUniverse(Universe* univ)
+game::map::Cursors::setUniverse(Universe* univ, const Configuration* mapConfig)
 {
     m_pUniverse = univ;
     if (univ != 0) {
@@ -38,7 +38,7 @@ game::map::Cursors::setUniverse(Universe* univ)
         m_currentIonStorm.setObjectType(0);
         m_currentMinefield.setObjectType(0);
     }
-    m_location.setUniverse(univ);
+    m_location.setUniverse(univ, mapConfig);
 }
 
 game::map::SimpleObjectCursor&

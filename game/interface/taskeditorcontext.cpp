@@ -368,7 +368,7 @@ namespace {
             return 0;
         } else if (const game::map::Ship* sh = dynamic_cast<const game::map::Ship*>(edit.process().getInvokingObject())) {
             // Ship prediction
-            ShipTaskPredictor pred(g->currentTurn().universe(), sh->getId(), g->shipScores(), *sl, r->hostConfiguration(), r->hostVersion(), r->registrationKey());
+            ShipTaskPredictor pred(g->currentTurn().universe(), sh->getId(), g->shipScores(), *sl, g->mapConfiguration(), r->hostConfiguration(), r->hostVersion(), r->registrationKey());
             pred.predictTask(edit, edit.getCursor());
             switch (which) {
              case pvFriendlyCode:   return makeStringValue(pred.getFriendlyCode());
@@ -759,7 +759,7 @@ game::interface::insertMovementCommand(interpreter::TaskEditor& edit, String_t v
     const Game& g = game::actions::mustHaveGame(session);
     const Universe& u = g.currentTurn().universe();
     const ShipList& shipList = game::actions::mustHaveShipList(session);
-    ShipTaskPredictor pred(u, sh->getId(), g.shipScores(), shipList, r.hostConfiguration(), r.hostVersion(), r.registrationKey());
+    ShipTaskPredictor pred(u, sh->getId(), g.shipScores(), shipList, g.mapConfiguration(), r.hostConfiguration(), r.hostVersion(), r.registrationKey());
     pred.predictTask(edit, edit.getCursor());
     if (!wantDuplicate && pred.getPosition() == pt) {
         return;
@@ -771,7 +771,7 @@ game::interface::insertMovementCommand(interpreter::TaskEditor& edit, String_t v
     // Set speed if desired
     if (wantSetSpeed) {
         // Do it
-        const int32_t dist2 = u.config().getSquaredDistance(pred.getPosition(), pt);
+        const int32_t dist2 = g.mapConfiguration().getSquaredDistance(pred.getPosition(), pt);
         const bool shipCanJump = sh->hasSpecialFunction(BasicHullFunction::Hyperdrive, g.shipScores(), shipList, r.hostConfiguration());
         if (shipCanJump && r.hostVersion().isExactHyperjumpDistance2(dist2)) {
             /* Looks like a hyperjump, so make one. This code is not in the regular
@@ -790,7 +790,7 @@ game::interface::insertMovementCommand(interpreter::TaskEditor& edit, String_t v
 
             /* Optimize speed */
             if (pred.getPosition() != pt) {
-                int n = getOptimumWarp(u, sh->getId(), pred.getPosition(), pt, g.shipScores(), shipList, r);
+                int n = getOptimumWarp(u, sh->getId(), pred.getPosition(), pt, g.shipScores(), shipList, g.mapConfiguration(), r);
                 if (n != 0 && n != pred.getWarpFactor()) {
                     commands.push_back(Format("SetSpeed %d", n));
                 }
@@ -802,7 +802,7 @@ game::interface::insertMovementCommand(interpreter::TaskEditor& edit, String_t v
     String_t command = Format("%s %d, %d", verb, pt.getX(), pt.getY());
     validateCommand(command);
 
-    String_t comment = u.findLocationName(pt, Universe::NameGravity | Universe::NameNoSpace, r.hostConfiguration(), r.hostVersion(), session.translator());
+    String_t comment = u.findLocationName(pt, Universe::NameGravity | Universe::NameNoSpace, g.mapConfiguration(), r.hostConfiguration(), r.hostVersion(), session.translator());
     if (!comment.empty()) {
         command += "   % ";
         command += comment;

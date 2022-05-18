@@ -66,9 +66,6 @@ game::ref::List::addObjectsAt(game::map::Universe& univ, game::map::Point pt, Op
 {
     // ex GObjectList::addObjectsAt
 
-    // Canonical location
-    pt = univ.config().getCanonicalLocation(pt);
-
     // Handle planet
     if (options.contains(IncludePlanet)) {
         if (Id_t pid = univ.findPlanetAt(pt)) {

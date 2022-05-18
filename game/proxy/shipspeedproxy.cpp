@@ -46,6 +46,7 @@ class game::proxy::ShipSpeedProxy::Trampoline {
     Trampoline(Session& session, Id_t shipId)
         : m_shipId(shipId),
           m_pTurn(),
+          m_pGame(),
           m_pShipList(),
           m_pRoot(),
           m_pShip(),
@@ -63,6 +64,7 @@ class game::proxy::ShipSpeedProxy::Trampoline {
             game::spec::ShipList* pShipList = session.getShipList().get();
             if (pRoot != 0 && pGame != 0 && pShipList != 0) {
                 m_pTurn = &pGame->currentTurn();
+                m_pGame = pGame;
                 m_pShipList = pShipList;
                 m_pRoot = pRoot;
                 m_pShip = m_pTurn->universe().ships().get(m_shipId);
@@ -95,7 +97,7 @@ class game::proxy::ShipSpeedProxy::Trampoline {
         {
             // ex WShipSpeedSelector::widgetUpdated [sort-of]
             if (m_pTurn.get() != 0 && m_pShipList.get() != 0 && m_pRoot.get() != 0 && m_pShip != 0 && n >= 0 && n <= m_status.maxSpeed) {
-                FleetMember fm(m_pTurn->universe(), *m_pShip);
+                FleetMember fm(m_pTurn->universe(), *m_pShip, m_pGame->mapConfiguration());
                 if (n == HYPER_WARP) {
                     if (m_pFriendlyCodeChanger.get() != 0) {
                         m_pFriendlyCodeChanger->setFriendlyCode("HYP");
@@ -115,6 +117,7 @@ class game::proxy::ShipSpeedProxy::Trampoline {
  private:
     Id_t m_shipId;
     Ptr<Turn> m_pTurn;
+    Ptr<Game> m_pGame;
     Ptr<game::spec::ShipList> m_pShipList;
     Ptr<Root> m_pRoot;
     Ship* m_pShip;

@@ -74,6 +74,7 @@ namespace {
         p->setPosition(game::map::Point(X, Y));
         p->setName("P");
         g->currentTurn().universe().postprocess(game::PlayerSet_t(PLAYER_NR), game::PlayerSet_t(PLAYER_NR), game::map::Object::Playable,
+                                                g->mapConfiguration(),
                                                 r->hostVersion(), r->hostConfiguration(), 12, *shipList, t.session().translator(), t.session().log());
         t.session().setGame(g);
     }

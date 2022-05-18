@@ -5,6 +5,7 @@
 #ifndef C2NG_GAME_INTERFACE_SHIPTASKPREDICTOR_HPP
 #define C2NG_GAME_INTERFACE_SHIPTASKPREDICTOR_HPP
 
+#include "game/map/configuration.hpp"
 #include "game/map/point.hpp"
 #include "game/map/shippredictor.hpp"
 #include "interpreter/taskpredictor.hpp"
@@ -20,12 +21,14 @@ namespace game { namespace interface {
             \param id                Ship Id
             \param scoreDefinitions  Unit score definitions (required for experience levels)
             \param shipList          Ship list (required for hull/beam/torp/engine specs)
+            \param mapConfig         Map configuration
             \param config            Host configuration
             \param hostVersion       Host version
             \param key               Registration key */
         ShipTaskPredictor(const game::map::Universe& univ, Id_t id,
                           const UnitScoreDefinitionList& scoreDefinitions,
                           const game::spec::ShipList& shipList,
+                          const game::map::Configuration& mapConfig,
                           const game::config::HostConfiguration& config,
                           const HostVersion& hostVersion,
                           const RegistrationKey& key);
@@ -99,6 +102,7 @@ namespace game { namespace interface {
         game::map::ShipPredictor m_predictor;
         const game::map::Universe& m_universe;
         const game::spec::ShipList& m_shipList;
+        const game::map::Configuration& m_mapConfig;
         const game::config::HostConfiguration& m_config;
 
         enum { MAX_XYS = 30 };

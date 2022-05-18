@@ -44,6 +44,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
                                 interpreter::Process& process,
                                 Session& session,
                                 Root& root,
+                                const game::map::Configuration& mapConfig,
                                 game::spec::ShipList& shipList,
                                 Turn& turn)
 {
@@ -81,7 +82,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
         // ex int/if/shipif.h:IFShipSetFCode
         // ex shipint.pas:Ship_SetFCode
         args.checkArgumentCount(1);
-        setShipProperty(sh, ispFCode, args.getNext(), root, shipList, turn);
+        setShipProperty(sh, ispFCode, args.getNext(), root, shipList, mapConfig, turn);
         break;
 
      case ismSetEnemy:
@@ -92,7 +93,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
         // ex int/if/shipif.h:IFShipSetEnemy
         // ex shipint.pas:Ship_SetEnemy
         args.checkArgumentCount(1);
-        setShipProperty(sh, ispEnemyId, args.getNext(), root, shipList, turn);
+        setShipProperty(sh, ispEnemyId, args.getNext(), root, shipList, mapConfig, turn);
         break;
 
      case ismSetSpeed:
@@ -103,7 +104,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
         // ex int/if/shipif.h:IFShipSetSpeed
         // ex shipint.pas:Ship_SetSpeed
         args.checkArgumentCount(1);
-        setShipProperty(sh, ispSpeedId, args.getNext(), root, shipList, turn);
+        setShipProperty(sh, ispSpeedId, args.getNext(), root, shipList, mapConfig, turn);
         break;
 
      case ismSetName:
@@ -114,7 +115,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
         // ex int/if/shipif.h:IFShipSetName
         // ex shipint.pas:Ship_SetName
         args.checkArgumentCount(1);
-        setShipProperty(sh, ispName, args.getNext(), root, shipList, turn);
+        setShipProperty(sh, ispName, args.getNext(), root, shipList, mapConfig, turn);
         break;
 
      case ismSetMission: {
@@ -139,7 +140,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
         if (!sh.isPlayable(game::map::Object::Playable)) {
             throw interpreter::Error::notAssignable();
         }
-        if (!game::map::FleetMember(turn.universe(), sh).setMission(m, i, t, root.hostConfiguration(), shipList)) {
+        if (!game::map::FleetMember(turn.universe(), sh, mapConfig).setMission(m, i, t, root.hostConfiguration(), shipList)) {
             throw Exception(Exception::eFleet);
         }
         break;
@@ -188,7 +189,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
         if (!sh.isPlayable(game::map::Object::Playable)) {
             throw interpreter::Error::notAssignable();
         }
-        if (!game::map::FleetMember(turn.universe(), sh).setWaypoint(game::map::Point(x, y), root.hostConfiguration(), shipList)) {
+        if (!game::map::FleetMember(turn.universe(), sh, mapConfig).setWaypoint(game::map::Point(x, y), root.hostConfiguration(), shipList)) {
             throw Exception(Exception::eFleet);
         }
         break;
@@ -234,7 +235,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
            @see CargoUnload, CargoUpload, CargoTransferWait
            @since PCC 1.0.10, PCC2 1.99.12, PCC2 2.40.3
            @diff The "proxy" ability is present in PCC 1.0.10, and PCC2 2.40.3 (PCC2ng), but not in PCC2. */
-        doCargoTransfer(sh, process, args, session, turn, root);
+        doCargoTransfer(sh, process, args, session, mapConfig, turn, root);
         break;
 
      case ismCargoUnload:
@@ -254,7 +255,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
            @see CargoUpload, CargoTransfer
            @since PCC 1.0.10, PCC2 1.99.12, PCC2 2.40.3 */
         // ex IFShipCargoUnload
-        doCargoUnload(sh, false, process, args, session, turn, root);
+        doCargoUnload(sh, false, process, args, session, mapConfig, turn, root);
         break;
 
      case ismCargoUpload:
@@ -272,7 +273,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
            @see CargoUnload, CargoTransfer, CargoUploadWait
            @since PCC 1.0.10, PCC2 1.99.12, PCC2 2.40.3 */
         // ex IFShipCargoUpload
-        doCargoUnload(sh, true, process, args, session, turn, root);
+        doCargoUnload(sh, true, process, args, session, mapConfig, turn, root);
         break;
 
      case ismSetFleet:
@@ -291,7 +292,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
         // ex IFShipSetFleet
         // ex shipint.pas:Ship_SetFleet
         args.checkArgumentCount(1);
-        setShipProperty(sh, ispFleetId, args.getNext(), root, shipList, turn);
+        setShipProperty(sh, ispFleetId, args.getNext(), root, shipList, mapConfig, turn);
         break;
     }
 }

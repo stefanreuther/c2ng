@@ -64,7 +64,7 @@ game::proxy::LockProxy::Query::handle(Session& session)
     const game::map::LockOptionDescriptor_t& mode = (m_flags.contains(Left) ? UserConfiguration::Lock_Left : UserConfiguration::Lock_Right);
     int32_t items = pRoot->userConfiguration()[mode]();
 
-    game::map::Locker locker(m_target, univ.config());
+    game::map::Locker locker(m_target, pGame->mapConfiguration());
     if (m_limit.active) {
         locker.setRangeLimit(m_limit.min, m_limit.max);
     }
@@ -111,7 +111,7 @@ game::proxy::LockProxy::UnitNameQuery::handle(Session& session)
     const game::map::Universe& univ = pTurn->universe();
 
     // Determine mode
-    game::map::Locker locker(m_target, univ.config());
+    game::map::Locker locker(m_target, pGame->mapConfiguration());
     if (m_limit.active) {
         locker.setRangeLimit(m_limit.min, m_limit.max);
     }
@@ -120,7 +120,7 @@ game::proxy::LockProxy::UnitNameQuery::handle(Session& session)
     locker.addUniverse(univ, game::map::MatchPlanets | game::map::MatchShips, 0);
 
     sendResponse(locker.getFoundPoint(),
-                 univ.findLocationUnitNames(locker.getFoundPoint(), pGame->getViewpointPlayer(), pRoot->playerList(), session.translator(), session.interface()));
+                 univ.findLocationUnitNames(locker.getFoundPoint(), pGame->getViewpointPlayer(), pRoot->playerList(), pGame->mapConfiguration(), session.translator(), session.interface()));
 }
 
 void

@@ -157,7 +157,7 @@ game::map::MovementPredictor::moveShips(const Universe& univ,
                 }
 
                 // Work on a copy of the ship
-                ShipPredictor pred(univ, sid, game.shipScores(), shipList, root.hostConfiguration(), root.hostVersion(), root.registrationKey());
+                ShipPredictor pred(univ, sid, game.shipScores(), shipList, game.mapConfiguration(), root.hostConfiguration(), root.hostVersion(), root.registrationKey());
                 pred.setWaypoint(pInfo->pos);
                 pred.computeTurn();
                 pInfo->pos = pred.getPosition();
@@ -177,7 +177,7 @@ game::map::MovementPredictor::moveShips(const Universe& univ,
                         // Normally, we'd have to use the combined ShipPredictor to compute both turns at once.
                         // However, since we're not interested in fuel usage, we can also compute the towee separately.
                         if (pShip->isPlayable(Object::ReadOnly)) {
-                            ShipPredictor toweePred(univ, toweeId, game.shipScores(), shipList, root.hostConfiguration(), root.hostVersion(), root.registrationKey());
+                            ShipPredictor toweePred(univ, toweeId, game.shipScores(), shipList, game.mapConfiguration(), root.hostConfiguration(), root.hostVersion(), root.registrationKey());
                             toweePred.setWaypoint(toweePred.getPosition());
                             toweePred.setWarpFactor(0);
                             toweePred.computeTurn();
@@ -260,7 +260,7 @@ game::map::MovementPredictor::moveShips(const Universe& univ,
             assert(pInfo != 0);
             Ship* pShip = univ.ships().get(sid);
             assert(pShip != 0);
-            ShipPredictor pred(univ, sid, game.shipScores(), shipList, root.hostConfiguration(), root.hostVersion(), root.registrationKey());
+            ShipPredictor pred(univ, sid, game.shipScores(), shipList, game.mapConfiguration(), root.hostConfiguration(), root.hostVersion(), root.registrationKey());
             pred.setWaypoint(Point(sum_x, sum_y));
             pred.computeTurn();
             pInfo->pos = pred.getPosition();

@@ -9,6 +9,7 @@
 
 namespace game { namespace map {
 
+    class Configuration;
     class Drawing;
     class Universe;
     class ObjectType;
@@ -28,7 +29,7 @@ namespace game { namespace map {
         /** Add a universe.
             Adds all objects from the universe.
             \param univ Universe */
-        void addUniverse(const Universe& univ);
+        void addUniverse(const Universe& univ, const Configuration& mapConfig);
 
         /** Add a point object.
             \param pt Point */

@@ -85,7 +85,7 @@ namespace {
         pl->setFriendlyCode(String_t("abc"));
         pl->setName("The Planet");
 
-        pl->internalCheck(univ.config(), thread.session().translator(), thread.session().log());
+        pl->internalCheck(thread.session().getGame()->mapConfiguration(), thread.session().translator(), thread.session().log());
         pl->combinedCheck2(univ, game::PlayerSet_t(1), 10);
         pl->setPlayability(game::map::Object::Playable);
 

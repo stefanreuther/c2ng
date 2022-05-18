@@ -232,7 +232,7 @@ client::dialogs::doPlanetInfoDialog(ui::Root& root,
                 game::Game* g = s.getGame().get();
                 game::Root* r = s.getRoot().get();
                 if (g != 0 && r != 0) {
-                    m_id = g->currentTurn().universe().findPlanetAt(m_pos, true, r->hostConfiguration(), r->hostVersion());
+                    m_id = g->currentTurn().universe().findPlanetAt(m_pos, true, g->mapConfiguration(), r->hostConfiguration(), r->hostVersion());
                 }
             }
         game::Id_t getId() const

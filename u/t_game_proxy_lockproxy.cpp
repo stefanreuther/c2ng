@@ -70,7 +70,7 @@ namespace {
 
         Planet& p = *univ.planets().create(333);
         p.setPosition(Point(2000, 2000));
-        p.internalCheck(univ.config(), h.session().translator(), h.session().log());
+        p.internalCheck(g->mapConfiguration(), h.session().translator(), h.session().log());
     }
 }
 

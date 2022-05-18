@@ -86,7 +86,7 @@ game::proxy::MapRendererProxy::Trampoline::attachTurn()
 
         // Create objects
         m_viewport.reset(new Viewport(m_turn->universe(), m_turn->getTurnNumber(), m_game->teamSettings(),
-                                      LabelExtra::get(m_session), m_game->shipScores(), *m_shipList, m_root->hostConfiguration()));
+                                      LabelExtra::get(m_session), m_game->shipScores(), *m_shipList, m_game->mapConfiguration(), m_root->hostConfiguration()));
         m_renderer.reset(new Renderer(*m_viewport));
         loadOptions();
 

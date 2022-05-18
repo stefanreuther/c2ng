@@ -30,7 +30,7 @@ game::proxy::MapConfigurationProxy::getMapConfiguration(WaitIndicator& ind, game
         virtual void handle(Session& session)
             {
                 if (Game* g = session.getGame().get()) {
-                    m_config = g->currentTurn().universe().config();
+                    m_config = g->mapConfiguration();
                 }
             }
      private:
@@ -52,7 +52,7 @@ game::proxy::MapConfigurationProxy::setMapConfiguration(const game::map::Configu
             {
                 if (Game* g = session.getGame().get()) {
                     // Set configuration
-                    Configuration& mapConfig = g->currentTurn().universe().config();
+                    Configuration& mapConfig = g->mapConfiguration();
                     mapConfig = m_config;
 
                     // Mark universe as changed to trigger redraw

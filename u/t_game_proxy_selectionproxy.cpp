@@ -475,7 +475,7 @@ TestGameProxySelectionProxy::testMarkRangeWrap()
     // Environment
     SessionThread h;
     prepare(h);
-    h.session().getGame()->currentTurn().universe().config().setConfiguration(game::map::Configuration::Wrapped, game::map::Point(2000, 2000), game::map::Point(2000, 2000));
+    h.session().getGame()->mapConfiguration().setConfiguration(game::map::Configuration::Wrapped, game::map::Point(2000, 2000), game::map::Point(2000, 2000));
     WaitIndicator ind;
     SelectionProxy t(h.gameSender(), ind);
 

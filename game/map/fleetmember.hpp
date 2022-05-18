@@ -12,6 +12,7 @@
 
 namespace game { namespace map {
 
+    class Configuration;
     class Universe;
     class Ship;
 
@@ -24,8 +25,9 @@ namespace game { namespace map {
      public:
         /** Constructor.
             \param univ Universe
-            \param ship Ship */
-        FleetMember(Universe& univ, Ship& ship);
+            \param ship Ship
+            \param mapConfig Map configuration */
+        FleetMember(Universe& univ, Ship& ship, const Configuration& mapConfig);
 
         /** Set fleet number.
             This gets a ship into and out of a fleet.
@@ -105,6 +107,7 @@ namespace game { namespace map {
      private:
         Universe& m_universe;
         Ship& m_ship;
+        const Configuration& m_mapConfig;
     };
 
 } }

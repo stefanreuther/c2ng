@@ -32,7 +32,7 @@ TestGameMapBeamupShipTransfer::testIt()
     sh.setName("Scotty");
     afl::string::NullTranslator tx;
 
-    game::map::BeamUpShipTransfer testee(sh, h.shipList(), h.turn(), h.config());
+    game::map::BeamUpShipTransfer testee(sh, h.shipList(), h.turn(), h.mapConfiguration(), h.config());
 
     /*
      *  Ship has a fuel tank of 100 with 10N (=100 max).
@@ -73,7 +73,7 @@ TestGameMapBeamupShipTransfer::testIt()
     const Command* cmd = cc->getCommand(Command::BeamUp, SHIP_ID);
     TS_ASSERT(cmd != 0);
     TS_ASSERT_EQUALS(cmd->getArg(), "N15 T20");
-    
+
 }
 
 /** Test command parsing. */
@@ -88,7 +88,7 @@ TestGameMapBeamUpShipTransfer::testParse()
 
     CommandExtra::create(h.turn()).create(SHIP_OWNER).addCommand(Command::BeamUp, SHIP_ID, "C30 M10");
 
-    game::map::BeamUpShipTransfer testee(sh, h.shipList(), h.turn(), h.config());
+    game::map::BeamUpShipTransfer testee(sh, h.shipList(), h.turn(), h.mapConfiguration(), h.config());
 
     // Initial changes still zero
     TS_ASSERT_EQUALS(testee.getChange(Element::Colonists), 0);
@@ -129,7 +129,7 @@ TestGameMapBeamUpShipTransfer::testCommand()
     cc.addCommand(Command::BeamUp, SHIP_ID, "n30");
 
     // Testee
-    game::map::BeamUpShipTransfer testee(sh, h.shipList(), h.turn(), h.config());
+    game::map::BeamUpShipTransfer testee(sh, h.shipList(), h.turn(), h.mapConfiguration(), h.config());
 
     // Verify
     TS_ASSERT(!testee.getFlags().contains(game::CargoContainer::UnloadTarget));

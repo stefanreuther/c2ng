@@ -6,12 +6,15 @@
 #include "game/actions/buildship.hpp"
 
 #include "t_game_actions.hpp"
+#include "afl/charset/utf8charset.hpp"
 #include "afl/io/internaldirectory.hpp"
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 #include "game/exception.hpp"
+#include "game/map/configuration.hpp"
 #include "game/map/planet.hpp"
+#include "game/map/planetstorage.hpp"
 #include "game/map/universe.hpp"
 #include "game/root.hpp"
 #include "game/session.hpp"
@@ -20,8 +23,6 @@
 #include "game/test/registrationkey.hpp"
 #include "game/test/specificationloader.hpp"
 #include "game/test/stringverifier.hpp"
-#include "game/map/planetstorage.hpp"
-#include "afl/charset/utf8charset.hpp"
 
 namespace {
     const int X = 1234;

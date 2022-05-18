@@ -8,6 +8,7 @@
 #include "game/cargocontainer.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/interpreterinterface.hpp"
+#include "game/map/configuration.hpp"
 #include "game/spec/hull.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/turn.hpp"
@@ -22,6 +23,7 @@ namespace game { namespace map {
         BeamUpShipTransfer(Ship& sh,
                            const game::spec::ShipList& shipList,
                            Turn& turn,
+                           const game::map::Configuration& mapConfig,
                            const game::config::HostConfiguration& config);
 
         ~BeamUpShipTransfer();
@@ -40,6 +42,7 @@ namespace game { namespace map {
         Ship& m_ship;
         const game::spec::ShipList& m_shipList;
         Turn& m_turn;
+        const game::map::Configuration& m_mapConfig;
         const game::config::HostConfiguration& m_config;
 
         util::Vector<int32_t,Element::Type> m_amount;

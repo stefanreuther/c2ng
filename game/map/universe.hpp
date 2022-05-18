@@ -9,7 +9,6 @@
 #include "afl/base/signal.hpp"
 #include "afl/sys/loglistener.hpp"
 #include "game/interpreterinterface.hpp"
-#include "game/map/configuration.hpp"
 #include "game/map/drawingcontainer.hpp"
 #include "game/map/explosiontype.hpp"
 #include "game/map/fleettype.hpp"
@@ -26,6 +25,7 @@
 
 namespace game { namespace map {
 
+    class Configuration;
     class Planet;
     class Ship;
     class IonStorm;
@@ -34,7 +34,6 @@ namespace game { namespace map {
     /** Universe.
         Serves as container for all sorts of map objects; owns those objects.
         It contains:
-        - map configuration;
         - object containers (ObjectVector or special classes);
         - ObjectType descendants for everything that has an ObjectCursor;
         - a set of players that have reliable data (hasFullData),
@@ -119,11 +118,6 @@ namespace game { namespace map {
         DrawingContainer& drawings();
         const DrawingContainer& drawings() const;
 
-        /** Access map configuration.
-            \return configuration */
-        Configuration& config();
-        const Configuration& config() const;
-
         /** Set reverter.
             The Universe will own the Reverter instance.
             Setting a Reverter will replace the previous one.
@@ -164,6 +158,7 @@ namespace game { namespace map {
             \param availablePlayers Available players (set of loaded result files).
                                     Used for hasFullData().
             \param playability      Playability to use for players in \c playingSet.
+            \param mapConfig        Map configuration
             \param host             Host version
             \param config           Host configuration
             \param turnNumber       Current turn number
@@ -171,6 +166,7 @@ namespace game { namespace map {
             \param tx               Translator (for logging)
             \param log              Logger */
         void postprocess(PlayerSet_t playingSet, PlayerSet_t availablePlayers, Object::Playability playability,
+                         const Configuration& mapConfig,
                          const game::HostVersion& host, const game::config::HostConfiguration& config,
                          int turnNumber,
                          const game::spec::ShipList& shipList,
@@ -194,22 +190,26 @@ namespace game { namespace map {
         /** Find planet at location, with optional warp wells.
             If there is no planet at the location, look whether the point is in the warp well of one.
             \param pt           Location, need not be normalized
-            \param gravityFlag  true to look into warp well. If false, function behaves exactly like findPlanetAt(int).
+            \param gravityFlag  true to look into warp well. If false, function behaves exactly like findPlanetAt(Point).
+            \param mapConfig    Map configuration
             \param config       Host configuration
             \param host         Host version
             \return Id of planet, or zero if none */
         Id_t findPlanetAt(Point pt,
                           bool gravityFlag,
+                          const game::map::Configuration& mapConfig,
                           const game::config::HostConfiguration& config,
                           const HostVersion& host) const;
 
         /** Find planet from warp well location.
             \param pt Location
+            \param mapConfig    Map configuration
             \param config       Host configuration
             \param host         Host version
             \pre findPlanetAt(pt) == 0
             \return Id of planet if pt is in its warp wells, 0 otherwise */
         Id_t findGravityPlanetAt(Point pt,
+                                 const game::map::Configuration& mapConfig,
                                  const game::config::HostConfiguration& config,
                                  const HostVersion& host) const;
 
@@ -222,11 +222,13 @@ namespace game { namespace map {
         /** Get name of a location in human-readable form.
             \param pt      location
             \param flags   details of requested string (NameShips, NameGravity, NameVerbose, NameNoSpace)
+            \param mapConfig Map configuration
             \param config  Host configuration
             \param host    Host version
             \param tx      Translator
             \return name */
         String_t findLocationName(Point pt, int flags,
+                                  const game::map::Configuration& mapConfig,
                                   const game::config::HostConfiguration& config,
                                   const HostVersion& host,
                                   afl::string::Translator& tx) const;
@@ -235,12 +237,14 @@ namespace game { namespace map {
             \param pt               Location
             \param viewpointPlayer  Viewpoint player (determines whose ships are shown by name)
             \param players          Player list
+            \param mapConfig        Map configuration
             \param tx               Translator
             \param iface            Interface (for name retrieval)
             \return human-readable, multi-line string */
         String_t findLocationUnitNames(Point pt,
                                        int viewpointPlayer,
                                        const PlayerList& players,
+                                       const game::map::Configuration& mapConfig,
                                        afl::string::Translator& tx,
                                        InterpreterInterface& iface) const;
 
@@ -258,8 +262,9 @@ namespace game { namespace map {
 
         /** Find planet controlling a minefield.
             \param mf Minefield
+            \param mapConfig Map configuration
             \return controlling planet Id; 0 if none */
-        Id_t findControllingPlanetId(const Minefield& mf) const;
+        Id_t findControllingPlanetId(const Minefield& mf, const Configuration& mapConfig) const;
 
         /** Find planet with universal minefield friendly code (mfX).
             \param forPlayer Player; must have played planets
@@ -270,8 +275,9 @@ namespace game { namespace map {
             Coordinates describe a rectangle and can be in any order
             \param a First coordinates
             \param b Second (opposite) coordinates
+            \param mapConfig Map configuration
             \return Number of objects found */
-        int markObjectsInRange(Point a, Point b);
+        int markObjectsInRange(Point a, Point b, const game::map::Configuration& mapConfig);
 
         /** Signal: about to update.
             Raised before checking to raise any object's sig_change (even if no signal is eventually raised).
@@ -286,9 +292,6 @@ namespace game { namespace map {
         afl::base::Signal<void()> sig_universeChange;
 
      private:
-        // Map configuration
-        Configuration m_config;
-
         // Object containers
         ObjectVector<Ship> m_ships;
         ObjectVector<Planet> m_planets;
@@ -462,18 +465,6 @@ inline const game::map::DrawingContainer&
 game::map::Universe::drawings() const
 {
     return m_drawings;
-}
-
-inline game::map::Configuration&
-game::map::Universe::config()
-{
-    return m_config;
-}
-
-inline const game::map::Configuration&
-game::map::Universe::config() const
-{
-    return m_config;
 }
 
 inline game::map::Reverter*

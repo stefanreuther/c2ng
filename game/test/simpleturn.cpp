@@ -4,8 +4,9 @@
 
 #include "game/test/simpleturn.hpp"
 #include "afl/base/countof.hpp"
-#include "afl/string/nulltranslator.hpp"
 #include "afl/except/assertionfailedexception.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "game/map/configuration.hpp"
 
 using game::map::Ship;
 using game::map::Planet;
@@ -14,6 +15,7 @@ game::test::SimpleTurn::SimpleTurn()
     : m_turn(),
       m_interface(),
       m_config(),
+      m_mapConfiguration(),
       m_shipList(),
       m_version(game::HostVersion::PHost, MKVERSION(3,5,0)),
       m_position(2000, 2000),

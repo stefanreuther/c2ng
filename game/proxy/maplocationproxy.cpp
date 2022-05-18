@@ -58,7 +58,7 @@ class game::proxy::MapLocationProxy::Trampoline {
                 game::map::Location& loc = pGame->cursors().location();
                 loc.getPosition(pt);
                 ref = loc.getReference();
-                config = pGame->currentTurn().universe().config();
+                config = pGame->mapConfiguration();
             }
             m_reply.postNewRequest(new Response(ref, pt, config));
         }

@@ -18,6 +18,7 @@
 namespace {
     struct TestHarness {
         game::map::Universe univ;
+        game::map::Configuration mapConfig;
         game::UnitScoreDefinitionList scoreDefinitions;
         game::spec::ShipList shipList;
         game::config::HostConfiguration config;
@@ -25,7 +26,7 @@ namespace {
         game::test::RegistrationKey key;
 
         TestHarness()
-            : univ(), scoreDefinitions(), shipList(), config(), hostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)),
+            : univ(), mapConfig(), scoreDefinitions(), shipList(), config(), hostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)),
               key(game::RegistrationKey::Registered, 10)
             { }
     };
@@ -94,7 +95,7 @@ TestGameInterfaceShipTaskPredictor::testMovement()
     sh.setCargo(game::Element::Neutronium, 150);
 
     // Object under test
-    game::interface::ShipTaskPredictor testee(h.univ, 99, h.scoreDefinitions, h.shipList, h.config, h.hostVersion, h.key);
+    game::interface::ShipTaskPredictor testee(h.univ, 99, h.scoreDefinitions, h.shipList, h.mapConfig, h.config, h.hostVersion, h.key);
 
     // Advance one turn; verify
     testee.advanceTurn();
@@ -144,7 +145,7 @@ TestGameInterfaceShipTaskPredictor::testMoveToCommand()
     interpreter::Arguments args(seg, 0, 2);
 
     // Object under test
-    game::interface::ShipTaskPredictor testee(h.univ, 99, h.scoreDefinitions, h.shipList, h.config, h.hostVersion, h.key);
+    game::interface::ShipTaskPredictor testee(h.univ, 99, h.scoreDefinitions, h.shipList, h.mapConfig, h.config, h.hostVersion, h.key);
     bool ok = testee.predictInstruction("MOVETO", args);
     TS_ASSERT(ok);
 
@@ -180,7 +181,7 @@ TestGameInterfaceShipTaskPredictor::testSetWaypointCommand()
     interpreter::Arguments args(seg, 0, 2);
 
     // Object under test
-    game::interface::ShipTaskPredictor testee(h.univ, 99, h.scoreDefinitions, h.shipList, h.config, h.hostVersion, h.key);
+    game::interface::ShipTaskPredictor testee(h.univ, 99, h.scoreDefinitions, h.shipList, h.mapConfig, h.config, h.hostVersion, h.key);
     bool ok = testee.predictInstruction("SETWAYPOINT", args);
     TS_ASSERT(ok);
 
@@ -214,7 +215,7 @@ TestGameInterfaceShipTaskPredictor::testMoveTowardsCommand()
     interpreter::Arguments args(seg, 0, 2);
 
     // Object under test
-    game::interface::ShipTaskPredictor testee(h.univ, 99, h.scoreDefinitions, h.shipList, h.config, h.hostVersion, h.key);
+    game::interface::ShipTaskPredictor testee(h.univ, 99, h.scoreDefinitions, h.shipList, h.mapConfig, h.config, h.hostVersion, h.key);
     bool ok = testee.predictInstruction("MOVETOWARDS", args);
     TS_ASSERT(ok);
 
@@ -247,7 +248,7 @@ TestGameInterfaceShipTaskPredictor::testSetSpeedCommand()
     interpreter::Arguments args(seg, 0, 1);
 
     // Object under test
-    game::interface::ShipTaskPredictor testee(h.univ, 99, h.scoreDefinitions, h.shipList, h.config, h.hostVersion, h.key);
+    game::interface::ShipTaskPredictor testee(h.univ, 99, h.scoreDefinitions, h.shipList, h.mapConfig, h.config, h.hostVersion, h.key);
     bool ok = testee.predictInstruction("SETSPEED", args);
     TS_ASSERT(ok);
 
@@ -274,7 +275,7 @@ TestGameInterfaceShipTaskPredictor::testSetFCodeCommand()
     interpreter::Arguments args(seg, 0, 1);
 
     // Object under test
-    game::interface::ShipTaskPredictor testee(h.univ, 99, h.scoreDefinitions, h.shipList, h.config, h.hostVersion, h.key);
+    game::interface::ShipTaskPredictor testee(h.univ, 99, h.scoreDefinitions, h.shipList, h.mapConfig, h.config, h.hostVersion, h.key);
     bool ok = testee.predictInstruction("SETFCODE", args);
     TS_ASSERT(ok);
 
@@ -306,7 +307,7 @@ TestGameInterfaceShipTaskPredictor::testSetMissionCommand()
     interpreter::Arguments args(seg, 0, 3);
 
     // Object under test
-    game::interface::ShipTaskPredictor testee(h.univ, 99, h.scoreDefinitions, h.shipList, h.config, h.hostVersion, h.key);
+    game::interface::ShipTaskPredictor testee(h.univ, 99, h.scoreDefinitions, h.shipList, h.mapConfig, h.config, h.hostVersion, h.key);
     bool ok = testee.predictInstruction("SETMISSION", args);
     TS_ASSERT(ok);
 
@@ -342,7 +343,7 @@ TestGameInterfaceShipTaskPredictor::testSetFCodeHyperjump()
     interpreter::Arguments args(seg, 0, 1);
 
     // Object under test
-    game::interface::ShipTaskPredictor testee(h.univ, 99, h.scoreDefinitions, h.shipList, h.config, h.hostVersion, h.key);
+    game::interface::ShipTaskPredictor testee(h.univ, 99, h.scoreDefinitions, h.shipList, h.mapConfig, h.config, h.hostVersion, h.key);
     TS_ASSERT(!testee.isHyperdriving());
     bool ok = testee.predictInstruction("SETFCODE", args);
     TS_ASSERT(ok);

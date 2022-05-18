@@ -87,7 +87,7 @@ namespace {
             base.techLevels[i] = 1;
         }
         pl->addCurrentBaseData(base, game::PlayerSet_t(1));
-        pl->internalCheck(s.session().getGame()->currentTurn().universe().config(),
+        pl->internalCheck(s.session().getGame()->mapConfiguration(),
                           s.session().translator(),
                           s.session().log());
         pl->setPlayability(game::map::Object::Playable);

@@ -88,7 +88,7 @@ namespace {
                 bool excludeValid = false;
                 if (game::Game* g = session.getGame().get()) {
                     if (game::Turn* t = g->getViewpointTurn().get()) {
-                        m_list.addObjectsAt(t->universe(), m_pos, m_options, m_excludeShip);
+                        m_list.addObjectsAt(t->universe(), g->mapConfiguration().getCanonicalLocation(m_pos), m_options, m_excludeShip);
 
                         // Verify that the ship to be excluded is actually eligible.
                         // This is needed to pick the correct error message.
@@ -98,7 +98,7 @@ namespace {
                         }
 
                         // Remember planet if it's empty
-                        if (game::map::Planet* pPlanet = t->universe().planets().get(t->universe().findPlanetAt(m_pos))) {
+                        if (game::map::Planet* pPlanet = t->universe().planets().get(t->universe().findPlanetAt(g->mapConfiguration().getCanonicalLocation(m_pos)))) {
                             if (!pPlanet->isPlayable(game::map::Object::Playable)) {
                                 m_hidingPlanetName = pPlanet->getName(session.translator());
                             }
@@ -182,7 +182,7 @@ namespace {
 
                         // Build list
                         if (posOK) {
-                            pos = univ.config().getCanonicalLocation(pos);
+                            pos = g->mapConfiguration().getCanonicalLocation(pos);
 
                             const game::map::AnyShipType ty(const_cast<game::map::Universe&>(univ).ships());
                             for (game::Id_t id = ty.findNextIndex(0); id != 0; id = ty.findNextIndex(id)) {
@@ -191,7 +191,7 @@ namespace {
 
                                 if (sh != 0
                                     && pred.getShipPosition(id, shPos)
-                                    && univ.config().getCanonicalLocation(shPos) == pos
+                                    && g->mapConfiguration().getCanonicalLocation(shPos) == pos
                                     && (m_options.contains(game::ref::List::IncludeForeignShips) || sh->isPlayable(game::map::Object::ReadOnly))
                                     && (!m_options.contains(game::ref::List::SafeShipsOnly) || sh->isReliablyVisible(0)))
                                 {

@@ -65,7 +65,7 @@ namespace {
             return 0;
         }
     }
-    
+
     int computeTurnFuel(const game::map::Ship& ship,
                         const game::config::HostConfiguration& config,
                         const game::spec::ShipList& shipList,
@@ -130,13 +130,14 @@ client::tiles::ShipMovementTile::attach(game::proxy::ObjectObserver& oop)
                                                           sh->getId(),
                                                           g->shipScores(),
                                                           *shipList,
+                                                          g->mapConfiguration(),
                                                           root->hostConfiguration(),
                                                           root->hostVersion(),
                                                           root->registrationKey());
                     crystal_ball.computeMovement();
 
                     ChunnelMission chd;
-                    chd.check(*sh, g->currentTurn().universe(), g->shipScores(), *shipList, *root);
+                    chd.check(*sh, g->currentTurn().universe(), g->mapConfiguration(), g->shipScores(), *shipList, *root);
                     const bool is_chunnel = chd.getTargetId() != 0
                         && sh->getWaypointDX().orElse(0) == 0
                         && sh->getWaypointDY().orElse(0) == 0;
@@ -149,6 +150,7 @@ client::tiles::ShipMovementTile::attach(game::proxy::ObjectObserver& oop)
                     // Location
                     job->data.text[Data::Location] = g->currentTurn().universe().findLocationName(pos,
                                                                                                   game::map::Universe::NameGravity | game::map::Universe::NameVerbose,
+                                                                                                  g->mapConfiguration(),
                                                                                                   root->hostConfiguration(),
                                                                                                   root->hostVersion(),
                                                                                                   s.translator());
@@ -171,6 +173,7 @@ client::tiles::ShipMovementTile::attach(game::proxy::ObjectObserver& oop)
                         sh->getWaypoint().get(wp);
                         job->data.text[Data::Waypoint] = g->currentTurn().universe().findLocationName(wp,
                                                                                                       game::map::Universe::NameGravity | game::map::Universe::NameVerbose | game::map::Universe::NameShips,
+                                                                                                      g->mapConfiguration(),
                                                                                                       root->hostConfiguration(),
                                                                                                       root->hostVersion(),
                                                                                                       s.translator());

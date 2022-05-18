@@ -85,7 +85,7 @@ namespace {
         game::map::Point a(x1, y1);
         game::map::Point b(x2, y2);
         if (normalizeCoords) {
-            b = g.currentTurn().universe().config().getSimpleNearestAlias(b, a);
+            b = g.mapConfiguration().getSimpleNearestAlias(b, a);
         }
 
         // Draw it
@@ -832,6 +832,7 @@ game::interface::IFHistoryLoadTurn(interpreter::Process& proc, game::Session& se
 
                                 int player = game.getViewpointPlayer();
                                 m_turn->universe().postprocess(game::PlayerSet_t(player), game::PlayerSet_t(player), game::map::Object::ReadOnly,
+                                                               game.mapConfiguration(),
                                                                root.hostVersion(), root.hostConfiguration(),
                                                                m_turnNumber, *m_session.getShipList(),
                                                                m_session.translator(), m_session.log());

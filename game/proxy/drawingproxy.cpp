@@ -68,6 +68,7 @@ class game::proxy::DrawingProxy::Trampoline {
     void flushRequests();
     void onDrawingChange();
     Turn* getTurn() const;
+    Game* getGame() const;
     void setCurrentDrawing(DrawingContainer::Iterator_t it, Turn* t);
 };
 
@@ -144,11 +145,13 @@ game::proxy::DrawingProxy::Trampoline::createCannedMarker(game::map::Point pos, 
 void
 game::proxy::DrawingProxy::Trampoline::selectNearestVisibleDrawing(game::map::Point pos, double maxDistance)
 {
-    if (Turn* t = getTurn()) {
-        DrawingContainer& cont = t->universe().drawings();
-        DrawingContainer::Iterator_t it = cont.findNearestVisibleDrawing(pos, t->universe().config(), maxDistance);
-        if (it != cont.end()) {
-            setCurrentDrawing(it, t);
+    if (Game* g = getGame()) {
+        if (Turn* t = getTurn()) {
+            DrawingContainer& cont = t->universe().drawings();
+            DrawingContainer::Iterator_t it = cont.findNearestVisibleDrawing(pos, g->mapConfiguration(), maxDistance);
+            if (it != cont.end()) {
+                setCurrentDrawing(it, t);
+            }
         }
     }
 }
@@ -156,11 +159,13 @@ game::proxy::DrawingProxy::Trampoline::selectNearestVisibleDrawing(game::map::Po
 void
 game::proxy::DrawingProxy::Trampoline::selectMarkerAt(game::map::Point pos)
 {
-    if (Turn* t = getTurn()) {
-        DrawingContainer& cont = t->universe().drawings();
-        DrawingContainer::Iterator_t it = cont.findMarkerAt(pos, t->universe().config());
-        if (it != cont.end()) {
-            setCurrentDrawing(it, t);
+    if (Game* g = getGame()) {
+        if (Turn* t = getTurn()) {
+            DrawingContainer& cont = t->universe().drawings();
+            DrawingContainer::Iterator_t it = cont.findMarkerAt(pos, g->mapConfiguration());
+            if (it != cont.end()) {
+                setCurrentDrawing(it, t);
+            }
         }
     }
 }
@@ -247,8 +252,10 @@ game::proxy::DrawingProxy::Trampoline::setColor(uint8_t color, bool adjacent)
         d->setColor(color);
         if (adjacent && d->getType() == Drawing::LineDrawing) {
             if (m_currentTurn != 0) {
-                m_currentTurn->universe().drawings().setAdjacentLinesColor(d->getPos(), color, m_currentTurn->universe().config());
-                m_currentTurn->universe().drawings().setAdjacentLinesColor(d->getPos2(), color, m_currentTurn->universe().config());
+                if (Game* g = getGame()) {
+                    m_currentTurn->universe().drawings().setAdjacentLinesColor(d->getPos(),  color, g->mapConfiguration());
+                    m_currentTurn->universe().drawings().setAdjacentLinesColor(d->getPos2(), color, g->mapConfiguration());
+                }
             }
         }
         sendDrawingUpdate();
@@ -262,8 +269,10 @@ game::proxy::DrawingProxy::Trampoline::setTag(util::Atom_t tag, bool adjacent)
         d->setTag(tag);
         if (adjacent && d->getType() == Drawing::LineDrawing) {
             if (m_currentTurn != 0) {
-                m_currentTurn->universe().drawings().setAdjacentLinesTag(d->getPos(), tag, m_currentTurn->universe().config());
-                m_currentTurn->universe().drawings().setAdjacentLinesTag(d->getPos2(), tag, m_currentTurn->universe().config());
+                if (Game* g = getGame()) {
+                    m_currentTurn->universe().drawings().setAdjacentLinesTag(d->getPos(),  tag, g->mapConfiguration());
+                    m_currentTurn->universe().drawings().setAdjacentLinesTag(d->getPos2(), tag, g->mapConfiguration());
+                }
             }
         }
         sendDrawingUpdate();
@@ -285,14 +294,14 @@ void
 game::proxy::DrawingProxy::Trampoline::erase(bool adjacent)
 {
     Drawing* d = *m_current;
-    if (d != 0 && m_currentTurn != 0) {
+    Game* g = getGame();
+    if (d != 0 && m_currentTurn != 0 && g != 0) {
         game::map::DrawingContainer& drawings = m_currentTurn->universe().drawings();
-        game::map::Configuration& config = m_currentTurn->universe().config();
         if (adjacent && d->getType() == Drawing::LineDrawing) {
             game::map::Point a = d->getPos(), b = d->getPos2();
             drawings.erase(m_current);
-            drawings.eraseAdjacentLines(a, config);
-            drawings.eraseAdjacentLines(b, config);
+            drawings.eraseAdjacentLines(a, g->mapConfiguration());
+            drawings.eraseAdjacentLines(b, g->mapConfiguration());
         } else {
             drawings.erase(m_current);
         }
@@ -365,6 +374,12 @@ game::proxy::DrawingProxy::Trampoline::getTurn() const
     } else {
         return 0;
     }
+}
+
+game::Game*
+game::proxy::DrawingProxy::Trampoline::getGame() const
+{
+    return m_session.getGame().get();
 }
 
 void

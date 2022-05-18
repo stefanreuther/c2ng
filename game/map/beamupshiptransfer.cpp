@@ -36,11 +36,13 @@ namespace {
 game::map::BeamUpShipTransfer::BeamUpShipTransfer(Ship& sh,
                                                   const game::spec::ShipList& shipList,
                                                   Turn& turn,
+                                                  const game::map::Configuration& mapConfig,
                                                   const game::config::HostConfiguration& config)
     : CargoContainer(),
       m_ship(sh),
       m_shipList(shipList),
       m_turn(turn),
+      m_mapConfig(mapConfig),
       m_config(config),
       m_amount()
 {
@@ -149,7 +151,7 @@ game::map::BeamUpShipTransfer::commit()
                     if (m != missionNumber) {
                         // No need to handle setMission() failure. If it fails, there's nothing we can do.
                         // However, if this is a blocked fleet member, it shouldn't have mission "beam up multiple" in the first place.
-                        FleetMember(m_turn.universe(), m_ship).setMission(m, i, t, m_config, m_shipList);
+                        FleetMember(m_turn.universe(), m_ship, m_mapConfig).setMission(m, i, t, m_config, m_shipList);
                         resetOK = true;
                     }
                 }
@@ -157,12 +159,12 @@ game::map::BeamUpShipTransfer::commit()
 
             // If mission was not reset above, clear it to "none".
             if (!resetOK) {
-                FleetMember(m_turn.universe(), m_ship).setMission(0, 0, 0, m_config, m_shipList);
+                FleetMember(m_turn.universe(), m_ship, m_mapConfig).setMission(0, 0, 0, m_config, m_shipList);
             }
         }
     } else {
         CommandExtra::create(m_turn).create(shipOwner).addCommand(Command::BeamUp, m_ship.getId(), cs.toPHostString());
-        FleetMember(m_turn.universe(), m_ship).setMission(missionNumber, 0, 0, m_config, m_shipList);
+        FleetMember(m_turn.universe(), m_ship, m_mapConfig).setMission(missionNumber, 0, 0, m_config, m_shipList);
     }
 
     // PCC2 explicitly marked the ship dirty.

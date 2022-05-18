@@ -186,7 +186,7 @@ game::proxy::SelectionProxy::Trampoline::markObjectsInRange(game::map::Point a, 
         if (revertFirst) {
             sel.copyTo(univ, sel.getCurrentLayer());
         }
-        int n = univ.markObjectsInRange(a, b);
+        int n = univ.markObjectsInRange(a, b, m_game->mapConfiguration());
 
         // Response
         m_reply.postRequest(&SelectionProxy::reportObjectsInRange, n);

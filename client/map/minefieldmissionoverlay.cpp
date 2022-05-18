@@ -129,11 +129,11 @@ client::map::MinefieldMissionOverlay::attach(game::proxy::ObjectObserver& oop)
                     game::map::MinefieldMission msn;
                     // FIXME: correct universe?
                     const game::map::Universe& univ = pGame->currentTurn().universe();
-                    if (msn.checkLayMission(*pShip, univ, *pRoot, pGame->shipScores(), *pShipList)) {
-                        computeMineLayEffect(m_data, msn, *pShip, univ, *pRoot);
+                    if (msn.checkLayMission(*pShip, univ, *pRoot, pGame->mapConfiguration(), pGame->shipScores(), *pShipList)) {
+                        computeMineLayEffect(m_data, msn, *pShip, univ, pGame->mapConfiguration(), *pRoot);
                     }
                     if (msn.checkScoopMission(*pShip, *pRoot, pGame->shipScores(), *pShipList)) {
-                        computeMineScoopEffect(m_data, msn, *pShip, univ, *pRoot, *pShipList);
+                        computeMineScoopEffect(m_data, msn, *pShip, univ, pGame->mapConfiguration(), *pRoot, *pShipList);
                     }
                 }
             }

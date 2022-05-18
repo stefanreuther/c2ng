@@ -14,6 +14,7 @@
 
 namespace game { namespace map {
 
+    class Configuration;
     class Ship;
     class Universe;
 
@@ -63,12 +64,14 @@ namespace game { namespace map {
         \param [in] ship             Ship to get information about
         \param [in] univ             Universe (used for other ships)
         \param [in] scoreDefinitions Ship score definitions (used for hull functions)
+        \param [in] mapConfig        Map configuration
         \param [in] shipList         Ship list (used for hull functions)
         \param [in] root             Root (used for host configuration) */
     void packShipMovementInfo(ShipMovementInfos_t& result,
                               const Ship& ship,
                               const Universe& univ,
                               const UnitScoreDefinitionList& scoreDefinitions,
+                              const Configuration& mapConfig,
                               const game::spec::ShipList& shipList,
                               const Root& root);
 

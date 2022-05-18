@@ -272,7 +272,7 @@ client::map::DistanceOverlay::setWaypoint()
                     game::actions::mustBePlayed(sh);
 
                     // FIXME: shouldn't call this if FleetMember will refuse (bug also in PCC2)
-                    game::map::FleetMember(t->universe(), sh).setWaypoint(m_waypoint, r.hostConfiguration(), sl);
+                    game::map::FleetMember(t->universe(), sh, g.mapConfiguration()).setWaypoint(m_waypoint, r.hostConfiguration(), sl);
                     session.notifyListeners();
                 }
             }
@@ -340,7 +340,7 @@ client::map::DistanceOverlay::buildStatus(Status& out, game::Session& session, g
 
         // Prediction
         // FIXME: deal with towee? (bug also in PCC2)
-        game::map::ShipPredictor pred(t.universe(), shipId, g.shipScores(), sl, r.hostConfiguration(), r.hostVersion(), r.registrationKey());
+        game::map::ShipPredictor pred(t.universe(), shipId, g.shipScores(), sl, g.mapConfiguration(), r.hostConfiguration(), r.hostVersion(), r.registrationKey());
         pred.setPosition(origin);
         pred.setWaypoint(target);
         pred.computeMovement();

@@ -127,7 +127,7 @@ TestGameSimTransfer::testCopyToShip()
 
     // Transfer
     Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
-    TS_ASSERT_EQUALS(tr.copyShipToGame(out, in, t.universe()), true);
+    TS_ASSERT_EQUALS(tr.copyShipToGame(out, in, t.universe(), t.mapConfiguration()), true);
 
     // Verify changes
     TS_ASSERT_EQUALS(out.getName(), "Carola");
@@ -160,7 +160,7 @@ TestGameSimTransfer::testCopyToMismatchingShip()
 
     // Test
     Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
-    TS_ASSERT_EQUALS(tr.copyShipToGame(out, in, t.universe()), false);
+    TS_ASSERT_EQUALS(tr.copyShipToGame(out, in, t.universe(), t.mapConfiguration()), false);
 }
 
 /** Test copy to regular ship with fighter transfer. */
@@ -198,7 +198,7 @@ TestGameSimTransfer::testCopyToShipWithFighters()
 
     // Transfer
     Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
-    TS_ASSERT_EQUALS(tr.copyShipToGame(out, in, t.universe()), true);
+    TS_ASSERT_EQUALS(tr.copyShipToGame(out, in, t.universe(), t.mapConfiguration()), true);
 
     // Verify
     TS_ASSERT_EQUALS(pl.getCargo(Element::Fighters).orElse(0), 20);
@@ -243,7 +243,7 @@ TestGameSimTransfer::testCopyToShipWithTorps()
 
     // Transfer
     Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
-    TS_ASSERT_EQUALS(tr.copyShipToGame(out, in, t.universe()), true);
+    TS_ASSERT_EQUALS(tr.copyShipToGame(out, in, t.universe(), t.mapConfiguration()), true);
 
     // Verify
     TS_ASSERT_EQUALS(pl.getCargo(Element::fromTorpedoType(TORP_ID)).orElse(-1), 25);

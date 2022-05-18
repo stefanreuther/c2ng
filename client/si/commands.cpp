@@ -516,16 +516,17 @@ namespace {
         }
 
         // Prepare initial mode
-        const game::map::Universe& univ = game::actions::mustHaveGame(session).currentTurn().universe();
-        const game::TeamSettings& teams = game::actions::mustHaveGame(session).teamSettings();
-        HistoryShipSelection::Modes_t modes = sel.getAvailableModes(univ, teams);
+        const game::Game& g = game::actions::mustHaveGame(session);
+        const game::map::Universe& univ = g.currentTurn().universe();
+        const game::TeamSettings& teams = g.teamSettings();
+        HistoryShipSelection::Modes_t modes = sel.getAvailableModes(univ, g.mapConfiguration(), teams);
         if (modes.empty() || (hasPosition && !modes.contains(HistoryShipSelection::LocalShips) && !modes.contains(HistoryShipSelection::ExactShips))) {
             // No valid modes means we have no applicable ships.
             // When we have a position, we want a location-based mode first.
             link.getProcess().setVariable("UI.RESULT", 0);
         } else {
             // Normal operation
-            sel.setMode(sel.getInitialMode(univ, teams));
+            sel.setMode(sel.getInitialMode(univ, g.mapConfiguration(), teams));
             si.postNewTask(link, new Task(sel, modes));
         }
     }
@@ -871,7 +872,7 @@ client::si::IFCCAddWaypoint(game::Session& session, ScriptSide& si, RequestLink1
     }
 
     // Edit ship task
-    game::interface::ShipTaskPredictor pred(g.currentTurn().universe(), sh->getId(), g.shipScores(), shipList, root.hostConfiguration(), root.hostVersion(), root.registrationKey());
+    game::interface::ShipTaskPredictor pred(g.currentTurn().universe(), sh->getId(), g.shipScores(), shipList, g.mapConfiguration(), root.hostConfiguration(), root.hostVersion(), root.registrationKey());
     afl::base::Ptr<interpreter::TaskEditor> task(session.getAutoTaskEditor(sh->getId(), interpreter::Process::pkShipTask, false));
     if (task.get() != 0) {
         pred.predictTask(*task, task->getCursor());
@@ -1224,7 +1225,7 @@ client::si::IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLi
                 game::Game& g = game::actions::mustHaveGame(session);
                 game::map::Universe& univ = g.currentTurn().universe();
                 game::map::Ship& sh = game::actions::mustExist(univ.ships().get(m_id));
-                game::map::FleetMember fm(univ, sh);
+                game::map::FleetMember fm(univ, sh, g.mapConfiguration());
 
                 fm.setWaypoint(m_position, r.hostConfiguration(), sl);
 
@@ -1233,7 +1234,7 @@ client::si::IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLi
                 game::map::Point shipPos;
                 if (!sh.isHyperdriving(g.shipScores(), sl, r.hostConfiguration()) && sh.getPosition(shipPos) && shipPos != m_position) {
                     // Determine optimum warp factor
-                    int speed = getOptimumWarp(univ, sh.getId(), shipPos, m_position, g.shipScores(), sl, r);
+                    int speed = getOptimumWarp(univ, sh.getId(), shipPos, m_position, g.shipScores(), sl, g.mapConfiguration(), r);
                     fm.setWarpFactor(speed, r.hostConfiguration(), sl);
                 }
             }
@@ -1321,13 +1322,13 @@ client::si::IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLi
 
             game::map::ChunnelMission chm;
             game::map::Universe& univ = g.currentTurn().universe(); // FIXME: is this the same where the ship is from?
-            if (chm.check(*sh, univ, g.shipScores(), shipList, root)) {
+            if (chm.check(*sh, univ, g.mapConfiguration(), g.shipScores(), shipList, root)) {
                 if (game::map::Ship* mate = univ.ships().get(chm.getTargetId())) {
                     in.chunnelMode = true;
 
                     game::map::Point matePos;
                     if (mate->getPosition(matePos)) {
-                        in.target = univ.config().getSimpleNearestAlias(matePos, pos);
+                        in.target = g.mapConfiguration().getSimpleNearestAlias(matePos, pos);
                     }
                 }
             }
@@ -1542,10 +1543,7 @@ client::si::IFCCGotoCoordinates(game::Session& session, ScriptSide& si, RequestL
 
     args.checkArgumentCount(0);
     game::Game& g = game::actions::mustHaveGame(session);
-    game::Turn* t = g.getViewpointTurn().get();
-    if (t != 0) {
-        si.postNewTask(link, new Task(t->universe().config()));
-    }
+    si.postNewTask(link, new Task(g.mapConfiguration()));
 }
 
 // @since PCC2 2.40.10

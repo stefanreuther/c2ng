@@ -76,6 +76,7 @@ namespace {
         addShip(h, 30, 1040, 1030, "Exxon Valdez");
 
         h.session.getGame()->currentTurn().universe().postprocess(game::PlayerSet_t(2), game::PlayerSet_t(2), game::map::Object::Playable,
+                                                                  h.session.getGame()->mapConfiguration(),
                                                                   h.session.getRoot()->hostVersion(), h.session.getRoot()->hostConfiguration(),
                                                                   77 /* turn number */,
                                                                   *h.session.getShipList(),

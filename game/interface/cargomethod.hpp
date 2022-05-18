@@ -13,9 +13,9 @@
 
 namespace game { namespace interface {
 
-    void doCargoTransfer(game::map::Planet& pl, interpreter::Process& process, interpreter::Arguments& args, Session& session, Turn& turn, const Root& root);
-    void doCargoTransfer(game::map::Ship& sh, interpreter::Process& process, interpreter::Arguments& args, Session& session, Turn& turn, const Root& root);
-    void doCargoUnload(game::map::Ship& sh, bool reverse, interpreter::Process& process, interpreter::Arguments& args, Session& session, Turn& turn, const Root& root);
+    void doCargoTransfer(game::map::Planet& pl, interpreter::Process& process, interpreter::Arguments& args, Session& session, const game::map::Configuration& mapConfig, Turn& turn, const Root& root);
+    void doCargoTransfer(game::map::Ship& sh, interpreter::Process& process, interpreter::Arguments& args, Session& session, const game::map::Configuration& mapConfig, Turn& turn, const Root& root);
+    void doCargoUnload(game::map::Ship& sh, bool reverse, interpreter::Process& process, interpreter::Arguments& args, Session& session, const game::map::Configuration& mapConfig, Turn& turn, const Root& root);
 
 } }
 

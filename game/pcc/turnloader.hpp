@@ -16,6 +16,7 @@
 #include "game/playerarray.hpp"
 #include "game/playerset.hpp"
 #include "game/turnloader.hpp"
+#include "util/profiledirectory.hpp"
 
 namespace game { namespace pcc {
 

@@ -649,6 +649,6 @@ void
 game::Session::updateMap()
 {
     if (m_root.get() != 0 && m_game.get() != 0) {
-        m_game->currentTurn().universe().config().initFromConfiguration(m_root->hostConfiguration(), m_root->userConfiguration());
+        m_game->mapConfiguration().initFromConfiguration(m_root->hostConfiguration(), m_root->userConfiguration());
     }
 }

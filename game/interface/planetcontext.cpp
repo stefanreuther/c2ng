@@ -184,11 +184,13 @@ namespace {
                           game::Session& session,
                           game::interface::PlanetMethod ipm,
                           afl::base::Ref<game::Root> root,
+                          afl::base::Ref<game::Game> game,
                           afl::base::Ref<game::Turn> turn)
             : m_id(id),
               m_session(session),
               m_method(ipm),
               m_root(root),
+              m_game(game),
               m_turn(turn)
             { }
 
@@ -196,18 +198,19 @@ namespace {
         virtual void call(interpreter::Process& proc, interpreter::Arguments& a)
             {
                 if (game::map::Planet* pl = m_turn->universe().planets().get(m_id)) {
-                    game::interface::callPlanetMethod(*pl, m_method, a, proc, m_session, *m_turn, *m_root);
+                    game::interface::callPlanetMethod(*pl, m_method, a, proc, m_session, m_game->mapConfiguration(), *m_turn, *m_root);
                 }
             }
 
         virtual PlanetMethodValue* clone() const
-            { return new PlanetMethodValue(m_id, m_session, m_method, m_root, m_turn); }
+            { return new PlanetMethodValue(m_id, m_session, m_method, m_root, m_game, m_turn); }
 
      private:
         game::Id_t m_id;
         game::Session& m_session;
         game::interface::PlanetMethod m_method;
         afl::base::Ref<game::Root> m_root;
+        afl::base::Ref<game::Game> m_game;
         afl::base::Ref<game::Turn> m_turn;
     };
 }
@@ -299,7 +302,7 @@ game::interface::PlanetContext::get(PropertyIndex_t index)
                     return 0;
                 }
              case PlanetMethodDomain:
-                return new PlanetMethodValue(pl->getId(), m_session, PlanetMethod(planet_mapping[index].index), m_root, m_game->currentTurn());
+                return new PlanetMethodValue(pl->getId(), m_session, PlanetMethod(planet_mapping[index].index), m_root, m_game, m_game->currentTurn());
             }
             return 0;
         } else {

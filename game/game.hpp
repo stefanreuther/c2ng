@@ -21,6 +21,7 @@
 #include "game/teamsettings.hpp"
 #include "game/unitscoredefinitionlist.hpp"
 #include "game/vcr/object.hpp"
+#include "game/map/configuration.hpp"
 
 namespace game {
 
@@ -102,6 +103,11 @@ namespace game {
             \return object selections */
         game::map::Selections& selections();
 
+        /** Access map configuration.
+            \return map configuration */
+        game::map::Configuration& mapConfiguration();
+        const game::map::Configuration& mapConfiguration() const;
+
         /** Access message configuration.
             \return message configuration */
         game::msg::Configuration& messageConfiguration();
@@ -160,6 +166,7 @@ namespace game {
 
         game::map::Cursors m_cursors;
         game::map::Selections m_selections;
+        game::map::Configuration m_mapConfiguration;
 
         game::msg::Configuration m_messageConfiguration;
 

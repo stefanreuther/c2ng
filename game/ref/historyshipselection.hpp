@@ -96,16 +96,18 @@ namespace game { namespace ref {
             or a list identical to one also attainable with a different mode (i.e., when there are no teams, TeamShips and OwnShips are the same).
 
             \param univ  Universe
+            \param mapConfig Map configuration
             \param teams Team settings
             \return Available modes */
-        Modes_t getAvailableModes(const game::map::Universe& univ, const TeamSettings& teams) const;
+        Modes_t getAvailableModes(const game::map::Universe& univ, const game::map::Configuration& mapConfig, const TeamSettings& teams) const;
 
         /** Get initial mode.
             Suggest an initial mode for the current situation.
             \param univ  Universe
+            \param mapConfig Map configuration
             \param teams Team settings
             \return mode */
-        Mode getInitialMode(const game::map::Universe& univ, const TeamSettings& teams) const;
+        Mode getInitialMode(const game::map::Universe& univ, const game::map::Configuration& mapConfig, const TeamSettings& teams) const;
 
         /** Get name of a given mode.
             \param mode Mode
@@ -135,7 +137,7 @@ namespace game { namespace ref {
         bool m_positionValid;
         game::map::Point m_position;
 
-        bool isInRange(int x, int y, const game::map::Universe& univ) const;
+        bool isInRange(int x, int y, const game::map::Configuration& mapConfig) const;
     };
 
 } }

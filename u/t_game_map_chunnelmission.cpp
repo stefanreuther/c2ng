@@ -52,13 +52,13 @@ namespace {
                         game::Root::Actions_t());
 
         // Can we set up a chunnel?
-        bool valid = game::map::isValidChunnelMate(init, mate, t.universe().config(), root, shipScores, t.shipList());
+        bool valid = game::map::isValidChunnelMate(init, mate, t.mapConfiguration(), root, shipScores, t.shipList());
         TSM_ASSERT_EQUALS(name.c_str(), valid, expectSetup);
 
         // Set up and parse
         init.setFriendlyCode(String_t("077"));
         game::map::ChunnelMission msn;
-        bool msnOK = msn.check(init, t.universe(), shipScores, t.shipList(), root);
+        bool msnOK = msn.check(init, t.universe(), t.mapConfiguration(), shipScores, t.shipList(), root);
 
         // Verify parse
         TSM_ASSERT_EQUALS(name.c_str(), msnOK, true);
@@ -111,14 +111,14 @@ namespace {
 
         // Would we be able to set up a chunnel?
         {
-            bool valid = game::map::isValidChunnelMate(init, mate, t.universe().config(), root, shipScores, t.shipList());
+            bool valid = game::map::isValidChunnelMate(init, mate, t.mapConfiguration(), root, shipScores, t.shipList());
             TSM_ASSERT_EQUALS(name.c_str(), valid, expectSuccess);
         }
 
         // Do we recognize the chunnel?
         {
             game::map::ChunnelMission msn;
-            bool valid = msn.check(init, t.universe(), shipScores, t.shipList(), root);
+            bool valid = msn.check(init, t.universe(), t.mapConfiguration(), shipScores, t.shipList(), root);
             TSM_ASSERT_EQUALS(name.c_str(), valid, expectSuccess);
             TSM_ASSERT_EQUALS(name.c_str(), msn.isValid(), expectSuccess);
             if (expectSuccess) {
@@ -126,7 +126,7 @@ namespace {
                 TSM_ASSERT_EQUALS(name.c_str(), msn.getChunnelType(), expectKind);
                 TSM_ASSERT_EQUALS(name.c_str(), msn.getFailureReasons(), 0);
             }
-        }        
+        }
     }
 }
 

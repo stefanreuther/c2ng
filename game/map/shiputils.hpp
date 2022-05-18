@@ -15,6 +15,7 @@
 
 namespace game { namespace map {
 
+    class Configuration;
     class Ship;
     class Planet;
     class Universe;
@@ -22,7 +23,7 @@ namespace game { namespace map {
     const game::spec::Mission* getShipMission(const Ship& ship, const game::config::HostConfiguration& config, const game::spec::MissionList& missions);
     const game::spec::Mission* getShipMissionByNumber(int nr, const Ship& ship, const game::config::HostConfiguration& config, const game::spec::MissionList& missions);
 
-    void setInterceptWaypoint(Universe& univ, Ship& sh);
+    void setInterceptWaypoint(Universe& univ, Ship& sh, const Configuration& mapConfig);
     void cancelAllCloneOrders(Universe& univ, const Planet& pl, const game::spec::FriendlyCodeList& list, util::RandomNumberGenerator& rng);
 
     const game::spec::Hull* getShipHull(const Ship& ship, const game::spec::ShipList& shipList);

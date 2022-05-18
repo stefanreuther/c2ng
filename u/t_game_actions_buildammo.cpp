@@ -6,13 +6,16 @@
 #include "game/actions/buildammo.hpp"
 
 #include "t_game_actions.hpp"
+#include "afl/charset/utf8charset.hpp"
 #include "afl/io/internaldirectory.hpp"
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/exception.hpp"
+#include "game/map/configuration.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/planetstorage.hpp"
+#include "game/map/reverter.hpp"
 #include "game/map/universe.hpp"
 #include "game/root.hpp"
 #include "game/session.hpp"
@@ -21,8 +24,6 @@
 #include "game/test/registrationkey.hpp"
 #include "game/test/specificationloader.hpp"
 #include "game/test/stringverifier.hpp"
-#include "game/map/reverter.hpp"
-#include "afl/charset/utf8charset.hpp"
 
 using game::Element;
 
@@ -411,7 +412,7 @@ TestGameActionsBuildAmmo::testSellNoReverter()
     TS_ASSERT_EQUALS(a.getMinAmount(Element::Fighters), 0);
     TS_ASSERT_EQUALS(a.getAmount(Element::Fighters), 0);
     TS_ASSERT_EQUALS(a.getMaxAmount(Element::Fighters), 60);
-    
+
     // Add 10 torpedoes
     TS_ASSERT_EQUALS(a.add(Element::fromTorpedoType(1), 10, false), 10);
     TS_ASSERT_EQUALS(a.getMinAmount(Element::fromTorpedoType(1)), 2);

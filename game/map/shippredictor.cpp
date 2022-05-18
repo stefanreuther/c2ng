@@ -5,6 +5,7 @@
 #include <cmath>
 #include "game/map/shippredictor.hpp"
 #include "afl/bits/bits.hpp"
+#include "game/map/configuration.hpp"
 #include "game/map/minefieldmission.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/ship.hpp"
@@ -519,10 +520,11 @@ namespace {
                          game::map::Point moveFrom, game::map::Point moveTo,
                          const game::UnitScoreDefinitionList& scoreDefinitions,
                          const game::spec::ShipList& shipList,
+                         const game::map::Configuration& mapConfig,
                          const game::Root& root,
                          int warp)
     {
-        game::map::ShipPredictor pred(univ, shipId, scoreDefinitions, shipList, root.hostConfiguration(), root.hostVersion(), root.registrationKey());
+        game::map::ShipPredictor pred(univ, shipId, scoreDefinitions, shipList, mapConfig, root.hostConfiguration(), root.hostVersion(), root.registrationKey());
         pred.setPosition(moveFrom);
         pred.setWaypoint(moveTo);
         pred.setWarpFactor(warp);
@@ -537,11 +539,13 @@ const int game::map::ShipPredictor::MOVEMENT_TIME_LIMIT;
 game::map::ShipPredictor::ShipPredictor(const Universe& univ, Id_t id,
                                         const UnitScoreDefinitionList& scoreDefinitions,
                                         const game::spec::ShipList& shipList,
+                                        const Configuration& mapConfig,
                                         const game::config::HostConfiguration& config,
                                         const HostVersion& hostVersion,
                                         const RegistrationKey& key)
     : m_scoreDefinitions(scoreDefinitions),
       m_shipList(shipList),
+      m_mapConfig(mapConfig),
       m_hostConfiguration(config),
       m_hostVersion(hostVersion),
       m_key(key),
@@ -557,11 +561,13 @@ game::map::ShipPredictor::ShipPredictor(const Universe& univ, Id_t id,
 game::map::ShipPredictor::ShipPredictor(const Universe& univ, Id_t id, ShipPredictor& towee,
                                         const UnitScoreDefinitionList& scoreDefinitions,
                                         const game::spec::ShipList& shipList,
+                                        const Configuration& mapConfig,
                                         const game::config::HostConfiguration& config,
                                         const HostVersion& hostVersion,
                                         const RegistrationKey& key)
     : m_scoreDefinitions(scoreDefinitions),
       m_shipList(shipList),
+      m_mapConfig(mapConfig),
       m_hostConfiguration(config),
       m_hostVersion(hostVersion),
       m_key(key),
@@ -645,7 +651,7 @@ game::map::ShipPredictor::computeTurn()
     // This is a hack: checkLayMission() takes a Ship, but we only have a ShipData.
     // However, with m_numTurns=0, both still have the same content.
     MinefieldMission md;
-    if (m_numTurns == 0 && md.checkLayMission(*real_ship, m_universe, m_hostVersion, m_key, m_hostConfiguration, m_scoreDefinitions, m_shipList)) {
+    if (m_numTurns == 0 && md.checkLayMission(*real_ship, m_universe, m_hostVersion, m_key, m_mapConfig, m_hostConfiguration, m_scoreDefinitions, m_shipList)) {
         int torps = m_ship.ammo.orElse(0);
         m_ship.ammo = torps - std::min(torps, md.getNumTorpedoes());
         if (md.isFriendlyCodeUsed()) {
@@ -892,7 +898,7 @@ game::map::ShipPredictor::computeTurn()
         }
         m_ship.waypointDX = m_ship.waypointDY = 0;
         m_ship.warpFactor = 0;
-        normalizePosition(m_ship, m_universe.config());
+        normalizePosition(m_ship, m_mapConfig);
         // FIXME: IF pconf<>NIL THEN s.FC := '???';
         // // FIXME: gravity wells?
     } else if (dist2 > 0 && m_ship.warpFactor.orElse(0) > 0) {
@@ -977,14 +983,14 @@ game::map::ShipPredictor::computeTurn()
         m_ship.y = m_ship.y.orElse(0) + my;
         m_ship.waypointDX = m_ship.waypointDX.orElse(0) - mx;
         m_ship.waypointDY = m_ship.waypointDY.orElse(0) - my;
-        normalizePosition(m_ship, m_universe.config());
+        normalizePosition(m_ship, m_mapConfig);
 
         // Warp wells
         int wp_x = m_ship.x.orElse(0) + m_ship.waypointDX.orElse(0);
         int wp_y = m_ship.y.orElse(0) + m_ship.waypointDY.orElse(0);
 
         if (m_ship.warpFactor.orElse(0) > 1 && m_universe.findPlanetAt(Point(m_ship.x.orElse(0), m_ship.y.orElse(0))) == 0) {
-            Id_t gpid = m_universe.findGravityPlanetAt(Point(m_ship.x.orElse(0), m_ship.y.orElse(0)), m_hostConfiguration, m_hostVersion);
+            Id_t gpid = m_universe.findGravityPlanetAt(Point(m_ship.x.orElse(0), m_ship.y.orElse(0)), m_mapConfig, m_hostConfiguration, m_hostVersion);
             if (const Planet* p = m_universe.planets().get(gpid)) {
                 // Okay, there is a planet. Move the ship.
                 Point ppos;
@@ -999,11 +1005,11 @@ game::map::ShipPredictor::computeTurn()
                     // would try to get there for ever. This is consistent
                     // with the CCScript `MoveTo' command and with what
                     // most people expect.
-                    if (m_universe.findPlanetAt(Point(wp_x, wp_y), true, m_hostConfiguration, m_hostVersion) == gpid) {
+                    if (m_universe.findPlanetAt(m_mapConfig.getCanonicalLocation(Point(wp_x, wp_y)), true, m_mapConfig, m_hostConfiguration, m_hostVersion) == gpid) {
                         m_ship.waypointDX = 0;
                         m_ship.waypointDY = 0;
                     } else {
-                        Point new_wp = m_universe.config().getSimpleNearestAlias(Point(wp_x, wp_y), Point(m_ship.x.orElse(0), m_ship.y.orElse(0)));
+                        Point new_wp = m_mapConfig.getSimpleNearestAlias(Point(wp_x, wp_y), Point(m_ship.x.orElse(0), m_ship.y.orElse(0)));
                         m_ship.waypointDX = new_wp.getX() - m_ship.x.orElse(0);
                         m_ship.waypointDY = new_wp.getY() - m_ship.y.orElse(0);
                     }
@@ -1061,7 +1067,7 @@ void
 game::map::ShipPredictor::setPosition(Point pt)
 {
     // ex GShipTurnPredictor::setPosition
-    pt = m_universe.config().getSimpleCanonicalLocation(pt);
+    pt = m_mapConfig.getSimpleCanonicalLocation(pt);
     m_ship.x = pt.getX();
     m_ship.y = pt.getY();
 }
@@ -1071,7 +1077,7 @@ void
 game::map::ShipPredictor::setWaypoint(Point pt)
 {
     // ex GShipTurnPredictor::setWaypoint
-    pt = m_universe.config().getSimpleNearestAlias(pt, Point(m_ship.x.orElse(0), m_ship.y.orElse(0)));
+    pt = m_mapConfig.getSimpleNearestAlias(pt, Point(m_ship.x.orElse(0), m_ship.y.orElse(0)));
     m_ship.waypointDX = pt.getX() - m_ship.x.orElse(0);
     m_ship.waypointDY = pt.getY() - m_ship.y.orElse(0);
 }
@@ -1232,6 +1238,7 @@ game::map::getOptimumWarp(const Universe& univ, Id_t shipId,
                           Point moveFrom, Point moveTo,
                           const UnitScoreDefinitionList& scoreDefinitions,
                           const game::spec::ShipList& shipList,
+                          const Configuration& mapConfig,
                           const Root& root)
 {
     // ex computeOptimumWarp
@@ -1246,7 +1253,7 @@ game::map::getOptimumWarp(const Universe& univ, Id_t shipId,
     }
 
     int thisSpeed = e->getMaxEfficientWarp();
-    int thisTime = getMovementTurns(univ, shipId, moveFrom, moveTo, scoreDefinitions, shipList, root, thisSpeed);
+    int thisTime = getMovementTurns(univ, shipId, moveFrom, moveTo, scoreDefinitions, shipList, mapConfig, root, thisSpeed);
     int result = thisSpeed;
 
     // Do we make it in finite time? If not, let user resolve it.
@@ -1258,8 +1265,8 @@ game::map::getOptimumWarp(const Universe& univ, Id_t shipId,
        - into deep space: allow all speeds down to warp 1
        - into warp well: assume they want to reach the planet. Do not go below warp 2.
        - stay in same warp well: allow all speeds down to warp 1 */
-    Id_t oldPlanet = univ.findPlanetAt(moveFrom, true, root.hostConfiguration(), root.hostVersion());
-    Id_t newPlanet = univ.findPlanetAt(moveTo,   true, root.hostConfiguration(), root.hostVersion());
+    Id_t oldPlanet = univ.findPlanetAt(moveFrom, true, mapConfig, root.hostConfiguration(), root.hostVersion());
+    Id_t newPlanet = univ.findPlanetAt(moveTo,   true, mapConfig, root.hostConfiguration(), root.hostVersion());
     int lowerLimit;
     if (newPlanet != 0 && oldPlanet != newPlanet) {
         lowerLimit = 2;
@@ -1270,7 +1277,7 @@ game::map::getOptimumWarp(const Universe& univ, Id_t shipId,
     // Find whether we can reach the target with a slower speed
     while (thisSpeed > lowerLimit) {
         --thisSpeed;
-        if (getMovementTurns(univ, shipId, moveFrom, moveTo, scoreDefinitions, shipList, root, thisSpeed) > thisTime) {
+        if (getMovementTurns(univ, shipId, moveFrom, moveTo, scoreDefinitions, shipList, mapConfig, root, thisSpeed) > thisTime) {
             // It's slower, so undo and stop
             return thisSpeed+1;
         }

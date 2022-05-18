@@ -8,6 +8,7 @@
 #include "t_game_actions.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
+#include "game/map/configuration.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/reverter.hpp"
 

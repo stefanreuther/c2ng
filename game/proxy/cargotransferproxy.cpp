@@ -90,11 +90,12 @@ game::proxy::CargoTransferProxy::init(const game::actions::CargoTransferSetup& s
             { }
         virtual void handle(Observer& obs)
             {
-                Turn& turn = game::actions::mustHaveGame(obs.session).currentTurn();
+                Game& g = game::actions::mustHaveGame(obs.session);
                 Root& root = game::actions::mustHaveRoot(obs.session);
 
                 m_setup.build(obs.transfer,
-                              turn,
+                              g.currentTurn(),
+                              g.mapConfiguration(),
                               root.hostConfiguration(),
                               game::actions::mustHaveShipList(obs.session),
                               root.hostVersion());

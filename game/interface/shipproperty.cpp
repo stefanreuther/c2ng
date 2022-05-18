@@ -578,7 +578,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            If the ship is at a planet, returns that planet's name and Id.
            In deep space, returns an (X,Y) pair. */
         if (sh.isVisible() && sh.getPosition(pt)) {
-            return makeStringValue(turn->universe().findLocationName(pt, 0, root->hostConfiguration(), root->hostVersion(), tx));
+            return makeStringValue(turn->universe().findLocationName(pt, 0, game->mapConfiguration(), root->hostConfiguration(), root->hostVersion(), tx));
         } else {
             return 0;
         }
@@ -652,6 +652,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
                                           sh.getId(),
                                           game->shipScores(),
                                           *shipList,
+                                          game->mapConfiguration(),
                                           root->hostConfiguration(),
                                           root->hostVersion(),
                                           root->registrationKey());
@@ -668,6 +669,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
                                           sh.getId(),
                                           game->shipScores(),
                                           *shipList,
+                                          game->mapConfiguration(),
                                           root->hostConfiguration(),
                                           root->hostVersion(),
                                           root->registrationKey());
@@ -902,7 +904,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            Id of planet at waypoint.
            @see PlanetAt() */
         if (sh.getWaypoint().get(pt)) {
-            return makeIntegerValue(turn->universe().findPlanetAt(pt));
+            return makeIntegerValue(turn->universe().findPlanetAt(game->mapConfiguration().getCanonicalLocation(pt)));
         } else {
             return 0;
         }
@@ -930,7 +932,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
             if (sh.getWaypointDX().isSame(0) && sh.getWaypointDY().isSame(0)) {
                 return makeStringValue("(Location)");
             } else {
-                return makeStringValue(turn->universe().findLocationName(pt, 0, root->hostConfiguration(), root->hostVersion(), tx));
+                return makeStringValue(turn->universe().findLocationName(pt, 0, game->mapConfiguration(), root->hostConfiguration(), root->hostVersion(), tx));
             }
         } else {
             return 0;
@@ -949,6 +951,7 @@ void
 game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, const afl::data::Value* value,
                                  Root& root,
                                  const game::spec::ShipList& shipList,
+                                 const game::map::Configuration& mapConfig,
                                  Turn& turn)
 {
     // ex int/if/shipif.h:setShipProperty
@@ -982,7 +985,7 @@ game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, const af
             int m = (isp == ispMissionId        ? iv : sh.getMission().orElse(0));
             int i = (isp == ispMissionIntercept ? iv : sh.getMissionParameter(InterceptParameter).orElse(0));
             int t = (isp == ispMissionTow       ? iv : sh.getMissionParameter(TowParameter).orElse(0));
-            if (!game::map::FleetMember(turn.universe(), sh).setMission(m, i, t, root.hostConfiguration(), shipList)) {
+            if (!game::map::FleetMember(turn.universe(), sh, mapConfig).setMission(m, i, t, root.hostConfiguration(), shipList)) {
                 throw Exception(Exception::eFleet);
             }
         }
@@ -997,7 +1000,7 @@ game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, const af
         break;
      case ispSpeedId:
         if (checkIntegerArg(iv, value, 0, game::spec::Engine::MAX_WARP)) {
-            if (!game::map::FleetMember(turn.universe(), sh).setWarpFactor(iv, root.hostConfiguration(), shipList)) {
+            if (!game::map::FleetMember(turn.universe(), sh, mapConfig).setWarpFactor(iv, root.hostConfiguration(), shipList)) {
                 throw Exception(Exception::eFleet);
             }
         }
@@ -1014,14 +1017,14 @@ game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, const af
         break;
      case ispFleetName:
         if (checkStringArg(sv, value)) {
-            if (!game::map::FleetMember(turn.universe(), sh).setFleetName(sv)) {
+            if (!game::map::FleetMember(turn.universe(), sh, mapConfig).setFleetName(sv)) {
                 throw interpreter::Error::notAssignable();
             }
         }
         break;
      case ispFleetId:
         if (checkIntegerArg(iv, value)) {
-            if (!game::map::FleetMember(turn.universe(), sh).setFleetNumber(iv, root.hostConfiguration(), shipList)) {
+            if (!game::map::FleetMember(turn.universe(), sh, mapConfig).setFleetNumber(iv, root.hostConfiguration(), shipList)) {
                 throw interpreter::Error::rangeError();
             }
         }

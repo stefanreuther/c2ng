@@ -3,14 +3,15 @@
   */
 
 #include "game/map/fleet.hpp"
+#include "afl/string/format.hpp"
 #include "game/map/anyshiptype.hpp"
+#include "game/map/configuration.hpp"
 #include "game/map/ship.hpp"
 #include "game/map/shiputils.hpp"
 #include "game/map/universe.hpp"
 #include "game/playerset.hpp"
 #include "game/spec/mission.hpp"
 #include "game/spec/missionlist.hpp"
-#include "afl/string/format.hpp"
 
 using game::spec::Mission;
 using afl::string::Format;
@@ -62,7 +63,8 @@ game::map::Fleet::markDirty()
 
 void
 game::map::Fleet::synchronize(const game::config::HostConfiguration& config,
-                              const game::spec::ShipList& shipList)
+                              const game::spec::ShipList& shipList,
+                              const Configuration& mapConfig)
 {
     // ex game/fleet.h:synchronizeFleet, fleet.pas:SynchFleet
     AnyShipType ships(m_universe.ships());
@@ -70,7 +72,7 @@ game::map::Fleet::synchronize(const game::config::HostConfiguration& config,
     for (Id_t i = ships.getNextIndex(0); i != 0; i = ships.getNextIndex(i)) {
         if (Ship* sh = ships.getObjectByIndex(i)) {
             if (sh->getFleetNumber() == fleetNumber) {
-                synchronizeFleetMember(m_universe, i, config, shipList);
+                synchronizeFleetMember(m_universe, i, mapConfig, config, shipList);
             }
         }
     }
@@ -113,6 +115,7 @@ game::map::Fleet::getTitle(afl::string::Translator& tx) const
 // It would make sense to put this into FleetMember, but then we'd have a call chain FleetMember -> Fleet -> FleetMember.
 void
 game::map::Fleet::synchronizeFleetMember(Universe& univ, Id_t sid,
+                                         const Configuration& mapConfig,
                                          const game::config::HostConfiguration& config,
                                          const game::spec::ShipList& shipList)
 {
@@ -152,7 +155,7 @@ game::map::Fleet::synchronizeFleetMember(Universe& univ, Id_t sid,
                     sh->setMission(leader->getMission(),
                                    leader->getMissionParameter(InterceptParameter),
                                    leader->getMissionParameter(TowParameter));
-                    setInterceptWaypoint(univ, *sh);
+                    setInterceptWaypoint(univ, *sh, mapConfig);
                     sh->setWarpFactor(leader->getWarpFactor());
                 }
             } else {
@@ -167,7 +170,7 @@ game::map::Fleet::synchronizeFleetMember(Universe& univ, Id_t sid,
 
                     Point shipPos, leaderPos;
                     if (sh->getPosition(shipPos) && leader->getWaypoint().get(leaderPos)) {
-                        sh->setWaypoint(univ.config().getSimpleNearestAlias(leaderPos, shipPos));
+                        sh->setWaypoint(mapConfig.getSimpleNearestAlias(leaderPos, shipPos));
                     }
                 }
 

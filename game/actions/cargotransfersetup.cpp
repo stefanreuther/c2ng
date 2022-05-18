@@ -346,6 +346,7 @@ game::actions::CargoTransferSetup::cancelConflictingTransfer(game::map::Universe
 void
 game::actions::CargoTransferSetup::build(CargoTransfer& action,
                                          Turn& turn,
+                                         const game::map::Configuration& mapConfig,
                                          const game::config::HostConfiguration& config,
                                          const game::spec::ShipList& shipList,
                                          const game::HostVersion& version)
@@ -396,7 +397,7 @@ game::actions::CargoTransferSetup::build(CargoTransfer& action,
             break;
 
          case UseBeamUpShip:
-            action.addNew(new game::map::BeamUpShipTransfer(getShip(univ, thisId), shipList, turn, config));
+            action.addNew(new game::map::BeamUpShipTransfer(getShip(univ, thisId), shipList, turn, mapConfig, config));
             break;
 
          case UseBeamUpPlanet:

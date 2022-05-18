@@ -14,6 +14,7 @@
 
 namespace game { namespace map {
 
+    class Configuration;
     class Minefield;
     class Universe;
     class MinefieldMission;
@@ -36,11 +37,11 @@ namespace game { namespace map {
 
     typedef std::vector<MinefieldEffect> MinefieldEffects_t;
 
-    bool isMinefieldEndangered(const Minefield& field, const Universe& univ, const HostVersion& host, const game::config::HostConfiguration& config);
+    bool isMinefieldEndangered(const Minefield& field, const Universe& univ, const Configuration& mapConfig, const HostVersion& host, const game::config::HostConfiguration& config);
 
-    void computeMineLayEffect(MinefieldEffects_t& result, const MinefieldMission& mission, const Ship& ship, const Universe& univ, const Root& root);
+    void computeMineLayEffect(MinefieldEffects_t& result, const MinefieldMission& mission, const Ship& ship, const Universe& univ, const Configuration& mapConfig, const Root& root);
 
-    void computeMineScoopEffect(MinefieldEffects_t& result, const MinefieldMission& mission, const Ship& ship, const Universe& univ, const Root& root,
+    void computeMineScoopEffect(MinefieldEffects_t& result, const MinefieldMission& mission, const Ship& ship, const Universe& univ, const Configuration& mapConfig, const Root& root,
                                 const game::spec::ShipList& shipList);
 
 } }

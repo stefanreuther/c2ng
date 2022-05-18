@@ -83,6 +83,7 @@ namespace {
             .postprocess(game::PlayerSet_t() + ME,      // Playing
                          game::PlayerSet_t() + ME + ALLY,  // Available
                          game::map::Object::Playable,
+                         h.session().getGame()->mapConfiguration(),
                          r->hostVersion(),
                          r->hostConfiguration(),
                          TURN_NR,

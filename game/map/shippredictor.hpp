@@ -17,6 +17,7 @@
 
 namespace game { namespace map {
 
+    class Configuration;
     class Universe;
 
     /** Ship Turn Predictor.
@@ -50,12 +51,14 @@ namespace game { namespace map {
             \param id                Ship Id
             \param scoreDefinitions  Unit score definitions (required for experience levels)
             \param shipList          Ship list (required for hull/beam/torp/engine specs)
+            \param mapConfig         Map configuration
             \param config            Host configuration
             \param hostVersion       Host version
             \param key               Registration key */
         ShipPredictor(const Universe& univ, Id_t id,
                       const UnitScoreDefinitionList& scoreDefinitions,
                       const game::spec::ShipList& shipList,
+                      const Configuration& mapConfig,
                       const game::config::HostConfiguration& config,
                       const HostVersion& hostVersion,
                       const RegistrationKey& key);
@@ -66,12 +69,14 @@ namespace game { namespace map {
             \param towee             Towee's predictor
             \param scoreDefinitions  Unit score definitions (required for experience levels)
             \param shipList          Ship list (required for hull/beam/torp/engine specs)
+            \param mapConfig         Map configuration
             \param config            Host configuration
             \param hostVersion       Host version
             \param key               Registration key */
         ShipPredictor(const Universe& univ, Id_t id, ShipPredictor& towee,
                       const UnitScoreDefinitionList& scoreDefinitions,
                       const game::spec::ShipList& shipList,
+                      const Configuration& mapConfig,
                       const game::config::HostConfiguration& config,
                       const HostVersion& hostVersion,
                       const RegistrationKey& key);
@@ -193,6 +198,7 @@ namespace game { namespace map {
 
         const UnitScoreDefinitionList& m_scoreDefinitions;
         const game::spec::ShipList& m_shipList;
+        const Configuration& m_mapConfig;
         const game::config::HostConfiguration& m_hostConfiguration;
         const HostVersion& m_hostVersion;
         const RegistrationKey& m_key;
@@ -216,12 +222,14 @@ namespace game { namespace map {
         \param moveTo            Target of movement (waypoint)
         \param scoreDefinitions  Unit score definitions (required for experience levels)
         \param shipList          Ship list (required for hull/beam/torp/engine specs)
+        \param mapConfig         Map configuration
         \param root              Root (provides host configuration, version, key)
         \return optimum warp factor */
     int getOptimumWarp(const Universe& univ, Id_t shipId,
                        Point moveFrom, Point moveTo,
                        const UnitScoreDefinitionList& scoreDefinitions,
                        const game::spec::ShipList& shipList,
+                       const Configuration& mapConfig,
                        const Root& root);
 
 } }

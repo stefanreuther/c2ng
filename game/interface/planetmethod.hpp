@@ -4,12 +4,13 @@
 #ifndef C2NG_GAME_INTERFACE_PLANETMETHOD_HPP
 #define C2NG_GAME_INTERFACE_PLANETMETHOD_HPP
 
+#include "game/map/configuration.hpp"
 #include "game/map/planet.hpp"
 #include "game/session.hpp"
+#include "game/shipbuildorder.hpp"
 #include "game/turn.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/process.hpp"
-#include "game/shipbuildorder.hpp"
 
 namespace game { namespace interface {
 
@@ -48,6 +49,7 @@ namespace game { namespace interface {
                           interpreter::Arguments& args,
                           interpreter::Process& process,
                           Session& session,
+                          const game::map::Configuration& mapConfig,
                           Turn& turn,
                           Root& root);
 

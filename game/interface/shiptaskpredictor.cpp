@@ -12,12 +12,14 @@
 game::interface::ShipTaskPredictor::ShipTaskPredictor(const game::map::Universe& univ, Id_t id,
                                                       const UnitScoreDefinitionList& scoreDefinitions,
                                                       const game::spec::ShipList& shipList,
+                                                      const game::map::Configuration& mapConfig,
                                                       const game::config::HostConfiguration& config,
                                                       const HostVersion& hostVersion,
                                                       const RegistrationKey& key)
-    : m_predictor(univ, id, scoreDefinitions, shipList, config, hostVersion, key),
+    : m_predictor(univ, id, scoreDefinitions, shipList, mapConfig, config, hostVersion, key),
       m_universe(univ),
       m_shipList(shipList),
+      m_mapConfig(mapConfig),
       m_config(config),
       m_numPositions(0),
       m_numFuelPositions(0),
@@ -195,7 +197,7 @@ game::interface::ShipTaskPredictor::predictInstruction(const String_t& name, int
             game::map::Point shipPos;
             if (sh != 0 && sh->getPosition(shipPos)) {
                 // FIXME: handle THost where intercept does not cross the seam?
-                m_predictor.setWaypoint(m_universe.config().getSimpleNearestAlias(shipPos, m_predictor.getPosition()));
+                m_predictor.setWaypoint(m_mapConfig.getSimpleNearestAlias(shipPos, m_predictor.getPosition()));
             }
         }
         return true;

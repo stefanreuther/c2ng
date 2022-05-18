@@ -7,6 +7,7 @@
 #include "game/map/boundingbox.hpp"
 #include "game/map/anyplanettype.hpp"
 #include "game/map/anyshiptype.hpp"
+#include "game/map/configuration.hpp"
 #include "game/map/circularobject.hpp"
 #include "game/map/drawing.hpp"
 #include "game/map/drawingcontainer.hpp"
@@ -19,12 +20,12 @@ game::map::BoundingBox::BoundingBox()
 { }
 
 void
-game::map::BoundingBox::addUniverse(const Universe& univ)
+game::map::BoundingBox::addUniverse(const Universe& univ, const Configuration& mapConfig)
 {
     // ex GChartBBox::initFromUniverse (part)
     // Add known/configured size of universe
-    addPoint(univ.config().getMinimumCoordinates());
-    addPoint(univ.config().getMaximumCoordinates());
+    addPoint(mapConfig.getMinimumCoordinates());
+    addPoint(mapConfig.getMaximumCoordinates());
 
     // Add regular units
     {
@@ -63,7 +64,7 @@ game::map::BoundingBox::addUniverse(const Universe& univ)
             Point otherPos;
             int otherRadius;
             if (otherEnd != 0 && otherEnd->getPosition(otherPos) && otherEnd->getRadius(otherRadius)) {
-                addCircle(univ.config().getSimpleNearestAlias(otherPos, pt), otherRadius);
+                addCircle(mapConfig.getSimpleNearestAlias(otherPos, pt), otherRadius);
             }
         }
     }

@@ -38,7 +38,7 @@ TestGameActionsCargoTransferSetup::testInit()
 
     // Building throws
     CargoTransfer a;
-    TS_ASSERT_THROWS(testee.build(a, h.turn(), h.config(), h.shipList(), h.version()), game::Exception);
+    TS_ASSERT_THROWS(testee.build(a, h.turn(), h.mapConfiguration(), h.config(), h.shipList(), h.version()), game::Exception);
     TS_ASSERT_THROWS(testee.buildDirect(a, h.turn().universe(), h.config(), h.shipList()), game::Exception);
 }
 
@@ -68,7 +68,7 @@ TestGameActionsCargoTransferSetup::testOwnShipOwnShip()
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Ready);
     TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.universe()), 0);
     TS_ASSERT_EQUALS(testee.isDirect(), true);
-    testee.build(action, h.turn(), h.config(), h.shipList(), h.version());
+    testee.build(action, h.turn(), h.mapConfiguration(), h.config(), h.shipList(), h.version());
 
     // Move
     TS_ASSERT_EQUALS(action.move(Element::Neutronium, 5, 0, 1, false, false), 5);
@@ -120,7 +120,7 @@ TestGameActionsCargoTransferSetup::testOwnShipAlliedShip()
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Ready);
     TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.universe()), 0);
     TS_ASSERT_EQUALS(testee.isDirect(), false);
-    testee.build(action, h.turn(), h.config(), h.shipList(), h.version());
+    testee.build(action, h.turn(), h.mapConfiguration(), h.config(), h.shipList(), h.version());
 
     // Move
     TS_ASSERT_EQUALS(action.move(Element::Neutronium, 3, 0, 1, false, false), 3);
@@ -163,7 +163,7 @@ TestGameActionsCargoTransferSetup::testOwnShipForeignShip()
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Ready);
     TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.universe()), 0);
     TS_ASSERT_EQUALS(testee.isDirect(), false);
-    testee.build(action, h.turn(), h.config(), h.shipList(), h.version());
+    testee.build(action, h.turn(), h.mapConfiguration(), h.config(), h.shipList(), h.version());
 
     // Move
     TS_ASSERT_EQUALS(action.move(Element::Neutronium, 3, 0, 1, false, false), 3);
@@ -191,7 +191,7 @@ TestGameActionsCargoTransferSetup::testForeignShipOwnShip()
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Ready);
     TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.universe()), 0);
     TS_ASSERT_EQUALS(testee.isDirect(), false);
-    testee.build(action, h.turn(), h.config(), h.shipList(), h.version());
+    testee.build(action, h.turn(), h.mapConfiguration(), h.config(), h.shipList(), h.version());
 
     // Move
     TS_ASSERT_EQUALS(action.move(Element::Neutronium, 4, 0, 1, false, false), 0);  // fails, cannot transfer this direction!
@@ -218,7 +218,7 @@ TestGameActionsCargoTransferSetup::testForeignShipForeignShip()
     // Use result
     CargoTransfer action;
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Impossible);
-    TS_ASSERT_THROWS(testee.build(action, h.turn(), h.config(), h.shipList(), h.version()), game::Exception);
+    TS_ASSERT_THROWS(testee.build(action, h.turn(), h.mapConfiguration(), h.config(), h.shipList(), h.version()), game::Exception);
 }
 
 /** Test creation of a transfer between a played ship and a scanned ship of a different owner, conflict case.
@@ -246,7 +246,7 @@ TestGameActionsCargoTransferSetup::testOwnShipForeignShipConflict()
     TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.universe()), 0);
     TS_ASSERT_EQUALS(h.universe().ships().get(10)->getCargo(Element::Neutronium).orElse(-1), 18);
     CargoTransfer action;
-    testee.build(action, h.turn(), h.config(), h.shipList(), h.version());
+    testee.build(action, h.turn(), h.mapConfiguration(), h.config(), h.shipList(), h.version());
 
     // Move
     TS_ASSERT_EQUALS(action.move(Element::Neutronium, 3, 0, 1, false, false), 3);
@@ -279,7 +279,7 @@ TestGameActionsCargoTransferSetup::testOwnShipForeignShipAutoCancel()
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Ready);
     TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.universe()), 10);
     TS_ASSERT_EQUALS(testee.isDirect(), false);
-    testee.build(action, h.turn(), h.config(), h.shipList(), h.version());
+    testee.build(action, h.turn(), h.mapConfiguration(), h.config(), h.shipList(), h.version());
 
     // Move
     TS_ASSERT_EQUALS(action.move(Element::Neutronium, 3, 0, 1, false, false), 3);
@@ -334,7 +334,7 @@ TestGameActionsCargoTransferSetup::testJettisonNormal()
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Ready);
     TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.universe()), 0);
     TS_ASSERT_EQUALS(testee.isDirect(), false);
-    testee.build(action, h.turn(), h.config(), h.shipList(), h.version());
+    testee.build(action, h.turn(), h.mapConfiguration(), h.config(), h.shipList(), h.version());
 
     // Move
     TS_ASSERT_EQUALS(action.move(Element::Neutronium, 3, 0, 1, false, false), 3);
@@ -404,7 +404,7 @@ TestGameActionsCargoTransferSetup::testOwnPlanetOwnShip()
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Ready);
     TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.universe()), 0);
     TS_ASSERT_EQUALS(testee.isDirect(), true);
-    testee.build(action, h.turn(), h.config(), h.shipList(), h.version());
+    testee.build(action, h.turn(), h.mapConfiguration(), h.config(), h.shipList(), h.version());
 
     // Move
     TS_ASSERT_EQUALS(action.move(Element::Neutronium, 5, 0, 1, false, false), 5);
@@ -454,7 +454,7 @@ TestGameActionsCargoTransferSetup::testOwnPlanetAlliedShip()
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Ready);
     TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.universe()), 0);
     TS_ASSERT_EQUALS(testee.isDirect(), false);
-    testee.build(action, h.turn(), h.config(), h.shipList(), h.version());
+    testee.build(action, h.turn(), h.mapConfiguration(), h.config(), h.shipList(), h.version());
 
     // Move
     TS_ASSERT_EQUALS(action.move(Element::Neutronium, 5, 0, 1, false, false), 0);     // planet->ship fails
@@ -496,7 +496,7 @@ TestGameActionsCargoTransferSetup::testOwnPlanetForeignShip()
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Ready);
     TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.universe()), 0);
     TS_ASSERT_EQUALS(testee.isDirect(), false);
-    testee.build(action, h.turn(), h.config(), h.shipList(), h.version());
+    testee.build(action, h.turn(), h.mapConfiguration(), h.config(), h.shipList(), h.version());
 
     // Move
     TS_ASSERT_EQUALS(action.move(Element::Neutronium, 5, 0, 1, false, false), 5);
@@ -525,7 +525,7 @@ TestGameActionsCargoTransferSetup::testForeignPlanetOwnShip()
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Ready);
     TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.universe()), 0);
     TS_ASSERT_EQUALS(testee.isDirect(), false);
-    testee.build(action, h.turn(), h.config(), h.shipList(), h.version());
+    testee.build(action, h.turn(), h.mapConfiguration(), h.config(), h.shipList(), h.version());
 
     // Move
     TS_ASSERT_EQUALS(action.move(Element::Neutronium, 5, 0, 1, false, false), 0);     // planet->ship fails
@@ -568,7 +568,7 @@ TestGameActionsCargoTransferSetup::testForeignShipOwnPlanet()
     TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.universe()), 0);
     TS_ASSERT_EQUALS(testee.isDirect(), false);
     CargoTransfer action;
-    testee.build(action, h.turn(), h.config(), h.shipList(), h.version());
+    testee.build(action, h.turn(), h.mapConfiguration(), h.config(), h.shipList(), h.version());
 
     // Move
     TS_ASSERT_EQUALS(action.move(Element::Neutronium, 5, 0, 1, false, false), 0);   // fails
@@ -610,7 +610,7 @@ TestGameActionsCargoTransferSetup::testOwnPlanetForeignShipConflict()
     // This produces a conflict. Auto-solve it.
     CargoTransfer action;
     TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.universe()), 100);
-    testee.build(action, h.turn(), h.config(), h.shipList(), h.version());
+    testee.build(action, h.turn(), h.mapConfiguration(), h.config(), h.shipList(), h.version());
 
     // Move
     TS_ASSERT_EQUALS(action.move(Element::Neutronium, 5, 0, 1, false, false), 5);

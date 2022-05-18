@@ -343,6 +343,7 @@ namespace {
                             m_session.setEditableAreas(editableAreas);
                             m_session.log().write(afl::sys::LogListener::Error, LOG_NAME, m_session.translator()("Compiling starchart..."));
                             m_session.getGame()->currentTurn().universe().postprocess(game::PlayerSet_t(m_player), game::PlayerSet_t(m_player), playability,
+                                                                                      m_session.getGame()->mapConfiguration(),
                                                                                       root.hostVersion(), root.hostConfiguration(),
                                                                                       m_session.getGame()->currentTurn().getTurnNumber(),
                                                                                       *m_session.getShipList(),

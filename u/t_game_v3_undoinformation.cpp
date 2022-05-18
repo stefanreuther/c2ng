@@ -11,6 +11,7 @@
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
+#include "game/map/configuration.hpp"
 #include "game/registrationkey.hpp"
 #include "game/root.hpp"
 #include "game/session.hpp"

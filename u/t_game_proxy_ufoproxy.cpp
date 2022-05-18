@@ -65,6 +65,7 @@ namespace {
             .postprocess(game::PlayerSet_t(),  // Playing
                          game::PlayerSet_t(),  // Available
                          game::map::Object::Playable,
+                         h.session().getGame()->mapConfiguration(),
                          r->hostVersion(),
                          r->hostConfiguration(),
                          77, // Turn

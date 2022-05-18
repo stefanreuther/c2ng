@@ -356,6 +356,7 @@ namespace {
         }
 
         session.getGame()->currentTurn().universe().postprocess(game::PlayerSet_t(arg_race), game::PlayerSet_t(arg_race), game::map::Object::Playable,
+                                                                session.getGame()->mapConfiguration(),
                                                                 root->hostVersion(), root->hostConfiguration(),
                                                                 session.getGame()->currentTurn().getTurnNumber(),
                                                                 *session.getShipList(),

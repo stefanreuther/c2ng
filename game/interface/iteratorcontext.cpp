@@ -134,7 +134,7 @@ namespace {
                         if (game::map::ObjectType* type = m_provider->getType()) {
                             if (game::Game* g = m_provider->getSession().getGame().get()) {
                                 // FIXME: this uses currentTurn's map configuration; should use the one belonging to the provider/type?
-                                if (game::Id_t id = type->findNearestIndex(game::map::Point(x, y), g->currentTurn().universe().config())) {
+                                if (game::Id_t id = type->findNearestIndex(game::map::Point(x, y), g->mapConfiguration())) {
                                     return makeIntegerValue(id);
                                 }
                             }

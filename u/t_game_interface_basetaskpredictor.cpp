@@ -9,6 +9,7 @@
 #include "afl/data/segment.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
+#include "game/map/configuration.hpp"
 #include "game/test/shiplist.hpp"
 #include "interpreter/arguments.hpp"
 
@@ -62,7 +63,7 @@ namespace {
             bd.launcherStorage.set(i, 0);
         }
         h.planet.addCurrentBaseData(bd, game::PlayerSet_t(PLAYER));
-        h.planet.internalCheck(h.univ.config(), tx, log);
+        h.planet.internalCheck(game::map::Configuration(), tx, log);
         h.planet.combinedCheck2(h.univ, game::PlayerSet_t(PLAYER), 77);
         h.planet.setPlayability(game::map::Object::Playable);
     }

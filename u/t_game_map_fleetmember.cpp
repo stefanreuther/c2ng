@@ -7,6 +7,7 @@
 
 #include "t_game_map.hpp"
 #include "game/config/hostconfiguration.hpp"
+#include "game/map/configuration.hpp"
 #include "game/map/universe.hpp"
 #include "game/spec/shiplist.hpp"
 #include "interpreter/mutexlist.hpp"
@@ -21,6 +22,7 @@ namespace {
      public:
         TestHarness()
             : univ(),
+              mapConfig(),
               config(),
               shipList(),
               mutexList()
@@ -30,6 +32,7 @@ namespace {
             }
 
         game::map::Universe univ;
+        game::map::Configuration mapConfig;
         game::config::HostConfiguration config;
         game::spec::ShipList shipList;
         interpreter::MutexList mutexList;
@@ -79,16 +82,16 @@ TestGameMapFleetMember::testSetFleetName()
 
     // Test:
     // - not permitted on single ship
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1)).setFleetName("one"), false);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1), h.mapConfig).setFleetName("one"), false);
 
     // - permitted on single-ship fleet
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(3)).setFleetName("three"), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(3), h.mapConfig).setFleetName("three"), true);
 
     // - not permitted on fleet member
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(7)).setFleetName("seven"), false);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(7), h.mapConfig).setFleetName("seven"), false);
 
     // - permitted on leader
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(9)).setFleetName("nine"), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(9), h.mapConfig).setFleetName("nine"), true);
 
     // Verify results
     TS_ASSERT_EQUALS(h.ship(1).getFleetName(), "");
@@ -120,15 +123,15 @@ TestGameMapFleetMember::testSetWaypoint()
     // Test:
     // - permitted on single ships and one-member fleets
     game::map::Point pt(1010, 1020);
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1)).setWaypoint(pt, h.config, h.shipList), true);
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(2)).setWaypoint(pt, h.config, h.shipList), true);
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(3)).setWaypoint(pt, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1), h.mapConfig).setWaypoint(pt, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(2), h.mapConfig).setWaypoint(pt, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(3), h.mapConfig).setWaypoint(pt, h.config, h.shipList), true);
 
     // - permitted on fleet leader but not member
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(7)).setWaypoint(pt, h.config, h.shipList), false);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(7), h.mapConfig).setWaypoint(pt, h.config, h.shipList), false);
     TS_ASSERT_EQUALS(*h.ship(7).getWaypoint().get(), game::map::Point(1000, 1000));
 
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(9)).setWaypoint(pt, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(9), h.mapConfig).setWaypoint(pt, h.config, h.shipList), true);
 
     // Verify results
     TS_ASSERT_EQUALS(*h.ship(1).getWaypoint().get(), pt);
@@ -158,11 +161,11 @@ TestGameMapFleetMember::testSetWarpFactor()
     h.ship(9).setFleetNumber(9);
 
     // Test:
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1)).setWarpFactor(7, h.config, h.shipList), true);
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(3)).setWarpFactor(7, h.config, h.shipList), true);
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(7)).setWarpFactor(7, h.config, h.shipList), false);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1), h.mapConfig).setWarpFactor(7, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(3), h.mapConfig).setWarpFactor(7, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(7), h.mapConfig).setWarpFactor(7, h.config, h.shipList), false);
     TS_ASSERT_EQUALS(h.ship(7).getWarpFactor().orElse(-1), 2);
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(9)).setWarpFactor(7, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(9), h.mapConfig).setWarpFactor(7, h.config, h.shipList), true);
 
     // Verify results
     TS_ASSERT_EQUALS(h.ship(1).getWarpFactor().orElse(-1), 7);
@@ -184,9 +187,9 @@ TestGameMapFleetMember::testSetMission()
     h.ship(9).setFleetNumber(9);
 
     // Test
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1)).setMission(2, 44, 55, h.config, h.shipList), true);
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(7)).setMission(3, 44, 55, h.config, h.shipList), true);
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(9)).setMission(4, 44, 55, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1), h.mapConfig).setMission(2, 44, 55, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(7), h.mapConfig).setMission(3, 44, 55, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(9), h.mapConfig).setMission(4, 44, 55, h.config, h.shipList), true);
 
     // Verify results
     TS_ASSERT_EQUALS(h.ship(1).getMission().orElse(-1), 2);
@@ -207,9 +210,9 @@ TestGameMapFleetMember::testSetMissionToIntercept()
     h.ship(9).setFleetNumber(9);
 
     // Test
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1)).setMission(MY_INTERCEPT_MISSION, 2, 0, h.config, h.shipList), true);
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(7)).setMission(MY_INTERCEPT_MISSION, 3, 0, h.config, h.shipList), false);
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(9)).setMission(MY_INTERCEPT_MISSION, 4, 0, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1), h.mapConfig).setMission(MY_INTERCEPT_MISSION, 2, 0, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(7), h.mapConfig).setMission(MY_INTERCEPT_MISSION, 3, 0, h.config, h.shipList), false);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(9), h.mapConfig).setMission(MY_INTERCEPT_MISSION, 4, 0, h.config, h.shipList), true);
 
     // Verify results
     TS_ASSERT_EQUALS(h.ship(1).getMission().orElse(-1), MY_INTERCEPT_MISSION);
@@ -236,9 +239,9 @@ TestGameMapFleetMember::testSetMissionFromIntercept()
     h.ship(9).setMission(MY_INTERCEPT_MISSION, 4, 0);
 
     // Test
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1)).setMission(99, 2, 0, h.config, h.shipList), true);
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(7)).setMission(99, 3, 0, h.config, h.shipList), false);
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(9)).setMission(99, 4, 0, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1), h.mapConfig).setMission(99, 2, 0, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(7), h.mapConfig).setMission(99, 3, 0, h.config, h.shipList), false);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(9), h.mapConfig).setMission(99, 4, 0, h.config, h.shipList), true);
 
     // Verify results
     TS_ASSERT_EQUALS(h.ship(1).getMission().orElse(-1), 99);
@@ -262,13 +265,13 @@ TestGameMapFleetMember::testSetFleetNumberFail()
 
     // Test
     // - non-existant ship
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1)).setFleetNumber(99, h.config, h.shipList), false);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1), h.mapConfig).setFleetNumber(99, h.config, h.shipList), false);
 
     // - existing ship that is not in a fleet
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1)).setFleetNumber(2, h.config, h.shipList), false);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1), h.mapConfig).setFleetNumber(2, h.config, h.shipList), false);
 
     // - existing ship that is not a fleet leader
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1)).setFleetNumber(7, h.config, h.shipList), false);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1), h.mapConfig).setFleetNumber(7, h.config, h.shipList), false);
 
     // Verify result
     TS_ASSERT_EQUALS(h.ship(1).getFleetNumber(), 0);
@@ -286,11 +289,11 @@ TestGameMapFleetMember::testSetFleetNumberSuccess()
     h.ship(3).setWaypoint(game::map::Point(1111, 1222));
 
     // Create a new fleet
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(3)).setFleetNumber(3, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(3), h.mapConfig).setFleetNumber(3, h.config, h.shipList), true);
 
     // Add members
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1)).setFleetNumber(3, h.config, h.shipList), true);
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(9)).setFleetNumber(3, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1), h.mapConfig).setFleetNumber(3, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(9), h.mapConfig).setFleetNumber(3, h.config, h.shipList), true);
 
     // Verify result
     TS_ASSERT_EQUALS(h.ship(1).getFleetNumber(), 3);
@@ -316,7 +319,7 @@ TestGameMapFleetMember::testSetFleetNumberDropLeader()
 
     // Remove the leader
     TS_ASSERT_EQUALS(h.ship(4).isFleetLeader(), true);
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(4)).setFleetNumber(0, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(4), h.mapConfig).setFleetNumber(0, h.config, h.shipList), true);
 
     // Verify result
     TS_ASSERT_EQUALS(h.ship(1).getFleetNumber(), 1);      // renamed fleet Id
@@ -344,7 +347,7 @@ TestGameMapFleetMember::testSetFleetNumberDropMember()
 
     // Remove a member
     TS_ASSERT_EQUALS(h.ship(7).isFleetMember(), true);
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(7)).setFleetNumber(0, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(7), h.mapConfig).setFleetNumber(0, h.config, h.shipList), true);
 
     // Verify result
     TS_ASSERT_EQUALS(h.ship(1).getFleetNumber(), 4);
@@ -374,7 +377,7 @@ TestGameMapFleetMember::testSetFleetNumberMoveMember()
 
     // Move member
     TS_ASSERT_EQUALS(h.ship(1).isFleetMember(), true);
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1)).setFleetNumber(5, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1), h.mapConfig).setFleetNumber(5, h.config, h.shipList), true);
 
     // Verify result
     TS_ASSERT_EQUALS(h.ship(1).getFleetNumber(), 5);
@@ -395,7 +398,7 @@ TestGameMapFleetMember::testSetMissionTow()
     }
 
     // Set tow mission
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1)).setMission(game::spec::Mission::msn_Tow, 0, 3, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1), h.mapConfig).setMission(game::spec::Mission::msn_Tow, 0, 3, h.config, h.shipList), true);
 
     // Verify: ship 3 (tow target) must have warp zero and no waypoint
     TS_ASSERT_EQUALS(h.ship(1).getMission().orElse(-1), int(game::spec::Mission::msn_Tow));
@@ -405,7 +408,7 @@ TestGameMapFleetMember::testSetMissionTow()
     TS_ASSERT_EQUALS(h.ship(3).getWarpFactor().orElse(-1), 0);
 
     // Clear tow mission
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1)).setMission(77, 0, 0, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1), h.mapConfig).setMission(77, 0, 0, h.config, h.shipList), true);
 
     // Verify
     TS_ASSERT_EQUALS(h.ship(1).getMission().orElse(-1), 77);
@@ -430,7 +433,7 @@ TestGameMapFleetMember::testSetMissionTowOther()
     }
 
     // Set tow mission
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1)).setMission(game::spec::Mission::msn_Tow, 0, 9, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1), h.mapConfig).setMission(game::spec::Mission::msn_Tow, 0, 9, h.config, h.shipList), true);
 
     // Verify: ship 5 (tow target) not affected
     TS_ASSERT_EQUALS(h.ship(1).getMission().orElse(-1), int(game::spec::Mission::msn_Tow));
@@ -454,7 +457,7 @@ TestGameMapFleetMember::testSetMissionTowInvalid()
     }
 
     // Set tow mission
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1)).setMission(game::spec::Mission::msn_Tow, 0, 777, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1), h.mapConfig).setMission(game::spec::Mission::msn_Tow, 0, 777, h.config, h.shipList), true);
 
     TS_ASSERT_EQUALS(h.ship(1).getMission().orElse(-1), int(game::spec::Mission::msn_Tow));
     TS_ASSERT_EQUALS(h.ship(1).getMissionParameter(game::TowParameter).orElse(-1), 777);
@@ -471,30 +474,30 @@ TestGameMapFleetMember::testIsMissionLocked()
     }
     h.ship(2).setFleetNumber(2);
     h.ship(3).setFleetNumber(2);
-    TS_ASSERT(FleetMember(h.univ, h.ship(2)).setMission(MY_INTERCEPT_MISSION, 7, 0, h.config, h.shipList));
+    TS_ASSERT(FleetMember(h.univ, h.ship(2), h.mapConfig).setMission(MY_INTERCEPT_MISSION, 7, 0, h.config, h.shipList));
 
     h.ship(5).setFleetNumber(5);
     h.ship(6).setFleetNumber(5);
 
     // Ship 1: non-fleet-member: not locked
-    TS_ASSERT(!FleetMember(h.univ, h.ship(1)).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
-    TS_ASSERT(!FleetMember(h.univ, h.ship(1)).isMissionLocked(FleetMember::AcceptLeaders, h.config, h.shipList, h.mutexList));
+    TS_ASSERT(!FleetMember(h.univ, h.ship(1), h.mapConfig).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
+    TS_ASSERT(!FleetMember(h.univ, h.ship(1), h.mapConfig).isMissionLocked(FleetMember::AcceptLeaders, h.config, h.shipList, h.mutexList));
 
     // Ship 2: fleet leader on intercept mission: not locked unless requested
-    TS_ASSERT( FleetMember(h.univ, h.ship(2)).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
-    TS_ASSERT(!FleetMember(h.univ, h.ship(2)).isMissionLocked(FleetMember::AcceptLeaders, h.config, h.shipList, h.mutexList));
+    TS_ASSERT( FleetMember(h.univ, h.ship(2), h.mapConfig).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
+    TS_ASSERT(!FleetMember(h.univ, h.ship(2), h.mapConfig).isMissionLocked(FleetMember::AcceptLeaders, h.config, h.shipList, h.mutexList));
 
     // Ship 3: fleet member on intercept mission: always locked
-    TS_ASSERT( FleetMember(h.univ, h.ship(3)).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
-    TS_ASSERT( FleetMember(h.univ, h.ship(3)).isMissionLocked(FleetMember::AcceptLeaders, h.config, h.shipList, h.mutexList));
+    TS_ASSERT( FleetMember(h.univ, h.ship(3), h.mapConfig).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
+    TS_ASSERT( FleetMember(h.univ, h.ship(3), h.mapConfig).isMissionLocked(FleetMember::AcceptLeaders, h.config, h.shipList, h.mutexList));
 
     // Ship 5: fleet leader not on intercept mission: not locked
-    TS_ASSERT(!FleetMember(h.univ, h.ship(5)).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
-    TS_ASSERT(!FleetMember(h.univ, h.ship(5)).isMissionLocked(FleetMember::AcceptLeaders, h.config, h.shipList, h.mutexList));
+    TS_ASSERT(!FleetMember(h.univ, h.ship(5), h.mapConfig).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
+    TS_ASSERT(!FleetMember(h.univ, h.ship(5), h.mapConfig).isMissionLocked(FleetMember::AcceptLeaders, h.config, h.shipList, h.mutexList));
 
     // Ship 6: fleet member not on intercept mission: not locked
-    TS_ASSERT(!FleetMember(h.univ, h.ship(6)).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
-    TS_ASSERT(!FleetMember(h.univ, h.ship(6)).isMissionLocked(FleetMember::AcceptLeaders, h.config, h.shipList, h.mutexList));
+    TS_ASSERT(!FleetMember(h.univ, h.ship(6), h.mapConfig).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
+    TS_ASSERT(!FleetMember(h.univ, h.ship(6), h.mapConfig).isMissionLocked(FleetMember::AcceptLeaders, h.config, h.shipList, h.mutexList));
 }
 
 /** Test isMissionLocked().
@@ -511,12 +514,12 @@ TestGameMapFleetMember::testIsMissionLockedMutex()
     TS_ASSERT(mtx != 0);
 
     // Ship 1: not locked
-    TS_ASSERT(!FleetMember(h.univ, h.ship(1)).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
-    TS_ASSERT(!FleetMember(h.univ, h.ship(1)).isMissionLocked(FleetMember::OverrideLocks, h.config, h.shipList, h.mutexList));
+    TS_ASSERT(!FleetMember(h.univ, h.ship(1), h.mapConfig).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
+    TS_ASSERT(!FleetMember(h.univ, h.ship(1), h.mapConfig).isMissionLocked(FleetMember::OverrideLocks, h.config, h.shipList, h.mutexList));
 
     // Ship 3: locked waypoint
-    TS_ASSERT( FleetMember(h.univ, h.ship(3)).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
-    TS_ASSERT(!FleetMember(h.univ, h.ship(3)).isMissionLocked(FleetMember::OverrideLocks, h.config, h.shipList, h.mutexList));
+    TS_ASSERT( FleetMember(h.univ, h.ship(3), h.mapConfig).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
+    TS_ASSERT(!FleetMember(h.univ, h.ship(3), h.mapConfig).isMissionLocked(FleetMember::OverrideLocks, h.config, h.shipList, h.mutexList));
 
     mtx->removeReference();
 }
@@ -531,9 +534,9 @@ TestGameMapFleetMember::testSetFleetNumberForeign()
     createShip(h, 2, 9, 1000, 1000);
     createShip(h, 3, 7, 1000, 1000);
 
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1)).setFleetNumber(1, h.config, h.shipList), true);
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(2)).setFleetNumber(1, h.config, h.shipList), false);
-    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(3)).setFleetNumber(1, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(1), h.mapConfig).setFleetNumber(1, h.config, h.shipList), true);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(2), h.mapConfig).setFleetNumber(1, h.config, h.shipList), false);
+    TS_ASSERT_EQUALS(FleetMember(h.univ, h.ship(3), h.mapConfig).setFleetNumber(1, h.config, h.shipList), true);
 
     // Verify result
     TS_ASSERT_EQUALS(h.ship(1).getFleetNumber(), 1);

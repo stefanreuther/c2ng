@@ -10,13 +10,14 @@
 namespace game { namespace map {
 
     class Universe;
+    class Configuration;
 
     class Cursors {
      public:
         Cursors();
         ~Cursors();
 
-        void setUniverse(Universe* univ);
+        void setUniverse(Universe* univ, const Configuration* mapConfig);
 
         SimpleObjectCursor& currentShip();
         SimpleObjectCursor& currentPlanet();

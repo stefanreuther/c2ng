@@ -6,11 +6,12 @@
 #include "game/map/selections.hpp"
 
 #include "t_game_map.hpp"
-#include "game/map/universe.hpp"
-#include "game/map/ship.hpp"
-#include "game/map/planet.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
+#include "game/map/configuration.hpp"
+#include "game/map/planet.hpp"
+#include "game/map/ship.hpp"
+#include "game/map/universe.hpp"
 #include "interpreter/selectionexpression.hpp"
 
 namespace {
@@ -318,7 +319,7 @@ TestGameMapSelections::testMarkListCurrent()
 
     // Prepare
     game::map::Selections testee;
-    
+
     // Execute
     testee.markList(0, list, true, u);
 
@@ -362,7 +363,7 @@ TestGameMapSelections::testMarkListOther()
 
     // Prepare
     game::map::Selections testee;
-    
+
     // Execute
     testee.markList(3, list, true, u);
 

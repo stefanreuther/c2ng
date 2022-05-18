@@ -64,7 +64,7 @@ namespace {
         pl->addCurrentBaseData(bd, game::PlayerSet_t(PLAYER_NR));
 
         // - meta info
-        pl->internalCheck(session.getGame()->currentTurn().universe().config(), session.translator(), session.log());
+        pl->internalCheck(session.getGame()->mapConfiguration(), session.translator(), session.log());
         pl->setPlayability(game::map::Object::Playable);
     }
 

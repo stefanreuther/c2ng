@@ -13,6 +13,7 @@
 namespace game { namespace map {
 
     class Universe;
+    class Configuration;
 
     /** Symbolic map location.
 
@@ -38,8 +39,9 @@ namespace game { namespace map {
         Location();
 
         /** Set universe.
-            \param univ Universe. Must live longer than the Location object. Can be null. */
-        void setUniverse(Universe* univ);
+            \param univ Universe. Must live longer than the Location object. Can be null.
+            \param mapConfig Map configuration. Must live longer than the Location object. Can be null. */
+        void setUniverse(Universe* univ, const Configuration* mapConfig);
 
         /** Set location to reference.
             If the location refers to a map object, we start tracking this object.
@@ -77,6 +79,7 @@ namespace game { namespace map {
 
      private:
         Universe* m_pUniverse;
+        const Configuration* m_pConfig;
         Point m_point;
         Reference m_reference;
         bool m_pointValid;

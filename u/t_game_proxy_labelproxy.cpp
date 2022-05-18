@@ -77,6 +77,7 @@ namespace {
 
         // Finish
         g->currentTurn().universe().postprocess(game::PlayerSet_t(2), game::PlayerSet_t(2), game::map::Object::Playable,
+                                                g->mapConfiguration(),
                                                 r->hostVersion(), r->hostConfiguration(), 77 /* turn number */,
                                                 *t.session().getShipList(), t.session().translator(), t.session().log());
         g->setViewpointPlayer(2);

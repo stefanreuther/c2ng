@@ -173,7 +173,7 @@ game::proxy::TaskEditorProxy::Trampoline::describeShip(ShipStatus& out) const
 
         // Predict
         const game::map::Universe& univ = g->currentTurn().universe();
-        ShipTaskPredictor pred(univ, m_id, g->shipScores(), *sl, r->hostConfiguration(), r->hostVersion(), r->registrationKey());
+        ShipTaskPredictor pred(univ, m_id, g->shipScores(), *sl, g->mapConfiguration(), r->hostConfiguration(), r->hostVersion(), r->registrationKey());
         const game::map::Point startPosition = pred.getPosition();
         const int startFuel = pred.getRemainingFuel();
         if (isPredictToEnd || m_editor->getCursor() < m_editor->getPC()) {
@@ -186,7 +186,7 @@ game::proxy::TaskEditorProxy::Trampoline::describeShip(ShipStatus& out) const
         out.startPosition    = startPosition;
         game::map::Point pt = startPosition;
         for (size_t i = 0, n = pred.getNumPositions(); i < n; ++i) {
-            game::map::Point npt = univ.config().getSimpleNearestAlias(pred.getPosition(i), startPosition);
+            game::map::Point npt = g->mapConfiguration().getSimpleNearestAlias(pred.getPosition(i), startPosition);
             out.positions.push_back(npt);
             if (isShowDistances) {
                 out.distances2.push_back(pt.getSquaredRawDistance(npt));

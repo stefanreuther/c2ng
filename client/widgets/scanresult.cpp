@@ -142,7 +142,7 @@ client::widgets::ScanResult::setPositions(game::map::Point origin, game::map::Po
                 if (pGame != 0 && pRoot != 0) {
                     afl::base::Ptr<game::Turn> pTurn = pGame->getViewpointTurn();
                     if (pTurn.get() != 0) {
-                        resultText = pTurn->universe().findLocationName(m_target, NAME_FLAGS, pRoot->hostConfiguration(), pRoot->hostVersion(), tx);
+                        resultText = pTurn->universe().findLocationName(m_target, NAME_FLAGS, pGame->mapConfiguration(), pRoot->hostConfiguration(), pRoot->hostVersion(), tx);
                     }
                 }
 
