@@ -92,7 +92,7 @@ namespace game { namespace config {
 
     // Order of bits must agree with enum RenderOptions::Option.
     // Order of options must agree with RenderOptions::Area.
-    namespace { BitsetValueParser parse_chartopts("ion,mine,ufos,sectors,borders,drawings,selection,labels,trails,shipdots,warpwells,messages"); }
+    namespace { BitsetValueParser parse_chartopts("ion,mine,ufos,sectors,borders,drawings,selection,labels,trails,shipdots,warpwells,messages,decay"); }
     const IntegerOptionDescriptor UserConfiguration::ChartRenderOptions[3][2] = {
         // Small
         { { "Chart.Small.Show", &parse_chartopts, },

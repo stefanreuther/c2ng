@@ -23,7 +23,7 @@ TestGameMapViewport::testRectangle()
     game::config::HostConfiguration config;
     game::UnitScoreDefinitionList shipScores;
     game::spec::ShipList shipList;
-    game::map::Viewport t(univ, 7, teams, 0, shipScores, shipList, mapConfig, config);
+    game::map::Viewport t(univ, 7, teams, 0, shipScores, shipList, mapConfig, config, game::HostVersion());
     t.setRange(Point(100, 100), Point(200, 300));
 
     // Borders as lines

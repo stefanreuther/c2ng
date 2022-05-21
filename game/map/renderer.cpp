@@ -283,6 +283,7 @@ game::map::Renderer::renderMinefields(const State& st) const
 {
     // ex GChartViewport::drawMines
     bool filled = m_viewport.hasOption(Viewport::FillMinefields);
+    bool decay = m_viewport.hasOption(Viewport::ShowMineDecay);
     const MinefieldType& ty = m_viewport.universe().minefields();
     for (Id_t i = ty.findNextIndex(0); i != 0; i = ty.findNextIndex(i)) {
         if (const Minefield* mf = ty.get(i)) {
@@ -291,6 +292,9 @@ game::map::Renderer::renderMinefields(const State& st) const
             int radius;
             if (mf->getPosition(pt) && mf->getOwner(owner) && mf->getRadius(radius)) {
                 const Configuration& config = m_viewport.mapConfiguration();
+                if (decay) {
+                    radius = Minefield::getRadiusFromUnits(mf->getUnitsAfterDecay(mf->getUnits(), m_viewport.hostVersion(), m_viewport.hostConfiguration()));
+                }
                 for (int img = st.getFirstImage(); img >= 0; img = st.getNextImage(img)) {
                     const Point imgPos = config.getSimplePointAlias(pt, img);
                     if (m_viewport.containsCircle(imgPos, radius)) {

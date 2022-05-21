@@ -44,7 +44,8 @@ namespace game { namespace map {
             ShowTrails,         // co_Trails    = 256
             ShowShipDots,       // co_ShipDots  = 512    // called co_NoTriangles in PCC 1.x
             ShowWarpWells,      // co_WarpWells = 1024
-            ShowMessages        // co_Messages  = 2048; xref all
+            ShowMessages,       // co_Messages  = 2048
+            ShowMineDecay       // xref all(), xref UserConfiguration::ChartRenderOptions
         };
         typedef afl::bits::SmallSet<Option> Options_t;
 
@@ -118,7 +119,7 @@ namespace game { namespace map {
 inline game::map::RenderOptions::Options_t
 game::map::RenderOptions::all()
 {
-    return Options_t::allUpTo(ShowWarpWells);
+    return Options_t::allUpTo(ShowMineDecay);
 }
 
 inline game::map::RenderOptions::Options_t
@@ -132,7 +133,7 @@ inline game::map::RenderOptions::Options_t
 game::map::RenderOptions::defaults()
 {
     // ex co_Default
-    return all() - ShowTrails - ShowWarpWells;
+    return all() - ShowTrails - ShowWarpWells - ShowMineDecay;
 }
 
 #endif

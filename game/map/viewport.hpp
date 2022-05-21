@@ -36,6 +36,7 @@ namespace game { namespace map {
             ShowShipDots,       // co_ShipDots  = 512,    // called co_NoTriangles in PCC 1.x
             ShowWarpWells,      // co_WarpWells = 1024,
             ShowMessages,       // co_Messages  = 2048
+            ShowMineDecay,
 
             ShowOutsideGrid,    // [fill] co_Sectors // inverted logic!
 
@@ -50,7 +51,8 @@ namespace game { namespace map {
                  const UnitScoreDefinitionList& shipScoreDefinitions,
                  const game::spec::ShipList& shipList,
                  const Configuration& mapConfig,
-                 const game::config::HostConfiguration& config);
+                 const game::config::HostConfiguration& config,
+                 HostVersion host);
         ~Viewport();
 
         Universe& universe() const;
@@ -61,6 +63,7 @@ namespace game { namespace map {
         const game::spec::ShipList& shipList() const;
         const Configuration& mapConfiguration() const;
         const game::config::HostConfiguration& hostConfiguration() const;
+        const HostVersion& hostVersion() const;
 
         void setRange(Point min, Point max);
         void setOption(Option opt, bool enable);
@@ -98,6 +101,7 @@ namespace game { namespace map {
         const game::spec::ShipList& m_shipList;
         const Configuration& m_mapConfig;
         const game::config::HostConfiguration& m_hostConfiguration;
+        const HostVersion m_hostVersion;
 
         Point m_min;
         Point m_max;

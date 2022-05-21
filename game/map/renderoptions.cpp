@@ -118,6 +118,9 @@ game::map::RenderOptions::getViewportOptions() const
     if (m_show.contains(ShowMessages)) {
         result += Viewport::ShowMessages;
     }
+    if (m_show.contains(ShowMineDecay)) {
+        result += Viewport::ShowMineDecay;
+    }
 
     // Fill
     if (m_show.contains(ShowGrid) && !m_fill.contains(ShowGrid)) {
@@ -179,6 +182,8 @@ game::map::RenderOptions::getOptionFromKey(util::Key_t key)
         return Options_t(ShowWarpWells);
      case 'n':
         return Options_t(ShowMessages);
+     case 'y':
+        return Options_t(ShowMineDecay);
      default:
         return Options_t();
     }

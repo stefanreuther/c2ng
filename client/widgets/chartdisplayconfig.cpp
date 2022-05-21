@@ -20,6 +20,7 @@ namespace {
     const Option OPTIONS[] = {
         { RenderOptions::ShowIonStorms,  N_("Ion storms")        },
         { RenderOptions::ShowMinefields, N_("Minefields")        },
+        { RenderOptions::ShowMineDecay,  N_("Minefields after decay") },
         { RenderOptions::ShowUfos,       N_("Ufos")              },
         { RenderOptions::ShowGrid,       N_("Sector borders")    },
         { RenderOptions::ShowBorders,    N_("Starchart borders") },

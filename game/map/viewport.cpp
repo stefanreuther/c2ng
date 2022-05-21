@@ -11,7 +11,8 @@ game::map::Viewport::Viewport(Universe& univ, int turnNumber, TeamSettings& team
                               const UnitScoreDefinitionList& shipScoreDefinitions,
                               const game::spec::ShipList& shipList,
                               const Configuration& mapConfig,
-                              const game::config::HostConfiguration& config)
+                              const game::config::HostConfiguration& config,
+                              HostVersion host)
     : m_universe(univ),
       m_teamSettings(teams),
       m_labels(labels),
@@ -20,6 +21,7 @@ game::map::Viewport::Viewport(Universe& univ, int turnNumber, TeamSettings& team
       m_shipList(shipList),
       m_mapConfig(mapConfig),
       m_hostConfiguration(config),
+      m_hostVersion(host),
       m_min(),
       m_max(),
       m_options(Options_t::allUpTo(FillUfos) - ShowShipDots),
@@ -84,6 +86,12 @@ const game::config::HostConfiguration&
 game::map::Viewport::hostConfiguration() const
 {
     return m_hostConfiguration;
+}
+
+const game::HostVersion&
+game::map::Viewport::hostVersion() const
+{
+    return m_hostVersion;
 }
 
 void
