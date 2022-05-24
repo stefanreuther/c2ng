@@ -100,8 +100,10 @@ namespace game { namespace actions {
         game::spec::Cost m_reservedAmount;
         afl::base::SignalConnection m_changeConnection;
 
-        void onChange();
+        bool m_updating;
+
         void update();
+        void onChange();
     };
 
 } }

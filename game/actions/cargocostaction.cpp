@@ -24,7 +24,8 @@ game::actions::CargoCostAction::CargoCostAction(CargoContainer& container)
     : sig_change(),
       m_container(container),
       m_cost(),
-      m_changeConnection(container.sig_change.add(this, &CargoCostAction::onChange))
+      m_changeConnection(container.sig_change.add(this, &CargoCostAction::onChange)),
+      m_updating(false)
 {
     // ex GCargoCostTransaction::GCargoCostTransaction
 }
@@ -177,6 +178,17 @@ game::actions::CargoCostAction::update()
 void
 game::actions::CargoCostAction::onChange()
 {
-    update();
-    sig_change.raise();
+    // We must avoid re-triggering ourselves
+    if (!m_updating) {
+        try {
+            m_updating = true;
+            update();
+            sig_change.raise();
+            m_updating = false;
+        }
+        catch (...) {
+            m_updating = false;
+            throw;
+        }
+    }
 }
