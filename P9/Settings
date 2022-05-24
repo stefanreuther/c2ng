@@ -12,7 +12,9 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/proxy/mapconfigurationproxy.cpp \
+FILES_gamelib = game/proxy/cloneshipproxy.cpp game/proxy/cloneshipproxy.hpp \
+    game/actions/cloneship.cpp game/actions/cloneship.hpp \
+    game/proxy/mapconfigurationproxy.cpp \
     game/proxy/mapconfigurationproxy.hpp \
     game/proxy/configurationeditorproxy.cpp \
     game/proxy/configurationeditoradaptor.hpp \
@@ -749,8 +751,8 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/widgets/chartmouseconfig.cpp \
-    client/widgets/chartmouseconfig.hpp \
+FILES_guilib = client/dialogs/cloneship.cpp client/dialogs/cloneship.hpp \
+    client/widgets/chartmouseconfig.cpp client/widgets/chartmouseconfig.hpp \
     client/widgets/markertemplatelist.cpp \
     client/widgets/markertemplatelist.hpp \
     client/widgets/chartdisplayconfig.cpp \
@@ -1694,7 +1696,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_proxy_mapconfigurationproxy.cpp \
+FILES_testsuite = u/t_game_proxy_cloneshipproxy.cpp \
+    u/t_game_actions_cloneship.cpp u/t_game_proxy_mapconfigurationproxy.cpp \
     u/t_game_proxy_configurationeditoradaptor.cpp \
     u/t_game_proxy_configurationeditorproxy.cpp \
     u/t_game_config_configurationeditor.cpp \

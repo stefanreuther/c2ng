@@ -1453,7 +1453,7 @@ On ShipBaseMenu Do
   Else
     AddItem Atom("CCUI.Ship.Recycle"), Translate("Recycle this ship")
   EndIf
-  % FIXME: "Clone this ship"
+  AddItem Atom("CC$CloneShip"), Translate("Clone this ship")
 EndOn
 
 Sub CCUI.ShipBaseMenu

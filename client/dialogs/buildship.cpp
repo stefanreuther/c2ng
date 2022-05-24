@@ -34,7 +34,7 @@ using ui::widgets::StaticText;
 namespace {
     class BuildShipDialog {
      public:
-        BuildShipDialog(ui::Root& root, util::RequestSender<game::Session> gameSender, game::Id_t planetId, afl::string::Translator& tx)
+        BuildShipDialog(ui::Root& root, util::RequestSender<game::Session> gameSender, game::Id_t planetId, const game::ShipBuildOrder& init, afl::string::Translator& tx)
             : m_buildProxy(gameSender, root.engine().dispatcher(), planetId),
               m_storageProxy(gameSender, root.engine().dispatcher(), planetId),
               m_usePartsFromStorage("U", 'u', root),
@@ -42,6 +42,9 @@ namespace {
               m_loop(root),
               m_isNew(false)
             {
+                if (init.getHullIndex() != 0) {
+                    m_buildProxy.setBuildOrder(init);
+                }
                 m_usePartsFromStorage.sig_fire.add(this, &BuildShipDialog::onToggleUseParts);
                 m_widget.sig_change.add(this, &BuildShipDialog::onBuildOrderChange);
             }
@@ -321,7 +324,7 @@ BuildShipDialog::addToAutoTask(game::proxy::WaitIndicator& ind, const String_t& 
  */
 
 void
-client::dialogs::doBuildShip(ui::Root& root, util::RequestSender<game::Session> gameSender, game::Id_t planetId, afl::string::Translator& tx)
+client::dialogs::doBuildShip(ui::Root& root, util::RequestSender<game::Session> gameSender, game::Id_t planetId, const game::ShipBuildOrder& init, afl::string::Translator& tx)
 {
-    BuildShipDialog(root, gameSender, planetId, tx).run();
+    BuildShipDialog(root, gameSender, planetId, init, tx).run();
 }

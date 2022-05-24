@@ -19,6 +19,7 @@
 #include "client/dialogs/buildstructuresdialog.hpp"
 #include "client/dialogs/buysuppliesdialog.hpp"
 #include "client/dialogs/cargohistorydialog.hpp"
+#include "client/dialogs/cloneship.hpp"
 #include "client/dialogs/commandlistdialog.hpp"
 #include "client/dialogs/entercoordinates.hpp"
 #include "client/dialogs/fileselectiondialog.hpp"
@@ -978,7 +979,7 @@ client::si::IFCCBuildShip(game::Session& session, ScriptSide& si, RequestLink1 l
         virtual void handle(Control& ctl, RequestLink2 link)
             {
                 UserSide& iface = ctl.interface();
-                client::dialogs::doBuildShip(ctl.root(), iface.gameSender(), m_pid, ctl.translator());
+                client::dialogs::doBuildShip(ctl.root(), iface.gameSender(), m_pid, game::ShipBuildOrder(), ctl.translator());
                 iface.continueProcess(link);
             }
      private:
@@ -1105,6 +1106,43 @@ client::si::IFCCCargoHistory(game::Session& session, ScriptSide& si, RequestLink
     si.postNewTask(link, new DialogTask(session, *pShip));
 }
 
+// @since PCC2 2.40.13
+void
+client::si::IFCCCloneShip(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    class Task : public UserTask {
+     public:
+        Task(game::Id_t shipId)
+            : m_shipId(shipId)
+            { }
+        virtual void handle(Control& ctl, RequestLink2 link)
+            {
+                UserSide& iface = ctl.interface();
+                client::dialogs::doCloneShip(ctl.root(), ctl.translator(), iface.gameSender(), m_shipId);
+                iface.continueProcess(link);
+            }
+     private:
+        game::Id_t m_shipId;
+    };
+
+    args.checkArgumentCount(0);
+
+    // Must have a played ship (to get an Id)
+    game::map::Ship& sh = game::actions::mustExist(dynamic_cast<game::map::Ship*>(link.getProcess().getCurrentObject()));
+    game::actions::mustBePlayed(sh);
+
+    // Some pre-validation (similar to CloneShipProxy)
+    game::map::Universe& univ = game::actions::mustHaveGame(session).currentTurn().universe();
+    game::map::Point pt;
+    if (!sh.getPosition(pt)) {
+        throw game::Exception(game::Exception::eNoBase);
+    }
+    game::map::Planet& pl = game::actions::mustExist(univ.planets().get(univ.findPlanetAt(pt)));
+    game::actions::mustBePlayed(pl);
+
+    // OK, do it
+    si.postNewTask(link, new Task(sh.getId()));
+}
 
 // @since PCC2 2.40.6
 void
@@ -4084,6 +4122,7 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("CC$BUILDSTRUCTURES",    new ScriptProcedure(s, &si, IFCCBuildStructures));
                 s.world().setNewGlobalValue("CC$BUYSUPPLIES",        new ScriptProcedure(s, &si, IFCCBuySupplies));
                 s.world().setNewGlobalValue("CC$CARGOHISTORY",       new ScriptProcedure(s, &si, IFCCCargoHistory));
+                s.world().setNewGlobalValue("CC$CLONESHIP",          new ScriptProcedure(s, &si, IFCCCloneShip));
                 // s.world().setNewGlobalValue("CC$CHANGEMISSION",      new ScriptProcedure(s, &si, IFCCChangeMission));
                 // s.world().setNewGlobalValue("CC$CHANGEPE",           new ScriptProcedure(s, &si, IFCCChangePE));
                 s.world().setNewGlobalValue("CC$CHANGESPEED",        new ScriptProcedure(s, &si, IFCCChangeSpeed));

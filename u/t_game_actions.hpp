@@ -189,6 +189,29 @@ class TestGameActionsChangeShipFriendlyCode : public CxxTest::TestSuite {
     void testAvoidRevert();
 };
 
+class TestGameActionsCloneShip : public CxxTest::TestSuite {
+ public:
+    void testNormal();
+    void testNormalPayTech();
+    void testNormalPayNone();
+    void testCanBuild();
+    void testTholianHost();
+    void testTholianPHost();
+    void testTechLimit();
+    void testRemoteOwner();
+    void testUnclonable();
+    void testFriendlyCodeGood();
+    void testFriendlyCodeBad();
+    void testFriendlyCodeOpen();
+    void testNoConflict();
+    void testBuildConflict();
+    void testCloneConflict();
+    void testCloneConflictSelf();
+    void testCloneConflictMore();
+    void testCloneOnce();
+    void testFleet();
+};
+
 class TestGameActionsConvertSupplies : public CxxTest::TestSuite {
  public:
     void testNormal();

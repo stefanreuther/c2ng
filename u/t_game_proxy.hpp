@@ -102,6 +102,12 @@ class TestGameProxyClassicVcrPlayerProxy : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameProxyCloneShipProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormal();
+};
+
 class TestGameProxyCommandListProxy : public CxxTest::TestSuite {
  public:
     void testIt();
