@@ -12,6 +12,7 @@
 #include "game/map/fleet.hpp"
 #include "game/map/fleetmember.hpp"
 #include "game/map/shippredictor.hpp"
+#include "game/map/shiputils.hpp"
 #include "game/root.hpp"
 #include "game/spec/engine.hpp"
 #include "game/spec/mission.hpp"
@@ -129,18 +130,6 @@ namespace {
             }
         }
         return result;
-    }
-
-    const game::spec::Mission* getShipMission(const game::map::Ship& ship,
-                                              const game::Root& root,
-                                              const game::spec::ShipList& shipList)
-    {
-        int nr, owner;
-        if (ship.getMission().get(nr) && ship.getRealOwner().get(owner)) {
-            return shipList.missions().getMissionByNumber(nr, game::PlayerSet_t(root.hostConfiguration().getPlayerMissionNumber(owner)));
-        } else {
-            return 0;
-        }
     }
 }
 
@@ -612,7 +601,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
      case ispMissionShort:
         /* @q Mission.Short:Str (Ship Property)
            Mission, short name. */
-        if (const game::spec::Mission* msn = getShipMission(sh, *root, *shipList)) {
+        if (const game::spec::Mission* msn = getShipMission(sh, root->hostConfiguration(), shipList->missions())) {
             return makeStringValue(msn->getShortName());
         } else {
             int m;
@@ -631,7 +620,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
      case ispMissionName:
         /* @q Mission:Str (Ship Property)
            Mission, full name. */
-        if (const game::spec::Mission* msn = getShipMission(sh, *root, *shipList)) {
+        if (const game::spec::Mission* msn = getShipMission(sh, root->hostConfiguration(), shipList->missions())) {
             return makeStringValue(msn->getName());
         } else {
             int m, i, t;
