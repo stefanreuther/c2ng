@@ -373,6 +373,7 @@ CreateKeymap SelectionDialog(Global)
 CreateKeymap ShipSelectionDialog(SelectionDialog)
 CreateKeymap PlanetSelectionDialog(SelectionDialog)
 CreateKeymap BaseSelectionDialog(SelectionDialog)
+CreateKeymap FleetSelectionDialog(SelectionDialog)
 
 % Global Bindings
 Bind Global           "a-c"    := "UI.PopupConsole"
@@ -400,6 +401,7 @@ Bind ControlScreen    "f4"     := "CC$GotoChart Chart.X, Chart.Y"
 Bind ControlScreen    "f5"     := "CC$PlanetInfo Chart.X, Chart.Y"
 Bind ControlScreen    "f6"     := "CCUI.GotoScreen 6"
 Bind ControlScreen    "f7"     := "UI.Search"
+Bind ControlScreen    "f10"    := "CCUI.GotoScreen 10"
 Bind ControlScreen    "c-f1"   := "CCUI.ListShips UI.X, UI.Y, 'e'"
 Bind ControlScreen    "c-f2"   := "CCUI.GotoPlanetThere"
 Bind ControlScreen    "c-f3"   := "CCUI.GotoBaseThere"
@@ -612,6 +614,7 @@ Bind RaceScreen       "f3"     := "CCUI.GotoScreen 3"
 Bind RaceScreen       "f4"     := "UI.GotoScreen 4"
 Bind RaceScreen       "f6"     := "CCUI.GotoScreen 6"
 Bind RaceScreen       "f7"     := "UI.Search"
+Bind RaceScreen       "f10"    := "CCUI.GotoScreen 10"
 Bind RaceScreen       "a"      := "UI.EditAlliances"
 Bind RaceScreen       "s-a"    := "CC$SpecBrowser"
 Bind RaceScreen       "b"      := "UI.BattleSimulator"

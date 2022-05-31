@@ -10,6 +10,7 @@ game::map::Cursors::Cursors()
       m_currentShip(),
       m_currentPlanet(),
       m_currentBase(),
+      m_currentFleet(),
       m_currentUfo(),
       m_currentIonStorm(),
       m_currentMinefield(),
@@ -27,6 +28,7 @@ game::map::Cursors::setUniverse(Universe* univ, const Configuration* mapConfig)
         m_currentShip.setObjectType(&univ->playedShips());
         m_currentPlanet.setObjectType(&univ->playedPlanets());
         m_currentBase.setObjectType(&univ->playedBases());
+        m_currentFleet.setObjectType(&univ->fleets());
         m_currentUfo.setObjectType(&univ->ufos());
         m_currentIonStorm.setObjectType(&univ->ionStormType());
         m_currentMinefield.setObjectType(&univ->minefields());
@@ -34,6 +36,7 @@ game::map::Cursors::setUniverse(Universe* univ, const Configuration* mapConfig)
         m_currentShip.setObjectType(0);
         m_currentPlanet.setObjectType(0);
         m_currentBase.setObjectType(0);
+        m_currentFleet.setObjectType(0);
         m_currentUfo.setObjectType(0);
         m_currentIonStorm.setObjectType(0);
         m_currentMinefield.setObjectType(0);
@@ -57,6 +60,12 @@ game::map::SimpleObjectCursor&
 game::map::Cursors::currentBase()
 {
     return m_currentBase;
+}
+
+game::map::SimpleObjectCursor&
+game::map::Cursors::currentFleet()
+{
+    return m_currentFleet;
 }
 
 game::map::SimpleObjectCursor&
@@ -91,7 +100,7 @@ game::map::Cursors::getCursorByNumber(int nr)
      case ShipScreen:   return &m_currentShip;
      case PlanetScreen: return &m_currentPlanet;
      case BaseScreen:   return &m_currentBase;
-     // case 10: return &current_fleet_selection;
+     case FleetScreen:  return &m_currentFleet;
      case Ufos:         return &m_currentUfo;
      case IonStorms:    return &m_currentIonStorm;
      case Minefields:   return &m_currentMinefield;
@@ -109,7 +118,7 @@ game::map::Cursors::getTypeByNumber(int nr)
          case ShipScreen:    return &m_pUniverse->playedShips();
          case PlanetScreen:  return &m_pUniverse->playedPlanets();
          case BaseScreen:    return &m_pUniverse->playedBases();
-            // case 10: return &current_fleet_type;
+         case FleetScreen:   return &m_pUniverse->fleets();
             // case 21: return &current_anyship_type;
             // case 22: return &current_anyplanet_type;
          case Ufos:          return &m_pUniverse->ufos();

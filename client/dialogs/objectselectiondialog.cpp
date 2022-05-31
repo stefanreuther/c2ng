@@ -305,13 +305,21 @@ const client::dialogs::ObjectSelectionDialog client::dialogs::BASE_SELECTION_DIA
     N_("You do not have any starbases.\n\n<small>To build starbases, use <kbd>F8</kbd> on a planet.</small>")
 };
 
+const client::dialogs::ObjectSelectionDialog client::dialogs::FLEET_SELECTION_DIALOG = {
+    game::map::Cursors::FleetScreen,
+    "FLEETSELECTIONDIALOG",
+    "FLEETSELECTIONDIALOG",
+    N_("Select Fleet"),
+    N_("You have not yet established a fleet.\n\n<small>To start a fleet, use the \"Start New Fleet\" command on a ship's <kbd>F10</kbd> menu.</small>")
+};
+
 int
 client::dialogs::doObjectSelectionDialog(const ObjectSelectionDialog& def,
                                          client::si::UserSide& iface,
                                          client::si::Control& parentControl,
                                          client::si::OutputState& outputState)
 {
-    // ex WObjectSelectionDialog (sort-of), CSelectWindow.Init (sort-of), cscreen.pas:RunSelectWindow
+    // ex WObjectSelectionDialog (sort-of), chooseBase(), chooseFleet(), choosePlanet(), chooseShip(), CSelectWindow.Init (sort-of), cscreen.pas:RunSelectWindow
     ui::Root& root = parentControl.root();
     afl::string::Translator& tx = parentControl.translator();
 

@@ -23,6 +23,7 @@ namespace client { namespace dialogs {
     extern const ObjectSelectionDialog SHIP_SELECTION_DIALOG;
     extern const ObjectSelectionDialog PLANET_SELECTION_DIALOG;
     extern const ObjectSelectionDialog BASE_SELECTION_DIALOG;
+    extern const ObjectSelectionDialog FLEET_SELECTION_DIALOG;
 
     int doObjectSelectionDialog(const ObjectSelectionDialog& def,
                                 client::si::UserSide& iface,

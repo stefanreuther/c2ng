@@ -2592,9 +2592,10 @@ client::si::IFUIChooseObject(game::Session& session, ScriptSide& si, RequestLink
      case 6:
         doHistoryShipSelection(session, si, link);
         break;
-//      case 10:
-//         result = chooseFleet();
-//         break;
+
+     case 10:
+        doStandardObjectSelection(client::dialogs::FLEET_SELECTION_DIALOG, session, si, link);
+        break;
 
      default:
         throw interpreter::Error::rangeError();

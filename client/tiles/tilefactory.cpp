@@ -158,6 +158,12 @@ namespace {
         { 0, 0 },
     };
 
+    const TileConfig fleetsel_dialog[] = {
+        { "OBJHEADER",          0 },
+        { "FLEETOVERVIEW",      0 },
+        { 0, 0 },
+    };
+
     const TileConfig blank[] = {
         { 0, 0 },
     };
@@ -194,6 +200,8 @@ namespace {
             return planetsel_dialog;
         } else if (name == "BASESELECTIONDIALOG") {
             return basesel_dialog;
+        } else if (name == "FLEETSELECTIONDIALOG") {
+            return fleetsel_dialog;
         } else if (name == "") {
             return blank;
         }
@@ -496,13 +504,16 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
 //     if (name == "HISTORYMOVEMENT")
 //         return new WHistoryShipMovementTile(selection);
 
-//     // Fleets
+    // Fleets
 //     if (name == "FLEETHEADER")
 //         return new WFleetScreenHeaderTile(selection);
 //     if (name == "FLEETMEMBERS")
 //         return new WFleetMemberTile(selection);
 //     if (name == "FLEETWAYPOINT")
 //         return new WFleetWaypointTile(selection);
+    if (name == "FLEETOVERVIEW") {
+        return createDocumentViewTile("Tile.FleetOverview", root, 30, 10, deleter, m_userSide, m_observer);
+    }
 
     // Misc
     if (name == "OBJHEADER") {

@@ -241,6 +241,57 @@ Sub Tile.BaseOverview
   SetContent t
 EndSub
 
+% Fleet Overview
+% - called in ship context on leader
+% - call SetContent with a 30x10 rich-text string
+% @since PCC2 2.40.13
+Sub Tile.FleetOverview
+  % ex WFleetOverviewTile::drawData, CFleetWindow.DrawData
+  Local t
+  Local fre = 0, cap = 0, tow = 0
+  Local sh
+
+  % Line 1: Name
+  t = Format(Translate("Leader of fleet #%d"), Id)
+  If Fleet.Name Then
+    t = RAdd(t, ": ", Fleet.Name)
+  EndIf
+  t = RAdd(t, "\n")
+
+  % Line 2: Location
+  t = RAdd(t, Translate("Location: "), CCVP.GetLocationName(Loc.X, Loc.Y, "vwo"), "\n")
+
+  % Line 3: Waypoint
+  If InStr(Global.Mission(Mission$, Owner.Real).Flags, "i") Then
+    t = RAdd(t, Translate("Mission: "), CCVP.ShipMissionLabel(), "\n")
+  Else
+    t = RAdd(t, Translate("Waypoint: "), CCVP.GetLocationName(Waypoint.X, Waypoint.Y, "vw"), "\n")
+  EndIf
+
+  % Line 4 (not in PCC2, but in PCC1)
+  t = RAdd(t, Translate("Speed: "), If(Speed$, Speed, Translate("not moving")), "\n")
+  t = RAdd(t, "\n")
+
+  % Line 5ff: Ship counts
+  ForEach Ship As sh Do
+    If sh->Fleet$ = Id Then
+      If sh->Type.Short <> 'f' Then
+        cap = cap + 1
+      Else
+        fre = fre + 1
+      EndIf
+      If sh->Mission$=7 And Global.Ship(sh->Mission.Tow).Fleet$=Id Then
+        tow = tow + 1
+      EndIf
+    EndIf
+  Next
+  If cap Then t = RAdd(t, Format(Translate("%d capital ship%!1{s%}"), cap), "\n")
+  If fre Then t = RAdd(t, Format(Translate("%d freighter%!1{s%}"), fre), "\n")
+  If tow Then t = RAdd(t, Format(Translate("%d fleet member%1{ is%|s are%} being towed."), tow), "\n")
+
+  SetContent t
+EndSub
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Ship Data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Ship mission
