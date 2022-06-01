@@ -7,6 +7,7 @@
 
 #include "t_game_ref.hpp"
 #include "afl/string/format.hpp"
+#include "game/ref/sortpredicate.hpp"
 
 using game::ref::HistoryShipList;
 using game::ref::UserList;
@@ -149,12 +150,12 @@ TestGameRefHistoryShipList::testSort2()
     testee.add(makeItem("i4", 5, 11));
     testee.add(makeItem("i5", 3, 33));
 
-    // Sort by turn Id
-    class Pred : public HistoryShipList::SortPredicate {
+    // Sort by ship Id
+    class Pred : public game::ref::SortPredicate {
      public:
-        virtual int compare(const HistoryShipList::Item& a, const HistoryShipList::Item& b) const
-            { return a.reference.getId() - b.reference.getId(); }
-        virtual String_t getClass(const HistoryShipList::Item& /*a*/) const
+        virtual int compare(const Reference& a, const Reference& b) const
+            { return a.getId() - b.getId(); }
+        virtual String_t getClass(const Reference& /*a*/) const
             { return String_t(); }
     };
     testee.sort(Pred());
