@@ -85,6 +85,8 @@ namespace ui {
     void prepareHighContrastListItem(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, ui::widgets::AbstractListbox::ItemState state);
     void prepareColorListItem(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, ui::widgets::AbstractListbox::ItemState state, ColorScheme& uiColors, afl::base::Deleter& h);
 
+    void drawDivider(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, const String_t& label, bool doubleLine);
+
     enum FrameType {
         NoFrame,            ///< Don't draw a frame. ex WColorFrame cf_None, using fw=2
         RedFrame,           ///< Red frame.          ex WColorFrame cf_Red, using fw=2

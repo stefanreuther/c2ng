@@ -7,6 +7,14 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestGameRefFleetList : public CxxTest::TestSuite {
+ public:
+    void testBasic();
+    void testSort1();
+    void testSort2();
+    void testAdd();
+};
+
 class TestGameRefHistoryShipList : public CxxTest::TestSuite {
  public:
     void testIt();

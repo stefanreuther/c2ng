@@ -187,25 +187,11 @@ client::widgets::ReferenceListbox::drawItem(gfx::Context<util::SkinColor::Color>
         break;
 
      case UserList::DividerItem:
-     case UserList::SubdividerItem: {
+     case UserList::SubdividerItem:
         // FIXME: this is incomplete
         ctx.useFont(*provider.getFont(gfx::FontRequest().addWeight(1)));
         ctx.setColor(util::SkinColor::Faded);
-
-        int y = area.getTopY() + ctx.getFont()->getCellSize().getY() / 2 - 1;
-        int max = std::max(0, std::min(ctx.getFont()->getTextWidth(item.name), area.getWidth() - 30));
-
-        drawHLine(ctx, area.getLeftX() + 2,        y, area.getLeftX() + 28);
-        drawHLine(ctx, area.getLeftX() + 32 + max, y, area.getLeftX() + area.getWidth() - 2);
-        if (item.type == UserList::DividerItem) {
-            drawHLine(ctx, area.getLeftX() + 2,        y - 2, area.getLeftX() + 28);
-            drawHLine(ctx, area.getLeftX() + 32 + max, y - 2, area.getLeftX() + area.getWidth() - 2);
-            drawHLine(ctx, area.getLeftX() + 2,        y + 2, area.getLeftX() + 28);
-            drawHLine(ctx, area.getLeftX() + 32 + max, y + 2, area.getLeftX() + area.getWidth() - 2);
-        }
-
-        outTextF(ctx, gfx::Point(area.getLeftX() + 30, area.getTopY()), max, item.name);
+        ui::drawDivider(ctx, area, item.name, item.type == UserList::DividerItem);
         break;
-     }
     }
 }

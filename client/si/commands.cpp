@@ -6,6 +6,7 @@
 #include "afl/base/optional.hpp"
 #include "afl/base/staticassert.hpp"
 #include "afl/charset/utf8.hpp"
+#include "afl/data/integervalue.hpp"
 #include "afl/except/assertionfailedexception.hpp"
 #include "afl/string/format.hpp"
 #include "afl/string/string.hpp"
@@ -23,6 +24,7 @@
 #include "client/dialogs/commandlistdialog.hpp"
 #include "client/dialogs/entercoordinates.hpp"
 #include "client/dialogs/fileselectiondialog.hpp"
+#include "client/dialogs/fleetlist.hpp"
 #include "client/dialogs/friendlycodedialog.hpp"
 #include "client/dialogs/helpdialog.hpp"
 #include "client/dialogs/historyship.hpp"
@@ -104,6 +106,7 @@
 #include "game/proxy/playerproxy.hpp"
 #include "game/proxy/predictedstarbaseadaptor.hpp"
 #include "game/proxy/searchproxy.hpp"
+#include "game/ref/fleetlist.hpp"
 #include "game/registrationkey.hpp"
 #include "game/root.hpp"
 #include "game/searchquery.hpp"
@@ -3503,6 +3506,95 @@ client::si::IFUIKeymapInfo(game::Session& session, ScriptSide& si, RequestLink1 
     }
 }
 
+/** @q UI.ListFleets x:Int, y:Int, Optional flags:Any, ok:Str, heading:Str (Global Command)
+    Choose a fleet.
+    Lists all fleets at the specified %x,%y.
+    If the user chooses one, returns their Id in {UI.Result}.
+    If the user cancels the dialog using <kbd>ESC</kbd>, {UI.Result} is set to EMPTY.
+
+    The %flags parameter modifies the function's behaviour:
+    - "a": list all fleets, ignore %x,%y.
+    - "e": do not display a dialog if there's just one fleet.
+
+    @since PCC2 1.99.17, PCC2 2.40.13 */
+void
+client::si::IFUIListFleets(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // ex IFUIListFleets
+    class Task : public UserTask {
+     public:
+        Task(std::auto_ptr<game::ref::FleetList> fleetList, String_t ok, String_t title)
+            : m_fleetList(fleetList),
+              m_ok(ok),
+              m_title(title)
+            { }
+        virtual void handle(Control& ctl, RequestLink2 link)
+            {
+                game::Reference ref = client::dialogs::doFleetList(ctl.root(), m_ok, m_title, *m_fleetList, ctl.interface().gameSender(), ctl.translator());
+
+                std::auto_ptr<afl::data::Value> result;
+                if (ref.isSet()) {
+                    result.reset(interpreter::makeIntegerValue(ref.getId()));
+                }
+                ctl.interface().setVariable(link, "UI.RESULT", result);
+                ctl.interface().continueProcess(link);
+            }
+     private:
+        std::auto_ptr<game::ref::FleetList> m_fleetList;
+        String_t m_ok;
+        String_t m_title;
+    };
+
+    /* UI.ListFleets x, y[, flags, ok, heading]
+       Flags: A = list all fleets (not just those at X,Y)
+              E = do not display a dialog if there is only one fleet */
+    args.checkArgumentCount(2, 5);
+
+    // Read args
+    enum {
+        AllFlag = 1,
+        EarlyFlag = 2
+    };
+    int32_t x, y;
+    int32_t flags = 0, except = 0;
+    String_t ok = session.translator()("OK");
+    String_t heading = session.translator()("List Fleets");
+
+    if (!interpreter::checkIntegerArg(x, args.getNext(), 0, 10000)) {
+        return;
+    }
+    if (!interpreter::checkIntegerArg(y, args.getNext(), 0, 10000)) {
+        return;
+    }
+    interpreter::checkFlagArg(flags, &except, args.getNext(), "AE");
+    interpreter::checkStringArg(ok, args.getNext());
+    interpreter::checkStringArg(heading, args.getNext());
+
+    // Validate
+    // @change PCC2 would verify range of 'except'
+    game::Game& g = game::actions::mustHaveGame(session);
+    game::Turn& t = game::actions::mustExist(g.getViewpointTurn().get());
+
+    // Prepare
+    std::auto_ptr<game::ref::FleetList> list(new game::ref::FleetList());
+    list->addAll(t.universe(), game::map::Point(x, y), except, (flags & AllFlag) != 0, session.translator());
+
+    // Early-out cases
+    if (list->size() == 0) {
+        // Empty
+        link.getProcess().setVariable("UI.RESULT", 0);
+    } else if (list->size() == 1 && (flags & EarlyFlag) != 0) {
+        // One, and early-out requested
+        // FIXME: this does not handle possible dividers
+        afl::data::IntegerValue v(list->get(0)->reference.getId());
+        link.getProcess().setVariable("UI.RESULT", &v);
+    } else {
+        // Multiple: do dialog
+        session.notifyListeners();
+        si.postNewTask(link, new Task(list, ok, heading));
+    }
+}
+
 /* @q UI.ListShipPrediction x:Int, y:Int, Optional sid:Int, ok:Str, heading:Str (Global Command)
    List ship prediction (visual scanner).
 
@@ -4190,7 +4282,7 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("UI.INPUTFCODE",         new ScriptProcedure(s, &si, IFUIInputFCode));
                 s.world().setNewGlobalValue("UI.INPUTNUMBER",        new ScriptProcedure(s, &si, IFUIInputNumber));
                 s.world().setNewGlobalValue("UI.KEYMAPINFO",         new ScriptProcedure(s, &si, IFUIKeymapInfo));
-                // s.world().setNewGlobalValue("UI.LISTFLEETS",         IFUIListFleets);
+                s.world().setNewGlobalValue("UI.LISTFLEETS",         new ScriptProcedure(s, &si, IFUIListFleets));
                 s.world().setNewGlobalValue("UI.LISTSHIPPREDICTION", new ScriptProcedure(s, &si, IFUIListShipPrediction));
                 s.world().setNewGlobalValue("UI.LISTSHIPS",          new ScriptProcedure(s, &si, IFUIListShips));
                 s.world().setNewGlobalValue("UI.MESSAGE",            new ScriptProcedure(s, &si, IFUIMessage));

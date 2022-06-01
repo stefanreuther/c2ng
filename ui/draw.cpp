@@ -377,6 +377,24 @@ ui::prepareColorListItem(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectang
 }
 
 void
+ui::drawDivider(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, const String_t& label, bool doubleLine)
+{
+    int y = area.getTopY() + ctx.getFont()->getCellSize().getY() / 2 - 1;
+    int max = std::max(0, std::min(ctx.getFont()->getTextWidth(label), area.getWidth() - 30));
+
+    drawHLine(ctx, area.getLeftX() + 2,        y, area.getLeftX() + 28);
+    drawHLine(ctx, area.getLeftX() + 32 + max, y, area.getLeftX() + area.getWidth() - 2);
+    if (doubleLine) {
+        drawHLine(ctx, area.getLeftX() + 2,        y - 2, area.getLeftX() + 28);
+        drawHLine(ctx, area.getLeftX() + 32 + max, y - 2, area.getLeftX() + area.getWidth() - 2);
+        drawHLine(ctx, area.getLeftX() + 2,        y + 2, area.getLeftX() + 28);
+        drawHLine(ctx, area.getLeftX() + 32 + max, y + 2, area.getLeftX() + area.getWidth() - 2);
+    }
+
+    outTextF(ctx, gfx::Point(area.getLeftX() + 30, area.getTopY()), max, label);
+}
+
+void
 ui::drawFrame(gfx::Context<uint8_t>& ctx, gfx::Rectangle r, FrameType type, int frameWidth)
 {
     // ex UIFrameGroup::drawContent, WColorFrame::drawContent, ui::widgets::FrameGroup::draw
