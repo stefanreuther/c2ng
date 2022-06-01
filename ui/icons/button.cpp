@@ -53,3 +53,9 @@ ui::icons::Button::setTextAlign(gfx::HorizontalAlignment x, gfx::VerticalAlignme
     m_xAlign = x;
     m_yAlign = y;
 }
+
+void
+ui::icons::Button::setText(const String_t& text)
+{
+    m_text = text;
+}

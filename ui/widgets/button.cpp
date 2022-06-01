@@ -34,3 +34,10 @@ ui::widgets::Button::setTextAlign(gfx::HorizontalAlignment x, gfx::VerticalAlign
     m_icon.setTextAlign(x, y);
     requestRedraw();
 }
+
+void
+ui::widgets::Button::setText(const String_t& text)
+{
+    m_icon.setText(text);
+    requestRedraw();
+}

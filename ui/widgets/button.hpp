@@ -38,6 +38,10 @@ namespace ui { namespace widgets {
             \param y vertical alignment */
         void setTextAlign(gfx::HorizontalAlignment x, gfx::VerticalAlignment y);
 
+        /** Set text.
+            \param text Text */
+        void setText(const String_t& text);
+
      private:
         ui::icons::Button m_icon;
     };

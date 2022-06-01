@@ -19,7 +19,7 @@ namespace ui { namespace icons {
             \param root Root (to obtain skin colors, fonts) */
         Button(String_t text, gfx::FontRequest font, Root& root);
         ~Button();
-        
+
         virtual gfx::Point getSize() const;
         virtual void draw(gfx::Context<SkinColor::Color>& ctx, gfx::Rectangle area, ButtonFlags_t flags) const;
 
@@ -32,6 +32,10 @@ namespace ui { namespace icons {
             \param x horizontal alignment
             \param y vertical alignment */
         void setTextAlign(gfx::HorizontalAlignment x, gfx::VerticalAlignment y);
+
+        /** Set text.
+            \param text Text */
+        void setText(const String_t& text);
 
      private:
         String_t m_text;
