@@ -17,7 +17,7 @@
 
 % @q CC$LibraryVersion:Str (Internal)
 % Version of the standard library (<tt>core.q</tt>).
-Dim Shared CC$LibraryVersion = '2.40.10'
+Dim Shared CC$LibraryVersion = '2.40.13'
 
 %%% Console-Mode Replacements for GUI routines %%%%%%%%%%%%%%%%%%%%%%
 
@@ -464,6 +464,7 @@ Bind ShipScreen       "alt-m"  := "CC$SearchMate"
 Bind ShipScreen       "c-m"    := "CC$GotoMate"
 Bind ShipScreen       "c-n"    := "CCUI.ListShipPrediction UI.X, UI.Y, Id"
 Bind ShipScreen       "f8"     := "CCUI.GotoBaseHere"
+Bind ShipScreen       "f10"    := "UI.Menu 'ShipFleetMenu'"
 Bind ShipScreen       "ret"    := "CCUI$GotoObject 11, Id"
 Bind ShipTaskScreen   "a"      := "CCUI.Task.AddMoveTo"
 Bind ShipTaskScreen   "c"      := "CC$ShipCargo"

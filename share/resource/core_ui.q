@@ -747,6 +747,61 @@ Sub CCUI.Ship.CancelShipyard
   With Planet(Orbit$) Do FixShip 0
 EndSub
 
+% Go to fleet screen
+% @since PCC2 2.40.13
+Sub CCUI.Ship.GotoFleetScreen
+  Local UI.Result = Fleet$
+  If Not UI.Result Then UI.ChooseObject 10
+  If UI.Result Then UI.GotoScreen 10, UI.Result
+EndSub
+
+% Go to fleet leader
+% @since PCC2 2.40.13
+Sub CCUI.Ship.GotoFleetLeader
+  If Fleet$ Then UI.GotoScreen 1, Fleet$
+EndSub
+
+% Leave fleet
+% @since PCC2 2.40.13
+Sub CCUI.Ship.LeaveFleet
+  Fleet$:=0
+EndSub
+
+% Start new fleet
+% @since PCC2 2.40.13
+Sub CCUI.Ship.StartNewFleet
+  Fleet$:=Id
+  Iterator(10).CurrentIndex:=Id
+EndSub
+
+% Join a fleet
+% @since PCC2 2.40.13
+Sub CCUI.Ship.JoinFleet
+  % ex ship.pas:JoinAFleet
+  Local UI.Result
+  UI.ListFleets Loc.X, Loc.Y, "a", Translate("OK"), Translate("Join Fleet")
+  If UI.Result Then Fleet$:=UI.Result
+EndSub
+
+Function CCUI$Ship.IsValidFleetMember(sh)
+  % ex isPossibleFleetMember(const GShip& caller, const GShip& other)
+  % call in context of ship 'other', with sh being 'caller'
+  Return Id<>sh->Id And Played And Owner$=sh->Owner$ And Fleet$=0 And Loc.X=sh->Loc.X And Loc.Y=sh->Loc.Y
+EndFunction
+
+% Add all lone ships at this place to a fleet
+% @since PCC2 2.40.13
+Sub CCUI.Ship.AddAllToFleet
+  % Start fleet if necessary
+  Local cc$fid = Fleet$
+  If Not cc$fid Then Fleet$ := cc$fid := Id
+
+  % Create fleet
+  Local cc$me = Global.Ship(Id)
+  ForEach Ship Do If CCUI$Ship.IsValidFleetMember(cc$me) Then Fleet$ := cc$fid
+  Iterator(10).CurrentIndex:=cc$fid
+EndSub
+
 % Mission Selection for a starbase
 % (This dialog is required for regular ships and for Global Actions / Ship Tasks)
 % Returns UI.Result=mission or empty
@@ -1549,4 +1604,26 @@ On BaseTaskOrdersMenu Do
   AddItem Atom("CCUI.Task.AddEnqueueShip"),    Translate("Enqueue Ship Build Order")
   AddItem Atom("CCUI.Task.AddSetBaseMission"), Translate("Set Mission")
   AddItem Atom("CCUI.Task.AddSetFCode"),       Translate("Set FCode")
+EndOn
+
+On ShipFleetMenu Do
+  % ex WShipScreen::doShipFleetMenu, ship.pas:FleetCommands
+  AddItem Atom("CCUI.Ship.GotoFleetScreen"),   Translate("Fleet screen")
+  If Fleet$ Then
+    AddItem Atom("CCUI.Ship.LeaveFleet"),      Translate("Leave fleet")
+    If Fleet$<>Id Then
+      AddItem Atom("CCUI.Ship.GotoFleetLeader"), Translate("Go to fleet leader")
+    EndIf
+  Else
+    AddItem Atom("CCUI.Ship.StartNewFleet"),   Translate("Start new fleet")
+    If Iterator(10).NextIndex(0) Then
+      AddItem Atom("CCUI.Ship.JoinFleet"),     Translate("Join a fleet")
+    EndIf
+  EndIf
+
+  % Only when there are matching ships
+  Local cc$me = Global.Ship(Id)
+  If FindShip(CCUI$Ship.IsValidFleetMember(cc$me)) Then
+    AddItem Atom("CCUI.Ship.AddAllToFleet"),   Translate("Add all to fleet")
+  EndIf
 EndOn
