@@ -111,6 +111,22 @@ game::map::Fleet::getTitle(afl::string::Translator& tx) const
     return getTitle(m_ship, tx);
 }
 
+int
+game::map::Fleet::countFleetMembers() const
+{
+    AnyShipType ships(m_universe.ships());
+    const int fleetNumber = m_ship.getId();
+    int result = 0;
+    for (Id_t i = ships.getNextIndex(0); i != 0; i = ships.getNextIndex(i)) {
+        if (const Ship* sh = ships.getObjectByIndex(i)) {
+            if (sh->getFleetNumber() == fleetNumber) {
+                ++result;
+            }
+        }
+    }
+    return result;
+}
+
 // FIXME: I'm not entirely happy with the placement of this function.
 // It would make sense to put this into FleetMember, but then we'd have a call chain FleetMember -> Fleet -> FleetMember.
 void

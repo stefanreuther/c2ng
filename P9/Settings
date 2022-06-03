@@ -754,9 +754,14 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/dialogs/fleetlist.cpp client/dialogs/fleetlist.hpp \
-    client/dialogs/cloneship.cpp client/dialogs/cloneship.hpp \
-    client/widgets/chartmouseconfig.cpp client/widgets/chartmouseconfig.hpp \
+FILES_guilib = client/tiles/fleetmembertile.cpp \
+    client/tiles/fleetmembertile.hpp client/widgets/fleetmemberlistbox.cpp \
+    client/widgets/fleetmemberlistbox.hpp \
+    client/tiles/fleetscreenheadertile.cpp \
+    client/tiles/fleetscreenheadertile.hpp client/dialogs/fleetlist.cpp \
+    client/dialogs/fleetlist.hpp client/dialogs/cloneship.cpp \
+    client/dialogs/cloneship.hpp client/widgets/chartmouseconfig.cpp \
+    client/widgets/chartmouseconfig.hpp \
     client/widgets/markertemplatelist.cpp \
     client/widgets/markertemplatelist.hpp \
     client/widgets/chartdisplayconfig.cpp \

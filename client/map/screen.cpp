@@ -432,6 +432,7 @@ client::map::Screen::handleStateChange(client::si::RequestLink2 link, client::si
      case OutputState::ShipScreen:
      case OutputState::PlanetScreen:
      case OutputState::BaseScreen:
+     case OutputState::FleetScreen:
      case OutputState::ShipTaskScreen:
      case OutputState::PlanetTaskScreen:
      case OutputState::BaseTaskScreen:

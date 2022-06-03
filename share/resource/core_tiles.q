@@ -770,6 +770,68 @@ Sub Tile.NarrowShipCargo
   SetContent t
 EndSub
 
+% Fleet waypoint
+% - called in ship context on fleet member
+% - call SetContent with 30x7 rich-text string
+Sub Tile.FleetWaypoint
+  % ex WFleetWaypointTile::drawData(GfxCanvas& can)
+  Local Function Row(left, right)
+    Return RAdd(RAlign(left, 80), right, "\n")
+  EndFunction
+
+  Local Function WaypointLabel(leader)
+    If leader Then
+      With leader Do
+        If InStr(Global.Mission(Mission$, Owner.Real).Flags, "i") Then
+          Return CCVP.ShipMissionLabel()
+        Else
+          Return CCVP.GetLocationName(Waypoint.X, Waypoint.Y, "vw")
+        EndIf
+      EndWith
+    Else
+      Return ""
+    EndIf
+  EndFunction
+
+  Local t, w, c
+  Local leader = Global.Ship(Fleet$)
+
+  % Line 1: waypoint
+  t :=         Row(Translate("Waypoint:"),    RStyle("green", WaypointLabel(leader)))
+
+  % Line 2: speed
+  t := RAdd(t, Row(Translate("Warp Factor:"), RStyle("green", If(leader->Speed$, leader->Speed, Translate("not moving")))))
+
+  % Line 3+4: title
+  t := RAdd(t, "\n", RStyle("big,heading-color", Translate("This ship:")), "\n")
+
+  % Line 5: distance
+  t := RAdd(t, Row(Translate("Distance:"), RStyle("green", Format(Translate("%.2f ly"), Waypoint.Dist))))
+
+  % Line 6,7: ETA and fuel usage
+  If Not Waypoint.Dist Then
+    w := RStyle("green", Translate("at waypoint"))
+  Else If Speed$=0 Then
+    w := RStyle("red", Translate("not moving"))
+  Else If Move.ETA >= 30 Then  % FIXME: hard-coded
+    w := RStyle("yellow", Translate("too long"))
+  Else
+    w := RStyle("green", Format(Translate("%d turn%!1{s%}"), Move.ETA))
+  EndIf
+  t := RAdd(t, Row(Translate("E.T.A.:"), w))
+
+  If Move.ETA >= 30 Then
+    c := 'yellow'
+  Else If Move.Fuel > Cargo.N Then
+    c := 'red'
+  Else
+    c := 'green'
+  EndIf
+  % FIXME: cloak fuel, turn fuel
+  t := RAdd(t, Row(Translate("Fuel Usage:"), RStyle(c, Format(Translate("%d kt"), CCVP.NumberToString(Move.Fuel)))))
+  SetContent t
+EndSub
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Planet Data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Planet natives

@@ -5,9 +5,11 @@
 #define C2NG_CLIENT_SCREENS_CONTROLSCREEN_HPP
 
 #include "afl/base/deleter.hpp"
+#include "client/map/minefieldmissionoverlay.hpp"
 #include "client/map/movementoverlay.hpp"
 #include "client/map/scanneroverlay.hpp"
 #include "client/map/widget.hpp"
+#include "client/screenhistory.hpp"
 #include "client/si/control.hpp"
 #include "client/si/inputstate.hpp"
 #include "client/si/outputstate.hpp"
@@ -15,12 +17,11 @@
 #include "client/widgets/scanresult.hpp"
 #include "game/map/object.hpp"
 #include "game/map/objectcursor.hpp"
-#include "ui/eventloop.hpp"
-#include "client/screenhistory.hpp"
-#include "client/map/minefieldmissionoverlay.hpp"
-#include "interpreter/process.hpp"
-#include "ui/widgets/panel.hpp"
+#include "game/proxy/fleetproxy.hpp"
 #include "game/proxy/taskeditorproxy.hpp"
+#include "interpreter/process.hpp"
+#include "ui/eventloop.hpp"
+#include "ui/widgets/panel.hpp"
 
 namespace client { namespace screens {
 
@@ -36,6 +37,7 @@ namespace client { namespace screens {
         static const Definition ShipScreen;
         static const Definition PlanetScreen;
         static const Definition BaseScreen;
+        static const Definition FleetScreen;
         static const Definition ShipTaskScreen;
         static const Definition PlanetTaskScreen;
         static const Definition BaseTaskScreen;
@@ -43,6 +45,8 @@ namespace client { namespace screens {
         ControlScreen(client::si::UserSide& us, int nr, const Definition& def);
 
         ControlScreen& withTaskEditor(interpreter::Process::ProcessKind kind);
+
+        ControlScreen& withFleetProxy();
 
         void run(client::si::InputState& in, client::si::OutputState& out);
 
@@ -95,6 +99,7 @@ namespace client { namespace screens {
         void onScannerMove(game::map::Point target);
         void onDoubleClick(game::map::Point target);
         void onTaskEditorShipChange(const game::proxy::TaskEditorProxy::ShipStatus& st);
+        void onFleetChange();
 
         ui::widgets::Panel m_panel;
         client::map::Widget m_mapWidget;
@@ -106,6 +111,7 @@ namespace client { namespace screens {
 
         std::auto_ptr<game::proxy::TaskEditorProxy> m_taskEditorProxy;
         interpreter::Process::ProcessKind m_taskKind;
+        std::auto_ptr<game::proxy::FleetProxy> m_fleetProxy;
 
         // should be last:
         util::RequestReceiver<ControlScreen> m_reply;

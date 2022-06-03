@@ -9,6 +9,7 @@
 #include "afl/string/string.hpp"
 #include "client/si/userside.hpp"
 #include "client/widgets/keymapwidget.hpp"
+#include "game/proxy/fleetproxy.hpp"
 #include "game/proxy/objectobserver.hpp"
 #include "game/proxy/taskeditorproxy.hpp"
 #include "ui/layoutablegroup.hpp"
@@ -40,6 +41,13 @@ namespace client { namespace tiles {
             @return this */
         TileFactory& withTaskEditorProxy(game::proxy::TaskEditorProxy* p);
 
+        /** Add a FleetProxy.
+            This will be made available to tiles that can use it.
+            @param p Pointer to FleetProxy, owned by caller, living sufficiently long for tiles.
+                     Can be null.
+            @return this */
+        TileFactory& withFleetProxy(game::proxy::FleetProxy* p);
+
         /** Create a single tile by name.
             @param name      Name
             @param deleter   Deleter; will own the tile and its sub-objects, of any.
@@ -58,6 +66,7 @@ namespace client { namespace tiles {
         client::widgets::KeymapWidget& m_keys;
         game::proxy::ObjectObserver& m_observer;
         game::proxy::TaskEditorProxy* m_pTaskEditor;
+        game::proxy::FleetProxy* m_pFleetProxy;
     };
 
 } }

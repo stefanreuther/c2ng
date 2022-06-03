@@ -275,6 +275,7 @@ namespace {
                  case OutputState::ShipScreen:
                  case OutputState::PlanetScreen:
                  case OutputState::BaseScreen:
+                 case OutputState::FleetScreen:
                  case OutputState::ShipTaskScreen:
                  case OutputState::PlanetTaskScreen:
                  case OutputState::BaseTaskScreen:

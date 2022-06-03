@@ -26,7 +26,8 @@ namespace game { namespace map {
         enum Action {                     ///< Kind of action.
             Movement,                     ///< Regular movement order.
             Tow,                          ///< Ship is being towed by another ship.
-            Chunnel                       ///< Ship is initiating a chunnel.
+            Chunnel,                      ///< Ship is initiating a chunnel.
+            FleetLeader                   ///< Relation to fleet leader.
         };
 
         enum Status {                     ///< Expected result of action.

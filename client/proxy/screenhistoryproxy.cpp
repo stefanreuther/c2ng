@@ -3,10 +3,11 @@
   */
 
 #include "client/proxy/screenhistoryproxy.hpp"
-#include "util/request.hpp"
-#include "game/turn.hpp"
-#include "game/game.hpp"
 #include "afl/string/format.hpp"
+#include "game/game.hpp"
+#include "game/map/fleet.hpp"
+#include "game/turn.hpp"
+#include "util/request.hpp"
 
 using client::ScreenHistory;
 using game::Reference;
@@ -42,15 +43,15 @@ namespace {
          case ScreenHistory::StarbaseTask:
             return pTurn->universe().playedBases().getObjectByIndex(ref.getX()) != 0;
 
+         case ScreenHistory::Fleet:
+            return pTurn->universe().fleets().getObjectByIndex(ref.getX()) != 0;
+
          case ScreenHistory::Starchart:
             return true;
             //  case RaceScreen:
             //     return true;
             //  case HistoryScreen:
             //     return current_histship_type.isValidIndex(x);
-
-            //  case FleetScreen:
-            //     return current_fleet_type.isValidIndex(x);
         }
         return false;
     }
@@ -82,6 +83,16 @@ namespace {
             }
             break;
 
+         case ScreenHistory::Fleet:
+            if (const game::Game* g = session.getGame().get()) {
+                if (const game::Turn* t = g->getViewpointTurn().get()) {
+                    if (const game::map::Ship* sh = t->universe().ships().get(ref.getX())) {
+                        return game::map::Fleet::getTitle(*sh, session.translator());
+                    }
+                }
+            }
+            return Format(tx("Fleet #%d"), ref.getX());
+
          case ScreenHistory::ShipTask:
             if (session.getReferenceName(Reference(Reference::Ship, ref.getX()), PlainName, tmp)) {
                 return Format(tx("Ship Task #%d: %s"), ref.getX(), tmp);
@@ -106,8 +117,6 @@ namespace {
      //    return tx("Race Screen");
      // case HistoryScreen:
      //    return Format(tx("Ship History %d: %s"), x, getDisplayedTurn().getCurrentUniverse().getShip(x).getName(GObject::PlainName));
-     // case FleetScreen:
-     //    return getFleetTitle(getDisplayedTurn().getCurrentUniverse(), x);
         }
         return String_t();
     }
@@ -151,6 +160,9 @@ namespace {
          case ScreenHistory::Starbase:
          case ScreenHistory::StarbaseTask:
             return setCursor(pGame->cursors().currentBase(), ref.getX());
+
+         case ScreenHistory::Fleet:
+            return setCursor(pGame->cursors().currentFleet(), ref.getX());
 
          case ScreenHistory::Starchart:
             pGame->cursors().location().set(game::map::Point(ref.getX(), ref.getY()));
@@ -257,7 +269,7 @@ client::proxy::ScreenHistoryProxy::activateReference(Downlink& link, ScreenHisto
 
         bool getResult() const
             { return m_result; }
-        
+
      private:
         ScreenHistory::Reference m_ref;
         bool m_result;

@@ -16,10 +16,11 @@
 
 using game::map::ShipMovementInfo;
 
-client::map::WaypointOverlay::WaypointOverlay(ui::Root& root)
+client::map::WaypointOverlay::WaypointOverlay(ui::Root& root, bool isFleet)
     : m_root(root),
       m_reply(root.engine().dispatcher(), *this),
-      m_infos()
+      m_infos(),
+      m_isFleet(isFleet)
 { }
 
 client::map::WaypointOverlay::~WaypointOverlay()
@@ -41,7 +42,7 @@ client::map::WaypointOverlay::drawBefore(gfx::Canvas& /*can*/, const Renderer& /
 void
 client::map::WaypointOverlay::drawAfter(gfx::Canvas& can, const Renderer& ren)
 {
-    // ex WShipScannerChartWidget::drawPost (part), WShipScannerChartWidget::drawScanner, ship.pas:DrawTowingInfo, ship.pas:DrawChunnelInfo
+    // ex WShipScannerChartWidget::drawPost (part), WShipScannerChartWidget::drawScanner, WFleetScannerChart::drawPre, ship.pas:DrawTowingInfo, ship.pas:DrawChunnelInfo
     gfx::Context<uint8_t> ctx(can, m_root.colorScheme());
 
     for (size_t i = 0, n = m_infos.size(); i < n; ++i) {
@@ -73,6 +74,18 @@ client::map::WaypointOverlay::drawAfter(gfx::Canvas& can, const Renderer& ren)
             ctx.setColor(ui::Color_Red);
             ctx.setLinePattern(0x55);
             drawLine(ctx, ren.scale(e.from), ren.scale(e.to));
+            break;
+
+         case ShipMovementInfo::FleetLeader:
+            if (m_isFleet && e.from != e.to) {
+                ctx.setColor(ui::Color_DarkYellow);
+                ctx.setLinePattern(gfx::SOLID_LINE);
+                gfx::Point a = ren.scale(e.to);       // leader position [map center]
+                gfx::Point b = ren.scale(e.from);     // unit position
+                drawLine(ctx, a, b);
+                drawHLine(ctx, b.getX()-10, b.getY(), b.getX()+10);
+                drawVLine(ctx, b.getX(), b.getY()-10, b.getY()+10);
+            }
             break;
         }
     }

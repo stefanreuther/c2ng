@@ -15,7 +15,7 @@ namespace client { namespace map {
 
     class WaypointOverlay : public Overlay {
      public:
-        WaypointOverlay(ui::Root& root);
+        WaypointOverlay(ui::Root& root, bool isFleet);
         ~WaypointOverlay();
 
         void setData(const game::map::ShipMovementInfos_t& infos);
@@ -32,6 +32,7 @@ namespace client { namespace map {
         ui::Root& m_root;
         util::RequestReceiver<WaypointOverlay> m_reply;
         game::map::ShipMovementInfos_t m_infos;
+        bool m_isFleet;
     };
 
 } }

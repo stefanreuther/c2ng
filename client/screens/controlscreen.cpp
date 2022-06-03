@@ -28,6 +28,7 @@
 #include "game/proxy/cursorobserverproxy.hpp"
 #include "game/proxy/objectlistener.hpp"
 #include "game/proxy/taskeditorproxy.hpp"
+#include "game/turn.hpp"
 #include "gfx/complex.hpp"
 #include "interpreter/contextreceiver.hpp"
 #include "interpreter/typehint.hpp"
@@ -102,6 +103,21 @@ namespace {
             && pShip != 0
             && pShip->isHyperdriving(pGame->shipScores(), *pShipList, pRoot->hostConfiguration());
     }
+
+    game::map::Object* getFleetLeader(game::Session& session, game::map::Object* mo)
+    {
+        game::map::Ship* sh = dynamic_cast<game::map::Ship*>(mo);
+        game::Game* pGame = session.getGame().get();
+        if (sh != 0 && pGame != 0 && sh->getFleetNumber() != 0) {
+            if (game::Turn* pTurn = pGame->getViewpointTurn().get()) {
+                if (game::map::Ship* leader = pTurn->universe().ships().get(sh->getFleetNumber())) {
+                    return leader;
+                }
+            }
+        }
+        return mo;
+    }
+
 }
 
 /*
@@ -212,7 +228,13 @@ const client::screens::ControlScreen::Definition client::screens::ControlScreen:
     "BASESCREEN",
     "BASESCREEN",
 };
-
+const client::screens::ControlScreen::Definition client::screens::ControlScreen::FleetScreen = {
+    client::si::OutputState::FleetScreen,
+    ScreenHistory::Fleet,
+    interpreter::Process::pkDefault,
+    "FLEETSCREEN",
+    "FLEETSCREEN",
+};
 const client::screens::ControlScreen::Definition client::screens::ControlScreen::ShipTaskScreen = {
     client::si::OutputState::ShipTaskScreen,
     ScreenHistory::ShipTask,
@@ -244,7 +266,8 @@ game::map::ObjectCursor*
 client::screens::ControlScreen::State::getCursor(game::Session& session) const
 {
     if (game::Game* g = session.getGame().get()) {
-        return g->cursors().getCursorByNumber(screenNumber);
+        int effScreenNumber = (screenNumber == game::map::Cursors::FleetScreen ? game::map::Cursors::ShipScreen : screenNumber);
+        return g->cursors().getCursorByNumber(effScreenNumber);
     } else {
         return 0;
     }
@@ -289,15 +312,21 @@ class client::screens::ControlScreen::ContextProvider : public game::interface::
 
 class client::screens::ControlScreen::Updater : public game::proxy::ObjectListener {
  public:
-    Updater(util::RequestSender<ControlScreen> reply)
+    Updater(util::RequestSender<ControlScreen> reply, bool isFleet)
         : m_reply(reply),
           m_lastObject(0),
           m_lastPosition(),
-          m_lastHyp()
+          m_lastHyp(),
+          m_isFleet(isFleet)
         { }
     virtual void handle(game::Session& session, game::map::Object* obj)
         {
             game::map::Object* mo = obj;
+
+            // If this is a fleet, we want to look at the fleet leader instead
+            if (m_isFleet) {
+                mo = getFleetLeader(session, mo);
+            }
 
             Point pt;
             bool hasPosition = mo != 0 && mo->getPosition(pt);
@@ -362,6 +391,7 @@ class client::screens::ControlScreen::Updater : public game::proxy::ObjectListen
     game::map::Object* m_lastObject;
     Point m_lastPosition;
     bool m_lastHyp;
+    bool m_isFleet;
 };
 
 
@@ -554,6 +584,7 @@ client::screens::ControlScreen::ControlScreen(client::si::UserSide& us, int nr, 
       m_center(),
       m_taskEditorProxy(),
       m_taskKind(interpreter::Process::pkDefault),
+      m_fleetProxy(),
       m_reply(us.root().engine().dispatcher(), *this),
       m_proprietor(us.gameSender().makeTemporary(new ProprietorFromSession(m_state, m_reply.getSender())))
 {
@@ -565,6 +596,13 @@ client::screens::ControlScreen::withTaskEditor(interpreter::Process::ProcessKind
 {
     m_taskEditorProxy.reset(new game::proxy::TaskEditorProxy(interface().gameSender(), root().engine().dispatcher()));
     m_taskKind = kind;
+    return *this;
+}
+
+client::screens::ControlScreen&
+client::screens::ControlScreen::withFleetProxy()
+{
+    m_fleetProxy.reset(new game::proxy::FleetProxy(interface().gameSender(), root().engine().dispatcher()));
     return *this;
 }
 
@@ -584,6 +622,7 @@ client::screens::ControlScreen::run(client::si::InputState& in, client::si::Outp
     ui::Group tileGroup(ui::layout::VBox::instance5);
     client::tiles::TileFactory(interface(), keys, oop)
         .withTaskEditorProxy(m_taskEditorProxy.get())
+        .withFleetProxy(m_fleetProxy.get())
         .createLayout(tileGroup, m_definition.layoutName, deleter);
     tileGroup.add(deleter.addNew(new ui::Spacer()));
     m_panel.add(tileGroup);
@@ -605,7 +644,7 @@ client::screens::ControlScreen::run(client::si::InputState& in, client::si::Outp
     m_panel.setState(ui::Widget::ModalState, true);
     root.add(m_panel);
 
-    oop.addNewListener(new Updater(m_reply.getSender()));
+    oop.addNewListener(new Updater(m_reply.getSender(), m_fleetProxy.get() != 0));
 
     m_mapWidget.addOverlay(m_scannerOverlay);
     m_mapWidget.addOverlay(m_movementOverlay);
@@ -613,7 +652,7 @@ client::screens::ControlScreen::run(client::si::InputState& in, client::si::Outp
 
     // FIXME: only for ship/fleet
     {
-        client::map::WaypointOverlay& wo = m_deleter.addNew(new client::map::WaypointOverlay(root));
+        client::map::WaypointOverlay& wo = m_deleter.addNew(new client::map::WaypointOverlay(root, m_fleetProxy.get() != 0));
         m_mapWidget.addOverlay(wo);
         wo.attach(oop);
     }
@@ -623,6 +662,9 @@ client::screens::ControlScreen::run(client::si::InputState& in, client::si::Outp
         m_mapWidget.addOverlay(ov);
         m_taskEditorProxy->sig_shipChange.add(&ov, &client::map::ShipTaskOverlay::setStatus);
         m_taskEditorProxy->sig_shipChange.add(this, &ControlScreen::onTaskEditorShipChange);
+    }
+    if (m_fleetProxy.get() != 0) {
+        m_fleetProxy->sig_change.add(this, &ControlScreen::onFleetChange);
     }
 
     m_movementOverlay.sig_move.add(this, &ControlScreen::onScannerMove);
@@ -647,6 +689,7 @@ client::screens::ControlScreen::handleStateChange(client::si::RequestLink2 link,
      case OutputState::ShipScreen:
      case OutputState::PlanetScreen:
      case OutputState::BaseScreen:
+     case OutputState::FleetScreen:
      case OutputState::ShipTaskScreen:
      case OutputState::PlanetTaskScreen:
      case OutputState::BaseTaskScreen:
@@ -798,4 +841,15 @@ client::screens::ControlScreen::onTaskEditorShipChange(const game::proxy::TaskEd
     bool isHyperdriving = st.isHyperdriving;
 
     m_movementOverlay.setLockOrigin(finalPos, isHyperdriving);
+}
+
+void
+client::screens::ControlScreen::onFleetChange()
+{
+    if (m_fleetProxy.get() != 0) {
+        if (m_fleetProxy->getSelectedFleetMember() == 0 && m_fleetProxy->getFleetMemberList().empty()) {
+            m_outputState.set(client::si::RequestLink2(), client::si::OutputState::PlayerScreen);
+            m_loop.stop(0);
+        }
+    }
 }

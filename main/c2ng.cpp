@@ -838,6 +838,15 @@ namespace {
                 state = out.getTarget();
                 break;
 
+             case OutputState::FleetScreen:
+                client::screens::ControlScreen(us, game::map::Cursors::FleetScreen, client::screens::ControlScreen::FleetScreen)
+                    .withFleetProxy()
+                    .run(in, out);
+                in = InputState();
+                in.setProcess(out.getProcess());
+                state = out.getTarget();
+                break;
+
              case OutputState::ShipTaskScreen:
                 client::screens::ControlScreen(us, game::map::Cursors::ShipScreen, client::screens::ControlScreen::ShipTaskScreen)
                     .withTaskEditor(interpreter::Process::pkShipTask)

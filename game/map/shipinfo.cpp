@@ -102,8 +102,16 @@ game::map::packShipMovementInfo(ShipMovementInfos_t& result,
             result.push_back(ShipMovementInfo(ShipMovementInfo::Tow, ShipMovementInfo::Success, i, pos, mapConfig.getSimpleNearestAlias(towerWaypoint, pos)));
         }
     }
-}
 
+    // Fleet member at possible remote position
+    if (ship.isFleetMember()) {
+        Ship* leader = univ.ships().get(ship.getFleetNumber());
+        Point leaderPos;
+        if (leader != 0 && leader->getPosition(leaderPos)) {
+            result.push_back(ShipMovementInfo(ShipMovementInfo::FleetLeader, ShipMovementInfo::Success, ship.getFleetNumber(), pos, leaderPos));
+        }
+    }
+}
 
 
 void

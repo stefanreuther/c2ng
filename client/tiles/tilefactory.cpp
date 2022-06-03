@@ -26,6 +26,8 @@
 #include "interpreter/typehint.hpp"
 #include "ui/rich/documentview.hpp"
 #include "util/translation.hpp"
+#include "client/tiles/fleetscreenheadertile.hpp"
+#include "client/tiles/fleetmembertile.hpp"
 
 using afl::string::Format;
 using client::si::WidgetWrapper;
@@ -81,15 +83,15 @@ namespace {
 //     { 0, 0 },
 // };
 
-// static const TileConfig fleet_screen[] = {
-//     { "FLEETHEADER",      0 },
-//     { "SHIPEQUIPMENT",    N_("Equipment & Crew:") },
-//     { "FLEETMEMBERS",     0 },
-//     { "FLEETWAYPOINT",    0 },
-//     { 0, 0 }
-// };
+    const TileConfig fleet_screen[] = {
+        { "FLEETHEADER",      0 },
+        { "SHIPEQUIPMENT",    N_("Equipment & Crew:") },
+        { "FLEETMEMBERS",     0 },
+        { "FLEETWAYPOINT",    0 },
+        { 0, 0 }
+    };
 
-    static const TileConfig ship_lock[] = {
+    const TileConfig ship_lock[] = {
         { "NARROWHEADER",        0 },
         { "NARROWSHIPEQUIPMENT", 0 },
         { "NARROWSHIPCARGO",     0 },
@@ -97,7 +99,7 @@ namespace {
         { 0, 0 },
     };
 
-    static const TileConfig planet_lock[] = {
+    const TileConfig planet_lock[] = {
         { "NARROWHEADER",          0 },
         { "NARROWPLANETMINERAL",   0 },
         { "NARROWPLANETECONOMY",   0 },
@@ -107,12 +109,12 @@ namespace {
         { 0, 0 },
     };
 
-    static const TileConfig unknown_planet_lock[] = {
+    const TileConfig unknown_planet_lock[] = {
         { "NARROWHEADER", 0 },
         { 0, 0 },
     };
 
-    static const TileConfig base_lock[] = {
+    const TileConfig base_lock[] = {
         { "NARROWHEADER",        0 },
         { "NARROWPLANETMINERAL", 0 },
         { "NARROWBASETECH",      0 },
@@ -120,21 +122,21 @@ namespace {
         { 0, 0 },
     };
 
-    static const TileConfig shiptask_screen[] = {
+    const TileConfig shiptask_screen[] = {
         { "SHIPTASKHEADER",      0 },
         { "SHIPTASKEDITOR",      N_("Auto Task:") },
         { "SHIPTASKCOMMAND",     0 },
         { 0, 0 },
     };
 
-    static const TileConfig planettask_screen[] = {
+    const TileConfig planettask_screen[] = {
         { "PLANETTASKHEADER",    0 },
         { "PLANETTASKEDITOR",    N_("Auto Task:") },
         { "PLANETTASKCOMMAND",   0 },
         { 0, 0 },
     };
 
-    static const TileConfig basetask_screen[] = {
+    const TileConfig basetask_screen[] = {
         { "BASETASKHEADER",      0 },
         { "BASETASKEDITOR",      N_("Auto Task:") },
         { "BASETASKCOMMAND",     0 },
@@ -178,8 +180,8 @@ namespace {
             return base_screen;
 //     if (name == "HISTORYSCREEN")
 //         return history_screen;
-//     if (name == "FLEETSCREEN")
-//         return fleet_screen;
+        } else if (name == "FLEETSCREEN") {
+            return fleet_screen;
         } else if (name == "PLANETLOCK") {
             return planet_lock;
         } else if (name == "SHIPLOCK") {
@@ -295,7 +297,8 @@ client::tiles::TileFactory::TileFactory(client::si::UserSide& user,
     : m_userSide(user),
       m_keys(keys),
       m_observer(observer),
-      m_pTaskEditor()
+      m_pTaskEditor(),
+      m_pFleetProxy()
 { }
 
 client::tiles::TileFactory::~TileFactory()
@@ -305,6 +308,13 @@ client::tiles::TileFactory&
 client::tiles::TileFactory::withTaskEditorProxy(game::proxy::TaskEditorProxy* p)
 {
     m_pTaskEditor = p;
+    return *this;
+}
+
+client::tiles::TileFactory&
+client::tiles::TileFactory::withFleetProxy(game::proxy::FleetProxy* p)
+{
+    m_pFleetProxy = p;
     return *this;
 }
 
@@ -505,12 +515,33 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
 //         return new WHistoryShipMovementTile(selection);
 
     // Fleets
-//     if (name == "FLEETHEADER")
-//         return new WFleetScreenHeaderTile(selection);
-//     if (name == "FLEETMEMBERS")
-//         return new WFleetMemberTile(selection);
-//     if (name == "FLEETWAYPOINT")
-//         return new WFleetWaypointTile(selection);
+    if (name == "FLEETHEADER") {
+        FleetScreenHeaderTile& tile = deleter.addNew(new FleetScreenHeaderTile(root, m_keys));
+        tile.attach(m_observer);
+        return &tile;
+    }
+    if (name == "FLEETMEMBERS") {
+        FleetMemberTile& tile = deleter.addNew(new FleetMemberTile(root, m_keys, tx));
+        if (m_pFleetProxy != 0) {
+            tile.attach(*m_pFleetProxy);
+        }
+        return &tile;
+    }
+    if (name == "FLEETWAYPOINT") {
+        class Factory : public DataViewFactory {
+         public:
+            void configure(StandardDataView& dv, ui::Root& root)
+                {
+                    // ex WFleetWaypointTile::init()
+                    dv.addNewButton(dv.Bottom, 1, 0, new ui::widgets::Button("U", 'u', root));
+                    dv.addNewButton(dv.Bottom, 1, 1, new ui::widgets::Button("D", 'd', root));
+                    dv.addNewButton(dv.Bottom, 0, 2, new ui::widgets::Button("W", 'w', root));
+                    dv.addNewButton(dv.Bottom, 0, 1, new ui::widgets::Button("A", 'a', root));
+                    dv.addNewButton(dv.Bottom, 0, 0, new ui::widgets::Button("C", 'c', root));
+                }
+        };
+        return Factory().run(m_keys, 30, 7, "Tile.FleetWaypoint", deleter, m_userSide, m_observer);
+    }
     if (name == "FLEETOVERVIEW") {
         return createDocumentViewTile("Tile.FleetOverview", root, 30, 10, deleter, m_userSide, m_observer);
     }
@@ -562,7 +593,7 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
     }
     if (name == "TASKEDITOR" || name == "SHIPTASKEDITOR" || name == "PLANETTASKEDITOR" || name == "BASETASKEDITOR") {
         // This needed a type distinction for a while in c2ng.
-        // Now it no longer needs that, so we can as well also accept the PCC2 name, TASKEDITORC2,
+        // Now it no longer needs that, so we can as well also accept the PCC2 name, TASKEDITOR.
         TaskEditorTile& tile = deleter.addNew(new TaskEditorTile(root, m_pTaskEditor));
         return &tile;
     }

@@ -45,6 +45,10 @@ namespace game { namespace map {
 
         String_t getTitle(afl::string::Translator& tx) const;
 
+        /** Count number of fleet members.
+            \return number of fleet members */
+        int countFleetMembers() const;
+
         /** Synchronize a fleet member.
             Synchronizes waypoint of a single fleet member with its leader, if any.
             Does nothing if the ship is not a fleet member.
