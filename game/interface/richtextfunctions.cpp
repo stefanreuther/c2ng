@@ -40,36 +40,36 @@ namespace {
         uint8_t     value;
     };
     const Style styles[] = {
-        { "",           kNone,  0 },
-        { "b",          kStyle, StyleAttribute::Bold }, /* tag name */
-        //{ "background", kColor, SkinColor::tc_Background },
-        { "big",        kStyle, StyleAttribute::Big },
-        { "blue",       kColor, SkinColor::Blue },
-        { "bold",       kStyle, StyleAttribute::Bold }, /* real name */
-        //{ "contrast",   kColor, SkinColor::tc_Contrast },
-        { "dim",        kColor, SkinColor::Faded },
-        { "em",         kStyle, StyleAttribute::Bold }, /* tag name (should actually be italic) */
-        { "fixed",      kStyle, StyleAttribute::Fixed }, /* real name */
-        { "green",      kColor, SkinColor::Green },
-        //{ "heading",    kColor, SkinColor::tc_Heading },
-        //{ "input",      kColor, SkinColor::tc_Input },
-        //{ "invstatic",  kColor, SkinColor::tc_InvStatic },
-        //{ "italic",     kStyle, StyleAttribute::Italic }, /* not supported yet */
-        { "kbd",        kStyle, StyleAttribute::Key }, /* tag name */
-        { "key",        kStyle, StyleAttribute::Key }, /* real name */
-        //{ "link",       kColor, SkinColor::tc_Link },
-        //{ "linkfocus",  kColor, SkinColor::tc_LinkFocus },
-        //{ "linkshade",  kColor, SkinColor::tc_LinkShade },
-        { "none",       kNone,  0 },
-        { "red",        kColor, SkinColor::Red },
-        //{ "selection",  kColor, SkinColor::tc_Selection },
-        { "small"    ,  kStyle, StyleAttribute::Small },
-        { "static",     kColor, SkinColor::Static },
-        { "tt",         kStyle, StyleAttribute::Fixed }, /* tag name */
-        { "u",          kStyle, StyleAttribute::Underline }, /* tag name */
-        { "underline",  kStyle, StyleAttribute::Underline }, /* real name */
-        { "white",      kColor, SkinColor::White },
-        { "yellow",     kColor, SkinColor::Yellow },
+        { "",                  kNone,  0 },
+        { "b",                 kStyle, StyleAttribute::Bold }, /* tag name */
+        { "background-color",  kColor, SkinColor::Background },
+        { "big",               kStyle, StyleAttribute::Big },
+        { "blue",              kColor, SkinColor::Blue },
+        { "bold",              kStyle, StyleAttribute::Bold }, /* real name */
+        { "contrast-color",    kColor, SkinColor::Contrast },
+        { "dim",               kColor, SkinColor::Faded },
+        { "em",                kStyle, StyleAttribute::Bold }, /* tag name (should actually be italic) */
+        { "fixed",             kStyle, StyleAttribute::Fixed }, /* real name */
+        { "green",             kColor, SkinColor::Green },
+        { "heading-color",     kColor, SkinColor::Heading },
+        { "input-color",       kColor, SkinColor::Input },
+        { "inverse-color",     kColor, SkinColor::InvStatic },
+        // { "italic",            kStyle, StyleAttribute::Italic }, /* not supported yet */
+        { "kbd",               kStyle, StyleAttribute::Key }, /* tag name */
+        { "key",               kStyle, StyleAttribute::Key }, /* real name */
+        { "link-color",        kColor, SkinColor::Link },
+        { "link-focus-color",  kColor, SkinColor::LinkFocus },
+        { "link-shade-color",  kColor, SkinColor::LinkShade },
+        { "none",              kNone,  0 },
+        { "red",               kColor, SkinColor::Red },
+        { "selection-color",   kColor, SkinColor::Selection },
+        { "small"    ,         kStyle, StyleAttribute::Small },
+        { "static",            kColor, SkinColor::Static },
+        { "tt",                kStyle, StyleAttribute::Fixed }, /* tag name */
+        { "u",                 kStyle, StyleAttribute::Underline }, /* tag name */
+        { "underline",         kStyle, StyleAttribute::Underline }, /* real name */
+        { "white",             kColor, SkinColor::White },
+        { "yellow",            kColor, SkinColor::Yellow },
     };
 
     Ptr_t processStyle(String_t style, Ptr_t text)
