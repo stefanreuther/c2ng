@@ -15,6 +15,15 @@ class TestGameRefFleetList : public CxxTest::TestSuite {
     void testAdd();
 };
 
+class TestGameRefFleetMemberList : public CxxTest::TestSuite {
+ public:
+    void testBasic();
+    void testSort1();
+    void testSort2();
+    void testSet();
+    void testSet2();
+};
+
 class TestGameRefHistoryShipList : public CxxTest::TestSuite {
  public:
     void testIt();

@@ -238,6 +238,16 @@ class TestGameProxyFleetCostProxy : public CxxTest::TestSuite {
     void testEmpty();
 };
 
+class TestGameProxyFleetProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNoShip();
+    void testNormal();
+    void testDeleteMid();
+    void testDeleteEnd();
+    void testDeleteAll();
+};
+
 class TestGameProxyFriendlyCodeProxy : public CxxTest::TestSuite {
  public:
     void testIt();
