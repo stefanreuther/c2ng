@@ -319,6 +319,61 @@ Sub BuildBaseDefenseWait (amount)
   Loop
 EndSub
 
+% @q FixShipWait (Ship Command)
+% @q FixShipWait id:Int (Planet Command)
+% Fix ship at starbase when possible.
+% Waits until the order can be submitted (i.e. the starbase's shipyard is idle), then gives the order.
+%
+% Although documented as a Ship and Planet command, this actually is a global command.
+% When calling it from a ship, do not specify a parameter.
+% When calling it from a planet, specify a ship Id.
+% @since PCC2 1.99.21, PCC 1.0.16, PCC2 2.40.13
+% @see FixShip (Ship Command), FixShip (Planet Command)
+Sub FixShipWait (Optional id)
+  % The ship detection differs between PCC 1.x and PCC2.
+  If Type.Short<>"p" Then
+    % assume ship context
+    If (Not Orbit$) Or (Not Planet(Orbit$).Base.YesNo) Then Abort "Not at a starbase"
+    Do While Planet(Orbit$).Shipyard
+      Stop
+    Loop
+    FixShip
+  Else
+    % assume starbase context
+    Do While Shipyard
+      Stop
+    Loop
+    FixShip id
+  EndIf
+EndSub
+
+% @q RecycleShipWait (Ship Command)
+% @q RecycleShipWait id:Int (Planet Command)
+% Recycle ship at starbase when possible.
+% Waits until the order can be submitted (i.e. the starbase's shipyard is idle), then gives the order.
+%
+% Although documented as a Ship and Planet command, this actually is a global command.
+% When calling it from a ship, do not specify a parameter.
+% When calling it from a planet, specify a ship Id.
+% @since PCC2 1.99.21, PCC 1.0.16, PCC2 2.40.13
+% @see RecycleShip (Ship Command), RecycleShip (Planet Command)
+Sub RecycleShipWait (Optional id)
+  If Type.Short<>"p" Then
+    % assume ship context
+    If (Not Orbit$) Or (Not Planets(Orbit$).Base.YesNo) Then Abort "Not at a starbase"
+    Do While Planets(Orbit$).Shipyard
+      Stop
+    Loop
+    RecycleShip
+  Else
+    % assume starbase context
+    Do While Shipyard
+      Stop
+    Loop
+    RecycleShip id
+  EndIf
+EndSub
+
 % @q History.ShowTurn nr:Int (Global Command)
 % Show turn from history database.
 %
@@ -331,6 +386,34 @@ Sub History.ShowTurn (nr)
   % This used to be a built-in function doing both the "load" and "show" parts; split in 2.40.12.
   History.LoadTurn nr
   CC$History.ShowTurn nr
+EndSub
+
+% @q SetFleetName name:Str (Ship Command)
+% Change fleet name. This ship must be member of a fleet to use this command.
+% The fleet's name will be changed to %name.
+% @since PCC2 1.99.17, PCC 1.0.14, PCC2 2.40.13
+Sub SetFleetName (name)
+  If Not IsEmpty(name) Then
+    If Fleet$=0 Then Abort "Not in a fleet"
+    Ship(Fleet$).Fleet.Name := name
+  EndIf
+EndSub
+
+% @q ChangeFleetLeader fid:Int, sid:Int (Global Command)
+% Change fleet leader. %fid is the fleet Id (and thus the Id of the fleet's leader).
+% %sid is the Id of the ship that will become the new leader of the fleet.
+% That ship should already be a member of the fleet.
+% @since PCC2 1.99.17, PCC 1.0.14, PCC2 2.40.13
+Sub ChangeFleetLeader (fid, sid)
+  If fid=sid Then Return
+  % start the new fleet
+  With Ship(sid) Do
+    SetFleet sid
+    Fleet.Name := Ship(fid).Fleet.Name
+  EndWith
+  % First move all members to the new fleet, then move the old leader
+  ForEach Ship Do If (Id<>fid) And (Fleet$=fid) Then SetFleet sid
+  With Ship(fid) Do SetFleet sid
 EndSub
 
 %%% More Game Functions
@@ -443,6 +526,20 @@ EndFunction
 % @sunce PCC2 2.40.9
 Function CCVP.ShipHasEnemyWarning
   Return Enemy And Mission$ = Cfg('ExtMissionsStartAt') + 18
+EndFunction
+
+% @since PCC2 2.40.13
+Function CCVP.MissionWorksOnShip(msn, sh)
+  Try
+    % @change SRace check (host.isMissionAllowed) now in mission.cc
+    If BitAnd(msn->Race$, 2^Cfg("PlayerSpecialMission", sh->Owner.Real))=0 Then Abort
+    If InStr(msn->Flags, "r") And System.GameType$ Then Abort
+    If InStr(msn->Flags, "i") And sh->Fleet$ And sh->Fleet$<>sh->Id Then Abort
+    If msn->Condition And Not Eval(msn->Condition, sh) Then Abort
+    Return True
+  Else
+    Return False
+  EndTry
 EndFunction
 
 % @since PCC2 2.40.1

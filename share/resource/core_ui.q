@@ -136,6 +136,49 @@ Sub CCUI.SelectNextMarkedHere
   Try With UI.Iterator Do CurrentIndex := NextIndexAt(CurrentIndex, Loc.X, Loc.Y, "wm")
 EndSub
 
+% X on ship screen
+% @since PCC2 2.40.13
+Sub CCUI.Ship.Exchange
+  % ex CC$ShipXchg
+  Local myX = UI.X, myY = UI.Y, myId = Id
+  If FindShip(Loc.X=myX And Loc.Y=myY And Id<>myId And Played)
+    % There is one of our ships other than this one at this location
+    CCUI.ListShips myX, myY, 'e' & myId
+  Else
+    % No ship, so check for a planet
+    Local pid = PlanetAt(myX, myY, 1)
+    If pid And Planet(pid).Played Then UI.GotoScreen 2, pid
+  EndIf
+EndSub
+
+% X on planet screen
+% @since PCC2 2.40.13
+Sub CCUI.Planet.Exchange
+  % ex CC$PlanetXchg
+  Local pid = PlanetAt(UI.X, UI.Y, 1)
+  If pid And pid<>Id And Planet(pid).Played Then
+    UI.GotoScreen 2, pid
+  Else
+    If FindShip(Loc.X=UI.X And Loc.Y=UI.Y And Played) Then CCUI.ListShips UI.X, UI.Y, 'e'
+  EndIf
+EndSub
+
+% X on base screen
+% @since PCC2 2.40.13
+Sub CCUI.Base.Exchange
+  % CC$BaseXchg
+  Local pid = PlanetAt(UI.X, UI.Y, 1)
+  If pid And pid<>Id And Planet(pid).Played Then
+    If Planet(pid).Base.YesNo Then
+      UI.GotoScreen 3, pid
+    Else
+      UI.GotoScreen 2, pid
+    EndIf
+  Else
+    If FindShip(Loc.X=UI.X And Loc.Y=UI.Y And Played) Then CCUI.ListShips UI.X, UI.Y, 'e'
+  EndIf
+EndSub
+
 
 
 
@@ -622,18 +665,11 @@ EndFunction
 % - a: Listbox
 % - i: ship Id
 Sub CCUI$Ship.PrepareMissionList (a, i)
-  ForEach Global.Mission Do
-    Try
-      % Check preconditions
-      % @change SRace check (host.isMissionAllowed) now in mission.cc
-      If BitAnd(Race$, 2^Cfg("PlayerSpecialMission", Ship(i).Owner.Real))=0 Then Abort
-      If InStr(Flags, "r") And System.GameType$ Then Abort
-      If InStr(Flags, "i") And Ship(i).Fleet$ And Ship(i).Fleet$<>i Then Abort
-      If Condition And Not Eval(Condition, Ship(i)) Then Abort
-
-      % All tests passed, add it
-      Call a->AddItem Number, Format("%s - %s", Key, Name)
-    EndTry
+  Local msn
+  ForEach Global.Mission As msn Do
+    If CCVP.MissionWorksOnShip(msn, Ship(i)) Then
+      Call a->AddItem msn->Number, Format("%s - %s", msn->Key, msn->Name)
+    EndIf
   Next
   Call a->AddItem, -1, Translate("# - Extended Mission")
 EndSub
@@ -669,6 +705,71 @@ Function CCUI$Ship.CompleteMissionSelection (newNr, shipId)
   EndIf
   Return res
 EndFunction
+
+% Ship operation
+% FIXME: when the waypoint is tied to the scanner, and keyboard move is enabled,
+% this triggers on every movement.
+Sub CC$WithShipWaypoint (cmd, opt, Optional overrideAT)
+  % ex fleet.pas:NFleetWarning (sort-of)
+  Local UI.Result
+  Local sid = Id
+  Local s, T
+  If IsEmpty(overrideAT) Then overrideAT:=False
+
+  % Check waypoint lock
+  s := "s" & sid & ".waypoint"
+  If Not overrideAT And GetLockInfo(s, 0) Then
+    If GetLockInfo(s, 2) Then
+      UI.Message Format(Translate("%s (%s)\nProceed anyway?"), GetLockInfo(s, 2), GetLockInfo(s, 1)), Translate("Waypoint"), Translate("Yes No")
+    Else
+      UI.Message Format(Translate("This function is under control of \"%s\".\nProceed anyway?"), GetLockInfo(s, 1)), Translate("Waypoint"), Translate("Yes No")
+    EndIf
+    If UI.Result <> 1 Then Return
+  EndIf
+
+  % Check fleet
+  If Fleet$<>0 And Fleet$<>sid Then
+    UI.Message Translate("This ship is member of a fleet. Do you want to set the waypoint of the whole fleet, or do you want to leave the fleet?"), Translate("Waypoint"), Translate("Set Leave Cancel")
+    If UI.Result=3 Then Return
+    If UI.Result=1 Then
+      % Set
+      sid:=Fleet$
+    Else
+      % Leave fleet
+      Fleet$:=0
+    EndIf
+  EndIf
+
+  % All tests passed
+  With Ship(sid) Do Eval cmd
+
+  % Set optimum speed
+  If opt Then
+    If Ship(sid).Speed<>"Hyperdrive" And Ship(sid).Waypoint.Dist>0 Then
+      % Find out how long it takes to get there at this speed
+      s := Global.Engine(Ship(sid).Engine$).Speed$
+      Ship(sid).Speed$ := s
+      T := Ship(sid).Move.Eta
+      If T < 30 Then % FIXME: hardcoded value
+        % Find whether we can reach the target with a slower speed
+        Do While s > 1
+          s := s-1
+          Ship(sid).Speed$ := s
+          If Ship(sid).Move.Eta > T Then
+            % It's slower, so undo and stop
+            Ship(sid).Speed$ := s+1
+            Break
+          EndIf
+        Loop
+      EndIf
+    EndIf
+  EndIf
+EndSub
+
+Sub CC$WithFleetWaypoint (cmd, opt)
+  With Ship(Fleet$) Do CC$WithShipWaypoint cmd, opt
+EndSub
+
 
 % Ship mission [M]
 % @since PCC2 2.40.1
@@ -747,6 +848,23 @@ Sub CCUI.Ship.CancelShipyard
   With Planet(Orbit$) Do FixShip 0
 EndSub
 
+% Go to or join a fleet
+% S-F10 on ship screen
+Sub CCUI.Ship.GotoFleet
+  % ex CC$ShipGoToFleet
+  Local UI.Result
+  If Fleet$ Then
+    UI.GotoScreen 10, Fleet$
+  Else
+    If Not FindShip(Fleet$) Then
+      UI.Message RXml(Translate("You have not yet set up a fleet to join. Use the \"Start New Fleet\" command on the <kbd>F10</kbd> menu to start one.")), Translate("Join Fleet"), Translate("OK")
+    Else
+      UI.ListFleets Loc.X, Loc.Y, "a", Translate("OK"), Translate("Join Fleet")
+      If UI.Result Then Fleet$ := UI.Result
+    EndIf
+  EndIf
+EndSub
+
 % Go to fleet screen
 % @since PCC2 2.40.13
 Sub CCUI.Ship.GotoFleetScreen
@@ -801,6 +919,188 @@ Sub CCUI.Ship.AddAllToFleet
   ForEach Ship Do If CCUI$Ship.IsValidFleetMember(cc$me) Then Fleet$ := cc$fid
   Iterator(10).CurrentIndex:=cc$fid
 EndSub
+
+%%% Fleet
+
+% Add all fleet members to simulation
+% C-ins on fleet screen
+% @since PCC2 2.40.13
+Sub CCUI.Fleet.AddToSim
+  Local fid = Fleet$
+  ForEach Ship Do
+    If Fleet$=fid Then CC$AddToSim False
+  Next
+EndSub
+
+% Make a ship leader of its fleet
+% 'b' in fleet screen
+% @since PCC2 2.40.13
+Sub CCUI.Fleet.ChangeLeader
+  % ex CC$ChangeLeader
+  Local UI.Result
+  If Fleet$ = Id Then Return      % ship is already the leader
+  UI.Message Translate("Make this ship the leader of the fleet?"), Translate("Fleet"), Translate("Yes No")
+  If UI.Result=1 Then ChangeFleetLeader Fleet$, Id
+EndSub
+
+% Dissolve a fleet
+% C-DEL on fleet screen
+% @since PCC2 2.40.13
+Sub CCUI.Fleet.Dissolve
+  % ex CC$FleetDeleteFleet
+  Local UI.Result
+  Local fid = Fleet$
+  UI.Message Translate("Dissolve this fleet?"), Translate("Fleet"), Translate("Yes No")
+  If UI.Result=1 Then
+    ForEach Ship Do If Id<>fid And Fleet$=fid Then Fleet$:=0
+    Ship(fid).Fleet$:=0
+  EndIf
+EndSub
+
+% Join a fleet into another
+% 'j' on fleet screen
+% @since PCC2 2.40.13
+Sub CCUI.Fleet.Join
+  % ex CC$FleetJoin, fleet.pas:JoinFleetWith
+  Local UI.Result
+  Local fid = Fleet$
+  If Iterator(10).NextIndex(fid, "w")=fid Then
+    MessageBox Translate("There is no other fleet we could join."), Translate("Join Fleet")
+  Else
+    UI.ListFleets Ship(fid).Loc.X, Ship(fid).Loc.Y, "a" & fid, Translate("OK"), Translate("Join Fleet")
+    If Not IsEmpty(UI.Result) Then
+      % Move members, then leader
+      ForEach Ship Do If Id<>fid And Fleet$=fid Then Fleet$:=UI.Result
+      Ship(fid).Fleet$:=UI.Result
+    EndIf
+  EndIf
+EndSub
+
+% Leave fleet
+% DEL on fleet screen
+% @since PCC2 2.40.13
+Sub CCUI.Fleet.Leave
+  % ex CC$FleetDeleteMember
+  Local UI.Result
+  If Fleet$ = Id Then
+    % This is the fleet leader, so we'd better ask
+    UI.Message Translate("Remove leader from fleet?"), Translate("Fleet"), Translate("Yes No")
+    If UI.Result<>1 Then Return
+  EndIf
+  Fleet$ := 0
+EndSub
+
+% Rename a fleet
+% 'n' on fleet screen
+% @since PCC2 2.40.13
+Sub CCUI.Fleet.Rename
+  % ex CC$FleetName
+  Local UI.Result
+  Local fid = Fleet$
+  UI.Input Translate("Enter new name:"), Format(Translate("Rename Fleet #%d"), fid), 255, "gm20", Ship(fid).Fleet.Name
+  SetFleetName UI.Result
+EndSub
+
+% Set fleet speed
+% @since PCC2 2.40.13
+Sub CCUI.Fleet.SetSpeed
+  CC$WithFleetWaypoint 'CC$ChangeSpeed', False
+EndSub
+
+% Split a fleet
+% 'p' on fleet screen
+% @since PCC2 2.40.13
+Sub CCUI.Fleet.Split
+  % ex CC$FleetSplit, fleet.pas:SplitFleet
+  Local UI.Result
+  Local oldfid = Fleet$                       % old fleet Id
+  Local newmark = Not Ship(oldfid).Marked     % selection status for new fleet
+  Local newcount = 0                          % number of ships in new fleet
+  Local newfid = If (Marked=newmark, Id, 0)   % new leader is this ship if it has the right status
+
+  % Count ships
+  ForEach Ship Do
+    If Fleet$=oldfid And Marked=newmark Then
+      newcount:=newcount+1
+      If newfid=0 Then newfid:=Id
+    EndIf
+  Next
+  If newcount=0 Then
+    UI.Message RXml(Translate("To split a fleet, please select the ships which should go into one fleet using <kbd>.</kbd>, and unselect those which should go into the other.")), Translate("Split Fleet")
+    Return
+  EndIf
+
+  % Confirm
+  UI.Message Format(Translate("Form a new fleet with %d ship%!1{s%}, leader is %s?"), newcount, Ship(newfid).Name), Translate("Split Fleet"), Translate("Yes No")
+  If UI.Result<>1 Then Return
+
+  % Do it
+  Ship(newfid).Fleet$ := newfid
+  ForEach Ship Do If Fleet$=oldfid And Marked=newmark Then Fleet$:=newfid
+
+  % Bring user there
+  If Fleet$=newfid Then Iterator(10).CurrentIndex:=newfid
+EndSub
+
+% Tow a fleet member
+Sub CCUI.Fleet.TowMember
+  % ex IFCCTowFleetMember, fleet.pas:TowMember
+  % Must be part of a fleet
+  Local TOW_MISSION = 7
+  Local fid = Fleet$, sid = Id
+  Local sh, list, UI.Result, ok, chosen
+  If Not Fleet$ Then Abort "Ship is not member of a fleet."
+
+  % Check whether this ship can tow
+  Local msn = Global.Mission(7, Owner.Real)
+  If Not IsEmpty(msn) And Not CCVP.MissionWorksOnShip(msn, Ship(Id)) Then
+    UI.Message Translate("This ship cannot tow."), Translate("Tow")
+    Return
+  EndIf
+
+  % Check intercept
+  msn := Global.Mission(Ship(fid).Mission$, Ship(fid).Owner.Real)
+  If InStr(msn->Flags, "i") Then
+    UI.Message Translate("This ship is member of a fleet which is on a intercept course. You cannot tow and intercept at the same time."), Translate("Tow")
+    Return
+  EndIf
+
+  % Build list of possible targets
+  list := Listbox(Translate("Tow"), Mission.Tow, 0, -1, "pcc2:fleetscreen")
+  ok := False
+  ForEach Ship As sh Do
+    If sh->Id<>sid And sh->Fleet$=fid And sh->Loc.X=Loc.X And sh->Loc.Y=Loc.Y Then
+      Call list->AddItem sh->Id, Reference("s", sh->Id).Name.Full
+      ok := True
+    EndIf
+  Next
+  If Mission$=7 Then
+    Call list->AddItem 0, Translate("Cancel tow")
+    ok := True
+  EndIf
+
+  % Anything?
+  If Not ok Then
+    UI.Message Translate("There is no other fleet member at this position."), Translate("Tow")
+    Return
+  EndIf
+
+  % Ask user
+  Call list->Run
+  If Not IsEmpty(UI.Result) Then
+    If UI.Result Then
+      chosen := UI.Result
+      If FindShip(Mission$=7 And Mission.Tow=sid) Then
+        UI.Message Translate("This ship is already being towed. Tow chains will not work.\nContinue anyway?"), Translate("Ship Mission"), Translate("Yes No")
+        If UI.Result<>1 Then Return
+      EndIf
+      SetMission 7, 0, chosen
+    Else
+      SetMission 0
+    EndIf
+  EndIf
+EndSub
+
 
 % Mission Selection for a starbase
 % (This dialog is required for regular ships and for Global Actions / Ship Tasks)
