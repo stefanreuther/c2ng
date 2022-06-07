@@ -111,13 +111,7 @@ namespace {
         ldr.loadResult(h.session.getGame()->currentTurn(), *h.session.getRoot(), *h.session.getGame(), resultFile, 7);
 
         // finish
-        h.session.getGame()->currentTurn().universe().postprocess(game::PlayerSet_t(7),
-                                                                  game::PlayerSet_t(7),
-                                                                  game::map::Object::Playable,
-                                                                  h.session.getGame()->mapConfiguration(),
-                                                                  h.session.getRoot()->hostVersion(),
-                                                                  h.session.getRoot()->hostConfiguration(),
-                                                                  61, *h.session.getShipList(), tx, log);
+        h.session.postprocessTurn(h.session.getGame()->currentTurn(), game::PlayerSet_t(7), game::PlayerSet_t(7), game::map::Object::Playable);
         h.session.getGame()->teamSettings().setViewpointPlayer(7);
     }
 

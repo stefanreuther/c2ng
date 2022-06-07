@@ -20,6 +20,7 @@
 #include "game/interface/userinterfacepropertyaccessor.hpp"
 #include "game/interface/userinterfacepropertystack.hpp"
 #include "game/interpreterinterface.hpp"
+#include "game/map/object.hpp"
 #include "game/reference.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/turnloader.hpp"
@@ -34,6 +35,7 @@ namespace game {
 
     class Root;
     class Game;
+    class Turn;
 
     /** Session.
         This aggregates the dynamic parts of a game session and controls lifetime of all child components.
@@ -219,6 +221,23 @@ namespace game {
             \retval true Name returned
             \retval false Invalid reference; name cannot be returned */
         bool getReferenceName(Reference ref, ObjectName which, String_t& result);
+
+        /** Postprocess a turn.
+            Used as part of the loading sequence.
+            This completes the turn data.
+
+            Requires that game, root, and shiplist are set.
+            Call is ignored if they are not.
+
+            \param t                Turn to work on
+            \param playingSet       Set of players we're playing.
+                                    Those players will be set to the given \c playability;
+                                    others will at best be ReadOnly.
+            \param availablePlayers Available players (set of loaded result files).
+                                    Used for hasFullData().
+            \param playability      Playability to use for players in \c playingSet.
+            \see game::map::Universe::postprocess() */
+        void postprocessTurn(Turn& t, PlayerSet_t playingSet, PlayerSet_t availablePlayers, game::map::Object::Playability playability);
 
         /** Save current status.
             \param opts Options, see TurnLoader::saveCurrentTurn()

@@ -355,12 +355,7 @@ namespace {
             throw game::Exception(tx("unable to load turn"));
         }
 
-        session.getGame()->currentTurn().universe().postprocess(game::PlayerSet_t(arg_race), game::PlayerSet_t(arg_race), game::map::Object::Playable,
-                                                                session.getGame()->mapConfiguration(),
-                                                                root->hostVersion(), root->hostConfiguration(),
-                                                                session.getGame()->currentTurn().getTurnNumber(),
-                                                                *session.getShipList(),
-                                                                tx, session.log());
+        session.postprocessTurn(session.getGame()->currentTurn(), game::PlayerSet_t(arg_race), game::PlayerSet_t(arg_race), game::map::Object::Playable);
         session.getGame()->setViewpointPlayer(arg_race);
 
         // Execute the process

@@ -76,10 +76,7 @@ namespace {
         r->userConfiguration().setOption("Label.Ship",   "Id",   game::config::ConfigurationOption::User);
 
         // Finish
-        g->currentTurn().universe().postprocess(game::PlayerSet_t(2), game::PlayerSet_t(2), game::map::Object::Playable,
-                                                g->mapConfiguration(),
-                                                r->hostVersion(), r->hostConfiguration(), 77 /* turn number */,
-                                                *t.session().getShipList(), t.session().translator(), t.session().log());
+        t.session().postprocessTurn(g->currentTurn(), game::PlayerSet_t(2), game::PlayerSet_t(2), game::map::Object::Playable);
         g->setViewpointPlayer(2);
 
         // Attach LabelExtra

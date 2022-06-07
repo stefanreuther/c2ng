@@ -59,10 +59,8 @@ namespace {
         p->addCurrentBaseData(bd, game::PlayerSet_t(PLAYER_NR));
         p->setPosition(game::map::Point(1000, 1000));
         p->setName("P");
-        g->currentTurn().universe().postprocess(game::PlayerSet_t(PLAYER_NR), game::PlayerSet_t(PLAYER_NR), game::map::Object::ReadOnly,
-                                                g->mapConfiguration(),
-                                                r->hostVersion(), r->hostConfiguration(), 12, *shipList, t.session().translator(), t.session().log());
         t.session().setGame(g);
+        t.session().postprocessTurn(g->currentTurn(), game::PlayerSet_t(PLAYER_NR), game::PlayerSet_t(PLAYER_NR), game::map::Object::Playable);
     }
 
     class UpdateReceiver {

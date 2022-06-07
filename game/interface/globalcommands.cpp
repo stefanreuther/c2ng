@@ -827,15 +827,10 @@ game::interface::IFHistoryLoadTurn(interpreter::Process& proc, game::Session& se
                         bool ok = flag;
                         if (ok) {
                             try {
-                                Root& root = game::actions::mustHaveRoot(m_session);
                                 Game& game = game::actions::mustHaveGame(m_session);
 
                                 int player = game.getViewpointPlayer();
-                                m_turn->universe().postprocess(game::PlayerSet_t(player), game::PlayerSet_t(player), game::map::Object::ReadOnly,
-                                                               game.mapConfiguration(),
-                                                               root.hostVersion(), root.hostConfiguration(),
-                                                               m_turnNumber, *m_session.getShipList(),
-                                                               m_session.translator(), m_session.log());
+                                m_session.postprocessTurn(*m_turn, game::PlayerSet_t(player), game::PlayerSet_t(player), game::map::Object::ReadOnly);
                                 m_historyTurn->handleLoadSucceeded(*m_turn);
                                 m_session.processList().continueProcess(m_process);
                             }

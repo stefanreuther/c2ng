@@ -14,6 +14,7 @@
 #include "game/game.hpp"
 #include "game/map/planet.hpp"
 #include "game/session.hpp"
+#include "game/test/root.hpp"
 #include "game/turn.hpp"
 #include "gfx/font.hpp"
 #include "gfx/nullengine.hpp"
@@ -56,16 +57,9 @@ namespace {
                 pl->addPlanetSource(game::PlayerSet_t(1));
                 pl->setPosition(game::map::Point(2222,3333));
                 pl->setName("Planet Express");
-                game::config::HostConfiguration config;
-                game::spec::ShipList shipList;
-                session.getGame()->currentTurn().universe().postprocess(/*playing:*/game::PlayerSet_t(1),
-                                                                        /*available:*/game::PlayerSet_t(1),
-                                                                        /*plability:*/game::map::Object::Playable,
-                                                                        session.getGame()->mapConfiguration(),
-                                                                        game::HostVersion(),
-                                                                        config,
-                                                                        1, shipList,
-                                                                        tx, log);
+                session.setRoot(new game::test::Root(game::HostVersion()));
+                session.setShipList(new game::spec::ShipList());
+                session.postprocessTurn(session.getGame()->currentTurn(), game::PlayerSet_t(1), game::PlayerSet_t(1), game::map::Object::Playable);
 
                 // Create pseudo graphics infrastructure (must live longest!)
                 gfx::NullEngine engine;

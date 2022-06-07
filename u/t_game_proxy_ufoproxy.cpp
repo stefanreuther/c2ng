@@ -60,18 +60,10 @@ namespace {
     void postprocessUniverse(SessionThread& h)
     {
         // postprocess() will set up the cursors, so that they sit on an object
-        game::Root* r = h.session().getRoot().get();
-        h.session().getGame()->currentTurn().universe()
-            .postprocess(game::PlayerSet_t(),  // Playing
-                         game::PlayerSet_t(),  // Available
-                         game::map::Object::Playable,
-                         h.session().getGame()->mapConfiguration(),
-                         r->hostVersion(),
-                         r->hostConfiguration(),
-                         77, // Turn
-                         *h.session().getShipList(),
-                         h.session().translator(),
-                         h.session().log());
+        h.session().postprocessTurn(h.session().getGame()->currentTurn(),
+                                    game::PlayerSet_t(),  // Playing
+                                    game::PlayerSet_t(),  // Available
+                                    game::map::Object::Playable);
     }
 
     template<typename T>

@@ -78,10 +78,8 @@ namespace {
         sh->addCurrentShipData(sd, PlayerSet_t(PLAYER_NR));
 
         // - finalize
-        g->currentTurn().universe().postprocess(PlayerSet_t(PLAYER_NR), PlayerSet_t(PLAYER_NR), game::map::Object::Playable, g->mapConfiguration(),
-                                                r->hostVersion(), r->hostConfiguration(), 12, *shipList, t.session().translator(), t.session().log());
-
         t.session().setGame(g);
+        t.session().postprocessTurn(g->currentTurn(), PlayerSet_t(PLAYER_NR), PlayerSet_t(PLAYER_NR), game::map::Object::Playable);
     }
 }
 

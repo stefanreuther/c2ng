@@ -295,12 +295,7 @@ interpreter::exporter::ConsoleApplication::appMain()
         throw game::Exception(tx("unable to load turn"));
     }
 
-    session.getGame()->currentTurn().universe().postprocess(game::PlayerSet_t(arg_race), game::PlayerSet_t(arg_race), game::map::Object::ReadOnly,
-                                                            session.getGame()->mapConfiguration(),
-                                                            root->hostVersion(), root->hostConfiguration(),
-                                                            session.getGame()->currentTurn().getTurnNumber(),
-                                                            *session.getShipList(),
-                                                            translator(), log());
+    session.postprocessTurn(session.getGame()->currentTurn(), game::PlayerSet_t(arg_race), game::PlayerSet_t(arg_race), game::map::Object::ReadOnly);
 
     // What do we want to export?
     std::auto_ptr<Context> array(findArray(arg_array2, session.world()));

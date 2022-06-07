@@ -43,16 +43,7 @@ namespace {
     /* Postprocess a SessionThread after ships have been added to it */
     void postprocess(game::test::SessionThread& h, game::Turn& t)
     {
-        t.universe().postprocess(game::PlayerSet_t::allUpTo(20),
-                                 game::PlayerSet_t::allUpTo(20),
-                                 game::map::Object::Playable,
-                                 h.session().getGame()->mapConfiguration(),
-                                 h.session().getRoot()->hostVersion(),
-                                 h.session().getRoot()->hostConfiguration(),
-                                 t.getTurnNumber(),
-                                 *h.session().getShipList(),
-                                 h.session().translator(),
-                                 h.session().log());
+        h.session().postprocessTurn(t, game::PlayerSet_t::allUpTo(20), game::PlayerSet_t::allUpTo(20), game::map::Object::Playable);
     }
 
 

@@ -75,12 +75,7 @@ namespace {
         addShip(h, 20, 1020, 1020, "Ever Given");
         addShip(h, 30, 1040, 1030, "Exxon Valdez");
 
-        h.session.getGame()->currentTurn().universe().postprocess(game::PlayerSet_t(2), game::PlayerSet_t(2), game::map::Object::Playable,
-                                                                  h.session.getGame()->mapConfiguration(),
-                                                                  h.session.getRoot()->hostVersion(), h.session.getRoot()->hostConfiguration(),
-                                                                  77 /* turn number */,
-                                                                  *h.session.getShipList(),
-                                                                  h.tx, h.session.log());
+        h.session.postprocessTurn(h.session.getGame()->currentTurn(), game::PlayerSet_t(2), game::PlayerSet_t(2), game::map::Object::Playable);
         h.session.getGame()->setViewpointPlayer(2);
     }
 }

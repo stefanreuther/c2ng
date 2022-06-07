@@ -450,6 +450,18 @@ game::Session::getReferenceName(Reference ref, ObjectName which, String_t& resul
     return false;
 }
 
+void
+game::Session::postprocessTurn(Turn& t, PlayerSet_t playingSet, PlayerSet_t availablePlayers, game::map::Object::Playability playability)
+{
+    const Game* g = m_game.get();
+    const Root* r = m_root.get();
+    const game::spec::ShipList* sl = m_shipList.get();
+    if (g != 0 && r != 0 && sl != 0) {
+        t.universe().postprocess(playingSet, availablePlayers, playability, g->mapConfiguration(), r->hostVersion(), r->hostConfiguration(),
+                                 t.getTurnNumber(), *sl, translator(), log());
+    }
+}
+
 std::auto_ptr<afl::base::Closure<void()> >
 game::Session::save(TurnLoader::SaveOptions_t opts, std::auto_ptr<afl::base::Closure<void(bool)> > then)
 {

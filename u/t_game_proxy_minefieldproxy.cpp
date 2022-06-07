@@ -78,19 +78,10 @@ namespace {
 
     void postprocessUniverse(SessionThread& h)
     {
-        game::Root* r = h.session().getRoot().get();
-        h.session().getGame()->currentTurn().universe()
-            .postprocess(game::PlayerSet_t() + ME,      // Playing
-                         game::PlayerSet_t() + ME + ALLY,  // Available
-                         game::map::Object::Playable,
-                         h.session().getGame()->mapConfiguration(),
-                         r->hostVersion(),
-                         r->hostConfiguration(),
-                         TURN_NR,
-                         *h.session().getShipList(),
-                         h.session().translator(),
-                         h.session().log());
-
+        h.session().postprocessTurn(h.session().getGame()->currentTurn(),
+                                    game::PlayerSet_t() + ME,      // Playing
+                                    game::PlayerSet_t() + ME + ALLY,  // Available
+                                    game::map::Object::Playable);
     }
 
     template<typename T>
