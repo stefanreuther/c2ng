@@ -117,6 +117,45 @@ namespace game { namespace map {
         \param [in] tx          Translator */
     void packShipMassRanges(ShipCargoInfos_t& result, const Ship& ship, util::NumberFormatter fmt, const game::spec::ShipList& shipList, afl::string::Translator& tx);
 
+
+    /** Information about a ship's position/location. */
+    struct ShipLocationInfo {
+        int turnNumber;                             ///< Turn number; always set.
+        afl::base::Optional<Point> position;        ///< Position, if known.
+        String_t positionName;                      ///< Name of position. Can be empty if position is not known.
+        IntegerProperty_t mass;                     ///< Mass, if known.
+        IntegerProperty_t heading;                  ///< Heading, if known. Unknown if ship did not move.
+        IntegerProperty_t warpFactor;               ///< Warp factor, if known.
+        afl::base::Optional<double> distanceMoved;  ///< Distance moved, if known.
+        ShipLocationInfo(int turnNumber)
+            : turnNumber(turnNumber), position(), positionName(), mass(), heading(), warpFactor(), distanceMoved()
+            { }
+    };
+
+    typedef std::vector<ShipLocationInfo> ShipLocationInfos_t;
+
+    /** Describe a ship's last locations.
+        Results are produces starting with the newest data.
+
+        \param [out] result     Result appended here
+        \param [in]  ship       Ship
+        \param [in]  univ       Universe (for naming locations)
+        \param [in]  turnNumber Turn number (for current info)
+        \param [in]  mapConfig  Map configuration (for naming locations, distances)
+        \param [in]  config     Host configuration (for naming locations)
+        \param [in]  host       Host version (for naming locations)
+        \param [in]  shipList   Ship list (for current mass)
+        \param [in]  tx         Translator */
+    void packShipLocationInfo(ShipLocationInfos_t& result,
+                              const Ship& ship,
+                              const Universe& univ,
+                              int turnNumber,
+                              const game::map::Configuration& mapConfig,
+                              const game::config::HostConfiguration& config,
+                              const HostVersion& host,
+                              const game::spec::ShipList& shipList,
+                              afl::string::Translator& tx);
+
 } }
 
 #endif

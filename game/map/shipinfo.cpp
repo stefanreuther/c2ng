@@ -2,6 +2,7 @@
   *  \file game/map/shipinfo.cpp
   */
 
+#include <cmath>
 #include "game/map/shipinfo.hpp"
 #include "afl/base/countof.hpp"
 #include "afl/string/format.hpp"
@@ -349,5 +350,55 @@ game::map::packShipMassRanges(ShipCargoInfos_t& result, const Ship& ship, util::
     }
     if (minCargo > 0) {
         h.addLine(tx("\xE2\x96\xB6 Min. Cargo"), minCargo, tx("kt"));
+    }
+}
+
+void
+game::map::packShipLocationInfo(ShipLocationInfos_t& result, const Ship& ship,
+                                const Universe& univ,
+                                int turnNumber,
+                                const game::map::Configuration& mapConfig,
+                                const game::config::HostConfiguration& config,
+                                const HostVersion& host,
+                                const game::spec::ShipList& shipList,
+                                afl::string::Translator& tx)
+{
+    // ex WHistoryShipPositionList::drawPart (part), WHistoryShipMovementTile::drawData (part)
+    for (int t = ship.getHistoryNewestLocationTurn(); t > 0 && ship.getHistoryLocation(t) != 0; --t) {
+        const ShipHistoryData::Track* now  = ship.getHistoryLocation(t);
+        const ShipHistoryData::Track* prev = ship.getHistoryLocation(t-1);
+
+        // Create new slot
+        result.push_back(ShipLocationInfo(t));
+        ShipLocationInfo& out = result.back();
+
+        // Fill location
+        int x, y;
+        if (now->x.get(x) && now->y.get(y)) {
+            Point pos(x, y);
+            out.position = pos;
+            out.positionName = univ.findLocationName(pos, Universe::NameOrbit | Universe::NameGravity, mapConfig, config, host, tx);
+
+            int prevX, prevY;
+            if (prev != 0 && prev->x.get(prevX) && prev->y.get(prevY)) {
+                out.distanceMoved = std::sqrt(double(mapConfig.getSquaredDistance(pos, Point(prevX, prevY))));
+            }
+        }
+
+        // Fill simple attributes
+        // @change Special-case for current position; PCC2 does not have that.
+        // This is partially inconsistent because it has different behaviour for own and foreign ships:
+        // own ships will show mass/speed/heading they WILL use, foreign show mass/speed/heading they DID use.
+        // However, PCC has always behaved this way by updating history when saving;
+        // we now just speed that up by "updating" immediately.
+        if (t == turnNumber) {
+            out.mass = ship.getMass(shipList);
+            out.heading = ship.getHeading();
+            out.warpFactor = ship.getWarpFactor();
+        } else {
+            out.mass = now->mass;
+            out.heading = now->heading;
+            out.warpFactor = now->speed;
+        }
     }
 }

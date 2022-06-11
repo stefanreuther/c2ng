@@ -132,6 +132,7 @@ game::map::Universe::Universe()
       m_drawings(),
       m_universeChanged(false),
       m_playedShips(m_ships),
+      m_historyShips(m_ships),
       m_playedPlanets(m_planets),
       m_playedBases(m_planets),
       m_fleets(m_ships),
@@ -278,6 +279,7 @@ game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePl
 
     // Signal sets
     m_playedShips.sig_setChange.raise(0);
+    m_historyShips.sig_setChange.raise(0);
     m_playedPlanets.sig_setChange.raise(0);
     m_playedBases.sig_setChange.raise(0);
     m_fleets.sig_setChange.raise(0);

@@ -20,6 +20,7 @@ namespace game { namespace map {
         void setUniverse(Universe* univ, const Configuration* mapConfig);
 
         SimpleObjectCursor& currentShip();
+        SimpleObjectCursor& currentHistoryShip();
         SimpleObjectCursor& currentPlanet();
         SimpleObjectCursor& currentBase();
         SimpleObjectCursor& currentFleet();
@@ -34,6 +35,7 @@ namespace game { namespace map {
         static const int ShipScreen = 1;
         static const int PlanetScreen = 2;
         static const int BaseScreen = 3;
+        static const int HistoryScreen = 6;
         static const int FleetScreen = 10;
         static const int Ufos = 30;
         static const int IonStorms = 31;
@@ -42,6 +44,7 @@ namespace game { namespace map {
      private:
         Universe* m_pUniverse;
         SimpleObjectCursor m_currentShip;
+        SimpleObjectCursor m_currentHistoryShip;
         SimpleObjectCursor m_currentPlanet;
         SimpleObjectCursor m_currentBase;
         SimpleObjectCursor m_currentFleet;

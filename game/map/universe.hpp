@@ -12,6 +12,7 @@
 #include "game/map/drawingcontainer.hpp"
 #include "game/map/explosiontype.hpp"
 #include "game/map/fleettype.hpp"
+#include "game/map/historyshiptype.hpp"
 #include "game/map/ionstormtype.hpp"
 #include "game/map/minefieldtype.hpp"
 #include "game/map/object.hpp"
@@ -67,6 +68,11 @@ namespace game { namespace map {
             \return PlayedShipType */
         PlayedShipType& playedShips();
         const PlayedShipType& playedShips() const;
+
+        /** Access history ships.
+            \return HistoryShipType */
+        HistoryShipType& historyShips();
+        const HistoryShipType& historyShips() const;
 
         /** Access planets.
             \return planet vector */
@@ -306,6 +312,7 @@ namespace game { namespace map {
 
         // Types (required for everything that has a cursor)
         PlayedShipType m_playedShips;
+        HistoryShipType m_historyShips;
         PlayedPlanetType m_playedPlanets;
         PlayedBaseType m_playedBases;
         FleetType m_fleets;
@@ -343,6 +350,18 @@ inline const game::map::PlayedShipType&
 game::map::Universe::playedShips() const
 {
     return m_playedShips;
+}
+
+inline game::map::HistoryShipType&
+game::map::Universe::historyShips()
+{
+    return m_historyShips;
+}
+
+inline const game::map::HistoryShipType&
+game::map::Universe::historyShips() const
+{
+    return m_historyShips;
 }
 
 inline game::map::ObjectVector<game::map::Planet>&

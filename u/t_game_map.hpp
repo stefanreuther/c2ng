@@ -131,6 +131,12 @@ class TestGameMapFleetMember : public CxxTest::TestSuite {
     void testSetFleetNumberForeign();
 };
 
+class TestGameMapHistoryShipType : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testIteration();
+};
+
 class TestGameMapIonStorm : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -460,6 +466,11 @@ class TestGameMapShipData : public CxxTest::TestSuite {
     void testIsTransferActiveEmpty();
     void testIsTransferActiveFull();
     void testIsTransferActivePart();
+};
+
+class TestGameMapShipInfo : public CxxTest::TestSuite {
+ public:
+    void testPackShipLocationInfo();
 };
 
 class TestGameMapShipPredictor : public CxxTest::TestSuite {
