@@ -9,7 +9,9 @@
 client::tiles::ErrorTile::ErrorTile(String_t text, ui::Root& root)
     : m_text(text),
       m_root(root)
-{ }
+{
+    setState(DisabledState, true);
+}
 
 client::tiles::ErrorTile::~ErrorTile()
 { }
