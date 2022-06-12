@@ -32,7 +32,7 @@ namespace client { namespace tiles {
                              Tiles will dispatch their keys here.
             @param observer  ObjectObserver managing the control screen's object */
         TileFactory(client::si::UserSide& user,
-                    client::widgets::KeymapWidget& keys,
+                    gfx::KeyEventConsumer& keys,
                     game::proxy::ObjectObserver& observer);
         ~TileFactory();
 
@@ -72,7 +72,7 @@ namespace client { namespace tiles {
 
      private:
         client::si::UserSide& m_userSide;
-        client::widgets::KeymapWidget& m_keys;
+        gfx::KeyEventConsumer& m_keys;
         game::proxy::ObjectObserver& m_observer;
         game::proxy::TaskEditorProxy* m_pTaskEditor;
         game::proxy::FleetProxy* m_pFleetProxy;

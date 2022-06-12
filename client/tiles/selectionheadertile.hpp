@@ -5,6 +5,7 @@
 #define C2NG_CLIENT_TILES_SELECTIONHEADERTILE_HPP
 
 #include "game/proxy/objectobserver.hpp"
+#include "gfx/keyeventconsumer.hpp"
 #include "ui/root.hpp"
 #include "ui/widget.hpp"
 #include "ui/widgets/button.hpp"
@@ -14,7 +15,7 @@ namespace client { namespace tiles {
 
     class SelectionHeaderTile : public ui::Widget {
      public:
-        SelectionHeaderTile(ui::Root& root, ui::Widget& keys);
+        SelectionHeaderTile(ui::Root& root, gfx::KeyEventConsumer& keys);
         ~SelectionHeaderTile();
 
         virtual void draw(gfx::Canvas& can);

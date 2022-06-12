@@ -6,8 +6,8 @@
 
 #include "afl/base/deleter.hpp"
 #include "afl/bits/smallset.hpp"
-#include "client/widgets/keymapwidget.hpp"
 #include "game/session.hpp"
+#include "gfx/keyeventconsumer.hpp"
 #include "gfx/resourceprovider.hpp"
 #include "ui/colorscheme.hpp"
 #include "ui/widgets/framegroup.hpp"
@@ -52,7 +52,7 @@ namespace client { namespace widgets {
         };
         static const size_t NUM_TEXTS = txtSubtitle+1;
 
-        ControlScreenHeader(ui::Root& root, KeymapWidget& kmw);
+        ControlScreenHeader(ui::Root& root, gfx::KeyEventConsumer& kmw);
         ~ControlScreenHeader();
 
         void enableButton(Button btn, ui::FrameType type);
@@ -84,7 +84,7 @@ namespace client { namespace widgets {
         ui::widgets::ImageButton* m_image;
         Buttons_t m_visibleButtons;
 
-        void createChildWidgets(ui::Root& root, KeymapWidget& kmw);
+        void createChildWidgets(ui::Root& root, gfx::KeyEventConsumer& kmw);
         void setChildWidgetPositions();
         void setChildPosition(ui::Widget* widget, int x, int y, int w, int h);
     };

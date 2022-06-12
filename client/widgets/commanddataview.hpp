@@ -5,13 +5,12 @@
 #define C2NG_CLIENT_WIDGETS_COMMANDDATAVIEW_HPP
 
 #include "client/widgets/collapsibledataview.hpp"
-#include "util/rich/text.hpp"
-#include "util/key.hpp"
+#include "gfx/keyeventconsumer.hpp"
 #include "ui/widgets/framegroup.hpp"
+#include "util/key.hpp"
+#include "util/rich/text.hpp"
 
 namespace client { namespace widgets {
-
-    class KeymapWidget;
 
     class CommandDataView : public CollapsibleDataView {
      public:
@@ -20,7 +19,7 @@ namespace client { namespace widgets {
             ButtonsRight
         };
 
-        CommandDataView(ui::Root& root, KeymapWidget& widget, Mode mode);
+        CommandDataView(ui::Root& root, gfx::KeyEventConsumer& widget, Mode mode);
         ~CommandDataView();
 
         virtual void setChildPositions();
@@ -33,7 +32,7 @@ namespace client { namespace widgets {
      private:
         struct Line;
 
-        KeymapWidget& m_keys;
+        gfx::KeyEventConsumer& m_keys;
 
         afl::container::PtrVector<Line> m_lines;
         Mode m_mode;

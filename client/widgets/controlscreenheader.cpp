@@ -161,7 +161,7 @@ client::widgets::ControlScreenHeader::TitleWidget::handleMouse(gfx::Point pt, Mo
  */
 
 
-client::widgets::ControlScreenHeader::ControlScreenHeader(ui::Root& root, KeymapWidget& kmw)
+client::widgets::ControlScreenHeader::ControlScreenHeader(ui::Root& root, gfx::KeyEventConsumer& kmw)
     : m_deleter(),
       m_visibleButtons()
 {
@@ -282,7 +282,7 @@ client::widgets::ControlScreenHeader::handleMouse(gfx::Point pt, MouseButtons_t 
 }
 
 void
-client::widgets::ControlScreenHeader::createChildWidgets(ui::Root& root, KeymapWidget& kmw)
+client::widgets::ControlScreenHeader::createChildWidgets(ui::Root& root, gfx::KeyEventConsumer& kmw)
 {
     // Create buttons
     static_assert(countof(BUTTONS) == NUM_BUTTONS, "countof BUTTONS");

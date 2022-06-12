@@ -37,7 +37,7 @@ namespace client { namespace tiles {
                 }
         };
 
-        ShipCargoTile(ui::Root& root, afl::string::Translator& tx, client::widgets::KeymapWidget& kmw);
+        ShipCargoTile(ui::Root& root, afl::string::Translator& tx, gfx::KeyEventConsumer& kmw);
         void attach(game::proxy::ObjectObserver& oop);
 
         void setData(const Data& data);
@@ -59,7 +59,7 @@ namespace client { namespace tiles {
 
         util::RequestReceiver<ShipCargoTile> m_receiver;
 
-        void init(ui::Root& root, client::widgets::KeymapWidget& kmw);
+        void init(ui::Root& root, gfx::KeyEventConsumer& kmw);
         void setGaugeData(client::widgets::SimpleGauge& gauge, const Data& data, size_t index);
         void setReviewData(ui::widgets::TextButton& button, Data::Transfer t);
     };

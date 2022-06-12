@@ -11,7 +11,6 @@
 #include "gfx/clipfilter.hpp"
 #include "ui/layout/hbox.hpp"
 #include "ui/widgets/button.hpp"
-#include "client/widgets/keymapwidget.hpp"
 
 // FIXME: move elsewhere?
 namespace client { namespace widgets { namespace {
@@ -99,7 +98,7 @@ struct client::widgets::CommandDataView::Line {
         }
 };
 
-client::widgets::CommandDataView::CommandDataView(ui::Root& root, KeymapWidget& widget, Mode mode)
+client::widgets::CommandDataView::CommandDataView(ui::Root& root, gfx::KeyEventConsumer& widget, Mode mode)
     : CollapsibleDataView(root),
       m_keys(widget),
       m_lines(),

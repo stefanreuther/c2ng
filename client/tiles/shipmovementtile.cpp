@@ -93,7 +93,7 @@ class client::tiles::ShipMovementTile::Job : public util::Request<ShipMovementTi
 };
 
 
-client::tiles::ShipMovementTile::ShipMovementTile(ui::Root& root, afl::string::Translator& tx, client::widgets::KeymapWidget& kmw)
+client::tiles::ShipMovementTile::ShipMovementTile(ui::Root& root, afl::string::Translator& tx, gfx::KeyEventConsumer& kmw)
     : CollapsibleDataView(root),
       m_translator(tx),
       m_table(root, NumColumns, NumLines),
@@ -342,7 +342,7 @@ client::tiles::ShipMovementTile::getPreferredChildSize() const
 }
 
 void
-client::tiles::ShipMovementTile::init(client::widgets::KeymapWidget& kmw)
+client::tiles::ShipMovementTile::init(gfx::KeyEventConsumer& kmw)
 {
     static const char*const LABELS[] = {
         N_("Location:"),

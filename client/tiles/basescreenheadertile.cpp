@@ -14,7 +14,7 @@
 using ui::widgets::FrameGroup;
 using client::widgets::getFrameTypeFromTaskStatus;
 
-client::tiles::BaseScreenHeaderTile::BaseScreenHeaderTile(ui::Root& root, client::widgets::KeymapWidget& kmw, bool forTask)
+client::tiles::BaseScreenHeaderTile::BaseScreenHeaderTile(ui::Root& root, gfx::KeyEventConsumer& kmw, bool forTask)
     : ControlScreenHeader(root, kmw),
       m_receiver(root.engine().dispatcher(), *this),
       m_forTask(forTask)

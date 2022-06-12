@@ -4,15 +4,14 @@
 #ifndef C2NG_CLIENT_WIDGETS_STANDARDDATAVIEW_HPP
 #define C2NG_CLIENT_WIDGETS_STANDARDDATAVIEW_HPP
 
+#include "afl/container/ptrvector.hpp"
 #include "client/widgets/collapsibledataview.hpp"
+#include "gfx/keyeventconsumer.hpp"
 #include "ui/rich/documentview.hpp"
 #include "ui/widgets/basebutton.hpp"
-#include "afl/container/ptrvector.hpp"
 #include "ui/widgets/framegroup.hpp"
 
 namespace client { namespace widgets {
-
-    class KeymapWidget;
 
     class StandardDataView : public CollapsibleDataView {
      public:
@@ -21,7 +20,7 @@ namespace client { namespace widgets {
             Bottom
         };
 
-        StandardDataView(ui::Root& root, gfx::Point sizeInCells, KeymapWidget& widget);
+        StandardDataView(ui::Root& root, gfx::Point sizeInCells, gfx::KeyEventConsumer& widget);
         ~StandardDataView();
 
         virtual void setChildPositions();
@@ -41,7 +40,7 @@ namespace client { namespace widgets {
         ui::rich::DocumentView m_docView;
         util::rich::Text m_text;
         afl::container::PtrVector<Button> m_buttons;
-        KeymapWidget& m_keys;
+        gfx::KeyEventConsumer& m_keys;
 
         void updateText();
         Button* findButton(util::Key_t key);

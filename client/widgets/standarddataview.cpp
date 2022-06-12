@@ -5,7 +5,6 @@
 #include "client/widgets/standarddataview.hpp"
 #include "ui/widgets/framegroup.hpp"
 #include "ui/layout/hbox.hpp"
-#include "client/widgets/keymapwidget.hpp"
 
 struct client::widgets::StandardDataView::Button {
     Button(ButtonAlignment alignment, int x, int y, std::auto_ptr<ui::widgets::BaseButton> btn, ui::Root& root)
@@ -27,7 +26,7 @@ struct client::widgets::StandardDataView::Button {
 };
 
 
-client::widgets::StandardDataView::StandardDataView(ui::Root& root, gfx::Point sizeInCells, KeymapWidget& widget)
+client::widgets::StandardDataView::StandardDataView(ui::Root& root, gfx::Point sizeInCells, gfx::KeyEventConsumer& widget)
     : CollapsibleDataView(root),
       m_sizeInCells(sizeInCells),
       m_docView(sizeInCells.scaledBy(root.provider().getFont(gfx::FontRequest())->getCellSize()), 0, root.provider()),

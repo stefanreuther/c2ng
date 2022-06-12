@@ -7,7 +7,7 @@
 #include "client/marker.hpp"
 #include "game/proxy/objectlistener.hpp"
 
-client::tiles::SelectionHeaderTile::SelectionHeaderTile(ui::Root& root, ui::Widget& keys)
+client::tiles::SelectionHeaderTile::SelectionHeaderTile(ui::Root& root, gfx::KeyEventConsumer& keys)
     : m_root(root),
       m_name(),
       m_marked(),

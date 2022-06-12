@@ -13,7 +13,7 @@ namespace client { namespace tiles {
 
     class BaseScreenHeaderTile : public client::widgets::ControlScreenHeader {
      public:
-        BaseScreenHeaderTile(ui::Root& root, client::widgets::KeymapWidget& kmw, bool forTask);
+        BaseScreenHeaderTile(ui::Root& root, gfx::KeyEventConsumer& kmw, bool forTask);
         void attach(game::proxy::ObjectObserver& oop);
 
      private:

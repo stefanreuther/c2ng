@@ -19,7 +19,7 @@ namespace client { namespace tiles {
             ShipTaskScreen
         };
 
-        ShipScreenHeaderTile(ui::Root& root, client::widgets::KeymapWidget& kmw, Kind k);
+        ShipScreenHeaderTile(ui::Root& root, gfx::KeyEventConsumer& kmw, Kind k);
         void attach(game::proxy::ObjectObserver& oop);
 
      private:

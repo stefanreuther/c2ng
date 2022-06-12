@@ -54,7 +54,7 @@ class client::tiles::ShipCargoTile::Job : public util::Request<ShipCargoTile> {
 
 
 
-client::tiles::ShipCargoTile::ShipCargoTile(ui::Root& root, afl::string::Translator& tx, client::widgets::KeymapWidget& kmw)
+client::tiles::ShipCargoTile::ShipCargoTile(ui::Root& root, afl::string::Translator& tx, gfx::KeyEventConsumer& kmw)
     : CollapsibleDataView(root),
       m_translator(tx),
       m_table(root, NumColumns, NumLines),
@@ -70,7 +70,7 @@ client::tiles::ShipCargoTile::ShipCargoTile(ui::Root& root, afl::string::Transla
 }
 
 void
-client::tiles::ShipCargoTile::init(ui::Root& root, client::widgets::KeymapWidget& kmw)
+client::tiles::ShipCargoTile::init(ui::Root& root, gfx::KeyEventConsumer& kmw)
 {
     // Configure the table
     // FIXME: use skin colors

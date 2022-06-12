@@ -16,7 +16,7 @@
 #include "game/turn.hpp"
 #include "ui/res/resid.hpp"
 
-client::tiles::FleetScreenHeaderTile::FleetScreenHeaderTile(ui::Root& root, client::widgets::KeymapWidget& kmw)
+client::tiles::FleetScreenHeaderTile::FleetScreenHeaderTile(ui::Root& root, gfx::KeyEventConsumer& kmw)
     : ControlScreenHeader(root, kmw),
       m_receiver(root.engine().dispatcher(), *this)
 {

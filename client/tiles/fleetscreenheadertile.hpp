@@ -19,7 +19,7 @@ namespace client { namespace tiles {
         /** Constructor.
             @param root   Root
             @param kmw    Keymap widget to receive keyboard input */
-        FleetScreenHeaderTile(ui::Root& root, client::widgets::KeymapWidget& kmw);
+        FleetScreenHeaderTile(ui::Root& root, gfx::KeyEventConsumer& kmw);
 
         /** Attach to ObjectObserver.
             @param oop ObjectObserver */

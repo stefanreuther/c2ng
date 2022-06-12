@@ -31,7 +31,7 @@ namespace client { namespace tiles {
                 }
         };
 
-        ShipMovementTile(ui::Root& root, afl::string::Translator& tx, client::widgets::KeymapWidget& kmw);
+        ShipMovementTile(ui::Root& root, afl::string::Translator& tx, gfx::KeyEventConsumer& kmw);
         void attach(game::proxy::ObjectObserver& oop);
 
         void setData(const Data& data);
@@ -51,7 +51,7 @@ namespace client { namespace tiles {
         ui::widgets::FrameGroup m_fleetFrame;
         util::RequestReceiver<ShipMovementTile> m_receiver;
 
-        void init(client::widgets::KeymapWidget& kmw);
+        void init(gfx::KeyEventConsumer& kmw);
     };
 
 } }

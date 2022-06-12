@@ -13,7 +13,7 @@
 using ui::widgets::FrameGroup;
 using client::widgets::getFrameTypeFromTaskStatus;
 
-client::tiles::ShipScreenHeaderTile::ShipScreenHeaderTile(ui::Root& root, client::widgets::KeymapWidget& kmw, Kind k)
+client::tiles::ShipScreenHeaderTile::ShipScreenHeaderTile(ui::Root& root, gfx::KeyEventConsumer& kmw, Kind k)
     : ControlScreenHeader(root, kmw),
       m_receiver(root.engine().dispatcher(), *this),
       m_kind(k)

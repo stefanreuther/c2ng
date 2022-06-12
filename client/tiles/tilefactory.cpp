@@ -235,10 +235,10 @@ namespace {
      public:
         virtual void configure(StandardDataView& dv, ui::Root& root) = 0;
 
-        ui::Widget* run(client::widgets::KeymapWidget& keys, int wi, int he, const char* name, afl::base::Deleter& deleter, client::si::UserSide& user, game::proxy::ObjectObserver& oop);
+        ui::Widget* run(gfx::KeyEventConsumer& keys, int wi, int he, const char* name, afl::base::Deleter& deleter, client::si::UserSide& user, game::proxy::ObjectObserver& oop);
     };
 
-    ui::Widget* DataViewFactory::run(client::widgets::KeymapWidget& keys,
+    ui::Widget* DataViewFactory::run(gfx::KeyEventConsumer& keys,
                                      int wi, int he,
                                      const char* name,
                                      afl::base::Deleter& deleter,
@@ -262,10 +262,10 @@ namespace {
      public:
         virtual void configure(client::widgets::CommandDataView& dv) = 0;
 
-        ui::Widget* run(client::widgets::KeymapWidget& keys, client::widgets::CommandDataView::Mode align, const char* name, afl::base::Deleter& deleter, client::si::UserSide& user, game::proxy::ObjectObserver& oop);
+        ui::Widget* run(gfx::KeyEventConsumer& keys, client::widgets::CommandDataView::Mode align, const char* name, afl::base::Deleter& deleter, client::si::UserSide& user, game::proxy::ObjectObserver& oop);
     };
 
-    ui::Widget* CommandDataViewFactory::run(client::widgets::KeymapWidget& keys,
+    ui::Widget* CommandDataViewFactory::run(gfx::KeyEventConsumer& keys,
                                             client::widgets::CommandDataView::Mode align,
                                             const char* name,
                                             afl::base::Deleter& deleter,
@@ -306,7 +306,7 @@ namespace {
  */
 
 client::tiles::TileFactory::TileFactory(client::si::UserSide& user,
-                                        client::widgets::KeymapWidget& keys,
+                                        gfx::KeyEventConsumer& keys,
                                         game::proxy::ObjectObserver& observer)
     : m_userSide(user),
       m_keys(keys),
