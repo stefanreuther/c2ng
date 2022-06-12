@@ -23,10 +23,11 @@
 #include "ui/eventloop.hpp"
 #include "ui/widgets/panel.hpp"
 #include "client/tiles/historyadaptor.hpp"
+#include "client/widgets/keymapwidget.hpp"
 
 namespace client { namespace screens {
 
-    class ControlScreen : private client::si::Control {
+    class ControlScreen : private client::si::Control, private gfx::KeyEventConsumer {
      public:
         struct Definition {
             client::si::OutputState::Target target;
@@ -95,6 +96,9 @@ namespace client { namespace screens {
         virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text);
         virtual game::interface::ContextProvider* createContextProvider();
 
+        // KeyEventConsumer:
+        virtual bool handleKey(util::Key_t key, int prefix);
+
         void setId(game::Id_t id);
         void setPositions(game::map::Point origin, game::map::Point target, bool isHyperdriving);
         void setTarget(game::map::Point target);
@@ -112,6 +116,7 @@ namespace client { namespace screens {
         client::map::MovementOverlay m_movementOverlay;
         client::map::MinefieldMissionOverlay m_minefieldOverlay;
         client::widgets::ScanResult m_scanResult;
+        client::widgets::KeymapWidget m_keymapWidget;
         game::map::Point m_center;
 
         std::auto_ptr<game::proxy::TaskEditorProxy> m_taskEditorProxy;

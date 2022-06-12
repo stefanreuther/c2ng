@@ -16,7 +16,6 @@
 #include "client/tiles/selectionheadertile.hpp"
 #include "client/tiles/shipscreenheadertile.hpp"
 #include "client/tiles/tilefactory.hpp"
-#include "client/widgets/keymapwidget.hpp"
 #include "client/widgets/scanresult.hpp"
 #include "game/interface/contextprovider.hpp"
 #include "game/interface/iteratorcontext.hpp"
@@ -38,6 +37,7 @@
 #include "ui/layout/vbox.hpp"
 #include "ui/prefixargument.hpp"
 #include "ui/spacer.hpp"
+#include "ui/widgets/keyforwarder.hpp"
 
 using interpreter::makeBooleanValue;
 using interpreter::makeIntegerValue;
@@ -577,6 +577,7 @@ client::screens::ControlScreen::ControlScreen(client::si::UserSide& us, int nr, 
       m_movementOverlay(root().engine().dispatcher(), interface().gameSender(), m_mapWidget, us.translator()),
       m_minefieldOverlay(root(), us.translator()),
       m_scanResult(root(), interface().gameSender(), translator()),
+      m_keymapWidget(interface().gameSender(), root().engine().dispatcher(), *this),
       m_center(),
       m_taskEditorProxy(),
       m_taskKind(interpreter::Process::pkDefault),
@@ -620,11 +621,10 @@ client::screens::ControlScreen::run(client::si::InputState& in, client::si::Outp
     // Build it
     ControlScreenColorScheme panelColors(root.provider(), "bg.cscreen", m_panel, ui::DARK_COLOR_SET, root.colorScheme());
     m_panel.setColorScheme(panelColors);
-    client::widgets::KeymapWidget keys(interface().gameSender(), root.engine().dispatcher(), *this);
     game::proxy::CursorObserverProxy oop(interface().gameSender(), std::auto_ptr<game::map::ObjectCursorFactory>(new ScreenCursorFactory(m_state)));
 
     ui::Group tileGroup(ui::layout::VBox::instance5);
-    client::tiles::TileFactory(interface(), keys, oop)
+    client::tiles::TileFactory(interface(), *this, oop)
         .withTaskEditorProxy(m_taskEditorProxy.get())
         .withFleetProxy(m_fleetProxy.get())
         .withHistoryAdaptor(m_historyAdaptor.get())
@@ -634,15 +634,16 @@ client::screens::ControlScreen::run(client::si::InputState& in, client::si::Outp
 
     m_minefieldOverlay.attach(oop);
 
-    keys.setKeymapName(m_definition.keymapName);
+    m_keymapWidget.setKeymapName(m_definition.keymapName);
 
     ui::Group mapGroup(ui::layout::VBox::instance5);
     mapGroup.add(m_mapWidget);
     mapGroup.add(m_scanResult);
 
     ui::PrefixArgument prefix(root);
+    ui::widgets::KeyForwarder forwarder(*this);
 
-    m_panel.add(keys);
+    m_panel.add(forwarder);
     m_panel.add(prefix);
     m_panel.add(mapGroup);
     m_panel.setExtent(root.getExtent());
@@ -765,6 +766,38 @@ game::interface::ContextProvider*
 client::screens::ControlScreen::createContextProvider()
 {
     return new ContextProvider(m_state);
+}
+
+bool
+client::screens::ControlScreen::handleKey(util::Key_t key, int prefix)
+{
+    // Tile buttons will generate key events to be handled by the user keymap, but also to be handled by us.
+    // We need a single target for key events, so we route them from here to m_keymapWidget manually.
+
+    // Handle user keys
+    if (m_keymapWidget.handleKey(key, prefix)) {
+        return true;
+    }
+
+    // Tabbing for history
+    // ex WHistoryScreen::handleEvent
+    if (m_historyAdaptor.get() != 0) {
+        if ((key & ~(util::KeyMod_Shift | util::KeyMod_Ctrl)) == util::Key_Tab) {
+            if (const game::map::ShipLocationInfo* p = m_historyAdaptor->getCurrentTurnInformation()) {
+                if (const game::map::Point* pt = p->position.get()) {
+                    game::proxy::HistoryShipProxy::Mode mode =
+                        (key & util::KeyMod_Shift) != 0
+                        ? game::proxy::HistoryShipProxy::Previous
+                        : game::proxy::HistoryShipProxy::Next;
+                    bool marked = (key & util::KeyMod_Ctrl) != 0;
+                    m_historyAdaptor->proxy().browseAt(*pt, mode, marked);
+                }
+            }
+        }
+        return true;
+    }
+
+    return false;
 }
 
 void
