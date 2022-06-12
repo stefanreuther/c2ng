@@ -630,6 +630,11 @@ Sub Tile.ShipEquipment
   Tile$ShipEquipment.Common False
 EndSub
 
+% Ship Equipment (for history); otherwise same as Tile.ShipEquipment
+Sub Tile.HistoryEquipment
+  Tile$ShipEquipment.Common True
+EndSub
+
 % Narrow ship equipment
 % - called in ship context
 % - call SetContent with 25x5 rich-text string

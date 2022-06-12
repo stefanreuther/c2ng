@@ -248,6 +248,10 @@ namespace {
                 ctl.handleStateChange(link, OutputState::BaseScreen);
                 ok = true;
                 break;
+             case ScreenHistory::HistoryShip:
+                ctl.handleStateChange(link, OutputState::HistoryScreen);
+                ok = true;
+                break;
              case ScreenHistory::Fleet:
                 ctl.handleStateChange(link, OutputState::FleetScreen);
                 ok = true;
@@ -2924,6 +2928,10 @@ client::si::IFUIGotoScreen(game::Session& session, ScriptSide& si, RequestLink1 
 
      case 4:
         si.postNewTask(link, new StateChangeTask(OutputState::Starchart));
+        break;
+
+     case 6:
+        enterScreen(game::map::Cursors::HistoryScreen, OutputState::HistoryScreen, obj, session, si, link);
         break;
 
      case 10:

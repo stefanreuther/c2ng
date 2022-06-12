@@ -39,6 +39,7 @@
 #include "client/si/inputstate.hpp"
 #include "client/si/outputstate.hpp"
 #include "client/si/userside.hpp"
+#include "client/tiles/historyadaptor.hpp"
 #include "client/usercallback.hpp"
 #include "game/actions/preconditions.hpp"
 #include "game/browser/accountmanager.hpp"
@@ -828,6 +829,15 @@ namespace {
 
              case OutputState::BaseScreen:
                 client::screens::ControlScreen(us, game::map::Cursors::BaseScreen, client::screens::ControlScreen::BaseScreen).run(in, out);
+                in = InputState();
+                in.setProcess(out.getProcess());
+                state = out.getTarget();
+                break;
+
+             case OutputState::HistoryScreen:
+                client::screens::ControlScreen(us, game::map::Cursors::HistoryScreen, client::screens::ControlScreen::HistoryScreen)
+                    .withHistoryAdaptor()
+                    .run(in, out);
                 in = InputState();
                 in.setProcess(out.getProcess());
                 state = out.getTarget();

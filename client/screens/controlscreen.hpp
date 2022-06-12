@@ -22,6 +22,7 @@
 #include "interpreter/process.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/widgets/panel.hpp"
+#include "client/tiles/historyadaptor.hpp"
 
 namespace client { namespace screens {
 
@@ -37,6 +38,7 @@ namespace client { namespace screens {
         static const Definition ShipScreen;
         static const Definition PlanetScreen;
         static const Definition BaseScreen;
+        static const Definition HistoryScreen;
         static const Definition FleetScreen;
         static const Definition ShipTaskScreen;
         static const Definition PlanetTaskScreen;
@@ -47,6 +49,8 @@ namespace client { namespace screens {
         ControlScreen& withTaskEditor(interpreter::Process::ProcessKind kind);
 
         ControlScreen& withFleetProxy();
+
+        ControlScreen& withHistoryAdaptor();
 
         void run(client::si::InputState& in, client::si::OutputState& out);
 
@@ -100,6 +104,7 @@ namespace client { namespace screens {
         void onDoubleClick(game::map::Point target);
         void onTaskEditorShipChange(const game::proxy::TaskEditorProxy::ShipStatus& st);
         void onFleetChange();
+        void onHistoryTurnChange();
 
         ui::widgets::Panel m_panel;
         client::map::Widget m_mapWidget;
@@ -112,6 +117,7 @@ namespace client { namespace screens {
         std::auto_ptr<game::proxy::TaskEditorProxy> m_taskEditorProxy;
         interpreter::Process::ProcessKind m_taskKind;
         std::auto_ptr<game::proxy::FleetProxy> m_fleetProxy;
+        std::auto_ptr<client::tiles::HistoryAdaptor> m_historyAdaptor;
 
         // should be last:
         util::RequestReceiver<ControlScreen> m_reply;

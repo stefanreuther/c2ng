@@ -228,6 +228,13 @@ const client::screens::ControlScreen::Definition client::screens::ControlScreen:
     "BASESCREEN",
     "BASESCREEN",
 };
+const client::screens::ControlScreen::Definition client::screens::ControlScreen::HistoryScreen = {
+    client::si::OutputState::HistoryScreen,
+    ScreenHistory::HistoryShip,
+    interpreter::Process::pkDefault,
+    "HISTORYSCREEN",
+    "HISTORYSCREEN",
+};
 const client::screens::ControlScreen::Definition client::screens::ControlScreen::FleetScreen = {
     client::si::OutputState::FleetScreen,
     ScreenHistory::Fleet,
@@ -509,17 +516,6 @@ bool
 client::screens::ControlScreen::Proprietor::set(game::interface::UserInterfaceProperty prop, const afl::data::Value* p)
 {
     // ex WControlScreen::setProperty
-    class Updater : public util::Request<ControlScreen> {
-     public:
-        Updater(Point pt)
-            : m_point(pt)
-            { }
-        void handle(ControlScreen& cs)
-            { cs.onScannerMove(m_point); }
-     private:
-        Point m_point;
-    };
-
     // Do it
     switch (prop) {
      case game::interface::iuiScanX:
@@ -534,7 +530,7 @@ client::screens::ControlScreen::Proprietor::set(game::interface::UserInterfacePr
                 m_scanPosition = newPos;
 
                 // Update UI
-                m_reply.postNewRequest(new Updater(newPos));
+                m_reply.postRequest(&ControlScreen::onScannerMove, newPos);
             }
             return true;
         } else {
@@ -585,6 +581,7 @@ client::screens::ControlScreen::ControlScreen(client::si::UserSide& us, int nr, 
       m_taskEditorProxy(),
       m_taskKind(interpreter::Process::pkDefault),
       m_fleetProxy(),
+      m_historyAdaptor(),
       m_reply(us.root().engine().dispatcher(), *this),
       m_proprietor(us.gameSender().makeTemporary(new ProprietorFromSession(m_state, m_reply.getSender())))
 {
@@ -606,6 +603,13 @@ client::screens::ControlScreen::withFleetProxy()
     return *this;
 }
 
+client::screens::ControlScreen&
+client::screens::ControlScreen::withHistoryAdaptor()
+{
+    m_historyAdaptor.reset(new client::tiles::HistoryAdaptor(interface().gameSender(), root().engine().dispatcher()));
+    return *this;
+}
+
 void
 client::screens::ControlScreen::run(client::si::InputState& in, client::si::OutputState& out)
 {
@@ -623,6 +627,7 @@ client::screens::ControlScreen::run(client::si::InputState& in, client::si::Outp
     client::tiles::TileFactory(interface(), keys, oop)
         .withTaskEditorProxy(m_taskEditorProxy.get())
         .withFleetProxy(m_fleetProxy.get())
+        .withHistoryAdaptor(m_historyAdaptor.get())
         .createLayout(tileGroup, m_definition.layoutName, deleter);
     tileGroup.add(deleter.addNew(new ui::Spacer()));
     m_panel.add(tileGroup);
@@ -644,7 +649,11 @@ client::screens::ControlScreen::run(client::si::InputState& in, client::si::Outp
     m_panel.setState(ui::Widget::ModalState, true);
     root.add(m_panel);
 
-    oop.addNewListener(new Updater(m_reply.getSender(), m_fleetProxy.get() != 0));
+    if (m_historyAdaptor.get() != 0) {
+        m_historyAdaptor->sig_turnChange.add(this, &ControlScreen::onHistoryTurnChange);
+    } else {
+        oop.addNewListener(new Updater(m_reply.getSender(), m_fleetProxy.get() != 0));
+    }
 
     m_mapWidget.addOverlay(m_scannerOverlay);
     m_mapWidget.addOverlay(m_movementOverlay);
@@ -689,6 +698,7 @@ client::screens::ControlScreen::handleStateChange(client::si::RequestLink2 link,
      case OutputState::ShipScreen:
      case OutputState::PlanetScreen:
      case OutputState::BaseScreen:
+     case OutputState::HistoryScreen:
      case OutputState::FleetScreen:
      case OutputState::ShipTaskScreen:
      case OutputState::PlanetTaskScreen:
@@ -851,5 +861,20 @@ client::screens::ControlScreen::onFleetChange()
             m_outputState.set(client::si::RequestLink2(), client::si::OutputState::PlayerScreen);
             m_loop.stop(0);
         }
+    }
+}
+
+void
+client::screens::ControlScreen::onHistoryTurnChange()
+{
+    if (m_historyAdaptor.get() != 0) {
+        if (const game::map::ShipLocationInfo* p = m_historyAdaptor->getCurrentTurnInformation()) {
+            if (const game::map::Point* pos = p->position.get()) {
+                setPositions(*pos, *pos, false);
+            } else {
+                clearPositions();
+            }
+        }
+        m_mapWidget.setShipTrailId(m_historyAdaptor->getShipId());
     }
 }

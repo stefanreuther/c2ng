@@ -28,6 +28,8 @@
 #include "util/translation.hpp"
 #include "client/tiles/fleetscreenheadertile.hpp"
 #include "client/tiles/fleetmembertile.hpp"
+#include "client/tiles/historypositiontile.hpp"
+#include "client/tiles/historymovementtile.hpp"
 
 using afl::string::Format;
 using client::si::WidgetWrapper;
@@ -74,14 +76,14 @@ namespace {
         { 0, 0 },
     };
 
-// static const TileConfig history_screen[] = {
-//     { "HISTORYHEADER",    0 },
-//     { "HISTORYEQUIPMENT", N_("Equipment & Crew:") },
-//     { "HISTORYPOSITION",  0 },
-//     { "HISTORYMOVEMENT",  N_("Travelled this turn:") },
-//     { "COMMENT",          0 },
-//     { 0, 0 },
-// };
+    const TileConfig history_screen[] = {
+        { "HISTORYHEADER",    0 },
+        { "HISTORYEQUIPMENT", N_("Equipment & Crew:") },
+        { "HISTORYPOSITION",  0 },
+        { "HISTORYMOVEMENT",  N_("Travelled this turn:") },
+        { "COMMENT",          0 },
+        { 0, 0 },
+    };
 
     const TileConfig fleet_screen[] = {
         { "FLEETHEADER",      0 },
@@ -178,8 +180,8 @@ namespace {
             return planet_screen;
         } else if (name == "BASESCREEN") {
             return base_screen;
-//     if (name == "HISTORYSCREEN")
-//         return history_screen;
+        } else if (name == "HISTORYSCREEN") {
+            return history_screen;
         } else if (name == "FLEETSCREEN") {
             return fleet_screen;
         } else if (name == "PLANETLOCK") {
@@ -284,6 +286,18 @@ namespace {
         wrap.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
         return &wrap;
     }
+
+    class ShipEquipmentTileFactory : public DataViewFactory {
+     public:
+        void configure(StandardDataView& dv, ui::Root& root)
+            {
+                // ex WShipEquipmentTile::WShipEquipmentTile
+                dv.addNewButton(dv.Top, 0, 0, new ui::widgets::Button("S", 's', root));
+                dv.addNewButton(dv.Top, 1, 0, new ui::widgets::Button("G", 'g', root));
+                dv.addNewButton(dv.Top, 2, 0, new ui::widgets::Button("R", 'r', root));
+                dv.addNewButton(dv.Top, 0, 1, new ui::widgets::Button("C", 'c', root));
+            }
+    };
 }
 
 
@@ -298,7 +312,8 @@ client::tiles::TileFactory::TileFactory(client::si::UserSide& user,
       m_keys(keys),
       m_observer(observer),
       m_pTaskEditor(),
-      m_pFleetProxy()
+      m_pFleetProxy(),
+      m_pHistoryAdaptor()
 { }
 
 client::tiles::TileFactory::~TileFactory()
@@ -315,6 +330,13 @@ client::tiles::TileFactory&
 client::tiles::TileFactory::withFleetProxy(game::proxy::FleetProxy* p)
 {
     m_pFleetProxy = p;
+    return *this;
+}
+
+client::tiles::TileFactory&
+client::tiles::TileFactory::withHistoryAdaptor(HistoryAdaptor* p)
+{
+    m_pHistoryAdaptor = p;
     return *this;
 }
 
@@ -458,18 +480,7 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
         return &tile;
     }
     if (name == "SHIPEQUIPMENT") {
-        class Factory : public DataViewFactory {
-         public:
-            void configure(StandardDataView& dv, ui::Root& root)
-                {
-                    // ex WShipEquipmentTile::WShipEquipmentTile
-                    dv.addNewButton(dv.Top, 0, 0, new ui::widgets::Button("S", 's', root));
-                    dv.addNewButton(dv.Top, 1, 0, new ui::widgets::Button("G", 'g', root));
-                    dv.addNewButton(dv.Top, 2, 0, new ui::widgets::Button("R", 'r', root));
-                    dv.addNewButton(dv.Top, 0, 1, new ui::widgets::Button("C", 'c', root));
-                }
-        };
-        return Factory().run(m_keys, 30, 6, "Tile.ShipEquipment", deleter, m_userSide, m_observer);
+        return ShipEquipmentTileFactory().run(m_keys, 30, 6, "Tile.ShipEquipment", deleter, m_userSide, m_observer);
     }
     if (name == "SHIPCARGO") {
         ShipCargoTile& tile = deleter.addNew(new ShipCargoTile(root, tx, m_keys));
@@ -507,12 +518,23 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
         tile.attach(m_observer);
         return &tile;
     }
-//     if (name == "HISTORYPOSITION")
-//         return new WHistoryShipPositionTile(selection);
-//     if (name == "HISTORYEQUIPMENT")
-//         return new WShipEquipmentTile(selection, true);
-//     if (name == "HISTORYMOVEMENT")
-//         return new WHistoryShipMovementTile(selection);
+    if (name == "HISTORYPOSITION") {
+        HistoryPositionTile& tile = deleter.addNew(new HistoryPositionTile(root, tx));
+        if (m_pHistoryAdaptor != 0) {
+            tile.attach(*m_pHistoryAdaptor);
+        }
+        return &tile;
+    }
+    if (name == "HISTORYEQUIPMENT") {
+        return ShipEquipmentTileFactory().run(m_keys, 30, 6, "Tile.HistoryEquipment", deleter, m_userSide, m_observer);
+    }
+    if (name == "HISTORYMOVEMENT") {
+        HistoryMovementTile& tile = deleter.addNew(new HistoryMovementTile(root, tx));
+        if (m_pHistoryAdaptor != 0) {
+            tile.attach(*m_pHistoryAdaptor);
+        }
+        return &tile;
+    }
 
     // Fleets
     if (name == "FLEETHEADER") {

@@ -19,6 +19,7 @@ namespace client { namespace si {
             ShipScreen,
             PlanetScreen,
             BaseScreen,
+            HistoryScreen,
             FleetScreen,
             ShipTaskScreen,
             PlanetTaskScreen,

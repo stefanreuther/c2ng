@@ -17,6 +17,7 @@ namespace client {
             Ship,
             Planet,
             Starbase,
+            HistoryShip,
             Fleet,
             ShipTask,
             PlanetTask,

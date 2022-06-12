@@ -18,6 +18,8 @@
 
 namespace client { namespace tiles {
 
+    class HistoryAdaptor;
+
     /** Factory for "tile" widgets.
         Tiles are displayed on control screens.
         They can listen to a number of objects providing the control screen's state,
@@ -48,6 +50,13 @@ namespace client { namespace tiles {
             @return this */
         TileFactory& withFleetProxy(game::proxy::FleetProxy* p);
 
+        /** Add a HistoryAdaptor.
+            This will be made available to tiles that can use it.
+            @param p Pointer to HistoryAdaptor, owned by caller, living sufficiently long for tiles.
+                     Can be null.
+            @return this */
+        TileFactory& withHistoryAdaptor(HistoryAdaptor* p);
+
         /** Create a single tile by name.
             @param name      Name
             @param deleter   Deleter; will own the tile and its sub-objects, of any.
@@ -67,6 +76,7 @@ namespace client { namespace tiles {
         game::proxy::ObjectObserver& m_observer;
         game::proxy::TaskEditorProxy* m_pTaskEditor;
         game::proxy::FleetProxy* m_pFleetProxy;
+        HistoryAdaptor* m_pHistoryAdaptor;
     };
 
 } }

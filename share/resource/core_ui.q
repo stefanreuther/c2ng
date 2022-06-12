@@ -52,6 +52,16 @@ Sub CCUI.GotoScreen (Screen)
   If Not IsEmpty(UI.Result) Then UI.GotoScreen Screen, UI.Result
 EndSub
 
+% F1 on history screen
+Sub CCUI$ShipScreenFromHistory
+  % CC$ShipScreenFromHistory
+  If Played Then
+    UI.GotoScreen 1, Id
+  Else
+    CCUI.GotoScreen 1
+  EndIf
+EndSub
+
 % Previous unit [PgUp etc.]
 % @since PCC2 2.40.1
 Sub CCUI.SelectPrevious
