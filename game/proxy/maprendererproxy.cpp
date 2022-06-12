@@ -33,6 +33,7 @@ class game::proxy::MapRendererProxy::Trampoline {
     void toggleOptions(RenderOptions::Options_t opts);
     void setDrawingTagFilter(util::Atom_t tag);
     void clearDrawingTagFilter();
+    void setShipTrailId(Id_t id);
 
  private:
     void loadOptions();
@@ -179,6 +180,13 @@ game::proxy::MapRendererProxy::Trampoline::clearDrawingTagFilter()
     }
 }
 
+void
+game::proxy::MapRendererProxy::Trampoline::setShipTrailId(Id_t id)
+{
+    if (m_viewport.get() != 0) {
+        m_viewport->setShipTrailId(id);
+    }
+}
 
 void
 game::proxy::MapRendererProxy::Trampoline::loadOptions()
@@ -242,4 +250,10 @@ void
 game::proxy::MapRendererProxy::clearDrawingTagFilter()
 {
     m_trampoline.postRequest(&Trampoline::clearDrawingTagFilter);
+}
+
+void
+game::proxy::MapRendererProxy::setShipTrailId(Id_t id)
+{
+    m_trampoline.postRequest(&Trampoline::setShipTrailId, id);
 }

@@ -253,6 +253,12 @@ client::map::Widget::clearDrawingTagFilter()
     m_proxy.clearDrawingTagFilter();
 }
 
+void
+client::map::Widget::setShipTrailId(game::Id_t id)
+{
+    m_proxy.setShipTrailId(id);
+}
+
 const client::map::Renderer&
 client::map::Widget::renderer() const
 {

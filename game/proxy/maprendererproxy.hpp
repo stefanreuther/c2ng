@@ -61,6 +61,12 @@ namespace game { namespace proxy {
             \see game::map::Viewport::clearDrawingTagFilter */
         void clearDrawingTagFilter();
 
+        /** Set Id of ship whose trail to always render.
+            Set to 0 to disable.
+            \param id Ship Id
+            \see game::map::Viewport::setShipTrailId */
+        void setShipTrailId(Id_t id);
+
         /** Signal: render list update.
             Invoked upon every change to the universe (Session::notifyListeners()) or rendering parameters.
             \param renderlist newly-created RenderList instance containing current starchart content */
