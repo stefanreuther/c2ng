@@ -51,4 +51,9 @@ class TestGameRefSortPredicate : public CxxTest::TestSuite {
     void testThen();
 };
 
+class TestGameRefTypeAdaptor : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 #endif
