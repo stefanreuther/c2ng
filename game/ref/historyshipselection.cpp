@@ -114,7 +114,7 @@ game::ref::HistoryShipSelection::buildList(HistoryShipList& list, const Turn& tu
     const TeamSettings& teams = pGame->teamSettings();
     const game::map::Universe& univ = turn.universe();
 
-    game::map::HistoryShipType ty(const_cast<game::map::Universe&>(univ).ships());
+    game::map::HistoryShipType& ty = const_cast<game::map::Universe&>(univ).historyShips();
     for (Id_t id = ty.findNextIndex(0); id != 0; id = ty.findNextIndex(id)) {
         if (const game::map::Ship* sh = ty.getObjectByIndex(id)) {
             bool accept = false;
@@ -222,7 +222,7 @@ game::ref::HistoryShipSelection::getAvailableModes(const game::map::Universe& un
     }
 
     // Check all ships
-    game::map::HistoryShipType ty(const_cast<game::map::Universe&>(univ).ships());
+    game::map::HistoryShipType& ty = const_cast<game::map::Universe&>(univ).historyShips();
     for (Id_t id = ty.findNextIndex(0); id != 0; id = ty.findNextIndex(id)) {
         if (const game::map::Ship* sh = ty.getObjectByIndex(id)) {
             // Check owner modes

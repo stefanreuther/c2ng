@@ -562,7 +562,7 @@ game::map::Renderer::renderShipExtras(const State& st) const
     }
 
     // Ship trails
-    HistoryShipType histType(m_viewport.universe().ships());
+    HistoryShipType& histType = m_viewport.universe().historyShips();
     if (m_viewport.hasOption(Viewport::ShowTrails)) {
         // All trails
         for (Id_t i = histType.findNextIndex(0); i != 0; i = histType.findNextIndex(i)) {
