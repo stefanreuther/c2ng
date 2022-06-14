@@ -24,6 +24,7 @@ namespace game { namespace interface {
      public:
         virtual game::map::ObjectCursor* getCursor() = 0;
         virtual game::map::ObjectType* getType() = 0;
+        virtual int getCursorNumber() = 0;
         virtual game::Session& getSession() = 0;
         virtual void store(interpreter::TagNode& out) = 0;
         virtual String_t toString() = 0;

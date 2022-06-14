@@ -42,7 +42,8 @@ namespace {
         iitNextAt,
         iitObject,
         iitPrevious,
-        iitPreviousAt
+        iitPreviousAt,
+        iitScreen
     };
 
     const interpreter::NameTable ITERATOR_MAP[] = {
@@ -56,6 +57,7 @@ namespace {
         { "OBJECT",           iitObject,     0, interpreter::thArray },
         { "PREVIOUSINDEX",    iitPreviousAt, 0, interpreter::thArray },
         { "PREVIOUSINDEXAT",  iitPreviousAt, 0, interpreter::thArray },
+        { "SCREEN",           iitScreen,     0, interpreter::thInt },
     };
 
     // FIXME: move into ObjectType, with a 'filter' argument that filters for marked, point, etc.
@@ -228,6 +230,7 @@ namespace {
 
                  case iitCurrent:
                  case iitCount:
+                 case iitScreen:
                     // Scalars, implemented outside
                     break;
                 }
@@ -340,6 +343,14 @@ game::interface::IteratorContext::get(PropertyIndex_t index)
         } else {
             return 0;
         }
+
+     case iitScreen:
+        if (int n = m_provider->getCursorNumber()) {
+            return makeIntegerValue(n);
+        } else {
+            return 0;
+        }
+
      case iitId:
      case iitIndex:
      case iitNearestIndex:
@@ -453,6 +464,8 @@ game::interface::makeIteratorValue(Session& session, int nr, bool reportRangeErr
                     return 0;
                 }
             }
+        virtual int getCursorNumber()
+            { return m_number; }
         virtual Session& getSession()
             { return m_session; }
         virtual void store(interpreter::TagNode& out)

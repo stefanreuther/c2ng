@@ -17,6 +17,8 @@ TestGameInterfaceIteratorProvider::testIt()
             { return 0; }
         virtual game::map::ObjectType* getType()
             { return 0; }
+        virtual int getCursorNumber()
+            { return 0; }
         virtual void store(interpreter::TagNode& /*out*/)
             { }
         virtual game::Session& getSession()

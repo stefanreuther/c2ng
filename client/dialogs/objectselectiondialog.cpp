@@ -77,6 +77,10 @@ namespace {
         const String_t& getKeymapName() const
             { return m_keymapName; }
 
+        // Get screen number
+        int getScreenNumber() const
+            { return m_screenNumber; }
+
      private:
         const int m_screenNumber;
         const String_t m_keymapName;
@@ -105,6 +109,8 @@ namespace {
             { return &m_state->cursor(); }
         virtual game::map::ObjectType* getType()
             { return m_state->cursor().getObjectType(); }
+        virtual int getCursorNumber()
+            { return m_state->getScreenNumber(); }
         virtual game::Session& getSession()
             { return m_session; }
         virtual void store(interpreter::TagNode& /*out*/)
