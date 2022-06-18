@@ -109,7 +109,6 @@
 #include "game/ref/configuration.hpp"
 #include "game/ref/fleetlist.hpp"
 #include "game/ref/sortpredicate.hpp"
-#include "game/ref/typeadaptor.hpp"
 #include "game/registrationkey.hpp"
 #include "game/root.hpp"
 #include "game/searchquery.hpp"
@@ -1878,27 +1877,25 @@ client::si::IFCCSelectNextShip(game::Session& session, ScriptSide& /*si*/, Reque
         throw interpreter::Error::contextError();
     }
 
-    // Build list of objects
-    game::ref::List list;
-    list.addObjectsAt(t.universe(), pt, game::ref::List::Options_t(), 0);
-
     // Sort
     game::ref::Configuration fig;
     fetchConfiguration(session, game::ref::REGULAR, fig);
     afl::base::Deleter del;
-    game::ref::SortPredicate& firstPredicate  = game::ref::createSortPredicate(fig.order.first,  session, del);
-    game::ref::SortPredicate& secondPredicate = game::ref::createSortPredicate(fig.order.second, session, del);
-    list.sort(firstPredicate.then(secondPredicate));
+    const game::ref::SortPredicate& firstPredicate    = game::ref::createSortPredicate(fig.order.first,  session, del);
+    const game::ref::SortPredicate& secondPredicate   = game::ref::createSortPredicate(fig.order.second, session, del);
+    const game::ref::SortPredicate& combinedPredicate = firstPredicate.then(secondPredicate);
+
+    game::map::ObjectType& ty = t.universe().playedShips()
+        .filterMarked(del, marked)
+        .filterPosition(del, pt)
+        .sort(del, combinedPredicate, game::Reference::Ship);
 
     // Browse
-    game::ref::TypeAdaptor ad(list, t.universe());
-    game::Id_t current = ad.findIndexForObject(sh);
+    game::Id_t current = sh->getId();
     game::Id_t next = (backward
-                       ? ad.findPreviousIndexWrap(current, marked)
-                       : ad.findNextIndexWrap(current, marked));
-    if (game::map::Object* obj = ad.getObjectByIndex(next)) {
-        g.cursors().currentShip().setCurrentIndex(obj->getId());
-    }
+                       ? ty.findPreviousIndexWrap(current)
+                       : ty.findNextIndexWrap(current));
+    g.cursors().currentShip().setCurrentIndex(next);
 }
 
 // @since PCC2 2.40.11
