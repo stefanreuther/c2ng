@@ -296,6 +296,7 @@ class TestGameMapObjectType : public CxxTest::TestSuite {
     void testNormal();
     void testPartial();
     void testFindNearest();
+    void testSort();
 };
 
 class TestGameMapPlanet : public CxxTest::TestSuite {

@@ -9,6 +9,7 @@
 #include "afl/container/ptrvector.hpp"
 #include "game/map/configuration.hpp"
 #include "game/map/object.hpp"
+#include "game/ref/sortbyid.hpp"
 
 using afl::container::PtrVector;
 using game::Id_t;
@@ -104,6 +105,12 @@ TestGameMapObjectType::testEmpty()
     TS_ASSERT(!t.isUnit());
     TS_ASSERT_EQUALS(t.countObjects(), 0);
     TS_ASSERT_EQUALS(t.findNextIndex(0), 0);
+
+    // Derived objects
+    afl::base::Deleter del;
+    TS_ASSERT(t.filterPosition(del, game::map::Point()).isEmpty());
+    TS_ASSERT(t.filterOwner(del, game::PlayerSet_t()).isEmpty());
+    TS_ASSERT(t.filterMarked(del, true).isEmpty());
 }
 
 /** Test behaviour on unit (1-element) list. */
@@ -127,6 +134,9 @@ TestGameMapObjectType::testUnit()
     TS_ASSERT_EQUALS(t.findNextIndexWrap(1, false), 1);
     TS_ASSERT_EQUALS(t.findNextIndexWrap(1, true), 0);
 
+    TS_ASSERT_EQUALS(t.findPreviousIndexNoWrap(1), 0);
+    TS_ASSERT_EQUALS(t.findNextIndexNoWrap(1), 0);
+
     TS_ASSERT_EQUALS(t.findPreviousIndexNoWrap(1, false), 0);
     TS_ASSERT_EQUALS(t.findPreviousIndexNoWrap(1, true), 0);
     TS_ASSERT_EQUALS(t.findNextIndexNoWrap(1, false), 0);
@@ -144,6 +154,35 @@ TestGameMapObjectType::testUnit()
 
     TS_ASSERT_EQUALS(t.findIndexForId(100), 1);
     TS_ASSERT_EQUALS(t.findIndexForId(1), 0);
+
+    // Derived objects
+    afl::base::Deleter del;
+    {
+        game::map::ObjectType& d = t.filterPosition(del, game::map::Point());
+        TS_ASSERT(d.isEmpty());
+        TS_ASSERT_EQUALS(d.findNextIndexNoWrap(0), 0);
+    }
+    {
+        game::map::ObjectType& d = t.filterPosition(del, game::map::Point(1000, 2000));
+        TS_ASSERT(!d.isEmpty());
+        TS_ASSERT_EQUALS(d.findNextIndexNoWrap(0), 1);
+        TS_ASSERT_EQUALS(d.findNextIndexNoWrap(1), 0);
+        TS_ASSERT_EQUALS(d.findPreviousIndexNoWrap(0), 1);
+        TS_ASSERT_EQUALS(d.findPreviousIndexNoWrap(1), 0);
+    }
+    {
+        game::map::ObjectType& d = t.filterOwner(del, game::PlayerSet_t());
+        TS_ASSERT(d.isEmpty());
+    }
+    {
+        game::map::ObjectType& d = t.filterOwner(del, game::PlayerSet_t(1));
+        TS_ASSERT(!d.isEmpty());
+        TS_ASSERT_EQUALS(d.findNextIndexNoWrap(0), 1);
+    }
+    {
+        game::map::ObjectType& d = t.filterMarked(del, true);
+        TS_ASSERT(d.isEmpty());
+    }
 }
 
 /** Test list containing several empty slots; needs to behave as empty. */
@@ -272,7 +311,6 @@ TestGameMapObjectType::testNormal()
     TS_ASSERT_EQUALS(t.findPreviousObjectAt(B, 5, true), 0);
     TS_ASSERT_EQUALS(t.findPreviousObjectAt(B, 7, true), 5);
 
-
     // findNextObjectAtWrap
     TS_ASSERT_EQUALS(t.findNextObjectAtWrap(B, 0, false), 3);
     TS_ASSERT_EQUALS(t.findNextObjectAtWrap(B, 1, false), 3);
@@ -307,6 +345,17 @@ TestGameMapObjectType::testNormal()
 
     TestObject alien(88, 8, Point());
     TS_ASSERT_EQUALS(t.findIndexForObject(&alien), 0);
+
+    // Filters
+    afl::base::Deleter del;
+    TS_ASSERT_EQUALS(t.filterPosition(del, A).countObjects(), 4);
+    TS_ASSERT_EQUALS(t.filterPosition(del, B).countObjects(), 3);
+    TS_ASSERT_EQUALS(t.filterMarked(del, true).countObjects(), 4);
+    TS_ASSERT_EQUALS(t.filterMarked(del, false).countObjects(), 7);
+    TS_ASSERT_EQUALS(t.filterOwner(del, game::PlayerSet_t(1)).countObjects(), 3);
+    TS_ASSERT_EQUALS(t.filterOwner(del, game::PlayerSet_t(2)).countObjects(), 4);
+    TS_ASSERT_EQUALS(t.filterOwner(del, game::PlayerSet_t(3)).countObjects(), 0);
+    TS_ASSERT_EQUALS(t.filterOwner(del, game::PlayerSet_t() + 1 + 2).countObjects(), 7);
 }
 
 /** Test handling partial information (no position, no owner). */
@@ -347,5 +396,49 @@ TestGameMapObjectType::testFindNearest()
     TS_ASSERT_EQUALS(t.findNearestIndex(Point(1010, 1010), config), 1);
     TS_ASSERT_EQUALS(t.findNearestIndex(Point(1400, 1400), config), 4);
     TS_ASSERT_EQUALS(t.findNearestIndex(Point(500, 1500), config), 3);
+}
+
+/** Test sort(). */
+void
+TestGameMapObjectType::testSort()
+{
+    // Similar situation as in testNormal.
+    // Use duplicate Ids to exercise tie-breaking, because SortById has no further dependencies.
+    const Point A(1000, 2000);
+    const Point B(1000, 4000);
+    TestType t;
+    t.addObject(1, 7, A);                      // 1
+    t.addObject(1, 7, A).setIsMarked(true);    // 2
+    t.addObject(2, 7, B);                      // 3
+    t.addObject(1, 7, B);                      // 4
+    t.addObject(2, 7, B).setIsMarked(true);    // 5
+    t.addObject(2, 7, A).setIsMarked(true);    // 6
+    t.addObject(2, 7, A).setIsMarked(true);    // 7
+
+    // Test sorting
+    afl::base::Deleter del;
+    game::ref::SortById pred;
+    game::map::ObjectType& sorted = t.sort(del, pred, game::Reference::Ship);
+    TS_ASSERT_EQUALS(sorted.findNextIndexNoWrap(0), 1);
+    TS_ASSERT_EQUALS(sorted.findNextIndexNoWrap(1), 2);
+    TS_ASSERT_EQUALS(sorted.findNextIndexNoWrap(2), 4);
+    TS_ASSERT_EQUALS(sorted.findNextIndexNoWrap(4), 3);
+    TS_ASSERT_EQUALS(sorted.findNextIndexNoWrap(3), 5);
+    TS_ASSERT_EQUALS(sorted.findNextIndexNoWrap(5), 6);
+    TS_ASSERT_EQUALS(sorted.findNextIndexNoWrap(6), 7);
+    TS_ASSERT_EQUALS(sorted.findNextIndexNoWrap(7), 0);
+
+    TS_ASSERT_EQUALS(sorted.findPreviousIndexNoWrap(0), 7);
+    TS_ASSERT_EQUALS(sorted.findPreviousIndexNoWrap(7), 6);
+    TS_ASSERT_EQUALS(sorted.findPreviousIndexNoWrap(6), 5);
+    TS_ASSERT_EQUALS(sorted.findPreviousIndexNoWrap(5), 3);
+    TS_ASSERT_EQUALS(sorted.findPreviousIndexNoWrap(3), 4);
+    TS_ASSERT_EQUALS(sorted.findPreviousIndexNoWrap(4), 2);
+    TS_ASSERT_EQUALS(sorted.findPreviousIndexNoWrap(2), 1);
+    TS_ASSERT_EQUALS(sorted.findPreviousIndexNoWrap(1), 0);
+
+    // Test further processing the sorted result (not recommended but possible)
+    TS_ASSERT_EQUALS(sorted.countObjects(), 7);
+    TS_ASSERT_EQUALS(sorted.filterMarked(del, true).countObjects(), 4);
 }
 

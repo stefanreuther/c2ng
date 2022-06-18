@@ -6,10 +6,13 @@
 #define C2NG_GAME_MAP_OBJECTTYPE_HPP
 
 #include "afl/base/deletable.hpp"
+#include "afl/base/deleter.hpp"
 #include "afl/base/signal.hpp"
-#include "game/types.hpp"
 #include "game/map/point.hpp"
 #include "game/playerset.hpp"
+#include "game/types.hpp"
+#include "game/reference.hpp"
+#include "game/ref/sortpredicate.hpp"
 
 namespace game { namespace map {
 
@@ -60,6 +63,58 @@ namespace game { namespace map {
         virtual Id_t getPreviousIndex(Id_t index) const = 0;
 
         /*
+         *  Meta-operations
+         */
+
+        /** Filter by position.
+            Create a view on this ObjectType that contains only the objects from this one which are at the given position.
+            Ids are returned unchanged from the underlying ObjectType; filtered-out objects are skipped.
+
+            \param del Deleter to control lifetime of created objects
+            \param pt  Position to search
+            \return new ObjectType */
+        ObjectType& filterPosition(afl::base::Deleter& del, Point pt);
+
+        /** Filter by owner.
+            Create a view on this ObjectType that contains only the objects from this one which are owned by one of the given players.
+            Ids are returned unchanged from the underlying ObjectType; filtered-out objects are skipped.
+
+            \param del Deleter to control lifetime of created objects
+            \param owners Owners to search
+            \return new ObjectType */
+        ObjectType& filterOwner(afl::base::Deleter& del, PlayerSet_t owners);
+
+        /** Filter by marked status.
+            If \c marked is given as true, create a view on this ObjectType that contains only marked objects;
+            otherwise, returns this ObjectType unchanged.
+            Ids are returned unchanged from the underlying ObjectType; filtered-out objects are skipped.
+
+            \param del Deleter to control lifetime of created objects
+            \param marked flag
+            \return new ObjectType */
+        ObjectType& filterMarked(afl::base::Deleter& del, bool marked);
+
+        /** Sort.
+            Create a view on this ObjectType that contains all the objects from this one, sorted by the given predicate.
+            Ids are returned unchanged from the underlying ObjectType, objects are returned in sorted order.
+            Objects are sorted by the given predicate, then by Id, then by index.
+
+            All objects must have the same type as defined by \c type.
+
+            The result is intended for one-time, temporary objects:
+            - Do not use for iteration.
+              Iterating over the entire result is an O(n^2) operation.
+              Instead, build a game::ref::List and sort that, which is O(nlogn).
+            - Use as last in a chain, i.e. do filterOwner().sort(), not sort().filterOwner();
+            - Instead of sort(X).sort(Y), use sort(X.then(Y)).
+
+            \param del Deleter to control lifetime of created objects
+            \param pred Sort predicate; must live as long as result is being used
+            \param type Object type; used to construct references */
+        ObjectType& sort(afl::base::Deleter& del, const game::ref::SortPredicate& pred, Reference::Type type);
+
+
+        /*
          *  Derived functions
          */
 
@@ -96,6 +151,30 @@ namespace game { namespace map {
             \param config map configuration (for wrap awareness)
             \return Index of nearest object, 0 if none */
         Id_t findNearestIndex(const Point pt, const Configuration& config);
+
+        /** Get previous object before index, with wrap.
+            If the last object of a kind is reached, search starts again at the beginning.
+            \param index index to start search at.
+            \return found index; 0 if none */
+        Id_t findPreviousIndexWrap(Id_t index);
+
+        /** Get next object after index, with wrap.
+            If the last object of a kind is reached, search starts again at the beginning.
+            \param index Index to start search at.
+            \return found index; 0 if none */
+        Id_t findNextIndexWrap(Id_t index);
+
+        /** Get previous object before index.
+            The returned object is guaranteed to exist.
+            \param index Index to start search at.
+            \return found index; 0 if none */
+        Id_t findPreviousIndexNoWrap(Id_t index);
+
+        /** Get next object after index.
+            The returned object is guaranteed to exist.
+            \param index Index to start search at.
+            \return found index; 0 if none */
+        Id_t findNextIndexNoWrap(Id_t index);
 
         /** Get previous object before index, with wrap.
             If the last object of a kind is reached, search starts again at the beginning.

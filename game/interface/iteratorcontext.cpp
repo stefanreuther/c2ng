@@ -60,35 +60,6 @@ namespace {
         { "SCREEN",           iitScreen,     0, interpreter::thInt },
     };
 
-    // FIXME: move into ObjectType, with a 'filter' argument that filters for marked, point, etc.
-    game::Id_t findNextIndexAt(game::map::ObjectType& type, game::Id_t index, const game::map::Point& pt, bool marked)
-    {
-        // ex client/widgets/objcontrol.cc:findSameLocation, sort-of
-        while ((index = type.findNextIndexNoWrap(index, marked)) != 0) {
-            if (const game::map::Object* obj = type.getObjectByIndex(index)) {
-                game::map::Point objPos;
-                if (obj->getPosition(objPos) && objPos == pt) {
-                    break;
-                }
-            }
-        }
-        return index;
-    }
-
-    game::Id_t findPreviousIndexAt(game::map::ObjectType& type, game::Id_t index, const game::map::Point& pt, bool marked)
-    {
-        while ((index = type.findPreviousIndexNoWrap(index, marked)) != 0) {
-            if (const game::map::Object* obj = type.getObjectByIndex(index)) {
-                game::map::Point objPos;
-                if (obj->getPosition(objPos) && objPos == pt) {
-                    break;
-                }
-            }
-        }
-        return index;
-    }
-
-
     class IteratorFunction : public interpreter::IndexableValue {
      public:
         IteratorFunction(afl::base::Ref<game::interface::IteratorProvider> provider, IteratorProperty p)
@@ -187,11 +158,11 @@ namespace {
                         int32_t fl = 0;
                         checkFlagArg(fl, 0, args.getNext(), "MW");
                         if (game::map::ObjectType* type = m_provider->getType()) {
-                            game::Id_t id = findNextIndexAt(*type, i, game::map::Point(x, y), (fl & 1) != 0);
-                            if (id == 0 && (fl & 2) != 0) {
-                                id = findNextIndexAt(*type, 0, game::map::Point(x, y), (fl & 1) != 0);
+                            if (fl & 2) {
+                                return makeIntegerValue(type->findNextObjectAtWrap(game::map::Point(x, y), i, (fl & 1) != 0));
+                            } else {
+                                return makeIntegerValue(type->findNextObjectAt(game::map::Point(x, y), i, (fl & 1) != 0));
                             }
-                            return makeIntegerValue(id);
                         }
                     }
                     return 0;
@@ -207,11 +178,11 @@ namespace {
                         int32_t fl = 0;
                         checkFlagArg(fl, 0, args.getNext(), "MW");
                         if (game::map::ObjectType* type = m_provider->getType()) {
-                            game::Id_t id = findPreviousIndexAt(*type, i, game::map::Point(x, y), (fl & 1) != 0);
-                            if (id == 0 && (fl & 2) != 0) {
-                                id = findPreviousIndexAt(*type, 0, game::map::Point(x, y), (fl & 1) != 0);
+                            if (fl & 2) {
+                                return makeIntegerValue(type->findPreviousObjectAtWrap(game::map::Point(x, y), i, (fl & 1) != 0));
+                            } else {
+                                return makeIntegerValue(type->findPreviousObjectAt(game::map::Point(x, y), i, (fl & 1) != 0));
                             }
-                            return makeIntegerValue(id);
                         }
                     }
                     return 0;
