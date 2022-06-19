@@ -297,6 +297,14 @@ class TestUtilSystemInformation : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestUtilTreeList : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormal();
+    void testAddPath();
+    void testSwap();
+};
+
 class TestUtilUnicodeChars : public CxxTest::TestSuite {
  public:
     void testIt();

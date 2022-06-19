@@ -986,6 +986,18 @@ PCC2 allows file numbers from 1 to 100, PCC 1.x only allows 1..20.
 (If you use {FreeFile} to obtain file numbers, you will not notice this difference,
 except for being able to open more files.)
 --------------------------------------------------------------------------------
+@type Func
+Operations documented as taking a parameter of type <tt>Func</tt> expect the name of a function.
+The function can be a user-defined function (see {Function} keyword),
+or a {int:index:group:function|predefined function} (but not an {int:index:group:elementaryfunction|elementary function}!).
+
+To pass a function as parameter, write just its name.
+Do NOT enclose the name in quotes.
+
+This syntax is only supported by PCC2.
+Therefore, many operations that call a function behind the scenes take a string parameter instead,
+and evaluate that string parameter when they need to call the function.
+--------------------------------------------------------------------------------
 @type Hash
 Hashes are unordered data stores indexed by a string.
 Normally, a hash is created using {Dim}:
@@ -1189,6 +1201,18 @@ In PCC2 since 1.99.12, strings store Unicode characters.
 In previous versions, strings hold the extended ASCII set used as the game character set.
 For external data, this restriction still holds;
 characters not in the game character set are removed because they cannot be stored.
+--------------------------------------------------------------------------------
+@type Sub
+Operations documented as taking a parameter of type <tt>Sub</tt> expect the name of a subroutine.
+The function can be a user-defined subroutine (see {Sub} keyword),
+or a {int:index:group:globalcommand|global command} (but not an {int:index:group:elementarycommand|elementary command}!).
+
+To pass a subroutine/command as parameter, write just its name.
+Do NOT enclose the name in quotes.
+
+This syntax is only supported by PCC2.
+Therefore, many operations that call a command behind the scenes take a string parameter instead,
+and evaluate that string parameter when they need to call the command.
 --------------------------------------------------------------------------------
 @type Widget
 Widgets are used to build dialog windows.

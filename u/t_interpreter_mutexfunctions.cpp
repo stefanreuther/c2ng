@@ -13,6 +13,8 @@
 #include "afl/sys/log.hpp"
 #include "interpreter/opcode.hpp"
 #include "interpreter/process.hpp"
+#include "interpreter/singlecontext.hpp"
+#include "interpreter/subroutinevalue.hpp"
 #include "interpreter/world.hpp"
 
 namespace {
@@ -21,6 +23,43 @@ namespace {
     using interpreter::BCORef_t;
     using interpreter::Opcode;
     using interpreter::Process;
+
+    /* A simple replacement for GlobalContext */
+    class SimpleGlobalContext : public interpreter::SingleContext, public interpreter::Context::ReadOnlyAccessor {
+     public:
+        SimpleGlobalContext(interpreter::World& w)
+            : m_world(w)
+            { }
+
+        // Context:
+        virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
+            {
+                afl::data::NameMap::Index_t ix = m_world.globalPropertyNames().getIndexByName(name);
+                if (ix != afl::data::NameMap::nil) {
+                    result = ix;
+                    return this;
+                } else {
+                    return 0;
+                }
+            }
+        virtual afl::data::Value* get(PropertyIndex_t index)
+            { return afl::data::Value::cloneOf(m_world.globalValues().get(index)); }
+        virtual SimpleGlobalContext* clone() const
+            { return new SimpleGlobalContext(m_world); }
+        virtual game::map::Object* getObject()
+            { return 0; }
+        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/)
+            { }
+
+        // BaseValue:
+        virtual String_t toString(bool /*readable*/) const
+            { return "#<global>"; }
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+            { throw interpreter::Error::notSerializable(); }
+
+     private:
+        interpreter::World& m_world;
+    };
 
     /* Common environment for all tests. */
     struct Environment {
@@ -31,7 +70,7 @@ namespace {
 
         Environment()
             : log(), tx(), fs(), world(log, tx, fs)
-            { }
+            { world.addNewGlobalContext(new SimpleGlobalContext(world)); }
     };
 
     BCORef_t makeBCO()
@@ -39,18 +78,27 @@ namespace {
         return interpreter::BytecodeObject::create(false);
     }
 
+    /* Wrap a BCO to execute with the dummy mutex functions */
+    BCORef_t makeDummyBCO(BCORef_t child)
+    {
+        BCORef_t result = makeBCO();
+        registerDummyMutexFunctions(*result);
+
+        interpreter::SubroutineValue sv(child);
+        result->addPushLiteral(&sv);
+        result->addInstruction(Opcode::maIndirect, Opcode::miIMLoad, 0);
+        return result;
+    }
+
     /* Compile a 'With Lock(<lockName>) Do Stop' command */
-    BCORef_t makeTakeLockBCO(String_t lockName, Environment& env)
+    BCORef_t makeTakeLockBCO(String_t lockName)
     {
         BCORef_t result = makeBCO();
 
         // Lock name
         afl::data::StringValue sv(lockName);
         result->addPushLiteral(&sv);
-
-        // LOCK function. We don't have a GlobalContext here, so pushvar will not work. Look it up manually.
-        result->addPushLiteral(env.world.getGlobalValue("LOCK"));
-
+        result->addInstruction(Opcode::maPush, Opcode::sNamedVariable, result->addName("LOCK"));
         result->addInstruction(Opcode::maIndirect, Opcode::miIMLoad, 1);
         result->addInstruction(Opcode::maSpecial, Opcode::miSpecialWith, 0);
         result->addInstruction(Opcode::maSpecial, Opcode::miSpecialSuspend, 0);
@@ -58,7 +106,7 @@ namespace {
     }
 
     /* Compile a 'With Lock(<lockName>, <hint>) Do Stop' command */
-    BCORef_t makeTakeLockWithHintBCO(String_t lockName, String_t hint, Environment& env)
+    BCORef_t makeTakeLockWithHintBCO(String_t lockName, String_t hint)
     {
         BCORef_t result = makeBCO();
 
@@ -67,7 +115,7 @@ namespace {
 
         afl::data::StringValue hintSV(hint);
         result->addPushLiteral(&hintSV);
-        result->addPushLiteral(env.world.getGlobalValue("LOCK"));
+        result->addInstruction(Opcode::maPush, Opcode::sNamedVariable, result->addName("LOCK"));
         result->addInstruction(Opcode::maIndirect, Opcode::miIMLoad, 2);
         result->addInstruction(Opcode::maSpecial, Opcode::miSpecialWith, 0);
         result->addInstruction(Opcode::maSpecial, Opcode::miSpecialSuspend, 0);
@@ -75,13 +123,13 @@ namespace {
     }
 
     /* Compile a 'GetLockInfo(<lockName>, <type>)' command */
-    BCORef_t makeGetLockInfoBCO(String_t lockName, uint16_t type, Environment& env)
+    BCORef_t makeGetLockInfoBCO(String_t lockName, uint16_t type)
     {
         BCORef_t result = makeBCO();
         afl::data::StringValue sv(lockName);
         result->addPushLiteral(&sv);
         result->addInstruction(Opcode::maPush, Opcode::sInteger, type);
-        result->addPushLiteral(env.world.getGlobalValue("GETLOCKINFO"));
+        result->addInstruction(Opcode::maPush, Opcode::sNamedVariable, result->addName("GETLOCKINFO"));
         result->addInstruction(Opcode::maIndirect, Opcode::miIMLoad, 2);
         return result;
     }
@@ -128,7 +176,7 @@ TestInterpreterMutexFunctions::testTakeLock()
 
     // Run process
     Process p(env.world, "pro", 42);
-    p.pushFrame(makeTakeLockBCO("LNAME", env), true);
+    p.pushFrame(makeTakeLockBCO("LNAME"), true);
     p.run();
     TS_ASSERT_EQUALS(p.getState(), Process::Suspended);
 
@@ -149,15 +197,25 @@ TestInterpreterMutexFunctions::testTakeLockConflict()
 
     // Run process
     Process p1(env.world, "pro", 42);
-    p1.pushFrame(makeTakeLockBCO("LNAME", env), true);
+    p1.pushFrame(makeTakeLockBCO("LNAME"), true);
     p1.run();
     TS_ASSERT_EQUALS(p1.getState(), Process::Suspended);
 
     // Run another process that wishes to take that lock
-    Process p2(env.world, "bro", 44);
-    p2.pushFrame(makeTakeLockBCO("LNAME", env), true);
-    p2.run();
-    TS_ASSERT_EQUALS(p2.getState(), Process::Failed);
+    {
+        Process p2(env.world, "bro", 44);
+        p2.pushFrame(makeTakeLockBCO("LNAME"), true);
+        p2.run();
+        TS_ASSERT_EQUALS(p2.getState(), Process::Failed);
+    }
+
+    // Run another process that wishes to take that lock - dummy version
+    {
+        Process p2(env.world, "bro", 44);
+        p2.pushFrame(makeDummyBCO(makeTakeLockBCO("LNAME")), true);
+        p2.run();
+        TS_ASSERT_EQUALS(p2.getState(), Process::Suspended);
+    }
 }
 
 /** Test implicit lock release.
@@ -172,7 +230,7 @@ TestInterpreterMutexFunctions::testReleaseLockOnExit()
     // Run process
     {
         Process p(env.world, "pro", 42);
-        p.pushFrame(makeTakeLockBCO("LNAME", env), true);
+        p.pushFrame(makeTakeLockBCO("LNAME"), true);
         p.run();
         TS_ASSERT_EQUALS(p.getState(), Process::Suspended);
 
@@ -196,14 +254,26 @@ TestInterpreterMutexFunctions::testGetLockInfo0()
 {
     Environment env;
     Process taker(env.world, "pro", 42);
-    taker.pushFrame(makeTakeLockBCO("LNAME", env), true);
+    taker.pushFrame(makeTakeLockBCO("LNAME"), true);
     taker.run();
 
-    Process querier(env.world, "q", 77);
-    querier.pushFrame(makeGetLockInfoBCO("LNAME", 0, env), true);
-    querier.run();
-    TS_ASSERT_EQUALS(querier.getState(), Process::Ended);
-    TS_ASSERT_EQUALS(toBoolean(querier), true);
+    // Real
+    {
+        Process querier(env.world, "q", 77);
+        querier.pushFrame(makeGetLockInfoBCO("LNAME", 0), true);
+        querier.run();
+        TS_ASSERT_EQUALS(querier.getState(), Process::Ended);
+        TS_ASSERT_EQUALS(toBoolean(querier), true);
+    }
+
+    // Dummy
+    {
+        Process querier(env.world, "q", 77);
+        querier.pushFrame(makeDummyBCO(makeGetLockInfoBCO("LNAME", 0)), true);
+        querier.run();
+        TS_ASSERT_EQUALS(querier.getState(), Process::Ended);
+        TS_ASSERT_EQUALS(toBoolean(querier), false);
+    }
 }
 
 /** Test GetLockInfo(,1).
@@ -215,14 +285,26 @@ TestInterpreterMutexFunctions::testGetLockInfo1()
 {
     Environment env;
     Process taker(env.world, "pro", 42);
-    taker.pushFrame(makeTakeLockBCO("LNAME", env), true);
+    taker.pushFrame(makeTakeLockBCO("LNAME"), true);
     taker.run();
 
-    Process querier(env.world, "q", 77);
-    querier.pushFrame(makeGetLockInfoBCO("LNAME", 1, env), true);
-    querier.run();
-    TS_ASSERT_EQUALS(querier.getState(), Process::Ended);
-    TS_ASSERT_EQUALS(toString(querier), "pro");
+    // Real
+    {
+        Process querier(env.world, "q", 77);
+        querier.pushFrame(makeGetLockInfoBCO("LNAME", 1), true);
+        querier.run();
+        TS_ASSERT_EQUALS(querier.getState(), Process::Ended);
+        TS_ASSERT_EQUALS(toString(querier), "pro");
+    }
+
+    // Dummy
+    {
+        Process querier(env.world, "q", 77);
+        querier.pushFrame(makeDummyBCO(makeGetLockInfoBCO("LNAME", 1)), true);
+        querier.run();
+        TS_ASSERT_EQUALS(querier.getState(), Process::Ended);
+        TS_ASSERT(querier.getResult() == 0);
+    }
 }
 
 /** Test GetLockInfo(,2).
@@ -234,14 +316,26 @@ TestInterpreterMutexFunctions::testGetLockInfo2()
 {
     Environment env;
     Process taker(env.world, "pro", 42);
-    taker.pushFrame(makeTakeLockWithHintBCO("HNAME", "Hint!", env), true);
+    taker.pushFrame(makeTakeLockWithHintBCO("HNAME", "Hint!"), true);
     taker.run();
 
-    Process querier(env.world, "q", 77);
-    querier.pushFrame(makeGetLockInfoBCO("HNAME", 2, env), true);
-    querier.run();
-    TS_ASSERT_EQUALS(querier.getState(), Process::Ended);
-    TS_ASSERT_EQUALS(toString(querier), "Hint!");
+    // Real
+    {
+        Process querier(env.world, "q", 77);
+        querier.pushFrame(makeGetLockInfoBCO("HNAME", 2), true);
+        querier.run();
+        TS_ASSERT_EQUALS(querier.getState(), Process::Ended);
+        TS_ASSERT_EQUALS(toString(querier), "Hint!");
+    }
+
+    // Dummy
+    {
+        Process querier(env.world, "q", 77);
+        querier.pushFrame(makeDummyBCO(makeGetLockInfoBCO("HNAME", 2)), true);
+        querier.run();
+        TS_ASSERT_EQUALS(querier.getState(), Process::Ended);
+        TS_ASSERT(querier.getResult() == 0);
+    }
 }
 
 /** Test GetLockInfo(,0), idle/failure case.
@@ -253,7 +347,7 @@ TestInterpreterMutexFunctions::testGetLockInfoFail0()
 {
     Environment env;
     Process querier(env.world, "q", 77);
-    querier.pushFrame(makeGetLockInfoBCO("LNAME", 0, env), true);
+    querier.pushFrame(makeGetLockInfoBCO("LNAME", 0), true);
     querier.run();
     TS_ASSERT_EQUALS(querier.getState(), Process::Ended);
     TS_ASSERT_EQUALS(toBoolean(querier), false);
@@ -268,7 +362,7 @@ TestInterpreterMutexFunctions::testGetLockInfoFail1()
 {
     Environment env;
     Process querier(env.world, "q", 77);
-    querier.pushFrame(makeGetLockInfoBCO("LNAME", 1, env), true);
+    querier.pushFrame(makeGetLockInfoBCO("LNAME", 1), true);
     querier.run();
     TS_ASSERT_EQUALS(querier.getState(), Process::Ended);
     TS_ASSERT(querier.getResult() == 0);
@@ -283,7 +377,7 @@ TestInterpreterMutexFunctions::testGetLockInfoFail2()
 {
     Environment env;
     Process querier(env.world, "q", 77);
-    querier.pushFrame(makeGetLockInfoBCO("LNAME", 2, env), true);
+    querier.pushFrame(makeGetLockInfoBCO("LNAME", 2), true);
     querier.run();
     TS_ASSERT_EQUALS(querier.getState(), Process::Ended);
     TS_ASSERT(querier.getResult() == 0);
@@ -297,16 +391,27 @@ void
 TestInterpreterMutexFunctions::testFailNull()
 {
     Environment env;
-    Process p(env.world, "p", 1);
 
     BCORef_t bco = makeBCO();
     bco->addPushLiteral(0);
     bco->addPushLiteral(env.world.getGlobalValue("LOCK"));
     bco->addInstruction(Opcode::maIndirect, Opcode::miIMLoad, 1);
-    p.pushFrame(bco, true);
-    p.run();
 
-    TS_ASSERT_EQUALS(p.getState(), Process::Failed);
+    // Real
+    {
+        Process p(env.world, "p", 1);
+        p.pushFrame(bco, true);
+        p.run();
+        TS_ASSERT_EQUALS(p.getState(), Process::Failed);
+    }
+
+    // Dummy
+    {
+        Process p(env.world, "p", 1);
+        p.pushFrame(makeDummyBCO(bco), true);
+        p.run();
+        TS_ASSERT_EQUALS(p.getState(), Process::Failed);
+    }
 }
 
 /** Test failure case: Lock(Empty).
@@ -317,15 +422,26 @@ void
 TestInterpreterMutexFunctions::testFailIter()
 {
     Environment env;
-    Process p(env.world, "p", 1);
 
     BCORef_t bco = makeBCO();
     bco->addPushLiteral(env.world.getGlobalValue("LOCK"));
     bco->addInstruction(Opcode::maSpecial, Opcode::miSpecialFirst, 0);
-    p.pushFrame(bco, true);
-    p.run();
 
-    TS_ASSERT_EQUALS(p.getState(), Process::Failed);
+    // Real
+    {
+        Process p(env.world, "p", 1);
+        p.pushFrame(bco, true);
+        p.run();
+        TS_ASSERT_EQUALS(p.getState(), Process::Failed);
+    }
+
+    // Dummy
+    {
+        Process p(env.world, "p", 1);
+        p.pushFrame(makeDummyBCO(bco), true);
+        p.run();
+        TS_ASSERT_EQUALS(p.getState(), Process::Failed);
+    }
 }
 
 /** Test border case: Dim(Lock).
@@ -336,16 +452,27 @@ void
 TestInterpreterMutexFunctions::testDim()
 {
     Environment env;
-    Process p(env.world, "p", 1);
 
     BCORef_t bco = makeBCO();
     bco->addPushLiteral(env.world.getGlobalValue("LOCK"));
     bco->addInstruction(Opcode::maPush, Opcode::sInteger, 1);
     bco->addInstruction(Opcode::maBinary, interpreter::biArrayDim, 0);
-    p.pushFrame(bco, true);
-    p.run();
 
-    TS_ASSERT_EQUALS(p.getState(), Process::Failed);
+    // Real
+    {
+        Process p(env.world, "p", 1);
+        p.pushFrame(bco, true);
+        p.run();
+        TS_ASSERT_EQUALS(p.getState(), Process::Failed);
+    }
+
+    // Dummy
+    {
+        Process p(env.world, "p", 1);
+        p.pushFrame(makeDummyBCO(bco), true);
+        p.run();
+        TS_ASSERT_EQUALS(p.getState(), Process::Failed);
+    }
 }
 
 /** Test border case: Str(Lock).

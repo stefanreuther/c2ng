@@ -253,6 +253,12 @@ class TestGameProxyFriendlyCodeProxy : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameProxyGlobalActionProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormal();
+};
+
 class TestGameProxyHistoryShipListProxy : public CxxTest::TestSuite {
  public:
     void testEmpty();

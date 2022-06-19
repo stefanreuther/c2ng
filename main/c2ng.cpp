@@ -46,6 +46,7 @@
 #include "game/browser/browser.hpp"
 #include "game/browser/directoryhandler.hpp"
 #include "game/game.hpp"
+#include "game/interface/globalactionextra.hpp"
 #include "game/interface/labelextra.hpp"
 #include "game/interface/simpleprocedure.hpp"
 #include "game/interface/vmfile.hpp"
@@ -980,6 +981,7 @@ namespace {
                 gameSession.log().addListener(log());
                 gameSession.setSystemInformation(util::getSystemInformation());
                 game::interface::LabelExtra::create(gameSession);
+                game::interface::GlobalActionExtra::create(gameSession);
 
                 // Set some variables
                 gameSession.world().setNewGlobalValue("C2$RESOURCEDIRECTORY", interpreter::makeStringValue(resourceDirectory->getDirectoryName()));

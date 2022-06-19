@@ -10,6 +10,9 @@
 #include "interpreter/mutexcontext.hpp"
 #include "interpreter/process.hpp"
 #include "interpreter/simpleindexablevalue.hpp"
+#include "interpreter/structuretypedata.hpp"
+#include "interpreter/structurevalue.hpp"
+#include "interpreter/structurevaluedata.hpp"
 #include "interpreter/values.hpp"
 #include "interpreter/world.hpp"
 
@@ -38,7 +41,46 @@ namespace interpreter { namespace {
         World& m_world;
     };
 
+    /*
+     *  Helper for parsing Lock() args
+     */
+
+    struct LockArgs {
+        String_t name;
+        String_t note;
+    };
+    void parseLockArgs(Arguments& args, LockArgs& out)
+    {
+        args.checkArgumentCount(1, 2);
+        if (!checkStringArg(out.name, args.getNext()) || out.name.empty()) {
+            throw Error("Expecting lock name");
+        }
+        checkStringArg(out.note, args.getNext());
+    }
+
+    /*
+     *  Helper for parsing GetLockInfo() args
+     */
+
+    struct GetLockInfoArgs {
+        String_t name;
+        int32_t option;
+        GetLockInfoArgs()
+            : name(), option()
+            { }
+    };
+    bool parseGetLockInfoArgs(Arguments& args, GetLockInfoArgs& out)
+    {
+        args.checkArgumentCount(1, 2);
+        if (!checkStringArg(out.name, args.getNext())) {
+            return false;
+        }
+        checkIntegerArg(out.option, args.getNext(), 0, 2);
+        return true;
+    }
+
 } }
+
 
 /****************************** LockFunction *****************************/
 
@@ -102,15 +144,10 @@ interpreter::LockFunction::call(Process& proc, afl::data::Segment& args, bool wa
        @see GetLockInfo
        @since PCC2 1.99.17, PCC 1.1.2, PCC2 2.40.1 */
     Arguments a(args, 0, args.size());
-    a.checkArgumentCount(1, 2);
+    LockArgs parsed;
+    parseLockArgs(a, parsed);
 
-    String_t name, note;
-    if (!checkStringArg(name, a.getNext()) || name.empty()) {
-        throw Error("Expecting lock name");
-    }
-    checkStringArg(note, a.getNext());
-
-    MutexContext* result = new MutexContext(m_world.mutexList().create(afl::string::strUCase(name), note, &proc));
+    MutexContext* result = new MutexContext(m_world.mutexList().create(afl::string::strUCase(parsed.name), parsed.note, &proc));
     if (want_result) {
         proc.pushNewValue(result);
     } else {
@@ -178,19 +215,16 @@ namespace interpreter { namespace {
 
            @see Lock()
            @since PCC2 1.99.17, PCC2 2.40.1 */
-        args.checkArgumentCount(1, 2);
 
         // Parse args
-        String_t name;
-        int32_t option = 0;
-        if (!checkStringArg(name, args.getNext())) {
+        GetLockInfoArgs parsed;
+        if (!parseGetLockInfoArgs(args, parsed)) {
             return 0;
         }
-        checkIntegerArg(option, args.getNext(), 0, 2);
 
         // Action
-        MutexList::Mutex* mtx = /*m_*/world.mutexList().query(afl::string::strUCase(name));
-        switch (option) {
+        MutexList::Mutex* mtx = /*m_*/world.mutexList().query(afl::string::strUCase(parsed.name));
+        switch (parsed.option) {
          case 0:
             return makeBooleanValue(mtx != 0);
          case 1:
@@ -211,9 +245,91 @@ namespace interpreter { namespace {
 
 } }
 
+/**************************** Dummy Functions ****************************/
+
+namespace interpreter { namespace {
+
+    /* Wrapper for a function pointer - could be a global utility class? */
+    class PlainFunction : public IndexableValue {
+     public:
+        typedef afl::data::Value* (*Function_t)(Arguments&);
+
+        PlainFunction(Function_t fcn)
+            : m_function(fcn)
+            { }
+
+        // IndexableValue:
+        virtual afl::data::Value* get(Arguments& args)
+            { return m_function(args); }
+        virtual void set(Arguments& /*args*/, afl::data::Value* /*value*/)
+            { throw Error::notAssignable(); }
+
+        // CallableValue:
+        virtual int32_t getDimension(int32_t /*which*/) const
+            { return 0; }
+        virtual Context* makeFirstContext()
+            { throw Error::typeError(Error::ExpectIterable); }
+
+        // BaseValue:
+        virtual CallableValue* clone() const
+            { return new PlainFunction(m_function); }
+        virtual String_t toString(bool /*readable*/) const
+            { return "#<function>"; }
+        virtual void store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, SaveContext& /*ctx*/) const
+            { throw Error::notSerializable(); }
+     private:
+        Function_t m_function;
+    };
+
+    afl::data::Value* IFDummyLock(Arguments& args)
+    {
+        // Parse args
+        LockArgs parsed;
+        parseLockArgs(args, parsed);
+
+        // Return empty structure (satisfies intended use in 'With')
+        return new StructureValue(*new StructureValueData(*new StructureTypeData()));
+    }
+
+    afl::data::Value* IFDummyGetLockInfo(Arguments& args)
+    {
+        // Parse args
+        GetLockInfoArgs parsed;
+        if (!parseGetLockInfoArgs(args, parsed)) {
+            return 0;
+        }
+
+        // Return correct type saying "no lock"
+        if (parsed.option == 0) {
+            return makeBooleanValue(false);
+        } else {
+            return 0;
+        }
+    }
+
+    void defineFunction(BytecodeObject& bco, const char* name, PlainFunction::Function_t fcn)
+    {
+        PlainFunction funcValue(fcn);
+        bco.addPushLiteral(&funcValue);
+        bco.addInstruction(Opcode::maPop, Opcode::sLocal, bco.addLocalVariable(name));
+    }
+
+} }
+
+/*
+ *  Public Entry Points
+ */
+
 void
 interpreter::registerMutexFunctions(World& world)
 {
     world.setNewGlobalValue("LOCK", new LockFunction(world));
     world.setNewGlobalValue("GETLOCKINFO", new SimpleIndexableValue(world, IFGetLockInfo, 0, 0));
+}
+
+void
+interpreter::registerDummyMutexFunctions(BytecodeObject& bco)
+{
+    defineFunction(bco, "LOCK", IFDummyLock);
+    defineFunction(bco, "GETLOCKINFO", IFDummyGetLockInfo);
 }

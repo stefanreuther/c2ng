@@ -81,6 +81,28 @@ class TestGameInterfaceFriendlyCodeContext : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameInterfaceGlobalActionExtra : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testFailures();
+};
+
+class TestGameInterfaceGlobalActions : public CxxTest::TestSuite {
+ public:
+    void testNormal();
+    void testNoShips();
+    void testNoPlanets();
+    void testNoUnmarked();
+    void testNoNumericFC();
+    void testNoSpecialFC();
+    void testList();
+    void testListNoShips();
+    void testListNoPlanets();
+    void testCancel();
+    void testLock();
+    void testLockIgnore();
+};
+
 class TestGameInterfaceGlobalCommands : public CxxTest::TestSuite {
  public:
     void testCheckPlayerArgNull();
