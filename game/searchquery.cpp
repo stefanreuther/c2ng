@@ -50,11 +50,13 @@ namespace {
     {
         // This is almost the regular 'Try xxx' sequence.
         // However, we don't preserve the error.
+        //     suncatch
         //     j L2
         //   L1:
         //     drop 1       (would normally be 'popvar SYSTEM.ERR')
         //   L2:
         BytecodeObject::Label_t endLabel = bco.makeLabel();
+        bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialUncatch, 0);
         bco.addJump(Opcode::jAlways, endLabel);
         bco.addLabel(catchLabel);
         bco.addInstruction(Opcode::maStack, Opcode::miStackDrop, 1);
