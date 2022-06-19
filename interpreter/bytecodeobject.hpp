@@ -90,8 +90,9 @@ namespace interpreter {
         /** Add named argument.
             addArgument(name, true) should not be followed by addArgument(name, false).
             \param name Name of argument
-            \param optional true if this argument is optional */
-        void addArgument(String_t name, bool optional);
+            \param optional true if this argument is optional
+            \return address of the argument */
+        uint16_t addArgument(String_t name, bool optional);
 
         /** Add local variable.
             addLocalVariable() should not be followed by addArgument().

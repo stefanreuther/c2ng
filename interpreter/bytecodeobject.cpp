@@ -110,14 +110,15 @@ interpreter::BytecodeObject::create(bool isProcedure)
 }
 
 // Add named argument.
-void
+uint16_t
 interpreter::BytecodeObject::addArgument(String_t name, bool optional)
 {
-    m_localVariables.add(name);
+    uint16_t result = m_localVariables.add(name);
     m_maxArgs = m_localVariables.getNumNames();
     if (!optional) {
         m_minArgs = m_localVariables.getNumNames();
     }
+    return result;
 }
 
 // Get subroutine name.

@@ -69,27 +69,30 @@ TestInterpreterBytecodeObject::testArgs()
     TS_ASSERT(!testee.isVarargs());
 
     // Add some args
-    testee.addArgument("A", false);
-    testee.addArgument("B", false);
+    uint16_t a = testee.addArgument("A", false);
+    uint16_t b = testee.addArgument("B", false);
     TS_ASSERT_EQUALS(testee.getMinArgs(), size_t(2));
     TS_ASSERT_EQUALS(testee.getMaxArgs(), size_t(2));
     TS_ASSERT(!testee.isVarargs());
+    TS_ASSERT_EQUALS(a, 0U);
+    TS_ASSERT_EQUALS(b, 1U);
 
     // Add some optional args
     testee.addArgument("C", false);
     testee.addArgument("D", false);
     testee.addArgument("E", true);
-    testee.addArgument("F", true);
+    uint16_t f = testee.addArgument("F", true);
     TS_ASSERT_EQUALS(testee.getMinArgs(), size_t(4));
     TS_ASSERT_EQUALS(testee.getMaxArgs(), size_t(6));
     TS_ASSERT(!testee.isVarargs());
+    TS_ASSERT_EQUALS(f, 5U);
 
     // Varargs are local variables
     TS_ASSERT(testee.hasLocalVariable("A"));
     TS_ASSERT(testee.hasLocalVariable("B"));
     TS_ASSERT(testee.hasLocalVariable("C"));
     TS_ASSERT(testee.hasLocalVariable("D"));
-    TS_ASSERT(testee.hasLocalVariable("F"));
+    TS_ASSERT(testee.hasLocalVariable("E"));
     TS_ASSERT(testee.hasLocalVariable("F"));
 }
 
