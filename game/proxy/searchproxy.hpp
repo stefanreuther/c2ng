@@ -16,6 +16,8 @@
 
 namespace game { namespace proxy {
 
+    class WaitIndicator;
+
     /** Asynchronous, two-way proxy for resolving search queries.
         Submit a search query using search().
         The response arrives asynchronously on sig_success or sig_error. */
@@ -27,6 +29,13 @@ namespace game { namespace proxy {
             \param gameSender Game sender
             \param reply RequestDispatcher to receive replies */
         SearchProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& reply);
+
+        /** Retrieve last saved query.
+            Use this to retrieve the query from a UI process.
+            \param ind WaitIndicator for UI synchronisation
+            \return saved search query
+            \see savedQuery() */
+        SearchQuery getSavedQuery(WaitIndicator& ind);
 
         /** Submit a search query.
             The search query is executed asynchronously on the game thread.

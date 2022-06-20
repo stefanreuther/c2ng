@@ -1,9 +1,6 @@
 /**
   *  \file client/dialogs/searchdialog.cpp
   *  \brief Search Dialog
-  *
-  *  Missing features:
-  *    - global actions
   */
 
 #include "client/dialogs/searchdialog.hpp"
@@ -11,6 +8,7 @@
 #include "afl/base/deleter.hpp"
 #include "afl/base/staticassert.hpp"
 #include "afl/string/format.hpp"
+#include "client/dialogs/globalactions.hpp"
 #include "client/downlink.hpp"
 #include "client/si/control.hpp"
 #include "client/widgets/expressionlist.hpp"
@@ -172,11 +170,17 @@ namespace {
      *  Search Dialog
      */
 
+    enum {
+        Stop_Normal,            // Dialog exits normally
+        Stop_Global             // Global Actions requested
+    };
+
     class SearchDialog : public client::si::Control {
      public:
-        SearchDialog(const SearchQuery& initialQuery, game::Reference currentObject, client::si::UserSide& iface, util::NumberFormatter fmt, client::si::OutputState& out);
+        SearchDialog(const SearchQuery& initialQuery, game::Reference currentObject, game::ref::List& result, client::si::UserSide& iface, util::NumberFormatter fmt, client::si::OutputState& out, bool isSubDialog);
 
-        void run(bool immediate);
+        void loadQuery(game::proxy::WaitIndicator& ind);
+        int run(bool immediate);
 
         virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target target);
         virtual void handleEndDialog(client::si::RequestLink2 link, int code);
@@ -216,10 +220,11 @@ namespace {
         ui::widgets::Button m_btnHelp;
         ui::widgets::Button m_btnHistory;
         client::widgets::ReferenceListbox m_refList;
+        bool m_isSubDialog;
 
         // Status
         SearchQuery m_query;
-        game::ref::List m_result;
+        game::ref::List& m_result;
 
         // Current object
         const game::Reference m_currentObject;
@@ -265,7 +270,7 @@ namespace {
 
 
 inline
-SearchDialog::SearchDialog(const SearchQuery& initialQuery, game::Reference currentObject, client::si::UserSide& iface, util::NumberFormatter fmt, client::si::OutputState& out)
+SearchDialog::SearchDialog(const SearchQuery& initialQuery, game::Reference currentObject, game::ref::List& result, client::si::UserSide& iface, util::NumberFormatter fmt, client::si::OutputState& out, bool isSubDialog)
     : Control(iface),
       m_format(fmt),
       m_outputState(out),
@@ -284,8 +289,9 @@ SearchDialog::SearchDialog(const SearchQuery& initialQuery, game::Reference curr
       m_btnHelp(translator()("Help"), 'h', root()),
       m_btnHistory(UTF_DOWN_ARROW, 0, root()),
       m_refList(root()),
+      m_isSubDialog(isSubDialog),
       m_query(initialQuery),
-      m_result(),
+      m_result(result),
       m_currentObject(currentObject)
 {
     // ex WSearchDialog::WSearchDialog
@@ -300,6 +306,12 @@ SearchDialog::SearchDialog(const SearchQuery& initialQuery, game::Reference curr
 }
 
 void
+SearchDialog::loadQuery(game::proxy::WaitIndicator& ind)
+{
+    m_query = m_searchProxy.getSavedQuery(ind);
+}
+
+int
 SearchDialog::run(bool immediate)
 {
     // ex WSearchDialog::init (sort-of)
@@ -355,16 +367,22 @@ SearchDialog::run(bool immediate)
 
     // Lower buttons
     ui::Group& g4 = del.addNew(new ui::Group(ui::layout::HBox::instance5));
-    g4.add(m_btnGoto);
-    g4.add(m_btnClose);
-    g4.add(m_btnMark);
-    // FIXME: g4.add(m_btnGlobal);
+    if (m_isSubDialog) {
+        g4.add(m_btnClose);
+        g4.add(m_btnMark);
+    } else {
+        g4.add(m_btnGoto);
+        g4.add(m_btnClose);
+        g4.add(m_btnMark);
+        g4.add(m_btnGlobal);
+    }
     g4.add(del.addNew(new ui::Spacer()));
     g4.add(m_btnHelp);
     win.add(g4);
     m_btnGoto.sig_fire.add(this, &SearchDialog::onGoto);
-    m_btnClose.sig_fire.addNewClosure(m_loop.makeStop(0));
+    m_btnClose.sig_fire.addNewClosure(m_loop.makeStop(Stop_Normal));
     m_btnMark.sig_fire.add(this, &SearchDialog::onMark);
+    m_btnGlobal.sig_fire.addNewClosure(m_loop.makeStop(Stop_Global));
 
     // Admin
     ui::widgets::KeyDispatcher& disp = del.addNew(new ui::widgets::KeyDispatcher());
@@ -396,19 +414,19 @@ SearchDialog::run(bool immediate)
     if (immediate) {
         onSearch();
     }
-    m_loop.run();
+    return m_loop.run();
 }
 
 void
 SearchDialog::handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target target)
 {
-    dialogHandleStateChange(link, target, m_outputState, m_loop, 0);
+    dialogHandleStateChange(link, target, m_outputState, m_loop, Stop_Normal);
 }
 
 void
 SearchDialog::handleEndDialog(client::si::RequestLink2 link, int code)
 {
-    dialogHandleEndDialog(link, code, m_outputState, m_loop, 0);
+    dialogHandleEndDialog(link, code, m_outputState, m_loop, Stop_Normal);
 }
 
 void
@@ -548,7 +566,11 @@ SearchDialog::onOptionClick(int id)
 void
 SearchDialog::onGoto()
 {
-    executeGoToReferenceWait("(Search Result)", m_refList.getCurrentReference());
+    if (m_isSubDialog) {
+        m_loop.stop(Stop_Normal);
+    } else {
+        executeGoToReferenceWait("(Search Result)", m_refList.getCurrentReference());
+    }
 }
 
 void
@@ -719,6 +741,11 @@ SearchDialog::setListContent(const game::ref::List& list)
     m_refListProxy.setContentNew(std::auto_ptr<game::proxy::ReferenceListProxy::Initializer_t>(new Init(list)));
 }
 
+
+/*
+ *  Entry Points
+ */
+
 void
 client::dialogs::doSearchDialog(const game::SearchQuery& initialQuery,
                                 game::Reference currentObject,
@@ -728,7 +755,34 @@ client::dialogs::doSearchDialog(const game::SearchQuery& initialQuery,
 {
     Downlink link(iface.root(), iface.translator());
     game::proxy::ConfigurationProxy config(iface.gameSender());
+    game::ref::List list;
 
-    SearchDialog dlg(initialQuery, currentObject, iface, config.getNumberFormatter(link), out);
-    dlg.run(immediate);
+    // Execute dialog
+    // Must take the object off the stack to remove its Control before we branch to global actions.
+    int code;
+    {
+        SearchDialog dlg(initialQuery, currentObject, list, iface, config.getNumberFormatter(link), out, false);
+        code = dlg.run(immediate);
+    }
+
+    // Optionally, branch to global actions.
+    if (code == Stop_Global) {
+        doGlobalActions(iface, out, list);
+    }
+}
+
+void
+client::dialogs::doSearchSubDialog(game::ref::List& list,
+                                   client::si::UserSide& iface,
+                                   client::si::OutputState& out)
+{
+    Downlink link(iface.root(), iface.translator());
+    game::proxy::ConfigurationProxy config(iface.gameSender());
+
+    // Execute dialog
+    // - no focused object, because user-perceived location is the dialog we are a sub-dialog to, not an object
+    // - load query ourselves so caller doesn't have to
+    SearchDialog dlg(game::SearchQuery(), game::Reference(), list, iface, config.getNumberFormatter(link), out, true);
+    dlg.loadQuery(link);
+    dlg.run(list.size() != 0);
 }

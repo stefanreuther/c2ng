@@ -8,6 +8,7 @@
 #include "afl/string/translator.hpp"
 #include "client/si/outputstate.hpp"
 #include "client/si/userside.hpp"
+#include "game/ref/list.hpp"
 #include "game/searchquery.hpp"
 #include "ui/root.hpp"
 
@@ -26,6 +27,16 @@ namespace client { namespace dialogs {
                         bool immediate,
                         client::si::UserSide& iface,
                         client::si::OutputState& out);
+
+    /** "Search" as a sub-dialog.
+        Displays and operates the search dialog as sub-dialog to another dialog, to provide an object list.
+
+        @param [in,out] list             Object list
+        @param [in]     iface            Connection to game side
+        @param [out]    out              Output state, e.g. order to change to a control screen */
+    void doSearchSubDialog(game::ref::List& list,
+                           client::si::UserSide& iface,
+                           client::si::OutputState& out);
 
 } }
 

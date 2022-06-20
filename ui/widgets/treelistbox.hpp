@@ -5,11 +5,12 @@
 #ifndef C2NG_UI_WIDGETS_TREELISTBOX_HPP
 #define C2NG_UI_WIDGETS_TREELISTBOX_HPP
 
-#include "ui/widgets/abstractlistbox.hpp"
+#include "afl/base/signal.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "ui/icons/icon.hpp"
 #include "ui/root.hpp"
-#include "afl/base/signal.hpp"
+#include "ui/widgets/abstractlistbox.hpp"
+#include "util/treelist.hpp"
 
 namespace ui { namespace widgets {
 
@@ -55,6 +56,13 @@ namespace ui { namespace widgets {
             \param open  For inner nodes, whether it is initially open or not (default: false). For leaf nodes, ignored.
             \return node reference */
         Node* addNode(int32_t id, int32_t level, String_t label, bool open);
+
+        /** Add tree.
+            Adds all nodes in the given TreeList that are children of parentNode, recursively.
+            \param level      Nesting level.
+            \param tree       Tree
+            \param parentNode Add this node's children */
+        void addTree(int32_t level, const util::TreeList& tree, size_t parentNode);
 
         /** Update after modification.
             Rebuilds the flattened list.

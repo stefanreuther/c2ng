@@ -11,6 +11,7 @@
 #include "game/interface/referencelistcontext.hpp"
 #include "util/simplerequestdispatcher.hpp"
 #include "afl/data/stringvalue.hpp"
+#include "game/test/waitindicator.hpp"
 
 using afl::base::Ref;
 using game::Reference;
@@ -288,6 +289,10 @@ TestGameProxySearchProxy::testSave()
 
     // Verify that query has been stored
     TS_ASSERT_EQUALS(SearchProxy::savedQuery(s.session()).getQuery(), "a");
+
+    // Verify using proxy
+    game::test::WaitIndicator ind;
+    TS_ASSERT_EQUALS(proxy.getSavedQuery(ind).getQuery(), "a");
 
     // Same thing again, now don't store
     recv.list.clear();

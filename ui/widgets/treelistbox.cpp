@@ -70,6 +70,19 @@ ui::widgets::TreeListbox::addNode(int32_t id, int32_t level, String_t label, boo
 }
 
 void
+ui::widgets::TreeListbox::addTree(int32_t level, const util::TreeList& tree, size_t parentNode)
+{
+    for (size_t i = tree.getFirstChild(parentNode); i != util::TreeList::nil; i = tree.getNextSibling(i)) {
+        int32_t key = 0;
+        String_t label;
+        if (tree.get(i, key, label)) {
+            addNode(key, level, label, false);
+            addTree(level+1, tree, i);
+        }
+    }
+}
+
+void
 ui::widgets::TreeListbox::updateAfterModification()
 {
     // ex UITreeWidget::updateAfterModification

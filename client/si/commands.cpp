@@ -26,6 +26,7 @@
 #include "client/dialogs/fileselectiondialog.hpp"
 #include "client/dialogs/fleetlist.hpp"
 #include "client/dialogs/friendlycodedialog.hpp"
+#include "client/dialogs/globalactions.hpp"
 #include "client/dialogs/helpdialog.hpp"
 #include "client/dialogs/historyship.hpp"
 #include "client/dialogs/hullspecification.hpp"
@@ -1565,6 +1566,30 @@ client::si::IFCCEditNewBuildOrder(game::Session& session, ScriptSide& si, Reques
 
     // Common back-end
     editBuildOrder(session, si, link, game::ShipBuildOrder(), verb);
+}
+
+// @since PCC2 2.40.13
+void
+client::si::IFCCGlobalActions(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // For now, no parameters
+    // TODO: pass optional search result
+    // TODO: pass current object for search?
+    args.checkArgumentCount(0);
+
+    class Task : public UserTask {
+     public:
+        virtual void handle(Control& ctl, RequestLink2 link)
+            {
+                UserSide& iface = ctl.interface();
+                OutputState out;
+                game::ref::List searchResult;
+                client::dialogs::doGlobalActions(iface, out, searchResult);
+                iface.joinProcess(link, out.getProcess());
+                ctl.handleStateChange(link, out.getTarget());
+            }
+    };
+    si.postNewTask(link, new Task());
 }
 
 // @since PCC2 2.40.10
@@ -4288,6 +4313,7 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("CC$EDITLABELCONFIG",    new ScriptProcedure(s, &si, IFCCEditLabelConfig));
                 s.world().setNewGlobalValue("CC$EDITNEWBUILDORDER",  new ScriptProcedure(s, &si, IFCCEditNewBuildOrder));
                 // s.world().setNewGlobalValue("CC$GIVE",               new ScriptProcedure(s, &si, IFCCGive));
+                s.world().setNewGlobalValue("CC$GLOBALACTIONS",      new ScriptProcedure(s, &si, IFCCGlobalActions));
                 s.world().setNewGlobalValue("CC$GOTOCOORDINATES",    new ScriptProcedure(s, &si, IFCCGotoCoordinates));
                 s.world().setNewGlobalValue("CC$IONSTORMINFO",       new ScriptProcedure(s, &si, IFCCIonStormInfo));
                 s.world().setNewGlobalValue("CC$IMPERIALSTATS",      new ScriptProcedure(s, &si, IFCCImperialStats));
