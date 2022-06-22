@@ -1,10 +1,8 @@
 /**
   *  \file client/dialogs/searchdialog.cpp
+  *  \brief Search Dialog
   *
   *  Missing features:
-  *    - focus on current object
-  *    - LRU / predef
-  *    - selection handling
   *    - global actions
   */
 
@@ -176,7 +174,7 @@ namespace {
 
     class SearchDialog : public client::si::Control {
      public:
-        SearchDialog(const SearchQuery& initialQuery, game::Reference currentObject, client::si::UserSide& iface, ui::Root& root, afl::string::Translator& tx, util::NumberFormatter fmt, client::si::OutputState& out);
+        SearchDialog(const SearchQuery& initialQuery, game::Reference currentObject, client::si::UserSide& iface, util::NumberFormatter fmt, client::si::OutputState& out);
 
         void run(bool immediate);
 
@@ -197,8 +195,6 @@ namespace {
         };
 
         // References
-        ui::Root& m_root;
-        afl::string::Translator& m_translator;
         util::NumberFormatter m_format;
         client::si::OutputState& m_outputState;
 
@@ -269,27 +265,25 @@ namespace {
 
 
 inline
-SearchDialog::SearchDialog(const SearchQuery& initialQuery, game::Reference currentObject, client::si::UserSide& iface, ui::Root& root, afl::string::Translator& tx, util::NumberFormatter fmt, client::si::OutputState& out)
+SearchDialog::SearchDialog(const SearchQuery& initialQuery, game::Reference currentObject, client::si::UserSide& iface, util::NumberFormatter fmt, client::si::OutputState& out)
     : Control(iface),
-      m_root(root),
-      m_translator(tx),
       m_format(fmt),
       m_outputState(out),
-      m_refListProxy(iface.gameSender(), root.engine().dispatcher()),
-      m_searchProxy(iface.gameSender(), root.engine().dispatcher()),
+      m_refListProxy(iface.gameSender(), root().engine().dispatcher()),
+      m_searchProxy(iface.gameSender(), root().engine().dispatcher()),
       m_exProxy(iface.gameSender(), game::config::ExpressionLists::Search),
-      m_loop(root),
-      m_input(1000, 30, root),
-      m_options(0, 0, root),
-      m_resultStatus(String_t(), util::SkinColor::Static, gfx::FontRequest().addSize(1), root.provider(), gfx::LeftAlign),
-      m_btnSearch(tx("Search!"), 0, root),
-      m_btnGoto(tx("Go to"), 0, root),
-      m_btnClose(tx("Close"), util::Key_Escape, root),
-      m_btnMark(tx("Mark..."), 'm', root),
-      m_btnGlobal(tx("Global..."), 'g', root),
-      m_btnHelp(tx("Help"), 'h', root),
-      m_btnHistory(UTF_DOWN_ARROW, 0, root),
-      m_refList(root),
+      m_loop(root()),
+      m_input(1000, 30, root()),
+      m_options(0, 0, root()),
+      m_resultStatus(String_t(), util::SkinColor::Static, gfx::FontRequest().addSize(1), root().provider(), gfx::LeftAlign),
+      m_btnSearch(translator()("Search!"), 0, root()),
+      m_btnGoto(translator()("Go to"), 0, root()),
+      m_btnClose(translator()("Close"), util::Key_Escape, root()),
+      m_btnMark(translator()("Mark..."), 'm', root()),
+      m_btnGlobal(translator()("Global..."), 'g', root()),
+      m_btnHelp(translator()("Help"), 'h', root()),
+      m_btnHistory(UTF_DOWN_ARROW, 0, root()),
+      m_refList(root()),
       m_query(initialQuery),
       m_result(),
       m_currentObject(currentObject)
@@ -327,21 +321,22 @@ SearchDialog::run(bool immediate)
     //     Spacer
     //     Button "Help"
 
+    afl::string::Translator& tx = translator();
     afl::base::Deleter del;
-    ui::Window& win = del.addNew(new ui::Window(m_translator("Search Object"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
+    ui::Window& win = del.addNew(new ui::Window(tx("Search Object"), root().provider(), root().colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
 
     // Options
-    m_options.addItem(Option_SearchObjects, 'o', m_translator("Objects"))
-        .addPossibleValues(SearchObjectLabel(m_translator));
-    m_options.addItem(Option_MatchType,     't', m_translator("Search type"))
-        .addPossibleValues(createStringTable(MATCH_TYPES).map(m_translator));
-    m_options.addItem(Option_PlayedOnly,    'p', m_translator("Played objects only"))
-        .addPossibleValues(createStringTable(NO_YES).map(m_translator));
+    m_options.addItem(Option_SearchObjects, 'o', tx("Objects"))
+        .addPossibleValues(SearchObjectLabel(tx));
+    m_options.addItem(Option_MatchType,     't', tx("Search type"))
+        .addPossibleValues(createStringTable(MATCH_TYPES).map(tx));
+    m_options.addItem(Option_PlayedOnly,    'p', tx("Played objects only"))
+        .addPossibleValues(createStringTable(NO_YES).map(tx));
     win.add(m_options);
 
     // Input
     ui::Group& g1 = del.addNew(new ui::Group(ui::layout::HBox::instance0));
-    g1.add(FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame, m_input));
+    g1.add(FrameGroup::wrapWidget(del, root().colorScheme(), ui::LoweredFrame, m_input));
     g1.add(m_btnHistory);
     win.add(g1);
     m_input.setFont(gfx::FontRequest().addSize(1));
@@ -354,8 +349,8 @@ SearchDialog::run(bool immediate)
     win.add(g2);
 
     // Result list
-    win.add(FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame,
-                                   del.addNew(new ui::widgets::ScrollbarContainer(m_refList, m_root))));
+    win.add(FrameGroup::wrapWidget(del, root().colorScheme(), ui::LoweredFrame,
+                                   del.addNew(new ui::widgets::ScrollbarContainer(m_refList, root()))));
     m_refList.setNumLines(20);
 
     // Lower buttons
@@ -386,7 +381,7 @@ SearchDialog::run(bool immediate)
     it.add(m_refList);
     win.add(it);
 
-    win.add(del.addNew(new ui::widgets::Quit(m_root, m_loop)));
+    win.add(del.addNew(new ui::widgets::Quit(root(), m_loop)));
 
     // Setup
     setValues();
@@ -396,8 +391,8 @@ SearchDialog::run(bool immediate)
 
     // Run
     win.pack();
-    m_root.centerWidget(win);
-    m_root.add(win);
+    root().centerWidget(win);
+    root().add(win);
     if (immediate) {
         onSearch();
     }
@@ -472,15 +467,16 @@ void
 SearchDialog::onSuccess(const game::ref::List& list)
 {
     // ex WSearchDialog::onResultChange (part)
-    m_resultStatus.setText(afl::string::Format(m_translator("%d result%!1{s%}"),
+    afl::string::Translator& tx = translator();
+    m_resultStatus.setText(afl::string::Format(tx("%d result%!1{s%}"),
                                                m_format.formatNumber(static_cast<int32_t>(list.size()))));
     m_result = list;
 
     if (list.size() == 0) {
         // Nothing found
-        ui::dialogs::MessageBox(m_translator("Your query didn't match any object."),
-                                m_translator("Search Object"),
-                                m_root).doOkDialog(m_translator);
+        ui::dialogs::MessageBox(tx("Your query didn't match any object."),
+                                tx("Search Object"),
+                                root()).doOkDialog(tx);
     } else {
         // Set list content. This will answer with onListChange.
         setListContent(list);
@@ -500,7 +496,8 @@ SearchDialog::onSuccess(const game::ref::List& list)
 void
 SearchDialog::onError(String_t err)
 {
-    ui::dialogs::MessageBox(err, m_translator("Search Object"), m_root).doOkDialog(m_translator);
+    afl::string::Translator& tx = translator();
+    ui::dialogs::MessageBox(err, tx("Search Object"), root()).doOkDialog(tx);
     m_input.requestFocus();
 }
 
@@ -560,18 +557,19 @@ SearchDialog::onMark()
     // ex WSearchDialog::doSelectionCommands
     enum { Mark, MarkOnly, Unmark };
 
-    ui::widgets::StringListbox list(m_root.provider(), m_root.colorScheme());
-    list.addItem(Mark,     m_translator("Mark found objects"));
-    list.addItem(MarkOnly, m_translator("Mark only found objects"));
-    list.addItem(Unmark,   m_translator("Unmark found objects"));
+    afl::string::Translator& tx = translator();
+    ui::widgets::StringListbox list(root().provider(), root().colorScheme());
+    list.addItem(Mark,     tx("Mark found objects"));
+    list.addItem(MarkOnly, tx("Mark only found objects"));
+    list.addItem(Unmark,   tx("Unmark found objects"));
 
-    ui::EventLoop loop(m_root);
-    if (!ui::widgets::MenuFrame(ui::layout::VBox::instance0, m_root, loop).doMenu(list, m_btnMark.getExtent().getBottomLeft())) {
+    ui::EventLoop loop(root());
+    if (!ui::widgets::MenuFrame(ui::layout::VBox::instance0, root(), loop).doMenu(list, m_btnMark.getExtent().getBottomLeft())) {
         return;
     }
 
     // Create a short-lived SelectionProxy; we don't need any callbacks that would necessitate a long-lived one.
-    SelectionProxy proxy(interface().gameSender(), m_root.engine().dispatcher());
+    SelectionProxy proxy(interface().gameSender(), root().engine().dispatcher());
 
     // Commands
     int32_t key = 0;
@@ -616,7 +614,7 @@ SearchDialog::onHistory()
 
     String_t value = m_input.getText();
     String_t flags;
-    if (client::widgets::doExpressionListPopup(m_root, m_exProxy, m_btnHistory.getExtent().getBottomLeft(), value, flags, m_translator)) {
+    if (client::widgets::doExpressionListPopup(root(), m_exProxy, m_btnHistory.getExtent().getBottomLeft(), value, flags, translator())) {
         // User has selected an item. Parse it.
         SearchQuery::SearchObjects_t obj;
         SearchQuery::MatchType type = SearchQuery::MatchTrue;
@@ -672,19 +670,20 @@ void
 SearchDialog::editSearchObjects()
 {
     SearchQuery::SearchObjects_t objs = m_query.getSearchObjects();
-    SearchObjectDialog(m_root, m_translator).run(objs);
+    SearchObjectDialog(root(), translator()).run(objs);
     m_query.setSearchObjects(objs);
 }
 
 void
 SearchDialog::editMatchType()
 {
-    ui::widgets::StringListbox box(m_root.provider(), m_root.colorScheme());
+    afl::string::Translator& tx = translator();
+    ui::widgets::StringListbox box(root().provider(), root().colorScheme());
     for (size_t i = 0; i < countof(MATCH_TYPES); ++i) {
-        box.addItem(int32_t(i), afl::string::Format("%d - %s", i+1, m_translator(MATCH_TYPES[i])));
+        box.addItem(int32_t(i), afl::string::Format("%d - %s", i+1, tx(MATCH_TYPES[i])));
     }
     box.setCurrentKey(m_query.getMatchType());
-    if (ui::widgets::doStandardDialog(m_translator("Search Object"), m_translator("Search type"), box, true, m_root, m_translator)) {
+    if (ui::widgets::doStandardDialog(tx("Search Object"), tx("Search type"), box, true, root(), tx)) {
         int32_t k;
         if (box.getCurrentKey(k)) {
             m_query.setMatchType(SearchQuery::MatchType(k));
@@ -695,12 +694,13 @@ SearchDialog::editMatchType()
 void
 SearchDialog::setValues()
 {
+    afl::string::Translator& tx = translator();
     m_options.findItem(Option_MatchType)
-        .setValue(m_translator(createStringTable(MATCH_TYPES)(m_query.getMatchType())));
+        .setValue(tx(createStringTable(MATCH_TYPES)(m_query.getMatchType())));
     m_options.findItem(Option_SearchObjects)
-        .setValue(SearchQuery::formatSearchObjects(m_query.getSearchObjects(), m_translator));
+        .setValue(SearchQuery::formatSearchObjects(m_query.getSearchObjects(), tx));
     m_options.findItem(Option_PlayedOnly)
-        .setValue(m_translator(createStringTable(NO_YES)(m_query.getPlayedOnly())));
+        .setValue(tx(createStringTable(NO_YES)(m_query.getPlayedOnly())));
 }
 
 void
@@ -724,13 +724,11 @@ client::dialogs::doSearchDialog(const game::SearchQuery& initialQuery,
                                 game::Reference currentObject,
                                 bool immediate,
                                 client::si::UserSide& iface,
-                                ui::Root& root,
-                                afl::string::Translator& tx,
                                 client::si::OutputState& out)
 {
-    Downlink link(root, tx);
+    Downlink link(iface.root(), iface.translator());
     game::proxy::ConfigurationProxy config(iface.gameSender());
 
-    SearchDialog dlg(initialQuery, currentObject, iface, root, tx, config.getNumberFormatter(link), out);
+    SearchDialog dlg(initialQuery, currentObject, iface, config.getNumberFormatter(link), out);
     dlg.run(immediate);
 }

@@ -4164,7 +4164,7 @@ client::si::IFUISearch(game::Session& session, ScriptSide& si, RequestLink1 link
             {
                 UserSide& ui = ctl.interface();
                 OutputState out;
-                client::dialogs::doSearchDialog(m_query, m_currentObject, m_immediate, ui, ctl.root(), ctl.translator(), out);
+                client::dialogs::doSearchDialog(m_query, m_currentObject, m_immediate, ui, out);
                 ui.joinProcess(link, out.getProcess());
                 ctl.handleStateChange(link, out.getTarget());
             }
