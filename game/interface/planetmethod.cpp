@@ -27,6 +27,7 @@
 #include "interpreter/error.hpp"
 #include "interpreter/values.hpp"
 #include "game/actions/convertsupplies.hpp"
+#include "interpreter/genericvalue.hpp"
 
 using game::Exception;
 
@@ -531,6 +532,22 @@ namespace {
             }
         }
     }
+
+    void doApplyBuildGoals(game::map::Planet& pl, interpreter::Arguments& args)
+    {
+        args.checkArgumentCount(1);
+        afl::data::Value* p = args.getNext();
+        if (p == 0) {
+            return;
+        }
+
+        game::interface::AutobuildSettingsValue_t* v = dynamic_cast<game::interface::AutobuildSettingsValue_t*>(p);
+        if (v == 0) {
+            throw interpreter::Error::typeError();
+        }
+
+        pl.applyAutobuildSettings(v->get());
+    }
 }
 
 void
@@ -873,6 +890,14 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            @since PCC2 1.99.15, PCC2 2.40.3 */
         args.checkArgumentCount(0);
         doAutoTaxNatives(pl, root);
+        break;
+
+     case ipmApplyBuildGoals:
+        /* @q CC$ApplyBuildGoals goals:Obj (Internal)
+           Used as planet method: apply build goals.
+           The "goals" is the result of a CC$EditAutobuildSettings command.
+           @since PCC2 2.40.13 */
+        doApplyBuildGoals(pl, args);
         break;
     }
 }

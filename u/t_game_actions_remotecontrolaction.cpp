@@ -279,3 +279,32 @@ TestGameActionsRemoteControlAction::testForeignControlled()
     TS_ASSERT(cc.getCommand(Command::RemoteControl, SHIP_ID) == 0);
 }
 
+/** Test parseVerb(). */
+void
+TestGameActionsRemoteControlAction::testParseVerb()
+{
+    RemoteControlAction::Verb v;
+
+    // Normal
+    TS_ASSERT(RemoteControlAction::parseVerb("allow", v));
+    TS_ASSERT_EQUALS(v, RemoteControlAction::Allow);
+
+    TS_ASSERT(RemoteControlAction::parseVerb("forbid", v));
+    TS_ASSERT_EQUALS(v, RemoteControlAction::Forbid);
+
+    TS_ASSERT(RemoteControlAction::parseVerb("drop", v));
+    TS_ASSERT_EQUALS(v, RemoteControlAction::Drop);
+
+    TS_ASSERT(RemoteControlAction::parseVerb("control", v));
+    TS_ASSERT_EQUALS(v, RemoteControlAction::Control);
+
+    // Shortened
+    TS_ASSERT(RemoteControlAction::parseVerb("a", v));
+    TS_ASSERT_EQUALS(v, RemoteControlAction::Allow);
+
+    // Errors
+    TS_ASSERT(!RemoteControlAction::parseVerb("drops", v));
+    TS_ASSERT(!RemoteControlAction::parseVerb("request", v));
+    TS_ASSERT(!RemoteControlAction::parseVerb("", v));
+}
+

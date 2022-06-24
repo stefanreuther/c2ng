@@ -44,10 +44,11 @@ namespace client { namespace si {
     /*
      *  Script Interface
      */
-    
+
     afl::data::Value* IFCCRemoteGetColor(game::Session& session, interpreter::Arguments& args);
     afl::data::Value* IFCCRemoteGetQuestion(game::Session& session, interpreter::Arguments& args);
     void IFCCRemoteToggle(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
+    void IFCCRemoteSet(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
 
 } }
 

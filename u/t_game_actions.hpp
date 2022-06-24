@@ -249,6 +249,7 @@ class TestGameActionsRemoteControlAction : public CxxTest::TestSuite {
     void testForeignDisabled();
     void testForeignThird();
     void testForeignControlled();
+    void testParseVerb();
 };
 
 class TestGameActionsTaxationAction : public CxxTest::TestSuite {

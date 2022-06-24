@@ -120,6 +120,28 @@ game::ref::List::size() const
     return m_content.size();
 }
 
+game::ref::List::Types_t
+game::ref::List::getTypes() const
+{
+    Types_t result;
+    for (size_t i = 0, n = m_content.size(); i < n; ++i) {
+        result += m_content[i].getType();
+    }
+    return result;
+}
+
+std::vector<game::Id_t>
+game::ref::List::getIds(Reference::Type type) const
+{
+    std::vector<Id_t> result;
+    for (size_t i = 0, n = m_content.size(); i < n; ++i) {
+        if (m_content[i].getType() == type) {
+            result.push_back(m_content[i].getId());
+        }
+    }
+    return result;
+}
+
 void
 game::ref::List::sort(const SortPredicate& pred)
 {

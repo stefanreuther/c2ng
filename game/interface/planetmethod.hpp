@@ -10,6 +10,7 @@
 #include "game/shipbuildorder.hpp"
 #include "game/turn.hpp"
 #include "interpreter/arguments.hpp"
+#include "interpreter/genericvalue.hpp"
 #include "interpreter/process.hpp"
 
 namespace game { namespace interface {
@@ -41,8 +42,11 @@ namespace game { namespace interface {
         ipmBuildShip,               // 23
         ipmCargoTransfer,           // 24
         ipmAutoTaxColonists,        // 25
-        ipmAutoTaxNatives           // 26
+        ipmAutoTaxNatives,          // 26
+        ipmApplyBuildGoals          // 27
     };
+
+    typedef interpreter::GenericValue<game::map::Planet::AutobuildSettings> AutobuildSettingsValue_t;
 
     void callPlanetMethod(game::map::Planet& pl,
                           PlanetMethod ipm,

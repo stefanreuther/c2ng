@@ -4,6 +4,7 @@
   */
 
 #include "game/actions/remotecontrolaction.hpp"
+#include "afl/base/countof.hpp"
 #include "afl/string/char.hpp"
 #include "game/v3/command.hpp"
 #include "game/v3/commandcontainer.hpp"
@@ -169,4 +170,23 @@ game::actions::RemoteControlAction::toggleState()
     } else {
         return false;
     }
+}
+
+// Parse a stringified verb into Verb value.
+bool
+game::actions::RemoteControlAction::parseVerb(const String_t& str, Verb& result)
+{
+    if (!str.empty()) {
+        for (size_t i = 0; i < countof(RC_VERBS); ++i) {
+            String_t pattern = RC_VERBS[i];
+            if (pattern.size() >= str.size()) {
+                pattern.erase(str.size());
+                if (afl::string::strCaseCompare(pattern, str) == 0) {
+                    result = Verb(i);
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }

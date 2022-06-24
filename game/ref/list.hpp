@@ -25,6 +25,7 @@ namespace game { namespace ref {
 
         typedef std::vector<Reference> Vector_t;
         typedef Vector_t::const_iterator Iterator_t;
+        typedef afl::bits::SmallSet<Reference::Type> Types_t;
 
         List();
         ~List();
@@ -45,6 +46,8 @@ namespace game { namespace ref {
         Reference operator[](size_t pos) const;
         void set(size_t pos, Reference ref);
         size_t size() const;
+        Types_t getTypes() const;
+        std::vector<Id_t> getIds(Reference::Type type) const;
 
         void sort(const SortPredicate& pred);
 

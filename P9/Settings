@@ -12,7 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/proxy/globalactionproxy.cpp \
+FILES_gamelib = game/proxy/objectlistexportadaptor.cpp \
+    game/proxy/objectlistexportadaptor.hpp game/proxy/globalactionproxy.cpp \
     game/proxy/globalactionproxy.hpp game/interface/globalactionextra.cpp \
     game/interface/globalactionextra.hpp util/treelist.cpp util/treelist.hpp \
     game/interface/globalactions.cpp game/interface/globalactions.hpp \
@@ -1719,7 +1720,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_proxy_globalactionproxy.cpp \
+FILES_testsuite = u/t_game_proxy_objectlistexportadaptor.cpp \
+    u/t_game_proxy_globalactionproxy.cpp \
     u/t_game_interface_globalactionextra.cpp \
     u/t_game_interface_globalactions.cpp u/t_util_treelist.cpp \
     u/t_game_ref_typeadaptor.cpp u/t_game_proxy_historyshipproxy.cpp \

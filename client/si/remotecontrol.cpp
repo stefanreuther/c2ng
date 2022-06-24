@@ -142,3 +142,27 @@ client::si::IFCCRemoteToggle(interpreter::Process& /*proc*/, game::Session& sess
 {
     toggleRemoteControl(session, getShipId(args));
 }
+
+/* @q CC$RemoteSet shipId:Int, verb:Str (Internal)
+   @since PCC2 2.40.13 */
+void
+client::si::IFCCRemoteSet(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+{
+    args.checkArgumentCount(2);
+
+    int32_t shipId = 0;
+    String_t verb;
+    if (!interpreter::checkIntegerArg(shipId, args.getNext()) || !interpreter::checkStringArg(verb, args.getNext())) {
+        return;
+    }
+
+    game::actions::RemoteControlAction::Verb v;
+    if (!RemoteControlAction::parseVerb(verb, v)) {
+        throw interpreter::Error("Invalid verb");
+    }
+
+    std::auto_ptr<RemoteControlAction> action(createAction(session, shipId));
+    if (action.get() == 0 || !action->setState(v)) {
+        throw interpreter::Error("Impossible");
+    }
+}

@@ -530,6 +530,7 @@ EndFunction
 
 % @since PCC2 2.40.13
 Function CCVP.MissionWorksOnShip(msn, sh)
+  Local System.Err
   Try
     % @change SRace check (host.isMissionAllowed) now in mission.cc
     If BitAnd(msn->Race$, 2^Cfg("PlayerSpecialMission", sh->Owner.Real))=0 Then Abort
@@ -540,6 +541,34 @@ Function CCVP.MissionWorksOnShip(msn, sh)
   Else
     Return False
   EndTry
+EndFunction
+
+% @since PCC2 2.40.13
+Function CCVP.MissionWorksGlobally(msn)
+  % ex client/actions/gamission.cc:checkMission
+  % We cannot do all missions from the Global Actions. We exclude:
+  % - missions of other players (even if we have RCd ships of them)
+  % - missions that are registered-only
+  % - missions that require waypoint permissions
+  % - missions whose args require the notion of "here"
+  % - missions whose condition evaluates to FALSE without error
+  %   (i.e. do not depend on actual ship data)
+  % Note that the last item is actually implemented as "evaluates to TRUE"
+  % in PCC 1.x, although documented like here */
+  Local System.Err
+
+  % Simple conditions
+  If BitAnd(msn->Race$, 2^My.Race.Mission)=0 Then Return False
+  If InStr(msn->Flags, "r") And System.GameType$ Then Return False
+  If InStr(msn->Flags, "i") Then Return False
+  If msn->Intercept.Type='h' Then Return False
+  If msn->Tow.Type='h' Then Return False
+
+  % Expression condition
+  Try If msn->Condition And Eval(msn->Condition, sh)=0 Then Return False
+
+  % We cannot prove it's disallowed, so allow it
+  Return True
 EndFunction
 
 % @since PCC2 2.40.1

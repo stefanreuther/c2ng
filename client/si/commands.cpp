@@ -23,10 +23,12 @@
 #include "client/dialogs/cloneship.hpp"
 #include "client/dialogs/commandlistdialog.hpp"
 #include "client/dialogs/entercoordinates.hpp"
+#include "client/dialogs/export.hpp"
 #include "client/dialogs/fileselectiondialog.hpp"
 #include "client/dialogs/fleetlist.hpp"
 #include "client/dialogs/friendlycodedialog.hpp"
 #include "client/dialogs/globalactions.hpp"
+#include "client/dialogs/goaldialog.hpp"
 #include "client/dialogs/helpdialog.hpp"
 #include "client/dialogs/historyship.hpp"
 #include "client/dialogs/hullspecification.hpp"
@@ -84,7 +86,9 @@
 #include "game/exception.hpp"
 #include "game/game.hpp"
 #include "game/interface/basetaskbuildcommandparser.hpp"
+#include "game/interface/planetmethod.hpp"
 #include "game/interface/plugincontext.hpp"
+#include "game/interface/referencelistcontext.hpp"
 #include "game/interface/richtextfunctions.hpp"
 #include "game/interface/richtextvalue.hpp"
 #include "game/interface/shiptaskpredictor.hpp"
@@ -103,6 +107,7 @@
 #include "game/proxy/fictivestarbaseadaptor.hpp"
 #include "game/proxy/inboxadaptor.hpp"
 #include "game/proxy/maplocationproxy.hpp"
+#include "game/proxy/objectlistexportadaptor.hpp"
 #include "game/proxy/outboxproxy.hpp"
 #include "game/proxy/playerproxy.hpp"
 #include "game/proxy/predictedstarbaseadaptor.hpp"
@@ -1472,6 +1477,29 @@ client::si::IFCCChooseInterceptTarget(game::Session& session, ScriptSide& si, Re
     }
 }
 
+// @since PCC2 2.40.13
+void
+client::si::IFCCEditAutobuildSettings(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    class Task : public UserTask {
+     public:
+        virtual void handle(Control& ctl, RequestLink2 link)
+            {
+                UserSide& iface = ctl.interface();
+                client::dialogs::GoalDialog dlg(ctl.root(), ctl.translator(), true);
+                std::auto_ptr<afl::data::Value> result;
+                if (dlg.run()) {
+                    result.reset(new game::interface::AutobuildSettingsValue_t(dlg.getResult()));
+                }
+                iface.setVariable(link, "UI.RESULT", result);
+                iface.continueProcess(link);
+            }
+    };
+
+    args.checkArgumentCount(0);
+    si.postNewTask(link, new Task());
+}
+
 // @since PCC2 2.40.9
 void
 client::si::IFCCEditCommands(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
@@ -1487,8 +1515,6 @@ client::si::IFCCEditCommands(game::Session& session, ScriptSide& si, RequestLink
                 iface.joinProcess(link, out.getProcess());
                 ctl.handleStateChange(link, out.getTarget());
             }
-     private:
-        bool m_excludeCurrent;
     };
 
     args.checkArgumentCount(0);
@@ -1566,6 +1592,67 @@ client::si::IFCCEditNewBuildOrder(game::Session& session, ScriptSide& si, Reques
 
     // Common back-end
     editBuildOrder(session, si, link, game::ShipBuildOrder(), verb);
+}
+
+// @since PCC2 2.40.13
+void
+client::si::IFCCExport(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // CC$Export refList
+    // For now, only reference-lists with ships or planets.
+    // If we decide on a broader interface, re-classify as public
+
+    class AdaptorFromSession : public afl::base::Closure<game::proxy::ExportAdaptor*(game::Session&)> {
+     public:
+        AdaptorFromSession(game::proxy::ObjectListExportAdaptor::Mode mode, const std::vector<game::Id_t>& ids)
+            : m_mode(mode), m_ids(ids)
+            { }
+        virtual game::proxy::ExportAdaptor* call(game::Session& session)
+            { return new game::proxy::ObjectListExportAdaptor(session, m_mode, m_ids); }
+     private:
+        game::proxy::ObjectListExportAdaptor::Mode m_mode;
+        const std::vector<game::Id_t> m_ids;
+    };
+
+    class Task : public UserTask {
+     public:
+        Task(game::proxy::ObjectListExportAdaptor::Mode mode, const std::vector<game::Id_t>& ids)
+            : m_mode(mode), m_ids(ids)
+            { }
+        virtual void handle(Control& ctl, RequestLink2 link)
+            {
+                client::dialogs::doExport(ctl.root(),
+                                          ctl.interface().gameSender().makeTemporary(new AdaptorFromSession(m_mode, m_ids)),
+                                          ctl.interface().gameSender(),
+                                          ctl.translator());
+                ctl.interface().continueProcess(link);
+            }
+     private:
+        game::proxy::ObjectListExportAdaptor::Mode m_mode;
+        const std::vector<game::Id_t> m_ids;
+    };
+
+    // Parse args
+    args.checkArgumentCount(1);
+    afl::data::Value* arg = args.getNext();
+    if (arg == 0) {
+        return;
+    }
+    game::interface::ReferenceListContext* refArg = dynamic_cast<game::interface::ReferenceListContext*>(arg);
+    if (refArg == 0) {
+        throw interpreter::Error("Expecting ReferenceList parameter");
+    }
+
+    // Validate list
+    const game::ref::List& refList = refArg->getList();
+    game::ref::List::Types_t types = refList.getTypes();
+    if (types == game::ref::List::Types_t(game::Reference::Ship)) {
+        si.postNewTask(link, new Task(game::proxy::ObjectListExportAdaptor::Ships, refList.getIds(game::Reference::Ship)));
+    } else if (types == game::ref::List::Types_t(game::Reference::Planet)) {
+        si.postNewTask(link, new Task(game::proxy::ObjectListExportAdaptor::Planets, refList.getIds(game::Reference::Planet)));
+    } else {
+        throw interpreter::Error("ReferenceList must contain either ships or planets");
+    }
 }
 
 // @since PCC2 2.40.13
@@ -4308,10 +4395,12 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("CC$CHANGEWAYPOINT",     new ScriptProcedure(s, &si, IFCCChangeWaypoint));
                 s.world().setNewGlobalValue("CC$CHOOSEINTERCEPTTARGET", new ScriptProcedure(s, &si, IFCCChooseInterceptTarget));
                 // s.world().setNewGlobalValue("CC$CSBROWSE",           new ScriptProcedure(s, &si, IFCCCSBrowse));
+                s.world().setNewGlobalValue("CC$EDITAUTOBUILDSETTINGS", new ScriptProcedure(s, &si, IFCCEditAutobuildSettings));
                 s.world().setNewGlobalValue("CC$EDITCOMMANDS",       new ScriptProcedure(s, &si, IFCCEditCommands));
                 s.world().setNewGlobalValue("CC$EDITCURRENTBUILDORDER", new ScriptProcedure(s, &si, IFCCEditCurrentBuildOrder));
                 s.world().setNewGlobalValue("CC$EDITLABELCONFIG",    new ScriptProcedure(s, &si, IFCCEditLabelConfig));
                 s.world().setNewGlobalValue("CC$EDITNEWBUILDORDER",  new ScriptProcedure(s, &si, IFCCEditNewBuildOrder));
+                s.world().setNewGlobalValue("CC$EXPORT",             new ScriptProcedure(s, &si, IFCCExport));
                 // s.world().setNewGlobalValue("CC$GIVE",               new ScriptProcedure(s, &si, IFCCGive));
                 s.world().setNewGlobalValue("CC$GLOBALACTIONS",      new ScriptProcedure(s, &si, IFCCGlobalActions));
                 s.world().setNewGlobalValue("CC$GOTOCOORDINATES",    new ScriptProcedure(s, &si, IFCCGotoCoordinates));
@@ -4326,6 +4415,7 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("CC$RESET",              new ScriptProcedure(s, &si, IFCCReset));
                 s.world().setNewGlobalValue("CC$REMOTEGETCOLOR",     new SimpleFunction(s, IFCCRemoteGetColor));
                 s.world().setNewGlobalValue("CC$REMOTEGETQUESTION",  new SimpleFunction(s, IFCCRemoteGetQuestion));
+                s.world().setNewGlobalValue("CC$REMOTESET",          new SimpleProcedure(s, IFCCRemoteSet));
                 s.world().setNewGlobalValue("CC$REMOTETOGGLE",       new SimpleProcedure(s, IFCCRemoteToggle));
                 s.world().setNewGlobalValue("CC$SELECTNEXTSHIP",     new ScriptProcedure(s, &si, IFCCSelectNextShip));
                 s.world().setNewGlobalValue("CC$SELLSUPPLIES",       new ScriptProcedure(s, &si, IFCCSellSupplies));

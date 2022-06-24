@@ -145,6 +145,7 @@ If System.GUI Then
   %% When the GUI is not active, don't define all these to save memory
   Load "core_tiles.q"
   Load "core_ui.q"
+  Load "core_global.q"
 EndIf % System.GUI
 
 

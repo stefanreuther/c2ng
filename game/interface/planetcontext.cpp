@@ -56,6 +56,7 @@ namespace {
         { "BUILDSHIP",                 game::interface::ipmBuildShip,         PlanetMethodDomain,   interpreter::thProcedure },
         { "BUILDTORPS",                game::interface::ipmBuildTorps,        PlanetMethodDomain,   interpreter::thProcedure },
         { "CARGOTRANSFER",             game::interface::ipmCargoTransfer,     PlanetMethodDomain,   interpreter::thProcedure },
+        { "CC$APPLYBUILDGOALS",        game::interface::ipmApplyBuildGoals,   PlanetMethodDomain,   interpreter::thProcedure },
         { "COLONISTS",                 game::interface::ippColonists,         PlanetPropertyDomain, interpreter::thInt },
         { "COLONISTS.CHANGE",          game::interface::ippColonistChangeStr, PlanetPropertyDomain, interpreter::thString },
         { "COLONISTS.CHANGE$",         game::interface::ippColonistChange,    PlanetPropertyDomain, interpreter::thInt },

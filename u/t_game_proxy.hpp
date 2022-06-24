@@ -391,6 +391,13 @@ class TestGameProxyMutexListProxy : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameProxyObjectListExportAdaptor : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testNull();
+    void testConfigError();
+};
+
 class TestGameProxyObjectListener : public CxxTest::TestSuite {
  public:
     void testInterface();

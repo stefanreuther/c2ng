@@ -68,6 +68,13 @@ namespace game { namespace actions {
             \return true on success */
         bool toggleState();
 
+        /** Parse a stringified verb into Verb value.
+            \param [in]  str    String
+            \param [out] result Result
+            \retval true parse successful, result has been set
+            \retval false parse failed */
+        static bool parseVerb(const String_t& str, Verb& result);
+
      private:
         Turn& m_turn;
         Id_t m_shipId;
