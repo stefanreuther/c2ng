@@ -128,6 +128,7 @@ namespace {
         { "OWNER.ADJ",                 game::interface::iplAdjName,           OwnerPropertyDomain,  interpreter::thString },
         { "PLAYED",                    game::interface::ippPlayed,            PlanetPropertyDomain, interpreter::thBool },
         { "RECYCLESHIP",               game::interface::ipmRecycleShip,       PlanetMethodDomain,   interpreter::thProcedure },
+        { "REF",                       game::interface::ippReference,         PlanetPropertyDomain, interpreter::thNone },
         { "SCORE",                     game::interface::ippScore,             PlanetPropertyDomain, interpreter::thArray },
         { "SELLSUPPLIES",              game::interface::ipmSellSupplies,      PlanetMethodDomain,   interpreter::thProcedure },
         { "SETCOLONISTTAX",            game::interface::ipmSetColonistTax,    PlanetMethodDomain,   interpreter::thProcedure },
@@ -285,8 +286,7 @@ game::interface::PlanetContext::get(PropertyIndex_t index)
             switch (PlanetDomain(planet_mapping[index].domain)) {
              case PlanetPropertyDomain:
                 return getPlanetProperty(*pl, PlanetProperty(planet_mapping[index].index),
-                                         m_session.translator(),
-                                         m_session.interface(),
+                                         m_session,
                                          m_root,
                                          m_game);
              case BasePropertyDomain:

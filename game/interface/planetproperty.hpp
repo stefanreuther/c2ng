@@ -7,10 +7,10 @@
 #include "afl/base/ptr.hpp"
 #include "afl/data/value.hpp"
 #include "game/game.hpp"
-#include "game/interpreterinterface.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/universe.hpp"
 #include "game/root.hpp"
+#include "game/session.hpp"
 
 namespace game { namespace interface {
 
@@ -81,6 +81,7 @@ namespace game { namespace interface {
         ippOrbitingOwn,
         ippOrbitingShips,
         ippPlayed,
+        ippReference,
         ippScore,
         ippSupplies,
         ippTask,
@@ -92,8 +93,7 @@ namespace game { namespace interface {
     };
 
     afl::data::Value* getPlanetProperty(const game::map::Planet& pl, PlanetProperty ipp,
-                                        afl::string::Translator& tx,
-                                        InterpreterInterface& iface,
+                                        Session& session,
                                         afl::base::Ref<Root> root,
                                         afl::base::Ref<Game> game);
     void setPlanetProperty(game::map::Planet& pl, PlanetProperty ipp, const afl::data::Value* value, Root& root);

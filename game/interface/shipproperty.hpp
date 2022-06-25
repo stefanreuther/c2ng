@@ -4,10 +4,11 @@
 #ifndef C2NG_GAME_INTERFACE_SHIPPROPERTY_HPP
 #define C2NG_GAME_INTERFACE_SHIPPROPERTY_HPP
 
-#include "game/map/ship.hpp"
 #include "afl/data/value.hpp"
 #include "game/game.hpp"
+#include "game/map/ship.hpp"
 #include "game/root.hpp"
+#include "game/session.hpp"
 
 namespace game { namespace interface {
 
@@ -67,6 +68,7 @@ namespace game { namespace interface {
         ispOrbitName,
         ispPlayed,
         ispRealOwner,
+        ispReference,
         ispScore,
         ispSpeedId,
         ispSpeedName,
@@ -116,8 +118,7 @@ namespace game { namespace interface {
         \param turn      Turn (needed for related units to name locations)
         \return property value */
     afl::data::Value* getShipProperty(const game::map::Ship& sh, ShipProperty isp,
-                                      afl::string::Translator& tx,
-                                      InterpreterInterface& iface,
+                                      Session& session,
                                       afl::base::Ref<const Root> root,
                                       afl::base::Ref<const game::spec::ShipList> shipList,
                                       afl::base::Ref<const Game> game,

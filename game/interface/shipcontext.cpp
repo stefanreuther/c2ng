@@ -110,6 +110,7 @@ namespace {
         { "OWNER.REAL",                game::interface::ispRealOwner,                 ShipPropertyDomain,      interpreter::thInt },
         { "PLAYED",                    game::interface::ispPlayed,                    ShipPropertyDomain,      interpreter::thBool },
         { "RECYCLESHIP",               game::interface::ismRecycleShip,               ShipMethodDomain,        interpreter::thProcedure },
+        { "REF",                       game::interface::ispReference,                 ShipPropertyDomain,      interpreter::thNone },
         { "SCORE",                     game::interface::ispScore,                     ShipPropertyDomain,      interpreter::thArray },
         { "SETCOMMENT",                game::interface::ismSetComment,                ShipMethodDomain,        interpreter::thProcedure },
         { "SETENEMY",                  game::interface::ismSetEnemy,                  ShipMethodDomain,        interpreter::thProcedure },
@@ -295,8 +296,7 @@ game::interface::ShipContext::get(PropertyIndex_t index)
              case ShipPropertyDomain:
                 return getShipProperty(*sh,
                                        ShipProperty(ship_mapping[index].index),
-                                       m_session.translator(),
-                                       m_session.interface(),
+                                       m_session,
                                        m_root,
                                        m_shipList,
                                        m_game,

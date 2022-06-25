@@ -9,6 +9,7 @@
 #include "game/cargospec.hpp"
 #include "game/exception.hpp"
 #include "game/interface/inboxsubsetvalue.hpp"
+#include "game/interface/referencecontext.hpp"
 #include "game/map/fleet.hpp"
 #include "game/map/fleetmember.hpp"
 #include "game/map/shippredictor.hpp"
@@ -258,8 +259,7 @@ ShipArrayProperty::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux
 
 afl::data::Value*
 game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
-                                 afl::string::Translator& tx,                          // needed for names
-                                 InterpreterInterface& iface,                          // needed for names, HasTask
+                                 Session& session,                                     // needed for names, HasTask
                                  afl::base::Ref<const Root> root,                      // needed for configuration
                                  afl::base::Ref<const game::spec::ShipList> shipList,  // needed for spec access
                                  afl::base::Ref<const Game> game,                      // needed for ship scores
@@ -501,7 +501,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
             if (game::map::Ship* leader = turn->universe().ships().get(fid)) {
                 String_t result = leader->getFleetName();
                 if (result.empty()) {
-                    result = leader->getName(LongName, tx, iface);
+                    result = leader->getName(LongName, session.translator(), session.interface());
                 }
                 return makeStringValue(result);
             }
@@ -567,7 +567,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            If the ship is at a planet, returns that planet's name and Id.
            In deep space, returns an (X,Y) pair. */
         if (sh.isVisible() && sh.getPosition(pt)) {
-            return makeStringValue(turn->universe().findLocationName(pt, 0, game->mapConfiguration(), root->hostConfiguration(), root->hostVersion(), tx));
+            return makeStringValue(turn->universe().findLocationName(pt, 0, game->mapConfiguration(), root->hostConfiguration(), root->hostVersion(), session.translator()));
         } else {
             return 0;
         }
@@ -585,7 +585,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            Individual messages have the same form as the inbox messages (InMsg()).
            @see int:index:group:incomingmessageproperty|Incoming Message Properties
            @since PCC2 2.0.3, PCC2 2.40.10 */
-        return InboxSubsetValue::create(sh.messages().get(), tx, root, game);
+        return InboxSubsetValue::create(sh.messages().get(), session.translator(), root, game);
      case ispMissionId:
         /* @q Mission$:Int (Ship Property)
            Mission number.
@@ -691,7 +691,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
         if (sh.getPosition(pt)) {
             if (const Id_t pid = turn->universe().findPlanetAt(pt)) {
                 if (const game::map::Planet* p = turn->universe().planets().get(pid)) {
-                    return makeStringValue(p->getName(tx));
+                    return makeStringValue(p->getName(session.translator()));
                 }
             }
         }
@@ -707,6 +707,12 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            The real owner can differ from the {Owner (Ship Property)|Owner} reported normally
            when the ship is under remote control. */
         return makeOptionalIntegerValue(sh.getRealOwner());
+     case ispReference:
+        /* @q Ref:Reference (Ship Property)
+           Symbolic reference to this ship.
+           If given an object of unknown type, this can be used to identify this object as a ship.
+           @since PCC2 2.40.13 */
+        return new ReferenceContext(Reference(Reference::Ship, sh.getId()), session);
      case ispSpeedId:
         /* @q Speed$:Int (Ship Property)
            Speed (warp factor).
@@ -729,7 +735,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
      case ispTask:
         /* @q Task:Bool (Ship Property)
            True if this ship has an auto task. */
-        return makeBooleanValue(iface.hasTask(iface.Ship, sh.getId()));
+        return makeBooleanValue(session.interface().hasTask(InterpreterInterface::Ship, sh.getId()));
      case ispTorpId:
         /* @q Torp$:Int (Ship Property, Combat Participant Property)
            Torpedo type. */
@@ -829,7 +835,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
                 return makeStringValue("Jettison");
             }
             if (const game::map::Planet* pl = turn->universe().planets().get(n)) {
-                return makeStringValue(pl->getName(tx));
+                return makeStringValue(pl->getName(session.translator()));
             }
         }
         return 0;
@@ -921,7 +927,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
             if (sh.getWaypointDX().isSame(0) && sh.getWaypointDY().isSame(0)) {
                 return makeStringValue("(Location)");
             } else {
-                return makeStringValue(turn->universe().findLocationName(pt, 0, game->mapConfiguration(), root->hostConfiguration(), root->hostVersion(), tx));
+                return makeStringValue(turn->universe().findLocationName(pt, 0, game->mapConfiguration(), root->hostConfiguration(), root->hostVersion(), session.translator()));
             }
         } else {
             return 0;

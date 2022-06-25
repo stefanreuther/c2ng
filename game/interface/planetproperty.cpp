@@ -5,6 +5,7 @@
 #include "game/interface/planetproperty.hpp"
 #include "game/cargospec.hpp"
 #include "game/interface/inboxsubsetvalue.hpp"
+#include "game/interface/referencecontext.hpp"
 #include "game/map/anyshiptype.hpp"
 #include "game/map/planetformula.hpp"
 #include "game/root.hpp"
@@ -152,8 +153,7 @@ PlanetArrayProperty::clone() const
 
 afl::data::Value*
 game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty ipp,
-                                   afl::string::Translator& tx,
-                                   InterpreterInterface& iface,
+                                   Session& session,
                                    afl::base::Ref<Root> root,
                                    afl::base::Ref<Game> game)
 {
@@ -204,7 +204,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
      case ippColonistChangeStr:
         /* @q Colonists.Change:Str (Planet Property)
            Colonist happiness change, text. */
-        return makeOptionalStringValue(game::tables::HappinessChangeName(tx)(getColonistChange(pl, root->hostConfiguration(), root->hostVersion())));
+        return makeOptionalStringValue(game::tables::HappinessChangeName(session.translator())(getColonistChange(pl, root->hostConfiguration(), root->hostVersion())));
      case ippColonistHappy:
         /* @q Colonists.Happy$:Int (Planet Property)
            Colonist happiness, numeric value. */
@@ -212,7 +212,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
      case ippColonistHappyStr:
         /* @q Colonists.Happy:Str (Planet Property)
            Colonist happiness, text. */
-        return makeOptionalStringValue(game::tables::HappinessName(tx)(pl.getColonistHappiness()));
+        return makeOptionalStringValue(game::tables::HappinessName(session.translator())(pl.getColonistHappiness()));
      case ippColonistSupported:
         /* @q Colonists.Supported:Int (Planet Property)
            Maximum colonist clans supported by planet's climate.
@@ -317,7 +317,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
         /* @q Industry:Str (Planet Property)
            Planetary industry level, human-readable.
            @see Industry$ (Planet Property) */
-        return makeOptionalStringValue(game::tables::IndustryLevel(tx)(pl.getIndustryLevel(root->hostVersion())));
+        return makeOptionalStringValue(game::tables::IndustryLevel(session.translator())(pl.getIndustryLevel(root->hostVersion())));
      case ippIndustryCode:
         /* @q Industry$:Int (Planet Property)
            Planetary industry level code.
@@ -372,7 +372,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
            Individual messages have the same form as the inbox messages (InMsg()).
            @see int:index:group:incomingmessageproperty|Incoming Message Properties
            @since PCC2 2.0.3, PCC2 2.40.10 */
-        return InboxSubsetValue::create(pl.messages().get(), tx, root, game);
+        return InboxSubsetValue::create(pl.messages().get(), session.translator(), root, game);
      case ippMinedD:
         /* @q Mined.D:Int (Planet Property)
            Mined Duranium, in kilotons. */
@@ -443,7 +443,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
      case ippName:
         /* @q Name:Str (Planet Property)
            Name of planet. */
-        return makeStringValue(pl.getName(tx));
+        return makeStringValue(pl.getName(session.translator()));
      case ippNativeChange:
         /* @q Natives.Change$:Int (Planet Property)
            Native happiness change, numeric value. */
@@ -451,12 +451,12 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
      case ippNativeChangeStr:
         /* @q Natives.Change:Str (Planet Property)
            Native happiness change, text. */
-        return makeOptionalStringValue(game::tables::HappinessChangeName(tx)(getNativeChange(pl, root->hostVersion())));
+        return makeOptionalStringValue(game::tables::HappinessChangeName(session.translator())(getNativeChange(pl, root->hostVersion())));
      case ippNativeGov:
         /* @q Natives.Gov:Str (Planet Property)
            Native government name. */
         if (pl.getNatives().get(n) && n > 0) {
-            return makeOptionalStringValue(game::tables::NativeGovernmentName(tx)(pl.getNativeGovernment()));
+            return makeOptionalStringValue(game::tables::NativeGovernmentName(session.translator())(pl.getNativeGovernment()));
         } else {
             return 0;
         }
@@ -480,7 +480,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
         /* @q Natives.Happy:Str (Planet Property)
            Native happiness, text. */
         if (pl.getNatives().get(n) && n > 0) {
-            return makeOptionalStringValue(game::tables::HappinessName(tx)(pl.getNativeHappiness()));
+            return makeOptionalStringValue(game::tables::HappinessName(session.translator())(pl.getNativeHappiness()));
         } else {
             return 0;
         }
@@ -488,7 +488,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
         /* @q Natives.Race:Str (Planet Property)
            Native race, name. */
         if (pl.getNatives().get(n) && n > 0) {
-            return makeOptionalStringValue(game::tables::NativeRaceName(tx)(pl.getNativeRace()));
+            return makeOptionalStringValue(game::tables::NativeRaceName(session.translator())(pl.getNativeRace()));
         } else {
             return 0;
         }
@@ -576,6 +576,12 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
            True if this planet is played.
            @since PCC 1.1.19 */
         return makeBooleanValue(pl.isPlayable(pl.Playable));
+     case ippReference:
+        /* @q Ref:Reference (Planet Property)
+           Symbolic reference to this planet.
+           If given an object of unknown type, this can be used to identify this object as a planet.
+           @since PCC2 2.40.13 */
+        return new ReferenceContext(Reference(Reference::Planet, pl.getId()), session);
      case ippSupplies:
         /* @q Supplies:Int (Planet Property)
            Supplies on this planet. */
@@ -583,11 +589,11 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
      case ippTask:
         /* @q Task:Bool (Planet Property)
            True if this planet has an Auto Task. */
-        return makeBooleanValue(iface.hasTask(iface.Planet, pl.getId()));
+        return makeBooleanValue(session.interface().hasTask(InterpreterInterface::Planet, pl.getId()));
      case ippTaskBase:
         /* @q Task.Base:Bool (Planet Property)
            True if this planet's starbase has an Auto Task. */
-        return makeBooleanValue(iface.hasTask(iface.Base, pl.getId()));
+        return makeBooleanValue(session.interface().hasTask(InterpreterInterface::Base, pl.getId()));
      case ippTemp:
         /* @q Temp$:Int (Planet Property)
            Temperature, numeric value. */
@@ -595,7 +601,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
      case ippTempStr:
         /* @q Temp:Int (Planet Property)
            Temperature class, human-readable. */
-        return makeOptionalStringValue(game::tables::TemperatureName(tx)(pl.getTemperature()));
+        return makeOptionalStringValue(game::tables::TemperatureName(session.translator())(pl.getTemperature()));
      case ippTypeChar:
         /* @q Type.Short:Str (Planet Property)
            Always "P" for planets.
