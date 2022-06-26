@@ -27,6 +27,8 @@ TestGameTestFiles::testFiles()
     TS_ASSERT_EQUALS(cksum.add(game::test::getDefaultRaceNames(),         1), 0xe372be16U);
     TS_ASSERT_EQUALS(cksum.add(game::test::getDefaultPlanetCoordinates(), 1), 0x0e060a5dU);
     TS_ASSERT_EQUALS(cksum.add(game::test::getDefaultPlanetNames(),       1), 0x16ddfaa3U);
+    TS_ASSERT_EQUALS(cksum.add(game::test::getDefaultBeams(),             1), 0xfe0f372aU);
+    TS_ASSERT_EQUALS(cksum.add(game::test::getDefaultTorpedoes(),         1), 0x626639f2U);
     TS_ASSERT_EQUALS(cksum.add(game::test::getDefaultHulls(),             1), 0x824c3decU);
     TS_ASSERT_EQUALS(cksum.add(game::test::getDefaultEngines(),           1), 0xc9ac6a41U);
     TS_ASSERT_EQUALS(cksum.add(game::test::getDefaultHullAssignments(),   1), 0xd40525beU);

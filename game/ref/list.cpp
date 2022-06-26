@@ -1,5 +1,6 @@
 /**
   *  \file game/ref/list.cpp
+  *  \brief Class game::ref::List
   */
 
 #include "game/ref/list.hpp"
@@ -53,7 +54,7 @@ game::ref::List::add(Reference ref)
 }
 
 void
-game::ref::List::add(Reference::Type type, const std::vector<Id_t> ids)
+game::ref::List::add(Reference::Type type, const std::vector<Id_t>& ids)
 {
     // ex GObjectList::addNonObject, GObjectList::addObject
     for (size_t i = 0, n = ids.size(); i < n; ++i) {
@@ -77,7 +78,7 @@ game::ref::List::addObjectsAt(game::map::Universe& univ, game::map::Point pt, Op
     // @change PCC2 checks for Object::Playable instead of ReadOnly
     const game::map::AnyShipType type(univ.ships());
     for (Id_t sid = type.findNextIndex(0); sid != 0; sid = type.findNextIndex(sid)) {
-        game::map::Ship* pShip = univ.ships().get(sid);
+        const game::map::Ship* pShip = univ.ships().get(sid);
         game::map::Point shipPos;
         if (sid != excludeShipId
             && pShip != 0

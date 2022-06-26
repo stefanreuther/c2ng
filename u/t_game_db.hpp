@@ -33,6 +33,11 @@ class TestGameDbFleetLoader : public CxxTest::TestSuite {
     void testSaveBig();
 };
 
+class TestGameDbLoader : public CxxTest::TestSuite {
+ public:
+    void testLoad();
+};
+
 class TestGameDbPacker : public CxxTest::TestSuite {
  public:
     void testUfo();

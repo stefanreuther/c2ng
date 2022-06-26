@@ -40,6 +40,13 @@ class TestGameRefHistoryShipSelection : public CxxTest::TestSuite {
     void testBuildListHist2();
 };
 
+class TestGameRefList : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormal();
+    void testAddObjectsAt();
+};
+
 class TestGameRefNullPredicate : public CxxTest::TestSuite {
  public:
     void testIt();

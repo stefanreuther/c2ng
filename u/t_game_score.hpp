@@ -35,6 +35,14 @@ class TestGameScoreScoreBuilderBase : public CxxTest::TestSuite {
     void testSpecials();
 };
 
+class TestGameScoreScoreId : public CxxTest::TestSuite {
+ public:
+};
+
+class TestGameScoreStructures : public CxxTest::TestSuite {
+ public:
+};
+
 class TestGameScoreTableBuilder : public CxxTest::TestSuite {
  public:
     void testIt();

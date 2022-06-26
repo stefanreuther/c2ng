@@ -159,13 +159,11 @@ game::proxy::DrawingProxy::Trampoline::selectNearestVisibleDrawing(game::map::Po
 void
 game::proxy::DrawingProxy::Trampoline::selectMarkerAt(game::map::Point pos)
 {
-    if (Game* g = getGame()) {
-        if (Turn* t = getTurn()) {
-            DrawingContainer& cont = t->universe().drawings();
-            DrawingContainer::Iterator_t it = cont.findMarkerAt(pos, g->mapConfiguration());
-            if (it != cont.end()) {
-                setCurrentDrawing(it, t);
-            }
+    if (Turn* t = getTurn()) {
+        DrawingContainer& cont = t->universe().drawings();
+        DrawingContainer::Iterator_t it = cont.findMarkerAt(pos);
+        if (it != cont.end()) {
+            setCurrentDrawing(it, t);
         }
     }
 }

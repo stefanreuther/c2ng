@@ -1,5 +1,6 @@
 /**
   *  \file client/si/commands.hpp
+  *  \brief Script Commands
   */
 #ifndef C2NG_CLIENT_SI_COMMANDS_HPP
 #define C2NG_CLIENT_SI_COMMANDS_HPP
@@ -13,11 +14,24 @@ namespace client { namespace si {
     class ScriptSide;
     class RequestLink1;
 
+    /*
+     *  Miscellaneous Commands
+     *
+     *  These commands are stable and documented.
+     */
+
     void IFLoadResource(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFLoadHelpFile(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFMessageBox(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFSystemExitClient(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFSystemExitRace(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
+
+    /*
+     *  Internal Commands (CC$Whatever)
+     *
+     *  Those commands are used internally.
+     *  They usually have an ad-hoc interface and are subject to change.
+     */
 
     void IFCCAddToSim(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCAddWaypoint(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
@@ -66,6 +80,14 @@ namespace client { namespace si {
     void IFCCViewMessages(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCViewNotifications(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
 
+    /*
+     *  User-Interface Commands (Chart.Xxxx, UI.Xxxx)
+     *
+     *  These commands are stable and documented.
+     *
+     *  In particular, the UI.Xxxx commands have the convention of returning their result in UI.Result.
+     */
+
     void IFChartSetView(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
 
     void IFUIBattleSimulator(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
@@ -96,6 +118,9 @@ namespace client { namespace si {
     void IFUIShowScores(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFUIUpdate(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
 
+    /** Register script commands.
+        Registers all client/user-interface based commands.
+        @param ui UserSide instance */
     void registerCommands(UserSide& ui);
 
 } }

@@ -260,22 +260,21 @@ TestGameMapDrawingContainer::testTagAdjacent()
 void
 TestGameMapDrawingContainer::testFindMarker()
 {
-    game::map::Configuration config;
     DrawingContainer t;
     t.addNew(makeCircle(1000, 1000, 1));
     t.addNew(makeAt(1000, 1000, 2));
     t.addNew(makeAt(1000, 1100, 3));
     t.addNew(makeCircle(1000, 1200, 4));
 
-    DrawingContainer::Iterator_t it = t.findMarkerAt(game::map::Point(1000, 1000), config);
+    DrawingContainer::Iterator_t it = t.findMarkerAt(game::map::Point(1000, 1000));
     TS_ASSERT(*it);
     TS_ASSERT_EQUALS((**it).getColor(), 2);
 
-    it = t.findMarkerAt(game::map::Point(1000, 1100), config);
+    it = t.findMarkerAt(game::map::Point(1000, 1100));
     TS_ASSERT(*it);
     TS_ASSERT_EQUALS((**it).getColor(), 3);
 
-    it = t.findMarkerAt(game::map::Point(1000, 1200), config);
+    it = t.findMarkerAt(game::map::Point(1000, 1200));
     TS_ASSERT(!*it);
 }
 

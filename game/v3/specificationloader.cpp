@@ -350,7 +350,7 @@ game::v3::SpecificationLoader::loadShipList(game::spec::ShipList& list, game::Ro
     // ex game/spec.cc:loadSpecification, ccinit.pas:LoadEquipment (sort-of)
     class Task : public Task_t {
      public:
-        Task(SpecificationLoader& parent, game::spec::ShipList& list, game::Root& root, std::auto_ptr<StatusTask_t>& then)
+        Task(SpecificationLoader& parent, game::spec::ShipList& list, const game::Root& root, std::auto_ptr<StatusTask_t>& then)
             : m_parent(parent), m_shipList(list), m_root(root), m_then(then)
             { }
         virtual void call()

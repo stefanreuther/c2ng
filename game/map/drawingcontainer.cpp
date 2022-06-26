@@ -60,7 +60,7 @@ game::map::DrawingContainer::findNearestVisibleDrawing(Point pt, const Configura
 
 // Find marker at a given position.
 game::map::DrawingContainer::Iterator_t
-game::map::DrawingContainer::findMarkerAt(Point pt, const Configuration& config) const
+game::map::DrawingContainer::findMarkerAt(Point pt) const
 {
     // FIXME: it makes sense to locate the LAST marker
     Iterator_t i = begin();

@@ -63,6 +63,12 @@ namespace game { namespace test {
     /** Get default planet name file (planet.nm). */
     afl::base::ConstBytes_t getDefaultPlanetNames();
 
+    /** Get default beams (beamspec.dat). */
+    afl::base::ConstBytes_t getDefaultBeams();
+
+    /** Get default torpedoes (torpspec.dat). */
+    afl::base::ConstBytes_t getDefaultTorpedoes();
+
     /** Get default hulls (hullspec.dat). */
     afl::base::ConstBytes_t getDefaultHulls();
 

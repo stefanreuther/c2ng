@@ -1,5 +1,6 @@
 /**
   *  \file game/score/scoreid.hpp
+  *  \brief Score Id typedef
   */
 #ifndef C2NG_GAME_SCORE_SCOREID_HPP
 #define C2NG_GAME_SCORE_SCOREID_HPP
@@ -25,12 +26,21 @@
 
 namespace game { namespace score {
 
+    /** Typedef for a score Id. */
     typedef int16_t ScoreId_t;
+
+    /*
+     *  Internal Score Ids (defined by SCORE.CC file format)
+     */
 
     const ScoreId_t ScoreId_Planets      = -1;
     const ScoreId_t ScoreId_Capital      = -2;
     const ScoreId_t ScoreId_Freighters   = -3;
     const ScoreId_t ScoreId_Bases        = -4;
+
+    /*
+     *  Predefined scores (defined by UTILx.DAT file format, inherited by SCORE.CC)
+     */
 
     const ScoreId_t ScoreId_Score        = 1;
     const ScoreId_t ScoreId_BuildPoints  = 2;

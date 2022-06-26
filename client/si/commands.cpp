@@ -1,5 +1,6 @@
 /**
   *  \file client/si/commands.cpp
+  *  \brief Script Commands
   */
 
 #include "client/si/commands.hpp"
@@ -137,16 +138,27 @@
 #include "util/rich/text.hpp"
 #include "util/unicodechars.hpp"
 
-using client::si::UserTask;
-using client::si::UserSide;
+using afl::string::Format;
+using client::ScreenHistory;
 using client::si::Control;
 using client::si::OutputState;
 using client::si::RequestLink1;
 using client::si::RequestLink2;
 using client::si::ScriptSide;
-using client::ScreenHistory;
+using client::si::UserSide;
+using client::si::UserTask;
+using game::Game;
+using game::Reference;
+using game::Root;
+using game::Turn;
 using game::interface::SimpleFunction;
 using game::interface::SimpleProcedure;
+using game::map::Planet;
+using game::map::Point;
+using game::map::Ship;
+using game::map::Universe;
+using game::spec::ShipList;
+using interpreter::Error;
 
 namespace {
     const char*const LOG_NAME = "client.si";
@@ -154,6 +166,7 @@ namespace {
     typedef interpreter::Process::Task_t Task_t;
     typedef afl::base::Closure<void(bool)> PostSaveTask_t;
 
+    /* Task: invoke Control::handleStateChange */
     class StateChangeTask : public UserTask {
      public:
         StateChangeTask(OutputState::Target target)
@@ -161,13 +174,14 @@ namespace {
             { }
         void handle(Control& ctl, RequestLink2 link)
             {
-                ctl.interface().mainLog().write(afl::sys::LogListener::Trace, LOG_NAME, afl::string::Format("<%p> handleStateChange(%s, %s)", &ctl, link.toString(), OutputState::toString(m_target)));
+                ctl.interface().mainLog().write(afl::sys::LogListener::Trace, LOG_NAME, Format("<%p> handleStateChange(%s, %s)", &ctl, link.toString(), OutputState::toString(m_target)));
                 ctl.handleStateChange(link, m_target);
             }
      private:
-        OutputState::Target m_target;
+        const OutputState::Target m_target;
     };
 
+    /* Task: Invoke Control::handlePopupConsole */
     class PopupConsoleTask : public UserTask {
      public:
         PopupConsoleTask()
@@ -176,6 +190,7 @@ namespace {
             { ctl.handlePopupConsole(link); }
     };
 
+    /* Task: show a MessageBox and continue the process */
     class MessageBoxTask : public UserTask {
      public:
         MessageBoxTask(game::interface::RichTextValue::Ptr_t pContent, String_t heading)
@@ -190,10 +205,11 @@ namespace {
                 ctl.interface().continueProcess(link);
             }
      private:
-        util::rich::Text m_content;
-        String_t m_heading;
+        const util::rich::Text m_content;
+        const String_t m_heading;
     };
 
+    /* Task: show a mailbox, given an InboxAdaptor_t */
     class ViewMailboxTask : public UserTask {
      public:
         ViewMailboxTask(game::proxy::InboxAdaptor_t* maker)
@@ -213,6 +229,12 @@ namespace {
         std::auto_ptr<game::proxy::InboxAdaptor_t> m_maker;
     };
 
+    /* Switch to a screen and object - game/script side.
+       @param screen  Screen number; for Cursors::getTypeByNumber() etc.
+       @param target  Associated OutputState::Target
+       @param obj     Object Id. If non-null, must correspond to a valid object
+       @param session Game session
+       @param link    Process link */
     void enterScreen(int screen, OutputState::Target target, int32_t obj, game::Session& session, ScriptSide& si, RequestLink1 link)
     {
         if (session.getGame().get() == 0) {
@@ -221,11 +243,11 @@ namespace {
         if (obj != 0) {
             game::map::ObjectType* ty = session.getGame()->cursors().getTypeByNumber(screen);
             if (!ty || ty->getObjectByIndex(obj) == 0) {
-                throw interpreter::Error::rangeError();
+                throw Error::rangeError();
             }
             game::map::ObjectCursor* cu = session.getGame()->cursors().getCursorByNumber(screen);
             if (!cu) {
-                throw interpreter::Error::rangeError();
+                throw Error::rangeError();
             }
             cu->setCurrentIndex(obj);
         }
@@ -234,9 +256,13 @@ namespace {
         si.postNewTask(link, new StateChangeTask(target));
     }
 
-    void activateReference(ScreenHistory::Reference ref, UserSide& iface, Control& ctl, RequestLink2 link)
+    /* Switch to a screen and object - UI side.
+       @param ref   Object reference
+       @param ctl   Control
+       @param link  Link */
+    void activateReference(ScreenHistory::Reference ref, Control& ctl, RequestLink2 link)
     {
-        client::proxy::ScreenHistoryProxy proxy(iface.gameSender());
+        client::proxy::ScreenHistoryProxy proxy(ctl.interface().gameSender());
         client::Downlink downLink(ctl.root(), ctl.translator());
 
         bool ok = false;
@@ -283,15 +309,23 @@ namespace {
             }
         }
         if (!ok) {
-            iface.continueProcess(link);
+            ctl.interface().continueProcess(link);
         }
     }
 
+    /* Read iuiScreenRegistered property from game side */
     bool isCurrentScreenRegistered(game::Session& session)
     {
         std::auto_ptr<afl::data::Value> result(session.uiPropertyStack().get(game::interface::iuiScreenRegistered));
         return interpreter::getBooleanValue(result.get()) > 0;
     }
+
+    /*
+     *  Determining plugin context for a command
+     *
+     *  This provides additional meta-information for a script executed by plugin initialisation.
+     *  This way we can know what resource files were provided by which plugin.
+     */
 
     struct PluginContext {
         String_t name;
@@ -329,6 +363,7 @@ namespace {
      *  Save & Exit
      */
 
+    /* UI-side state change after a "save" operation (for save & exit). */
     class PostSaveStateChangeAction : public util::Request<Control> {
      public:
         PostSaveStateChangeAction(OutputState::Target target, RequestLink2 link)
@@ -342,6 +377,8 @@ namespace {
         RequestLink2 m_link;
     };
 
+    /* Game-side post-save action.
+       Perform additional operations and continue with PostSaveStateChangeAction. */
     class PostSaveAction : public PostSaveTask_t {
      public:
         PostSaveAction(game::Session& session, ScriptSide& si, RequestLink1 link, OutputState::Target target)
@@ -351,7 +388,7 @@ namespace {
         virtual void call(bool flag)
             {
                 // Ignore flag for now - failure to save does not prevent exiting
-                m_session.log().write(afl::sys::LogListener::Trace, LOG_NAME, afl::string::Format("Task: PostSaveAction(%d)", int(flag)));
+                m_session.log().write(afl::sys::LogListener::Trace, LOG_NAME, Format("Task: PostSaveAction(%d)", int(flag)));
 
                 // Save VM.
                 // TODO: check whether this should be after saving?
@@ -378,6 +415,7 @@ namespace {
         OutputState::Target m_target;
     };
 
+    /* Null save action, when the game does not provide one. */
     class NullSaveAction : public Task_t {
      public:
         NullSaveAction(std::auto_ptr<PostSaveTask_t> then)
@@ -389,6 +427,7 @@ namespace {
         std::auto_ptr<PostSaveTask_t> m_then;
     };
 
+    /* Save-and-exit operation */
     void trySaveSession(game::Session& session, ScriptSide& si, RequestLink1 link, OutputState::Target target)
     {
         // TODO: for now, always saves a final turn. Should make some UI!
@@ -399,6 +438,11 @@ namespace {
         link.getProcess().suspend(action);
     }
 
+    /*
+     *  More UI macros
+     */
+
+    /* Execute Cargo Transfer dialog for a given CargoTransferSetup */
     void doConfiguredTransfer(ScriptSide& si, RequestLink1 link, game::actions::CargoTransferSetup setup)
     {
         class DialogTask : public UserTask {
@@ -421,14 +465,15 @@ namespace {
         si.postNewTask(link, new DialogTask(setup));
     }
 
-    game::Reference getCurrentShipOrPlanetReference(const game::map::Object* obj)
+    /* Get object reference, given a map object */
+    Reference getCurrentShipOrPlanetReference(const game::map::Object* obj)
     {
-        if (const game::map::Planet* pl = dynamic_cast<const game::map::Planet*>(obj)) {
-            return game::Reference(game::Reference::Planet, pl->getId());
-        } else if (const game::map::Ship* sh = dynamic_cast<const game::map::Ship*>(obj)) {
-            return game::Reference(game::Reference::Ship, sh->getId());
+        if (const Planet* pl = dynamic_cast<const Planet*>(obj)) {
+            return Reference(Reference::Planet, pl->getId());
+        } else if (const Ship* sh = dynamic_cast<const Ship*>(obj)) {
+            return Reference(Reference::Ship, sh->getId());
         } else {
-            return game::Reference();
+            return Reference();
         }
     }
 
@@ -465,7 +510,7 @@ namespace {
             const client::dialogs::ObjectSelectionDialog& m_def;
         };
 
-        if (game::Game* g = session.getGame().get()) {
+        if (Game* g = session.getGame().get()) {
             game::map::ObjectCursor* c = g->cursors().getCursorByNumber(def.screenNumber);
             if (c == 0 || c->getCurrentIndex() == 0) {
                 // No ship selected means no ship present; clear UI.Result and show a message
@@ -530,13 +575,13 @@ namespace {
         int x, y, screen;
         bool hasPosition = false;
         if (interpreter::checkIntegerArg(x, vx.get()) && interpreter::checkIntegerArg(y, vy.get()) && interpreter::checkIntegerArg(screen, vs.get()) && screen > 0) {
-            sel.setPosition(game::map::Point(x, y));
+            sel.setPosition(Point(x, y));
             hasPosition = true;
         }
 
         // Prepare initial mode
-        const game::Game& g = game::actions::mustHaveGame(session);
-        const game::map::Universe& univ = g.currentTurn().universe();
+        const Game& g = game::actions::mustHaveGame(session);
+        const Universe& univ = g.currentTurn().universe();
         const game::TeamSettings& teams = g.teamSettings();
         HistoryShipSelection::Modes_t modes = sel.getAvailableModes(univ, g.mapConfiguration(), teams);
         if (modes.empty() || (hasPosition && !modes.contains(HistoryShipSelection::LocalShips) && !modes.contains(HistoryShipSelection::ExactShips))) {
@@ -557,9 +602,9 @@ namespace {
     void editBuildOrder(ScriptSide& si, RequestLink1 link, game::ShipBuildOrder o, String_t verb)
     {
         // Must look at a planet with a starbase
-        game::map::Planet* pl = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
+        Planet* pl = dynamic_cast<Planet*>(link.getProcess().getCurrentObject());
         if (pl == 0) {
-            throw interpreter::Error::contextError();
+            throw Error::contextError();
         }
         game::actions::mustHavePlayedBase(*pl);
 
@@ -725,7 +770,6 @@ client::si::IFLoadHelpFile(game::Session& session, ScriptSide& /*si*/, RequestLi
     getHelpIndex(session).addFile(session.world().fileSystem().makePathName(context.directory, arg), context.name);
 }
 
-
 /* @q MessageBox text:Str, Optional heading:Str (Global Command)
    Display a message.
    In the graphical interface, displays an "OK" message box.
@@ -790,7 +834,7 @@ client::si::IFCCAddToSim(game::Session& /*session*/, ScriptSide& si, RequestLink
 
     class Task : public UserTask {
      public:
-        Task(game::Reference ref, bool ask)
+        Task(Reference ref, bool ask)
             : m_reference(ref), m_ask(ask)
             { }
         virtual void handle(Control& ctl, RequestLink2 link)
@@ -800,15 +844,15 @@ client::si::IFCCAddToSim(game::Session& /*session*/, ScriptSide& si, RequestLink
                 iface.continueProcess(link);
             }
      private:
-        game::Reference m_reference;
+        Reference m_reference;
         bool m_ask;
     };
 
-    game::Reference ref = getCurrentShipOrPlanetReference(link.getProcess().getCurrentObject());
+    Reference ref = getCurrentShipOrPlanetReference(link.getProcess().getCurrentObject());
     if (ref.isSet()) {
         si.postNewTask(link, new Task(ref, ask));
     } else {
-        throw interpreter::Error::contextError();
+        throw Error::contextError();
     }
 }
 
@@ -819,7 +863,7 @@ client::si::IFCCAddWaypoint(game::Session& session, ScriptSide& si, RequestLink1
     // ex WShipAutoTaskCommandTile::createWaypointCommand
     class WaypointTask : public util::Request<game::Session> {
      public:
-        WaypointTask(game::Id_t id, String_t verb, int flags, game::map::Point pos)
+        WaypointTask(game::Id_t id, String_t verb, int flags, Point pos)
             : m_id(id), m_verb(verb), m_flags(flags), m_position(pos)
             { }
 
@@ -836,7 +880,7 @@ client::si::IFCCAddWaypoint(game::Session& session, ScriptSide& si, RequestLink1
         const game::Id_t m_id;
         const String_t m_verb;
         const int m_flags;
-        const game::map::Point m_position;
+        const Point m_position;
     };
 
     class Task : public UserTask {
@@ -876,13 +920,13 @@ client::si::IFCCAddWaypoint(game::Session& session, ScriptSide& si, RequestLink1
     static_assert(game::interface::imc_SetSpeed == 1, "SetSpeed");
     static_assert(game::interface::imc_AcceptDuplicate == 2, "AcceptDuplicate");
 
-    game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
-    game::Root& root = game::actions::mustHaveRoot(session);
-    game::Game& g = game::actions::mustHaveGame(session);
+    ShipList& shipList = game::actions::mustHaveShipList(session);
+    Root& root = game::actions::mustHaveRoot(session);
+    Game& g = game::actions::mustHaveGame(session);
 
-    game::map::Ship* sh = dynamic_cast<game::map::Ship*>(link.getProcess().getCurrentObject());
+    Ship* sh = dynamic_cast<Ship*>(link.getProcess().getCurrentObject());
     if (sh == 0) {
-        throw interpreter::Error::contextError();
+        throw Error::contextError();
     }
 
     // Edit ship task
@@ -938,11 +982,11 @@ client::si::IFCCBuildAmmo(game::Session& session, ScriptSide& si, RequestLink1 l
     args.checkArgumentCount(0);
     game::actions::mustHaveGame(session);
 
-    game::map::Planet* pl = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
+    Planet* pl = dynamic_cast<Planet*>(link.getProcess().getCurrentObject());
     if (pl != 0 && pl->isPlayable(game::map::Object::Playable)) {
         si.postNewTask(link, new Task(pl->getId()));
     } else {
-        throw interpreter::Error::contextError();
+        throw Error::contextError();
     }
 }
 
@@ -969,11 +1013,11 @@ client::si::IFCCBuildBase(game::Session& session, ScriptSide& si, RequestLink1 l
     args.checkArgumentCount(0);
     game::actions::mustHaveGame(session);
 
-    game::map::Planet* pl = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
+    Planet* pl = dynamic_cast<Planet*>(link.getProcess().getCurrentObject());
     if (pl != 0 && pl->isPlayable(game::map::Object::Playable)) {
         si.postNewTask(link, new Task(pl->getId()));
     } else {
-        throw interpreter::Error::contextError();
+        throw Error::contextError();
     }
 }
 
@@ -1000,9 +1044,9 @@ client::si::IFCCBuildShip(game::Session& session, ScriptSide& si, RequestLink1 l
     args.checkArgumentCount(0);
     game::actions::mustHaveGame(session);
 
-    game::map::Planet* pl = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
+    Planet* pl = dynamic_cast<Planet*>(link.getProcess().getCurrentObject());
     if (pl == 0) {
-        throw interpreter::Error::contextError();
+        throw Error::contextError();
     }
     game::actions::mustHavePlayedBase(*pl);
     si.postNewTask(link, new Task(pl->getId()));
@@ -1034,7 +1078,7 @@ client::si::IFCCBuildStructures(game::Session& session, ScriptSide& si, RequestL
 
     game::actions::mustHaveGame(session);
 
-    game::map::Planet& pl = game::actions::mustExist(dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject()));
+    Planet& pl = game::actions::mustExist(dynamic_cast<Planet*>(link.getProcess().getCurrentObject()));
     game::actions::mustBePlayed(pl);
 
     si.postNewTask(link, new Task(pl.getId(), page));
@@ -1048,9 +1092,9 @@ client::si::IFCCBuySupplies(game::Session& /*session*/, ScriptSide& si, RequestL
     args.checkArgumentCount(0);
 
     // Must be our planet
-    game::map::Planet* pPlanet = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
+    Planet* pPlanet = dynamic_cast<Planet*>(link.getProcess().getCurrentObject());
     if (pPlanet == 0) {
-        throw interpreter::Error::contextError();
+        throw Error::contextError();
     }
     game::actions::mustBePlayed(*pPlanet);
 
@@ -1080,20 +1124,20 @@ client::si::IFCCCargoHistory(game::Session& session, ScriptSide& si, RequestLink
     args.checkArgumentCount(0);
 
     // Must be on a ship
-    const game::map::Ship* pShip = dynamic_cast<game::map::Ship*>(link.getProcess().getCurrentObject());
+    const Ship* pShip = dynamic_cast<Ship*>(link.getProcess().getCurrentObject());
     if (pShip == 0) {
-        throw interpreter::Error::contextError();
+        throw Error::contextError();
     }
 
     // Do it
     class DialogTask : public UserTask {
      public:
-        DialogTask(game::Session& session, const game::map::Ship& ship)
+        DialogTask(game::Session& session, const Ship& ship)
             : m_data()
             {
                 int currentTurn = game::actions::mustHaveGame(session).currentTurn().getTurnNumber();
                 util::NumberFormatter fmt = game::actions::mustHaveRoot(session).userConfiguration().getNumberFormatter();
-                game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
+                ShipList& shipList = game::actions::mustHaveShipList(session);
                 afl::string::Translator& tx = session.translator();
 
                 packShipLastKnownCargo(m_data, ship, currentTurn, fmt, shipList, tx);
@@ -1135,16 +1179,16 @@ client::si::IFCCCloneShip(game::Session& session, ScriptSide& si, RequestLink1 l
     args.checkArgumentCount(0);
 
     // Must have a played ship (to get an Id)
-    game::map::Ship& sh = game::actions::mustExist(dynamic_cast<game::map::Ship*>(link.getProcess().getCurrentObject()));
+    Ship& sh = game::actions::mustExist(dynamic_cast<Ship*>(link.getProcess().getCurrentObject()));
     game::actions::mustBePlayed(sh);
 
     // Some pre-validation (similar to CloneShipProxy)
-    game::map::Universe& univ = game::actions::mustHaveGame(session).currentTurn().universe();
-    game::map::Point pt;
+    Universe& univ = game::actions::mustHaveGame(session).currentTurn().universe();
+    Point pt;
     if (!sh.getPosition(pt)) {
         throw game::Exception(game::Exception::eNoBase);
     }
-    game::map::Planet& pl = game::actions::mustExist(univ.planets().get(univ.findPlanetAt(pt)));
+    Planet& pl = game::actions::mustExist(univ.planets().get(univ.findPlanetAt(pt)));
     game::actions::mustBePlayed(pl);
 
     // OK, do it
@@ -1174,7 +1218,7 @@ client::si::IFCCChangeSpeed(game::Session& session, ScriptSide& si, RequestLink1
     args.checkArgumentCount(0);
     game::actions::mustHaveGame(session);
 
-    game::map::Ship* sh = dynamic_cast<game::map::Ship*>(link.getProcess().getCurrentObject());
+    Ship* sh = dynamic_cast<Ship*>(link.getProcess().getCurrentObject());
     if (sh != 0 && sh->isPlayable(game::map::Object::Playable)) {
         if (sh->isFleetMember()) {
             throw game::Exception(game::Exception::eFleet);
@@ -1182,7 +1226,7 @@ client::si::IFCCChangeSpeed(game::Session& session, ScriptSide& si, RequestLink1
             si.postNewTask(link, new Task(sh->getId()));
         }
     } else {
-        throw interpreter::Error::contextError();
+        throw Error::contextError();
     }
 }
 
@@ -1209,11 +1253,11 @@ client::si::IFCCChangeTaxes(game::Session& session, ScriptSide& si, RequestLink1
     args.checkArgumentCount(0);
     game::actions::mustHaveGame(session);
 
-    game::map::Planet* pl = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
+    Planet* pl = dynamic_cast<Planet*>(link.getProcess().getCurrentObject());
     if (pl != 0 && pl->isPlayable(game::map::Object::Playable)) {
         si.postNewTask(link, new Task(pl->getId()));
     } else {
-        throw interpreter::Error::contextError();
+        throw Error::contextError();
     }
 }
 
@@ -1240,11 +1284,11 @@ client::si::IFCCChangeTech(game::Session& session, ScriptSide& si, RequestLink1 
     args.checkArgumentCount(0);
     game::actions::mustHaveGame(session);
 
-    game::map::Planet* pl = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
+    Planet* pl = dynamic_cast<Planet*>(link.getProcess().getCurrentObject());
     if (pl != 0 && pl->isPlayable(game::map::Object::Playable) && pl->hasBase()) {
         si.postNewTask(link, new Task(pl->getId()));
     } else {
-        throw interpreter::Error::contextError();
+        throw Error::contextError();
     }
 }
 
@@ -1257,24 +1301,24 @@ client::si::IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLi
 
     class WaypointTask : public util::Request<game::Session> {
      public:
-        WaypointTask(game::Id_t id, game::map::Point pos)
+        WaypointTask(game::Id_t id, Point pos)
             : m_id(id), m_position(pos)
             { }
 
         virtual void handle(game::Session& session)
             {
-                game::Root& r = game::actions::mustHaveRoot(session);
-                game::spec::ShipList& sl = game::actions::mustHaveShipList(session);
-                game::Game& g = game::actions::mustHaveGame(session);
-                game::map::Universe& univ = g.currentTurn().universe();
-                game::map::Ship& sh = game::actions::mustExist(univ.ships().get(m_id));
+                Root& r = game::actions::mustHaveRoot(session);
+                ShipList& sl = game::actions::mustHaveShipList(session);
+                Game& g = game::actions::mustHaveGame(session);
+                Universe& univ = g.currentTurn().universe();
+                Ship& sh = game::actions::mustExist(univ.ships().get(m_id));
                 game::map::FleetMember fm(univ, sh, g.mapConfiguration());
 
                 fm.setWaypoint(m_position, r.hostConfiguration(), sl);
 
                 // Set optimum warp
                 // ex setOptimumWarp
-                game::map::Point shipPos;
+                Point shipPos;
                 if (!sh.isHyperdriving(g.shipScores(), sl, r.hostConfiguration()) && sh.getPosition(shipPos) && shipPos != m_position) {
                     // Determine optimum warp factor
                     int speed = getOptimumWarp(univ, sh.getId(), shipPos, m_position, g.shipScores(), sl, g.mapConfiguration(), r);
@@ -1284,7 +1328,7 @@ client::si::IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLi
 
      private:
         game::Id_t m_id;
-        game::map::Point m_position;
+        Point m_position;
     };
 
 
@@ -1334,12 +1378,12 @@ client::si::IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLi
     };
 
     args.checkArgumentCount(0);
-    game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
-    game::Root& root = game::actions::mustHaveRoot(session);
-    game::Game& g = game::actions::mustHaveGame(session);
+    ShipList& shipList = game::actions::mustHaveShipList(session);
+    Root& root = game::actions::mustHaveRoot(session);
+    Game& g = game::actions::mustHaveGame(session);
 
-    game::map::Ship* sh = dynamic_cast<game::map::Ship*>(link.getProcess().getCurrentObject());
-    game::map::Point pos;
+    Ship* sh = dynamic_cast<Ship*>(link.getProcess().getCurrentObject());
+    Point pos;
     if (sh != 0 && sh->isPlayable(game::map::Object::Playable) && sh->getPosition(pos)) {
         if (sh->isFleetMember()) {
             throw game::Exception(game::Exception::eFleet);
@@ -1363,12 +1407,12 @@ client::si::IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLi
                 || sh->hasSpecialFunction(game::spec::BasicHullFunction::ChunnelOthers, g.shipScores(), shipList, root.hostConfiguration());
 
             game::map::ChunnelMission chm;
-            game::map::Universe& univ = g.currentTurn().universe(); // FIXME: is this the same where the ship is from?
+            Universe& univ = g.currentTurn().universe(); // FIXME: is this the same where the ship is from?
             if (chm.check(*sh, univ, g.mapConfiguration(), g.shipScores(), shipList, root)) {
-                if (game::map::Ship* mate = univ.ships().get(chm.getTargetId())) {
+                if (Ship* mate = univ.ships().get(chm.getTargetId())) {
                     in.chunnelMode = true;
 
-                    game::map::Point matePos;
+                    Point matePos;
                     if (mate->getPosition(matePos)) {
                         in.target = g.mapConfiguration().getSimpleNearestAlias(matePos, pos);
                     }
@@ -1377,7 +1421,7 @@ client::si::IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLi
             si.postNewTask(link, new Task(in));
         }
     } else {
-        throw interpreter::Error::contextError();
+        throw Error::contextError();
     }
 }
 
@@ -1439,8 +1483,8 @@ client::si::IFCCChooseInterceptTarget(game::Session& session, ScriptSide& si, Re
     game::actions::mustHaveRoot(session);
     game::actions::mustHaveGame(session);
 
-    game::map::Ship* sh = dynamic_cast<game::map::Ship*>(link.getProcess().getCurrentObject());
-    game::map::Point pos;
+    Ship* sh = dynamic_cast<Ship*>(link.getProcess().getCurrentObject());
+    Point pos;
     if (sh != 0 && sh->isPlayable(game::map::Object::Playable) && sh->getPosition(pos)) {
         client::dialogs::NavChartState in;
         in.title = title;
@@ -1457,7 +1501,7 @@ client::si::IFCCChooseInterceptTarget(game::Session& session, ScriptSide& si, Re
         in.requireOwnShip = (flags & AllShipFlag) == 0;
         si.postNewTask(link, new Task(in));
     } else {
-        throw interpreter::Error::contextError();
+        throw Error::contextError();
     }
 }
 
@@ -1517,9 +1561,9 @@ client::si::IFCCEditCurrentBuildOrder(game::Session& session, ScriptSide& si, Re
 
     // Are we actually looking at a planet with a supported command?
     // - check planet
-    game::map::Planet* pl = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
+    Planet* pl = dynamic_cast<Planet*>(link.getProcess().getCurrentObject());
     if (pl == 0) {
-        throw interpreter::Error::contextError();
+        throw Error::contextError();
     }
     game::actions::mustHavePlayedBase(*pl);
 
@@ -1623,18 +1667,18 @@ client::si::IFCCExport(game::Session& /*session*/, ScriptSide& si, RequestLink1 
     }
     game::interface::ReferenceListContext* refArg = dynamic_cast<game::interface::ReferenceListContext*>(arg);
     if (refArg == 0) {
-        throw interpreter::Error("Expecting ReferenceList parameter");
+        throw Error("Expecting ReferenceList parameter");
     }
 
     // Validate list
     const game::ref::List& refList = refArg->getList();
     game::ref::List::Types_t types = refList.getTypes();
-    if (types == game::ref::List::Types_t(game::Reference::Ship)) {
-        si.postNewTask(link, new Task(game::proxy::ObjectListExportAdaptor::Ships, refList.getIds(game::Reference::Ship)));
-    } else if (types == game::ref::List::Types_t(game::Reference::Planet)) {
-        si.postNewTask(link, new Task(game::proxy::ObjectListExportAdaptor::Planets, refList.getIds(game::Reference::Planet)));
+    if (types == game::ref::List::Types_t(Reference::Ship)) {
+        si.postNewTask(link, new Task(game::proxy::ObjectListExportAdaptor::Ships, refList.getIds(Reference::Ship)));
+    } else if (types == game::ref::List::Types_t(Reference::Planet)) {
+        si.postNewTask(link, new Task(game::proxy::ObjectListExportAdaptor::Planets, refList.getIds(Reference::Planet)));
     } else {
-        throw interpreter::Error("ReferenceList must contain either ships or planets");
+        throw Error("ReferenceList must contain either ships or planets");
     }
 }
 
@@ -1674,7 +1718,7 @@ client::si::IFCCGotoCoordinates(game::Session& session, ScriptSide& si, RequestL
             { }
         virtual void handle(Control& ctl, RequestLink2 link)
             {
-                game::map::Point pt;
+                Point pt;
                 if (client::dialogs::doEnterCoordinatesDialog(pt, m_config, ctl.root(), ctl.interface().gameSender(), ctl.translator())) {
                     game::proxy::MapLocationProxy(ctl.interface().gameSender(), ctl.root().engine().dispatcher())
                         .setPosition(pt);
@@ -1688,7 +1732,7 @@ client::si::IFCCGotoCoordinates(game::Session& session, ScriptSide& si, RequestL
     };
 
     args.checkArgumentCount(0);
-    game::Game& g = game::actions::mustHaveGame(session);
+    Game& g = game::actions::mustHaveGame(session);
     si.postNewTask(link, new Task(g.mapConfiguration()));
 }
 
@@ -1753,7 +1797,7 @@ client::si::IFCCListScreenHistory(game::Session& session, ScriptSide& si, Reques
                     for (int32_t i = 0; i < n; ++i) {
                         iface.history().rotate();
                     }
-                    activateReference(iface.history().pop(), iface, ctl, link);
+                    activateReference(iface.history().pop(), ctl, link);
                 } else {
                     iface.continueProcess(link);
                 }
@@ -1777,7 +1821,7 @@ client::si::IFCCManageBuildQueue(game::Session& session, ScriptSide& si, Request
 
     // Focus on planet if possible (but don't fail if not)
     game::Id_t planetId = 0;
-    game::map::Planet* pPlanet = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
+    Planet* pPlanet = dynamic_cast<Planet*>(link.getProcess().getCurrentObject());
     if (pPlanet != 0) {
         planetId = pPlanet->getId();
     }
@@ -1790,9 +1834,8 @@ client::si::IFCCManageBuildQueue(game::Session& session, ScriptSide& si, Request
             { }
         virtual void handle(Control& ctl, RequestLink2 link)
             {
-                UserSide& iface = ctl.interface();
-                ScreenHistory::Reference ref = client::dialogs::doBuildQueueDialog(m_planetId, ctl.root(), iface.gameSender(), ctl.translator());
-                activateReference(ref, iface, ctl, link);
+                ScreenHistory::Reference ref = client::dialogs::doBuildQueueDialog(m_planetId, ctl.root(), ctl.interface().gameSender(), ctl.translator());
+                activateReference(ref, ctl, link);
             }
      private:
         game::Id_t m_planetId;
@@ -1838,7 +1881,7 @@ client::si::IFCCPopScreenHistory(game::Session& session, ScriptSide& si, Request
                 if (m_excludeCurrent) {
                     iface.history().rotate();
                 }
-                activateReference(iface.history().pop(), iface, ctl, link);
+                activateReference(iface.history().pop(), ctl, link);
             }
      private:
         bool m_excludeCurrent;
@@ -1858,7 +1901,7 @@ client::si::IFCCProcessManager(game::Session& /*session*/, ScriptSide& si, Reque
 
     class Task : public UserTask {
      public:
-        Task(game::Reference ref)
+        Task(Reference ref)
             : m_ref(ref)
             { }
         virtual void handle(Control& ctl, RequestLink2 link)
@@ -1871,7 +1914,7 @@ client::si::IFCCProcessManager(game::Session& /*session*/, ScriptSide& si, Reque
                 ctl.handleStateChange(link, out.getTarget());
             }
      private:
-        game::Reference m_ref;
+        Reference m_ref;
     };
 
     si.postNewTask(link, new Task(getCurrentShipOrPlanetReference(link.getProcess().getInvokingObject())));
@@ -1895,7 +1938,7 @@ client::si::IFCCReset(game::Session& /*session*/, ScriptSide& si, RequestLink1 l
     // ReverterProxy will validate further preconditions
     class Task : public UserTask {
      public:
-        Task(game::map::Point pos)
+        Task(Point pos)
             : m_pos(pos)
             { }
         virtual void handle(Control& ctl, RequestLink2 link)
@@ -1905,9 +1948,9 @@ client::si::IFCCReset(game::Session& /*session*/, ScriptSide& si, RequestLink1 l
                 iface.continueProcess(link);
             }
      private:
-        game::map::Point m_pos;
+        Point m_pos;
     };
-    si.postNewTask(link, new Task(game::map::Point(x, y)));
+    si.postNewTask(link, new Task(Point(x, y)));
 }
 
 // @since PCC2 2.40.8
@@ -1918,9 +1961,9 @@ client::si::IFCCSellSupplies(game::Session& /*session*/, ScriptSide& si, Request
     args.checkArgumentCount(0);
 
     // Must be our planet
-    game::map::Planet* pPlanet = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
+    Planet* pPlanet = dynamic_cast<Planet*>(link.getProcess().getCurrentObject());
     if (pPlanet == 0) {
-        throw interpreter::Error::contextError();
+        throw Error::contextError();
     }
     game::actions::mustBePlayed(*pPlanet);
 
@@ -1956,12 +1999,12 @@ client::si::IFCCSelectNextShip(game::Session& session, ScriptSide& /*si*/, Reque
     bool marked   = (mode & 2) != 0;
 
     // Access game
-    game::Game& g = game::actions::mustHaveGame(session);
-    game::Turn& t = game::actions::mustExist(g.getViewpointTurn().get());
-    const game::map::Ship* sh = dynamic_cast<game::map::Ship*>(g.cursors().currentShip().getCurrentObject());
-    game::map::Point pt;
+    Game& g = game::actions::mustHaveGame(session);
+    Turn& t = game::actions::mustExist(g.getViewpointTurn().get());
+    const Ship* sh = dynamic_cast<Ship*>(g.cursors().currentShip().getCurrentObject());
+    Point pt;
     if (sh == 0 || !sh->getPosition(pt)) {
-        throw interpreter::Error::contextError();
+        throw Error::contextError();
     }
 
     // Sort
@@ -1975,7 +2018,7 @@ client::si::IFCCSelectNextShip(game::Session& session, ScriptSide& /*si*/, Reque
     game::map::ObjectType& ty = t.universe().playedShips()
         .filterMarked(del, marked)
         .filterPosition(del, pt)
-        .sort(del, combinedPredicate, game::Reference::Ship);
+        .sort(del, combinedPredicate, Reference::Ship);
 
     // Browse
     game::Id_t current = sh->getId();
@@ -2054,7 +2097,7 @@ client::si::IFCCSendMessage(game::Session& session, ScriptSide& si, RequestLink1
         int m_viewpointPlayer;
         bool m_hasMessages;
     };
-    game::Game& g = game::actions::mustHaveGame(session);
+    Game& g = game::actions::mustHaveGame(session);
     si.postNewTask(link, new DialogTask(g.getViewpointPlayer(), g.currentTurn().outbox().getNumMessages() != 0));
 }
 
@@ -2090,7 +2133,7 @@ client::si::IFCCShipCostCalc(game::Session& session, ScriptSide& si, RequestLink
     game::actions::mustHaveGame(session);
     bool hasBase;
     game::Id_t planetId;
-    if (const game::map::Planet* pl = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject())) {
+    if (const Planet* pl = dynamic_cast<Planet*>(link.getProcess().getCurrentObject())) {
         // Planet exists
         planetId = pl->getId();
         hasBase = pl->isPlayable(game::map::Object::ReadOnly) && pl->hasBase();
@@ -2110,9 +2153,9 @@ client::si::IFCCShipSpec(game::Session& /*session*/, ScriptSide& si, RequestLink
     args.checkArgumentCount(0);
 
     // Must be a known ship
-    game::map::Ship* pShip = dynamic_cast<game::map::Ship*>(link.getProcess().getCurrentObject());
+    Ship* pShip = dynamic_cast<Ship*>(link.getProcess().getCurrentObject());
     if (pShip == 0 || !pShip->getHull().isValid()) {
-        throw interpreter::Error::contextError();
+        throw Error::contextError();
     }
 
     // Show dialog
@@ -2162,15 +2205,15 @@ client::si::IFCCTransferMulti(game::Session& session, ScriptSide& si, RequestLin
     interpreter::checkBooleanArg(flag, args.getNext());
 
     // Must be our ship
-    game::map::Ship* pShip = dynamic_cast<game::map::Ship*>(link.getProcess().getCurrentObject());
+    Ship* pShip = dynamic_cast<Ship*>(link.getProcess().getCurrentObject());
     if (pShip == 0) {
-        throw interpreter::Error::contextError();
+        throw Error::contextError();
     }
     game::actions::mustBePlayed(*pShip);
 
     // Other preconditions
-    game::Game& g = game::actions::mustHaveGame(session);
-    game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
+    Game& g = game::actions::mustHaveGame(session);
+    ShipList& shipList = game::actions::mustHaveShipList(session);
 
     // Validate fleet request
     if (flag && pShip->getFleetNumber() == 0) {
@@ -2185,7 +2228,7 @@ client::si::IFCCTransferMulti(game::Session& session, ScriptSide& si, RequestLin
     // Task
     class Task : public UserTask {
      public:
-        Task(game::actions::MultiTransferSetup setup, const game::map::Universe& univ, const game::spec::ShipList& shipList, afl::string::Translator& tx)
+        Task(game::actions::MultiTransferSetup setup, const Universe& univ, const ShipList& shipList, afl::string::Translator& tx)
             : m_setup(setup), m_cargoTypes()
             {
                 // Pack element types
@@ -2239,9 +2282,9 @@ client::si::IFCCTransferPlanet(game::Session& /*session*/, ScriptSide& si, Reque
     }
 
     // Must be our planet
-    game::map::Planet* pPlanet = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
+    Planet* pPlanet = dynamic_cast<Planet*>(link.getProcess().getCurrentObject());
     if (pPlanet == 0) {
-        throw interpreter::Error::contextError();
+        throw Error::contextError();
     }
     game::actions::mustBePlayed(*pPlanet);
 
@@ -2279,14 +2322,14 @@ client::si::IFCCTransferShip(game::Session& session, ScriptSide& si, RequestLink
     }
 
     // Must be our ship
-    game::map::Ship* pShip = dynamic_cast<game::map::Ship*>(link.getProcess().getCurrentObject());
+    Ship* pShip = dynamic_cast<Ship*>(link.getProcess().getCurrentObject());
     if (pShip == 0) {
-        throw interpreter::Error::contextError();
+        throw Error::contextError();
     }
     game::actions::mustBePlayed(*pShip);
 
     // Parse mode/target
-    game::map::Universe& univ = game::actions::mustHaveGame(session).currentTurn().universe();
+    Universe& univ = game::actions::mustHaveGame(session).currentTurn().universe();
     switch (mode) {
      case 0:
         // Choose target
@@ -2333,19 +2376,19 @@ client::si::IFCCTransferUnload(game::Session& session, ScriptSide& si, RequestLi
     args.checkArgumentCount(0);
 
     // Must be our ship
-    game::map::Ship* pShip = dynamic_cast<game::map::Ship*>(link.getProcess().getCurrentObject());
+    Ship* pShip = dynamic_cast<Ship*>(link.getProcess().getCurrentObject());
     if (pShip == 0) {
-        throw interpreter::Error::contextError();
+        throw Error::contextError();
     }
     game::actions::mustBePlayed(*pShip);
 
     // Ship must have a position
-    game::map::Point shipPos;
+    Point shipPos;
     bool ok = pShip->getPosition(shipPos);
     afl::except::checkAssertion(ok, "pShip->getPosition");
 
     // Find planet
-    game::map::Universe& univ = game::actions::mustHaveGame(session).currentTurn().universe();
+    Universe& univ = game::actions::mustHaveGame(session).currentTurn().universe();
     game::Id_t pid = univ.findPlanetAt(shipPos);
     if (pid == 0) {
         throw game::Exception(game::Exception::ePos);
@@ -2398,7 +2441,7 @@ client::si::IFCCUseKeymap(game::Session& /*session*/, ScriptSide& si, RequestLin
     }
     const interpreter::KeymapValue* kv = dynamic_cast<const interpreter::KeymapValue*>(value);
     if (kv == 0) {
-        throw interpreter::Error::typeError(interpreter::Error::ExpectKeymap);
+        throw Error::typeError(Error::ExpectKeymap);
     }
 
     // - accept null prefix
@@ -2433,7 +2476,7 @@ client::si::IFCCViewCombat(game::Session& session, ScriptSide& si, RequestLink1 
 
     // Verify that we have all components. If we don't, Adaptor/VcrDatabaseProxy will run in totally degraded mode,
     // so it's better to prevent this.
-    game::Game& g = game::actions::mustHaveGame(session);
+    Game& g = game::actions::mustHaveGame(session);
     game::actions::mustHaveRoot(session);
     game::actions::mustHaveShipList(session);
 
@@ -2449,9 +2492,9 @@ client::si::IFCCViewCombat(game::Session& session, ScriptSide& si, RequestLink1 
         Adaptor(game::Session& session)
             : m_session(session)
             { }
-        virtual const game::Root& root() const
+        virtual const Root& root() const
             { return game::actions::mustHaveRoot(m_session); }
-        virtual const game::spec::ShipList& shipList() const
+        virtual const ShipList& shipList() const
             { return game::actions::mustHaveShipList(m_session); }
         virtual const game::TeamSettings* getTeamSettings() const
             { return &game::actions::mustHaveGame(m_session).teamSettings(); }
@@ -2484,7 +2527,7 @@ client::si::IFCCViewCombat(game::Session& session, ScriptSide& si, RequestLink1 
             { return &game::sim::getSimulatorSession(m_session)->setup(); }
         virtual bool isGameObject(const game::vcr::Object& obj) const
             {
-                game::Game* g = m_session.getGame().get();
+                Game* g = m_session.getGame().get();
                 return g != 0 && g->isGameObject(obj, shipList().hulls());
             }
      private:
@@ -2538,7 +2581,7 @@ client::si::IFCCViewCombat(game::Session& session, ScriptSide& si, RequestLink1 
         virtual void handle(Control& ctl, RequestLink2 link)
             {
                 client::si::UserSide& us = ctl.interface();
-                game::Reference ref = client::dialogs::playCombat(ctl.root(), ctl.translator(), us.gameSender().makeTemporary(new AdaptorFromSession()), us.gameSender(), us.mainLog());
+                Reference ref = client::dialogs::playCombat(ctl.root(), ctl.translator(), us.gameSender().makeTemporary(new AdaptorFromSession()), us.gameSender(), us.mainLog());
                 if (ref.isSet()) {
                     // Re-using the existing executeGoToReferenceWait function requires use of a Control,
                     // and will produce a potential second process that we need to join with ours.
@@ -2571,12 +2614,12 @@ client::si::IFCCViewMessages(game::Session& session, ScriptSide& si, RequestLink
 
     std::auto_ptr<game::proxy::InboxAdaptor_t> p;
     const game::map::Object* obj = link.getProcess().getCurrentObject();
-    if (dynamic_cast<const game::map::Ship*>(obj) != 0) {
+    if (dynamic_cast<const Ship*>(obj) != 0) {
         p.reset(game::proxy::makeShipInboxAdaptor(obj->getId()));
-    } else if (dynamic_cast<const game::map::Planet*>(obj) != 0) {
+    } else if (dynamic_cast<const Planet*>(obj) != 0) {
         p.reset(game::proxy::makePlanetInboxAdaptor(obj->getId()));
     } else {
-        throw interpreter::Error::contextError();
+        throw Error::contextError();
     }
 
     si.postNewTask(link, new ViewMailboxTask(p.release()));
@@ -2732,7 +2775,7 @@ client::si::IFUIChooseObject(game::Session& session, ScriptSide& si, RequestLink
         break;
 
      default:
-        throw interpreter::Error::rangeError();
+        throw Error::rangeError();
     }
 }
 
@@ -2982,7 +3025,7 @@ client::si::IFUIGotoChart(game::Session& session, ScriptSide& si, RequestLink1 l
 
     // Place cursor
     // FIXME: if X,Y refer to an object, lock onto that instead of X,Y
-    game::actions::mustHaveGame(session).cursors().location().set(game::map::Point(x, y));
+    game::actions::mustHaveGame(session).cursors().location().set(Point(x, y));
 
     // Change screen
     si.postNewTask(link, new StateChangeTask(OutputState::Starchart));
@@ -3071,7 +3114,7 @@ client::si::IFUIGotoScreen(game::Session& session, ScriptSide& si, RequestLink1 
         break;
 
      default:
-        throw interpreter::Error::rangeError();
+        throw Error::rangeError();
     }
 }
 
@@ -3404,11 +3447,11 @@ client::si::IFUIInputFCode(game::Session& session, ScriptSide& si, RequestLink1 
     interpreter::checkStringArg(current, args.getNext());
 
     // Validate
-    game::Root& r = game::actions::mustHaveRoot(session);
-    game::Game& g = game::actions::mustHaveGame(session);
-    game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
+    Root& r = game::actions::mustHaveRoot(session);
+    Game& g = game::actions::mustHaveGame(session);
+    ShipList& shipList = game::actions::mustHaveShipList(session);
     if (player < 0 || player > game::MAX_PLAYERS) {
-        throw interpreter::Error::rangeError();
+        throw Error::rangeError();
     }
     if (player == 0) {
         player = g.getViewpointPlayer();
@@ -3420,7 +3463,7 @@ client::si::IFUIInputFCode(game::Session& session, ScriptSide& si, RequestLink1 
         // Default mode
         game::map::Object* obj = link.getProcess().getCurrentObject();
         if (obj == 0) {
-            throw interpreter::Error::contextError();
+            throw Error::contextError();
         }
 
         FriendlyCodeList(shipList.friendlyCodes(), *obj, g.shipScores(), shipList, r.hostConfiguration())
@@ -3497,7 +3540,6 @@ client::si::IFUIInputFCode(game::Session& session, ScriptSide& si, RequestLink1 
     };
     si.postNewTask(link, new Task(list, current));
 }
-
 
 /* @q UI.InputNumber title:Str, Optional min:Int, max:Int, current:Int, help:Any, label:Str (Global Command)
    Number input.
@@ -3656,7 +3698,7 @@ client::si::IFUIListFleets(game::Session& session, ScriptSide& si, RequestLink1 
             { }
         virtual void handle(Control& ctl, RequestLink2 link)
             {
-                game::Reference ref = client::dialogs::doFleetList(ctl.root(), m_ok, m_title, *m_fleetList, ctl.interface().gameSender(), ctl.translator());
+                Reference ref = client::dialogs::doFleetList(ctl.root(), m_ok, m_title, *m_fleetList, ctl.interface().gameSender(), ctl.translator());
 
                 std::auto_ptr<afl::data::Value> result;
                 if (ref.isSet()) {
@@ -3698,12 +3740,12 @@ client::si::IFUIListFleets(game::Session& session, ScriptSide& si, RequestLink1 
 
     // Validate
     // @change PCC2 would verify range of 'except'
-    game::Game& g = game::actions::mustHaveGame(session);
-    game::Turn& t = game::actions::mustExist(g.getViewpointTurn().get());
+    Game& g = game::actions::mustHaveGame(session);
+    Turn& t = game::actions::mustExist(g.getViewpointTurn().get());
 
     // Prepare
     std::auto_ptr<game::ref::FleetList> list(new game::ref::FleetList());
-    list->addAll(t.universe(), game::map::Point(x, y), except, (flags & AllFlag) != 0, session.translator());
+    list->addAll(t.universe(), Point(x, y), except, (flags & AllFlag) != 0, session.translator());
 
     // Early-out cases
     if (list->size() == 0) {
@@ -3766,7 +3808,7 @@ client::si::IFUIListShipPrediction(game::Session& session, ScriptSide& si, Reque
     // Post command
     class Task : public UserTask {
      public:
-        Task(game::map::Point pos, game::Id_t fromShip, String_t okName, String_t title)
+        Task(Point pos, game::Id_t fromShip, String_t okName, String_t title)
             : m_pos(pos), m_fromShip(fromShip), m_okName(okName), m_title(title)
             { }
         void handle(Control& ctl, RequestLink2 link)
@@ -3786,7 +3828,7 @@ client::si::IFUIListShipPrediction(game::Session& session, ScriptSide& si, Reque
                 // Execute dialog
                 // @change In c2ng, loadNext() initializes with the current ship and updates the scanner.
                 client::Downlink downLink(ctl.root(), ctl.translator());
-                game::Reference resultReference;
+                Reference resultReference;
                 if (dialog.loadNext(downLink, m_pos, m_fromShip, opts)) {
                     resultReference = dialog.run();
                 }
@@ -3805,13 +3847,13 @@ client::si::IFUIListShipPrediction(game::Session& session, ScriptSide& si, Reque
             }
 
      private:
-        game::map::Point m_pos;
+        Point m_pos;
         game::Id_t m_fromShip;
         String_t m_okName;
         String_t m_title;
     };
 
-    si.postNewTask(link, new Task(game::map::Point(x, y), fromShip, ok, heading));
+    si.postNewTask(link, new Task(Point(x, y), fromShip, ok, heading));
 }
 
 /* @q UI.ListShips x:Int, y:Int, Optional flags:Any, ok:Str, heading:Str (Global Command)
@@ -3877,7 +3919,7 @@ client::si::IFUIListShips(game::Session& session, ScriptSide& si, RequestLink1 l
     // Post command
     class Task : public UserTask {
      public:
-        Task(game::map::Point pos,
+        Task(Point pos,
              int flags, game::Id_t excludeShip,
              String_t okName, String_t title)
             : m_pos(pos), m_flags(flags), m_excludeShip(excludeShip), m_okName(okName), m_title(title)
@@ -3903,7 +3945,7 @@ client::si::IFUIListShips(game::Session& session, ScriptSide& si, RequestLink1 l
 
                 // Execute dialog
                 client::Downlink downLink(ctl.root(), ctl.translator());
-                game::Reference resultReference;
+                Reference resultReference;
                 if (dialog.loadCurrent(downLink, m_pos, opts, m_excludeShip)) {
                     resultReference = dialog.run();
                 }
@@ -3922,14 +3964,14 @@ client::si::IFUIListShips(game::Session& session, ScriptSide& si, RequestLink1 l
             }
 
      private:
-        game::map::Point m_pos;
+        Point m_pos;
         int m_flags;
         game::Id_t m_excludeShip;
         String_t m_okName;
         String_t m_title;
     };
 
-    si.postNewTask(link, new Task(game::map::Point(x, y), flags, except, ok, heading));
+    si.postNewTask(link, new Task(Point(x, y), flags, except, ok, heading));
 }
 
 /* @q UI.Message text:RichText, Optional title:Str, buttons:Str (Global Command)
@@ -4062,7 +4104,7 @@ client::si::IFUIPlanetInfo(game::Session& session, ScriptSide& si, RequestLink1 
         return;
     }
     if (!game::actions::mustHaveGame(session).currentTurn().universe().planets().get(pid)) {
-        throw interpreter::Error::rangeError();
+        throw Error::rangeError();
     }
 
     class Task : public UserTask {
@@ -4084,7 +4126,6 @@ client::si::IFUIPlanetInfo(game::Session& session, ScriptSide& si, RequestLink1 
     };
     si.postNewTask(link, new Task(pid));
 }
-
 
 /* @q UI.PopupConsole (Global Command)
    Open the <a href="pcc2:console">console</a>.
@@ -4205,7 +4246,7 @@ client::si::IFUISearch(game::Session& session, ScriptSide& si, RequestLink1 link
          case 2:  q.setMatchType(SearchQuery::MatchTrue);     break;
          case 3:  q.setMatchType(SearchQuery::MatchFalse);    break;
          case 4:  q.setMatchType(SearchQuery::MatchLocation); break;
-         default: throw interpreter::Error::rangeError();
+         default: throw Error::rangeError();
         }
 
         // Objects
@@ -4214,7 +4255,7 @@ client::si::IFUISearch(game::Session& session, ScriptSide& si, RequestLink1 link
 
     class Task : public UserTask {
      public:
-        Task(const SearchQuery& q, game::Reference currentObject, bool immediate)
+        Task(const SearchQuery& q, Reference currentObject, bool immediate)
             : m_query(q), m_currentObject(currentObject), m_immediate(immediate)
             { }
         void handle(Control& ctl, RequestLink2 link)
@@ -4227,7 +4268,7 @@ client::si::IFUISearch(game::Session& session, ScriptSide& si, RequestLink1 link
             }
      private:
         SearchQuery m_query;
-        game::Reference m_currentObject;
+        Reference m_currentObject;
         bool m_immediate;
     };
     si.postNewTask(link, new Task(q, getCurrentShipOrPlanetReference(link.getProcess().getCurrentObject()), immediate));
@@ -4252,7 +4293,6 @@ client::si::IFUIShowScores(game::Session& /*session*/, ScriptSide& si, RequestLi
     };
     si.postNewTask(link, new Task());
 }
-
 
 /* @q UI.Update Optional flag:Bool (Global Command)
    Update graphical user interface.
@@ -4328,21 +4368,17 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("CC$BUYSUPPLIES",        new ScriptProcedure(s, &si, IFCCBuySupplies));
                 s.world().setNewGlobalValue("CC$CARGOHISTORY",       new ScriptProcedure(s, &si, IFCCCargoHistory));
                 s.world().setNewGlobalValue("CC$CLONESHIP",          new ScriptProcedure(s, &si, IFCCCloneShip));
-                // s.world().setNewGlobalValue("CC$CHANGEMISSION",      new ScriptProcedure(s, &si, IFCCChangeMission));
-                // s.world().setNewGlobalValue("CC$CHANGEPE",           new ScriptProcedure(s, &si, IFCCChangePE));
                 s.world().setNewGlobalValue("CC$CHANGESPEED",        new ScriptProcedure(s, &si, IFCCChangeSpeed));
                 s.world().setNewGlobalValue("CC$CHANGETAXES",        new ScriptProcedure(s, &si, IFCCChangeTaxes));
                 s.world().setNewGlobalValue("CC$CHANGETECH",         new ScriptProcedure(s, &si, IFCCChangeTech));
                 s.world().setNewGlobalValue("CC$CHANGEWAYPOINT",     new ScriptProcedure(s, &si, IFCCChangeWaypoint));
                 s.world().setNewGlobalValue("CC$CHOOSEINTERCEPTTARGET", new ScriptProcedure(s, &si, IFCCChooseInterceptTarget));
-                // s.world().setNewGlobalValue("CC$CSBROWSE",           new ScriptProcedure(s, &si, IFCCCSBrowse));
                 s.world().setNewGlobalValue("CC$EDITAUTOBUILDSETTINGS", new ScriptProcedure(s, &si, IFCCEditAutobuildSettings));
                 s.world().setNewGlobalValue("CC$EDITCOMMANDS",       new ScriptProcedure(s, &si, IFCCEditCommands));
                 s.world().setNewGlobalValue("CC$EDITCURRENTBUILDORDER", new ScriptProcedure(s, &si, IFCCEditCurrentBuildOrder));
                 s.world().setNewGlobalValue("CC$EDITLABELCONFIG",    new ScriptProcedure(s, &si, IFCCEditLabelConfig));
                 s.world().setNewGlobalValue("CC$EDITNEWBUILDORDER",  new ScriptProcedure(s, &si, IFCCEditNewBuildOrder));
                 s.world().setNewGlobalValue("CC$EXPORT",             new ScriptProcedure(s, &si, IFCCExport));
-                // s.world().setNewGlobalValue("CC$GIVE",               new ScriptProcedure(s, &si, IFCCGive));
                 s.world().setNewGlobalValue("CC$GLOBALACTIONS",      new ScriptProcedure(s, &si, IFCCGlobalActions));
                 s.world().setNewGlobalValue("CC$GOTOCOORDINATES",    new ScriptProcedure(s, &si, IFCCGotoCoordinates));
                 s.world().setNewGlobalValue("CC$IONSTORMINFO",       new ScriptProcedure(s, &si, IFCCIonStormInfo));
@@ -4352,7 +4388,6 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("CC$MINEFIELDINFO",      new ScriptProcedure(s, &si, IFCCMinefieldInfo));
                 s.world().setNewGlobalValue("CC$POPSCREENHISTORY",   new ScriptProcedure(s, &si, IFCCPopScreenHistory));
                 s.world().setNewGlobalValue("CC$PROCESSMANAGER",     new ScriptProcedure(s, &si, IFCCProcessManager));
-                // s.world().setNewGlobalValue("CC$REMOTECONTROL",      new ScriptProcedure(s, &si, IFCCRemoteControl));
                 s.world().setNewGlobalValue("CC$RESET",              new ScriptProcedure(s, &si, IFCCReset));
                 s.world().setNewGlobalValue("CC$REMOTEGETCOLOR",     new SimpleFunction(s, IFCCRemoteGetColor));
                 s.world().setNewGlobalValue("CC$REMOTEGETQUESTION",  new SimpleFunction(s, IFCCRemoteGetQuestion));
@@ -4361,11 +4396,9 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("CC$SELECTNEXTSHIP",     new ScriptProcedure(s, &si, IFCCSelectNextShip));
                 s.world().setNewGlobalValue("CC$SELLSUPPLIES",       new ScriptProcedure(s, &si, IFCCSellSupplies));
                 s.world().setNewGlobalValue("CC$SENDMESSAGE",        new ScriptProcedure(s, &si, IFCCSendMessage));
-                // s.world().setNewGlobalValue("CC$SETTINGS",           new ScriptProcedure(s, &si, IFCCSettings));
                 s.world().setNewGlobalValue("CC$SHIPCOSTCALC",       new ScriptProcedure(s, &si, IFCCShipCostCalc));
                 s.world().setNewGlobalValue("CC$SHIPSPEC",           new ScriptProcedure(s, &si, IFCCShipSpec));
                 s.world().setNewGlobalValue("CC$SPECBROWSER",        new ScriptProcedure(s, &si, IFCCSpecBrowser));
-                // s.world().setNewGlobalValue("CC$TOWFLEETMEMBER",     new ScriptProcedure(s, &si, IFCCTowFleetMember));
                 s.world().setNewGlobalValue("CC$TRANSFERMULTI",      new ScriptProcedure(s, &si, IFCCTransferMulti));
                 s.world().setNewGlobalValue("CC$TRANSFERPLANET",     new ScriptProcedure(s, &si, IFCCTransferPlanet));
                 s.world().setNewGlobalValue("CC$TRANSFERSHIP",       new ScriptProcedure(s, &si, IFCCTransferShip));

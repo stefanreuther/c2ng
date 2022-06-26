@@ -1,14 +1,15 @@
 /**
   *  \file game/score/structures.hpp
+  *  \brief Structures for Score Database
   */
 #ifndef C2NG_GAME_SCORE_STRUCTURES_HPP
 #define C2NG_GAME_SCORE_STRUCTURES_HPP
 
 #include "afl/bits/int16le.hpp"
-#include "afl/bits/value.hpp"
 #include "afl/bits/int32le.hpp"
 #include "afl/bits/uint16le.hpp"
 #include "afl/bits/uint32le.hpp"
+#include "afl/bits/value.hpp"
 #include "game/v3/structures.hpp"
 
 namespace game { namespace score { namespace structures {

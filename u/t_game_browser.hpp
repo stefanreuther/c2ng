@@ -29,6 +29,10 @@ class TestGameBrowserHandlerList : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameBrowserTypes : public CxxTest::TestSuite {
+ public:
+};
+
 class TestGameBrowserUnsupportedAccountFolder : public CxxTest::TestSuite {
  public:
     void testIt();

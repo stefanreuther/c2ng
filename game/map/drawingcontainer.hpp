@@ -46,9 +46,8 @@ namespace game { namespace map {
 
         /** Find marker at a given position.
             \param pt     Position
-            \param config Map configuration
             \return Iterator to first visible marker at that position, end() if none found */
-        Iterator_t findMarkerAt(Point pt, const Configuration& config) const;
+        Iterator_t findMarkerAt(Point pt) const;
 
         /** Get iterator to first drawing.
             \return iterator */
