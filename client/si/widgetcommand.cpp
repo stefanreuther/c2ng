@@ -69,7 +69,7 @@ namespace {
 }
 
 void
-client::si::IFWidgetRun(game::Session& session, ScriptSide& ss, const WidgetReference& ref, interpreter::Process& proc, interpreter::Arguments& args)
+client::si::IFWidgetRun(game::Session& /*session*/, ScriptSide& ss, const WidgetReference& ref, interpreter::Process& proc, interpreter::Arguments& args)
 {
     // ContextProvider that allows child processes to access our local variables:
     class RunContextProvider : public game::interface::ContextProvider {
@@ -177,7 +177,6 @@ client::si::IFWidgetRun(game::Session& session, ScriptSide& ss, const WidgetRefe
 
     // Actual action
     args.checkArgumentCount(0);
-    session.notifyListeners();
     ss.postNewTask(RequestLink1(proc, false), new RunTask(ref));
 }
 
@@ -314,7 +313,7 @@ client::si::IFListboxAddItem(ScriptSide& ss, const WidgetReference& ref, interpr
 }
 
 void
-client::si::IFListboxDialogRun(game::Session& session, ScriptSide& ss, const WidgetReference& ref, interpreter::Process& proc, interpreter::Arguments& args)
+client::si::IFListboxDialogRun(game::Session& /*session*/, ScriptSide& ss, const WidgetReference& ref, interpreter::Process& proc, interpreter::Arguments& args)
 {
     // ex IntListboxClosure::call
     // ex userint.pas:Listbox_Run
@@ -356,13 +355,12 @@ client::si::IFListboxDialogRun(game::Session& session, ScriptSide& ss, const Wid
 
     // Do it
     args.checkArgumentCount(0);
-    session.notifyListeners();
     ss.postNewTask(RequestLink1(proc, false), new RunTask(ref));
 }
 
 // @since PCC2 2.40.8
 void
-client::si::IFListboxDialogRunMenu(game::Session& session, ScriptSide& ss, const WidgetReference& ref, interpreter::Process& proc, interpreter::Arguments& args)
+client::si::IFListboxDialogRunMenu(game::Session& /*session*/, ScriptSide& ss, const WidgetReference& ref, interpreter::Process& proc, interpreter::Arguments& args)
 {
     class RunTask : public UserTask {
      public:
@@ -401,7 +399,6 @@ client::si::IFListboxDialogRunMenu(game::Session& session, ScriptSide& ss, const
         return;
     }
 
-    session.notifyListeners();
     ss.postNewTask(RequestLink1(proc, false), new RunTask(ref, anchor));
 }
 

@@ -466,7 +466,6 @@ namespace {
         };
 
         if (game::Game* g = session.getGame().get()) {
-            session.notifyListeners();
             game::map::ObjectCursor* c = g->cursors().getCursorByNumber(def.screenNumber);
             if (c == 0 || c->getCurrentIndex() == 0) {
                 // No ship selected means no ship present; clear UI.Result and show a message
@@ -555,7 +554,7 @@ namespace {
      *  Ship Build Order varieties
      */
 
-    void editBuildOrder(game::Session& session, ScriptSide& si, RequestLink1 link, game::ShipBuildOrder o, String_t verb)
+    void editBuildOrder(ScriptSide& si, RequestLink1 link, game::ShipBuildOrder o, String_t verb)
     {
         // Must look at a planet with a starbase
         game::map::Planet* pl = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
@@ -611,7 +610,6 @@ namespace {
             game::ShipBuildOrder m_order;
             String_t m_verb;
         };
-        session.notifyListeners();
         si.postNewTask(link, new Task(pl->getId(), o, verb));
     }
 }
@@ -656,7 +654,7 @@ client::si::IFLoadResource(game::Session& session, ScriptSide& si, RequestLink1 
     PluginContext context = findPluginContext(link);
 
     // Create the resource.
-    // FIXME: We are in a state where we are allowed to do I/O (and where exceptions are allowed to be thrown).
+    // We are in a state where we are allowed to do I/O (and where exceptions are allowed to be thrown).
     // This may change when we add resource providers that need UI access.
     // At that time, we might have to defer creation of the provider into the RelayTask or ManagerRequest.
     std::auto_ptr<ui::res::Provider> provider(ui::res::createProvider(resourceName, context.directory, session.world().fileSystem(), session.log(), session.translator()));
@@ -753,7 +751,6 @@ client::si::IFMessageBox(game::Session& session, ScriptSide& si, RequestLink1 li
     interpreter::checkStringArg(heading, args.getNext());
 
     // Do it
-    session.notifyListeners();
     si.postNewTask(link, new MessageBoxTask(pContent, heading));
 }
 
@@ -784,13 +781,12 @@ client::si::IFSystemExitRace(game::Session& session, ScriptSide& si, RequestLink
 
 // @since PCC2 2.40.10
 void
-client::si::IFCCAddToSim(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+client::si::IFCCAddToSim(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     // ex IFCCAddToSim
     bool ask = true;
     args.checkArgumentCount(0, 1);
     interpreter::checkBooleanArg(ask, args.getNext());
-    session.notifyListeners();
 
     class Task : public UserTask {
      public:
@@ -880,8 +876,6 @@ client::si::IFCCAddWaypoint(game::Session& session, ScriptSide& si, RequestLink1
     static_assert(game::interface::imc_SetSpeed == 1, "SetSpeed");
     static_assert(game::interface::imc_AcceptDuplicate == 2, "AcceptDuplicate");
 
-    session.notifyListeners();
-
     game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
     game::Root& root = game::actions::mustHaveRoot(session);
     game::Game& g = game::actions::mustHaveGame(session);
@@ -942,7 +936,6 @@ client::si::IFCCBuildAmmo(game::Session& session, ScriptSide& si, RequestLink1 l
     };
 
     args.checkArgumentCount(0);
-    session.notifyListeners();
     game::actions::mustHaveGame(session);
 
     game::map::Planet* pl = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
@@ -974,7 +967,6 @@ client::si::IFCCBuildBase(game::Session& session, ScriptSide& si, RequestLink1 l
     };
 
     args.checkArgumentCount(0);
-    session.notifyListeners();
     game::actions::mustHaveGame(session);
 
     game::map::Planet* pl = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
@@ -1006,7 +998,6 @@ client::si::IFCCBuildShip(game::Session& session, ScriptSide& si, RequestLink1 l
     };
 
     args.checkArgumentCount(0);
-    session.notifyListeners();
     game::actions::mustHaveGame(session);
 
     game::map::Planet* pl = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
@@ -1041,7 +1032,6 @@ client::si::IFCCBuildStructures(game::Session& session, ScriptSide& si, RequestL
     int32_t page = 0;
     interpreter::checkIntegerArg(page, args.getNext(), 0, 2);
 
-    session.notifyListeners();
     game::actions::mustHaveGame(session);
 
     game::map::Planet& pl = game::actions::mustExist(dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject()));
@@ -1082,7 +1072,6 @@ client::si::IFCCBuySupplies(game::Session& /*session*/, ScriptSide& si, RequestL
     si.postNewTask(link, new DialogTask(pPlanet->getId()));
 }
 
-
 // @since PCC2 2.40.8
 void
 client::si::IFCCCargoHistory(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
@@ -1095,7 +1084,6 @@ client::si::IFCCCargoHistory(game::Session& session, ScriptSide& si, RequestLink
     if (pShip == 0) {
         throw interpreter::Error::contextError();
     }
-    session.notifyListeners();
 
     // Do it
     class DialogTask : public UserTask {
@@ -1184,7 +1172,6 @@ client::si::IFCCChangeSpeed(game::Session& session, ScriptSide& si, RequestLink1
     };
 
     args.checkArgumentCount(0);
-    session.notifyListeners();
     game::actions::mustHaveGame(session);
 
     game::map::Ship* sh = dynamic_cast<game::map::Ship*>(link.getProcess().getCurrentObject());
@@ -1251,7 +1238,6 @@ client::si::IFCCChangeTech(game::Session& session, ScriptSide& si, RequestLink1 
     };
 
     args.checkArgumentCount(0);
-    session.notifyListeners();
     game::actions::mustHaveGame(session);
 
     game::map::Planet* pl = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
@@ -1348,7 +1334,6 @@ client::si::IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLi
     };
 
     args.checkArgumentCount(0);
-    session.notifyListeners();
     game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
     game::Root& root = game::actions::mustHaveRoot(session);
     game::Game& g = game::actions::mustHaveGame(session);
@@ -1450,7 +1435,6 @@ client::si::IFCCChooseInterceptTarget(game::Session& session, ScriptSide& si, Re
     enum { AllShipFlag = 1 };
 
     // Do it
-    session.notifyListeners();
     game::actions::mustHaveShipList(session);
     game::actions::mustHaveRoot(session);
     game::actions::mustHaveGame(session);
@@ -1518,7 +1502,6 @@ client::si::IFCCEditCommands(game::Session& session, ScriptSide& si, RequestLink
     };
 
     args.checkArgumentCount(0);
-    session.notifyListeners();
     game::actions::mustHaveGame(session);
 
     si.postNewTask(link, new Task());
@@ -1552,9 +1535,9 @@ client::si::IFCCEditCurrentBuildOrder(game::Session& session, ScriptSide& si, Re
 
     // If this was a supported command, edit it
     if (pred.getVerb() == "BUILDSHIP") {
-        editBuildOrder(session, si, link, pred.getOrder(), "BuildShip");
+        editBuildOrder(si, link, pred.getOrder(), "BuildShip");
     } else if (pred.getVerb() == "ENQUEUESHIP") {
-        editBuildOrder(session, si, link, pred.getOrder(), "EnqueueShip");
+        editBuildOrder(si, link, pred.getOrder(), "EnqueueShip");
     } else {
         link.getProcess().setVariable("UI.RESULT", 0);
     }
@@ -1579,7 +1562,7 @@ client::si::IFCCEditLabelConfig(game::Session& /*session*/, ScriptSide& si, Requ
 
 // @since PCC2 2.40.12
 void
-client::si::IFCCEditNewBuildOrder(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+client::si::IFCCEditNewBuildOrder(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     // CC$EditNewBuildOrder 'verb'
     // Parse args
@@ -1591,7 +1574,7 @@ client::si::IFCCEditNewBuildOrder(game::Session& session, ScriptSide& si, Reques
     }
 
     // Common back-end
-    editBuildOrder(session, si, link, game::ShipBuildOrder(), verb);
+    editBuildOrder(si, link, game::ShipBuildOrder(), verb);
 }
 
 // @since PCC2 2.40.13
@@ -1728,7 +1711,6 @@ client::si::IFCCIonStormInfo(game::Session& session, ScriptSide& si, RequestLink
                 ctl.handleStateChange(link, out.getTarget());
             }
     };
-    session.notifyListeners();
     si.postNewTask(link, new Task());
 }
 
@@ -1750,7 +1732,6 @@ client::si::IFCCImperialStats(game::Session& session, ScriptSide& si, RequestLin
                 ctl.handleStateChange(link, out.getTarget());
             }
     };
-    session.notifyListeners();
     si.postNewTask(link, new Task());
 }
 
@@ -1782,7 +1763,6 @@ client::si::IFCCListScreenHistory(game::Session& session, ScriptSide& si, Reques
     };
 
     args.checkArgumentCount(0);
-    session.notifyListeners();
     game::actions::mustHaveGame(session);
 
     si.postNewTask(link, new Task(isCurrentScreenRegistered(session)));
@@ -1793,7 +1773,6 @@ void
 client::si::IFCCManageBuildQueue(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     args.checkArgumentCount(0);
-    session.notifyListeners();
     game::actions::mustHaveGame(session);
 
     // Focus on planet if possible (but don't fail if not)
@@ -1826,7 +1805,6 @@ void
 client::si::IFCCMinefieldInfo(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     // For now, nullary. It would make sense to give this guy a "minefield Id" parameter.
-    // FIXME: check whether we have minefields
     args.checkArgumentCount(0);
     game::actions::mustHaveGame(session);
 
@@ -1841,7 +1819,6 @@ client::si::IFCCMinefieldInfo(game::Session& session, ScriptSide& si, RequestLin
                 ctl.handleStateChange(link, out.getTarget());
             }
     };
-    session.notifyListeners();
     si.postNewTask(link, new Task());
 }
 
@@ -1868,7 +1845,6 @@ client::si::IFCCPopScreenHistory(game::Session& session, ScriptSide& si, Request
     };
 
     args.checkArgumentCount(0);
-    session.notifyListeners();
     game::actions::mustHaveGame(session);
 
     si.postNewTask(link, new Task(isCurrentScreenRegistered(session)));
@@ -1898,8 +1874,7 @@ client::si::IFCCProcessManager(game::Session& /*session*/, ScriptSide& si, Reque
         game::Reference m_ref;
     };
 
-    // FIXME: put a sensible value into game::Reference()
-    si.postNewTask(link, new Task(game::Reference()));
+    si.postNewTask(link, new Task(getCurrentShipOrPlanetReference(link.getProcess().getInvokingObject())));
 }
 
 /* @q CC$Reset x:Int, y:Int (Internal)
@@ -2125,7 +2100,6 @@ client::si::IFCCShipCostCalc(game::Session& session, ScriptSide& si, RequestLink
         planetId = 0;
     }
 
-    session.notifyListeners();
     si.postNewTask(link, new Task(hasBase, planetId));
 }
 
@@ -2388,7 +2362,6 @@ void
 client::si::IFCCUfoInfo(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     // For now, nullary. It would make sense to give this guy a "Ufo Id" parameter.
-    // FIXME: check whether we have Ufos
     args.checkArgumentCount(0);
     game::actions::mustHaveGame(session);
 
@@ -2403,7 +2376,6 @@ client::si::IFCCUfoInfo(game::Session& session, ScriptSide& si, RequestLink1 lin
                 ctl.handleStateChange(link, out.getTarget());
             }
     };
-    session.notifyListeners();
     si.postNewTask(link, new Task());
 }
 
@@ -2413,7 +2385,7 @@ client::si::IFCCUfoInfo(game::Session& session, ScriptSide& si, RequestLink1 lin
    and gives it %prefix as the prefix argument ({UI.Prefix}).
    @since PCC2 1.99.22, PCC2 2.40.10 */
 void
-client::si::IFCCUseKeymap(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+client::si::IFCCUseKeymap(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     // Read arguments
     args.checkArgumentCount(2);
@@ -2445,7 +2417,6 @@ client::si::IFCCUseKeymap(game::Session& session, ScriptSide& si, RequestLink1 l
         String_t m_keymapName;
         int m_prefix;
     };
-    session.notifyListeners();
     si.postNewTask(link, new Task(kv->getKeymap()->getName(), prefix));
 }
 
@@ -2459,7 +2430,6 @@ client::si::IFCCViewCombat(game::Session& session, ScriptSide& si, RequestLink1 
     static const char*const INDEX_VAR_NAME = "CCUI$CURRENTVCR";
 
     args.checkArgumentCount(0);
-    session.notifyListeners();
 
     // Verify that we have all components. If we don't, Adaptor/VcrDatabaseProxy will run in totally degraded mode,
     // so it's better to prevent this.
@@ -2587,7 +2557,6 @@ client::si::IFCCViewInbox(game::Session& session, ScriptSide& si, RequestLink1 l
 {
     // ex IFCCViewInbox
     args.checkArgumentCount(0);
-    session.notifyListeners();
     game::actions::mustHaveGame(session);
     si.postNewTask(link, new ViewMailboxTask(game::proxy::makeInboxAdaptor()));
 }
@@ -2598,7 +2567,6 @@ client::si::IFCCViewMessages(game::Session& session, ScriptSide& si, RequestLink
 {
     // ex IFCCViewMessages
     args.checkArgumentCount(0);
-    session.notifyListeners();
     game::actions::mustHaveGame(session);
 
     std::auto_ptr<game::proxy::InboxAdaptor_t> p;
@@ -2616,7 +2584,7 @@ client::si::IFCCViewMessages(game::Session& session, ScriptSide& si, RequestLink
 
 // @since PCC2 2.40.10
 void
-client::si::IFCCViewNotifications(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+client::si::IFCCViewNotifications(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     class Task : public UserTask {
      public:
@@ -2649,7 +2617,6 @@ client::si::IFCCViewNotifications(game::Session& session, ScriptSide& si, Reques
     };
 
     args.checkArgumentCount(0);
-    session.notifyListeners();
     si.postNewTask(link, new Task());
 }
 
@@ -2707,7 +2674,6 @@ client::si::IFUIBattleSimulator(game::Session& session, ScriptSide& si, RequestL
                 ctl.handleStateChange(link, out.getTarget());
             }
     };
-    session.notifyListeners();
     si.postNewTask(link, new Task());
 }
 
@@ -2814,7 +2780,6 @@ client::si::IFUIChooseTurn(game::Session& session, ScriptSide& si, RequestLink1 
 
     if (session.getGame().get() != 0) {
         // Regular task
-        session.notifyListeners();
         si.postNewTask(link, new Task(delta));
     } else {
         throw game::Exception(game::Exception::eUser);
@@ -2844,7 +2809,6 @@ client::si::IFUIEditAlliances(game::Session& session, ScriptSide& si, RequestLin
     // Preconditions
     args.checkArgumentCount(0);
     game::actions::mustHaveGame(session);
-    session.notifyListeners();                   // ex flushUI
 
     // Do it
     si.postNewTask(link, new Task());
@@ -2870,7 +2834,6 @@ client::si::IFUIEditTeams(game::Session& session, ScriptSide& si, RequestLink1 l
     // Preconditions
     args.checkArgumentCount(0);
     game::actions::mustHaveGame(session);
-    session.notifyListeners();                   // ex flushUI
 
     // Do it
     si.postNewTask(link, new Task());
@@ -3062,7 +3025,7 @@ client::si::IFUIGotoScreen(game::Session& session, ScriptSide& si, RequestLink1 
     }
 
     // If second argument is specified but empty, ignore command!
-    if (args.getNumArgs() > 0 && !interpreter::checkIntegerArg(obj, args.getNext(), 0, 10000)) { // FIXME: magic number
+    if (args.getNumArgs() > 0 && !interpreter::checkIntegerArg(obj, args.getNext(), 0, game::MAX_NUMBER)) {
         return;
     }
 
@@ -3125,7 +3088,7 @@ client::si::IFUIGotoScreen(game::Session& session, ScriptSide& si, RequestLink1 
 
    @since PCC2 1.99.15, PCC 1.0.15, PCC2 2.40.6 */
 void
-client::si::IFUIHelp(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+client::si::IFUIHelp(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     // ex IFUIHelp
     // ex userint.pas:UserInt_UI_Help
@@ -3149,7 +3112,6 @@ client::si::IFUIHelp(game::Session& session, ScriptSide& si, RequestLink1 link, 
      private:
         String_t m_pageName;
     };
-    session.notifyListeners();
     si.postNewTask(link, new Task(pageName));
 }
 
@@ -3188,7 +3150,7 @@ client::si::IFUIHelp(game::Session& session, ScriptSide& si, RequestLink1 link, 
   In text mode, this command makes a simple input line using the %prompt only.
   @since PCC 1.0.9, PCC2 1.99.9, PCC2 2.40 */
 void
-client::si::IFUIInput(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+client::si::IFUIInput(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     // ex IFUIInput, globint.pas:Global_UI_Input
     /* UI.Input <prompt>[, <title>, <maxChars>, <flags>, <default>] */
@@ -3294,7 +3256,6 @@ client::si::IFUIInput(game::Session& session, ScriptSide& si, RequestLink1 link,
         int32_t m_flags;
         int32_t m_width;
     };
-    session.notifyListeners();
     si.postNewTask(link, new Task(prompt, title, defaultText, maxChars, flags, width));
 }
 
@@ -3323,7 +3284,7 @@ client::si::IFUIInput(game::Session& session, ScriptSide& si, RequestLink1 link,
 
    @since PCC2 2.40.12 */
 void
-client::si::IFUIInputCommand(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+client::si::IFUIInputCommand(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     args.checkArgumentCount(1, 5);
 
@@ -3381,7 +3342,6 @@ client::si::IFUIInputCommand(game::Session& session, ScriptSide& si, RequestLink
         String_t m_defaultText;
         String_t m_helpId;
     };
-    session.notifyListeners();
     si.postNewTask(link, new Task(prompt, title, flags, defaultText, helpId));
 }
 
@@ -3535,8 +3495,6 @@ client::si::IFUIInputFCode(game::Session& session, ScriptSide& si, RequestLink1 
         std::auto_ptr<game::spec::FriendlyCodeList::Infos_t> m_list;
         String_t m_current;
     };
-    session.notifyListeners();
-    // FIXME: if (exc.checkForBreak()) return;
     si.postNewTask(link, new Task(list, current));
 }
 
@@ -3565,7 +3523,7 @@ client::si::IFUIInputFCode(game::Session& session, ScriptSide& si, RequestLink1 
 
    @since PCC 1.1.16, PCC2 1.99.9, PCC2 2.40.6 */
 void
-client::si::IFUIInputNumber(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+client::si::IFUIInputNumber(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     // ex IFUIInputNumber
     // ex userint.pas:UserInt_UI_InputNumber
@@ -3633,8 +3591,6 @@ client::si::IFUIInputNumber(game::Session& session, ScriptSide& si, RequestLink1
         String_t m_help;
         String_t m_prompt;
     };
-    session.notifyListeners();
-    // FIXME: if (exc.checkForBreak()) return;
     si.postNewTask(link, new Task(title, min, max, current, help, prompt));
 }
 
@@ -3672,7 +3628,6 @@ client::si::IFUIKeymapInfo(game::Session& session, ScriptSide& si, RequestLink1 
     }
 
     if (!keymapName.empty()) {
-        session.notifyListeners();
         si.postNewTask(link, new Task(keymapName));
     }
 }
@@ -3761,7 +3716,6 @@ client::si::IFUIListFleets(game::Session& session, ScriptSide& si, RequestLink1 
         link.getProcess().setVariable("UI.RESULT", &v);
     } else {
         // Multiple: do dialog
-        session.notifyListeners();
         si.postNewTask(link, new Task(list, ok, heading));
     }
 }
@@ -3857,7 +3811,6 @@ client::si::IFUIListShipPrediction(game::Session& session, ScriptSide& si, Reque
         String_t m_title;
     };
 
-    session.notifyListeners();
     si.postNewTask(link, new Task(game::map::Point(x, y), fromShip, ok, heading));
 }
 
@@ -3976,7 +3929,6 @@ client::si::IFUIListShips(game::Session& session, ScriptSide& si, RequestLink1 l
         String_t m_title;
     };
 
-    session.notifyListeners();
     si.postNewTask(link, new Task(game::map::Point(x, y), flags, except, ok, heading));
 }
 
@@ -4049,9 +4001,6 @@ client::si::IFUIMessage(game::Session& session, ScriptSide& si, RequestLink1 lin
                 std::auto_ptr<afl::data::Value> result;
                 if (id != 0) {
                     // ...only if we actually got some buttons
-                    // FIXME: replacement for flushUI, checkForBreak()?
-                    //     flushUI();
-                    //     if (exc.checkForBreak())
                     int n = dlg.run();
                     result.reset(interpreter::makeIntegerValue(n));
                 }
@@ -4065,7 +4014,6 @@ client::si::IFUIMessage(game::Session& session, ScriptSide& si, RequestLink1 lin
         String_t m_heading;
         String_t m_buttons;
     };
-    session.notifyListeners();
     si.postNewTask(link, new Task(pContent, title, afl::string::strTrim(buttons)));
 }
 
@@ -4077,7 +4025,7 @@ client::si::IFUIMessage(game::Session& session, ScriptSide& si, RequestLink1 lin
    For example, this command is used to report changes of the current selection layer.
    @since PCC2 1.99.10, PCC2 2.40.10 */
 void
-client::si::IFUIOverlayMessage(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+client::si::IFUIOverlayMessage(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     // ex IFUIOverlayMessage
     args.checkArgumentCount(1);
@@ -4097,7 +4045,6 @@ client::si::IFUIOverlayMessage(game::Session& session, ScriptSide& si, RequestLi
      private:
         String_t m_message;
     };
-    session.notifyListeners();
     si.postNewTask(link, new Task(msg));
 }
 
@@ -4135,7 +4082,6 @@ client::si::IFUIPlanetInfo(game::Session& session, ScriptSide& si, RequestLink1 
      private:
         game::Id_t m_id;
     };
-    session.notifyListeners();
     si.postNewTask(link, new Task(pid));
 }
 
@@ -4193,7 +4139,6 @@ client::si::IFUISelectionManager(game::Session& session, ScriptSide& si, Request
                 ctl.handleStateChange(link, out.getTarget());
             }
     };
-    session.notifyListeners();
     si.postNewTask(link, new Task());
 }
 
@@ -4285,7 +4230,6 @@ client::si::IFUISearch(game::Session& session, ScriptSide& si, RequestLink1 link
         game::Reference m_currentObject;
         bool m_immediate;
     };
-    session.notifyListeners();
     si.postNewTask(link, new Task(q, getCurrentShipOrPlanetReference(link.getProcess().getCurrentObject()), immediate));
 }
 
@@ -4293,7 +4237,7 @@ client::si::IFUISearch(game::Session& session, ScriptSide& si, RequestLink1 link
    Displays the score history.
    @since PCC2 2.40.10 */
 void
-client::si::IFUIShowScores(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+client::si::IFUIShowScores(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     args.checkArgumentCount(0);
 
@@ -4306,7 +4250,6 @@ client::si::IFUIShowScores(game::Session& session, ScriptSide& si, RequestLink1 
                 ui.continueProcess(link);
             }
     };
-    session.notifyListeners();
     si.postNewTask(link, new Task());
 }
 
@@ -4319,7 +4262,7 @@ client::si::IFUIShowScores(game::Session& session, ScriptSide& si, RequestLink1 
    In console mode, this function does nothing.
    @since PCC 1.0.13, PCC2 1.99.9, PCC2 2.40.1 */
 void
-client::si::IFUIUpdate(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+client::si::IFUIUpdate(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     // ex IFUIUpdate, globint.pas:Global_UI_Update
     /* UI.Update [<forceFullRedrawFlag>] */
@@ -4332,11 +4275,9 @@ client::si::IFUIUpdate(game::Session& session, ScriptSide& si, RequestLink1 link
 
     if (mode >= 0) {
         // We need to do two things for redraw:
-        // - notifyListeners() to flush out all pending signalisations.
+        // - notifyListeners() to flush out all pending signalisations (implicit in postNewTask now).
         //   This is enough to redraw components implemented in C++, directly sitting on some signal.
         //   Those will post their updates directly into the UserSide.
-        session.notifyListeners();
-
         // - briefly suspend the currently-running process.
         //   This will give room for components implemented in CCScript to update,
         //   which are triggered by notifyListeners() on the ScriptSide.

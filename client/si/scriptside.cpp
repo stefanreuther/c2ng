@@ -114,6 +114,9 @@ client::si::ScriptSide::postNewTask(RequestLink1 link, UserTask* t)
         RequestLink2 m_link;
     };
 
+    // Notify listeners to keep UI up-to-date
+    m_session.notifyListeners();
+
     // Post request
     std::auto_ptr<UserTask> tt(t);
     postNewInteraction(new Proxy(tt, link));
