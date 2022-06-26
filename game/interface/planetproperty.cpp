@@ -161,6 +161,12 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
     // FIXME: check lifetime issues. If this gives out an array property, that one must keep config/shipList alive.
     int32_t n;
     switch (ipp) {
+     case ippBaseDefenseSpeed:
+        /* @q Defense.Base.Speed:Int (Planet Property)
+           Auto-build speed for starbase defense.
+           @assignable
+           @since PCC2 2.40.13, PCC2 2.0.14 */
+        return makeIntegerValue(pl.getAutobuildSpeed(BaseDefenseBuilding));
      case ippBaseDefenseWanted:
         /* @q Defense.Base.Want:Int (Planet Property)
            Auto-build goal for starbase defense.
@@ -253,6 +259,12 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
         /* @q Defense.Max:Int (Planet Property)
            Maximum number of planetary defense posts. */
         return makeOptionalIntegerValue(getMaxBuildings(pl, DefenseBuilding, root->hostConfiguration()));
+     case ippDefenseSpeed:
+        /* @q Defense.Speed:Int (Planet Property)
+           Auto-build speed for defense posts.
+           @assignable
+           @since PCC2 2.40.13, PCC2 2.0.14 */
+        return makeIntegerValue(pl.getAutobuildSpeed(DefenseBuilding));
      case ippDefenseWanted:
         /* @q Defense.Want:Int (Planet Property)
            Auto-build goal for defense posts.
@@ -288,6 +300,12 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
         /* @q Factories.Max:Int (Planet Property)
            Maximum number of factories on planet. */
         return makeOptionalIntegerValue(getMaxBuildings(pl, FactoryBuilding, root->hostConfiguration()));
+     case ippFactoriesSpeed:
+        /* @q Factories.Speed:Int (Planet Property)
+           Auto-build speed for factories.
+           @assignable
+           @since PCC2 2.40.13, PCC2 2.0.14 */
+        return makeIntegerValue(pl.getAutobuildSpeed(FactoryBuilding));
      case ippFactoriesWanted:
         /* @q Factories.Want:Int (Planet Property)
            Auto-build goal for factories.
@@ -436,6 +454,12 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
            Auto-build goal for mineral mines.
            @assignable */
         return makeIntegerValue(pl.getAutobuildGoal(MineBuilding));
+     case ippMinesSpeed:
+        /* @q Mines.Speed:Int (Planet Property)
+           Auto-build speed for mineral mines.
+           @assignable
+           @since PCC2 2.40.13, PCC2 2.0.14 */
+        return makeIntegerValue(pl.getAutobuildSpeed(MineBuilding));
      case ippMoney:
         /* @q Money:Int (Planet Property)
            Money (megacredits) on planet. */
@@ -626,29 +650,52 @@ game::interface::setPlanetProperty(game::map::Planet& pl, PlanetProperty ipp, co
 {
     // ex int/if/planetif.h:setPlanetProperty
     // We cannot assign to anything other than auto-build goals on non-played planets
-    if (!pl.isPlayable(pl.Playable) && (ipp != ippMinesWanted && ipp != ippFactoriesWanted && ipp != ippDefenseWanted && ipp != ippBaseDefenseWanted)) {
+    if (!pl.isPlayable(pl.Playable)
+        && (ipp != ippMinesWanted && ipp != ippFactoriesWanted && ipp != ippDefenseWanted && ipp != ippBaseDefenseWanted
+            && ipp != ippMinesSpeed && ipp != ippFactoriesSpeed && ipp != ippDefenseSpeed && ipp != ippBaseDefenseSpeed))
+    {
         throw Error::notAssignable();
     }
 
     int32_t iv;
     switch (ipp) {
+     case ippMinesSpeed:
+        if (checkIntegerArg(iv, value, 0, MAX_AUTOBUILD_SPEED)) {
+            pl.setAutobuildSpeed(MineBuilding, iv);
+        }
+        break;
      case ippMinesWanted:
-        if (checkIntegerArg(iv, value, 0, 1000)) {
+        if (checkIntegerArg(iv, value, 0, MAX_AUTOBUILD_GOAL)) {
             pl.setAutobuildGoal(MineBuilding, iv);
         }
         break;
+     case ippFactoriesSpeed:
+        if (checkIntegerArg(iv, value, 0, MAX_AUTOBUILD_SPEED)) {
+            pl.setAutobuildSpeed(FactoryBuilding, iv);
+        }
+        break;
      case ippFactoriesWanted:
-        if (checkIntegerArg(iv, value, 0, 1000)) {
+        if (checkIntegerArg(iv, value, 0, MAX_AUTOBUILD_GOAL)) {
             pl.setAutobuildGoal(FactoryBuilding, iv);
         }
         break;
+     case ippDefenseSpeed:
+        if (checkIntegerArg(iv, value, 0, MAX_AUTOBUILD_SPEED)) {
+            pl.setAutobuildSpeed(DefenseBuilding, iv);
+        }
+        break;
      case ippDefenseWanted:
-        if (checkIntegerArg(iv, value, 0, 1000)) {
+        if (checkIntegerArg(iv, value, 0, MAX_AUTOBUILD_GOAL)) {
             pl.setAutobuildGoal(DefenseBuilding, iv);
         }
         break;
+     case ippBaseDefenseSpeed:
+        if (checkIntegerArg(iv, value, 0, MAX_AUTOBUILD_SPEED)) {
+            pl.setAutobuildSpeed(BaseDefenseBuilding, iv);
+        }
+        break;
      case ippBaseDefenseWanted:
-        if (checkIntegerArg(iv, value, 0, 1000)) {
+        if (checkIntegerArg(iv, value, 0, MAX_AUTOBUILD_GOAL)) {
             pl.setAutobuildGoal(BaseDefenseBuilding, iv);
         }
         break;

@@ -16,6 +16,7 @@ namespace game { namespace interface {
 
     enum PlanetProperty {
         ippBaseBuildFlag,
+        ippBaseDefenseSpeed,
         ippBaseDefenseWanted,
         ippBaseFlag,
         ippBaseStr,
@@ -31,6 +32,7 @@ namespace game { namespace interface {
         ippColonists,
         ippDefense,
         ippDefenseMax,
+        ippDefenseSpeed,
         ippDefenseWanted,
         ippDensityD,
         ippDensityM,
@@ -39,6 +41,7 @@ namespace game { namespace interface {
         ippFCode,
         ippFactories,
         ippFactoriesMax,
+        ippFactoriesSpeed,
         ippFactoriesWanted,
         ippGroundD,
         ippGroundM,
@@ -60,6 +63,7 @@ namespace game { namespace interface {
         ippMineralTime,
         ippMines,
         ippMinesMax,
+        ippMinesSpeed,
         ippMinesWanted,
         ippMoney,
         ippName,
