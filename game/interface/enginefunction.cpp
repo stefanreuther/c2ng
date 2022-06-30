@@ -4,7 +4,6 @@
 
 #include "game/interface/enginefunction.hpp"
 #include "game/interface/enginecontext.hpp"
-#include "interpreter/error.hpp"
 #include "interpreter/arguments.hpp"
 
 /* @q Engine(id:Int):Obj (Function, Context)
@@ -39,9 +38,9 @@ game::interface::EngineFunction::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::EngineFunction::set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
+game::interface::EngineFunction::set(interpreter::Arguments& args, afl::data::Value* value)
 {
-    throw interpreter::Error::notAssignable();
+    rejectSet(args, value);
 }
 
 // CallableValue:
@@ -82,7 +81,7 @@ game::interface::EngineFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::EngineFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::EngineFunction::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
-    throw interpreter::Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }

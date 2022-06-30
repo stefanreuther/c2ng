@@ -3,14 +3,11 @@
   */
 
 #include "game/interface/inboxfunction.hpp"
-#include "interpreter/error.hpp"
 #include "game/actions/preconditions.hpp"
 #include "game/interface/inboxcontext.hpp"
 #include "interpreter/arguments.hpp"
 #include "game/turn.hpp"
 #include "game/root.hpp"
-
-using interpreter::Error;
 
 /* @q InMsg(n:Int):Obj (Function, Context)
    Access incoming message.
@@ -54,9 +51,9 @@ game::interface::InboxFunction::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::InboxFunction::set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
+game::interface::InboxFunction::set(interpreter::Arguments& args, afl::data::Value* value)
 {
-    throw Error::notAssignable();
+    rejectSet(args, value);
 }
 
 // CallableValue:
@@ -98,9 +95,9 @@ game::interface::InboxFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::InboxFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::InboxFunction::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
-    throw Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }
 
 game::interface::InboxFunction*

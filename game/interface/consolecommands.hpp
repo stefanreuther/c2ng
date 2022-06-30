@@ -14,7 +14,7 @@
 
 namespace game { namespace interface {
 
-    void IFUIInput(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
+    void IFUIInput(game::Session& session, interpreter::Process& proc, interpreter::Arguments& args);
 
     /** Register console commands.
         Call this function only when operating in a console application.

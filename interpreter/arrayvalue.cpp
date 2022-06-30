@@ -55,7 +55,7 @@ interpreter::Context*
 interpreter::ArrayValue::makeFirstContext()
 {
     // ex IntArray::makeFirstContext()
-    throw Error::typeError(Error::ExpectIterable);
+    return rejectFirstContext();
 }
 
 // BaseValue:

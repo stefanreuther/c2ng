@@ -4,7 +4,6 @@
 
 #include "game/interface/notificationfunctions.hpp"
 #include "interpreter/arguments.hpp"
-#include "interpreter/error.hpp"
 #include "interpreter/values.hpp"
 #include "game/map/ship.hpp"
 #include "game/map/planet.hpp"
@@ -12,7 +11,6 @@
 #include "afl/string/format.hpp"
 
 using afl::string::Format;
-using interpreter::Error;
 
 /*
  *  CC$NotifyConfirmed() function
@@ -62,7 +60,7 @@ interpreter::Context*
 game::interface::NotifyConfirmedFunction::makeFirstContext()
 {
     // ex IntCCNotifyConfirmed::makeFirstContext
-    throw Error::typeError(Error::ExpectIterable);
+    return rejectFirstContext();
 }
 
 game::interface::NotifyConfirmedFunction*
@@ -81,10 +79,10 @@ game::interface::NotifyConfirmedFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::NotifyConfirmedFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::NotifyConfirmedFunction::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
     // ex IntCCNotifyConfirmed::store
-    throw Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }
 
 /*
@@ -95,7 +93,7 @@ game::interface::NotifyConfirmedFunction::store(interpreter::TagNode& /*out*/, a
    Back-end to {Notify} and {AddNotify}.
    @since PCC2 2.40.8 */
 void
-game::interface::IFCCNotify(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args)
+game::interface::IFCCNotify(game::Session& session, interpreter::Process& proc, interpreter::Arguments& args)
 {
     // ex IFCCNotify
     // ex ccexec.pas:GenerateNotifyMessage (Struc_CC_Notify, Struc_AddNotify)

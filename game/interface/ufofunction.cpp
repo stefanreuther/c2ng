@@ -45,9 +45,9 @@ game::interface::UfoFunction::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::UfoFunction::set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
+game::interface::UfoFunction::set(interpreter::Arguments& args, afl::data::Value* value)
 {
-    throw interpreter::Error::notAssignable();
+    rejectSet(args, value);
 }
 
 // CallableValue:
@@ -91,7 +91,7 @@ game::interface::UfoFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::UfoFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::UfoFunction::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
-    throw interpreter::Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }

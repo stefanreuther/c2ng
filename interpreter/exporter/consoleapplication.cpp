@@ -148,9 +148,9 @@ namespace {
         return "#<meta>";
     }
 
-    void MetaContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+    void MetaContext::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
     {
-        throw interpreter::Error::notSerializable();
+        rejectStore(out, aux, ctx);
     }
 
     void MetaContext::addProperty(const String_t& name, interpreter::TypeHint th)

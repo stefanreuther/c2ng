@@ -93,8 +93,6 @@
 #include "game/interface/richtextfunctions.hpp"
 #include "game/interface/richtextvalue.hpp"
 #include "game/interface/shiptaskpredictor.hpp"
-#include "game/interface/simplefunction.hpp"
-#include "game/interface/simpleprocedure.hpp"
 #include "game/interface/taskeditorcontext.hpp"
 #include "game/interface/vmfile.hpp"
 #include "game/map/chunnelmission.hpp"
@@ -123,6 +121,8 @@
 #include "game/turn.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/keymapvalue.hpp"
+#include "interpreter/simplefunction.hpp"
+#include "interpreter/simpleprocedure.hpp"
 #include "interpreter/values.hpp"
 #include "ui/defaultresourceprovider.hpp"
 #include "ui/dialogs/messagebox.hpp"
@@ -151,14 +151,14 @@ using game::Game;
 using game::Reference;
 using game::Root;
 using game::Turn;
-using game::interface::SimpleFunction;
-using game::interface::SimpleProcedure;
 using game::map::Planet;
 using game::map::Point;
 using game::map::Ship;
 using game::map::Universe;
 using game::spec::ShipList;
 using interpreter::Error;
+using interpreter::SimpleFunction;
+using interpreter::SimpleProcedure;
 
 namespace {
     const char*const LOG_NAME = "client.si";
@@ -4389,10 +4389,10 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("CC$POPSCREENHISTORY",   new ScriptProcedure(s, &si, IFCCPopScreenHistory));
                 s.world().setNewGlobalValue("CC$PROCESSMANAGER",     new ScriptProcedure(s, &si, IFCCProcessManager));
                 s.world().setNewGlobalValue("CC$RESET",              new ScriptProcedure(s, &si, IFCCReset));
-                s.world().setNewGlobalValue("CC$REMOTEGETCOLOR",     new SimpleFunction(s, IFCCRemoteGetColor));
-                s.world().setNewGlobalValue("CC$REMOTEGETQUESTION",  new SimpleFunction(s, IFCCRemoteGetQuestion));
-                s.world().setNewGlobalValue("CC$REMOTESET",          new SimpleProcedure(s, IFCCRemoteSet));
-                s.world().setNewGlobalValue("CC$REMOTETOGGLE",       new SimpleProcedure(s, IFCCRemoteToggle));
+                s.world().setNewGlobalValue("CC$REMOTEGETCOLOR",     new SimpleFunction<game::Session&>(s, IFCCRemoteGetColor));
+                s.world().setNewGlobalValue("CC$REMOTEGETQUESTION",  new SimpleFunction<game::Session&>(s, IFCCRemoteGetQuestion));
+                s.world().setNewGlobalValue("CC$REMOTESET",          new SimpleProcedure<game::Session&>(s, IFCCRemoteSet));
+                s.world().setNewGlobalValue("CC$REMOTETOGGLE",       new SimpleProcedure<game::Session&>(s, IFCCRemoteToggle));
                 s.world().setNewGlobalValue("CC$SELECTNEXTSHIP",     new ScriptProcedure(s, &si, IFCCSelectNextShip));
                 s.world().setNewGlobalValue("CC$SELLSUPPLIES",       new ScriptProcedure(s, &si, IFCCSellSupplies));
                 s.world().setNewGlobalValue("CC$SENDMESSAGE",        new ScriptProcedure(s, &si, IFCCSendMessage));

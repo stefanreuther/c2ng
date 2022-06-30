@@ -103,9 +103,9 @@ game::proxy::ObjectListExportAdaptor::Context::toString(bool /*readable*/) const
 }
 
 void
-game::proxy::ObjectListExportAdaptor::Context::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::proxy::ObjectListExportAdaptor::Context::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
-    throw interpreter::Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }
 
 interpreter::Context*

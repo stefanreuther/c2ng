@@ -27,8 +27,8 @@
 #include "interpreter/expr/node.hpp"
 #include "interpreter/expr/parser.hpp"
 #include "interpreter/opcode.hpp"
-#include "interpreter/simpleindexablevalue.hpp"
-#include "interpreter/simpleprocedurevalue.hpp"
+#include "interpreter/simplefunction.hpp"
+#include "interpreter/simpleprocedure.hpp"
 #include "interpreter/specialcommand.hpp"
 #include "interpreter/statementcompilationcontext.hpp"
 #include "interpreter/statementcompiler.hpp"
@@ -899,25 +899,27 @@ interpreter::registerFileFunctions(World& world)
     world.addNewSpecialCommand("SETSTR",  new SFSetStr());
     world.addNewSpecialCommand("SETWORD", new SFSetInt(2));
 
-    world.setNewGlobalValue("APPENDFILENAMEEXTENSION", new SimpleIndexableValue(world, IFAppendFileNameExtension, 0, 0));
-    world.setNewGlobalValue("CC$GET",           new SimpleIndexableValue(world, IFCCGet, 0, 0));
-    world.setNewGlobalValue("CC$INPUT",         new SimpleIndexableValue(world, IFCCInput, 0, 0));
-    world.setNewGlobalValue("CC$OPEN",          new SimpleIndexableValue(world, IFCCOpen, 0, 0));
-    world.setNewGlobalValue("CC$PRINT",         new SimpleIndexableValue(world, IFCCPrint, 0, 0));
-    world.setNewGlobalValue("CC$SETINT",        new SimpleIndexableValue(world, IFCCSetInt, 0, 0));
-    world.setNewGlobalValue("CC$SETSTR",        new SimpleIndexableValue(world, IFCCSetStr, 0, 0));
-    world.setNewGlobalValue("FPOS",             new SimpleIndexableValue(world, IFFPos, 0, 0));
-    world.setNewGlobalValue("FREEFILE",         new SimpleIndexableValue(world, IFFreeFile, 0, 0));
-    world.setNewGlobalValue("FSIZE",            new SimpleIndexableValue(world, IFFSize, 0, 0));
-    world.setNewGlobalValue("GETBYTE",          new SimpleIndexableValue(world, IFGetByte, 0, 0));
-    world.setNewGlobalValue("GETDIRECTORYNAME", new SimpleIndexableValue(world, IFGetDirectoryName, 0, 0));
-    world.setNewGlobalValue("GETFILENAME",      new SimpleIndexableValue(world, IFGetFileName, 0, 0));
-    world.setNewGlobalValue("GETLONG",          new SimpleIndexableValue(world, IFGetLong, 0, 0));
-    world.setNewGlobalValue("GETSTR",           new SimpleIndexableValue(world, IFGetStr, 0, 0));
-    world.setNewGlobalValue("GETWORD",          new SimpleIndexableValue(world, IFGetWord, 0, 0));
-    world.setNewGlobalValue("MAKEFILENAME",     new SimpleIndexableValue(world, IFMakeFileName, 0, 0));
+    typedef SimpleFunction<World&> FunctionValue_t;
 
-    world.setNewGlobalValue("CLOSE", new SimpleProcedureValue(world, IFClose));
-    world.setNewGlobalValue("PUT",   new SimpleProcedureValue(world, IFPut));
-    world.setNewGlobalValue("SEEK",  new SimpleProcedureValue(world, IFSeek));
+    world.setNewGlobalValue("APPENDFILENAMEEXTENSION", new FunctionValue_t(world, IFAppendFileNameExtension));
+    world.setNewGlobalValue("CC$GET",                  new FunctionValue_t(world, IFCCGet));
+    world.setNewGlobalValue("CC$INPUT",                new FunctionValue_t(world, IFCCInput));
+    world.setNewGlobalValue("CC$OPEN",                 new FunctionValue_t(world, IFCCOpen));
+    world.setNewGlobalValue("CC$PRINT",                new FunctionValue_t(world, IFCCPrint));
+    world.setNewGlobalValue("CC$SETINT",               new FunctionValue_t(world, IFCCSetInt));
+    world.setNewGlobalValue("CC$SETSTR",               new FunctionValue_t(world, IFCCSetStr));
+    world.setNewGlobalValue("FPOS",                    new FunctionValue_t(world, IFFPos));
+    world.setNewGlobalValue("FREEFILE",                new FunctionValue_t(world, IFFreeFile));
+    world.setNewGlobalValue("FSIZE",                   new FunctionValue_t(world, IFFSize));
+    world.setNewGlobalValue("GETBYTE",                 new FunctionValue_t(world, IFGetByte));
+    world.setNewGlobalValue("GETDIRECTORYNAME",        new FunctionValue_t(world, IFGetDirectoryName));
+    world.setNewGlobalValue("GETFILENAME",             new FunctionValue_t(world, IFGetFileName));
+    world.setNewGlobalValue("GETLONG",                 new FunctionValue_t(world, IFGetLong));
+    world.setNewGlobalValue("GETSTR",                  new FunctionValue_t(world, IFGetStr));
+    world.setNewGlobalValue("GETWORD",                 new FunctionValue_t(world, IFGetWord));
+    world.setNewGlobalValue("MAKEFILENAME",            new FunctionValue_t(world, IFMakeFileName));
+
+    world.setNewGlobalValue("CLOSE", new SimpleProcedure<World&>(world, IFClose));
+    world.setNewGlobalValue("PUT",   new SimpleProcedure<World&>(world, IFPut));
+    world.setNewGlobalValue("SEEK",  new SimpleProcedure<World&>(world, IFSeek));
 }

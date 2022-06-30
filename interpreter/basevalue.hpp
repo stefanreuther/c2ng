@@ -31,13 +31,21 @@ namespace interpreter {
         /** Store data for serialization.
             \param out [out] Tag node
             \param aux [out] Auxiliary data
-            \param ctx [in,optional] Context to save structured data.
+            \param ctx [in] Context to save structured data.
                    Serialization may fail if this object represents structured data and no context is given.
             \throw Error if object cannot be serialized */
         virtual void store(TagNode& out, afl::io::DataSink& aux, SaveContext& ctx) const = 0;
 
         // afl::data::Value:
         virtual void visit(afl::data::Visitor& visitor) const;
+
+     protected:
+        /** Default implementation for store().
+            Will reject by throwing an appropriate error.
+            \param out [out] Tag node; forward from store()
+            \param aux [out] Auxiliary data; forward from store()
+            \param ctx [in] Context to save structured data; forward from store() */
+        void rejectStore(TagNode& out, afl::io::DataSink& aux, SaveContext& ctx) const;
     };
 
 }

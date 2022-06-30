@@ -3,7 +3,6 @@
   */
 
 #include "game/interface/friendlycodefunction.hpp"
-#include "interpreter/error.hpp"
 #include "interpreter/values.hpp"
 #include "interpreter/arguments.hpp"
 
@@ -47,9 +46,9 @@ game::interface::FriendlyCodeFunction::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::FriendlyCodeFunction::set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
+game::interface::FriendlyCodeFunction::set(interpreter::Arguments& args, afl::data::Value* value)
 {
-    throw interpreter::Error::notAssignable();
+    rejectSet(args, value);
 }
 
 // CallableValue:
@@ -85,7 +84,7 @@ game::interface::FriendlyCodeFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::FriendlyCodeFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::FriendlyCodeFunction::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
-    throw interpreter::Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }

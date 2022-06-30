@@ -6,7 +6,6 @@
 #include "interpreter/nametable.hpp"
 #include "game/interface/vcrsideproperty.hpp"
 #include "interpreter/typehint.hpp"
-#include "interpreter/error.hpp"
 #include "interpreter/values.hpp"
 #include "game/vcr/battle.hpp"
 #include "game/vcr/database.hpp"
@@ -167,10 +166,10 @@ game::interface::VcrSideContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::VcrSideContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::VcrSideContext::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
     // ex IntVcrSideContext::store
-    throw interpreter::Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }
 
 game::vcr::Battle*

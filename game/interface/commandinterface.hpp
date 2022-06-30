@@ -10,11 +10,11 @@
 
 namespace game { namespace interface {
 
-    void IFAddCommand(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
-    void IFDeleteCommand(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
+    void IFAddCommand(game::Session& session, interpreter::Process& proc, interpreter::Arguments& args);
+    void IFDeleteCommand(game::Session& session, interpreter::Process& proc, interpreter::Arguments& args);
 
     afl::data::Value* IFGetCommand(game::Session& session, interpreter::Arguments& args);
-    
+
 } }
 
 #endif

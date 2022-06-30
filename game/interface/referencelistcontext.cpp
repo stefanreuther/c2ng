@@ -201,8 +201,8 @@ class game::interface::ReferenceListContext::ObjectArrayValue : public interpret
     // BaseValue:
     virtual String_t toString(bool /*readable*/) const
         { return "#<array>"; }
-    virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
-        { throw interpreter::Error::notSerializable(); }
+    virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
+        { rejectStore(out, aux, ctx); }
 
  private:
     afl::base::Ref<Data> m_list;
@@ -270,9 +270,9 @@ game::interface::ReferenceListContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::ReferenceListContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::ReferenceListContext::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
-    throw interpreter::Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }
 
 const game::ref::List&

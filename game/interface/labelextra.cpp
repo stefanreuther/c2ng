@@ -8,12 +8,12 @@
 #include "game/game.hpp"
 #include "game/interface/planetfunction.hpp"
 #include "game/interface/shipfunction.hpp"
-#include "game/interface/simpleprocedure.hpp"
 #include "game/map/anyplanettype.hpp"
 #include "game/map/anyshiptype.hpp"
 #include "game/map/universe.hpp"
 #include "game/turn.hpp"
 #include "interpreter/arguments.hpp"
+#include "interpreter/simpleprocedure.hpp"
 #include "interpreter/values.hpp"
 
 using afl::string::Format;
@@ -23,6 +23,7 @@ using game::interface::LabelVector;
 using game::map::Universe;
 using interpreter::Process;
 using interpreter::ProcessList;
+using interpreter::SimpleProcedure;
 
 namespace {
     // Logger name
@@ -92,7 +93,7 @@ namespace {
     }
 
     /* updateFunction for ships */
-    void IFCCSetShipLabel(Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+    void IFCCSetShipLabel(game::Session& session, Process& /*proc*/, interpreter::Arguments& args)
     {
         LabelExtra* x = LabelExtra::get(session);
         if (x == 0) {
@@ -102,7 +103,7 @@ namespace {
     }
 
     /* updateFunction for planets */
-    void IFCCSetPlanetLabel(Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+    void IFCCSetPlanetLabel(game::Session& session, Process& /*proc*/, interpreter::Arguments& args)
     {
         LabelExtra* x = LabelExtra::get(session);
         if (x == 0) {
@@ -452,8 +453,8 @@ game::interface::LabelExtra::runUpdater()
 
                 // Build code
                 interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
-                int n = m_shipLabels.compileUpdater(*bco, ShipFunction(m_session),  SimpleProcedure(m_session, IFCCSetShipLabel));
-                n += m_planetLabels.compileUpdater(*bco, PlanetFunction(m_session), SimpleProcedure(m_session, IFCCSetPlanetLabel));
+                int n = m_shipLabels.compileUpdater(*bco, ShipFunction(m_session),  SimpleProcedure<Session&>(m_session, IFCCSetShipLabel));
+                n += m_planetLabels.compileUpdater(*bco, PlanetFunction(m_session), SimpleProcedure<Session&>(m_session, IFCCSetPlanetLabel));
                 m_session.log().write(LogListener::Debug, LOG_NAME, Format("updating %d objects", n));
                 assert(!m_shipLabels.hasDirtyLabels());
                 assert(!m_planetLabels.hasDirtyLabels());

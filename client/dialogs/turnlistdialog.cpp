@@ -8,13 +8,13 @@
 #include "game/game.hpp"
 #include "game/historyturn.hpp"
 #include "game/interface/globalcommands.hpp"
-#include "game/interface/simpleprocedure.hpp"
 #include "game/root.hpp"
 #include "game/turn.hpp"
 #include "game/turnloader.hpp"
 #include "interpreter/bytecodeobject.hpp"
 #include "interpreter/opcode.hpp"
 #include "interpreter/process.hpp"
+#include "interpreter/simpleprocedure.hpp"
 #include "interpreter/values.hpp"
 #include "ui/dialogs/messagebox.hpp"
 #include "ui/group.hpp"
@@ -222,7 +222,7 @@ namespace {
                 interpreter::Process& proc = s.processList().create(s.world(), "<LoadRequest>");
                 interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
                 proc.pushNewValue(interpreter::makeIntegerValue(m_turnNumber));
-                proc.pushNewValue(new game::interface::SimpleProcedure(s, game::interface::IFHistoryLoadTurn));
+                proc.pushNewValue(new interpreter::SimpleProcedure<game::Session&>(s, game::interface::IFHistoryLoadTurn));
                 bco->addInstruction(interpreter::Opcode::maIndirect, interpreter::Opcode::miIMCall, 1);
                 proc.pushFrame(bco, false);
                 proc.setNewFinalizer(new Finalizer(m_response, s, m_turnNumber));

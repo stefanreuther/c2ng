@@ -14,7 +14,7 @@ namespace game { namespace interface {
     afl::data::Value* IFCCSelReadContent(game::Session& session, interpreter::Arguments& args);
     afl::data::Value* IFCCSelGetQuestion(game::Session& session, interpreter::Arguments& args);
 
-    void IFSelectionSave(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
+    void IFSelectionSave(game::Session& session, interpreter::Process& proc, interpreter::Arguments& args);
 
 } }
 

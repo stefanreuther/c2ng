@@ -5,7 +5,6 @@
 
 #include "interpreter/subroutinevalue.hpp"
 #include "interpreter/process.hpp"
-#include "interpreter/error.hpp"
 #include "interpreter/savecontext.hpp"
 
 
@@ -50,7 +49,7 @@ interpreter::Context*
 interpreter::SubroutineValue::makeFirstContext()
 {
     // ex IntSubroutineValue::makeFirstContext
-    throw Error::typeError(Error::ExpectIterable);
+    return rejectFirstContext();
 }
 
 String_t

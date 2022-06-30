@@ -1,9 +1,9 @@
 /**
   *  \file interpreter/procedurevalue.cpp
+  *  \brief Class interpreter::ProcedureValue
   */
 
 #include "interpreter/procedurevalue.hpp"
-#include "interpreter/error.hpp"
 #include "interpreter/process.hpp"
 
 // CallableValue:
@@ -32,7 +32,7 @@ interpreter::ProcedureValue::getDimension(int32_t /*which*/) const
 interpreter::Context*
 interpreter::ProcedureValue::makeFirstContext()
 {
-    throw Error::typeError(Error::ExpectIterable);
+    return rejectFirstContext();
 }
 
 // BaseValue:
@@ -43,7 +43,7 @@ interpreter::ProcedureValue::toString(bool /*readable*/) const
 }
 
 void
-interpreter::ProcedureValue::store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, SaveContext& /*ctx*/) const
+interpreter::ProcedureValue::store(TagNode& out, afl::io::DataSink& aux, SaveContext& ctx) const
 {
-    throw Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }

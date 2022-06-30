@@ -23,7 +23,7 @@ server::play::MainCommandHandler::processCommand(const String_t& cmd, interprete
     // Commands
     if (cmd == "sendmessage") {
         // Sending a message invalidates main because that contains the number of messages
-        game::interface::IFSendMessage(process, m_session, args);
+        game::interface::IFSendMessage(m_session, process, args);
         objs.addNew(new MainPacker(m_session));
         objs.addNew(new OutMessageIndexPacker(m_session));
     } else {

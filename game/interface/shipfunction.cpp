@@ -7,7 +7,6 @@
 #include "game/turn.hpp"
 #include "game/game.hpp"
 #include "game/interface/shipcontext.hpp"
-#include "interpreter/error.hpp"
 #include "game/map/anyshiptype.hpp"
 
 game::interface::ShipFunction::ShipFunction(Session& session)
@@ -43,10 +42,9 @@ game::interface::ShipFunction::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::ShipFunction::set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
+game::interface::ShipFunction::set(interpreter::Arguments& args, afl::data::Value* value)
 {
-    // ex IntSimpleIndexableValue::set
-    throw interpreter::Error::notAssignable();
+    rejectSet(args, value);
 }
 
 
@@ -99,7 +97,7 @@ game::interface::ShipFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::ShipFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::ShipFunction::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
-    throw interpreter::Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }

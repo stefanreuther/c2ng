@@ -21,10 +21,10 @@ game::interface::RichTextValue::toString(bool /*readable*/) const
 }
 
 void
-game::interface::RichTextValue::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::RichTextValue::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
     // ex IntRichTextValue::store
-    throw interpreter::Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }
 
 // Value:

@@ -6,6 +6,7 @@
 #include "interpreter/callablevalue.hpp"
 
 #include "t_interpreter.hpp"
+#include "interpreter/error.hpp"
 
 /** Interface test. */
 void
@@ -20,7 +21,7 @@ TestInterpreterCallableValue::testInterface()
         virtual int32_t getDimension(int32_t /*which*/) const
             { return 0; }
         virtual interpreter::Context* makeFirstContext()
-            { return 0; }
+            { return rejectFirstContext(); }
         virtual interpreter::CallableValue* clone() const
             { return 0; }
         virtual String_t toString(bool /*readable*/) const
@@ -29,5 +30,8 @@ TestInterpreterCallableValue::testInterface()
             { }
     };
     Tester t;
+
+    // Test makeFirstContext() / rejectFirstContext():
+    TS_ASSERT_THROWS(t.makeFirstContext(), interpreter::Error);
 }
 

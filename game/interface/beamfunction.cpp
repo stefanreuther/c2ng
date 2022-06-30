@@ -38,9 +38,9 @@ game::interface::BeamFunction::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::BeamFunction::set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
+game::interface::BeamFunction::set(interpreter::Arguments& args, afl::data::Value* value)
 {
-    throw interpreter::Error::notAssignable();
+    rejectSet(args, value);
 }
 
 // CallableValue:
@@ -81,7 +81,7 @@ game::interface::BeamFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::BeamFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::BeamFunction::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
-    throw interpreter::Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }

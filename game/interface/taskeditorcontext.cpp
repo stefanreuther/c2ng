@@ -163,13 +163,13 @@ namespace {
         virtual int32_t getDimension(int32_t which) const
             { return which == 0 ? 1 : limitRange(m_edit->getNumInstructions()); }
         virtual interpreter::Context* makeFirstContext()
-            { throw Error::typeError(Error::ExpectIterable); }
+            { return rejectFirstContext(); }
 
         // BaseValue:
         virtual String_t toString(bool /*readable*/) const
             { return "#<array>"; }
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
-            { throw Error::notSerializable(); }
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
+            { rejectStore(out, aux, ctx); }
 
         // Value:
         virtual TaskEditorLinesProperty* clone() const
@@ -596,9 +596,9 @@ game::interface::TaskEditorContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::TaskEditorContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::TaskEditorContext::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
-    throw interpreter::Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }
 
 game::interface::TaskEditorContext*

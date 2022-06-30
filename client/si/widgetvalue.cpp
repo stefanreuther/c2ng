@@ -3,7 +3,6 @@
   */
 
 #include "client/si/widgetvalue.hpp"
-#include "interpreter/error.hpp"
 
 client::si::WidgetValue::WidgetValue(const WidgetReference& ref)
     : m_ref(ref)
@@ -22,9 +21,9 @@ client::si::WidgetValue::toString(bool /*readable*/) const
 }
 
 void
-client::si::WidgetValue::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+client::si::WidgetValue::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
-    throw interpreter::Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }
 
 const client::si::WidgetReference&

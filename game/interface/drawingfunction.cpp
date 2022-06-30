@@ -18,10 +18,9 @@ game::interface::DrawingFunction::get(interpreter::Arguments& /*args*/)
 }
 
 void
-game::interface::DrawingFunction::set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
+game::interface::DrawingFunction::set(interpreter::Arguments& args, afl::data::Value* value)
 {
-    // ex IntSimpleIndexableValue::set
-    throw interpreter::Error::notAssignable();
+    rejectSet(args, value);
 }
 
 // CallableValue:
@@ -51,7 +50,7 @@ game::interface::DrawingFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::DrawingFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::DrawingFunction::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
-    throw interpreter::Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }

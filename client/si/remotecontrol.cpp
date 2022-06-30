@@ -138,7 +138,7 @@ client::si::IFCCRemoteGetQuestion(game::Session& session, interpreter::Arguments
 /* @q CC$RemoteToggle shipId:Int (Internal)
    @since PCC2 2.40.9 */
 void
-client::si::IFCCRemoteToggle(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+client::si::IFCCRemoteToggle(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
     toggleRemoteControl(session, getShipId(args));
 }
@@ -146,7 +146,7 @@ client::si::IFCCRemoteToggle(interpreter::Process& /*proc*/, game::Session& sess
 /* @q CC$RemoteSet shipId:Int, verb:Str (Internal)
    @since PCC2 2.40.13 */
 void
-client::si::IFCCRemoteSet(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+client::si::IFCCRemoteSet(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
     args.checkArgumentCount(2);
 

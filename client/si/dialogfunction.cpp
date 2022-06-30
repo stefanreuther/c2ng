@@ -19,19 +19,6 @@ client::si::DialogFunction::DialogFunction(game::Session& session, ScriptSide* p
       m_pScriptSide(pScriptSide)
 { }
 
-// BaseValue:
-String_t
-client::si::DialogFunction::toString(bool /*readable*/) const
-{
-    return "#<function>";
-}
-
-void
-client::si::DialogFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
-{
-    throw interpreter::Error::notSerializable();
-}
-
 // IndexableValue:
 afl::data::Value*
 client::si::DialogFunction::get(interpreter::Arguments& args)
@@ -80,23 +67,6 @@ client::si::DialogFunction::get(interpreter::Arguments& args)
     } else {
         return 0;
     }
-}
-void
-client::si::DialogFunction::set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
-{
-    throw interpreter::Error::notAssignable();
-}
-
-int32_t
-client::si::DialogFunction::getDimension(int32_t /*which*/) const
-{
-    return 0;
-}
-
-interpreter::Context*
-client::si::DialogFunction::makeFirstContext()
-{
-    throw interpreter::Error::typeError(interpreter::Error::ExpectIterable);
 }
 
 client::si::DialogFunction*

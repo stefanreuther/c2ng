@@ -57,7 +57,7 @@ TestClientSiScriptProcedure::testIt()
     theString = "";
     afl::data::Segment seg;
     seg.pushBackNew(new afl::data::StringValue("hi"));
-    testee.call(proc, seg, false);
+    static_cast<interpreter::CallableValue&>(testee).call(proc, seg, false);
     TS_ASSERT_EQUALS(theString, "pn=testIt, argc=1, arg1='hi'");
 }
 
@@ -90,6 +90,6 @@ TestClientSiScriptProcedure::testNull()
     theString = "nope";
     afl::data::Segment seg;
     seg.pushBackNew(new afl::data::StringValue("hi"));
-    TS_ASSERT_THROWS(testee.call(proc, seg, false), interpreter::Error);    // "Command not valid"
+    TS_ASSERT_THROWS(static_cast<interpreter::CallableValue&>(testee).call(proc, seg, false), interpreter::Error);    // "Command not valid"
     TS_ASSERT_EQUALS(theString, "nope");
 }

@@ -25,3 +25,9 @@ interpreter::IndexableValue::call(Process& proc, afl::data::Segment& args, bool 
         delete v;
     }
 }
+
+void
+interpreter::IndexableValue::rejectSet(Arguments& /*args*/, afl::data::Value* /*value*/) const
+{
+    throw Error::notAssignable();
+}

@@ -85,8 +85,8 @@ namespace {
         // BaseValue:
         virtual String_t toString(bool /*readable*/) const
             { return "#<hashIterator>"; }
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
-            { throw interpreter::Error::notSerializable(); }
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
+            { rejectStore(out, aux, ctx); }
 
         // Value:
         HashContext* clone() const

@@ -3,7 +3,6 @@
   */
 
 #include "game/interface/inboxsubsetvalue.hpp"
-#include "interpreter/error.hpp"
 #include "game/interface/inboxcontext.hpp"
 #include "interpreter/arguments.hpp"
 
@@ -88,9 +87,9 @@ InboxSubsetContext::toString(bool /*readable*/) const
 }
 
 void
-InboxSubsetContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+InboxSubsetContext::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
-    throw interpreter::Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }
 
 interpreter::Context&
@@ -134,10 +133,10 @@ game::interface::InboxSubsetValue::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::InboxSubsetValue::set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
+game::interface::InboxSubsetValue::set(interpreter::Arguments& args, afl::data::Value* value)
 {
     // ex IntMappedMessageValue::set
-    throw interpreter::Error::notAssignable();
+    rejectSet(args, value);
 }
 
 int32_t
@@ -177,9 +176,9 @@ game::interface::InboxSubsetValue::toString(bool /*readable*/) const
 }
 
 void
-game::interface::InboxSubsetValue::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::InboxSubsetValue::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
-    throw interpreter::Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }
 
 game::interface::InboxSubsetValue*

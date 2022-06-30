@@ -4,7 +4,6 @@
   */
 
 #include "interpreter/keymapvalue.hpp"
-#include "interpreter/error.hpp"
 
 // Constructor.
 interpreter::KeymapValue::KeymapValue(util::KeymapRef_t keymap)
@@ -31,10 +30,10 @@ interpreter::KeymapValue::toString(bool /*readable*/) const
 }
 
 void
-interpreter::KeymapValue::store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, SaveContext& /*ctx*/) const
+interpreter::KeymapValue::store(TagNode& out, afl::io::DataSink& aux, SaveContext& ctx) const
 {
     // ex IntKeymapValue::store
-    throw Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }
 
 interpreter::KeymapValue*

@@ -131,10 +131,10 @@ BaseArrayProperty::get(Arguments& args)
 }
 
 void
-BaseArrayProperty::set(Arguments& /*args*/, afl::data::Value* /*value*/)
+BaseArrayProperty::set(Arguments& args, afl::data::Value* value)
 {
     // ex IntBaseArrayProperty::set
-    throw Error::notAssignable();
+    rejectSet(args, value);
 }
 
 
@@ -171,7 +171,7 @@ interpreter::Context*
 BaseArrayProperty::makeFirstContext()
 {
     // ex IntBaseArrayProperty::makeFirstContext
-    throw Error::typeError(Error::ExpectIterable);
+    return rejectFirstContext();
 }
 
 // BaseValue:
@@ -183,10 +183,10 @@ BaseArrayProperty::toString(bool /*readable*/) const
 }
 
 void
-BaseArrayProperty::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+BaseArrayProperty::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
     // ex IntBaseArrayProperty::store
-    throw Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }
 
 // Value:

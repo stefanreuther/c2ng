@@ -37,9 +37,9 @@ game::interface::HullFunction::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::HullFunction::set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
+game::interface::HullFunction::set(interpreter::Arguments& args, afl::data::Value* value)
 {
-    throw interpreter::Error::notAssignable();
+    rejectSet(args, value);
 }
 
 // CallableValue:
@@ -80,7 +80,7 @@ game::interface::HullFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::HullFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::HullFunction::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
-    throw interpreter::Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }

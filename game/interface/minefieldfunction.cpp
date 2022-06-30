@@ -3,7 +3,6 @@
   */
 
 #include "game/interface/minefieldfunction.hpp"
-#include "interpreter/error.hpp"
 #include "game/turn.hpp"
 #include "game/game.hpp"
 #include "interpreter/arguments.hpp"
@@ -41,9 +40,9 @@ game::interface::MinefieldFunction::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::MinefieldFunction::set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
+game::interface::MinefieldFunction::set(interpreter::Arguments& args, afl::data::Value* value)
 {
-    throw interpreter::Error::notAssignable();
+    rejectSet(args, value);
 }
 
 // CallableValue:
@@ -91,7 +90,7 @@ game::interface::MinefieldFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::MinefieldFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::MinefieldFunction::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
-    throw interpreter::Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }

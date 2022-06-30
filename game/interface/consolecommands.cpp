@@ -8,9 +8,9 @@
 #include "afl/charset/utf8reader.hpp"
 #include "afl/data/stringvalue.hpp"
 #include "game/extra.hpp"
-#include "game/interface/simpleprocedure.hpp"
 #include "game/root.hpp"
 #include "game/stringverifier.hpp"
+#include "interpreter/simpleprocedure.hpp"
 #include "interpreter/values.hpp"
 
 using afl::base::Ref;
@@ -89,7 +89,7 @@ namespace {
 
 /* Global command "UI.Input", console version. */
 void
-game::interface::IFUIInput(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args)
+game::interface::IFUIInput(game::Session& session, interpreter::Process& proc, interpreter::Arguments& args)
 {
     // ex int/if/conif.cc:IFUIInput
     // UI.Input <prompt>[, <title>, <maxChars>, <flags>, <default>]
@@ -171,6 +171,6 @@ game::interface::registerConsoleCommands(Session& session, afl::base::Ref<afl::i
     session.extra().setNew(ID, new ConsoleExtra(in, out));
 
     // Command
-    session.world().setNewGlobalValue("UI.INPUT", new SimpleProcedure(session, IFUIInput));
+    session.world().setNewGlobalValue("UI.INPUT", new interpreter::SimpleProcedure<Session&>(session, IFUIInput));
     session.world().setNewGlobalValue("SYSTEM.GUI", interpreter::makeBooleanValue(false));
 }

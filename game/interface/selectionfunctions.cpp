@@ -170,7 +170,7 @@ namespace {
         }
     }
 
-    
+
     void saveSelection(afl::io::TextFile& tf, game::Game& g, int layer, bool timeless)
     {
         // ex search.pas:ScriptSaveSelection
@@ -416,11 +416,11 @@ game::interface::IFCCSelGetQuestion(game::Session& session, interpreter::Argumen
    @see SelectionLoad, Selection.Layer
    @since PCC 1.1.3, PCC2 1.99.13, PCC2 2.40.6 */
 void
-game::interface::IFSelectionSave(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+game::interface::IFSelectionSave(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
     // SelectionSave "f[T#]"
     Game& g = game::actions::mustHaveGame(session);
-    
+
     afl::io::TextFile* tf = 0;
     int32_t flags = 0;
     int32_t layer = -1;

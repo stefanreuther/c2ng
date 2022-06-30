@@ -170,6 +170,11 @@ class TestInterpreterFileValue : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestInterpreterFunctionValue : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestInterpreterFusion : public CxxTest::TestSuite {
  public:
     void testFusedBinary();
@@ -189,6 +194,11 @@ class TestInterpreterHashValue : public CxxTest::TestSuite {
     void testEmpty();
     void testUnit();
     void testMulti();
+};
+
+class TestInterpreterIndexableValue : public CxxTest::TestSuite {
+ public:
+    void testIt();
 };
 
 class TestInterpreterKeymapValue : public CxxTest::TestSuite {
@@ -495,6 +505,18 @@ class TestInterpreterSelectionExpression : public CxxTest::TestSuite {
  public:
     void testValid();
     void testInvalid();
+};
+
+class TestInterpreterSimpleFunction : public CxxTest::TestSuite {
+ public:
+    void testValue();
+    void testVoid();
+};
+
+class TestInterpreterSimpleProcedure : public CxxTest::TestSuite {
+ public:
+    void testValue();
+    void testVoid();
 };
 
 class TestInterpreterSimpleSpecialCommand : public CxxTest::TestSuite {

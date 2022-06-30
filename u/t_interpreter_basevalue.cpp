@@ -7,6 +7,10 @@
 
 #include "t_interpreter.hpp"
 #include "afl/data/visitor.hpp"
+#include "afl/io/nullstream.hpp"
+#include "interpreter/tagnode.hpp"
+#include "interpreter/vmio/nullsavecontext.hpp"
+#include "interpreter/error.hpp"
 
 /** Simple test.
     This is mostly an interface test. */
@@ -18,14 +22,14 @@ TestInterpreterBaseValue::testIt()
      public:
         virtual String_t toString(bool /*readable*/) const
             { return "Tester"; }
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
-            { }
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
+            { rejectStore(out, aux, ctx); }
         virtual Tester* clone() const
             { return new Tester(); }
     };
     Tester t;
 
-    // Value:
+    // Verify visit():
     class Visitor : public afl::data::Visitor {
      public:
         virtual void visitString(const String_t& /*str*/)
@@ -49,4 +53,10 @@ TestInterpreterBaseValue::testIt()
     };
     Visitor v;
     v.visit(&t);
+
+    // Verify store()/rejectStore():
+    interpreter::TagNode out;
+    afl::io::NullStream aux;
+    interpreter::vmio::NullSaveContext ctx;
+    TS_ASSERT_THROWS(t.store(out, aux, ctx), interpreter::Error);
 }

@@ -30,6 +30,13 @@ namespace interpreter {
 
         virtual bool isProcedureCall() const;
         virtual void call(Process& proc, afl::data::Segment& args, bool want_result);
+
+     protected:
+        /** Reject set().
+            Throws an Error::notAssignable().
+            \param args Parameters; pass from set()
+            \param value Value to assign; pass from set() */
+        void rejectSet(Arguments& args, afl::data::Value* value) const;
     };
 
 }

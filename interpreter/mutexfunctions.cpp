@@ -9,7 +9,7 @@
 #include "interpreter/error.hpp"
 #include "interpreter/mutexcontext.hpp"
 #include "interpreter/process.hpp"
-#include "interpreter/simpleindexablevalue.hpp"
+#include "interpreter/simplefunction.hpp"
 #include "interpreter/structuretypedata.hpp"
 #include "interpreter/structurevalue.hpp"
 #include "interpreter/structurevaluedata.hpp"
@@ -173,7 +173,7 @@ interpreter::Context*
 interpreter::LockFunction::makeFirstContext()
 {
     // ex IntLock::makeFirstContext
-    throw Error::typeError(Error::ExpectIterable);
+    return rejectFirstContext();
 }
 
 interpreter::LockFunction*
@@ -192,10 +192,10 @@ interpreter::LockFunction::toString(bool /*readable*/) const
 }
 
 void
-interpreter::LockFunction::store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, SaveContext& /*ctx*/) const
+interpreter::LockFunction::store(TagNode& out, afl::io::DataSink& aux, SaveContext& ctx) const
 {
     // ex IntLock::store
-    throw Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }
 
 /************************** GetLockInfoFunction **************************/
@@ -249,38 +249,6 @@ namespace interpreter { namespace {
 
 namespace interpreter { namespace {
 
-    /* Wrapper for a function pointer - could be a global utility class? */
-    class PlainFunction : public IndexableValue {
-     public:
-        typedef afl::data::Value* (*Function_t)(Arguments&);
-
-        PlainFunction(Function_t fcn)
-            : m_function(fcn)
-            { }
-
-        // IndexableValue:
-        virtual afl::data::Value* get(Arguments& args)
-            { return m_function(args); }
-        virtual void set(Arguments& /*args*/, afl::data::Value* /*value*/)
-            { throw Error::notAssignable(); }
-
-        // CallableValue:
-        virtual int32_t getDimension(int32_t /*which*/) const
-            { return 0; }
-        virtual Context* makeFirstContext()
-            { throw Error::typeError(Error::ExpectIterable); }
-
-        // BaseValue:
-        virtual CallableValue* clone() const
-            { return new PlainFunction(m_function); }
-        virtual String_t toString(bool /*readable*/) const
-            { return "#<function>"; }
-        virtual void store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, SaveContext& /*ctx*/) const
-            { throw Error::notSerializable(); }
-     private:
-        Function_t m_function;
-    };
-
     afl::data::Value* IFDummyLock(Arguments& args)
     {
         // Parse args
@@ -307,9 +275,9 @@ namespace interpreter { namespace {
         }
     }
 
-    void defineFunction(BytecodeObject& bco, const char* name, PlainFunction::Function_t fcn)
+    void defineFunction(BytecodeObject& bco, const char* name, afl::data::Value* (*fcn)(interpreter::Arguments&))
     {
-        PlainFunction funcValue(fcn);
+        interpreter::SimpleFunction<void> funcValue(fcn);
         bco.addPushLiteral(&funcValue);
         bco.addInstruction(Opcode::maPop, Opcode::sLocal, bco.addLocalVariable(name));
     }
@@ -324,7 +292,7 @@ void
 interpreter::registerMutexFunctions(World& world)
 {
     world.setNewGlobalValue("LOCK", new LockFunction(world));
-    world.setNewGlobalValue("GETLOCKINFO", new SimpleIndexableValue(world, IFGetLockInfo, 0, 0));
+    world.setNewGlobalValue("GETLOCKINFO", new interpreter::SimpleFunction<World&>(world, IFGetLockInfo));
 }
 
 void

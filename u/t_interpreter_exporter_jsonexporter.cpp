@@ -11,7 +11,6 @@
 #include "interpreter/exporter/fieldlist.hpp"
 #include "afl/data/integervalue.hpp"
 #include "afl/data/stringvalue.hpp"
-#include "interpreter/error.hpp"
 #include "interpreter/indexablevalue.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/arrayvalue.hpp"
@@ -40,8 +39,8 @@ namespace {
      public:
         virtual afl::data::Value* get(interpreter::Arguments& args)
             { return afl::data::Value::cloneOf(args.getNext()); }
-        virtual void set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
-            { throw interpreter::Error::notAssignable(); }
+        virtual void set(interpreter::Arguments& args, afl::data::Value* value)
+            { rejectSet(args, value); }
         virtual int32_t getDimension(int32_t which) const
             { return which == 0 ? 1 : 5; }
         virtual interpreter::Context* makeFirstContext()
@@ -50,8 +49,8 @@ namespace {
             { return new MyIndexable(); }
         virtual String_t toString(bool /*readable*/) const
             { return "#<MyIndexable>"; }
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
-            { throw interpreter::Error::notSerializable(); }
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
+            { rejectStore(out, aux, ctx); }
     };
 }
 

@@ -57,8 +57,8 @@ namespace {
         // IntValue:
         virtual String_t toString(bool /*readable*/) const
             { return "#<MyCallable>"; }
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
-            { throw interpreter::Error::notSerializable(); }
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
+            { rejectStore(out, aux, ctx); }
         virtual MyCallable* clone() const
             { return new MyCallable(); }
 

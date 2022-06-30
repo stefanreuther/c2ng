@@ -22,7 +22,7 @@
 #include "game/turn.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/error.hpp"
-#include "interpreter/indexablevalue.hpp"
+#include "interpreter/functionvalue.hpp"
 #include "interpreter/values.hpp"
 #include "util/math.hpp"
 
@@ -36,7 +36,7 @@ using interpreter::checkIntegerArg;
 using interpreter::checkStringArg;
 
 namespace {
-    class ShipArrayProperty : public interpreter::IndexableValue {
+    class ShipArrayProperty : public interpreter::FunctionValue {
      public:
         enum Type {
             Score,
@@ -49,14 +49,7 @@ namespace {
                           afl::base::Ref<const game::spec::ShipList> shipList);
 
         virtual afl::data::Value* get(interpreter::Arguments& args);
-        virtual void set(interpreter::Arguments& args, afl::data::Value* value);
-
-        virtual int32_t getDimension(int32_t which) const;
-        virtual interpreter::Context* makeFirstContext();
         virtual ShipArrayProperty* clone() const;
-
-        virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
      private:
         const Type m_type;
@@ -214,47 +207,11 @@ ShipArrayProperty::get(interpreter::Arguments& args)
     return 0;
 }
 
-void
-ShipArrayProperty::set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
-{
-    // ex IntShipArrayProperty::set
-    throw interpreter::Error::notAssignable();
-}
-
-int32_t
-ShipArrayProperty::getDimension(int32_t /*which*/) const
-{
-    // ex IntShipArrayProperty::getDimension
-    // These properties behave like hashes, not arrays, so don't claim to be an array
-    return 0;
-}
-
-interpreter::Context*
-ShipArrayProperty::makeFirstContext()
-{
-    // ex IntShipArrayProperty::makeFirstContext
-    throw interpreter::Error::typeError(interpreter::Error::ExpectIterable);
-}
-
 ShipArrayProperty*
 ShipArrayProperty::clone() const
 {
     // ex IntShipArrayProperty::clone
     return new ShipArrayProperty(*this);
-}
-
-String_t
-ShipArrayProperty::toString(bool /*readable*/) const
-{
-    // ex IntShipArrayProperty::toString
-    return "#<array>";
-}
-
-void
-ShipArrayProperty::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
-{
-    // ex IntShipArrayProperty::store
-    throw interpreter::Error::notSerializable();
 }
 
 afl::data::Value*

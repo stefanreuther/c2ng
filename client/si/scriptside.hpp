@@ -23,7 +23,6 @@ namespace client { namespace si {
     class Control;
     class RequestLink1;
     class RequestLink2;
-    class ScriptProcedure;
     class UserSide;
     class UserTask;
 

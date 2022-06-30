@@ -4,30 +4,22 @@
 #ifndef C2NG_CLIENT_SI_WIDGETFUNCTIONVALUE_HPP
 #define C2NG_CLIENT_SI_WIDGETFUNCTIONVALUE_HPP
 
-#include "interpreter/indexablevalue.hpp"
-#include "client/si/widgetfunction.hpp"
-#include "afl/base/weaklink.hpp"
 #include "afl/base/ref.hpp"
-#include "game/session.hpp"
+#include "afl/base/weaklink.hpp"
+#include "client/si/widgetfunction.hpp"
 #include "client/si/widgetreference.hpp"
+#include "game/session.hpp"
+#include "interpreter/functionvalue.hpp"
 
 namespace client { namespace si {
 
     class ScriptSide;
 
-    class WidgetFunctionValue : public interpreter::IndexableValue {
+    class WidgetFunctionValue : public interpreter::FunctionValue {
      public:
         WidgetFunctionValue(WidgetFunction func, game::Session& session, ScriptSide* ss, const WidgetReference& ref);
 
-        // BaseValue:
-        virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
-
-        // CallableValue:
         virtual afl::data::Value* get(interpreter::Arguments& args);
-        virtual void set(interpreter::Arguments& args, afl::data::Value* value);
-        virtual int32_t getDimension(int32_t which) const;
-        virtual interpreter::Context* makeFirstContext();
         virtual WidgetFunctionValue* clone() const;
 
      private:

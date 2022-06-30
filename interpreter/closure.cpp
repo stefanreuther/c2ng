@@ -3,7 +3,6 @@
   */
 
 #include "interpreter/closure.hpp"
-#include "interpreter/error.hpp"
 
 interpreter::Closure::Closure()
     : CallableValue(),
@@ -16,7 +15,7 @@ interpreter::Closure::Closure(const Closure& other)
       m_function(other.m_function),
       m_fixedArgs(other.m_fixedArgs)
 { }
-      
+
 interpreter::Closure::~Closure()
 { }
 
@@ -95,7 +94,7 @@ interpreter::Closure::makeFirstContext()
     // ex IntClosure::makeFirstContext
     // Since we are providing a "slice" of the array, we cannot make a first context.
     // It would have to represent that slice. Therefore, pretend to be not iterable.
-    throw Error::typeError(Error::ExpectIterable);
+    return rejectFirstContext();
 }
 
 // BaseValue:
@@ -107,10 +106,10 @@ interpreter::Closure::toString(bool /*readable*/) const
 }
 
 void
-interpreter::Closure::store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, SaveContext& /*ctx*/) const
+interpreter::Closure::store(TagNode& out, afl::io::DataSink& aux, SaveContext& ctx) const
 {
     // ex IntClosure::store
-    throw Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }
 
 // Value:

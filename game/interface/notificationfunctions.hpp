@@ -31,7 +31,7 @@ namespace game { namespace interface {
         Session& m_session;
     };
 
-    void IFCCNotify(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
+    void IFCCNotify(game::Session& session, interpreter::Process& proc, interpreter::Arguments& args);
     afl::data::Value* IFCCNumNotifications(game::Session& session, interpreter::Arguments& args);
 
 } }

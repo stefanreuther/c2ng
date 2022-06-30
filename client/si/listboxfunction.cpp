@@ -24,20 +24,6 @@ client::si::ListboxFunction::ListboxFunction(game::Session& session, ScriptSide*
       m_pScriptSide(pScriptSide)
 { }
 
-// BaseValue:
-String_t
-client::si::ListboxFunction::toString(bool /*readable*/) const
-{
-    return "#<function>";
-}
-
-void
-client::si::ListboxFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
-{
-    throw interpreter::Error::notSerializable();
-}
-
-// IndexableValue:
 /* @q Listbox():Any (Function)
    @noproto
    | With Listbox(title:Str, Optional current:Int, width:Int, height:Int, help:Str) Do
@@ -58,7 +44,7 @@ client::si::ListboxFunction::store(interpreter::TagNode& /*out*/, afl::io::DataS
      You can repeat %Run as often as you wish.
 
    The parameters are as follows:
- 
+
    - %title: a string that is displayed in the title bar of the list box.
      This is the only mandatory parameter for %Listbox();
    - %current: the %id value of the entry which will be selected by default
@@ -70,11 +56,11 @@ client::si::ListboxFunction::store(interpreter::TagNode& /*out*/, afl::io::DataS
      default is number of items in list box.
      Pass -1 here to choose that default;
    - %help: the help page associated with this list box. See {UI.Help}.
- 
+
    The %Run command actually displays the list box and lets the user choose
    from it. It sets the {UI.Result} variable to the identifier (%id) of the
    item chosen by the user, or to EMPTY if she canceled.
- 
+
    Example: this is a simplified version of the "Set Primary Enemy" command:
    |   Local i, UI.Result
    |   With Listbox("Primary Enemy", Enemy$, 260, 12, 10026) Do
@@ -83,7 +69,7 @@ client::si::ListboxFunction::store(interpreter::TagNode& /*out*/, afl::io::DataS
    |     Run
    |     SetEnemy UI.Result
    |   EndWith
- 
+
    Note: scripts can not suspend while a <tt>With Listbox</tt> block is active.
    @since PCC 1.1.1, PCC2 1.99.25, PCC2 2.40.1 */
 afl::data::Value*
@@ -152,24 +138,6 @@ client::si::ListboxFunction::get(interpreter::Arguments& args)
 
     // Produce result
     return new GenericWidgetValue(getStringListDialogNameTable(), m_session, ss, WidgetReference(wh, result));
-}
-
-void
-client::si::ListboxFunction::set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
-{
-    throw interpreter::Error::notAssignable();
-}
-
-int32_t
-client::si::ListboxFunction::getDimension(int32_t /*which*/) const
-{
-    return 0;
-}
-
-interpreter::Context*
-client::si::ListboxFunction::makeFirstContext()
-{
-    throw interpreter::Error::typeError(interpreter::Error::ExpectIterable);
 }
 
 client::si::ListboxFunction*

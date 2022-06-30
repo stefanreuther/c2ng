@@ -60,9 +60,9 @@ game::interface::MissionFunction::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::MissionFunction::set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
+game::interface::MissionFunction::set(interpreter::Arguments& args, afl::data::Value* value)
 {
-    throw interpreter::Error::notAssignable();
+    rejectSet(args, value);
 }
 
 // CallableValue:
@@ -97,7 +97,7 @@ game::interface::MissionFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::MissionFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::MissionFunction::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
-    throw interpreter::Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }

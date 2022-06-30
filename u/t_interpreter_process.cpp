@@ -224,8 +224,8 @@ namespace {
             { return new SimpleCallable(*this); }
         virtual String_t toString(bool /*readable*/) const
             { return "#<SimpleCallable:" + m_value + ">"; }
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
-            { throw interpreter::Error::notSerializable(); }
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
+            { rejectStore(out, aux, ctx); }
      private:
         String_t m_value;
         bool m_isProcedure;
@@ -257,8 +257,8 @@ namespace {
             { return new SimpleIndexable(*this); }
         virtual String_t toString(bool /*readable*/) const
             { return "#<SimpleIndexable>"; }
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
-            { throw interpreter::Error::notSerializable(); }
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
+            { rejectStore(out, aux, ctx); }
      private:
         String_t& m_value;
         int m_numArgs;

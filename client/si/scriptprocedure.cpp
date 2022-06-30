@@ -18,48 +18,15 @@ client::si::ScriptProcedure::ScriptProcedure(game::Session& session, ScriptSide*
 client::si::ScriptProcedure::~ScriptProcedure()
 { }
 
-// BaseValue:
-String_t
-client::si::ScriptProcedure::toString(bool /*readable*/) const
-{
-    return "#<procedure>";
-}
 
 void
-client::si::ScriptProcedure::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
-{
-    throw interpreter::Error::notSerializable();
-}
-
-// CallableValue:
-void
-client::si::ScriptProcedure::call(interpreter::Process& proc, afl::data::Segment& args, bool want_result)
+client::si::ScriptProcedure::call(interpreter::Process& proc, interpreter::Arguments& args)
 {
     if (ScriptSide* ss = m_pScriptSide.get()) {
-        // FIXME: do we need the want_result? If not, we can make ScriptProcedure a simpler ProcedureValue instead.
-        interpreter::Arguments a(args, 0, args.size());
-        m_pFunction(m_session, *ss, RequestLink1(proc, want_result), a);
+        m_pFunction(m_session, *ss, RequestLink1(proc, false), args);
     } else {
         throw interpreter::Error::contextError();
     }
-}
-
-bool
-client::si::ScriptProcedure::isProcedureCall() const
-{
-    return true;
-}
-
-int32_t
-client::si::ScriptProcedure::getDimension(int32_t /*which*/) const
-{
-    return 0;
-}
-
-interpreter::Context*
-client::si::ScriptProcedure::makeFirstContext()
-{
-    throw interpreter::Error::typeError(interpreter::Error::ExpectIterable);
 }
 
 client::si::ScriptProcedure*

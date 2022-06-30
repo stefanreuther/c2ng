@@ -47,8 +47,8 @@ namespace client { namespace si {
 
     afl::data::Value* IFCCRemoteGetColor(game::Session& session, interpreter::Arguments& args);
     afl::data::Value* IFCCRemoteGetQuestion(game::Session& session, interpreter::Arguments& args);
-    void IFCCRemoteToggle(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
-    void IFCCRemoteSet(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
+    void IFCCRemoteToggle(game::Session& session, interpreter::Process& proc, interpreter::Arguments& args);
+    void IFCCRemoteSet(game::Session& session, interpreter::Process& proc, interpreter::Arguments& args);
 
 } }
 

@@ -48,7 +48,6 @@
 #include "game/game.hpp"
 #include "game/interface/globalactionextra.hpp"
 #include "game/interface/labelextra.hpp"
-#include "game/interface/simpleprocedure.hpp"
 #include "game/interface/vmfile.hpp"
 #include "game/nu/browserhandler.hpp"
 #include "game/pcc/browserhandler.hpp"
@@ -61,6 +60,7 @@
 #include "gfx/complex.hpp"
 #include "gfx/gen/orbitconfig.hpp"
 #include "gfx/gen/spaceviewconfig.hpp"
+#include "interpreter/simpleprocedure.hpp"
 #include "interpreter/values.hpp"
 #include "ui/defaultresourceprovider.hpp"
 #include "ui/draw.hpp"
@@ -283,7 +283,7 @@ namespace {
             util::RequestSender<game::Session> m_gameSender;
         };
 
-        static void IFLoadTurn(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args)
+        static void IFLoadTurn(game::Session& session, interpreter::Process& proc, interpreter::Arguments& args)
             {
                 args.checkArgumentCount(1);
                 int32_t player;
@@ -423,7 +423,7 @@ namespace {
                             interpreter::Process& proc = session.processList().create(session.world(), "<Loader>");
                             interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
                             proc.pushNewValue(interpreter::makeIntegerValue(m_player));
-                            proc.pushNewValue(new game::interface::SimpleProcedure(session, IFLoadTurn));
+                            proc.pushNewValue(new interpreter::SimpleProcedure<game::Session&>(session, IFLoadTurn));
                             bco->addInstruction(interpreter::Opcode::maIndirect, interpreter::Opcode::miIMCall, 1);
                             proc.pushFrame(bco, false);
                             proc.setNewFinalizer(new Finalizer(m_uiSender));

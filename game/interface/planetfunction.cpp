@@ -7,7 +7,6 @@
 #include "game/turn.hpp"
 #include "game/game.hpp"
 #include "game/interface/planetcontext.hpp"
-#include "interpreter/error.hpp"
 #include "game/map/anyplanettype.hpp"
 
 game::interface::PlanetFunction::PlanetFunction(Session& session)
@@ -43,10 +42,10 @@ game::interface::PlanetFunction::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::PlanetFunction::set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
+game::interface::PlanetFunction::set(interpreter::Arguments& args, afl::data::Value* value)
 {
     // ex IntSimpleIndexableValue::set
-    throw interpreter::Error::notAssignable();
+    rejectSet(args, value);
 }
 
 
@@ -98,7 +97,7 @@ game::interface::PlanetFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::PlanetFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::PlanetFunction::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
-    throw interpreter::Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }

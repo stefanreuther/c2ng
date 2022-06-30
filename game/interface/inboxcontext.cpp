@@ -9,16 +9,15 @@
 #include "game/root.hpp"
 #include "game/turn.hpp"
 #include "interpreter/arguments.hpp"
-#include "interpreter/error.hpp"
 #include "interpreter/indexablevalue.hpp"
 #include "interpreter/nametable.hpp"
+#include "interpreter/procedurevalue.hpp"
 #include "interpreter/process.hpp"
 #include "interpreter/propertyacceptor.hpp"
 #include "interpreter/values.hpp"
 #include "interpreter/world.hpp"
 
 using afl::string::Format;
-using interpreter::Error;
 
 namespace {
     enum MessageProperty {
@@ -67,8 +66,8 @@ namespace {
                 return interpreter::makeStringValue((*m_lines)[index-1]);
             }
 
-        virtual void set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
-            { throw Error::notAssignable(); }
+        virtual void set(interpreter::Arguments& args, afl::data::Value* value)
+            { rejectSet(args, value); }
 
         // CallableValue:
         virtual int32_t getDimension(int32_t which) const
@@ -81,14 +80,14 @@ namespace {
             }
 
         virtual interpreter::Context* makeFirstContext()
-            { throw Error::typeError(Error::ExpectIterable); }
+            { return rejectFirstContext(); }
 
         // BaseValue:
         virtual String_t toString(bool /*readable*/) const
             { return "#<array>"; }
 
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
-            { throw Error::notSerializable(); }
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
+            { rejectStore(out, aux, ctx); }
 
         virtual MessageTextValue* clone() const
             { return new MessageTextValue(m_lines); }
@@ -102,7 +101,7 @@ namespace {
      *  Implementation of InMsg().Write (command)
      */
 
-    class MessageWriteCommand : public interpreter::CallableValue {
+    class MessageWriteCommand : public interpreter::ProcedureValue {
         // ex IntMessageWriteProcedure
      public:
         MessageWriteCommand(int turnNumber, size_t messageIndex,
@@ -112,23 +111,9 @@ namespace {
               m_messageIndex(messageIndex)
             { }
 
-        virtual void call(interpreter::Process& proc, afl::data::Segment& args, bool want_result);
+        virtual void call(interpreter::Process& proc, interpreter::Arguments& args);
 
-        virtual bool isProcedureCall() const
-            { return true; }
-
-        virtual int32_t getDimension(int32_t /*which*/) const
-            { return 0; }
-
-        virtual interpreter::Context* makeFirstContext()
-            { throw Error::typeError(Error::ExpectIterable); }
-
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
-            { throw Error::notSerializable(); }
-
-        virtual String_t toString(bool /*readable*/) const
-            { return "#<procedure>"; }
-        virtual CallableValue* clone() const
+        virtual ProcedureValue* clone() const
             { return new MessageWriteCommand(m_turnNumber, m_messageIndex, m_lines); }
 
      private:
@@ -139,7 +124,7 @@ namespace {
 }
 
 void
-MessageWriteCommand::call(interpreter::Process& proc, afl::data::Segment& args, bool want_result)
+MessageWriteCommand::call(interpreter::Process& proc, interpreter::Arguments& args)
 {
     // ex IntMessageWriteProcedure::call
     // ex fileint.pas:ScriptWriteMessage, msgint.pas:Mailbox_Write
@@ -156,23 +141,16 @@ MessageWriteCommand::call(interpreter::Process& proc, afl::data::Segment& args, 
 
        @since PCC 1.1.16, PCC2 1.99.13, PCC2 2.40.8 */
 
-    /* Boilerplate */
-    if (want_result) {
-        proc.pushNewValue(0);
-    }
-
-    interpreter::Arguments a(args, 0, args.size());
-
     // Implementation
     afl::io::TextFile* tf;
     int32_t flags = 0;
-    a.checkArgumentCount(1, 2);
+    args.checkArgumentCount(1, 2);
 
-    if (!proc.world().fileTable().checkFileArg(tf, a.getNext())) {
+    if (!proc.world().fileTable().checkFileArg(tf, args.getNext())) {
         return;
     }
 
-    interpreter::checkFlagArg(flags, 0, a.getNext(), "R");
+    interpreter::checkFlagArg(flags, 0, args.getNext(), "R");
 
     if (flags == 0) {
         // FIXME: PCC1 tracks the last "Turn" header written and omits duplicates
@@ -296,10 +274,10 @@ game::interface::InboxContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::InboxContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::InboxContext::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
     // ex IntMessageContext::store
-    throw Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }
 
 const game::msg::Mailbox&

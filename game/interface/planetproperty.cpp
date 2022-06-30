@@ -19,7 +19,7 @@
 #include "game/turn.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/error.hpp"
-#include "interpreter/indexablevalue.hpp"
+#include "interpreter/functionvalue.hpp"
 #include "interpreter/values.hpp"
 
 using interpreter::makeIntegerValue;
@@ -33,23 +33,11 @@ using interpreter::Error;
 using interpreter::Arguments;
 
 namespace {
-    class PlanetArrayProperty : public interpreter::IndexableValue {
+    class PlanetArrayProperty : public interpreter::FunctionValue {
      public:
         PlanetArrayProperty(const game::map::Planet& planet, afl::base::Ref<game::Game> game, game::interface::PlanetProperty property);
 
-        // IndexableValue:
         virtual afl::data::Value* get(Arguments& args);
-        virtual void set(Arguments& args, afl::data::Value* value);
-
-        // CallableValue:
-        virtual int32_t getDimension(int32_t which) const;
-        virtual interpreter::Context* makeFirstContext();
-
-        // BaseValue:
-        virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
-
-        // Value:
         virtual PlanetArrayProperty* clone() const;
 
      private:
@@ -69,7 +57,7 @@ namespace {
 }
 
 PlanetArrayProperty::PlanetArrayProperty(const game::map::Planet& planet, afl::base::Ref<game::Game> game, game::interface::PlanetProperty property)
-    : interpreter::IndexableValue(),
+    : interpreter::FunctionValue(),
       m_planet(planet),
       m_game(game),
       m_property(property)
@@ -102,43 +90,6 @@ PlanetArrayProperty::get(Arguments& args)
      default:
         return 0;
     }
-}
-
-void
-PlanetArrayProperty::set(Arguments& /*args*/, afl::data::Value* /*value*/)
-{
-    // ex PlanetArrayProperty::set
-    throw Error::notAssignable();
-}
-
-// CallableValue:
-int32_t
-PlanetArrayProperty::getDimension(int32_t /*which*/) const
-{
-    // ex PlanetArrayProperty::getDimension
-    return 0;
-}
-
-interpreter::Context*
-PlanetArrayProperty::makeFirstContext()
-{
-    // ex PlanetArrayProperty::makeFirstContext
-    throw Error::typeError(Error::ExpectIterable);
-}
-
-// BaseValue:
-String_t
-PlanetArrayProperty::toString(bool /*readable*/) const
-{
-    // ex PlanetArrayProperty::toString
-    return "#<array>";
-}
-
-void
-PlanetArrayProperty::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
-{
-    // ex PlanetArrayProperty::store
-    throw Error::notSerializable();
 }
 
 // Value:

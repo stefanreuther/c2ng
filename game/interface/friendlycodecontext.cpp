@@ -3,7 +3,6 @@
   */
 
 #include "game/interface/friendlycodecontext.hpp"
-#include "interpreter/error.hpp"
 #include "interpreter/nametable.hpp"
 #include "game/interface/friendlycodeproperty.hpp"
 #include "interpreter/typehint.hpp"
@@ -97,7 +96,7 @@ game::interface::FriendlyCodeContext::toString(bool readable) const
 }
 
 void
-game::interface::FriendlyCodeContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::FriendlyCodeContext::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
-    throw interpreter::Error::notAssignable();
+    rejectStore(out, aux, ctx);
 }

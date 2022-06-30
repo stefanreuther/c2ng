@@ -16,7 +16,6 @@
 #include "game/spec/shiplist.hpp"
 #include "game/test/root.hpp"
 #include "game/turn.hpp"
-#include "interpreter/error.hpp"
 #include "interpreter/process.hpp"
 #include "interpreter/structurevalue.hpp"
 #include "interpreter/subroutinevalue.hpp"
@@ -85,8 +84,8 @@ namespace {
             { return new Function(m_name, m_isProcedure, m_acc, m_result.get()); }
         virtual String_t toString(bool /*readable*/) const
             { return afl::string::Format("<%s>", m_name); }
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
-            { throw interpreter::Error::notSerializable(); }
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
+            { rejectStore(out, aux, ctx); }
      private:
         String_t m_name;
         bool m_isProcedure;

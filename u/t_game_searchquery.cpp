@@ -9,10 +9,10 @@
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
-#include "game/interface/simplefunction.hpp"
 #include "game/session.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/process.hpp"
+#include "interpreter/simplefunction.hpp"
 #include "interpreter/structuretypedata.hpp"
 #include "interpreter/structurevalue.hpp"
 #include "interpreter/structurevaluedata.hpp"
@@ -58,7 +58,7 @@ namespace {
 
         We re-use the game::interface::SimpleFunction wrapper which is an additional dependency
         SearchQuery normally doesn't need. */
-    afl::data::Value* IFObjectIsAtMock(game::Session&, interpreter::Arguments& args)
+    afl::data::Value* IFObjectIsAtMock(interpreter::Arguments& args)
     {
         // Verify that function is called correctly
         TS_ASSERT_EQUALS(args.getNumArgs(), 3U);
@@ -162,7 +162,7 @@ TestGameSearchQuery::testLocation()
     afl::string::NullTranslator tx;
     interpreter::World world(log, tx, fs);
     game::Session session(tx, fs);              // required for SimpleFunction, not otherwise needed
-    world.setNewGlobalValue("OBJECTISAT", new game::interface::SimpleFunction(session, IFObjectIsAtMock));
+    world.setNewGlobalValue("OBJECTISAT", new interpreter::SimpleFunction<void>(IFObjectIsAtMock));
 
     // Verify
     // - match

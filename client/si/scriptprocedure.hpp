@@ -5,11 +5,12 @@
 #ifndef C2NG_CLIENT_SI_SCRIPTPROCEDURE_HPP
 #define C2NG_CLIENT_SI_SCRIPTPROCEDURE_HPP
 
-#include "interpreter/callablevalue.hpp"
-#include "interpreter/arguments.hpp"
+#include "afl/base/weaklink.hpp"
 #include "client/si/requestlink1.hpp"
 #include "game/session.hpp"
-#include "afl/base/weaklink.hpp"
+#include "interpreter/arguments.hpp"
+#include "interpreter/callablevalue.hpp"
+#include "interpreter/procedurevalue.hpp"
 
 namespace client { namespace si {
 
@@ -42,7 +43,7 @@ namespace client { namespace si {
         Because the ScriptSide may die before the World, the ScriptSide has a WeakLink pointing at the ScriptSide.
         After the ScriptSide died, the ScriptProcedure will become inactive
         and fail all requests with a interpreter::Error::contextError(). */
-    class ScriptProcedure : public interpreter::CallableValue {
+    class ScriptProcedure : public interpreter::ProcedureValue {
      public:
         /** Constructor.
             \param session     Session
@@ -53,16 +54,9 @@ namespace client { namespace si {
         /** Destructor. */
         ~ScriptProcedure();
 
-        // BaseValue:
-        virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
-
-        // CallableValue:
-        virtual void call(interpreter::Process& proc, afl::data::Segment& args, bool want_result);
-        virtual bool isProcedureCall() const;
-        virtual int32_t getDimension(int32_t which) const;
-        virtual interpreter::Context* makeFirstContext();
+        virtual void call(interpreter::Process& proc, interpreter::Arguments& args);
         virtual ScriptProcedure* clone() const;
+
      private:
         game::Session& m_session;
         afl::base::WeakLink<ScriptSide> m_pScriptSide;

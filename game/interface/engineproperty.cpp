@@ -34,22 +34,22 @@ namespace {
                     return 0;
                 }
             }
-        virtual void set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
-            { throw interpreter::Error::notAssignable(); }
+        virtual void set(interpreter::Arguments& args, afl::data::Value* value)
+            { rejectSet(args, value); }
 
         // CallableValue:
         virtual int32_t getDimension(int32_t which) const
             { return which==0 ? 1 : m_engine.MAX_WARP+1; }
         virtual interpreter::Context* makeFirstContext()
-            { throw interpreter::Error::typeError(interpreter::Error::ExpectIterable); }
+            { return rejectFirstContext(); }
         virtual EngineFuelFactor* clone() const
             { return new EngineFuelFactor(m_engine); }
 
         // BaseValue:
         virtual String_t toString(bool /*readable*/) const
             { return "#<array>"; }
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
-            { throw interpreter::Error::notSerializable(); }
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
+            { rejectStore(out, aux, ctx); }
 
      private:
         /** Subject engine.

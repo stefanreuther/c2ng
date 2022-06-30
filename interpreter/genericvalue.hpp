@@ -6,7 +6,6 @@
 #define C2NG_INTERPRETER_GENERICVALUE_HPP
 
 #include "interpreter/basevalue.hpp"
-#include "interpreter/error.hpp"
 
 namespace interpreter {
 
@@ -64,9 +63,9 @@ interpreter::GenericValue<T>::toString(bool /*readable*/) const
 
 template<typename T>
 void
-interpreter::GenericValue<T>::store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, SaveContext& /*ctx*/) const
+interpreter::GenericValue<T>::store(TagNode& out, afl::io::DataSink& aux, SaveContext& ctx) const
 {
-    throw Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }
 
 template<typename T>

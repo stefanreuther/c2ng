@@ -3,7 +3,6 @@
   */
 
 #include "game/interface/pluginfunction.hpp"
-#include "interpreter/error.hpp"
 #include "interpreter/arguments.hpp"
 
 game::interface::PluginFunction::PluginFunction(Session& session)
@@ -30,9 +29,9 @@ game::interface::PluginFunction::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::PluginFunction::set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
+game::interface::PluginFunction::set(interpreter::Arguments& args, afl::data::Value* value)
 {
-    throw interpreter::Error::notAssignable();
+    rejectSet(args, value);
 }
 
 // CallableValue:
@@ -45,7 +44,7 @@ game::interface::PluginFunction::getDimension(int32_t /*which*/) const
 interpreter::Context*
 game::interface::PluginFunction::makeFirstContext()
 {
-    throw interpreter::Error::typeError(interpreter::Error::ExpectIterable);
+    return rejectFirstContext();
 }
 
 game::interface::PluginFunction*
@@ -62,7 +61,7 @@ game::interface::PluginFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::PluginFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::PluginFunction::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
-    throw interpreter::Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }

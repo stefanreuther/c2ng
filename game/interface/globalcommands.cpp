@@ -210,7 +210,7 @@ game::interface::checkPlayerSetArg(PlayerSet_t& result, afl::data::Value* value)
    @see CreateConfigOption
    @since PCC 1.1.4, PCC2 1.99.25, PCC2 2.40.1 */
 void
-game::interface::IFAddConfig(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+game::interface::IFAddConfig(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFAddConfig, globint.pas:Global_AddConfig
     // Parse args
@@ -250,7 +250,7 @@ game::interface::IFAddConfig(interpreter::Process& /*proc*/, game::Session& sess
 
    @since PCC 1.1.4, PCC2 1.99.25, PCC2 2.40.1 */
 void
-game::interface::IFAddFCode(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+game::interface::IFAddFCode(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFAddFCode, globint.pas:Global_AddFCode
 
@@ -290,7 +290,7 @@ game::interface::IFAddFCode(interpreter::Process& /*proc*/, game::Session& sessi
    @see CreatePrefOption
    @since PCC2 2.40.1 */
 void
-game::interface::IFAddPref(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+game::interface::IFAddPref(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
     // Parse args
     args.checkArgumentCount(1);
@@ -335,7 +335,7 @@ game::interface::IFAddPref(interpreter::Process& /*proc*/, game::Session& sessio
 
    @since PCC 1.1.1, PCC2 1.99.25, PCC2 2.40.8 */
 void
-game::interface::IFAuthPlayer(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+game::interface::IFAuthPlayer(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
     // ex int/if/globalif.cc:IFAuthPlayer, globint.pas:Global_AuthPlayer
     // Parse args
@@ -358,7 +358,7 @@ game::interface::IFAuthPlayer(interpreter::Process& /*proc*/, game::Session& ses
 
    @since PCC2 2.40.3, PCC2 1.99.10 */
 void
-game::interface::IFCCSelectionExec(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+game::interface::IFCCSelectionExec(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
     // ex int/if/globalif.cc:IFCCSelectionExec
     args.checkArgumentCount(2);
@@ -386,7 +386,7 @@ game::interface::IFCCSelectionExec(interpreter::Process& /*proc*/, game::Session
 
    @since PCC2 2.40.12 */
 void
-game::interface::IFCCHistoryShowTurn(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+game::interface::IFCCHistoryShowTurn(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
     // Split off original IFHistoryShowTurn
     // Check parameters
@@ -436,7 +436,7 @@ game::interface::IFCCHistoryShowTurn(interpreter::Process& /*proc*/, game::Sessi
    @see AddConfig, Cfg(), CreatePrefOption
    @since PCC2 2.40.1 */
 void
-game::interface::IFCreateConfigOption(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+game::interface::IFCreateConfigOption(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
     args.checkArgumentCount(2);
     createConfigOption(game::actions::mustHaveRoot(session).hostConfiguration(), args);
@@ -458,7 +458,7 @@ game::interface::IFCreateConfigOption(interpreter::Process& /*proc*/, game::Sess
    @see AddPref, Pref(), CreateConfigOption
    @since PCC2 2.40.1 */
 void
-game::interface::IFCreatePrefOption(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+game::interface::IFCreatePrefOption(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
     args.checkArgumentCount(2);
     createConfigOption(game::actions::mustHaveRoot(session).userConfiguration(), args);
@@ -482,7 +482,7 @@ game::interface::IFCreatePrefOption(interpreter::Process& /*proc*/, game::Sessio
 
    @since PCC2 2.40.13 */
 void
-game::interface::IFExport(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+game::interface::IFExport(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
     args.checkArgumentCount(4, 5);
 
@@ -542,7 +542,7 @@ game::interface::IFExport(interpreter::Process& /*proc*/, game::Session& session
    @see NewMarker
    @since PCC2 2.40.10 */
 void
-game::interface::IFNewCannedMarker(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+game::interface::IFNewCannedMarker(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
     // ex createCannedMarker (sort-of)
     using game::map::Drawing;
@@ -595,7 +595,7 @@ game::interface::IFNewCannedMarker(interpreter::Process& /*proc*/, game::Session
    @see NewLine, NewRectangle, NewMarker
    @since PCC2 1.99.9, PCC 1.0.5, PCC2 2.40.1 */
 void
-game::interface::IFNewCircle(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+game::interface::IFNewCircle(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFNewCircle, globint.pas:Global_NewCircle
     // NewCircle x,y,radius,[color,tag,expire]
@@ -644,7 +644,7 @@ game::interface::IFNewCircle(interpreter::Process& /*proc*/, game::Session& sess
    @see NewCircle, NewLine, NewRectangleRaw, NewMarker
    @since PCC2 1.99.9, PCC 1.0.5, PCC2 2.40.1 */
 void
-game::interface::IFNewRectangle(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+game::interface::IFNewRectangle(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFNewRectangle, globint.pas:Global_NewRectangle
     drawLineOrRectangle(session, args, game::map::Drawing::RectangleDrawing, true);
@@ -665,7 +665,7 @@ game::interface::IFNewRectangle(interpreter::Process& /*proc*/, game::Session& s
    @see NewCircle, NewLine, NewRectangle, NewMarker
    @since PCC2 1.99.9, PCC 1.1.15, PCC2 2.40.1 */
 void
-game::interface::IFNewRectangleRaw(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+game::interface::IFNewRectangleRaw(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFNewRectangleRaw, globint.pas:Global_NewRectangleRaw
     drawLineOrRectangle(session, args, game::map::Drawing::RectangleDrawing, false);
@@ -687,7 +687,7 @@ game::interface::IFNewRectangleRaw(interpreter::Process& /*proc*/, game::Session
    @see NewCircle, NewLineRaw, NewRectangle, NewMarker
    @since PCC2 1.99.9, PCC 1.0.5, PCC2 2.40.1 */
 void
-game::interface::IFNewLine(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+game::interface::IFNewLine(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFNewLine, globint.pas:Global_NewLine
     drawLineOrRectangle(session, args, game::map::Drawing::LineDrawing, true);
@@ -708,7 +708,7 @@ game::interface::IFNewLine(interpreter::Process& /*proc*/, game::Session& sessio
    @see NewCircle, NewLine, NewRectangle, NewMarker
    @since PCC2 1.99.9, PCC 1.1.15, PCC2 2.40.1 */
 void
-game::interface::IFNewLineRaw(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+game::interface::IFNewLineRaw(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFNewLineRaw, globint.pas:Global_NewLineRaw
     drawLineOrRectangle(session, args, game::map::Drawing::LineDrawing, false);
@@ -729,7 +729,7 @@ game::interface::IFNewLineRaw(interpreter::Process& /*proc*/, game::Session& ses
    @see NewCircle, NewLineRaw, NewRectangle, NewMarker, NewCannedMarker
    @since PCC2 1.99.9, PCC 1.0.5, PCC2 2.40.1 */
 void
-game::interface::IFNewMarker(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+game::interface::IFNewMarker(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFNewMarker, globint.pas:Global_NewMarker
     // NewMarker x,y,typ[,color,text,tag,expire]
@@ -777,7 +777,7 @@ game::interface::IFNewMarker(interpreter::Process& /*proc*/, game::Session& sess
    @see History.ShowTurn
    @since PCC2 2.40.12 */
 void
-game::interface::IFHistoryLoadTurn(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args)
+game::interface::IFHistoryLoadTurn(game::Session& session, interpreter::Process& proc, interpreter::Arguments& args)
 {
     // Check parameters
     args.checkArgumentCount(1);
@@ -872,7 +872,7 @@ game::interface::IFHistoryLoadTurn(interpreter::Process& proc, game::Session& se
 
    @since PCC 1.0.17, PCC2 1.99.12, PCC2 2.40.5 */
 void
-game::interface::IFSaveGame(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args)
+game::interface::IFSaveGame(game::Session& session, interpreter::Process& proc, interpreter::Arguments& args)
 {
     // ex int/if/globalif.cc:IFSaveGame, globint.pas:Global_SaveGame
     args.checkArgumentCount(0, 1);
@@ -908,7 +908,7 @@ game::interface::IFSaveGame(interpreter::Process& proc, game::Session& session, 
 
    @since PCC2 2.40.8 */
 void
-game::interface::IFSendMessage(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+game::interface::IFSendMessage(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
     // ex globint.pas:Global_SendMessage (sort-of; only a stub in PCC1)
     args.checkArgumentCountAtLeast(2);

@@ -4,10 +4,10 @@
   */
 
 #include "game/interface/globalactionextra.hpp"
-#include "game/interface/simpleprocedure.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/callablevalue.hpp"
 #include "interpreter/error.hpp"
+#include "interpreter/simpleprocedure.hpp"
 
 using interpreter::CallableValue;
 using interpreter::Error;
@@ -61,7 +61,7 @@ namespace {
        - Error: if exec threw an error, last error message
 
        @since PCC2 2.40.13 */
-    void IFAddGlobalAction(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+    void IFAddGlobalAction(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
     {
         args.checkArgumentCount(4);
 
@@ -122,7 +122,7 @@ namespace {
 
 game::interface::GlobalActionExtra::GlobalActionExtra(Session& session)
 {
-    session.world().setNewGlobalValue("ADDGLOBALACTION", new SimpleProcedure(session, IFAddGlobalAction));
+    session.world().setNewGlobalValue("ADDGLOBALACTION", new interpreter::SimpleProcedure<Session&>(session, IFAddGlobalAction));
 }
 
 game::interface::GlobalActionExtra::~GlobalActionExtra()

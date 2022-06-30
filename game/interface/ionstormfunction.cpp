@@ -43,10 +43,9 @@ game::interface::IonStormFunction::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::IonStormFunction::set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
+game::interface::IonStormFunction::set(interpreter::Arguments& args, afl::data::Value* value)
 {
-    // ex IntSimpleIndexableValue::set
-    throw interpreter::Error::notAssignable();
+    rejectSet(args, value);
 }
 
 // CallableValue:
@@ -94,7 +93,7 @@ game::interface::IonStormFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::IonStormFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::IonStormFunction::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
-    throw interpreter::Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }

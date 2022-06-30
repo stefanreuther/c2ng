@@ -21,7 +21,7 @@
 #include "game/turn.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/error.hpp"
-#include "interpreter/indexablevalue.hpp"
+#include "interpreter/functionvalue.hpp"
 #include "interpreter/nametable.hpp"
 #include "interpreter/propertyacceptor.hpp"
 #include "interpreter/typehint.hpp"
@@ -60,7 +60,7 @@ namespace {
         { "SCREEN",           iitScreen,     0, interpreter::thInt },
     };
 
-    class IteratorFunction : public interpreter::IndexableValue {
+    class IteratorFunction : public interpreter::FunctionValue {
      public:
         IteratorFunction(afl::base::Ref<game::interface::IteratorProvider> provider, IteratorProperty p)
             : m_provider(provider),
@@ -69,7 +69,6 @@ namespace {
         ~IteratorFunction()
             { }
 
-        // IndexableValue:
         virtual afl::data::Value* get(interpreter::Arguments& args)
             {
                 // ex IntIteratorFunction::get
@@ -207,42 +206,12 @@ namespace {
                 }
                 return 0;
             }
-        virtual void set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
-            {
-                // ex IntIteratorFunction::set
-                throw interpreter::Error::notAssignable();
-            }
 
-        // CallableValue:
-        virtual int32_t getDimension(int32_t /*which*/) const
-            {
-                // ex IntIteratorFunction::getDimension
-                return 0;
-            }
-
-        virtual interpreter::Context* makeFirstContext()
-            {
-                // ex IntIteratorFunction::makeFirstContext
-                throw interpreter::Error::typeError(interpreter::Error::ExpectIterable);
-            }
 
         virtual IteratorFunction* clone() const
             {
                 // ex IntIteratorFunction::clone
                 return new IteratorFunction(m_provider, m_property);
-            }
-
-        // BaseValue:
-        virtual String_t toString(bool /*readable*/) const
-            {
-                // ex IntIteratorFunction::toString
-                return "#<array>";
-            }
-
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
-            {
-                // ex IntIteratorFunction::store
-                throw interpreter::Error::notSerializable();
             }
 
      private:

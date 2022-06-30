@@ -132,7 +132,7 @@ game::interface::VcrContext::get(PropertyIndex_t index)
         switch (VcrDomain(vcr_mapping[index].domain)) {
          case VcrPropertyDomain:
             return getVcrProperty(m_battleNumber, VcrProperty(vcr_mapping[index].index), m_session, m_root, m_turn, m_shipList);
-            
+
          case LeftPropertyDomain:
             return getVcrSideProperty(*battle, 0, VcrSideProperty(vcr_mapping[index].index),
                                       m_session.translator(),
@@ -192,10 +192,10 @@ game::interface::VcrContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::VcrContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::VcrContext::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
     // ex IntVcrContext::store
-    throw interpreter::Error::notAssignable();
+    rejectStore(out, aux, ctx);
 }
 
 game::vcr::Battle*

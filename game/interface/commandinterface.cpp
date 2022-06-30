@@ -26,7 +26,7 @@ using game::v3::CommandExtra;
    @todo document the commands
    @since PCC 1.1.4, PCC2 1.99.9, PCC2 2.40.1 */
 void
-game::interface::IFAddCommand(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+game::interface::IFAddCommand(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFAddCommand, globint.pas:Global_AddCommand
     args.checkArgumentCount(1);
@@ -61,7 +61,7 @@ game::interface::IFAddCommand(interpreter::Process& /*proc*/, game::Session& ses
    @todo document the commands
    @since PCC2 2.40.1 */
 void
-game::interface::IFDeleteCommand(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+game::interface::IFDeleteCommand(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
     args.checkArgumentCount(1);
 

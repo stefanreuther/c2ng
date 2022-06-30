@@ -3,7 +3,6 @@
   */
 
 #include "game/interface/vcrsidefunction.hpp"
-#include "interpreter/error.hpp"
 #include "interpreter/arguments.hpp"
 
 game::interface::VcrSideFunction::VcrSideFunction(size_t battleNumber,
@@ -34,10 +33,10 @@ game::interface::VcrSideFunction::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::VcrSideFunction::set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
+game::interface::VcrSideFunction::set(interpreter::Arguments& args, afl::data::Value* value)
 {
     // ex IntVcrSideArray::set
-    throw interpreter::Error::notAssignable();
+    rejectSet(args, value);
 }
 
 // CallableValue:
@@ -77,10 +76,10 @@ game::interface::VcrSideFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::VcrSideFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::VcrSideFunction::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
     // ex IntVcrSideArray::store
-    throw interpreter::Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }
 
 int32_t

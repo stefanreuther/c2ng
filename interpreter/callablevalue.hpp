@@ -1,17 +1,6 @@
 /**
   *  \file interpreter/callablevalue.hpp
   *  \brief Class interpreter::CallableValue
-  *
-  *  Original comment:
-  *
-  *  IntCallableValue is the basic type for an item which can be
-  *  called. Derived from it is IntIndexableValue, which can appear as
-  *  a function call "value(args)" on the left or right side of an
-  *  assignment, or in iteration "ForEach value". 
-  *  IntSimpleIndexableValue implements the common case of such a
-  *  value, which is a global function with no associated data. 
-  *  Likewise, IntSimpleProcedureValue implements the common case of a
-  *  global procedure.
   */
 #ifndef C2NG_INTERPRETER_CALLABLEVALUE_HPP
 #define C2NG_INTERPRETER_CALLABLEVALUE_HPP
@@ -63,6 +52,12 @@ namespace interpreter {
 
         // Value:
         virtual CallableValue* clone() const = 0;
+
+     protected:
+        /** Reject makeFirstContext() with a type error.
+            \return Function never returns, but this makes it compatible with use as "return rejectFirstContext();"
+            \throw Error */
+        Context* rejectFirstContext() const;
     };
 
 }

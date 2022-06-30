@@ -12,7 +12,11 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/test/defaultshiplist.cpp game/test/defaultshiplist.hpp \
+FILES_gamelib = interpreter/callablevalue.cpp \
+    interpreter/simpleprocedure.cpp interpreter/simpleprocedure.hpp \
+    interpreter/simplefunction.cpp interpreter/simplefunction.hpp \
+    interpreter/functionvalue.cpp interpreter/functionvalue.hpp \
+    game/test/defaultshiplist.cpp game/test/defaultshiplist.hpp \
     game/proxy/objectlistexportadaptor.cpp \
     game/proxy/objectlistexportadaptor.hpp game/proxy/globalactionproxy.cpp \
     game/proxy/globalactionproxy.hpp game/interface/globalactionextra.cpp \
@@ -408,12 +412,9 @@ FILES_gamelib = game/test/defaultshiplist.cpp game/test/defaultshiplist.hpp \
     game/interface/explosioncontext.hpp game/interface/explosionproperty.cpp \
     game/interface/explosionproperty.hpp game/map/explosiontype.cpp \
     game/map/explosiontype.hpp game/map/explosion.cpp game/map/explosion.hpp \
-    interpreter/simpleprocedurevalue.cpp \
-    interpreter/simpleprocedurevalue.hpp \
-    interpreter/simpleindexablevalue.cpp \
-    interpreter/simpleindexablevalue.hpp interpreter/filefunctions.cpp \
-    interpreter/filefunctions.hpp interpreter/filetable.cpp \
-    interpreter/filetable.hpp game/map/fleettype.cpp game/map/fleettype.hpp \
+    interpreter/filefunctions.cpp interpreter/filefunctions.hpp \
+    interpreter/filetable.cpp interpreter/filetable.hpp \
+    game/map/fleettype.cpp game/map/fleettype.hpp \
     interpreter/procedurevalue.cpp interpreter/procedurevalue.hpp \
     game/interface/shipmethod.cpp game/interface/shipmethod.hpp \
     game/map/shiputils.cpp game/map/shiputils.hpp game/map/fleet.cpp \
@@ -473,8 +474,7 @@ FILES_gamelib = game/test/defaultshiplist.cpp game/test/defaultshiplist.hpp \
     game/pcc/gamefolder.hpp game/pcc/serverdirectory.cpp \
     game/pcc/serverdirectory.hpp game/pcc/browserhandler.cpp \
     game/pcc/browserhandler.hpp game/interface/globalcommands.cpp \
-    game/interface/globalcommands.hpp game/interface/simpleprocedure.cpp \
-    game/interface/simpleprocedure.hpp game/historyturnlist.cpp \
+    game/interface/globalcommands.hpp game/historyturnlist.cpp \
     game/historyturnlist.hpp game/historyturn.cpp game/historyturn.hpp \
     util/backupfile.cpp util/backupfile.hpp game/nu/turnloader.cpp \
     game/nu/turnloader.hpp game/nu/specificationloader.cpp \
@@ -529,8 +529,7 @@ FILES_gamelib = game/test/defaultshiplist.cpp game/test/defaultshiplist.hpp \
     game/interface/iteratorcontext.hpp game/map/objectobserver.cpp \
     game/map/objectobserver.hpp game/interface/richtextfunctions.cpp \
     game/interface/richtextfunctions.hpp game/interface/richtextvalue.cpp \
-    game/interface/richtextvalue.hpp game/interface/simplefunction.cpp \
-    game/interface/simplefunction.hpp game/stringverifier.cpp \
+    game/interface/richtextvalue.hpp game/stringverifier.cpp \
     game/v3/stringverifier.cpp game/v3/stringverifier.hpp \
     game/stringverifier.hpp game/interface/userinterfacepropertyaccessor.hpp \
     game/map/cursors.cpp game/map/cursors.hpp \
@@ -1721,10 +1720,12 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_db_loader.cpp u/t_game_test_defaultshiplist.cpp \
-    u/t_game_browser_types.cpp u/t_game_score_scoreid.cpp \
-    u/t_game_score_structures.cpp u/t_game_ref_list.cpp \
-    u/t_game_proxy_objectlistexportadaptor.cpp \
+FILES_testsuite = u/t_interpreter_simpleprocedure.cpp \
+    u/t_interpreter_simplefunction.cpp u/t_interpreter_indexablevalue.cpp \
+    u/t_interpreter_functionvalue.cpp u/t_game_db_loader.cpp \
+    u/t_game_test_defaultshiplist.cpp u/t_game_browser_types.cpp \
+    u/t_game_score_scoreid.cpp u/t_game_score_structures.cpp \
+    u/t_game_ref_list.cpp u/t_game_proxy_objectlistexportadaptor.cpp \
     u/t_game_proxy_globalactionproxy.cpp \
     u/t_game_interface_globalactionextra.cpp \
     u/t_game_interface_globalactions.cpp u/t_util_treelist.cpp \

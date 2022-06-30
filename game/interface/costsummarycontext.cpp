@@ -4,7 +4,6 @@
   */
 
 #include "game/interface/costsummarycontext.hpp"
-#include "interpreter/error.hpp"
 #include "interpreter/nametable.hpp"
 #include "interpreter/propertyacceptor.hpp"
 #include "interpreter/values.hpp"
@@ -117,7 +116,7 @@ game::interface::CostSummaryContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::CostSummaryContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::CostSummaryContext::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
-    throw interpreter::Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }

@@ -29,9 +29,9 @@ game::interface::ExplosionFunction::get(interpreter::Arguments& /*args*/)
 }
 
 void
-game::interface::ExplosionFunction::set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
+game::interface::ExplosionFunction::set(interpreter::Arguments& args, afl::data::Value* value)
 {
-    throw interpreter::Error::notAssignable();
+    rejectSet(args, value);
 }
 
 // CallableValue:
@@ -62,7 +62,7 @@ game::interface::ExplosionFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::ExplosionFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::ExplosionFunction::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
-    throw interpreter::Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }

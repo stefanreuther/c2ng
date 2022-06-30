@@ -5,7 +5,6 @@
 #include "game/interface/explosioncontext.hpp"
 #include "interpreter/typehint.hpp"
 #include "interpreter/nametable.hpp"
-#include "interpreter/error.hpp"
 #include "interpreter/propertyacceptor.hpp"
 #include "game/interface/explosionproperty.hpp"
 #include "game/game.hpp"
@@ -94,9 +93,9 @@ game::interface::ExplosionContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::ExplosionContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::ExplosionContext::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
-    throw interpreter::Error::notSerializable();
+    rejectStore(out, aux, ctx);
 }
 
 game::interface::ExplosionContext*
