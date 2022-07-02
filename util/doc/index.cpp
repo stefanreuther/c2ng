@@ -5,6 +5,7 @@
 
 #include <vector>
 #include "util/doc/index.hpp"
+#include "afl/charset/utf8charset.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "afl/except/fileformatexception.hpp"
 #include "afl/io/xml/defaultentityhandler.hpp"
@@ -259,6 +260,7 @@ void
 util::doc::Index::save(afl::io::Stream& out) const
 {
     afl::io::TextFile textOut(out);
+    textOut.setCharsetNew(new afl::charset::Utf8Charset());
     saveNode(textOut, *m_root, 0);
     textOut.flush();
 }

@@ -58,6 +58,7 @@ class TestUtilDocIndex : public CxxTest::TestSuite {
     void testStructureIO();
     void testErrors();
     void testRelated();
+    void testCharset();
 };
 
 class TestUtilDocInternalBlobStore : public CxxTest::TestSuite {

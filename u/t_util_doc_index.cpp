@@ -518,3 +518,30 @@ TestUtilDocIndex::testRelated()
     TS_ASSERT_EQUALS(testee.getNodeRelatedVersions(d2a).size(), 0U);
     TS_ASSERT_EQUALS(testee.getNodeRelatedVersions(testee.root()).size(), 0U);
 }
+
+/* Test handling of non-ASCII characters in index file */
+void
+TestUtilDocIndex::testCharset()
+{
+    const String_t TEXT = "\xc3\xa4";
+    Index testee;
+    testee.addDocument(testee.root(), "doc-id", TEXT, Index::ObjectId_t());
+
+    // Save
+    InternalStream str;
+    testee.save(str);
+
+    // Verify content
+    TS_ASSERT_EQUALS(simplify(str.getContent()), "<index><docid=\"doc-id\"title=\""+TEXT+"\"/></index>");
+
+    // Reload
+    Index copy;
+    str.setPos(0);
+    copy.load(str);
+
+    // Verify loaded content
+    TS_ASSERT_EQUALS(copy.getNumNodeChildren(copy.root()), 1U);
+    Index::Handle_t copyId = copy.getNodeChildByIndex(copy.root(), 0);
+    TS_ASSERT_EQUALS(copy.getNodeTitle(copyId), TEXT);
+}
+
