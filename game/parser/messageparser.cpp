@@ -35,8 +35,8 @@ namespace {
     void parseCheckInstruction(game::parser::MessageTemplate& tpl, uint8_t opcode, String_t line)
     {
         uint8_t scope = game::parser::MessageTemplate::sAny;
-        int8_t offset = 0;
-        int8_t scale  = 1;
+        int offset = 0;
+        int scale  = 1;
         if (!line.empty()) {
             if (line[0] == '+') {
                 scope = game::parser::MessageTemplate::sRelative;
@@ -49,8 +49,12 @@ namespace {
             if (scope != game::parser::MessageTemplate::sAny) {
                 String_t::size_type i = 1;
                 while (i < line.size() && line[i] >= '0' && line[i] <= '9') {
-                    // FIXME: overflow check
                     offset = 10*offset + line[i] - '0';
+                    if (offset > 127) {
+                        /* Overflow; go into "invalid" branch below */
+                        i = line.size();
+                        break;
+                    }
                     ++i;
                 }
                 if (i < line.size() && line[i] == ',') {
@@ -66,7 +70,7 @@ namespace {
                     scope = game::parser::MessageTemplate::sAny;
                 }
             }
-            tpl.addCheckInstruction(uint8_t(opcode + scope), offset, line);
+            tpl.addCheckInstruction(uint8_t(opcode + scope), int8_t(offset), line);
         }
     }
 

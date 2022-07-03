@@ -43,11 +43,16 @@ int32_t
 interpreter::ArrayValue::getDimension(int32_t which) const
 {
     // ex IntArray::getDimension
-    // FIXME: range checks?
+    size_t value;
     if (which == 0) {
-        return m_data->getNumDimensions();
+        value = m_data->getNumDimensions();
     } else {
-        return m_data->getDimension(which-1);
+        value = m_data->getDimension(which-1);
+    }
+    if (value > 0x7FFFFFFF) {
+        return 0x7FFFFFFF;
+    } else {
+        return static_cast<int32_t>(value);
     }
 }
 

@@ -69,7 +69,7 @@ interpreter::Closure::getDimension(int32_t which) const
 {
     // ex IntClosure::getDimension
     int32_t totalDimensions = m_function->getDimension(0);
-    int32_t fixedDimensions = m_fixedArgs->size();
+    int32_t fixedDimensions = int32_t(m_fixedArgs->size());
     if (fixedDimensions >= totalDimensions) {
         // All arguments fixed; no way this has any dimensions
         return 0;

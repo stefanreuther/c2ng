@@ -178,7 +178,7 @@ util::parseKey(String_t str, Key_t& result)
             // Up to four hex digits
             const char* p = str.c_str()+2;
             char* pout;
-            result |= std::strtoul(p, &pout, 16);
+            result = static_cast<Key_t>(result | std::strtoul(p, &pout, 16));
             if (*pout == 0) {
                 found = true;
             }

@@ -113,7 +113,7 @@ interpreter::BytecodeObject::create(bool isProcedure)
 uint16_t
 interpreter::BytecodeObject::addArgument(String_t name, bool optional)
 {
-    uint16_t result = m_localVariables.add(name);
+    uint16_t result = packIndex(m_localVariables.add(name));
     m_maxArgs = m_localVariables.getNumNames();
     if (!optional) {
         m_minArgs = m_localVariables.getNumNames();

@@ -48,7 +48,7 @@ gfx::ClipFilter::drawPixel(const Point& pt, Color_t color, Alpha_t alpha)
 void
 gfx::ClipFilter::drawPixels(const Point& pt, afl::base::Memory<const Color_t> colors, Alpha_t alpha)
 {
-    Rectangle r(pt, Point(colors.size(), 1));
+    Rectangle r(pt, Point(static_cast<int32_t>(colors.size()), 1));
     r.intersect(m_rectangle);
     if (r.exists()) {
         parent().drawPixels(r.getTopLeft(), colors.subrange(r.getLeftX() - pt.getX(), r.getWidth()), alpha);
