@@ -409,6 +409,7 @@ TaxationKeyWidget::handleKey(util::Key_t key, int prefix)
         return true;
 
      case 'u':
+     case util::Key_Backspace:
         // Undo
         m_proxy.revert(TaxationAction::Areas_t(m_area));
         return true;
