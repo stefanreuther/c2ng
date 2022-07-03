@@ -350,6 +350,7 @@ BuildQueueList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, Ite
         const int em = normalFont->getEmWidth();
 
         area.consumeY(PAD_PX);
+        area.consumeRightX(GAP_PX);
         ctx.useFont(*normalFont);
 
         // Icon
@@ -436,7 +437,7 @@ BuildQueueList::getLayoutInfo() const
         extraSize += em * POINTS_EMS + GAP_PX;
     }
 
-    gfx::Point size(em * (ACTION_EMS + FCODE_EMS) + 3*GAP_PX + extraSize, getItemHeight() * 15);
+    gfx::Point size(em * (ACTION_EMS + FCODE_EMS) + 4*GAP_PX + extraSize, getItemHeight() * 15);
     return ui::layout::Info(size, size, ui::layout::Info::GrowBoth);
 }
 
