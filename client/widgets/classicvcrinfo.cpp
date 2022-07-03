@@ -6,6 +6,8 @@
   */
 
 #include "client/widgets/classicvcrinfo.hpp"
+#include "afl/string/format.hpp"
+#include "gfx/complex.hpp"
 #include "util/string.hpp"
 
 namespace {
@@ -67,6 +69,7 @@ client::widgets::ClassicVcrInfo::draw(gfx::Canvas& can)
     afl::base::Ref<gfx::Font> largeFont  = getLargeFont();
     afl::base::Ref<gfx::Font> normalFont = getNormalFont();
     afl::base::Ref<gfx::Font> boldFont   = getBoldFont();
+    afl::base::Ref<gfx::Font> smallFont  = m_root.provider().getFont("-");
 
     const int largeHeight  = largeFont->getCellSize().getY();
     const int normalHeight = normalFont->getCellSize().getY();
@@ -75,7 +78,7 @@ client::widgets::ClassicVcrInfo::draw(gfx::Canvas& can)
 
     // Prepare context
     gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
-    ctx.setSolidBackground();
+    drawBackground(ctx, r);
     ctx.setColor(util::SkinColor::Static);
 
     // First line
@@ -89,6 +92,11 @@ client::widgets::ClassicVcrInfo::draw(gfx::Canvas& can)
         String_t text = m_data.algorithmName;
         util::addListItem(text, ", ", m_data.position);
         outText(ctx, gfx::Point(x+w, y), text);
+    }
+    if (const int32_t* seed = m_data.seed.get()) {
+        ctx.useFont(*smallFont);
+        ctx.setColor(util::SkinColor::Faded);
+        outText(ctx, gfx::Point(x+w, y+normalHeight), afl::string::Format("#%d", *seed));
     }
     ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
 

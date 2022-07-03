@@ -76,6 +76,7 @@ game::proxy::VcrDatabaseProxy::Trampoline::requestData(size_t index)
             d.groups.push_back(b->getGroupInfo(i, root.hostConfiguration()));
         }
 
+        d.seed = b->getAuxiliaryInformation(game::vcr::Battle::aiSeed);
         d.algorithmName = b->getAlgorithmName(m_adaptor.translator());
         d.resultSummary = b->getResultSummary(me, root.hostConfiguration(), shipList, root.userConfiguration().getNumberFormatter(), tx);
 

@@ -6,8 +6,9 @@
 #define C2NG_GAME_VCR_INFO_HPP
 
 #include <vector>
-#include "util/skincolor.hpp"
+#include "afl/base/optional.hpp"
 #include "afl/string/string.hpp"
+#include "util/skincolor.hpp"
 
 namespace game { namespace vcr {
 
@@ -43,6 +44,7 @@ namespace game { namespace vcr {
         String_t algorithmName;                               ///< Algorithm name ("PHost").
         String_t resultSummary;                               ///< Result summary ("We won").
         String_t position;                                    ///< Position. Can be empty.
+        afl::base::Optional<int32_t> seed;                    ///< Seed. Can be unknown.
         std::vector<ObjectInfo> units;                        ///< Information for all units.
         std::vector<GroupInfo> groups;                        ///< Information for all groups (fleets).
     };

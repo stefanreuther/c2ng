@@ -184,6 +184,7 @@ TestGameProxyVcrDatabaseProxy::testIt()
     TS_ASSERT_EQUALS(env.currentBattle, 1U);
     TS_ASSERT_EQUALS(u.m_data.heading, "Battle 2 of 2");
     TS_ASSERT_EQUALS(u.m_data.algorithmName, "PHost 4");
+    TS_ASSERT_EQUALS(u.m_data.seed.orElse(-1), 42);
     TS_ASSERT_EQUALS(u.m_data.units.size(), 2U);
     TS_ASSERT_EQUALS(u.m_data.units[0].text[0], "Liz (Id #14, a Player 2 ANNIHILATION CLASS BATTLESHIP)");
     TS_ASSERT_EQUALS(u.m_data.units[1].text[0], "Bird (Id #434, a Player 3 starship)");
