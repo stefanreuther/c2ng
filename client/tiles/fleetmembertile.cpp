@@ -24,6 +24,7 @@ namespace {
     {
         ui::widgets::Button& btn = del.addNew(new ui::widgets::Button(title, key, root));
         btn.dispatchKeyTo(keyHandler);
+        btn.setCompact(true);
         g.add(btn);
     }
 }
@@ -41,7 +42,6 @@ client::tiles::FleetMemberTile::FleetMemberTile(ui::Root& root, gfx::KeyEventCon
     m_list.setFlag(AbstractListbox::NoPageKeys, true);
 
     // Buttons
-    // FIXME: these buttons are smaller in PCC2
     ui::Group& g = m_deleter.addNew(new ui::Group(ui::layout::HBox::instance5));
     addButton(g, m_deleter, root, keyHandler, tx("Del"), util::Key_Delete);
     addButton(g, m_deleter, root, keyHandler, "B", 'b');

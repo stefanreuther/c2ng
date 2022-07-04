@@ -37,11 +37,18 @@ namespace ui { namespace icons {
             \param text Text */
         void setText(const String_t& text);
 
+        /** Set compact mode.
+            In compact mode, the button size is reduced to fit a 2px frame in the same space.
+            This makes the button smaller than the font claims, but has traditionally been used for some buttons.
+            \param flag Flag to enable compact mode */
+        void setCompact(bool flag);
+
      private:
         String_t m_text;
         gfx::FontRequest m_font;
         gfx::HorizontalAlignment m_xAlign;
         gfx::VerticalAlignment m_yAlign;
+        bool m_compact;
         Root& m_root;
     };
 

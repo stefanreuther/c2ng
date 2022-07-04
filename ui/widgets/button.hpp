@@ -42,6 +42,11 @@ namespace ui { namespace widgets {
             \param text Text */
         void setText(const String_t& text);
 
+        /** Set compact mode.
+            \param flag Flag to enable compact mode
+            \see ui::icons::Button::setCompact */
+        void setCompact(bool flag);
+
      private:
         ui::icons::Button m_icon;
     };

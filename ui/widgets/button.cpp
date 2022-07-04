@@ -41,3 +41,10 @@ ui::widgets::Button::setText(const String_t& text)
     m_icon.setText(text);
     requestRedraw();
 }
+
+void
+ui::widgets::Button::setCompact(bool flag)
+{
+    m_icon.setCompact(flag);
+    requestRedraw();
+}
