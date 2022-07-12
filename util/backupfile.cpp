@@ -10,7 +10,6 @@
 #include "afl/io/directory.hpp"
 #include "afl/io/directoryentry.hpp"
 #include "afl/string/format.hpp"
-#include "util/translation.hpp"
 
 namespace {
     // FIXME: move this into a common place?
@@ -201,10 +200,10 @@ util::BackupFile::hasFile(afl::io::FileSystem& fs, String_t tpl)
 }
 
 afl::base::Ref<afl::io::Stream>
-util::BackupFile::openFile(afl::io::FileSystem& fs, String_t tpl)
+util::BackupFile::openFile(afl::io::FileSystem& fs, String_t tpl, afl::string::Translator& tx)
 {
     if (tpl.empty()) {
-        throw afl::except::FileProblemException("<BackupFile>", _("No backup file configured"));
+        throw afl::except::FileProblemException("<BackupFile>", tx("No backup file configured"));
     } else {
         return fs.openFile(expandFileName(fs, tpl), fs.OpenRead);
     }

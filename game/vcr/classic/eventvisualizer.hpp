@@ -5,6 +5,7 @@
 #ifndef C2NG_GAME_VCR_CLASSIC_EVENTVISUALIZER_HPP
 #define C2NG_GAME_VCR_CLASSIC_EVENTVISUALIZER_HPP
 
+#include "afl/string/translator.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/playerlist.hpp"
 #include "game/spec/shiplist.hpp"
@@ -38,13 +39,15 @@ namespace game { namespace vcr { namespace classic {
             \param shipList Ship List
             \param players Player list
             \param teams Team settings
-            \param config Host configuration */
+            \param config Host configuration
+            \param tx Translator (for fallback names) */
         void init(Algorithm& algo,
                   const Battle& battle,
                   const game::spec::ShipList& shipList,
                   const PlayerList& players,
                   const TeamSettings* teams,
-                  const game::config::HostConfiguration& config);
+                  const game::config::HostConfiguration& config,
+                  afl::string::Translator& tx);
 
         /** Play single cycle.
             Calls Algorithm::playCycle() and generates all needed event callbacks.
@@ -95,7 +98,8 @@ namespace game { namespace vcr { namespace classic {
                       const game::spec::ShipList& shipList,
                       const PlayerList& players,
                       const TeamSettings* teams,
-                      const game::config::HostConfiguration& config);
+                      const game::config::HostConfiguration& config,
+                      afl::string::Translator& tx);
         void updateSide(Side side, Algorithm& algo);
         void refreshSide(Side side, Algorithm& algo);
         EventListener::HitEffect getHitEffect(Algorithm& algo, Side side);

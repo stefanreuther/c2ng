@@ -17,6 +17,7 @@
 #include "afl/data/stringvalue.hpp"
 #include "afl/io/constmemorystream.hpp"
 #include "afl/io/internalsink.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "interpreter/savevisitor.hpp"
 #include "interpreter/values.hpp"
 #include "interpreter/vmio/loadcontext.hpp"
@@ -168,6 +169,7 @@ TestInterpreterVmioValueLoader::testReal()
 {
     // ex IntValueTestSuite::testReal
     afl::charset::Utf8Charset cs;
+    afl::string::NullTranslator tx;
     interpreter::vmio::NullLoadContext loadContext;
     interpreter::vmio::NullSaveContext saveContext;
 
@@ -185,7 +187,7 @@ TestInterpreterVmioValueLoader::testReal()
 
         // Load value
         afl::io::ConstMemoryStream auxIn((afl::base::Bytes_t()));
-        std::auto_ptr<afl::data::Value> value(interpreter::vmio::ValueLoader(cs, loadContext).loadValue(tagIn, auxIn));
+        std::auto_ptr<afl::data::Value> value(interpreter::vmio::ValueLoader(cs, loadContext, tx).loadValue(tagIn, auxIn));
         TSM_ASSERT(msg, value.get() != 0);
 
         afl::data::FloatValue* fv = dynamic_cast<afl::data::FloatValue*>(value.get());
@@ -249,6 +251,8 @@ void
 TestInterpreterVmioValueLoader::testInteger()
 {
     // ex IntValueTestSuite::testInt
+    afl::string::NullTranslator tx;
+
     // Some tag nodes
     static const interpreter::TagNode tags[] = {
         { interpreter::TagNode::Tag_Integer, 4711 },
@@ -267,7 +271,7 @@ TestInterpreterVmioValueLoader::testInteger()
     afl::data::Value* ivs[N];
     afl::data::ScalarValue* iivs[N];
     for (size_t i = 0; i < N; ++i) {
-        ivs[i] = interpreter::vmio::ValueLoader(cs, loadContext).loadValue(tags[i], auxIn);
+        ivs[i] = interpreter::vmio::ValueLoader(cs, loadContext, tx).loadValue(tags[i], auxIn);
         TS_ASSERT(ivs[i] != 0);
         iivs[i] = dynamic_cast<afl::data::ScalarValue*>(ivs[i]);
         TS_ASSERT(iivs[i] != 0);
@@ -324,6 +328,7 @@ void
 TestInterpreterVmioValueLoader::testLoadSegment()
 {
     // ex IntDataTestSuite::testLoad
+    afl::string::NullTranslator tx;
     static const uint8_t data[] = {
         0, 0, 0, 0, 0, 0,        // real 0.0
         0, 2, 5, 4, 0, 0,        // int 1029
@@ -348,7 +353,7 @@ TestInterpreterVmioValueLoader::testLoadSegment()
     // Load it into a segment
     afl::charset::Utf8Charset cs;
     interpreter::vmio::NullLoadContext loadContext;
-    interpreter::vmio::ValueLoader(cs, loadContext).load(seg, mem, 0, 9);
+    interpreter::vmio::ValueLoader(cs, loadContext, tx).load(seg, mem, 0, 9);
 
     afl::data::StringValue* sv;
     afl::data::FloatValue* fv;
@@ -419,6 +424,7 @@ TestInterpreterVmioValueLoader::testLoadSegment()
 void
 TestInterpreterVmioValueLoader::testLoadSegment2()
 {
+    afl::string::NullTranslator tx;
     static const uint8_t data[] = {
         0, 2, 5, 4, 0, 0,        // int 1029
         0, 1, 0, 0, 0, 0,        // null
@@ -436,7 +442,7 @@ TestInterpreterVmioValueLoader::testLoadSegment2()
     // Load it into a segment as [null,1029,null,23]
     afl::charset::Utf8Charset cs;
     interpreter::vmio::NullLoadContext loadContext;
-    interpreter::vmio::ValueLoader(cs, loadContext).load(seg, mem, 1, 2);
+    interpreter::vmio::ValueLoader(cs, loadContext, tx).load(seg, mem, 1, 2);
 
     afl::data::IntegerValue* iv;
 

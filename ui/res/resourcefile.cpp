@@ -4,14 +4,13 @@
   */
 
 #include "ui/res/resourcefile.hpp"
-#include "afl/io/limitedstream.hpp"
-#include "afl/bits/value.hpp"
-#include "afl/bits/uint16le.hpp"
-#include "afl/bits/uint32le.hpp"
-#include "afl/except/fileformatexception.hpp"
-#include "util/translation.hpp"
 #include "afl/base/growablememory.hpp"
 #include "afl/base/staticassert.hpp"
+#include "afl/bits/uint16le.hpp"
+#include "afl/bits/uint32le.hpp"
+#include "afl/bits/value.hpp"
+#include "afl/except/fileformatexception.hpp"
+#include "afl/io/limitedstream.hpp"
 
 namespace {
     typedef afl::bits::Value<afl::bits::UInt16LE> UInt16_t;
@@ -35,11 +34,11 @@ namespace {
 }
 
 // Constructor.
-ui::res::ResourceFile::ResourceFile(afl::base::Ref<afl::io::Stream> file)
+ui::res::ResourceFile::ResourceFile(afl::base::Ref<afl::io::Stream> file, afl::string::Translator& tx)
     : m_file(file),
       m_index()
 {
-    init();
+    init(tx);
 }
 
 // Destructor.
@@ -61,13 +60,13 @@ ui::res::ResourceFile::openMember(uint16_t id)
 
 // Initialize.
 void
-ui::res::ResourceFile::init()
+ui::res::ResourceFile::init(afl::string::Translator& tx)
 {
     // Read header
     RawHeader header;
     m_file->fullRead(afl::base::fromObject(header));
     if (header.magic != 0x5A52 /* 'RZ' */) {
-        throw afl::except::FileFormatException(*m_file, _("File is missing required signature"));
+        throw afl::except::FileFormatException(*m_file, tx("File is missing required signature"));
     }
 
     // Read index

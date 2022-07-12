@@ -185,7 +185,7 @@ game::sim::ConsoleApplication::ConsoleApplication(afl::sys::Environment& env, af
     : Application(env, fs),
       m_verbose(true)
 {
-    consoleLogger().setConfiguration("*@Error=raw:*=hide");
+    consoleLogger().setConfiguration("*@Error=raw:*=hide", translator());
 }
 
 void
@@ -285,7 +285,7 @@ game::sim::ConsoleApplication::parseCommandLine(Parameters& p)
                 m_verbose = false;
             } else if (text == "log") {
                 try {
-                    consoleLogger().setConfiguration(parser.getRequiredParameter(text));
+                    consoleLogger().setConfiguration(parser.getRequiredParameter(text), tx);
                 }
                 catch (std::exception& e) {
                     errorExit(tx("parameter to '--log' is not valid"));
@@ -593,7 +593,7 @@ game::sim::ConsoleApplication::showClassResults(const Setup& /*setup*/, const Se
                     } else {
                         line += ", ";
                     }
-                    line += Format("%d x %s", numSurvivors, session.root->playerList().getPlayerName(pl, Player::AdjectiveName));
+                    line += Format("%d x %s", numSurvivors, session.root->playerList().getPlayerName(pl, Player::AdjectiveName, tx));
                 }
             }
             if (first) {

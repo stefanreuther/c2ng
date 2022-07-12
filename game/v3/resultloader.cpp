@@ -201,7 +201,7 @@ void
 game::v3::ResultLoader::loadTurnfile(Turn& trn, const Root& root, afl::io::Stream& file, int player) const
 {
     // ex game/load-trn.cc:loadTurn
-    m_log.write(m_log.Info, LOG_NAME, Format(m_translator("Loading %s TRN file..."), root.playerList().getPlayerName(player, Player::AdjectiveName)));
+    m_log.write(m_log.Info, LOG_NAME, Format(m_translator("Loading %s TRN file..."), root.playerList().getPlayerName(player, Player::AdjectiveName, m_translator)));
     Loader(*m_charset, m_translator, m_log).loadTurnfile(trn, root, file, player);
 }
 
@@ -228,7 +228,7 @@ game::v3::ResultLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, ga
     // ex GGameResultStorage::load(GGameTurn& trn)
     {
         Ref<Stream> file = root.gameDirectory().openFile(Format("player%d.rst", player), afl::io::FileSystem::OpenRead);
-        m_log.write(m_log.Info, LOG_NAME, Format(m_translator("Loading %s RST file..."), root.playerList().getPlayerName(player, Player::AdjectiveName)));
+        m_log.write(m_log.Info, LOG_NAME, Format(m_translator("Loading %s RST file..."), root.playerList().getPlayerName(player, Player::AdjectiveName, m_translator)));
         ldr.loadResult(turn, root, game, *file, player);
 
         // Backup
@@ -254,7 +254,7 @@ game::v3::ResultLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, ga
 
     // Load fleets.
     // Must be after loading the result/turn because it requires shipsource flags
-    game::db::FleetLoader(*m_charset).load(root.gameDirectory(), turn.universe(), player);
+    game::db::FleetLoader(*m_charset, m_translator).load(root.gameDirectory(), turn.universe(), player);
 
     // Util
     Parser mp(m_translator, m_log, game, player, root, game::actions::mustHaveShipList(session));
@@ -294,8 +294,8 @@ game::v3::ResultLoader::doLoadHistoryTurn(Turn& turn, Game& game, int player, in
     tpl.setTurnNumber(turnNumber);
 
     {
-        Ref<Stream> file = tpl.openFile(m_fileSystem, root.userConfiguration()[UserConfiguration::Backup_Result]());
-        m_log.write(m_log.Info, LOG_NAME, Format(m_translator("Loading %s backup file..."), root.playerList().getPlayerName(player, Player::AdjectiveName)));
+        Ref<Stream> file = tpl.openFile(m_fileSystem, root.userConfiguration()[UserConfiguration::Backup_Result](), m_translator);
+        m_log.write(m_log.Info, LOG_NAME, Format(m_translator("Loading %s backup file..."), root.playerList().getPlayerName(player, Player::AdjectiveName, m_translator)));
         ldr.loadResult(turn, root, game, *file, player);
     }
 
@@ -338,7 +338,7 @@ game::v3::ResultLoader::doSaveCurrentTurn(const Turn& turn, const Game& game, Pl
                 saveCurrentDatabases(turn, game, player, root, session, *m_charset);
 
                 // Fleets
-                game::db::FleetLoader(*m_charset).save(root.gameDirectory(), turn.universe(), player);
+                game::db::FleetLoader(*m_charset, m_translator).save(root.gameDirectory(), turn.universe(), player);
             }
         }
     }

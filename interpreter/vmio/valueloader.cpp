@@ -7,15 +7,14 @@
 #include <cmath>
 #include "interpreter/vmio/valueloader.hpp"
 #include "afl/base/growablememory.hpp"
-#include "afl/bits/value.hpp"
+#include "afl/base/staticassert.hpp"
 #include "afl/bits/int16le.hpp"
 #include "afl/bits/int32le.hpp"
-#include "afl/base/staticassert.hpp"
+#include "afl/bits/value.hpp"
 #include "afl/except/fileformatexception.hpp"
-#include "util/translation.hpp"
-#include "interpreter/values.hpp"
-#include "interpreter/filevalue.hpp"
 #include "interpreter/blobvalue.hpp"
+#include "interpreter/filevalue.hpp"
+#include "interpreter/values.hpp"
 #include "interpreter/vmio/loadcontext.hpp"
 #include "interpreter/vmio/structures.hpp"
 #include "util/io.hpp"
@@ -23,24 +22,25 @@
 namespace {
     using interpreter::vmio::structures::Tag;
 
-    afl::data::Value* failInvalidValue(afl::io::Stream& aux)
+    afl::data::Value* failInvalidValue(afl::io::Stream& aux, afl::string::Translator& tx)
     {
-        throw afl::except::FileFormatException(aux, _("Invalid value in data segment; file probably written by newer version of PCC"));
+        throw afl::except::FileFormatException(aux, tx("Invalid value in data segment; file probably written by newer version of PCC"));
     }
 
-    afl::data::Value* checkNull(afl::data::Value* value, afl::io::Stream& aux)
+    afl::data::Value* checkNull(afl::data::Value* value, afl::io::Stream& aux, afl::string::Translator& tx)
     {
         if (value == 0) {
-            failInvalidValue(aux);
+            failInvalidValue(aux, tx);
         }
         return value;
     }
 }
 
 // Constructor.
-interpreter::vmio::ValueLoader::ValueLoader(afl::charset::Charset& cs, LoadContext& ctx)
+interpreter::vmio::ValueLoader::ValueLoader(afl::charset::Charset& cs, LoadContext& ctx, afl::string::Translator& tx)
     : m_charset(cs),
-      m_context(ctx)
+      m_context(ctx),
+      m_translator(tx)
 { }
 
 
@@ -100,26 +100,26 @@ interpreter::vmio::ValueLoader::loadValue(const TagNode& tag, afl::io::Stream& a
         return new FileValue(tag.value);
 
      case TagNode::Tag_BCO:
-        return checkNull(m_context.loadBCO(tag.value), aux);
+        return checkNull(m_context.loadBCO(tag.value), aux, m_translator);
 
      case TagNode::Tag_Array:
-        return checkNull(m_context.loadArray(tag.value), aux);
+        return checkNull(m_context.loadArray(tag.value), aux, m_translator);
 
      case TagNode::Tag_Hash:
-        return checkNull(m_context.loadHash(tag.value), aux);
+        return checkNull(m_context.loadHash(tag.value), aux, m_translator);
 
      case TagNode::Tag_Struct:
-        return checkNull(m_context.loadStructureValue(tag.value), aux);
+        return checkNull(m_context.loadStructureValue(tag.value), aux, m_translator);
 
      case TagNode::Tag_StructType:
-        return checkNull(m_context.loadStructureType(tag.value), aux);
+        return checkNull(m_context.loadStructureType(tag.value), aux, m_translator);
 
      default:
         if ((tag.tag & 0x00FF) == 0) {
             if (Context* ctx = m_context.loadContext(tag, aux)) {
                 return ctx;
             } else {
-                return failInvalidValue(aux);
+                return failInvalidValue(aux, m_translator);
             }
         } else {
             return makeFloatValue(loadFloat48(tag));

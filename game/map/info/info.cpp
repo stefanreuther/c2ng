@@ -1311,7 +1311,7 @@ game::map::info::renderStarchartForeignSummary(TagNode& tab,
                 || thisMinefields != 0))
         {
             TagNode& row = makeRow(tab);
-            makeLink(makeLeftCell(row), players.getPlayerName(pl, Player::ShortName),
+            makeLink(makeLeftCell(row), players.getPlayerName(pl, Player::ShortName, tx),
                      link.makeSearchLink(SearchQuery(SearchQuery::MatchTrue,
                                                      SearchQuery::SearchObjects_t() + SearchQuery::SearchShips + SearchQuery::SearchPlanets + SearchQuery::SearchOthers,
                                                      Format("Owner$=%d", pl))));

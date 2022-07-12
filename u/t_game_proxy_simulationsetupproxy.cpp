@@ -7,6 +7,7 @@
 
 #include "t_game_proxy.hpp"
 #include "afl/base/staticassert.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "game/game.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/universe.hpp"
@@ -51,10 +52,11 @@ namespace {
 
     void prepareFriendlyCodes(SessionThread& thread)
     {
+        afl::string::NullTranslator tx;
         game::spec::FriendlyCodeList& list = thread.session().getShipList()->friendlyCodes();
-        list.addCode(game::spec::FriendlyCode("sc1", "s,ship code"));
-        list.addCode(game::spec::FriendlyCode("plc", "p,planet code"));
-        list.addCode(game::spec::FriendlyCode("sc2", "s,ship code 2"));
+        list.addCode(game::spec::FriendlyCode("sc1", "s,ship code",   tx));
+        list.addCode(game::spec::FriendlyCode("plc", "p,planet code", tx));
+        list.addCode(game::spec::FriendlyCode("sc2", "s,ship code 2", tx));
     }
 
     void preparePlanetNames(SessionThread& thread)

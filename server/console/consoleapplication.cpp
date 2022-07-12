@@ -158,7 +158,7 @@ server::console::ConsoleApplication::ConsoleApplication(afl::sys::Environment& e
     m_availableContexts.pushBackNew(new RouterContextFactory("router", m_networkStack));
 
     // Be quiet by default.
-    consoleLogger().setConfiguration("*@-Info=hide");
+    consoleLogger().setConfiguration("*@-Info=hide", translator());
 }
 
 // Destructor.
@@ -182,7 +182,7 @@ server::console::ConsoleApplication::appMain()
             if (p == "h" || p == "help") {
                 help();
             } else if (p == "log") {
-                consoleLogger().setConfiguration(commandLineParser.getRequiredParameter("log"));
+                consoleLogger().setConfiguration(commandLineParser.getRequiredParameter("log"), tx);
             } else if (p == "proxy") {
                 String_t url = commandLineParser.getRequiredParameter(p);
                 if (!m_networkStack.add(url)) {

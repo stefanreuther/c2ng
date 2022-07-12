@@ -36,11 +36,11 @@ namespace {
         The xtrafcode.txt file usually contains all the codes we already had in fcodes.cc,
         but with lower-quality meta-information.
         Thus, if a definition already exists, ignore the extra code. */
-    void addExtraCode(game::spec::FriendlyCodeList& list, const String_t& code)
+    void addExtraCode(game::spec::FriendlyCodeList& list, const String_t& code, afl::string::Translator& tx)
     {
         size_t pos;
         if (!list.getIndexByName(code, pos)) {
-            list.addCode(game::spec::FriendlyCode(code, "X,"));
+            list.addCode(game::spec::FriendlyCode(code, "X,", tx));
         }
     }
 }
@@ -181,7 +181,7 @@ game::spec::FriendlyCodeList::load(afl::io::Stream& in, afl::sys::LogListener& l
                 fc.erase(3);
             }
             try {
-                addCode(FriendlyCode(fc, line));
+                addCode(FriendlyCode(fc, line, tx));
             }
             catch(std::exception& e) {
                 log.write(log.Error, LOG_NAME, in.getName(), tf.getLineNumber(), e.what());
@@ -196,7 +196,7 @@ game::spec::FriendlyCodeList::load(afl::io::Stream& in, afl::sys::LogListener& l
 
 // Load extra friendly codes list.
 void
-game::spec::FriendlyCodeList::loadExtraCodes(afl::io::Stream& in)
+game::spec::FriendlyCodeList::loadExtraCodes(afl::io::Stream& in, afl::string::Translator& tx)
 {
     // ex GFCode::loadExtraFC
     uint8_t tmp[4096];
@@ -205,7 +205,7 @@ game::spec::FriendlyCodeList::loadExtraCodes(afl::io::Stream& in)
         for (size_t i = 0; i < n; ++i) {
             if (std::isspace(tmp[i])) {
                 if (!code.empty()) {
-                    addExtraCode(*this, code);
+                    addExtraCode(*this, code, tx);
                     code.clear();
                 }
             } else {
@@ -215,8 +215,8 @@ game::spec::FriendlyCodeList::loadExtraCodes(afl::io::Stream& in)
     }
 
     if (!code.empty()) {
-        addExtraCode(*this, code);
-    }    
+        addExtraCode(*this, code, tx);
+    }
 }
 
 // Pack friendly-code list into standalone info object.

@@ -87,8 +87,7 @@ namespace {
                     N_("%s starship"),
                     N_("%s ship")
                 };
-                result.subtitle = Format(tx.translateString(table[kind]).c_str(),
-                                         pRoot->playerList().getPlayerName(shipOwner, game::Player::AdjectiveName));
+                result.subtitle = Format(tx(table[kind]), pRoot->playerList().getPlayerName(shipOwner, game::Player::AdjectiveName, tx));
             }
 
             int perceivedOwner = 0;
@@ -96,10 +95,9 @@ namespace {
 
             if (shipOwner != perceivedOwner) {
                 if (perceivedOwner == viewpoint) {
-                    result.subtitle += tx.translateString(" under our control");
+                    result.subtitle += tx(" under our control");
                 } else {
-                    result.subtitle += Format(tx.translateString(" under %s control").c_str(),
-                                              pRoot->playerList().getPlayerName(perceivedOwner, game::Player::AdjectiveName));
+                    result.subtitle += Format(tx(" under %s control"), pRoot->playerList().getPlayerName(perceivedOwner, game::Player::AdjectiveName, tx));
                 }
             }
 

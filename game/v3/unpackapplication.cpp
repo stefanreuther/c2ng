@@ -40,7 +40,7 @@ namespace {
 game::v3::UnpackApplication::UnpackApplication(afl::sys::Environment& env, afl::io::FileSystem& fs)
     : Application(env, fs)
 {
-    consoleLogger().setConfiguration("*=raw");
+    consoleLogger().setConfiguration("*=raw", translator());
 }
 
 void
@@ -88,7 +88,7 @@ game::v3::UnpackApplication::appMain()
             } else if (text == "u") {
                 uncompileTurns = true;
             } else if (text == "log") {
-                consoleLogger().setConfiguration(parser.getRequiredParameter("log"));
+                consoleLogger().setConfiguration(parser.getRequiredParameter("log"), tx);
             } else if (text == "h" || text == "help") {
                 help();
             } else {

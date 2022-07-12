@@ -40,7 +40,6 @@
 #include "afl/string/format.hpp"
 #include "game/map/ship.hpp"
 #include "util/io.hpp"
-#include "util/translation.hpp"
 
 using afl::string::Format;
 
@@ -152,8 +151,9 @@ namespace {
 }
 
 // Constructor.
-game::db::FleetLoader::FleetLoader(afl::charset::Charset& cs)
-    : m_charset(cs)
+game::db::FleetLoader::FleetLoader(afl::charset::Charset& cs, afl::string::Translator& tx)
+    : m_charset(cs),
+      m_translator(tx)
 { }
 
 // Load fleets.
@@ -171,7 +171,7 @@ game::db::FleetLoader::load(afl::io::Directory& dir, game::map::Universe& univ, 
     FleetFileHeader header;
     s->fullRead(afl::base::fromObject(header));
     if (std::memcmp(header.magic, MAGIC, sizeof(MAGIC)) != 0 || (header.version != 0 && header.version != 1)) {
-        throw afl::except::FileFormatException(*s, _("Invalid file header"));
+        throw afl::except::FileFormatException(*s, m_translator("Invalid file header"));
     }
 
     // Get count

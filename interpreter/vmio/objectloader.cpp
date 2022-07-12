@@ -510,12 +510,12 @@ interpreter::vmio::ObjectLoader::loadBCO(ChunkLoader& ldr, uint32_t id)
 
          case 2:
             // "data" (literals for pushlit, data segment)
-            ValueLoader(m_charset, *this).load(obj->literals(), *ps, 0, propCount);
+            ValueLoader(m_charset, *this, m_translator).load(obj->literals(), *ps, 0, propCount);
             break;
 
          case 3:
             // "names" (names for e.g. pushvar, name list)
-            ValueLoader(m_charset, *this).loadNames(obj->names(), *ps, propCount);
+            ValueLoader(m_charset, *this, m_translator).loadNames(obj->names(), *ps, propCount);
             break;
 
          case 4:
@@ -525,7 +525,7 @@ interpreter::vmio::ObjectLoader::loadBCO(ChunkLoader& ldr, uint32_t id)
 
          case 5:
             // "local_names" (predeclared locals, name list)
-            ValueLoader(m_charset, *this).loadNames(obj->localVariables(), *ps, propCount);
+            ValueLoader(m_charset, *this, m_translator).loadNames(obj->localVariables(), *ps, propCount);
             break;
 
          case 6:
@@ -564,12 +564,12 @@ interpreter::vmio::ObjectLoader::loadHash(ChunkLoader& ldr, uint32_t id)
         switch (propId) {
          case 1:
             // names
-            ValueLoader(m_charset, *this).loadNames(names, *ps, propCount);
+            ValueLoader(m_charset, *this, m_translator).loadNames(names, *ps, propCount);
             break;
 
          case 2:
             // values
-            ValueLoader(m_charset, *this).load(values, *ps, 0, propCount);
+            ValueLoader(m_charset, *this, m_translator).load(values, *ps, 0, propCount);
             break;
 
          default:
@@ -604,7 +604,7 @@ interpreter::vmio::ObjectLoader::loadArray(ChunkLoader& ldr, uint32_t id)
 
          case 2:
             // values
-            ValueLoader(m_charset, *this).load(array->content, *ps, 0, propCount);
+            ValueLoader(m_charset, *this, m_translator).load(array->content, *ps, 0, propCount);
             break;
 
          default:
@@ -635,7 +635,7 @@ interpreter::vmio::ObjectLoader::loadStructureValue(ChunkLoader& ldr, uint32_t i
             break;
          case 2:
             // content
-            ValueLoader(m_charset, *this).load(value->data, *ps, 0, propCount);
+            ValueLoader(m_charset, *this, m_translator).load(value->data, *ps, 0, propCount);
             break;
 
          default:
@@ -657,7 +657,7 @@ interpreter::vmio::ObjectLoader::loadStructureType(ChunkLoader& ldr, uint32_t id
         switch (propId) {
          case 1:
             // names
-            ValueLoader(m_charset, *this).loadNames(type->names(), *ps, propCount);
+            ValueLoader(m_charset, *this, m_translator).loadNames(type->names(), *ps, propCount);
             break;
 
          default:
@@ -736,7 +736,7 @@ interpreter::vmio::ObjectLoader::loadProcess(ChunkLoader& ldr, afl::io::Stream& 
 
              case 6:
                 // value stack (data segment)
-                ValueLoader(m_charset, ctx).load(proc->getValueStack(), *ps, 0, propCount);
+                ValueLoader(m_charset, ctx, m_translator).load(proc->getValueStack(), *ps, 0, propCount);
                 break;
 
              default:
@@ -827,7 +827,7 @@ interpreter::vmio::ObjectLoader::loadFrames(Process& proc, LoadContext& ctx, afl
                 if (frame == 0) {
                     throw afl::except::FileFormatException(s, m_translator("Invalid frame"));
                 }
-                ValueLoader(m_charset, ctx).load(frame->localValues, *ps, 0, propCount);
+                ValueLoader(m_charset, ctx, m_translator).load(frame->localValues, *ps, 0, propCount);
                 break;
 
              case 3:
@@ -835,7 +835,7 @@ interpreter::vmio::ObjectLoader::loadFrames(Process& proc, LoadContext& ctx, afl
                 if (frame == 0) {
                     throw afl::except::FileFormatException(s, m_translator("Invalid frame"));
                 }
-                ValueLoader(m_charset, ctx).loadNames(frame->localNames, *ps, propCount);
+                ValueLoader(m_charset, ctx, m_translator).loadNames(frame->localNames, *ps, propCount);
                 break;
             }
         }

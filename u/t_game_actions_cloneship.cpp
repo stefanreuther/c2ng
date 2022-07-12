@@ -317,7 +317,8 @@ TestGameActionsCloneShip::testFriendlyCodeGood()
     game::test::SimpleTurn t;
     game::test::Root root(game::HostVersion(), game::RegistrationKey::Registered, 10);
     game::UnitScoreDefinitionList shipScores;
-    t.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("cln","r,foo"));
+    afl::string::NullTranslator tx;
+    t.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("cln", "r,foo", tx));
 
     // Units
     Planet& pl = init(t);
@@ -338,7 +339,8 @@ TestGameActionsCloneShip::testFriendlyCodeBad()
     game::test::SimpleTurn t;
     game::test::Root root(game::HostVersion(), game::RegistrationKey::Unregistered, 6);
     game::UnitScoreDefinitionList shipScores;
-    t.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("cln","r,foo"));
+    afl::string::NullTranslator tx;
+    t.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("cln", "r,foo", tx));
 
     // Units
     Planet& pl = init(t);
@@ -359,7 +361,8 @@ TestGameActionsCloneShip::testFriendlyCodeOpen()
     game::test::SimpleTurn t;
     game::test::Root root(game::HostVersion(), game::RegistrationKey::Unregistered, 6);
     game::UnitScoreDefinitionList shipScores;
-    t.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("cln",",foo"));
+    afl::string::NullTranslator tx;
+    t.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("cln", ",foo", tx));
 
     // Units
     Planet& pl = init(t);

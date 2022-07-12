@@ -770,7 +770,8 @@ void
 TestGameMapPlanetInfo::testPackGroundDefenseInfo()
 {
     // Create a root with some players
-    game::test::Root root(HostVersion(HostVersion::PHost, MKVERSION(3, 2, 0))) ;
+    afl::string::NullTranslator tx;
+    game::test::Root root(HostVersion(HostVersion::PHost, MKVERSION(3, 2, 0)));
     root.playerList().create(1)->setName(game::Player::LongName, "Fed");
     root.playerList().create(2)->setName(game::Player::LongName, "Lizard");
     root.playerList().create(3)->setName(game::Player::LongName, "Romulan");
@@ -778,7 +779,7 @@ TestGameMapPlanetInfo::testPackGroundDefenseInfo()
     root.playerList().create(5)->setName(game::Player::LongName, "Orion");
     root.playerList().create(6)->setName(game::Player::LongName, "Borg");
 
-    game::map::GroundDefenseInfo info = game::map::packGroundDefenseInfo(makePlayedPlanet(), root);
+    game::map::GroundDefenseInfo info = game::map::packGroundDefenseInfo(makePlayedPlanet(), root, tx);
 
     TS_ASSERT_EQUALS(info.defender, PLAYER);
     TS_ASSERT_EQUALS(info.isPlayable, true);

@@ -183,7 +183,7 @@ game::db::Loader::load(afl::io::Stream& in, Turn& turn, Game& game, bool acceptP
 
     // A ValueLoader
     interpreter::vmio::NullLoadContext loadContext;
-    interpreter::vmio::ValueLoader valueLoader(m_charset, loadContext);
+    interpreter::vmio::ValueLoader valueLoader(m_charset, loadContext, m_translator);
 
     // Read property names
     afl::data::NameMap planetPropertyNames;

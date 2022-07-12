@@ -344,7 +344,7 @@ game::vcr::Object::getSubtitle(const TeamSettings* teamSettings, const Root& roo
     // Object title
     String_t adj = (getOwner() == viewpointPlayer
                     ? tx("our")
-                    : String_t(Format(tx("a %s"), root.playerList().getPlayerName(getOwner(), Player::AdjectiveName))));
+                    : String_t(Format(tx("a %s"), root.playerList().getPlayerName(getOwner(), Player::AdjectiveName, tx))));
 
     // Experience
     String_t type;

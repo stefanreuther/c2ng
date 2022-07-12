@@ -6,7 +6,6 @@
 #include "util/directorybrowser.hpp"
 #include "afl/string/string.hpp"
 #include "afl/string/format.hpp"
-#include "util/translation.hpp"
 
 namespace {
     using afl::io::Directory;
@@ -139,11 +138,11 @@ util::DirectoryBrowser::selectChild(size_t n)
 }
 
 String_t
-util::DirectoryBrowser::createDirectory(String_t name)
+util::DirectoryBrowser::createDirectory(String_t name, afl::string::Translator& tx)
 {
     // Verify
     if (name.empty() || m_fileSystem.getFileName(name) != name) {
-        return _("Invalid directory name");
+        return tx("Invalid directory name");
     }
 
     // Create

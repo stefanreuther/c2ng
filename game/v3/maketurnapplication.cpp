@@ -46,7 +46,7 @@ namespace {
 game::v3::MaketurnApplication::MaketurnApplication(afl::sys::Environment& env, afl::io::FileSystem& fs)
     : Application(env, fs)
 {
-    consoleLogger().setConfiguration("*=raw");
+    consoleLogger().setConfiguration("*=raw", translator());
 }
 
 void
@@ -67,7 +67,7 @@ game::v3::MaketurnApplication::appMain()
             } else if (text == "f") {
                 optForce = true;
             } else if (text == "log") {
-                consoleLogger().setConfiguration(parser.getRequiredParameter("log"));
+                consoleLogger().setConfiguration(parser.getRequiredParameter("log"), tx);
             } else {
                 errorExit(afl::string::Format(tx("invalid option specified. Use \"%s -h\" for help"), environment().getInvocationName()));
             }

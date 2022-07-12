@@ -21,7 +21,7 @@ server::dbexport::ExportApplication::ExportApplication(afl::sys::Environment& en
       m_dbAddress(DEFAULT_ADDRESS, DB_PORT)
 {
     // Be quiet by default.
-    consoleLogger().setConfiguration("*@-Info=hide");
+    consoleLogger().setConfiguration("*@-Info=hide", translator());
 }
 
 server::dbexport::ExportApplication::~ExportApplication()
@@ -43,7 +43,7 @@ server::dbexport::ExportApplication::appMain()
             if (p == "h" || p == "help") {
                 help();
             } else if (p == "log") {
-                consoleLogger().setConfiguration(commandLineParser.getRequiredParameter("log"));
+                consoleLogger().setConfiguration(commandLineParser.getRequiredParameter("log"), tx);
             } else if (handleCommandLineOption(p, commandLineParser)) {
                 // ok
             } else {

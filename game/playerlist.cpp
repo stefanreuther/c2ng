@@ -4,9 +4,8 @@
   */
 
 #include "game/playerlist.hpp"
-#include "util/string.hpp"
 #include "afl/string/format.hpp"
-#include "util/translation.hpp"
+#include "util/string.hpp"
 
 // FIXME: simplification: refuse player numbers > MAX_PLAYERS. Keep m_players at MAX_PLAYERS+1 slots all the time.
 
@@ -118,6 +117,7 @@ game::PlayerList::expandNames(const String_t tpl, bool useOriginalNames) const
                 result += '%';
                 ++n;
             } else if (Player* pl = getPlayerFromCharacter(tpl[n])) {
+                // FIXME: deal with empty names (and thus translation)
                 result += pl->getName(which);
                 ++n;
             } else {
@@ -170,7 +170,7 @@ game::PlayerList::getNextPlayer(int id) const
 
 // Get name of a player.
 String_t
-game::PlayerList::getPlayerName(int id, Player::Name which) const
+game::PlayerList::getPlayerName(int id, Player::Name which, afl::string::Translator& tx) const
 {
     String_t result;
     if (const Player* p = get(id)) {
@@ -184,7 +184,7 @@ game::PlayerList::getPlayerName(int id, Player::Name which) const
          case Player::OriginalShortName:
          case Player::OriginalAdjectiveName:
          case Player::OriginalLongName:
-            result = afl::string::Format(_("Player %d").c_str(), id);
+            result = afl::string::Format(tx("Player %d"), id);
             break;
          case Player::UserName:
          case Player::NickName:

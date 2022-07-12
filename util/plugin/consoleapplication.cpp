@@ -106,7 +106,7 @@ util::plugin::ConsoleApplication::ConsoleApplication(afl::sys::Environment& env,
     : Application(env, fs),
       profile(env, fs, translator(), log())
 {
-    consoleLogger().setConfiguration("*@-Debug=drop");
+    consoleLogger().setConfiguration("*@-Debug=drop", translator());
 }
 
 void

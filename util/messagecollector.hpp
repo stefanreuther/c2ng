@@ -4,11 +4,12 @@
 #ifndef C2NG_UTIL_MESSAGECOLLECTOR_HPP
 #define C2NG_UTIL_MESSAGECOLLECTOR_HPP
 
+#include "afl/base/types.hpp"
+#include "afl/container/ptrvector.hpp"
+#include "afl/string/translator.hpp"
 #include "afl/sys/loglistener.hpp"
 #include "afl/sys/mutex.hpp"
 #include "util/messagematcher.hpp"
-#include "afl/container/ptrvector.hpp"
-#include "afl/base/types.hpp"
 
 namespace util {
 
@@ -32,8 +33,9 @@ namespace util {
         virtual void handleMessage(const Message& msg);
 
         /** Configure the MessageCollector.
-            \param filter Filter string for MessageMatcher::setConfiguration(). Should produce "keep", "hide", or "drop" commands. */
-        void setConfiguration(String_t filter);
+            \param filter Filter string for MessageMatcher::setConfiguration(). Should produce "keep", "hide", or "drop" commands.
+            \param tx Translator (for error messages) */
+        void setConfiguration(String_t filter, afl::string::Translator& tx);
 
         /** Get oldest position in message buffer. */
         MessageNumber_t getOldestPosition() const;

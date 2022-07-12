@@ -318,7 +318,7 @@ game::v3::DirectoryLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player,
     }
 
     // ex game/load.h:loadDirectory
-    m_log.write(m_log.Info, LOG_NAME, Format(m_translator("Loading %s data...").c_str(), root.playerList().getPlayerName(player, Player::AdjectiveName)));
+    m_log.write(m_log.Info, LOG_NAME, Format(m_translator("Loading %s data...").c_str(), root.playerList().getPlayerName(player, Player::AdjectiveName, m_translator)));
 
     // gen.dat
     Directory& dir = root.gameDirectory();
@@ -489,8 +489,8 @@ game::v3::DirectoryLoader::doLoadHistoryTurn(Turn& turn, Game& game, int player,
     tpl.setTurnNumber(turnNumber);
 
     {
-        Ref<Stream> file = tpl.openFile(m_fileSystem, root.userConfiguration()[UserConfiguration::Backup_Result]());
-        m_log.write(m_log.Info, LOG_NAME, Format(m_translator.translateString("Loading %s backup file...").c_str(), root.playerList().getPlayerName(player, Player::AdjectiveName)));
+        Ref<Stream> file = tpl.openFile(m_fileSystem, root.userConfiguration()[UserConfiguration::Backup_Result](), m_translator);
+        m_log.write(m_log.Info, LOG_NAME, Format(m_translator("Loading %s backup file..."), root.playerList().getPlayerName(player, Player::AdjectiveName, m_translator)));
         ldr.loadResult(turn, root, game, *file, player);
     }
 
@@ -517,7 +517,7 @@ game::v3::DirectoryLoader::doSaveCurrentTurn(const Turn& turn, const Game& game,
 
     for (int player = 1; player <= MAX_PLAYERS; ++player) {
         if (players.contains(player)) {
-            m_log.write(m_log.Info, LOG_NAME, Format(m_translator.translateString("Writing %s data...").c_str(), root.playerList().getPlayerName(player, Player::AdjectiveName)));
+            m_log.write(m_log.Info, LOG_NAME, Format(m_translator("Writing %s data..."), root.playerList().getPlayerName(player, Player::AdjectiveName, m_translator)));
             ControlFile control;
             control.load(dir, player, m_translator, m_log);
 

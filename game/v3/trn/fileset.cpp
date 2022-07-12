@@ -46,7 +46,7 @@ game::v3::trn::FileSet::updateTrailers()
         structures::TurnPlayerSecret data;
         bool haveData = false;
         const Timestamp t = m_turnFiles[0]->getTimestamp();
-    
+
         // Try to find existing block
         for (int i = 1; i <= NUM_PLAYERS; ++i) {
             // FIXME: only check files that we will not rewrite?
@@ -91,7 +91,7 @@ game::v3::trn::FileSet::saveAll(afl::sys::LogListener& log, const PlayerList& pl
         afl::base::Ref<afl::io::Stream> file = m_directory.openFile(afl::string::Format("player%d.trn", player), afl::io::FileSystem::Create);
         log.write(afl::sys::LogListener::Info, LOG_NAME,
                   afl::string::Format(tx("Writing %s turn file (%d command%!1{s%})..."),
-                                      players.getPlayerName(player, Player::AdjectiveName),
+                                      players.getPlayerName(player, Player::AdjectiveName, tx),
                                       m_turnFiles[i]->getNumCommands()));
         m_turnFiles[i]->write(*file);
 

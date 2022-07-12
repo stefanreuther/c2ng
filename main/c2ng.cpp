@@ -921,15 +921,15 @@ namespace {
                 // Starting from here, log messages will be retrievable
                 util::MessageCollector collector;
                 log().addListener(collector);
-                console.setConfiguration("*@Trace=hide");
-                collector.setConfiguration("*@Trace=hide");
+                console.setConfiguration("*@Trace=hide", translator());
+                collector.setConfiguration("*@Trace=hide", translator());
 
                 // Parse command line.
                 CommandLineParameters params(translator());
                 params.parse(m_environment.getCommandLine(), dialog());
                 if (!params.getTraceConfiguration().empty()) {
-                    console.setConfiguration(params.getTraceConfiguration());
-                    collector.setConfiguration(params.getTraceConfiguration());
+                    console.setConfiguration(params.getTraceConfiguration(), translator());
+                    collector.setConfiguration(params.getTraceConfiguration(), translator());
                 }
                 log().write(log().Info, LOG_NAME, afl::string::Format("[%s]", PROGRAM_TITLE));
 

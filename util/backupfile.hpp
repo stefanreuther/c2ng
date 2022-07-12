@@ -7,6 +7,7 @@
 
 #include "afl/io/stream.hpp"
 #include "afl/io/filesystem.hpp"
+#include "afl/string/translator.hpp"
 
 namespace util {
 
@@ -64,9 +65,10 @@ namespace util {
         /** Open file for reading, using a template.
             \param fs File System instance
             \param tpl Template file name (can be empty; in this case, the function does nothing)
+            \param tx Translator (for error messages)
             \return file, never null
             \throw FileProblemException if file does not exist */
-        afl::base::Ref<afl::io::Stream> openFile(afl::io::FileSystem& fs, String_t tpl);
+        afl::base::Ref<afl::io::Stream> openFile(afl::io::FileSystem& fs, String_t tpl, afl::string::Translator& tx);
 
      private:
         String_t m_gameDirectory;

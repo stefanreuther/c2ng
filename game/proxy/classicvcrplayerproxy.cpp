@@ -26,7 +26,7 @@ class game::proxy::ClassicVcrPlayerProxy::Trampoline {
  public:
     Trampoline(util::RequestSender<ClassicVcrPlayerProxy> reply, VcrDatabaseAdaptor& adaptor);
 
-    void initRequest(size_t index);    
+    void initRequest(size_t index);
     void eventRequest();
     void jumpRequest(game::vcr::classic::Time_t time);
 
@@ -72,7 +72,7 @@ game::proxy::ClassicVcrPlayerProxy::Trampoline::initRequest(size_t index)
                 log.write(afl::sys::LogListener::Error, LOG_NAME, m_adaptor.translator()("VCR algorithm does not accept"));
                 sendResponse(true);
             } else {
-                m_visualizer.init(*m_algorithm, *b, shipList, root.playerList(), m_adaptor.getTeamSettings(), root.hostConfiguration());
+                m_visualizer.init(*m_algorithm, *b, shipList, root.playerList(), m_adaptor.getTeamSettings(), root.hostConfiguration(), m_adaptor.translator());
                 sendResponse(false);
             }
         }
@@ -82,7 +82,7 @@ game::proxy::ClassicVcrPlayerProxy::Trampoline::initRequest(size_t index)
         sendResponse(true);
     }
 }
-    
+
 void
 game::proxy::ClassicVcrPlayerProxy::Trampoline::eventRequest()
 {

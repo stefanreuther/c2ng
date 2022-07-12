@@ -7,6 +7,7 @@
 
 #include "t_util.hpp"
 #include "afl/string/format.hpp"
+#include "afl/string/nulltranslator.hpp"
 
 /** Test forward iteration. */
 void
@@ -14,9 +15,10 @@ TestUtilMessageCollector::testForward()
 {
     const int N = 10;
     util::MessageCollector testee;
+    afl::string::NullTranslator tx;
 
     // Populate it
-    testee.setConfiguration("keep=keep:drop=drop:hide=hide");
+    testee.setConfiguration("keep=keep:drop=drop:hide=hide", tx);
     for (int i = 0; i < N; ++i) {
         testee.write(afl::sys::LogListener::Info, "keep", afl::string::Format("k%d", i));
         testee.write(afl::sys::LogListener::Info, "drop", afl::string::Format("d%d", i));
@@ -41,7 +43,7 @@ TestUtilMessageCollector::testForward()
     }
 
     // Reconfigure and iterate again
-    testee.setConfiguration("*=keep");
+    testee.setConfiguration("*=keep", tx);
     {
         String_t result;
         afl::sys::LogListener::Message msg;
@@ -65,9 +67,10 @@ TestUtilMessageCollector::testBackward()
 {
     const int N = 10;
     util::MessageCollector testee;
+    afl::string::NullTranslator tx;
 
     // Populate it
-    testee.setConfiguration("keep=keep:drop=drop:hide=hide");
+    testee.setConfiguration("keep=keep:drop=drop:hide=hide", tx);
     for (int i = 0; i < N; ++i) {
         testee.write(afl::sys::LogListener::Info, "keep", afl::string::Format("k%d", i));
         testee.write(afl::sys::LogListener::Info, "drop", afl::string::Format("d%d", i));
@@ -92,7 +95,7 @@ TestUtilMessageCollector::testBackward()
     }
 
     // Reconfigure and iterate again
-    testee.setConfiguration("*=keep");
+    testee.setConfiguration("*=keep", tx);
     {
         String_t result;
         afl::sys::LogListener::Message msg;
@@ -115,11 +118,12 @@ void
 TestUtilMessageCollector::testWrap()
 {
     util::MessageCollector testee;
+    afl::string::NullTranslator tx;
 
     const int N = 10;
 
     // Populate it
-    testee.setConfiguration("keep=keep:drop=drop:hide=hide");
+    testee.setConfiguration("keep=keep:drop=drop:hide=hide", tx);
     testee.write(afl::sys::LogListener::Info, "keep", "kpre\nkmid\nkfinal");
     testee.write(afl::sys::LogListener::Info, "drop", "dpre\ndmid\ndfinal");
     testee.write(afl::sys::LogListener::Info, "hide", "hpre\nhmid\nhfinal");
@@ -143,7 +147,7 @@ TestUtilMessageCollector::testWrap()
     }
 
     // Reconfigure and iterate again
-    testee.setConfiguration("*=keep");
+    testee.setConfiguration("*=keep", tx);
     {
         String_t result;
         afl::sys::LogListener::Message msg;

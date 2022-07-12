@@ -84,7 +84,7 @@ client::tiles::ShipScreenHeaderTile::attach(game::proxy::ObjectObserver& oop)
                     game::spec::Hull* hull = sh->getHull().get(hullNumber) ? sl->hulls().get(hullNumber) : 0;
                     m_subtitle = afl::string::Format(fmt.c_str(),
                                                      sh->getId(),
-                                                     r->playerList().getPlayerName(owner, game::Player::AdjectiveName),
+                                                     r->playerList().getPlayerName(owner, game::Player::AdjectiveName, tx),
                                                      r->hostConfiguration().getExperienceLevelName(level, session.translator()),
                                                      (hull ? hull->getName(sl->componentNamer()) : tx("ship")));
 

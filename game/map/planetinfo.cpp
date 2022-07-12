@@ -216,7 +216,7 @@ namespace {
         if (game::map::getMaxSupportedColonists(pl, root.hostConfiguration(), root.hostVersion(), player).get(clans)) {
             addItem(list, afl::string::Format(tx("Supports %s %ss"),
                                               fmt.formatPopulation(clans),
-                                              root.playerList().getPlayerName(player, game::Player::AdjectiveName)));
+                                              root.playerList().getPlayerName(player, game::Player::AdjectiveName, tx)));
 
             /* Host-style CDR: according to PCC 1.x, this rule is active unless a special
                Rebel/Robot/Colony/Klingon rule kicks in. */
@@ -678,7 +678,7 @@ game::map::describePlanetNatives(afl::io::xml::Nodes_t& nodes,
                 if (forThem != forMe) {
                     addDetail(list, UTF_HYPHEN, afl::string::Format(tx("%d kt supplies per turn for %s"),
                                                                     fmt.formatNumber(forThem),
-                                                                    root.playerList().getPlayerName(owner, Player::ShortName)));
+                                                                    root.playerList().getPlayerName(owner, Player::ShortName, tx)));
                 }
             }
         }
@@ -741,7 +741,7 @@ game::map::describePlanetColony(afl::io::xml::Nodes_t& nodes,
     } else if (owner == 0) {
         addItem(list, tx("No colonists."));
     } else {
-        addItem(list, afl::string::Format(tx("Colonists: %s"), root.playerList().getPlayerName(owner, Player::ShortName)));
+        addItem(list, afl::string::Format(tx("Colonists: %s"), root.playerList().getPlayerName(owner, Player::ShortName, tx)));
 
         int32_t pop;
         if (pl.getCargo(Element::Colonists).get(pop)) {
@@ -1189,7 +1189,8 @@ game::map::preparePlanetEffectors(const Universe& univ,
 // Retrieve information about ground defense.
 game::map::GroundDefenseInfo
 game::map::packGroundDefenseInfo(const Planet& pl,
-                                 const Root& root)
+                                 const Root& root,
+                                 afl::string::Translator& tx)
 {
     // ex doGroundCombatPrediction (part)
     // ex envscan.pas:CGroundCombatWindow.DrawInterior (part)
@@ -1228,7 +1229,7 @@ game::map::packGroundDefenseInfo(const Planet& pl,
         result.isPlayable = pl.isPlayable(Object::Playable);
         for (int i = 1; i <= MAX_PLAYERS; ++i) {
             if (players.getAllPlayers().contains(i)) {
-                result.name.set(i, players.getPlayerName(i, Player::LongName));
+                result.name.set(i, players.getPlayerName(i, Player::LongName, tx));
                 if (i == planetOwner) {
                     result.strength.set(i, planetColonists);
                 } else {

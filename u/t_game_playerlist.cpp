@@ -6,8 +6,9 @@
 #include "game/playerlist.hpp"
 
 #include "t_game.hpp"
-#include "game/player.hpp"
 #include "afl/charset/utf8reader.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "game/player.hpp"
 #include "game/test/counter.hpp"
 
 /** Test setup and expandNames(). */
@@ -299,17 +300,18 @@ TestGamePlayerList::testNotify()
 void
 TestGamePlayerList::testGetName()
 {
+    afl::string::NullTranslator tx;
     game::PlayerList testee;
     game::Player* p = testee.create(3);
     p->setName(game::Player::LongName, "Long");
     p->setName(game::Player::EmailAddress, "e@mai.l");
 
-    TS_ASSERT_EQUALS(testee.getPlayerName(3, game::Player::LongName), "Long");
-    TS_ASSERT_EQUALS(testee.getPlayerName(3, game::Player::EmailAddress), "e@mai.l");
-    TS_ASSERT_EQUALS(testee.getPlayerName(3, game::Player::AdjectiveName), "Player 3");
+    TS_ASSERT_EQUALS(testee.getPlayerName(3, game::Player::LongName, tx), "Long");
+    TS_ASSERT_EQUALS(testee.getPlayerName(3, game::Player::EmailAddress, tx), "e@mai.l");
+    TS_ASSERT_EQUALS(testee.getPlayerName(3, game::Player::AdjectiveName, tx), "Player 3");
 
-    TS_ASSERT_EQUALS(testee.getPlayerName(1, game::Player::LongName), "Player 1");
-    TS_ASSERT_EQUALS(testee.getPlayerName(1, game::Player::EmailAddress), "");
-    TS_ASSERT_EQUALS(testee.getPlayerName(1, game::Player::AdjectiveName), "Player 1");
+    TS_ASSERT_EQUALS(testee.getPlayerName(1, game::Player::LongName, tx), "Player 1");
+    TS_ASSERT_EQUALS(testee.getPlayerName(1, game::Player::EmailAddress, tx), "");
+    TS_ASSERT_EQUALS(testee.getPlayerName(1, game::Player::AdjectiveName, tx), "Player 1");
 }
 

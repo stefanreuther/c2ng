@@ -61,11 +61,11 @@ util::MessageCollector::handleMessage(const Message& msg)
 }
 
 void
-util::MessageCollector::setConfiguration(String_t filter)
+util::MessageCollector::setConfiguration(String_t filter, afl::string::Translator& tx)
 {
     // Preparation: update configuration in a temporary object so we don't change the state if it fails midway.
     MessageMatcher mm;
-    mm.setConfiguration(filter);
+    mm.setConfiguration(filter, tx);
 
     // Change state
     afl::sys::MutexGuard g(m_mutex);

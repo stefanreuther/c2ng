@@ -370,7 +370,7 @@ TestGameInterfaceGlobalActions::testNoSpecialFC()
     univ.planets().get(47)->setFriendlyCode(String_t("abc"));
 
     // Define a special friendly code
-    h.session.getShipList()->friendlyCodes().addCode(game::spec::FriendlyCode("abc",","));
+    h.session.getShipList()->friendlyCodes().addCode(game::spec::FriendlyCode("abc", ",", h.session.translator()));
 
     // Create process
     Process& proc = h.session.processList().create(h.session.world(), "p");

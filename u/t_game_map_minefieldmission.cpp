@@ -7,6 +7,7 @@
 
 #include "t_game_map.hpp"
 #include "afl/base/countof.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "game/map/configuration.hpp"
 #include "game/map/universe.hpp"
 #include "game/spec/shiplist.hpp"
@@ -237,8 +238,9 @@ TestGameMapMinefieldMission::testLayDropFCodeDisallowed()
 {
     MinefieldMission testee;
     TestHarness h;
+    afl::string::NullTranslator tx;
 
-    h.turn.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("mdh", "rs,drop half"));
+    h.turn.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("mdh", "rs,drop half", tx));
 
     Ship& sh = addTorper(h, 222, 3);
     sh.setMission(3, 0, 0);
@@ -262,8 +264,9 @@ TestGameMapMinefieldMission::testLayDropFCodeInapplicable()
 {
     MinefieldMission testee;
     TestHarness h;
+    afl::string::NullTranslator tx;
 
-    h.turn.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("mdh", "p,drop half"));
+    h.turn.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("mdh", "p,drop half", tx));
 
     Ship& sh = addTorper(h, 222, 3);
     sh.setMission(3, 0, 0);
@@ -706,6 +709,7 @@ void
 TestGameMapMinefieldMission::testScoopFCodeDisabled()
 {
     MinefieldMission testee;
+    afl::string::NullTranslator tx;
 
     game::test::Root root(HostVersion(HostVersion::PHost, MKVERSION(3,0,0)));
     TestHarness h;
@@ -715,7 +719,7 @@ TestGameMapMinefieldMission::testScoopFCodeDisabled()
     ship.setMission(2, 0, 0);
     ship.setFriendlyCode(String_t("msc"));
 
-    h.turn.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("msc", "p,foo"));
+    h.turn.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("msc", "p,foo", tx));
 
     TS_ASSERT_EQUALS(testee.checkScoopMission(ship, root, h.shipScores, h.turn.shipList()), false);
 }
@@ -727,6 +731,7 @@ void
 TestGameMapMinefieldMission::testScoopFCodeUnregistered()
 {
     MinefieldMission testee;
+    afl::string::NullTranslator tx;
 
     game::test::Root root(HostVersion(HostVersion::PHost, MKVERSION(3,0,0)), RegistrationKey::Unregistered);
     TestHarness h;
@@ -736,7 +741,7 @@ TestGameMapMinefieldMission::testScoopFCodeUnregistered()
     ship.setMission(2, 0, 0);
     ship.setFriendlyCode(String_t("msc"));
 
-    h.turn.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("msc", "sr,foo"));
+    h.turn.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("msc", "sr,foo", tx));
 
     TS_ASSERT_EQUALS(testee.checkScoopMission(ship, root, h.shipScores, h.turn.shipList()), false);
 }

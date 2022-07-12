@@ -7,6 +7,7 @@
 
 #include "afl/base/signal.hpp"
 #include "afl/container/ptrvector.hpp"
+#include "afl/string/translator.hpp"
 #include "game/player.hpp"
 #include "game/playerset.hpp"
 
@@ -94,8 +95,9 @@ namespace game {
             Equivalent to get(id)->getName(which), but handles the case that get(id) returns null.
             \param id Slot
             \param which Which name to get
+            \param tx Translator (for fallback names)
             \return name */
-        String_t getPlayerName(int id, Player::Name which) const;
+        String_t getPlayerName(int id, Player::Name which, afl::string::Translator& tx) const;
 
         /** Notify listeners.
             Call eventually after modifying players.

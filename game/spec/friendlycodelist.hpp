@@ -161,8 +161,9 @@ namespace game { namespace spec {
         /** Load extra friendly codes list.
             This will append the specified file to the current list, avoiding duplicates to existing entries.
             Therefore, you should call this after load().
-            \param in Input file */
-        void loadExtraCodes(afl::io::Stream& in);
+            \param in Input file
+            \param tx Translator */
+        void loadExtraCodes(afl::io::Stream& in, afl::string::Translator& tx);
 
         /** Pack friendly-code list into standalone info object.
             This will only pack friendly codes, not prefixes (FriendlyCode::PrefixCode).

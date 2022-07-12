@@ -34,11 +34,11 @@ TestServerPlayFriendlyCodePacker::testIt()
 
     // Friendly code list
     game::spec::FriendlyCodeList& fcList = session.getShipList()->friendlyCodes();
-    fcList.addCode(game::spec::FriendlyCode("pfc", "p,whatever"));
-    fcList.addCode(game::spec::FriendlyCode("gs3", "s-3,give to %3"));
-    fcList.addCode(game::spec::FriendlyCode("gs4", "s,give to %4"));
+    fcList.addCode(game::spec::FriendlyCode("pfc", "p,whatever", tx));
+    fcList.addCode(game::spec::FriendlyCode("gs3", "s-3,give to %3", tx));
+    fcList.addCode(game::spec::FriendlyCode("gs4", "s,give to %4", tx));
     afl::io::ConstMemoryStream ms(afl::string::toBytes("ab"));
-    fcList.loadExtraCodes(ms);
+    fcList.loadExtraCodes(ms, tx);
 
     // Testee
     server::play::FriendlyCodePacker testee(session);

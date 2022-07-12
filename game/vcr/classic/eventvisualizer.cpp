@@ -32,15 +32,16 @@ game::vcr::classic::EventVisualizer::init(Algorithm& algo,
                                           const game::spec::ShipList& shipList,
                                           const PlayerList& players,
                                           const TeamSettings* teams,
-                                          const game::config::HostConfiguration& config)
+                                          const game::config::HostConfiguration& config,
+                                          afl::string::Translator& tx)
 {
     // Start up the algorithm
     algo.setCapabilities(battle.getCapabilities());
     algo.initBattle(battle.left(), battle.right(), battle.getSeed());
 
     // Initialize events
-    initSide(LeftSide, algo, battle.left(), shipList, players, teams, config);
-    initSide(RightSide, algo, battle.right(), shipList, players, teams, config);
+    initSide(LeftSide, algo, battle.left(), shipList, players, teams, config, tx);
+    initSide(RightSide, algo, battle.right(), shipList, players, teams, config, tx);
 
     // Finalize by setting the time
     m_listener.updateTime(algo.getTime(), algo.getDistance());
@@ -143,13 +144,14 @@ game::vcr::classic::EventVisualizer::initSide(Side side, Algorithm& algo,
                                               const game::spec::ShipList& shipList,
                                               const PlayerList& players,
                                               const TeamSettings* teams,
-                                              const game::config::HostConfiguration& config)
+                                              const game::config::HostConfiguration& config,
+                                              afl::string::Translator& tx)
 {
     // Initialize UnitInfo.
     EventListener::UnitInfo ui;
     ui.object          = obj;
     ui.position        = algo.getObjectX(side);
-    ui.ownerName       = players.getPlayerName(obj.getOwner(), Player::ShortName);
+    ui.ownerName       = players.getPlayerName(obj.getOwner(), Player::ShortName, tx);
     ui.relation        = teams != 0 ? teams->getPlayerRelation(obj.getOwner()) : TeamSettings::EnemyPlayer;
     if (const game::spec::Component* beam = shipList.beams().get(obj.getBeamType())) {
         ui.beamName = beam->getName(shipList.componentNamer());

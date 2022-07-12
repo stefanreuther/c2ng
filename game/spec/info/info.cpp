@@ -465,7 +465,7 @@ game::spec::info::describeWeaponEffects(WeaponEffects& result, const ShipQuery& 
             if (i != query.getOwner() && !did.contains(i)) {
                 const int thisk = fbk(i);
                 const int thisx = fbx(i);
-                result.fighterEffects.push_back(describe(afl::string::Format(tx("%s Fighter"), root.playerList().getPlayerName(i, Player::AdjectiveName)), query, thisk, thisx, level, false, config));
+                result.fighterEffects.push_back(describe(afl::string::Format(tx("%s Fighter"), root.playerList().getPlayerName(i, Player::AdjectiveName, tx)), query, thisk, thisx, level, false, config));
 
                 // Tag all that have the same option combo to limit number of items shown
                 did += (config.getPlayersWhere(HostConfiguration::FighterBeamKill, thisk) & config.getPlayersWhere(HostConfiguration::FighterBeamExplosive, thisx));

@@ -449,7 +449,7 @@ namespace {
 interpreter::ConsoleApplication::ConsoleApplication(afl::sys::Environment& env, FileSystem& fs)
     : Application(env, fs)
 {
-    consoleLogger().setConfiguration("*=raw");
+    consoleLogger().setConfiguration("*=raw", translator());
 }
 
 void
@@ -530,7 +530,7 @@ interpreter::ConsoleApplication::appMain()
                 params.opt_commands = true;
             } else if (p == "log") {
                 try {
-                    consoleLogger().setConfiguration(commandLine.getRequiredParameter(p));
+                    consoleLogger().setConfiguration(commandLine.getRequiredParameter(p), tx);
                 }
                 catch (std::exception& e) {
                     errorExit(tx("parameter to '--log' is not valid"));
@@ -538,7 +538,7 @@ interpreter::ConsoleApplication::appMain()
             } else if (p == "readonly" || p == "read-only") {
                 params.opt_readonly = true;
             } else if (p == "q") {
-                consoleLogger().setConfiguration("script*@Info+=raw:*=hide");
+                consoleLogger().setConfiguration("script*@Info+=raw:*=hide", tx);
             } else if (p == "h" || p == "help") {
                 help();
             } else {
@@ -601,7 +601,7 @@ interpreter::ConsoleApplication::appMain()
         result = doCompileMode(session, params);
         break;
      case DisassembleMode:
-        consoleLogger().setConfiguration("*@Warn+=raw:*=drop");
+        consoleLogger().setConfiguration("*@Warn+=raw:*=drop", translator());
         result = doDisassembleMode(session, params, standardOutput());
         break;
      case DumpMode:

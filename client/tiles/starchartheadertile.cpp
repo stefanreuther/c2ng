@@ -43,7 +43,7 @@ namespace {
             int owner;
             if (obj->getOwner(owner) && pRoot != 0) {
                 if (owner != 0) {
-                    result.text[StarchartHeaderTile::Owner] = pRoot->playerList().getPlayerName(owner, game::Player::ShortName);
+                    result.text[StarchartHeaderTile::Owner] = pRoot->playerList().getPlayerName(owner, game::Player::ShortName, tx);
                 } else {
                     result.text[StarchartHeaderTile::Owner] = tx("unowned");
                 }

@@ -11,6 +11,7 @@
 #include "afl/data/segment.hpp"
 #include "afl/data/value.hpp"
 #include "afl/io/stream.hpp"
+#include "afl/string/translator.hpp"
 #include "interpreter/tagnode.hpp"
 
 namespace interpreter { namespace vmio {
@@ -31,8 +32,9 @@ namespace interpreter { namespace vmio {
      public:
         /** Constructor.
             \param cs Character set. For game data, typically the game character set.
-            \param ctx Load context to load non-scalar data */
-        ValueLoader(afl::charset::Charset& cs, LoadContext& ctx);
+            \param ctx Load context to load non-scalar data
+            \param tx Translator (for error messages) */
+        ValueLoader(afl::charset::Charset& cs, LoadContext& ctx, afl::string::Translator& tx);
 
         /** Load data segment.
             \param data       [out] Segment to store data into
@@ -61,6 +63,7 @@ namespace interpreter { namespace vmio {
      private:
         afl::charset::Charset& m_charset;
         LoadContext& m_context;
+        afl::string::Translator& m_translator;
 
         String_t loadPascalString(uint32_t flag, afl::io::Stream& aux);
         String_t loadLongString(uint32_t length, afl::io::Stream& aux);

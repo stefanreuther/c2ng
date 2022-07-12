@@ -7,6 +7,7 @@
 
 #include "afl/charset/charset.hpp"
 #include "afl/io/directory.hpp"
+#include "afl/string/translator.hpp"
 #include "game/map/universe.hpp"
 
 namespace game { namespace db {
@@ -16,8 +17,9 @@ namespace game { namespace db {
     class FleetLoader {
      public:
         /** Constructor.
-            \param cs Game character set */
-        explicit FleetLoader(afl::charset::Charset& cs);
+            \param cs Game character set
+            \param tx Translator */
+        explicit FleetLoader(afl::charset::Charset& cs, afl::string::Translator& tx);
 
         /** Load fleets.
 
@@ -42,6 +44,7 @@ namespace game { namespace db {
 
      private:
         afl::charset::Charset& m_charset;
+        afl::string::Translator& m_translator;
     };
 
 } }

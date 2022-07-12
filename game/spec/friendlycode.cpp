@@ -24,14 +24,14 @@ game::spec::FriendlyCode::FriendlyCode()
 { }
 
 // Construct from definition.
-game::spec::FriendlyCode::FriendlyCode(String_t code, String_t descriptionLine)
+game::spec::FriendlyCode::FriendlyCode(String_t code, String_t descriptionLine, afl::string::Translator& tx)
     : m_code(code),
       m_description(),
       m_races(),
       m_flags()
 {
     // ex GFCode::GFCode
-    initFromString(descriptionLine);
+    initFromString(descriptionLine, tx);
 }
 
 // Destructor.
@@ -202,18 +202,18 @@ game::spec::FriendlyCode::parseFlags(const String_t& s, const char* data, FlagSe
 /** Initialize from description string.
     \param descriptionLine Description */
 void
-game::spec::FriendlyCode::initFromString(const String_t& descriptionLine)
+game::spec::FriendlyCode::initFromString(const String_t& descriptionLine, afl::string::Translator& tx)
 {
     // ex GFCode::initFromString, ccmain.pas:DefineFriendlyCode
     String_t flagStr;
     if (!afl::string::strSplit(descriptionLine, flagStr, m_description, ",")) {
         // FIXME: exception?
-        throw std::range_error(afl::string::Format(_("Friendly code \"%s\" lacking description").c_str(), m_code));
+        throw std::range_error(afl::string::Format(tx("Friendly code \"%s\" lacking description").c_str(), m_code));
     }
     m_description = afl::string::strTrim(m_description);
 
     m_races = PlayerSet_t::allUpTo(MAX_RACES);
     if (!parseFlags(flagStr, "SPBCARUX", m_flags, m_races)) {
-        throw std::range_error(afl::string::Format(_("Malformed flags for friendly code \"%s\"").c_str(), m_code));
+        throw std::range_error(afl::string::Format(tx("Invalid flags for friendly code \"%s\"").c_str(), m_code));
     }
 }

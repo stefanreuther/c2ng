@@ -14,7 +14,6 @@
 #include "game/nu/specificationloader.hpp"
 #include "game/nu/stringverifier.hpp"
 #include "game/nu/turnloader.hpp"
-#include "util/translation.hpp"
 
 using afl::string::Format;
 using afl::sys::LogListener;
@@ -118,7 +117,7 @@ game::nu::GameFolder::loadGameRoot(const game::config::UserConfiguration& config
                             actions += Root::aLoadEditable;
                         }
                         catch (std::exception& e) {
-                            m_handler.log().write(LogListener::Warn, LOG_NAME, _("Game directory lost"), e);
+                            m_handler.log().write(LogListener::Warn, LOG_NAME, m_handler.translator()("Game directory lost"), e);
                             m_account.setGameFolderName(::getGameIdAsString(m_gameNr), String_t());
                         }
                     }
@@ -167,7 +166,7 @@ game::nu::GameFolder::loadGameRoot(const game::config::UserConfiguration& config
 
                     // Turn loader
                     root->setTurnLoader(new TurnLoader(m_state, m_handler.translator(), m_handler.log(), m_handler.browser().profile(), m_handler.getDefaultSpecificationDirectory()));
-    
+
                     // + playerList
 
                     result = root;

@@ -43,7 +43,7 @@ namespace {
         bits &= getAllReceivers(players);
         if (bits.empty()) {
             // Message will not be sent, so we can translate this
-            return tx.translateString("Nobody");
+            return tx("Nobody");
         } else if (bits.isUnitSet()) {
             // One receiver
             for (int i = 0; i <= game::MAX_PLAYERS; ++i) {
@@ -51,7 +51,7 @@ namespace {
                     if (i == 0) {
                         return "Host";
                     } else {
-                        return players.getPlayerName(i, game::Player::LongName);
+                        return players.getPlayerName(i, game::Player::LongName, tx);
                     }
                 }
             }
@@ -366,7 +366,7 @@ game::msg::Outbox::getHeadersForDisplay(int sender,
     // ex GOutbox::getHeadersForDisplay
     receivers &= getAllReceivers(players);
 
-    String_t senderName = players.getPlayerName(sender, Player::LongName);
+    String_t senderName = players.getPlayerName(sender, Player::LongName, tx);
     String_t receiverText = getReceiverText(receivers, tx, players);
     String_t text = afl::string::Format(tx("<<< Sub Space Message >>>\nFROM: %s\nTO: %s\n"), senderName, receiverText);
     if (isUniversalReceiver(receivers, players)) {

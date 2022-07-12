@@ -57,9 +57,9 @@ namespace {
      *  Number-to-Element_t formatters
      */
 
-    Element_t describeOwner(int player, const game::Root& root)
+    Element_t describeOwner(int player, const game::Root& root, afl::string::Translator& tx)
     {
-        return Element_t(player, root.playerList().getPlayerName(player, game::Player::ShortName));
+        return Element_t(player, root.playerList().getPlayerName(player, game::Player::ShortName, tx));
     }
 
     Element_t describeExperienceLevel(int level, const game::Root& root, afl::string::Translator& tx)
@@ -130,7 +130,7 @@ namespace {
          case Ship::agg_NoFuel:
             return Element_t(aggressiveness, tx("No Fuel"));
          default:
-            return Element_t(aggressiveness, Format("Primary Enemy %s", root.playerList().getPlayerName(aggressiveness, game::Player::ShortName)));
+            return Element_t(aggressiveness, Format(tx("Primary Enemy %s"), root.playerList().getPlayerName(aggressiveness, game::Player::ShortName, tx)));
         }
     }
 
@@ -338,7 +338,7 @@ game::proxy::SimulationSetupProxy::Trampoline::packList(ListItems_t& list)
         item.disabled = (obj->getFlags() & Object::fl_Deactivated) != 0;
         item.name = obj->getName();
         if (m_root.get() != 0 && m_shipList.get() != 0) {
-            const String_t playerAdjective = m_root->playerList().getPlayerName(obj->getOwner(), Player::AdjectiveName);
+            const String_t playerAdjective = m_root->playerList().getPlayerName(obj->getOwner(), Player::AdjectiveName, tx);
             if (const Planet* p = dynamic_cast<const Planet*>(obj)) {
                 if (p->hasBase()) {
                     item.info = Format(tx("%s planet+SB"), playerAdjective);
@@ -367,7 +367,7 @@ game::proxy::SimulationSetupProxy::Trampoline::packObject(ObjectInfo& out, const
     out.friendlyCode             = in.getFriendlyCode();
     out.damage                   = in.getDamage();
     out.shield                   = in.getShield();
-    out.owner                    = m_root.get() != 0 ? describeOwner(in.getOwner(), *m_root)                         : Element_t();
+    out.owner                    = m_root.get() != 0 ? describeOwner(in.getOwner(),                     *m_root, tx) : Element_t();
     out.experienceLevel          = m_root.get() != 0 ? describeExperienceLevel(in.getExperienceLevel(), *m_root, tx) : Element_t();
     out.flags                    = in.getFlags();
     out.flakRatingOverride       = in.getFlakRatingOverride();
@@ -974,7 +974,7 @@ game::proxy::SimulationSetupProxy::Trampoline::getOwnerChoices(Elements_t& resul
     if (m_root.get() != 0) {
         const PlayerList& pl = m_root->playerList();
         for (Player* p = pl.getFirstPlayer(); p != 0; p = pl.getNextPlayer(p)) {
-            result.push_back(describeOwner(p->getId(), *m_root));
+            result.push_back(describeOwner(p->getId(), *m_root, m_translator));
         }
     }
 }

@@ -506,7 +506,7 @@ game::map::Universe::findLocationUnitNames(Point pt,
     // Foreign ships?
     for (int pl = 1; pl <= MAX_PLAYERS; ++pl) {
         if (pl != viewpointPlayer && numShips.get(pl) != 0) {
-            util::addListItem(desc, SEP, afl::string::Format(tx("%d %s ship%!1{s%}"), numShips.get(pl), players.getPlayerName(pl, Player::AdjectiveName)));
+            util::addListItem(desc, SEP, afl::string::Format(tx("%d %s ship%!1{s%}"), numShips.get(pl), players.getPlayerName(pl, Player::AdjectiveName, tx)));
         }
     }
 

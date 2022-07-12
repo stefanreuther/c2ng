@@ -140,9 +140,9 @@ game::proxy::MinefieldProxy::Trampoline::buildSweepInfo(SweepInfo& out) const
 
         // Fighters
         if (frate > 0) {
+            afl::string::Translator& tx = m_session.translator();
             out.weapons.push_back(SweepItem(util::divideAndRoundUp(units, frate), 0,
-                                            Format(m_session.translator()("%s fighter"),
-                                                   r->playerList().getPlayerName(frace, Player::AdjectiveName))));
+                                            Format(tx("%s fighter"), r->playerList().getPlayerName(frace, Player::AdjectiveName, tx))));
         }
     }
 }
@@ -170,7 +170,7 @@ game::proxy::MinefieldProxy::Trampoline::buildMinefieldInfo(MinefieldInfo& out) 
         // - Owner
         int owner;
         if (p->getOwner(owner)) {
-            out.text[Owner] = r->playerList().getPlayerName(owner, Player::ShortName);
+            out.text[Owner] = r->playerList().getPlayerName(owner, Player::ShortName, tx);
         }
 
         // - Size
@@ -198,7 +198,7 @@ game::proxy::MinefieldProxy::Trampoline::buildMinefieldInfo(MinefieldInfo& out) 
             } else if (planetOwner == g->getViewpointPlayer()) {
                 out.text[ControlPlayer] = tx("our planet");
             } else {
-                out.text[ControlPlayer] = r->playerList().getPlayerName(planetOwner, Player::ShortName);
+                out.text[ControlPlayer] = r->playerList().getPlayerName(planetOwner, Player::ShortName, tx);
             }
         } else {
             out.text[ControlPlanet] = tx("unknown");

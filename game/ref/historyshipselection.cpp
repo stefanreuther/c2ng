@@ -187,7 +187,7 @@ game::ref::HistoryShipSelection::buildList(HistoryShipList& list, const Turn& tu
 
      case ByOwner:
         if (const Root* pRoot = session.getRoot().get()) {
-            list.sort(SortByOwner(univ, pRoot->playerList()));
+            list.sort(SortByOwner(univ, pRoot->playerList(), session.translator()));
         }
         break;
 

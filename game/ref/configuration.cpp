@@ -60,7 +60,7 @@ game::ref::createSortPredicate(int config, Session& session, afl::base::Deleter&
 
      case ConfigSortByOwner:
         if (pRoot != 0 && pTurn != 0) {
-            return del.addNew(new SortByOwner(pTurn->universe(), pRoot->playerList()));
+            return del.addNew(new SortByOwner(pTurn->universe(), pRoot->playerList(), session.translator()));
         }
         break;
 

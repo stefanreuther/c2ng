@@ -6,10 +6,11 @@
 #define C2NG_UTIL_DIRECTORYBROWSER_HPP
 
 #include <memory>
-#include "afl/io/filesystem.hpp"
-#include "afl/io/directoryentry.hpp"
 #include "afl/base/inlineoptional.hpp"
 #include "afl/io/directory.hpp"
+#include "afl/io/directoryentry.hpp"
+#include "afl/io/filesystem.hpp"
+#include "afl/string/translator.hpp"
 #include "util/filenamepattern.hpp"
 
 namespace util {
@@ -89,7 +90,10 @@ namespace util {
             \param n Index into directories(). Out-of-range values are ignored. */
         void selectChild(size_t n);
 
-        String_t createDirectory(String_t name);
+        /** Create directory in current directory.
+            \param name Name
+            \param tx   Translator (for error messages) */
+        String_t createDirectory(String_t name, afl::string::Translator& tx);
 
         /** Get current directory.
             \return directory object */

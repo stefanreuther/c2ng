@@ -15,6 +15,7 @@
 #include "afl/io/directoryentry.hpp"
 #include "afl/io/internaldirectory.hpp"
 #include "afl/string/format.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "game/map/universe.hpp"
 
 using afl::base::Ref;
@@ -24,11 +25,12 @@ using afl::io::DirectoryEntry;
 namespace {
     void loadFile(game::map::Universe& univ, int playerNr, afl::base::ConstBytes_t data)
     {
+        afl::string::NullTranslator tx;
         afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
         Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("");
         dir->addStream(afl::string::Format("fleet%d.cc", playerNr), *new afl::io::ConstMemoryStream(data));
 
-        game::db::FleetLoader(cs).load(*dir, univ, playerNr);
+        game::db::FleetLoader(cs, tx).load(*dir, univ, playerNr);
     }
 
     void createShip(game::map::Universe& univ, int id, int owner)
@@ -47,9 +49,10 @@ TestGameDbFleetLoader::testEmpty()
 {
     game::map::Universe univ;
     afl::charset::Utf8Charset cs;
+    afl::string::NullTranslator tx;
     Ref<Directory> dir = afl::io::InternalDirectory::create("");
 
-    TS_ASSERT_THROWS_NOTHING(game::db::FleetLoader(cs).load(*dir, univ, 1));
+    TS_ASSERT_THROWS_NOTHING(game::db::FleetLoader(cs, tx).load(*dir, univ, 1));
 }
 
 /** Test loading a broken file: zero-length. */
@@ -267,6 +270,7 @@ TestGameDbFleetLoader::testSave()
 {
     Ref<Directory> dir = afl::io::InternalDirectory::create("");
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
+    afl::string::NullTranslator tx;
 
     // Create a universe and save it
     {
@@ -279,7 +283,7 @@ TestGameDbFleetLoader::testSave()
         univ.ships().get(3)->setFleetNumber(3);
         univ.ships().get(4)->setFleetNumber(3);
         univ.ships().get(3)->setFleetName("three");
-        game::db::FleetLoader(cs).save(*dir, univ, 7);
+        game::db::FleetLoader(cs, tx).save(*dir, univ, 7);
     }
 
     // Verify that file was created and has appropriate size
@@ -294,7 +298,7 @@ TestGameDbFleetLoader::testSave()
         createShip(univ, 2, 7);
         createShip(univ, 3, 7);
         createShip(univ, 4, 7);
-        game::db::FleetLoader(cs).load(*dir, univ, 7);
+        game::db::FleetLoader(cs, tx).load(*dir, univ, 7);
 
         TS_ASSERT_EQUALS(univ.ships().get(1)->getFleetNumber(), 3);
         TS_ASSERT_EQUALS(univ.ships().get(2)->getFleetNumber(), 0);
@@ -311,6 +315,7 @@ TestGameDbFleetLoader::testSaveEmpty()
     // Create a directory with a file in it
     Ref<Directory> dir = afl::io::InternalDirectory::create("");
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
+    afl::string::NullTranslator tx;
     dir->openFile("fleet7.cc", afl::io::FileSystem::Create);
 
     // Create a universe and save it
@@ -319,7 +324,7 @@ TestGameDbFleetLoader::testSaveEmpty()
     createShip(univ, 2, 7);
     createShip(univ, 3, 7);
     createShip(univ, 4, 7);
-    game::db::FleetLoader(cs).save(*dir, univ, 7);
+    game::db::FleetLoader(cs, tx).save(*dir, univ, 7);
 
     // File is gone
     TS_ASSERT_THROWS(dir->openFile("fleet7.cc", afl::io::FileSystem::OpenRead), std::exception);
@@ -332,6 +337,7 @@ TestGameDbFleetLoader::testSaveBig()
 {
     Ref<Directory> dir = afl::io::InternalDirectory::create("");
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
+    afl::string::NullTranslator tx;
 
     // Create a universe and save it
     {
@@ -344,7 +350,7 @@ TestGameDbFleetLoader::testSaveBig()
         univ.ships().get(803)->setFleetNumber(803);
         univ.ships().get(804)->setFleetNumber(803);
         univ.ships().get(803)->setFleetName("three");
-        game::db::FleetLoader(cs).save(*dir, univ, 7);
+        game::db::FleetLoader(cs, tx).save(*dir, univ, 7);
     }
 
     // Verify that file was created and has appropriate size
@@ -359,7 +365,7 @@ TestGameDbFleetLoader::testSaveBig()
         createShip(univ, 802, 7);
         createShip(univ, 803, 7);
         createShip(univ, 804, 7);
-        game::db::FleetLoader(cs).load(*dir, univ, 7);
+        game::db::FleetLoader(cs, tx).load(*dir, univ, 7);
 
         TS_ASSERT_EQUALS(univ.ships().get(801)->getFleetNumber(), 803);
         TS_ASSERT_EQUALS(univ.ships().get(802)->getFleetNumber(), 0);

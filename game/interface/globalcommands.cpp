@@ -272,7 +272,8 @@ game::interface::IFAddFCode(game::Session& session, interpreter::Process& /*proc
 
     // Do it
     shipList.friendlyCodes().addCode(game::spec::FriendlyCode(afl::string::strTrim(String_t(text, 0, n)),
-                                                              afl::string::strTrim(String_t(text, n+1))));
+                                                              afl::string::strTrim(String_t(text, n+1)),
+                                                              session.translator()));
 }
 
 /* @q AddPref line:Str (Global Command)

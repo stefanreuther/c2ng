@@ -141,7 +141,7 @@ game::spec::info::Filter::describe(const FilterElement& e, const Browser& browse
      }
 
      case Value_Player:
-        return FilterInfo(tx("Player"), browser.root().playerList().getPlayerName(e.value, Player::ShortName), EditValuePlayer, getPlayerRange(browser.root()), e);
+        return FilterInfo(tx("Player"), browser.root().playerList().getPlayerName(e.value, Player::ShortName, tx), EditValuePlayer, getPlayerRange(browser.root()), e);
 
      case Value_Category:
         return FilterInfo(tx("Category"), toString(RacialAbilityList::Category(e.value), tx), NotEditable, IntRange_t(), e);

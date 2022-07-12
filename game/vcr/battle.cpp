@@ -30,16 +30,16 @@ game::vcr::Battle::getDescription(const game::PlayerList& players, afl::string::
             } else if (rightRace == pl) {
                 rightSlot = 0;
             } else {
-                return tx.translateString("Multiple races");
+                return tx("Multiple races");
             }
         }
     }
 
     if (leftRace == 0 || rightRace == 0) {
-        return tx.translateString("Unknown");
+        return tx("Unknown");
     } else {
-        String_t leftName  = (leftSlot  != 0 ? leftSlot->getName()  : players.getPlayerName(leftRace, Player::ShortName));
-        String_t rightName = (rightSlot != 0 ? rightSlot->getName() : players.getPlayerName(rightRace, Player::ShortName));
-        return afl::string::Format(tx.translateString("%s vs. %s").c_str(), leftName, rightName);
+        String_t leftName  = (leftSlot  != 0 ? leftSlot->getName()  : players.getPlayerName(leftRace,  Player::ShortName, tx));
+        String_t rightName = (rightSlot != 0 ? rightSlot->getName() : players.getPlayerName(rightRace, Player::ShortName, tx));
+        return afl::string::Format(tx("%s vs. %s"), leftName, rightName);
     }
 }

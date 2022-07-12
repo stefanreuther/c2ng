@@ -22,7 +22,7 @@ namespace game { namespace sim { namespace {
 
     String_t getShipName(const Ship& sh, const game::spec::ShipList& shipList, const PlayerList& playerList, afl::string::Translator& tx)
     {
-        const String_t playerAdjective = playerList.getPlayerName(sh.getOwner(), game::Player::AdjectiveName);
+        const String_t playerAdjective = playerList.getPlayerName(sh.getOwner(), game::Player::AdjectiveName, tx);
         String_t typeInfo;
         if (const game::spec::Hull* h = shipList.hulls().get(sh.getHullType())) {
             typeInfo = Format(tx("%s %s"), playerAdjective, h->getShortName(shipList.componentNamer()));
@@ -32,7 +32,7 @@ namespace game { namespace sim { namespace {
         return Format("%s (#%d, %s)", sh.getName(), sh.getId(), typeInfo);
     }
 
-    
+
     void addTech(Cost& cost, int player, int& haveTech, int needTech, const FleetCostOptions& opts, const HostConfiguration& config)
     {
         switch (opts.shipTechMode) {

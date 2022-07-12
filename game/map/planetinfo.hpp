@@ -254,9 +254,11 @@ namespace game { namespace map {
     /** Retrieve information about ground defense.
         This function describes the current ground defense situation.
         \param pl   Planet
-        \param root Root (required for player names, host configuration, version) */
+        \param root Root (required for player names, host configuration, version)
+        \param tx   Translator */
     GroundDefenseInfo packGroundDefenseInfo(const Planet& pl,
-                                            const Root& root);
+                                            const Root& root,
+                                            afl::string::Translator& tx);
 
 } }
 

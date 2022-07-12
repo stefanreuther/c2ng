@@ -68,11 +68,11 @@ namespace {
 
         cc1id_Texture1    = 4500,      /* backgrounds */
         cc1id_Texture2    = 4501,      /* window frames */
-    
+
         /* Specification stuff */
         cc1id_Spec_PConfig  = 510,  /**< pconfig defaults. Highly version dependant binary format */
         cc1id_Spec_Disttabl = 511,  /**< Disttabl.dat */
-    
+
         cc1id_Spec_Beamspec = 520,  /* compressed images of spec files */
         cc1id_Spec_Engspec  = 521,
         cc1id_Spec_Hullspec = 522,
@@ -143,8 +143,8 @@ namespace {
     };
 }
 
-ui::res::ResourceFileProvider::ResourceFileProvider(afl::base::Ref<afl::io::Stream> file)
-    : m_file(file)
+ui::res::ResourceFileProvider::ResourceFileProvider(afl::base::Ref<afl::io::Stream> file, afl::string::Translator& tx)
+    : m_file(file, tx)
 {
     // ex ResProviderResFile::ResProviderResFile
 }

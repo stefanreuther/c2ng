@@ -5,8 +5,9 @@
 #ifndef C2NG_UTIL_MESSAGEMATCHER_HPP
 #define C2NG_UTIL_MESSAGEMATCHER_HPP
 
-#include "afl/sys/loglistener.hpp"
 #include "afl/bits/smallset.hpp"
+#include "afl/string/translator.hpp"
+#include "afl/sys/loglistener.hpp"
 #include "util/filenamepattern.hpp"
 
 namespace util {
@@ -38,8 +39,9 @@ namespace util {
         /** Set configuration.
             Replaces this MessageMatcher's ruleset by the one given in \c value.
             \param value New ruleset. See class description.
+            \param tx Translator (for error messages)
             \throw std::runtime_error on syntax errors */
-        void setConfiguration(const String_t& value);
+        void setConfiguration(const String_t& value, afl::string::Translator& tx);
 
         /** Match message.
             \param msg [in] Message to check

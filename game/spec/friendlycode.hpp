@@ -55,8 +55,9 @@ namespace game { namespace spec {
             This handles a fcodes.cc line that originally contained code+","+descriptionLine.
             \param code Friendly code
             \param descriptionLine Description line, consisting of flags, a comma, and description text.
+            \param tx Translator (for error messages)
             \throw std::runtime_error descriptionLine is invalid */
-        FriendlyCode(String_t code, String_t descriptionLine);
+        FriendlyCode(String_t code, String_t descriptionLine, afl::string::Translator& tx);
 
         /** Destructor. */
         ~FriendlyCode();
@@ -114,7 +115,7 @@ namespace game { namespace spec {
      private:
         static bool parseFlags(const String_t& s, const char* data, FlagSet_t& flags, PlayerSet_t& races);
 
-        void initFromString(const String_t& descriptionLine);
+        void initFromString(const String_t& descriptionLine, afl::string::Translator& tx);
 
         String_t m_code;
         String_t m_description;

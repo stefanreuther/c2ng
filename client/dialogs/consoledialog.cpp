@@ -129,9 +129,9 @@ namespace {
                                           "*@Error=red:"
                                           "script.input=bold:"
                                           "script.result=bold,right:"
-                                          "script.empty=dim,right");
+                                          "script.empty=dim,right", tx);
                 m_recall.setConfiguration("script.input=input:"
-                                          "script.result=result");
+                                          "script.result=result", tx);
                 user.mainLog().addListener(m_notifier);
                 m_notifier.sig_change.add(this, &ConsoleController::onUpdate);
                 onUpdate();

@@ -4,9 +4,10 @@
 
 #include "game/ref/sortbyowner.hpp"
 
-game::ref::SortByOwner::SortByOwner(const game::map::Universe& univ, const PlayerList& players)
+game::ref::SortByOwner::SortByOwner(const game::map::Universe& univ, const PlayerList& players, afl::string::Translator& tx)
     : m_universe(univ),
-      m_players(players)
+      m_players(players),
+      m_translator(tx)
 { }
 
 int
@@ -20,7 +21,7 @@ String_t
 game::ref::SortByOwner::getClass(const Reference& a) const
 {
     // ex diviOwner
-    return m_players.getPlayerName(getOwner(a), Player::ShortName);
+    return m_players.getPlayerName(getOwner(a), Player::ShortName, m_translator);
 }
 
 int

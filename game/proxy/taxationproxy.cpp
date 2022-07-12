@@ -100,7 +100,7 @@ class game::proxy::TaxationProxy::Trampoline {
             if (a == TaxationAction::Colonists) {
                 int owner = 0;
                 in.planet().getOwner(owner);
-                out.title = afl::string::Format(tx("%s colony"), root.playerList().getPlayerName(owner, Player::AdjectiveName));
+                out.title = afl::string::Format(tx("%s colony"), root.playerList().getPlayerName(owner, Player::AdjectiveName, tx));
             } else {
                 out.title = afl::string::Format(tx("%s natives"), game::tables::NativeRaceName(tx)(in.planet().getNativeRace().orElse(0)));
             }

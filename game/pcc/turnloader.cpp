@@ -221,7 +221,7 @@ game::pcc::TurnLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, gam
     // Load result file from remote
     {
         Ref<Stream> file = m_serverDirectory->openFile(Format("player%d.rst", player), afl::io::FileSystem::OpenRead);
-        m_log.write(LogListener::Info, LOG_NAME, Format(m_translator("Loading %s RST file..."), root.playerList().getPlayerName(player, Player::AdjectiveName)));
+        m_log.write(LogListener::Info, LOG_NAME, Format(m_translator("Loading %s RST file..."), root.playerList().getPlayerName(player, Player::AdjectiveName, m_translator)));
         ldr.loadResult(turn, root, game, *file, player);
 
         // TODO: backups?
@@ -231,14 +231,14 @@ game::pcc::TurnLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, gam
     {
         Ptr<Stream> file = m_serverDirectory->openFileNT(Format("player%d.trn", player), afl::io::FileSystem::OpenRead);
         if (file.get() != 0) {
-            m_log.write(LogListener::Info, LOG_NAME, Format(m_translator("Loading %s TRN file..."), root.playerList().getPlayerName(player, Player::AdjectiveName)));
+            m_log.write(LogListener::Info, LOG_NAME, Format(m_translator("Loading %s TRN file..."), root.playerList().getPlayerName(player, Player::AdjectiveName, m_translator)));
             Loader(*m_charset, m_translator, m_log).loadTurnfile(turn, root, *file, player);
         }
     }
 
     // Load fleets from local game directory
     // Must be after loading the result/turn because it requires shipsource flags
-    game::db::FleetLoader(*m_charset).load(root.gameDirectory(), turn.universe(), player);
+    game::db::FleetLoader(*m_charset, m_translator).load(root.gameDirectory(), turn.universe(), player);
 
     // Load util from remote
     Parser mp(m_translator, m_log, game, player, root, game::actions::mustHaveShipList(session));
@@ -337,7 +337,7 @@ game::pcc::TurnLoader::doSaveCurrentTurn(const Turn& turn, const Game& game, Pla
                 saveCurrentDatabases(turn, game, player, root, session, *m_charset);
 
                 // Fleets
-                game::db::FleetLoader(*m_charset).save(root.gameDirectory(), turn.universe(), player);
+                game::db::FleetLoader(*m_charset, m_translator).save(root.gameDirectory(), turn.universe(), player);
             }
         }
     }

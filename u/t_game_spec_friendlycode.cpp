@@ -22,9 +22,10 @@ void
 TestGameSpecFriendlyCode::testFCode()
 {
     // ex GameFcodeTestSuite::testFCode
-    game::spec::FriendlyCode mkt("mkt", "sc,make torps");
-    game::spec::FriendlyCode lfm("lfm", "sc+9ab,make fighters");
-    game::spec::FriendlyCode att("ATT", "p,attack");
+    afl::string::NullTranslator tx;
+    game::spec::FriendlyCode mkt("mkt", "sc,make torps", tx);
+    game::spec::FriendlyCode lfm("lfm", "sc+9ab,make fighters", tx);
+    game::spec::FriendlyCode att("ATT", "p,attack", tx);
 
     game::PlayerList list;
 
@@ -45,13 +46,15 @@ TestGameSpecFriendlyCode::testFCode()
 void
 TestGameSpecFriendlyCode::testFCodeFail()
 {
+    afl::string::NullTranslator tx;
+
     // Player character out of range
-    TS_ASSERT_THROWS(game::spec::FriendlyCode("xy0", "+0,hi"), std::exception);
-    TS_ASSERT_THROWS(game::spec::FriendlyCode("xyz", "+z,hi"), std::exception);
+    TS_ASSERT_THROWS(game::spec::FriendlyCode("xy0", "+0,hi", tx), std::exception);
+    TS_ASSERT_THROWS(game::spec::FriendlyCode("xyz", "+z,hi", tx), std::exception);
 
     // Missing description
-    TS_ASSERT_THROWS(game::spec::FriendlyCode("xyz", ""), std::exception);
-    TS_ASSERT_THROWS(game::spec::FriendlyCode("xyz", "p"), std::exception);
+    TS_ASSERT_THROWS(game::spec::FriendlyCode("xyz", "", tx), std::exception);
+    TS_ASSERT_THROWS(game::spec::FriendlyCode("xyz", "p", tx), std::exception);
 }
 
 /** Test initial state getters. */
@@ -70,6 +73,8 @@ TestGameSpecFriendlyCode::testData()
 void
 TestGameSpecFriendlyCode::testDescription()
 {
+    afl::string::NullTranslator tx;
+
     // Player list
     game::PlayerList list;
     game::Player* pl = list.create(3);
@@ -81,10 +86,10 @@ TestGameSpecFriendlyCode::testDescription()
     pl->setName(pl->OriginalShortName, "OrigShort");
 
     // Verify descriptions
-    TS_ASSERT_EQUALS(game::spec::FriendlyCode("xyz",",[%3]").getDescription(list), "[Short]");
-    TS_ASSERT_EQUALS(game::spec::FriendlyCode("xyz",",[%-3]").getDescription(list), "[Adj]");
-    TS_ASSERT_EQUALS(game::spec::FriendlyCode("xyz",",[%2]").getDescription(list), "[2]");
-    TS_ASSERT_EQUALS(game::spec::FriendlyCode("xyz",",[%-2]").getDescription(list), "[2]");
+    TS_ASSERT_EQUALS(game::spec::FriendlyCode("xyz",",[%3]", tx).getDescription(list), "[Short]");
+    TS_ASSERT_EQUALS(game::spec::FriendlyCode("xyz",",[%-3]", tx).getDescription(list), "[Adj]");
+    TS_ASSERT_EQUALS(game::spec::FriendlyCode("xyz",",[%2]", tx).getDescription(list), "[2]");
+    TS_ASSERT_EQUALS(game::spec::FriendlyCode("xyz",",[%-2]", tx).getDescription(list), "[2]");
 }
 
 /** Test worksOn(). */
@@ -99,10 +104,10 @@ TestGameSpecFriendlyCode::testWorksOn()
     afl::string::NullTranslator tx;
 
     // Some fcodes
-    game::spec::FriendlyCode planetFC("pfc", "p,xxx");
-    game::spec::FriendlyCode baseFC("bfc", "b,xxx");
-    game::spec::FriendlyCode shipFC("sfc", "s,xxx");
-    game::spec::FriendlyCode fedFC("ffc", "p+1,xxx");
+    game::spec::FriendlyCode planetFC("pfc", "p,xxx", tx);
+    game::spec::FriendlyCode baseFC("bfc", "b,xxx", tx);
+    game::spec::FriendlyCode shipFC("sfc", "s,xxx", tx);
+    game::spec::FriendlyCode fedFC("ffc", "p+1,xxx", tx);
 
     // Fed planet
     {
@@ -189,11 +194,11 @@ TestGameSpecFriendlyCode::testWorksOnShip()
     afl::string::NullTranslator tx;
 
     // Some fcodes
-    game::spec::FriendlyCode planetFC("pfc", "p,xxx");
-    game::spec::FriendlyCode shipFC("sfc", "s,xxx");
-    game::spec::FriendlyCode fedFC("ffc", "s+1,xxx");
-    game::spec::FriendlyCode capFC("cfc", "sc,xxx");
-    game::spec::FriendlyCode alchemyFC("afc", "sa,xxx");
+    game::spec::FriendlyCode planetFC("pfc", "p,xxx", tx);
+    game::spec::FriendlyCode shipFC("sfc", "s,xxx", tx);
+    game::spec::FriendlyCode fedFC("ffc", "s+1,xxx", tx);
+    game::spec::FriendlyCode capFC("cfc", "sc,xxx", tx);
+    game::spec::FriendlyCode alchemyFC("afc", "sa,xxx", tx);
 
     // Fed ship
     {
@@ -262,8 +267,9 @@ TestGameSpecFriendlyCode::testWorksOnShip()
 void
 TestGameSpecFriendlyCode::testIsPermitted()
 {
-    game::spec::FriendlyCode unregFC("ufc", "s,xxx");
-    game::spec::FriendlyCode regFC("rfc", "sr,xxx");
+    afl::string::NullTranslator tx;
+    game::spec::FriendlyCode unregFC("ufc", "s,xxx", tx);
+    game::spec::FriendlyCode regFC("rfc", "sr,xxx", tx);
 
     game::test::RegistrationKey unregKey(game::RegistrationKey::Unregistered, 6);
     game::test::RegistrationKey regKey(game::RegistrationKey::Registered, 10);

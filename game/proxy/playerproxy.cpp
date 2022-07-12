@@ -63,7 +63,7 @@ game::proxy::PlayerProxy::getPlayerName(WaitIndicator& link, int id, Player::Nam
         virtual void handle(Session& s)
             {
                 if (PlayerList* p = getPlayerList(s)) {
-                    m_result = p->getPlayerName(m_id, m_which);
+                    m_result = p->getPlayerName(m_id, m_which, s.translator());
                 }
             }
      private:

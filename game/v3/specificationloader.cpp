@@ -591,7 +591,7 @@ game::v3::SpecificationLoader::loadFriendlyCodes(game::spec::ShipList& list, afl
     // Extra definitions
     ps = dir.openFileNT("xtrfcode.txt", FileSystem::OpenRead);
     if (ps.get()) {
-        fcs.loadExtraCodes(*ps);
+        fcs.loadExtraCodes(*ps, m_translator);
     }
 }
 

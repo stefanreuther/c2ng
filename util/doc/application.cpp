@@ -111,7 +111,7 @@ util::doc::Application::appMain()
             if (handleDataOption(data, text, parser)) {
                 // ok
             } else if (text == "log") {
-                consoleLogger().setConfiguration(parser.getRequiredParameter("log"));
+                consoleLogger().setConfiguration(parser.getRequiredParameter("log"), tx);
             } else if (text == "h" || text == "help") {
                 help();
             } else {

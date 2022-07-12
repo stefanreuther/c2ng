@@ -35,6 +35,6 @@ ui::res::createProvider(String_t name, String_t baseDirectory, afl::io::FileSyst
     } else {
         // Trim optional "res:" prefix
         hasPrefix(name, "res");
-        return new ResourceFileProvider(fs.openFile(fs.makePathName(baseDirectory, name), fs.OpenRead));
+        return new ResourceFileProvider(fs.openFile(fs.makePathName(baseDirectory, name), fs.OpenRead), tx);
     }
 }

@@ -18,6 +18,8 @@
 void
 TestGameInterfaceFriendlyCodeContext::testIt()
 {
+    afl::string::NullTranslator tx;
+
     // Create a root (FIXME: what for?)
     afl::base::Ref<game::Root> root(*new game::Root(afl::io::InternalDirectory::create("gameDir"),
                                                     *new game::test::SpecificationLoader(),
@@ -31,7 +33,7 @@ TestGameInterfaceFriendlyCodeContext::testIt()
     afl::base::Ref<game::spec::ShipList> shipList(*new game::spec::ShipList());
 
     // Add a mission
-    shipList->friendlyCodes().addCode(game::spec::FriendlyCode("cln", "sr-57,Clone ship"));
+    shipList->friendlyCodes().addCode(game::spec::FriendlyCode("cln", "sr-57,Clone ship", tx));
     TS_ASSERT_EQUALS(shipList->friendlyCodes().size(), 1U);
 
     // Test

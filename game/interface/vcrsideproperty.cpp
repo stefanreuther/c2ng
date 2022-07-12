@@ -269,16 +269,14 @@ game::interface::getVcrSideProperty(game::vcr::Battle& battle, size_t side, VcrS
            @q Left:Int (Combat Property), Right:Int (Combat Property)
            Name and type of this combat participant.
            A string of the form "name (Planet #Id)" resp. "name (Ship #Id)". */
-        return makeStringValue(afl::string::Format(obj->isPlanet()
-                                                   ? tx.translateString("%s (Planet #%d)").c_str()
-                                                   : tx.translateString("%s (Ship #%d)").c_str(),
+        return makeStringValue(afl::string::Format(obj->isPlanet() ? tx("%s (Planet #%d)") : tx("%s (Ship #%d)"),
                                                    obj->getName(),
                                                    obj->getId()));
      case ivsOwnerAdj:
         /* @q Owner.Adj:Str (Combat Participant Property)
            @q Left.Owner.Adj:Str (Combat Property), Right.Owner.Adj:Str (Combat Property)
            Adjective name of this player. */
-        return makeStringValue(players.getPlayerName(obj->getOwner(), Player::AdjectiveName));
+        return makeStringValue(players.getPlayerName(obj->getOwner(), Player::AdjectiveName, tx));
      case ivsOwnerId:
         /* @q Owner$:Int (Combat Participant Property)
            @q Left.Owner$:Int (Combat Property), Right.Owner$:Int (Combat Property)
@@ -288,7 +286,7 @@ game::interface::getVcrSideProperty(game::vcr::Battle& battle, size_t side, VcrS
         /* @q Owner:Str (Combat Participant Property)
            @q Left.Owner:Str (Combat Property), Right.Owner:Str (Combat Property)
            Short name of this player. */
-        return makeStringValue(players.getPlayerName(obj->getOwner(), Player::ShortName));
+        return makeStringValue(players.getPlayerName(obj->getOwner(), Player::ShortName, tx));
      case ivsShield:
         /* @q Shield:Int (Combat Participant Property)
            @q Left.Shield:Int (Combat Property), Right.Shield:Int (Combat Property)

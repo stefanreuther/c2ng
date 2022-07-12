@@ -153,7 +153,7 @@ namespace {
         virtual void handle(afl::io::FileSystem& /*fs*/)
             {
                 if (DirectoryBrowser* b = m_browser.get()) {
-                    m_result = b->createDirectory(m_name);
+                    m_result = b->createDirectory(m_name, m_translator);
                     setState(m_state, *b, m_translator);
                 }
             }

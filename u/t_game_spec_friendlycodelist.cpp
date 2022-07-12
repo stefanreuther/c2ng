@@ -91,10 +91,11 @@ TestGameSpecFriendlyCodeList::testRandom()
 {
     // ex GameFcodeTestSuite::testRandom
     game::spec::FriendlyCodeList testee;
+    afl::string::NullTranslator tx;
 
     afl::io::ConstMemoryStream in(afl::string::toBytes("E zot"));
-    testee.loadExtraCodes(in);
-    testee.addCode(game::spec::FriendlyCode("mkt", "sc,make torps"));
+    testee.loadExtraCodes(in, tx);
+    testee.addCode(game::spec::FriendlyCode("mkt", "sc,make torps", tx));
 
     game::HostVersion host;
     host.set(host.PHost, MKVERSION(4, 0, 0));
@@ -163,6 +164,7 @@ void
 TestGameSpecFriendlyCodeList::testContainer()
 {
     game::spec::FriendlyCodeList testee;
+    afl::string::NullTranslator tx;
 
     // Verify initial state
     TS_ASSERT_EQUALS(testee.size(), 0U);
@@ -170,10 +172,10 @@ TestGameSpecFriendlyCodeList::testContainer()
     TS_ASSERT(testee.at(0) == 0);
 
     // Add some elements
-    testee.addCode(game::spec::FriendlyCode("pfc", "p,xxx"));
-    testee.addCode(game::spec::FriendlyCode("bfc", "b,xxx"));
-    testee.addCode(game::spec::FriendlyCode("sfc", "s,xxx"));
-    testee.addCode(game::spec::FriendlyCode("ffc", "p+1,xxx"));
+    testee.addCode(game::spec::FriendlyCode("pfc", "p,xxx", tx));
+    testee.addCode(game::spec::FriendlyCode("bfc", "b,xxx", tx));
+    testee.addCode(game::spec::FriendlyCode("sfc", "s,xxx", tx));
+    testee.addCode(game::spec::FriendlyCode("ffc", "p+1,xxx", tx));
 
     // Verify properties
     TS_ASSERT_EQUALS(testee.size(), 4U);
@@ -233,18 +235,19 @@ void
 TestGameSpecFriendlyCodeList::testSpecial()
 {
     game::spec::FriendlyCodeList testee;
+    afl::string::NullTranslator tx;
 
     // Provide normal
-    testee.addCode(game::spec::FriendlyCode("pfc", "p,xxx"));
-    testee.addCode(game::spec::FriendlyCode("bfc", "b,xxx"));
-    testee.addCode(game::spec::FriendlyCode("ufc", "u,xxx"));
+    testee.addCode(game::spec::FriendlyCode("pfc", "p,xxx", tx));
+    testee.addCode(game::spec::FriendlyCode("bfc", "b,xxx", tx));
+    testee.addCode(game::spec::FriendlyCode("ufc", "u,xxx", tx));
 
     // Load extras
     afl::io::ConstMemoryStream ms(afl::string::toBytes("ab\n"
                                                        "z\n"
                                                        "pppp\n"
                                                        "e f"));
-    testee.loadExtraCodes(ms);
+    testee.loadExtraCodes(ms, tx);
 
     // Verify
     TS_ASSERT( testee.isSpecial("ab",   true));
@@ -337,6 +340,7 @@ void
 TestGameSpecFriendlyCodeList::testGenerateRandomLoop()
 {
     // Environment
+    afl::string::NullTranslator tx;
     game::HostVersion host;
     util::RandomNumberGenerator rng(0);
 
@@ -348,7 +352,7 @@ TestGameSpecFriendlyCodeList::testGenerateRandomLoop()
     }
     afl::io::ConstMemoryStream ms(mem);
     game::spec::FriendlyCodeList testee;
-    testee.loadExtraCodes(ms);
+    testee.loadExtraCodes(ms, tx);
 
     // generateRandomCode() must still finish
     TS_ASSERT_EQUALS(testee.generateRandomCode(rng, host).size(), 3U);
@@ -359,6 +363,7 @@ void
 TestGameSpecFriendlyCodeList::testGenerateRandomBlock()
 {
     // Environment
+    afl::string::NullTranslator tx;
     game::HostVersion host;
     util::RandomNumberGenerator rng(0);
 
@@ -372,7 +377,7 @@ TestGameSpecFriendlyCodeList::testGenerateRandomBlock()
     }
     afl::io::ConstMemoryStream ms(mem);
     game::spec::FriendlyCodeList testee;
-    testee.loadExtraCodes(ms);
+    testee.loadExtraCodes(ms, tx);
 
     TS_ASSERT( testee.isSpecial("NXY", true));
     TS_ASSERT(!testee.isSpecial("3XY", true));
@@ -420,15 +425,16 @@ void
 TestGameSpecFriendlyCodeList::testSort()
 {
     using game::spec::FriendlyCode;
+    afl::string::NullTranslator tx;
 
     // Alphanumeric goes before non-alphanumeric, capital before lower-case.
     game::spec::FriendlyCodeList testee;
-    testee.addCode(FriendlyCode("!bc", ",x"));
-    testee.addCode(FriendlyCode("abc", ",x"));
-    testee.addCode(FriendlyCode("0bc", ",x"));
-    testee.addCode(FriendlyCode("Abc", ",x"));
-    testee.addCode(FriendlyCode("ABC", ",x"));
-    testee.addCode(FriendlyCode("?bc", ",x"));
+    testee.addCode(FriendlyCode("!bc", ",x", tx));
+    testee.addCode(FriendlyCode("abc", ",x", tx));
+    testee.addCode(FriendlyCode("0bc", ",x", tx));
+    testee.addCode(FriendlyCode("Abc", ",x", tx));
+    testee.addCode(FriendlyCode("ABC", ",x", tx));
+    testee.addCode(FriendlyCode("?bc", ",x", tx));
 
     // Sort
     testee.sort();
@@ -507,12 +513,13 @@ void
 TestGameSpecFriendlyCodeList::testPack()
 {
     // Friendly code list
+    afl::string::NullTranslator tx;
     game::spec::FriendlyCodeList testee;
-    testee.addCode(game::spec::FriendlyCode("pfc", "p,whatever"));
-    testee.addCode(game::spec::FriendlyCode("gs3", "s,give to %3"));
-    testee.addCode(game::spec::FriendlyCode("gs4", "s,give to %4"));
+    testee.addCode(game::spec::FriendlyCode("pfc", "p,whatever", tx));
+    testee.addCode(game::spec::FriendlyCode("gs3", "s,give to %3", tx));
+    testee.addCode(game::spec::FriendlyCode("gs4", "s,give to %4", tx));
     afl::io::ConstMemoryStream ms(afl::string::toBytes("ab"));
-    testee.loadExtraCodes(ms);
+    testee.loadExtraCodes(ms, tx);
 
     // Player list
     game::PlayerList pl;
@@ -546,6 +553,7 @@ TestGameSpecFriendlyCodeList::testPack()
 void
 TestGameSpecFriendlyCodeList::testLoadExtraDup()
 {
+    afl::string::NullTranslator tx;
     game::spec::FriendlyCodeList testee;
 
     // fcodes.cc
@@ -557,14 +565,13 @@ TestGameSpecFriendlyCodeList::testLoadExtraDup()
             "mkt,s,Make\n";
         afl::io::ConstMemoryStream ms(afl::string::toBytes(FILE));
         afl::sys::Log log;
-        afl::string::NullTranslator tx;
         testee.load(ms, log, tx);
     }
 
     // xtrafcode.txt
     {
         afl::io::ConstMemoryStream ms(afl::string::toBytes("A mkt NUK j"));
-        testee.loadExtraCodes(ms);
+        testee.loadExtraCodes(ms, tx);
     }
 
     // Verify. Content must be mkt/ATT/HYP/A/NUK/j

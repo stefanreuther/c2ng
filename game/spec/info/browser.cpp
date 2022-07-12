@@ -423,7 +423,7 @@ game::spec::info::Browser::getAttribute(Page p, Id_t id, FilterAttribute att) co
 void
 game::spec::info::Browser::describePlayer(PageContent& content, Id_t id) const
 {
-    content.title = m_root.playerList().getPlayerName(id, Player::LongName);
+    content.title = m_root.playerList().getPlayerName(id, Player::LongName, m_translator);
     if (const Player* pl = m_root.playerList().get(id)) {
         content.pictureName = m_picNamer.getPlayerPicture(*pl);
         addAttribute(content, m_translator("Short name"),    pl->getName(Player::ShortName));

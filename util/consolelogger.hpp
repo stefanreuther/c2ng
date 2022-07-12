@@ -5,10 +5,11 @@
 #ifndef C2NG_UTIL_CONSOLELOGGER_HPP
 #define C2NG_UTIL_CONSOLELOGGER_HPP
 
-#include "afl/sys/loglistener.hpp"
-#include "afl/io/textwriter.hpp"
-#include "afl/sys/mutex.hpp"
 #include "afl/base/ptr.hpp"
+#include "afl/io/textwriter.hpp"
+#include "afl/string/translator.hpp"
+#include "afl/sys/loglistener.hpp"
+#include "afl/sys/mutex.hpp"
 #include "util/messagematcher.hpp"
 
 namespace util {
@@ -48,8 +49,9 @@ namespace util {
             \param config MessageMatcher configuration. Produces one of
             - "hide", "drop" (=hide)
             - "keep", "show" (=show normally, default)
-            - "raw" (=show just text) */
-        void setConfiguration(String_t config);
+            - "raw" (=show just text)
+            \param tx Translator (for error messages) */
+        void setConfiguration(String_t config, afl::string::Translator& tx);
 
      private:
         afl::sys::Mutex m_mutex;

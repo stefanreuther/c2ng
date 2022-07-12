@@ -69,7 +69,7 @@ util::ConsoleLogger::attachWriter(bool error, afl::base::Ptr<afl::io::TextWriter
 }
 
 void
-util::ConsoleLogger::setConfiguration(String_t config)
+util::ConsoleLogger::setConfiguration(String_t config, afl::string::Translator& tx)
 {
-    m_matcher.setConfiguration(config);
+    m_matcher.setConfiguration(config, tx);
 }

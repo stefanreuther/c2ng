@@ -6,9 +6,9 @@
 #include "game/proxy/playerproxy.hpp"
 
 #include "t_game_proxy.hpp"
+#include "game/test/root.hpp"
 #include "game/test/sessionthread.hpp"
 #include "game/test/waitindicator.hpp"
-#include "game/test/root.hpp"
 
 using afl::base::Ptr;
 using game::Root;
@@ -34,7 +34,7 @@ TestGameProxyPlayerProxy::testEmpty()
     TS_ASSERT_EQUALS(allNames.get(10), "");
 }
 
-/** Test behaviour with nonempty lists. 
+/** Test behaviour with nonempty lists.
     A: create empty session; add a root and populate player list.
     E: all functions must return expected empty values. */
 void
@@ -59,7 +59,7 @@ TestGameProxyPlayerProxy::testNormal()
     // Check
     game::proxy::PlayerProxy testee(h.gameSender());
     TS_ASSERT_EQUALS(testee.getAllPlayers(ind).toInteger(), 0x06U);     // 1<<1 + 1<<2
-    
+
     TS_ASSERT_EQUALS(testee.getPlayerName(ind, 1, game::Player::LongName), "The Ones");
     TS_ASSERT_EQUALS(testee.getPlayerName(ind, 2, game::Player::LongName), "The Twos");
     TS_ASSERT_EQUALS(testee.getPlayerName(ind, 3, game::Player::LongName), "Player 3");

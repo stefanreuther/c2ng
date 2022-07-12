@@ -8,6 +8,7 @@
 #include "afl/io/nulltextwriter.hpp"
 #include "afl/net/resp/client.hpp"
 #include "afl/string/format.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "afl/sys/standardcommandlineparser.hpp"
 #include "afl/sys/thread.hpp"
 #include "server/configurationhandler.hpp"
@@ -188,6 +189,7 @@ server::Application::reportError(String_t str)
 void
 server::Application::parseCommandLine(ConfigurationHandler& handler)
 {
+    afl::string::NullTranslator tx;  // server application is not translated
     afl::sys::StandardCommandLineParser parser(environment().getCommandLine());
     bool option;
     String_t text;
@@ -198,7 +200,7 @@ server::Application::parseCommandLine(ConfigurationHandler& handler)
         if (handler.handleCommandLineOption(text, parser)) {
             // ok, "-D" or "--config"
         } else if (text == "log") {
-            m_logger.setConfiguration(parser.getRequiredParameter(text));
+            m_logger.setConfiguration(parser.getRequiredParameter(text), tx);
         } else if (text == "proxy") {
             String_t url = parser.getRequiredParameter(text);
             if (!m_clientNetworkStack.add(url)) {

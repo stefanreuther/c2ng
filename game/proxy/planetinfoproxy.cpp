@@ -70,7 +70,7 @@ game::proxy::PlanetInfoProxy::Response::Response(Session& session, Id_t id, Inte
                 if (game::spec::ShipList* sl = session.getShipList().get()) {
                     describePlanetDefenseEffects(m_defenseEffectsInfo, pp, *r, *sl, g->planetScores(), tx);
                 }
-                m_groundDefenseInfo = packGroundDefenseInfo(pp, *r);
+                m_groundDefenseInfo = packGroundDefenseInfo(pp, *r, tx);
             }
 
             // Unload info for reference by UI

@@ -6,9 +6,10 @@
 #define C2NG_UI_RES_RESOURCEFILE_HPP
 
 #include <vector>
+#include "afl/base/ptr.hpp"
 #include "afl/base/ref.hpp"
 #include "afl/io/stream.hpp"
-#include "afl/base/ptr.hpp"
+#include "afl/string/translator.hpp"
 
 namespace ui { namespace res {
 
@@ -22,7 +23,7 @@ namespace ui { namespace res {
      public:
         /** Constructor.
             \param file File */
-        ResourceFile(afl::base::Ref<afl::io::Stream> file);
+        ResourceFile(afl::base::Ref<afl::io::Stream> file, afl::string::Translator& tx);
 
         /** Destructor. */
         ~ResourceFile();
@@ -46,7 +47,7 @@ namespace ui { namespace res {
         /// Index.
         std::vector<Entry> m_index;
 
-        void init();
+        void init(afl::string::Translator& tx);
     };
 
 } }

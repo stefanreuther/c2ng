@@ -4,7 +4,6 @@
   */
 
 #include "util/messagematcher.hpp"
-#include "util/translation.hpp"
 #include "util/stringparser.hpp"
 
 // Constructor.
@@ -18,7 +17,7 @@ util::MessageMatcher::~MessageMatcher()
 
 // Set configuration.
 void
-util::MessageMatcher::setConfiguration(const String_t& value)
+util::MessageMatcher::setConfiguration(const String_t& value, afl::string::Translator& tx)
 {
     using afl::sys::LogListener;
 
@@ -56,7 +55,7 @@ util::MessageMatcher::setConfiguration(const String_t& value)
             } else if (p.parseString("Error")) {
                 level = LogListener::Error;
             } else {
-                throw std::runtime_error(_("Invalid log level in message match expression"));
+                throw std::runtime_error(tx("Invalid log level in message match expression"));
             }
 
             // "level+" syntax
@@ -84,7 +83,7 @@ util::MessageMatcher::setConfiguration(const String_t& value)
 
         // Action
         if (!p.parseCharacter('=')) {
-            throw std::runtime_error(_("Missing '=' in message match expression"));
+            throw std::runtime_error(tx("Missing '=' in message match expression"));
         }
         String_t action;
         p.parseDelim(":", action);
@@ -97,7 +96,7 @@ util::MessageMatcher::setConfiguration(const String_t& value)
             break;
         }
         if (!p.parseCharacter(':')) {
-            throw std::runtime_error(_("Missing ':' in message match expression"));
+            throw std::runtime_error(tx("Missing ':' in message match expression"));
         }
     }
 
