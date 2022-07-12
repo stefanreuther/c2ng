@@ -12,10 +12,10 @@
 #include "afl/io/internaldirectory.hpp"
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
+#include "afl/sys/internalenvironment.hpp"
 #include "afl/sys/log.hpp"
 #include "game/root.hpp"
 #include "game/test/registrationkey.hpp"
-#include "game/test/simpleenvironment.hpp"
 #include "game/test/specificationloader.hpp"
 #include "game/test/stringverifier.hpp"
 #include "game/turn.hpp"
@@ -28,7 +28,7 @@ namespace {
         afl::sys::Log log;
         afl::io::NullFileSystem fs;
         game::v3::DirectoryScanner scanner;
-        game::test::SimpleEnvironment env;
+        afl::sys::InternalEnvironment env;
         util::ProfileDirectory profile;
 
         // Testee [ResultLoader]

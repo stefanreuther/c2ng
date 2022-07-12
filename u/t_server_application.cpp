@@ -8,31 +8,7 @@
 #include "t_server.hpp"
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/net/nullnetworkstack.hpp"
-#include "afl/base/nullenumerator.hpp"
-
-namespace {
-    class TestEnvironment : public afl::sys::Environment {
-     public:
-        virtual afl::base::Ref<CommandLine_t> getCommandLine()
-            { return *new afl::base::NullEnumerator<String_t>(); }
-        virtual String_t getInvocationName()
-            { return "TestEnvironment"; }
-        virtual String_t getEnvironmentVariable(const String_t& /*name*/)
-            { return String_t(); }
-        virtual String_t getSettingsDirectoryName(const String_t& /*appName*/)
-            { return "/settings"; }
-        virtual String_t getInstallationDirectoryName()
-            { return "/install"; }
-        virtual afl::string::LanguageCode getUserLanguage()
-            { return afl::string::LanguageCode(); }
-        virtual afl::base::Ref<afl::io::TextWriter> attachTextWriter(Channel /*ch*/)
-            { throw std::runtime_error("attachTextWriter unsupported"); }
-        virtual afl::base::Ref<afl::io::TextReader> attachTextReader(Channel /*ch*/)
-            { throw std::runtime_error("attachTextReader unsupported"); }
-        virtual afl::base::Ref<afl::io::Stream> attachStream(Channel /*ch*/)
-            { throw std::runtime_error("attachStream unsupported"); }
-    };
-}
+#include "afl/sys/internalenvironment.hpp"
 
 /** Test simple application. */
 void
@@ -57,7 +33,7 @@ TestServerApplication::testSimple()
     };
 
     // Environment and instantiation:
-    TestEnvironment env;
+    afl::sys::InternalEnvironment env;
     afl::io::NullFileSystem fs;
     afl::net::NullNetworkStack net;
     Tester t("test", env, fs, net);

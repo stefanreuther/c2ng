@@ -41,11 +41,6 @@ class TestGameTestShipList : public CxxTest::TestSuite {
     void testPListTorpedoes();
 };
 
-class TestGameTestSimpleEnvironment : public CxxTest::TestSuite {
- public:
-    void testIt();
-};
-
 class TestGameTestStringVerifier : public CxxTest::TestSuite {
  public:
     void testIt();

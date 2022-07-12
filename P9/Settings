@@ -109,7 +109,6 @@ FILES_gamelib = interpreter/callablevalue.cpp \
     game/ref/historyshipselection.cpp game/ref/historyshipselection.hpp \
     game/ref/historyshiplist.cpp game/ref/historyshiplist.hpp \
     game/actions/multitransfersetup.cpp game/actions/multitransfersetup.hpp \
-    game/test/simpleenvironment.cpp game/test/simpleenvironment.hpp \
     game/proxy/expressionlistproxy.cpp game/proxy/expressionlistproxy.hpp \
     game/config/expressionlists.cpp game/config/expressionlists.hpp \
     util/expressionlist.cpp util/expressionlist.hpp \
@@ -1790,7 +1789,6 @@ FILES_testsuite = u/t_interpreter_simpleprocedure.cpp \
     u/t_ui_widgets_treelistbox.cpp u/t_game_proxy_historyshiplistproxy.cpp \
     u/t_game_ref_historyshiplist.cpp u/t_game_ref_historyshipselection.cpp \
     u/t_game_actions_multitransfersetup.cpp \
-    u/t_game_test_simpleenvironment.cpp \
     u/t_game_proxy_expressionlistproxy.cpp \
     u/t_game_config_expressionlists.cpp u/t_util_expressionlist.cpp \
     u/t_game_proxy_inboxadaptor.cpp u/t_game_proxy_mailboxproxy.cpp \

@@ -6,10 +6,10 @@
 #include "util/application.hpp"
 
 #include "t_util.hpp"
-#include "afl/io/nullfilesystem.hpp"
 #include "afl/io/internalstream.hpp"
-#include "afl/io/textfile.hpp"
+#include "afl/io/nullfilesystem.hpp"
 #include "afl/string/string.hpp"
+#include "afl/sys/internalenvironment.hpp"
 
 /** Test initialisation with an uncooperative environment.
     The uncooperative throws exceptions instead of attaching channels.
@@ -18,28 +18,7 @@ void
 TestUtilApplication::testInit()
 {
     // Environment
-    class UncooperativeEnvironment : public afl::sys::Environment {
-     public:
-        virtual afl::base::Ref<CommandLine_t> getCommandLine()
-            { throw std::runtime_error("no ref"); }
-        virtual String_t getInvocationName()
-            { return String_t(); }
-        virtual String_t getEnvironmentVariable(const String_t& /*name*/)
-            { return String_t(); }
-        virtual String_t getSettingsDirectoryName(const String_t& /*appName*/)
-            { return String_t(); }
-        virtual String_t getInstallationDirectoryName()
-            { return String_t(); }
-        virtual afl::string::LanguageCode getUserLanguage()
-            { return afl::string::LanguageCode(); }
-        virtual afl::base::Ref<afl::io::TextWriter> attachTextWriter(Channel /*ch*/)
-            { throw std::runtime_error("no ref"); }
-        virtual afl::base::Ref<afl::io::TextReader> attachTextReader(Channel /*ch*/)
-            { throw std::runtime_error("no ref"); }
-        virtual afl::base::Ref<afl::io::Stream> attachStream(Channel /*ch*/)
-            { throw std::runtime_error("no ref"); }
-    };
-    UncooperativeEnvironment env;
+    afl::sys::InternalEnvironment env;
     afl::io::NullFileSystem fs;
 
     // Application descendant
@@ -74,33 +53,16 @@ void
 TestUtilApplication::testExit()
 {
     // Environment
-    class FakeEnvironment : public afl::sys::Environment {
+    class FakeEnvironment : public afl::sys::InternalEnvironment {
      public:
         FakeEnvironment()
             : m_stream(*new afl::io::InternalStream())
-            { }
-        virtual afl::base::Ref<CommandLine_t> getCommandLine()
-            { throw std::runtime_error("no ref"); }
-        virtual String_t getInvocationName()
-            { return String_t(); }
-        virtual String_t getEnvironmentVariable(const String_t& /*name*/)
-            { return String_t(); }
-        virtual String_t getSettingsDirectoryName(const String_t& /*appName*/)
-            { return String_t(); }
-        virtual String_t getInstallationDirectoryName()
-            { return String_t(); }
-        virtual afl::string::LanguageCode getUserLanguage()
-            { return afl::string::LanguageCode(); }
-        virtual afl::base::Ref<afl::io::TextWriter> attachTextWriter(Channel /*ch*/)
-            { return *new afl::io::TextFile(*m_stream); }
-        virtual afl::base::Ref<afl::io::TextReader> attachTextReader(Channel /*ch*/)
-            { return *new afl::io::TextFile(*m_stream); }
-        virtual afl::base::Ref<afl::io::Stream> attachStream(Channel /*ch*/)
-            { return m_stream; }
-
+            {
+                setChannelStream(Output, m_stream.asPtr());
+                setChannelStream(Error, m_stream.asPtr());
+            }
         afl::base::ConstBytes_t getOutput()
             { return m_stream->getContent(); }
-
      private:
         afl::base::Ref<afl::io::InternalStream> m_stream;
     };

@@ -8,106 +8,16 @@
 #include <map>
 #include "t_server_mailin.hpp"
 #include "afl/data/stringlist.hpp"
+#include "afl/data/stringvalue.hpp"
 #include "afl/io/constmemorystream.hpp"
 #include "afl/io/internalstream.hpp"
 #include "afl/io/nullfilesystem.hpp"
-#include "afl/io/textfile.hpp"
-#include "afl/sys/environment.hpp"
-#include "afl/data/stringvalue.hpp"
+#include "afl/net/protocolhandlerfactory.hpp"
 #include "afl/net/resp/protocolhandler.hpp"
 #include "afl/net/server.hpp"
-#include "afl/net/protocolhandlerfactory.hpp"
+#include "afl/sys/environment.hpp"
+#include "afl/sys/internalenvironment.hpp"
 #include "afl/sys/thread.hpp"
-
-namespace {
-    /*
-     *  As of 20171001, this is a pretty messy implementation of an Environment mock
-     *  to show what needs to be done to mock an environment.
-     */
-    class EnvironmentMock : public afl::sys::Environment {
-     public:
-        EnvironmentMock()
-            : m_in(*new afl::io::ConstMemoryStream(afl::base::Nothing)),
-              m_out(*new afl::io::InternalStream()),
-              m_error(m_out),
-              m_invocationName("mock"),
-              m_installationDirectory("."),
-              m_commandLine(),
-              m_environment()
-            { }
-
-        virtual afl::base::Ref<CommandLine_t> getCommandLine()
-            { return *new StringListIterator(m_commandLine); }
-        virtual String_t getInvocationName()
-            { return m_invocationName; }
-        virtual String_t getEnvironmentVariable(const String_t& name)
-            { return m_environment[name]; }
-        virtual String_t getSettingsDirectoryName(const String_t& /*appName*/)
-            { return "."; }
-        virtual String_t getInstallationDirectoryName()
-            { return m_installationDirectory; }
-        virtual afl::string::LanguageCode getUserLanguage()
-            { return afl::string::LanguageCode(); }
-        virtual afl::base::Ref<afl::io::TextWriter> attachTextWriter(Channel ch)
-            { return *new afl::io::TextFile(*attachStream(ch)); }
-        virtual afl::base::Ref<afl::io::TextReader> attachTextReader(Channel ch)
-            { return *new afl::io::TextFile(*attachStream(ch)); }
-        virtual afl::base::Ref<afl::io::Stream> attachStream(Channel ch)
-            {
-                switch (ch) {
-                 case Input: return m_in;
-                 case Output: return m_out;
-                 case Error: return m_error;
-                }
-                throw std::runtime_error("fail");
-            }
-
-        void setInvocationName(String_t name)
-            { m_invocationName = name; }
-        void setInstallationDirectoryName(String_t dir)
-            { m_installationDirectory = dir; }
-        void setCommandLine(const afl::data::StringList_t& cmdl)
-            { m_commandLine = cmdl; }
-        void setChannelStream(Channel ch, afl::base::Ref<afl::io::Stream> s)
-            {
-                switch (ch) {
-                 case Input: m_in.reset(*s); break;
-                 case Output: m_out.reset(*s); break;
-                 case Error: m_error.reset(*s); break;
-                }
-            }
-
-     private:
-        afl::base::Ref<afl::io::Stream> m_in;
-        afl::base::Ref<afl::io::Stream> m_out;
-        afl::base::Ref<afl::io::Stream> m_error;
-
-        String_t m_invocationName;
-        String_t m_installationDirectory;
-
-        afl::data::StringList_t m_commandLine;
-
-        std::map<String_t, String_t> m_environment;
-
-        class StringListIterator : public CommandLine_t {
-         public:
-            StringListIterator(afl::base::Memory<const String_t> data)
-                : m_data(data)
-                { }
-            bool getNextElement(String_t& ele)
-                {
-                    if (const String_t* p = m_data.eat()) {
-                        ele = *p;
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-         private:
-            afl::base::Memory<const String_t> m_data;
-        };
-    };
-}
 
 
 /** Test obtaining help. */
@@ -115,7 +25,7 @@ void
 TestServerMailinMailInApplication::testHelp()
 {
     // Create environment
-    EnvironmentMock env;
+    afl::sys::InternalEnvironment env;
 
     // - add command line
     afl::data::StringList_t list;
@@ -123,7 +33,7 @@ TestServerMailinMailInApplication::testHelp()
     env.setCommandLine(list);
 
     // - add output
-    afl::base::Ref<afl::io::InternalStream> out = *new afl::io::InternalStream();
+    afl::base::Ptr<afl::io::InternalStream> out = new afl::io::InternalStream();
     env.setChannelStream(afl::sys::Environment::Output, out);
 
     // - null FileSystem
@@ -174,7 +84,7 @@ TestServerMailinMailInApplication::testReject()
      */
 
     // Create environment
-    EnvironmentMock env;
+    afl::sys::InternalEnvironment env;
 
     // - add command line
     afl::data::StringList_t list;
@@ -191,10 +101,10 @@ TestServerMailinMailInApplication::testReject()
         "\n"
         "witty text here.\n"
         "\n";
-    env.setChannelStream(afl::sys::Environment::Input, *new afl::io::ConstMemoryStream(afl::string::toBytes(INPUT)));
+    env.setChannelStream(afl::sys::Environment::Input, new afl::io::ConstMemoryStream(afl::string::toBytes(INPUT)));
 
     // - capture output
-    afl::base::Ref<afl::io::InternalStream> out = *new afl::io::InternalStream();
+    afl::base::Ptr<afl::io::InternalStream> out = new afl::io::InternalStream();
     env.setChannelStream(afl::sys::Environment::Output, out);
     env.setChannelStream(afl::sys::Environment::Error, out);
 

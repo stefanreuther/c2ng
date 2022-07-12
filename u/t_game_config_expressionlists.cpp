@@ -6,55 +6,20 @@
 #include "game/config/expressionlists.hpp"
 
 #include "t_game_config.hpp"
-#include "afl/string/posixfilenames.hpp"
-#include "afl/io/directory.hpp"
-#include "afl/io/filesystem.hpp"
-#include "afl/io/stream.hpp"
-#include "afl/base/nullenumerator.hpp"
-#include "afl/io/internaldirectory.hpp"
-#include "afl/string/nulltranslator.hpp"
 #include "afl/io/constmemorystream.hpp"
-#include "afl/sys/log.hpp"
+#include "afl/io/directory.hpp"
 #include "afl/io/filemapping.hpp"
-#include "game/test/simpleenvironment.hpp"
+#include "afl/io/filesystem.hpp"
+#include "afl/io/internaldirectory.hpp"
+#include "afl/io/internalfilesystem.hpp"
+#include "afl/io/stream.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "afl/sys/internalenvironment.hpp"
+#include "afl/sys/log.hpp"
 
+using afl::io::FileSystem;
 using game::config::ExpressionLists;
 using util::ExpressionList;
-
-namespace {
-    /* Simple file system that reports only one directory no matter what path is used. */
-    class SimpleFileSystem : public afl::io::FileSystem {
-     public:
-        SimpleFileSystem(afl::base::Ref<afl::io::Directory> dir)
-            : m_directory(dir)
-            { }
-        virtual afl::base::Ref<afl::io::Stream> openFile(FileName_t fileName, OpenMode mode)
-            { return m_directory->openFile(getFileName(fileName), mode); }
-        virtual afl::base::Ref<afl::io::Directory> openDirectory(FileName_t /*dirName*/)
-            { return m_directory; }
-        virtual afl::base::Ref<afl::io::Directory> openRootDirectory()
-            { return m_directory; }
-        virtual bool isAbsolutePathName(FileName_t /*path*/)
-            { return true; }
-        virtual bool isPathSeparator(char c)
-            { return m_fileNames.isPathSeparator(c); }
-        virtual FileName_t makePathName(FileName_t path, FileName_t name)
-            { return m_fileNames.makePathName(path, name); }
-        virtual FileName_t getCanonicalPathName(FileName_t name)
-            { return m_fileNames.getCanonicalPathName(name); }
-        virtual FileName_t getAbsolutePathName(FileName_t name)
-            { return m_fileNames.getCanonicalPathName(name); }
-        virtual FileName_t getFileName(FileName_t name)
-            { return m_fileNames.getFileName(name); }
-        virtual FileName_t getDirectoryName(FileName_t name)
-            { return m_fileNames.getDirectoryName(name); }
-        virtual FileName_t getWorkingDirectoryName()
-            { return "."; }
-     private:
-        afl::base::Ref<afl::io::Directory> m_directory;
-        afl::string::PosixFileNames m_fileNames;
-    };
-}
 
 void
 TestGameConfigExpressionLists::testAccess()
@@ -153,14 +118,15 @@ TestGameConfigExpressionLists::testLoadRecent()
         "[PlanetLabels]\n"
         "Planet Name    Name\n";
 
-    afl::base::Ref<afl::io::InternalDirectory> profileDir(afl::io::InternalDirectory::create("profile"));
-    profileDir->addStream("lru.ini", *new afl::io::ConstMemoryStream(afl::string::toBytes(LRU_INI)));
-
     // Environment
     afl::string::NullTranslator tx;
     afl::sys::Log log;
-    SimpleFileSystem fs(profileDir);
-    game::test::SimpleEnvironment env;
+    afl::io::InternalFileSystem fs;
+    afl::sys::InternalEnvironment env;
+    fs.createDirectory("/profile");
+    fs.openFile("/profile/lru.ini", FileSystem::Create)->fullWrite(afl::string::toBytes(LRU_INI));
+    env.setSettingsDirectoryName("/profile");
+
     util::ProfileDirectory profile(env, fs, tx, log);
 
     // Testee
@@ -206,17 +172,18 @@ TestGameConfigExpressionLists::testLoadPredefined()
         "[planetlabels]\n"
         "p   l\n";
 
-    afl::base::Ref<afl::io::InternalDirectory> profileDir(afl::io::InternalDirectory::create("profile"));
-    profileDir->addStream("expr.ini", *new afl::io::ConstMemoryStream(afl::string::toBytes(EXPR_INI)));
-
     afl::base::Ref<afl::io::InternalDirectory> gameDir(afl::io::InternalDirectory::create("game"));
     gameDir->addStream("expr.cc", *new afl::io::ConstMemoryStream(afl::string::toBytes(EXPR_CC)));
 
     // Environment
     afl::string::NullTranslator tx;
     afl::sys::Log log;
-    SimpleFileSystem fs(profileDir);
-    game::test::SimpleEnvironment env;
+    afl::io::InternalFileSystem fs;
+    afl::sys::InternalEnvironment env;
+    fs.createDirectory("/profile");
+    fs.openFile("/profile/expr.ini", FileSystem::Create)->fullWrite(afl::string::toBytes(EXPR_INI));
+    env.setSettingsDirectoryName("/profile");
+
     util::ProfileDirectory profile(env, fs, tx, log);
 
     // Testee
@@ -262,14 +229,13 @@ TestGameConfigExpressionLists::testLoadPredefined()
 void
 TestGameConfigExpressionLists::testSave()
 {
-    // Test data
-    afl::base::Ref<afl::io::InternalDirectory> profileDir(afl::io::InternalDirectory::create("profile"));
-
     // Environment
     afl::string::NullTranslator tx;
     afl::sys::Log log;
-    SimpleFileSystem fs(profileDir);
-    game::test::SimpleEnvironment env;
+    afl::io::InternalFileSystem fs;
+    afl::sys::InternalEnvironment env;
+    env.setSettingsDirectoryName("/profile");     // Will be auto-created!
+
     util::ProfileDirectory profile(env, fs, tx, log);
 
     // Testee
@@ -280,7 +246,8 @@ TestGameConfigExpressionLists::testSave()
     testee.saveRecentFiles(profile, log, tx);
 
     // Verify
-    afl::base::Ref<afl::io::Stream> file = profileDir->openFile("lru.ini", afl::io::FileSystem::OpenRead);
+    afl::base::Ref<afl::io::Directory> profileDir(fs.openDirectory("/profile"));
+    afl::base::Ref<afl::io::Stream> file = profileDir->openFile("lru.ini", FileSystem::OpenRead);
     String_t content = afl::string::fromBytes(file->createVirtualMapping()->get());
 
     // Remove \r, for Windows
@@ -289,7 +256,7 @@ TestGameConfigExpressionLists::testSave()
         content.erase(n, 1);
     }
 
-    TS_ASSERT_EQUALS(content, 
+    TS_ASSERT_EQUALS(content,
                      "[SHIPLABELS]\n"
                      "a b c  xyz\n"
                      "a b c  [!]123\n"

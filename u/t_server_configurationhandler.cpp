@@ -8,11 +8,10 @@
 #include "server/configurationhandler.hpp"
 
 #include "t_server.hpp"
-#include "afl/sys/loglistener.hpp"
+#include "afl/io/internalfilesystem.hpp"
 #include "afl/sys/commandlineparser.hpp"
-#include "afl/string/posixfilenames.hpp"
-#include "afl/except/fileproblemexception.hpp"
-#include "afl/io/constmemorystream.hpp"
+#include "afl/sys/internalenvironment.hpp"
+#include "afl/sys/loglistener.hpp"
 
 namespace {
     const char LOG_NAME[] = "test.log";
@@ -84,81 +83,6 @@ namespace {
      private:
         String_t m_value;
     };
-
-    /* A FileSystem that provides single files. */
-    class TestFileSystem : public afl::io::FileSystem {
-     public:
-        TestFileSystem()
-            : m_fileNames(),
-              m_files()
-            { }
-        virtual afl::base::Ref<afl::io::Stream> openFile(FileName_t fileName, OpenMode mode)
-            {
-                if (mode != OpenRead) {
-                    throw afl::except::FileProblemException(fileName, "open for modify not supported");
-                }
-                FileMap_t::iterator it = m_files.find(getCanonicalPathName(fileName));
-                if (it == m_files.end()) {
-                    throw afl::except::FileProblemException(fileName, "not found");
-                }
-                return it->second->createChild();
-            }
-        virtual afl::base::Ref<afl::io::Directory> openDirectory(FileName_t dirName)
-            { throw afl::except::FileProblemException(dirName, "openDirectory not supported"); }
-        virtual afl::base::Ref<afl::io::Directory> openRootDirectory()
-            { throw std::runtime_error("openRootDirectory not supported"); }
-        virtual bool isAbsolutePathName(FileName_t path)
-            { return m_fileNames.isAbsolutePathName(path); }
-        virtual bool isPathSeparator(char c)
-            { return m_fileNames.isPathSeparator(c); }
-        virtual FileName_t makePathName(FileName_t path, FileName_t name)
-            { return m_fileNames.makePathName(path, name); }
-        virtual FileName_t getCanonicalPathName(FileName_t name)
-            { return m_fileNames.getCanonicalPathName(name); }
-        virtual FileName_t getAbsolutePathName(FileName_t name)
-            { return getCanonicalPathName(makePathName(getWorkingDirectoryName(), name)); }
-        virtual FileName_t getFileName(FileName_t name)
-            { return m_fileNames.getFileName(name); }
-        virtual FileName_t getDirectoryName(FileName_t name)
-            { return m_fileNames.getDirectoryName(name); }
-        virtual FileName_t getWorkingDirectoryName()
-            { return "/"; }
-
-        void addFile(String_t absoluteName, afl::base::Ref<afl::io::Stream> file)
-            { m_files[absoluteName] = file.asPtr(); }
-     private:
-        typedef std::map<String_t, afl::base::Ptr<afl::io::Stream> > FileMap_t;
-        afl::string::PosixFileNames m_fileNames;
-        FileMap_t m_files;
-    };
-
-    /* An Environment that just provides environment variables */
-    class TestEnvironment : public afl::sys::Environment {
-     public:
-        virtual afl::base::Ref<CommandLine_t> getCommandLine()
-            { throw std::runtime_error("getCommandLine unsupported"); }
-        virtual String_t getInvocationName()
-            { return "TestEnvironment"; }
-        virtual String_t getEnvironmentVariable(const String_t& name)
-            { return m_environment[name]; }
-        virtual String_t getSettingsDirectoryName(const String_t& /*appName*/)
-            { return "/settings"; }
-        virtual String_t getInstallationDirectoryName()
-            { return "/install"; }
-        virtual afl::string::LanguageCode getUserLanguage()
-            { return afl::string::LanguageCode(); }
-        virtual afl::base::Ref<afl::io::TextWriter> attachTextWriter(Channel /*ch*/)
-            { throw std::runtime_error("attachTextWriter unsupported"); }
-        virtual afl::base::Ref<afl::io::TextReader> attachTextReader(Channel /*ch*/)
-            { throw std::runtime_error("attachTextReader unsupported"); }
-        virtual afl::base::Ref<afl::io::Stream> attachStream(Channel /*ch*/)
-            { throw std::runtime_error("attachStream unsupported"); }
-
-        void setEnvironmentVariable(String_t name, String_t value)
-            { m_environment[name] = value; }
-     private:
-        std::map<String_t, String_t> m_environment;
-    };
 }
 
 
@@ -213,14 +137,15 @@ void
 TestServerConfigurationHandler::testFile()
 {
     TestLogListener log;
-    TestEnvironment env;
-    TestFileSystem fs;
+    afl::sys::InternalEnvironment env;
+    afl::io::InternalFileSystem fs;
+    fs.createDirectory("/the");
+    fs.openFile("/the/file.txt", afl::io::FileSystem::Create)->fullWrite(afl::string::toBytes("# comment\n"
+                                                                                              "g.public = public value\n"
+                                                                                              "\n"
+                                                                                              "other.thing = whatever\n"
+                                                                                              "G.KEY = secret\n"));
     env.setEnvironmentVariable("C2CONFIG", "/the/file.txt");
-    fs.addFile("/the/file.txt", *new afl::io::ConstMemoryStream(afl::string::toBytes("# comment\n"
-                                                                                     "g.public = public value\n"
-                                                                                     "\n"
-                                                                                     "other.thing = whatever\n"
-                                                                                     "G.KEY = secret\n")));
 
     // Test
     TestConfigHandler testee(log);
@@ -237,8 +162,8 @@ void
 TestServerConfigurationHandler::testFileOverride()
 {
     TestLogListener log;
-    TestEnvironment env;
-    TestFileSystem fs;
+    afl::sys::InternalEnvironment env;
+    afl::io::InternalFileSystem fs;
 
     // Test
     TestConfigHandler testee(log);
@@ -254,13 +179,13 @@ void
 TestServerConfigurationHandler::testNoFile()
 {
     TestLogListener log;
-    TestEnvironment env;
-    TestFileSystem fs;
+    afl::sys::InternalEnvironment env;
+    afl::io::InternalFileSystem fs;
     env.setEnvironmentVariable("C2CONFIG", "/a.txt");
-    fs.addFile("/a.txt", *new afl::io::ConstMemoryStream(afl::string::toBytes("g.public.a=public value\n"
-                                                                              "g.override=other\n")));
-    fs.addFile("/b.txt", *new afl::io::ConstMemoryStream(afl::string::toBytes("g.public.b=public value\n"
-                                                                              "g.override=other\n")));
+    fs.openFile("/a.txt", afl::io::FileSystem::Create)->fullWrite(afl::string::toBytes("g.public.a=public value\n"
+                                                                                       "g.override=other\n"));
+    fs.openFile("/b.txt", afl::io::FileSystem::Create)->fullWrite(afl::string::toBytes("g.public.b=public value\n"
+                                                                                       "g.override=other\n"));
 
     // Test
     TestConfigHandler testee(log);
