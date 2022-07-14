@@ -5,9 +5,10 @@
 #define C2NG_GAME_INTERFACE_PLAYERPROPERTY_HPP
 
 #include "afl/data/value.hpp"
-#include "game/playerlist.hpp"
+#include "afl/string/translator.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/game.hpp"
+#include "game/playerlist.hpp"
 
 namespace game { namespace interface {
 
@@ -42,7 +43,8 @@ namespace game { namespace interface {
     afl::data::Value* getPlayerProperty(int pid, PlayerProperty ipl,
                                         const PlayerList& list,
                                         const Game& game,
-                                        const game::config::HostConfiguration& config);
+                                        const game::config::HostConfiguration& config,
+                                        afl::string::Translator& tx);
 
 } }
 

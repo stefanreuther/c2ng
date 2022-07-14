@@ -70,8 +70,9 @@ namespace game {
             Use this to format friendly codes, missions, etc.
             \param tpl Template
             \param useOriginalNames if true, use original names (OriginalAdjectiveName), otherwise, use normal names (AdjectiveName).
+            \param tx Translator (for fallback names)
             \return expanded string */
-        String_t expandNames(String_t tpl, bool useOriginalNames) const;
+        String_t expandNames(String_t tpl, bool useOriginalNames, afl::string::Translator& tx) const;
 
         /** Get set of all players.
             \return set of players where Player::isReal() is true */

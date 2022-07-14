@@ -268,7 +268,7 @@ game::proxy::VcrDatabaseProxy::Trampoline::packPlayerNames(PlayerArray<String_t>
     const PlayerList& list = m_adaptor.root().playerList();
     for (int i = 0; i <= MAX_PLAYERS; ++i) {
         if (const Player* pl = list.get(i)) {
-            result.set(i, pl->getName(which));
+            result.set(i, pl->getName(which, m_adaptor.translator()));
         }
     }
 }

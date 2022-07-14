@@ -96,7 +96,7 @@ game::score::TableBuilder::buildTurn(util::DataTable& out, const TurnScore& in) 
                 // Add row
                 const int playerId = p->getId();
                 DataTable::Row& r = out.addRow(playerId);
-                r.setName(p->getName(Player::ShortName));
+                r.setName(p->getName(Player::ShortName, m_translator));
 
                 // Fill it
                 for (size_t i = 0, n = getNumVariants(); i < n; ++i) {

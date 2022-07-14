@@ -4,10 +4,11 @@
 #ifndef C2NG_GAME_INTERFACE_FRIENDLYCODECONTEXT_HPP
 #define C2NG_GAME_INTERFACE_FRIENDLYCODECONTEXT_HPP
 
-#include "interpreter/context.hpp"
 #include "afl/base/ref.hpp"
+#include "afl/string/translator.hpp"
 #include "game/root.hpp"
 #include "game/spec/shiplist.hpp"
+#include "interpreter/context.hpp"
 
 namespace game { namespace interface {
 
@@ -15,7 +16,8 @@ namespace game { namespace interface {
      public:
         FriendlyCodeContext(size_t slot,
                             afl::base::Ref<Root> root,
-                            afl::base::Ref<game::spec::ShipList> shipList);
+                            afl::base::Ref<game::spec::ShipList> shipList,
+                            afl::string::Translator& tx);
         ~FriendlyCodeContext();
 
         // Context:
@@ -34,6 +36,7 @@ namespace game { namespace interface {
         size_t m_slot;
         afl::base::Ref<Root> m_root;
         afl::base::Ref<game::spec::ShipList> m_shipList;
+        afl::string::Translator& m_translator;
     };
 
 } }

@@ -42,7 +42,7 @@ namespace {
 }
 
 afl::data::Value*
-game::interface::getFriendlyCodeProperty(const game::spec::FriendlyCode& fc, FriendlyCodeProperty ifp, const PlayerList& players)
+game::interface::getFriendlyCodeProperty(const game::spec::FriendlyCode& fc, FriendlyCodeProperty ifp, const PlayerList& players, afl::string::Translator& tx)
 {
     switch (ifp) {
      case ifpName:
@@ -55,7 +55,7 @@ game::interface::getFriendlyCodeProperty(const game::spec::FriendlyCode& fc, Fri
            Description.
            A one-liner describing the friendly code.
            @since PCC2 2.40.1 */
-        return makeStringValue(fc.getDescription(players));
+        return makeStringValue(fc.getDescription(players, tx));
      case ifpFlags:
         /* @q Flags:Str (Friendly Code Property)
            Flags. Contains options specified for the friendly code:

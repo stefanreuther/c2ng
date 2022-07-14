@@ -5,8 +5,9 @@
 #ifndef C2NG_GAME_PLAYER_HPP
 #define C2NG_GAME_PLAYER_HPP
 
-#include "afl/string/string.hpp"
 #include "afl/base/types.hpp"
+#include "afl/string/string.hpp"
+#include "afl/string/translator.hpp"
 
 namespace game {
 
@@ -76,8 +77,9 @@ namespace game {
 
         /** Get name.
             \param which Which name to get
+            \param tx Translator (to generate default name if needed)
             \return name */
-        const String_t& getName(Name which) const;
+        String_t getName(Name which, afl::string::Translator& tx) const;
 
         /** Initialize for standard "unowned" slot.
             Sets name appropriately for slot 0 (unowned units). */
@@ -95,11 +97,29 @@ namespace game {
             \return true if player was changed */
         bool isChanged() const;
 
+        /** Get default name.
+            The default name is used when no name has been set.
+            \param playerNr   Player number
+            \param which      Which name to get
+            \param tx         Translator */
+        static String_t getDefaultName(int playerNr, Name which, afl::string::Translator& tx);
+
      private:
+        enum Kind {
+            Normal,
+            Alien,
+            Unowned
+        };
+
         const int m_id;
         bool m_isReal;
         bool m_changed;
+        Kind m_kind : 8;
         String_t m_names[NUM_NAMES];
+
+        void clearNames();
+        static const char* pickTemplate(Kind k, const char* normal, const char* alien, const char* unowned);
+        static String_t getDefaultName(int playerNr, Name which, Kind k, afl::string::Translator& tx);
     };
 
 }

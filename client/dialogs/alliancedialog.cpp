@@ -193,7 +193,7 @@ client::dialogs::AllianceDialog::initContent(util::RequestSender<game::Session> 
                     for (int i = 1; i <= game::MAX_PLAYERS; ++i) {
                         if (game::Player* pl = pRoot->playerList().get(i)) {
                             if (pl->isReal()) {
-                                m_data.names.set(i, pl->getName(game::Player::ShortName));
+                                m_data.names.set(i, pl->getName(game::Player::ShortName, session.translator()));
                                 m_data.players += i;
                             }
                         }

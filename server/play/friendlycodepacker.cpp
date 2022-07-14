@@ -40,10 +40,10 @@ server::play::FriendlyCodePacker::buildValue() const
         for (size_t i = 0, n = friendlyCodes.size(); i < n; ++i) {
             if (const FriendlyCode* fc = friendlyCodes.at(i)) {
                 Hash::Ref_t data = Hash::create();
-                data->setNew("NAME",        gi::getFriendlyCodeProperty(*fc, gi::ifpName,        root->playerList()));
-                data->setNew("DESCRIPTION", gi::getFriendlyCodeProperty(*fc, gi::ifpDescription, root->playerList()));
-                data->setNew("FLAGS",       gi::getFriendlyCodeProperty(*fc, gi::ifpFlags,       root->playerList()));
-                data->setNew("RACES",       gi::getFriendlyCodeProperty(*fc, gi::ifpRaces,       root->playerList()));
+                data->setNew("NAME",        gi::getFriendlyCodeProperty(*fc, gi::ifpName,        root->playerList(), m_session.translator()));
+                data->setNew("DESCRIPTION", gi::getFriendlyCodeProperty(*fc, gi::ifpDescription, root->playerList(), m_session.translator()));
+                data->setNew("FLAGS",       gi::getFriendlyCodeProperty(*fc, gi::ifpFlags,       root->playerList(), m_session.translator()));
+                data->setNew("RACES",       gi::getFriendlyCodeProperty(*fc, gi::ifpRaces,       root->playerList(), m_session.translator()));
                 result->pushBackNew(new HashValue(data));
             }
         }

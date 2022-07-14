@@ -25,11 +25,13 @@ namespace {
 
 game::interface::FriendlyCodeContext::FriendlyCodeContext(size_t slot,
                                                           afl::base::Ref<Root> root,
-                                                          afl::base::Ref<game::spec::ShipList> shipList)
+                                                          afl::base::Ref<game::spec::ShipList> shipList,
+                                                          afl::string::Translator& tx)
     : Context(),
       m_slot(slot),
       m_root(root),
-      m_shipList(shipList)
+      m_shipList(shipList),
+      m_translator(tx)
 { }
 
 game::interface::FriendlyCodeContext::~FriendlyCodeContext()
@@ -47,7 +49,7 @@ game::interface::FriendlyCodeContext::get(PropertyIndex_t index)
 {
     const game::spec::FriendlyCode* fc = m_shipList->friendlyCodes().at(m_slot);
     if (fc != 0) {
-        return getFriendlyCodeProperty(*fc, FriendlyCodeProperty(FC_MAPPING[index].index), m_root->playerList());
+        return getFriendlyCodeProperty(*fc, FriendlyCodeProperty(FC_MAPPING[index].index), m_root->playerList(), m_translator);
     } else {
         return 0;
     }
@@ -68,7 +70,7 @@ game::interface::FriendlyCodeContext::next()
 game::interface::FriendlyCodeContext*
 game::interface::FriendlyCodeContext::clone() const
 {
-    return new FriendlyCodeContext(m_slot, m_root, m_shipList);
+    return new FriendlyCodeContext(m_slot, m_root, m_shipList, m_translator);
 }
 
 game::map::Object*

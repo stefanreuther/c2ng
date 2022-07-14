@@ -964,7 +964,7 @@ game::proxy::SimulationSetupProxy::Trampoline::getFriendlyCodeChoices(Slot_t slo
         }
 
         // Build output
-        filteredList.pack(result, m_root->playerList());
+        filteredList.pack(result, m_root->playerList(), m_translator);
     }
 }
 

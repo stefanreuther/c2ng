@@ -96,7 +96,7 @@ game::msg::Inbox::getMessageHeading(size_t index, afl::string::Translator& tx, c
             if (line[3] == '0') {
                 return pre + tx.translateString("Anonymous Message");
             } else if (Player* pl = players.getPlayerFromCharacter(line[3])) {
-                return pre + pl->getName(Player::LongName);
+                return pre + pl->getName(Player::LongName, tx);
             } else {
                 // proceed, use default
             }

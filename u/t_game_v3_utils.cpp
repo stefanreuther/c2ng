@@ -8,9 +8,10 @@
 #include "t_game_v3.hpp"
 #include "afl/charset/codepage.hpp"
 #include "afl/charset/codepagecharset.hpp"
-#include "game/test/files.hpp"
-#include "afl/io/internaldirectory.hpp"
 #include "afl/io/constmemorystream.hpp"
+#include "afl/io/internaldirectory.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "game/test/files.hpp"
 
 using afl::base::Ref;
 using afl::charset::Charset;
@@ -25,6 +26,7 @@ void
 TestGameV3Utils::testLoadRaceNames()
 {
     // Environment
+    afl::string::NullTranslator tx;
     Ref<InternalDirectory> dir = InternalDirectory::create("spec");
     dir->addStream("race.nm", *new ConstMemoryStream(game::test::getDefaultRaceNames()));
 
@@ -36,13 +38,13 @@ TestGameV3Utils::testLoadRaceNames()
 
     // Verify
     TS_ASSERT(pl.get(1) != 0);
-    TS_ASSERT_EQUALS(pl.get(1)->getName(Player::ShortName), "The Feds");
+    TS_ASSERT_EQUALS(pl.get(1)->getName(Player::ShortName, tx), "The Feds");
 
     TS_ASSERT(pl.get(11) != 0);
-    TS_ASSERT_EQUALS(pl.get(11)->getName(Player::ShortName), "The Colonies");
+    TS_ASSERT_EQUALS(pl.get(11)->getName(Player::ShortName, tx), "The Colonies");
 
     TS_ASSERT(pl.get(12) != 0);
-    TS_ASSERT_EQUALS(pl.get(12)->getName(Player::ShortName), "Alien Marauders");
+    TS_ASSERT_EQUALS(pl.get(12)->getName(Player::ShortName, tx), "Alien Marauders");
 
     TS_ASSERT(pl.get(13) == 0);
 }

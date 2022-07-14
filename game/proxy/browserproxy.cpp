@@ -129,7 +129,7 @@ namespace {
             TurnLoader::PlayerStatusSet_t st = loader.getPlayerStatus(p->getId(), extra, tx);
             if (!st.empty()) {
                 info.availablePlayers += p->getId();
-                info.playerNames.set(p->getId(), p->getName(Player::ShortName));
+                info.playerNames.set(p->getId(), p->getName(Player::ShortName, tx));
                 info.playerExtra.set(p->getId(), extra);
             }
         }

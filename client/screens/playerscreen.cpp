@@ -16,6 +16,8 @@
 #include "game/root.hpp"
 #include "game/turn.hpp"
 #include "gfx/complex.hpp"
+#include "interpreter/arguments.hpp"
+#include "interpreter/values.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/group.hpp"
 #include "ui/layout/flow.hpp"
@@ -33,8 +35,7 @@
 #include "ui/widgets/transparentwindow.hpp"
 #include "ui/window.hpp"
 #include "util/requestreceiver.hpp"
-#include "interpreter/values.hpp"
-#include "interpreter/arguments.hpp"
+#include "util/string.hpp"
 
 namespace {
     const char*const KEYMAP_NAME = "RACESCREEN";
@@ -440,11 +441,8 @@ namespace {
                     if (root != 0 && game != 0) {
                         afl::string::Translator& tx = m_session.translator();
                         if (game::Player* p = root->playerList().get(game->getViewpointPlayer())) {
-                            info = p->getName(game::Player::LongName);
-                            if (!p->getName(game::Player::UserName).empty()) {
-                                info += "\n";
-                                info += p->getName(game::Player::UserName);
-                            }
+                            info = p->getName(game::Player::LongName, tx);
+                            util::addListItem(info, "\n", p->getName(game::Player::UserName, tx));
                         } else {
                             info = afl::string::Format(tx("Player %d"), game->getViewpointPlayer());
                         }

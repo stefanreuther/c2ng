@@ -31,10 +31,11 @@ namespace {
     };
 }
 
-game::interface::PlayerContext::PlayerContext(int nr, afl::base::Ref<Game> game, afl::base::Ref<Root> root)
+game::interface::PlayerContext::PlayerContext(int nr, afl::base::Ref<Game> game, afl::base::Ref<Root> root, afl::string::Translator& tx)
     : m_number(nr),
       m_game(game),
-      m_root(root)
+      m_root(root),
+      m_translator(tx)
 { }
 
 game::interface::PlayerContext::~PlayerContext()
@@ -52,7 +53,7 @@ afl::data::Value*
 game::interface::PlayerContext::get(PropertyIndex_t index)
 {
     // ex IntPlayerContext::get
-    return getPlayerProperty(m_number, PlayerProperty(player_mapping[index].index), m_root->playerList(), *m_game, m_root->hostConfiguration());
+    return getPlayerProperty(m_number, PlayerProperty(player_mapping[index].index), m_root->playerList(), *m_game, m_root->hostConfiguration(), m_translator);
 }
 
 bool
@@ -78,7 +79,7 @@ game::interface::PlayerContext*
 game::interface::PlayerContext::clone() const
 {
     // ex IntPlayerContext::clone
-    return new PlayerContext(m_number, m_game, m_root);
+    return new PlayerContext(m_number, m_game, m_root, m_translator);
 }
 
 game::map::Object*
@@ -130,6 +131,6 @@ game::interface::PlayerContext::create(int nr, Session& session)
         return 0;
     }
 
-    return new PlayerContext(nr, *g, *r);
+    return new PlayerContext(nr, *g, *r, session.translator());
 }
 

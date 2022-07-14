@@ -42,7 +42,7 @@ game::interface::FriendlyCodeFunction::get(interpreter::Arguments& args)
         return 0;
     }
 
-    return new FriendlyCodeContext(slot, *root, *shipList);
+    return new FriendlyCodeContext(slot, *root, *shipList, m_session.translator());
 }
 
 void
@@ -64,7 +64,7 @@ game::interface::FriendlyCodeFunction::makeFirstContext()
     Root* root = m_session.getRoot().get();
     game::spec::ShipList* shipList = m_session.getShipList().get();
     if (root != 0 && shipList != 0 && shipList->friendlyCodes().at(0) != 0) {
-        return new FriendlyCodeContext(0, *root, *shipList);
+        return new FriendlyCodeContext(0, *root, *shipList, m_session.translator());
     } else {
         return 0;
     }

@@ -322,8 +322,8 @@ TestGameProxyVcrDatabaseProxy::testGetPlayerNames()
 
     // Check
     TS_ASSERT_EQUALS(adj.get(3), "three");
-    TS_ASSERT_EQUALS(adj.get(9), "");
-    TS_ASSERT_EQUALS(full.get(3), "");
+    TS_ASSERT_EQUALS(adj.get(9), "Player 9");
+    TS_ASSERT_EQUALS(full.get(3), "Player 3");
     TS_ASSERT_EQUALS(full.get(9), "Nine");
 }
 

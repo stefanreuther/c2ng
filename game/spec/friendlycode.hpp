@@ -68,8 +68,9 @@ namespace game { namespace spec {
 
         /** Get description.
             \param playerList Player list used to render player name placeholders.
+            \param tx Translator (for default player names)
             \return formatted description */
-        String_t getDescription(const PlayerList& playerList) const;
+        String_t getDescription(const PlayerList& playerList, afl::string::Translator& tx) const;
 
         /** Get flags.
             \return Flags */

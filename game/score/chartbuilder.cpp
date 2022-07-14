@@ -77,7 +77,7 @@ game::score::ChartBuilder::build() const
                     // Add row
                     const int playerId = p->getId();
                     DataTable::Row& r = result->addRow(playerId);
-                    r.setName(p->getName(Player::ShortName));
+                    r.setName(p->getName(Player::ShortName, m_translator));
 
                     // Fill it
                     for (size_t turnIndex = 0, numTurns = m_scores.getNumTurns(); turnIndex < numTurns; ++turnIndex) {

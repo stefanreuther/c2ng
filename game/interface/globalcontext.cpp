@@ -191,7 +191,8 @@ game::interface::GlobalContext::get(PropertyIndex_t index)
                                          PlayerProperty(global_mapping[index].index),
                                          root->playerList(),
                                          *game,
-                                         root->hostConfiguration());
+                                         root->hostConfiguration(),
+                                         m_session.translator());
             } else {
                 return 0;
             }

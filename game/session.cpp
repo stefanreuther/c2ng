@@ -379,11 +379,11 @@ game::Session::getReferenceName(Reference ref, ObjectName which, String_t& resul
         if (Root* r = m_root.get()) {
             if (const Player* p = r->playerList().get(ref.getId())) {
                 if (which == PlainName) {
-                    result = p->getName(Player::ShortName);
+                    result = p->getName(Player::ShortName, translator());
                 } else {
                     result = ref.toString(translator());
                     result += ": ";
-                    result += p->getName(Player::ShortName);
+                    result += p->getName(Player::ShortName, translator());
                 }
                 return true;
             }
@@ -534,7 +534,7 @@ game::Session::getPlayerAdjective(int nr, String_t& out)
 {
     if (const Root* root = m_root.get()) {
         if (const Player* player = root->playerList().get(nr)) {
-            out = player->getName(Player::AdjectiveName);
+            out = player->getName(Player::AdjectiveName, translator());
             return true;
         }
     }

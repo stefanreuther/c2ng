@@ -98,7 +98,7 @@ TestGameSpecInfoBrowser::testDescribePlayer()
     TS_ASSERT(a);
     TS_ASSERT_EQUALS(a->value, "sevenses");
 
-    a = findAttribute(*c, "Short name");
+    a = findAttribute(*c, "User name");
     TS_ASSERT(!a);
 }
 

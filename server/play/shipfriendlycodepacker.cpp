@@ -40,7 +40,7 @@ server::play::ShipFriendlyCodePacker::buildValue() const
     }
 
     FriendlyCodeList list(sl.friendlyCodes(), *pShip, game.shipScores(), sl, root.hostConfiguration());
-    return buildFriendlyCodeList(list, root.playerList());
+    return buildFriendlyCodeList(list, root.playerList(), m_session.translator());
 }
 
 String_t
@@ -51,7 +51,8 @@ server::play::ShipFriendlyCodePacker::getName() const
 
 server::Value_t*
 server::play::ShipFriendlyCodePacker::buildFriendlyCodeList(const game::spec::FriendlyCodeList& list,
-                                                            const game::PlayerList& players)
+                                                            const game::PlayerList& players,
+                                                            afl::string::Translator& tx)
 {
     // ex writeFCodesFor
     afl::base::Ref<afl::data::Vector> vv(afl::data::Vector::create());
@@ -59,7 +60,7 @@ server::play::ShipFriendlyCodePacker::buildFriendlyCodeList(const game::spec::Fr
         if (const game::spec::FriendlyCode* fc = *it) {
             afl::base::Ref<afl::data::Hash> hv(afl::data::Hash::create());
             hv->setNew("fc", interpreter::makeStringValue(fc->getCode()));
-            hv->setNew("desc", interpreter::makeStringValue(fc->getDescription(players)));
+            hv->setNew("desc", interpreter::makeStringValue(fc->getDescription(players, tx)));
             vv->pushBackNew(new afl::data::HashValue(hv));
         }
     }

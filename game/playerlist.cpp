@@ -4,7 +4,6 @@
   */
 
 #include "game/playerlist.hpp"
-#include "afl/string/format.hpp"
 #include "util/string.hpp"
 
 // FIXME: simplification: refuse player numbers > MAX_PLAYERS. Keep m_players at MAX_PLAYERS+1 slots all the time.
@@ -96,7 +95,7 @@ game::PlayerList::getCharacterFromPlayer(int id)
 
 // Expand names in string template.
 String_t
-game::PlayerList::expandNames(const String_t tpl, bool useOriginalNames) const
+game::PlayerList::expandNames(const String_t tpl, bool useOriginalNames, afl::string::Translator& tx) const
 {
     // ex GRaceNameList::expandNames, ccmain.pas:ReplaceRaces
     String_t result;
@@ -117,8 +116,7 @@ game::PlayerList::expandNames(const String_t tpl, bool useOriginalNames) const
                 result += '%';
                 ++n;
             } else if (Player* pl = getPlayerFromCharacter(tpl[n])) {
-                // FIXME: deal with empty names (and thus translation)
-                result += pl->getName(which);
+                result += pl->getName(which, tx);
                 ++n;
             } else {
                 // ignore; next iteration will append this character
@@ -172,27 +170,11 @@ game::PlayerList::getNextPlayer(int id) const
 String_t
 game::PlayerList::getPlayerName(int id, Player::Name which, afl::string::Translator& tx) const
 {
-    String_t result;
     if (const Player* p = get(id)) {
-        result = p->getName(which);
+        return p->getName(which, tx);
+    } else {
+        return Player::getDefaultName(id, which, tx);
     }
-    if (result.empty()) {
-        switch (which) {
-         case Player::ShortName:
-         case Player::AdjectiveName:
-         case Player::LongName:
-         case Player::OriginalShortName:
-         case Player::OriginalAdjectiveName:
-         case Player::OriginalLongName:
-            result = afl::string::Format(tx("Player %d"), id);
-            break;
-         case Player::UserName:
-         case Player::NickName:
-         case Player::EmailAddress:
-            break;
-        }
-    }
-    return result;
 }
 
 // Notify listeners.

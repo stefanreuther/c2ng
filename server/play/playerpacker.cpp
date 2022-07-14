@@ -32,7 +32,7 @@ server::play::PlayerPacker::buildValue() const
         game::Player* pl = r.playerList().get(i);
         if (pl != 0 && pl->isReal()) {
             afl::base::Ref<afl::data::Hash> hv(afl::data::Hash::create());
-            game::interface::PlayerContext ctx(i, g, r);
+            game::interface::PlayerContext ctx(i, g, r, m_session.translator());
             addValue(*hv, ctx, "BASES", "BASES");
             addValue(*hv, ctx, "PLANETS", "PLANETS");
             addValue(*hv, ctx, "RACE", "RACE");

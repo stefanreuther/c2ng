@@ -168,8 +168,9 @@ namespace game { namespace spec {
         /** Pack friendly-code list into standalone info object.
             This will only pack friendly codes, not prefixes (FriendlyCode::PrefixCode).
             \param out [out] List
-            \param players [in] Players (for formatting descriptions) */
-        void pack(Infos_t& out, const PlayerList& players) const;
+            \param players [in] Players (for formatting descriptions)
+            \param tx [in] Translator (for default race names) */
+        void pack(Infos_t& out, const PlayerList& players, afl::string::Translator& tx) const;
 
 
         /*

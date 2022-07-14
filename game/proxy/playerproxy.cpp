@@ -94,7 +94,7 @@ game::proxy::PlayerProxy::getPlayerNames(WaitIndicator& link, Player::Name which
                 if (PlayerList* p = getPlayerList(s)) {
                     for (int i = 0; i <= MAX_PLAYERS; ++i) {
                         if (Player* pl = p->get(i)) {
-                            m_result.set(i, pl->getName(m_which));
+                            m_result.set(i, pl->getName(m_which, s.translator()));
                         }
                     }
                 }

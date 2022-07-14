@@ -37,7 +37,7 @@ TestGameInterfaceFriendlyCodeContext::testIt()
     TS_ASSERT_EQUALS(shipList->friendlyCodes().size(), 1U);
 
     // Test
-    game::interface::FriendlyCodeContext testee(0, root, shipList);
+    game::interface::FriendlyCodeContext testee(0, root, shipList, tx);
     interpreter::test::ContextVerifier v(testee, "testIt");
     v.verifyTypes();
 

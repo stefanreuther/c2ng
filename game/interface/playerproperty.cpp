@@ -16,7 +16,8 @@ afl::data::Value*
 game::interface::getPlayerProperty(int pid, PlayerProperty ipl,
                                    const PlayerList& list,
                                    const Game& game,
-                                   const game::config::HostConfiguration& config)
+                                   const game::config::HostConfiguration& config,
+                                   afl::string::Translator& tx)
 {
     // ex int/if/playerif.h:getPlayerProperty
 
@@ -39,7 +40,7 @@ game::interface::getPlayerProperty(int pid, PlayerProperty ipl,
            @q Race.Adj:Str (Player Property)
            Adjective name of this player. */
         if (const Player* p = list.get(pid)) {
-            return makeStringValue(p->getName(Player::AdjectiveName));
+            return makeStringValue(p->getName(Player::AdjectiveName, tx));
         } else {
             return 0;
         }
@@ -49,7 +50,7 @@ game::interface::getPlayerProperty(int pid, PlayerProperty ipl,
            @q Race:Str (Player Property)
            Full name of this player. */
         if (const Player* p = list.get(pid)) {
-            return makeStringValue(p->getName(Player::LongName));
+            return makeStringValue(p->getName(Player::LongName, tx));
         } else {
             return 0;
         }
@@ -89,7 +90,7 @@ game::interface::getPlayerProperty(int pid, PlayerProperty ipl,
            @q Enemy:Str (Ship Property)
            Short name of this player. */
         if (const Player* p = list.get(pid)) {
-            return makeStringValue(p->getName(Player::ShortName));
+            return makeStringValue(p->getName(Player::ShortName, tx));
         } else {
             return 0;
         }

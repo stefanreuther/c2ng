@@ -48,10 +48,10 @@ game::spec::FriendlyCode::getCode() const
 
 // Get description.
 String_t
-game::spec::FriendlyCode::getDescription(const PlayerList& playerList) const
+game::spec::FriendlyCode::getDescription(const PlayerList& playerList, afl::string::Translator& tx) const
 {
     // ex GFCode::getDescription
-    return playerList.expandNames(m_description, false);
+    return playerList.expandNames(m_description, false, tx);
 }
 
 // Get flags.

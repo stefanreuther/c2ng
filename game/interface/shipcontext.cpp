@@ -319,7 +319,8 @@ game::interface::ShipContext::get(PropertyIndex_t index)
                                              PlayerProperty(ship_mapping[index].index),
                                              m_root->playerList(),
                                              *m_game,
-                                             m_root->hostConfiguration());
+                                             m_root->hostConfiguration(),
+                                             m_session.translator());
                 } else {
                     return 0;
                 }
@@ -329,7 +330,8 @@ game::interface::ShipContext::get(PropertyIndex_t index)
                                              PlayerProperty(ship_mapping[index].index),
                                              m_root->playerList(),
                                              *m_game,
-                                             m_root->hostConfiguration());
+                                             m_root->hostConfiguration(),
+                                             m_session.translator());
                 } else {
                     return 0;
                 }

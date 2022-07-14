@@ -67,7 +67,7 @@ game::interface::MinefieldFunction::makeFirstContext()
     Root* r = m_session.getRoot().get();
     if (g != 0 || r != 0) {
         if (int mid = g->currentTurn().universe().minefields().findNextIndex(0)) {
-            return new MinefieldContext(mid, *r, *g);
+            return new MinefieldContext(mid, *r, *g, m_session.translator());
         } else {
             return 0;
         }

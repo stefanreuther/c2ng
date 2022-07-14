@@ -19,10 +19,12 @@ class game::v3::Parser::DataInterface : public game::parser::DataInterface {
  public:
     DataInterface(int playerNr,
                   const Root& root,
-                  const game::spec::ShipList& shipList)
+                  const game::spec::ShipList& shipList,
+                  afl::string::Translator& tx)
         : m_playerNumber(playerNr),
           m_root(root),
-          m_shipList(shipList)
+          m_shipList(shipList),
+          m_translator(tx)
         { }
 
     virtual int getPlayerNumber() const
@@ -44,7 +46,7 @@ class game::v3::Parser::DataInterface : public game::parser::DataInterface {
         }
 
     virtual String_t expandRaceNames(String_t tpl) const
-        { return m_root.playerList().expandNames(tpl, true); }
+        { return m_root.playerList().expandNames(tpl, true, m_translator); }
 
  private:
     int parsePlayerName(Player::Name which, const String_t& name) const
@@ -54,7 +56,7 @@ class game::v3::Parser::DataInterface : public game::parser::DataInterface {
             // (host sanitized extended character)
             const PlayerList& pp = m_root.playerList();
             for (Player* p = pp.getFirstPlayer(); p != 0; p = pp.getNextPlayer(p)) {
-                if (strCaseCompare(name, strTrim(p->getName(which))) == 0) {
+                if (strCaseCompare(name, strTrim(p->getName(which, m_translator))) == 0) {
                     return p->getId();
                 }
             }
@@ -75,6 +77,7 @@ class game::v3::Parser::DataInterface : public game::parser::DataInterface {
     int m_playerNumber;
     const Root& m_root;
     const game::spec::ShipList& m_shipList;
+    afl::string::Translator& m_translator;
 };
 
 // Constructor.
@@ -110,7 +113,7 @@ game::v3::Parser::parseMessages(afl::io::Stream& in, const game::msg::Inbox& inb
     p.load(in, m_translator, m_log);
 
     // Parse messages
-    DataInterface gdi(m_player, m_root, m_shipList);
+    DataInterface gdi(m_player, m_root, m_shipList, m_translator);
     for (size_t i = 0, n = inbox.getNumMessages(); i < n; ++i) {
         String_t text = inbox.getMessageText(i, m_translator, m_root.playerList());
 

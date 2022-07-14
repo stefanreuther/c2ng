@@ -221,12 +221,12 @@ game::spec::FriendlyCodeList::loadExtraCodes(afl::io::Stream& in, afl::string::T
 
 // Pack friendly-code list into standalone info object.
 void
-game::spec::FriendlyCodeList::pack(Infos_t& out, const PlayerList& players) const
+game::spec::FriendlyCodeList::pack(Infos_t& out, const PlayerList& players, afl::string::Translator& tx) const
 {
     for (Iterator_t it = begin(), e = end(); it != e; ++it) {
         if (const FriendlyCode* p = *it) {
             if (!(p->getFlags().contains(FriendlyCode::PrefixCode))) {
-                out.push_back(Info(p->getCode(), p->getDescription(players)));
+                out.push_back(Info(p->getCode(), p->getDescription(players, tx)));
             }
         }
     }

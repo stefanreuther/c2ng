@@ -33,7 +33,7 @@ TestGameSpecFriendlyCode::testFCode()
     TS_ASSERT(mkt.getRaces().contains(1));
     TS_ASSERT(mkt.getRaces().contains(2));
     TS_ASSERT(mkt.getRaces().contains(10));
-    TS_ASSERT_EQUALS(mkt.getDescription(list), "make torps");
+    TS_ASSERT_EQUALS(mkt.getDescription(list, tx), "make torps");
 
     TS_ASSERT(!lfm.getRaces().contains(1));
     TS_ASSERT(!lfm.getRaces().contains(8));
@@ -61,10 +61,11 @@ TestGameSpecFriendlyCode::testFCodeFail()
 void
 TestGameSpecFriendlyCode::testData()
 {
+    afl::string::NullTranslator tx;
     game::PlayerList list;
     game::spec::FriendlyCode testee;
     TS_ASSERT_EQUALS(testee.getCode(), "");
-    TS_ASSERT_EQUALS(testee.getDescription(list), "");
+    TS_ASSERT_EQUALS(testee.getDescription(list, tx), "");
     TS_ASSERT(testee.getFlags().empty());
     TS_ASSERT(testee.getRaces().empty());
 }
@@ -86,10 +87,10 @@ TestGameSpecFriendlyCode::testDescription()
     pl->setName(pl->OriginalShortName, "OrigShort");
 
     // Verify descriptions
-    TS_ASSERT_EQUALS(game::spec::FriendlyCode("xyz",",[%3]", tx).getDescription(list), "[Short]");
-    TS_ASSERT_EQUALS(game::spec::FriendlyCode("xyz",",[%-3]", tx).getDescription(list), "[Adj]");
-    TS_ASSERT_EQUALS(game::spec::FriendlyCode("xyz",",[%2]", tx).getDescription(list), "[2]");
-    TS_ASSERT_EQUALS(game::spec::FriendlyCode("xyz",",[%-2]", tx).getDescription(list), "[2]");
+    TS_ASSERT_EQUALS(game::spec::FriendlyCode("xyz",",[%3]", tx).getDescription(list, tx), "[Short]");
+    TS_ASSERT_EQUALS(game::spec::FriendlyCode("xyz",",[%-3]", tx).getDescription(list, tx), "[Adj]");
+    TS_ASSERT_EQUALS(game::spec::FriendlyCode("xyz",",[%2]", tx).getDescription(list, tx), "[2]");
+    TS_ASSERT_EQUALS(game::spec::FriendlyCode("xyz",",[%-2]", tx).getDescription(list, tx), "[2]");
 }
 
 /** Test worksOn(). */

@@ -74,7 +74,7 @@ game::interface::PlayerFunction::makeFirstContext()
     }
 
     if (pl != 0) {
-        return new PlayerContext(pl->getId(), *g, *r);
+        return new PlayerContext(pl->getId(), *g, *r, m_session.translator());
     } else {
         return 0;
     }

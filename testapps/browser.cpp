@@ -118,7 +118,7 @@ int main(int, char** argv)
                             game::TurnLoader::PlayerStatusSet_t st = root->getTurnLoader()->getPlayerStatus(i, extra, tx);
                             if (!st.empty() || !extra.empty()) {
                                 std::cout << "Player " << i << ", "
-                                          << pl->getName(pl->ShortName);
+                                          << pl->getName(pl->ShortName, tx);
                                 if (st.contains(game::TurnLoader::Available)) {
                                     std::cout << ", available";
                                 }

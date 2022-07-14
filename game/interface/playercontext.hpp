@@ -4,16 +4,17 @@
 #ifndef C2NG_GAME_INTERFACE_PLAYERCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_PLAYERCONTEXT_HPP
 
-#include "interpreter/context.hpp"
+#include "afl/string/translator.hpp"
 #include "game/game.hpp"
 #include "game/root.hpp"
 #include "game/session.hpp"
+#include "interpreter/context.hpp"
 
 namespace game { namespace interface {
 
     class PlayerContext : public interpreter::Context, public interpreter::Context::ReadOnlyAccessor {
      public:
-        PlayerContext(int nr, afl::base::Ref<Game> game, afl::base::Ref<Root> root);
+        PlayerContext(int nr, afl::base::Ref<Game> game, afl::base::Ref<Root> root, afl::string::Translator& tx);
         ~PlayerContext();
 
         // Context:
@@ -34,6 +35,7 @@ namespace game { namespace interface {
         int m_number;
         afl::base::Ref<Game> m_game;
         afl::base::Ref<Root> m_root;
+        afl::string::Translator& m_translator;
     };
 
 } }

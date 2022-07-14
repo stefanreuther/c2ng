@@ -36,7 +36,7 @@ server::play::PlanetFriendlyCodePacker::buildValue() const
     }
 
     FriendlyCodeList list(sl.friendlyCodes(), *pPlanet, game.shipScores(), sl, root.hostConfiguration());
-    return ShipFriendlyCodePacker::buildFriendlyCodeList(list, root.playerList());
+    return ShipFriendlyCodePacker::buildFriendlyCodeList(list, root.playerList(), m_session.translator());
 }
 
 String_t

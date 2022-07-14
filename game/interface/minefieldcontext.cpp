@@ -61,10 +61,11 @@ namespace {
     };
 }
 
-game::interface::MinefieldContext::MinefieldContext(int id, afl::base::Ref<Root> root, afl::base::Ref<Game> game)
+game::interface::MinefieldContext::MinefieldContext(int id, afl::base::Ref<Root> root, afl::base::Ref<Game> game, afl::string::Translator& tx)
     : m_id(id),
       m_root(root),
-      m_game(game)
+      m_game(game),
+      m_translator(tx)
 {
     // ex IntMinefieldContext::IntMinefieldContext
 }
@@ -110,7 +111,7 @@ game::interface::MinefieldContext::get(PropertyIndex_t index)
 
          case OwnerPropertyDomain:
             if (mf->getOwner(n)) {
-                return getPlayerProperty(n, PlayerProperty(minefield_mapping[index].index), m_root->playerList(), *m_game, m_root->hostConfiguration());
+                return getPlayerProperty(n, PlayerProperty(minefield_mapping[index].index), m_root->playerList(), *m_game, m_root->hostConfiguration(), m_translator);
             } else {
                 return 0;
             }
@@ -137,7 +138,7 @@ game::interface::MinefieldContext::next()
 game::interface::MinefieldContext*
 game::interface::MinefieldContext::clone() const
 {
-    return new MinefieldContext(m_id, m_root, m_game);
+    return new MinefieldContext(m_id, m_root, m_game, m_translator);
 }
 
 game::map::Minefield*
@@ -177,7 +178,7 @@ game::interface::MinefieldContext::create(int id, Session& session, bool force)
     Root* r = session.getRoot().get();
     // FIXME: the minefields().get() test is not in PCC2 for MinefieldFunction::get()
     if (g != 0 && r != 0 && (force || g->currentTurn().universe().minefields().get(id) != 0)) {
-        return new MinefieldContext(id, *r, *g);
+        return new MinefieldContext(id, *r, *g, session.translator());
     } else {
         return 0;
     }

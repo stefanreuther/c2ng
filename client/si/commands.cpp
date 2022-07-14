@@ -3467,7 +3467,7 @@ client::si::IFUIInputFCode(game::Session& session, ScriptSide& si, RequestLink1 
         }
 
         FriendlyCodeList(shipList.friendlyCodes(), *obj, g.shipScores(), shipList, r.hostConfiguration())
-            .pack(*list, r.playerList());
+            .pack(*list, r.playerList(), session.translator());
     } else {
         // Parameterized mode
         // Determine type flags
@@ -3509,7 +3509,7 @@ client::si::IFUIInputFCode(game::Session& session, ScriptSide& si, RequestLink1 
             }
         }
         filteredList.sort();
-        filteredList.pack(*list, r.playerList());
+        filteredList.pack(*list, r.playerList(), session.translator());
     }
 
     // Do it.

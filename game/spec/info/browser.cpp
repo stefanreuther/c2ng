@@ -426,10 +426,10 @@ game::spec::info::Browser::describePlayer(PageContent& content, Id_t id) const
     content.title = m_root.playerList().getPlayerName(id, Player::LongName, m_translator);
     if (const Player* pl = m_root.playerList().get(id)) {
         content.pictureName = m_picNamer.getPlayerPicture(*pl);
-        addAttribute(content, m_translator("Short name"),    pl->getName(Player::ShortName));
-        addAttribute(content, m_translator("Adjective"),     pl->getName(Player::AdjectiveName));
-        addAttribute(content, m_translator("User name"),     pl->getName(Player::UserName));
-        addAttribute(content, m_translator("Email address"), pl->getName(Player::EmailAddress));
+        addAttribute(content, m_translator("Short name"),    pl->getName(Player::ShortName,     m_translator));
+        addAttribute(content, m_translator("Adjective"),     pl->getName(Player::AdjectiveName, m_translator));
+        addAttribute(content, m_translator("User name"),     pl->getName(Player::UserName,      m_translator));
+        addAttribute(content, m_translator("Email address"), pl->getName(Player::EmailAddress,  m_translator));
 
         for (RacialAbilityList::Iterator_t it = m_racialAbilities.begin(), e = m_racialAbilities.end(); it != e; ++it) {
             if (it->players.contains(id)) {
@@ -448,7 +448,7 @@ game::spec::info::Browser::listPlayers(ListContent& content, const Filter& f) co
 {
     for (Player* pl = m_root.playerList().getFirstPlayer(); pl != 0; pl = m_root.playerList().getNextPlayer(pl)) {
         if (matchPlayer(*pl, f)) {
-            content.content.push_back(ListEntry(pl->getName(Player::ShortName), pl->getId()));
+            content.content.push_back(ListEntry(pl->getName(Player::ShortName, m_translator), pl->getId()));
         }
     }
 }
@@ -520,11 +520,11 @@ game::spec::info::Browser::matchPlayerName(const Player& pl, const String_t& f) 
 {
     Matcher m(f);
     return m.ok()
-        || m(pl.getName(Player::ShortName))
-        || m(pl.getName(Player::LongName))
-        || m(pl.getName(Player::AdjectiveName))
-        || m(pl.getName(Player::UserName))
-        || m(pl.getName(Player::NickName));
+        || m(pl.getName(Player::ShortName,     m_translator))
+        || m(pl.getName(Player::LongName,      m_translator))
+        || m(pl.getName(Player::AdjectiveName, m_translator))
+        || m(pl.getName(Player::UserName,      m_translator))
+        || m(pl.getName(Player::NickName,      m_translator));
 }
 
 void

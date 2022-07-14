@@ -43,7 +43,10 @@ namespace {
                 }
             }
         virtual String_t expandRaceNames(String_t name) const
-            { return m_playerList.expandNames(name, true); }
+            {
+                afl::string::NullTranslator tx;
+                return m_playerList.expandNames(name, true, tx);
+            }
      private:
         void setupPlayerList()
             {

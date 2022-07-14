@@ -530,7 +530,7 @@ TestGameSpecFriendlyCodeList::testPack()
 
     // Pack
     game::spec::FriendlyCodeList::Infos_t info;
-    testee.pack(info, pl);
+    testee.pack(info, pl, tx);
 
     // Verify
     TS_ASSERT_EQUALS(info.size(), 3U);
