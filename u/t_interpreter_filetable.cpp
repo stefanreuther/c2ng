@@ -6,11 +6,54 @@
 #include "interpreter/filetable.hpp"
 
 #include "t_interpreter.hpp"
-#include "afl/io/nullstream.hpp"
 #include "afl/data/integervalue.hpp"
-#include "interpreter/filevalue.hpp"
-#include "interpreter/error.hpp"
+#include "afl/data/stringvalue.hpp"
+#include "afl/except/fileproblemexception.hpp"
+#include "afl/io/filemapping.hpp"
 #include "afl/io/internalstream.hpp"
+#include "afl/io/multiplexablestream.hpp"
+#include "afl/io/nullstream.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "interpreter/error.hpp"
+#include "interpreter/filevalue.hpp"
+
+namespace {
+    class FailStream : public afl::io::MultiplexableStream {
+     public:
+        virtual size_t read(Bytes_t /*m*/)
+            { return 0; }
+        virtual size_t write(ConstBytes_t /*m*/)
+            { throw afl::except::FileProblemException(*this, "no write"); }
+        virtual void flush()
+            { throw afl::except::FileProblemException(*this, "no flush"); }
+        virtual void setPos(FileSize_t /*pos*/)
+            { }
+        virtual FileSize_t getPos()
+            { return 0; }
+        virtual FileSize_t getSize()
+            { return 0; }
+        virtual uint32_t getCapabilities()
+            { return CanRead | CanWrite; }
+        virtual String_t getName()
+            { return "FailStream"; }
+        virtual afl::base::Ptr<afl::io::FileMapping> createFileMapping(FileSize_t /*limit*/)
+            { return 0; }
+    };
+
+    /* Log listener that counts messages */
+    class CountingLogListener : public afl::sys::LogListener {
+     public:
+        CountingLogListener()
+            : m_count(0)
+            { }
+        virtual void handleMessage(const Message& /*msg*/)
+            { ++m_count; }
+        int get() const
+            { return m_count; }
+     private:
+        int m_count;
+    };
+}
 
 /** Simple test. */
 void
@@ -39,6 +82,7 @@ TestInterpreterFileTable::testIt()
     afl::data::IntegerValue four(4);    interpreter::FileValue ffour(4);
     afl::data::IntegerValue six(6);     interpreter::FileValue fsix(6);
     afl::data::IntegerValue neg(-1);    interpreter::FileValue fneg(-1);
+    afl::data::StringValue str("str");
 
     size_t fd;
     TS_ASSERT(!testee.checkFileArg(fd, 0,      false));
@@ -50,6 +94,7 @@ TestInterpreterFileTable::testIt()
     TS_ASSERT_THROWS(testee.checkFileArg(fd, &fsix, false), interpreter::Error);
     TS_ASSERT_THROWS(testee.checkFileArg(fd, &neg,  false), interpreter::Error);
     TS_ASSERT_THROWS(testee.checkFileArg(fd, &fneg, false), interpreter::Error);
+    TS_ASSERT_THROWS(testee.checkFileArg(fd, &str,  false), interpreter::Error);
 
     TS_ASSERT(!testee.checkFileArg(fd, 0,      true));
     TS_ASSERT( testee.checkFileArg(fd, &one,   true)); TS_ASSERT_EQUALS(fd, 1U);
@@ -60,14 +105,16 @@ TestInterpreterFileTable::testIt()
     TS_ASSERT_THROWS(testee.checkFileArg(fd, &fsix,  true), interpreter::Error);
     TS_ASSERT_THROWS(testee.checkFileArg(fd, &neg,   true), interpreter::Error);
     TS_ASSERT_THROWS(testee.checkFileArg(fd, &fneg,  true), interpreter::Error);
+    TS_ASSERT_THROWS(testee.checkFileArg(fd, &str,   true), interpreter::Error);
 
     // Check file arguments to text files
     afl::io::TextFile* tf;
     TS_ASSERT(!testee.checkFileArg(tf, 0));    TS_ASSERT(tf == 0);
     TS_ASSERT( testee.checkFileArg(tf, &one)); TS_ASSERT(tf != 0);
-    TS_ASSERT_THROWS(!testee.checkFileArg(tf, &ffour), interpreter::Error);
-    TS_ASSERT_THROWS(!testee.checkFileArg(tf, &six),   interpreter::Error);
-    TS_ASSERT_THROWS(!testee.checkFileArg(tf, &fneg),  interpreter::Error);
+    TS_ASSERT_THROWS(testee.checkFileArg(tf, &ffour), interpreter::Error);
+    TS_ASSERT_THROWS(testee.checkFileArg(tf, &six),   interpreter::Error);
+    TS_ASSERT_THROWS(testee.checkFileArg(tf, &fneg),  interpreter::Error);
+    TS_ASSERT_THROWS(testee.checkFileArg(tf, &str),   interpreter::Error);
 
     // Close
     testee.closeFile(1);
@@ -131,4 +178,78 @@ TestInterpreterFileTable::testAppend()
     TS_ASSERT_SAME_DATA(l1file->getContent().unsafeData(),
                         "l1file\n"
                         "t\xe4xt\n", 12);
+}
+
+/** Test closing file when an error occurs.
+    A: Open a stream that fails on flush/write. Write something into it. Close file.
+    E: closeFile() must throw, but file must be closed afterwards. */
+void
+TestInterpreterFileTable::testCloseError()
+{
+    const int FILE_NR = 1;
+
+    // Open a file
+    interpreter::FileTable testee;
+    testee.setMaxFiles(6);
+    testee.openFile(FILE_NR, *new FailStream());
+
+    // Write
+    afl::io::TextFile* tf = testee.getFile(FILE_NR);
+    TS_ASSERT(tf != 0);
+    tf->writeLine("hi there");
+
+    // Close
+    TS_ASSERT_THROWS(testee.closeFile(FILE_NR), afl::except::FileProblemException);
+    TS_ASSERT(testee.getFile(FILE_NR) == 0);
+}
+
+/** Test closeAllFiles(), success case.
+    A: open some files. Call closeAllFiles().
+    E: files closed, no log messages generated. */
+void
+TestInterpreterFileTable::testCloseAll()
+{
+    // Prepare
+    interpreter::FileTable testee;
+    testee.setMaxFiles(6);
+    testee.openFile(1, *new afl::io::NullStream());
+    testee.openFile(2, *new afl::io::NullStream());
+    testee.openFile(3, *new afl::io::NullStream());
+
+    // Test
+    CountingLogListener log;
+    afl::string::NullTranslator tx;
+    testee.closeAllFiles(log, tx);
+
+    // Verify
+    TS_ASSERT_EQUALS(log.get(), 0);
+    TS_ASSERT(testee.getFile(1) == 0);
+    TS_ASSERT(testee.getFile(2) == 0);
+    TS_ASSERT(testee.getFile(3) == 0);
+}
+
+/** Test closeAll, error case.
+    A: open some files. Call closeAllFiles().
+    E: files closed, some log messages generated. */
+void
+TestInterpreterFileTable::testCloseAllError()
+{
+    // Prepare
+    interpreter::FileTable testee;
+    testee.setMaxFiles(6);
+    testee.openFile(1, *new afl::io::NullStream());
+    testee.openFile(2, *new FailStream());
+    testee.openFile(3, *new afl::io::NullStream());
+    testee.getFile(2)->writeLine("hi");
+
+    // Test
+    CountingLogListener log;
+    afl::string::NullTranslator tx;
+    testee.closeAllFiles(log, tx);
+
+    // Verify
+    TS_ASSERT(log.get() >= 1);
+    TS_ASSERT(testee.getFile(1) == 0);
+    TS_ASSERT(testee.getFile(2) == 0);
+    TS_ASSERT(testee.getFile(3) == 0);
 }

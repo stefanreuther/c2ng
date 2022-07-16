@@ -9,6 +9,8 @@
 #include "interpreter/error.hpp"
 #include "interpreter/filevalue.hpp"
 
+const char*const LOG_NAME = "interpreter";
+
 struct interpreter::FileTable::State {
     afl::base::Ref<afl::io::Stream> stream;
     afl::io::TextFile textFile;
@@ -28,12 +30,12 @@ interpreter::FileTable::State::State(afl::base::Ref<afl::io::Stream> stream)
 interpreter::FileTable::State::~State()
 {
     // ex IntFileDescriptor::~IntFileDescriptor
+    // This is a last-resort flush to try to prevent data loss.
+    // Normally, files are flushed by closeFile(), closeAllFiles() which can report errors.
     try {
         textFile.flush();
     }
     catch (afl::except::FileProblemException& e) {
-        // console.write(LOG_ERROR, format("%s: %s", e.getFileName(), e.what()));
-        // console.write(LOG_ERROR, format(_("%s: Error closing this file, possible data loss."), text_file.getName()));
         (void) e;
     }
 }
@@ -74,8 +76,30 @@ void
 interpreter::FileTable::closeFile(size_t fd)
 {
     if (fd < m_files.size() && m_files[fd] != 0) {
-        m_files[fd]->textFile.flush();
-        m_files.replaceElementNew(fd, 0);
+        // Extract the file, then flush it, so it will be guaranteed closed even if the flush fails.
+        std::auto_ptr<State> p(m_files.extractElement(fd));
+        p->textFile.flush();
+    }
+}
+
+void
+interpreter::FileTable::closeAllFiles(afl::sys::LogListener& log, afl::string::Translator& tx)
+{
+    bool hadErrors = false;
+    for (size_t i = 0, n = m_files.size(); i < n; ++i) {
+        std::auto_ptr<State> p(m_files.extractElement(i));
+        if (p.get() != 0) {
+            try {
+                p->textFile.flush();
+            }
+            catch (std::exception& e) {
+                log.write(afl::sys::LogListener::Error, LOG_NAME, String_t(), e);
+                hadErrors = true;
+            }
+        }
+    }
+    if (hadErrors) {
+        log.write(afl::sys::LogListener::Error, LOG_NAME, tx("Error while closing files; written data may have been lost."));
     }
 }
 

@@ -163,6 +163,9 @@ class TestInterpreterFileTable : public CxxTest::TestSuite {
  public:
     void testIt();
     void testAppend();
+    void testCloseError();
+    void testCloseAll();
+    void testCloseAllError();
 };
 
 class TestInterpreterFileValue : public CxxTest::TestSuite {

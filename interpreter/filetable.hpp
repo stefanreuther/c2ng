@@ -8,6 +8,8 @@
 #include "afl/container/ptrvector.hpp"
 #include "afl/data/value.hpp"
 #include "afl/io/textfile.hpp"
+#include "afl/string/translator.hpp"
+#include "afl/sys/loglistener.hpp"
 
 namespace interpreter {
 
@@ -50,6 +52,12 @@ namespace interpreter {
             \param fd File number */
         void closeFile(size_t fd);
 
+        /** Close all files.
+            If errors occur, they are logged on the given LogListener.
+            \param log LogListener
+            \param tx  Translator */
+        void closeAllFiles(afl::sys::LogListener& log, afl::string::Translator& tx);
+
         /** Get file by number.
             \param fd File number
             \return File instance; null if file is not open */
@@ -69,7 +77,7 @@ namespace interpreter {
             \retval false User-supplied argument was null
             \throw Error User-supplied argument was out-of-range, wrong type, or not open but mustBeOpen was required */
         bool checkFileArg(size_t& fd, const afl::data::Value* arg, bool mustBeOpen);
-        
+
         /** Check file argument, produce text file pointer.
             \param tf [out] Text file pointer
             \param arg [in] User-supplied argument (integer or FileValue)

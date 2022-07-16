@@ -401,6 +401,9 @@ namespace {
                     m_session.log().write(afl::sys::LogListener::Error, LOG_NAME, m_session.translator()("Unable to save game"), e);
                 }
 
+                // Close/flush all files
+                m_session.world().fileTable().closeAllFiles(m_session.log(), m_session.translator());
+
                 // Perform state change. This will eventually continue the process.
                 m_scriptSide.callAsyncNew(new PostSaveStateChangeAction(m_target, m_link));
             }
