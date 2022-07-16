@@ -14,6 +14,7 @@
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
+#include "afl/test/loglistener.hpp"
 #include "interpreter/arraydata.hpp"
 #include "interpreter/arrayvalue.hpp"
 #include "interpreter/error.hpp"
@@ -783,32 +784,19 @@ TestInterpreterUnaryExecution::testVal()
 void
 TestInterpreterUnaryExecution::testTrace()
 {
-    class Listener : public afl::sys::LogListener {
-     public:
-        Listener()
-            : m_count(0)
-            { }
-        virtual void handleMessage(const Message& /*msg*/)
-            { ++m_count; }
-        int get() const
-            { return m_count; }
-     private:
-        int m_count;
-    };
-
-    Listener log;
+    afl::test::LogListener log;
     TestHarness h;
     std::auto_ptr<Value> p;
     h.log.addListener(log);
-    TS_ASSERT_EQUALS(log.get(), 0);
+    TS_ASSERT_EQUALS(log.getNumMessages(), 0U);
 
     p.reset(executeUnaryOperation(h.world, interpreter::unTrace, 0));
     TS_ASSERT(p.get() == 0);
-    TS_ASSERT_EQUALS(log.get(), 1);
+    TS_ASSERT_EQUALS(log.getNumMessages(), 1U);
 
     p.reset(executeUnaryOperation(h.world, interpreter::unTrace, addr(IntegerValue(3))));
     TS_ASSERT_EQUALS(toInteger(p), 3);
-    TS_ASSERT_EQUALS(log.get(), 2);
+    TS_ASSERT_EQUALS(log.getNumMessages(), 2U);
 }
 
 /** Test unNot2: logical negation (binary logic). */

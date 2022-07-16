@@ -14,6 +14,7 @@
 #include "afl/io/multiplexablestream.hpp"
 #include "afl/io/nullstream.hpp"
 #include "afl/string/nulltranslator.hpp"
+#include "afl/test/loglistener.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/filevalue.hpp"
 
@@ -38,20 +39,6 @@ namespace {
             { return "FailStream"; }
         virtual afl::base::Ptr<afl::io::FileMapping> createFileMapping(FileSize_t /*limit*/)
             { return 0; }
-    };
-
-    /* Log listener that counts messages */
-    class CountingLogListener : public afl::sys::LogListener {
-     public:
-        CountingLogListener()
-            : m_count(0)
-            { }
-        virtual void handleMessage(const Message& /*msg*/)
-            { ++m_count; }
-        int get() const
-            { return m_count; }
-     private:
-        int m_count;
     };
 }
 
@@ -217,12 +204,12 @@ TestInterpreterFileTable::testCloseAll()
     testee.openFile(3, *new afl::io::NullStream());
 
     // Test
-    CountingLogListener log;
+    afl::test::LogListener log;
     afl::string::NullTranslator tx;
     testee.closeAllFiles(log, tx);
 
     // Verify
-    TS_ASSERT_EQUALS(log.get(), 0);
+    TS_ASSERT_EQUALS(log.getNumMessages(), 0U);
     TS_ASSERT(testee.getFile(1) == 0);
     TS_ASSERT(testee.getFile(2) == 0);
     TS_ASSERT(testee.getFile(3) == 0);
@@ -243,12 +230,12 @@ TestInterpreterFileTable::testCloseAllError()
     testee.getFile(2)->writeLine("hi");
 
     // Test
-    CountingLogListener log;
+    afl::test::LogListener log;
     afl::string::NullTranslator tx;
     testee.closeAllFiles(log, tx);
 
     // Verify
-    TS_ASSERT(log.get() >= 1);
+    TS_ASSERT(log.getNumMessages() >= 1U);
     TS_ASSERT(testee.getFile(1) == 0);
     TS_ASSERT(testee.getFile(2) == 0);
     TS_ASSERT(testee.getFile(3) == 0);

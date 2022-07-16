@@ -16,6 +16,7 @@
 #include "afl/io/stream.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
+#include "afl/test/loglistener.hpp"
 #include "interpreter/arrayvalue.hpp"
 #include "interpreter/defaultstatementcompilationcontext.hpp"
 #include "interpreter/hashvalue.hpp"
@@ -58,21 +59,6 @@ namespace {
     using interpreter::Error;
     using interpreter::Process;
     using interpreter::StatementCompiler;
-
-    /* Log listener that counts messages */
-    // FIXME: dupe
-    class CountingLogListener : public afl::sys::LogListener {
-     public:
-        CountingLogListener()
-            : m_count(0)
-            { }
-        virtual void handleMessage(const Message& /*msg*/)
-            { ++m_count; }
-        int get() const
-            { return m_count; }
-     private:
-        int m_count;
-    };
 
     class MinGlobalContext : public interpreter::SingleContext, public interpreter::Context::PropertyAccessor {
      public:
@@ -1241,25 +1227,25 @@ TestInterpreterStatementCompiler::testSub()
     // Runtime error: failed disambiguation - should have created warning ahead
     {
         TestHarness h;
-        CountingLogListener ll;
+        afl::test::LogListener ll;
         h.log().addListener(ll);
         h.checkCompile("sub tt(x)\n"
                        "  a:=3*x\n"
                        "endsub\n"
                        "call tt +6\n");
-        TS_ASSERT_EQUALS(ll.get(), 1);
+        TS_ASSERT_EQUALS(ll.getNumMessages(), 1U);
     }
 
     // Same thing, for "#" operator
     {
         TestHarness h;
-        CountingLogListener ll;
+        afl::test::LogListener ll;
         h.log().addListener(ll);
         h.checkCompile("sub tt(x)\n"
                        "  a:=3*x\n"
                        "endsub\n"
                        "call tt #6\n");
-        TS_ASSERT_EQUALS(ll.get(), 1);
+        TS_ASSERT_EQUALS(ll.getNumMessages(), 1U);
     }
 
     // Optional args (missing)
@@ -2457,40 +2443,40 @@ void
 TestInterpreterStatementCompiler::testPrint()
 {
     // Base case
-    int numMessages;
+    size_t numMessages;
     {
         TestHarness h;
-        CountingLogListener ll;
+        afl::test::LogListener ll;
         h.log().addListener(ll);
         h.checkRun("a:=1");
-        numMessages = ll.get();
+        numMessages = ll.getNumMessages();
     }
 
     // Standard case, multiple args
     {
         TestHarness h;
-        CountingLogListener ll;
+        afl::test::LogListener ll;
         h.log().addListener(ll);
         h.checkRun("print 'a', 3, 'b'");
-        TS_ASSERT_EQUALS(ll.get(), numMessages+1);
+        TS_ASSERT_EQUALS(ll.getNumMessages(), numMessages+1);
     }
 
     // Standard case, one arg
     {
         TestHarness h;
-        CountingLogListener ll;
+        afl::test::LogListener ll;
         h.log().addListener(ll);
         h.checkRun("print 'a'");
-        TS_ASSERT_EQUALS(ll.get(), numMessages+1);
+        TS_ASSERT_EQUALS(ll.getNumMessages(), numMessages+1);
     }
 
     // Nullary still produces a line
     {
         TestHarness h;
-        CountingLogListener ll;
+        afl::test::LogListener ll;
         h.log().addListener(ll);
         h.checkRun("print");
-        TS_ASSERT_EQUALS(ll.get(), numMessages+1);
+        TS_ASSERT_EQUALS(ll.getNumMessages(), numMessages+1);
     }
 
     // Print to file

@@ -9,6 +9,7 @@
 #include "afl/io/constmemorystream.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
+#include "afl/test/loglistener.hpp"
 
 /** Test list I/O. */
 void
@@ -227,25 +228,12 @@ TestGameSpecBasicHullFunctionList::testErrors()
     using afl::string::toBytes;
     using game::spec::BasicHullFunctionList;
 
-    // A logger that checks whether we create a message
-    class CountingLogger : public afl::sys::LogListener {
-     public:
-        CountingLogger()
-            : m_numMessages(0)
-            { }
-        virtual void handleMessage(const Message& /*msg*/)
-            { ++m_numMessages; }
-        size_t getNumMessages() const
-            { return m_numMessages; }
-     private:
-        size_t m_numMessages;
-    };
     afl::string::NullTranslator tx;
 
     // Syntax error in line
     {
         ConstMemoryStream ms(toBytes("\nhi mom\n"));
-        CountingLogger log;
+        afl::test::LogListener log;
         BasicHullFunctionList().load(ms, tx, log);
         TS_ASSERT(log.getNumMessages() > 0);
     }
@@ -253,7 +241,7 @@ TestGameSpecBasicHullFunctionList::testErrors()
     // Syntax error in line
     {
         ConstMemoryStream ms(toBytes("\n1,foo\n"));
-        CountingLogger log;
+        afl::test::LogListener log;
         BasicHullFunctionList().load(ms, tx, log);
         TS_ASSERT(log.getNumMessages() > 0);
     }
@@ -263,7 +251,7 @@ TestGameSpecBasicHullFunctionList::testErrors()
         ConstMemoryStream ms(toBytes("1,a,alchemy\n"
                                      "999999,a,improvedalchemy\n"
                                      "d=i\n"));
-        CountingLogger log;
+        afl::test::LogListener log;
         BasicHullFunctionList hfl;
         hfl.load(ms, tx, log);
         TS_ASSERT(log.getNumMessages() > 0);
@@ -278,7 +266,7 @@ TestGameSpecBasicHullFunctionList::testErrors()
                                      "d=one\n"
                                      "2,a,alchemy\n"
                                      "d=two\n"));
-        CountingLogger log;
+        afl::test::LogListener log;
         BasicHullFunctionList hfl;
         hfl.load(ms, tx, log);
         TS_ASSERT(log.getNumMessages() > 0);
@@ -293,7 +281,7 @@ TestGameSpecBasicHullFunctionList::testErrors()
                                      "d=one\n"
                                      "1,a,somethingelse\n"
                                      "d=two\n"));
-        CountingLogger log;
+        afl::test::LogListener log;
         BasicHullFunctionList hfl;
         hfl.load(ms, tx, log);
         TS_ASSERT(log.getNumMessages() > 0);
@@ -304,7 +292,7 @@ TestGameSpecBasicHullFunctionList::testErrors()
     // Missing function
     {
         ConstMemoryStream ms(toBytes("d=one\n"));
-        CountingLogger log;
+        afl::test::LogListener log;
         BasicHullFunctionList().load(ms, tx, log);
         TS_ASSERT(log.getNumMessages() > 0);
     }
@@ -313,7 +301,7 @@ TestGameSpecBasicHullFunctionList::testErrors()
     {
         ConstMemoryStream ms(toBytes("1,a,alchemy\n"
                                      "i=foo\n"));
-        CountingLogger log;
+        afl::test::LogListener log;
         BasicHullFunctionList hfl;
         hfl.load(ms, tx, log);
         TS_ASSERT(log.getNumMessages() > 0);
@@ -325,7 +313,7 @@ TestGameSpecBasicHullFunctionList::testErrors()
     {
         ConstMemoryStream ms(toBytes("1,a,alchemy\n"
                                      "i=1\n"));
-        CountingLogger log;
+        afl::test::LogListener log;
         BasicHullFunctionList hfl;
         hfl.load(ms, tx, log);
         TS_ASSERT(hfl.getFunctionById(1) != 0);      // This is not a warning
@@ -336,7 +324,7 @@ TestGameSpecBasicHullFunctionList::testErrors()
     {
         ConstMemoryStream ms(toBytes("1,a,alchemy\n"
                                      "i=alchemy\n"));
-        CountingLogger log;
+        afl::test::LogListener log;
         BasicHullFunctionList hfl;
         hfl.load(ms, tx, log);
         TS_ASSERT(hfl.getFunctionById(1) != 0);      // This is not a warning
@@ -347,7 +335,7 @@ TestGameSpecBasicHullFunctionList::testErrors()
     {
         ConstMemoryStream ms(toBytes("1,a,alchemy\n"
                                      "s=x\n"));
-        CountingLogger log;
+        afl::test::LogListener log;
         BasicHullFunctionList hfl;
         hfl.load(ms, tx, log);
         TS_ASSERT(log.getNumMessages() > 0);
@@ -358,7 +346,7 @@ TestGameSpecBasicHullFunctionList::testErrors()
     {
         ConstMemoryStream ms(toBytes("1,a,alchemy\n"
                                      "s=3,4,x\n"));
-        CountingLogger log;
+        afl::test::LogListener log;
         BasicHullFunctionList hfl;
         hfl.load(ms, tx, log);
         TS_ASSERT(log.getNumMessages() > 0);
@@ -369,7 +357,7 @@ TestGameSpecBasicHullFunctionList::testErrors()
     {
         ConstMemoryStream ms(toBytes("1,a,alchemy\n"
                                      "s=5,3,1,-1\n"));
-        CountingLogger log;
+        afl::test::LogListener log;
         BasicHullFunctionList hfl;
         hfl.load(ms, tx, log);
         TS_ASSERT(log.getNumMessages() > 0);

@@ -6,12 +6,13 @@
 #include "game/spec/friendlycodelist.hpp"
 
 #include "t_game_spec.hpp"
-#include "afl/io/constmemorystream.hpp"
 #include "afl/base/growablememory.hpp"
+#include "afl/io/constmemorystream.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
+#include "afl/test/loglistener.hpp"
 #include "game/map/planet.hpp"
 #include "game/spec/shiplist.hpp"
-#include "afl/string/nulltranslator.hpp"
 
 /** Test isNumeric(). */
 void
@@ -453,23 +454,10 @@ TestGameSpecFriendlyCodeList::testSort()
 void
 TestGameSpecFriendlyCodeList::testSyntaxErrors()
 {
-    class CountingLogger : public afl::sys::LogListener {
-     public:
-        CountingLogger()
-            : m_numMessages(0)
-            { }
-        virtual void handleMessage(const Message& /*msg*/)
-            { ++m_numMessages; }
-        size_t getNumMessages() const
-            { return m_numMessages; }
-     private:
-        size_t m_numMessages;
-    };
-
     // Badly formatted line
     {
         afl::io::ConstMemoryStream ms(afl::string::toBytes("foo\n"));
-        CountingLogger log;
+        afl::test::LogListener log;
         game::spec::FriendlyCodeList list;
         afl::string::NullTranslator tx;
         list.load(ms, log, tx);
@@ -478,7 +466,7 @@ TestGameSpecFriendlyCodeList::testSyntaxErrors()
     }
     {
         afl::io::ConstMemoryStream ms(afl::string::toBytes("longcode,,foo\n"));
-        CountingLogger log;
+        afl::test::LogListener log;
         game::spec::FriendlyCodeList list;
         afl::string::NullTranslator tx;
         list.load(ms, log, tx);

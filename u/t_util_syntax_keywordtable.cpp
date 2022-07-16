@@ -6,23 +6,9 @@
 #include "util/syntax/keywordtable.hpp"
 
 #include "t_util_syntax.hpp"
-#include "afl/sys/loglistener.hpp"
 #include "afl/io/constmemorystream.hpp"
-
-namespace {
-    class LogCounter : public afl::sys::LogListener {
-     public:
-        LogCounter()
-            : m_count(0)
-            { }
-        virtual void handleMessage(const Message& /*msg*/)
-            { ++m_count; }
-        int get() const
-            { return m_count; }
-     private:
-        int m_count;
-    };
-}
+#include "afl/sys/loglistener.hpp"
+#include "afl/test/loglistener.hpp"
 
 /** Simple add/get test. */
 void
@@ -59,82 +45,82 @@ TestUtilSyntaxKeywordTable::testLoadErrors()
     // Sanity check
     {
         afl::io::ConstMemoryStream ms(afl::base::Nothing);
-        LogCounter c;
+        afl::test::LogListener c;
         util::syntax::KeywordTable().load(ms, c);
-        TS_ASSERT_EQUALS(c.get(), 0);
+        TS_ASSERT_EQUALS(c.getNumMessages(), 0U);
     }
 
     // Syntax error on one line
     {
         afl::io::ConstMemoryStream ms(afl::string::toBytes("foo"));
-        LogCounter c;
+        afl::test::LogListener c;
         util::syntax::KeywordTable().load(ms, c);
-        TS_ASSERT_EQUALS(c.get(), 1);
+        TS_ASSERT_EQUALS(c.getNumMessages(), 1U);
     }
 
     // Two syntax errors (proves that parsing proceeds)
     {
         afl::io::ConstMemoryStream ms(afl::string::toBytes("foo\nbar"));
-        LogCounter c;
+        afl::test::LogListener c;
         util::syntax::KeywordTable().load(ms, c);
-        TS_ASSERT_EQUALS(c.get(), 2);
+        TS_ASSERT_EQUALS(c.getNumMessages(), 2U);
     }
-    
+
     // Empty key
     {
         afl::io::ConstMemoryStream ms(afl::string::toBytes("=x"));
-        LogCounter c;
+        afl::test::LogListener c;
         util::syntax::KeywordTable().load(ms, c);
-        TS_ASSERT_EQUALS(c.get(), 1);
+        TS_ASSERT_EQUALS(c.getNumMessages(), 1U);
     }
 
     // Bad block
     {
         afl::io::ConstMemoryStream ms(afl::string::toBytes("{"));
-        LogCounter c;
+        afl::test::LogListener c;
         util::syntax::KeywordTable().load(ms, c);
-        TS_ASSERT_EQUALS(c.get(), 1);
+        TS_ASSERT_EQUALS(c.getNumMessages(), 1U);
     }
 
     // Bad block
     {
         afl::io::ConstMemoryStream ms(afl::string::toBytes("{x"));
-        LogCounter c;
+        afl::test::LogListener c;
         util::syntax::KeywordTable().load(ms, c);
-        TS_ASSERT_EQUALS(c.get(), 1);
+        TS_ASSERT_EQUALS(c.getNumMessages(), 1U);
     }
 
     // Bad block closer
     {
         afl::io::ConstMemoryStream ms(afl::string::toBytes("}x"));
-        LogCounter c;
+        afl::test::LogListener c;
         util::syntax::KeywordTable().load(ms, c);
-        TS_ASSERT_EQUALS(c.get(), 1);
+        TS_ASSERT_EQUALS(c.getNumMessages(), 1U);
     }
 
     // Bad block closer
     {
         afl::io::ConstMemoryStream ms(afl::string::toBytes("x}"));
-        LogCounter c;
+        afl::test::LogListener c;
         util::syntax::KeywordTable().load(ms, c);
-        TS_ASSERT_EQUALS(c.get(), 1);
+        TS_ASSERT_EQUALS(c.getNumMessages(), 1U);
     }
 
     // Badly-placed block closer (missing opener)
     {
         afl::io::ConstMemoryStream ms(afl::string::toBytes("}"));
-        LogCounter c;
+        afl::test::LogListener c;
         util::syntax::KeywordTable().load(ms, c);
-        TS_ASSERT_EQUALS(c.get(), 1);
+        TS_ASSERT_EQUALS(c.getNumMessages(), 1U);
     }
 
     // Badly-placed block closer (missing opener)
     {
         util::syntax::KeywordTable tab;
         afl::io::ConstMemoryStream ms(afl::string::toBytes("x {\na=b\n}\n}"));
-        LogCounter c;
+        afl::test::LogListener c;
         tab.load(ms, c);
-        TS_ASSERT_EQUALS(c.get(), 1);
+        TS_ASSERT_EQUALS(c.getNumMessages(), 1U);
 
         const String_t* p = tab.get("x.a");
         TS_ASSERT(p);
@@ -144,9 +130,9 @@ TestUtilSyntaxKeywordTable::testLoadErrors()
     // Bad reference
     {
         afl::io::ConstMemoryStream ms(afl::string::toBytes("a = 1\nb = $a\nx = $y\n"));
-        LogCounter c;
+        afl::test::LogListener c;
         util::syntax::KeywordTable().load(ms, c);
-        TS_ASSERT_EQUALS(c.get(), 1);
+        TS_ASSERT_EQUALS(c.getNumMessages(), 1U);
     }
 }
 
@@ -176,10 +162,10 @@ TestUtilSyntaxKeywordTable::testLoad()
                                                        "}\n"));
 
     // Parse it. Must be silent (no messages)
-    LogCounter c;
+    afl::test::LogListener c;
     util::syntax::KeywordTable testee;
     testee.load(ms, c);
-    TS_ASSERT_EQUALS(c.get(), 0);
+    TS_ASSERT_EQUALS(c.getNumMessages(), 0U);
 
     // Verify content
     TS_ASSERT(testee.get("a") == 0);
@@ -210,7 +196,7 @@ TestUtilSyntaxKeywordTable::testLoad()
 
     TS_ASSERT(testee.get("e.c") != 0);
     TS_ASSERT_EQUALS(*testee.get("e.c"), "bar");
-    
+
     TS_ASSERT(testee.get("f") != 0);
     TS_ASSERT_EQUALS(*testee.get("f"), "1");
 

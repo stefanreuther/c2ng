@@ -16,6 +16,7 @@
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
+#include "afl/test/loglistener.hpp"
 #include "afl/test/translator.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/arrayvalue.hpp"
@@ -262,20 +263,6 @@ namespace {
      private:
         String_t& m_value;
         int m_numArgs;
-    };
-
-    /* Log listener that counts messages */
-    class CountingLogListener : public afl::sys::LogListener {
-     public:
-        CountingLogListener()
-            : m_count(0)
-            { }
-        virtual void handleMessage(const Message& /*msg*/)
-            { ++m_count; }
-        int get() const
-            { return m_count; }
-     private:
-        int m_count;
     };
 
     /* Common environment for all tests. */
@@ -2416,14 +2403,14 @@ TestInterpreterProcess::testExecPrint()
     // Normal case: generates a message.
     // Because the interpreter generates a number of additional messages as well,
     // do not check for absolute counts, but just note the value.
-    int normalCount;
+    size_t normalCount;
     {
-        CountingLogListener log;
+        afl::test::LogListener log;
         Environment env;
         env.log.addListener(log);
         env.proc.pushNewValue(interpreter::makeIntegerValue(42));
         runInstruction(env, Opcode::maSpecial, Opcode::miSpecialPrint, 0);
-        normalCount = log.get();
+        normalCount = log.getNumMessages();
         TS_ASSERT_EQUALS(env.proc.getState(), Process::Ended);
         TS_ASSERT(normalCount >= 1);
         TS_ASSERT_EQUALS(env.proc.getStackSize(), 0U);
@@ -2431,13 +2418,13 @@ TestInterpreterProcess::testExecPrint()
 
     // Null case: no message generated, so one message less than before.
     {
-        CountingLogListener log;
+        afl::test::LogListener log;
         Environment env;
         env.log.addListener(log);
         env.proc.pushNewValue(0);
         runInstruction(env, Opcode::maSpecial, Opcode::miSpecialPrint, 0);
         TS_ASSERT_EQUALS(env.proc.getState(), Process::Ended);
-        TS_ASSERT_EQUALS(log.get(), normalCount-1);
+        TS_ASSERT_EQUALS(log.getNumMessages(), normalCount-1U);
         TS_ASSERT_EQUALS(env.proc.getStackSize(), 0U);
     }
 }
