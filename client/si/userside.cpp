@@ -107,13 +107,20 @@ client::si::UserSide::~UserSide()
 void
 client::si::UserSide::reset()
 {
+    // User-side cleanups
     m_history.clear();
 
-    // FIXME: here?
+    // Script-side cleanups
+    // At this point, we have no process running, so clearing the process table can happen here.
     class Task : public util::Request<game::Session> {
      public:
         void handle(game::Session& session)
-            { session.authCache().clear(); }
+            {
+                session.authCache().clear();
+
+                session.processList().terminateAllProcesses();
+                session.processList().removeTerminatedProcesses();
+            }
     };
     m_gameSender.postNewRequest(new Task());
 }
