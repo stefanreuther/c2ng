@@ -7,7 +7,7 @@
 #include "util/filenamepattern.hpp"
 #include "afl/charset/utf8reader.hpp"
 #include "afl/string/string.hpp"
-#include "util/translation.hpp"
+#include "afl/string/translator.hpp"
 
 /** Implementation of pattern matching.
     This class is the internal back-end to FileNamePattern.
@@ -81,7 +81,7 @@ util::FileNamePattern::Impl::compile(String_t arg)
         } else if (arg[pos] == '\\') {
             ++pos;
             if (pos >= arg.size()) {
-                throw std::runtime_error(_("Backslash must be followed by a character"));
+                throw std::runtime_error(afl::string::Translator::getSystemInstance()("Backslash must be followed by a character"));
             }
             addOp(MatchLiteral, String_t(1, arg[pos]));
             ++pos;

@@ -5,9 +5,9 @@
 
 #include <stdexcept>
 #include "game/config/integervalueparser.hpp"
-#include "afl/string/parse.hpp"
 #include "afl/string/format.hpp"
-#include "util/translation.hpp"
+#include "afl/string/parse.hpp"
+#include "afl/string/translator.hpp"
 
 // Global instance.
 game::config::IntegerValueParser game::config::IntegerValueParser::instance;
@@ -30,7 +30,7 @@ game::config::IntegerValueParser::parse(String_t value) const
     int32_t result;
     String_t::size_type pos;
     if (!afl::string::strToInteger(value, result, pos) && !afl::string::strToInteger(value.substr(0, pos), result)) {
-        throw std::range_error(_("Invalid number"));
+        throw std::range_error(afl::string::Translator::getSystemInstance()("Invalid number"));
     }
     return result;
 }

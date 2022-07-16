@@ -17,7 +17,6 @@
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/window.hpp"
 #include "util/directorybrowser.hpp"
-#include "util/translation.hpp"
 
 namespace {
     using client::widgets::FolderListbox;

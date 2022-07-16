@@ -17,7 +17,6 @@
 #include "ui/widgets/statictext.hpp"
 #include "ui/window.hpp"
 #include "util/filenamepattern.hpp"
-#include "util/translation.hpp"
 #include "util/io.hpp"
 
 using client::widgets::FileListbox;

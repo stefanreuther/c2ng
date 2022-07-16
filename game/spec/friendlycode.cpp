@@ -13,7 +13,6 @@
 #include "game/registrationkey.hpp"
 #include "game/spec/basichullfunction.hpp"
 #include "util/string.hpp"
-#include "util/translation.hpp"
 
 // Default constructor.
 game::spec::FriendlyCode::FriendlyCode()

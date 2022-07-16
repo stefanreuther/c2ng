@@ -21,7 +21,6 @@
 #include "game/v3/trn/fileset.hpp"
 #include "game/v3/turnfile.hpp"
 #include "util/backupfile.hpp"
-#include "util/translation.hpp"
 
 using afl::base::Ptr;
 using afl::base::Ref;

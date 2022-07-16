@@ -5,10 +5,10 @@
 
 #include <stdexcept>
 #include "game/config/enumvalueparser.hpp"
-#include "util/string.hpp"
-#include "afl/string/string.hpp"
 #include "afl/string/format.hpp"
-#include "util/translation.hpp"
+#include "afl/string/string.hpp"
+#include "afl/string/translator.hpp"
+#include "util/string.hpp"
 
 game::config::EnumValueParser::EnumValueParser(const char* tpl)
     : m_template(tpl)
@@ -29,7 +29,7 @@ game::config::EnumValueParser::parse(String_t value) const
         }
         ++counter;
     }
-    throw std::range_error(_("Invalid number"));
+    throw std::range_error(afl::string::Translator::getSystemInstance()("Invalid number"));
 }
 
 String_t

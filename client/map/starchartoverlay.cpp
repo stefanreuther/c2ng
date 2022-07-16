@@ -35,7 +35,6 @@
 #include "ui/widgets/scrollbarcontainer.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/window.hpp"
-#include "util/translation.hpp"
 
 using game::proxy::LockProxy;
 using game::config::UserConfiguration;

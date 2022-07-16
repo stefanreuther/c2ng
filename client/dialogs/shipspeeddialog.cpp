@@ -16,7 +16,6 @@
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/framegroup.hpp"
 #include "ui/window.hpp"
-#include "util/translation.hpp"
 
 namespace {
     using game::proxy::ShipSpeedProxy;

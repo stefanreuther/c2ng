@@ -9,7 +9,6 @@
 #include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/widgets/stringlistbox.hpp"
-#include "util/translation.hpp"
 
 int32_t
 client::dialogs::doScreenHistoryDialog(ui::Root& root,
