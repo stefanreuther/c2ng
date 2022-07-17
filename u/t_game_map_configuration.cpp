@@ -601,10 +601,11 @@ TestGameMapConfiguration::testInitFromBadConfig()
 void
 TestGameMapConfiguration::testSaveToConfig()
 {
+    HostConfiguration config;
     UserConfiguration pref;
 
     game::map::Configuration testee;
-    testee.saveToConfiguration(pref, HostConfiguration());
+    testee.saveToConfiguration(pref, config);
 
     afl::base::Ref<UserConfiguration::Enumerator_t> e(pref.getOptions());
     UserConfiguration::OptionInfo_t info;
@@ -619,11 +620,12 @@ TestGameMapConfiguration::testSaveToConfig()
 void
 TestGameMapConfiguration::testSaveToConfigWrap()
 {
+    HostConfiguration config;
     UserConfiguration pref;
 
     game::map::Configuration testee;
     testee.setConfiguration(testee.Wrapped, Point(2000, 2000), Point(2000, 2000));
-    testee.saveToConfiguration(pref, HostConfiguration());
+    testee.saveToConfiguration(pref, config);
 
     afl::base::Ref<UserConfiguration::Enumerator_t> e(pref.getOptions());
     UserConfiguration::OptionInfo_t info;
@@ -643,13 +645,14 @@ TestGameMapConfiguration::testSaveToConfigWrap()
 void
 TestGameMapConfiguration::testSaveToConfigFull()
 {
+    HostConfiguration config;
     UserConfiguration pref;
 
     game::map::Configuration testee;
     testee.setConfiguration(testee.Wrapped, Point(1800, 1900), Point(2000, 2100));
     testee.setCircularExcess(200);
     testee.setCircularPrecision(7);
-    testee.saveToConfiguration(pref, HostConfiguration());
+    testee.saveToConfiguration(pref, config);
 
     ConfigurationOption* opt = pref.getOptionByName("Chart.Geo.Mode");
     TS_ASSERT(opt);
@@ -684,11 +687,12 @@ void
 TestGameMapConfiguration::testSaveToConfigUser()
 {
     UserConfiguration pref;
+    HostConfiguration config;
     pref.setOption("Chart.Geo.Mode", "flat", ConfigurationOption::Game);
 
     game::map::Configuration testee;
     testee.setConfiguration(testee.Flat, Point(2000, 2000), Point(2000, 2000));
-    testee.saveToConfiguration(pref, HostConfiguration());
+    testee.saveToConfiguration(pref, config);
 
     ConfigurationOption* opt = pref.getOptionByName("Chart.Geo.Mode");
     TS_ASSERT(opt);

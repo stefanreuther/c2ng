@@ -40,7 +40,7 @@ namespace {
     class TestObjectType : public game::map::ObjectVectorType<TestObject> {
      public:
         TestObjectType(game::map::ObjectVector<TestObject>& vec)
-            : ObjectVectorType(vec)
+            : game::map::ObjectVectorType<TestObject>(vec)
             { }
         virtual bool isValid(const TestObject&) const
             { return true; }
