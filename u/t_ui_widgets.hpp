@@ -22,6 +22,7 @@ class TestUiWidgetsChart : public CxxTest::TestSuite {
     void testRender();
     void testRenderExtend();
     void testRenderSkip();
+    void testRenderAntiAlias();
 };
 
 class TestUiWidgetsCheckbox : public CxxTest::TestSuite {

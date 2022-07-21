@@ -39,6 +39,9 @@ namespace ui { namespace widgets {
         /** Line Mode: label this line on the left. */
         static const int Line_LabelLeft = 8;
 
+        /** Line Mode: do not use anti-aliasing. */
+        static const int Line_NoAntiAliasing = 16;
+
 
         /** Point icons. */
         enum PointIcon {

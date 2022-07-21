@@ -5,15 +5,16 @@
 
 #include <algorithm>
 #include "ui/widgets/chart.hpp"
+#include "gfx/antialiased.hpp"
 #include "gfx/clipfilter.hpp"
 #include "gfx/complex.hpp"
 #include "gfx/context.hpp"
+#include "ui/icons/colortile.hpp"
+#include "ui/icons/hbox.hpp"
 #include "ui/icons/skintext.hpp"
+#include "util/layout.hpp"
 #include "util/string.hpp"
 #include "util/updater.hpp"
-#include "ui/icons/hbox.hpp"
-#include "ui/icons/colortile.hpp"
-#include "util/layout.hpp"
 
 using util::Updater;
 using ui::widgets::Chart;
@@ -31,6 +32,14 @@ namespace {
             - (area.getHeight() * (y - worldYRange.min())) / worldHeight;
     }
 
+    void drawChartLine(gfx::BaseContext& ctx, gfx::Point from, gfx::Point to, uint8_t lineMode)
+    {
+        if ((lineMode & Chart::Line_NoAntiAliasing) != 0) {
+            drawLine(ctx, from, to);
+        } else {
+            drawLineAA(ctx, from, to);
+        }
+    }
 
     void drawChart(gfx::BaseContext& ctx, const gfx::Rectangle& area, int maxWorldX, util::Range<int32_t> worldYRange, const util::DataTable::Row& data,
                    uint8_t lineMode, Chart::PointIcon pointIcon)
@@ -45,11 +54,11 @@ namespace {
                 gfx::Point thisPoint(convertX(area, maxWorldX, i), convertY(area, worldYRange, thisValue));
                 if (drawState == On) {
                     // I'm already drawing, just proceed
-                    drawLine(ctx, prevPoint, thisPoint);
+                    drawChartLine(ctx, prevPoint, thisPoint, lineMode);
                 } else if (drawState == Never && (lineMode & Chart::Line_ExtendLeft) != 0) {
                     // I'm starting to draw, and line needs to be extended to the left
                     if (thisPoint.getX() > area.getLeftX()) {
-                        drawLine(ctx, gfx::Point(area.getLeftX()+1, thisPoint.getY()), thisPoint);
+                        drawChartLine(ctx, gfx::Point(area.getLeftX()+1, thisPoint.getY()), thisPoint, lineMode);
                     }
                 } else {
                     // FIXME: do not draw this pixel if there is an incoming or outgoing line: this messes up patterned lines

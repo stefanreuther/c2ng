@@ -7,6 +7,12 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestGfxAntialiased : public CxxTest::TestSuite {
+ public:
+    void testLine();
+    void testCircle();
+};
+
 class TestGfxApplication : public CxxTest::TestSuite {
  public:
     void testInterface();
