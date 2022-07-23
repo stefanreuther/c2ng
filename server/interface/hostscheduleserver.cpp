@@ -195,30 +195,18 @@ server::interface::HostScheduleServer::packSchedule(const HostSchedule::Schedule
     if (const HostSchedule::Type* t = sch.type.get()) {
         h->setNew("type", makeIntegerValue(HostSchedule::formatType(*t)));
     }
-    if (const int32_t* p = sch.weekdays.get()) {
-        h->setNew("weekdays", makeIntegerValue(*p));
-    }
-    if (const int32_t* p = sch.interval.get()) {
-        h->setNew("interval", makeIntegerValue(*p));
-    }
-    if (const int32_t* p = sch.daytime.get()) {
-        h->setNew("daytime", makeIntegerValue(*p));
-    }
+    addOptionalIntegerKey(*h, "weekdays", sch.weekdays);
+    addOptionalIntegerKey(*h, "interval", sch.interval);
+    addOptionalIntegerKey(*h, "daytime", sch.daytime);
     if (const bool* p = sch.hostEarly.get()) {
         h->setNew("hostEarly", makeIntegerValue(*p));
     }
-    if (const int32_t* p = sch.hostDelay.get()) {
-        h->setNew("hostDelay", makeIntegerValue(*p));
-    }
-    if (const int32_t* p = sch.hostLimit.get()) {
-        h->setNew("hostLimit", makeIntegerValue(*p));
-    }
+    addOptionalIntegerKey(*h, "hostDelay", sch.hostDelay);
+    addOptionalIntegerKey(*h, "hostLimit", sch.hostLimit);
     if (const HostSchedule::Condition* p = sch.condition.get()) {
         h->setNew("condition", makeIntegerValue(HostSchedule::formatCondition(*p)));
     }
-    if (const int32_t* p = sch.conditionTurn.get()) {
-        h->setNew("condTurn", makeIntegerValue(*p));
-    }
+    addOptionalIntegerKey(*h, "condTurn", sch.conditionTurn);
     if (const int32_t* p = sch.conditionTime.get()) {
         // FIXME: this packs the condTime in raw format, which is an error
         // when Host.TimeScale is not 60 (should be passed through getUserTimeFromTime).

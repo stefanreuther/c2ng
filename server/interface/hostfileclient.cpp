@@ -59,24 +59,12 @@ server::interface::HostFileClient::unpackInfo(const afl::data::Value* p)
     parseLabel(a("label").toString(), result.label);
 
     // - optional parts
-    if (const Value* pTurn = a("turn").getValue()) {
-        result.turnNumber = toInteger(pTurn);
-    }
-    if (const Value* pSlot = a("slot").getValue()) {
-        result.slotId = toInteger(pSlot);
-    }
-    if (const Value* pSlotName = a("slotname").getValue()) {
-        result.slotName = toString(pSlotName);
-    }
-    if (const Value* pGame = a("game").getValue()) {
-        result.gameId = toInteger(pGame);
-    }
-    if (const Value* pGameName = a("gamename").getValue()) {
-        result.gameName = toString(pGameName);
-    }
-    if (const Value* pToolName = a("toolname").getValue()) {
-        result.toolName = toString(pToolName);
-    }
+    result.turnNumber = toOptionalInteger(a("turn").getValue());
+    result.slotId     = toOptionalInteger(a("slot").getValue());
+    result.slotName   = toOptionalString(a("slotname").getValue());
+    result.gameId     = toOptionalInteger(a("game").getValue());
+    result.gameName   = toOptionalString(a("gamename").getValue());
+    result.toolName   = toOptionalString(a("toolname").getValue());
     return result;
 }
 

@@ -117,20 +117,13 @@ server::interface::TalkGroupClient::unpackDescription(const Value_t* value)
 {
     Description result;
     afl::data::Access a(value);
-    if (const Value_t* p = a("name").getValue()) {
-        result.name = toString(p);
-    }
-    if (const Value_t* p = a("description").getValue()) {
-        result.description = toString(p);
-    }
-    if (const Value_t* p = a("parent").getValue()) {
-        result.parentGroup = toString(p);
-    }
-    if (const Value_t* p = a("key").getValue()) {
-        result.key = toString(p);
-    }
+    result.name = toOptionalString(a("name").getValue());
+    result.description = toOptionalString(a("description").getValue());
+    result.parentGroup = toOptionalString(a("parent").getValue());
+    result.key = toOptionalString(a("key").getValue());
+
     if (const Value_t* p = a("unlisted").getValue()) {
-        result.unlisted = toInteger(p);
+        result.unlisted = toInteger(p) != 0;
     }
     return result;
 }

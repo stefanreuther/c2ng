@@ -90,20 +90,12 @@ server::interface::HostHistoryClient::getTurns(int32_t gameId, const TurnFilter&
 void
 server::interface::HostHistoryClient::unpackEvent(Event& out, afl::data::Access a)
 {
-    out.time = a("time").toInteger();
-    out.eventType = a("event").toString();
-    if (const Value_t* p = a("game").getValue()) {
-        out.gameId = toInteger(p);
-    }
-    if (const Value_t* p = a("gameName").getValue()) {
-        out.gameName = toString(p);
-    }
-    if (const Value_t* p = a("user").getValue()) {
-        out.userId = toString(p);
-    }
-    if (const Value_t* p = a("slot").getValue()) {
-        out.slotNumber = toInteger(p);
-    }
+    out.time       = a("time").toInteger();
+    out.eventType  = a("event").toString();
+    out.gameId     = toOptionalInteger(a("game").getValue());
+    out.gameName   = toOptionalString(a("gameName").getValue());
+    out.userId     = toOptionalString(a("user").getValue());
+    out.slotNumber = toOptionalInteger(a("slot").getValue());
     if (const Value_t* p = a("state").getValue()) {
         HostGame::State st;
         if (!HostGame::parseState(toString(p), st)) {

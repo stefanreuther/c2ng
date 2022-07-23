@@ -182,11 +182,7 @@ server::interface::FileGameServer::packKeyInfo(const FileGame::KeyInfo& info)
     h->setNew("reg",  makeIntegerValue(info.isRegistered));
     h->setNew("key1", makeStringValue(info.label1));
     h->setNew("key2", makeStringValue(info.label2));
-    if (const int32_t* p = info.useCount.get()) {
-        h->setNew("useCount", makeIntegerValue(*p));
-    }
-    if (const String_t* p = info.keyId.get()) {
-        h->setNew("id", makeStringValue(*p));
-    }
+    addOptionalIntegerKey(*h, "useCount", info.useCount);
+    addOptionalStringKey(*h, "id", info.keyId);
     return new HashValue(h);
 }

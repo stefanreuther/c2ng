@@ -6,6 +6,7 @@
 #include <memory>
 #include "server/interface/filegameclient.hpp"
 #include "afl/data/access.hpp"
+#include "server/types.hpp"
 
 using afl::data::Segment;
 using afl::data::Access;
@@ -128,7 +129,5 @@ server::interface::FileGameClient::unpackKeyInfo(KeyInfo& result, const afl::dat
     if (const afl::data::Value* pp = a("useCount").getValue()) {
         result.useCount = safeToInteger(Access(pp));
     }
-    if (const afl::data::Value* pp = a("id").getValue()) {
-        result.keyId = Access(pp).toString();
-    }
+    result.keyId        = toOptionalString(a("id").getValue());
 }

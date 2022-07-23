@@ -497,9 +497,7 @@ server::interface::HostGameServer::packInfo(const HostGame::Info& info)
     h->setNew("name", makeStringValue(info.name));
 
     // description
-    if (const String_t* p = info.description.get()) {
-        h->setNew("description", makeStringValue(*p));
-    }
+    addOptionalStringKey(*h, "description", info.description);
 
     // difficulty
     h->setNew("difficulty", makeIntegerValue(info.difficulty));
@@ -543,14 +541,10 @@ server::interface::HostGameServer::packInfo(const HostGame::Info& info)
     }
 
     // scoreName
-    if (const String_t* p = info.scoreName.get()) {
-        h->setNew("scoreName", makeStringValue(*p));
-    }
+    addOptionalStringKey(*h, "scoreName", info.scoreName);
 
     // scoreDescription
-    if (const String_t* p = info.scoreDescription.get()) {
-        h->setNew("scoreDescription", makeStringValue(*p));
-    }
+    addOptionalStringKey(*h, "scoreDescription", info.scoreDescription);
 
     // hostName
     h->setNew("host", makeStringValue(info.hostName));
@@ -571,47 +565,31 @@ server::interface::HostGameServer::packInfo(const HostGame::Info& info)
     h->setNew("shiplistKind", makeStringValue(info.shipListKind));
 
     // masterName
-    if (const String_t* p = info.masterName.get()) {
-        h->setNew("master", makeStringValue(*p));
-    }
+    addOptionalStringKey(*h, "master", info.masterName);
 
     // masterDescription
-    if (const String_t* p = info.masterDescription.get()) {
-        h->setNew("masterDescription", makeStringValue(*p));
-    }
+    addOptionalStringKey(*h, "masterDescription", info.masterDescription);
 
     // masterKind
-    if (const String_t* p = info.masterKind.get()) {
-        h->setNew("masterKind", makeStringValue(*p));
-    }
+    addOptionalStringKey(*h, "masterKind", info.masterKind);
 
     // turnNumber
     h->setNew("turn", makeIntegerValue(info.turnNumber));
 
     // lastHostTime
-    if (const int32_t* p = info.lastHostTime.get()) {
-        h->setNew("lastHostTime", makeIntegerValue(*p));
-    }
+    addOptionalIntegerKey(*h, "lastHostTime", info.lastHostTime);
 
     // nextHostTime
-    if (const int32_t* p = info.nextHostTime.get()) {
-        h->setNew("nextHostTime", makeIntegerValue(*p));
-    }
+    addOptionalIntegerKey(*h, "nextHostTime", info.nextHostTime);
 
     // forumId
-    if (const int32_t* p = info.forumId.get()) {
-        h->setNew("forum", makeIntegerValue(*p));
-    }
+    addOptionalIntegerKey(*h, "forum", info.forumId);
 
     // userRank
-    if (const int32_t* p = info.userRank.get()) {
-        h->setNew("userRank", makeIntegerValue(*p));
-    }
+    addOptionalIntegerKey(*h, "userRank", info.userRank);
 
     // otherRank
-    if (const int32_t* p = info.otherRank.get()) {
-        h->setNew("otherRank", makeIntegerValue(*p));
-    }
+    addOptionalIntegerKey(*h, "otherRank", info.otherRank);
 
     return new HashValue(h);
 }
@@ -625,39 +603,25 @@ server::interface::HostGameServer::packVictoryCondition(const HostGame::VictoryC
     h->setNew("endCondition", makeStringValue(vc.endCondition));
 
     // endTurn
-    if (const int32_t* p = vc.endTurn.get()) {
-        h->setNew("endTurn", makeIntegerValue(*p));
-    }
+    addOptionalIntegerKey(*h, "endTurn", vc.endTurn);
 
     // endProbability
-    if (const int32_t* p = vc.endProbability.get()) {
-        h->setNew("endProbability", makeIntegerValue(*p));
-    }
+    addOptionalIntegerKey(*h, "endProbability", vc.endProbability);
 
     // endScore
-    if (const int32_t* p = vc.endScore.get()) {
-        h->setNew("endScore", makeIntegerValue(*p));
-    }
+    addOptionalIntegerKey(*h, "endScore", vc.endScore);
 
     // endScoreName
-    if (const String_t* p = vc.endScoreName.get()) {
-        h->setNew("endScoreName", makeStringValue(*p));
-    }
+    addOptionalStringKey(*h, "endScoreName", vc.endScoreName);
 
     // endScoreDescription
-    if (const String_t* p = vc.endScoreDescription.get()) {
-        h->setNew("endScoreDescription", makeStringValue(*p));
-    }
+    addOptionalStringKey(*h, "endScoreDescription", vc.endScoreDescription);
 
     // referee
-    if (const String_t* p = vc.referee.get()) {
-        h->setNew("referee", makeStringValue(*p));
-    }
+    addOptionalStringKey(*h, "referee", vc.referee);
 
     // refereeDescription
-    if (const String_t* p = vc.refereeDescription.get()) {
-        h->setNew("refereeDescription", makeStringValue(*p));
-    }
+    addOptionalStringKey(*h, "refereeDescription", vc.refereeDescription);
 
     return new HashValue(h);
 }

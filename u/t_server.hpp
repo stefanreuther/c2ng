@@ -34,6 +34,7 @@ class TestServerTypes : public CxxTest::TestSuite {
  public:
     void testToInteger();
     void testToString();
+    void testOptional();
 };
 
 class TestServertypes : public CxxTest::TestSuite {

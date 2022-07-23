@@ -75,18 +75,10 @@ server::interface::HostHistoryServer::handleCommand(const String_t& upcasedComma
                 Hash::Ref_t h = Hash::create();
                 h->setNew("time", makeIntegerValue(pe->time));
                 h->setNew("event", makeStringValue(pe->eventType));
-                if (const int32_t* p = pe->gameId.get()) {
-                    h->setNew("game", makeIntegerValue(*p));
-                }
-                if (const String_t* p = pe->gameName.get()) {
-                    h->setNew("gameName", makeStringValue(*p));
-                }
-                if (const String_t* p = pe->userId.get()) {
-                    h->setNew("user", makeStringValue(*p));
-                }
-                if (const int32_t* p = pe->slotNumber.get()) {
-                    h->setNew("slot", makeIntegerValue(*p));
-                }
+                addOptionalIntegerKey(*h, "game", pe->gameId);
+                addOptionalStringKey(*h, "gameName", pe->gameName);
+                addOptionalStringKey(*h, "user", pe->userId);
+                addOptionalIntegerKey(*h, "slot", pe->slotNumber);
                 if (const HostGame::State* p = pe->gameState.get()) {
                     h->setNew("state", makeStringValue(HostGame::formatState(*p)));
                 }

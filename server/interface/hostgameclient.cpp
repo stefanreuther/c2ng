@@ -228,39 +228,25 @@ server::interface::HostGameClient::getVictoryCondition(int32_t gameId)
     vc.endCondition = a("endCondition").toString();
 
     // endTurn [optional]
-    if (const Value_t* pp = a("endTurn").getValue()) {
-        vc.endTurn = Access(pp).toInteger();
-    }
+    vc.endTurn = toOptionalInteger(a("endTurn").getValue());
 
     // endProbability [optional]
-    if (const Value_t* pp = a("endProbability").getValue()) {
-        vc.endProbability = Access(pp).toInteger();
-    }
+    vc.endProbability = toOptionalInteger(a("endProbability").getValue());
 
     // endScore [optional]
-    if (const Value_t* pp = a("endScore").getValue()) {
-        vc.endScore = Access(pp).toInteger();
-    }
+    vc.endScore = toOptionalInteger(a("endScore").getValue());
 
     // endScoreName [optional]
-    if (const Value_t* pp = a("endScoreName").getValue()) {
-        vc.endScoreName = Access(pp).toString();
-    }
+    vc.endScoreName = toOptionalString(a("endScoreName").getValue());
 
     // endScoreDescription [optional]
-    if (const Value_t* pp = a("endScoreDescription").getValue()) {
-        vc.endScoreDescription = Access(pp).toString();
-    }
+    vc.endScoreDescription = toOptionalString(a("endScoreDescription").getValue());
 
     // referee [optional]
-    if (const Value_t* pp = a("referee").getValue()) {
-        vc.referee = Access(pp).toString();
-    }
+    vc.referee = toOptionalString(a("referee").getValue());
 
     // refereeDescription [optional]
-    if (const Value_t* pp = a("refereeDescription").getValue()) {
-        vc.refereeDescription = Access(pp).toString();
-    }
+    vc.refereeDescription = toOptionalString(a("refereeDescription").getValue());
 
     return vc;
 }
@@ -296,9 +282,7 @@ server::interface::HostGameClient::unpackInfo(const Value_t* value)
     result.name = a("name").toString();
 
     // description [optional]
-    if (const Value_t* p = a("description").getValue()) {
-        result.description = Access(p).toString();
-    }
+    result.description = toOptionalString(a("description").getValue());
 
     // difficulty
     result.difficulty = a("difficulty").toInteger();
@@ -350,14 +334,10 @@ server::interface::HostGameClient::unpackInfo(const Value_t* value)
     }
 
     // scoreName [optional]
-    if (const Value_t* p = a("scoreName").getValue()) {
-        result.scoreName = Access(p).toString();
-    }
+    result.scoreName = toOptionalString(a("scoreName").getValue());
 
     // scoreDescription [optional]
-    if (const Value_t* p = a("scoreDescription").getValue()) {
-        result.scoreDescription = Access(p).toString();
-    }
+    result.scoreDescription = toOptionalString(a("scoreDescription").getValue());
 
     // hostName / "host"
     result.hostName = a("host").toString();
@@ -378,47 +358,31 @@ server::interface::HostGameClient::unpackInfo(const Value_t* value)
     result.shipListKind = a("shiplistKind").toString();
 
     // masterName / "master" [optional]
-    if (const Value_t* p = a("master").getValue()) {
-        result.masterName = Access(p).toString();
-    }
+    result.masterName = toOptionalString(a("master").getValue());
 
     // masterDescription [optional]
-    if (const Value_t* p = a("masterDescription").getValue()) {
-        result.masterDescription = Access(p).toString();
-    }
+    result.masterDescription = toOptionalString(a("masterDescription").getValue());
 
     // masterKind [optional]
-    if (const Value_t* p = a("masterKind").getValue()) {
-        result.masterKind = Access(p).toString();
-    }
+    result.masterKind = toOptionalString(a("masterKind").getValue());
 
     // turnNumber / "turn"
     result.turnNumber = a("turn").toInteger();
 
     // lastHostTime [optional]
-    if (const Value_t* p = a("lastHostTime").getValue()) {
-        result.lastHostTime = Access(p).toInteger();
-    }
+    result.lastHostTime = toOptionalInteger(a("lastHostTime").getValue());
 
     // nextHostTime [optional]
-    if (const Value_t* p = a("nextHostTime").getValue()) {
-        result.nextHostTime = Access(p).toInteger();
-    }
+    result.nextHostTime = toOptionalInteger(a("nextHostTime").getValue());
 
     // forumId / "forum" [optional]
-    if (const Value_t* p = a("forum").getValue()) {
-        result.forumId = Access(p).toInteger();
-    }
+    result.forumId = toOptionalInteger(a("forum").getValue());
 
     // userRank
-    if (const Value_t* p = a("userRank").getValue()) {
-        result.userRank = Access(p).toInteger();
-    }
+    result.userRank = toOptionalInteger(a("userRank").getValue());
 
     // otherRank
-    if (const Value_t* p = a("otherRank").getValue()) {
-        result.otherRank = Access(p).toInteger();
-    }
+    result.otherRank = toOptionalInteger(a("otherRank").getValue());
 
     return result;
 }

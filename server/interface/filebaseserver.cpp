@@ -314,14 +314,8 @@ server::interface::FileBaseServer::packInfo(const FileBase::Info& info)
      case FileBase::IsDirectory: result->setNew("type", makeStringValue("dir"));     break;
      case FileBase::IsUnknown:   result->setNew("type", makeStringValue("unknown")); break;
     }
-    if (const int32_t* p = info.visibility.get()) {
-        result->setNew("visibility", makeIntegerValue(*p));
-    }
-    if (const int32_t* p = info.size.get()) {
-        result->setNew("size", makeIntegerValue(*p));
-    }
-    if (const String_t* p = info.contentId.get()) {
-        result->setNew("id", makeStringValue(*p));
-    }
+    addOptionalIntegerKey(*result, "visibility", info.visibility);
+    addOptionalIntegerKey(*result, "size", info.size);
+    addOptionalStringKey(*result, "id", info.contentId);
     return new HashValue(result);
 }

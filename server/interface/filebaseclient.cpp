@@ -178,19 +178,13 @@ server::interface::FileBaseClient::unpackInfo(const afl::data::Value* p)
     result.type = (type == "file" ? IsFile : type == "dir" ? IsDirectory : IsUnknown);
 
     // Size
-    if (const afl::data::Value* pSize = a("size").getValue()) {
-        result.size = toInteger(pSize);
-    }
+    result.size = toOptionalInteger(a("size").getValue());
 
     // Visibilty
-    if (const afl::data::Value* pVis = a("visibility").getValue()) {
-        result.visibility = toInteger(pVis);
-    }
+    result.visibility = toOptionalInteger(a("visibility").getValue());
 
     // Content Id
-    if (const afl::data::Value* pId = a("id").getValue()) {
-        result.contentId = toString(pId);
-    }
+    result.contentId = toOptionalString(a("id").getValue());
 
     return result;
 }

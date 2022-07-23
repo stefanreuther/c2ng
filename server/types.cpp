@@ -30,6 +30,26 @@ server::toString(const Value_t* v)
     return afl::data::Access(v).toString();
 }
 
+afl::base::Optional<int32_t>
+server::toOptionalInteger(const Value_t* v)
+{
+    if (v == 0) {
+        return afl::base::Nothing;
+    } else {
+        return toInteger(v);
+    }
+}
+
+afl::base::Optional<String_t>
+server::toOptionalString(const Value_t* v)
+{
+    if (v == 0) {
+        return afl::base::Nothing;
+    } else {
+        return toString(v);
+    }
+}
+
 server::Value_t*
 server::makeIntegerValue(int32_t val)
 {
@@ -40,6 +60,22 @@ server::Value_t*
 server::makeStringValue(const String_t& str)
 {
     return new afl::data::StringValue(str);
+}
+
+void
+server::addOptionalIntegerKey(afl::data::Hash& h, const char* keyName, const afl::base::Optional<int32_t>& val)
+{
+    if (const int32_t* p = val.get()) {
+        h.setNew(keyName, makeIntegerValue(*p));
+    }
+}
+
+void
+server::addOptionalStringKey(afl::data::Hash& h, const char* keyName, const afl::base::Optional<String_t>& str)
+{
+    if (const String_t* p = str.get()) {
+        h.setNew(keyName, makeStringValue(*p));
+    }
 }
 
 server::Time_t

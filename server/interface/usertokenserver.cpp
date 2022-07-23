@@ -72,9 +72,7 @@ server::interface::UserTokenServer::handleCommand(const String_t& upcasedCommand
         afl::data::Hash::Ref_t h(afl::data::Hash::create());
         h->setNew("user", makeStringValue(i.userId));
         h->setNew("type", makeStringValue(i.tokenType));
-        if (const String_t* p = i.newToken.get()) {
-            h->setNew("new", makeStringValue(*p));
-        }
+        addOptionalStringKey(*h, "new", i.newToken);
         result.reset(new afl::data::HashValue(h));
         return true;
     } else if (upcasedCommand == "RESETTOKEN") {

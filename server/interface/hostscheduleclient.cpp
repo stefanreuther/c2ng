@@ -104,19 +104,13 @@ server::interface::HostScheduleClient::unpackSchedule(const Value_t* p)
     }
 
     // weekdays
-    if (const Value_t* pp = a("weekdays").getValue()) {
-        sch.weekdays = Access(pp).toInteger();
-    }
+    sch.weekdays = toOptionalInteger(a("weekdays").getValue());
 
     // interval
-    if (const Value_t* pp = a("interval").getValue()) {
-        sch.interval = Access(pp).toInteger();
-    }
+    sch.interval = toOptionalInteger(a("interval").getValue());
 
     // daytime
-    if (const Value_t* pp = a("daytime").getValue()) {
-        sch.daytime = Access(pp).toInteger();
-    }
+    sch.daytime = toOptionalInteger(a("daytime").getValue());
 
     // hostEarly
     if (const Value_t* pp = a("hostEarly").getValue()) {
@@ -124,14 +118,10 @@ server::interface::HostScheduleClient::unpackSchedule(const Value_t* p)
     }
 
     // hostDelay
-    if (const Value_t* pp = a("hostDelay").getValue()) {
-        sch.hostDelay = Access(pp).toInteger();
-    }
+    sch.hostDelay = toOptionalInteger(a("hostDelay").getValue());
 
     // hostLimit
-    if (const Value_t* pp = a("hostLimit").getValue()) {
-        sch.hostLimit = Access(pp).toInteger();
-    }
+    sch.hostLimit = toOptionalInteger(a("hostLimit").getValue());
 
     // condition
     if (const Value_t* pp = a("condition").getValue()) {
@@ -143,14 +133,10 @@ server::interface::HostScheduleClient::unpackSchedule(const Value_t* p)
     }
 
     // condTurn
-    if (const Value_t* pp = a("condTurn").getValue()) {
-        sch.conditionTurn = Access(pp).toInteger();
-    }
+    sch.conditionTurn = toOptionalInteger(a("condTurn").getValue());
 
     // condTime
-    if (const Value_t* pp = a("condTime").getValue()) {
-        sch.conditionTime = Access(pp).toInteger();
-    }
+    sch.conditionTime = toOptionalInteger(a("condTime").getValue());
     return sch;
 }
 

@@ -6,8 +6,8 @@
 #include "server/types.hpp"
 
 #include "t_server.hpp"
-#include "afl/data/integervalue.hpp"
 #include "afl/data/floatvalue.hpp"
+#include "afl/data/integervalue.hpp"
 #include "afl/data/stringvalue.hpp"
 #include "afl/except/invaliddataexception.hpp"
 
@@ -75,5 +75,39 @@ TestServertypes::testTime()
 
     // pack->unpack roundtrip
     TS_ASSERT_EQUALS(server::unpackTime(server::packTime(afl::sys::Time::fromUnixTime(1485689224))), afl::sys::Time::fromUnixTime(1485689220));
+}
+
+/** Test addOptionalIntegerKey(), addOptionalStringKey(), toOptionalString(), toOptionalInteger(). */
+void
+TestServerTypes::testOptional()
+{
+    afl::data::Hash::Ref_t h = afl::data::Hash::create();
+
+    // addOptional
+    server::addOptionalStringKey(*h, "ks", afl::base::Optional<String_t>("known"));
+    server::addOptionalStringKey(*h, "us", afl::base::Optional<String_t>());
+    server::addOptionalIntegerKey(*h, "ki", afl::base::Optional<int32_t>(77));
+    server::addOptionalIntegerKey(*h, "ui", afl::base::Optional<int32_t>());
+
+    TS_ASSERT(h->get("ks") != 0);
+    TS_ASSERT(h->get("us") == 0);
+    TS_ASSERT_EQUALS(server::toString(h->get("ks")), "known");
+
+    TS_ASSERT(h->get("ki") != 0);
+    TS_ASSERT(h->get("ui") == 0);
+    TS_ASSERT_EQUALS(server::toInteger(h->get("ki")), 77);
+
+    // toOptional
+    afl::data::StringValue sv("sv");
+    afl::data::IntegerValue iv(99);
+    TS_ASSERT_EQUALS(server::toOptionalString(&sv).orElse("x"), "sv");
+    TS_ASSERT_EQUALS(server::toOptionalString(0).orElse("x"), "x");
+    TS_ASSERT_EQUALS(server::toOptionalInteger(&iv).orElse(-1), 99);
+    TS_ASSERT_EQUALS(server::toOptionalInteger(0).orElse(-1), -1);
+
+    TS_ASSERT_EQUALS(server::toOptionalString(h->get("ks")).orElse("x"), "known");
+    TS_ASSERT_EQUALS(server::toOptionalString(h->get("us")).orElse("x"), "x");
+    TS_ASSERT_EQUALS(server::toOptionalInteger(h->get("ki")).orElse(-1), 77);
+    TS_ASSERT_EQUALS(server::toOptionalInteger(h->get("ui")).orElse(-1), -1);
 }
 

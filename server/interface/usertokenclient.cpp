@@ -42,9 +42,7 @@ server::interface::UserTokenClient::checkToken(String_t token, afl::base::Option
     Info i;
     i.userId = a("user").toString();
     i.tokenType = a("type").toString();
-    if (const Value_t* p = a("new").getValue()) {
-        i.newToken = afl::data::Access(p).toString();
-    }
+    i.newToken = toOptionalString(a("new").getValue());
     return i;
 }
 

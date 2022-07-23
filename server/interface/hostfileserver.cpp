@@ -100,24 +100,12 @@ server::interface::HostFileServer::packInfo(const HostFile::Info& info)
     // Pack HostFile part
     result->setNew("name", makeStringValue(info.name));
     result->setNew("label", makeStringValue(HostFile::formatLabel(info.label)));
-    if (const int32_t* p = info.turnNumber.get()) {
-        result->setNew("turn", makeIntegerValue(*p));
-    }
-    if (const int32_t* p = info.slotId.get()) {
-        result->setNew("slot", makeIntegerValue(*p));
-    }
-    if (const String_t* p = info.slotName.get()) {
-        result->setNew("slotname", makeStringValue(*p));
-    }
-    if (const int32_t* p = info.gameId.get()) {
-        result->setNew("game", makeIntegerValue(*p));
-    }
-    if (const String_t* p = info.gameName.get()) {
-        result->setNew("gamename", makeStringValue(*p));
-    }
-    if (const String_t* p = info.toolName.get()) {
-        result->setNew("toolname", makeStringValue(*p));
-    }
+    addOptionalIntegerKey(*result, "turn", info.turnNumber);
+    addOptionalIntegerKey(*result, "slot", info.slotId);
+    addOptionalStringKey(*result, "slotname", info.slotName);
+    addOptionalIntegerKey(*result, "game", info.gameId);
+    addOptionalStringKey(*result, "gamename", info.gameName);
+    addOptionalStringKey(*result, "toolname", info.toolName);
 
     return pp.release();
 }

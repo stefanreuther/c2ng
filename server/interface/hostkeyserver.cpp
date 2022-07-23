@@ -88,26 +88,14 @@ server::interface::HostKeyServer::packInfo(const HostKey::Info& info)
     hv->setNew("key2", makeStringValue(info.label2));
 
     // Information from file server
-    if (const String_t* p = info.filePathName.get()) {
-        hv->setNew("filePathName", makeStringValue(*p));
-    }
-    if (const int32_t* p = info.fileUseCount.get()) {
-        hv->setNew("fileUseCount", makeIntegerValue(*p));
-    }
+    addOptionalStringKey(*hv, "filePathName", info.filePathName);
+    addOptionalIntegerKey(*hv, "fileUseCount", info.fileUseCount);
 
     // Information from host key store
-    if (const int32_t* p = info.lastGame.get()) {
-        hv->setNew("game", makeIntegerValue(*p));
-    }
-    if (const String_t* p = info.lastGameName.get()) {
-        hv->setNew("gameName", makeStringValue(*p));
-    }
-    if (const int32_t* p = info.gameUseCount.get()) {
-        hv->setNew("gameUseCount", makeIntegerValue(*p));
-    }
-    if (const Time_t* p = info.gameLastUsed.get()) {
-        hv->setNew("gameLastUsed", makeIntegerValue(*p));
-    }
+    addOptionalIntegerKey(*hv, "game", info.lastGame);
+    addOptionalStringKey(*hv, "gameName", info.lastGameName);
+    addOptionalIntegerKey(*hv, "gameUseCount", info.gameUseCount);
+    addOptionalIntegerKey(*hv, "gameLastUsed", info.gameLastUsed);
 
     return new afl::data::HashValue(hv);
 }

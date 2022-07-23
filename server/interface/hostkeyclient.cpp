@@ -47,25 +47,12 @@ server::interface::HostKeyClient::unpackInfo(const Value_t* p)
     result.label1       = a("key1").toString();
     result.label2       = a("key2").toString();
 
-    if (const Value_t* e = a("filePathName").getValue()) {
-        result.filePathName = Access(e).toString();
-    }
-    if (const Value_t* e = a("fileUseCount").getValue()) {
-        result.fileUseCount = Access(e).toInteger();
-    }
-
-    if (const Value_t* e = a("game").getValue()) {
-        result.lastGame = Access(e).toInteger();
-    }
-    if (const Value_t* e = a("gameName").getValue()) {
-        result.lastGameName = Access(e).toString();
-    }
-    if (const Value_t* e = a("gameUseCount").getValue()) {
-        result.gameUseCount = Access(e).toInteger();
-    }
-    if (const Value_t* e = a("gameLastUsed").getValue()) {
-        result.gameLastUsed = Access(e).toInteger();
-    }
+    result.filePathName = toOptionalString(a("filePathName").getValue());
+    result.fileUseCount = toOptionalInteger(a("fileUseCount").getValue());
+    result.lastGame     = toOptionalInteger(a("game").getValue());
+    result.lastGameName = toOptionalString(a("gameName").getValue());
+    result.gameUseCount = toOptionalInteger(a("gameUseCount").getValue());
+    result.gameLastUsed = toOptionalInteger(a("gameLastUsed").getValue());
 
     return result;
 }
