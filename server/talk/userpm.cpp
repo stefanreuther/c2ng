@@ -5,18 +5,22 @@
 
 #include <stdexcept>
 #include "server/talk/userpm.hpp"
-#include "server/talk/root.hpp"
 #include "server/errors.hpp"
+#include "server/talk/root.hpp"
+#include "server/talk/user.hpp"
+#include "server/talk/userfolder.hpp"
 
 // Constructor.
 server::talk::UserPM::UserPM(Root& root, int32_t pmId)
-    : m_pmTree(root.pmRoot().subtree(pmId)),
+    : m_root(root),
+      m_pmTree(root.pmRoot().subtree(pmId)),
       m_pmId(pmId)
 { }
 
 // Wildcard constructor.
 server::talk::UserPM::UserPM(Root& root, Wildcard /*wild*/)
-    : m_pmTree(root.pmRoot().subtree("*")),
+    : m_root(root),
+      m_pmTree(root.pmRoot().subtree("*")),
       m_pmId(0)
 { }
 
@@ -94,7 +98,7 @@ server::talk::UserPM::text()
 
 // Describe this message.
 server::interface::TalkPM::Info
-server::talk::UserPM::describe(String_t forUser)
+server::talk::UserPM::describe(String_t forUser, int32_t folderId)
 {
     // ex UserPM::describe
     server::interface::TalkPM::Info result;
@@ -103,8 +107,26 @@ server::talk::UserPM::describe(String_t forUser)
     result.time      = time().get();
     result.subject   = subject().get();
     result.flags     = flags(forUser).get();
+
+    // Parent
+    User u(m_root, forUser);
     if (int32_t parent = parentMessageId().get()) {
+        // Return parent Id if known, even if it cannot be mapped to a folder
         result.parent = parent;
+
+        // Try to map to a folder; only if we have that, produce further metadata
+        int32_t parentFolder = UserFolder::findFolder(u, m_root, parent, folderId);
+        if (parentFolder != 0) {
+            result.parentSubject = UserPM(m_root, parent).subject().get();
+            result.parentFolder = parentFolder;
+            result.parentFolderName = UserFolder(u, parentFolder).getHeader("name", m_root);
+        }
+    }
+
+    // Suggested folder
+    if (int32_t suggestedFolder = UserFolder::findSuggestedFolder(u, m_root, m_pmId, folderId)) {
+        result.suggestedFolder = suggestedFolder;
+        result.suggestedFolderName = UserFolder(u, suggestedFolder).getHeader("name", m_root);
     }
     return result;
 }

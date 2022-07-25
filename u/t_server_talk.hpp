@@ -129,6 +129,7 @@ class TestServerTalkTalkPM : public CxxTest::TestSuite {
     void testRoot();
     void testReceivers();
     void testReceiverErrors();
+    void testSuggestedFolder();
 };
 
 class TestServerTalkTalkPost : public CxxTest::TestSuite {
@@ -200,6 +201,8 @@ class TestServerTalkUserFolder : public CxxTest::TestSuite {
     void testIt();
     void testAllocate();
     void testMixedProperties();
+    void testFindFolder();
+    void testFindSuggestedFolder();
 };
 
 class TestServerTalkUserPM : public CxxTest::TestSuite {

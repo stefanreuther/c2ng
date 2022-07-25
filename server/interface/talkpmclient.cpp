@@ -31,7 +31,7 @@ server::interface::TalkPMClient::create(String_t receivers, String_t subject, St
     }
     return m_commandHandler.callInt(cmd);
 }
-    
+
 server::interface::TalkPMClient::Info
 server::interface::TalkPMClient::getInfo(int32_t folder, int32_t pmid)
 {
@@ -146,7 +146,7 @@ server::interface::TalkPMClient::changeFlags(int32_t folder, int32_t flagsToClea
     while (const int32_t* p = pmids.eat()) {
         cmd.pushBackInteger(*p);
     }
-    return m_commandHandler.callInt(cmd);    
+    return m_commandHandler.callInt(cmd);
 }
 
 server::interface::TalkPMClient::Info
@@ -159,8 +159,17 @@ server::interface::TalkPMClient::unpackInfo(const afl::data::Value* p)
     result.time      = a("time").toInteger();
     result.subject   = a("subject").toString();
     result.flags     = a("flags").toInteger();
+
+    // parent is traditionally serialized as 0 if not present
     if (int32_t parent = a("parent").toInteger()) {
         result.parent = parent;
     }
+
+    result.parentSubject       = toOptionalString(a("parentSubject").getValue());
+    result.parentFolder        = toOptionalInteger(a("parentFolder").getValue());
+    result.parentFolderName    = toOptionalString(a("parentFolderName").getValue());
+    result.suggestedFolder     = toOptionalInteger(a("suggestedFolder").getValue());
+    result.suggestedFolderName = toOptionalString(a("suggestedFolderName").getValue());
+
     return result;
 }

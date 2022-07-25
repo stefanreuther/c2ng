@@ -7,10 +7,10 @@
 
 #include "t_server_talk.hpp"
 #include "afl/net/nullcommandhandler.hpp"
-#include "afl/net/redis/internaldatabase.hpp"
-#include "server/talk/root.hpp"
 #include "afl/net/redis/integersetkey.hpp"
+#include "afl/net/redis/internaldatabase.hpp"
 #include "afl/net/redis/sortoperation.hpp"
+#include "server/talk/root.hpp"
 
 /** Basic test for UserPM. */
 void
@@ -54,16 +54,18 @@ TestServerTalkUserPM::testIt()
     TS_ASSERT_EQUALS(testee.referenceCounter().get(), 1);
 
     // Describe
-    server::interface::TalkPM::Info info = testee.describe("1009");
+    server::interface::TalkPM::Info info = testee.describe("1009", 1);
     TS_ASSERT_EQUALS(info.author, "a");
     TS_ASSERT_EQUALS(info.receivers, "r");
     TS_ASSERT_EQUALS(info.time, 9988);
     TS_ASSERT_EQUALS(info.subject, "s");
     TS_ASSERT_EQUALS(info.flags, 3);
     TS_ASSERT_EQUALS(info.parent.orElse(-1), 9);
+    TS_ASSERT_EQUALS(info.parentFolder.isValid(), false);
+    TS_ASSERT_EQUALS(info.suggestedFolder.isValid(), false);
 
     // Describe for another user
-    info = testee.describe("1010");
+    info = testee.describe("1010", 0);
     TS_ASSERT_EQUALS(info.author, "a");
     TS_ASSERT_EQUALS(info.receivers, "r");
     TS_ASSERT_EQUALS(info.time, 9988);

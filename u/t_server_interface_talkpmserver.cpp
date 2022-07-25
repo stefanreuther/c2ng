@@ -129,6 +129,11 @@ TestServerInterfaceTalkPMServer::testIt()
         in.subject = "ss";
         in.flags = 5;
         in.parent = 111;
+        in.parentFolder = 3;
+        in.parentFolderName = "par";
+        in.parentSubject = "pp";
+        in.suggestedFolder = 7;
+        in.suggestedFolderName = "sug";
         mock.expectCall("getInfo(106,97)");
         mock.provideReturnValue(in);
 
@@ -142,6 +147,11 @@ TestServerInterfaceTalkPMServer::testIt()
         TS_ASSERT_EQUALS(a("subject").toString(), "ss");
         TS_ASSERT_EQUALS(a("flags").toInteger(), 5);
         TS_ASSERT_EQUALS(a("parent").toInteger(), 111);
+        TS_ASSERT_EQUALS(a("parentFolder").toInteger(), 3);
+        TS_ASSERT_EQUALS(a("parentFolderName").toString(), "par");
+        TS_ASSERT_EQUALS(a("parentSubject").toString(), "pp");
+        TS_ASSERT_EQUALS(a("suggestedFolder").toInteger(), 7);
+        TS_ASSERT_EQUALS(a("suggestedFolderName").toString(), "sug");
     }
 
     // getInfos
@@ -169,6 +179,11 @@ TestServerInterfaceTalkPMServer::testIt()
         TS_ASSERT_EQUALS(a[1]("subject").toString(), "SS");
         TS_ASSERT_EQUALS(a[1]("flags").toInteger(), 6);
         TS_ASSERT_EQUALS(a[1]("parent").toInteger(), 0);       // transmitted as 0 if not present
+        TS_ASSERT(a[1]("parentFolder").getValue() == 0);
+        TS_ASSERT(a[1]("parentFolderName").getValue() == 0);
+        TS_ASSERT(a[1]("parentSubject").getValue() == 0);
+        TS_ASSERT(a[1]("suggestedFolder").getValue() == 0);
+        TS_ASSERT(a[1]("suggestedFolderName").getValue() == 0);
     }
 
     // copy
@@ -300,6 +315,11 @@ TestServerInterfaceTalkPMServer::testRoundtrip()
         in.subject = "ss";
         in.flags = 5;
         in.parent = 111;
+        in.parentFolder = 3;
+        in.parentFolderName = "par";
+        in.parentSubject = "pp";
+        in.suggestedFolder = 7;
+        in.suggestedFolderName = "sug";
         mock.expectCall("getInfo(106,97)");
         mock.provideReturnValue(in);
 
@@ -310,6 +330,11 @@ TestServerInterfaceTalkPMServer::testRoundtrip()
         TS_ASSERT_EQUALS(out.subject, "ss");
         TS_ASSERT_EQUALS(out.flags, 5);
         TS_ASSERT_EQUALS(out.parent.orElse(-1), 111);
+        TS_ASSERT_EQUALS(out.parentFolder.orElse(-1), 3);
+        TS_ASSERT_EQUALS(out.parentFolderName.orElse(""), "par");
+        TS_ASSERT_EQUALS(out.parentSubject.orElse(""), "pp");
+        TS_ASSERT_EQUALS(out.suggestedFolder.orElse(-1), 7);
+        TS_ASSERT_EQUALS(out.suggestedFolderName.orElse(""), "sug");
     }
 
     // getInfos

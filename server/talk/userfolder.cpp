@@ -1,27 +1,32 @@
 /**
   *  \file server/talk/userfolder.cpp
+  *  \brief Class server::talk::UserFolder
   */
 
 #include <memory>
 #include <stdexcept>
 #include "server/talk/userfolder.hpp"
-#include "server/talk/user.hpp"
+#include "afl/net/redis/integersetoperation.hpp"
 #include "server/errors.hpp"
-#include "server/types.hpp"
 #include "server/talk/root.hpp"
+#include "server/talk/user.hpp"
+#include "server/talk/userpm.hpp"
+#include "server/types.hpp"
 
-// /** Constructor.
-//     \param user User to create this folder for
-//     \param userFolderId User's folder Id */
+namespace {
+    /** Maximum number of loops for findSuggestedFolder().
+        Go up only so many levels looking for a folder to store the message. */
+    const int SUGGEST_LIMIT = 10;
+}
+
+// Constructor.
 server::talk::UserFolder::UserFolder(User& user, int32_t userFolderId)
     : m_userFolderSet(user.pmFolders()),
       m_userFolder(user.pmFolderData().subtree(userFolderId)),
       m_userFolderId(userFolderId)
 { }
 
-// /** Check existance of this folder.
-//     \retval true this is a user folder
-//     \retval false this is a default folder */
+// Check existance of this folder.
 bool
 server::talk::UserFolder::checkExistance(Root& root)
 {
@@ -35,7 +40,7 @@ server::talk::UserFolder::checkExistance(Root& root)
     }
 }
 
-// /** Set of messages in this folder. */
+// Access set of messages in this folder.
 afl::net::redis::IntegerSetKey
 server::talk::UserFolder::messages()
 {
@@ -43,9 +48,7 @@ server::talk::UserFolder::messages()
     return m_userFolder.intSetKey("messages");
 }
 
-// /** Header of this folder. This returns the user-specific header,
-//     even if the folder does not have one. A write access would create it.
-//     See getHeader() for details. */
+// Access header of this folder.
 afl::net::redis::HashKey
 server::talk::UserFolder::header()
 {
@@ -53,9 +56,7 @@ server::talk::UserFolder::header()
     return m_userFolder.hashKey("header");
 }
 
-// /** Flag for unread messages in this folder.
-//     This is vaguely specified to allow an unread message count later, but
-//     so far it is implemented as a flag only. */
+// Access flag for unread messages in this folder.
 afl::net::redis::IntegerField
 server::talk::UserFolder::unreadMessages()
 {
@@ -63,12 +64,7 @@ server::talk::UserFolder::unreadMessages()
     return header().intField("unread");
 }
 
-// /** Get header element. Folders can have user-specific and global
-//     default headers. The latter are used for folders every user has.
-//     This looks into the user-specific header first, then into the
-//     global one. That is, if the user has renamed his outbox, this will
-//     return the new name; if he has not touched it, it will return the
-//     global name. */
+// Get header value.
 String_t
 server::talk::UserFolder::getHeader(String_t key, Root& root)
 {
@@ -79,9 +75,7 @@ server::talk::UserFolder::getHeader(String_t key, Root& root)
     return toString(result.get());
 }
 
-/** Describe this folder.
-    \param isUser true iff this is a user folder
-    \param root Server root */
+// Describe this folder.
 server::interface::TalkFolder::Info
 server::talk::UserFolder::describe(bool isUser, Root& root)
 {
@@ -95,8 +89,7 @@ server::talk::UserFolder::describe(bool isUser, Root& root)
     return result;
 }
 
-// /** Remove this folder.
-//     Assumes that it has already been unlinked, as well as all the messages. */
+// Remove this folder from the database.
 void
 server::talk::UserFolder::remove()
 {
@@ -105,7 +98,7 @@ server::talk::UserFolder::remove()
     header().remove();
 }
 
-// /** Allocate a new folder Id. */
+// Allocate a new folder Id for a user.
 int32_t
 server::talk::UserFolder::allocateFolder(User& user)
 {
@@ -121,6 +114,7 @@ server::talk::UserFolder::allocateFolder(User& user)
     return result;
 }
 
+// Access default folder set.
 afl::net::redis::IntegerSetKey
 server::talk::UserFolder::defaultFolders(Root& root)
 {
@@ -128,6 +122,62 @@ server::talk::UserFolder::defaultFolders(Root& root)
     return root.defaultFolderRoot().intSetKey("all");
 }
 
+// Find folder containing a PM.
+int32_t
+server::talk::UserFolder::findFolder(User& user, Root& root, int32_t pmId, int32_t preferFolder)
+{
+    // Check preferred folder
+    if (preferFolder != 0 && UserFolder(user, preferFolder).messages().contains(pmId)) {
+        return preferFolder;
+    }
+
+    // Check other folders
+    afl::data::IntegerList_t list;
+    defaultFolders(root).merge(user.pmFolders()).getAll(list);
+    std::sort(list.begin(), list.end());
+    for (size_t i = 0, n = list.size(); i < n; ++i) {
+        const int32_t folderId = list[i];
+        if (preferFolder != folderId && UserFolder(user, folderId).messages().contains(pmId)) {
+            return folderId;
+        }
+    }
+    return 0;
+}
+
+// Suggest folder for filing a PM.
+int32_t
+server::talk::UserFolder::findSuggestedFolder(User& user, Root& root, int32_t pmId, int32_t excludeFolder)
+{
+    // Check user folders only (do not suggest filing in a system folder)
+    // Required usecases:
+    // - if you reply to a message and move that to folder X, suggest moving to X for further replies
+    // - if you visit a message in folder X, but have moved its parent to Y, suggest moving to Y
+    afl::data::IntegerList_t list;
+    user.pmFolders().getAll(list);
+    std::sort(list.begin(), list.end());
+
+    for (int loop = 0; loop < SUGGEST_LIMIT; ++loop) {
+        // Get message parent.
+        // Refuse when reaching 0, or when Ids go backwards (=database inconsistency, cannot normally happen)
+        const int32_t parentMessageId = UserPM(root, pmId).parentMessageId().get();
+
+        if (parentMessageId == 0 || parentMessageId >= pmId) {
+            break;
+        }
+        pmId = parentMessageId;
+
+        for (size_t i = 0, n = list.size(); i < n; ++i) {
+            const int32_t folderId = list[i];
+            if (excludeFolder != folderId && UserFolder(user, folderId).messages().contains(pmId)) {
+                return folderId;
+            }
+        }
+    }
+
+    return 0;
+}
+
+// Access default header. (Not exposed through service interface, thus, private here.)
 afl::net::redis::HashKey
 server::talk::UserFolder::defaultHeader(Root& root)
 {

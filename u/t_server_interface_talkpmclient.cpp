@@ -45,6 +45,11 @@ TestServerInterfaceTalkPMClient::testIt()
         in->setNew("author", server::makeStringValue("aa"));
         in->setNew("time", server::makeIntegerValue(987654));
         in->setNew("parent", server::makeIntegerValue(12));
+        in->setNew("parentFolder", server::makeIntegerValue(5));
+        in->setNew("parentFolderName", server::makeStringValue("five"));
+        in->setNew("parentSubject", server::makeStringValue("old-subj"));
+        in->setNew("suggestedFolder", server::makeIntegerValue(9));
+        in->setNew("suggestedFolderName", server::makeStringValue("sug"));
         in->setNew("flags", server::makeIntegerValue(3));
         mock.expectCall("PMSTAT, 105, 145");
         mock.provideNewResult(new HashValue(in));
@@ -57,6 +62,11 @@ TestServerInterfaceTalkPMClient::testIt()
         TS_ASSERT(out.parent.get() != 0);
         TS_ASSERT_EQUALS(*out.parent.get(), 12);
         TS_ASSERT_EQUALS(out.flags, 3);
+        TS_ASSERT_EQUALS(out.parentFolder.orElse(-1), 5);
+        TS_ASSERT_EQUALS(out.parentFolderName.orElse(""), "five");
+        TS_ASSERT_EQUALS(out.parentSubject.orElse(""), "old-subj");
+        TS_ASSERT_EQUALS(out.suggestedFolder.orElse(-1), 9);
+        TS_ASSERT_EQUALS(out.suggestedFolderName.orElse(""), "sug");
     }
 
     // getInfos
@@ -90,6 +100,11 @@ TestServerInterfaceTalkPMClient::testIt()
         TS_ASSERT(out[1]->parent.get() != 0);
         TS_ASSERT_EQUALS(*out[1]->parent.get(), 12);
         TS_ASSERT_EQUALS(out[1]->flags, 3);
+        TS_ASSERT_EQUALS(out[1]->parentFolder.isValid(), false);
+        TS_ASSERT_EQUALS(out[1]->parentFolderName.isValid(), false);
+        TS_ASSERT_EQUALS(out[1]->parentSubject.isValid(), false);
+        TS_ASSERT_EQUALS(out[1]->suggestedFolder.isValid(), false);
+        TS_ASSERT_EQUALS(out[1]->suggestedFolderName.isValid(), false);
     }
 
     // copy

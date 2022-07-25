@@ -194,7 +194,7 @@ server::talk::TalkPM::getInfo(int32_t folder, int32_t pmid)
         throw std::runtime_error(PM_NOT_FOUND);
     } else {
         // Report the message
-        return UserPM(m_root, pmid).describe(m_session.getUser());
+        return UserPM(m_root, pmid).describe(m_session.getUser(), folder);
     }
 }
 
@@ -211,7 +211,7 @@ server::talk::TalkPM::getInfo(int32_t folder, afl::base::Memory<const int32_t> p
         if (!uf.messages().contains(*p)) {
             results.pushBackNew(0);
         } else {
-            results.pushBackNew(new Info(UserPM(m_root, *p).describe(m_session.getUser())));
+            results.pushBackNew(new Info(UserPM(m_root, *p).describe(m_session.getUser(), folder)));
         }
     }
 }

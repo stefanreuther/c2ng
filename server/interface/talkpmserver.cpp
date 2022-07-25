@@ -1,16 +1,17 @@
 /**
   *  \file server/interface/talkpmserver.cpp
+  *  \brief Class server::interface::TalkPMServer
   */
 
 #include <stdexcept>
 #include "server/interface/talkpmserver.hpp"
 #include "afl/data/hash.hpp"
 #include "afl/data/hashvalue.hpp"
+#include "afl/data/integerlist.hpp"
 #include "afl/data/vector.hpp"
 #include "afl/data/vectorvalue.hpp"
 #include "interpreter/arguments.hpp"
 #include "server/errors.hpp"
-#include "afl/data/integerlist.hpp"
 #include "server/interface/talkrenderserver.hpp"
 
 using afl::data::Hash;
@@ -270,18 +271,29 @@ server::interface::TalkPMServer::packInfo(const TalkPM::Info& info)
        Information about one message.
        This is a variant of {pm:$PMID:header}.
 
-       @key author:UID     (user who sent it)
-       @key to:TalkAddr    (users who receive it)
-       @key time:Time      (time when sent)
-       @key subject:Str    (subject)
-       @key flags:TalkFlag (user's flags)
-       @key parent:PMID    (parent message, 0 if none) */
+       @key author:UID               (user who sent it)
+       @key to:TalkAddr              (users who receive it)
+       @key time:Time                (time when sent)
+       @key subject:Str              (subject)
+       @key flags:TalkFlag           (user's flags)
+       @key parent:PMID              (parent message, 0 if none)
+       @key parentSubject:Str        (parent message subject, missing if none)
+       @key parentFolder:UFID        (parent folder Id if known, missing if none)
+       @key parentFolderName:Str     (parent folder name if known, missing if none)
+       @key suggestedFolder:UFID     (suggested folder to move into, missing if none known)
+       @key suggestedFolderName:UFID (name of suggested folder, missing if none known) */
     Hash::Ref_t result = Hash::create();
-    result->setNew("author", server::makeStringValue(info.author));
-    result->setNew("to", server::makeStringValue(info.receivers));
-    result->setNew("time", server::makeIntegerValue(info.time));
-    result->setNew("subject", server::makeStringValue(info.subject));
-    result->setNew("flags", server::makeIntegerValue(info.flags));
-    result->setNew("parent", server::makeIntegerValue(info.parent.orElse(0)));
+    result->setNew("author",  makeStringValue(info.author));
+    result->setNew("to",      makeStringValue(info.receivers));
+    result->setNew("time",    makeIntegerValue(info.time));
+    result->setNew("subject", makeStringValue(info.subject));
+    result->setNew("flags",   makeIntegerValue(info.flags));
+    result->setNew("parent",  makeIntegerValue(info.parent.orElse(0)));
+    addOptionalStringKey(*result,  "parentSubject",       info.parentSubject);
+    addOptionalIntegerKey(*result, "parentFolder",        info.parentFolder);
+    addOptionalStringKey(*result,  "parentFolderName",    info.parentFolderName);
+    addOptionalIntegerKey(*result, "suggestedFolder",     info.suggestedFolder);
+    addOptionalStringKey(*result,  "suggestedFolderName", info.suggestedFolderName);
+
     return new HashValue(result);
 }

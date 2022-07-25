@@ -17,6 +17,7 @@
 #include "server/talk/userpm.hpp"
 #include "server/talk/userfolder.hpp"
 #include "server/talk/user.hpp"
+#include "server/talk/talkfolder.hpp"
 
 /** Test rendering (bug #336). */
 void
@@ -108,6 +109,19 @@ TestServerTalkTalkPM::testIt()
         TS_ASSERT_EQUALS(i.flags, 0);
 
         TS_ASSERT_THROWS(TalkPM(bSession, root).getInfo(2, 1), std::exception);
+    }
+
+    // Get info on #2. It's in A's inbox; should suggest linking with previous message in outbox.
+    {
+        TalkPM::Info i = TalkPM(aSession, root).getInfo(1, 2);
+        TS_ASSERT_EQUALS(i.author, "b");
+        TS_ASSERT_EQUALS(i.receivers, "u:a");
+        TS_ASSERT_EQUALS(i.subject, "re: subj");
+        TS_ASSERT_EQUALS(i.flags, 0);
+        TS_ASSERT_EQUALS(i.parent.orElse(-1), 1);
+        TS_ASSERT_EQUALS(i.parentFolder.orElse(-1), 2);
+        TS_ASSERT_EQUALS(i.parentSubject.orElse(""), "subj");
+        TS_ASSERT_EQUALS(i.parentFolderName.orElse(""), "Outbox");
     }
 
     // Copy. Message #1 is in A's outbox, #2 is in his inbox. Copy #2 into outbox as well.
@@ -361,5 +375,57 @@ TestServerTalkTalkPM::testReceiverErrors()
     TS_ASSERT_THROWS(testee.create("u:a, u:b", "subj", "text:text", afl::base::Nothing), std::exception);
     TS_ASSERT_THROWS(testee.create("u:a,,u:b", "subj", "text:text", afl::base::Nothing), std::exception);
     TS_ASSERT_THROWS(testee.create("x:1", "subj", "text:text", afl::base::Nothing), std::exception);
+}
+
+/** Test suggested folders. */
+void
+TestServerTalkTalkPM::testSuggestedFolder()
+{
+    using server::talk::TalkPM;
+    using server::talk::Session;
+
+    // Infrastructure
+    afl::net::redis::InternalDatabase db;
+    afl::net::NullCommandHandler mq;
+    server::talk::Root root(db, mq, server::talk::Configuration());
+
+    Session aSession;
+    Session bSession;
+    aSession.setUser("a");
+    bSession.setUser("b");
+
+    // Make two system folders
+    root.defaultFolderRoot().subtree("1").hashKey("header").stringField("name").set("Inbox");
+    root.defaultFolderRoot().subtree("1").hashKey("header").stringField("description").set("Incoming messages");
+    root.defaultFolderRoot().subtree("2").hashKey("header").stringField("name").set("Outbox");
+    root.defaultFolderRoot().subtree("2").hashKey("header").stringField("description").set("Sent messages");
+    root.defaultFolderRoot().intSetKey("all").add(1);
+    root.defaultFolderRoot().intSetKey("all").add(2);
+
+    // Make a user folder; use TalkFolder for simplicity
+    int32_t folderId = server::talk::TalkFolder(aSession, root).create("User", afl::base::Nothing);
+
+    // Create messages
+    int32_t a = TalkPM(aSession, root).create("u:b", "subj", "one", afl::base::Nothing);
+    int32_t b = TalkPM(bSession, root).create("u:a", "re: subj", "two", a);
+    int32_t c = TalkPM(aSession, root).create("u:b", "re: re: subj", "two", b);
+
+    // Move a into folder
+    const int32_t pmids[] = {a};
+    int32_t n = TalkPM(aSession, root).move(2, folderId, pmids);
+    TS_ASSERT_EQUALS(n, 1);
+
+    // Verify
+    TalkPM::Info i = TalkPM(aSession, root).getInfo(2, c);
+    TS_ASSERT_EQUALS(i.author, "a");
+    TS_ASSERT_EQUALS(i.receivers, "u:b");
+    TS_ASSERT_EQUALS(i.subject, "re: re: subj");
+    TS_ASSERT_EQUALS(i.flags, 1);
+    TS_ASSERT_EQUALS(i.parent.orElse(-1), b);
+    TS_ASSERT_EQUALS(i.parentFolder.orElse(-1), 1);
+    TS_ASSERT_EQUALS(i.parentSubject.orElse(""), "re: subj");
+    TS_ASSERT_EQUALS(i.parentFolderName.orElse(""), "Inbox");
+    TS_ASSERT_EQUALS(i.suggestedFolder.orElse(-1), folderId);
+    TS_ASSERT_EQUALS(i.suggestedFolderName.orElse(""), "User");
 }
 

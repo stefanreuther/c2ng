@@ -102,8 +102,9 @@ namespace server { namespace talk {
             Produces an Info structure containing the message's metainformation.
             Since this contains the flags, it is user-specific.
             \param forUser User Id
+            \param folderId Folder Id
             \return Info structure */
-        server::interface::TalkPM::Info describe(String_t forUser);
+        server::interface::TalkPM::Info describe(String_t forUser, int32_t folderId);
 
         /** Get message Id.
             \return the Id used when constructing this object. */
@@ -134,6 +135,9 @@ namespace server { namespace talk {
         };
 
      private:
+        /** Root. */
+        Root& m_root;
+
         /** Database subtree. */
         afl::net::redis::Subtree m_pmTree;
 
