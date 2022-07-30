@@ -111,6 +111,7 @@ game::map::Cursors::getCursorByNumber(int nr)
      case BaseScreen:    return &m_currentBase;
      case HistoryScreen: return &m_currentHistoryShip;
      case FleetScreen:   return &m_currentFleet;
+     // No cursor for AllShips, AllPlanets
      case Ufos:          return &m_currentUfo;
      case IonStorms:     return &m_currentIonStorm;
      case Minefields:    return &m_currentMinefield;
@@ -130,8 +131,8 @@ game::map::Cursors::getTypeByNumber(int nr)
          case BaseScreen:    return &m_pUniverse->playedBases();
          case HistoryScreen: return &m_pUniverse->historyShips();
          case FleetScreen:   return &m_pUniverse->fleets();
-            // case 21: return &current_anyship_type;
-            // case 22: return &current_anyplanet_type;
+         case AllShips:      return &m_pUniverse->allShips();
+         case AllPlanets:    return &m_pUniverse->allPlanets();
          case Ufos:          return &m_pUniverse->ufos();
          case IonStorms:     return &m_pUniverse->ionStormType();
          case Minefields:    return &m_pUniverse->minefields();

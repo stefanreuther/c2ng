@@ -474,7 +474,7 @@ game::map::Renderer::renderShipExtras(const State& st) const
 {
     // ex GChartViewport::drawShipSelAndVectors
     const Configuration& config = m_viewport.mapConfiguration();
-    AnyShipType ty(m_viewport.universe().ships());
+    AnyShipType& ty(m_viewport.universe().allShips());
 
     // Selections
     if (m_viewport.hasOption(Viewport::ShowSelection)) {
@@ -512,7 +512,7 @@ game::map::Renderer::renderShipExtras(const State& st) const
             }
         }
 
-        AnyPlanetType pty(m_viewport.universe().planets());
+        AnyPlanetType& pty(m_viewport.universe().allPlanets());
         for (Id_t i = pty.findNextIndexNoWrap(0, false); i != 0; i = pty.findNextIndexNoWrap(i, false)) {
             const Planet* pl = pty.getObjectByIndex(i);
             Point planetPosition;
@@ -533,7 +533,7 @@ game::map::Renderer::renderShipExtras(const State& st) const
             // Draw icon if enabled and we're not at a planet
             int flags = 0;
             if (!m_viewport.hasOption(Viewport::ShowShipDots)
-                && AnyPlanetType(m_viewport.universe().planets()).findNextObjectAt(shipPosition, 0, false) == 0)
+                && m_viewport.universe().allPlanets().findNextObjectAt(shipPosition, 0, false) == 0)
             {
                 flags |= RendererListener::risShowIcon;
             }
@@ -744,7 +744,7 @@ game::map::Renderer::renderPlanets(const State& st) const
     // ex GChartViewport::drawPlanets
     Universe& univ = m_viewport.universe();
 
-    AnyPlanetType ty(univ.planets());
+    AnyPlanetType& ty(univ.allPlanets());
     for (Id_t i = ty.findNextIndex(0); i != 0; i = ty.findNextIndex(i)) {
         Point pos;
         if (Planet* p = ty.getObjectByIndex(i)) {
@@ -888,13 +888,13 @@ game::map::Renderer::renderShips(const State& st) const
 {
     // ex GChartViewport::drawShips, sort-of
     const Configuration& config = m_viewport.mapConfiguration();
-    AnyShipType ships(m_viewport.universe().ships());
+    AnyShipType& ships(m_viewport.universe().allShips());
     for (Id_t i = ships.findNextIndex(0); i != 0; i = ships.findNextIndex(i)) {
         if (Ship* s = ships.getObjectByIndex(i)) {
             Point shipPosition;
             int shipOwner;
             if (s->getPosition(shipPosition) && s->getOwner(shipOwner)) {
-                bool atPlanet = AnyPlanetType(m_viewport.universe().planets()).findNextObjectAt(shipPosition, 0, false) != 0;
+                bool atPlanet = m_viewport.universe().allPlanets().findNextObjectAt(shipPosition, 0, false) != 0;
 
                 String_t label;
                 if (m_viewport.hasOption(Viewport::ShowLabels)) {
@@ -983,7 +983,7 @@ game::map::Renderer::getPlanetFlags(const Planet& planet, Point pos) const
     }
 
     // - ripOwnShips, ripAlliedShips, ripEnemyShips, ripGuessedAlliedShips, ripGuessedEnemyShips
-    AnyShipType ships(m_viewport.universe().ships());
+    AnyShipType& ships(m_viewport.universe().allShips());
     for (Id_t sid = ships.findNextObjectAt(pos, 0, false); sid != 0; sid = ships.findNextObjectAt(pos, sid, false)) {
         if (Ship* s = ships.getObjectByIndex(sid)) {
             int shipOwner;

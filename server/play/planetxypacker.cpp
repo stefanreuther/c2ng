@@ -26,7 +26,7 @@ server::play::PlanetXYPacker::buildValue() const
     game::Root& r = game::actions::mustHaveRoot(m_session);
 
     afl::base::Ref<afl::data::Vector> vv(afl::data::Vector::create());
-    game::map::AnyPlanetType ty(t.universe().planets());
+    game::map::AnyPlanetType& ty(t.universe().allPlanets());
 
     // Note: iteration starts at 0 so JSON can be indexed with planet Ids
     for (int i = 0, n = t.universe().planets().size(); i <= n; ++i) {

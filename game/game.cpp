@@ -6,8 +6,6 @@
 #include "game/game.hpp"
 #include "game/turn.hpp"
 #include "game/alliance/container.hpp"
-#include "game/map/anyshiptype.hpp"
-#include "game/map/anyplanettype.hpp"
 
 game::Game::Game()
     : sig_viewpointTurnChange(),
@@ -379,13 +377,13 @@ game::Game::isGameObject(const game::vcr::Object& obj, const game::spec::HullVec
     // FIXME: 20210417 Is this a nice place for this function?
     if (Turn* t = getViewpointTurn().get()) {
         if (!obj.isPlanet()) {
-            const game::map::Ship* sh = game::map::AnyShipType(t->universe().ships()).getObjectByIndex(obj.getId());
+            const game::map::Ship* sh = t->universe().allShips().getObjectByIndex(obj.getId());
             int hullId;
             return sh != 0
                 && sh->getHull().get(hullId)
                 && obj.canBeHull(hulls, hullId);
         } else {
-            const game::map::Planet* pl = game::map::AnyPlanetType(t->universe().planets()).getObjectByIndex(obj.getId());
+            const game::map::Planet* pl = t->universe().allPlanets().getObjectByIndex(obj.getId());
             return pl != 0;
         }
     }

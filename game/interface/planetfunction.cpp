@@ -7,7 +7,6 @@
 #include "game/turn.hpp"
 #include "game/game.hpp"
 #include "game/interface/planetcontext.hpp"
-#include "game/map/anyplanettype.hpp"
 
 game::interface::PlanetFunction::PlanetFunction(Session& session)
     : m_session(session)
@@ -71,7 +70,7 @@ game::interface::PlanetFunction::makeFirstContext()
     Game* game = m_session.getGame().get();
     Root* root = m_session.getRoot().get();
     if (game != 0 && root != 0) {
-        Id_t id = game::map::AnyPlanetType(game->currentTurn().universe().planets()).findNextIndex(0);
+        Id_t id = game->currentTurn().universe().allPlanets().findNextIndex(0);
         if (id != 0) {
             return new PlanetContext(id, m_session, *root, *game);
         } else {

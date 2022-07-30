@@ -9,6 +9,8 @@
 #include "afl/base/signal.hpp"
 #include "afl/sys/loglistener.hpp"
 #include "game/interpreterinterface.hpp"
+#include "game/map/anyplanettype.hpp"
+#include "game/map/anyshiptype.hpp"
 #include "game/map/drawingcontainer.hpp"
 #include "game/map/explosiontype.hpp"
 #include "game/map/fleettype.hpp"
@@ -74,6 +76,11 @@ namespace game { namespace map {
         HistoryShipType& historyShips();
         const HistoryShipType& historyShips() const;
 
+        /** Access all ships.
+            \return AllShipType */
+        AnyShipType& allShips();
+        const AnyShipType& allShips() const;
+
         /** Access planets.
             \return planet vector */
         ObjectVector<Planet>& planets();
@@ -88,6 +95,11 @@ namespace game { namespace map {
             \return PlayedBaseType */
         PlayedBaseType& playedBases();
         const PlayedBaseType& playedBases() const;
+
+        /** Access all planets.
+            \return AllPlanetType */
+        AnyPlanetType& allPlanets();
+        const AnyPlanetType& allPlanets() const;
 
         /** Access fleets.
             \return fleets */
@@ -317,6 +329,8 @@ namespace game { namespace map {
         PlayedBaseType m_playedBases;
         FleetType m_fleets;
         IonStormType m_ionStormType;
+        AnyShipType m_allShips;
+        AnyPlanetType m_allPlanets;
 
         // Reverter
         std::auto_ptr<Reverter> m_reverter;
@@ -364,6 +378,18 @@ game::map::Universe::historyShips() const
     return m_historyShips;
 }
 
+inline game::map::AnyShipType&
+game::map::Universe::allShips()
+{
+    return m_allShips;
+}
+
+inline const game::map::AnyShipType&
+game::map::Universe::allShips() const
+{
+    return m_allShips;
+}
+
 inline game::map::ObjectVector<game::map::Planet>&
 game::map::Universe::planets()
 {
@@ -399,6 +425,18 @@ const inline game::map::PlayedBaseType&
 game::map::Universe::playedBases() const
 {
     return m_playedBases;
+}
+
+inline game::map::AnyPlanetType&
+game::map::Universe::allPlanets()
+{
+    return m_allPlanets;
+}
+
+inline const game::map::AnyPlanetType&
+game::map::Universe::allPlanets() const
+{
+    return m_allPlanets;
 }
 
 inline game::map::FleetType&

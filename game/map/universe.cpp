@@ -137,6 +137,8 @@ game::map::Universe::Universe()
       m_playedBases(m_planets),
       m_fleets(m_ships),
       m_ionStormType(m_ionStorms),
+      m_allShips(m_ships),
+      m_allPlanets(m_planets),
       m_reverter(0),
       m_availablePlayers()
 {
@@ -287,6 +289,8 @@ game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePl
     m_minefields.sig_setChange.raise(0);
     m_ufos.sig_setChange.raise(0);
     m_explosions.sig_setChange.raise(0);
+    m_allShips.sig_setChange.raise(0);
+    m_allPlanets.sig_setChange.raise(0);
 
     // Combined checks
     for (Id_t i = 1, n = m_ships.size(); i <= n; ++i) {

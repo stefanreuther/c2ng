@@ -404,11 +404,8 @@ void
 game::interface::LabelExtra::checkObjects()
 {
     if (Universe* u = getUniverse(m_session)) {
-        game::map::AnyShipType ships(u->ships());
-        m_shipLabels.checkObjects(ships);
-
-        game::map::AnyPlanetType planets(u->planets());
-        m_planetLabels.checkObjects(planets);
+        m_shipLabels.checkObjects(u->allShips());
+        m_planetLabels.checkObjects(u->allPlanets());
     }
 }
 
@@ -418,12 +415,8 @@ void
 game::interface::LabelExtra::markObjects()
 {
     if (Universe* u = getUniverse(m_session)) {
-        game::map::AnyShipType ships(u->ships());
-        m_shipLabels.markObjects(ships);
-
-        game::map::AnyPlanetType planets(u->planets());
-        m_planetLabels.markObjects(planets);
-
+        m_shipLabels.markObjects(u->allShips());
+        m_planetLabels.markObjects(u->allPlanets());
         m_paranoiaCounter = 0;
     }
 }

@@ -180,7 +180,7 @@ game::ref::FleetMemberList::setFleet(const game::map::Universe& univ, Id_t fleet
 
         // Add members
         // We check AnyShipType for simplicity; fleets should only involve playable ships.
-        AnyShipType ships(const_cast<game::map::Universe&>(univ).ships());
+        const AnyShipType& ships(univ.allShips());
         for (Id_t i = ships.getNextIndex(0); i != 0; i = ships.getNextIndex(i)) {
             if (const Ship* mem = ships.getObjectByIndex(i)) {
                 if (i != fleetNumber && mem->isPlayable(game::map::Object::ReadOnly) && mem->getFleetNumber() == fleetNumber) {

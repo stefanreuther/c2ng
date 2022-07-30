@@ -26,9 +26,11 @@ TestGameMapUniverse::testBasics()
     // Accessors
     TS_ASSERT_EQUALS(&u.ships(),         &cu.ships());
     TS_ASSERT_EQUALS(&u.playedShips(),   &cu.playedShips());
+    TS_ASSERT_EQUALS(&u.allShips(),      &cu.allShips());
     TS_ASSERT_EQUALS(&u.planets(),       &cu.planets());
     TS_ASSERT_EQUALS(&u.playedPlanets(), &cu.playedPlanets());
     TS_ASSERT_EQUALS(&u.playedBases(),   &cu.playedBases());
+    TS_ASSERT_EQUALS(&u.allPlanets(),    &cu.allPlanets());
     TS_ASSERT_EQUALS(&u.fleets(),        &cu.fleets());
     TS_ASSERT_EQUALS(&u.ionStorms(),     &cu.ionStorms());
     TS_ASSERT_EQUALS(&u.ionStormType(),  &cu.ionStormType());

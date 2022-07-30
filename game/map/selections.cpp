@@ -5,7 +5,6 @@
 
 #include "game/map/selections.hpp"
 #include "afl/base/countof.hpp"
-#include "game/map/anyplanettype.hpp"
 #include "game/map/objectvector.hpp"
 #include "game/map/universe.hpp"
 
@@ -62,8 +61,7 @@ void
 game::map::Selections::copyFrom(Universe& u, size_t layer)
 {
     if (SelectionVector* p = get(Planet, layer)) {
-        AnyPlanetType ty(u.planets());
-        p->copyFrom(ty);
+        p->copyFrom(u.allPlanets());
     }
     if (SelectionVector* p = get(Ship, layer)) {
         p->copyFrom(u.historyShips());
@@ -75,8 +73,7 @@ void
 game::map::Selections::copyTo(Universe& u, size_t layer) const
 {
     if (const SelectionVector* p = get(Planet, layer)) {
-        AnyPlanetType ty(u.planets());
-        p->copyTo(ty);
+        p->copyTo(u.allPlanets());
     }
     if (const SelectionVector* p = get(Ship, layer)) {
         p->copyTo(u.historyShips());
@@ -89,8 +86,7 @@ game::map::Selections::limitToExistingObjects(Universe& u, size_t layer)
 {
     // ex GSelection::limitToExistingObjects
     if (SelectionVector* p = get(Planet, layer)) {
-        AnyPlanetType ty(u.planets());
-        p->limitToExistingObjects(ty);
+        p->limitToExistingObjects(u.allPlanets());
     }
     if (SelectionVector* p = get(Ship, layer)) {
         p->limitToExistingObjects(u.historyShips());

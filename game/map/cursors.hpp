@@ -37,6 +37,8 @@ namespace game { namespace map {
         static const int BaseScreen = 3;
         static const int HistoryScreen = 6;
         static const int FleetScreen = 10;
+        static const int AllShips = 21;
+        static const int AllPlanets = 22;
         static const int Ufos = 30;
         static const int IonStorms = 31;
         static const int Minefields = 32;

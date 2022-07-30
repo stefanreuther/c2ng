@@ -67,7 +67,7 @@ namespace game { namespace ref {
             @param pt            Location
             @param options       Options to select which objects to add
             @param excludeShipId Do not include this ship Id even if it is otherwise eligible (0=exclude none) */
-        void addObjectsAt(game::map::Universe& univ, game::map::Point pt, Options_t options, Id_t excludeShipId);
+        void addObjectsAt(const game::map::Universe& univ, game::map::Point pt, Options_t options, Id_t excludeShipId);
 
         /** Clear list. */
         void clear();

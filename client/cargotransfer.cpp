@@ -162,7 +162,7 @@ client::doShipCargoTransfer(ui::Root& root,
                         }
 
                         // Add ships
-                        const game::map::AnyShipType ty(univ.ships());
+                        const game::map::AnyShipType& ty(univ.allShips());
                         for (game::Id_t sid = ty.findNextIndex(0); sid != 0; sid = ty.findNextIndex(sid)) {
                             if (game::actions::CargoTransferSetup::fromShipShip(univ, m_shipId, sid).isValid()) {
                                 objectList.add(game::Reference(game::Reference::Ship, sid));
@@ -248,7 +248,7 @@ client::doPlanetCargoTransfer(ui::Root& root,
 
                     // Add ships
                     game::map::Universe& univ = pGame->currentTurn().universe();
-                    const game::map::AnyShipType ty(univ.ships());
+                    const game::map::AnyShipType& ty(univ.allShips());
                     for (game::Id_t sid = ty.findNextIndex(0); sid != 0; sid = ty.findNextIndex(sid)) {
                         if (game::actions::CargoTransferSetup::fromPlanetShip(univ, m_planetId, sid).isValid()) {
                             objectList.add(game::Reference(game::Reference::Ship, sid));

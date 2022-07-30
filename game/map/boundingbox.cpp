@@ -5,8 +5,6 @@
 
 #include <algorithm>
 #include "game/map/boundingbox.hpp"
-#include "game/map/anyplanettype.hpp"
-#include "game/map/anyshiptype.hpp"
 #include "game/map/configuration.hpp"
 #include "game/map/circularobject.hpp"
 #include "game/map/drawing.hpp"
@@ -28,17 +26,11 @@ game::map::BoundingBox::addUniverse(const Universe& univ, const Configuration& m
     addPoint(mapConfig.getMaximumCoordinates());
 
     // Add regular units
-    {
-        AnyPlanetType t(const_cast<Universe&>(univ).planets());
-        addType(t);
-    }
-    {
-        AnyShipType t(const_cast<Universe&>(univ).ships());
-        addType(t);
-    }
-    addType(const_cast<Universe&>(univ).ionStormType());
-    addType(const_cast<Universe&>(univ).minefields());
-    addType(const_cast<Universe&>(univ).explosions());
+    addType(univ.allPlanets());
+    addType(univ.allShips());
+    addType(univ.ionStormType());
+    addType(univ.minefields());
+    addType(univ.explosions());
 
     // Add drawings
     for (DrawingContainer::Iterator_t it = univ.drawings().begin(), end = univ.drawings().end(); it != end; ++it) {

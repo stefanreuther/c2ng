@@ -27,7 +27,7 @@ server::play::ShipXYPacker::buildValue() const
     game::spec::ShipList& sl = game::actions::mustHaveShipList(m_session);
 
     afl::base::Ref<afl::data::Vector> vv(afl::data::Vector::create());
-    game::map::AnyShipType ty(t.universe().ships());
+    game::map::AnyShipType& ty(t.universe().allShips());
     for (int i = 0, n = t.universe().ships().size(); i <= n; ++i) {
         if (ty.getObjectByIndex(i) != 0) {
             afl::base::Ref<afl::data::Hash> hv(afl::data::Hash::create());

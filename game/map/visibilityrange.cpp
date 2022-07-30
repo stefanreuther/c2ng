@@ -48,8 +48,8 @@ game::map::buildVisibilityRange(RangeSet& out, const Universe& univ, const VisCo
     }
 
     // Build new ranges
-    AnyShipType tyAnyShips(const_cast<Universe&>(univ).ships());
-    AnyPlanetType tyAnyPlanets(const_cast<Universe&>(univ).planets());
+    AnyShipType& tyAnyShips(const_cast<Universe&>(univ).allShips());
+    AnyPlanetType& tyAnyPlanets(const_cast<Universe&>(univ).allPlanets());
     switch (vc.mode) {
      case VisModeOwn:
         out.addObjectType(tyAnyShips,   players, false, vc.range);

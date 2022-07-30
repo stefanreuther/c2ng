@@ -4,7 +4,6 @@
 
 #include "game/interface/planetcontext.hpp"
 #include "afl/base/countof.hpp"
-#include "game/map/anyplanettype.hpp"
 #include "interpreter/nametable.hpp"
 #include "game/interface/baseproperty.hpp"
 #include "game/interface/planetproperty.hpp"
@@ -324,7 +323,7 @@ bool
 game::interface::PlanetContext::next()
 {
     // ex planint.pas:CPlanetContext.Next
-    if (Id_t id = game::map::AnyPlanetType(m_game->currentTurn().universe().planets()).findNextIndex(m_id)) {
+    if (Id_t id = m_game->currentTurn().universe().allPlanets().findNextIndex(m_id)) {
         m_id = id;
         return true;
     }

@@ -16,7 +16,6 @@
 #include "interpreter/typehint.hpp"
 #include "afl/base/countof.hpp"
 #include "interpreter/error.hpp"
-#include "game/map/anyshiptype.hpp"
 #include "game/turn.hpp"
 #include "interpreter/propertyacceptor.hpp"
 #include "afl/string/format.hpp"
@@ -360,7 +359,7 @@ bool
 game::interface::ShipContext::next()
 {
     // ex shipint.pas:CShipContext.Next
-    if (Id_t id = game::map::AnyShipType(m_game->currentTurn().universe().ships()).findNextIndex(m_id)) {
+    if (Id_t id = m_game->currentTurn().universe().allShips().findNextIndex(m_id)) {
         m_id = id;
         return true;
     }

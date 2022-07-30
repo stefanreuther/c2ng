@@ -63,7 +63,7 @@ game::ref::List::add(Reference::Type type, const std::vector<Id_t>& ids)
 }
 
 void
-game::ref::List::addObjectsAt(game::map::Universe& univ, game::map::Point pt, Options_t options, Id_t excludeShipId)
+game::ref::List::addObjectsAt(const game::map::Universe& univ, game::map::Point pt, Options_t options, Id_t excludeShipId)
 {
     // ex GObjectList::addObjectsAt
 
@@ -76,7 +76,7 @@ game::ref::List::addObjectsAt(game::map::Universe& univ, game::map::Point pt, Op
 
     // Handle ships
     // @change PCC2 checks for Object::Playable instead of ReadOnly
-    const game::map::AnyShipType type(univ.ships());
+    const game::map::AnyShipType& type(univ.allShips());
     for (Id_t sid = type.findNextIndex(0); sid != 0; sid = type.findNextIndex(sid)) {
         const game::map::Ship* pShip = univ.ships().get(sid);
         game::map::Point shipPos;

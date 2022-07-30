@@ -498,7 +498,7 @@ game::map::info::computeStarchartInfo(const Turn& turn, const TeamSettings& team
     const Universe& univ = turn.universe();
 
     // Planets
-    AnyPlanetType ptype(const_cast<Universe&>(univ).planets());
+    const AnyPlanetType& ptype(univ.allPlanets());
     for (Id_t pid = ptype.findNextIndex(0); pid != 0; pid = ptype.findNextIndex(pid)) {
         if (const Planet* pl = ptype.getObjectByIndex(pid)) {
             // Accout total
@@ -517,7 +517,7 @@ game::map::info::computeStarchartInfo(const Turn& turn, const TeamSettings& team
     }
 
     // Ships
-    AnyShipType stype(const_cast<Universe&>(univ).ships());
+    const AnyShipType& stype(univ.allShips());
     for (Id_t sid = stype.findNextIndex(0); sid != 0; sid = stype.findNextIndex(sid)) {
         const Ship* sh = stype.getObjectByIndex(sid);
         int owner;

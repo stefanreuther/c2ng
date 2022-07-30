@@ -4,7 +4,6 @@
 
 #include "game/map/fleet.hpp"
 #include "afl/string/format.hpp"
-#include "game/map/anyshiptype.hpp"
 #include "game/map/configuration.hpp"
 #include "game/map/ship.hpp"
 #include "game/map/shiputils.hpp"
@@ -22,7 +21,7 @@ namespace {
     {
         const game::Id_t fid = ship.getFleetNumber();
         if (fid != 0) {
-            game::map::AnyShipType ships(univ.ships());
+            game::map::AnyShipType& ships(univ.allShips());
             for (game::Id_t i = ships.getNextIndex(0); i != 0; i = ships.getNextIndex(i)) {
                 if (const game::map::Ship* other = ships.getObjectByIndex(i)) {
                     if (i != ship.getId() && other->getFleetNumber() == fid) {
@@ -50,7 +49,7 @@ void
 game::map::Fleet::markDirty()
 {
     // ex game/fleet.h:markFleetDirty
-    AnyShipType ships(m_universe.ships());
+    AnyShipType& ships(m_universe.allShips());
     const int fleetNumber = m_ship.getId();
     for (Id_t i = ships.getNextIndex(0); i != 0; i = ships.getNextIndex(i)) {
         if (Ship* sh = ships.getObjectByIndex(i)) {
@@ -67,7 +66,7 @@ game::map::Fleet::synchronize(const game::config::HostConfiguration& config,
                               const Configuration& mapConfig)
 {
     // ex game/fleet.h:synchronizeFleet, fleet.pas:SynchFleet
-    AnyShipType ships(m_universe.ships());
+    AnyShipType& ships(m_universe.allShips());
     const int fleetNumber = m_ship.getId();
     for (Id_t i = ships.getNextIndex(0); i != 0; i = ships.getNextIndex(i)) {
         if (Ship* sh = ships.getObjectByIndex(i)) {
@@ -90,7 +89,7 @@ game::map::Fleet::hasSpecialFunction(int basicFunction,
         return m_ship.hasSpecialFunction(basicFunction, scoreDefinitions, shipList, config);
     } else {
         // Fleet: check all members
-        AnyShipType ships(m_universe.ships());
+        AnyShipType& ships(m_universe.allShips());
         const int fleetNumber = m_ship.getId();
         for (Id_t i = ships.getNextIndex(0); i != 0; i = ships.getNextIndex(i)) {
             if (Ship* sh = ships.getObjectByIndex(i)) {
@@ -114,7 +113,7 @@ game::map::Fleet::getTitle(afl::string::Translator& tx) const
 int
 game::map::Fleet::countFleetMembers() const
 {
-    AnyShipType ships(m_universe.ships());
+    AnyShipType& ships(m_universe.allShips());
     const int fleetNumber = m_ship.getId();
     int result = 0;
     for (Id_t i = ships.getNextIndex(0); i != 0; i = ships.getNextIndex(i)) {

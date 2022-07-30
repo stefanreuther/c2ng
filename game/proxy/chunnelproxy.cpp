@@ -64,7 +64,7 @@ namespace {
         // Possible targets
         Universe& univ = g.currentTurn().universe();
         if (const Ship* initiator = univ.ships().get(shipId)) {
-            const game::map::AnyShipType ty(univ.ships());
+            const game::map::AnyShipType& ty(univ.allShips());
             for (Id_t id = ty.findNextIndex(0); id != 0; id = ty.findNextIndex(id)) {
                 if (const Ship* mate = univ.ships().get(id)) {
                     if (game::map::isValidChunnelMate(*initiator, *mate, g.mapConfiguration(), r, g.shipScores(), sl)) {
@@ -90,7 +90,7 @@ namespace {
         Universe& univ = g.currentTurn().universe();
         const Point canonicalPosition = g.mapConfiguration().getCanonicalLocation(pos);
         if (const Ship* initiator = univ.ships().get(shipId)) {
-            const game::map::AnyShipType ty(univ.ships());
+            const game::map::AnyShipType& ty(univ.allShips());
             for (Id_t id = ty.findNextIndex(0); id != 0; id = ty.findNextIndex(id)) {
                 const Ship* mate = univ.ships().get(id);
                 Point matePos;
