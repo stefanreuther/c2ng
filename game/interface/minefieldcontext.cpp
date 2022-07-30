@@ -14,7 +14,7 @@
 
 namespace {
     enum MinefieldDomain { MinefieldPropertyDomain, MinefieldMethodDomain, OwnerPropertyDomain };
-   
+
     static const interpreter::NameTable minefield_mapping[] = {
         { "DELETE",     game::interface::immDelete,    MinefieldMethodDomain,   interpreter::thProcedure },
         { "ID",         game::interface::impId,        MinefieldPropertyDomain, interpreter::thInt },
@@ -29,7 +29,7 @@ namespace {
         { "RADIUS",     game::interface::impRadius,    MinefieldPropertyDomain, interpreter::thInt },
         { "SCANNED",    game::interface::impScanType,  MinefieldPropertyDomain, interpreter::thInt },
         { "TYPE",       game::interface::impTypeStr,   MinefieldPropertyDomain, interpreter::thString },
-        { "TYPE$",      game::interface::impTypeCode,  MinefieldPropertyDomain, interpreter::thInt },
+        { "TYPE$",      game::interface::impTypeCode,  MinefieldPropertyDomain, interpreter::thBool },
         { "UNITS",      game::interface::impUnits,     MinefieldPropertyDomain, interpreter::thInt },
         { "UNMARK",     game::interface::immUnmark,    MinefieldMethodDomain,   interpreter::thProcedure },
     };

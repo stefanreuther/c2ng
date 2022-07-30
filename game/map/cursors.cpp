@@ -123,7 +123,6 @@ game::map::ObjectType*
 game::map::Cursors::getTypeByNumber(int nr)
 {
     // ex int/if/iterif.h:getObjectTypeFromIteratorId
-    // FIXME: here?
     if (m_pUniverse != 0) {
         switch (nr) {
          case ShipScreen:    return &m_pUniverse->playedShips();

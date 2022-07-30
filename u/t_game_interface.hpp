@@ -129,6 +129,21 @@ class TestGameInterfaceInboxSubsetValue : public CxxTest::TestSuite {
     void testIndexing();
 };
 
+class TestGameInterfaceIteratorContext : public CxxTest::TestSuite {
+ public:
+    void testCreateObjectShip();
+    void testCreateObjectPlanet();
+    void testCreateObjectMinefield();
+    void testCreateObjectIonStorm();
+    void testIteratorContextBasics();
+    void testIteratorContextNativeCreate();
+    void testIteratorContextNativeCreateFail();
+    void testIteratorContextScriptCreate();
+    void testIteratorContextScriptCreateFail();
+    void testIteratorContextProperties();
+    void testIteratorContextCurrent();
+};
+
 class TestGameInterfaceIteratorProvider : public CxxTest::TestSuite {
  public:
     void testIt();

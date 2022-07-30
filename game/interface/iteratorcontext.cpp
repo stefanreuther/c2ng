@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/iteratorcontext.cpp
+  *  \brief Class game::interface::IteratorContext
   */
 
 #include <climits>
@@ -27,11 +28,14 @@
 #include "interpreter/typehint.hpp"
 #include "interpreter/values.hpp"
 
-using interpreter::makeIntegerValue;
-using interpreter::checkIntegerArg;
 using interpreter::checkFlagArg;
+using interpreter::checkIntegerArg;
+using interpreter::makeIntegerValue;
 
 namespace {
+    /*
+     *  Iterator property indexes
+     */
     enum IteratorProperty {
         iitCount,
         iitCurrent,
@@ -60,6 +64,19 @@ namespace {
         { "SCREEN",           iitScreen,     0, interpreter::thInt },
     };
 
+    /*
+     *  Common options for NextIndex(), PreviousIndex(), etc.
+     */
+
+    const char*const BROWSE_OPTIONS = "MW";
+
+    const int Browse_Marked = 1;
+    const int Browse_Wrap = 2;
+
+    /*
+     *  IteratorFunction: implementation of all function propertis
+     */
+
     class IteratorFunction : public interpreter::FunctionValue {
      public:
         IteratorFunction(afl::base::Ref<game::interface::IteratorProvider> provider, IteratorProperty p)
@@ -69,150 +86,9 @@ namespace {
         ~IteratorFunction()
             { }
 
-        virtual afl::data::Value* get(interpreter::Arguments& args)
-            {
-                // ex IntIteratorFunction::get
-                int32_t i, x, y;
-                switch (m_property) {
-                 case iitId:
-                    // "Id(index)" => get Id of object
-                    args.checkArgumentCount(1);
-                    if (checkIntegerArg(i, args.getNext(), 0, INT_MAX)) {
-                        if (game::map::ObjectType* type = m_provider->getType()) {
-                            if (game::map::Object* obj = type->getObjectByIndex(i)) {
-                                return makeIntegerValue(obj->getId());
-                            }
-                        }
-                    }
-                    return 0;
-
-                 case iitIndex:
-                    // "Index(id)" => find index for Id
-                    args.checkArgumentCount(1);
-                    if (checkIntegerArg(i, args.getNext(), 0, INT_MAX)) {
-                        if (game::map::ObjectType* type = m_provider->getType()) {
-                            if (game::Id_t id = type->findIndexForId(i)) {
-                                return makeIntegerValue(id);
-                            }
-                        }
-                    }
-                    return 0;
-
-                 case iitNearestIndex:
-                    // "NearestIndex(x,y)" => find nearest object
-                    // @since PCC2 2.40.10
-                    args.checkArgumentCount(2);
-                    if (checkIntegerArg(x, args.getNext(), 0, game::MAX_NUMBER) && checkIntegerArg(y, args.getNext(), 0, game::MAX_NUMBER)) {
-                        if (game::map::ObjectType* type = m_provider->getType()) {
-                            if (game::Game* g = m_provider->getSession().getGame().get()) {
-                                // FIXME: this uses currentTurn's map configuration; should use the one belonging to the provider/type?
-                                if (game::Id_t id = type->findNearestIndex(game::map::Point(x, y), g->mapConfiguration())) {
-                                    return makeIntegerValue(id);
-                                }
-                            }
-                        }
-                    }
-                    return 0;
-
-                 case iitNext:
-                    // "Next(index[,flags])" => find next index from index
-                    args.checkArgumentCount(1, 2);
-                    if (checkIntegerArg(i, args.getNext(), 0, INT_MAX)) {
-                        int32_t fl = 0;
-                        checkFlagArg(fl, 0, args.getNext(), "MW");
-                        if (game::map::ObjectType* type = m_provider->getType()) {
-                            if (fl & 2) {
-                                return makeIntegerValue(type->findNextIndexWrap(i, fl & 1));
-                            } else {
-                                return makeIntegerValue(type->findNextIndexNoWrap(i, fl & 1));
-                            }
-                        }
-                    }
-                    return 0;
-
-                 case iitPrevious:
-                    // "Previous(index[,flags])" => find previous index from index
-                    args.checkArgumentCount(1, 2);
-                    if (checkIntegerArg(i, args.getNext(), 0, INT_MAX)) {
-                        int32_t fl = 0;
-                        checkFlagArg(fl, 0, args.getNext(), "MW");
-                        if (game::map::ObjectType* type = m_provider->getType()) {
-                            if (fl & 2) {
-                                return makeIntegerValue(type->findPreviousIndexWrap(i, fl & 1));
-                            } else {
-                                return makeIntegerValue(type->findPreviousIndexNoWrap(i, fl & 1));
-                            }
-                        }
-                    }
-                    return 0;
-
-                 case iitNextAt:
-                    // "NextIndexAt(index,x,y[,flags])" => find previous index from index
-                    // @since PCC2 2.40.9
-                    args.checkArgumentCount(3, 4);
-                    if (checkIntegerArg(i, args.getNext(), 0, INT_MAX)
-                        && checkIntegerArg(x, args.getNext(), 0, game::MAX_NUMBER)
-                        && checkIntegerArg(y, args.getNext(), 0, game::MAX_NUMBER))
-                    {
-                        int32_t fl = 0;
-                        checkFlagArg(fl, 0, args.getNext(), "MW");
-                        if (game::map::ObjectType* type = m_provider->getType()) {
-                            if (fl & 2) {
-                                return makeIntegerValue(type->findNextObjectAtWrap(game::map::Point(x, y), i, (fl & 1) != 0));
-                            } else {
-                                return makeIntegerValue(type->findNextObjectAt(game::map::Point(x, y), i, (fl & 1) != 0));
-                            }
-                        }
-                    }
-                    return 0;
-
-                 case iitPreviousAt:
-                    // "PreviousIndexAt(index,x,y[,flags])" => find previous index from index
-                    // @since PCC2 2.40.9
-                    args.checkArgumentCount(3, 4);
-                    if (checkIntegerArg(i, args.getNext(), 0, INT_MAX)
-                        && checkIntegerArg(x, args.getNext(), 0, game::MAX_NUMBER)
-                        && checkIntegerArg(y, args.getNext(), 0, game::MAX_NUMBER))
-                    {
-                        int32_t fl = 0;
-                        checkFlagArg(fl, 0, args.getNext(), "MW");
-                        if (game::map::ObjectType* type = m_provider->getType()) {
-                            if (fl & 2) {
-                                return makeIntegerValue(type->findPreviousObjectAtWrap(game::map::Point(x, y), i, (fl & 1) != 0));
-                            } else {
-                                return makeIntegerValue(type->findPreviousObjectAt(game::map::Point(x, y), i, (fl & 1) != 0));
-                            }
-                        }
-                    }
-                    return 0;
-
-                 case iitObject:
-                    // "Object(id)" => object
-                    args.checkArgumentCount(1);
-                    if (checkIntegerArg(i, args.getNext(), 0, INT_MAX)) {
-                        if (game::map::ObjectType* type = m_provider->getType()) {
-                            if (game::map::Object* obj = type->getObjectByIndex(i)) {
-                                return game::interface::createObjectContext(obj, m_provider->getSession());
-                            }
-                        }
-                    }
-                    return 0;
-
-                 case iitCurrent:
-                 case iitCount:
-                 case iitScreen:
-                    // Scalars, implemented outside
-                    break;
-                }
-                return 0;
-            }
-
-
-        virtual IteratorFunction* clone() const
-            {
-                // ex IntIteratorFunction::clone
-                return new IteratorFunction(m_provider, m_property);
-            }
+        game::map::ObjectType* getFilteredType(afl::base::Deleter& del, int flags);
+        virtual afl::data::Value* get(interpreter::Arguments& args);
+        virtual IteratorFunction* clone() const;
 
      private:
         afl::base::Ref<game::interface::IteratorProvider> m_provider;
@@ -220,7 +96,218 @@ namespace {
     };
 }
 
+game::map::ObjectType*
+IteratorFunction::getFilteredType(afl::base::Deleter& del, int flags)
+{
+    game::map::ObjectType* type = m_provider->getType();
+    if (type != 0) {
+        if ((flags & Browse_Marked) != 0) {
+            type = &type->filterMarked(del, true);
+        }
+    }
+    return type;
+}
 
+afl::data::Value*
+IteratorFunction::get(interpreter::Arguments& args)
+{
+    // ex IntIteratorFunction::get
+    int32_t i, x, y;
+    switch (m_property) {
+     case iitId:
+        /* @q Id(index:Int):Int (Iterator Property)
+           Find Id for a given index.
+           EMPTY if the index does not correspond to a valid object.
+           @since PCC2 2.40 */
+        args.checkArgumentCount(1);
+        if (checkIntegerArg(i, args.getNext(), 0, INT_MAX)) {
+            if (game::map::ObjectType* type = m_provider->getType()) {
+                if (game::map::Object* obj = type->getObjectByIndex(i)) {
+                    return makeIntegerValue(obj->getId());
+                }
+            }
+        }
+        return 0;
+
+     case iitIndex:
+        /* @q Index(id:Int):Int (Iterator Property)
+           Find index for a given Id.
+           EMPTY if there is no object with the given Id.
+           @since PCC2 2.40 */
+        args.checkArgumentCount(1);
+        if (checkIntegerArg(i, args.getNext(), 0, INT_MAX)) {
+            if (game::map::ObjectType* type = m_provider->getType()) {
+                if (game::Id_t index = type->findIndexForId(i)) {
+                    return makeIntegerValue(index);
+                }
+            }
+        }
+        return 0;
+
+     case iitNearestIndex:
+        /* @q NearestIndex(x:Int, y:Int):Int (Iterator Property)
+           Find index of object nearest to the given position.
+           EMPTY if no object found.
+           @since PCC2 2.40.10 */
+        args.checkArgumentCount(2);
+        if (checkIntegerArg(x, args.getNext(), 0, game::MAX_NUMBER) && checkIntegerArg(y, args.getNext(), 0, game::MAX_NUMBER)) {
+            if (game::map::ObjectType* type = m_provider->getType()) {
+                if (game::Game* g = m_provider->getSession().getGame().get()) {
+                    if (game::Id_t index = type->findNearestIndex(game::map::Point(x, y), g->mapConfiguration())) {
+                        return makeIntegerValue(index);
+                    }
+                }
+            }
+        }
+        return 0;
+
+     case iitNext:
+        /* @q NextIndex(index:Int, Optional flags:Str):Int (Iterator Property)
+           Find next index (browse forward).
+           Pass index=0 to find the first possible index.
+
+           Flags can be a combination of:
+           - "M": only accept marked objects
+           - "W": wraparound; after last object, select first one
+
+           Returns the index of a found object, 0 if no applicable object exists.
+           @since PCC2 2.40 */
+        args.checkArgumentCount(1, 2);
+        if (checkIntegerArg(i, args.getNext(), 0, INT_MAX)) {
+            int32_t fl = 0;
+            checkFlagArg(fl, 0, args.getNext(), BROWSE_OPTIONS);
+            afl::base::Deleter del;
+            if (game::map::ObjectType* type = getFilteredType(del, fl)) {
+                if ((fl & Browse_Wrap) != 0) {
+                    return makeIntegerValue(type->findNextIndexWrap(i, false));
+                } else {
+                    return makeIntegerValue(type->findNextIndexNoWrap(i, false));
+                }
+            }
+        }
+        return 0;
+
+     case iitPrevious:
+        /* @q PreviousIndex(index:Int, Optional flags:Str):Int (Iterator Property)
+           Find previous index (browse backward).
+           Pass index=0 to find the last possible index.
+
+           Flags can be a combination of:
+           - "M": only accept marked objects
+           - "W": wraparound; after first object, select last one
+
+           Returns the index of a found object, 0 if no applicable object exists.
+           @since PCC2 2.40 */
+        args.checkArgumentCount(1, 2);
+        if (checkIntegerArg(i, args.getNext(), 0, INT_MAX)) {
+            int32_t fl = 0;
+            checkFlagArg(fl, 0, args.getNext(), BROWSE_OPTIONS);
+            afl::base::Deleter del;
+            if (game::map::ObjectType* type = getFilteredType(del, fl)) {
+                if ((fl & Browse_Wrap) != 0) {
+                    return makeIntegerValue(type->findPreviousIndexWrap(i, false));
+                } else {
+                    return makeIntegerValue(type->findPreviousIndexNoWrap(i, false));
+                }
+            }
+        }
+        return 0;
+
+     case iitNextAt:
+        /* @q NextIndexAt(index:Int, x:Int, y:Int, Optional flags:Str):Int (Iterator Property)
+           Find next index at a given position.
+           Pass index=0 to find the first possible index.
+
+           Flags can be a combination of:
+           - "M": only accept marked objects
+           - "W": wraparound; after last object, select first one
+
+           Returns the index of a found object, 0 if no applicable object exists.
+           @since PCC2 2.40.9 */
+        args.checkArgumentCount(3, 4);
+        if (checkIntegerArg(i, args.getNext(), 0, INT_MAX)
+            && checkIntegerArg(x, args.getNext(), 0, game::MAX_NUMBER)
+            && checkIntegerArg(y, args.getNext(), 0, game::MAX_NUMBER))
+        {
+            int32_t fl = 0;
+            checkFlagArg(fl, 0, args.getNext(), BROWSE_OPTIONS);
+            afl::base::Deleter del;
+            if (game::map::ObjectType* type = getFilteredType(del, fl)) {
+                if ((fl & Browse_Wrap) != 0) {
+                    return makeIntegerValue(type->findNextObjectAtWrap(game::map::Point(x, y), i, false));
+                } else {
+                    return makeIntegerValue(type->findNextObjectAt(game::map::Point(x, y), i, false));
+                }
+            }
+        }
+        return 0;
+
+     case iitPreviousAt:
+        /* @q PreviousIndexAt(index:Int, x:Int, y:Int, Optional flags:Str):Int (Iterator Property)
+           Find previous index at a given position.
+           Pass index=0 to find the last possible index.
+
+           Flags can be a combination of:
+           - "M": only accept marked objects
+           - "W": wraparound; after first object, select last one
+
+           Returns the index of a found object, 0 if no applicable object exists.
+           @since PCC2 2.40.9 */
+        args.checkArgumentCount(3, 4);
+        if (checkIntegerArg(i, args.getNext(), 0, INT_MAX)
+            && checkIntegerArg(x, args.getNext(), 0, game::MAX_NUMBER)
+            && checkIntegerArg(y, args.getNext(), 0, game::MAX_NUMBER))
+        {
+            int32_t fl = 0;
+            checkFlagArg(fl, 0, args.getNext(), BROWSE_OPTIONS);
+            afl::base::Deleter del;
+            if (game::map::ObjectType* type = getFilteredType(del, fl)) {
+                if ((fl & Browse_Wrap) != 0) {
+                    return makeIntegerValue(type->findPreviousObjectAtWrap(game::map::Point(x, y), i, false));
+                } else {
+                    return makeIntegerValue(type->findPreviousObjectAt(game::map::Point(x, y), i, false));
+                }
+            }
+        }
+        return 0;
+
+     case iitObject:
+        /* @q Object(index:Int):Obj (Iterator Property)
+           Access object by index.
+           For example, if this iterator iterates through planets,
+           this function will return a planet as if by use of the {Planet()} function.
+
+           @since PCC2 2.40 */
+        args.checkArgumentCount(1);
+        if (checkIntegerArg(i, args.getNext(), 0, INT_MAX)) {
+            if (game::map::ObjectType* type = m_provider->getType()) {
+                if (game::map::Object* obj = type->getObjectByIndex(i)) {
+                    return game::interface::createObjectContext(obj, m_provider->getSession());
+                }
+            }
+        }
+        return 0;
+
+     case iitCurrent:
+     case iitCount:
+     case iitScreen:
+        // Scalars, implemented outside
+        break;
+    }
+    return 0;
+}
+
+IteratorFunction*
+IteratorFunction::clone() const
+{
+    // ex IntIteratorFunction::clone
+    return new IteratorFunction(m_provider, m_property);
+}
+
+
+/*
+ *  IteratorContext
+ */
 
 game::interface::IteratorContext::IteratorContext(afl::base::Ref<IteratorProvider> provider)
     : SingleContext(),
@@ -271,6 +358,9 @@ game::interface::IteratorContext::get(PropertyIndex_t index)
     // ex IntIteratorContext::get
     switch (IteratorProperty(index)) {
      case iitCount:
+        /* @q Count:Int (Iterator Property)
+           Number of objects in this set (e.g. number of ships).
+           @since PCC2 2.40 */
         if (game::map::ObjectType* type = m_provider->getType()) {
             return makeIntegerValue(type->countObjects());
         } else {
@@ -278,6 +368,11 @@ game::interface::IteratorContext::get(PropertyIndex_t index)
         }
 
      case iitCurrent:
+        /* @q CurrentIndex:Int (Iterator Property)
+           Index of currently-selected object.
+           EMPTY if this iterator has no underlying cursor.
+           @assignable
+           @since PCC2 2.40 */
         if (game::map::ObjectCursor* cursor = m_provider->getCursor()) {
             return makeIntegerValue(cursor->getCurrentIndex());
         } else {
@@ -285,6 +380,17 @@ game::interface::IteratorContext::get(PropertyIndex_t index)
         }
 
      case iitScreen:
+        /* @q Screen:Int (Iterator Property)
+           Associated screen/iterator number.
+           In particular, if this iterator was created using {Iterator()|Iterator(n)}, returns n.
+           If this iterator matches the object set for a control screen,
+           this is the correct value to use for {UI.GotoScreen}.
+
+           For example, if this iterator iterates through own planets, this property has value 2.
+
+           EMPTY if there is no associated screen number.
+
+           @since PCC2 2.40.13 */
         if (int n = m_provider->getCursorNumber()) {
             return makeIntegerValue(n);
         } else {
@@ -345,27 +451,34 @@ game::interface::IteratorContext::store(interpreter::TagNode& out, afl::io::Data
 }
 
 
-/** Implementation of the "Iterator" function. Iterators implement
-    access to a GObjectSelection. Scripts can use this to access a selection's
-    current object, and to iterate through the objects. This interface
-    is still preliminary.
-    - Iterator(n).CurrentIndex: currently active index
-    - Iterator(n).Count: number of objects
-    - Iterator(n).Id(x): given an index, return that object's Id
-    - Iterator(n).Index(id): given an Id, return that object's index; null if none
-    - Iterator(n).NextIndex(i,fl): get next index after i. 0 if none found. Flags are "w" to permit wrap, "m" to accept only marked.
-    - Iterator(n).NextIndexAt(i,x,y,fl): same, but filter for XY as well
-    - Iterator(n).PreviousIndex(i,fl): same like NextIndex, but other direction
-    - Iterator(n).PreviousIndexAt(i,x,y,fl): same but filter for XY as well
-    - Iterator(n).Object(x): object from index. Still undecided.
+/* @q Iterator(n:Int):Iterator (Function)
+   Access to a a set of objects.
+   This function accesses the well-known global object sets.
 
-    n is:
-    - 1,2,3: played ships, planets, bases
-    - 10: fleets
-    - 21, 22: all ships, planets
-    - 30: ufos
-    - 31: ion storms
-    - 32: minefields */
+   Parameter n selects the set. The values are chosen similar to {UI.GotoScreen} or {UI.ChooseObject}.
+
+   <table>
+    <tr><td width="4">1</td> <td width="10">Own starships</td></tr>
+    <tr><td width="4">2</td> <td width="10">Own planets</td></tr>
+    <tr><td width="4">3</td> <td width="10">Own starbases</td></tr>
+    <tr><td width="4">10</td><td width="10">Fleets</td></tr>
+    <tr><td width="4">21</td><td width="10">All ships</td></tr>
+    <tr><td width="4">22</td><td width="10">All planets</td></tr>
+    <tr><td width="4">30</td><td width="10">Ufos</td></tr>
+    <tr><td width="4">31</td><td width="10">Ion storms</td></tr>
+    <tr><td width="4">32</td><td width="10">Minefields</td></tr>
+   </table>
+
+   It is important that PCC2 distinguishes between <b>Index</b> and <b>Id</b>.
+   The Id is the regular object Id, whereas the Index is an opaque value referring to that object.
+   For ships, planets, starbases, and fleets, these values are always identical.
+   For other object types, they may differ.
+   Most functions in an iterator work on Indexes.
+   Convert between index and Id using the Index() and Id() functions.
+
+   @see int:index:group:iteratorproperty|Iterator Properties
+
+   @since PCC2 2.40 */
 afl::data::Value*
 game::interface::IFIterator(game::Session& session, interpreter::Arguments& args)
 {
@@ -376,11 +489,17 @@ game::interface::IFIterator(game::Session& session, interpreter::Arguments& args
         return 0;
     }
 
-    return makeIteratorValue(session, v, true);
+    afl::data::Value* result = makeIteratorValue(session, v);
+    if (result == 0) {
+        throw interpreter::Error::rangeError();
+    }
+
+    return result;
 }
 
+// Make iterator for a screen number.
 interpreter::Context*
-game::interface::makeIteratorValue(Session& session, int nr, bool reportRangeError)
+game::interface::makeIteratorValue(Session& session, int nr)
 {
     class NumberedIteratorProvider : public IteratorProvider {
      public:
@@ -426,16 +545,13 @@ game::interface::makeIteratorValue(Session& session, int nr, bool reportRangeErr
     if (g == 0) {
         return 0;
     } else if (g->cursors().getTypeByNumber(nr) == 0) {
-        if (reportRangeError) {
-            throw interpreter::Error::rangeError();
-        } else {
-            return 0;
-        }
+        return 0;
     } else {
         return new IteratorContext(*new NumberedIteratorProvider(session, nr));
     }
 }
 
+// Create object context, given an object.
 interpreter::Context*
 game::interface::createObjectContext(game::map::Object* obj, Session& session)
 {
@@ -448,7 +564,6 @@ game::interface::createObjectContext(game::map::Object* obj, Session& session)
     } else if (dynamic_cast<game::map::Minefield*>(obj) != 0) {
         return MinefieldContext::create(obj->getId(), session, false);
     } else {
-        // FIXME? other types
         return 0;
     }
 }

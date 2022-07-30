@@ -1052,6 +1052,8 @@ In PCC2 Web, <tt>2.5*2</tt> is a valid integer.
 An iterator references a current object from a set.
 Control screens observe iterators, i.e. the ship screen observes the ship iterator;
 changing the iterator changes the displayed ship.
+
+For properties of such objects, see {int:index:group:iteratorproperty|Iterator Properties}.
 --------------------------------------------------------------------------------
 @type Keymap
 Functions documented to take a parameter of type <em>Keymap</em> are special.
@@ -1425,6 +1427,10 @@ These are internal properties and commands.
 They are used by the interpreter, or for the implementation of various PCC functions.
 They are listed here for completeness;
 you should not use these in your own scripts.
+--------------------------------------------------------------------------------
+@group Iterator Property
+Iterator properties are properties of {int:index:type:iterator|iterator objects},
+which are typically created the {Iterator()} function and {UI.Iterator} property.
 --------------------------------------------------------------------------------
 @group Keymap
 This section describes all predefined keymaps.

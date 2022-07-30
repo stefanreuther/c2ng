@@ -462,7 +462,7 @@ client::screens::ControlScreen::Proprietor::get(game::interface::UserInterfacePr
      case game::interface::iuiIterator:
         // UI.Iterator: created from state
         if (m_session.getGame().get() != 0) {
-            result.reset(game::interface::makeIteratorValue(m_session, m_state->screenNumber, false));
+            result.reset(game::interface::makeIteratorValue(m_session, m_state->screenNumber));
         } else {
             result.reset();
         }
