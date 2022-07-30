@@ -146,6 +146,34 @@ Sub CCUI.SelectNextMarkedHere
   Try With UI.Iterator Do CurrentIndex := NextIndexAt(CurrentIndex, Loc.X, Loc.Y, "wm")
 EndSub
 
+% Previous unit here, sorted [Shift-Tab]
+% @since PCC2 2.40.13
+Sub CCUI.SelectPreviousHereSorted
+  Local System.Err
+  Try With UI.Iterator Do CurrentIndex := PreviousIndexAt(CurrentIndex, Loc.X, Loc.Y, "ws")
+EndSub
+
+% Next unit here, sorted [Tab]
+% @since PCC2 2.40.13
+Sub CCUI.SelectNextHereSorted
+  Local System.Err
+  Try With UI.Iterator Do CurrentIndex := NextIndexAt(CurrentIndex, Loc.X, Loc.Y, "ws")
+EndSub
+
+% Previous marked unit here, sorted [Ctrl-Shift-Tab]
+% @since PCC2 2.40.13
+Sub CCUI.SelectPreviousMarkedHereSorted
+  Local System.Err
+  Try With UI.Iterator Do CurrentIndex := PreviousIndexAt(CurrentIndex, Loc.X, Loc.Y, "wms")
+EndSub
+
+% Next unit here, sorted [Ctrl-Tab]
+% @since PCC2 2.40.13
+Sub CCUI.SelectNextMarkedHereSorted
+  Local System.Err
+  Try With UI.Iterator Do CurrentIndex := NextIndexAt(CurrentIndex, Loc.X, Loc.Y, "wms")
+EndSub
+
 % X on ship screen
 % @since PCC2 2.40.13
 Sub CCUI.Ship.Exchange

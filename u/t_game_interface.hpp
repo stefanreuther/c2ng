@@ -142,6 +142,7 @@ class TestGameInterfaceIteratorContext : public CxxTest::TestSuite {
     void testIteratorContextScriptCreateFail();
     void testIteratorContextProperties();
     void testIteratorContextCurrent();
+    void testIteratorContextSorted();
 };
 
 class TestGameInterfaceIteratorProvider : public CxxTest::TestSuite {

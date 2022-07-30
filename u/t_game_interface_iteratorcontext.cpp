@@ -14,6 +14,7 @@
 #include "game/game.hpp"
 #include "game/map/ship.hpp"
 #include "game/map/universe.hpp"
+#include "game/ref/configuration.hpp"
 #include "game/session.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/test/root.hpp"
@@ -528,5 +529,36 @@ TestGameInterfaceIteratorContext::testIteratorContextCurrent()
 
     // Value still unchanged
     verif.verifyInteger("CURRENTINDEX", 8);
+}
+
+/** Test IteratorContext, sorted iteration. */
+void
+TestGameInterfaceIteratorContext::testIteratorContextSorted()
+{
+    // Environment
+    TestHarness h;
+    createPlanet(h, 10, 1000, 1000)->setName("e");
+    createPlanet(h, 20, 1000, 1200)->setName("d");
+    createPlanet(h, 30, 1000, 1300)->setName("a");
+    createPlanet(h, 40, 1000, 1000)->setName("b");
+    createPlanet(h, 50, 1000, 1400)->setName("c");
+
+    h.session.getRoot()->userConfiguration()[game::config::UserConfiguration::Sort_Ship].set(game::ref::ConfigSortByName);
+
+    // Object under test
+    std::auto_ptr<Context> ctx(game::interface::makeIteratorValue(h.session, Cursors::AllPlanets));
+    TS_ASSERT(ctx.get() != 0);
+
+    // Verify
+    afl::test::Assert a("testIteratorContextProperties");
+    ContextVerifier verif(*ctx, a);
+
+    // - NextIndexAt
+    Call(a, verif, "NEXTINDEX").withInteger(0).withString("S").checkInteger(30);
+    Call(a, verif, "NEXTINDEX").withInteger(30).withString("S").checkInteger(40);
+    Call(a, verif, "NEXTINDEX").withInteger(40).withString("S").checkInteger(50);
+    Call(a, verif, "NEXTINDEX").withInteger(50).withString("S").checkInteger(20);
+    Call(a, verif, "NEXTINDEX").withInteger(20).withString("S").checkInteger(10);
+    Call(a, verif, "NEXTINDEX").withInteger(10).withString("S").checkInteger(0);
 }
 

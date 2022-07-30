@@ -1988,49 +1988,6 @@ client::si::IFCCSellSupplies(game::Session& /*session*/, ScriptSide& si, Request
     si.postNewTask(link, new DialogTask(pPlanet->getId()));
 }
 
-// @since PCC2 2.40.14
-void
-client::si::IFCCSelectNextShip(game::Session& session, ScriptSide& /*si*/, RequestLink1 /*link*/, interpreter::Arguments& args)
-{
-    // ex WShipScreen::handleEvent [part]
-    // CC$SelectNextShip "bm"
-    // Parse args
-    args.checkArgumentCount(0, 1);
-    int32_t mode = 0;
-    interpreter::checkFlagArg(mode, 0, args.getNext(), "BM");
-    bool backward = (mode & 1) != 0;
-    bool marked   = (mode & 2) != 0;
-
-    // Access game
-    Game& g = game::actions::mustHaveGame(session);
-    Turn& t = game::actions::mustExist(g.getViewpointTurn().get());
-    const Ship* sh = dynamic_cast<Ship*>(g.cursors().currentShip().getCurrentObject());
-    Point pt;
-    if (sh == 0 || !sh->getPosition(pt)) {
-        throw Error::contextError();
-    }
-
-    // Sort
-    game::ref::Configuration fig;
-    fetchConfiguration(session, game::ref::REGULAR, fig);
-    afl::base::Deleter del;
-    const game::ref::SortPredicate& firstPredicate    = game::ref::createSortPredicate(fig.order.first,  session, del);
-    const game::ref::SortPredicate& secondPredicate   = game::ref::createSortPredicate(fig.order.second, session, del);
-    const game::ref::SortPredicate& combinedPredicate = firstPredicate.then(secondPredicate);
-
-    game::map::ObjectType& ty = t.universe().playedShips()
-        .filterMarked(del, marked)
-        .filterPosition(del, pt)
-        .sort(del, combinedPredicate, Reference::Ship);
-
-    // Browse
-    game::Id_t current = sh->getId();
-    game::Id_t next = (backward
-                       ? ty.findPreviousIndexWrap(current)
-                       : ty.findNextIndexWrap(current));
-    g.cursors().currentShip().setCurrentIndex(next);
-}
-
 // @since PCC2 2.40.11
 void
 client::si::IFCCSendMessage(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
@@ -4396,7 +4353,6 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("CC$REMOTEGETQUESTION",  new SimpleFunction<game::Session&>(s, IFCCRemoteGetQuestion));
                 s.world().setNewGlobalValue("CC$REMOTESET",          new SimpleProcedure<game::Session&>(s, IFCCRemoteSet));
                 s.world().setNewGlobalValue("CC$REMOTETOGGLE",       new SimpleProcedure<game::Session&>(s, IFCCRemoteToggle));
-                s.world().setNewGlobalValue("CC$SELECTNEXTSHIP",     new ScriptProcedure(s, &si, IFCCSelectNextShip));
                 s.world().setNewGlobalValue("CC$SELLSUPPLIES",       new ScriptProcedure(s, &si, IFCCSellSupplies));
                 s.world().setNewGlobalValue("CC$SENDMESSAGE",        new ScriptProcedure(s, &si, IFCCSendMessage));
                 s.world().setNewGlobalValue("CC$SHIPCOSTCALC",       new ScriptProcedure(s, &si, IFCCShipCostCalc));

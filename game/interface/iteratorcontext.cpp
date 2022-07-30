@@ -12,12 +12,14 @@
 #include "game/interface/planetcontext.hpp"
 #include "game/interface/shipcontext.hpp"
 #include "game/limits.hpp"
+#include "game/map/cursors.hpp"
 #include "game/map/ionstorm.hpp"
 #include "game/map/minefield.hpp"
 #include "game/map/objectcursor.hpp"
 #include "game/map/objecttype.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/ship.hpp"
+#include "game/ref/configuration.hpp"
 #include "game/session.hpp"
 #include "game/turn.hpp"
 #include "interpreter/arguments.hpp"
@@ -68,10 +70,11 @@ namespace {
      *  Common options for NextIndex(), PreviousIndex(), etc.
      */
 
-    const char*const BROWSE_OPTIONS = "MW";
+    const char*const BROWSE_OPTIONS = "MWS";
 
     const int Browse_Marked = 1;
     const int Browse_Wrap = 2;
+    const int Browse_Sort = 4;
 
     /*
      *  IteratorFunction: implementation of all function propertis
@@ -101,8 +104,27 @@ IteratorFunction::getFilteredType(afl::base::Deleter& del, int flags)
 {
     game::map::ObjectType* type = m_provider->getType();
     if (type != 0) {
+        // Marked ("M") flag
         if ((flags & Browse_Marked) != 0) {
             type = &type->filterMarked(del, true);
+        }
+
+        // Sort ("S") flag
+        if ((flags & Browse_Sort) != 0) {
+            // Obtain reference type from screen number. Silently ignore the sort request if screen number cannot be foudn.
+            game::Reference::Type refType = game::map::Cursors::getReferenceTypeByNumber(m_provider->getCursorNumber());
+            if (refType != game::Reference::Null) {
+                // Build sort predicate
+                game::Session& session = m_provider->getSession();
+                game::ref::Configuration fig;
+                fetchConfiguration(session, game::ref::REGULAR, fig);
+                const game::ref::SortPredicate& firstPredicate    = game::ref::createSortPredicate(fig.order.first,  session, del);
+                const game::ref::SortPredicate& secondPredicate   = game::ref::createSortPredicate(fig.order.second, session, del);
+                const game::ref::SortPredicate& combinedPredicate = del.addNew(new game::ref::SortPredicate::CombinedPredicate(firstPredicate, secondPredicate));
+
+                // Sorted type
+                type = &type->sort(del, combinedPredicate, refType);
+            }
         }
     }
     return type;
@@ -168,6 +190,7 @@ IteratorFunction::get(interpreter::Arguments& args)
 
            Flags can be a combination of:
            - "M": only accept marked objects
+           - "S": sort according to Sort.Ship/Sort.Ship.Secondary preferences option (since 2.40.13)
            - "W": wraparound; after last object, select first one
 
            Returns the index of a found object, 0 if no applicable object exists.
@@ -194,6 +217,7 @@ IteratorFunction::get(interpreter::Arguments& args)
 
            Flags can be a combination of:
            - "M": only accept marked objects
+           - "S": sort according to Sort.Ship/Sort.Ship.Secondary preferences option (since 2.40.13)
            - "W": wraparound; after first object, select last one
 
            Returns the index of a found object, 0 if no applicable object exists.
@@ -220,6 +244,7 @@ IteratorFunction::get(interpreter::Arguments& args)
 
            Flags can be a combination of:
            - "M": only accept marked objects
+           - "S": sort according to Sort.Ship/Sort.Ship.Secondary preferences option (since 2.40.13)
            - "W": wraparound; after last object, select first one
 
            Returns the index of a found object, 0 if no applicable object exists.
@@ -249,6 +274,7 @@ IteratorFunction::get(interpreter::Arguments& args)
 
            Flags can be a combination of:
            - "M": only accept marked objects
+           - "S": sort according to Sort.Ship/Sort.Ship.Secondary preferences option (since 2.40.13)
            - "W": wraparound; after first object, select last one
 
            Returns the index of a found object, 0 if no applicable object exists.

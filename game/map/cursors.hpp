@@ -6,6 +6,7 @@
 
 #include "game/map/simpleobjectcursor.hpp"
 #include "game/map/location.hpp"
+#include "game/reference.hpp"
 
 namespace game { namespace map {
 
@@ -31,6 +32,8 @@ namespace game { namespace map {
 
         ObjectCursor* getCursorByNumber(int nr);
         ObjectType* getTypeByNumber(int nr);
+
+        static Reference::Type getReferenceTypeByNumber(int nr);
 
         static const int ShipScreen = 1;
         static const int PlanetScreen = 2;

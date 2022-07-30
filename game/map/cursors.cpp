@@ -139,3 +139,21 @@ game::map::Cursors::getTypeByNumber(int nr)
     }
     return 0;
 }
+
+game::Reference::Type
+game::map::Cursors::getReferenceTypeByNumber(int nr)
+{
+    switch (nr) {
+     case ShipScreen:    return Reference::Ship;
+     case PlanetScreen:  return Reference::Planet;
+     case BaseScreen:    return Reference::Starbase;
+     case HistoryScreen: return Reference::Ship;
+     case FleetScreen:   return Reference::Ship;
+     case AllShips:      return Reference::Ship;
+     case AllPlanets:    return Reference::Planet;
+     case Ufos:          return Reference::Ufo;
+     case IonStorms:     return Reference::Storm;
+     case Minefields:    return Reference::Minefield;
+    }
+    return Reference::Null;
+}
