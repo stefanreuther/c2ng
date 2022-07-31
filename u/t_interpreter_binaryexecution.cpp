@@ -940,7 +940,11 @@ TestInterpreterBinaryExecution::testStr()
     TS_ASSERT_EQUALS(h.toString(), "42");
     h.exec(interpreter::biStr, addr(IntegerValue(42)), addr(IntegerValue(3)));
     TS_ASSERT_EQUALS(h.toString(), "42.000");
-    h.exec(interpreter::biStr, addr(FloatValue(42.0125)), addr(IntegerValue(3)));
+    // The following test used to check '42.0125', but that fails on certain systems due to FP precision issues.
+    // Digits produced for formatting:
+    // - success: 420125000000000028413035813024123399372911080718040466308593750000000000000000000000000000000000000
+    // - failure: 420124999999999992894572642398998141288757324218750000000000000000000000000000000000000000000000000
+    h.exec(interpreter::biStr, addr(FloatValue(42.0126)), addr(IntegerValue(3)));
     TS_ASSERT_EQUALS(h.toString(), "42.013");
     h.exec(interpreter::biStr, addr(BooleanValue(1)), addr(IntegerValue(7)));
     TS_ASSERT_EQUALS(h.toString(), "YES");
