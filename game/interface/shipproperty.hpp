@@ -110,8 +110,7 @@ namespace game { namespace interface {
     /** Get ship property.
         \param sh        Ship to inquire.
         \param isp       Ship property to inquire.
-        \param tx        Translator.
-        \param iface     Interface to other properties.
+        \param session   Session
         \param root      Root (needed for configuration)
         \param shipList  Ship list (needed for specifications)
         \param game      Game (needed for unit score definitions)

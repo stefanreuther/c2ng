@@ -167,8 +167,8 @@ namespace game { namespace proxy {
             By default, this is enabled, and tech upgrades are implicitly performed.
             When this is disabled, and a tech upgrade is required, the request will fail;
             tech upgrades will not be included in cost.
-            \param b New status
-            \see game::actions::BuildShip::setUseTechUpgrade*/
+            \param flag New status
+            \see game::actions::BuildShip::setUseTechUpgrade */
         void setUseTechUpgrade(bool flag);
 
         /** Commit the transaction.

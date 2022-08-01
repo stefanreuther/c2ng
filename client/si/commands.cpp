@@ -3634,17 +3634,17 @@ client::si::IFUIKeymapInfo(game::Session& session, ScriptSide& si, RequestLink1 
     }
 }
 
-/** @q UI.ListFleets x:Int, y:Int, Optional flags:Any, ok:Str, heading:Str (Global Command)
-    Choose a fleet.
-    Lists all fleets at the specified %x,%y.
-    If the user chooses one, returns their Id in {UI.Result}.
-    If the user cancels the dialog using <kbd>ESC</kbd>, {UI.Result} is set to EMPTY.
+/* @q UI.ListFleets x:Int, y:Int, Optional flags:Any, ok:Str, heading:Str (Global Command)
+   Choose a fleet.
+   Lists all fleets at the specified %x,%y.
+   If the user chooses one, returns their Id in {UI.Result}.
+   If the user cancels the dialog using <kbd>ESC</kbd>, {UI.Result} is set to EMPTY.
 
-    The %flags parameter modifies the function's behaviour:
-    - "a": list all fleets, ignore %x,%y.
-    - "e": do not display a dialog if there's just one fleet.
+   The %flags parameter modifies the function's behaviour:
+   - "a": list all fleets, ignore %x,%y.
+   - "e": do not display a dialog if there's just one fleet.
 
-    @since PCC2 1.99.17, PCC2 2.40.13 */
+   @since PCC2 1.99.17, PCC2 2.40.13 */
 void
 client::si::IFUIListFleets(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {

@@ -85,7 +85,7 @@ namespace game {
 
         /** Convert to script command.
             \param verb      Verb to use (e.g. "BuildShip")
-            \param shipList  Ship list. Optional; if given, adds a comment describing the ship
+            \param pShipList Ship list. Optional; if given, adds a comment describing the ship
             \return command */
         String_t toScriptCommand(String_t verb, const game::spec::ShipList* pShipList) const;
 

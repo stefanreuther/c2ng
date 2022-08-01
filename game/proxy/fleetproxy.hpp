@@ -29,7 +29,7 @@ namespace game { namespace proxy {
      public:
         /** Constructor.
             @param gameSender Game sender
-            @param receiver   RequestDispatcher to receive updates in this thread */
+            @param reply      RequestDispatcher to receive updates in this thread */
         FleetProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& reply);
 
         /** Destructor. */

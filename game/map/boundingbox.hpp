@@ -28,7 +28,8 @@ namespace game { namespace map {
 
         /** Add a universe.
             Adds all objects from the universe.
-            \param univ Universe */
+            \param univ Universe
+            \param mapConfig Map configuration */
         void addUniverse(const Universe& univ, const Configuration& mapConfig);
 
         /** Add a point object.

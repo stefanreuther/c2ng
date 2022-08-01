@@ -39,6 +39,7 @@ namespace game { namespace interface {
         @param list Player list (to access Player object)
         @param game Game (for scores)
         @param config Host configuration (for race/mission Ids)
+        @param tx Translator (for default names)
         @return Value (newly-allocated) */
     afl::data::Value* getPlayerProperty(int pid, PlayerProperty ipl,
                                         const PlayerList& list,

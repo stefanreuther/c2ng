@@ -19,7 +19,7 @@ namespace client { namespace dialogs {
         Provides a plain editor for a ShipBuildOrder object, with no "commit" logic.
 
         @param [in]       root           UI root
-        @param [in.out]   order          ShipBuildOrder
+        @param [in,out]   order          ShipBuildOrder
         @param [in]       adaptorSender  StarbaseAdaptor sender to access underlying starbase
         @param [in]       gameSender     Game sender (help, ConfigurationProxy, etc.)
         @param [in]       planetId       Planet Id to use for BuildShipMain (if nonzero, dialog offers part building)

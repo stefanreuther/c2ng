@@ -22,7 +22,8 @@ namespace ui { namespace res {
     class ResourceFile {
      public:
         /** Constructor.
-            \param file File */
+            \param file File
+            \param tx Translator (for error messages) */
         ResourceFile(afl::base::Ref<afl::io::Stream> file, afl::string::Translator& tx);
 
         /** Destructor. */

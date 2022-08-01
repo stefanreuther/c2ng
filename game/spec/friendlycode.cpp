@@ -199,7 +199,8 @@ game::spec::FriendlyCode::parseFlags(const String_t& s, const char* data, FlagSe
 }
 
 /** Initialize from description string.
-    \param descriptionLine Description */
+    \param descriptionLine Description
+    \param tx Translator (for exception texts) */
 void
 game::spec::FriendlyCode::initFromString(const String_t& descriptionLine, afl::string::Translator& tx)
 {

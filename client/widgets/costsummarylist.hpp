@@ -34,6 +34,7 @@ namespace client { namespace widgets {
             \param numLines Number of lines for this widget for layout purposes
             \param isList true to exhibit list behaviour, false to exhibit static behaviour
             \param footerStyle Footer style
+            \param root UI root
             \param tx Translator */
         CostSummaryList(int numLines, bool isList, FooterStyle footerStyle, ui::Root& root, afl::string::Translator& tx);
         ~CostSummaryList();

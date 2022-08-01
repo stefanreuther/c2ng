@@ -137,7 +137,7 @@ namespace util {
 
     /** Sanitize string for logging.
         Replaces non-ASCII, non-printable characters with '?'.
-        \param s String
+        \param str String
         \return Sanitized string */
     String_t sanitizeString(String_t str);
 

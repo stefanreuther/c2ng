@@ -62,7 +62,7 @@ namespace game { namespace proxy {
         /** Constructor.
             After creation, a report about the current situation will immediately be generated.
             @param gameSender Game sender
-            @param receiver   RequestDispatcher to receive updates in this thread */
+            @param reply      RequestDispatcher to receive updates in this thread */
         HistoryShipProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& reply);
 
         /** Destructor. */

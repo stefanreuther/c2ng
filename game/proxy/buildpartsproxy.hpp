@@ -64,7 +64,7 @@ namespace game { namespace proxy {
 
         /** Get status, synchronously.
             \param [in,out] ind    WaitIndicator for UI synchronisation
-            \param [out]    result Result */
+            \param [out]    st     Result */
         void getStatus(WaitIndicator& ind, Status& st);
 
         /** Select part for building.

@@ -17,9 +17,9 @@ namespace util { namespace doc {
         The file is imported as a single blob into the given page.
         The text is not modified or formatted.
 
-        @param [in/out] idx        Help index
+        @param [in,out] idx        Help index
         @param [in]     page       Page
-        @param [in/out] blobStore  Blob store to store transformed pages
+        @param [in,out] blobStore  Blob store to store transformed pages
         @param [in]     file       File
         @param [in]     cs         Character set */
     void importText(Index& idx, Index::Handle_t page, BlobStore& blobStore, afl::io::Stream& file, afl::charset::Charset& cs);
