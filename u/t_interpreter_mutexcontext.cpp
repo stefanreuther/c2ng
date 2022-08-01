@@ -38,8 +38,7 @@ void
 TestInterpreterMutexContext::testSave()
 {
     interpreter::MutexList list;
-    interpreter::MutexList::Mutex* mtx = list.create("NAME", "long info", 0);
-    interpreter::MutexContext testee(mtx);
+    interpreter::MutexContext testee("NAME", "long info");
 
     // Save it
     interpreter::TagNode tag;
@@ -69,16 +68,13 @@ void
 TestInterpreterMutexContext::testBasics()
 {
     interpreter::MutexList list;
-    interpreter::MutexList::Mutex* mtx = list.create("NAME", "long info", 0);
-    interpreter::MutexContext testee(mtx);
+    interpreter::MutexContext testee("NAME", "long info");
 
     // lookup: always fails
     interpreter::Context::PropertyIndex_t x;
     TS_ASSERT(testee.lookup("FOO", x) == 0);
     TS_ASSERT(testee.lookup("", x) == 0);
     TS_ASSERT(testee.lookup("NAME", x) == 0);
-
-    // get, set: cannot legally be called
 
     // next: no next object
     TS_ASSERT_EQUALS(testee.next(), false);
@@ -97,6 +93,6 @@ TestInterpreterMutexContext::testBasics()
 
     // toString
     TS_ASSERT_EQUALS(testee.toString(false), "#<lock>");
-    TS_ASSERT_EQUALS(testee.toString(true), "#<lock>");
+    TS_ASSERT_EQUALS(testee.toString(true), "Lock(\"NAME\",\"long info\")");
 }
 

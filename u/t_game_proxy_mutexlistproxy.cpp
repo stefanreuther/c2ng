@@ -22,10 +22,10 @@ TestGameProxyMutexListProxy::testIt()
     // Two processes with a mutex, one without
     interpreter::World& w = s.session().world();
     interpreter::Process& p1 = s.session().processList().create(w, "p1");
-    p1.pushNewContext(new interpreter::MutexContext(w.mutexList().create("M1", "note 1", &p1)));
+    p1.pushNewContext(new interpreter::MutexContext("M1", "note 1"));
 
     interpreter::Process& p2 = s.session().processList().create(w, "p2");
-    p2.pushNewContext(new interpreter::MutexContext(w.mutexList().create("M2", "note 2", &p2)));
+    p2.pushNewContext(new interpreter::MutexContext("M2", "note 2"));
 
     interpreter::Process& p3 = s.session().processList().create(w, "p3");
 

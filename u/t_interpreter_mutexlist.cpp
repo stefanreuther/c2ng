@@ -17,18 +17,19 @@
 void
 TestInterpreterMutexList::testDestruction()
 {
+    // As of 20220801, this test has become pretty pointless as destruction no longer happens in the MutexContext object.
     {
         // Destroy MutexContext first, MutexList last.
         std::auto_ptr<interpreter::MutexContext> ctx;
         interpreter::MutexList testee;
-        ctx.reset(new interpreter::MutexContext(testee.create("foo", "bar", 0)));
+        ctx.reset(new interpreter::MutexContext("FOO", "bar"));
         ctx.reset();
     }
     {
         // Destroy MutexList first, MutexContext last. This will abandon the mutex in the meantime.
         std::auto_ptr<interpreter::MutexContext> ctx;
         interpreter::MutexList testee;
-        ctx.reset(new interpreter::MutexContext(testee.create("foo", "bar", 0)));
+        ctx.reset(new interpreter::MutexContext("FOO", "bar"));
     }
 }
 

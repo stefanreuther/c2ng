@@ -456,9 +456,9 @@ interpreter::vmio::ObjectLoader::loadContext(const TagNode& tag, afl::io::Stream
 }
 
 interpreter::Context*
-interpreter::vmio::ObjectLoader::loadMutex(const String_t& name, const String_t& note, Process* owner)
+interpreter::vmio::ObjectLoader::loadMutex(const String_t& name, const String_t& note)
 {
-    return m_context.loadMutex(name, note, owner);
+    return m_context.loadMutex(name, note);
 }
 
 interpreter::Process*

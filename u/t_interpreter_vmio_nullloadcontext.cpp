@@ -34,7 +34,7 @@ TestInterpreterVmioNullLoadContext::testIt()
         node.value = 42;
         TS_ASSERT(testee.loadContext(node, in) == 0);
     }
-    TS_ASSERT(testee.loadMutex("foo", "bar", 0) == 0);
+    TS_ASSERT(testee.loadMutex("foo", "bar") == 0);
     TS_ASSERT(testee.createProcess() == 0);
 }
 

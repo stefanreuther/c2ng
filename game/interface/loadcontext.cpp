@@ -105,7 +105,7 @@ game::interface::LoadContext::loadContext(const interpreter::TagNode& tag, afl::
 }
 
 interpreter::Context*
-game::interface::LoadContext::loadMutex(const String_t& /*name*/, const String_t& /*note*/, interpreter::Process* /*owner*/)
+game::interface::LoadContext::loadMutex(const String_t& /*name*/, const String_t& /*note*/)
 {
     return 0;
 }

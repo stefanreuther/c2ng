@@ -20,7 +20,7 @@ namespace interpreter { namespace vmio {
         virtual afl::data::Value* loadStructureValue(uint32_t id);
         virtual afl::data::Value* loadStructureType(uint32_t id);
         virtual Context* loadContext(const TagNode& tag, afl::io::Stream& aux);
-        virtual Context* loadMutex(const String_t& name, const String_t& note, Process* owner);
+        virtual Context* loadMutex(const String_t& name, const String_t& note);
         virtual Process* createProcess();
         virtual void finishProcess(Process& proc);
     };

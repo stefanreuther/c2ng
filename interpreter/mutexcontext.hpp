@@ -12,14 +12,18 @@ namespace interpreter {
 
     /** Mutex context.
         This is the main primitive exposed to the script interface.
-        Users will do "With Lock(...)", causing an IntMutexContext be created.
-        As long as this context lives, the mutex will be held.
-        Since the interpreter may copy around the object, we must use reference-counting. */
+        Users will do "With Lock(...)", causing n MutexContext be created and be pushed to the context stack.
+
+        As of 20220801, a mutex is owned as long as it is on a context stack;
+        previously, a mutex was owned as long as a MutexContext object existed somwhere.
+        Mutex objects are rarely copied (not at all if the only recommended syntax, "With Lock(...)" is used),
+        so copying needn't be absolutely cheap. */
     class MutexContext : public Context {
      public:
         /** Constructor.
-            \param mtx Mutex. Must have one reference allocated to this object. */
-        MutexContext(MutexList::Mutex* mtx);
+            \param name Mutex name (by convention, in upper-case)
+            \param note Note associated with it */
+        MutexContext(const String_t& name, const String_t& note);
         ~MutexContext();
 
         // Context:
@@ -37,6 +41,8 @@ namespace interpreter {
 
      private:
         MutexList::Mutex* m_mutex;
+        String_t m_name;
+        String_t m_note;
     };
 
 }

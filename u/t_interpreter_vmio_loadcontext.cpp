@@ -25,7 +25,7 @@ TestInterpreterVmioLoadContext::testIt()
             { return 0; }
         virtual interpreter::Context* loadContext(const interpreter::TagNode& /*tag*/, afl::io::Stream& /*aux*/)
             { return 0; }
-        virtual interpreter::Context* loadMutex(const String_t& /*name*/, const String_t& /*note*/, interpreter::Process* /*owner*/)
+        virtual interpreter::Context* loadMutex(const String_t& /*name*/, const String_t& /*note*/)
             { return 0; }
         virtual interpreter::Process* createProcess()
             { return 0; }

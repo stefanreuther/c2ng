@@ -23,8 +23,8 @@ TestInterpreterVmioProcessLoadContext::testLoadMutex()
     // Environment classes
     class TestContext : public interpreter::SingleContext {
      public:
-        TestContext(String_t name, String_t note, interpreter::Process* owner)
-            : m_name(name), m_note(note), m_owner(owner)
+        TestContext(String_t name, String_t note)
+            : m_name(name), m_note(note)
             { }
         virtual PropertyAccessor* lookup(const afl::data::NameQuery& /*name*/, PropertyIndex_t& /*result*/)
             { return 0; }
@@ -41,7 +41,6 @@ TestInterpreterVmioProcessLoadContext::testLoadMutex()
 
         String_t m_name;
         String_t m_note;
-        interpreter::Process* m_owner;
     };
 
     class TestParent : public interpreter::vmio::LoadContext {
@@ -58,10 +57,8 @@ TestInterpreterVmioProcessLoadContext::testLoadMutex()
             { return 0; }
         virtual interpreter::Context* loadContext(const interpreter::TagNode& /*tag*/, afl::io::Stream& /*aux*/)
             { return 0; }
-        virtual interpreter::Context* loadMutex(const String_t& name, const String_t& note, interpreter::Process* owner)
-            {
-                return new TestContext(name, note, owner);
-            }
+        virtual interpreter::Context* loadMutex(const String_t& name, const String_t& note)
+            { return new TestContext(name, note); }
         virtual interpreter::Process* createProcess()
             { return 0; }
         virtual void finishProcess(interpreter::Process& /*proc*/)
@@ -96,10 +93,9 @@ TestInterpreterVmioProcessLoadContext::testLoadMutex()
         TS_ASSERT(ctx != 0);
         TS_ASSERT_EQUALS(ctx->m_name, "hi");
         TS_ASSERT_EQUALS(ctx->m_note, "mom");
-        TS_ASSERT(ctx->m_owner == 0);
     }
 
-    // - With "is this process" flag
+    // - With "is this process" flag [as of 20220801, no longer different from above]
     {
         afl::io::ConstMemoryStream aux(DATA);
         interpreter::TagNode tag;
@@ -110,7 +106,6 @@ TestInterpreterVmioProcessLoadContext::testLoadMutex()
         TS_ASSERT(ctx != 0);
         TS_ASSERT_EQUALS(ctx->m_name, "hi");
         TS_ASSERT_EQUALS(ctx->m_note, "mom");
-        TS_ASSERT_EQUALS(ctx->m_owner, &proc);
     }
 }
 

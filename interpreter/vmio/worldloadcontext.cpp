@@ -49,13 +49,9 @@ interpreter::vmio::WorldLoadContext::loadContext(const TagNode& tag, afl::io::St
 }
 
 interpreter::Context*
-interpreter::vmio::WorldLoadContext::loadMutex(const String_t& name, const String_t& note, Process* owner)
+interpreter::vmio::WorldLoadContext::loadMutex(const String_t& name, const String_t& note)
 {
-    if (MutexList::Mutex* mtx = m_world.mutexList().load(name, note, owner)) {
-        return new MutexContext(mtx);
-    } else {
-        return 0;
-    }
+    return new MutexContext(name, note);
 }
 
 interpreter::Process*

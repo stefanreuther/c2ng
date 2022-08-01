@@ -19,7 +19,7 @@ namespace {
     }
 
     /** Load mutex. */
-    interpreter::Context* loadMutex(interpreter::vmio::LoadContext& ctx, interpreter::Process* owner, afl::io::Stream& aux)
+    interpreter::Context* loadMutex(interpreter::vmio::LoadContext& ctx, afl::io::Stream& aux)
     {
         // ex IntMutexContext::load
         afl::bits::Value<afl::bits::UInt32LE> header[2];
@@ -27,7 +27,7 @@ namespace {
 
         String_t name = loadString(aux, header[0]);
         String_t note = loadString(aux, header[1]);
-        return ctx.loadMutex(name, note, owner);
+        return ctx.loadMutex(name, note);
     }
 }
 
@@ -73,7 +73,7 @@ interpreter::vmio::ProcessLoadContext::loadContext(const TagNode& tag, afl::io::
 {
     switch (tag.tag) {
      case TagNode::Tag_Mutex:
-        return ::loadMutex(*this, (tag.value & 1) != 0 ? &m_process : 0, aux);
+        return ::loadMutex(*this, aux);
 
      case TagNode::Tag_Frame:
         // Frame. Depends on current process.
@@ -85,9 +85,9 @@ interpreter::vmio::ProcessLoadContext::loadContext(const TagNode& tag, afl::io::
 }
 
 interpreter::Context*
-interpreter::vmio::ProcessLoadContext::loadMutex(const String_t& name, const String_t& note, Process* owner)
+interpreter::vmio::ProcessLoadContext::loadMutex(const String_t& name, const String_t& note)
 {
-    return m_parent.loadMutex(name, note, owner);
+    return m_parent.loadMutex(name, note);
 }
 
 interpreter::Process*

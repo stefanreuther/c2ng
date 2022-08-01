@@ -147,7 +147,7 @@ interpreter::LockFunction::call(Process& proc, afl::data::Segment& args, bool wa
     LockArgs parsed;
     parseLockArgs(a, parsed);
 
-    MutexContext* result = new MutexContext(m_world.mutexList().create(afl::string::strUCase(parsed.name), parsed.note, &proc));
+    MutexContext* result = new MutexContext(afl::string::strUCase(parsed.name), parsed.note);
     if (want_result) {
         proc.pushNewValue(result);
     } else {

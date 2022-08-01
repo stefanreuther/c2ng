@@ -26,6 +26,8 @@ namespace interpreter { namespace vmio {
         - the context knowing about the current process (ProcessLoadContext) implements loadContext() for mutexes
           because it knows how to deserialize mutex data and associate it with a process; it calls loadMutex()
           to actually create the mutex.
+          As of 20220801, this is no longer strictly needed as mutexes are implicitly associated with a process
+          by the time being added to a process' context stack.
         - the context knowing about the script world (WorldLoadContext) implements loadMutex() to actually
           create the mutex. */
     class LoadContext : public afl::base::Deletable {
@@ -66,9 +68,8 @@ namespace interpreter { namespace vmio {
             May throw if there is a mutex conflict.
             \param name Mutex name (identifier)
             \param note Mutex note
-            \param owner Owning process or null
             \return context value or null */
-        virtual Context* loadMutex(const String_t& name, const String_t& note, Process* owner) = 0;
+        virtual Context* loadMutex(const String_t& name, const String_t& note) = 0;
 
         /** Create a process.
             \return newly-created process or null */

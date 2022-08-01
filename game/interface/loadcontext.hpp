@@ -20,7 +20,7 @@ namespace game { namespace interface {
         virtual afl::data::Value* loadStructureValue(uint32_t id);
         virtual afl::data::Value* loadStructureType(uint32_t id);
         virtual interpreter::Context* loadContext(const interpreter::TagNode& tag, afl::io::Stream& aux);
-        virtual interpreter::Context* loadMutex(const String_t& name, const String_t& note, interpreter::Process* owner);
+        virtual interpreter::Context* loadMutex(const String_t& name, const String_t& note);
         virtual interpreter::Process* createProcess();
         virtual void finishProcess(interpreter::Process& proc);
 
