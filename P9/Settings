@@ -12,7 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = interpreter/simplecontext.cpp interpreter/simplecontext.hpp \
+FILES_gamelib = game/v3/genextra.cpp game/v3/genextra.hpp \
+    interpreter/simplecontext.cpp interpreter/simplecontext.hpp \
     interpreter/callablevalue.cpp interpreter/simpleprocedure.cpp \
     interpreter/simpleprocedure.hpp interpreter/simplefunction.cpp \
     interpreter/simplefunction.hpp interpreter/functionvalue.cpp \
@@ -1720,7 +1721,7 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_interpreter_simplecontext.cpp \
+FILES_testsuite = u/t_game_v3_genextra.cpp u/t_interpreter_simplecontext.cpp \
     u/t_game_interface_iteratorcontext.cpp u/t_gfx_antialiased.cpp \
     u/t_interpreter_simpleprocedure.cpp u/t_interpreter_simplefunction.cpp \
     u/t_interpreter_indexablevalue.cpp u/t_interpreter_functionvalue.cpp \

@@ -132,6 +132,11 @@ class TestGameV3FizzFile : public CxxTest::TestSuite {
     void testNormal();
 };
 
+class TestGameV3GenExtra : public CxxTest::TestSuite {
+ public:
+    void testAccess();
+};
+
 class TestGameV3GenFile : public CxxTest::TestSuite {
  public:
     void testFile();

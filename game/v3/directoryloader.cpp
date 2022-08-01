@@ -15,6 +15,7 @@
 #include "game/v3/commandextra.hpp"
 #include "game/v3/controlfile.hpp"
 #include "game/v3/fizzfile.hpp"
+#include "game/v3/genextra.hpp"
 #include "game/v3/genfile.hpp"
 #include "game/v3/loader.hpp"
 #include "game/v3/outboxreader.hpp"
@@ -300,6 +301,21 @@ game::v3::DirectoryLoader::getProperty(Property p)
 void
 game::v3::DirectoryLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session)
 {
+    // ex game/load.h:loadDirectory
+    m_log.write(m_log.Info, LOG_NAME, Format(m_translator("Loading %s data...").c_str(), root.playerList().getPlayerName(player, Player::AdjectiveName, m_translator)));
+
+    // gen.dat
+    Directory& dir = root.gameDirectory();
+    GenFile gen;
+    {
+        Ref<Stream> file = dir.openFile(Format("gen%d.dat", player), FileSystem::OpenRead);
+        gen.loadFromFile(*file);
+        if (gen.getPlayerId() != player) {
+            throw afl::except::FileProblemException(*file, Format(m_translator("File is owned by player %d, should be %d").c_str(), gen.getPlayerId(), player));
+        }
+    }
+    GenExtra::create(turn).create(player) = gen;
+
     // Initialize
     Loader ldr(*m_charset, m_translator, m_log);
     ldr.prepareUniverse(turn.universe());
@@ -317,22 +333,7 @@ game::v3::DirectoryLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player,
         game.expressionLists().loadPredefinedFiles(*m_pProfile, *m_specificationDirectory, m_log, m_translator);
     }
 
-    // ex game/load.h:loadDirectory
-    m_log.write(m_log.Info, LOG_NAME, Format(m_translator("Loading %s data...").c_str(), root.playerList().getPlayerName(player, Player::AdjectiveName, m_translator)));
-
-    // gen.dat
-    Directory& dir = root.gameDirectory();
-    GenFile gen;
-    {
-        Ref<Stream> file = dir.openFile(Format("gen%d.dat", player), FileSystem::OpenRead);
-        gen.loadFromFile(*file);
-        if (gen.getPlayerId() != player) {
-            throw afl::except::FileProblemException(*file, Format(m_translator("File is owned by player %d, should be %d").c_str(), gen.getPlayerId(), player));
-        }
-    }
-
     // FIXME->trn.setHaveData(player);
-    // FIXME->trn.setGen(player, GGen(gen));
     gen.copyScoresTo(game.scores());
     turn.setTurnNumber(gen.getTurnNumber());
     turn.setTimestamp(gen.getTimestamp());
@@ -512,7 +513,7 @@ game::v3::DirectoryLoader::doSaveCurrentTurn(const Turn& turn, const Game& game,
     FizzFile fizz;
     fizz.load(dir);
     if (!fizz.isValid()) {
-        m_log.write(m_log.Warn, LOG_NAME, m_translator.translateString("File \"fizz.bin\" not found. Game data may not be usable with other programs."));
+        m_log.write(m_log.Warn, LOG_NAME, m_translator("File \"fizz.bin\" not found. Game data may not be usable with other programs."));
     }
 
     for (int player = 1; player <= MAX_PLAYERS; ++player) {
@@ -523,7 +524,11 @@ game::v3::DirectoryLoader::doSaveCurrentTurn(const Turn& turn, const Game& game,
 
             // Load GenFile
             GenFile gen;
-            gen.loadFromFile(*dir.openFile(Format("gen%d.dat", player), FileSystem::OpenRead));
+            if (const GenFile* p = GenExtra::get(turn, player)) {
+                gen = *p;
+            } else {
+                gen.loadFromFile(*dir.openFile(Format("gen%d.dat", player), FileSystem::OpenRead));
+            }
 
             const uint32_t sigCheck = computeChecksum(gen.getSignature2());
             uint32_t shipChecksum = sigCheck, planetChecksum = sigCheck, baseChecksum = sigCheck;

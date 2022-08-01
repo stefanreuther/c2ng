@@ -23,6 +23,7 @@
 #include "game/parser/messageinformation.hpp"
 #include "game/v3/commandcontainer.hpp"
 #include "game/v3/commandextra.hpp"
+#include "game/v3/genextra.hpp"
 #include "game/v3/genfile.hpp"
 #include "game/v3/hconfig.hpp"
 #include "game/v3/inboxfile.hpp"
@@ -704,8 +705,8 @@ game::v3::Loader::loadResult(Turn& turn, const Root& root, Game& game, afl::io::
     if (gen.getPlayerId() != player) {
         throw FileFormatException(file, Format(m_translator("File is owned by player %d, should be %d"), gen.getPlayerId(), player));
     }
-// FIXME:    trn.setHaveData(player);
-// FIXME:    trn.setGen(player, GGen(gen));
+    GenExtra::create(turn).create(player) = gen;
+    // FIXME:    trn.setHaveData(player);
     gen.copyScoresTo(game.scores());
     turn.setTurnNumber(gen.getTurnNumber());
     turn.setTimestamp(gen.getTimestamp());
@@ -899,8 +900,9 @@ game::v3::Loader::loadTurnfile(Turn& turn, const Root& root, afl::io::Stream& fi
 
         virtual void addNewPassword(const NewPassword_t& pass)
             {
-                // FIXME
-                (void) pass;
+                if (GenFile* p = GenExtra::get(m_turn, m_player)) {
+                    p->setNewPasswordData(pass);
+                }
             }
 
         virtual void addAllianceCommand(String_t text)
@@ -1028,11 +1030,13 @@ game::v3::Loader::saveTurnFile(TurnFile& thisTurn, const Turn& turn, int player,
         }
     }
 
-    // FIXME: load password
-    // char new_password[10];
-    // if (gen.getNewPasswordData(new_password)) {
-    //     trns[pid-1]->addCommand(tcm_ChangePassword, 0, new_password, sizeof(new_password));
-    // }
+    // New password
+    if (const GenFile* gen = GenExtra::get(turn, player)) {
+        afl::base::ConstBytes_t newPassword = gen->getNewPasswordData();
+        if (!newPassword.empty()) {
+            thisTurn.addCommand(tcm_ChangePassword, 0, newPassword);
+        }
+    }
 
     thisTurn.update();
 }
