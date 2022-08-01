@@ -80,13 +80,13 @@ client::widgets::HistoryPositionListbox::getCurrentTurnNumber() const
 
 // AbstractListbox / Widget:
 size_t
-client::widgets::HistoryPositionListbox::getNumItems()
+client::widgets::HistoryPositionListbox::getNumItems() const
 {
     return m_content.size() + 1;
 }
 
 bool
-client::widgets::HistoryPositionListbox::isItemAccessible(size_t n)
+client::widgets::HistoryPositionListbox::isItemAccessible(size_t n) const
 {
     // ex WHistoryShipPositionList::isAccessible, CHistoryTurnList.Accessible
     const Info_t* p = getItem(n);
@@ -94,7 +94,7 @@ client::widgets::HistoryPositionListbox::isItemAccessible(size_t n)
 }
 
 int
-client::widgets::HistoryPositionListbox::getItemHeight(size_t n)
+client::widgets::HistoryPositionListbox::getItemHeight(size_t n) const
 {
     const int lineHeight = m_root.provider().getFont(gfx::FontRequest())->getCellSize().getY();
     if (n == 0) {

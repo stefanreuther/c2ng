@@ -61,11 +61,11 @@ namespace ui { namespace widgets {
         /** Return width of an item.
             \param nr Item, [0,getNumberOfItems()).
             \return width in pixels */
-        virtual int getItemWidth(size_t nr) = 0;
+        virtual int getItemWidth(size_t nr) const = 0;
 
         /** Return number of items.
             \return number of items, >= 0 */
-        virtual size_t getNumItems() = 0;
+        virtual size_t getNumItems() const = 0;
 
         /** Draw an item.
             \param can Canvas to draw on

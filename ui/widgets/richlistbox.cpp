@@ -120,20 +120,20 @@ ui::widgets::RichListbox::hasRenderFlag(RenderFlag flag) const
 
 // AbstractListbox:
 size_t
-ui::widgets::RichListbox::getNumItems()
+ui::widgets::RichListbox::getNumItems() const
 {
     return m_items.size();
 }
 
 bool
-ui::widgets::RichListbox::isItemAccessible(size_t n)
+ui::widgets::RichListbox::isItemAccessible(size_t n) const
 {
     return (n < m_items.size()
             && m_items[n]->accessible);
 }
 
 int
-ui::widgets::RichListbox::getItemHeight(size_t n)
+ui::widgets::RichListbox::getItemHeight(size_t n) const
 {
     return (n < m_items.size()
             ? m_items[n]->doc.getDocumentHeight() + 4

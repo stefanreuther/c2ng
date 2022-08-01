@@ -24,19 +24,19 @@ client::widgets::TurnListbox::TurnListbox(gfx::Point cells, ui::Root& root, afl:
 
 // AbstractListbox virtuals:
 size_t
-client::widgets::TurnListbox::getNumItems()
+client::widgets::TurnListbox::getNumItems() const
 {
     return m_items.size();
 }
 
 bool
-client::widgets::TurnListbox::isItemAccessible(size_t /*n*/)
+client::widgets::TurnListbox::isItemAccessible(size_t /*n*/) const
 {
     return true;
 }
 
 int
-client::widgets::TurnListbox::getItemHeight(size_t /*n*/)
+client::widgets::TurnListbox::getItemHeight(size_t /*n*/) const
 {
     return m_bigFont->getLineHeight()
         + m_smallFont->getLineHeight()

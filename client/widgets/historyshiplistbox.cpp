@@ -78,13 +78,13 @@ client::widgets::HistoryShipListbox::getCurrentReference() const
 }
 
 size_t
-client::widgets::HistoryShipListbox::getNumItems()
+client::widgets::HistoryShipListbox::getNumItems() const
 {
     return m_content.size();
 }
 
 bool
-client::widgets::HistoryShipListbox::isItemAccessible(size_t n)
+client::widgets::HistoryShipListbox::isItemAccessible(size_t n) const
 {
     // ex WObjectList::isAccessible
     bool ok = false;
@@ -105,7 +105,7 @@ client::widgets::HistoryShipListbox::isItemAccessible(size_t n)
 }
 
 int
-client::widgets::HistoryShipListbox::getItemHeight(size_t /*n*/)
+client::widgets::HistoryShipListbox::getItemHeight(size_t /*n*/) const
 {
     return m_root.provider().getFont(gfx::FontRequest())->getCellSize().getY();
 }

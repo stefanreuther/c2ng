@@ -104,19 +104,19 @@ client::widgets::CombatUnitList::getCurrentShip(size_t& slot) const
 }
 
 size_t
-client::widgets::CombatUnitList::getNumItems()
+client::widgets::CombatUnitList::getNumItems() const
 {
     return m_items.size();
 }
 
 bool
-client::widgets::CombatUnitList::isItemAccessible(size_t n)
+client::widgets::CombatUnitList::isItemAccessible(size_t n) const
 {
     return n < m_items.size() && !m_items[n].flags.contains(Inaccessible);
 }
 
 int
-client::widgets::CombatUnitList::getItemHeight(size_t /*n*/)
+client::widgets::CombatUnitList::getItemHeight(size_t /*n*/) const
 {
     return getFont()->getLineHeight();
 }

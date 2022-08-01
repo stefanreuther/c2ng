@@ -90,9 +90,9 @@ namespace {
 
         ProcessListWidget(ui::Root& root, afl::string::Translator& tx);
 
-        virtual size_t getNumItems();
-        virtual bool isItemAccessible(size_t n);
-        virtual int getItemHeight(size_t n);
+        virtual size_t getNumItems() const;
+        virtual bool isItemAccessible(size_t n) const;
+        virtual int getItemHeight(size_t n) const;
         virtual int getHeaderHeight() const;
         virtual int getFooterHeight() const;
         virtual void drawHeader(gfx::Canvas& can, gfx::Rectangle area);
@@ -255,19 +255,19 @@ ProcessListWidget::ProcessListWidget(ui::Root& root, afl::string::Translator& tx
 }
 
 size_t
-ProcessListWidget::getNumItems()
+ProcessListWidget::getNumItems() const
 {
     return m_content.size();
 }
 
 bool
-ProcessListWidget::isItemAccessible(size_t /*n*/)
+ProcessListWidget::isItemAccessible(size_t /*n*/) const
 {
     return true;
 }
 
 int
-ProcessListWidget::getItemHeight(size_t /*n*/)
+ProcessListWidget::getItemHeight(size_t /*n*/) const
 {
     return getFont()->getLineHeight();
 }
@@ -704,7 +704,7 @@ ProcessListDialog::run()
     win.add(g1);
 
     ui::Widget& helper = del.addNew(new client::widgets::HelpWidget(m_root, tx, interface().gameSender(), "pcc2:processmgr"));
-    
+
     ui::Group& g2 = del.addNew(new ui::Group(ui::layout::HBox::instance5));
     ui::widgets::Button& btnExec = del.addNew(new ui::widgets::Button(tx("X - Execute"), 'x', m_root));
     ui::widgets::Button& btnClose = del.addNew(new ui::widgets::Button(tx("Close"), util::Key_Escape, m_root));

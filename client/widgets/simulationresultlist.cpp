@@ -54,19 +54,19 @@ client::widgets::SimulationResultList::setClassResults(const ClassInfos_t& list)
 
 // AbstractListbox:
 size_t
-client::widgets::SimulationResultList::getNumItems()
+client::widgets::SimulationResultList::getNumItems() const
 {
     return m_classResults.size();
 }
 
 bool
-client::widgets::SimulationResultList::isItemAccessible(size_t /*n*/)
+client::widgets::SimulationResultList::isItemAccessible(size_t /*n*/) const
 {
     return true;
 }
 
 int
-client::widgets::SimulationResultList::getItemHeight(size_t /*n*/)
+client::widgets::SimulationResultList::getItemHeight(size_t /*n*/) const
 {
     return getFont(m_root)->getLineHeight();
 }

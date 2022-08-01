@@ -96,19 +96,19 @@ client::widgets::CostSummaryList::makeExporter(util::RequestSender<game::Session
 }
 
 size_t
-client::widgets::CostSummaryList::getNumItems()
+client::widgets::CostSummaryList::getNumItems() const
 {
     return m_content.getNumItems();
 }
 
 bool
-client::widgets::CostSummaryList::isItemAccessible(size_t /*n*/)
+client::widgets::CostSummaryList::isItemAccessible(size_t /*n*/) const
 {
     return true;
 }
 
 int
-client::widgets::CostSummaryList::getItemHeight(size_t /*n*/)
+client::widgets::CostSummaryList::getItemHeight(size_t /*n*/) const
 {
     return getLineHeight();
 }

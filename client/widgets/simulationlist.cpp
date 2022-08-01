@@ -41,12 +41,6 @@ client::widgets::SimulationList::getItem(size_t index) const
     }
 }
 
-size_t
-client::widgets::SimulationList::getNumItems() const
-{
-    return m_content.size();
-}
-
 void
 client::widgets::SimulationList::setPreferredHeight(int numLines)
 {
@@ -55,19 +49,19 @@ client::widgets::SimulationList::setPreferredHeight(int numLines)
 
 // AbstractListbox:
 size_t
-client::widgets::SimulationList::getNumItems()
+client::widgets::SimulationList::getNumItems() const
 {
     return m_content.size();
 }
 
 bool
-client::widgets::SimulationList::isItemAccessible(size_t /*n*/)
+client::widgets::SimulationList::isItemAccessible(size_t /*n*/) const
 {
     return true;
 }
 
 int
-client::widgets::SimulationList::getItemHeight(size_t /*n*/)
+client::widgets::SimulationList::getItemHeight(size_t /*n*/) const
 {
     return getLineHeight();
 }

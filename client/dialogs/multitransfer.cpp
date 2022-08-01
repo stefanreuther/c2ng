@@ -82,9 +82,9 @@ namespace {
         MultiTransferList(ui::Root& root, afl::string::Translator& tx, NumberFormatter fmt);
 
         // AbstractListbox:
-        virtual size_t getNumItems();
-        virtual bool isItemAccessible(size_t n);
-        virtual int getItemHeight(size_t n);
+        virtual size_t getNumItems() const;
+        virtual bool isItemAccessible(size_t n) const;
+        virtual int getItemHeight(size_t n) const;
         virtual int getHeaderHeight() const;
         virtual int getFooterHeight() const;
         virtual void drawHeader(gfx::Canvas& can, gfx::Rectangle area);
@@ -192,19 +192,19 @@ MultiTransferList::MultiTransferList(ui::Root& root, afl::string::Translator& tx
 
 // AbstractListbox:
 size_t
-MultiTransferList::getNumItems()
+MultiTransferList::getNumItems() const
 {
     return m_items.size();
 }
 
 bool
-MultiTransferList::isItemAccessible(size_t /*n*/)
+MultiTransferList::isItemAccessible(size_t /*n*/) const
 {
     return true;
 }
 
 int
-MultiTransferList::getItemHeight(size_t /*n*/)
+MultiTransferList::getItemHeight(size_t /*n*/) const
 {
     return getFont()->getLineHeight();
 }

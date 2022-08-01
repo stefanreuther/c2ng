@@ -306,8 +306,8 @@ namespace {
      public:
         ScoreIconBox(ui::Root& root, ScoreTabs_t& tabs, afl::string::Translator& tx);
         virtual ui::layout::Info getLayoutInfo() const;
-        virtual int getItemWidth(size_t nr);
-        virtual size_t getNumItems();
+        virtual int getItemWidth(size_t nr) const;
+        virtual size_t getNumItems() const;
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state);
      private:
         const ScoreTab* getTab(size_t nr) const;
@@ -434,7 +434,7 @@ ScoreIconBox::getLayoutInfo() const
 }
 
 int
-ScoreIconBox::getItemWidth(size_t nr)
+ScoreIconBox::getItemWidth(size_t nr) const
 {
     // ex WScoreIconBox::getItemWidth
     if (const ScoreTab* t = getTab(nr)) {
@@ -446,7 +446,7 @@ ScoreIconBox::getItemWidth(size_t nr)
 }
 
 size_t
-ScoreIconBox::getNumItems()
+ScoreIconBox::getNumItems() const
 {
     // ex WScoreIconBox::getNumberOfItems
     return m_tabs.size();

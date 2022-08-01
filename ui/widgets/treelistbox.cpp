@@ -217,19 +217,19 @@ ui::widgets::TreeListbox::setIcon(Node* node, ui::icons::Icon* pIcon)
 
 // AbstractListbox virtuals:
 size_t
-ui::widgets::TreeListbox::getNumItems()
+ui::widgets::TreeListbox::getNumItems() const
 {
     return m_itemToNode.size();
 }
 
 bool
-ui::widgets::TreeListbox::isItemAccessible(size_t /*n*/)
+ui::widgets::TreeListbox::isItemAccessible(size_t /*n*/) const
 {
     return true;
 }
 
 int
-ui::widgets::TreeListbox::getItemHeight(size_t n)
+ui::widgets::TreeListbox::getItemHeight(size_t n) const
 {
     int height = getFont()->getLineHeight();
     if (n < m_itemToNode.size()) {
@@ -433,7 +433,7 @@ ui::widgets::TreeListbox::onItemClickAt(size_t itemIndex, gfx::Point pos)
 }
 
 afl::base::Ref<gfx::Font>
-ui::widgets::TreeListbox::getFont()
+ui::widgets::TreeListbox::getFont() const
 {
     return m_root.provider().getFont(gfx::FontRequest());
 }

@@ -28,14 +28,14 @@ namespace {
             }
 
         // AbstractListbox:
-        virtual size_t getNumItems()
+        virtual size_t getNumItems() const
             { return m_items.size(); }
-        virtual bool isItemAccessible(size_t n)
+        virtual bool isItemAccessible(size_t n) const
             {
                 // ex WLRUListBox::isAccessible
                 return n < m_items.size() && !m_items[n].isHeading;
             }
-        virtual int getItemHeight(size_t /*n*/)
+        virtual int getItemHeight(size_t /*n*/) const
             { return getFont()->getLineHeight(); }
         virtual int getHeaderHeight() const
             { return 0; }

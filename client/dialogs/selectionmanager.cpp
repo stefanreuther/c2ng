@@ -45,9 +45,9 @@ namespace {
         virtual bool handleKey(util::Key_t key, int prefix);
 
         // AbstractListbox:
-        virtual size_t getNumItems();
-        virtual bool isItemAccessible(size_t n);
-        virtual int getItemHeight(size_t n);
+        virtual size_t getNumItems() const;
+        virtual bool isItemAccessible(size_t n) const;
+        virtual int getItemHeight(size_t n) const;
         virtual int getHeaderHeight() const;
         virtual int getFooterHeight() const;
         virtual void drawHeader(gfx::Canvas& can, gfx::Rectangle area);
@@ -155,19 +155,19 @@ SelectionList::handleKey(util::Key_t key, int prefix)
 
 // AbstractListbox:
 size_t
-SelectionList::getNumItems()
+SelectionList::getNumItems() const
 {
     return m_info.layers.size();
 }
 
 bool
-SelectionList::isItemAccessible(size_t /*n*/)
+SelectionList::isItemAccessible(size_t /*n*/) const
 {
     return true;
 }
 
 int
-SelectionList::getItemHeight(size_t /*n*/)
+SelectionList::getItemHeight(size_t /*n*/) const
 {
     return getItemHeight();
 }

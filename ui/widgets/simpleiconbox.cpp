@@ -31,7 +31,7 @@ ui::widgets::SimpleIconBox::getLayoutInfo() const
 
 // IconBox:
 int
-ui::widgets::SimpleIconBox::getItemWidth(size_t nr)
+ui::widgets::SimpleIconBox::getItemWidth(size_t nr) const
 {
     // ex UIDirectoryCrumbTrail::getItemWidth (sort-of)
     if (nr < m_items.size()) {
@@ -42,7 +42,7 @@ ui::widgets::SimpleIconBox::getItemWidth(size_t nr)
 }
 
 size_t
-ui::widgets::SimpleIconBox::getNumItems()
+ui::widgets::SimpleIconBox::getNumItems() const
 {
     return m_items.size();
 }
@@ -67,7 +67,7 @@ ui::widgets::SimpleIconBox::drawItem(gfx::Canvas& can, gfx::Rectangle area, size
             drawBackground(ctx, area);
             ctx.setColor(SkinColor::Static);
         }
-    
+
         outText(ctx, gfx::Point(area.getLeftX() + GAP_X, area.getTopY() + GAP_Y), m_items[item].text);
     }
 }

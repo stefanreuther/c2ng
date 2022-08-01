@@ -71,19 +71,19 @@ client::widgets::AllianceStatusList::getCurrentPlayer() const
 
 // AbstractListbox:
 size_t
-client::widgets::AllianceStatusList::getNumItems()
+client::widgets::AllianceStatusList::getNumItems() const
 {
     return m_items.size();
 }
 
 bool
-client::widgets::AllianceStatusList::isItemAccessible(size_t n)
+client::widgets::AllianceStatusList::isItemAccessible(size_t n) const
 {
     return n < m_items.size() && !m_items[n].flags.contains(Self);
 }
 
 int
-client::widgets::AllianceStatusList::getItemHeight(size_t /*n*/)
+client::widgets::AllianceStatusList::getItemHeight(size_t /*n*/) const
 {
     return getItemHeight();
 }

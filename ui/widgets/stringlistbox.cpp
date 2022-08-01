@@ -23,18 +23,18 @@ ui::widgets::StringListbox::~StringListbox()
 
 // AbstractListbox:
 size_t
-ui::widgets::StringListbox::getNumItems()
+ui::widgets::StringListbox::getNumItems() const
 {
     return m_content.size();
 }
 
 bool
-ui::widgets::StringListbox::isItemAccessible(size_t /*n*/)
+ui::widgets::StringListbox::isItemAccessible(size_t /*n*/) const
 {
     return true;
 }
 int
-ui::widgets::StringListbox::getItemHeight(size_t /*n*/)
+ui::widgets::StringListbox::getItemHeight(size_t /*n*/) const
 {
     return m_provider.getFont(gfx::FontRequest())->getLineHeight();
 }

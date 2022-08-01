@@ -103,11 +103,11 @@ namespace {
             { }
         virtual bool handleKey(util::Key_t key, int prefix)
             { return defaultHandleKey(key, prefix); }
-        virtual size_t getNumItems()
+        virtual size_t getNumItems() const
             { return 10; }
-        virtual bool isItemAccessible(size_t /*n*/)
+        virtual bool isItemAccessible(size_t /*n*/) const
             { return true; }
-        virtual int getItemHeight(size_t /*n*/)
+        virtual int getItemHeight(size_t /*n*/) const
             { return 16; }
         virtual int getHeaderHeight() const
             { return 5; }

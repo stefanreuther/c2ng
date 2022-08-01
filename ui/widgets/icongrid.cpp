@@ -142,31 +142,31 @@ ui::widgets::IconGrid::getCurrentColumn() const
 
 // ScrollableWidget:
 int
-ui::widgets::IconGrid::getPageTop()
+ui::widgets::IconGrid::getPageTop() const
 {
     return m_pageTop;
 }
 
 int
-ui::widgets::IconGrid::getPageSize()
+ui::widgets::IconGrid::getPageSize() const
 {
     return getExtent().getHeight() / (m_cellSize.getY() + 1 + 2*m_padding);
 }
 
 int
-ui::widgets::IconGrid::getCursorTop()
+ui::widgets::IconGrid::getCursorTop() const
 {
     return m_currentLine;
 }
 
 int
-ui::widgets::IconGrid::getCursorSize()
+ui::widgets::IconGrid::getCursorSize() const
 {
     return 1;
 }
 
 int
-ui::widgets::IconGrid::getTotalSize()
+ui::widgets::IconGrid::getTotalSize() const
 {
     return util::divideAndRoundUp(int(m_icons.size()), m_widthInCells);
 }

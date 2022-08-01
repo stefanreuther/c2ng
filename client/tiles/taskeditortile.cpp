@@ -34,14 +34,14 @@ class client::tiles::TaskEditorTile::ListWidget : public ui::widgets::AbstractLi
         { }
 
     // AbstractListbox:
-    virtual size_t getNumItems()
+    virtual size_t getNumItems() const
         {
             // +1 for blank item at end, +2 for divider line
             return m_status.commands.size() + 2;
         }
-    virtual bool isItemAccessible(size_t n)
+    virtual bool isItemAccessible(size_t n) const
         { return n <= m_status.commands.size(); }
-    virtual int getItemHeight(size_t /*n*/)
+    virtual int getItemHeight(size_t /*n*/) const
         { return m_provider.getFont(gfx::FontRequest())->getLineHeight(); }
     virtual int getHeaderHeight() const
         { return 0; }

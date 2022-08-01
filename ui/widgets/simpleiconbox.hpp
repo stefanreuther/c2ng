@@ -29,8 +29,8 @@ namespace ui { namespace widgets {
         virtual ui::layout::Info getLayoutInfo() const;
 
         // IconBox:
-        virtual int getItemWidth(size_t nr);
-        virtual size_t getNumItems();
+        virtual int getItemWidth(size_t nr) const;
+        virtual size_t getNumItems() const;
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state);
 
         void swapContent(Items_t& items, size_t current);

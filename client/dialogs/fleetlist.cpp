@@ -38,10 +38,10 @@ namespace {
                 handleModelChange();
             }
 
-        virtual size_t getNumItems()
+        virtual size_t getNumItems() const
             { return m_content.size(); }
 
-        virtual bool isItemAccessible(size_t n)
+        virtual bool isItemAccessible(size_t n) const
             {
                 bool ok = false;
                 if (const FleetList::Item* p = m_content.get(n)) {
@@ -60,7 +60,7 @@ namespace {
                 return ok;
             }
 
-        virtual int getItemHeight(size_t /*n*/)
+        virtual int getItemHeight(size_t /*n*/) const
             { return getFont()->getLineHeight(); }
 
         virtual int getHeaderHeight() const

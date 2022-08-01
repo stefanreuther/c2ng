@@ -51,7 +51,7 @@ namespace {
                 return result;
             }
 
-        bool isEmpty()
+        bool isEmpty() const
             { return m_list.getNumItems() == 0; }
 
      private:

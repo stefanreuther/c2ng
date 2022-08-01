@@ -40,9 +40,9 @@ namespace ui { namespace widgets {
         AbstractListbox();
 
         // AbstractListbox virtuals:
-        virtual size_t getNumItems() = 0;
-        virtual bool isItemAccessible(size_t n) = 0;
-        virtual int getItemHeight(size_t n) = 0;
+        virtual size_t getNumItems() const = 0;
+        virtual bool isItemAccessible(size_t n) const = 0;
+        virtual int getItemHeight(size_t n) const = 0;
         virtual int getHeaderHeight() const = 0;
         virtual int getFooterHeight() const = 0;
         virtual void drawHeader(gfx::Canvas& can, gfx::Rectangle area) = 0;
@@ -50,11 +50,11 @@ namespace ui { namespace widgets {
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state) = 0;
 
         // ScrollableWidget virtuals:
-        virtual int getPageTop();
-        virtual int getPageSize();
-        virtual int getCursorTop();
-        virtual int getCursorSize();
-        virtual int getTotalSize();
+        virtual int getPageTop() const;
+        virtual int getPageSize() const;
+        virtual int getCursorTop() const;
+        virtual int getCursorSize() const;
+        virtual int getTotalSize() const;
         virtual void setPageTop(int top);
         virtual void scroll(Operation op);
 
@@ -72,8 +72,8 @@ namespace ui { namespace widgets {
         bool hasFlag(Flag flag) const;
         void updateItem(size_t item);
         void updateCurrentItem();
-        gfx::Rectangle getRelativeItemPosition(size_t item);
-        gfx::Rectangle getAbsoluteItemPosition(size_t item);
+        gfx::Rectangle getRelativeItemPosition(size_t item) const;
+        gfx::Rectangle getAbsoluteItemPosition(size_t item) const;
 
         bool getItemFromRelativePosition(gfx::Point pt, size_t& item, gfx::Rectangle& area);
         ItemState getItemState(size_t nr);

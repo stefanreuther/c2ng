@@ -67,31 +67,31 @@ client::widgets::FileListbox::setCurrentIndex(size_t n)
 
 // ScrollableWidget:
 int
-client::widgets::FileListbox::getPageTop()
+client::widgets::FileListbox::getPageTop() const
 {
     return int(m_firstItem);
 }
 
 int
-client::widgets::FileListbox::getPageSize()
+client::widgets::FileListbox::getPageSize() const
 {
     return m_currentColumns * m_currentLines;
 }
 
 int
-client::widgets::FileListbox::getCursorTop()
+client::widgets::FileListbox::getCursorTop() const
 {
     return int(m_currentItem);
 }
 
 int
-client::widgets::FileListbox::getCursorSize()
+client::widgets::FileListbox::getCursorSize() const
 {
     return 1;
 }
 
 int
-client::widgets::FileListbox::getTotalSize()
+client::widgets::FileListbox::getTotalSize() const
 {
     return int(m_items.size());
 }
@@ -354,7 +354,7 @@ client::widgets::FileListbox::updatePageTop()
     if (m_currentItem < m_firstItem) {
         m_firstItem = m_currentItem;
     }
-    
+
     size_t pageSize = size_t(getPageSize());
     if (m_currentItem - m_firstItem >= pageSize) {
         m_firstItem = m_currentItem - (pageSize-1);

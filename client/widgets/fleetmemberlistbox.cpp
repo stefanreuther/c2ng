@@ -57,13 +57,13 @@ client::widgets::FleetMemberListbox::getCurrentFleetMember() const
 }
 
 size_t
-client::widgets::FleetMemberListbox::getNumItems()
+client::widgets::FleetMemberListbox::getNumItems() const
 {
     return m_content.size();
 }
 
 bool
-client::widgets::FleetMemberListbox::isItemAccessible(size_t n)
+client::widgets::FleetMemberListbox::isItemAccessible(size_t n) const
 {
     bool ok = false;
     if (const FleetMemberList::Item* p = m_content.get(n)) {
@@ -83,7 +83,7 @@ client::widgets::FleetMemberListbox::isItemAccessible(size_t n)
 }
 
 int
-client::widgets::FleetMemberListbox::getItemHeight(size_t /*n*/)
+client::widgets::FleetMemberListbox::getItemHeight(size_t /*n*/) const
 {
     return getFont()->getLineHeight();
 }

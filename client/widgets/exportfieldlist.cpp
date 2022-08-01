@@ -29,7 +29,7 @@ client::widgets::ExportFieldList::setContent(const interpreter::exporter::FieldL
 
 // AbstractListbox:
 size_t
-client::widgets::ExportFieldList::getNumItems()
+client::widgets::ExportFieldList::getNumItems() const
 {
     // ex WExportFieldList::update (sort-of)
     /* "+1" to allow users to scroll past the end and insert there */
@@ -37,13 +37,13 @@ client::widgets::ExportFieldList::getNumItems()
 }
 
 bool
-client::widgets::ExportFieldList::isItemAccessible(size_t /*n*/)
+client::widgets::ExportFieldList::isItemAccessible(size_t /*n*/) const
 {
     return true;
 }
 
 int
-client::widgets::ExportFieldList::getItemHeight(size_t /*n*/)
+client::widgets::ExportFieldList::getItemHeight(size_t /*n*/) const
 {
     return getFont()->getLineHeight();
 }

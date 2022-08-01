@@ -46,23 +46,23 @@ namespace ui {
 
         /** Get position of page top.
             \return position (index, pixel position, ...) */
-        virtual int getPageTop() = 0;
+        virtual int getPageTop() const = 0;
 
         /** Get size of one page.
             \return size (number of items, pixels, ...) */
-        virtual int getPageSize() = 0;
+        virtual int getPageSize() const = 0;
 
         /** Get position of cursor.
             \return position (index, pixel position, ...) */
-        virtual int getCursorTop() = 0;
+        virtual int getCursorTop() const = 0;
 
         /** Get size of cursor.
             \return size (number of items, pixels, ...) */
-        virtual int getCursorSize() = 0;
+        virtual int getCursorSize() const = 0;
 
         /** Get total size of content.
             \return size (number of items, pixels, ...) */
-        virtual int getTotalSize() = 0;
+        virtual int getTotalSize() const = 0;
 
         /** Set position of page top.
             If this actually results in a change, the widget needs to emit sig_change.

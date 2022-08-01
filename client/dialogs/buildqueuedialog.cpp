@@ -60,9 +60,9 @@ namespace {
         bool hasChanges() const;
         game::Id_t getCurrentPlanetId() const;
 
-        virtual size_t getNumItems();
-        virtual bool isItemAccessible(size_t n);
-        virtual int getItemHeight(size_t n);
+        virtual size_t getNumItems() const;
+        virtual bool isItemAccessible(size_t n) const;
+        virtual int getItemHeight(size_t n) const;
         virtual int getHeaderHeight() const;
         virtual int getFooterHeight() const;
         virtual void drawHeader(gfx::Canvas& can, gfx::Rectangle area);
@@ -277,19 +277,19 @@ BuildQueueList::getCurrentPlanetId() const
 }
 
 size_t
-BuildQueueList::getNumItems()
+BuildQueueList::getNumItems() const
 {
     return m_data.size();
 }
 
 bool
-BuildQueueList::isItemAccessible(size_t /*n*/)
+BuildQueueList::isItemAccessible(size_t /*n*/) const
 {
     return true;
 }
 
 int
-BuildQueueList::getItemHeight(size_t /*n*/)
+BuildQueueList::getItemHeight(size_t /*n*/) const
 {
     return getItemHeight();
 }

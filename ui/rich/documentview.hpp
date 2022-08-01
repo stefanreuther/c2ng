@@ -50,11 +50,11 @@ namespace ui { namespace rich {
         afl::base::Signal<void(String_t)> sig_linkClick;
 
         // ScrollableWidget:
-        virtual int getPageTop();
-        virtual int getPageSize();
-        virtual int getCursorTop();
-        virtual int getCursorSize();
-        virtual int getTotalSize();
+        virtual int getPageTop() const;
+        virtual int getPageSize() const;
+        virtual int getCursorTop() const;
+        virtual int getCursorSize() const;
+        virtual int getTotalSize() const;
         virtual void setPageTop(int top);
         virtual void scroll(Operation op);
 

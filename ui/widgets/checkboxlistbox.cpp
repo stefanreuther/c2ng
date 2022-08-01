@@ -168,20 +168,20 @@ ui::widgets::CheckboxListbox::getItemId(Item* p) const
 
 // AbstractListbox virtuals:
 size_t
-ui::widgets::CheckboxListbox::getNumItems()
+ui::widgets::CheckboxListbox::getNumItems() const
 {
     return m_items.size();
 }
 
 bool
-ui::widgets::CheckboxListbox::isItemAccessible(size_t n)
+ui::widgets::CheckboxListbox::isItemAccessible(size_t n) const
 {
     Item* p = getItemByIndex(n);
     return p != 0 && p->accessible;
 }
 
 int
-ui::widgets::CheckboxListbox::getItemHeight(size_t /*n*/)
+ui::widgets::CheckboxListbox::getItemHeight(size_t /*n*/) const
 {
     return getItemHeight();
 }

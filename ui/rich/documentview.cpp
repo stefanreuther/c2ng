@@ -120,32 +120,32 @@ ui::rich::DocumentView::addTopY(int deltaY)
 
 // ScrollableWidget:
 int
-ui::rich::DocumentView::getPageTop()
+ui::rich::DocumentView::getPageTop() const
 {
     // ex UIRichDocument::getTopY, sort-of
     return m_topY;
 }
 
 int
-ui::rich::DocumentView::getPageSize()
+ui::rich::DocumentView::getPageSize() const
 {
     return getExtent().getHeight();
 }
 
 int
-ui::rich::DocumentView::getCursorTop()
+ui::rich::DocumentView::getCursorTop() const
 {
     return getPageTop();
 }
 
 int
-ui::rich::DocumentView::getCursorSize()
+ui::rich::DocumentView::getCursorSize() const
 {
     return getPageSize();
 }
 
 int
-ui::rich::DocumentView::getTotalSize()
+ui::rich::DocumentView::getTotalSize() const
 {
     return doc.getDocumentHeight();
 }

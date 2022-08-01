@@ -71,13 +71,13 @@ client::widgets::ReferenceListbox::getCurrentReference() const
 }
 
 size_t
-client::widgets::ReferenceListbox::getNumItems()
+client::widgets::ReferenceListbox::getNumItems() const
 {
     return m_content.size();
 }
 
 bool
-client::widgets::ReferenceListbox::isItemAccessible(size_t n)
+client::widgets::ReferenceListbox::isItemAccessible(size_t n) const
 {
     // ex WObjectList::isAccessible
     bool ok = false;
@@ -98,7 +98,7 @@ client::widgets::ReferenceListbox::isItemAccessible(size_t n)
 }
 
 int
-client::widgets::ReferenceListbox::getItemHeight(size_t /*n*/)
+client::widgets::ReferenceListbox::getItemHeight(size_t /*n*/) const
 {
     return m_root.provider().getFont(gfx::FontRequest())->getCellSize().getY();
 }

@@ -134,9 +134,9 @@ namespace ui { namespace widgets {
         int getItemId(Item* p) const;
 
         // AbstractListbox virtuals:
-        virtual size_t getNumItems();
-        virtual bool isItemAccessible(size_t n);
-        virtual int getItemHeight(size_t n);
+        virtual size_t getNumItems() const;
+        virtual bool isItemAccessible(size_t n) const;
+        virtual int getItemHeight(size_t n) const;
         virtual int getHeaderHeight() const;
         virtual int getFooterHeight() const;
         virtual void drawHeader(gfx::Canvas& can, gfx::Rectangle area);

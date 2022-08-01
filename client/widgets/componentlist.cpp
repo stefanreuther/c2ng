@@ -70,20 +70,20 @@ client::widgets::ComponentList::getCurrentAmount() const
 
 // AbstractListbox virtuals:
 size_t
-client::widgets::ComponentList::getNumItems()
+client::widgets::ComponentList::getNumItems() const
 {
     return m_content.size();
 }
 
 bool
-client::widgets::ComponentList::isItemAccessible(size_t n)
+client::widgets::ComponentList::isItemAccessible(size_t n) const
 {
     return n < m_content.size()
         && m_content[n].isAccessible;
 }
 
 int
-client::widgets::ComponentList::getItemHeight(size_t /*n*/)
+client::widgets::ComponentList::getItemHeight(size_t /*n*/) const
 {
     return getFont()->getLineHeight();
 }

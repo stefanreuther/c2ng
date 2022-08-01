@@ -19,31 +19,31 @@ ui::widgets::AbstractListbox::AbstractListbox()
 
 // ScrollableWidget virtuals:
 int
-ui::widgets::AbstractListbox::getPageTop()
+ui::widgets::AbstractListbox::getPageTop() const
 {
     return m_topY;
 }
 
 int
-ui::widgets::AbstractListbox::getPageSize()
+ui::widgets::AbstractListbox::getPageSize() const
 {
     return std::max(0, getExtent().getHeight() - getHeaderHeight());
 }
 
 int
-ui::widgets::AbstractListbox::getCursorTop()
+ui::widgets::AbstractListbox::getCursorTop() const
 {
     return getRelativeItemPosition(m_currentItem).getTopY();
 }
 
 int
-ui::widgets::AbstractListbox::getCursorSize()
+ui::widgets::AbstractListbox::getCursorSize() const
 {
     return getItemHeight(m_currentItem);
 }
 
 int
-ui::widgets::AbstractListbox::getTotalSize()
+ui::widgets::AbstractListbox::getTotalSize() const
 {
     size_t n = getNumItems();
     if (n > 0) {
@@ -376,7 +376,7 @@ ui::widgets::AbstractListbox::updateCurrentItem()
 }
 
 gfx::Rectangle
-ui::widgets::AbstractListbox::getRelativeItemPosition(size_t item)
+ui::widgets::AbstractListbox::getRelativeItemPosition(size_t item) const
 {
     gfx::Rectangle result(0, 0, getExtent().getWidth(), getItemHeight(item));
     if (hasFlag(EqualSizes)) {
@@ -390,7 +390,7 @@ ui::widgets::AbstractListbox::getRelativeItemPosition(size_t item)
 }
 
 gfx::Rectangle
-ui::widgets::AbstractListbox::getAbsoluteItemPosition(size_t item)
+ui::widgets::AbstractListbox::getAbsoluteItemPosition(size_t item) const
 {
     gfx::Rectangle r = getRelativeItemPosition(item);
     r.moveBy(gfx::Point(0, -m_topY));

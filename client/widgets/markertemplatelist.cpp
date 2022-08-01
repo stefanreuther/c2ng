@@ -31,19 +31,19 @@ client::widgets::MarkerTemplateList::setContent(const DataVector_t& content)
 
 // AbstractListbox:
 size_t
-client::widgets::MarkerTemplateList::getNumItems()
+client::widgets::MarkerTemplateList::getNumItems() const
 {
     return m_content.size();
 }
 
 bool
-client::widgets::MarkerTemplateList::isItemAccessible(size_t /*n*/)
+client::widgets::MarkerTemplateList::isItemAccessible(size_t /*n*/) const
 {
     return true;
 }
 
 int
-client::widgets::MarkerTemplateList::getItemHeight(size_t /*n*/)
+client::widgets::MarkerTemplateList::getItemHeight(size_t /*n*/) const
 {
     return getLineHeight();
 }

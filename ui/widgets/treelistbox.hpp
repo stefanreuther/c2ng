@@ -113,9 +113,9 @@ namespace ui { namespace widgets {
         void setIcon(Node* node, ui::icons::Icon* pIcon);
 
         // AbstractListbox virtuals:
-        virtual size_t getNumItems();
-        virtual bool isItemAccessible(size_t n);
-        virtual int getItemHeight(size_t n);
+        virtual size_t getNumItems() const;
+        virtual bool isItemAccessible(size_t n) const;
+        virtual int getItemHeight(size_t n) const;
         virtual int getHeaderHeight() const;
         virtual int getFooterHeight() const;
         virtual void drawHeader(gfx::Canvas& can, gfx::Rectangle area);
@@ -146,7 +146,7 @@ namespace ui { namespace widgets {
 
         void onItemClickAt(size_t itemIndex, gfx::Point pos);
 
-        afl::base::Ref<gfx::Font> getFont();
+        afl::base::Ref<gfx::Font> getFont() const;
     };
 
 } }

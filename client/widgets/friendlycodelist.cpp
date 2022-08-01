@@ -46,19 +46,19 @@ client::widgets::FriendlyCodeList::getFriendlyCode() const
 
 // AbstractListbox virtuals:
 size_t
-client::widgets::FriendlyCodeList::getNumItems()
+client::widgets::FriendlyCodeList::getNumItems() const
 {
     return m_list.size();
 }
 
 bool
-client::widgets::FriendlyCodeList::isItemAccessible(size_t /*n*/)
+client::widgets::FriendlyCodeList::isItemAccessible(size_t /*n*/) const
 {
     return true;
 }
 
 int
-client::widgets::FriendlyCodeList::getItemHeight(size_t /*n*/)
+client::widgets::FriendlyCodeList::getItemHeight(size_t /*n*/) const
 {
     return m_root.provider().getFont(gfx::FontRequest())->getLineHeight();
 }

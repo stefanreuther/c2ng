@@ -19,19 +19,19 @@ client::widgets::FolderListbox::FolderListbox(gfx::Point cells, ui::Root& root)
 
 // AbstractListbox virtuals:
 size_t
-client::widgets::FolderListbox::getNumItems()
+client::widgets::FolderListbox::getNumItems() const
 {
     return m_items.size();
 }
 
 bool
-client::widgets::FolderListbox::isItemAccessible(size_t /*n*/)
+client::widgets::FolderListbox::isItemAccessible(size_t /*n*/) const
 {
     return true;
 }
 
 int
-client::widgets::FolderListbox::getItemHeight(size_t /*n*/)
+client::widgets::FolderListbox::getItemHeight(size_t /*n*/) const
 {
     return m_font->getLineHeight();
 }
