@@ -21,6 +21,7 @@
 #include "client/dialogs/buildstructuresdialog.hpp"
 #include "client/dialogs/buysuppliesdialog.hpp"
 #include "client/dialogs/cargohistorydialog.hpp"
+#include "client/dialogs/changepassword.hpp"
 #include "client/dialogs/cloneship.hpp"
 #include "client/dialogs/commandlistdialog.hpp"
 #include "client/dialogs/entercoordinates.hpp"
@@ -119,6 +120,8 @@
 #include "game/searchquery.hpp"
 #include "game/sim/sessionextra.hpp"
 #include "game/turn.hpp"
+#include "game/v3/genextra.hpp"
+#include "game/v3/genfile.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/keymapvalue.hpp"
 #include "interpreter/simplefunction.hpp"
@@ -1196,6 +1199,52 @@ client::si::IFCCCloneShip(game::Session& session, ScriptSide& si, RequestLink1 l
 
     // OK, do it
     si.postNewTask(link, new Task(sh.getId()));
+}
+
+// @since PCC2 2.40.13
+void
+client::si::IFCCChangePassword(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // Task to set password
+    class SetPasswordTask : public util::Request<game::Session> {
+     public:
+        SetPasswordTask(const String_t& password)
+            : m_password(password)
+            { }
+        virtual void handle(game::Session& session)
+            {
+                Game& g = game::actions::mustHaveGame(session);
+                Turn& t = g.currentTurn();
+                if (game::v3::GenFile* p = game::v3::GenExtra::get(t, g.getViewpointPlayer())) {
+                    p->setPassword(m_password);
+                }
+            }
+     private:
+        const String_t m_password;
+    };
+
+    // User-interface task
+    class Task : public UserTask {
+     public:
+        virtual void handle(Control& ctl, RequestLink2 link)
+            {
+                String_t password;
+                if (client::dialogs::doChangePassword(ctl.root(), ctl.translator(), password)) {
+                    ctl.interface().gameSender().postNewRequest(new SetPasswordTask(password));
+                }
+                ctl.interface().continueProcess(link);
+            }
+    };
+
+    // Implementation
+    args.checkArgumentCount(0);
+    const Game& g = game::actions::mustHaveGame(session);
+    const Turn& t = g.currentTurn();
+    if (game::v3::GenExtra::get(t, g.getViewpointPlayer()) != 0) {
+        si.postNewTask(link, new Task());
+    } else {
+        throw Error("Password change not supported");
+    }
 }
 
 // @since PCC2 2.40.6
@@ -4328,6 +4377,7 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("CC$BUYSUPPLIES",        new ScriptProcedure(s, &si, IFCCBuySupplies));
                 s.world().setNewGlobalValue("CC$CARGOHISTORY",       new ScriptProcedure(s, &si, IFCCCargoHistory));
                 s.world().setNewGlobalValue("CC$CLONESHIP",          new ScriptProcedure(s, &si, IFCCCloneShip));
+                s.world().setNewGlobalValue("CC$CHANGEPASSWORD",     new ScriptProcedure(s, &si, IFCCChangePassword));
                 s.world().setNewGlobalValue("CC$CHANGESPEED",        new ScriptProcedure(s, &si, IFCCChangeSpeed));
                 s.world().setNewGlobalValue("CC$CHANGETAXES",        new ScriptProcedure(s, &si, IFCCChangeTaxes));
                 s.world().setNewGlobalValue("CC$CHANGETECH",         new ScriptProcedure(s, &si, IFCCChangeTech));
