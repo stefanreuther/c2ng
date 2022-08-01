@@ -15,7 +15,7 @@
 #include "interpreter/arraydata.hpp"
 #include "interpreter/arrayvalue.hpp"
 #include "interpreter/bytecodeobject.hpp"
-#include "interpreter/context.hpp"
+#include "interpreter/simplecontext.hpp"
 #include "interpreter/propertyacceptor.hpp"
 #include "interpreter/subroutinevalue.hpp"
 #include "interpreter/values.hpp"
@@ -30,7 +30,7 @@ namespace {
      *
      *  Secondary objective: return additional properties in enumProperties() (these all cause verifyTypes to fail).
      */
-    class TestContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
+    class TestContext : public interpreter::SimpleContext, public interpreter::Context::PropertyAccessor {
      public:
         TestContext(String_t name, interpreter::TypeHint th, afl::data::Value* value)
             : m_name(name), m_type(th), m_value(value), m_table()

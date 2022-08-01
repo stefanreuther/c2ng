@@ -4,7 +4,7 @@
 #ifndef C2NG_GAME_INTERFACE_VCRSIDECONTEXT_HPP
 #define C2NG_GAME_INTERFACE_VCRSIDECONTEXT_HPP
 
-#include "interpreter/context.hpp"
+#include "interpreter/simplecontext.hpp"
 #include "game/root.hpp"
 #include "game/session.hpp"
 #include "game/spec/shiplist.hpp"
@@ -14,7 +14,7 @@
 
 namespace game { namespace interface {
 
-    class VcrSideContext : public interpreter::Context, public interpreter::Context::ReadOnlyAccessor {
+    class VcrSideContext : public interpreter::SimpleContext, public interpreter::Context::ReadOnlyAccessor {
      public:
         VcrSideContext(size_t battleNumber,
                        size_t side,

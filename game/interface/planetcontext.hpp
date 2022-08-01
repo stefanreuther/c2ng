@@ -4,7 +4,7 @@
 #ifndef C2NG_GAME_INTERFACE_PLANETCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_PLANETCONTEXT_HPP
 
-#include "interpreter/context.hpp"
+#include "interpreter/simplecontext.hpp"
 #include "afl/base/ref.hpp"
 #include "game/root.hpp"
 #include "game/game.hpp"
@@ -13,7 +13,7 @@
 
 namespace game { namespace interface {
 
-    class PlanetContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
+    class PlanetContext : public interpreter::SimpleContext, public interpreter::Context::PropertyAccessor {
      public:
         PlanetContext(int id,
                       Session& session,

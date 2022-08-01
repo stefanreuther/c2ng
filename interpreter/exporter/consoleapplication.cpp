@@ -24,6 +24,7 @@
 #include "interpreter/error.hpp"
 #include "interpreter/exporter/configuration.hpp"
 #include "interpreter/propertyacceptor.hpp"
+#include "interpreter/simplecontext.hpp"
 #include "interpreter/values.hpp"
 #include "util/charsetfactory.hpp"
 #include "util/profiledirectory.hpp"
@@ -37,7 +38,7 @@ namespace {
 
     /* Meta-context for generating field names. Used to implement '-F'. */
     // FIXME: move into library
-    class MetaContext : public interpreter::Context,
+    class MetaContext : public interpreter::SimpleContext,
                         public interpreter::Context::ReadOnlyAccessor,
                         public interpreter::PropertyAcceptor
     {

@@ -8,11 +8,11 @@
 #include "game/game.hpp"
 #include "game/root.hpp"
 #include "game/session.hpp"
-#include "interpreter/context.hpp"
+#include "interpreter/simplecontext.hpp"
 
 namespace game { namespace interface {
 
-    class PlayerContext : public interpreter::Context, public interpreter::Context::ReadOnlyAccessor {
+    class PlayerContext : public interpreter::SimpleContext, public interpreter::Context::ReadOnlyAccessor {
      public:
         PlayerContext(int nr, afl::base::Ref<Game> game, afl::base::Ref<Root> root, afl::string::Translator& tx);
         ~PlayerContext();

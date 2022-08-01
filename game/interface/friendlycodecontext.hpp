@@ -8,11 +8,11 @@
 #include "afl/string/translator.hpp"
 #include "game/root.hpp"
 #include "game/spec/shiplist.hpp"
-#include "interpreter/context.hpp"
+#include "interpreter/simplecontext.hpp"
 
 namespace game { namespace interface {
 
-    class FriendlyCodeContext : public interpreter::Context, public interpreter::Context::ReadOnlyAccessor {
+    class FriendlyCodeContext : public interpreter::SimpleContext, public interpreter::Context::ReadOnlyAccessor {
      public:
         FriendlyCodeContext(size_t slot,
                             afl::base::Ref<Root> root,

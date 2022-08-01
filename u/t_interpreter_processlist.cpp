@@ -16,6 +16,7 @@
 #include "interpreter/callablevalue.hpp"
 #include "interpreter/opcode.hpp"
 #include "interpreter/process.hpp"
+#include "interpreter/simplecontext.hpp"
 #include "interpreter/world.hpp"
 
 namespace {
@@ -819,7 +820,7 @@ TestInterpreterProcessList::testObject()
         virtual bool getPosition(game::map::Point& /*result*/) const
             { return false; }
     };
-    class MyObjectContext : public interpreter::Context {
+    class MyObjectContext : public interpreter::SimpleContext {
      public:
         MyObjectContext(MyObject& obj)
             : m_obj(obj)

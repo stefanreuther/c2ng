@@ -4,7 +4,7 @@
 #ifndef C2NG_GAME_INTERFACE_DRAWINGCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_DRAWINGCONTEXT_HPP
 
-#include "interpreter/context.hpp"
+#include "interpreter/simplecontext.hpp"
 #include "game/turn.hpp"
 #include "afl/base/ref.hpp"
 #include "game/map/drawingcontainer.hpp"
@@ -12,7 +12,7 @@
 
 namespace game { namespace interface {
 
-    class DrawingContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
+    class DrawingContext : public interpreter::SimpleContext, public interpreter::Context::PropertyAccessor {
      public:
         DrawingContext(afl::base::Ref<Turn> turn, game::map::DrawingContainer::Iterator_t it);
         ~DrawingContext();

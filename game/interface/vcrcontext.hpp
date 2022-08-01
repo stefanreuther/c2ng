@@ -4,7 +4,7 @@
 #ifndef C2NG_GAME_INTERFACE_VCRCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_VCRCONTEXT_HPP
 
-#include "interpreter/context.hpp"
+#include "interpreter/simplecontext.hpp"
 #include "game/session.hpp"
 #include "game/root.hpp"
 #include "game/turn.hpp"
@@ -12,7 +12,7 @@
 
 namespace game { namespace interface {
 
-    class VcrContext : public interpreter::Context, public interpreter::Context::ReadOnlyAccessor {
+    class VcrContext : public interpreter::SimpleContext, public interpreter::Context::ReadOnlyAccessor {
      public:
         VcrContext(size_t battleNumber,
                    Session& session,

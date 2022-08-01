@@ -72,7 +72,7 @@ namespace {
 
 
 game::interface::UfoContext::UfoContext(Id_t slot, afl::base::Ref<Turn> turn, Session& session)
-    : Context(),
+    : SimpleContext(),
       m_slot(slot),
       m_turn(turn),
       m_session(session)

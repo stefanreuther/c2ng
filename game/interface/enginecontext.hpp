@@ -4,13 +4,13 @@
 #ifndef C2NG_GAME_INTERFACE_ENGINECONTEXT_HPP
 #define C2NG_GAME_INTERFACE_ENGINECONTEXT_HPP
 
-#include "interpreter/context.hpp"
+#include "interpreter/simplecontext.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/session.hpp"
 
 namespace game { namespace interface {
 
-    class EngineContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
+    class EngineContext : public interpreter::SimpleContext, public interpreter::Context::PropertyAccessor {
      public:
         EngineContext(int nr, afl::base::Ref<game::spec::ShipList> shipList);
         ~EngineContext();

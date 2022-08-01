@@ -27,7 +27,7 @@ game::interface::FriendlyCodeContext::FriendlyCodeContext(size_t slot,
                                                           afl::base::Ref<Root> root,
                                                           afl::base::Ref<game::spec::ShipList> shipList,
                                                           afl::string::Translator& tx)
-    : Context(),
+    : SimpleContext(),
       m_slot(slot),
       m_root(root),
       m_shipList(shipList),

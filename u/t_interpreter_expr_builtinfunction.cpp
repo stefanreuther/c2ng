@@ -1152,7 +1152,7 @@ void
 TestInterpreterExprBuiltinFunction::testIteration()
 {
     /* Mock for an array element: returns a sequence VAL=1..10, with ID=10..100 */
-    class ElementMock : public interpreter::Context, private interpreter::Context::ReadOnlyAccessor {
+    class ElementMock : public interpreter::SimpleContext, private interpreter::Context::ReadOnlyAccessor {
      public:
         ElementMock()
             : m_value(1)

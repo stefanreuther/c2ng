@@ -87,11 +87,11 @@ class game::interface::ReferenceListContext::ProcedureValue : public interpreter
  *  IterableReferenceContext wraps the ReferenceContext to provide iteration.
  */
 
-class game::interface::ReferenceListContext::IterableReferenceContext : public interpreter::Context {
+class game::interface::ReferenceListContext::IterableReferenceContext : public interpreter::SimpleContext {
  public:
     /* Regular constructor. */
     IterableReferenceContext(afl::base::Ref<Data> list, Session& session, size_t index)
-        : Context(),
+        : SimpleContext(),
           m_list(list), m_session(session), m_index(index),
           m_child(new ReferenceContext(m_list->list[index], session))
         { }
@@ -101,7 +101,7 @@ class game::interface::ReferenceListContext::IterableReferenceContext : public i
        Using the regular constructor would rebuild m_child from list/index,
        which might produce a different result if list has already changed in the meantime. */
     IterableReferenceContext(const IterableReferenceContext& other)
-        : Context(),
+        : SimpleContext(),
           m_list(other.m_list), m_session(other.m_session), m_index(other.m_index),
           m_child(other.m_child->clone())
         { }

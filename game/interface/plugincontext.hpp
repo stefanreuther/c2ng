@@ -4,12 +4,12 @@
 #ifndef C2NG_GAME_INTERFACE_PLUGINCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_PLUGINCONTEXT_HPP
 
-#include "interpreter/context.hpp"
+#include "interpreter/simplecontext.hpp"
 #include "game/session.hpp"
 
 namespace game { namespace interface {
 
-    class PluginContext : public interpreter::Context, public interpreter::Context::ReadOnlyAccessor {
+    class PluginContext : public interpreter::SimpleContext, public interpreter::Context::ReadOnlyAccessor {
      public:
         PluginContext(String_t name, Session& session);
         ~PluginContext();

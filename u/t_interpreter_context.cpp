@@ -24,6 +24,10 @@ TestInterpreterContext::testIt()
             { return 0; }
         virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/)
             { }
+        virtual void onContextEntered(interpreter::Process& /*proc*/)
+            { }
+        virtual void onContextLeft()
+            { }
 
         // BaseValue:
         virtual String_t toString(bool /*readable*/) const

@@ -7,7 +7,7 @@
 #include "interpreter/arguments.hpp"
 
 namespace {
-    class InboxSubsetContext : public interpreter::Context {
+    class InboxSubsetContext : public interpreter::SimpleContext {
      public:
         InboxSubsetContext(size_t index,
                            const std::vector<size_t>& indexes,
@@ -37,7 +37,7 @@ namespace {
 }
 
 InboxSubsetContext::InboxSubsetContext(size_t index, const std::vector<size_t>& indexes, afl::string::Translator& tx, afl::base::Ref<const game::Root> root, afl::base::Ref<const game::Game> game)
-    : Context(), m_index(index), m_indexes(indexes), m_translator(tx), m_root(root), m_game(game), m_child()
+    : SimpleContext(), m_index(index), m_indexes(indexes), m_translator(tx), m_root(root), m_game(game), m_child()
 { }
 
 InboxSubsetContext::~InboxSubsetContext()

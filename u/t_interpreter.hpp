@@ -468,6 +468,10 @@ class TestInterpreterProcess : public CxxTest::TestSuite {
     void testExecFusedComparison();
     void testExecFusedComparison2();
     void testExecInplaceUnary();
+    void testContextEnter();
+    void testContextEnterError();
+    void testContextEnterCatch();
+    void testContextEnterReject();
 };
 
 class TestInterpreterProcessList : public CxxTest::TestSuite {
@@ -508,6 +512,10 @@ class TestInterpreterSelectionExpression : public CxxTest::TestSuite {
  public:
     void testValid();
     void testInvalid();
+};
+
+class TestInterpreterSimpleContext : public CxxTest::TestSuite {
+ public:
 };
 
 class TestInterpreterSimpleFunction : public CxxTest::TestSuite {

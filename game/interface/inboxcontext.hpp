@@ -10,13 +10,13 @@
 #include "game/game.hpp"
 #include "game/msg/inbox.hpp"
 #include "game/parser/messagetemplate.hpp"
-#include "interpreter/context.hpp"
+#include "interpreter/simplecontext.hpp"
 
 namespace game { namespace interface {
 
     /** Inbox context.
         Implements the result of the "InMsg" function (-> InboxFunction). */
-    class InboxContext : public interpreter::Context, interpreter::Context::ReadOnlyAccessor {
+    class InboxContext : public interpreter::SimpleContext, interpreter::Context::ReadOnlyAccessor {
      public:
         /** Constructor.
             \param index Message index (0-based)

@@ -12,12 +12,12 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = interpreter/callablevalue.cpp \
-    interpreter/simpleprocedure.cpp interpreter/simpleprocedure.hpp \
-    interpreter/simplefunction.cpp interpreter/simplefunction.hpp \
-    interpreter/functionvalue.cpp interpreter/functionvalue.hpp \
-    game/test/defaultshiplist.cpp game/test/defaultshiplist.hpp \
-    game/proxy/objectlistexportadaptor.cpp \
+FILES_gamelib = interpreter/simplecontext.cpp interpreter/simplecontext.hpp \
+    interpreter/callablevalue.cpp interpreter/simpleprocedure.cpp \
+    interpreter/simpleprocedure.hpp interpreter/simplefunction.cpp \
+    interpreter/simplefunction.hpp interpreter/functionvalue.cpp \
+    interpreter/functionvalue.hpp game/test/defaultshiplist.cpp \
+    game/test/defaultshiplist.hpp game/proxy/objectlistexportadaptor.cpp \
     game/proxy/objectlistexportadaptor.hpp game/proxy/globalactionproxy.cpp \
     game/proxy/globalactionproxy.hpp game/interface/globalactionextra.cpp \
     game/interface/globalactionextra.hpp util/treelist.cpp util/treelist.hpp \
@@ -1720,13 +1720,14 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_interface_iteratorcontext.cpp \
-    u/t_gfx_antialiased.cpp u/t_interpreter_simpleprocedure.cpp \
-    u/t_interpreter_simplefunction.cpp u/t_interpreter_indexablevalue.cpp \
-    u/t_interpreter_functionvalue.cpp u/t_game_db_loader.cpp \
-    u/t_game_test_defaultshiplist.cpp u/t_game_browser_types.cpp \
-    u/t_game_score_scoreid.cpp u/t_game_score_structures.cpp \
-    u/t_game_ref_list.cpp u/t_game_proxy_objectlistexportadaptor.cpp \
+FILES_testsuite = u/t_interpreter_simplecontext.cpp \
+    u/t_game_interface_iteratorcontext.cpp u/t_gfx_antialiased.cpp \
+    u/t_interpreter_simpleprocedure.cpp u/t_interpreter_simplefunction.cpp \
+    u/t_interpreter_indexablevalue.cpp u/t_interpreter_functionvalue.cpp \
+    u/t_game_db_loader.cpp u/t_game_test_defaultshiplist.cpp \
+    u/t_game_browser_types.cpp u/t_game_score_scoreid.cpp \
+    u/t_game_score_structures.cpp u/t_game_ref_list.cpp \
+    u/t_game_proxy_objectlistexportadaptor.cpp \
     u/t_game_proxy_globalactionproxy.cpp \
     u/t_game_interface_globalactionextra.cpp \
     u/t_game_interface_globalactions.cpp u/t_util_treelist.cpp \

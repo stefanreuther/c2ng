@@ -7,11 +7,11 @@
 #include "game/map/explosion.hpp"
 #include "game/turn.hpp"
 #include "game/session.hpp"
-#include "interpreter/context.hpp"
+#include "interpreter/simplecontext.hpp"
 
 namespace game { namespace interface {
 
-    class ExplosionContext : public interpreter::Context, public interpreter::Context::ReadOnlyAccessor {
+    class ExplosionContext : public interpreter::SimpleContext, public interpreter::Context::ReadOnlyAccessor {
      public:
         ExplosionContext(Id_t id, Session& session, afl::base::Ref<Turn> turn);
         ~ExplosionContext();

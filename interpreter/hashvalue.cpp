@@ -5,16 +5,16 @@
 
 #include "interpreter/hashvalue.hpp"
 #include "interpreter/arguments.hpp"
-#include "interpreter/values.hpp"
 #include "interpreter/error.hpp"
-#include "interpreter/context.hpp"
 #include "interpreter/propertyacceptor.hpp"
-#include "interpreter/typehint.hpp"
 #include "interpreter/savecontext.hpp"
+#include "interpreter/simplecontext.hpp"
+#include "interpreter/typehint.hpp"
+#include "interpreter/values.hpp"
 
 namespace {
     /** Context for iterating a hash. */
-    class HashContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
+    class HashContext : public interpreter::SimpleContext, public interpreter::Context::PropertyAccessor {
      public:
         HashContext(afl::data::Hash::Ref_t data)
             : m_data(data),

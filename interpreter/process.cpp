@@ -176,6 +176,11 @@ interpreter::Process::~Process()
     // Clear task so if it accesses some process properties, it still sees them
     m_task.reset();
 
+    // Clear all contexts
+    while (!m_contexts.empty()) {
+        popContext();
+    }
+
     // Disown all my mutexes
     m_world.mutexList().disownLocksByProcess(this);
 
@@ -193,7 +198,7 @@ interpreter::Process::pushFrame(BCORef_t bco, bool wantResult)
     frame->frameSP     = m_frames.size();
     frame->wantResult  = wantResult;
     m_frames.pushBackNew(frame);
-    m_contexts.pushBackNew(new FrameContext(*frame));
+    pushNewContext(new FrameContext(*frame));
     return *frame;
 }
 
@@ -207,7 +212,7 @@ interpreter::Process::popFrame()
 
     /* Clean up stacks */
     while (m_contexts.size() > frame->contextSP) {
-        m_contexts.popBack();
+        popContext();
     }
     while (m_exceptionHandlers.size() > frame->exceptionSP) {
         m_exceptionHandlers.popBack();
@@ -315,7 +320,9 @@ interpreter::Process::pushNewContext(Context* ctx)
 {
     // ex IntExecutionContext::pushNewContext
     assert(ctx);
-    m_contexts.pushBackNew(ctx);
+    std::auto_ptr<Context> p(ctx);
+    p->onContextEntered(*this);
+    m_contexts.pushBackNew(p.release());
 }
 
 // Push new contexts from template.
@@ -361,13 +368,16 @@ void
 interpreter::Process::popContext()
 {
     // ex IntExecutionContext::popContext()
-    m_contexts.popBack();
+    std::auto_ptr<Context> ctx(m_contexts.extractLast());
 
     // Fix up contextTOS.
     // This is to avoid that an implicitly set contextTOS survives too long.
     if (m_contextTOS > m_contexts.size()) {
         m_contextTOS = m_contexts.size();
     }
+
+    // Clean up
+    ctx->onContextLeft();
 }
 
 // Access list of contexts.
@@ -1583,7 +1593,7 @@ interpreter::Process::handleException(String_t e, String_t trace)
             m_valueStack.popBack();
         }
         while (m_contexts.size() > eh->contextSP) {
-            m_contexts.popBack();
+            popContext();
         }
         while (m_frames.size() > eh->frameSP) {
             m_frames.popBack();

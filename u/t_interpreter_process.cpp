@@ -72,7 +72,7 @@ namespace {
     /* Singular object context.
        We don't expect this context to be copied or examined in another way.
        It only provides a single object we give it. */
-    class SingularObjectContext : public interpreter::Context {
+    class SingularObjectContext : public interpreter::SimpleContext {
      public:
         SingularObjectContext(game::map::Object* pObject)
             : m_pObject(pObject)
@@ -99,7 +99,7 @@ namespace {
        We don't expect this context to be copied or examined in another way.
        It only provides a single variable.
        (Turns out that optionally allowing cloning is helpful.) */
-    class SingularVariableContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
+    class SingularVariableContext : public interpreter::SimpleContext, public interpreter::Context::PropertyAccessor {
      public:
         SingularVariableContext(String_t name, String_t& value)
             : m_name(name), m_value(value), m_clonable(false)
@@ -148,7 +148,7 @@ namespace {
 
     /* Counting context.
        Exposes a single variable whose value changes with next(). */
-    class CountingContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
+    class CountingContext : public interpreter::SimpleContext, public interpreter::Context::PropertyAccessor {
      public:
         CountingContext(String_t name, int32_t value)
             : m_name(name), m_value(value)
@@ -263,6 +263,40 @@ namespace {
      private:
         String_t& m_value;
         int m_numArgs;
+    };
+
+    /* Tracing context. Traces the onContextEntered/onContextLeft calls. */
+    class TracingContext : public interpreter::Context {
+     public:
+        TracingContext(String_t& trace, bool reject)
+            : m_trace(trace), m_reject(reject)
+            { }
+        virtual PropertyAccessor* lookup(const afl::data::NameQuery& /*name*/, PropertyIndex_t& /*result*/)
+            { return 0; }
+        virtual bool next()
+            { return false; }
+        virtual interpreter::Context* clone() const
+            { return new TracingContext(m_trace, m_reject); }
+        virtual game::map::Object* getObject()
+            { return 0; }
+        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/)
+            { }
+        virtual void onContextEntered(interpreter::Process& /*proc*/)
+            {
+                m_trace += "(enter)";
+                if (m_reject) {
+                    throw interpreter::Error("fail");
+                }
+            }
+        virtual void onContextLeft()
+            { m_trace += "(leave)"; }
+        virtual String_t toString(bool /*readable*/) const
+            { return "#<trace>"; }
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+            { TS_FAIL("TracingContext::store unexpected"); }
+     private:
+        String_t& m_trace;
+        bool m_reject;
     };
 
     /* Common environment for all tests. */
@@ -3252,5 +3286,99 @@ TestInterpreterProcess::testExecInplaceUnary()
         TS_ASSERT_EQUALS(env.proc.getState(), Process::Ended);
         TS_ASSERT(isNull(env));
     }
+}
+
+/** Test onContextEntered(), onContextLeft(). */
+void
+TestInterpreterProcess::testContextEnter()
+{
+    // Execute 'swith', 'sendwith'
+    Environment env;
+
+    String_t trace;
+    TracingContext ctx(trace, false);
+
+    BCORef_t bco = makeBCO();
+    bco->addPushLiteral(&ctx);
+    bco->addInstruction(Opcode::maSpecial, Opcode::miSpecialWith, 0);
+    bco->addInstruction(Opcode::maSpecial, Opcode::miSpecialEndWith, 0);
+    runBCO(env, bco);
+
+    TS_ASSERT_EQUALS(env.proc.getState(), Process::Ended);
+    TS_ASSERT_EQUALS(trace, "(enter)(leave)");
+}
+
+/** Test onContextEntered(), onContextLeft() when context is left abnormally. */
+void
+TestInterpreterProcess::testContextEnterError()
+{
+    // Execute 'swith', 'sthrow' > context is left implicitly, not by 'sendwith'
+    String_t trace;
+    TracingContext ctx(trace, false);
+
+    {
+        Environment env;
+
+        BCORef_t bco = makeBCO();
+        bco->addPushLiteral(&ctx);
+        bco->addInstruction(Opcode::maSpecial, Opcode::miSpecialWith, 0);
+        bco->addInstruction(Opcode::maPush, Opcode::sInteger, 3);
+        bco->addInstruction(Opcode::maSpecial, Opcode::miSpecialThrow, 0);
+        runBCO(env, bco);
+
+        TS_ASSERT_EQUALS(env.proc.getState(), Process::Failed);
+        // Context will be destroyed here
+    }
+
+    TS_ASSERT_EQUALS(trace, "(enter)(leave)");
+}
+
+/** Test onContextEntered(), onContextLeft() when context is left abnormally, but error is caught. */
+void
+TestInterpreterProcess::testContextEnterCatch()
+{
+    // Execute 'swith', 'sendwith'
+    Environment env;
+
+    String_t trace;
+    TracingContext ctx(trace, false);
+
+    BCORef_t bco = makeBCO();
+    BytecodeObject::Label_t lcatch = bco->makeLabel();
+    bco->addInstruction(Opcode::maJump, Opcode::jCatch | Opcode::jSymbolic, lcatch);
+    bco->addPushLiteral(&ctx);
+    bco->addInstruction(Opcode::maSpecial, Opcode::miSpecialWith, 0);
+    bco->addInstruction(Opcode::maPush, Opcode::sInteger, 3);
+    bco->addInstruction(Opcode::maSpecial, Opcode::miSpecialThrow, 0);
+    bco->addLabel(lcatch);
+    runBCO(env, bco);
+
+    TS_ASSERT_EQUALS(env.proc.getState(), Process::Ended);
+    TS_ASSERT_EQUALS(trace, "(enter)(leave)");
+}
+
+/** Test onContextEntered(), onContextLeft() when context rejects entering.
+    In this case, the leave callback must not be called. */
+void
+TestInterpreterProcess::testContextEnterReject()
+{
+    // Execute 'swith', 'sthrow' > context is left implicitly, not by 'sendwith'
+    String_t trace;
+    TracingContext ctx(trace, true);
+
+    {
+        Environment env;
+
+        BCORef_t bco = makeBCO();
+        bco->addPushLiteral(&ctx);
+        bco->addInstruction(Opcode::maSpecial, Opcode::miSpecialWith, 0);
+        bco->addInstruction(Opcode::maSpecial, Opcode::miSpecialEndWith, 0);
+        runBCO(env, bco);
+
+        TS_ASSERT_EQUALS(env.proc.getState(), Process::Failed);
+        // Context will be destroyed here
+    }
+
+    TS_ASSERT_EQUALS(trace, "(enter)");
 }
 

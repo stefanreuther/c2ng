@@ -4,7 +4,7 @@
 #ifndef C2NG_GAME_INTERFACE_SHIPCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_SHIPCONTEXT_HPP
 
-#include "interpreter/context.hpp"
+#include "interpreter/simplecontext.hpp"
 #include "afl/base/ref.hpp"
 #include "game/root.hpp"
 #include "game/game.hpp"
@@ -13,7 +13,7 @@
 
 namespace game { namespace interface {
 
-    class ShipContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
+    class ShipContext : public interpreter::SimpleContext, public interpreter::Context::PropertyAccessor {
      public:
         ShipContext(int id,
                     Session& session,

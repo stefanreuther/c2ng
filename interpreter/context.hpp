@@ -12,6 +12,7 @@
 namespace interpreter {
 
     class PropertyAcceptor;
+    class Process;
 
     /** Context for name lookup.
         A context provides a means for looking up and dealing with local names, and possibly iteration through objects. */
@@ -67,6 +68,14 @@ namespace interpreter {
         /** Enumerate properties. Call acceptor.addProperty for every property.
             \param acceptor Acceptor object */
         virtual void enumProperties(PropertyAcceptor& acceptor) = 0;
+
+        /** Context has been entered on a process ("With" statement).
+            \param proc Process
+            \throw Error reject entering the context */
+        virtual void onContextEntered(Process& proc) = 0;
+
+        /** Context has been left on a process ("EndWith" statement). */
+        virtual void onContextLeft() = 0;
     };
 
 }

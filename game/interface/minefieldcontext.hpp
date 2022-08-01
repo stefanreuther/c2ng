@@ -9,11 +9,11 @@
 #include "game/map/minefield.hpp"
 #include "game/root.hpp"
 #include "game/session.hpp"
-#include "interpreter/context.hpp"
+#include "interpreter/simplecontext.hpp"
 
 namespace game { namespace interface {
 
-    class MinefieldContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
+    class MinefieldContext : public interpreter::SimpleContext, public interpreter::Context::PropertyAccessor {
      public:
         MinefieldContext(int id, afl::base::Ref<Root> root, afl::base::Ref<Game> game, afl::string::Translator& tx);
         ~MinefieldContext();

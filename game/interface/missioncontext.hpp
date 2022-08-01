@@ -4,13 +4,13 @@
 #ifndef C2NG_GAME_INTERFACE_MISSIONCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_MISSIONCONTEXT_HPP
 
-#include "interpreter/context.hpp"
+#include "interpreter/simplecontext.hpp"
 #include "afl/base/ref.hpp"
 #include "game/spec/shiplist.hpp"
 
 namespace game { namespace interface {
 
-    class MissionContext : public interpreter::Context, public interpreter::Context::ReadOnlyAccessor {
+    class MissionContext : public interpreter::SimpleContext, public interpreter::Context::ReadOnlyAccessor {
      public:
         MissionContext(size_t slot,
                        afl::base::Ref<game::spec::ShipList> shipList);

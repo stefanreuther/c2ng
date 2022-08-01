@@ -13,7 +13,7 @@
 #include "afl/io/stream.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "game/test/waitindicator.hpp"
-#include "interpreter/context.hpp"
+#include "interpreter/simplecontext.hpp"
 #include "interpreter/propertyacceptor.hpp"
 #include "interpreter/typehint.hpp"
 #include "interpreter/values.hpp"
@@ -26,6 +26,7 @@ using afl::io::FileMapping;
 using afl::io::FileSystem;
 using afl::io::Stream;
 using interpreter::Context;
+using interpreter::SimpleContext;
 using util::CharsetFactory;
 
 namespace {
@@ -44,7 +45,7 @@ namespace {
     }
 
     /* TestContext - same as for interpreter::exporter::Configuration */
-    class TestContext : public Context, public Context::ReadOnlyAccessor {
+    class TestContext : public SimpleContext, public Context::ReadOnlyAccessor {
      public:
         virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
             {

@@ -7,7 +7,7 @@
 
 #include "afl/base/ptr.hpp"
 #include "game/spec/costsummary.hpp"
-#include "interpreter/context.hpp"
+#include "interpreter/simplecontext.hpp"
 
 namespace game { namespace interface {
 
@@ -20,7 +20,7 @@ namespace game { namespace interface {
 
         A CostSummary must be non-empty to be exported by CostSummaryContext.
         The constructor function, CostSummaryContext::create, will verify this. */
-    class CostSummaryContext : public interpreter::Context, public interpreter::Context::ReadOnlyAccessor {
+    class CostSummaryContext : public interpreter::SimpleContext, public interpreter::Context::ReadOnlyAccessor {
      public:
         /** Create a CostSummaryContext.
             @param cs CostSummary

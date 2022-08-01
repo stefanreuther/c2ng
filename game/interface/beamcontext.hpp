@@ -4,7 +4,7 @@
 #ifndef C2NG_GAME_INTERFACE_BEAMCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_BEAMCONTEXT_HPP
 
-#include "interpreter/context.hpp"
+#include "interpreter/simplecontext.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/root.hpp"
 #include "afl/base/ref.hpp"
@@ -12,7 +12,7 @@
 
 namespace game { namespace interface {
 
-    class BeamContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
+    class BeamContext : public interpreter::SimpleContext, public interpreter::Context::PropertyAccessor {
      public:
         BeamContext(int nr, afl::base::Ref<game::spec::ShipList> shipList, afl::base::Ref<game::Root> root);
         ~BeamContext();

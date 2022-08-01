@@ -14,6 +14,7 @@
 #include "afl/io/internaltextwriter.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "interpreter/propertyacceptor.hpp"
+#include "interpreter/simplecontext.hpp"
 #include "interpreter/values.hpp"
 
 namespace {
@@ -30,7 +31,7 @@ namespace {
         return s;
     }
 
-    class TestContext : public interpreter::Context, public interpreter::Context::ReadOnlyAccessor {
+    class TestContext : public interpreter::SimpleContext, public interpreter::Context::ReadOnlyAccessor {
      public:
         virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
             {
@@ -170,7 +171,6 @@ TestInterpreterExporterConfiguration::testSave()
                      "Fields=X@-5\n"
                      "Charset=cp850\n"
                      "Format=html\n");
-    
 }
 
 /** Test exportText(), text file format. */

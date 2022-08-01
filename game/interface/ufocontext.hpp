@@ -8,11 +8,11 @@
 #include "game/map/ufo.hpp"
 #include "game/session.hpp"
 #include "game/turn.hpp"
-#include "interpreter/context.hpp"
+#include "interpreter/simplecontext.hpp"
 
 namespace game { namespace interface {
 
-    class UfoContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
+    class UfoContext : public interpreter::SimpleContext, public interpreter::Context::PropertyAccessor {
      public:
         UfoContext(Id_t slot, afl::base::Ref<Turn> turn, Session& session);
         ~UfoContext();

@@ -4,7 +4,7 @@
 #ifndef C2NG_GAME_INTERFACE_TORPEDOCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_TORPEDOCONTEXT_HPP
 
-#include "interpreter/context.hpp"
+#include "interpreter/simplecontext.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/root.hpp"
 #include "afl/base/ref.hpp"
@@ -12,7 +12,7 @@
 
 namespace game { namespace interface {
 
-    class TorpedoContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
+    class TorpedoContext : public interpreter::SimpleContext, public interpreter::Context::PropertyAccessor {
      public:
         TorpedoContext(bool useLauncher, int nr, afl::base::Ref<game::spec::ShipList> shipList, afl::base::Ref<game::Root> root);
         ~TorpedoContext();

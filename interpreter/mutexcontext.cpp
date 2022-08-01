@@ -74,6 +74,19 @@ interpreter::MutexContext::enumProperties(PropertyAcceptor& /*acceptor*/)
     // ex IntMutexContext::enumProperties
 }
 
+void
+interpreter::MutexContext::onContextEntered(Process& proc)
+{
+    // TODO
+    (void) proc;
+}
+
+void
+interpreter::MutexContext::onContextLeft()
+{
+    // TODO
+}
+
 // BaseValue:
 
 /* toString implementation. */

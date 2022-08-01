@@ -9,7 +9,7 @@
 #include "game/interface/planetcontext.hpp"
 #include "game/interface/shipcontext.hpp"
 #include "game/root.hpp"
-#include "interpreter/context.hpp"
+#include "interpreter/simplecontext.hpp"
 
 using game::config::UserConfiguration;
 
@@ -23,7 +23,7 @@ using game::config::UserConfiguration;
  *  using the Id list as a filter only.
  */
 
-class game::proxy::ObjectListExportAdaptor::Context : public interpreter::Context {
+class game::proxy::ObjectListExportAdaptor::Context : public interpreter::SimpleContext {
  public:
     Context(afl::base::Ref<Data> d, size_t index);
 

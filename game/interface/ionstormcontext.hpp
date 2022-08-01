@@ -5,13 +5,13 @@
 #ifndef C2NG_GAME_INTERFACE_IONSTORMCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_IONSTORMCONTEXT_HPP
 
-#include "interpreter/context.hpp"
+#include "interpreter/simplecontext.hpp"
 #include "game/session.hpp"
 #include "game/map/ionstorm.hpp"
 
 namespace game { namespace interface {
 
-    class IonStormContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
+    class IonStormContext : public interpreter::SimpleContext, public interpreter::Context::PropertyAccessor {
      public:
         IonStormContext(int id, Session& session, afl::base::Ref<Game> game);
         ~IonStormContext();

@@ -13,6 +13,7 @@
 #include "interpreter/error.hpp"
 #include "interpreter/exporter/fieldlist.hpp"
 #include "interpreter/propertyacceptor.hpp"
+#include "interpreter/simplecontext.hpp"
 #include "interpreter/values.hpp"
 
 namespace {
@@ -78,7 +79,7 @@ namespace {
         - provides object Ids up to 10
         - provides 4 properties A..D with values 1..4
         - references an ObjectVector and can provide objects from that */
-    class TestContext : public interpreter::Context, public interpreter::Context::ReadOnlyAccessor {
+    class TestContext : public interpreter::SimpleContext, public interpreter::Context::ReadOnlyAccessor {
      public:
         TestContext(int id, game::map::ObjectVector<TestObject>& vec)
             : m_id(id),

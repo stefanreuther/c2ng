@@ -28,6 +28,8 @@ namespace interpreter {
         virtual MutexContext* clone() const;
         virtual game::map::Object* getObject();
         virtual void enumProperties(PropertyAcceptor& acceptor);
+        virtual void onContextEntered(Process& proc);
+        virtual void onContextLeft();
 
         // BaseValue:
         virtual String_t toString(bool readable) const;

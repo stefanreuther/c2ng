@@ -4,7 +4,7 @@
 #ifndef C2NG_GAME_INTERFACE_HULLCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_HULLCONTEXT_HPP
 
-#include "interpreter/context.hpp"
+#include "interpreter/simplecontext.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/root.hpp"
 #include "afl/base/ref.hpp"
@@ -12,7 +12,7 @@
 
 namespace game { namespace interface {
 
-    class HullContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
+    class HullContext : public interpreter::SimpleContext, public interpreter::Context::PropertyAccessor {
      public:
         HullContext(int nr, afl::base::Ref<game::spec::ShipList> shipList, afl::base::Ref<game::Root> root);
         ~HullContext();
