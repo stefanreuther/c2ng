@@ -84,7 +84,7 @@ namespace game { namespace map {
         Reference m_reference;
         bool m_pointValid;
 
-        void notifyObservers(bool lastOK, Point lastPos);
+        void notifyListeners(bool lastOK, Point lastPos);
     };
 
 } }

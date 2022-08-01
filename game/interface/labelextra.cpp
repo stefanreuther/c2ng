@@ -43,7 +43,7 @@ namespace {
      *  To solve this,
      *  - ignore changes that arrive while the object is updating (see LabelVector::checkObjects())
      *  - collect dirty bits in sig_preUpdate, but start actions in sig_universeChange, where they are already reset
-     *  - call Session::notifyObservers() before resetting the "is-updating" status,
+     *  - call Session::notifyListeners() before resetting the "is-updating" status,
      *    so changes during the update are collected in "is-updating" state
      *
      *  A more complex case is an object updating another one, e.g.

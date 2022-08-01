@@ -67,7 +67,7 @@ game::map::Location::set(Reference ref)
         }
     }
 
-    notifyObservers(lastOK, lastPos);
+    notifyListeners(lastOK, lastPos);
 }
 
 void
@@ -80,7 +80,7 @@ game::map::Location::set(Point pt)
     m_pointValid = true;
     m_reference = Reference();
 
-    notifyObservers(lastOK, lastPos);
+    notifyListeners(lastOK, lastPos);
 }
 
 bool
@@ -161,7 +161,7 @@ game::map::Location::browse(BrowseFlags_t flags)
 }
 
 void
-game::map::Location::notifyObservers(bool lastOK, Point lastPos)
+game::map::Location::notifyListeners(bool lastOK, Point lastPos)
 {
     Point thisPos;
     bool  thisOK = getPosition(thisPos);
