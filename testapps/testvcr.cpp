@@ -75,7 +75,7 @@ main(int, char** argv)
         util::ConsoleLogger logger;
         afl::charset::Utf8Charset cs;
         game::v3::RootLoader loader(fs.openDirectory(fs.makePathName(fs.makePathName(env.getInstallationDirectoryName(), "share"), "specs")),
-                                    0,
+                                    0, 0,
                                     tx, logger,
                                     fs);
 
@@ -95,7 +95,7 @@ main(int, char** argv)
 
         // Load VCRs
         afl::base::Ptr<game::vcr::classic::Database> vcrs = loadVcrs(file, *root);
-        
+
         std::cout << "--- Starting Playback ---" << std::endl;
 
         for (int rc = 0; rc < repeat; ++rc) {

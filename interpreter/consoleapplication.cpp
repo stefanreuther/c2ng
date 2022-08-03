@@ -312,7 +312,7 @@ namespace {
         afl::string::Translator& tx = session.translator();
 
         String_t defaultRoot = fs.makePathName(fs.makePathName(env.getInstallationDirectoryName(), "share"), "specs");
-        game::v3::RootLoader loader(fs.openDirectory(params.arg_rootdir.orElse(defaultRoot)), &profile, tx, session.log(), fs);
+        game::v3::RootLoader loader(fs.openDirectory(params.arg_rootdir.orElse(defaultRoot)), &profile, 0 /* FIXME: pass proper callback? */, tx, session.log(), fs);
 
         // Check game data
         // FIXME: load correct config!

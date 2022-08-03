@@ -18,6 +18,7 @@
 #include "game/turn.hpp"
 #include "game/v3/loader.hpp"
 #include "game/v3/parser.hpp"
+#include "game/v3/passwordchecker.hpp"
 #include "game/v3/trn/fileset.hpp"
 #include "game/v3/turnfile.hpp"
 #include "util/backupfile.hpp"
@@ -40,14 +41,16 @@ game::v3::ResultLoader::ResultLoader(afl::base::Ref<afl::io::Directory> specific
                                      afl::sys::LogListener& log,
                                      const DirectoryScanner& scanner,
                                      afl::io::FileSystem& fs,
-                                     util::ProfileDirectory* pProfile)
+                                     util::ProfileDirectory* pProfile,
+                                     game::browser::UserCallback* pCallback)
     : m_specificationDirectory(specificationDirectory),
       m_defaultSpecificationDirectory(defaultSpecificationDirectory),
       m_charset(charset),
       m_translator(tx),
       m_log(log),
       m_fileSystem(fs),
-      m_pProfile(pProfile)
+      m_pProfile(pProfile),
+      m_pCallback(pCallback)
 {
     for (int i = 1; i <= DirectoryScanner::NUM_PLAYERS; ++i) {
         m_playerFlags.set(i, scanner.getPlayerFlags(i));
@@ -81,7 +84,8 @@ game::v3::ResultLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game
     class Task : public Task_t {
      public:
         Task(ResultLoader& parent, Turn& turn, Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t>& then)
-            : m_parent(parent), m_turn(turn), m_game(game), m_player(player), m_root(root), m_session(session), m_then(then)
+            : m_parent(parent), m_turn(turn), m_game(game), m_player(player), m_root(root), m_session(session), m_then(then),
+              m_checker(turn, parent.m_pCallback, parent.m_log, parent.m_translator)
             { }
 
         virtual void call()
@@ -89,7 +93,7 @@ game::v3::ResultLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game
                 m_parent.m_log.write(LogListener::Trace, LOG_NAME, "Task: loadCurrentTurn");
                 try {
                     m_parent.doLoadCurrentTurn(m_turn, m_game, m_player, m_root, m_session);
-                    m_then->call(true);
+                    m_checker.checkPassword(m_player, m_then);
                 }
                 catch (std::exception& e) {
                     m_session.log().write(LogListener::Error, LOG_NAME, String_t(), e);
@@ -104,6 +108,7 @@ game::v3::ResultLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game
         Root& m_root;
         Session& m_session;
         std::auto_ptr<StatusTask_t> m_then;
+        PasswordChecker m_checker;
     };
     return std::auto_ptr<Task_t>(new Task(*this, turn, game, player, root, session, then));
 }

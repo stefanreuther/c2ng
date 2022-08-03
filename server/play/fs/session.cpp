@@ -46,7 +46,7 @@ server::play::fs::Session::createRoot(String_t pathName, afl::string::Translator
      *  interface to pass the result of HostTurn::submit() out of GameAccess::save().
      */
     afl::base::Ref<Directory> gameDirectory(Directory::create(*this, pathName));
-    game::v3::RootLoader loader(*rootDir, 0 /* profile */, tx, log, fs);
+    game::v3::RootLoader loader(*rootDir, 0 /* profile */, 0 /* callback */, tx, log, fs);
     const game::config::UserConfiguration uc;
     return loader.load(gameDirectory, gameCharset, uc, false);
 }

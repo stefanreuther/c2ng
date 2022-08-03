@@ -21,6 +21,7 @@
 #include "game/v3/outboxreader.hpp"
 #include "game/v3/packer.hpp"
 #include "game/v3/parser.hpp"
+#include "game/v3/passwordchecker.hpp"
 #include "game/v3/registry.hpp"
 #include "game/v3/structures.hpp"
 #include "game/v3/writer.hpp"
@@ -132,13 +133,15 @@ namespace {
 
 // Constructor.
 game::v3::DirectoryLoader::DirectoryLoader(afl::base::Ref<afl::io::Directory> specificationDirectory,
-                afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory,
-                std::auto_ptr<afl::charset::Charset> charset,
-                afl::string::Translator& tx,
-                afl::sys::LogListener& log,
-                const DirectoryScanner& scanner,
-                afl::io::FileSystem& fs,
-                util::ProfileDirectory* pProfile)
+                                           afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory,
+                                           std::auto_ptr<afl::charset::Charset> charset,
+                                           afl::string::Translator& tx,
+                                           afl::sys::LogListener& log,
+                                           const DirectoryScanner& scanner,
+                                           afl::io::FileSystem& fs,
+                                           util::ProfileDirectory* pProfile,
+                                           game::browser::UserCallback* pCallback)
+
     : m_specificationDirectory(specificationDirectory),
       m_defaultSpecificationDirectory(defaultSpecificationDirectory),
       m_charset(charset),
@@ -146,6 +149,7 @@ game::v3::DirectoryLoader::DirectoryLoader(afl::base::Ref<afl::io::Directory> sp
       m_log(log),
       m_fileSystem(fs),
       m_pProfile(pProfile),
+      m_pCallback(pCallback),
       m_playerFlags(),
       m_playersWithDosOutbox()
 {
@@ -180,7 +184,8 @@ game::v3::DirectoryLoader::loadCurrentTurn(Turn& turn, Game& game, int player, R
     class Task : public Task_t {
      public:
         Task(DirectoryLoader& parent, Turn& turn, Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t>& then)
-            : m_parent(parent), m_turn(turn), m_game(game), m_player(player), m_root(root), m_session(session), m_then(then)
+            : m_parent(parent), m_turn(turn), m_game(game), m_player(player), m_root(root), m_session(session), m_then(then),
+              m_checker(turn, parent.m_pCallback, session.log(), session.translator())
             { }
 
         virtual void call()
@@ -188,7 +193,7 @@ game::v3::DirectoryLoader::loadCurrentTurn(Turn& turn, Game& game, int player, R
                 m_session.log().write(LogListener::Trace, LOG_NAME, "Task: loadCurrentTurn");
                 try {
                     m_parent.doLoadCurrentTurn(m_turn, m_game, m_player, m_root, m_session);
-                    m_then->call(true);
+                    m_checker.checkPassword(m_player, m_then);
                 }
                 catch (std::exception& e) {
                     m_session.log().write(LogListener::Error, LOG_NAME, String_t(), e);
@@ -203,6 +208,7 @@ game::v3::DirectoryLoader::loadCurrentTurn(Turn& turn, Game& game, int player, R
         Root& m_root;
         Session& m_session;
         std::auto_ptr<StatusTask_t> m_then;
+        PasswordChecker m_checker;
     };
     return std::auto_ptr<Task_t>(new Task(*this, turn, game, player, root, session, then));
 }

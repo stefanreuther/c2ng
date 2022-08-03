@@ -4,7 +4,7 @@
 #ifndef C2NG_U_T_GAME_V3_HPP
 #define C2NG_U_T_GAME_V3_HPP
 
-#include <cxxtest/TestSuite.h> 
+#include <cxxtest/TestSuite.h>
 
 class TestGameV3AttachmentConfiguration : public CxxTest::TestSuite {
  public:
@@ -200,6 +200,15 @@ class TestGameV3Packer : public CxxTest::TestSuite {
     void testUnpackShip();
     void testUnpackPlanet();
     void testUnpackBase();
+};
+
+class TestGameV3PasswordChecker : public CxxTest::TestSuite {
+ public:
+    void testNoPassword();
+    void testCheckDisabled();
+    void testAskSuccess();
+    void testAskFailure();
+    void testAskCancel();
 };
 
 class TestGameV3RegistrationKey : public CxxTest::TestSuite {

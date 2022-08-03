@@ -26,7 +26,7 @@ namespace {
 // Constructor.
 game::browser::DirectoryHandler::DirectoryHandler(Browser& b, afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory, util::ProfileDirectory& profile)
     : m_browser(b),
-      m_v3Loader(defaultSpecificationDirectory, &profile, b.translator(), b.log(), b.fileSystem())
+      m_v3Loader(defaultSpecificationDirectory, &profile, &b.callback(), b.translator(), b.log(), b.fileSystem())
 { }
 
 // Handle folder name or URL.

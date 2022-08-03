@@ -125,6 +125,10 @@ namespace game { namespace pcc {
             @return logger */
         afl::sys::LogListener& log();
 
+        /** Access user callback.
+            @return user callback */
+        game::browser::UserCallback& callback();
+
         afl::base::Ptr<Root> loadRoot(game::browser::Account& account,
                                       afl::data::Access gameListEntry,
                                       const game::config::UserConfiguration& config);

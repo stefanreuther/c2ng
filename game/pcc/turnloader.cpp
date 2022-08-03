@@ -22,6 +22,7 @@
 #include "game/turn.hpp"
 #include "game/v3/loader.hpp"
 #include "game/v3/parser.hpp"
+#include "game/v3/passwordchecker.hpp"
 #include "game/v3/trn/fileset.hpp"
 #include "game/v3/turnfile.hpp"
 #include "server/interface/hostturn.hpp"
@@ -33,6 +34,7 @@ using afl::string::Format;
 using afl::sys::LogListener;
 using game::v3::Loader;
 using game::v3::Parser;
+using game::v3::PasswordChecker;
 using game::v3::TurnFile;
 using server::interface::HostTurn;
 
@@ -96,7 +98,8 @@ game::pcc::TurnLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game:
     class Task : public Task_t {
      public:
         Task(TurnLoader& parent, Turn& turn, Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t>& then)
-            : m_parent(parent), m_turn(turn), m_game(game), m_player(player), m_root(root), m_session(session), m_then(then)
+            : m_parent(parent), m_turn(turn), m_game(game), m_player(player), m_root(root), m_session(session), m_then(then),
+              m_checker(turn, &parent.m_serverDirectory->handler().callback(), parent.m_log, parent.m_translator)
             { }
 
         virtual void call()
@@ -104,7 +107,7 @@ game::pcc::TurnLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game:
                 m_parent.m_log.write(LogListener::Trace, LOG_NAME, "Task: loadCurrentTurn");
                 try {
                     m_parent.doLoadCurrentTurn(m_turn, m_game, m_player, m_root, m_session);
-                    m_then->call(true);
+                    m_checker.checkPassword(m_player, m_then);
                 }
                 catch (std::exception& e) {
                     m_session.log().write(afl::sys::LogListener::Error, LOG_NAME, String_t(), e);
@@ -119,6 +122,7 @@ game::pcc::TurnLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game:
         Root& m_root;
         Session& m_session;
         std::auto_ptr<StatusTask_t> m_then;
+        PasswordChecker m_checker;
     };
     return m_serverDirectory->handler().login(m_serverDirectory->account(),
                                               std::auto_ptr<Task_t>(new Task(*this, turn, game, player, root, session, then)));

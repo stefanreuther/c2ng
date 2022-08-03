@@ -11,6 +11,7 @@
 #include "afl/io/stream.hpp"
 #include "afl/string/translator.hpp"
 #include "afl/sys/loglistener.hpp"
+#include "game/browser/usercallback.hpp"
 #include "game/map/universe.hpp"
 #include "game/playerarray.hpp"
 #include "game/playerset.hpp"
@@ -31,7 +32,8 @@ namespace game { namespace v3 {
             \param log Logger
             \param scanner Directory scanner (for initialisation)
             \param fs File System instance
-            \param pProfile Profile directory (optional) */
+            \param pProfile Profile directory (optional)
+            \param pCallback User callback (optional; if not given, passwords are not checked) */
         ResultLoader(afl::base::Ref<afl::io::Directory> specificationDirectory,
                      afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory,
                      std::auto_ptr<afl::charset::Charset> charset,
@@ -39,7 +41,8 @@ namespace game { namespace v3 {
                      afl::sys::LogListener& log,
                      const DirectoryScanner& scanner,
                      afl::io::FileSystem& fs,
-                     util::ProfileDirectory* pProfile);
+                     util::ProfileDirectory* pProfile,
+                     game::browser::UserCallback* pCallback);
 
         virtual PlayerStatusSet_t getPlayerStatus(int player, String_t& extra, afl::string::Translator& tx) const;
         virtual std::auto_ptr<Task_t> loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
@@ -58,6 +61,7 @@ namespace game { namespace v3 {
         afl::sys::LogListener& m_log;
         afl::io::FileSystem& m_fileSystem;
         util::ProfileDirectory* m_pProfile;
+        game::browser::UserCallback* m_pCallback;
 
         PlayerArray<DirectoryScanner::PlayerFlags_t> m_playerFlags;
 

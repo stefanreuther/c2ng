@@ -11,6 +11,7 @@
 #include "afl/io/filesystem.hpp"
 #include "afl/string/translator.hpp"
 #include "afl/sys/loglistener.hpp"
+#include "game/browser/usercallback.hpp"
 #include "game/config/userconfiguration.hpp"
 #include "game/root.hpp"
 #include "game/v3/directoryscanner.hpp"
@@ -25,6 +26,7 @@ namespace game { namespace v3 {
      public:
         RootLoader(afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory,
                    util::ProfileDirectory* pProfile,
+                   game::browser::UserCallback* pCallback,
                    afl::string::Translator& tx,
                    afl::sys::LogListener& log,
                    afl::io::FileSystem& fs);
@@ -37,6 +39,7 @@ namespace game { namespace v3 {
      private:
         afl::base::Ref<afl::io::Directory> m_defaultSpecificationDirectory;
         util::ProfileDirectory* m_pProfile;
+        game::browser::UserCallback* m_pCallback;
         afl::string::Translator& m_translator;
         afl::sys::LogListener& m_log;
         afl::io::FileSystem& m_fileSystem;

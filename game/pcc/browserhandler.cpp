@@ -362,6 +362,12 @@ game::pcc::BrowserHandler::log()
     return m_browser.log();
 }
 
+game::browser::UserCallback&
+game::pcc::BrowserHandler::callback()
+{
+    return m_browser.callback();
+}
+
 afl::base::Ptr<game::Root>
 game::pcc::BrowserHandler::loadRoot(game::browser::Account& account, afl::data::Access gameListEntry, const game::config::UserConfiguration& config)
 {
