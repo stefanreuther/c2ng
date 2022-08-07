@@ -209,6 +209,8 @@ class TestGameV3PasswordChecker : public CxxTest::TestSuite {
     void testAskSuccess();
     void testAskFailure();
     void testAskCancel();
+    void testCached();
+    void testNotCached();
 };
 
 class TestGameV3RegistrationKey : public CxxTest::TestSuite {

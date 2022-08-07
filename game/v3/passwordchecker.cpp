@@ -9,9 +9,27 @@
 #include "game/v3/genfile.hpp"
 
 using afl::sys::LogListener;
+using game::AuthCache;
+using game::v3::GenFile;
 
 namespace {
     const char*const LOG_NAME = "game.v3";
+
+    bool matchAuthCache(int player, const AuthCache& authCache, const GenFile& gen)
+    {
+        AuthCache::Item q;
+        q.playerNr = player;
+
+        AuthCache::Items_t found = authCache.find(q);
+        for (size_t i = 0, n = found.size(); i < n; ++i) {
+            if (const String_t* p = found[i]->password.get()) {
+                if (gen.isPassword(*p)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }
 
 game::v3::PasswordChecker::PasswordChecker(Turn& turn, game::browser::UserCallback* pCallback, afl::sys::LogListener& log, afl::string::Translator& tx)
@@ -20,12 +38,16 @@ game::v3::PasswordChecker::PasswordChecker(Turn& turn, game::browser::UserCallba
 { }
 
 void
-game::v3::PasswordChecker::checkPassword(int player, std::auto_ptr<StatusTask_t> then)
+game::v3::PasswordChecker::checkPassword(int player, const AuthCache& authCache, std::auto_ptr<StatusTask_t> then)
 {
     const GenFile* gen = GenExtra::get(m_turn, player);
     if (gen == 0 || !gen->hasPassword()) {
         // No password or none loaded
         m_log.write(LogListener::Trace, LOG_NAME, "PasswordChecker: no password");
+        then->call(true);
+    } else if (matchAuthCache(player, authCache, *gen)) {
+        // Match AuthCache (--password option)
+        m_log.write(LogListener::Trace, LOG_NAME, "PasswordChecker: match cached");
         then->call(true);
     } else if (m_pCallback == 0) {
         // Check disabled (for console apps)

@@ -11,6 +11,7 @@
 #include "game/browser/usercallback.hpp"
 #include "game/task.hpp"
 #include "game/turn.hpp"
+#include "game/authcache.hpp"
 
 namespace game { namespace v3 {
 
@@ -38,9 +39,10 @@ namespace game { namespace v3 {
 
             If no password is configured, will immediately call the "then" callback.
 
-            @param player Player number
-            @param then   Status callback */
-        void checkPassword(int player, std::auto_ptr<StatusTask_t> then);
+            @param player    Player number
+            @param authCache AuthCache instance
+            @param then      Status callback */
+        void checkPassword(int player, const AuthCache& authCache, std::auto_ptr<StatusTask_t> then);
 
      private:
         void onPasswordResult(game::browser::UserCallback::PasswordResponse resp);

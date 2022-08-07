@@ -83,6 +83,7 @@
 #include "util/string.hpp"
 #include "util/stringparser.hpp"
 #include "version.hpp"
+#include "game/authcache.hpp"
 
 namespace {
     const char LOG_NAME[] = "main";
@@ -686,6 +687,8 @@ namespace {
                             m_proxyAddress = parser.getRequiredParameter(text);
                         } else if (text == "help") {
                             doHelp(dialog);
+                        } else if (text == "password") {
+                            m_password = parser.getRequiredParameter(text);
                         } else if (text == "log") {
                             util::addListItem(m_traceConfig, ":", parser.getRequiredParameter(text));
                         } else if (text == "debug-request-delay") {
@@ -730,7 +733,8 @@ namespace {
                 help += m_translator("Options:");
                 help += "\n";
                 help += util::formatOptions(m_translator("-resource=NAME\tAdd resource provider\n"
-                                                         "-proxy=URL\tSet network proxy\n")
+                                                         "-proxy=URL\tSet network proxy\n"
+                                                         "-password=PASS\tResult file password\n")
                                             + m_rootOptions.getHelp());
                 help += "\n";
                 help += m_translator("(c) copyright 2017-2022 Stefan Reuther <streu@gmx.de>");
@@ -748,6 +752,9 @@ namespace {
         const afl::base::Optional<String_t>& getProxyAddress() const
             { return m_proxyAddress; }
 
+        const afl::base::Optional<String_t>& getPassword() const
+            { return m_password; }
+
         const String_t& getTraceConfiguration() const
             { return m_traceConfig; }
 
@@ -757,6 +764,7 @@ namespace {
         String_t m_gameDirectory;
         String_t m_traceConfig;
         afl::base::Optional<String_t> m_proxyAddress;
+        afl::base::Optional<String_t> m_password;
         std::vector<String_t> m_commandLineResources;
         afl::string::Translator& m_translator;
         int m_requestThreadDelay;
@@ -982,6 +990,13 @@ namespace {
                 gameSession.setSystemInformation(util::getSystemInformation());
                 game::interface::LabelExtra::create(gameSession);
                 game::interface::GlobalActionExtra::create(gameSession);
+
+                // Password
+                if (const String_t* p = params.getPassword().get()) {
+                    std::auto_ptr<game::AuthCache::Item> item(new game::AuthCache::Item());
+                    item->password = *p;
+                    gameSession.authCache().addNew(item.release());
+                }
 
                 // Set some variables
                 gameSession.world().setNewGlobalValue("C2$RESOURCEDIRECTORY", interpreter::makeStringValue(resourceDirectory->getDirectoryName()));

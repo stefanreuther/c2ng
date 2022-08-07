@@ -107,7 +107,7 @@ game::pcc::TurnLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game:
                 m_parent.m_log.write(LogListener::Trace, LOG_NAME, "Task: loadCurrentTurn");
                 try {
                     m_parent.doLoadCurrentTurn(m_turn, m_game, m_player, m_root, m_session);
-                    m_checker.checkPassword(m_player, m_then);
+                    m_checker.checkPassword(m_player, m_session.authCache(), m_then);
                 }
                 catch (std::exception& e) {
                     m_session.log().write(afl::sys::LogListener::Error, LOG_NAME, String_t(), e);
