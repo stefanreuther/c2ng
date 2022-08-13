@@ -204,11 +204,15 @@ server::host::Exporter::importGame(Game& game, Root& root, String_t fsDirName)
     const char* GAME_PATH = "game";
     String_t gamePath = game.getDirectory();
     Ref<DirectoryEntry> gameEntry = target->getDirectoryEntryByName(GAME_PATH);
+
+    // Backups first because we can reconstruct everything else from that
+    importBackups(gamePath + "/backup", gameEntry->getPathName(), "backup", root.config().unpackBackups);
+
+    // Remainder
     importSubdirectory(gamePath + "/in", gameEntry->getPathName(), "in");
     importSubdirectory(gamePath + "/out", gameEntry->getPathName(), "out");
     importSubdirectory(gamePath + "/data", gameEntry->getPathName(), "data");
     importLogFiles(gamePath, gameEntry->getPathName());
-    importBackups(gamePath + "/backup", gameEntry->getPathName(), "backup", root.config().unpackBackups);
 
     // Log
     uint32_t elapsedTicks = afl::sys::Time::getTickCounter() - startTicks;
