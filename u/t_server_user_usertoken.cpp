@@ -254,3 +254,36 @@ TestServerUserUserToken::testTokenExpiredCreate()
     TS_ASSERT_EQUALS(newToken, testee.getToken(userId, tokenType));
 }
 
+/** Test token access with a broken token.
+    If token creation crashes midway, it may leave us with a token listed for the user, but not in allTokens().
+    getToken() must not return such a token, because checkToken() would refuse it. */
+void
+TestServerUserUserToken::testTokenMissing()
+{
+    afl::io::NullFileSystem fs;
+    server::common::RandomIdGenerator gen(fs);
+    server::user::ClassicEncrypter enc("foo");
+    afl::net::redis::InternalDatabase db;
+    server::user::Root root(db, gen, enc, server::user::Configuration());
+
+    // Manually create a single token that has plenty time remaining, but is not listed in allTokens()
+    const server::Time_t now = root.getTime();
+    const String_t oldToken = "t";
+    const String_t userId = "1002";
+    const String_t tokenType = "login";
+    root.tokenById(oldToken).userId().set(userId);
+    root.tokenById(oldToken).tokenType().set(tokenType);
+    root.tokenById(oldToken).validUntil().set(now + 1000000);
+    server::user::User(root, userId).tokensByType(tokenType).add(oldToken);
+
+    // Retrieve token
+    server::user::UserToken testee(root);
+    String_t token = testee.getToken(userId, tokenType);
+
+    // Retrieved token must be usable for checking
+    // Do not verify the identity of the token; implementation is free to create a new one or fix the broken one.
+    server::interface::UserToken::Info info = testee.checkToken(token, tokenType, false);
+    TS_ASSERT_EQUALS(info.userId, userId);
+    TS_ASSERT_EQUALS(info.tokenType, tokenType);
+}
+

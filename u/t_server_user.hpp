@@ -79,6 +79,7 @@ class TestServerUserUserToken : public CxxTest::TestSuite {
     void testTokenRenewal();
     void testTokenExpired();
     void testTokenExpiredCreate();
+    void testTokenMissing();
 };
 
 #endif

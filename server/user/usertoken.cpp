@@ -89,8 +89,10 @@ server::user::UserToken::getToken(String_t userId, String_t tokenType)
     for (size_t i = 0, n = a.getArraySize(); i < n; i += 2) {
         Time_t thisTime = a[i+1].toInteger();
         String_t thisToken = a[i].toString();
-        if (thisTime < now) {
+        if (thisTime < now || !m_root.allTokens().contains(thisToken)) {
             // Token is expired, remove it
+            // -or-
+            // Token is not listed in allTokens(), meaning creation crashed
             deleteToken(userId, tokenType, thisToken);
         } else if (thisTime > bestTime) {
             // Not expired
