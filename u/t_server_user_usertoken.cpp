@@ -14,6 +14,8 @@
 #include "server/common/randomidgenerator.hpp"
 #include "server/user/classicencrypter.hpp"
 #include "server/user/root.hpp"
+#include "server/user/token.hpp"
+#include "server/user/user.hpp"
 
 /** Simple functionality test. */
 void
@@ -139,3 +141,116 @@ TestServerUserUserToken::testMany()
         testee.getToken(user, "login");
     }
 }
+
+/** Test token renewal.
+    If a user repeatedly uses an old token, only a single new token must be created. */
+void
+TestServerUserUserToken::testTokenRenewal()
+{
+    afl::io::NullFileSystem fs;
+    server::common::RandomIdGenerator gen(fs);
+    server::user::ClassicEncrypter enc("foo");
+    afl::net::redis::InternalDatabase db;
+    server::user::Root root(db, gen, enc, server::user::Configuration());
+
+    // Manually create a single token that is about to expire
+    const server::Time_t now = root.getTime();
+    const String_t oldToken = "oooooooo";
+    const String_t userId = "1002";
+    const String_t tokenType = "login";
+    root.allTokens().add(oldToken);
+    root.tokenById(oldToken).userId().set(userId);
+    root.tokenById(oldToken).tokenType().set(tokenType);
+    root.tokenById(oldToken).validUntil().set(now + 24*60);   // expires tomorrow
+    server::user::User(root, userId).tokensByType(tokenType).add(oldToken);
+
+    // Verify using old token
+    server::user::UserToken testee(root);
+    server::interface::UserToken::Info info = testee.checkToken(oldToken, tokenType, true);
+    TS_ASSERT_EQUALS(info.userId, userId);
+    TS_ASSERT_EQUALS(info.tokenType, tokenType);
+    TS_ASSERT_EQUALS(info.userId, userId);
+    TS_ASSERT_DIFFERS(info.newToken.orElse(""), "");
+
+    // Verify again using same old token - should report the same new token
+    server::interface::UserToken::Info info2 = testee.checkToken(oldToken, tokenType, true);
+    TS_ASSERT_EQUALS(info2.userId, userId);
+    TS_ASSERT_EQUALS(info2.tokenType, tokenType);
+    TS_ASSERT_EQUALS(info2.userId, userId);
+    TS_ASSERT_DIFFERS(info2.newToken.orElse(""), "");
+    TS_ASSERT_EQUALS(info2.newToken.orElse(""), info.newToken.orElse(""));
+
+    // Old token must still exist, it's not yet expired
+    TS_ASSERT(root.allTokens().contains(oldToken));
+}
+
+/** Test use of expired token.
+    Access must be refused, token deleted. */
+void
+TestServerUserUserToken::testTokenExpired()
+{
+    afl::io::NullFileSystem fs;
+    server::common::RandomIdGenerator gen(fs);
+    server::user::ClassicEncrypter enc("foo");
+    afl::net::redis::InternalDatabase db;
+    server::user::Root root(db, gen, enc, server::user::Configuration());
+
+    // Manually create a single token that is expired
+    const server::Time_t now = root.getTime();
+    const String_t oldToken = "oooooooo";
+    const String_t userId = "1002";
+    const String_t tokenType = "login";
+    root.allTokens().add(oldToken);
+    root.tokenById(oldToken).userId().set(userId);
+    root.tokenById(oldToken).tokenType().set(tokenType);
+    root.tokenById(oldToken).validUntil().set(now - 1);
+    server::user::User(root, userId).tokensByType(tokenType).add(oldToken);
+
+    // Verify using old token
+    server::user::UserToken testee(root);
+    TS_ASSERT_THROWS(testee.checkToken(oldToken, tokenType, true), std::runtime_error);
+
+    // Token must be gone
+    TS_ASSERT(!root.allTokens().contains(oldToken));
+
+    // Still fails
+    TS_ASSERT_THROWS(testee.checkToken(oldToken, tokenType, true), std::runtime_error);
+}
+
+/** Test retrieval of expired token.
+    Expired token must be removed, new one created. */
+void
+TestServerUserUserToken::testTokenExpiredCreate()
+{
+    afl::io::NullFileSystem fs;
+    server::common::RandomIdGenerator gen(fs);
+    server::user::ClassicEncrypter enc("foo");
+    afl::net::redis::InternalDatabase db;
+    server::user::Root root(db, gen, enc, server::user::Configuration());
+
+    // Manually create a single token that is expired
+    const server::Time_t now = root.getTime();
+    const String_t oldToken = "oooooooo";
+    const String_t userId = "1002";
+    const String_t tokenType = "login";
+    root.allTokens().add(oldToken);
+    root.tokenById(oldToken).userId().set(userId);
+    root.tokenById(oldToken).tokenType().set(tokenType);
+    root.tokenById(oldToken).validUntil().set(now - 1);
+    server::user::User(root, userId).tokensByType(tokenType).add(oldToken);
+
+    // Verify using old token
+    server::user::UserToken testee(root);
+    String_t newToken = testee.getToken(userId, tokenType);
+
+    // Must be a new token
+    TS_ASSERT_DIFFERS(oldToken, newToken);
+
+    // Old token must be gone
+    TS_ASSERT(!root.allTokens().contains(oldToken));
+    TS_ASSERT(root.allTokens().contains(newToken));
+
+    // New one can be reproduced
+    TS_ASSERT_EQUALS(newToken, testee.getToken(userId, tokenType));
+}
+

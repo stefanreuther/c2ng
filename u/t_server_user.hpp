@@ -75,6 +75,9 @@ class TestServerUserUserToken : public CxxTest::TestSuite {
     void testTokenTypes();
     void testClearToken();
     void testMany();
+    void testTokenRenewal();
+    void testTokenExpired();
+    void testTokenExpiredCreate();
 };
 
 #endif

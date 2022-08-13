@@ -140,7 +140,7 @@ server::user::UserToken::checkToken(String_t token, afl::base::Optional<String_t
     if (autoRenew) {
         const Descriptor& desc = getDescriptor(result.tokenType);
         if ((validUntil - now) < desc.minAge) {
-            result.newToken = createToken(result.userId, result.tokenType, now + desc.maxAge);
+            result.newToken = getToken(result.userId, result.tokenType);
         }
     }
 
