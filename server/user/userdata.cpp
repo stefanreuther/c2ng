@@ -108,12 +108,18 @@ server::user::UserData::set(String_t userId, String_t key, String_t value)
 
     // Delete keys
     while (newSize > m_root.config().userDataMaxTotalSize) {
-        String_t oldKey = d.usedKeys().popBack();
-        if (key.empty()) {
-            // Happens only on inconsistent data
+        const String_t oldKey = d.usedKeys().popBack();
+        if (oldKey.empty()) {
+            // Happens only on inconsistent data - clean up.
+            // Make sure this operation gets through, on matter what
+            d.totalSize().set(int(newWeight));
+            if (!value.empty()) {
+                d.usedKeys().pushFront(key);
+                d.data(key).set(value);
+            }
             break;
         }
-        int thisSize = int(estimateSize(oldKey, d.data(oldKey).get()));
+        const int thisSize = int(estimateSize(oldKey, d.data(oldKey).get()));
         newSize -= thisSize;
         d.data(oldKey).remove();
         d.totalSize() -= thisSize;

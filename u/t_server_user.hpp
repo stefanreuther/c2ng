@@ -54,6 +54,7 @@ class TestServerUserUserData : public CxxTest::TestSuite {
     void testExpire();
     void testExpire2();
     void testError();
+    void testExpireInconsistent();
 };
 
 class TestServerUserUserManagement : public CxxTest::TestSuite {

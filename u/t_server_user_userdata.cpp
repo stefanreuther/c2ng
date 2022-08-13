@@ -6,10 +6,11 @@
 #include "server/user/userdata.hpp"
 
 #include "t_server_user.hpp"
-#include "server/user/root.hpp"
+#include "afl/net/redis/internaldatabase.hpp"
 #include "server/common/numericalidgenerator.hpp"
 #include "server/user/classicencrypter.hpp"
-#include "afl/net/redis/internaldatabase.hpp"
+#include "server/user/root.hpp"
+#include "server/user/user.hpp"
 
 /** Basic functionality test. */
 void
@@ -138,5 +139,31 @@ TestServerUserUserData::testError()
 
     // Invalid values
     TS_ASSERT_THROWS(testee.set("u", "a", "xxxxxxxxxxxxxxxxxxxxx"), std::exception);
+}
+
+/** Test inconsistent data case.
+    The server used to hang if the stored size was much larger than the actual data size,
+    because it would fail to free up the amount of space it thinks it can free. */
+void
+TestServerUserUserData::testExpireInconsistent()
+{
+    // Setup
+    server::common::NumericalIdGenerator gen;
+    server::user::ClassicEncrypter enc("foo");
+    afl::net::redis::InternalDatabase db;
+    server::user::Configuration config;
+    config.userDataMaxTotalSize = 100;
+    server::user::Root root(db, gen, enc, config);
+    server::user::UserData testee(root);
+
+    // Inconsistent status: size is set but data is empty; GC therefore will fail
+    const String_t userId = "ui";
+    server::user::User(root, userId).userData().intKey("size").set(1000);
+
+    // Set a value, must succeed
+    testee.set(userId, "k", "v");
+    testee.set(userId, "k2", "v2");
+    TS_ASSERT_EQUALS(testee.get(userId, "k"), "v");
+    TS_ASSERT_EQUALS(testee.get(userId, "k2"), "v2");
 }
 
