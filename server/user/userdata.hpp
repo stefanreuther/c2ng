@@ -15,8 +15,11 @@ namespace server { namespace user {
         This used to be implemented in api/user.cgi. */
     class UserData : public server::interface::UserData {
      public:
+        /** Constructor.
+            @param root Service root */
         explicit UserData(Root& root);
 
+        // Interface methods:
         virtual void set(String_t userId, String_t key, String_t value);
         virtual String_t get(String_t userId, String_t key);
 

@@ -4,8 +4,8 @@
   */
 
 #include "server/interface/userdataserver.hpp"
-#include "server/types.hpp"
 #include "server/interface/userdata.hpp"
+#include "server/types.hpp"
 
 server::interface::UserDataServer::UserDataServer(UserData& impl)
     : m_implementation(impl)

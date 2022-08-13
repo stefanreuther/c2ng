@@ -1,5 +1,6 @@
 /**
   *  \file server/user/usertoken.cpp
+  *  \brief Class server::user::UserToken
   */
 
 #include <memory>

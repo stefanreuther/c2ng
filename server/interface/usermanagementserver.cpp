@@ -4,10 +4,10 @@
   */
 
 #include "server/interface/usermanagementserver.hpp"
-#include "server/types.hpp"
-#include "server/interface/usermanagement.hpp"
 #include "afl/data/vector.hpp"
 #include "afl/data/vectorvalue.hpp"
+#include "server/interface/usermanagement.hpp"
+#include "server/types.hpp"
 
 server::interface::UserManagementServer::UserManagementServer(UserManagement& impl)
     : m_implementation(impl)

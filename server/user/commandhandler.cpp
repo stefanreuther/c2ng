@@ -1,5 +1,6 @@
 /**
   *  \file server/user/commandhandler.cpp
+  *  \brief Class server::user::CommandHandler
   */
 
 #include "server/user/commandhandler.hpp"

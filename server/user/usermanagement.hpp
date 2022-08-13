@@ -1,5 +1,6 @@
 /**
   *  \file server/user/usermanagement.hpp
+  *  \brief Class server::user::UserManagement
   */
 #ifndef C2NG_SERVER_USER_USERMANAGEMENT_HPP
 #define C2NG_SERVER_USER_USERMANAGEMENT_HPP
@@ -10,10 +11,15 @@ namespace server { namespace user {
 
     class Root;
 
+    /** Implementation of UserManagement interface.
+        This interface allows creating users, logging in, and accessing the user profile. */
     class UserManagement : public server::interface::UserManagement {
      public:
-        UserManagement(Root& root);
+        /** Constructor.
+            @param root Service root (database, configuration) */
+        explicit UserManagement(Root& root);
 
+        // Interface methods:
         virtual String_t add(String_t userName, String_t password, afl::base::Memory<const String_t> config);
         virtual void remove(String_t userId);
         virtual String_t login(String_t userName, String_t password);

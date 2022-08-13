@@ -1,5 +1,6 @@
 /**
   *  \file server/user/usermanagement.cpp
+  *  \brief Class server::user::UserManagement
   */
 
 #include "server/user/usermanagement.hpp"

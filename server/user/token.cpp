@@ -1,5 +1,6 @@
 /**
   *  \file server/user/token.cpp
+  *  \brief Class server::user::Token
   */
 
 #include "server/user/token.hpp"

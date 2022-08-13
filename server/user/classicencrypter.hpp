@@ -11,12 +11,12 @@ namespace server { namespace user {
 
     /** Classic (un-secure) password encrypter.
         Password are hashed with a system-wide key.
-        This is PlanetsCentral's original password scheme. */
+        This is PlanetsCentral's original password scheme which generates encrypted tokens of the form "1,<base64-hash>". */
     class ClassicEncrypter : public PasswordEncrypter {
      public:
         /** Constructor.
             \param userKey System-wide key */
-        ClassicEncrypter(String_t userKey);
+        explicit ClassicEncrypter(String_t userKey);
 
         // PasswordEncrypter:
         virtual String_t encryptPassword(String_t password, String_t userId);

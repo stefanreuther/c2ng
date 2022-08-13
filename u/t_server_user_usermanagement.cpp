@@ -6,13 +6,14 @@
 #include "server/user/usermanagement.hpp"
 
 #include "t_server_user.hpp"
-#include "server/user/classicencrypter.hpp"
-#include "server/common/numericalidgenerator.hpp"
-#include "server/user/root.hpp"
-#include "afl/net/redis/internaldatabase.hpp"
 #include "afl/data/access.hpp"
 #include "afl/net/redis/hashkey.hpp"
 #include "afl/net/redis/integerfield.hpp"
+#include "afl/net/redis/internaldatabase.hpp"
+#include "server/common/numericalidgenerator.hpp"
+#include "server/user/classicencrypter.hpp"
+#include "server/user/multipasswordencrypter.hpp"
+#include "server/user/root.hpp"
 
 using afl::data::Access;
 using afl::base::Nothing;
@@ -375,5 +376,53 @@ TestServerUserUserManagement::testRemove()
     TS_ASSERT_DIFFERS(id2, id);
     TS_ASSERT_EQUALS(testee.getUserIdByName("joe"), id2);
     TS_ASSERT_EQUALS(testee.getNameByUserId(id2), "joe");
+}
+
+/** Test logging in when no password has been set. */
+void
+TestServerUserUserManagement::testLoginNoPassword()
+{
+    // ex TestServerTalkTalkNNTP::testLogin
+    using afl::net::redis::Subtree;
+
+    // Infrastructure
+    afl::net::redis::InternalDatabase db;
+    server::common::NumericalIdGenerator gen;
+    Subtree(db, "uid:").stringKey("a_b").set("1009");
+    server::user::ClassicEncrypter enc("xyz");
+    server::user::Root root(db, gen, enc, server::user::Configuration());
+    server::user::UserManagement testee(root);
+
+    // Login fails, no password set
+    TS_ASSERT_THROWS(testee.login("a_b", "z"), std::runtime_error);
+}
+
+/** Test logging in with password upgrade. */
+void
+TestServerUserUserManagement::testLoginUpgrade()
+{
+    using afl::net::redis::Subtree;
+
+    // Infrastructure
+    afl::net::redis::InternalDatabase db;
+    server::common::NumericalIdGenerator gen;
+    Subtree(db, "user:").subtree("1009").stringKey("password").set("1,52YluJAXWKqqhVThh22cNw");
+    Subtree(db, "uid:").stringKey("a_b").set("1009");
+
+    // Use two ClassicEncrypter's because these are deterministic
+    server::user::ClassicEncrypter oldEnc("xyz");
+    server::user::ClassicEncrypter newEnc("abc");
+    server::user::MultiPasswordEncrypter enc(newEnc, oldEnc);
+    server::user::Root root(db, gen, enc, server::user::Configuration());
+    server::user::UserManagement testee(root);
+
+    // Logging in succeeds
+    TS_ASSERT_EQUALS(testee.login("a_b", "z"), "1009");
+
+    // Password has been upgraded (re-hashed with new key)
+    TS_ASSERT_EQUALS(Subtree(db, "user:").subtree("1009").stringKey("password").get(), "1,2zwKRpT/uUBsg4skmgRPaQ");
+
+    // Logging in succeeds again
+    TS_ASSERT_EQUALS(testee.login("a_b", "z"), "1009");
 }
 

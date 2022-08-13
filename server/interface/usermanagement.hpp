@@ -13,39 +13,62 @@
 
 namespace server { namespace interface {
 
+    /** Interface for managing users. */
     class UserManagement : public afl::base::Deletable {
      public:
-        // ADDUSER name pass [key value...]
+        /** Add a new user (ADDUSER).
+            @param userName  User name
+            @param password  Password
+            @param config    List of key/value pairs of additional attributes
+            @return user Id */
         virtual String_t add(String_t userName, String_t password, afl::base::Memory<const String_t> config) = 0;
 
-        // DELUSER name
+        /** Delete a user (DELUSER).
+            @param userId  User Id */
         virtual void remove(String_t userId) = 0;
 
-        // LOGIN user pass
+        /** Check password (LOGIN).
+            @param userName  User name
+            @param password  Password
+            @return user Id on success */
         virtual String_t login(String_t userName, String_t password) = 0;
 
-        // LOOKUP
+        /** Look up user name (LOOKUP).
+            @param userName  User name
+            @return user Id */
         virtual String_t getUserIdByName(String_t userName) = 0;
 
-        // NAME uid
+        /** Retrieve name for a user Id (NAME).
+            @param userId  User Id
+            @return user name */
         virtual String_t getNameByUserId(String_t userId) = 0;
 
-        // MNAME uid...
+        /** Retrieve names for a list of user Ids (MNAME).
+            @param userIds   List of user Ids
+            @param userNames Names */
         virtual void getNamesByUserId(afl::base::Memory<const String_t> userIds, afl::data::StringList_t& userNames) = 0;
 
-        // GET uid key
+        /** Get user profile value (GET).
+            @param userId  User Id
+            @param key     Profile key
+            @return newly-created value; caller assumes ownership */
         virtual Value_t* getProfileRaw(String_t userId, String_t key) = 0;
 
-        // MGET uid key...
+        /** Get multiple user profile values (MGET).
+            @param userId  User Id
+            @param keys    Profile keys
+            @return newly-created value (array of values); caller assumes ownership */
         virtual Value_t* getProfileRaw(String_t userId, afl::base::Memory<const String_t> keys) = 0;
 
-        // SET uid [key value...]
+        /** Set user profile values.
+            @param userId  User Id
+            @param config  List of key/value pairs */
         virtual void setProfile(String_t userId, afl::base::Memory<const String_t> config) = 0;
 
-        // PASSWD name pass
+        /** Change user password.
+            @param userId   User Id
+            @param password New password */
         virtual void setPassword(String_t userId, String_t password) = 0;
-
-        // TODO: LIST, STAT
     };
 
 } }

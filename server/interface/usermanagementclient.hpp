@@ -10,10 +10,15 @@
 
 namespace server { namespace interface {
 
+    /** Client for user management server.
+        Uses a CommandHandler to send commands to a server, and receives the results. */
     class UserManagementClient : public UserManagement {
      public:
+        /** Constructor.
+            @param commandHandler Server connection. Lifetime must exceed that of the UserManagementClient. */
         explicit UserManagementClient(afl::net::CommandHandler& commandHandler);
 
+        // UserManagement:
         virtual String_t add(String_t userName, String_t password, afl::base::Memory<const String_t> config);
         virtual void remove(String_t userId);
         virtual String_t login(String_t userName, String_t password);

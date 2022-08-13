@@ -4,8 +4,8 @@
   */
 
 #include "server/user/classicencrypter.hpp"
-#include "afl/checksums/md5.hpp"
 #include "afl/charset/base64.hpp"
+#include "afl/checksums/md5.hpp"
 
 server::user::ClassicEncrypter::ClassicEncrypter(String_t userKey)
     : m_userKey(userKey)

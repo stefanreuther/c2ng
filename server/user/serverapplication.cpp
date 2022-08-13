@@ -1,5 +1,6 @@
 /**
   *  \file server/user/serverapplication.cpp
+  *  \brief Class server::user::ServerApplication
   */
 
 #include "server/user/serverapplication.hpp"
@@ -70,13 +71,9 @@ server::user::ServerApplication::serverMain()
     server::common::RandomIdGenerator gen(fileSystem());
 
     // Password encrypter
-#if 0
-    ClassicEncrypter enc(m_config.userKey);
-#else
     SaltedPasswordEncrypter primary(gen);
     ClassicEncrypter secondary(m_config.userKey);
     MultiPasswordEncrypter enc(primary, secondary);
-#endif
 
     // Set up root
     Root root(db, gen, enc, m_config);

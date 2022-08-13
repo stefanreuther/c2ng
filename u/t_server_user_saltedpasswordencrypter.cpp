@@ -35,6 +35,8 @@ TestServerUserSaltedPasswordEncrypter::testIt()
     TS_ASSERT_EQUALS(testee.checkPassword("q", "2,3,13f40f242c637e360803b26e46825ed0790d1a7b", "1001"), PasswordEncrypter::Invalid);
     TS_ASSERT_EQUALS(testee.checkPassword("p", "2,4,13f40f242c637e360803b26e46825ed0790d1a7b", "1001"), PasswordEncrypter::Invalid);
     TS_ASSERT_EQUALS(testee.checkPassword("p", "1,3,13f40f242c637e360803b26e46825ed0790d1a7b", "1001"), PasswordEncrypter::Invalid);
+    TS_ASSERT_EQUALS(testee.checkPassword("p", "2,313f40f242c637e360803b26e46825ed0790d1a7b", "1001"), PasswordEncrypter::Invalid);
+    TS_ASSERT_EQUALS(testee.checkPassword("p", "2313f40f242c637e360803b26e46825ed0790d1a7b", "1001"), PasswordEncrypter::Invalid);
 }
 
 /** Simple functionality test.

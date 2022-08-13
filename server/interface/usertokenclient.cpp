@@ -1,10 +1,11 @@
 /**
   *  \file server/interface/usertokenclient.cpp
+  *  \brief Class server::interface::UserTokenClient
   */
 
 #include "server/interface/usertokenclient.hpp"
-#include "afl/data/segment.hpp"
 #include "afl/data/access.hpp"
+#include "afl/data/segment.hpp"
 #include "server/types.hpp"
 
 using afl::data::Segment;

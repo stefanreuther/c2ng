@@ -1,13 +1,14 @@
 /**
   *  \file server/user/root.hpp
+  *  \brief Class server::user::Root
   */
 #ifndef C2NG_SERVER_USER_ROOT_HPP
 #define C2NG_SERVER_USER_ROOT_HPP
 
-#include "server/common/root.hpp"
-#include "afl/sys/log.hpp"
 #include "afl/net/redis/stringsetkey.hpp"
+#include "afl/sys/log.hpp"
 #include "server/common/idgenerator.hpp"
+#include "server/common/root.hpp"
 #include "server/types.hpp"
 #include "server/user/configuration.hpp"
 
@@ -72,21 +73,26 @@ namespace server { namespace user {
          *  Database Schema
          */
 
-        /** Access set of all active tokens. */
+        /** Access set of all active tokens.
+            \return set */
         afl::net::redis::StringSetKey allTokens();
 
-        /** Access a token's metadata. */
+        /** Access a token's metadata.
+            \return token metadata */
         Token tokenById(String_t token);
 
-        /** Allocate a user Id. */
+        /** Allocate a user Id.
+            \return new user Id */
         String_t allocateUserId();
 
-        /** Access set of all live user Ids. */
+        /** Access set of all live user Ids.
+            \return set */
         afl::net::redis::StringSetKey allUsers();
 
-        /** Access default profile copy.
-            This hash is copied into new users' profiles.
-            Unlike defaultProfile(), a change in defaultProfileCopy()'s content will not affect existing users. */
+        /** Access copyable default profile.
+            When a user is created, this hash is copied into their profile.
+            Unlike defaultProfile(), a change in defaultProfileCopy()'s content will not affect existing users.
+            \return hash */
         afl::net::redis::HashKey defaultProfileCopy();
 
      private:

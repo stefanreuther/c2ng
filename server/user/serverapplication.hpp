@@ -1,5 +1,6 @@
 /**
   *  \file server/user/serverapplication.hpp
+  *  \brief Class server::user::ServerApplication
   */
 #ifndef C2NG_SERVER_USER_SERVERAPPLICATION_HPP
 #define C2NG_SERVER_USER_SERVERAPPLICATION_HPP
@@ -10,6 +11,7 @@
 
 namespace server { namespace user {
 
+    /** User Server main entry point. */
     class ServerApplication : public server::Application {
      public:
         /** Constructor.
@@ -20,6 +22,7 @@ namespace server { namespace user {
         ServerApplication(afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net, afl::async::Interrupt& intr);
         ~ServerApplication();
 
+        // Application:
         virtual void serverMain();
         virtual bool handleConfiguration(const String_t& key, const String_t& value);
         virtual bool handleCommandLineOption(const String_t& option, afl::sys::CommandLineParser& parser);

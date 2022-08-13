@@ -5,8 +5,8 @@
 #ifndef C2NG_SERVER_INTERFACE_USERDATACLIENT_HPP
 #define C2NG_SERVER_INTERFACE_USERDATACLIENT_HPP
 
-#include "server/interface/userdata.hpp"
 #include "afl/net/commandhandler.hpp"
+#include "server/interface/userdata.hpp"
 
 namespace server { namespace interface {
 

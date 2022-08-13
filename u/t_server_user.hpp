@@ -68,6 +68,8 @@ class TestServerUserUserManagement : public CxxTest::TestSuite {
     void testProfileNoLimit();
     void testProfileDefaultLimit();
     void testRemove();
+    void testLoginNoPassword();
+    void testLoginUpgrade();
 };
 
 class TestServerUserUserToken : public CxxTest::TestSuite {

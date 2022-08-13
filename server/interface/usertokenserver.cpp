@@ -1,15 +1,16 @@
 /**
   *  \file server/interface/usertokenserver.cpp
+  *  \brief Class server::interface::UserTokenServer
   */
 
 #include <stdexcept>
 #include "server/interface/usertokenserver.hpp"
-#include "server/interface/usertoken.hpp"
-#include "server/types.hpp"
-#include "server/errors.hpp"
 #include "afl/data/hash.hpp"
 #include "afl/data/hashvalue.hpp"
 #include "afl/data/stringlist.hpp"
+#include "server/errors.hpp"
+#include "server/interface/usertoken.hpp"
+#include "server/types.hpp"
 
 server::interface::UserTokenServer::UserTokenServer(UserToken& impl)
     : m_implementation(impl)

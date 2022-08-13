@@ -1,11 +1,14 @@
 /**
   *  \file server/user/user.hpp
+  *  \brief Class server::user::User
   */
 #ifndef C2NG_SERVER_USER_USER_HPP
 #define C2NG_SERVER_USER_USER_HPP
 
-#include "server/common/user.hpp"
+#include "afl/net/redis/stringkey.hpp"
 #include "afl/net/redis/stringsetkey.hpp"
+#include "afl/net/redis/subtree.hpp"
+#include "server/common/user.hpp"
 
 namespace server { namespace user {
 

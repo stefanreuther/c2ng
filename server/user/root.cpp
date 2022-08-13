@@ -1,10 +1,11 @@
 /**
   *  \file server/user/root.cpp
+  *  \brief Class server::user::Root
   */
 
 #include "server/user/root.hpp"
-#include "server/user/token.hpp"
 #include "afl/string/format.hpp"
+#include "server/user/token.hpp"
 
 // Constructor.
 server::user::Root::Root(afl::net::CommandHandler& db, server::common::IdGenerator& gen, PasswordEncrypter& encrypter, const Configuration& config)
