@@ -36,7 +36,7 @@ namespace {
 }
 
 // Constructor.
-server::host::HostPlayer::HostPlayer(Session& session, Root& root)
+server::host::HostPlayer::HostPlayer(const Session& session, Root& root)
     : m_session(session),
       m_root(root)
 { }
@@ -112,7 +112,9 @@ server::host::HostPlayer::substitute(int32_t gameId, int32_t slot, String_t user
     m_session.checkPermission(game, Game::ReadPermission);
 
     // Check user
-    // FIXME: check existence of user? Classic didn't.
+    if (!User::exists(m_root, userId)) {
+        throw std::runtime_error(USER_NOT_FOUND);
+    }
 
     // Check preconditions
 
@@ -228,13 +230,6 @@ server::host::HostPlayer::resign(int32_t gameId, int32_t slot, String_t userId)
         /* History */
         game.addUserHistoryItem(m_root, userId == m_session.getUser() ? dead ? "game-resign-dead" : "game-resign" : "game-resign-other", afl::string::Format("%s:%d", userId, slot), userId);
 
-        // This was commented out in c2host classic:
-        // /* If user drops himself, penalize him */
-        // if (!dead && userId == conn.getUser() && !game.isRankingDisabled()) {
-        //     handlePlayerDrop(database_connection, userId, game, slotId);
-        //     handlePlayerRankChanges(database_connection, userId);
-        // }
-
         /* Notify cron to recompute host time */
         m_root.handleGameChange(gameId);
     }
@@ -244,7 +239,7 @@ void
 server::host::HostPlayer::add(int32_t gameId, String_t userId)
 {
     // ex planetscentral/host/cmdplayer.h:doPlayerAdd
-    
+
     // Obtain simple access; this only changes permissions
     GameArbiter::Guard guard(m_root.arbiter(), gameId, GameArbiter::Simple);
 

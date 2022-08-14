@@ -7,13 +7,13 @@
 #include "server/host/file/rootitem.hpp"
 
 #include "t_server_host_file.hpp"
-#include "server/interface/filebaseclient.hpp"
-#include "server/host/gamecreator.hpp"
+#include "afl/io/nullfilesystem.hpp"
+#include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
 #include "server/file/internalfileserver.hpp"
-#include "afl/net/nullcommandhandler.hpp"
+#include "server/host/gamecreator.hpp"
+#include "server/interface/filebaseclient.hpp"
 #include "server/interface/mailqueueclient.hpp"
-#include "afl/io/nullfilesystem.hpp"
 
 namespace {
     void createGame(server::host::Root& root)

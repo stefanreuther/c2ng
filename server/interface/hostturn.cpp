@@ -1,5 +1,6 @@
 /**
   *  \file server/interface/hostturn.cpp
+  *  \brief Interface server::interface::HostTurn
   */
 
 #include "server/interface/hostturn.hpp"

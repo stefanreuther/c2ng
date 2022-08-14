@@ -19,7 +19,7 @@ namespace server { namespace host {
         /** Constructor.
             \param session Session
             \param root    Service root */
-        HostTurn(Session& session, Root& root);
+        HostTurn(const Session& session, Root& root);
 
         // HostTurn virtuals:
         virtual Result submit(const String_t& blob,
@@ -30,7 +30,7 @@ namespace server { namespace host {
         virtual void setTemporary(int32_t gameId, int32_t slotNr, bool flag);
 
      private:
-        Session& m_session;
+        const Session& m_session;
         Root& m_root;
     };
 

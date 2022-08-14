@@ -19,7 +19,7 @@ namespace server { namespace host {
         /** Constructor.
             \param session Session
             \param root    Service root */
-        HostSchedule(Session& session, Root& root);
+        HostSchedule(const Session& session, Root& root);
 
         // HostSchedule virtuals:
         virtual void add(int32_t gameId, const Schedule& sched);
@@ -33,7 +33,7 @@ namespace server { namespace host {
                              afl::data::IntegerList_t& result);
 
      private:
-        Session& m_session;
+        const Session& m_session;
         Root& m_root;
 
         void doAddReplace(int32_t gameId, const Schedule& sched, bool add);

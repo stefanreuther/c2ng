@@ -4,10 +4,10 @@
   */
 
 #include "server/host/file/rootitem.hpp"
-#include "server/host/file/toolrootitem.hpp"
 #include "server/host/file/gamerootitem.hpp"
+#include "server/host/file/toolrootitem.hpp"
 
-server::host::file::RootItem::RootItem(Session& session, Root& root)
+server::host::file::RootItem::RootItem(const Session& session, Root& root)
     : m_session(session),
       m_root(root)
 { }

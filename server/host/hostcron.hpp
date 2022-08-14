@@ -18,7 +18,7 @@ namespace server { namespace host {
         /** Constructor.
             \param session Session
             \param root    Service root */
-        HostCron(Session& session, Root& root);
+        HostCron(const Session& session, Root& root);
 
         // HostCron:
         virtual Event getGameEvent(int32_t gameId);
@@ -28,7 +28,7 @@ namespace server { namespace host {
         virtual void getBrokenGames(BrokenMap_t& result);
 
      private:
-        Session& m_session;
+        const Session& m_session;
         Root& m_root;
     };
 

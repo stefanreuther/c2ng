@@ -21,7 +21,7 @@ namespace server { namespace host { namespace file {
             \param gameId Game Id. Caller has verified that user can access the game.
             \param slotId Slot Id. Caller has verified that user can access this slot.
             \param slotName Name of this slot; returned as server::interface::HostFile::Info::slotName (and should therefore normally be given). */
-        GameSlotItem(Session& session, Root& root, int32_t gameId, int slotId, afl::base::Optional<String_t> slotName);
+        GameSlotItem(const Session& session, Root& root, int32_t gameId, int slotId, afl::base::Optional<String_t> slotName);
 
         // Item:
         virtual String_t getName();
@@ -31,11 +31,11 @@ namespace server { namespace host { namespace file {
         virtual String_t getContent();
 
      private:
-        Session& m_session;
+        const Session& m_session;
         Root& m_root;
-        int m_gameId;
-        int m_slotId;
-        afl::base::Optional<String_t> m_slotName;
+        const int m_gameId;
+        const int m_slotId;
+        const afl::base::Optional<String_t> m_slotName;
     };
 
 } } }

@@ -135,7 +135,7 @@ TestServerInterfaceHostScheduleClient::testModify()
         HostSchedule::Schedule sch;
         sch.type = HostSchedule::Weekly;
         sch.weekdays = 0;
-        sch.condition = HostSchedule::None;        
+        sch.condition = HostSchedule::None;
         mock.expectCall("SCHEDULEMOD, 7, WEEKLY, 0, FOREVER");
         mock.provideNewResult(0);
         testee.modify(7, sch);
@@ -148,7 +148,7 @@ TestServerInterfaceHostScheduleClient::testModify()
         mock.expectCall("SCHEDULEADD, 4, STOP, UNTILTIME, 140000");
         mock.provideNewResult(0);
         testee.add(4, sch);
-    }    
+    }
     {
         HostSchedule::Schedule sch;
         sch.type = HostSchedule::Stopped;
@@ -157,7 +157,7 @@ TestServerInterfaceHostScheduleClient::testModify()
         mock.expectCall("SCHEDULEADD, 4, STOP, UNTILTURN, 2");
         mock.provideNewResult(0);
         testee.add(4, sch);
-    }    
+    }
 
     // - combination
     {
@@ -311,7 +311,7 @@ TestServerInterfaceHostScheduleClient::testErrors()
         a->setNew("type", server::makeIntegerValue(99));
         mock.expectCall("SCHEDULELIST, 82");
         mock.provideNewResult(new VectorValue(Vector::create(Segment().pushBackNew(new HashValue(a)))));
-        
+
         std::vector<HostSchedule::Schedule> result;
         TS_ASSERT_THROWS(testee.getAll(82, result), afl::except::InvalidDataException);
     }
@@ -322,7 +322,7 @@ TestServerInterfaceHostScheduleClient::testErrors()
         a->setNew("condition", server::makeStringValue("meh"));
         mock.expectCall("SCHEDULELIST, 155");
         mock.provideNewResult(new VectorValue(Vector::create(Segment().pushBackNew(new HashValue(a)))));
-        
+
         std::vector<HostSchedule::Schedule> result;
         TS_ASSERT_THROWS(testee.getAll(155, result), afl::except::InvalidDataException);
     }

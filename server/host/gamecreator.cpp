@@ -35,16 +35,7 @@ namespace {
             // - tool:$TOOL:settings
             afl::data::StringList_t settings;
             src.subtree("tool").subtree(tool).hashKey("settings").getAll(settings);
-#if 0
-            // We don't have a setAll(), so use the for loop below
-            if (!settings.empty()) {
-                dst.subtree("tool").subtree(tool).hashKey("settings").setAll(settings);
-            }
-#else
-            for (size_t i = 0; i+1 < settings.size(); i += 2) {
-                dst.subtree("tool").subtree(tool).hashKey("settings").stringField(settings[i]).set(settings[i+1]);
-            }
-#endif
+            dst.subtree("tool").subtree(tool).hashKey("settings").setAll(settings);
 
             // - toolkind. Copy from master data, not from source game.
             String_t kind = toolRoot.byName(tool).stringField("kind").get();
@@ -213,10 +204,9 @@ server::host::GameCreator::copyGame(int32_t srcId, int32_t dstId)
     // Copy tools
     copyTools(src, dst, m_root.toolRoot());
 
-    // Do not copy state. This is set by createNewGameFinish.
-    // Do not copy type. This is set by createNewGameFinish.
+    // Do not copy state. This is set by finishNewGame.
+    // Do not copy type. This is set by finishNewGame.
     // Do not copy owner.
-
 }
 
 // Finish game creation.

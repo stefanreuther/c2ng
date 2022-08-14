@@ -24,7 +24,7 @@ namespace server { namespace host { namespace file {
             \param slotName Slot name
             \param resultAccess true if player can access result files
             \param turnAccess true if player can access turn files */
-        HistorySlotItem(Session& session, Root& root, int32_t gameId, int turnNumber, int slotNumber, String_t slotName,
+        HistorySlotItem(const Session& session, Root& root, int32_t gameId, int turnNumber, int slotNumber, String_t slotName,
                         bool resultAccess, bool turnAccess);
 
         // Item:
@@ -35,14 +35,14 @@ namespace server { namespace host { namespace file {
         virtual String_t getContent();
 
      private:
-        Session& m_session;
+        const Session& m_session;
         Root& m_root;
-        int m_gameId;
-        int m_turnNumber;
-        int m_slotNumber;
-        String_t m_slotName;
-        bool m_resultAccess;
-        bool m_turnAccess;
+        const int m_gameId;
+        const int m_turnNumber;
+        const int m_slotNumber;
+        const String_t m_slotName;
+        const bool m_resultAccess;
+        const bool m_turnAccess;
     };
 
 } } }

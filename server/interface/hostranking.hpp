@@ -5,10 +5,10 @@
 #ifndef C2NG_SERVER_INTERFACE_HOSTRANKING_HPP
 #define C2NG_SERVER_INTERFACE_HOSTRANKING_HPP
 
-#include "server/types.hpp"
 #include "afl/base/deletable.hpp"
 #include "afl/base/optional.hpp"
 #include "afl/data/stringlist.hpp"
+#include "server/types.hpp"
 
 namespace server { namespace interface {
 

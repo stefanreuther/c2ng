@@ -10,6 +10,7 @@
 #include "afl/net/redis/stringfield.hpp"
 #include "afl/net/redis/subtree.hpp"
 #include "afl/string/format.hpp"
+#include "server/host/user.hpp"
 
 namespace {
     /** Logging channel for this module. */
@@ -98,7 +99,7 @@ void
 server::host::rank::LevelHandler::handlePlayerTurn(String_t userId, bool submit, uint32_t level)
 {
     // ex planetscentral/host/ranking.h:handlePlayerTurn
-    afl::net::redis::HashKey profile(m_root.userRoot().subtree(userId).hashKey("profile"));
+    afl::net::redis::HashKey profile(User(m_root, userId).profile());
 
     // Count this turn
     if (submit) {
@@ -159,7 +160,7 @@ server::host::rank::LevelHandler::handlePlayerDrop(String_t userId, Game& game, 
     }
 
     // Give penalty
-    afl::net::redis::HashKey profile(m_root.userRoot().subtree(userId).hashKey("profile"));
+    afl::net::redis::HashKey profile(User(m_root, userId).profile());
     int32_t oldReliability = profile.intField("turnreliability").get();
     int32_t newReliability = int32_t(oldReliability * double(maxScore*100 - playerScore*DROP_PENALTY) / (maxScore*100));
     profile.intField("turnreliability").set(newReliability);
@@ -172,7 +173,7 @@ void
 server::host::rank::LevelHandler::addPlayerRankPoints(String_t userId, int32_t pts)
 {
     // ex planetscentral/host/ranking.h:addPlayerRankPoints
-    afl::net::redis::HashKey profile(m_root.userRoot().subtree(userId).hashKey("profile"));
+    afl::net::redis::HashKey profile(User(m_root, userId).profile());
     profile.intField("rankpoints") += pts;
 }
 
@@ -181,7 +182,7 @@ void
 server::host::rank::LevelHandler::handlePlayerRankChanges(String_t userId)
 {
     // ex planetscentral/host/ranking.h:handlePlayerRankChanges
-    afl::net::redis::HashKey profile(m_root.userRoot().subtree(userId).hashKey("profile"));
+    afl::net::redis::HashKey profile(User(m_root, userId).profile());
 
     int32_t currentRank        = profile.intField("rank").get();
     int32_t currentRankPoints  = profile.intField("rankpoints").get();

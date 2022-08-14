@@ -4,10 +4,10 @@
   */
 
 #include "server/host/root.hpp"
+#include "afl/charset/codepage.hpp"
 #include "afl/net/reconnectable.hpp"
 #include "afl/sys/time.hpp"
 #include "server/host/cron.hpp"
-#include "afl/charset/codepage.hpp"
 
 namespace {
     void configure(afl::net::CommandHandler& hdl)
@@ -179,12 +179,6 @@ server::host::Root::fileSystem()
     return m_fileSystem;
 }
 
-// /** Get current time. We store MINUTES since epoch, giving us a little longer
-//     than 2038 if time() works right.
-
-//     This is therefore a minutes counter since Thu Jan 1 1970, 0:00.
-//     To obtain minutes: %60.
-//     To obtain hours: /60%24. */
 server::Time_t
 server::host::Root::getTime()
 {
@@ -268,4 +262,10 @@ server::host::Root::globalHistory()
 {
     // ex GLOBAL_HISTORY
     return afl::net::redis::StringListKey(m_db, "global:history");
+}
+
+afl::net::redis::IntegerKey
+server::host::Root::gameByTime(const String_t& timestamp)
+{
+    return gameRoot().subtree("bytime").intKey(timestamp);
 }

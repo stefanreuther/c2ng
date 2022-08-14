@@ -1,20 +1,21 @@
 /**
   *  \file server/interface/hostplayerserver.cpp
+  *  \brief Class server::interface::HostPlayerServer
   */
 
 #include <stdexcept>
 #include "server/interface/hostplayerserver.hpp"
-#include "server/types.hpp"
-#include "server/errors.hpp"
-#include "afl/data/vector.hpp"
-#include "afl/data/vectorvalue.hpp"
 #include "afl/data/hash.hpp"
 #include "afl/data/hashvalue.hpp"
+#include "afl/data/vector.hpp"
+#include "afl/data/vectorvalue.hpp"
+#include "server/errors.hpp"
+#include "server/types.hpp"
 
-using afl::data::Vector;
-using afl::data::VectorValue;
 using afl::data::Hash;
 using afl::data::HashValue;
+using afl::data::Vector;
+using afl::data::VectorValue;
 
 server::interface::HostPlayerServer::HostPlayerServer(HostPlayer& impl)
     : m_implementation(impl)

@@ -20,10 +20,10 @@
 #include "server/host/root.hpp"
 #include "server/host/schedule.hpp"
 #include "server/host/talklistener.hpp"
+#include "server/host/user.hpp"
 #include "server/interface/baseclient.hpp"
 #include "server/interface/filebaseclient.hpp"
 #include "server/types.hpp"
-#include "server/host/user.hpp"
 
 const int server::host::Game::NUM_PLAYERS;
 
@@ -132,13 +132,6 @@ server::host::Game::TurnInfo::turnStatus()
 {
     return m_key.stringField("turnstatus");
 }
-
-// // Access relative directory name.
-// afl::net::redis::StringField
-// server::host::Game::TurnInfo::relativeDirectory()
-// {
-//     return m_key.stringField("dir");
-// }
 
 /**************************** Game::TurnFiles ****************************/
 
@@ -399,7 +392,7 @@ server::host::Game::getConfigInt(String_t name)
     return settings().intField(name).get();
 }
 
-// Set configuration inter value.
+// Set configuration integer value.
 void
 server::host::Game::setConfigInt(String_t name, int32_t value)
 {
@@ -734,6 +727,13 @@ afl::net::redis::HashKey
 server::host::Game::rankPoints()
 {
     return m_game.hashKey("rankpoints");
+}
+
+// Access current turn time stamp.
+afl::net::redis::StringField
+server::host::Game::timestamp()
+{
+    return settings().stringField("timestamp");
 }
 
 // Access turn.

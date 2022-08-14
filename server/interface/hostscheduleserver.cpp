@@ -1,15 +1,16 @@
 /**
   *  \file server/interface/hostscheduleserver.cpp
+  *  \brief Class server::interface::HostScheduleServer
   */
 
 #include <stdexcept>
 #include "server/interface/hostscheduleserver.hpp"
-#include "server/types.hpp"
-#include "server/errors.hpp"
 #include "afl/data/hash.hpp"
 #include "afl/data/hashvalue.hpp"
 #include "afl/data/vector.hpp"
 #include "afl/data/vectorvalue.hpp"
+#include "server/errors.hpp"
+#include "server/types.hpp"
 
 using afl::data::Hash;
 using afl::data::HashValue;

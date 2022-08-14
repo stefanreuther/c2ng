@@ -5,10 +5,10 @@
 #ifndef C2NG_SERVER_HOST_INSTALLER_HPP
 #define C2NG_SERVER_HOST_INSTALLER_HPP
 
-#include "game/playerset.hpp"
 #include "afl/base/types.hpp"
 #include "afl/data/stringlist.hpp"
 #include "afl/string/string.hpp"
+#include "game/playerset.hpp"
 
 namespace server { namespace host {
 

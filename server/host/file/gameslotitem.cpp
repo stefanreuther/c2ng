@@ -5,11 +5,11 @@
 
 #include "server/host/file/gameslotitem.hpp"
 #include "afl/string/format.hpp"
-#include "server/interface/filebase.hpp"
 #include "server/host/file/fileitem.hpp"
+#include "server/interface/filebase.hpp"
 
 
-server::host::file::GameSlotItem::GameSlotItem(Session& session, Root& root, int32_t gameId, int slotId, afl::base::Optional<String_t> slotName)
+server::host::file::GameSlotItem::GameSlotItem(const Session& session, Root& root, int32_t gameId, int slotId, afl::base::Optional<String_t> slotName)
     : m_session(session), m_root(root), m_gameId(gameId), m_slotId(slotId),
       m_slotName(slotName)
 { }

@@ -1,15 +1,16 @@
 /**
   *  \file server/interface/hosthistoryserver.cpp
+  *  \brief Class server::interface::HostHistoryServer
   */
 
 #include <stdexcept>
 #include "server/interface/hosthistoryserver.hpp"
-#include "server/interface/hosthistory.hpp"
-#include "server/errors.hpp"
-#include "afl/data/vector.hpp"
-#include "afl/data/vectorvalue.hpp"
 #include "afl/data/hash.hpp"
 #include "afl/data/hashvalue.hpp"
+#include "afl/data/vector.hpp"
+#include "afl/data/vectorvalue.hpp"
+#include "server/errors.hpp"
+#include "server/interface/hosthistory.hpp"
 
 using afl::data::Hash;
 using afl::data::HashValue;

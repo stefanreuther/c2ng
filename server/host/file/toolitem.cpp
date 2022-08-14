@@ -1,5 +1,6 @@
 /**
   *  \file server/host/file/toolitem.cpp
+  *  \brief Class server::host::file::ToolItem
   */
 
 #include "server/host/file/toolitem.hpp"
@@ -10,7 +11,7 @@
 using server::interface::BaseClient;
 using server::interface::FileBaseClient;
 
-server::host::file::ToolItem::ToolItem(Session& session, afl::net::CommandHandler& filer, String_t name, String_t pathName, String_t title, afl::base::Optional<String_t> restriction)
+server::host::file::ToolItem::ToolItem(const Session& session, afl::net::CommandHandler& filer, String_t name, String_t pathName, String_t title, afl::base::Optional<String_t> restriction)
     : m_session(session),
       m_filer(filer),
       m_name(name),

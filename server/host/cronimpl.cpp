@@ -356,6 +356,7 @@ server::host::CronImpl::run()
     }
 }
 
+// Stop request.
 void
 server::host::CronImpl::stop()
 {
@@ -366,6 +367,7 @@ server::host::CronImpl::stop()
     m_wake.post();
 }
 
+// Scheduler main entry point.
 void
 server::host::CronImpl::schedulerMain()
 {
@@ -426,6 +428,7 @@ server::host::CronImpl::schedulerMain()
     }
 }
 
+// Check for stop request.
 bool
 server::host::CronImpl::isStopRequested()
 {
@@ -560,8 +563,8 @@ server::host::CronImpl::processRequests()
     }
 }
 
-// /** Move due items from the schedule to the overdue list.
-//     This marks them for immediate processing. */
+// Move due items from the schedule to the overdue list.
+// This marks them for immediate processing.
 void
 server::host::CronImpl::moveDueItems()
 {
@@ -578,9 +581,9 @@ server::host::CronImpl::moveDueItems()
     }
 }
 
-// /** Run due item.
-//     \param gameId      [in]  Game to work on
-//     \param newSchedule [out] New schedule for next event will be produced here */
+// Run due item.
+// \param gameId      [in]  Game to work on
+// \param newSchedule [out] New schedule for next event will be produced here
 void
 server::host::CronImpl::runDueItem(const int32_t gameId, std::list<Event_t>& newSchedule)
 {

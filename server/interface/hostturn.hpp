@@ -1,5 +1,6 @@
 /**
   *  \file server/interface/hostturn.hpp
+  *  \brief Interface server::interface::HostTurn
   */
 #ifndef C2NG_SERVER_INTERFACE_HOSTTURN_HPP
 #define C2NG_SERVER_INTERFACE_HOSTTURN_HPP
@@ -10,18 +11,20 @@
 
 namespace server { namespace interface {
 
+    /** Interface for turn submission into a host server. */
     class HostTurn : public afl::base::Deletable {
      public:
+        /** Result of a turn submission. */
         struct Result {
-            int32_t state;
-            String_t output;
-            int32_t gameId;
-            int32_t slot;
-            int32_t previousState;
-            int32_t turnNumber;
-            String_t userId;
-            String_t gameName;
-            bool allowTemp;
+            int32_t state;                           /**< State of turn submission. */
+            String_t output;                         /**< Turn checker output. */
+            int32_t gameId;                          /**< Game Id. */
+            int32_t slot;                            /**< Slot number. */
+            int32_t previousState;                   /**< Previous turn state. */
+            int32_t turnNumber;                      /**< Turn number. */
+            String_t userId;                         /**< User Id. */
+            String_t gameName;                       /**< Game name. */
+            bool allowTemp;                          /**< True if turn can be marked temporary. */
 
             Result();
             ~Result();
@@ -37,15 +40,23 @@ namespace server { namespace interface {
 
         static const int32_t TemporaryTurnFlag = 16; /**< Turn submitted and marked temporary. */
 
-
-        // TRN content:Blob [GAME game:GID] [SLOT slot:Int] [MAIL email:Str] [INFO info:Str]
+        /** Submit a turn file (TRN).
+            @param blob      Turn file data
+            @param game      Submit turn to this game (empty for auto-detect).
+            @param slot      Submit turn for this player (empty for auto-detect).
+            @param mail      Sender email address
+            @param info      Optional information for logging
+            @return result of submission */
         virtual Result submit(const String_t& blob,
                               afl::base::Optional<int32_t> game,
                               afl::base::Optional<int32_t> slot,
                               afl::base::Optional<String_t> mail,
                               afl::base::Optional<String_t> info) = 0;
 
-        // TRNMARKTEMP game:GID slot:Int flag:Int
+        /** Mark turn temporary (TRNMARKTEMP).
+            @param gameId   Game
+            @param slot     Slot number
+            @param flag     true to mark temporary */
         virtual void setTemporary(int32_t gameId, int32_t slot, bool flag) = 0;
     };
 

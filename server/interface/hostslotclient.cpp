@@ -1,5 +1,6 @@
 /**
   *  \file server/interface/hostslotclient.cpp
+  *  \brief Class server::interface::HostSlotClient
   */
 
 #include <memory>

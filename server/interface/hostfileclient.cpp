@@ -1,15 +1,16 @@
 /**
   *  \file server/interface/hostfileclient.cpp
+  *  \brief Class server::interface::HostFileClient
   */
 
 #include "server/interface/hostfileclient.hpp"
-#include "server/interface/filebaseclient.hpp"
 #include "afl/data/access.hpp"
+#include "server/interface/filebaseclient.hpp"
 #include "server/types.hpp"
 
-using afl::data::Value;
 using afl::data::Access;
 using afl::data::Segment;
+using afl::data::Value;
 
 server::interface::HostFileClient::HostFileClient(afl::net::CommandHandler& commandHandler)
     : m_commandHandler(commandHandler)

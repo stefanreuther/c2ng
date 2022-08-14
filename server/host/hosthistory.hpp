@@ -19,13 +19,13 @@ namespace server { namespace host {
         /** Constructor.
             \param session Session
             \param root    Service root */
-        HostHistory(Session& session, Root& root);
+        HostHistory(const Session& session, Root& root);
 
         virtual void getEvents(const EventFilter& filter, afl::container::PtrVector<Event>& result);
         virtual void getTurns(int32_t gameId, const TurnFilter& filter, afl::container::PtrVector<Turn>& result);
 
      private:
-        Session& m_session;
+        const Session& m_session;
         Root& m_root;
     };
 

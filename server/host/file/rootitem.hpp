@@ -11,13 +11,14 @@
 
 namespace server { namespace host { namespace file {
 
-    /** Host File Hierarchy: Root node. */
+    /** Host File Hierarchy: Root node.
+        The root node provides top-level items in find() but cannot be listed with listContent(). */
     class RootItem : public Item {
      public:
         /** Constructor.
             \param session Session (for access checking)
             \param root Root */
-        RootItem(Session& session, Root& root);
+        RootItem(const Session& session, Root& root);
 
         // Item:
         virtual String_t getName();
@@ -27,7 +28,7 @@ namespace server { namespace host { namespace file {
         virtual String_t getContent();
 
      private:
-        Session& m_session;
+        const Session& m_session;
         Root& m_root;
     };
 

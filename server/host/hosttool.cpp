@@ -126,7 +126,7 @@ namespace {
     }
 }
 
-server::host::HostTool::HostTool(Session& session, Root& root, Root::ToolTree tree)
+server::host::HostTool::HostTool(const Session& session, Root& root, Root::ToolTree tree)
     : m_session(session),
       m_root(root),
       m_tree(tree)
@@ -237,10 +237,7 @@ server::host::HostTool::copy(String_t sourceId, String_t destinationId)
     afl::data::StringList_t data;
     m_tree.byName(sourceId).getAll(data);
     m_tree.byName(destinationId).remove();
-    for (size_t i = 0; i+1 < data.size(); i += 2) {
-        // FIXME: we don't have a 'setAll' yet
-        m_tree.byName(destinationId).stringField(data[i]).set(data[i+1]);
-    }
+    m_tree.byName(destinationId).setAll(data);
 
     list.add(destinationId);
 }

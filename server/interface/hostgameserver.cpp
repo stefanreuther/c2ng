@@ -1,23 +1,24 @@
 /**
   *  \file server/interface/hostgameserver.cpp
+  *  \brief Class server::interface::HostGameServer
   */
 
 #include <stdexcept>
 #include "server/interface/hostgameserver.hpp"
-#include "server/types.hpp"
-#include "server/errors.hpp"
-#include "afl/data/vector.hpp"
-#include "afl/data/vectorvalue.hpp"
+#include "afl/base/staticassert.hpp"
 #include "afl/data/hash.hpp"
 #include "afl/data/hashvalue.hpp"
+#include "afl/data/vector.hpp"
+#include "afl/data/vectorvalue.hpp"
+#include "server/errors.hpp"
 #include "server/interface/hostscheduleserver.hpp"
-#include "afl/base/staticassert.hpp"
 #include "server/interface/hosttoolserver.hpp"
+#include "server/types.hpp"
 
-using afl::data::Vector;
-using afl::data::VectorValue;
 using afl::data::Hash;
 using afl::data::HashValue;
+using afl::data::Vector;
+using afl::data::VectorValue;
 
 server::interface::HostGameServer::HostGameServer(HostGame& impl)
     : ComposableCommandHandler(),

@@ -5,9 +5,9 @@
 #ifndef C2NG_SERVER_HOST_CONFIGURATION_HPP
 #define C2NG_SERVER_HOST_CONFIGURATION_HPP
 
-#include "server/types.hpp"
 #include "afl/net/name.hpp"
 #include "afl/string/string.hpp"
+#include "server/types.hpp"
 
 namespace server { namespace host {
 

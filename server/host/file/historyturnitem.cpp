@@ -5,10 +5,10 @@
 
 #include "server/host/file/historyturnitem.hpp"
 #include "afl/string/format.hpp"
-#include "server/host/file/historyslotitem.hpp"
 #include "server/host/file/fileitem.hpp"
+#include "server/host/file/historyslotitem.hpp"
 
-server::host::file::HistoryTurnItem::HistoryTurnItem(Session& session, Root& root, int32_t gameId, int turnNumber, game::PlayerSet_t resultAccess, game::PlayerSet_t turnAccess)
+server::host::file::HistoryTurnItem::HistoryTurnItem(const Session& session, Root& root, int32_t gameId, int turnNumber, game::PlayerSet_t resultAccess, game::PlayerSet_t turnAccess)
     : m_session(session), m_root(root), m_gameId(gameId), m_turnNumber(turnNumber),
       m_resultAccess(resultAccess), m_turnAccess(turnAccess)
 { }

@@ -1,5 +1,6 @@
 /**
   *  \file server/interface/hostplayer.cpp
+  *  \brief Interface server::interface::HostPlayer
   */
 
 #include "server/interface/hostplayer.hpp"

@@ -5,15 +5,15 @@
 #ifndef C2NG_SERVER_HOST_GAME_HPP
 #define C2NG_SERVER_HOST_GAME_HPP
 
-#include "afl/net/redis/subtree.hpp"
-#include "afl/net/redis/integerfield.hpp"
-#include "afl/net/redis/stringlistkey.hpp"
 #include "afl/net/commandhandler.hpp"
+#include "afl/net/redis/integerfield.hpp"
+#include "afl/net/redis/stringfield.hpp"
+#include "afl/net/redis/stringlistkey.hpp"
+#include "afl/net/redis/subtree.hpp"
 #include "game/playerset.hpp"
+#include "server/common/racenames.hpp"
 #include "server/interface/hostgame.hpp"
 #include "server/interface/hostplayer.hpp"
-#include "server/common/racenames.hpp"
-#include "afl/net/redis/stringfield.hpp"
 
 namespace server { namespace host {
 
@@ -76,10 +76,6 @@ namespace server { namespace host {
             /** Access turn status.
                 \return key. Content is array of packed Int16LE. */
             afl::net::redis::StringField turnStatus();
-
-            // /** Access relative directory name.
-            //     \return key. Content is name of directory relative to game's directory. */
-            // afl::net::redis::StringField relativeDirectory();
 
          private:
             afl::net::redis::HashKey m_key;
@@ -246,7 +242,7 @@ namespace server { namespace host {
             \return value */
         int32_t getConfigInt(String_t name);
 
-        /** Set configuration inter value.
+        /** Set configuration integer value.
             This sets the raw value and does not check any interactions / consistency rules.
             \param name Configuration key
             \param value Value */
@@ -408,6 +404,10 @@ namespace server { namespace host {
         /** Access rank points.
             \return key. Field names are user Ids, content is rank points already awarded for this game */
         afl::net::redis::HashKey rankPoints();
+
+        /** Access current turn time stamp (VGAP string format).
+            \return field. */
+        afl::net::redis::StringField timestamp();
 
         /** Access turn.
             \param nr Turn number

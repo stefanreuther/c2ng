@@ -6,8 +6,8 @@
 #define C2NG_SERVER_HOST_FILE_ITEM_HPP
 
 #include "afl/base/deletable.hpp"
-#include "server/interface/hostfile.hpp"
 #include "afl/container/ptrvector.hpp"
+#include "server/interface/hostfile.hpp"
 
 namespace server { namespace host { namespace file {
 
@@ -26,7 +26,7 @@ namespace server { namespace host { namespace file {
         typedef afl::container::PtrVector<Item> ItemVector_t;
 
         /** Get name.
-            \return name (same as getInfo().name, but more efficient) */
+            \return name (plain name, withoug path; same as getInfo().name, but more efficient) */
         virtual String_t getName() = 0;
 
         /** Get full information.
@@ -34,19 +34,24 @@ namespace server { namespace host { namespace file {
         virtual Info_t getInfo() = 0;
 
         /** Find item by name.
-            \param name Name
+            If an item is returned by listContent(), it needs to be found by this function.
+            However, this function may also find functions not returned by listContent().
+
+            \param name Name (plain name, without path)
             \return newly-allocated item, or null if not found
             \throw std::runtime_error 405 (Not a directory)
             \throw std::runtime_error 401 (Permission denied) */
         virtual Item* find(const String_t& name) = 0;
 
         /** Get content of directory.
+            Fails for files.
             \param out [out] Result vector
             \throw std::runtime_error 405 (Not a directory)
             \throw std::runtime_error 401 (Permission denied) */
         virtual void listContent(ItemVector_t& out) = 0;
 
         /** Get content of file.
+            Fails for directories.
             \return file content
             \throw std::runtime_error 401 (Permission denied) */
         virtual String_t getContent() = 0;
@@ -62,7 +67,7 @@ namespace server { namespace host { namespace file {
             \throw std::runtime_error 401 (Permission denied) */
         Item& resolvePath(const String_t& pathName, ItemVector_t& out);
 
-
+     protected:
         /*
          *  Default Implementations
          */

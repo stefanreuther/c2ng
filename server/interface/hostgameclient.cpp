@@ -1,16 +1,17 @@
 /**
   *  \file server/interface/hostgameclient.cpp
+  *  \brief Class server::interface::HostGameClient
   */
 
 #include "server/interface/hostgameclient.hpp"
-#include "afl/data/segment.hpp"
 #include "afl/data/access.hpp"
+#include "afl/data/segment.hpp"
 #include "afl/except/invaliddataexception.hpp"
 #include "server/interface/hostscheduleclient.hpp"
 #include "server/interface/hosttoolclient.hpp"
 
-using afl::data::Segment;
 using afl::data::Access;
+using afl::data::Segment;
 
 server::interface::HostGameClient::HostGameClient(afl::net::CommandHandler& commandHandler)
     : m_commandHandler(commandHandler)
@@ -113,7 +114,6 @@ server::interface::HostGameClient::getConfig(int32_t gameId, String_t key)
 }
 
 // GAMEMGET game:GID key:Str...
-// FIXME: do we need this guy? It is not used anywhere.
 void
 server::interface::HostGameClient::getConfig(int32_t gameId, const afl::data::StringList_t& keys, afl::data::StringList_t& values)
 {
@@ -172,7 +172,6 @@ server::interface::HostGameClient::getDirectory(int32_t gameId)
 }
 
 // GAMECHECKPERM game:GID
-// FIXME: do we need this guy? It is not used anywhere.
 server::interface::HostGame::Permissions_t
 server::interface::HostGameClient::getPermissions(int32_t gameId, String_t userId)
 {
@@ -252,7 +251,6 @@ server::interface::HostGameClient::getVictoryCondition(int32_t gameId)
 }
 
 // GAMEUPDATE game:GID...
-// FIXME: do we need this guy? Better auto-upgrade games on startup.
 void
 server::interface::HostGameClient::updateGames(const afl::data::IntegerList_t& gameIds)
 {

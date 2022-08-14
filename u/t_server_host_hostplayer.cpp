@@ -346,7 +346,7 @@ TestServerHostHostPlayer::testResignComboPerm()
 
     // Can resign ourselves and our replacement
     testee.resign(gid, 1, "u3");
-    
+
     // u1,u2 remain
     TS_ASSERT_EQUALS(StringListKey(h.db(), "game:1:player:1:users").size(), 2);
     TS_ASSERT_EQUALS(StringListKey(h.db(), "game:1:player:1:users")[0], "u1");

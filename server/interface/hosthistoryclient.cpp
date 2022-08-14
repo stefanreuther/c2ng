@@ -1,5 +1,6 @@
 /**
   *  \file server/interface/hosthistoryclient.cpp
+  *  \brief Class server::interface::HostHistoryClient
   */
 
 #include <memory>
@@ -7,8 +8,8 @@
 #include "afl/data/segment.hpp"
 #include "afl/except/invaliddataexception.hpp"
 
-using afl::data::Segment;
 using afl::data::Access;
+using afl::data::Segment;
 
 server::interface::HostHistoryClient::HostHistoryClient(afl::net::CommandHandler& commandHandler)
     : m_commandHandler(commandHandler)

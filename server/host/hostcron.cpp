@@ -11,7 +11,7 @@
 #include "server/host/root.hpp"
 #include "server/host/session.hpp"
 
-server::host::HostCron::HostCron(Session& session, Root& root)
+server::host::HostCron::HostCron(const Session& session, Root& root)
     : m_session(session),
       m_root(root)
 { }

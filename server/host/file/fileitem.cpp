@@ -1,22 +1,27 @@
 /**
   *  \file server/host/file/fileitem.cpp
+  *  \brief Class server::host::file::FileItem
   */
 
 #include <cstring>
+#include <algorithm>
 #include "server/host/file/fileitem.hpp"
-#include "server/interface/filebaseclient.hpp"
 #include "server/interface/baseclient.hpp"
+#include "server/interface/filebaseclient.hpp"
 
+using server::host::file::FileItem;
 using server::interface::BaseClient;
 using server::interface::FileBaseClient;
-using server::host::file::FileItem;
 
 namespace {
-    FileItem* createFile(afl::net::CommandHandler& filer,
-                         const FileBaseClient::Info& fileInfo,
-                         const String_t& fileName,
-                         const String_t& fullName,
-                         const String_t& userName)
+    /* Create FileItem from information in filer.
+       @param filer         Filer
+       @param fileInfo      Information retrieved from filer
+       @param fileName      File name (without path name)
+       @param fullName      Full name on filer
+       @param userName      User name for access checking
+       @return newly-allocated FileItem */
+    FileItem* createFileItem(afl::net::CommandHandler& filer, const FileBaseClient::Info& fileInfo, const String_t& fileName, const String_t& fullName, const String_t& userName)
     {
         FileItem::Info_t i;
         i.name = fileName;
@@ -73,7 +78,7 @@ server::host::file::FileItem::listFileServerContent(afl::net::CommandHandler& fi
     for (FileBaseClient::ContentInfoMap_t::const_iterator it = files.begin(); it != files.end(); ++it) {
         if (const FileBaseClient::Info* p = it->second) {
             if (p->type == FileBaseClient::IsFile) {
-                out.pushBackNew(createFile(filer, *p, it->first, pathName + "/" + it->first, userName));
+                out.pushBackNew(createFileItem(filer, *p, it->first, pathName + "/" + it->first, userName));
             }
         }
     }
@@ -90,7 +95,7 @@ server::host::file::FileItem::listFileServerContent(afl::net::CommandHandler& fi
         try {
             const String_t fullName = pathName + "/" + filter[0];
             const FileBaseClient::Info fi = FileBaseClient(filer).getFileInformation(fullName);
-            out.pushBackNew(createFile(filer, fi, filter[0], fullName, userName));
+            out.pushBackNew(createFileItem(filer, fi, filter[0], fullName, userName));
         }
         catch (std::exception& e) {
             // If it's a 404, we cannot find the file, i.e. don't throw and report no file found.
@@ -107,7 +112,7 @@ server::host::file::FileItem::listFileServerContent(afl::net::CommandHandler& fi
         for (FileBaseClient::ContentInfoMap_t::const_iterator it = files.begin(); it != files.end(); ++it) {
             if (const FileBaseClient::Info* p = it->second) {
                 if (p->type == FileBaseClient::IsFile && std::find(filter.begin(), filter.end(), it->first) != filter.end()) {
-                    out.pushBackNew(createFile(filer, *p, it->first, pathName + "/" + it->first, userName));
+                    out.pushBackNew(createFileItem(filer, *p, it->first, pathName + "/" + it->first, userName));
                 }
             }
         }

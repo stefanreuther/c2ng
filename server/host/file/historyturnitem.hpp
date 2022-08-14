@@ -5,10 +5,10 @@
 #ifndef C2NG_SERVER_HOST_FILE_HISTORYTURNITEM_HPP
 #define C2NG_SERVER_HOST_FILE_HISTORYTURNITEM_HPP
 
+#include "game/playerset.hpp"
 #include "server/host/file/item.hpp"
 #include "server/host/root.hpp"
 #include "server/host/session.hpp"
-#include "game/playerset.hpp"
 
 namespace server { namespace host { namespace file {
 
@@ -23,7 +23,7 @@ namespace server { namespace host { namespace file {
             \param turnNumber Turn number. Caller has verified that user can access this turn.
             \param resultAccess Set of result files accessible to the player
             \param turnAccess Set of turn files accessible to the player */
-        HistoryTurnItem(Session& session, Root& root, int32_t gameId, int turnNumber, game::PlayerSet_t resultAccess, game::PlayerSet_t turnAccess);
+        HistoryTurnItem(const Session& session, Root& root, int32_t gameId, int turnNumber, game::PlayerSet_t resultAccess, game::PlayerSet_t turnAccess);
 
         // Item:
         virtual String_t getName();
@@ -33,12 +33,12 @@ namespace server { namespace host { namespace file {
         virtual String_t getContent();
 
      private:
-        Session& m_session;
+        const Session& m_session;
         Root& m_root;
-        int m_gameId;
-        int m_turnNumber;
-        game::PlayerSet_t m_resultAccess;
-        game::PlayerSet_t m_turnAccess;
+        const int m_gameId;
+        const int m_turnNumber;
+        const game::PlayerSet_t m_resultAccess;
+        const game::PlayerSet_t m_turnAccess;
     };
 
 } } }

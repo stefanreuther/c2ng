@@ -19,7 +19,7 @@ namespace server { namespace host {
         /** Constructor.
             \param session Session
             \param root    Service root */
-        HostGame(Session& session, Root& root);
+        HostGame(const Session& session, Root& root);
 
         virtual int32_t createNewGame();
         virtual int32_t cloneGame(int32_t gameId, afl::base::Optional<State> newState);
@@ -48,7 +48,7 @@ namespace server { namespace host {
         virtual void updateGames(const afl::data::IntegerList_t& gameIds);
 
      private:
-        Session& m_session;
+        const Session& m_session;
         Root& m_root;
 
         void listGames(const Filter& filter, afl::data::IntegerList_t& result);

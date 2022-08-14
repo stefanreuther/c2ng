@@ -1,13 +1,14 @@
 /**
   *  \file server/interface/hostturnserver.cpp
+  *  \brief Class server::interface::HostTurnServer
   */
 
 #include <stdexcept>
 #include "server/interface/hostturnserver.hpp"
-#include "server/interface/hostturn.hpp"
-#include "server/errors.hpp"
 #include "afl/data/hash.hpp"
 #include "afl/data/hashvalue.hpp"
+#include "server/errors.hpp"
+#include "server/interface/hostturn.hpp"
 #include "server/types.hpp"
 
 using afl::data::Hash;

@@ -1,5 +1,6 @@
 /**
   *  \file server/interface/hostfileserver.cpp
+  *  \brief Class server::interface::HostFileServer
   */
 
 #include <memory>

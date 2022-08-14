@@ -17,7 +17,7 @@ server::host::Session::~Session()
 
 // Check permissions.
 void
-server::host::Session::checkPermission(Game& g, Game::PermissionLevel level)
+server::host::Session::checkPermission(Game& g, Game::PermissionLevel level) const
 {
     // ex HostConnection::checkPermission
     if (!g.hasPermission(getUser(), level)) {

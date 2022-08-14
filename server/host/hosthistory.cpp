@@ -180,7 +180,7 @@ namespace {
 }
 
 
-server::host::HostHistory::HostHistory(Session& session, Root& root)
+server::host::HostHistory::HostHistory(const Session& session, Root& root)
     : m_session(session), m_root(root)
 { }
 

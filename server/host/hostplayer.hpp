@@ -19,7 +19,7 @@ namespace server { namespace host {
         /** Constructor.
             \param session Session
             \param root    Service root */
-        HostPlayer(Session& session, Root& root);
+        HostPlayer(const Session& session, Root& root);
 
         // HostPlayer virtuals:
         virtual void join(int32_t gameId, int32_t slot, String_t userId);
@@ -35,7 +35,7 @@ namespace server { namespace host {
         virtual String_t get(int32_t gameId, String_t userId, String_t key);
 
      private:
-        Session& m_session;
+        const Session& m_session;
         Root& m_root;
     };
 

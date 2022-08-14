@@ -1,18 +1,24 @@
 /**
   *  \file server/interface/hostgameclient.hpp
+  *  \brief Class server::interface::HostGameClient
   */
 #ifndef C2NG_SERVER_INTERFACE_HOSTGAMECLIENT_HPP
 #define C2NG_SERVER_INTERFACE_HOSTGAMECLIENT_HPP
 
-#include "server/interface/hostgame.hpp"
 #include "afl/net/commandhandler.hpp"
+#include "server/interface/hostgame.hpp"
 
 namespace server { namespace interface {
 
+    /** Client for host game access.
+        Uses a CommandHandler to send commands to a server, and receives the results. */
     class HostGameClient : public HostGame {
      public:
+        /** Constructor.
+            @param commandHandler Server connection. Lifetime must exceed that of the HostGameClient. */
         explicit HostGameClient(afl::net::CommandHandler& commandHandler);
 
+        // HostGame virtuals:
         virtual int32_t createNewGame();
         virtual int32_t cloneGame(int32_t gameId, afl::base::Optional<State> newState);
         virtual void setType(int32_t gameId, Type type);
@@ -39,6 +45,9 @@ namespace server { namespace interface {
         virtual VictoryCondition getVictoryCondition(int32_t gameId);
         virtual void updateGames(const afl::data::IntegerList_t& gameIds);
 
+        /** Unpack a serialized Info structure.
+            @param value Value received from server
+            @return Info */
         static Info unpackInfo(const Value_t* value);
 
      private:

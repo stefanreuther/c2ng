@@ -1,17 +1,18 @@
 /**
   *  \file server/host/hostranking.cpp
+  *  \brief Class server::host::HostRanking
   */
 
 #include <memory>
 #include <stdexcept>
 #include "server/host/hostranking.hpp"
-#include "afl/data/vector.hpp"
-#include "afl/data/vectorvalue.hpp"
+#include "afl/data/access.hpp"
 #include "afl/data/hash.hpp"
 #include "afl/data/hashvalue.hpp"
-#include "afl/data/access.hpp"
-#include "server/errors.hpp"
+#include "afl/data/vector.hpp"
+#include "afl/data/vectorvalue.hpp"
 #include "afl/net/redis/sortoperation.hpp"
+#include "server/errors.hpp"
 #include "server/host/root.hpp"
 
 using afl::data::Access;

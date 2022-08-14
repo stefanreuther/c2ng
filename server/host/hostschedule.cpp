@@ -66,7 +66,7 @@ namespace {
     }
 }
 
-server::host::HostSchedule::HostSchedule(Session& session, Root& root)
+server::host::HostSchedule::HostSchedule(const Session& session, Root& root)
     : m_session(session),
       m_root(root)
 { }
@@ -143,7 +143,7 @@ void
 server::host::HostSchedule::drop(int32_t gameId)
 {
     // ex doScheduleDrop
-    
+
     // Obtain critical access; schedule modifications cannot parallel anything
     GameArbiter::Guard guard(m_root.arbiter(), gameId, GameArbiter::Critical);
 
@@ -189,7 +189,6 @@ server::host::HostSchedule::preview(int32_t gameId,
     Game game(m_root, gameId);
     m_session.checkPermission(game, Game::ReadPermission);
 
-#if 1
     // The following derived from cronimpl.cpp:computeGameHostTimes
     afl::net::redis::Subtree sroot(game.getSchedule());
     afl::net::redis::StringListKey scheduleList(sroot.stringListKey("list"));
@@ -266,54 +265,6 @@ server::host::HostSchedule::preview(int32_t gameId,
             break;
         }
     }
-#else
-    // Figure out last host date
-    int32_t lastHost = game.lastHostTime().get();
-    int32_t turn     = game.turnNumber().get();
-    if (lastHost == 0) {
-        // Host never run, so pretend we're hosting now.
-        lastHost = m_root.getTime();
-        ++turn;
-        result.push_back(m_root.config().getUserTimeFromTime(lastHost));
-    }
-
-    // Process all schedules
-    afl::net::redis::Subtree sroot(game.getSchedule());
-    afl::net::redis::StringListKey schedules(sroot.stringListKey("list"));
-    int32_t numSchedules = schedules.size();
-    int32_t currentSchedule = 0;
-    while (currentSchedule < numSchedules
-           && (actualTurnLimit > int32_t(result.size()))
-           && (!timeLimit.isValid() || (*timeLimit.get() > lastHost))
-           && lastHost != 0)
-    {
-        // Process one schedule
-        // FIXME: this does not seem to handle properly transitions from
-        // one DAILY/WEEKLY schedule to another with a time condition.
-        // FIXME: this does not handle the getPreviousVirtualHost() logic
-        server::host::Schedule sched;
-        sched.loadFrom(sroot.hashKey(schedules[currentSchedule]));
-        while ((actualTurnLimit > int32_t(result.size()))
-               && (!timeLimit.isValid() || (*timeLimit.get() > lastHost))
-               && lastHost != 0
-               && !sched.isExpired(turn, lastHost))
-        {
-            lastHost = sched.getNextHost(lastHost);
-            if (lastHost != 0) {
-                // It's a turn time
-                ++turn;
-                result.push_back(m_root.config().getUserTimeFromTime(lastHost));
-            } else {
-                // Not a turn time, host does not run for this schedule.
-                // Does the schedule expire?
-                if (sched.getCondition() == HostSchedule::Time) {
-                    lastHost = sched.getConditionArg();
-                }
-            }
-        }
-        ++currentSchedule;
-    }
-#endif
 }
 
 /** Common implementation of add() and replace().

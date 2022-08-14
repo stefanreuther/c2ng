@@ -1,5 +1,6 @@
 /**
   *  \file server/interface/hosttoolclient.cpp
+  *  \brief Class server::interface::HostToolClient
   */
 
 #include "server/interface/hosttoolclient.hpp"

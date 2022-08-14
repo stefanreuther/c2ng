@@ -23,7 +23,7 @@ namespace server { namespace host {
             If the desired permission is not available, throws a PERMISSION_DENIED exception.
             \param g Game to check
             \param level Desired permission level */
-        void checkPermission(Game& g, Game::PermissionLevel level);
+        void checkPermission(Game& g, Game::PermissionLevel level) const;
     };
 
 } }

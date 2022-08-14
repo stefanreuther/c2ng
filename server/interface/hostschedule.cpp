@@ -1,5 +1,6 @@
 /**
   *  \file server/interface/hostschedule.cpp
+  *  \brief Interface server::interface::HostSchedule
   */
 
 #include "server/interface/hostschedule.hpp"

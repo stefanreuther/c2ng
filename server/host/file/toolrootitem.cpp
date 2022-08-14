@@ -1,12 +1,13 @@
 /**
   *  \file server/host/file/toolrootitem.cpp
+  *  \brief Class server::host::file::ToolRootItem
   */
 
 #include "server/host/file/toolrootitem.hpp"
-#include "server/interface/filebase.hpp"
 #include "server/host/file/toolitem.hpp"
+#include "server/interface/filebase.hpp"
 
-server::host::file::ToolRootItem::ToolRootItem(Session& session, afl::net::CommandHandler& filer, String_t name, const Root::ToolTree& tree, bool restricted)
+server::host::file::ToolRootItem::ToolRootItem(const Session& session, afl::net::CommandHandler& filer, String_t name, const Root::ToolTree& tree, bool restricted)
     : m_session(session),
       m_filer(filer),
       m_name(name),

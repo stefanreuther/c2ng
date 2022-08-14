@@ -5,8 +5,8 @@
 #ifndef C2NG_SERVER_HOST_RANK_REFEREEFILEREADER_HPP
 #define C2NG_SERVER_HOST_RANK_REFEREEFILEREADER_HPP
 
-#include "util/fileparser.hpp"
 #include "server/host/rank/rank.hpp"
+#include "util/fileparser.hpp"
 
 namespace server { namespace host { namespace rank {
 

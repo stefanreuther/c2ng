@@ -12,14 +12,15 @@
 namespace server { namespace host { namespace file {
 
     /** Host File Hierarchy: "game/" node.
-        This node contains a list of games. */
+        This node contains subdirectories for all the games, but is not listable. */
     class GameRootItem : public Item {
      public:
         /** Constructor.
             \param session Session (for access checking)
             \param root Root */
-        GameRootItem(Session& session, Root& root);
+        GameRootItem(const Session& session, Root& root);
 
+        // Item:
         virtual String_t getName();
         virtual Info_t getInfo();
         virtual Item* find(const String_t& name);
@@ -27,7 +28,7 @@ namespace server { namespace host { namespace file {
         virtual String_t getContent();
 
      private:
-        Session& m_session;
+        const Session& m_session;
         Root& m_root;
     };
 

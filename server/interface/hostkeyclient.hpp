@@ -5,8 +5,8 @@
 #ifndef C2NG_SERVER_INTERFACE_HOSTKEYCLIENT_HPP
 #define C2NG_SERVER_INTERFACE_HOSTKEYCLIENT_HPP
 
-#include "server/interface/hostkey.hpp"
 #include "afl/net/commandhandler.hpp"
+#include "server/interface/hostkey.hpp"
 #include "server/types.hpp"
 
 namespace server { namespace interface {

@@ -23,7 +23,7 @@ using game::v3::RegistrationKey;
 using server::host::KeyStore;
 
 namespace {
-    
+
     std::auto_ptr<afl::charset::Charset> makeCharset()
     {
         return std::auto_ptr<afl::charset::Charset>(new afl::charset::CodepageCharset(afl::charset::g_codepage437));
@@ -33,7 +33,7 @@ namespace {
     {
         server::host::Configuration config;
         config.maxStoredKeys = maxStoredKeys;
-        return config;        
+        return config;
     }
 }
 
@@ -62,7 +62,7 @@ TestServerHostKeyStore::testIt()
     TS_ASSERT_EQUALS(keys[0].lastGame, GAME_ID);
     TS_ASSERT_EQUALS(keys[0].lastUsed, TIME);
     TS_ASSERT_EQUALS(keys[0].useCount, 1);
-    
+
     // Key must be readable
     RegistrationKey key2(makeCharset());
     bool ok = testee.getKey(keys[0].keyId, key2);

@@ -5,23 +5,22 @@
 #ifndef C2NG_SERVER_HOST_ROOT_HPP
 #define C2NG_SERVER_HOST_ROOT_HPP
 
-#include "afl/sys/log.hpp"
-#include "afl/net/commandhandler.hpp"
-#include "afl/net/redis/subtree.hpp"
-#include "server/host/configuration.hpp"
-#include "server/types.hpp"
-#include "afl/sys/mutex.hpp"
-#include "server/interface/talkforum.hpp"
-#include "server/interface/mailqueue.hpp"
-#include "server/host/gamearbiter.hpp"
-#include "util/processrunner.hpp"
-#include "afl/io/filesystem.hpp"
-#include "afl/sys/time.hpp"
-#include "util/randomnumbergenerator.hpp"
-#include "afl/net/redis/stringlistkey.hpp"
-#include "server/interface/sessionrouter.hpp"
-#include "server/common/root.hpp"
 #include "afl/charset/codepagecharset.hpp"
+#include "afl/io/filesystem.hpp"
+#include "afl/net/commandhandler.hpp"
+#include "afl/net/redis/stringlistkey.hpp"
+#include "afl/net/redis/subtree.hpp"
+#include "afl/sys/log.hpp"
+#include "afl/sys/mutex.hpp"
+#include "afl/sys/time.hpp"
+#include "server/common/root.hpp"
+#include "server/host/configuration.hpp"
+#include "server/host/gamearbiter.hpp"
+#include "server/interface/mailqueue.hpp"
+#include "server/interface/sessionrouter.hpp"
+#include "server/types.hpp"
+#include "util/processrunner.hpp"
+#include "util/randomnumbergenerator.hpp"
 
 namespace server { namespace host {
 
@@ -97,26 +96,68 @@ namespace server { namespace host {
             The host server can run with or without a session router. */
         void setRouter(server::interface::SessionRouter* p);
 
+        /** Access host filer.
+            \return host filer */
         afl::net::CommandHandler& hostFile();
+
+        /** Access user filer.
+            \return user filer */
         afl::net::CommandHandler& userFile();
 
+        /** Get TalkListener to manage forums.
+            \return TalkListener; can be null */
         TalkListener* getForum();
+
+        /** Access mail queue.
+            \return mail queue */
         server::interface::MailQueue& mailQueue();
 
+        /** Access GameArbiter.
+            \return GameArbiter */
         GameArbiter& arbiter();
 
+        /** Access configuration.
+            \return configuration */
         const Configuration& config() const;
+
+        /** Access random-number generator.
+            \return random-number generator */
         util::RandomNumberGenerator& rng();
 
+        /** Access ProcessRunner for checking turns.
+            \return ProcessRunner */
         util::ProcessRunner& checkturnRunner();
+
+        /** Access file system.
+            \return file system */
         afl::io::FileSystem& fileSystem();
 
+        /** Get current time.
+            By default, we store minutes from epoch, see Configuration::timeScale.
+
+            To obtain minutes: %60.
+            To obtain hours (in GMT zone): /60%24.
+
+            \return time */
         Time_t getTime();
+
+        /** Convert time (minutes-from-epoch) into time usable by other components.
+            \param t Internal time
+            \return Converted time */
         afl::sys::Time getSystemTimeFromTime(Time_t t);
 
+        /** Get scheduler.
+            \return scheduler; can be null */
         Cron* getCron();
+
+        /** Handle change to game.
+            Forwards the request to scheduler, if any.
+            \param gameId Game Id */
         void handleGameChange(int32_t gameId);
 
+        /** Try to close active game sessions, given a key.
+            \param key key to identify sessions to close
+            \see server::interface::SessionRouter::groupAction() */
         void tryCloseRouterSessions(String_t key);
 
 
@@ -147,6 +188,11 @@ namespace server { namespace host {
         /** Access global history.
             \return list. Most-current message is at front. */
         afl::net::redis::StringListKey globalHistory();
+
+        /** Access game Id, given a timestamp.
+            \param timestamp Game time stamp
+            \return key with game Id (nonexistant for unknown timestamp) */
+        afl::net::redis::IntegerKey gameByTime(const String_t& timestamp);
 
 
      private:

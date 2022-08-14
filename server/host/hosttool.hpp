@@ -22,7 +22,7 @@ namespace server { namespace host {
             \param session Session
             \param root    Service root
             \param tree    Database tree to use */
-        HostTool(Session& session, Root& root, Root::ToolTree tree);
+        HostTool(const Session& session, Root& root, Root::ToolTree tree);
 
         // HostTool:
         virtual void add(String_t id, String_t path, String_t program, String_t kind);
@@ -37,7 +37,7 @@ namespace server { namespace host {
         virtual int32_t setDifficulty(String_t id, afl::base::Optional<int32_t> value, bool use);
 
      private:
-        Session& m_session;
+        const Session& m_session;
         Root& m_root;
         Root::ToolTree m_tree;
     };

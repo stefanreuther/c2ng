@@ -4,8 +4,8 @@
   */
 
 #include "server/host/rank/refereefilereader.hpp"
-#include "afl/string/string.hpp"
 #include "afl/string/parse.hpp"
+#include "afl/string/string.hpp"
 
 // Default constructor.
 server::host::rank::RefereeFileReader::RefereeFileReader()
@@ -13,7 +13,7 @@ server::host::rank::RefereeFileReader::RefereeFileReader()
       m_end(false)
 {
     // ex RefereeFileReader::RefereeFileReader
-    initRanks(m_ranks);
+    initRanks(m_ranks, 0x7FFFFFFF);
 }
 
 void
@@ -24,7 +24,7 @@ server::host::rank::RefereeFileReader::handleLine(const String_t& /*fileName*/, 
     if (n >= line.size()) {
         return;
     }
- 
+
     /* Must be an assignment */
     String_t::size_type p = line.find('=');
     if (p == line.npos) {

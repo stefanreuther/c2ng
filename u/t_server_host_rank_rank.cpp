@@ -19,7 +19,7 @@ TestServerHostRankRank::testSimple()
 {
     // Scores          #2    #4    #3    #5    #4    #1    #7    #6    #8    #7    #9
     Rank_t scores = { -500, -400, -450, -300, -400, -600, -200, -250, -100, -200, -50 };
-    Rank_t null; initRanks(null);
+    Rank_t null; initRanks(null, 0x7FFFFFFF);
     Rank_t result;
     compactRanks(result, scores, null, PlayerSet_t::allUpTo(Game::NUM_PLAYERS));
     TS_ASSERT_EQUALS(result[0],  2);
@@ -41,7 +41,7 @@ TestServerHostRankRank::testNotPlaying()
 {
     // Scores            -   #2    #1    #3    #2     -    #5    #4    #6    #5    #7
     Rank_t scores = { -500, -400, -450, -300, -400, -600, -200, -250, -100, -200, -50 };
-    Rank_t null; initRanks(null);
+    Rank_t null; initRanks(null, 0x7FFFFFFF);
     Rank_t result;
     compactRanks(result, scores, null, PlayerSet_t::allUpTo(Game::NUM_PLAYERS) - 6 - 1);
     TS_ASSERT_EQUALS(result[1],  2);
@@ -103,11 +103,11 @@ TestServerHostRankRank::testTurnOverLimit2()
 void
 TestServerHostRankRank::testPartial()
 {
-    Rank_t ranks; initRanks(ranks);
+    Rank_t ranks; initRanks(ranks, 0x7FFFFFFF);
     ranks[5] = 1;
     ranks[3] = 5;
     ranks[9] = 10;
-    Rank_t scores; initRanks(scores);
+    Rank_t scores; initRanks(scores, 0x7FFFFFFF);
     Rank_t result;
     compactRanks(result, ranks, scores, PlayerSet_t::allUpTo(Game::NUM_PLAYERS));
     TS_ASSERT_EQUALS(result[0],  4);
@@ -128,11 +128,11 @@ TestServerHostRankRank::testPartial()
 void
 TestServerHostRankRank::testPartial2()
 {
-    Rank_t ranks; initRanks(ranks);
+    Rank_t ranks; initRanks(ranks, 0x7FFFFFFF);
     ranks[5] = 1;
     ranks[3] = 5;
     ranks[9] = 10;
-    Rank_t scores; initRanks(scores);
+    Rank_t scores; initRanks(scores, 0x7FFFFFFF);
     Rank_t result;
     compactRanks(result, ranks, scores, PlayerSet_t::allUpTo(Game::NUM_PLAYERS) - 4);
     TS_ASSERT_EQUALS(result[0],  3);

@@ -19,14 +19,14 @@ namespace server { namespace host {
         /** Constructor.
             \param session Session
             \param root    Service root */
-        HostKey(Session& session, Root& root);
+        HostKey(const Session& session, Root& root);
 
         // Interface methods:
         void listKeys(Infos_t& out);
         String_t getKey(String_t keyId);
 
      private:
-        Session& m_session;
+        const Session& m_session;
         Root& m_root;
     };
 

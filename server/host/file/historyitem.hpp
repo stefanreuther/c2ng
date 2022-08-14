@@ -19,7 +19,7 @@ namespace server { namespace host { namespace file {
             \param session Session (for access checking).
             \param root Root
             \param gameId Game Id. Caller has verified that user can access the game. */
-        HistoryItem(Session& session, Root& root, int32_t gameId);
+        HistoryItem(const Session& session, Root& root, int32_t gameId);
 
         // Item:
         virtual String_t getName();
@@ -31,9 +31,9 @@ namespace server { namespace host { namespace file {
      private:
         class Loader;
 
-        Session& m_session;
+        const Session& m_session;
         Root& m_root;
-        int m_gameId;
+        const int m_gameId;
     };
 
 } } }

@@ -8,7 +8,7 @@
 #include "server/host/gamearbiter.hpp"
 #include "server/host/file/gameitem.hpp"
 
-server::host::file::GameRootItem::GameRootItem(Session& session, Root& root)
+server::host::file::GameRootItem::GameRootItem(const Session& session, Root& root)
     : m_session(session),
       m_root(root)
 { }

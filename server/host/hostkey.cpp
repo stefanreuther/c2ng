@@ -30,7 +30,7 @@ using server::interface::FileGame;
 using server::interface::FileGameClient;
 
 namespace {
-    std::auto_ptr<RegistrationKey> makeServerKey(Session& session, Root& root)
+    std::auto_ptr<RegistrationKey> makeServerKey(const Session& session, Root& root)
     {
         std::auto_ptr<RegistrationKey> result;
         if (!session.getUser().empty() && !root.config().keyTitle.empty()) {
@@ -49,7 +49,7 @@ namespace {
 }
 
 
-server::host::HostKey::HostKey(Session& session, Root& root)
+server::host::HostKey::HostKey(const Session& session, Root& root)
     : m_session(session),
       m_root(root)
 { }

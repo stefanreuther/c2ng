@@ -4,13 +4,13 @@
   */
 
 #include "server/host/file/historyitem.hpp"
-#include "server/host/file/historyturnitem.hpp"
-#include "game/playerset.hpp"
-#include "game/playerarray.hpp"
-#include "afl/string/parse.hpp"
-#include "afl/bits/pack.hpp"
 #include "afl/bits/int16le.hpp"
+#include "afl/bits/pack.hpp"
 #include "afl/string/format.hpp"
+#include "afl/string/parse.hpp"
+#include "game/playerarray.hpp"
+#include "game/playerset.hpp"
+#include "server/host/file/historyturnitem.hpp"
 
 namespace {
     bool loadPrimaryPlayers(server::host::Game::Turn turn, game::PlayerArray<String_t>& out)
@@ -34,7 +34,7 @@ namespace {
 
 class server::host::file::HistoryItem::Loader {
  public:
-    Loader(Game& game, Root& root, Session& session)
+    Loader(Game& game, Root& root, const Session& session)
         : m_game(game), m_root(root), m_session(session),
           m_trustingPrimaries(), m_slotsAsPrimary()
         { init(); }
@@ -46,7 +46,7 @@ class server::host::file::HistoryItem::Loader {
 
     Game& m_game;
     Root& m_root;
-    Session& m_session;
+    const Session& m_session;
 
     game::PlayerArray<String_t> m_trustingPrimaries;
     game::PlayerSet_t m_slotsAsPrimary;
@@ -72,6 +72,7 @@ server::host::file::HistoryItem::Loader::create(int turnNr)
     } else {
         // Admin: offer all valid slots
         int16_t turnStatus[Game::NUM_PLAYERS];
+        afl::base::Memory<int16_t>(turnStatus).fill(-1);
         afl::bits::unpackArray<afl::bits::Int16LE>(turnStatus, afl::string::toBytes(t.info().turnStatus().get()), -1);
         for (int slot = 1; slot <= Game::NUM_PLAYERS; ++slot) {
             if (turnStatus[slot-1] != -1) {
@@ -133,8 +134,11 @@ server::host::file::HistoryItem::Loader::init()
 }
 
 
+/*
+ *  HistoryItem
+ */
 
-server::host::file::HistoryItem::HistoryItem(Session& session, Root& root, int32_t gameId)
+server::host::file::HistoryItem::HistoryItem(const Session& session, Root& root, int32_t gameId)
     : m_session(session), m_root(root), m_gameId(gameId)
 { }
 

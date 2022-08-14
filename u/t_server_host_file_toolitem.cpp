@@ -7,8 +7,8 @@
 #include "server/host/file/toolitem.hpp"
 
 #include "t_server_host_file.hpp"
-#include "server/host/session.hpp"
 #include "server/file/internalfileserver.hpp"
+#include "server/host/session.hpp"
 #include "server/interface/filebaseclient.hpp"
 
 /** Basic test. */

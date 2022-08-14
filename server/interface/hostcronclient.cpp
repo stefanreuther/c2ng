@@ -1,13 +1,14 @@
 /**
   *  \file server/interface/hostcronclient.cpp
+  *  \brief Class server::interface::HostCronClient
   */
 
 #include "server/interface/hostcronclient.hpp"
-#include "afl/data/segment.hpp"
 #include "afl/data/access.hpp"
+#include "afl/data/segment.hpp"
 
-using afl::data::Segment;
 using afl::data::Access;
+using afl::data::Segment;
 
 server::interface::HostCronClient::HostCronClient(afl::net::CommandHandler& commandHandler)
     : m_commandHandler(commandHandler)

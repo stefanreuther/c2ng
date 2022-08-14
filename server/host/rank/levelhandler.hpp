@@ -5,8 +5,8 @@
 #ifndef C2NG_SERVER_HOST_RANK_LEVELHANDLER_HPP
 #define C2NG_SERVER_HOST_RANK_LEVELHANDLER_HPP
 
-#include "server/host/root.hpp"
 #include "server/host/game.hpp"
+#include "server/host/root.hpp"
 
 namespace server { namespace host { namespace rank {
 

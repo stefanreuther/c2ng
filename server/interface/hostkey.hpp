@@ -6,9 +6,9 @@
 #define C2NG_SERVER_INTERFACE_HOSTKEY_HPP
 
 #include "afl/base/deletable.hpp"
-#include "afl/string/string.hpp"
-#include "afl/base/types.hpp"
 #include "afl/base/optional.hpp"
+#include "afl/base/types.hpp"
+#include "afl/string/string.hpp"
 #include "server/types.hpp"
 
 namespace server { namespace interface {

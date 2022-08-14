@@ -278,7 +278,7 @@ TestServerHostRankLevelHandler::testPromote()
     HashKey(h.db(), "user:1397:profile").intField("turnsplayed").set(10000);
     HashKey(h.db(), "user:1397:profile").intField("turnreliability").set(96000);
     HashKey(h.db(), "user:1397:profile").intField("rankpoints").set(49000);
-    
+
     // Testee
     server::host::rank::LevelHandler testee(h.root());
     testee.handlePlayerRankChanges("1390");
@@ -315,7 +315,7 @@ TestServerHostRankLevelHandler::testDemote()
     HashKey(h.db(), "user:1397:profile").intField("turnreliability").set(89499);
     HashKey(h.db(), "user:1397:profile").intField("rankpoints").set(49000);
     HashKey(h.db(), "user:1397:profile").intField("rank").set(13);
-    
+
     // Testee
     server::host::rank::LevelHandler testee(h.root());
     testee.handlePlayerRankChanges("1390");

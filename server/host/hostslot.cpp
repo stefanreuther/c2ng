@@ -1,15 +1,16 @@
 /**
   *  \file server/host/hostslot.cpp
+  *  \brief Class server::host::HostSlot
   */
 
 #include "server/host/hostslot.hpp"
-#include "server/host/gamearbiter.hpp"
+#include "server/errors.hpp"
 #include "server/host/game.hpp"
+#include "server/host/gamearbiter.hpp"
 #include "server/host/root.hpp"
 #include "server/host/session.hpp"
-#include "server/errors.hpp"
 
-server::host::HostSlot::HostSlot(Session& session, Root& root)
+server::host::HostSlot::HostSlot(const Session& session, Root& root)
     : m_session(session),
       m_root(root)
 { }

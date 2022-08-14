@@ -7,7 +7,7 @@
 #include "afl/string/format.hpp"
 #include "server/host/file/fileitem.hpp"
 
-server::host::file::HistorySlotItem::HistorySlotItem(Session& session, Root& root, int32_t gameId, int turnNumber, int slotNumber, String_t slotName,
+server::host::file::HistorySlotItem::HistorySlotItem(const Session& session, Root& root, int32_t gameId, int turnNumber, int slotNumber, String_t slotName,
                                                      bool resultAccess, bool turnAccess)
     : m_session(session), m_root(root), m_gameId(gameId), m_turnNumber(turnNumber), m_slotNumber(slotNumber), m_slotName(slotName),
       m_resultAccess(resultAccess), m_turnAccess(turnAccess)

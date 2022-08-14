@@ -5,9 +5,9 @@
 
 #include <stdexcept>
 #include "server/interface/hostrankingserver.hpp"
-#include "server/interface/hostranking.hpp"
 #include "afl/string/string.hpp"
 #include "server/errors.hpp"
+#include "server/interface/hostranking.hpp"
 
 server::interface::HostRankingServer::HostRankingServer(HostRanking& impl)
     : m_implementation(impl)

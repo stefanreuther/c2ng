@@ -52,6 +52,7 @@ TestServerHostRankScoreFileReader::testParse()
     // Verify
     TS_ASSERT_EQUALS(HashKey(db, "desc").stringField("foo").get(), "foo score");
     TS_ASSERT_EQUALS(HashKey(db, "desc").stringField("bar").get(), "bar score");
+    TS_ASSERT_EQUALS(HashKey(db, "desc").size(), 2);
 
     String_t foo = HashKey(db, "score").stringField("foo").get();
     String_t bar = HashKey(db, "score").stringField("bar").get();

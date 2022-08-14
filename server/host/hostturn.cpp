@@ -76,7 +76,7 @@ namespace server { namespace host { namespace {
 
 } } }
 
-server::host::HostTurn::HostTurn(Session& session, Root& root)
+server::host::HostTurn::HostTurn(const Session& session, Root& root)
     : m_session(session),
       m_root(root)
 { }
@@ -116,7 +116,7 @@ server::host::HostTurn::submit(const String_t& blob,
     if (const int32_t* p = gameLimit.get()) {
         gameNumber = *p;
     } else {
-        gameNumber = m_root.gameRoot().subtree("bytime").intKey(trn->getTimestamp().getTimestampAsString()).get();
+        gameNumber = m_root.gameByTime(trn->getTimestamp().getTimestampAsString()).get();
     }
     if (gameNumber == 0) {
         throw std::runtime_error(GAME_NOT_FOUND);

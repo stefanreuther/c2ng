@@ -33,8 +33,8 @@
 #include "server/file/root.hpp"
 #include "server/host/game.hpp"
 #include "server/host/root.hpp"
-#include "util/math.hpp"
 #include "server/interface/baseclient.hpp"
+#include "util/math.hpp"
 
 namespace {
     const char LOG_NAME[] = "host.rating";
@@ -129,9 +129,10 @@ namespace {
     }
 }
 
-// /** Compute rating of a game.
-//     \param root Server root
-//     \param g Game */
+/*
+ *  Public Entry Point
+ */
+
 int
 server::host::computeGameRating(Root& root, Game& g)
 {

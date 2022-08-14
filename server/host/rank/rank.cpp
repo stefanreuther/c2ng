@@ -1,12 +1,11 @@
 /**
   *  \file server/host/rank/rank.cpp
+  *  \brief Utilities for Player Ranking
   */
 
 #include "server/host/rank/rank.hpp"
 
-// /** Initialize ranks.
-//     \param ranks [out] Output
-//     \param value [in] Value to initialize with */
+// Initialize ranks.
 void
 server::host::rank::initRanks(Rank_t& ranks, int32_t value)
 {
@@ -16,11 +15,7 @@ server::host::rank::initRanks(Rank_t& ranks, int32_t value)
     }
 }
 
-// /** Compact ranks.
-//     \param dest    [out] Output ranks
-//     \param rank    [in]  Input ranks, smaller is better
-//     \param score   [in]  Input scores, used as tie-breaker for equal input ranks, bigger is better
-//     \param players [in]  Mask for slots used in either Rank_t */
+// Compact ranks.
 void
 server::host::rank::compactRanks(Rank_t& dest, const Rank_t& rank, const Rank_t& score, game::PlayerSet_t players)
 {

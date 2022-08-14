@@ -1,16 +1,17 @@
 /**
   *  \file server/interface/hosttoolserver.cpp
+  *  \brief Class server::interface::HostToolServer
   */
 
 #include <cstring>
 #include <stdexcept>
 #include "server/interface/hosttoolserver.hpp"
-#include "server/types.hpp"
-#include "afl/data/vector.hpp"
-#include "afl/data/vectorvalue.hpp"
 #include "afl/data/hash.hpp"
 #include "afl/data/hashvalue.hpp"
+#include "afl/data/vector.hpp"
+#include "afl/data/vectorvalue.hpp"
 #include "server/errors.hpp"
+#include "server/types.hpp"
 
 namespace {
     bool parseUseFlag(interpreter::Arguments& args)
@@ -24,7 +25,6 @@ namespace {
             throw std::runtime_error(server::INVALID_OPTION);
         }
     }
-                      
 }
 
 server::interface::HostToolServer::HostToolServer(HostTool& impl, HostTool::Area area)
@@ -152,7 +152,7 @@ server::interface::HostToolServer::handleCommand(const String_t& upcasedCommand,
            @key default:Int      (1 if this tool is the default) */
         // ex describeHost
         // @change c2host-classic does not verify argument count
-        args.checkArgumentCount(0); 
+        args.checkArgumentCount(0);
         std::vector<HostTool::Info> infos;
         m_implementation.getAll(infos);
 
@@ -250,7 +250,7 @@ server::interface::HostToolServer::isCommand(const String_t& upcasedCommand, con
         // Cannot happen.
         return false;
     }
-    
+
     const size_t suffixLength = std::strlen(suffix);
     const size_t prefixLength = std::strlen(prefix);
     return (prefixLength + suffixLength == upcasedCommand.size())

@@ -1,11 +1,12 @@
 /**
   *  \file server/interface/hostturnclient.cpp
+  *  \brief Class server::interface::HostTurnClient
   */
 
 #include <utility>
 #include "server/interface/hostturnclient.hpp"
-#include "afl/data/segment.hpp"
 #include "afl/data/access.hpp"
+#include "afl/data/segment.hpp"
 #include "server/types.hpp"
 
 server::interface::HostTurnClient::HostTurnClient(afl::net::CommandHandler& commandHandler)

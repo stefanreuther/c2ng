@@ -36,7 +36,6 @@ using afl::string::Format;
 using server::interface::FileBaseClient;
 
 namespace {
-    
     class TestHarness {
      public:
         TestHarness(const server::host::Configuration& config)

@@ -1,11 +1,12 @@
 /**
   *  \file server/interface/hostplayerclient.cpp
+  *  \brief Class server::interface::HostPlayerClient
   */
 
 #include <memory>
 #include "server/interface/hostplayerclient.hpp"
-#include "afl/data/segment.hpp"
 #include "afl/data/access.hpp"
+#include "afl/data/segment.hpp"
 #include "afl/except/invaliddataexception.hpp"
 
 using afl::data::Segment;

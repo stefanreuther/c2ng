@@ -24,7 +24,7 @@
 #include "server/interface/filebaseclient.hpp"
 #include "server/interface/hosttool.hpp"
 
-server::host::HostGame::HostGame(Session& session, Root& root)
+server::host::HostGame::HostGame(const Session& session, Root& root)
     : m_session(session),
       m_root(root)
 { }

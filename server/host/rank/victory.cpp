@@ -22,6 +22,7 @@ namespace {
 
     using server::host::rank::Rank_t;
     using server::host::Game;
+    using server::host::Root;
 
     struct PlayerInfo {
         int32_t turnsTotal;
@@ -39,13 +40,13 @@ namespace {
     /** Save ranks in game.
         \param ranks [in] Ranks, not necessarily compacted
         \param game  Game to store to */
-    void saveRanks(const server::host::rank::Rank_t& ranks, Game& game)
+    void saveRanks(const Rank_t& ranks, Game& game)
     {
         /* Compact ranks using a null tiebreaker */
         game::PlayerSet_t slots = game.getGameSlots();
         Rank_t result;
         Rank_t null;
-        server::host::rank::initRanks(null);
+        server::host::rank::initRanks(null, 0);
         server::host::rank::compactRanks(result, ranks, null, slots);
 
         /* Save */
@@ -63,8 +64,9 @@ namespace {
     {
         using afl::bits::Int32LE;
 
+        /* Initialize ranks to INT32_MAX, so unset fields get the worst-possible rank */
         Rank_t ranks;
-        server::host::rank::initRanks(ranks);
+        server::host::rank::initRanks(ranks, 0x7FFFFFFF);
 
         /* Fetch all scores, but negate them because a high score is a good rank */
         const int32_t turn = game.turnNumber().get();
@@ -120,7 +122,7 @@ namespace {
     }
 
     /** Check "score" condition. Game ends when someone reaches a particular score. */
-    bool checkScoreCondition(server::host::Root& root, Game& game)
+    bool checkScoreCondition(Root& root, Game& game)
     {
         /* Check turn number. If endTurn is not yet reached, nobody can possibly have enough points. */
         int32_t turn = game.turnNumber().get();
@@ -159,14 +161,14 @@ namespace {
         return true;
     }
 
-    int logIt(server::host::Root& root, int n)
+    int logIt(Root& root, int n)
     {
         root.log().write(afl::sys::LogListener::Info, LOG_NAME, afl::string::Format("I rolled a %d", n));;
         return n;
     }
 
     /** Check "turn" condition. Game ends after reaching a particular turn. */
-    bool checkTurnCondition(server::host::Root& root, Game& game)
+    bool checkTurnCondition(Root& root, Game& game)
     {
         /* Check turn number. Game does not end if endTurn not reached */
         int32_t turn = game.turnNumber().get();
@@ -239,7 +241,7 @@ server::host::rank::checkForcedGameEnd(Game& game)
     if (turn <= 0) {
         /* There are no scores. Treat everyone equal. */
         Rank_t null;
-        server::host::rank::initRanks(null);
+        server::host::rank::initRanks(null, 0x7FFFFFFF);
         saveRanks(null, game);
     } else if (game.getConfig("endCondition") == "score") {
         /* This must approximate the actual game score. If a "120 planets for 5 turns"
@@ -340,7 +342,7 @@ server::host::rank::computeGameRankings(Root& root, Game& game)
 
     // Fetch ranks computed by referee
     Rank_t refRanks;
-    server::host::rank::initRanks(refRanks);
+    server::host::rank::initRanks(refRanks, 0x7FFFFFFF);
     for (int slot = 1; slot <= Game::NUM_PLAYERS; ++slot) {
         int32_t value = game.getSlot(slot).rank().get();
         if (value) {

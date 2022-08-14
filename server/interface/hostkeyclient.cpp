@@ -4,11 +4,11 @@
   */
 
 #include "server/interface/hostkeyclient.hpp"
-#include "afl/data/segment.hpp"
 #include "afl/data/access.hpp"
+#include "afl/data/segment.hpp"
 
-using afl::data::Segment;
 using afl::data::Access;
+using afl::data::Segment;
 
 server::interface::HostKeyClient::HostKeyClient(afl::net::CommandHandler& commandHandler)
     : HostKey(),

@@ -1,8 +1,6 @@
 /**
   *  \file server/host/exec.cpp
   *  \brief Execution of Host/Master
-  *
-  *  FIXME: this is a very straight port and probably needs to be improved
   */
 
 #include "server/host/exec.hpp"
@@ -176,8 +174,8 @@ namespace {
     int32_t unimportGameData(server::host::Root& root, Game& game)
     {
         // Remove bytime association (nobody will upload turns now anyway)
-        String_t turnTime = game.getConfig("timestamp");
-        root.gameRoot().subtree("bytime").intKey(turnTime).remove();
+        String_t turnTime = game.timestamp().get();
+        root.gameByTime(turnTime).remove();
 
         return game.turnNumber().get();
     }
@@ -225,8 +223,8 @@ namespace {
         const int16_t turnNr(nextturnFile.turnNumber);
 
         game.turnNumber().set(turnNr);
-        game.setConfig("timestamp", turnTime);
-        root.gameRoot().subtree("bytime").intKey(turnTime).set(game.getId());
+        game.timestamp().set(turnTime);
+        root.gameByTime(turnTime).set(game.getId());
 
         // Times
         server::Time_t now = root.getTime();

@@ -1,13 +1,14 @@
 /**
   *  \file server/interface/hostcronserver.cpp
+  *  \brief Class server::interface::HostCronServer
   */
 
 #include <stdexcept>
 #include "server/interface/hostcronserver.hpp"
-#include "afl/data/vector.hpp"
-#include "afl/data/vectorvalue.hpp"
 #include "afl/data/hash.hpp"
 #include "afl/data/hashvalue.hpp"
+#include "afl/data/vector.hpp"
+#include "afl/data/vectorvalue.hpp"
 #include "server/errors.hpp"
 
 server::interface::HostCronServer::HostCronServer(HostCron& impl)

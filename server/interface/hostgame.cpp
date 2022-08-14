@@ -1,5 +1,6 @@
 /**
   *  \file server/interface/hostgame.cpp
+  *  \brief Interface server::interface::HostGame
   */
 
 #include "server/interface/hostgame.hpp"
