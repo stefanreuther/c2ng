@@ -15,11 +15,15 @@
 #include "afl/io/filesystem.hpp"
 #include "afl/net/redis/stringfield.hpp"
 #include "afl/string/format.hpp"
+#include "afl/string/messages.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/mutexguard.hpp"
 #include "afl/sys/thread.hpp"
 #include "game/v3/resultfile.hpp"
 #include "game/v3/structures.hpp"
+#include "server/errors.hpp"
+#include "server/file/clientdirectoryhandler.hpp"
+#include "server/file/utils.hpp"
 #include "server/host/actions.hpp"
 #include "server/host/exporter.hpp"
 #include "server/host/game.hpp"
@@ -33,12 +37,13 @@
 #include "server/interface/baseclient.hpp"
 #include "server/interface/filebaseclient.hpp"
 
-using server::host::Game;
-using server::interface::HostGame;
-using server::interface::BaseClient;
-using server::interface::FileBaseClient;
-using server::interface::FileBase;
+using afl::string::Format;
 using afl::sys::LogListener;
+using server::host::Game;
+using server::interface::BaseClient;
+using server::interface::FileBase;
+using server::interface::FileBaseClient;
+using server::interface::HostGame;
 
 namespace {
     const char LOG_NAME[] = "host.exec";
@@ -478,6 +483,107 @@ namespace {
             hdl.handlePlayerRankChanges(it->first);
         }
     }
+
+    /* Check presence of a directory.
+       \param root    Service root
+       \param dirName Directory to check
+       \param err     Error message to throw on problem */
+    void checkDirectory(server::host::Root& root, const String_t& dirName, const char* err)
+    {
+        if (server::interface::FileBaseClient(root.hostFile()).getFileInformation(dirName).type != server::interface::FileBase::IsDirectory) {
+            root.log().write(LogListener::Error, LOG_NAME, Format("Not a directory: %s", dirName));
+            throw std::runtime_error(err);
+        }
+    }
+
+    /* Copy a directory on the host file server (make sure destName has the same content as sourceName).
+       \param root        Service root
+       \param sourceName  Source directory name
+       \param destName    Destination directory name */
+    void copyDirectory(server::host::Root& root, const String_t& sourceName, const String_t& destName)
+    {
+        server::file::ClientDirectoryHandler sourceHandler(root.hostFile(), sourceName);
+        server::file::ClientDirectoryHandler destHandler(root.hostFile(), destName);
+        synchronizeDirectories(destHandler, sourceHandler);
+    }
+
+    /* Copy subset of a directory.
+       Like copyDirectory, but pretend the source directory contains at most the files listed in fileNames.
+       \param root        Service root
+       \param sourceName  Source directory name
+       \param destName    Destination directory name
+       \param fileNames   File names */
+    void copyDirectorySubset(server::host::Root& root, const String_t& sourceName, const String_t& destName, const afl::data::StringList_t& fileNames)
+    {
+        // Implement a filter that pretends the source directory contains only the requested names.
+        // FIXME: with this implementation, the synchronizeDirectories() will use GET/PUT, not a server-side CP,
+        // because it no longer can detect that source and destination are the same.
+        // Alternatives would be to (a) make some explicit isSame() operation for that detection,
+        // or (b) replace the dest.copyFile(src) operation by a src.copyFileTo(dest) operation.
+        class FilteredDirectoryHandler : public server::file::ReadOnlyDirectoryHandler {
+         public:
+            FilteredDirectoryHandler(server::file::ReadOnlyDirectoryHandler& parent,
+                                     const afl::data::StringList_t& fileNames)
+                : m_parent(parent), m_fileNames(fileNames)
+                { }
+            virtual String_t getName()
+                { return m_parent.getName(); }
+            virtual afl::base::Ref<afl::io::FileMapping> getFile(const Info& info)
+                {
+                    checkVisibleFileName(info.name);
+                    return m_parent.getFile(info);
+                }
+            virtual afl::base::Ref<afl::io::FileMapping> getFileByName(String_t name)
+                {
+                    checkVisibleFileName(name);
+                    return m_parent.getFileByName(name);
+                }
+            virtual void readContent(Callback& callback)
+                {
+                    FilteredCallback cb(callback, *this);
+                    m_parent.readContent(cb);
+                }
+            virtual ReadOnlyDirectoryHandler* getDirectory(const Info& info)
+                {
+                    checkVisibleFileName(info.name);
+                    return m_parent.getDirectory(info);
+                }
+
+         private:
+            class FilteredCallback : public server::file::ReadOnlyDirectoryHandler::Callback {
+             public:
+                FilteredCallback(Callback& callback, FilteredDirectoryHandler& parent)
+                    : m_callback(callback), m_parent(parent)
+                    { }
+                virtual void addItem(const Info& info)
+                    {
+                        if (m_parent.isVisibleFileName(info.name)) {
+                            m_callback.addItem(info);
+                        }
+                    }
+             private:
+                Callback& m_callback;
+                FilteredDirectoryHandler& m_parent;
+            };
+
+            server::file::ReadOnlyDirectoryHandler& m_parent;
+            const afl::data::StringList_t& m_fileNames;
+
+            bool isVisibleFileName(const String_t& name) const
+                { return std::find(m_fileNames.begin(), m_fileNames.end(), name) != m_fileNames.end(); }
+            void checkVisibleFileName(const String_t& name) const
+                {
+                    if (!isVisibleFileName(name)) {
+                        throw afl::except::FileProblemException(name, afl::string::Messages::fileNotFound());
+                    }
+                }
+        };
+
+        server::file::ClientDirectoryHandler sourceHandler(root.hostFile(), sourceName);
+        server::file::ClientDirectoryHandler destHandler(root.hostFile(), destName);
+        FilteredDirectoryHandler filteredSource(sourceHandler, fileNames);
+        synchronizeDirectories(destHandler, filteredSource);
+    }
 }
 
 // Run host on a game.
@@ -587,4 +693,118 @@ server::host::runMaster(util::ProcessRunner& runner, Root& root, int32_t gameId)
     }
 
     root.log().write(LogListener::Info, LOG_NAME, afl::string::Format("game %d: master completed", gameId));
+}
+
+// Reset game to turn.
+void
+server::host::resetToTurn(Root& root, Game& g, int turnNr)
+{
+    // To restore turn X, we need to reconstruct:
+    //     G/data        from G/backup/pre-<X+1> [which usually is the same as G/backup/post-<X>]
+    //     G/in          from G/backup/trn-<X+1>
+    //     G/out/all     subset of G/data according to game:turn:<X+1>:files:all
+    //     G/out/R       subset of G/data according to game:turn:<X+1>:files:<R>
+    // Notes:
+    // - this will not reconstruct the playerfiles.zip, playerX.zip
+    // - reconstructing from turn <X+1> data is consistent with the history view (HistoryTurnItem)
+    // - for now, assume DB is consistent.
+    //   Our job is to not break an inconsistent DB even more, but not to fix a broken DB.
+    Game::Turn t(g.turn(turnNr));
+
+    // Prepare file system stuff
+    server::interface::BaseClient(root.hostFile()).setUserContext(String_t());
+    server::interface::FileBaseClient hostFile(root.hostFile());
+    const String_t gameDir = g.getDirectory();
+    const String_t dataSourceDir = Format("%s/backup/pre-%03d", gameDir, turnNr+1);
+    const String_t turnSourceDir = Format("%s/backup/trn-%03d", gameDir, turnNr+1);
+    const String_t dataDestDir = Format("%s/data", gameDir);
+    const String_t turnDestDir = Format("%s/in", gameDir);
+    const String_t allDestDir  = Format("%s/out/all", gameDir);
+
+    // Verify directories so that we fail early instead of leaving a half-copied tree
+    checkDirectory(root, dataSourceDir, BAD_TURN_NUMBER);
+    checkDirectory(root, turnSourceDir, BAD_TURN_NUMBER);
+    checkDirectory(root, dataDestDir,   BAD_TURN_NUMBER);
+    checkDirectory(root, turnDestDir,   BAD_TURN_NUMBER);
+    checkDirectory(root, allDestDir,    BAD_TURN_NUMBER);
+
+    // Copy data/turns
+    copyDirectory(root, dataSourceDir, dataDestDir);
+    copyDirectory(root, turnSourceDir, turnDestDir);
+
+    // Create out/all
+    {
+        afl::data::StringList_t globalFiles;
+        t.files().globalFiles().getAll(globalFiles);
+        copyDirectorySubset(root, dataSourceDir, allDestDir, globalFiles);
+    }
+
+    // Create out/<player>
+    for (int pl = 1; pl <= Game::NUM_PLAYERS; ++pl) {
+        try {
+            // Create player directory in case it got missing.
+            // A game always has all directories (see GameCreator::createNewGame()), so this shouldn't ever have to do anything.
+            const String_t playerDestDir = Format("%s/out/%d", gameDir, pl);
+            hostFile.createDirectoryTree(playerDestDir);
+
+            // Copy files
+            afl::data::StringList_t playerFiles;
+            t.files().playerFiles(pl).getAll(playerFiles);
+            copyDirectorySubset(root, dataSourceDir, playerDestDir, playerFiles);
+        }
+        catch (std::exception& e) {
+            // There should not be any errors here. If there are, just log and ignore to not leave a partial copy in the "main" directories.
+            // We have not pre-verified these directories.
+            root.log().write(LogListener::Error, LOG_NAME, Format("Error creating player %d's directory", pl), e);
+        }
+    }
+
+    // Import database - see importGameData
+    // - no need to update masterHasRun, hostHasRun, state
+
+    // - forget cached data
+    g.clearCache();
+
+    // - no need to execute a copyPending request
+
+    // - update timestamp and turn number
+    const String_t newTimestamp = t.info().timestamp().get();
+    const String_t oldTimestamp = g.timestamp().get();
+    root.gameByTime(oldTimestamp).remove();
+    root.gameByTime(newTimestamp).set(g.getId());
+
+    g.turnNumber().set(turnNr);
+    g.timestamp().set(newTimestamp);
+
+    // - times: pretend host ran now, turn submitted now; prevents immediate host
+    const server::Time_t now = root.getTime();
+    g.lastHostTime().set(now);
+    g.lastTurnSubmissionTime().set(now);
+
+    // - no need to track player history
+    // - no need to track scores, these are already present
+
+    // - turn status; make all present turns temporary
+    const String_t allTurnStatus = t.info().turnStatus().get();
+    for (int i = 1; i <= Game::NUM_PLAYERS; ++i) {
+        afl::net::redis::IntegerField statusField = g.getSlot(i).turnStatus();
+        int slotTurnStatus = (allTurnStatus.size() >= size_t(i)*2
+                              ? afl::bits::Int16LE::unpack(*reinterpret_cast<const afl::bits::Int16LE::Bytes_t*>(allTurnStatus.data() + 2*(i-1)))
+                              : 0);
+        if (slotTurnStatus < 0) {
+            slotTurnStatus = Game::TurnMissing;
+        }
+        if (slotTurnStatus == Game::TurnGreen
+            || slotTurnStatus == Game::TurnYellow)
+        {
+            slotTurnStatus |= Game::TurnIsTemporary;
+        }
+        g.getSlot(i).turnStatus().set(slotTurnStatus);
+    }
+
+    // - no need to import file history, we just read it!
+    // - no need for victory check, will be done on next host run
+
+    // Publish all results. This will also publish turns.
+    ResultSender(root, g).installAllResults();
 }

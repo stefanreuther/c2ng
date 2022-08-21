@@ -272,6 +272,12 @@ namespace server { namespace interface {
         // FIXME: do we need this guy? Better auto-upgrade games on startup.
         virtual void updateGames(const afl::data::IntegerList_t& gameIds) = 0;
 
+        /** Reset game to specified turn (GAMERESET).
+            @param gameId  Game Id
+            @param turnNr  Turn number */
+        virtual void resetToTurn(int32_t gameId, int turnNr) = 0;
+
+
         /** Format a State into a string.
             @param state State
             @return string representation */

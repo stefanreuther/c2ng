@@ -82,6 +82,7 @@ namespace server {
     const char*const SLOT_EMPTY                  = "412 Slot not in use";
     const char*const WRONG_TURN_STATE            = "412 Bad turn state";
     const char*const INVALID_EXECUTABLE          = "412 Invalid executable";
+    const char*const BAD_TURN_NUMBER             = "412 Bad turn number";
 
     // 413 Request Entity Too Large
     const char*const FILE_TOO_LARGE              = "413 File too large";

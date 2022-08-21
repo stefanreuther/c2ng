@@ -920,3 +920,48 @@ TestServerHostHostGame::testFilters()
     }
 }
 
+/** Test resetToTurn(), failure cases.
+    Cannot test the non-failure cases with reasonable effort here; those are tested in c2systest. */
+void
+TestServerHostHostGame::testResetGameFail()
+{
+    TestHarness h;
+    server::host::Session adminSession;
+    server::host::HostGame adminInstance(adminSession, h.root());
+
+    server::host::Session userSession;
+    userSession.setUser("x");
+    server::host::HostGame userInstance(userSession, h.root());
+
+    afl::data::StringList_t config;
+    config.push_back("hostHasRun");
+    config.push_back("1");
+    config.push_back("masterHasRun");
+    config.push_back("1");
+
+    // Cannot reset a game that is joining
+    {
+        int32_t gid = adminInstance.createNewGame();
+        adminInstance.setType(gid, HostGame::PublicGame);
+        adminInstance.setState(gid, HostGame::Joining);
+        TS_ASSERT_THROWS(adminInstance.resetToTurn(gid, 1), std::exception);
+    }
+
+    // Cannot reset to unknown turn
+    {
+        int32_t gid = adminInstance.createNewGame();
+        adminInstance.setType(gid, HostGame::PublicGame);
+        adminInstance.setConfig(gid, config);
+        adminInstance.setState(gid, HostGame::Running);
+        TS_ASSERT_THROWS(adminInstance.resetToTurn(gid, 10), std::exception);
+    }
+
+    // Cannot reset as user
+    {
+        int32_t gid = adminInstance.createNewGame();
+        adminInstance.setType(gid, HostGame::PublicGame);
+        adminInstance.setConfig(gid, config);
+        adminInstance.setState(gid, HostGame::Running);
+        TS_ASSERT_THROWS(userInstance.resetToTurn(gid, 1), std::exception);
+    }
+}

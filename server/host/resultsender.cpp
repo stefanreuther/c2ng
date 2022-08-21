@@ -29,6 +29,26 @@ using server::interface::FileBaseClient;
 using server::interface::HostGame;
 
 namespace {
+    typedef std::map<String_t, game::PlayerSet_t> PlayerMap_t;
+
+    void addPlayers(PlayerMap_t& out, const afl::data::StringList_t& in, int slot)
+    {
+        for (size_t i = 0; i < in.size(); ++i) {
+            out[in[i]] += slot;
+        }
+    }
+
+    void installResults(Game& g, server::host::Root& root, const PlayerMap_t& allPlayers)
+    {
+        for (PlayerMap_t::const_iterator i = allPlayers.begin(); i != allPlayers.end(); ++i) {
+            const String_t userGameDir = g.getPlayerConfig(i->first, "gameDir");
+            if (!userGameDir.empty()) {
+                server::host::Installer(root).installGameData(g, i->second, i->first, userGameDir);
+            }
+        }
+    }
+
+
     // FIXME: Merge with server::talk::LinkFormatter somehow?
     String_t makeGameUrl(int32_t gameId, String_t gameName)
     {
@@ -282,9 +302,7 @@ server::host::ResultSender::sendAllResults()
         afl::data::StringList_t playersByFormat[NumFormats];
         afl::data::StringList_t players;
         m_game.listPlayers(slot, players);
-        for (size_t i = 0; i < players.size(); ++i) {
-            allPlayers[players[i]] += slot;
-        }
+        addPlayers(allPlayers, players, slot);
 
         // Send results in all formats
         collectPlayers(m_root, m_game, players, playersByFormat);
@@ -292,15 +310,23 @@ server::host::ResultSender::sendAllResults()
     }
 
     // Distribute results to local directories
-    for (std::map<String_t, game::PlayerSet_t>::const_iterator i = allPlayers.begin(); i != allPlayers.end(); ++i) {
-        String_t userGameDir = m_game.getPlayerConfig(i->first, "gameDir");
-        if (!userGameDir.empty()) {
-            Installer(m_root).installGameData(m_game, i->second, i->first, userGameDir);
-        }
-    }
+    installResults(m_game, m_root, allPlayers);
 
     // Clear status flags
     m_game.endChanged().remove();
     m_game.configChanged().remove();
     m_game.scheduleChanged().remove();
+}
+
+void
+server::host::ResultSender::installAllResults()
+{
+    std::map<String_t, game::PlayerSet_t> allPlayers;
+    for (int slot = 1; slot <= Game::NUM_PLAYERS; ++slot) {
+        afl::data::StringList_t players;
+        m_game.listPlayers(slot, players);
+        addPlayers(allPlayers, players, slot);
+    }
+
+    installResults(m_game, m_root, allPlayers);
 }

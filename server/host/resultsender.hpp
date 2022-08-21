@@ -23,6 +23,10 @@ namespace server { namespace host {
             Call after a host run. */
         void sendAllResults();
 
+        /** Install all result files.
+            This is a subset of sendAllResults(). */
+        void installAllResults();
+
      private:
         Root& m_root;
         Game& m_game;

@@ -140,6 +140,7 @@ class TestServerHostHostGame : public CxxTest::TestSuite {
     void testVictoryCondition();
     void testListUserGames();
     void testFilters();
+    void testResetGameFail();
 };
 
 class TestServerHostHostKey : public CxxTest::TestSuite {

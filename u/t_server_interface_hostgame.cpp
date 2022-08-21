@@ -63,6 +63,8 @@ TestServerInterfaceHostGame::testInterface()
             { return VictoryCondition(); }
         virtual void updateGames(const afl::data::IntegerList_t& /*gameIds*/)
             { }
+        virtual void resetToTurn(int32_t /*gameId*/, int /*turnNr*/)
+            { }
     };
     Tester t;
 }

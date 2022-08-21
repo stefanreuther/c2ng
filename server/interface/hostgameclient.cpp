@@ -257,6 +257,13 @@ server::interface::HostGameClient::updateGames(const afl::data::IntegerList_t& g
     m_commandHandler.callVoid(Segment().pushBackString("GAMEUPDATE").pushBackElements(gameIds));
 }
 
+// GAMERESET game:GID turn:Int
+void
+server::interface::HostGameClient::resetToTurn(int32_t gameId, int turnNr)
+{
+    m_commandHandler.callVoid(Segment().pushBackString("GAMERESET").pushBackInteger(gameId).pushBackInteger(turnNr));
+}
+
 server::interface::HostGame::Info
 server::interface::HostGameClient::unpackInfo(const Value_t* value)
 {

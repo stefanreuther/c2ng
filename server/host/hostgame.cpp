@@ -13,6 +13,7 @@
 #include "afl/string/parse.hpp"
 #include "server/errors.hpp"
 #include "server/host/actions.hpp"
+#include "server/host/exec.hpp"
 #include "server/host/game.hpp"
 #include "server/host/gamecreator.hpp"
 #include "server/host/rank/victory.hpp"
@@ -519,6 +520,35 @@ server::host::HostGame::updateGames(const afl::data::IntegerList_t& gameIds)
         // Update file history
         importAllFileHistory(hostFile, game);
     }
+}
+
+void
+server::host::HostGame::resetToTurn(int32_t gameId, int turnNr)
+{
+    // Must be admin
+    m_session.checkAdmin();
+
+    // Obtain critical access; we'll be severely messing with the game
+    GameArbiter::Guard guard(m_root.arbiter(), gameId, GameArbiter::Critical);
+
+    // Check existence and permission
+    Game g(m_root, gameId);
+    m_session.checkPermission(g, Game::AdminPermission);
+
+    // Check game state: must be running or finished
+    const State st = g.getState();
+    if (st != Running && st != Finished) {
+        throw std::runtime_error(WRONG_GAME_STATE);
+    }
+
+    // Verify turn number
+    const int currentTurnNr = g.turnNumber().get();
+    if (turnNr < 1 || turnNr >= currentTurnNr) {
+        throw std::runtime_error(BAD_TURN_NUMBER);
+    }
+
+    // Do it
+    server::host::resetToTurn(m_root, g, turnNr);
 }
 
 void

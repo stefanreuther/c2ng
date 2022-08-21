@@ -46,6 +46,7 @@ namespace server { namespace host {
         virtual Totals getTotals();
         virtual VictoryCondition getVictoryCondition(int32_t gameId);
         virtual void updateGames(const afl::data::IntegerList_t& gameIds);
+        virtual void resetToTurn(int32_t gameId, int turnNr);
 
      private:
         const Session& m_session;

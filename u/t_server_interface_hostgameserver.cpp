@@ -185,6 +185,8 @@ namespace {
                 call += ")";
                 checkCall(call);
             }
+        virtual void resetToTurn(int32_t gameId, int turnNr)
+            { checkCall(Format("resetToTurn(%d,%d)", gameId, turnNr)); }
     };
 
     HostGame::Info makeInfo()
@@ -583,6 +585,10 @@ TestServerInterfaceHostGameServer::testIt()
     mock.expectCall("updateGames()");
     TS_ASSERT_THROWS_NOTHING(testee.callVoid(Segment().pushBackString("GAMEUPDATE")));
 
+    // resetToTurn
+    mock.expectCall("resetToTurn(7,22)");
+    TS_ASSERT_THROWS_NOTHING(testee.callVoid(Segment().pushBackString("GAMERESET").pushBackInteger(7).pushBackInteger(22)));
+
     // Variations
     mock.expectCall("createNewGame()");
     mock.provideReturnValue(99);
@@ -616,6 +622,7 @@ TestServerInterfaceHostGameServer::testErrors()
     TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("GAMELIST").pushBackString("USER")), std::exception);
     TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("GAMEMGET")), std::exception);
     TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("GAMETOTALS").pushBackInteger(9)), std::exception);
+    TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("GAMERESET").pushBackInteger(7)), std::exception);
 
     // Bad commands or keywords
     TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("")), std::exception);
@@ -632,6 +639,7 @@ TestServerInterfaceHostGameServer::testErrors()
     TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("GAMELIST").pushBackString("STATE").pushBackString("RUNNING")), std::exception);
     TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("GAMELIST").pushBackString("TYPE").pushBackString("typing")), std::exception);
     TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("GAMEMGET").pushBackString("hu")), std::exception);
+    TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("GAMERESET").pushBackInteger(7).pushBackString("asdljlad")), std::exception);
 
     mock.checkFinish();
 }
@@ -1025,5 +1033,10 @@ TestServerInterfaceHostGameServer::testRoundtrip()
         mock.expectCall("updateGames()");
         TS_ASSERT_THROWS_NOTHING(level4.updateGames(afl::data::IntegerList_t()));
     }
-}
 
+    // resetToTurn
+    mock.expectCall("resetToTurn(22,12)");
+    TS_ASSERT_THROWS_NOTHING(level4.resetToTurn(22,12));
+
+    mock.checkFinish();
+}

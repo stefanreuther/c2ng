@@ -474,6 +474,17 @@ server::interface::HostGameServer::handleCommand(const String_t& upcasedCommand,
         m_implementation.updateGames(gameIds);
         result.reset(makeStringValue("OK"));
         return true;
+    } else if (upcasedCommand == "GAMERESET") {
+        /* @q GAMERESET game:GID turn:Int (Host Command)
+           Reset game to specified turn.
+
+           Permissions: admin. */
+        args.checkArgumentCount(2);
+        int32_t gameId = toInteger(args.getNext());
+        int turnNr = toInteger(args.getNext());
+        m_implementation.resetToTurn(gameId, turnNr);
+        result.reset(makeStringValue("OK"));
+        return true;
     } else {
         return false;
     }

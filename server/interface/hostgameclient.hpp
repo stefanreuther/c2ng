@@ -44,6 +44,7 @@ namespace server { namespace interface {
         virtual Totals getTotals();
         virtual VictoryCondition getVictoryCondition(int32_t gameId);
         virtual void updateGames(const afl::data::IntegerList_t& gameIds);
+        virtual void resetToTurn(int32_t gameId, int turnNr);
 
         /** Unpack a serialized Info structure.
             @param value Value received from server

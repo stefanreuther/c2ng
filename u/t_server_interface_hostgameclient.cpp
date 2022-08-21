@@ -267,6 +267,11 @@ TestServerInterfaceHostGameClient::testIt()
         TS_ASSERT_THROWS_NOTHING(testee.updateGames(ids));
     }
 
+    // GAMERESET
+    mock.expectCall("GAMERESET, 55, 13");
+    mock.provideNewResult(0);   // does not matter
+    TS_ASSERT_THROWS_NOTHING(testee.resetToTurn(55, 13));
+
     mock.checkFinish();
 }
 

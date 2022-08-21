@@ -10,6 +10,7 @@
 namespace server { namespace host {
 
     class Root;
+    class Game;
 
     /** Run host on a game.
         The game must be in state "running" and have game data present.
@@ -39,6 +40,18 @@ namespace server { namespace host {
         \param root   Service root
         \param gameId Game to run master for */
     void runMaster(util::ProcessRunner& runner, Root& root, int32_t gameId);
+
+    /** Reset game to turn.
+        The game must be running and in a turn after turnNr.
+
+        This will
+        - verify that a backup exists
+        - copy the data from the backups and history DB
+
+        \param root Root
+        \param g    Game
+        \param turnNr Turn number */
+    void resetToTurn(Root& root, Game& g, int turnNr);
 
 } }
 
