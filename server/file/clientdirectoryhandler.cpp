@@ -107,7 +107,7 @@ server::file::ClientDirectoryHandler::removeDirectory(String_t name)
 }
 
 afl::base::Optional<server::file::DirectoryHandler::Info>
-server::file::ClientDirectoryHandler::copyFile(DirectoryHandler& source, const Info& sourceInfo, String_t name)
+server::file::ClientDirectoryHandler::copyFile(ReadOnlyDirectoryHandler& source, const Info& sourceInfo, String_t name)
 {
     ClientDirectoryHandler* sourceCDH = dynamic_cast<ClientDirectoryHandler*>(&source);
     if (sourceCDH != 0 && &m_commandHandler == &sourceCDH->m_commandHandler) {

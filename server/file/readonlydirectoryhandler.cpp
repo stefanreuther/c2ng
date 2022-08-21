@@ -1,12 +1,12 @@
 /**
-  *  \file server/file/directoryhandler.cpp
-  *  \brief Interface server::file::DirectoryHandler
+  *  \file server/file/readonlydirectoryhandler.cpp
+  *  \brief Interface server::file::ReadOnlyDirectoryHandler
   */
 
-#include "server/file/directoryhandler.hpp"
+#include "server/file/readonlydirectoryhandler.hpp"
 
 bool
-server::file::DirectoryHandler::findItem(String_t name, Info& info)
+server::file::ReadOnlyDirectoryHandler::findItem(String_t name, Info& info)
 {
     class FindCallback : public Callback {
      public:

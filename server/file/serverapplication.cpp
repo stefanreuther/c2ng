@@ -41,7 +41,7 @@ namespace {
         virtual afl::base::Ref<afl::io::FileMapping> getFileByName(String_t name);
         virtual Info createFile(String_t name, afl::base::ConstBytes_t content);
         virtual void removeFile(String_t name);
-        virtual afl::base::Optional<Info> copyFile(DirectoryHandler& source, const Info& sourceInfo, String_t name);
+        virtual afl::base::Optional<Info> copyFile(ReadOnlyDirectoryHandler& source, const Info& sourceInfo, String_t name);
         virtual void readContent(Callback& callback);
         virtual DirectoryHandler* getDirectory(const Info& info);
         virtual Info createDirectory(String_t name);
@@ -82,7 +82,7 @@ ProxyDirectoryHandler::removeFile(String_t name)
 }
 
 afl::base::Optional<server::file::DirectoryHandler::Info>
-ProxyDirectoryHandler::copyFile(DirectoryHandler& source, const Info& sourceInfo, String_t name)
+ProxyDirectoryHandler::copyFile(ReadOnlyDirectoryHandler& source, const Info& sourceInfo, String_t name)
 {
     return m_impl.copyFile(source, sourceInfo, name);
 }

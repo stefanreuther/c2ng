@@ -20,7 +20,7 @@ namespace server { namespace file {
         virtual afl::base::Ref<afl::io::FileMapping> getFileByName(String_t name);
         virtual Info createFile(String_t name, afl::base::ConstBytes_t content);
         virtual void removeFile(String_t name);
-        virtual afl::base::Optional<Info> copyFile(DirectoryHandler& source, const Info& sourceInfo, String_t name);
+        virtual afl::base::Optional<Info> copyFile(ReadOnlyDirectoryHandler& source, const Info& sourceInfo, String_t name);
 
         virtual void readContent(Callback& callback);
         virtual DirectoryHandler* getDirectory(const Info& info);
@@ -29,7 +29,7 @@ namespace server { namespace file {
 
      private:
         afl::io::FileSystem& m_fileSystem;
-        String_t m_name;
+        const String_t m_name;
     };
 
 } }

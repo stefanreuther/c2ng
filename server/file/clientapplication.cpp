@@ -79,7 +79,7 @@ server::file::ClientApplication::doCopy(afl::sys::CommandLineParser& cmdl)
 {
     afl::string::Translator& tx = translator();
     DirectoryHandlerFactory dhf(fileSystem(), networkStack());
-    DirectoryHandler* in = 0;
+    ReadOnlyDirectoryHandler* in = 0;
     DirectoryHandler* out = 0;
     CopyFlags_t flags;
     String_t p;
@@ -116,7 +116,7 @@ server::file::ClientApplication::doSync(afl::sys::CommandLineParser& cmdl)
 {
     afl::string::Translator& tx = translator();
     DirectoryHandlerFactory dhf(fileSystem(), networkStack());
-    DirectoryHandler* in = 0;
+    ReadOnlyDirectoryHandler* in = 0;
     DirectoryHandler* out = 0;
     String_t p;
     bool opt;
@@ -180,7 +180,7 @@ server::file::ClientApplication::doList(afl::sys::CommandLineParser& cmdl)
 }
 
 void
-server::file::ClientApplication::doList(DirectoryHandler& in, String_t name, bool recursive, bool longFormat, bool withHeader)
+server::file::ClientApplication::doList(ReadOnlyDirectoryHandler& in, String_t name, bool recursive, bool longFormat, bool withHeader)
 {
     afl::io::TextWriter& out = standardOutput();
     if (withHeader) {
@@ -218,7 +218,7 @@ server::file::ClientApplication::doList(DirectoryHandler& in, String_t name, boo
         for (size_t i = 0, n = children.size(); i < n; ++i) {
             const DirectoryHandler::Info& ch = children[i];
             if (ch.type == DirectoryHandler::IsDirectory) {
-                std::auto_ptr<DirectoryHandler> sub(in.getDirectory(ch));
+                std::auto_ptr<ReadOnlyDirectoryHandler> sub(in.getDirectory(ch));
                 doList(*sub, DirectoryHandlerFactory::makePathName(name, ch.name), recursive, longFormat, withHeader);
             }
         }

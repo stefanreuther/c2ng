@@ -38,7 +38,7 @@ namespace {
             { return m_impl->createFile(name, content); }
         virtual void removeFile(String_t name)
             { m_impl->removeFile(name); }
-        virtual afl::base::Optional<Info> copyFile(DirectoryHandler& source, const Info& sourceInfo, String_t name)
+        virtual afl::base::Optional<Info> copyFile(ReadOnlyDirectoryHandler& source, const Info& sourceInfo, String_t name)
             { return m_impl->copyFile(source, sourceInfo, name); }
         virtual void readContent(Callback& callback)
             { m_impl->readContent(callback); }

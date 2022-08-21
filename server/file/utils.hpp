@@ -24,7 +24,7 @@ namespace server { namespace file {
     /** List a directory.
         \param out Output
         \param dir Directory to list */
-    void listDirectory(InfoVector_t& out, DirectoryHandler& dir);
+    void listDirectory(InfoVector_t& out, ReadOnlyDirectoryHandler& dir);
 
 
     /** Copy a directory or directory tree.
@@ -38,7 +38,7 @@ namespace server { namespace file {
         \param flags options
 
         \throw afl::except::FileProblemException on error */
-    void copyDirectory(DirectoryHandler& out, DirectoryHandler& in, CopyFlags_t flags);
+    void copyDirectory(DirectoryHandler& out, ReadOnlyDirectoryHandler& in, CopyFlags_t flags);
 
 
     /** Remove a directory's content.
@@ -62,7 +62,7 @@ namespace server { namespace file {
         \param in Source directory
 
         \throw afl::except::FileProblemException on error */
-    void synchronizeDirectories(DirectoryHandler& out, DirectoryHandler& in);
+    void synchronizeDirectories(DirectoryHandler& out, ReadOnlyDirectoryHandler& in);
 } }
 
 #endif

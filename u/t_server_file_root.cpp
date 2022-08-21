@@ -27,7 +27,7 @@ TestServerFileRoot::testIt()
             { return Info(); }
         virtual void removeFile(String_t /*name*/)
             { }
-        virtual afl::base::Optional<Info> copyFile(DirectoryHandler& /*source*/, const Info& /*sourceInfo*/, String_t /*name*/)
+        virtual afl::base::Optional<Info> copyFile(ReadOnlyDirectoryHandler& /*source*/, const Info& /*sourceInfo*/, String_t /*name*/)
             { return afl::base::Nothing; }
         virtual void readContent(Callback& /*callback*/)
             { }
@@ -38,7 +38,7 @@ TestServerFileRoot::testIt()
         virtual void removeDirectory(String_t /*name*/)
             { }
     };
-    server::file::DirectoryItem item("(root)", 0, std::auto_ptr<server::file::DirectoryHandler>(new NullDirectoryHandler()));    
+    server::file::DirectoryItem item("(root)", 0, std::auto_ptr<server::file::DirectoryHandler>(new NullDirectoryHandler()));
 
     // Test it
     server::file::Root testee(item, afl::io::InternalDirectory::create("(spec)"));

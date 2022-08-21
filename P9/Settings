@@ -1181,9 +1181,10 @@ DEPEND_guilib = afl
 PROJ_AUTO += guilib:gfx/*.cpp,gfx/*.hpp,ui/*.cpp,ui/*.hpp,client/*.cpp,client/*.hpp
 
 TARGETS += serverlib
-FILES_serverlib = server/file/ca/garbagecollector.cpp \
-    server/file/ca/garbagecollector.hpp server/monitor/statusobserver.hpp \
-    server/host/file/historyitem.hpp \
+FILES_serverlib = server/file/readonlydirectoryhandler.cpp \
+    server/file/readonlydirectoryhandler.hpp \
+    server/file/ca/garbagecollector.cpp server/file/ca/garbagecollector.hpp \
+    server/monitor/statusobserver.hpp server/host/file/historyitem.hpp \
     server/interface/documentationclient.cpp \
     server/interface/documentationclient.hpp \
     server/doc/documentationimpl.cpp server/doc/documentationimpl.hpp \
@@ -1443,8 +1444,8 @@ FILES_serverlib = server/file/ca/garbagecollector.cpp \
     server/file/ca/internalreferencecounter.hpp \
     server/file/ca/referencecounter.hpp \
     server/file/directoryhandlerfactory.cpp \
-    server/file/directoryhandlerfactory.hpp server/file/directoryhandler.cpp \
-    server/file/utils.cpp server/file/utils.hpp server/file/ca/commit.cpp \
+    server/file/directoryhandlerfactory.hpp server/file/utils.cpp \
+    server/file/utils.hpp server/file/ca/commit.cpp \
     server/file/ca/commit.hpp server/file/ca/referenceupdater.hpp \
     server/file/ca/root.cpp server/file/ca/root.hpp \
     server/file/ca/directoryhandler.cpp server/file/ca/directoryhandler.hpp \
@@ -1723,7 +1724,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_v3_passwordchecker.cpp u/t_game_v3_genextra.cpp \
+FILES_testsuite = u/t_server_file_readonlydirectoryhandler.cpp \
+    u/t_game_v3_passwordchecker.cpp u/t_game_v3_genextra.cpp \
     u/t_interpreter_simplecontext.cpp u/t_game_interface_iteratorcontext.cpp \
     u/t_gfx_antialiased.cpp u/t_interpreter_simpleprocedure.cpp \
     u/t_interpreter_simplefunction.cpp u/t_interpreter_indexablevalue.cpp \

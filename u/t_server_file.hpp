@@ -30,8 +30,6 @@ class TestServerFileCommandHandler : public CxxTest::TestSuite {
 class TestServerFileDirectoryHandler : public CxxTest::TestSuite {
  public:
     void testInterface();
-    void testFind();
-    void testConvertSize();
 };
 
 class TestServerFileDirectoryHandlerFactory : public CxxTest::TestSuite {
@@ -119,6 +117,13 @@ class TestServerFileItem : public CxxTest::TestSuite {
 class TestServerFileRaceNames : public CxxTest::TestSuite {
  public:
     void testIt();
+};
+
+class TestServerFileReadOnlyDirectoryHandler : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+    void testFind();
+    void testConvertSize();
 };
 
 class TestServerFileRoot : public CxxTest::TestSuite {

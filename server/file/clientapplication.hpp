@@ -5,16 +5,17 @@
 #ifndef C2NG_SERVER_FILE_CLIENTAPPLICATION_HPP
 #define C2NG_SERVER_FILE_CLIENTAPPLICATION_HPP
 
-#include "util/application.hpp"
-#include "afl/sys/environment.hpp"
 #include "afl/io/filesystem.hpp"
 #include "afl/net/networkstack.hpp"
-#include "afl/sys/commandlineparser.hpp"
 #include "afl/net/tunnel/tunnelablenetworkstack.hpp"
+#include "afl/sys/commandlineparser.hpp"
+#include "afl/sys/environment.hpp"
+#include "util/application.hpp"
 
 namespace server { namespace file {
 
     class DirectoryHandler;
+    class ReadOnlyDirectoryHandler;
 
     /** c2fileclient application. */
     class ClientApplication : public util::Application {
@@ -33,7 +34,7 @@ namespace server { namespace file {
         void doCopy(afl::sys::CommandLineParser& cmdl);
         void doSync(afl::sys::CommandLineParser& cmdl);
         void doList(afl::sys::CommandLineParser& cmdl);
-        void doList(DirectoryHandler& in, String_t name, bool recursive, bool longFormat, bool withHeader);
+        void doList(ReadOnlyDirectoryHandler& in, String_t name, bool recursive, bool longFormat, bool withHeader);
         void doClear(afl::sys::CommandLineParser& cmdl);
         void doServe(afl::sys::CommandLineParser& cmdl);
         void doGC(afl::sys::CommandLineParser& cmdl);

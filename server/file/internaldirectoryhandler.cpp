@@ -123,7 +123,7 @@ server::file::InternalDirectoryHandler::removeDirectory(String_t name)
 }
 
 afl::base::Optional<server::file::DirectoryHandler::Info>
-server::file::InternalDirectoryHandler::copyFile(DirectoryHandler& /*source*/, const Info& /*sourceInfo*/, String_t /*name*/)
+server::file::InternalDirectoryHandler::copyFile(ReadOnlyDirectoryHandler& /*source*/, const Info& /*sourceInfo*/, String_t /*name*/)
 {
     // There is no point in optimizing this.
     return afl::base::Nothing;

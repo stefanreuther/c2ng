@@ -254,7 +254,7 @@ server::file::ca::DirectoryHandler::removeFile(String_t name)
 }
 
 afl::base::Optional<server::file::DirectoryHandler::Info>
-server::file::ca::DirectoryHandler::copyFile(server::file::DirectoryHandler& source, const Info& sourceInfo, String_t name)
+server::file::ca::DirectoryHandler::copyFile(ReadOnlyDirectoryHandler& source, const Info& sourceInfo, String_t name)
 {
     // The other side must work on the same ObjectStore
     DirectoryHandler* dh = dynamic_cast<DirectoryHandler*>(&source);

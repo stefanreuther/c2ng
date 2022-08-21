@@ -13,6 +13,7 @@
 #include "server/file/ca/garbagecollector.hpp"
 #include "server/file/ca/root.hpp"
 #include "server/file/clientdirectoryhandler.hpp"
+#include "server/file/directoryhandler.hpp"
 #include "server/file/filesystemhandler.hpp"
 #include "server/file/internaldirectoryhandler.hpp"
 #include "server/interface/baseclient.hpp"

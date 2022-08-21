@@ -58,7 +58,7 @@ namespace server { namespace file {
         virtual DirectoryHandler* getDirectory(const Info& info);
         virtual Info createDirectory(String_t name);
         virtual void removeDirectory(String_t name);
-        virtual afl::base::Optional<Info> copyFile(DirectoryHandler& source, const Info& sourceInfo, String_t name);
+        virtual afl::base::Optional<Info> copyFile(ReadOnlyDirectoryHandler& source, const Info& sourceInfo, String_t name);
 
         /** Find file, given a name.
             \param name Name to find
@@ -71,7 +71,7 @@ namespace server { namespace file {
         Directory* findDirectory(const String_t& name);
 
      private:
-        String_t m_name;
+        const String_t m_name;
         Directory& m_dir;
 
         String_t makeName(const String_t& childName) const;

@@ -38,13 +38,13 @@ namespace server { namespace file {
         virtual DirectoryHandler* getDirectory(const Info& info);
         virtual Info createDirectory(String_t name);
         virtual void removeDirectory(String_t name);
-        virtual afl::base::Optional<Info> copyFile(DirectoryHandler& source, const Info& sourceInfo, String_t name);
+        virtual afl::base::Optional<Info> copyFile(ReadOnlyDirectoryHandler& source, const Info& sourceInfo, String_t name);
 
      private:
         String_t makePath(String_t userPath);
 
         afl::net::CommandHandler& m_commandHandler;
-        String_t m_basePath;
+        const String_t m_basePath;
     };
 
 } }

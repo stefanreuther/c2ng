@@ -15,6 +15,7 @@
 #include "server/file/directoryhandler.hpp"
 
 using server::file::DirectoryHandler;
+using server::file::ReadOnlyDirectoryHandler;
 
 namespace {
     /** Comparator for DirectoryHandler::Info; sort by name. */
@@ -47,7 +48,7 @@ namespace {
         \param out Output directory
         \param in Input directory
         \param inChild Input file info */
-    void copyFile(DirectoryHandler& out, DirectoryHandler& in, const DirectoryHandler::Info& inChild)
+    void copyFile(DirectoryHandler& out, ReadOnlyDirectoryHandler& in, const DirectoryHandler::Info& inChild)
     {
         if (!out.copyFile(in, inChild, inChild.name).isValid()) {
             out.createFile(inChild.name, in.getFile(inChild)->get());
@@ -60,7 +61,7 @@ namespace {
         \param out Output directory
         \param in Input directory
         \param inChild Input item info */
-    void copyChild(DirectoryHandler& out, DirectoryHandler& in, const DirectoryHandler::Info& inChild)
+    void copyChild(DirectoryHandler& out, ReadOnlyDirectoryHandler& in, const DirectoryHandler::Info& inChild)
     {
         switch (inChild.type) {
          case DirectoryHandler::IsUnknown:
@@ -73,7 +74,7 @@ namespace {
 
          case DirectoryHandler::IsDirectory: {
             std::auto_ptr<DirectoryHandler> outHandler(out.getDirectory(out.createDirectory(inChild.name)));
-            std::auto_ptr<DirectoryHandler> inHandler(in.getDirectory(inChild));
+            std::auto_ptr<ReadOnlyDirectoryHandler> inHandler(in.getDirectory(inChild));
             copyDirectory(*outHandler, *inHandler, server::file::CopyFlags_t(server::file::CopyRecursively));
             break;
          }
@@ -105,7 +106,7 @@ namespace {
         }
     }
 
-    void copyTarball(DirectoryHandler& out, DirectoryHandler& in, const DirectoryHandler::Info& inChild, const String_t& outName)
+    void copyTarball(DirectoryHandler& out, ReadOnlyDirectoryHandler& in, const DirectoryHandler::Info& inChild, const String_t& outName)
     {
         // Get input file content
         afl::base::Ref<afl::io::FileMapping> inMapping = in.getFile(inChild);
@@ -136,7 +137,7 @@ namespace {
 
 // List a directory.
 void
-server::file::listDirectory(InfoVector_t& out, DirectoryHandler& dir)
+server::file::listDirectory(InfoVector_t& out, ReadOnlyDirectoryHandler& dir)
 {
     // Read input content
     class Callback : public DirectoryHandler::Callback {
@@ -157,7 +158,7 @@ server::file::listDirectory(InfoVector_t& out, DirectoryHandler& dir)
 
 // Copy a directory or directory tree.
 void
-server::file::copyDirectory(DirectoryHandler& out, DirectoryHandler& in, CopyFlags_t flags)
+server::file::copyDirectory(DirectoryHandler& out, ReadOnlyDirectoryHandler& in, CopyFlags_t flags)
 {
     // Read content
     InfoVector_t inChildren;
@@ -213,7 +214,7 @@ server::file::copyDirectory(DirectoryHandler& out, DirectoryHandler& in, CopyFla
                 }
 
                 // Handler for input
-                std::auto_ptr<DirectoryHandler> inHandler(in.getDirectory(ch));
+                std::auto_ptr<ReadOnlyDirectoryHandler> inHandler(in.getDirectory(ch));
                 copyDirectory(*outHandler, *inHandler, flags);
             }
             break;
@@ -237,7 +238,7 @@ server::file::removeDirectoryContent(DirectoryHandler& dir)
 
 // Synchronize a directory tree.
 void
-server::file::synchronizeDirectories(DirectoryHandler& out, DirectoryHandler& in)
+server::file::synchronizeDirectories(DirectoryHandler& out, ReadOnlyDirectoryHandler& in)
 {
     // Read content
     InfoVector_t inChildren;
@@ -280,7 +281,7 @@ server::file::synchronizeDirectories(DirectoryHandler& out, DirectoryHandler& in
 
                  case DirectoryHandler::IsDirectory: {
                     // Recursively erase directory
-                    std::auto_ptr<DirectoryHandler> inDir(in.getDirectory(inChild));
+                    std::auto_ptr<ReadOnlyDirectoryHandler> inDir(in.getDirectory(inChild));
                     std::auto_ptr<DirectoryHandler> outDir(out.getDirectory(outChild));
                     synchronizeDirectories(*outDir, *inDir);
                     break;

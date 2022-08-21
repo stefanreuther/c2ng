@@ -8,7 +8,7 @@
 #include "afl/net/http/pagerequest.hpp"
 #include "afl/net/http/pageresponse.hpp"
 #include "afl/string/format.hpp"
-#include "server/file/directoryhandler.hpp"
+#include "server/file/readonlydirectoryhandler.hpp"
 #include "server/file/utils.hpp"
 #include "util/string.hpp"
 
@@ -59,7 +59,7 @@ class server::file::DirectoryPage::Sorter {
         }
 };
 
-server::file::DirectoryPage::DirectoryPage(DirectoryHandler& dh)
+server::file::DirectoryPage::DirectoryPage(ReadOnlyDirectoryHandler& dh)
     : m_directoryHandler(dh)
 { }
 
@@ -81,7 +81,7 @@ server::file::DirectoryPage::handleRequest(afl::net::http::PageRequest& in, afl:
     // Parse path. Each component must be a directory.
     const String_t& path = in.getPath();
     size_t pos = std::min(path.find_first_not_of("/"), path.size());
-    DirectoryHandler* dir = &m_directoryHandler;
+    ReadOnlyDirectoryHandler* dir = &m_directoryHandler;
     size_t n;
     while ((n = path.find('/', pos)) != String_t::npos) {
         DirectoryHandler::Info info;

@@ -9,7 +9,7 @@
 
 namespace server { namespace file {
 
-    class DirectoryHandler;
+    class ReadOnlyDirectoryHandler;
 
     /** HTTP Page implementation for serving a DirectoryHandler.
         Add this to a afl::net::http::PageDispatcher to serve a DirectoryHandler via HTTP.
@@ -24,14 +24,14 @@ namespace server { namespace file {
      public:
         /** Constructor.
             \param dh DirectoryHandler */
-        explicit DirectoryPage(DirectoryHandler& dh);
+        explicit DirectoryPage(ReadOnlyDirectoryHandler& dh);
 
         virtual bool isValidMethod(const String_t& method) const;
         virtual bool isValidPath() const;
         virtual void handleRequest(afl::net::http::PageRequest& in, afl::net::http::PageResponse& out);
      private:
         class Sorter;
-        DirectoryHandler& m_directoryHandler;
+        ReadOnlyDirectoryHandler& m_directoryHandler;
     };
 
 } }

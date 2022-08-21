@@ -67,7 +67,7 @@ server::file::FileSystemHandler::removeFile(String_t name)
 }
 
 afl::base::Optional<server::file::DirectoryHandler::Info>
-server::file::FileSystemHandler::copyFile(DirectoryHandler& /*source*/, const Info& /*sourceInfo*/, String_t /*name*/)
+server::file::FileSystemHandler::copyFile(ReadOnlyDirectoryHandler& /*source*/, const Info& /*sourceInfo*/, String_t /*name*/)
 {
     // The best we can do is as good as the naive implementation, so don't optimize this.
     return afl::base::Nothing;
