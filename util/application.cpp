@@ -134,7 +134,22 @@ util::Application::standardOutput()
 void
 util::Application::reportError(String_t str)
 {
-    m_errorOutput->writeLine(afl::string::Format("%s: %s", m_environment.getInvocationName(), str));
-    m_standardOutput->flush();
-    m_errorOutput->flush();
+    // Ignore errors during flush. This is the last resort if anything fails.
+    // In particular, these flush() will fail when writing into a broken pipe,
+    // causing the process to terminate() if we don't catch it.
+
+    // Standard output
+    try {
+        m_standardOutput->flush();
+    }
+    catch (...) {
+    }
+
+    // Standard error; we want the error message to be the last thing seen
+    try {
+        m_errorOutput->writeLine(afl::string::Format("%s: %s", m_environment.getInvocationName(), str));
+        m_errorOutput->flush();
+    }
+    catch (...) {
+    }
 }

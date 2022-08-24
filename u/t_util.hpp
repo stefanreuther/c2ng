@@ -11,6 +11,7 @@ class TestUtilApplication : public CxxTest::TestSuite {
  public:
     void testInit();
     void testExit();
+    void testWriteError();
 };
 
 class TestUtilAtomTable : public CxxTest::TestSuite {
