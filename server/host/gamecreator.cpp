@@ -109,7 +109,6 @@ server::host::GameCreator::createNewGame()
     file.createDirectory(dirName + "/data");
     file.createDirectory(dirName + "/backup");
     file.createDirectory(dirName + "/in");
-    file.createDirectory(dirName + "/in/new");
     file.createDirectory(dirName + "/out");
     file.createDirectory(dirName + "/out/all");
     for (int i = 1; i <= Game::NUM_PLAYERS; ++i) {

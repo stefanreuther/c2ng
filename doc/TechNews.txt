@@ -7,6 +7,17 @@ PCC2ng NEWS FILE - Technical Version
   manual.
 
 
+2.40.13
+-------
+
+### c2host-server: game/XXXX/in/new
+
+  The `in/new` directory is no longer used or maintained. Therefore,
+  downgrading from 2.40.13 to a previous version may cause errors if
+  games have been created/joined in the new version.
+
+
+
 2.40.11
 -------
 

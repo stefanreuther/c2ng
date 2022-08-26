@@ -328,10 +328,6 @@ namespace {
 
                 root.log().write(LogListener::Info, LOG_NAME, afl::string::Format("game %d: trying turn from 'user:%s'", game.getId(), userGameDir));
 
-                // Store on hostfile
-                BaseClient(root.hostFile()).setUserContext(players[i]);
-                FileBaseClient(root.hostFile()).putFile(afl::string::Format("%s/in/new/player%d.trn", hostFileDir, slot), trnData);
-
                 // Store in workdir
                 workdir.openFile(afl::string::Format("%s/in/new/player%d.trn", gameDir, slot), afl::io::FileSystem::Create)->fullWrite(afl::string::toBytes(trnData));
 

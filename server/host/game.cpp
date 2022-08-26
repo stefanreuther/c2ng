@@ -548,7 +548,6 @@ server::host::Game::pushPlayerSlot(int32_t slot, String_t player, Root& root)
     afl::net::CommandHandler& hostFile(root.hostFile());
     server::interface::BaseClient(hostFile).setUserContext(String_t());
     server::interface::FileBaseClient hostFileClient(hostFile);
-    hostFileClient.setDirectoryPermissions(gameDir + "/in/new", player, "w");
     hostFileClient.setDirectoryPermissions(gameDir + "/out/all", player, "rl");
     hostFileClient.setDirectoryPermissions(gameDir + "/out/" + String_t(afl::string::Format("%d", slot)), player, "rl");
 
@@ -580,8 +579,7 @@ server::host::Game::popPlayerSlot(int32_t slot, Root& root)
         server::interface::FileBaseClient hostFileClient(hostFile);
         hostFileClient.setDirectoryPermissions(gameDir + "/out/" + String_t(afl::string::Format("%d", slot)), player, "0");
         if (ref == 0) {
-            // Revoke file permissions for public directories
-            hostFileClient.setDirectoryPermissions(gameDir + "/in/new", player, "0");
+            // Revoke file permissions for public directory
             hostFileClient.setDirectoryPermissions(gameDir + "/out/all", player, "0");
         }
     }

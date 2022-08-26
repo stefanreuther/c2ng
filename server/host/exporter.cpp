@@ -164,6 +164,19 @@ server::host::Exporter::exportGame(Game& game, Root& root, String_t fsDirName)
     // Existing game scripts will attempt to make backups. Make the directory so they don't fail.
     gameEntry->openDirectory()->getDirectoryEntryByName("backup")->createAsDirectory();
 
+    // Create 'new' directory.
+    // This directory is no longer part of the filespace
+    // (but old games may still have it, so don't fail if it exists).
+    try {
+        gameEntry->openDirectory()
+            ->getDirectoryEntryByName("in")
+            ->openDirectory()
+            ->getDirectoryEntryByName("new")
+            ->createAsDirectory();
+    }
+    catch (std::exception&)
+    { }
+
     // Main scripts
     exportSubdirectory("bin", fsDirName, "bin");
     exportSubdirectory("defaults", fsDirName, "defaults");
