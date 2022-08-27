@@ -86,6 +86,9 @@ namespace {
             { return afl::string::Format("<%s>", m_name); }
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
             { rejectStore(out, aux, ctx); }
+        // Portability hack for older compilers:
+        const Function& self() const
+            { return *this; }
      private:
         String_t m_name;
         bool m_isProcedure;
@@ -97,9 +100,9 @@ namespace {
     size_t createTestAction(GlobalActions& ga, String_t& acc)
     {
         afl::data::IntegerValue one(1);
-        size_t actionNr = ga.addAction(Function("prepare", false, acc, &one),
-                                       Function("exec", true, acc, 0),
-                                       Function("result", true, acc, 0));
+        size_t actionNr = ga.addAction(Function("prepare", false, acc, &one).self(),
+                                       Function("exec", true, acc, 0).self(),
+                                       Function("result", true, acc, 0).self());
         TS_ASSERT(ga.getActionByIndex(actionNr) != 0);
         return actionNr;
     }
@@ -493,9 +496,9 @@ TestGameInterfaceGlobalActions::testCancel()
 {
     GlobalActions testee;
     String_t acc;
-    size_t actionNr = testee.addAction(Function("prepare", false, acc, 0),
-                                       Function("exec", true, acc, 0),
-                                       Function("result", true, acc, 0));
+    size_t actionNr = testee.addAction(Function("prepare", false, acc, 0).self(),
+                                       Function("exec", true, acc, 0).self(),
+                                       Function("result", true, acc, 0).self());
     TS_ASSERT(testee.getActionByIndex(actionNr) != 0);
 
     // Define a universe with some units
@@ -524,9 +527,9 @@ TestGameInterfaceGlobalActions::testLock()
     GlobalActions testee;
     String_t acc;
     afl::data::IntegerValue one(1);
-    size_t actionNr = testee.addAction(Function("prepare", false, acc, &one),
-                                       interpreter::SubroutineValue(makeTakeLockActionBCO(Function("exec", true, acc, 0))),
-                                       Function("result", true, acc, 0));
+    size_t actionNr = testee.addAction(Function("prepare", false, acc, &one).self(),
+                                       interpreter::SubroutineValue(makeTakeLockActionBCO(Function("exec", true, acc, 0).self())),
+                                       Function("result", true, acc, 0).self());
     TS_ASSERT(testee.getActionByIndex(actionNr) != 0);
 
     // Define a universe with some units and take a lock
@@ -558,9 +561,9 @@ TestGameInterfaceGlobalActions::testLockIgnore()
     GlobalActions testee;
     String_t acc;
     afl::data::IntegerValue one(1);
-    size_t actionNr = testee.addAction(Function("prepare", false, acc, &one),
-                                       interpreter::SubroutineValue(makeTakeLockActionBCO(Function("exec", true, acc, 0))),
-                                       Function("result", true, acc, 0));
+    size_t actionNr = testee.addAction(Function("prepare", false, acc, &one).self(),
+                                       interpreter::SubroutineValue(makeTakeLockActionBCO(Function("exec", true, acc, 0).self())),
+                                       Function("result", true, acc, 0).self());
     TS_ASSERT(testee.getActionByIndex(actionNr) != 0);
 
     // Define a universe with some units and take a lock

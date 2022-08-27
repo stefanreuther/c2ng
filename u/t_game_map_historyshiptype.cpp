@@ -75,7 +75,7 @@ TestGameMapHistoryShipType::testIteration()
     const Point PE(99, 99);
 
     // Ship 10 normal
-    Ship& s10 = addShip(vec, 10, PA, 3);
+    /*Ship& s10 =*/ addShip(vec, 10, PA, 3);
 
     // Ship 20 with history
     Ship& s20 = addShip(vec, 20, PB, 3);
@@ -89,7 +89,7 @@ TestGameMapHistoryShipType::testIteration()
     vec.create(40);
 
     // Ship 50 normal
-    Ship& s50 = addShip(vec, 50, PB, 4);
+    /*Ship& s50 =*/ addShip(vec, 50, PB, 4);
 
     // Finish (this sets the ship's kind)
     finish(vec);

@@ -297,7 +297,7 @@ TestGameInterfaceShipTaskPredictor::testSetMissionCommand()
     sh.setWarpFactor(7);
     sh.setCargo(game::Element::Neutronium, 400);
 
-    game::map::Ship& other = addShip(h, 555);
+    /*game::map::Ship& other =*/ addShip(h, 555);
     sh.setPosition(game::map::Point(1200, 1300));
 
     afl::data::Segment seg;

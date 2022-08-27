@@ -560,8 +560,9 @@ TestGameDbLoader::testLoad()
     testee.load(inputStream, t, g, true);
 
     // Must postprocess to set types
+    game::config::HostConfiguration config;
     t.universe().postprocess(game::PlayerSet_t(20), game::PlayerSet_t(20), game::map::Object::ReadOnly,
-                             g.mapConfiguration(), game::HostVersion(), game::config::HostConfiguration(), 7, sl, tx, log);
+                             g.mapConfiguration(), game::HostVersion(), config, 7, sl, tx, log);
 
     // Verify
     // - autobuild
