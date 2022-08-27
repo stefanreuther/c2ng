@@ -33,7 +33,6 @@ MESSAGES. Can we integrate all messages (in-game messages, PMs, activities, foru
 
 FILER NG.
 - Add transaction support: upload many files at once and commit at the end; fork dataspace for backup.
-- [DONE] fsck/garbage collection.
 
 SDL2/ANDROID.
 - Touch events!
@@ -56,7 +55,6 @@ PCC1 FEATURES MISSING IN PCC2.
 I18N.
 - Create .po files (custom extractor).
 - Read .po files. We can probably do without compiling them now.
-- Remove last users of _() macro.
 
 
 MISC
@@ -64,7 +62,6 @@ MISC
 
 INTERPRETER REWORKS.
 - Constant folding. Translate '"foo" & chr(33)' into a string.
-- [DONE] Rework expressions to reference+deleter style instead of current auto_ptr style.
 
 HISTORY.
 - When loading history ships, clear the mission settings. Don't say the last mission of a stolen ship forever.

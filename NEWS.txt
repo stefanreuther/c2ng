@@ -1,6 +1,16 @@
 PCC2ng NEWS FILE
 ================
 
+2.40.13
+-------
+
+  Client features: lots of improvements to starchart (including
+  starchart configuration). Data export. Ship cloning. Fleet screen
+  (F10). Ship history screen (F6). Global Actions.
+
+  Server: some new operations.
+
+
 2.40.12
 -------
 

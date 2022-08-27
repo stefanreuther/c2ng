@@ -305,9 +305,10 @@ Internationalisation
   translation is implemented. The on-disk format for translations is
   not yet decided.
 
-  Most components should actually accept and use a Translator
-  instance. For code where this is impractical, the "_" shortcut macro
-  is also available, but should be used sparingly.
+  All components should actually accept and use a Translator instance.
+  In very few cases, this is not practical, so there's a global
+  instance (afl::string::Translator::getSystemInstance()). The "_"
+  macro is no longer used.
 
 
 
