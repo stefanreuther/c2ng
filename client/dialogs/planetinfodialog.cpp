@@ -139,8 +139,8 @@ namespace {
                 // Mines
                 m_info[0]->setContent(m_translator("Neutronium"), m_proxy.getMineralInfo(PlanetInfoProxy::Neutronium), PlanetMineralInfo::First);
                 m_info[1]->setContent(m_translator("Tritanium"),  m_proxy.getMineralInfo(PlanetInfoProxy::Tritanium),  PlanetMineralInfo::Second);
-                m_info[2]->setContent(m_translator("Molybdenum"), m_proxy.getMineralInfo(PlanetInfoProxy::Duranium),   PlanetMineralInfo::Second);
-                m_info[3]->setContent(m_translator("Duranium"),   m_proxy.getMineralInfo(PlanetInfoProxy::Molybdenum), PlanetMineralInfo::Second);
+                m_info[2]->setContent(m_translator("Duranium"),   m_proxy.getMineralInfo(PlanetInfoProxy::Duranium),   PlanetMineralInfo::Second);
+                m_info[3]->setContent(m_translator("Molybdenum"), m_proxy.getMineralInfo(PlanetInfoProxy::Molybdenum), PlanetMineralInfo::Second);
 
                 // Free-text
                 // - prepare XML document
