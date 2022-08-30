@@ -256,31 +256,35 @@ ui::rich::DocumentView::handleKey(util::Key_t key, int /*prefix*/)
     }
 
     if ((key_flags & fl_Scroll) != 0) {
+        int oldTopY = m_topY;
         switch (key) {
          case util::Key_Up:
          case util::Key_WheelUp:
             scroll(LineUp);
-            return true;
+            break;
          case util::Key_Down:
          case util::Key_WheelDown:
             scroll(LineDown);
-            return true;
+            break;
          case util::Key_PgUp:
             scroll(PageUp);
-            return true;
+            break;
          case util::Key_PgDn:
          case ' ':
             scroll(PageDown);
-            return true;
+            break;
          case util::Key_PgUp + util::KeyMod_Ctrl:
          case util::Key_Home + util::KeyMod_Ctrl:
          case '<':
             setTopY(0);
-            return true;
+            break;
          case util::Key_PgDn + util::KeyMod_Ctrl:
          case util::Key_End + util::KeyMod_Ctrl:
          case '>':
             setTopY(doc.getDocumentHeight());
+            break;
+        }
+        if (oldTopY != m_topY) {
             return true;
         }
     }
