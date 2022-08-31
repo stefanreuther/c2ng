@@ -11,8 +11,10 @@
 #include "game/proxy/cargotransferproxy.hpp"
 #include "game/session.hpp"
 #include "ui/eventloop.hpp"
+#include "ui/group.hpp"
 #include "ui/root.hpp"
 #include "ui/widgets/abstractcheckbox.hpp"
+#include "ui/widgets/focusiterator.hpp"
 #include "util/requestsender.hpp"
 #include "util/vector.hpp"
 
@@ -25,6 +27,8 @@ namespace client { namespace dialogs {
         bool run(util::RequestSender<game::Session> gameSender);
 
      private:
+        struct AddHelper;
+
         ui::Root& m_root;
         afl::string::Translator& m_translator;
         game::proxy::CargoTransferProxy& m_proxy;
@@ -38,6 +42,12 @@ namespace client { namespace dialogs {
         void onUnload();
         void onChange(size_t side, const game::proxy::CargoTransferProxy::Cargo& cargo);
         void onEnableOverload();
+
+        void addCargoTransferLine(game::Element::Type type,
+                                  const AddHelper& helper,
+                                  ui::Group& lineGroup,
+                                  ui::widgets::FocusIterator& iter,
+                                  afl::base::Deleter& del);
     };
 
 } }

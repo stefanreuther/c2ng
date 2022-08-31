@@ -3,6 +3,7 @@
   */
 
 #include "client/dialogs/cargotransferdialog.hpp"
+#include "afl/base/countof.hpp"
 #include "afl/string/format.hpp"
 #include "client/downlink.hpp"
 #include "client/widgets/cargotransferheader.hpp"
@@ -18,6 +19,18 @@
 #include "ui/widgets/focusablegroup.hpp"
 #include "ui/widgets/focusiterator.hpp"
 #include "util/rich/parser.hpp"
+
+using game::Element;
+
+struct client::dialogs::CargoTransferDialog::AddHelper {
+    game::proxy::CargoTransferProxy::General gen;
+    game::proxy::CargoTransferProxy::Participant left, right;
+    util::NumberFormatter fmt;
+
+    AddHelper()
+        : gen(), left(), right(), fmt(false, false)
+        { }
+};
 
 client::dialogs::CargoTransferDialog::CargoTransferDialog(ui::Root& root, afl::string::Translator& tx, game::proxy::CargoTransferProxy& proxy)
     : m_root(root),
@@ -41,50 +54,53 @@ client::dialogs::CargoTransferDialog::run(util::RequestSender<game::Session> gam
     // ex transfer.pas:CargoTransfer
     afl::string::Translator& tx = m_translator;
 
+    AddHelper helper;
     Downlink link(m_root, tx);
-    game::proxy::CargoTransferProxy::General gen;
-    m_proxy.getGeneralInformation(link, gen);
+    m_proxy.getGeneralInformation(link, helper.gen);
+    m_proxy.getParticipantInformation(link, 0, helper.left);
+    m_proxy.getParticipantInformation(link, 1, helper.right);
+    helper.fmt = game::proxy::ConfigurationProxy(gameSender).getNumberFormatter(link);
 
-    game::proxy::CargoTransferProxy::Participant left, right;
-    m_proxy.getParticipantInformation(link, 0, left);
-    m_proxy.getParticipantInformation(link, 1, right);
-
-    util::NumberFormatter fmt = game::proxy::ConfigurationProxy(gameSender).getNumberFormatter(link);
-
-    if (gen.validTypes.empty()) {
-        ui::dialogs::MessageBox(afl::string::Format(tx("There is nothing you could transfer to or from %s."), right.name),
+    if (helper.gen.validTypes.empty()) {
+        ui::dialogs::MessageBox(afl::string::Format(tx("There is nothing you could transfer to or from %s."), helper.right.name),
                                 tx("Cargo Transfer"), m_root).doOkDialog(tx);
         return false;
     }
 
     afl::base::Deleter del;
     ui::Window& win(del.addNew(new ui::Window(tx("Cargo Transfer"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5)));
-    win.add(del.addNew(new client::widgets::CargoTransferHeader(m_root, tx, left.name, right.name)));
+    win.add(del.addNew(new client::widgets::CargoTransferHeader(m_root, tx, helper.left.name, helper.right.name)));
 
     ui::Group& lineGroup = del.addNew(new ui::Group(ui::layout::VBox::instance0));
     ui::widgets::FocusIterator& iter = del.addNew(new ui::widgets::FocusIterator(ui::widgets::FocusIterator::Vertical + ui::widgets::FocusIterator::Wrap));
-    game::ElementTypes_t validTypes = gen.validTypes;
-    game::Element::Type type = game::Element::Type(0);
-    while (!validTypes.empty()) {
-        // @change This displays lines in order of Element::Type.
-        // PCC2 has an explicit table, which differs from the Element::Type order
-        // by swapping colonists and supplies. I don't think that's significant.
+    game::ElementTypes_t validTypes = helper.gen.validTypes;
+
+    // Add cargo transfer lines.
+    // Do not just use the "native" order of game::Element; it seems muscle memory is relevant after all:
+    // With native order, Colonists and Supplies are swapped, and we don't want to depend on the native order.
+    // Thus, first add in a fixed order...
+    static const Element::Type FIXED_TYPES[] = {
+        Element::Neutronium,
+        Element::Tritanium,
+        Element::Duranium,
+        Element::Molybdenum,
+        Element::Supplies,
+        Element::Colonists,
+        Element::Money,
+    };
+    for (size_t i = 0; i < countof(FIXED_TYPES); ++i) {
+        const Element::Type type = FIXED_TYPES[i];
         if (validTypes.contains(type)) {
-            String_t name = gen.typeNames.get(type);
-            String_t unit = gen.typeUnits.get(type);
-            if (!unit.empty()) {
-                name += " [";
-                name += unit;
-                name += "]";
-            }
-            client::widgets::CargoTransferLine& line = del.addNew(new client::widgets::CargoTransferLine(m_root, tx, name, int(type), fmt));
-            line.setAmounts(false, left.cargo.amount.get(type), left.cargo.remaining.get(type));
-            line.setAmounts(true, right.cargo.amount.get(type), right.cargo.remaining.get(type));
-            line.sig_move.add(this, &CargoTransferDialog::onMove);
-            ui::Widget& w = ui::widgets::FocusableGroup::wrapWidget(del, 1, line);
-            lineGroup.add(w);
-            iter.add(w);
-            m_lines.set(type, &line);
+            addCargoTransferLine(type, helper, lineGroup, iter, del);
+        }
+        validTypes -= type;
+    }
+
+    // ...then add the remainder
+    Element::Type type = Element::Type(0);
+    while (!validTypes.empty()) {
+        if (validTypes.contains(type)) {
+            addCargoTransferLine(type, helper, lineGroup, iter, del);
         }
         validTypes -= type;
         ++type;
@@ -99,12 +115,12 @@ client::dialogs::CargoTransferDialog::run(util::RequestSender<game::Session> gam
 
     ui::Group& g = del.addNew(new ui::Group(ui::layout::HBox::instance5));
 
-    if (gen.allowUnload) {
-        ui::widgets::Button& btnUnload = del.addNew(new ui::widgets::Button(left.isUnloadTarget ? tx("\xE2\x86\x90 Unload") : tx("Unload \xE2\x86\x92") , 'u', m_root));
+    if (helper.gen.allowUnload) {
+        ui::widgets::Button& btnUnload = del.addNew(new ui::widgets::Button(helper.left.isUnloadTarget ? tx("\xE2\x86\x90 Unload") : tx("Unload \xE2\x86\x92") , 'u', m_root));
         btnUnload.sig_fire.add(this, &CargoTransferDialog::onUnload);
         g.add(btnUnload);
     }
-    if (gen.allowSupplySale) {
+    if (helper.gen.allowSupplySale) {
         ui::widgets::Checkbox& cb = del.addNew(new ui::widgets::Checkbox(m_root, 's', tx("Sell supplies"), m_sellSupplies));
         cb.addDefaultImages();
         cb.setIsFocusable(false);
@@ -134,7 +150,7 @@ client::dialogs::CargoTransferDialog::run(util::RequestSender<game::Session> gam
 void
 client::dialogs::CargoTransferDialog::onMove(int id, bool target, int amount)
 {
-    m_proxy.move(game::Element::Type(id), amount, !target, target, m_sellSupplies.get());
+    m_proxy.move(Element::Type(id), amount, !target, target, m_sellSupplies.get());
 }
 
 void
@@ -148,7 +164,7 @@ client::dialogs::CargoTransferDialog::onChange(size_t side, const game::proxy::C
 {
     if (side == 0 || side == 1) {
         bool right = (side==1);
-        for (game::Element::Type e = game::Element::Type(0); e != m_lines.size(); ++e) {
+        for (Element::Type e = Element::Type(0); e != m_lines.size(); ++e) {
             if (client::widgets::CargoTransferLine* line = m_lines.get(e)) {
                 line->setAmounts(right, cargo.amount.get(e), cargo.remaining.get(e));
             }
@@ -177,5 +193,30 @@ client::dialogs::CargoTransferDialog::onEnableOverload()
         m_overloadCheckbox.setImage(RESOURCE_ID("ui.cb1"));
         m_overloadCheckbox.setState(ui::Widget::DisabledState, true);
         m_proxy.setOverload(true);
-    }    
+    }
+}
+
+void
+client::dialogs::CargoTransferDialog::addCargoTransferLine(game::Element::Type type,
+                                                           const AddHelper& helper,
+                                                           ui::Group& lineGroup,
+                                                           ui::widgets::FocusIterator& iter,
+                                                           afl::base::Deleter& del)
+{
+    String_t name = helper.gen.typeNames.get(type);
+    String_t unit = helper.gen.typeUnits.get(type);
+    if (!unit.empty()) {
+        name += " [";
+        name += unit;
+        name += "]";
+    }
+
+    client::widgets::CargoTransferLine& line = del.addNew(new client::widgets::CargoTransferLine(m_root, m_translator, name, int(type), helper.fmt));
+    line.setAmounts(false, helper.left.cargo.amount.get(type), helper.left.cargo.remaining.get(type));
+    line.setAmounts(true, helper.right.cargo.amount.get(type), helper.right.cargo.remaining.get(type));
+    line.sig_move.add(this, &CargoTransferDialog::onMove);
+    ui::Widget& w = ui::widgets::FocusableGroup::wrapWidget(del, 1, line);
+    lineGroup.add(w);
+    iter.add(w);
+    m_lines.set(type, &line);
 }
