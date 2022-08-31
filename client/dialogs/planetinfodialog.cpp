@@ -15,6 +15,7 @@
 #include "game/game.hpp"
 #include "game/map/universe.hpp"
 #include "game/proxy/planetinfoproxy.hpp"
+#include "game/proxy/referenceproxy.hpp"
 #include "game/turn.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/group.hpp"
@@ -32,7 +33,9 @@
 #include "ui/window.hpp"
 
 using client::widgets::PlanetMineralInfo;
+using game::Reference;
 using game::proxy::PlanetInfoProxy;
+using game::proxy::ReferenceProxy;
 
 namespace {
     void addNodes(afl::io::xml::NodeReader& rdr, const afl::io::xml::Nodes_t& nodes)
@@ -72,7 +75,7 @@ namespace {
         ~PlanetInfoDialog()
             { }
 
-        void run()
+        void run(const String_t& title)
             {
                 // HBox
                 //   VBox
@@ -82,8 +85,7 @@ namespace {
                 //   VBox
                 //     4x PlanetMineralInfo
 
-                // FIXME: PCC2 uses planet name as title?
-                ui::Window win(m_translator("Planet Scan"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::HBox::instance5);
+                ui::Window win(title, m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::HBox::instance5);
 
                 ui::Group& lgroup = m_del.addNew(new ui::Group(ui::layout::VBox::instance5));
                 ui::Group& rgroup = m_del.addNew(new ui::Group(ui::layout::VBox::instance5));
@@ -209,11 +211,20 @@ client::dialogs::doPlanetInfoDialog(ui::Root& root,
 {
     // ex doPlanetScan
     // ex envscan.pas:ScanPlanet, DoEnvScan
+    // Determine planet name, synchronously
+    String_t planetName;
+    Downlink link(root, tx);
+    if (!ReferenceProxy(gameSender).getReferenceName(link, Reference(Reference::Planet, planetId), game::LongName /* Planet #x: nnn */, planetName)) {
+        planetName = tx("Planet");
+    }
+
+    // Set up PlanetInfoProxy to retrieve data asynchronously.
+    // This must be after the synchronous wait so that the window is already open when the data arrives, and word-wrap works correctly.
     PlanetInfoProxy proxy(gameSender, root.engine().dispatcher());
     PlanetInfoDialog dlg(root, gameSender, tx, proxy);
     proxy.setPlanet(planetId);
 
-    dlg.run();
+    dlg.run(planetName);
 }
 
 void

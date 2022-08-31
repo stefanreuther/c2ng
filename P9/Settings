@@ -12,7 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/v3/passwordchecker.cpp game/v3/passwordchecker.hpp \
+FILES_gamelib = game/proxy/referenceproxy.cpp game/proxy/referenceproxy.hpp \
+    game/v3/passwordchecker.cpp game/v3/passwordchecker.hpp \
     game/v3/genextra.cpp game/v3/genextra.hpp interpreter/simplecontext.cpp \
     interpreter/simplecontext.hpp interpreter/callablevalue.cpp \
     interpreter/simpleprocedure.cpp interpreter/simpleprocedure.hpp \
@@ -1724,7 +1725,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_server_file_readonlydirectoryhandler.cpp \
+FILES_testsuite = u/t_game_proxy_referenceproxy.cpp \
+    u/t_server_file_readonlydirectoryhandler.cpp \
     u/t_game_v3_passwordchecker.cpp u/t_game_v3_genextra.cpp \
     u/t_interpreter_simplecontext.cpp u/t_game_interface_iteratorcontext.cpp \
     u/t_gfx_antialiased.cpp u/t_interpreter_simpleprocedure.cpp \

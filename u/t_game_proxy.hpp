@@ -463,6 +463,12 @@ class TestGameProxyReferenceObserverProxy : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameProxyReferenceProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormal();
+};
+
 class TestGameProxyReverterProxy : public CxxTest::TestSuite {
  public:
     void testEmpty();
