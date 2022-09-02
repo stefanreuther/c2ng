@@ -867,6 +867,13 @@ client::map::Screen::onObjectChanged(game::Reference ref)
     if (ref.isSet()) {
         m_locationProxy.setPosition(ref);
     }
+
+    // If this is a ship, show its trail; if no object at all, keep last ship
+    if (ref.isSet()) {
+        m_widget.setShipTrailId(ref.getType() == game::Reference::Ship
+                                ? ref.getId()
+                                : 0);
+    }
 }
 
 void
