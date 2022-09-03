@@ -28,16 +28,9 @@ game::Exception::Exception(String_t error)
 game::Exception::~Exception() throw()
 { }
 
-const String_t&
-game::Exception::getScriptError() const
-{
-    // ex GError::getScriptError
-    return m_scriptError;
-}
-
 const char*
 game::Exception::what() const throw()
 {
-    // ex GError::what
+    // ex GError::what, GError::getScriptError
     return m_scriptError.c_str();
 }

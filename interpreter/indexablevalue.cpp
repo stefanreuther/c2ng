@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/indexablevalue.cpp
+  *  \brief Class interpreter::IndexableValue
   */
 
 #include "interpreter/indexablevalue.hpp"

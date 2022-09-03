@@ -114,6 +114,15 @@ namespace {
             out.fullWrite(afl::base::Memory<UInt32_t>(buffer).trim(i).toBytes());
         }
     }
+
+    uint32_t convertSize(size_t size)
+    {
+        uint32_t result = static_cast<uint32_t>(size);
+        if (result != size) {
+            throw interpreter::Error("Object too large");
+        }
+        return result;
+    }
 }
 
 SaveObject::SaveObject(afl::io::Stream& s)
@@ -413,25 +422,25 @@ interpreter::vmio::FileSaveContext::saveBCO(afl::io::Stream& out, const Bytecode
 
     // Property 2: "data" (literals for pushlit, data segment)
     const afl::data::Segment& literals = bco.literals();
-    so.startProperty(uint32_t(literals.size()));
+    so.startProperty(convertSize(literals.size()));
     SaveVisitor::save(out, literals, literals.size(), m_charset, *this);
     so.endProperty();
 
     // Property 3: "names" (names for e.g. pushvar, name list)
     const afl::data::NameMap& names = bco.names();
-    so.startProperty(uint32_t(names.getNumNames()));
+    so.startProperty(convertSize(names.getNumNames()));
     SaveVisitor::saveNames(out, names, names.getNumNames(), m_charset);
     so.endProperty();
 
     // Property 4: "code" (count = number of instructions, size = 4x count). 32 bit per instruction.
     const std::vector<Opcode>& code = bco.code();
-    so.startProperty(uint32_t(code.size()));
+    so.startProperty(convertSize(code.size()));
     writeArray32(out, afl::base::Memory<const Opcode>(code));
     so.endProperty();
 
     // Property 5: "local_names" (predeclared locals, name list)
     const afl::data::NameMap& localNames = bco.localVariables();
-    so.startProperty(uint32_t(localNames.getNumNames()));
+    so.startProperty(convertSize(localNames.getNumNames()));
     SaveVisitor::saveNames(out, localNames, localNames.getNumNames(), m_charset);
     so.endProperty();
 
@@ -450,7 +459,7 @@ interpreter::vmio::FileSaveContext::saveBCO(afl::io::Stream& out, const Bytecode
     // Property 8: "line numbers" (count = number of lines, size = 8x count)
     const std::vector<uint32_t>& lineNumbers = bco.lineNumbers();
     if (m_debugInformationEnabled) {
-        so.startProperty(uint32_t(lineNumbers.size()/2));
+        so.startProperty(convertSize(lineNumbers.size()/2));
         writeArray32(out, afl::base::Memory<const uint32_t>(lineNumbers));
         so.endProperty();
     } else {
@@ -471,13 +480,13 @@ interpreter::vmio::FileSaveContext::saveHash(afl::io::Stream& out, const afl::da
 
     // Property 1: names
     const afl::data::NameMap& names = hash.getKeys();
-    so.startProperty(uint32_t(names.getNumNames()));
+    so.startProperty(convertSize(names.getNumNames()));
     SaveVisitor::saveNames(out, names, names.getNumNames(), m_charset);
     so.endProperty();
 
     // Property 2: values
     const afl::data::Segment& content = hash.getValues();
-    so.startProperty(uint32_t(content.size()));
+    so.startProperty(convertSize(content.size()));
     SaveVisitor::save(out, content, content.size(), m_charset, *this);
     so.endProperty();
 
@@ -493,14 +502,14 @@ interpreter::vmio::FileSaveContext::saveArray(afl::io::Stream& out, const ArrayD
     so.start(structures::otyp_DataArray, id, 2);
 
     // Property 1: dimensions
-    const std::vector<size_t>& dim = array.getDimensions();
-    so.startProperty(uint32_t(dim.size()));
-    writeArray32(out, afl::base::Memory<const size_t>(dim));
+    afl::base::Memory<const size_t> dim = array.getDimensions();
+    so.startProperty(convertSize(dim.size()));
+    writeArray32(out, dim);
     so.endProperty();
 
     // Property 2: content
-    const afl::data::Segment& content = array.content;
-    so.startProperty(uint32_t(content.size()));
+    const afl::data::Segment& content = array.content();
+    so.startProperty(convertSize(content.size()));
     SaveVisitor::save(out, content, content.size(), m_charset, *this);
     so.endProperty();
 
@@ -517,7 +526,7 @@ interpreter::vmio::FileSaveContext::saveStructureType(afl::io::Stream& out, cons
 
     // Property 1: name list
     const afl::data::NameMap& names = type.names();
-    so.startProperty(uint32_t(names.getNumNames()));
+    so.startProperty(convertSize(names.getNumNames()));
     SaveVisitor::saveNames(out, names, names.getNumNames(), m_charset);
     so.endProperty();
 
@@ -541,7 +550,7 @@ interpreter::vmio::FileSaveContext::saveStructureValue(afl::io::Stream& out, con
 
     // Property 2: content
     const afl::data::Segment& data = value.data;
-    so.startProperty(uint32_t(data.size()));
+    so.startProperty(convertSize(data.size()));
     SaveVisitor::save(out, data, data.size(), m_charset, *this);
     so.endProperty();
 
@@ -563,20 +572,20 @@ interpreter::vmio::FileSaveContext::saveFrame(afl::io::Stream& out, const Proces
     so.startProperty(0);
     structures::FrameHeader header;
     header.bcoRef = addBCO(*fr.bco);
-    header.pc = uint32_t(fr.pc);
-    header.contextSP = uint32_t(fr.contextSP);
-    header.exceptionSP = uint32_t(fr.exceptionSP);
+    header.pc = convertSize(fr.pc);
+    header.contextSP = convertSize(fr.contextSP);
+    header.exceptionSP = convertSize(fr.exceptionSP);
     header.flags = (fr.wantResult * header.WantResult);
     out.fullWrite(afl::base::fromObject(header));
     so.endProperty();
 
     // Property 2: local values (data segment)
-    so.startProperty(uint32_t(fr.localValues.size()));
+    so.startProperty(convertSize(fr.localValues.size()));
     SaveVisitor::save(out, fr.localValues, fr.localValues.size(), m_charset, *this);
     so.endProperty();
 
     // Property 3: local names (name list)
-    so.startProperty(uint32_t(fr.localNames.getNumNames()));
+    so.startProperty(convertSize(fr.localNames.getNumNames()));
     SaveVisitor::saveNames(out, fr.localNames, fr.localNames.getNumNames(), m_charset);
     so.endProperty();
 
@@ -610,7 +619,7 @@ interpreter::vmio::FileSaveContext::saveProcess(afl::io::Stream& out, const Proc
 
     // Property 3: frames (object array)
     size_t numFrames = proc.getNumActiveFrames();
-    so.startProperty(uint32_t(numFrames));
+    so.startProperty(convertSize(numFrames));
     for (size_t i = 0; i < numFrames; ++i) {
         if (const Process::Frame* f = proc.getFrame(i)) {
             // FIXME: do we need to use childContext here?
@@ -621,26 +630,26 @@ interpreter::vmio::FileSaveContext::saveProcess(afl::io::Stream& out, const Proc
 
     // Property 4: contexts (data segment)
     const afl::container::PtrVector<Context>& contexts = proc.getContexts();
-    so.startProperty(uint32_t(contexts.size()));
+    so.startProperty(convertSize(contexts.size()));
     SaveVisitor::saveContexts(out, contexts, childContext);
     so.endProperty();
 
     // Property 5: exceptions (counts = number, size = 16xcount)
     const afl::container::PtrVector<Process::ExceptionHandler>& exceptions = proc.getExceptionHandlers();
-    so.startProperty(uint32_t(exceptions.size()));
+    so.startProperty(convertSize(exceptions.size()));
     for (size_t i = 0, n = exceptions.size(); i < n; ++i) {
         UInt32_t tmp[4];
-        tmp[0] = uint32_t(exceptions[i]->frameSP);
-        tmp[1] = uint32_t(exceptions[i]->contextSP);
-        tmp[2] = uint32_t(exceptions[i]->valueSP);
-        tmp[3] = uint32_t(exceptions[i]->pc);
+        tmp[0] = convertSize(exceptions[i]->frameSP);
+        tmp[1] = convertSize(exceptions[i]->contextSP);
+        tmp[2] = convertSize(exceptions[i]->valueSP);
+        tmp[3] = convertSize(exceptions[i]->pc);
         out.fullWrite(afl::base::fromObject(tmp));
     }
     so.endProperty();
 
     // Property 6: value stack (data segment)
     const Process::Segment_t& valueStack = proc.getValueStack();
-    so.startProperty(uint32_t(valueStack.size()));
+    so.startProperty(convertSize(valueStack.size()));
     SaveVisitor::save(out, valueStack, valueStack.size(), m_charset, childContext);
     so.endProperty();
 

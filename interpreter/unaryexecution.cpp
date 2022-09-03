@@ -196,10 +196,10 @@ namespace {
             double a = prepareTrig(arg);
             double s = std::sin(a);
             double c = std::cos(a);
-            if (std::fabs(c) < 1.0E-06)          // FIXME?, see FDivide
+            if (interpreter::isAlmostZero(c)) {
                 throw Error("Divide by zero");
-            else
-                return makeFloatValue(s/c);
+            }
+            return makeFloatValue(s/c);
         }
     }
 

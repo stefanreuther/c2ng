@@ -5,10 +5,10 @@
 #ifndef C2NG_INTERPRETER_ARRAYVALUE_HPP
 #define C2NG_INTERPRETER_ARRAYVALUE_HPP
 
-#include "afl/base/types.hpp"
-#include "interpreter/indexablevalue.hpp"
 #include "afl/base/ref.hpp"
+#include "afl/base/types.hpp"
 #include "interpreter/arraydata.hpp"
+#include "interpreter/indexablevalue.hpp"
 
 namespace interpreter {
 

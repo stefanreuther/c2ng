@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/ternaryoperation.hpp
+  *  \brief Enum interpreter::TernaryOperation
   */
 #ifndef C2NG_INTERPRETER_TERNARYOPERATION_HPP
 #define C2NG_INTERPRETER_TERNARYOPERATION_HPP
@@ -14,6 +15,10 @@ namespace interpreter {
         teKeyAdd                    ///< Add key/command to keymap, return keymap.
     };
 
+    /** Get name for a ternary operation.
+        This is used for disassembling.
+        @param op Operation, matching a TernaryOperation value
+        @return name; never null  */
     const char* getTernaryName(uint8_t op);
 
 }

@@ -106,6 +106,11 @@ namespace interpreter {
         \return formatted value */
     String_t formatFloat(double value);
 
+    /** Check for value that is almost zero.
+        If a value is almost zero, we refuse dividing.
+        \param value Value
+        \return flag */
+    bool isAlmostZero(double value);
 }
 
 template<class StorageType, StorageType NullValue, class UserType>

@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/keywords.cpp
+  *  \brief Interpreter: Keywords
   */
 
 #include "interpreter/keywords.hpp"
@@ -61,7 +62,7 @@ namespace {
     };
 }
 
-/** Check whether the given string is a keyword. */
+// Check whether the given string is a keyword.
 interpreter::Keyword
 interpreter::lookupKeyword(const String_t& s)
 {
@@ -76,7 +77,7 @@ interpreter::lookupKeyword(const String_t& s)
     return kwNone;
 }
 
-/** Enumerate keywords. */
+// Enumerate keywords.
 void
 interpreter::enumKeywords(PropertyAcceptor& acceptor)
 {

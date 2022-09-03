@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/indexablevalue.hpp
+  *  \brief Class interpreter::IndexableValue
   */
 #ifndef C2NG_INTERPRETER_INDEXABLEVALUE_HPP
 #define C2NG_INTERPRETER_INDEXABLEVALUE_HPP

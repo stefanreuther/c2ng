@@ -229,8 +229,8 @@ TestInterpreterArrayData::testResize()
     {
         interpreter::Arguments args(coord, 0, coord.size());
         TS_ASSERT(testee.computeIndex(args, n));
-        testee.content.setNew(n, interpreter::makeIntegerValue(42));
-        TS_ASSERT_EQUALS(countValues(testee.content), 1U);
+        testee.content().setNew(n, interpreter::makeIntegerValue(42));
+        TS_ASSERT_EQUALS(countValues(testee.content()), 1U);
     }
 
     // Resize to 15x20x30
@@ -246,9 +246,9 @@ TestInterpreterArrayData::testResize()
     {
         interpreter::Arguments args(coord, 0, coord.size());
         TS_ASSERT(testee.computeIndex(args, n));
-        TS_ASSERT(interpreter::checkIntegerArg(iv, testee.content[n]));
+        TS_ASSERT(interpreter::checkIntegerArg(iv, testee.content()[n]));
         TS_ASSERT_EQUALS(iv, 42);
-        TS_ASSERT_EQUALS(countValues(testee.content), 1U);
+        TS_ASSERT_EQUALS(countValues(testee.content()), 1U);
     }
 
     // Resize to 16x26x36
@@ -264,9 +264,9 @@ TestInterpreterArrayData::testResize()
     {
         interpreter::Arguments args(coord, 0, coord.size());
         TS_ASSERT(testee.computeIndex(args, n));
-        TS_ASSERT(interpreter::checkIntegerArg(iv, testee.content[n]));
+        TS_ASSERT(interpreter::checkIntegerArg(iv, testee.content()[n]));
         TS_ASSERT_EQUALS(iv, 42);
-        TS_ASSERT_EQUALS(countValues(testee.content), 1U);
+        TS_ASSERT_EQUALS(countValues(testee.content()), 1U);
     }
 
     // Resize to 6x6x6
@@ -282,7 +282,7 @@ TestInterpreterArrayData::testResize()
     {
         interpreter::Arguments args(coord, 0, coord.size());
         TS_ASSERT_THROWS(testee.computeIndex(args, n), interpreter::Error);
-        TS_ASSERT_EQUALS(countValues(testee.content), 0U);
+        TS_ASSERT_EQUALS(countValues(testee.content()), 0U);
     }
 
     // Invalid resize request (wrong dimension)

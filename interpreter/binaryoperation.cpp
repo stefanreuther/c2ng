@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/binaryoperation.cpp
+  *  \brief Enum interpreter::BinaryOperation
   */
 
 #include "interpreter/binaryoperation.hpp"
@@ -57,9 +58,7 @@ namespace {
 }
 
 
-/** Get name for a binary operation.
-    This is used for disassembling.
-    \param op Operation, IntBinaryOperation */
+// Get name for a binary operation.
 const char*
 interpreter::getBinaryName(uint8_t op)
 {

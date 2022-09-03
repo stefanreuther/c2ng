@@ -32,8 +32,8 @@ namespace interpreter {
             Make a visitor to produce TagNode/aux data.
             \param out [out] TagNode goes here
             \param aux [out] Auxiliary data appended here
-            \param cs [in] Character set
-            \param ctx [in,optional] Save context to save structured data */
+            \param cs  [in] Character set
+            \param ctx [in] Save context to save structured data */
         SaveVisitor(TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, SaveContext& ctx);
 
         // Visitor methods:

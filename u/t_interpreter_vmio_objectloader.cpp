@@ -283,12 +283,12 @@ TestInterpreterVmioObjectLoader::testLoadArray()
 
         int32_t iv;
         String_t sv;
-        TS_ASSERT(interpreter::checkIntegerArg(iv, a->content[5*3+3]));
+        TS_ASSERT(interpreter::checkIntegerArg(iv, a->content()[5*3+3]));
         TS_ASSERT_EQUALS(iv, 1);
-        TS_ASSERT(interpreter::checkStringArg(sv, a->content[5*2+2]));
+        TS_ASSERT(interpreter::checkStringArg(sv, a->content()[5*2+2]));
         TS_ASSERT_EQUALS(sv, "a");
 
-        TS_ASSERT_EQUALS(a->content.size(), size_t(5*3+3+1));
+        TS_ASSERT_EQUALS(a->content().size(), size_t(5*3+3+1));
     }
 
     // Verify BCOs

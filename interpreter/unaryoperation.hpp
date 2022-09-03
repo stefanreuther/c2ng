@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/unaryoperation.hpp
+  *  \brief Enum interpreter::UnaryOperation
   */
 #ifndef C2NG_INTERPRETER_UNARYOPERATION_HPP
 #define C2NG_INTERPRETER_UNARYOPERATION_HPP
@@ -52,6 +53,10 @@ namespace interpreter {
         unLCase                     ///< Convert string to lower-case.
     };
 
+    /** Get name for an unary operation.
+        This is used for disassembling.
+        @param op Operation, matching an UnaryOperation value
+        @return name; never null */
     const char* getUnaryName(uint8_t op);
 
 }

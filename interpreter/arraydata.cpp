@@ -58,7 +58,7 @@ namespace {
 
 // Constructor.
 interpreter::ArrayData::ArrayData()
-    : content(),
+    : m_content(),
       m_totalSize(1),
       m_dimensions()
 {
@@ -153,14 +153,14 @@ interpreter::ArrayData::resize(const ArrayData& tpl)
 
     if (allowInPlace) {
         // In-place resize. This means just discard excess elements, if any.
-        if (content.size() > tpl.m_totalSize) {
-            content.popBackN(content.size() - tpl.m_totalSize);
+        if (m_content.size() > tpl.m_totalSize) {
+            m_content.popBackN(m_content.size() - tpl.m_totalSize);
         }
     } else {
         // Out-of-place resize. Slow.
         afl::data::Segment newData;
-        moveArray(content, newData, m_dimensions, tpl.m_dimensions, 0, 0, 0);
-        content.swap(newData);
+        moveArray(m_content, newData, m_dimensions, tpl.m_dimensions, 0, 0, 0);
+        m_content.swap(newData);
     }
 
     // Copy new metadata

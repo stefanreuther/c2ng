@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/keywords.hpp
+  *  \brief Interpreter: Keywords
   */
 #ifndef C2NG_INTERPRETER_KEYWORDS_HPP
 #define C2NG_INTERPRETER_KEYWORDS_HPP
@@ -64,8 +65,13 @@ namespace interpreter {
         kwWith
     };
 
+    /** Check whether the given string is a keyword.
+        @param s String, upper-case
+        @return keyword; kwNone if s does not match any keyword */
     Keyword lookupKeyword(const String_t& s);
 
+    /** Enumerate keywords.
+        @param [out] acceptor  Will receive the list of keywords */
     void enumKeywords(PropertyAcceptor& acceptor);
 
 }

@@ -668,15 +668,14 @@ interpreter::Process::run()
         catch (Error& e) {
             handleException(e.what(), e.getTrace());
         }
-        // FIXME: port this
-        // catch (GError& e) {
-        //     handleException(e.getScriptError(), string_t());
-        // }
         catch (std::bad_alloc& e) {
             // Do not reflect this back into the script.
             throw;
         }
         catch (std::exception& e) {
+            // @change PCC2 had a separate branch for GError (=game::Exception),
+            // which had different names for what() and getScriptError().
+            // We no longer distinguish those.
             handleException(e.what(), String_t());
         }
         // FIXME: port this
@@ -1551,7 +1550,7 @@ interpreter::Process::handleFunctionCall(BCORef_t bco, Segment_t& args, bool wan
             throw Error::tooComplex();
         }
         va->addDimension(static_cast<int32_t>(numVarArgs));
-        args.transferLastTo(numVarArgs, va->content);
+        args.transferLastTo(numVarArgs, va->content());
     }
 
     /* Copy regular parameters */
@@ -1887,7 +1886,7 @@ interpreter::Process::handleMakeList(uint16_t nelems)
         throw Error::rangeError();
 
     // Populate it
-    m_valueStack.transferLastTo(nelems, ad->content);
+    m_valueStack.transferLastTo(nelems, ad->content());
     m_valueStack.pushBackNew(new ArrayValue(ad));
 }
 

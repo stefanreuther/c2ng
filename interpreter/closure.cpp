@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/closure.cpp
+  *  \brief Class interpreter::Closure
   */
 
 #include "interpreter/closure.hpp"

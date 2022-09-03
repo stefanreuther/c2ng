@@ -1725,7 +1725,9 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_proxy_referenceproxy.cpp \
+FILES_testsuite = u/t_interpreter_savevisitor.cpp \
+    u/t_interpreter_expr_node.cpp u/t_interpreter_singlecontext.cpp \
+    u/t_game_proxy_referenceproxy.cpp \
     u/t_server_file_readonlydirectoryhandler.cpp \
     u/t_game_v3_passwordchecker.cpp u/t_game_v3_genextra.cpp \
     u/t_interpreter_simplecontext.cpp u/t_game_interface_iteratorcontext.cpp \

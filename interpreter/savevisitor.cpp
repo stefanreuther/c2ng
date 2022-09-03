@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/savevisitor.cpp
+  *  \brief Class interpreter::SaveVisitor
   */
 
 #include <algorithm>

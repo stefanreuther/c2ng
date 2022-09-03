@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/ternaryoperation.cpp
+  *  \brief Enum interpreter::TernaryOperation
   */
 
 #include "interpreter/ternaryoperation.hpp"
@@ -11,8 +12,7 @@ namespace {
     };
 }
 
-/** Get name for a ternary operation. This is used for disassembling.
-    \param op Operation, IntTernaryOperation */
+// Get name for a ternary operation.
 const char*
 interpreter::getTernaryName(uint8_t op)
 {

@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/closure.hpp
+  *  \brief Class interpreter::Closure
   */
 #ifndef C2NG_INTERPRETER_CLOSURE_HPP
 #define C2NG_INTERPRETER_CLOSURE_HPP
@@ -9,15 +10,39 @@
 
 namespace interpreter {
 
-    /** Closure. */
+    /** Closure.
+        Represents a CallableValue with some arguments fixed.
+        When called (i.e. call()), inserts the fixed arguments at the beginning of the argument list.
+        Otherwise, behaves exactly like the underlying CallableValue.
+
+        To create,
+        - construct
+        - set the underlying CallableValue using setNewFunction
+        - add fixed arguments using addNewArgument(), addNewArgumentsFrom() */
     class Closure : public CallableValue {
      public:
+        /** Constructor. */
         Closure();
+
+        /** Destructor. */
         ~Closure();
 
-        // Closure:
+        /** Set function.
+            @param function Function. Should not be null. Will become owned by Closure. */
         void setNewFunction(CallableValue* function);
+
+        /** Add single argument.
+            @param value Value. Will become owned by Closure. */
         void addNewArgument(afl::data::Value* value);
+
+        /** Add arguments by transferring from a data segment.
+            Removes the last @c nargs arguments from @c seg, taking over their ownership,
+            and append them to the list of fixed arguments.
+
+            @param [in,out] seg   Segment
+            @param [in]     nargs Number of arguments to transfer
+
+            @see afl::data::Segment::transferLastTo */
         void addNewArgumentsFrom(afl::data::Segment& seg, size_t nargs);
 
         // CallableValue:

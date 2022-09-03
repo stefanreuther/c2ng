@@ -13,7 +13,6 @@ void
 TestGameException::testIt()
 {
     game::Exception testee("hurz");
-    TS_ASSERT_EQUALS(testee.getScriptError(), "hurz");
     TS_ASSERT_EQUALS(std::strcmp(testee.what(), "hurz"), 0);
 }
 

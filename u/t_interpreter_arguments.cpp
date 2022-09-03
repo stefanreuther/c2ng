@@ -255,8 +255,9 @@ TestInterpreterArguments::testFlagArg()
 {
     // Null
     {
-        int32_t flags = 0, value = 0;
+        int32_t flags = 9, value = 0;
         TS_ASSERT(!interpreter::checkFlagArg(flags, &value, 0, "XYZ"));
+        TS_ASSERT_EQUALS(flags, 9);    // on 'false' return, other outputs are unchanged
     }
 
     // Integer
@@ -276,10 +277,10 @@ TestInterpreterArguments::testFlagArg()
         int32_t flags = 64, value = 0;
         std::auto_ptr<afl::data::Value> p(interpreter::makeStringValue("XY7"));
         TS_ASSERT(interpreter::checkFlagArg(flags, &value, p.get(), "XYZ"));
-        TS_ASSERT_EQUALS(flags, 67);      // new flags added to existing value! FIXME: is this correct?
+        TS_ASSERT_EQUALS(flags, 3);
         TS_ASSERT_EQUALS(value, 7);
 
-        // Fails if no value requested: value speciifed in string
+        // Fails if no value requested: value specified in string
         TS_ASSERT_THROWS(interpreter::checkFlagArg(flags, 0, p.get(), "XYZ"), interpreter::Error);
     }
 

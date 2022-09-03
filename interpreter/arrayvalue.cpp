@@ -20,7 +20,7 @@ interpreter::ArrayValue::get(Arguments& args)
     // ex IntArray::get
     size_t index;
     if (m_data->computeIndex(args, index)) {
-        return afl::data::Value::cloneOf(m_data->content[index]);
+        return afl::data::Value::cloneOf(m_data->content()[index]);
     } else {
         return 0;
     }
@@ -32,7 +32,7 @@ interpreter::ArrayValue::set(Arguments& args, afl::data::Value* value)
     // ex IntArray::set
     size_t index;
     if (m_data->computeIndex(args, index)) {
-        m_data->content.set(index, value);
+        m_data->content().set(index, value);
     } else {
         throw Error::typeError(Error::ExpectInteger);
     }

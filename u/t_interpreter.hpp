@@ -511,6 +511,28 @@ class TestInterpreterSaveContext : public CxxTest::TestSuite {
     void testInterface();
 };
 
+class TestInterpreterSaveVisitor : public CxxTest::TestSuite {
+ public:
+    void testString();
+    void testInteger();
+    void testInteger2();
+    void testFloat();
+    void testFloat2();
+    void testFloat3();
+    void testFloatInf();
+    void testFloatInf2();
+    void testBooleanFalse();
+    void testBooleanTrue();
+    void testHash();
+    void testVector();
+    void testOther();
+    void testOther2();
+    void testNull();
+    void testError();
+    void testSaveNames();
+    void testSaveNames2();
+};
+
 class TestInterpreterSelectionExpression : public CxxTest::TestSuite {
  public:
     void testValid();
@@ -536,6 +558,11 @@ class TestInterpreterSimpleProcedure : public CxxTest::TestSuite {
 class TestInterpreterSimpleSpecialCommand : public CxxTest::TestSuite {
  public:
     void testIt();
+};
+
+class TestInterpreterSingleContext : public CxxTest::TestSuite {
+ public:
+    void testInterface();
 };
 
 class TestInterpreterSpecialCommand : public CxxTest::TestSuite {

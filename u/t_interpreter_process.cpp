@@ -2775,10 +2775,10 @@ TestInterpreterProcess::testExecMakeList()
         TS_ASSERT_EQUALS(a->getData()->getDimension(0), 4U);
 
         // Array content
-        TS_ASSERT_EQUALS(interpreter::toString(a->getData()->content.get(0), false), "1");
-        TS_ASSERT_EQUALS(interpreter::toString(a->getData()->content.get(1), false), "2");
-        TS_ASSERT (a->getData()->content.get(2) == 0);
-        TS_ASSERT_EQUALS(interpreter::toString(a->getData()->content.get(3), false), "4");
+        TS_ASSERT_EQUALS(interpreter::toString(a->getData()->content().get(0), false), "1");
+        TS_ASSERT_EQUALS(interpreter::toString(a->getData()->content().get(1), false), "2");
+        TS_ASSERT (a->getData()->content().get(2) == 0);
+        TS_ASSERT_EQUALS(interpreter::toString(a->getData()->content().get(3), false), "4");
     }
 
     // Error case: missing stack

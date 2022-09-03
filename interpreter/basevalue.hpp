@@ -6,9 +6,9 @@
 #define C2NG_INTERPRETER_BASEVALUE_HPP
 
 #include "afl/data/value.hpp"
+#include "afl/io/datasink.hpp"
 #include "afl/string/string.hpp"
 #include "interpreter/tagnode.hpp"
-#include "afl/io/datasink.hpp"
 
 namespace interpreter {
 

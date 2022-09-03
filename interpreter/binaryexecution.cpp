@@ -517,8 +517,9 @@ namespace {
                 return makeFloatValue(double(p.ia) / double(p.ib));
             }
          case ariFloat:
-            if (std::fabs(p.fb) < 1.0E-06)          // FIXME?
+            if (interpreter::isAlmostZero(p.fb)) {
                 throw Error("Divide by zero");
+            }
             return makeFloatValue(p.fa / p.fb);
          default:
             throw Error::typeError(Error::ExpectNumeric);
@@ -904,13 +905,8 @@ namespace {
         if (a == 0 || b == 0)
             return 0;
 
-        const afl::data::StringValue* sa = dynamic_cast<const afl::data::StringValue*>(a);
-        const afl::data::ScalarValue* ib = dynamic_cast<const afl::data::ScalarValue*>(b);
-        if (sa == 0 || ib == 0)
-            throw Error::typeError();
-
-        String_t ssa = sa->getValue();
-        int32_t  iib = ib->getValue();
+        String_t ssa = mustBeStringValue(a);
+        int32_t  iib = mustBeScalarValue(b);
         if (iib > 0) {
             ssa = afl::charset::Utf8().substr(ssa, iib-1, String_t::npos);
         }
@@ -924,13 +920,8 @@ namespace {
         if (a == 0 || b == 0)
             return 0;
 
-        const afl::data::StringValue* sa = dynamic_cast<const afl::data::StringValue*>(a);
-        const afl::data::ScalarValue* ib = dynamic_cast<const afl::data::ScalarValue*>(b);
-        if (sa == 0 || ib == 0)
-            throw Error::typeError();
-
-        String_t ssa = sa->getValue();
-        int32_t  iib = ib->getValue();
+        String_t ssa = mustBeStringValue(a);
+        int32_t  iib = mustBeScalarValue(b);
         if (iib > 0) {
             ssa = afl::charset::Utf8().substr(ssa, 0, iib);
         } else {
@@ -946,13 +937,8 @@ namespace {
         if (a == 0 || b == 0)
             return 0;
 
-        const afl::data::StringValue* sa = dynamic_cast<const afl::data::StringValue*>(a);
-        const afl::data::ScalarValue* ib = dynamic_cast<const afl::data::ScalarValue*>(b);
-        if (sa == 0 || ib == 0)
-            throw Error::typeError();
-
-        String_t ssa = sa->getValue();
-        int32_t  iib = ib->getValue();
+        String_t ssa = mustBeStringValue(a);
+        int32_t  iib = mustBeScalarValue(b);
         if (iib > 0) {
             size_t have = afl::charset::Utf8().length(ssa);
             if (size_t(iib) < have)
@@ -970,13 +956,8 @@ namespace {
         if (a == 0 || b == 0)
             return 0;
 
-        const afl::data::ScalarValue* ia = dynamic_cast<const afl::data::ScalarValue*>(a);
-        const afl::data::StringValue* sb = dynamic_cast<const afl::data::StringValue*>(b);
-        if (ia == 0 || sb == 0)
-            throw Error::typeError();
-
-        int32_t  iia = ia->getValue();
-        String_t ssb = sb->getValue();
+        int32_t iia = mustBeScalarValue(a);
+        const String_t& ssb = mustBeStringValue(b);
 
         // FIXME: we should have some kind of limits to avoid overloading
         String_t result;

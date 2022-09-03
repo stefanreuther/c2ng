@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/singlecontext.cpp
+  *  \brief Class interpreter::SingleContext
   */
 
 #include "interpreter/singlecontext.hpp"

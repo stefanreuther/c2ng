@@ -604,7 +604,7 @@ interpreter::vmio::ObjectLoader::loadArray(ChunkLoader& ldr, uint32_t id)
 
          case 2:
             // values
-            ValueLoader(m_charset, *this, m_translator).load(array->content, *ps, 0, propCount);
+            ValueLoader(m_charset, *this, m_translator).load(array->content(), *ps, 0, propCount);
             break;
 
          default:

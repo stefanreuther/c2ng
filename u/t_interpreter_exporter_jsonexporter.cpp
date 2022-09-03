@@ -159,8 +159,8 @@ TestInterpreterExporterJsonExporter::testArray()
     {
         afl::base::Ref<interpreter::ArrayData> vec = *new interpreter::ArrayData();
         vec->addDimension(3);
-        vec->content.pushBackNew(new IntegerValue(7));   // Index 0, NOT shown!
-        vec->content.pushBackNew(new StringValue("s"));
+        vec->content().pushBackNew(new IntegerValue(7));   // Index 0, NOT shown!
+        vec->content().pushBackNew(new StringValue("s"));
         IntegerValue iv(42);
         interpreter::ArrayValue vv(vec);
         testee.addField(&iv, "a", interpreter::thInt);

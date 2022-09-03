@@ -554,17 +554,17 @@ TestGameActionsBuildAmmo::testIsValidCombination()
     {
         game::Exception ex("");
         TS_ASSERT_EQUALS(game::actions::BuildAmmo::isValidCombination(theirPlanet, myShip, ex), false);
-        TS_ASSERT_DIFFERS(ex.getScriptError(), "");
+        TS_ASSERT_DIFFERS(ex.what(), String_t());
     }
     {
         game::Exception ex("");
         TS_ASSERT_EQUALS(game::actions::BuildAmmo::isValidCombination(farPlanet, myShip, ex), false);
-        TS_ASSERT_DIFFERS(ex.getScriptError(), "");
+        TS_ASSERT_DIFFERS(ex.what(), String_t());
     }
     {
         game::Exception ex("");
         TS_ASSERT_EQUALS(game::actions::BuildAmmo::isValidCombination(unPlanet, myShip, ex), false);
-        TS_ASSERT_DIFFERS(ex.getScriptError(), "");
+        TS_ASSERT_DIFFERS(ex.what(), String_t());
     }
 
     // Create unplayed ship and check against all planets
@@ -574,22 +574,22 @@ TestGameActionsBuildAmmo::testIsValidCombination()
     {
         game::Exception ex("");
         TS_ASSERT_EQUALS(game::actions::BuildAmmo::isValidCombination(myPlanet, theirShip, ex), false);
-        TS_ASSERT_DIFFERS(ex.getScriptError(), "");
+        TS_ASSERT_DIFFERS(ex.what(), String_t());
     }
     {
         game::Exception ex("");
         TS_ASSERT_EQUALS(game::actions::BuildAmmo::isValidCombination(theirPlanet, theirShip, ex), false);
-        TS_ASSERT_DIFFERS(ex.getScriptError(), "");
+        TS_ASSERT_DIFFERS(ex.what(), String_t());
     }
     {
         game::Exception ex("");
         TS_ASSERT_EQUALS(game::actions::BuildAmmo::isValidCombination(farPlanet, theirShip, ex), false);
-        TS_ASSERT_DIFFERS(ex.getScriptError(), "");
+        TS_ASSERT_DIFFERS(ex.what(), String_t());
     }
     {
         game::Exception ex("");
         TS_ASSERT_EQUALS(game::actions::BuildAmmo::isValidCombination(unPlanet, theirShip, ex), false);
-        TS_ASSERT_DIFFERS(ex.getScriptError(), "");
+        TS_ASSERT_DIFFERS(ex.what(), String_t());
     }
 }
 

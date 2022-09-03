@@ -27,10 +27,6 @@ namespace game {
         /** Destructor. */
         ~Exception() throw();
 
-        /** Get script-side error text.
-            \return text */
-        const String_t& getScriptError() const;
-
         /** Get user-side error text.
             \return text */
         virtual const char* what() const throw();

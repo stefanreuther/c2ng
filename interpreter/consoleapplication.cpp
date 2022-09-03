@@ -92,56 +92,63 @@
 #include "util/string.hpp"
 #include "version.hpp"
 
-using afl::string::Format;
+using afl::base::Optional;
+using afl::base::Ref;
 using afl::io::FileSystem;
+using afl::string::Format;
+using afl::string::Translator;
+using afl::sys::Environment;
+using afl::sys::LogListener;
 using interpreter::BCOPtr_t;
 using interpreter::BCORef_t;
+using interpreter::ConsoleApplication;
+
+struct interpreter::ConsoleApplication::Parameters {
+    enum Mode {
+        ExecMode,          //   --exec (default)   Execute
+        CompileMode,       //   --compile, -c      Produce "*.qc" files
+        DisassembleMode    //   --disassemble, -S  Produce "*.qs" files
+    };
+
+    Optional<String_t> arg_gamedir;                    // -G
+    Optional<String_t> arg_rootdir;                    // -R
+    Optional<String_t> arg_output;                     // -o
+    bool opt_debug;                                    // -g/-s
+    bool opt_commands;                                 // -k
+    bool opt_preexecLoad;                              // -fpreexec-load
+    bool opt_readonly;                                 // --readonly
+    bool opt_nostdlib;                                 // --nostdlib
+    Mode mode;
+    std::auto_ptr<afl::charset::Charset> gameCharset;  // -C
+    std::vector<String_t> loadPath;                    // -I
+    std::vector<String_t> job;                         // list of files/commands
+    int optimisationLevel;                             // -O
+    int playerNumber;                                  // -P
+
+    Parameters()
+        : arg_gamedir(),
+          arg_rootdir(),
+          arg_output(),
+          opt_debug(true),
+          opt_commands(false),
+          opt_preexecLoad(false),
+          opt_readonly(false),
+          opt_nostdlib(false),
+          mode(ExecMode),
+          gameCharset(new afl::charset::CodepageCharset(afl::charset::g_codepageLatin1)),
+          loadPath(),
+          job(),
+          optimisationLevel(1),
+          playerNumber(0)
+        { }
+};
 
 namespace {
     const char LOG_NAME[] = "script";
 
-    enum Mode {
-        ExecMode,          //   --exec (default)   Execute
-        CompileMode,       //   --compile, -c      Produce "*.qc" files
-        DisassembleMode,   //   --disassemble, -S  Produce "*.qs" files
-        DumpMode           //   --dump             Dump
-    };
-
-    struct Parameters {
-        afl::base::Optional<String_t> arg_gamedir;  // -G
-        afl::base::Optional<String_t> arg_rootdir;  // -R
-        afl::base::Optional<String_t> arg_output;   // -o
-        bool opt_debug;                             // -g/-s
-        bool opt_commands;                          // -k
-        bool opt_preexecLoad;                       // -fpreexec-load
-        bool opt_readonly;                          // --readonly
-        bool opt_nostdlib;                          // --nostdlib
-        Mode mode;
-        std::auto_ptr<afl::charset::Charset> gameCharset;
-        std::vector<String_t> loadPath;             // -I
-        std::vector<String_t> job;
-        int optimisationLevel;
-        int playerNumber;
-
-        Parameters()
-            : arg_gamedir(),
-              arg_rootdir(),
-              arg_output(),
-              opt_debug(true),
-              opt_commands(false),
-              opt_preexecLoad(false),
-              opt_readonly(false),
-              opt_nostdlib(false),
-              mode(ExecMode),
-              gameCharset(new afl::charset::CodepageCharset(afl::charset::g_codepageLatin1)),
-              loadPath(),
-              job(),
-              optimisationLevel(1),
-              playerNumber(0)
-            { }
-    };
-
-    void warnIgnoredOptions(afl::sys::LogListener& log, const Parameters& params, afl::string::Translator& tx)
+    /* Warn for ignored options.
+       In compile or disassemble mode, we ignore a specified game. */
+    void warnIgnoredOptions(LogListener& log, const ConsoleApplication::Parameters& params, Translator& tx)
     {
         if (params.arg_gamedir.isValid()) {
             log.write(log.Warn, LOG_NAME, tx("Game directory ('-G') name has been ignored"));
@@ -154,6 +161,7 @@ namespace {
         }
     }
 
+    /* Get file name extension for a file name */
     String_t getFileNameExtension(FileSystem& fs, String_t input)
     {
         String_t fileName = fs.getFileName(input);
@@ -165,7 +173,8 @@ namespace {
         }
     }
 
-    void doCompile(game::Session& session, const Parameters& params, std::vector<BCOPtr_t>& result)
+    /* Compile the given job into a list of BCOs. */
+    void doCompile(game::Session& session, const ConsoleApplication::Parameters& params, std::vector<BCOPtr_t>& result)
     {
         // Commands or files?
         if (params.opt_commands) {
@@ -188,19 +197,20 @@ namespace {
             sc.compileList(*bco, scc);
             sc.finishBCO(*bco, scc);
             result.push_back(bco.asPtr());
-            session.log().write(afl::sys::Log::Trace, LOG_NAME, Format(session.translator()("Compiled %d command%!1{s%}.").c_str(), params.job.size()));
+            session.log().write(LogListener::Trace, LOG_NAME, Format(session.translator()("Compiled %d command%!1{s%}.").c_str(), params.job.size()));
         } else {
             // Files: compile files into individual BCOs
             for (size_t i = 0, n = params.job.size(); i < n; ++i) {
-                // FIXME: when given .qs files, assemble. When given .qc files, load.
                 FileSystem& fs = session.world().fileSystem();
                 String_t ext = getFileNameExtension(fs, params.job[i]);
-                afl::base::Ref<afl::io::Stream> stream(fs.openFile(params.job[i], FileSystem::OpenRead));
+                Ref<afl::io::Stream> stream(fs.openFile(params.job[i], FileSystem::OpenRead));
                 if (ext == "qc") {
+                    // Load object file
                     game::interface::LoadContext lc(session);
                     interpreter::vmio::ObjectLoader loader(*params.gameCharset, session.translator(), lc);
                     result.push_back(loader.loadObjectFile(stream).asPtr());
                 } else {
+                    // Compile source file
                     BCORef_t bco = interpreter::BytecodeObject::create(true);
                     afl::io::TextFile tf(*stream);
                     interpreter::FileCommandSource cs(tf);
@@ -220,11 +230,13 @@ namespace {
                         result.push_back(bco.asPtr());
                     }
                     catch (interpreter::Error& e) {
-                        // Compiler error. Convert this exception to a FileProblemException.
-                        // This causes the report to look like
-                        //     c2export: file.q: line NN: Whatever
-                        //     loaded by 'file2.q', line N
-                        // FIXME: no, it doesn't!
+                        // Compiler error. Convert this exception to a FileProblemException; framework will log it in "prog: file: line: msg" format.
+                        // For a normal error in the file-given-on-command-line, this will log
+                        //     c2script: file-given-on-command-line.q: line NN: Whatever
+                        // which is what we want. For an included file (-fpreexec-load), this causes the report to look like
+                        //     c2script: file-given-on-command-line.q: line NN: Whatever
+                        //     in file 'loaded-file.q', line N
+                        // This is suboptimal, but the best we can do for now.
                         String_t msg = Format(session.translator()("line %d: %s").c_str(), cs.getLineNumber(), e.what());
                         String_t trace = e.getTrace();
                         if (!trace.empty()) {
@@ -235,10 +247,11 @@ namespace {
                     }
                 }
             }
-            session.log().write(afl::sys::Log::Trace, LOG_NAME, Format(session.translator()("Compiled %d file%!1{s%}.").c_str(), params.job.size()));
+            session.log().write(LogListener::Trace, LOG_NAME, Format(session.translator()("Compiled %d file%!1{s%}.").c_str(), params.job.size()));
         }
     }
 
+    /* Merge a list-of-BCOs into a single BCO: if multiple have been generated, make a single BCO that calls them all. */
     BCORef_t mergeResult(const std::vector<BCOPtr_t>& result)
     {
         if (result.size() == 1) {
@@ -256,6 +269,7 @@ namespace {
         }
     }
 
+    /* Generate output file name, given input file name. */
     String_t getOutputFileName(FileSystem& fs, String_t input, const char* ext)
     {
         String_t dirName = fs.getDirectoryName(input);
@@ -273,7 +287,9 @@ namespace {
         return fs.makePathName(dirName, fileName);
     }
 
-    void saveObjectFile(afl::sys::LogListener& log, FileSystem& fs, String_t fileName, BCORef_t bco, const Parameters& params, afl::string::Translator& tx)
+    /* Save an object file, starting with a given BCO.
+       Saves the transitive closure of that BCO. */
+    void saveObjectFile(LogListener& log, FileSystem& fs, String_t fileName, BCORef_t bco, const ConsoleApplication::Parameters& params, Translator& tx)
     {
         // Prepare save
         interpreter::vmio::FileSaveContext fsc(*params.gameCharset);
@@ -282,12 +298,13 @@ namespace {
         log.write(log.Trace, LOG_NAME, Format(tx("Writing '%s', %d object%!1{s%}...").c_str(), fileName, fsc.getNumPreparedObjects()));
 
         // Create output file
-        afl::base::Ref<afl::io::Stream> file = fs.openFile(fileName, FileSystem::Create);
+        Ref<afl::io::Stream> file = fs.openFile(fileName, FileSystem::Create);
         fsc.saveObjectFile(*file, bcoID);
     }
 
-
-    void saveAssemblerSource(afl::io::TextWriter& out, BCORef_t bco, const Parameters& params)
+    /* Save assembler source, starting with a given BCO.
+       Saves the transitive closure of that BCO. */
+    void saveAssemblerSource(afl::io::TextWriter& out, BCORef_t bco, const ConsoleApplication::Parameters& params)
     {
         interpreter::vmio::AssemblerSaveContext asc;
         asc.setDebugInformation(params.opt_debug);
@@ -299,8 +316,7 @@ namespace {
     /*
      *  Execute Mode
      */
-    int doExecMode(game::Session& session, const Parameters& params,
-                   afl::sys::Environment& env, util::ProfileDirectory& profile)
+    int doExecMode(game::Session& session, const ConsoleApplication::Parameters& params, Environment& env, util::ProfileDirectory& profile)
     {
         // Compile
         std::vector<BCOPtr_t> result;
@@ -309,7 +325,7 @@ namespace {
 
         // Set up game directories
         FileSystem& fs = session.world().fileSystem();
-        afl::string::Translator& tx = session.translator();
+        Translator& tx = session.translator();
 
         String_t defaultRoot = fs.makePathName(fs.makePathName(env.getInstallationDirectoryName(), "share"), "specs");
         game::v3::RootLoader loader(fs.openDirectory(params.arg_rootdir.orElse(defaultRoot)), &profile, 0 /* FIXME: pass proper callback? */, tx, session.log(), fs);
@@ -319,7 +335,7 @@ namespace {
         const game::config::UserConfiguration uc;
         afl::base::Ptr<game::Root> root = loader.load(fs.openDirectory(params.arg_gamedir.orElse(".")), *params.gameCharset, uc, false);
         if (root.get() == 0 || root->getTurnLoader().get() == 0) {
-            session.log().write(afl::sys::Log::Error, LOG_NAME, tx.translateString("no game data found"));
+            session.log().write(LogListener::Error, LOG_NAME, tx.translateString("no game data found"));
             return 1;
         }
 
@@ -328,13 +344,13 @@ namespace {
         if (arg_race != 0) {
             String_t extra;
             if (!root->getTurnLoader()->getPlayerStatus(arg_race, extra, tx).contains(game::TurnLoader::Available)) {
-                session.log().write(afl::sys::Log::Error, LOG_NAME, Format(tx.translateString("no game data available for player %d").c_str(), arg_race));
+                session.log().write(LogListener::Error, LOG_NAME, Format(tx.translateString("no game data available for player %d").c_str(), arg_race));
                 return 1;
             }
         } else {
             arg_race = root->getTurnLoader()->getDefaultPlayer(root->playerList().getAllPlayers());
             if (arg_race == 0) {
-                session.log().write(afl::sys::Log::Error, LOG_NAME, tx.translateString("please specify the player number"));
+                session.log().write(LogListener::Error, LOG_NAME, tx.translateString("please specify the player number"));
                 return 1;
             }
         }
@@ -384,10 +400,10 @@ namespace {
     /*
      *  Compile Mode
      */
-    int doCompileMode(game::Session& session, const Parameters& params)
+    int doCompileMode(game::Session& session, const ConsoleApplication::Parameters& params)
     {
         // Environment
-        afl::sys::LogListener& log = session.log();
+        LogListener& log = session.log();
         FileSystem& fs = session.world().fileSystem();
 
         warnIgnoredOptions(log, params, session.translator());
@@ -405,7 +421,7 @@ namespace {
             return 0;
         } else if (params.opt_commands) {
             // No output file given, input is commands
-            log.write(afl::sys::Log::Error, LOG_NAME, session.translator()("must specify an output file ('-o FILE') if input is commands"));
+            log.write(LogListener::Error, LOG_NAME, session.translator()("must specify an output file ('-o FILE') if input is commands"));
             return 1;
         } else {
             // No output file given, input is files. Generate output file names.
@@ -419,7 +435,7 @@ namespace {
     /*
      *  Disassemble Mode
      */
-    int doDisassembleMode(game::Session& session, const Parameters& params, afl::io::TextWriter& standardOutput)
+    int doDisassembleMode(game::Session& session, const ConsoleApplication::Parameters& params, afl::io::TextWriter& standardOutput)
     {
         warnIgnoredOptions(session.log(), params, session.translator());
 
@@ -434,7 +450,7 @@ namespace {
         String_t output;
         if (params.arg_output.get(output)) {
             // Save to file
-            afl::base::Ref<afl::io::Stream> file = session.world().fileSystem().openFile(output, FileSystem::Create);
+            Ref<afl::io::Stream> file = session.world().fileSystem().openFile(output, FileSystem::Create);
             afl::io::TextFile text(*file);
             saveAssemblerSource(text, bco, params);
         } else {
@@ -446,6 +462,10 @@ namespace {
 }
 
 
+/*
+ *  ConsoleApplication
+ */
+
 interpreter::ConsoleApplication::ConsoleApplication(afl::sys::Environment& env, FileSystem& fs)
     : Application(env, fs)
 {
@@ -456,25 +476,87 @@ void
 interpreter::ConsoleApplication::appMain()
 {
     util::ProfileDirectory profile(environment(), fileSystem(), translator(), log());
-    afl::string::Translator& tx = translator();
+    Translator& tx = translator();
 
     // Parameters
     Parameters params;
+    parseParameters(params);
+    if (params.job.empty()) {
+        if (params.opt_commands) {
+            errorExit(Format(tx("no commands specified. Use '%s -h' for help."), environment().getInvocationName()));
+        } else {
+            errorExit(Format(tx("no input files specified. Use '%s -h' for help."), environment().getInvocationName()));
+        }
+    }
 
-    // Parser
+    // Make a game session.
+    // Making a session means we can re-use the Session's initialisation of special commands.
+    // Also, interpreter objects are not intended to outlive a session.
+    FileSystem& fs = fileSystem();
+    game::Session session(tx, fs);
+    session.log().addListener(log());
+    session.sig_runRequest.add(&session.processList(), &ProcessList::run);
+
+    // If we are in exec mode, inject core.q
+    if (!params.opt_nostdlib && params.mode == Parameters::ExecMode) {
+        String_t corePath = fs.makePathName(fs.makePathName(environment().getInstallationDirectoryName(), "share"), "resource");
+        params.loadPath.insert(params.loadPath.begin(), corePath);
+        if (params.opt_commands) {
+            params.job.insert(params.job.begin(), "Load 'core.q'");
+        } else {
+            params.job.insert(params.job.begin(), fs.makePathName(corePath, "core.q"));
+        }
+    }
+
+    // Register console commands.
+    // If attachXXX throws, we're caught by the main loop.
+    game::interface::registerConsoleCommands(session, environment().attachTextReader(Environment::Input), environment().attachTextWriter(Environment::Output));
+
+    // Build load path
+    if (!params.loadPath.empty()) {
+        if (params.loadPath.size() == 1U) {
+            session.world().setSystemLoadDirectory(fs.openDirectory(params.loadPath[0]).asPtr());
+        } else {
+            Ref<afl::io::MultiDirectory> dir = afl::io::MultiDirectory::create();
+            for (size_t i = 0, n = params.loadPath.size(); i < n; ++i) {
+                dir->addDirectory(fs.openDirectory(params.loadPath[i]));
+            }
+            session.world().setSystemLoadDirectory(dir.asPtr());
+        }
+    }
+    int result = 0;
+    switch (params.mode) {
+     case Parameters::ExecMode:
+        result = doExecMode(session, params, environment(), profile);
+        break;
+     case Parameters::CompileMode:
+        result = doCompileMode(session, params);
+        break;
+     case Parameters::DisassembleMode:
+        consoleLogger().setConfiguration("*@Warn+=raw:*=drop", translator());
+        result = doDisassembleMode(session, params, standardOutput());
+        break;
+    }
+    exit(result);
+}
+
+/** Parse parameters.
+    @params [out] Parameters */
+void
+interpreter::ConsoleApplication::parseParameters(Parameters& params)
+{
+    Translator& tx = translator();
     afl::sys::StandardCommandLineParser commandLine(environment().getCommandLine());
     String_t p;
     bool opt;
     while (commandLine.getNext(opt, p)) {
         if (opt) {
             if (p == "exec" || p == "run") {
-                params.mode = ExecMode;
+                params.mode = Parameters::ExecMode;
             } else if (p == "compile" || p == "c") {
-                params.mode = CompileMode;
+                params.mode = Parameters::CompileMode;
             } else if (p == "disassemble" || p == "S") {
-                params.mode = DisassembleMode;
-            } else if (p == "dump") {
-                params.mode = DumpMode;
+                params.mode = Parameters::DisassembleMode;
             } else if (p == "g") {
                 params.opt_debug = true;
             } else if (p == "s") {
@@ -548,80 +630,18 @@ interpreter::ConsoleApplication::appMain()
             params.job.push_back(p);
         }
     }
-
-    if (params.job.empty()) {
-        if (params.opt_commands) {
-            errorExit(Format(tx("no commands specified. Use '%s -h' for help."), environment().getInvocationName()));
-        } else {
-            errorExit(Format(tx("no input files specified. Use '%s -h' for help."), environment().getInvocationName()));
-        }
-    }
-
-    // Make a game session.
-    // Making a session means we can re-use the Session's initialisation of special commands.
-    // Also, interpreter objects are not intended to outlive a session.
-    FileSystem& fs = fileSystem();
-    game::Session session(tx, fs);
-    session.log().addListener(log());
-    session.sig_runRequest.add(&session.processList(), &ProcessList::run);
-
-    // If we are in exec mode, inject core.q
-    if (!params.opt_nostdlib && params.mode == ExecMode) {
-        String_t corePath = fs.makePathName(fs.makePathName(environment().getInstallationDirectoryName(), "share"), "resource");
-        params.loadPath.insert(params.loadPath.begin(), corePath);
-        if (params.opt_commands) {
-            params.job.insert(params.job.begin(), "Load 'core.q'");
-        } else {
-            params.job.insert(params.job.begin(), fs.makePathName(corePath, "core.q"));
-        }
-    }
-
-    // Register console commands.
-    // If attachXXX throws, we're caught by the main loop.
-    game::interface::registerConsoleCommands(session, environment().attachTextReader(afl::sys::Environment::Input), environment().attachTextWriter(afl::sys::Environment::Output));
-
-    // Build load path
-    if (!params.loadPath.empty()) {
-        if (params.loadPath.size() == 1U) {
-            session.world().setSystemLoadDirectory(fs.openDirectory(params.loadPath[0]).asPtr());
-        } else {
-            afl::base::Ref<afl::io::MultiDirectory> dir = afl::io::MultiDirectory::create();
-            for (size_t i = 0, n = params.loadPath.size(); i < n; ++i) {
-                dir->addDirectory(fs.openDirectory(params.loadPath[i]));
-            }
-            session.world().setSystemLoadDirectory(dir.asPtr());
-        }
-    }
-    int result = 0;
-    switch (params.mode) {
-     case ExecMode:
-        result = doExecMode(session, params, environment(), profile);
-        break;
-     case CompileMode:
-        result = doCompileMode(session, params);
-        break;
-     case DisassembleMode:
-        consoleLogger().setConfiguration("*@Warn+=raw:*=drop", translator());
-        result = doDisassembleMode(session, params, standardOutput());
-        break;
-     case DumpMode:
-        errorExit("FIXME: NOT IMPLEMENTED");
-        break;
-    }
-    exit(result);
 }
 
 /** Exit with help message. */
 void
 interpreter::ConsoleApplication::help()
 {
-    afl::string::Translator& tx = translator();
+    Translator& tx = translator();
     const String_t options =
         util::formatOptions(tx("Actions:\n"
                                "--exec, --run\tExecute (default)\n"
                                "--compile, -c\tCompile to \"*.qc\" files\n"
                                "--disassemble, -S\tDisassemble to \"*.qs\" files\n"
-                               // "--dump\tDump data\n"
                                "\n"
                                "Options:\n"
                                "-g\tEnable debug info (default)\n"

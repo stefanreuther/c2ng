@@ -49,7 +49,7 @@ TestInterpreterVmioFileSaveContext::testIt()
     {
         afl::base::Ref<interpreter::ArrayData> ad(*new interpreter::ArrayData());
         TS_ASSERT(ad->addDimension(10));
-        ad->content.setNew(1, interpreter::makeIntegerValue(77));
+        ad->content().setNew(1, interpreter::makeIntegerValue(77));
         interpreter::ArrayValue av(ad);
         bco->addPushLiteral(&av);
     }
@@ -215,14 +215,14 @@ TestInterpreterVmioFileSaveContext::testCycle()
     TS_ASSERT(ac->addDimension(10));
 
     // - data in the arrays
-    aa->content.setNew(1, interpreter::makeIntegerValue(1));
-    ab->content.setNew(1, interpreter::makeIntegerValue(2));
-    ac->content.setNew(1, interpreter::makeIntegerValue(3));
+    aa->content().setNew(1, interpreter::makeIntegerValue(1));
+    ab->content().setNew(1, interpreter::makeIntegerValue(2));
+    ac->content().setNew(1, interpreter::makeIntegerValue(3));
 
     // - references: a -> b <-> c
-    aa->content.setNew(2, new interpreter::ArrayValue(ab));
-    ab->content.setNew(2, new interpreter::ArrayValue(ac));
-    ac->content.setNew(2, new interpreter::ArrayValue(ab));
+    aa->content().setNew(2, new interpreter::ArrayValue(ab));
+    ab->content().setNew(2, new interpreter::ArrayValue(ac));
+    ac->content().setNew(2, new interpreter::ArrayValue(ab));
 
     {
         interpreter::ArrayValue av(aa);
@@ -299,8 +299,8 @@ TestInterpreterVmioFileSaveContext::testCycle()
     }
 
     // Break the cycle to allow clean up!
-    aa->content.setNew(2, 0);
-    ab->content.setNew(2, 0);
-    ac->content.setNew(2, 0);
+    aa->content().setNew(2, 0);
+    ab->content().setNew(2, 0);
+    ac->content().setNew(2, 0);
 }
 

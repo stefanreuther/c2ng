@@ -53,15 +53,25 @@ namespace interpreter {
             \throw Error The template does not have the same number of dimensions as this array */
         void resize(const ArrayData& tpl);
 
-        // FIXME: avoid publishing this?
-        afl::data::Segment content;
+        /** Access content.
+            \return content segment */
+        afl::data::Segment& content()
+            { return m_content; }
 
-        // FIXME: can we avoid this?
-        // FIXME: return a Memory<size_t>?
-        const std::vector<size_t>& getDimensions() const
+        /** Access content.
+            \return content segment */
+        const afl::data::Segment& content() const
+            { return m_content; }
+
+        /** Get all dimensions.
+            \return array */
+        afl::base::Memory<const size_t> getDimensions() const
             { return m_dimensions; }
 
      private:
+        /** Content. */
+        afl::data::Segment m_content;
+
         /** Total size. Used to keep track of the maximum total number of elements. */
         size_t m_totalSize;
 

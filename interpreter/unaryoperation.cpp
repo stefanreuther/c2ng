@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/unaryoperation.cpp
+  *  \brief Enum interpreter::UnaryOperation
   */
 
 #include "interpreter/unaryoperation.hpp"
@@ -49,8 +50,7 @@ namespace {
     };
 }
 
-/** Get name for an unary operation. This is used for disassembling.
-    \param op Operation, IntUnaryOperation */
+// Get name for an unary operation.
 const char*
 interpreter::getUnaryName(uint8_t op)
 {

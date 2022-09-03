@@ -108,7 +108,7 @@ interpreter::getBooleanValue(const afl::data::Value* value)
         virtual void visitInteger(int32_t iv)
             { m_result = (iv != 0); }
         virtual void visitFloat(double fv)
-            { m_result = (std::fabs(fv) > 1.0E-06); }
+            { m_result = !isAlmostZero(fv); }
         virtual void visitBoolean(bool bv)
             { m_result = bv; }
         virtual void visitHash(const afl::data::Hash& /*hv*/)
@@ -202,7 +202,6 @@ interpreter::toString(const afl::data::Value* value, bool readable)
             }
         virtual void visitOther(const afl::data::Value& other)
             {
-                // FIXME: relay to our value mix-in
                 if (const BaseValue* bv = dynamic_cast<const BaseValue*>(&other)) {
                     m_result = bv->toString(m_readable);
                 } else {
@@ -278,4 +277,13 @@ interpreter::formatFloat(double value)
         result.erase(cut);
     }
     return result;
+}
+
+// Check for value that is almost zero.
+bool
+interpreter::isAlmostZero(double value)
+{
+    // FIXME: Traditionally, we consider values below 1.0E-06 as zero (falsy, not permitted as divisor).
+    // Can we do better, now that we're guaranteed to have IEEE FP?
+    return std::fabs(value) < 1.0E-06;
 }

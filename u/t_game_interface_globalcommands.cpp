@@ -63,8 +63,8 @@ TestGameInterfaceGlobalCommands::testCheckPlayerArgArray()
 {
     afl::base::Ref<interpreter::ArrayData> ad = *new interpreter::ArrayData();
     ad->addDimension(3);
-    ad->content.setNew(0, new afl::data::IntegerValue(4));
-    ad->content.setNew(2, new afl::data::IntegerValue(7));
+    ad->content().setNew(0, new afl::data::IntegerValue(4));
+    ad->content().setNew(2, new afl::data::IntegerValue(7));
     interpreter::ArrayValue av(ad);
 
     game::PlayerSet_t result;
@@ -91,7 +91,7 @@ TestGameInterfaceGlobalCommands::testCheckPlayerArgArrayRange()
 {
     afl::base::Ref<interpreter::ArrayData> ad = *new interpreter::ArrayData();
     ad->addDimension(3);
-    ad->content.setNew(0, new afl::data::IntegerValue(44));
+    ad->content().setNew(0, new afl::data::IntegerValue(44));
     interpreter::ArrayValue av(ad);
 
     game::PlayerSet_t result;

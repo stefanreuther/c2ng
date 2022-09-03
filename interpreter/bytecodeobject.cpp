@@ -336,9 +336,8 @@ interpreter::BytecodeObject::addPushLiteral(const afl::data::Value* literal)
         // Recycle existing literal
         addInstruction(Opcode::maPush, Opcode::sLiteral, existing);
     } else {
-        // FIXME: check 16-bit range
         m_literals.pushBack(literal);
-        addInstruction(Opcode::maPush, Opcode::sLiteral, uint16_t(m_literals.size()-1));
+        addInstruction(Opcode::maPush, Opcode::sLiteral, packIndex(m_literals.size()-1));
     }
 }
 
@@ -479,7 +478,6 @@ interpreter::BytecodeObject::append(const BytecodeObject& other)
 
     m_numLabels = packIndex(static_cast<uint32_t>(m_numLabels) + other.m_numLabels);
     m_code.reserve(m_code.size() + other.m_code.size());
-    // FIXME: refuse if code size exceeds 16 bit range?
 
     // Copy the code
     for (PC_t i = 0; i != other.m_code.size(); ++i) {
@@ -531,9 +529,9 @@ interpreter::BytecodeObject::append(const BytecodeObject& other)
          case Opcode::maJump:
             // Adjust argument
             if (o.minor & Opcode::jSymbolic) {
-                addInstruction(maj, o.minor, uint16_t(o.arg + symBase));
+                addInstruction(maj, o.minor, packIndex(static_cast<uint32_t>(o.arg) + symBase));
             } else {
-                addInstruction(maj, o.minor, uint16_t(o.arg + absBase));
+                addInstruction(maj, o.minor, packIndex(static_cast<uint32_t>(o.arg) + absBase));
             }
             break;
          case Opcode::maMemref:

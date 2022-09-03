@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/binaryoperation.hpp
+  *  \brief Enum interpreter::BinaryOperation
   */
 #ifndef C2NG_INTERPRETER_BINARYOPERATION_HPP
 #define C2NG_INTERPRETER_BINARYOPERATION_HPP
@@ -59,6 +60,10 @@ namespace interpreter {
         biArrayDim                  ///< Get array dimension.
     };
 
+    /** Get name for a binary operation.
+        This is used for disassembling.
+        @param op Operation, matching a BinaryOperation value
+        @return name; never null  */
     const char* getBinaryName(uint8_t op);
 
 }

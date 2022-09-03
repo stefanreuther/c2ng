@@ -161,10 +161,10 @@ interpreter::checkFlagArg(int32_t& flagOut, int32_t* valueOut, const afl::data::
         return true;
     } else if (const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(value)) {
         // Parse string
-        // FIXME: reset flagOut to 0 here?
         const String_t& s = sv->getValue();
         uint32_t parsedValue = 0;
         enum { No, Yes, Followed } valueState = No;
+        flagOut = 0;
         for (size_t i = 0; i < s.size(); ++i) {
             char c = afl::string::charToUpper(s[i]);
             if (const char* p = std::strchr(tpl, c)) {

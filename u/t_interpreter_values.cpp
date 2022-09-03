@@ -257,6 +257,16 @@ TestInterpreterValues::testMake()
     p.reset(interpreter::makeOptionalIntegerValue(game::IntegerProperty_t()));
     TS_ASSERT(p.get() == 0);
 
+    // makeOptionalIntegerValue [Optional]
+    p.reset(interpreter::makeOptionalIntegerValue(afl::base::Optional<int32_t>(77)));
+    TS_ASSERT(dynamic_cast<afl::data::IntegerValue*>(p.get()) != 0);
+    TS_ASSERT_EQUALS(dynamic_cast<afl::data::IntegerValue*>(p.get())->getValue(), 77);
+    TS_ASSERT_EQUALS(interpreter::getBooleanValue(p.get()), 1);
+
+    // makeOptionalIntegerValue [empty Optional]
+    p.reset(interpreter::makeOptionalIntegerValue(afl::base::Optional<int32_t>()));
+    TS_ASSERT(p.get() == 0);
+
     // makeOptionalStringValue
     p.reset(interpreter::makeOptionalStringValue(String_t("hi")));
     TS_ASSERT(dynamic_cast<afl::data::StringValue*>(p.get()) != 0);
