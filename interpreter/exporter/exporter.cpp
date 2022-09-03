@@ -4,7 +4,6 @@
   */
 
 #include "interpreter/exporter/exporter.hpp"
-#include "game/map/object.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/exporter/fieldlist.hpp"
 #include "interpreter/propertyacceptor.hpp"

@@ -7,12 +7,12 @@
 
 #include "interpreter/exporter/jsonexporter.hpp"
 #include "afl/charset/utf8reader.hpp"
-#include "afl/string/format.hpp"
-#include "interpreter/indexablevalue.hpp"
-#include "interpreter/arguments.hpp"
-#include "interpreter/values.hpp"
 #include "afl/data/booleanvalue.hpp"
 #include "afl/data/scalarvalue.hpp"
+#include "afl/string/format.hpp"
+#include "interpreter/arguments.hpp"
+#include "interpreter/indexablevalue.hpp"
+#include "interpreter/values.hpp"
 
 namespace {
     void writeValue(afl::io::TextWriter& tf, afl::data::Value* value, int depth);

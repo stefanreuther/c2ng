@@ -5,8 +5,8 @@
 #ifndef C2NG_INTERPRETER_EXPORTER_TEXTEXPORTER_HPP
 #define C2NG_INTERPRETER_EXPORTER_TEXTEXPORTER_HPP
 
-#include "interpreter/exporter/exporter.hpp"
 #include "afl/io/textwriter.hpp"
+#include "interpreter/exporter/exporter.hpp"
 
 namespace interpreter { namespace exporter {
 

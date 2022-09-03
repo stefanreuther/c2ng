@@ -4,8 +4,8 @@
   */
 
 #include "interpreter/exporter/format.hpp"
-#include "util/translation.hpp"
 #include "afl/base/countof.hpp"
+#include "util/translation.hpp"
 
 namespace {
     struct Map {

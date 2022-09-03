@@ -15,17 +15,17 @@
   */
 
 #include "interpreter/exporter/dbfexporter.hpp"
+#include "afl/base/staticassert.hpp"
+#include "afl/bits/fixedstring.hpp"
+#include "afl/bits/uint16le.hpp"
 #include "afl/bits/uint32le.hpp"
 #include "afl/bits/value.hpp"
-#include "afl/bits/uint16le.hpp"
-#include "afl/base/staticassert.hpp"
-#include "interpreter/exporter/fieldlist.hpp"
-#include "interpreter/error.hpp"
-#include "interpreter/values.hpp"
 #include "afl/data/floatvalue.hpp"
 #include "afl/data/scalarvalue.hpp"
 #include "afl/string/format.hpp"
-#include "afl/bits/fixedstring.hpp"
+#include "interpreter/error.hpp"
+#include "interpreter/exporter/fieldlist.hpp"
+#include "interpreter/values.hpp"
 
 namespace {
     struct FileHeader {

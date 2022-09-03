@@ -5,7 +5,6 @@
 
 #include <algorithm>
 #include "interpreter/exporter/fieldlist.hpp"
-#include "afl/string/char.hpp"
 #include "afl/string/format.hpp"
 #include "afl/string/parse.hpp"
 #include "interpreter/error.hpp"

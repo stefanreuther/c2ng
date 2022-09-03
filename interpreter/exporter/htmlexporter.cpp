@@ -4,7 +4,6 @@
   */
 
 #include "interpreter/exporter/htmlexporter.hpp"
-#include "afl/charset/utf8reader.hpp"
 #include "afl/string/format.hpp"
 #include "interpreter/exporter/fieldlist.hpp"
 #include "interpreter/values.hpp"
