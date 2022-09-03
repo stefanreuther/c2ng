@@ -6,18 +6,18 @@
 #include <cassert>
 #include <memory>
 #include "interpreter/optimizer.hpp"
-#include "interpreter/bytecodeobject.hpp"
-#include "interpreter/opcode.hpp"
-#include "interpreter/unaryoperation.hpp"
-#include "afl/data/value.hpp"
-#include "afl/data/stringvalue.hpp"
-#include "afl/data/scalarvalue.hpp"
-#include "afl/data/floatvalue.hpp"
-#include "afl/string/char.hpp"
-#include "interpreter/fusion.hpp"
-#include "interpreter/unaryexecution.hpp"
-#include "afl/data/integervalue.hpp"
 #include "afl/data/booleanvalue.hpp"
+#include "afl/data/floatvalue.hpp"
+#include "afl/data/integervalue.hpp"
+#include "afl/data/scalarvalue.hpp"
+#include "afl/data/stringvalue.hpp"
+#include "afl/data/value.hpp"
+#include "afl/string/char.hpp"
+#include "interpreter/bytecodeobject.hpp"
+#include "interpreter/fusion.hpp"
+#include "interpreter/opcode.hpp"
+#include "interpreter/unaryexecution.hpp"
+#include "interpreter/unaryoperation.hpp"
 
 using interpreter::Opcode;
 using interpreter::BytecodeObject;
@@ -63,6 +63,7 @@ namespace {
         bool doUnaryCondition(PC_t pc);
         bool doFoldUnaryInt(PC_t pc);
         bool doFoldBinaryInt(PC_t pc);
+        bool doFoldBinaryTypeCheck(PC_t pc);
         bool doFoldJump(PC_t pc);
         bool doPopPush(PC_t pc);
         bool doCompareNC(PC_t pc);
@@ -116,6 +117,7 @@ OptimizerState::iterate()
         { &OptimizerState::doUnaryCondition,    Opcode::maUnary,    1, "UnaryCondition" },
         { &OptimizerState::doFoldUnaryInt,      Opcode::maPush,     1, "FoldUnaryInt" },
         { &OptimizerState::doFoldBinaryInt,     Opcode::maPush,     1, "FoldBinaryInt" },
+        { &OptimizerState::doFoldBinaryTypeCheck, Opcode::maBinary, 1, "FoldBinaryTypeCheck" },
         { &OptimizerState::doFoldJump,          Opcode::maPush,     1, "FoldJump" },
         { &OptimizerState::doPopPush,           Opcode::maPop,      1, "PopPush" },
         { &OptimizerState::doCompareNC,         Opcode::maPush,     1, "CompareNC" },
@@ -752,6 +754,70 @@ OptimizerState::doFoldBinaryInt(PC_t pc)
             return false;
         }
      default:
+        return false;
+    }
+}
+
+/** Remove type checks following a binary operation. */
+bool
+OptimizerState::doFoldBinaryTypeCheck(PC_t pc)
+{
+    if (m_bco(pc+1).major != Opcode::maUnary) {
+        return false;
+    }
+
+    bool match;
+    const uint8_t nextMinor = m_bco(pc+1).minor;
+    switch (m_bco(pc).minor) {
+     case interpreter::biAnd:
+     case interpreter::biOr:
+     case interpreter::biXor:
+     case interpreter::biCompareEQ:
+     case interpreter::biCompareEQ_NC:
+     case interpreter::biCompareNE:
+     case interpreter::biCompareNE_NC:
+     case interpreter::biCompareLE:
+     case interpreter::biCompareLE_NC:
+     case interpreter::biCompareLT:
+     case interpreter::biCompareLT_NC:
+     case interpreter::biCompareGE:
+     case interpreter::biCompareGE_NC:
+     case interpreter::biCompareGT:
+     case interpreter::biCompareGT_NC:
+        // Result is bool; remove ubool
+        // Appears in "x := (a=b or c)", "if not(a=b or c)".
+        match = (nextMinor == interpreter::unBool);
+        break;
+
+     case interpreter::biSub:
+     case interpreter::biMult:
+     case interpreter::biDivide:
+     case interpreter::biIntegerDivide:
+     case interpreter::biRemainder:
+     case interpreter::biPow:
+     case interpreter::biFindStr:
+     case interpreter::biFindStr_NC:
+     case interpreter::biBitAnd:
+     case interpreter::biBitOr:
+     case interpreter::biBitXor:
+     case interpreter::biATan:
+     case interpreter::biArrayDim:
+        // Result is numeric; remove upos
+        // Appears in "for i:=a*2 to b".
+        match = (nextMinor == interpreter::unPos);
+        break;
+
+     default:
+        // In theory, we could also optimize combinations such as bconcat/ustr.
+        // However, since we do not implicitly generate ustr, don't bother for now;
+        // if user asked for them, they will get them.
+        match = false;
+    }
+
+    if (match) {
+        clearInstruction(pc+1);
+        return true;
+    } else {
         return false;
     }
 }

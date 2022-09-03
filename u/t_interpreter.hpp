@@ -378,6 +378,9 @@ class TestInterpreterOptimizer : public CxxTest::TestSuite {
     void testDeadStore1();
     void testDeadStore2();
     void testDeadStore3();
+    void testFoldBinaryTypeCheck1();
+    void testFoldBinaryTypeCheck2();
+    void testFoldBinaryTypeCheck3();
 };
 
 class TestInterpreterProcedureValue : public CxxTest::TestSuite {

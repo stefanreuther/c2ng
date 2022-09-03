@@ -2410,7 +2410,7 @@ TestInterpreterOptimizer::testFoldJump1()
     TS_ASSERT(isInstruction(s.bco(7),  Opcode::maJump,  Opcode::jSymbolic, lc));
     TS_ASSERT(isInstruction(s.bco(8),  Opcode::maUnary, interpreter::unNeg, 0));
     TS_ASSERT(isInstruction(s.bco(9),  Opcode::maJump,  Opcode::jSymbolic));
-    
+
     TS_ASSERT(isInstruction(s.bco(10), Opcode::maUnary, interpreter::unInc, 0));
 }
 
@@ -2981,17 +2981,17 @@ TestInterpreterOptimizer::testTailMerge()
     s.bco.addInstruction(Opcode::maJump, Opcode::jSymbolic, lEnd);
 
     optimize(s.world, s.bco, 2);
-                         
+
     TS_ASSERT_EQUALS(s.bco.getNumInstructions(), 8U);
 
-    TS_ASSERT(isInstruction(s.bco(0), Opcode::maPush, Opcode::sNamedVariable));    
-    TS_ASSERT(isInstruction(s.bco(1), Opcode::maJump, Opcode::jSymbolic + Opcode::jIfFalse + Opcode::jIfEmpty + Opcode::jPopAlways, lElse));    
-    TS_ASSERT(isInstruction(s.bco(2), Opcode::maPush, Opcode::sNamedVariable));    
-    TS_ASSERT(isInstruction(s.bco(3), Opcode::maJump, Opcode::jSymbolic + Opcode::jAlways));    
-    TS_ASSERT(isInstruction(s.bco(4), Opcode::maJump, Opcode::jSymbolic));    
-    TS_ASSERT(isInstruction(s.bco(5), Opcode::maPush, Opcode::sNamedVariable));    
-    TS_ASSERT(isInstruction(s.bco(6), Opcode::maJump, Opcode::jSymbolic));    
-    TS_ASSERT(isInstruction(s.bco(7), Opcode::maUnary, interpreter::unInc));    
+    TS_ASSERT(isInstruction(s.bco(0), Opcode::maPush, Opcode::sNamedVariable));
+    TS_ASSERT(isInstruction(s.bco(1), Opcode::maJump, Opcode::jSymbolic + Opcode::jIfFalse + Opcode::jIfEmpty + Opcode::jPopAlways, lElse));
+    TS_ASSERT(isInstruction(s.bco(2), Opcode::maPush, Opcode::sNamedVariable));
+    TS_ASSERT(isInstruction(s.bco(3), Opcode::maJump, Opcode::jSymbolic + Opcode::jAlways));
+    TS_ASSERT(isInstruction(s.bco(4), Opcode::maJump, Opcode::jSymbolic));
+    TS_ASSERT(isInstruction(s.bco(5), Opcode::maPush, Opcode::sNamedVariable));
+    TS_ASSERT(isInstruction(s.bco(6), Opcode::maJump, Opcode::jSymbolic));
+    TS_ASSERT(isInstruction(s.bco(7), Opcode::maUnary, interpreter::unInc));
 }
 
 /** Test failure to optimize because of label inconsistencies:
@@ -3144,5 +3144,49 @@ TestInterpreterOptimizer::testDeadStore3()
     TS_ASSERT(isInstruction(s.bco(0), Opcode::maSpecial, Opcode::miSpecialNewHash, 0));
     TS_ASSERT(isInstruction(s.bco(1), Opcode::maStack,   Opcode::miStackDrop,      1));
     TS_ASSERT(isInstruction(s.bco(2), Opcode::maUnary,   interpreter::unAbs,       0));
+}
+
+/** Test type check removal for binary operations, boolean case. */
+void
+TestInterpreterOptimizer::testFoldBinaryTypeCheck1()
+{
+    Stuff s;
+    s.bco.addInstruction(Opcode::maBinary, interpreter::biCompareGE, 0);
+    s.bco.addInstruction(Opcode::maUnary,  interpreter::unBool, 0);
+
+    optimize(s.world, s.bco, 2);
+
+    TS_ASSERT_EQUALS(s.bco.getNumInstructions(), 1U);
+    TS_ASSERT(isInstruction(s.bco(0), Opcode::maBinary, interpreter::biCompareGE, 0));
+}
+
+/** Test type check removal for binary operations, integer case. */
+void
+TestInterpreterOptimizer::testFoldBinaryTypeCheck2()
+{
+    Stuff s;
+    s.bco.addInstruction(Opcode::maBinary, interpreter::biBitAnd, 0);
+    s.bco.addInstruction(Opcode::maUnary,  interpreter::unPos, 0);
+
+    optimize(s.world, s.bco, 2);
+
+    TS_ASSERT_EQUALS(s.bco.getNumInstructions(), 1U);
+    TS_ASSERT(isInstruction(s.bco(0), Opcode::maBinary, interpreter::biBitAnd, 0));
+}
+
+/** Test type check removal for binary operations, negative case.
+    A type check that actually changes the type needs to remain. */
+void
+TestInterpreterOptimizer::testFoldBinaryTypeCheck3()
+{
+    Stuff s;
+    s.bco.addInstruction(Opcode::maBinary, interpreter::biCompareGE, 0);
+    s.bco.addInstruction(Opcode::maUnary,  interpreter::unPos, 0);
+
+    optimize(s.world, s.bco, 2);
+
+    TS_ASSERT_EQUALS(s.bco.getNumInstructions(), 2U);
+    TS_ASSERT(isInstruction(s.bco(0), Opcode::maBinary, interpreter::biCompareGE, 0));
+    TS_ASSERT(isInstruction(s.bco(1), Opcode::maUnary,  interpreter::unPos,       0));
 }
 
