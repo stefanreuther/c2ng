@@ -2336,5 +2336,6 @@ FILES_extra = share/specs/utildata.ini share/specs/names.cc \
     share/specs/mission.cc share/specs/msgparse.ini share/specs/hullfunc.cc \
     share/specs/hostver.ini share/specs/expr.cc share/resource/core_ui.q \
     share/resource/core_tiles.q share/resource/core.q \
-    share/resource/core_game.q
+    share/resource/core_game.q share/resource/core_global.q \
+    share/resource/core_config.q
 TYPE_extra = none

@@ -2186,6 +2186,15 @@ Commands registered for the %Exit {int:index:type:hook|hook} are run just before
 This is the right place to save state.
 @since PCC2 1.99.25, PCC 1.0.9
 --------------------------------------------------------------------------------
+@q GamePreferences:Hook (Hook)
+@noproto
+| On GamePreferences Do Add name, set, value
+This hook is called when the {UI.Preferences|Preference/Configuration Editor user interface} is invoked.
+It runs in a new {int:index:group:configurationeditorcommand|Configuration Editor Context}.
+It must use {Add (Configuration Editor Command)|Add} and related commands to provide a preference list tailored for the current situation.
+Commands called in this hook populate the "Game Options" page and should configure interaction with host.
+@since PCC2 2.41
+--------------------------------------------------------------------------------
 @q GlobalActions:Hook (Hook)
 @noproto
 | On GlobalActions Do Add name, prepare, exec, result
@@ -2218,6 +2227,23 @@ Commands registered for the %NewTurn {int:index:type:hook|hook} are run
 immediately after {Load (Hook)} when PCC is started first in a new turn.
 @since PCC2 1.99.12, PCC 1.1.13
 --------------------------------------------------------------------------------
+@q Preferences:Hook (Hook)
+@noproto
+| On Preferences Do Add name, set, value
+This hook is called when the {UI.Preferences|Preference/Configuration Editor user interface} is invoked.
+It runs in a new {int:index:group:configurationeditorcommand|Configuration Editor Context}.
+It must use {Add (Configuration Editor Command)|Add} and related commands to provide a preference list tailored for the current situation.
+
+Commands called in this hook are not associated with a particular page of the Preferences dialog.
+The parameter given to %Add needs to include a page name.
+For example,
+| On Preferences Do Add "Extra | Fancy | Option", MySet, MyValue
+will create a page "Extra", containing an option "Fancy > Option".
+
+Normally, you should use {GamePreferences (Hook)|GamePreferences} or {UserPreferences (Hook)|UserPreferences} instead.
+
+@since PCC2 2.41
+--------------------------------------------------------------------------------
 @q Quit:Hook (Hook)
 @noproto
 | On Quit Do command
@@ -2241,6 +2267,15 @@ just before PCC looks for new result files.
 
 <b>Note:</b> This functionality does not exist in PCC2.
 @since PCC 1.1.4
+--------------------------------------------------------------------------------
+@q UserPreferences:Hook (Hook)
+@noproto
+| On UserPreferences Do Add name, set, value
+This hook is called when the {UI.Preferences|Preference/Configuration Editor user interface} is invoked.
+It runs in a new {int:index:group:configurationeditorcommand|Configuration Editor Context}.
+It must use {Add (Configuration Editor Command)|Add} and related commands to provide a preference list tailored for the current situation.
+Commands called in this hook populate the "Options" page and should configure local user preferences.
+@since PCC2 2.41
 --------------------------------------------------------------------------------
 
 

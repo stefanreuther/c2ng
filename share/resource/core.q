@@ -146,6 +146,7 @@ If System.GUI Then
   Load "core_tiles.q"
   Load "core_ui.q"
   Load "core_global.q"
+  Load "core_config.q"
 EndIf % System.GUI
 
 
@@ -671,6 +672,7 @@ Bind RaceScreen       "alt-h"  := "UI.Help 'pcc2:racescreen'"
 Bind RaceScreen       "i"      := "CC$ImperialStats"
 Bind RaceScreen       "m"      := "CC$ViewInbox"
 Bind RaceScreen       "alt-n"  := "CC$ViewNotifications"
+Bind RaceScreen       "ctrl-o" := "UI.Preferences"
 Bind RaceScreen       "alt-q"  := "CC$ProcessManager"
 Bind RaceScreen       "s"      := "UI.ShowScores"
 Bind RaceScreen       "c-s"    := "SaveGame"
