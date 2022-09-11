@@ -1347,6 +1347,16 @@ They will always evaluate all parameters, and then execute the function.
 
 You can define your own functions using {Function}.
 --------------------------------------------------------------------------------
+@group Global Action Context
+The Global Action Context is used internally to define global actions.
+
+When the Global Actions user-interface is invoked, the GlobalActions hook is run
+within a Global Action Context.
+Thus, to define global actions for use with the respective user interface, do
+| On GlobalActions Do Add "name", prepare, exec, result
+
+A Global Action Context can be created manually using the {GlobalActionContext()} function.
+--------------------------------------------------------------------------------
 @group Global Command
 Global commands are valid virtually anywhere.
 They affect the game or your turn at whole, not only one particular object.
@@ -1599,6 +1609,8 @@ and {@group Global Command|global commands}.
 ===  Versions
 ===
 
+--------------------------------------------------------------------------------
+@version PCC2 2.41
 --------------------------------------------------------------------------------
 @version PCC2 2.40.13
 --------------------------------------------------------------------------------
@@ -2167,6 +2179,15 @@ when a directory is entered, before game data is loaded, just before {BeforeLoad
 Commands registered for the %Exit {int:index:type:hook|hook} are run just before exiting a game.
 This is the right place to save state.
 @since PCC2 1.99.25, PCC 1.0.9
+--------------------------------------------------------------------------------
+@q GlobalActions:Hook (Hook)
+@noproto
+| On GlobalActions Do Add name, prepare, exec, result
+This hook is called when the {UI.GlobalActions|Global Actions user interface} is invoked.
+It runs in a new {int:index:group:globalactioncontext|Global Action Context}.
+It must use the {Add (Global Action Context)|Add} command to add global actions.
+It can check the environment to provide a global-action list tailored for the current situation.
+@since PCC2 2.41
 --------------------------------------------------------------------------------
 @q Load:Hook (Hook)
 @noproto

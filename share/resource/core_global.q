@@ -49,8 +49,10 @@ Sub CCGA.FCode.Finish(state, globalState)
   UI.Message Format(Translate("%d friendly code%!1{s%} changed."), state(0)), Translate("Global Actions")
 EndSub
 
-AddGlobalAction Translate("Friendly Codes | Randomize"), CCGA.FCode.InitRandom, CCGA.FCode.ExecuteRandom, CCGA.FCode.Finish
-AddGlobalAction Translate("Friendly Codes | Set to..."), CCGA.FCode.InitSet,    CCGA.FCode.ExecuteSet,    CCGA.FCode.Finish
+On GlobalActions Do
+  Add Translate("Friendly Codes | Randomize"), CCGA.FCode.InitRandom, CCGA.FCode.ExecuteRandom, CCGA.FCode.Finish
+  Add Translate("Friendly Codes | Set to..."), CCGA.FCode.InitSet,    CCGA.FCode.ExecuteSet,    CCGA.FCode.Finish
+EndOn
 
 
 %%% Remote Control actions
@@ -60,13 +62,9 @@ AddGlobalAction Translate("Friendly Codes | Set to..."), CCGA.FCode.InitSet,    
 Function CCGA.Remote.InitCommon(q, resp, verb)
   % ex WGlobalRemoteControlAction::prepare
   Local UI.Result
-  If Not Cfg("CPEnableRemote") Then
-    UI.Message Format(Translate("Remote control is not active in this game."), Translate("Global Actions"))
-  Else
-    UI.Message q, Translate("Global Actions"), Translate("Yes No")
-    If UI.Result=1 Then
-      Return Array(verb, resp, 0)
-    EndIf
+  UI.Message q, Translate("Global Actions"), Translate("Yes No")
+  If UI.Result=1 Then
+    Return Array(verb, resp, 0)
   EndIf
 EndFunction
 
@@ -100,11 +98,14 @@ Sub CCGA.Remote.Finish(state, globalState)
   UI.Message Format(state(1), state(2)), Translate("Global Actions")
 EndSub
 
-AddGlobalAction Translate("Remote Control | Allow"),   CCGA.Remote.InitAllow,   CCGA.Remote.Execute, CCGA.Remote.Finish
-AddGlobalAction Translate("Remote Control | Forbid"),  CCGA.Remote.InitForbid,  CCGA.Remote.Execute, CCGA.Remote.Finish
-AddGlobalAction Translate("Remote Control | Drop"),    CCGA.Remote.InitDrop,    CCGA.Remote.Execute, CCGA.Remote.Finish
-AddGlobalAction Translate("Remote Control | Request"), CCGA.Remote.InitControl, CCGA.Remote.Execute, CCGA.Remote.Finish
-
+On GlobalActions Do
+  If Cfg("CPEnableRemote") Then
+    Add Translate("Remote Control | Allow"),   CCGA.Remote.InitAllow,   CCGA.Remote.Execute, CCGA.Remote.Finish
+    Add Translate("Remote Control | Forbid"),  CCGA.Remote.InitForbid,  CCGA.Remote.Execute, CCGA.Remote.Finish
+    Add Translate("Remote Control | Drop"),    CCGA.Remote.InitDrop,    CCGA.Remote.Execute, CCGA.Remote.Finish
+    Add Translate("Remote Control | Request"), CCGA.Remote.InitControl, CCGA.Remote.Execute, CCGA.Remote.Finish
+  EndIf
+EndOn
 
 %%% Mission actions
 
@@ -211,9 +212,11 @@ Sub CCGA.SetEnemy.Finish(state, globalState)
 EndSub
 
 
-AddGlobalAction Translate("Missions | Set starbase mission..."),   CCGA.SetBaseMission.Init, CCGA.SetBaseMission.Execute, CCGA.SetBaseMission.Finish
-AddGlobalAction Translate("Missions | Set ship mission..."),       CCGA.SetShipMission.Init, CCGA.SetShipMission.Execute, CCGA.SetShipMission.Finish
-AddGlobalAction Translate("Missions | Set ship primary enemy..."), CCGA.SetEnemy.Init,       CCGA.SetEnemy.Execute,       CCGA.SetEnemy.Finish
+On GlobalActions Do
+  Add Translate("Missions | Set starbase mission..."),   CCGA.SetBaseMission.Init, CCGA.SetBaseMission.Execute, CCGA.SetBaseMission.Finish
+  Add Translate("Missions | Set ship mission..."),       CCGA.SetShipMission.Init, CCGA.SetShipMission.Execute, CCGA.SetShipMission.Finish
+  Add Translate("Missions | Set ship primary enemy..."), CCGA.SetEnemy.Init,       CCGA.SetEnemy.Execute,       CCGA.SetEnemy.Finish
+EndOn
 
 
 %%% Build actions
@@ -277,8 +280,10 @@ Sub CCGA.Autobuild.Finish(state, globalState)
   UI.Message Format(Translate("Structures have been built on %d planet%!1{s%}."), state(0)), Translate("Global Actions")
 EndSub
 
-AddGlobalAction Translate("Building | Autobuild"),          CCGA.Autobuild.Init, CCGA.Autobuild.Execute, CCGA.Autobuild.Finish
-AddGlobalAction Translate("Building | Set Build Goals..."), CCGA.SetGoals.Init,  CCGA.SetGoals.Execute,  CCGA.SetGoals.Finish
+On GlobalActions Do
+  Add Translate("Building | Autobuild"),          CCGA.Autobuild.Init, CCGA.Autobuild.Execute, CCGA.Autobuild.Finish
+  Add Translate("Building | Set Build Goals..."), CCGA.SetGoals.Init,  CCGA.SetGoals.Execute,  CCGA.SetGoals.Finish
+EndOn
 
 
 %%% Taxation actions
@@ -335,9 +340,11 @@ Sub CCGA.AutoTax.Finish(state, globalState)
   UI.Message Format(Translate("Taxes have been changed on %d planet%!1{s%}."), state(0)), Translate("Global Actions")
 EndSub
 
-AddGlobalAction Translate("Taxes | Optimize"),                  CCGA.AutoTax.Init,          CCGA.AutoTax.Execute, CCGA.AutoTax.Finish
-AddGlobalAction Translate("Taxes | Optimize (colonists only)"), CCGA.AutoTax.InitColonists, CCGA.AutoTax.Execute, CCGA.AutoTax.Finish
-AddGlobalAction Translate("Taxes | Optimize (natives only)"),   CCGA.AutoTax.InitNatives,   CCGA.AutoTax.Execute, CCGA.AutoTax.Finish
+On GlobalActions Do
+  Add Translate("Taxes | Optimize"),                  CCGA.AutoTax.Init,          CCGA.AutoTax.Execute, CCGA.AutoTax.Finish
+  Add Translate("Taxes | Optimize (colonists only)"), CCGA.AutoTax.InitColonists, CCGA.AutoTax.Execute, CCGA.AutoTax.Finish
+  Add Translate("Taxes | Optimize (natives only)"),   CCGA.AutoTax.InitNatives,   CCGA.AutoTax.Execute, CCGA.AutoTax.Finish
+EndOn
 
 
 %%% Export
@@ -369,7 +376,7 @@ Sub CCGA.Export.Finish(state, globalState)
   EndIf
 EndSub
 
-AddGlobalAction Translate("Export..."), CCGA.Export.Init, CCGA.Export.Execute, CCGA.Export.Finish
+On GlobalActions Do Add Translate("Export..."), CCGA.Export.Init, CCGA.Export.Execute, CCGA.Export.Finish
 
 
 %%% Script
@@ -410,4 +417,24 @@ Sub CCGA.ScriptCommand.Finish(state, globalState)
   EndIf
 EndSub
 
-AddGlobalAction Translate("Script command..."), CCGA.ScriptCommand.Init, CCGA.ScriptCommand.Execute, CCGA.ScriptCommand.Finish
+On GlobalActions Do Add Translate("Script command..."), CCGA.ScriptCommand.Init, CCGA.ScriptCommand.Execute, CCGA.ScriptCommand.Finish
+
+
+%
+%  Main Entry Point
+%
+
+% @q UI.GlobalActions Optional result:Obj (Global Command)
+% Global Actions user interface.
+% Shows the list of global actions and lets the user choose, configure, and execute them.
+% To do so, this command first runs the {GlobalActions (Hook)|GlobalActions hook}.
+%
+% The optional %result parameter is supported since version 2.41.
+% It contains a {ReferenceList()|reference list} with the most recent search result,
+% and makes the global actions operate on that result by default.
+% @since PCC2 2.40.13
+Sub UI.GlobalActions (Optional result)
+  Dim g As GlobalActionContext
+  With g Do RunHook GlobalActions
+  CC$GlobalActions g, result
+EndSub

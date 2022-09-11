@@ -8,12 +8,12 @@
 #include "afl/base/deleter.hpp"
 #include "afl/base/staticassert.hpp"
 #include "afl/string/format.hpp"
-#include "client/dialogs/globalactions.hpp"
 #include "client/downlink.hpp"
 #include "client/si/control.hpp"
 #include "client/widgets/expressionlist.hpp"
 #include "client/widgets/referencelistbox.hpp"
 #include "game/interface/referencecontext.hpp"
+#include "game/interface/referencelistcontext.hpp"
 #include "game/proxy/configurationproxy.hpp"
 #include "game/proxy/expressionlistproxy.hpp"
 #include "game/proxy/referencelistproxy.hpp"
@@ -48,6 +48,7 @@
 using afl::functional::createStringTable;
 using game::SearchQuery;
 using game::proxy::SelectionProxy;
+using interpreter::Opcode;
 using ui::widgets::FrameGroup;
 
 namespace {
@@ -766,8 +767,66 @@ client::dialogs::doSearchDialog(const game::SearchQuery& initialQuery,
     }
 
     // Optionally, branch to global actions.
+    // We cannot invoke the dialog directly, because we need to run a script to prepare the input.
+    // It's easiest to have the script call the dialog.
     if (code == Stop_Global) {
-        doGlobalActions(iface, out, list);
+        /* A Control to receive callbacks from the process created by TransferTask
+           (and, eventually, the Global Actions dialog called from it).
+           As of 20220909, this is the same implementation as in ProcessListDialog;
+           keep it separate for now in case we change it later.
+           In particular, handlePopupConsole() should probably be implemented as defaultHandlePopupConsole(). */
+        class ExtraControl : public client::si::Control {
+         public:
+            ExtraControl(client::si::UserSide& iface, ui::Root& root, client::si::OutputState& out)
+                : Control(iface), m_outputState(out), m_loop(root)
+                { }
+            virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target target)
+                { dialogHandleStateChange(link, target, m_outputState, m_loop, 0); }
+            virtual void handleEndDialog(client::si::RequestLink2 link, int /*code*/)
+                { interface().continueProcess(link); }
+            virtual void handlePopupConsole(client::si::RequestLink2 link)
+                { interface().continueProcess(link); }
+            virtual void handleScanKeyboardMode(client::si::RequestLink2 link)
+                { defaultHandleScanKeyboardMode(link); }
+            virtual void handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap)
+                { defaultHandleSetView(link, name, withKeymap); }
+            virtual void handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix)
+                { defaultHandleUseKeymap(link, name, prefix); }
+            virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text)
+                { defaultHandleOverlayMessage(link, text); }
+            virtual game::interface::ContextProvider* createContextProvider()
+                { return 0; }
+         private:
+            client::si::OutputState& m_outputState;
+            ui::EventLoop m_loop;
+        };
+
+        /* Task to invoke "UI.GlobalActions <TheSearchResult>" */
+        class TransferTask : public client::si::ScriptTask {
+         public:
+            TransferTask(const game::ref::List& list)
+                : m_listData(*new game::interface::ReferenceListContext::Data())
+                { m_listData->list = list; }
+            virtual void execute(uint32_t pgid, game::Session& session)
+                {
+                    interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
+                    game::interface::ReferenceListContext ctx(m_listData, session);
+                    bco->addPushLiteral(&ctx);
+                    bco->addInstruction(Opcode::maPush, Opcode::sNamedVariable, bco->addName("UI.GLOBALACTIONS"));
+                    bco->addInstruction(Opcode::maIndirect, Opcode::miIMCall, 1);
+
+                    interpreter::Process& proc = session.processList().create(session.world(), "(Global Actions)");
+                    proc.pushFrame(bco, false);
+
+                    session.processList().resumeProcess(proc, pgid);
+                }
+
+         private:
+            afl::base::Ref<game::interface::ReferenceListContext::Data> m_listData;
+        };
+
+        /* Invoke the task */
+        ExtraControl(iface, iface.root(), out).executeTaskWait(std::auto_ptr<client::si::ScriptTask>(new TransferTask(list)));
     }
 }
 

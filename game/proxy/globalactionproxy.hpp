@@ -5,8 +5,9 @@
 #ifndef C2NG_GAME_PROXY_GLOBALACTIONPROXY_HPP
 #define C2NG_GAME_PROXY_GLOBALACTIONPROXY_HPP
 
-#include "util/requestsender.hpp"
 #include "game/session.hpp"
+#include "interpreter/variablereference.hpp"
+#include "util/requestsender.hpp"
 #include "util/treelist.hpp"
 
 namespace game { namespace proxy {
@@ -29,8 +30,9 @@ namespace game { namespace proxy {
 
         /** Get list of actions.
             @param [in,out] ind     WaitIndicator for UI synchronisation
-            @param [out]    result  Result */
-        void getActions(WaitIndicator& ind, util::TreeList& result);
+            @param [out]    result  Result
+            @param [in]     ref     Reference to variable containing the global actions */
+        void getActions(WaitIndicator& ind, util::TreeList& result, interpreter::VariableReference ref);
 
      private:
         util::RequestSender<Session> m_gameSender;

@@ -6,11 +6,12 @@
 #include "game/proxy/globalactionproxy.hpp"
 
 #include "t_game_proxy.hpp"
+#include "game/interface/globalactioncontext.hpp"
 #include "game/test/sessionthread.hpp"
 #include "game/test/waitindicator.hpp"
-#include "game/interface/globalactionextra.hpp"
+#include "interpreter/variablereference.hpp"
 
-/** Test behaviour on empty session. */
+/** Test behaviour on empty session/null reference. */
 void
 TestGameProxyGlobalActionProxy::testEmpty()
 {
@@ -18,7 +19,7 @@ TestGameProxyGlobalActionProxy::testEmpty()
     game::test::WaitIndicator ind;
     game::proxy::GlobalActionProxy testee(t.gameSender());
     util::TreeList result;
-    testee.getActions(ind, result);
+    testee.getActions(ind, result, interpreter::VariableReference());
 
     TS_ASSERT_EQUALS(result.getFirstChild(util::TreeList::root), util::TreeList::nil);
 }
@@ -31,14 +32,18 @@ TestGameProxyGlobalActionProxy::testNormal()
 
     // Add an item. This is a legitimate (but not public) way to add a separator/inner node.
     // (Normally, such nodes are only created on the way when a real node with underlying action is added.)
-    game::interface::GlobalActionExtra::create(t.session())
-        .actionNames().add(0, "test", util::TreeList::root);
+    game::interface::GlobalActionContext ctx;
+    ctx.data()->actionNames.add(0, "test", util::TreeList::root);
+
+    // Store this in a process
+    interpreter::Process& p = t.session().processList().create(t.session().world(), "testNormal");
+    interpreter::VariableReference ref = interpreter::VariableReference::Maker(p).make("WHATEVER", &ctx);
 
     // Call
     game::test::WaitIndicator ind;
     game::proxy::GlobalActionProxy testee(t.gameSender());
     util::TreeList result;
-    testee.getActions(ind, result);
+    testee.getActions(ind, result, ref);
 
     // Verify result
     size_t a = result.getFirstChild(util::TreeList::root);

@@ -15,6 +15,7 @@
 #include "game/interface/enginefunction.hpp"
 #include "game/interface/explosionfunction.hpp"
 #include "game/interface/friendlycodefunction.hpp"
+#include "game/interface/globalactioncontext.hpp"
 #include "game/interface/globalcommands.hpp"
 #include "game/interface/globalcontext.hpp"
 #include "game/interface/globalfunctions.hpp"
@@ -630,6 +631,8 @@ game::Session::initWorld()
     m_world.setNewGlobalValue("NEWRECTANGLERAW",  new SessionProcedure_t(*this, game::interface::IFNewRectangleRaw));
     m_world.setNewGlobalValue("SAVEGAME",         new SessionProcedure_t(*this, game::interface::IFSaveGame));
     m_world.setNewGlobalValue("SENDMESSAGE",      new SessionProcedure_t(*this, game::interface::IFSendMessage));
+
+    m_world.setNewGlobalValue("GLOBALACTIONCONTEXT", new interpreter::SimpleFunction<void>(game::interface::IFGlobalActionContext));
 
     // Add global context (=properties)
     m_world.addNewGlobalContext(new game::interface::GlobalContext(*this));

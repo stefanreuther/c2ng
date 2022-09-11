@@ -88,6 +88,7 @@
 #include "game/exception.hpp"
 #include "game/game.hpp"
 #include "game/interface/basetaskbuildcommandparser.hpp"
+#include "game/interface/globalactioncontext.hpp"
 #include "game/interface/planetmethod.hpp"
 #include "game/interface/plugincontext.hpp"
 #include "game/interface/referencelistcontext.hpp"
@@ -162,6 +163,7 @@ using game::spec::ShipList;
 using interpreter::Error;
 using interpreter::SimpleFunction;
 using interpreter::SimpleProcedure;
+using interpreter::VariableReference;
 
 namespace {
     const char*const LOG_NAME = "client.si";
@@ -1734,28 +1736,62 @@ client::si::IFCCExport(game::Session& /*session*/, ScriptSide& si, RequestLink1 
     }
 }
 
-// @since PCC2 2.40.13
+// @since PCC2 2.40.13 (as CC$GlobalActions)
+// @since PCC2 2.41 (as CC$GlobalActions actionList, Optional searchResult)
 void
 client::si::IFCCGlobalActions(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
-    // For now, no parameters
-    // TODO: pass optional search result
     // TODO: pass current object for search?
-    args.checkArgumentCount(0);
 
+    // Check number of arguments
+    args.checkArgumentCount(1, 2);
+
+    // Check action-list argument
+    afl::data::Value* v = args.getNext();
+    if (v == 0) {
+        return;
+    }
+    if (dynamic_cast<game::interface::GlobalActionContext*>(v) == 0) {
+        throw interpreter::Error::typeError();
+    }
+
+    // Check optional list argument
+    game::interface::ReferenceListContext* list = 0;
+    if (afl::data::Value* listArg = args.getNext()) {
+        list = dynamic_cast<game::interface::ReferenceListContext*>(listArg);
+        if (list == 0) {
+            throw interpreter::Error::typeError();
+        }
+    }
+
+    // Save the variable
+    VariableReference ref = VariableReference::Maker(link.getProcess()).make("CC$GA", v);
+
+    // Invoke UI
     class Task : public UserTask {
      public:
+        Task(const game::interface::ReferenceListContext* list, const VariableReference& ref)
+            : m_searchResult(),
+              m_ref(ref)
+            {
+                if (list != 0) {
+                    m_searchResult = list->getList();
+                }
+            }
+
         virtual void handle(Control& ctl, RequestLink2 link)
             {
                 UserSide& iface = ctl.interface();
                 OutputState out;
-                game::ref::List searchResult;
-                client::dialogs::doGlobalActions(iface, out, searchResult);
+                client::dialogs::doGlobalActions(iface, out, m_searchResult, m_ref);
                 iface.joinProcess(link, out.getProcess());
                 ctl.handleStateChange(link, out.getTarget());
             }
+     private:
+        game::ref::List m_searchResult;
+        VariableReference m_ref;
     };
-    si.postNewTask(link, new Task());
+    si.postNewTask(link, new Task(list, ref));
 }
 
 // @since PCC2 2.40.10

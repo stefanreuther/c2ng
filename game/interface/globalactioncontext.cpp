@@ -1,21 +1,19 @@
 /**
-  *  \file game/interface/globalactionextra.cpp
-  *  \brief Class game::interface::GlobalActionExtra
+  *  \file game/interface/globalactioncontext.cpp
+  *  \brief Class game::interface::GlobalActionContext
   */
 
-#include "game/interface/globalactionextra.hpp"
-#include "interpreter/arguments.hpp"
-#include "interpreter/callablevalue.hpp"
+#include "game/interface/globalactioncontext.hpp"
 #include "interpreter/error.hpp"
+#include "interpreter/nametable.hpp"
+#include "interpreter/propertyacceptor.hpp"
 #include "interpreter/simpleprocedure.hpp"
+#include "interpreter/typehint.hpp"
 
 using interpreter::CallableValue;
 using interpreter::Error;
 
 namespace {
-    // Extra Identifier
-    const game::ExtraIdentifier<game::Session, game::interface::GlobalActionExtra> LABEL_ID = {{}};
-
     // Helper to check type of a CallableValue parameter
     const CallableValue& requireCallable(const afl::data::Value* value)
     {
@@ -35,7 +33,7 @@ namespace {
         }
     }
 
-    /* @q AddGlobalAction name:Str, prepare:Func, exec:Sub, result:Sub (Global Command)
+    /* @q Add name:Str, prepare:Func, exec:Sub, result:Sub (Global Action Context)
        Add a Global Action.
 
        The name is a string containing the name of the action.
@@ -60,8 +58,9 @@ namespace {
        - NumErrors: integer, number of objects where exec threw an error
        - Error: if exec threw an error, last error message
 
-       @since PCC2 2.40.13 */
-    void IFAddGlobalAction(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
+       @since PCC2 2.41
+       @see GlobalActions (Hook) */
+    void IFGlobalAction_Add(afl::base::Ref<game::interface::GlobalActionContext::Data> state, interpreter::Process& /*proc*/, interpreter::Arguments& args)
     {
         args.checkArgumentCount(4);
 
@@ -83,12 +82,6 @@ namespace {
         const CallableValue& execCallable    = requireCallable(execValue);
         const CallableValue& resultCallable  = requireCallable(resultValue);
 
-        // Access extra
-        game::interface::GlobalActionExtra* extra = game::interface::GlobalActionExtra::get(session);
-        if (extra == 0) {
-            throw Error::contextError();
-        }
-
         // Parse the name into a path
         std::vector<String_t> path;
         size_t i = 0, n;
@@ -102,7 +95,7 @@ namespace {
         }
 
         // Create
-        size_t id = extra->actions().addAction(prepareCallable, execCallable, resultCallable);
+        size_t id = state->actions.addAction(prepareCallable, execCallable, resultCallable);
 
         // Check for two-way castability
         int32_t treeId = static_cast<int32_t>(id + 1);
@@ -112,58 +105,95 @@ namespace {
         }
 
         // Add to tree
-        extra->actionNames().addPath(treeId, path, util::TreeList::root);
+        state->actionNames.addPath(treeId, path, util::TreeList::root);
     }
+
+    /*
+     *  Property Mapping
+     */
+    enum {
+        piAdd
+    };
+
+    const interpreter::NameTable TABLE[] = {
+        { "ADD", piAdd, 0, interpreter::thProcedure },
+    };
 }
+
 
 /*
- *  GlobalActionExtra
+ *  GlobalActionContext
  */
 
-game::interface::GlobalActionExtra::GlobalActionExtra(Session& session)
-{
-    session.world().setNewGlobalValue("ADDGLOBALACTION", new interpreter::SimpleProcedure<Session&>(session, IFAddGlobalAction));
-}
-
-game::interface::GlobalActionExtra::~GlobalActionExtra()
+game::interface::GlobalActionContext::GlobalActionContext()
+    : SingleContext(),
+      m_data(*new Data())
 { }
 
-game::interface::GlobalActionExtra&
-game::interface::GlobalActionExtra::create(Session& session)
+game::interface::GlobalActionContext::~GlobalActionContext()
+{ }
+
+// ReadOnlyAccessor:
+afl::data::Value*
+game::interface::GlobalActionContext::get(PropertyIndex_t index)
 {
-    GlobalActionExtra* p = session.extra().get(LABEL_ID);
-    if (p == 0) {
-        p = session.extra().setNew(LABEL_ID, new GlobalActionExtra(session));
+    switch (TABLE[index].index) {
+     case piAdd:
+        return new interpreter::SimpleProcedure<afl::base::Ref<Data> >(m_data, IFGlobalAction_Add);
     }
-    return *p;
+    return 0;
 }
 
-game::interface::GlobalActionExtra*
-game::interface::GlobalActionExtra::get(Session& session)
+// Context:
+interpreter::Context::PropertyAccessor*
+game::interface::GlobalActionContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
-    return session.extra().get(LABEL_ID);
+    if (interpreter::lookupName(name, TABLE, result)) {
+        return this;
+    } else {
+        return 0;
+    }
 }
 
-game::interface::GlobalActions&
-game::interface::GlobalActionExtra::actions()
+game::interface::GlobalActionContext*
+game::interface::GlobalActionContext::clone() const
 {
-    return m_actions;
+    return new GlobalActionContext(*this);
 }
 
-const game::interface::GlobalActions&
-game::interface::GlobalActionExtra::actions() const
+game::map::Object*
+game::interface::GlobalActionContext::getObject()
 {
-    return m_actions;
+    return 0;
 }
 
-util::TreeList&
-game::interface::GlobalActionExtra::actionNames()
+void
+game::interface::GlobalActionContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
 {
-    return m_actionNames;
+    acceptor.enumTable(TABLE);
 }
 
-const util::TreeList&
-game::interface::GlobalActionExtra::actionNames() const
+// BaseValue:
+String_t
+game::interface::GlobalActionContext::toString(bool /*readable*/) const
 {
-    return m_actionNames;
+    return "#<GlobalActions>";
+}
+
+void
+game::interface::GlobalActionContext::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
+{
+    rejectStore(out, aux, ctx);
+}
+
+/* @q GlobalActionContext():Obj (Function)
+   Create a Global Action Context.
+
+   @see Add (Global Action Context), int:index:group:globalactioncontext|Global Action Context, GlobalActions (Hook)
+   @since PCC2 2.41 */
+afl::data::Value*
+game::interface::IFGlobalActionContext(interpreter::Arguments& args)
+{
+    args.checkArgumentCount(0);
+    return new GlobalActionContext();
 }

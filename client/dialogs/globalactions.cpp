@@ -9,7 +9,7 @@
 #include "client/si/control.hpp"
 #include "client/si/userside.hpp"
 #include "client/widgets/helpwidget.hpp"
-#include "game/interface/globalactionextra.hpp"
+#include "game/interface/globalactioncontext.hpp"
 #include "game/interface/globalactions.hpp"
 #include "game/proxy/globalactionproxy.hpp"
 #include "ui/dialogs/messagebox.hpp"
@@ -27,8 +27,9 @@
 using client::si::OutputState;
 using client::si::RequestLink2;
 using client::si::ScriptTask;
-using game::interface::GlobalActionExtra;
+using game::interface::GlobalActionContext;
 using game::interface::GlobalActions;
+using interpreter::VariableReference;
 using ui::widgets::TreeListbox;
 
 namespace {
@@ -48,7 +49,7 @@ namespace {
      */
     class Dialog : public client::si::Control {
      public:
-        Dialog(client::si::UserSide& us, OutputState& outputState, game::ref::List& searchResult);
+        Dialog(client::si::UserSide& us, OutputState& outputState, game::ref::List& searchResult, const VariableReference& ref);
 
         void init(game::proxy::WaitIndicator& ind);
         void run();
@@ -75,6 +76,7 @@ namespace {
         // Infrastructure
         OutputState& m_outputState;
         ui::EventLoop m_loop;
+        const VariableReference m_ref;
 
         // Widgets
         TreeListbox m_tree;
@@ -101,10 +103,11 @@ namespace {
     };
 }
 
-Dialog::Dialog(client::si::UserSide& us, OutputState& outputState, game::ref::List& searchResult)
+Dialog::Dialog(client::si::UserSide& us, OutputState& outputState, game::ref::List& searchResult, const VariableReference& ref)
     : Control(us),
       m_outputState(outputState),
       m_loop(us.root()),
+      m_ref(ref),
       m_tree(us.root(), 15, 20*us.root().provider().getFont(gfx::FontRequest())->getEmWidth()),
       m_grid(0, 0, us.root()),
       m_searchResult(searchResult),
@@ -132,7 +135,7 @@ void
 Dialog::init(game::proxy::WaitIndicator& ind)
 {
     util::TreeList list;
-    game::proxy::GlobalActionProxy(interface().gameSender()).getActions(ind, list);
+    game::proxy::GlobalActionProxy(interface().gameSender()).getActions(ind, list, m_ref);
     m_tree.addTree(0, list, util::TreeList::root);
 }
 
@@ -328,24 +331,25 @@ Dialog::executeGlobalAction(size_t actionId)
 {
     class Task : public ScriptTask {
      public:
-        Task(size_t actionId, GlobalActions::Flags_t flags)
-            : m_actionId(actionId), m_flags(flags)
+        Task(size_t actionId, GlobalActions::Flags_t flags, const VariableReference& ref)
+            : m_actionId(actionId), m_flags(flags), m_ref(ref)
             { }
         virtual void execute(uint32_t pgid, game::Session& session)
             {
-                if (GlobalActionExtra* p = GlobalActionExtra::get(session)) {
+                if (GlobalActionContext* ctx = dynamic_cast<GlobalActionContext*>(m_ref.get(session.processList()))) {
                     interpreter::ProcessList& processList = session.processList();
                     interpreter::Process& proc = processList.create(session.world(), "(Global Actions)");
-                    const GlobalActions::Action* a = p->actions().getActionByIndex(m_actionId);
-                    proc.pushFrame(p->actions().compileGlobalAction(a, session.world(), m_flags), false);
+                    const GlobalActions::Action* a = ctx->data()->actions.getActionByIndex(m_actionId);
+                    proc.pushFrame(ctx->data()->actions.compileGlobalAction(a, session.world(), m_flags), false);
                     processList.resumeProcess(proc, pgid);
                 }
             }
      private:
         size_t m_actionId;
         GlobalActions::Flags_t m_flags;
+        const VariableReference m_ref;
     };
-    executeTaskWait(std::auto_ptr<ScriptTask>(new Task(actionId, m_flags)));
+    executeTaskWait(std::auto_ptr<ScriptTask>(new Task(actionId, m_flags, m_ref)));
 }
 
 /* Execute action on search result (compileListAction) */
@@ -354,16 +358,16 @@ Dialog::executeListAction(size_t actionId)
 {
     class Task : public ScriptTask {
      public:
-        Task(size_t actionId, GlobalActions::Flags_t flags, const game::ref::List& list)
-            : m_actionId(actionId), m_flags(flags), m_list(list)
+        Task(size_t actionId, GlobalActions::Flags_t flags, const game::ref::List& list, const VariableReference ref)
+            : m_actionId(actionId), m_flags(flags), m_list(list), m_ref(ref)
             { }
         virtual void execute(uint32_t pgid, game::Session& session)
             {
-                if (GlobalActionExtra* p = GlobalActionExtra::get(session)) {
+                if (GlobalActionContext* ctx = dynamic_cast<GlobalActionContext*>(m_ref.get(session.processList()))) {
                     interpreter::ProcessList& processList = session.processList();
                     interpreter::Process& proc = processList.create(session.world(), "(Global Actions)");
-                    const GlobalActions::Action* a = p->actions().getActionByIndex(m_actionId);
-                    proc.pushFrame(p->actions().compileListAction(a, m_list, session.world(), m_flags), false);
+                    const GlobalActions::Action* a = ctx->data()->actions.getActionByIndex(m_actionId);
+                    proc.pushFrame(ctx->data()->actions.compileListAction(a, m_list, session.world(), m_flags), false);
                     processList.resumeProcess(proc, pgid);
                 }
             }
@@ -371,8 +375,9 @@ Dialog::executeListAction(size_t actionId)
         size_t m_actionId;
         GlobalActions::Flags_t m_flags;
         game::ref::List m_list;
+        const VariableReference m_ref;
     };
-    executeTaskWait(std::auto_ptr<ScriptTask>(new Task(actionId, m_flags, m_searchResult)));
+    executeTaskWait(std::auto_ptr<ScriptTask>(new Task(actionId, m_flags, m_searchResult, m_ref)));
 }
 
 
@@ -383,10 +388,11 @@ Dialog::executeListAction(size_t actionId)
 void
 client::dialogs::doGlobalActions(client::si::UserSide& us,
                                  client::si::OutputState& outputState,
-                                 game::ref::List& searchResult)
+                                 game::ref::List& searchResult,
+                                 interpreter::VariableReference ref)
 {
     // ex doGlobalActions, globact.pas:NGlobalActions
-    Dialog dlg(us, outputState, searchResult);
+    Dialog dlg(us, outputState, searchResult, ref);
     Downlink link(us.root(), us.translator());
     dlg.init(link);
     dlg.run();

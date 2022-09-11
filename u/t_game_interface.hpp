@@ -81,10 +81,13 @@ class TestGameInterfaceFriendlyCodeContext : public CxxTest::TestSuite {
     void testIt();
 };
 
-class TestGameInterfaceGlobalActionExtra : public CxxTest::TestSuite {
+class TestGameInterfaceGlobalActionContext : public CxxTest::TestSuite {
  public:
     void testIt();
     void testFailures();
+    void testContext();
+    void testMake();
+    void testMakeFail();
 };
 
 class TestGameInterfaceGlobalActions : public CxxTest::TestSuite {

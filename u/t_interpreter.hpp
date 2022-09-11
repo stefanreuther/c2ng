@@ -759,6 +759,13 @@ class TestInterpreterValues : public CxxTest::TestSuite {
     void testFormatFloat();
 };
 
+class TestInterpreterVariableReference : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testNull();
+    void testOverwrite();
+};
+
 class TestInterpreterWorld : public CxxTest::TestSuite {
  public:
     void testIt();
