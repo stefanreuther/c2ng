@@ -139,6 +139,7 @@ game::config::ConfigurationEditor::Node::toggleValue(Configuration& config)
 void
 game::config::ConfigurationEditor::Node::setValue(Configuration& config, String_t value)
 {
+    // ex WConfigOptionEditor::edit (part)
     if (ConfigurationOption* opt = getFirstOption(config)) {
         opt->setAndMarkUpdated(value, ConfigurationOption::User);
     }

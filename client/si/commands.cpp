@@ -48,6 +48,7 @@
 #include "client/dialogs/objectselectiondialog.hpp"
 #include "client/dialogs/outboxdialog.hpp"
 #include "client/dialogs/planetinfodialog.hpp"
+#include "client/dialogs/preferences.hpp"
 #include "client/dialogs/processlistdialog.hpp"
 #include "client/dialogs/revertdialog.hpp"
 #include "client/dialogs/scores.hpp"
@@ -88,6 +89,7 @@
 #include "game/exception.hpp"
 #include "game/game.hpp"
 #include "game/interface/basetaskbuildcommandparser.hpp"
+#include "game/interface/configurationeditorcontext.hpp"
 #include "game/interface/globalactioncontext.hpp"
 #include "game/interface/planetmethod.hpp"
 #include "game/interface/plugincontext.hpp"
@@ -2144,6 +2146,45 @@ client::si::IFCCSendMessage(game::Session& session, ScriptSide& si, RequestLink1
     };
     Game& g = game::actions::mustHaveGame(session);
     si.postNewTask(link, new DialogTask(g.getViewpointPlayer(), g.currentTurn().outbox().getNumMessages() != 0));
+}
+
+// @since PCC2 1.99.19 (as CC$Settings)
+// @since PCC2 2.41 (as CC$Settings options)
+void
+client::si::IFCCSettings(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // ex IFCCSettings
+    args.checkArgumentCount(1);
+
+    // Check option arguments
+    afl::data::Value* v = args.getNext();
+    if (v == 0) {
+        return;
+    }
+    if (dynamic_cast<game::interface::ConfigurationEditorContext*>(v) == 0) {
+        throw interpreter::Error::typeError();
+    }
+
+    // Save the variables
+    VariableReference ref = VariableReference::Maker(link.getProcess()).make("CC$OPT", v);
+
+    // Invoke UI
+    class Task : public UserTask {
+     public:
+        Task(const VariableReference& ref)
+            : m_ref(ref)
+            { }
+        void handle(Control& ctl, RequestLink2 link)
+            {
+                OutputState out;
+                client::dialogs::doPreferencesDialog(ctl.interface(), m_ref, out);
+                ctl.interface().joinProcess(link, out.getProcess());
+                ctl.handleStateChange(link, out.getTarget());
+            }
+     private:
+        VariableReference m_ref;
+    };
+    si.postNewTask(link, new Task(ref));
 }
 
 // @since PCC2 1.99.16, PCC2 2.40.12
@@ -4441,6 +4482,7 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("CC$REMOTETOGGLE",       new SimpleProcedure<game::Session&>(s, IFCCRemoteToggle));
                 s.world().setNewGlobalValue("CC$SELLSUPPLIES",       new ScriptProcedure(s, &si, IFCCSellSupplies));
                 s.world().setNewGlobalValue("CC$SENDMESSAGE",        new ScriptProcedure(s, &si, IFCCSendMessage));
+                s.world().setNewGlobalValue("CC$SETTINGS",           new ScriptProcedure(s, &si, IFCCSettings));
                 s.world().setNewGlobalValue("CC$SHIPCOSTCALC",       new ScriptProcedure(s, &si, IFCCShipCostCalc));
                 s.world().setNewGlobalValue("CC$SHIPSPEC",           new ScriptProcedure(s, &si, IFCCShipSpec));
                 s.world().setNewGlobalValue("CC$SPECBROWSER",        new ScriptProcedure(s, &si, IFCCSpecBrowser));

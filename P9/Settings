@@ -766,7 +766,9 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/dialogs/changepassword.cpp \
+FILES_guilib = client/widgets/configvaluelist.cpp \
+    client/widgets/configvaluelist.hpp client/dialogs/preferences.cpp \
+    client/dialogs/preferences.hpp client/dialogs/changepassword.cpp \
     client/dialogs/changepassword.hpp gfx/antialiased.cpp \
     gfx/antialiased.hpp client/dialogs/globalactions.cpp \
     client/dialogs/globalactions.hpp client/tiles/historymovementtile.cpp \

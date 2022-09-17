@@ -178,6 +178,16 @@ ui::widgets::TreeListbox::getIdFromNode(const Node* node) const
     }
 }
 
+String_t
+ui::widgets::TreeListbox::getLabelFromNode(const Node* node) const
+{
+    if (node != 0) {
+        return node->label;
+    } else {
+        return 0;
+    }
+}
+
 bool
 ui::widgets::TreeListbox::hasChildren(const Node* node) const
 {

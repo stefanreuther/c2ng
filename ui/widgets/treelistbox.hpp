@@ -95,8 +95,13 @@ namespace ui { namespace widgets {
 
         /** Get Id from node.
             \param node Node reference
-            \return Id */
+            \return Id; 0 if node is null */
         int32_t getIdFromNode(const Node* node) const;
+
+        /** Get label from node.
+            \param node Node reference
+            \return label; empty if node is null */
+        String_t getLabelFromNode(const Node* node) const;
 
         /** Check whether a node has children.
             \param node Node index
