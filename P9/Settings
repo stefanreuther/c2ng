@@ -12,8 +12,10 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = interpreter/variablereference.cpp \
-    interpreter/variablereference.hpp game/interface/globalactioncontext.cpp \
+FILES_gamelib = game/interface/configurationeditorcontext.cpp \
+    game/interface/configurationeditorcontext.hpp \
+    interpreter/variablereference.cpp interpreter/variablereference.hpp \
+    game/interface/globalactioncontext.cpp \
     game/interface/globalactioncontext.hpp game/proxy/referenceproxy.cpp \
     game/proxy/referenceproxy.hpp game/v3/passwordchecker.cpp \
     game/v3/passwordchecker.hpp game/v3/genextra.cpp game/v3/genextra.hpp \
@@ -1726,7 +1728,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_interpreter_variablereference.cpp \
+FILES_testsuite = u/t_game_interface_configurationeditorcontext.cpp \
+    u/t_interpreter_variablereference.cpp \
     u/t_game_interface_globalactioncontext.cpp \
     u/t_interpreter_savevisitor.cpp u/t_interpreter_expr_node.cpp \
     u/t_interpreter_singlecontext.cpp u/t_game_proxy_referenceproxy.cpp \

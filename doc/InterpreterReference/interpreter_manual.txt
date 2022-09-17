@@ -1261,6 +1261,12 @@ For example, this code iterates through all fights, then through all units, and 
 Properties of the first and second combat participants are also accessible as %Left.Xxx and %Right.Xxx
 combat properties.
 --------------------------------------------------------------------------------
+@group Configuration Editor Command
+The Configuration Editor Commands are used internally to set up the Configuration dialog.
+Scripts can use it to add their own configuration to the dialog.
+
+A Configuration Editor Context can be created manually using the {ConfigurationEditorContext()} function.
+--------------------------------------------------------------------------------
 @group Context
 Each expression is evaluated in a particular context which defines which properties are available.
 Using the context references, you can temporarily switch to a different context to access another object's properties.

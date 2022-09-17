@@ -11,6 +11,7 @@
 #include "game/interface/beamfunction.hpp"
 #include "game/interface/cargofunctions.hpp"
 #include "game/interface/commandinterface.hpp"
+#include "game/interface/configurationeditorcontext.hpp"
 #include "game/interface/drawingfunction.hpp"
 #include "game/interface/enginefunction.hpp"
 #include "game/interface/explosionfunction.hpp"
@@ -633,6 +634,7 @@ game::Session::initWorld()
     m_world.setNewGlobalValue("SENDMESSAGE",      new SessionProcedure_t(*this, game::interface::IFSendMessage));
 
     m_world.setNewGlobalValue("GLOBALACTIONCONTEXT", new interpreter::SimpleFunction<void>(game::interface::IFGlobalActionContext));
+    m_world.setNewGlobalValue("CONFIGURATIONEDITORCONTEXT", new SessionFunction_t(*this, game::interface::IFConfigurationEditorContext));
 
     // Add global context (=properties)
     m_world.addNewGlobalContext(new game::interface::GlobalContext(*this));

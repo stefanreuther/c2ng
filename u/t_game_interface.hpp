@@ -39,6 +39,15 @@ class TestGameInterfaceCompletionList : public CxxTest::TestSuite {
     void testAddBuildCompletionList();
 };
 
+class TestGameInterfaceConfigurationEditorContext : public CxxTest::TestSuite {
+ public:
+    void testBasics();
+    void testMake();
+    void testSequence();
+    void testSubtree();
+    void testFailures();
+};
+
 class TestGameInterfaceContextProvider : public CxxTest::TestSuite {
  public:
     void testInterface();
