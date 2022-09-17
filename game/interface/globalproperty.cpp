@@ -8,6 +8,8 @@
 #include "game/root.hpp"
 #include "game/turn.hpp"
 #include "game/turnloader.hpp"
+#include "game/v3/genextra.hpp"
+#include "game/v3/genfile.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/values.hpp"
@@ -194,6 +196,19 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
 
            @since PCC 1.0.14 */
         return makeIntegerValue(PCC2_VERSION_CODE);
+     case igpSystemHasPassword:
+        /* @q System.HasPassword:Bool (Global Property)
+           Result file password status.
+           This property is True if there is a result file password, False if there is none.
+           If the game does not support result file passwords, the value is EMPTY.
+           @since PCC2 2.41 */
+        if (Game* g = session.getGame().get()) {
+            Turn& t = g->currentTurn();
+            if (game::v3::GenFile* p = game::v3::GenExtra::get(t, g->getViewpointPlayer())) {
+                return makeBooleanValue(p->hasPassword());
+            }
+        }
+        return 0;
      case igpSystemHost:
         /* @q System.Host:Str (Global Property)
            Name of Host program.

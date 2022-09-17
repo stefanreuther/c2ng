@@ -289,6 +289,42 @@ game::config::ConfigurationEditor::addGeneric(int level, const String_t& name, i
     return addNew(new GenericNode(level, name, type, value));
 }
 
+// Add generic nodes for all options from a given configuration.
+void
+game::config::ConfigurationEditor::addAll(int level, int type, const Configuration& config)
+{
+    class NamedNode : public Node {
+     public:
+        NamedNode(int level, int type, const String_t& name)
+            : Node(level, name), m_type(type)
+            { }
+        virtual int getType()
+            { return m_type; }
+        virtual String_t getValue(const Configuration& config, afl::string::Translator& /*tx*/)
+            {
+                if (ConfigurationOption* opt = config.getOptionByName(getName())) {
+                    return opt->toString();
+                } else {
+                    return String_t();
+                }
+            }
+        virtual void enumOptions(Configuration& config, afl::base::Closure<void(ConfigurationOption&)>& fcn)
+            {
+                if (ConfigurationOption* opt = config.getOptionByName(getName())) {
+                    fcn.call(*opt);
+                }
+            }
+     private:
+        const int m_type;
+    };
+
+    afl::base::Ref<Configuration::Enumerator_t> e = config.getOptions();
+    Configuration::OptionInfo_t item;
+    while (e->getNextElement(item)) {
+        addNewNode(new NamedNode(level, type, item.first));
+    }
+}
+
 // Get node, given an index.
 game::config::ConfigurationEditor::Node*
 game::config::ConfigurationEditor::getNodeByIndex(size_t index) const

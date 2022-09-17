@@ -26,9 +26,9 @@ namespace {
         /* @q Chart.X:Int (Global Property), Chart.Y:Int (Global Property)
            Current position in the starchart.
            - on the starchart (and player screen): center of starchart.
-           Values can be assigned to modify the current position.
+             Values can be assigned to modify the current position.
            - on control screens: center of scanner (=location of current unit).
-           Cannot be modified.
+             Cannot be modified.
            @diff PCC 1.x always used the "on the starchart" interpretation, i.e. these values
            give a starchart position that may not have anything to do with the current unit's
            position the user actually sees.
@@ -55,15 +55,16 @@ namespace {
         { "MY.TEAM",               game::interface::iplTeam,              MyPlayerPropertyDomain, interpreter::thInt },
         { "MY.VCRS",               game::interface::igpMyVCRs,            GlobalPropertyDomain,   interpreter::thInt },
         { "SELECTION.LAYER",       game::interface::igpSelectionLayer,    GlobalPropertyDomain,   interpreter::thInt },
-        { "SHIPS.CAPITAL",         game::interface::iplTotalCapital,      MyPlayerPropertyDomain, interpreter::thInt },  // Implemented as player properties because
-        { "SHIPS.FREIGHTERS",      game::interface::iplTotalFreighters,   MyPlayerPropertyDomain, interpreter::thInt },  // that has easier access to a 'TGen'. A better
-        { "SHIPS.TOTAL",           game::interface::iplTotalShips,        MyPlayerPropertyDomain, interpreter::thInt },  // way may be to implement it using GStatFile.
+        { "SHIPS.CAPITAL",         game::interface::iplTotalCapital,      MyPlayerPropertyDomain, interpreter::thInt },
+        { "SHIPS.FREIGHTERS",      game::interface::iplTotalFreighters,   MyPlayerPropertyDomain, interpreter::thInt },
+        { "SHIPS.TOTAL",           game::interface::iplTotalShips,        MyPlayerPropertyDomain, interpreter::thInt },
         // SYSTEM.EGG
         // SYSTEM.ERR -> global variable (localizable!)
         { "SYSTEM.GAMEDIRECTORY",  game::interface::igpGameDirectory,     GlobalPropertyDomain,   interpreter::thString },
         { "SYSTEM.GAMETYPE",       game::interface::igpRegSharewareText,  GlobalPropertyDomain,   interpreter::thString },
         { "SYSTEM.GAMETYPE$",      game::interface::igpRegSharewareFlag,  GlobalPropertyDomain,   interpreter::thInt },
         // SYSTEM.GUI -> game::interface::registerConsoleCommands, client::si::registerCommands
+        { "SYSTEM.HASPASSWORD",    game::interface::igpSystemHasPassword, GlobalPropertyDomain,   interpreter::thBool },
         { "SYSTEM.HOST",           game::interface::igpSystemHost,        GlobalPropertyDomain,   interpreter::thString },
         { "SYSTEM.HOST$",          game::interface::igpSystemHostCode,    GlobalPropertyDomain,   interpreter::thInt },
         { "SYSTEM.HOSTVERSION",    game::interface::igpSystemHostVersion, GlobalPropertyDomain,   interpreter::thString },
@@ -197,7 +198,7 @@ game::interface::GlobalContext::get(PropertyIndex_t index)
                 return 0;
             }
          }
-                                         
+
          case UIPropertyDomain:
             return m_session.uiPropertyStack().get(UserInterfaceProperty(global_mapping[index].index));
         }

@@ -255,6 +255,12 @@ namespace game { namespace config {
             @return GenericNode instance */
         GenericNode& addGeneric(int level, const String_t& name, int type, const String_t& value);
 
+        /** Add nodes for all options from a given configuration.
+            @param level Indentation level (0=top)
+            @param name  Human-readable, translated name
+            @param config Configuration */
+        void addAll(int level, int type, const Configuration& config);
+
         /** Get node, given an index.
             @param index Index [0,getNumNodes())
             @return Node; null if index is out-of-bounds */

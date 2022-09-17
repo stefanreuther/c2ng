@@ -544,6 +544,13 @@ game::HostVersion::setImpliedHostConfiguration(game::config::HostConfiguration& 
         // pconfig.pas:IsShowCommandAvailable
         config[HostConfiguration::CPEnableShow].set(false);
 
+        // WPreferencesDialog::init
+        config[HostConfiguration::CPEnableLanguage].set(false);
+        config[HostConfiguration::CPEnableRaceName].set(false);
+        config[HostConfiguration::CPEnableRemote].set(false);
+        config[HostConfiguration::CPEnableSend].set(false);
+        config[HostConfiguration::DisablePasswords].set(false);
+
         // WTorpInfo::drawContent
         for (int i = 1; i <= MAX_PLAYERS; ++i) {
             int rate = config[HostConfiguration::PlayerSpecialMission](i) == 9 ? 400 : 100;

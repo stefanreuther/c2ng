@@ -4,7 +4,7 @@
 #ifndef C2NG_U_T_GAME_CONFIG_HPP
 #define C2NG_U_T_GAME_CONFIG_HPP
 
-#include <cxxtest/TestSuite.h> 
+#include <cxxtest/TestSuite.h>
 
 class TestGameConfigAliasOption : public CxxTest::TestSuite {
  public:
@@ -44,6 +44,7 @@ class TestGameConfigConfigurationEditor : public CxxTest::TestSuite {
     void testSourceMulti();
     void testChange();
     void testAlias();
+    void testAddAll();
 };
 
 class TestGameConfigConfigurationOption : public CxxTest::TestSuite {

@@ -308,3 +308,58 @@ TestGameConfigConfigurationEditor::testAlias()
     TS_ASSERT_EQUALS(config[boolOption](), 1);
 }
 
+/** Test addAll(). */
+void
+TestGameConfigConfigurationEditor::testAddAll()
+{
+    afl::string::NullTranslator tx;
+    const int TYPE = 77;
+
+    static const IntegerOptionDescriptor opt1  = { "v1",  &IntegerValueParser::instance };
+    static const IntegerOptionDescriptor opt2  = { "v2",  &IntegerValueParser::instance };
+    static const IntegerOptionDescriptor opt3  = { "v3",  &IntegerValueParser::instance };
+    game::config::Configuration config;
+    config[opt1].set(42);
+    config[opt2].set(23);
+    config[opt3].set(69);
+
+    ConfigurationEditor ed;
+    ed.addAll(0, TYPE, config);
+
+    // Verify
+    TS_ASSERT_EQUALS(ed.getNumNodes(), 3U);
+
+    ConfigurationEditor::Node* n1 = ed.getNodeByIndex(0);
+    TS_ASSERT(n1 != 0);
+    TS_ASSERT_EQUALS(n1->getName(), "v1");
+    TS_ASSERT_EQUALS(n1->getValue(config, tx), "42");
+    TS_ASSERT_EQUALS(n1->getType(), TYPE);
+    TS_ASSERT_EQUALS(n1->getFirstOption(config), &config[opt1]);
+
+    ConfigurationEditor::Node* n2 = ed.getNodeByIndex(1);
+    TS_ASSERT(n2 != 0);
+    TS_ASSERT_EQUALS(n2->getName(), "v2");
+    TS_ASSERT_EQUALS(n2->getValue(config, tx), "23");
+    TS_ASSERT_EQUALS(n2->getType(), TYPE);
+    TS_ASSERT_EQUALS(n2->getFirstOption(config), &config[opt2]);
+
+    ConfigurationEditor::Node* n3 = ed.getNodeByIndex(2);
+    TS_ASSERT(n3 != 0);
+    TS_ASSERT_EQUALS(n3->getName(), "v3");
+    TS_ASSERT_EQUALS(n3->getValue(config, tx), "69");
+    TS_ASSERT_EQUALS(n3->getType(), TYPE);
+    TS_ASSERT_EQUALS(n3->getFirstOption(config), &config[opt3]);
+
+    // Apply the editor to a different config
+    game::config::Configuration config2;
+    config2[opt1].set(17);
+
+    TS_ASSERT_EQUALS(n1->getValue(config2, tx), "17");
+    TS_ASSERT_EQUALS(n2->getValue(config2, tx), "");
+    TS_ASSERT_EQUALS(n3->getValue(config2, tx), "");
+
+    TS_ASSERT_EQUALS(n1->getFirstOption(config2), &config2[opt1]);
+    TS_ASSERT(n2->getFirstOption(config2) == 0);
+    TS_ASSERT(n3->getFirstOption(config2) == 0);
+}
+

@@ -22,6 +22,7 @@ namespace game { namespace interface {
         igpSystemProgram,
         igpSystemVersion,
         igpSystemVersionCode,
+        igpSystemHasPassword,
         igpSystemHost,
         igpSystemHostCode,
         igpSystemHostVersion,
