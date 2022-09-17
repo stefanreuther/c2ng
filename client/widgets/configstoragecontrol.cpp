@@ -77,7 +77,7 @@ client::widgets::ConfigStorageControl::render()
     if (index < countof(SOURCE_NAMES)) {
         m_text.setText(m_translator(SOURCE_NAMES[index]));
     }
-    m_text.setState(DisabledState, m_source == ConfigurationEditor::NotStored);
+    m_button.setState(DisabledState, m_source == ConfigurationEditor::NotStored);
 }
 
 void
@@ -87,6 +87,8 @@ client::widgets::ConfigStorageControl::onButtonClick()
     ui::widgets::StringListbox list(m_root.provider(), m_root.colorScheme());
     list.addItem(ConfigurationOption::User, m_translator(SOURCE_NAMES[ConfigurationEditor::User]));
     list.addItem(ConfigurationOption::Game, m_translator(SOURCE_NAMES[ConfigurationEditor::Game]));
+    list.setCurrentKey(m_source == ConfigurationEditor::User ? ConfigurationOption::User : ConfigurationOption::Game);
+    list.setPreferredHeight(int(list.getNumItems()));
 
     ui::EventLoop loop(m_root);
     if (ui::widgets::MenuFrame(ui::layout::HBox::instance0, m_root, loop).doMenu(list, m_button.getExtent().getBottomLeft())) {
