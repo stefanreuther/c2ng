@@ -58,6 +58,7 @@ game::config::ConfigurationOption::setAndMarkUpdated(String_t value, Source sour
     if (value != toString()) {
         set(value);
         markUpdated(source);
+        markChanged();
     }
 }
 
