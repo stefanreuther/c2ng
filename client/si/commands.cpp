@@ -13,6 +13,7 @@
 #include "afl/string/string.hpp"
 #include "client/cargotransfer.hpp"
 #include "client/dialogs/alliancedialog.hpp"
+#include "client/dialogs/backupconfig.hpp"
 #include "client/dialogs/buildammo.hpp"
 #include "client/dialogs/buildqueuedialog.hpp"
 #include "client/dialogs/buildship.hpp"
@@ -22,6 +23,7 @@
 #include "client/dialogs/buysuppliesdialog.hpp"
 #include "client/dialogs/cargohistorydialog.hpp"
 #include "client/dialogs/changepassword.hpp"
+#include "client/dialogs/chartconfig.hpp"
 #include "client/dialogs/cloneship.hpp"
 #include "client/dialogs/commandlistdialog.hpp"
 #include "client/dialogs/entercoordinates.hpp"
@@ -1584,6 +1586,46 @@ client::si::IFCCEditAutobuildSettings(game::Session& /*session*/, ScriptSide& si
     si.postNewTask(link, new Task());
 }
 
+// @since PCC2 2.41
+void
+client::si::IFCCEditBackup(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // CC$EditBackup current, default
+    class Task : public UserTask {
+     public:
+        Task(const String_t& currentValue, const String_t& defaultValue)
+            : m_currentValue(currentValue),
+              m_defaultValue(defaultValue)
+            { }
+        virtual void handle(Control& ctl, RequestLink2 link)
+            {
+                UserSide& us = ctl.interface();
+                bool ok = client::dialogs::editBackupConfiguration(m_currentValue, m_defaultValue, ctl.root(), us.gameSender(), ctl.translator());
+                std::auto_ptr<afl::data::Value> result;
+                if (ok) {
+                    result.reset(interpreter::makeStringValue(m_currentValue));
+                }
+                us.setVariable(link, "UI.RESULT", result);
+                us.continueProcess(link);
+            }
+     private:
+        String_t m_currentValue;
+        String_t m_defaultValue;
+    };
+
+
+    args.checkArgumentCount(2);
+
+    String_t currentValue, defaultValue;
+    if (!interpreter::checkStringArg(currentValue, args.getNext())
+        || !interpreter::checkStringArg(defaultValue, args.getNext()))
+    {
+        return;
+    }
+
+    si.postNewTask(link, new Task(currentValue, defaultValue));
+}
+
 // @since PCC2 2.40.9
 void
 client::si::IFCCEditCommands(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
@@ -2277,6 +2319,23 @@ client::si::IFCCSpecBrowser(game::Session& /*session*/, ScriptSide& si, RequestL
             }
     };
     si.postNewTask(link, new DialogTask());
+}
+
+// @since PCC2 2.41
+void
+client::si::IFCCStarchartConfig(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    args.checkArgumentCount(0);
+
+    class Task : public UserTask {
+     public:
+        virtual void handle(Control& ctl, RequestLink2 link)
+            {
+                client::dialogs::doChartConfigDialog(ctl.root(), ctl.interface().gameSender(), ctl.translator());
+                ctl.interface().continueProcess(link);
+            }
+    };
+    si.postNewTask(link, new Task());
 }
 
 // @since PCC2 2.40.10
@@ -4461,6 +4520,7 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("CC$CHANGEWAYPOINT",     new ScriptProcedure(s, &si, IFCCChangeWaypoint));
                 s.world().setNewGlobalValue("CC$CHOOSEINTERCEPTTARGET", new ScriptProcedure(s, &si, IFCCChooseInterceptTarget));
                 s.world().setNewGlobalValue("CC$EDITAUTOBUILDSETTINGS", new ScriptProcedure(s, &si, IFCCEditAutobuildSettings));
+                s.world().setNewGlobalValue("CC$EDITBACKUP",         new ScriptProcedure(s, &si, IFCCEditBackup));
                 s.world().setNewGlobalValue("CC$EDITCOMMANDS",       new ScriptProcedure(s, &si, IFCCEditCommands));
                 s.world().setNewGlobalValue("CC$EDITCURRENTBUILDORDER", new ScriptProcedure(s, &si, IFCCEditCurrentBuildOrder));
                 s.world().setNewGlobalValue("CC$EDITLABELCONFIG",    new ScriptProcedure(s, &si, IFCCEditLabelConfig));
@@ -4486,6 +4546,7 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("CC$SHIPCOSTCALC",       new ScriptProcedure(s, &si, IFCCShipCostCalc));
                 s.world().setNewGlobalValue("CC$SHIPSPEC",           new ScriptProcedure(s, &si, IFCCShipSpec));
                 s.world().setNewGlobalValue("CC$SPECBROWSER",        new ScriptProcedure(s, &si, IFCCSpecBrowser));
+                s.world().setNewGlobalValue("CC$STARCHARTCONFIG",    new ScriptProcedure(s, &si, IFCCStarchartConfig));
                 s.world().setNewGlobalValue("CC$TRANSFERMULTI",      new ScriptProcedure(s, &si, IFCCTransferMulti));
                 s.world().setNewGlobalValue("CC$TRANSFERPLANET",     new ScriptProcedure(s, &si, IFCCTransferPlanet));
                 s.world().setNewGlobalValue("CC$TRANSFERSHIP",       new ScriptProcedure(s, &si, IFCCTransferShip));
