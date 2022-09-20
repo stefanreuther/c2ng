@@ -4,10 +4,10 @@
   */
 
 #include "game/proxy/classicvcrplayerproxy.hpp"
-#include "game/vcr/classic/eventrecorder.hpp"
-#include "game/vcr/classic/eventvisualizer.hpp"
 #include "game/vcr/classic/algorithm.hpp"
 #include "game/vcr/classic/database.hpp"
+#include "game/vcr/classic/eventrecorder.hpp"
+#include "game/vcr/classic/eventvisualizer.hpp"
 #include "game/vcr/classic/nullvisualizer.hpp"
 
 namespace gvc = game::vcr::classic;
@@ -30,6 +30,7 @@ class game::proxy::ClassicVcrPlayerProxy::Trampoline {
     void eventRequest();
     void jumpRequest(game::vcr::classic::Time_t time);
 
+    void sendError(const String_t& msg);
     void sendResponse(bool finish);
 
  private:
@@ -57,28 +58,26 @@ game::proxy::ClassicVcrPlayerProxy::Trampoline::initRequest(size_t index)
     gvc::Battle* b = db != 0 ? db->getBattle(index) : 0;
     const Root& root = m_adaptor.root();
     const game::spec::ShipList& shipList = m_adaptor.shipList();
-    afl::sys::LogListener& log = m_adaptor.log();
     if (db != 0 && b != 0) {
         m_algorithm.reset(b->createAlgorithm(m_visualizer, root.hostConfiguration(), shipList));
         if (m_algorithm.get() == 0) {
-            // FIXME: must tell the player
-            log.write(afl::sys::LogListener::Error, LOG_NAME, m_adaptor.translator()("Failed to set up VCR algorithm"));
-            sendResponse(true);
+            // No algorithm (wrong type tag)
+            sendError(m_adaptor.translator()("Failed to set up VCR algorithm"));
         } else {
             uint16_t seed = b->getSeed();
             game::vcr::Object leftCopy = b->left(), rightCopy = b->right();
-            m_algorithm->setCapabilities(b->getCapabilities());
-            if (m_algorithm->checkBattle(leftCopy, rightCopy, seed)) {
-                log.write(afl::sys::LogListener::Error, LOG_NAME, m_adaptor.translator()("VCR algorithm does not accept"));
-                sendResponse(true);
+            if (!m_algorithm->setCapabilities(b->getCapabilities())) {
+                sendError(m_adaptor.translator()("VCR algorithm does not accept (incompatible version?)"));
+            } else if (m_algorithm->checkBattle(leftCopy, rightCopy, seed)) {
+                sendError(m_adaptor.translator()("VCR algorithm does not accept (wrong shiplist?)"));
             } else {
                 m_visualizer.init(*m_algorithm, *b, shipList, root.playerList(), m_adaptor.getTeamSettings(), root.hostConfiguration(), m_adaptor.translator());
                 sendResponse(false);
             }
         }
     } else {
-        // FIXME: must tell the player
-        log.write(afl::sys::LogListener::Error, LOG_NAME, m_adaptor.translator()("Failed to access game data"));
+        // Missing/wrong database, or wrong index
+        sendError(m_adaptor.translator()("Failed to access game data"));
         sendResponse(true);
     }
 }
@@ -131,6 +130,28 @@ game::proxy::ClassicVcrPlayerProxy::Trampoline::jumpRequest(game::vcr::classic::
     } else {
         sendResponse(true);
     }
+}
+
+void
+game::proxy::ClassicVcrPlayerProxy::Trampoline::sendError(const String_t& msg)
+{
+    class Response : public util::Request<ClassicVcrPlayerProxy> {
+     public:
+        Response(const String_t& msg)
+            : m_message(msg)
+            { }
+        virtual void handle(ClassicVcrPlayerProxy& s)
+            { s.sig_error.raise(m_message); }
+     private:
+        String_t m_message;
+    };
+
+    // Error reporting
+    m_adaptor.log().write(afl::sys::LogListener::Error, LOG_NAME, msg);
+    m_reply.postNewRequest(new Response(msg));
+
+    // Send stop response just in case, to unblock client who ignores errors
+    sendResponse(true);
 }
 
 void

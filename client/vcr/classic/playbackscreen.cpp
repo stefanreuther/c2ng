@@ -7,7 +7,10 @@
 #include "afl/string/format.hpp"
 #include "client/downlink.hpp"
 #include "client/imageloader.hpp"
+#include "client/vcr/classic/interleavedscheduler.hpp"
+#include "client/vcr/classic/standardscheduler.hpp"
 #include "client/vcr/classic/traditionalscheduler.hpp"
+#include "game/root.hpp"
 #include "game/vcr/classic/battle.hpp"
 #include "game/vcr/classic/database.hpp"
 #include "game/vcr/classic/eventlistener.hpp"
@@ -15,6 +18,11 @@
 #include "game/vcr/classic/utils.hpp"
 #include "gfx/anim/controller.hpp"
 #include "gfx/anim/pixmapsprite.hpp"
+#include "gfx/complex.hpp"
+#include "gfx/gen/texture.hpp"
+#include "gfx/rgbapixmap.hpp"
+#include "ui/dialogs/messagebox.hpp"
+#include "ui/draw.hpp"
 #include "ui/group.hpp"
 #include "ui/layout/hbox.hpp"
 #include "ui/layout/vbox.hpp"
@@ -23,13 +31,7 @@
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/panel.hpp"
 #include "ui/widgets/spritewidget.hpp"
-#include "client/vcr/classic/standardscheduler.hpp"
-#include "client/vcr/classic/interleavedscheduler.hpp"
-#include "game/root.hpp"
-#include "gfx/complex.hpp"
-#include "gfx/rgbapixmap.hpp"
-#include "gfx/gen/texture.hpp"
-#include "ui/draw.hpp"
+#include "util/rich/text.hpp"
 
 namespace gvc = game::vcr::classic;
 using afl::string::Format;
@@ -216,6 +218,7 @@ client::vcr::classic::PlaybackScreen::PlaybackScreen(ui::Root& root, afl::string
       m_proxy(adaptorSender, root.engine().dispatcher()),
       m_index(index),
       m_log(log),
+      m_loop(root),
       m_spriteWidget(),
       m_leftStatus(root, tx),
       m_rightStatus(root, tx),
@@ -236,6 +239,7 @@ client::vcr::classic::PlaybackScreen::PlaybackScreen(ui::Root& root, afl::string
       m_queuedTime(0)
 {
     m_proxy.sig_event.add(this, &PlaybackScreen::handleEvents);
+    m_proxy.sig_error.add(this, &PlaybackScreen::handleError);
 }
 
 client::vcr::classic::PlaybackScreen::~PlaybackScreen()
@@ -247,9 +251,8 @@ client::vcr::classic::PlaybackScreen::run()
 {
     preloadImages();
 
-    ui::EventLoop loop(m_root);
     ui::widgets::Button btn("OK", util::Key_Escape, m_root);
-    btn.sig_fire.addNewClosure(loop.makeStop(1));
+    btn.sig_fire.addNewClosure(m_loop.makeStop(1));
     m_timer->sig_fire.add(this, &PlaybackScreen::onTick);
 
     m_playbackControl.sig_togglePlay.add(this, &PlaybackScreen::onTogglePlay);
@@ -279,11 +282,23 @@ client::vcr::classic::PlaybackScreen::run()
     m_proxy.initRequest(m_index);
     m_spriteWidget.tick();
 
-    loop.run();
+    m_loop.run();
 
     m_renderer.reset();
 
     return 0;
+}
+
+void
+client::vcr::classic::PlaybackScreen::handleError(String_t msg)
+{
+    util::rich::Text text = m_translator("This battle cannot be played.");
+    text += "\n\n";
+    text += util::rich::Text(Format(m_translator("Most likely, your local configuration does not match the host's, or your host software is incompatible with PCC2.\n\n"
+                                                 "Error message provided by playback engine: %s"), msg)).withStyle(util::rich::StyleAttribute::Small);
+
+    ui::dialogs::MessageBox(text, m_translator("Visual Combat Recorder"), m_root).doOkDialog(m_translator);
+    m_loop.stop(1);
 }
 
 void

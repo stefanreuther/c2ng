@@ -21,7 +21,7 @@ namespace {
     using game::vcr::classic::LeftSide;
     using game::vcr::classic::RightSide;
     using game::vcr::classic::FighterStatus;
-    
+
     struct Environment {
         game::test::Root root;
         game::spec::ShipList shipList;
@@ -34,9 +34,12 @@ namespace {
         Environment()
             : root(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0))),
               shipList(), pTeamSettings(0), battles(), translator(), currentBattle(0)
-            { }
+            {
+                game::test::initStandardBeams(shipList);
+                game::test::initStandardTorpedoes(shipList);
+            }
     };
-    
+
     class TestAdaptor : public game::proxy::VcrDatabaseAdaptor {
      public:
         TestAdaptor(Environment& env)
@@ -106,14 +109,18 @@ namespace {
 
     struct EventReceiver {
         EventReceiver()
-            : m_events(), m_done(false)
+            : m_events(), m_done(false), m_error()
             { }
 
         void onEvent(util::StringInstructionList& events, bool done)
             { m_events = events; m_done = done; }
 
+        void onError(String_t err)
+            { m_error = err; }
+
         util::StringInstructionList m_events;
         bool m_done;
+        String_t m_error;
     };
 
     class PlacementVerifier : public game::vcr::classic::EventListener {
@@ -159,15 +166,39 @@ namespace {
      private:
         int m_position[2];
     };
+
+    void testError(Environment& env, size_t index, const char* name)
+    {
+        // Set up tasking
+        util::SimpleRequestDispatcher disp;
+        TestAdaptor ad(env);
+        util::RequestReceiver<game::proxy::VcrDatabaseAdaptor> recv(disp, ad);
+
+        // Make proxy
+        game::proxy::ClassicVcrPlayerProxy proxy(recv.getSender(), disp);
+        EventReceiver event;
+        proxy.sig_event.add(&event, &EventReceiver::onEvent);
+        proxy.sig_error.add(&event, &EventReceiver::onError);
+
+        // Load the fight
+        proxy.initRequest(index);
+        while (disp.wait(0))
+            ;
+
+        TSM_ASSERT_EQUALS(name, event.m_events.size(), 0U);
+        TSM_ASSERT(name, event.m_done);
+        TSM_ASSERT_DIFFERS(name, event.m_error, "");
+    }
 }
 
+/** Test normal scenario (happy path).
+    A: define a battle. Play it; rewind it.
+    E: events generated as expected */
 void
 TestGameProxyClassicVcrPlayerProxy::testIt()
 {
     // Make simple environment
     Environment env;
-    game::test::initStandardBeams(env.shipList);
-    game::test::initStandardTorpedoes(env.shipList);
     env.battles.addNewBattle(new game::vcr::classic::Battle(makeLeftShip(), makeRightShip(), 42, 0, 0))
         ->setType(game::vcr::classic::PHost4, 0);
 
@@ -181,6 +212,7 @@ TestGameProxyClassicVcrPlayerProxy::testIt()
     game::proxy::ClassicVcrPlayerProxy proxy(recv.getSender(), disp);
     EventReceiver event;
     proxy.sig_event.add(&event, &EventReceiver::onEvent);
+    proxy.sig_error.add(&event, &EventReceiver::onError);
 
     // Load first fight
     proxy.initRequest(0);
@@ -188,6 +220,7 @@ TestGameProxyClassicVcrPlayerProxy::testIt()
         ;
     TS_ASSERT(event.m_events.size() > 0);
     TS_ASSERT(!event.m_done);
+    TS_ASSERT_EQUALS(event.m_error, "");
 
     // Verify
     {
@@ -209,6 +242,7 @@ TestGameProxyClassicVcrPlayerProxy::testIt()
         event.m_events.clear();
     }
     TS_ASSERT(event.m_done);
+    TS_ASSERT_EQUALS(event.m_error, "");
 
     // Jump. This will produce a new position.
     proxy.jumpRequest(52);
@@ -216,5 +250,59 @@ TestGameProxyClassicVcrPlayerProxy::testIt()
         ;
     TS_ASSERT(event.m_events.size() > 0);
     TS_ASSERT(!event.m_done);
+    TS_ASSERT_EQUALS(event.m_error, "");
+}
+
+/** Test error: bad algorithm.
+    A: define a battle with an unknown algorithm.
+    E: error generated but no events */
+void
+TestGameProxyClassicVcrPlayerProxy::testErrorBadAlgo()
+{
+    Environment env;
+    env.battles.addNewBattle(new game::vcr::classic::Battle(makeLeftShip(), makeRightShip(), 42, 0, 0))
+        ->setType(game::vcr::classic::UnknownPHost, 0);
+
+    testError(env, 0, "testErrorBadAlgo");
+}
+
+/** Test error: bad content.
+    A: define a battle with bad conten (too many beams).
+    E: error generated but no events */
+void
+TestGameProxyClassicVcrPlayerProxy::testErrorBadContent()
+{
+    Environment env;
+    game::vcr::Object leftShip = makeLeftShip();
+    leftShip.setNumBeams(77);
+    env.battles.addNewBattle(new game::vcr::classic::Battle(leftShip, makeRightShip(), 42, 0, 0))
+        ->setType(game::vcr::classic::PHost4, 0);
+
+    testError(env, 0, "testErrorBadContent");
+}
+
+/** Test error: bad index.
+    A: try to play a battle with an out-of-range index.
+    E: error generated but no events */
+void
+TestGameProxyClassicVcrPlayerProxy::testErrorBadIndex()
+{
+    Environment env;
+    testError(env, 1, "testErrorBadIndex");
+}
+
+/** Test error: bad capabilities.
+    A: try to play a battle with bad capabilities.
+    E: error generated but no events */
+void
+TestGameProxyClassicVcrPlayerProxy::testErrorBadCapabilities()
+{
+    Environment env;
+    game::vcr::Object leftShip = makeLeftShip();
+    leftShip.setNumBeams(77);
+    env.battles.addNewBattle(new game::vcr::classic::Battle(leftShip, makeRightShip(), 42, 0, 0))
+        ->setType(game::vcr::classic::PHost4, -1);    /* all bits set = lots of unknown capabilities */
+
+    testError(env, 0, "testErrorBadCapabilities");
 }
 

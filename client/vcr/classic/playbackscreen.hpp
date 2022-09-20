@@ -15,6 +15,7 @@
 #include "game/proxy/classicvcrplayerproxy.hpp"
 #include "game/session.hpp"
 #include "game/vcr/classic/types.hpp"
+#include "ui/eventloop.hpp"
 #include "ui/root.hpp"
 #include "ui/widgets/spritewidget.hpp"
 #include "util/requestreceiver.hpp"
@@ -39,7 +40,9 @@ namespace client { namespace vcr { namespace classic {
         game::proxy::ClassicVcrPlayerProxy m_proxy;
         size_t m_index;
         afl::sys::LogListener& m_log;
+        ui::EventLoop m_loop;
 
+        void handleError(String_t msg);
         void handleEvents(util::StringInstructionList& list, bool finish);
 
         void preloadImages();

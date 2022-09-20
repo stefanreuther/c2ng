@@ -5,12 +5,12 @@
 #ifndef C2NG_GAME_PROXY_CLASSICVCRPLAYERPROXY_HPP
 #define C2NG_GAME_PROXY_CLASSICVCRPLAYERPROXY_HPP
 
-#include "game/vcr/classic/types.hpp"
-#include "util/requestsender.hpp"
-#include "util/requestdispatcher.hpp"
 #include "game/proxy/vcrdatabaseadaptor.hpp"
-#include "util/stringinstructionlist.hpp"
+#include "game/vcr/classic/types.hpp"
+#include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
+#include "util/requestsender.hpp"
+#include "util/stringinstructionlist.hpp"
 
 namespace game { namespace proxy {
 
@@ -53,7 +53,17 @@ namespace game { namespace proxy {
             \param time Time */
         void jumpRequest(game::vcr::classic::Time_t time);
 
+        /** Signal: events.
+            Reports battle progress in response to initRequest(), eventRequest(), jumpRequest().
+            \param events Instructions to replay
+            \param end    true if this is the last batch of events */
         afl::base::Signal<void(util::StringInstructionList&, bool)> sig_event;
+
+        /** Signal: error.
+            Reports a textual error.
+            After this event, a single sig_event with end=true will be reported, but no further sig_event callbacks.
+            \param msg Human-readable error message */
+        afl::base::Signal<void(String_t)> sig_error;
 
      private:
         class Trampoline;

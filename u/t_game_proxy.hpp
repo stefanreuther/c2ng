@@ -100,6 +100,10 @@ class TestGameProxyChunnelProxy : public CxxTest::TestSuite {
 class TestGameProxyClassicVcrPlayerProxy : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testErrorBadAlgo();
+    void testErrorBadContent();
+    void testErrorBadIndex();
+    void testErrorBadCapabilities();
 };
 
 class TestGameProxyCloneShipProxy : public CxxTest::TestSuite {
