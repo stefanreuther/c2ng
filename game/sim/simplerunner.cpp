@@ -13,8 +13,9 @@ game::sim::SimpleRunner::SimpleRunner(const Setup& setup,
                                       const game::spec::ShipList& list,
                                       const game::config::HostConfiguration& config,
                                       const game::vcr::flak::Configuration& flakConfig,
+                                      afl::sys::LogListener& log,
                                       util::RandomNumberGenerator& rng)
-    : Runner(setup, opts, list, config, flakConfig, rng)
+    : Runner(setup, opts, list, config, flakConfig, log, rng)
 { }
 
 void

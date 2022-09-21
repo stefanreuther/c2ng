@@ -134,9 +134,9 @@ game::proxy::SimulationRunProxy::Trampoline::Trampoline(util::RequestSender<Simu
                                    ? systemThreads
                                    : 1);
         if (numThreads > 1) {
-            m_runner.reset(new game::sim::ParallelRunner(m_sim->setup(), m_sim->configuration(), *m_shipList, m_root->hostConfiguration(), m_root->flakConfiguration(), m_rng, numThreads));
+            m_runner.reset(new game::sim::ParallelRunner(m_sim->setup(), m_sim->configuration(), *m_shipList, m_root->hostConfiguration(), m_root->flakConfiguration(), m_log, m_rng, numThreads));
         } else {
-            m_runner.reset(new game::sim::SimpleRunner(m_sim->setup(), m_sim->configuration(), *m_shipList, m_root->hostConfiguration(), m_root->flakConfiguration(), m_rng));
+            m_runner.reset(new game::sim::SimpleRunner(m_sim->setup(), m_sim->configuration(), *m_shipList, m_root->hostConfiguration(), m_root->flakConfiguration(), m_log, m_rng));
         }
         m_runner->sig_update.add(this, &Trampoline::reportUpdate);
     }

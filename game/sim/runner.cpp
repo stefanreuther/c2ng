@@ -21,6 +21,7 @@ game::sim::Runner::Job::Job(const Setup& setup,
                             const game::spec::ShipList& list,
                             const game::config::HostConfiguration& config,
                             const game::vcr::flak::Configuration& flakConfig,
+                            afl::sys::LogListener& log,
                             util::RandomNumberGenerator& rng,
                             size_t serial)
     : m_setup(setup),
@@ -29,6 +30,7 @@ game::sim::Runner::Job::Job(const Setup& setup,
       m_shipList(list),
       m_config(config),
       m_flakConfiguration(flakConfig),
+      m_log(log),
       m_rng(rng.getSeed() ^ uint32_t(serial)),
       m_result(),
       m_stats()
@@ -40,13 +42,21 @@ game::sim::Runner::Job::Job(const Setup& setup,
 inline void
 game::sim::Runner::Job::run()
 {
-    runSimulation(m_newState, m_stats, m_result, m_options, m_shipList, m_config, m_flakConfiguration, m_rng);
+    try {
+        runSimulation(m_newState, m_stats, m_result, m_options, m_shipList, m_config, m_flakConfiguration, m_rng);
+    }
+    catch (std::exception& e) {
+        // In a correctly working system, this place is never reached.
+        // This exception occurs if the VCR refuses to accept a record created by the simulator.
+        // It is important to catch it anyway because if we don't, the UI will hang.
+        m_log.write(afl::sys::LogListener::Error, "game.sim", "Error in VCR", e);
+    }
 }
 
 inline bool
 game::sim::Runner::Job::writeBack(ResultList& list) const
 {
-    if (m_result.battles.get() != 0 && m_result.battles->getNumBattles() == 0) {
+    if (m_result.battles.get() == 0 || m_result.battles->getNumBattles() == 0) {
         return false;
     } else {
         list.addResult(m_setup, m_newState, m_stats, m_result);
@@ -70,12 +80,14 @@ game::sim::Runner::Runner(const Setup& setup,
                           const game::spec::ShipList& list,
                           const game::config::HostConfiguration& config,
                           const game::vcr::flak::Configuration& flakConfig,
+                          afl::sys::LogListener& log,
                           util::RandomNumberGenerator& rng)
     : m_setup(setup),
       m_options(opts),
       m_shipList(list),
       m_config(config),
       m_flakConfiguration(flakConfig),
+      m_log(log),
       m_rng(rng),
       m_count(0),
       m_seriesLength(0),
@@ -90,7 +102,7 @@ game::sim::Runner::init()
     // ex WSimResultWindow::runFirstSimulation (sort-of)
     bool ok;
     if (m_count == 0) {
-        Job j(m_setup, m_options, m_shipList, m_config, m_flakConfiguration, m_rng, 0);
+        Job j(m_setup, m_options, m_shipList, m_config, m_flakConfiguration, m_log, m_rng, 0);
         j.run();
         if (j.writeBack(m_resultList)) {
             m_count = 1;
@@ -144,7 +156,7 @@ game::sim::Runner::Job*
 game::sim::Runner::makeJob(Limit_t& limit, util::StopSignal& stopper)
 {
     if (!stopper.get() && (limit == 0 || m_count < limit)) {
-        return new Job(m_setup, m_options, m_shipList, m_config, m_flakConfiguration, m_rng, m_count++);
+        return new Job(m_setup, m_options, m_shipList, m_config, m_flakConfiguration, m_log, m_rng, m_count++);
     } else {
         return 0;
     }

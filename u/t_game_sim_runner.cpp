@@ -12,6 +12,7 @@
 
 #include "t_game_sim.hpp"
 #include "afl/base/signalconnection.hpp"
+#include "afl/sys/log.hpp"
 #include "game/sim/parallelrunner.hpp"
 #include "game/sim/setup.hpp"
 #include "game/sim/ship.hpp"
@@ -185,9 +186,12 @@ TestGameSimRunner::testRegression1()
     // Stop signal (not used)
     util::StopSignal sig;
 
+    // Logger (not used)
+    afl::sys::Log log;
+
     // SimpleRunner
     util::RandomNumberGenerator simpleRNG(42);
-    game::sim::SimpleRunner simpleRunner(setup, opts, shipList, config, flakConfiguration, simpleRNG);
+    game::sim::SimpleRunner simpleRunner(setup, opts, shipList, config, flakConfiguration, log, simpleRNG);
     simpleRunner.init();
     TS_ASSERT_EQUALS(simpleRunner.resultList().getNumBattles(), 1U);
 
@@ -196,7 +200,7 @@ TestGameSimRunner::testRegression1()
 
     // ParallelRunner
     util::RandomNumberGenerator parallelRNG(42);
-    game::sim::ParallelRunner parallelRunner(setup, opts, shipList, config, flakConfiguration, parallelRNG, 1);
+    game::sim::ParallelRunner parallelRunner(setup, opts, shipList, config, flakConfiguration, log, parallelRNG, 1);
     parallelRunner.init();
     TS_ASSERT_EQUALS(parallelRunner.resultList().getNumBattles(), 1U);
 
@@ -239,9 +243,12 @@ TestGameSimRunner::testRegression2()
     // Stop signal (not used)
     util::StopSignal sig;
 
+    // Logger (not used)
+    afl::sys::Log log;
+
     // SimpleRunner
     util::RandomNumberGenerator simpleRNG(77);
-    game::sim::SimpleRunner simpleRunner(setup, opts, shipList, config, flakConfiguration, simpleRNG);
+    game::sim::SimpleRunner simpleRunner(setup, opts, shipList, config, flakConfiguration, log, simpleRNG);
     simpleRunner.init();
     TS_ASSERT_EQUALS(simpleRunner.resultList().getNumBattles(), 1U);
 
@@ -250,7 +257,7 @@ TestGameSimRunner::testRegression2()
 
     // ParallelRunner
     util::RandomNumberGenerator parallelRNG(77);
-    game::sim::ParallelRunner parallelRunner(setup, opts, shipList, config, flakConfiguration, parallelRNG, 5);
+    game::sim::ParallelRunner parallelRunner(setup, opts, shipList, config, flakConfiguration, log, parallelRNG, 5);
     parallelRunner.init();
     TS_ASSERT_EQUALS(parallelRunner.resultList().getNumBattles(), 1U);
 
@@ -287,15 +294,18 @@ TestGameSimRunner::testInterrupt()
     game::TeamSettings team;
     opts.setMode(game::sim::Configuration::VcrHost, team, config);
 
+    // Logger (not used)
+    afl::sys::Log log;
+
     // SimpleRunner
     util::RandomNumberGenerator simpleRNG(77);
-    game::sim::SimpleRunner simpleRunner(setup, opts, shipList, config, flakConfiguration, simpleRNG);
+    game::sim::SimpleRunner simpleRunner(setup, opts, shipList, config, flakConfiguration, log, simpleRNG);
     simpleRunner.init();
     checkInterrupt("SimpleRunner", simpleRunner);
 
     // ParallelRunner
     util::RandomNumberGenerator parallelRNG(77);
-    game::sim::ParallelRunner parallelRunner(setup, opts, shipList, config, flakConfiguration, parallelRNG, 5);
+    game::sim::ParallelRunner parallelRunner(setup, opts, shipList, config, flakConfiguration, log, parallelRNG, 5);
     parallelRunner.init();
     checkInterrupt("SimpleRunner", parallelRunner);
 }

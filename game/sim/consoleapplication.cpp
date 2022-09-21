@@ -543,9 +543,9 @@ game::sim::ConsoleApplication::runSimulation(Setup& setup, const Session& sessio
     // Build runner
     std::auto_ptr<Runner> runner;
     if (params.numThreads <= 1) {
-        runner.reset(new SimpleRunner(setup, opts, *session.shipList, session.root->hostConfiguration(), session.root->flakConfiguration(), rng));
+        runner.reset(new SimpleRunner(setup, opts, *session.shipList, session.root->hostConfiguration(), session.root->flakConfiguration(), consoleLogger(), rng));
     } else {
-        runner.reset(new ParallelRunner(setup, opts, *session.shipList, session.root->hostConfiguration(), session.root->flakConfiguration(), rng, params.numThreads));
+        runner.reset(new ParallelRunner(setup, opts, *session.shipList, session.root->hostConfiguration(), session.root->flakConfiguration(), consoleLogger(), rng, params.numThreads));
     }
 
     // Run first sim

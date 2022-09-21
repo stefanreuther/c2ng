@@ -34,6 +34,7 @@ namespace game { namespace sim {
             \param [in]     list    Ship list (see Runner)
             \param [in]     config  Host configuration (see Runner)
             \param [in]     flakConfig FLAK configuration (see Runner)
+            \param [in,out] log     Logger (for errors, see Runner)
             \param [in,out] rng     Random number generator (see Runner)
             \param [in]     numThreads Number of threads to start*/
         ParallelRunner(const Setup& setup,
@@ -41,6 +42,7 @@ namespace game { namespace sim {
                        const game::spec::ShipList& list,
                        const game::config::HostConfiguration& config,
                        const game::vcr::flak::Configuration& flakConfig,
+                       afl::sys::LogListener& log,
                        util::RandomNumberGenerator& rng,
                        size_t numThreads);
 
