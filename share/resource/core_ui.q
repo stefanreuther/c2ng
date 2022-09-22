@@ -193,19 +193,21 @@ EndSub
 % @since PCC2 2.40.13
 Sub CCUI.Planet.Exchange
   % ex CC$PlanetXchg
-  Local pid = PlanetAt(UI.X, UI.Y, 1)
+  Local anyShip = FindShip(Loc.X=UI.X And Loc.Y=UI.Y And Played)
+  Local pid = PlanetAt(UI.X, UI.Y, IsEmpty(Z(anyShip)))
   If pid And pid<>Id And Planet(pid).Played Then
     UI.GotoScreen 2, pid
   Else
-    If FindShip(Loc.X=UI.X And Loc.Y=UI.Y And Played) Then CCUI.ListShips UI.X, UI.Y, 'e'
+    If anyShip Then CCUI.ListShips UI.X, UI.Y, 'e'
   EndIf
 EndSub
 
 % X on base screen
 % @since PCC2 2.40.13
 Sub CCUI.Base.Exchange
-  % CC$BaseXchg
-  Local pid = PlanetAt(UI.X, UI.Y, 1)
+  % ex CC$BaseXchg, bdata.pas:BaseXchg
+  Local anyShip = FindShip(Loc.X=UI.X And Loc.Y=UI.Y And Played)
+  Local pid = PlanetAt(UI.X, UI.Y, IsEmpty(Z(anyShip)))
   If pid And pid<>Id And Planet(pid).Played Then
     If Planet(pid).Base.YesNo Then
       UI.GotoScreen 3, pid
@@ -213,7 +215,7 @@ Sub CCUI.Base.Exchange
       UI.GotoScreen 2, pid
     EndIf
   Else
-    If FindShip(Loc.X=UI.X And Loc.Y=UI.Y And Played) Then CCUI.ListShips UI.X, UI.Y, 'e'
+    If anyShip Then CCUI.ListShips UI.X, UI.Y, 'e'
   EndIf
 EndSub
 
