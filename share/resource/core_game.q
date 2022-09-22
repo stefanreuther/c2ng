@@ -543,6 +543,11 @@ Function CCVP.MissionWorksOnShip(msn, sh)
   EndTry
 EndFunction
 
+% @since PCC2 2.41
+Function CCVP.MissionLocksWaypoint(msn)
+  Return InStr(msn->Flags, "i")
+EndFunction
+
 % @since PCC2 2.40.13
 Function CCVP.MissionWorksGlobally(msn)
   % ex client/actions/gamission.cc:checkMission

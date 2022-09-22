@@ -744,6 +744,22 @@ Function CCUI$Ship.CompleteMissionSelection (newNr, shipId)
   Return res
 EndFunction
 
+% Check presence of a lock and ask whether to override it.
+% Returns true to proceed.
+Function CC$QueryLock(lockName, title)
+  % ex cscreen.pas:CsQueryLock
+  Local UI.Result
+  If GetLockInfo(lockName, 0) Then
+    If GetLockInfo(lockName, 2) Then
+      UI.Message Format(Translate("%s (%s)\nProceed anyway?"), GetLockInfo(lockName, 2), GetLockInfo(lockName, 1)), title, Translate("Yes No")
+    Else
+      UI.Message Format(Translate("This function is under control of \"%s\".\nProceed anyway?"), GetLockInfo(lockName, 1)), title, Translate("Yes No")
+    EndIf
+    If UI.Result<>1 Then Return False
+  EndIf
+  Return True
+EndFunction
+
 % Ship operation
 % FIXME: when the waypoint is tied to the scanner, and keyboard move is enabled,
 % this triggers on every movement.
@@ -756,14 +772,7 @@ Sub CC$WithShipWaypoint (cmd, opt, Optional overrideAT)
 
   % Check waypoint lock
   s := "s" & sid & ".waypoint"
-  If Not overrideAT And GetLockInfo(s, 0) Then
-    If GetLockInfo(s, 2) Then
-      UI.Message Format(Translate("%s (%s)\nProceed anyway?"), GetLockInfo(s, 2), GetLockInfo(s, 1)), Translate("Waypoint"), Translate("Yes No")
-    Else
-      UI.Message Format(Translate("This function is under control of \"%s\".\nProceed anyway?"), GetLockInfo(s, 1)), Translate("Waypoint"), Translate("Yes No")
-    EndIf
-    If UI.Result <> 1 Then Return
-  EndIf
+  If Not overrideAT And Not CC$QueryLock("s" & sid & ".waypoint", Translate("Waypoint")) Then Return
 
   % Check fleet
   If Fleet$<>0 And Fleet$<>sid Then
@@ -812,6 +821,7 @@ EndSub
 % Ship mission [M]
 % @since PCC2 2.40.1
 Sub CCUI.Ship.SetMission
+  % ex mission.pas:NSetMission (sort-of)
   Local _ := Translate
   Local UI.Result, System.Err
   Local i := Id
@@ -820,6 +830,11 @@ Sub CCUI.Ship.SetMission
     If GetCommand('beamup ' & i) Then
       UI.Message _("This ship has an active \"Beam Up Multiple\" order. Its mission will be overridden by PHost.\nContinue anyway?"), _("Ship Mission"), _("Yes No")
       If UI.Result<>1 Then Return
+    EndIf
+    If Fleet.Status='member' And CCVP.MissionLocksWaypoint(Global.Mission(Mission$, Owner.Real)) Then
+      UI.Message _("This ship is member of a fleet which is on a intercept course. Changing the mission will lose the intercept lock.\nLeave the fleet and continue?"), _("Ship Mission"), _("Yes No")
+      If UI.Result<>1 Then Return
+      SetFleet 0
     EndIf
 
     % Build listbox
@@ -830,6 +845,7 @@ Sub CCUI.Ship.SetMission
     % Process result
     Local r := CCUI$Ship.CompleteMissionSelection(UI.Result, i)
     If Not IsEmpty(r) Then
+      If CCVP.MissionLocksWaypoint(Global.Mission(r(0), Owner.Real)) And Not CC$QueryLock('s' & Id & '.waypoint', _("Ship Mission")) Then Return
       SetMission r(0), r(1), r(2)
 
       % Execute 'OnSet=' command
