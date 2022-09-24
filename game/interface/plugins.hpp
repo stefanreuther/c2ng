@@ -1,5 +1,5 @@
 /**
-  *  \file client/plugins.hpp
+  *  \file game/interface/plugins.hpp
   *  \brief Plugin Integration
   *
   *  We load plugins by creating bytecode.
@@ -11,15 +11,18 @@
   *  Loading of files (namely, core.q) is also implemented here to allow the same re-usage benefits.
   *  In addition, this reduces the number of places where script files are opened to a minimum,
   *  allowing to add things like *.qc file support with minimum effort.
+  *
+  *  This code references methods defined by the client by name (LoadResource, LoadHelpFile).
+  *  Otherwise, it works closely with PluginContext; therefore, it is placed in game::interface.
   */
-#ifndef C2NG_CLIENT_PLUGINS_HPP
-#define C2NG_CLIENT_PLUGINS_HPP
+#ifndef C2NG_GAME_INTERFACE_PLUGINS_HPP
+#define C2NG_GAME_INTERFACE_PLUGINS_HPP
 
 #include "interpreter/bytecodeobject.hpp"
 #include "util/plugin/plugin.hpp"
 #include "util/plugin/manager.hpp"
 
-namespace client {
+namespace game { namespace interface {
 
     /** Create plugin loader for a single plugin.
         \param plugin The plugin
@@ -38,6 +41,6 @@ namespace client {
         \return BytecodeObject that, when executed, will load the given file or print an error message. */
     interpreter::BCORef_t createFileLoader(const String_t& fileName, const String_t& origin);
 
-}
+} }
 
 #endif

@@ -200,9 +200,30 @@ class TestGameInterfaceNotificationStore : public CxxTest::TestSuite {
     void testReplace();
 };
 
+class TestGameInterfacePluginContext : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testNonExistant();
+    void testCreateRegular();
+    void testCreateNull();
+    void testCreateUnknown();
+    void testCreateErrors();
+};
+
 class TestGameInterfacePluginProperty : public CxxTest::TestSuite {
  public:
     void testGet();
+};
+
+class TestGameInterfacePlugins : public CxxTest::TestSuite {
+ public:
+    void testLoadResource();
+    void testLoadHelpFile();
+    void testLoadScript();
+    void testExecScript();
+    void testUnloaded();
+    void testLoadSuccess();
+    void testLoadFailure();
 };
 
 class TestGameInterfaceProcessListEditor : public CxxTest::TestSuite {

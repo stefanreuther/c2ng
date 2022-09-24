@@ -1,14 +1,14 @@
 /**
-  *  \file client/plugins.cpp
+  *  \file game/interface/plugins.cpp
   *  \brief Plugin Integration
   */
 
-#include "client/plugins.hpp"
-#include "interpreter/opcode.hpp"
+#include "game/interface/plugins.hpp"
 #include "afl/data/stringvalue.hpp"
+#include "afl/string/format.hpp"
+#include "interpreter/opcode.hpp"
 #include "interpreter/subroutinevalue.hpp"
 #include "util/translation.hpp"
-#include "afl/string/format.hpp"
 
 using util::plugin::Plugin;
 using interpreter::Opcode;
@@ -87,7 +87,7 @@ namespace {
 
 // Create plugin loader for a single plugin.
 interpreter::BCORef_t
-client::createPluginLoader(const util::plugin::Plugin& plugin)
+game::interface::createPluginLoader(const util::plugin::Plugin& plugin)
 {
     // ex client/main.cc:loadPlugin (sort-of)
 
@@ -137,7 +137,7 @@ client::createPluginLoader(const util::plugin::Plugin& plugin)
 
 // Create plugin loader for all unloaded plugins.
 interpreter::BCORef_t
-client::createLoaderForUnloadedPlugins(util::plugin::Manager& manager)
+game::interface::createLoaderForUnloadedPlugins(util::plugin::Manager& manager)
 {
     // ex client/main.cc:loadPlugins
 
@@ -173,7 +173,7 @@ client::createLoaderForUnloadedPlugins(util::plugin::Manager& manager)
 
 // Create a file loader.
 interpreter::BCORef_t
-client::createFileLoader(const String_t& fileName, const String_t& origin)
+game::interface::createFileLoader(const String_t& fileName, const String_t& origin)
 {
     // Create a BCO
     interpreter::BCORef_t result(interpreter::BytecodeObject::create(true));

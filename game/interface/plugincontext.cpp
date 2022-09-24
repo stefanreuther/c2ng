@@ -1,12 +1,14 @@
 /**
   *  \file game/interface/plugincontext.cpp
+  *  \brief Class game::interface::PluginContext
   */
 
 #include "game/interface/plugincontext.hpp"
-#include "interpreter/nametable.hpp"
-#include "interpreter/propertyacceptor.hpp"
 #include "afl/string/format.hpp"
 #include "game/interface/pluginproperty.hpp"
+#include "interpreter/nametable.hpp"
+#include "interpreter/propertyacceptor.hpp"
+#include "interpreter/values.hpp"
 
 namespace {
     enum PluginDomain { PluginPropertyDomain };
@@ -48,13 +50,6 @@ game::interface::PluginContext::get(PropertyIndex_t index)
     }
 }
 
-bool
-game::interface::PluginContext::next()
-{
-    // ex IntPluginContext::next
-    return false;
-}
-
 game::interface::PluginContext*
 game::interface::PluginContext::clone() const
 {
@@ -78,10 +73,12 @@ game::interface::PluginContext::enumProperties(interpreter::PropertyAcceptor& ac
 
 // BaseValue:
 String_t
-game::interface::PluginContext::toString(bool /*readable*/) const
+game::interface::PluginContext::toString(bool readable) const
 {
     // ex IntPluginContext::toString
-    return afl::string::Format("#<plugin:%s>", m_name);
+    return readable
+        ? afl::string::Format("System.Plugin(%s)", interpreter::quoteString(m_name))
+        : afl::string::Format("#<plugin:%s>", m_name);
 }
 
 void
@@ -100,4 +97,22 @@ game::interface::PluginContext::create(String_t name, Session& session)
     } else {
         return 0;
     }
+}
+
+afl::data::Value*
+game::interface::IFSystemPlugin(Session& session, interpreter::Arguments& args)
+{
+    /* @q System.Plugin(id:Str):Obj (Function)
+       Accesses the properties of the plugin given by the name <tt>Id</tt>.
+       If no such plugin was loaded, returns EMPTY.
+       @see int:index:group:pluginproperty|Plugin Properties
+       @since PCC2 1.99.25, PCC2 2.40.1 */
+    args.checkArgumentCount(1);
+
+    String_t arg;
+    if (!interpreter::checkStringArg(arg, args.getNext())) {
+        return 0;
+    }
+
+    return PluginContext::create(arg, session);
 }

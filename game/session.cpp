@@ -29,7 +29,7 @@
 #include "game/interface/notificationfunctions.hpp"
 #include "game/interface/planetfunction.hpp"
 #include "game/interface/playerfunction.hpp"
-#include "game/interface/pluginfunction.hpp"
+#include "game/interface/plugincontext.hpp"
 #include "game/interface/referencecontext.hpp"
 #include "game/interface/referencelistcontext.hpp"
 #include "game/interface/richtextfunctions.hpp"
@@ -584,7 +584,7 @@ game::Session::initWorld()
     m_world.setNewGlobalValue("RANDOMFCODE",   new SessionFunction_t(*this, game::interface::IFRandomFCode));
     m_world.setNewGlobalValue("SHIP",          new game::interface::ShipFunction(*this));
     m_world.setNewGlobalValue("STORM",         new game::interface::IonStormFunction(*this));
-    m_world.setNewGlobalValue("SYSTEM.PLUGIN", new game::interface::PluginFunction(*this));
+    m_world.setNewGlobalValue("SYSTEM.PLUGIN", new SessionFunction_t(*this, game::interface::IFSystemPlugin));
     m_world.setNewGlobalValue("TORPEDO",       new game::interface::TorpedoFunction(false, *this));
     m_world.setNewGlobalValue("TRANSLATE",     new SessionFunction_t(*this, game::interface::IFTranslate));
     m_world.setNewGlobalValue("TRUEHULL",      new SessionFunction_t(*this, game::interface::IFTruehull));

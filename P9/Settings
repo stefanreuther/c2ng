@@ -12,7 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/interface/configurationeditorcontext.cpp \
+FILES_gamelib = game/interface/plugins.hpp game/interface/plugins.cpp \
+    game/interface/configurationeditorcontext.cpp \
     game/interface/configurationeditorcontext.hpp \
     interpreter/variablereference.cpp interpreter/variablereference.hpp \
     game/interface/globalactioncontext.cpp \
@@ -430,7 +431,6 @@ FILES_gamelib = game/interface/configurationeditorcontext.cpp \
     game/interface/vcrsidecontext.cpp game/interface/vcrsidecontext.hpp \
     game/interface/vcrproperty.cpp game/interface/vcrproperty.hpp \
     game/interface/vcrsideproperty.cpp game/interface/vcrsideproperty.hpp \
-    game/interface/pluginfunction.cpp game/interface/pluginfunction.hpp \
     game/interface/plugincontext.cpp game/interface/plugincontext.hpp \
     game/interface/pluginproperty.cpp game/interface/pluginproperty.hpp \
     util/plugin/installer.cpp util/plugin/installer.hpp \
@@ -1105,8 +1105,7 @@ FILES_guilib = client/dialogs/backupconfig.cpp \
     ui/res/winplanbitmapprovider.hpp ui/res/factory.cpp ui/res/factory.hpp \
     ui/res/resourcefileprovider.cpp ui/res/resourcefileprovider.hpp \
     ui/res/resourcefile.cpp ui/res/resourcefile.hpp ui/res/resid.cpp \
-    ui/res/resid.hpp client/plugins.cpp client/plugins.hpp \
-    client/widgets/controlscreenheader.cpp \
+    ui/res/resid.hpp client/widgets/controlscreenheader.cpp \
     client/widgets/controlscreenheader.hpp \
     client/tiles/shipscreenheadertile.cpp \
     client/tiles/shipscreenheadertile.hpp ui/widgets/imagebutton.cpp \
@@ -1731,7 +1730,9 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_interface_configurationeditorcontext.cpp \
+FILES_testsuite = u/t_game_interface_plugins.cpp \
+    u/t_game_interface_plugincontext.cpp \
+    u/t_game_interface_configurationeditorcontext.cpp \
     u/t_interpreter_variablereference.cpp \
     u/t_game_interface_globalactioncontext.cpp \
     u/t_interpreter_savevisitor.cpp u/t_interpreter_expr_node.cpp \

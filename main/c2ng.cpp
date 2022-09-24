@@ -30,7 +30,6 @@
 #include "afl/sys/thread.hpp"
 #include "afl/test/translator.hpp"
 #include "client/map/screen.hpp"
-#include "client/plugins.hpp"
 #include "client/screens/browserscreen.hpp"
 #include "client/screens/controlscreen.hpp"
 #include "client/screens/playerscreen.hpp"
@@ -47,6 +46,7 @@
 #include "game/browser/directoryhandler.hpp"
 #include "game/game.hpp"
 #include "game/interface/labelextra.hpp"
+#include "game/interface/plugins.hpp"
 #include "game/interface/vmfile.hpp"
 #include "game/nu/browserhandler.hpp"
 #include "game/pcc/browserhandler.hpp"
@@ -127,11 +127,11 @@ namespace {
 
                 // Create process to load core.q
                 interpreter::Process& coreProcess = processList.create(t.world(), "<Core>");
-                coreProcess.pushFrame(client::createFileLoader("core.q", "core.q"), false);
+                coreProcess.pushFrame(game::interface::createFileLoader("core.q", "core.q"), false);
 
                 // Create process to load plugins
                 interpreter::Process& pluginProcess = processList.create(t.world(), "<PluginLoader>");
-                pluginProcess.pushFrame(client::createLoaderForUnloadedPlugins(t.plugins()), false);
+                pluginProcess.pushFrame(game::interface::createLoaderForUnloadedPlugins(t.plugins()), false);
 
                 // Execute both processes
                 processList.resumeProcess(coreProcess, pgid);
