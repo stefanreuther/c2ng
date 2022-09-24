@@ -440,6 +440,26 @@ class TestGameProxyPlayerProxy : public CxxTest::TestSuite {
     void testNormal();
 };
 
+class TestGameProxyPluginManagerProxy : public CxxTest::TestSuite {
+ public:
+    void testRequest();
+    void testDebounce();
+    void testInstall();
+    void testInstallNoDir();
+    void testInstallNoFile();
+    void testInstallBadFile();
+    void testInstallConflict();
+    void testInstallConflict2();
+    void testInstallOneAlternative();
+    void testInstallMultipleAlternatives();
+    void testInstallMissingFile();
+    void testInstallBadSequence();
+    void testRemove();
+    void testRemoveDepend();
+    void testRemoveMissing();
+    void testUninstallBadName();
+};
+
 class TestGameProxyPredictedStarbaseAdaptor : public CxxTest::TestSuite {
  public:
     void testEmpty();

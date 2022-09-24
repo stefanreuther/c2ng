@@ -12,6 +12,8 @@ class TestUtilPluginManager : public CxxTest::TestSuite {
     void testIt();
     void testCycle();
     void testNull();
+    void testDescribe();
+    void testDescribeNull();
 };
 
 class TestUtilPluginPlugin : public CxxTest::TestSuite {

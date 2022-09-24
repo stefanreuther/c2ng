@@ -22,6 +22,16 @@ namespace {
     {
         features["PCC"] = PCC2_VERSION;
     }
+
+    String_t formatFeatureName(const util::plugin::Plugin::FeatureSet_t::const_iterator& it)
+    {
+        String_t result = it->first;
+        if (!it->second.empty()) {
+            result += " ";
+            result += it->second;
+        }
+        return result;
+    }
 }
 
 // Constructor.
@@ -149,6 +159,19 @@ util::plugin::Manager::enumPlugins(std::vector<Plugin*>& out, bool ordered) cons
     }
 }
 
+// Enumerate plugins, as textual information.
+void
+util::plugin::Manager::enumPluginInfo(Infos_t& out) const
+{
+    // ex WPluginList::init, part
+    // For now, use the normal sorting order (same as PCC2).
+    // We could explicitly sort if this becomes necessary.
+    for (size_t i = 0, n = m_plugins.size(); i < n; ++i) {
+        const Plugin* p = m_plugins[i];
+        out.push_back(Info(p->getId(), p->getName(), p->isLoaded() ? Loaded : NotLoaded));
+    }
+}
+
 // Enumerate conflicting plugins.
 void
 util::plugin::Manager::enumConflictingPlugins(const Plugin& candidate, std::vector<Plugin*>& out) const
@@ -213,4 +236,55 @@ util::plugin::Manager::getPluginById(const String_t& id) const
         }
     }
     return 0;
+}
+
+util::plugin::Manager::Details
+util::plugin::Manager::describePlugin(Plugin* p) const
+{
+    // ex WPluginDialog::onMove(), part
+    if (p != 0) {
+        // Header
+        Details result(p->getId(), p->getName(), p->isLoaded() ? Loaded : NotLoaded);
+
+        // Description
+        result.description = p->getDescription();
+
+        // Files
+        const Plugin::ItemList_t& items = p->getItems();
+        for (size_t i = 0; i < items.size(); ++i) {
+            if (items[i].type != Plugin::Command) {
+                result.files.push_back(items[i].name);
+            }
+        }
+
+        // Requires
+        {
+            Plugin::FeatureSet_t empty, need, all, miss;
+            enumProvidedFeatures(all);
+            p->enumMissingFeatures(empty, need);
+            p->enumMissingFeatures(all, miss);
+            for (Plugin::FeatureSet_t::const_iterator i = need.begin(); i != need.end(); ++i) {
+                if (miss.find(i->first) != miss.end()) {
+                    result.missingFeatures.push_back(formatFeatureName(i));
+                } else {
+                    result.usedFeatures.push_back(formatFeatureName(i));
+                }
+            }
+        }
+
+        // Provides
+        {
+            Plugin::FeatureSet_t offer;
+            p->enumProvidedFeatures(offer);
+            for (Plugin::FeatureSet_t::const_iterator i = offer.begin(); i != offer.end(); ++i) {
+                if (i->first != p->getId()) {
+                    result.providedFeatures.push_back(formatFeatureName(i));
+                }
+            }
+        }
+
+        return result;
+    } else {
+        return Details(String_t(), String_t(), NotLoaded);
+    }
 }

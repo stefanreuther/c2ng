@@ -7,6 +7,7 @@
 
 #include <vector>
 #include "afl/container/ptrvector.hpp"
+#include "afl/data/stringlist.hpp"
 #include "afl/io/directory.hpp"
 #include "afl/io/filesystem.hpp"
 #include "afl/string/translator.hpp"
@@ -20,6 +21,42 @@ namespace util { namespace plugin {
         This maintains plugin meta-information, not the plugin content. */
     class Manager {
      public:
+        /** Plugin status.
+            This is an enum to allow for potential future statuses. */
+        enum Status {
+            NotLoaded,                 ///< Plugin not loaded.
+            Loaded                     ///< Plugin is loaded.
+        };
+
+        /** Information about a plugin.
+            A structure containing enough information to render a plugin list.
+            Can be copied as needed. */
+        struct Info {
+            String_t id;               ///< Plugin Id. \see Plugin::getId()
+            String_t name;             ///< Plugin Name. \see Plugin::getName()
+            Status status;             ///< Plugin status.
+
+            Info(const String_t& id, const String_t& name, Status status)
+                : id(id), name(name), status(status)
+                { }
+        };
+        typedef std::vector<Info> Infos_t;
+
+        /** Detail information about a plugin.
+            Contains all user-visible information about a plugin.
+            Can be copied as needed. */
+        struct Details : public Info {
+            String_t description;                      ///< Description. \see Plugin::getDescription()
+            afl::data::StringList_t files;             ///< Files that make up this plugin. \see Plugin::getItems()
+            afl::data::StringList_t usedFeatures;      ///< Features used by this plugin. These are required and are actually available.
+            afl::data::StringList_t missingFeatures;   ///< Features missing by this plugin. These are required but not available.
+            afl::data::StringList_t providedFeatures;  ///< Features provided by this plugin.
+            Details(const String_t& id, const String_t& name, Status status)
+                : Info(id, name, status),
+                  description(), files(), usedFeatures(), missingFeatures(), providedFeatures()
+                { }
+        };
+
         /** Constructor.
             \param tx Translator (for log messages)
             \param log Logger (for log messages) */
@@ -52,6 +89,11 @@ namespace util { namespace plugin {
             \param [in]  ordered  true for ordered mode, false for standard mode */
         void enumPlugins(std::vector<Plugin*>& out, bool ordered) const;
 
+        /** Enumerate plugins, as textual information.
+            The sort order is appropriate for display.
+            \param [out] out  result */
+        void enumPluginInfo(Infos_t& out) const;
+
         /** Enumerate conflicting plugins.
             \param [in]  candidate  Candidate plugin (one that we want to add, i.e. newly created)
             \param [out] out        List of plugins that prevent loading the candidate, owned by Manager */
@@ -77,6 +119,11 @@ namespace util { namespace plugin {
             \param id Plugin Id
             \return plugin (owned by Managr) or null */
         Plugin* getPluginById(const String_t& id) const;
+
+        /** Get details for a plugin.
+            \param p Plugin (should not be null)
+            \return details */
+        Details describePlugin(Plugin* p) const;
 
         /** Access log listener.
             \return log listener */

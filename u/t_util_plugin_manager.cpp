@@ -28,7 +28,7 @@ TestUtilPluginManager::testIt()
     afl::string::NullTranslator tx;
     afl::sys::Log log;
     Manager testee(tx, log);
-//    TS_ASSERT_EQUALS(&testee.log(), &log);
+    TS_ASSERT_EQUALS(&testee.log(), &log);
 
     // Create a directory with some plugins in it
     Ref<InternalDirectory> dir = InternalDirectory::create("dir");
@@ -54,6 +54,16 @@ TestUtilPluginManager::testIt()
         TS_ASSERT_EQUALS(alpha[0]->getId(), "A");
         TS_ASSERT_EQUALS(alpha[1]->getId(), "B");
         TS_ASSERT_EQUALS(alpha[2]->getId(), "C");
+    }
+
+    // List them (alphabetic, textual)
+    {
+        Manager::Infos_t result;
+        testee.enumPluginInfo(result);
+        TS_ASSERT_EQUALS(result.size(), 3U);
+        TS_ASSERT_EQUALS(result[0].id, "A");
+        TS_ASSERT_EQUALS(result[1].id, "B");
+        TS_ASSERT_EQUALS(result[2].id, "C");
     }
 
     // List them (ordered)
@@ -205,5 +215,68 @@ TestUtilPluginManager::testNull()
         testee.enumPlugins(alpha, false);
         TS_ASSERT_EQUALS(alpha.size(), 0U);
     }
+}
+
+/** Test describePlugin(). */
+void
+TestUtilPluginManager::testDescribe()
+{
+    // Setup
+    afl::string::NullTranslator tx;
+    afl::sys::Log log;
+    Manager testee(tx, log);
+
+    // Create a directory with some plugins in it
+    Ref<InternalDirectory> dir = InternalDirectory::create("dir");
+    dir->addStream("a.c2p", *new ConstMemoryStream(toBytes("description = first plugin\n"
+                                                           "name = first\n"
+                                                           "requires = x, b, q\n"
+                                                           "provides = f\n"
+                                                           "exec = print 'hi'\n"
+                                                           "helpfile = foo.xml\n")));
+    dir->addStream("b.c2p", *new ConstMemoryStream(toBytes("provides = q\n"
+                                                           "name = second\n")));
+    testee.findPlugins(*dir);
+
+    // Verify
+    Manager::Details da = testee.describePlugin(testee.getPluginById("A"));
+    TS_ASSERT_EQUALS(da.id, "A");
+    TS_ASSERT_EQUALS(da.name, "first");
+    TS_ASSERT_EQUALS(da.description, "first plugin");
+    TS_ASSERT_EQUALS(da.usedFeatures.size(), 2U);
+    TS_ASSERT_EQUALS(da.usedFeatures[0], "B");
+    TS_ASSERT_EQUALS(da.usedFeatures[1], "Q");
+    TS_ASSERT_EQUALS(da.missingFeatures.size(), 1U);
+    TS_ASSERT_EQUALS(da.missingFeatures[0], "X");
+    TS_ASSERT_EQUALS(da.providedFeatures.size(), 1U);
+    TS_ASSERT_EQUALS(da.providedFeatures[0], "F");
+    TS_ASSERT_EQUALS(da.files.size(), 1U);
+    TS_ASSERT_EQUALS(da.files[0], "foo.xml");
+
+    Manager::Details db = testee.describePlugin(testee.getPluginById("B"));
+    TS_ASSERT_EQUALS(db.id, "B");
+    TS_ASSERT_EQUALS(db.name, "second");
+    TS_ASSERT_EQUALS(db.description, "");
+    TS_ASSERT_EQUALS(db.usedFeatures.size(), 0U);
+    TS_ASSERT_EQUALS(db.missingFeatures.size(), 0U);
+    TS_ASSERT_EQUALS(db.providedFeatures.size(), 1U);
+    TS_ASSERT_EQUALS(db.providedFeatures[0], "Q");
+    TS_ASSERT_EQUALS(db.files.size(), 0U);
+}
+
+/** Test describePlugin(), null case. */
+void
+TestUtilPluginManager::testDescribeNull()
+{
+    // Setup
+    afl::string::NullTranslator tx;
+    afl::sys::Log log;
+    Manager testee(tx, log);
+
+    Manager::Details d = testee.describePlugin(0);
+    TS_ASSERT_EQUALS(d.id, "");
+    TS_ASSERT_EQUALS(d.name, "");
+    TS_ASSERT_EQUALS(d.status, Manager::NotLoaded);
+    TS_ASSERT_EQUALS(d.description, "");
 }
 
