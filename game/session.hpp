@@ -202,6 +202,14 @@ namespace game {
             \return plugin manager */
         util::plugin::Manager& plugins();
 
+        /** Set plugin directory name.
+            \param name Name. Empty (default) means plugins cannot be installed. */
+        void setPluginDirectoryName(String_t name);
+
+        /** Get plugin directory name.
+            \return name */
+        String_t getPluginDirectoryName() const;
+
         /** Access authentication cache.
             \return authentication cache */
         AuthCache& authCache();
@@ -276,6 +284,7 @@ namespace game {
 
         util::RandomNumberGenerator m_rng;
         util::plugin::Manager m_plugins;
+        String_t m_pluginDirectoryName;
         AuthCache m_authCache;
         ExtraContainer<Session> m_extra;
         game::interface::NotificationStore m_notifications;

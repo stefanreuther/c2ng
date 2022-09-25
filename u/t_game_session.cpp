@@ -37,11 +37,16 @@ TestGameSession::testInit()
     TS_ASSERT(testee.getEditableAreas().empty());
     TS_ASSERT(testee.world().fileTable().getFreeFile() != 0);
     TS_ASSERT(testee.world().globalPropertyNames().getIndexByName("HULL") != afl::data::NameMap::nil);
+    TS_ASSERT_EQUALS(testee.getPluginDirectoryName(), "");
 
     // EditableAreas is modifiable
     game::Session::AreaSet_t a(game::Session::CommandArea);
     testee.setEditableAreas(a);
     TS_ASSERT_EQUALS(testee.getEditableAreas(), a);
+
+    // Plugin directory is modifiable
+    testee.setPluginDirectoryName("/pp");
+    TS_ASSERT_EQUALS(testee.getPluginDirectoryName(), "/pp");
 }
 
 /** Test subobjects.

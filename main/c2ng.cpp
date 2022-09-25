@@ -11,6 +11,7 @@
 #include "afl/base/ref.hpp"
 #include "afl/base/uncopyable.hpp"
 #include "afl/except/commandlineexception.hpp"
+#include "afl/io/directoryentry.hpp"
 #include "afl/io/filesystem.hpp"
 #include "afl/net/http/client.hpp"
 #include "afl/net/http/clientconnection.hpp"
@@ -41,6 +42,7 @@
 #include "client/tiles/historyadaptor.hpp"
 #include "client/usercallback.hpp"
 #include "game/actions/preconditions.hpp"
+#include "game/authcache.hpp"
 #include "game/browser/accountmanager.hpp"
 #include "game/browser/browser.hpp"
 #include "game/browser/directoryhandler.hpp"
@@ -82,7 +84,6 @@
 #include "util/string.hpp"
 #include "util/stringparser.hpp"
 #include "version.hpp"
-#include "game/authcache.hpp"
 
 namespace {
     const char LOG_NAME[] = "main";
@@ -174,7 +175,9 @@ namespace {
 
                 try {
                     // Plugins
-                    session.plugins().findPlugins(*m_profile.open()->openDirectory("plugins"));
+                    afl::base::Ref<afl::io::DirectoryEntry> e = m_profile.open()->getDirectoryEntryByName("plugins");
+                    session.setPluginDirectoryName(e->getPathName());
+                    session.plugins().findPlugins(*e->openDirectory());
                 }
                 catch (...) { }
 

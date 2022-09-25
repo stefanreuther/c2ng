@@ -83,6 +83,7 @@ game::Session::Session(afl::string::Translator& tx, afl::io::FileSystem& fs)
       m_processList(),
       m_rng(afl::sys::Time::getTickCounter()),
       m_plugins(tx, m_log),
+      m_pluginDirectoryName(),
       m_authCache(),
       m_extra(),
       m_notifications(m_processList),
@@ -339,6 +340,18 @@ util::plugin::Manager&
 game::Session::plugins()
 {
     return m_plugins;
+}
+
+void
+game::Session::setPluginDirectoryName(String_t name)
+{
+    m_pluginDirectoryName = name;
+}
+
+String_t
+game::Session::getPluginDirectoryName() const
+{
+    return m_pluginDirectoryName;
 }
 
 game::AuthCache&
