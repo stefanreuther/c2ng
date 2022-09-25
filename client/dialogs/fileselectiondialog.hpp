@@ -5,6 +5,7 @@
 #ifndef C2NG_CLIENT_DIALOGS_FILESELECTIONDIALOG_HPP
 #define C2NG_CLIENT_DIALOGS_FILESELECTIONDIALOG_HPP
 
+#include "afl/data/stringlist.hpp"
 #include "afl/io/filesystem.hpp"
 #include "afl/string/string.hpp"
 #include "afl/string/translator.hpp"
@@ -57,6 +58,11 @@ namespace client { namespace dialogs {
             \see util::FileNamePattern */
         void setPattern(const String_t& pat);
 
+        /** Add additional pattern (wildcard).
+            \param pat Pattern
+            \see util::FileNamePattern */
+        void addPattern(const String_t& pat);
+
         /** Set default extension.
             If this is nonempty and the user enters a file name without extension, that extension is appended.
             \param defaultExtension Default extension, not including leading dot
@@ -85,7 +91,7 @@ namespace client { namespace dialogs {
         String_t m_title;
 
         String_t m_folderName;
-        String_t m_pattern;
+        afl::data::StringList_t m_patterns;
         String_t m_defaultExtension;
         size_t m_contentOffset;
 

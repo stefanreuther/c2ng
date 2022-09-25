@@ -90,10 +90,10 @@ namespace {
 
     class InitTask : public util::Request<afl::io::FileSystem> {
      public:
-        InitTask(std::auto_ptr<DirectoryBrowser>& result, String_t folderName, String_t pattern, FileSelectionDialog::State& state, afl::string::Translator& tx)
+        InitTask(std::auto_ptr<DirectoryBrowser>& result, String_t folderName, const afl::data::StringList_t& patterns, FileSelectionDialog::State& state, afl::string::Translator& tx)
             : m_result(result),
               m_folderName(folderName),
-              m_pattern(pattern),
+              m_patterns(patterns),
               m_state(state),
               m_translator(tx)
             { }
@@ -101,8 +101,8 @@ namespace {
             {
                 m_result.reset(new DirectoryBrowser(fs));
                 m_result->clearFileNamePatterns();
-                if (!m_pattern.empty()) {
-                    m_result->addFileNamePattern(m_pattern);
+                for (size_t i = 0, n = m_patterns.size(); i < n; ++i) {
+                    m_result->addFileNamePattern(m_patterns[i]);
                 }
                 if (m_folderName.empty()) {
                     m_result->openRoot();
@@ -115,7 +115,7 @@ namespace {
      private:
         std::auto_ptr<DirectoryBrowser>& m_result;
         String_t m_folderName;
-        String_t m_pattern;
+        afl::data::StringList_t m_patterns;
         FileSelectionDialog::State& m_state;
         afl::string::Translator& m_translator;
     };
@@ -210,7 +210,7 @@ namespace {
                         m_result.newWildcard = file;
                         return;
                     }
-                    
+
                     // Handle relative file names
                     if (!fs.isAbsolutePathName(dir)) {
                         // Relative file names cannot be used in the "roots" view
@@ -278,7 +278,7 @@ client::dialogs::FileSelectionDialog::FileSelectionDialog(ui::Root& root, afl::s
       m_fileSystem(fs),
       m_title(title),
       m_folderName(),
-      m_pattern(util::FileNamePattern::getAllFilesPattern()),
+      m_patterns(1, util::FileNamePattern::getAllFilesPattern()),
       m_defaultExtension(),
       m_contentOffset(0),
       m_pHelpWidget(0),
@@ -310,7 +310,13 @@ client::dialogs::FileSelectionDialog::getFolder() const
 void
 client::dialogs::FileSelectionDialog::setPattern(const String_t& pat)
 {
-    m_pattern = pat;
+    m_patterns.assign(1, pat);
+}
+
+void
+client::dialogs::FileSelectionDialog::addPattern(const String_t& pat)
+{
+    m_patterns.push_back(pat);
 }
 
 void
@@ -355,7 +361,7 @@ client::dialogs::FileSelectionDialog::run()
                                                   m_root.provider())));
     g1.add(m_input);
     win.add(g1);
-    
+
     // FIXME: scrollbar
     win.add(ui::widgets::FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame, m_fileList));
     win.add(m_crumbTrail);
@@ -403,7 +409,7 @@ void
 client::dialogs::FileSelectionDialog::init()
 {
     State state;
-    InitTask t(m_browser, m_folderName, m_pattern, state, m_translator);
+    InitTask t(m_browser, m_folderName, m_patterns, state, m_translator);
     m_link.call(m_fileSystem, t);
     loadState(state);
 }
@@ -483,8 +489,9 @@ client::dialogs::FileSelectionDialog::handleUserInput(String_t name, bool allowP
     if (result.hasNewContent) {
         loadState(state);
     }
-    result.newWildcard.get(m_pattern);
-
+    if (const String_t* p = result.newWildcard.get()) {
+        setPattern(*p);
+    }
     if (result.result.get(m_result)) {
         m_loop.stop(1);
     }
