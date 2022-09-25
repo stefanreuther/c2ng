@@ -19,6 +19,7 @@
 #include "ui/widgets/simpleiconbox.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/rich/text.hpp"
+#include "client/si/userside.hpp"
 
 namespace client { namespace screens {
 
@@ -35,11 +36,9 @@ namespace client { namespace screens {
      public:
         /** Constructor.
             Prepares a BrowserScreen.
-            \param root User interface root
-            \param tx Translator
-            \param proxy Browser proxy for most operations
-            \param gameSender Sender to communicate with the game session (required for plugins/help) */
-        BrowserScreen(ui::Root& root, afl::string::Translator& tx, game::proxy::BrowserProxy& proxy, util::RequestSender<game::Session> gameSender);
+            \param us UserSide
+            \param proxy Browser proxy for most operations */
+        BrowserScreen(client::si::UserSide& us, game::proxy::BrowserProxy& proxy);
 
         /** Display this screen.
             Returns when the user cancels the dialog.
@@ -104,7 +103,7 @@ namespace client { namespace screens {
         void onKeyEnter(int);
         void onKeyLeft(int);
         void onKeyHelp(int);
-        // void onKeyPlugin(int); // F5
+        void onKeyPlugin(int);
         void onKeyQuit(int);
         void onAddAccount(int);
         void onRootAction(size_t index);
@@ -120,6 +119,7 @@ namespace client { namespace screens {
 
         void buildInfo();
 
+        client::si::UserSide& m_userSide;
         ui::Root& m_root;
         afl::string::Translator& m_translator;
         util::RequestSender<game::Session> m_gameSender;

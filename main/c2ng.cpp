@@ -1059,7 +1059,7 @@ namespace {
                     root.add(docView);
 
                     // Browser
-                    client::screens::BrowserScreen browserScreen(root, translator(), browserProxy, gameReceiver.getSender());
+                    client::screens::BrowserScreen browserScreen(userSide, browserProxy);
                     browserScreen.sig_gameSelection.addNewClosure(new BrowserListener(browserScreen, browserSender, gameReceiver.getSender()));
 
                     int result = browserScreen.run(docColors);

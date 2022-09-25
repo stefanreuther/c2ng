@@ -11,6 +11,7 @@
 #include "client/dialogs/directoryselectiondialog.hpp"
 #include "client/dialogs/folderconfigdialog.hpp"
 #include "client/dialogs/helpdialog.hpp"
+#include "client/dialogs/pluginmanager.hpp"
 #include "client/downlink.hpp"
 #include "client/imageloader.hpp"
 #include "game/playerlist.hpp"
@@ -40,6 +41,11 @@
 #include "util/rich/parser.hpp"
 #include "util/rich/styleattribute.hpp"
 #include "util/translation.hpp"
+#include "ui/defaultresourceprovider.hpp"
+#include "client/help.hpp"
+#include "client/si/control.hpp"
+#include "client/si/scripttask.hpp"
+#include "game/interface/plugins.hpp"
 
 using afl::base::Ptr;
 using afl::container::PtrVector;
@@ -289,23 +295,24 @@ namespace {
 
 /***************************** BrowserScreen *****************************/
 
-client::screens::BrowserScreen::BrowserScreen(ui::Root& root, afl::string::Translator& tx, game::proxy::BrowserProxy& proxy, util::RequestSender<game::Session> gameSender)
-    : m_root(root),
-      m_translator(tx),
-      m_gameSender(gameSender),
-      m_receiver(root.engine().dispatcher(), *this),
+client::screens::BrowserScreen::BrowserScreen(client::si::UserSide& us, game::proxy::BrowserProxy& proxy)
+    : m_userSide(us),
+      m_root(us.root()),
+      m_translator(us.translator()),
+      m_gameSender(us.gameSender()),
+      m_receiver(m_root.engine().dispatcher(), *this),
       m_proxy(proxy),
       m_list(gfx::Point(20, 20), m_root),
-      m_crumbs(root.provider().getFont(gfx::FontRequest())->getCellSize().scaledBy(40, 1), m_root),
-      m_info(root.provider(), root.colorScheme()),
-      m_optionButton(tx("Ins - Add Account"), util::Key_Insert, root),
+      m_crumbs(m_root.provider().getFont(gfx::FontRequest())->getCellSize().scaledBy(40, 1), m_root),
+      m_info(m_root.provider(), m_root.colorScheme()),
+      m_optionButton(m_translator("Ins - Add Account"), util::Key_Insert, m_root),
       m_infoItems(),
       m_infoIndex(0),
-      m_loop(root),
+      m_loop(m_root),
       m_hasUp(false),
       m_state(Working),
       m_blockState(false),
-      m_timer(root.engine().createTimer())
+      m_timer(m_root.engine().createTimer())
 {
     m_crumbs.setChangeOnClick(true);
     m_timer->sig_fire.add(this, &BrowserScreen::onTimer);
@@ -342,7 +349,7 @@ client::screens::BrowserScreen::run(gfx::ColorScheme<util::SkinColor::Color>& pa
     keys.add(util::Key_Left,                     this, &BrowserScreen::onKeyLeft);
     keys.add('h',                                this, &BrowserScreen::onKeyHelp);
     keys.add(util::Key_F1,                       this, &BrowserScreen::onKeyHelp);
-    // keys.add(util::Key_F5,                    this, &BrowserScreen::onKeyPlugin);
+    keys.add(util::Key_F5,                       this, &BrowserScreen::onKeyPlugin);
     keys.add(util::Key_Quit,                     this, &BrowserScreen::onKeyQuit);
     window.add(keys);
 
@@ -559,6 +566,113 @@ client::screens::BrowserScreen::onKeyHelp(int)
 {
     // ex PCC2GameChooserWindow::handleEvent (part)
     client::dialogs::doHelpDialog(m_root, m_translator, m_gameSender, "pcc2:gamesel");
+}
+
+void
+client::screens::BrowserScreen::onKeyPlugin(int)
+{
+    class LocalPluginManager : public client::dialogs::PluginManager {
+     public:
+        LocalPluginManager(client::si::UserSide& us)
+            : PluginManager(us.root(), us.gameSender(), us.translator()),
+              m_userSide(us)
+            { }
+        virtual void unloadPlugin(const String_t& id)
+            {
+                class Confirmer : public util::Request<game::proxy::WaitIndicator> {
+                 public:
+                    virtual void handle(game::proxy::WaitIndicator& ind)
+                        { ind.post(true); }
+                };
+
+                class ManagerRequest : public util::Request<ui::res::Manager> {
+                 public:
+                    ManagerRequest(const String_t& id, util::RequestSender<game::proxy::WaitIndicator> reply)
+                        : m_id(id), m_reply(reply)
+                        { }
+
+                    ~ManagerRequest()
+                        { m_reply.postNewRequest(new Confirmer()); }
+
+                    virtual void handle(ui::res::Manager& mgr)
+                        { mgr.removeProvidersByKey(m_id); }
+                 private:
+                    const String_t m_id;
+                    util::RequestSender<game::proxy::WaitIndicator> m_reply;
+                };
+
+                class HelpRequest : public util::Request<game::Session> {
+                 public:
+                    HelpRequest(const String_t& id)
+                        : m_id(id)
+                        { }
+                    virtual void handle(game::Session& session)
+                        { getHelpIndex(session).removeFilesByOrigin(m_id); }
+                 private:
+                    const String_t m_id;
+                };
+
+                Downlink link(root(), translator());
+                if (ui::DefaultResourceProvider* drp = dynamic_cast<ui::DefaultResourceProvider*>(&root().provider())) {
+                    util::RequestReceiver<game::proxy::WaitIndicator> linkReceiver(root().engine().dispatcher(), link);
+                    drp->postNewManagerRequest(new ManagerRequest(id, linkReceiver.getSender()), true);
+                    link.wait();
+                }
+
+                HelpRequest ht(id);
+                link.call(gameSender(), ht);
+            }
+        virtual void loadPlugin(const String_t& id)
+            {
+                class LocalControl : public client::si::Control {
+                 public:
+                    LocalControl(client::si::UserSide& us)
+                        : Control(us)
+                        { }
+                    virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target /*target*/)
+                        { interface().continueProcessWithFailure(link, "Context error"); }
+                    virtual void handleEndDialog(client::si::RequestLink2 link, int /*code*/)
+                        { interface().continueProcessWithFailure(link, "Context error"); }
+                    virtual void handlePopupConsole(client::si::RequestLink2 link)
+                        { interface().continueProcessWithFailure(link, "Context error"); }
+                    virtual void handleScanKeyboardMode(client::si::RequestLink2 link)
+                        { interface().continueProcessWithFailure(link, "Context error"); }
+                    virtual void handleSetView(client::si::RequestLink2 link, String_t /*name*/, bool /*withKeymap*/)
+                        { interface().continueProcessWithFailure(link, "Context error"); }
+                    virtual void handleUseKeymap(client::si::RequestLink2 link, String_t /*name*/, int /*prefix*/)
+                        { interface().continueProcessWithFailure(link, "Context error"); }
+                    virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t /*text*/)
+                        { interface().continueProcessWithFailure(link, "Context error"); }
+                    virtual game::interface::ContextProvider* createContextProvider()
+                        { return 0; }
+                };
+
+                class Task : public client::si::ScriptTask {
+                 public:
+                    Task(const String_t& id)
+                        : m_id(id)
+                        { }
+                    virtual void execute(uint32_t pgid, game::Session& session)
+                        {
+                            interpreter::ProcessList& list = session.processList();
+                            interpreter::Process& proc = list.create(session.world(), "(Plugin Loader)");
+                            if (util::plugin::Plugin* plug = session.plugins().getPluginById(m_id)) {
+                                proc.pushFrame(game::interface::createPluginLoader(*plug), false);
+                                plug->setLoaded(true);
+                            }
+                            list.resumeProcess(proc, pgid);
+                        }
+                 private:
+                    const String_t m_id;
+                };
+
+                LocalControl(m_userSide).executeTaskWait(std::auto_ptr<client::si::ScriptTask>(new Task(id)));
+            }
+     private:
+        client::si::UserSide& m_userSide;
+    };
+
+    LocalPluginManager(m_userSide).run();
 }
 
 void
