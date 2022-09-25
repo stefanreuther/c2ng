@@ -10,44 +10,7 @@
 #include "afl/io/directory.hpp"
 #include "afl/io/directoryentry.hpp"
 #include "afl/string/format.hpp"
-
-namespace {
-    // FIXME: move this into a common place?
-    /** Try to create a path. Creates a complete path that can contain multiple non-existant
-        directory levels. This does not fail when the path cannot be created; in that case,
-        subsequent operations using the path will fail.
-        \param dirName Name of path to create */
-    void tryCreatePath(afl::io::FileSystem& fs, const String_t dirName)
-    {
-        const String_t parentName = fs.getDirectoryName(dirName);
-        const String_t childName  = fs.getFileName(dirName);
-
-        // If parentName is the same as dirName, this means that dirName does not have a parent.
-        // In this case, we don't do anything.
-        if (parentName != dirName) {
-            // Try enumerating the parent's content. If that fails, try to create it.
-            // (openDir alone does not check whether the directory actually exists.)
-            try {
-                afl::base::Ref<afl::io::Directory> parent = fs.openDirectory(parentName);
-                parent->getDirectoryEntries();
-            }
-            catch (afl::except::FileProblemException&) {
-                tryCreatePath(fs, parentName);
-            }
-
-            // Parent should now exist. Try creating child in it unless it already exists.
-            try {
-                afl::base::Ref<afl::io::Directory> parent = fs.openDirectory(parentName);
-                afl::base::Ref<afl::io::DirectoryEntry> entry = parent->getDirectoryEntryByName(childName);
-                if (entry->getFileType() != afl::io::DirectoryEntry::tDirectory) {
-                    entry->createAsDirectory();
-                }
-            }
-            catch (afl::except::FileProblemException&) { }
-        }
-    }
-
-}
+#include "util/io.hpp"
 
 // Create a blank template.
 util::BackupFile::BackupFile()
@@ -155,7 +118,7 @@ util::BackupFile::copyFile(afl::io::FileSystem& fs, String_t tpl, afl::io::Strea
     if (!tpl.empty()) {
         // Create directory for file
         const String_t name = expandFileName(fs, tpl);
-        tryCreatePath(fs, fs.getDirectoryName(name));
+        util::createDirectoryTree(fs, fs.getDirectoryName(name));
 
         // Do it
         afl::base::Ref<afl::io::Stream> file = fs.openFile(name, fs.Create);

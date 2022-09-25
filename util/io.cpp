@@ -5,6 +5,9 @@
 
 #include "util/io.hpp"
 #include "afl/base/growablememory.hpp"
+#include "afl/except/fileproblemexception.hpp"
+#include "afl/io/directory.hpp"
+#include "afl/io/directoryentry.hpp"
 
 bool
 util::storePascalString(afl::io::DataSink& out, const String_t& str, afl::charset::Charset& charset)
@@ -78,5 +81,36 @@ util::appendFileNameExtension(afl::io::FileSystem& fs, String_t pathName, String
         } else {
             return pathName;
         }
+    }
+}
+
+void
+util::createDirectoryTree(afl::io::FileSystem& fs, const String_t dirName)
+{
+    const String_t parentName = fs.getDirectoryName(dirName);
+    const String_t childName  = fs.getFileName(dirName);
+
+    // If parentName is the same as dirName, this means that dirName does not have a parent.
+    // In this case, we don't do anything.
+    if (parentName != dirName) {
+        // Try enumerating the parent's content. If that fails, try to create it.
+        // (openDir alone does not check whether the directory actually exists.)
+        try {
+            afl::base::Ref<afl::io::Directory> parent = fs.openDirectory(parentName);
+            parent->getDirectoryEntries();
+        }
+        catch (afl::except::FileProblemException&) {
+            createDirectoryTree(fs, parentName);
+        }
+
+        // Parent should now exist. Try creating child in it unless it already exists.
+        try {
+            afl::base::Ref<afl::io::Directory> parent = fs.openDirectory(parentName);
+            afl::base::Ref<afl::io::DirectoryEntry> entry = parent->getDirectoryEntryByName(childName);
+            if (entry->getFileType() != afl::io::DirectoryEntry::tDirectory) {
+                entry->createAsDirectory();
+            }
+        }
+        catch (afl::except::FileProblemException&) { }
     }
 }

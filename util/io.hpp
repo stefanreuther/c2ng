@@ -5,11 +5,11 @@
 #ifndef C2NG_UTIL_IO_HPP
 #define C2NG_UTIL_IO_HPP
 
-#include "afl/io/stream.hpp"
-#include "afl/string/string.hpp"
 #include "afl/charset/charset.hpp"
 #include "afl/io/datasink.hpp"
 #include "afl/io/filesystem.hpp"
+#include "afl/io/stream.hpp"
+#include "afl/string/string.hpp"
 
 namespace util {
 
@@ -46,6 +46,14 @@ namespace util {
         \param force     true: replace an existing extension; false: append extension only if it is missing
         \return New path name */
     String_t appendFileNameExtension(afl::io::FileSystem& fs, String_t pathName, String_t ext, bool force);
+
+    /** Try to create a path.
+        Creates a complete path that can contain multiple non-existant
+        directory levels. This does not fail when the path cannot be created;
+        in that case, subsequent operations using the path will fail.
+        \param fs File System instance
+        \param dirName Name of path to create */
+    void createDirectoryTree(afl::io::FileSystem& fs, const String_t dirName);
 
 }
 

@@ -12,6 +12,7 @@
 #include "afl/charset/utf8charset.hpp"
 #include "afl/except/fileproblemexception.hpp"
 #include "afl/io/constmemorystream.hpp"
+#include "afl/io/internalfilesystem.hpp"
 #include "afl/io/internalsink.hpp"
 #include "afl/io/nullfilesystem.hpp"
 
@@ -217,5 +218,32 @@ TestUtilIo::testAppendExt()
 
     TS_ASSERT_EQUALS(util::appendFileNameExtension(fs, "/a/b/c", "txt", false), "/a/b/c.txt");
     TS_ASSERT_EQUALS(util::appendFileNameExtension(fs, "/a/b/c", "txt", true),  "/a/b/c.txt");
+}
+
+/** Test createDirectoryTree(). */
+void
+TestUtilIo::testCreateDirectoryTree()
+{
+    // Must succeed on a NullFileSystem (i.e. not fail due to directory not being created)
+    {
+        afl::io::NullFileSystem fs;
+        TS_ASSERT_THROWS_NOTHING(util::createDirectoryTree(fs, "/foo/bar/baz"));
+    }
+
+    // Must succeed on an InternalFileSystem, directory must actually exist afterwards
+    {
+        afl::io::InternalFileSystem fs;
+        TS_ASSERT_THROWS_NOTHING(util::createDirectoryTree(fs, "/foo/bar/baz"));
+        TS_ASSERT_THROWS_NOTHING(fs.openFile("/foo/bar/baz/quux", afl::io::FileSystem::Create));
+    }
+
+    // Must succeed on an InternalFileSystem if it partially exists
+    {
+        afl::io::InternalFileSystem fs;
+        fs.createDirectory("/foo");
+        fs.createDirectory("/foo/bar");
+        TS_ASSERT_THROWS_NOTHING(util::createDirectoryTree(fs, "/foo/bar/baz"));
+        TS_ASSERT_THROWS_NOTHING(fs.openFile("/foo/bar/baz/quux", afl::io::FileSystem::Create));
+    }
 }
 

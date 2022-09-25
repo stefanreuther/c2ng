@@ -110,6 +110,7 @@ class TestUtilIo : public CxxTest::TestSuite {
     void testStorePascalStringTruncate();
     void testLoadPascalString();
     void testAppendExt();
+    void testCreateDirectoryTree();
 };
 
 class TestUtilKey : public CxxTest::TestSuite {
