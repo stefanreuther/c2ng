@@ -85,7 +85,7 @@ IonStormForecastDialog::setPositions()
 {
     m_mapWidget.setCenter(m_center);
     m_movementOverlay.setPosition(m_target);
-    m_movementOverlay.setLockOrigin(m_origin, false);
+    m_movementOverlay.setLockOrigin(m_origin, false, 0);
     m_scannerOverlay.setPositions(m_origin, m_target);
     m_scanResult.setPositions(m_origin, m_target);
 }

@@ -14,6 +14,7 @@
 #include "game/map/planet.hpp"
 #include "game/map/ship.hpp"
 #include "game/map/universe.hpp"
+#include "game/test/registrationkey.hpp"
 
 namespace {
     using game::Reference;
@@ -29,6 +30,9 @@ namespace {
     using game::map::Ufo;
     using game::map::Universe;
 
+    const int ENGINE_TYPE = 9;
+    const int HULL_TYPE = 5;
+
     void createPlanet(Universe& univ, int id, Point pt)
     {
         Planet* p = univ.planets().create(id);
@@ -42,7 +46,13 @@ namespace {
     void createShip(Universe& univ, int id, Point pt)
     {
         Ship* p = univ.ships().create(id);
-        p->addShipXYData(pt, 1, 100, game::PlayerSet_t(1));
+        game::map::ShipData sd;
+        sd.x = pt.getX();
+        sd.y = pt.getY();
+        sd.engineType = ENGINE_TYPE;
+        sd.hullType = HULL_TYPE;
+        sd.owner = 1;
+        p->addCurrentShipData(sd, game::PlayerSet_t(1));
         p->internalCheck();
     }
 
@@ -292,24 +302,31 @@ TestGameMapLocker::testWarpWell()
         int clickedX, clickedY;
         int originX, originY;
         bool isHyperdriving;
+        int shipId;
         int expectX, expectY;
         const char* info;
     };
+    const int SHIP_ID = 100;
     static const TestCase TESTS[] = {
-        // clicked      origin      HYP       expect
+        // clicked      origin      HYP       shipId   expect
         // Some standard cases
-        { 1000, 1000,   1100, 1000, false,    1003, 1000,   "warp well from east" },
-        { 1000, 1000,   1000, 1000, false,    1000, 1000,   "warp well from planet" },
-        { 1000, 1000,   1000, 1002, false,    1000, 1000,   "warp well from inside" },
-        { 1000, 1000,    500,  500, false,     998,  998,   "warp well from south-east" },
+        { 1000, 1000,   1100, 1000, false,    0,       1003, 1000,   "warp well from east" },
+        { 1000, 1000,   1000, 1000, false,    0,       1000, 1000,   "warp well from planet" },
+        { 1000, 1000,   1000, 1002, false,    0,       1000, 1000,   "warp well from inside" },
+        { 1000, 1000,    500,  500, false,    0,        998,  998,   "warp well from south-east" },
 
         // With HYP, it can be useful to go a farther distance to be in range.
-        { 1000, 1000,   1338, 1000, false,    1003, 1000,   "far normal" },
-        { 1000, 1000,   1338, 1000, true,      998, 1000,   "far hyper" },
+        { 1000, 1000,   1338, 1000, false,    0,       1003, 1000,   "far normal" },
+        { 1000, 1000,   1338, 1000, true,     0,        998, 1000,   "far hyper" },
 
         // If we cannot ever get into range, don't use any warp wells.
-        { 1000, 1000,   1138, 1000, false,    1003, 1000,   "near normal" },
-        { 1000, 1000,   1138, 1000, true,     1000, 1000,   "near hyper" },
+        { 1000, 1000,   1138, 1000, false,    0,       1003, 1000,   "near normal" },
+        { 1000, 1000,   1138, 1000, true,     0,       1000, 1000,   "near hyper" },
+
+        // Sometimes it can be required to go farther into a warp well
+        { 1000, 1000,   1084, 1013, false,    SHIP_ID, 1002, 1000,   "far warp ship" },
+        { 1000, 1000,   1084, 1013, false,    0,       1003, 1000,   "far warp not ship" },
+        { 1000, 1000,   1084, 1013, false,    1,       1003, 1000,   "far warp wrong ship" },
     };
 
     for (size_t i = 0; i < sizeof(TESTS)/sizeof(TESTS[0]); ++i) {
@@ -320,15 +337,23 @@ TestGameMapLocker::testWarpWell()
         hostConfig[HostConfiguration::RoundGravityWells].set(1);
         game::HostVersion hostVersion(game::HostVersion::PHost, MKVERSION(4,0,0));
         Configuration fig;
+        game::test::RegistrationKey key(game::RegistrationKey::Registered, 10);
+        game::UnitScoreDefinitionList scoreDefinitions;
+
+        // Minimum ship list
+        game::spec::ShipList shipList;
+        shipList.engines().create(ENGINE_TYPE)->setMaxEfficientWarp(9);
+        shipList.hulls().create(HULL_TYPE)->setMass(100);
 
         // Universe with a single planet
         Universe u;
         createPlanet(u, 50, Point(1000, 1000));
+        createShip(u, SHIP_ID, Point(c.originX, c.originY));
 
         // Test
         Locker t(Point(c.clickedX, c.clickedY), fig);
         t.addUniverse(u, -1, 0);
-        const Point pt = t.findWarpWellEdge(Point(c.originX, c.originY), c.isHyperdriving, u, hostConfig, hostVersion);
+        const Point pt = t.findWarpWellEdge(Point(c.originX, c.originY), c.isHyperdriving, u, c.shipId, scoreDefinitions, shipList, hostConfig, hostVersion, key);
 
         // Verify
         TSM_ASSERT_EQUALS(c.info, pt.getX(), c.expectX);

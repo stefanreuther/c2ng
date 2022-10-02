@@ -61,6 +61,9 @@ namespace {
             }
         }
         h.session().setGame(g);
+
+        // Shiplist is required for warp-well locking
+        h.session().setShipList(new game::spec::ShipList());
     }
 
     void addPlanet(SessionThread& h)
@@ -331,7 +334,7 @@ TestGameProxyLockProxy::testSetOrigin()
     // Testee
     ResultReceiver recv;
     t.sig_result.add(&recv, &ResultReceiver::onResult);
-    t.setOrigin(Point(2100, 2000), false);
+    t.setOrigin(Point(2100, 2000), false, 0);
     t.requestPosition(Point(2010, 2010), LockProxy::Flags_t() + LockProxy::ToggleOptimizeWarp + LockProxy::Left);
 
     // Wait for result

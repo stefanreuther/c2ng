@@ -54,8 +54,9 @@ namespace game { namespace proxy {
 
         /** Set origin for movement-aware locking to warp-well edges.
             \param pos Position
-            \param isHyperdriving true if hyperdriving */
-        void setOrigin(Point_t pos, bool isHyperdriving);
+            \param isHyperdriving true if hyperdriving
+            \param shipId ship Id (used for further specs; can be 0) */
+        void setOrigin(Point_t pos, bool isHyperdriving, Id_t shipId);
 
         /** Request position lock.
             Determines the object closest to the clicked target and schedules a sig_result callback with the result point.
@@ -97,6 +98,7 @@ namespace game { namespace proxy {
             bool active;
             bool isHyperdriving;
             Point_t pos;
+            Id_t shipId;
         };
 
         util::RequestSender<Session> m_gameSender;

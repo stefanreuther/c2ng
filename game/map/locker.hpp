@@ -6,9 +6,11 @@
 #define C2NG_GAME_MAP_LOCKER_HPP
 
 #include "game/config/integeroption.hpp"
+#include "game/hostversion.hpp"
 #include "game/map/point.hpp"
 #include "game/reference.hpp"
-#include "game/hostversion.hpp"
+#include "game/spec/shiplist.hpp"
+#include "game/unitscoredefinitionlist.hpp"
 
 namespace game { namespace map {
 
@@ -108,13 +110,26 @@ namespace game { namespace map {
 
         /** Find warp-well edge.
             Call instead of getFoundObject() to find a point that minimizes the movement distance to reach the found point.
+            If a valid ship Id is passed, minimizes the travel time for that ship.
             \param origin         Origin of movement (minimize movement starting here)
             \param isHyperdriving true for hyperdrive, false for normal movement
             \param univ           Universe
+            \param shipId         Id of ship we're working with (pass 0 if you don't have one)
+            \param scoreDefinitions Ship score definitions (for ship abilities)
+            \param shipList       Ship list (for ship abilities, engine definition)
             \param config         Host configuration (for warp well parameters)
             \param host           Host version (for warp well rules/shape)
+            \param key            Registration key (for ship abilities)
             \return point in warp well if applicable, otherwise, same as getFoundPoint(). */
-        Point findWarpWellEdge(Point origin, bool isHyperdriving, const Universe& univ, const game::config::HostConfiguration& config, const HostVersion& host) const;
+        Point findWarpWellEdge(Point origin,
+                               bool isHyperdriving,
+                               const Universe& univ,
+                               Id_t shipId,
+                               const UnitScoreDefinitionList& scoreDefinitions,
+                               const game::spec::ShipList& shipList,
+                               const game::config::HostConfiguration& config,
+                               const HostVersion& host,
+                               const RegistrationKey& key) const;
 
         /** Get found point.
             If the found object is across a map border, this will return the coordinates nearest to the original target.
@@ -139,7 +154,15 @@ namespace game { namespace map {
         const Configuration& m_config;
 
         void addPointRaw(Point pt, Reference obj);
-        int32_t getWarpWellDistanceMetric(Point origin, Point pt, bool isHyperdriving, const HostVersion& host) const;
+        int32_t getWarpWellDistanceMetric(Point origin, Point pt,
+                                          bool isHyperdriving,
+                                          const Universe& univ,
+                                          Id_t shipId,
+                                          const UnitScoreDefinitionList& scoreDefinitions,
+                                          const game::spec::ShipList& shipList,
+                                          const game::config::HostConfiguration& config,
+                                          const HostVersion& host,
+                                          const RegistrationKey& key) const;
     };
 
 } }

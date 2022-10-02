@@ -78,9 +78,18 @@ game::proxy::LockProxy::Query::handle(Session& session)
     bool actionWarp = m_flags.contains(ToggleOptimizeWarp);
     bool configWarp = pRoot->userConfiguration()[UserConfiguration::ChartScannerWarpWells]();
 
-    if (m_origin.active && (items & game::map::MatchPlanets) != 0 && (actionWarp != configWarp)) {
+    game::spec::ShipList* pShipList = session.getShipList().get();
+    if (m_origin.active && (items & game::map::MatchPlanets) != 0 && (actionWarp != configWarp) && pShipList != 0) {
         // Warp-well aware
-        sendResponse(locker.findWarpWellEdge(m_origin.pos, m_origin.isHyperdriving, univ, pRoot->hostConfiguration(), pRoot->hostVersion()));
+        sendResponse(locker.findWarpWellEdge(m_origin.pos,
+                                             m_origin.isHyperdriving,
+                                             univ,
+                                             m_origin.shipId,
+                                             pGame->shipScores(),
+                                             *pShipList,
+                                             pRoot->hostConfiguration(),
+                                             pRoot->hostVersion(),
+                                             pRoot->registrationKey()));
     } else {
         // Regular locking only
         sendResponse(locker.getFoundPoint());
@@ -158,11 +167,12 @@ game::proxy::LockProxy::setRangeLimit(Point_t min, Point_t max)
 }
 
 void
-game::proxy::LockProxy::setOrigin(Point_t pos, bool isHyperdriving)
+game::proxy::LockProxy::setOrigin(Point_t pos, bool isHyperdriving, Id_t shipId)
 {
     m_origin.active = true;
     m_origin.isHyperdriving = isHyperdriving;
     m_origin.pos = pos;
+    m_origin.shipId = shipId;
 }
 
 void

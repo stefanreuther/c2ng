@@ -33,6 +33,7 @@ namespace client { namespace screens {
             client::si::OutputState::Target target;
             ScreenHistory::Type historyType;
             interpreter::Process::ProcessKind taskType;
+            bool isShip;
             const char* layoutName;
             const char* keymapName;
         };
@@ -110,6 +111,8 @@ namespace client { namespace screens {
         void onFleetChange();
         void onHistoryTurnChange();
 
+        game::Id_t getShipId() const;
+
         ui::widgets::Panel m_panel;
         client::map::Widget m_mapWidget;
         client::map::ScannerOverlay m_scannerOverlay;
@@ -118,6 +121,7 @@ namespace client { namespace screens {
         client::widgets::ScanResult m_scanResult;
         client::widgets::KeymapWidget m_keymapWidget;
         game::map::Point m_center;
+        game::Id_t m_id;
 
         std::auto_ptr<game::proxy::TaskEditorProxy> m_taskEditorProxy;
         interpreter::Process::ProcessKind m_taskKind;

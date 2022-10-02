@@ -211,6 +211,7 @@ const client::screens::ControlScreen::Definition client::screens::ControlScreen:
     client::si::OutputState::ShipScreen,
     ScreenHistory::Ship,
     interpreter::Process::pkDefault,
+    true,
     "SHIPSCREEN",
     "SHIPSCREEN",
 };
@@ -218,6 +219,7 @@ const client::screens::ControlScreen::Definition client::screens::ControlScreen:
     client::si::OutputState::PlanetScreen,
     ScreenHistory::Planet,
     interpreter::Process::pkDefault,
+    false,
     "PLANETSCREEN",
     "PLANETSCREEN",
 };
@@ -225,6 +227,7 @@ const client::screens::ControlScreen::Definition client::screens::ControlScreen:
     client::si::OutputState::BaseScreen,
     ScreenHistory::Starbase,
     interpreter::Process::pkDefault,
+    false,
     "BASESCREEN",
     "BASESCREEN",
 };
@@ -232,6 +235,7 @@ const client::screens::ControlScreen::Definition client::screens::ControlScreen:
     client::si::OutputState::HistoryScreen,
     ScreenHistory::HistoryShip,
     interpreter::Process::pkDefault,
+    true,
     "HISTORYSCREEN",
     "HISTORYSCREEN",
 };
@@ -239,6 +243,7 @@ const client::screens::ControlScreen::Definition client::screens::ControlScreen:
     client::si::OutputState::FleetScreen,
     ScreenHistory::Fleet,
     interpreter::Process::pkDefault,
+    true,
     "FLEETSCREEN",
     "FLEETSCREEN",
 };
@@ -246,6 +251,7 @@ const client::screens::ControlScreen::Definition client::screens::ControlScreen:
     client::si::OutputState::ShipTaskScreen,
     ScreenHistory::ShipTask,
     interpreter::Process::pkShipTask,
+    true,
     "SHIPTASKSCREEN",
     "SHIPTASKSCREEN",
 };
@@ -253,6 +259,7 @@ const client::screens::ControlScreen::Definition client::screens::ControlScreen:
     client::si::OutputState::PlanetTaskScreen,
     ScreenHistory::PlanetTask,
     interpreter::Process::pkPlanetTask,
+    false,
     "PLANETTASKSCREEN",
     "PLANETTASKSCREEN",
 };
@@ -260,6 +267,7 @@ const client::screens::ControlScreen::Definition client::screens::ControlScreen:
     client::si::OutputState::BaseTaskScreen,
     ScreenHistory::StarbaseTask,
     interpreter::Process::pkBaseTask,
+    false,
     "BASETASKSCREEN",
     "BASETASKSCREEN",
 };
@@ -579,6 +587,7 @@ client::screens::ControlScreen::ControlScreen(client::si::UserSide& us, int nr, 
       m_scanResult(root(), interface().gameSender(), translator()),
       m_keymapWidget(interface().gameSender(), root().engine().dispatcher(), *this),
       m_center(),
+      m_id(),
       m_taskEditorProxy(),
       m_taskKind(interpreter::Process::pkDefault),
       m_fleetProxy(),
@@ -804,6 +813,7 @@ void
 client::screens::ControlScreen::setId(game::Id_t id)
 {
     // ex WControlScreen::onCurrentChanged (sort-of)
+    m_id = id;
     interface().history().push(ScreenHistory::Reference(m_definition.historyType, id, 0));
     if (m_taskEditorProxy.get() != 0) {
         m_taskEditorProxy->selectTask(id, m_taskKind, true);
@@ -842,7 +852,7 @@ client::screens::ControlScreen::setTarget(game::map::Point target)
 void
 client::screens::ControlScreen::setIsHyperdriving(bool isHyperdriving)
 {
-    m_movementOverlay.setLockOrigin(m_center, isHyperdriving);
+    m_movementOverlay.setLockOrigin(m_center, isHyperdriving, getShipId());
 }
 
 void
@@ -883,7 +893,7 @@ client::screens::ControlScreen::onTaskEditorShipChange(const game::proxy::TaskEd
     game::map::Point finalPos = st.positions.empty() ? st.startPosition : st.positions.back();
     bool isHyperdriving = st.isHyperdriving;
 
-    m_movementOverlay.setLockOrigin(finalPos, isHyperdriving);
+    m_movementOverlay.setLockOrigin(finalPos, isHyperdriving, getShipId());
 }
 
 void
@@ -910,4 +920,10 @@ client::screens::ControlScreen::onHistoryTurnChange()
         }
         m_mapWidget.setShipTrailId(m_historyAdaptor->getShipId());
     }
+}
+
+game::Id_t
+client::screens::ControlScreen::getShipId() const
+{
+    return m_definition.isShip ? m_id : 0;
 }

@@ -243,9 +243,9 @@ client::map::MovementOverlay::getPosition(game::map::Point& out) const
 }
 
 void
-client::map::MovementOverlay::setLockOrigin(game::map::Point pt, bool isHyperdriving)
+client::map::MovementOverlay::setLockOrigin(game::map::Point pt, bool isHyperdriving, game::Id_t shipId)
 {
-    m_lockProxy.setOrigin(pt, isHyperdriving);
+    m_lockProxy.setOrigin(pt, isHyperdriving, shipId);
 }
 
 void

@@ -9,7 +9,9 @@
 #include "game/map/anyshiptype.hpp"
 #include "game/map/configuration.hpp"
 #include "game/map/object.hpp"
+#include "game/map/shippredictor.hpp"
 #include "game/map/universe.hpp"
+#include "game/spec/engine.hpp"
 
 using game::config::HostConfiguration;
 
@@ -184,10 +186,15 @@ game::map::Locker::addUniverse(const Universe& univ, int32_t items, const Drawin
 
 // Find warp-well edge.
 game::map::Point
-game::map::Locker::findWarpWellEdge(Point origin, bool isHyperdriving,
+game::map::Locker::findWarpWellEdge(Point origin,
+                                    bool isHyperdriving,
                                     const Universe& univ,
+                                    Id_t shipId,
+                                    const UnitScoreDefinitionList& scoreDefinitions,
+                                    const game::spec::ShipList& shipList,
                                     const game::config::HostConfiguration& config,
-                                    const HostVersion& host) const
+                                    const HostVersion& host,
+                                    const RegistrationKey& key) const
 {
     // ex WScannerChartWidget::doItemLock (part)
     // Query current position
@@ -211,12 +218,12 @@ game::map::Locker::findWarpWellEdge(Point origin, bool isHyperdriving,
 
         // Start with the assumption that moving directly is the best choice.
         // Then try all points in warp well range.
-        int32_t bestDistance = getWarpWellDistanceMetric(origin, m_foundPoint, isHyperdriving, host);
+        int32_t bestDistance = getWarpWellDistanceMetric(origin, m_foundPoint, isHyperdriving, univ, shipId, scoreDefinitions, shipList, config, host, key);
         Point bestPoint  = m_foundPoint;
         for (int dx = -wwrange; dx <= wwrange; ++dx) {
             for (int dy = -wwrange; dy <= wwrange; ++dy) {
                 Point newPoint(m_foundPoint.getX() + dx, m_foundPoint.getY() + dy);
-                int32_t newDistance = getWarpWellDistanceMetric(origin, newPoint, isHyperdriving, host);
+                int32_t newDistance = getWarpWellDistanceMetric(origin, newPoint, isHyperdriving, univ, shipId, scoreDefinitions, shipList, config, host, key);
                 if (newDistance >= 0
                     && (bestDistance < 0 || newDistance < bestDistance)
                     && univ.findGravityPlanetAt(newPoint, m_config, config, host) == foundPlanetId)
@@ -272,13 +279,41 @@ game::map::Locker::addPointRaw(Point pt, Reference obj)
 
 /* Get warp well distance metric: refuse non-exact hyperjump targets */
 int32_t
-game::map::Locker::getWarpWellDistanceMetric(Point origin, Point pt, bool isHyperdriving, const HostVersion& host) const
+game::map::Locker::getWarpWellDistanceMetric(Point origin, Point pt,
+                                             bool isHyperdriving,
+                                             const Universe& univ,
+                                             Id_t shipId,
+                                             const UnitScoreDefinitionList& scoreDefinitions,
+                                             const game::spec::ShipList& shipList,
+                                             const game::config::HostConfiguration& config,
+                                             const HostVersion& host,
+                                             const RegistrationKey& key) const
 {
     // ex WShipScannerChartWidget::lockQueryDistance
     int32_t dist2 = m_config.getSquaredDistance(origin, pt);
     if (isHyperdriving && !host.isExactHyperjumpDistance2(dist2)) {
         return -1;
     } else {
-        return dist2;
+        if (game::map::Ship* sh = univ.ships().get(shipId)) {
+            ShipPredictor pred(univ, shipId, scoreDefinitions, shipList, m_config, config, host, key);
+            if (game::spec::Engine* e = shipList.engines().get(sh->getEngineType().orElse(0))) {
+                pred.setWarpFactor(e->getMaxEfficientWarp());
+            }
+            pred.setPosition(origin);
+            pred.setWaypoint(pt);
+            pred.computeMovement();
+            const int t = pred.getNumTurns();
+
+            // Combining distance and time metric into one value.
+            // Better time should trump better distance.
+            // - assume a maximum sensible distance of 5000, maximum sensible dist2 is 25M
+            // - assume a maximum time of 32 (MOVEMENT_TIME_LIMIT), and a maximum metric of 2G, maximum slice is 62M
+            const int MAX_TIME = 32;  // give some headroom to MOVEMENT_TIME_LIMIT
+            const int32_t SCALE = 0x7FFFFFFF / MAX_TIME;
+            return SCALE * std::min(t, MAX_TIME)
+                + std::min(dist2, SCALE-1);
+        } else {
+            return dist2;
+        }
     }
 }

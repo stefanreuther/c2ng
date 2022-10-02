@@ -496,7 +496,7 @@ NavChartDialog::setPositions()
 {
     m_mapWidget.setCenter(m_state.center);
     m_movementOverlay.setPosition(m_state.target);
-    m_movementOverlay.setLockOrigin(m_state.origin, m_state.hyperjumping);
+    m_movementOverlay.setLockOrigin(m_state.origin, m_state.hyperjumping, m_state.shipId);
     m_scannerOverlay.setPositions(m_state.origin, m_state.target);
     m_scanResult.setPositions(m_state.origin, m_state.target);
 }
