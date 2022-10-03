@@ -201,3 +201,46 @@ TestGameMsgBrowser::testSummary()
     TS_ASSERT_EQUALS(sum[4].heading, "head-4");
 }
 
+/** Test search(). */
+void
+TestGameMsgBrowser::testSearch()
+{
+    Environment env;
+    TestMailbox mbox("..xx...x");
+
+    game::msg::Browser testee(mbox, env.tx, env.players, &env.config);
+
+    // Finding message 4
+    // - normally
+    TS_ASSERT_EQUALS(testee.search(0, game::msg::Browser::Next,     1, "text-4").index, 4U);
+    TS_ASSERT_EQUALS(testee.search(0, game::msg::Browser::Next,     1, "text-4").found, true);
+
+    // - case-blind
+    TS_ASSERT_EQUALS(testee.search(0, game::msg::Browser::Next,     1, "TEXT-4").index, 4U);
+
+    // - from end
+    TS_ASSERT_EQUALS(testee.search(7, game::msg::Browser::Previous, 1, "text-4").index, 4U);
+
+    // - first, last
+    TS_ASSERT_EQUALS(testee.search(0, game::msg::Browser::First,    1, "text-4").index, 4U);
+    TS_ASSERT_EQUALS(testee.search(0, game::msg::Browser::Last,     1, "text-4").index, 4U);
+
+    // - with repeat (will settle at first found)
+    TS_ASSERT_EQUALS(testee.search(0, game::msg::Browser::Next,     2, "text-4").index, 4U);
+
+    // Repeat case (will find 4,5)
+    TS_ASSERT_EQUALS(testee.search(1, game::msg::Browser::Next,     2, "text").index, 5U);
+
+    // Failure case
+    TS_ASSERT_EQUALS(testee.search(5, game::msg::Browser::Next,     1, "notfound").index, 5U);
+    TS_ASSERT_EQUALS(testee.search(5, game::msg::Browser::Previous, 1, "notfound").index, 5U);
+    TS_ASSERT_EQUALS(testee.search(5, game::msg::Browser::First,    1, "notfound").index, 0U);
+    TS_ASSERT_EQUALS(testee.search(5, game::msg::Browser::Last,     1, "notfound").index, 7U);
+
+    TS_ASSERT_EQUALS(testee.search(5, game::msg::Browser::Next,     1, "notfound").found, false);
+
+    // Filtered case: not found because it's filtered
+    TS_ASSERT_EQUALS(testee.search(0, game::msg::Browser::Next,     1, "text-2").index, 0U);
+    TS_ASSERT_EQUALS(testee.search(0, game::msg::Browser::Next,     1, "text-2").found, false);
+}
+

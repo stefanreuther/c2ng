@@ -14,6 +14,7 @@ class TestGameMsgBrowser : public CxxTest::TestSuite {
     void testUnfiltered();
     void testAllFiltered();
     void testSummary();
+    void testSearch();
 };
 
 class TestGameMsgConfiguration : public CxxTest::TestSuite {

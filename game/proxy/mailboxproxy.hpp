@@ -99,6 +99,15 @@ namespace game { namespace proxy {
             \see game::msg::Browser::browse */
         void browse(game::msg::Browser::Mode mode, int amount, bool acceptFiltered);
 
+        /** Search messages.
+            Eventually replies with sig_update, or sig_searchFailure.
+            \param mode            Browsing mode
+            \param amount          Number of steps to go
+            \param acceptFiltered  true to accept filtered messages, false to skip
+            \param needle          Search text
+            \see game::msg::Browser::search */
+        void search(game::msg::Browser::Mode mode, int amount, bool acceptFiltered, const String_t& needle);
+
         /** Toggle whether heading is filtered.
             Responds with sig_summaryChanged.
             \param heading Heading
@@ -118,6 +127,10 @@ namespace game { namespace proxy {
             \param summary Updated summary */
         afl::base::Signal<void(const game::msg::Browser::Summary_t&)> sig_summaryChanged;
 
+        /** Signal: search failure.
+            Invoked whenever search() doesn't find a match. */
+        afl::base::Signal<void()> sig_searchFailure;
+
      private:
         class Trampoline;
         class TrampolineFromAdaptor;
@@ -128,6 +141,7 @@ namespace game { namespace proxy {
         size_t m_numRequests;
 
         void updateCurrentMessage(size_t index, Message data, bool requested);
+        void emitSearchFailure();
     };
 
 } }

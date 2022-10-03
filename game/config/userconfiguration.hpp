@@ -93,6 +93,9 @@ namespace game { namespace config {
         static const IntegerOptionDescriptor Game_ReadOnly;
         static const IntegerOptionDescriptor Game_AccessHostFiles;
 
+        // Messages
+        static const StringOptionDescriptor  Messages_LastSearch;
+
         // Display
         static const IntegerOptionDescriptor Display_ThousandsSep;
         static const IntegerOptionDescriptor Display_Clans;

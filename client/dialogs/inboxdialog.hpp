@@ -9,6 +9,7 @@
 #include "client/si/outputstate.hpp"
 #include "client/si/userside.hpp"
 #include "client/widgets/messageactionpanel.hpp"
+#include "game/proxy/configurationproxy.hpp"
 #include "game/proxy/mailboxproxy.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/rich/documentview.hpp"
@@ -40,6 +41,9 @@ namespace client { namespace dialogs {
         void onUpdate(size_t index, const game::proxy::MailboxProxy::Message& msg);
         void updateButton(client::widgets::MessageActionPanel::Action a, const String_t& s);
         void onAction(client::widgets::MessageActionPanel::Action a, int arg);
+        void doSearch();
+        void doSearchNext();
+        void onSearchFailure();
 
         game::proxy::MailboxProxy::Status m_state;
         game::proxy::MailboxProxy::Message m_data;
@@ -49,7 +53,9 @@ namespace client { namespace dialogs {
 
         client::widgets::MessageActionPanel m_actionPanel;
         ui::rich::DocumentView m_content;
+        String_t m_searchText;
 
+        game::proxy::ConfigurationProxy m_configProxy;
         game::proxy::MailboxProxy m_proxy;
     };
 

@@ -16,12 +16,25 @@ using game::actions::mustHaveRoot;
 using game::actions::mustHaveGame;
 using game::msg::Browser;
 
+namespace {
+    struct SearchRequest {
+        Browser::Mode mode;
+        int amount;
+        bool acceptFiltered;
+        String_t needle;
+        SearchRequest(Browser::Mode mode, int amount, bool acceptFiltered, String_t needle)
+            : mode(mode), amount(amount), acceptFiltered(acceptFiltered), needle(needle)
+            { }
+    };
+}
+
 class game::proxy::MailboxProxy::Trampoline {
  public:
     Trampoline(MailboxAdaptor& adaptor, util::RequestSender<MailboxProxy> reply);
 
     void setCurrentMessage(size_t index);
     void browse(game::msg::Browser::Mode mode, int amount, bool acceptFiltered);
+    void search(SearchRequest req);
     void toggleHeadingFiltered(String_t heading);
     void performMessageAction(game::msg::Mailbox::Action a);
 
@@ -29,6 +42,7 @@ class game::proxy::MailboxProxy::Trampoline {
     void buildSummary(game::msg::Browser::Summary_t& summary, size_t* index) const;
 
     void sendResponse(bool requested);
+    void sendSearchFailure();
     void sendSummary();
 
  private:
@@ -65,6 +79,20 @@ game::proxy::MailboxProxy::Trampoline::browse(game::msg::Browser::Mode mode, int
 
     Browser b(m_adaptor.mailbox(), session.translator(), mustHaveRoot(session).playerList(), acceptFiltered ? 0 : m_adaptor.getConfiguration());
     setCurrentMessage(b.browse(m_currentMessage, mode, amount));
+}
+
+void
+game::proxy::MailboxProxy::Trampoline::search(SearchRequest req)
+{
+    Session& session = m_adaptor.session();
+
+    Browser b(m_adaptor.mailbox(), session.translator(), mustHaveRoot(session).playerList(), req.acceptFiltered ? 0 : m_adaptor.getConfiguration());
+    Browser::Result r = b.search(m_currentMessage, req.mode, req.amount, req.needle);
+    if (r.found) {
+        setCurrentMessage(r.index);
+    } else {
+        sendSearchFailure();
+    }
 }
 
 void
@@ -146,6 +174,12 @@ game::proxy::MailboxProxy::Trampoline::sendResponse(bool requested)
     }
 
     m_reply.postRequest(&MailboxProxy::updateCurrentMessage, index, m, requested);
+}
+
+inline void
+game::proxy::MailboxProxy::Trampoline::sendSearchFailure()
+{
+    m_reply.postRequest(&MailboxProxy::emitSearchFailure);
 }
 
 void
@@ -244,6 +278,14 @@ game::proxy::MailboxProxy::browse(game::msg::Browser::Mode mode, int amount, boo
 }
 
 void
+game::proxy::MailboxProxy::search(game::msg::Browser::Mode mode, int amount, bool acceptFiltered, const String_t& needle)
+{
+    // Search does not take part in debouncing; the last response might be an error
+    // and if we suppress all answers before that, we don't have updateCurrentMessage() data.
+    m_request.postRequest(&Trampoline::search, SearchRequest(mode, amount, acceptFiltered, needle));
+}
+
+void
 game::proxy::MailboxProxy::toggleHeadingFiltered(String_t heading)
 {
     m_request.postRequest(&Trampoline::toggleHeadingFiltered, heading);
@@ -264,4 +306,10 @@ game::proxy::MailboxProxy::updateCurrentMessage(size_t index, Message data, bool
     if (m_numRequests == 0) {
         sig_update.raise(index, data);
     }
+}
+
+void
+game::proxy::MailboxProxy::emitSearchFailure()
+{
+    sig_searchFailure.raise();
 }

@@ -8,15 +8,19 @@
 #include "client/widgets/decayingmessage.hpp"
 #include "client/widgets/helpwidget.hpp"
 #include "game/actions/preconditions.hpp"
+#include "game/config/userconfiguration.hpp"
+#include "ui/dialogs/messagebox.hpp"
 #include "ui/group.hpp"
 #include "ui/layout/hbox.hpp"
 #include "ui/layout/vbox.hpp"
 #include "ui/prefixargument.hpp"
 #include "ui/spacer.hpp"
+#include "ui/widgets/inputline.hpp"
 #include "ui/widgets/quit.hpp"
 #include "ui/window.hpp"
 
 using client::widgets::MessageActionPanel;
+
 
 /****************************** InboxDialog ******************************/
 
@@ -30,9 +34,12 @@ client::dialogs::InboxDialog::InboxDialog(String_t title, util::RequestSender<ga
       m_loop(root),
       m_actionPanel(root, tx),
       m_content(root.provider().getFont(gfx::FontRequest().setStyle(1))->getCellSize().scaledBy(41, 22), 0, root.provider()),
+      m_searchText(),
+      m_configProxy(iface.gameSender()),
       m_proxy(sender, root.engine().dispatcher())
 {
     m_proxy.sig_update.add(this, &InboxDialog::onUpdate);
+    m_proxy.sig_searchFailure.add(this, &InboxDialog::onSearchFailure);
 }
 
 client::dialogs::InboxDialog::~InboxDialog()
@@ -49,6 +56,8 @@ client::dialogs::InboxDialog::run(client::si::OutputState& out,
         client::widgets::showDecayingMessage(root(), noMessageAdvice);
         return false;
     }
+
+    m_searchText = m_configProxy.getOption(m_link, game::config::UserConfiguration::Messages_LastSearch);
 
     // Window
     //   HBox
@@ -222,7 +231,12 @@ client::dialogs::InboxDialog::onAction(client::widgets::MessageActionPanel::Acti
      case MessageActionPanel::Redirect:
      case MessageActionPanel::Delete:
      case MessageActionPanel::Forward:
+        break;
+
      case MessageActionPanel::Search:
+        doSearch();
+        break;
+
      case MessageActionPanel::Write:
         break;
 
@@ -265,6 +279,13 @@ client::dialogs::InboxDialog::onAction(client::widgets::MessageActionPanel::Acti
         break;
 
      case MessageActionPanel::SearchNext:
+        if (m_searchText.empty()) {
+            doSearch();
+        } else {
+            doSearchNext();
+        }
+        break;
+
      case MessageActionPanel::WriteAll:
      case MessageActionPanel::ReplyAll:
         break;
@@ -273,4 +294,37 @@ client::dialogs::InboxDialog::onAction(client::widgets::MessageActionPanel::Acti
         doSubjectListDialog(m_proxy, root(), interface().gameSender(), translator());
         break;
     }
+}
+
+void
+client::dialogs::InboxDialog::doSearch()
+{
+    // ex WMessageDisplay::doSearch
+    afl::string::Translator& tx = translator();
+    ui::widgets::InputLine input(1000, 30, root());
+    input.setText(m_searchText);
+    if (input.doStandardDialog(tx("Search in messages"), tx("Search for:"), tx)) {
+        m_searchText = input.getText();
+        if (!m_searchText.empty()) {
+            m_configProxy.setOption(game::config::UserConfiguration::Messages_LastSearch, m_searchText);
+            m_proxy.search(game::msg::Browser::First, 0, true, m_searchText);
+            // Will update the message or call onSearchFailure
+        }
+    }
+}
+
+void
+client::dialogs::InboxDialog::doSearchNext()
+{
+    // ex WMessageDisplay::doSearchNext (sort-of)
+    m_proxy.search(game::msg::Browser::Next, 1, true, m_searchText);
+    // Will update the message or call onSearchFailure
+}
+
+void
+client::dialogs::InboxDialog::onSearchFailure()
+{
+    afl::string::Translator& tx = translator();
+    ui::dialogs::MessageBox(tx("Search text not found."), tx("Search in messages"), root())
+        .doOkDialog(tx);
 }

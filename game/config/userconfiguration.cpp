@@ -76,6 +76,9 @@ namespace game { namespace config {
     const IntegerOptionDescriptor UserConfiguration::Game_ReadOnly        = { "Game.ReadOnly", &BooleanValueParser::instance };
     const IntegerOptionDescriptor UserConfiguration::Game_AccessHostFiles = { "Game.AccessHostFiles", &BooleanValueParser::instance };
 
+    // Messages
+    const StringOptionDescriptor  UserConfiguration::Messages_LastSearch  = { "Messages.LastSearch" };
+
     // Display
     const IntegerOptionDescriptor UserConfiguration::Display_ThousandsSep = { "Display.ThousandsSep", &BooleanValueParser::instance };
     const IntegerOptionDescriptor UserConfiguration::Display_Clans        = { "Display.Clans", &BooleanValueParser::instance };
@@ -195,6 +198,9 @@ game::config::UserConfiguration::setDefaultValues()
     //     SoundStereo.set(true);
 
     // Game options are not for editing by user
+
+    // Messages
+    me[Messages_LastSearch].set(String_t());
 
     // Display
     me[Display_ThousandsSep].set(1);

@@ -13,6 +13,7 @@
 #include "util/requestreceiver.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/io/nullfilesystem.hpp"
+#include "game/test/counter.hpp"
 
 namespace {
     /*
@@ -161,7 +162,7 @@ TestGameProxyMailboxProxy::testSummary()
     Environment env(".........."
                     ".........."
                     "xx");
-    
+
     // Set up tasking
     // WaitIndicator's RequestDispatcher personality serves both sides
     game::test::WaitIndicator ind;
@@ -235,5 +236,52 @@ TestGameProxyMailboxProxy::testAction()
 
     // Verify
     TS_ASSERT(u.m_data.flags.contains(game::msg::Mailbox::Confirmed));
+}
+
+/** Test search. */
+void
+TestGameProxyMailboxProxy::testSearch()
+{
+    Environment env(".......");
+
+    // Set up tasking
+    // WaitIndicator's RequestDispatcher personality serves both sides
+    game::test::WaitIndicator ind;
+    TestAdaptor ad(env);
+    util::RequestReceiver<game::proxy::MailboxAdaptor> recv(ind, ad);
+    env.currentMessage = 0;
+
+    // Testee
+    game::proxy::MailboxProxy proxy(recv.getSender(), ind);
+
+    // Search
+    game::test::Counter ctr;
+    UpdateReceiver u;
+    proxy.sig_update.add(&u, &UpdateReceiver::onUpdate);
+    proxy.sig_searchFailure.add(&ctr, &game::test::Counter::increment);
+    proxy.search(game::msg::Browser::Next, 1, false, "text-3");
+    ind.processQueue();
+
+    TS_ASSERT_EQUALS(u.m_index, 3U);
+    TS_ASSERT_EQUALS(u.m_data.text.getText(), "text-3");
+    TS_ASSERT_EQUALS(u.m_data.isFiltered, false);
+    TS_ASSERT_EQUALS(ctr.get(), 0);
+
+    // Failure
+    proxy.search(game::msg::Browser::Next, 1, false, "nope");
+    ind.processQueue();
+
+    TS_ASSERT_EQUALS(u.m_index, 3U);
+    TS_ASSERT_EQUALS(u.m_data.text.getText(), "text-3");
+    TS_ASSERT_EQUALS(u.m_data.isFiltered, false);
+    TS_ASSERT_EQUALS(ctr.get(), 1);
+
+    // Browsing must work
+    proxy.browse(game::msg::Browser::Next, 1, false);
+    ind.processQueue();
+
+    TS_ASSERT_EQUALS(u.m_index, 4U);
+    TS_ASSERT_EQUALS(u.m_data.text.getText(), "text-4");
+    TS_ASSERT_EQUALS(u.m_data.isFiltered, false);
 }
 
