@@ -108,6 +108,16 @@ namespace game { namespace proxy {
             \see game::msg::Browser::search */
         void search(game::msg::Browser::Mode mode, int amount, bool acceptFiltered, const String_t& needle);
 
+        /** Write messages to a file.
+            \param [in] ind        WaitIndicator for UI synchronisation
+            \param [in] fileName   Output file name
+            \param [in] first      First message index, inclusive
+            \param [in] last       Last message index, exclusive
+            \param [out] errorMessage Error message on failure
+            \retval true success
+            \retval false error; errorMessage has been set */
+        bool write(WaitIndicator& ind, const String_t& fileName, size_t first, size_t last, String_t& errorMessage);
+
         /** Toggle whether heading is filtered.
             Responds with sig_summaryChanged.
             \param heading Heading

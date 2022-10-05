@@ -4,6 +4,8 @@
   */
 
 #include "game/proxy/mailboxproxy.hpp"
+#include "afl/io/textfile.hpp"
+#include "afl/string/format.hpp"
 #include "game/actions/preconditions.hpp"
 #include "game/msg/configuration.hpp"
 #include "game/msg/outbox.hpp"
@@ -12,6 +14,7 @@
 #include "game/proxy/waitindicator.hpp"
 #include "game/root.hpp"
 
+using afl::string::Format;
 using game::actions::mustHaveRoot;
 using game::actions::mustHaveGame;
 using game::msg::Browser;
@@ -35,6 +38,7 @@ class game::proxy::MailboxProxy::Trampoline {
     void setCurrentMessage(size_t index);
     void browse(game::msg::Browser::Mode mode, int amount, bool acceptFiltered);
     void search(SearchRequest req);
+    bool write(const String_t& fileName, size_t first, size_t last, String_t& errorMessage);
     void toggleHeadingFiltered(String_t heading);
     void performMessageAction(game::msg::Mailbox::Action a);
 
@@ -93,6 +97,47 @@ game::proxy::MailboxProxy::Trampoline::search(SearchRequest req)
     } else {
         sendSearchFailure();
     }
+}
+
+bool
+game::proxy::MailboxProxy::Trampoline::write(const String_t& fileName, size_t first, size_t last, String_t& errorMessage)
+{
+    // ex WMessageDisplay::doWriteMessage (part)
+    // TODO: consider moving that to Mailbox and merging with MessageWriteCommand::call
+    Session& session = m_adaptor.session();
+    afl::io::FileSystem& fs = session.world().fileSystem();
+    game::msg::Mailbox& mbox = m_adaptor.mailbox();
+    if (Root* r = session.getRoot().get()) {
+        try {
+            afl::base::Ptr<afl::io::Stream> s = fs.openFileNT(fileName, afl::io::FileSystem::OpenWrite);
+            if (s.get() == 0) {
+                s = fs.openFile(fileName, afl::io::FileSystem::CreateNew).asPtr();
+            }
+            s->setPos(s->getSize());
+
+            // Write message. Use game character set, because programs like PCC 1.x / mgrep
+            // use these files and assume game character set. The message will not contain
+            // anything else, anyway.
+            afl::io::TextFile tf(*s);
+            tf.setCharsetNew(r->charset().clone());
+
+            // Turn number
+            tf.writeLine(Format("=== Turn %d ===", mbox.getMessageTurnNumber(first)));
+            if (last > first+1) {
+                tf.writeLine(Format("   %d message(s)", last-first));
+            }
+            for (size_t i = first; i < last; ++i) {
+                tf.writeLine(Format("--- Message %d ---", i+1));
+                tf.writeLine(mbox.getMessageText(i, session.translator(), r->playerList()));
+            }
+            tf.flush();
+        }
+        catch (std::exception& e) {
+            errorMessage = e.what();
+            return false;
+        }
+    }
+    return true;
 }
 
 void
@@ -283,6 +328,39 @@ game::proxy::MailboxProxy::search(game::msg::Browser::Mode mode, int amount, boo
     // Search does not take part in debouncing; the last response might be an error
     // and if we suppress all answers before that, we don't have updateCurrentMessage() data.
     m_request.postRequest(&Trampoline::search, SearchRequest(mode, amount, acceptFiltered, needle));
+}
+
+bool
+game::proxy::MailboxProxy::write(WaitIndicator& ind, const String_t& fileName, size_t first, size_t last, String_t& errorMessage)
+{
+    class Task : public util::Request<Trampoline> {
+     public:
+        Task(const String_t& fileName, size_t first, size_t last)
+            : m_fileName(fileName), m_first(first), m_last(last),
+              m_success(true), m_errorMessage()
+            { }
+        virtual void handle(Trampoline& tpl)
+            { m_success = tpl.write(m_fileName, m_first, m_last, m_errorMessage); }
+        bool isOK() const
+            { return m_success; }
+        const String_t& getErrorMessage() const
+            { return m_errorMessage; }
+     private:
+        String_t m_fileName;
+        size_t m_first;
+        size_t m_last;
+        bool m_success;
+        String_t m_errorMessage;  // pass by copy to avoid potential aliasing with user-side
+    };
+
+    Task t(fileName, first, last);
+    ind.call(m_request, t);
+    if (!t.isOK()) {
+        errorMessage = t.getErrorMessage();
+        return false;
+    } else {
+        return true;
+    }
 }
 
 void

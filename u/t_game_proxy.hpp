@@ -348,6 +348,9 @@ class TestGameProxyMailboxProxy : public CxxTest::TestSuite {
     void testToggleFiltered();
     void testAction();
     void testSearch();
+    void testWrite();
+    void testWriteMulti();
+    void testWriteError();
 };
 
 class TestGameProxyMapConfigurationProxy : public CxxTest::TestSuite {

@@ -4,6 +4,7 @@
 
 #include "client/dialogs/inboxdialog.hpp"
 #include "afl/string/format.hpp"
+#include "client/dialogs/sessionfileselectiondialog.hpp"
 #include "client/dialogs/subjectlist.hpp"
 #include "client/widgets/decayingmessage.hpp"
 #include "client/widgets/helpwidget.hpp"
@@ -19,8 +20,8 @@
 #include "ui/widgets/quit.hpp"
 #include "ui/window.hpp"
 
+using afl::string::Format;
 using client::widgets::MessageActionPanel;
-
 
 /****************************** InboxDialog ******************************/
 
@@ -173,7 +174,8 @@ client::dialogs::InboxDialog::onUpdate(size_t index, const game::proxy::MailboxP
     m_data = msg;
 
     // Position
-    m_actionPanel.setPosition(afl::string::Format("%d/%d", index+1, m_state.numMessages), msg.isFiltered);
+    m_actionPanel.setPosition(Format("%d/%d", index+1, m_state.numMessages), msg.isFiltered);
+    m_state.currentMessage = index;
 
     // Buttons
     updateButton(MessageActionPanel::GoTo1, msg.goto1Name);
@@ -238,6 +240,7 @@ client::dialogs::InboxDialog::onAction(client::widgets::MessageActionPanel::Acti
         break;
 
      case MessageActionPanel::Write:
+        doWrite(false);
         break;
 
      case MessageActionPanel::BrowsePrevious:
@@ -287,6 +290,9 @@ client::dialogs::InboxDialog::onAction(client::widgets::MessageActionPanel::Acti
         break;
 
      case MessageActionPanel::WriteAll:
+        doWrite(true);
+        break;
+
      case MessageActionPanel::ReplyAll:
         break;
 
@@ -327,4 +333,25 @@ client::dialogs::InboxDialog::onSearchFailure()
     afl::string::Translator& tx = translator();
     ui::dialogs::MessageBox(tx("Search text not found."), tx("Search in messages"), root())
         .doOkDialog(tx);
+}
+
+void
+client::dialogs::InboxDialog::doWrite(bool all)
+{
+    afl::string::Translator& tx = translator();
+    String_t heading = all ? tx("Save All Messages") : tx("Save this Message");
+    SessionFileSelectionDialog dlg(root(), tx, interface().gameSender(), heading);
+    dlg.setPattern(util::FileNamePattern::getAllFilesWithExtensionPattern("txt"));
+    if (dlg.runDefault(m_link)) {
+        // Do it!
+        const String_t fileName = dlg.getResult();
+        String_t err;
+        bool ok = all
+            ? m_proxy.write(m_link, fileName, 0,                      m_state.numMessages,      err)
+            : m_proxy.write(m_link, fileName, m_state.currentMessage, m_state.currentMessage+1, err);
+        if (!ok) {
+            ui::dialogs::MessageBox(Format(tx("Unable to write to file %s: %s"), fileName, err), heading, root())
+                .doOkDialog(tx);
+        }
+    }
 }

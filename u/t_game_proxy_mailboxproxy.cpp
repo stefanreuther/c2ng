@@ -6,14 +6,15 @@
 #include "game/proxy/mailboxproxy.hpp"
 
 #include "t_game_proxy.hpp"
+#include "afl/io/nullfilesystem.hpp"
 #include "afl/string/format.hpp"
-#include "game/test/root.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "game/game.hpp"
+#include "game/test/counter.hpp"
+#include "game/test/root.hpp"
 #include "game/test/waitindicator.hpp"
 #include "util/requestreceiver.hpp"
-#include "afl/string/nulltranslator.hpp"
-#include "afl/io/nullfilesystem.hpp"
-#include "game/test/counter.hpp"
+#include "afl/io/internalfilesystem.hpp"
 
 namespace {
     /*
@@ -35,7 +36,7 @@ namespace {
         virtual String_t getMessageHeading(size_t index, afl::string::Translator& /*tx*/, const game::PlayerList& /*players*/) const
             { return afl::string::Format("head-%d", index / 10); }
         virtual int getMessageTurnNumber(size_t /*index*/) const
-            { return 0; }
+            { return 42; }
         virtual bool isMessageFiltered(size_t index, afl::string::Translator& /*tx*/, const game::PlayerList& /*players*/, const game::msg::Configuration& /*config*/) const
             {
                 TS_ASSERT(index < m_pattern.size());
@@ -62,7 +63,7 @@ namespace {
 
     struct Environment {
         afl::string::NullTranslator tx;
-        afl::io::NullFileSystem fs;
+        afl::io::InternalFileSystem fs;
         game::Session session;
         TestMailbox mailbox;
         game::msg::Configuration config;
@@ -164,7 +165,6 @@ TestGameProxyMailboxProxy::testSummary()
                     "xx");
 
     // Set up tasking
-    // WaitIndicator's RequestDispatcher personality serves both sides
     game::test::WaitIndicator ind;
     TestAdaptor ad(env);
     util::RequestReceiver<game::proxy::MailboxAdaptor> recv(ind, ad);
@@ -196,7 +196,6 @@ TestGameProxyMailboxProxy::testToggleFiltered()
     Environment env(".....");
 
     // Set up tasking
-    // WaitIndicator's RequestDispatcher personality serves both sides
     game::test::WaitIndicator ind;
     TestAdaptor ad(env);
     util::RequestReceiver<game::proxy::MailboxAdaptor> recv(ind, ad);
@@ -217,7 +216,6 @@ TestGameProxyMailboxProxy::testAction()
     Environment env(".....");
 
     // Set up tasking
-    // WaitIndicator's RequestDispatcher personality serves both sides
     game::test::WaitIndicator ind;
     TestAdaptor ad(env);
     util::RequestReceiver<game::proxy::MailboxAdaptor> recv(ind, ad);
@@ -245,7 +243,6 @@ TestGameProxyMailboxProxy::testSearch()
     Environment env(".......");
 
     // Set up tasking
-    // WaitIndicator's RequestDispatcher personality serves both sides
     game::test::WaitIndicator ind;
     TestAdaptor ad(env);
     util::RequestReceiver<game::proxy::MailboxAdaptor> recv(ind, ad);
@@ -283,5 +280,84 @@ TestGameProxyMailboxProxy::testSearch()
     TS_ASSERT_EQUALS(u.m_index, 4U);
     TS_ASSERT_EQUALS(u.m_data.text.getText(), "text-4");
     TS_ASSERT_EQUALS(u.m_data.isFiltered, false);
+}
+
+/** Test write(), single message case. */
+void
+TestGameProxyMailboxProxy::testWrite()
+{
+    Environment env(".......");
+
+    // Set up tasking
+    game::test::WaitIndicator ind;
+    TestAdaptor ad(env);
+    util::RequestReceiver<game::proxy::MailboxAdaptor> recv(ind, ad);
+
+    // Test: write two single messages (exercises creation and append)
+    game::proxy::MailboxProxy proxy(recv.getSender(), ind);
+    String_t err;
+    TS_ASSERT_EQUALS(proxy.write(ind, "/test.txt", 1, 2, err), true);
+    TS_ASSERT_EQUALS(proxy.write(ind, "/test.txt", 3, 4, err), true);
+
+    // Verify
+    afl::base::Ref<afl::io::Stream> in(env.fs.openFile("/test.txt", afl::io::FileSystem::OpenRead));
+    afl::io::TextFile tf(*in);
+    String_t line;
+    TS_ASSERT(tf.readLine(line)); TS_ASSERT_EQUALS(line, "=== Turn 42 ===");
+    TS_ASSERT(tf.readLine(line)); TS_ASSERT_EQUALS(line, "--- Message 2 ---");
+    TS_ASSERT(tf.readLine(line)); TS_ASSERT_EQUALS(line, "text-1");
+    TS_ASSERT(tf.readLine(line)); TS_ASSERT_EQUALS(line, "=== Turn 42 ===");
+    TS_ASSERT(tf.readLine(line)); TS_ASSERT_EQUALS(line, "--- Message 4 ---");
+    TS_ASSERT(tf.readLine(line)); TS_ASSERT_EQUALS(line, "text-3");
+    TS_ASSERT(!tf.readLine(line));
+}
+
+/** Test write(), multiple messages case. */
+void
+TestGameProxyMailboxProxy::testWriteMulti()
+{
+    Environment env(".......");
+
+    // Set up tasking
+    game::test::WaitIndicator ind;
+    TestAdaptor ad(env);
+    util::RequestReceiver<game::proxy::MailboxAdaptor> recv(ind, ad);
+
+    // Test: write multiple messages in one go
+    game::proxy::MailboxProxy proxy(recv.getSender(), ind);
+    String_t err;
+    TS_ASSERT_EQUALS(proxy.write(ind, "/test.txt", 2, 5, err), true);
+
+    // Verify
+    afl::base::Ref<afl::io::Stream> in(env.fs.openFile("/test.txt", afl::io::FileSystem::OpenRead));
+    afl::io::TextFile tf(*in);
+    String_t line;
+    TS_ASSERT(tf.readLine(line)); TS_ASSERT_EQUALS(line, "=== Turn 42 ===");
+    TS_ASSERT(tf.readLine(line)); TS_ASSERT_EQUALS(line, "   3 message(s)");
+    TS_ASSERT(tf.readLine(line)); TS_ASSERT_EQUALS(line, "--- Message 3 ---");
+    TS_ASSERT(tf.readLine(line)); TS_ASSERT_EQUALS(line, "text-2");
+    TS_ASSERT(tf.readLine(line)); TS_ASSERT_EQUALS(line, "--- Message 4 ---");
+    TS_ASSERT(tf.readLine(line)); TS_ASSERT_EQUALS(line, "text-3");
+    TS_ASSERT(tf.readLine(line)); TS_ASSERT_EQUALS(line, "--- Message 5 ---");
+    TS_ASSERT(tf.readLine(line)); TS_ASSERT_EQUALS(line, "text-4");
+    TS_ASSERT(!tf.readLine(line));
+}
+
+/** Test write(), error case. */
+void
+TestGameProxyMailboxProxy::testWriteError()
+{
+    Environment env(".......");
+
+    // Set up tasking
+    game::test::WaitIndicator ind;
+    TestAdaptor ad(env);
+    util::RequestReceiver<game::proxy::MailboxAdaptor> recv(ind, ad);
+
+    // Test: write to a file that cannot be accessed
+    game::proxy::MailboxProxy proxy(recv.getSender(), ind);
+    String_t err;
+    TS_ASSERT_EQUALS(proxy.write(ind, "/bad/directory/test.txt", 2, 5, err), false);
+    TS_ASSERT_DIFFERS(err, "");
 }
 
