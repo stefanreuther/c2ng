@@ -19,6 +19,7 @@
 #include "ui/widgets/inputline.hpp"
 #include "ui/widgets/quit.hpp"
 #include "ui/window.hpp"
+#include "util/stringparser.hpp"
 
 using afl::string::Format;
 using client::widgets::MessageActionPanel;
@@ -41,6 +42,7 @@ client::dialogs::InboxDialog::InboxDialog(String_t title, util::RequestSender<ga
 {
     m_proxy.sig_update.add(this, &InboxDialog::onUpdate);
     m_proxy.sig_searchFailure.add(this, &InboxDialog::onSearchFailure);
+    m_content.sig_linkClick.add(this, &InboxDialog::onLinkClick);
 }
 
 client::dialogs::InboxDialog::~InboxDialog()
@@ -353,5 +355,15 @@ client::dialogs::InboxDialog::doWrite(bool all)
             ui::dialogs::MessageBox(Format(tx("Unable to write to file %s: %s"), fileName, err), heading, root())
                 .doOkDialog(tx);
         }
+    }
+}
+
+void
+client::dialogs::InboxDialog::onLinkClick(String_t str)
+{
+    util::StringParser p(str);
+    int x, y;
+    if (p.parseInt(x) && p.parseCharacter(',') && p.parseInt(y) && p.parseEnd()) {
+        executeGoToReferenceWait("(Message)", game::map::Point(x, y));
     }
 }
