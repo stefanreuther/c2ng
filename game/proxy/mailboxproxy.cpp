@@ -3,13 +3,16 @@
   *  \brief Class game::proxy::MailboxProxy
   */
 
+#include <cctype>
 #include "game/proxy/mailboxproxy.hpp"
 #include "afl/io/textfile.hpp"
 #include "afl/string/format.hpp"
 #include "game/actions/preconditions.hpp"
+#include "game/game.hpp"
 #include "game/msg/configuration.hpp"
 #include "game/msg/outbox.hpp"
 #include "game/parser/format.hpp"
+#include "game/parser/messagetemplate.hpp"
 #include "game/playerset.hpp"
 #include "game/proxy/waitindicator.hpp"
 #include "game/root.hpp"
@@ -29,6 +32,71 @@ namespace {
             : mode(mode), amount(amount), acceptFiltered(acceptFiltered), needle(needle)
             { }
     };
+
+    /** Check for message header. Header lines must fulfill the regexp
+        "[A-Z]+ *:", i.e. any single word followed by optional spaces and a
+        colon. We want to recognize
+          "TO: race"     (THost)
+          "TO  : race"   (PHost, English)
+          "An  : race"   (PHost, German)
+          "CC: race"     (PCC)
+        We do not need to recognize "<<<Universal Message>>>", this is handled
+        on the outside. We do not need to handle "<CC:" and the blank line
+        between host's headers and ours; we see the message in
+        "cooked" format after these idiosyncrasies have been resolved.
+
+        \todo This does not recognize Estonian
+          " SAAJA: race"
+        but I consider Estonian in error here. This does not recognize
+        Russian, which uses Cyrillic letters in the headers.
+
+        Original: readmsg.pas, IsHeader */
+    bool isHeader(const String_t& line)
+    {
+        String_t::size_type n = 0;
+        while (n < line.size() && std::isalpha(uint8_t(line[n]))) {
+            ++n;
+        }
+        if (n == 0) {
+            return false;
+        }
+        while (n < line.size() && line[n] == ' ') {
+            ++n;
+        }
+        return (n < line.size() && line[n] == ':');
+    }
+
+
+    String_t quoteForReply(const String_t& originalText)
+    {
+        // ex WMessageActionPanel::doReply()
+        // Split message into lines
+        game::parser::MessageLines_t lines;
+        game::parser::splitMessage(lines, originalText);
+
+        // Skip headers. First line always is (-foo).
+        size_t first = 1;
+        while (first < lines.size()
+               && (lines[first].size() == 0
+                   || lines[first] == game::msg::Outbox::UNIVERSAL_TEXT
+                   || isHeader(lines[first])))
+        {
+            ++first;
+        }
+
+        // Quote remainder.
+        String_t quotedMessage;
+        while (first < lines.size()) {
+            quotedMessage += '>';
+            if (lines[first].size() > 0 && lines[first][0] != '>') {
+                quotedMessage += ' ';
+            }
+            quotedMessage += lines[first];
+            quotedMessage += '\n';
+            ++first;
+        }
+        return quotedMessage;
+    }
 }
 
 class game::proxy::MailboxProxy::Trampoline {
@@ -41,6 +109,7 @@ class game::proxy::MailboxProxy::Trampoline {
     bool write(const String_t& fileName, size_t first, size_t last, String_t& errorMessage);
     void toggleHeadingFiltered(String_t heading);
     void performMessageAction(game::msg::Mailbox::Action a);
+    QuoteResult quoteMessage(size_t index, QuoteAction action);
 
     void packStatus(Status& st);
     void buildSummary(game::msg::Browser::Summary_t& summary, size_t* index) const;
@@ -155,6 +224,40 @@ game::proxy::MailboxProxy::Trampoline::performMessageAction(game::msg::Mailbox::
 {
     m_adaptor.mailbox().performMessageAction(m_currentMessage, a);
     sendResponse(false);
+}
+
+game::proxy::MailboxProxy::QuoteResult
+game::proxy::MailboxProxy::Trampoline::quoteMessage(size_t index, QuoteAction action)
+{
+    // TODO: consider moving that to Mailbox
+    // Viewpoint player
+    int sender = 0;
+    if (Game* g = m_adaptor.session().getGame().get()) {
+        sender = g->getViewpointPlayer();
+    }
+
+    // Original message text
+    afl::string::Translator& tx = m_adaptor.session().translator();
+    String_t originalText;
+    if (Root* r = m_adaptor.session().getRoot().get()) {
+        originalText = m_adaptor.mailbox().getMessageText(index, tx, r->playerList());
+    }
+
+    // Message text
+    String_t text;
+    switch (action) {
+     case QuoteForForwarding:
+        text = "--- Forwarded Message ---\n"
+            + originalText
+            + "\n--- End Forwarded Message ---";
+        break;
+
+     case QuoteForReplying:
+        text = quoteForReply(originalText);
+        break;
+    }
+
+    return QuoteResult(sender, text);
 }
 
 void
@@ -373,6 +476,27 @@ void
 game::proxy::MailboxProxy::performMessageAction(game::msg::Mailbox::Action a)
 {
     m_request.postRequest(&Trampoline::performMessageAction, a);
+}
+
+game::proxy::MailboxProxy::QuoteResult
+game::proxy::MailboxProxy::quoteMessage(WaitIndicator& ind, size_t index, QuoteAction action)
+{
+    class Task : public util::Request<Trampoline> {
+     public:
+        Task(size_t index, QuoteAction action, QuoteResult& result)
+            : m_index(index), m_action(action), m_result(result)
+            { }
+        virtual void handle(Trampoline& tpl)
+            { m_result = tpl.quoteMessage(m_index, m_action); }
+     private:
+        size_t m_index;
+        QuoteAction m_action;
+        QuoteResult& m_result;
+    };
+    QuoteResult result(0, String_t());
+    Task t(index, action, result);
+    ind.call(m_request, t);
+    return result;
 }
 
 void

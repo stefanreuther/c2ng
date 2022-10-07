@@ -7,11 +7,11 @@
 #include "afl/string/format.hpp"
 #include "game/limits.hpp"
 
-namespace {
-    /* Header line for a universal message.
-       Used/recognized by other programs, don't translate. */
-    const char UNIVERSAL_TEXT[] = "  <<< Universal Message >>>";
+/* Header line for a universal message.
+   Used/recognized by other programs, don't translate. */
+const char game::msg::Outbox::UNIVERSAL_TEXT[] = "  <<< Universal Message >>>";
 
+namespace {
     /* Header line for a message to ourselves and others.
        Starts with a '<' to avoid PHost recognizing it as a command message.
        We need to filter it out upon reception. */
@@ -83,7 +83,7 @@ namespace {
         }
 
         const String_t firstLine = afl::string::strFirst(msg, "\n");
-        if (firstLine == UNIVERSAL_TEXT
+        if (firstLine == game::msg::Outbox::UNIVERSAL_TEXT
             || firstLine.compare(0, sizeof(CC_PREFIX)-1,      CC_PREFIX,      sizeof(CC_PREFIX)-1) == 0
             || firstLine.compare(0, sizeof(CC_SELF_PREFIX)-1, CC_SELF_PREFIX, sizeof(CC_SELF_PREFIX)-1) == 0)
         {

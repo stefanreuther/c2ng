@@ -25,14 +25,14 @@ namespace {
      */
     class TestMailbox : public game::msg::Mailbox {
      public:
-        TestMailbox(String_t pattern)
-            : m_pattern(pattern), m_flags()
+        TestMailbox(String_t pattern, String_t prefix)
+            : m_pattern(pattern), m_prefix(prefix), m_flags()
             { }
 
         virtual size_t getNumMessages() const
             { return m_pattern.size(); }
         virtual String_t getMessageText(size_t index, afl::string::Translator& /*tx*/, const game::PlayerList& /*players*/) const
-            { return afl::string::Format("text-%d", index); }
+            { return afl::string::Format("%stext-%d", m_prefix, index); }
         virtual String_t getMessageHeading(size_t index, afl::string::Translator& /*tx*/, const game::PlayerList& /*players*/) const
             { return afl::string::Format("head-%d", index / 10); }
         virtual int getMessageTurnNumber(size_t /*index*/) const
@@ -54,6 +54,7 @@ namespace {
             }
      private:
         String_t m_pattern;
+        String_t m_prefix;
         Flags_t m_flags;
     };
 
@@ -69,9 +70,9 @@ namespace {
         game::msg::Configuration config;
         size_t currentMessage;
 
-        Environment(String_t pattern)
+        Environment(String_t pattern, String_t prefix)
             : tx(), fs(), session(tx, fs),
-              mailbox(pattern),
+              mailbox(pattern, prefix),
               config(),
               currentMessage(0)
             {
@@ -118,7 +119,7 @@ namespace {
 void
 TestGameProxyMailboxProxy::testIt()
 {
-    Environment env("x...x.x.");
+    Environment env("x...x.x.", "");
 
     // Set up tasking
     // WaitIndicator's RequestDispatcher personality serves both sides
@@ -162,7 +163,7 @@ TestGameProxyMailboxProxy::testSummary()
 {
     Environment env(".........."
                     ".........."
-                    "xx");
+                    "xx", "");
 
     // Set up tasking
     game::test::WaitIndicator ind;
@@ -193,7 +194,7 @@ TestGameProxyMailboxProxy::testSummary()
 void
 TestGameProxyMailboxProxy::testToggleFiltered()
 {
-    Environment env(".....");
+    Environment env(".....", "");
 
     // Set up tasking
     game::test::WaitIndicator ind;
@@ -213,7 +214,7 @@ TestGameProxyMailboxProxy::testToggleFiltered()
 void
 TestGameProxyMailboxProxy::testAction()
 {
-    Environment env(".....");
+    Environment env(".....", "");
 
     // Set up tasking
     game::test::WaitIndicator ind;
@@ -240,7 +241,7 @@ TestGameProxyMailboxProxy::testAction()
 void
 TestGameProxyMailboxProxy::testSearch()
 {
-    Environment env(".......");
+    Environment env(".......", "");
 
     // Set up tasking
     game::test::WaitIndicator ind;
@@ -286,7 +287,7 @@ TestGameProxyMailboxProxy::testSearch()
 void
 TestGameProxyMailboxProxy::testWrite()
 {
-    Environment env(".......");
+    Environment env(".......", "");
 
     // Set up tasking
     game::test::WaitIndicator ind;
@@ -316,7 +317,7 @@ TestGameProxyMailboxProxy::testWrite()
 void
 TestGameProxyMailboxProxy::testWriteMulti()
 {
-    Environment env(".......");
+    Environment env(".......", "");
 
     // Set up tasking
     game::test::WaitIndicator ind;
@@ -347,7 +348,7 @@ TestGameProxyMailboxProxy::testWriteMulti()
 void
 TestGameProxyMailboxProxy::testWriteError()
 {
-    Environment env(".......");
+    Environment env(".......", "");
 
     // Set up tasking
     game::test::WaitIndicator ind;
@@ -359,5 +360,27 @@ TestGameProxyMailboxProxy::testWriteError()
     String_t err;
     TS_ASSERT_EQUALS(proxy.write(ind, "/bad/directory/test.txt", 2, 5, err), false);
     TS_ASSERT_DIFFERS(err, "");
+}
+
+/** Test quoteMessage(). */
+void
+TestGameProxyMailboxProxy::testQuote()
+{
+    Environment env(".......", "(-r)<<< Message >>>\nFROM: me\n");
+
+    // Set up tasking
+    game::test::WaitIndicator ind;
+    TestAdaptor ad(env);
+    util::RequestReceiver<game::proxy::MailboxAdaptor> recv(ind, ad);
+
+    game::proxy::MailboxProxy proxy(recv.getSender(), ind);
+
+    // Reply
+    game::proxy::MailboxProxy::QuoteResult r = proxy.quoteMessage(ind, 3, game::proxy::MailboxProxy::QuoteForReplying);
+    TS_ASSERT_EQUALS(r.text, "> text-3\n");
+
+    // Forward
+    game::proxy::MailboxProxy::QuoteResult f = proxy.quoteMessage(ind, 5, game::proxy::MailboxProxy::QuoteForForwarding);
+    TS_ASSERT_EQUALS(f.text, "--- Forwarded Message ---\n(-r)<<< Message >>>\nFROM: me\ntext-5\n--- End Forwarded Message ---");
 }
 

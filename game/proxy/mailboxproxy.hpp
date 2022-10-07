@@ -63,6 +63,20 @@ namespace game { namespace proxy {
                 { }
         };
 
+        /** Action for quoting. */
+        enum QuoteAction {
+            QuoteForForwarding,
+            QuoteForReplying
+        };
+
+        struct QuoteResult {
+            int sender;
+            String_t text;
+            QuoteResult(int sender, const String_t& text)
+                : sender(sender), text(text)
+                { }
+        };
+
 
         /** Constructor.
             \param sender  Sender
@@ -128,6 +142,13 @@ namespace game { namespace proxy {
             \param a Action
             \see game::msg::Mailbox::performMessageAction */
         void performMessageAction(game::msg::Mailbox::Action a);
+
+        /** Quote message for forwarding/replying.
+            \param [in] ind     WaitIndicator for UI synchronisation
+            \param [in] index   Message index
+            \param [in] action  Action
+            \return parameters */
+        QuoteResult quoteMessage(WaitIndicator& ind, size_t index, QuoteAction action);
 
         /** Signal: message update.
             \param msg Message */

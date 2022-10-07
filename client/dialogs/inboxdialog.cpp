@@ -4,12 +4,17 @@
 
 #include "client/dialogs/inboxdialog.hpp"
 #include "afl/string/format.hpp"
+#include "client/dialogs/messageeditor.hpp"
+#include "client/dialogs/messagereceiver.hpp"
 #include "client/dialogs/sessionfileselectiondialog.hpp"
 #include "client/dialogs/subjectlist.hpp"
 #include "client/widgets/decayingmessage.hpp"
 #include "client/widgets/helpwidget.hpp"
+#include "client/widgets/playersetselector.hpp"
 #include "game/actions/preconditions.hpp"
 #include "game/config/userconfiguration.hpp"
+#include "game/proxy/outboxproxy.hpp"
+#include "game/proxy/playerproxy.hpp"
 #include "ui/dialogs/messagebox.hpp"
 #include "ui/group.hpp"
 #include "ui/layout/hbox.hpp"
@@ -225,6 +230,9 @@ client::dialogs::InboxDialog::onAction(client::widgets::MessageActionPanel::Acti
         break;
 
      case MessageActionPanel::Reply:
+        if (!m_data.reply.empty()) {
+            doReply(m_data.reply);
+        }
         break;
 
      case MessageActionPanel::Confirm:
@@ -234,7 +242,10 @@ client::dialogs::InboxDialog::onAction(client::widgets::MessageActionPanel::Acti
      case MessageActionPanel::Edit:
      case MessageActionPanel::Redirect:
      case MessageActionPanel::Delete:
+        break;
+
      case MessageActionPanel::Forward:
+        doForward();
         break;
 
      case MessageActionPanel::Search:
@@ -296,6 +307,9 @@ client::dialogs::InboxDialog::onAction(client::widgets::MessageActionPanel::Acti
         break;
 
      case MessageActionPanel::ReplyAll:
+        if (!m_data.replyAll.empty()) {
+            doReply(m_data.replyAll);
+        }
         break;
 
      case MessageActionPanel::BrowseSubjects:
@@ -365,5 +379,59 @@ client::dialogs::InboxDialog::onLinkClick(String_t str)
     int x, y;
     if (p.parseInt(x) && p.parseCharacter(',') && p.parseInt(y) && p.parseEnd()) {
         executeGoToReferenceWait("(Message)", game::map::Point(x, y));
+    }
+}
+
+void
+client::dialogs::InboxDialog::doForward()
+{
+    // WMessageDisplay::doForwardMessage()
+    afl::string::Translator& tx = translator();
+
+    // Get player data
+    game::proxy::PlayerProxy proxy(interface().gameSender());
+    game::PlayerArray<String_t> names = proxy.getPlayerNames(m_link, game::Player::ShortName);
+    game::PlayerSet_t players = proxy.getAllPlayers(m_link);
+
+    // Player selector
+    client::widgets::HelpWidget help(root(), tx, interface().gameSender(), "pcc2:msgin");
+    client::widgets::PlayerSetSelector setSelect(root(), names, players + 0, tx);
+    MessageReceiver dlg(tx("Forward Message"), setSelect, root(), tx);
+    dlg.addUniversalToggle(players);
+    dlg.addHelp(help);
+    dlg.pack();
+    root().moveWidgetToEdge(dlg, gfx::RightAlign, gfx::BottomAlign, 10);
+
+    if (dlg.run() != 0) {
+        // Fetch message parameters
+        game::proxy::MailboxProxy::QuoteResult qm = m_proxy.quoteMessage(m_link, m_state.currentMessage, game::proxy::MailboxProxy::QuoteForForwarding);
+
+        // Prepare message editor
+        game::proxy::OutboxProxy outProxy(interface().gameSender());
+        MessageEditor ed(root(), outProxy, interface().gameSender(), tx);
+        ed.setSender(qm.sender);
+        ed.setReceivers(setSelect.getSelectedPlayers());
+        ed.setText(qm.text);
+        if (ed.run()) {
+            outProxy.addMessage(ed.getSender(), ed.getText(), ed.getReceivers());
+        }
+    }
+}
+
+void
+client::dialogs::InboxDialog::doReply(game::PlayerSet_t to)
+{
+    // WMessageActionPanel::doReply()
+    // Fetch message parameters
+    game::proxy::MailboxProxy::QuoteResult qm = m_proxy.quoteMessage(m_link, m_state.currentMessage, game::proxy::MailboxProxy::QuoteForReplying);
+
+    // Prepare message editor
+    game::proxy::OutboxProxy outProxy(interface().gameSender());
+    MessageEditor ed(root(), outProxy, interface().gameSender(), translator());
+    ed.setSender(qm.sender);
+    ed.setReceivers(to);
+    ed.setText(qm.text);
+    if (ed.run()) {
+        outProxy.addMessage(ed.getSender(), ed.getText(), ed.getReceivers());
     }
 }

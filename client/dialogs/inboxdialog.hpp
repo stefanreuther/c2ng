@@ -46,6 +46,8 @@ namespace client { namespace dialogs {
         void onSearchFailure();
         void doWrite(bool all);
         void onLinkClick(String_t str);
+        void doForward();
+        void doReply(game::PlayerSet_t to);
 
         game::proxy::MailboxProxy::Status m_state;
         game::proxy::MailboxProxy::Message m_data;

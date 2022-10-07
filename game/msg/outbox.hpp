@@ -38,6 +38,8 @@ namespace game { namespace msg {
         Messages are stored including a sender, to allow a possible host or multi-RST view. */
     class Outbox : public Mailbox {
      public:
+        static const char UNIVERSAL_TEXT[];
+
         /** Constructor.
             Makes a blank outbox. */
         Outbox();
