@@ -132,8 +132,9 @@ namespace {
         // Everything else is only accepted when we're in history
         return pl.getPlanetSource().empty();
     }
-
 }
+
+const size_t game::map::Planet::NUM_TIMESTAMPS;
 
 // Construct new planet.
 game::map::Planet::Planet(Id_t id)

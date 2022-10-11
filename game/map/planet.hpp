@@ -69,6 +69,7 @@ namespace game { namespace map {
             NativeTime,             ///< Native gov/pop/race
             CashTime                ///< Cash/supplies
         };
+        static const size_t NUM_TIMESTAMPS = 4;
 
         struct AutobuildSettings {
             IntegerProperty_t goal[NUM_PLANETARY_BUILDING_TYPES];

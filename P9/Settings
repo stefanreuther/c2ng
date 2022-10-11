@@ -12,7 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/proxy/pluginmanagerproxy.cpp \
+FILES_gamelib = game/parser/binarytransfer.cpp \
+    game/parser/binarytransfer.hpp game/proxy/pluginmanagerproxy.cpp \
     game/proxy/pluginmanagerproxy.hpp game/interface/plugins.hpp \
     game/interface/plugins.cpp game/interface/configurationeditorcontext.cpp \
     game/interface/configurationeditorcontext.hpp \
@@ -1733,7 +1734,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_client_widgets_pluginlist.cpp u/t_client_widgets.hpp \
+FILES_testsuite = u/t_game_parser_binarytransfer.cpp \
+    u/t_client_widgets_pluginlist.cpp u/t_client_widgets.hpp \
     u/t_game_proxy_pluginmanagerproxy.cpp u/t_game_interface_plugins.cpp \
     u/t_game_interface_plugincontext.cpp \
     u/t_game_interface_configurationeditorcontext.cpp \

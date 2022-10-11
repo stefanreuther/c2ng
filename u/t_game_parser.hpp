@@ -7,6 +7,30 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestGameParserBinaryTransfer : public CxxTest::TestSuite {
+ public:
+    void testPackBinaryMinefield();
+    void testPackBinaryDrawing();
+    void testPackBinaryDrawing2();
+    void testPackBinaryDrawing3();
+    void testPackBinaryDrawing4();
+    void testPackBinaryPlanet();
+    void testUnpackMinefield();
+    void testUnpackPlanet();
+    void testUnpackPlanet2();
+    void testUnpackDrawing();
+    void testUnpackDrawing2();
+    void testUnpackDrawing3();
+    void testUnpackDrawing4();
+    void testDrawingColors();
+    void testDrawingMarkerShapes();
+    void testUnpackVPA1();
+    void testUnpackVPA2();
+    void testUnpackVPA3();
+    void testUnpackStatistic();
+    void testDecodeErrors();
+};
+
 class TestGameParserDataInterface : public CxxTest::TestSuite {
  public:
     void testIt();
