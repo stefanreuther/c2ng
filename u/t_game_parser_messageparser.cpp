@@ -687,3 +687,43 @@ TestGameParserMessageParser::testFailId()
     }
 }
 
+/** Test creation of markers. */
+void
+TestGameParserMessageParser::testMarker()
+{
+    const char* FILE =
+        "marker,Test\n"
+        "  check  = Distress call\n"
+        "  check  = starship at:\n"
+        "  parse  = +1,( $, $ )\n"
+        "  assign = X, Y\n"
+        "  values = 3, 5\n"
+        "  assign = Shape, Color\n";
+    afl::string::NullTranslator tx;
+    afl::sys::Log log;
+    afl::io::ConstMemoryStream ms(afl::string::toBytes(FILE));
+
+    // Load
+    game::parser::MessageParser testee;
+    TS_ASSERT_THROWS_NOTHING(testee.load(ms, tx, log));
+    TS_ASSERT_EQUALS(testee.getNumTemplates(), 1U);
+    MockDataInterface ifc;
+
+    afl::container::PtrVector<game::parser::MessageInformation> info;
+    TS_ASSERT_THROWS_NOTHING(testee.parseMessage("(-x0005)<< Long Range Sensors >>\n"
+                                                 "Distress call and explosion\n"
+                                                 "detected from a starship at:\n"
+                                                 "( 1930 , 2728 )\n"
+                                                 "The name of the ship was the: \n"
+                                                 "C.S.S. War03\n",
+                                                 ifc,
+                                                 30, info, tx, log));
+    TS_ASSERT_EQUALS(info.size(), 1U);
+    TS_ASSERT(info[0] != 0);
+    TS_ASSERT_EQUALS(info[0]->getObjectType(), game::parser::MessageInformation::MarkerDrawing);
+    TS_ASSERT_EQUALS(info[0]->getObjectId(), 0);
+    TS_ASSERT_EQUALS(getValue<game::parser::MessageIntegerValue_t>(*info[0], game::parser::mi_X, "X"), 1930);
+    TS_ASSERT_EQUALS(getValue<game::parser::MessageIntegerValue_t>(*info[0], game::parser::mi_Y, "Y"), 2728);
+    TS_ASSERT_EQUALS(getValue<game::parser::MessageIntegerValue_t>(*info[0], game::parser::mi_DrawingShape, "shape"), 3);
+    TS_ASSERT_EQUALS(getValue<game::parser::MessageIntegerValue_t>(*info[0], game::parser::mi_Color, "color"), 5);
+}

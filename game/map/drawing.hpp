@@ -150,6 +150,11 @@ namespace game { namespace map {
         bool isVisible() const
             { return m_color != 0; }
 
+        /** Compare for equality.
+            \param other Other drawing to compare to
+            \return true if both drawings are equivalent. */
+        bool equals(const Drawing& other) const;
+
         /** Compute distance of this drawing to a given point in the game universe.
 
             Note: You should normally use getDistanceToWrap instead.

@@ -12,6 +12,7 @@
 #include "game/msg/inbox.hpp"
 #include "game/root.hpp"
 #include "game/spec/shiplist.hpp"
+#include "util/atomtable.hpp"
 
 namespace game { namespace v3 {
 
@@ -29,8 +30,9 @@ namespace game { namespace v3 {
             \param game Game. Updates will be applied to its currentTurn().
             \param player Player number
             \param root Root (playerList(), hostConfiguration())
-            \param shipList ship list (may update hull functions) */
-        Parser(afl::string::Translator& tx, afl::sys::LogListener& log, Game& game, int player, Root& root, game::spec::ShipList& shipList);
+            \param shipList ship list (may update hull functions)
+            \param atomTable AtomTable (for marker tags) */
+        Parser(afl::string::Translator& tx, afl::sys::LogListener& log, Game& game, int player, Root& root, game::spec::ShipList& shipList, util::AtomTable& atomTable);
 
         /** Load util.dat file.
             \param in The util.dat file
@@ -51,6 +53,7 @@ namespace game { namespace v3 {
         int m_player;
         Root& m_root;
         game::spec::ShipList& m_shipList;
+        util::AtomTable& m_atomTable;
     };
 
 } }

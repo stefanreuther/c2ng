@@ -152,6 +152,7 @@ game::v3::udata::Parser::Parser(Game& game,
                                 int playerNr,
                                 game::config::HostConfiguration& config,
                                 game::spec::ShipList& shipList,
+                                util::AtomTable& atomTable,
                                 afl::charset::Charset& cs,
                                 afl::string::Translator& tx,
                                 afl::sys::LogListener& log)
@@ -159,6 +160,7 @@ game::v3::udata::Parser::Parser(Game& game,
       m_player(playerNr),
       m_hostConfiguration(config),
       m_shipList(shipList),
+      m_atomTable(atomTable),
       m_charset(cs),
       m_translator(tx),
       m_log(log),
@@ -661,7 +663,7 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
             MessageInformation info(MessageInformation::Ufo, report->ufoId, getTurnNumber());
             info.addValue(gp::mi_X,        report->x);
             info.addValue(gp::mi_Y,        report->y);
-            info.addValue(gp::mi_UfoColor, report->color);
+            info.addValue(gp::mi_Color,    report->color);
             info.addValue(gp::mi_Radius,   report->radius);
             info.addValue(gp::mi_Speed,    report->warpFactor);
             if (report->heading >= 0) {
@@ -1081,5 +1083,5 @@ game::v3::udata::Parser::processScoreRecord(afl::base::ConstBytes_t data, Scope 
 void
 game::v3::udata::Parser::processMessageInformation(const game::parser::MessageInformation& info)
 {
-    m_game.addMessageInformation(info, m_hostConfiguration, afl::base::Nothing);
+    m_game.addMessageInformation(info, m_hostConfiguration, m_atomTable, afl::base::Nothing);
 }

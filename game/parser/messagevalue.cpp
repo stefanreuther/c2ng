@@ -16,10 +16,12 @@ namespace {
     };
 
     const Keyword stringNames[] = {
+        { "COMMENT",           game::parser::ms_DrawingComment          },
         { "FCODE",             game::parser::ms_FriendlyCode            },
         { "INFO1",             game::parser::ms_UfoInfo1                },
         { "INFO2",             game::parser::ms_UfoInfo2                },
         { "NAME",              game::parser::ms_Name                    },
+        { "TAG",               game::parser::ms_DrawingTag              },
     };
 
     const Keyword intNames[] = {
@@ -45,7 +47,7 @@ namespace {
         { "COLONISTS",         game::parser::mi_PlanetColonists         },
         { "COLONISTS.HAPPY",   game::parser::mi_PlanetColonistHappiness },
         { "COLONISTS.TAX",     game::parser::mi_PlanetColonistTax       },
-        { "COLOR",             game::parser::mi_UfoColor                }, // COLOR.EGA in scripting language
+        { "COLOR",             game::parser::mi_Color                   }, // COLOR.EGA in scripting language for Ufos
         { "CREW",              game::parser::mi_ShipCrew                },
         { "DAMAGE",            game::parser::mi_Damage                  },
         { "DEFENSE",           game::parser::mi_PlanetDefense           },
@@ -55,6 +57,7 @@ namespace {
         { "DENSITY.T",         game::parser::mi_PlanetDensityT          },
         { "ENEMY",             game::parser::mi_ShipEnemy               },
         { "ENGINE",            game::parser::mi_ShipEngineType          },
+        { "EXPIRE",            game::parser::mi_DrawingExpire           },
         { "FACTORIES",         game::parser::mi_PlanetFactories         },
         { "HEADING",           game::parser::mi_Heading                 },
         { "HULL",              game::parser::mi_ShipHull                },
@@ -82,6 +85,7 @@ namespace {
         { "OWNER",             game::parser::mi_Owner                   },
         { "RADIUS",            game::parser::mi_Radius                  },
         { "REASON",            game::parser::mi_MineScanReason          }, // SCANNED in the scripting language
+        { "SHAPE",             game::parser::mi_DrawingShape            },
         { "SPEED",             game::parser::mi_Speed                   },
         { "STABILITY",         game::parser::mi_WormholeStabilityCode   }, // Not in scripting language
         { "STATUS",            game::parser::mi_IonStatus               },
@@ -130,6 +134,8 @@ game::parser::getNameFromIndex(MessageStringIndex si, afl::string::Translator& t
      case ms_FriendlyCode: return tx("FCode");
      case ms_UfoInfo1:     return tx("Info 1");
      case ms_UfoInfo2:     return tx("Info 2");
+     case ms_DrawingComment: return tx("Comment");
+     case ms_DrawingTag:   return tx("Tag");
      case ms_Max:          return "?";
     }
     return "?";
@@ -150,6 +156,9 @@ game::parser::getNameFromIndex(MessageIntegerIndex ii, afl::string::Translator& 
      case mi_Speed:             return tx("Speed");
      case mi_Type:              return tx("Type");
      case mi_Mass:              return tx("Mass");
+     case mi_Color:             return tx("Color");
+     case mi_EndX:              return tx("End X");
+     case mi_EndY:              return tx("End Y");
 
         /* Minefields: */
      case mi_MineUnits:         return tx("Mine Units");
@@ -232,7 +241,6 @@ game::parser::getNameFromIndex(MessageIntegerIndex ii, afl::string::Translator& 
      case mi_UfoRealId:         return tx("Real ID");
      case mi_UfoSpeedX:         return tx("X Movement");
      case mi_UfoSpeedY:         return tx("Y Movement");
-     case mi_UfoColor:          return tx("Color");
      case mi_UfoPlanetRange:    return tx("Visibility Range from Planet");
      case mi_UfoShipRange:      return tx("Visibility Range from Ship");
 
@@ -242,6 +250,10 @@ game::parser::getNameFromIndex(MessageIntegerIndex ii, afl::string::Translator& 
 
         /* Explosion: */
      case mi_ExplodedShipId:    return tx("Exploded Ship Id");
+
+        /* Drawing: */
+     case mi_DrawingShape:      return tx("Shape");
+     case mi_DrawingExpire:     return tx("Expiration turn");
 
      case mi_Max:               return "?";
     }

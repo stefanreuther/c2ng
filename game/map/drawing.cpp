@@ -132,6 +132,20 @@ game::map::Drawing::setExpire(int expire)
     m_expire = expire;
 }
 
+// Compare for equality.
+bool
+game::map::Drawing::equals(const Drawing& other) const
+{
+    return m_pos == other.m_pos
+        && m_type == other.m_type
+        && m_color == other.m_color
+        && m_x2 == other.m_x2
+        && m_y2 == other.m_y2
+        && m_tag == other.m_tag
+        && m_expire == other.m_expire
+        && m_comment == other.m_comment;
+}
+
 // Compute distance of this drawing to a given point in the game universe.
 double
 game::map::Drawing::getDistanceTo(Point pt) const

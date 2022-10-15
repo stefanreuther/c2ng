@@ -261,7 +261,7 @@ game::v3::ResultLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, ga
     game::db::FleetLoader(*m_charset, m_translator).load(root.gameDirectory(), turn.universe(), player);
 
     // Util
-    Parser mp(m_translator, m_log, game, player, root, game::actions::mustHaveShipList(session));
+    Parser mp(m_translator, m_log, game, player, root, game::actions::mustHaveShipList(session), session.world().atomTable());
     {
         Ptr<Stream> file = root.gameDirectory().openFileNT(Format("util%d.dat", player), afl::io::FileSystem::OpenRead);
         if (file.get() != 0) {

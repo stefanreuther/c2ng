@@ -105,3 +105,54 @@ TestGameParserMessageInformation::testConfiguration()
     TS_ASSERT_EQUALS(it, testee.end());
 }
 
+/** Test getValue(). */
+void
+TestGameParserMessageInformation::testGetValue()
+{
+    MessageInformation testee(MessageInformation::Ship, 77, 12);
+    testee.addValue(game::parser::mi_ShipHull, 15);
+    testee.addValue(game::parser::ms_Name, "NN");
+    testee.addValue(game::parser::mi_ShipRemoteFlag, 1);
+
+    // Normal
+    {
+        int32_t i = 0;
+        TS_ASSERT(testee.getValue(game::parser::mi_ShipHull, i));
+        TS_ASSERT_EQUALS(i, 15);
+    }
+
+    // Range check, success
+    {
+        int32_t i = 0;
+        TS_ASSERT(testee.getValue(game::parser::mi_ShipHull, i, 0, 100));
+        TS_ASSERT_EQUALS(i, 15);
+    }
+
+    // Range check, failure
+    {
+        int32_t i = 0;
+        TS_ASSERT(!testee.getValue(game::parser::mi_ShipHull, i, 0, 10));
+        TS_ASSERT_EQUALS(i, 0);
+    }
+
+    // String
+    {
+        String_t s;
+        TS_ASSERT(testee.getValue(game::parser::ms_Name, s));
+        TS_ASSERT_EQUALS(s, "NN");
+    }
+
+    // Missing index: integer
+    {
+        int32_t i = 0;
+        TS_ASSERT(!testee.getValue(game::parser::mi_Owner, i));
+        TS_ASSERT_EQUALS(i, 0);
+    }
+
+    // Missing index: string
+    {
+        String_t s;
+        TS_ASSERT(!testee.getValue(game::parser::ms_DrawingComment, s));
+        TS_ASSERT_EQUALS(s, "");
+    }
+}

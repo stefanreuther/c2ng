@@ -40,6 +40,10 @@ namespace game { namespace parser {
             Configuration,       ///< This message contains configuration information.
             PlayerScore,         ///< This message contains player scores. Id is optional and gives the util.dat score Id.
             Alliance,            ///< This message contains alliances.
+            MarkerDrawing,       ///< Marker drawing. Id is not relevant.
+            CircleDrawing,       ///< Circle drawing. Id is not relevant.
+            LineDrawing,         ///< Line drawing. Id is not relevant.
+            RectangleDrawing,    ///< Rectangle drawing. Id is not relevant.
             NoObject
         };
 
@@ -96,6 +100,16 @@ namespace game { namespace parser {
             \retval true Value was found, \c out updated
             \retval false Value not found, \c out unchanged */
         bool getValue(MessageIntegerIndex ii, int32_t& out) const;
+
+        /** Get integer value, with range checking.
+            Same as the two-argument getValue(), but returns success only if the value is within the given range.
+            \param ii [in] Integer value index
+            \param out [out] Result
+            \param min [in] Minimum (inclusive)
+            \param max [in] Maximum (inclusive)
+            \retval true Value was found, \c out updated
+            \retval false Value not found, \c out unchanged */
+        bool getValue(MessageIntegerIndex ii, int32_t& out, int32_t min, int32_t max) const;
 
         /** Get iterator to first contained value.
             \return iterator */

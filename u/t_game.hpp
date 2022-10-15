@@ -92,6 +92,7 @@ class TestGameGame : public CxxTest::TestSuite {
     void testMessageAlliance();
     void testMessageConfig();
     void testMessageLink();
+    void testMessageDrawing();
 };
 
 class TestGameHistoryTurn : public CxxTest::TestSuite {

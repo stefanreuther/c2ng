@@ -66,6 +66,10 @@ namespace game { namespace parser {
         ms_UfoInfo1,
         ms_UfoInfo2,
 
+        /* Drawing: */
+        ms_DrawingComment,
+        ms_DrawingTag,
+
         ms_Max
     };
 
@@ -81,6 +85,9 @@ namespace game { namespace parser {
         mi_Speed,
         mi_Type,                    // Mines, Ufos
         mi_Mass,
+        mi_Color,                   // Ufos, drawings
+        mi_EndX,
+        mi_EndY,
 
         /* Minefields: */
         mi_MineUnits,
@@ -166,7 +173,6 @@ namespace game { namespace parser {
         mi_UfoRealId,               // also as Ufo Id for a wormhole
         mi_UfoSpeedX,
         mi_UfoSpeedY,
-        mi_UfoColor,
         mi_UfoPlanetRange,
         mi_UfoShipRange,
 
@@ -176,6 +182,10 @@ namespace game { namespace parser {
 
         /* Explosion: */
         mi_ExplodedShipId,
+
+        /* Drawing: */
+        mi_DrawingShape,
+        mi_DrawingExpire,
 
         mi_Max
     };

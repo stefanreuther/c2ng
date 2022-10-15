@@ -81,20 +81,21 @@ class game::v3::Parser::DataInterface : public game::parser::DataInterface {
 };
 
 // Constructor.
-game::v3::Parser::Parser(afl::string::Translator& tx, afl::sys::LogListener& log, Game& game, int player, Root& root, game::spec::ShipList& shipList)
+game::v3::Parser::Parser(afl::string::Translator& tx, afl::sys::LogListener& log, Game& game, int player, Root& root, game::spec::ShipList& shipList, util::AtomTable& atomTable)
     : m_translator(tx),
       m_log(log),
       m_game(game),
       m_player(player),
       m_root(root),
-      m_shipList(shipList)
+      m_shipList(shipList),
+      m_atomTable(atomTable)
 { }
 
 // Load util.dat file.
 void
 game::v3::Parser::loadUtilData(afl::io::Stream& in, afl::charset::Charset& charset)
 {
-    game::v3::udata::Parser(m_game, m_player, m_root.hostConfiguration(), m_shipList, charset, m_translator, m_log).read(in);
+    game::v3::udata::Parser(m_game, m_player, m_root.hostConfiguration(), m_shipList, m_atomTable, charset, m_translator, m_log).read(in);
 }
 
 // Parse messages.
@@ -121,7 +122,7 @@ game::v3::Parser::parseMessages(afl::io::Stream& in, const game::msg::Inbox& inb
         p.parseMessage(text, gdi, m_game.currentTurn().getTurnNumber(), info, m_translator, m_log);
 
         for (size_t ii = 0, in = info.size(); ii < in; ++ii) {
-            m_game.addMessageInformation(*info[ii], m_root.hostConfiguration(), i);
+            m_game.addMessageInformation(*info[ii], m_root.hostConfiguration(), m_atomTable, i);
         }
     }
 }

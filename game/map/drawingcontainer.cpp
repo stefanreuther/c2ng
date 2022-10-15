@@ -6,6 +6,96 @@
 #include "game/map/drawingcontainer.hpp"
 #include "game/map/configuration.hpp"
 
+using game::map::Drawing;
+using game::map::Point;
+using game::MAX_NUMBER;
+using game::parser::MessageInformation;
+
+namespace {
+    /* Parse MessageInformation into a Drawing object.
+       Return drawing on success, or null. */
+    Drawing* parseDrawing(const MessageInformation& info, util::AtomTable& atomTable)
+    {
+        // Check type
+        Drawing::Type type;
+        switch (info.getObjectType()) {
+         case MessageInformation::MarkerDrawing:    type = Drawing::MarkerDrawing;    break;
+         case MessageInformation::LineDrawing:      type = Drawing::LineDrawing;      break;
+         case MessageInformation::RectangleDrawing: type = Drawing::RectangleDrawing; break;
+         case MessageInformation::CircleDrawing:    type = Drawing::CircleDrawing;    break;
+         default: return 0;
+        }
+
+        // Fetch X
+        int32_t x, y;
+        if (!info.getValue(game::parser::mi_X, x, 1, MAX_NUMBER) || !info.getValue(game::parser::mi_Y, y, 1, MAX_NUMBER)) {
+            return 0;
+        }
+
+        // Create draft drawing
+        std::auto_ptr<Drawing> d(new Drawing(Point(x, y), type));
+
+        int32_t shape, radius, x2, y2;
+        String_t comment;
+        switch (type) {
+         case Drawing::MarkerDrawing:
+            // Requires shape
+            if (!info.getValue(game::parser::mi_DrawingShape, shape, 0, Drawing::NUM_USER_MARKERS-1)) {
+                return 0;
+            }
+            d->setMarkerKind(int(shape));
+
+            // Optional comment
+            if (info.getValue(game::parser::ms_DrawingComment, comment)) {
+                d->setComment(comment);
+            }
+            break;
+
+         case Drawing::CircleDrawing:
+            // Requires radius
+            if (!info.getValue(game::parser::mi_Radius, radius, 1, Drawing::MAX_CIRCLE_RADIUS)) {
+                return 0;
+            }
+            d->setCircleRadius(radius);
+            break;
+
+         case Drawing::LineDrawing:
+         case Drawing::RectangleDrawing:
+            // Requires X2,Y2
+            if (!info.getValue(game::parser::mi_EndX, x2, 1, MAX_NUMBER) || !info.getValue(game::parser::mi_EndY, y2, 1, MAX_NUMBER)) {
+                return 0;
+            }
+            d->setPos2(Point(x2, y2));
+            break;
+        }
+
+        // Common parameters:
+        // - color
+        int32_t color;
+        if (info.getValue(game::parser::mi_Color, color, 0, Drawing::NUM_USER_COLORS)) {
+            d->setColor(static_cast<uint8_t>(color));
+        }
+
+        // - tag
+        String_t tag;
+        if (info.getValue(game::parser::ms_DrawingTag, tag)) {
+            d->setTag(atomTable.getAtomFromString(tag));
+        }
+
+        // - expire
+        // If not given, defaults to 0, so markers created by message templates are temporary.
+        int32_t expire;
+        if (info.getValue(game::parser::mi_DrawingExpire, expire)) {
+            d->setExpire(expire);
+        } else {
+            d->setExpire(0);
+        }
+
+        return d.release();
+    }
+}
+
+
 class game::map::DrawingContainer::Worker {
  public:
     virtual bool accept(const Drawing& d) = 0;
@@ -67,6 +157,22 @@ game::map::DrawingContainer::findMarkerAt(Point pt) const
     while (i != end()) {
         if (const Drawing* p = *i) {
             if (p->isVisible() && p->getType() == Drawing::MarkerDrawing && p->getPos() == pt) {
+                break;
+            }
+        }
+        ++i;
+    }
+    return i;
+}
+
+// Find a drawing.
+game::map::DrawingContainer::Iterator_t
+game::map::DrawingContainer::findDrawing(const Drawing& d) const
+{
+    Iterator_t i = begin();
+    while (i != end()) {
+        if (const Drawing* p = *i) {
+            if (p->equals(d)) {
                 break;
             }
         }
@@ -156,6 +262,32 @@ game::map::DrawingContainer::setAdjacentLinesTag(Point pos, util::Atom_t tag, co
     };
     TagWorker w(tag);
     processAdjacent(pos, w, config);
+}
+
+void
+game::map::DrawingContainer::addMessageInformation(const game::parser::MessageInformation& info, util::AtomTable& atomTable)
+{
+    std::auto_ptr<Drawing> d(parseDrawing(info, atomTable));
+    if (d.get() != 0) {
+        if (findDrawing(*d) == end()) {
+            addNew(d.release());
+        }
+    }
+}
+
+game::map::DrawingContainer::CheckResult
+game::map::DrawingContainer::checkMessageInformation(const game::parser::MessageInformation& info, util::AtomTable& atomTable) const
+{
+    std::auto_ptr<Drawing> d(parseDrawing(info, atomTable));
+    if (d.get() != 0) {
+        if (findDrawing(*d) != end()) {
+            return Found;
+        } else {
+            return NotFound;
+        }
+    } else {
+        return Invalid;
+    }
 }
 
 void

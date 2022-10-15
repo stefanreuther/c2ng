@@ -213,7 +213,10 @@ game::Game::expressionLists() const
 }
 
 void
-game::Game::addMessageInformation(const game::parser::MessageInformation& info, game::config::HostConfiguration& config, afl::base::Optional<size_t> msgNr)
+game::Game::addMessageInformation(const game::parser::MessageInformation& info,
+                                  game::config::HostConfiguration& config,
+                                  util::AtomTable& atomTable,
+                                  afl::base::Optional<size_t> msgNr)
 {
     // ex GUniverse::addMessageInformation
     using game::parser::MessageInformation;
@@ -312,6 +315,14 @@ game::Game::addMessageInformation(const game::parser::MessageInformation& info, 
                 }
             }
         }
+        break;
+
+     case MessageInformation::MarkerDrawing:
+     case MessageInformation::CircleDrawing:
+     case MessageInformation::LineDrawing:
+     case MessageInformation::RectangleDrawing:
+        // Drawing
+        currentTurn().universe().drawings().addMessageInformation(info, atomTable);
         break;
 
      case MessageInformation::NoObject:

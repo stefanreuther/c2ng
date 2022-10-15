@@ -22,6 +22,7 @@
 #include "game/unitscoredefinitionlist.hpp"
 #include "game/vcr/object.hpp"
 #include "game/map/configuration.hpp"
+#include "util/atomtable.hpp"
 
 namespace game {
 
@@ -129,9 +130,11 @@ namespace game {
 
             \param info Information
             \param config Host configuration (can be updated with message information)
+            \param atomTable AtomTable (for marker tags)
             \param msgNr If this information is from a message, its number */
         void addMessageInformation(const game::parser::MessageInformation& info,
                                    game::config::HostConfiguration& config,
+                                   util::AtomTable& atomTable,
                                    afl::base::Optional<size_t> msgNr);
 
         /** Synchronize teams from alliances.

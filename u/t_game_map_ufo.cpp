@@ -115,7 +115,7 @@ TestGameMapUfo::testMovementPrediction()
     // Scan ufo in turn 5
     gp::MessageInformation info(gp::MessageInformation::Ufo, 10, 5);
     info.addValue(gp::mi_Type, 33);
-    info.addValue(gp::mi_UfoColor, 7);
+    info.addValue(gp::mi_Color, 7);
     info.addValue(gp::mi_X, 1000);
     info.addValue(gp::mi_Y, 2000);
     testee.addMessageInformation(info);

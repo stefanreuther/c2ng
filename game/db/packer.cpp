@@ -46,7 +46,7 @@ game::db::Packer::addUfo(Turn& turn, const structures::Ufo& ufo)
 
     // Scalars
     // FIXME: do we need to deal with -1 values here?
-    info.addValue(gp::mi_UfoColor,       ufo.ufo.color);
+    info.addValue(gp::mi_Color,          ufo.ufo.color);
     info.addValue(gp::mi_UfoRealId,      ufo.realId);
     info.addValue(gp::mi_Speed,          ufo.ufo.warpFactor);
     if (ufo.ufo.heading >= 0) {

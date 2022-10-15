@@ -93,3 +93,16 @@ game::parser::MessageInformation::getValue(MessageIntegerIndex ii, int32_t& out)
     }
     return false;
 }
+
+// Get integer value, with range checking.
+bool
+game::parser::MessageInformation::getValue(MessageIntegerIndex ii, int32_t& out, int32_t min, int32_t max) const
+{
+    int32_t tmp;
+    if (getValue(ii, tmp) && tmp >= min && tmp <= max) {
+        out = tmp;
+        return true;
+    } else {
+        return false;
+    }
+}

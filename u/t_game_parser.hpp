@@ -17,6 +17,7 @@ class TestGameParserMessageInformation : public CxxTest::TestSuite {
     void testIt();
     void testPlayerScore();
     void testConfiguration();
+    void testGetValue();
 };
 
 class TestGameParserMessageParser : public CxxTest::TestSuite {
@@ -29,6 +30,7 @@ class TestGameParserMessageParser : public CxxTest::TestSuite {
     void testDelta();
     void testTimAllies();
     void testFailId();
+    void testMarker();
 };
 
 class TestGameParserMessageTemplate : public CxxTest::TestSuite {

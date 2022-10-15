@@ -13,6 +13,7 @@
 #include "game/spec/shiplist.hpp"
 #include "game/v3/structures.hpp"
 #include "game/v3/udata/reader.hpp"
+#include "util/atomtable.hpp"
 #include "util/vector.hpp"
 
 namespace game { namespace v3 { namespace udata {
@@ -24,6 +25,7 @@ namespace game { namespace v3 { namespace udata {
             \param playerNr   Player number.
             \param config     Host configuration. Could be updated by received data.
             \param shipList   Ship list. The modified hull function list could be updated by received data.
+            \param atomTable  Atom table (for marker tags).
             \param cs         Character set. Used for decoding strings.
             \param tx         Translator
             \param log        Logger */
@@ -31,6 +33,7 @@ namespace game { namespace v3 { namespace udata {
                int playerNr,
                game::config::HostConfiguration& config,
                game::spec::ShipList& shipList,
+               util::AtomTable& atomTable,
                afl::charset::Charset& cs,
                afl::string::Translator& tx,
                afl::sys::LogListener& log);
@@ -53,6 +56,7 @@ namespace game { namespace v3 { namespace udata {
         const int m_player;
         game::config::HostConfiguration& m_hostConfiguration;
         game::spec::ShipList& m_shipList;
+        util::AtomTable& m_atomTable;
         afl::charset::Charset& m_charset;
         afl::string::Translator& m_translator;
         afl::sys::LogListener& m_log;

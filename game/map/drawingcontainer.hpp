@@ -5,9 +5,11 @@
 #ifndef C2NG_GAME_MAP_DRAWINGCONTAINER_HPP
 #define C2NG_GAME_MAP_DRAWINGCONTAINER_HPP
 
+#include "afl/base/signal.hpp"
 #include "afl/container/ptrmultilist.hpp"
 #include "game/map/drawing.hpp"
-#include "afl/base/signal.hpp"
+#include "game/parser/messageinformation.hpp"
+#include "util/atomtable.hpp"
 
 namespace game { namespace map {
 
@@ -17,6 +19,13 @@ namespace game { namespace map {
         This owns a list of Drawing objects. */
     class DrawingContainer {
      public:
+        /** Result of checkMessageInformation(). */
+        enum CheckResult {
+            Invalid,            ///< Information does not describe a valid drawing.
+            NotFound,           ///< Drawing not found (message was not received).
+            Found               ///< Drawing found.
+        };
+
         /** Underlying container type. */
         typedef afl::container::PtrMultiList<Drawing> List_t;
 
@@ -48,6 +57,13 @@ namespace game { namespace map {
             \param pt     Position
             \return Iterator to first visible marker at that position, end() if none found */
         Iterator_t findMarkerAt(Point pt) const;
+
+        /** Find a drawing.
+            If a drawing exists that has the same content (position, shape, size, metadata) as the given one,
+            returns an iterator for it.
+            \param d Copy of drawing to find
+            \return iterator; end() if none found */
+        Iterator_t findDrawing(const Drawing& d) const;
 
         /** Get iterator to first drawing.
             \return iterator */
@@ -93,6 +109,25 @@ namespace game { namespace map {
             \param config Map configuration (required for coordinate mapping)
             \see Drawing::setTag */
         void setAdjacentLinesTag(Point pos, util::Atom_t tag, const Configuration& config);
+
+        /** Add message information.
+            Assumes that the provided MessageInformation object describes a drawing, and tries to create that.
+            Creating duplicate markers is avoided.
+
+            Timestamps are ignored, so a marker is created no matter what turn the information is from.
+
+            \param info Information
+            \param atomTable Atom table (for marker tags) */
+        void addMessageInformation(const game::parser::MessageInformation& info, util::AtomTable& atomTable);
+
+        /** Check message information.
+            Determines whether the given MessageInformation describes a valid marker and, if so,
+            whether it was already received or not.
+
+            \param info Information
+            \param atomTable Atom table (for marker tags)
+            \return result */
+        CheckResult checkMessageInformation(const game::parser::MessageInformation& info, util::AtomTable& atomTable) const;
 
         /** Signal: change.
             Raised whenever a new drawing is added or one is deleted. */

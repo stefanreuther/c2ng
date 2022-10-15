@@ -37,6 +37,8 @@ TestGameMapDrawing::testInit()
     TS_ASSERT_EQUALS(rect.getColor(), 7);
     TS_ASSERT_EQUALS(rect.getExpire(), 42);
 
+    TS_ASSERT(rect.equals(rect));
+
     // Circle
     Drawing circle(Point(2000, 2030), Drawing::CircleDrawing);
     circle.setCircleRadius(50);
@@ -44,6 +46,9 @@ TestGameMapDrawing::testInit()
     TS_ASSERT_EQUALS(circle.getType(), Drawing::CircleDrawing);
     TS_ASSERT_EQUALS(circle.getPos(), Point(2000, 2030));
     TS_ASSERT_EQUALS(circle.getCircleRadius(), 50);
+
+    TS_ASSERT(!rect.equals(circle));
+    TS_ASSERT(circle.equals(circle));
 
     // Marker
     Drawing marker(Point(1111, 2222), Drawing::MarkerDrawing);
@@ -102,7 +107,7 @@ TestGameMapDrawing::testDistance()
         // - ends
         TS_ASSERT_EQUALS(line.getDistanceTo(Point(2000, 2100)), 0);
         TS_ASSERT_EQUALS(line.getDistanceTo(Point(2200, 2400)), 0);
-    
+
         // - point on line
         TS_ASSERT_EQUALS(line.getDistanceTo(Point(2100, 2250)), 0);
 
@@ -173,5 +178,38 @@ TestGameMapDrawing::testDistanceWrap()
         // hypot(110, 220)
         TS_ASSERT_DELTA(marker.getDistanceToWrap(Point(1010, 1020), config), 245.97, 0.01);
     }
+}
+
+/** Test equals(). */
+void
+TestGameMapDrawing::testEquals()
+{
+    // Two equal lines
+    Drawing line(Point(2000, 2100), Drawing::LineDrawing);
+    line.setPos2(Point(2200, 2400));
+
+    Drawing line2(Point(2000, 2100), Drawing::LineDrawing);
+    line2.setPos2(Point(2200, 2400));
+
+    TS_ASSERT(line.equals(line2));
+    TS_ASSERT(line2.equals(line));
+
+    // Modify color
+    line.setColor(27);
+    TS_ASSERT(!line.equals(line2));
+    TS_ASSERT(!line2.equals(line));
+
+    line2.setColor(27);
+    TS_ASSERT(line.equals(line2));
+    TS_ASSERT(line2.equals(line));
+
+    // Modify tag
+    line.setTag(27);
+    TS_ASSERT(!line.equals(line2));
+    TS_ASSERT(!line2.equals(line));
+
+    line2.setTag(27);
+    TS_ASSERT(line.equals(line2));
+    TS_ASSERT(line2.equals(line));
 }
 

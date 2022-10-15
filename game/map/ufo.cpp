@@ -380,7 +380,7 @@ game::map::Ufo::addMessageInformation(const game::parser::MessageInformation& in
         }
 
         // Color
-        if (info.getValue(gp::mi_UfoColor, iv)) {
+        if (info.getValue(gp::mi_Color, iv)) {
             m_colorCode = iv;
         }
 

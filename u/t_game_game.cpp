@@ -11,8 +11,10 @@
 #include "game/config/hostconfiguration.hpp"
 #include "game/turn.hpp"
 #include "game/parser/messageinformation.hpp"
+#include "util/atomtable.hpp"
 
 using game::config::HostConfiguration;
+using util::AtomTable;
 
 /** Test smart pointers.
     A: pass Game object from smart through dumb pointer.
@@ -162,7 +164,8 @@ TestGameGame::testMessageAlliance()
         info.addAllianceValue("other", o);
     }
     HostConfiguration config;
-    testee.addMessageInformation(info, config, afl::base::Nothing);
+    AtomTable atomTable;
+    testee.addMessageInformation(info, config, atomTable, afl::base::Nothing);
 
     // Verify
     TS_ASSERT_EQUALS(allies.getOffer(0)->theirOffer.get(4), Offer::Conditional);
@@ -178,6 +181,7 @@ void
 TestGameGame::testMessageConfig()
 {
     HostConfiguration config;
+    AtomTable atomTable;
 
     game::Game testee;
     testee.currentTurn().setTurnNumber(42);
@@ -190,7 +194,7 @@ TestGameGame::testMessageConfig()
     info.addConfigurationValue("MaxColTempSlope", "?");            // Integer, bogus value
     info.addConfigurationValue("MaxPlanetaryIncome", "777");       // Integer
 
-    TS_ASSERT_THROWS_NOTHING(testee.addMessageInformation(info, config, afl::base::Nothing));
+    TS_ASSERT_THROWS_NOTHING(testee.addMessageInformation(info, config, atomTable, afl::base::Nothing));
 
     TS_ASSERT_EQUALS(config[HostConfiguration::RaceMiningRate](1), 5);
     TS_ASSERT_EQUALS(config[HostConfiguration::RaceMiningRate](4), 8);
@@ -207,6 +211,7 @@ TestGameGame::testMessageConfig()
 void
 TestGameGame::testMessageLink()
 {
+    AtomTable atomTable;
     HostConfiguration config;
 
     game::Game testee;
@@ -218,12 +223,12 @@ TestGameGame::testMessageLink()
     // Add planet information
     game::parser::MessageInformation i1(game::parser::MessageInformation::Planet, 99, 42);
     i1.addValue(game::parser::ms_FriendlyCode, "ppp");
-    TS_ASSERT_THROWS_NOTHING(testee.addMessageInformation(i1, config, 3));
+    TS_ASSERT_THROWS_NOTHING(testee.addMessageInformation(i1, config, atomTable, 3));
 
     // Add ship information
     game::parser::MessageInformation i2(game::parser::MessageInformation::Ship, 77, 42);
     i2.addValue(game::parser::ms_FriendlyCode, "sss");
-    TS_ASSERT_THROWS_NOTHING(testee.addMessageInformation(i2, config, 4));
+    TS_ASSERT_THROWS_NOTHING(testee.addMessageInformation(i2, config, atomTable, 4));
 
     // Verify
     TS_ASSERT_EQUALS(pl->getFriendlyCode().orElse(""), "ppp");
@@ -235,3 +240,31 @@ TestGameGame::testMessageLink()
     TS_ASSERT_EQUALS(sh->messages().get()[0], 4U);
 }
 
+/** Test message containing drawing.
+    A: create Game. Call addMessageInformation() with a drawing definition.
+    E: drawing exists in currentTurn() */
+void
+TestGameGame::testMessageDrawing()
+{
+    AtomTable atomTable;
+    HostConfiguration config;
+
+    game::Game testee;
+    testee.currentTurn().setTurnNumber(42);
+
+    game::parser::MessageInformation info(game::parser::MessageInformation::MarkerDrawing, 0, 42);
+    info.addValue(game::parser::mi_X, 2000);
+    info.addValue(game::parser::mi_Y, 3000);
+    info.addValue(game::parser::mi_DrawingShape, 5);
+    info.addValue(game::parser::ms_DrawingComment, "hi");
+    TS_ASSERT_THROWS_NOTHING(testee.addMessageInformation(info, config, atomTable, afl::base::Nothing));
+
+    // Verify
+    game::map::DrawingContainer& dc = testee.currentTurn().universe().drawings();
+    TS_ASSERT_DIFFERS(dc.begin(), dc.end());
+    TS_ASSERT_EQUALS((*dc.begin())->getPos().getX(), 2000);
+    TS_ASSERT_EQUALS((*dc.begin())->getPos().getY(), 3000);
+    TS_ASSERT_EQUALS((*dc.begin())->getType(), game::map::Drawing::MarkerDrawing);
+    TS_ASSERT_EQUALS((*dc.begin())->getMarkerKind(), 5);
+    TS_ASSERT_EQUALS((*dc.begin())->getComment(), "hi");
+}

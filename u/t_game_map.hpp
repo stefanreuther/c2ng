@@ -81,6 +81,7 @@ class TestGameMapDrawing : public CxxTest::TestSuite {
     void testInit();
     void testDistance();
     void testDistanceWrap();
+    void testEquals();
 };
 
 class TestGameMapDrawingContainer : public CxxTest::TestSuite {
@@ -93,6 +94,12 @@ class TestGameMapDrawingContainer : public CxxTest::TestSuite {
     void testColorAdjacent();
     void testTagAdjacent();
     void testFindMarker();
+    void testAddMIMarker();
+    void testAddMILine();
+    void testAddMIRectangle();
+    void testAddMICircle();
+    void testAddMIMissing();
+    void testFindDrawing();
 };
 
 class TestGameMapExplosion : public CxxTest::TestSuite {

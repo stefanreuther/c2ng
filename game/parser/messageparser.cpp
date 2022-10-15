@@ -245,6 +245,13 @@ namespace {
             mergeable = true;
             break;
 
+         case MessageInformation::MarkerDrawing:
+         case MessageInformation::CircleDrawing:
+         case MessageInformation::LineDrawing:
+         case MessageInformation::RectangleDrawing:
+            /* Never mergeable */
+            break;
+
          case MessageInformation::Alliance:
             /* This one is special, see below */
             break;
@@ -432,6 +439,16 @@ game::parser::MessageParser::load(afl::io::Stream& file, afl::string::Translator
                 mo = MessageInformation::Alliance;
             } else if (util::stringMatch("Wormhole", kind)) {
                 mo = MessageInformation::Wormhole;
+            } else if (util::stringMatch("Ufo", kind)) {
+                mo = MessageInformation::Ufo;
+            } else if (util::stringMatch("MArker", kind)) {
+                mo = MessageInformation::MarkerDrawing;
+            } else if (util::stringMatch("Line", kind)) {
+                mo = MessageInformation::LineDrawing;
+            } else if (util::stringMatch("Rectangle", kind)) {
+                mo = MessageInformation::RectangleDrawing;
+            } else if (util::stringMatch("CIrcle", kind)) {
+                mo = MessageInformation::CircleDrawing;
             } else {
                 mo = MessageInformation::NoObject;
             }

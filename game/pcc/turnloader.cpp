@@ -244,7 +244,7 @@ game::pcc::TurnLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, gam
     game::db::FleetLoader(*m_charset, m_translator).load(root.gameDirectory(), turn.universe(), player);
 
     // Load util from remote
-    Parser mp(m_translator, m_log, game, player, root, game::actions::mustHaveShipList(session));
+    Parser mp(m_translator, m_log, game, player, root, game::actions::mustHaveShipList(session), session.world().atomTable());
     {
         Ptr<Stream> file = m_serverDirectory->openFileNT(Format("util%d.dat", player), afl::io::FileSystem::OpenRead);
         if (file.get() != 0) {
