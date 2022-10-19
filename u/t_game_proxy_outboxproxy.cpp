@@ -6,13 +6,15 @@
 #include "game/proxy/outboxproxy.hpp"
 
 #include "t_game_proxy.hpp"
-#include "game/test/sessionthread.hpp"
-#include "game/test/waitindicator.hpp"
-#include "game/test/root.hpp"
+#include "afl/io/internalfilesystem.hpp"
+#include "afl/io/textfile.hpp"
 #include "game/game.hpp"
-#include "game/turn.hpp"
 #include "game/msg/outbox.hpp"
 #include "game/proxy/mailboxproxy.hpp"
+#include "game/test/root.hpp"
+#include "game/test/sessionthread.hpp"
+#include "game/test/waitindicator.hpp"
+#include "game/turn.hpp"
 
 /** Test behaviour on empty session. */
 void
@@ -189,5 +191,87 @@ TestGameProxyOutboxProxy::testMailboxProxy()
     TS_ASSERT_EQUALS(summary[1].index, 2U);
     TS_ASSERT_EQUALS(summary[1].count, 1U);
     TS_ASSERT_EQUALS(summary[1].heading, "To: Player 5");
+}
+
+/** Test addMessageToFile, empty session (tests the fallback cases). */
+void
+TestGameProxyOutboxProxy::testFileEmpty()
+{
+    afl::io::InternalFileSystem fs;
+    game::test::SessionThread t(fs);
+    game::test::WaitIndicator ind;
+    game::proxy::OutboxProxy testee(t.gameSender());
+
+    // Save messages
+    String_t err;
+    TS_ASSERT(testee.addMessageToFile(ind, 3, "t1\n", "/file.txt", err));
+    TS_ASSERT(testee.addMessageToFile(ind, 4, "t2\n  \n", "/file.txt", err));
+
+    // Verify result
+    afl::base::Ref<afl::io::Stream> in(fs.openFile("/file.txt", afl::io::FileSystem::OpenRead));
+    afl::io::TextFile tf(*in);
+    String_t s;
+    TS_ASSERT(tf.readLine(s)); TS_ASSERT_EQUALS(s, "--- Message ---");
+    TS_ASSERT(tf.readLine(s)); TS_ASSERT_EQUALS(s, "(-r3000)<<< Data Transmission >>>");
+    TS_ASSERT(tf.readLine(s)); TS_ASSERT_EQUALS(s, "t1");
+    TS_ASSERT(tf.readLine(s)); TS_ASSERT_EQUALS(s, "--- Message ---");
+    TS_ASSERT(tf.readLine(s)); TS_ASSERT_EQUALS(s, "(-r4000)<<< Data Transmission >>>");
+    TS_ASSERT(tf.readLine(s)); TS_ASSERT_EQUALS(s, "t2");
+}
+
+/** Test addMessageToFile, normal case. */
+void
+TestGameProxyOutboxProxy::testFileNormal()
+{
+    afl::io::InternalFileSystem fs;
+    game::test::SessionThread t(fs);
+
+    // Define a root and game
+    t.session().setRoot(new game::test::Root(game::HostVersion()));
+    for (int i = 1; i <= 11; ++i) {
+        t.session().getRoot()->playerList().create(i);
+    }
+    t.session().getRoot()->playerList().get(3)->setName(game::Player::LongName, "Trinity");
+    t.session().getRoot()->playerList().get(4)->setName(game::Player::LongName, "Quattro");
+    t.session().setGame(new game::Game());
+    t.session().getGame()->currentTurn().setTurnNumber(42);
+
+    game::test::WaitIndicator ind;
+    game::proxy::OutboxProxy testee(t.gameSender());
+
+    // Save messages
+    String_t err;
+    TS_ASSERT(testee.addMessageToFile(ind, 3, "t1\n", "/file.txt", err));
+    TS_ASSERT(testee.addMessageToFile(ind, 4, "t2\n  \n", "/file.txt", err));
+
+    // Verify result
+    afl::base::Ref<afl::io::Stream> in(fs.openFile("/file.txt", afl::io::FileSystem::OpenRead));
+    afl::io::TextFile tf(*in);
+    String_t s;
+    TS_ASSERT(tf.readLine(s)); TS_ASSERT_EQUALS(s, "--- Message ---");
+    TS_ASSERT(tf.readLine(s)); TS_ASSERT_EQUALS(s, "(-r3000)<<< Data Transmission >>>");
+    TS_ASSERT(tf.readLine(s)); TS_ASSERT_EQUALS(s, "FROM: Trinity");
+    TS_ASSERT(tf.readLine(s)); TS_ASSERT_EQUALS(s, "TURN: 42");
+    TS_ASSERT(tf.readLine(s)); TS_ASSERT_EQUALS(s, "t1");
+    TS_ASSERT(tf.readLine(s)); TS_ASSERT_EQUALS(s, "--- Message ---");
+    TS_ASSERT(tf.readLine(s)); TS_ASSERT_EQUALS(s, "(-r4000)<<< Data Transmission >>>");
+    TS_ASSERT(tf.readLine(s)); TS_ASSERT_EQUALS(s, "FROM: Quattro");
+    TS_ASSERT(tf.readLine(s)); TS_ASSERT_EQUALS(s, "TURN: 42");
+    TS_ASSERT(tf.readLine(s)); TS_ASSERT_EQUALS(s, "t2");
+}
+
+/** Test addMessageToFile, error case. */
+void
+TestGameProxyOutboxProxy::testFileError()
+{
+    afl::io::InternalFileSystem fs;
+    game::test::SessionThread t(fs);
+    game::test::WaitIndicator ind;
+    game::proxy::OutboxProxy testee(t.gameSender());
+
+    // Save to uncreatible file
+    String_t err;
+    TS_ASSERT(!testee.addMessageToFile(ind, 3, "t1\n", "/nonex/file.txt", err));
+    TS_ASSERT_DIFFERS(err, "");
 }
 

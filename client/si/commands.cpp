@@ -2118,14 +2118,14 @@ client::si::IFCCSellSupplies(game::Session& /*session*/, ScriptSide& si, Request
 }
 
 // @since PCC2 2.40.11
+// Parameter since 2.41
 void
 client::si::IFCCSendMessage(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
-    args.checkArgumentCount(0);
     class DialogTask : public UserTask {
      public:
-        DialogTask(int viewpointPlayer, bool hasMessages)
-            : m_viewpointPlayer(viewpointPlayer), m_hasMessages(hasMessages)
+        DialogTask(const afl::base::Optional<String_t>& text, int viewpointPlayer, bool hasMessages)
+            : m_text(text), m_viewpointPlayer(viewpointPlayer), m_hasMessages(hasMessages)
             { }
         virtual void handle(Control& ctl, RequestLink2 link)
             {
@@ -2146,8 +2146,12 @@ client::si::IFCCSendMessage(game::Session& session, ScriptSide& si, RequestLink1
                 client::dialogs::MessageReceiver dlg(tx("Send Message"), setSelect, ctl.root(), tx);
                 dlg.addUniversalToggle(players);
                 dlg.addHelp(help);
-                if (m_hasMessages) {
-                    dlg.addExtra(util::KeyString(tx("Revise...")), 2);
+                if (!m_text.isValid()) {
+                    if (m_hasMessages) {
+                        dlg.addExtra(util::KeyString(tx("Revise...")), 2);
+                    }
+                } else {
+                    dlg.addExtra(util::KeyString(tx("File...")), 3);
                 }
                 dlg.pack();
                 ctl.root().centerWidget(dlg);
@@ -2155,11 +2159,15 @@ client::si::IFCCSendMessage(game::Session& session, ScriptSide& si, RequestLink1
                  case 1: {
                     // Send
                     game::proxy::OutboxProxy outProxy(ctl.interface().gameSender());
-                    client::dialogs::MessageEditor ed(root, outProxy, ctl.interface().gameSender(), tx);
-                    ed.setSender(m_viewpointPlayer);
-                    ed.setReceivers(setSelect.getSelectedPlayers());
-                    if (ed.run()) {
-                        outProxy.addMessage(ed.getSender(), ed.getText(), ed.getReceivers());
+                    if (const String_t* s = m_text.get()) {
+                        outProxy.addMessage(m_viewpointPlayer, *s, setSelect.getSelectedPlayers());
+                    } else {
+                        client::dialogs::MessageEditor ed(root, outProxy, ctl.interface().gameSender(), tx);
+                        ed.setSender(m_viewpointPlayer);
+                        ed.setReceivers(setSelect.getSelectedPlayers());
+                        if (ed.run()) {
+                            outProxy.addMessage(ed.getSender(), ed.getText(), ed.getReceivers());
+                        }
                     }
                     ctl.interface().continueProcess(link);
                     break;
@@ -2175,19 +2183,44 @@ client::si::IFCCSendMessage(game::Session& session, ScriptSide& si, RequestLink1
                     break;
                  }
 
+                 case 3: {
+                    // To file
+                    client::dialogs::SessionFileSelectionDialog fs(root, tx, ctl.interface().gameSender(), tx("Send message to file"));
+                    if (fs.runDefault(ind)) {
+                        String_t err;
+                        if (!game::proxy::OutboxProxy(ctl.interface().gameSender()).addMessageToFile(ind, m_viewpointPlayer, m_text.orElse(""), fs.getResult(), err)) {
+                            ui::dialogs::MessageBox(Format(tx("Unable to save message: %s"), err), tx("Send message to file"), root).doOkDialog(tx);
+                        }
+                    }
+                    ctl.interface().continueProcess(link);
+                    break;
+                 }
+
                  default:
                     // Cancel etc.
                     ctl.interface().continueProcess(link);
                     break;
                 }
-
             }
      private:
+        afl::base::Optional<String_t> m_text;
         int m_viewpointPlayer;
         bool m_hasMessages;
     };
+
+    // Parse parameters
+    args.checkArgumentCount(0, 1);
+    afl::base::Optional<String_t> text;
+    if (args.getNumArgs() > 0) {
+        String_t s;
+        if (!interpreter::checkStringArg(s, args.getNext())) {
+            return;
+        }
+        text = s;
+    }
+
     Game& g = game::actions::mustHaveGame(session);
-    si.postNewTask(link, new DialogTask(g.getViewpointPlayer(), g.currentTurn().outbox().getNumMessages() != 0));
+    si.postNewTask(link, new DialogTask(text, g.getViewpointPlayer(), g.currentTurn().outbox().getNumMessages() != 0));
 }
 
 // @since PCC2 1.99.19 (as CC$Settings)

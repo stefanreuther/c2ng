@@ -4,6 +4,7 @@
 
 #include "game/interface/drawingproperty.hpp"
 #include "afl/base/staticassert.hpp"
+#include "game/parser/binarytransfer.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/values.hpp"
@@ -15,7 +16,7 @@ using interpreter::checkStringArg;
 using game::map::Drawing;
 
 afl::data::Value*
-game::interface::getDrawingProperty(const game::map::Drawing& d, DrawingProperty idp)
+game::interface::getDrawingProperty(const game::map::Drawing& d, DrawingProperty idp, afl::charset::Charset& charset)
 {
     // ex int/if/drawingif.h:getDrawingProperty
     switch (idp) {
@@ -32,6 +33,11 @@ game::interface::getDrawingProperty(const game::map::Drawing& d, DrawingProperty
            @assignable
            @see SetComment (Drawing Command) */
         return makeStringValue(d.getComment());
+     case idpEncodedMessage:
+        /* @q Message.Encoded:Str (Drawing Property)
+           Drawing data, encoded in "VPA Data Transmission" format.
+           @since PCC2 2.41 */
+        return makeStringValue(game::parser::packBinaryDrawing(d, charset));
      case idpEndX:
         /* @q End.X:Int (Drawing Property)
            X location of endpoint.
@@ -152,7 +158,7 @@ game::interface::setDrawingProperty(game::map::Drawing& d, DrawingProperty idp, 
             d.setExpire(i);
         }
         break;
-        // case idpLocX: - FIXME: could be assignable 
+        // case idpLocX: - FIXME: could be assignable
         // case idpLocY: - FIXME: could be assignable
      case idpRadius:
         if (checkIntegerArg(i, value, 1, Drawing::MAX_CIRCLE_RADIUS)) {

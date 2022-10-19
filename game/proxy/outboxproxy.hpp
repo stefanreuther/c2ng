@@ -93,6 +93,15 @@ namespace game { namespace proxy {
             \param [in] id  Id */
         void deleteMessage(Id_t id);
 
+        /** Store message to file.
+            \param [in,out] ind      UI synchronisation
+            \param [in]     sender   Message sender
+            \param [in]     text     Message text
+            \param [in]     fileName File name
+            \param [out]    errorMessage Error message
+            \return true on success, false on error (errorMessage set) */
+        bool addMessageToFile(WaitIndicator& ind, int sender, String_t text, String_t fileName, String_t& errorMessage);
+
         /** Get MailboxAdaptor.
             \return MailboxAdaptor that accesses the same Outbox this proxy is accessing */
         util::RequestSender<MailboxAdaptor> getMailboxAdaptor();

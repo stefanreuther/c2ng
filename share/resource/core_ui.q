@@ -1414,6 +1414,23 @@ EndSub
 
 
 %
+%  Sharing Objects
+%
+
+Sub CC$Share
+  CC$SendMessage Message.Encoded
+EndSub
+
+Sub CCUI.Planet.Share
+  CC$Share
+EndSub
+
+Sub CCUI.Minefield.Share
+  CC$Share
+EndSub
+
+
+%
 %  Selection Manager
 %
 

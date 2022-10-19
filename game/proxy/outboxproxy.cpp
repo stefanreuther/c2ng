@@ -4,6 +4,7 @@
   */
 
 #include "game/proxy/outboxproxy.hpp"
+#include "afl/string/format.hpp"
 #include "game/actions/preconditions.hpp"
 #include "game/game.hpp"
 #include "game/msg/outbox.hpp"
@@ -13,6 +14,7 @@
 #include "interpreter/arguments.hpp"
 #include "interpreter/values.hpp"
 
+using afl::string::Format;
 using game::actions::mustHaveGame;
 using game::actions::mustHaveRoot;
 using game::msg::Outbox;
@@ -191,6 +193,76 @@ game::proxy::OutboxProxy::deleteMessage(Id_t id)
         const Id_t m_id;
     };
     m_gameSender.postNewRequest(new Task(id));
+}
+
+bool
+game::proxy::OutboxProxy::addMessageToFile(WaitIndicator& ind, int sender, String_t text, String_t fileName, String_t& errorMessage)
+{
+    class Task : public util::Request<Session> {
+     public:
+        Task(int sender, const String_t& text, const String_t& fileName)
+            : m_sender(sender), m_text(text), m_fileName(fileName), m_errorMessage(), m_ok(false)
+            { }
+        virtual void handle(Session& session)
+            {
+                // ex team.pas:SendMessageToFile
+                try {
+                    // Objects
+                    afl::io::FileSystem& fs = session.world().fileSystem();
+                    afl::string::Translator& tx = session.translator();
+                    Root* r = session.getRoot().get();
+                    Game* g = session.getGame().get();
+
+                    // Open file for append
+                    afl::base::Ptr<afl::io::Stream> s = fs.openFileNT(m_fileName, afl::io::FileSystem::OpenWrite);
+                    if (s.get() == 0) {
+                        s = fs.openFile(m_fileName, afl::io::FileSystem::CreateNew).asPtr();
+                    }
+                    s->setPos(s->getSize());
+
+                    // Text file; use game character set
+                    afl::io::TextFile tf(*s);
+                    if (r != 0) {
+                        tf.setCharsetNew(r->charset().clone());
+                    }
+
+                    // Write
+                    tf.writeLine("--- Message ---");
+                    tf.writeLine(Format("(-r%X000)<<< Data Transmission >>>", m_sender));
+                    if (r != 0) {
+                        tf.writeLine(Format("FROM: %s", r->playerList().getPlayerName(m_sender, game::Player::LongName, tx)));
+                    }
+                    if (g != 0) {
+                        tf.writeLine(Format("TURN: %s", g->currentTurn().getTurnNumber()));
+                    }
+                    tf.writeLine(afl::string::strRTrim(m_text));
+                    tf.flush();
+                    m_ok = true;
+                }
+                catch (std::exception& e) {
+                    m_errorMessage = e.what();
+                }
+            }
+        bool isOK() const
+            { return m_ok; }
+        const String_t& getErrorMessage() const
+            { return m_errorMessage; }
+     private:
+        int m_sender;
+        const String_t& m_text;
+        const String_t& m_fileName;
+        String_t m_errorMessage;        // don't reference callers object to avoid aliasing between threads
+        bool m_ok;
+    };
+
+    Task t(sender, text, fileName);
+    ind.call(m_gameSender, t);
+    if (t.isOK()) {
+        return true;
+    } else {
+        errorMessage = t.getErrorMessage();
+        return false;
+    }
 }
 
 util::RequestSender<game::proxy::MailboxAdaptor>

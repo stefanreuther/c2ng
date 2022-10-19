@@ -11,6 +11,7 @@
 #include "client/si/control.hpp"
 #include "client/tiles/selectionheadertile.hpp"
 #include "client/widgets/helpwidget.hpp"
+#include "game/interface/minefieldcontext.hpp"
 #include "game/proxy/configurationproxy.hpp"
 #include "game/proxy/minefieldproxy.hpp"
 #include "ui/dialogs/messagebox.hpp"
@@ -163,10 +164,10 @@ MinefieldInfoDialog::run()
     // Content: Minefield Info
     ui::widgets::Button& btnP = m_planetButton;
     ui::widgets::Button& btnS = del.addNew(new ui::widgets::Button("S", 's', m_root));
-    // ui::widgets::Button& btnI = del.addNew(new ui::widgets::Button("I", 'i', m_root));
+    ui::widgets::Button& btnI = del.addNew(new ui::widgets::Button("I", 'i', m_root));
     btnP.setFont(""); btnP.dispatchKeyTo(keys);
     btnS.setFont(""); btnS.dispatchKeyTo(keys);
-    // btnI.setFont(""); btnI.dispatchKeyTo(keys);
+    btnI.setFont(""); btnI.dispatchKeyTo(keys);
 
     ui::Group& cg = del.addNew(new ui::Group(ui::layout::HBox::instance5));
     ui::Group& cg1 = del.addNew(new ui::Group(ui::layout::VBox::instance5));
@@ -301,6 +302,10 @@ MinefieldInfoDialog::handleKey(util::Key_t key, int /*prefix*/)
         setPassageDistance(m_passageDistance - 1);
         return true;
 
+     case 'i':
+        executeCommandWait("CCUI.Minefield.Share", false, "(Send Message)");
+        return true;
+
      case 'p':
         if (m_planetId != 0) {
             executeGoToReferenceWait("(Controlling Planet)", game::Reference(game::Reference::Planet, m_planetId));
@@ -361,7 +366,21 @@ MinefieldInfoDialog::handleOverlayMessage(client::si::RequestLink2 link, String_
 game::interface::ContextProvider*
 MinefieldInfoDialog::createContextProvider()
 {
-    return 0;
+    class ContextProvider : public game::interface::ContextProvider {
+     public:
+        ContextProvider(game::Id_t id)
+            : m_id(id)
+            { }
+        virtual void createContext(game::Session& session, interpreter::ContextReceiver& recv)
+            {
+                if (interpreter::Context* ctx = game::interface::MinefieldContext::create(m_id, session, false)) {
+                    recv.pushNewContext(ctx);
+                }
+            }
+     private:
+        game::Id_t m_id;
+    };
+    return new ContextProvider(m_minefieldId);
 }
 
 void

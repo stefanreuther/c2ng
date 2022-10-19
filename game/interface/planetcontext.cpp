@@ -97,6 +97,7 @@ namespace {
         { "LOC.Y",                     game::interface::ippLocY,              PlanetPropertyDomain, interpreter::thInt },
         { "MARK",                      game::interface::ipmMark,              PlanetMethodDomain,   interpreter::thProcedure },
         { "MARKED",                    game::interface::ippMarked,            PlanetPropertyDomain, interpreter::thBool },
+        { "MESSAGE.ENCODED",           game::interface::ippEncodedMessage,    PlanetPropertyDomain, interpreter::thString },
         { "MESSAGES",                  game::interface::ippMessages,          PlanetPropertyDomain, interpreter::thArray },
         { "MINED.D",                   game::interface::ippMinedD,            PlanetPropertyDomain, interpreter::thInt },
         { "MINED.M",                   game::interface::ippMinedM,            PlanetPropertyDomain, interpreter::thInt },

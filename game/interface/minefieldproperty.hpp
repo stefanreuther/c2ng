@@ -12,6 +12,7 @@ namespace game { namespace interface {
     /** Minefield property identifier. */
     enum MinefieldProperty {
         impId,
+        impEncodedMessage,
         impLastScan,
         impLocX,
         impLocY,

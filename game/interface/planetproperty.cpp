@@ -8,6 +8,7 @@
 #include "game/interface/referencecontext.hpp"
 #include "game/map/anyshiptype.hpp"
 #include "game/map/planetformula.hpp"
+#include "game/parser/binarytransfer.hpp"
 #include "game/root.hpp"
 #include "game/stringverifier.hpp"
 #include "game/tables/happinesschangename.hpp"
@@ -237,6 +238,11 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
         /* @q Density.T:Int (Planet Property)
            Density of Tritanium in planet core. */
         return makeOptionalIntegerValue(pl.getOreDensity(Element::Tritanium));
+     case ippEncodedMessage:
+        /* @q Message.Encoded:Str (Planet Property)
+           Planet data, encoded in "VPA Data Transmission" format.
+           @since PCC2 2.41 */
+        return makeStringValue(game::parser::packBinaryPlanet(pl, root->charset(), root->hostVersion()));
      case ippFCode:
         /* @q FCode:Str (Planet Property)
            Friendly code.

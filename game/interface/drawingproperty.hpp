@@ -5,8 +5,9 @@
 #ifndef C2NG_GAME_INTERFACE_DRAWINGPROPERTY_HPP
 #define C2NG_GAME_INTERFACE_DRAWINGPROPERTY_HPP
 
-#include "game/map/drawing.hpp"
+#include "afl/charset/charset.hpp"
 #include "afl/data/value.hpp"
+#include "game/map/drawing.hpp"
 
 namespace game { namespace interface {
 
@@ -14,6 +15,7 @@ namespace game { namespace interface {
     enum DrawingProperty {
         idpColor,
         idpComment,
+        idpEncodedMessage,
         idpEndX,
         idpEndY,
         idpExpire,
@@ -29,8 +31,9 @@ namespace game { namespace interface {
     /** Get property of a drawing.
         \param d Drawing
         \param idp Property
+        \param charset Character set
         \return newly-allocated property value */
-    afl::data::Value* getDrawingProperty(const game::map::Drawing& d, DrawingProperty idp);
+    afl::data::Value* getDrawingProperty(const game::map::Drawing& d, DrawingProperty idp, afl::charset::Charset& charset);
 
     /** Set property of a drawing.
         \param d Drawing

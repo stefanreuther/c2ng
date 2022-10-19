@@ -38,6 +38,7 @@ namespace game { namespace interface {
         ippDensityM,
         ippDensityN,
         ippDensityT,
+        ippEncodedMessage,
         ippFCode,
         ippFactories,
         ippFactoriesMax,

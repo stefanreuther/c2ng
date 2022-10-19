@@ -25,7 +25,7 @@ client::tiles::PlanetScreenHeaderTile::PlanetScreenHeaderTile(ui::Root& root, gf
     } else {
         enableButton(btnAuto, ui::NoFrame);
         enableButton(btnAdd,  ui::NoFrame);
-        // enableButton(btnSend, ui::NoFrame); // FIXME: missing in PCC2!
+        enableButton(btnSend, ui::NoFrame);
     }
 }
 

@@ -14,7 +14,7 @@ namespace game { namespace interface {
 
     class DrawingContext : public interpreter::SimpleContext, public interpreter::Context::PropertyAccessor {
      public:
-        DrawingContext(afl::base::Ref<Turn> turn, game::map::DrawingContainer::Iterator_t it);
+        DrawingContext(afl::base::Ref<Turn> turn, afl::base::Ref<Root> root, game::map::DrawingContainer::Iterator_t it);
         ~DrawingContext();
 
         // Context:
@@ -35,6 +35,7 @@ namespace game { namespace interface {
      private:
         // Turn, to keep the turn object alive
         afl::base::Ref<Turn> m_turn;
+        afl::base::Ref<Root> m_root;
 
         game::map::DrawingContainer::Iterator_t m_iterator;
     };

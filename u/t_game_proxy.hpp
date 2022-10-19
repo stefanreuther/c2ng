@@ -423,6 +423,9 @@ class TestGameProxyOutboxProxy : public CxxTest::TestSuite {
     void testNormal();
     void testAdaptor();
     void testMailboxProxy();
+    void testFileEmpty();
+    void testFileNormal();
+    void testFileError();
 };
 
 class TestGameProxyPlanetInfoProxy : public CxxTest::TestSuite {

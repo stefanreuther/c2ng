@@ -3,6 +3,7 @@
   */
 
 #include "game/interface/minefieldproperty.hpp"
+#include "game/parser/binarytransfer.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/values.hpp"
 
@@ -27,6 +28,11 @@ game::interface::getMinefieldProperty(const game::map::Minefield& mf, MinefieldP
         /* @q Id:Int (Minefield Property)
            Id of this minefield. */
         return makeIntegerValue(mf.getId());
+     case impEncodedMessage:
+        /* @q Message.Encoded:Str (Minefield Property)
+           Minefield data, encoded in "VPA Data Transmission" format.
+           @since PCC2 2.41 */
+        return makeStringValue(game::parser::packBinaryMinefield(mf));
      case impLastScan:
         /* @q LastScan:Int (Minefield Property)
            Turn when minefield was last scanned. */

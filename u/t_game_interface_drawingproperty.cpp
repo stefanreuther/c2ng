@@ -8,6 +8,7 @@
 #include "game/interface/drawingproperty.hpp"
 
 #include "t_game_interface.hpp"
+#include "afl/charset/utf8charset.hpp"
 #include "afl/data/access.hpp"
 #include "afl/data/integervalue.hpp"
 #include "afl/data/stringvalue.hpp"
@@ -22,6 +23,7 @@ using game::map::Point;
 void
 TestGameInterfaceDrawingProperty::testGetLine()
 {
+    afl::charset::Utf8Charset cs;
     Drawing d(Point(1100, 1200), Drawing::LineDrawing);
     d.setColor(7);
     d.setTag(99);
@@ -29,40 +31,40 @@ TestGameInterfaceDrawingProperty::testGetLine()
     d.setExpire(12);
 
     std::auto_ptr<Value> p;
-    p.reset(gi::getDrawingProperty(d, gi::idpColor));
+    p.reset(gi::getDrawingProperty(d, gi::idpColor, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 7);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpComment));
+    p.reset(gi::getDrawingProperty(d, gi::idpComment, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toString(), "");
 
-    p.reset(gi::getDrawingProperty(d, gi::idpEndX));
+    p.reset(gi::getDrawingProperty(d, gi::idpEndX, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 1300);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpEndY));
+    p.reset(gi::getDrawingProperty(d, gi::idpEndY, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 1400);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpExpire));
+    p.reset(gi::getDrawingProperty(d, gi::idpExpire, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 12);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpLocX));
+    p.reset(gi::getDrawingProperty(d, gi::idpLocX, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 1100);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpLocY));
+    p.reset(gi::getDrawingProperty(d, gi::idpLocY, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 1200);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpRadius));
+    p.reset(gi::getDrawingProperty(d, gi::idpRadius, cs));
     TS_ASSERT(p.get() == 0);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpShape));
+    p.reset(gi::getDrawingProperty(d, gi::idpShape, cs));
     TS_ASSERT(p.get() == 0);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpTag));
+    p.reset(gi::getDrawingProperty(d, gi::idpTag, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 99);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpTypeString));
+    p.reset(gi::getDrawingProperty(d, gi::idpTypeString, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toString(), "Line");
 
-    p.reset(gi::getDrawingProperty(d, gi::idpTypeCode));
+    p.reset(gi::getDrawingProperty(d, gi::idpTypeCode, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 0);
 }
 
@@ -70,6 +72,7 @@ TestGameInterfaceDrawingProperty::testGetLine()
 void
 TestGameInterfaceDrawingProperty::testGetCircle()
 {
+    afl::charset::Utf8Charset cs;
     Drawing d(Point(1500, 1400), Drawing::CircleDrawing);
     d.setColor(9);
     d.setTag(77);
@@ -77,40 +80,40 @@ TestGameInterfaceDrawingProperty::testGetCircle()
     d.setExpire(15);
 
     std::auto_ptr<Value> p;
-    p.reset(gi::getDrawingProperty(d, gi::idpColor));
+    p.reset(gi::getDrawingProperty(d, gi::idpColor, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 9);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpComment));
+    p.reset(gi::getDrawingProperty(d, gi::idpComment, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toString(), "");
 
-    p.reset(gi::getDrawingProperty(d, gi::idpEndX));
+    p.reset(gi::getDrawingProperty(d, gi::idpEndX, cs));
     TS_ASSERT(p.get() == 0);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpEndY));
+    p.reset(gi::getDrawingProperty(d, gi::idpEndY, cs));
     TS_ASSERT(p.get() == 0);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpExpire));
+    p.reset(gi::getDrawingProperty(d, gi::idpExpire, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 15);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpLocX));
+    p.reset(gi::getDrawingProperty(d, gi::idpLocX, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 1500);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpLocY));
+    p.reset(gi::getDrawingProperty(d, gi::idpLocY, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 1400);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpRadius));
+    p.reset(gi::getDrawingProperty(d, gi::idpRadius, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 220);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpShape));
+    p.reset(gi::getDrawingProperty(d, gi::idpShape, cs));
     TS_ASSERT(p.get() == 0);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpTag));
+    p.reset(gi::getDrawingProperty(d, gi::idpTag, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 77);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpTypeString));
+    p.reset(gi::getDrawingProperty(d, gi::idpTypeString, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toString(), "Circle");
 
-    p.reset(gi::getDrawingProperty(d, gi::idpTypeCode));
+    p.reset(gi::getDrawingProperty(d, gi::idpTypeCode, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 2);
 }
 
@@ -118,6 +121,7 @@ TestGameInterfaceDrawingProperty::testGetCircle()
 void
 TestGameInterfaceDrawingProperty::testGetMarker()
 {
+    afl::charset::Utf8Charset cs;
     Drawing d(Point(2200, 2105), Drawing::MarkerDrawing);
     d.setColor(11);
     d.setTag(22);
@@ -126,40 +130,40 @@ TestGameInterfaceDrawingProperty::testGetMarker()
     d.setComment("note!");
 
     std::auto_ptr<Value> p;
-    p.reset(gi::getDrawingProperty(d, gi::idpColor));
+    p.reset(gi::getDrawingProperty(d, gi::idpColor, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 11);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpComment));
+    p.reset(gi::getDrawingProperty(d, gi::idpComment, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toString(), "note!");
 
-    p.reset(gi::getDrawingProperty(d, gi::idpEndX));
+    p.reset(gi::getDrawingProperty(d, gi::idpEndX, cs));
     TS_ASSERT(p.get() == 0);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpEndY));
+    p.reset(gi::getDrawingProperty(d, gi::idpEndY, cs));
     TS_ASSERT(p.get() == 0);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpExpire));
+    p.reset(gi::getDrawingProperty(d, gi::idpExpire, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toInteger(), -1);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpLocX));
+    p.reset(gi::getDrawingProperty(d, gi::idpLocX, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 2200);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpLocY));
+    p.reset(gi::getDrawingProperty(d, gi::idpLocY, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 2105);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpRadius));
+    p.reset(gi::getDrawingProperty(d, gi::idpRadius, cs));
     TS_ASSERT(p.get() == 0);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpShape));
+    p.reset(gi::getDrawingProperty(d, gi::idpShape, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 2);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpTag));
+    p.reset(gi::getDrawingProperty(d, gi::idpTag, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 22);
 
-    p.reset(gi::getDrawingProperty(d, gi::idpTypeString));
+    p.reset(gi::getDrawingProperty(d, gi::idpTypeString, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toString(), "Marker");
 
-    p.reset(gi::getDrawingProperty(d, gi::idpTypeCode));
+    p.reset(gi::getDrawingProperty(d, gi::idpTypeCode, cs));
     TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 3);
 }
 
@@ -205,7 +209,7 @@ TestGameInterfaceDrawingProperty::testSetLine()
         TS_ASSERT_THROWS_NOTHING(gi::setDrawingProperty(d, gi::idpExpire, &iv));
         TS_ASSERT_EQUALS(d.getExpire(), 77);
     }
-    
+
     // Set radius - fails for Line
     {
         afl::data::IntegerValue iv(90);
@@ -261,7 +265,7 @@ TestGameInterfaceDrawingProperty::testSetCircle()
         TS_ASSERT_THROWS_NOTHING(gi::setDrawingProperty(d, gi::idpExpire, &iv));
         TS_ASSERT_EQUALS(d.getExpire(), 55);
     }
-    
+
     // Set radius
     {
         afl::data::IntegerValue iv(90);
@@ -314,7 +318,7 @@ TestGameInterfaceDrawingProperty::testSetMarker()
         TS_ASSERT_THROWS_NOTHING(gi::setDrawingProperty(d, gi::idpExpire, &iv));
         TS_ASSERT_EQUALS(d.getExpire(), 66);
     }
-    
+
     // Set radius - fails for Marker
     {
         afl::data::IntegerValue iv(90);

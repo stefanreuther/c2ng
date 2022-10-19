@@ -17,21 +17,22 @@ namespace {
     enum DrawingDomain { DrawingPropertyDomain, DrawingMethodDomain };
 
     static const interpreter::NameTable drawing_mapping[] = {
-        { "COLOR",        game::interface::idpColor,      DrawingPropertyDomain,    interpreter::thInt },
-        { "COMMENT",      game::interface::idpComment,    DrawingPropertyDomain,    interpreter::thString },
-        { "DELETE",       game::interface::idmDelete,     DrawingMethodDomain,      interpreter::thProcedure },
-        { "END.X",        game::interface::idpEndX,       DrawingPropertyDomain,    interpreter::thInt },
-        { "END.Y",        game::interface::idpEndY,       DrawingPropertyDomain,    interpreter::thInt },
-        { "EXPIRE",       game::interface::idpExpire,     DrawingPropertyDomain,    interpreter::thInt },
-        { "LOC.X",        game::interface::idpLocX,       DrawingPropertyDomain,    interpreter::thInt },
-        { "LOC.Y",        game::interface::idpLocY,       DrawingPropertyDomain,    interpreter::thInt },
-        { "RADIUS",       game::interface::idpRadius,     DrawingPropertyDomain,    interpreter::thInt },
-        { "SETCOLOR",     game::interface::idmSetColor,   DrawingMethodDomain,      interpreter::thProcedure },
-        { "SETCOMMENT",   game::interface::idmSetComment, DrawingMethodDomain,      interpreter::thProcedure },
-        { "SHAPE",        game::interface::idpShape,      DrawingPropertyDomain,    interpreter::thInt },
-        { "TAG",          game::interface::idpTag,        DrawingPropertyDomain,    interpreter::thInt },
-        { "TYPE",         game::interface::idpTypeString, DrawingPropertyDomain,    interpreter::thString },
-        { "TYPE$",        game::interface::idpTypeCode,   DrawingPropertyDomain,    interpreter::thInt },
+        { "COLOR",           game::interface::idpColor,          DrawingPropertyDomain,    interpreter::thInt },
+        { "COMMENT",         game::interface::idpComment,        DrawingPropertyDomain,    interpreter::thString },
+        { "DELETE",          game::interface::idmDelete,         DrawingMethodDomain,      interpreter::thProcedure },
+        { "END.X",           game::interface::idpEndX,           DrawingPropertyDomain,    interpreter::thInt },
+        { "END.Y",           game::interface::idpEndY,           DrawingPropertyDomain,    interpreter::thInt },
+        { "EXPIRE",          game::interface::idpExpire,         DrawingPropertyDomain,    interpreter::thInt },
+        { "LOC.X",           game::interface::idpLocX,           DrawingPropertyDomain,    interpreter::thInt },
+        { "LOC.Y",           game::interface::idpLocY,           DrawingPropertyDomain,    interpreter::thInt },
+        { "MESSAGE.ENCODED", game::interface::idpEncodedMessage, DrawingPropertyDomain,    interpreter::thString },
+        { "RADIUS",          game::interface::idpRadius,         DrawingPropertyDomain,    interpreter::thInt },
+        { "SETCOLOR",        game::interface::idmSetColor,       DrawingMethodDomain,      interpreter::thProcedure },
+        { "SETCOMMENT",      game::interface::idmSetComment,     DrawingMethodDomain,      interpreter::thProcedure },
+        { "SHAPE",           game::interface::idpShape,          DrawingPropertyDomain,    interpreter::thInt },
+        { "TAG",             game::interface::idpTag,            DrawingPropertyDomain,    interpreter::thInt },
+        { "TYPE",            game::interface::idpTypeString,     DrawingPropertyDomain,    interpreter::thString },
+        { "TYPE$",           game::interface::idpTypeCode,       DrawingPropertyDomain,    interpreter::thInt },
     };
 
     class DrawingMethodValue : public interpreter::ProcedureValue {
@@ -56,8 +57,9 @@ namespace {
     };
 }
 
-game::interface::DrawingContext::DrawingContext(afl::base::Ref<Turn> turn, game::map::DrawingContainer::Iterator_t it)
+game::interface::DrawingContext::DrawingContext(afl::base::Ref<Turn> turn, afl::base::Ref<Root> root, game::map::DrawingContainer::Iterator_t it)
     : m_turn(turn),
+      m_root(root),
       m_iterator(it)
 { }
 
@@ -97,7 +99,7 @@ game::interface::DrawingContext::get(PropertyIndex_t index)
     if (const game::map::Drawing* d = *m_iterator) {
         switch (DrawingDomain(drawing_mapping[index].domain)) {
          case DrawingPropertyDomain:
-            return getDrawingProperty(*d, DrawingProperty(drawing_mapping[index].index));
+            return getDrawingProperty(*d, DrawingProperty(drawing_mapping[index].index), m_root->charset());
          case DrawingMethodDomain:
             return new DrawingMethodValue(m_turn, m_iterator, DrawingMethod(drawing_mapping[index].index));
          default:
@@ -131,7 +133,7 @@ game::interface::DrawingContext*
 game::interface::DrawingContext::clone() const
 {
     // ex IntDrawingContext::clone
-    return new DrawingContext(m_turn, m_iterator);
+    return new DrawingContext(m_turn, m_root, m_iterator);
 }
 
 game::map::Object*
@@ -171,6 +173,11 @@ game::interface::DrawingContext::create(Session& session)
         return 0;
     }
 
+    Root* root = session.getRoot().get();
+    if (root == 0) {
+        return 0;
+    }
+
     Turn& turn = game->currentTurn();
     game::map::DrawingContainer& d = turn.universe().drawings();
     game::map::DrawingContainer::Iterator_t it = d.begin();
@@ -178,5 +185,5 @@ game::interface::DrawingContext::create(Session& session)
         return 0;
     }
 
-    return new DrawingContext(turn, it);
+    return new DrawingContext(turn, *root, it);
 }

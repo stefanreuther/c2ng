@@ -3,35 +3,36 @@
   */
 
 #include "game/interface/minefieldcontext.hpp"
-#include "interpreter/propertyacceptor.hpp"
-#include "game/interface/playerproperty.hpp"
-#include "game/interface/minefieldproperty.hpp"
-#include "interpreter/error.hpp"
-#include "game/turn.hpp"
 #include "afl/string/format.hpp"
 #include "game/interface/minefieldmethod.hpp"
+#include "game/interface/minefieldproperty.hpp"
+#include "game/interface/playerproperty.hpp"
+#include "game/turn.hpp"
+#include "interpreter/error.hpp"
 #include "interpreter/procedurevalue.hpp"
+#include "interpreter/propertyacceptor.hpp"
 
 namespace {
     enum MinefieldDomain { MinefieldPropertyDomain, MinefieldMethodDomain, OwnerPropertyDomain };
 
     static const interpreter::NameTable minefield_mapping[] = {
-        { "DELETE",     game::interface::immDelete,    MinefieldMethodDomain,   interpreter::thProcedure },
-        { "ID",         game::interface::impId,        MinefieldPropertyDomain, interpreter::thInt },
-        { "LASTSCAN",   game::interface::impLastScan,  MinefieldPropertyDomain, interpreter::thInt },
-        { "LOC.X",      game::interface::impLocX,      MinefieldPropertyDomain, interpreter::thInt },
-        { "LOC.Y",      game::interface::impLocY,      MinefieldPropertyDomain, interpreter::thInt },
-        { "MARK",       game::interface::immMark,      MinefieldMethodDomain,   interpreter::thProcedure },
-        { "MARKED",     game::interface::impMarked,    MinefieldPropertyDomain, interpreter::thBool },
-        { "OWNER",      game::interface::iplShortName, OwnerPropertyDomain,     interpreter::thString },
-        { "OWNER$",     game::interface::iplId,        OwnerPropertyDomain,     interpreter::thInt },
-        { "OWNER.ADJ",  game::interface::iplAdjName,   OwnerPropertyDomain,     interpreter::thString },
-        { "RADIUS",     game::interface::impRadius,    MinefieldPropertyDomain, interpreter::thInt },
-        { "SCANNED",    game::interface::impScanType,  MinefieldPropertyDomain, interpreter::thInt },
-        { "TYPE",       game::interface::impTypeStr,   MinefieldPropertyDomain, interpreter::thString },
-        { "TYPE$",      game::interface::impTypeCode,  MinefieldPropertyDomain, interpreter::thBool },
-        { "UNITS",      game::interface::impUnits,     MinefieldPropertyDomain, interpreter::thInt },
-        { "UNMARK",     game::interface::immUnmark,    MinefieldMethodDomain,   interpreter::thProcedure },
+        { "DELETE",          game::interface::immDelete,         MinefieldMethodDomain,   interpreter::thProcedure },
+        { "ID",              game::interface::impId,             MinefieldPropertyDomain, interpreter::thInt },
+        { "LASTSCAN",        game::interface::impLastScan,       MinefieldPropertyDomain, interpreter::thInt },
+        { "LOC.X",           game::interface::impLocX,           MinefieldPropertyDomain, interpreter::thInt },
+        { "LOC.Y",           game::interface::impLocY,           MinefieldPropertyDomain, interpreter::thInt },
+        { "MARK",            game::interface::immMark,           MinefieldMethodDomain,   interpreter::thProcedure },
+        { "MARKED",          game::interface::impMarked,         MinefieldPropertyDomain, interpreter::thBool },
+        { "MESSAGE.ENCODED", game::interface::impEncodedMessage, MinefieldPropertyDomain, interpreter::thString },
+        { "OWNER",           game::interface::iplShortName,      OwnerPropertyDomain,     interpreter::thString },
+        { "OWNER$",          game::interface::iplId,             OwnerPropertyDomain,     interpreter::thInt },
+        { "OWNER.ADJ",       game::interface::iplAdjName,        OwnerPropertyDomain,     interpreter::thString },
+        { "RADIUS",          game::interface::impRadius,         MinefieldPropertyDomain, interpreter::thInt },
+        { "SCANNED",         game::interface::impScanType,       MinefieldPropertyDomain, interpreter::thInt },
+        { "TYPE",            game::interface::impTypeStr,        MinefieldPropertyDomain, interpreter::thString },
+        { "TYPE$",           game::interface::impTypeCode,       MinefieldPropertyDomain, interpreter::thBool },
+        { "UNITS",           game::interface::impUnits,          MinefieldPropertyDomain, interpreter::thInt },
+        { "UNMARK",          game::interface::immUnmark,         MinefieldMethodDomain,   interpreter::thProcedure },
     };
     class MinefieldMethodValue : public interpreter::ProcedureValue {
      public:
