@@ -1418,7 +1418,28 @@ EndSub
 %
 
 Sub CC$Share
-  CC$SendMessage Message.Encoded
+  % ex team.pas:MailCommand
+  % As of 20221022, VPA data transmissions (Message.Encoded) are supported for planets, minefields and drawings,
+  % whereas 'show' is supported for planets, minefields and ships.
+  % For now, the UI can only share planets and minefields which are supported by both.
+  Local mode, UI.Result
+  If Cfg("CPEnableShow") Then
+    With Listbox("") Do
+      AddItem 1, Translate("Current information (message)")
+      AddItem 2, Translate("Next-turn information (\"show\")")
+      RunMenu UI.Key
+    EndWith
+    mode := UI.Result
+  Else
+    mode := 1
+  EndIf
+
+  Select Case mode
+    Case 1
+      CC$SendMessage Message.Encoded
+    Case 2
+      CC$EditShowCommand
+  EndSelect
 EndSub
 
 Sub CCUI.Planet.Share

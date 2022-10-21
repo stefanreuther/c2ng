@@ -37,6 +37,16 @@ namespace game {
         \return result */
     String_t formatPlayerHostSet(PlayerSet_t set, const PlayerList& list, afl::string::Translator& tx);
 
+    /** Format player set into number list ("1 3 5").
+        \param set Set
+        \return formatted string */
+    String_t formatPlayerSetAsList(PlayerSet_t set);
+
+    /** Parse number list ("1 3 5") into player set.
+        \param str String
+        \return player set. Garbage within the string is ignored. */
+    PlayerSet_t parsePlayerListAsSet(const String_t& str);
+
 }
 
 #endif

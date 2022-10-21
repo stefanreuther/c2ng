@@ -36,6 +36,21 @@ TestUtilStringParser::testIt()
         TS_ASSERT_EQUALS(p.getPosition(), 3U);
     }
 
+    // consumeCharacter
+    {
+        util::StringParser p("13a");
+        TS_ASSERT_EQUALS(p.getRemainder(), "13a");
+        TS_ASSERT(p.consumeCharacter());
+        TS_ASSERT(p.parseInt(n));
+        TS_ASSERT_EQUALS(p.getPosition(), 2U);
+        TS_ASSERT(p.parseString("a"));
+        TS_ASSERT(p.parseEnd());
+        TS_ASSERT(!p.consumeCharacter());
+        TS_ASSERT_EQUALS(n, 3);
+        TS_ASSERT_EQUALS(p.getRemainder(), "");
+        TS_ASSERT_EQUALS(p.getPosition(), 3U);
+    }
+
     // parseCharacter
     {
         util::StringParser p("xyz");

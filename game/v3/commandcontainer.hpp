@@ -9,6 +9,7 @@
 #include "afl/container/ptrmultilist.hpp"
 #include "afl/io/stream.hpp"
 #include "afl/string/string.hpp"
+#include "game/playerset.hpp"
 #include "game/timestamp.hpp"
 #include "game/v3/command.hpp"
 
@@ -79,6 +80,21 @@ namespace game { namespace v3 {
         /** Remove commands by affected unit.
             \param ref Affected unit. See Command::getAffectedUnit */
         void removeCommandsByReference(Reference ref);
+
+        /** Get player set from a command that takes one as its parameter.
+            This applies to the commands ShowShip, ShowPlanet, ShowMinefield.
+            \param typ Command
+            \param id  Id
+            \return player set; empty if no such command exists */
+        PlayerSet_t getCommandPlayerSet(Command::Type typ, Id_t id) const;
+
+        /** Create command with player set parameter.
+            This applies to the commands ShowShip, ShowPlanet, ShowMinefield.
+            When given an empty set, removes the command; otherwise, creates/updates it.
+            \param typ Command
+            \param id  Id
+            \param set player set */
+        void setCommandPlayerSet(Command::Type typ, Id_t id, PlayerSet_t set);
 
         /** Get iterator to first command.
             \return iterator */

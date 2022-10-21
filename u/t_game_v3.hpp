@@ -81,6 +81,7 @@ class TestGameV3CommandContainer : public CxxTest::TestSuite {
     void testLoadTimeMismatch();
     void testRemove();
     void testRemoveByReference();
+    void testPlayerSet();
 };
 
 class TestGameV3CommandExtra : public CxxTest::TestSuite {

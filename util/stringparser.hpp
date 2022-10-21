@@ -64,6 +64,10 @@ namespace util {
             \return true if end was reached, false if not */
         bool parseEnd();
 
+        /** Consume a single character.
+            \return true if character was consumed, false if end was reached. */
+        bool consumeCharacter();
+
         /** Get current character.
             Does not modify the state.
             \param ch [out] Character

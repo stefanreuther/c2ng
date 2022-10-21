@@ -145,6 +145,8 @@
 #include "util/rich/parser.hpp"
 #include "util/rich/text.hpp"
 #include "util/unicodechars.hpp"
+#include "game/v3/commandcontainer.hpp"
+#include "game/v3/commandextra.hpp"
 
 using afl::string::Format;
 using client::ScreenHistory;
@@ -159,6 +161,7 @@ using game::Game;
 using game::Reference;
 using game::Root;
 using game::Turn;
+using game::map::Minefield;
 using game::map::Planet;
 using game::map::Point;
 using game::map::Ship;
@@ -668,6 +671,17 @@ namespace {
             String_t m_verb;
         };
         si.postNewTask(link, new Task(pl->getId(), o, verb));
+    }
+
+    /*
+     *  Command List Access
+     */
+
+    game::v3::CommandContainer* getCommandContainer(game::Session& session)
+    {
+        game::Game& g = game::actions::mustHaveGame(session);
+        game::Turn& t = game::actions::mustExist(g.getViewpointTurn().get());
+        return game::v3::CommandExtra::get(t, g.getViewpointPlayer());
     }
 }
 
@@ -1717,6 +1731,84 @@ client::si::IFCCEditNewBuildOrder(game::Session& /*session*/, ScriptSide& si, Re
 
     // Common back-end
     editBuildOrder(si, link, game::ShipBuildOrder(), verb);
+}
+
+// @since PCC2 2.41
+void
+client::si::IFCCEditShowCommand(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    class CommitTask : public util::Request<game::Session> {
+     public:
+        CommitTask(game::v3::Command::Type type, game::Id_t id, game::PlayerSet_t set)
+            : m_type(type), m_id(id), m_set(set)
+            { }
+        virtual void handle(game::Session& session)
+            {
+                if (game::v3::CommandContainer* cc = getCommandContainer(session)) {
+                    cc->setCommandPlayerSet(m_type, m_id, m_set);
+                }
+            }
+     private:
+        game::v3::Command::Type m_type;
+        game::Id_t m_id;
+        game::PlayerSet_t m_set;
+    };
+
+    class DialogTask : public UserTask {
+     public:
+        DialogTask(game::v3::Command::Type type, game::Id_t id, const game::v3::CommandContainer& cc, String_t title)
+            : m_type(type), m_id(id), m_set(cc.getCommandPlayerSet(type, id)), m_title(title)
+            { }
+
+        virtual void handle(Control& ctl, RequestLink2 link)
+            {
+                afl::string::Translator& tx = ctl.translator();
+                ui::Root& root = ctl.root();
+
+                // Initialize data (this could have already been done on the script side?)
+                game::proxy::PlayerProxy proxy(ctl.interface().gameSender());
+                Downlink ind(root, tx);
+
+                game::PlayerArray<String_t> names = proxy.getPlayerNames(ind, game::Player::ShortName);
+                game::PlayerSet_t players = proxy.getAllPlayers(ind);
+
+                // Widget
+                // FIXME: client::widgets::HelpWidget help(root, tx, ctl.interface().gameSender(), "pcc2:msgout");
+                client::widgets::PlayerSetSelector setSelect(ctl.root(), names, players, tx);
+                setSelect.setSelectedPlayers(m_set);
+                client::dialogs::MessageReceiver dlg(m_title, setSelect, ctl.root(), tx);
+                // FIXME: dlg.addHelp(help);
+                dlg.pack();
+                ctl.root().centerWidget(dlg);
+                if (dlg.run() != 0) {
+                    ctl.interface().gameSender().postNewRequest(new CommitTask(m_type, m_id, setSelect.getSelectedPlayers()));
+                }
+                ctl.interface().continueProcess(link);
+            }
+
+     private:
+        game::v3::Command::Type m_type;
+        game::Id_t m_id;
+        game::PlayerSet_t m_set;
+        String_t m_title;
+    };
+
+    args.checkArgumentCount(0);
+    if (game::v3::CommandContainer* cc = getCommandContainer(session)) {
+        game::map::Object* obj = link.getProcess().getCurrentObject();
+        afl::string::Translator& tx = session.translator();
+        if (Planet* pl = dynamic_cast<Planet*>(obj)) {
+            si.postNewTask(link, new DialogTask(game::v3::Command::ShowPlanet, pl->getId(), *cc, tx("Show planet to...")));
+        } else if (Ship* sh = dynamic_cast<Ship*>(obj)) {
+            si.postNewTask(link, new DialogTask(game::v3::Command::ShowShip, sh->getId(), *cc, tx("Show ship to...")));
+        } else if (Minefield* mf = dynamic_cast<Minefield*>(obj)) {
+            si.postNewTask(link, new DialogTask(game::v3::Command::ShowMinefield, mf->getId(), *cc, tx("Show minefield to...")));
+        } else {
+            throw Error::contextError();
+        }
+    } else {
+        throw Error::contextError();
+    }
 }
 
 // @since PCC2 2.40.13
@@ -4558,6 +4650,7 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("CC$EDITCURRENTBUILDORDER", new ScriptProcedure(s, &si, IFCCEditCurrentBuildOrder));
                 s.world().setNewGlobalValue("CC$EDITLABELCONFIG",    new ScriptProcedure(s, &si, IFCCEditLabelConfig));
                 s.world().setNewGlobalValue("CC$EDITNEWBUILDORDER",  new ScriptProcedure(s, &si, IFCCEditNewBuildOrder));
+                s.world().setNewGlobalValue("CC$EDITSHOWCOMMAND",    new ScriptProcedure(s, &si, IFCCEditShowCommand));
                 s.world().setNewGlobalValue("CC$EXPORT",             new ScriptProcedure(s, &si, IFCCExport));
                 s.world().setNewGlobalValue("CC$GLOBALACTIONS",      new ScriptProcedure(s, &si, IFCCGlobalActions));
                 s.world().setNewGlobalValue("CC$GOTOCOORDINATES",    new ScriptProcedure(s, &si, IFCCGotoCoordinates));

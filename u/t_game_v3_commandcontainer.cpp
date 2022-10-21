@@ -309,3 +309,38 @@ TestGameV3CommandContainer::testRemoveByReference()
         TS_ASSERT_EQUALS(it, cmds.end());
     }
 }
+
+/** Test PlayerSet operations. */
+void
+TestGameV3CommandContainer::testPlayerSet()
+{
+    game::v3::CommandContainer testee;
+    const game::v3::Command* p;
+
+    // Initially empty
+    TS_ASSERT_EQUALS(testee.getCommandPlayerSet(game::v3::Command::ShowShip, 10), game::PlayerSet_t());
+
+    // Set to create
+    testee.setCommandPlayerSet(game::v3::Command::ShowShip, 10, game::PlayerSet_t() + 3 + 5);
+    TS_ASSERT_EQUALS(testee.getCommandPlayerSet(game::v3::Command::ShowShip, 10), game::PlayerSet_t() + 3 + 5);
+    p = testee.getCommand(game::v3::Command::ShowShip, 10);
+    TS_ASSERT(p != 0);
+    TS_ASSERT_EQUALS(p->getArg(), "3 5");
+    TS_ASSERT_EQUALS(p->getCommandText(), "show ship 10 3 5");
+
+    // Set to update
+    testee.setCommandPlayerSet(game::v3::Command::ShowShip, 10, game::PlayerSet_t() + 9);
+    TS_ASSERT_EQUALS(testee.getCommandPlayerSet(game::v3::Command::ShowShip, 10), game::PlayerSet_t() + 9);
+    p = testee.getCommand(game::v3::Command::ShowShip, 10);
+    TS_ASSERT(p != 0);
+    TS_ASSERT_EQUALS(p->getArg(), "9");
+    TS_ASSERT_EQUALS(p->getCommandText(), "show ship 10 9");
+
+    // Set to delete
+    testee.setCommandPlayerSet(game::v3::Command::ShowShip, 10, game::PlayerSet_t());
+    TS_ASSERT_EQUALS(testee.getCommandPlayerSet(game::v3::Command::ShowShip, 10), game::PlayerSet_t());
+    p = testee.getCommand(game::v3::Command::ShowShip, 10);
+    TS_ASSERT(p == 0);
+    TS_ASSERT_EQUALS(testee.begin(), testee.end());
+}
+

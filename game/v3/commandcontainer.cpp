@@ -134,6 +134,29 @@ game::v3::CommandContainer::removeCommandsByReference(Reference ref)
     }
 }
 
+// Get player set from a command that takes one as its parameter.
+game::PlayerSet_t
+game::v3::CommandContainer::getCommandPlayerSet(Command::Type typ, Id_t id) const
+{
+    if (const Command* c = getCommand(typ, id)) {
+        return parsePlayerListAsSet(c->getArg());
+    } else {
+        return PlayerSet_t();
+    }
+}
+
+// Create command with player set parameter.
+void
+game::v3::CommandContainer::setCommandPlayerSet(Command::Type typ, Id_t id, PlayerSet_t set)
+{
+    String_t arg = formatPlayerSetAsList(set);
+    if (arg.empty()) {
+        removeCommand(typ, id);
+    } else {
+        addCommand(typ, id, arg);
+    }
+}
+
 // Load command file (cmdX.txt).
 void
 game::v3::CommandContainer::loadCommandFile(afl::io::Stream& file, const Timestamp& time)

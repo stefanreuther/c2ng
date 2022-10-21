@@ -166,6 +166,8 @@ class TestGamePlayerSet : public CxxTest::TestSuite {
  public:
     void testFormat();
     void testFormatPlayerHostSet();
+    void testFormatList();
+    void testParseList();
 };
 
 class TestGameReference : public CxxTest::TestSuite {

@@ -54,6 +54,7 @@ namespace client { namespace si {
     void IFCCEditCurrentBuildOrder(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCEditLabelConfig(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCEditNewBuildOrder(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
+    void IFCCEditShowCommand(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCExport(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCGlobalActions(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCGotoCoordinates(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);

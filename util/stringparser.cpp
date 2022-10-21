@@ -123,6 +123,18 @@ util::StringParser::parseEnd()
     return m_pos == m_string.size();
 }
 
+// Consume a single character.
+bool
+util::StringParser::consumeCharacter()
+{
+    if (m_pos < m_string.size()) {
+        ++m_pos;
+        return true;
+    } else {
+        return false;
+    }
+}
+
 // Get current character.
 bool
 util::StringParser::getCurrentCharacter(char& ch) const
