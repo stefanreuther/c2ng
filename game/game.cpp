@@ -215,8 +215,12 @@ game::Game::expressionLists() const
 void
 game::Game::addMessageInformation(const game::parser::MessageInformation& info,
                                   game::config::HostConfiguration& config,
+                                  HostVersion host,
                                   util::AtomTable& atomTable,
-                                  afl::base::Optional<size_t> msgNr)
+                                  afl::base::Optional<size_t> msgNr,
+                                  bool isLoading,
+                                  afl::string::Translator& tx,
+                                  afl::sys::LogListener& log)
 {
     // ex GUniverse::addMessageInformation
     using game::parser::MessageInformation;
@@ -236,6 +240,12 @@ game::Game::addMessageInformation(const game::parser::MessageInformation& info,
             if (const size_t* pNr = msgNr.get()) {
                 pShip->messages().add(*pNr);
             }
+            if (!isLoading) {
+                pShip->internalCheck();
+                pShip->combinedCheck1(currentTurn().universe(),
+                                      currentTurn().universe().getAvailablePlayers(),
+                                      currentTurn().getTurnNumber());
+            }
         }
         break;
 
@@ -247,12 +257,19 @@ game::Game::addMessageInformation(const game::parser::MessageInformation& info,
             if (const size_t* pNr = msgNr.get()) {
                 pPlanet->messages().add(*pNr);
             }
+            if (!isLoading) {
+                pPlanet->internalCheck(mapConfiguration(), tx, log);
+                pPlanet->combinedCheck2(currentTurn().universe(),
+                                        currentTurn().universe().getAvailablePlayers(),
+                                        currentTurn().getTurnNumber());
+            }
         }
         break;
 
      case MessageInformation::Minefield:
         // Minefield: add normally. MinefieldType will deal with details.
         currentTurn().universe().minefields().addMessageInformation(info);
+        currentTurn().universe().minefields().internalCheck(currentTurn().getTurnNumber(), host, config);
         break;
 
      case MessageInformation::IonStorm:

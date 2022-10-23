@@ -261,6 +261,8 @@ game::interface::NotificationStore::performMessageAction(size_t index, Action a)
      case ToggleConfirmed:
         confirmMessage(msg, !isMessageConfirmed(msg));
         break;
+     case ToggleReceived:
+        break;
     }
 }
 

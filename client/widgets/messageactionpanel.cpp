@@ -206,22 +206,25 @@ client::widgets::MessageActionPanel::init(ui::Root& root, afl::string::Translato
     static_assert(Confirm == 3, "Confirm");
     m_actions.pushBackNew(new LabeledButton(root, 'c', "C", tx("Confirm")));
 
-    static_assert(Edit == 4, "Edit");
+    static_assert(Accept == 4, "Accept");
+    m_actions.pushBackNew(new LabeledButton(root, 'a', "A", tx("Accept")));
+
+    static_assert(Edit == 5, "Edit");
     m_actions.pushBackNew(new LabeledButton(root, 'e', "E", tx("Edit...")));
 
-    static_assert(Redirect == 5, "Redirect");
+    static_assert(Redirect == 6, "Redirect");
     m_actions.pushBackNew(new LabeledButton(root, 't', "T", tx("To...")));
 
-    static_assert(Delete == 6, "Delete");
+    static_assert(Delete == 7, "Delete");
     m_actions.pushBackNew(new LabeledButton(root, util::Key_Delete, "Del", tx("Delete")));
 
-    static_assert(Forward == 7, "Forward");
+    static_assert(Forward == 8, "Forward");
     m_actions.pushBackNew(new LabeledButton(root, 'f', "F", tx("Forward...")));
 
-    static_assert(Search == 8, "Search");
+    static_assert(Search == 9, "Search");
     m_actions.pushBackNew(new LabeledButton(root, 's', "S", tx("Search...")));
 
-    static_assert(Write == 9, "Write");
+    static_assert(Write == 10, "Write");
     m_actions.pushBackNew(new LabeledButton(root, 'w', "W", tx("Write to file...")));
 
     // Add pager buttons

@@ -24,6 +24,7 @@ namespace game { namespace v3 { namespace udata {
             \param game       Game. Data will be stored here (mostly, its currentTurn(), but also scores and score definitions)
             \param playerNr   Player number.
             \param config     Host configuration. Could be updated by received data.
+            \param host       Host version.
             \param shipList   Ship list. The modified hull function list could be updated by received data.
             \param atomTable  Atom table (for marker tags).
             \param cs         Character set. Used for decoding strings.
@@ -32,6 +33,7 @@ namespace game { namespace v3 { namespace udata {
         Parser(Game& game,
                int playerNr,
                game::config::HostConfiguration& config,
+               game::HostVersion host,
                game::spec::ShipList& shipList,
                util::AtomTable& atomTable,
                afl::charset::Charset& cs,
@@ -55,6 +57,7 @@ namespace game { namespace v3 { namespace udata {
         Game& m_game;
         const int m_player;
         game::config::HostConfiguration& m_hostConfiguration;
+        HostVersion m_hostVersion;
         game::spec::ShipList& m_shipList;
         util::AtomTable& m_atomTable;
         afl::charset::Charset& m_charset;

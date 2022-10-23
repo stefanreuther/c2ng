@@ -95,7 +95,7 @@ game::v3::Parser::Parser(afl::string::Translator& tx, afl::sys::LogListener& log
 void
 game::v3::Parser::loadUtilData(afl::io::Stream& in, afl::charset::Charset& charset)
 {
-    game::v3::udata::Parser(m_game, m_player, m_root.hostConfiguration(), m_shipList, m_atomTable, charset, m_translator, m_log).read(in);
+    game::v3::udata::Parser(m_game, m_player, m_root.hostConfiguration(), m_root.hostVersion(), m_shipList, m_atomTable, charset, m_translator, m_log).read(in);
 }
 
 // Parse messages.
@@ -122,7 +122,7 @@ game::v3::Parser::parseMessages(afl::io::Stream& in, const game::msg::Inbox& inb
         p.parseMessage(text, gdi, m_game.currentTurn().getTurnNumber(), info, m_translator, m_log);
 
         for (size_t ii = 0, in = info.size(); ii < in; ++ii) {
-            m_game.addMessageInformation(*info[ii], m_root.hostConfiguration(), m_atomTable, i);
+            m_game.addMessageInformation(*info[ii], m_root.hostConfiguration(), m_root.hostVersion(), m_atomTable, i, true, m_translator, m_log);
         }
     }
 }

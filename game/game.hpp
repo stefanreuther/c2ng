@@ -130,12 +130,20 @@ namespace game {
 
             \param info Information
             \param config Host configuration (can be updated with message information)
+            \param host Host version
             \param atomTable AtomTable (for marker tags)
-            \param msgNr If this information is from a message, its number */
+            \param msgNr If this information is from a message, its number
+            \param isLoading true if we are loading and will perform object checks later (false: perform object checks now)
+            \param tx Translator (for log messages)
+            \param log Logger */
         void addMessageInformation(const game::parser::MessageInformation& info,
                                    game::config::HostConfiguration& config,
+                                   HostVersion host,
                                    util::AtomTable& atomTable,
-                                   afl::base::Optional<size_t> msgNr);
+                                   afl::base::Optional<size_t> msgNr,
+                                   bool isLoading,
+                                   afl::string::Translator& tx,
+                                   afl::sys::LogListener& log);
 
         /** Synchronize teams from alliances.
             If we are allied with a player, adds them to our team;

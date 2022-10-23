@@ -323,6 +323,12 @@ game::map::Universe::hasFullData(int playerNr) const
     return m_availablePlayers.contains(playerNr);
 }
 
+game::PlayerSet_t
+game::map::Universe::getAvailablePlayers() const
+{
+    return m_availablePlayers;
+}
+
 
 /*
  *  Location accessors

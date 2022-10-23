@@ -28,6 +28,7 @@ namespace client { namespace widgets {
          *    [X] go to X/Y         optional
          *    [R] reply to          optional
          *    [C] confirm           optional
+         *    [A] accept            optional
          *    ...
          *    [E] Edit              optional
          *    [T] To...             optional
@@ -47,6 +48,7 @@ namespace client { namespace widgets {
             GoTo2,              ///< "X" (go to coordinate mentioned in message).
             Reply,              ///< "R" (reply to message).
             Confirm,            ///< "C" (confirm notification).
+            Accept,             ///< "A" (accept transfer).
             Edit,               ///< "E" (edit).
             Redirect,           ///< "T" (edit receivers).
             Delete,             ///< "Del" (delete message).

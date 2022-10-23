@@ -227,6 +227,9 @@ client::dialogs::OutboxDialog::onAction(client::widgets::MessageActionPanel::Act
         editMessage();
         break;
 
+     case MessageActionPanel::Accept:
+        break;
+
      case MessageActionPanel::Redirect:
         redirectMessage();
         break;

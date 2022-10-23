@@ -6,15 +6,19 @@
 #include "game/proxy/mailboxproxy.hpp"
 
 #include "t_game_proxy.hpp"
+#include "afl/io/internalfilesystem.hpp"
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/format.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "game/game.hpp"
+#include "game/msg/inbox.hpp"
+#include "game/proxy/inboxadaptor.hpp"
 #include "game/test/counter.hpp"
 #include "game/test/root.hpp"
+#include "game/test/sessionthread.hpp"
 #include "game/test/waitindicator.hpp"
+#include "game/turn.hpp"
 #include "util/requestreceiver.hpp"
-#include "afl/io/internalfilesystem.hpp"
 
 namespace {
     /*
@@ -382,5 +386,61 @@ TestGameProxyMailboxProxy::testQuote()
     // Forward
     game::proxy::MailboxProxy::QuoteResult f = proxy.quoteMessage(ind, 5, game::proxy::MailboxProxy::QuoteForForwarding);
     TS_ASSERT_EQUALS(f.text, "--- Forwarded Message ---\n(-r)<<< Message >>>\nFROM: me\ntext-5\n--- End Forwarded Message ---");
+}
+
+/** Test receiveData(); integration test against actual Inbox. */
+void
+TestGameProxyMailboxProxy::testData()
+{
+    game::test::SessionThread t;
+    t.session().setRoot(new game::test::Root(game::HostVersion()));
+    t.session().setGame(new game::Game());
+    t.session().getGame()->currentTurn().setTurnNumber(10);
+    t.session().getGame()->currentTurn().inbox().addMessage("(-r1000)<<< Message >>>\n"
+                                                            "FROM: Fed\n"
+                                                            "TO: me\n"
+                                                            "\n"
+                                                            "<<< VPA Data Transmission >>>\n"
+                                                            "\n"
+                                                            "OBJECT: Mine field 61\n"
+                                                            "DATA: 2094989326\n"
+                                                            "ocaalekakbhadaaaijmcaaaaaaaa\n", 10);
+
+    // Set up tasking
+    game::test::WaitIndicator ind;
+    game::proxy::MailboxProxy proxy(t.gameSender().makeTemporary(game::proxy::makeInboxAdaptor()), ind);
+
+    // Verify initial status
+    game::proxy::MailboxProxy::Status st;
+    proxy.getStatus(ind, st);
+    TS_ASSERT_EQUALS(st.numMessages, 1U);
+    TS_ASSERT_EQUALS(st.currentMessage, 0U);
+
+    // Retrieve message
+    UpdateReceiver u;
+    proxy.sig_update.add(&u, &UpdateReceiver::onUpdate);
+    proxy.setCurrentMessage(0);
+    t.sync();
+    ind.processQueue();
+    TS_ASSERT_EQUALS(u.m_data.text.substr(0, 8).getText(), "(-r1000)");
+    TS_ASSERT_EQUALS(u.m_data.dataStatus, game::proxy::MailboxProxy::DataReceivable);
+
+    // Receive it
+    proxy.receiveData();
+    t.sync();
+    ind.processQueue();
+    TS_ASSERT_EQUALS(u.m_data.dataStatus, game::proxy::MailboxProxy::DataReceived);
+
+    // Verify data actually got received
+    game::map::Minefield* mf = t.session().getGame()->currentTurn().universe().minefields().get(61);
+    TS_ASSERT(mf != 0);
+
+    game::map::Point pt;
+    TS_ASSERT(mf->getPosition(pt));
+    TS_ASSERT_EQUALS(pt.getX(), 2635);
+    TS_ASSERT_EQUALS(pt.getY(), 1818);
+    int r = 0;
+    TS_ASSERT(mf->getRadius(r));
+    TS_ASSERT_EQUALS(r, 104);
 }
 

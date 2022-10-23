@@ -151,6 +151,7 @@ namespace {
 game::v3::udata::Parser::Parser(Game& game,
                                 int playerNr,
                                 game::config::HostConfiguration& config,
+                                game::HostVersion host,
                                 game::spec::ShipList& shipList,
                                 util::AtomTable& atomTable,
                                 afl::charset::Charset& cs,
@@ -159,6 +160,7 @@ game::v3::udata::Parser::Parser(Game& game,
     : m_game(game),
       m_player(playerNr),
       m_hostConfiguration(config),
+      m_hostVersion(host),
       m_shipList(shipList),
       m_atomTable(atomTable),
       m_charset(cs),
@@ -1083,5 +1085,5 @@ game::v3::udata::Parser::processScoreRecord(afl::base::ConstBytes_t data, Scope 
 void
 game::v3::udata::Parser::processMessageInformation(const game::parser::MessageInformation& info)
 {
-    m_game.addMessageInformation(info, m_hostConfiguration, m_atomTable, afl::base::Nothing);
+    m_game.addMessageInformation(info, m_hostConfiguration, m_hostVersion, m_atomTable, afl::base::Nothing, true, m_translator, m_log);
 }

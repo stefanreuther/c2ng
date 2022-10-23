@@ -9,6 +9,8 @@
 #include "afl/string/nulltranslator.hpp"
 #include "game/playerlist.hpp"
 
+using game::msg::Mailbox;
+
 namespace {
     String_t getMessageHeading(String_t text)
     {
@@ -30,7 +32,7 @@ TestGameMsgInbox::testBasics()
 {
     afl::string::NullTranslator tx;
     game::PlayerList list;
-    
+
     game::msg::Inbox testee;
     testee.addMessage("a", 10);
     testee.addMessage("b", 20);
@@ -349,3 +351,27 @@ TestGameMsgInbox::testSort()
     TS_ASSERT_EQUALS(testee.getMessageText(4, tx, list), TEXT[4]);
 }
 
+/** Test ToggleReceived. */
+void
+TestGameMsgInbox::testToggleReceived()
+{
+    // Create
+    game::msg::Inbox testee;
+    testee.addMessage("<<< VPA Data Transmission >>>\n"
+                      "\n"
+                      "OBJECT: Mine field 61\n"
+                      "DATA: 2094989326\n"
+                      "ocaalekakbhadaaaijmcaaaaaaaa\n", 3);
+    TS_ASSERT_EQUALS(testee.getMessageActions(0), Mailbox::Actions_t() + Mailbox::ToggleReceived);
+    TS_ASSERT_EQUALS(testee.getMessageFlags(0),   Mailbox::Flags_t());
+
+    // Toggle once
+    testee.performMessageAction(0, Mailbox::ToggleReceived);
+    TS_ASSERT_EQUALS(testee.getMessageActions(0), Mailbox::Actions_t() + Mailbox::ToggleReceived);
+    TS_ASSERT_EQUALS(testee.getMessageFlags(0),   Mailbox::Flags_t() + Mailbox::Received);
+
+    // Toggle again
+    testee.performMessageAction(0, Mailbox::ToggleReceived);
+    TS_ASSERT_EQUALS(testee.getMessageActions(0), Mailbox::Actions_t() + Mailbox::ToggleReceived);
+    TS_ASSERT_EQUALS(testee.getMessageFlags(0),   Mailbox::Flags_t());
+}

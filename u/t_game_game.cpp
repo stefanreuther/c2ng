@@ -6,13 +6,16 @@
 #include "game/game.hpp"
 
 #include "t_game.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "afl/sys/log.hpp"
 #include "game/alliance/container.hpp"
 #include "game/alliance/level.hpp"
 #include "game/config/hostconfiguration.hpp"
-#include "game/turn.hpp"
 #include "game/parser/messageinformation.hpp"
+#include "game/turn.hpp"
 #include "util/atomtable.hpp"
 
+using game::HostVersion;
 using game::config::HostConfiguration;
 using util::AtomTable;
 
@@ -164,8 +167,11 @@ TestGameGame::testMessageAlliance()
         info.addAllianceValue("other", o);
     }
     HostConfiguration config;
+    HostVersion host;
     AtomTable atomTable;
-    testee.addMessageInformation(info, config, atomTable, afl::base::Nothing);
+    afl::sys::Log log;
+    afl::string::NullTranslator tx;
+    testee.addMessageInformation(info, config, host, atomTable, afl::base::Nothing, true, tx, log);
 
     // Verify
     TS_ASSERT_EQUALS(allies.getOffer(0)->theirOffer.get(4), Offer::Conditional);
@@ -181,7 +187,10 @@ void
 TestGameGame::testMessageConfig()
 {
     HostConfiguration config;
+    HostVersion host;
     AtomTable atomTable;
+    afl::sys::Log log;
+    afl::string::NullTranslator tx;
 
     game::Game testee;
     testee.currentTurn().setTurnNumber(42);
@@ -194,7 +203,7 @@ TestGameGame::testMessageConfig()
     info.addConfigurationValue("MaxColTempSlope", "?");            // Integer, bogus value
     info.addConfigurationValue("MaxPlanetaryIncome", "777");       // Integer
 
-    TS_ASSERT_THROWS_NOTHING(testee.addMessageInformation(info, config, atomTable, afl::base::Nothing));
+    TS_ASSERT_THROWS_NOTHING(testee.addMessageInformation(info, config, host, atomTable, afl::base::Nothing, true, tx, log));
 
     TS_ASSERT_EQUALS(config[HostConfiguration::RaceMiningRate](1), 5);
     TS_ASSERT_EQUALS(config[HostConfiguration::RaceMiningRate](4), 8);
@@ -211,8 +220,11 @@ TestGameGame::testMessageConfig()
 void
 TestGameGame::testMessageLink()
 {
-    AtomTable atomTable;
     HostConfiguration config;
+    HostVersion host;
+    AtomTable atomTable;
+    afl::sys::Log log;
+    afl::string::NullTranslator tx;
 
     game::Game testee;
     testee.currentTurn().setTurnNumber(42);
@@ -223,12 +235,12 @@ TestGameGame::testMessageLink()
     // Add planet information
     game::parser::MessageInformation i1(game::parser::MessageInformation::Planet, 99, 42);
     i1.addValue(game::parser::ms_FriendlyCode, "ppp");
-    TS_ASSERT_THROWS_NOTHING(testee.addMessageInformation(i1, config, atomTable, 3));
+    TS_ASSERT_THROWS_NOTHING(testee.addMessageInformation(i1, config, host, atomTable, 3, true, tx, log));
 
     // Add ship information
     game::parser::MessageInformation i2(game::parser::MessageInformation::Ship, 77, 42);
     i2.addValue(game::parser::ms_FriendlyCode, "sss");
-    TS_ASSERT_THROWS_NOTHING(testee.addMessageInformation(i2, config, atomTable, 4));
+    TS_ASSERT_THROWS_NOTHING(testee.addMessageInformation(i2, config, host, atomTable, 4, true, tx, log));
 
     // Verify
     TS_ASSERT_EQUALS(pl->getFriendlyCode().orElse(""), "ppp");
@@ -246,8 +258,11 @@ TestGameGame::testMessageLink()
 void
 TestGameGame::testMessageDrawing()
 {
-    AtomTable atomTable;
     HostConfiguration config;
+    HostVersion host;
+    AtomTable atomTable;
+    afl::sys::Log log;
+    afl::string::NullTranslator tx;
 
     game::Game testee;
     testee.currentTurn().setTurnNumber(42);
@@ -257,7 +272,7 @@ TestGameGame::testMessageDrawing()
     info.addValue(game::parser::mi_Y, 3000);
     info.addValue(game::parser::mi_DrawingShape, 5);
     info.addValue(game::parser::ms_DrawingComment, "hi");
-    TS_ASSERT_THROWS_NOTHING(testee.addMessageInformation(info, config, atomTable, afl::base::Nothing));
+    TS_ASSERT_THROWS_NOTHING(testee.addMessageInformation(info, config, host, atomTable, afl::base::Nothing, true, tx, log));
 
     // Verify
     game::map::DrawingContainer& dc = testee.currentTurn().universe().drawings();

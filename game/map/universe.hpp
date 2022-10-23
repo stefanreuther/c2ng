@@ -195,6 +195,10 @@ namespace game { namespace map {
             \return true if we have a result file for this player loaded */
         bool hasFullData(int playerNr) const;
 
+        /** Get available players.
+            \return set of all players where hasFullData() is true */
+        PlayerSet_t getAvailablePlayers() const;
+
 
         /*
          *  Location accessors

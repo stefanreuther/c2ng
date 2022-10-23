@@ -24,12 +24,14 @@ namespace game { namespace msg {
     class Mailbox : public afl::base::Deletable {
      public:
         enum Flag {
-            Confirmed
+            Confirmed,
+            Received
         };
         typedef afl::bits::SmallSet<Flag> Flags_t;
 
         enum Action {
-            ToggleConfirmed
+            ToggleConfirmed,
+            ToggleReceived
         };
         typedef afl::bits::SmallSet<Action> Actions_t;
 

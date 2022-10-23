@@ -11,6 +11,7 @@
 #include "game/game.hpp"
 #include "game/msg/configuration.hpp"
 #include "game/msg/outbox.hpp"
+#include "game/parser/binarytransfer.hpp"
 #include "game/parser/format.hpp"
 #include "game/parser/messagetemplate.hpp"
 #include "game/playerset.hpp"
@@ -109,6 +110,7 @@ class game::proxy::MailboxProxy::Trampoline {
     bool write(const String_t& fileName, size_t first, size_t last, String_t& errorMessage);
     void toggleHeadingFiltered(String_t heading);
     void performMessageAction(game::msg::Mailbox::Action a);
+    void receiveData();
     QuoteResult quoteMessage(size_t index, QuoteAction action);
 
     void packStatus(Status& st);
@@ -226,6 +228,36 @@ game::proxy::MailboxProxy::Trampoline::performMessageAction(game::msg::Mailbox::
     sendResponse(false);
 }
 
+void
+game::proxy::MailboxProxy::Trampoline::receiveData()
+{
+    Session& session = m_adaptor.session();
+    Root& root = mustHaveRoot(session);
+    game::msg::Mailbox& mbox = m_adaptor.mailbox();
+    afl::string::Translator& tx = session.translator();
+    const size_t index = m_currentMessage;
+
+    if (Game* g = session.getGame().get()) {
+        game::parser::MessageLines_t text;
+        game::parser::splitMessage(text, mbox.getMessageText(index, tx, root.playerList()));
+        afl::container::PtrVector<game::parser::MessageInformation> info;
+        int turnNr = mbox.getMessageTurnNumber(index)-1;
+        if (game::parser::unpackBinaryMessage(text, turnNr, info, root.charset()).first == game::parser::UnpackSuccess) {
+            // Receive it
+            for (size_t i = 0; i < info.size(); ++i) {
+                g->addMessageInformation(*info[i], root.hostConfiguration(), root.hostVersion(), session.world().atomTable(), index, false, tx, session.log());
+            }
+
+            // Toggle "Received" flag
+            if (!mbox.getMessageFlags(index).contains(game::msg::Mailbox::Received)) {
+                mbox.performMessageAction(index, game::msg::Mailbox::ToggleReceived);
+            }
+        }
+    }
+
+    sendResponse(false);
+}
+
 game::proxy::MailboxProxy::QuoteResult
 game::proxy::MailboxProxy::Trampoline::quoteMessage(size_t index, QuoteAction action)
 {
@@ -319,6 +351,33 @@ game::proxy::MailboxProxy::Trampoline::sendResponse(bool requested)
 
     if (const game::msg::Outbox* out = dynamic_cast<game::msg::Outbox*>(&mbox)) {
         m.id = out->getMessageId(m_currentMessage);
+    }
+
+    m.dataStatus = NoData;
+    if (m.actions.contains(game::msg::Mailbox::ToggleReceived)) {
+        if (m.flags.contains(game::msg::Mailbox::Received)) {
+            m.dataStatus = DataReceived;
+        } else {
+            game::parser::MessageLines_t text;
+            game::parser::splitMessage(text, mbox.getMessageText(index, tx, root.playerList()));
+            afl::container::PtrVector<game::parser::MessageInformation> info;
+            switch (game::parser::unpackBinaryMessage(text, mbox.getMessageTurnNumber(index)-1, info, root.charset()).first) {
+             case game::parser::UnpackSuccess:
+                m.dataStatus = DataReceivable;
+                break;
+
+             case game::parser::UnpackUnspecial:
+                break;
+
+             case game::parser::UnpackFailed:
+                m.dataStatus = DataFailed;
+                break;
+
+             case game::parser::UnpackChecksumError:
+                m.dataStatus = DataWrongChecksum;
+                break;
+            }
+        }
     }
 
     m_reply.postRequest(&MailboxProxy::updateCurrentMessage, index, m, requested);
@@ -476,6 +535,12 @@ void
 game::proxy::MailboxProxy::performMessageAction(game::msg::Mailbox::Action a)
 {
     m_request.postRequest(&Trampoline::performMessageAction, a);
+}
+
+void
+game::proxy::MailboxProxy::receiveData()
+{
+    m_request.postRequest(&Trampoline::receiveData);
 }
 
 game::proxy::MailboxProxy::QuoteResult

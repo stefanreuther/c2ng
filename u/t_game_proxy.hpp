@@ -352,6 +352,7 @@ class TestGameProxyMailboxProxy : public CxxTest::TestSuite {
     void testWriteMulti();
     void testWriteError();
     void testQuote();
+    void testData();
 };
 
 class TestGameProxyMapConfigurationProxy : public CxxTest::TestSuite {

@@ -30,6 +30,7 @@ class TestGameMsgInbox : public CxxTest::TestSuite {
     void testBasics();
     void testHeaders();
     void testSort();
+    void testToggleReceived();
 };
 
 class TestGameMsgMailbox : public CxxTest::TestSuite {

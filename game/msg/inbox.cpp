@@ -36,9 +36,10 @@ namespace {
 struct game::msg::Inbox::Message {
     String_t text;
     int turnNumber;
+    bool received;
 
     Message(const String_t& text, int turnNumber)
-        : text(text), turnNumber(turnNumber)
+        : text(text), turnNumber(turnNumber), received(false)
         { }
 };
 
@@ -155,21 +156,35 @@ game::msg::Inbox::isMessageFiltered(size_t index, afl::string::Translator& tx, c
 }
 
 game::msg::Mailbox::Flags_t
-game::msg::Inbox::getMessageFlags(size_t /*index*/) const
+game::msg::Inbox::getMessageFlags(size_t index) const
 {
-    return Flags_t();
+    Flags_t result;
+    if (index < m_messages.size()) {
+        if (m_messages[index]->received) {
+            result += Received;
+        }
+    }
+    return result;
 }
 
 game::msg::Mailbox::Actions_t
 game::msg::Inbox::getMessageActions(size_t /*index*/) const
 {
-    return Actions_t();
+    return Actions_t() + ToggleReceived;
 }
 
 void
-game::msg::Inbox::performMessageAction(size_t /*index*/, Action /*a*/)
+game::msg::Inbox::performMessageAction(size_t index, Action a)
 {
-    // No actions for now.
+    if (index < m_messages.size()) {
+        switch (a) {
+         case ToggleConfirmed:
+            break;
+         case ToggleReceived:
+            m_messages[index]->received = !m_messages[index]->received;
+            break;
+        }
+    }
 }
 
 // Manipulation
