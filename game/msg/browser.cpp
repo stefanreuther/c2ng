@@ -142,7 +142,7 @@ game::msg::Browser::browse(size_t index, Mode mode, int amount, const Acceptor& 
         break;
 
      case Previous:
-        // ex WMessageDisplay::doPrev
+        // ex WMessageDisplay::doPrev, CMessageView.Page
         while (!r.found && newIndex > 0) {
             --newIndex;
             if (a.accept(newIndex)) {
@@ -155,7 +155,7 @@ game::msg::Browser::browse(size_t index, Mode mode, int amount, const Acceptor& 
         break;
 
      case Next:
-        // ex WMessageDisplay::doNext
+        // ex WMessageDisplay::doNext, CMessageView.Page
         while (!r.found && ++newIndex < m_mailbox.getNumMessages()) {
             if (a.accept(newIndex)) {
                 r.index = newIndex;

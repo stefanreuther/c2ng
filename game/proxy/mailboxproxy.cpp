@@ -70,7 +70,7 @@ namespace {
 
     String_t quoteForReply(const String_t& originalText)
     {
-        // ex WMessageActionPanel::doReply()
+        // ex WMessageActionPanel::doReply(), readmsg.pas:QuoteMessage
         // Split message into lines
         game::parser::MessageLines_t lines;
         game::parser::splitMessage(lines, originalText);
@@ -87,13 +87,22 @@ namespace {
 
         // Quote remainder.
         String_t quotedMessage;
+        bool wasEmpty = false;
         while (first < lines.size()) {
-            quotedMessage += '>';
-            if (lines[first].size() > 0 && lines[first][0] != '>') {
-                quotedMessage += ' ';
+            if (lines[first].empty()) {
+                wasEmpty = true;
+            } else {
+                if (wasEmpty) {
+                    quotedMessage += ">\n";
+                }
+                quotedMessage += '>';
+                if (lines[first].size() > 0 && lines[first][0] != '>') {
+                    quotedMessage += ' ';
+                }
+                quotedMessage += lines[first];
+                quotedMessage += '\n';
+                wasEmpty = false;
             }
-            quotedMessage += lines[first];
-            quotedMessage += '\n';
             ++first;
         }
         return quotedMessage;
@@ -159,6 +168,7 @@ game::proxy::MailboxProxy::Trampoline::browse(game::msg::Browser::Mode mode, int
 void
 game::proxy::MailboxProxy::Trampoline::search(SearchRequest req)
 {
+    // ex readmsg.pas:MessageSearch
     Session& session = m_adaptor.session();
 
     Browser b(m_adaptor.mailbox(), session.translator(), mustHaveRoot(session).playerList(), req.acceptFiltered ? 0 : m_adaptor.getConfiguration());
@@ -173,7 +183,7 @@ game::proxy::MailboxProxy::Trampoline::search(SearchRequest req)
 bool
 game::proxy::MailboxProxy::Trampoline::write(const String_t& fileName, size_t first, size_t last, String_t& errorMessage)
 {
-    // ex WMessageDisplay::doWriteMessage (part)
+    // ex WMessageDisplay::doWriteMessage (part), readmsg.pas:SaveAllMessages, readmsg.pas:SaveThisMessage
     // TODO: consider moving that to Mailbox and merging with MessageWriteCommand::call
     Session& session = m_adaptor.session();
     afl::io::FileSystem& fs = session.world().fileSystem();

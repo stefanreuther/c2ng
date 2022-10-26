@@ -388,6 +388,28 @@ TestGameProxyMailboxProxy::testQuote()
     TS_ASSERT_EQUALS(f.text, "--- Forwarded Message ---\n(-r)<<< Message >>>\nFROM: me\ntext-5\n--- End Forwarded Message ---");
 }
 
+/** Test quoteMessage(), special cases. */
+void
+TestGameProxyMailboxProxy::testQuote2()
+{
+    Environment env(".......", "(-r)<<< Message >>>\nFROM: me\n\n  <<< Universal Message >>>\n\nfirst\n\n\nsecond\n");
+
+    // Set up tasking
+    game::test::WaitIndicator ind;
+    TestAdaptor ad(env);
+    util::RequestReceiver<game::proxy::MailboxAdaptor> recv(ind, ad);
+
+    game::proxy::MailboxProxy proxy(recv.getSender(), ind);
+
+    // Reply
+    game::proxy::MailboxProxy::QuoteResult r = proxy.quoteMessage(ind, 3, game::proxy::MailboxProxy::QuoteForReplying);
+    TS_ASSERT_EQUALS(r.text, "> first\n>\n> second\n> text-3\n");
+
+    // Forward
+    game::proxy::MailboxProxy::QuoteResult f = proxy.quoteMessage(ind, 5, game::proxy::MailboxProxy::QuoteForForwarding);
+    TS_ASSERT_EQUALS(f.text, "--- Forwarded Message ---\n(-r)<<< Message >>>\nFROM: me\n\n  <<< Universal Message >>>\n\nfirst\n\n\nsecond\ntext-5\n--- End Forwarded Message ---");
+}
+
 /** Test receiveData(); integration test against actual Inbox. */
 void
 TestGameProxyMailboxProxy::testData()

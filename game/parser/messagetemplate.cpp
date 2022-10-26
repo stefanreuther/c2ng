@@ -607,8 +607,9 @@ game::parser::getMessageHeaderInformation(const MessageLines_t& msg, MessageHead
 int32_t
 game::parser::parseIntegerValue(const String_t& value)
 {
-    // ex game/msgtemplate.cc:getIntValue
-    // ex game/msgtemplate.cc:parseIntValue
+    // ex game/msgtemplate.cc:getIntValue, game/msgtemplate.cc:parseIntValue, readmsg.pas:Eval
+    // No need to parse YES/NO here. This is used in configuration parsing;
+    // in PCC2, it goes through MessageConfigurationValue_t, and thus through BooleanValueParser.
     String_t::size_type pos;
     int32_t result;
     if (afl::string::strToInteger(value, result, pos) || afl::string::strToInteger(value.substr(0, pos), result)) {

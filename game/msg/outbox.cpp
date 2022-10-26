@@ -192,6 +192,7 @@ game::msg::Outbox::getMessageSendPrefix(size_t index, int receiver,
                                         const PlayerList& players) const
 {
     if (index < m_messages.size()) {
+        // ex readmsg.pas:MessageHead
         PlayerSet_t receivers = m_messages[index]->receivers & getAllReceivers(players);
 
         // Universal message? (all or all+host)
@@ -323,7 +324,7 @@ game::msg::Outbox::addMessage(int sender, String_t text, PlayerSet_t receivers)
 void
 game::msg::Outbox::addMessageFromFile(int sender, String_t text, PlayerSet_t receivers)
 {
-    // ex GOutbox::addMessageFromFile
+    // ex GOutbox::addMessageFromFile, readmsg.pas:CombineMessages
     /* attempt to merge messages. Preconditions:
        - message box contains at least one message
        - receivers don't overlap

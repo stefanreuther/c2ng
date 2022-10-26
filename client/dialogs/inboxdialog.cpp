@@ -6,8 +6,10 @@
 #include "afl/string/format.hpp"
 #include "client/dialogs/messageeditor.hpp"
 #include "client/dialogs/messagereceiver.hpp"
+#include "client/dialogs/searchdialog.hpp"
 #include "client/dialogs/sessionfileselectiondialog.hpp"
 #include "client/dialogs/subjectlist.hpp"
+#include "client/downlink.hpp"
 #include "client/widgets/decayingmessage.hpp"
 #include "client/widgets/helpwidget.hpp"
 #include "client/widgets/playersetselector.hpp"
@@ -15,6 +17,7 @@
 #include "game/config/userconfiguration.hpp"
 #include "game/proxy/outboxproxy.hpp"
 #include "game/proxy/playerproxy.hpp"
+#include "game/proxy/searchproxy.hpp"
 #include "ui/dialogs/messagebox.hpp"
 #include "ui/group.hpp"
 #include "ui/layout/hbox.hpp"
@@ -22,6 +25,7 @@
 #include "ui/prefixargument.hpp"
 #include "ui/spacer.hpp"
 #include "ui/widgets/inputline.hpp"
+#include "ui/widgets/keydispatcher.hpp"
 #include "ui/widgets/quit.hpp"
 #include "ui/window.hpp"
 #include "util/stringparser.hpp"
@@ -112,6 +116,11 @@ client::dialogs::InboxDialog::run(client::si::OutputState& out,
     btnOK.sig_fire.addNewClosure(m_loop.makeStop(0));
     btnHelp.dispatchKeyTo(help);
     m_actionPanel.sig_action.add(this, &InboxDialog::onAction);
+
+    // Extra keys
+    ui::widgets::KeyDispatcher disp;
+    disp.add(util::Key_F7 + util::KeyMod_Alt, this, &InboxDialog::onSearchObject);
+    win.add(disp);
 
     win.pack();
 
@@ -365,7 +374,7 @@ client::dialogs::InboxDialog::onAction(client::widgets::MessageActionPanel::Acti
 void
 client::dialogs::InboxDialog::doSearch()
 {
-    // ex WMessageDisplay::doSearch
+    // ex WMessageDisplay::doSearch, readmsg.pas:InitiateMessageSearch
     afl::string::Translator& tx = translator();
     ui::widgets::InputLine input(1000, 30, root());
     input.setText(m_searchText);
@@ -393,6 +402,17 @@ client::dialogs::InboxDialog::onSearchFailure()
     afl::string::Translator& tx = translator();
     ui::dialogs::MessageBox(tx("Search text not found."), tx("Search in messages"), root())
         .doOkDialog(tx);
+}
+
+void
+client::dialogs::InboxDialog::onSearchObject()
+{
+    Downlink link(root(), translator());
+    game::SearchQuery q(game::proxy::SearchProxy(interface().gameSender(), root().engine().dispatcher()).getSavedQuery(link));
+
+    client::si::OutputState out;
+    doSearchDialog(q, game::Reference(), false, interface(), out);
+    handleStateChange(out.getProcess(), out.getTarget());
 }
 
 void

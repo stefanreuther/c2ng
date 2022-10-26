@@ -44,6 +44,7 @@ namespace client { namespace dialogs {
         void doSearch();
         void doSearchNext();
         void onSearchFailure();
+        void onSearchObject();
         void doWrite(bool all);
         void onLinkClick(String_t str);
         void doForward();
