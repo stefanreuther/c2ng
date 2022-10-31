@@ -12,7 +12,7 @@
 #include "afl/io/directory.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "game/playerarray.hpp"
-#include "server/file/racenames.hpp"
+#include "server/common/racenames.hpp"
 
 namespace server { namespace file {
 
@@ -35,7 +35,7 @@ namespace server { namespace file {
 
         afl::charset::Charset& defaultCharacterSet();
 
-        RaceNames_t& defaultRaceNames();
+        const server::common::RaceNames& defaultRaceNames() const;
 
         game::v3::DirectoryScanner& directoryScanner();
 
@@ -51,7 +51,7 @@ namespace server { namespace file {
 
         afl::charset::CodepageCharset m_defaultCharset;
 
-        RaceNames_t m_defaultRaceNames;
+        server::common::RaceNames m_defaultRaceNames;
 
         afl::base::Ref<afl::io::Directory> m_defaultSpecificationDirectory;
 

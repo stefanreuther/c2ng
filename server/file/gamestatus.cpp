@@ -8,6 +8,7 @@
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 #include "game/v3/registrationkey.hpp"
+#include "server/common/racenames.hpp"
 #include "server/file/directoryitem.hpp"
 #include "server/file/directorywrapper.hpp"
 #include "server/file/root.hpp"
@@ -19,12 +20,12 @@ namespace {
 
     void createSlotList(server::file::GameStatus::GameInfo& out,
                         const game::v3::DirectoryScanner& scanner,
-                        const server::file::RaceNames_t& raceNames)
+                        const server::common::RaceNames& raceNames)
     {
         for (int i = 1; i <= scanner.NUM_PLAYERS; ++i) {
             if (scanner.getPlayerFlags(i).contains(scanner.HaveResult)) {
-                if (const String_t* pName = raceNames.at(i)) {
-                    out.slots.push_back(server::file::GameStatus::Slot_t(i, *pName));
+                if (const String_t* pName = raceNames.longNames().at(i)) {
+                    out.slots.push_back(server::file::GameStatus::Slot_t(i, pName->empty() ? String_t(afl::string::Format("Player %d", i)) : *pName));
                 }
             }
         }
@@ -77,8 +78,8 @@ server::file::GameStatus::load(Root& root, DirectoryItem& dir)
 
             // Load race names and generate slot list
             if (FileItem* it = dir.findFile("race.nm")) {
-                RaceNames_t raceNames;
-                loadRaceNames(raceNames, dir.getFileContent(*it)->get(), root.defaultCharacterSet());
+                server::common::RaceNames raceNames;
+                raceNames.load(dir.getFileContent(*it)->get(), root.defaultCharacterSet());
                 createSlotList(*g, scanner, raceNames);
             } else {
                 g->missingFiles.push_back("race.nm");

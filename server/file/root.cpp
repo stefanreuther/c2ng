@@ -4,8 +4,8 @@
 
 #include "server/file/root.hpp"
 #include "afl/charset/codepage.hpp"
+#include "afl/io/filemapping.hpp"
 #include "afl/string/format.hpp"
-#include "server/file/racenames.hpp"
 
 server::file::Root::Root(DirectoryItem& rootDirectory, afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory)
     : m_log(),
@@ -43,8 +43,8 @@ server::file::Root::defaultCharacterSet()
     return m_defaultCharset;
 }
 
-server::file::RaceNames_t&
-server::file::Root::defaultRaceNames()
+const server::common::RaceNames&
+server::file::Root::defaultRaceNames() const
 {
     return m_defaultRaceNames;
 }
@@ -71,11 +71,10 @@ void
 server::file::Root::loadRaceNames()
 {
     try {
-        server::file::loadRaceNames(m_defaultRaceNames, *m_defaultSpecificationDirectory, defaultCharacterSet());
+        m_defaultRaceNames.load(m_defaultSpecificationDirectory->openFile("race.nm", afl::io::FileSystem::OpenRead)->createVirtualMapping()->get(),
+                                defaultCharacterSet());
     }
     catch (std::exception& e) {
-        for (int i = 1; i <= game::MAX_PLAYERS; ++i) {
-            m_defaultRaceNames.set(i, afl::string::Format("Player %d", i));
-        }
+        // Ignore error. User of m_defaultRaceNames compensates.
     }
 }

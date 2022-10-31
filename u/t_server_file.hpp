@@ -114,11 +114,6 @@ class TestServerFileItem : public CxxTest::TestSuite {
     void testInterface();
 };
 
-class TestServerFileRaceNames : public CxxTest::TestSuite {
- public:
-    void testIt();
-};
-
 class TestServerFileReadOnlyDirectoryHandler : public CxxTest::TestSuite {
  public:
     void testInterface();
