@@ -6,6 +6,7 @@
 #define C2NG_GAME_PROXY_MAILBOXADAPTOR_HPP
 
 #include "afl/base/deletable.hpp"
+#include "game/msg/configuration.hpp"
 #include "game/msg/mailbox.hpp"
 #include "game/session.hpp"
 

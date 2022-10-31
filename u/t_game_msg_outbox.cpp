@@ -45,7 +45,7 @@ TestGameMsgOutbox::testIt()
     // Border cases/unimplemented
     TS_ASSERT_EQUALS(testee.getMessageText(99, tx, players), "");
     TS_ASSERT_EQUALS(testee.getMessageHeading(99, tx, players), "");
-    TS_ASSERT_EQUALS(testee.getMessageTurnNumber(0), 0);
+    TS_ASSERT_EQUALS(testee.getMessageMetadata(0, tx, players).turnNumber, 0);
 }
 
 /** Test merging. */

@@ -338,7 +338,7 @@ game::TeamSettings::getReceiveConfiguration(int player) const
 game::TeamSettings::MessageTypes_t
 game::TeamSettings::getAllReceiveConfigurations()
 {
-    return MessageTypes_t() + PlanetList + PlanetInformation + MinefieldInformation + ResultAccess;
+    return MessageTypes_t() + PlanetList + PlanetInformation + MinefieldInformation + ResultAccess + DrawingInformation;
 }
 
 // Synchronize data transfer configuration (send/receive settings) from team settings. */

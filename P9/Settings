@@ -12,11 +12,12 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/msg/format.cpp game/msg/format.hpp \
-    game/parser/binarytransfer.cpp game/parser/binarytransfer.hpp \
-    game/proxy/pluginmanagerproxy.cpp game/proxy/pluginmanagerproxy.hpp \
-    game/interface/plugins.hpp game/interface/plugins.cpp \
-    game/interface/configurationeditorcontext.cpp \
+FILES_gamelib = game/msg/mailbox.cpp game/parser/informationconsumer.cpp \
+    game/parser/informationconsumer.hpp game/msg/format.cpp \
+    game/msg/format.hpp game/parser/binarytransfer.cpp \
+    game/parser/binarytransfer.hpp game/proxy/pluginmanagerproxy.cpp \
+    game/proxy/pluginmanagerproxy.hpp game/interface/plugins.hpp \
+    game/interface/plugins.cpp game/interface/configurationeditorcontext.cpp \
     game/interface/configurationeditorcontext.hpp \
     interpreter/variablereference.cpp interpreter/variablereference.hpp \
     game/interface/globalactioncontext.cpp \

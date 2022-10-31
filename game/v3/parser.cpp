@@ -100,7 +100,7 @@ game::v3::Parser::loadUtilData(afl::io::Stream& in, afl::charset::Charset& chars
 
 // Parse messages.
 void
-game::v3::Parser::parseMessages(afl::io::Stream& in, const game::msg::Inbox& inbox)
+game::v3::Parser::parseMessages(afl::io::Stream& in, game::msg::Inbox& inbox, afl::charset::Charset& charset)
 {
     // ex game/msgglobal.cc:parseMessages (remotely related)
 
@@ -113,16 +113,36 @@ game::v3::Parser::parseMessages(afl::io::Stream& in, const game::msg::Inbox& inb
     game::parser::MessageParser p;
     p.load(in, m_translator, m_log);
 
+    // Consumer
+    class Consumer : public game::parser::InformationConsumer {
+     public:
+        Consumer(Parser& p, size_t index)
+            : m_game(p.m_game), m_root(p.m_root), m_atomTable(p.m_atomTable), m_index(index), m_translator(p.m_translator), m_log(p.m_log)
+            { }
+        virtual void addMessageInformation(const game::parser::MessageInformation& info)
+            { m_game.addMessageInformation(info, m_root.hostConfiguration(), m_root.hostVersion(), m_atomTable, m_index, true, m_translator, m_log); }
+        using InformationConsumer::addMessageInformation;
+     private:
+        Game& m_game;
+        Root& m_root;
+        util::AtomTable& m_atomTable;
+        size_t m_index;
+        afl::string::Translator& m_translator;
+        afl::sys::LogListener& m_log;
+    };
+
     // Parse messages
     DataInterface gdi(m_player, m_root, m_shipList, m_translator);
     for (size_t i = 0, n = inbox.getNumMessages(); i < n; ++i) {
-        String_t text = inbox.getMessageText(i, m_translator, m_root.playerList());
+        Consumer c(*this, i);
 
+        // Normal parsing
+        String_t text = inbox.getMessageText(i, m_translator, m_root.playerList());
         afl::container::PtrVector<game::parser::MessageInformation> info;
         p.parseMessage(text, gdi, m_game.currentTurn().getTurnNumber(), info, m_translator, m_log);
+        c.addMessageInformation(info);
 
-        for (size_t ii = 0, in = info.size(); ii < in; ++ii) {
-            m_game.addMessageInformation(*info[ii], m_root.hostConfiguration(), m_root.hostVersion(), m_atomTable, i, true, m_translator, m_log);
-        }
+        // Prepare binary messages
+        inbox.receiveMessageData(i, c, m_game.teamSettings(), false, charset);
     }
 }

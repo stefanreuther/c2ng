@@ -29,20 +29,9 @@
 #include "ui/widgets/quit.hpp"
 #include "ui/window.hpp"
 #include "util/stringparser.hpp"
-#include "util/unicodechars.hpp"
 
 using afl::string::Format;
 using client::widgets::MessageActionPanel;
-
-namespace {
-    void addStatus(ui::rich::Document& doc, const char*const icon, util::SkinColor::Color color, String_t text)
-    {
-        doc.addParagraph();
-        doc.add(util::rich::Text(icon).withColor(color));
-        doc.add(" ");
-        doc.add(text);
-    }
-}
 
 /****************************** InboxDialog ******************************/
 
@@ -215,39 +204,16 @@ client::dialogs::InboxDialog::onUpdate(size_t index, const game::proxy::MailboxP
         m_actionPanel.disableAction(MessageActionPanel::Confirm);
     }
 
-    if (msg.dataStatus == game::proxy::MailboxProxy::DataReceivable) {
+    if (msg.dataStatus == game::msg::Mailbox::DataReceivable || msg.dataStatus == game::msg::Mailbox::DataReceived) {
         m_actionPanel.enableAction(MessageActionPanel::Accept, String_t());
     } else {
         m_actionPanel.disableAction(MessageActionPanel::Accept);
     }
 
     // Content
-    afl::string::Translator& tx = translator();
     ui::rich::Document& doc = m_content.getDocument();
     doc.clear();
     doc.add(msg.text);
-    switch (msg.dataStatus) {
-     case game::proxy::MailboxProxy::NoData:
-        break;
-     case game::proxy::MailboxProxy::DataReceivable:
-        addStatus(doc, UTF_RIGHT_POINTER, util::SkinColor::Green, tx("Data can be received"));
-        break;
-     case game::proxy::MailboxProxy::DataReceived:
-        addStatus(doc, UTF_CHECK_MARK, util::SkinColor::Green, tx("Data has been received"));
-        break;
-     case game::proxy::MailboxProxy::DataExpired:
-        addStatus(doc, UTF_BALLOT_CROSS, util::SkinColor::Yellow, tx("Data is expired"));
-        break;
-     case game::proxy::MailboxProxy::DataWrongPasscode:
-        addStatus(doc, UTF_BALLOT_CROSS, util::SkinColor::Red, tx("Wrong passcode"));
-        break;
-     case game::proxy::MailboxProxy::DataWrongChecksum:
-        addStatus(doc, UTF_BALLOT_CROSS, util::SkinColor::Red, tx("Checksum error"));
-        break;
-     case game::proxy::MailboxProxy::DataFailed:
-        addStatus(doc, UTF_BALLOT_CROSS, util::SkinColor::Red, tx("Data error"));
-        break;
-    }
     doc.finish();
     m_content.handleDocumentUpdate();
 }

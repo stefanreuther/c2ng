@@ -35,19 +35,28 @@ namespace {
 
         virtual size_t getNumMessages() const
             { return m_pattern.size(); }
-        virtual String_t getMessageText(size_t index, afl::string::Translator& /*tx*/, const game::PlayerList& /*players*/) const
+        virtual String_t getMessageHeaderText(size_t /*index*/, afl::string::Translator& /*tx*/, const game::PlayerList& /*players*/) const
+            { return String_t(); }
+        virtual String_t getMessageBodyText(size_t index, afl::string::Translator& /*tx*/, const game::PlayerList& /*players*/) const
             { return afl::string::Format("%stext-%d", m_prefix, index); }
+        virtual String_t getMessageForwardText(size_t index, afl::string::Translator& tx, const game::PlayerList& players) const
+            { return defaultGetMessageForwardText(index, tx, players); }
+        virtual String_t getMessageReplyText(size_t index, afl::string::Translator& tx, const game::PlayerList& players) const
+            { return defaultGetMessageReplyText(index, tx, players); }
+        virtual util::rich::Text getMessageDisplayText(size_t index, afl::string::Translator& tx, const game::PlayerList& players) const
+            { return getMessageText(index, tx, players); }
         virtual String_t getMessageHeading(size_t index, afl::string::Translator& /*tx*/, const game::PlayerList& /*players*/) const
-            { return afl::string::Format("head-%d", index / 10); }
-        virtual int getMessageTurnNumber(size_t /*index*/) const
-            { return 42; }
-        virtual bool isMessageFiltered(size_t index, afl::string::Translator& /*tx*/, const game::PlayerList& /*players*/, const game::msg::Configuration& /*config*/) const
             {
                 TS_ASSERT(index < m_pattern.size());
-                return (m_pattern[index] == 'x');
+                return afl::string::Format("head-%d%c", index / 10, m_pattern[index]);
             }
-        virtual Flags_t getMessageFlags(size_t /*index*/) const
-            { return m_flags; }
+        virtual Metadata getMessageMetadata(size_t /*index*/, afl::string::Translator& /*tx*/, const game::PlayerList& /*players*/) const
+            {
+                Metadata md;
+                md.turnNumber = 42;
+                md.flags = m_flags;
+                return md;
+            }
         virtual Actions_t getMessageActions(size_t /*index*/) const
             { return Actions_t(); }
         virtual void performMessageAction(size_t /*index*/, Action a)
@@ -56,6 +65,8 @@ namespace {
                     m_flags ^= Confirmed;
                 }
             }
+        virtual void receiveMessageData(size_t /*index*/, game::parser::InformationConsumer& /*consumer*/, const game::TeamSettings& /*teamSettings*/, bool /*onRequest*/, afl::charset::Charset& /*cs*/)
+            { }
      private:
         String_t m_pattern;
         String_t m_prefix;
@@ -82,6 +93,11 @@ namespace {
             {
                 session.setRoot(new game::test::Root(game::HostVersion()));
                 session.setGame(new game::Game());
+
+                // Filter "all" messages that have a 'x' in the pattern
+                for (size_t i = 0; i < 100; ++i) {
+                    config.setHeadingFiltered(afl::string::Format("head-%dx", i), true);
+                }
             }
     };
 
@@ -186,11 +202,11 @@ TestGameProxyMailboxProxy::testSummary()
     // Verify
     TS_ASSERT_EQUALS(index, 1U);
     TS_ASSERT_EQUALS(sum.size(), 3U);
-    TS_ASSERT_EQUALS(sum[0].heading, "head-0");
+    TS_ASSERT_EQUALS(sum[0].heading, "head-0.");
     TS_ASSERT_EQUALS(sum[0].isFiltered, false);
-    TS_ASSERT_EQUALS(sum[1].heading, "head-1");
+    TS_ASSERT_EQUALS(sum[1].heading, "head-1.");
     TS_ASSERT_EQUALS(sum[1].isFiltered, false);
-    TS_ASSERT_EQUALS(sum[2].heading, "head-2");
+    TS_ASSERT_EQUALS(sum[2].heading, "head-2x");
     TS_ASSERT_EQUALS(sum[2].isFiltered, true);
 }
 
@@ -428,6 +444,17 @@ TestGameProxyMailboxProxy::testData()
                                                             "DATA: 2094989326\n"
                                                             "ocaalekakbhadaaaijmcaaaaaaaa\n", 10);
 
+    // Scan message
+    {
+        class Consumer : public game::parser::InformationConsumer {
+         public:
+            virtual void addMessageInformation(const game::parser::MessageInformation&)
+                { }
+        };
+        Consumer c;
+        t.session().getGame()->currentTurn().inbox().receiveMessageData(0, c, t.session().getGame()->teamSettings(), false, t.session().getRoot()->charset());
+    }
+
     // Set up tasking
     game::test::WaitIndicator ind;
     game::proxy::MailboxProxy proxy(t.gameSender().makeTemporary(game::proxy::makeInboxAdaptor()), ind);
@@ -445,13 +472,13 @@ TestGameProxyMailboxProxy::testData()
     t.sync();
     ind.processQueue();
     TS_ASSERT_EQUALS(u.m_data.text.substr(0, 8).getText(), "(-r1000)");
-    TS_ASSERT_EQUALS(u.m_data.dataStatus, game::proxy::MailboxProxy::DataReceivable);
+    TS_ASSERT_EQUALS(u.m_data.dataStatus, game::msg::Mailbox::DataReceivable);
 
     // Receive it
     proxy.receiveData();
     t.sync();
     ind.processQueue();
-    TS_ASSERT_EQUALS(u.m_data.dataStatus, game::proxy::MailboxProxy::DataReceived);
+    TS_ASSERT_EQUALS(u.m_data.dataStatus, game::msg::Mailbox::DataReceived);
 
     // Verify data actually got received
     game::map::Minefield* mf = t.session().getGame()->currentTurn().universe().minefields().get(61);

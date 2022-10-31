@@ -6,12 +6,27 @@
 #include "game/msg/inbox.hpp"
 
 #include "t_game_msg.hpp"
+#include "afl/charset/utf8charset.hpp"
 #include "afl/string/nulltranslator.hpp"
+#include "game/parser/informationconsumer.hpp"
+#include "game/parser/messageinformation.hpp"
 #include "game/playerlist.hpp"
 
 using game::msg::Mailbox;
 
 namespace {
+    class Consumer : public game::parser::InformationConsumer {
+     public:
+        virtual void addMessageInformation(const game::parser::MessageInformation& info)
+            { m_markers.insert(100*info.getObjectId() + int(info.getObjectType())); }
+
+        bool hasInfo(game::parser::MessageInformation::Type type, int id) const
+            { return m_markers.find(100*id + int(type)) != m_markers.end(); }
+
+     private:
+        std::set<int32_t> m_markers;
+    };
+
     String_t getMessageHeading(String_t text)
     {
         afl::string::NullTranslator tx;
@@ -41,13 +56,20 @@ TestGameMsgInbox::testBasics()
     TS_ASSERT_EQUALS(testee.getMessageText(0, tx, list), "a");
     TS_ASSERT_EQUALS(testee.getMessageText(1, tx, list), "b");
     TS_ASSERT_EQUALS(testee.getMessageText(2, tx, list), "c");
-    TS_ASSERT_EQUALS(testee.getMessageTurnNumber(0), 10);
-    TS_ASSERT_EQUALS(testee.getMessageTurnNumber(1), 20);
-    TS_ASSERT_EQUALS(testee.getMessageTurnNumber(2), 15);
+    TS_ASSERT_EQUALS(testee.getMessageMetadata(0, tx, list).turnNumber, 10);
+    TS_ASSERT_EQUALS(testee.getMessageMetadata(1, tx, list).turnNumber, 20);
+    TS_ASSERT_EQUALS(testee.getMessageMetadata(2, tx, list).turnNumber, 15);
+
+    TS_ASSERT_EQUALS(testee.getMessageForwardText(0, tx, list),
+                     "--- Forwarded Message ---\n"
+                     "a\n"
+                     "--- End Forwarded Message ---");
+    TS_ASSERT_EQUALS(testee.getMessageReplyText(0, tx, list),
+                     "> a\n");
 
     // Out-of-range
     TS_ASSERT_EQUALS(testee.getMessageText(3, tx, list), "");
-    TS_ASSERT_EQUALS(testee.getMessageTurnNumber(3), 0);
+    TS_ASSERT_EQUALS(testee.getMessageMetadata(3, tx, list).turnNumber, 0);
 }
 
 /** Test getMessageHeading().
@@ -351,27 +373,136 @@ TestGameMsgInbox::testSort()
     TS_ASSERT_EQUALS(testee.getMessageText(4, tx, list), TEXT[4]);
 }
 
-/** Test ToggleReceived. */
+/** Test data reception. */
 void
-TestGameMsgInbox::testToggleReceived()
+TestGameMsgInbox::testReceive()
 {
     // Create
+    afl::string::NullTranslator tx;
+    game::PlayerList list;
+    afl::charset::Utf8Charset cs;
+    game::TeamSettings teamSettings;
     game::msg::Inbox testee;
-    testee.addMessage("<<< VPA Data Transmission >>>\n"
+    testee.addMessage("(-r3000)<<< Sub Space Message >>>\n"
+                      "<<< VPA Data Transmission >>>\n"
                       "\n"
                       "OBJECT: Mine field 61\n"
                       "DATA: 2094989326\n"
                       "ocaalekakbhadaaaijmcaaaaaaaa\n", 3);
-    TS_ASSERT_EQUALS(testee.getMessageActions(0), Mailbox::Actions_t() + Mailbox::ToggleReceived);
-    TS_ASSERT_EQUALS(testee.getMessageFlags(0),   Mailbox::Flags_t());
+    TS_ASSERT_EQUALS(testee.getMessageMetadata(0, tx, list).dataStatus, game::msg::Mailbox::NoData);
 
-    // Toggle once
-    testee.performMessageAction(0, Mailbox::ToggleReceived);
-    TS_ASSERT_EQUALS(testee.getMessageActions(0), Mailbox::Actions_t() + Mailbox::ToggleReceived);
-    TS_ASSERT_EQUALS(testee.getMessageFlags(0),   Mailbox::Flags_t() + Mailbox::Received);
+    // Initial scan
+    Consumer c1;
+    testee.receiveMessageData(0, c1, teamSettings, false, cs);
+    TS_ASSERT(!c1.hasInfo(game::parser::MessageInformation::Minefield, 61));
+    TS_ASSERT_EQUALS(testee.getMessageMetadata(0, tx, list).dataStatus, game::msg::Mailbox::DataReceivable);
 
-    // Toggle again
-    testee.performMessageAction(0, Mailbox::ToggleReceived);
-    TS_ASSERT_EQUALS(testee.getMessageActions(0), Mailbox::Actions_t() + Mailbox::ToggleReceived);
-    TS_ASSERT_EQUALS(testee.getMessageFlags(0),   Mailbox::Flags_t());
+    // Force reception
+    Consumer c2;
+    testee.receiveMessageData(0, c2, teamSettings, true, cs);
+    TS_ASSERT(c2.hasInfo(game::parser::MessageInformation::Minefield, 61));
+    TS_ASSERT_EQUALS(testee.getMessageMetadata(0, tx, list).dataStatus, game::msg::Mailbox::DataReceived);
+}
+
+/** Test automatic reception. */
+void
+TestGameMsgInbox::testAutoReceive()
+{
+    // Create
+    afl::string::NullTranslator tx;
+    game::PlayerList list;
+    game::TeamSettings teamSettings;
+    teamSettings.setViewpointPlayer(10);
+    teamSettings.setReceiveConfiguration(3, game::TeamSettings::MessageTypes_t(game::TeamSettings::MinefieldInformation));
+    teamSettings.setReceiveConfiguration(4, game::TeamSettings::MessageTypes_t(game::TeamSettings::DrawingInformation));
+
+    afl::charset::Utf8Charset cs;
+    game::msg::Inbox testee;
+
+    // Minefield from 3 (auto-receive)
+    testee.addMessage("(-r3000)<<< Sub Space Message >>>\n"
+                      "<<< VPA Data Transmission >>>\n"
+                      "\n"
+                      "OBJECT: Mine field 61\n"
+                      "DATA: 2094989326\n"
+                      "ocaalekakbhadaaaijmcaaaaaaaa\n", 3);
+
+    // Drawing from 3 (not auto-receive)
+    testee.addMessage("(-r3000)<<< Sub Space Message >>>\n"
+                      "<<< VPA Data Transmission >>>\n"
+                      "\n"
+                      "OBJECT: Marker\n"
+                      "DATA: -1680801779\n"
+                      "cafaokjapjiaaaaaaaaaljdkaa\n", 3);
+
+    // Same drawing from 4 (auto-receive)
+    testee.addMessage("(-r4000)<<< Sub Space Message >>>\n"
+                      "<<< VPA Data Transmission >>>\n"
+                      "\n"
+                      "OBJECT: Marker\n"
+                      "DATA: -1680801779\n"
+                      "cafaokjapjiaaaaaaaaaljdkaa\n", 3);
+    TS_ASSERT_EQUALS(testee.getMessageMetadata(0, tx, list).dataStatus, game::msg::Mailbox::NoData);
+    TS_ASSERT_EQUALS(testee.getMessageMetadata(1, tx, list).dataStatus, game::msg::Mailbox::NoData);
+    TS_ASSERT_EQUALS(testee.getMessageMetadata(2, tx, list).dataStatus, game::msg::Mailbox::NoData);
+
+    // Scan first
+    Consumer c1;
+    testee.receiveMessageData(0, c1, teamSettings, false, cs);
+    TS_ASSERT(c1.hasInfo(game::parser::MessageInformation::Minefield, 61));
+    TS_ASSERT_EQUALS(testee.getMessageMetadata(0, tx, list).dataStatus, game::msg::Mailbox::DataReceived);
+
+    // Scan second
+    Consumer c2;
+    testee.receiveMessageData(1, c2, teamSettings, false, cs);
+    TS_ASSERT(!c2.hasInfo(game::parser::MessageInformation::MarkerDrawing, 0));
+    TS_ASSERT_EQUALS(testee.getMessageMetadata(1, tx, list).dataStatus, game::msg::Mailbox::DataReceivable);
+
+    // Scan third
+    Consumer c3;
+    testee.receiveMessageData(2, c3, teamSettings, false, cs);
+    TS_ASSERT(c3.hasInfo(game::parser::MessageInformation::MarkerDrawing, 0));
+    TS_ASSERT_EQUALS(testee.getMessageMetadata(2, tx, list).dataStatus, game::msg::Mailbox::DataReceived);
+}
+
+/** Test reception errors. */
+void
+TestGameMsgInbox::testReceiveErrors()
+{
+    // Create
+    afl::string::NullTranslator tx;
+    game::PlayerList list;
+    afl::charset::Utf8Charset cs;
+    game::TeamSettings teamSettings;
+    game::msg::Inbox testee;
+
+    // - message 0: failure (minefield body, planet header)
+    testee.addMessage("(-r3000)<<< Sub Space Message >>>\n"
+                      "<<< VPA Data Transmission >>>\n"
+                      "\n"
+                      "OBJECT: Planet 50\n"
+                      "DATA: 2094989326\n"
+                      "ocaalekakbhadaaaijmcaaaaaaaa\n", 3);
+    // - message 1: not a data transfer
+    testee.addMessage("(-r3000)<<< Sub Space Message >>>\n"
+                      "Just some text\n", 3);
+    // - message 2: checksum error
+    testee.addMessage("(-r3000)<<< Sub Space Message >>>\n"
+                      "<<< VPA Data Transmission >>>\n"
+                      "\n"
+                      "OBJECT: Mine field 61\n"
+                      "DATA: 99999\n"
+                      "ocaalekakbhadaaaijmcaaaaaaaa\n", 3);
+    TS_ASSERT_EQUALS(testee.getMessageMetadata(0, tx, list).dataStatus, game::msg::Mailbox::NoData);
+
+    // Initial scan
+    Consumer c;
+    testee.receiveMessageData(0, c, teamSettings, false, cs);
+    TS_ASSERT_EQUALS(testee.getMessageMetadata(0, tx, list).dataStatus, game::msg::Mailbox::DataFailed);
+
+    testee.receiveMessageData(1, c, teamSettings, false, cs);
+    TS_ASSERT_EQUALS(testee.getMessageMetadata(1, tx, list).dataStatus, game::msg::Mailbox::NoData);
+
+    testee.receiveMessageData(2, c, teamSettings, false, cs);
+    TS_ASSERT_EQUALS(testee.getMessageMetadata(2, tx, list).dataStatus, game::msg::Mailbox::DataWrongChecksum);
 }

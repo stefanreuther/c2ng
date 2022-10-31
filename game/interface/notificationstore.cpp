@@ -23,6 +23,7 @@
 #include "game/interface/notificationstore.hpp"
 #include "game/interface/processlisteditor.hpp"
 #include "interpreter/process.hpp"
+#include "util/unicodechars.hpp"
 
 struct game::interface::NotificationStore::Message {
     ProcessAssociation_t assoc;
@@ -164,29 +165,63 @@ game::interface::NotificationStore::getNumMessages() const
 }
 
 String_t
-game::interface::NotificationStore::getMessageText(size_t index, afl::string::Translator& tx, const PlayerList& /*players*/) const
+game::interface::NotificationStore::getMessageHeaderText(size_t index, afl::string::Translator& /*tx*/, const PlayerList& /*players*/) const
 {
     // ex IntNotificationMessageStore::getText, IntNotificationMessage::getText
-    String_t result;
+    if (const Message* msg = getMessageByIndex(index)) {
+        return msg->header;
+    } else {
+        return String_t();
+    }
+}
+
+String_t
+game::interface::NotificationStore::getMessageBodyText(size_t index, afl::string::Translator& /*tx*/, const PlayerList& /*players*/) const
+{
+    // ex IntNotificationMessageStore::getText, IntNotificationMessage::getText
+    if (const Message* msg = getMessageByIndex(index)) {
+        return msg->body;
+    } else {
+        return String_t();
+    }
+}
+
+String_t
+game::interface::NotificationStore::getMessageForwardText(size_t index, afl::string::Translator& tx, const PlayerList& players) const
+{
+    return defaultGetMessageForwardText(index, tx, players);
+}
+
+String_t
+game::interface::NotificationStore::getMessageReplyText(size_t index, afl::string::Translator& tx, const PlayerList& players) const
+{
+    return defaultGetMessageReplyText(index, tx, players);
+}
+
+util::rich::Text
+game::interface::NotificationStore::getMessageDisplayText(size_t index, afl::string::Translator& tx, const PlayerList& players) const
+{
     if (const Message* msg = getMessageByIndex(index)) {
         // Body
-        result = msg->header + msg->body;
+        util::rich::Text result = defaultGetMessageDisplayText(msg->header + msg->body, NoData, tx, players);
 
         // Extra info
         uint32_t pid;
         if (msg->assoc.get(pid)) {
             if (interpreter::Process* proc = m_processList.getProcessById(pid)) {
                 if (msg->confirmed) {
-                    result += tx("\n\nThis message has been confirmed.");
+                    addStatus(result, UTF_CHECK_MARK, util::SkinColor::Green, tx("This message has been confirmed."));
                 } else if (proc->getProcessKind() != interpreter::Process::pkDefault) {
-                    result += tx("\n\nThe auto task has been stopped; it will continue when you confirm this message.");
+                    addStatus(result, UTF_STOPWATCH, util::SkinColor::Yellow, tx("The auto task has been stopped; it will continue when you confirm this message."));
                 } else {
-                    result += tx("\n\nThe script has been stopped; it will continue when you confirm this message.");
+                    addStatus(result, UTF_STOPWATCH, util::SkinColor::Yellow, tx("The script has been stopped; it will continue when you confirm this message."));
                 }
             }
         }
+        return result;
+    } else {
+        return util::rich::Text();
     }
-    return result;
 }
 
 String_t
@@ -219,27 +254,16 @@ game::interface::NotificationStore::getMessageHeading(size_t index, afl::string:
     return result;
 }
 
-int
-game::interface::NotificationStore::getMessageTurnNumber(size_t /*index*/) const
+game::msg::Mailbox::Metadata
+game::interface::NotificationStore::getMessageMetadata(size_t index, afl::string::Translator& /*tx*/, const PlayerList& /*players*/) const
 {
-    return 0;
-}
-
-bool
-game::interface::NotificationStore::isMessageFiltered(size_t /*index*/, afl::string::Translator& /*tx*/, const PlayerList& /*players*/, const game::msg::Configuration& /*config*/) const
-{
-    return false;
-}
-
-game::msg::Mailbox::Flags_t
-game::interface::NotificationStore::getMessageFlags(size_t index) const
-{
-    Flags_t result;
-    const Message* msg = getMessageByIndex(index);
-    if (isMessageConfirmed(msg)) {
-        result += Confirmed;
+    Metadata md;
+    if (const Message* msg = getMessageByIndex(index)) {
+        if (isMessageConfirmed(msg)) {
+            md.flags += Confirmed;
+        }
     }
-    return result;
+    return md;
 }
 
 game::msg::Mailbox::Actions_t
@@ -261,10 +285,12 @@ game::interface::NotificationStore::performMessageAction(size_t index, Action a)
      case ToggleConfirmed:
         confirmMessage(msg, !isMessageConfirmed(msg));
         break;
-     case ToggleReceived:
-        break;
     }
 }
+
+void
+game::interface::NotificationStore::receiveMessageData(size_t /*index*/, game::parser::InformationConsumer& /*consumer*/, const TeamSettings& /*teamSettings*/, bool /*onRequest*/, afl::charset::Charset& /*cs*/)
+{ }
 
 bool
 game::interface::NotificationStore::findMessage(ProcessAssociation_t assoc, size_t& index) const

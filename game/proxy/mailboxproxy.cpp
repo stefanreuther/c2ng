@@ -10,10 +10,8 @@
 #include "game/actions/preconditions.hpp"
 #include "game/game.hpp"
 #include "game/msg/configuration.hpp"
-#include "game/msg/format.hpp"
 #include "game/msg/outbox.hpp"
-#include "game/parser/binarytransfer.hpp"
-#include "game/parser/messagetemplate.hpp"
+#include "game/parser/informationconsumer.hpp"
 #include "game/playerset.hpp"
 #include "game/proxy/waitindicator.hpp"
 #include "game/root.hpp"
@@ -129,7 +127,7 @@ game::proxy::MailboxProxy::Trampoline::write(const String_t& fileName, size_t fi
             tf.setCharsetNew(r->charset().clone());
 
             // Turn number
-            tf.writeLine(Format("=== Turn %d ===", mbox.getMessageTurnNumber(first)));
+            tf.writeLine(Format("=== Turn %d ===", mbox.getMessageMetadata(first, session.translator(), r->playerList()).turnNumber));
             if (last > first+1) {
                 tf.writeLine(Format("   %d message(s)", last-first));
             }
@@ -167,28 +165,34 @@ game::proxy::MailboxProxy::Trampoline::performMessageAction(game::msg::Mailbox::
 void
 game::proxy::MailboxProxy::Trampoline::receiveData()
 {
+    class Consumer : public game::parser::InformationConsumer {
+     public:
+        Consumer(Game& g, Root& root, Session& session, size_t index)
+            : m_game(g), m_root(root), m_session(session), m_index(index)
+            { }
+
+        virtual void addMessageInformation(const game::parser::MessageInformation& info)
+            {
+                m_game.addMessageInformation(info, m_root.hostConfiguration(), m_root.hostVersion(), m_session.world().atomTable(), m_index, false, m_session.translator(), m_session.log());
+            }
+
+        using InformationConsumer::addMessageInformation;
+     private:
+        Game& m_game;
+        Root& m_root;
+        Session& m_session;
+        size_t m_index;
+    };
+
+
     Session& session = m_adaptor.session();
     Root& root = mustHaveRoot(session);
     game::msg::Mailbox& mbox = m_adaptor.mailbox();
-    afl::string::Translator& tx = session.translator();
     const size_t index = m_currentMessage;
 
     if (Game* g = session.getGame().get()) {
-        game::parser::MessageLines_t text;
-        game::parser::splitMessage(text, mbox.getMessageText(index, tx, root.playerList()));
-        afl::container::PtrVector<game::parser::MessageInformation> info;
-        int turnNr = mbox.getMessageTurnNumber(index)-1;
-        if (game::parser::unpackBinaryMessage(text, turnNr, info, root.charset()).first == game::parser::UnpackSuccess) {
-            // Receive it
-            for (size_t i = 0; i < info.size(); ++i) {
-                g->addMessageInformation(*info[i], root.hostConfiguration(), root.hostVersion(), session.world().atomTable(), index, false, tx, session.log());
-            }
-
-            // Toggle "Received" flag
-            if (!mbox.getMessageFlags(index).contains(game::msg::Mailbox::Received)) {
-                mbox.performMessageAction(index, game::msg::Mailbox::ToggleReceived);
-            }
-        }
+        Consumer c(*g, root, session, index);
+        mbox.receiveMessageData(index, c, g->teamSettings(), true, root.charset());
     }
 
     sendResponse(false);
@@ -197,32 +201,25 @@ game::proxy::MailboxProxy::Trampoline::receiveData()
 game::proxy::MailboxProxy::QuoteResult
 game::proxy::MailboxProxy::Trampoline::quoteMessage(size_t index, QuoteAction action)
 {
-    // TODO: consider moving that to Mailbox
     // Viewpoint player
     int sender = 0;
     if (Game* g = m_adaptor.session().getGame().get()) {
         sender = g->getViewpointPlayer();
     }
 
-    // Original message text
-    afl::string::Translator& tx = m_adaptor.session().translator();
-    String_t originalText;
-    if (Root* r = m_adaptor.session().getRoot().get()) {
-        originalText = m_adaptor.mailbox().getMessageText(index, tx, r->playerList());
-    }
-
     // Message text
+    afl::string::Translator& tx = m_adaptor.session().translator();
     String_t text;
-    switch (action) {
-     case QuoteForForwarding:
-        text = "--- Forwarded Message ---\n"
-            + originalText
-            + "\n--- End Forwarded Message ---";
-        break;
+    if (Root* r = m_adaptor.session().getRoot().get()) {
+        switch (action) {
+         case QuoteForForwarding:
+            text = m_adaptor.mailbox().getMessageForwardText(index, tx, r->playerList());
+            break;
 
-     case QuoteForReplying:
-        text = game::msg::quoteMessageForReply(originalText);
-        break;
+         case QuoteForReplying:
+            text = m_adaptor.mailbox().getMessageReplyText(index, tx, r->playerList());
+            break;
+        }
     }
 
     return QuoteResult(sender, text);
@@ -264,62 +261,37 @@ game::proxy::MailboxProxy::Trampoline::sendResponse(bool requested)
     Session& session = m_adaptor.session();
     Root& root = mustHaveRoot(session);
     Game* g = session.getGame().get();
-    int viewpointPlayer = (g != 0 ? g->getViewpointPlayer() : 0);
-    game::msg::Mailbox& mbox = m_adaptor.mailbox();
+    const int viewpointPlayer = (g != 0 ? g->getViewpointPlayer() : 0);
+    const game::msg::Mailbox& mbox = m_adaptor.mailbox();
     afl::string::Translator& tx = session.translator();
     const size_t index = m_currentMessage;
 
-    game::msg::Format fmt = game::msg::formatMessage(mbox.getMessageText(index, tx, root.playerList()), root.playerList(), tx);
+    const game::msg::Mailbox::Metadata md = mbox.getMessageMetadata(index, tx, root.playerList());
 
-    m.text = fmt.text.withStyle(util::rich::StyleAttribute::Fixed);
+    m.text = mbox.getMessageDisplayText(index, tx, root.playerList());
     m.isFiltered = Browser(mbox, tx, root.playerList(), m_adaptor.getConfiguration()).isMessageFiltered(index);
 
-    m.goto2 = fmt.firstLink;
-    session.getReferenceName(fmt.firstLink, LongName, m.goto2Name);
-    m.reply = fmt.reply;
-    m.replyAll = fmt.replyAll;
+    m.goto2 = md.secondaryLink;
+    session.getReferenceName(m.goto2, LongName, m.goto2Name);
+    m.reply = md.reply;
+    m.replyAll = md.replyAll;
     if (m.replyAll != PlayerSet_t(viewpointPlayer) && !m.replyAll.contains(root.playerList().getAllPlayers())) {
         // Remove ourselves from the replyAll list unless we're the only one (message-to-self),
         // or if this would cause a Universal Message to become a not-universal message.
         m.replyAll -= viewpointPlayer;
     }
-    if (!fmt.reply.empty()) {
-        m.replyName = formatPlayerHostSet(fmt.reply, root.playerList(), session.translator());
+    if (!m.reply.empty()) {
+        m.replyName = formatPlayerHostSet(m.reply, root.playerList(), session.translator());
     }
 
     m.actions = mbox.getMessageActions(m_currentMessage);
-    m.flags = mbox.getMessageFlags(m_currentMessage);
+    m.flags = md.flags;
 
-    if (const game::msg::Outbox* out = dynamic_cast<game::msg::Outbox*>(&mbox)) {
+    if (const game::msg::Outbox* out = dynamic_cast<const game::msg::Outbox*>(&mbox)) {
         m.id = out->getMessageId(m_currentMessage);
     }
 
-    m.dataStatus = NoData;
-    if (m.actions.contains(game::msg::Mailbox::ToggleReceived)) {
-        if (m.flags.contains(game::msg::Mailbox::Received)) {
-            m.dataStatus = DataReceived;
-        } else {
-            game::parser::MessageLines_t text;
-            game::parser::splitMessage(text, mbox.getMessageText(index, tx, root.playerList()));
-            afl::container::PtrVector<game::parser::MessageInformation> info;
-            switch (game::parser::unpackBinaryMessage(text, mbox.getMessageTurnNumber(index)-1, info, root.charset()).first) {
-             case game::parser::UnpackSuccess:
-                m.dataStatus = DataReceivable;
-                break;
-
-             case game::parser::UnpackUnspecial:
-                break;
-
-             case game::parser::UnpackFailed:
-                m.dataStatus = DataFailed;
-                break;
-
-             case game::parser::UnpackChecksumError:
-                m.dataStatus = DataWrongChecksum;
-                break;
-            }
-        }
-    }
+    m.dataStatus = md.dataStatus;
 
     m_reply.postRequest(&MailboxProxy::updateCurrentMessage, index, m, requested);
 }

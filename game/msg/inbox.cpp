@@ -4,8 +4,10 @@
 
 #include "game/msg/inbox.hpp"
 #include "afl/string/char.hpp"
+#include "game/msg/format.hpp"
+#include "game/parser/binarytransfer.hpp"
+#include "game/parser/messagetemplate.hpp"
 #include "game/player.hpp"
-#include "game/msg/configuration.hpp"
 
 namespace {
     /** Simplify message header.
@@ -36,10 +38,10 @@ namespace {
 struct game::msg::Inbox::Message {
     String_t text;
     int turnNumber;
-    bool received;
+    Mailbox::DataStatus dataStatus;
 
     Message(const String_t& text, int turnNumber)
-        : text(text), turnNumber(turnNumber), received(false)
+        : text(text), turnNumber(turnNumber), dataStatus(NoData)
         { }
 };
 
@@ -59,13 +61,42 @@ game::msg::Inbox::getNumMessages() const
 }
 
 String_t
-game::msg::Inbox::getMessageText(size_t index, afl::string::Translator& /*tx*/, const PlayerList& /*players*/) const
+game::msg::Inbox::getMessageHeaderText(size_t /*index*/, afl::string::Translator& /*tx*/, const PlayerList& /*players*/) const
+{
+    // No headers
+    return String_t();
+}
+
+String_t
+game::msg::Inbox::getMessageBodyText(size_t index, afl::string::Translator& /*tx*/, const PlayerList& /*players*/) const
 {
     // ex GInbox::getText
-    if (index < m_messages.size()) {
-        return m_messages[index]->text;
+    if (const Message* p = getMessage(index)) {
+        return p->text;
     } else {
         return String_t();
+    }
+}
+
+String_t
+game::msg::Inbox::getMessageForwardText(size_t index, afl::string::Translator& tx, const PlayerList& players) const
+{
+    return defaultGetMessageForwardText(index, tx, players);
+}
+
+String_t
+game::msg::Inbox::getMessageReplyText(size_t index, afl::string::Translator& tx, const PlayerList& players) const
+{
+    return defaultGetMessageReplyText(index, tx, players);
+}
+
+util::rich::Text
+game::msg::Inbox::getMessageDisplayText(size_t index, afl::string::Translator& tx, const PlayerList& players) const
+{
+    if (const Message* p = getMessage(index)) {
+        return defaultGetMessageDisplayText(p->text, p->dataStatus, tx, players);
+    } else {
+        return util::rich::Text();
     }
 }
 
@@ -75,12 +106,12 @@ game::msg::Inbox::getMessageHeading(size_t index, afl::string::Translator& tx, c
     // ex GInbox::getHeading, sendmsg.pas:MessageSubject
     // This is the same algorithm as in PCC 1.x.
     // c2ng change: use only one parenized letter.
-    String_t line = afl::string::strTrim(afl::string::strFirst(getMessageText(index, tx, players), "\n"));
+    String_t line = afl::string::strTrim(afl::string::strFirst(getMessageBodyText(index, tx, players), "\n"));
 
     // Shortcuts:
     if (line.length() < 5) {
         /* translators: must start with "( )" */
-        return tx.translateString("(_) Unknown");
+        return tx("(_) Unknown");
     }
     if (line[0] != '(') {
         /* pre-3.2 message format */
@@ -95,7 +126,7 @@ game::msg::Inbox::getMessageHeading(size_t index, afl::string::Translator& tx, c
      case 'R':
         if (line.size() > 3) {
             if (line[3] == '0') {
-                return pre + tx.translateString("Anonymous Message");
+                return pre + tx("Anonymous Message");
             } else if (Player* pl = players.getPlayerFromCharacter(line[3])) {
                 return pre + pl->getName(Player::LongName, tx);
             } else {
@@ -104,13 +135,13 @@ game::msg::Inbox::getMessageHeading(size_t index, afl::string::Translator& tx, c
         }
         break;
      case 'D':
-        return pre + tx.translateString("Starbase Message");
+        return pre + tx("Starbase Message");
      case 'L':
-        return pre + tx.translateString("Minefield Laid");
+        return pre + tx("Minefield Laid");
      case 'I':
-        return pre + tx.translateString("Ion Storm");
+        return pre + tx("Ion Storm");
      case 'G':
-        return pre + tx.translateString("HConfig");
+        return pre + tx("HConfig");
      case 'M':
         /* Mine scan/sweep. People want to separate these, to be able to filter
            out unsuccessful scans, and only see sweeps. We look for two keyphrases
@@ -122,13 +153,13 @@ game::msg::Inbox::getMessageHeading(size_t index, afl::string::Translator& tx, c
            and NewEnglish (and, implicitly, for German, which happens to use
            distinct headers for scan and sweep). */
         if (line.find("Sub Space Message") != line.npos) {
-            String_t fulltext = getMessageText(index, tx, players);
+            String_t fulltext = getMessageBodyText(index, tx, players);
             if (fulltext.find("ines have been destroyed") != fulltext.npos
                 || fulltext.find("is using beam weapons to") != fulltext.npos)
             {
-                return pre + tx.translateString("Mine Sweep");
+                return pre + tx("Mine Sweep");
             } else {
-                return pre + tx.translateString("Mine Scan");
+                return pre + tx("Mine Scan");
             }
         }
         /* else use default */
@@ -139,51 +170,36 @@ game::msg::Inbox::getMessageHeading(size_t index, afl::string::Translator& tx, c
 }
 
 // Inquiry:
-int
-game::msg::Inbox::getMessageTurnNumber(size_t index) const
+game::msg::Mailbox::Metadata
+game::msg::Inbox::getMessageMetadata(size_t index, afl::string::Translator& tx, const PlayerList& players) const
 {
-    if (index < m_messages.size()) {
-        return m_messages[index]->turnNumber;
-    } else {
-        return 0;
+    Metadata md;
+    if (const Message* p = getMessage(index)) {
+        const Format fmt = formatMessage(p->text, players, tx);
+        md.turnNumber    = p->turnNumber;
+        md.dataStatus    = p->dataStatus;
+        md.secondaryLink = fmt.firstLink;
+        md.reply         = fmt.reply;
+        md.replyAll      = fmt.replyAll;
     }
-}
-
-bool
-game::msg::Inbox::isMessageFiltered(size_t index, afl::string::Translator& tx, const PlayerList& players, const Configuration& config) const
-{
-    return config.isHeadingFiltered(getMessageHeading(index, tx, players));
-}
-
-game::msg::Mailbox::Flags_t
-game::msg::Inbox::getMessageFlags(size_t index) const
-{
-    Flags_t result;
-    if (index < m_messages.size()) {
-        if (m_messages[index]->received) {
-            result += Received;
-        }
-    }
-    return result;
+    return md;
 }
 
 game::msg::Mailbox::Actions_t
 game::msg::Inbox::getMessageActions(size_t /*index*/) const
 {
-    return Actions_t() + ToggleReceived;
+    return Actions_t();
 }
 
 void
-game::msg::Inbox::performMessageAction(size_t index, Action a)
+game::msg::Inbox::performMessageAction(size_t /*index*/, Action /*a*/)
+{ }
+
+void
+game::msg::Inbox::receiveMessageData(size_t index, game::parser::InformationConsumer& consumer, const TeamSettings& teamSettings, bool onRequest, afl::charset::Charset& cs)
 {
-    if (index < m_messages.size()) {
-        switch (a) {
-         case ToggleConfirmed:
-            break;
-         case ToggleReceived:
-            m_messages[index]->received = !m_messages[index]->received;
-            break;
-        }
+    if (Message* p = getMessage(index)) {
+        p->dataStatus = defaultReceiveMessageData(p->text, p->turnNumber-1, consumer, teamSettings, onRequest, cs);
     }
 }
 
@@ -217,4 +233,20 @@ game::msg::Inbox::sort(afl::string::Translator& tx, const PlayerList& players)
         }
     }
     m_messages.swap(newData);
+}
+
+game::msg::Inbox::Message*
+game::msg::Inbox::getMessage(size_t index)
+{
+    if (index < m_messages.size()) {
+        return m_messages[index];
+    } else {
+        return 0;
+    }
+}
+
+const game::msg::Inbox::Message*
+game::msg::Inbox::getMessage(size_t index) const
+{
+    return const_cast<Inbox*>(this)->getMessage(index);
 }

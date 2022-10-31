@@ -40,9 +40,11 @@ namespace game { namespace v3 {
         void loadUtilData(afl::io::Stream& in, afl::charset::Charset& charset);
 
         /** Parse messages.
+            This will also scan for binary data transmissions.
             \param in The msgparse.ini file
-            \param inbox Loaded inbox */
-        void parseMessages(afl::io::Stream& in, const game::msg::Inbox& inbox);
+            \param inbox Loaded inbox
+            \param charset Character set */
+        void parseMessages(afl::io::Stream& in, game::msg::Inbox& inbox, afl::charset::Charset& charset);
 
      private:
         class DataInterface;

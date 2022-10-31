@@ -273,7 +273,7 @@ game::v3::ResultLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, ga
     {
         Ptr<Stream> file = m_specificationDirectory->openFileNT("msgparse.ini", afl::io::FileSystem::OpenRead);
         if (file.get() != 0) {
-            mp.parseMessages(*file, turn.inbox());
+            mp.parseMessages(*file, turn.inbox(), *m_charset);
         }
     }
 

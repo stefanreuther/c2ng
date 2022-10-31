@@ -43,16 +43,6 @@ namespace game { namespace proxy {
                 { }
         };
 
-        enum DataStatus {
-            NoData,             ///< No data (UnpackUnspecial).
-            DataReceivable,     ///< Data can be received (ms_Receivable).
-            DataReceived,       ///< Data successfully received (ms_Received, UnpackSuccess).
-            DataExpired,        ///< Data is expired (ms_Expired).
-            DataWrongPasscode,  ///< Wrong passcode (ms_BadCode).
-            DataWrongChecksum,  ///< Wrong checksum (ms_BadCRC, UnpackChecksumError).
-            DataFailed          ///< Data not decoable (UnpackFailed).
-        };
-
         /** Message information. */
         struct Message {
             util::rich::Text text;                   ///< Message text, formatted with links. See game::msg::formatMessage.
@@ -67,10 +57,10 @@ namespace game { namespace proxy {
             game::msg::Mailbox::Flags_t flags;       ///< Flags.
             game::msg::Mailbox::Actions_t actions;   ///< Actions.
             Id_t id;                                 ///< Message Id (for outgoing messages).
-            DataStatus dataStatus;                   ///< Data status (for data transmissions).
+            game::msg::Mailbox::DataStatus dataStatus; ///< Data status (for data transmissions).
 
             Message()
-                : text(), isFiltered(false), goto1(), goto1Name(), goto2(), goto2Name(), reply(), replyAll(), replyName(), flags(), actions(), id(), dataStatus(NoData)
+                : text(), isFiltered(false), goto1(), goto1Name(), goto2(), goto2Name(), reply(), replyAll(), replyName(), flags(), actions(), id(), dataStatus(game::msg::Mailbox::NoData)
                 { }
         };
 

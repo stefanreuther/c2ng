@@ -88,13 +88,16 @@ namespace game { namespace interface {
 
         // Mailbox interface:
         virtual size_t getNumMessages() const;
-        virtual String_t getMessageText(size_t index, afl::string::Translator& tx, const PlayerList& players) const;
+        virtual String_t getMessageHeaderText(size_t index, afl::string::Translator& tx, const PlayerList& players) const;
+        virtual String_t getMessageBodyText(size_t index, afl::string::Translator& tx, const PlayerList& players) const;
+        virtual String_t getMessageForwardText(size_t index, afl::string::Translator& tx, const PlayerList& players) const;
+        virtual String_t getMessageReplyText(size_t index, afl::string::Translator& tx, const PlayerList& players) const;
+        virtual util::rich::Text getMessageDisplayText(size_t index, afl::string::Translator& tx, const PlayerList& players) const;
         virtual String_t getMessageHeading(size_t index, afl::string::Translator& tx, const PlayerList& players) const;
-        virtual int getMessageTurnNumber(size_t index) const;
-        virtual bool isMessageFiltered(size_t index, afl::string::Translator& tx, const PlayerList& players, const game::msg::Configuration& config) const;
-        virtual Flags_t getMessageFlags(size_t index) const;
+        virtual Metadata getMessageMetadata(size_t index, afl::string::Translator& tx, const PlayerList& players) const;
         virtual Actions_t getMessageActions(size_t index) const;
         virtual void performMessageAction(size_t index, Action a);
+        virtual void receiveMessageData(size_t index, game::parser::InformationConsumer& consumer, const TeamSettings& teamSettings, bool onRequest, afl::charset::Charset& cs);
 
      private:
         bool findMessage(ProcessAssociation_t assoc, size_t& index) const;

@@ -41,7 +41,8 @@ namespace game {
             PlanetList,              // ex tx_Informer
             PlanetInformation,       // ex tx_VPAplan
             MinefieldInformation,    // ex tx_VPAmine
-            ResultAccess             // ex tx_RSTcookie
+            ResultAccess,            // ex tx_RSTcookie
+            DrawingInformation       // @since 2.41
         };
         typedef afl::bits::SmallSet<MessageType> MessageTypes_t;
 

@@ -130,14 +130,43 @@ game::msg::Outbox::getNumMessages() const
 }
 
 String_t
-game::msg::Outbox::getMessageText(size_t index, afl::string::Translator& tx, const PlayerList& players) const
+game::msg::Outbox::getMessageHeaderText(size_t index, afl::string::Translator& tx, const PlayerList& players) const
 {
-    // ex GOutbox::getText
+    // ex GOutbox::getText [part]
     if (index < m_messages.size()) {
-        return getHeadersForDisplay(m_messages[index]->sender, m_messages[index]->receivers, tx, players) + m_messages[index]->text;
+        return getHeadersForDisplay(m_messages[index]->sender, m_messages[index]->receivers, tx, players);
     } else {
         return String_t();
     }
+}
+
+String_t
+game::msg::Outbox::getMessageBodyText(size_t index, afl::string::Translator& /*tx*/, const PlayerList& /*players*/) const
+{
+    // ex GOutbox::getText [part]
+    if (index < m_messages.size()) {
+        return m_messages[index]->text;
+    } else {
+        return String_t();
+    }
+}
+
+String_t
+game::msg::Outbox::getMessageForwardText(size_t index, afl::string::Translator& tx, const PlayerList& players) const
+{
+    return defaultGetMessageForwardText(index, tx, players);
+}
+
+String_t
+game::msg::Outbox::getMessageReplyText(size_t index, afl::string::Translator& tx, const PlayerList& players) const
+{
+    return defaultGetMessageReplyText(index, tx, players);
+}
+
+util::rich::Text
+game::msg::Outbox::getMessageDisplayText(size_t index, afl::string::Translator& tx, const PlayerList& players) const
+{
+    return defaultGetMessageDisplayText(getMessageText(index, tx, players), NoData, tx, players);
 }
 
 String_t
@@ -155,22 +184,12 @@ game::msg::Outbox::getMessageHeading(size_t index, afl::string::Translator& tx, 
     }
 }
 
-int
-game::msg::Outbox::getMessageTurnNumber(size_t /*index*/) const
+game::msg::Mailbox::Metadata
+game::msg::Outbox::getMessageMetadata(size_t /*index*/, afl::string::Translator& /*tx*/, const PlayerList& /*players*/) const
 {
-    return 0;
-}
-
-bool
-game::msg::Outbox::isMessageFiltered(size_t /*index*/, afl::string::Translator& /*tx*/, const PlayerList& /*players*/, const Configuration& /*config*/) const
-{
-    return false;
-}
-
-game::msg::Mailbox::Flags_t
-game::msg::Outbox::getMessageFlags(size_t /*index*/) const
-{
-    return Flags_t();
+    Metadata md;
+    // FIXME
+    return md;
 }
 
 game::msg::Mailbox::Actions_t
@@ -184,6 +203,10 @@ game::msg::Outbox::performMessageAction(size_t /*index*/, Action /*a*/)
 {
     // No actions for now
 }
+
+void
+game::msg::Outbox::receiveMessageData(size_t /*index*/, game::parser::InformationConsumer& /*consumer*/, const TeamSettings& /*teamSettings*/, bool /*onRequest*/, afl::charset::Charset& /*cs*/)
+{ }
 
 // Get prefix for message when sent.
 String_t

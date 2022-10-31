@@ -4,6 +4,7 @@
   */
 
 #include "game/msg/browser.hpp"
+#include "game/msg/configuration.hpp"
 #include "game/msg/mailbox.hpp"
 
 class game::msg::Browser::Acceptor {
@@ -54,7 +55,7 @@ bool
 game::msg::Browser::isMessageFiltered(size_t index) const
 {
     return m_pConfig != 0
-        && m_mailbox.isMessageFiltered(index, m_translator, m_playerList, *m_pConfig);
+        && m_pConfig->isHeadingFiltered(m_mailbox.getMessageHeading(index, m_translator, m_playerList));
 }
 
 size_t

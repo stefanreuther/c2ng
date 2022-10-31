@@ -21,22 +21,28 @@ namespace {
 
         virtual size_t getNumMessages() const
             { return m_pattern.size(); }
-        virtual String_t getMessageText(size_t index, afl::string::Translator& /*tx*/, const game::PlayerList& /*players*/) const
+        virtual String_t getMessageHeaderText(size_t /*index*/, afl::string::Translator& /*tx*/, const game::PlayerList& /*players*/) const
+            { return String_t(); }
+        virtual String_t getMessageBodyText(size_t index, afl::string::Translator& /*tx*/, const game::PlayerList& /*players*/) const
             { return afl::string::Format("text-%d", index); }
+        virtual String_t getMessageForwardText(size_t index, afl::string::Translator& tx, const game::PlayerList& players) const
+            { return defaultGetMessageForwardText(index, tx, players); }
+        virtual String_t getMessageReplyText(size_t index, afl::string::Translator& tx, const game::PlayerList& players) const
+            { return defaultGetMessageReplyText(index, tx, players); }
+        virtual util::rich::Text getMessageDisplayText(size_t index, afl::string::Translator& tx, const game::PlayerList& players) const
+            { return getMessageText(index, tx, players); }
         virtual String_t getMessageHeading(size_t index, afl::string::Translator& /*tx*/, const game::PlayerList& /*players*/) const
-            { return afl::string::Format("head-%d", index / 10); }
-        virtual int getMessageTurnNumber(size_t /*index*/) const
-            { return 0; }
-        virtual bool isMessageFiltered(size_t index, afl::string::Translator& /*tx*/, const game::PlayerList& /*players*/, const game::msg::Configuration& /*config*/) const
             {
                 TS_ASSERT(index < m_pattern.size());
-                return (m_pattern[index] == 'x');
+                return afl::string::Format("head-%d%c", index / 10, m_pattern[index]);
             }
-        virtual Flags_t getMessageFlags(size_t /*index*/) const
-            { return Flags_t(); }
+        virtual Metadata getMessageMetadata(size_t /*index*/, afl::string::Translator& /*tx*/, const game::PlayerList& /*players*/) const
+            { return Metadata(); }
         virtual Actions_t getMessageActions(size_t /*index*/) const
             { return Actions_t(); }
         virtual void performMessageAction(size_t /*index*/, Action /*a*/)
+            { }
+        virtual void receiveMessageData(size_t /*index*/, game::parser::InformationConsumer& /*consumer*/, const game::TeamSettings& /*teamSettings*/, bool /*onRequest*/, afl::charset::Charset& /*cs*/)
             { }
      private:
         String_t m_pattern;
@@ -46,6 +52,14 @@ namespace {
         afl::string::NullTranslator tx;
         game::PlayerList players;
         game::msg::Configuration config;
+
+        Environment()
+            {
+                // Filter "all" messages that have a 'x' in the pattern
+                for (size_t i = 0; i < 100; ++i) {
+                    config.setHeadingFiltered(afl::string::Format("head-%dx", i), true);
+                }
+            }
     };
 }
 
@@ -188,17 +202,17 @@ TestGameMsgBrowser::testSummary()
     TS_ASSERT_EQUALS(sum[0].index, 0U);
     TS_ASSERT_EQUALS(sum[0].count, 10U);
     TS_ASSERT_EQUALS(sum[0].isFiltered, false);
-    TS_ASSERT_EQUALS(sum[0].heading, "head-0");
+    TS_ASSERT_EQUALS(sum[0].heading, "head-0.");
 
     TS_ASSERT_EQUALS(sum[1].index, 10U);
     TS_ASSERT_EQUALS(sum[1].count, 10U);
     TS_ASSERT_EQUALS(sum[1].isFiltered, true);
-    TS_ASSERT_EQUALS(sum[1].heading, "head-1");
+    TS_ASSERT_EQUALS(sum[1].heading, "head-1x");
 
     TS_ASSERT_EQUALS(sum[4].index, 40U);
     TS_ASSERT_EQUALS(sum[4].count, 7U);
     TS_ASSERT_EQUALS(sum[4].isFiltered, true);
-    TS_ASSERT_EQUALS(sum[4].heading, "head-4");
+    TS_ASSERT_EQUALS(sum[4].heading, "head-4x");
 }
 
 /** Test search(). */

@@ -60,7 +60,7 @@ namespace game { namespace msg {
         /** Check whether message is filtered.
             \param index Index, [0, mailbox.getNumMessages())
             \return true message is filtered
-            \see Mailbox::isMessageFiltered, Configuration::isHeadingFiltered */
+            \see Configuration::isHeadingFiltered */
         bool isMessageFiltered(size_t index) const;
 
         /** Find first message.

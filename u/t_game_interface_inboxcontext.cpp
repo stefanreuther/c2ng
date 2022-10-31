@@ -47,7 +47,7 @@ namespace {
         TS_ASSERT_EQUALS(in.getNumMessages(), 3U);
         TS_ASSERT_EQUALS(in.getMessageText(0, h.tx, h.root->playerList()), "(-a000)<<< First >>>\nThis is the first message.");
         TS_ASSERT_EQUALS(in.getMessageHeading(0, h.tx, h.root->playerList()), "(a) First");
-        TS_ASSERT_EQUALS(in.getMessageTurnNumber(0), 10);
+        TS_ASSERT_EQUALS(in.getMessageMetadata(0, h.tx, h.root->playerList()).turnNumber, 10);
     }
 }
 

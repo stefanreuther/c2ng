@@ -53,7 +53,7 @@ TestGameInterfaceNotificationStore::testIt()
     TS_ASSERT_EQUALS(store.getNumMessages(), 2U);
     TS_ASSERT_EQUALS(store.getMessageByIndex(1), msg2);
     TS_ASSERT_EQUALS(store.getMessageHeading(1, tx, list), "foo2");
-    TS_ASSERT_EQUALS(store.getMessageText(1, tx, list).substr(0, 10), "foo2\nbar2\n"); // text is followed by explanation of the process link
+    TS_ASSERT_EQUALS(store.getMessageText(1, tx, list), "foo2\nbar2");
     TS_ASSERT_EQUALS(store.getMessageBody(msg2), "bar2");
 
     TS_ASSERT_EQUALS(store.findMessageByProcessId(proc.getProcessId()), msg2);

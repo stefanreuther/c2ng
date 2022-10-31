@@ -221,11 +221,11 @@ game::interface::InboxContext::get(PropertyIndex_t index)
      case impFullText:
         /* @q FullText:Str (Incoming Message Property)
            Message text, in one big string. */
-        return interpreter::makeStringValue(mailbox().getMessageText(m_index, m_translator, m_root->playerList()));
+        return interpreter::makeStringValue(mailbox().getMessageBodyText(m_index, m_translator, m_root->playerList()));
 
      case immWrite:
         // @change PCC2 uses the game's turn number; we have a message turn number
-        return new MessageWriteCommand(mailbox().getMessageTurnNumber(m_index), m_index, getLineCache());
+        return new MessageWriteCommand(mailbox().getMessageMetadata(m_index, m_translator, m_root->playerList()).turnNumber, m_index, getLineCache());
     }
     return 0;
 }
@@ -298,7 +298,7 @@ game::interface::InboxContext::getLineCache()
     // ex IntMessageContext::createLineCache
     if (m_lineCache.get() == 0) {
         m_lineCache = new game::parser::MessageLines_t();
-        game::parser::splitMessage(*m_lineCache, mailbox().getMessageText(m_index, m_translator, m_root->playerList()));
+        game::parser::splitMessage(*m_lineCache, mailbox().getMessageBodyText(m_index, m_translator, m_root->playerList()));
     }
     return m_lineCache;
 }
