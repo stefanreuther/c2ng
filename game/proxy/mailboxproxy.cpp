@@ -10,9 +10,9 @@
 #include "game/actions/preconditions.hpp"
 #include "game/game.hpp"
 #include "game/msg/configuration.hpp"
+#include "game/msg/format.hpp"
 #include "game/msg/outbox.hpp"
 #include "game/parser/binarytransfer.hpp"
-#include "game/parser/format.hpp"
 #include "game/parser/messagetemplate.hpp"
 #include "game/playerset.hpp"
 #include "game/proxy/waitindicator.hpp"
@@ -33,80 +33,6 @@ namespace {
             : mode(mode), amount(amount), acceptFiltered(acceptFiltered), needle(needle)
             { }
     };
-
-    /** Check for message header. Header lines must fulfill the regexp
-        "[A-Z]+ *:", i.e. any single word followed by optional spaces and a
-        colon. We want to recognize
-          "TO: race"     (THost)
-          "TO  : race"   (PHost, English)
-          "An  : race"   (PHost, German)
-          "CC: race"     (PCC)
-        We do not need to recognize "<<<Universal Message>>>", this is handled
-        on the outside. We do not need to handle "<CC:" and the blank line
-        between host's headers and ours; we see the message in
-        "cooked" format after these idiosyncrasies have been resolved.
-
-        \todo This does not recognize Estonian
-          " SAAJA: race"
-        but I consider Estonian in error here. This does not recognize
-        Russian, which uses Cyrillic letters in the headers.
-
-        Original: readmsg.pas, IsHeader */
-    bool isHeader(const String_t& line)
-    {
-        String_t::size_type n = 0;
-        while (n < line.size() && std::isalpha(uint8_t(line[n]))) {
-            ++n;
-        }
-        if (n == 0) {
-            return false;
-        }
-        while (n < line.size() && line[n] == ' ') {
-            ++n;
-        }
-        return (n < line.size() && line[n] == ':');
-    }
-
-
-    String_t quoteForReply(const String_t& originalText)
-    {
-        // ex WMessageActionPanel::doReply(), readmsg.pas:QuoteMessage
-        // Split message into lines
-        game::parser::MessageLines_t lines;
-        game::parser::splitMessage(lines, originalText);
-
-        // Skip headers. First line always is (-foo).
-        size_t first = 1;
-        while (first < lines.size()
-               && (lines[first].size() == 0
-                   || lines[first] == game::msg::Outbox::UNIVERSAL_TEXT
-                   || isHeader(lines[first])))
-        {
-            ++first;
-        }
-
-        // Quote remainder.
-        String_t quotedMessage;
-        bool wasEmpty = false;
-        while (first < lines.size()) {
-            if (lines[first].empty()) {
-                wasEmpty = true;
-            } else {
-                if (wasEmpty) {
-                    quotedMessage += ">\n";
-                }
-                quotedMessage += '>';
-                if (lines[first].size() > 0 && lines[first][0] != '>') {
-                    quotedMessage += ' ';
-                }
-                quotedMessage += lines[first];
-                quotedMessage += '\n';
-                wasEmpty = false;
-            }
-            ++first;
-        }
-        return quotedMessage;
-    }
 }
 
 class game::proxy::MailboxProxy::Trampoline {
@@ -295,7 +221,7 @@ game::proxy::MailboxProxy::Trampoline::quoteMessage(size_t index, QuoteAction ac
         break;
 
      case QuoteForReplying:
-        text = quoteForReply(originalText);
+        text = game::msg::quoteMessageForReply(originalText);
         break;
     }
 
@@ -337,13 +263,13 @@ game::proxy::MailboxProxy::Trampoline::sendResponse(bool requested)
     Message m;
     Session& session = m_adaptor.session();
     Root& root = mustHaveRoot(session);
+    Game* g = session.getGame().get();
+    int viewpointPlayer = (g != 0 ? g->getViewpointPlayer() : 0);
     game::msg::Mailbox& mbox = m_adaptor.mailbox();
     afl::string::Translator& tx = session.translator();
     const size_t index = m_currentMessage;
 
-    game::parser::Format fmt;
-    formatMessage(fmt, mbox.getMessageText(index, tx, root.playerList()),
-                  root.playerList());
+    game::msg::Format fmt = game::msg::formatMessage(mbox.getMessageText(index, tx, root.playerList()), root.playerList(), tx);
 
     m.text = fmt.text.withStyle(util::rich::StyleAttribute::Fixed);
     m.isFiltered = Browser(mbox, tx, root.playerList(), m_adaptor.getConfiguration()).isMessageFiltered(index);
@@ -352,6 +278,11 @@ game::proxy::MailboxProxy::Trampoline::sendResponse(bool requested)
     session.getReferenceName(fmt.firstLink, LongName, m.goto2Name);
     m.reply = fmt.reply;
     m.replyAll = fmt.replyAll;
+    if (m.replyAll != PlayerSet_t(viewpointPlayer) && !m.replyAll.contains(root.playerList().getAllPlayers())) {
+        // Remove ourselves from the replyAll list unless we're the only one (message-to-self),
+        // or if this would cause a Universal Message to become a not-universal message.
+        m.replyAll -= viewpointPlayer;
+    }
     if (!fmt.reply.empty()) {
         m.replyName = formatPlayerHostSet(fmt.reply, root.playerList(), session.translator());
     }

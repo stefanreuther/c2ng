@@ -12,10 +12,11 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/parser/binarytransfer.cpp \
-    game/parser/binarytransfer.hpp game/proxy/pluginmanagerproxy.cpp \
-    game/proxy/pluginmanagerproxy.hpp game/interface/plugins.hpp \
-    game/interface/plugins.cpp game/interface/configurationeditorcontext.cpp \
+FILES_gamelib = game/msg/format.cpp game/msg/format.hpp \
+    game/parser/binarytransfer.cpp game/parser/binarytransfer.hpp \
+    game/proxy/pluginmanagerproxy.cpp game/proxy/pluginmanagerproxy.hpp \
+    game/interface/plugins.hpp game/interface/plugins.cpp \
+    game/interface/configurationeditorcontext.cpp \
     game/interface/configurationeditorcontext.hpp \
     interpreter/variablereference.cpp interpreter/variablereference.hpp \
     game/interface/globalactioncontext.cpp \
@@ -311,10 +312,9 @@ FILES_gamelib = game/parser/binarytransfer.cpp \
     game/map/planetpredictor.hpp game/map/planeteffectors.cpp \
     game/map/planeteffectors.hpp game/v3/registry.cpp game/v3/registry.hpp \
     game/map/chunnelmission.cpp game/map/chunnelmission.hpp util/updater.hpp \
-    game/parser/format.cpp game/parser/format.hpp game/reference.cpp \
-    game/reference.hpp game/msg/configuration.cpp game/msg/configuration.hpp \
-    game/shipquery.cpp game/shipquery.hpp util/syntax/lisphighlighter.cpp \
-    util/syntax/lisphighlighter.hpp \
+    game/reference.cpp game/reference.hpp game/msg/configuration.cpp \
+    game/msg/configuration.hpp game/shipquery.cpp game/shipquery.hpp \
+    util/syntax/lisphighlighter.cpp util/syntax/lisphighlighter.hpp \
     game/vcr/classic/mirroringeventlistener.cpp \
     game/vcr/classic/mirroringeventlistener.hpp \
     util/syntax/pascalhighlighter.cpp util/syntax/pascalhighlighter.hpp \
@@ -1734,7 +1734,7 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_parser_binarytransfer.cpp \
+FILES_testsuite = u/t_game_msg_format.cpp u/t_game_parser_binarytransfer.cpp \
     u/t_client_widgets_pluginlist.cpp u/t_client_widgets.hpp \
     u/t_game_proxy_pluginmanagerproxy.cpp u/t_game_interface_plugins.cpp \
     u/t_game_interface_plugincontext.cpp \

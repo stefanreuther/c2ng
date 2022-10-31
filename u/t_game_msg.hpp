@@ -25,6 +25,12 @@ class TestGameMsgConfiguration : public CxxTest::TestSuite {
     void testSaveEmpty();
 };
 
+class TestGameMsgFormat : public CxxTest::TestSuite {
+ public:
+    void testFormatMessage();
+    void testQuoteMessageForReply();
+};
+
 class TestGameMsgInbox : public CxxTest::TestSuite {
  public:
     void testBasics();
