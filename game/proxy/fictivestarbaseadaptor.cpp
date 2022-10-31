@@ -100,9 +100,6 @@ namespace {
         // ex createDefaultBase
         game::map::BaseData bd;
 
-        // Owner
-        bd.owner = owner;
-
         // Equipment
         bd.numBaseDefensePosts = pl.getNumBuildings(game::BaseDefenseBuilding).orElse(0);
         bd.damage              = pl.getBaseDamage().orElse(0);

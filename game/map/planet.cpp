@@ -50,8 +50,7 @@ namespace {
 
     bool isUsed(const game::map::BaseData& d)
     {
-        return d.owner.isValid()
-            || d.numBaseDefensePosts.isValid()
+        return d.numBaseDefensePosts.isValid()
             || d.damage.isValid()
             || d.techLevels[0].isValid()
             || d.techLevels[1].isValid()

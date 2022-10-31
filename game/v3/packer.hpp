@@ -39,23 +39,24 @@ namespace game { namespace v3 {
         void unpackBase(game::map::BaseData& out, const game::v3::structures::Base& in);
 
         /** Pack a ship.
-            \param out [out] Source, on-disk
+            \param out [out] Target, on-disk
             \param id  [in] Ship Id
-            \param in  [in] Target, internal
+            \param in  [in] Source, internal
             \param remapExplore [in] Remap mission flag (true for SRace, false for classic) */
         void packShip(game::v3::structures::Ship& out, int id, const game::map::ShipData& in, bool remapExplore);
 
         /** Pack a planet.
-            \param out [out] Source, on-disk
+            \param out [out] Target, on-disk
             \param id  [in] Planet Id
-            \param in  [in] Target, internal */
+            \param in  [in] Source, internal */
         void packPlanet(game::v3::structures::Planet& out, int id, const game::map::PlanetData& in);
 
         /** Pack a starbase.
-            \param out [out] Source, on-disk
+            \param out [out] Target, on-disk
             \param id  [in] Base Id
-            \param in  [in] Target, internal */
-        void packBase(game::v3::structures::Base& out, int id, const game::map::BaseData& in);
+            \param in  [in] Source, internal
+            \param in  [in] Base owner */
+        void packBase(game::v3::structures::Base& out, int id, const game::map::BaseData& in, int owner);
 
      private:
         afl::charset::Charset& m_charset;

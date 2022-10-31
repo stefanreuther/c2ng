@@ -797,9 +797,13 @@ game::v3::DirectoryLoader::saveBases(afl::io::Stream& file, const game::map::Uni
                 game::map::BaseData baseData;
                 pPlanet->getCurrentBaseData(baseData);
 
+                // Owner
+                int baseOwner = player;
+                pPlanet->getOwner(baseOwner);
+
                 // Serialize it
                 gt::Base rawBase;
-                Packer(*m_charset).packBase(rawBase, i, baseData);
+                Packer(*m_charset).packBase(rawBase, i, baseData, baseOwner);
                 file.fullWrite(afl::base::fromObject(rawBase));
 
                 // Checksums

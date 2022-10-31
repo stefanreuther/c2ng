@@ -148,7 +148,6 @@ TestGameV3Packer::testUnpackBase()
     game::v3::Packer(cs).unpackBase(out, in);
 
     // Verify
-    TS_ASSERT_EQUALS(out.owner.orElse(-1),                  4);
     TS_ASSERT_EQUALS(out.numBaseDefensePosts.orElse(-1),    200);
     TS_ASSERT_EQUALS(out.damage.orElse(-1),                 0);
     TS_ASSERT_EQUALS(out.techLevels[0].orElse(-1),          6);

@@ -27,7 +27,6 @@ namespace {
     void addBase(game::map::Planet& planet)
     {
         game::map::BaseData data;
-        data.owner = 1;
         data.numBaseDefensePosts = 9;
         data.damage = 0;
         planet.addCurrentBaseData(data, game::PlayerSet_t(1));

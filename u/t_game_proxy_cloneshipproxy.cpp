@@ -57,7 +57,6 @@ namespace {
         p->addCurrentPlanetData(pd, PlayerSet_t(PLAYER_NR));
 
         game::map::BaseData bd;
-        bd.owner = PLAYER_NR;
         for (size_t i = 0; i < game::NUM_TECH_AREAS; ++i) {
             bd.techLevels[i] = 1;
         }

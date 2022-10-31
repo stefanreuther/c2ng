@@ -63,7 +63,6 @@ namespace {
         for (int i = 0; i < 4; ++i) {
             bd.techLevels[i] = 3;
         }
-        bd.owner = PLAYER_NR;
         p->addCurrentBaseData(bd, game::PlayerSet_t(PLAYER_NR));
         p->setPosition(game::map::Point(X, Y));
         p->setName("P");

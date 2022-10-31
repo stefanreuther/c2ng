@@ -147,7 +147,6 @@ void
 game::v3::Packer::unpackBase(game::map::BaseData& out, const game::v3::structures::Base& in)
 {
     // FIXME: must validate data so we don't accidentally see an unknown value
-    out.owner               = in.owner;
     out.numBaseDefensePosts = in.numBaseDefensePosts;
     out.damage              = in.damage;
 
@@ -285,10 +284,10 @@ game::v3::Packer::packPlanet(game::v3::structures::Planet& out, int id, const ga
 
 // Pack a starbase.
 void
-game::v3::Packer::packBase(game::v3::structures::Base& out, int id, const game::map::BaseData& in)
+game::v3::Packer::packBase(game::v3::structures::Base& out, int id, const game::map::BaseData& in, int owner)
 {
     out.baseId = static_cast<int16_t>(id);
-    copyOut(out.owner, in.owner);
+    out.owner = static_cast<int16_t>(owner);
     copyOut(out.numBaseDefensePosts, in.numBaseDefensePosts);
     copyOut(out.damage, in.damage);
     for (size_t i = 0; i < NUM_TECH_AREAS; ++i) {

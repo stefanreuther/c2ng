@@ -54,7 +54,6 @@ namespace {
 
         // - base data
         game::map::BaseData bd;
-        bd.owner = PLAYER_NR;
         bd.engineStorage.set(9, 0);
         bd.beamStorage.set(0, 0);
         bd.launcherStorage.set(0, 0);

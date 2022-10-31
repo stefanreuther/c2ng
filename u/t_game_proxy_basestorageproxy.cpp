@@ -55,7 +55,6 @@ namespace {
         for (int i = 0; i < 4; ++i) {
             bd.techLevels[i] = 3;
         }
-        bd.owner = PLAYER_NR;
         p->addCurrentBaseData(bd, game::PlayerSet_t(PLAYER_NR));
         p->setPosition(game::map::Point(1000, 1000));
         p->setName("P");
@@ -253,7 +252,6 @@ TestGameProxyBaseStorageProxy::testCustom()
 
                 // - base
                 game::map::BaseData bd;
-                bd.owner = PLAYER_NR;
                 bd.hullStorage.set(3, 333);
                 m_planet.addCurrentBaseData(bd, game::PlayerSet_t(PLAYER_NR));
 

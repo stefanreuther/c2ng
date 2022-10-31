@@ -12,7 +12,6 @@
 namespace game { namespace map {
 
     struct BaseData {
-        IntegerProperty_t    owner;
         IntegerProperty_t    numBaseDefensePosts;
         IntegerProperty_t    damage;
         IntegerProperty_t    techLevels[4];
