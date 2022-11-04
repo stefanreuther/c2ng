@@ -45,6 +45,46 @@ namespace {
         Int16_t passcode;
     };
     static_assert(sizeof(TransferSettings) == 24, "sizeof TransferSettings");
+
+    /*
+     *  We do not interpret the Flags field.
+     *  Instead, we store these settings in UserConfiguration.
+     *  Draft code for handling flags:
+     */
+
+    // /** Values for general team configuration.
+    //     These values are part of the binary representation, do not change. */
+    // enum Flag {
+    //     SynchronizeFromAllies,   // ex tf_AutoSync
+    //     SynchronizeToTransfer    // ex tf_XferSync
+    // };
+    // typedef afl::bits::SmallSet<Flag> Flags_t;
+
+    // /** Set flags.
+    //     \param flags New flags */
+    // void setFlags(Flags_t flags);
+
+    // /** Get flags.
+    //     \return flags */
+    // Flags_t getFlags() const;
+
+    // // Set flags.
+    // void
+    // game::TeamSettings::setFlags(Flags_t flags)
+    // {
+    //     int flagInt = flags.toInteger();
+    //     if (m_flags != flagInt) {
+    //         m_flags = flagInt;
+    //         sig_teamChange.raise();
+    //     }
+    // }
+
+    // // Get flags.
+    // game::TeamSettings::Flags_t
+    // game::TeamSettings::getFlags() const
+    // {
+    //     return Flags_t::fromInteger(m_flags);
+    // }
 }
 
 
@@ -248,6 +288,103 @@ game::TeamSettings::getRelationColor(Relation relation)
         return util::SkinColor::Red;
     }
     return util::SkinColor::Static;
+}
+
+// Set send configuration for a player.
+void
+game::TeamSettings::setSendConfiguration(int player, MessageTypes_t config)
+{
+    int configInt = config.toInteger();
+    if (m_sendConfig.get(player) != configInt) {
+        m_sendConfig.set(player, configInt);
+        sig_teamChange.raise();
+    }
+}
+
+// Get send configuration for a player.
+game::TeamSettings::MessageTypes_t
+game::TeamSettings::getSendConfiguration(int player) const
+{
+    return MessageTypes_t::fromInteger(m_sendConfig.get(player));
+}
+
+// Get set of all supported send configurations.
+game::TeamSettings::MessageTypes_t
+game::TeamSettings::getAllSendConfigurations()
+{
+    // ex tx_ALLSEND
+    return MessageTypes_t() + PlanetList + ResultAccess;
+}
+
+// Set receive configuration for a player.
+void
+game::TeamSettings::setReceiveConfiguration(int player, MessageTypes_t config)
+{
+    int configInt = config.toInteger();
+    if (m_receiveConfig.get(player) != configInt) {
+        m_receiveConfig.set(player, configInt);
+        sig_teamChange.raise();
+    }
+}
+
+// Get receive configuration for a player.
+game::TeamSettings::MessageTypes_t
+game::TeamSettings::getReceiveConfiguration(int player) const
+{
+    return MessageTypes_t::fromInteger(m_receiveConfig.get(player));
+}
+
+// Get set of all supported receive configurations.
+game::TeamSettings::MessageTypes_t
+game::TeamSettings::getAllReceiveConfigurations()
+{
+    return MessageTypes_t() + PlanetList + PlanetInformation + MinefieldInformation + ResultAccess;
+}
+
+// Synchronize data transfer configuration (send/receive settings) from team settings. */
+void
+game::TeamSettings::synchronizeDataTransferConfigurationFromTeams()
+{
+    // ex team.pas:SyncXfer
+    // @change does not check flag
+    const int s = m_sendConfig.get(m_viewpointPlayer);
+    const int r = m_receiveConfig.get(m_viewpointPlayer);
+    util::Updater u;
+    for (int i = 1; i <= MAX_PLAYERS; ++i) {
+        if (i != m_viewpointPlayer) {
+            int ss = m_sendConfig.get(i);
+            int rr = m_receiveConfig.get(i);
+            if (getPlayerRelation(i) == EnemyPlayer) {
+                u.set(ss, ss & ~s);
+                u.set(rr, rr & ~r);
+            } else {
+                u.set(ss, ss | s);
+                u.set(rr, rr | r);
+            }
+            m_sendConfig.set(i, ss);
+            m_receiveConfig.set(i, rr);
+        }
+    }
+    if (u) {
+        sig_teamChange.raise();
+    }
+}
+
+// Set passcode for PlanetList transmissions.
+void
+game::TeamSettings::setPasscode(int code)
+{
+    if (m_passcode != code) {
+        m_passcode = code;
+        sig_teamChange.raise();
+    }
+}
+
+// Get passcode for PlanetList transmissions.
+int
+game::TeamSettings::getPasscode() const
+{
+    return m_passcode;
 }
 
 // Load from file.

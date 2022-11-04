@@ -322,7 +322,7 @@ game::Game::addMessageInformation(const game::parser::MessageInformation& info, 
 void
 game::Game::synchronizeTeamsFromAlliances()
 {
-    // ex game/team.cc:syncTeamsFromAlliances
+    // ex game/team.cc:syncTeamsFromAlliances, team.pas:SyncTeams
     // @change This does NOT check the preferences option
     using game::alliance::Level;
 

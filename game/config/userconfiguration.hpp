@@ -123,6 +123,7 @@ namespace game { namespace config {
 
         // Team
         static const IntegerOptionDescriptor Team_AutoSync;
+        static const IntegerOptionDescriptor Team_SyncTransfer;
 
         // Unpack
         static const IntegerOptionDescriptor Unpack_AcceptRaceNames;

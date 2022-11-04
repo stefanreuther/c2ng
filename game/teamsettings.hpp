@@ -7,6 +7,7 @@
 
 #include "afl/base/signal.hpp"
 #include "afl/base/uncopyable.hpp"
+#include "afl/bits/smallset.hpp"
 #include "afl/charset/charset.hpp"
 #include "afl/io/directory.hpp"
 #include "afl/string/string.hpp"
@@ -27,11 +28,23 @@ namespace game {
         This is an entirely client-side concept. */
     class TeamSettings : private afl::base::Uncopyable {
      public:
+        /** Player relations. */
         enum Relation {
             ThisPlayer,         // ex is_Me
             AlliedPlayer,       // ex is_Ally
             EnemyPlayer         // ex is_Enemy
         };
+
+        /** Values for send/receive configuration.
+            These values are part of the binary representation, do not change. */
+        enum MessageType {
+            PlanetList,              // ex tx_Informer
+            PlanetInformation,       // ex tx_VPAplan
+            MinefieldInformation,    // ex tx_VPAmine
+            ResultAccess             // ex tx_RSTcookie
+        };
+        typedef afl::bits::SmallSet<MessageType> MessageTypes_t;
+
 
         /** Constructor.
             Makes default team settings. */
@@ -112,6 +125,48 @@ namespace game {
             \param relation Relation to check
             \return color */
         static util::SkinColor::Color getRelationColor(Relation relation);
+
+        /** Set send configuration for a player.
+            \param player Player
+            \param config New configuration */
+        void setSendConfiguration(int player, MessageTypes_t config);
+
+        /** Get send configuration for a player.
+            \param player Player
+            \return configuration */
+        MessageTypes_t getSendConfiguration(int player) const;
+
+        /** Get set of all supported send configurations.
+            Only values in this set have an effect when set in getSendConfiguration/setSendConfiguration.
+            \return set */
+        static MessageTypes_t getAllSendConfigurations();
+
+        /** Set receive configuration for a player.
+            \param player Player
+            \param config New configuration */
+        void setReceiveConfiguration(int player, MessageTypes_t config);
+
+        /** Get receive configuration for a player.
+            \param player Player
+            \return configuration */
+        MessageTypes_t getReceiveConfiguration(int player) const;
+
+        /** Get set of all supported receive configurations.
+            Only values in this set have an effect when set in getReceiveConfiguration/setReceiveConfiguration.
+            \return set */
+        static MessageTypes_t getAllReceiveConfigurations();
+
+        /** Synchronize data transfer configuration (send/receive settings) from team settings. */
+        void synchronizeDataTransferConfigurationFromTeams();
+
+        /** Set passcode for PlanetList transmissions.
+            \param passcode New passcode (0..9999) */
+        void setPasscode(int code);
+
+        /** Get passcode for PlanetList transmissions.
+            \return passcode */
+        int getPasscode() const;
+
 
         /** Load from file.
             \param dir Directory

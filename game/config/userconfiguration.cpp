@@ -125,6 +125,7 @@ namespace game { namespace config {
 
     // Team
     const IntegerOptionDescriptor UserConfiguration::Team_AutoSync = { "Team.AutoSync", &BooleanValueParser::instance };
+    const IntegerOptionDescriptor UserConfiguration::Team_SyncTransfer = { "Team.SyncTransfer", &BooleanValueParser::instance };  // @since 2.41
 
     // Unpack
     namespace { EnumValueParser Unpack_Parser("ask,accept,reject"); }
@@ -233,6 +234,7 @@ game::config::UserConfiguration::setDefaultValues()
 
     // Team
     me[Team_AutoSync].set(1);
+    me[Team_SyncTransfer].set(0);
 
     // Unpack
     me[Unpack_AcceptRaceNames].set(1);

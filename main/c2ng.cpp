@@ -327,6 +327,9 @@ namespace {
                             if (root.userConfiguration()[game::config::UserConfiguration::Team_AutoSync]()) {
                                 m_session.getGame()->synchronizeTeamsFromAlliances();
                             }
+                            if (root.userConfiguration()[game::config::UserConfiguration::Team_SyncTransfer]()) {
+                                m_session.getGame()->teamSettings().synchronizeDataTransferConfigurationFromTeams();
+                            }
 
                             game::map::Object::Playability playability;
                             game::Session::AreaSet_t editableAreas;

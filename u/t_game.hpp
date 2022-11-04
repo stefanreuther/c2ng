@@ -245,6 +245,8 @@ class TestGameTeamSettings : public CxxTest::TestSuite {
     void testViewpoint();
     void testLoadSave();
     void testCopyFrom();
+    void testTransferSettings();
+    void testSyncTransferSettings();
 };
 
 class TestGameTimestamp : public CxxTest::TestSuite {

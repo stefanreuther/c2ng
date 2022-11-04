@@ -24,6 +24,12 @@ TestGameTeamSettings::testInit()
     TS_ASSERT(!testee.hasAnyTeams());
     TS_ASSERT(!testee.isNamedTeam(9));
     TS_ASSERT_EQUALS(testee.getTeamPlayers(9), game::PlayerSet_t(9));
+    TS_ASSERT(testee.getSendConfiguration(9).empty());
+    TS_ASSERT(testee.getReceiveConfiguration(9).empty());
+    TS_ASSERT_EQUALS(testee.getPasscode(), 0);
+
+    TS_ASSERT(!testee.getAllSendConfigurations().empty());
+    TS_ASSERT(!testee.getAllReceiveConfigurations().empty());
 }
 
 /** Test setters and getters. */
@@ -177,7 +183,7 @@ TestGameTeamSettings::testCopyFrom()
     game::test::Counter counter;
     game::TeamSettings a;
     a.sig_teamChange.add(&counter, &game::test::Counter::increment);
-    
+
     game::TeamSettings b;
     b.copyFrom(a);
     TS_ASSERT_EQUALS(counter.get(), 0);
@@ -190,5 +196,83 @@ TestGameTeamSettings::testCopyFrom()
     TS_ASSERT_EQUALS(counter.get(), 1);
     TS_ASSERT_EQUALS(a.getPlayerTeam(7), 3);
     TS_ASSERT_EQUALS(a.getTeamName(3, tx), "three");
+}
+
+/** Test setting and retrieving transfer settings. */
+void
+TestGameTeamSettings::testTransferSettings()
+{
+    game::TeamSettings testee;
+
+    // Set
+    testee.setSendConfiguration(1, game::TeamSettings::MessageTypes_t() + game::TeamSettings::ResultAccess);
+    testee.setSendConfiguration(999999999, game::TeamSettings::MessageTypes_t() + game::TeamSettings::ResultAccess);  // out-of-range, must not crash
+
+    testee.setReceiveConfiguration(1, game::TeamSettings::MessageTypes_t() + game::TeamSettings::PlanetList);
+    testee.setReceiveConfiguration(999999999, game::TeamSettings::MessageTypes_t() + game::TeamSettings::PlanetList);  // out-of-range, must not crash
+
+    // Retrieve
+    TS_ASSERT_EQUALS(testee.getSendConfiguration(1), game::TeamSettings::MessageTypes_t() + game::TeamSettings::ResultAccess);
+    TS_ASSERT_EQUALS(testee.getSendConfiguration(999999999), game::TeamSettings::MessageTypes_t());
+
+    TS_ASSERT_EQUALS(testee.getReceiveConfiguration(1), game::TeamSettings::MessageTypes_t() + game::TeamSettings::PlanetList);
+    TS_ASSERT_EQUALS(testee.getReceiveConfiguration(999999999), game::TeamSettings::MessageTypes_t());
+
+    // Passcode
+    testee.setPasscode(4711);
+    TS_ASSERT_EQUALS(testee.getPasscode(), 4711);
+}
+
+/** Test synchronizeDataTransferConfigurationFromTeams(). */
+void
+TestGameTeamSettings::testSyncTransferSettings()
+{
+    const game::TeamSettings::MessageTypes_t T1(game::TeamSettings::PlanetList);
+    const game::TeamSettings::MessageTypes_t T2(game::TeamSettings::ResultAccess);
+    const game::TeamSettings::MessageTypes_t T3(game::TeamSettings::PlanetInformation);
+
+    game::TeamSettings testee;
+
+    // I am bird
+    testee.setViewpointPlayer(3);
+    testee.setSendConfiguration(3, T1);
+    testee.setReceiveConfiguration(3, T2);
+
+    // Team member Klingon
+    testee.setPlayerTeam(4, 3);
+    testee.setSendConfiguration(4, T2);
+    testee.setReceiveConfiguration(4, T3);
+
+    // Team member Orion
+    testee.setPlayerTeam(5, 3);
+    testee.setSendConfiguration(5, T1+T2);
+    testee.setReceiveConfiguration(5, T1+T2+T3);
+
+    // Non-team-member Rebel [same config as Klingon]
+    testee.setSendConfiguration(10, T2);
+    testee.setReceiveConfiguration(10, T3);
+
+    // Non-team-member Fed [same config as Orion]
+    testee.setSendConfiguration(1, T1+T2);
+    testee.setReceiveConfiguration(1, T1+T2+T3);
+
+    // Sync
+    testee.synchronizeDataTransferConfigurationFromTeams();
+
+    // Verify
+    TS_ASSERT_EQUALS(testee.getSendConfiguration(3), T1);
+    TS_ASSERT_EQUALS(testee.getReceiveConfiguration(3), T2);
+
+    TS_ASSERT_EQUALS(testee.getSendConfiguration(4), T1+T2);
+    TS_ASSERT_EQUALS(testee.getReceiveConfiguration(4), T2+T3);
+
+    TS_ASSERT_EQUALS(testee.getSendConfiguration(5), T1+T2);
+    TS_ASSERT_EQUALS(testee.getReceiveConfiguration(5), T1+T2+T3);
+
+    TS_ASSERT_EQUALS(testee.getSendConfiguration(10), T2);
+    TS_ASSERT_EQUALS(testee.getReceiveConfiguration(10), T3);
+
+    TS_ASSERT_EQUALS(testee.getSendConfiguration(1), T2);
+    TS_ASSERT_EQUALS(testee.getReceiveConfiguration(1), T1+T3);
 }
 
