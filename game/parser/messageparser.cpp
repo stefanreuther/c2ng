@@ -210,6 +210,9 @@ namespace {
          case MessageInformation::IonStorm:
          case MessageInformation::Ufo:
          case MessageInformation::Wormhole:
+         case MessageInformation::ExtraShip:
+         case MessageInformation::ExtraMinefield:
+         case MessageInformation::ExtraPlanet:
             /* Those are identified by a mandatory Id */
             if (tpl.getVariableSlotByName("ID", skipSlot) && skipSlot < processLimit) {
                 id = parseIntegerValue(values[skipSlot]);
@@ -449,6 +452,12 @@ game::parser::MessageParser::load(afl::io::Stream& file, afl::string::Translator
                 mo = MessageInformation::RectangleDrawing;
             } else if (util::stringMatch("CIrcle", kind)) {
                 mo = MessageInformation::CircleDrawing;
+            } else if (util::stringMatch("EXTRAShip", kind)) {
+                mo = MessageInformation::ExtraShip;
+            } else if (util::stringMatch("EXTRAPlanet", kind)) {
+                mo = MessageInformation::ExtraPlanet;
+            } else if (util::stringMatch("EXTRAMinefield", kind)) {
+                mo = MessageInformation::ExtraMinefield;
             } else {
                 mo = MessageInformation::NoObject;
             }

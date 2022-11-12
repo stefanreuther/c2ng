@@ -506,3 +506,31 @@ TestGameMsgInbox::testReceiveErrors()
     testee.receiveMessageData(2, c, teamSettings, false, cs);
     TS_ASSERT_EQUALS(testee.getMessageMetadata(2, tx, list).dataStatus, game::msg::Mailbox::DataWrongChecksum);
 }
+
+/** Test primary link handling. */
+void
+TestGameMsgInbox::testPrimaryLink()
+{
+    // Create
+    afl::string::NullTranslator tx;
+    game::PlayerList list;
+    game::msg::Inbox testee;
+
+    testee.addMessage("(-i0006)<<< ION Advisory >>>"
+                      "ION Disturbance\n"
+                      "ID Number:  6\n"
+                      "Centered At: (  1959, 1110)\n"
+                      "North of Fred\n"
+                      "Planet ID Number  268\n"
+                      " 26 LY from planet\n", 3);
+
+    // Check default settings
+    TS_ASSERT_EQUALS(testee.getMessageMetadata(0, tx, list).primaryLink, game::Reference(game::Reference::Storm, 6));
+    TS_ASSERT_EQUALS(testee.getMessageMetadata(0, tx, list).secondaryLink, game::Reference(game::map::Point(1959, 1110)));
+
+    // Override association
+    testee.setMessagePrimaryLink(0, game::Reference(game::Reference::Planet, 268));
+    TS_ASSERT_EQUALS(testee.getMessageMetadata(0, tx, list).primaryLink, game::Reference(game::Reference::Planet, 268));
+    TS_ASSERT_EQUALS(testee.getMessageMetadata(0, tx, list).secondaryLink, game::Reference(game::map::Point(1959, 1110)));
+}
+

@@ -57,6 +57,11 @@ namespace game { namespace msg {
             \param turnNumber Turn number */
         void addMessage(String_t text, int turnNumber);
 
+        /** Set message's primary link.
+            \param index Message index
+            \param ref Reference to use as primary link (unset to use default) */
+        void setMessagePrimaryLink(size_t index, Reference ref);
+
         /** Sort messages.
             This will group messages of equal subjects together, but preserves the overall order
             (i.e. messages from other races will remain first).

@@ -106,3 +106,38 @@ game::parser::MessageInformation::getValue(MessageIntegerIndex ii, int32_t& out,
         return false;
     }
 }
+
+// Get object type/Id in Reference format.
+game::Reference
+game::parser::MessageInformation::getObjectReference() const
+{
+    switch (m_type) {
+     case Ship:
+        return Reference(Reference::Ship, m_id);
+     case Planet:
+        return Reference(Reference::Planet, m_id);
+     case Starbase:
+        return Reference(Reference::Starbase, m_id);
+     case Minefield:
+        return Reference(Reference::Minefield, m_id);
+     case IonStorm:
+        return Reference(Reference::Storm, m_id);
+     case Ufo:
+        return Reference(Reference::Ufo, m_id);
+     case Wormhole:
+     case Explosion:
+     case Configuration:
+     case PlayerScore:
+     case Alliance:
+     case MarkerDrawing:
+     case CircleDrawing:
+     case LineDrawing:
+     case RectangleDrawing:
+     case ExtraShip:
+     case ExtraPlanet:
+     case ExtraMinefield:
+     case NoObject:
+        break;
+    }
+    return Reference();
+}

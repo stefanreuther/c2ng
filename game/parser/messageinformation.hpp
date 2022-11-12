@@ -15,9 +15,10 @@
 #ifndef C2NG_GAME_PARSER_MESSAGEINFORMATION_HPP
 #define C2NG_GAME_PARSER_MESSAGEINFORMATION_HPP
 
-#include "game/parser/messagevalue.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "game/alliance/offer.hpp"
+#include "game/parser/messagevalue.hpp"
+#include "game/reference.hpp"
 
 namespace game { namespace parser {
 
@@ -44,6 +45,9 @@ namespace game { namespace parser {
             CircleDrawing,       ///< Circle drawing. Id is not relevant.
             LineDrawing,         ///< Line drawing. Id is not relevant.
             RectangleDrawing,    ///< Rectangle drawing. Id is not relevant.
+            ExtraShip,           ///< Like Ship, but should not associate message with the ship.
+            ExtraPlanet,         ///< Like Planet, but should not associate message with the planet.
+            ExtraMinefield,      ///< Like Minefield, but should not associate message with the minefield.
             NoObject
         };
 
@@ -130,6 +134,10 @@ namespace game { namespace parser {
         /** Get turn number.
             \return turn number */
         int getTurnNumber() const;
+
+        /** Get object type/Id in Reference format.
+            \return reference */
+        Reference getObjectReference() const;
 
      private:
         const Type m_type;

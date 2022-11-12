@@ -142,6 +142,16 @@ game::v3::Parser::parseMessages(afl::io::Stream& in, game::msg::Inbox& inbox, af
         p.parseMessage(text, gdi, m_game.currentTurn().getTurnNumber(), info, m_translator, m_log);
         c.addMessageInformation(info);
 
+        // Determine reference
+        Reference ref;
+        for (size_t di = 0; di < info.size(); ++di) {
+            ref = info[di]->getObjectReference();
+            if (ref.isSet()) {
+                break;
+            }
+        }
+        inbox.setMessagePrimaryLink(i, ref);
+
         // Prepare binary messages
         inbox.receiveMessageData(i, c, m_game.teamSettings(), false, charset);
     }

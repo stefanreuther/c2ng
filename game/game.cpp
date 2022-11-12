@@ -233,6 +233,7 @@ game::Game::addMessageInformation(const game::parser::MessageInformation& info,
     // Dispatch
     switch (info.getObjectType()) {
      case MessageInformation::Ship:
+     case MessageInformation::ExtraShip:
         // Ship: add normally, with no claim to reliability (=empty source set).
         // To add information to be treated as reliable (e.g. target.dat file), add it to the ship directly.
         if (game::map::Ship* pShip = currentTurn().universe().ships().get(info.getObjectId())) {
@@ -251,6 +252,7 @@ game::Game::addMessageInformation(const game::parser::MessageInformation& info,
 
      case MessageInformation::Planet:
      case MessageInformation::Starbase:
+     case MessageInformation::ExtraPlanet:
         // Planet: add normally
         if (game::map::Planet* pPlanet = currentTurn().universe().planets().get(info.getObjectId())) {
             pPlanet->addMessageInformation(info);
@@ -267,6 +269,7 @@ game::Game::addMessageInformation(const game::parser::MessageInformation& info,
         break;
 
      case MessageInformation::Minefield:
+     case MessageInformation::ExtraMinefield:
         // Minefield: add normally. MinefieldType will deal with details.
         currentTurn().universe().minefields().addMessageInformation(info);
         currentTurn().universe().minefields().internalCheck(currentTurn().getTurnNumber(), host, config);

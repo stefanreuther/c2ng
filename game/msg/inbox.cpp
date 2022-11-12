@@ -39,9 +39,10 @@ struct game::msg::Inbox::Message {
     String_t text;
     int turnNumber;
     Mailbox::DataStatus dataStatus;
+    Reference ref;
 
     Message(const String_t& text, int turnNumber)
-        : text(text), turnNumber(turnNumber), dataStatus(NoData)
+        : text(text), turnNumber(turnNumber), dataStatus(NoData), ref()
         { }
 };
 
@@ -178,7 +179,7 @@ game::msg::Inbox::getMessageMetadata(size_t index, afl::string::Translator& tx, 
         const Format fmt = formatMessage(p->text, players, tx);
         md.turnNumber    = p->turnNumber;
         md.dataStatus    = p->dataStatus;
-        md.primaryLink   = fmt.headerLink;
+        md.primaryLink   = p->ref.orElse(fmt.headerLink);
         md.secondaryLink = fmt.firstLink;
         md.reply         = fmt.reply;
         md.replyAll      = fmt.replyAll;
@@ -210,6 +211,14 @@ game::msg::Inbox::addMessage(String_t text, int turnNumber)
 {
     // ex GInbox::addMessage
     m_messages.pushBackNew(new Message(text, turnNumber));
+}
+
+void
+game::msg::Inbox::setMessagePrimaryLink(size_t index, Reference ref)
+{
+    if (Message* p = getMessage(index)) {
+        p->ref = ref;
+    }
 }
 
 void

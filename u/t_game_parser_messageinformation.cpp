@@ -19,6 +19,7 @@ TestGameParserMessageInformation::testIt()
     TS_ASSERT_EQUALS(testee.getObjectId(), 77);
     TS_ASSERT_EQUALS(testee.getTurnNumber(), 12);
     TS_ASSERT_EQUALS(testee.begin(), testee.end());
+    TS_ASSERT_EQUALS(testee.getObjectReference(), game::Reference(game::Reference::Ship, 77));
 
     // Add information
     testee.addValue(game::parser::mi_ShipHull, 15);
@@ -58,6 +59,7 @@ TestGameParserMessageInformation::testPlayerScore()
     TS_ASSERT_EQUALS(testee.getObjectId(), 1000);
     TS_ASSERT_EQUALS(testee.getTurnNumber(), 3);
     TS_ASSERT_EQUALS(testee.begin(), testee.end());
+    TS_ASSERT_EQUALS(testee.getObjectReference(), game::Reference());
 
     // Add
     testee.addScoreValue(3, 105);
@@ -90,6 +92,7 @@ TestGameParserMessageInformation::testConfiguration()
     TS_ASSERT_EQUALS(testee.getObjectId(), 0);
     TS_ASSERT_EQUALS(testee.getTurnNumber(), 5);
     TS_ASSERT_EQUALS(testee.begin(), testee.end());
+    TS_ASSERT_EQUALS(testee.getObjectReference(), game::Reference());
 
     // Add
     testee.addConfigurationValue("GameName", "The Game");
@@ -113,6 +116,7 @@ TestGameParserMessageInformation::testGetValue()
     testee.addValue(game::parser::mi_ShipHull, 15);
     testee.addValue(game::parser::ms_Name, "NN");
     testee.addValue(game::parser::mi_ShipRemoteFlag, 1);
+    TS_ASSERT_EQUALS(testee.getObjectReference(), game::Reference(game::Reference::Ship, 77));
 
     // Normal
     {
