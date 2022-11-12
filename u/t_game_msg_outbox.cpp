@@ -46,6 +46,15 @@ TestGameMsgOutbox::testIt()
     TS_ASSERT_EQUALS(testee.getMessageText(99, tx, players), "");
     TS_ASSERT_EQUALS(testee.getMessageHeading(99, tx, players), "");
     TS_ASSERT_EQUALS(testee.getMessageMetadata(0, tx, players).turnNumber, 0);
+
+    TS_ASSERT_EQUALS(testee.getMessageForwardText(0, tx, players),
+                     "--- Forwarded Message ---\n"
+                     "<<< Sub Space Message >>>\n"
+                     "FROM: Long Three\n"
+                     "TO: Player 4\n"
+                     "text\n"
+                     "--- End Forwarded Message ---");
+    TS_ASSERT_EQUALS(testee.getMessageReplyText(0, tx, players), "> text\n");
 }
 
 /** Test merging. */

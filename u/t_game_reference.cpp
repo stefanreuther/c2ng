@@ -30,6 +30,8 @@ TestGameReference::testAccessor()
         TS_ASSERT_EQUALS(testee == Reference(Reference::Ship, 77), false);
         TS_ASSERT_EQUALS(testee != Reference(), false);
         TS_ASSERT_EQUALS(testee != Reference(Reference::Ship, 77), true);
+        TS_ASSERT(!testee.orElse(testee).isSet());
+        TS_ASSERT(testee.orElse(Reference(Reference::Ship, 77)) == Reference(Reference::Ship, 77));
     }
 
     // Initialize from type/Id
@@ -46,6 +48,8 @@ TestGameReference::testAccessor()
         TS_ASSERT_EQUALS(testee != Reference(), true);
         TS_ASSERT_EQUALS(testee != Reference(Reference::Planet, 77), true);
         TS_ASSERT_EQUALS(testee != Reference(Reference::Planet, 12), false);
+        TS_ASSERT(testee.orElse(testee).isSet());
+        TS_ASSERT(testee.orElse(Reference(Reference::Ship, 77)) == Reference(Reference::Planet, 12));
     }
 
     // Initialize from point
@@ -66,6 +70,8 @@ TestGameReference::testAccessor()
         TS_ASSERT_EQUALS(testee != Reference(Reference::Planet, 77), true);
         TS_ASSERT_EQUALS(testee != Reference(Reference::Planet, 12), true);
         TS_ASSERT_EQUALS(testee != pt, false);
+        TS_ASSERT(testee.orElse(testee).isSet());
+        TS_ASSERT(testee.orElse(Reference(Reference::Ship, 77)) == Reference(Point(1000,2000)));
     }
 }
 

@@ -106,3 +106,10 @@ game::Reference::operator!=(const Reference& other) const
 {
     return !operator==(other);
 }
+
+// Select valid reference.
+game::Reference
+game::Reference::orElse(Reference other) const
+{
+    return isSet() ? *this : other;
+}

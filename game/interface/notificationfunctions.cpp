@@ -113,10 +113,13 @@ game::interface::IFCCNotify(game::Session& session, interpreter::Process& proc, 
 
     // FIXME: should this really be getInvokingObject()?
     game::map::Object* obj = proc.getInvokingObject();
+    Reference ref;
     if (dynamic_cast<game::map::Planet*>(obj) != 0) {
         header = Format(tx("(-p%04d)<<< Planet >>>\n\n"), obj->getId());
+        ref = Reference(Reference::Planet, obj->getId());
     } else if (dynamic_cast<game::map::Ship*>(obj) != 0) {
         header = Format(tx("(-s%04d)<<< Ship >>>\n\n"), obj->getId());
+        ref = Reference(Reference::Ship, obj->getId());
     } else {
         header = tx("(-X0000)<<< Notification >>>\n\n");
     }
@@ -125,7 +128,8 @@ game::interface::IFCCNotify(game::Session& session, interpreter::Process& proc, 
 
     session.notifications().addMessage(assoc ? NotificationStore::ProcessAssociation_t(proc.getProcessId()) : NotificationStore::ProcessAssociation_t(),
                                        header,
-                                       text);
+                                       text,
+                                       ref);
 }
 
 /* @q CC$NumNotifications():Int (Internal)

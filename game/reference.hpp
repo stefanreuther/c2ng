@@ -123,6 +123,12 @@ namespace game {
             \return true if both references are different */
         bool operator!=(const Reference& other) const;
 
+        /** Select valid reference.
+            If this is a valid reference, returns a copy of it;
+            otherwise, returns the parameter.
+            \param other Other reference */
+        Reference orElse(Reference other) const;
+
      private:
         Type m_type;
         int m_x;

@@ -217,11 +217,13 @@ game::msg::formatMessage(const String_t& in, const PlayerList& players, afl::str
     }
     out.text.append(String_t(in, n));
 
-    // Reply information
+    // Reply information and primary object guess
+    // At this place, only extract reliable/simple information; more complex object associations will be done by the message parser.
+    // ex readmsg.pas:EvaluateMessageTarget
     game::parser::MessageLines_t lines;
     game::parser::splitMessage(lines, in);
     switch (getMessageHeaderInformation(lines, game::parser::MsgHdrKind)) {
-     case 'r':
+     case 'r': // player-to-player message
         if (Player* p = players.getPlayerFromCharacter(char(getMessageHeaderInformation(lines, game::parser::MsgHdrSubId)))) {
             // Reply to sender
             if (p->getId() == 0) {
@@ -236,11 +238,55 @@ game::msg::formatMessage(const String_t& in, const PlayerList& players, afl::str
         }
         break;
 
-     case 'g':
-     case 'h':
+     case 'g': // configuration
+     case 'h': // from host
         out.reply = out.replyAll = PlayerSet_t(0);
         parseExtraReceivers(out.replyAll, lines, players, tx);
         break;
+
+     case 'u': // Ufo
+        if (int32_t id = getMessageHeaderInformation(lines, game::parser::MsgHdrBigId)) {
+            out.headerLink = Reference(Reference::Ufo, id);
+        }
+        break;
+
+     case 'p': // planet
+     case 't': // terraform
+     case 'y': // meteor
+     case 'z': // sensor sweep
+        if (int32_t id = getMessageHeaderInformation(lines, game::parser::MsgHdrId)) {
+            out.headerLink = Reference(Reference::Planet, id);
+        }
+        break;
+
+     case 'd': // space dock
+        if (int32_t id = getMessageHeaderInformation(lines, game::parser::MsgHdrId)) {
+            out.headerLink = Reference(Reference::Starbase, id);
+        }
+        break;
+
+     case 's': // ship
+     case 'w': // web mines
+        if (int32_t id = getMessageHeaderInformation(lines, game::parser::MsgHdrId)) {
+            out.headerLink = Reference(Reference::Ship, id);
+        }
+        break;
+
+     case 'i': // ion storm
+        if (int32_t id = getMessageHeaderInformation(lines, game::parser::MsgHdrId)) {
+            out.headerLink = Reference(Reference::Storm, id);
+        }
+        break;
+
+     case 'l': // mines laid
+     case 'm': // mines scanned
+        if (int32_t id = getMessageHeaderInformation(lines, game::parser::MsgHdrBigId)) {
+            out.headerLink = Reference(Reference::Minefield, id);
+        }
+        break;
+
+        // Do not handle 'f'. PCC1 applies heuristic to search it in VCRs.
+        // Do not handle 'e', 'n'. PCC1 applies heuristic to detect RGA/Pillage.
 
      default:
         break;

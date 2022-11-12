@@ -282,7 +282,7 @@ TestGameProxyTaskEditorProxy::testMessage()
         ed->replace(0, 0, code, TaskEditor::DefaultCursor, TaskEditor::PlacePCBefore);
 
         // Message
-        s.session().notifications().addMessage(ed->process().getProcessId(), "header", "the message body");
+        s.session().notifications().addMessage(ed->process().getProcessId(), "header", "the message body", game::Reference());
 
         s.session().releaseAutoTaskEditor(ed);
     }

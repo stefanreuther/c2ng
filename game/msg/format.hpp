@@ -18,6 +18,9 @@ namespace game { namespace msg {
         /** Reference for the message's first link. */
         Reference firstLink;
 
+        /** Reference for the message's header. */
+        Reference headerLink;
+
         /** Receivers for "reply" function. */
         PlayerSet_t reply;
 

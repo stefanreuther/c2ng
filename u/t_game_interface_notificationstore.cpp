@@ -14,6 +14,8 @@
 #include "interpreter/process.hpp"
 #include "interpreter/world.hpp"
 
+using game::Reference;
+
 /** Simple sequence test.
     This test is mostly taken from PCC2 that had more complex interaction with processes.
 
@@ -36,7 +38,7 @@ TestGameInterfaceNotificationStore::testIt()
     TS_ASSERT_EQUALS(store.getNumMessages(), 0U);
 
     // Add a message
-    game::interface::NotificationStore::Message* msg = store.addMessage(77777, "foo\n", "bar");
+    game::interface::NotificationStore::Message* msg = store.addMessage(77777, "foo\n", "bar", Reference(Reference::Ship, 77));
     TS_ASSERT(msg != 0);
     TS_ASSERT_EQUALS(store.getNumMessages(), 1U);
     TS_ASSERT_EQUALS(store.getMessageByIndex(0), msg);
@@ -44,10 +46,14 @@ TestGameInterfaceNotificationStore::testIt()
     TS_ASSERT_EQUALS(store.getMessageText(0, tx, list), "foo\nbar");
     TS_ASSERT_EQUALS(store.getMessageBody(msg), "bar");
     TS_ASSERT_EQUALS(store.getMessageBody(0), "");             // 0 is actually NULL
+    TS_ASSERT_EQUALS(store.getMessageMetadata(0, tx, list).primaryLink, Reference(Reference::Ship, 77));
+    TS_ASSERT_EQUALS(store.getMessageReplyText(0, tx, list), "> foo\n> bar\n");
+    TS_ASSERT_EQUALS(store.getMessageForwardText(0, tx, list), "--- Forwarded Message ---\nfoo\nbar\n--- End Forwarded Message ---");
+    TS_ASSERT_EQUALS(store.getMessageDisplayText(0, tx, list).getText(), "foo\nbar");
 
     // Add another message, associate that with a process
     interpreter::Process& proc = procList.create(world, "name");
-    game::interface::NotificationStore::Message* msg2 = store.addMessage(proc.getProcessId(), "foo2\n", "bar2");
+    game::interface::NotificationStore::Message* msg2 = store.addMessage(proc.getProcessId(), "foo2\n", "bar2", Reference());
     TS_ASSERT(msg2 != 0);
     TS_ASSERT(msg2 != msg);
     TS_ASSERT_EQUALS(store.getNumMessages(), 2U);
@@ -55,6 +61,8 @@ TestGameInterfaceNotificationStore::testIt()
     TS_ASSERT_EQUALS(store.getMessageHeading(1, tx, list), "foo2");
     TS_ASSERT_EQUALS(store.getMessageText(1, tx, list), "foo2\nbar2");
     TS_ASSERT_EQUALS(store.getMessageBody(msg2), "bar2");
+    TS_ASSERT_EQUALS(store.getMessageDisplayText(1, tx, list).getText().substr(0, 9), "foo2\nbar2");
+    TS_ASSERT(store.getMessageDisplayText(1, tx, list).getText().find("has been stopped") != String_t::npos);
 
     TS_ASSERT_EQUALS(store.findMessageByProcessId(proc.getProcessId()), msg2);
     TS_ASSERT(!store.findMessageByProcessId(88888));
@@ -82,11 +90,12 @@ TestGameInterfaceNotificationStore::testHeader()
     TS_ASSERT_EQUALS(store.getNumMessages(), 0U);
 
     // add a message
-    game::interface::NotificationStore::Message* msg = store.addMessage(77777, "(-s0123)<<< Ship Message >>>\nFROM: USS Kelvin\n\n", "Hi mom.");
+    game::interface::NotificationStore::Message* msg = store.addMessage(77777, "(-s0123)<<< Ship Message >>>\nFROM: USS Kelvin\n\n", "Hi mom.", Reference(Reference::Ship, 123));
     TS_ASSERT(msg != 0);
     TS_ASSERT_EQUALS(store.getNumMessages(), 1U);
     TS_ASSERT_EQUALS(store.getMessageByIndex(0), msg);
     TS_ASSERT_EQUALS(store.getMessageHeading(0, tx, list), "(-s) Ship Message");
+    TS_ASSERT_EQUALS(store.getMessageMetadata(0, tx, list).primaryLink, Reference(Reference::Ship, 123));
 }
 
 /** Test resumeConfirmedProcesses().
@@ -114,8 +123,8 @@ TestGameInterfaceNotificationStore::testResume()
     TS_ASSERT_EQUALS(p2.getState(), interpreter::Process::Suspended);
 
     // Messages for each
-    store.addMessage(p1.getProcessId(), "m1", "b");
-    store.addMessage(p2.getProcessId(), "m2", "b");
+    store.addMessage(p1.getProcessId(), "m1", "b", Reference());
+    store.addMessage(p2.getProcessId(), "m2", "b", Reference());
     TS_ASSERT_EQUALS(store.getNumMessages(), 2U);
 
     // Confirm m2
@@ -150,12 +159,12 @@ TestGameInterfaceNotificationStore::testReplace()
     TS_ASSERT_EQUALS(store.getNumMessages(), 0U);
 
     // Add a message
-    store.addMessage(77777, "h1", "b1");
+    store.addMessage(77777, "h1", "b1", Reference());
     TS_ASSERT_EQUALS(store.getNumMessages(), 1U);
     TS_ASSERT_EQUALS(store.getMessageHeading(0, tx, list), "h1");
 
     // Add another message with the same Id
-    store.addMessage(77777, "h2", "b2");
+    store.addMessage(77777, "h2", "b2", Reference());
     TS_ASSERT_EQUALS(store.getNumMessages(), 1U);
     TS_ASSERT_EQUALS(store.getMessageHeading(0, tx, list), "h2");
 }

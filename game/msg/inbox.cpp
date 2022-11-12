@@ -178,6 +178,7 @@ game::msg::Inbox::getMessageMetadata(size_t index, afl::string::Translator& tx, 
         const Format fmt = formatMessage(p->text, players, tx);
         md.turnNumber    = p->turnNumber;
         md.dataStatus    = p->dataStatus;
+        md.primaryLink   = fmt.headerLink;
         md.secondaryLink = fmt.firstLink;
         md.reply         = fmt.reply;
         md.replyAll      = fmt.replyAll;

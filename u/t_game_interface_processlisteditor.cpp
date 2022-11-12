@@ -226,7 +226,7 @@ TestGameInterfaceProcessListEditor::testNotification()
     ProcessListEditor t(h.list);
     afl::test::Translator tx("<", ">");
 
-    h.notif.addMessage(h.p1.getProcessId(), "header", "body");
+    h.notif.addMessage(h.p1.getProcessId(), "header", "body", game::Reference());
 
     ProcessListEditor::Info info;
     TS_ASSERT_EQUALS(t.describe(0, info, h.notif, tx), true);
@@ -243,7 +243,7 @@ TestGameInterfaceProcessListEditor::testReadNotification()
     ProcessListEditor t(h.list);
     afl::test::Translator tx("<", ">");
 
-    h.notif.confirmMessage(h.notif.addMessage(h.p1.getProcessId(), "header", "body"), true);
+    h.notif.confirmMessage(h.notif.addMessage(h.p1.getProcessId(), "header", "body", game::Reference()), true);
 
     ProcessListEditor::Info info;
     TS_ASSERT_EQUALS(t.describe(0, info, h.notif, tx), true);

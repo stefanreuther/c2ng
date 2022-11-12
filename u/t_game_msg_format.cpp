@@ -43,6 +43,7 @@ TestGameMsgFormat::testFormatMessage()
                                                          "781 Minen und hat einen\n"
                                                          "Durchmesser von 54 Lichtjahren.\n", playerList, tx);
         TS_ASSERT_EQUALS(msg.firstLink, game::Reference(game::map::Point(2185, 1610)));
+        TS_ASSERT_EQUALS(msg.headerLink, game::Reference(game::Reference::Minefield, 90));
         TS_ASSERT_EQUALS(msg.reply, game::PlayerSet_t());
         TS_ASSERT_EQUALS(msg.replyAll, game::PlayerSet_t());
     }
@@ -60,6 +61,7 @@ TestGameMsgFormat::testFormatMessage()
                                                          "structure decay  1    \n", playerList, tx);
 
         TS_ASSERT_EQUALS(msg.firstLink, game::Reference());
+        TS_ASSERT_EQUALS(msg.headerLink, game::Reference());
         TS_ASSERT_EQUALS(msg.reply, game::PlayerSet_t(0));
         TS_ASSERT_EQUALS(msg.replyAll, game::PlayerSet_t(0));
     }
@@ -72,6 +74,7 @@ TestGameMsgFormat::testFormatMessage()
                                                          "\n"
                                                          "next host: when you're done\n", playerList, tx);
         TS_ASSERT_EQUALS(msg.firstLink, game::Reference());
+        TS_ASSERT_EQUALS(msg.headerLink, game::Reference());
         TS_ASSERT_EQUALS(msg.reply, game::PlayerSet_t(0));
         TS_ASSERT_EQUALS(msg.replyAll, game::PlayerSet_t::allUpTo(11));
     }
@@ -87,6 +90,7 @@ TestGameMsgFormat::testFormatMessage()
                                                          "(-f0263)<<< Fleet Message >>>\n"
                                                          "Aeolos suXa domeol\n", playerList, tx);
         TS_ASSERT_EQUALS(msg.firstLink, game::Reference());
+        TS_ASSERT_EQUALS(msg.headerLink, game::Reference());
         TS_ASSERT_EQUALS(msg.reply, game::PlayerSet_t(2));
         TS_ASSERT_EQUALS(msg.replyAll, game::PlayerSet_t() + 2 + 6 + 8 + 9 + 10);
     }
@@ -102,6 +106,7 @@ TestGameMsgFormat::testFormatMessage()
                                                          "(-f0263)<<< Fleet Message >>>\n"
                                                          "Aeolos suXa domeol\n", playerList, tx);
         TS_ASSERT_EQUALS(msg.firstLink, game::Reference());
+        TS_ASSERT_EQUALS(msg.headerLink, game::Reference());
         TS_ASSERT_EQUALS(msg.reply, game::PlayerSet_t(2));
         TS_ASSERT_EQUALS(msg.replyAll, game::PlayerSet_t() + 2 + 6 + 8 + 9);
     }
@@ -116,6 +121,7 @@ TestGameMsgFormat::testFormatMessage()
                                                          "--- Forwarded Message ---\n"
                                                          "(-lame!)<<< Sub Space Message >>>\n", playerList, tx);
         TS_ASSERT_EQUALS(msg.firstLink, game::Reference());
+        TS_ASSERT_EQUALS(msg.headerLink, game::Reference());
         TS_ASSERT_EQUALS(msg.reply, game::PlayerSet_t(9));
         TS_ASSERT_EQUALS(msg.replyAll, game::PlayerSet_t::allUpTo(11) - 0);
     }
@@ -141,6 +147,7 @@ TestGameMsgFormat::testFormatMessage()
                                                          "\n"
                                                          "ship slots : 19 used, 481 empty\n", playerList, tx);
         TS_ASSERT_EQUALS(msg.firstLink, game::Reference());
+        TS_ASSERT_EQUALS(msg.headerLink, game::Reference());
         TS_ASSERT_EQUALS(msg.reply, game::PlayerSet_t());
         TS_ASSERT_EQUALS(msg.replyAll, game::PlayerSet_t());
     }
@@ -154,6 +161,7 @@ TestGameMsgFormat::testFormatMessage()
                                                          "i think fed and cyborg will win the\n"
                                                          "game.\n", playerList, tx);
         TS_ASSERT_EQUALS(msg.firstLink, game::Reference());
+        TS_ASSERT_EQUALS(msg.headerLink, game::Reference());
         TS_ASSERT_EQUALS(msg.reply, game::PlayerSet_t::allUpTo(11) - 0);
         TS_ASSERT_EQUALS(msg.replyAll, game::PlayerSet_t::allUpTo(11) - 0);
     }
@@ -166,6 +174,7 @@ TestGameMsgFormat::testFormatMessage()
                                                          "and ( 2392, 1823)\n"
                                                          " 1538 explosions detected!\n", playerList, tx);
         TS_ASSERT_EQUALS(msg.firstLink, game::Reference(game::map::Point(2385, 1796)));
+        TS_ASSERT_EQUALS(msg.headerLink, game::Reference(game::Reference::Minefield, 5));
         TS_ASSERT_EQUALS(msg.reply, game::PlayerSet_t());
         TS_ASSERT_EQUALS(msg.replyAll, game::PlayerSet_t());
     }
@@ -179,8 +188,82 @@ TestGameMsgFormat::testFormatMessage()
                                                          "Thanks to all, see you in another universe!\n", playerList, tx);
 
         TS_ASSERT_EQUALS(msg.firstLink, game::Reference());
+        TS_ASSERT_EQUALS(msg.headerLink, game::Reference());
         TS_ASSERT_EQUALS(msg.reply, game::PlayerSet_t(1));
         TS_ASSERT_EQUALS(msg.replyAll, game::PlayerSet_t(1));
+    }
+
+    // - planet
+    {
+        game::msg::Format msg = game::msg::formatMessage("(-y0181)<<< Meteorbericht >>>\n"
+                                                         "\n"
+                                                         "Von: Planet Garon IV\n"
+                                                         "ID:  #181\n"
+                                                         "\n"
+                                                         "Meteoritenschauer! Es entstand\n"
+                                                         "kein nennenswerter Schaden. Die\n"
+                                                         "Meteoriten bestanden aus\n"
+                                                         "...\n", playerList, tx);
+
+        TS_ASSERT_EQUALS(msg.firstLink, game::Reference());
+        TS_ASSERT_EQUALS(msg.headerLink, game::Reference(game::Reference::Planet, 181));
+        TS_ASSERT_EQUALS(msg.reply, game::PlayerSet_t());
+        TS_ASSERT_EQUALS(msg.replyAll, game::PlayerSet_t());
+    }
+
+    // - ship
+    {
+        game::msg::Format msg = game::msg::formatMessage("(-s0010)<< Transporter Log >>\n"
+                                                         "\n"
+                                                         "From: Incompetent Freedom\n"
+                                                         "Trying to beam cargo up from\n"
+                                                         "another race's planet #365\n"
+                                                         "Qvarne\n"
+                                                         " 0 KT of neutronium\n"
+                                                         "beamed up from the surface\n", playerList, tx);
+
+        TS_ASSERT_EQUALS(msg.firstLink, game::Reference());
+        TS_ASSERT_EQUALS(msg.headerLink, game::Reference(game::Reference::Ship, 10));
+        TS_ASSERT_EQUALS(msg.reply, game::PlayerSet_t());
+        TS_ASSERT_EQUALS(msg.replyAll, game::PlayerSet_t());
+    }
+
+    // - ion storm
+    {
+        game::msg::Format msg = game::msg::formatMessage("(-i0036)<<< ION Advisory >>>\n"
+                                                         "Ion Disturbance\n"
+                                                         "ID Number:  36\n"
+                                                         "Centered At: (  1762, 2067)\n"
+                                                         "East of \n"
+                                                         "Planet ID Number  60\n"
+                                                         " 86 LY from planet\n"
+                                                         "Voltage : 123\n"
+                                                         "Heading : 77\n"
+                                                         "Speed   :  Warp 6\n"
+                                                         "Radius  : 152\n"
+                                                         "Class :  Level 3\n"
+                                                         "  Strong\n"
+                                                         "System is growing\n", playerList, tx);
+
+        TS_ASSERT_EQUALS(msg.firstLink, game::Reference(game::map::Point(1762, 2067)));
+        TS_ASSERT_EQUALS(msg.headerLink, game::Reference(game::Reference::Storm, 36));
+        TS_ASSERT_EQUALS(msg.reply, game::PlayerSet_t());
+        TS_ASSERT_EQUALS(msg.replyAll, game::PlayerSet_t());
+    }
+
+    // - space dock
+    {
+        game::msg::Format msg = game::msg::formatMessage("(-d0279)<<< Space Dock Message >>>\n"
+                                                         "\n"
+                                                         "A new VICTORIOUS CLASS BATTLESHIP\n"
+                                                         "Has been constructed\n"
+                                                         "at Pedmont\n"
+                                                         "space dock.\n", playerList, tx);
+
+        TS_ASSERT_EQUALS(msg.firstLink, game::Reference());
+        TS_ASSERT_EQUALS(msg.headerLink, game::Reference(game::Reference::Starbase, 279));
+        TS_ASSERT_EQUALS(msg.reply, game::PlayerSet_t());
+        TS_ASSERT_EQUALS(msg.replyAll, game::PlayerSet_t());
     }
 }
 

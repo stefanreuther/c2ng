@@ -127,7 +127,7 @@ TestGameProxyProcessListProxy::testResumeConfirmed()
     interpreter::Process& p3 = s.session().processList().create(w, "p3");
 
     // Messages
-    game::interface::NotificationStore::Message* msg = s.session().notifications().addMessage(p2.getProcessId(), "header", "body");
+    game::interface::NotificationStore::Message* msg = s.session().notifications().addMessage(p2.getProcessId(), "header", "body", game::Reference());
     s.session().notifications().confirmMessage(msg, true);
 
     // Testee

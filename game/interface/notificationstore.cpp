@@ -22,6 +22,7 @@
 
 #include "game/interface/notificationstore.hpp"
 #include "game/interface/processlisteditor.hpp"
+#include "game/msg/format.hpp"
 #include "interpreter/process.hpp"
 #include "util/unicodechars.hpp"
 
@@ -30,12 +31,14 @@ struct game::interface::NotificationStore::Message {
     bool confirmed;
     String_t header;
     String_t body;
+    Reference ref;
 
-    Message(ProcessAssociation_t assoc, String_t header, String_t body)
+    Message(ProcessAssociation_t assoc, String_t header, String_t body, Reference ref)
         : assoc(assoc),
           confirmed(false),
           header(header),
-          body(body)
+          body(body),
+          ref(ref)
         { }
 };
 
@@ -81,7 +84,7 @@ game::interface::NotificationStore::getMessageByIndex(size_t index) const
 
 // Add new message.
 game::interface::NotificationStore::Message*
-game::interface::NotificationStore::addMessage(ProcessAssociation_t assoc, String_t header, String_t body)
+game::interface::NotificationStore::addMessage(ProcessAssociation_t assoc, String_t header, String_t body, Reference ref)
 {
     // ex IntNotificationMessageStore::addNewMessage (sort-of)
     // Remove previous message
@@ -91,7 +94,7 @@ game::interface::NotificationStore::addMessage(ProcessAssociation_t assoc, Strin
     }
 
     // Add new one
-    return m_messages.pushBackNew(new Message(assoc, header, body));
+    return m_messages.pushBackNew(new Message(assoc, header, body, ref));
 }
 
 // Check whether message is confirmed.
@@ -255,13 +258,16 @@ game::interface::NotificationStore::getMessageHeading(size_t index, afl::string:
 }
 
 game::msg::Mailbox::Metadata
-game::interface::NotificationStore::getMessageMetadata(size_t index, afl::string::Translator& /*tx*/, const PlayerList& /*players*/) const
+game::interface::NotificationStore::getMessageMetadata(size_t index, afl::string::Translator& tx, const PlayerList& players) const
 {
     Metadata md;
     if (const Message* msg = getMessageByIndex(index)) {
+        const game::msg::Format fmt = game::msg::formatMessage(msg->header + msg->body, players, tx);
         if (isMessageConfirmed(msg)) {
             md.flags += Confirmed;
         }
+        md.primaryLink = fmt.headerLink.orElse(msg->ref);
+        md.secondaryLink = fmt.firstLink;
     }
     return md;
 }

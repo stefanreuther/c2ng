@@ -5,12 +5,13 @@
 #ifndef C2NG_GAME_INTERFACE_NOTIFICATIONSTORE_HPP
 #define C2NG_GAME_INTERFACE_NOTIFICATIONSTORE_HPP
 
+#include "afl/base/optional.hpp"
+#include "afl/base/types.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "afl/string/string.hpp"
-#include "afl/base/types.hpp"
-#include "afl/base/optional.hpp"
-#include "interpreter/processlist.hpp"
 #include "game/msg/mailbox.hpp"
+#include "game/reference.hpp"
+#include "interpreter/processlist.hpp"
 
 namespace game { namespace interface {
 
@@ -59,8 +60,9 @@ namespace game { namespace interface {
         /** Add new message.
             \param assoc Optional process Id
             \param header Message header (should contain \n separator)
-            \param body Message body (concatenated to body for message text) */
-        Message* addMessage(ProcessAssociation_t assoc, String_t header, String_t body);
+            \param body Message body (concatenated to body for message text)
+            \param ref Associated object Id */
+        Message* addMessage(ProcessAssociation_t assoc, String_t header, String_t body, Reference ref);
 
         /** Check whether message is confirmed.
             \param msg Message to check
