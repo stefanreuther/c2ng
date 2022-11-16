@@ -23,6 +23,7 @@ namespace game { namespace v3 {
                             afl::sys::LogListener& log);
 
         virtual std::auto_ptr<Task_t> loadShipList(game::spec::ShipList& list, game::Root& root, std::auto_ptr<StatusTask_t> then);
+        virtual afl::base::Ref<afl::io::Stream> openSpecificationFile(const String_t& fileName);
 
         void loadBeams(game::spec::ShipList& list, afl::io::Directory& dir);
         void loadLaunchers(game::spec::ShipList& list, afl::io::Directory& dir);

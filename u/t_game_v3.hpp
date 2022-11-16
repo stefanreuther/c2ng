@@ -257,6 +257,7 @@ class TestGameV3SpecificationLoader : public CxxTest::TestSuite {
     void testHullfuncAssignmentLevel();
     void testLoadFCodes();
     void testLoadMissions();
+    void testOpenSpecFile();
 };
 
 class TestGameV3StringVerifier : public CxxTest::TestSuite {

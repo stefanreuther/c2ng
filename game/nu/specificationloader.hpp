@@ -21,6 +21,7 @@ namespace game { namespace nu {
         ~SpecificationLoader();
 
         virtual std::auto_ptr<Task_t> loadShipList(game::spec::ShipList& list, Root& root, std::auto_ptr<StatusTask_t> then);
+        virtual afl::base::Ref<afl::io::Stream> openSpecificationFile(const String_t& fileName);
 
      private:
         afl::base::Ref<GameState> m_gameState;

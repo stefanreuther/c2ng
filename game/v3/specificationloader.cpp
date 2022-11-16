@@ -384,6 +384,12 @@ game::v3::SpecificationLoader::loadShipList(game::spec::ShipList& list, game::Ro
     return std::auto_ptr<Task_t>(new Task(*this, list, root, then));
 }
 
+afl::base::Ref<afl::io::Stream>
+game::v3::SpecificationLoader::openSpecificationFile(const String_t& fileName)
+{
+    return m_directory->openFile(fileName, afl::io::FileSystem::OpenRead);
+}
+
 void
 game::v3::SpecificationLoader::loadBeams(game::spec::ShipList& list, afl::io::Directory& dir)
 {

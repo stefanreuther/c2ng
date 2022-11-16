@@ -835,3 +835,21 @@ TestGameV3SpecificationLoader::testLoadMissions()
     TS_ASSERT_EQUALS(p->getHotkey(), '7');
 }
 
+void
+TestGameV3SpecificationLoader::testOpenSpecFile()
+{
+    Environment env;
+    env.addStream("beamspec.dat", BEAMSPEC);
+
+    std::auto_ptr<Charset> charset(new CodepageCharset(afl::charset::g_codepage437));
+    NullTranslator tx;
+    Log log;
+    SpecificationLoader testee(env.dir, charset, tx, log);
+
+    // Existing file
+    TS_ASSERT_EQUALS(testee.openSpecificationFile("beamspec.dat")->getSize(), sizeof(BEAMSPEC));
+
+    // Nonexistant file
+    TS_ASSERT_THROWS(testee.openSpecificationFile("other.dat"), afl::except::FileProblemException);
+}
+

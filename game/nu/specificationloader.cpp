@@ -3,13 +3,15 @@
   */
 
 #include "game/nu/specificationloader.hpp"
-#include "game/spec/hull.hpp"
-#include "game/spec/beam.hpp"
-#include "game/spec/torpedolauncher.hpp"
-#include "game/spec/engine.hpp"
+#include "afl/except/fileproblemexception.hpp"
 #include "afl/string/format.hpp"
+#include "afl/string/messages.hpp"
 #include "afl/string/parse.hpp"
 #include "game/root.hpp"
+#include "game/spec/beam.hpp"
+#include "game/spec/engine.hpp"
+#include "game/spec/hull.hpp"
+#include "game/spec/torpedolauncher.hpp"
 
 namespace gs = game::spec;
 using afl::string::Format;
@@ -127,6 +129,12 @@ game::nu::SpecificationLoader::loadShipList(game::spec::ShipList& list, Root& ro
         std::auto_ptr<StatusTask_t> m_then;
     };
     return m_gameState->login(std::auto_ptr<Task_t>(new Task(*this, list, root, then)));
+}
+
+afl::base::Ref<afl::io::Stream>
+game::nu::SpecificationLoader::openSpecificationFile(const String_t& fileName)
+{
+    throw afl::except::FileProblemException(fileName, afl::string::Messages::fileNotFound());
 }
 
 void

@@ -8,8 +8,10 @@
 #include <memory>
 #include "afl/base/deletable.hpp"
 #include "afl/base/refcounted.hpp"
+#include "afl/io/stream.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/task.hpp"
+#include "afl/base/ref.hpp"
 
 namespace game {
 
@@ -26,6 +28,14 @@ namespace game {
             This function is passed a Root, mainly for consulatation of configuration stuff.
             However, loading the specification may provide new information (e.g. Nu provides server-side race names). */
         virtual std::auto_ptr<Task_t> loadShipList(game::spec::ShipList& list, Root& root, std::auto_ptr<StatusTask_t> then) = 0;
+
+        /** Open file in the specification directory.
+            Looks for the file in all appropriate places, in correct order.
+            Opens the file for reading.
+            \param fileName  Name
+            \return file stream
+            \throw FileProblemException if file does not exist */
+        virtual afl::base::Ref<afl::io::Stream> openSpecificationFile(const String_t& fileName) = 0;
     };
 
 }
