@@ -12,7 +12,11 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/msg/mailbox.cpp game/parser/informationconsumer.cpp \
+FILES_gamelib = game/v3/udata/sessionnameprovider.cpp \
+    game/v3/udata/sessionnameprovider.hpp game/v3/udata/nameprovider.hpp \
+    game/v3/udata/messagebuilder.cpp game/v3/udata/messagebuilder.hpp \
+    game/interface/mailboxcontext.cpp game/interface/mailboxcontext.hpp \
+    game/msg/mailbox.cpp game/parser/informationconsumer.cpp \
     game/parser/informationconsumer.hpp game/msg/format.cpp \
     game/msg/format.hpp game/parser/binarytransfer.cpp \
     game/parser/binarytransfer.hpp game/proxy/pluginmanagerproxy.cpp \
@@ -1734,10 +1738,13 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_msg_format.cpp u/t_game_parser_binarytransfer.cpp \
-    u/t_client_widgets_pluginlist.cpp u/t_client_widgets.hpp \
-    u/t_game_proxy_pluginmanagerproxy.cpp u/t_game_interface_plugins.cpp \
-    u/t_game_interface_plugincontext.cpp \
+FILES_testsuite = u/t_game_interface_mailboxcontext.cpp \
+    u/t_game_v3_udata_nameprovider.cpp \
+    u/t_game_v3_udata_sessionnameprovider.cpp \
+    u/t_game_v3_udata_messagebuilder.cpp u/t_game_msg_format.cpp \
+    u/t_game_parser_binarytransfer.cpp u/t_client_widgets_pluginlist.cpp \
+    u/t_client_widgets.hpp u/t_game_proxy_pluginmanagerproxy.cpp \
+    u/t_game_interface_plugins.cpp u/t_game_interface_plugincontext.cpp \
     u/t_game_interface_configurationeditorcontext.cpp \
     u/t_interpreter_variablereference.cpp \
     u/t_game_interface_globalactioncontext.cpp \

@@ -24,6 +24,7 @@
 #include "game/interface/inboxfunction.hpp"
 #include "game/interface/ionstormfunction.hpp"
 #include "game/interface/iteratorcontext.hpp"
+#include "game/interface/mailboxcontext.hpp"
 #include "game/interface/minefieldfunction.hpp"
 #include "game/interface/missionfunction.hpp"
 #include "game/interface/notificationfunctions.hpp"
@@ -616,6 +617,7 @@ game::Session::initWorld()
     m_world.setNewGlobalValue("REFERENCE",         new SessionFunction_t(*this, game::interface::IFReference));
     m_world.setNewGlobalValue("LOCATIONREFERENCE", new SessionFunction_t(*this, game::interface::IFLocationReference));
     m_world.setNewGlobalValue("REFERENCELIST",     new SessionFunction_t(*this, game::interface::IFReferenceList));
+    m_world.setNewGlobalValue("MAILBOX"      ,     new SessionFunction_t(*this, game::interface::IFMailbox));
 
     m_world.setNewGlobalValue("CC$SELREADHEADER",  new SessionFunction_t(*this, game::interface::IFCCSelReadHeader));
     m_world.setNewGlobalValue("CC$SELREADCONTENT", new SessionFunction_t(*this, game::interface::IFCCSelReadContent));

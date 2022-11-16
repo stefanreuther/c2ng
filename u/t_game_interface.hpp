@@ -187,6 +187,14 @@ class TestGameInterfaceLabelVector : public CxxTest::TestSuite {
     void testCompile();
 };
 
+class TestGameInterfaceMailboxContext : public CxxTest::TestSuite {
+ public:
+    void testBasics();
+    void testAdd();
+    void testLoadUtilData();
+    void testInterface();
+};
+
 class TestGameInterfaceMissionContext : public CxxTest::TestSuite {
  public:
     void testIt();

@@ -93,6 +93,7 @@
 #include "game/interface/basetaskbuildcommandparser.hpp"
 #include "game/interface/configurationeditorcontext.hpp"
 #include "game/interface/globalactioncontext.hpp"
+#include "game/interface/mailboxcontext.hpp"
 #include "game/interface/planetmethod.hpp"
 #include "game/interface/plugincontext.hpp"
 #include "game/interface/referencelistcontext.hpp"
@@ -125,6 +126,8 @@
 #include "game/searchquery.hpp"
 #include "game/sim/sessionextra.hpp"
 #include "game/turn.hpp"
+#include "game/v3/commandcontainer.hpp"
+#include "game/v3/commandextra.hpp"
 #include "game/v3/genextra.hpp"
 #include "game/v3/genfile.hpp"
 #include "interpreter/arguments.hpp"
@@ -145,8 +148,6 @@
 #include "util/rich/parser.hpp"
 #include "util/rich/text.hpp"
 #include "util/unicodechars.hpp"
-#include "game/v3/commandcontainer.hpp"
-#include "game/v3/commandextra.hpp"
 
 using afl::string::Format;
 using client::ScreenHistory;
@@ -2874,6 +2875,64 @@ client::si::IFCCViewInbox(game::Session& session, ScriptSide& si, RequestLink1 l
     si.postNewTask(link, new ViewMailboxTask(game::proxy::makeInboxAdaptor()));
 }
 
+// @since PCC2 2.41
+void
+client::si::IFCCViewMailbox(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // Check parameter
+    args.checkArgumentCount(1);
+    afl::data::Value* p = args.getNext();
+    if (p == 0) {
+        return;
+    }
+    if (dynamic_cast<game::interface::MailboxContext*>(p) == 0) {
+        throw interpreter::Error::typeError();
+    }
+
+    // Save the variable
+    VariableReference ref = VariableReference::Maker(link.getProcess()).make("CC$MBOX", p);
+
+    // Adaptor
+    class Adaptor : public game::proxy::MailboxAdaptor {
+     public:
+        Adaptor(game::Session& session, const VariableReference& ref)
+            : m_session(session), m_ref(ref)
+            { }
+        virtual game::Session& session() const
+            { return m_session; }
+        virtual game::msg::Mailbox& mailbox() const
+            {
+                game::interface::MailboxContext* p = dynamic_cast<game::interface::MailboxContext*>(m_ref.get(m_session.processList()));
+                if (p == 0) {
+                    throw interpreter::Error("No mailbox");
+                }
+                return p->mailbox();
+            }
+        virtual game::msg::Configuration* getConfiguration() const
+            { return 0; /* FIXME? */ }
+        virtual size_t getCurrentMessage() const
+            { return 0; }
+        virtual void setCurrentMessage(size_t /*n*/)
+            { }
+     private:
+        game::Session& m_session;
+        VariableReference m_ref;
+    };
+    class AdaptorFromSession : public afl::base::Closure<game::proxy::MailboxAdaptor*(game::Session&)> {
+     public:
+        AdaptorFromSession(const VariableReference& ref)
+            : m_ref(ref)
+            { }
+        virtual Adaptor* call(game::Session& session)
+            { return new Adaptor(session, m_ref); }
+     private:
+        VariableReference m_ref;
+    };
+
+    // Call UI
+    si.postNewTask(link, new ViewMailboxTask(new AdaptorFromSession(ref)));
+}
+
 // @since PCC2 2.40.10
 void
 client::si::IFCCViewMessages(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
@@ -4681,6 +4740,7 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("CC$USEKEYMAP",          new ScriptProcedure(s, &si, IFCCUseKeymap));
                 s.world().setNewGlobalValue("CC$VIEWCOMBAT",         new ScriptProcedure(s, &si, IFCCViewCombat));
                 s.world().setNewGlobalValue("CC$VIEWINBOX",          new ScriptProcedure(s, &si, IFCCViewInbox));
+                s.world().setNewGlobalValue("CC$VIEWMAILBOX",        new ScriptProcedure(s, &si, IFCCViewMailbox));
                 s.world().setNewGlobalValue("CC$VIEWMESSAGES",       new ScriptProcedure(s, &si, IFCCViewMessages));
                 s.world().setNewGlobalValue("CC$VIEWNOTIFICATIONS",  new ScriptProcedure(s, &si, IFCCViewNotifications));
                 s.world().setNewGlobalValue("CHART.SETVIEW",         new ScriptProcedure(s, &si, IFChartSetView));

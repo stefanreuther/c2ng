@@ -678,6 +678,7 @@ Bind RaceScreen       "alt-q"  := "CC$ProcessManager"
 Bind RaceScreen       "s"      := "UI.ShowScores"
 Bind RaceScreen       "c-s"    := "SaveGame"
 Bind RaceScreen       "t"      := "UI.EditTeams"
+Bind RaceScreen       "alt-u"  := "CCUI.Messages.ViewUtilData"
 Bind RaceScreen       "v"      := "CC$ViewCombat"
 Bind RaceScreen       "w"      := "CC$SendMessage"
 

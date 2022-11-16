@@ -1861,6 +1861,24 @@ Sub CCUI.Task.AddWaitOneTurn
   CCUI.Task.AddCommand "WaitOneTurn"
 EndSub
 
+
+%
+%  Messages
+%
+
+% @since PCC2 2.41
+Sub CCUI.Messages.ViewUtilData
+  Local System.Err
+  Dim m As Mailbox
+  Try
+    Call m->LoadUtilData
+    CC$ViewMailbox m
+  Else
+    UI.Message Format("%s: %s", Translate("Unable to view utility data file"), System.Err)
+  EndTry
+EndSub
+
+
 %
 %  Menus
 %
