@@ -25,6 +25,17 @@ class TestGameMsgConfiguration : public CxxTest::TestSuite {
     void testSaveEmpty();
 };
 
+class TestGameMsgFile : public CxxTest::TestSuite {
+ public:
+    void testWriteSingle();
+    void testWriteMulti();
+    void testWriteDifferentTurns();
+    void testLoad();
+    void testLoadEmpty();
+    void testLoadUndelimited();
+    void testLoadTurn();
+};
+
 class TestGameMsgFormat : public CxxTest::TestSuite {
  public:
     void testFormatMessage();

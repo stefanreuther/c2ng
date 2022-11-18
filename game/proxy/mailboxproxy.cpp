@@ -10,6 +10,7 @@
 #include "game/actions/preconditions.hpp"
 #include "game/game.hpp"
 #include "game/msg/configuration.hpp"
+#include "game/msg/file.hpp"
 #include "game/msg/outbox.hpp"
 #include "game/parser/informationconsumer.hpp"
 #include "game/playerset.hpp"
@@ -125,16 +126,7 @@ game::proxy::MailboxProxy::Trampoline::write(const String_t& fileName, size_t fi
             // anything else, anyway.
             afl::io::TextFile tf(*s);
             tf.setCharsetNew(r->charset().clone());
-
-            // Turn number
-            tf.writeLine(Format("=== Turn %d ===", mbox.getMessageMetadata(first, session.translator(), r->playerList()).turnNumber));
-            if (last > first+1) {
-                tf.writeLine(Format("   %d message(s)", last-first));
-            }
-            for (size_t i = first; i < last; ++i) {
-                tf.writeLine(Format("--- Message %d ---", i+1));
-                tf.writeLine(mbox.getMessageText(i, session.translator(), r->playerList()));
-            }
+            game::msg::writeMessages(tf, mbox, first, last, r->playerList(), session.translator());
             tf.flush();
         }
         catch (std::exception& e) {

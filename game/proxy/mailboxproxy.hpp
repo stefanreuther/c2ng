@@ -130,7 +130,8 @@ namespace game { namespace proxy {
             \param [in] last       Last message index, exclusive
             \param [out] errorMessage Error message on failure
             \retval true success
-            \retval false error; errorMessage has been set */
+            \retval false error; errorMessage has been set
+            \see game::msg::writeMessages */
         bool write(WaitIndicator& ind, const String_t& fileName, size_t first, size_t last, String_t& errorMessage);
 
         /** Toggle whether heading is filtered.

@@ -192,6 +192,7 @@ class TestGameInterfaceMailboxContext : public CxxTest::TestSuite {
     void testBasics();
     void testAdd();
     void testLoadUtilData();
+    void testLoadFile();
     void testInterface();
 };
 

@@ -1878,6 +1878,30 @@ Sub CCUI.Messages.ViewUtilData
   EndTry
 EndSub
 
+% @since PCC2 2.41
+Sub CCUI.Messages.ViewFile
+  % ex cc.pas:ReadFileMbox
+  Local System.Err, fd, fname, UI.Result
+  Dim m As Mailbox
+
+  UI.FileWindow Translate("View Mailbox"), "*.*"
+  If IsEmpty(UI.Result) Then Return
+  fname := UI.Result
+
+  fd := FreeFile()
+  Try
+    Open fname For Input As #fd
+  Else
+    UI.Message Format("%s: %s", fname, System.Err), Translate("View Mailbox")
+    Return
+  EndTry
+
+  Call m->LoadFile, #fd
+  Close #fd
+
+  CC$ViewMailbox m
+EndSub
+
 
 %
 %  Menus

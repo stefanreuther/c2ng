@@ -7,8 +7,10 @@
 
 #include "t_game_interface.hpp"
 #include "afl/charset/utf8charset.hpp"
+#include "afl/io/constmemorystream.hpp"
 #include "afl/io/internaldirectory.hpp"
 #include "afl/io/nullfilesystem.hpp"
+#include "afl/io/nullstream.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "game/game.hpp"
 #include "game/interface/referencecontext.hpp"
@@ -18,7 +20,6 @@
 #include "interpreter/callablevalue.hpp"
 #include "interpreter/test/contextverifier.hpp"
 #include "interpreter/vmio/nullsavecontext.hpp"
-#include "afl/io/nullstream.hpp"
 
 using afl::base::Ref;
 using afl::io::InternalDirectory;
@@ -197,6 +198,72 @@ TestGameInterfaceMailboxContext::testLoadUtilData()
     TS_ASSERT_EQUALS(ctx->mailbox().getMessageMetadata(1, tx, players).primaryLink, game::Reference(game::Reference::Ship, 37));
 }
 
+
+void
+TestGameInterfaceMailboxContext::testLoadFile()
+{
+    // Arbitrary file descriptor to use
+    const int FD = 5;
+
+    // Test file (valid output test case)
+    const char*const FILE =
+        "=== Turn 10 ===\n"
+        "   2 message(s)\n"
+        "--- Message 2 ---\n"
+        "second header\n"
+        "second body\n"
+        "\n"
+        "--- Message 3 ---\n"
+        "(-r3000)<<< Data Transmission >>>\n"
+        "<<< VPA Data Transmission >>>\n\n"
+        "OBJECT: Mine field 61\n"
+        "DATA: 2094989326\n"
+        "ocaalekakbhadaaaijmcaaaaaaaa\n";
+
+    // Create
+    afl::io::NullFileSystem fs;
+    afl::string::NullTranslator tx;
+    game::Session session(tx, fs);
+
+    // Provide test file
+    session.world().fileTable().openFile(FD, *new afl::io::ConstMemoryStream(afl::string::toBytes(FILE)));
+
+    // Test
+    std::auto_ptr<game::interface::MailboxContext> ctx(game::interface::MailboxContext::create(session));
+    TS_ASSERT(ctx.get() != 0);
+
+    // Retrieve loader
+    interpreter::test::ContextVerifier verif(*ctx, "testLoadFile");
+    std::auto_ptr<afl::data::Value> load(verif.getValue("LOADFILE"));
+
+    interpreter::CallableValue* cvLoad = dynamic_cast<interpreter::CallableValue*>(load.get());
+    TS_ASSERT(cvLoad != 0);
+    TS_ASSERT(cvLoad->isProcedureCall());
+
+    // Invoke loader
+    interpreter::Process proc(session.world(), "testLoadFile", 99);
+    afl::data::Segment args;
+    args.pushBackInteger(FD);
+    cvLoad->call(proc, args, false);
+
+    // Verify result
+    game::PlayerList players;
+    TS_ASSERT_EQUALS(ctx->mailbox().getNumMessages(), 2U);
+    TS_ASSERT_EQUALS(ctx->mailbox().getMessageText(0, tx, players),
+                     "second header\n"
+                     "second body\n");
+    TS_ASSERT_EQUALS(ctx->mailbox().getMessageText(1, tx, players),
+                     "(-r3000)<<< Data Transmission >>>\n"
+                     "<<< VPA Data Transmission >>>\n\n"
+                     "OBJECT: Mine field 61\n"
+                     "DATA: 2094989326\n"
+                     "ocaalekakbhadaaaijmcaaaaaaaa\n");
+    TS_ASSERT_EQUALS(ctx->mailbox().getMessageMetadata(0, tx, players).turnNumber, 10);
+    TS_ASSERT_EQUALS(ctx->mailbox().getMessageMetadata(1, tx, players).turnNumber, 10);
+    TS_ASSERT_EQUALS(ctx->mailbox().getMessageMetadata(0, tx, players).primaryLink, game::Reference());
+    TS_ASSERT_EQUALS(ctx->mailbox().getMessageMetadata(1, tx, players).primaryLink, game::Reference(game::Reference::Minefield, 61));
+}
+
 /** Test public interface. */
 void
 TestGameInterfaceMailboxContext::testInterface()
@@ -224,4 +291,3 @@ TestGameInterfaceMailboxContext::testInterface()
         TS_ASSERT_THROWS(p.reset(game::interface::IFMailbox(session, args)), interpreter::Error);
     }
 }
-

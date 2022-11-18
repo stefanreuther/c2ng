@@ -9,6 +9,7 @@
 #include "game/exception.hpp"
 #include "game/game.hpp"
 #include "game/interface/referencecontext.hpp"
+#include "game/msg/file.hpp"
 #include "game/root.hpp"
 #include "game/specificationloader.hpp"
 #include "game/turn.hpp"
@@ -76,6 +77,20 @@ namespace {
         }
     }
 
+    // @since PCC2 2.41
+    void IFMailbox_LoadFile(Data d, interpreter::Process& proc, interpreter::Arguments& args)
+    {
+        // LoadFile #fd
+        args.checkArgumentCount(1);
+
+        afl::io::TextFile* tf = 0;
+        if (!proc.world().fileTable().checkFileArg(tf, args.getNext())) {
+            return;
+        }
+
+        game::msg::loadMessages(*tf, *d.mailbox);
+    }
+
 
     /*
      *  Mapping
@@ -83,11 +98,13 @@ namespace {
 
     enum {
         mcAdd,
+        mcLoadFile,
         mcLoadUtilData
     };
 
     const interpreter::NameTable TABLE[] = {
         { "ADD",           mcAdd,          0, interpreter::thProcedure },
+        { "LOADFILE",      mcLoadFile,     0, interpreter::thProcedure },
         { "LOADUTILDATA",  mcLoadUtilData, 0, interpreter::thProcedure },
     };
 }
@@ -127,6 +144,8 @@ game::interface::MailboxContext::get(PropertyIndex_t index)
     switch (TABLE[index].index) {
      case mcAdd:
         return new interpreter::SimpleProcedure<Data>(Data(m_mailbox, m_session), IFMailbox_Add);
+     case mcLoadFile:
+        return new interpreter::SimpleProcedure<Data>(Data(m_mailbox, m_session), IFMailbox_LoadFile);
      case mcLoadUtilData:
         return new interpreter::SimpleProcedure<Data>(Data(m_mailbox, m_session), IFMailbox_LoadUtilData);
     }

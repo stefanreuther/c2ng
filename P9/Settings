@@ -12,7 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/v3/udata/sessionnameprovider.cpp \
+FILES_gamelib = game/msg/file.cpp game/msg/file.hpp \
+    game/v3/udata/sessionnameprovider.cpp \
     game/v3/udata/sessionnameprovider.hpp game/v3/udata/nameprovider.hpp \
     game/v3/udata/messagebuilder.cpp game/v3/udata/messagebuilder.hpp \
     game/interface/mailboxcontext.cpp game/interface/mailboxcontext.hpp \
@@ -1738,8 +1739,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_interface_mailboxcontext.cpp \
-    u/t_game_v3_udata_nameprovider.cpp \
+FILES_testsuite = u/t_game_msg_file.cpp \
+    u/t_game_interface_mailboxcontext.cpp u/t_game_v3_udata_nameprovider.cpp \
     u/t_game_v3_udata_sessionnameprovider.cpp \
     u/t_game_v3_udata_messagebuilder.cpp u/t_game_msg_format.cpp \
     u/t_game_parser_binarytransfer.cpp u/t_client_widgets_pluginlist.cpp \
