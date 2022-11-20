@@ -106,6 +106,13 @@ namespace {
          case game::parser::MessageInformation::PlayerScore:   return "PlayerScore";
          case game::parser::MessageInformation::Alliance:      return "Alliance";
          case game::parser::MessageInformation::NoObject:      return "NoObject";
+         case game::parser::MessageInformation::MarkerDrawing: return "MarkerDrawing";
+         case game::parser::MessageInformation::CircleDrawing: return "CircleDrawing";
+         case game::parser::MessageInformation::LineDrawing:   return "LineDrawing";
+         case game::parser::MessageInformation::RectangleDrawing: return "RectangleDrawing";
+         case game::parser::MessageInformation::ExtraShip:     return "ExtraShip";
+         case game::parser::MessageInformation::ExtraPlanet:   return "ExtraPlanet";
+         case game::parser::MessageInformation::ExtraMinefield: return "ExtraMinefield";
         }
         return "?";
     }
@@ -148,7 +155,7 @@ namespace {
             }
         }
     }
-    
+
     void parseMessages(const char* fn)
     {
         afl::base::Ref<afl::io::Stream> file = afl::io::FileSystem::getInstance().openFile(fn, afl::io::FileSystem::OpenRead);

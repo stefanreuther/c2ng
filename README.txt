@@ -18,11 +18,6 @@ WHAT IS PCC2 (c2ng)?
   PCC2. It is intended to be 100% compatible to PCC2. However, it does
   away with many self-imposed limitations of PCC2.
 
-  As of August 2022, c2ng is still incomplete, but should be playable.
-  End-users should remain with PCC2 or PCC1. However, the back-end
-  code is complete enough that c2ng now runs behind PlanetsCentral.com
-  exclusively.
-
 
 Project Goals
 --------------
@@ -47,8 +42,9 @@ Project Goals
 Status
 =======
 
-  This is a mostly complete, mostly usable Planets client. The GUI is
-  still rough at times.
+  This is a complete, playable Planets client at a feature level
+  comparable to PCC1/PCC2. The GUI is still rough at times, but we
+  have a rock-solid engine under the hood.
 
   Browsing and loading local and network games ................. done
     Browse your hard disk as well as network.
@@ -86,7 +82,7 @@ Status
   SDL2 ......................................................... done
     Milestone four can be built using SDL2.
 
-  All the features of PCC1/PCC2 ............................ 99% done
+  All the features of PCC1/PCC2 ......................... 99.99% done
 
 
 What can you do with it?
@@ -160,22 +156,13 @@ Program List
     . c2user-server: user manager
 
 
-Near Milestones
-----------------
-
-  - model the complete data and make it available for scripting
-    . v3 objects done now
-    . Nu advantages (map to racial abilities and configuration)
-  - more server integration
-  - fancier GUI
-  - more graphics resolutions!
-
-
 Future Milestones
 ------------------
 
-  - implement i18n
-  - implement help
+  - complete the Nu integration
+  - more server integration
+  - fancier GUI and more graphics resolutions!
+  - implement internationalisation and help
   - can we integrate forums/activities?
   - more operating systems (Android!)
   - C++11/17

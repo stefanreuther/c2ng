@@ -1,6 +1,15 @@
 PCC2ng NEWS FILE
 ================
 
+
+2.41
+----
+
+  Client reaches practical feature parity with PCC1/PCC2; only minor
+  details missing. Features added: configuration dialog and plugin
+  manager. Messenger features, in particular, VPA data transmissions.
+
+
 2.40.13
 -------
 
