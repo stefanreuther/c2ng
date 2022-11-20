@@ -36,6 +36,7 @@
 #include "server/host/talkadapter.hpp"
 #include "server/interface/baseclient.hpp"
 #include "server/interface/filebaseclient.hpp"
+#include "util/stringparser.hpp"
 
 using afl::string::Format;
 using afl::sys::LogListener;
@@ -150,6 +151,23 @@ namespace {
         }
     }
 
+    std::vector<int32_t> splitIntList(const String_t& s)
+    {
+        std::vector<int32_t> result;
+        util::StringParser p(s);
+        while (!p.parseEnd()) {
+            int iv;
+            if (p.parseInt(iv)) {
+                if (iv > 0) {
+                    result.push_back(iv);
+                }
+            } else {
+                p.consumeCharacter();
+            }
+        }
+        return result;
+    }
+
     void respawnGame(server::host::Root& root, Game& game)
     {
         // Get the game this is a copy of
@@ -160,10 +178,15 @@ namespace {
         Game copyOf(root, copyOfId);
 
         // If this is a respawn cycle, get that Id
-        int32_t newSourceId = copyOf.getConfigInt("copyNext");
-        if (newSourceId == 0) {
-            newSourceId = copyOfId;
+        // - copyNext: for a fixed cycle ("after A, always spawn B")
+        // - copyNextChoice: for a random choice ("after A, spawn B, C, or D")
+        std::vector<int32_t> candidates = splitIntList(copyOf.getConfig("copyNextChoice"));
+        if (int32_t copyNextId = copyOf.getConfigInt("copyNext")) {
+            candidates.push_back(copyNextId);
         }
+        const int32_t newSourceId = candidates.empty()
+            ? copyOfId
+            : candidates[root.rng()(uint16_t(candidates.size()))];
         Game newSource(root, newSourceId);
 
         // Finally, create the new game
