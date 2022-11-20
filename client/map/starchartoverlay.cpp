@@ -105,6 +105,15 @@ namespace {
             return int(0.5 + 2 - 2*std::cos((phase-50) * 3.141592/15));
         }
     }
+
+    int getRadiusFromPhase(int phase)
+    {
+        if (phase < 10) {
+            return 2*phase+3;
+        } else {
+            return 0;
+        }
+    }
 }
 
 
@@ -207,7 +216,7 @@ bool
 client::map::StarchartOverlay::drawCursor(gfx::Canvas& can, const Renderer& ren)
 {
     // ex WStandardChartMode::drawCursor
-    gfx::Point sc = ren.scale(m_location.configuration().getSimpleNearestAlias(m_location.getPosition(), ren.getCenter()));
+    const gfx::Point sc = ren.scale(m_location.configuration().getSimpleNearestAlias(m_location.getPosition(), ren.getCenter()));
 
     if (!m_location.getFocusedObject().isSet()) {
         // Nothing focused: draw cross
@@ -264,7 +273,14 @@ client::map::StarchartOverlay::drawCursor(gfx::Canvas& can, const Renderer& ren)
             gfx::Context<util::SkinColor::Color> ctx(can, scheme);
             frame.draw(ctx, area, ui::ButtonFlags_t());
 
+            // Extra splash; maintain area
             m_cursorArea = area;
+            if (int r = getRadiusFromPhase(m_cursorPhase)) {
+                gfx::Context<uint8_t> ctx8(can, m_root.colorScheme());
+                ctx8.setColor(frameColor);
+                drawCircle(ctx8, sc, r);
+                m_cursorArea.include(gfx::Rectangle(sc - gfx::Point(r, r), gfx::Point(2*r, 2*r)));
+            }
             m_cursorArea.grow(10, 10);
         }
     }
