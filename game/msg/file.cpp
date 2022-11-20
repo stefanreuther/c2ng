@@ -97,8 +97,8 @@ Reader::flush()
 
         // Do not add empty messages
         if (!m_text.empty()) {
-            m_mailbox.addMessage(joinText(m_text), m_turnNumber);
-            m_mailbox.setMessagePrimaryLink(m_mailbox.getNumMessages()-1, findLink(m_text));
+            size_t idx = m_mailbox.addMessage(joinText(m_text), m_turnNumber);
+            m_mailbox.setMessagePrimaryLink(idx, findLink(m_text));
         }
     }
     m_text.clear();

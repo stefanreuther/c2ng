@@ -47,8 +47,7 @@ namespace {
         game::interface::checkReferenceArg(ref, args.getNext());
 
         // Do it
-        size_t n = d.mailbox->getNumMessages();
-        d.mailbox->addMessage(text, turnNumber);
+        size_t n = d.mailbox->addMessage(text, turnNumber);
         d.mailbox->setMessagePrimaryLink(n, ref);
     }
 

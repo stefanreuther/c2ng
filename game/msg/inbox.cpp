@@ -206,11 +206,13 @@ game::msg::Inbox::receiveMessageData(size_t index, game::parser::InformationCons
 }
 
 // Manipulation
-void
+size_t
 game::msg::Inbox::addMessage(String_t text, int turnNumber)
 {
     // ex GInbox::addMessage
+    size_t result = m_messages.size();
     m_messages.pushBackNew(new Message(text, turnNumber));
+    return result;
 }
 
 void

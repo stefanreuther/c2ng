@@ -49,9 +49,9 @@ TestGameMsgInbox::testBasics()
     game::PlayerList list;
 
     game::msg::Inbox testee;
-    testee.addMessage("a", 10);
-    testee.addMessage("b", 20);
-    testee.addMessage("c", 15);
+    TS_ASSERT_EQUALS(testee.addMessage("a", 10), 0U);
+    TS_ASSERT_EQUALS(testee.addMessage("b", 20), 1U);
+    TS_ASSERT_EQUALS(testee.addMessage("c", 15), 2U);
     TS_ASSERT_EQUALS(testee.getNumMessages(), 3U);
     TS_ASSERT_EQUALS(testee.getMessageText(0, tx, list), "a");
     TS_ASSERT_EQUALS(testee.getMessageText(1, tx, list), "b");

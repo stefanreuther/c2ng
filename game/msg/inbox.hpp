@@ -54,8 +54,9 @@ namespace game { namespace msg {
 
         /** Add a single message.
             \param text       Complete text of message
-            \param turnNumber Turn number */
-        void addMessage(String_t text, int turnNumber);
+            \param turnNumber Turn number
+            \return Index of messag */
+        size_t addMessage(String_t text, int turnNumber);
 
         /** Set message's primary link.
             \param index Message index
