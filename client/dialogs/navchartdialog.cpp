@@ -297,7 +297,7 @@ NavChartOverlay::handleKey(util::Key_t key, int /*prefix*/, const client::map::R
      case util::Key_Insert:
      case 'y':
         // Add circle
-        if (st.chunnelMode) {
+        if (!st.chunnelMode) {
             m_altCenter = st.target;
             requestRedraw();
         }
@@ -305,7 +305,7 @@ NavChartOverlay::handleKey(util::Key_t key, int /*prefix*/, const client::map::R
 
      case util::Key_Delete:
         // Remove circle
-        if (st.chunnelMode) {
+        if (!st.chunnelMode) {
             m_altCenter = afl::base::Nothing;
             requestRedraw();
         }
