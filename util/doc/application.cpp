@@ -13,6 +13,7 @@
 #include "afl/io/directory.hpp"
 #include "afl/io/directoryentry.hpp"
 #include "afl/io/filemapping.hpp"
+#include "afl/io/multidirectory.hpp"
 #include "afl/io/xml/defaultentityhandler.hpp"
 #include "afl/io/xml/node.hpp"
 #include "afl/io/xml/parser.hpp"
@@ -43,6 +44,7 @@ using afl::io::Directory;
 using afl::io::DirectoryEntry;
 using afl::io::FileMapping;
 using afl::io::FileSystem;
+using afl::io::MultiDirectory;
 using afl::io::Stream;
 using afl::io::TextWriter;
 using afl::io::xml::DefaultEntityHandler;
@@ -335,6 +337,7 @@ util::doc::Application::importHelp(DataParameters& data, afl::sys::CommandLinePa
     // Parse
     NodeParameters np;
     std::vector<String_t> fileNames;
+    Ref<MultiDirectory> imagePath = MultiDirectory::create();
     String_t text;
     int flags = 0;
     bool option;
@@ -344,6 +347,8 @@ util::doc::Application::importHelp(DataParameters& data, afl::sys::CommandLinePa
                 // ok
             } else if (text == "remove-source") {
                 flags |= ImportHelp_RemoveSource;
+            } else if (text == "image-path") {
+                imagePath->addDirectory(fileSystem().openDirectory(parser.getRequiredParameter(text)));
             } else {
                 errorExitBadOption();
             }
@@ -362,7 +367,7 @@ util::doc::Application::importHelp(DataParameters& data, afl::sys::CommandLinePa
     Index::Handle_t hdl = addDocument(ref, np, false);
     for (size_t i = 0; i < fileNames.size(); ++i) {
         Ref<Stream> file = fileSystem().openFile(fileNames[i], FileSystem::OpenRead);
-        util::doc::importHelp(ref.index, hdl, *ref.blobStore, *file, flags, log(), translator());
+        util::doc::importHelp(ref.index, hdl, *ref.blobStore, *file, *imagePath, flags, log(), translator());
     }
     saveData(ref, data);
 }
@@ -646,6 +651,7 @@ util::doc::Application::help()
                                                 "--document\t(import, add) Create a document\n"
                                                 "--charset=CS\t(import-text) Set character set\n"
                                                 "--remove-source\t(import-help) Remove source notes\n"
+                                                "--image-path=DIR\t(import-help) Path to resolve <img src> links\n"
                                                 "--all\t(verify) Report all individual messages (default=summarize)\n"
                                                 "-v\t(verify) Do not abbreviate messages\n"
                                                 "--warn-only\t(verify) Show only warnings\n"

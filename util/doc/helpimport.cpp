@@ -250,11 +250,31 @@ namespace {
             idx.setNodeContentId(st.page, blobStore.addObject(sink.getContent()));
         }
     }
+
+    String_t importFile(BlobStore& blobStore, String_t fileName, afl::io::Directory& imagePath)
+    {
+        // Open file
+        afl::base::Ptr<Stream> file = imagePath.openFileNT(fileName, afl::io::FileSystem::OpenRead);
+        if (file.get() == 0) {
+            return String_t();
+        }
+
+        // Import file
+        BlobStore::ObjectId_t objId = blobStore.addObject(file->createVirtualMapping()->get());
+
+        // Build result file name
+        const String_t::size_type p = fileName.find_last_of("\\/:");
+        const String_t userName = ((fileName.empty() || p == fileName.size()-1) ? "image"
+                                   : p >= fileName.size()
+                                   ? fileName
+                                   : fileName.substr(p));
+        return Format("asset:%s/%s", objId, userName);
+    }
 }
 
 
 void
-util::doc::importHelp(Index& idx, Index::Handle_t root, BlobStore& blobStore, afl::io::Stream& file, int flags, afl::sys::LogListener& log, afl::string::Translator& tx)
+util::doc::importHelp(Index& idx, Index::Handle_t root, BlobStore& blobStore, afl::io::Stream& file, afl::io::Directory& imagePath, int flags, afl::sys::LogListener& log, afl::string::Translator& tx)
 {
     // XML reader
     CharsetFactory csFactory;
@@ -301,11 +321,16 @@ util::doc::importHelp(Index& idx, Index::Handle_t root, BlobStore& blobStore, af
                     String_t target = isAbsoluteLink(rdr.getValue()) ? rdr.getValue() : transformPageName(rdr.getValue());
                     tag.setAttribute(rdr.getName(), target);
                 } else if (tag.getName() == "img" && rdr.getName() == "src") {
-                    // <img src> would mean we need to import the image as an asset somehow.
+                    // If link is not absolute, import target as a blob
                     if (isAbsoluteLink(rdr.getValue())) {
                         tag.setAttribute(rdr.getName(), rdr.getValue());
                     } else {
-                        log.write(LogListener::Warn, LOG_NAME, Format(tx("%s:%d: found <img src>; image import not implemented yet"), file.getName(), rdr.getPos()));
+                        String_t importedFile = importFile(blobStore, rdr.getValue(), imagePath);
+                        if (importedFile.empty()) {
+                            log.write(LogListener::Warn, LOG_NAME, Format(tx("%s:%d: referenced image not found"), file.getName(), rdr.getPos()));
+                        } else {
+                            tag.setAttribute(rdr.getName(), importedFile);
+                        }
                     }
                 } else {
                     // Normal attribute, add it

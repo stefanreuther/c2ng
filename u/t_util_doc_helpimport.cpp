@@ -6,13 +6,17 @@
 #include "util/doc/helpimport.hpp"
 
 #include "t_util_doc.hpp"
+#include "afl/io/constmemorystream.hpp"
+#include "afl/io/internaldirectory.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "afl/sys/log.hpp"
 #include "util/doc/index.hpp"
 #include "util/doc/internalblobstore.hpp"
-#include "afl/io/constmemorystream.hpp"
-#include "afl/sys/log.hpp"
-#include "afl/string/nulltranslator.hpp"
+#include "afl/test/loglistener.hpp"
 
+using afl::base::Ref;
 using afl::io::ConstMemoryStream;
+using afl::io::InternalDirectory;
 using afl::string::NullTranslator;
 using afl::sys::Log;
 using util::doc::Index;
@@ -52,12 +56,13 @@ TestUtilDocHelpImport::testIt()
     Log log;
     NullTranslator tx;
     Index idx;
+    Ref<InternalDirectory> dir = InternalDirectory::create("testIt");
 
     // Import into a document
     Index::Handle_t doc = idx.addDocument(idx.root(), "doc-url", "Doc", "");
 
     // Do it
-    importHelp(idx, doc, blobStore, ms, 0, log, tx);
+    importHelp(idx, doc, blobStore, ms, *dir, 0, log, tx);
 
     // Verify
     TS_ASSERT_EQUALS(idx.getNumNodeChildren(doc), 3U);
@@ -114,12 +119,13 @@ TestUtilDocHelpImport::testIt2()
     Log log;
     NullTranslator tx;
     Index idx;
+    Ref<InternalDirectory> dir = InternalDirectory::create("testIt2");
 
     // Import into a document
     Index::Handle_t doc = idx.addDocument(idx.root(), "doc-url", "Doc", "");
 
     // Do it
-    importHelp(idx, doc, blobStore, ms, 0, log, tx);
+    importHelp(idx, doc, blobStore, ms, *dir, 0, log, tx);
 
     // Verify
     TS_ASSERT_EQUALS(idx.getNumNodeChildren(doc), 1U);
@@ -156,12 +162,13 @@ TestUtilDocHelpImport::testIt3()
     Log log;
     NullTranslator tx;
     Index idx;
+    Ref<InternalDirectory> dir = InternalDirectory::create("testIt3");
 
     // Import into a document
     Index::Handle_t doc = idx.addDocument(idx.root(), "doc-url", "Doc", "");
 
     // Do it
-    importHelp(idx, doc, blobStore, ms, 0, log, tx);
+    importHelp(idx, doc, blobStore, ms, *dir, 0, log, tx);
 
     // Verify
     TS_ASSERT_EQUALS(idx.getNumNodeChildren(doc), 1U);
@@ -209,12 +216,13 @@ TestUtilDocHelpImport::testIt4()
     Log log;
     NullTranslator tx;
     Index idx;
+    Ref<InternalDirectory> dir = InternalDirectory::create("testIt4");
 
     // Import into a document
     Index::Handle_t doc = idx.addDocument(idx.root(), "doc-url", "Doc", "");
 
     // Do it
-    importHelp(idx, doc, blobStore, ms, 0, log, tx);
+    importHelp(idx, doc, blobStore, ms, *dir, 0, log, tx);
 
     // Verify
     TS_ASSERT_EQUALS(idx.getNumNodeChildren(doc), 1U);
@@ -250,12 +258,13 @@ TestUtilDocHelpImport::testRemoveSource()
     Log log;
     NullTranslator tx;
     Index idx;
+    Ref<InternalDirectory> dir = InternalDirectory::create("testRemoveSource");
 
     // Do it
     ms.setPos(0);
-    importHelp(idx, idx.addDocument(idx.root(), "off", "Doc", ""), blobStore, ms, 0, log, tx);
+    importHelp(idx, idx.addDocument(idx.root(), "off", "Doc", ""), blobStore, ms, *dir, 0, log, tx);
     ms.setPos(0);
-    importHelp(idx, idx.addDocument(idx.root(), "on", "Doc", ""), blobStore, ms, util::doc::ImportHelp_RemoveSource, log, tx);
+    importHelp(idx, idx.addDocument(idx.root(), "on", "Doc", ""), blobStore, ms, *dir, util::doc::ImportHelp_RemoveSource, log, tx);
 
     // Verify
     {
@@ -284,3 +293,89 @@ TestUtilDocHelpImport::testRemoveSource()
                          "<p><b>See also: </b><a href=\"q\">Hooks</a></p>");
     }
 }
+
+/** Test importing images (<img src> with relative URL). */
+void
+TestUtilDocHelpImport::testImportImage()
+{
+    // Environment
+    static const uint8_t PIXEL[] = {
+        0x47, 0x49, 0x46, 0x38, 0x37, 0x61, 0x01, 0x00, 0x01, 0x00, 0xf0, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0x2c, 0x00, 0x00, 0x00, 0x00,
+        0x01, 0x00, 0x01, 0x00, 0x00, 0x02, 0x02, 0x4c, 0x01, 0x00, 0x3b
+    };
+    ConstMemoryStream ms(afl::string::toBytes("<?xml version=\"1.0\"?>\n"
+                                              "<!DOCTYPE help SYSTEM \"pcc2help.dtd\">\n"
+                                              "<help priority=\"99\">\n"
+                                              " <page id=\"p\">\n"
+                                              "  <h1>H</h1>\n"
+                                              "  <p>text...<img src=\"pixel.gif\" /></p>\n"
+                                              " </page>\n"
+                                              "</help>\n"));
+    InternalBlobStore blobStore;
+    Log log;
+    NullTranslator tx;
+    Index idx;
+    Ref<InternalDirectory> dir = InternalDirectory::create("testImportImage");
+    dir->openFile("pixel.gif", afl::io::FileSystem::Create)->fullWrite(PIXEL);
+
+    // Do it
+    ms.setPos(0);
+    Index::Handle_t doc = idx.addDocument(idx.root(), "doc-url", "Doc", "");
+    importHelp(idx, doc, blobStore, ms, *dir, 0, log, tx);
+
+    // Verify
+    TS_ASSERT_EQUALS(idx.getNumNodeChildren(doc), 1U);
+    Index::Handle_t page;
+    String_t tmp;
+    TS_ASSERT(idx.findNodeByAddress("doc-url/p", page, tmp));
+    TS_ASSERT(idx.isNodePage(page));
+    TS_ASSERT_EQUALS(idx.getNodeTitle(page), "H");
+
+    // Verify content [do not rely on the exact name of the picture]
+    String_t content = afl::string::fromBytes(blobStore.getObject(idx.getNodeContentId(page))->get());
+    String_t pixelId = blobStore.addObject(PIXEL);
+    TS_ASSERT_DIFFERS(pixelId, "");
+    TS_ASSERT_EQUALS(content, "<p>text...<img src=\"asset:" + pixelId + "/pixel.gif\"/></p>");
+}
+
+/** Test failure to import image. */
+void
+TestUtilDocHelpImport::testImportImageFail()
+{
+    // Environment
+    ConstMemoryStream ms(afl::string::toBytes("<?xml version=\"1.0\"?>\n"
+                                              "<!DOCTYPE help SYSTEM \"pcc2help.dtd\">\n"
+                                              "<help priority=\"99\">\n"
+                                              " <page id=\"p\">\n"
+                                              "  <h1>H</h1>\n"
+                                              "  <p>text...<img src=\"pixel.gif\" /></p>\n"
+                                              " </page>\n"
+                                              "</help>\n"));
+    InternalBlobStore blobStore;
+    afl::test::LogListener log;
+    NullTranslator tx;
+    Index idx;
+    Ref<InternalDirectory> dir = InternalDirectory::create("testImportImageFail");
+
+    // Do it
+    ms.setPos(0);
+    Index::Handle_t doc = idx.addDocument(idx.root(), "doc-url", "Doc", "");
+    importHelp(idx, doc, blobStore, ms, *dir, 0, log, tx);
+
+    // Verify
+    TS_ASSERT_EQUALS(idx.getNumNodeChildren(doc), 1U);
+    Index::Handle_t page;
+    String_t tmp;
+    TS_ASSERT(idx.findNodeByAddress("doc-url/p", page, tmp));
+    TS_ASSERT(idx.isNodePage(page));
+    TS_ASSERT_EQUALS(idx.getNodeTitle(page), "H");
+
+    // Verify content: image tag does not receive a src attribute because we cannot translate it
+    String_t content = afl::string::fromBytes(blobStore.getObject(idx.getNodeContentId(page))->get());
+    TS_ASSERT_EQUALS(content, "<p>text...<img/></p>");
+
+    // Import must have created a warning
+    TS_ASSERT_LESS_THAN_EQUALS(1U, log.getNumWarnings());
+}
+

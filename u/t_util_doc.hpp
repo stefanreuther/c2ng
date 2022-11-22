@@ -25,6 +25,8 @@ class TestUtilDocHelpImport : public CxxTest::TestSuite {
     void testIt3();
     void testIt4();
     void testRemoveSource();
+    void testImportImage();
+    void testImportImageFail();
 };
 
 class TestUtilDocHtmlRenderer : public CxxTest::TestSuite {

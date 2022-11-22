@@ -227,7 +227,7 @@ Tag List
 
   <img src="url" align="left|right|center" width="w" height="h" top="t" left="l"> - image
     Part of group: block, nestedBlock
-    Import: transform 'src'
+    Import: transform 'src', import local files
     Render: with w/h/t/l: crop; with w/h: scale, otherwise plain <img src>
     Help: evaluates src, align; produce float object
     Rich: -

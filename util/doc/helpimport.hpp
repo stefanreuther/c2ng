@@ -5,6 +5,7 @@
 #ifndef C2NG_UTIL_DOC_HELPIMPORT_HPP
 #define C2NG_UTIL_DOC_HELPIMPORT_HPP
 
+#include "afl/io/directory.hpp"
 #include "afl/io/stream.hpp"
 #include "afl/string/translator.hpp"
 #include "afl/sys/loglistener.hpp"
@@ -37,10 +38,11 @@ namespace util { namespace doc {
         @param [in]     root       Root page
         @param [in,out] blobStore  Blob store to store transformed pages
         @param [in]     file       XML file
+        @param [in]     imagePath  Image path
         @param [in]     flags      Flags
         @param [in,out] log        Log listener (warning messages)
         @param [in]     tx         Translator (warning messages) */
-    void importHelp(Index& idx, Index::Handle_t root, BlobStore& blobStore, afl::io::Stream& file, int flags, afl::sys::LogListener& log, afl::string::Translator& tx);
+    void importHelp(Index& idx, Index::Handle_t root, BlobStore& blobStore, afl::io::Stream& file, afl::io::Directory& imagePath, int flags, afl::sys::LogListener& log, afl::string::Translator& tx);
 
 } }
 
