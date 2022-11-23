@@ -737,7 +737,7 @@ util::doc::Application::listNodeInfo(const DataReference& ref, const ListParamet
 
         size_t numIds = ref.index.getNumNodeIds(hdl);
         for (size_t i = 1; i < numIds; ++i) {
-            standardOutput().writeLine(Format("%sALSO %-40s  %s", "-", indent, ref.index.getNodeIdByIndex(hdl, i)));
+            standardOutput().writeLine(Format("%sALSO %-40s  %s", indent, "-", ref.index.getNodeIdByIndex(hdl, i)));
         }
         break;
      }
