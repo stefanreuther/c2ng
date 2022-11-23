@@ -71,6 +71,16 @@ namespace {
             }
         }
     }
+
+    String_t getImageAlignmentClass(const TagNode& t)
+    {
+        const String_t& align = t.getAttributeByName("align");
+        if (!align.empty()) {
+            return "ia-" + align;
+        } else {
+            return String_t();
+        }
+    }
 }
 
 void
@@ -238,6 +248,7 @@ HtmlRenderer::renderImage(const TagNode& t)
                              << width << height
                              << m_options.transformLink(link)
                              << left << top);
+                addAttribute("class", getImageAlignmentClass(t));
                 m_result += ">&nbsp;</div>";
             } else {
                 // Image with given width and height (this will scale the image)
@@ -246,6 +257,7 @@ HtmlRenderer::renderImage(const TagNode& t)
                 addAttribute("width", Format("%d", width));
                 addAttribute("height", Format("%d", height));
                 addAttribute("alt", t.getAttributeByName("alt"));
+                addAttribute("class", getImageAlignmentClass(t));
                 m_result += ">";
             }
         } else {
@@ -253,6 +265,7 @@ HtmlRenderer::renderImage(const TagNode& t)
             m_result += "<img";
             addAttribute("src", m_options.transformLink(link));
             addAttribute("alt", t.getAttributeByName("alt"));
+            addAttribute("class", getImageAlignmentClass(t));
             m_result += ">";
         }
     }
