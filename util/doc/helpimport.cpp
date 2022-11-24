@@ -383,7 +383,8 @@ util::doc::importHelp(Index& idx, Index::Handle_t root, BlobStore& blobStore, af
                 // Raw text on page [irregular case]
                 const String_t text = transformText(rdr.getValue(), true, true);
                 if (!text.empty()) {
-                    me.result.pushBackNew(new TextNode());
+                    log.write(LogListener::Warn, LOG_NAME, Format(tx("%s:%d: raw text on page"), file.getName(), rdr.getPos()));
+                    me.result.pushBackNew(new TextNode(text));
                 }
             } else {
                 // Text within tag

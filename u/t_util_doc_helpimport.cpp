@@ -192,6 +192,49 @@ TestUtilDocHelpImport::testIt3()
 /** Import test.
     Exercises trimming of space between blocks. */
 void
+TestUtilDocHelpImport::testIt5()
+{
+    // Environment
+    ConstMemoryStream ms(afl::string::toBytes("<?xml version=\"1.0\"?>\n"
+                                              "<!DOCTYPE help SYSTEM \"pcc2help.dtd\">\n"
+                                              "<help priority=\"99\">\n"
+                                              " <page id=\"a:b\">\n"
+                                              "  <h1>Heading</h1>\n"
+                                              "  bogus text\n"
+                                              "  <p>good text</p>\n"
+                                              " </page>\n"
+                                              "</help>\n"));
+    InternalBlobStore blobStore;
+    afl::test::LogListener log;
+    NullTranslator tx;
+    Index idx;
+    Ref<InternalDirectory> dir = InternalDirectory::create("testIt5");
+
+    // Import into a document
+    Index::Handle_t doc = idx.addDocument(idx.root(), "doc-url", "Doc", "");
+
+    // Do it
+    importHelp(idx, doc, blobStore, ms, *dir, 0, log, tx);
+
+    // Verify
+    TS_ASSERT_EQUALS(idx.getNumNodeChildren(doc), 1U);
+
+    Index::Handle_t page;
+    String_t tmp;
+    TS_ASSERT(idx.findNodeByAddress("doc-url/a/b", page, tmp));
+    TS_ASSERT(idx.isNodePage(page));
+    TS_ASSERT_EQUALS(idx.getNodeTitle(page), "Heading");
+
+    String_t content = afl::string::fromBytes(blobStore.getObject(idx.getNodeContentId(page))->get());
+    TS_ASSERT_EQUALS(content, "bogus text<p>good text</p>");
+
+    // Import must have created a warning
+    TS_ASSERT_LESS_THAN_EQUALS(1U, log.getNumWarnings());
+}
+
+/** Import test.
+    Exercises trimming of space between blocks. */
+void
 TestUtilDocHelpImport::testIt4()
 {
     // Environment

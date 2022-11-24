@@ -24,6 +24,7 @@ class TestUtilDocHelpImport : public CxxTest::TestSuite {
     void testIt2();
     void testIt3();
     void testIt4();
+    void testIt5();
     void testRemoveSource();
     void testImportImage();
     void testImportImageFail();
