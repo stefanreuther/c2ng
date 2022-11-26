@@ -339,6 +339,12 @@ game::actions::BuildAmmo::isValidCombination(const game::map::Planet& planet, co
         return false;
     }
 
+    // Ship must have secondary weapons
+    if (ship.getNumLaunchers().orElse(0) <= 0 && ship.getNumBays().orElse(0) <= 0) {
+        ex = Exception(Exception::ePerm);
+        return false;
+    }
+
     // Success
     return true;
 }

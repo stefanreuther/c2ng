@@ -44,6 +44,7 @@ class TestGameActionsBuildAmmo : public CxxTest::TestSuite {
     void testInvalidTypes();
     void testDifferentContainers();
     void testIsValidCombination();
+    void testIsValidCombination2();
 };
 
 class TestGameActionsBuildParts : public CxxTest::TestSuite {

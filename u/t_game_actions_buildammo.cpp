@@ -593,3 +593,49 @@ TestGameActionsBuildAmmo::testIsValidCombination()
     }
 }
 
+/** Test isValidCombination(), varying ship equipment. */
+void
+TestGameActionsBuildAmmo::testIsValidCombination2()
+{
+    // Create some planets:
+    game::map::Universe univ;
+
+    // - my planet (base case)
+    game::map::Planet& myPlanet = *univ.planets().create(100);
+    preparePlanet(univ, myPlanet, X, Y, OWNER);
+
+    // - torpedo ship
+    game::map::Ship& torpShip = *univ.ships().create(1);
+    prepareShip(torpShip, X, Y, OWNER);
+    torpShip.setTorpedoType(3);
+    torpShip.setNumLaunchers(2);
+    torpShip.setNumBays(0);
+
+    game::map::Ship& fighterShip = *univ.ships().create(2);
+    prepareShip(fighterShip, X, Y, OWNER);
+    fighterShip.setTorpedoType(0);
+    fighterShip.setNumLaunchers(0);
+    fighterShip.setNumBays(5);
+
+    game::map::Ship& freightShip = *univ.ships().create(3);
+    prepareShip(freightShip, X, Y, OWNER);
+    freightShip.setTorpedoType(0);
+    freightShip.setNumLaunchers(0);
+    freightShip.setNumBays(0);
+
+    // Compare
+    {
+        game::Exception ex("");
+        TS_ASSERT_EQUALS(game::actions::BuildAmmo::isValidCombination(myPlanet, torpShip, ex), true);
+    }
+    {
+        game::Exception ex("");
+        TS_ASSERT_EQUALS(game::actions::BuildAmmo::isValidCombination(myPlanet, fighterShip, ex), true);
+    }
+    {
+        game::Exception ex("");
+        TS_ASSERT_EQUALS(game::actions::BuildAmmo::isValidCombination(myPlanet, freightShip, ex), false);
+        TS_ASSERT_DIFFERS(ex.what(), String_t());
+    }
+}
+

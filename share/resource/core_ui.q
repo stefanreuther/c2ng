@@ -1929,8 +1929,8 @@ EndSub
 On ShipBaseMenu Do
   Local currentAction
   Local p = Planet(Orbit$)
-  % FIXME: If Fighter.Bays Then AddItem 0, Translate("Build fighters")
-  % FIXME: If Torp.LCount  Then AddItem 0, Translate("Build torpedoes")
+  If Fighter.Bays Then AddItem Atom("CC$BuildAmmo"), Translate("Build fighters")
+  If Torp.LCount  Then AddItem Atom("CC$BuildAmmo"), Translate("Build torpedoes")
   AddItem Atom("UI.GotoScreen 3, Orbit$"), Translate("Starbase screen")
 
   currentAction := If(p->Shipyard.Id = Id, p->Shipyard.Action, '')

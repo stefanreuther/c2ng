@@ -86,6 +86,7 @@
 #include "client/si/usertask.hpp"
 #include "client/widgets/helpwidget.hpp"
 #include "client/widgets/playersetselector.hpp"
+#include "game/actions/buildammo.hpp"
 #include "game/actions/multitransfersetup.hpp"
 #include "game/actions/preconditions.hpp"
 #include "game/exception.hpp"
@@ -988,31 +989,57 @@ void
 client::si::IFCCBuildAmmo(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     // ex IFCCBuildAmmo
-    // FIXME: add a version for ships
     class Task : public UserTask {
      public:
-        Task(game::Id_t pid)
-            : m_pid(pid)
+        Task(game::Id_t pid, afl::base::Optional<game::Id_t> shipId)
+            : m_pid(pid), m_shipId(shipId)
             { }
         virtual void handle(Control& ctl, RequestLink2 link)
             {
                 UserSide& iface = ctl.interface();
                 game::proxy::BuildAmmoProxy proxy(iface.gameSender(), ctl.root().engine().dispatcher(), m_pid);
-                proxy.setPlanet();
+                if (const game::Id_t* p = m_shipId.get()) {
+                    proxy.setShip(*p);
+                } else {
+                    proxy.setPlanet();
+                }
                 client::dialogs::doBuildAmmo(ctl.root(), proxy, iface.gameSender(), m_pid, ctl.translator());
                 iface.continueProcess(link);
             }
      private:
         game::Id_t m_pid;
+        afl::base::Optional<game::Id_t> m_shipId;
     };
 
     args.checkArgumentCount(0);
-    game::actions::mustHaveGame(session);
+    Game& g = game::actions::mustHaveGame(session);
+    Universe& univ = g.currentTurn().universe();
 
-    Planet* pl = dynamic_cast<Planet*>(link.getProcess().getCurrentObject());
-    if (pl != 0 && pl->isPlayable(game::map::Object::Playable)) {
-        si.postNewTask(link, new Task(pl->getId()));
+    bool ok = false;
+    if (Planet* pl = dynamic_cast<Planet*>(link.getProcess().getCurrentObject())) {
+        // Planet
+        if (pl->isPlayable(game::map::Object::Playable) && pl->hasBase()) {
+            si.postNewTask(link, new Task(pl->getId(), afl::base::Nothing));
+            ok = true;
+        }
+    } else if (Ship* sh = dynamic_cast<Ship*>(link.getProcess().getCurrentObject())) {
+        // Ship
+        Point pt;
+        if (sh->getPosition(pt)) {
+            if (Planet* pl = univ.planets().get(univ.findPlanetAt(pt))) {
+                game::Exception ex("");
+                if (!game::actions::BuildAmmo::isValidCombination(*pl, *sh, ex)) {
+                    throw ex;
+                }
+                si.postNewTask(link, new Task(pl->getId(), sh->getId()));
+                ok = true;
+            }
+        }
     } else {
+        // ignore
+    }
+
+    if (!ok) {
         throw Error::contextError();
     }
 }
