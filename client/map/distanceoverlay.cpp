@@ -339,10 +339,10 @@ client::map::DistanceOverlay::buildStatus(Status& out, game::Session& session, g
         out.shipName = sh->getName(game::LongName, tx, session.interface());
 
         // Prediction
-        // FIXME: deal with towee? (bug also in PCC2)
         game::map::ShipPredictor pred(t.universe(), shipId, g.shipScores(), sl, g.mapConfiguration(), r.hostConfiguration(), r.hostVersion(), r.registrationKey());
         pred.setPosition(origin);
         pred.setWaypoint(target);
+        pred.addTowee();
         pred.computeMovement();
 
         // Speed/time

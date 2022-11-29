@@ -1,5 +1,6 @@
 /**
   *  \file game/map/shippredictor.cpp
+  *  \brief Class game::map::ShipPredictor
   */
 
 #include <cmath>
@@ -535,7 +536,7 @@ namespace {
 
 const int game::map::ShipPredictor::MOVEMENT_TIME_LIMIT;
 
-// Single ship predictor.
+// Create ship predictor.
 game::map::ShipPredictor::ShipPredictor(const Universe& univ, Id_t id,
                                         const UnitScoreDefinitionList& scoreDefinitions,
                                         const game::spec::ShipList& shipList,
@@ -549,7 +550,7 @@ game::map::ShipPredictor::ShipPredictor(const Universe& univ, Id_t id,
       m_hostConfiguration(config),
       m_hostVersion(hostVersion),
       m_key(key),
-      m_shipId(id), m_ship(), m_valid(false), m_pTowee(0),
+      m_shipId(id), m_ship(), m_valid(false), m_pTowee(),
       m_universe(univ), m_movementFuelUsed(0), m_cloakFuelUsed(0), m_numTurns(0),
       m_usedProperties()
 {
@@ -557,26 +558,16 @@ game::map::ShipPredictor::ShipPredictor(const Universe& univ, Id_t id,
     init();
 }
 
-// Tow-pair predictor.
-game::map::ShipPredictor::ShipPredictor(const Universe& univ, Id_t id, ShipPredictor& towee,
-                                        const UnitScoreDefinitionList& scoreDefinitions,
-                                        const game::spec::ShipList& shipList,
-                                        const Configuration& mapConfig,
-                                        const game::config::HostConfiguration& config,
-                                        const HostVersion& hostVersion,
-                                        const RegistrationKey& key)
-    : m_scoreDefinitions(scoreDefinitions),
-      m_shipList(shipList),
-      m_mapConfig(mapConfig),
-      m_hostConfiguration(config),
-      m_hostVersion(hostVersion),
-      m_key(key),
-      m_shipId(id), m_ship(), m_valid(false), m_pTowee(&towee),
-      m_universe(univ), m_movementFuelUsed(0), m_cloakFuelUsed(0), m_numTurns(0),
-      m_usedProperties()
+// Add predictor for ship's towee, if any.
+void
+game::map::ShipPredictor::addTowee()
 {
-    // ex GShipTurnPredictor::GShipTurnPredictor
-    init();
+    if (m_valid && m_ship.mission.orElse(0) == game::spec::Mission::msn_Tow) {
+        const Ship* p = m_universe.ships().get(m_ship.missionTowParameter.orElse(0));
+        if (p != 0 && p->hasFullShipData()) {
+            m_pTowee.reset(new ShipPredictor(m_universe, p->getId(), m_scoreDefinitions, m_shipList, m_mapConfig, m_hostConfiguration, m_hostVersion, m_key));
+        }
+    }
 }
 
 // Get total fuel used for movement.
@@ -874,7 +865,7 @@ game::map::ShipPredictor::computeTurn()
         if (m_ship.mission.orElse(0) == game::spec::Mission::msn_Tow) {
             m_ship.mission = 0;
         }
-        if (m_pTowee) {
+        if (m_pTowee.get() != 0) {
             m_pTowee->computeTurn();
         }
 
@@ -956,7 +947,7 @@ game::map::ShipPredictor::computeTurn()
         }
 
         // Advance time in towee. Must be here because we need to know its "post-movement" mass.
-        if (m_pTowee) {
+        if (m_pTowee.get() != 0) {
             if (m_ship.mission.orElse(0) == game::spec::Mission::msn_Tow) {
                 // we assume the tow succeeds. FIXME: be more clever?
                 if (m_pTowee->m_ship.mission.orElse(0) == game::spec::Mission::msn_Tow) {
@@ -970,8 +961,8 @@ game::map::ShipPredictor::computeTurn()
 
         // Compute fuel usage.
         int fuel = computeFuelUsage(m_universe, m_ship,
-                                    m_pTowee ? m_pTowee->m_shipId : 0,
-                                    m_pTowee ? &m_pTowee->m_ship : 0,
+                                    m_pTowee.get() != 0 ? m_pTowee->m_shipId : 0,
+                                    m_pTowee.get() != 0 ? &m_pTowee->m_ship : 0,
                                     real_ship->hasSpecialFunction(BasicHullFunction::Gravitonic, m_scoreDefinitions, m_shipList, m_hostConfiguration),
                                     dist,
                                     m_shipList, m_hostConfiguration, m_hostVersion);
@@ -1018,7 +1009,7 @@ game::map::ShipPredictor::computeTurn()
         }
 
         // Update towee position
-        if (m_pTowee) {
+        if (m_pTowee.get() != 0) {
             if (m_ship.mission.orElse(0) == game::spec::Mission::msn_Tow) {
                 m_pTowee->m_ship.x = m_ship.x;
                 m_pTowee->m_ship.y = m_ship.y;
@@ -1028,7 +1019,7 @@ game::map::ShipPredictor::computeTurn()
         }
     } else {
         // No sensible movement order for this ship. Advance towee's time anyway.
-        if (m_pTowee) {
+        if (m_pTowee.get() != 0) {
             m_pTowee->computeTurn();
         }
     }
@@ -1214,7 +1205,7 @@ game::map::ShipPredictor::getFriendlyCode() const
 String_t
 game::map::ShipPredictor::getTowedShipName() const
 {
-    if (m_pTowee != 0) {
+    if (m_pTowee.get() != 0) {
         return m_pTowee->m_ship.name.orElse(String_t());
     } else {
         return String_t();

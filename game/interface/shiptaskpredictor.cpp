@@ -27,6 +27,7 @@ game::interface::ShipTaskPredictor::ShipTaskPredictor(const game::map::Universe&
       m_haveFuel(true)
 {
     // ex IntShipPredictor::IntShipPredictor
+    m_predictor.addTowee();
 }
 
 game::interface::ShipTaskPredictor::~ShipTaskPredictor()

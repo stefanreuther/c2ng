@@ -602,6 +602,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
                                           root->hostConfiguration(),
                                           root->hostVersion(),
                                           root->registrationKey());
+            pred.addTowee();
             pred.computeMovement();
             return makeIntegerValue(pred.getNumTurns());
         } else {
@@ -619,6 +620,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
                                           root->hostConfiguration(),
                                           root->hostVersion(),
                                           root->registrationKey());
+            pred.addTowee();
             pred.computeMovement();
             return makeIntegerValue(pred.getMovementFuelUsed());
         } else {

@@ -194,8 +194,8 @@ TestGameMapInfoMission::testRenderShipPredictorUsedProperties3()
     sh2.setName(String_t("Other Ship"));
 
     // Predict
-    game::map::ShipPredictor towPred(env.univ, 88, env.scoreDefinitions, env.shipList, env.mapConfig, env.config, env.hostVersion, env.key);
-    game::map::ShipPredictor pred(env.univ, 99, towPred, env.scoreDefinitions, env.shipList, env.mapConfig, env.config, env.hostVersion, env.key);
+    game::map::ShipPredictor pred(env.univ, 99, env.scoreDefinitions, env.shipList, env.mapConfig, env.config, env.hostVersion, env.key);
+    pred.addTowee();
     pred.computeTurn();
     TS_ASSERT_EQUALS(pred.getNumTurns(), 1);
     TS_ASSERT(pred.getUsedProperties().contains(game::map::ShipPredictor::UsedTowee));

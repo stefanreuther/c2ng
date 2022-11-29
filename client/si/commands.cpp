@@ -1883,22 +1883,16 @@ client::si::IFCCExplainPrediction(game::Session& session, ScriptSide& si, Reques
     game::map::Universe& univ = g.currentTurn().universe();
 
     // Ship prediction
-    std::auto_ptr<game::map::ShipPredictor> mainPredictor, toweePredictor;
-    const Ship* towedShip;
-    if (sh->getMission().orElse(0) == game::spec::Mission::msn_Tow && ((towedShip = univ.ships().get(sh->getMissionParameter(game::TowParameter).orElse(0))) != 0)) {
-        toweePredictor.reset(new game::map::ShipPredictor(univ, towedShip->getId(), g.shipScores(), sl, g.mapConfiguration(), r.hostConfiguration(), r.hostVersion(), r.registrationKey()));
-        mainPredictor.reset(new game::map::ShipPredictor(univ, sh->getId(), *toweePredictor, g.shipScores(), sl, g.mapConfiguration(), r.hostConfiguration(), r.hostVersion(), r.registrationKey()));
-    } else {
-        mainPredictor.reset(new game::map::ShipPredictor(univ, sh->getId(), g.shipScores(), sl, g.mapConfiguration(), r.hostConfiguration(), r.hostVersion(), r.registrationKey()));
-    }
-    mainPredictor->computeMovement();
+    game::map::ShipPredictor pred(univ, sh->getId(), g.shipScores(), sl, g.mapConfiguration(), r.hostConfiguration(), r.hostVersion(), r.registrationKey());
+    pred.addTowee();
+    pred.computeMovement();
 
     // Chunnel mission
     game::map::ChunnelMission chunnel;
     chunnel.check(*sh, univ, g.mapConfiguration(), g.shipScores(), sl, r);
 
     // Anything to say?
-    if (mainPredictor->getUsedProperties().empty() && chunnel.getFailureReasons() == 0) {
+    if (pred.getUsedProperties().empty() && chunnel.getFailureReasons() == 0) {
         return;
     }
 
@@ -1906,12 +1900,12 @@ client::si::IFCCExplainPrediction(game::Session& session, ScriptSide& si, Reques
     afl::string::Translator& tx = session.translator();
     std::auto_ptr<game::map::info::Nodes_t> nodes(new game::map::info::Nodes_t());
 
-    if (!mainPredictor->getUsedProperties().empty()) {
+    if (!pred.getUsedProperties().empty()) {
         nodes->pushBackNew(makeTitle("Prediction considers..."));
         afl::io::xml::TagNode* mainList = new afl::io::xml::TagNode("ul");
         nodes->pushBackNew(mainList);
         mainList->setAttribute("class", "compact");
-        game::map::info::renderShipPredictorUsedProperties(*mainList, *mainPredictor, missionName, r.playerList(), tx);
+        game::map::info::renderShipPredictorUsedProperties(*mainList, pred, missionName, r.playerList(), tx);
     }
 
     if (chunnel.getFailureReasons() != 0) {

@@ -125,7 +125,6 @@ client::tiles::ShipMovementTile::attach(game::proxy::ObjectObserver& oop)
                 game::spec::ShipList* shipList = s.getShipList().get();
                 afl::string::Translator& tx = s.translator();
                 if (sh != 0 && root != 0 && shipList != 0 && g != 0 && sh->getShipKind() == game::map::Ship::CurrentShip) {
-                    // FIXME: towing!!!!1
                     game::map::ShipPredictor crystal_ball(g->currentTurn().universe(),
                                                           sh->getId(),
                                                           g->shipScores(),
@@ -134,6 +133,7 @@ client::tiles::ShipMovementTile::attach(game::proxy::ObjectObserver& oop)
                                                           root->hostConfiguration(),
                                                           root->hostVersion(),
                                                           root->registrationKey());
+                    crystal_ball.addTowee();
                     crystal_ball.computeMovement();
 
                     ChunnelMission chd;

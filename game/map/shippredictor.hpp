@@ -1,9 +1,11 @@
 /**
   *  \file game/map/shippredictor.hpp
+  *  \brief Class game::map::ShipPredictor
   */
 #ifndef C2NG_GAME_MAP_SHIPPREDICTOR_HPP
 #define C2NG_GAME_MAP_SHIPPREDICTOR_HPP
 
+#include <memory>
 #include "afl/bits/smallset.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/element.hpp"
@@ -46,7 +48,7 @@ namespace game { namespace map {
         /** Set of properties used in prediction. */
         typedef afl::bits::SmallSet<UsedProperty> UsedProperties_t;
 
-        /** Single ship predictor.
+        /** Create ship predictor.
             \param univ              Universe
             \param id                Ship Id
             \param scoreDefinitions  Unit score definitions (required for experience levels)
@@ -63,23 +65,16 @@ namespace game { namespace map {
                       const HostVersion& hostVersion,
                       const RegistrationKey& key);
 
-        /** Tow-pair predictor.
-            \param univ              Universe
-            \param id                Ship Id
-            \param towee             Towee's predictor
-            \param scoreDefinitions  Unit score definitions (required for experience levels)
-            \param shipList          Ship list (required for hull/beam/torp/engine specs)
-            \param mapConfig         Map configuration
-            \param config            Host configuration
-            \param hostVersion       Host version
-            \param key               Registration key */
-        ShipPredictor(const Universe& univ, Id_t id, ShipPredictor& towee,
-                      const UnitScoreDefinitionList& scoreDefinitions,
-                      const game::spec::ShipList& shipList,
-                      const Configuration& mapConfig,
-                      const game::config::HostConfiguration& config,
-                      const HostVersion& hostVersion,
-                      const RegistrationKey& key);
+        /** Add predictor for ship's towee, if any.
+            If this ship is towing an applicable ship (with full data), prediction will use live data,
+            that is, compute the towee's mission effects.
+
+            If this function is not used, or if the towed ship is not available with full data,
+            prediction will use static data.
+
+            This function has no effect if the ship does not actually use a Tow mission. */
+        void addTowee();
+
 
         /*
          *  Inquiry
@@ -214,7 +209,7 @@ namespace game { namespace map {
         const Id_t           m_shipId;
         ShipData             m_ship;
         bool                 m_valid;
-        ShipPredictor*       m_pTowee;
+        std::auto_ptr<ShipPredictor> m_pTowee;
         const Universe&      m_universe;
         int32_t              m_movementFuelUsed;
         int32_t              m_cloakFuelUsed;
