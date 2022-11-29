@@ -245,6 +245,7 @@ client::tiles::ShipMovementTile::attach(game::proxy::ObjectObserver& oop)
                        This is how PCC1 does it.
                        - also show one turn usage for stationary ships
                        - also show full usage if predictor turned off cloaking */
+                    bool footnotes = !crystal_ball.getUsedProperties().empty() || chd.getFailureReasons() != 0;
                     int eta        = crystal_ball.getNumTurns();
                     int move_fuel  = crystal_ball.getMovementFuelUsed();
                     int cloak_fuel = computeCloakFuel(*sh, root->hostConfiguration(), g->shipScores(), *shipList, root->hostVersion(), eta);
@@ -274,6 +275,9 @@ client::tiles::ShipMovementTile::attach(game::proxy::ObjectObserver& oop)
                     } else {
                         job->data.colors[Data::FuelUsage] = SkinColor::Green;
                     }
+                    if (footnotes) {
+                        job->data.text[Data::FuelUsage] += " *";
+                    }
 
                     // Load
                     int towee_mass = 0;
@@ -294,6 +298,9 @@ client::tiles::ShipMovementTile::attach(game::proxy::ObjectObserver& oop)
                     } else {
                         job->data.fleetStatus = ui::RedFrame;
                     }
+
+                    // Prediction color
+                    job->data.hasExplanation = footnotes;
                 }
                 m_reply.postNewRequest(job.release());
             }
@@ -317,6 +324,7 @@ client::tiles::ShipMovementTile::setData(const Data& data)
     }
 
     m_fleetFrame.setType(data.fleetStatus);
+    m_queryButton.setState(DisabledState, !data.hasExplanation);
 }
 
 void

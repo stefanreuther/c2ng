@@ -9,6 +9,9 @@
 #include "afl/charset/utf8.hpp"
 #include "afl/data/integervalue.hpp"
 #include "afl/except/assertionfailedexception.hpp"
+#include "afl/io/xml/nodereader.hpp"
+#include "afl/io/xml/tagnode.hpp"
+#include "afl/io/xml/textnode.hpp"
 #include "afl/string/format.hpp"
 #include "afl/string/string.hpp"
 #include "client/cargotransfer.hpp"
@@ -105,6 +108,7 @@
 #include "game/interface/vmfile.hpp"
 #include "game/map/chunnelmission.hpp"
 #include "game/map/fleetmember.hpp"
+#include "game/map/info/mission.hpp"
 #include "game/map/objecttype.hpp"
 #include "game/map/shipinfo.hpp"
 #include "game/map/shippredictor.hpp"
@@ -138,11 +142,17 @@
 #include "interpreter/values.hpp"
 #include "ui/defaultresourceprovider.hpp"
 #include "ui/dialogs/messagebox.hpp"
+#include "ui/layout/hbox.hpp"
+#include "ui/layout/vbox.hpp"
 #include "ui/res/factory.hpp"
 #include "ui/res/manager.hpp"
 #include "ui/res/provider.hpp"
+#include "ui/rich/documentparser.hpp"
+#include "ui/rich/documentview.hpp"
+#include "ui/spacer.hpp"
 #include "ui/widgets/decimalselector.hpp"
 #include "ui/widgets/inputline.hpp"
+#include "ui/widgets/quit.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/widgets/stringlistbox.hpp"
 #include "util/math.hpp"
@@ -684,6 +694,17 @@ namespace {
         game::Game& g = game::actions::mustHaveGame(session);
         game::Turn& t = game::actions::mustExist(g.getViewpointTurn().get());
         return game::v3::CommandExtra::get(t, g.getViewpointPlayer());
+    }
+
+
+    afl::io::xml::TagNode* makeTitle(const String_t& title)
+    {
+        std::auto_ptr<afl::io::xml::TagNode> b(new afl::io::xml::TagNode("b"));
+        b->addNewChild(new afl::io::xml::TextNode(title));
+
+        std::auto_ptr<afl::io::xml::TagNode> p(new afl::io::xml::TagNode("p"));
+        p->addNewChild(b.release());
+        return p.release();
     }
 }
 
@@ -1837,6 +1858,131 @@ client::si::IFCCEditShowCommand(game::Session& session, ScriptSide& si, RequestL
     } else {
         throw Error::contextError();
     }
+}
+
+// @since PCC2 2.41, PCC2 2.0.4 (different signature)
+void
+client::si::IFCCExplainPrediction(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // Parse args
+    args.checkArgumentCount(0, 1);
+    String_t missionName;
+    interpreter::checkStringArg(missionName, args.getNext());
+
+    // Must be in ship context
+    const Ship* sh = dynamic_cast<Ship*>(link.getProcess().getCurrentObject());
+    if (sh == 0) {
+        throw Error::contextError();
+    }
+    game::actions::mustBePlayed(*sh);
+
+    // Universe
+    game::Game& g = game::actions::mustHaveGame(session);
+    game::spec::ShipList& sl = game::actions::mustHaveShipList(session);
+    game::Root& r = game::actions::mustHaveRoot(session);
+    game::map::Universe& univ = g.currentTurn().universe();
+
+    // Ship prediction
+    std::auto_ptr<game::map::ShipPredictor> mainPredictor, toweePredictor;
+    const Ship* towedShip;
+    if (sh->getMission().orElse(0) == game::spec::Mission::msn_Tow && ((towedShip = univ.ships().get(sh->getMissionParameter(game::TowParameter).orElse(0))) != 0)) {
+        toweePredictor.reset(new game::map::ShipPredictor(univ, towedShip->getId(), g.shipScores(), sl, g.mapConfiguration(), r.hostConfiguration(), r.hostVersion(), r.registrationKey()));
+        mainPredictor.reset(new game::map::ShipPredictor(univ, sh->getId(), *toweePredictor, g.shipScores(), sl, g.mapConfiguration(), r.hostConfiguration(), r.hostVersion(), r.registrationKey()));
+    } else {
+        mainPredictor.reset(new game::map::ShipPredictor(univ, sh->getId(), g.shipScores(), sl, g.mapConfiguration(), r.hostConfiguration(), r.hostVersion(), r.registrationKey()));
+    }
+    mainPredictor->computeMovement();
+
+    // Chunnel mission
+    game::map::ChunnelMission chunnel;
+    chunnel.check(*sh, univ, g.mapConfiguration(), g.shipScores(), sl, r);
+
+    // Anything to say?
+    if (mainPredictor->getUsedProperties().empty() && chunnel.getFailureReasons() == 0) {
+        return;
+    }
+
+    // Render
+    afl::string::Translator& tx = session.translator();
+    std::auto_ptr<game::map::info::Nodes_t> nodes(new game::map::info::Nodes_t());
+
+    if (!mainPredictor->getUsedProperties().empty()) {
+        nodes->pushBackNew(makeTitle("Prediction considers..."));
+        afl::io::xml::TagNode* mainList = new afl::io::xml::TagNode("ul");
+        nodes->pushBackNew(mainList);
+        mainList->setAttribute("class", "compact");
+        game::map::info::renderShipPredictorUsedProperties(*mainList, *mainPredictor, missionName, r.playerList(), tx);
+    }
+
+    if (chunnel.getFailureReasons() != 0) {
+        nodes->pushBackNew(makeTitle("Chunnel will fail because..."));
+        afl::io::xml::TagNode* chunnelList = new afl::io::xml::TagNode("ul");
+        nodes->pushBackNew(chunnelList);
+        chunnelList->setAttribute("class", "compact");
+        game::map::info::renderChunnelFailureReasons(*chunnelList, chunnel.getFailureReasons(), tx);
+    }
+
+    // Show on UI
+    class Task : public UserTask {
+     public:
+        Task(std::auto_ptr<game::map::info::Nodes_t>& nodes)
+            : m_nodes(nodes)
+            { }
+
+        virtual void handle(Control& ctl, RequestLink2 link)
+            {
+                // Objects
+                ui::Root& root = ctl.root();
+                afl::string::Translator& tx = ctl.translator();
+
+                // Build a reader
+                afl::io::xml::NodeReader rdr;
+                for (size_t i = 0, n = m_nodes->size(); i < n; ++i) {
+                    rdr.addNode((*m_nodes)[i]);
+                }
+
+                // Parse into document
+                ui::rich::DocumentView docView(gfx::Point(10, 10), 0, root.provider());
+                ui::rich::Document& doc = docView.getDocument();
+                ui::rich::DocumentParser parser(doc, rdr);
+                doc.setPageWidth(root.getExtent().getWidth() * 8/10);
+                parser.parseDocument();
+                doc.finish();
+                docView.handleDocumentUpdate();
+                docView.setPreferredSize(gfx::Point(doc.getDocumentWidth(), doc.getDocumentHeight()));
+
+                // Show it
+                afl::base::Deleter del;
+                ui::Window& win = del.addNew(new ui::Window(tx("Prediction Details"), root.provider(), root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
+                win.add(docView);
+
+                ui::Group& g = del.addNew(new ui::Group(ui::layout::HBox::instance5));
+                ui::widgets::Button& btnOK = del.addNew(new ui::widgets::Button(tx("OK"), util::Key_Return, root));
+                g.add(del.addNew(new ui::Spacer()));
+                g.add(btnOK);
+                g.add(del.addNew(new ui::Spacer()));
+                win.add(g);
+
+                ui::EventLoop loop(root);
+                ui::widgets::KeyDispatcher& disp = del.addNew(new ui::widgets::KeyDispatcher());
+                disp.addNewClosure(' ', loop.makeStop(0));
+                disp.addNewClosure(util::Key_Escape, loop.makeStop(0));
+                btnOK.sig_fire.addNewClosure(loop.makeStop(0));
+                win.add(disp);
+                win.add(del.addNew(new ui::widgets::Quit(root, loop)));
+
+                win.pack();
+                root.centerWidget(win);
+                root.add(win);
+                loop.run();
+
+                ctl.interface().continueProcess(link);
+            }
+
+     private:
+        std::auto_ptr<game::map::info::Nodes_t> m_nodes;
+    };
+    si.postNewTask(link, new Task(nodes));
 }
 
 // @since PCC2 2.40.13
@@ -4737,6 +4883,7 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("CC$EDITLABELCONFIG",    new ScriptProcedure(s, &si, IFCCEditLabelConfig));
                 s.world().setNewGlobalValue("CC$EDITNEWBUILDORDER",  new ScriptProcedure(s, &si, IFCCEditNewBuildOrder));
                 s.world().setNewGlobalValue("CC$EDITSHOWCOMMAND",    new ScriptProcedure(s, &si, IFCCEditShowCommand));
+                s.world().setNewGlobalValue("CC$EXPLAINPREDICTION",  new ScriptProcedure(s, &si, IFCCExplainPrediction));
                 s.world().setNewGlobalValue("CC$EXPORT",             new ScriptProcedure(s, &si, IFCCExport));
                 s.world().setNewGlobalValue("CC$GLOBALACTIONS",      new ScriptProcedure(s, &si, IFCCGlobalActions));
                 s.world().setNewGlobalValue("CC$GOTOCOORDINATES",    new ScriptProcedure(s, &si, IFCCGotoCoordinates));

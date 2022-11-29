@@ -23,11 +23,12 @@ namespace client { namespace tiles {
             String_t text[7];
             util::SkinColor::Color colors[7];
             ui::FrameType fleetStatus;
+            bool hasExplanation;
 
             Data()
+                : fleetStatus(ui::NoFrame), hasExplanation(false)
                 {
                     afl::base::Memory<util::SkinColor::Color>(colors).fill(util::SkinColor::Green);
-                    fleetStatus = ui::NoFrame;
                 }
         };
 

@@ -870,6 +870,12 @@ Sub CCUI.Ship.ToggleRemote
   EndIf
 EndSub
 
+% Explain prediction
+% @since PCC2 2.41
+Sub CCUI.Ship.ExplainPrediction
+  CC$ExplainPrediction CCVP.ShipMissionLabel()
+EndSub
+
 
 % @since PCC2 2.40.10
 Function CCUI$Ship.ValidateShipyard()

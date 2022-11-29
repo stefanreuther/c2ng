@@ -63,6 +63,14 @@ class TestGameMapInfoLinkBuilder : public CxxTest::TestSuite {
     void testInterface();
 };
 
+class TestGameMapInfoMission : public CxxTest::TestSuite {
+ public:
+    void testRenderChunnelFailureReasons();
+    void testRenderShipPredictorUsedProperties();
+    void testRenderShipPredictorUsedProperties2();
+    void testRenderShipPredictorUsedProperties3();
+};
+
 class TestGameMapInfoNullLinkBuilder : public CxxTest::TestSuite {
  public:
     void testIt();

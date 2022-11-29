@@ -1210,12 +1210,30 @@ game::map::ShipPredictor::getFriendlyCode() const
     return m_ship.friendlyCode.orElse(String_t());
 }
 
+// Get name of towed ship.
+String_t
+game::map::ShipPredictor::getTowedShipName() const
+{
+    if (m_pTowee != 0) {
+        return m_pTowee->m_ship.name.orElse(String_t());
+    } else {
+        return String_t();
+    }
+}
+
 // Get the universe used for predicting.
 const game::map::Universe&
 game::map::ShipPredictor::getUniverse() const
 {
     // ex GShipTurnPredictor::getUniverse
     return m_universe;
+}
+
+// Access ship list.
+const game::spec::ShipList&
+game::map::ShipPredictor::shipList() const
+{
+    return m_shipList;
 }
 
 

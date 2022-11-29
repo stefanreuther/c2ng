@@ -187,9 +187,17 @@ namespace game { namespace map {
             \return friendly code */
         String_t getFriendlyCode() const;
 
+        /** Get name of towed ship.
+            \return name; empty if none */
+        String_t getTowedShipName() const;
+
         /** Get universe used for predicting.
             \return universe */
         const Universe& getUniverse() const;
+
+        /** Access ship list.
+            \return ship list */
+        const game::spec::ShipList& shipList() const;
 
         static const int MOVEMENT_TIME_LIMIT = 30;
 
