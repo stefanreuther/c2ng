@@ -6,15 +6,18 @@
 #include "game/interface/richtextfunctions.hpp"
 
 #include "t_game_interface.hpp"
-#include "game/session.hpp"
-#include "afl/string/nulltranslator.hpp"
-#include "interpreter/values.hpp"
 #include "afl/data/segment.hpp"
-#include "interpreter/arguments.hpp"
-#include "game/interface/richtextvalue.hpp"
-#include "util/unicodechars.hpp"
-#include "interpreter/error.hpp"
 #include "afl/io/nullfilesystem.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "game/interface/richtextvalue.hpp"
+#include "game/session.hpp"
+#include "interpreter/arguments.hpp"
+#include "interpreter/error.hpp"
+#include "interpreter/values.hpp"
+#include "util/rich/visitor.hpp"
+#include "util/unicodechars.hpp"
+#include "util/rich/styleattribute.hpp"
+#include "util/rich/colorattribute.hpp"
 
 namespace {
     typedef std::auto_ptr<afl::data::Value> Value_t;
@@ -288,6 +291,22 @@ TestGameInterfaceRichTextFunctions::testRStyle()
     afl::io::NullFileSystem fs;
     game::Session s(tx, fs);
 
+    class AttributeLister : public util::rich::Visitor {
+     public:
+        virtual bool handleText(String_t /*text*/)
+            { return true; }
+        virtual bool startAttribute(const util::rich::Attribute& att)
+            { m_attributes.push_back(&att); return true; }
+        virtual bool endAttribute(const util::rich::Attribute& /*att*/)
+            { return true; }
+        size_t size() const
+            { return m_attributes.size(); }
+        const util::rich::Attribute* operator[](size_t x) const
+            { return m_attributes[x]; }
+     private:
+        std::vector<const util::rich::Attribute*> m_attributes;
+    };
+
     // Test a number of invocations
     {
         // RStyle("red", "the text") = "the text"
@@ -300,6 +319,14 @@ TestGameInterfaceRichTextFunctions::testRStyle()
         TS_ASSERT(game::interface::checkRichArg(p, result.get()));
         TS_ASSERT_EQUALS(p->getText(), "the text");
         TS_ASSERT_EQUALS(p->getNumAttributes(), 1U);
+
+        // Verify attribute
+        AttributeLister att;
+        att.visit(*p);
+        TS_ASSERT_EQUALS(att.size(), 1U);
+        const util::rich::ColorAttribute* catt = dynamic_cast<const util::rich::ColorAttribute*>(att[0]);
+        TS_ASSERT(catt != 0);
+        TS_ASSERT_EQUALS(catt->getColor(), util::SkinColor::Red);
     }
     {
         // RStyle("red", "a", "b", 3) = "ab3"
@@ -314,6 +341,34 @@ TestGameInterfaceRichTextFunctions::testRStyle()
         TS_ASSERT(game::interface::checkRichArg(p, result.get()));
         TS_ASSERT_EQUALS(p->getText(), "ab3");
         TS_ASSERT_EQUALS(p->getNumAttributes(), 1U);
+
+        // Verify attribute
+        AttributeLister att;
+        att.visit(*p);
+        TS_ASSERT_EQUALS(att.size(), 1U);
+        const util::rich::ColorAttribute* catt = dynamic_cast<const util::rich::ColorAttribute*>(att[0]);
+        TS_ASSERT(catt != 0);
+        TS_ASSERT_EQUALS(catt->getColor(), util::SkinColor::Red);
+    }
+    {
+        // RStyle("big", "the text") = "the text"
+        afl::data::Segment seg;
+        seg.setNew(0, interpreter::makeStringValue("big"));
+        seg.setNew(1, interpreter::makeStringValue("the text"));
+        interpreter::Arguments args(seg, 0, 2);
+        Value_t result(game::interface::IFRStyle(s, args));
+        Ptr_t p;
+        TS_ASSERT(game::interface::checkRichArg(p, result.get()));
+        TS_ASSERT_EQUALS(p->getText(), "the text");
+        TS_ASSERT_EQUALS(p->getNumAttributes(), 1U);
+
+        // Verify attribute
+        AttributeLister att;
+        att.visit(*p);
+        TS_ASSERT_EQUALS(att.size(), 1U);
+        const util::rich::StyleAttribute* satt = dynamic_cast<const util::rich::StyleAttribute*>(att[0]);
+        TS_ASSERT(satt != 0);
+        TS_ASSERT_EQUALS(satt->getStyle(), util::rich::StyleAttribute::Big);
     }
 }
 

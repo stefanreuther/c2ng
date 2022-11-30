@@ -31,8 +31,7 @@ typedef game::interface::RichTextValue::Ref_t Ref_t;
 namespace {
     enum StyleKind {
         kNone,
-        kStyle,
-        kColor
+        kStyle
     };
     struct Style {
         const char* name;
@@ -42,72 +41,59 @@ namespace {
     const Style styles[] = {
         { "",                  kNone,  0 },
         { "b",                 kStyle, StyleAttribute::Bold }, /* tag name */
-        { "background-color",  kColor, SkinColor::Background },
         { "big",               kStyle, StyleAttribute::Big },
-        { "blue",              kColor, SkinColor::Blue },
         { "bold",              kStyle, StyleAttribute::Bold }, /* real name */
-        { "contrast-color",    kColor, SkinColor::Contrast },
-        { "dim",               kColor, SkinColor::Faded },
         { "em",                kStyle, StyleAttribute::Bold }, /* tag name (should actually be italic) */
         { "fixed",             kStyle, StyleAttribute::Fixed }, /* real name */
-        { "green",             kColor, SkinColor::Green },
-        { "heading-color",     kColor, SkinColor::Heading },
-        { "input-color",       kColor, SkinColor::Input },
-        { "inverse-color",     kColor, SkinColor::InvStatic },
         // { "italic",            kStyle, StyleAttribute::Italic }, /* not supported yet */
         { "kbd",               kStyle, StyleAttribute::Key }, /* tag name */
         { "key",               kStyle, StyleAttribute::Key }, /* real name */
-        { "link-color",        kColor, SkinColor::Link },
-        { "link-focus-color",  kColor, SkinColor::LinkFocus },
-        { "link-shade-color",  kColor, SkinColor::LinkShade },
         { "none",              kNone,  0 },
-        { "red",               kColor, SkinColor::Red },
-        { "selection-color",   kColor, SkinColor::Selection },
         { "small"    ,         kStyle, StyleAttribute::Small },
-        { "static",            kColor, SkinColor::Static },
         { "tt",                kStyle, StyleAttribute::Fixed }, /* tag name */
         { "u",                 kStyle, StyleAttribute::Underline }, /* tag name */
         { "underline",         kStyle, StyleAttribute::Underline }, /* real name */
-        { "white",             kColor, SkinColor::White },
-        { "yellow",            kColor, SkinColor::Yellow },
     };
 
     Ptr_t processStyle(String_t style, Ptr_t text)
     {
         style = afl::string::strTrim(afl::string::strLCase(style));
 
-        const Style* p = 0;
-        afl::base::Memory<const Style> pp(styles);
-        while (const Style* q = pp.eat()) {
-            if (q->name == style) {
-                p = q;
-                break;
+        util::SkinColor::Color color;
+        if (util::SkinColor::parse(style, color)) {
+            // Color
+            Ptr_t tmp = new util::rich::Text(*text);
+            tmp->withNewAttribute(new util::rich::ColorAttribute(color));
+            return tmp;
+        } else {
+            // Other style
+            const Style* p = 0;
+            afl::base::Memory<const Style> pp(styles);
+            while (const Style* q = pp.eat()) {
+                if (q->name == style) {
+                    p = q;
+                    break;
+                }
             }
-        }
 
-        if (!p) {
-            throw interpreter::Error("Invalid style");
-        }
+            if (!p) {
+                throw interpreter::Error("Invalid style");
+            }
 
-        switch (p->kind) {
-         case kNone:
+            switch (p->kind) {
+             case kNone:
+                return text;
+             case kStyle:
+             {
+                 Ptr_t tmp = new util::rich::Text(*text);
+                 tmp->withNewAttribute(new StyleAttribute(StyleAttribute::Style(p->value)));
+                 return tmp;
+             }
+            }
+
+            // Fallback, does not happen
             return text;
-         case kColor:
-         {
-             Ptr_t tmp = new util::rich::Text(*text);
-             tmp->withNewAttribute(new util::rich::ColorAttribute(SkinColor::Color(p->value)));
-             return tmp;
-         }
-         case kStyle:
-         {
-             Ptr_t tmp = new util::rich::Text(*text);
-             tmp->withNewAttribute(new StyleAttribute(StyleAttribute::Style(p->value)));
-             return tmp;
-         }
         }
-
-        // Fallback, does not happen
-        return text;
     }
 }
 

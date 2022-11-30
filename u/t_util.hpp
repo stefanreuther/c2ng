@@ -252,6 +252,7 @@ class TestUtilSimpleRequestDispatcher : public CxxTest::TestSuite {
 class TestUtilSkinColor : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testParse();
 };
 
 class TestUtilStopSignal : public CxxTest::TestSuite {

@@ -18,34 +18,6 @@
 #include "util/skincolor.hpp"
 #include "util/unicodechars.hpp"
 
-namespace {
-    struct ColorMap {
-        const char* name;
-        util::SkinColor::Color color;
-    };
-    
-    /** Parse a color name. */
-    util::SkinColor::Color parseColorName(const String_t& name)
-    {
-        static const ColorMap colors[] = {
-            { "static", util::SkinColor::Static },
-            { "green",  util::SkinColor::Green },
-            { "yellow", util::SkinColor::Yellow },
-            { "red",    util::SkinColor::Red },
-            { "white",  util::SkinColor::White },
-            { "blue",   util::SkinColor::Blue },
-            { "dim",    util::SkinColor::Faded },
-        };
-        for (std::size_t i = 0; i < countof(colors); ++i) {
-            if (name == colors[i].name) {
-                return colors[i].color;
-            }
-        }
-        return util::SkinColor::Static;
-    }
-}
-
-
 // Constructor.
 util::rich::Parser::Parser(afl::io::xml::BaseReader& rdr)
     : m_reader(rdr),
@@ -160,15 +132,20 @@ util::rich::Parser::parseTextItem(bool keepFormat)
     } else if (isOpeningTag("small")) {
         return parseText(keepFormat).withStyle(StyleAttribute::Small);
     } else if (isOpeningTag("font")) {
-        afl::base::Optional<SkinColor::Color> c;
+        SkinColor::Color c = SkinColor::Static;
+        bool hasColor = false;
         while (m_currentToken == m_reader.TagAttribute) {
             if (m_reader.getName() == "color") {
-                c = parseColorName(m_reader.getValue());
+                if (!SkinColor::parse(m_reader.getValue(), c)) {
+                    // Treat 'color="unknown"' as 'color="static"' for now
+                    c = SkinColor::Static;
+                }
+                hasColor = true;
             }
             readNext();
         }
-        if (const SkinColor::Color* pc = c.get()) {
-            return parseText(keepFormat).withColor(*pc);
+        if (hasColor) {
+            return parseText(keepFormat).withColor(c);
         } else {
             return parseText(keepFormat);
         }

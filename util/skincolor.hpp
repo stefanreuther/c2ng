@@ -6,6 +6,7 @@
 #define C2NG_UTIL_SKINCOLOR_HPP
 
 #include "afl/base/types.hpp"
+#include "afl/string/string.hpp"
 
 namespace util {
 
@@ -30,6 +31,12 @@ namespace util {
             LinkFocus            ///< Link focus (background to tc_Link).
         };
         static const size_t NUM_COLORS = LinkFocus+1;
+
+        /** Parse a color name.
+            @param [in]  name   Name (lower-case)
+            @param [out] result Color
+            @return true if name was valid, result set. false if name was not valid, result unchanged */
+        static bool parse(const String_t& name, Color& result);
     };
 
 }
