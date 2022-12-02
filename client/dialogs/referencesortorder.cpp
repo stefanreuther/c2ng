@@ -3,22 +3,24 @@
   */
 
 #include "client/dialogs/referencesortorder.hpp"
-#include "ui/widgets/stringlistbox.hpp"
-#include "game/ref/configuration.hpp"
 #include "afl/base/countof.hpp"
 #include "afl/string/format.hpp"
-#include "util/translation.hpp"
-#include "ui/layout/hbox.hpp"
+#include "game/ref/configuration.hpp"
 #include "ui/eventloop.hpp"
+#include "ui/group.hpp"
+#include "ui/layout/hbox.hpp"
+#include "ui/layout/vbox.hpp"
+#include "ui/widgets/focusiterator.hpp"
+#include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/menuframe.hpp"
 #include "ui/widgets/richlistbox.hpp"
-#include "ui/layout/vbox.hpp"
-#include "ui/widgets/statictext.hpp"
-#include "ui/widgets/framegroup.hpp"
-#include "ui/window.hpp"
-#include "ui/group.hpp"
+#include "ui/widgets/scrollbar.hpp"
+#include "ui/widgets/scrollbarcontainer.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
-#include "ui/widgets/focusiterator.hpp"
+#include "ui/widgets/statictext.hpp"
+#include "ui/widgets/stringlistbox.hpp"
+#include "ui/window.hpp"
+#include "util/translation.hpp"
 
 namespace gr = game::ref;
 using afl::string::Format;
@@ -154,11 +156,11 @@ ReferenceSortOrderDialog::run(game::ref::Configuration& order, ui::Root& root, a
     ui::Group& g11(del.addNew(new ui::Group(ui::layout::VBox::instance5)));
     ui::Group& g12(del.addNew(new ui::Group(ui::layout::VBox::instance5)));
     g11.add(del.addNew(new ui::widgets::StaticText(tx("Sort by..."), util::SkinColor::Static, gfx::FontRequest().addSize(1), root.provider())));
-    g11.add(ui::widgets::FrameGroup::wrapWidget(del, root.colorScheme(), ui::LoweredFrame, m_firstList));
+    g11.add(ui::widgets::FrameGroup::wrapWidget(del, root.colorScheme(), ui::LoweredFrame, del.addNew(new ui::widgets::ScrollbarContainer(m_firstList, root))));
     g1.add(g11);
 
     g12.add(del.addNew(new ui::widgets::StaticText(tx("then by..."), util::SkinColor::Static, gfx::FontRequest().addSize(1), root.provider())));
-    g12.add(ui::widgets::FrameGroup::wrapWidget(del, root.colorScheme(), ui::LoweredFrame, m_secondList));
+    g12.add(ui::widgets::FrameGroup::wrapWidget(del, root.colorScheme(), ui::LoweredFrame, del.addNew(new ui::widgets::ScrollbarContainer(m_secondList, root))));
     g1.add(g12);
 
     win.add(g1);

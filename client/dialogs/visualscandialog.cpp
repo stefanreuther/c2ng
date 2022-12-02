@@ -46,6 +46,8 @@
 #include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/imagebutton.hpp"
 #include "ui/widgets/quit.hpp"
+#include "ui/widgets/scrollbar.hpp"
+#include "ui/widgets/scrollbarcontainer.hpp"
 #include "util/unicodechars.hpp"
 
 using client::si::OutputState;
@@ -479,6 +481,7 @@ class client::dialogs::VisualScanDialog::ListPeer {
     Window& m_parent;
     ui::Window m_window;
     client::widgets::ReferenceListbox m_list;
+    ui::widgets::ScrollbarContainer m_scrollbar;
     afl::base::SignalConnection conn_listChange;
     afl::base::SignalConnection conn_referenceChange;
 
@@ -752,13 +755,14 @@ client::dialogs::VisualScanDialog::KeyHandler::handleKey(util::Key_t key, int /*
 client::dialogs::VisualScanDialog::ListPeer::ListPeer(ui::Root& root, Window& parent)
     : m_parent(parent),
       m_window(parent.m_translator.translateString("Ship List"), root.provider(), root.colorScheme(), ui::BLUE_WINDOW, ui::layout::HBox::instance0),
-      m_list(root)
+      m_list(root),
+      m_scrollbar(m_list, root)
 {
     // ex WVisualScanListWindow::init
     // Build widgets
     m_list.setNumLines(25);
     m_list.setWidth(300 /* FIXME */);
-    m_window.add(m_list);
+    m_window.add(m_scrollbar);
 
     // Initialize
     m_list.setContent(m_parent.m_userList);
@@ -1189,7 +1193,11 @@ client::dialogs::VisualScanDialog::Window::showCargoList()
                                 CostSummaryList::TotalsFooter,
                                 m_root, m_translator));
         list.setContent(m_cargoSummaryBuilder->m_summary);
-        win.add(list);
+
+        ui::Group& listGroup = del.addNew(new ui::Group(ui::layout::HBox::instance0));
+        listGroup.add(list);
+        listGroup.add(del.addNew(new ui::widgets::Scrollbar(list, m_root)));
+        win.add(listGroup);
 
         ui::widgets::Button& btnExport = del.addNew(new ui::widgets::Button(util::KeyString(m_translator("E - Export")), m_root));
         ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(m_translator("OK"), util::Key_Return, m_root));

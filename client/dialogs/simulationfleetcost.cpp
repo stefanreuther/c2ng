@@ -20,6 +20,7 @@
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/keydispatcher.hpp"
 #include "ui/widgets/quit.hpp"
+#include "ui/widgets/scrollbar.hpp"
 #include "ui/widgets/statictext.hpp"
 #include "ui/window.hpp"
 
@@ -141,7 +142,10 @@ FleetCostDialog::run()
     afl::base::Deleter del;
 
     ui::Window& win = del.addNew(new ui::Window(m_translator("Fleet Cost Comparison"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
-    win.add(m_costSummary);
+    ui::Group& listGroup = del.addNew(new ui::Group(ui::layout::HBox::instance0));
+    listGroup.add(m_costSummary);
+    listGroup.add(del.addNew(new ui::widgets::Scrollbar(m_costSummary, m_root)));
+    win.add(listGroup);
 
     ui::Group& cycleGroup = del.addNew(new ui::Group(ui::layout::HBox::instance5));
     ui::widgets::Button& btnPrev = del.addNew(new ui::widgets::Button("<", util::Key_Tab + util::KeyMod_Shift, m_root));

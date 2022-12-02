@@ -13,6 +13,7 @@
 #include "ui/spacer.hpp"
 #include "ui/widgets/inputline.hpp"
 #include "ui/widgets/keydispatcher.hpp"
+#include "ui/widgets/scrollbarcontainer.hpp"
 #include "ui/widgets/simpleiconbox.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/window.hpp"
@@ -215,7 +216,7 @@ namespace {
                 afl::base::Deleter del;
                 ui::Window& window = del.addNew(new ui::Window(m_translator("Choose directory"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
                 window.add(m_crumbs);
-                window.add(m_list);
+                window.add(del.addNew(new ui::widgets::ScrollbarContainer(m_list, m_root)));
 
                 ui::widgets::KeyDispatcher keys;
                 keys.add(util::Key_Left,  this, &Dialog::onKeyLeft);

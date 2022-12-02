@@ -19,6 +19,7 @@
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/quit.hpp"
+#include "ui/widgets/scrollbarcontainer.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/widgets/statictext.hpp"
 #include "util/unicodechars.hpp"
@@ -117,7 +118,7 @@ namespace {
             {
                 afl::base::Deleter del;
                 ui::Window win(m_translator("Manage Build Queue"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5);
-                win.add(ui::widgets::FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame, m_list));
+                win.add(ui::widgets::FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame, del.addNew(new ui::widgets::ScrollbarContainer(m_list, m_root))));
 
                 ui::Widget& keys = del.addNew(new BuildQueueKeyHandler(m_proxy, m_list));
                 win.add(keys);

@@ -13,6 +13,7 @@
 #include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/keydispatcher.hpp"
 #include "ui/widgets/quit.hpp"
+#include "ui/widgets/scrollbarcontainer.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/widgets/statictext.hpp"
 #include "ui/window.hpp"
@@ -362,8 +363,8 @@ client::dialogs::FileSelectionDialog::run()
     g1.add(m_input);
     win.add(g1);
 
-    // FIXME: scrollbar
-    win.add(ui::widgets::FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame, m_fileList));
+    win.add(ui::widgets::FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame,
+                                                del.addNew(new ui::widgets::ScrollbarContainer(m_fileList, m_root))));
     win.add(m_crumbTrail);
 
     ui::widgets::StandardDialogButtons& btns = del.addNew(new ui::widgets::StandardDialogButtons(m_root, m_translator));

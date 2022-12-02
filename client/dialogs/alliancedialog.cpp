@@ -20,6 +20,7 @@
 #include "ui/widgets/focusiterator.hpp"
 #include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/quit.hpp"
+#include "ui/widgets/scrollbarcontainer.hpp"
 #include "ui/widgets/statictext.hpp"
 
 using client::widgets::AllianceLevelGrid;
@@ -136,7 +137,7 @@ client::dialogs::AllianceDialog::initDialog(util::RequestSender<game::Session> g
     Group& g1  = m_deleter.addNew(new Group(HBox::instance5));
     Group& g11 = m_deleter.addNew(new Group(VBox::instance5));
     g11.add(m_deleter.addNew(new StaticText(tx("Alliances:"), util::SkinColor::Static, gfx::FontRequest().addSize(1), m_root.provider())));
-    g11.add(ui::widgets::FrameGroup::wrapWidget(m_deleter, m_root.colorScheme(), ui::LoweredFrame, *m_pList));
+    g11.add(ui::widgets::FrameGroup::wrapWidget(m_deleter, m_root.colorScheme(), ui::LoweredFrame, m_deleter.addNew(new ui::widgets::ScrollbarContainer(*m_pList, m_root))));
     g11.add(m_deleter.addNew(new Spacer()));
     g1.add(g11);
 

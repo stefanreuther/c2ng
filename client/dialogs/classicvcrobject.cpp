@@ -21,6 +21,7 @@
 #include "ui/widgets/imagebutton.hpp"
 #include "ui/widgets/keyforwarder.hpp"
 #include "ui/widgets/quit.hpp"
+#include "ui/widgets/scrollbarcontainer.hpp"
 #include "ui/widgets/statictext.hpp"
 #include "ui/widgets/stringlistbox.hpp"
 #include "ui/window.hpp"
@@ -126,7 +127,7 @@ ClassicVcrObjectDialog::run(ui::Root& root)
     leftGroup.add(m_nameWidget);
     leftGroup.add(m_subtitleWidget);
     leftGroup.add(del.addNew(new ui::Spacer()));
-    leftGroup.add(FrameGroup::wrapWidget(del, root.colorScheme(), ui::LoweredFrame, m_hullList));
+    leftGroup.add(FrameGroup::wrapWidget(del, root.colorScheme(), ui::LoweredFrame, del.addNew(new ui::widgets::ScrollbarContainer(m_hullList, root))));
     headGroup.add(leftGroup);
     headGroup.add(FrameGroup::wrapWidget(del, root.colorScheme(), ui::LoweredFrame, m_image));
     headGroup.add(del.addNew(new ui::Spacer()));

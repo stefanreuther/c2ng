@@ -7,6 +7,7 @@
 #include "afl/string/format.hpp"
 #include "client/downlink.hpp"
 #include "game/proxy/playerproxy.hpp"
+#include "game/proxy/vcrdatabaseproxy.hpp"
 #include "game/vcr/flak/eventrecorder.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/group.hpp"
@@ -18,7 +19,7 @@
 #include "ui/widgets/keyforwarder.hpp"
 #include "ui/widgets/panel.hpp"
 #include "ui/widgets/quit.hpp"
-#include "game/proxy/vcrdatabaseproxy.hpp"
+#include "ui/widgets/scrollbarcontainer.hpp"
 
 using afl::string::Format;
 using client::widgets::CombatUnitList;
@@ -121,7 +122,7 @@ client::vcr::flak::PlaybackScreen::run()
     win.add(m_arena);
 
     ui::widgets::Panel& g11 = del.addNew(new ui::widgets::Panel(ui::layout::VBox::instance5, 5));
-    g11.add(m_unitList);
+    g11.add(del.addNew(new ui::widgets::ScrollbarContainer(m_unitList, m_root)));
     g11.add(m_cameraControl);
 
     ui::Group& g114 = del.addNew(new ui::Group(ui::layout::HBox::instance0));
