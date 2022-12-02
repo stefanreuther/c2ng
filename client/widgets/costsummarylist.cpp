@@ -274,7 +274,7 @@ client::widgets::CostSummaryList::getLayoutInfo() const
         width += 5;
     }
 
-    return gfx::Point(width, height);
+    return ui::layout::Info(gfx::Point(width, height), gfx::Point(width, height), ui::layout::Info::GrowBoth);
 }
 
 bool
