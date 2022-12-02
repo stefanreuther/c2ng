@@ -55,7 +55,7 @@ ui::widgets::Scrollbar::draw(gfx::Canvas& can)
     }
 
     // Scrollbox
-    if (r.getHeight() >= 2) {
+    if (r.getHeight() >= 4) {
         drawFrameUp(ctx, r);
         r.grow(-1, -1);
 
@@ -67,8 +67,8 @@ ui::widgets::Scrollbar::draw(gfx::Canvas& can)
             }
             int divi = m_widget.getTotalSize();
 
-            int yy1 = r.getHeight() * int32_t(top) / divi;
-            int yy2 = r.getHeight() * int32_t(top + m_widget.getPageSize()) / divi;
+            int yy1 = (r.getHeight()-2) * int32_t(top) / divi;
+            int yy2 = (r.getHeight()-2) * int32_t(top + m_widget.getPageSize()) / divi + 2;
 
             if (yy1 > 0) {
                 drawSolidBar(ctx, gfx::Rectangle(r.getLeftX(), r.getTopY(), r.getWidth(), yy1), Color_Shield + 3);
