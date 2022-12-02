@@ -715,11 +715,12 @@ game::interface::IFNewLineRaw(game::Session& session, interpreter::Process& /*pr
     drawLineOrRectangle(session, args, game::map::Drawing::LineDrawing, false);
 }
 
-/* @q NewMarker x:Int, y:Int, type:Int, Optional color:Int, tag:Int, expire:Int (Global Command)
+/* @q NewMarker x:Int, y:Int, type:Int, Optional color:Int, text:Str, tag:Int, expire:Int (Global Command)
    Create new marker drawing.
    The %type selects the marker shape.
 
    The %color is an integer between 0 and 30, and selects the color.
+   The %text contains the marker's comment shown on the map.
    The %tag is a value between 0 and 32767 you can use to identify your drawings,
    usually this value is created using {Atom}.
 
@@ -727,6 +728,10 @@ game::interface::IFNewLineRaw(game::Session& session, interpreter::Process& /*pr
    if the current turn number is larger than this value, the drawing is automatically deleted.
    Thus, set %expire=0 to make drawings only visible for the current session.
    %expire=-1 is the default, drawings with this value never expire.
+
+   Note: this command was erroneously documented without the %text argument in some versions,
+   but has always accepted the parameters as shown above.
+
    @see NewCircle, NewLineRaw, NewRectangle, NewMarker, NewCannedMarker
    @since PCC2 1.99.9, PCC 1.0.5, PCC2 2.40.1 */
 void
