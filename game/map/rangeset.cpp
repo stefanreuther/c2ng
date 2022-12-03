@@ -51,9 +51,9 @@ game::map::RangeSet::addObjectType(ObjectType& type, PlayerSet_t playerLimit, bo
     for (int i = type.findNextIndex(0); i != 0; i = type.findNextIndex(i)) {
         if (const Object* mo = type.getObjectByIndex(i)) {
             int owner;
-            if (mo->getOwner(owner) && playerLimit.contains(owner) && (!markedOnly || mo->isMarked())) {
+            if (mo->getOwner().get(owner) && playerLimit.contains(owner) && (!markedOnly || mo->isMarked())) {
                 Point pt;
-                if (mo->getPosition(pt)) {
+                if (mo->getPosition().get(pt)) {
                     add(pt, r);
                 }
             }

@@ -148,7 +148,7 @@ game::interface::doCargoUnload(game::map::Ship& sh, bool reverse, interpreter::P
 
     // Validate position
     game::map::Point shipPos;
-    if (!sh.getPosition(shipPos)) {
+    if (!sh.getPosition().get(shipPos)) {
         throw Exception("Ship does not exist");
     }
 

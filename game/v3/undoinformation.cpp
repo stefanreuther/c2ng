@@ -44,7 +44,7 @@ game::v3::UndoInformation::set(const game::map::Universe& univ,
     }
     int planetOwner;
     game::map::Point planetPos;
-    if (!dat->getOwner(planetOwner) || !dat->getPosition(planetPos)) {
+    if (!dat->getOwner().get(planetOwner) || !dat->getPosition().get(planetPos)) {
         return;
     }
 
@@ -80,8 +80,8 @@ game::v3::UndoInformation::set(const game::map::Universe& univ,
         int shipOwner;
         game::map::Point shipPos;
         if (newShip != 0 && oldShip != 0
-            && newShip->getOwner(shipOwner) && shipOwner == planetOwner
-            && newShip->getPosition(shipPos) && shipPos == planetPos)
+            && newShip->getOwner().get(shipOwner) && shipOwner == planetOwner
+            && newShip->getPosition().get(shipPos) && shipPos == planetPos)
         {
             supplyDiffs += newShip->getCargo(Element::Supplies).orElse(0) - oldShip->supplies.orElse(0);
             int ammoDiff = newShip->getAmmo().orElse(0) - oldShip->ammo.orElse(0);

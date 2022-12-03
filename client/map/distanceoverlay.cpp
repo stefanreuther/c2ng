@@ -317,7 +317,7 @@ client::map::DistanceOverlay::buildStatus(Status& out, game::Session& session, g
     // ex WDistanceChartMode::getMode
     const game::map::Ship* sh = t.universe().ships().get(shipId);
     game::map::Point shipPos;
-    if (sh == 0 || !sh->isVisible() || !sh->getPosition(shipPos)) {
+    if (sh == 0 || !sh->isVisible() || !sh->getPosition().get(shipPos)) {
         // Ship doesn't exist or isn't visible
         out.mode = DistanceMode;
     } else {

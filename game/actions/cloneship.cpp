@@ -75,7 +75,7 @@ game::actions::CloneShip::commit(const game::map::Configuration& mapConfig, util
     m_ship.setFriendlyCode(String_t(CLN_FCODE));
 
     game::map::Point pos;
-    if (m_ship.getPosition(pos)) {
+    if (m_ship.getPosition().get(pos)) {
         // Clear waypoint
         fm.setWaypoint(pos, m_root.hostConfiguration(), m_shipList);
         fm.setWarpFactor(0, m_root.hostConfiguration(), m_shipList);
@@ -103,8 +103,7 @@ game::actions::CloneShip::OrderStatus
 game::actions::CloneShip::getOrderStatus() const
 {
     // ex doCloneShip (part), bdata.pas:CloneAShip (part)
-    int planetOwner = 0;
-    m_planet.getOwner(planetOwner);
+    const int planetOwner = m_planet.getOwner().orElse(0);
     const int hullNr = m_ship.getHull().orElse(0);
     const int hullSlot = m_shipList.hullAssignments().getIndexFromHull(m_root.hostConfiguration(), planetOwner, hullNr);
 

@@ -42,7 +42,7 @@ game::interface::getExplosionProperty(const game::map::Explosion& expl,
         /* @q Loc.X:Int (Explosion Property)
            X location of explosion.
            @since PCC2 2.40.1 */
-        if (expl.getPosition(pt)) {
+        if (expl.getPosition().get(pt)) {
             return makeIntegerValue(pt.getX());
         } else {
             return 0;
@@ -52,7 +52,7 @@ game::interface::getExplosionProperty(const game::map::Explosion& expl,
         /* @q Loc.Y:Int (Explosion Property)
            Y location of explosion.
            @since PCC2 2.40.1 */
-        if (expl.getPosition(pt)) {
+        if (expl.getPosition().get(pt)) {
             return makeIntegerValue(pt.getY());
         } else {
             return 0;

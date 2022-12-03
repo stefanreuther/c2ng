@@ -344,7 +344,7 @@ class client::screens::ControlScreen::Updater : public game::proxy::ObjectListen
             }
 
             Point pt;
-            bool hasPosition = mo != 0 && mo->getPosition(pt);
+            bool hasPosition = mo != 0 && mo->getPosition().get(pt);
             bool isHyp = isHyperdriving(session, mo);
 
             if (mo != 0 && (mo != m_lastObject || pt != m_lastPosition)) {
@@ -501,7 +501,7 @@ client::screens::ControlScreen::Proprietor::get(game::interface::UserInterfacePr
         result.reset();
         if (game::map::Object* obj = m_state->getObject(m_session)) {
             Point pt;
-            if (obj->getPosition(pt)) {
+            if (obj->getPosition().get(pt)) {
                 if (prop == game::interface::iuiChartX) {
                     result.reset(makeIntegerValue(pt.getX()));
                 } else {

@@ -54,14 +54,13 @@ game::Reference::getId() const
 }
 
 // Get position.
-bool
-game::Reference::getPos(game::map::Point& pt) const
+afl::base::Optional<game::map::Point>
+game::Reference::getPosition() const
 {
     if (m_type == MapLocation) {
-        pt = game::map::Point(m_x, m_y);
-        return true;
+        return game::map::Point(m_x, m_y);
     } else {
-        return false;
+        return afl::base::Nothing;
     }
 }
 

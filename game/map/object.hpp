@@ -69,14 +69,12 @@ namespace game { namespace map {
         virtual Id_t getId() const = 0;
 
         /** Get owner of this object.
-            \param result [out] Result
-            \return true if owner is known */
-        virtual bool getOwner(int& result) const = 0;
+            \return owner if known */
+        virtual afl::base::Optional<int> getOwner() const = 0;
 
         /** Get position in game universe.
-            \param result [out] result
-            \return true if position is known */
-        virtual bool getPosition(Point& result) const = 0;
+            \return position if known */
+        virtual afl::base::Optional<Point> getPosition() const = 0;
 
 
         /*

@@ -290,7 +290,7 @@ game::map::Renderer::renderMinefields(const State& st) const
             Point pt;
             int owner;
             int radius;
-            if (mf->getPosition(pt) && mf->getOwner(owner) && mf->getRadius(radius)) {
+            if (mf->getPosition().get(pt) && mf->getOwner().get(owner) && mf->getRadius().get(radius)) {
                 const Configuration& config = m_viewport.mapConfiguration();
                 if (decay) {
                     radius = Minefield::getRadiusFromUnits(mf->getUnitsAfterDecay(mf->getUnits(), m_viewport.hostVersion(), m_viewport.hostConfiguration()));
@@ -318,14 +318,14 @@ game::map::Renderer::renderUfos(const State& st) const
         if (const Ufo* ufo = ty.getObjectByIndex(i)) {
             Point center;
             int radius;
-            if (ufo->getRadius(radius) && ufo->getPosition(center)) {
+            if (ufo->getRadius().get(radius) && ufo->getPosition().get(center)) {
                 // Check other end
                 // FIXME: here, we remain in this map image, even if drawing across the seam
                 // would produce a shorter line.
                 Point otherCenter;
                 bool drawOther = false;
                 if (const Ufo* otherEnd = ufo->getOtherEnd()) {
-                    if (otherEnd->getPosition(otherCenter)) {
+                    if (otherEnd->getPosition().get(otherCenter)) {
                         if (center.getY() < otherCenter.getY() || (center.getY() == otherCenter.getY() && center.getX() < otherCenter.getX())) {
                             drawOther = true;
                         }
@@ -364,7 +364,7 @@ game::map::Renderer::renderIonStorms(const State& st) const
         if (const IonStorm* ion = ty.getObjectByIndex(i)) {
             Point center;
             int radius;
-            if (ion->getRadius(radius) && ion->getPosition(center)) {
+            if (ion->getRadius().get(radius) && ion->getPosition().get(center)) {
                 for (int img = st.getFirstImage(); img >= 0; img = st.getNextImage(img)) {
                     Point imgCenter = config.getSimplePointAlias(center, img);
                     if (m_viewport.containsCircle(imgCenter, radius)) {
@@ -397,7 +397,7 @@ game::map::Renderer::renderDrawings(const State& st) const
     for (Id_t i = e.findNextIndex(0); i != 0; i = e.findNextIndex(i)) {
         if (const Explosion* ex = e.getObjectByIndex(i)) {
             Point pt;
-            if (ex->getPosition(pt)) {
+            if (ex->getPosition().get(pt)) {
                 for (int img = st.getFirstImage(); img >= 0; img = st.getNextImage(img)) {
                     Point imgPos = config.getSimplePointAlias(pt, img);
                     if (m_viewport.containsCircle(imgPos, 10)) {
@@ -483,7 +483,7 @@ game::map::Renderer::renderShipExtras(const State& st) const
         for (Id_t i = ty.findNextIndexNoWrap(0, true); i != 0; i = ty.findNextIndexNoWrap(i, true)) {
             const Ship* sh = ty.getObjectByIndex(i);
             Point shipPosition;
-            if (sh != 0 && sh->getPosition(shipPosition)) {
+            if (sh != 0 && sh->getPosition().get(shipPosition)) {
                 // Regular images
                 for (int img = st.getFirstImage(); img >= 0; img = st.getNextImage(img)) {
                     st.listener().drawSelection(config.getSimplePointAlias(shipPosition, img));
@@ -505,7 +505,7 @@ game::map::Renderer::renderShipExtras(const State& st) const
         for (Id_t i = ty.findNextIndexNoWrap(0, false); i != 0; i = ty.findNextIndexNoWrap(i, false)) {
             const Ship* sh = ty.getObjectByIndex(i);
             Point shipPosition;
-            if (sh != 0 && !sh->messages().empty() && sh->getPosition(shipPosition)) {
+            if (sh != 0 && !sh->messages().empty() && sh->getPosition().get(shipPosition)) {
                 for (int img = st.getFirstImage(); img >= 0; img = st.getNextImage(img)) {
                     st.listener().drawMessageMarker(config.getSimplePointAlias(shipPosition, img));
                 }
@@ -516,7 +516,7 @@ game::map::Renderer::renderShipExtras(const State& st) const
         for (Id_t i = pty.findNextIndexNoWrap(0, false); i != 0; i = pty.findNextIndexNoWrap(i, false)) {
             const Planet* pl = pty.getObjectByIndex(i);
             Point planetPosition;
-            if (pl != 0 && !pl->messages().empty() && pl->getPosition(planetPosition)) {
+            if (pl != 0 && !pl->messages().empty() && pl->getPosition().get(planetPosition)) {
                 for (int img = st.getFirstImage(); img >= 0; img = st.getNextImage(img)) {
                     st.listener().drawMessageMarker(config.getSimplePointAlias(planetPosition, img));
                 }
@@ -529,7 +529,7 @@ game::map::Renderer::renderShipExtras(const State& st) const
         const Ship* sh = ty.getObjectByIndex(i);
         Point shipPosition;
         int shipOwner;
-        if (sh != 0 && sh->getPosition(shipPosition) && sh->getOwner(shipOwner)) {
+        if (sh != 0 && sh->getPosition().get(shipPosition) && sh->getOwner().get(shipOwner)) {
             // Draw icon if enabled and we're not at a planet
             int flags = 0;
             if (!m_viewport.hasOption(Viewport::ShowShipDots)
@@ -568,7 +568,7 @@ game::map::Renderer::renderShipExtras(const State& st) const
         for (Id_t i = histType.findNextIndex(0); i != 0; i = histType.findNextIndex(i)) {
             const Ship* sh = histType.getObjectByIndex(i);
             int shipOwner;
-            if (sh != 0 && sh->getOwner(shipOwner)) {
+            if (sh != 0 && sh->getOwner().get(shipOwner)) {
                 renderShipTrail(st, *sh, shipOwner, m_viewport.getTurnNumber());
                 renderShipVector(st, *sh, shipOwner);
             }
@@ -576,7 +576,7 @@ game::map::Renderer::renderShipExtras(const State& st) const
     } else if (const Ship* sh = histType.getObjectByIndex(m_viewport.getShipTrailId())) {
         // One ship's trail
         int shipOwner;
-        if (sh->getOwner(shipOwner)) {
+        if (sh->getOwner().get(shipOwner)) {
             renderShipTrail(st, *sh, shipOwner, m_viewport.getTurnNumber());
             renderShipVector(st, *sh, shipOwner);
         }
@@ -708,7 +708,7 @@ game::map::Renderer::renderShipVector(const State& st, const Ship& sh, int shipO
 //     END;
 
     Point shipPos;
-    if (sh.getPosition(shipPos)) {
+    if (sh.getPosition().get(shipPos)) {
         // Waypoint
         Point shipWaypoint;
         if (sh.getWaypoint().get(shipWaypoint) && shipWaypoint != shipPos) {
@@ -748,7 +748,7 @@ game::map::Renderer::renderPlanets(const State& st) const
     for (Id_t i = ty.findNextIndex(0); i != 0; i = ty.findNextIndex(i)) {
         Point pos;
         if (Planet* p = ty.getObjectByIndex(i)) {
-            if (p->getPosition(pos)) {
+            if (p->getPosition().get(pos)) {
                 renderPlanet(st, *p, pos);
             }
         }
@@ -893,7 +893,7 @@ game::map::Renderer::renderShips(const State& st) const
         if (Ship* s = ships.getObjectByIndex(i)) {
             Point shipPosition;
             int shipOwner;
-            if (s->getPosition(shipPosition) && s->getOwner(shipOwner)) {
+            if (s->getPosition().get(shipPosition) && s->getOwner().get(shipOwner)) {
                 bool atPlanet = m_viewport.universe().allPlanets().findNextObjectAt(shipPosition, 0, false) != 0;
 
                 String_t label;
@@ -953,7 +953,7 @@ game::map::Renderer::getPlanetFlags(const Planet& planet, Point pos) const
 
     // - ripUnowned, ripOwnPlanet, ripAlliedPlanet, ripEnemyPlanet
     int planetOwner;
-    if (planet.getOwner(planetOwner)) {
+    if (planet.getOwner().get(planetOwner)) {
         if (planetOwner == 0) {
             flags |= RendererListener::ripUnowned;
         } else {
@@ -987,7 +987,7 @@ game::map::Renderer::getPlanetFlags(const Planet& planet, Point pos) const
     for (Id_t sid = ships.findNextObjectAt(pos, 0, false); sid != 0; sid = ships.findNextObjectAt(pos, sid, false)) {
         if (Ship* s = ships.getObjectByIndex(sid)) {
             int shipOwner;
-            if (s->getOwner(shipOwner)) {
+            if (s->getOwner().get(shipOwner)) {
                 switch (m_viewport.teamSettings().getPlayerRelation(shipOwner)) {
                  case TeamSettings::ThisPlayer:
                     flags |= RendererListener::ripOwnShips;

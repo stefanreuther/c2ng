@@ -23,11 +23,11 @@ TestGameMapExplosion::testInit()
     TS_ASSERT_EQUALS(t.getShipName(), "");
 
     Point pt;
-    TS_ASSERT_EQUALS(t.getPosition(pt), true);
+    TS_ASSERT_EQUALS(t.getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt, Point(20, 30));
 
     int n;
-    TS_ASSERT_EQUALS(t.getOwner(n), true);
+    TS_ASSERT_EQUALS(t.getOwner().get(n), true);
     TS_ASSERT_EQUALS(n, 0);
 }
 

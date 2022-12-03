@@ -154,7 +154,7 @@ game::actions::BuildParts::perform(BaseBuildExecutor& exec)
             switch (ele.area) {
              case HullTech: {
                 int owner;
-                if (planet().getOwner(owner)) {
+                if (planet().getOwner().get(owner)) {
                     comp = shipList().hulls().get(shipList().hullAssignments().getHullFromIndex(hostConfiguration(), owner, ele.slot));
                 }
                 break;

@@ -41,7 +41,7 @@ namespace {
             result.text[StarchartHeaderTile::Id]   = Format(tx("(Id #%d)"), obj->getId());
 
             int owner;
-            if (obj->getOwner(owner) && pRoot != 0) {
+            if (obj->getOwner().get(owner) && pRoot != 0) {
                 if (owner != 0) {
                     result.text[StarchartHeaderTile::Owner] = pRoot->playerList().getPlayerName(owner, game::Player::ShortName, tx);
                 } else {

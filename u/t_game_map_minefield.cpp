@@ -102,18 +102,18 @@ TestGameMapMinefield::testInit()
     TS_ASSERT_EQUALS(t.getId(), 77);
 
     int n;
-    TS_ASSERT_EQUALS(t.getOwner(n), true);
+    TS_ASSERT_EQUALS(t.getOwner().get(n), true);
     TS_ASSERT_EQUALS(n, 4);
 
     Point pt;
-    TS_ASSERT_EQUALS(t.getPosition(pt), true);
+    TS_ASSERT_EQUALS(t.getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt, Point(2000, 3000));
 
-    TS_ASSERT_EQUALS(t.getRadius(n), true);
+    TS_ASSERT_EQUALS(t.getRadius().get(n), true);
     TS_ASSERT_EQUALS(n, 32);
 
     int32_t sq;
-    TS_ASSERT_EQUALS(t.getRadiusSquared(sq), true);
+    TS_ASSERT_EQUALS(t.getRadiusSquared().get(sq), true);
     TS_ASSERT_EQUALS(sq, 1024);
 
     TS_ASSERT_EQUALS(t.isValid(), true);
@@ -130,14 +130,14 @@ TestGameMapMinefield::testInit()
     // Modify units
     t.setUnits(2000);
     TS_ASSERT_EQUALS(t.getUnitsLastSeen(), 2000);
-    TS_ASSERT_EQUALS(t.getRadiusSquared(sq), true);
+    TS_ASSERT_EQUALS(t.getRadiusSquared().get(sq), true);
     TS_ASSERT_EQUALS(sq, 2000);
     TS_ASSERT_EQUALS(t.isValid(), true);
 
     // Copy
     Minefield u(t);
     TS_ASSERT_EQUALS(u.getUnitsLastSeen(), 2000);
-    TS_ASSERT_EQUALS(u.getRadiusSquared(sq), true);
+    TS_ASSERT_EQUALS(u.getRadiusSquared().get(sq), true);
     TS_ASSERT_EQUALS(sq, 2000);
     TS_ASSERT_EQUALS(u.isValid(), true);
 
@@ -152,7 +152,7 @@ TestGameMapMinefield::testInitEmpty()
 {
     Minefield t(66);
     int n;
-    TS_ASSERT_EQUALS(t.getOwner(n), false);
+    TS_ASSERT_EQUALS(t.getOwner().get(n), false);
     TS_ASSERT_EQUALS(t.isValid(), false);
 }
 
@@ -206,7 +206,7 @@ TestGameMapMinefield::testAddReport()
         TS_ASSERT_EQUALS(m.isWeb(), false);
 
         Point pt;
-        TS_ASSERT_EQUALS(m.getPosition(pt), true);
+        TS_ASSERT_EQUALS(m.getPosition().get(pt), true);
         TS_ASSERT_EQUALS(pt, Point(2000, 2000));
     }
 }

@@ -22,7 +22,7 @@ namespace game { namespace map { namespace {
             if (const Ship* pShip = ships.get(i)) {
                 Point shipPos;
                 int shipOwner = 0;
-                if (pShip->getPosition(shipPos)
+                if (pShip->getPosition().get(shipPos)
                     && shipPos == pt
                     && pShip->getRealOwner().get(shipOwner))
                 {
@@ -44,7 +44,7 @@ namespace game { namespace map { namespace {
     {
         Point center;
         int owner;
-        if (field.getPosition(center) && field.getOwner(owner)) {
+        if (field.getPosition().get(center) && field.getOwner().get(owner)) {
             result.push_back(MinefieldEffect(center, field.getId(), radiusChange, field.getUnits(), owner, numTorps, field.isWeb(),
                                              isMinefieldEndangered(field, univ, mapConfig, host, config)));
         }
@@ -60,7 +60,7 @@ game::map::isMinefieldEndangered(const Minefield& field, const Universe& univ, c
     // Determine minefield owner and position
     int mfOwner = 0;
     Point mfCenter;
-    if (!field.getOwner(mfOwner) || !field.getPosition(mfCenter)) {
+    if (!field.getOwner().get(mfOwner) || !field.getPosition().get(mfCenter)) {
         return false;
     }
 
@@ -85,8 +85,8 @@ game::map::isMinefieldEndangered(const Minefield& field, const Universe& univ, c
             Point pt;
             int plOwner = 0;
             if (pPlanet->isVisible()
-                && pPlanet->getPosition(pt)
-                && (!pPlanet->getOwner(plOwner) || plOwner != mfOwner)
+                && pPlanet->getPosition().get(pt)
+                && (!pPlanet->getOwner().get(plOwner) || plOwner != mfOwner)
                 && hasPossibleEnemyShip(univ, pt, mfOwner)
                 && mapConfig.getSquaredDistance(mfCenter, pt) <= util::squareFloat(radius + maxRange))
             {
@@ -102,7 +102,7 @@ game::map::isMinefieldEndangered(const Minefield& field, const Universe& univ, c
         if (const Ship* pShip = ships.get(i)) {
             Point shipPos;
             int shipOwner = 0;
-            if (pShip->getPosition(shipPos)
+            if (pShip->getPosition().get(shipPos)
                 && pShip->getRealOwner().get(shipOwner)
                 && shipOwner != mfOwner
                 && mapConfig.getSquaredDistance(mfCenter, shipPos) <= util::squareFloat(radius + config[range](shipOwner)))
@@ -135,8 +135,7 @@ game::map::computeMineLayEffect(MinefieldEffects_t& result,
         mf.reset(new Minefield(*pField));
         existingUnits = pField->getUnitsForLaying(root.hostVersion(), root.hostConfiguration());
     } else {
-        Point center;
-        ship.getPosition(center);
+        Point center = ship.getPosition().orElse(Point());
         mf.reset(new Minefield(0, center, shipOwner, mission.isWeb(), 0));
         existingUnits = 0;
     }
@@ -163,9 +162,8 @@ game::map::computeMineScoopEffect(MinefieldEffects_t& result, const MinefieldMis
                                   const game::spec::ShipList& shipList)
 {
     // ex WShipScannerChartWidget::drawPost (part)
-    Point shipPos;
-    ship.getPosition(shipPos);
-    int room = ship.getFreeCargo(shipList).orElse(0);
+    const Point shipPos = ship.getPosition().orElse(Point());
+    const int room = ship.getFreeCargo(shipList).orElse(0);
     const MinefieldType& mfs = univ.minefields();
     for (Id_t mfId = 1; mfId <= mfs.size() && room > 0; ++mfId) {
         // Check whether we can scoop this field
@@ -175,9 +173,9 @@ game::map::computeMineScoopEffect(MinefieldEffects_t& result, const MinefieldMis
         if (mf != 0
             && (mission.getRequiredMinefieldId() == 0 || mission.getRequiredMinefieldId() == mf->getId())
             && mf->isValid()
-            && mf->getOwner(mfOwner)
+            && mf->getOwner().get(mfOwner)
             && mfOwner == mission.getMinefieldOwner()
-            && mf->getPosition(mfPos)
+            && mf->getPosition().get(mfPos)
             && mapConfig.getSquaredDistance(mfPos, shipPos) <= mf->getUnitsForLaying(root.hostVersion(), root.hostConfiguration()))
         {
             // Okay, scoop it. First, figure out conversion rate.

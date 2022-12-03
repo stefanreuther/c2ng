@@ -53,7 +53,6 @@ namespace client { namespace map {
 
         void setPosition(game::map::Point pt);
         void clearPosition();
-        bool getPosition(game::map::Point& out) const;
 
         void setLockOrigin(game::map::Point pt, bool isHyperdriving, game::Id_t shipId);
 

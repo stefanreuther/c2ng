@@ -153,8 +153,8 @@ game::map::FleetMember::setFleetNumber(Id_t nfid,
         int thisOwner, newOwner;
         if (nsh != 0
             && nsh->isPlayable(game::map::Object::Playable)
-            && m_ship.getOwner(thisOwner)
-            && nsh->getOwner(newOwner)
+            && m_ship.getOwner().get(thisOwner)
+            && nsh->getOwner().get(newOwner)
             && thisOwner == newOwner)
         {
             // enter or change fleet
@@ -219,7 +219,7 @@ game::map::FleetMember::setWaypoint(Point pt,
         if (!m_ship.getWaypoint().isSame(pt)) {
             // Set waypoint
             Point position;
-            if (m_ship.getPosition(position)) {
+            if (m_ship.getPosition().get(position)) {
                 m_ship.setWaypoint(m_mapConfig.getSimpleNearestAlias(pt, position));
             }
 

@@ -56,7 +56,7 @@ game::ref::SortByNewLocation::getLocation(const Reference& a, game::map::Point& 
         // does not move, or we don't know how it moves.
         const game::map::Object* mo = m_universe.getObject(a);
         if (mo != 0) {
-            return mo->getPosition(out);
+            return mo->getPosition().get(out);
         } else {
             return false;
         }

@@ -12,17 +12,17 @@
 #include "game/map/universe.hpp"
 
 namespace {
-    bool getPositionFromReference(const game::map::Universe* pUniv, const game::Reference ref, game::map::Point& out)
+    afl::base::Optional<game::map::Point> getPositionFromReference(const game::map::Universe* pUniv, const game::Reference ref)
     {
         // Try to resolve as object
         if (pUniv != 0) {
             if (const game::map::Object* p = pUniv->getObject(ref)) {
-                return p->getPosition(out);
+                return p->getPosition();
             }
         }
 
         // Could still be a reference to a map location
-        return ref.getPos(out);
+        return ref.getPosition();
     }
 }
 
@@ -40,7 +40,7 @@ void
 game::map::Location::setUniverse(Universe* univ, const Configuration* mapConfig)
 {
     // Save old position in case the object does not exist in the new universe
-    if (getPositionFromReference(m_pUniverse, m_reference, m_point)) {
+    if (getPositionFromReference(m_pUniverse, m_reference).get(m_point)) {
         m_pointValid = true;
     }
 
@@ -53,50 +53,48 @@ void
 game::map::Location::set(Reference ref)
 {
     // ex GChartLocation::setCurrentObject
-    Point lastPos;
-    bool  lastOK = getPosition(lastPos);
+    afl::base::Optional<Point> lastPos = getPosition();
 
     m_reference = ref;
 
     // Set point to position from reference, unless it already is an alias of the current position
     Point pt;
-    if (getPositionFromReference(m_pUniverse, m_reference, pt)) {
+    if (getPositionFromReference(m_pUniverse, m_reference).get(pt)) {
         if (!(m_pConfig != 0 && m_pointValid && m_pConfig->getCanonicalLocation(m_point) == pt)) {
             m_point = pt;
             m_pointValid = true;
         }
     }
 
-    notifyListeners(lastOK, lastPos);
+    notifyListeners(lastPos);
 }
 
 void
 game::map::Location::set(Point pt)
 {
-    Point lastPos;
-    bool  lastOK = getPosition(lastPos);
+    afl::base::Optional<Point> lastPos = getPosition();
 
     m_point = pt;
     m_pointValid = true;
     m_reference = Reference();
 
-    notifyListeners(lastOK, lastPos);
+    notifyListeners(lastPos);
 }
 
-bool
-game::map::Location::getPosition(Point& pt) const
+afl::base::Optional<game::map::Point>
+game::map::Location::getPosition() const
 {
-    if (getPositionFromReference(m_pUniverse, m_reference, pt)) {
+    Point pt;
+    if (getPositionFromReference(m_pUniverse, m_reference).get(pt)) {
         // If point represents an alias of the current position, report that instead
         if (m_pConfig != 0 && m_pointValid && m_pConfig->getCanonicalLocation(m_point) == pt) {
             pt = m_point;
         }
-        return true;
+        return pt;
     } else if (m_pointValid) {
-        pt = m_point;
-        return true;
+        return m_point;
     } else {
-        return false;
+        return afl::base::Nothing;
     }
 }
 
@@ -109,8 +107,7 @@ game::map::Location::getReference() const
 game::Reference
 game::map::Location::getEffectiveReference() const
 {
-    Point pt;
-    return getPositionFromReference(m_pUniverse, m_reference, pt)
+    return getPositionFromReference(m_pUniverse, m_reference).isValid()
         ? m_reference
         : Reference();
 }
@@ -161,12 +158,10 @@ game::map::Location::browse(BrowseFlags_t flags)
 }
 
 void
-game::map::Location::notifyListeners(bool lastOK, Point lastPos)
+game::map::Location::notifyListeners(const afl::base::Optional<Point>& lastPos)
 {
-    Point thisPos;
-    bool  thisOK = getPosition(thisPos);
-
-    if (lastOK != thisOK || lastPos != thisPos) {
-        sig_positionChange.raise(thisPos);
+    afl::base::Optional<Point> thisPos = getPosition();
+    if (!thisPos.isSame(lastPos)) {
+        sig_positionChange.raise(thisPos.orElse(Point()));
     }
 }

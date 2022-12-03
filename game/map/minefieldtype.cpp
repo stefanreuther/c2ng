@@ -66,7 +66,7 @@ game::map::MinefieldType::internalCheck(int currentTurn, const game::HostVersion
             // - it was not scanned this turn although we think it should
             //   (a minefield may be laid but immediately be swept; in this case, it's gone.)
             int owner;
-            if (!mf->getOwner(owner)
+            if (!mf->getOwner().get(owner)
                 || !mf->isValid()
                 || mf->getUnits() == 0
                 || (m_allMinefieldsKnown.contains(owner)
@@ -98,7 +98,7 @@ game::map::MinefieldType::addMessageInformation(const game::parser::MessageInfor
     if (info.getValue(gp::mi_X, x) && info.getValue(gp::mi_Y, y)) {
         // New position
         pt = Point(x, y);
-    } else if (existing != 0 && existing->getPosition(pt)) {
+    } else if (existing != 0 && existing->getPosition().get(pt)) {
         // Keep old position
     } else {
         // No position known, cannot use this report
@@ -109,7 +109,7 @@ game::map::MinefieldType::addMessageInformation(const game::parser::MessageInfor
     int32_t owner;
     if (info.getValue(gp::mi_Owner, owner)) {
         // New owner
-    } else if (existing != 0 && existing->getOwner(owner)) {
+    } else if (existing != 0 && existing->getOwner().get(owner)) {
         // Keep old owner
     } else {
         // No owner known, cannot use this report

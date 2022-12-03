@@ -144,8 +144,7 @@ client::tiles::ShipMovementTile::attach(game::proxy::ObjectObserver& oop)
                     const bool is_training = sh->getMission().orElse(0) == root->hostConfiguration()[game::config::HostConfiguration::ExtMissionsStartAt]() + game::spec::Mission::pmsn_Training;
                     const bool is_hyper = !is_training && sh->isHyperdriving(g->shipScores(), *shipList, root->hostConfiguration());
 
-                    game::map::Point pos;
-                    sh->getPosition(pos);
+                    game::map::Point pos = sh->getPosition().orElse(game::map::Point());
 
                     // Location
                     job->data.text[Data::Location] = g->currentTurn().universe().findLocationName(pos,

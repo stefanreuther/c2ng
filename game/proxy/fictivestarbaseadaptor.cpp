@@ -21,8 +21,8 @@ namespace {
         game::map::PlanetData pd;
 
         // Owner
-        int owner;
-        if (!pl.getOwner(owner) || owner == 0) {
+        int owner = pl.getOwner().orElse(0);
+        if (owner == 0) {
             if (const game::Game* g = session.getGame().get()) {
                 owner = g->getViewpointPlayer();
             } else {
@@ -136,8 +136,7 @@ namespace {
     void finishPlanet(Planet& pl, game::Session& session)
     {
         // Force position
-        game::map::Point pt;
-        if (!pl.getPosition(pt)) {
+        if (!pl.getPosition().isValid()) {
             pl.setPosition(game::map::Point(1000, 1000));
         }
         pl.setKnownToNotExist(false);

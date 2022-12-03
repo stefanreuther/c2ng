@@ -87,7 +87,7 @@ game::interface::getUfoProperty(const game::map::Ufo& ufo, UfoProperty iup,
      case iupLocX:
         /* @q Loc.X:Int (Ufo Property)
            X location of Ufo center. */
-        if (ufo.getPosition(pt)) {
+        if (ufo.getPosition().get(pt)) {
             return makeIntegerValue(pt.getX());
         } else {
             return 0;
@@ -95,7 +95,7 @@ game::interface::getUfoProperty(const game::map::Ufo& ufo, UfoProperty iup,
      case iupLocY:
         /* @q Loc.Y:Int (Ufo Property)
            Y location of Ufo center. */
-        if (ufo.getPosition(pt)) {
+        if (ufo.getPosition().get(pt)) {
             return makeIntegerValue(pt.getY());
         } else {
             return 0;
@@ -123,11 +123,7 @@ game::interface::getUfoProperty(const game::map::Ufo& ufo, UfoProperty iup,
      case iupRadius:
         /* @q Radius:Int (Ufo Property)
            Radius of Ufo in ly. */
-        if (ufo.getRadius(r)) {
-            return makeIntegerValue(r);
-        } else {
-            return 0;
-        }
+        return makeOptionalIntegerValue(ufo.getRadius());
      case iupSpeedInt:
         /* @q Speed$:Int (Ufo Property)
            Speed (warp factor). */

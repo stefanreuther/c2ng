@@ -47,8 +47,8 @@ namespace game { namespace map {
         // Object:
         virtual String_t getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const;
         virtual Id_t getId() const;
-        virtual bool getOwner(int& result) const;
-        virtual bool getPosition(Point& result) const;
+        virtual afl::base::Optional<int> getOwner() const;
+        virtual afl::base::Optional<Point> getPosition() const;
 
         /** Get name of ship that exploded here.
             \return name; empty if unknown. */

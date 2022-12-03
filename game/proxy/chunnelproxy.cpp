@@ -68,9 +68,8 @@ namespace {
             for (Id_t id = ty.findNextIndex(0); id != 0; id = ty.findNextIndex(id)) {
                 if (const Ship* mate = univ.ships().get(id)) {
                     if (game::map::isValidChunnelMate(*initiator, *mate, g.mapConfiguration(), r, g.shipScores(), sl)) {
-                        Point initPos, matePos;
-                        initiator->getPosition(initPos);
-                        mate->getPosition(matePos);
+                        const Point initPos = initiator->getPosition().orElse(Point());
+                        const Point matePos = mate->getPosition().orElse(Point());
                         addCandidateLocation(result, ChunnelProxy::Candidate(g.mapConfiguration().getSimpleNearestAlias(matePos, initPos)));
                     }
                 }
@@ -94,7 +93,7 @@ namespace {
             for (Id_t id = ty.findNextIndex(0); id != 0; id = ty.findNextIndex(id)) {
                 const Ship* mate = univ.ships().get(id);
                 Point matePos;
-                if (mate != 0 && mate->getPosition(matePos) && matePos == canonicalPosition && game::map::isValidChunnelMate(*initiator, *mate, g.mapConfiguration(), r, g.shipScores(), sl)) {
+                if (mate != 0 && mate->getPosition().get(matePos) && matePos == canonicalPosition && game::map::isValidChunnelMate(*initiator, *mate, g.mapConfiguration(), r, g.shipScores(), sl)) {
                     list.add(game::Reference(game::Reference::Ship, id));
                 }
             }

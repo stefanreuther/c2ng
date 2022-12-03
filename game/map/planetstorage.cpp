@@ -74,7 +74,7 @@ game::map::PlanetStorage::getMaxAmount(Element::Type type) const
     /* the torp/ore limits are arbitrary, but should match Tim's TRN check. */
     int torpType, planetOwner;
     if (type == Element::Fighters) {
-        if (m_planet.getOwner(planetOwner)) {
+        if (m_planet.getOwner().get(planetOwner)) {
             return m_hostConfiguration[game::config::HostConfiguration::MaximumFightersOnBase](planetOwner);
         } else {
             return 0;

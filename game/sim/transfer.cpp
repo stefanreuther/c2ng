@@ -59,7 +59,7 @@ game::sim::Transfer::copyShipFromGame(Ship& out, const game::map::Ship& in) cons
     // ex GSimulatorRealGameInterface::copyShip (totally reworked)
     // Must know at least owner and hull
     int owner, hullNr;
-    if (!in.getOwner(owner) || !in.getHull().get(hullNr)) {
+    if (!in.getOwner().get(owner) || !in.getHull().get(hullNr)) {
         return false;
     }
     const game::spec::Hull* pHull = m_shipList.hulls().get(hullNr);
@@ -173,7 +173,7 @@ game::sim::Transfer::copyShipToGame(game::map::Ship& out, const Ship& in, game::
 {
     // ex GSimulatorRealGameInterface::updateToGame, ccsim.pas:DoWriteback
     int owner, hullNr;
-    if (!out.getOwner(owner) || !out.getHull().get(hullNr)) {
+    if (!out.getOwner().get(owner) || !out.getHull().get(hullNr)) {
         return false;
     }
     const int realOwner = out.getRealOwner().orElse(owner);
@@ -233,7 +233,7 @@ game::sim::Transfer::copyShipToGame(game::map::Ship& out, const Ship& in, game::
     game::map::Point pt;
     game::map::Planet* planet = 0;
     if (simAmmo != shipAmmo
-        && out.getPosition(pt)
+        && out.getPosition().get(pt)
         && (planet = univ.planets().get(univ.findPlanetAt(pt))) != 0
         && planet->isPlayable(game::map::Object::Playable))
     {
@@ -267,7 +267,7 @@ game::sim::Transfer::copyPlanetFromGame(Planet& out, const game::map::Planet& in
     // ex GSimulatorRealGameInterface::copyPlanet
     // We cannot do anything sensible if we don't know the owner
     int owner = 0;
-    if (!in.getOwner(owner) || owner == 0) {
+    if (!in.getOwner().get(owner) || owner == 0) {
         return false;
     }
 
@@ -337,7 +337,7 @@ game::sim::Transfer::copyPlanetToGame(game::map::Planet& out, const Planet& in) 
 {
     // Check applicability
     int owner;
-    if (!out.getOwner(owner)) {
+    if (!out.getOwner().get(owner)) {
         return false;
     }
     if (!out.isPlayable(game::map::Object::Playable) || owner != in.getOwner()) {

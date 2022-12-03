@@ -26,7 +26,7 @@ namespace {
     int getPlanetOwner(const game::map::Planet& planet)
     {
         int owner = 0;
-        afl::except::checkAssertion(planet.getOwner(owner), "no owner", "<BuildAmmo>");
+        afl::except::checkAssertion(planet.getOwner().get(owner), "no owner", "<BuildAmmo>");
         return owner;
     }
 }
@@ -327,14 +327,14 @@ game::actions::BuildAmmo::isValidCombination(const game::map::Planet& planet, co
 
     // Check position
     game::map::Point planetPos, shipPos;
-    if (!planet.getPosition(planetPos) || !ship.getPosition(shipPos) || planetPos != shipPos) {
+    if (!planet.getPosition().get(planetPos) || !ship.getPosition().get(shipPos) || planetPos != shipPos) {
         ex = Exception(Exception::ePos);
         return false;
     }
 
     // Check owner
     int planetOwner, shipOwner;
-    if (!planet.getOwner(planetOwner) || !ship.getOwner(shipOwner) || planetOwner != shipOwner) {
+    if (!planet.getOwner().get(planetOwner) || !ship.getOwner().get(shipOwner) || planetOwner != shipOwner) {
         ex = Exception(Exception::eNotOwner);
         return false;
     }

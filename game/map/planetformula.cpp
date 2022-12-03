@@ -61,7 +61,7 @@ game::map::getMaxBuildings(const Planet& p, PlanetaryBuilding kind, const game::
      case DefenseBuilding:
         return getMaxBuildingsFormula(clans, 50);
      case BaseDefenseBuilding:
-        if (p.getOwner(n)) {
+        if (p.getOwner().get(n)) {
             return p.hasBase() ? config[config.MaximumDefenseOnBase](n) : 0;
         } else {
             return LongProperty_t();
@@ -90,7 +90,7 @@ game::map::getColonistChange(const Planet& pl, const game::config::HostConfigura
     int32_t colos;
     int owner;
     int temp;
-    if (pl.getCargo(Element::Colonists).get(colos) && pl.getOwner(owner) && pl.getTemperature().get(temp)) {
+    if (pl.getCargo(Element::Colonists).get(colos) && pl.getOwner().get(owner) && pl.getTemperature().get(temp)) {
         double common = 1000 - 80*tax - std::sqrt(double(colos));
         bool crystal = (config.getPlayerRaceNumber(owner) == 7) && config[config.CrystalsPreferDeserts]();
         if (host.getKind() == HostVersion::PHost) {
@@ -132,7 +132,7 @@ game::map::getColonistDue(const Planet& pl, const game::config::HostConfiguratio
     // `Round', THost uses `ERnd' aka `I-don't-care-how-it-rounds'.
     int owner;
     int32_t colos;
-    if (pl.getOwner(owner) && pl.getCargo(Element::Colonists).get(colos)) {
+    if (pl.getOwner().get(owner) && pl.getCargo(Element::Colonists).get(colos)) {
         const int rate = config[config.ColonistTaxRate](owner);
         if (host.getKind() == HostVersion::PHost) {
             return util::divideAndRound(util::divideAndRound(colos * tax, 1000) * rate, 100);
@@ -150,7 +150,7 @@ game::map::getColonistDueLimited(const Planet& pl, const game::config::HostConfi
     // ex game/planetform.h:getColonistDueLimited, pdata.pas:LimitColonists, pdata.pas:ColonistDueLimited
     int owner;
     int32_t due;
-    if (pl.getOwner(owner) && getColonistDue(pl, config, host, tax).get(due)) {
+    if (pl.getOwner().get(owner) && getColonistDue(pl, config, host, tax).get(due)) {
         const int32_t max = config[config.MaxPlanetaryIncome](owner);
         if (due < max) {
             rem_inc = max - due;
@@ -171,7 +171,7 @@ game::map::getColonistSafeTax(const Planet& pl, const game::config::HostConfigur
     // ex game/planetform.h:getColonistSafeTax, pdata.pas:OptimizeTaxes
     int owner, happy, temp;
     int32_t colos;
-    if (pl.getOwner(owner)
+    if (pl.getOwner().get(owner)
         && pl.getCargo(Element::Colonists).get(colos)
         && pl.getColonistHappiness().get(happy)
         && pl.getTemperature().get(temp))
@@ -282,7 +282,7 @@ game::map::getMaxSupportedColonists(const Planet& pl, const game::config::HostCo
 {
     // ex game/planetform.h:getMaxSupportedColonists
     int owner;
-    if (pl.getOwner(owner)) {
+    if (pl.getOwner().get(owner)) {
         return getMaxSupportedColonists(pl, config, host, owner);
     } else {
         return afl::base::Nothing;
@@ -356,7 +356,7 @@ game::map::getNativeDue(const Planet& pl, const game::config::HostConfiguration&
     // ex game/planetform.h:getNativeDue
     int race, gov, owner;
     int32_t pop;
-    if (pl.getNativeRace().get(race) && pl.getNativeGovernment().get(gov) && pl.getOwner(owner) && pl.getNatives().get(pop)) {
+    if (pl.getNativeRace().get(race) && pl.getNativeGovernment().get(gov) && pl.getOwner().get(owner) && pl.getNatives().get(pop)) {
         return getNativeDue(tax, race, gov, pop, owner, config, host);
     } else {
         return afl::base::Nothing;
@@ -386,7 +386,7 @@ game::map::getNativeDueLimited(const Planet& pl, const game::config::HostConfigu
 {
     // ex planacc.pas:LimitCollection
     int race, owner;
-    if (pl.getNativeRace().get(race) && pl.getOwner(owner)) {
+    if (pl.getNativeRace().get(race) && pl.getOwner().get(owner)) {
         /* amorphs don't pay */
         if (race == AmorphousNatives) {
             return 0;
@@ -436,7 +436,7 @@ game::map::getNativeSafeTax(const Planet& pl, const game::config::HostConfigurat
     // Validate inputs
     int owner, race, gov, happy;
     int32_t cpop, npop;
-    if (pl.getOwner(owner) && pl.getCargo(Element::Colonists).get(cpop)
+    if (pl.getOwner().get(owner) && pl.getCargo(Element::Colonists).get(cpop)
         && pl.getNativeRace().get(race) && pl.getNatives().get(npop)
         && pl.getNativeGovernment().get(gov) && pl.getNativeHappiness().get(happy)
         && npop > 0)
@@ -495,7 +495,7 @@ game::map::getNativeBaseTax(const Planet& pl, const game::config::HostConfigurat
     // ex game/planetform.h:getNativeBaseTax
     // ex envscan.pas:BaseTax
     int owner;
-    if (pl.getOwner(owner)) {
+    if (pl.getOwner().get(owner)) {
         return getNativeBaseTax(pl, owner, config, host, happyTarget);
     } else {
         return afl::base::Nothing;
@@ -548,7 +548,7 @@ game::map::getBovinoidSupplyContribution(const Planet& pl, const game::config::H
     // Change to PCC2: PCC2 returns 0, we return unknown
     int race, owner;
     int32_t pop;
-    if (pl.getOwner(owner) && pl.getNativeRace().get(race) && pl.getNatives().get(pop)) {
+    if (pl.getOwner().get(owner) && pl.getNativeRace().get(race) && pl.getNatives().get(pop)) {
         if (race == BovinoidNatives) {
             return getBovinoidSupplyContribution(pop, owner, config, host);
         } else {
@@ -586,7 +586,7 @@ game::map::getBovinoidSupplyContributionLimited(const Planet& pl, const game::co
     //         it should be supported
     int32_t clans, due;
     int owner;
-    if (pl.getOwner(owner) && pl.getCargo(Element::Colonists).get(clans) && getBovinoidSupplyContribution(pl, config, host).get(due)) {
+    if (pl.getOwner().get(owner) && pl.getCargo(Element::Colonists).get(clans) && getBovinoidSupplyContribution(pl, config, host).get(due)) {
         int32_t limit = host.getKind() == HostVersion::PHost ? clans * config[config.ProductionRate](owner) / 100 : clans;
         if (due < limit) {
             return due;
@@ -630,7 +630,7 @@ game::map::getMiningCapacity(const Planet& pl, const game::config::HostConfigura
         // Mining rate
         int owner;
         int mining_rate;
-        if (pl.getOwner(owner)) {
+        if (pl.getOwner().get(owner)) {
             mining_rate = config[config.RaceMiningRate](owner);
         } else {
             mining_rate = 100;

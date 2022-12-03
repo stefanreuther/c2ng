@@ -150,25 +150,25 @@ game::ref::HistoryShipSelection::buildList(HistoryShipList& list, const Turn& tu
                 }
                 break;
              case ForeignShips:
-                if (sh->getOwner(owner) && owner != teams.getViewpointPlayer()) {
+                if (sh->getOwner().get(owner) && owner != teams.getViewpointPlayer()) {
                     accept = true;
                     turn = getShipLastTurn(*sh);
                 }
                 break;
              case TeamShips:
-                if (sh->getOwner(owner) && teams.getPlayerRelation(owner) != TeamSettings::EnemyPlayer) {
+                if (sh->getOwner().get(owner) && teams.getPlayerRelation(owner) != TeamSettings::EnemyPlayer) {
                     accept = true;
                     turn = getShipLastTurn(*sh);
                 }
                 break;
              case EnemyShips:
-                if (sh->getOwner(owner) && teams.getPlayerRelation(owner) == TeamSettings::EnemyPlayer) {
+                if (sh->getOwner().get(owner) && teams.getPlayerRelation(owner) == TeamSettings::EnemyPlayer) {
                     accept = true;
                     turn = getShipLastTurn(*sh);
                 }
                 break;
              case OwnShips:
-                if (sh->getOwner(owner) && owner == teams.getViewpointPlayer()) {
+                if (sh->getOwner().get(owner) && owner == teams.getViewpointPlayer()) {
                     accept = true;
                     turn = getShipLastTurn(*sh);
                 }
@@ -227,7 +227,7 @@ game::ref::HistoryShipSelection::getAvailableModes(const game::map::Universe& un
         if (const game::map::Ship* sh = ty.getObjectByIndex(id)) {
             // Check owner modes
             int shipOwner;
-            if (sh->getOwner(shipOwner)) {
+            if (sh->getOwner().get(shipOwner)) {
                 modes += AllShips;
                 if (shipOwner == teams.getViewpointPlayer()) {
                     modes += OwnShips;

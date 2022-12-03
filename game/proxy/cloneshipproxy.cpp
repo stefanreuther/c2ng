@@ -62,7 +62,7 @@ class game::proxy::CloneShipProxy::TrampolineFromSession : public afl::base::Clo
             Universe& univ = game::actions::mustHaveGame(session).currentTurn().universe();
             Ship& sh = game::actions::mustExist(univ.ships().get(m_id));
             Point pt;
-            if (!sh.getPosition(pt)) {
+            if (!sh.getPosition().get(pt)) {
                 throw Exception(Exception::eNoBase);
             }
             Planet& pl = game::actions::mustExist(univ.planets().get(univ.findPlanetAt(pt)));

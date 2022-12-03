@@ -379,7 +379,7 @@ namespace {
                     }
 
                     game::map::Point pt;
-                    if (!pGame->cursors().location().getPosition(pt)) {
+                    if (!pGame->cursors().location().getPosition().get(pt)) {
                         result.reset();
                         return;
                     }
@@ -400,10 +400,8 @@ namespace {
                         throw interpreter::Error::notAssignable();
                     }
 
-                    // Get old position. If this fails, it leaves the point default-initialized.
-                    // This is needed to bootstrap.
-                    game::map::Point pt;
-                    pGame->cursors().location().getPosition(pt);
+                    // Get old position
+                    game::map::Point pt = pGame->cursors().location().getPosition().orElse(game::map::Point());
 
                     // Only call set() if this actually is a change, to avoid losing track of an object.
                     if (value != pt.get(c)) {

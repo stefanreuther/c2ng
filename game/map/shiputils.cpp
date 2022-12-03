@@ -44,7 +44,7 @@ game::map::setInterceptWaypoint(Universe& univ, Ship& sh, const Configuration& m
         if (Ship* target = univ.ships().get(i)) {
             // FIXME: handle THost where intercept does not cross the seam?
             Point shipPos, targetPos;
-            if (target->getPosition(targetPos) && sh.getPosition(shipPos)) {
+            if (target->getPosition().get(targetPos) && sh.getPosition().get(shipPos)) {
                 sh.setWaypoint(mapConfig.getSimpleNearestAlias(targetPos, shipPos));
             }
         }

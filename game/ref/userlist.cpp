@@ -128,8 +128,8 @@ game::ref::UserList::makeReferenceItem(Reference r, Session& session)
                 marked = p->isMarked();
                 playability = p->getPlayability();
 
-                int owner = 0;
-                if (p->getOwner(owner) && owner != 0) {
+                const int owner = p->getOwner().orElse(0);
+                if (owner != 0) {
                     switch (g->teamSettings().getPlayerRelation(owner)) {
                      case TeamSettings::ThisPlayer:    color = util::SkinColor::Green;  break;
                      case TeamSettings::AlliedPlayer:  color = util::SkinColor::Yellow; break;

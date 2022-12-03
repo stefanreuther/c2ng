@@ -183,8 +183,7 @@ game::proxy::PlanetPredictorProxy::Trampoline::packPrediction(Status& st)
         }
 
         // Effectors
-        int owner = 0;
-        m_planet->getOwner(owner);
+        int owner = m_planet->getOwner().orElse(0);
         st.effectorLabel = m_effectors.describe(m_translator, owner, m_root->hostConfiguration(), m_root->hostVersion());
     }
 }

@@ -88,12 +88,9 @@ namespace game { namespace sim { namespace {
         virtual int getShipOwner(Id_t id) const
             {
                 // ex GSimulatorRealGameInterface::getShipOwner
-                const Game* g = m_session.getGame().get();
-                if (g) {
-                    const game::map::Ship* sh = g->currentTurn().universe().ships().get(id);
-                    int owner;
-                    if (sh && sh->getOwner(owner)) {
-                        return owner;
+                if (const Game* g = m_session.getGame().get()) {
+                    if (const game::map::Ship* sh = g->currentTurn().universe().ships().get(id)) {
+                        return sh->getOwner().orElse(0);
                     }
                 }
                 return 0;

@@ -174,8 +174,8 @@ namespace {
                             if (const game::Game* g = session.getGame().get()) {
                                 if (const game::Turn* t = g->getViewpointTurn().get()) {
                                     if (const game::map::Ship* s = t->universe().ships().get(m_id)) {
-                                        s->getOwner(m_parent.m_owner);
-                                        s->getPosition(m_parent.m_position);
+                                        m_parent.m_owner = s->getOwner().orElse(0);
+                                        s->getPosition().get(m_parent.m_position);
                                     }
                                 }
                             }

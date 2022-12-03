@@ -264,7 +264,7 @@ TestGameV3Loader::testLoadPlanets()
         TS_ASSERT(pl != 0);
 
         int owner;
-        TS_ASSERT_EQUALS(pl->getOwner(owner), true);
+        TS_ASSERT_EQUALS(pl->getOwner().get(owner), true);
         TS_ASSERT_EQUALS(owner, 4);
 
         TS_ASSERT_EQUALS(pl->getFriendlyCode().orElse(""),                       "f0A");
@@ -303,7 +303,7 @@ TestGameV3Loader::testLoadPlanets()
         TS_ASSERT(pl != 0);
 
         int owner;
-        TS_ASSERT_EQUALS(pl->getOwner(owner), true);
+        TS_ASSERT_EQUALS(pl->getOwner().get(owner), true);
         TS_ASSERT_EQUALS(owner, 4);
 
         TS_ASSERT_EQUALS(pl->getFriendlyCode().orElse(""),                       "/'f");
@@ -398,11 +398,11 @@ TestGameV3Loader::testLoadShips()
         TS_ASSERT(sh != 0);
 
         int owner;
-        TS_ASSERT_EQUALS(sh->getOwner(owner), true);
+        TS_ASSERT_EQUALS(sh->getOwner().get(owner), true);
         TS_ASSERT_EQUALS(owner, 10);
 
         game::map::Point pt;
-        TS_ASSERT_EQUALS(sh->getPosition(pt), true);
+        TS_ASSERT_EQUALS(sh->getPosition().get(pt), true);
         TS_ASSERT_EQUALS(pt.getX(), 2643);
         TS_ASSERT_EQUALS(pt.getY(), 2522);
 

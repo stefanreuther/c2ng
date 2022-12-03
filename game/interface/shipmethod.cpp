@@ -24,7 +24,7 @@ namespace {
 
         // Find the planet
         game::map::Point shipPosition;
-        if (!ship.getPosition(shipPosition)) {
+        if (!ship.getPosition().get(shipPosition)) {
             throw Exception(Exception::ePos);
         }
         game::map::Planet* planet = univ.planets().get(univ.playedBases().findNextObjectAt(shipPosition, 0, false));

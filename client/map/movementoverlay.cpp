@@ -231,17 +231,6 @@ client::map::MovementOverlay::clearPosition()
     m_valid = false;
 }
 
-bool
-client::map::MovementOverlay::getPosition(game::map::Point& out) const
-{
-    if (m_valid) {
-        out = m_position;
-        return true;
-    } else {
-        return false;
-    }
-}
-
 void
 client::map::MovementOverlay::setLockOrigin(game::map::Point pt, bool isHyperdriving, game::Id_t shipId)
 {

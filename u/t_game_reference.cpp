@@ -24,7 +24,7 @@ TestGameReference::testAccessor()
         TS_ASSERT(!testee.isSet());
         TS_ASSERT_EQUALS(testee.getType(), Reference::Null);
         TS_ASSERT_EQUALS(testee.getId(), 0);
-        TS_ASSERT_EQUALS(testee.getPos(pt), false);
+        TS_ASSERT_EQUALS(testee.getPosition().get(pt), false);
         TS_ASSERT_EQUALS(testee.toString(tx), "");
         TS_ASSERT_EQUALS(testee == Reference(), true);
         TS_ASSERT_EQUALS(testee == Reference(Reference::Ship, 77), false);
@@ -40,7 +40,7 @@ TestGameReference::testAccessor()
         TS_ASSERT(testee.isSet());
         TS_ASSERT_EQUALS(testee.getType(), Reference::Planet);
         TS_ASSERT_EQUALS(testee.getId(), 12);
-        TS_ASSERT_EQUALS(testee.getPos(pt), false);
+        TS_ASSERT_EQUALS(testee.getPosition().get(pt), false);
         TS_ASSERT_EQUALS(testee.toString(tx), "Planet #12");
         TS_ASSERT_EQUALS(testee == Reference(), false);
         TS_ASSERT_EQUALS(testee == Reference(Reference::Planet, 77), false);
@@ -58,7 +58,7 @@ TestGameReference::testAccessor()
         TS_ASSERT(testee.isSet());
         TS_ASSERT_EQUALS(testee.getType(), Reference::MapLocation);
         // unspecified -> TS_ASSERT_EQUALS(testee.getId(), 12);
-        TS_ASSERT_EQUALS(testee.getPos(pt), true);
+        TS_ASSERT_EQUALS(testee.getPosition().get(pt), true);
         TS_ASSERT_EQUALS(pt, Point(1000, 2000));
         TS_ASSERT_EQUALS(testee.toString(tx), "(1000,2000)");
         TS_ASSERT_EQUALS(testee == Reference(), false);

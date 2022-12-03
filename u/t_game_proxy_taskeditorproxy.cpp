@@ -201,7 +201,7 @@ TestGameProxyTaskEditorProxy::testShipStatus()
     addShip(s, SHIP_ID, Point(1000,1000));
 
     game::map::Point pt(333,333);
-    s.session().getGame()->currentTurn().universe().ships().get(SHIP_ID)->getPosition(pt);
+    s.session().getGame()->currentTurn().universe().ships().get(SHIP_ID)->getPosition().get(pt);
 
     // Add a task
     {

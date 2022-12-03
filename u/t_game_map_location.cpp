@@ -35,14 +35,14 @@ TestGameMapLocation::testPoint()
 
     // Initial position is unset
     Point pt;
-    TS_ASSERT_EQUALS(testee.getPosition(pt), false);
+    TS_ASSERT_EQUALS(testee.getPosition().get(pt), false);
     TS_ASSERT_EQUALS(testee.getReference(), Reference());
 
     // Set a position; must give a signal and be readable back
     testee.set(Point(10,20));
     TS_ASSERT_EQUALS(recv.results.size(), 1U);
     TS_ASSERT_EQUALS(recv.results[0], Point(10,20));
-    TS_ASSERT_EQUALS(testee.getPosition(pt), true);
+    TS_ASSERT_EQUALS(testee.getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt, Point(10,20));
 
     // Same position again gives no notification
@@ -82,7 +82,7 @@ TestGameMapLocation::testRef()
     testee.set(Reference(Reference::Ship, 1));
     TS_ASSERT_EQUALS(recv.results.size(), 1U);
     TS_ASSERT_EQUALS(recv.results[0], POS1);
-    TS_ASSERT_EQUALS(testee.getPosition(pt), true);
+    TS_ASSERT_EQUALS(testee.getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt, POS1);
 
     // Change to another ship at same position
@@ -93,7 +93,7 @@ TestGameMapLocation::testRef()
     testee.set(Reference(Reference::Ship, 3));
     TS_ASSERT_EQUALS(recv.results.size(), 2U);
     TS_ASSERT_EQUALS(recv.results[1], POS2);
-    TS_ASSERT_EQUALS(testee.getPosition(pt), true);
+    TS_ASSERT_EQUALS(testee.getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt, POS2);
     TS_ASSERT_EQUALS(testee.getReference(), Reference(Reference::Ship, 3));
 }
@@ -123,17 +123,17 @@ TestGameMapLocation::testUniv()
     Point pt;
     testee.setUniverse(&t1.universe(), &t1.mapConfiguration());
     testee.set(Reference(Reference::Ship, 1));
-    TS_ASSERT_EQUALS(testee.getPosition(pt), true);
+    TS_ASSERT_EQUALS(testee.getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt, POS1);
 
     // Reset universe, keeps position
     testee.setUniverse(0, 0);
-    TS_ASSERT_EQUALS(testee.getPosition(pt), true);
+    TS_ASSERT_EQUALS(testee.getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt, POS1);
 
     // Set to turn 2, moves position
     testee.setUniverse(&t2.universe(), &t2.mapConfiguration());
-    TS_ASSERT_EQUALS(testee.getPosition(pt), true);
+    TS_ASSERT_EQUALS(testee.getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt, POS2);
 }
 
@@ -156,21 +156,21 @@ TestGameMapLocation::testEffectiveRef()
     // Set position to ship; verify
     Point pt;
     testee.set(Reference(Reference::Ship, 1));
-    TS_ASSERT_EQUALS(testee.getPosition(pt), true);
+    TS_ASSERT_EQUALS(testee.getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt, POS1);
     TS_ASSERT_EQUALS(testee.getReference(), Reference(Reference::Ship, 1));
     TS_ASSERT_EQUALS(testee.getEffectiveReference(), Reference(Reference::Ship, 1));
 
     // Set position
     testee.set(POS2);
-    TS_ASSERT_EQUALS(testee.getPosition(pt), true);
+    TS_ASSERT_EQUALS(testee.getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt, POS2);
     TS_ASSERT_EQUALS(testee.getReference(), Reference());
     TS_ASSERT_EQUALS(testee.getEffectiveReference(), Reference());
 
     // Set invalid reference
     testee.set(Reference(Reference::Ship, 77));
-    TS_ASSERT_EQUALS(testee.getPosition(pt), true);
+    TS_ASSERT_EQUALS(testee.getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt, POS2);                                               // previous position
     TS_ASSERT_EQUALS(testee.getReference(), Reference(Reference::Ship, 77));  // read-back correctly
     TS_ASSERT_EQUALS(testee.getEffectiveReference(), Reference());            // cleared out in getEffectiveReference()
@@ -278,19 +278,19 @@ TestGameMapLocation::testWrap()
     Point pt;
     testee.setUniverse(&t.universe(), &t.mapConfiguration());
     testee.set(Reference(Reference::Ship, 1));
-    TS_ASSERT_EQUALS(testee.getPosition(pt), true);
+    TS_ASSERT_EQUALS(testee.getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt, IN);
 
     // Set "out" position, then set reference
     testee.set(OUT);
     testee.set(Reference(Reference::Ship, 1));
-    TS_ASSERT_EQUALS(testee.getPosition(pt), true);
+    TS_ASSERT_EQUALS(testee.getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt, OUT);
 
     // If position is not exact, it is not kept
     testee.set(OUT + Point(1,0));
     testee.set(Reference(Reference::Ship, 1));
-    TS_ASSERT_EQUALS(testee.getPosition(pt), true);
+    TS_ASSERT_EQUALS(testee.getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt, IN);
 }
 

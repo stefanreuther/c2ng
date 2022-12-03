@@ -136,7 +136,7 @@ client::doShipCargoTransfer(ui::Root& root,
                     game::map::Ship* pShip = univ.ships().get(m_shipId);
                     game::map::Point pt;
                     int owner;
-                    if (pShip != 0 && pShip->isPlayable(game::map::Object::Playable) && pShip->getOwner(owner) && pShip->getPosition(pt)) {
+                    if (pShip != 0 && pShip->isPlayable(game::map::Object::Playable) && pShip->getOwner().get(owner) && pShip->getPosition().get(pt)) {
                         // Add the planet
                         if (game::Id_t pid = univ.findPlanetAt(pt)) {
                             if (game::actions::CargoTransferSetup::fromPlanetShip(univ, pid, m_shipId).isValid()) {

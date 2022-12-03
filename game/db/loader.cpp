@@ -412,7 +412,7 @@ game::db::Loader::save(afl::io::Stream& out, const Turn& turn, const Game& game,
         if (const gm::Minefield* mf = univ.minefields().get(id)) {
             gm::Point pos;
             int owner = 0;
-            if (mf->getPosition(pos) && mf->getOwner(owner)) {
+            if (mf->getPosition().get(pos) && mf->getOwner().get(owner)) {
                 dt::Minefield dbm;
                 dbm.id    = static_cast<int16_t>(id);
                 dbm.x     = static_cast<int16_t>(pos.getX());

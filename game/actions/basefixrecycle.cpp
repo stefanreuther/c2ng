@@ -21,7 +21,7 @@ game::actions::BaseFixRecycle::getValidActions(const game::map::Ship& sh) const
 
     // Verify positions
     game::map::Point planetPos, shipPos;
-    if (!m_planet.getPosition(planetPos) || !sh.getPosition(shipPos)) {
+    if (!m_planet.getPosition().get(planetPos) || !sh.getPosition().get(shipPos)) {
         return ShipyardActionSet_t();
     }
     if (planetPos != shipPos) {
@@ -30,7 +30,7 @@ game::actions::BaseFixRecycle::getValidActions(const game::map::Ship& sh) const
 
     // Verify owner
     int planetOwner, shipOwner;
-    if (!m_planet.getOwner(planetOwner) || !sh.getOwner(shipOwner)) {
+    if (!m_planet.getOwner().get(planetOwner) || !sh.getOwner().get(shipOwner)) {
         return ShipyardActionSet_t();
     }
 

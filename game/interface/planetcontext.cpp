@@ -301,7 +301,7 @@ game::interface::PlanetContext::get(PropertyIndex_t index)
                                        m_session.getShipList(),
                                        &m_game->currentTurn());
              case OwnerPropertyDomain:
-                if (pl->getOwner(owner)) {
+                if (pl->getOwner().get(owner)) {
                     return getPlayerProperty(owner, PlayerProperty(planet_mapping[index].index), m_root->playerList(), *m_game, m_root->hostConfiguration(), m_session.translator());
                 } else {
                     return 0;

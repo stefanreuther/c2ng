@@ -178,14 +178,12 @@ game::map::MinefieldMission::checkLayMission(const Ship& ship, const Universe& u
         }
 
         if (hostVersion.hasAutomaticMineIdentity()) {
-            mf->getOwner(race);
+            race = mf->getOwner().orElse(0);
         }
 
-        int mfOwner = 0;
-        Point mfPos, shipPos;
-        mf->getOwner(mfOwner);
-        mf->getPosition(mfPos);
-        ship.getPosition(shipPos);
+        const int mfOwner = mf->getOwner().orElse(0);
+        const Point mfPos = mf->getPosition().orElse(Point());
+        const Point shipPos = ship.getPosition().orElse(Point());
         if (mfOwner != race
             || mf->isWeb() != makeweb
             || mapConfig.getSquaredDistance(mfPos, shipPos) > mf->getUnitsForLaying(hostVersion, config))
@@ -195,16 +193,14 @@ game::map::MinefieldMission::checkLayMission(const Ship& ship, const Universe& u
     } else {
         // We're not requiring a particular minefield, so find one.
         int32_t closest = 0;
-        Point shipPos;
-        ship.getPosition(shipPos);
+        const Point shipPos = ship.getPosition().orElse(Point());
         if (hostVersion.hasMinefieldCenterBug()) {
             for (Id_t i = mfc.findNextIndex(0); i != 0; i = mfc.findNextIndex(i)) {
                 if (const Minefield* mf = mfc.get(i)) {
                     int mfOwner;
-                    if (mf->getOwner(mfOwner) && mfOwner == race && mf->isWeb() == makeweb) {
-                        Point mfPos;
-                        mf->getPosition(mfPos);
-                        int32_t dist = mapConfig.getSquaredDistance(mfPos, shipPos);
+                    if (mf->getOwner().get(mfOwner) && mfOwner == race && mf->isWeb() == makeweb) {
+                        const Point mfPos = mf->getPosition().orElse(Point());
+                        const int32_t dist = mapConfig.getSquaredDistance(mfPos, shipPos);
                         if (reqid == 0 || dist < closest) {
                             // Minefield matches type and is close.
                             // We note its Id only when we're inside;
@@ -222,9 +218,8 @@ game::map::MinefieldMission::checkLayMission(const Ship& ship, const Universe& u
             for (Id_t i = mfc.findNextIndex(0); i != 0; i = mfc.findNextIndex(i)) {
                 if (const Minefield* mf = mfc.get(i)) {
                     int mfOwner;
-                    if (mf->getOwner(mfOwner) && mfOwner == race && mf->isWeb() == makeweb) {
-                        Point mfPos;
-                        mf->getPosition(mfPos);
+                    if (mf->getOwner().get(mfOwner) && mfOwner == race && mf->isWeb() == makeweb) {
+                        Point mfPos = mf->getPosition().orElse(Point());
                         int32_t dist = mapConfig.getSquaredDistance(mfPos, shipPos);
                         if (dist <= mf->getUnitsForLaying(hostVersion, config)) {
                             // Minefield matches type and is close, and we're inside

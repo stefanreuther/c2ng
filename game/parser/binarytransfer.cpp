@@ -677,8 +677,7 @@ game::parser::packBinaryPlanet(const game::map::Planet& pl, afl::charset::Charse
     namespace gt = game::v3::structures;
 
     // Determine owner
-    int owner = -1;
-    pl.getOwner(owner);
+    const int owner = pl.getOwner().orElse(-1);
 
     // Determine timestamps
     int earliestTurn = 0, latestTurn = 0;
@@ -769,11 +768,8 @@ String_t
 game::parser::packBinaryMinefield(const game::map::Minefield& mf)
 {
     // ex chartdlg.pas:MailMinefield (sort-of)
-    Point pos;
-    mf.getPosition(pos);
-
-    int owner = 0;
-    mf.getOwner(owner);
+    const Point pos = mf.getPosition().orElse(Point());
+    const int owner = mf.getOwner().orElse(0);
 
     BinaryMinefield b;
     b.turnNumber = static_cast<int16_t>(mf.getTurnLastSeen());

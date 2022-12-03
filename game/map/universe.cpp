@@ -61,7 +61,7 @@ namespace {
     {
         // ex WSelectChartMode::checkObject
         game::map::Point pt;
-        if (!obj.getPosition(pt)) {
+        if (!obj.getPosition().get(pt)) {
             return 0;
         }
 
@@ -243,7 +243,7 @@ game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePl
             p->internalCheck(mapConfig, tx, log);
 
             int owner;
-            if (p->getOwner(owner)) {
+            if (p->getOwner().get(owner)) {
                 p->setPlayability(p->isVisible() && p->hasFullPlanetData() && owner != 0
                                   ? (playingSet.contains(owner)
                                      ? playability
@@ -260,7 +260,7 @@ game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePl
             s->internalCheck();
 
             int owner;
-            if (s->getOwner(owner)) {
+            if (s->getOwner().get(owner)) {
                 s->setPlayability(s->isVisible() && s->hasFullShipData()
                                   ? (playingSet.contains(owner)
                                      ? playability
@@ -379,7 +379,7 @@ game::map::Universe::findGravityPlanetAt(Point pt,
         for (Id_t i = ty.getPreviousIndex(0); i != 0; i = ty.getPreviousIndex(i)) {
             if (const Planet* p = ty.getObjectByIndex(i)) {
                 Point pos;
-                if (p->getPosition(pos)) {
+                if (p->getPosition().get(pos)) {
                     if (config[config.RoundGravityWells]()) {
                         if (mapConfig.getSquaredDistance(pos, pt) <= sqs)
                             return i;
@@ -402,7 +402,7 @@ game::map::Universe::findGravityPlanetAt(Point pt,
         for (Id_t i = ty.getNextIndex(0); i != 0; i = ty.getNextIndex(i)) {
             if (const Planet* p = ty.getObjectByIndex(i)) {
                 Point pos;
-                if (p->getPosition(pos)) {
+                if (p->getPosition().get(pos)) {
                     if (mapConfig.getSquaredDistance(pos, pt) <= 9) {
                         pt = pos;  // (!)
                         pid = i;
@@ -492,7 +492,7 @@ game::map::Universe::findLocationUnitNames(Point pt,
         if (const Ship* sh = ty.getObjectByIndex(sid)) {
             Point shipPos;
             int shipOwner;
-            if (sh->getPosition(shipPos) && shipPos == realPos && sh->getOwner(shipOwner)) {
+            if (sh->getPosition().get(shipPos) && shipPos == realPos && sh->getOwner().get(shipOwner)) {
                 // Valid ship, count it
                 numShips.set(shipOwner, numShips.get(shipOwner) + 1);
                 if (myShipId == 0 && shipOwner == viewpointPlayer) {
@@ -549,7 +549,7 @@ game::map::Universe::findShipCloningAt(Id_t pid, Id_t after) const
     // ex GPlanet::findShipCloningHere, GShip::isCloningAt, planacc.pas:FindShipBeingClonedAt, ShipIsCloningAt
     const Planet* p = planets().get(pid);
     Point pt;
-    if (p == 0 || !p->getPosition(pt)) {
+    if (p == 0 || !p->getPosition().get(pt)) {
         return 0;
     }
 
@@ -573,17 +573,17 @@ game::map::Universe::findControllingPlanetId(const Minefield& mf, const Configur
 
     Point minePos;
     int mineOwner;
-    if (mf.getPosition(minePos) && mf.getOwner(mineOwner)) {
+    if (mf.getPosition().get(minePos) && mf.getOwner().get(mineOwner)) {
         AnyPlanetType ty(const_cast<Universe&>(*this).planets());
         for (Id_t i = ty.findNextIndex(0); i != 0; i = ty.findNextIndex(i)) {
             if (const Planet* p = m_planets.get(i)) {
                 int planetOwner;
                 Point planetPos;
-                if (p->getPosition(planetPos)) {
+                if (p->getPosition().get(planetPos)) {
                     /* The planet is a possible controlling planet if...
                        - we know it has the same owner as the minefield
                        - we don't know the planet's owner, and don't have full data for the minefield owner's race */
-                    bool maybe = (p->getOwner(planetOwner)
+                    bool maybe = (p->getOwner().get(planetOwner)
                                   ? planetOwner == mineOwner
                                   : !hasFullData(mineOwner));
 
@@ -613,7 +613,7 @@ game::map::Universe::findUniversalMinefieldFriendlyCodePlanetId(int forPlayer) c
             if (pl->isPlayable(Object::Playable)) {
                 int owner;
                 String_t fc;
-                if (pl->getOwner(owner)
+                if (pl->getOwner().get(owner)
                     && owner == forPlayer
                     && pl->getFriendlyCode().get(fc)
                     && util::strStartsWith(fc, "mf"))

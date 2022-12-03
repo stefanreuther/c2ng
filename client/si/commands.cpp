@@ -1046,7 +1046,7 @@ client::si::IFCCBuildAmmo(game::Session& session, ScriptSide& si, RequestLink1 l
     } else if (Ship* sh = dynamic_cast<Ship*>(link.getProcess().getCurrentObject())) {
         // Ship
         Point pt;
-        if (sh->getPosition(pt)) {
+        if (sh->getPosition().get(pt)) {
             if (Planet* pl = univ.planets().get(univ.findPlanetAt(pt))) {
                 game::Exception ex("");
                 if (!game::actions::BuildAmmo::isValidCombination(*pl, *sh, ex)) {
@@ -1260,7 +1260,7 @@ client::si::IFCCCloneShip(game::Session& session, ScriptSide& si, RequestLink1 l
     // Some pre-validation (similar to CloneShipProxy)
     Universe& univ = game::actions::mustHaveGame(session).currentTurn().universe();
     Point pt;
-    if (!sh.getPosition(pt)) {
+    if (!sh.getPosition().get(pt)) {
         throw game::Exception(game::Exception::eNoBase);
     }
     Planet& pl = game::actions::mustExist(univ.planets().get(univ.findPlanetAt(pt)));
@@ -1440,7 +1440,7 @@ client::si::IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLi
                 // Set optimum warp
                 // ex setOptimumWarp
                 Point shipPos;
-                if (!sh.isHyperdriving(g.shipScores(), sl, r.hostConfiguration()) && sh.getPosition(shipPos) && shipPos != m_position) {
+                if (!sh.isHyperdriving(g.shipScores(), sl, r.hostConfiguration()) && sh.getPosition().get(shipPos) && shipPos != m_position) {
                     // Determine optimum warp factor
                     int speed = getOptimumWarp(univ, sh.getId(), shipPos, m_position, g.shipScores(), sl, g.mapConfiguration(), r);
                     fm.setWarpFactor(speed, r.hostConfiguration(), sl);
@@ -1505,7 +1505,7 @@ client::si::IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLi
 
     Ship* sh = dynamic_cast<Ship*>(link.getProcess().getCurrentObject());
     Point pos;
-    if (sh != 0 && sh->isPlayable(game::map::Object::Playable) && sh->getPosition(pos)) {
+    if (sh != 0 && sh->isPlayable(game::map::Object::Playable) && sh->getPosition().get(pos)) {
         if (sh->isFleetMember()) {
             throw game::Exception(game::Exception::eFleet);
         } else {
@@ -1534,7 +1534,7 @@ client::si::IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLi
                     in.chunnelMode = true;
 
                     Point matePos;
-                    if (mate->getPosition(matePos)) {
+                    if (mate->getPosition().get(matePos)) {
                         in.target = g.mapConfiguration().getSimpleNearestAlias(matePos, pos);
                     }
                 }
@@ -1606,7 +1606,7 @@ client::si::IFCCChooseInterceptTarget(game::Session& session, ScriptSide& si, Re
 
     Ship* sh = dynamic_cast<Ship*>(link.getProcess().getCurrentObject());
     Point pos;
-    if (sh != 0 && sh->isPlayable(game::map::Object::Playable) && sh->getPosition(pos)) {
+    if (sh != 0 && sh->isPlayable(game::map::Object::Playable) && sh->getPosition().get(pos)) {
         client::dialogs::NavChartState in;
         in.title = title;
         in.center = pos;
@@ -2822,7 +2822,7 @@ client::si::IFCCTransferUnload(game::Session& session, ScriptSide& si, RequestLi
 
     // Ship must have a position
     Point shipPos;
-    bool ok = pShip->getPosition(shipPos);
+    bool ok = pShip->getPosition().get(shipPos);
     afl::except::checkAssertion(ok, "pShip->getPosition");
 
     // Find planet

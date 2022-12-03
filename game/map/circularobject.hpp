@@ -15,12 +15,14 @@ namespace game { namespace map {
      public:
         virtual ~CircularObject();
 
-        /** Get object radius in light-years. */
-        virtual bool getRadius(int& result) const = 0;
-        
+        /** Get object radius in light-years.
+            @return radius in ly */
+        virtual afl::base::Optional<int> getRadius() const = 0;
+
         /** Get squared radius in light-years.
-            This is used for objects that have fractional radius, such as minefields. */
-        virtual bool getRadiusSquared(int32_t& result) const = 0;
+            This is used for objects that have fractional radius, such as minefields.
+            @return squared radius in ly^2 */
+        virtual afl::base::Optional<int32_t> getRadiusSquared() const = 0;
     };
 
 

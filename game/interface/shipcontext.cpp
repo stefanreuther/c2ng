@@ -313,7 +313,7 @@ game::interface::ShipContext::get(PropertyIndex_t index)
                     return 0;
                 }
              case OwnerPropertyDomain:
-                if (sh->getOwner(n)) {
+                if (sh->getOwner().get(n)) {
                     return getPlayerProperty(n,
                                              PlayerProperty(ship_mapping[index].index),
                                              m_root->playerList(),

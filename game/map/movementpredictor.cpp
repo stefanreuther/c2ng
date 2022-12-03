@@ -81,7 +81,7 @@ game::map::MovementPredictor::init(const Universe& univ)
                 if (pShip->isPlayable(Ship::ReadOnly)) {
                     pShip->getWaypoint().get(pInfo->pos);
                 } else {
-                    pShip->getPosition(pInfo->pos);
+                    pShip->getPosition().get(pInfo->pos);
                 }
                 copyCargo(*pInfo, *pShip, Cargo_t::Tritanium,  Element::Tritanium);
                 copyCargo(*pInfo, *pShip, Cargo_t::Duranium,   Element::Duranium);
@@ -243,8 +243,7 @@ game::map::MovementPredictor::moveShips(const Universe& univ,
             Ship* pShip = univ.ships().get(sid);
             assert(pShip != 0);
             assert(getInterceptTarget(*pShip) != 0);
-            Point pos;
-            pShip->getPosition(pos);
+            const Point pos = pShip->getPosition().orElse(Point());
             sum_x += pos.getX();
             sum_y += pos.getY();
             ++num_ships;

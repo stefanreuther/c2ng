@@ -77,15 +77,15 @@ TestGameMapMinefieldType::testAddMessageInformation()
     TS_ASSERT(mf);
 
     game::map::Point pt;
-    TS_ASSERT_EQUALS(mf->getPosition(pt), true);
+    TS_ASSERT_EQUALS(mf->getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt.getX(), 2222);
     TS_ASSERT_EQUALS(pt.getY(), 1555);
 
     int n;
-    TS_ASSERT_EQUALS(mf->getRadius(n), true);
+    TS_ASSERT_EQUALS(mf->getRadius().get(n), true);
     TS_ASSERT_EQUALS(n, 40);
 
-    TS_ASSERT_EQUALS(mf->getOwner(n), true);
+    TS_ASSERT_EQUALS(mf->getOwner().get(n), true);
     TS_ASSERT_EQUALS(n, 10);
 }
 
@@ -116,15 +116,15 @@ TestGameMapMinefieldType::testAddMessageInformationFull()
     TS_ASSERT(mf);
 
     game::map::Point pt;
-    TS_ASSERT_EQUALS(mf->getPosition(pt), true);
+    TS_ASSERT_EQUALS(mf->getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt.getX(), 1666);
     TS_ASSERT_EQUALS(pt.getY(), 1777);
 
     int n;
-    TS_ASSERT_EQUALS(mf->getRadius(n), true);
+    TS_ASSERT_EQUALS(mf->getRadius().get(n), true);
     TS_ASSERT_EQUALS(n, 40);
 
-    TS_ASSERT_EQUALS(mf->getOwner(n), true);
+    TS_ASSERT_EQUALS(mf->getOwner().get(n), true);
     TS_ASSERT_EQUALS(n, 10);
 
     TS_ASSERT_EQUALS(mf->getUnits(), 1620);
@@ -155,15 +155,15 @@ TestGameMapMinefieldType::testAddMessageInformationMinUpdate()
     TS_ASSERT(mf);
 
     game::map::Point pt;
-    TS_ASSERT_EQUALS(mf->getPosition(pt), true);
+    TS_ASSERT_EQUALS(mf->getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt.getX(), 1444);
     TS_ASSERT_EQUALS(pt.getY(), 1555);
 
     int n;
-    TS_ASSERT_EQUALS(mf->getRadius(n), true);
+    TS_ASSERT_EQUALS(mf->getRadius().get(n), true);
     TS_ASSERT_EQUALS(n, 40);
 
-    TS_ASSERT_EQUALS(mf->getOwner(n), true);
+    TS_ASSERT_EQUALS(mf->getOwner().get(n), true);
     TS_ASSERT_EQUALS(n, 4);
 
     TS_ASSERT_EQUALS(mf->getUnits(), 1600);

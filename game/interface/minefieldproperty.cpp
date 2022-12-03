@@ -7,8 +7,9 @@
 #include "interpreter/error.hpp"
 #include "interpreter/values.hpp"
 
-using interpreter::makeIntegerValue;
 using interpreter::makeBooleanValue;
+using interpreter::makeIntegerValue;
+using interpreter::makeOptionalIntegerValue;
 using interpreter::makeStringValue;
 
 afl::data::Value*
@@ -22,7 +23,6 @@ game::interface::getMinefieldProperty(const game::map::Minefield& mf, MinefieldP
 
     // Regular minefield case
     game::map::Point pt;
-    int i;
     switch (imp) {
      case impId:
         /* @q Id:Int (Minefield Property)
@@ -40,7 +40,7 @@ game::interface::getMinefieldProperty(const game::map::Minefield& mf, MinefieldP
      case impLocX:
         /* @q Loc.X:Int (Minefield Property)
            X location of center of minefield. */
-        if (mf.getPosition(pt)) {
+        if (mf.getPosition().get(pt)) {
             return makeIntegerValue(pt.getX());
         } else {
             return 0;
@@ -48,7 +48,7 @@ game::interface::getMinefieldProperty(const game::map::Minefield& mf, MinefieldP
      case impLocY:
         /* @q Loc.Y:Int (Minefield Property)
            Y location of center of minefield. */
-        if (mf.getPosition(pt)) {
+        if (mf.getPosition().get(pt)) {
             return makeIntegerValue(pt.getY());
         } else {
             return 0;
@@ -60,11 +60,7 @@ game::interface::getMinefieldProperty(const game::map::Minefield& mf, MinefieldP
      case impRadius:
         /* @q Radius:Int (Minefield Property)
            Minefield radius in ly. */
-        if (mf.getRadius(i)) {
-            return makeIntegerValue(i);
-        } else {
-            return 0;
-        }
+        return makeOptionalIntegerValue(mf.getRadius());
      case impScanType:
         /* @q Scanned:Int (Minefield Property)
            Last reported action on this minefield.

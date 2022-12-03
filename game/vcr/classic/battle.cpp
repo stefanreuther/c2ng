@@ -243,10 +243,10 @@ game::vcr::classic::Battle::isESBActive(const game::config::HostConfiguration& c
     return true;
 }
 
-bool
-game::vcr::classic::Battle::getPosition(game::map::Point& result) const
+afl::base::Optional<game::map::Point>
+game::vcr::classic::Battle::getPosition() const
 {
-    return m_position.get(result);
+    return m_position;
 }
 
 afl::base::Optional<int32_t>

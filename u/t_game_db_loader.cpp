@@ -596,7 +596,7 @@ TestGameDbLoader::testLoad()
         TS_ASSERT_EQUALS(pl->getFriendlyCode().orElse(""), "157");
 
         int owner = -1;
-        TS_ASSERT_EQUALS(pl->getOwner(owner), true);
+        TS_ASSERT_EQUALS(pl->getOwner().get(owner), true);
         TS_ASSERT_EQUALS(owner, 0);
         TS_ASSERT_EQUALS(pl->getCargo(game::Element::Neutronium).orElse(-1), 154);
         TS_ASSERT_EQUALS(pl->getTemperature().orElse(-1), 40);
@@ -606,7 +606,7 @@ TestGameDbLoader::testLoad()
         TS_ASSERT(pl != 0);
         TS_ASSERT_EQUALS(pl->getFriendlyCode().orElse(""), "\\TC");
         int owner = -1;
-        TS_ASSERT_EQUALS(pl->getOwner(owner), true);
+        TS_ASSERT_EQUALS(pl->getOwner().get(owner), true);
         TS_ASSERT_EQUALS(owner, 7);
         TS_ASSERT_EQUALS(pl->getCargo(game::Element::Neutronium).orElse(-1), 119);
         TS_ASSERT_EQUALS(pl->getTemperature().orElse(-1), 23);
@@ -649,7 +649,7 @@ TestGameDbLoader::testLoad()
         TS_ASSERT(sh != 0);
 
         int owner = -1;
-        TS_ASSERT(sh->getOwner(owner));
+        TS_ASSERT(sh->getOwner().get(owner));
         TS_ASSERT_EQUALS(owner, 7);
         TS_ASSERT_EQUALS(sh->getFriendlyCode().orElse(""), "*Kf");
         TS_ASSERT_EQUALS(sh->getEngineType().orElse(-1), 9);

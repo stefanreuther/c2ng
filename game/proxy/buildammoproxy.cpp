@@ -145,8 +145,7 @@ game::proxy::BuildAmmoProxy::Trampoline::packStatus(Status& out) const
     // Fighter
     const Root& root = game::actions::mustHaveRoot(m_session);
     Part ft;
-    int owner = 0;
-    m_planet.getOwner(owner);
+    const int owner = m_planet.getOwner().orElse(0);
     ft.type       = Element::Fighters;
     ft.page       = game::spec::info::FighterPage;
     ft.id         = owner;

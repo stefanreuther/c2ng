@@ -141,7 +141,7 @@ game::interface::getReferenceProperty(Reference ref, ReferenceProperty prop, Ses
            If this is a reference to a map location, returns the X coordinate.
            @since PCC2 2.40.7 */
         game::map::Point pt;
-        if (ref.getPos(pt)) {
+        if (ref.getPosition().get(pt)) {
             return makeIntegerValue(pt.getX());
         } else {
             return 0;
@@ -153,7 +153,7 @@ game::interface::getReferenceProperty(Reference ref, ReferenceProperty prop, Ses
            If this is a reference to a map location, returns the Y coordinate.
            @since PCC2 2.40.7 */
         game::map::Point pt;
-        if (ref.getPos(pt)) {
+        if (ref.getPosition().get(pt)) {
             return makeIntegerValue(pt.getY());
         } else {
             return 0;

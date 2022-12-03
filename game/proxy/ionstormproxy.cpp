@@ -73,12 +73,10 @@ game::proxy::IonStormProxy::Trampoline::buildIonStormInfo(IonStormInfo& out) con
         out.stormId = st->getId();
 
         // Center
-        if (!st->getPosition(out.center)) {
-            out.center = game::map::Point();
-        }
+        out.center = st->getPosition().orElse(game::map::Point());
 
         // Radius
-        if (st->getRadius(out.radius)) {
+        if (st->getRadius().get(out.radius)) {
             out.text[Radius] = Format(tx("%d ly"), fmt.formatNumber(out.radius));
         } else {
             out.radius = 0;

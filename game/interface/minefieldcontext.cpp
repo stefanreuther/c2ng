@@ -111,7 +111,7 @@ game::interface::MinefieldContext::get(PropertyIndex_t index)
             return getMinefieldProperty(*mf, MinefieldProperty(minefield_mapping[index].index));
 
          case OwnerPropertyDomain:
-            if (mf->getOwner(n)) {
+            if (mf->getOwner().get(n)) {
                 return getPlayerProperty(n, PlayerProperty(minefield_mapping[index].index), m_root->playerList(), *m_game, m_root->hostConfiguration(), m_translator);
             } else {
                 return 0;

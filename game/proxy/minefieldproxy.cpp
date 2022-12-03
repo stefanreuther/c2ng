@@ -162,14 +162,14 @@ game::proxy::MinefieldProxy::Trampoline::buildMinefieldInfo(MinefieldInfo& out) 
 
         // Main information
         out.minefieldId = p->getId();
-        p->getRadius(out.radius);
-        p->getPosition(out.center);
+        out.radius = p->getRadius().orElse(0);
+        out.center = p->getPosition().orElse(game::map::Point());
         out.controllingPlanetId = (t != 0 ? t->universe().findControllingPlanetId(*p, g->mapConfiguration()) : 0);
 
         // Textual information
         // - Owner
         int owner;
-        if (p->getOwner(owner)) {
+        if (p->getOwner().get(owner)) {
             out.text[Owner] = r->playerList().getPlayerName(owner, Player::ShortName, tx);
         }
 
@@ -191,7 +191,7 @@ game::proxy::MinefieldProxy::Trampoline::buildMinefieldInfo(MinefieldInfo& out) 
             out.text[ControlPlanet] = pl->getName(tx);
 
             int planetOwner;
-            if (!pl->getOwner(planetOwner)) {
+            if (!pl->getOwner().get(planetOwner)) {
                 out.text[ControlPlayer] = tx("a planet with unknown owner");
             } else if (planetOwner == 0) {
                 out.text[ControlPlayer] = tx("unowned planet");
@@ -258,10 +258,7 @@ game::proxy::MinefieldProxy::Trampoline::onObjectChange()
 
         // If object changes, reset PassageInfo
         if (change) {
-            m_passageDistance = 0;
-            if (p != 0) {
-                p->getRadius(m_passageDistance);
-            }
+            m_passageDistance = (p != 0 ? p->getRadius().orElse(0) : 0);
             sendPassageInfo();
         }
 

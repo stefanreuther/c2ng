@@ -40,8 +40,6 @@ namespace {
 
     FleetMemberList::Item makeItem(const Ship& sh, const FleetMemberList::Flags_t flags)
     {
-        game::map::Point pt;
-        sh.getPosition(pt);
         return FleetMemberList::Item(UserList::Item(UserList::ReferenceItem,
                                                     sh.getName(),
                                                     Reference(Reference::Ship, sh.getId()),
@@ -50,7 +48,7 @@ namespace {
                                                     util::SkinColor::Static),
                                      flags,
                                      sh.getFriendlyCode().orElse(""),
-                                     pt);
+                                     sh.getPosition().orElse(Point()));
     }
 }
 
@@ -174,9 +172,8 @@ game::ref::FleetMemberList::setFleet(const game::map::Universe& univ, Id_t fleet
     m_items.clear();
     if (const Ship* leader = univ.ships().get(fleetNumber)) {
         // Add leader
-        Point leaderPos;
         m_items.push_back(makeItem(*leader, Flags_t(Leader)));
-        leader->getPosition(leaderPos);
+        const Point leaderPos = leader->getPosition().orElse(Point());
 
         // Add members
         // We check AnyShipType for simplicity; fleets should only involve playable ships.
@@ -186,7 +183,7 @@ game::ref::FleetMemberList::setFleet(const game::map::Universe& univ, Id_t fleet
                 if (i != fleetNumber && mem->isPlayable(game::map::Object::ReadOnly) && mem->getFleetNumber() == fleetNumber) {
                     Flags_t flags;
                     Point memPos;
-                    if (mem->getPosition(memPos) && memPos != leaderPos) {
+                    if (mem->getPosition().get(memPos) && memPos != leaderPos) {
                         flags += Away;
                     }
                     m_items.push_back(makeItem(*mem, flags));

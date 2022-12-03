@@ -354,7 +354,7 @@ game::map::Ship::combinedCheck1(Universe& univ, PlayerSet_t availablePlayers, in
     // If ship claims to exists, but we don't have current data, it's destroyed. Remove it.
     // (But don't upgrade a non-existant ship, e.g. explosion-only, to HistoryShip.)
     int owner;
-    if (getOwner(owner)
+    if (getOwner().get(owner)
         && owner != 0
         && ((availablePlayers.contains(owner) && m_shipSource.empty())
             || m_currentData.damage.orElse(0) > 150))
@@ -435,7 +435,7 @@ game::map::Ship::getName(ObjectName which, afl::string::Translator& tx, Interpre
         } else {
             int owner;
             String_t ownerName;
-            if (getOwner(owner) && iface.getPlayerAdjective(owner, ownerName)) {
+            if (getOwner().get(owner) && iface.getPlayerAdjective(owner, ownerName)) {
                 int hullNr;
                 String_t hullName;
                 if (getHull().get(hullNr) && iface.getHullShortName(hullNr, hullName)) {
@@ -456,24 +456,22 @@ game::map::Ship::getId() const
     return m_id;
 }
 
-bool
-game::map::Ship::getOwner(int& result) const
+afl::base::Optional<int>
+game::map::Ship::getOwner() const
 {
     // ex GShip::getOwner
-    return m_currentData.owner.get(result);
+    return m_currentData.owner;
 }
 
-bool
-game::map::Ship::getPosition(Point& result) const
+afl::base::Optional<game::map::Point>
+game::map::Ship::getPosition() const
 {
     // ex GShip::getPos
     int x, y;
     if (m_currentData.x.get(x) && m_currentData.y.get(y)) {
-        result.setX(x);
-        result.setY(y);
-        return true;
+        return Point(x, y);
     } else {
-        return false;
+        return afl::base::Nothing;
     }
 }
 
@@ -647,7 +645,7 @@ game::map::Ship::getRealOwner() const
     int n;
     if (m_remoteControlFlag > 0) {
         return m_remoteControlFlag;
-    } else if (getOwner(n)) {
+    } else if (getOwner().get(n)) {
         return n;
     } else {
         return IntegerProperty_t();

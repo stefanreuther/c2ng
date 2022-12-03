@@ -298,7 +298,7 @@ game::v3::Reverter::MyLocationReverter::MyLocationReverter(const Reverter& paren
         if (const Planet* planet = univ.playedPlanets().getObjectByIndex(planetId)) {
             int planetOwner;
             if (m_parent.getPlanetData(planetId) != 0
-                && planet->getOwner(planetOwner)
+                && planet->getOwner().get(planetOwner)
                 && (!planet->hasBase() || m_parent.getBaseData(planetId) != 0))
             {
                 m_list.add(Reference(Reference::Planet, planetId));
@@ -315,7 +315,7 @@ game::v3::Reverter::MyLocationReverter::MyLocationReverter(const Reverter& paren
         Ship* ship = ships.getObjectByIndex(shipId);
         Point shipPosition;
         int shipOwner;
-        if (ship != 0 && ship->getPosition(shipPosition) && m_parent.getShipData(shipId) != 0 && ship->getOwner(shipOwner)) {
+        if (ship != 0 && ship->getPosition().get(shipPosition) && m_parent.getShipData(shipId) != 0 && ship->getOwner().get(shipOwner)) {
             if (shipPosition == pt) {
                 m_list.add(Reference(Reference::Ship, shipId));
                 m_players += shipOwner;

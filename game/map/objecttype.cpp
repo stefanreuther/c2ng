@@ -51,7 +51,7 @@ namespace game { namespace map { namespace {
             {
                 Object* p = m_parent.getObjectByIndex(index);
                 Point center;
-                if (p != 0 && p->getPosition(center) && center == m_position) {
+                if (p != 0 && p->getPosition().get(center) && center == m_position) {
                     return p;
                 } else {
                     return 0;
@@ -73,7 +73,7 @@ namespace game { namespace map { namespace {
             {
                 Object* p = m_parent.getObjectByIndex(index);
                 int owner;
-                if (p != 0 && p->getOwner(owner) && m_owners.contains(owner)) {
+                if (p != 0 && p->getOwner().get(owner) && m_owners.contains(owner)) {
                     return p;
                 } else {
                     return 0;
@@ -290,7 +290,7 @@ game::map::ObjectType::findNearestIndex(const Point pt, const Configuration& con
     for (Id_t i = findNextIndex(0); i != 0; i = findNextIndex(i)) {
         if (const Object* mo = getObjectByIndex(i)) {
             Point center;
-            if (mo->getPosition(center)) {
+            if (mo->getPosition().get(center)) {
                 // Position is known
                 int32_t ndist2 = config.getSquaredDistance(pt, center);
 
@@ -298,7 +298,7 @@ game::map::ObjectType::findNearestIndex(const Point pt, const Configuration& con
                 bool ninside;
                 if (const CircularObject* co = dynamic_cast<const CircularObject*>(mo)) {
                     int32_t radiusSquared;
-                    ninside = (co->getRadiusSquared(radiusSquared) && ndist2 <= radiusSquared);
+                    ninside = (co->getRadiusSquared().get(radiusSquared) && ndist2 <= radiusSquared);
                 } else{
                     ninside = false;
                 }

@@ -96,52 +96,48 @@ game::map::Minefield::getId() const
     return m_id;
 }
 
-bool
-game::map::Minefield::getOwner(int& result) const
+afl::base::Optional<int>
+game::map::Minefield::getOwner() const
 {
     // ex GMinefield::getOwner
     if (isValid()) {
-        result = m_owner;
-        return true;
+        return m_owner;
     } else {
-        return false;
+        return afl::base::Nothing;
     }
 }
 
-bool
-game::map::Minefield::getPosition(Point& result) const
+afl::base::Optional<game::map::Point>
+game::map::Minefield::getPosition() const
 {
     // ex GMinefield::getPos
     if (isValid()) {
-        result = m_position;
-        return true;
+        return m_position;
     } else {
-        return false;
+        return afl::base::Nothing;
     }
 }
 
 // CircularObject:
-bool
-game::map::Minefield::getRadius(int& result) const
+afl::base::Optional<int>
+game::map::Minefield::getRadius() const
 {
     // ex GMinefield::getRadius
     if (isValid()) {
-        result = m_currentRadius;
-        return true;
+        return m_currentRadius;
     } else {
-        return false;
+        return afl::base::Nothing;
     }
 }
 
-bool
-game::map::Minefield::getRadiusSquared(int32_t& result) const
+afl::base::Optional<int32_t>
+game::map::Minefield::getRadiusSquared() const
 {
     // ex GMinefield::getRadiusSquared
     if (isValid()) {
-        result = m_currentUnits;
-        return true;
+        return m_currentUnits;
     } else {
-        return false;
+        return afl::base::Nothing;
     }
 }
 

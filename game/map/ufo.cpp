@@ -59,49 +59,46 @@ game::map::Ufo::getId() const
     return m_id;
 }
 
-bool
-game::map::Ufo::getOwner(int& result) const
+afl::base::Optional<int>
+game::map::Ufo::getOwner() const
 {
     // ex GUfo::getOwner
-    result = 0;
-    return true;
+    return 0;
 }
 
-bool
-game::map::Ufo::getPosition(Point& result) const
+afl::base::Optional<game::map::Point>
+game::map::Ufo::getPosition() const
 {
     // ex GUfo::getPos
     if (isValid()) {
-        result = m_position;
-        return true;
+        return m_position;
     } else {
-        return false;
+        return afl::base::Nothing;
     }
 }
 
 
 // CircularObject:
-bool
-game::map::Ufo::getRadius(int& result) const
+afl::base::Optional<int>
+game::map::Ufo::getRadius() const
 {
     // ex GUfo::getRadius
     if (isValid()) {
-        return m_radius.get(result);
+        return m_radius;
     } else {
-        return false;
+        return afl::base::Nothing;
     }
 }
 
-bool
-game::map::Ufo::getRadiusSquared(int32_t& result) const
+afl::base::Optional<int32_t>
+game::map::Ufo::getRadiusSquared() const
 {
     // ex GUfo::getRadiusSquared
     int r;
-    if (getRadius(r)) {
-        result = util::squareInteger(r);
-        return true;
+    if (getRadius().get(r)) {
+        return util::squareInteger(r);
     } else {
-        return false;
+        return afl::base::Nothing;
     }
 }
 

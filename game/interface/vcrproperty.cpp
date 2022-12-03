@@ -94,7 +94,7 @@ game::interface::getVcrProperty(size_t battleNumber,
            Location of the battle in the universe, if known.
            @since PCC2 2.40.11 */
         game::map::Point pt;
-        if (battle->getPosition(pt)) {
+        if (battle->getPosition().get(pt)) {
             return makeIntegerValue(ivp == ivpLocX ? pt.getX() : pt.getY());
         }
         return 0;

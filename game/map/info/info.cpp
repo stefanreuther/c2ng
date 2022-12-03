@@ -251,8 +251,7 @@ namespace {
     {
         for (Id_t i = type.findNextIndex(0); i != 0; i = type.findNextIndex(i)) {
             if (const Planet* pl = type.getObjectByIndex(i)) {
-                int owner = 0;
-                pl->getOwner(owner);
+                const int owner = pl->getOwner().orElse(0);
 
                 /* Mining */
                 for (size_t i = 0; i < NUM_MINERALS; ++i) {
@@ -506,7 +505,7 @@ game::map::info::computeStarchartInfo(const Turn& turn, const TeamSettings& team
 
             // Account owners
             int owner;
-            if (pl->getOwner(owner)) {
+            if (pl->getOwner().get(owner)) {
                 if (pl->getHistoryTimestamp(Planet::ColonistTime) == turn.getTurnNumber()) {
                     out.numCurrentPlanets.set(owner, out.numCurrentPlanets.get(owner) + 1);
                 } else {
@@ -521,7 +520,7 @@ game::map::info::computeStarchartInfo(const Turn& turn, const TeamSettings& team
     for (Id_t sid = stype.findNextIndex(0); sid != 0; sid = stype.findNextIndex(sid)) {
         const Ship* sh = stype.getObjectByIndex(sid);
         int owner;
-        if (sh != 0 && sh->getOwner(owner)) {
+        if (sh != 0 && sh->getOwner().get(owner)) {
             if (sh->getShipKind() == Ship::HistoryShip || sh->getShipKind() == Ship::GuessedShip) {
                 out.numOldShips.set(owner, out.numOldShips.get(owner) + 1);
             } else {
@@ -538,7 +537,7 @@ game::map::info::computeStarchartInfo(const Turn& turn, const TeamSettings& team
     for (Id_t mid = mfs.findNextIndex(0); mid != 0; mid = mfs.findNextIndex(mid)) {
         const Minefield* mf = mfs.getObjectByIndex(mid);
         int owner;
-        if (mf != 0 && mf->getOwner(owner)) {
+        if (mf != 0 && mf->getOwner().get(owner)) {
             out.numMinefields.set(owner, out.numMinefields.get(owner) + 1);
             switch (teams.getPlayerRelation(owner)) {
              case TeamSettings::ThisPlayer:
@@ -1113,7 +1112,7 @@ game::map::info::renderShipSummary(TagNode& tab,
                 }
 
                 Point pos;
-                if (sh->getPosition(pos) && univ.findPlanetAt(pos) == 0) {
+                if (sh->getPosition().get(pos) && univ.findPlanetAt(pos) == 0) {
                     ++counts[0];
                 }
             }
@@ -1233,7 +1232,7 @@ game::map::info::renderStarchartEmpireSummary(TagNode& tab,
     for (Id_t pid = ptype.findNextIndex(0); pid != 0; pid = ptype.findNextIndex(pid)) {
         if (const Planet* pl = ptype.getObjectByIndex(pid)) {
             Point pos;
-            if (pl->getPosition(pos)) {
+            if (pl->getPosition().get(pos)) {
                 planetXs.push_back(pos.getX());
                 planetYs.push_back(pos.getY());
             }

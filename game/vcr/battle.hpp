@@ -101,9 +101,8 @@ namespace game { namespace vcr {
         virtual bool isESBActive(const game::config::HostConfiguration& config) const = 0;
 
         /** Get position of this battle on the map.
-            \param [out] result Position
-            \return true: position was known, result set; false: result not set */
-        virtual bool getPosition(game::map::Point& result) const = 0;
+            \return position if known */
+        virtual afl::base::Optional<game::map::Point> getPosition() const = 0;
 
         /** Get auxiliary information.
             This information is intended for external clients (=scripts, c2play-server).

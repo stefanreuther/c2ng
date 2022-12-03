@@ -61,7 +61,7 @@ game::map::packShipMovementInfo(ShipMovementInfos_t& result,
     // ex WShipScannerChartWidget::drawPost (part)
     // Ship position. We cannot do anything without it.
     Point pos;
-    if (!ship.getPosition(pos)) {
+    if (!ship.getPosition().get(pos)) {
         return;
     }
 
@@ -78,7 +78,7 @@ game::map::packShipMovementInfo(ShipMovementInfos_t& result,
     if (ch.check(ship, univ, mapConfig, scoreDefinitions, shipList, root)) {
         const Ship* target = univ.ships().get(ch.getTargetId());
         Point targetPos;
-        if (target != 0 && target->getPosition(targetPos)) {
+        if (target != 0 && target->getPosition().get(targetPos)) {
             ShipMovementInfo::Status st =
                 ch.getFailureReasons() == 0
                 ? ShipMovementInfo::Success
@@ -108,7 +108,7 @@ game::map::packShipMovementInfo(ShipMovementInfos_t& result,
     if (ship.isFleetMember()) {
         Ship* leader = univ.ships().get(ship.getFleetNumber());
         Point leaderPos;
-        if (leader != 0 && leader->getPosition(leaderPos)) {
+        if (leader != 0 && leader->getPosition().get(leaderPos)) {
             result.push_back(ShipMovementInfo(ShipMovementInfo::FleetLeader, ShipMovementInfo::Success, ship.getFleetNumber(), pos, leaderPos));
         }
     }

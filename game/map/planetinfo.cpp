@@ -309,7 +309,7 @@ namespace {
         bool by;
         int32_t clans;
         int race;
-        if (pl.getOwner(race) && root.hostConfiguration().getPlayerRaceNumber(race) == 6 && pl.getCargo(game::Element::Colonists).get(clans)) {
+        if (pl.getOwner().get(race) && root.hostConfiguration().getPlayerRaceNumber(race) == 6 && pl.getCargo(game::Element::Colonists).get(clans)) {
             // Planet is Borg, use clans/race
             by = false;
         } else if (root.hostConfiguration().getPlayerRaceNumber(viewpointPlayer) == 6) {
@@ -404,7 +404,7 @@ namespace {
 
         // Will that be a fight after all?
         int planetOwner;
-        if (!pl.getOwner(planetOwner) || planetOwner == 0 || planetOwner == viewpointPlayer) {
+        if (!pl.getOwner().get(planetOwner) || planetOwner == 0 || planetOwner == viewpointPlayer) {
             return;
         }
 
@@ -623,7 +623,7 @@ game::map::describePlanetClimate(afl::io::xml::Nodes_t& nodes,
         addItem(list, afl::string::Format(tx("Average temperature: %d" "\xC2\xB0" "\x46"), temp));
 
         int planetOwner;
-        if (pl.getOwner(planetOwner) && planetOwner > 0 && planetOwner != viewpointPlayer) {
+        if (pl.getOwner().get(planetOwner) && planetOwner > 0 && planetOwner != viewpointPlayer) {
             showSupport(list, pl, root, planetOwner, tx);
         }
         showSupport(list, pl, root, viewpointPlayer, tx);
@@ -673,7 +673,7 @@ game::map::describePlanetNatives(afl::io::xml::Nodes_t& nodes,
             addDetail(list, UTF_HYPHEN, afl::string::Format(tx("%d kt supplies per turn"), fmt.formatNumber(forMe)));
 
             int owner;
-            if (pl.getOwner(owner) && owner != 0) {
+            if (pl.getOwner().get(owner) && owner != 0) {
                 int32_t forThem = getBovinoidSupplyContribution(pop, owner, root.hostConfiguration(), root.hostVersion());
                 if (forThem != forMe) {
                     addDetail(list, UTF_HYPHEN, afl::string::Format(tx("%d kt supplies per turn for %s"),
@@ -736,7 +736,7 @@ game::map::describePlanetColony(afl::io::xml::Nodes_t& nodes,
 
     // Colony
     int owner;
-    if (!pl.getOwner(owner)) {
+    if (!pl.getOwner().get(owner)) {
         addItem(list, tx("No information on colonists available."));
     } else if (owner == 0) {
         addItem(list, tx("No colonists."));
@@ -908,7 +908,7 @@ void game::map::describePlanetDefenseEffects(DefenseEffectInfos_t& result,
 
     // Quick exit if owner not known to simplify following code
     int planetOwner;
-    if (!pl.getOwner(planetOwner)) {
+    if (!pl.getOwner().get(planetOwner)) {
         return;
     }
 
@@ -1100,8 +1100,8 @@ game::map::prepareUnloadInfo(const Universe& univ,
     Point planetPosition;
     int planetOwner;
     if (pl != 0
-        && pl->getPosition(planetPosition)
-        && pl->getOwner(planetOwner))
+        && pl->getPosition().get(planetPosition)
+        && pl->getOwner().get(planetOwner))
     {
         PlayedShipType& ty = const_cast<PlayedShipType&>(univ.playedShips());
         for (Id_t sid = ty.findNextObjectAt(planetPosition, 0, false); sid != 0; sid = ty.findNextObjectAt(planetPosition, sid, false)) {
@@ -1109,7 +1109,7 @@ game::map::prepareUnloadInfo(const Universe& univ,
             int shipOwner;
             if (sh != 0
                 && sh->isPlayable(Object::Playable)
-                && sh->getOwner(shipOwner)
+                && sh->getOwner().get(shipOwner)
                 && shipOwner == viewpointPlayer
                 && sh->isTransporterActive(Ship::UnloadTransporter))
             {
@@ -1146,8 +1146,8 @@ game::map::preparePlanetEffectors(const Universe& univ,
     Point planetPosition;
     int planetOwner;
     if (pl != 0
-        && pl->getPosition(planetPosition)
-        && pl->getOwner(planetOwner))
+        && pl->getPosition().get(planetPosition)
+        && pl->getOwner().get(planetOwner))
     {
         PlayedShipType& ty = const_cast<PlayedShipType&>(univ.playedShips());
         for (Id_t sid = ty.findNextObjectAt(planetPosition, 0, false); sid != 0; sid = ty.findNextObjectAt(planetPosition, sid, false)) {
@@ -1155,7 +1155,7 @@ game::map::preparePlanetEffectors(const Universe& univ,
             int shipOwner;
             if (sh != 0
                 && sh->isPlayable(Object::ReadOnly)
-                && sh->getOwner(shipOwner))
+                && sh->getOwner().get(shipOwner))
             {
                 int shipMission;
                 if (config.getPlayerMissionNumber(shipOwner) == 2
@@ -1203,7 +1203,7 @@ game::map::packGroundDefenseInfo(const Planet& pl,
     int planetOwner;
     int defense;
     int32_t planetColonists;
-    if (pl.getOwner(planetOwner)
+    if (pl.getOwner().get(planetOwner)
         && planetOwner != 0
         && pl.getCargo(Element::Colonists).get(planetColonists)
         && pl.getNumBuildings(DefenseBuilding).get(defense))

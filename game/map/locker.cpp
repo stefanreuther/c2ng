@@ -77,7 +77,7 @@ game::map::Locker::addObject(const Object& obj, Reference::Type type)
 {
     // ex GLockData::addObject
     Point pt;
-    if (obj.getPosition(pt)) {
+    if (obj.getPosition().get(pt)) {
         addPoint(pt, obj.isMarked(), type == Reference::Null ? Reference() : Reference(type, obj.getId()));
     }
 }

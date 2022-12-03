@@ -72,7 +72,7 @@ TestGameVcrClassicBattle::testSample()
     TS_ASSERT_EQUALS(t.getObject(0, false)->getCrew(), 2);
     TS_ASSERT_EQUALS(t.getObject(1, false)->getCrew(), 240);
     TS_ASSERT(t.getObject(2, false) == 0);
-    TS_ASSERT_EQUALS(t.getPosition(pos), false);
+    TS_ASSERT_EQUALS(t.getPosition().get(pos), false);
     TS_ASSERT_EQUALS(t.getAlgorithmName(tx), "Host");
 
     TS_ASSERT_EQUALS(t.getSignature(), 0);
@@ -116,7 +116,7 @@ TestGameVcrClassicBattle::testPosition()
 
     // Verify
     game::map::Point pos;
-    TS_ASSERT_EQUALS(t.getPosition(pos), true);
+    TS_ASSERT_EQUALS(t.getPosition().get(pos), true);
     TS_ASSERT_EQUALS(pos.getX(), 500);
     TS_ASSERT_EQUALS(pos.getY(), 600);
 }

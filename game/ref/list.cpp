@@ -29,7 +29,7 @@ namespace {
                 // If that still does not work, compare content.
                 // Compare points and Ids separately.
                 game::map::Point pa, pb;
-                if (a.getPos(pa) && b.getPos(pb)) {
+                if (a.getPosition().get(pa) && b.getPosition().get(pb)) {
                     return pa.compare(pb) < 0;
                 } else {
                     return a.getId() < b.getId();
@@ -82,7 +82,7 @@ game::ref::List::addObjectsAt(const game::map::Universe& univ, game::map::Point 
         game::map::Point shipPos;
         if (sid != excludeShipId
             && pShip != 0
-            && pShip->getPosition(shipPos)
+            && pShip->getPosition().get(shipPos)
             && shipPos == pt
             && (options.contains(IncludeForeignShips) || pShip->isPlayable(game::map::Object::ReadOnly))
             && (!options.contains(SafeShipsOnly) || pShip->isReliablyVisible(0)))

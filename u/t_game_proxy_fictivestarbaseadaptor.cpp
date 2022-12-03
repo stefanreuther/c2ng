@@ -56,7 +56,7 @@ TestGameProxyFictiveStarbaseAdaptor::testZero()
     TS_ASSERT_EQUALS(testee.planet().hasBase(), true);
 
     int owner = 0;
-    TS_ASSERT_EQUALS(testee.planet().getOwner(owner), true);
+    TS_ASSERT_EQUALS(testee.planet().getOwner().get(owner), true);
     TS_ASSERT_EQUALS(owner, 3);
 }
 
@@ -95,7 +95,7 @@ TestGameProxyFictiveStarbaseAdaptor::testMixed()
     TS_ASSERT_EQUALS(testee.planet().getNumBuildings(game::FactoryBuilding).orElse(0), 3); /* as configured */
 
     int owner = 0;
-    TS_ASSERT_EQUALS(testee.planet().getOwner(owner), true);
+    TS_ASSERT_EQUALS(testee.planet().getOwner().get(owner), true);
     TS_ASSERT_EQUALS(owner, 4);
 }
 

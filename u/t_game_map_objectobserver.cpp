@@ -52,10 +52,10 @@ TestGameMapObjectObserver::testNormal()
             { return String_t(); }
         virtual Id_t getId() const
             { return m_id; }
-        virtual bool getOwner(int& /*result*/) const
-            { return false; }
-        virtual bool getPosition(game::map::Point& /*result*/) const
-            { return false; }
+        virtual afl::base::Optional<int> getOwner() const
+            { return afl::base::Nothing; }
+        virtual afl::base::Optional<game::map::Point> getPosition() const
+            { return afl::base::Nothing; }
         void notify()
             { sig_change.raise(m_id); }
      private:

@@ -71,7 +71,7 @@ game::actions::CargoTransferSetup::fromPlanetShip(const game::map::Universe& uni
     const Ship* pShip = univ.ships().get(shipId);
     game::map::Point shipPos;
     int shipOwner;
-    if (pShip == 0 || !pShip->getPosition(shipPos) || !pShip->getOwner(shipOwner)) {
+    if (pShip == 0 || !pShip->getPosition().get(shipPos) || !pShip->getOwner().get(shipOwner)) {
         return CargoTransferSetup();
     }
 
@@ -79,7 +79,7 @@ game::actions::CargoTransferSetup::fromPlanetShip(const game::map::Universe& uni
     const Planet* pPlanet = univ.planets().get(planetId);
     game::map::Point planetPos;
     int planetOwner;
-    if (pPlanet == 0 || !pPlanet->getPosition(planetPos) || !pPlanet->getOwner(planetOwner)) {
+    if (pPlanet == 0 || !pPlanet->getPosition().get(planetPos) || !pPlanet->getOwner().get(planetOwner)) {
         return CargoTransferSetup();
     }
 
@@ -128,7 +128,7 @@ game::actions::CargoTransferSetup::fromShipShip(const game::map::Universe& univ,
     const Ship* pLeft = univ.ships().get(leftId);
     game::map::Point leftPos;
     int leftOwner;
-    if (pLeft == 0 || !pLeft->getPosition(leftPos) || !pLeft->getOwner(leftOwner)) {
+    if (pLeft == 0 || !pLeft->getPosition().get(leftPos) || !pLeft->getOwner().get(leftOwner)) {
         return CargoTransferSetup();
     }
 
@@ -136,7 +136,7 @@ game::actions::CargoTransferSetup::fromShipShip(const game::map::Universe& univ,
     const Ship* pRight = univ.ships().get(rightId);
     game::map::Point rightPos;
     int rightOwner;
-    if (pRight == 0 || !pRight->getPosition(rightPos) || !pRight->getOwner(rightOwner)) {
+    if (pRight == 0 || !pRight->getPosition().get(rightPos) || !pRight->getOwner().get(rightOwner)) {
         return CargoTransferSetup();
     }
 
@@ -175,7 +175,7 @@ game::actions::CargoTransferSetup::fromShipJettison(const game::map::Universe& u
     // Validate ship Id: must exist and be playable
     const Ship* pShip = univ.ships().get(shipId);
     game::map::Point shipPos;
-    if (pShip == 0 || !pShip->getPosition(shipPos) || !pShip->isPlayable(Object::Playable)) {
+    if (pShip == 0 || !pShip->getPosition().get(shipPos) || !pShip->isPlayable(Object::Playable)) {
         return CargoTransferSetup();
     }
 
@@ -201,7 +201,7 @@ game::actions::CargoTransferSetup::fromShipBeamUp(const game::Turn& turn, int sh
     const game::map::Universe& univ = turn.universe();
     const Ship* pShip = univ.ships().get(shipId);
     game::map::Point shipPos;
-    if (pShip == 0 || !pShip->getPosition(shipPos) || !pShip->isPlayable(Object::Playable)) {
+    if (pShip == 0 || !pShip->getPosition().get(shipPos) || !pShip->isPlayable(Object::Playable)) {
         return CargoTransferSetup();
     }
 

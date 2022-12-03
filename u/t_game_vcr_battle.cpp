@@ -34,8 +34,8 @@ TestGameVcrBattle::testIt()
             { return String_t(); }
         virtual bool isESBActive(const game::config::HostConfiguration& /*config*/) const
             { return false; }
-        virtual bool getPosition(game::map::Point&) const
-            { return false; }
+        virtual afl::base::Optional<game::map::Point> getPosition() const
+            { return afl::base::Nothing; }
         virtual afl::base::Optional<int32_t> getAuxiliaryInformation(AuxInfo /*info*/) const
             { return afl::base::Nothing; }
         virtual String_t getResultSummary(int, const game::config::HostConfiguration&, const game::spec::ShipList&, util::NumberFormatter, afl::string::Translator&) const
@@ -77,8 +77,8 @@ TestGameVcrBattle::testDescription()
             { return String_t(); }
         virtual bool isESBActive(const game::config::HostConfiguration& /*config*/) const
             { return false; }
-        virtual bool getPosition(game::map::Point& /*result*/) const
-            { return false; }
+        virtual afl::base::Optional<game::map::Point> getPosition() const
+            { return afl::base::Nothing; }
         virtual afl::base::Optional<int32_t> getAuxiliaryInformation(AuxInfo /*info*/) const
             { return afl::base::Nothing; }
         virtual String_t getResultSummary(int, const game::config::HostConfiguration&, const game::spec::ShipList&, util::NumberFormatter, afl::string::Translator&) const

@@ -85,7 +85,7 @@ namespace {
     int getPlanetOwner(const game::map::Planet& planet)
     {
         int owner = 0;
-        afl::except::checkAssertion(planet.getOwner(owner), "no owner", "<BaseBuildAction>");
+        afl::except::checkAssertion(planet.getOwner().get(owner), "no owner", "<BaseBuildAction>");
         return owner;
     }
 

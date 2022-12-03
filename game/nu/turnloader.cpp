@@ -503,7 +503,7 @@ game::nu::TurnLoader::loadStarbases(game::map::Universe& univ, afl::data::Access
         }
 
         int owner;
-        if (out->getOwner(owner) && players.contains(owner)) {
+        if (out->getOwner().get(owner) && players.contains(owner)) {
             // It is an own base
             out->addBaseSource(players);
             out->setNumBuildings(BaseDefenseBuilding, in("defense").toInteger());

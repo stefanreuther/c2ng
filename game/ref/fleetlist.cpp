@@ -179,7 +179,7 @@ game::ref::FleetList::addAll(const game::map::Universe& univ, afl::base::Optiona
         if (const game::map::Ship* sh = ty.getObjectByIndex(i)) {
             if (i != except) {
                 game::map::Point pt;
-                const bool isHere = refLoc.get() != 0 && sh->getPosition(pt) && pt == *refLoc.get();
+                const bool isHere = refLoc.get() != 0 && sh->getPosition().get(pt) && pt == *refLoc.get();
                 if (isHere || includeAll) {
                     add(Item(UserList::Item(UserList::ReferenceItem,
                                             game::map::Fleet::getTitle(*sh, tx),

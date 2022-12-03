@@ -81,7 +81,7 @@ game::proxy::VcrDatabaseProxy::Trampoline::requestData(size_t index)
         d.resultSummary = b->getResultSummary(me, root.hostConfiguration(), shipList, root.userConfiguration().getNumberFormatter(), tx);
 
         game::map::Point pos;
-        if (b->getPosition(pos)) {
+        if (b->getPosition().get(pos)) {
             d.position = pos.toString();
         }
     }

@@ -33,7 +33,7 @@ game::map::ObjectCursor::browse(Mode mode, bool marked)
          case NextHere:
             if (const Object* obj = getCurrentObject()) {
                 Point pt;
-                if (obj->getPosition(pt)) {
+                if (obj->getPosition().get(pt)) {
                     id = type->findNextObjectAtWrap(pt, id, marked);
                 }
             }
@@ -41,7 +41,7 @@ game::map::ObjectCursor::browse(Mode mode, bool marked)
          case PreviousHere:
             if (const Object* obj = getCurrentObject()) {
                 Point pt;
-                if (obj->getPosition(pt)) {
+                if (obj->getPosition().get(pt)) {
                     id = type->findPreviousObjectAtWrap(pt, id, marked);
                 }
             }

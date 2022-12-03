@@ -90,8 +90,7 @@ namespace {
                 result.subtitle = Format(tx(table[kind]), pRoot->playerList().getPlayerName(shipOwner, game::Player::AdjectiveName, tx));
             }
 
-            int perceivedOwner = 0;
-            s->getOwner(perceivedOwner);
+            const int perceivedOwner = s->getOwner().orElse(0);
 
             if (shipOwner != perceivedOwner) {
                 if (perceivedOwner == viewpoint) {

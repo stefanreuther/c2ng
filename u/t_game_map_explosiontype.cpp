@@ -82,7 +82,7 @@ TestGameMapExplosionType::testAddMessageInformation()
     TS_ASSERT_EQUALS(e->getShipName(), "Boomer");
 
     Point pt;
-    TS_ASSERT_EQUALS(e->getPosition(pt), true);
+    TS_ASSERT_EQUALS(e->getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt, Point(333, 444));
 }
 

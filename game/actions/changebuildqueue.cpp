@@ -215,8 +215,7 @@ game::actions::ChangeBuildQueue::describe(Infos_t& result, afl::string::Translat
         // Input
         const LocalInfo& in = m_info[i];
         const Planet& pl = mustExist(m_universe.planets().get(in.planetId));
-        int player = 0;
-        pl.getOwner(player);
+        const int player = pl.getOwner().orElse(0);
 
         // Make empty slot
         result.push_back(Info());
@@ -372,7 +371,7 @@ game::actions::ChangeBuildQueue::init(util::RandomNumberGenerator& rng, int view
         Planet* p = m_universe.planets().get(i);
         game::map::Point pt;
         int owner;
-        if (p != 0 && p->getOwner(owner) && owner == viewpointPlayer && p->getPosition(pt)) {
+        if (p != 0 && p->getOwner().get(owner) && owner == viewpointPlayer && p->getPosition().get(pt)) {
             // Existing friendly code
             String_t friendlyCode = p->getFriendlyCode().orElse("");
 

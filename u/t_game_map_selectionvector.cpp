@@ -22,10 +22,10 @@ namespace {
             { return String_t(); }
         virtual game::Id_t getId() const
             { return m_id; }
-        virtual bool getOwner(int& /*result*/) const
-            { return false; }
-        virtual bool getPosition(game::map::Point& /*result*/) const
-            { return false; }
+        virtual afl::base::Optional<int> getOwner() const
+            { return afl::base::Nothing; }
+        virtual afl::base::Optional<game::map::Point> getPosition() const
+            { return afl::base::Nothing; }
      private:
         game::Id_t m_id;
     };

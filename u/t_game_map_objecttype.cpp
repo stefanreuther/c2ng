@@ -33,22 +33,20 @@ namespace {
             { return String_t(); }
         virtual game::Id_t getId() const
             { return m_id; }
-        virtual bool getOwner(int& result) const
+        virtual afl::base::Optional<int> getOwner() const
             {
                 if (m_owner >= 0) {
-                    result = m_owner;
-                    return true;
+                    return m_owner;
                 } else {
-                    return false;
+                    return afl::base::Nothing;
                 }
             }
-        virtual bool getPosition(game::map::Point& result) const
+        virtual afl::base::Optional<Point> getPosition() const
             {
                 if (m_pos.getX() > 0) {
-                    result = m_pos;
-                    return true;
+                    return m_pos;
                 } else {
-                    return false;
+                    return afl::base::Nothing;
                 }
             }
      private:

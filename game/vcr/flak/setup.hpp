@@ -6,6 +6,7 @@
 #define C2NG_GAME_VCR_FLAK_SETUP_HPP
 
 #include "afl/base/growablememory.hpp"
+#include "afl/base/optional.hpp"
 #include "afl/charset/charset.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "afl/string/translator.hpp"
@@ -162,9 +163,8 @@ namespace game { namespace vcr { namespace flak {
 
         /** Get position of this battle on the map.
             This information is transmitted with the file header and has no effect on the fight.
-            \param [out] pos Position
-            \return true: position was known, result set; false: result not set */
-        bool getPosition(game::map::Point& pos) const;
+            \return position if known */
+        afl::base::Optional<game::map::Point> getPosition() const;
 
         /** Set position.
             \param pos Position */

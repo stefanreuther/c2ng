@@ -76,7 +76,7 @@ namespace {
         if (obj.isPlanet()) {
             if (game::map::Planet* pPlanet = trn.universe().planets().get(obj.getId())) {
                 // Update position if known
-                pPlanet->getPosition(pos);
+                pPlanet->getPosition().get(pos);
 
                 // Report last-turn ownership
                 MessageInformation info(MessageInformation::Planet, obj.getId(), trn.getTurnNumber()-1);

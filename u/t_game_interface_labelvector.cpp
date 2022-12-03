@@ -28,10 +28,10 @@ namespace {
             { return "obj"; }
         virtual game::Id_t getId() const
             { return m_id; }
-        virtual bool getOwner(int& result) const
-            { result = 0; return true; }
-        virtual bool getPosition(game::map::Point& /*result*/) const
-            { return false; }
+        virtual afl::base::Optional<int> getOwner() const
+            { return 0; }
+        virtual afl::base::Optional<game::map::Point> getPosition() const
+            { return afl::base::Nothing; }
      private:
         const int m_id;
     };

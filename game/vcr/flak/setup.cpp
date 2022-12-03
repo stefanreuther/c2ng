@@ -228,14 +228,13 @@ game::vcr::flak::Setup::setSeed(uint32_t seed)
     m_seed = seed;
 }
 
-bool
-game::vcr::flak::Setup::getPosition(game::map::Point& pos) const
+afl::base::Optional<game::map::Point>
+game::vcr::flak::Setup::getPosition() const
 {
     if (m_position != game::map::Point()) {
-        pos = m_position;
-        return true;
+        return m_position;
     } else {
-        return false;
+        return afl::base::Nothing;
     }
 }
 

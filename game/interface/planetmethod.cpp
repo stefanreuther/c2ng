@@ -289,8 +289,7 @@ namespace {
         game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
 
         // Fetch planet owner. This will not fail (and if it does, getIndexFromHull will refuse it).
-        int planetOwner = 0;
-        pl.getOwner(planetOwner);
+        const int planetOwner = pl.getOwner().orElse(0);
 
         int32_t type;
         if (!interpreter::checkIntegerArg(type, args.getNext(), 1, shipList.hulls().size())) {

@@ -20,10 +20,10 @@ namespace {
      public:
         virtual Id_t getId() const
             { return 0; }
-        virtual bool getOwner(int&) const
-            { return false; }
-        virtual bool getPosition(game::map::Point&) const
-            { return false; }
+        virtual afl::base::Optional<int> getOwner() const
+            { return 0; }
+        virtual afl::base::Optional<game::map::Point> getPosition() const
+            { return afl::base::Nothing; }
         virtual String_t getName(game::ObjectName, afl::string::Translator&, game::InterpreterInterface&) const
             { return String_t(); }
     };
@@ -36,10 +36,10 @@ namespace {
             { }
         virtual Id_t getId() const
             { return 0; }
-        virtual bool getOwner(int&) const
-            { return false; }
-        virtual bool getPosition(game::map::Point& pos) const
-            { pos = m_pos; return true; }
+        virtual afl::base::Optional<int> getOwner() const
+            { return 0; }
+        virtual afl::base::Optional<game::map::Point> getPosition() const
+            { return m_pos; }
         virtual String_t getName(game::ObjectName, afl::string::Translator&, game::InterpreterInterface&) const
             { return String_t(); }
      private:

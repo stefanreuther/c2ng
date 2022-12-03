@@ -985,7 +985,7 @@ game::map::ShipPredictor::computeTurn()
             if (const Planet* p = m_universe.planets().get(gpid)) {
                 // Okay, there is a planet. Move the ship.
                 Point ppos;
-                if (p->getPosition(ppos)) {
+                if (p->getPosition().get(ppos)) {
                     m_ship.x = ppos.getX();
                     m_ship.y = ppos.getY();
 

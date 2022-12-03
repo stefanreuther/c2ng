@@ -14,8 +14,7 @@ namespace {
                       const game::spec::ShipList& shipList,
                       const game::map::Planet& pl)
     {
-        int owner = 0;
-        pl.getOwner(owner);
+        const int owner = pl.getOwner().orElse(0);
         for (int i = 1, n = shipList.hullAssignments().getMaxIndex(config, owner); i <= n; ++i) {
             if (int hullId = shipList.hullAssignments().getHullFromIndex(config, owner, i)) {
                 return hullId;
@@ -85,8 +84,7 @@ game::actions::BuildShip::BuildShip(game::map::Planet& planet,
 
     // Fetch build order from planet.
     // The planet will have a ship INDEX, not TYPE.
-    int owner = 0;
-    planet.getOwner(owner);
+    const int owner = planet.getOwner().orElse(0);
     m_order = planet.getBaseBuildOrder();
     m_order.setHullIndex(shipList.hullAssignments().getHullFromIndex(root.hostConfiguration(), owner, m_order.getHullIndex()));
 
@@ -142,8 +140,7 @@ game::ShipQuery
 game::actions::BuildShip::getQuery() const
 {
     // ex WShipBuildDialog::handleEvent (part)
-    int owner = 0;
-    planet().getOwner(owner);
+    const int owner = planet().getOwner().orElse(0);
 
     ShipQuery q;
     q.setHullType(m_order.getHullIndex());
@@ -259,8 +256,7 @@ game::actions::BuildShip::perform(BaseBuildExecutor& exec)
     // ex GStarbaseBuildShipAction::perform
     // @change This performs the tech upgrades before the actual parts.
     // Tech upgrades therefore appear before the parts in Detailed Bill (like PCC2, unlike PCC1).
-    int owner;
-    planet().getOwner(owner);
+    const int owner = planet().getOwner().orElse(0);
 
     // First, attempt to build one hull
     const int hullNr = m_order.getHullIndex();
@@ -401,7 +397,7 @@ bool
 game::actions::BuildShip::getNewOrder(ShipBuildOrder& o) const
 {
     int owner;
-    if (!planet().getOwner(owner)) {
+    if (!planet().getOwner().get(owner)) {
         return false;
     }
 

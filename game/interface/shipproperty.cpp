@@ -505,7 +505,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
      case ispLocX:
         /* @q Loc.X:Int (Ship Property)
            X location of ship. */
-        if (sh.getPosition(pt)) {
+        if (sh.getPosition().get(pt)) {
             return makeIntegerValue(pt.getX());
         } else {
             return 0;
@@ -513,7 +513,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
      case ispLocY:
         /* @q Loc.Y:Int (Ship Property)
            Y location of ship. */
-        if (sh.getPosition(pt)) {
+        if (sh.getPosition().get(pt)) {
             return makeIntegerValue(pt.getY());
         } else {
             return 0;
@@ -523,7 +523,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            Location of ship, as a human-readable string.
            If the ship is at a planet, returns that planet's name and Id.
            In deep space, returns an (X,Y) pair. */
-        if (sh.isVisible() && sh.getPosition(pt)) {
+        if (sh.isVisible() && sh.getPosition().get(pt)) {
             return makeStringValue(turn->universe().findLocationName(pt, 0, game->mapConfiguration(), root->hostConfiguration(), root->hostVersion(), session.translator()));
         } else {
             return 0;
@@ -639,7 +639,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
      case ispOrbitId:
         /* @q Orbit$:Int (Ship Property)
            Id of planet this ship is orbiting. 0 if none. */
-        if (sh.getPosition(pt)) {
+        if (sh.getPosition().get(pt)) {
             return makeIntegerValue(turn->universe().findPlanetAt(pt));
         } else {
             return 0;
@@ -647,7 +647,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
      case ispOrbitName:
         /* @q Orbit:Str (Ship Property)
            Name of planet this ship is orbiting. EMPTY if none. */
-        if (sh.getPosition(pt)) {
+        if (sh.getPosition().get(pt)) {
             if (const Id_t pid = turn->universe().findPlanetAt(pt)) {
                 if (const game::map::Planet* p = turn->universe().planets().get(pid)) {
                     return makeStringValue(p->getName(session.translator()));

@@ -43,7 +43,7 @@ TestGameDbPacker::testUfo()
     TS_ASSERT_EQUALS(p->getInfo2(), "mostly stable (<30%)");
 
     game::map::Point pt;
-    TS_ASSERT_EQUALS(p->getPosition(pt), true);
+    TS_ASSERT_EQUALS(p->getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt.getX(), 1176);
     TS_ASSERT_EQUALS(pt.getY(), 1369);
     TS_ASSERT_EQUALS(p->getSpeed().orElse(-1), 0);
@@ -52,7 +52,7 @@ TestGameDbPacker::testUfo()
     TS_ASSERT_EQUALS(p->getShipRange().orElse(-1), 295);
 
     int n;
-    TS_ASSERT_EQUALS(p->getRadius(n), true);
+    TS_ASSERT_EQUALS(p->getRadius().get(n), true);
     TS_ASSERT_EQUALS(n, 6);
     TS_ASSERT_EQUALS(p->getTypeCode().orElse(-1), 1);
     TS_ASSERT_EQUALS(p->getRealId(), 2);
@@ -100,7 +100,7 @@ TestGameDbPacker::testPlanet()
     TS_ASSERT_EQUALS(p->getId(), 4);
 
     int owner;
-    TS_ASSERT_EQUALS(p->getOwner(owner), true);
+    TS_ASSERT_EQUALS(p->getOwner().get(owner), true);
     TS_ASSERT_EQUALS(owner, 8);
 
     TS_ASSERT_EQUALS(p->getFriendlyCode().isValid(), false);
@@ -148,7 +148,7 @@ TestGameDbPacker::testFullPlanet()
     TS_ASSERT_EQUALS(p->getId(), 6);
 
     int owner;
-    TS_ASSERT_EQUALS(p->getOwner(owner), true);
+    TS_ASSERT_EQUALS(p->getOwner().get(owner), true);
     TS_ASSERT_EQUALS(owner, 5);
 
     TS_ASSERT_EQUALS(p->getFriendlyCode().orElse(""), "9q)");
@@ -251,7 +251,7 @@ TestGameDbPacker::testShip()
 
     // Proceed with verification
     int owner;
-    TS_ASSERT_EQUALS(p->getOwner(owner), true);
+    TS_ASSERT_EQUALS(p->getOwner().get(owner), true);
     TS_ASSERT_EQUALS(owner, 5);
 
     TS_ASSERT_EQUALS(p->getFriendlyCode().isValid(), false);
@@ -334,7 +334,7 @@ TestGameDbPacker::testFullShip()
 
     // Proceed with verification
     int owner;
-    TS_ASSERT_EQUALS(p->getOwner(owner), true);
+    TS_ASSERT_EQUALS(p->getOwner().get(owner), true);
     TS_ASSERT_EQUALS(owner, 7);
 
     TS_ASSERT_EQUALS(p->getFriendlyCode().orElse(""), "113");

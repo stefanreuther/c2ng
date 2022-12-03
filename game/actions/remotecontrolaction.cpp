@@ -53,7 +53,7 @@ game::actions::RemoteControlAction::getOldState() const
     // ex getOldRemoteControlState, phost.pas::GetRCFlag
     const game::map::Ship*const pShip = m_turn.universe().ships().get(m_shipId);
     int shipOwner;
-    if (pShip == 0 || !pShip->getOwner(shipOwner)) {
+    if (pShip == 0 || !pShip->getOwner().get(shipOwner)) {
         // Ship not known: report normal state
         return Other;
     } else {

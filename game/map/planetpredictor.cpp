@@ -73,7 +73,7 @@ namespace {
         int planetOwner = 0;
         int max;
         int have;
-        if (pl.getOwner(planetOwner)
+        if (pl.getOwner().get(planetOwner)
             && getMaxBuildings(pl, kind, config).get(max)
             && pl.getNumBuildings(kind).get(have))
         {
@@ -92,7 +92,7 @@ namespace {
     {
         // ex planacc.pas:ComputePlanetTurn.Assimilate
         int planetOwner = 0;
-        if (pl.getOwner(planetOwner) && config.getPlayerRaceNumber(planetOwner) == 6) {
+        if (pl.getOwner().get(planetOwner) && config.getPlayerRaceNumber(planetOwner) == 6) {
             int nativeRace;
             if (pl.getNativeRace().get(nativeRace) && nativeRace != 0 && nativeRace != game::AmorphousNatives) {
                 int32_t assim = pl.getCargo(Element::Colonists).orElse(0) * config[config.BorgAssimilationRate](planetOwner) / 100;
@@ -149,8 +149,7 @@ game::map::PlanetPredictor::computeTurn(const PlanetEffectors& eff,
        - PHost: assimilate */
 
     // Planet owner. If not known, treat as 0.
-    int planetOwner = 0;
-    m_planet.getOwner(planetOwner);
+    int planetOwner = m_planet.getOwner().orElse(0);
 
     // Hiss
     if (config[config.AllowHiss]()) {

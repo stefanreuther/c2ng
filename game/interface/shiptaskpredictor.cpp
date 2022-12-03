@@ -196,7 +196,7 @@ game::interface::ShipTaskPredictor::predictInstruction(const String_t& name, int
         if (msn != 0 && msn->hasFlag(game::spec::Mission::WaypointMission)) {
             const game::map::Ship* sh = m_universe.ships().get(i);
             game::map::Point shipPos;
-            if (sh != 0 && sh->getPosition(shipPos)) {
+            if (sh != 0 && sh->getPosition().get(shipPos)) {
                 // FIXME: handle THost where intercept does not cross the seam?
                 m_predictor.setWaypoint(m_mapConfig.getSimpleNearestAlias(shipPos, m_predictor.getPosition()));
             }

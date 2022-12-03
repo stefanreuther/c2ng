@@ -231,10 +231,10 @@ game::vcr::flak::Battle::isESBActive(const game::config::HostConfiguration& conf
     return config[game::config::HostConfiguration::AllowEngineShieldBonus]();
 }
 
-bool
-game::vcr::flak::Battle::getPosition(game::map::Point& result) const
+afl::base::Optional<game::map::Point>
+game::vcr::flak::Battle::getPosition() const
 {
-    return m_setup->getPosition(result);
+    return m_setup->getPosition();
 }
 
 afl::base::Optional<int32_t>

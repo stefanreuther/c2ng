@@ -159,7 +159,7 @@ game::interface::BaseTaskPredictor::postBuildOrder(ShipBuildOrder order)
     if (order.getHullIndex() > 0) {
         // Can we actually build this?
         int planetOwner = 0;
-        m_planet.getOwner(planetOwner);
+        m_planet.getOwner().get(planetOwner);
 
         int slot = m_shipList.hullAssignments().getIndexFromHull(m_config, planetOwner, order.getHullIndex());
         if (slot > 0) {

@@ -153,9 +153,7 @@ game::proxy::BaseStorageProxy::Trampoline::packComponent(TechLevel area, const g
 inline int
 game::proxy::BaseStorageProxy::Trampoline::getPlanetOwner(const Planet& planet)
 {
-    int playerNr = 0;
-    planet.getOwner(playerNr);
-    return playerNr;
+    return planet.getOwner().orElse(0);
 }
 
 inline int

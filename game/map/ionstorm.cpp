@@ -21,7 +21,7 @@ namespace {
         // ex drawPrediction, chartdlg.pas::DrawStormPrediction
         int radius, voltage, heading;
         Point center;
-        if (!ion.getRadius(radius) || !ion.getVoltage().get(voltage) || !ion.getHeading().get(heading) || !ion.getPosition(center)) {
+        if (!ion.getRadius().get(radius) || !ion.getVoltage().get(voltage) || !ion.getHeading().get(heading) || !ion.getPosition().get(center)) {
             return;
         }
 
@@ -86,45 +86,42 @@ game::map::IonStorm::getId() const
     return m_id;
 }
 
-bool
-game::map::IonStorm::getOwner(int& result) const
+afl::base::Optional<int>
+game::map::IonStorm::getOwner() const
 {
     // GIonStorm::getOwner
-    result = 0;
-    return true;
+    return 0;
 }
 
-bool
-game::map::IonStorm::getPosition(Point& result) const
+afl::base::Optional<game::map::Point>
+game::map::IonStorm::getPosition() const
 {
     // ex GIonStorm::getPos
     int x, y;
     if (m_x.get(x) && m_y.get(y)) {
-        result = Point(x, y);
-        return true;
+        return Point(x, y);
     } else {
-        return false;
+        return afl::base::Nothing;
     }
 }
 
 // CircularObject:
-bool
-game::map::IonStorm::getRadius(int& result) const
+afl::base::Optional<int>
+game::map::IonStorm::getRadius() const
 {
     // ex GIonStorm::getRadius
-    return m_radius.get(result);
+    return m_radius;
 }
 
-bool
-game::map::IonStorm::getRadiusSquared(int32_t& result) const
+afl::base::Optional<int32_t>
+game::map::IonStorm::getRadiusSquared() const
 {
     // ex GIonStorm::getRadiusSquared
     int r;
-    if (getRadius(r)) {
-        result = util::squareInteger(r);
-        return true;
+    if (getRadius().get(r)) {
+        return util::squareInteger(r);
     } else {
-        return false;
+        return afl::base::Nothing;
     }
 }
 
@@ -283,7 +280,7 @@ game::map::IonStorm::getForecast(Forecast_t& result) const
     // Add current position as very certain
     Point center;
     int radius;
-    if (getPosition(center) && getRadius(radius)) {
+    if (getPosition().get(center) && getRadius().get(radius)) {
         result.push_back(IonStorm::Forecast(center, radius, 0));
     }
 }

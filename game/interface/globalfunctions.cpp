@@ -428,13 +428,13 @@ game::interface::IFObjectIsAt(game::Session& session, interpreter::Arguments& ar
     // Different handling depending on object type
     game::map::Point thisPoint(x, y);
     game::map::Point objPos;
-    if (!mapObj->getPosition(objPos)) {
+    if (!mapObj->getPosition().get(objPos)) {
         return 0;
     }
     if (const game::map::CircularObject* circObj = dynamic_cast<const game::map::CircularObject*>(mapObj)) {
         // Circular
         int32_t r2;
-        if (!circObj->getRadiusSquared(r2)) {
+        if (!circObj->getRadiusSquared().get(r2)) {
             return 0;
         }
         return makeBooleanValue(config.getSquaredDistance(thisPoint, objPos) <= r2);

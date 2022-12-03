@@ -56,7 +56,7 @@ class game::proxy::MapLocationProxy::Trampoline {
             Configuration config;
             if (Game* pGame = m_session.getGame().get()) {
                 game::map::Location& loc = pGame->cursors().location();
-                loc.getPosition(pt);
+                loc.getPosition().get(pt);
                 ref = loc.getReference();
                 config = pGame->mapConfiguration();
             }
@@ -71,8 +71,7 @@ class game::proxy::MapLocationProxy::Trampoline {
                 pGame->cursors().location().set(t);
                 m_inhibitPositionChange = false;
 
-                game::map::Point pt;
-                pGame->cursors().location().getPosition(pt);
+                const Point pt = pGame->cursors().location().getPosition().orElse(Point());
                 sendPositionChange(pt);
             }
         }
@@ -84,8 +83,7 @@ class game::proxy::MapLocationProxy::Trampoline {
                 pGame->cursors().location().browse(flags);
                 m_inhibitPositionChange = false;
 
-                game::map::Point pt;
-                pGame->cursors().location().getPosition(pt);
+                const Point pt = pGame->cursors().location().getPosition().orElse(Point());
                 sendPositionChange(pt);
                 m_reply.postRequest(&MapLocationProxy::emitBrowseResult, pGame->cursors().location().getEffectiveReference(), pt);
             }

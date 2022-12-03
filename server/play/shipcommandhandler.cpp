@@ -23,7 +23,7 @@ namespace {
                    const game::map::Universe& univ)
     {
         game::map::Point pt;
-        if (ship.getPosition(pt)) {
+        if (ship.getPosition().get(pt)) {
             if (game::Id_t id = univ.findPlanetAt(pt)) {
                 objs.addNew(new server::play::PlanetPacker(session, id));
             }

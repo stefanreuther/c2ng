@@ -37,7 +37,7 @@ namespace game { namespace vcr { namespace flak {
                                    int resultLevel);
         virtual String_t getAlgorithmName(afl::string::Translator& tx) const;
         virtual bool isESBActive(const game::config::HostConfiguration& config) const;
-        virtual bool getPosition(game::map::Point& result) const;
+        virtual afl::base::Optional<game::map::Point> getPosition() const;
         virtual afl::base::Optional<int32_t> getAuxiliaryInformation(AuxInfo info) const;
         virtual String_t getResultSummary(int viewpointPlayer,
                                           const game::config::HostConfiguration& config, const game::spec::ShipList& shipList,

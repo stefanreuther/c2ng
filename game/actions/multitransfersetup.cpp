@@ -88,7 +88,7 @@ game::actions::MultiTransferSetup::getSupportedElementTypes(const game::map::Uni
     if (const Ship* sh = univ.ships().get(m_shipId)) {
         game::map::Point shipPos;
         int shipOwner;
-        if (sh->isPlayable(Object::Playable) && sh->getPosition(shipPos) && sh->getOwner(shipOwner)) {
+        if (sh->isPlayable(Object::Playable) && sh->getPosition().get(shipPos) && sh->getOwner().get(shipOwner)) {
             ShipStorage storage(*const_cast<Ship*>(sh), shipList);
             for (Element::Type ty = Element::begin(), last = Element::end(shipList); ty != last; ++ty) {
                 if (storage.canHaveElement(ty)) {
@@ -118,7 +118,7 @@ game::actions::MultiTransferSetup::build(CargoTransfer& action, game::map::Unive
     if (Ship* sh = univ.ships().get(m_shipId)) {
         game::map::Point shipPos;
         int shipOwner;
-        if (sh->isPlayable(Object::Playable) && sh->getPosition(shipPos) && sh->getOwner(shipOwner)) {
+        if (sh->isPlayable(Object::Playable) && sh->getPosition().get(shipPos) && sh->getOwner().get(shipOwner)) {
             // Collect all ships in a list
             afl::base::Deleter del;
             game::ref::List list;
@@ -130,7 +130,7 @@ game::actions::MultiTransferSetup::build(CargoTransfer& action, game::map::Unive
                 if (Ship* s2 = dynamic_cast<Ship*>(univ.getObject(list[i]))) {
                     game::map::Point s2Pos;
                     int s2Owner;
-                    if (s2->isPlayable(Object::Playable) && s2->getPosition(s2Pos) && s2->getOwner(s2Owner)
+                    if (s2->isPlayable(Object::Playable) && s2->getPosition().get(s2Pos) && s2->getOwner().get(s2Owner)
                         && s2Pos == shipPos && s2Owner == shipOwner
                         && (!m_fleet || s2->getFleetNumber() == sh->getFleetNumber()))
                     {
@@ -147,7 +147,7 @@ game::actions::MultiTransferSetup::build(CargoTransfer& action, game::map::Unive
             if (Id_t planetId = univ.findPlanetAt(shipPos)) {
                 if (Planet* pl = univ.planets().get(planetId)) {
                     int planetOwner;
-                    if (pl->isPlayable(Object::Playable) && pl->getOwner(planetOwner) && planetOwner == shipOwner) {
+                    if (pl->isPlayable(Object::Playable) && pl->getOwner().get(planetOwner) && planetOwner == shipOwner) {
                         // We play this planet, so use it.
                         if (tryAdd(action, m_element, new PlanetStorage(*pl, root.hostConfiguration()))) {
                             result.extensionIndex = action.getNumContainers() - 1;

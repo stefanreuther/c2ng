@@ -47,7 +47,7 @@ game::map::BoundingBox::addUniverse(const Universe& univ, const Configuration& m
         const Ufo* ufo = ufos.getObjectByIndex(i);
         Point pt;
         int radius;
-        if (ufo != 0 && ufo->getPosition(pt) && ufo->getRadius(radius)) {
+        if (ufo != 0 && ufo->getPosition().get(pt) && ufo->getRadius().get(radius)) {
             // Valid Ufo: add it
             addCircle(pt, radius);
 
@@ -55,7 +55,7 @@ game::map::BoundingBox::addUniverse(const Universe& univ, const Configuration& m
             const Ufo* otherEnd = ufo->getOtherEnd();
             Point otherPos;
             int otherRadius;
-            if (otherEnd != 0 && otherEnd->getPosition(otherPos) && otherEnd->getRadius(otherRadius)) {
+            if (otherEnd != 0 && otherEnd->getPosition().get(otherPos) && otherEnd->getRadius().get(otherRadius)) {
                 addCircle(mapConfig.getSimpleNearestAlias(otherPos, pt), otherRadius);
             }
         }
@@ -134,10 +134,10 @@ game::map::BoundingBox::addType(const ObjectType& ty)
     for (Id_t i = ty.findNextIndex(0); i != 0; i = ty.findNextIndex(i)) {
         if (const Object* obj = const_cast<ObjectType&>(ty).getObjectByIndex(i)) {
             Point pos;
-            if (obj->getPosition(pos)) {
+            if (obj->getPosition().get(pos)) {
                 if (const CircularObject* circ = dynamic_cast<const CircularObject*>(obj)) {
                     int r;
-                    if (circ->getRadius(r)) {
+                    if (circ->getRadius().get(r)) {
                         addCircle(pos, r);
                     }
                 } else {

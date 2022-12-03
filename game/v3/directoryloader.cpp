@@ -798,8 +798,7 @@ game::v3::DirectoryLoader::saveBases(afl::io::Stream& file, const game::map::Uni
                 pPlanet->getCurrentBaseData(baseData);
 
                 // Owner
-                int baseOwner = player;
-                pPlanet->getOwner(baseOwner);
+                const int baseOwner = pPlanet->getOwner().orElse(player);
 
                 // Serialize it
                 gt::Base rawBase;

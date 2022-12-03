@@ -106,8 +106,8 @@ game::map::ChunnelMission::check(const Ship& sh, const Universe& univ,
 
                 // Distance check
                 Point shipPosition, matePosition;
-                if (!sh.getPosition(shipPosition)
-                    || !mate->getPosition(matePosition)
+                if (!sh.getPosition().get(shipPosition)
+                    || !mate->getPosition().get(matePosition)
                     || !root.hostVersion().isValidChunnelDistance2(mapConfig.getSquaredDistance(shipPosition, matePosition), config))
                 {
                     m_failure |= chf_Distance;
@@ -199,11 +199,11 @@ game::map::isValidChunnelMate(const Ship& initiator,
     Point initPos, matePos;
 
     return initiator.getId() != mate.getId()
-        && initiator.getOwner(initOwner)
-        && initiator.getPosition(initPos)
+        && initiator.getOwner().get(initOwner)
+        && initiator.getPosition().get(initPos)
         && getInitiatorCapabilities(initiator, shipScores, shipList, root) != 0
-        && mate.getOwner(mateOwner)
-        && mate.getPosition(matePos)
+        && mate.getOwner().get(mateOwner)
+        && mate.getPosition().get(matePos)
         && mate.isPlayable(game::map::Object::ReadOnly)
         && mateOwner == initOwner
         && mate.getFleetNumber() == 0
@@ -220,8 +220,7 @@ game::map::setupChunnel(Ship& initiator, Ship& mate, Universe& univ,
 {
     // Clear speed and waypoint, set FC
     {
-        game::map::Point pt;
-        initiator.getPosition(pt);
+        const Point pt = initiator.getPosition().orElse(Point());
 
         FleetMember initFM(univ, initiator, mapConfig);
         initFM.setWaypoint(pt, config, shipList);
@@ -232,8 +231,7 @@ game::map::setupChunnel(Ship& initiator, Ship& mate, Universe& univ,
     // Mate
     if (mate.isPlayable(game::map::Object::Playable)) {
         // For simplicity, use the fleet calls (although mates never are fleet members)
-        game::map::Point pt;
-        mate.getPosition(pt);
+        Point pt = mate.getPosition().orElse(Point());
 
         FleetMember mateFM(univ, mate, mapConfig);
         mateFM.setWaypoint(pt, config, shipList);

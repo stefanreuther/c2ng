@@ -346,7 +346,7 @@ game::map::UfoType::mergeWormhole(Ufo& ufo, int wormholeId, const Wormhole& data
     } else {
         // Just updating an old Ufo
         Point oldPosition;
-        if (ufo.getPosition(oldPosition) && oldPosition != data.pos) {
+        if (ufo.getPosition().get(oldPosition) && oldPosition != data.pos) {
             log.write(afl::sys::LogListener::Warn, LOG_NAME,
                       Format(tx("Ufo #%d and wormhole #%d do not match."), ufo.getId(), wormholeId));
         }

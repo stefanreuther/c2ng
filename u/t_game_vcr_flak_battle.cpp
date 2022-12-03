@@ -248,7 +248,7 @@ TestGameVcrFlakBattle::testIt()
 
     // - getPosition
     game::map::Point pt;
-    TS_ASSERT_EQUALS(testee.getPosition(pt), true);
+    TS_ASSERT_EQUALS(testee.getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt.getX(), 2595);
     TS_ASSERT_EQUALS(pt.getY(), 2526);
 

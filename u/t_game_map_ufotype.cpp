@@ -219,7 +219,7 @@ namespace {
         TSM_ASSERT(name, p->isSeenThisTurn());
 
         Point pt;
-        TSM_ASSERT_EQUALS(name, p->getPosition(pt), true);
+        TSM_ASSERT_EQUALS(name, p->getPosition().get(pt), true);
         TSM_ASSERT_EQUALS(name, pt.getX(), scan_x);
         TSM_ASSERT_EQUALS(name, p->getMovementVector().getX(), expected_result);
     }
@@ -252,9 +252,9 @@ TestGameMapUfoType::testLoadUfo()
     TS_ASSERT_EQUALS(pu->getInfo1(), "15895 KT/Bidir.");
     TS_ASSERT_EQUALS(pu->getInfo2(), "mostly stable");
     TS_ASSERT_EQUALS(pu->getPlanetRange().orElse(-1), 251);
-    TS_ASSERT_EQUALS(pu->getPosition(pt), true);
+    TS_ASSERT_EQUALS(pu->getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt, Point(2827, 1248));
-    TS_ASSERT_EQUALS(pu->getRadius(r), true);
+    TS_ASSERT_EQUALS(pu->getRadius().get(r), true);
     TS_ASSERT_EQUALS(r, 6);
     TS_ASSERT(pu->getOtherEnd() == 0);  // not known for host ufos
 
@@ -300,9 +300,9 @@ TestGameMapUfoType::testLoadWormhole()
     TS_ASSERT_EQUALS(pu->getInfo1(), "15895 kt/Bidir.");
     TS_ASSERT_EQUALS(pu->getInfo2(), "mostly stable (<30%)");
     TS_ASSERT_EQUALS(pu->getPlanetRange().orElse(-1), 251);
-    TS_ASSERT_EQUALS(pu->getPosition(pt), true);
+    TS_ASSERT_EQUALS(pu->getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt, Point(2827, 1248));
-    TS_ASSERT_EQUALS(pu->getRadius(r), true);
+    TS_ASSERT_EQUALS(pu->getRadius().get(r), true);
     TS_ASSERT_EQUALS(r, 6);
     TS_ASSERT(pu->getOtherEnd() != 0);
     TS_ASSERT_EQUALS(pu->getOtherEnd()->getId(), 54);
@@ -351,9 +351,9 @@ TestGameMapUfoType::testLoadBoth()
     TS_ASSERT_EQUALS(pu->getInfo1(), "15895 KT/Bidir.");       // from Host Ufo
     TS_ASSERT_EQUALS(pu->getInfo2(), "mostly stable (<30%)");  // generated internally
     TS_ASSERT_EQUALS(pu->getPlanetRange().orElse(-1), 251);
-    TS_ASSERT_EQUALS(pu->getPosition(pt), true);
+    TS_ASSERT_EQUALS(pu->getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt, Point(2827, 1248));
-    TS_ASSERT_EQUALS(pu->getRadius(r), true);
+    TS_ASSERT_EQUALS(pu->getRadius().get(r), true);
     TS_ASSERT_EQUALS(r, 6);
     TS_ASSERT(pu->getOtherEnd() != 0);
     TS_ASSERT_EQUALS(pu->getOtherEnd()->getId(), 54);

@@ -139,8 +139,7 @@ server::play::PlanetPacker::buildValue() const
 
         // Hulls
         // FIXME: can we implement this without knowing the owner?
-        int owner = 0;
-        pPlanet->getOwner(owner);
+        const int owner = pPlanet->getOwner().orElse(0);
         const int numHullSlots = sl.hullAssignments().getMaxIndex(r.hostConfiguration(), owner);
         {
             afl::base::Ref<afl::data::Vector> hulls(afl::data::Vector::create());

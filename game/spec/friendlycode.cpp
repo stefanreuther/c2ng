@@ -138,7 +138,7 @@ game::spec::FriendlyCode::worksOn(const game::map::Planet& p, const game::config
         return false;
     }
     int owner = 0;
-    if (!p.getOwner(owner)) {
+    if (!p.getOwner().get(owner)) {
         return false;
     }
     if (!m_races.contains(config.getPlayerRaceNumber(owner))) {

@@ -485,11 +485,11 @@ TestGameProxyMailboxProxy::testData()
     TS_ASSERT(mf != 0);
 
     game::map::Point pt;
-    TS_ASSERT(mf->getPosition(pt));
+    TS_ASSERT(mf->getPosition().get(pt));
     TS_ASSERT_EQUALS(pt.getX(), 2635);
     TS_ASSERT_EQUALS(pt.getY(), 1818);
     int r = 0;
-    TS_ASSERT(mf->getRadius(r));
+    TS_ASSERT(mf->getRadius().get(r));
     TS_ASSERT_EQUALS(r, 104);
 }
 

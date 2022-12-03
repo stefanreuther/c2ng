@@ -77,12 +77,10 @@ game::proxy::UfoProxy::Trampoline::buildUfoInfo(UfoInfo& out) const
         out.ufoId = p->getId();
 
         // Center
-        if (!p->getPosition(out.center)) {
-            out.center = game::map::Point();
-        }
+        out.center = p->getPosition().orElse(game::map::Point());
 
         // Radius
-        if (p->getRadius(out.radius)) {
+        if (p->getRadius().get(out.radius)) {
             if (out.radius == 0) {
                 out.text[Radius] = tx("(small)");
             } else {

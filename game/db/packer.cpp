@@ -252,11 +252,8 @@ game::db::Packer::packUfo(structures::Ufo& out, const game::map::Ufo& in)
 {
     // ex GUfo::getHistoryData
     // Read position (will not fail).
-    gm::Point pos;
-    in.getPosition(pos);
-
-    int radius = 0;
-    in.getRadius(radius);
+    const gm::Point pos = in.getPosition().orElse(gm::Point());
+    const int radius = in.getRadius().orElse(0);
 
     // Populate structure
     out.id              = static_cast<int16_t>(in.getId());

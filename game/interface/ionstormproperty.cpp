@@ -45,7 +45,7 @@ game::interface::getIonStormProperty(const game::map::IonStorm& ion, IonStormPro
      case iipLocX:
         /* @q Loc.X:Int (Storm Property)
            Ion storm center X coordinate. */
-        if (ion.getPosition(pt)) {
+        if (ion.getPosition().get(pt)) {
             return makeIntegerValue(pt.getX());
         } else {
             return 0;
@@ -53,7 +53,7 @@ game::interface::getIonStormProperty(const game::map::IonStorm& ion, IonStormPro
      case iipLocY:
         /* @q Loc.Y:Int (Storm Property)
            Ion storm center Y coordinate. */
-        if (ion.getPosition(pt)) {
+        if (ion.getPosition().get(pt)) {
             return makeIntegerValue(pt.getY());
         } else {
             return 0;
@@ -69,11 +69,7 @@ game::interface::getIonStormProperty(const game::map::IonStorm& ion, IonStormPro
      case iipRadius:
         /* @q Radius:Int (Storm Property)
            Ion storm radius in ly. */
-        if (ion.getRadius(n)) {
-            return makeIntegerValue(n);
-        } else {
-            return 0;
-        }
+        return makeOptionalIntegerValue(ion.getRadius());
      case iipSpeedInt:
         /* @q Speed$:Int (Storm Property)
            Ion storm speed (warp factor). */

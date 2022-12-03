@@ -114,7 +114,7 @@ BaseArrayProperty::get(Arguments& args)
      case game::interface::ibpEngineStorage:
         return performArrayReference(getBaseEngineStore, m_shipList->engines().size(), arg, false);
      case game::interface::ibpHullStorage:
-        if (m_planet.getOwner(owner)) {
+        if (m_planet.getOwner().get(owner)) {
             return performArrayReference(getBaseHullStoreSlot, m_shipList->hullAssignments().getMaxIndex(m_config, owner), arg, true);
         } else {
             return 0;
@@ -224,7 +224,7 @@ BaseArrayProperty::performArrayReference(Function_t func, int limit, int32_t arg
         return makeIntegerValue(sum);
     } else if (hull) {
         int owner;
-        if (m_planet.getOwner(owner)) {
+        if (m_planet.getOwner().get(owner)) {
             if (int slot = m_shipList->hullAssignments().getIndexFromHull(m_config, owner, arg)) {
                 return makeOptionalIntegerValue(func(m_planet, *m_shipList, slot));
             } else {
@@ -276,7 +276,7 @@ game::interface::getBaseProperty(const game::map::Planet& pl, BaseProperty ibp,
            Maximum number of fighters allowed on starbase. EMPTY if no base.
            @since PCC 1.1.16, PCC2 1.99.8 */
         int owner;
-        if (pl.getOwner(owner)) {
+        if (pl.getOwner().get(owner)) {
             return makeIntegerValue(config[config.MaximumFightersOnBase](owner));
         } else {
             return 0;

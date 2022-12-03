@@ -96,7 +96,7 @@ namespace {
                         // This is needed to pick the correct error message.
                         if (game::map::Ship* pShip = t->universe().ships().get(m_excludeShip)) {
                             game::map::Point excludePos;
-                            excludeValid = (pShip->getPosition(excludePos) && excludePos == m_pos);
+                            excludeValid = (pShip->getPosition().get(excludePos) && excludePos == m_pos);
                         }
 
                         // Remember planet if it's empty

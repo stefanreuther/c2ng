@@ -321,7 +321,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
         /* @q Loc.X:Int (Planet Property)
            Planet X location. */
         game::map::Point pos;
-        if (pl.getPosition(pos)) {
+        if (pl.getPosition().get(pos)) {
             return makeIntegerValue(pos.getX());
         } else {
             return 0;
@@ -331,7 +331,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
         /* @q Loc.Y:Int (Planet Property)
            Planet Y location. */
         game::map::Point pos;
-        if (pl.getPosition(pos)) {
+        if (pl.getPosition().get(pos)) {
             return makeIntegerValue(pos.getY());
         } else {
             return 0;
@@ -526,7 +526,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
         /* @q Orbit.Enemy:Int (Planet Property)
            Number of enemy (=not own) ships in orbit of this planet. */
         game::map::Point pt;
-        if (pl.getPosition(pt)) {
+        if (pl.getPosition().get(pt)) {
             return makeIntegerValue(game->currentTurn().universe().allShips().countObjectsAt(pt, PlayerSet_t::allUpTo(MAX_PLAYERS) - game->getViewpointPlayer()));
         } else {
             return 0;
@@ -536,7 +536,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
         /* @q Orbit.Own:Int (Planet Property)
            Number of own ships in orbit of this planet. */
         game::map::Point pt;
-        if (pl.getPosition(pt)) {
+        if (pl.getPosition().get(pt)) {
             return makeIntegerValue(game->currentTurn().universe().allShips().countObjectsAt(pt, PlayerSet_t(game->getViewpointPlayer())));
         } else {
             return 0;
@@ -546,7 +546,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
         /* @q Orbit:Int (Planet Property)
            Total number of ships in orbit of this planet. */
         game::map::Point pt;
-        if (pl.getPosition(pt)) {
+        if (pl.getPosition().get(pt)) {
             return makeIntegerValue(game->currentTurn().universe().allShips().countObjectsAt(pt, PlayerSet_t::allUpTo(MAX_PLAYERS)));
         } else {
             return 0;

@@ -70,7 +70,7 @@ namespace {
         // ex game/fleet.cc:isValidFleetMember
         int shipOwner;
         return sh.getShipSource().contains(player)
-            && sh.getOwner(shipOwner)
+            && sh.getOwner().get(shipOwner)
             && shipOwner == player
             && sh.getFleetNumber() == 0;
     }
@@ -249,7 +249,7 @@ game::db::FleetLoader::save(afl::io::Directory& dir, const game::map::Universe& 
     for (Id_t i = 1; i <= maxShipId; ++i) {
         if (const game::map::Ship* pShip = univ.ships().get(i)) {
             int shipOwner;
-            if (pShip->getShipSource().contains(playerNumber) && pShip->getOwner(shipOwner) && shipOwner == playerNumber) {
+            if (pShip->getShipSource().contains(playerNumber) && pShip->getOwner().get(shipOwner) && shipOwner == playerNumber) {
                 uint16_t fleetNr = static_cast<uint16_t>(pShip->getFleetNumber());
                 if (fleetNr != 0) {
                     if (pShip->isFleetLeader() && !pShip->getFleetName().empty()) {

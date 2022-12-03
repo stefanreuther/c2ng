@@ -70,7 +70,7 @@ game::actions::BuildStarbase::update()
 {
     int factor = int(m_wantBase) - int(m_planet.isBuildingBase());
     int owner;
-    if (m_planet.getOwner(owner)) {
+    if (m_planet.getOwner().get(owner)) {
         m_costAction.setCost(m_hostConfiguration[game::config::HostConfiguration::StarbaseCost](owner) * factor);
     }
 }

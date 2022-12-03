@@ -72,12 +72,12 @@ namespace game { namespace map {
         // Object:
         virtual String_t getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const;
         virtual Id_t getId() const;
-        virtual bool getOwner(int& result) const;
-        virtual bool getPosition(Point& result) const;
+        virtual afl::base::Optional<int> getOwner() const;
+        virtual afl::base::Optional<Point> getPosition() const;
 
         // CircularObject:
-        virtual bool getRadius(int& result) const;
-        virtual bool getRadiusSquared(int32_t& result) const;
+        virtual afl::base::Optional<int> getRadius() const;
+        virtual afl::base::Optional<int32_t> getRadiusSquared() const;
 
         /** Add minefield report.
             New information is included in this object if it is newer or better than existing information.

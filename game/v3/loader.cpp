@@ -857,8 +857,7 @@ game::v3::Loader::loadTurnfile(Turn& turn, const Root& root, afl::io::Stream& fi
                 if (game::map::Planet* pl = m_turn.universe().planets().get(id)) {
                     game::map::BaseData data;
                     pl->getCurrentBaseData(data);
-                    int owner = 0;
-                    pl->getOwner(owner);
+                    const int owner = pl->getOwner().orElse(0);
                     Packer(charset).packBase(out, id, data, owner);
                 }
             }
@@ -988,8 +987,7 @@ game::v3::Loader::saveTurnFile(TurnFile& thisTurn, const Turn& turn, int player,
             game::map::BaseData newBase;
             pPlanet->getCurrentBaseData(newBase);
 
-            int owner = 0;
-            pPlanet->getOwner(owner);
+            const int owner = pPlanet->getOwner().orElse(0);
 
             // Convert into blobs
             structures::Base rawOldBase, rawNewBase;

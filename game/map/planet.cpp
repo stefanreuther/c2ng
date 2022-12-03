@@ -525,7 +525,7 @@ game::map::Planet::combinedCheck2(const Universe& univ, PlayerSet_t availablePla
         } else {
             // We have taken this planet from the history
             int owner;
-            if (getOwner(owner) && availablePlayers.contains(owner)) {
+            if (getOwner().get(owner) && availablePlayers.contains(owner)) {
                 // planet is played by us, but we do no longer own it
                 m_currentPlanetData.owner = 0;
                 m_currentPlanetData.colonistClans = LongProperty_t();
@@ -533,7 +533,7 @@ game::map::Planet::combinedCheck2(const Universe& univ, PlayerSet_t availablePla
         }
 
         int owner;
-        if (getOwner(owner) && availablePlayers.contains(owner) && m_baseKind != NoBase && m_baseKind != CurrentBase) {
+        if (getOwner().get(owner) && availablePlayers.contains(owner) && m_baseKind != NoBase && m_baseKind != CurrentBase) {
             // We play this planet, and have history information about a base, but that base isn't there.
             // -or- We're building a base here (this will set the status to ExistingBase).
             // Delete the base.
@@ -575,18 +575,18 @@ game::map::Planet::getId() const
     return m_id;
 }
 
-bool
-game::map::Planet::getOwner(int& result) const
+afl::base::Optional<int>
+game::map::Planet::getOwner() const
 {
     // ex GPlanet::getOwner, GPlanet::isOwnerKnown
-    return m_currentPlanetData.owner.get(result);
+    return m_currentPlanetData.owner;
 }
 
-bool
-game::map::Planet::getPosition(Point& result) const
+afl::base::Optional<game::map::Point>
+game::map::Planet::getPosition() const
 {
     // ex GPlanet::getPos
-    return !m_knownToNotExist && m_position.get(result);
+    return m_knownToNotExist ? afl::base::Nothing : m_position;
 }
 
 
@@ -1310,7 +1310,7 @@ game::map::Planet::getBaseBuildHull(const game::config::HostConfiguration& confi
 {
     // ex GPlanet::getBaseBuildHull
     int owner, index;
-    if (getOwner(owner) && getBaseBuildOrderHullIndex().get(index)) {
+    if (getOwner().get(owner) && getBaseBuildOrderHullIndex().get(index)) {
         if (int hull = map.getHullFromIndex(config, owner, index)) {
             return hull;
         } else {

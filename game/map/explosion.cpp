@@ -47,20 +47,18 @@ game::map::Explosion::getId() const
     return m_id;
 }
 
-bool
-game::map::Explosion::getOwner(int& result) const
+afl::base::Optional<int>
+game::map::Explosion::getOwner() const
 {
     // Explosions always report unowned
-    result = 0;
-    return true;
+    return 0;
 }
 
-bool
-game::map::Explosion::getPosition(Point& result) const
+afl::base::Optional<game::map::Point>
+game::map::Explosion::getPosition() const
 {
     // ex GExplosion::getPos
-    result = m_position;
-    return true;
+    return m_position;
 }
 
 String_t

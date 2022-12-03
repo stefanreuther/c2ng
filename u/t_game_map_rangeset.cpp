@@ -101,7 +101,7 @@ TestGameMapRangeSet::testAddObjectType()
 
     // We rely on Explosion returning owner 0, not unknown
     int owner = -1;
-    TS_ASSERT_EQUALS(Explosion(0, Point(1,2)).getOwner(owner), true);
+    TS_ASSERT_EQUALS(Explosion(0, Point(1,2)).getOwner().get(owner), true);
     TS_ASSERT_EQUALS(owner, 0);
 
     // Test goes here:

@@ -81,7 +81,7 @@ namespace game {
 
         /** Construct from position.
             \param pt Position
-            \post getPos(...) == true */
+            \post *getPosition().get() == pt */
         Reference(game::map::Point pt);
 
         /** Check validity.
@@ -97,10 +97,8 @@ namespace game {
         int getId() const;
 
         /** Get position.
-            \param [out] pt Position
-            \retval true This reference was of type MapLocation, position returned
-            \retval false This reference was not a location. */
-        bool getPos(game::map::Point& pt) const;
+            \return Position if reference is of type MapLocation; otherwise, empty. */
+        afl::base::Optional<game::map::Point> getPosition() const;
 
         /** Format to string.
             This is just a simple formatter with no relation to a game.

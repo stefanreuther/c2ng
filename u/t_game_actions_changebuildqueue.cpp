@@ -104,7 +104,7 @@ namespace {
         Planet* p = env.univ.planets().get(planetId);
         TS_ASSERT(p != 0);
         game::map::Point pt;
-        TS_ASSERT(p->getPosition(pt));
+        TS_ASSERT(p->getPosition().get(pt));
 
         Ship* sh = env.univ.ships().create(shipId);
         TS_ASSERT(sh != 0);

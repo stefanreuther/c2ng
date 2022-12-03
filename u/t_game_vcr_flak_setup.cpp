@@ -71,7 +71,7 @@ TestGameVcrFlakSetup::testInit()
     TS_ASSERT_EQUALS(testee.getTotalTime(), 0);
 
     game::map::Point pt;
-    TS_ASSERT_EQUALS(testee.getPosition(pt), false);
+    TS_ASSERT_EQUALS(testee.getPosition().get(pt), false);
 }
 
 /** Test I/O.
@@ -91,7 +91,7 @@ TestGameVcrFlakSetup::testIO()
     // Verify content
     game::map::Point pt;
     TS_ASSERT_EQUALS(testee.getAmbientFlags(), 0);
-    TS_ASSERT_EQUALS(testee.getPosition(pt), true);
+    TS_ASSERT_EQUALS(testee.getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt.getX(), 2595);
     TS_ASSERT_EQUALS(pt.getY(), 2526);
     TS_ASSERT_EQUALS(testee.getTotalTime(), 352);
@@ -125,7 +125,7 @@ TestGameVcrFlakSetup::testCopy()
     // Verify the copy
     game::map::Point pt;
     TS_ASSERT_EQUALS(t2.getAmbientFlags(), 0);
-    TS_ASSERT_EQUALS(t2.getPosition(pt), true);
+    TS_ASSERT_EQUALS(t2.getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt.getX(), 2595);
     TS_ASSERT_EQUALS(pt.getY(), 2526);
     TS_ASSERT_EQUALS(t2.getTotalTime(), 352);

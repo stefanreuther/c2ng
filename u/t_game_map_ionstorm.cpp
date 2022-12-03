@@ -41,11 +41,11 @@ TestGameMapIonStorm::testIt()
     game::map::IonStorm i(3);
     TS_ASSERT_EQUALS(i.getName(game::PlainName, tx, iface), "Ion storm #3");
     TS_ASSERT_EQUALS(i.getId(), 3);
-    TS_ASSERT_EQUALS(i.getOwner(n), true);
+    TS_ASSERT_EQUALS(i.getOwner().get(n), true);
     TS_ASSERT_EQUALS(n, 0);
-    TS_ASSERT_EQUALS(i.getPosition(pt), false);
-    TS_ASSERT_EQUALS(i.getRadius(n), false);
-    TS_ASSERT_EQUALS(i.getRadiusSquared(d), false);
+    TS_ASSERT_EQUALS(i.getPosition().get(pt), false);
+    TS_ASSERT_EQUALS(i.getRadius().get(n), false);
+    TS_ASSERT_EQUALS(i.getRadiusSquared().get(d), false);
     TS_ASSERT_EQUALS(i.getClass().get(n), false);
     TS_ASSERT_EQUALS(i.getVoltage().get(n), false);
     TS_ASSERT_EQUALS(i.getHeading().get(n), false);
@@ -61,14 +61,14 @@ TestGameMapIonStorm::testIt()
     TS_ASSERT_EQUALS(i.getName(game::LongName, tx, iface), "Ion storm #3: Klothilde");
     TS_ASSERT_EQUALS(i.getName(game::DetailedName, tx, iface), "Ion storm #3: Klothilde");
     TS_ASSERT_EQUALS(i.getId(), 3);
-    TS_ASSERT_EQUALS(i.getOwner(n), true);
+    TS_ASSERT_EQUALS(i.getOwner().get(n), true);
     TS_ASSERT_EQUALS(n, 0);
-    TS_ASSERT_EQUALS(i.getPosition(pt), true);
+    TS_ASSERT_EQUALS(i.getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt.getX(), 2001);
     TS_ASSERT_EQUALS(pt.getY(), 3014);
-    TS_ASSERT_EQUALS(i.getRadius(n), true);
+    TS_ASSERT_EQUALS(i.getRadius().get(n), true);
     TS_ASSERT_EQUALS(n, 40);
-    TS_ASSERT_EQUALS(i.getRadiusSquared(d), true);
+    TS_ASSERT_EQUALS(i.getRadiusSquared().get(d), true);
     TS_ASSERT_EQUALS(d, 1600);
     TS_ASSERT_EQUALS(i.getClass().get(n), true);
     TS_ASSERT_EQUALS(n, 4);
@@ -120,10 +120,10 @@ TestGameMapIonStorm::testMessageInfoMin()
     i.addMessageInformation(info);
 
     TS_ASSERT_EQUALS(i.getName(game::DetailedName, tx, iface), "Ion storm #3: Klothilde");
-    TS_ASSERT_EQUALS(i.getPosition(pt), true);
+    TS_ASSERT_EQUALS(i.getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt.getX(), 900);
     TS_ASSERT_EQUALS(pt.getY(), 1800);
-    TS_ASSERT_EQUALS(i.getRadius(n), true);
+    TS_ASSERT_EQUALS(i.getRadius().get(n), true);
     TS_ASSERT_EQUALS(n, 70);
     TS_ASSERT_EQUALS(i.getClass().orElse(-1), 1);
     TS_ASSERT_EQUALS(i.getVoltage().orElse(-1), 20);
@@ -159,10 +159,10 @@ TestGameMapIonStorm::testMessageInfoMax()
     i.addMessageInformation(info);
 
     TS_ASSERT_EQUALS(i.getName(game::DetailedName, tx, iface), "Ion storm #3: Wilma");
-    TS_ASSERT_EQUALS(i.getPosition(pt), true);
+    TS_ASSERT_EQUALS(i.getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt.getX(), 1111);
     TS_ASSERT_EQUALS(pt.getY(), 2222);
-    TS_ASSERT_EQUALS(i.getRadius(n), true);
+    TS_ASSERT_EQUALS(i.getRadius().get(n), true);
     TS_ASSERT_EQUALS(n, 33);
     TS_ASSERT_EQUALS(i.getClass().orElse(-1), 1);
     TS_ASSERT_EQUALS(i.getVoltage().orElse(-1), 20);
@@ -193,10 +193,10 @@ TestGameMapIonStorm::testMessageInfoMissing()
     i.addMessageInformation(info);
 
     TS_ASSERT_EQUALS(i.getName(game::DetailedName, tx, iface), "Ion storm #3: Klothilde");
-    TS_ASSERT_EQUALS(i.getPosition(pt), true);
+    TS_ASSERT_EQUALS(i.getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt.getX(), 2001);
     TS_ASSERT_EQUALS(pt.getY(), 3014);
-    TS_ASSERT_EQUALS(i.getRadius(n), true);
+    TS_ASSERT_EQUALS(i.getRadius().get(n), true);
     TS_ASSERT_EQUALS(n, 40);
     TS_ASSERT_EQUALS(i.getClass().orElse(-1), 4);
     TS_ASSERT_EQUALS(i.getVoltage().orElse(-1), 180);

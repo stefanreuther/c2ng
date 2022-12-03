@@ -83,7 +83,7 @@ namespace {
         virtual String_t makePlanetLink(const game::map::Planet& pl) const
             {
                 game::map::Point pt;
-                if (pl.isPlayable(game::map::Object::ReadOnly) && pl.getPosition(pt)) {
+                if (pl.isPlayable(game::map::Object::ReadOnly) && pl.getPosition().get(pt)) {
                     return Format("pl:%d,%d,%d,%d", pl.getId(), int(pl.hasBase()), pt.getX(), pt.getY());
                 } else {
                     return String_t();

@@ -31,9 +31,7 @@ game::ref::SortByOwner::getOwner(const Reference& a) const
     if (a.getType() == Reference::Player) {
         result = a.getId();
     } else if (const game::map::Object* obj = m_universe.getObject(a)) {
-        if (!obj->getOwner(result)) {
-            result = 0;
-        }
+        result = obj->getOwner().orElse(0);
     } else {
         result = 0;
     }

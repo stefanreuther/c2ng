@@ -43,7 +43,7 @@ game::ref::SortByLocation::getLocation(const Reference& a, game::map::Point& out
     // FIXME: handle reference-to-position
     const game::map::Object* mo = m_universe.getObject(a);
     if (mo != 0) {
-        return mo->getPosition(out);
+        return mo->getPosition().get(out);
     } else {
         return false;
     }

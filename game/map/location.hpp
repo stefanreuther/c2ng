@@ -53,9 +53,8 @@ namespace game { namespace map {
         void set(Point pt);
 
         /** Get position.
-            \param pt [out] Point
-            \return true if position known and has been set */
-        bool getPosition(Point& pt) const;
+            \return position if known */
+        afl::base::Optional<Point> getPosition() const;
 
         /** Get reference.
             \return reference */
@@ -84,7 +83,7 @@ namespace game { namespace map {
         Reference m_reference;
         bool m_pointValid;
 
-        void notifyListeners(bool lastOK, Point lastPos);
+        void notifyListeners(const afl::base::Optional<Point>& lastPos);
     };
 
 } }

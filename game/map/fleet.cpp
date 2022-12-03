@@ -184,7 +184,7 @@ game::map::Fleet::synchronizeFleetMember(Universe& univ, Id_t sid,
                     sh->setWarpFactor(leader->getWarpFactor());
 
                     Point shipPos, leaderPos;
-                    if (sh->getPosition(shipPos) && leader->getWaypoint().get(leaderPos)) {
+                    if (sh->getPosition().get(shipPos) && leader->getWaypoint().get(leaderPos)) {
                         sh->setWaypoint(mapConfig.getSimpleNearestAlias(leaderPos, shipPos));
                     }
                 }

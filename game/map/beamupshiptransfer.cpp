@@ -132,9 +132,7 @@ game::map::BeamUpShipTransfer::commit()
     cs.set(CargoSpec::Supplies,   m_amount.get(Element::Supplies)   + getChange(Element::Supplies));
     cs.set(CargoSpec::Colonists,  m_amount.get(Element::Colonists)  + getChange(Element::Colonists));
 
-    int shipOwner = 0;
-    m_ship.getOwner(shipOwner);
-
+    const int shipOwner = m_ship.getOwner().orElse(0);
     const int missionNumber = m_config[m_config.ExtMissionsStartAt]() + game::spec::Mission::pmsn_BeamUpMultiple;
 
     if (cs.isZero()) {
@@ -174,8 +172,7 @@ game::map::BeamUpShipTransfer::commit()
 void
 game::map::parseBeamUpCommand(util::Vector<int32_t,Element::Type>& out, Turn& turn, const Ship& ship, int factor)
 {
-    int shipOwner = 0;
-    ship.getOwner(shipOwner);
+    const int shipOwner = ship.getOwner().orElse(0);
     if (const CommandContainer* cc = CommandExtra::get(turn, shipOwner)) {
         if (const Command* cmd = cc->getCommand(Command::BeamUp, ship.getId())) {
             CargoSpec cs(cmd->getArg(), true);

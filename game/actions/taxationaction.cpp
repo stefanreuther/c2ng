@@ -155,8 +155,7 @@ game::actions::TaxationAction::describe(Area a, afl::string::Translator& tx, con
 {
     String_t result;
 
-    int planetOwner = 0;
-    m_planet.getOwner(planetOwner);
+    const int planetOwner = m_planet.getOwner().orElse(0);
 
     const int happyChange = getHappinessChange(a);
     const int32_t due = getDue(a);

@@ -27,11 +27,11 @@ TestGameMapUfo::testAccessor()
     TS_ASSERT_EQUALS(t.isStoredInHistory(), false);
     TS_ASSERT_EQUALS(t.isSeenThisTurn(), false);
     TS_ASSERT_EQUALS(t.isValid(), false);
-    TS_ASSERT_EQUALS(t.getPosition(pt), false);
-    TS_ASSERT_EQUALS(t.getRadius(radius), false);
-    TS_ASSERT_EQUALS(t.getRadiusSquared(radius2), false);
+    TS_ASSERT_EQUALS(t.getPosition().get(pt), false);
+    TS_ASSERT_EQUALS(t.getRadius().get(radius), false);
+    TS_ASSERT_EQUALS(t.getRadiusSquared().get(radius2), false);
 
-    TS_ASSERT_EQUALS(t.getOwner(owner), true);
+    TS_ASSERT_EQUALS(t.getOwner().get(owner), true);
     TS_ASSERT_EQUALS(owner, 0);
 
     // Set it
@@ -63,14 +63,14 @@ TestGameMapUfo::testAccessor()
     TS_ASSERT_EQUALS(t.getPlainName(), "Area 51");
     TS_ASSERT_EQUALS(t.getName(game::PlainName, tx, iface), "Area 51");
     TS_ASSERT_EQUALS(t.getName(game::LongName, tx, iface), "Ufo #77: Area 51");
-    TS_ASSERT_EQUALS(t.getPosition(pt), true);
+    TS_ASSERT_EQUALS(t.getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt.getX(), 1000);
     TS_ASSERT_EQUALS(pt.getY(), 1400);
 
-    TS_ASSERT_EQUALS(t.getRadius(radius), true);
+    TS_ASSERT_EQUALS(t.getRadius().get(radius), true);
     TS_ASSERT_EQUALS(radius, 25);
 
-    TS_ASSERT_EQUALS(t.getRadiusSquared(radius2), true);
+    TS_ASSERT_EQUALS(t.getRadiusSquared().get(radius2), true);
     TS_ASSERT_EQUALS(radius2, 625);
 }
 
@@ -125,7 +125,7 @@ TestGameMapUfo::testMovementPrediction()
     testee.postprocess(12, mapConfig);
 
     game::map::Point pt;
-    TS_ASSERT_EQUALS(testee.getPosition(pt), true);
+    TS_ASSERT_EQUALS(testee.getPosition().get(pt), true);
 
     TS_ASSERT_EQUALS(pt.getX(), 1000 + 4*7);
     TS_ASSERT_EQUALS(pt.getY(), 2000 + 5*7);

@@ -19,7 +19,7 @@ namespace game { namespace map {
         These objects have certain informative properties, and in addition:
         - optional connection to another object (Wormhole connection)
         - can be stored in history database
-        
+
         \see UfoType for details. */
     class Ufo : public CircularObject {
      public:
@@ -33,12 +33,12 @@ namespace game { namespace map {
         // Object:
         virtual String_t getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const;
         virtual Id_t getId() const;
-        virtual bool getOwner(int& result) const;
-        virtual bool getPosition(Point& result) const;
+        virtual afl::base::Optional<int> getOwner() const;
+        virtual afl::base::Optional<Point> getPosition() const;
 
         // CircularObject:
-        virtual bool getRadius(int& result) const;
-        virtual bool getRadiusSquared(int32_t& result) const;
+        virtual afl::base::Optional<int> getRadius() const;
+        virtual afl::base::Optional<int32_t> getRadiusSquared() const;
 
         // Inquiry:
         bool isValid() const;

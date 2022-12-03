@@ -23,8 +23,7 @@ namespace {
     Planet& addBase(Planet& p)
     {
         // Create base
-        int owner = 0;
-        p.getOwner(owner);
+        const int owner = p.getOwner().orElse(0);
         p.addCurrentBaseData(game::map::BaseData(), game::PlayerSet_t(owner));
 
         // Update m_baseKind

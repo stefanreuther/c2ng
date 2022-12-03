@@ -82,9 +82,7 @@ game::proxy::BuildPartsProxy::Trampoline::~Trampoline()
 inline int
 game::proxy::BuildPartsProxy::Trampoline::getPlanetOwner() const
 {
-    int playerNr = 0;
-    m_planet.getOwner(playerNr);
-    return playerNr;
+    return m_planet.getOwner().orElse(0);
 }
 
 void
