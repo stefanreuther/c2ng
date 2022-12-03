@@ -269,6 +269,8 @@ client::dialogs::BuildShipMain::onDetailedBill()
         return;
     }
 
+    util::NumberFormatter fmt = game::proxy::ConfigurationProxy(m_gameSender).getNumberFormatter(link);
+
     // Dialog:
     //   Window [VBox]
     //     CostSummaryList
@@ -276,7 +278,7 @@ client::dialogs::BuildShipMain::onDetailedBill()
     //       "Help", Spacer, "Export", "Close"
     afl::base::Deleter del;
     ui::Window& win = del.addNew(new ui::Window(m_translator("Cost for building that starship"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
-    CostSummaryList& list = del.addNew(new CostSummaryList(int(result.getNumItems()), false, CostSummaryList::ComparisonFooter, m_root, m_translator));
+    CostSummaryList& list = del.addNew(new CostSummaryList(int(result.getNumItems()), false, CostSummaryList::ComparisonFooter, m_root, fmt, m_translator));
     list.setContent(result);
     list.setAvailableAmount(m_availableAmount);
     win.add(list);

@@ -1,5 +1,6 @@
 /**
   *  \file client/widgets/costsummarylist.hpp
+  *  \brief Class client::widgets::CostSummaryList
   */
 #ifndef C2NG_CLIENT_WIDGETS_COSTSUMMARYLIST_HPP
 #define C2NG_CLIENT_WIDGETS_COSTSUMMARYLIST_HPP
@@ -10,6 +11,7 @@
 #include "game/spec/costsummary.hpp"
 #include "ui/root.hpp"
 #include "ui/widgets/abstractlistbox.hpp"
+#include "util/numberformatter.hpp"
 #include "util/requestsender.hpp"
 
 namespace client { namespace widgets {
@@ -35,8 +37,9 @@ namespace client { namespace widgets {
             \param isList true to exhibit list behaviour, false to exhibit static behaviour
             \param footerStyle Footer style
             \param root UI root
+            \param fmt NumberFormatter
             \param tx Translator */
-        CostSummaryList(int numLines, bool isList, FooterStyle footerStyle, ui::Root& root, afl::string::Translator& tx);
+        CostSummaryList(int numLines, bool isList, FooterStyle footerStyle, ui::Root& root, util::NumberFormatter fmt, afl::string::Translator& tx);
         ~CostSummaryList();
 
         /** Set content.
@@ -77,6 +80,7 @@ namespace client { namespace widgets {
         afl::string::Translator& m_translator;
         game::spec::CostSummary m_content;
         game::spec::Cost m_available;
+        util::NumberFormatter m_numberFormatter;
 
         int getLineHeight() const;
     };

@@ -1,5 +1,6 @@
 /**
   *  \file client/widgets/costsummarylist.cpp
+  *  \brief Class client::widgets::CostSummaryList
   */
 
 #include "client/widgets/costsummarylist.hpp"
@@ -11,41 +12,40 @@
 #include "ui/draw.hpp"
 #include "util/unicodechars.hpp"
 
-namespace {
-    String_t numToString(int32_t value)
-    {
-        // FIXME: use preferences for NumberFormatter
-        return afl::string::Format("%d", value);
-    }
+using afl::string::Format;
+using game::spec::Cost;
+using util::SkinColor;
 
-    void showValue(gfx::Context<util::SkinColor::Color>& ctx, int x, int y, int32_t value)
+namespace {
+    void showValue(gfx::Context<SkinColor::Color>& ctx, int x, int y, const util::NumberFormatter& fmt, int32_t value)
     {
         if (value == 0) {
-            ctx.setColor(util::SkinColor::Faded);
+            ctx.setColor(SkinColor::Faded);
             outText(ctx, gfx::Point(x, y), UTF_FIGURE_DASH);
         } else {
-            ctx.setColor(util::SkinColor::Static);
-            outText(ctx, gfx::Point(x, y), numToString(value));
+            ctx.setColor(SkinColor::Static);
+            outText(ctx, gfx::Point(x, y), fmt.formatNumber(value));
         }
     }
 
-    void showComparison(gfx::Context<util::SkinColor::Color>& ctx, int x, int y, int h, int32_t have, int32_t total)
+    void showComparison(gfx::Context<SkinColor::Color>& ctx, int x, int y, int h, const util::NumberFormatter& fmt, int32_t have, int32_t total)
     {
         int32_t delta = have - total;
-        ctx.setColor(delta >= 0 ? util::SkinColor::Green : util::SkinColor::Red);
-        outText(ctx, gfx::Point(x, y), numToString(total));
-        outText(ctx, gfx::Point(x, y+h), numToString(delta));
+        ctx.setColor(delta >= 0 ? SkinColor::Green : SkinColor::Red);
+        outText(ctx, gfx::Point(x, y), fmt.formatNumber(total));
+        outText(ctx, gfx::Point(x, y+h), fmt.formatNumber(delta));
     }
 }
 
-client::widgets::CostSummaryList::CostSummaryList(int numLines, bool isList, FooterStyle footerStyle, ui::Root& root, afl::string::Translator& tx)
+client::widgets::CostSummaryList::CostSummaryList(int numLines, bool isList, FooterStyle footerStyle, ui::Root& root, util::NumberFormatter fmt, afl::string::Translator& tx)
     : AbstractListbox(),
       m_numLines(numLines),
       m_footerStyle(footerStyle),
       m_root(root),
       m_translator(tx),
       m_content(),
-      m_available()
+      m_available(),
+      m_numberFormatter(fmt)
 {
     // ex WBillDisplay::WBillDisplay
     setState(DisabledState, !isList);
@@ -142,9 +142,9 @@ client::widgets::CostSummaryList::drawHeader(gfx::Canvas& can, gfx::Rectangle ar
     const int m = font->getEmWidth();
     const int h = font->getLineHeight();
 
-    gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
+    gfx::Context<SkinColor::Color> ctx(can, getColorScheme());
     ctx.useFont(*font);
-    ctx.setColor(util::SkinColor::Static);
+    ctx.setColor(SkinColor::Static);
 
     outText(ctx, gfx::Point(x, y), m_translator("Item"));
     ctx.setTextAlign(gfx::RightAlign, gfx::TopAlign);
@@ -168,9 +168,9 @@ client::widgets::CostSummaryList::drawFooter(gfx::Canvas& can, gfx::Rectangle ar
     const int m = font->getEmWidth();
     const int h = font->getLineHeight();
 
-    gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
+    gfx::Context<SkinColor::Color> ctx(can, getColorScheme());
     ctx.useFont(*font);
-    ctx.setColor(util::SkinColor::Static);
+    ctx.setColor(SkinColor::Static);
     // FIXME -> drawBackground(ctx, getExtent());
 
     // Divider
@@ -182,50 +182,50 @@ client::widgets::CostSummaryList::drawFooter(gfx::Canvas& can, gfx::Rectangle ar
     y++;
 
     // Compute totals
-    game::spec::Cost total = m_content.getTotalCost();
+    Cost total = m_content.getTotalCost();
     outText(ctx, gfx::Point(x, y), m_translator("Total:"));
 
     // Display it
     if (m_footerStyle == TotalsFooter) {
         // Simple version
         ctx.setTextAlign(gfx::RightAlign, gfx::TopAlign);
-        showValue(ctx, x + 27*m, y, total.get(game::spec::Cost::Money) + total.get(game::spec::Cost::Supplies));
-        showValue(ctx, x + 31*m, y, total.get(game::spec::Cost::Tritanium));
-        showValue(ctx, x + 35*m, y, total.get(game::spec::Cost::Duranium));
-        showValue(ctx, x + 39*m, y, total.get(game::spec::Cost::Molybdenum));
+        showValue(ctx, x + 27*m, y, m_numberFormatter, total.get(Cost::Money) + total.get(Cost::Supplies));
+        showValue(ctx, x + 31*m, y, m_numberFormatter, total.get(Cost::Tritanium));
+        showValue(ctx, x + 35*m, y, m_numberFormatter, total.get(Cost::Duranium));
+        showValue(ctx, x + 39*m, y, m_numberFormatter, total.get(Cost::Molybdenum));
     } else {
         // With comparison
         outText(ctx, gfx::Point(x, y+h), m_translator("Remaining:"));
         ctx.setTextAlign(gfx::RightAlign, gfx::TopAlign);
 
         // MC/Supplies
-        int32_t haveMC  = m_available.get(game::spec::Cost::Money);
-        int32_t haveSup = m_available.get(game::spec::Cost::Supplies);
-        int32_t needMC  = total.get(game::spec::Cost::Money);
-        int32_t needSup = total.get(game::spec::Cost::Supplies);
+        int32_t haveMC  = m_available.get(Cost::Money);
+        int32_t haveSup = m_available.get(Cost::Supplies);
+        int32_t needMC  = total.get(Cost::Money);
+        int32_t needSup = total.get(Cost::Supplies);
         if (haveMC+haveSup < needMC+needSup) {
             // There's a shortage of mc+sup, so we need more supplies
-            ctx.setColor(util::SkinColor::Red);
-            outText(ctx, gfx::Point(x + 27*m, y+h), afl::string::Format(m_translator("(sup) %d"), numToString(haveSup+haveMC - needSup - needMC)));
+            ctx.setColor(SkinColor::Red);
+            outText(ctx, gfx::Point(x + 27*m, y+h), Format(m_translator("(sup) %d"), m_numberFormatter.formatNumber(haveSup+haveMC - needSup - needMC)));
         } else if (haveSup < needSup) {
             // Enough money, but not enough supplies
-            ctx.setColor(util::SkinColor::Red);
-            outText(ctx, gfx::Point(x + 27*m, y+h), afl::string::Format(m_translator("(sup) %d"), numToString(haveSup - needSup)));
+            ctx.setColor(SkinColor::Red);
+            outText(ctx, gfx::Point(x + 27*m, y+h), Format(m_translator("(sup) %d"), m_numberFormatter.formatNumber(haveSup - needSup)));
         } else {
             // Enough money and supplies, but we may need to sell supplies
-            ctx.setColor(util::SkinColor::Green);
+            ctx.setColor(SkinColor::Green);
             if (haveMC < needMC) {
-                outText(ctx, gfx::Point(x + 27*m, y+h), afl::string::Format(m_translator("(sup) %d"), numToString(haveSup+haveMC - needSup - needMC)));
+                outText(ctx, gfx::Point(x + 27*m, y+h), Format(m_translator("(sup) %d"), m_numberFormatter.formatNumber(haveSup+haveMC - needSup - needMC)));
             } else {
-                outText(ctx, gfx::Point(x + 27*m, y+h), afl::string::Format(m_translator("(mc) %d"), numToString(haveMC - needMC)));
+                outText(ctx, gfx::Point(x + 27*m, y+h), Format(m_translator("(mc) %d"), m_numberFormatter.formatNumber(haveMC - needMC)));
             }
         }
-        outText(ctx, gfx::Point(x + 27*m, y), numToString(total.get(game::spec::Cost::Money) + total.get(game::spec::Cost::Supplies)));
+        outText(ctx, gfx::Point(x + 27*m, y), m_numberFormatter.formatNumber(total.get(Cost::Money) + total.get(Cost::Supplies)));
 
         // Minerals
-        showComparison(ctx, x + 31*m, y, h, m_available.get(game::spec::Cost::Tritanium),  total.get(game::spec::Cost::Tritanium));
-        showComparison(ctx, x + 35*m, y, h, m_available.get(game::spec::Cost::Duranium),   total.get(game::spec::Cost::Duranium));
-        showComparison(ctx, x + 39*m, y, h, m_available.get(game::spec::Cost::Molybdenum), total.get(game::spec::Cost::Molybdenum));
+        showComparison(ctx, x + 31*m, y, h, m_numberFormatter, m_available.get(Cost::Tritanium),  total.get(Cost::Tritanium));
+        showComparison(ctx, x + 35*m, y, h, m_numberFormatter, m_available.get(Cost::Duranium),   total.get(Cost::Duranium));
+        showComparison(ctx, x + 39*m, y, h, m_numberFormatter, m_available.get(Cost::Molybdenum), total.get(Cost::Molybdenum));
     }
 }
 
@@ -236,7 +236,7 @@ client::widgets::CostSummaryList::drawItem(gfx::Canvas& can, gfx::Rectangle area
     afl::base::Ref<gfx::Font> font = m_root.provider().getFont("");
     const int m = font->getEmWidth();
 
-    gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
+    gfx::Context<SkinColor::Color> ctx(can, getColorScheme());
     ctx.useFont(*font);
 
     afl::base::Deleter del;
@@ -248,11 +248,11 @@ client::widgets::CostSummaryList::drawItem(gfx::Canvas& can, gfx::Rectangle area
         ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
         outTextF(ctx, gfx::Point(x + 3*m, y), m*20, p->name);
         ctx.setTextAlign(gfx::RightAlign, gfx::TopAlign);
-        outText(ctx, gfx::Point(x + 3*m,  y), afl::string::Format("%d %s ", p->multiplier, UTF_TIMES));
-        showValue(ctx, x + 27*m, y, p->cost.get(game::spec::Cost::Money) + p->cost.get(game::spec::Cost::Supplies));
-        showValue(ctx, x + 31*m, y, p->cost.get(game::spec::Cost::Tritanium));
-        showValue(ctx, x + 35*m, y, p->cost.get(game::spec::Cost::Duranium));
-        showValue(ctx, x + 39*m, y, p->cost.get(game::spec::Cost::Molybdenum));
+        outText(ctx, gfx::Point(x + 3*m,  y), Format("%d %s ", p->multiplier, UTF_TIMES));
+        showValue(ctx, x + 27*m, y, m_numberFormatter, p->cost.get(Cost::Money) + p->cost.get(Cost::Supplies));
+        showValue(ctx, x + 31*m, y, m_numberFormatter, p->cost.get(Cost::Tritanium));
+        showValue(ctx, x + 35*m, y, m_numberFormatter, p->cost.get(Cost::Duranium));
+        showValue(ctx, x + 39*m, y, m_numberFormatter, p->cost.get(Cost::Molybdenum));
     }
 }
 

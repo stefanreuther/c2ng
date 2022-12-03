@@ -1173,6 +1173,8 @@ client::dialogs::VisualScanDialog::Window::showCargoList()
             return;
         }
 
+        util::NumberFormatter fmt = game::proxy::ConfigurationProxy(m_gameSender).getNumberFormatter(link);
+
         // Show the dialog
         // VBox
         //   HBox
@@ -1191,7 +1193,7 @@ client::dialogs::VisualScanDialog::Window::showCargoList()
             new CostSummaryList(int(std::max(size_t(5), std::min(size_t(20), m_cargoSummaryBuilder->m_summary.getNumItems()))),
                                 true,
                                 CostSummaryList::TotalsFooter,
-                                m_root, m_translator));
+                                m_root, fmt, m_translator));
         list.setContent(m_cargoSummaryBuilder->m_summary);
 
         ui::Group& listGroup = del.addNew(new ui::Group(ui::layout::HBox::instance0));

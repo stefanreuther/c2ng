@@ -9,6 +9,7 @@
 #include "client/downlink.hpp"
 #include "client/widgets/costsummarylist.hpp"
 #include "client/widgets/helpwidget.hpp"
+#include "game/proxy/configurationproxy.hpp"
 #include "game/proxy/fleetcostproxy.hpp"
 #include "game/proxy/playerproxy.hpp"
 #include "game/proxy/teamproxy.hpp"
@@ -23,6 +24,7 @@
 #include "ui/widgets/scrollbar.hpp"
 #include "ui/widgets/statictext.hpp"
 #include "ui/window.hpp"
+#include "util/numberformatter.hpp"
 
 namespace {
     int getNextPlayer(game::PlayerSet_t set, int player, int delta)
@@ -46,9 +48,9 @@ namespace {
 
     class FleetCostDialog {
      public:
-        FleetCostDialog(ui::Root& root, game::proxy::SimulationSetupProxy& setupProxy, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx);
+        FleetCostDialog(ui::Root& root, game::proxy::SimulationSetupProxy& setupProxy, util::RequestSender<game::Session> gameSender, util::NumberFormatter fmt, afl::string::Translator& tx);
 
-        bool init();
+        bool init(game::proxy::WaitIndicator& link);
         void run();
 
      private:
@@ -73,7 +75,7 @@ namespace {
         int m_currentPlayer;
         int m_currentTeam;
 
-        void render(client::Downlink& link);
+        void render(game::proxy::WaitIndicator& link);
         void onEditOptions();
         void onNext();
         void onPrevious();
@@ -84,13 +86,14 @@ namespace {
 FleetCostDialog::FleetCostDialog(ui::Root& root,
                                  game::proxy::SimulationSetupProxy& setupProxy,
                                  util::RequestSender<game::Session> gameSender,
+                                 util::NumberFormatter fmt,
                                  afl::string::Translator& tx)
     : m_root(root),
       m_costProxy(setupProxy),
       m_gameSender(gameSender),
       m_translator(tx),
       m_label("", util::SkinColor::Static, "", root.provider()),
-      m_costSummary(20, true, client::widgets::CostSummaryList::TotalsFooter, root, tx),
+      m_costSummary(20, true, client::widgets::CostSummaryList::TotalsFooter, root, fmt, tx),
       m_involvedPlayers(),
       m_involvedTeams(),
       m_playerNames(),
@@ -102,11 +105,9 @@ FleetCostDialog::FleetCostDialog(ui::Root& root,
 { }
 
 bool
-FleetCostDialog::init()
+FleetCostDialog::init(game::proxy::WaitIndicator& link)
 {
     // ex WFleetCostDialog::init (part)
-    client::Downlink link(m_root, m_translator);
-
     // Player list
     m_involvedPlayers = m_costProxy.getInvolvedPlayers(link);
     if (m_involvedPlayers.empty()) {
@@ -200,7 +201,7 @@ FleetCostDialog::run()
 }
 
 void
-FleetCostDialog::render(client::Downlink& link)
+FleetCostDialog::render(game::proxy::WaitIndicator& link)
 {
     game::spec::CostSummary content;
     if (m_teamsActive) {
@@ -277,8 +278,9 @@ client::dialogs::showSimulationFleetCost(ui::Root& root,
                                          afl::string::Translator& tx)
 {
     // ex ccsim.pas:FleetCostComparator
-    FleetCostDialog dlg(root, setupProxy, gameSender, tx);
-    if (dlg.init()) {
+    client::Downlink link(root, tx);
+    FleetCostDialog dlg(root, setupProxy, gameSender, game::proxy::ConfigurationProxy(gameSender).getNumberFormatter(link), tx);
+    if (dlg.init(link)) {
         dlg.run();
     }
 }
