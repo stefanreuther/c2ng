@@ -202,4 +202,22 @@ namespace ui {
 
 }
 
+inline ui::ColorScheme&
+ui::Root::colorScheme()
+{
+    return m_colorScheme;
+}
+
+inline gfx::ResourceProvider&
+ui::Root::provider()
+{
+    return m_provider;
+}
+
+inline gfx::Engine&
+ui::Root::engine()
+{
+    return m_engine;
+}
+
 #endif

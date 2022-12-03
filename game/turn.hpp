@@ -119,4 +119,78 @@ namespace game {
 
 }
 
+inline void
+game::Turn::setTurnNumber(int turnNumber)
+{
+    m_turnNumber = turnNumber;
+}
+
+inline int
+game::Turn::getTurnNumber() const
+{
+    return m_turnNumber;
+}
+
+inline game::map::Universe&
+game::Turn::universe()
+{
+    // ex GGameTurn::getCurrentUniverse, GGameTurn::getPreviousUniverse
+    return m_universe;
+}
+
+inline const game::map::Universe&
+game::Turn::universe() const
+{
+    // ex GGameTurn::getCurrentUniverse, GGameTurn::getPreviousUniverse
+    return m_universe;
+}
+
+inline game::msg::Inbox&
+game::Turn::inbox()
+{
+    return m_inbox;
+}
+
+inline const game::msg::Inbox&
+game::Turn::inbox() const
+{
+    return m_inbox;
+}
+
+inline game::msg::Outbox&
+game::Turn::outbox()
+{
+    return m_outbox;
+}
+
+inline const game::msg::Outbox&
+game::Turn::outbox() const
+{
+    return m_outbox;
+}
+
+inline game::ExtraContainer<game::Turn>&
+game::Turn::extras()
+{
+    return m_extras;
+}
+
+inline const game::ExtraContainer<game::Turn>&
+game::Turn::extras() const
+{
+    return m_extras;
+}
+
+inline game::alliance::Container&
+game::Turn::alliances()
+{
+    return m_alliances;
+}
+
+inline const game::alliance::Container&
+game::Turn::alliances() const
+{
+    return m_alliances;
+}
+
 #endif

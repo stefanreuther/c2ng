@@ -186,4 +186,136 @@ namespace game {
 
 }
 
+inline game::Turn&
+game::Game::currentTurn()
+{
+    return *m_currentTurn;
+}
+
+inline const game::Turn&
+game::Game::currentTurn() const
+{
+    return *m_currentTurn;
+}
+
+inline game::HistoryTurnList&
+game::Game::previousTurns()
+{
+    return m_previousTurns;
+}
+
+inline const game::HistoryTurnList&
+game::Game::previousTurns() const
+{
+    return m_previousTurns;
+}
+
+inline game::UnitScoreDefinitionList&
+game::Game::planetScores()
+{
+    return m_planetScores;
+}
+
+inline const game::UnitScoreDefinitionList&
+game::Game::planetScores() const
+{
+    return m_planetScores;
+}
+
+inline game::UnitScoreDefinitionList&
+game::Game::shipScores()
+{
+    return m_shipScores;
+}
+
+inline const game::UnitScoreDefinitionList&
+game::Game::shipScores() const
+{
+    return m_shipScores;
+}
+
+inline int
+game::Game::getViewpointPlayer() const
+{
+    return m_teamSettings.getViewpointPlayer();
+}
+
+inline void
+game::Game::setViewpointPlayer(int playerNr)
+{
+    m_teamSettings.setViewpointPlayer(playerNr);
+}
+
+inline game::TeamSettings&
+game::Game::teamSettings()
+{
+    return m_teamSettings;
+}
+
+inline const game::TeamSettings&
+game::Game::teamSettings() const
+{
+    return m_teamSettings;
+}
+
+inline game::score::TurnScoreList&
+game::Game::scores()
+{
+    return m_scores;
+}
+
+inline const game::score::TurnScoreList&
+game::Game::scores() const
+{
+    return m_scores;
+}
+
+inline game::map::Cursors&
+game::Game::cursors()
+{
+    return m_cursors;
+}
+
+inline game::map::Selections&
+game::Game::selections()
+{
+    return m_selections;
+}
+
+inline game::map::Configuration&
+game::Game::mapConfiguration()
+{
+    return m_mapConfiguration;
+}
+
+inline const game::map::Configuration&
+game::Game::mapConfiguration() const
+{
+    return m_mapConfiguration;
+}
+
+inline game::msg::Configuration&
+game::Game::messageConfiguration()
+{
+    return m_messageConfiguration;
+}
+
+inline const game::msg::Configuration&
+game::Game::messageConfiguration() const
+{
+    return m_messageConfiguration;
+}
+
+inline game::config::ExpressionLists&
+game::Game::expressionLists()
+{
+    return m_expressionLists;
+}
+
+inline const game::config::ExpressionLists&
+game::Game::expressionLists() const
+{
+    return m_expressionLists;
+}
+
 #endif

@@ -223,4 +223,111 @@ namespace game {
 
 }
 
+// Access game directory.
+inline afl::io::Directory&
+game::Root::gameDirectory() const
+{
+    return *m_gameDirectory;
+}
+
+// Access specification loader.
+inline game::SpecificationLoader&
+game::Root::specificationLoader()
+{
+    return *m_specificationLoader;
+}
+
+// Access host version.
+inline game::HostVersion&
+game::Root::hostVersion()
+{
+    return m_hostVersion;
+}
+
+// Access host version.
+inline const game::HostVersion&
+game::Root::hostVersion() const
+{
+    return m_hostVersion;
+}
+
+// Access character set.
+inline afl::charset::Charset&
+game::Root::charset() const
+{
+    return *m_charset;
+}
+
+// Access host configuration.
+inline game::config::HostConfiguration&
+game::Root::hostConfiguration()
+{
+    return m_hostConfiguration;
+}
+
+inline const game::config::HostConfiguration&
+game::Root::hostConfiguration() const
+{
+    return m_hostConfiguration;
+}
+
+// Access FLAK configuration.
+inline game::vcr::flak::Configuration&
+game::Root::flakConfiguration()
+{
+    return m_flakConfiguration;
+}
+
+inline const game::vcr::flak::Configuration&
+game::Root::flakConfiguration() const
+{
+    return m_flakConfiguration;
+}
+
+// Access user configuration (preferences).
+inline game::config::UserConfiguration&
+game::Root::userConfiguration()
+{
+    return m_userConfiguration;
+}
+
+inline const game::config::UserConfiguration&
+game::Root::userConfiguration() const
+{
+    return m_userConfiguration;
+}
+
+// Access player list.
+inline game::PlayerList&
+game::Root::playerList()
+{
+    return m_playerList;
+}
+
+inline const game::PlayerList&
+game::Root::playerList() const
+{
+    return m_playerList;
+}
+
+// Access registration status.
+inline game::RegistrationKey&
+game::Root::registrationKey()
+{
+    return *m_registrationKey;
+}
+
+inline const game::RegistrationKey&
+game::Root::registrationKey() const
+{
+    return *m_registrationKey;
+}
+
+// Access string verifier.
+inline const game::StringVerifier&
+game::Root::stringVerifier() const
+{
+    return *m_stringVerifier;
+}
+
 #endif

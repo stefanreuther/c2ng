@@ -322,4 +322,88 @@ namespace interpreter {
 
 }
 
+// Access global property names.
+inline afl::data::NameMap&
+interpreter::World::globalPropertyNames()
+{
+    return m_globalPropertyNames;
+}
+
+// Access global property names (const).
+inline const afl::data::NameMap&
+interpreter::World::globalPropertyNames() const
+{
+    return m_globalPropertyNames;
+}
+
+// Access ship property names.
+inline afl::data::NameMap&
+interpreter::World::shipPropertyNames()
+{
+    return m_shipPropertyNames;
+}
+
+// Access ship property names (const).
+inline const afl::data::NameMap&
+interpreter::World::shipPropertyNames() const
+{
+    return m_shipPropertyNames;
+}
+
+// Access planet property names.
+inline afl::data::NameMap&
+interpreter::World::planetPropertyNames()
+{
+    return m_planetPropertyNames;
+}
+
+// Access planet property names (const).
+inline const afl::data::NameMap&
+interpreter::World::planetPropertyNames() const
+{
+    return m_planetPropertyNames;
+}
+
+// Access global values.
+inline afl::data::Segment&
+interpreter::World::globalValues()
+{
+    return m_globalValues;
+}
+
+// Access global values (const).
+inline const afl::data::Segment&
+interpreter::World::globalValues() const
+{
+    return m_globalValues;
+}
+
+// Access ship properties.
+inline interpreter::ObjectPropertyVector&
+interpreter::World::shipProperties()
+{
+    return m_shipProperties;
+}
+
+// Access ship properties (const).
+inline const interpreter::ObjectPropertyVector&
+interpreter::World::shipProperties() const
+{
+    return m_shipProperties;
+}
+
+// Access planet properties.
+inline interpreter::ObjectPropertyVector&
+interpreter::World::planetProperties()
+{
+    return m_planetProperties;
+}
+
+// Access planet properties (const).
+inline const interpreter::ObjectPropertyVector&
+interpreter::World::planetProperties() const
+{
+    return m_planetProperties;
+}
+
 #endif

@@ -237,24 +237,6 @@ ui::Root::consumeMousePrefixArgument()
     return result;
 }
 
-ui::ColorScheme&
-ui::Root::colorScheme()
-{
-    return m_colorScheme;
-}
-
-gfx::ResourceProvider&
-ui::Root::provider()
-{
-    return m_provider;
-}
-
-gfx::Engine&
-ui::Root::engine()
-{
-    return m_engine;
-}
-
 void
 ui::Root::add(Widget& child)
 {

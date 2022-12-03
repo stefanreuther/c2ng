@@ -128,7 +128,7 @@ namespace game { namespace spec {
             \param config Host configuration */
         void findRacialAbilities(const game::config::HostConfiguration& config);
 
-        
+
         /** Enumerate all hull functions related to a hull.
             \param result [out] result will be appended here
             \param hullNr [in] Hull number
@@ -187,5 +187,160 @@ namespace game { namespace spec {
     };
 
 } }
+
+
+// Get beams.
+inline game::spec::ComponentVector<game::spec::Beam>&
+game::spec::ShipList::beams()
+{
+    return m_beams;
+}
+
+// Get beams.
+inline const game::spec::ComponentVector<game::spec::Beam>&
+game::spec::ShipList::beams() const
+{
+    return m_beams;
+}
+
+// Get engines.
+inline game::spec::ComponentVector<game::spec::Engine>&
+game::spec::ShipList::engines()
+{
+    return m_engines;
+}
+
+// Get engines.
+inline const game::spec::ComponentVector<game::spec::Engine>&
+game::spec::ShipList::engines() const
+{
+    return m_engines;
+}
+
+// Get torpedo launchers.
+inline game::spec::ComponentVector<game::spec::TorpedoLauncher>&
+game::spec::ShipList::launchers()
+{
+    return m_launchers;
+}
+
+// Get torpedo launchers.
+inline const game::spec::ComponentVector<game::spec::TorpedoLauncher>&
+game::spec::ShipList::launchers() const
+{
+    return m_launchers;
+}
+
+// Get hulls.
+inline game::spec::ComponentVector<game::spec::Hull>&
+game::spec::ShipList::hulls()
+{
+    return m_hulls;
+}
+
+// Get hulls.
+inline const game::spec::ComponentVector<game::spec::Hull>&
+game::spec::ShipList::hulls() const
+{
+    return m_hulls;
+}
+
+// Get basic hull function definitions.
+inline game::spec::BasicHullFunctionList&
+game::spec::ShipList::basicHullFunctions()
+{
+    return m_basicHullFunctions;
+}
+
+// Get basic hull function definitions.
+inline const game::spec::BasicHullFunctionList&
+game::spec::ShipList::basicHullFunctions() const
+{
+    return m_basicHullFunctions;
+}
+
+// Get modified hull function definitions.
+inline game::spec::ModifiedHullFunctionList&
+game::spec::ShipList::modifiedHullFunctions()
+{
+    return m_modifiedHullFunctions;
+}
+
+// Get modified hull function definitions.
+inline const game::spec::ModifiedHullFunctionList&
+game::spec::ShipList::modifiedHullFunctions() const
+{
+    return m_modifiedHullFunctions;
+}
+
+// Get racial abilities.
+inline game::spec::HullFunctionAssignmentList&
+game::spec::ShipList::racialAbilities()
+{
+    return m_racialAbilities;
+}
+
+// Get racial abilities.
+inline const game::spec::HullFunctionAssignmentList&
+game::spec::ShipList::racialAbilities() const
+{
+    return m_racialAbilities;
+}
+
+// Get hull function assignments.
+inline game::spec::HullAssignmentList&
+game::spec::ShipList::hullAssignments()
+{
+    return m_hullAssignments;
+}
+
+// Get hull function assignments.
+inline const game::spec::HullAssignmentList&
+game::spec::ShipList::hullAssignments() const
+{
+    return m_hullAssignments;
+}
+
+// Get component namer.
+inline game::spec::StandardComponentNameProvider&
+game::spec::ShipList::componentNamer()
+{
+    return m_componentNamer;
+}
+
+// Get component namer.
+inline const game::spec::StandardComponentNameProvider&
+game::spec::ShipList::componentNamer() const
+{
+    return m_componentNamer;
+}
+
+// Get friendly codes.
+inline game::spec::FriendlyCodeList&
+game::spec::ShipList::friendlyCodes()
+{
+    return m_friendlyCodes;
+}
+
+// Get friendly codes.
+inline const game::spec::FriendlyCodeList&
+game::spec::ShipList::friendlyCodes() const
+{
+    return m_friendlyCodes;
+}
+
+// Get missions.
+inline game::spec::MissionList&
+game::spec::ShipList::missions()
+{
+    return m_missions;
+}
+
+// Get missions.
+inline const game::spec::MissionList&
+game::spec::ShipList::missions() const
+{
+    return m_missions;
+}
 
 #endif
