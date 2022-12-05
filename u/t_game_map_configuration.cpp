@@ -35,6 +35,10 @@ TestGameMapConfiguration::testFlat()
     TS_ASSERT(cc.getSimpleNearestAlias(Point(10, 20), Point(2900, 1100)) == Point(10, 20));
     TS_ASSERT(cc.getSimpleNearestAlias(Point(10, 20), Point(1100, 1100)) == Point(10, 20));
 
+    TS_ASSERT(cc.limitUserLocation(Point(10, 20)) == Point(10, 20));
+    TS_ASSERT(cc.limitUserLocation(Point(1000, 2000)) == Point(1000, 2000));
+    TS_ASSERT(cc.limitUserLocation(Point(15000, 9000)) == Point(10000, 9000));
+
     TS_ASSERT(cc.isOnMap(Point(10, 20)));
 
     // Sector numbers known for all points in [1000,3000)
@@ -317,6 +321,10 @@ TestGameMapConfiguration::testWrapped()
     TS_ASSERT(cc.getSimpleNearestAlias(Point(1010, 1020), Point(1100, 2900)) == Point(1010, 3020));
     TS_ASSERT(cc.getSimpleNearestAlias(Point(1010, 1020), Point(2900, 1100)) == Point(3010, 1020));
     TS_ASSERT(cc.getSimpleNearestAlias(Point(1010, 1020), Point(1100, 1100)) == Point(1010, 1020));
+
+    TS_ASSERT(cc.limitUserLocation(Point(10, 20)) == Point(2010, 2020));
+    TS_ASSERT(cc.limitUserLocation(Point(1000, 2000)) == Point(1000, 2000));
+    TS_ASSERT(cc.limitUserLocation(Point(3010, 3020)) == Point(1010, 1020));
 
     TS_ASSERT(!cc.isOnMap(Point(10, 20)));
 

@@ -401,6 +401,12 @@ void
 client::map::Location::setPosition(game::map::Point pt)
 {
     // ex GChartLocation::setLocation, GChartLocation::updateLocation (sort-of)
+    // Adjust position.
+    // In theory, in case of Wrapped map, we might have to update MovementController's
+    // idea of previous location, but it is smart enough to translate an observed "+1900"
+    // movement into a "-100" movement (same as PCC2).
+    pt = m_config.limitUserLocation(pt);
+
     // Take over new position
     bool change = (pt != m_cursorPosition);
     if (change) {

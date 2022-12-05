@@ -126,6 +126,14 @@ namespace game { namespace map {
             \return validity */
         bool isValidPlanetCoordinate(Point pt) const;
 
+        /** Limit user coordinate location.
+            Assuming @c represents a point the user wants to be at,
+            returns the position they actually are at.
+
+            \param pt point
+            \return updater position */
+        Point limitUserLocation(Point pt) const;
+
         /** Get canonical location.
             If any kind of wrap is active, this performs the "wrap" step normally performed by the host.
 

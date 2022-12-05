@@ -383,6 +383,29 @@ game::map::Configuration::isValidPlanetCoordinate(Point pt) const
         && isOnMap(pt);
 }
 
+// Limit user coordinate location.
+game::map::Point
+game::map::Configuration::limitUserLocation(Point pt) const
+{
+    // ex chartusr.pas:CheckStarchartPosition (sort-of)
+    switch (m_mode) {
+     case Flat:
+     case Circular:
+        // Flat: no limits other than integer limits.
+        // Circular: no limits for now. We could consider limiting to Radius+Excess, but neither PCC1 nor PCC2 do that right now.
+        pt = Point(std::max(0, std::min(MAX_NUMBER, pt.getX())),
+                   std::max(0, std::min(MAX_NUMBER, pt.getY())));
+        break;
+
+     case Wrapped:
+        // Keep coordinates in wrap region
+        pt = getCanonicalLocation(pt);
+        break;
+    }
+
+    return pt;
+}
+
 // Get canonical location.
 game::map::Point
 game::map::Configuration::getCanonicalLocation(Point pt) const
