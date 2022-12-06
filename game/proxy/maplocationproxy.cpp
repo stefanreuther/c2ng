@@ -12,16 +12,29 @@
 using game::map::Configuration;
 using game::map::Point;
 
+namespace {
+    void initLocalMapConfig(const game::Root& root, Configuration& config)
+    {
+        config.initFromConfiguration(root.hostConfiguration(), root.userConfiguration());
+    }
+}
+
 class game::proxy::MapLocationProxy::Trampoline {
  public:
     Trampoline(Session& session, util::RequestSender<MapLocationProxy> reply)
         : m_reply(reply),
           m_session(session),
           m_inhibitPositionChange(false),
+          m_localConfig(),
           conn_positionChange()
         {
             if (Game* pGame = session.getGame().get()) {
                 conn_positionChange = pGame->cursors().location().sig_positionChange.add(this, &Trampoline::onPositionChange);
+            }
+            if (Root* pRoot = session.getRoot().get()) {
+                conn_prefChange = pRoot->userConfiguration().sig_change.add(this, &Trampoline::onConfigChange);
+                conn_configChange = pRoot->hostConfiguration().sig_change.add(this, &Trampoline::onConfigChange);
+                initLocalMapConfig(*pRoot, m_localConfig);
             }
         }
 
@@ -29,6 +42,18 @@ class game::proxy::MapLocationProxy::Trampoline {
         {
             if (!m_inhibitPositionChange) {
                 sendPositionChange(pt);
+            }
+        }
+
+    void onConfigChange()
+        {
+            if (Root* pRoot = m_session.getRoot().get()) {
+                Configuration tmpConfig;
+                initLocalMapConfig(*pRoot, tmpConfig);
+                if (tmpConfig != m_localConfig) {
+                    m_localConfig = tmpConfig;
+                    sendConfigChange();
+                }
             }
         }
 
@@ -53,14 +78,27 @@ class game::proxy::MapLocationProxy::Trampoline {
 
             Reference ref;
             Point pt(2000, 2000);
-            Configuration config;
             if (Game* pGame = m_session.getGame().get()) {
                 game::map::Location& loc = pGame->cursors().location();
                 loc.getPosition().get(pt);
                 ref = loc.getReference();
-                config = pGame->mapConfiguration();
             }
-            m_reply.postNewRequest(new Response(ref, pt, config));
+            m_reply.postNewRequest(new Response(ref, pt, m_localConfig));
+        }
+
+    void sendConfigChange()
+        {
+            class Response : public util::Request<MapLocationProxy> {
+             public:
+                Response(const Configuration& config)
+                    : m_config(config)
+                    { }
+                virtual void handle(MapLocationProxy& proxy)
+                    { proxy.sig_configChange.raise(m_config); }
+             private:
+                const Configuration m_config;
+            };
+            m_reply.postNewRequest(new Response(m_localConfig));
         }
 
     template<typename T>
@@ -90,10 +128,22 @@ class game::proxy::MapLocationProxy::Trampoline {
         }
 
  private:
+    /* Links */
     util::RequestSender<MapLocationProxy> m_reply;
     Session& m_session;
+
+    /* Inhibit implicit position changes to avoid multiple/overlapping reports */
     bool m_inhibitPositionChange;
+
+    /* Local copy of the configuration.
+       We need to maintain our own copy because the global copy is updated by Session from the same callbacks we use,
+       and we cannot know whether Session has already updated it when we see it. */
+    Configuration m_localConfig;
+
+    /* Signal connections */
     afl::base::SignalConnection conn_positionChange;
+    afl::base::SignalConnection conn_prefChange;
+    afl::base::SignalConnection conn_configChange;
 };
 
 class game::proxy::MapLocationProxy::TrampolineFromSession : public afl::base::Closure<Trampoline*(Session&)> {

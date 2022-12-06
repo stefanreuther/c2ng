@@ -228,6 +228,20 @@ namespace game { namespace map {
             \return sector number (100..499), zero if point is not in any numbered sector */
         int getSectorNumber(Point pt) const;
 
+        /*
+         *  Comparison
+         */
+
+        /** Compare for equality.
+            \param other Other configuration
+            \return true if both configurations are identical */
+        bool operator==(const Configuration& other) const;
+
+        /** Compare for inequality.
+            \param other Other configuration
+            \return true if both configurations are different */
+        bool operator!=(const Configuration& other) const;
+
      private:
         void computeDerivedInformation();
 

@@ -679,6 +679,24 @@ game::map::Configuration::getSectorNumber(Point pt) const
         + (999 - (y % 1000)) / 100;
 }
 
+bool
+game::map::Configuration::operator==(const Configuration& other) const
+{
+    return m_mode == other.m_mode
+        && m_center == other.m_center
+        && m_size == other.m_size
+        // No need to compare m_min, m_max (computed)
+        && m_fromHostConfiguration == other.m_fromHostConfiguration
+        && m_circularPrecision == other.m_circularPrecision
+        && m_circularExcess == other.m_circularExcess;
+}
+
+bool
+game::map::Configuration::operator!=(const Configuration& other) const
+{
+    return !operator==(other);
+}
+
 void
 game::map::Configuration::computeDerivedInformation()
 {

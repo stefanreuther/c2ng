@@ -104,6 +104,12 @@ TestGameMapConfiguration::testFlat()
 
     // Distance
     TS_ASSERT_EQUALS(cc.getSquaredDistance(Point(1000, 1000), Point(1003, 1004)), 25);
+
+    // Comparison
+    TS_ASSERT_EQUALS(cc == cc, true);
+    TS_ASSERT_EQUALS(cc != cc, false);
+    TS_ASSERT_EQUALS(cc == game::map::Configuration(), true);
+    TS_ASSERT_EQUALS(cc != game::map::Configuration(), false);
 }
 
 /** Test image transformations in flat, default map.
@@ -197,6 +203,10 @@ TestGameMapConfiguration::testFlatSmall()
     TS_ASSERT_EQUALS(cc.getSectorNumber(Point(1999, 999)), 0);
     TS_ASSERT_EQUALS(cc.getSectorNumber(Point(999,  1999)), 0);
     TS_ASSERT_EQUALS(cc.getSectorNumber(Point(1999, 3001)), 0);
+
+    // Comparison to default
+    TS_ASSERT_EQUALS(cc == game::map::Configuration(), false);
+    TS_ASSERT_EQUALS(cc != game::map::Configuration(), true);
 }
 
 /** Test nonstandard, small map.
@@ -273,6 +283,10 @@ TestGameMapConfiguration::testFlatOffset()
     TS_ASSERT(!cc.parseSectorNumber(99, p));
     TS_ASSERT(!cc.parseSectorNumber(500, p));
     TS_ASSERT(!cc.parseSectorNumber(501, p));
+
+    // Comparison to default
+    TS_ASSERT_EQUALS(cc == game::map::Configuration(), false);
+    TS_ASSERT_EQUALS(cc != game::map::Configuration(), true);
 }
 
 /** Test image transformations in nonstandard map.
@@ -380,6 +394,10 @@ TestGameMapConfiguration::testWrapped()
     TS_ASSERT_EQUALS(cc.getSquaredDistance(Point(1000, 1000), Point(3003, 3004)), 25);
     TS_ASSERT_EQUALS(cc.getSquaredDistance(Point(3000, 3000), Point(1003, 1004)), 25);
     TS_ASSERT_EQUALS(cc.getSquaredDistance(Point(3000, 3000), Point(3003, 3004)), 25);
+
+    // Comparison to default
+    TS_ASSERT_EQUALS(cc == game::map::Configuration(), false);
+    TS_ASSERT_EQUALS(cc != game::map::Configuration(), true);
 }
 
 /** Test image transformations in wrapped map. */
@@ -456,6 +474,10 @@ TestGameMapConfiguration::testWrappedSmall()
     TS_ASSERT_EQUALS(cc.getSectorNumber(Point(1500, 1600)), 353);
     TS_ASSERT_EQUALS(cc.getSectorNumber(Point(1500, 1700)), 352);
     TS_ASSERT_EQUALS(cc.getSectorNumber(Point(1500, 1800)), 351);
+
+    // Comparison to default
+    TS_ASSERT_EQUALS(cc == game::map::Configuration(), false);
+    TS_ASSERT_EQUALS(cc != game::map::Configuration(), true);
 }
 
 /** Test circular map.
@@ -486,6 +508,10 @@ TestGameMapConfiguration::testCircular()
     TS_ASSERT_EQUALS(cc.getCanonicalLocation(Point(2102, 3100)), Point(1917, 1109));
     TS_ASSERT_EQUALS(cc.getCanonicalLocation(Point(1300, 1200)), Point(2617, 2705));
     TS_ASSERT_EQUALS(cc.getCanonicalLocation(Point(3027, 2286)), Point(1100, 1749));
+
+    // Comparison to default
+    TS_ASSERT_EQUALS(cc == game::map::Configuration(), false);
+    TS_ASSERT_EQUALS(cc != game::map::Configuration(), true);
 }
 
 /** Test image transformations in circular map.

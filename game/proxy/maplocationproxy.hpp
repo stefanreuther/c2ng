@@ -17,7 +17,8 @@
 namespace game { namespace proxy {
 
     /** Asynchronous, bidirectional proxy for map location.
-        This accesses the Session > Game > game::map::Cursors > game::map::Location object. */
+        This accesses the Session > Game > game::map::Cursors > game::map::Location object.
+        In addition, it provides a game::map::Configuration object and reports changes. */
     class MapLocationProxy {
      public:
         /** Constructor.
@@ -29,21 +30,24 @@ namespace game { namespace proxy {
         ~MapLocationProxy();
 
         /** Post a request to query the current location.
+            This call is used for retrieving the initial position.
             Every postQueryLocation() call will eventually produce a sig_locationResult callback. */
         void postQueryLocation();
 
         /** Set location to point.
+            Will eventually generate a sig_positionChange callback.
             \param pt Point
             \see game::map::Location::set() */
         void setPosition(game::map::Point pt);
 
         /** Set location to reference.
+            Will eventually generate a sig_positionChange callback.
             \param ref Reference
             \see game::map::Location::set() */
         void setPosition(game::Reference ref);
 
         /** Browse from current object.
-            Will respond with sig_browseResult in addition to sig_locationResult.
+            Will respond with sig_browseResult in addition to sig_positionChange.
             \param flags Flags
             \see game::map::Location::browse() */
         void browse(game::map::Location::BrowseFlags_t flags);
@@ -63,6 +67,10 @@ namespace game { namespace proxy {
         /** Position change callback.
             Called if the game-side location reports a sig_positionChange. */
         afl::base::Signal<void(game::map::Point)> sig_positionChange;
+
+        /** Configuration change callback.
+            Called if the map configuration changes on game side. */
+        afl::base::Signal<void(game::map::Configuration)> sig_configChange;
 
      private:
         class Trampoline;

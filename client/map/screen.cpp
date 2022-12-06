@@ -260,6 +260,7 @@ client::map::Screen::Screen(client::si::UserSide& userSide,
 
     // Connect signals
     m_locationProxy.sig_locationResult.add(this, &Screen::onLocationResult);
+    m_locationProxy.sig_configChange.add(this, &Screen::onMapConfigChange);
     m_locationProxy.sig_positionChange.add(this, &Screen::onPositionChange);
     m_locationProxy.sig_browseResult.add(this, &Screen::onBrowseResult);
     m_refListProxy.sig_listChange.add(this, &Screen::onListChange);
@@ -795,6 +796,12 @@ client::map::Screen::onLocationResult(game::Reference ref, game::map::Point pt, 
     m_location.setConfiguration(config);
     m_location.setPosition(pt);
     m_location.setFocusedObject(ref);
+}
+
+void
+client::map::Screen::onMapConfigChange(game::map::Configuration config)
+{
+    m_location.setConfiguration(config);
 }
 
 void

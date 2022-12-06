@@ -27,6 +27,7 @@ namespace {
         Point point;
         Configuration config;
         bool ok;
+        bool configOk;
 
         void onLocationResult(Reference ref, Point point, Configuration config)
             {
@@ -36,8 +37,14 @@ namespace {
                 this->ok = true;
             }
 
+        void onConfigChange(Configuration config)
+            {
+                this->config = config;
+                this->configOk = true;
+            }
+
         ResultReceiver()
-            : ref(), point(), config(), ok(false)
+            : ref(), point(), config(), ok(false), configOk(false)
             { }
     };
 
@@ -230,5 +237,46 @@ TestGameProxyMapLocationProxy::testBrowse()
     }
     TS_ASSERT_EQUALS(recv.point, Point(1000, 1002));
     TS_ASSERT_EQUALS(recv.ref, Reference(Reference::Ship, 2));
+}
+
+/** Test configuration change.
+    A: create session. Register sig_configChange callback. Modify configuration.
+    E: sig_configChange callback generated */
+void
+TestGameProxyMapLocationProxy::testConfigChange()
+{
+    // Environment
+    CxxTest::setAbortTestOnFail(true);
+    SessionThread s;
+    prepare(s);
+    s.session().getRoot()->hostConfiguration()[game::config::HostConfiguration::AllowWraparoundMap].set(0);
+    SimpleRequestDispatcher disp;
+    MapLocationProxy testee(s.gameSender(), disp);
+
+    // Set up receiver
+    ResultReceiver recv;
+    testee.sig_locationResult.add(&recv, &ResultReceiver::onLocationResult);
+    testee.sig_configChange.add(&recv, &ResultReceiver::onConfigChange);
+    testee.postQueryLocation();
+    while (!recv.ok) {
+        TS_ASSERT(disp.wait(1000));
+    }
+    TS_ASSERT(!recv.configOk); // no config callback yet
+    TS_ASSERT_EQUALS(recv.config.getMode(), game::map::Configuration::Flat);
+
+    // Modify configuration
+    class ModTask : public util::Request<game::Session> {
+     public:
+        virtual void handle(game::Session& s)
+            {
+                s.getRoot()->hostConfiguration()[game::config::HostConfiguration::AllowWraparoundMap].set(1);
+                s.notifyListeners();
+            }
+    };
+    s.gameSender().postNewRequest(new ModTask());
+    while (!recv.configOk) {
+        TS_ASSERT(disp.wait(1000));
+    }
+    TS_ASSERT_EQUALS(recv.config.getMode(), game::map::Configuration::Wrapped);
 }
 

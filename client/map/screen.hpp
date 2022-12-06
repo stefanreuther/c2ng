@@ -157,6 +157,7 @@ namespace client { namespace map {
 
         void updateCenter();
         void onLocationResult(game::Reference ref, game::map::Point pt, game::map::Configuration config);
+        void onMapConfigChange(game::map::Configuration config);
         void onPositionChange(game::map::Point pt);
         void onBrowseResult(game::Reference ref, game::map::Point pt);
         void onListChange(const game::ref::UserList& list);
