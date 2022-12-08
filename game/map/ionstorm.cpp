@@ -265,7 +265,7 @@ game::map::IonStorm::addMessageInformation(const game::parser::MessageInformatio
 void
 game::map::IonStorm::getForecast(Forecast_t& result) const
 {
-    // ex WIonForecastChart::drawPre (part)
+    // ex WIonForecastChart::drawPre (part), chartdlg.pas:PredictStorm
     for (int it = 0; it <= UNCERTAINITY_LIMIT; ++it) {
         // Storm changes direction by [-10, +10] degrees. Plot all even changes.
         // Storm goes warp 2..4. Plot slow speed outside (for tightest turns), fast speed inside (for farthest reach).

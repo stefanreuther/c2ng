@@ -25,7 +25,7 @@ namespace {
             : m_root(root),
               m_kind(k)
             { }
-                   
+
         virtual gfx::Point getSize() const
             { return getCellSize(m_root); }
 
@@ -41,8 +41,6 @@ namespace {
         ui::Root& m_root;
         int m_kind;
     };
-
-    
 }
 
 
@@ -76,6 +74,6 @@ client::widgets::MarkerKindSelector::getMarkerKind() const
 bool
 client::widgets::MarkerKindSelector::doStandardDialog(String_t title, afl::string::Translator& tx)
 {
-    // ex WMarkerTypeSelector::doStandardDialog
+    // ex WMarkerTypeSelector::doStandardDialog, chartdlg.pas:ChooseMarkerType
     return ui::widgets::doStandardDialog(title, tx("Choose marker type:"), *this, false, m_root, tx);
 }

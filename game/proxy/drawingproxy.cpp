@@ -145,6 +145,7 @@ game::proxy::DrawingProxy::Trampoline::createCannedMarker(game::map::Point pos, 
 void
 game::proxy::DrawingProxy::Trampoline::selectNearestVisibleDrawing(game::map::Point pos, double maxDistance)
 {
+    // ex chartusr.pas:NTryDelete (sort-of)
     if (Game* g = getGame()) {
         if (Turn* t = getTurn()) {
             DrawingContainer& cont = t->universe().drawings();
@@ -159,6 +160,7 @@ game::proxy::DrawingProxy::Trampoline::selectNearestVisibleDrawing(game::map::Po
 void
 game::proxy::DrawingProxy::Trampoline::selectMarkerAt(game::map::Point pos)
 {
+    // ex chartusr.pas:FindMarkerAt
     if (Turn* t = getTurn()) {
         DrawingContainer& cont = t->universe().drawings();
         DrawingContainer::Iterator_t it = cont.findMarkerAt(pos);
@@ -296,6 +298,7 @@ game::proxy::DrawingProxy::Trampoline::erase(bool adjacent)
     if (d != 0 && m_currentTurn != 0 && g != 0) {
         game::map::DrawingContainer& drawings = m_currentTurn->universe().drawings();
         if (adjacent && d->getType() == Drawing::LineDrawing) {
+            // ex chartusr.pas:DeleteObjAndAdjacent
             game::map::Point a = d->getPos(), b = d->getPos2();
             drawings.erase(m_current);
             drawings.eraseAdjacentLines(a, g->mapConfiguration());

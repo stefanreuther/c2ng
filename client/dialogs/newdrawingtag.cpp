@@ -65,7 +65,7 @@ client::dialogs::NewDrawingTag::getTagName() const
 bool
 client::dialogs::NewDrawingTag::run(String_t title, afl::string::Translator& tx, bool* pAdjacent)
 {
-    // ex WCreateMarkerDialog::init
+    // ex WCreateMarkerDialog::init, chartdlg.pas:ChooseNewTag
     const int CANCEL = 0, OK = 1, ADJACENT = 2;
     afl::base::Deleter del;
 

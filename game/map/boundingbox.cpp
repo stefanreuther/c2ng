@@ -20,7 +20,7 @@ game::map::BoundingBox::BoundingBox()
 void
 game::map::BoundingBox::addUniverse(const Universe& univ, const Configuration& mapConfig)
 {
-    // ex GChartBBox::initFromUniverse (part)
+    // ex GChartBBox::initFromUniverse (part), chart.pas:CalcBBox (part)
     // Add known/configured size of universe
     addPoint(mapConfig.getMinimumCoordinates());
     addPoint(mapConfig.getMaximumCoordinates());
@@ -65,7 +65,7 @@ game::map::BoundingBox::addUniverse(const Universe& univ, const Configuration& m
 void
 game::map::BoundingBox::addPoint(Point pt)
 {
-    // ex GChartBBox::addPoint
+    // ex GChartBBox::addPoint, chart.pas:AddBBoxPoint
     // @change We use half-open intervals, hence different logic
     if (m_min == m_max) {
         // Empty -> set anew
@@ -83,7 +83,7 @@ game::map::BoundingBox::addPoint(Point pt)
 void
 game::map::BoundingBox::addCircle(Point pt, int radius)
 {
-    // ex GChartBBox::addCircle
+    // ex GChartBBox::addCircle, chart.pas:AddBBoxCircle
     addPoint(pt + Point(radius, radius));
     addPoint(pt - Point(radius, radius));
 }

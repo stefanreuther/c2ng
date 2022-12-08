@@ -652,7 +652,7 @@ game::map::Configuration::parseSectorNumber(int n, Point& result) const
 int
 game::map::Configuration::getSectorNumber(Point pt) const
 {
-    // ex GPoint::getSectorNumber
+    // ex GPoint::getSectorNumber, chart.pas:SectorNr
     // outside map?
     if (!isOnMap(pt)) {
         return 0;

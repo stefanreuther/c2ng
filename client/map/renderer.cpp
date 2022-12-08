@@ -37,7 +37,7 @@ namespace {
 
     void drawCross(gfx::BaseContext& ctx, gfx::Point pt, int size)
     {
-        // ex GChartViewport::drawCross (part)
+        // ex GChartViewport::drawCross (part), chart.pas:NDrawCross
         drawHLine(ctx, pt.getX() - size, pt.getY(), pt.getX() + size);
         drawVLine(ctx, pt.getX(), pt.getY() - size, pt.getY() + size);
     }
@@ -115,6 +115,7 @@ class client::map::Renderer::Listener : public game::map::RendererListener {
 
     void drawObject(gfx::Point center, int scaledRadius, bool filled)
         {
+            // ex chart.pas:DrawCircle
             if (filled) {
                 drawFilledCircle(m_context, center, scaledRadius);
             } else {
@@ -124,7 +125,7 @@ class client::map::Renderer::Listener : public game::map::RendererListener {
 
     void drawMovingObject(gfx::Point center, int scaledRadius, int speed, int heading, bool filled)
         {
-            // ex GChartViewport::drawMovingObject
+            // ex GChartViewport::drawMovingObject, chart.pas:NDrawThing
             drawObject(center, scaledRadius, filled);
             if (speed > 0 && speed <= 20 && heading >= 0) {
                 double h = heading * util::PI / 180.0;
@@ -142,6 +143,7 @@ class client::map::Renderer::Listener : public game::map::RendererListener {
 
     void setMineFillStyle(gfx::Point pt, bool isWeb, Relation_t rel)
         {
+            // ex chart.pas:SetMineFillStyle
             // Adjust pattern position to avoid that own and foreing minefields hide each other
             if (rel == game::TeamSettings::ThisPlayer) {
                 pt.addY(1);
@@ -389,7 +391,7 @@ class client::map::Renderer::Listener : public game::map::RendererListener {
         }
     virtual void drawIonStorm(game::map::Point p, int r, int voltage, int speed, int heading, bool filled)
         {
-            // ex GChartViewport::drawIons
+            // ex GChartViewport::drawIons, chart.pas:NDrawIons (part)
             m_context.setLinePattern(0xFF);
             m_context.setFillPattern(IONSTORM_FILL);
             m_context.setColor(getIonStormColor(voltage));
@@ -679,6 +681,7 @@ client::map::Renderer::getCenter() const
 bool
 client::map::Renderer::zoomIn()
 {
+    // ex chart.pas:ZoomIn
     if (m_zoomDivider > 1) {
         --m_zoomDivider;
         return true;
@@ -693,6 +696,7 @@ client::map::Renderer::zoomIn()
 bool
 client::map::Renderer::zoomOut()
 {
+    // ex chart.pas:ZoomOut
     if (m_zoomMultiplier > 1) {
         --m_zoomMultiplier;
         return true;

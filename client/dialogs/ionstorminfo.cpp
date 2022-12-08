@@ -288,7 +288,7 @@ IonStormInfoDialog::initLabels()
     // We can easily have the labels computed automatically, so we only set the right column.
     const int RIGHT = 16*em;
 
-    // ex WIonStormInfoTile::drawData (part)
+    // ex WIonStormInfoTile::drawData (part), CIonWindow.DrawInterior
     m_infoTable.all().setColor(ui::Color_Black);
     m_infoTable.cell(0, 0).setText(tx("Centered at:"));
     m_infoTable.cell(0, 1).setText(tx("Radius:"));
@@ -309,7 +309,7 @@ IonStormInfoDialog::onStormChange(const IonStormProxy::IonStormInfo& info)
     if (info.stormId == 0) {
         m_loop.stop(0);
     } else {
-        // ex WIonStormInfoTile::drawData (part)
+        // ex WIonStormInfoTile::drawData (part), CIonWindow.DrawData
         m_infoTable.cell(1, 0).setText(info.center.toString());
         m_infoTable.cell(1, 1).setText(info.text[IonStormProxy::Radius]);
 

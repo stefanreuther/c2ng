@@ -203,7 +203,7 @@ namespace {
 void
 client::drawMarker(gfx::BaseContext& ctx, const Marker& marker, gfx::Point pt)
 {
-    // ex client/marks.h:drawMarker
+    // ex client/marks.h:drawMarker, chart.pas:DrawMarker
     const int8_t* ptr = marker.data;
     while (*ptr != END) {
         ctx.canvas().drawPixel(pt + gfx::Point(ptr[0], ptr[1]), ctx.getRawColor(), ctx.getAlpha());
@@ -214,7 +214,7 @@ client::drawMarker(gfx::BaseContext& ctx, const Marker& marker, gfx::Point pt)
 void
 client::drawDottedCircle(gfx::BaseContext& ctx, gfx::Point pt, int r)
 {
-    // ex client/marks.h:drawDottedCircle
+    // ex client/marks.h:drawDottedCircle, chart.pas:DottedCircle
     static const Marker*const markers[] = {
         &dotted_1, &dotted_2, &dotted_3, &dotted_4,
         &dotted_5, &dotted_6, &dotted_7
@@ -229,7 +229,7 @@ client::drawDottedCircle(gfx::BaseContext& ctx, gfx::Point pt, int r)
 void
 client::drawSelection(gfx::BaseContext& ctx, gfx::Point pt, int mult, int divi)
 {
-    // ex client/marks.h:drawSelection
+    // ex client/marks.h:drawSelection, chart.pas:NDrawSelection
     if (mult <= 0 || divi <= 0) {
         /* invalid, ignore */
     } else if (mult > divi) {
@@ -289,7 +289,7 @@ client::drawShipIcon(gfx::BaseContext& ctx, const gfx::Point pt, bool isMe, bool
 const client::Marker*
 client::getUserMarker(int kind, bool big)
 {
-    // ex getUserMarker
+    // ex getUserMarker, chart.pas:DrawUserMarker
     static const Marker*const user_markers[][2] = {
         { &um_plus,      &um_small_plus },
         { &um_exclam,    &um_small_exclam },

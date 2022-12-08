@@ -41,7 +41,7 @@ namespace {
 
         bool run()
             {
-                // ex WNewDrawingDialog::buildDialog
+                // ex WNewDrawingDialog::buildDialog, CPaintWindow.DrawInterior
                 afl::base::Deleter del;
                 // VBox
                 //   UIFrameGroup/VBox

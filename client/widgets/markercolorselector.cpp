@@ -64,7 +64,7 @@ client::widgets::MarkerColorSelector::getColor() const
 bool
 client::widgets::MarkerColorSelector::doStandardDialog(String_t title, afl::string::Translator& tx, bool* adjacent)
 {
-    // ex WColorSelector::doStandardDialog
+    // ex WColorSelector::doStandardDialog, chartdlg.pas:SetObjColor
     const int CANCEL = 0, OK = 1, ADJACENT = 2;
 
     afl::base::Deleter del;

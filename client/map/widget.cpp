@@ -139,6 +139,7 @@ client::map::Widget::maybeRequestNewRange()
 void
 client::map::Widget::updateModeConfiguration(bool force)
 {
+    // ex chart.pas:NDrawChartUser (sort-of)
     game::map::RenderOptions::Area area = game::map::RenderOptions::Normal;
     switch (m_mode) {
      case NormalMode:

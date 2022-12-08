@@ -122,7 +122,7 @@ game::map::Renderer::~Renderer()
 void
 game::map::Renderer::render(RendererListener& out) const
 {
-    // ex GChartViewport::drawAux
+    // ex GChartViewport::drawAux, chart.pas:NDrawChartLL, NDrawChart
     State st(m_viewport, out);
 
     renderGrid(st);
@@ -167,6 +167,7 @@ game::map::Renderer::renderGrid(const State& st) const
 void
 game::map::Renderer::renderRectangularGrid(const State& st) const
 {
+    // ex chart.pas:NDrawSectors (part)
     const Configuration& config = m_viewport.mapConfiguration();
     const int dx = std::min(config.getSize().getX() / 200, 10);
     const int dy = std::min(config.getSize().getY() / 200, 10);
@@ -207,6 +208,7 @@ game::map::Renderer::renderRectangularGrid(const State& st) const
 void
 game::map::Renderer::renderCircularGrid(const State& st) const
 {
+    // ex chart.pas:NDrawSectors (part), NDrawGridCircle
     const Configuration& config = m_viewport.mapConfiguration();
 
     const int size = config.getSize().getX();
@@ -311,7 +313,7 @@ game::map::Renderer::renderMinefields(const State& st) const
 void
 game::map::Renderer::renderUfos(const State& st) const
 {
-    // ex GChartViewport::drawUfos
+    // ex GChartViewport::drawUfos, chart.pas:NDrawUfos
     const Configuration& config = m_viewport.mapConfiguration();
     UfoType& ty = m_viewport.universe().ufos();
     for (Id_t i = ty.findNextIndex(0); i != 0; i = ty.findNextIndex(i)) {
@@ -357,7 +359,7 @@ game::map::Renderer::renderUfos(const State& st) const
 void
 game::map::Renderer::renderIonStorms(const State& st) const
 {
-    // ex GChartViewport::drawIons
+    // ex GChartViewport::drawIons, chart.pas:NDrawIons (part)
     const Configuration& config = m_viewport.mapConfiguration();
     IonStormType& ty = m_viewport.universe().ionStormType();
     for (Id_t i = ty.findNextIndex(0); i != 0; i = ty.findNextIndex(i)) {
@@ -380,7 +382,7 @@ game::map::Renderer::renderIonStorms(const State& st) const
 void
 game::map::Renderer::renderDrawings(const State& st) const
 {
-    // ex GChartViewport::drawDrawings
+    // ex GChartViewport::drawDrawings, chart.pas:NDrawDrawings
     // Drawings
     const DrawingContainer& d = m_viewport.universe().drawings();
     for (DrawingContainer::Iterator_t i = d.begin(); i != d.end(); ++i) {
@@ -472,7 +474,7 @@ game::map::Renderer::renderDrawing(const State& st, const Drawing& d) const
 void
 game::map::Renderer::renderShipExtras(const State& st) const
 {
-    // ex GChartViewport::drawShipSelAndVectors
+    // ex GChartViewport::drawShipSelAndVectors, chart.pas:NDrawShipSelAndVectors
     const Configuration& config = m_viewport.mapConfiguration();
     AnyShipType& ty(m_viewport.universe().allShips());
 
@@ -589,7 +591,7 @@ game::map::Renderer::renderShipExtras(const State& st) const
 void
 game::map::Renderer::renderShipTrail(const State& st, const Ship& sh, int shipOwner, int turnNumber) const
 {
-    // ex GChartViewport::drawShipTrail
+    // ex GChartViewport::drawShipTrail, chart.pas:NShowShipTrail
     // Like PCC2,  we try not to assume any knowledge about how many ship track entries there are per ship.
     // Therefore, we always draw 16 turns max (stemming from the fact that PCC2 UI uses 8 colors).
     // We draw forward in time, so that a new line overwrites an old one if needed.
@@ -673,7 +675,7 @@ game::map::Renderer::renderShipTrail(const State& st, const Ship& sh, int shipOw
 void
 game::map::Renderer::renderShipVector(const State& st, const Ship& sh, int shipOwner) const
 {
-    // ex GChartViewport::drawShipVector
+    // ex GChartViewport::drawShipVector, chart.pas:NShowVector
     // Change to PCC2: this does not call drawShipTrail. This does the image loop internally for possible wrap support.
     const Configuration& config = m_viewport.mapConfiguration();
     const TeamSettings::Relation rel = m_viewport.teamSettings().getPlayerRelation(shipOwner);
@@ -719,8 +721,7 @@ game::map::Renderer::renderShipVector(const State& st, const Ship& sh, int shipO
 
         // Speed and heading
         int speed, heading;
-        if (sh.getWarpFactor
-            ().get(speed) && sh.getHeading().get(heading) && speed > 0) {
+        if (sh.getWarpFactor().get(speed) && sh.getHeading().get(heading) && speed > 0) {
             // This is a simplification against PCC1/PCC2 by using the computed heading.
             // It comes with a certain imprecision: a 81 ly circle has a circumference of 509, but we reach only 360 points = 70%.
             int dist = util::squareInteger(speed);
@@ -741,7 +742,7 @@ game::map::Renderer::renderShipVector(const State& st, const Ship& sh, int shipO
 void
 game::map::Renderer::renderPlanets(const State& st) const
 {
-    // ex GChartViewport::drawPlanets
+    // ex GChartViewport::drawPlanets, chart.pas:NDrawPlanets
     Universe& univ = m_viewport.universe();
 
     AnyPlanetType& ty(univ.allPlanets());
@@ -759,6 +760,7 @@ game::map::Renderer::renderPlanets(const State& st) const
 void
 game::map::Renderer::renderPlanet(const State& st, const Planet& planet, Point pos) const
 {
+    // ex chart.pas:NDrawPlanetIcon (sort-of)
     // An estimate of the size of a planet icon, including rings, markers, warp well, etc.
     // Setting this too low means a partially-visible icon at the edge disappears a little too quick.
     const int SIZE = 15;
@@ -823,7 +825,7 @@ game::map::Renderer::renderPlanet(const State& st, const Planet& planet, Point p
 void
 game::map::Renderer::renderWarpWell(const State& st, Point pos) const
 {
-    // ex GChartViewport::drawWarpWell
+    // ex GChartViewport::drawWarpWell, chart.pas:NDrawWarpWell
     // For now, keep it simple, functionality-wise and speed-wise.
     // Functionality: this just draws an edgy circle, and does not draw deformed warp wells when they overlap (same as PCC1/2).
     // Speed: this generates one call per edge, and therefore a correspondingly large number of scaling operations.
@@ -886,7 +888,7 @@ game::map::Renderer::renderWarpWell(const State& st, Point pos) const
 void
 game::map::Renderer::renderShips(const State& st) const
 {
-    // ex GChartViewport::drawShips, sort-of
+    // ex GChartViewport::drawShips, sort-of; chart.pas:NDrawShips
     const Configuration& config = m_viewport.mapConfiguration();
     AnyShipType& ships(m_viewport.universe().allShips());
     for (Id_t i = ships.findNextIndex(0); i != 0; i = ships.findNextIndex(i)) {

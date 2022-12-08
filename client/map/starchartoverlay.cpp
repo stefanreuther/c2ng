@@ -394,6 +394,7 @@ client::map::StarchartOverlay::handleKey(util::Key_t key, int prefix, const Rend
         return true;
 
      case 'o' + util::KeyMod_Alt:
+     case 'o':
         client::dialogs::doChartConfigDialog(m_root, m_screen.gameSender(), m_translator);
         return true;
 
@@ -425,6 +426,7 @@ client::map::StarchartOverlay::handleKey(util::Key_t key, int prefix, const Rend
         startDeleting();
         return true;
 
+     case 'e':
      case util::Key_F9:
      case util::Key_F9 + util::KeyMod_Alt:
         editMarkerComment();
@@ -486,7 +488,7 @@ client::map::StarchartOverlay::editDrawingTagFilter()
         // Active -> Inactive
         clearDrawingTagFilter();
     } else {
-        // ex selectMarkerTag
+        // ex selectMarkerTag, chartdlg.pas:ChooseNewTagFilter
         // Ask for new: get list
         util::StringList tagList;
         Downlink link(m_root, m_translator);
@@ -669,7 +671,7 @@ client::map::StarchartOverlay::editMarkerTag()
 void
 client::map::StarchartOverlay::editMarkerComment()
 {
-    // ex tryEditMarkerComment
+    // ex tryEditMarkerComment, chartusr.pas:NTryEditMarkerComment
     game::proxy::DrawingProxy& proxy = m_screen.drawingProxy();
     Downlink link(m_root, m_translator);
     proxy.selectMarkerAt(m_location.getPosition());

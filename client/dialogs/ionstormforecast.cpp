@@ -177,7 +177,7 @@ IonStormForecastDialog::run()
 void
 client::dialogs::doIonStormForecastDialog(ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx, const game::proxy::IonStormProxy::IonStormInfo& info)
 {
-    // ex doIonStormPrediction
+    // ex doIonStormPrediction, chartdlg.pas:ShowProjectedMovement
     if (!info.forecast.empty()) {
         // Compute warp arrow as map center
         const int offset = util::squareInteger(info.speed) + info.radius;

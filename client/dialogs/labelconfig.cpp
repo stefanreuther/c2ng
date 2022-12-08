@@ -320,7 +320,7 @@ Dialog::hideBusyIndicator()
 void
 client::dialogs::editLabelConfiguration(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender)
 {
-    // ex editLabelExpressions
+    // ex editLabelExpressions, chartusr.pas:EnterFormula
     Dialog dlg(root, tx, gameSender);
     Downlink link(root, tx);
     dlg.init(link);

@@ -313,7 +313,7 @@ UfoInfoDialog::initWidgets()
     const int LEFT = 12*em;
     const int RIGHT = 16*em;
 
-    // ex WUfoInfoTile::drawData (part)
+    // ex WUfoInfoTile::drawData (part), CUfoView.Draw
     m_infoTable.all().setColor(ui::Color_Black);
     m_infoTable.cell(0, 0).setExtraColumns(1);
     m_infoTable.cell(0, 1).setExtraColumns(1);
@@ -357,7 +357,7 @@ UfoInfoDialog::onUfoChange(const UfoProxy::UfoInfo& info)
     if (info.ufoId == 0) {
         m_loop.stop(0);
     } else {
-        // ex WUfoInfoTile::drawData (part)
+        // ex WUfoInfoTile::drawData (part), CUfoView.DrawData
         afl::string::Translator& tx = m_translator;
         m_infoTable.cell(0, 0).setText(info.text[UfoProxy::Info1]);
         m_infoTable.cell(0, 1).setText(info.text[UfoProxy::Info2]);

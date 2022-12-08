@@ -131,7 +131,7 @@ game::map::DrawingContainer::addNew(Drawing* drawing)
 game::map::DrawingContainer::Iterator_t
 game::map::DrawingContainer::findNearestVisibleDrawing(Point pt, const Configuration& config, double maxDistance) const
 {
-    // ex GDrawingContainer::findNearestVisibleDrawing
+    // ex GDrawingContainer::findNearestVisibleDrawing, chartusr.pas:FindNearestObject
     Iterator_t found = end();
     double minDistance = maxDistance;
     for (Iterator_t i = begin(), e = end(); i != e; ++i) {
@@ -212,7 +212,7 @@ game::map::DrawingContainer::eraseExpiredDrawings(int turnNumber)
 void
 game::map::DrawingContainer::eraseAdjacentLines(Point pos, const Configuration& config)
 {
-    // ex deleteAdjacent
+    // ex deleteAdjacent, chartusr.pas:DeleteAdjacent
     class EraseWorker : public Worker {
      public:
         virtual bool accept(const Drawing&)
@@ -227,7 +227,7 @@ game::map::DrawingContainer::eraseAdjacentLines(Point pos, const Configuration& 
 void
 game::map::DrawingContainer::setAdjacentLinesColor(Point pos, uint8_t color, const Configuration& config)
 {
-    // ex doColorizeAdjacent
+    // ex doColorizeAdjacent, chartusr.pas:ColorizeAdjacent
     class ColorWorker : public Worker {
      public:
         ColorWorker(uint8_t color)
@@ -247,7 +247,7 @@ game::map::DrawingContainer::setAdjacentLinesColor(Point pos, uint8_t color, con
 void
 game::map::DrawingContainer::setAdjacentLinesTag(Point pos, util::Atom_t tag, const Configuration& config)
 {
-    // ex doTagAdjacent
+    // ex doTagAdjacent, chartusr.pas:TagAdjacent
     class TagWorker : public Worker {
      public:
         TagWorker(util::Atom_t tag)

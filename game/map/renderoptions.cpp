@@ -156,7 +156,7 @@ game::map::RenderOptions::fromConfiguration(const game::config::UserConfiguratio
 game::map::RenderOptions::Options_t
 game::map::RenderOptions::getOptionFromKey(util::Key_t key)
 {
-    // ex GChartOptions::toggleOptionKey
+    // ex GChartOptions::toggleOptionKey, chartusr.pas:ProcessOptionToggle (sort-of)
     switch (key) {
      case 'm':
         return Options_t(ShowMinefields);

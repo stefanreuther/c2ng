@@ -629,7 +629,7 @@ game::map::Universe::findUniversalMinefieldFriendlyCodePlanetId(int forPlayer) c
 int
 game::map::Universe::markObjectsInRange(Point a, Point b, const game::map::Configuration& mapConfig)
 {
-    // ex WSelectChartMode::rebuildSelection, part
+    // ex WSelectChartMode::rebuildSelection, part; chartusr.pas:MarkRange
     AnyShipType ships(m_ships);
     int numShips = markTypeObjectsInRange(ships, a, b, mapConfig);
 

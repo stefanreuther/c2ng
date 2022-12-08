@@ -1453,6 +1453,7 @@ Sub CCUI.Planet.Share
 EndSub
 
 Sub CCUI.Minefield.Share
+  % ex chartdlg.pas:MailMinefield
   CC$Share
 EndSub
 

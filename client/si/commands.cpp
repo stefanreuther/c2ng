@@ -2102,7 +2102,7 @@ client::si::IFCCGlobalActions(game::Session& /*session*/, ScriptSide& si, Reques
 void
 client::si::IFCCGotoCoordinates(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
-    // ex client/chart/standardmode.cc:doGoTo
+    // ex client/chart/standardmode.cc:doGoTo, chartusr.pas:GotoXY
     class Task : public UserTask {
      public:
         Task(const game::map::Configuration& config)

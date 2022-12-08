@@ -67,6 +67,12 @@ namespace game { namespace proxy {
             \see game::map::Drawing::Drawing */
         void create(game::map::Point pos, game::map::Drawing::Type type);
 
+        /** Create new canned (predefined) marker.
+            The new marker is selected as new current drawing.
+
+            \param pos  Position
+            \param slot Slot number, [0, UserConfiguration::NUM_CANNED_MARKERS)
+            \see game::config::UserConfiguration::getCannedMarker */
         void createCannedMarker(game::map::Point pos, int slot);
 
         /** Select nearest drawing.
