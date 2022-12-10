@@ -234,9 +234,10 @@ game::map::UfoType::postprocess(int turn, const Configuration& mapConfig, const 
         ++index;
 
         /* We can connect this Ufo with the next one if it has an even
-           real_id, and the next one exists and has a one-higher Id */
+           real_id, and the next one exists and has a one-higher Id.
+           Note that 0 is a valid RealId for a wormhole. */
         const int32_t thisId = pu->getRealId();
-        if (thisId != 0 && (thisId & 1) == 0) {
+        if ((thisId & 1) == 0) {
             Ufo* next = getUfoByIndex(index);
             if (next != 0 && next->getRealId() == thisId+1) {
                 pu->connectWith(*next);
