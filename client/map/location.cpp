@@ -348,7 +348,8 @@ client::map::Location::Location(Listener& listener, afl::sys::LogListener& log)
       m_cursorPosition(),
       m_focusedObject(),
       m_objectList(),
-      m_config()
+      m_config(),
+      m_preferredObject()
 { }
 
 client::map::Location::~Location()
@@ -502,6 +503,18 @@ client::map::Location::startJump()
     return m_pState->startJump(*this);
 }
 
+void
+client::map::Location::setPreferredObject(game::Reference ref)
+{
+    m_preferredObject = ref;
+}
+
+game::Reference
+client::map::Location::getPreferredObject() const
+{
+    return m_preferredObject;
+}
+
 const game::map::Configuration&
 client::map::Location::configuration() const
 {
@@ -521,7 +534,13 @@ client::map::Location::verifyFocusedObject()
         }
     }
 
-    // If we have a list, we should have a focused object; focus on first possible.
+    // If we have a list, we should have a focused object; focus on preferred or first possible.
+    if (!m_focusedObject.isSet() && m_preferredObject.isSet()) {
+        size_t pos;
+        if (m_objectList.find(m_preferredObject, pos)) {
+            m_focusedObject = m_preferredObject;
+        }
+    }
     if (!m_focusedObject.isSet()) {
         size_t pos = 0;
         size_t limit = m_objectList.size();

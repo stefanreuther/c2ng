@@ -11,6 +11,7 @@
 #include "game/map/universe.hpp"
 #include "game/test/root.hpp"
 #include "game/test/sessionthread.hpp"
+#include "game/test/waitindicator.hpp"
 #include "game/turn.hpp"
 #include "util/simplerequestdispatcher.hpp"
 
@@ -78,11 +79,12 @@ namespace {
         s.session().setGame(new game::Game());
     }
 
-    void addShip(SessionThread& s, int id, Point pos)
+    game::map::Ship& addShip(SessionThread& s, int id, Point pos)
     {
         game::map::Ship* sh = s.session().getGame()->currentTurn().universe().ships().create(id);
         sh->addShipXYData(pos, 1, 100, game::PlayerSet_t(1));
         sh->internalCheck();
+        return *sh;
     }
 }
 
@@ -278,5 +280,37 @@ TestGameProxyMapLocationProxy::testConfigChange()
         TS_ASSERT(disp.wait(1000));
     }
     TS_ASSERT_EQUALS(recv.config.getMode(), game::map::Configuration::Wrapped);
+}
+
+/** Test getOtherPosition().
+    A: create session with a ship with waypoint. Call getOtherPosition().
+    E: correct value returned */
+void
+TestGameProxyMapLocationProxy::testGetOtherPosition()
+{
+    const game::Id_t ID = 100;
+    const Point POS(1200, 1300);
+    const Point WP(1400, 1700);
+
+    // Environment
+    CxxTest::setAbortTestOnFail(true);
+    SessionThread s;
+    game::test::WaitIndicator ind;
+    prepare(s);
+    addShip(s, ID, POS).setWaypoint(WP);
+
+    // Testee
+    MapLocationProxy testee(s.gameSender(), ind);
+    testee.setPosition(POS);
+
+    // Verify
+    // - Failure case
+    Point result;
+    TS_ASSERT_EQUALS(testee.getOtherPosition(ind, 0, result), false);
+    TS_ASSERT_EQUALS(result, Point());
+
+    // - Success case
+    TS_ASSERT_EQUALS(testee.getOtherPosition(ind, ID, result), true);
+    TS_ASSERT_EQUALS(result, WP);
 }
 

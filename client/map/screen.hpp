@@ -104,6 +104,8 @@ namespace client { namespace map {
         // FIXME: should this be here?
         game::proxy::DrawingProxy& drawingProxy()
             { return m_drawingProxy; }
+        game::proxy::MapLocationProxy& locationProxy()
+            { return m_locationProxy; }
         util::RequestSender<game::Session> gameSender()
             { return m_gameSender; }
         client::map::Widget& mapWidget()

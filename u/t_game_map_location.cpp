@@ -294,3 +294,100 @@ TestGameMapLocation::testWrap()
     TS_ASSERT_EQUALS(pt, IN);
 }
 
+/** Test getOtherPosition(), ship case. */
+void
+TestGameMapLocation::testGetOtherPosition()
+{
+    // Environment
+    const Point POS(700, 2000);
+    const Point WP(900, 1100);
+    const Point OTHER(1000, 1000);
+    const game::Id_t SHIP1 = 42;
+    const game::Id_t SHIP2 = 43;
+    game::test::SimpleTurn t;
+    t.setPosition(POS);
+    t.addShip(SHIP1, 1, Object::Playable).setWaypoint(WP);
+    t.addShip(SHIP2, 1, Object::Playable);
+
+    // Testee
+    Location testee;
+    testee.setUniverse(&t.universe(), &t.mapConfiguration());
+
+    // Point that is neither location or waypoint of ship
+    testee.set(OTHER);
+    TS_ASSERT_EQUALS(testee.getOtherPosition(0).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getOtherPosition(SHIP1).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getOtherPosition(SHIP2).isValid(), false);
+
+    // Position of ship
+    testee.set(POS);
+    TS_ASSERT_EQUALS(testee.getOtherPosition(0).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getOtherPosition(SHIP1).orElse(Point()), WP);
+    TS_ASSERT_EQUALS(testee.getOtherPosition(SHIP2).isValid(), false);        // ship has no waypoint, so no result
+
+    // Waypoint of ship
+    testee.set(WP);
+    TS_ASSERT_EQUALS(testee.getOtherPosition(0).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getOtherPosition(SHIP1).orElse(Point()), POS);
+}
+
+/** Test getOtherPosition(), circular map case. */
+void
+TestGameMapLocation::testGetOtherPositionCircular()
+{
+    // Environment
+    const Point IN(700, 2000);
+    const Point OUT(3500, 2000);
+    game::test::SimpleTurn t;
+    t.mapConfiguration().setConfiguration(game::map::Configuration::Circular, Point(2000, 2000), Point(1400, 1400));
+
+    // Testee
+    Location testee;
+    testee.setUniverse(&t.universe(), &t.mapConfiguration());
+
+    // Inside-out
+    testee.set(IN);
+    TS_ASSERT_EQUALS(testee.getOtherPosition(0).orElse(Point()), OUT);
+
+    // Outside-in
+    testee.set(OUT);
+    TS_ASSERT_EQUALS(testee.getOtherPosition(0).orElse(Point()), IN);
+}
+
+/** Test getOtherPosition(), Ufo case. */
+void
+TestGameMapLocation::testGetOtherPositionUfo()
+{
+    // Environment
+    game::test::SimpleTurn t;
+    game::map::Ufo* u1 = t.universe().ufos().addUfo(1, 1, 1);
+    u1->setPosition(Point(1000, 1100));
+    u1->setRadius(20);
+
+    game::map::Ufo* u2 = t.universe().ufos().addUfo(2, 1, 1);
+    u2->setPosition(Point(1000, 1100));
+    u2->setRadius(10);
+
+    game::map::Ufo* u3 = t.universe().ufos().addUfo(3, 1, 1);
+    u3->setPosition(Point(2000, 1500));
+    u3->setRadius(10);
+
+    u3->connectWith(*u2);
+
+    // Testee
+    Location testee;
+    testee.setUniverse(&t.universe(), &t.mapConfiguration());
+
+    // Only in ufo 1 (fails due to radius)
+    testee.set(Point(1000, 1115));
+    TS_ASSERT_EQUALS(testee.getOtherPosition(0).isValid(), false);
+
+    // Ufo 1 and Ufo 2 (picks Ufo 2)
+    testee.set(Point(1000, 1105));
+    TS_ASSERT_EQUALS(testee.getOtherPosition(0).orElse(Point()), Point(2000, 1500));
+
+    // Ufo 3
+    testee.set(Point(2000, 1510));
+    TS_ASSERT_EQUALS(testee.getOtherPosition(0).orElse(Point()), Point(1000, 1100));
+}
+

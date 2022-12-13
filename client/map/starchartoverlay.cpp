@@ -419,7 +419,7 @@ client::map::StarchartOverlay::handleKey(util::Key_t key, int prefix, const Rend
         return true;
 
      case 'x':
-        moveInsideOut();
+        moveToOtherPosition();
         return true;
 
      case util::Key_Delete:
@@ -744,32 +744,15 @@ client::map::StarchartOverlay::editVisibilityRange()
 }
 
 void
-client::map::StarchartOverlay::moveInsideOut()
+client::map::StarchartOverlay::moveToOtherPosition()
 {
-    const game::map::Configuration& config = m_location.configuration();
-    if (config.getMode() == game::map::Configuration::Circular) {
-        // Determine location to jump to
-        bool ok;
-        game::map::Point pt = config.getCanonicalLocation(m_location.getPosition());
-        if (pt != m_location.getPosition()) {
-            // Move outside-in
-            ok = true;
-        } else {
-            // Try to move inside-out
-            game::map::Point pt2;
-            if (config.getPointAlias(pt, pt2, 1, true)) {
-                pt = pt2;
-                ok = true;
-            } else {
-                ok = false;
-            }
-        }
-
-        // Execute the jump
-        if (ok) {
-            if (m_location.startJump()) {
-                m_location.setPosition(pt);
-            }
+    Downlink link(m_root, m_translator);
+    game::Reference ref = m_location.getPreferredObject();
+    game::Id_t shipId = (ref.getType() == game::Reference::Ship ? ref.getId() : 0);
+    game::map::Point pt;
+    if (m_screen.locationProxy().getOtherPosition(link, shipId, pt)) {
+        if (m_location.startJump()) {
+            m_location.setPosition(pt);
         }
     }
 }

@@ -98,6 +98,63 @@ game::map::Location::getPosition() const
     }
 }
 
+afl::base::Optional<game::map::Point>
+game::map::Location::getOtherPosition(Id_t shipId) const
+{
+    Point currentPosition;
+    if (getPosition().get(currentPosition)) {
+        if (m_pUniverse != 0 && m_pConfig != 0) {
+            if (const Ship* sh = m_pUniverse->ships().get(shipId)) {
+                // - if position is at ship, return its waypoint
+                Point pt, result;
+                if (sh->getPosition().get(pt) && pt == currentPosition && sh->getWaypoint().get(result) && result != currentPosition) {
+                    return result;
+                }
+                // - if position is at ship waypoint, return its position
+                if (sh->getWaypoint().get(pt) && pt == currentPosition && sh->getPosition().get(result) && result != currentPosition) {
+                    return result;
+                }
+            }
+
+            // - if position is in a wormhole, return exit position
+            // ex chartusr.pas:ChartUfoX
+            for (Id_t i = m_pUniverse->ufos().findNextIndex(0); i != 0; i = m_pUniverse->ufos().findNextIndex(i)) {
+                if (const Ufo* u = m_pUniverse->ufos().getObjectByIndex(i)) {
+                    Point ufoCenter;
+                    int32_t ufoRadius;
+                    if (u->getPosition().get(ufoCenter) && u->getRadiusSquared().get(ufoRadius) && m_pConfig->getSquaredDistance(currentPosition, ufoCenter) <= ufoRadius) {
+                        if (const Ufo* other = u->getOtherEnd()) {
+                            Point result;
+                            if (other->getPosition().get(result) && result != currentPosition) {
+                                return result;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // - if circular map is active, switch between map images
+            if (m_pConfig->getMode() == Configuration::Circular) {
+                Point result;
+
+                // inside > out
+                if (m_pConfig->getPointAlias(currentPosition, result, 1, true)) {
+                    return result;
+                }
+
+                // outside > in
+                result = m_pConfig->getCanonicalLocation(currentPosition);
+                if (result != currentPosition) {
+                    return result;
+                }
+            }
+        }
+    }
+
+    // No match
+    return afl::base::Nothing;
+}
+
 game::Reference
 game::map::Location::getReference() const
 {

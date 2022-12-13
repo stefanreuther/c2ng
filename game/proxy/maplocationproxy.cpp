@@ -7,6 +7,7 @@
 #include "game/game.hpp"
 #include "game/map/cursors.hpp"
 #include "game/map/location.hpp"
+#include "game/proxy/waitindicator.hpp"
 #include "game/turn.hpp"
 
 using game::map::Configuration;
@@ -38,7 +39,7 @@ class game::proxy::MapLocationProxy::Trampoline {
             }
         }
 
-    void onPositionChange(game::map::Point pt)
+    void onPositionChange(Point pt)
         {
             if (!m_inhibitPositionChange) {
                 sendPositionChange(pt);
@@ -57,7 +58,7 @@ class game::proxy::MapLocationProxy::Trampoline {
             }
         }
 
-    void sendPositionChange(game::map::Point pt)
+    void sendPositionChange(Point pt)
         { m_reply.postRequest(&MapLocationProxy::emitPositionChange, pt); }
 
     void sendLocation()
@@ -104,7 +105,7 @@ class game::proxy::MapLocationProxy::Trampoline {
     template<typename T>
     void setPosition(T t)
         {
-            if (game::Game* pGame = m_session.getGame().get()) {
+            if (Game* pGame = m_session.getGame().get()) {
                 m_inhibitPositionChange = true;
                 pGame->cursors().location().set(t);
                 m_inhibitPositionChange = false;
@@ -116,7 +117,7 @@ class game::proxy::MapLocationProxy::Trampoline {
 
     void browse(game::map::Location::BrowseFlags_t flags)
         {
-            if (game::Game* pGame = m_session.getGame().get()) {
+            if (Game* pGame = m_session.getGame().get()) {
                 m_inhibitPositionChange = true;
                 pGame->cursors().location().browse(flags);
                 m_inhibitPositionChange = false;
@@ -124,6 +125,15 @@ class game::proxy::MapLocationProxy::Trampoline {
                 const Point pt = pGame->cursors().location().getPosition().orElse(Point());
                 sendPositionChange(pt);
                 m_reply.postRequest(&MapLocationProxy::emitBrowseResult, pGame->cursors().location().getEffectiveReference(), pt);
+            }
+        }
+
+    bool getOtherPosition(Id_t shipId, Point& result)
+        {
+            if (Game* pGame = m_session.getGame().get()) {
+                return pGame->cursors().location().getOtherPosition(shipId).get(result);
+            } else {
+                return false;
             }
         }
 
@@ -183,7 +193,7 @@ void
 game::proxy::MapLocationProxy::setPosition(game::map::Point pt)
 {
     ++m_numOutstandingRequests;
-    m_trampoline.postRequest(&Trampoline::setPosition<game::map::Point>, pt);
+    m_trampoline.postRequest(&Trampoline::setPosition<Point>, pt);
 }
 
 void
@@ -191,6 +201,36 @@ game::proxy::MapLocationProxy::browse(game::map::Location::BrowseFlags_t flags)
 {
     ++m_numOutstandingRequests;
     m_trampoline.postRequest(&Trampoline::browse, flags);
+}
+
+bool
+game::proxy::MapLocationProxy::getOtherPosition(WaitIndicator& ind, game::Id_t shipId, game::map::Point& result)
+{
+    class Task : public util::Request<Trampoline> {
+     public:
+        Task(Id_t shipId)
+            : m_shipId(shipId), m_ok(false), m_result()
+            { }
+        virtual void handle(Trampoline& tpl)
+            { m_ok = tpl.getOtherPosition(m_shipId, m_result); }
+        bool isOK() const
+            { return m_ok; }
+        const Point& getResult() const
+            { return m_result; }
+     private:
+        const Id_t m_shipId;
+        bool m_ok;
+        Point m_result;
+    };
+
+    Task t(shipId);
+    ind.call(m_trampoline, t);
+    if (t.isOK()) {
+        result = t.getResult();
+        return true;
+    } else {
+        return false;
+    }
 }
 
 // Set location to reference.

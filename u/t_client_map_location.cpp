@@ -61,6 +61,9 @@ namespace {
                 // Interface requires this initialisation
                 location.setConfiguration(Configuration());
                 location.setFocusedObject(Reference());
+
+                // Coverage...
+                TS_ASSERT_EQUALS(location.configuration().getMode(), Configuration::Flat);
             }
     };
 
@@ -607,6 +610,7 @@ TestClientMapLocation::testJumpLock()
     bool ok = h.location.startJump();
     TS_ASSERT(ok);
     TS_ASSERT_EQUALS(h.location.getNumObjects(), 0U);
+    TS_ASSERT(h.location.getObjectByIndex(0) == 0);
 
     // Request lock
     h.location.lockObject(LockProxy::Flags_t());
@@ -655,6 +659,10 @@ TestClientMapLocation::testFocusedObject()
     TS_ASSERT(it != 0);
     TS_ASSERT_EQUALS(it->name, "planet");
     TS_ASSERT_EQUALS(it->reference, Reference(Reference::Planet, PLANET_ID));
+
+    // Range check
+    it = h.location.getObjectByIndex(3);
+    TS_ASSERT(it == 0);
 }
 
 /** Test focused object, pre-set case. */
@@ -790,11 +798,11 @@ TestClientMapLocation::testLoseFocusedObject()
     TS_ASSERT_EQUALS(h.location.getFocusedObject(), Reference(Reference::Ship, SHIP_ID));
 }
 
-/** Interface test. */
+/** Test keeping the focused object. */
 void
 TestClientMapLocation::testKeepFocusedObject()
 {
-    TestHarness h("testLoseFocusedObject");
+    TestHarness h("testKeepFocusedObject");
 
     // Regular startup
     h.listener.expectCall("requestObjectList(1200,2300)");
@@ -825,5 +833,32 @@ TestClientMapLocation::testKeepFocusedObject()
     // Focus updates with Id
     TS_ASSERT_EQUALS(h.location.getCurrentObjectIndex(), 2U);
     TS_ASSERT_EQUALS(h.location.getFocusedObject(), Reference(Reference::Planet, 3));
+}
+
+/** Test handling of preferred object. */
+void
+TestClientMapLocation::testKeepPreferredObject()
+{
+    TestHarness h("testKeepPreferredObject");
+
+    // Set a preferred object
+    h.location.setPreferredObject(Reference(Reference::Planet, 5));
+    TS_ASSERT_EQUALS(h.location.getPreferredObject(), Reference(Reference::Planet, 5));
+
+    // Regular startup
+    h.listener.expectCall("requestObjectList(1200,2300)");
+    h.location.setPosition(Point(1200, 2300));
+    h.listener.checkFinish();
+
+    // Set object list
+    UserList u;
+    u.add(UserList::ReferenceItem, "A", Reference(Reference::Planet, 1), false, Object::Playable, SkinColor::Green);
+    u.add(UserList::ReferenceItem, "B", Reference(Reference::Planet, 3), false, Object::Playable, SkinColor::Green);
+    u.add(UserList::ReferenceItem, "C", Reference(Reference::Planet, 5), false, Object::Playable, SkinColor::Green);
+    h.location.setObjectList(u);
+
+    // Verify current focused object
+    TS_ASSERT_EQUALS(h.location.getCurrentObjectIndex(), 2U);
+    TS_ASSERT_EQUALS(h.location.getFocusedObject(), Reference(Reference::Planet, 5));
 }
 

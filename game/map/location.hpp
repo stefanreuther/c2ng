@@ -56,6 +56,16 @@ namespace game { namespace map {
             \return position if known */
         afl::base::Optional<Point> getPosition() const;
 
+        /** Get possible "other end" position.
+            This is a suggested position for the user to go to.
+            - if position is at ship, return its waypoint
+            - if position is at ship waypoint, return its position
+            - if position is in a wormhole, return exit position
+            - if circular map is active, switch between map images
+            \param shipId Focus ship Id; can be 0
+            \return alternate position */
+        afl::base::Optional<Point> getOtherPosition(Id_t shipId) const;
+
         /** Get reference.
             \return reference */
         Reference getReference() const;

@@ -33,6 +33,7 @@ class TestClientMapLocation : public CxxTest::TestSuite {
     void testCycleFocusUnmarked();
     void testLoseFocusedObject();
     void testKeepFocusedObject();
+    void testKeepPreferredObject();
 };
 
 class TestClientMapOverlay : public CxxTest::TestSuite {

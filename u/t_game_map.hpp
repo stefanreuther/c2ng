@@ -164,6 +164,9 @@ class TestGameMapLocation : public CxxTest::TestSuite {
     void testBrowse();
     void testBrowsePlanet();
     void testWrap();
+    void testGetOtherPosition();
+    void testGetOtherPositionCircular();
+    void testGetOtherPositionUfo();
 };
 
 class TestGameMapLocationReverter : public CxxTest::TestSuite {

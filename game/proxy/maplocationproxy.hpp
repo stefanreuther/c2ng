@@ -16,6 +16,8 @@
 
 namespace game { namespace proxy {
 
+    class WaitIndicator;
+
     /** Asynchronous, bidirectional proxy for map location.
         This accesses the Session > Game > game::map::Cursors > game::map::Location object.
         In addition, it provides a game::map::Configuration object and reports changes. */
@@ -51,6 +53,18 @@ namespace game { namespace proxy {
             \param flags Flags
             \see game::map::Location::browse() */
         void browse(game::map::Location::BrowseFlags_t flags);
+
+        /** Get possible "other end" position.
+            - if position is at ship, return its waypoint
+            - if position is at ship waypoint, return its position
+            - if position is in a wormhole, return exit position
+            - if circular map is active, switch between map images
+            \param [in]  ind      UI synchronisation
+            \param [in]  shipId   Focus ship Id; can be 0
+            \param [out] result   Result
+            \return true on success; false if no alternate position found
+            \see game::map::Location::getOtherPosition() */
+        bool getOtherPosition(WaitIndicator& ind, game::Id_t shipId, game::map::Point& result);
 
         /** Location callback.
             Called in response to postQueryLocation().

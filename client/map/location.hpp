@@ -143,6 +143,16 @@ namespace client { namespace map {
             @retval false Jump not possible because another jump is still active */
         bool startJump();
 
+        /** Set preferred object.
+            When receiving an object list, prefer to lock on that object.
+            @param ref Object */
+        void setPreferredObject(game::Reference ref);
+
+        /** Get preferred object.
+            @return preferred object
+            @see setPreferredObject() */
+        game::Reference getPreferredObject() const;
+
         /** Access map configuration.
             @return handle to configuration */
         const game::map::Configuration& configuration() const;
@@ -175,6 +185,7 @@ namespace client { namespace map {
         game::Reference m_focusedObject;        // Focused object. Part of object list or unset in IdleState, otherwise arbitrary
         game::ref::UserList m_objectList;       // Object list. Valid in IdleState.
         game::map::Configuration m_config;      // Configuration. Not part of state machine; assumed to be present when needed.
+        game::Reference m_preferredObject;      // Preferred object to lock on
 
         void verifyFocusedObject();
 

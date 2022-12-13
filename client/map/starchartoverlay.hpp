@@ -67,7 +67,7 @@ namespace client { namespace map {
         void startDeleting();
         void startDistance();
         void editVisibilityRange();
-        void moveInsideOut();
+        void moveToOtherPosition();
 
         void setDrawingTagFilter(util::Atom_t tag, String_t tagName);
         void clearDrawingTagFilter();
