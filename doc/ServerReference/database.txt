@@ -669,7 +669,8 @@ Game settings
 @key configChanged:Int         (bool, set if config [tools, shiplist, ...] changed)
 @key scheduleChanged:Int       (bool, set if schedule changed)
 @key copyOf:GID                (Id of game this is a copy of, if any)
-@key copyEnable:Int            (0 or 1, if 1: if a game whose %copyOf points here goes joining->running, make a new, joining, copy of game copyNext/copyNextChoice; this one if copyNext is not set)
+@key copyDisable:Int           (0 or 1, if 1: do not auto-respawn (copyNext/copyNextChoice))
+@c documented but not implemented; replaced by copyDisable --> @key copyEnable:Int            (0 or 1, if 1: if a game whose %copyOf points here goes joining->running, make a new, joining, copy of game copyNext/copyNextChoice; this one if copyNext is not set)
 @key copyNext:GID
 @key copyNextChoice:Str        (list of game Ids separated by ","; extends copyNext by random choice from a set)
 @key copyPending:Int           (0 or 1, set to 1 when copy should be executed but has not yet been)

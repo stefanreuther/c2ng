@@ -175,6 +175,10 @@ namespace {
         if (!copyOfId) {
             return;
         }
+        if (game.getConfigInt("copyDisable") != 0) {
+            return;
+        }
+
         Game copyOf(root, copyOfId);
 
         // If this is a respawn cycle, get that Id
