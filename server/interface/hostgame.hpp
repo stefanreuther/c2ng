@@ -133,9 +133,10 @@ namespace server { namespace interface {
             afl::base::Optional<String_t> requiredTool;                    ///< Return only games running this tool.
             afl::base::Optional<String_t> requiredShipList;                ///< Return only games using this ship list.
             afl::base::Optional<String_t> requiredMaster;                  ///< Return only games created using this master.
+            afl::base::Optional<int32_t> requiredCopyOf;                   ///< Return only games copied from this game.
 
             Filter()
-                : requiredState(), requiredType(), requiredUser(), requiredHost(), requiredTool(), requiredShipList(), requiredMaster()
+                : requiredState(), requiredType(), requiredUser(), requiredHost(), requiredTool(), requiredShipList(), requiredMaster(), requiredCopyOf()
                 { }
         };
 

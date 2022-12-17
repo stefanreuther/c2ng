@@ -424,4 +424,8 @@ server::interface::HostGameClient::buildGameListCommand(afl::data::Segment& cmd,
         cmd.pushBackString("MASTER");
         cmd.pushBackString(*s);
     }
+    if (const int32_t* i = filter.requiredCopyOf.get()) {
+        cmd.pushBackString("COPYOF");
+        cmd.pushBackInteger(*i);
+    }
 }

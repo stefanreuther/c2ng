@@ -625,6 +625,7 @@ server::host::HostGame::listGames(const Filter& filter, afl::data::IntegerList_t
     const String_t* requiredTool     = filter.requiredTool.get();
     const String_t* requiredShipList = filter.requiredShipList.get();
     const String_t* requiredMaster   = filter.requiredMaster.get();
+    const int32_t* requiredCopyOf    = filter.requiredCopyOf.get();
 
     for (size_t i = 0; i < games.size(); ++i) {
         Game game(m_root, games[i], Game::NoExistanceCheck);
@@ -634,6 +635,7 @@ server::host::HostGame::listGames(const Filter& filter, afl::data::IntegerList_t
             && (!requiredHost || game.settings().stringField("host").get() == *requiredHost)
             && (!requiredShipList || game.settings().stringField("shiplist").get() == *requiredShipList)
             && (!requiredMaster || game.settings().stringField("master").get() == *requiredMaster)
+            && (!requiredCopyOf || game.getConfigInt("copyOf") == *requiredCopyOf)
             && (!requiredTool || game.tools().contains(*requiredTool)))
         {
             result.push_back(games[i]);

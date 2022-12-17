@@ -416,6 +416,12 @@ TestServerInterfaceHostGameClient::testStat()
         f5.requiredMaster = String_t("pmaster");
         testee.getInfos(f5, true, infos);
 
+        mock.expectCall("GAMELIST, COPYOF, 7");
+        mock.provideNewResult(0);
+        HostGame::Filter f6;
+        f6.requiredCopyOf = 7;
+        testee.getInfos(f6, false, infos);
+
         TS_ASSERT_EQUALS(infos.size(), 0U);
     }
 

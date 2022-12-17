@@ -145,6 +145,14 @@ TestServerHostHostGame::testCloneGame()
     TS_ASSERT_EQUALS(testee.getName(b), "New Game 1");
     TS_ASSERT_EQUALS(testee.getState(b), HostGame::Joining);
     TS_ASSERT_EQUALS(testee.getType(b), HostGame::PrivateGame);
+
+    // Verify listability
+    afl::data::IntegerList_t list;
+    server::interface::HostGame::Filter filter;
+    filter.requiredCopyOf = a;
+    testee.getGames(filter, list);
+    TS_ASSERT_EQUALS(list.size(), 1U);
+    TS_ASSERT_EQUALS(list[0], b);
 }
 
 /** Test cloneGame(), operation with target state. */

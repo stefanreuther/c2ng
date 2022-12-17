@@ -146,6 +146,7 @@ server::interface::HostGameServer::handleCommand(const String_t& upcasedCommand,
            - MASTER id:Str (only games using this master version, since 2.40.9)
            - SHIPLIST id:Str (only games using this ship list, since 2.40.9)
            - TOOL id:Str (only games using this tool, since 2.40.9)
+           - COPYOF id:Int (only games copied from this game, since 2.41)
 
            The command returns a list of {@type HostGameInfo} (normal) by default.
            %VERBOSE returns the verbose variant, %ID returns just a list of {@type GID|game Ids}.
@@ -189,6 +190,9 @@ server::interface::HostGameServer::handleCommand(const String_t& upcasedCommand,
             } else if (keyword == "MASTER") {
                 args.checkArgumentCountAtLeast(1);
                 filter.requiredMaster = toString(args.getNext());
+            } else if (keyword == "COPYOF") {
+                args.checkArgumentCountAtLeast(1);
+                filter.requiredCopyOf = toInteger(args.getNext());
             } else if (keyword == "VERBOSE") {
                 mode = Verbose;
             } else if (keyword == "ID") {
