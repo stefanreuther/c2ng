@@ -93,6 +93,7 @@ namespace client { namespace map {
 
         void setNewOverlay(Layer layer, Overlay* pOverlay);
         void removeOverlay(Overlay* pOverlay);
+        bool hasOverlay(Layer layer) const;
 
         void lockObject(game::proxy::LockProxy::Flags_t flags);
         void browse(game::map::Location::BrowseFlags_t flags);

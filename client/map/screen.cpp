@@ -711,6 +711,13 @@ client::map::Screen::removeOverlay(Overlay* pOverlay)
     }
 }
 
+bool
+client::map::Screen::hasOverlay(Layer layer) const
+{
+    // ex WChartMode::getParent (sort-of)
+    return m_overlays[layer].get() != 0;
+}
+
 void
 client::map::Screen::lockObject(game::proxy::LockProxy::Flags_t flags)
 {

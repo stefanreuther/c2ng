@@ -71,6 +71,7 @@ namespace client { namespace map {
 
         void setDrawingTagFilter(util::Atom_t tag, String_t tagName);
         void clearDrawingTagFilter();
+        void ensureDrawingTagVisible(const String_t& tagName);
     };
 
 } }

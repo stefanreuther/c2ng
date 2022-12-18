@@ -114,6 +114,13 @@ namespace {
             return 0;
         }
     }
+
+    /* UI-side canonicalisation of tag names: "0" and "" are the same.
+       Not 100% bullet-proof, but covers the usual case. */
+    String_t wrapZero(const String_t& tagName)
+    {
+        return (tagName == "0" ? String_t() : tagName);
+    }
 }
 
 
@@ -206,7 +213,8 @@ client::map::StarchartOverlay::drawAfter(gfx::Canvas& can, const Renderer& ren)
     }
 
     // Filter
-    if (m_drawingTagFilterActive) {
+    // Do not show when a PrimaryLayer is active; PrimaryLayers tend to occupy this screen corner
+    if (m_drawingTagFilterActive && !m_screen.hasOverlay(Screen::PrimaryLayer)) {
         ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
         outText(ctx, area.getTopLeft(), afl::string::Format(m_translator("Drawing filter: showing only %s"), m_drawingTagFilterName));
     }
@@ -604,6 +612,7 @@ client::map::StarchartOverlay::startDrawing()
         }
         break;
     }
+    ensureDrawingTagVisible(info.tagName);
 }
 
 void
@@ -778,5 +787,13 @@ client::map::StarchartOverlay::clearDrawingTagFilter()
         m_drawingTagFilterActive = false;
         m_screen.mapWidget().clearDrawingTagFilter();
         requestRedraw();
+    }
+}
+
+void
+client::map::StarchartOverlay::ensureDrawingTagVisible(const String_t& tagName)
+{
+    if (m_drawingTagFilterActive && wrapZero(tagName) != wrapZero(m_drawingTagFilterName)) {
+        clearDrawingTagFilter();
     }
 }
