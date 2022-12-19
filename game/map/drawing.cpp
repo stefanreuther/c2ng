@@ -18,6 +18,11 @@ namespace {
 
         return t >= a && t <= b;
     }
+
+    long scalarProduct(game::map::Point p1, game::map::Point p2)
+    {
+        return long(p1.getX())*long(p2.getX()) + long(p1.getY())*long(p2.getY());
+    }
 }
 
 const int game::map::Drawing::NUM_USER_COLORS;
@@ -152,24 +157,37 @@ game::map::Drawing::getDistanceTo(Point pt) const
 {
     // ex GDrawing::getDistanceTo
     switch (m_type) {
-     case LineDrawing:
-        if (isInRange(pt.getX(), m_pos.getX(), m_x2) && isInRange(pt.getY(), m_pos.getY(), m_y2)) {
-            /* position is approximately within bounding rectangle of line */
-            const long d0 = m_pos.getSquaredRawDistance(Point(m_x2, m_y2));
-            if (d0 == 0) {
-                /* degenerate case: line has length 0 */
-                return std::sqrt(double(m_pos.getSquaredRawDistance(pt)));
-            } else {
-                /* regular case: compute distance between point and line */
+     case LineDrawing: {
+        const long d0 = m_pos.getSquaredRawDistance(Point(m_x2, m_y2));
+        if (d0 == 0) {
+            /* degenerate case: line has length 0 */
+            return std::sqrt(double(m_pos.getSquaredRawDistance(pt)));
+        } else {
+            /* Distance to the line is length of the altitude of `pt`, in the triangle Pos/Pos2/pt.
+               However, the altitude's foot actually needs to end up between Pos/Pos2.
+
+               The foot point is Pos + ((pt-Pos).dir)/(dir.dir) * dir,
+               with . marking scalar product, and dir = Pos2-Pos being the direction vector.
+
+               Simplified, ((pt-Pos).dir)/(dir.dir) needs to be in [0,1] range.
+               Given that (dir.dir) = |dir|^2 = d0 is always positive,
+               we check ((pt-Pos).dir) for range [0, d0]. */
+            Point dir = Point(m_x2, m_y2) - m_pos;
+            long num = scalarProduct(pt - m_pos, dir);
+            if (num >= 0 && num <= d0) {
+                /* regular case: compute distance between point and line:
+                   |(pt-Pos) x dir| / |dir|, where x denotes vector product.
+                   Given two 2D vectors, |a x b| = xa*yb - xb*ya. */
                 const int32_t det = int32_t(pt.getY() - m_pos.getY()) * int32_t(m_x2 - m_pos.getX())
                                   - int32_t(pt.getX() - m_pos.getX()) * int32_t(m_y2 - m_pos.getY());
                 return std::abs(det / std::sqrt(double(d0)));
+            } else {
+                /* position is outside bounding rectangle, estimate using endpoints */
+                return std::sqrt(double(std::min(pt.getSquaredRawDistance(m_pos),
+                                                 pt.getSquaredRawDistance(Point(m_x2, m_y2)))));
             }
-        } else {
-            /* position is outside bounding rectangle, estimate using endpoints */
-            return std::sqrt(double(std::min(m_pos.getSquaredRawDistance(pt),
-                                             m_pos.getSquaredRawDistance(Point(m_x2, m_y2)))));
         }
+     }
 
      case RectangleDrawing: {
         /* Rectangle. We have 9 cases:

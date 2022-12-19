@@ -119,6 +119,48 @@ TestGameMapDrawing::testDistance()
         TS_ASSERT_DELTA(line.getDistanceTo(Point(2400, 2700)), 360.555, 0.01);
     }
 
+    // Line (swapped order of points)
+    {
+        Drawing line(Point(2200, 2400), Drawing::LineDrawing);
+        line.setPos2(Point(2000, 2100));
+
+        // - ends
+        TS_ASSERT_EQUALS(line.getDistanceTo(Point(2000, 2100)), 0);
+        TS_ASSERT_EQUALS(line.getDistanceTo(Point(2200, 2400)), 0);
+
+        // - point on line
+        TS_ASSERT_EQUALS(line.getDistanceTo(Point(2100, 2250)), 0);
+
+        // - in bounding rectangle
+        TS_ASSERT_DELTA(line.getDistanceTo(Point(2100, 2200)), 27.735, 0.01);
+
+        // - far out
+        TS_ASSERT_DELTA(line.getDistanceTo(Point(2000, 1900)), 200, 0.01);
+        TS_ASSERT_DELTA(line.getDistanceTo(Point(2400, 2700)), 360.555, 0.01);
+    }
+
+    // Horizontal line
+    {
+        Drawing line(Point(2000, 2100), Drawing::LineDrawing);
+        line.setPos2(Point(2200, 2100));
+
+        // - around first end
+        TS_ASSERT_EQUALS(line.getDistanceTo(Point(2000, 2090)), 10);
+        TS_ASSERT_EQUALS(line.getDistanceTo(Point(1990, 2100)), 10);
+        TS_ASSERT_EQUALS(line.getDistanceTo(Point(2000, 2110)), 10);
+        TS_ASSERT_DELTA(line.getDistanceTo(Point(1990, 2110)), 14.142, 0.01);
+
+        // - around second end
+        TS_ASSERT_EQUALS(line.getDistanceTo(Point(2200, 2090)), 10);
+        TS_ASSERT_EQUALS(line.getDistanceTo(Point(2210, 2100)), 10);
+        TS_ASSERT_EQUALS(line.getDistanceTo(Point(2200, 2110)), 10);
+        TS_ASSERT_DELTA(line.getDistanceTo(Point(2210, 2110)), 14.142, 0.01);
+
+        // - around mid
+        TS_ASSERT_EQUALS(line.getDistanceTo(Point(2100, 2090)), 10);
+        TS_ASSERT_EQUALS(line.getDistanceTo(Point(2100, 2110)), 10);
+    }
+
     // Circle
     {
         Drawing circle(Point(2500, 2600), Drawing::CircleDrawing);
