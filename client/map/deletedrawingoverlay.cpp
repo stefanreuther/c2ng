@@ -91,8 +91,9 @@ client::map::DeleteDrawingOverlay::handleKey(util::Key_t key, int /*prefix*/, co
         return true;
 
      case util::Key_Delete:
-        // Let top-level handle this!
-        return false;
+        // Try to find a new drawing. If none found, keeps the previous one.
+        screen().selectNearestVisibleDrawing();
+        return true;
 
      case 'a':
         // Delete adjacent

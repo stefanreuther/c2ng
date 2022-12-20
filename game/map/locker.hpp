@@ -5,12 +5,14 @@
 #ifndef C2NG_GAME_MAP_LOCKER_HPP
 #define C2NG_GAME_MAP_LOCKER_HPP
 
+#include "afl/base/optional.hpp"
 #include "game/config/integeroption.hpp"
 #include "game/hostversion.hpp"
 #include "game/map/point.hpp"
 #include "game/reference.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/unitscoredefinitionlist.hpp"
+#include "util/atomtable.hpp"
 
 namespace game { namespace map {
 
@@ -58,6 +60,11 @@ namespace game { namespace map {
             \param min Minimum (bottom-left) coordinate, inclusive.
             \param max Maximum (top-right) coordinate, inclusive. */
         void setRangeLimit(Point min, Point max);
+
+        /** Set tag filter.
+            If a tag filter is set, drawings only take part in locking if their tag matches.
+            \param tagFilter Tag filter */
+        void setDrawingTagFilter(afl::base::Optional<util::Atom_t> tagFilter);
 
         /** Set limitation to marked objects.
             If set, only marked objects are considered.
@@ -147,6 +154,7 @@ namespace game { namespace map {
         Point m_target;
         Point m_min;
         Point m_max;
+        afl::base::Optional<util::Atom_t> m_tagFilter;
         Point m_foundPoint;
         Reference m_foundObject;
         bool m_markedOnly;

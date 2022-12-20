@@ -20,6 +20,7 @@ namespace {
     using afl::base::Ptr;
     using game::Game;
     using game::HostVersion;
+    using game::map::Drawing;
     using game::map::Planet;
     using game::map::Point;
     using game::map::Ship;
@@ -45,12 +46,22 @@ namespace {
 
     void prepare(SessionThread& h)
     {
+        // Root
         Ptr<Root> r = new game::test::Root(HostVersion(HostVersion::PHost, MKVERSION(4,0,0)));
         h.session().setRoot(r);
 
-        // Ships at positions (1000,1110), (1000,1120), ... (1000,1200)
+        // Game
         Ptr<Game> g = new Game();
-        Universe& univ = g->currentTurn().universe();
+        h.session().setGame(g);
+
+        // Shiplist is required for warp-well locking
+        h.session().setShipList(new game::spec::ShipList());
+    }
+
+    void addShips(SessionThread& h)
+    {
+        // Ships at positions (1000,1110), (1000,1120), ... (1000,1200)
+        Universe& univ = h.session().getGame()->currentTurn().universe();
         for (int i = 1; i < 10; ++i) {
             Ship* p = univ.ships().create(i);
             TS_ASSERT(p);
@@ -60,10 +71,6 @@ namespace {
                 p->setIsMarked(true);
             }
         }
-        h.session().setGame(g);
-
-        // Shiplist is required for warp-well locking
-        h.session().setShipList(new game::spec::ShipList());
     }
 
     void addPlanet(SessionThread& h)
@@ -74,6 +81,13 @@ namespace {
         Planet& p = *univ.planets().create(333);
         p.setPosition(Point(2000, 2000));
         p.internalCheck(g->mapConfiguration(), h.session().translator(), h.session().log());
+    }
+
+    void createMarker(SessionThread& h, Point pt, util::Atom_t tag)
+    {
+        Drawing* p = new Drawing(pt, Drawing::MarkerDrawing);
+        p->setTag(tag);
+        h.session().getGame()->currentTurn().universe().drawings().addNew(p);
     }
 }
 
@@ -138,6 +152,7 @@ TestGameProxyLockProxy::testNormal()
     CxxTest::setAbortTestOnFail(true);
     SessionThread h;
     prepare(h);
+    addShips(h);
     SimpleRequestDispatcher disp;
     LockProxy t(h.gameSender(), disp);
 
@@ -164,6 +179,7 @@ TestGameProxyLockProxy::testNormalName()
     CxxTest::setAbortTestOnFail(true);
     SessionThread h;
     prepare(h);
+    addShips(h);
     SimpleRequestDispatcher disp;
     LockProxy t(h.gameSender(), disp);
 
@@ -191,6 +207,7 @@ TestGameProxyLockProxy::testRepeat()
     CxxTest::setAbortTestOnFail(true);
     SessionThread h;
     prepare(h);
+    addShips(h);
     SimpleRequestDispatcher disp;
     LockProxy t(h.gameSender(), disp);
 
@@ -218,6 +235,7 @@ TestGameProxyLockProxy::testRepeatName()
     CxxTest::setAbortTestOnFail(true);
     SessionThread h;
     prepare(h);
+    addShips(h);
     SimpleRequestDispatcher disp;
     LockProxy t(h.gameSender(), disp);
 
@@ -246,6 +264,7 @@ TestGameProxyLockProxy::testMarked()
     CxxTest::setAbortTestOnFail(true);
     SessionThread h;
     prepare(h);
+    addShips(h);
     SimpleRequestDispatcher disp;
     LockProxy t(h.gameSender(), disp);
 
@@ -272,6 +291,7 @@ TestGameProxyLockProxy::testRange()
     CxxTest::setAbortTestOnFail(true);
     SessionThread h;
     prepare(h);
+    addShips(h);
     SimpleRequestDispatcher disp;
     LockProxy t(h.gameSender(), disp);
 
@@ -299,6 +319,7 @@ TestGameProxyLockProxy::testRangeName()
     CxxTest::setAbortTestOnFail(true);
     SessionThread h;
     prepare(h);
+    addShips(h);
     SimpleRequestDispatcher disp;
     LockProxy t(h.gameSender(), disp);
 
@@ -326,7 +347,8 @@ TestGameProxyLockProxy::testSetOrigin()
     // Environment
     CxxTest::setAbortTestOnFail(true);
     SessionThread h;
-    prepare(h);        // Ships at positions (1000,1110), (1000,1120), ... (1000,1200)
+    prepare(h);
+    addShips(h);       // Ships at positions (1000,1110), (1000,1120), ... (1000,1200)
     addPlanet(h);      // Planet at position 2000,2000
     SimpleRequestDispatcher disp;
     LockProxy t(h.gameSender(), disp);
@@ -345,3 +367,33 @@ TestGameProxyLockProxy::testSetOrigin()
     TS_ASSERT_EQUALS(recv.results[0], Point(2003, 2000));
 }
 
+
+/** Set setDrawingTagFilter.
+    A: create session with some markers.
+    E: call setDrawingTagFilter(); then call requestPosition(). Must produce correct result. */
+void
+TestGameProxyLockProxy::testSetDrawingTagFilter()
+{
+    // Environment
+    CxxTest::setAbortTestOnFail(true);
+    SessionThread h;
+    prepare(h);
+    createMarker(h, Point(990, 1000), 0);
+    createMarker(h, Point(1020, 1000), 10);
+
+    SimpleRequestDispatcher disp;
+    LockProxy t(h.gameSender(), disp);
+
+    // Testee
+    ResultReceiver recv;
+    t.sig_result.add(&recv, &ResultReceiver::onResult);
+    t.setDrawingTagFilter(10);
+    t.requestPosition(Point(1000, 1000), LockProxy::Flags_t());
+
+    // Wait for result
+    while (recv.results.empty()) {
+        TS_ASSERT(disp.wait(1000));
+    }
+    TS_ASSERT_EQUALS(recv.results.size(), 1U);
+    TS_ASSERT_EQUALS(recv.results[0], Point(1020, 1000));
+}

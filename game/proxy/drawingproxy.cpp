@@ -39,8 +39,8 @@ class game::proxy::DrawingProxy::Trampoline {
 
     void create(game::map::Point pos, Drawing::Type type);
     void createCannedMarker(game::map::Point pos, int slot);
-    void selectNearestVisibleDrawing(game::map::Point pos, double maxDistance);
-    void selectMarkerAt(game::map::Point pos);
+    void selectNearestVisibleDrawing(game::map::Point pos, double maxDistance, afl::base::Optional<util::Atom_t> tagFilter);
+    void selectMarkerAt(game::map::Point pos, afl::base::Optional<util::Atom_t> tagFilter);
     void finish();
     void setPos(game::map::Point pos);
     void setPos2(game::map::Point pos);
@@ -143,13 +143,13 @@ game::proxy::DrawingProxy::Trampoline::createCannedMarker(game::map::Point pos, 
 }
 
 void
-game::proxy::DrawingProxy::Trampoline::selectNearestVisibleDrawing(game::map::Point pos, double maxDistance)
+game::proxy::DrawingProxy::Trampoline::selectNearestVisibleDrawing(game::map::Point pos, double maxDistance, afl::base::Optional<util::Atom_t> tagFilter)
 {
     // ex chartusr.pas:NTryDelete (sort-of)
     if (Game* g = getGame()) {
         if (Turn* t = getTurn()) {
             DrawingContainer& cont = t->universe().drawings();
-            DrawingContainer::Iterator_t it = cont.findNearestVisibleDrawing(pos, g->mapConfiguration(), maxDistance);
+            DrawingContainer::Iterator_t it = cont.findNearestVisibleDrawing(pos, g->mapConfiguration(), maxDistance, tagFilter);
             if (it != cont.end()) {
                 setCurrentDrawing(it, t);
             }
@@ -158,12 +158,12 @@ game::proxy::DrawingProxy::Trampoline::selectNearestVisibleDrawing(game::map::Po
 }
 
 void
-game::proxy::DrawingProxy::Trampoline::selectMarkerAt(game::map::Point pos)
+game::proxy::DrawingProxy::Trampoline::selectMarkerAt(game::map::Point pos, afl::base::Optional<util::Atom_t> tagFilter)
 {
     // ex chartusr.pas:FindMarkerAt
     if (Turn* t = getTurn()) {
         DrawingContainer& cont = t->universe().drawings();
-        DrawingContainer::Iterator_t it = cont.findMarkerAt(pos);
+        DrawingContainer::Iterator_t it = cont.findMarkerAt(pos, tagFilter);
         if (it != cont.end()) {
             setCurrentDrawing(it, t);
         }
@@ -494,17 +494,17 @@ game::proxy::DrawingProxy::createCannedMarker(game::map::Point pos, int slot)
 }
 
 void
-game::proxy::DrawingProxy::selectNearestVisibleDrawing(game::map::Point pos, double maxDistance)
+game::proxy::DrawingProxy::selectNearestVisibleDrawing(game::map::Point pos, double maxDistance, afl::base::Optional<util::Atom_t> tagFilter)
 {
     flushRequests();
-    m_request.postRequest(&Trampoline::selectNearestVisibleDrawing, pos, maxDistance);
+    m_request.postRequest(&Trampoline::selectNearestVisibleDrawing, pos, maxDistance, tagFilter);
 }
 
 void
-game::proxy::DrawingProxy::selectMarkerAt(game::map::Point pos)
+game::proxy::DrawingProxy::selectMarkerAt(game::map::Point pos, afl::base::Optional<util::Atom_t> tagFilter)
 {
     flushRequests();
-    m_request.postRequest(&Trampoline::selectMarkerAt, pos);
+    m_request.postRequest(&Trampoline::selectMarkerAt, pos, tagFilter);
 }
 
 void

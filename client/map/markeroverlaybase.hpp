@@ -32,6 +32,7 @@ namespace client { namespace map {
      private:
         void onDrawingUpdate(const Status_t& st);
         void editColor();
+        void editTag();
 
         ui::Root& m_root;
         afl::string::Translator& m_translator;

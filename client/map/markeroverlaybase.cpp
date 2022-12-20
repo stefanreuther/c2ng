@@ -4,6 +4,8 @@
 
 #include "client/map/markeroverlaybase.hpp"
 #include "client/dialogs/helpdialog.hpp"
+#include "client/dialogs/newdrawingtag.hpp"
+#include "client/downlink.hpp"
 #include "client/map/screen.hpp"
 #include "client/widgets/markercolorselector.hpp"
 
@@ -54,6 +56,10 @@ client::map::MarkerOverlayBase::defaultHandleKey(util::Key_t key, int /*prefix*/
         editColor();
         return true;
 
+     case 't':
+        editTag();
+        return true;
+
      case util::Key_Delete:
         // Delete marker
         m_screen.drawingProxy().erase(false);
@@ -87,5 +93,22 @@ client::map::MarkerOverlayBase::editColor()
     csel.setColor(m_drawing.getColor());
     if (csel.doStandardDialog(m_translator("Drawing Color"), m_translator, 0)) {
         m_screen.drawingProxy().setColor(csel.getColor(), false);
+    }
+}
+
+void
+client::map::MarkerOverlayBase::editTag()
+{
+    // Fetch list of tags
+    Downlink link(m_root, m_translator);
+    util::StringList tagList;
+    m_screen.drawingProxy().getTagList(link, tagList);
+    tagList.sortAlphabetically();
+
+    // Dialog
+    client::dialogs::NewDrawingTag dlg(tagList, m_root, m_screen.gameSender());
+    dlg.setTag(m_drawing.getTag());
+    if (dlg.run(m_translator("Drawing Tag"), m_translator, 0)) {
+        m_screen.drawingProxy().setTagName(dlg.getTagName(), false);
     }
 }

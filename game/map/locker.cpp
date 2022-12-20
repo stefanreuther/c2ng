@@ -19,6 +19,7 @@ game::map::Locker::Locker(Point target, const Configuration& config)
     : m_target(target),
       m_min(INT_MIN, INT_MIN),
       m_max(INT_MAX, INT_MAX),
+      m_tagFilter(),
       m_foundPoint(target),
       m_foundObject(),
       m_markedOnly(false),
@@ -34,6 +35,13 @@ game::map::Locker::setRangeLimit(Point min, Point max)
 {
     m_min = min;
     m_max = max;
+}
+
+// Set tag filter.
+void
+game::map::Locker::setDrawingTagFilter(afl::base::Optional<util::Atom_t> tagFilter)
+{
+    m_tagFilter = tagFilter;
 }
 
 // Set limitation to marked objects.
@@ -144,10 +152,11 @@ game::map::Locker::addDrawings(const Universe& univ, const Drawing* ignore)
 {
     // ex findMarker
     const DrawingContainer& d = univ.drawings();
+    const util::Atom_t* pTag = m_tagFilter.get();
     for (DrawingContainer::Iterator_t i = d.begin(); i != d.end(); ++i) {
         if (Drawing* pd = *i) {
             if (pd != ignore) {
-                if (pd->isVisible() && pd->getType() == Drawing::MarkerDrawing) {
+                if (pd->isVisible() && pd->getType() == Drawing::MarkerDrawing && (pTag == 0 || *pTag == pd->getTag())) {
                     addPoint(pd->getPos(), false);
                 }
             }

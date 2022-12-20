@@ -5,6 +5,7 @@
 #ifndef C2NG_GAME_MAP_DRAWINGCONTAINER_HPP
 #define C2NG_GAME_MAP_DRAWINGCONTAINER_HPP
 
+#include "afl/base/optional.hpp"
 #include "afl/base/signal.hpp"
 #include "afl/container/ptrmultilist.hpp"
 #include "game/map/drawing.hpp"
@@ -49,14 +50,16 @@ namespace game { namespace map {
             \param pt          Origin point
             \param config      Map configuration
             \param maxDistance Maximum distance to consider
+            \param tagFilter   If specified, accept only drawings with the given tag
             \return Iterator to closest drawing that is visible (Drawing::isVisible()) and closer than maxDistance.
                     end() if there is no applicable drawing. */
-        Iterator_t findNearestVisibleDrawing(Point pt, const Configuration& config, double maxDistance) const;
+        Iterator_t findNearestVisibleDrawing(Point pt, const Configuration& config, double maxDistance, afl::base::Optional<util::Atom_t> tagFilter) const;
 
         /** Find marker at a given position.
-            \param pt     Position
+            \param pt         Position
+            \param tagFilter  If specified, accept only markers with the given tag
             \return Iterator to first visible marker at that position, end() if none found */
-        Iterator_t findMarkerAt(Point pt) const;
+        Iterator_t findMarkerAt(Point pt, afl::base::Optional<util::Atom_t> tagFilter) const;
 
         /** Find a drawing.
             If a drawing exists that has the same content (position, shape, size, metadata) as the given one,

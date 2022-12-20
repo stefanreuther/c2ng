@@ -129,14 +129,15 @@ game::map::DrawingContainer::addNew(Drawing* drawing)
 
 // Find nearest visible drawing.
 game::map::DrawingContainer::Iterator_t
-game::map::DrawingContainer::findNearestVisibleDrawing(Point pt, const Configuration& config, double maxDistance) const
+game::map::DrawingContainer::findNearestVisibleDrawing(Point pt, const Configuration& config, double maxDistance, afl::base::Optional<util::Atom_t> tagFilter) const
 {
     // ex GDrawingContainer::findNearestVisibleDrawing, chartusr.pas:FindNearestObject
     Iterator_t found = end();
     double minDistance = maxDistance;
+    const util::Atom_t* pTag = tagFilter.get();
     for (Iterator_t i = begin(), e = end(); i != e; ++i) {
         if (const Drawing* p = *i) {
-            if (p->isVisible()) {
+            if (p->isVisible() && (pTag == 0 || *pTag == p->getTag())) {
                 double dist = p->getDistanceToWrap(pt, config);
                 if (dist < minDistance) {
                     minDistance = dist;
@@ -150,13 +151,14 @@ game::map::DrawingContainer::findNearestVisibleDrawing(Point pt, const Configura
 
 // Find marker at a given position.
 game::map::DrawingContainer::Iterator_t
-game::map::DrawingContainer::findMarkerAt(Point pt) const
+game::map::DrawingContainer::findMarkerAt(Point pt, afl::base::Optional<util::Atom_t> tagFilter) const
 {
     // FIXME: it makes sense to locate the LAST marker
     Iterator_t i = begin();
+    const util::Atom_t* pTag = tagFilter.get();
     while (i != end()) {
         if (const Drawing* p = *i) {
-            if (p->isVisible() && p->getType() == Drawing::MarkerDrawing && p->getPos() == pt) {
+            if (p->isVisible() && p->getType() == Drawing::MarkerDrawing && p->getPos() == pt && (pTag == 0 || *pTag == p->getTag())) {
                 break;
             }
         }

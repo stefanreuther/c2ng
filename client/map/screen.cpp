@@ -86,6 +86,13 @@ namespace {
      private:
         game::Reference m_ref;
     };
+
+    /* UI-side canonicalisation of tag names: "0" and "" are the same.
+       Not 100% bullet-proof, but covers the usual case. */
+    String_t wrapZero(const String_t& tagName)
+    {
+        return (tagName == "0" ? String_t() : tagName);
+    }
 }
 
 
@@ -248,6 +255,8 @@ client::map::Screen::Screen(client::si::UserSide& userSide,
       m_propertyProxy(gameSender.makeTemporary(new PropertiesFromSession(m_sharedState))),
       m_refList(),
       m_currentObject(),
+      m_drawingTagFilter(),
+      m_drawingTagFilterName(),
       m_viewName(),
       m_keymapName(),
       m_keymapKeys(),
@@ -716,6 +725,62 @@ client::map::Screen::hasOverlay(Layer layer) const
 {
     // ex WChartMode::getParent (sort-of)
     return m_overlays[layer].get() != 0;
+}
+
+void
+client::map::Screen::setDrawingTagFilter(util::Atom_t tag, String_t tagName)
+{
+    const util::Atom_t* p = m_drawingTagFilter.get();
+    if (p == 0 || *p != tag) {
+        m_drawingTagFilter = tag;
+        m_drawingTagFilterName = tagName;
+        m_lockProxy.setDrawingTagFilter(m_drawingTagFilter);
+        m_widget.setDrawingTagFilter(tag);
+        requestRedraw();
+    }
+}
+
+void
+client::map::Screen::clearDrawingTagFilter()
+{
+    if (m_drawingTagFilter.isValid()) {
+        m_drawingTagFilter = afl::base::Nothing;
+        m_lockProxy.setDrawingTagFilter(m_drawingTagFilter);
+        m_widget.clearDrawingTagFilter();
+        requestRedraw();
+    }
+}
+
+void
+client::map::Screen::ensureDrawingTagVisible(const String_t& tagName)
+{
+    if (m_drawingTagFilter.isValid() && wrapZero(tagName) != wrapZero(m_drawingTagFilterName)) {
+        clearDrawingTagFilter();
+    }
+}
+
+bool
+client::map::Screen::hasDrawingTagFilter() const
+{
+    return m_drawingTagFilter.isValid();
+}
+
+const afl::base::Optional<util::Atom_t>&
+client::map::Screen::getDrawingTagFilter() const
+{
+    return m_drawingTagFilter;
+}
+
+const String_t&
+client::map::Screen::getDrawingTagFilterName() const
+{
+    return m_drawingTagFilterName;
+}
+
+void
+client::map::Screen::selectNearestVisibleDrawing()
+{
+    m_drawingProxy.selectNearestVisibleDrawing(m_location.getPosition(), NEAR_DISTANCE, m_drawingTagFilter);
 }
 
 void

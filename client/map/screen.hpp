@@ -46,6 +46,9 @@ namespace client { namespace map {
         };
         static const size_t NUM_LAYERS = MessageLayer+1;
 
+        /* What distance is considered "near" for drawings? */
+        static const int NEAR_DISTANCE = 21;
+
         Screen(client::si::UserSide& userSide,
                ui::Root& root,
                afl::string::Translator& tx,
@@ -94,6 +97,14 @@ namespace client { namespace map {
         void setNewOverlay(Layer layer, Overlay* pOverlay);
         void removeOverlay(Overlay* pOverlay);
         bool hasOverlay(Layer layer) const;
+
+        void setDrawingTagFilter(util::Atom_t tag, String_t tagName);
+        void clearDrawingTagFilter();
+        void ensureDrawingTagVisible(const String_t& tagName);
+        bool hasDrawingTagFilter() const;
+        const afl::base::Optional<util::Atom_t>& getDrawingTagFilter() const;
+        const String_t& getDrawingTagFilterName() const;
+        void selectNearestVisibleDrawing();
 
         void lockObject(game::proxy::LockProxy::Flags_t flags);
         void browse(game::map::Location::BrowseFlags_t flags);
@@ -148,6 +159,9 @@ namespace client { namespace map {
 
         game::ref::UserList m_refList;
         game::Reference m_currentObject;
+
+        afl::base::Optional<util::Atom_t> m_drawingTagFilter;
+        String_t m_drawingTagFilterName;
 
         String_t m_viewName;
         String_t m_keymapName;

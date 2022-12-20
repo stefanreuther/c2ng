@@ -165,11 +165,12 @@ TestGameMapDrawingContainer::testFindNearest()
     t.addNew(makeAt(1100, 1100, 1));
     t.addNew(makeAt(1200, 1200, 0));
     t.addNew(makeAt(1200, 1100, 1));
-    t.addNew(makeAt(1400, 1100, 1));
+    (*t.addNew(makeAt(1400, 1100, 1)))
+        ->setTag(77);
 
     // Closest will be (1200,1100) which is 100 ly away. (1200,1200) is not visible.
     {
-        DrawingContainer::Iterator_t it = t.findNearestVisibleDrawing(Point(1200, 1200), config, 1e6);
+        DrawingContainer::Iterator_t it = t.findNearestVisibleDrawing(Point(1200, 1200), config, 1e6, afl::base::Nothing);
         TS_ASSERT_DIFFERS(it, t.end());
         TS_ASSERT(*it);
         TS_ASSERT_EQUALS((*it)->getPos().getX(), 1200);
@@ -178,8 +179,17 @@ TestGameMapDrawingContainer::testFindNearest()
 
     // No result because maxDistance exceeded
     {
-        DrawingContainer::Iterator_t it = t.findNearestVisibleDrawing(Point(1200, 1200), config, 99);
+        DrawingContainer::Iterator_t it = t.findNearestVisibleDrawing(Point(1200, 1200), config, 99, afl::base::Nothing);
         TS_ASSERT_EQUALS(it, t.end());
+    }
+
+    // With tag filter
+    {
+        DrawingContainer::Iterator_t it = t.findNearestVisibleDrawing(Point(1200, 1200), config, 1e6, 77);
+        TS_ASSERT_DIFFERS(it, t.end());
+        TS_ASSERT(*it);
+        TS_ASSERT_EQUALS((*it)->getPos().getX(), 1400);
+        TS_ASSERT_EQUALS((*it)->getPos().getY(), 1100);
     }
 }
 
@@ -280,16 +290,23 @@ TestGameMapDrawingContainer::testFindMarker()
     t.addNew(makeAt(1000, 1100, 3));
     t.addNew(makeCircle(1000, 1200, 4));
 
-    DrawingContainer::Iterator_t it = t.findMarkerAt(Point(1000, 1000));
+    DrawingContainer::Iterator_t it = t.findMarkerAt(Point(1000, 1000), afl::base::Nothing);
     TS_ASSERT(*it);
     TS_ASSERT_EQUALS((**it).getColor(), 2);
 
-    it = t.findMarkerAt(Point(1000, 1100));
+    it = t.findMarkerAt(Point(1000, 1100), afl::base::Nothing);
     TS_ASSERT(*it);
     TS_ASSERT_EQUALS((**it).getColor(), 3);
 
-    it = t.findMarkerAt(Point(1000, 1200));
+    it = t.findMarkerAt(Point(1000, 1200), afl::base::Nothing);
     TS_ASSERT(!*it);
+
+    it = t.findMarkerAt(Point(1000, 1100), 77);
+    TS_ASSERT(!*it);
+
+    it = t.findMarkerAt(Point(1000, 1100), 0);
+    TS_ASSERT(*it);
+    TS_ASSERT_EQUALS((**it).getColor(), 3);
 }
 
 /** Test addMessageInformation, marker. */

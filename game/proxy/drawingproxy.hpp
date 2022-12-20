@@ -80,15 +80,17 @@ namespace game { namespace proxy {
             If no matching drawing is found, no change to the current drawing happens.
             \param pos         Position
             \param maxDistance Maximum distance
+            \param tagFilter   If specified, accept only drawings with the given tag
             \see game::map::DrawingContainer::findNearestVisibleDrawing */
-        void selectNearestVisibleDrawing(game::map::Point pos, double maxDistance);
+        void selectNearestVisibleDrawing(game::map::Point pos, double maxDistance, afl::base::Optional<util::Atom_t> tagFilter);
 
         /** Select marker at a given position.
             If a matching marker is found, it is selected as new current drawing.
             If no matching marker is found, no change to the current drawing happens.
-            \param pos Position
+            \param pos         Position
+            \param tagFilter   If specified, accept only markers with the given tag
             \see game::map::DrawingContainer::findMarkerAt */
-        void selectMarkerAt(game::map::Point pos);
+        void selectMarkerAt(game::map::Point pos, afl::base::Optional<util::Atom_t> tagFilter);
 
         /** Finish working with the current drawing.
             Deselects the current drawing. */

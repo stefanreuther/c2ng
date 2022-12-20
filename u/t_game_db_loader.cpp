@@ -576,14 +576,14 @@ TestGameDbLoader::testLoad()
         const game::map::DrawingContainer& dc = t.universe().drawings();
 
         // A circle
-        game::map::DrawingContainer::Iterator_t it1 = dc.findNearestVisibleDrawing(game::map::Point(1466, 1466), g.mapConfiguration(), 100);
+        game::map::DrawingContainer::Iterator_t it1 = dc.findNearestVisibleDrawing(game::map::Point(1466, 1466), g.mapConfiguration(), 100, afl::base::Nothing);
         TS_ASSERT(it1 != dc.end());
         TS_ASSERT_EQUALS((**it1).getPos(), game::map::Point(1479, 1456));
         TS_ASSERT_EQUALS((**it1).getCircleRadius(), 10);
         TS_ASSERT_EQUALS((**it1).getColor(), 9);
 
         // A marker
-        game::map::DrawingContainer::Iterator_t it2 = dc.findMarkerAt(game::map::Point(1273, 1553));
+        game::map::DrawingContainer::Iterator_t it2 = dc.findMarkerAt(game::map::Point(1273, 1553), afl::base::Nothing);
         TS_ASSERT(it2 != dc.end());
         TS_ASSERT_EQUALS((**it2).getMarkerKind(), 2);
         TS_ASSERT_EQUALS((**it2).getColor(), 9);

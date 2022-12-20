@@ -283,27 +283,27 @@ TestGameProxyDrawingProxy::testFindNearest()
     StatusReceiver recv(testee);
 
     // Select marker, unsuccessfully
-    testee.selectNearestVisibleDrawing(Point(2000, 2000), 10);
+    testee.selectNearestVisibleDrawing(Point(2000, 2000), 10, afl::base::Nothing);
     h.sync();
     ind.processQueue();
     TS_ASSERT(!recv.get().isValid());
 
     // Select marker, successfully
-    testee.selectNearestVisibleDrawing(Point(1000, 1011), 10);
+    testee.selectNearestVisibleDrawing(Point(1000, 1011), 10, afl::base::Nothing);
     h.sync();
     ind.processQueue();
     TS_ASSERT(recv.get().isValid());
     TS_ASSERT_EQUALS(recv.get().get()->getColor(), 2);
 
     // Select again, unsuccessfully. This does not change anything.
-    testee.selectNearestVisibleDrawing(Point(2000, 2000), 10);
+    testee.selectNearestVisibleDrawing(Point(2000, 2000), 10, afl::base::Nothing);
     h.sync();
     ind.processQueue();
     TS_ASSERT(recv.get().isValid());
     TS_ASSERT_EQUALS(recv.get().get()->getColor(), 2);
 
     // Select again, successfully
-    testee.selectNearestVisibleDrawing(Point(1000, 1019), 10);
+    testee.selectNearestVisibleDrawing(Point(1000, 1019), 10, afl::base::Nothing);
     h.sync();
     ind.processQueue();
     TS_ASSERT(recv.get().isValid());
@@ -327,7 +327,7 @@ TestGameProxyDrawingProxy::testErase()
     StatusReceiver recv(testee);
 
     // Select and erase
-    testee.selectNearestVisibleDrawing(Point(1000, 1011), 10);
+    testee.selectNearestVisibleDrawing(Point(1000, 1011), 10, afl::base::Nothing);
     testee.erase(false);
 
     // Verify
@@ -360,7 +360,7 @@ TestGameProxyDrawingProxy::testColorAdjacent()
 
     // Action
     DrawingProxy testee(h.gameSender(), ind);
-    testee.selectNearestVisibleDrawing(Point(1005, 1015), 10);
+    testee.selectNearestVisibleDrawing(Point(1005, 1015), 10, afl::base::Nothing);
     testee.setColor(9, true);
 
     // Verify
@@ -390,7 +390,7 @@ TestGameProxyDrawingProxy::testTagAdjacent()
 
     // Action
     DrawingProxy testee(h.gameSender(), ind);
-    testee.selectNearestVisibleDrawing(Point(1005, 1015), 10);
+    testee.selectNearestVisibleDrawing(Point(1005, 1015), 10, afl::base::Nothing);
     testee.setTag(600, true);
 
     // Verify
@@ -420,7 +420,7 @@ TestGameProxyDrawingProxy::testEraseAdjacent()
 
     // Action
     DrawingProxy testee(h.gameSender(), ind);
-    testee.selectNearestVisibleDrawing(Point(1005, 1015), 10);
+    testee.selectNearestVisibleDrawing(Point(1005, 1015), 10, afl::base::Nothing);
     testee.erase(true);
 
     // Verify
@@ -456,7 +456,7 @@ TestGameProxyDrawingProxy::testParallel()
     TS_ASSERT(!r2.get().isValid());
 
     // Select circle with second instance
-    p2.selectNearestVisibleDrawing(Point(1700, 1500), 10);
+    p2.selectNearestVisibleDrawing(Point(1700, 1500), 10, afl::base::Nothing);
     h.sync();
     ind.processQueue();
 
@@ -500,20 +500,20 @@ TestGameProxyDrawingProxy::testSelectMarker()
     StatusReceiver recv(testee);
 
     // Select marker, unsuccessfully
-    testee.selectMarkerAt(Point(2000, 2000));
+    testee.selectMarkerAt(Point(2000, 2000), afl::base::Nothing);
     h.sync();
     ind.processQueue();
     TS_ASSERT(!recv.get().isValid());
 
     // Select marker, successfully
-    testee.selectMarkerAt(Point(1000, 1000));
+    testee.selectMarkerAt(Point(1000, 1000), afl::base::Nothing);
     h.sync();
     ind.processQueue();
     TS_ASSERT(recv.get().isValid());
     TS_ASSERT_EQUALS(recv.get().get()->getColor(), 1);
 
     // Select other marker, successfully
-    testee.selectMarkerAt(Point(1000, 1010));
+    testee.selectMarkerAt(Point(1000, 1010), afl::base::Nothing);
     h.sync();
     ind.processQueue();
     TS_ASSERT(recv.get().isValid());
@@ -533,7 +533,7 @@ TestGameProxyDrawingProxy::testSetTagName()
 
     // Create and set number
     DrawingProxy testee(h.gameSender(), ind);
-    testee.selectMarkerAt(Point(1000, 1000));
+    testee.selectMarkerAt(Point(1000, 1000), afl::base::Nothing);
     testee.setTagName("17", false);
     h.sync();
     ind.processQueue();

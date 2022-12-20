@@ -4,11 +4,13 @@
 #ifndef C2NG_CLIENT_MAP_STARCHARTOVERLAY_HPP
 #define C2NG_CLIENT_MAP_STARCHARTOVERLAY_HPP
 
+#include "afl/base/optional.hpp"
 #include "afl/base/signalconnection.hpp"
 #include "afl/string/translator.hpp"
 #include "client/dialogs/newdrawing.hpp"
 #include "client/map/overlay.hpp"
 #include "game/map/rangeset.hpp"
+#include "game/proxy/drawingproxy.hpp"
 #include "ui/root.hpp"
 
 namespace client { namespace map {
@@ -39,10 +41,6 @@ namespace client { namespace map {
         Location& m_location;
         Screen& m_screen;
 
-        bool m_drawingTagFilterActive;
-        util::Atom_t m_drawingTagFilter;
-        String_t m_drawingTagFilterName;
-
         game::map::Point m_cursorPosition;
         gfx::Rectangle m_cursorArea;
         int m_cursorPhase;
@@ -69,9 +67,8 @@ namespace client { namespace map {
         void editVisibilityRange();
         void moveToOtherPosition();
 
-        void setDrawingTagFilter(util::Atom_t tag, String_t tagName);
-        void clearDrawingTagFilter();
-        void ensureDrawingTagVisible(const String_t& tagName);
+        void selectMarker(game::proxy::DrawingProxy& proxy);
+        void selectNearestVisibleDrawing(game::proxy::DrawingProxy& proxy);
     };
 
 } }

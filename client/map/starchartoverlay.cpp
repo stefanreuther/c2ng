@@ -40,9 +40,6 @@ using game::proxy::LockProxy;
 using game::config::UserConfiguration;
 
 namespace {
-    /* What distance is considered "near" for drawings? */
-    const int NEAR_DISTANCE = 21;
-
     /* Determine distance-to-move from key and prefix argument */
     int determineDistance(util::Key_t key, int prefix)
     {
@@ -114,13 +111,6 @@ namespace {
             return 0;
         }
     }
-
-    /* UI-side canonicalisation of tag names: "0" and "" are the same.
-       Not 100% bullet-proof, but covers the usual case. */
-    String_t wrapZero(const String_t& tagName)
-    {
-        return (tagName == "0" ? String_t() : tagName);
-    }
 }
 
 
@@ -130,9 +120,6 @@ client::map::StarchartOverlay::StarchartOverlay(ui::Root& root, afl::string::Tra
       m_translator(tx),
       m_location(loc),
       m_screen(scr),
-      m_drawingTagFilterActive(false),
-      m_drawingTagFilter(),
-      m_drawingTagFilterName(),
       m_cursorPosition(),
       m_cursorArea(),
       m_cursorPhase(),
@@ -214,9 +201,9 @@ client::map::StarchartOverlay::drawAfter(gfx::Canvas& can, const Renderer& ren)
 
     // Filter
     // Do not show when a PrimaryLayer is active; PrimaryLayers tend to occupy this screen corner
-    if (m_drawingTagFilterActive && !m_screen.hasOverlay(Screen::PrimaryLayer)) {
+    if (m_screen.hasDrawingTagFilter() && !m_screen.hasOverlay(Screen::PrimaryLayer)) {
         ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
-        outText(ctx, area.getTopLeft(), afl::string::Format(m_translator("Drawing filter: showing only %s"), m_drawingTagFilterName));
+        outText(ctx, area.getTopLeft(), afl::string::Format(m_translator("Drawing filter: showing only %s"), m_screen.getDrawingTagFilterName()));
     }
 }
 
@@ -492,9 +479,9 @@ client::map::StarchartOverlay::onEffectTimer()
 void
 client::map::StarchartOverlay::editDrawingTagFilter()
 {
-    if (m_drawingTagFilterActive) {
+    if (m_screen.hasDrawingTagFilter()) {
         // Active -> Inactive
-        clearDrawingTagFilter();
+        m_screen.clearDrawingTagFilter();
     } else {
         // ex selectMarkerTag, chartdlg.pas:ChooseNewTagFilter
         // Ask for new: get list
@@ -531,7 +518,7 @@ client::map::StarchartOverlay::editDrawingTagFilter()
             int32_t k;
             String_t v;
             if (box.getStringList().get(box.getCurrentItem(), k, v)) {
-                setDrawingTagFilter(static_cast<util::Atom_t>(k), v);
+                m_screen.setDrawingTagFilter(static_cast<util::Atom_t>(k), v);
             }
         }
     }
@@ -550,7 +537,7 @@ client::map::StarchartOverlay::editMarkerColor()
     //     return;
 
     // Find nearest visible drawing
-    proxy.selectNearestVisibleDrawing(m_location.getPosition(), NEAR_DISTANCE);
+    selectNearestVisibleDrawing(proxy);
     game::proxy::DrawingProxy::Status_t st;
     proxy.getStatus(link, st);
     const game::map::Drawing* p = st.get();
@@ -612,7 +599,7 @@ client::map::StarchartOverlay::startDrawing()
         }
         break;
     }
-    ensureDrawingTagVisible(info.tagName);
+    m_screen.ensureDrawingTagVisible(info.tagName);
 }
 
 void
@@ -650,10 +637,12 @@ client::map::StarchartOverlay::editMarkerTag()
     // if ((getChartOpts(false, viewport.mult, viewport.divi).show & GChartOptions::co_Drawings) == 0)
     //     return;
 
+    // Make a local proxy to not interfere with a possible active mode
+    game::proxy::DrawingProxy proxy(m_screen.gameSender(), m_root.engine().dispatcher());
+
     // Find nearest visible drawing
-    game::proxy::DrawingProxy& proxy = m_screen.drawingProxy();
     Downlink link(m_root, m_translator);
-    proxy.selectNearestVisibleDrawing(m_location.getPosition(), NEAR_DISTANCE);
+    selectNearestVisibleDrawing(proxy);
     game::proxy::DrawingProxy::Status_t st;
     proxy.getStatus(link, st);
     const game::map::Drawing* p = st.get();
@@ -681,9 +670,11 @@ void
 client::map::StarchartOverlay::editMarkerComment()
 {
     // ex tryEditMarkerComment, chartusr.pas:NTryEditMarkerComment
-    game::proxy::DrawingProxy& proxy = m_screen.drawingProxy();
+    // Make a local proxy to not interfere with a possible active mode
+    game::proxy::DrawingProxy proxy(m_screen.gameSender(), m_root.engine().dispatcher());
+
     Downlink link(m_root, m_translator);
-    proxy.selectMarkerAt(m_location.getPosition());
+    selectMarker(proxy);
     game::proxy::DrawingProxy::Status_t st;
     proxy.getStatus(link, st);
     const game::map::Drawing* p = st.get();
@@ -696,8 +687,9 @@ void
 client::map::StarchartOverlay::startMovingMarker()
 {
     game::proxy::DrawingProxy& proxy = m_screen.drawingProxy();
+
     Downlink link(m_root, m_translator);
-    proxy.selectMarkerAt(m_location.getPosition());
+    selectMarker(proxy);
     game::proxy::DrawingProxy::Status_t st;
     proxy.getStatus(link, st);
     const game::map::Drawing* p = st.get();
@@ -717,7 +709,7 @@ client::map::StarchartOverlay::startDeleting()
     // Find nearest visible drawing
     game::proxy::DrawingProxy& proxy = m_screen.drawingProxy();
     Downlink link(m_root, m_translator);
-    proxy.selectNearestVisibleDrawing(m_location.getPosition(), NEAR_DISTANCE);
+    selectNearestVisibleDrawing(proxy);
     game::proxy::DrawingProxy::Status_t st;
     proxy.getStatus(link, st);
     const game::map::Drawing* p = st.get();
@@ -767,33 +759,21 @@ client::map::StarchartOverlay::moveToOtherPosition()
 }
 
 void
-client::map::StarchartOverlay::setDrawingTagFilter(util::Atom_t tag, String_t tagName)
+client::map::StarchartOverlay::selectMarker(game::proxy::DrawingProxy& proxy)
 {
-    if (!m_drawingTagFilterActive || m_drawingTagFilter != tag) {
-        // FIXME: configure locking, selectNearestVisibleDrawing
-        m_drawingTagFilterActive = true;
-        m_drawingTagFilter = tag;
-        m_drawingTagFilterName = tagName;
-        m_screen.mapWidget().setDrawingTagFilter(tag);
-        requestRedraw();
-    }
+    // Lose focus on possible previous drawing
+    proxy.finish();
+
+    // Focus new drawing
+    proxy.selectMarkerAt(m_location.getPosition(), m_screen.getDrawingTagFilter());
 }
 
 void
-client::map::StarchartOverlay::clearDrawingTagFilter()
+client::map::StarchartOverlay::selectNearestVisibleDrawing(game::proxy::DrawingProxy& proxy)
 {
-    if (m_drawingTagFilterActive) {
-        // FIXME: configure locking, selectNearestVisibleDrawing
-        m_drawingTagFilterActive = false;
-        m_screen.mapWidget().clearDrawingTagFilter();
-        requestRedraw();
-    }
-}
+    // Lose focus on possible previous drawing
+    proxy.finish();
 
-void
-client::map::StarchartOverlay::ensureDrawingTagVisible(const String_t& tagName)
-{
-    if (m_drawingTagFilterActive && wrapZero(tagName) != wrapZero(m_drawingTagFilterName)) {
-        clearDrawingTagFilter();
-    }
+    // Focus new drawing
+    proxy.selectNearestVisibleDrawing(m_location.getPosition(), Screen::NEAR_DISTANCE, m_screen.getDrawingTagFilter());
 }

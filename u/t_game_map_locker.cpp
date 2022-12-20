@@ -63,6 +63,13 @@ namespace {
         p->setPosition(pt);
         p->setRadius(5);
     }
+
+    Drawing* createMarker(Point pt, util::Atom_t tag)
+    {
+        Drawing* p = new Drawing(pt, Drawing::MarkerDrawing);
+        p->setTag(tag);
+        return p;
+    }
 }
 
 /** Test addPoint().
@@ -232,6 +239,35 @@ TestGameMapLocker::testDrawings()
 
     TS_ASSERT_EQUALS(t.getFoundPoint(), Point(990, 1000));
     TS_ASSERT_EQUALS(t.getFoundObject(), Reference());
+}
+
+/** Test locking on drawings, with tag filter.
+    A: create some drawings with tags.
+    E: correct position returned. */
+void
+TestGameMapLocker::testDrawingTagFilter()
+{
+    Configuration fig;
+    Universe u;
+    u.drawings().addNew(createMarker(Point(990, 1000), 0));
+    u.drawings().addNew(createMarker(Point(1020, 1000), 10));
+
+    // Without filter
+    {
+        Locker t(Point(1000, 1000), fig);
+        t.addUniverse(u, -1, 0);
+        TS_ASSERT_EQUALS(t.getFoundPoint(), Point(990, 1000));
+        TS_ASSERT_EQUALS(t.getFoundObject(), Reference());
+    }
+
+    // With filter
+    {
+        Locker t(Point(1000, 1000), fig);
+        t.setDrawingTagFilter(10);
+        t.addUniverse(u, -1, 0);
+        TS_ASSERT_EQUALS(t.getFoundPoint(), Point(1020, 1000));
+        TS_ASSERT_EQUALS(t.getFoundObject(), Reference());
+    }
 }
 
 /** Test locking on explosions.

@@ -52,6 +52,12 @@ namespace game { namespace proxy {
             \see game::map::Locker::setRangeLimit */
         void setRangeLimit(Point_t min, Point_t max);
 
+        /** Set tag filter.
+            If a tag filter is set, drawings only take part in locking if their tag matches.
+            \param tagFilter Tag filter
+            \see game::map::Locker::setDrawingTagFilter */
+        void setDrawingTagFilter(afl::base::Optional<util::Atom_t> tagFilter);
+
         /** Set origin for movement-aware locking to warp-well edges.
             \param pos Position
             \param isHyperdriving true if hyperdriving
@@ -106,6 +112,7 @@ namespace game { namespace proxy {
 
         Limit m_limit;
         Origin m_origin;
+        afl::base::Optional<util::Atom_t> m_tagFilter;
 
         Point_t m_lastTarget;
         Flags_t m_lastFlags;

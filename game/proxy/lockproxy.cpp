@@ -14,8 +14,8 @@ using game::config::UserConfiguration;
 
 class game::proxy::LockProxy::Query : public util::Request<Session> {
  public:
-    Query(Point_t target, Flags_t flags, const Limit& limit, const Origin& origin, util::RequestSender<LockProxy> reply)
-        : m_target(target), m_flags(flags), m_limit(limit), m_origin(origin), m_reply(reply)
+    Query(Point_t target, Flags_t flags, const Limit& limit, const afl::base::Optional<util::Atom_t>& tagFilter, const Origin& origin, util::RequestSender<LockProxy> reply)
+        : m_target(target), m_flags(flags), m_limit(limit), m_tagFilter(tagFilter), m_origin(origin), m_reply(reply)
         { }
     virtual void handle(Session& session);
  private:
@@ -24,6 +24,7 @@ class game::proxy::LockProxy::Query : public util::Request<Session> {
     Point_t m_target;
     Flags_t m_flags;
     Limit m_limit;
+    afl::base::Optional<util::Atom_t> m_tagFilter;
     Origin m_origin;
     util::RequestSender<LockProxy> m_reply;
 };
@@ -68,6 +69,7 @@ game::proxy::LockProxy::Query::handle(Session& session)
     if (m_limit.active) {
         locker.setRangeLimit(m_limit.min, m_limit.max);
     }
+    locker.setDrawingTagFilter(m_tagFilter);
     locker.setMarkedOnly(m_flags.contains(MarkedOnly));
 
     // Find target
@@ -148,6 +150,7 @@ game::proxy::LockProxy::LockProxy(util::RequestSender<Session> gameSender, util:
       m_reply(reply, *this),
       m_limit(),
       m_origin(),
+      m_tagFilter(),
       m_lastTarget(),
       m_lastFlags(Flags_t::fromInteger(-1))     // guaranteed to compare inequal to valid flag values
 {
@@ -167,6 +170,12 @@ game::proxy::LockProxy::setRangeLimit(Point_t min, Point_t max)
 }
 
 void
+game::proxy::LockProxy::setDrawingTagFilter(afl::base::Optional<util::Atom_t> tagFilter)
+{
+    m_tagFilter = tagFilter;
+}
+
+void
 game::proxy::LockProxy::setOrigin(Point_t pos, bool isHyperdriving, Id_t shipId)
 {
     m_origin.active = true;
@@ -180,7 +189,7 @@ game::proxy::LockProxy::requestPosition(Point_t target, Flags_t flags)
 {
     m_lastTarget = target;
     m_lastFlags = flags;
-    m_gameSender.postNewRequest(new Query(target, flags, m_limit, m_origin, m_reply.getSender()));
+    m_gameSender.postNewRequest(new Query(target, flags, m_limit, m_tagFilter, m_origin, m_reply.getSender()));
 }
 
 void

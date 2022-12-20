@@ -185,6 +185,7 @@ class TestGameMapLocker : public CxxTest::TestSuite {
     void testUfos();
     void testMinefields();
     void testDrawings();
+    void testDrawingTagFilter();
     void testExplosions();
     void testWrap();
     void testCircular();
