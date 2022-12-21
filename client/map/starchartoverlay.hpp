@@ -66,6 +66,7 @@ namespace client { namespace map {
         void startDistance();
         void editVisibilityRange();
         void moveToOtherPosition();
+        void editZoom();
 
         void selectMarker(game::proxy::DrawingProxy& proxy);
         void selectNearestVisibleDrawing(game::proxy::DrawingProxy& proxy);

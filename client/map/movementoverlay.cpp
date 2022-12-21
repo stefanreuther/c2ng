@@ -4,6 +4,7 @@
 
 #include <cstdlib>
 #include "client/map/movementoverlay.hpp"
+#include "client/dialogs/zoomlevel.hpp"
 #include "client/map/renderer.hpp"
 #include "client/map/widget.hpp"
 #include "game/map/renderoptions.hpp"
@@ -151,8 +152,6 @@ client::map::MovementOverlay::handleKey(util::Key_t key, int prefix, const Rende
             game::proxy::DrawingProxy(m_gameSender, m_parent.root().engine().dispatcher())
                 .createCannedMarker(m_position, prefix % game::config::UserConfiguration::NUM_CANNED_MARKERS);
             return true;
-
-            /* TODO: z [edit zoom in PCC 1.x] */
         }
     }
     if (m_valid && m_modes.contains(AcceptZoomKeys)) {
@@ -162,6 +161,9 @@ client::map::MovementOverlay::handleKey(util::Key_t key, int prefix, const Rende
             return true;
          case '-':
             m_parent.zoomOut();
+            return true;
+         case 'z':
+            editZoom();
             return true;
         }
     }
@@ -477,4 +479,13 @@ client::map::MovementOverlay::onHover(gfx::Point pt)
     m_hoveredPoint = pt;
     configureLockProxy(ren);
     m_lockProxy.requestUnitNames(ren.unscale(pt));
+}
+
+void
+client::map::MovementOverlay::editZoom()
+{
+    client::dialogs::ZoomLevel result;
+    if (client::dialogs::editZoomLevel(m_parent.renderer(), result, m_parent.root(), m_translator)) {
+        m_parent.setZoom(result.mult, result.divi);
+    }
 }

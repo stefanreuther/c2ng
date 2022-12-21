@@ -65,6 +65,15 @@ namespace util {
         \retval false String not valid, result unchanged */
     bool parseBooleanValue(const String_t& s, bool& result);
 
+    /** Parse a zoom level.
+        Valid inputs are either a single (positive) number, or two numbers sepearated by "/" or ":".
+        \param [in]  s    String
+        \param [out] mul  Multiplier
+        \param [out] div  Divider
+        \retval true String parsed correctly, result has been updated
+        \retval false String not valid, result unchanged */
+    bool parseZoomLevel(const String_t& s, int& mul, int& div);
+
     /** Format a textual list of options.
         The string can contain
         - regular lines (subheadings, blank lines)
@@ -100,6 +109,12 @@ namespace util {
         \param tx Translator
         \return formatted age */
     String_t formatAge(int currentTurn, int historyTurn, afl::string::Translator& tx);
+
+    /** Format a zoom level.
+        \param mul Multiplier
+        \param div Divider
+        \return Formatted zoom level */
+    String_t formatZoomLevel(int mul, int div);
 
     /** Encode MIME header.
         \param input text to encode

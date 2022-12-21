@@ -44,6 +44,9 @@ namespace client { namespace map {
         bool zoomIn();
         bool zoomOut();
         void setZoom(int mult, int divi);
+        bool isValidZoomLevel(int mult, int divi) const;
+        int getZoomMultiplier() const;
+        int getZoomDivider() const;
 
      private:
         class Listener;

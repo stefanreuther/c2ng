@@ -26,7 +26,11 @@ namespace {
     const int SCMaxIconHeight = 50;
     const int SCMaxIconWidth  = 300;
 
-    const int MAX_ZOOM = 10;
+    /* PCC1 (using 16-bit int) limits zoom levels to 10 to avoid integer overflow for common cases (coordinates <= 3000).
+       Given that we (hopefully) use 32-bit int, we could legally allow huge zoom levels even for uncommon cases
+       (coordinates up to 10000); limit for now to avoid people doing too stupid things.
+       It will probably still have performance impact. */
+    const int MAX_ZOOM = sizeof(int) < sizeof(int32_t) ? 10 : 100;
 
     const uint8_t IONSTORM_FILL[] = { 0x88, 0x00, 0x22, 0x00,
                                       0x88, 0x00, 0x22, 0x00 };
@@ -713,6 +717,24 @@ client::map::Renderer::setZoom(int mult, int divi)
 {
     m_zoomMultiplier = std::max(1, std::min(MAX_ZOOM, mult));
     m_zoomDivider    = std::max(1, divi);
+}
+
+bool
+client::map::Renderer::isValidZoomLevel(int mult, int divi) const
+{
+    return mult > 0 && divi > 0 && mult <= MAX_ZOOM && divi <= MAX_ZOOM;
+}
+
+int
+client::map::Renderer::getZoomMultiplier() const
+{
+    return m_zoomMultiplier;
+}
+
+int
+client::map::Renderer::getZoomDivider() const
+{
+    return m_zoomDivider;
 }
 
 void

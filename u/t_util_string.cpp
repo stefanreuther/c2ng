@@ -388,3 +388,49 @@ TestUtilString::testStrStartsWith()
     TS_ASSERT(strStartsWith("foobar", "bar") == 0);
 }
 
+/** Test parseZoomLevel. */
+void
+TestUtilString::testParseZoomLevel()
+{
+    using util::parseZoomLevel;
+    int mul = 99, div = 99;
+
+    // Error cases (leave output unmodified)
+    TS_ASSERT_EQUALS(parseZoomLevel("", mul, div), false);
+    TS_ASSERT_EQUALS(parseZoomLevel(":", mul, div), false);
+    TS_ASSERT_EQUALS(parseZoomLevel("/", mul, div), false);
+    TS_ASSERT_EQUALS(parseZoomLevel("4/", mul, div), false);
+    TS_ASSERT_EQUALS(parseZoomLevel("/4", mul, div), false);
+    TS_ASSERT_EQUALS(parseZoomLevel("0/0", mul, div), false);
+    TS_ASSERT_EQUALS(parseZoomLevel("-2/-3", mul, div), false);
+    TS_ASSERT_EQUALS(mul, 99);
+    TS_ASSERT_EQUALS(div, 99);
+
+    // Success cases
+    TS_ASSERT_EQUALS(parseZoomLevel("1", mul, div), true);
+    TS_ASSERT_EQUALS(mul, 1);
+    TS_ASSERT_EQUALS(div, 1);
+
+    TS_ASSERT_EQUALS(parseZoomLevel("   4  ", mul, div), true);
+    TS_ASSERT_EQUALS(mul, 4);
+    TS_ASSERT_EQUALS(div, 1);
+
+    TS_ASSERT_EQUALS(parseZoomLevel("2:3", mul, div), true);
+    TS_ASSERT_EQUALS(mul, 2);
+    TS_ASSERT_EQUALS(div, 3);
+
+    TS_ASSERT_EQUALS(parseZoomLevel(" 5 / 9 ", mul, div), true);
+    TS_ASSERT_EQUALS(mul, 5);
+    TS_ASSERT_EQUALS(div, 9);
+}
+
+/** Test formatZoomLevel. */
+void
+TestUtilString::testFormatZoomLevel()
+{
+    using util::formatZoomLevel;
+    TS_ASSERT_EQUALS(formatZoomLevel(1, 1), "1");
+    TS_ASSERT_EQUALS(formatZoomLevel(4, 4), "4/4");
+    TS_ASSERT_EQUALS(formatZoomLevel(1, 2), "1/2");
+}
+

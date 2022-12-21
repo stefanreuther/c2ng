@@ -181,6 +181,29 @@ util::parseBooleanValue(const String_t& s, bool& result)
     }
 }
 
+// Parse a zoom level.
+bool
+util::parseZoomLevel(const String_t& s, int& mul, int& div)
+{
+    int m = 1, d = 1;
+    String_t::size_type pos = s.find_first_of(":/");
+    bool ok;
+    if (pos == String_t::npos) {
+        d = 1;
+        ok = afl::string::strToInteger(s, m);
+    } else {
+        ok = afl::string::strToInteger(s.substr(0, pos), m)
+            && afl::string::strToInteger(s.substr(pos+1), d);
+    }
+    if (ok && m > 0 && d > 0) {
+        mul = m;
+        div = d;
+        return true;
+    } else {
+        return false;
+    }
+}
+
 String_t
 util::formatOptions(String_t s)
 {
@@ -266,6 +289,17 @@ util::formatAge(int currentTurn, int historyTurn, afl::string::Translator& tx)
         return afl::string::Format(tx("turn %d"), historyTurn);
     } else {
         return afl::string::Format(tx("%d turns ago"), age);
+    }
+}
+
+// Format a zoom level.
+String_t
+util::formatZoomLevel(int mul, int div)
+{
+    if (div == 1) {
+        return afl::string::Format("%d", mul);
+    } else {
+        return afl::string::Format("%d/%d", mul, div);
     }
 }
 

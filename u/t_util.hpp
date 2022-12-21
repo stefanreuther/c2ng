@@ -274,6 +274,8 @@ class TestUtilString : public CxxTest::TestSuite {
     void testCollate();
     void testFormatAge();
     void testStrStartsWith();
+    void testParseZoomLevel();
+    void testFormatZoomLevel();
 };
 
 class TestUtilStringInstructionList : public CxxTest::TestSuite {

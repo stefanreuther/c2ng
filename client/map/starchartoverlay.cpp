@@ -8,6 +8,7 @@
 #include "client/dialogs/chartconfig.hpp"
 #include "client/dialogs/newdrawingtag.hpp"
 #include "client/dialogs/visibilityrange.hpp"
+#include "client/dialogs/zoomlevel.hpp"
 #include "client/downlink.hpp"
 #include "client/map/callback.hpp"
 #include "client/map/deletedrawingoverlay.hpp"
@@ -427,6 +428,10 @@ client::map::StarchartOverlay::handleKey(util::Key_t key, int prefix, const Rend
         editMarkerComment();
         return true;
 
+     case 'z':
+        editZoom();
+        return true;
+
      default:
         if ((key & util::KeyMod_Alt) != 0) {
             game::map::RenderOptions::Options_t opts = game::map::RenderOptions::getOptionFromKey(key & ~(util::KeyMod_Alt | util::KeyMod_Ctrl));
@@ -743,6 +748,15 @@ client::map::StarchartOverlay::moveToOtherPosition()
         if (m_location.startJump()) {
             m_location.setPosition(pt);
         }
+    }
+}
+
+void
+client::map::StarchartOverlay::editZoom()
+{
+    client::dialogs::ZoomLevel result;
+    if (client::dialogs::editZoomLevel(m_screen.mapWidget().renderer(), result, m_root, m_translator)) {
+        m_screen.mapWidget().setZoom(result.mult, result.divi);
     }
 }
 

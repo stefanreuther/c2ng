@@ -90,6 +90,8 @@ namespace client { namespace map {
         void onLockResult(game::map::Point result);
         void onUnitNameResult(game::map::Point result, String_t names);
         void onHover(gfx::Point pt);
+
+        void editZoom();
     };
 
 } }
