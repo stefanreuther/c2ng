@@ -397,3 +397,43 @@ TestGameProxyLockProxy::testSetDrawingTagFilter()
     TS_ASSERT_EQUALS(recv.results.size(), 1U);
     TS_ASSERT_EQUALS(recv.results[0], Point(1020, 1000));
 }
+
+/** Test NoDrawings flag.
+    A: create session with markers and ships.
+    E: call requestPosition() with and without flag. Must produce correct result. */
+void
+TestGameProxyLockProxy::testNoDrawings()
+{
+    // Environment
+    CxxTest::setAbortTestOnFail(true);
+    SessionThread h;
+    prepare(h);
+    addShips(h);                              // 1000, 1110..1190
+    createMarker(h, Point(2000, 2100), 0);
+
+    SimpleRequestDispatcher disp;
+    LockProxy t(h.gameSender(), disp);
+
+    // Testee
+    ResultReceiver recv;
+    t.sig_result.add(&recv, &ResultReceiver::onResult);
+
+    // First attempt
+    t.requestPosition(Point(2000, 2000), LockProxy::Flags_t());
+    while (recv.results.empty()) {
+        TS_ASSERT(disp.wait(1000));
+    }
+    TS_ASSERT_EQUALS(recv.results.size(), 1U);
+    TS_ASSERT_EQUALS(recv.results[0], Point(2000, 2100));  // marker position
+    recv.results.clear();
+
+    // Same thing, but without drawings
+    t.requestPosition(Point(2000, 2000), LockProxy::Flags_t(LockProxy::NoDrawings));
+    while (recv.results.empty()) {
+        TS_ASSERT(disp.wait(1000));
+    }
+    TS_ASSERT_EQUALS(recv.results.size(), 1U);
+    TS_ASSERT_EQUALS(recv.results[0], Point(1000, 1190));  // ship position
+    recv.results.clear();
+}
+

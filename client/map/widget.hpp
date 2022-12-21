@@ -49,6 +49,7 @@ namespace client { namespace map {
         void setDrawingTagFilter(util::Atom_t tag);
         void clearDrawingTagFilter();
         void setShipTrailId(game::Id_t id);
+        const game::map::RenderOptions& getOptions() const;
 
         const Renderer& renderer() const;
 
@@ -56,6 +57,7 @@ namespace client { namespace map {
 
      private:
         void onUpdate(afl::base::Ptr<game::map::RenderList> renderList);
+        void onConfiguration(game::map::RenderOptions opts);
         void maybeRequestNewRange();
         void updateModeConfiguration(bool force);
 
@@ -66,6 +68,7 @@ namespace client { namespace map {
 
         Mode m_mode;
         game::map::RenderOptions::Area m_currentConfigurationArea;
+        game::map::RenderOptions m_options;
 
         game::map::Point m_min;
         game::map::Point m_max;

@@ -14,11 +14,13 @@ client::map::Widget::Widget(util::RequestSender<game::Session> gameSender, ui::R
       m_preferredSize(preferredSize),
       m_mode(NormalMode),
       m_currentConfigurationArea(),
+      m_options(),
       m_min(),
       m_max(),
       m_overlays()
 {
     m_proxy.sig_update.add(this, &Widget::onUpdate);
+    m_proxy.sig_configuration.add(this, &Widget::onConfiguration);
     updateModeConfiguration(true);
 }
 
@@ -120,6 +122,12 @@ client::map::Widget::onUpdate(afl::base::Ptr<game::map::RenderList> renderList)
 {
     m_renderer.setRenderList(renderList);
     requestRedraw();
+}
+
+void
+client::map::Widget::onConfiguration(game::map::RenderOptions opts)
+{
+    m_options = opts;
 }
 
 void
@@ -258,6 +266,12 @@ void
 client::map::Widget::setShipTrailId(game::Id_t id)
 {
     m_proxy.setShipTrailId(id);
+}
+
+const game::map::RenderOptions&
+client::map::Widget::getOptions() const
+{
+    return m_options;
 }
 
 const client::map::Renderer&

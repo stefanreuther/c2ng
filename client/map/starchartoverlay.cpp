@@ -532,10 +532,6 @@ client::map::StarchartOverlay::editMarkerColor()
     game::proxy::DrawingProxy proxy(m_screen.gameSender(), m_root.engine().dispatcher());
     Downlink link(m_root, m_translator);
 
-    // FIXME -> port this // Not possible if drawings not visible
-    // if ((getChartOpts(false, viewport.mult, viewport.divi).show & GChartOptions::co_Drawings) == 0)
-    //     return;
-
     // Find nearest visible drawing
     selectNearestVisibleDrawing(proxy);
     game::proxy::DrawingProxy::Status_t st;
@@ -633,10 +629,6 @@ void
 client::map::StarchartOverlay::editMarkerTag()
 {
     // ex doTagChange
-    // FIXME: // Not possible if drawings not visible
-    // if ((getChartOpts(false, viewport.mult, viewport.divi).show & GChartOptions::co_Drawings) == 0)
-    //     return;
-
     // Make a local proxy to not interfere with a possible active mode
     game::proxy::DrawingProxy proxy(m_screen.gameSender(), m_root.engine().dispatcher());
 
@@ -702,10 +694,6 @@ void
 client::map::StarchartOverlay::startDeleting()
 {
     // ex doDelete
-    // FIXME: // Not possible if drawings not visible
-    // if ((getChartOpts(false, viewport.mult, viewport.divi).show & GChartOptions::co_Drawings) == 0)
-    //     return;
-
     // Find nearest visible drawing
     game::proxy::DrawingProxy& proxy = m_screen.drawingProxy();
     Downlink link(m_root, m_translator);
@@ -764,8 +752,10 @@ client::map::StarchartOverlay::selectMarker(game::proxy::DrawingProxy& proxy)
     // Lose focus on possible previous drawing
     proxy.finish();
 
-    // Focus new drawing
-    proxy.selectMarkerAt(m_location.getPosition(), m_screen.getDrawingTagFilter());
+    // Focus new drawing - only if drawings are actually visible
+    if (m_screen.hasVisibleDrawings()) {
+        proxy.selectMarkerAt(m_location.getPosition(), m_screen.getDrawingTagFilter());
+    }
 }
 
 void
@@ -774,6 +764,8 @@ client::map::StarchartOverlay::selectNearestVisibleDrawing(game::proxy::DrawingP
     // Lose focus on possible previous drawing
     proxy.finish();
 
-    // Focus new drawing
-    proxy.selectNearestVisibleDrawing(m_location.getPosition(), Screen::NEAR_DISTANCE, m_screen.getDrawingTagFilter());
+    // Focus new drawing - only if drawings are actually visible
+    if (m_screen.hasVisibleDrawings()) {
+        proxy.selectNearestVisibleDrawing(m_location.getPosition(), Screen::NEAR_DISTANCE, m_screen.getDrawingTagFilter());
+    }
 }

@@ -31,6 +31,7 @@ namespace game { namespace proxy {
         enum Flag {
             Left,                     /**< Use Lock_Left (default: Lock_Right). */
             MarkedOnly,               /**< Consider only marked objects. \see game::map::Locker::setMarkedOnly */
+            NoDrawings,               /**< Ignore drawings even if enabled in user configuration. */
             ToggleOptimizeWarp        /**< Optimize for movement different from global config. */
         };
 

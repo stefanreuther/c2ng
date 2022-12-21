@@ -757,6 +757,9 @@ client::map::Screen::ensureDrawingTagVisible(const String_t& tagName)
     if (m_drawingTagFilter.isValid() && wrapZero(tagName) != wrapZero(m_drawingTagFilterName)) {
         clearDrawingTagFilter();
     }
+    if (!hasVisibleDrawings()) {
+        m_widget.toggleOptions(game::map::RenderOptions::Options_t(game::map::RenderOptions::ShowDrawings));
+    }
 }
 
 bool
@@ -783,9 +786,18 @@ client::map::Screen::selectNearestVisibleDrawing()
     m_drawingProxy.selectNearestVisibleDrawing(m_location.getPosition(), NEAR_DISTANCE, m_drawingTagFilter);
 }
 
+bool
+client::map::Screen::hasVisibleDrawings() const
+{
+    return m_widget.getOptions().getOption(game::map::RenderOptions::ShowDrawings) != game::map::RenderOptions::Disabled;
+}
+
 void
 client::map::Screen::lockObject(game::proxy::LockProxy::Flags_t flags)
 {
+    if (!hasVisibleDrawings()) {
+        flags += game::proxy::LockProxy::NoDrawings;
+    }
     m_location.lockObject(flags);
 }
 

@@ -1,17 +1,18 @@
 /**
   *  \file game/proxy/maprendererproxy.hpp
+  *  \brief Class game::proxy::MapRendererProxy
   */
 #ifndef C2NG_GAME_PROXY_MAPRENDERERPROXY_HPP
 #define C2NG_GAME_PROXY_MAPRENDERERPROXY_HPP
 
 #include "afl/base/signal.hpp"
 #include "game/map/renderlist.hpp"
+#include "game/map/renderoptions.hpp"
 #include "game/map/viewport.hpp"
 #include "game/session.hpp"
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
-#include "game/map/renderoptions.hpp"
 
 namespace game { namespace proxy {
 
@@ -21,6 +22,7 @@ namespace game { namespace proxy {
         To use,
         - construct
         - observe sig_update to receive render lists
+        - observe sig_configuration to receive effective configuration
         - configure parameters; in particular, range */
     class MapRendererProxy {
      public:
@@ -72,12 +74,20 @@ namespace game { namespace proxy {
             \param renderlist newly-created RenderList instance containing current starchart content */
         afl::base::Signal<void(afl::base::Ptr<game::map::RenderList> renderlist)> sig_update;
 
+        /** Signal: current configuration.
+            Invoked upon every change to render configuration, through UserConfiguration change or setConfiguration().
+            No guarantee is made whether this signal arrives before or after the first sig_update using the configuration.
+            \param opts Configuration */
+        afl::base::Signal<void(game::map::RenderOptions opts)> sig_configuration;
+
      private:
         util::RequestReceiver<MapRendererProxy> m_receiver;
 
         class Trampoline;
         class TrampolineFromSession;
         util::RequestSender<Trampoline> m_trampoline;
+
+        void emitConfiguration(game::map::RenderOptions opts);
     };
 
 } }

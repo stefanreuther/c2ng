@@ -105,6 +105,7 @@ namespace client { namespace map {
         const afl::base::Optional<util::Atom_t>& getDrawingTagFilter() const;
         const String_t& getDrawingTagFilterName() const;
         void selectNearestVisibleDrawing();
+        bool hasVisibleDrawings() const;
 
         void lockObject(game::proxy::LockProxy::Flags_t flags);
         void browse(game::map::Location::BrowseFlags_t flags);

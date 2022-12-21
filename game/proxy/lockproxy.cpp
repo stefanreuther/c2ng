@@ -64,6 +64,9 @@ game::proxy::LockProxy::Query::handle(Session& session)
     // Determine mode
     const game::map::LockOptionDescriptor_t& mode = (m_flags.contains(Left) ? UserConfiguration::Lock_Left : UserConfiguration::Lock_Right);
     int32_t items = pRoot->userConfiguration()[mode]();
+    if (m_flags.contains(NoDrawings)) {
+        items &= ~game::map::MatchDrawings;
+    }
 
     game::map::Locker locker(m_target, pGame->mapConfiguration());
     if (m_limit.active) {

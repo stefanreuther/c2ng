@@ -335,6 +335,7 @@ class TestGameProxyLockProxy : public CxxTest::TestSuite {
     void testRangeName();
     void testSetOrigin();
     void testSetDrawingTagFilter();
+    void testNoDrawings();
 };
 
 class TestGameProxyMailboxAdaptor : public CxxTest::TestSuite {

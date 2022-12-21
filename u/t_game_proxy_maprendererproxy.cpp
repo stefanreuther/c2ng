@@ -45,6 +45,23 @@ namespace {
         afl::base::Ptr<game::map::RenderList> m_result;
     };
 
+    /* Receiver to capture configuration callbacks */
+    class ConfigReceiver {
+     public:
+        ConfigReceiver()
+            : m_result(), m_ok()
+            { }
+        void onConfiguration(game::map::RenderOptions opts)
+            { m_result = opts; m_ok = true; }
+        bool hasResult() const
+            { return m_ok; }
+        const game::map::RenderOptions& get() const
+            { return m_result; }
+     private:
+        game::map::RenderOptions m_result;
+        bool m_ok;
+    };
+
     /* RendererListener to capture received marker colors */
     class MarkerCollector : public game::map::RenderList {
      public:
@@ -302,6 +319,8 @@ TestGameProxyMapRendererProxy::testModifyPreferences()
     addMarker(h, 1010, 1010, 7, 1);
     MapRendererProxy testee(h.gameSender(), ind);
     ResultReceiver recv(testee);
+    ConfigReceiver cfg;
+    testee.sig_configuration.add(&cfg, &ConfigReceiver::onConfiguration);
 
     // Toggle
     testee.setRange(Point(1000, 1000), Point(2000, 2000));
@@ -315,6 +334,8 @@ TestGameProxyMapRendererProxy::testModifyPreferences()
         MarkerCollector coll;
         recv.replay(coll);
         TS_ASSERT_EQUALS(coll.getColors(), MarkerCollector::Colors_t());
+        TS_ASSERT_EQUALS(cfg.hasResult(), true);
+        TS_ASSERT_EQUALS(cfg.get().getOption(game::map::RenderOptions::ShowDrawings), game::map::RenderOptions::Disabled);
     }
 
     // Enable by modifying preferences
@@ -337,6 +358,7 @@ TestGameProxyMapRendererProxy::testModifyPreferences()
         MarkerCollector coll;
         recv.replay(coll);
         TS_ASSERT_EQUALS(coll.getColors(), MarkerCollector::Colors_t() + 7);
+        TS_ASSERT_EQUALS(cfg.get().getOption(game::map::RenderOptions::ShowDrawings), game::map::RenderOptions::Enabled);
     }
 }
 

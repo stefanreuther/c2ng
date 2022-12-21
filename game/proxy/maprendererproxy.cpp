@@ -1,5 +1,6 @@
 /**
   *  \file game/proxy/maprendererproxy.cpp
+  *  \brief Class game::proxy::MapRendererProxy
   */
 
 #include <memory>
@@ -161,6 +162,10 @@ game::proxy::MapRendererProxy::Trampoline::toggleOptions(RenderOptions::Options_
         parsedOptions.toggleOptions(opts);
         parsedOptions.storeToConfiguration(m_root->userConfiguration(), m_area);
         m_viewport->setOptions(parsedOptions.getViewportOptions()); /* triggers update */
+
+        // We're not doing session.notifyListeners() here (should we?).
+        // To be internally consistent, explicitly forward the changed options.
+        m_reply.postRequest(&MapRendererProxy::emitConfiguration, parsedOptions);
     }
 }
 
@@ -192,7 +197,9 @@ void
 game::proxy::MapRendererProxy::Trampoline::loadOptions()
 {
     if (m_viewport.get() != 0 && m_root.get() != 0) {
-        m_viewport->setOptions(RenderOptions::fromConfiguration(m_root->userConfiguration(), m_area).getViewportOptions());
+        RenderOptions opts = RenderOptions::fromConfiguration(m_root->userConfiguration(), m_area);
+        m_viewport->setOptions(opts.getViewportOptions());
+        m_reply.postRequest(&MapRendererProxy::emitConfiguration, opts);
     }
 }
 
@@ -256,4 +263,10 @@ void
 game::proxy::MapRendererProxy::setShipTrailId(Id_t id)
 {
     m_trampoline.postRequest(&Trampoline::setShipTrailId, id);
+}
+
+void
+game::proxy::MapRendererProxy::emitConfiguration(game::map::RenderOptions opts)
+{
+    sig_configuration.raise(opts);
 }
