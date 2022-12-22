@@ -186,6 +186,7 @@ client::dialogs::MessageEditor::run()
     win.add(ui::widgets::FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame, editor));
     editor.setPreferredSizeInCells(MAX_LINE_LENGTH, MAX_MESSAGE_LINES);
     editor.setHighlighter(&highl);
+    editor.setCharacterFilter(&filter);
 
     // Buttons
     ui::widgets::Button& btnHelp   = del.addNew(new ui::widgets::Button(m_translator("Help"),   'h',              m_root));
