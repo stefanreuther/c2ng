@@ -56,6 +56,7 @@ class TestUiWidgetsIconGrid : public CxxTest::TestSuite {
 class TestUiWidgetsInputLine : public CxxTest::TestSuite {
  public:
     void testInsert();
+    void testHandleKey();
 };
 
 class TestUiWidgetsRadioButton : public CxxTest::TestSuite {

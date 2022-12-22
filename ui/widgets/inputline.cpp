@@ -198,12 +198,16 @@ ui::widgets::InputLine::handleKey(util::Key_t key, int /*prefix*/)
         }
     } else {
         ed::Command cmd;
+        String_t oldText = m_text;
         if (lookupKey(key, cmd) && handleCommand(m_text, m_cursorIndex, 0, getEditorFlags(*this), cmd, m_maxLength)) {
             /* Handled by generic editor */
             requestActive();
             setFlag(TypeErase, false);
             scroll();
             requestRedraw();
+            if (m_text != oldText) {
+                sig_change.raise();
+            }
             return true;
         } else if (m_flags.contains(NonEditable) && key == ' ') {
             /* Trigger activation */
