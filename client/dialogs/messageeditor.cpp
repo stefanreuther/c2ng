@@ -5,7 +5,9 @@
 
 #include "client/dialogs/messageeditor.hpp"
 #include "afl/base/deleter.hpp"
+#include "afl/string/format.hpp"
 #include "client/dialogs/messagereceiver.hpp"
+#include "client/dialogs/sessionfileselectiondialog.hpp"
 #include "client/downlink.hpp"
 #include "client/widgets/helpwidget.hpp"
 #include "client/widgets/playersetselector.hpp"
@@ -214,6 +216,7 @@ client::dialogs::MessageEditor::run()
     disp.add(util::Key_Return + util::KeyMod_Ctrl, this, &MessageEditor::onSend);
     disp.add('s'              + util::KeyMod_Alt, this, &MessageEditor::onSend);
     disp.add('t'              + util::KeyMod_Alt, this, &MessageEditor::onChangeReceivers);
+    disp.add('r'              + util::KeyMod_Ctrl, this, &MessageEditor::onReadMessage);
     win.add(disp);
 
     // Actions
@@ -267,6 +270,31 @@ client::dialogs::MessageEditor::onChangeReceivers()
         setReceivers(setSelect.getSelectedPlayers());
         updateContent(ind);
     }
+}
+
+void
+client::dialogs::MessageEditor::onReadMessage()
+{
+    // ex sendmsg.pas:LoadMessageEditor
+    // Ask for file name
+    SessionFileSelectionDialog dlg(m_root, m_translator, m_gameSender, m_translator("Load Message"));
+    Downlink ind(m_root, m_translator);
+    if (!dlg.runDefault(ind)) {
+        return;
+    }
+
+    // Load file
+    String_t text;
+    String_t errorMessage;
+    if (!m_proxy.loadMessageTextFromFile(ind, text, dlg.getResult(), errorMessage)) {
+        MessageBox(afl::string::Format(m_translator("Unable to load %s: %s"), dlg.getResult(), errorMessage),
+                   m_translator("Load Message"), m_root)
+            .doOkDialog(m_translator);
+        return;
+    }
+
+    // Insert it
+    m_editor.handleInsert(util::editor::Flags_t() + util::editor::WordWrap, text);
 }
 
 void

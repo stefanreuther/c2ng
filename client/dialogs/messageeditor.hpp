@@ -74,6 +74,7 @@ namespace client { namespace dialogs {
         void onChangeReceivers();
         void onCancel();
         void onSend();
+        void onReadMessage();
         void updateContent(game::proxy::WaitIndicator& ind);
 
         ui::Root& m_root;

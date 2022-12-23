@@ -34,6 +34,7 @@ class TestGameMsgFile : public CxxTest::TestSuite {
     void testLoadEmpty();
     void testLoadUndelimited();
     void testLoadTurn();
+    void testLoadMessageText();
 };
 
 class TestGameMsgFormat : public CxxTest::TestSuite {

@@ -139,7 +139,7 @@ namespace util { namespace editor {
 
         /** Handle insertion of text.
             \param flags Flags
-            \param text  Text, can include "\t" */
+            \param text  Text, can include "\n" */
         void handleInsert(Flags_t flags, String_t text);
 
         /** Signal: change to content or cursor.

@@ -7,12 +7,14 @@
 #include "afl/string/format.hpp"
 #include "game/actions/preconditions.hpp"
 #include "game/game.hpp"
+#include "game/msg/file.hpp"
 #include "game/msg/outbox.hpp"
 #include "game/proxy/waitindicator.hpp"
 #include "game/root.hpp"
 #include "game/turn.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/values.hpp"
+#include "util/string.hpp"
 
 using afl::string::Format;
 using game::actions::mustHaveGame;
@@ -258,6 +260,63 @@ game::proxy::OutboxProxy::addMessageToFile(WaitIndicator& ind, int sender, Strin
     Task t(sender, text, fileName);
     ind.call(m_gameSender, t);
     if (t.isOK()) {
+        return true;
+    } else {
+        errorMessage = t.getErrorMessage();
+        return false;
+    }
+}
+
+bool
+game::proxy::OutboxProxy::loadMessageTextFromFile(WaitIndicator& ind, String_t& text, String_t fileName, String_t& errorMessage)
+{
+    class Task : public util::Request<Session> {
+     public:
+        Task(const String_t& fileName)
+            : m_text(), m_fileName(fileName), m_errorMessage(), m_ok(false)
+            { }
+        virtual void handle(Session& session)
+            {
+                try {
+                    // Objects
+                    afl::io::FileSystem& fs = session.world().fileSystem();
+                    afl::string::Translator& tx = session.translator();
+                    Root* r = session.getRoot().get();
+
+                    // Open file for reading
+                    afl::base::Ref<afl::io::Stream> s = fs.openFile(m_fileName, afl::io::FileSystem::OpenRead);
+
+                    // Text file; use game character set
+                    afl::io::TextFile tf(*s);
+                    if (r != 0) {
+                        tf.setCharsetNew(r->charset().clone());
+                    }
+
+                    // Do it
+                    m_text = game::msg::loadMessageText(tf, r != 0 ? &r->stringVerifier() : 0);
+                    m_ok = true;
+                }
+                catch (std::exception& e) {
+                    m_errorMessage = e.what();
+                }
+            }
+        bool isOK() const
+            { return m_ok; }
+        const String_t& getErrorMessage() const
+            { return m_errorMessage; }
+        const String_t& getText() const
+            { return m_text; }
+     private:
+        String_t m_text;
+        String_t m_fileName;
+        String_t m_errorMessage;        // don't reference callers object to avoid aliasing between threads
+        bool m_ok;
+    };
+
+    Task t(fileName);
+    ind.call(m_gameSender, t);
+    if (t.isOK()) {
+        text = t.getText();
         return true;
     } else {
         errorMessage = t.getErrorMessage();

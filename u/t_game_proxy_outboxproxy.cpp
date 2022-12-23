@@ -6,13 +6,20 @@
 #include "game/proxy/outboxproxy.hpp"
 
 #include "t_game_proxy.hpp"
+#include "afl/charset/codepage.hpp"
+#include "afl/charset/codepagecharset.hpp"
+#include "afl/io/internaldirectory.hpp"
 #include "afl/io/internalfilesystem.hpp"
 #include "afl/io/textfile.hpp"
 #include "game/game.hpp"
 #include "game/msg/outbox.hpp"
 #include "game/proxy/mailboxproxy.hpp"
+#include "game/root.hpp"
+#include "game/stringverifier.hpp"
+#include "game/test/registrationkey.hpp"
 #include "game/test/root.hpp"
 #include "game/test/sessionthread.hpp"
+#include "game/test/specificationloader.hpp"
 #include "game/test/waitindicator.hpp"
 #include "game/turn.hpp"
 
@@ -273,5 +280,100 @@ TestGameProxyOutboxProxy::testFileError()
     String_t err;
     TS_ASSERT(!testee.addMessageToFile(ind, 3, "t1\n", "/nonex/file.txt", err));
     TS_ASSERT_DIFFERS(err, "");
+}
+
+/** Test loadMessageTextFromFile(), success case. */
+void
+TestGameProxyOutboxProxy::testLoadMessage()
+{
+    afl::io::InternalFileSystem fs;
+    fs.openFile("/file", afl::io::FileSystem::Create)
+        ->fullWrite(afl::string::toBytes("TURN: 30\n"
+                                         "FROM: Me\n"
+                                         "TO: You\n"
+                                         "\n"
+                                         "Hi there\n"));
+    game::test::SessionThread t(fs);
+    game::test::WaitIndicator ind;
+    game::proxy::OutboxProxy testee(t.gameSender());
+
+    String_t text;
+    String_t error;
+    bool ok = testee.loadMessageTextFromFile(ind, text, "/file", error);
+    TS_ASSERT(ok);
+    TS_ASSERT_EQUALS(text, "Hi there");
+}
+
+/** Test loadMessageTextFromFile(), failure case. */
+void
+TestGameProxyOutboxProxy::testLoadMessageFail()
+{
+    afl::io::InternalFileSystem fs;
+    game::test::SessionThread t(fs);
+    game::test::WaitIndicator ind;
+    game::proxy::OutboxProxy testee(t.gameSender());
+
+    String_t text;
+    String_t error;
+    bool ok = testee.loadMessageTextFromFile(ind, text, "/file", error);
+    TS_ASSERT(!ok);
+    TS_ASSERT_DIFFERS(error, "");
+}
+
+/** Test loadMessageTextFromFile(), fully-populated root case.
+    Exercises usage of game charset and StringVerifier. */
+void
+TestGameProxyOutboxProxy::testLoadMessageRoot()
+{
+    // String verifier for testing; accepts only lower-case and unicode
+    class TestSV : public game::StringVerifier {
+     public:
+        virtual bool isValidString(Context /*ctx*/, const String_t& /*text*/) const
+            {
+                TS_FAIL("isValidString unexpected");
+                return false;
+            }
+        virtual bool isValidCharacter(Context ctx, afl::charset::Unichar_t ch) const
+            {
+                TS_ASSERT_EQUALS(ctx, Message);
+                return (ch >= 'a' && ch <= 'z') || ch >= 0x80;
+            }
+        virtual size_t getMaxStringLength(Context /*ctx*/) const
+            {
+                TS_FAIL("getMaxStringLength unexpected");
+                return 0;
+            }
+        virtual TestSV* clone() const
+            { return new TestSV(); }
+    };
+
+    afl::io::InternalFileSystem fs;
+    fs.openFile("/file", afl::io::FileSystem::Create)
+        ->fullWrite(afl::string::toBytes("TURN: 30\n"
+                                         "FROM: Me\n"
+                                         "TO: You\n"
+                                         "\n"
+                                         "Hi there\n"
+                                         "G\x94od d\x84y\n"));
+    game::test::SessionThread t(fs);
+    t.session().setRoot(new game::Root(afl::io::InternalDirectory::create("<empty>"),
+                                       *new game::test::SpecificationLoader(),
+                                       game::HostVersion(),
+                                       std::auto_ptr<game::RegistrationKey>(new game::test::RegistrationKey(game::RegistrationKey::Registered, 10)),
+                                       std::auto_ptr<game::StringVerifier>(new TestSV()),
+                                       std::auto_ptr<afl::charset::Charset>(new afl::charset::CodepageCharset(afl::charset::g_codepage437)),
+                                       game::Root::Actions_t()));
+
+    game::test::WaitIndicator ind;
+    game::proxy::OutboxProxy testee(t.gameSender());
+
+    String_t text;
+    String_t error;
+    bool ok = testee.loadMessageTextFromFile(ind, text, "/file", error);
+    TS_ASSERT(ok);
+
+    // Capitals and spaces are eaten by StringVerifier; \n would be eaten as well but is passed through.
+    // Non-ASCII is converted to UTF-8 by game charset and passed through by StringVerifier.
+    TS_ASSERT_EQUALS(text, "ithere\n\xC3\xB6odd\xC3\xA4y");
 }
 

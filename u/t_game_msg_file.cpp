@@ -54,6 +54,13 @@ namespace {
         };
         std::vector<Data> m_data;
     };
+
+    String_t loadMessageTextFromString(String_t str, const game::StringVerifier* pSV)
+    {
+        afl::io::ConstMemoryStream ms(afl::string::toBytes(str));
+        afl::io::TextFile tf(ms);
+        return game::msg::loadMessageText(tf, pSV);
+    }
 }
 
 /** Test writing a single message. */
@@ -271,3 +278,53 @@ TestGameMsgFile::testLoadTurn()
     TS_ASSERT_EQUALS(mbox.getMessageMetadata(2, tx, players).turnNumber, 20);
 }
 
+/** Test loadMessageText(). */
+void
+TestGameMsgFile::testLoadMessageText()
+{
+    // Trivial case
+    TS_ASSERT_EQUALS(loadMessageTextFromString("", 0), "");
+
+    // Standard case
+    TS_ASSERT_EQUALS(loadMessageTextFromString("first\nsecond\nthird\n\n", 0),
+                     "first\nsecond\nthird");
+
+    // Newline removal
+    TS_ASSERT_EQUALS(loadMessageTextFromString("\n\n\nfoo\n\n\n", 0), "foo");
+
+    // Lots of headers
+    TS_ASSERT_EQUALS(loadMessageTextFromString("--- Message ---\n"
+                                               "TURN: 30\n"
+                                               "first\n"
+                                               "--- Message ---\n"
+                                               "second\n"
+                                               "--- Message ---\n"
+                                               "TURN:20\n"
+                                               "third\n", 0),
+                     "first\nsecond\nthird");
+
+    // With StringVerifier
+    class TestSV : public game::StringVerifier {
+     public:
+        virtual bool isValidString(Context /*ctx*/, const String_t& /*text*/) const
+            {
+                TS_FAIL("isValidString unexpected");
+                return false;
+            }
+        virtual bool isValidCharacter(Context ctx, afl::charset::Unichar_t ch) const
+            {
+                TS_ASSERT_EQUALS(ctx, Message);
+                return (ch >= 'a' && ch <= 'z');
+            }
+        virtual size_t getMaxStringLength(Context /*ctx*/) const
+            {
+                TS_FAIL("getMaxStringLength unexpected");
+                return 0;
+            }
+        virtual TestSV* clone() const
+            { return new TestSV(); }
+    };
+    TestSV sv;
+    TS_ASSERT_EQUALS(loadMessageTextFromString("First\nSecond\nThird\n\n", &sv),
+                     "irst\necond\nhird");
+}

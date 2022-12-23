@@ -6,10 +6,13 @@
 #include "game/msg/file.hpp"
 #include "afl/charset/codepage.hpp"
 #include "afl/charset/codepagecharset.hpp"
+#include "afl/charset/utf8.hpp"
+#include "afl/charset/utf8reader.hpp"
 #include "afl/string/format.hpp"
 #include "game/msg/inbox.hpp"
 #include "game/msg/mailbox.hpp"
 #include "game/parser/binarytransfer.hpp"
+#include "util/string.hpp"
 #include "util/stringparser.hpp"
 
 using afl::string::Format;
@@ -59,6 +62,18 @@ namespace {
             }
         }
         return game::Reference();
+    }
+
+    bool acceptLine(const String_t& line)
+    {
+        return !util::strStartsWith(line, "--- Mess")
+            && !util::strStartsWith(line, "=== Turn")     // Not in PCC1
+            && !util::strStartsWith(line, "(o")
+            && !util::strStartsWith(line, "(-")
+            && !util::strStartsWith(line, "TURN:")
+            && !util::strStartsWith(line, "FROM:")
+            && !util::strStartsWith(line, "TO:")
+            && !util::strStartsWith(line, "CC:");
     }
 }
 
@@ -146,4 +161,43 @@ game::msg::loadMessages(afl::io::TextFile& in, Inbox& mbox)
         rdr.handleLine(line);
     }
     rdr.flush();
+}
+
+String_t
+game::msg::loadMessageText(afl::io::TextFile& in, const StringVerifier* pSV)
+{
+    // ex sendmsg.pas:LoadMessageEditor (part)
+    String_t result;
+
+    // Read
+    String_t line;
+    while (in.readLine(line)) {
+        if (acceptLine(line)) {
+            line = afl::string::strRTrim(line);
+            if (pSV != 0) {
+                afl::charset::Utf8Reader rdr(afl::string::toBytes(line), 0);
+                while (rdr.hasMore()) {
+                    afl::charset::Unichar_t ch = rdr.eat();
+                    if (pSV->isValidCharacter(StringVerifier::Message, ch)) {
+                        afl::charset::Utf8().append(result, ch);
+                    }
+                }
+            } else {
+                result += line;
+            }
+
+            // Do not produce leading newlines
+            if (!result.empty()) {
+                result += '\n';
+            }
+        }
+    }
+
+    // Remove final '\n's
+    String_t::size_type p = result.size();
+    while (p > 0 && result[p-1] == '\n') {
+        --p;
+    }
+    result.erase(p);
+    return result;
 }

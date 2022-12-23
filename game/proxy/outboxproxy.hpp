@@ -102,6 +102,14 @@ namespace game { namespace proxy {
             \return true on success, false on error (errorMessage set) */
         bool addMessageToFile(WaitIndicator& ind, int sender, String_t text, String_t fileName, String_t& errorMessage);
 
+        /** Load message text from file.
+            \param [in,out] ind      UI synchronisation
+            \param [out]    text     Message text
+            \param [in]     fileName File name
+            \param [out]    errorMessage Error message
+            \return true on success, false on error (errorMessage set) */
+        bool loadMessageTextFromFile(WaitIndicator& ind, String_t& text, String_t fileName, String_t& errorMessage);
+
         /** Get MailboxAdaptor.
             \return MailboxAdaptor that accesses the same Outbox this proxy is accessing */
         util::RequestSender<MailboxAdaptor> getMailboxAdaptor();
