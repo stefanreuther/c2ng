@@ -8,6 +8,7 @@
 #include "game/map/info/types.hpp"
 #include "game/map/universe.hpp"
 #include "game/session.hpp"
+#include "util/numberformatter.hpp"
 #include "util/stringlist.hpp"
 
 namespace game { namespace map { namespace info {
@@ -25,8 +26,9 @@ namespace game { namespace map { namespace info {
      public:
         /** Constructor.
             @param session Session // FIXME: can we use something smaller than a Session?
-            @param link LinkBuilder */
-        Browser(Session& session, const LinkBuilder& link);
+            @param link LinkBuilder
+            @param fmt  Number Formatter */
+        Browser(Session& session, const LinkBuilder& link, util::NumberFormatter fmt);
 
         /** Set options for a page.
 
@@ -58,6 +60,7 @@ namespace game { namespace map { namespace info {
      private:
         Session& m_session;
         const LinkBuilder& m_link;
+        util::NumberFormatter m_numberFormatter;
         PageOptions_t m_options[NUM_PAGES];
 
         void renderTotalsPage(Nodes_t& out);

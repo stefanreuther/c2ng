@@ -6,15 +6,17 @@
 #define C2NG_GAME_PROXY_IMPERIALSTATSPROXY_HPP
 
 #include "afl/base/signal.hpp"
+#include "game/map/info/linkbuilder.hpp"
 #include "game/map/info/types.hpp"
 #include "game/session.hpp"
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
 #include "util/stringlist.hpp"
-#include "game/map/info/linkbuilder.hpp"
 
 namespace game { namespace proxy {
+
+    class WaitIndicator;
 
     /** Imperial Statistic Proxy.
 
@@ -53,6 +55,14 @@ namespace game { namespace proxy {
             @param opts Options
             @see game::map::info::Browser::setPageOptions() */
         void setPageOptions(game::map::info::Page page, PageOptions_t opts);
+
+        /** Save page as HTML.
+            @param [in]  ind      WaitIndicator for UI synchronisation
+            @param [in]  page     Page to export
+            @param [in]  fileName Output file name
+            @param [out] errorMessage Error message
+            @return true on success; false on error (error message will be set) */
+        bool savePageAsHTML(WaitIndicator& ind, game::map::info::Page page, String_t fileName, String_t& errorMessage);
 
         /** Signal: update of page content.
             Sent in response to requestPageContent().

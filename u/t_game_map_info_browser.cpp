@@ -37,7 +37,7 @@ namespace {
 
         TestHarness()
             : tx(), fs(), session(tx, fs),
-              browser(session, link)
+              browser(session, link, util::NumberFormatter(true, false))
             { }
     };
 

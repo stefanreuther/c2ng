@@ -289,6 +289,8 @@ class TestGameProxyImperialStatsProxy : public CxxTest::TestSuite {
     void testNonempty();
     void testOptions();
     void testContentOptions();
+    void testSaveHTML();
+    void testSaveHTMLError();
 };
 
 class TestGameProxyInboxAdaptor : public CxxTest::TestSuite {

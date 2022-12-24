@@ -6,6 +6,8 @@
 #include "game/proxy/imperialstatsproxy.hpp"
 
 #include "t_game_proxy.hpp"
+#include "afl/io/filemapping.hpp"
+#include "afl/io/internalfilesystem.hpp"
 #include "afl/io/internalsink.hpp"
 #include "afl/io/xml/writer.hpp"
 #include "game/game.hpp"
@@ -203,5 +205,53 @@ TestGameProxyImperialStatsProxy::testContentOptions()
                      "<h1>Colony</h1>"
                      "<table align=\"left\"><tr><td width=\"16\"><font color=\"white\">Top 24 Supplies Planets</font></td><td align=\"right\" width=\"8\">(kt)</td></tr></table>");
     TS_ASSERT_EQUALS(recv.getCount(), 1);
+}
+
+/** Test savePageAsHTML().
+    A: set up a situation with mock file system and call savePageAsHTML()
+    E: correct result generated */
+void
+TestGameProxyImperialStatsProxy::testSaveHTML()
+{
+    afl::io::InternalFileSystem fs;
+    SessionThread t(fs);
+    t.session().setRoot(new game::test::Root(game::HostVersion()));
+    t.session().setShipList(new game::spec::ShipList());
+    t.session().setGame(new game::Game());
+
+    WaitIndicator ind;
+    ImperialStatsProxy testee(t.gameSender(), ind, makeLinkBuilder());
+    testee.setPageOptions(game::map::info::ColonyPage, game::map::info::Colony_ShowOnlySupplies);
+
+    String_t error;
+    bool ok = testee.savePageAsHTML(ind, game::map::info::ColonyPage, "/out.html", error);
+    TS_ASSERT(ok);
+
+    // Verify file content
+    String_t content = afl::string::fromBytes(fs.openFile("/out.html", afl::io::FileSystem::OpenRead)->createVirtualMapping()->get());
+    TS_ASSERT(content.find("<title>Colony</title>") != String_t::npos);
+    TS_ASSERT(content.find("<table align=\"left\" class=\"normaltable\"><tr><td valign=\"top\" width=\"256\"><span class=\"color-white\">Top 24 Supplies Planets</span></td><td valign=\"top\" align=\"right\" width=\"128\">(kt)</td></tr></table>") != String_t::npos);
+}
+
+/** Test savePageAsHTML(), error case.
+    A: set up a situation with mock file system and call savePageAsHTML() with a failing file name.
+    E: correct result generated */
+void
+TestGameProxyImperialStatsProxy::testSaveHTMLError()
+{
+    afl::io::InternalFileSystem fs;
+    SessionThread t(fs);
+    t.session().setRoot(new game::test::Root(game::HostVersion()));
+    t.session().setShipList(new game::spec::ShipList());
+    t.session().setGame(new game::Game());
+
+    WaitIndicator ind;
+    ImperialStatsProxy testee(t.gameSender(), ind, makeLinkBuilder());
+    testee.setPageOptions(game::map::info::ColonyPage, game::map::info::Colony_ShowOnlySupplies);
+
+    String_t error;
+    bool ok = testee.savePageAsHTML(ind, game::map::info::ColonyPage, "/nonexistant-subdir/out.html", error);
+    TS_ASSERT(!ok);
+    TS_ASSERT_DIFFERS(error, "");
 }
 

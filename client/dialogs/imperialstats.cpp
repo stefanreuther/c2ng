@@ -9,10 +9,12 @@
 #include "afl/io/xml/nodereader.hpp"
 #include "afl/string/format.hpp"
 #include "client/dialogs/planetinfodialog.hpp"
+#include "client/dialogs/sessionfileselectiondialog.hpp"
 #include "client/si/control.hpp"
 #include "client/widgets/helpwidget.hpp"
 #include "game/map/info/scriptlinkbuilder.hpp"
 #include "game/proxy/imperialstatsproxy.hpp"
+#include "ui/dialogs/messagebox.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/group.hpp"
 #include "ui/layout/hbox.hpp"
@@ -162,6 +164,7 @@ namespace {
         void onPageOptions(const util::StringList& opts, PageOptions_t current);
         void onLinkClick(String_t link);
         void onOptions();
+        void onSave();
 
         virtual bool handleKey(util::Key_t key, int prefix);
 
@@ -258,12 +261,14 @@ Dialog::run()
     win.add(m_docView);
 
     // Right side (buttons)
+    Button& btnSave = del.addNew(new Button(tx("Ctrl-S - Save"), 's' + util::KeyMod_Ctrl, root));
     Group& g1 = del.addNew(new Group(ui::layout::VBox::instance5));
     for (size_t i = 0; i < m_pageButtons.size(); ++i) {
         g1.add(*m_pageButtons[i]);
     }
     g1.add(del.addNew(new Spacer(gfx::Point(10, 10))));
     g1.add(m_optionsButton);
+    g1.add(btnSave);
     g1.add(del.addNew(new Spacer()));
 
     // Bottom-right buttons
@@ -283,6 +288,7 @@ Dialog::run()
     win.add(del.addNew(new ui::widgets::KeyForwarder(*this)));
 
     // Events
+    btnSave.sig_fire.add(this, &Dialog::onSave);
     btnClose.sig_fire.addNewClosure(m_loop.makeStop(0));
     btnHelp.dispatchKeyTo(help);
 
@@ -362,6 +368,27 @@ Dialog::onOptions()
                 m_proxy.setPageOptions(m_currentPage, static_cast<PageOptions_t>(opts));
                 requestPage();
             }
+        }
+    }
+}
+
+/* Event handler: "Save" button */
+void
+Dialog::onSave()
+{
+    ui::Root& root = m_userSide.root();
+    afl::string::Translator& tx = translator();
+
+    client::dialogs::SessionFileSelectionDialog dlg(root, tx, m_userSide.gameSender(), tx("Save Page"));
+    dlg.setPattern(util::FileNamePattern::getAllFilesWithExtensionPattern("html"));
+    dlg.setDefaultExtension("html");
+    client::Downlink link(root, tx);
+    if (dlg.runDefault(link)) {
+        String_t fileName = dlg.getResult();
+        String_t errorMessage;
+        if (!m_proxy.savePageAsHTML(link, m_currentPage, fileName, errorMessage)) {
+            ui::dialogs::MessageBox(afl::string::Format("Unable to save %s: %s", fileName, errorMessage), tx("Save Page"), root)
+                .doOkDialog(tx);
         }
     }
 }
