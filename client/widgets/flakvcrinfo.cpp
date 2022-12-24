@@ -5,8 +5,21 @@
 
 #include "client/widgets/flakvcrinfo.hpp"
 #include "afl/string/format.hpp"
+#include "gfx/complex.hpp"
 #include "gfx/context.hpp"
 #include "util/string.hpp"
+
+namespace {
+    bool isLastShipInGroup(size_t shipIndex, const game::vcr::BattleInfo& data)
+    {
+        for (size_t i = 0, n = data.groups.size(); i < n; ++i) {
+            if (shipIndex == data.groups[i].firstObject + data.groups[i].numObjects-1) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
 
 client::widgets::FlakVcrInfo::FlakVcrInfo(ui::Root& root, afl::string::Translator& tx)
     : m_root(root),
@@ -83,19 +96,40 @@ client::widgets::FlakVcrInfo::draw(gfx::Canvas& can)
         int n = (r.getBottomY() - y) / normalHeight;
         if (nships <= n) {
             // Enough room for ships
+            ctx.setTransparentBackground();
             for (size_t i = 0; i < m_data.units.size(); ++i) {
+                // Clear text
+                drawBackground(ctx, gfx::Rectangle(x+indent, y, w-indent, normalHeight));
+
+                // If this is the last ship in its group (and this is not the last group), draw a divider.
+                // This is O(n^2), but n is small and this makes us independant of the order of groups.
+                if (i+1 != m_data.units.size() && isLastShipInGroup(i, m_data)) {
+                    ctx.setColor(util::SkinColor::Faded);
+                    drawHLine(ctx, x+indent, y + normalHeight-1, x+w-1);
+                }
+
+                // Unit name
                 ctx.setColor(m_data.units[i].color[0]);
                 outTextF(ctx, gfx::Point(x+indent, y), w-indent, m_data.units[i].text[0]);
                 y += normalHeight;
             }
         } else if (nfleets <= n) {
             // Enough room for fleets
+            ctx.setTransparentBackground();
             for (size_t i = 0; i < m_data.groups.size(); ++i) {
+                // Clear text and draw divider (for consistency with single-ship version)
+                if (i+1 != m_data.groups.size()) {
+                    drawBackground(ctx, gfx::Rectangle(x+indent, y, w-indent, normalHeight));
+                    ctx.setColor(util::SkinColor::Faded);
+                    drawHLine(ctx, x+indent, y + normalHeight-1, x+w-1);
+                }
+
+                // Unit/fleet name
                 const game::vcr::GroupInfo& f = m_data.groups[i];
                 ctx.setColor(m_teamSettings.getPlayerColor(f.owner));
                 String_t text;
-                if (f.numObjects == 1 && f.speed == 0) {
-                    text = afl::string::Format(m_translator("a %s planet"), m_adjectiveNames.get(f.owner));
+                if (f.numObjects == 1 && f.firstObject < m_data.units.size()) {
+                    text = m_data.units[f.firstObject].text[0];
                 } else {
                     text = afl::string::Format(m_translator("%d %s unit%0$!d%!1{s%}"), f.numObjects, m_adjectiveNames.get(f.owner));
                 }
