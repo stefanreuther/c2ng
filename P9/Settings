@@ -775,7 +775,8 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/dialogs/zoomlevel.cpp client/dialogs/zoomlevel.hpp \
+FILES_guilib = client/application.cpp client/application.hpp \
+    client/dialogs/zoomlevel.cpp client/dialogs/zoomlevel.hpp \
     client/widgets/plugininfo.cpp client/widgets/plugininfo.hpp \
     client/widgets/pluginlist.cpp client/widgets/pluginlist.hpp \
     client/dialogs/pluginmanager.cpp client/dialogs/pluginmanager.hpp \
