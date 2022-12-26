@@ -1,7 +1,8 @@
 /**
   *  \file game/v3/udata/parser.cpp
+  *  \brief Class game::v3::udata::Parser
   *
-  *  FIXME: this is a semi-direct port of PCC2's two classes, GUtilParser and GUtilMessageParser.
+  *  This is a semi-direct port of PCC2's two classes, GUtilParser and GUtilMessageParser.
   *  That separation was probably for a hypothetical util.dat viewer built from the same source.
   *  The split would have to be a little different in c2ng because we do more via MessageInformation.
   *  We can probably improve a lot upon this in terms of testability, re-usability, etc.
@@ -96,6 +97,7 @@ namespace {
                            const game::spec::ShipList& shipList,
                            const game::config::HostConfiguration& config)
     {
+        // ex ccinit.pas:ProcessShipResult
         if (!obj.isPlanet()) {
             if (game::map::Ship* pShip = trn.universe().ships().get(obj.getId())) {
                 // Prepare some last-turn information
@@ -172,6 +174,13 @@ game::v3::udata::Parser::Parser(Game& game,
 
 game::v3::udata::Parser::~Parser()
 { }
+
+void
+game::v3::udata::Parser::handleNoUtilData()
+{
+    // For now, same as handleEnd()
+    Parser::handleEnd();
+}
 
 // Reader:
 bool
@@ -912,47 +921,68 @@ game::v3::udata::Parser::handleError(afl::io::Stream& in)
 void
 game::v3::udata::Parser::handleEnd()
 {
-    // ex GUtilMessageParser::finish
-    // ex ccinit.pas:ProcessBattleResults
-    // FIXME: call this when there are no VCRs
+    // ex GUtilMessageParser::finish, ccinit.pas:ProcessBattleResults
     afl::base::Ptr<game::vcr::Database> db = m_game.currentTurn().getBattles();
-    game::vcr::classic::Database* classicDB = dynamic_cast<game::vcr::classic::Database*>(db.get());
-    if (classicDB == 0) {
+
+    // Early exit if we have no VCRs at all
+    if (db.get() == 0) {
         return;
     }
 
-    for (size_t i = 0, n = classicDB->getNumBattles(); i < n; ++i) {
-        if (game::vcr::classic::Battle* battle = classicDB->getBattle(i)) {
-            const gt::Util7Battle* result = getBattleResult(m_battleResults, *battle);
-            game::map::Point pos;
-            if (result != 0) {
-                if (result->x != 0 && result->y != 0) {
-                    pos = game::map::Point(result->x, result->y);
+    if (game::vcr::classic::Database* classicDB = dynamic_cast<game::vcr::classic::Database*>(db.get())) {
+        // Special processing for classic
+        for (size_t i = 0, n = classicDB->getNumBattles(); i < n; ++i) {
+            if (game::vcr::classic::Battle* battle = classicDB->getBattle(i)) {
+                const gt::Util7Battle* result = getBattleResult(m_battleResults, *battle);
+                game::map::Point pos;
+                if (result != 0) {
+                    if (result->x != 0 && result->y != 0) {
+                        pos = game::map::Point(result->x, result->y);
+                    }
+                }
+
+                // Try to process results. Planets first because these may produce a position for later.
+                processPlanetResult(m_game.currentTurn(), battle->left(), pos);
+                processPlanetResult(m_game.currentTurn(), battle->right(), pos);
+
+                processShipResult(m_game.currentTurn(), battle->left(),  pos, m_destroyedShips, result, 0, checkEsbAgainst(battle->right(), m_hostConfiguration), m_shipList, m_hostConfiguration);
+                processShipResult(m_game.currentTurn(), battle->right(), pos, m_destroyedShips, result, 1, checkEsbAgainst(battle->left(),  m_hostConfiguration), m_shipList, m_hostConfiguration);
+
+                if (pos != game::map::Point(0, 0)) {
+                    battle->setPosition(pos);
                 }
             }
-
-            // Try to process results. Planets first because these may produce a position for later.
-            processPlanetResult(m_game.currentTurn(), battle->left(), pos);
-            processPlanetResult(m_game.currentTurn(), battle->right(), pos);
-
-            processShipResult(m_game.currentTurn(), battle->left(),  pos, m_destroyedShips, result, 0, checkEsbAgainst(battle->right(), m_hostConfiguration), m_shipList, m_hostConfiguration);
-            processShipResult(m_game.currentTurn(), battle->right(), pos, m_destroyedShips, result, 1, checkEsbAgainst(battle->left(),  m_hostConfiguration), m_shipList, m_hostConfiguration);
-
-            if (pos != game::map::Point(0, 0)) {
-                battle->setPosition(pos);
+        }
+    } else {
+        // Limited processing for general
+        for (size_t i = 0, n = db->getNumBattles(); i < n; ++i) {
+            if (game::vcr::Battle* battle = db->getBattle(i)) {
+                game::map::Point pos;
+                for (size_t slot = 0, nslots = battle->getNumObjects(); slot < nslots; ++slot) {
+                    if (const game::vcr::Object* obj = battle->getObject(slot, false)) {
+                        processPlanetResult(m_game.currentTurn(), *obj, pos);
+                    }
+                }
+                for (size_t slot = 0, nslots = battle->getNumObjects(); slot < nslots; ++slot) {
+                    if (const game::vcr::Object* obj = battle->getObject(slot, false)) {
+                        processShipResult(m_game.currentTurn(), *obj, pos, m_destroyedShips, 0, slot, battle->isESBActive(m_hostConfiguration), m_shipList, m_hostConfiguration);
+                    }
+                }
             }
+        }
+    }
 
-            // {... add experience levels ...}
-            // { FIXME: maybe add some heuristics w.r.t. Commander ships? }
-            // IF (pconf<>NIL) AND (pconf^.main.NumExperienceLevels > 0) THEN BEGIN
-            //   FOR side:=Left TO Right DO BEGIN
-            //     SetStr(uhdr.name, 50, 'Experience');
-            //     uhdr.id := uscore_Experience;
-            //     uhdr.limit := pconf^.main.NumExperienceLevels;
-            //     ush := AddUnitScore((side = Left) OR (VCRs^[i].BattleType = 0), uhdr, 1);
-            //     AddUnitScoreEntry(ush, VCRs^[i].Objs[side].Id, VCRs^[i].Objs[side].Level, Gen.TurnNr-1);
-            //   END;
-            // END;
+    // Add experience levels
+    // Deliberately not try to handle Commander.
+    // This is just a plain guess for ships we do not play.
+    // Next time we see that ship, it might have leveled up, again be helped by a commander, etc.
+    for (size_t i = 0, n = db->getNumBattles(); i < n; ++i) {
+        if (game::vcr::Battle* battle = db->getBattle(i)) {
+            for (size_t slot = 0, nslots = battle->getNumObjects(); slot < nslots; ++slot) {
+                if (const game::vcr::Object* obj = battle->getObject(slot, false)) {
+                    processExperienceLevel(*obj);
+                }
+            }
         }
     }
 }
@@ -961,6 +991,25 @@ int
 game::v3::udata::Parser::getTurnNumber() const
 {
     return m_game.currentTurn().getTurnNumber();
+}
+
+game::UnitScoreList*
+game::v3::udata::Parser::getUnitScoreList(Scope scope, Id_t id)
+{
+    UnitScoreList* result = 0;
+    switch (scope) {
+     case ShipScope:
+        if (game::map::Ship* pShip = m_game.currentTurn().universe().ships().get(id)) {
+            result = &pShip->unitScores();
+        }
+        break;
+     case PlanetScope:
+        if (game::map::Planet* pPlanet = m_game.currentTurn().universe().planets().get(id)) {
+            result = &pPlanet->unitScores();
+        }
+        break;
+    }
+    return result;
 }
 
 void
@@ -1042,6 +1091,19 @@ game::v3::udata::Parser::processEnemies(uint16_t enemies)
     processMessageInformation(info);
 }
 
+void
+game::v3::udata::Parser::processExperienceLevel(const game::vcr::Object& obj)
+{
+    bool isPlanet = obj.isPlanet();
+    game::UnitScoreDefinitionList& defs = isPlanet ? m_game.planetScores() : m_game.shipScores();
+    game::UnitScoreList::Index_t index;
+    if (defs.lookup(game::ScoreId_ExpLevel, index)) {
+        if (game::UnitScoreList* p = getUnitScoreList(isPlanet ? PlanetScope : ShipScope, obj.getId())) {
+            p->merge(index, static_cast<int16_t>(obj.getExperienceLevel()), static_cast<int16_t>(getTurnNumber()-1));
+        }
+    }
+}
+
 /** Load score record.
     \param data   Data
     \param scope  Scope (ships or planets)
@@ -1066,25 +1128,11 @@ game::v3::udata::Parser::processScoreRecord(afl::base::ConstBytes_t data, Scope 
 
     // Read entries
     while (Eater<gt::Util49UnitScoreEntry> entry = data) {
-        UnitScoreList* p = 0;
-        switch (scope) {
-         case ShipScope:
-            if (game::map::Ship* pShip = m_game.currentTurn().universe().ships().get(entry->id)) {
-                p = &pShip->unitScores();
-            }
-            break;
-         case PlanetScope:
-            if (game::map::Planet* pPlanet = m_game.currentTurn().universe().planets().get(entry->id)) {
-                p = &pPlanet->unitScores();
-            }
-            break;
-        }
-        if (p != 0) {
+        if (UnitScoreList* p = getUnitScoreList(scope, entry->id)) {
             p->merge(index, entry->value, static_cast<int16_t>(getTurnNumber()));
         }
     }
 }
-
 
 void
 game::v3::udata::Parser::processMessageInformation(const game::parser::MessageInformation& info)

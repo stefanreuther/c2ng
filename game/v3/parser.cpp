@@ -4,6 +4,7 @@
   */
 
 #include "game/v3/parser.hpp"
+#include "afl/charset/utf8charset.hpp"
 #include "game/parser/datainterface.hpp"
 #include "game/parser/messageparser.hpp"
 #include "game/turn.hpp"
@@ -96,6 +97,15 @@ void
 game::v3::Parser::loadUtilData(afl::io::Stream& in, afl::charset::Charset& charset)
 {
     game::v3::udata::Parser(m_game, m_player, m_root.hostConfiguration(), m_root.hostVersion(), m_shipList, m_atomTable, charset, m_translator, m_log).read(in);
+}
+
+// Handle absence of util.dat file.
+void
+game::v3::Parser::handleNoUtilData()
+{
+    // We do not read anything, so any charset does. Utf8 is the simplest one.
+    afl::charset::Utf8Charset charset;
+    game::v3::udata::Parser(m_game, m_player, m_root.hostConfiguration(), m_root.hostVersion(), m_shipList, m_atomTable, charset, m_translator, m_log).handleNoUtilData();
 }
 
 // Parse messages.

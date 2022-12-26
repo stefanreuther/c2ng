@@ -458,12 +458,17 @@ game::v3::DirectoryLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player,
         }
     }
 
+    // FLAK
+    ldr.loadFlakBattles(turn, dir, player);
+
     // Util
     Parser mp(m_translator, m_log, game, player, root, game::actions::mustHaveShipList(session), session.world().atomTable());
     {
         afl::base::Ptr<Stream> s = dir.openFileNT(Format("util%d.dat", player), FileSystem::OpenRead);
         if (s.get() != 0) {
             mp.loadUtilData(*s, *m_charset);
+        } else {
+            mp.handleNoUtilData();
         }
     }
 
@@ -474,9 +479,6 @@ game::v3::DirectoryLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player,
             mp.parseMessages(*file, turn.inbox(), *m_charset);
         }
     }
-
-    // FLAK
-    ldr.loadFlakBattles(turn, dir, player);
 }
 
 void

@@ -260,12 +260,17 @@ game::v3::ResultLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, ga
     // Must be after loading the result/turn because it requires shipsource flags
     game::db::FleetLoader(*m_charset, m_translator).load(root.gameDirectory(), turn.universe(), player);
 
+    // FLAK
+    ldr.loadFlakBattles(turn, root.gameDirectory(), player);
+
     // Util
     Parser mp(m_translator, m_log, game, player, root, game::actions::mustHaveShipList(session), session.world().atomTable());
     {
         Ptr<Stream> file = root.gameDirectory().openFileNT(Format("util%d.dat", player), afl::io::FileSystem::OpenRead);
         if (file.get() != 0) {
             mp.loadUtilData(*file, *m_charset);
+        } else {
+            mp.handleNoUtilData();
         }
     }
 
@@ -276,9 +281,6 @@ game::v3::ResultLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, ga
             mp.parseMessages(*file, turn.inbox(), *m_charset);
         }
     }
-
-    // FLAK
-    ldr.loadFlakBattles(turn, root.gameDirectory(), player);
 }
 
 void

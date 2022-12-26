@@ -39,6 +39,9 @@ namespace game { namespace v3 {
             \param charset Character set */
         void loadUtilData(afl::io::Stream& in, afl::charset::Charset& charset);
 
+        /** Handle absence of util.dat file. */
+        void handleNoUtilData();
+
         /** Parse messages.
             This will also scan for binary data transmissions.
             \param in The msgparse.ini file

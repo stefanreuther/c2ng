@@ -1,5 +1,6 @@
 /**
   *  \file game/v3/udata/parser.hpp
+  *  \brief Class game::v3::udata::Parser
   */
 #ifndef C2NG_GAME_V3_UDATA_PARSER_HPP
 #define C2NG_GAME_V3_UDATA_PARSER_HPP
@@ -11,13 +12,17 @@
 #include "game/game.hpp"
 #include "game/parser/messageinformation.hpp"
 #include "game/spec/shiplist.hpp"
+#include "game/unitscorelist.hpp"
 #include "game/v3/structures.hpp"
 #include "game/v3/udata/reader.hpp"
+#include "game/vcr/object.hpp"
 #include "util/atomtable.hpp"
 #include "util/vector.hpp"
 
 namespace game { namespace v3 { namespace udata {
 
+    /** Util.dat parser.
+        Contains logic to read a util.dat file and assimilate its content into a game. */
     class Parser : public Reader {
      public:
         /** Constructor.
@@ -41,6 +46,12 @@ namespace game { namespace v3 { namespace udata {
                afl::sys::LogListener& log);
 
         virtual ~Parser();
+
+        /** Perform post-processing when we have no util.dat file.
+            Essentially, pretends that there is an empty util.dat file and processes that.
+            This will synthesize some data (mainly, information derived from VCRs).
+            This responsibility isn't perfectly placed but will have to do for now. */
+        void handleNoUtilData();
 
         // Reader:
         virtual bool handleRecord(uint16_t recordId, afl::base::ConstBytes_t data);
@@ -69,10 +80,12 @@ namespace game { namespace v3 { namespace udata {
         std::vector<game::v3::structures::Util7Battle> m_battleResults;
 
         int getTurnNumber() const;
+        UnitScoreList* getUnitScoreList(Scope scope, Id_t id);
 
         void markShipKilled(Id_t id);
         void processAlliances(const game::v3::structures::Util22Alliance& allies);
         void processEnemies(uint16_t enemies);
+        void processExperienceLevel(const game::vcr::Object& obj);
         void processScoreRecord(afl::base::ConstBytes_t data, Scope scope, UnitScoreDefinitionList& defs);
         void processMessageInformation(const game::parser::MessageInformation& info);
     };
