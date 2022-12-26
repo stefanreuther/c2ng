@@ -58,32 +58,11 @@ void
 game::proxy::VcrDatabaseProxy::Trampoline::requestData(size_t index)
 {
     game::vcr::BattleInfo d;
-
-    const TeamSettings* teamSettings = m_adaptor.getTeamSettings();
-    const Root& root = m_adaptor.root();
-    const game::spec::ShipList& shipList = m_adaptor.shipList();
-    afl::string::Translator& tx = m_adaptor.translator();
-    const int me = teamSettings != 0 ? teamSettings->getViewpointPlayer() : 0;
-
     if (game::vcr::Battle* b = m_adaptor.battles().getBattle(index)) {
+        const Root& root = m_adaptor.root();
+        const game::spec::ShipList& shipList = m_adaptor.shipList();
         b->prepareResult(root.hostConfiguration(), shipList, game::vcr::Battle::NeedQuickOutcome);
-        for (size_t i = 0, n = b->getNumObjects(); i < n; ++i) {
-            if (const game::vcr::Object* obj = b->getObject(i, false)) {
-                d.units.push_back(obj->describe(teamSettings, &root, &shipList, tx));
-            }
-        }
-        for (size_t i = 0, n = b->getNumGroups(); i < n; ++i) {
-            d.groups.push_back(b->getGroupInfo(i, root.hostConfiguration()));
-        }
-
-        d.seed = b->getAuxiliaryInformation(game::vcr::Battle::aiSeed);
-        d.algorithmName = b->getAlgorithmName(m_adaptor.translator());
-        d.resultSummary = b->getResultSummary(me, root.hostConfiguration(), shipList, root.userConfiguration().getNumberFormatter(), tx);
-
-        game::map::Point pos;
-        if (b->getPosition().get(pos)) {
-            d.position = pos.toString();
-        }
+        b->getBattleInfo(d, m_adaptor.getTeamSettings(), shipList, root, m_adaptor.translator());
     }
 
     m_reply.postRequest(&VcrDatabaseProxy::updateCurrentBattle, index, getNumBattles(), d);

@@ -938,6 +938,10 @@ game::v3::udata::Parser::handleEnd()
             processShipResult(m_game.currentTurn(), battle->left(),  pos, m_destroyedShips, result, 0, checkEsbAgainst(battle->right(), m_hostConfiguration), m_shipList, m_hostConfiguration);
             processShipResult(m_game.currentTurn(), battle->right(), pos, m_destroyedShips, result, 1, checkEsbAgainst(battle->left(),  m_hostConfiguration), m_shipList, m_hostConfiguration);
 
+            if (pos != game::map::Point(0, 0)) {
+                battle->setPosition(pos);
+            }
+
             // {... add experience levels ...}
             // { FIXME: maybe add some heuristics w.r.t. Commander ships? }
             // IF (pconf<>NIL) AND (pconf^.main.NumExperienceLevels > 0) THEN BEGIN

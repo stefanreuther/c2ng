@@ -5,6 +5,8 @@
 
 #include "game/vcr/battle.hpp"
 #include "afl/string/format.hpp"
+#include "game/root.hpp"
+#include "game/teamsettings.hpp"
 #include "game/vcr/object.hpp"
 
 String_t
@@ -42,4 +44,31 @@ game::vcr::Battle::getDescription(const game::PlayerList& players, afl::string::
         String_t rightName = (rightSlot != 0 ? rightSlot->getName() : players.getPlayerName(rightRace, Player::ShortName, tx));
         return afl::string::Format(tx("%s vs. %s"), leftName, rightName);
     }
+}
+
+void
+game::vcr::Battle::getBattleInfo(BattleInfo& out,
+                                 const TeamSettings* teamSettings,
+                                 const game::spec::ShipList& shipList,
+                                 const Root& root,
+                                 afl::string::Translator& tx) const
+{
+    const int me = teamSettings != 0 ? teamSettings->getViewpointPlayer() : 0;
+
+    out.units.clear();
+    for (size_t i = 0, n = getNumObjects(); i < n; ++i) {
+        if (const game::vcr::Object* obj = getObject(i, false)) {
+            out.units.push_back(obj->describe(teamSettings, &root, &shipList, tx));
+        }
+    }
+
+    out.groups.clear();
+    for (size_t i = 0, n = getNumGroups(); i < n; ++i) {
+        out.groups.push_back(getGroupInfo(i, root.hostConfiguration()));
+    }
+
+    out.seed          = getAuxiliaryInformation(Battle::aiSeed);
+    out.algorithmName = getAlgorithmName(tx);
+    out.resultSummary = getResultSummary(me, root.hostConfiguration(), shipList, root.userConfiguration().getNumberFormatter(), tx);
+    out.position      = getPosition();
 }

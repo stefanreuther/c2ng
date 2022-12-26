@@ -39,18 +39,23 @@ client::widgets::ClassicVcrInfo::ClassicVcrInfo(ui::Root& root)
       m_leftButton("L", 'l', root),
       m_rightButton("R", 'r', root),
       m_tabButton("Tab", util::Key_Tab, root),
-      m_scoreButton("S", 's', root)
+      m_scoreButton("S", 's', root),
+      m_showMapButton("F4", util::Key_F4, root)
 {
     // ex WVcrSelector::WVcrSelector [part]
     addChild(m_leftButton, 0);
     addChild(m_rightButton, 0);
     addChild(m_tabButton, 0);
     addChild(m_scoreButton, 0);
+    addChild(m_showMapButton, 0);
 
     m_leftButton.sig_fire.add(&sig_left, &afl::base::Signal<void(int)>::raise);
     m_rightButton.sig_fire.add(&sig_right, &afl::base::Signal<void(int)>::raise);
     m_tabButton.sig_fire.add(&sig_tab, &afl::base::Signal<void(int)>::raise);
     m_scoreButton.sig_fire.add(&sig_score, &afl::base::Signal<void(int)>::raise);
+    m_showMapButton.sig_fire.add(this, &ClassicVcrInfo::onMap);
+
+    updateButtonState();
 }
 
 client::widgets::ClassicVcrInfo::~ClassicVcrInfo()
@@ -90,7 +95,9 @@ client::widgets::ClassicVcrInfo::draw(gfx::Canvas& can)
     ctx.setTextAlign(gfx::RightAlign, gfx::TopAlign);
     {
         String_t text = m_data.algorithmName;
-        util::addListItem(text, ", ", m_data.position);
+        if (const game::map::Point* pt = m_data.position.get()) {
+            util::addListItem(text, ", ", pt->toString());
+        }
         outText(ctx, gfx::Point(x+w, y), text);
     }
     if (const int32_t* seed = m_data.seed.get()) {
@@ -191,6 +198,13 @@ client::widgets::ClassicVcrInfo::setData(const Data_t& data)
 {
     m_data = data;
     requestRedraw();
+    updateButtonState();
+}
+
+void
+client::widgets::ClassicVcrInfo::setTabAvailable(bool flag)
+{
+    m_tabButton.setState(DisabledState, !flag);
 }
 
 afl::base::Ref<gfx::Font>
@@ -235,4 +249,22 @@ client::widgets::ClassicVcrInfo::setChildPositions()
 
     const int scoreX = tabX - buttonSize - 5;
     m_scoreButton.setExtent(gfx::Rectangle(scoreX, bottomY - buttonSize, buttonSize, buttonSize));
+
+    const int mapW = m_showMapButton.getLayoutInfo().getMinSize().getX();
+    const int mapX = scoreX - mapW - 5;
+    m_showMapButton.setExtent(gfx::Rectangle(mapX, bottomY - buttonSize, mapW, buttonSize));
+}
+
+void
+client::widgets::ClassicVcrInfo::updateButtonState()
+{
+    m_showMapButton.setState(DisabledState, !m_data.position.isValid());
+}
+
+void
+client::widgets::ClassicVcrInfo::onMap()
+{
+    if (const game::map::Point* pt = m_data.position.get()) {
+        sig_showMap.raise(*pt);
+    }
 }

@@ -27,6 +27,7 @@ client::widgets::FlakVcrInfo::FlakVcrInfo(ui::Root& root, afl::string::Translato
       m_listButton("L", 'l', root),
       m_tabButton("Tab", util::Key_Tab, root),
       m_scoreButton("S", 's', root),
+      m_showMapButton("F4", util::Key_F4, root),
       m_data(),
       m_adjectiveNames(),
       m_teamSettings()
@@ -35,10 +36,14 @@ client::widgets::FlakVcrInfo::FlakVcrInfo(ui::Root& root, afl::string::Translato
     addChild(m_listButton, 0);
     addChild(m_tabButton, 0);
     addChild(m_scoreButton, 0);
+    addChild(m_showMapButton, 0);
 
     m_listButton.sig_fire.add(&sig_list, &afl::base::Signal<void(int)>::raise);
     m_tabButton.sig_fire.add(&sig_tab, &afl::base::Signal<void(int)>::raise);
     m_scoreButton.sig_fire.add(&sig_score, &afl::base::Signal<void(int)>::raise);
+    m_showMapButton.sig_fire.add(this, &FlakVcrInfo::onMap);
+
+    updateButtonState();
 }
 
 client::widgets::FlakVcrInfo::~FlakVcrInfo()
@@ -76,7 +81,9 @@ client::widgets::FlakVcrInfo::draw(gfx::Canvas& can)
     ctx.setTextAlign(gfx::RightAlign, gfx::TopAlign);
     {
         String_t text = m_data.algorithmName;
-        util::addListItem(text, ", ", m_data.position);
+        if (const game::map::Point* pt = m_data.position.get()) {
+            util::addListItem(text, ", ", pt->toString());
+        }
         outText(ctx, gfx::Point(x+w, y), text);
     }
     ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
@@ -235,6 +242,7 @@ client::widgets::FlakVcrInfo::setData(const Data_t& data)
 {
     m_data = data;
     requestRedraw();
+    updateButtonState();
 }
 
 void
@@ -280,4 +288,21 @@ client::widgets::FlakVcrInfo::setChildPositions()
     lastRow.consumeRightX(pad);
 
     m_listButton.setExtent(lastRow.splitRightX(buttonSize));
+    lastRow.consumeRightX(pad);
+
+    m_showMapButton.setExtent(lastRow.splitRightX(m_showMapButton.getLayoutInfo().getMinSize().getX()));
+}
+
+void
+client::widgets::FlakVcrInfo::updateButtonState()
+{
+    m_showMapButton.setState(DisabledState, !m_data.position.isValid());
+}
+
+void
+client::widgets::FlakVcrInfo::onMap()
+{
+    if (const game::map::Point* pt = m_data.position.get()) {
+        sig_showMap.raise(*pt);
+    }
 }

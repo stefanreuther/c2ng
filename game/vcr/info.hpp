@@ -8,6 +8,7 @@
 #include <vector>
 #include "afl/base/optional.hpp"
 #include "afl/string/string.hpp"
+#include "game/map/point.hpp"
 #include "util/skincolor.hpp"
 
 namespace game { namespace vcr {
@@ -43,7 +44,7 @@ namespace game { namespace vcr {
         String_t heading;                                     ///< Heading of the battle ("Battle 1 of 10").
         String_t algorithmName;                               ///< Algorithm name ("PHost").
         String_t resultSummary;                               ///< Result summary ("We won").
-        String_t position;                                    ///< Position. Can be empty.
+        afl::base::Optional<game::map::Point> position;       ///< Position. Can be empty.
         afl::base::Optional<int32_t> seed;                    ///< Seed. Can be unknown.
         std::vector<ObjectInfo> units;                        ///< Information for all units.
         std::vector<GroupInfo> groups;                        ///< Information for all groups (fleets).

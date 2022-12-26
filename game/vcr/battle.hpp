@@ -14,6 +14,11 @@
 #include "game/spec/shiplist.hpp"
 #include "game/vcr/info.hpp"
 
+namespace game {
+    class TeamSettings;
+    class Root;
+}
+
 namespace game { namespace vcr {
 
     class Object;
@@ -145,6 +150,18 @@ namespace game { namespace vcr {
             \param tx Translator
             \return description */
         String_t getDescription(const game::PlayerList& players, afl::string::Translator& tx) const;
+
+        /** Describe battle as BattleInfo structure.
+            @param [out] out           Result
+            @param [in]  teamSettings  Team settings (optional, for viewpoint player)
+            @param [in]  shipList      Ship list (for hull names)
+            @param [in]  root          Root (for configuration)
+            @param [in]  tx            Translator */
+        void getBattleInfo(BattleInfo& out,
+                           const TeamSettings* teamSettings,
+                           const game::spec::ShipList& shipList,
+                           const Root& root,
+                           afl::string::Translator& tx) const;
     };
 
 } }

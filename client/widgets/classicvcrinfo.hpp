@@ -30,11 +30,13 @@ namespace client { namespace widgets {
         virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
 
         void setData(const Data_t& data);
+        void setTabAvailable(bool flag);
 
         afl::base::Signal<void(int)> sig_left;
         afl::base::Signal<void(int)> sig_right;
         afl::base::Signal<void(int)> sig_tab;
         afl::base::Signal<void(int)> sig_score;
+        afl::base::Signal<void(game::map::Point)> sig_showMap;
 
      private:
         ui::Root& m_root;
@@ -42,6 +44,7 @@ namespace client { namespace widgets {
         ui::widgets::Button m_rightButton;
         ui::widgets::Button m_tabButton;
         ui::widgets::Button m_scoreButton;
+        ui::widgets::Button m_showMapButton;
         Data_t m_data;
 
         afl::base::Ref<gfx::Font> getLargeFont() const;
@@ -49,6 +52,8 @@ namespace client { namespace widgets {
         afl::base::Ref<gfx::Font> getBoldFont() const;
 
         void setChildPositions();
+        void updateButtonState();
+        void onMap();
     };
 
 } }

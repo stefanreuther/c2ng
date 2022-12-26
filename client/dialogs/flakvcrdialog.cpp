@@ -38,6 +38,7 @@ client::dialogs::FlakVcrDialog::FlakVcrDialog(ui::Root& root, afl::string::Trans
     m_info.sig_list.add(this, &FlakVcrDialog::onList);
     m_info.sig_tab.add(this, &FlakVcrDialog::onTab);
     m_info.sig_score.add(this, &FlakVcrDialog::onScore);
+    m_info.sig_showMap.add(this, &FlakVcrDialog::onShowMap);
 }
 
 client::dialogs::FlakVcrDialog::~FlakVcrDialog()
@@ -222,3 +223,10 @@ client::dialogs::FlakVcrDialog::onScore()
     showCombatScoreSummary(m_root, m_translator, m_vcrSender, m_gameSender);
 }
 
+
+void
+client::dialogs::FlakVcrDialog::onShowMap(game::map::Point pt)
+{
+    m_result = pt;
+    m_loop.stop(1);
+}

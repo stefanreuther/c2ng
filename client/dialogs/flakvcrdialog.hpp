@@ -68,6 +68,7 @@ namespace client { namespace dialogs {
         void onList();
         void onTab();
         void onScore();
+        void onShowMap(game::map::Point pt);
     };
 
 } }

@@ -37,6 +37,7 @@ client::dialogs::ClassicVcrDialog::ClassicVcrDialog(ui::Root& root, afl::string:
     m_info.sig_right.add(this, &ClassicVcrDialog::onRightInfo);
     m_info.sig_tab.add(this, &ClassicVcrDialog::onTab);
     m_info.sig_score.add(this, &ClassicVcrDialog::onScore);
+    m_info.sig_showMap.add(this, &ClassicVcrDialog::onShowMap);
 }
 
 client::dialogs::ClassicVcrDialog::~ClassicVcrDialog()
@@ -117,6 +118,8 @@ client::dialogs::ClassicVcrDialog::initNumBattles()
     if (m_currentIndex >= m_numBattles) {
         m_currentIndex = 0;
     }
+
+    m_info.setTabAvailable(m_numBattles > 1);
 }
 
 void
@@ -213,4 +216,11 @@ void
 client::dialogs::ClassicVcrDialog::onScore()
 {
     showCombatScoreSummary(m_root, m_translator, m_vcrSender, m_gameSender);
+}
+
+void
+client::dialogs::ClassicVcrDialog::onShowMap(game::map::Point pt)
+{
+    m_result = pt;
+    m_loop.stop(1);
 }

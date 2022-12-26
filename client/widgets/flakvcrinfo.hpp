@@ -49,6 +49,7 @@ namespace client { namespace widgets {
         afl::base::Signal<void(int)> sig_list;
         afl::base::Signal<void(int)> sig_tab;
         afl::base::Signal<void(int)> sig_score;
+        afl::base::Signal<void(game::map::Point)> sig_showMap;
 
      private:
         ui::Root& m_root;
@@ -56,6 +57,7 @@ namespace client { namespace widgets {
         ui::widgets::Button m_listButton;
         ui::widgets::Button m_tabButton;
         ui::widgets::Button m_scoreButton;
+        ui::widgets::Button m_showMapButton;
         Data_t m_data;
         game::PlayerArray<String_t> m_adjectiveNames;
         game::TeamSettings m_teamSettings;
@@ -65,6 +67,8 @@ namespace client { namespace widgets {
         afl::base::Ref<gfx::Font> getBoldFont() const;
 
         void setChildPositions();
+        void updateButtonState();
+        void onMap();
     };
 
 } }
