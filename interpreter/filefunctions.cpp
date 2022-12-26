@@ -584,7 +584,7 @@ namespace {
 
     /* @q CC$SetStr(v:Blob, pos:Int, size:Int, value:Str):Blob (Internal)
        Backend to {SetStr}. */
-    afl::data::Value* IFCCSetStr(World& /*world*/, Arguments& args)
+    afl::data::Value* IFCCSetStr(World& world, Arguments& args)
     {
         // ex fileint.pas:File_SetStr (part)
         int32_t index, size;
@@ -606,8 +606,8 @@ namespace {
             return afl::data::Value::cloneOf(first);
         }
 
-        // FIXME: Convert to game character set
-        // value = convertUtf8ToGame(value);
+        // Convert to game character set
+        afl::base::GrowableBytes_t encodedValue(world.fileTable().getFileCharset().encode(afl::string::toMemory(value)));
 
         // prepare the blob
         std::auto_ptr<interpreter::BlobValue> blob(new interpreter::BlobValue());
@@ -615,7 +615,7 @@ namespace {
 
         // execute
         if (size != 0) {
-            afl::bits::packFixedString(blob->data().subrange(index, size), afl::string::toBytes(value));
+            afl::bits::packFixedString(blob->data().subrange(index, size), encodedValue);
         }
 
         return blob.release();
@@ -764,7 +764,7 @@ namespace {
        Returns the string that is stored at position %pos in the data block in a field of size %length.
        The string is converted from the game character set, and trailing space is removed.
        @since PCC2 1.99.12, PCC 1.0.13, PCC2 2.40.1 */
-    afl::data::Value* IFGetStr(World& /*world*/, Arguments& args)
+    afl::data::Value* IFGetStr(World& world, Arguments& args)
     {
         // ex fileint.pas:op_GETSTR_func
         interpreter::BlobValue* bv;
@@ -777,8 +777,7 @@ namespace {
         }
 
         // Do it
-        // FIXME: convertGameToUtf8()!!!
-        String_t result = afl::string::fromBytes(afl::bits::unpackFixedString(bv->data().subrange(index, size)));
+        String_t result = world.fileTable().getFileCharset().decode(afl::bits::unpackFixedString(bv->data().subrange(index, size)));
         return makeStringValue(result);
     }
 

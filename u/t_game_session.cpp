@@ -7,7 +7,10 @@
 #include "game/session.hpp"
 
 #include "t_game.hpp"
+#include "afl/charset/codepage.hpp"
+#include "afl/charset/codepagecharset.hpp"
 #include "afl/data/access.hpp"
+#include "afl/io/internalfilesystem.hpp"
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "game/game.hpp"
@@ -15,7 +18,10 @@
 #include "game/map/ship.hpp"
 #include "game/map/ufo.hpp"
 #include "game/map/universe.hpp"
+#include "game/test/registrationkey.hpp"
 #include "game/test/root.hpp"
+#include "game/test/specificationloader.hpp"
+#include "game/test/stringverifier.hpp"
 #include "game/turn.hpp"
 #include "interpreter/subroutinevalue.hpp"
 
@@ -291,5 +297,70 @@ TestGameSession::testTask()
     TS_ASSERT_EQUALS(testee.getTaskStatus(p, interpreter::Process::pkBaseTask, false),   game::Session::OtherTask);
     TS_ASSERT_EQUALS(testee.getTaskStatus(p, interpreter::Process::pkPlanetTask, true),  game::Session::NoTask);
     TS_ASSERT_EQUALS(testee.getTaskStatus(p, interpreter::Process::pkBaseTask, true),    game::Session::NoTask);
+}
+
+/** Test file character set handling. */
+void
+TestGameSession::testFileCharsetHandling()
+{
+    afl::io::InternalFileSystem fs;
+    afl::string::NullTranslator tx;
+    game::Session testee(tx, fs);
+
+    // Initial file system content
+    const char*const SCRIPT =
+        "t := chr(246)\n"
+        "open '/file.txt' for output as #1\n"
+        "print #1, t\n"
+        "close #1\n"
+        "a := ''\n"
+        "open '/data.dat' for output as #1\n"
+        "setstr a, 0, 20, t\n"
+        "put #1, a, 20\n"
+        "close #1\n";
+    fs.createDirectory("/gd");
+    fs.openFile("/gd/t.q", afl::io::FileSystem::Create)->fullWrite(afl::string::toBytes(SCRIPT));
+
+    // Create a root. This sets the charset.
+    testee.setRoot(new game::Root(fs.openDirectory("/gd"),
+                                  *new game::test::SpecificationLoader(),
+                                  game::HostVersion(),
+                                  std::auto_ptr<game::RegistrationKey>(new game::test::RegistrationKey(game::RegistrationKey::Registered, 10)),
+                                  std::auto_ptr<game::StringVerifier>(new game::test::StringVerifier()),
+                                  std::auto_ptr<afl::charset::Charset>(new afl::charset::CodepageCharset(afl::charset::g_codepage437)),
+                                  game::Root::Actions_t()));
+
+    // Build a script process
+    interpreter::World& w = testee.world();
+    interpreter::Process& p = testee.processList().create(w, "testFileCharsetHandling");
+    afl::base::Ptr<afl::io::Stream> in = w.openLoadFile("t.q");
+    TS_ASSERT(in.get() != 0);               // Fails if Session/Root does not correctly provide the load directory
+    p.pushFrame(w.compileFile(*in, "origin", 1), false);
+
+    // Run the process
+    uint32_t pgid = testee.processList().allocateProcessGroup();
+    testee.processList().resumeProcess(p, pgid);
+    testee.processList().startProcessGroup(pgid);
+    testee.processList().run();
+
+    // Verify
+    TS_ASSERT_EQUALS(p.getState(), interpreter::Process::Ended);
+
+    // Verify file content
+    uint8_t tmp[100];
+    size_t n;
+
+    // - text file
+    TS_ASSERT_THROWS_NOTHING(n = fs.openFile("/file.txt", afl::io::FileSystem::OpenRead)->read(tmp));
+    TS_ASSERT_LESS_THAN_EQUALS(2U, n);      // at least two characters [first is payload, second (and more) for system newline]
+    TS_ASSERT_EQUALS(tmp[0], 0x94);         // 0x94 = U+00F6 in codepage 437, fails if Session/Root does not correctly provide the charset
+
+    // - binary file
+    TS_ASSERT_THROWS_NOTHING(n = fs.openFile("/data.dat", afl::io::FileSystem::OpenRead)->read(tmp));
+    TS_ASSERT_EQUALS(n, 20U);
+    TS_ASSERT_EQUALS(tmp[0], 0x94);
+    TS_ASSERT_EQUALS(tmp[1], 0x20);
+    TS_ASSERT_EQUALS(tmp[2], 0x20);
+    TS_ASSERT_EQUALS(tmp[19], 0x20);
 }
 

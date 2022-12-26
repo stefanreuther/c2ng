@@ -204,6 +204,7 @@ class TestGameSession : public CxxTest::TestSuite {
     void testReferenceNameNonempty();
     void testInterpreterInterface();
     void testTask();
+    void testFileCharsetHandling();
 };
 
 class TestGameShipBuildOrder : public CxxTest::TestSuite {

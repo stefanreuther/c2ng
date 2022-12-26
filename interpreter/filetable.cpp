@@ -4,6 +4,8 @@
   */
 
 #include "interpreter/filetable.hpp"
+#include "afl/charset/codepage.hpp"
+#include "afl/charset/codepagecharset.hpp"
 #include "afl/data/scalarvalue.hpp"
 #include "afl/except/fileproblemexception.hpp"
 #include "interpreter/error.hpp"
@@ -11,20 +13,31 @@
 
 const char*const LOG_NAME = "interpreter";
 
+namespace {
+    /* Make default character set.
+       Default is Latin1 for compatibility/historical reasons. */
+    afl::charset::Charset* makeDefaultCharset()
+    {
+        return new afl::charset::CodepageCharset(afl::charset::g_codepageLatin1);
+    }
+}
+
+
 struct interpreter::FileTable::State {
     afl::base::Ref<afl::io::Stream> stream;
     afl::io::TextFile textFile;
 
-    State(afl::base::Ref<afl::io::Stream> stream);
+    State(afl::base::Ref<afl::io::Stream> stream, FileTable& parent);
     ~State();
 };
 
-interpreter::FileTable::State::State(afl::base::Ref<afl::io::Stream> stream)
+interpreter::FileTable::State::State(afl::base::Ref<afl::io::Stream> stream, FileTable& parent)
     : stream(stream),
       textFile(*stream)
 {
     // ex IntFileDescriptor::IntFileDescriptor
-    // FIXME: how to do this? text_file.setCharacterSet(getGameCharacterSet());
+    textFile.setCharsetNew(parent.getFileCharset().clone());
+    textFile.setUtf8Snoop(true);
 }
 
 interpreter::FileTable::State::~State()
@@ -45,7 +58,8 @@ interpreter::FileTable::State::~State()
 
 // Constructor.
 interpreter::FileTable::FileTable()
-    : m_files()
+    : m_ioCharset(makeDefaultCharset()),
+      m_files()
 { }
 
 // Destructor.
@@ -68,7 +82,7 @@ interpreter::FileTable::openFile(size_t fd, afl::base::Ref<afl::io::Stream> ps)
         throw Error::rangeError();
     }
 
-    m_files.replaceElementNew(fd, new State(ps));
+    m_files.replaceElementNew(fd, new State(ps, *this));
 }
 
 // Close a file.
@@ -176,6 +190,17 @@ interpreter::FileTable::checkFileArg(afl::io::TextFile*& tf, const afl::data::Va
     }
 }
 
+// Set file I/O character set.
+void
+interpreter::FileTable::setFileCharsetNew(std::auto_ptr<afl::charset::Charset> cs)
+{
+    if (cs.get() != 0) {
+        m_ioCharset = cs;
+    } else {
+        m_ioCharset.reset(makeDefaultCharset());
+    }
+}
+
 // Get a currently-unused slot.
 size_t
 interpreter::FileTable::getFreeFile() const
@@ -188,4 +213,11 @@ interpreter::FileTable::getFreeFile() const
         }
     }
     return 0;
+}
+
+// Get file I/O character set.
+afl::charset::Charset&
+interpreter::FileTable::getFileCharset() const
+{
+    return *m_ioCharset;
 }

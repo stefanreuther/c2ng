@@ -5,6 +5,7 @@
 #ifndef C2NG_INTERPRETER_FILETABLE_HPP
 #define C2NG_INTERPRETER_FILETABLE_HPP
 
+#include "afl/charset/charset.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "afl/data/value.hpp"
 #include "afl/io/textfile.hpp"
@@ -86,12 +87,24 @@ namespace interpreter {
             \throw Error User-supplied argument was out-of-range, wrong type, or not open */
         bool checkFileArg(afl::io::TextFile*& tf, const afl::data::Value* arg);
 
+        /** Set file I/O character set.
+            \param cs Newly-allocated character set, null to invoke default */
+        void setFileCharsetNew(std::auto_ptr<afl::charset::Charset> cs);
+
         /** Get a currently-unused slot.
             \return Unused file number; 0 if none */
         size_t getFreeFile() const;
 
+        /** Get file I/O character set.
+            \return character set */
+        afl::charset::Charset& getFileCharset() const;
+
      private:
         class State;
+
+        /** File I/O character set.
+            Never null. */
+        std::auto_ptr<afl::charset::Charset> m_ioCharset;
 
         /** Open script files.
             File numbers are indexes into this array.

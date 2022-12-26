@@ -143,7 +143,6 @@
         <tr><td class="missing">Obj</td><td>Planned but not implemented</td></tr>
         <tr><td>[]</td><td>Container has multiple objects of this type</td></tr>
       </table>
-      
     </div>
 
     <p>This document lists the (planned and existing) object structure of PCC2ng in an abstract, high-level format.</p>
@@ -302,7 +301,9 @@
           <div class="ref">LogListener <em>: afl::sys::LogListener</em></div>
           <div class="ref">Translator <em>: afl::string::Translator</em></div>
           <div class="owned">MutexList <em>: interpreter::MutexList</em></div>
-          <div class="owned">FileTable <em>: interpreter::FileTable</em></div>
+          <div class="owned">FileTable <em>: interpreter::FileTable</em>
+            <div class="owned virtual">FileCharset <em>: afl::charset::Charset</em><strong>Kept in sync with Root.Charset by Session</strong></div>
+          </div>
           <div class="ptr owned virtual">SystemLoadDir, LocalLoadDir <em>: afl::io::Directory</em></div>
           <div class="ref">FileSystem <em>: afl::io::FileSystem</em></div>
         </div>

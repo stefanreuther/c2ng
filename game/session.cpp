@@ -672,8 +672,10 @@ game::Session::connectSignals()
 
     if (m_root.get() != 0) {
         m_world.setLocalLoadDirectory(&m_root->gameDirectory());
+        m_world.fileTable().setFileCharsetNew(std::auto_ptr<afl::charset::Charset>(m_root->charset().clone()));
     } else {
         m_world.setLocalLoadDirectory(0);
+        m_world.fileTable().setFileCharsetNew(std::auto_ptr<afl::charset::Charset>());
     }
 
     sig_connectionChange.raise();
