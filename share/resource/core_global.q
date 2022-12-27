@@ -369,7 +369,6 @@ Sub CCGA.Export.Finish(state, globalState)
   Else
     Try
       CC$Export state
-      UI.Message Translate("Export succeeded."), Translate("Export")
     Else
       UI.Message Translate("Your selection includes ships and planets. PCC cannot export ships and planets at the same time. Please use the \"1\" and \"2\" buttons to select only one type."), Translate("Export")
     EndTry

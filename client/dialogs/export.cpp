@@ -308,6 +308,8 @@ ExportDialog::onOK()
             MessageBox(Format(m_translator("Error during export: %s"), err), m_translator("Export"), m_root)
                 .doOkDialog(m_translator);
         } else {
+            MessageBox(m_translator("Export succeeded."), m_translator("Export"), m_root)
+                .doOkDialog(m_translator);
             m_loop.stop(0);
         }
     }
