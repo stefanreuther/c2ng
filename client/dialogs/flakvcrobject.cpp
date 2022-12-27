@@ -42,7 +42,7 @@ namespace {
      public:
         Dialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender, VcrDatabaseProxy& proxy, util::NumberFormatter fmt);
 
-        void init(game::proxy::WaitIndicator& ind, const game::vcr::BattleInfo& info);
+        void init(game::proxy::WaitIndicator& ind, const game::vcr::BattleInfo& info, size_t initialUnit);
         game::Reference run(ui::Widget& help);
         void requestCurrent();
         void onListScroll();
@@ -110,7 +110,7 @@ Dialog::Dialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<
 
 /* Initialize (blocking data retrieval) */
 void
-Dialog::init(game::proxy::WaitIndicator& ind, const game::vcr::BattleInfo& info)
+Dialog::init(game::proxy::WaitIndicator& ind, const game::vcr::BattleInfo& info, size_t initialUnit)
 {
     // Environment
     game::PlayerArray<String_t> names = m_proxy.getPlayerNames(ind, game::Player::AdjectiveName);
@@ -118,6 +118,7 @@ Dialog::init(game::proxy::WaitIndicator& ind, const game::vcr::BattleInfo& info)
     m_proxy.getTeamSettings(ind, teams);
 
     // Build the list
+    size_t initialIndex = 0;
     for (size_t i = 0; i < info.groups.size(); ++i) {
         // Fleet
         const game::vcr::GroupInfo& g = info.groups[i];
@@ -127,9 +128,13 @@ Dialog::init(game::proxy::WaitIndicator& ind, const game::vcr::BattleInfo& info)
         for (size_t j = 0; j < g.numObjects; ++j) {
             size_t objIndex = g.firstObject + j;
             if (objIndex < info.units.size()) {
+                if (initialUnit == objIndex) {
+                    initialIndex = m_unitList.getNumItems();
+                }
                 m_unitList.addItem(CombatUnitList::Unit, objIndex, info.units[objIndex].text[0], CombatUnitList::Flags_t(), util::SkinColor::Static);
             }
         }
+        m_unitList.setCurrentItem(initialIndex);
     }
 }
 
@@ -190,8 +195,8 @@ Dialog::run(ui::Widget& help)
     win.pack();
     m_root.centerWidget(win);
     m_root.add(win);
-    m_loop.run();
-    return m_reference;
+    int result = m_loop.run();
+    return result == 0 ? game::Reference() : m_reference;
 }
 
 /* Send request for current ship to proxy */
@@ -301,7 +306,8 @@ client::dialogs::doFlakVcrObjectInfoDialog(ui::Root& root,
                                            afl::string::Translator& tx,
                                            util::RequestSender<game::Session> gameSender,
                                            game::proxy::VcrDatabaseProxy& proxy,
-                                           const game::vcr::BattleInfo& info)
+                                           const game::vcr::BattleInfo& info,
+                                           size_t initialUnit)
 {
     Downlink link(root, tx);
     util::NumberFormatter fmt = game::proxy::ConfigurationProxy(gameSender).getNumberFormatter(link);
@@ -309,6 +315,6 @@ client::dialogs::doFlakVcrObjectInfoDialog(ui::Root& root,
     client::widgets::HelpWidget help(root, tx, gameSender, "pcc2:vcrinfo");
 
     Dialog dlg(root, tx, gameSender, proxy, fmt);
-    dlg.init(link, info);
+    dlg.init(link, info, initialUnit);
     return dlg.run(help);
 }

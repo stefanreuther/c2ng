@@ -4,8 +4,7 @@
   */
 
 #include "client/dialogs/vcrplayer.hpp"
-#include "client/dialogs/classicvcrdialog.hpp"
-#include "client/dialogs/flakvcrdialog.hpp"
+#include "client/dialogs/vcrselection.hpp"
 #include "client/downlink.hpp"
 #include "client/vcr/classic/playbackscreen.hpp"
 #include "client/vcr/flak/playbackscreen.hpp"
@@ -59,23 +58,19 @@ client::dialogs::playCombat(ui::Root& root, afl::string::Translator& tx, util::R
     VcrDatabaseProxy(vcrSender, root.engine().dispatcher(), tx, std::auto_ptr<game::spec::info::PictureNamer>()).getStatus(ind, st);
 
     // Type-specific dialog
+    VcrSelection dlg(root, tx, vcrSender, gameSender);
     switch (st.kind) {
-     case VcrDatabaseProxy::ClassicCombat: {
-        ClassicVcrDialog dlg(root, tx, vcrSender, gameSender);
+     case VcrDatabaseProxy::ClassicCombat:
         dlg.sig_play.addNewClosure(new ClassicPlayHandler(root, tx, vcrSender, log));
-        result = dlg.run();
         break;
-     }
-     case VcrDatabaseProxy::FlakCombat: {
-        FlakVcrDialog dlg(root, tx, vcrSender, gameSender);
+
+     case VcrDatabaseProxy::FlakCombat:
         dlg.sig_play.addNewClosure(new FlakPlayHandler(root, tx, vcrSender, log));
-        result = dlg.run();
         break;
-     }
+
      case VcrDatabaseProxy::UnknownCombat:
         break;
     }
-
-    return result;
+    return dlg.run();
 }
 

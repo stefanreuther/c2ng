@@ -5,7 +5,6 @@
 #include <ctime>
 #include "client/screens/playerscreen.hpp"
 #include "afl/string/format.hpp"
-#include "client/dialogs/classicvcrdialog.hpp"
 #include "client/dialogs/inboxdialog.hpp"
 #include "client/si/control.hpp"
 #include "client/si/scripttask.hpp"

@@ -1,13 +1,13 @@
 /**
-  *  \file client/dialogs/flakvcrdialog.hpp
-  *  \brief Class client::dialogs::FlakVcrDialog
+  *  \file client/dialogs/vcrselection.hpp
+  *  \brief Class client::dialogs::VcrSelection
   */
-#ifndef C2NG_CLIENT_DIALOGS_FLAKVCRDIALOG_HPP
-#define C2NG_CLIENT_DIALOGS_FLAKVCRDIALOG_HPP
+#ifndef C2NG_CLIENT_DIALOGS_VCRSELECTION_HPP
+#define C2NG_CLIENT_DIALOGS_VCRSELECTION_HPP
 
 #include "afl/base/signal.hpp"
 #include "afl/string/translator.hpp"
-#include "client/widgets/flakvcrinfo.hpp"
+#include "client/widgets/vcrinfo.hpp"
 #include "game/proxy/vcrdatabaseadaptor.hpp"
 #include "game/proxy/vcrdatabaseproxy.hpp"
 #include "game/reference.hpp"
@@ -18,18 +18,21 @@
 
 namespace client { namespace dialogs {
 
-    /** FLAK VCR dialog.
-        Displays a FLAK VCR database and allows users to chose a fight.
-        When a fight is chosen, raises sig_play; caller can use that to start playback. */
-    class FlakVcrDialog {
+    /** VCR selection dialog.
+        Displays a VCR database and allows users to chose a fight.
+        When a fight is chosen, raises sig_play; caller can use that to start playback.
+
+        This is a merge of the previous FlakVcrDialog and ClassicVcrDialog.
+        Therefore, it supports all combat types. */
+    class VcrSelection {
      public:
         /** Constructor.
             \param root       UI root
             \param tx         Translator
             \param vcrSender  VCR sender (to access VCR database)
             \param gameSender Game sender (to access remainder of game) */
-        FlakVcrDialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::proxy::VcrDatabaseAdaptor> vcrSender, util::RequestSender<game::Session> gameSender);
-        ~FlakVcrDialog();
+        VcrSelection(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::proxy::VcrDatabaseAdaptor> vcrSender, util::RequestSender<game::Session> gameSender);
+        ~VcrSelection();
 
         /** Run dialog.
             If user chooses to go to an object, returns a reference that you should pass to Control::executeGoToReferenceWait.
@@ -46,13 +49,14 @@ namespace client { namespace dialogs {
         game::proxy::VcrDatabaseProxy m_proxy;
         util::RequestSender<game::proxy::VcrDatabaseAdaptor> m_vcrSender;
         util::RequestSender<game::Session> m_gameSender;
-        client::widgets::FlakVcrInfo m_info;
+        client::widgets::VcrInfo m_info;
         ui::EventLoop m_loop;
         game::Reference m_result;
         game::vcr::BattleInfo m_battleInfo;
 
         size_t m_currentIndex;
         size_t m_numBattles;
+        game::proxy::VcrDatabaseProxy::Kind m_kind;
 
         void init();
 
@@ -65,12 +69,13 @@ namespace client { namespace dialogs {
         void postLoad();
 
         void onUpdate(size_t index, const game::vcr::BattleInfo& data);
-        void onList();
+        void onInfo(size_t pos);
         void onTab();
         void onScore();
         void onShowMap(game::map::Point pt);
     };
 
 } }
+
 
 #endif

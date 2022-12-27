@@ -1,9 +1,10 @@
 /**
-  *  \file client/dialogs/flakvcrdialog.cpp
-  *  \brief Class client::dialogs::FlakVcrDialog
+  *  \file client/dialogs/vcrselection.cpp
+  *  \brief Class client::dialogs::VcrSelection
   */
 
-#include "client/dialogs/flakvcrdialog.hpp"
+#include "client/dialogs/vcrselection.hpp"
+#include "client/dialogs/classicvcrobject.hpp"
 #include "client/dialogs/combatoverview.hpp"
 #include "client/dialogs/combatscoresummary.hpp"
 #include "client/dialogs/flakvcrobject.hpp"
@@ -21,7 +22,9 @@
 #include "ui/window.hpp"
 #include "util/unicodechars.hpp"
 
-client::dialogs::FlakVcrDialog::FlakVcrDialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::proxy::VcrDatabaseAdaptor> vcrSender, util::RequestSender<game::Session> gameSender)
+using game::proxy::VcrDatabaseProxy;
+
+client::dialogs::VcrSelection::VcrSelection(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::proxy::VcrDatabaseAdaptor> vcrSender, util::RequestSender<game::Session> gameSender)
     : m_root(root),
       m_translator(tx),
       m_proxy(vcrSender, root.engine().dispatcher(), tx, std::auto_ptr<game::spec::info::PictureNamer>(new client::PictureNamer())),
@@ -32,20 +35,21 @@ client::dialogs::FlakVcrDialog::FlakVcrDialog(ui::Root& root, afl::string::Trans
       m_result(),
       m_battleInfo(),
       m_currentIndex(0),
-      m_numBattles(0)
+      m_numBattles(0),
+      m_kind()
 {
-    m_proxy.sig_update.add(this, &FlakVcrDialog::onUpdate);
-    m_info.sig_list.add(this, &FlakVcrDialog::onList);
-    m_info.sig_tab.add(this, &FlakVcrDialog::onTab);
-    m_info.sig_score.add(this, &FlakVcrDialog::onScore);
-    m_info.sig_showMap.add(this, &FlakVcrDialog::onShowMap);
+    m_proxy.sig_update.add(this, &VcrSelection::onUpdate);
+    m_info.sig_info.add(this, &VcrSelection::onInfo);
+    m_info.sig_tab.add(this, &VcrSelection::onTab);
+    m_info.sig_score.add(this, &VcrSelection::onScore);
+    m_info.sig_showMap.add(this, &VcrSelection::onShowMap);
 }
 
-client::dialogs::FlakVcrDialog::~FlakVcrDialog()
+client::dialogs::VcrSelection::~VcrSelection()
 { }
 
 game::Reference
-client::dialogs::FlakVcrDialog::run()
+client::dialogs::VcrSelection::run()
 {
     // Query number of battles
     init();
@@ -74,26 +78,26 @@ client::dialogs::FlakVcrDialog::run()
     ui::widgets::Quit quit(m_root, m_loop);
     window.add(quit);
 
-    btnUp.sig_fire.add(this, &FlakVcrDialog::onPrevious);
-    btnDown.sig_fire.add(this, &FlakVcrDialog::onNext);
+    btnUp.sig_fire.add(this, &VcrSelection::onPrevious);
+    btnDown.sig_fire.add(this, &VcrSelection::onNext);
     btnCancel.sig_fire.addNewClosure(m_loop.makeStop(0));
-    btnPlay.sig_fire.add(this, &FlakVcrDialog::onPlay);
+    btnPlay.sig_fire.add(this, &VcrSelection::onPlay);
 
     // Extra keys
     ui::widgets::KeyDispatcher disp;
     window.add(disp);
-    disp.add('-',                                this, &FlakVcrDialog::onPrevious);
-    disp.add(util::Key_WheelUp,                  this, &FlakVcrDialog::onPrevious);
-    disp.add(util::Key_PgUp,                     this, &FlakVcrDialog::onPrevious);
-    disp.add('+',                                this, &FlakVcrDialog::onNext);
-    disp.add(util::Key_WheelDown,                this, &FlakVcrDialog::onNext);
-    disp.add(util::Key_PgDn,                     this, &FlakVcrDialog::onNext);
-    disp.add(util::Key_Home,                     this, &FlakVcrDialog::onFirst);
-    disp.add(util::Key_Home + util::KeyMod_Ctrl, this, &FlakVcrDialog::onFirst);
-    disp.add(util::Key_PgUp + util::KeyMod_Ctrl, this, &FlakVcrDialog::onFirst);
-    disp.add(util::Key_End,                      this, &FlakVcrDialog::onLast);
-    disp.add(util::Key_End + util::KeyMod_Ctrl,  this, &FlakVcrDialog::onLast);
-    disp.add(util::Key_PgDn + util::KeyMod_Ctrl, this, &FlakVcrDialog::onLast);
+    disp.add('-',                                this, &VcrSelection::onPrevious);
+    disp.add(util::Key_WheelUp,                  this, &VcrSelection::onPrevious);
+    disp.add(util::Key_PgUp,                     this, &VcrSelection::onPrevious);
+    disp.add('+',                                this, &VcrSelection::onNext);
+    disp.add(util::Key_WheelDown,                this, &VcrSelection::onNext);
+    disp.add(util::Key_PgDn,                     this, &VcrSelection::onNext);
+    disp.add(util::Key_Home,                     this, &VcrSelection::onFirst);
+    disp.add(util::Key_Home + util::KeyMod_Ctrl, this, &VcrSelection::onFirst);
+    disp.add(util::Key_PgUp + util::KeyMod_Ctrl, this, &VcrSelection::onFirst);
+    disp.add(util::Key_End,                      this, &VcrSelection::onLast);
+    disp.add(util::Key_End + util::KeyMod_Ctrl,  this, &VcrSelection::onLast);
+    disp.add(util::Key_PgDn + util::KeyMod_Ctrl, this, &VcrSelection::onLast);
 
     postLoad();
 
@@ -106,14 +110,15 @@ client::dialogs::FlakVcrDialog::run()
 }
 
 void
-client::dialogs::FlakVcrDialog::init()
+client::dialogs::VcrSelection::init()
 {
     Downlink link(m_root, m_translator);
-    game::proxy::VcrDatabaseProxy::Status st;
+    VcrDatabaseProxy::Status st;
     m_proxy.getStatus(link, st);
 
     m_numBattles = st.numBattles;
     m_currentIndex = st.currentBattle;
+    m_kind = st.kind;
 
     // Process result
     if (m_currentIndex >= m_numBattles) {
@@ -134,7 +139,7 @@ client::dialogs::FlakVcrDialog::init()
 }
 
 void
-client::dialogs::FlakVcrDialog::onPrevious()
+client::dialogs::VcrSelection::onPrevious()
 {
     if (m_currentIndex > 0) {
         setCurrentIndex(m_currentIndex-1);
@@ -142,7 +147,7 @@ client::dialogs::FlakVcrDialog::onPrevious()
 }
 
 void
-client::dialogs::FlakVcrDialog::onNext()
+client::dialogs::VcrSelection::onNext()
 {
     // ex FlakVcrSelector::next
     if (m_numBattles - m_currentIndex > 1) {
@@ -151,7 +156,7 @@ client::dialogs::FlakVcrDialog::onNext()
 }
 
 void
-client::dialogs::FlakVcrDialog::onFirst()
+client::dialogs::VcrSelection::onFirst()
 {
     // ex FlakVcrSelector::previous
     if (m_currentIndex != 0) {
@@ -160,7 +165,7 @@ client::dialogs::FlakVcrDialog::onFirst()
 }
 
 void
-client::dialogs::FlakVcrDialog::onLast()
+client::dialogs::VcrSelection::onLast()
 {
     if (m_currentIndex != m_numBattles-1) {
         setCurrentIndex(m_numBattles-1);
@@ -168,13 +173,13 @@ client::dialogs::FlakVcrDialog::onLast()
 }
 
 void
-client::dialogs::FlakVcrDialog::onPlay()
+client::dialogs::VcrSelection::onPlay()
 {
     sig_play.raise(m_currentIndex);
 }
 
 void
-client::dialogs::FlakVcrDialog::setCurrentIndex(size_t index)
+client::dialogs::VcrSelection::setCurrentIndex(size_t index)
 {
     // ex FlakVcrSelector::setCurrent
     m_currentIndex = index;
@@ -182,24 +187,36 @@ client::dialogs::FlakVcrDialog::setCurrentIndex(size_t index)
 }
 
 void
-client::dialogs::FlakVcrDialog::postLoad()
+client::dialogs::VcrSelection::postLoad()
 {
     m_proxy.setCurrentBattle(m_currentIndex);
 }
 
 void
-client::dialogs::FlakVcrDialog::onUpdate(size_t /*index*/, const game::vcr::BattleInfo& data)
+client::dialogs::VcrSelection::onUpdate(size_t /*index*/, const game::vcr::BattleInfo& data)
 {
     m_battleInfo = data;
     m_info.setData(data);
 }
 
 void
-client::dialogs::FlakVcrDialog::onList()
+client::dialogs::VcrSelection::onInfo(size_t index)
 {
     // ex FlakVcrSelector::showInfo
     if (!m_battleInfo.groups.empty()) {
-        m_result = doFlakVcrObjectInfoDialog(m_root, m_translator, m_gameSender, m_proxy, m_battleInfo);
+        switch (m_kind) {
+         case VcrDatabaseProxy::UnknownCombat:
+            break;
+
+         case VcrDatabaseProxy::ClassicCombat:
+            m_result = doClassicVcrObjectInfoDialog(m_root, m_translator, m_gameSender, m_proxy, index);
+            break;
+
+         case VcrDatabaseProxy::FlakCombat:
+            m_result = doFlakVcrObjectInfoDialog(m_root, m_translator, m_gameSender, m_proxy, m_battleInfo, index);
+            break;
+        }
+
         if (m_result.isSet()) {
             m_loop.stop(1);
         }
@@ -207,7 +224,7 @@ client::dialogs::FlakVcrDialog::onList()
 }
 
 void
-client::dialogs::FlakVcrDialog::onTab()
+client::dialogs::VcrSelection::onTab()
 {
     // ex FlakVcrSelector::showDiagram
     size_t pos = 0;
@@ -218,14 +235,14 @@ client::dialogs::FlakVcrDialog::onTab()
 }
 
 void
-client::dialogs::FlakVcrDialog::onScore()
+client::dialogs::VcrSelection::onScore()
 {
     showCombatScoreSummary(m_root, m_translator, m_vcrSender, m_gameSender);
 }
 
 
 void
-client::dialogs::FlakVcrDialog::onShowMap(game::map::Point pt)
+client::dialogs::VcrSelection::onShowMap(game::map::Point pt)
 {
     m_result = pt;
     m_loop.stop(1);

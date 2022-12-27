@@ -1,15 +1,19 @@
 /**
-  *  \file client/widgets/flakvcrinfo.cpp
-  *  \brief Class client::widgets::FlakVcrInfo
+  *  \file client/widgets/vcrinfo.cpp
+  *  \brief Class client::widgets::VcrInfo
   */
 
-#include "client/widgets/flakvcrinfo.hpp"
+#include "client/widgets/vcrinfo.hpp"
 #include "afl/string/format.hpp"
 #include "gfx/complex.hpp"
 #include "gfx/context.hpp"
 #include "util/string.hpp"
 
 namespace {
+    /* Number of units in classic combat */
+    const size_t NUM_CLASSIC_UNITS = 2;
+
+    /* Check for last ship in a group */
     bool isLastShipInGroup(size_t shipIndex, const game::vcr::BattleInfo& data)
     {
         for (size_t i = 0, n = data.groups.size(); i < n; ++i) {
@@ -21,10 +25,11 @@ namespace {
     }
 }
 
-client::widgets::FlakVcrInfo::FlakVcrInfo(ui::Root& root, afl::string::Translator& tx)
+client::widgets::VcrInfo::VcrInfo(ui::Root& root, afl::string::Translator& tx)
     : m_root(root),
       m_translator(tx),
-      m_listButton("L", 'l', root),
+      m_leftButton("L", 'l', root),
+      m_rightButton("R", 'r', root),
       m_tabButton("Tab", util::Key_Tab, root),
       m_scoreButton("S", 's', root),
       m_showMapButton("F4", util::Key_F4, root),
@@ -33,26 +38,29 @@ client::widgets::FlakVcrInfo::FlakVcrInfo(ui::Root& root, afl::string::Translato
       m_teamSettings()
 {
     // ex FlakVcrSelector::FlakVcrSelector
-    addChild(m_listButton, 0);
+    // Do not add m_rightButton yet
+    addChild(m_leftButton, 0);
     addChild(m_tabButton, 0);
     addChild(m_scoreButton, 0);
     addChild(m_showMapButton, 0);
 
-    m_listButton.sig_fire.add(&sig_list, &afl::base::Signal<void(int)>::raise);
-    m_tabButton.sig_fire.add(&sig_tab, &afl::base::Signal<void(int)>::raise);
-    m_scoreButton.sig_fire.add(&sig_score, &afl::base::Signal<void(int)>::raise);
-    m_showMapButton.sig_fire.add(this, &FlakVcrInfo::onMap);
+    m_leftButton.sig_fire.add(this, &VcrInfo::onLeft);
+    m_rightButton.sig_fire.add(this, &VcrInfo::onRight);
+    m_tabButton.sig_fire.add(this, &VcrInfo::onTab);
+    m_scoreButton.sig_fire.add(this, &VcrInfo::onScore);
+    m_showMapButton.sig_fire.add(this, &VcrInfo::onMap);
 
     updateButtonState();
 }
 
-client::widgets::FlakVcrInfo::~FlakVcrInfo()
+client::widgets::VcrInfo::~VcrInfo()
 { }
 
 void
-client::widgets::FlakVcrInfo::draw(gfx::Canvas& can)
+client::widgets::VcrInfo::draw(gfx::Canvas& can)
 {
-    // ex FlakVcrSelector::drawContent
+    // ex FlakVcrSelector::drawContent etc.
+
     // Prepare coordinates
     const gfx::Rectangle& r = getExtent();
     const int x = r.getLeftX();
@@ -62,14 +70,17 @@ client::widgets::FlakVcrInfo::draw(gfx::Canvas& can)
     // Prepare fonts
     afl::base::Ref<gfx::Font> largeFont  = getLargeFont();
     afl::base::Ref<gfx::Font> normalFont = getNormalFont();
+    afl::base::Ref<gfx::Font> boldFont   = getBoldFont();
+    afl::base::Ref<gfx::Font> smallFont  = m_root.provider().getFont("-");
 
     const int largeHeight  = largeFont->getCellSize().getY();
     const int normalHeight = normalFont->getCellSize().getY();
+    const int boldHeight   = boldFont->getCellSize().getY();
     const int indent       = normalHeight/2;
 
     // Prepare context
     gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
-    ctx.setSolidBackground();
+    drawBackground(ctx, r);
     ctx.setColor(util::SkinColor::Static);
 
     // First line
@@ -86,21 +97,53 @@ client::widgets::FlakVcrInfo::draw(gfx::Canvas& can)
         }
         outText(ctx, gfx::Point(x+w, y), text);
     }
+    if (const int32_t* seed = m_data.seed.get()) {
+        ctx.useFont(*smallFont);
+        ctx.setColor(util::SkinColor::Faded);
+        outText(ctx, gfx::Point(x+w, y+normalHeight), afl::string::Format("#%d", *seed));
+    }
     ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
 
     y += largeHeight;
     y += normalHeight/2;
 
-    // Only draw content if there is any (to fill the temporary state where m_data has just a heading, no content)
-    // This is a convenient place to fend off zero-size fonts which would give a division error.
-    int nships  = static_cast<int>(m_data.units.size());
-    int nfleets = static_cast<int>(m_data.groups.size());
-    if (normalHeight > 0 && nships > 0 && nfleets > 0) {
-        // Content
+    // Content-dependant layout
+    const int nships  = static_cast<int>(m_data.units.size());
+    const int nfleets = static_cast<int>(m_data.groups.size());
+    if (isClassic()) {
+        // Two warriors
+        for (size_t i = 0; i < NUM_CLASSIC_UNITS && i < m_data.units.size(); ++i) {
+            const game::vcr::ObjectInfo& info = m_data.units[i];
+
+            ctx.useFont(*boldFont);
+            ctx.setColor(info.color[0]);
+            outTextF(ctx, gfx::Point(x, y), w, info.text[0]);
+            y += boldHeight;
+
+            for (size_t j = 1; j < game::vcr::NUM_LINES_PER_UNIT; ++j) {
+                ctx.useFont(*normalFont);
+                ctx.setColor(info.color[j]);
+                outTextF(ctx, gfx::Point(x + indent, y), w - indent, info.text[j]);
+                y += normalHeight;
+            }
+
+            y += normalHeight/2;
+        }
+
+        // Result
+        ctx.useFont(*normalFont);
+        ctx.setColor(util::SkinColor::Static);
+        outTextF(ctx, gfx::Point(x, y), w, m_data.resultSummary);
+    } else if (normalHeight > 0 && nships > 0 && nfleets > 0) {
+        // Only draw content if there is any (to fill the temporary state where m_data has just a heading, no content)
+        // This is a convenient place to fend off zero-size fonts which would give a division error.
+        ctx.useFont(*boldFont);
+        ctx.setColor(util::SkinColor::Static);
         outTextF(ctx, gfx::Point(x, y), w, afl::string::Format(m_translator("%d unit%!1{s%} in %d group%!1{s%}:"), nships, nfleets));
         y += normalHeight;
 
         int n = (r.getBottomY() - y) / normalHeight;
+        ctx.useFont(*normalFont);
         if (nships <= n) {
             // Enough room for ships
             ctx.setTransparentBackground();
@@ -166,44 +209,46 @@ client::widgets::FlakVcrInfo::draw(gfx::Canvas& can)
 }
 
 void
-client::widgets::FlakVcrInfo::handleStateChange(State /*st*/, bool /*enable*/)
+client::widgets::VcrInfo::handleStateChange(State /*st*/, bool /*enable*/)
 { }
 
 void
-client::widgets::FlakVcrInfo::requestChildRedraw(Widget& /*child*/, const gfx::Rectangle& area)
+client::widgets::VcrInfo::requestChildRedraw(Widget& /*child*/, const gfx::Rectangle& area)
 {
     requestRedraw(area);
 }
 
 void
-client::widgets::FlakVcrInfo::handleChildAdded(Widget& /*child*/)
+client::widgets::VcrInfo::handleChildAdded(Widget& /*child*/)
 {
     requestRedraw();
 }
 
 void
-client::widgets::FlakVcrInfo::handleChildRemove(Widget& /*child*/)
+client::widgets::VcrInfo::handleChildRemove(Widget& /*child*/)
 {
     requestRedraw();
 }
 
 void
-client::widgets::FlakVcrInfo::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::widgets::VcrInfo::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
 {
     setChildPositions();
 }
 
 void
-client::widgets::FlakVcrInfo::handleChildPositionChange(Widget& /*child*/, gfx::Rectangle& /*oldPosition*/)
+client::widgets::VcrInfo::handleChildPositionChange(Widget& /*child*/, gfx::Rectangle& /*oldPosition*/)
 { }
 
 ui::layout::Info
-client::widgets::FlakVcrInfo::getLayoutInfo() const
+client::widgets::VcrInfo::getLayoutInfo() const
 {
-    // ex FlakVcrSelector::getLayoutInfo
+    // Font sizes
     gfx::Point normalCell = getNormalFont()->getCellSize();
     gfx::Point largeCell  = getLargeFont()->getCellSize();
 
+    // Classic dialog 8.5x normal + 2x bold + 1x large, where normal+bold essentially is 10.5x normal.
+    // The FLAK version uses 13x normal, so this is enough space for both layouts.
     gfx::Point size = largeCell.scaledBy(20, 1)
         .extendBelow(normalCell.scaledBy(40, 13));
     size.addY(normalCell.getY() / 2);
@@ -212,95 +257,160 @@ client::widgets::FlakVcrInfo::getLayoutInfo() const
 }
 
 bool
-client::widgets::FlakVcrInfo::handleKey(util::Key_t key, int prefix)
+client::widgets::VcrInfo::handleKey(util::Key_t key, int prefix)
 {
     return defaultHandleKey(key, prefix);
 }
 
 bool
-client::widgets::FlakVcrInfo::handleMouse(gfx::Point pt, MouseButtons_t pressedButtons)
+client::widgets::VcrInfo::handleMouse(gfx::Point pt, MouseButtons_t pressedButtons)
 {
     return defaultHandleMouse(pt, pressedButtons);
 }
 
 void
-client::widgets::FlakVcrInfo::setPlayerNames(const game::PlayerArray<String_t>& adjNames)
+client::widgets::VcrInfo::setPlayerNames(const game::PlayerArray<String_t>& adjNames)
 {
     m_adjectiveNames = adjNames;
     requestRedraw();
 }
 
 void
-client::widgets::FlakVcrInfo::setTeams(const game::TeamSettings& teams)
+client::widgets::VcrInfo::setTeams(const game::TeamSettings& teams)
 {
     m_teamSettings.copyFrom(teams);
     requestRedraw();
 }
 
 void
-client::widgets::FlakVcrInfo::setData(const Data_t& data)
+client::widgets::VcrInfo::setData(const Data_t& data)
 {
     m_data = data;
     requestRedraw();
-    updateButtonState();
+    setChildPositions();           // First, so it sets the position of 'R'...
+    updateButtonState();           // ...if that is shown by this.
 }
 
 void
-client::widgets::FlakVcrInfo::setTabAvailable(bool flag)
+client::widgets::VcrInfo::setTabAvailable(bool flag)
 {
     m_tabButton.setState(DisabledState, !flag);
 }
 
 afl::base::Ref<gfx::Font>
-client::widgets::FlakVcrInfo::getLargeFont() const
+client::widgets::VcrInfo::getLargeFont() const
 {
     return m_root.provider().getFont(gfx::FontRequest().addSize(1));
 }
 
 afl::base::Ref<gfx::Font>
-client::widgets::FlakVcrInfo::getNormalFont() const
+client::widgets::VcrInfo::getNormalFont() const
 {
     return m_root.provider().getFont(gfx::FontRequest());
 }
 
 afl::base::Ref<gfx::Font>
-client::widgets::FlakVcrInfo::getBoldFont() const
+client::widgets::VcrInfo::getBoldFont() const
 {
     return m_root.provider().getFont(gfx::FontRequest().addWeight(1));
 }
 
-void
-client::widgets::FlakVcrInfo::setChildPositions()
+bool
+client::widgets::VcrInfo::isClassic() const
 {
-    // Dimensions
+    return m_data.units.size() == NUM_CLASSIC_UNITS
+        && m_data.groups.size() == NUM_CLASSIC_UNITS;
+}
+
+void
+client::widgets::VcrInfo::setChildPositions()
+{
+    // Metrics
     const int largeHeight  = getLargeFont()->getCellSize().getY();
-    const int buttonSize = largeHeight * 9/8;
-    const int tabSize = buttonSize * 8/5;
-    const int pad = 5;
+    const int normalHeight = getNormalFont()->getCellSize().getY();
+    const int boldHeight   = getBoldFont()->getCellSize().getY();
+    const int buttonSize   = largeHeight * 9/8;
+    const int tabSize      = buttonSize * 8/5;
+    const int pad          = 5;
 
     gfx::Rectangle area = getExtent();
     gfx::Rectangle lastRow = area.splitBottomY(buttonSize);
 
-    m_tabButton.setExtent(lastRow.splitRightX(tabSize));
-    lastRow.consumeRightX(pad);
+    if (isClassic()) {
+        // Classic layout with L/R buttons
+        const int rightX = area.getRightX();
+        const int leftTop = area.getTopY() + largeHeight + normalHeight/2;
+        m_leftButton.setExtent(gfx::Rectangle(rightX - buttonSize, leftTop, buttonSize, buttonSize));
 
-    m_scoreButton.setExtent(lastRow.splitRightX(buttonSize));
-    lastRow.consumeRightX(pad);
+        const int rightTop = leftTop + boldHeight + normalHeight*7/2;
+        m_rightButton.setExtent(gfx::Rectangle(rightX - buttonSize, rightTop, buttonSize, buttonSize));
 
-    m_listButton.setExtent(lastRow.splitRightX(buttonSize));
-    lastRow.consumeRightX(pad);
+        m_tabButton.setExtent(lastRow.splitRightX(tabSize));
+        lastRow.consumeRightX(pad);
 
-    m_showMapButton.setExtent(lastRow.splitRightX(m_showMapButton.getLayoutInfo().getMinSize().getX()));
+        m_scoreButton.setExtent(lastRow.splitRightX(buttonSize));
+        lastRow.consumeRightX(pad);
+
+        m_showMapButton.setExtent(lastRow.splitRightX(m_showMapButton.getLayoutInfo().getMinSize().getX()));
+    } else {
+        // Fleet-combat layout with just L button
+        m_tabButton.setExtent(lastRow.splitRightX(tabSize));
+        lastRow.consumeRightX(pad);
+
+        m_scoreButton.setExtent(lastRow.splitRightX(buttonSize));
+        lastRow.consumeRightX(pad);
+
+        m_leftButton.setExtent(lastRow.splitRightX(buttonSize));
+        lastRow.consumeRightX(pad);
+
+        m_showMapButton.setExtent(lastRow.splitRightX(m_showMapButton.getLayoutInfo().getMinSize().getX()));
+    }
 }
 
 void
-client::widgets::FlakVcrInfo::updateButtonState()
+client::widgets::VcrInfo::updateButtonState()
 {
+    // Enable map button if position is available
     m_showMapButton.setState(DisabledState, !m_data.position.isValid());
+
+    // Show or hide 'R' button
+    if (isClassic()) {
+        if (m_rightButton.getParent() == 0) {
+            addChild(m_rightButton, 0);
+        }
+    } else {
+        if (m_rightButton.getParent() != 0) {
+            removeChild(m_rightButton);
+        }
+    }
 }
 
 void
-client::widgets::FlakVcrInfo::onMap()
+client::widgets::VcrInfo::onLeft()
+{
+    sig_info.raise(0);
+}
+
+void
+client::widgets::VcrInfo::onRight()
+{
+    sig_info.raise(1);
+}
+
+void
+client::widgets::VcrInfo::onTab()
+{
+    sig_tab.raise();
+}
+
+void
+client::widgets::VcrInfo::onScore()
+{
+    sig_score.raise();
+}
+
+void
+client::widgets::VcrInfo::onMap()
 {
     if (const game::map::Point* pt = m_data.position.get()) {
         sig_showMap.raise(*pt);

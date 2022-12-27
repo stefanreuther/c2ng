@@ -20,12 +20,14 @@ namespace client { namespace dialogs {
         \param gameSender  Game sender (for ConfigurationProxy)
         \param proxy       VcrDatabaseProxy to use
         \param info        Battle info
+        \param initialUnit Unit to select initially (Battle::getObject() index)
         \return If user chose to go to an object's control screen, a reference to it. */
     game::Reference doFlakVcrObjectInfoDialog(ui::Root& root,
                                               afl::string::Translator& tx,
                                               util::RequestSender<game::Session> gameSender,
                                               game::proxy::VcrDatabaseProxy& proxy,
-                                              const game::vcr::BattleInfo& info);
+                                              const game::vcr::BattleInfo& info,
+                                              size_t initialUnit);
 
 } }
 
