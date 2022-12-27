@@ -14,39 +14,12 @@
 #include "afl/string/format.hpp"
 #include "afl/string/string.hpp"
 #include "game/browser/browser.hpp"
+#include "game/v3/structures.hpp"
+
+namespace gt = game::v3::structures;
 
 namespace {
-
     const char*const LOG_NAME = "game.browser";
-
-    /*
-     *  Definition of the gamestat.dat file
-     */
-
-    typedef afl::bits::Value<afl::bits::Int16LE> Int16_t;
-    typedef afl::bits::Value<afl::bits::FixedString<80> > String80_t;
-    typedef afl::bits::Value<afl::bits::FixedString<20> > String20_t;
-
-    const int NUM_SLOTS = 8;
-
-    struct GameStatEntry {
-        Int16_t unused;
-        Int16_t players[11];
-        String80_t downloadPath;
-        String80_t uploadPath;
-        String20_t name;
-        Int16_t unused2;
-    };
-
-    struct GameStatFile {
-        GameStatEntry slots[NUM_SLOTS];
-        char empty;
-        Int16_t lastSlot;
-    };
-
-    static_assert(sizeof(GameStatEntry) == 206, "sizeof GameStatEntry");
-    static_assert(sizeof(GameStatFile) == 1651, "sizeof GameStatFile");
-
 
     bool sortFolders(const game::browser::Folder& a, const game::browser::Folder& b)
     {
@@ -79,12 +52,12 @@ game::browser::FileSystemFolder::loadContent(afl::container::PtrVector<Folder>& 
                 afl::charset::CodepageCharset charset(afl::charset::g_codepage1252);
 
                 // Read gamestat file. If file does not exist or cannot be read, it is ignored.
-                GameStatFile index;
+                gt::GameStatFile index;
                 m_directory->openFile("gamestat.dat", afl::io::FileSystem::OpenRead)
                     ->fullRead(afl::base::fromObject(index));
 
                 // Build content
-                for (int i = 0; i < NUM_SLOTS; ++i) {
+                for (size_t i = 0; i < gt::NUM_GAMESTAT_SLOTS; ++i) {
                     result.pushBackNew(new FileSystemFolder(m_parent,
                                                             m_directory->openDirectory(afl::string::Format("vpwork%d", i+1)),
                                                             charset.decode(index.slots[i].name),

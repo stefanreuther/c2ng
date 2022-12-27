@@ -431,7 +431,7 @@ game::sim::ConsoleApplication::loadSession(Session& session, const Parameters& p
 
         // Load root
         const game::config::UserConfiguration uc;
-        session.root = loader.load(fs.openDirectory(params.gameDirectoryName.orElse(".")), charset, uc, true);
+        session.root = loader.load(fs.openDirectory(fs.getAbsolutePathName(params.gameDirectoryName.orElse("."))), charset, uc, true);
         if (session.root.get() == 0) {
             // This should not happen because we pass forceEmpty=true
             errorExit(tx("no game data found"));

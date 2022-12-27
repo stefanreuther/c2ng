@@ -179,6 +179,9 @@ class TestGameV3Loader : public CxxTest::TestSuite {
     void testInvalidPlayer();
     void testAllianceCommand();
     void testMessageCommand();
+    void testGameNamePConfig();
+    void testGameNameFromDirectory();
+    void testGameNameFromGamestat();
 };
 
 class TestGameV3OutboxReader : public CxxTest::TestSuite {

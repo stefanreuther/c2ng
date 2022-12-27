@@ -37,6 +37,7 @@ namespace game { namespace v3 { namespace structures {
     typedef afl::bits::Value<afl::bits::FixedString<30> > String30_t;
     typedef afl::bits::Value<afl::bits::FixedString<32> > String32_t;
     typedef afl::bits::Value<afl::bits::FixedString<50> > String50_t;
+    typedef afl::bits::Value<afl::bits::FixedString<80> > String80_t;
 
     typedef uint8_t Timestamp_t[18];
 
@@ -57,6 +58,8 @@ namespace game { namespace v3 { namespace structures {
     const int NUM_PLAYERS          = 11;                        ///< Number of players in standard game.
     const int NUM_OWNERS           = 12;                        ///< Permitted range for owners: include Aliens.
     const int NUM_HULLS_PER_PLAYER = 20;                        ///< Number of hulls per player.
+
+    const size_t NUM_GAMESTAT_SLOTS = 8;                        ///< Number of slots in gamestat.dat file.
 
     const size_t MAX_TRN_ATTACHMENTS = 10;                      ///< Maximum attachments in a turn file.
 
@@ -706,6 +709,32 @@ namespace game { namespace v3 { namespace structures {
     const uint32_t VPA_VERS_CHUNK_MAGIC = 0x53524556;           ///< VPA chunk Id: Version number (VERS).
     const uint32_t VPA_WORM_CHUNK_MAGIC = 0x4D524F57;           ///< VPA chunk Id: Wormholes (WORM).
     const uint32_t VPA_XYPL_CHUNK_MAGIC = 0x4C505958;           ///< VPA chunk Id: Planet positions (XYPL).
+
+
+    /*
+     *  gamestat.dat (Winplan game index)
+     */
+
+    /** Entry in gamestat.dat.
+        Defines one game. */
+    struct GameStatEntry {
+        Int16_t unused;                                         ///< Unused field.
+        Int16_t players[11];                                    ///< Played races (-1=played, 0=not played).
+        String80_t downloadPath;                                ///< Result download path.
+        String80_t uploadPath;                                  ///< Turn upload path.
+        String20_t name;                                        ///< Game name.
+        Int16_t unused2;                                        ///< Unused field.
+    };
+    static_assert(sizeof(GameStatEntry) == 206, "sizeof GameStatEntry");
+
+    /** Structure of gamestat.dat.
+        Defines metadata for vpworkX slots. */
+    struct GameStatFile {
+        GameStatEntry slots[NUM_GAMESTAT_SLOTS];                ///< Game definitions.
+        char empty;                                             ///< Unused field.
+        Int16_t lastSlot;                                       ///< Last-used slot (1-8).
+    };
+    static_assert(sizeof(GameStatFile) == 1651, "sizeof GameStatFile");
 
 
     /*

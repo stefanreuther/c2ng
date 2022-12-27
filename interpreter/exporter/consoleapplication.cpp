@@ -259,7 +259,7 @@ interpreter::exporter::ConsoleApplication::appMain()
 
     // Check game data
     // FIXME: load correct config!
-    const String_t usedGameDir = arg_gamedir.orElse(".");
+    const String_t usedGameDir = fs.getAbsolutePathName(arg_gamedir.orElse("."));
     const game::config::UserConfiguration uc;
     afl::base::Ptr<game::Root> root = loader.load(fs.openDirectory(usedGameDir), *gameCharset, uc, false);
     if (root.get() == 0 || root->getTurnLoader().get() == 0) {

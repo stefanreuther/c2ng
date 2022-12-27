@@ -111,6 +111,41 @@ namespace {
         }
         return s;
     }
+
+    /* Try to guess a game name */
+    void guessGameName(game::config::StringOption& gameName, afl::io::Directory& dir, afl::charset::Charset& cs)
+    {
+        // ex cc.pas:FillInGameName
+        // Nothing to do if option was set
+        if (gameName.wasSet()) {
+            return;
+        }
+
+        // Check for vpwork directory
+        String_t dirTitle = afl::string::strLCase(dir.getTitle());
+        static_assert(game::v3::structures::NUM_GAMESTAT_SLOTS == 8, NUM_GAMESTAT_SLOTS);
+        if (dirTitle.size() == 7 && dirTitle >= "vpwork1" && dirTitle <= "vpwork8") {
+            const int slotNr = dirTitle[6] - '1';
+            try {
+                afl::base::Ptr<afl::io::Directory> parent = dir.getParentDirectory();
+                if (parent.get() != 0) {
+                    game::v3::structures::GameStatFile file;
+                    parent->openFile("gamestat.dat", afl::io::FileSystem::OpenRead)
+                        ->fullRead(afl::base::fromObject(file));
+
+                    String_t configuredName = cs.decode(file.slots[slotNr].name);
+                    if (!configuredName.empty()) {
+                        gameName.setAndMarkUpdated(configuredName, game::config::ConfigurationOption::Game);
+                        return;
+                    }
+                }
+            }
+            catch (...) { }
+        }
+
+        // Use directory name
+        gameName.setAndMarkUpdated(dir.getTitle(), game::config::ConfigurationOption::Game);
+    }
 }
 
 // Constructor.
@@ -1078,6 +1113,9 @@ game::v3::Loader::loadConfiguration(Root& root, afl::io::Directory& dir)
 
     // FLAK
     game::vcr::flak::loadConfiguration(root.flakConfiguration(), dir, m_log, m_translator);
+
+    // If we still do not have a game name, try to guess one
+    guessGameName(root.hostConfiguration()[game::config::HostConfiguration::GameName], dir, m_charset);
 }
 
 /** Add message from message file.
