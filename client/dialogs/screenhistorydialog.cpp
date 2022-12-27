@@ -51,7 +51,7 @@ client::dialogs::doScreenHistoryDialog(ui::Root& root,
     for (size_t i = names.size(); i > 0; --i) {
         list.addItem(key++, *names.at(i-1));
     }
-    bool ok = ui::widgets::doStandardDialog(tx("Screen History"), String_t(), list, true, root, tx);
+    bool ok = list.doStandardDialog(tx("Screen History"), String_t(), 0, root, tx);
 
     int32_t result;
     if (ok && list.getCurrentKey(result)) {

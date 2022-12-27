@@ -325,7 +325,7 @@ namespace {
 
                 if (!result.infos.empty()) {
                     PropertyListbox box(m_root, result);
-                    if (ui::widgets::doStandardDialog(result.title, String_t(), box, true, m_root, m_translator)) {
+                    if (box.doStandardDialog(result.title, String_t(), 0, m_root, m_translator)) {
                         size_t index = box.getCurrentItem();
                         if (index < result.infos.size()) {
                             // Must manually reset TypeErase which gets set by the focus change

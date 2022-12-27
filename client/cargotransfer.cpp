@@ -45,7 +45,7 @@ namespace {
             {
                 // ex WObjectList::doStandardDialog2, sort-of
                 game::Reference result;
-                if (ui::widgets::doStandardDialog(title, String_t(), m_list, false, m_root, m_translator)) {
+                if (m_list.doStandardDialog(title, String_t(), 0, m_root, m_translator)) {
                     result = m_list.getCurrentReference();
                 }
                 return result;

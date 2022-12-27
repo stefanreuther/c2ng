@@ -29,7 +29,7 @@ namespace {
         if (btn != 0 && btn->getKey() == key) {
             return btn;
         }
-        
+
         if (ui::Widget* w = me.getFocusedChild()) {
             if (ui::widgets::BaseButton* btn = findKeyButton(*w, key)) {
                 return btn;
@@ -98,44 +98,18 @@ client::si::StringListDialogWidget::run(ui::Root& root, afl::string::Translator&
     setPreferredWidth(m_width <= 0 ? 0 : m_width, true);
     setCurrentKey(m_current);
 
-    // We cannot operate when we have a parent
-    if (getParent() != 0) {
-        return false;
-    }
-
-    // ex UIListbox::doStandardListbox:
-    ui::EventLoop loop(root);
-    afl::base::Deleter h;
-
-    ui::Window& w = h.addNew(new ui::Window(m_dialogTitle, root.provider(), root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
-    ui::widgets::FrameGroup& listGroup = h.addNew(new ui::widgets::FrameGroup(ui::layout::HBox::instance0, root.colorScheme(), ui::LoweredFrame));
-    listGroup.add(*this);
-    // FIXME: the following assumes we get as many lines from layout as we request.
-    if (getLayoutInfo().getPreferredSize().getY() < int(getNumItems()) * getItemHeight(0)) {
-        listGroup.add(h.addNew(new ui::widgets::Scrollbar(*this, root)));
-    }
-    w.add(listGroup);
-
-    ui::widgets::StandardDialogButtons& btns = h.addNew(new ui::widgets::StandardDialogButtons(root, tx));
-    btns.addStop(loop);
+    // Standard dialog
+    std::auto_ptr<ui::Widget> pHelp;
     if (!m_help.empty()) {
-        ui::Widget& helper = h.addNew(new client::widgets::HelpWidget(root, tx, gameSender, m_help));
-        w.add(helper);
-        btns.addHelp(helper);
+        pHelp.reset(new client::widgets::HelpWidget(root, tx, gameSender, m_help));
     }
-    w.add(btns);
-    w.add(h.addNew(new ui::widgets::Quit(root, loop)));
-
-    w.pack();
-    root.centerWidget(w);
-    root.add(w);
-    int result = loop.run();
+    bool result = doStandardDialog(m_dialogTitle, String_t(), pHelp.get(), root, tx);
 
     // Update current
-    if (result != 0) {
+    if (result) {
         getCurrentKey(m_current);
     }
-    return result != 0;
+    return result;
 }
 
 bool

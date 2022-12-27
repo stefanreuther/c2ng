@@ -165,9 +165,7 @@ client::dialogs::doCompletion(ui::widgets::InputLine& input, client::si::UserSid
             ++i;
         }
         list.sortItemsAlphabetically();
-        if (ui::widgets::doStandardDialog(tx("Completions"), String_t(), list, true, root, tx)
-            && list.getCurrentKey(i))
-        {
+        if (list.doStandardDialog(tx("Completions"), String_t(), 0, root, tx) && list.getCurrentKey(i)) {
             game::interface::CompletionList::Iterator_t it = result.begin(), e = result.end();
             while (it != e && i != 0) {
                 ++it, --i;

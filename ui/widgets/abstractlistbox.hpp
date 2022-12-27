@@ -1,16 +1,33 @@
 /**
   *  \file ui/widgets/abstractlistbox.hpp
+  *  \brief Base class ui::widgets::AbstractListbox
   */
 #ifndef C2NG_UI_WIDGETS_ABSTRACTLISTBOX_HPP
 #define C2NG_UI_WIDGETS_ABSTRACTLISTBOX_HPP
 
-#include "ui/scrollablewidget.hpp"
+#include "afl/base/deleter.hpp"
 #include "afl/base/signal.hpp"
 #include "afl/bits/smallset.hpp"
-#include "afl/base/deleter.hpp"
+#include "afl/string/translator.hpp"
+#include "ui/root.hpp"
+#include "ui/scrollablewidget.hpp"
 
 namespace ui { namespace widgets {
 
+    /** Base class for a scrollable list box.
+
+        A list box contains:
+        - an optional fixed header
+        - a scrollable list of items
+        - an optional fixed footer
+
+        Items can have different heights.
+        One item can be selected.
+        Items can be inaccessible (e.g. headings, unavailable choices).
+
+        Derived classes provide layout and drawing for the items.
+        Derived classes must provide key handling;
+        to provide default handling only, they can use defaultHandleKey(). */
     class AbstractListbox : public ScrollableWidget {
      public:
         /// List-box widget flags.
@@ -81,6 +98,12 @@ namespace ui { namespace widgets {
         size_t getCurrentItem() const;
         void setCurrentItem(size_t nr, Direction dir = GoDown);
         void handleModelChange();
+
+        bool doStandardDialog(String_t title,
+                              String_t label,
+                              Widget* pHelp,
+                              Root& root,
+                              afl::string::Translator& tx);
 
         afl::base::Signal<void(size_t)> sig_itemDoubleClick;
         afl::base::Signal<void(size_t)> sig_itemClick;

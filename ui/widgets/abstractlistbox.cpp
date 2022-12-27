@@ -1,13 +1,21 @@
 /**
   *  \file ui/widgets/abstractlistbox.cpp
+  *  \brief Base class ui::widgets::AbstractListbox
   */
 
 #include <algorithm>
 #include "ui/widgets/abstractlistbox.hpp"
 #include "gfx/clipfilter.hpp"
-#include "gfx/context.hpp"
 #include "gfx/complex.hpp"
+#include "gfx/context.hpp"
 #include "ui/draw.hpp"
+#include "ui/layout/vbox.hpp"
+#include "ui/widgets/framegroup.hpp"
+#include "ui/widgets/quit.hpp"
+#include "ui/widgets/scrollbarcontainer.hpp"
+#include "ui/widgets/standarddialogbuttons.hpp"
+#include "ui/widgets/statictext.hpp"
+#include "ui/window.hpp"
 
 ui::widgets::AbstractListbox::AbstractListbox()
     : ScrollableWidget(),
@@ -537,6 +545,64 @@ ui::widgets::AbstractListbox::handleModelChange()
     }
     requestRedraw();
     sig_change.raise();
+}
+
+bool
+ui::widgets::AbstractListbox::doStandardDialog(String_t title,
+                                               String_t label,
+                                               Widget* pHelp,
+                                               Root& root,
+                                               afl::string::Translator& tx)
+{
+    // ex UIListbox::doStandardListbox:
+    // We cannot operate when we have a parent
+    if (getParent() != 0) {
+        return false;
+    }
+
+    ui::EventLoop loop(root);
+    afl::base::Deleter del;
+
+    Window& w = del.addNew(new Window(title, root.provider(), root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
+    if (!label.empty()) {
+        w.add(del.addNew(new StaticText(label, util::SkinColor::Static, "+", root.provider())));
+    }
+    w.add(FrameGroup::wrapWidget(del, root.colorScheme(), ui::LoweredFrame,
+                                 del.addNew(new ScrollbarContainer(*this, root))));
+
+    StandardDialogButtons& btns = del.addNew(new StandardDialogButtons(root, tx));
+    btns.addStop(loop);
+    if (pHelp != 0) {
+        btns.addHelp(*pHelp);
+    }
+    w.add(btns);
+    w.add(del.addNew(new ui::widgets::Quit(root, loop)));
+    w.pack();
+
+    // Handle double-click
+    class Handler : public afl::base::Closure<void(size_t)> {
+     public:
+        Handler(EventLoop& loop)
+            : m_loop(loop)
+            { }
+        virtual void call(size_t)
+            { m_loop.stop(1); }
+        virtual Handler* clone() const
+            { return new Handler(m_loop); }
+     private:
+        EventLoop& m_loop;
+    };
+    afl::base::SignalConnection conn(sig_itemDoubleClick.addNewClosure(new Handler(loop)));
+
+    // Limit size
+    gfx::Rectangle a = w.getExtent();
+    a.intersect(root.getExtent());
+    w.setExtent(a);
+
+    root.centerWidget(w);
+    root.add(w);
+
+    return loop.run() != 0;
 }
 
 bool

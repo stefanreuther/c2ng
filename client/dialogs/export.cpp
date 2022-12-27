@@ -402,13 +402,12 @@ ExportDialog::chooseField(String_t& fieldName, String_t title)
         }
     }
     listBox.sortItemsAlphabetically();
-    listBox.setPreferredHeight(std::max(3, int(list.size())));
     if (key >= 0) {
         listBox.setCurrentKey(key);
     }
 
     // Dialog
-    if (ui::widgets::doStandardDialog(title, String_t(), listBox, true, m_root, m_translator)) {
+    if (listBox.doStandardDialog(title, String_t(), 0, m_root, m_translator)) {
         int32_t chosenKey;
         if (listBox.getCurrentKey(chosenKey) && chosenKey >= 0 && chosenKey < int32_t(list.size())) {
             fieldName = list[size_t(chosenKey)];
@@ -467,7 +466,7 @@ ExportDialog::changeFormat()
         listBox.addItem(int(i), getFormatDescription(interpreter::exporter::Format(i), m_translator));
     }
     listBox.setCurrentKey(int(m_config.getFormat()));
-    if (ui::widgets::doStandardDialog(m_translator("Change File Type"), String_t(), listBox, true, m_root, m_translator)) {
+    if (listBox.doStandardDialog(m_translator("Change File Type"), String_t(), 0, m_root, m_translator)) {
         int32_t key;
         if (listBox.getCurrentKey(key)) {
             m_proxy.setFormat(interpreter::exporter::Format(key));
@@ -486,7 +485,7 @@ ExportDialog::changeCharset()
         listBox.addItem(int(i), f.getCharsetDescription(i, m_translator));
     }
     listBox.setCurrentKey(int(m_config.getCharsetIndex()));
-    if (ui::widgets::doStandardDialog(m_translator("Change Character Set"), String_t(), listBox, true, m_root, m_translator)) {
+    if (listBox.doStandardDialog(m_translator("Change Character Set"), String_t(), 0, m_root, m_translator)) {
         int32_t key;
         if (listBox.getCurrentKey(key)) {
             m_proxy.setCharsetIndex(CharsetFactory::Index_t(key));

@@ -677,7 +677,7 @@ NavChartDialog::chooseChunnelMate()
         box.setContent(list);
         box.setNumLines(10);
         box.setWidth(m_root.provider().getFont(gfx::FontRequest())->getEmWidth() * 20);
-        if (ui::widgets::doStandardDialog(m_translator("Chunnel"), String_t(), box, false, m_root, m_translator)) {
+        if (box.doStandardDialog(m_translator("Chunnel"), m_translator("Select Chunnel mate:"), 0, m_root, m_translator)) {
             return box.getCurrentReference().getId();
         } else {
             return 0;

@@ -167,15 +167,8 @@ RevertDialog::onList()
     client::widgets::ReferenceListbox box(m_root);
     box.setNumLines(15);
     box.setContent(m_status.list);
-
-    ui::widgets::doStandardDialog(m_translator("Reset Location"),
-                                  m_translator("Affected units:"),
-                                  box,
-                                  true,
-                                  m_root,
-                                  m_translator);
+    box.doStandardDialog(m_translator("Reset Location"), m_translator("Affected units:"), 0, m_root, m_translator);
 }
-
 
 void
 client::dialogs::doRevertLocation(ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx, game::map::Point pos)
