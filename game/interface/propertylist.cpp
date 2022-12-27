@@ -11,6 +11,16 @@
 #include "interpreter/values.hpp"
 #include "util/string.hpp"
 
+namespace {
+    class CompareInfos {
+     public:
+        bool operator()(const game::interface::PropertyList::Info& a, const game::interface::PropertyList::Info& b) const
+            {
+                return afl::string::strUCase(a.name) < afl::string::strUCase(b.name);
+            }
+    };
+}
+
 void
 game::interface::buildPropertyList(PropertyList& out, const game::map::Object* obj, const interpreter::World& world, afl::string::Translator& tx)
 {
@@ -39,5 +49,7 @@ game::interface::buildPropertyList(PropertyList& out, const game::map::Object* o
                 out.infos.push_back(PropertyList::Info(name, interpreter::toString(value, true), util::SkinColor::Static));
             }
         }
+
+        std::sort(out.infos.begin(), out.infos.end(), CompareInfos());
     }
 }
