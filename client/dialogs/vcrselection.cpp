@@ -10,6 +10,7 @@
 #include "client/dialogs/flakvcrobject.hpp"
 #include "client/downlink.hpp"
 #include "client/picturenamer.hpp"
+#include "client/widgets/helpwidget.hpp"
 #include "game/proxy/playerproxy.hpp"
 #include "game/proxy/teamproxy.hpp"
 #include "ui/group.hpp"
@@ -61,27 +62,32 @@ client::dialogs::VcrSelection::run()
     ui::Window window(m_translator("VCR"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5);
     window.add(m_info);
 
+    client::widgets::HelpWidget help(m_root, m_translator, m_gameSender, "pcc2:vcr");
     ui::widgets::Button btnUp(UTF_UP_ARROW, util::Key_Up, m_root);
     ui::widgets::Button btnDown(UTF_DOWN_ARROW, util::Key_Down, m_root);
     ui::widgets::Button btnPlay(m_translator("Play"), util::Key_Return, m_root);
     ui::Spacer spc;
     ui::widgets::Button btnCancel(m_translator("Back"), util::Key_Escape, m_root);
+    ui::widgets::Button btnHelp(m_translator("Help"), 'h', m_root);
 
     ui::Group g(ui::layout::HBox::instance5);
     g.add(btnUp);
     g.add(btnDown);
     g.add(btnPlay);
     g.add(spc);
+    g.add(btnHelp);
     g.add(btnCancel);
     window.add(g);
 
     ui::widgets::Quit quit(m_root, m_loop);
     window.add(quit);
+    window.add(help);
 
     btnUp.sig_fire.add(this, &VcrSelection::onPrevious);
     btnDown.sig_fire.add(this, &VcrSelection::onNext);
     btnCancel.sig_fire.addNewClosure(m_loop.makeStop(0));
     btnPlay.sig_fire.add(this, &VcrSelection::onPlay);
+    btnHelp.dispatchKeyTo(help);
 
     // Extra keys
     ui::widgets::KeyDispatcher disp;

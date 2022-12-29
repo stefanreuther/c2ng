@@ -1,0 +1,3129 @@
+<?xml version="1.0"?>
+<!DOCTYPE help SYSTEM "pcc2help.dtd">
+<help priority="99">
+  <!-- Main TOC -->
+  <page id="toc">
+    <h1>PCC2 Help Table of Content</h1>
+    <ul>
+      <li>Startup
+      <ul>
+        <li><a href="pcc2:invoke">Invoking PCC2</a>;</li>
+        <li><a href="config:intro">Configuration files</a>.</li>
+      </ul></li>
+      <li>Using
+      <ul>
+        <li><a href="pcc2:gamesel">Game Selection</a>;</li>
+        <li><a href="pcc2:racescreen">Race Screen</a>;</li>
+        <li><a href="pcc2:cscreen">Control Screen</a>;</li>
+        <li><a href="pcc2:starchart">Starchart</a>;</li>
+        <li><a href="pcc2:bsim">Battle Simulator</a>;</li>
+        <li><a href="help">Help</a>.</li>
+      </ul></li>
+      <li><a href="int:intro">Script Interpreter</a>.</li>
+    </ul>
+  </page>
+
+
+  <!-- Invoking -->
+  <page id="group:invoking">
+    <h1>Invocation</h1>
+
+    <page id="pcc2:invoke">
+      <h1>Invoking PCC2</h1>
+      <p>PCC2 is a graphical application.
+        If you have used the PCC2 Installer, it will have set up an icon for you.
+        Otherwise, you will have to start it manually.
+        Just starting it (double-click the program) will work, but by passing additional parameters,
+        you can customize startup.
+        Not counting options, The following possibilities exist:</p>
+      <ul>
+        <li><tt>c2ng</tt><br />
+          (no player number and directory): start with a <a href="pcc2:gamesel">game chooser</a>;</li>
+        <li><tt>c2ng GAMEDIR</tt><br />
+          start with a <a href="pcc2:gamesel">game chooser</a> in the specified directory.</li>
+      </ul>
+      <p>You do not have to unpack your RST before playing.
+        If you don't, PCC2 will read the RST directly, and produce a TRN directly.
+        If you do unpack your turn, PCC2 will behave like a classic VGA Planets&#x2122; client and just modify <tt>.dat</tt> files;
+        you will then have to run Maketurn separately.</p>
+      <p>To play registered, place a <tt>fizz.bin</tt> file created by your registered client in the game directory,
+        just like you do with PCC 1.x.</p>
+      <p><tt>c2ng</tt> accepts some command line options as shown below,
+        and honors some <a href="env">environment variables</a>.</p>
+      <p>The PCC2 Installer for Windows will make a Start Menu shortcut
+      which will start PCC2 with a game selector, starting at your Winplan directory.</p>
+
+      <h2>Command-Line Options</h2>
+      <ul>
+        <li><tt>--bpp=<em>BITS</em></tt>: bits per pixel;</li>
+        <li><tt>--fullscreen</tt>: full-screen mode (opposite of <tt>--windowed</tt>);</li>
+        <li><tt>--nomousegrab</tt>: don't grab mouse pointer.
+          By default, PCC2 grabs the mouse pointer in the starchart to support infinite movement.
+          However, this prevents you from switching to another application while in the starchart;</li>
+        <li><tt>--password=<em>PASS</em></tt>: result file password;</li>
+        <li><tt>--proxy=<em>URL</em></tt>: use proxy for network access. URL can be "socks4://host:port" or "sock5://host:port";</li>
+        <li><tt>--resource=<em>NAME</em></tt>: add a resource file;</li>
+        <li><tt>--size=<em>WIDTHxHEIGHT</em></tt>: set screen resolution or window size;</li>
+        <li><tt>--windowed</tt>: windowed mode (opposite of <tt>--fullscreen</tt>).</li>
+      </ul>
+    </page>
+
+    <page id="env">
+      <h1>Environment Variables</h1>
+      <p>The following environment variables are evaluated by PCC2, or by the SDL library it is based upon:</p>
+      <ul>
+        <li><tt>SDL_VIDEODRIVER</tt>: select a video driver. Possible choices are, depending upon your version of SDL:
+          <tt>x11</tt> (Unix: X11),
+          <tt>dga</tt> (Unix: XFree DGA),
+          <tt>fbcon</tt> (Linux: framebuffer console),
+          <tt>svgalib</tt> (Unix: SVGAlib),
+          <tt>aalib</tt> (ASCII art, more for fun than actually useful),
+          <tt>windib</tt> (Win32: standard GDI),
+          <tt>directx</tt> (Win32 DirectX).
+        Normally, SDL auto-detects the best driver to use;</li>
+        <!-- <li><tt>SDL_AUDIODRIVER</tt>: select an audio driver. Possible choices are, depending upon your version of SDL:
+          <tt>alsa</tt> (Linux: ALSA),
+          <tt>dma</tt> (Unix: OSS DMA),
+          <tt>dsp</tt> (Unix: OSS standard),
+          <tt>esd</tt> (Linux: Enlightened sound daemon),
+          <tt>waveout</tt> (Win32: standard WaveOut),
+          <tt>dsound</tt> (Win32: DirectX).
+          Normally, SDL auto-detects the best driver to use;</li> -->
+        <li><tt>LC_ALL</tt>, <tt>LC_MESSAGES</tt>, <tt>LANG</tt> (Unix):
+          select language. PCC2 uses the first of those variables which is set.
+          It should contain a two-letter language code, optionally followed by additional information ignored by PCC2.
+          For example, <tt>de</tt> selects German language, like <tt>de_DE</tt>, <tt>de_AT</tt>, <tt>de_DE@utf-8</tt>, etc.;</li>
+        <li><tt>HOME</tt> (Unix): your home directory.
+          PCC2's <a href="config:intro">configuration directory</a>, <tt>.pcc2</tt>, goes there.</li>
+      </ul>
+      <p>To change environment variables permanently under Windows NT or higher,
+        right-click <em>My Computer</em>, choose <em>Properties</em>, choose
+        <em>Advanced</em>, choose <em>Environment Variables</em>, and add the
+        variable in the <em>User Variables</em> section.
+        Users of other environments put the variables into their startup or login scripts,
+        such as <tt>autoexec.bat</tt> or <tt>.profile</tt>.</p>
+    </page>
+  </page>
+
+  <!-- Screens -->
+  <page id="group:screens">
+    <h1>PCC2 Screens</h1>
+
+    <!-- Game Selection Screen -->
+    <page id="pcc2:gamesel">
+      <h1>Game Selection</h1>
+      <p>Welcome to PCC2 Next Generation!</p>
+
+      <p><font color="red"><b>Note:</b> The <b>Help</b> key in most of PCC2 is <kbd>Alt-H</kbd>
+        (or, where possible, <kbd>H</kbd>),
+        not <kbd>F1</kbd> like in many other current desktop programs.
+        <kbd>F1</kbd> will work in some screens, but not all.</font></p>
+
+      <p>The Game Selection screen allows you to select a game from your computer, or from a server.
+        On top level (labeled "[Places]"), you can either browse into your computer ("My Computer"),
+        or into one of the accounts that you created.
+        Use <kbd>Ins</kbd> to <a href="pcc2:addaccount">add an account</a>.</p>
+
+      <p>To enter a directory or account, select it on the left and double-click it or press <kbd>Enter</kbd>.
+        When looking at a game, available races will be shown on the right.
+        Open it for <a href="pcc2:racescreen">playing</a> by double-clicking the race.
+        If additional actions are available for a game, choose "Setup &amp; Actions...".</p>
+
+      <kl>
+        <ki key="Tab">Switch between fields;</ki>
+        <ki key="Left">Switch to directory selector; if already there, go to parent directory;</ki>
+        <ki key="Right">Switch to player selector; if not possible, enter directory;</ki>
+        <ki key="Enter">On player selector: load game; otherwise like <kbd>Right</kbd>;</ki>
+        <ki key="Ins"><a href="pcc2:addaccount">Add account</a>;</ki>
+        <ki key="F5"><a href="pcc2:plugins">Plugin Manager</a>;</ki>
+        <ki key="ESC">Exit.</ki>
+      </kl>
+
+      <p>When a game contains game data, <kbd>Enter</kbd> and <kbd>Right</kbd> will not browse its subdirectories,
+        but switch to the game selector instead.
+        Normally, game directories do not contain other game directories.
+        Use the <em>Change into this folder</em> item at the bottom of the player list
+        to browse subdirectories.</p>
+
+        <!-- FIXME: describe additional actions -->
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="See also:"> <a href="toc">Table of Content</a>, <a href="pcc2:invoke">Invoking PCC2</a>.</di>
+      </dl>
+    </page>
+
+    <page id="pcc2:addaccount">
+      <h1>Add Account</h1>
+      <p>PCC2 supports directly talking to hosting servers.
+        To do so, you need to tell it your login data.
+        You will then be able to browse your games on the server, using PCC2.</p>
+
+      <p>To define an account, enter your user name and choose the server type (PlanetsCentral or planets.nu).
+        The account will now appear on the top level of the <a href="pcc2:gamesel">Game Selection screen</a>.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"><kbd>Ins</kbd> from <a href="pcc2:gamesel">PCC2 Game Selection</a>.</di>
+      </dl>
+    </page>
+
+    <!-- FIXME: pcc2:unpack -->
+    <!-- FIXME: pcc2:sweep -->
+
+    <!-- Plugin Manager -->
+    <page id="pcc2:plugins">
+      <h1>Plugins</h1>
+      <p>Plugins provide additional functionality or artwork for PCC2.
+        This screen displays all installed plugins and allows you to add or remove some.</p>
+      <kl>
+        <ki key="&#x2191;, &#x2193;">Move around;</ki>
+        <ki key="Ins">Add (install) a new plugin;</ki>
+        <ki key="Del">Remove (uninstall) a plugin;</ki>
+        <ki key="ESC">Close window.</ki>
+      </kl>
+
+      <h2>Plugin Installation (Ins)</h2>
+
+      <p>A plugin typically consists of one or more files, plus an accompanying plugin description in the form of a <tt>*.c2p</tt> file.
+        All these files can be compressed to a single <tt>*.c2z</tt> (or <tt>*.zip</tt>) file.
+        When you want to install a plugin, PCC2 will ask you for the <tt>*.c2p</tt> or <tt>*.c2z</tt> file.</p>
+
+      <p>If you just have a <tt>*.res</tt> or <tt>*.q</tt> file you want loaded, you can also directly install that.</p>
+
+      <p>After you choose a file, PCC2 will check preconditions and ask you for confirmation before installing the plugin.
+        Installing copies the plugin into your user profile directory;
+        the original data is not needed anymore after installation.</p>
+
+      <h2>Plugin Uninstallation (Del)</h2>
+
+      <p>When you select a plugin for uninstallation, PCC2 will check preconditions
+        and ask you for confirmation before uninstalling the plugin.</p>
+
+      <h2>Notes</h2>
+
+      <p>After you uninstall a plugin, some remains of it may remain still active until you exit PCC2.
+        That's why PCC2 will remind you to restart after a plugin has been removed or updated.</p>
+        <p>There also is a command-line utility <tt>c2plugin</tt> you can use to manage plugins.
+        When you have installed PCC2 for Windows using the installer,
+        launching a <tt>*.c2z</tt> or <tt>*.c2p</tt> file (by double-clicking in Explorer, or from a web browser) will directly install the plugin.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>F5</kbd> from <a href="pcc2:gamesel">PCC2 Game Selection</a>.</di>
+      </dl>
+    </page>
+
+    <!-- FIXME: pcc2:resultattachments -->
+
+    <!-- Race Screen -->
+    <page id="pcc2:racescreen">
+      <h1>Race Screen</h1>
+      <p>This screen is the central point of your empire.</p>
+      <kl>
+        <ki key="F1"><a href="pcc2:unitsel">Ship selector</a>,   then <a href="pcc2:shipscreen">ship screen</a>;</ki>
+        <ki key="F2"><a href="pcc2:unitsel">Planet selector</a>, then <a href="pcc2:planetscreen">planet screen</a>;</ki>
+        <ki key="F3"><a href="pcc2:unitsel">Base selector</a>,   then <a href="pcc2:basescreen">base screen</a>;</ki>
+        <ki key="F4"><a href="pcc2:starchart">Starchart</a>;</ki>
+        <ki key="F6"><a href="pcc2:historyselect">Choose ship</a>, then <a href="pcc2:historyscreen">Starship History</a>;</ki>
+        <ki key="F7"><a href="pcc2:search">Search object</a>;</ki>
+        <ki key="F10"><a href="pcc2:fleetscreen">Fleet screen</a>;</ki>
+        <ki key="A"><a href="pcc2:allies">Alliances</a>;</ki>
+        <ki key="B"><a href="pcc2:bsim">Battle simulator</a>;</ki>
+        <ki key="G"><a href="pcc2:globact">Global actions</a>;</ki>
+        <ki key="I"><a href="pcc2:imperial">Imperial Statistics</a>;</ki>
+        <ki key="M"><a href="pcc2:msgin">Read messages</a>;</ki>
+        <ki key="S"><a href="pcc2:scores">Score display</a>;</ki>
+        <ki key="T"><a href="pcc2:teams">Team settings</a>;</ki>
+        <ki key="V"><a href="pcc2:vcr">Watch VCRs</a>;</ki>
+        <ki key="W"><a href="pcc2:msgout">Write/revise messages</a>;</ki>
+        <ki key="Shift-A"><a href="pcc2:almanac">Universe Almanac</a> (specification browser);</ki>
+        <ki key="Alt-&#x2191;">Show previous turn;</ki>
+        <ki key="Alt-&#x2193;">Show next turn;</ki>
+        <ki key="Alt-C">Open <a href="pcc2:console">console</a>;</ki>
+        <ki key="Alt-E"><a href="pcc2:auxcmds">Edit auxiliary commands</a>;</ki>
+        <ki key="Alt-K"><a href="pcc2:keymap">Keymap debugger</a>;</ki>
+        <ki key="Alt-M">View file using <a href="pcc2:msgin">message viewer</a>;</ki>
+        <ki key="Alt-N">Open <a href="pcc2:notify">Notification messages</a>;</ki>
+        <ki key="Alt-Q">Open <a href="pcc2:processmgr">Process Manager</a>;</ki>
+        <ki key="Alt-U">Show <tt>util.dat</tt> using <a href="pcc2:msgin">message viewer</a>;</ki>
+        <ki key="Alt-.">Open <a href="pcc2:selectionmgr">selection manager</a>;</ki>
+        <ki key="Alt-Left, Alt-Right">Next/previous selection layer;</ki>
+        <ki key="Backspace">Go to previous screen;</ki>
+        <ki key="Alt-Backspace">Show list of previous screens;</ki>
+        <ki key="Ctrl-O"><a href="pcc2:settings">Settings</a>;</ki>
+        <ki key="Ctrl-S">Save game without exiting;</ki>
+        <ki key="ESC">Save and exit.</ki>
+      </kl>
+      <h2>Reference</h2>
+      <dl class="compact">
+        <di term="Keys:"> <kbd>ESC</kbd> from most screens;</di>
+        <di term="Keymap:"> <a href="int:name:racescreen">RaceScreen</a>;</di>
+        <di term="Script context:"> global context.</di>
+      </dl>
+    </page>
+
+    <!-- Settings screen -->
+    <page id="pcc2:settings">
+      <h1>Settings</h1>
+      <p>This dialog has three pages:</p>
+      <dl>
+        <di term="Game Settings"> game options. These options are configured in the host
+          and take effect the next turn.
+          This includes the option to set a <em>result file password</em> or <em>rename your race</em>,
+          if allowed;</di>
+        <di term="Options"> most of PCC's options, grouped in a user-friendly way, with user-friendly editors.
+          Most users use this part;</di>
+        <di term="Configuration File"> all of PCC's options, in the form as they appear in <tt><a href="config:pcc2ini">pcc2.ini</a></tt> files.
+          This part is for experienced users only.</di>
+      </dl>
+
+      <h2>Keys</h2>
+      <kl>
+        <ki key="Enter">edit the currently-selected option;</ki>
+        <ki key="&#x2191;, &#x2193;">move around;</ki>
+        <ki key="Tab">switch page;</ki>
+        <ki key="S">choose where the settings is stored:
+        <ul>
+          <li>in the Game configuration file (<tt>pcc2.ini</tt> in the game directory);</li>
+          <li>in the User configuration file (<tt><a href="config:pcc2ini">pcc2.ini</a></tt> in your <a href="config:intro">home directory/user profile directory</a>).</li>
+        </ul></ki>
+        <ki key="Space">on the <em>Options</em> page: open a subtree;</ki>
+        <ki key="ESC">Close this dialog.</ki>
+      </kl>
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Ctrl-O</kbd> on <a href="pcc2:racescreen">race screen</a>;</di>
+        <di term="See also:"> <a href="pcc2:settings:backup">Backup settings</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Settings - Backup -->
+    <page id="pcc2:settings:backup">
+      <h1>Backup Settings</h1>
+      <p>PCC2 can create backups of game files on various occasions.</p>
+
+      <p>It offers choice between three settings:</p>
+      <dl>
+        <di term="disabled"> no backups will be made;</di>
+        <di term="enabled"> the file will be created in a directory <tt>backups</tt> within the game directory;</di>
+        <di term="custom"> you can enter a custom file name template.</di>
+      </dl>
+
+      <p>Internally, the "enabled" setting is just a default file name template.
+        File name templates are file names that can contain the following placeholders:</p>
+      <dl>
+        <di term="%d"> the game directory.
+        If the template starts with this placeholder, it will be replaced by the complete directory name.
+        If the placeholder appears in the middle of the template, it will be replaced by the final component of the
+        directory name;</di>
+        <di term="%p"> the player number from 1..11;</di>
+        <di term="%t"> the turn number with three digits, 001..999;</di>
+        <di term="%%"> a literal percent sign.</di>
+      </dl>
+      <p>If the name refers to a non-existing directory, the directory will be created.</p>
+
+      <h2>Examples</h2>
+
+      <p>Assuming you're playing player 7 in <tt>c:\games\first</tt>, and it's turn 42.
+      This would yield the following expansions:</p>
+      <ul>
+        <li><tt>%d\backups\turn%p.%t</tt> (default)<br />
+          &#x2192; <tt>c:\games\first\backups\turn7.042</tt></li>
+        <li><tt>c:\backups\%d\turn%p.%t</tt><br />
+          &#x2192; <tt>c:\backups\first\turn7.042</tt></li>
+      </ul>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> backup options on <a href="pcc2:settings">settings dialog</a></di>
+      </dl>
+    </page>
+
+    <!-- Unit selector (ship/planet/base) -->
+    <page id="pcc2:unitsel">
+      <h1>Unit selector</h1>
+
+      <p>Use this window to select a unit.
+        Usually this is used to enter a <a href="pcc2:cscreen">control screen</a>.</p>
+      <kl>
+        <ki key="&#x2191;, &#x2193;">Browse through objects;</ki>
+        <ki key="Home, End">Go to first&#47;last object;</ki>
+        <ki key="Tab">Go to next object at this place;</ki>
+        <ki key="Shift-Tab">Go to previous object at this place;</ki>
+        <ki key="Ctrl">(with one of the browsing keys) limit browsing to marked objects;</ki>
+        <ki key=".">Mark/unmark current object;</ki>
+        <ki key="Enter">Select object.</ki>
+      </kl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>F1</kbd>, <kbd>F2</kbd>, <kbd>F3</kbd> or <kbd>F10</kbd> almost everywhere;</di>
+        <di term="Keymap:">
+          <a href="int:name:shipselectiondialog">ShipSelectionDialog</a>,
+          <a href="int:name:planetselectiondialog">PlanetSelectionDialog</a>,
+          <a href="int:name:baseselectiondialog">BaseSelectionDialog</a>,
+          <a href="int:name:fleetselectiondialog">FleetSelectionDialog</a>;
+        </di>
+        <di term="Related command:"> <a href="int:name:ui.chooseobject">UI.ChooseObject</a>;</di>
+        <di term="See also:">
+          <a href="pcc2:shipscreen">Ship Screen</a>,
+          <a href="pcc2:planetscreen">Planet Screen</a>,
+          <a href="pcc2:basescreen">Starbase Screen</a>,
+          <a href="pcc2:fleetscreen">Fleet Screen</a>.
+        </di>
+      </dl>
+    </page>
+
+    <!-- History ship selector -->
+    <page id="pcc2:historyselect">
+      <h1>History Ship Selection</h1>
+      <p>The dialog displays all ships of a certain kind in a list.
+        Choose one to get to the <a href="pcc2:historyscreen">Ship History Screen</a>.</p>
+      <kl>
+        <ki key="D">Choose display filter:
+          <ul>
+            <li>All ships: all ships you've ever seen;</li>
+            <li>Ships near (X,Y): all ships near the given position (only available when you call this dialog from the <a href="pcc2:starchart">starchart</a> or a <a href="pcc2:cscreen">control screen</a>);</li>
+            <li>Ships exactly at (X,Y): all ships exactly at the given position (same restriction as "Ships near");</li>
+            <li>Foreign ships: all ships you do not own;</li>
+            <li>Team ships: all your ships and ships of your team-mates (only when <a href="pcc2:teams">teams</a> configured);</li>
+            <li>Enemy ships: all ships of enemy teams (only when <a href="pcc2:teams">teams</a> configured);</li>
+            <li>Own ships: all your ships.</li>
+          </ul>
+        </ki>
+      </kl>
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>F6</kbd> almost everywhere</di>
+        <di term="Related command:"> <a href="int:name:ui.chooseobject">UI.ChooseObject</a></di>
+        <di term="See also:"><a href="pcc2:historyscreen">Ship History Screen</a></di>
+      </dl>
+    </page>
+
+    <!-- Control screen (referenced by actual control screens) -->
+    <page id="pcc2:cscreen">
+      <h1>Control Screen</h1>
+      <p>Control screens allow you to inspect and control individual units.
+        All control screens support similar keys.</p>
+
+      <kl>
+        <ki key="PgUp, PgDn">Browse (with <kbd>Ctrl</kbd>: only marked units);</ki>
+        <ki key=".">Mark&#47;unmark unit;</ki>
+        <ki key="F1">Choose ship;</ki>
+        <ki key="F2">Choose planet;</ki>
+        <ki key="F3, F8">Choose base;</ki>
+        <ki key="F4">Go to starchart;</ki>
+        <ki key="F6"><a href="pcc2:historyscreen">Starship History</a>;</ki>
+        <ki key="F10">Choose fleet;</ki>
+        <ki key="Shift-F1, Shift-F2, Shift-F3, Shift-F4, Shift-F8">Go to ship&#47;planet&#47;base&#47;starchart location at this point;</ki>
+        <ki key="Ctrl-F1, Ctrl-F2, Ctrl-F3, Ctrl-F4, Ctrl-F8">Go to ship&#47;planet&#47;base&#47;starchart location at other end of scanner;</ki>
+        <ki key="X">Go to unit at other end of scanner;</ki>
+        <ki key="F5, Shift-F5"><a href="pcc2:envscreen">Information about planet</a> here;</ki>
+        <ki key="Ctrl-F5"><a href="pcc2:envscreen">Information about planet</a> at other end of scanner;</ki>
+        <ki key="F7"><a href="pcc2:search">Search object</a>;</ki>
+        <ki key="Ctrl-H"><a href="pcc2:search">Search objects</a> at this location;</ki>
+        <ki key="F9">Edit this unit's comment;</ki>
+        <ki key="Shift-F9">Edit comment of planet here;</ki>
+        <ki key="Ctrl-F9">Edit comment of planet at other end of scanner;</ki>
+        <ki key="L"><a href="pcc2:listship">List ships</a> at other end of scanner;</ki>
+        <ki key="Shift-L"><a href="pcc2:listship">List ships</a> here;</ki>
+        <ki key="Ctrl-N"><a href="pcc2:listship">List ships</a> that will be here next turn;</ki>
+        <ki key="Shift-M">Show <a href="pcc2:msgin">subspace messages</a> from this unit;</ki>
+        <ki key="Y">Enable keyboard-move-scanner mode. Move scanner around with arrows, exit with <kbd>ESC</kbd>;</ki>
+        <ki key="Backspace">Go to previous screen;</ki>
+        <ki key="Alt-Backspace">Show list of previous screens;</ki>
+        <ki key="Ins">Add unit to battle simulation;</ki>
+        <ki key="Alt-C">Show <a href="pcc2:console">console</a>;</ki>
+        <ki key="Alt-Q">Open <a href="pcc2:processmgr">Process Manager</a>;</ki>
+        <ki key="Alt-K"><a href="pcc2:keymap">Keymap debugger</a>;</ki>
+        <ki key="Alt-.">Open <a href="pcc2:selectionmgr">Selection manager</a>;</ki>
+        <ki key="Alt-Left, Alt-Right">Next/previous selection layer;</ki>
+        <ki key="Alt-R"><a href="pcc2:reset">Reset current location</a> (undo);</ki>
+        <ki key="Enter">Toggle between regular control screen and <a href="pcc2:taskscreen">auto task screen</a>;</ki>
+        <ki key="ESC">Go to <a href="pcc2:racescreen">race screen</a>.</ki>
+      </kl>
+
+      <p>You can use <kbd>Ctrl-Alt</kbd>+letter to toggle starchart options,
+        e.g. <kbd>Ctrl-Alt-M</kbd> to toggle display of minefields.
+        See <a href="pcc2:starchart">Starchart, section "Option Toggles"</a> for details.</p>
+
+      <h2>Visual Elements</h2>
+      <ul>
+        <li>The top line on the left contains the name of the unit. If is followed by a flag icon if there are messages from the unit that can be read using <kbd>Shift-M</kbd>;</li>
+        <li>The second line contains brief information about the kind of this unit (e.g. the ship type);</li>
+        <li>The following block has function buttons for the major areas (<kbd>F1</kbd> etc.), and an image of the unit in the center.
+        <ul>
+          <li>The image has a yellow frame if the unit is selected (<kbd>.</kbd>);</li>
+          <li>The "Auto" button has a green frame if the unit has an auto task, and a yellow frame if some other script is running on it;</li>
+        </ul></li>
+        <li>A map of the unit's surroundings appears on the right.
+          You can click into it, or activate keyboard-move-scanner mode using <kbd>Y</kbd>.
+          The scanner result (name of the unit you're pointing at) is shown below the map).</li>
+      </ul>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>F1</kbd>, <kbd>F2</kbd>, <kbd>F3</kbd> or <kbd>F10</kbd> almost everywhere,
+          or follow a link in <a href="pcc2:imperial">Imperial Statistics</a> or <a href="pcc2:search">Search</a>;</di>
+        <di term="Related command:"> <a href="int:name:ui.gotoscreen">UI.GotoScreen</a>;</di>
+        <di term="Keymap:"> <a href="int:name:controlscreen">ControlScreen</a> (extended by actual control screen's keymap);</di>
+        <di term="Script context:"> respective unit;</di>
+        <di term="See also:">
+          <a href="pcc2:shipscreen">Ship Screen</a>,
+          <a href="pcc2:planetscreen">Planet Screen</a>,
+          <a href="pcc2:basescreen">Starbase Screen</a>,
+          <a href="pcc2:fleetscreen">Fleet Screen</a>.
+        </di>
+      </dl>
+    </page>
+
+    <!-- Auto Task Screen -->
+    <page id="pcc2:taskscreen">
+      <h1>Auto Task Screen</h1>
+
+      <p>PCC2 allows you to define give commands in advance.
+        For example, if you want a ship to move to planet #1, then to planet #2, then to planet #3,
+        you can define this route in advance using an Auto Task.</p>
+
+      <p>Auto Tasks are scripts.
+        Each line in the script is a command that may take multiple turns to execute, such as a
+        <tt>MoveTo</tt> command for a ship, or a <tt>EnqueueShip</tt> command for a starbase.
+        The Auto Task Screen displays the current status and lets you edit the script.</p>
+
+      <p>The red triangle displays the current command; it is hollow when the command already started executing and solid when it hasn't.</p>
+
+      <p>While you edit the task, it is stopped.
+        It will run when you leave the auto task screen or switch to another object.</p>
+
+      <p>When an auto task finishes (runs off its end), it is automatically removed.</p>
+
+      <p>Auto tasks can produce messages (using the <a href="int:name:notify">Notify</a> command or by running into a problem).
+        Such messages are shown in the <a href="pcc2:notify">Notification</a> dialog when you start PCC2.
+        The message currently holding up this task is also shown on the auto task screen.
+        When you fix the problem, you can confirm the message directly from here using <kbd>M</kbd>.</p>
+
+      <p>The following keys are supported in addition to <a href="pcc2:cscreen">Control Screen</a> keys.</p>
+
+      <kl>
+        <ki key="Ins">Insert a command before the current line;</ki>
+        <ki key="Space">Edit current command;</ki>
+        <ki key="Del">Delete current command;</ki>
+        <ki key="Ctrl-Del">Delete all commands;</ki>
+        <ki key="%, K">Disable/enable a command temporarily (comment it out);</ki>
+        <ki key="Ctrl-N">Set next command to execute;</ki>
+        <ki key="1..4">Depending on actual screen, insert commands;</ki>
+        <ki key="M">Confirm <a href="pcc2:notify">Notification Message</a> produced by this task (cause task to continue);</ki>
+        <ki key="Ctrl-S">Save task as text file;</ki>
+        <ki key="Ctrl-R">Load task from text file (insert commands at cursor);</ki>
+        <ki key="Enter">Go to <a href="pcc2:cscreen">control screen</a>.</ki>
+      </kl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Enter</kbd> from
+          <a href="pcc2:shipscreen">ship</a>, <a href="pcc2:planetscreen">planet</a>, or
+          <a href="pcc2:basescreen">starbase</a> screen;</di>
+        <di term="Related command:"> <a href="int:name:ui.gotoscreen">UI.GotoScreen</a>;</di>
+        <di term="Keymap:"> <a href="int:name:autotaskscreen">AutoTaskScreen</a>;</di>
+        <di term="Script context:"> respective unit.</di>
+      </dl>
+    </page>
+
+    <!-- Ship screen -->
+    <page id="pcc2:shipscreen">
+      <h1>Ship Screen</h1>
+
+      <p>This screen allows you to control your ships.
+        The following keys are supported in addition to <a href="pcc2:cscreen">Control Screen</a> keys.</p>
+
+      <kl>
+        <ki key="N">Change ship's name;</ki>
+        <ki key="M">Change ship's mission;</ki>
+        <ki key="E">Change ship's primary enemy;</ki>
+        <ki key="A">Change ship's waypoint using <a href="pcc2:navchart">Navigation Chart</a>;</ki>
+        <ki key="C"><a href="pcc2:cargo">Cargo transfer</a>;</ki>
+        <ki key="D"><a href="pcc2:multicargo">Multi-ship cargo transfer</a>;</ki>
+        <ki key="B">Open menu listing starbase commands applicable to this ship;</ki>
+        <ki key="R">Allow&#47;forbid&#47;drop remote control for this ship (PHost feature);</ki>
+        <ki key="G">Give ship away (PHost feature);</ki>
+        <ki key="S">Show ship <a href="pcc2:specsheet">specification sheet</a>;</ki>
+        <ki key="Q">Explain ship predictions. Tells you what missions and orders were considered for computing the fuel usage;</ki>
+        <ki key="Ctrl-J">Review Jettison order;</ki>
+        <ki key="Ctrl-S">Review transfer-to-enemy-ship order;</ki>
+        <ki key="Ctrl-P">Review unload-to-planet order;</ki>
+        <ki key="Ctrl-F">Make ship's friendly code the same as the friendly code of the planet it's orbiting;</ki>
+        <ki key="Ctrl-N"><a href="pcc2:listship">List ships</a> that will be at the same position as this ship next turn. Also places the scanner at the predicted new position;</ki>
+        <ki key="U">Cargo transfer to planet;</ki>
+        <ki key="F">Change ship's <a href="pcc2:fcode">friendly code</a>;</ki>
+        <ki key="W">Change ship's warp speed. On the warp speed dialog, type a number to set that warp factor, or <kbd>Y</kbd> to enable the Hyperdrive on ships that have one;</ki>
+        <ki key="Ctrl-W">Change ship's waypoint to match the scanner;</ki>
+        <ki key="Ctrl-Z">Clear ship's waypoint;</ki>
+        <ki key="Ctrl-I">Go to ship whose Id is in this ship's mission's Intercept parameter (i.e. go to ship we're intercepting);</ki>
+        <ki key="Alt-I"><a href="pcc2:search">Search</a> ships that have our Id as Intercept parameter (i.e. find ships intercepting us);</ki>
+        <ki key="Ctrl-T">Go to ship whose Id is in this ship's mission's Tow parameter (i.e. go to ship we're towing);</ki>
+        <ki key="Alt-T"><a href="pcc2:search">Search</a> ships that have our Id as Tow parameter (i.e. find ships towing us);</ki>
+        <ki key="Ctrl-M">Go to ship we are chunneling to;</ki>
+        <ki key="Alt-M"><a href="pcc2:search">Search</a> ships that are chunneling to us;</ki>
+        <ki key="Tab">Cycle through ships at this place. With <kbd>Ctrl</kbd>: marked ships only. With <kbd>Shift</kbd>: backward;</ki>
+        <ki key="F10">Fleet menu: (only applicable items will be displayed)
+        <dl>
+          <di term="Fleet screen">Go to <a href="pcc2:fleetscreen">Fleet Screen</a>;</di>
+          <di term="Start new fleet">Make this ship the leader of a new fleet;</di>
+          <di term="Join a fleet">Make this ship member of an existing fleet;</di>
+          <di term="Leave fleet">Remove this ship from its fleet;</di>
+          <di term="Go to fleet leader">Go to the fleet leader's ship screen;</di>
+          <di term="Add all to fleet">If this ship isn't yet member of a fleet, make it leader of a new one. Then add all other ships at this place to the fleet;</di>
+        </dl>
+        </ki>
+        <ki key="Shift-F10">Same as "Join a fleet" or "Go to fleet screen", whichever is applicable.</ki>
+      </kl>
+
+      <p>The "R" button will only appear if your game supports the Remote Control functionality
+        (see <tt>pconfig.src</tt>).
+        It will have a red frame if this ship's remote control is forbidden,
+        a green frame if this is a remote-controlled ship (or you are applying for remote control),
+        and a yellow frame if this is a remote-controlled ship you're giving back to its owner.</p>
+
+      <p>The "G" button will only appear if your game supports the Give Ship functionality.
+        It will have a yellow frame when you have given an order to give the ship away.</p>
+
+      <p>The "F10" button will have a green frame if this ship is leader of a fleet, a red frame if it is a member.</p>
+
+      <p>To change a ship's waypoint, double-click into the starchart.
+        Alternatively, use the <a href="pcc2:navchart">Navigation Chart</a> (<kbd>A</kbd>),
+        which also allows you to set up a Chunnel or Hyperjump on capable ships.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>F1</kbd> from almost everywhere;</di>
+        <di term="Related command:"> <a href="int:name:ui.gotoscreen">UI.GotoScreen</a>;</di>
+        <di term="Keymap:"> <a href="int:name:shipscreen">ShipScreen</a>;</di>
+        <di term="Script context:"> <a href="int:name:ship:context">Ship()</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Ship Task screen -->
+    <page id="pcc2:shiptaskscreen">
+      <h1>Ship Task Screen</h1>
+
+      <p>This screen supports allows defining an Auto Task for a ship.
+        Typically, ship auto tasks define multi-turn waypoints.
+        The following keys are supported in addition to <a href="pcc2:taskscreen">Auto Task Screen</a> keys.</p>
+
+      <kl>
+        <ki key="A">Create <tt>MoveTo</tt> command using the <a href="pcc2:navchart">Navigation Chart</a>;</ki>
+        <ki key="Ctrl-W">Create <tt>MoveTo</tt> command for the scanner target (same as double-click into scanner chart).</ki>
+        <ki key="C, U"><a href="pcc2:cargo">Cargo transfer</a></ki>
+        <ki key="G">Go to <a href="pcc2:starchart">starchart</a> showing the place the ship will be after the current command.</ki>
+        <ki key="W">Change ship's warp speed.</ki>
+        <ki key="O">Options that affect prediction and display:
+        <ul>
+          <li>Predict to cursor/to end (also use <kbd>E</kbd> to toggle).</li>
+          <li>Show turn distances (also use <kbd>D</kbd> to toggle).</li>
+        </ul></ki>
+      </kl>
+
+      <p>To define a waypoint, double-click into the map.
+        Alternatively, use the <a href="pcc2:navchart">Navigation Chart</a> (<kbd>A</kbd>).</p>
+
+      <h2>Ship Task Commands</h2>
+      <ul>
+        <li>Movement Commands
+        <ul>
+          <li><tt>MoveTo</tt>: set waypoint and move ship there;</li>
+          <li><tt>MoveTowards</tt>: set waypoint and move for one turn (this may stop in mid-space!);</li>
+          <li><tt>SetSpeed</tt>: set warp speed;</li>
+          <li><tt>SetWaypoint</tt>: set waypoint, but do not move yet (ship will move during later <tt>WaitOneTurn</tt> commands, maybe.</li>
+        </ul></li>
+        <li>Cargo Commands: <tt>CargoUnload</tt>, <tt>CargoUpload</tt>.
+          PCC2 will ask for a cargo type and create a command which transfers everything of that type.
+          You can edit the command using <kbd>Space</kbd> to fit your needs;</li>
+        <li>Mission Commands: <tt>SetEnemy</tt>, <tt>SetFCode</tt>, <tt>SetMission</tt>: self-explanatory;</li>
+        <li>Miscellaneous Commands:
+        <ul>
+          <li><tt>Notify</tt>: generate a <a href="pcc2:notify">message</a> and wait until you confirm it; use this to send reminders into the future (like "have reached waypoint, refuel me");</li>
+          <li><tt>SetComment</tt>: change ship comment;</li>
+          <li><tt>SetName</tt>: change ship name;</li>
+          <li><tt>WaitOneTurn</tt>: wait one turn, performing whatever orders that were given before;</li>
+          <li><tt>Restart</tt>: restart auto task from the beginning.</li>
+        </ul></li>
+      </ul>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Enter</kbd> from <a href="pcc2:shipscreen">ship screen</a>;</di>
+        <di term="Related command:"> <a href="int:name:ui.gotoscreen">UI.GotoScreen</a>;</di>
+        <di term="Keymap:"> <a href="int:name:autotaskscreen">AutoTaskScreen</a>;</di>
+        <di term="Script context:"> <a href="int:name:ship:context">Ship()</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Planet screen -->
+    <page id="pcc2:planetscreen">
+      <h1>Planet Screen</h1>
+
+      <p>This screen allows you to control your planets.
+        The following keys are supported in addition to <a href="pcc2:cscreen">Control Screen</a> keys.</p>
+
+      <kl>
+        <ki key="B, D, M"><a href="pcc2:buildings">Build structures (factories, mines, defense)</a>;</ki>
+        <ki key="S"><a href="pcc2:sellsup">Sell supplies</a>;</ki>
+        <ki key="Ctrl-S">Undo sell supplies;</ki>
+        <ki key="T"><a href="pcc2:taxes">Taxes</a>;</ki>
+        <ki key="G">Give planet away (PHost feature);</ki>
+        <ki key="I">Send information about this planet to another player.
+          Depending on host version/configuration, you can send current information (VPA data transmission),
+          or next-turn information (PHost "show" command);</ki>
+        <ki key="F8">Go to starbase if any, otherwise build one.</ki>
+      </kl>
+
+      <p>The "G" button will only appear if your game supports the Give Planet functionality.
+        It will have a yellow frame when you have given an order to give the planet away.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>F2</kbd> from almost everywhere;</di>
+        <di term="Related command:"> <a href="int:name:ui.gotoscreen">UI.GotoScreen</a>;</di>
+        <di term="Keymap:"> <a href="int:name:planetscreen">PlanetScreen</a>;</di>
+        <di term="Script context:"> <a href="int:name:planet:context">Planet()</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Planet Task screen -->
+    <page id="pcc2:planettaskscreen">
+      <h1>Planet Task Screen</h1>
+
+      <p>This screen supports allows defining an Auto Task for a planet.
+        You can use the <a href="pcc2:taskscreen">Auto Task Screen</a> keys.</p>
+
+      <h2>Planet Task Commands</h2>
+      <ul>
+        <li>Order Commands:
+        <ul>
+          <li><tt>SetFCode</tt>: self-explanatory;</li>
+        </ul></li>
+        <li>Cargo Commands: <tt>CargoUnloadAllShips</tt>: unload Tritanium, Molybdenum, Duranium, colonists, supplies, and cash from all ships in orbit of this planet.
+          You can edit the command using <kbd>Space</kbd> to fit your needs;</li>
+        <li>Miscellaneous Commands:
+        <ul>
+          <li><tt>Notify</tt>: generate a <a href="pcc2:notify">message</a> and wait until you confirm it; use this to send reminders into the future (like "have reached waypoint, refuel me");</li>
+          <li><tt>SetComment</tt>: change planet comment;</li>
+          <li><tt>WaitOneTurn</tt>: wait one turn, performing whatever orders that were given before;</li>
+          <li><tt>Restart</tt>: restart auto task from the beginning.</li>
+        </ul></li>
+      </ul>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Enter</kbd> from <a href="pcc2:planetscreen">planet screen</a>;</di>
+        <di term="Related command:"> <a href="int:name:ui.gotoscreen">UI.GotoScreen</a>;</di>
+        <di term="Keymap:"> <a href="int:name:autotaskscreen">AutoTaskScreen</a>;</di>
+        <di term="Script context:"> <a href="int:name:planet:context">Planet()</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Base screen -->
+    <page id="pcc2:basescreen">
+      <h1>Base Screen</h1>
+
+      <p>This screen allows you to control your starbases.
+        The following keys are supported in addition to <a href="pcc2:cscreen">Control Screen</a> keys.</p>
+
+      <kl>
+        <ki key="T">Upgrade tech levels;</ki>
+        <ki key="D"><a href="pcc2:buildings">Build defense</a>;</ki>
+        <ki key="B"><a href="pcc2:buildship">Build ship</a>;</ki>
+        <ki key="Q"><a href="pcc2:queuemanager">Manage build queue</a>;</ki>
+        <ki key="M">Change base mission;</ki>
+        <ki key="R">Fix&#47;recycle a ship;</ki>
+        <ki key="A">Build torpedoes&#47;fighters.</ki>
+      </kl>
+
+      <p>The current ship build order will be shown on the control screen,
+        along with the queue position ("Q:") if known.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>F3</kbd> from almost everywhere;</di>
+        <di term="Related command:"> <a href="int:name:ui.gotoscreen">UI.GotoScreen</a>;</di>
+        <di term="Keymap:"> <a href="int:name:basescreen">BaseScreen</a>;</di>
+        <di term="Script context:"> <a href="int:name:planet:context">Planet()</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Base Task screen -->
+    <page id="pcc2:basetaskscreen">
+      <h1>Base Task Screen</h1>
+
+      <p>This screen supports allows defining an Auto Task for a starbase.
+        Typically, a starbase auto task tries to submit ship build orders.
+        The following keys are supported in addition to <a href="pcc2:taskscreen">Auto Task Screen</a> keys.</p>
+
+      <kl>
+        <ki key="E">Edit current <tt>EnqueueShip</tt> or <tt>BuildShip</tt> command using <a href="pcc2:buildship">ship build screen</a>;</ki>
+      </kl>
+
+      <h2>Base Task Commands</h2>
+      <ul>
+        <li>Order Commands:
+        <ul>
+          <li><tt>EnqueueShip</tt>: choose a ship design on the <a href="pcc2:buildship">Ship Build screen</a>. The ship will be built when resources are available and the base's previous build order (if any) has completed;</li>
+          <li><tt>SetMission</tt>, <tt>SetFCode</tt>: self-explanatory;</li>
+        </ul></li>
+        <li>Cargo Commands: <tt>CargoUnloadAllShips</tt>: unload Tritanium, Molybdenum, Duranium, colonists, supplies, and cash from all ships in orbit of this planet.
+          You can edit the command using <kbd>Space</kbd> to fit your needs;</li>
+        <li>Miscellaneous Commands:
+        <ul>
+          <li><tt>Notify</tt>: generate a <a href="pcc2:notify">message</a> and wait until you confirm it; use this to send reminders into the future (like "have reached waypoint, refuel me");</li>
+          <li><tt>SetComment</tt>: change ship comment;</li>
+          <li><tt>WaitOneTurn</tt>: wait one turn, performing whatever orders that were given before;</li>
+          <li><tt>Restart</tt>: restart auto task from the beginning.</li>
+        </ul></li>
+      </ul>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Enter</kbd> from <a href="pcc2:basescreen">base screen</a>;</di>
+        <di term="Related command:"> <a href="int:name:ui.gotoscreen">UI.GotoScreen</a>;</di>
+        <di term="Keymap:"> <a href="int:name:autotaskscreen">AutoTaskScreen</a>;</di>
+        <di term="Script context:"> <a href="int:name:planet:context">Planet()</a>.</di>
+      </dl>
+    </page>
+
+    <!-- History Screen -->
+    <page id="pcc2:historyscreen">
+      <h1>Ship History Screen</h1>
+
+      <p>PCC2 records information about own and enemy ships, which can be displayed on this screen.
+        The screen shows the last known equipment and ammunition of the ship.
+        A list shows the last known positions and masses.</p>
+
+      <p>The following keys are supported in addition to <a href="pcc2:cscreen">Control Screen</a> keys.</p>
+
+      <kl>
+        <ki key="C">For enemy ships, displays the last known cargo, and computes a few useful things from the ship's mass. For own ships, opens the <a href="pcc2:cargo">cargo transfer</a>;</ki>
+        <ki key="S">Show ship <a href="pcc2:specsheet">specification sheet</a>;</ki>
+        <ki key="Tab">cycle through ships that were at this place. With <kbd>Ctrl</kbd>: marked ships only. With <kbd>Shift</kbd>: backward.</ki>
+      </kl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>F6</kbd> from almost everywhere;</di>
+        <di term="Related command:"> <a href="int:name:ui.gotoscreen">UI.GotoScreen</a>;</di>
+        <di term="Keymap:"> <a href="int:name:historyscreen">HistoryScreen</a>;</di>
+        <di term="Script context:"> <a href="int:name:ship:context">Ship()</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Fleet Screen -->
+    <page id="pcc2:fleetscreen">
+      <h1>Fleet Screen</h1>
+
+      <p>Ships can be grouped into fleets.
+        A fleet shares a common waypoint and speed.
+        Fleets have a leader which defines the course.</p>
+
+      <p>The screen displays a list with all fleet members.
+        Some operations pertain to the whole fleet, some to the currently-chosen member.</p>
+
+      <p>The following keys are supported in addition to <a href="pcc2:cscreen">Control Screen</a> keys.</p>
+      <kl>
+        <ki key="A">Change fleet's waypoint. See <a href="pcc2:navchart">Navigation Chart</a>;</ki>
+        <ki key="B">Make the selected ship the leader of the fleet;</ki>
+        <ki key="C"><a href="pcc2:cargo">Cargo transfer</a>;</ki>
+        <ki key="D"><a href="pcc2:multicargo">Multi-ship cargo transfer</a>;</ki>
+        <ki key="F"><a href="pcc2:fcode">Change friendly code</a> of current ship;</ki>
+        <ki key="G">Give ship away (PHost feature). Note that the ship cannot be member of the fleet when owned by someone else;</ki>
+        <ki key="J">Join another fleet. All ships of this fleet will become members of the other fleet;</ki>
+        <ki key="N">Change name of current fleet. The name is optional;</ki>
+        <ki key="P">Split fleet. This will make two new fleets, one containing all the marked ships (use <kbd>.</kbd>), one containing the unmarked ones;</ki>
+        <ki key="S"><a href="pcc2:specsheet">Show specification sheet</a>;</ki>
+        <ki key="T">Tow another fleet member;</ki>
+        <ki key="U"><a href="pcc2:cargo">Unload ship to planet</a>;</ki>
+        <ki key="W">Change fleet's warp speed. On the warp speed dialog, type a number to set that warp factor;</ki>
+        <ki key="Ins">Add ship to battle simulation;</ki>
+        <ki key="Ctrl-Ins">Add all ships to battle simulation;</ki>
+        <ki key="Del">Remove ship from fleet;</ki>
+        <ki key="Ctrl-Del">Remove all ships from the fleet (dissolve it);</ki>
+        <ki key="Ctrl-W">Change fleet's waypoint to match the scanner;</ki>
+        <ki key="Ctrl-Z">Clear fleet's waypoint.</ki>
+      </kl>
+
+      <p>To change the fleet's waypoint, double-click into the map.
+        Alternatively, use the <a href="pcc2:navchart">Navigation Chart</a> (<kbd>A</kbd>).</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>F10</kbd> from almost everywhere;</di>
+        <di term="Related command:"> <a href="int:name:ui.gotoscreen">UI.GotoScreen</a>;</di>
+        <di term="Keymap:"> <a href="int:name:fleetscreen">FleetScreen</a>;</di>
+        <di term="Script context:"> <a href="int:name:ship:context">Ship()</a> (for current member).</di>
+      </dl>
+    </page>
+
+    <!-- Environment Scan -->
+    <page id="pcc2:envscreen">
+      <h1>Planet Environment Scan</h1>
+
+      <p>This screen display information about the environment (minerals, population, etc.)
+        of your own planets, unowned or enemy planets you visit, or you have previously seen.
+        Depending on the exact situation, you'll see different information,
+        often merged from different scans (e.g. minerals from history and current population).</p>
+
+      <kl>
+        <ki key="C">Ground combat simulator.
+          For own planets, displays an overview of how many clans an enemy would have to send to conquer the planet.
+          For enemy planets, you can enter a number of clans,
+          and PCC2 will compute the range of possible outcomes.</ki>
+      </kl>
+
+      <h2>Details</h2>
+
+      <p>The text on the left side can be scrolled if it's too long.</p>
+      <ul>
+        <li>"won't die if less than": you can exceed the maximum population, but the overpopulation will not die up to this limit;</li>
+        <li>"pillage/RGA max. turns": when you're continuously attacking the planet, the population will be gone after this many turns;</li>
+        <li>"base tax rate": how much money you can collect from the natives at a tax rate that produces no change in happiness (Safe Tax method).
+          The number of colonists is show in addition if it differs from the number of megacredits;</li>
+        <li>"max tax rate": how much money you can collect from the natives with a happiness change
+          of -30. You can normally collect even more, but then negative effects (no growth, riots) will kick in.</li>
+      </ul>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>F5</kbd>/<kbd>Shift-F5</kbd>/<kbd>Ctrl-F5</kbd> from almost everywhere;</di>
+        <di term="Related command:"> <a href="int:name:ui.planetinfo">UI.PlanetInfo</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Starchart -->
+    <page id="pcc2:starchart">
+      <h1>Starchart</h1>
+
+      <p>The starchart displays your view of the universe.
+        Depending on game settings, you may see all planet positions from the start, or you may need to come close to see them.
+        You will only see enemy ships, enemy populations on planets, wormholes, and minefields, when you're close enough and are using the Sensor Sweep mission.
+        PCC2 will track units so if you saw something a few turns ago, you will still see it.</p>
+
+      <kl>
+        <ki key="Arrows">Use the arrows to move around in steps of 10 (or <a href="prefixarg">prefix argument</a>). Hold <kbd>Shift</kbd> to go a single light year, <kbd>Ctrl</kbd> to go 100;</ki>
+        <ki key="+, -">Zoom;</ki>
+        <ki key="Space">Lock onto planet. With <kbd>Ctrl</kbd>, only marked units;</ki>
+        <ki key="Enter">Lock onto ship. With <kbd>Ctrl</kbd>, only marked units;</ki>
+        <ki key="F1">Go to ship screen (if locked at a ship);</ki>
+        <ki key="F2">Go to planet screen (if locked at a planet);</ki>
+        <ki key="F3, F8">Go to base screen (if locked at a planet with base);</ki>
+        <ki key="F4, ESC">Exit starchart;</ki>
+        <ki key="F5"><a href="pcc2:envscreen">Planet information</a> (if locked at a planet);</ki>
+        <ki key="F6"><a href="pcc2:historyscreen">Starship History</a> (if locked at a ship or near a ship's position);</ki>
+        <ki key="F7"><a href="pcc2:search">Search object</a>;</ki>
+        <ki key="Ctrl-H"><a href="pcc2:search">Search objects</a> at this location;</ki>
+        <ki key="F9">Edit current unit's or marker's comment;</ki>
+        <ki key="Shift-F9, Ctrl-F9">Edit current planet's comment;</ki>
+        <ki key="Alt-F9">Edit current marker's comment;</ki>
+        <ki key="PgUp, PgDn">Browse through units of this type in Id order. With <kbd>Ctrl</kbd>, only marked units. With <kbd>Shift</kbd>, also include units we're not playing;</ki>
+        <ki key="L"><a href="pcc2:listship">List ships</a> at this point;</ki>
+        <ki key="Ctrl-N"><a href="pcc2:listship">List ships</a> that will be here next turn;</ki>
+        <ki key="G"><a href="pcc2:gotoxy">Go to coordinate or sector</a>;</ki>
+        <ki key="digit M, Ctrl-M">Create canned marker. <kbd>Ctrl-M</kbd> creates a default marker, <kbd>1 M</kbd> through <kbd>9 M</kbd> create markers 1-9;</ki>
+        <ki key="M"><a href="pcc2:minescreen">Minefield information</a>;</ki>
+        <ki key="U"><a href="pcc2:ufoscreen">Ufo information</a>;</ki>
+        <ki key="I"><a href="pcc2:ionscreen">Ion storm information</a>;</ki>
+        <ki key="C">Change color of drawing near cursor;</ki>
+        <ki key="V">Move marker we're locked on. Finish moving with <kbd>ESC</kbd>;</ki>
+        <ki key="P"><a href="pcc2:draw">Draw</a>;</ki>
+        <ki key="T"><a href="pcc2:drawtag">Change drawing tag</a>;</ki>
+        <ki key="D"><a href="pcc2:distance">Distance mode</a>;</ki>
+        <ki key="R">Range mode. Mark all objects within a rectangular area. Finish with <kbd>ESC</kbd>, cancel with <kbd>Backspace</kbd>;</ki>
+        <ki key="Ctrl-R">Toggle or <a href="pcc2:starchart:ranges">configure display of visibility ranges</a>;</ki>
+        <ki key="X">When looking at a wormhole, goes to its other end.
+          When looking at a ship, goes to its waypoint and back.
+          On circular wrapped map, switch between this point and its "outside" image;</ki>
+        <ki key="Del">Delete drawing near cursor. Confirm with <kbd>Enter</kbd> or <kbd>Y</kbd>, cancel with <kbd>ESC</kbd> or <kbd>N</kbd>.
+          Pick different drawing to delete using <kbd>Del</kbd>. Delete this line and all adjacent lines using <kbd>A</kbd>;</ki>
+        <ki key="Backspace">Go to previous screen;</ki>
+        <ki key="Alt-Backspace">Show list of previous screens;</ki>
+        <ki key="Alt-O"><a href="pcc2:starchartopts">Starchart options</a>;</ki>
+        <ki key="Alt-F"><a href="pcc2:drawtag">Filter drawings</a>;</ki>
+        <ki key="Alt-L">Edit <a href="pcc2:labels">unit label expressions</a>;</ki>
+      </kl>
+
+      <h2>Option Toggles</h2>
+      <kl>
+        <ki key="Alt-M">Toggle display of minefields;</ki>
+        <ki key="Alt-A">Toggle display of ships as dots or triangles;</ki>
+        <ki key="Alt-D">Toggle display of <a href="pcc2:labels">unit labels</a>;</ki>
+        <ki key="Alt-I">Toggle display of ion storms;</ki>
+        <ki key="Alt-V">Toggle display of ship vectors;</ki>
+        <ki key="Alt-T">Toggle highlight of marked units;</ki>
+        <ki key="Alt-S">Toggle display of sector borders;</ki>
+        <ki key="Alt-B">Toggle display of map borders;</ki>
+        <ki key="Alt-U">Toggle display of Ufos;</ki>
+        <ki key="Alt-P">Toggle display of drawings;</ki>
+        <ki key="Alt-W">Toggle display of warp well boundaries;</ki>
+        <ki key="Alt-N">Toggle display of message flags. A flag is displayed if there is a <a href="pcc2:msgin">message</a> for a unit. Press <kbd>Shift-N</kbd> to read the messages;</ki>
+        <ki key="Alt-Y">Toggle whether minefields are shown after decay.</ki>
+      </kl>
+
+      <h2>Object View</h2>
+
+      <p>When you select an object (ship or planet) on the starchart, PCC2 will display two map overlays:
+        a list containing all objects at this place, and an overlay panel containing information about the current object.
+        While the info panel is displayed, most keys of the respective control screen are active.
+        For example, while locked at a ship, <kbd>M</kbd> changes the ship's mission instead of opening a minefield info view.
+        In addition, the following keys are accepted:</p>
+
+      <kl>
+        <ki key="Tab">Cycle through units at this place. With <kbd>Ctrl</kbd>, only marked units. With <kbd>Shift</kbd>, go backwards;</ki>
+        <ki key="B">Replace planet view by starbase view; if no starbase present, try to build one;</ki>
+        <ki key="P">Replace starbase view by planet view;</ki>
+        <ki key="A">On planet view, <a href="pcc2:buildings">build structures</a>;</ki>
+        <ki key="ESC">Hide view.</ki>
+      </kl>
+
+      <h2>Starchart Symbols</h2>
+      <ul>
+        <li>Starships are color-coded: <b><font color="green">&#x2022;&#160;green</font></b> for own,
+          <b><font color="yellow">&#x2022;&#160;gold</font></b> for allied,
+          <b><font color="red">&#x2022;&#160;red</font></b> for enemy units.
+          Ships are dots or tiny triangles (<kbd>Alt-A</kbd> to toggle) when in free space,
+          circles when in orbit of a planet.
+          When ships of different kind orbit a planet, the ring is
+          <b><font color="yellow">&#x2022;&#160;yellow</font></b>;</li>
+        <li>Planets have a <b><font color="blue">&#x2022;&#160;blue</font></b> ring when they're yours,
+          a <font>gray</font> one when they are owned by an enemy,
+          a <font>bronze</font> one when they are owned by an ally,
+          a <font>gray dotted</font> one when they are unowned,
+          and no ring at all when nothing is known;</li>
+        <li>Planets that have bases have an additional "+"-style cross;</li>
+        <li>Own minefields are <font>green</font>,
+          allied minefields are <font>bronze</font>,
+          enemy fields are <font>gray</font>.
+          Web fields are denser than normal ones;</li>
+        <li>Explosions are a mix of yellow and red pixels;</li>
+        <li>Sector borders (gray dotted lines) are drawn every 100 lightyears
+          (also see <a href="pcc2:gotoxy">Go to X/Y or sector</a>);</li>
+        <li>The map boundary is drawn as a dashed line.
+          On a wrapped (circular/rectangular) map, crossing the map border will have your ship re-enter the map at the other side.
+          On a non-wrapped map, the map boundary has no in-game meaning.</li>
+      </ul>
+
+      <p>Whether a player is ally or enemy is determined by the <a href="pcc2:teams">Teams</a> setting.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>F4</kbd> from almost everywhere;</di>
+        <di term="Related command:"> <a href="int:name:ui.gotochart">UI.GotoChart</a>,
+          <a href="int:name:chart.setview">Chart.SetView</a>;</di>
+        <di term="Keymap:">
+          <a href="int:name:starchart">Starchart</a> (normal),
+          <a href="int:name:shiplock">ShipLock</a>,
+          <a href="int:name:planetlock">PlanetLock</a>,
+          <a href="int:name:baselock">BaseLock</a>),
+          <a href="int:name:unknownplanetlock">UnknownPlanetLock</a> (when locked at appropriate object);</di>
+        <di term="Script context:"> corresponding to locked object.</di>
+      </dl>
+    </page>
+
+    <!-- Starchart Options -->
+    <page id="pcc2:starchartopts">
+      <h1>Starchart Options</h1>
+
+      <p>This dialog configures the <a href="pcc2:starchart">starchart</a> as well as all other starchart views displayed throughout the program.
+        It consists of multiple pages.</p>
+
+      <p>On every page, there is a small menu with an <kbd>S</kbd> button.
+        Use this to choose where the settings from this page are stored:</p>
+
+      <ul>
+        <li><b>User configuration file</b>: your general <tt><a href="config:pcc2ini">pcc2.ini</a></tt> file
+          in your <a href="config:intro">profile directory</a>, valid for all games;</li>
+        <li><b>Game configuration file</b>: <tt>pcc2.ini</tt> file in the game directory,
+          valid for this game only.</li>
+      </ul>
+
+      <h2>Display page</h2>
+
+      <p>Configures what objects you want to see.
+        For circular objects (ion storms, minefields, ufos), you can also configure whether you want them filled (green "F") or outlined (blue "X").
+        For the sector borders, there is an additional possibility "I" to restrict sector borders to the "inside" of a circular wrapped map.
+        Drawing the sector borders outside the map is very expensive so it's possible to turn it off.</p>
+
+      <p>Regular starcharts, small-size starcharts and scanners can be configured differently.
+        Click the checkbox to the right of the object name to set the value for all three configurations at once.
+        Click the "+" to the left of the name to show separate options for the three configurations.</p>
+
+      <h2>Geometry page</h2>
+
+      <p>Configures your map shape and behaviour.</p>
+
+      <dl>
+        <di term="Normal (plane)">a normal map, with "infinite" unchartered space outside the star cluster.
+          You can modify the <em>Center</em> and <em>Size</em> fields to adjust the position of the sector grid if your map has a nonstandard shape.
+          The Center is the location of the center of the map (a coordinate pair, two values),
+          the Size is the size (diameter), and can be one or two values;</di>
+
+        <di term="Wrapped (rectangular, Sphere)">rectangular wrap.
+          A ship exiting the map to the right enters it again on the left.
+          This is a very popular setting these days; there are a handful add-ons implementing it and it is built into PHost.
+          <em>Center</em> and <em>Size</em> define the size of the map, as for <em>Normal</em>.
+          When you use PHost with wrap enabled, PCC2 will configure itself automatically;</di>
+
+        <di term="Round wrap (circular, PWrap)">circular wrap.
+          The map is not a rectangle, but a circle.
+          Ships leaving the circle enter it again on the opposite edge.
+          The <em>Size</em> here is a single value specifying the radius of the circle.</di>
+      </dl>
+
+      <p><font color="red"><b>Note:</b></font> For <em>Normal</em> and <em>Wrapped</em>, the Size is the side length of the rectangle.
+        This differs from PCC 1.x where it was half of that.</p>
+
+      <h2>Markers page</h2>
+
+      <p>You can configure 10 markers you can quickly create from starcharts or scanners
+        (default marker: <kbd>Ctrl+M</kbd>, markers 1 to 9: <kbd>1 M</kbd> to <kbd>9 M</kbd>).</p>
+
+      <kl>
+        <ki key="Space">Pick shape and color for this marker;</ki>
+        <ki key="N">Enter a name for this marker. This name is just a reminder for you and has no other effect.</ki>
+      </kl>
+
+      <h2>Mouse page</h2>
+
+      <p>This page configures what objects the cursor "locks on" when you press a mouse button,
+        <kbd>Space</kbd> or <kbd>Enter</kbd>, as well as what happens when you use the mouse wheel.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Alt-O</kbd> from <a href="pcc2:starchart">starchart</a>;</di>
+        <di term="See also:"> <a href="pcc2:settings">Settings dialog</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Ranges -->
+    <page id="pcc2:starchart:ranges">
+      <h1>Visibility Ranges</h1>
+
+      <p>PCC can display visibility ranges in the starcharts.
+        Objects that are visible are displayed normally; everything outside the range receives a blue shade.</p>
+
+      <kl>
+        <ki key="R">Choose origin of scan.
+          "Own units/ships/planets" will display ranges around your units.
+          "Marked units" will display ranges around <a href="pcc2:selectionmgr">marked</a> ships and planets;</ki>
+        <ki key="T">When enabled, draws ranges around your <a href="pcc2:teams">team member's</a> units as well.
+          This option is ignored for the "Marked" origin.</ki>
+        <ki key="Down">Choose from predefined ranges according to host configuration:
+        <ul>
+          <li>Sensor range: range of sensor sweep mission (<cfg>SensorRange</cfg>);</li>
+          <li>Visibility range: distance at which ships in free space are visible (<cfg>ScanRange</cfg>);</li>
+          <li>Minefields visible: distance at which minefield are visible to Mine Sweep (<cfg>MineScanRange</cfg>);</li>
+          <li>Dark sense: range of the Dark Sense mission (<cfg>DarkSenseRange</cfg>).</li>
+        </ul></ki>
+      </kl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Ctrl-R</kbd> from <a href="pcc2:starchart">starchart</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Unit Labels -->
+    <page id="pcc2:labels">
+      <h1>Unit Labels</h1>
+
+      <p>PCC2 can label planets and ships in the starcharts.
+        Labels are defined by <a href="int:expr">expressions</a> which are evaluated for each ship/planet.
+        Using the <a href="pcc2:starchartopts">starchart options</a> or, in the starchart, the <kbd>Alt-D</kbd> shortcut,
+        you can configure in which starchart views the labels are displayed.</p>
+      <kl>
+        <ki key="Tab">Switch between fields;</ki>
+        <ki key="Down">Select from predefined or last-used expressions.</ki>
+      </kl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Alt-L</kbd> from <a href="pcc2:starchart">starchart</a>;</di>
+        <di term="See also:"> <a href="pcc2:settings">Settings dialog</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Go to X/Y -->
+    <page id="pcc2:gotoxy">
+      <h1>Go to X/Y</h1>
+
+      <p>Use this dialog to go to a specific location in the map.</p>
+
+      <p>Enter a coordinate pair in the form "<tt>1111,2222</tt>".</p>
+
+      <p>Alternatively, you can enter a sector number such as "<tt>123</tt>", to be brought to the center of that sector.
+        A sector is a 100&#xd7;100 area of space.
+        The sector number is displayed in the lower-left corner of the starchart.
+        Sector numbers appear on various paper starcharts and are a quick way to refer to an area.
+        Unfortunately, they are generally not known to users of programs other than PCC/PCC2.</p>
+
+      <p>In case of a wrapped map, requesting a location outside the existing map area
+        brings you to an alias of that location
+        (i.e. 900,700 is outside the map, so you'll be brought to 2900,2700).</p>
+
+      <p>When PCC2 shows a coordinate pair (e.g. in a <a href="pcc2:msgin">message</a>),
+        that typically serves as a clickable hyperlink that brings you to the starchart.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>G</kbd> from <a href="pcc2:starchart">starchart</a></di>
+      </dl>
+    </page>
+
+    <!-- Minefield screen -->
+    <page id="pcc2:minescreen">
+      <h1>Minefield Information</h1>
+
+      <p>This window shows information about a minefield.
+        When not invoked directly from a minefield, displays the nearest one.</p>
+
+      <kl>
+        <ki key="Up, Down">Browse through minefields;</ki>
+        <ki key="Tab">Browse through minefields with same center;</ki>
+        <ki key="S">Show how many beams are needed to sweep this field;</ki>
+        <ki key="P">Go to planet controlling this minefield;</ki>
+        <ki key="Del">Remove minefield from starchart.
+          This will just remove the minefield from the map,
+          it will not sweep the field. The field will re-appear when it is scanned again;</ki>
+        <ki key="Enter">Show minefield in <a href="pcc2:starchart">starchart</a>.</ki>
+      </kl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>M</kbd> from <a href="pcc2:starchart">starchart</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Ufo screen -->
+    <page id="pcc2:ufoscreen">
+      <h1>Ufo Information</h1>
+
+      <p>This window shows information about an Ufo.
+        When not invoked directly from an Ufo, displays the nearest one.</p>
+
+      <p>Ufos are objects created by add-on programs that operate according to add-on rules.
+        You cannot directly interact with Ufos through this screen.
+        However, you can configure an Ufo to be kept in PCC2's starchart database.
+        PCC2 also has some builtin knowledge about PHost's wormholes which are shown as Ufos.</p>
+
+      <kl>
+        <ki key="Up, Down">Browse through Ufos;</ki>
+        <ki key="Tab">Browse through Ufos with same center;</ki>
+        <ki key="X">For wormholes, go to the other end if known;</ki>
+        <ki key="K">Toggle whether this Ufo shall be kept in the database;</ki>
+        <ki key="Enter">Show Ufo in <a href="pcc2:starchart">starchart</a>.</ki>
+      </kl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>U</kbd> from <a href="pcc2:starchart">starchart</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Ion screen -->
+    <page id="pcc2:ionscreen">
+      <h1>Ion Storm Information</h1>
+
+      <p>This window shows information about an ion storm.
+        When not invoked directly from an ion storm, displays the nearest one.</p>
+      <kl>
+        <ki key="Up, Down">Browse through storms;</ki>
+        <ki key="F"><a href="pcc2:ionforecast">Ion storm forecast</a>;</ki>
+        <ki key="Enter">Show storm in <a href="pcc2:starchart">starchart</a>.</ki>
+      </kl>
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>I</kbd> from <a href="pcc2:starchart">starchart</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Ion forecast -->
+    <page id="pcc2:ionforecast">
+      <h1>Ion Storm Forecast</h1>
+
+      <p>This window displays a forecast about the future movement of an ion storm.
+        You can move around the scanner beam using the usual keys;
+        <kbd>+</kbd> and <kbd>-</kbd> will change the zoom factor,
+      <kbd>Tab</kbd> recenters the map.</p>
+
+      <p><kbd>ESC</kbd> closes the window.</p>
+
+      <p>The forecast considers the following properties of ion storms, consistent with Host 3.22.003 and PHost 4:</p>
+      <ul>
+        <li>Storms don't change their direction by more than 10&#176; per turn;</li>
+        <li>Storms smaller than 200 ly move at Warp 6, larger ones move at Warp 2 to 4;</li>
+        <li>Storms with more than 250 MeV move at warp 8, regardless of what the above rule says.</li>
+      </ul>
+      <p>The forecast does not consider growth of the storm, pancaking, and ion storm joining.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>F</kbd> from <a href="pcc2:ionscreen">ion storm information</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Console -->
+    <page id="pcc2:console">
+      <h1>Console</h1>
+      <p>The console has two purposes.
+        It logs various system messages, such as PCC2's startup phase.
+        It also acts as the interface to the script interpreter.
+        You can enter expressions and one-line commands.
+        When you enter an expression, both the expression and its result will be logged on the console.
+        You can therefore use this as a calculator ("what is <tt>17*4</tt>?"),
+        and to check PCC2 expressions (<tt>Distance(Ship(10), Ufo(20))</tt>, <tt>Ship(17).Name</tt>)
+        or commands (<tt>SetMission 4</tt>).
+        For details, refer to <a href="int:intro">PCC2 Interpreter Documentation</a>.</p>
+
+      <p>You can use the following keys:</p>
+      <kl>
+        <ki key="Enter">Evaluate expression;</ki>
+        <ki key="&#x2191;, &#x2193;">Recall previous input and output into input line;</ki>
+        <ki key="Ins">Insert last result into input line;</ki>
+        <ki key="Tab">Attempt to complete current word (as property name of current object);</ki>
+        <ki key="Alt-V">List user-defined properties of the current object, and their values;</ki>
+        <ki key="Shift-&#x2191;, Shift-&#x2193;">Scroll through previous output;</ki>
+        <ki key="Shift-PgUp, Shift-PgDn">Scroll through previous output.</ki>
+      </kl>
+
+      <!-- FIXME: <p><b>When PCC2 is executing a long-running script, it will not otherwise react on keypresses.
+           In this case, press <kbd>Ctrl-Pause</kbd> or, if your computer doesn't accept that,
+           <kbd>Ctrl-C</kbd>, to abort that script (PCC2 will ask for confirmation).</b></p> -->
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Alt-C</kbd> from almost everywhere;</di>
+        <di term="Related command:"> <a href="int:name:ui.popupconsole">UI.PopupConsole</a>;</di>
+        <di term="Script context:"> same as invoking screen.</di>
+      </dl>
+    </page>
+
+    <!-- Keymap debugger -->
+    <page id="pcc2:keymap">
+      <h1>Keymap Debugger</h1>
+
+      <p>The keymap debugger can be used to figure out what a key does.
+        It is useful if you want to develop scripts.
+        On the left, it displays the names of the currently active keymaps, which define what keys are active at this place
+        When you press a key, the action it triggers will be displayed on the right.</p>
+        <p>To close the keymap debugger, press <kbd>Shift-ESC</kbd>
+        (a lone <kbd>ESC</kbd> will also work if it isn't bound by the active keymap).</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Alt-K</kbd> from almost everywhere;</di>
+        <di term="See also:"> <a href="int:index:type:keymap">Keymaps</a> in script manual.</di>
+      </dl>
+    </page>
+
+    <!-- Selection Manager -->
+    <page id="pcc2:selectionmgr">
+      <h1>Selection Manager</h1>
+
+      <p>You can mark and objects using <kbd>.</kbd> to keep track of objects you still need to work with.
+        This is called the selection.
+        In a typical workflow, you all units at the beginning of the turn, and unmark them when you're done with them.</p>
+
+      <p>PCC2 manages eight layers of selections, called "A" to "H".
+        At almost any place, you can switch selection layers using <kbd>Alt-&#x2190;</kbd> and <kbd>Alt-&#x2192;</kbd>,
+        and you can invoke the Selection Manager using <kbd>Alt-.</kbd>.
+        You can use this, for example, to keep track of the planets you're working with on one layer,
+        and visualize <a href="pcc2:search">search results</a> on the others.</p>
+
+      <p>The following functions are available on the Selection Manager:</p>
+      <kl>
+        <ki key="D">Clear one layer (unselect all objects). With <kbd>Ctrl</kbd>: clear all layers;</ki>
+        <ki key="I">Invert one layer. With <kbd>Ctrl</kbd>: invert all layers;</ki>
+        <ki key="C">Copy/compute the current layer from an expression, see below;</ki>
+        <ki key="S">Save current selection layer. With <kbd>Ctrl</kbd>: save all layers;</ki>
+        <ki key="L">Load one or all selection layers from a saved file;</ki>
+        <ki key="M">Merge one or all selection. Like <kbd>L</kbd>, but adds to the previous selection instead of replacing it;</ki>
+        <ki key="F7">List objects on current layer. Activates the layer and shows it in the <a href="pcc2:search">Search dialog</a>.</ki>
+        <ki key="Enter">Select new current layer and close Selection Manager;</ki>
+        <ki key="ESC">Close selection manager.</ki>
+      </kl>
+
+      <h2 id="pcc2:selectionexpr">Selection Expressions</h2>
+
+      <p>You can compute a selection layer's content from other layers' content.
+        For example, you can merge two layers using an expression such as <tt>A or B</tt>:
+        the result will be a selection that contains all objects that were in A or B.
+        In the simplest form, the selection expression contains just a layer name, such as <tt>D</tt>,
+        which just copies a layer.</p>
+
+      <p>The following contains possible selection expressions in order of increasing precedence.</p>
+      <ul>
+        <li>Lowest priority:
+        <dl>
+          <di term="a&nbsp;Or&nbsp;b">   Logical Or: yields all objects that are in a or b;</di>
+          <di term="a&nbsp;+&nbsp;b">    Same as <tt>a Or b</tt>;</di>
+          <di term="a&nbsp;Xor&nbsp;b">  Logical Exclusive-or: yields all objects that are in a or b, but not in both;</di>
+          <di term="a&nbsp;-&nbsp;b">    Logical Subtraction: yields all objects that are in a, but not in b;</di>
+        </dl>
+        </li>
+        <li>Medium priority:
+        <dl>
+          <di term="a&nbsp;And&nbsp;b">  Logical And: yields all objects that are in a and in b;</di>
+          <di term="a&nbsp;*&nbsp;b">    Same as <tt>a And b</tt>;</di>
+        </dl>
+        </li>
+        <li>Highest priority (unary operators):
+        <dl>
+          <di term="Not&nbsp;a">         Logical Negation: yields all objects that are not in a;</di>
+          <di term="-a">                 Same as <tt>Not a</tt>;</di>
+          <di term="(a)">                Parentheses: yields a;</di>
+          <di term="P(a), PLANETS(a)">   Yields all the planets contained in a;</di>
+          <di term="S(a), SHIPS(a)">     Yields all the ships contained in a;</di>
+          <di term="CURRENT">            Yields the current selection;</di>
+          <di term="A, B, ..., H">       Yields the contents of the specified layer;</di>
+          <di term="P, PLANETS">         Yields the list of all planets;</di>
+          <di term="S, SHIPS">           Yields the list of all ships;</di>
+          <di term="0">                  Yields an empty selection;</di>
+          <di term="1">                  Yields the full selection containing all objects.</di>
+        </dl>
+        </li>
+      </ul>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Alt-.</kbd> from almost everywhere;</di>
+        <di term="Related command:"> <a href="int:name:ui.selectionmanager">UI.SelectionManager</a>,
+        <a href="int:name:selectionexec">SelectionExec</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Search -->
+    <page id="pcc2:search">
+      <h1>Search</h1>
+
+      <p>The Search function can locate objects according to a variety of queries.</p>
+
+      <p>Enter your query into the input field.
+        Use the controls above to choose search options:</p>
+      <kl>
+        <ki key="Alt-O">
+          Select <em>objects</em> to search. Choose any combination of
+          <ul>
+            <li>Starships;</li>
+            <li>Planets;</li>
+            <li>Starbases (starbases are normally searched when Planets is checked, so use this option alone when you want to search starbases only);</li>
+            <li>Ufos (includes wormholes);</li>
+            <li>Others (ion storms and minefields);</li>
+          </ul>
+        </ki>
+        <ki key="Alt-T">
+          Select <em>type</em> of search:
+          <ul>
+            <li>Name&#47;Id&#47;Comment: searches for a substring of the object's name, or its Id.
+            Id numbers can be specified with an optional leading hash sign, as in <tt>#357</tt>.
+            Search is case-insensitive;</li>
+            <li>Expression true: you enter a script expression
+            (see <a href="int:intro">PCC2 Interpreter Documentation</a>).
+            The result contains all objects where the expression yields true (nonzero, nonempty);</li>
+            <li>Expression false: like Expression true, but returns all objects where the expression yields false (zero, empty);</li>
+            <li>Location: enter a coordinate pair (e.g. <tt>1526,2039</tt>).
+            The search returns all object located at or covering that point;</li>
+          </ul>
+        </ki>
+        <ki key="Alt-P">Toggle whether you want to find your own played units only.</ki>
+      </kl>
+
+      <p>After confirming your input using <kbd>Enter</kbd> or the "Search!" button,
+        the result will be displayed in the list box below.
+        You can select an object and press <kbd>Enter</kbd> to show its <a href="pcc2:cscreen">control screen</a> or,
+        if that is not available, show it in the <a href="pcc2:starchart">starchart</a>.</p>
+
+      <h2>Keys</h2>
+      <kl>
+        <ki key="Enter">On input line, search. On result list, show result unit's control screen, or show unit on starchart.
+          If the dialog has been called from <a href="pcc2:globact">Global Actions</a>, just confirm the result and return;</ki>
+        <ki key="Alt-M">("Mark...") Operate on the selection.
+        <ul>
+          <li>Mark found objects;</li>
+          <li>Mark only found objects (this unmarks all other objects);</li>
+          <li>Unmark found objects;</li>
+        </ul></ki>
+        <ki key="Alt-G">("Global...") Open <a href="pcc2:globact">Global Actions</a> operating on the result list;</ki>
+        <ki key="Alt-.">Open <a href="pcc2:selectionmgr">selection manager</a>;</ki>
+        <ki key="Alt-&#x2190;, Alt-&#x2192;">Next/previous selection layer;</ki>
+        <ki key="F1, F6">When a ship is focused in the result list, go to its control screen/history screen;</ki>
+        <ki key="F2, F3">When a planet is focused in the result list, go to its control screen/starbase screen;</ki>
+        <!-- FIXME <ki key="F4, Shift-Enter">On result list, show object in starchart;</ki> -->
+        <ki key="F7">Put focus onto search query input field.</ki>
+      </kl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>F7</kbd> from almost everywhere;</di>
+        <di term="Related command:"> <a href="int:name:ui.search">UI.Search</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Incoming messages -->
+    <page id="pcc2:msgin">
+      <h1>Read Messages</h1>
+      <p>This dialog displays your incoming messages.
+      You receive messages from other players, your units that report events, or the host.</p>
+      <p>Messages are not saved between turns, so there is no need (and no possibility) to delete them after you read them.</p>
+      <kl>
+        <ki key="&#x2191;, &#x2193;">Browse; with <kbd>Shift</kbd>, don't skip hidden (filtered) messages;</ki>
+        <ki key="Ctrl-PgUp, Ctrl-PgDn">Go to first/last message;</ki>
+        <ki key="S, F7, /">Search for text;</ki>
+        <ki key="N">Continue search;</ki>
+        <ki key="F">Forward to another player;</ki>
+        <ki key="R">Reply to this message (with quoted text; with <kbd>Ctrl</kbd>, reply-to-all);</ki>
+        <ki key="G">Go to object mentioned in this message;</ki>
+        <ki key="X">Go to map location mentioned in this message;</ki>
+        <ki key="W">Write message to file (with <kbd>Ctrl</kbd>, all);</ki>
+        <ki key="A">If message contains a data transmission, accept that;</ki>
+        <ki key="Enter">Reply or go to object, whichever PCC2 considers most likely;</ki>
+        <ki key="Tab">Subject overview. Messages of similar content are collapsed to one line, for quicker navigation.
+          On the overview list, press <kbd>K</kbd> to hide&#47;show a particular group.
+          Messages in a hidden group will be skipped by normal browsing;</ki>
+        <ki key="digits =">Go to N'th message;</ki>
+        <ki key="ESC">Exit.</ki>
+      </kl>
+
+      <p>If the message contains a map location (coordinate),
+        you can also click it to go there.</p>
+
+      <h2>Filtering Messages</h2>
+
+      <p>You often do not want to read all messages.
+        Especially scans (minefields, planets, ion storms) will be processed by PCC
+        and drawn into the <a href="pcc2:starchart">starchart</a>, so you do not need to see them.</p>
+
+      <p>PCC includes a client-side message filter.
+        Use <kbd>K</kbd> on the subject overview (<kbd>Tab</kbd>) to hide or show a group.
+        A group is defined as a set of messages having a common header.</p>
+
+      <p>If you are using PHost, you can also activate a host-side message filter
+        on the <a href="pcc2:settings">settings</a> screen.
+        I recommend the client-side filter, though, because that allows finer control
+        and allows you to change your mind later on.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>M</kbd> from <a href="pcc2:racescreen">race screen</a>;
+          <kbd>Shift-M</kbd> on <a href="pcc2:cscreen">control screen</a> for just a unit's messages,
+          <kbd>Alt-U</kbd> from race screen for <tt>util.dat</tt> (machine-readable messages);
+          <kbd>Alt-M</kbd> from race screen for messages from a file;</di>
+        <di term="See also:"> <a href="pcc2:msgout">Write Messages</a>,
+          <a href="pcc2:notify">Notifications</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Write messages -->
+    <page id="pcc2:msgout">
+      <h1>Write Messages</h1>
+      <p>You can send messages to other players.
+        These messages will be sent when the host runs, and receivers can read them next turn.</p>
+
+      <p>Choose races to send message to, or <kbd>U</kbd> to send a universal message (to everyone).
+        You'll be placed in the message editor:</p>
+      <kl>
+        <ki key="Arrows">Move around. With <kbd>Ctrl</kbd>, move whole words;</ki>
+        <ki key="Enter">Start new line;</ki>
+        <ki key="Home, Ctrl-A">Beginning of line;</ki>
+        <ki key="Del, Ctrl-D">Delete character;</ki>
+        <ki key="End, Ctrl-E">End of line;</ki>
+        <ki key="Ctrl-K">Delete till end of line;</ki>
+        <ki key="Ctrl-N">Insert new line before current;</ki>
+        <ki key="Ctrl-T">Swap characters before and after cursor;</ki>
+        <ki key="Ctrl-Y">Delete line;</ki>
+        <ki key="Alt-T">Change receiver of message;</ki>
+        <ki key="Alt-W">Toggle word-wrap mode;</ki>
+        <ki key="Ins">Toggle insert mode;</ki>
+        <ki key="Backspace">Delete character backwards (with <kbd>Ctrl</kbd>: word);</ki>
+        <ki key="F10, Ctrl-Enter">Send message.</ki>
+      </kl>
+
+      <p>Press <kbd>R</kbd> in the receiver selection window to <a href="pcc2:revise">revise previously-sent messages</a>.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>W</kbd> from <a href="pcc2:racescreen">race screen</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Outgoing messages -->
+    <page id="pcc2:revise">
+      <h1>Revise Messages</h1>
+
+      <p>This dialog shows all messages that you have written but which were not sent yet.
+        You can modify or delete them if you changed your mind.</p>
+
+      <p>In addition to most <a href="pcc2:msgin">message reading</a> keys, this accepts the following keys:</p>
+      <kl>
+        <ki key="Enter, E">Edit message</ki>
+        <ki key="T">Change receiver of message</ki>
+        <ki key="Del">Delete message</ki>
+      </kl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>R</kbd> from <a href="pcc2:msgout">message dialog</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Notification messages -->
+    <page id="pcc2:notify">
+      <h1>Notification Messages</h1>
+
+      <p>Notification messages are generated by scripts.
+        Especially <a href="pcc2:taskscreen">Auto Tasks</a> will generate such messages when there is a problem.</p>
+
+      <p>In addition to most <a href="pcc2:msgin">message reading</a> keys, this accepts the following keys:</p>
+
+      <kl>
+        <ki key="C">Confirm message. The auto task or script which generated the message will continue executing when you close this window.
+          Note that if the message was caused by an error, it will immediately re-appear unless you have fixed the error.
+          If the message was generated by a <tt>Notify</tt> command, it will be gone in your next PCC2 session.</ki>
+      </kl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Alt-N</kbd> from <a href="pcc2:racescreen">race screen</a>;</di>
+        <di term="See also:"> <a href="int:name:notify">Notify</a> and
+          <a href="int:name:addnotify">AddNotify</a> script commands</di>
+      </dl>
+    </page>
+
+    <!-- Scores -->
+    <page id="pcc2:scores">
+      <h1>Scores</h1>
+
+      <p>PCC2 records current and past scores in a file <tt>score.cc</tt>.
+        Available scores depend on the game being used.
+        Typical scores include number of planets, ships, starbases, and the classic score computed from that.
+        Additional scores could be number of minefields, PTScore, or number of cactuses.</p>
+
+      <p>PCC2 displays scores in one or more overview tables, and one chart per score.</p>
+
+      <kl>
+        <ki key="&#x2190;, &#x2192;">Choose between different views;</ki>
+        <ki key="Ctrl-&#x2191;, Ctrl-&#x2193;">(overview) Choose race to highlight;</ki>
+        <ki key="Ctrl-&#x2190;, Ctrl-&#x2192;">(charts) Choose race to highlight;</ki>
+        <ki key="D">(overview) Choose different display mode:
+        <ul>
+          <li>Normal scoreboard;</li>
+          <li>Differences to previous turn (each turn vs. its predecessor);</li>
+          <li>Differences to turn X (each turn vs. turn X);</li>
+          <li>Percentages (relative strength compared to highlighted race, which is taken as 100%);</li>
+          <li>Ratio of total (relative strength compared to all races together);</li>
+          <li>Scores by player vs. Scores by team (like <kbd>Y</kbd> key);</li>
+        </ul>
+        </ki>
+        <ki key="Y">Toggle whether scores are displayed by player or team (=sum of players in a team);</ki>
+        <ki key="X">Toggle whether scores are displayed as individual lines (default) or cumulative on the diagram views.
+          With cumulative display, the third curve does not contain player 3's score, but the sum of players 1, 2 and 3.
+          This makes it easier to see events like the ship limit or progress of planet colonisation.
+          This kind of diagram is sometimes known as <em>stacked area chart</em>;</ki>
+        <ki key="+, -">(overview) Browse through turns;</ki>
+        <ki key="Ctrl-U">(overview) Unsorted;</ki>
+      </kl>
+
+      <p>To sort overview tables, click the heading of the column you want to sort by,
+        or press <kbd>Ctrl</kbd> plus the score's hotkey (e.g. <kbd>Ctrl-P</kbd> for planets).
+        Hogkeys for individual pages are assigned dynamically depending upon which pages are present.</p>
+
+      <p>Team scores are only available when any <a href="pcc2:teams">teams</a> are configured.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>S</kbd> from <a href="pcc2:racescreen">race screen</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Imperial Statistics -->
+    <page id="pcc2:imperial">
+      <h1>Imperial Statistics</h1>
+
+      <p>This screen displays various statistics about your empire.
+        Choose a report using the buttons on the right, or the <kbd>Up</kbd> and <kbd>Down</kbd> arrows.
+        Underlined words are clickable links, taking you directly to an object or a ready-made <a href="pcc2:search">search query</a>.
+        Use the mouse, or <kbd>Tab</kbd> and <kbd>Enter</kbd>, to follow a link.
+        Some reports can be customized using the <kbd>#</kbd> menu.</p>
+
+      <ul>
+        <li><b>Totals</b> shows total unit count, minerals, populations and production;</li>
+        <li><b>Minerals</b> shows your top Neutronium, Tritanium, Duranium, and Molybdenum planets;</li>
+        <li><b>Planets</b> shows planets grouped by native race and climate;</li>
+        <li><b>Colony</b> shows your top colonies according to population, supplies, and cash;</li>
+        <li><b>Starbases</b> shows your starbases according to various attributes, and ships being built on them;</li>
+        <li><b>Starships</b> and <b>Capital</b> show your ships (or just capital ships) according to
+          their type and other attributes;</li>
+        <li><b>Starchart</b> shows information about your starchart and scanned units;</li>
+        <li><b>Weapons</b> gives a statistic about weapons on your ships.</li>
+      </ul>
+
+      <h2>Keys</h2>
+
+      <kl>
+        <ki key="&#x2191;, &#x2193;">Change page;</ki>
+        <ki key="#">Select page-dependant options;</ki>
+        <ki key="Ctrl-S">Save current page as HTML file. Using a web browser, you can copy tables from the HTML file into a spreadsheet program;</ki>
+        <ki key="ESC">Exit.</ki>
+      </kl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>I</kbd> from <a href="pcc2:racescreen">race screen</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Universe Almanac -->
+    <page id="pcc2:almanac">
+      <h1>Universe Almanac</h1>
+      <p>The Universe Almanac displays your game's specification files.
+        You can use this to answer questions like "who can build cloakable ships in this game?".</p>
+
+      <p>Scroll around using arrows. Use <kbd>Tab</kbd> to switch between the list, and the toolbar above it.
+        Use <kbd>Tab</kbd> or digits to activate different pages.</p>
+
+      <h2>Pages</h2>
+
+      <dl>
+        <di term="Races"> All the races in the game, including their abilities;</di>
+        <di term="Racial Abilities"> Regular racial abilities known as such ("can assimilate natives"),
+          special missions ("pillage"), and other abilities implied by configuration ("2x tax income");</di>
+        <di term="Ship Hulls"> All ship hulls;</di>
+        <di term="Ship Abilities"> Ship abilities such as Cloak, Hyperdrive, or Alchemy;</di>
+        <di term="Engines, Beams, Torpedoes, Fighters"> Other starship components.</di>
+      </dl>
+
+      <h2>Filtering</h2>
+
+      <p>To add a filter, click the "Filter" option on the toolbar.
+        It will ask for a filter criterion.
+        Possible filter criteria depend on the current page, and could be
+        name containing a particular word, value being in a particular range (e.g. "50-100 crew")
+        or a particular choice ("Tholian hulls", "armed ships").</p>
+
+      <p>To modify a filter, click the "pen" icon, or toggle it using the "toggle" icon.
+        To remove it, use the "&#x2717;" icon.</p>
+
+      <p>Some pages have quick filter buttons that show you associated information
+        (e.g. all racial abilities for a race).</p>
+
+      <h2>Sorting</h2>
+
+      <p>You can sort the lists.
+        To sort, click the "Sort" option on the toolbar.
+        Depending on the number of sort orders available, this will toggle or offer a list.</p>
+
+      <h2>Keys</h2>
+
+      <kl>
+        <ki key="Space">Add/edit/toggle filter or sort (like mouse click);</ki>
+        <ki key="Del">Remove filter;</ki>
+        <ki key="Alt-A">Quick filter: abilities;</ki>
+        <ki key="Alt-P">Quick filter: players;</ki>
+        <ki key="Alt-T">Quick filter: hulls.</ki>
+      </kl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Shift-A</kbd> from <a href="pcc2:racescreen">race screen</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Team editor -->
+    <page id="pcc2:teams">
+      <h1>Teams</h1>
+      <p>You can use teams to model formal and informal alliances.
+        Units of races in the same team as you will be shown in yellow instead of red:
+        use this to mark your allies.</p>
+
+      <p>Note that teams do not affect gameplay.
+        Teams are purely a client-side display feature
+        (however, when you put two races into the same team, they will by default behave friendly in the <a href="pcc2:bsim">Battle Simulator</a>).
+        If you wish to behave friendly to your team-mates, you need to set up a formal <a href="pcc2:allies">alliance</a>.</p>
+
+      <p>PCC2 supports optional automatic synchronisation of teams.
+        Whenever you offer an alliance to someone, they will be put into your team.
+        If there is someone in your team whom you do not offer an alliance, they will be dropped from the team.
+        This way, you normally have to deal with your alliances only, and can let the teams manage themselves.
+        If you do not like this feature, turn it off using <kbd>A</kbd>.</p>
+
+      <kl>
+        <ki key="Arrows">Move around;</ki>
+        <ki key="Space">Make current race (line) belong to current team (column);</ki>
+        <ki key="N">Assign name to current team;</ki>
+        <ki key="A">Toggle <em>auto-sync</em> option.</ki>
+      </kl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>T</kbd> from <a href="pcc2:racescreen">race screen</a>;</di>
+        <di term="See also:"> <a href="pcc2:allies">Alliances</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Alliance editor -->
+    <page id="pcc2:allies">
+      <h1>Alliances</h1>
+      <p>This dialog allows you to configure alliances.
+        It is only available if your host version supports alliances.</p>
+
+      <p>The left side lists all other players together with a quick status:</p>
+      <ul>
+        <li>red: no alliance</li>
+        <li>yellow: partial alliance (they have offered but you didn't, or the other way around)</li>
+        <li>green: alliance established</li>
+        <li>bright red: you have declared them an enemy</li>
+      </ul>
+
+      <p>On the right, the selected player's alliance status is broken down.
+        The actual selection depends on the host version.
+        You can edit alliances here.
+        Possible settings include "not offered" (blank checkbox), "offered" (blue <font color="blue">X</font>), and "conditional offer" (green <font color="green">C</font>).
+        A conditional offer can only by used by the partner if they offer the same level to you.</p>
+
+      <p>Depending on your host version, the following levels could be available with different settings:</p>
+      <ul>
+        <li><b>Alliance offer</b> (PHost): You have offered them an alliance (but not necessarily any privileges).</li>
+        <li><b>Standard alliance</b> (THost): You have offered them an alliance. You will not attack them.</li>
+        <li><b>Ship alliance</b> (PHost): You allow them ship-related privileges.</li>
+        <li><b>Planet alliance </b> (PHost): You allow them planet-related privileges.</li>
+        <li><b>Minefield alliance </b> (PHost): You allow them free flight through your minefields.</li>
+        <li><b>Combat alliance </b> (PHost): You will not attack them.</li>
+        <li><b>Vision alliance </b> (PHost, THost): They will see everything you see.</li>
+      </ul>
+
+      <p>The following keys are active in this dialog:</p>
+      <kl>
+        <ki key="Arrows, Tab">Move around</ki>
+        <ki key="Space">Toggle current alliance or alliance level</ki>
+      </kl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>A</kbd> from <a href="pcc2:racescreen">race screen</a>;</di>
+        <di term="See also:"> <a href="pcc2:teams">Teams</a>.</di>
+      </dl>
+    </page>
+
+    <!-- PHost commands -->
+    <page id="pcc2:auxcmds">
+      <h1>Edit auxiliary commands</h1>
+
+      <p>This menu displays all auxiliary commands (mainly for the PHost command processor).
+        This feature is for people who know what they are doing.</p>
+
+      <p>You can add, modify and delete commands.
+        That PCC2 automatically extracts commands from messages.
+        The commands will not be visible on the normal <a href="pcc2:msgout">outgoing message list</a>.</p>
+
+      <kl>
+        <ki key="Arrows">Move around;</ki>
+        <ki key="Del">Delete current command;</ki>
+        <ki key="Ins">Add a new command;</ki>
+        <ki key="Space">Modify the current command (see below).</ki>
+      </kl>
+
+      <p>Note that PCC2 knows about the interaction between commands.
+        When you add a new command that cancels a previous one, PCC2 will notice and replace the old command with the new one.
+        For example, adding <tt>allies drop 3</tt> will replace a previous <tt>allies add 3</tt> command,
+        and adding <tt>give ship 3 to 5</tt> will replace a previous <tt>give ship 3 to 9</tt>.
+        The <kbd>Space</kbd> bar therefore simply gives you an input line containing the current command,
+        allowing you to edit it into a new one that possibly replaces the old one.
+        You can, however, also enter a completely new command which will be added to the list.
+        Likewise, <kbd>Ins</kbd> gives you a blank input line for a new command which will be added anew or replaces an old command.</p>
+
+      <p>PCC2 will also insert commands at sensible places (for example,
+        <tt>allies add</tt> always precedes <tt>allies config</tt>), you cannot reorder them.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Alt-E</kbd> from <a href="pcc2:racescreen">race screen</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Reset -->
+    <page id="pcc2:reset">
+      <h1>Reset Location</h1>
+
+      <p>This function allows you to reset all units at a particular location to the status they had at the beginning of the turn.
+        Most things can simply be reverted manually (e.g. just re-enter the mission the ship had at the beginning of the turn),
+        but sometimes this is quite tedious.
+        This function can also be used when the turn file has been messed up due to a bug in a program.</p>
+
+      <p>Because units can interact, you must reset all units at a location in a group.
+        It is not possible to reset a single ship, maybe: if that ship has transferred cargo somewhere,
+        the receiver of that cargo must be reset as well.</p>
+
+      <p>PCC2 divides properties into two groups; you can reset them independant of each other:</p>
+
+      <kl>
+        <ki key="C">Cargo, structures, builds. Resets everything that has to do with cargo, i.e. build orders,
+          planetary structures (which are built from money and supplies), built starship components or weapons,
+          and ship build orders;</ki>
+        <ki key="M">Missions, orders, names. Resets missions, friendly codes, names, tax rates, waypoints, etc.
+          These do not interact with other units.</ki>
+      </kl>
+
+      <p>Other keys:</p>
+      <kl>
+        <ki key="L">List affected units;</ki>
+        <ki key="Enter">Confirm;</ki>
+        <ki key="ESC">Cancel.</ki>
+      </kl>
+
+      <p>Note that this function does not reset <em>everything</em> to its original place.
+        In particular, client-side information such as the unit's comment are not recovered.
+        In addition, planets.nu does not store original values for values such as friendly codes,
+        so this function will recover the value at the beginning of the session, but not at the beginning of the turn for those.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Alt-R</kbd> on <a href="pcc2:cscreen">control screens</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Battle simulator -->
+    <page id="pcc2:bsim">
+      <h1>Battle Simulator</h1>
+
+      <p>The Battle Simulator allows you to simulate fights between any number of ships and planets,
+        to determine your chances against possible enemy fleets.
+        You can use ships from the game, or build your own.</p>
+
+      <kl>
+        <ki key="Ins">Add new ship (asks for hull type, assigns default owner);</ki>
+        <ki key="Ctrl-Ins, *">Insert multiple copies of the current ship;</ki>
+        <ki key="P">Add planet. You can have one planet per simulation. Set the planet's beam technology using <kbd>B</kbd> to add a starbase. A planet will always appear at the end of the list;</ki>
+        <ki key="Enter">Run the simulation once and <a href="pcc2:simresult">show results</a>;</ki>
+        <ki key="Del">Remove this unit;</ki>
+        <ki key="Ctrl-Del">Clear simulation setup;</ki>
+        <ki key="F1">(ship) Show this ship on <a href="pcc2:shipscreen">ship screen</a> if possible;</ki>
+        <ki key="F2">(planet) Show this planet on <a href="pcc2:planetscreen">planet screen</a> if possible;</ki>
+        <ki key="Ctrl-Up, Ctrl-Down">(ship) Move ship up&#47;down (has no effect on simulation);</ki>
+        <ki key="1">(ship) Edit primary weapon (beams);</ki>
+        <ki key="2">(ship) Edit secondary weapon (torpedoes, fighters);</ki>
+        <ki key="A">(ship) Edit aggressiveness (PE, Kill), (planet) Edit number of starbase torpedoes. You can enter a count for each type, start typing or use <kbd>&#x2190;</kbd>/<kbd>&#x2192;</kbd>;</ki>
+        <ki key="B">(planet) Edit beam tech level. Nonzero beam tech means a starbase is present;</ki>
+        <ki key="C">(ship) Edit crew;</ki>
+        <ki key="D">(ship) Edit damage, (planet) Edit number of defense posts;</ki>
+        <ki key="E">(ship) Edit engine (for engine&#47;shield bonus computation);</ki>
+        <ki key="F">Edit <a href="pcc2:fcode">friendly code</a>;</ki>
+        <ki key="Shift-F">Move to next unit, and give it a numeric fcode above the previous unit's code;</ki>
+        <ki key="G">(planet) Edit number of starbase fighters;</ki>
+        <ki key="I">Edit Id number;</ki>
+        <ki key="K">(ship) Edit ship ratings for FLAK simulation;</ki>
+        <ki key="L">Edit experience level (if active on your host);</ki>
+        <ki key="M">(ship) Edit mass (custom ships only);</ki>
+        <ki key="N">Edit name (for planets, choose from known planet names);</ki>
+        <ki key="O">Edit owner;</ki>
+        <ki key="P">(planet) Edit population (and compute number of defense posts from that);</ki>
+        <ki key="R">Toggle random friendly codes. When enabled, the friendly code will be set to a random numeric value before the simulation. You can choose to randomize some digits only by assigning a friendly code containing "#";</ki>
+        <ki key="S">(ship) Edit shield level, (planet) Edit number of starbase defense posts;</ki>
+        <ki key="T">(ship) Edit hull type, (planet) Edit starbase torpedo tech level;</ki>
+        <ki key="V">(ship) Toggle cloak status;</ki>
+        <ki key="X">Edit intercept target (for Intercept Attack battle order);</ki>
+        <ki key="Y">Edit <a href="pcc2:simfunctions">abilities (hullfuncs)</a>;</ki>
+        <ki key=".">Temporarily disable unit (remove from simulation without deleting it) or enable it again;</ki>
+        <ki key="# or \">(or right mouse button) Sort ship list;</ki>
+        <!-- FIXME <ki key="Ctrl-A">Edit alliance relations;</ki> -->
+        <ki key="U">Update this unit's simulation data with information from game;</ki>
+        <ki key="Ctrl-U">Update all unit's simulation data with information from game;</ki>
+        <ki key="W">Write this unit's simulation data to game;</ki>
+        <ki key="Ctrl-W">Write all unit's simulation data to game;</ki>
+        <ki key="Ctrl-C"><a href="pcc2:fleetcost">Fleet cost comparison</a>;</ki>
+        <ki key="Ctrl-O">Edit <a href="pcc2:simopts">options</a>;</ki>
+        <ki key="Ctrl-R">Read saved simulation from a file (.ccb);</ki>
+        <ki key="Ctrl-S">Save simulation setup to file.</ki>
+      </kl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>B</kbd> from <a href="pcc2:racescreen">race screen</a></di>
+      </dl>
+    </page>
+
+    <!-- pcc2:simplanet does no longer exist, there is no planet dialog box anymore. -->
+
+    <!-- Simulator Options -->
+    <page id="pcc2:simopts">
+      <h1>Battle Simulator Options</h1>
+      <kl>
+        <ki key="M">Choose mode (host&#47;VCR version). Other options are updated accordingly;</ki>
+        <ki key="E">Edit engine&#47;shield bonus (should correspond to Host setting);</ki>
+        <ki key="C">Toggle Fed Crew Bonus (should correspond to Host setting);</ki>
+        <ki key="R">Toggle random left&#47;right side assignment. PHost does this, THost doesn't;</ki>
+        <ki key="L">Choose balancing mode for THost left&#47;right imbalance. Default implemented in THost is "360 kt", PHost doesn't need this and has "none";</ki>
+        <ki key="A">Choose whether to honor alliances. When this setting is enabled (default), ships belonging to the same <a href="pcc2:teams">team</a> do not attack each other;</ki>
+        <ki key="B">Set to "one" to limit simulations to one fight per battle. Default is to simulate all;</ki>
+        <ki key="S">Toggle seed control. If enabled, a "series" (see <a href="pcc2:simresult">Simulator Result</a>) is guaranteed to simulate all possible results; if disabled, random battles are simulated. Only supported for one-fight THost battles;</ki>
+        <ki key="F">Choose whether random friendly codes are applied when you start the simulation with <kbd>Enter</kbd>, or for each simulated battle.</ki>
+      </kl>
+
+      <h2>Simulator Modes</h2>
+      <ul>
+        <li><b>Host</b> simulates classic Host combat;</li>
+        <li><b>PHost 2..4</b> simulates PHost combat. PHost uses different order-of-battle than Host (in particular, planets have a battle order), and different formulas;</li>
+        <li><b>FLAK</b> is a multi-ship combat engine. Unlike the others that break down multi-ship fights into a series of 1:1 fights, this one fights all ships at once;</li>
+        <li><b>NuHost</b> is the variant of Host running on planets.nu and uses slightly different formulas.</li>
+      </ul>
+
+      <h2>Balancing</h2>
+      <p>The original combat algorithm implemented in Host has the problem of not being exactly symmetric,
+        such that it makes a difference whether you end up on the left or right side.
+        Various ways to solve this have been suggested.</p>
+      <ul>
+        <li>With Left/Right Balance: 360 kt, a ship fighting against a carrier from the right-hand side will receive 360&nbsp;kt more mass.
+          This is implemented in Host;</li>
+        <li>With Left/Right Balance: Master at Arms, a ship fighting a carrier from the right-hand side will receive some bonus fighters and bays.
+          This is not implemented in any host version, but the PCC battle simulator has been used to validate the concept;</li>
+        <li>With Random Left/Right enabled, sides will be assigned randomly, so you cannot predict where you will end up.
+          This is implemented in PHost.</li>
+      </ul>
+
+      <h2>Seed Control</h2>
+      <p>In Host, there are only 119 possible outcomes of each fight.
+        With Seed Control enabled, the Battle Simulator will just compute all of them (instead of randomly choosing).
+        Thus, if you're computing a full series, you're guaranteed to have seen all possible outcomes.</p>
+      <p>This feature is not supported for PHost or FLAK which have much higher number of outcomes.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Ctrl-O</kbd> from <a href="pcc2:bsim">battle simulator</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Simulator Abilities -->
+    <page id="pcc2:simfunctions">
+      <h1>Battle Simulator Ship/Planet Abilities</h1>
+
+      <p>You can define special abilities for each ship or planet.
+        By default, these abilities are taken from the ship list and configuration.
+        You can force a ship to have or not have an ability, independant of what ship list and configuration say.</p>
+
+      <p>Note that not all abilities are supported for all simulator modes.
+        All abilities are supported for ships; a subset is supported for planets.</p>
+
+      <ul>
+        <li><b>Planet Immunity:</b> the ship is not attacked by aggressive planets.
+          Supported for all modes (but works a little different in FLAK mode).</li>
+        <li><b>Full Weaponry:</b> the ship does not lose weapons when damaged.
+          Supported for all modes.</li>
+        <li><b>Commander:</b> the ship boosts other ships' experience level.
+          Supported for PHost4 and FLAK simulations (the others have no experience).</li>
+        <li><b>3&#215; Beam Kill:</b> beams do triple damage against crew.
+          This is a default racial ability of the Privateers.
+          Supported for all modes but FLAK.</li>
+        <li><b>2&#215; Beam/Torp Charge:</b> beams or torpedoes recharge twice as fast.
+          Supported for all modes but FLAK.</li>
+        <li><b>Elusive:</b> Torpedoes have only a 10% chance to hit this ship instead of the default 65%.
+          Supported for Host and NuHost simulation.</li>
+        <li><b>Squadron:</b> The ship actually is a fighter squadron, where each beam represents a fighter.
+          Its crew cannot be killed, and if it is destroyed, one fighter dies (one beam is lost) and the ship continues the fight.
+          Supported for all modes but FLAK.</li>
+        <li><b>Shield Generator:</b> The ship provides additional shields to other ships of the same owner.
+          As long as a Shield Generator is present, ships get +25% shield and 50% Engine/Shield bonus,
+          for up to two Shield Generators per fight.
+          Supported for all modes but FLAK.</li>
+        <li><b>Cloaked Fighter Bays:</b> When cloaked, the ship can provide its fighter bays and fighters in other carriers' fights.
+          Supported for all modes but FLAK.
+          Note that when this ability is used, the "Minimum Fighters Aboard" statistic is no longer useful.</li>
+      </ul>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Y</kbd> from <a href="pcc2:bsim">battle simulator</a>.</di>
+      </dl>
+    </page>
+
+
+    <!-- Fleet Cost Comparison -->
+    <page id="pcc2:fleetcost">
+      <h1>Fleet Cost Comparison</h1>
+      <p>This window displays the costs of each player's simulated fleet.
+        Because not all costs are spent for just this one battle, you can use the options dialog to configure what to include.
+        You need at least one ship in the simulation to access this dialog.
+        The overview always includes the costs for building the actual ships and their weapons.</p>
+      <kl>
+        <ki key="Tab, Shift-Tab">Cycle through players or teams;</ki>
+        <ki key="O"><a href="pcc2:fleetcostopts">Options</a>;</ki>
+        <ki key="E"><a href="pcc2:export">Export list into a file</a>.</ki>
+      </kl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Ctrl-C</kbd> from <a href="pcc2:bsim">battle simulator</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Fleet Cost Comparison Options -->
+    <page id="pcc2:fleetcostopts">
+      <h1>Fleet Cost Comparison Options</h1>
+      <p>This dialog allows you to fine-tune the options for the <a href="pcc2:fleetcost">fleet cost comparison</a>.</p>
+      <kl>
+        <ki key="F">Toggle whether fighters are counted as if built using the <tt>lfm</tt> friendly code (<tt>ShipFighterCost</tt>),
+          on a starbase (<tt>BaseFighterCost</tt>), or not at all;</ki>
+        <ki key="T">Toggle whether torpedo costs are included;</ki>
+        <ki key="E">Toggle whether engine costs are included;
+          Note that engine costs for custom ships are not included because we don't know how many engines these ships have;</ki>
+        <ki key="P">Toggle whether planet defense costs are included;</ki>
+        <ki key="B">Toggle whether costs for building a starbase, its defense,
+          its fighters, and, if <kbd>T</kbd> is enabled and starbases actually use torpedoes in combat, its torpedoes are included;</ki>
+        <ki key="L">Toggle whether starbase tech levels (beams, and torpedoes if appropriate) are included;</ki>
+        <ki key="S">Toggle whether tech levels used for building ships are included.
+          You can include tech levels once per ship (as if each ship was built on a different base specifically equipped to build this ship),
+          or once per player (as if all ships were built on the same base; tech levels are billed to the first ship needing them);</ki>
+        <ki key="Y">Toggle whether costs are grouped by player or by team.</ki>
+      </kl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>O</kbd> from <a href="pcc2:fleetcost">fleet cost comparison</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Simulator Result -->
+    <page id="pcc2:simresult">
+      <h1>Battle Simulator Result</h1>
+
+      <p>When starting the simulation, the simulator will compute one possible outcome and show you the simulation result screen.
+        You can run more simulations from here.</p>
+      <p>The simulator result screen displays simulation results.
+        The "Totals" tab has results grouped by class and probability (e.g. "2 Feds surviving: 10x, 1 Borg surviving: 2x").
+        The "Details" tab has information about each unit.</p>
+
+      <kl>
+        <ki key="Space">Run one simulation;</ki>
+        <ki key="S">Run one series. With <a href="pcc2:simopts">seed control</a> enabled, this will simulate all possible results exactly once. A second series will yield the same result as the first one. Otherwise, just simulates 110 random battles;</ki>
+        <ki key="R">Repeat indefinitely, until canceled with a key;</ki>
+        <ki key="Enter">From totals tab, <a href="pcc2:vcr">watch sample battle</a> that produces this result;</ki>
+        <ki key="E">From details tab, close result screen and place cursor on current ship;</ki>
+        <ki key="ESC">Exit.</ki>
+      </kl>
+
+      <p>Clicking on a number on the "Details" tab will let you <a href="pcc2:vcr">watch a sample battle</a> that yields the minimum or maximum result for that value, respectively.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Enter</kbd> from <a href="pcc2:bsim">battle simulator</a>.</di>
+      </dl>
+    </page>
+
+    <!-- VCR -->
+    <page id="pcc2:vcr">
+      <h1>VCR</h1>
+      <p>The VCR allows you to view this turn's battles or, when invoked from the <a href="pcc2:simresult">battle simulator</a>, simulated fights.</p>
+      <p>Choose a fight using arrows, press <kbd>Enter</kbd> to play it. In addition, the following keys are available:</p>
+      <kl>
+        <ki key="Tab">Display combat diagram. This can give you an overview over big fights. All units come in as color-coded lines at the left; destruction and owner change is displayed with appropriate symbols and color changes.
+        <kl>
+          <ki key="T">Toggle team colors. By default, lines are colored by owner. With this option enabled, they are colored by <a href="pcc2:teams">teams</a>;</ki>
+          <ki key="S">Combat score summary. Shows how much experience and build points each race got this turn, and how many tons they sunk;</ki>
+        </kl></ki>
+        <ki key="S">Combat score summary;</ki>
+        <ki key="L, R"><a href="pcc2:vcrinfo">Display information about one side of the fight</a>;</ki>
+        <ki key="F4">Show location of fight on <a href="pcc2:starchart">starchart</a>, if position is known;</ki>
+        <ki key="Enter">Watch fight. See <a href="pcc2:vcr:playback">Classic Playback</a> and <a href="pcc2:flak">FLAK playback</a>.</ki>
+      </kl>
+
+      <h2>Display Layout</h2>
+
+      <p>The first line shows the number of the battle on the left.
+        On the right, it shows the battle format (e.g. "PHost 4"), the position of the fight if known,
+        and the random-number seed ("#12345").</p>
+
+      <p>For fights with two participants, the dialog shows the details for both.
+        For fights with more participants, depending on available space, shows the names of the participants, a summary of the fleets ("10 Rebel ships"),
+        or a summary of participating players ("10 Rebels, 5 Colonies").
+        In that case, use <kbd>L</kbd> to see details.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>V</kbd> from <a href="pcc2:racescreen">race screen</a>,
+          <kbd>Enter</kbd> from <a href="pcc2:simresult">simulator result</a>.</di>
+      </dl>
+    </page>
+
+    <!-- VCR Playback -->
+    <page id="pcc2:vcr:playback">
+      <h1>VCR Playback</h1>
+      <p>This screen displays a classic, 1:1 fight.
+        On the top, you see the two fighting units.
+        On the bottom, you see each unit's status (shields, damage, weapon status).</p>
+
+      <kl>
+        <ki key="Right">Play&#47;pause;</ki>
+        <ki key="Shift-Right, Shift-Left">Move single frame;</ki>
+        <ki key="Shift-B">Move backward single frame;</ki>
+        <ki key="Shift-F">Move forward single frame;</ki>
+        <ki key="Ctrl-Right, Ctrl-Left">Move 20 frames;</ki>
+        <ki key="Alt-Right, Alt-Left">Go to end&#47;beginning;</ki>
+        <ki key="ESC">Exit.</ki>
+      </kl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Enter</kbd> from <a href="pcc2:vcr">VCR selection</a>.</di>
+      </dl>
+    </page>
+
+
+    <!-- VCR Info -->
+    <page id="pcc2:vcrinfo">
+      <h1>Combat Information</h1>
+      <p>This window displays information about combatants.
+        For classic combat, shows one participant, use <kbd>Tab</kbd> to switch sides.
+        For FLAK combat, shows the fleet structure on the left side, use <kbd>&#x2191;</kbd> and <kbd>&#x2193;</kbd> to browse.</p>
+
+      <p>When looking at a ship, PCC2 compares its arms with the permitted maximum for its type (e.g. "4 beams, hull allows 6").
+        In classic combat, the type is not always exactly known; in this case, PCC2 offers a list of possible types.</p>
+
+      <p>When looking at a planet, PCC2 tries to find out whether it has a starbase, and how many defense posts it has.</p>
+      <kl>
+        <ki key="Tab">(classic) Switch to other side;</ki>
+        <ki key="S">Show ship <a href="pcc2:specsheet">specification sheet</a> for current ship;</ki>
+        <ki key="Ins">Add this unit to the <a href="pcc2:bsim">battle simulation</a>. This uses the unit's state after the fight, and is not possible when the unit was destroyed;</ki>
+        <ki key="Shift-Ins">Add this unit to the battle simulation, using the unit's state before the fight.</ki>
+      </kl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>L</kbd> and <kbd>R</kbd> from <a href="pcc2:vcr">VCR selection</a></di>
+      </dl>
+    </page>
+
+    <!-- FLAK playback -->
+    <page id="pcc2:flak">
+      <h1>FLAK Playback</h1>
+      <p>This is the FLAK player that displays fleet combat.</p>
+      <p>FLAK has two display modes:</p>
+      <ul>
+        <!-- FIXME: missing <li>Isometric 3-D. Shows the battle at a 45 degree angle with no perspective;</li> -->
+        <li>Perspective 3-D. Shows the battle from a freely-moving camera with proper perspective;</li>
+        <li>Flat view. Shows the a flat view onto the battle from the top.
+          Since FLAK is just two-dimensional internally, this is what the combat engine actually does.</li>
+      </ul>
+      <p>Most of the screen is covered by the playback arena.
+        On the right, you see a list of all participating fleets and units.</p>
+      <p>During playback, use the following keys:</p>
+      <kl>
+        <ki key="Right">Start/pause playback;</ki>
+        <ki key="Up, Down">Scroll in ship list</ki>
+        <ki key="Ctrl-&#x2190;">Rewind 20 seconds;</ki>
+        <ki key="Ctrl-&#x2192;">Fast-forward 20 seconds;</ki>
+        <ki key="Alt-&#x2190;">Rewind to beginning;</ki>
+        <ki key="Alt-&#x2192;">Fast-forward to end;</ki>
+        <ki key="Shift-B">Rewind one second;</ki>
+        <ki key="Shift-F">Forward one second;</ki>
+        <ki key="3, Tab">Toggle display mode;</ki>
+        <!-- FIXME: missing <ki key="1, 2">Show status of currently-selected ship on left/right info panel;</ki> -->
+        <ki key="F">(perspective mode) Camera follows current fleet;</ki>
+        <ki key="C">Toggle automatic camera;</ki>
+        <ki key="Shift-Arrow">(perspective mode) Move camera;</ki>
+        <ki key="A">Zoom in;</ki>
+        <ki key="Z, Y">Zoom out.</ki>
+      </kl>
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Enter</kbd> from <a href="pcc2:vcr">VCR selection</a> for FLAK fight.</di>
+      </dl>
+    </page>
+
+    <!-- FCode dialog (all of them) -->
+    <page id="pcc2:fcode">
+      <h1>Friendly Code</h1>
+      <p>Ships and planets have a Friendly Code, which is a three-character password that serves as access control,
+        and can trigger special actions.</p>
+      <p>As a little help, PCC2 knows special friendly codes and offers you them on a list.</p>
+      <kl>
+        <ki key="Tab">Switch between input and list;</ki>
+        <ki key="Alt-R">Pick a random friendly code that has no special meaning.</ki>
+      </kl>
+
+      <p>Note that the list also contains a few codes that are not at all special, but should be used with care.
+        For example, Host lets Lizard ships start with "BBB"; you should change this to avoid your enemies guessing it.
+        The friendly code <tt>???</tt> is used by the <a href="pcc2:bsim">simulator</a> as an exception to the
+        "same fcode, no fight" rule, so you don't have to come up with individual fcodes for completely made-up fights.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>F</kbd> from <a href="pcc2:cscreen">control screens</a>
+          and <a href="pcc2:bsim">battle simulator</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Visual Scan -->
+    <page id="pcc2:listship">
+      <h1>List Ships</h1>
+
+      <p>This window displays information about enemy or own ships.
+        It is used as visual scanner, and to select ships for various operations.</p>
+        <kl>
+          <ki key="Up&#47;Down">Browse through ships;</ki>
+          <ki key="Ctrl-Up&#47;Ctrl-Down">Browse through marked ships;</ki>
+          <ki key=".">Mark&#47;unmark current ship;</ki>
+          <ki key="C"><a href="pcc2:cargo">Cargo transfer</a> for own ships; last known cargo for foreign ships;</ki>
+          <ki key="Ctrl-C">Show cargo summary for all your ships on the list;</ki>
+          <ki key="Enter">Go to this ship in <a href="pcc2:shipscreen">ship screen</a>;</ki>
+          <ki key="R">Allow&#47;forbid&#47;request&#47;drop remote control (PHost feature);</ki>
+          <ki key="S">Toggle specification display (a window similar to regular <a href="pcc2:specsheet">specification display</a> which automatically updates as you browse ships);</ki>
+          <ki key="L">Toggle list view;</ki>
+          <ki key="Shift-M">Show <a href="pcc2:msgin">subspace messages</a> from this ship;</ki>
+          <ki key="Ins">Add this ship to the <a href="pcc2:bsim">battle simulation</a>;</ki>
+          <ki key="Ctrl-Ins">Add all ships to the <a href="pcc2:bsim">battle simulation</a>.</ki>
+        </kl>
+
+        <p>When you have opened the list view using <kbd>L</kbd>,
+          you can use the right mouse button or <kbd>#</kbd> resp. <kbd>\</kbd>
+          to bring up a menu that allows you to sort the list.
+          The sort order will be saved, and also be used for other "ships at one place" lists,
+          including the order for the <kbd>Tab</kbd> key on the <a href="pcc2:shipscreen">Ship Screen</a>.</p>
+
+        <h2>Current vs. Prediction</h2>
+
+        <p>By default, this window displays ships at a particular location;
+          the cargo summary will display current cargo.</p>
+
+        <p>When this window is invoked with <kbd>Ctrl-N</kbd>, it predicts future positions of your ships.
+          From a planet, it will display ships that will be at this planet.
+          From a ship, it will display ships that will be at the same location as that ship next turn.
+          Unlike regular fuel consumption computation, this prediction resolves intercepts.
+          Cargo summary will show predicted cargo.</p>
+
+        <h2>Reference</h2>
+        <dl>
+          <di term="Keys:"> <kbd>L</kbd> from <a href="pcc2:cscreen">control screens</a>
+            and <a href="pcc2:starchart">starchart</a> (current ships),
+            <kbd>Ctrl-N</kbd> from <a href="pcc2:cscreen">control screens</a>
+            and <a href="pcc2:starchart">starchart</a> (predicted positions);</di>
+          <di term="Related command:"><a href="int:name:ui.listships">UI.ListShips</a>,
+            <a href="int:name:ui.listshipprediction">UI.ListShipPrediction</a>.</di>
+        </dl>
+    </page>
+
+    <!-- Specification -->
+    <page id="pcc2:specsheet">
+      <h1>Ship Specification</h1>
+      <p>This window displays information about a ship's hull.
+        It lists resources needed to build the ship, as well as its cargo capacity and special functions.</p>
+      <kl>
+        <ki key="ESC">Close window;</ki>
+        <ki key="W">Show weapon effects against this ship;</ki>
+        <ki key="F1">Browse ship abilities.</ki>
+      </kl>
+
+      <h2>Ship abilities</h2>
+      <p>Ships can have special abilities, such as Cloak or Gravitonic.</p>
+      <p>PCC2 uses the PHost&nbsp;4 ship abilities internally.
+        Even when you're using a game not hosted by PHost&nbsp;4, ships will have <em>Tow</em> when they can tow,
+        or <em>Full Weaponry</em> when they belong to the Feds.</p>
+      <p>Abilities available to all ships are considered <em>racial abilities</em>.
+        Those are not shown on the normal specification sheet, but listed on the ability list you can show with <kbd>F1</kbd>.</p>
+
+      <!-- FIXME: color-coding, config still missing <h3>Ability Icons</h3>
+      <p>On the Specification Sheet and on the <a href="pcc2:buildship">Ship Build Screen</a>,
+        ship abilities are normally shown as a set of icons.
+        The color of the icon shows the status of the ability.</p>
+      <ul class="compact">
+        <li>Colored icon: you have the ability;</li>
+        <li>Red icon: you have the ability, but it is damaged and can currently not be used;</li>
+        <li>Gray icon: you cannot use the ability.
+          A green marker indicates that you will be able to use the ability at a higher experience level.
+          A red marker indicates that only other players can use the ability.</li>
+      </ul>
+      <p>If you prefer the abilities to be shown as text, use the
+        <a href="pcc2:settings">Settings Menu</a>, Preferences > User Interface > Ship ability icons.</p> -->
+
+      <h3>Ability List</h3>
+      <p>Use <kbd>F1</kbd> from the specification sheet to pop up the detailed ability list.
+        This list uses various icons to tell you about an ability's status:</p>
+      <ul class="compact">
+        <li><tt>[U]</tt> is a universal ability, which every player has on every ship;</li>
+        <li><tt>[R]</tt> is a racial ability, which some players have on each of their ships;</li>
+        <li><tt>[G]</tt> is a general class ability, which every ship of this type has for every player;</li>
+        <li><tt>[C]</tt> is a class ability, every ship of this type has for some players;</li>
+        <li><tt>[S]</tt> is a ship ability, which this individual ship has, no matter who owns it.</li>
+      </ul>
+      <p>In addition, a symbol tells you whether you have this ability:</p>
+      <ul class="compact">
+        <li><tt>&#x25B6;</tt> you have it; shown in <font color="red">red</font> if it is damaged</li>
+        <li><tt>+</tt> you need more experience;</li>
+        <li><tt>-</tt> your experience is too high (maybe you now have a better ability);</li>
+        <li>(blank) this ability is only available to other players.</li>
+      </ul>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>S</kbd> from <a href="pcc2:shipscreen">ship screen</a>,
+          <a href="pcc2:listship">ship list</a>, <a href="pcc2:buildship">ship build screen</a>, or
+          <a href="pcc2:vcrinfo">VCR details screen</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Navigation starchart -->
+    <page id="pcc2:navchart">
+      <h1>Navigation Chart</h1>
+      <p>The Navigation Chart shows the surroundings of the current ship.
+        It can be zoomed and moved, and thus be used to set up waypoints farther away than the normal scanner chart allows.</p>
+      <p>If the ship is moving, the map displays a set of warp circles around its position.
+        For a ship that is hyperdriving, circles will be shown at 340&nbsp;ly and 360&nbsp;ly distance.</p>
+      <kl>
+        <ki key="Arrows">Move around in steps of 10. Hold <kbd>Shift</kbd> to go a single light year, <kbd>Ctrl</kbd> to go 100;</ki>
+        <ki key="Alt-R">Move cursor by random amount +&#47;-&nbsp;5 in either direction;</ki>
+        <ki key="+, -">Zoom;</ki>
+        <ki key="Z">Enter zoom level manually;</ki>
+        <ki key="Space">Lock onto planet;</ki>
+        <ki key="Enter">Lock onto ship;</ki>
+        <ki key="Tab">Recenter map at current position;</ki>
+        <ki key="Ins">Add secondary set of warp circles at current position;</ki>
+        <ki key="Backspace">Undo last <kbd>Tab</kbd>;</ki>
+        <ki key="C">(only on capable ships) toggle Chunnel mode. When enabled, only possible Chunnel targets can be selected, and PCC2 will set up a chunnel when you confirm this dialog;</ki>
+        <ki key="L"><a href="pcc2:listship">List ships</a>;</ki>
+        <ki key="digit M, Ctrl-M">Create canned marker. <kbd>Ctrl-M</kbd> creates a default marker, <kbd>1 M</kbd> through <kbd>9 M</kbd> create markers 1-9;</ki>
+        <ki key="F5"><a href="pcc2:envscreen">Planet information</a>;</ki>
+        <ki key="F10">Confirm.</ki>
+      </kl>
+
+      <p>You can use <kbd>Alt</kbd>+letter to toggle starchart options,
+        e.g. <kbd>Alt-M</kbd> to toggle display of minefields.
+        See <a href="pcc2:starchart">Starchart, section "Option Toggles"</a> for details.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>A</kbd> from <a href="pcc2:shipscreen">ship screen</a> or <a href="pcc2:fleetscreen">fleet screen</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Cargo Transfer -->
+    <page id="pcc2:cargo">
+      <h1>Cargo Transfer</h1>
+      <p>After choosing the target (if applicable), the Cargo Transfer window displays the unit you started with on the left, and the target on the right.</p>
+      <kl>
+        <ki key="&#x2191;, &#x2193;">Choose kind of cargo to transfer;</ki>
+        <ki key="&#x2190;, &#x2192;">Move 10 units. With <a href="prefixarg">prefix argument</a>, move that many;</ki>
+        <ki key="Shift-&#x2190;, Shift-&#x2192;">Move 1 unit;</ki>
+        <ki key="Ctrl-&#x2190;, Ctrl-&#x2192;">Move 100 units;</ki>
+        <ki key="Alt-&#x2190;, Alt-&#x2192;">Move as much as possible. With <a href="prefixarg">prefix</a>, move as many to make the left&#47;right unit have exactly that many;</ki>
+        <ki key="U">If one unit is a planet, unload all T&#47;D&#47;M&#47;$&#47;Sup&#47;Colonists to it;</ki>
+        <ki key="S">If one unit is a planet, toggle automatic supply sale. Supplies you move off one unit appear as megacredits on the other;</ki>
+        <ki key="O">Turn on overload mode, see below;</ki>
+        <ki key="Enter">Confirm. Execute the transfer and close the window;</ki>
+        <ki key="ESC">Cancel.</ki>
+      </kl>
+
+      <h2>Special Situations</h2>
+
+      <p>You can <b>transfer cargo</b> to unowned or enemy units, or jettison into space.
+        Unlike transfers to own units, which happen immediately, these orders will be executed during the host run.
+        If you change your mind, you can get your cargo back by using the Cargo Transfer function again, and just loading it back.
+        As an indicator for an active Transfer/Unload/Jettison order, a "&#x2192;" icon will appear next to the "C" button.</p>
+
+      <p>PHost supports a <b>Beam up Multiple</b> mission.
+        With this mission, you can beam up cargo from unowned or friendly planets.
+        Unlike for the normal "Beam up Fuel", "Beam up Tritanium", etc. missions, you can choose the amounts you want to get.
+        PCC2 allows you to set up such a transfer using the regular cargo transfer interface.
+        Although the cargo transfer dialog will show the beamed-up cargo, it will not appear directly.
+        Cargo will be beamed up when host runs.
+        As an indicator for an active Beam Up Multiple order, a "&#x2190;" icon will appear next to the "C" button.</p>
+
+      <h2>Overload Mode</h2>
+
+      <p>Normally, PCC2 will not allow you to load more cargo onto a ship than will fit.
+        You can turn off these checks using Overload Mode.
+        This is useful in some rare situations.
+        For example, you might want to beam up large amounts of cargo and let host decide how much you get.
+        An alternative example would be two fully-loaded ships trying to swap some cargo.</p>
+
+      <p>If you use Overload Mode, you need to manually make sure your ships are not overloaded.
+        If you fail to do so, host will destroy your excess cargo.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>C</kbd> and <kbd>U</kbd> from <a href="pcc2:cscreen">control screens</a> and <a href="pcc2:listship">visual scan</a>;</di>
+        <di term="See also:"> <a href="pcc2:sellsup">Sell Supplies</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Multi-Ship Cargo Transfer -->
+    <page id="pcc2:multicargo">
+      <h1>Multi-Ship Cargo Transfer</h1>
+      <p>This function allows you to transfer cargo between multiple units at once.
+        For example, you can use it to distribute fuel or ammo between your fleet.</p>
+
+        <p>PCC will ask for the cargo type to transfer.
+          It will then display a list of all units that can carry this cargo.</p>
+
+        <p>Cargo is transferred through a <b>hold space</b>, i.e. you can move cargo into the hold space and from there onto other units.
+          In addition, one unit (usually, the planet) can be tagged as extension of the hold space:
+          when you try to load cargo from hold space, but it is empty, it is taken from there;
+          when you close this dialog but still have cargo in hold space, it is moved there.</p>
+
+        <kl>
+          <ki key="&#x2190;, +">Move 10 kt from hold space to this unit. With <a href="prefixarg">prefix argument</a>, move that many. With <kbd>Shift</kbd>, move 1. With <kbd>Ctrl</kbd>, move 100. With <kbd>Alt</kbd>, move everything;</ki>
+          <ki key="&#x2192;, -">Move 10 kt from this unit to hold space. Modifiers like for <kbd>+</kbd> can be used;</ki>
+          <ki key="Space, .">Tag current unit as extension to hold space, or untag it;</ki>
+          <ki key="U">Unload all units (except for tagged unit) to hold space;</ki>
+          <ki key="#">Menu. This menu's items distribute cargo from hold space to all units (except for the tagged unit) according to different rules.
+            You can also call these functions by hitting their letter directly, without going through the menu.
+            Functions are only available if hold space is not empty.
+            <kl>
+              <ki key="E">Distribute cargo evenly. Every unit receives the same amount;</ki>
+              <ki key="F">Distribute free space evenly. Fill up all units until all have the same amount of free space;</ki>
+              <ki key="P">Distribute proportionally. Give each unit cargo proportionally to their capacity;</ki>
+            </kl>
+          Note that neither of these functions will remove cargo from a unit;</ki>
+          <ki key="A, Ins">Create temporary storage. You can use this to temporarily store cargo, which simplifies some maneuvers. The temporary storage must be empty before the cargo transfer can be confirmed. Up to 5 temporary storages can be created.</ki>
+        </kl>
+
+        <h2>Reference</h2>
+        <dl>
+          <di term="Keys:"> <kbd>D</kbd> from <a href="pcc2:shipscreen">ship screen</a>.</di>
+        </dl>
+    </page>
+
+    <!-- Structure building -->
+    <page id="pcc2:buildings">
+      <h1>Buildings</h1>
+      <p>You can build mines, factories, and defense posts on your planets.</p>
+      <p>PCC2 offers three views. On each you can build a different selection of structures, and you see a different amount of useful information:</p>
+      <ul>
+        <li>Planetary Economy: build mines, factories, and defense;</li>
+        <li>Mining Industry: build mines. Shows the predicted minerals mined by your mines;</li>
+        <li>Defense: build planetary and starbase defense. Shows the resulting weapon strength.</li>
+      </ul>
+
+      <h2>Keys</h2>
+      <kl>
+        <ki key="&#x2191;, &#x2193;">Choose type of building;</ki>
+        <ki key="&#x2190;, &#x2192;, Tab">Choose view;</ki>
+        <ki key="+">Build one structure (with prefix: build that many);</ki>
+        <ki key="-">Scrap one structure (with prefix: scrap that many). You can only scrap what you've built this turn;</ki>
+        <ki key="T"><a href="pcc2:taxes">Taxes</a>;</ki>
+        <ki key="S"><a href="pcc2:sellsup">Sell supplies</a>;</ki>
+        <ki key="A"><a href="pcc2:autobuild">Auto build</a>;</ki>
+        <ki key="G">Edit autobuild goals;</ki>
+        <ki key="C">(defense) Show ground combat strength;</ki>
+        <ki key="Enter">Confirm;</ki>
+        <ki key="ESC">Cancel.</ki>
+      </kl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>B</kbd>, <kbd>D</kbd>, <kbd>M</kbd> from <a href="pcc2:planetscreen">planet screen</a>,
+          <kbd>D</kbd> from <a href="pcc2:basescreen">starbase screen</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Taxation -->
+    <page id="pcc2:taxes">
+      <h1>Taxes</h1>
+      <p>You can ask taxes from your natives and colonists.
+        PCC2 shows the effect of taxation on your populations regarding income, happiness, growth, and experience.</p>
+      <kl>
+        <ki key="Tab">Switch between colonists and natives;</ki>
+        <ki key="+, &#x2190;">Increase taxes (with prefix: by that amount);</ki>
+        <ki key="-, &#x2190;">Decrease taxes (with prefix: by that amount);</ki>
+        <ki key="Shift-&#x2192;">Pick lowest tax rate that gives a higher income (useful on small outposts);</ki>
+        <ki key="Shift-&#x2190;">Pick highest tax rate that gives a lower income;</ki>
+        <ki key="Ctrl-&#x2192;">Set tax rate 100%;</ki>
+        <ki key="Ctrl-&#x2190;">Set tax rate 0%;</ki>
+        <ki key="Space">Auto tax colonists and natives;</ki>
+        <ki key="Shift-Space">Auto tax only current area (colonists or natives);</ki>
+        <ki key="U, Backspace">Undo current area (revert to value when dialog was opened);</ki>
+        <ki key="R">Toggle whether the population prediction displays absolute values (default), absolute or relative (percentage) per-turn change.
+          With <kbd>Shift</kbd>, toggles between absolute and relative change only;</ki>
+        <ki key="W">Change number of hissers or terraformers for prediction ("how would growth change if I had a heater here?");</ki>
+        <ki key="=, %">(with prefix) Set tax rate to specified value.</ki>
+      </kl>
+
+      <p>The <em>Auto Tax</em> function implements "safe-taxing": it will aim at making the happiness 100% within 5..10 turns.
+        If several tax rates yield the same income, it will use the lowest of them for greater population growth.
+        This taxation algorithm is safe because it will not cause riots, not even if you lose a turn.
+        However, other taxation algorithms are known which can yield higher income in many situations (e.g. "growth-taxing").</p>
+
+      <h2>Prediction Effects</h2>
+
+      <p>If you have ships, or ships performing the Hiss mission, their effect will be included in happiness and growth predictions.
+        Using <kbd>W</kbd>, you can change the number of ships for the computation.
+        Select a field using <kbd>&#x2191;</kbd>/<kbd>&#x2193;</kbd>, and use <kbd>&#x2190;</kbd>/<kbd>&#x2192;</kbd>, or type a number.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>T</kbd> from <a href="pcc2:planetscreen">planet screen</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Sell supplies -->
+    <page id="pcc2:sellsup">
+      <h1>Sell Supplies</h1>
+
+      <p>You can sell supplies to get money.</p>
+
+      <p>With PCC, this is rarely needed because PCC automatically sells supplies when needed for buying something,
+        and you can sell supplies during <a href="pcc2:cargotransfer">cargo transfer</a>,
+        but sometimes can still be useful.</p>
+
+      <p>The "Sell Supplies" dialog will ask you how many supplies you want to sell.
+        It will sell the supplies when you confirm with <kbd>Enter</kbd>.
+        You can also enter the number of supplies you want to keep and confirm with <kbd>A</kbd>.</p>
+
+      <p>The "Undo Supply Sale" dialog will ask you how many supplies you want to buy.
+        You can only buy back supplies that you sold this turn, when you have not yet used the money.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>S</kbd> (sell) and <kbd>Ctrl-S</kbd> (undo) from <a href="pcc2:planetscreen">planet screen</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Auto Build Goals -->
+    <page id="pcc2:autobuild">
+      <h1>Auto Build</h1>
+
+      <p>PCC can automatically build structures for you.
+        You can define goals (number fo structures) and speeds for each planet.</p>
+
+      <p>When ordered to perform automatic building, PCC2 will sort those values by speed, highest first.
+        It will then try to build as many structures as the speed says, stopping only when the goal has been reached or rules don't allow building more.
+        It will then proceed with the second structure, etc.
+        If all structures have been processed, the cycle starts again, until nothing more can be built.
+        As a special exception, PCC2 will make sure there's at least one factory, even if you ordered it to build mines first.</p>
+
+      <p>By default, goals are 1000 (meaning "infinite"), and speeds are 5 for mines, 10 for factories, and 3 for defense posts.
+        This means that auto build will try to build 10 factories, then 5 mines, then 3 defense posts.
+        If you have lots of money, this means that PCC2 will build twice as many factories as mines.
+        If you have little money, this means PCC2 will first build up factories before starting with mines.</p>
+
+      <p>To disable auto build for one structure, set its goals and&#47;or speeds to zero.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>G</kbd> and <kbd>A</kbd> from <a href="pcc2:buildings">build screen</a>,
+          and as options on <a href="pcc2:globact">global actions</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Build ships -->
+    <page id="pcc2:buildship">
+      <h1>Building Ships</h1>
+
+      <p>You can build ships on your starbases.
+        You set up the ship design using the ship build dialog.
+        The ship will be built during the next host run and available next turn
+        (or later, when the ship limit is reached and the build queue is active).</p>
+
+      <p>The ship build dialog is also used for the related functions,</p>
+      <ul>
+        <li>Ship Cost Calculator to compute costs for any fictional ship;</li>
+        <li>Editing "EnqueueShip" commands for auto tasks.</li>
+      </ul>
+
+      <p>The dialog has four tabs.
+        Choose the hull type on the first tab, further components on the other three tabs.
+        You can choose components you don't yet have the right tech for, PCC2 will then include the tech level
+        cost in the bill displayed below, and automatically upgrade tech as appropriate.
+        For beams and torpedoes, you can choose how many components to put into your ship using <kbd>+</kbd> and <kbd>-</kbd>.</p>
+
+      <p>Available keys vary depending on the exact use of the dialog.</p>
+      <kl>
+        <ki key="Enter">Confirm build; modifies the build order to build this ship. If you do not have enough resources to build this ship, offers to put the build order onto the <a href="pcc2:basetaskscreen">starbase auto task</a>;</ki>
+        <ki key="ESC">Return to previous screen, do not change the build order;</ki>
+        <ki key="C">Cancel current build order;</ki>
+        <ki key="U">Toggle whether parts from starbase storage will be used;</ki>
+        <ki key="I">Toggle whether tech upgrades are included in the cost computation;</ki>
+        <ki key="D">Display detailed bill listing all components, their cost, and the remaining/missing resources on the planet;</ki>
+        <ki key="S">Show <a href="pcc2:specsheet">hull specification sheet</a>;</ki>
+        <ki key="Space">Build or scrap individual components (for Super Refit).</ki>
+      </kl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>B</kbd> or <kbd>S</kbd> from <a href="pcc2:buildings">build screen</a>,
+          <kbd>E</kbd> from <a href="pcc2:shiptaskscreen">ship auto task screen</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Build Queue Manager -->
+    <page id="pcc2:queuemanager">
+      <h1>Manage Build Queue</h1>
+      <p>This window displays all your current <a href="pcc2:buildship">ship build orders</a> and allows you to assign build priorities ("PBx" friendly codes).</p>
+      <p>For each build order, it displays:</p>
+      <ul>
+        <li>Type of ship being built, and name of the starbase building the ship;</li>
+        <li>Friendly code. Highlighted in red if there are multiple orders with the same PBx friendly code;</li>
+        <li>Position of the build order in the build queue, if known (1=first);</li>
+        <li>Number of build points consumed by this build order, if known/applicable.
+          For example, "3 / 21" means you have 21 build points and this ship consumes 3.
+          The next line might be "5 / 18", saying that you have 18 points remaining, consuming 5.
+          The number consumed is shown in red if you do not have enough points.</li>
+      </ul>
+      <p>The list is shown in approximate order the ships will be built, first ships first (highest priority, PB1).
+        Scroll around using the arrows, or use the following keys:</p>
+      <kl>
+        <ki key="+, Shift-&#x2191;">Increase this build order's priority (build earlier);</ki>
+        <ki key="-, Shift-&#x2193;">Decrease this build order's priority (build later);</ki>
+        <ki key="1..9">Set friendly code of starbase to PBx;</ki>
+        <ki key="0">(zero) Remove PBx friendly code;</ki>
+        <ki key="S">Show summary of build orders by type and kind (see below);</ki>
+        <ki key="G">Go to <a href="pcc2:basescreen">starbase screen</a> for current starbase
+          (will ask whether to apply or discard changes);</ki>
+        <ki key="Enter">Confirm and apply all changes;</ki>
+        <ki key="ESC">Cancel and discard all changes.</ki>
+      </kl>
+
+      <h2>Notes</h2>
+
+      <p>Build queue rules differ between host versions.
+        The order shown is not necessarily exact.
+        In particular, new build orders will be collected starting from an unknown/random starbase,
+        so if you give two new orders, we cannot predict which will be built first.</p>
+      <p>This dialog shows the PBx friendly codes first (PB1, then PB2, etc.),
+        reflecting that those build orders will be processed first if you are awarded a priority build.
+        Whether you are awarded a priority build or perform a regular build instead is decided by host
+        (e.g. too few build points, fewer than 450 ships in game in HOST).</p>
+      <p>PCC2 assumes you can have one order in the PB1 slot, one in the PB2 slot, and so on,
+        and highlights duplicate codes as an error.
+        This matches the PHost rule.
+        In HOST, you can have multiple builds with the same code, but rules regarding this are complex
+        and vary between versions, so it's better to stick to the simple rule.</p>
+      <p>For PHost, this dialog also shows clone orders.
+        In HOST, cloning uses entirely different rules than regular builds and are not shown here.</p>
+
+      <h2>Planned Builds</h2>
+      <p>On the <a href="pcc2:buildship">ship build screen</a>, you can try to build a ship even if you do not have sufficient resources.
+        In that case, PCC2 will create an auto-task containing an <tt>EnqueueShip</tt> command.</p>
+        <p>Such tasks will be shown as "Plan &lt;ship&gt;" on this list, with a Clock icon, and cannot be prioritized.</p>
+
+      <h2>Summary</h2>
+      <p>The <kbd>S</kbd> key ("Summary...") brings up a dialog showing a summary of type and kind of ship build orders:</p>
+      <ul>
+        <li>How many ships of type X are you building?</li>
+        <li>How many ships are being built, cloned, or planned?</li>
+      </ul>
+      <p>This dialog does not allow any manipulation of the build orders.
+        However, you can use the <kbd>M</kbd> ("Mark...") button to mark or unmark the respective starbases,
+        to process them further later on.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Q</kbd> from <a href="pcc2:basescreen">starbase screen</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Drawing in the starchart -->
+    <page id="pcc2:draw">
+      <h1>Drawing</h1>
+      <p>You can draw four kinds of items into the starchart:</p>
+      <ul>
+        <li>Polygons, sequences of lines;</li>
+        <li>Rectangles;</li>
+        <li>Circles;</li>
+        <li>Markers, little symbols.</li>
+      </ul>
+      <p>If you want to draw a marker, PCC2 will prompt you for shape and color, and draw that marker
+        into the starchart.
+        For the other types, you'll be dropped back in the starchart, and a
+        new shape starting here will be begun.
+        Complete the shape and finish it with <kbd>ESC</kbd>.</p>
+      <p>Regular starchart movement keys are accepted.</p>
+      <kl>
+        <ki key="+, -">(circle) Change radius in steps of 10. With <a href="prefixarg">prefix</a>, that many. With <kbd>Shift</kbd>, in steps of 1;</ki>
+        <ki key="Y">(circle) Make radius 350 ly;</ki>
+        <ki key="=">(circle) With <a href="prefixarg">prefix</a>: make it that large;</ki>
+        <ki key="W">(circle) With <a href="prefixarg">prefix</a>: make it X&#xb2; ly large (distance covered with warp factor);</ki>
+        <ki key="G">(circle) With <a href="prefixarg">prefix</a>: make it 2&#xd7;X&#xb2; ly large (distance covered with gravitonic engine);</ki>
+        <ki key="C">Change color;</ki>
+        <ki key="T">Change <a href="pcc2:drawtag">tag</a>;</ki>
+        <ki key="Alt">(circle) Hold <kbd>Alt</kbd> while moving the mouse to set the circle radius;</ki>
+        <ki key="+">(line) Finish line and start next one;</ki>
+        <ki key="Backspace">Go back to starting point;</ki>
+        <ki key="X">(line, rectangle) Swap start and end point;</ki>
+        <ki key="Del">Cancel, delete the drawing;</ki>
+        <ki key="ESC">Finish.</ki>
+      </kl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>P</kbd> from <a href="pcc2:starchart">starchart</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Drawing tags -->
+    <page id="pcc2:drawtag">
+      <h1>Drawing Tags</h1>
+      <p>Each <a href="pcc2:draw">drawing</a> can have a tag.
+        You can use tags to group drawings thematically,
+        e.g. different tags for borders, freighter routes, and enemy sightings.
+        By default, all drawings are displayed, but you can filter display to show just one tag.</p>
+      <p>A tag can be a number or string (technically: an <a href="int:name:atom">atom</a>).</p>
+
+      <h2>Setting Drawing Tags</h2>
+      <p>You can choose the tag for a new drawing using <kbd>T</kbd> on the <a href="pcc2:draw">Drawing</a> dialog.</p>
+      <p>You can change a drawing's tag using <kbd>T</kbd> on the <a href="pcc2:starchart">starchart</a>.</p>
+      <p>Both dialogs will let you enter a new tag, or choose an existing one from a list.
+        When changing an existing line's tag, you can use <kbd>Alt-A</kbd>
+        to change the tag of all adjacent lines as well.</p>
+
+      <h2>Filtering Drawings</h2>
+      <p>You can filter tags using <kbd>Alt-F</kbd> on the starchart.
+        The dialog will let you select an existing tag and then display just that.
+        Press <kbd>Alt-F</kbd> again to turn off the filter.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>T</kbd> from <a href="pcc2:starchart">starchart</a>
+          and <a href="pcc2:draw">Drawing</a> dialog; <kbd>Alt-F</kbd> from <a href="pcc2:starchart">starchart</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Starchart distance mode -->
+    <page id="pcc2:distance">
+      <h1>Distance Mode</h1>
+      <p>Distance mode allows you to measure distances on the starchart.
+        It behaves a little different when you invoke it from a ship you play, or from another context.
+        When you invoke it from a ship, PCC2 automatically computes that ship's fuel consumption
+        (as if you had typed <kbd>F</kbd>), and starts measuring at that ship's waypoint, not its position.
+        Also, <kbd>ESC</kbd> will return to the ship instead of leaving you where you are.</p>
+      <p>Regular starchart movement keys are accepted.</p>
+      <kl>
+        <ki key="X">Swap start and end point;</ki>
+        <ki key="F">When looking at a ship, compute much fuel this ship would need to cover the requested distance.
+          The ship doesn't have to currently be at the start or end point;</ki>
+        <ki key="W">When a ship has been selected using <kbd>F</kbd>, and that ship is at the origin
+          of the measurement, this sets its waypoint to the current position;</ki>
+        <ki key="Backspace">Go back to starting point and exit distance meter;</ki>
+        <ki key="ESC, D">Exit distance mode.</ki>
+      </kl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>D</kbd> from <a href="pcc2:starchart">starchart</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Global Actions -->
+    <page id="pcc2:globact">
+      <h1>Global Actions</h1>
+
+      <p>Global actions allow you to perform an action on many objects (ships, planets) at once.</p>
+      <p>On the left side, you can choose an action to perform.
+        Actions are grouped in a tree, use <kbd>Space</kbd> or click the "+" to unfold a tree node.</p>
+      <kl>
+        <ki key="Enter">Execute selected action. This will normally display a dialog asking you for parameters or confirmation;</ki>
+        <ki key="N">Toggle exclude numerical fcodes option. By default, this is enabled, so units with numerical friendly codes are excluded to leave your battle setups alone;</ki>
+        <ki key="S">Toggle exclude special fcodes option. By default, this is enabled, so units with special friendly codes are excluded to not disturb your special missions;</ki>
+        <ki key="M">Toggle marked objects only option. When enabled, only marked objects will be processed;</ki>
+        <ki key="1,2">Toggle ships/planets. By default, this function operates on all units, but you can apply a global action to ships or planets only;</ki>
+        <ki key="L">Toggle lock override. By default, this function tries to avoid, for example, changing waypoints of a ship that operates on an auto-waypoint, but you can force it to process those, too (although this may confuse the Auto Task);</ki>
+        <ki key="F7">Search. This produces a new search result for <kbd>R</kbd> to work on;</ki>
+        <ki key="R">Toggle search result option. When enabled, this function operates on the last search result. When disabled, Global Actions operate on all units;</ki>
+        <ki key="ESC">Exit.</ki>
+      </kl>
+
+      <h2>Description of the Actions</h2>
+
+      <dl>
+        <di term="Friendly Codes">This item offers the ability to randomize affected friendly codes, or to <a href="pcc2:fcode">set to a particular value</a>;</di>
+        <di term="Missions">This item allows you to change starbase missions, starship missions, and starship primary enemies.
+          Note that not all starship missions are possible here: those that need to know the "current ship" cannot be set globally;</di>
+        <di term="Building">This item allows you to set <a href="pcc2:autobuild">auto-build goals</a> on all planets, or perform auto-build. Note that goals can even be set on planets you don't own so you can pre-initialize them before actually colonizing them;</di>
+        <di term="Taxes">This item has three "Optimize" choices, which will set optimum taxes (safetax) for Colonists, Natives, or both, respectively;</di>
+        <di term="Export"><a href="pcc2:export">Export data</a> into various data formats. Note that this can only export planets or ships, not both at the same time;</di>
+        <di term="Script Command">Allows you to enter a single-line script command which will be executed for each object. This is similar to using a <tt>ForEach</tt> command (with an <tt>If</tt> for the filtering) on the <a href="pcc2:console">console</a>. It differs in that this creates a process for each unit.</di>
+      </dl>
+
+      <p>In PCC2ng, plugins can provide additional global actions.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>G</kbd> from <a href="pcc2:racescreen">race screen</a> or <a href="pcc2:search">search</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Export -->
+    <page id="pcc2:export">
+      <h1>Export</h1>
+
+      <p>This dialog allows you to export data into various formats, both human-readable and machine-readable.
+        The objects to export are selected in a previous step, usually, on the <a href="pcc2:globact">Global Action</a> dialog.
+        Use this dialog to set the output format.</p>
+      <kl>
+        <ki key="Ins">Add a field;</ki>
+        <ki key="Del">Remove a field;</ki>
+        <ki key="Space">Edit current field;</ki>
+        <ki key="Ctrl-&#x2191;/&#x2193;">Move a field up or down;</ki>
+        <ki key="&#x2190;/&#x2192;, +/-">Change field width.
+          The field width is used for text output formats.
+          By default, PCC2 chooses a width, but you can override it by specifying one.
+          These keys change the width by 10 or the <a href="prefixarg">prefix argument</a>,
+          hold <kbd>Shift</kbd> to change by 1, hold <kbd>Ctrl</kbd> to change by 100.
+          Positive values (shown as "&#x2192;NN") align the value to the right, which is typically used for numbers;
+          negative values (shown as "NN&#x2190;") align the value to the left, which is typically used for text;</ki>
+        <ki key="*">Toggle field alignment (left/right);</ki>
+        <ki key="F">Change output file type;</ki>
+        <ki key="C">Change output file character set;</ki>
+        <ki key="Ctrl+S">Save settings into a file;</ki>
+        <ki key="Ctrl+R">Read settings from a file;</ki>
+        <ki key="Enter">Ask for output file name and do the export.</ki>
+      </kl>
+
+      <p>This feature is also available in the standalone <tt>c2export</tt> program.</p>
+
+      <h2>Output File Formats</h2>
+
+      <dl>
+        <di term="Text file"> creates a plain text file;</di>
+        <di term="Text table"> creates an ASCII-art table;</di>
+        <di term="Comma-separated values"> and its siblings create a file that can be imported into a spreadsheet program. Field widths are ignored in this format;</di>
+        <di term="JSON"> is the ubiquitous JavaScript-based data interchange format. Field widths are ignored in this format;</di>
+        <di term="HTML table"> produces a HTML table that can be viewed with a browser or imported into a spreadsheet program;</di>
+        <di term="dBASE file"> produces a binary database file format. This format can be imported by a number of spreadsheet or database programs.</di>
+      </dl>
+
+      <h2>Format of a Settings File</h2>
+
+      <p>Settings are stored in text files.
+        By convention, these files have the extension ".ccx".
+        Settings files consist of lines of the form "name=value", much like <tt>pconfig.src</tt>.
+        Empty lines and lines starting with "#" are ignored.</p>
+      <ul>
+        <li><b>Fields=NAME@WIDTH</b>: add a field. This line can occur multiple times to add multiple fields.
+          The "@WIDTH" part is optional.
+          You can also add multiple fields in one assignment by separating them with commas, as in "Fields=Name,Id";</li>
+        <li><b>Charset=NAME</b>: select character set (optional);</li>
+        <li><b>Format=FORMAT</b>: select ouput file type (optional);</li>
+      </ul>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> this function is accessible via <a href="pcc2:globact">global actions</a> to export ships/planets.
+          It is also available using <kbd>E</kbd> on the
+          <a href="pcc2:listship">List Ship</a> cargo summary,
+          <a href="pcc2:fleetcost">Fleet Cost comparison</a>,
+          and <a href="pcc2:buildship">Ship Building</a> detailed bill.</di>
+      </dl>
+    </page>
+
+    <!-- Process Manager -->
+    <page id="pcc2:processmgr">
+      <h1>Process Manager</h1>
+      <p>The Process Manager allows you to manage active background scripts such as Auto Tasks.
+        When you open this window, you will see all scripts in "Suspended" state, that is, they are not currently running but waiting for something to happen (the next turn, usually).</p>
+      <kl>
+        <ki key="T">Mark this script for termination. With <kbd>Ctrl</kbd>, mark all scripts for termination;</ki>
+        <ki key="R">Mark this script for running. With <kbd>Ctrl</kbd>, mark all scripts for running;</ki>
+        <ki key="S">Mark this script to suspend. Use this to undo an accidental <kbd>T</kbd> or <kbd>R</kbd>. With <kbd>Ctrl</kbd>, mark all scripts to suspend;</ki>
+        <ki key="X">Execute all terminate/run requests;</ki>
+        <ki key="P">Change process priority. Use this to control the order in which scripts run. Lower numerical values means the script runs earlier;</ki>
+        <ki key="G">Go to the unit from which this script was started;</ki>
+        <ki key="N">If the process has a <a href="pcc2:notify">notification</a>, show it;</ki>
+        <ki key="L">If this process holds locks, list them. With <kbd>Ctrl</kbd>, list all locks in the system;</ki>
+        <ki key="ESC">Close this window. This will also execute all terminate/run requests.</ki>
+      </kl>
+
+      <h2>Columns</h2>
+
+      <dl>
+        <di term="Name"> Name of the script;</di>
+        <di term="Msg"> Indicates whether the script has a notification;</di>
+        <di term="Where"> Indicates the object this script is running on (s111, p111, b111 for ship, planet, base, respectively);</di>
+        <di term="Pri"> Priority. Lower numeric values run first;</di>
+        <di term="Status"> Target status.
+        <dl>
+          <di term="Suspended"> Script is waiting and will run automatically next turn;</di>
+          <di term="Runnable"> Script was selected to run;</di>
+          <di term="Terminated"> Script was selected to be terminated;</di>
+          <di term="Frozen"> Auto task is being edited on the auto-task screen and cannot be manipulated here;</di>
+          <di term="Waiting"> Script is waiting for user interaction and cannot be manipulated here.
+          Because PCC2ng is controlled by scripts, you will see the process that opened the Process Manager in this status.</di>
+        </dl></di>
+      </dl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Alt-Q</kbd> almost everywhere.</di>
+      </dl>
+    </page>
+
+    <!-- Help -->
+    <page id="help">
+      <h1>Help</h1>
+      <kl>
+        <ki key="&#x2191;, &#x2193;">Scroll;</ki>
+        <ki key="PgUp, PgDn">Scroll;</ki>
+        <ki key="Tab">Cycle through hyperlinks. With <kbd>Shift</kbd>, cycle backwards;</ki>
+        <ki key="Enter">Follow link;</ki>
+        <ki key="B, Backspace">Back to previous position (undo follow link);</ki>
+        <ki key="G">Go to page. Pages are identified by a name in PCC2 (not a number like in PCC 1.x);</ki>
+        <ki key="T">Go to <a href="toc">Table of Content</a>;</ki>
+        <ki key="ESC">Exit.</ki>
+      </kl>
+
+      <p>PCC2 comes with pre-installed help files regarding usage of PCC2 and the scripting language.
+        <a href="pcc2:plugins">Plugins</a> can provide additional help to extend or replace the help texts.
+        If the help text you're reading is not the one provided by PCC2, or it is built from multiple pages,
+        you will see the source of each text in a small, right-aligned note below the text.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Alt-H</kbd> or <kbd>H</kbd> almost everywhere.</di>
+      </dl>
+    </page>
+
+    <!-- Prefix arg -->
+    <page id="prefixarg">
+      <h1>Prefix Argument</h1>
+      <p>At some places, PCC2 accepts a <em>prefix argument</em> which modifies the following keystroke.
+        Normally, this is used to set the amount you wish to build, move, etc.</p>
+      <p>To use a prefix argument, just start by typing a number.
+        A yellow popup will appear.
+        Keep typing, and confirm by pressing the key whose function you want to perform.
+        For example, to build 15 factories on the <a href="pcc2:buildings">Buildings</a> screen,
+        you'd type <kbd>1</kbd><kbd>5</kbd><kbd>+</kbd>.</p>
+      <kl>
+        <ki key="Backspace">Delete last digit;</ki>
+        <ki key="*">Multiply. Enter <tt>3*3</tt> for a prefix argument of 9;</ki>
+        <ki key="&#47;">Divide. Enter <tt>20&#47;4</tt> for a prefix argument of 5;</ki>
+        <ki key="ESC">Cancel prefix argument.</ki>
+      </kl>
+      <p>Note that there is no addition or subtraction operator for the prefix argument.
+        Instead, simply use the respective function multiple times.
+        To build 10+15 factories, type <kbd>1</kbd><kbd>0</kbd><kbd>+</kbd><kbd>1</kbd><kbd>5</kbd><kbd>+</kbd>.</p>
+    </page>
+  </page>
+
+
+  <!-- Configuration -->
+
+  <page id="group:config">
+    <h1>Configuration</h1>
+
+    <!-- Intro -->
+    <page id="config:intro">
+      <h1>Configuration Introduction</h1>
+      <p>PCC2 has multiple mechanisms to configure it according to your needs.
+        Most of these mechanisms are available on the regular user interface.</p>
+
+      <h2>Where are the configuration files?</h2>
+
+      <p>In Windows, PCC2 creates a directory <tt>PCC2</tt> in your profile directory
+        (<tt>C:\Documents and Settings\User\Application Data</tt> or <tt>C:\Users\User\AppData\Roaming</tt>).</p>
+
+      <p>In Unix, PCC2 creates a directory <tt>.pcc2</tt> in your home directory.</p>
+
+      <p>All configuration files will be created in this directory.</p>
+
+      <h2>What configuration files are there?</h2>
+      <ul>
+        <li><b><a href="config:pcc2ini">pcc2.ini</a>:</b> the main configuration file.
+          This file has some special properties described on its <a href="config:pcc2ini">help page</a>;</li>
+        <li><b><a href="config:exprini">expr.ini</a>:</b> user-defined search/label expressions;</li>
+        <li><b>lru.ini:</b> last search/label expressions.
+          This file is automatically updated by PCC2 and has the same format as expr.ini;</li>
+        <li><b>plugins/:</b> this folder contains <a href="pcc2:plugins">plugins</a>.</li>
+      </ul>
+
+      <h2>Legacy configuration</h2>
+      <ul>
+        <li><b><a href="config:ccres">cc-res.cfg</a>:</b> this file is located in the resource directory of your PCC2 directory
+          and can be used to configure resources (images).
+          This is used by the installer.
+          Normally, you should install an artwork plugin instead;</li>
+        <li>PCC2 comes with a standard ship list which is stored in <tt>C:\Programs\PCC2\share\specs</tt> or <tt>/opt/c2ng/share/specs</tt>.
+          In addition to standard files like <tt>hullspec.dat</tt>, this directory also contains a few PCC-specific files ending in <tt>.cc</tt>.
+          These can be overridden on a per-game basis by placing an identically-named file in your game directory,
+          in the same way non-standard ship lists can be used.
+          It is not recommended to ever modify the files in PCC2's ship list directory.<br/>
+          In addition, you can create a file ending with <tt>.usr</tt> in your game directory.
+          That file will behave as if it were appended to the respective <tt>.cc</tt> file.</li>
+      </ul>
+    </page>
+
+    <!-- pcc2.ini -->
+    <page id="config:pcc2ini">
+      <h1>pcc2.ini</h1>
+      <p>This is the main configuration file.</p>
+      <p><tt>pcc2.ini</tt> will be created in your profile directory.
+        Previous versions of PCC2 placed this file directly in your home directory.
+        If it is already there, it will stay there.
+        However, new files will be created in the configuration directory.</p>
+
+      <p>In addition, PCC2 supports per-game configuration.
+        A <tt>pcc2.ini</tt> file can also exist in a game directory;
+        settings from that file override those in the main configuration file.</p>
+
+      <p>Dialogs like the <a href="pcc2:settings">settings dialog</a> will offer you choice
+        whether a setting is stored in the main ("User") or game configuration file.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="See also:"> <a href="config:intro">Configuration Introduction</a>, <a href="pcc2:settings">settings dialog"</a>,
+          <a href="pcc2:chartconfig">starchart configuration dialog</a>.</di>
+      </dl>
+    </page>
+
+    <!-- expr.ini -->
+    <page id="config:exprini">
+      <h1>expr.ini</h1>
+      <p>This file allows you to configure expressions for the <a href="pcc2:search">search function</a> and <a href="pcc2:labels">unit labels</a>.
+        Those expressions will then be available for easy selection using a drop-down menu.</p>
+
+      <p>PCC2 comes with predefined expressions in a file <tt>expr.cc</tt> that is located in PCC2's main specification directory.
+        It is not recommended to edit <tt>expr.cc</tt>; instead, create <tt>expr.ini</tt>. Both files have the same syntax.</p>
+
+      <p>A new section starts with a section name in brackets:</p>
+      <ul class="compact">
+        <li><tt>[Find]</tt>: search expressions;</li>
+        <li><tt>[ShipLabels]</tt>: ship labels;</li>
+        <li><tt>[PlanetLabels]</tt>: planet labels.</li>
+      </ul>
+
+      <p>Within each section, each expression is defined with a line like this:</p>
+      <pre>Name of Expression   [p] Expression+here</pre>
+
+      <ul class="compact">
+        <li>Name that is shown in drop-down lists;</li>
+        <li>Two spaces as separator;</li>
+        <li>For search expressions, the object type in parentheses: [p]=planets, [s]=ships, [b]=bases.
+          Combinations like [sp]=ships and planets are allowed;</li>
+        <li>Finally, the actual <a href="int:expr">expression</a>.</li>
+      </ul>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="See also:"> <a href="config:intro">Configuration Introduction</a>.</di>
+      </dl>
+    </page>
+
+    <!-- cc-res.cfg -->
+    <page id="config:ccres">
+      <h1>cc-res.cfg</h1>
+      <p>This file defines additional resource files to load.
+        It is located in the resource directory of your PCC2 directory
+        (<tt>C:\Programs\PCC2\share\resource</tt> in Windows, <tt>/opt/c2ng/share/resource</tt> in Unix).
+        Typically, it does not exist and you must create it as a text file.
+        This file can be used to configure resources (images).</p>
+
+      <p>Each line contains one link to a resource package.
+        Empty lines and lines starting with ";" are ignored.</p>
+
+      <ul>
+        <li><tt>res:<b>file.res</b></tt><br/><b>file.res</b> is the name of a PCC 1.x resource file which is used to provide ship, base, planet, and fighter images;</li>
+        <li><tt>wp:<b>dir</b></tt><br/><b>dir</b> points at a Winplan "bmp" directory which provides ship images;</li>
+        <li><tt>wpvcr:<b>file.dll</b></tt><br/><b>file.dll</b> is the name of a Winplan "wpvcr.dll" file which provides ship images for the VCR;</li>
+        <li><tt>dir:<b>dir</b></tt><br/><b>dir</b> points at a PCC2 resource directory.</li>
+      </ul>
+
+      <p>A line that does not match any of these formats is treated as the name of a PCC 1.x resource file (as in PCC 1.x).</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="See also:"> <a href="config:intro">Configuration Introduction</a>.</di>
+      </dl>
+    </page>
+  </page>
+</help>

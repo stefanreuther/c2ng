@@ -8,6 +8,7 @@
 #include "afl/data/stringvalue.hpp"
 #include "afl/string/format.hpp"
 #include "client/dialogs/helpdialog.hpp"
+#include "client/dialogs/searchdialog.hpp"
 #include "client/downlink.hpp"
 #include "client/si/control.hpp"
 #include "client/si/userside.hpp"
@@ -31,13 +32,20 @@
 #include "util/unicodechars.hpp"
 
 using game::proxy::SelectionProxy;
+using game::SearchQuery;
 
 namespace {
+    enum {
+        StopNormal,
+        StopSearchMarked
+    };
+
     class SelectionList : public ui::widgets::AbstractListbox {
      public:
         SelectionList(ui::Root& root, afl::string::Translator& tx);
 
         void setContent(const SelectionProxy::Info& content);
+        bool hasObjects(size_t layer) const;
 
         // Widget:
         virtual void handlePositionChange(gfx::Rectangle& oldPosition);
@@ -81,7 +89,7 @@ namespace {
         virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text);
         virtual game::interface::ContextProvider* createContextProvider();
 
-        void run();
+        int run();
         bool handleKey(util::Key_t key, int prefix);
 
         client::si::OutputState& outputState();
@@ -126,6 +134,14 @@ SelectionList::setContent(const SelectionProxy::Info& content)
         setCurrentItem(m_info.currentLayer);
     }
     requestRedraw();
+}
+
+bool
+SelectionList::hasObjects(size_t layer) const
+{
+    return (layer < m_info.layers.size())
+        && (m_info.layers[layer].numPlanets > 0
+            || m_info.layers[layer].numShips > 0);
 }
 
 // Widget:
@@ -310,7 +326,7 @@ SelectionManager::createContextProvider()
     return 0;
 }
 
-void
+int
 SelectionManager::run()
 {
     afl::base::Deleter del;
@@ -361,7 +377,7 @@ SelectionManager::run()
     m_list.sig_itemDoubleClick.add(this, &SelectionManager::onOK);
     m_root.centerWidget(win);
     m_root.add(win);
-    m_loop.run();
+    return m_loop.run();
 }
 
 bool
@@ -370,7 +386,7 @@ SelectionManager::handleKey(util::Key_t key, int /*prefix*/)
     // ex WSelectionManager::handleEvent(const UIEvent& event, bool second_pass)
     switch (key) {
      case util::Key_Escape:
-        m_loop.stop(0);
+        m_loop.stop(StopNormal);
         return true;
 
      case util::Key_Return:
@@ -446,6 +462,18 @@ SelectionManager::handleKey(util::Key_t key, int /*prefix*/)
      case util::Key_F1:
         client::dialogs::doHelpDialog(m_root, m_translator, m_gameSender, "pcc2:selectionmgr");
         return true;
+
+     case util::Key_F7:
+        // Search
+        if (m_list.hasObjects(m_list.getCurrentItem())) {
+            // Activate layer
+            m_proxy.setCurrentLayer(m_list.getCurrentItem());
+
+            // Exit dialog
+            m_loop.stop(StopSearchMarked);
+        }
+        return true;
+
      default:
         return false;
     }
@@ -467,7 +495,7 @@ void
 SelectionManager::onOK()
 {
     m_proxy.setCurrentLayer(m_list.getCurrentItem());
-    m_loop.stop(0);
+    m_loop.stop(StopNormal);
 }
 
 void
@@ -572,8 +600,27 @@ client::dialogs::doSelectionManager(client::si::UserSide& iface,
     }
 
     // Dialog
-    SelectionManager mgr(iface, ctl.root(), proxy, info, ctl.translator());
-    mgr.run();
+    int code;
+    {
+        SelectionManager mgr(iface, ctl.root(), proxy, info, ctl.translator());
+        code = mgr.run();
+        out = mgr.outputState();
+    }
 
-    out = mgr.outputState();
+    // Postprocess: optional search
+    if (code == StopSearchMarked) {
+        // Search
+        client::si::OutputState out2;
+        doSearchDialog(SearchQuery(SearchQuery::MatchTrue,
+                                   SearchQuery::SearchObjects_t() + SearchQuery::SearchShips + SearchQuery::SearchPlanets,
+                                   "Marked"),
+                       game::Reference(), true, iface, out2);
+
+        // Join outbound processes
+        if (out.getProcess().isValid()) {
+            iface.joinProcess(out.getProcess(), out2.getProcess());
+        } else {
+            out = out2;
+        }
+    }
 }

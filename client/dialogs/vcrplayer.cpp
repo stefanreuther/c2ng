@@ -30,18 +30,19 @@ namespace {
 
     class FlakPlayHandler : public afl::base::Closure<void(size_t)> {
      public:
-        FlakPlayHandler(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::proxy::VcrDatabaseAdaptor> vcrSender, afl::sys::LogListener& log)
-            : m_root(root), m_translator(tx), m_vcrSender(vcrSender), m_log(log)
+        FlakPlayHandler(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::proxy::VcrDatabaseAdaptor> vcrSender, util::RequestSender<game::Session> gameSender, afl::sys::LogListener& log)
+            : m_root(root), m_translator(tx), m_vcrSender(vcrSender), m_gameSender(gameSender), m_log(log)
             { }
         virtual void call(size_t index)
             {
-                client::vcr::flak::PlaybackScreen screen(m_root, m_translator, m_vcrSender, index, m_log);
+                client::vcr::flak::PlaybackScreen screen(m_root, m_translator, m_vcrSender, index, m_gameSender, m_log);
                 screen.run();
             }
      private:
         ui::Root& m_root;
         afl::string::Translator& m_translator;
         util::RequestSender<game::proxy::VcrDatabaseAdaptor> m_vcrSender;
+        util::RequestSender<game::Session> m_gameSender;
         afl::sys::LogListener& m_log;
     };
 }
@@ -65,7 +66,7 @@ client::dialogs::playCombat(ui::Root& root, afl::string::Translator& tx, util::R
         break;
 
      case VcrDatabaseProxy::FlakCombat:
-        dlg.sig_play.addNewClosure(new FlakPlayHandler(root, tx, vcrSender, log));
+        dlg.sig_play.addNewClosure(new FlakPlayHandler(root, tx, vcrSender, gameSender, log));
         break;
 
      case VcrDatabaseProxy::UnknownCombat:

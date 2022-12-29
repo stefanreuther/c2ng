@@ -6,6 +6,7 @@
 #include "client/vcr/flak/playbackscreen.hpp"
 #include "afl/string/format.hpp"
 #include "client/downlink.hpp"
+#include "client/widgets/helpwidget.hpp"
 #include "game/proxy/playerproxy.hpp"
 #include "game/proxy/vcrdatabaseproxy.hpp"
 #include "game/vcr/flak/eventrecorder.hpp"
@@ -57,12 +58,15 @@ namespace {
 
 client::vcr::flak::PlaybackScreen::PlaybackScreen(ui::Root& root, afl::string::Translator& tx,
                                                   util::RequestSender<game::proxy::VcrDatabaseAdaptor> adaptorSender,
-                                                  size_t index, afl::sys::LogListener& log)
+                                                  size_t index,
+                                                  util::RequestSender<game::Session> gameSender,
+                                                  afl::sys::LogListener& log)
     : m_root(root),
       m_translator(tx),
       m_adaptorSender(adaptorSender),
       m_proxy(adaptorSender, root.engine().dispatcher()),
       m_index(index),
+      m_gameSender(gameSender),
       m_log(log),
       m_timer(root.engine().createTimer()),
       m_visState(),
@@ -131,17 +135,22 @@ client::vcr::flak::PlaybackScreen::run()
     g114.add(del.addNew(new ui::Spacer()));
     g11.add(g114);
 
+    client::widgets::HelpWidget& help = del.addNew(new client::widgets::HelpWidget(m_root, m_translator, m_gameSender, "pcc2:flak"));
     ui::Group& g115 = del.addNew(new ui::Group(ui::layout::HBox::instance5));
+    ui::widgets::Button& btnHelp = del.addNew(new ui::widgets::Button(m_translator("Help"), 'h', m_root));
     ui::widgets::Button& btnClose = del.addNew(new ui::widgets::Button(m_translator("Close"), util::Key_Escape, m_root));
     g115.add(del.addNew(new ui::Spacer()));
+    g115.add(btnHelp);
     g115.add(btnClose);
     g11.add(g115);
 
     win.add(g11);
     win.add(del.addNew(new ui::widgets::KeyForwarder(*this)));
     win.add(del.addNew(new ui::widgets::Quit(m_root, loop)));
+    win.add(help);
 
     btnClose.sig_fire.addNewClosure(loop.makeStop(0));
+    btnHelp.dispatchKeyTo(help);
     m_unitList.requestFocus();
 
     win.setExtent(m_root.getExtent());
@@ -157,6 +166,7 @@ client::vcr::flak::PlaybackScreen::handleKey(util::Key_t key, int /*prefix*/)
         // FIXME: '1' = observeLeft, '2' = observeRight
 
      case '3':
+     case util::Key_Tab:
         m_arena.toggleMode(ArenaWidget::ThreeDMode, ArenaWidget::FlatMode);
         updateMode();
         return true;

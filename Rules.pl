@@ -319,7 +319,7 @@ sub generate_copy_tree {
         # Directory
         opendir my $dir, $in or die;
         foreach my $e (sort readdir $dir) {
-            if ($e !~ /^\./ && $e ne 'CVS' && $e !~ /~$/) {
+            if ($e !~ /^\./ && $e ne 'CVS' && $e !~ /~$/ && $e !~ /^#/) {
                 generate_copy_tree($rule, normalize_filename($out, $e), normalize_filename($in, $e));
             }
         }

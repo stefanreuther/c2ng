@@ -48,7 +48,7 @@ client::dialogs::editSimulationBaseTorpedoes(ui::Root& root,
 
     ui::EventLoop loop(root);
     ui::widgets::StandardDialogButtons& btn = del.addNew(new ui::widgets::StandardDialogButtons(root, tx));
-    ui::Widget& help = del.addNew(new client::widgets::HelpWidget(root, tx, gameSender, "pcc2:simplanet"));
+    ui::Widget& help = del.addNew(new client::widgets::HelpWidget(root, tx, gameSender, "pcc2:bsim"));
     btn.addStop(loop);
     btn.addHelp(help);
     win.add(btn);

@@ -976,7 +976,7 @@ SimulatorDialog::onEditDamageDefense()
     } else if (isAtPlanet()) {
         // ex WSimPlanetEditor::editDefense
         int32_t value = m_currentObject.defense;
-        if (doNumber(m_root, SimulationSetupProxy::Range_t(0, MAX_DEFENSE), value, m_translator("Set Defense"), m_translator("Defense"), "pcc2:simplanet", m_translator)) {
+        if (doNumber(m_root, SimulationSetupProxy::Range_t(0, MAX_DEFENSE), value, m_translator("Set Defense"), m_translator("Defense"), "pcc2:bsim", m_translator)) {
             m_proxy.setDefense(m_currentSlot, value);
         }
     }
@@ -1051,7 +1051,7 @@ SimulatorDialog::onEditBaseBeamLevel()
         prependDigits(elems);
 
         int32_t value = m_currentObject.baseBeamTech;
-        if (doList(m_root, m_gameSender, elems, value, m_translator("Set Starbase Beam Tech"), "pcc2:simplanet", m_translator)) {
+        if (doList(m_root, m_gameSender, elems, value, m_translator("Set Starbase Beam Tech"), "pcc2:bsim", m_translator)) {
             m_proxy.setBaseBeamTech(m_currentSlot, value);
         }
     }
@@ -1173,7 +1173,7 @@ SimulatorDialog::onEditName()
         sortAlphabetically(elems, 0);
 
         int32_t value = m_currentObject.id;
-        if (doList(m_root, m_gameSender, elems, value, m_translator("Set Planet Name"), "pcc2:simplanet", m_translator)) {
+        if (doList(m_root, m_gameSender, elems, value, m_translator("Set Planet Name"), "pcc2:bsim", m_translator)) {
             m_proxy.setId(m_currentSlot, value);
         }
     }
@@ -1281,7 +1281,7 @@ SimulatorDialog::onEditTypeBaseTorpedoLevel()
         prependDigits(elems);
 
         int32_t value = m_currentObject.baseTorpedoTech;
-        if (doList(m_root, m_gameSender, elems, value, m_translator("Set Starbase Torpedo Tech"), "pcc2:simplanet", m_translator)) {
+        if (doList(m_root, m_gameSender, elems, value, m_translator("Set Starbase Torpedo Tech"), "pcc2:bsim", m_translator)) {
             m_proxy.setBaseTorpedoTech(m_currentSlot, value);
         }
     }

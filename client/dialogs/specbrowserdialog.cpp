@@ -11,6 +11,7 @@
 #include "client/downlink.hpp"
 #include "client/picturenamer.hpp"
 #include "client/widgets/filterdisplay.hpp"
+#include "client/widgets/helpwidget.hpp"
 #include "client/widgets/playerlist.hpp"
 #include "game/proxy/playerproxy.hpp"
 #include "game/proxy/specbrowserproxy.hpp"
@@ -287,8 +288,11 @@ namespace {
                 Group& g12 = m_deleter.addNew(new Group(ui::layout::VBox::instance5));
                 Group& g2 = m_deleter.addNew(new Group(ui::layout::HBox::instance5));
 
+                client::widgets::HelpWidget help(m_root, m_translator, m_gameSender, "pcc2:almanac");
                 Button& btnOK = m_deleter.addNew(new Button(m_translator("Close"), util::Key_Escape, m_root));
+                Button& btnHelp = m_deleter.addNew(new Button(m_translator("Help"), 'h', m_root));
                 btnOK.sig_fire.addNewClosure(m_loop.makeStop(0));
+                btnHelp.dispatchKeyTo(help);
 
                 ui::widgets::FrameGroup& listGroup = m_deleter.addNew(new ui::widgets::FrameGroup(ui::layout::VBox::instance0, m_root.colorScheme(), ui::LoweredFrame));
                 listGroup.add(m_deleter.addNew(new ui::widgets::ScrollbarContainer(m_list, m_root)));
@@ -302,9 +306,11 @@ namespace {
                 g12.add(m_buttonGroup);
                 g2.add(btnOK);
                 g2.add(m_deleter.addNew(new ui::Spacer()));
+                g2.add(btnHelp);
 
                 g1.add(g11);
                 g1.add(g12);
+                m_window.add(help);
                 m_window.add(m_tabs);
                 m_window.add(g1);
                 m_window.add(g2);

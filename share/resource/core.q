@@ -703,10 +703,15 @@ Bind SelectionDialog  "s-tab"  := "CCUI.SelectPreviousHere"
 Bind SelectionDialog  "c-tab"  := "CCUI.SelectNextMarkedHere"
 Bind SelectionDialog  "c-s-tab" := "CCUI.SelectPreviousMarkedHere"
 Bind SelectionDialog  "."      := "CCUI.ToggleSelection"
+Bind SelectionDialog  "h"      := "UI.Help 'pcc2:unitsel'",    "alt-h"  := "UI.Help 'pcc2:unitsel'"
 
 On EnterDirectory Do TryLoad "autoexec.q"
 
-If System.GUI Then Print "[", System.Program, " ", System.Version, ", core.q ", CC$LibraryVersion, "]"
+If System.GUI Then
+  LoadHelpFile MakeFileName(C2$ResourceDirectory, "pcc2help.xml")
+  LoadHelpFile MakeFileName(C2$ResourceDirectory, "pcc2interpreter.xml")
+  Print "[", System.Program, " ", System.Version, ", core.q ", CC$LibraryVersion, "]"
+EndIf
 
 %% Experimental
 Function Compile(expr)

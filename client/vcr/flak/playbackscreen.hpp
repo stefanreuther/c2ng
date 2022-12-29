@@ -32,10 +32,13 @@ namespace client { namespace vcr { namespace flak {
             \param tx             Translator
             \param adaptorSender  Access to VCR database
             \param index          Index into VCR database
+            \param gameSender     Game sender (for help)
             \param log            Logger */
         PlaybackScreen(ui::Root& root, afl::string::Translator& tx,
                        util::RequestSender<game::proxy::VcrDatabaseAdaptor> adaptorSender,
-                       size_t index, afl::sys::LogListener& log);
+                       size_t index,
+                       util::RequestSender<game::Session> gameSender,
+                       afl::sys::LogListener& log);
         ~PlaybackScreen();
 
         void run();
@@ -48,6 +51,7 @@ namespace client { namespace vcr { namespace flak {
         util::RequestSender<game::proxy::VcrDatabaseAdaptor> m_adaptorSender;
         game::proxy::FlakVcrPlayerProxy m_proxy;
         size_t m_index;
+        util::RequestSender<game::Session> m_gameSender;
         afl::sys::LogListener& m_log;
         afl::base::Ref<gfx::Timer> m_timer;
 

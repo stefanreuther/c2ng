@@ -6,6 +6,7 @@
 #include "afl/base/refcounted.hpp"
 #include "client/si/control.hpp"
 #include "client/tiles/tilefactory.hpp"
+#include "client/widgets/helpwidget.hpp"
 #include "client/widgets/keymapwidget.hpp"
 #include "game/interface/contextprovider.hpp"
 #include "game/interface/iteratorcontext.hpp"
@@ -349,15 +350,18 @@ client::dialogs::doObjectSelectionDialog(const ObjectSelectionDialog& def,
     client::tiles::TileFactory(iface, keys, oop).createLayout(win, def.layoutName, del);
     ctl.attach(oop);
 
-    ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(tx.translateString("OK"),     util::Key_Return, root));
-    ui::widgets::Button& btnCancel = del.addNew(new ui::widgets::Button(tx.translateString("Cancel"), util::Key_Escape, root));
+    ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(tx("OK"),     util::Key_Return, root));
+    ui::widgets::Button& btnCancel = del.addNew(new ui::widgets::Button(tx("Cancel"), util::Key_Escape, root));
+    ui::widgets::Button& btnHelp   = del.addNew(new ui::widgets::Button(tx("Help"),   'h',              root));
     btnOK.dispatchKeyTo(keys);
     btnCancel.dispatchKeyTo(keys);
+    btnHelp.dispatchKeyTo(keys);
 
     ui::Group& g = del.addNew(new ui::Group(ui::layout::HBox::instance5));
     g.add(btnOK);
     g.add(btnCancel);
     g.add(del.addNew(new ui::Spacer()));
+    g.add(btnHelp);
     win.add(g);
     win.add(keys);
 
