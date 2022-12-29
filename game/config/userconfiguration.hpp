@@ -99,6 +99,7 @@ namespace game { namespace config {
         // Display
         static const IntegerOptionDescriptor Display_ThousandsSep;
         static const IntegerOptionDescriptor Display_Clans;
+        static const IntegerOptionDescriptor Display_HullfuncImages;
         static const IntegerOptionDescriptor Tax_PredictRelative;
 
         // Starchart

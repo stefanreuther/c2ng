@@ -10,6 +10,7 @@
 #include "client/downlink.hpp"
 #include "client/picturenamer.hpp"
 #include "client/widgets/hullspecificationsheet.hpp"
+#include "game/config/userconfiguration.hpp"
 #include "game/proxy/configurationproxy.hpp"
 #include "game/proxy/hullspecificationproxy.hpp"
 #include "game/proxy/playerproxy.hpp"
@@ -39,7 +40,7 @@ namespace {
     class Dialog : private gfx::KeyEventConsumer {
      public:
         Dialog(HullSpecificationProxy& proxy, ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender,
-               game::PlayerSet_t allPlayers, const game::PlayerArray<String_t>& playerNames, util::NumberFormatter fmt);
+               game::PlayerSet_t allPlayers, const game::PlayerArray<String_t>& playerNames, util::NumberFormatter fmt, bool useIcons);
 
         void run(String_t title);
 
@@ -148,14 +149,14 @@ namespace {
  */
 
 Dialog::Dialog(HullSpecificationProxy& proxy, ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender,
-               game::PlayerSet_t allPlayers, const game::PlayerArray<String_t>& playerNames, util::NumberFormatter fmt)
+               game::PlayerSet_t allPlayers, const game::PlayerArray<String_t>& playerNames, util::NumberFormatter fmt, bool useIcons)
     : m_proxy(proxy),
       m_root(root),
       m_translator(tx),
       m_gameSender(gameSender),
       m_numberFormatter(fmt),
       m_loop(root),
-      m_widget(root, tx, allPlayers, playerNames, fmt),
+      m_widget(root, tx, allPlayers, playerNames, fmt, useIcons),
       conn_update(m_proxy.sig_update.add(&m_widget, &client::widgets::HullSpecificationSheet::setContent))
 { }
 
@@ -264,7 +265,8 @@ client::dialogs::showHullSpecificationForShip(game::Id_t shipId, ui::Root& root,
     Dialog dlg(proxy, root, tx, gameSender,
                PlayerProxy(gameSender).getAllPlayers(link),
                PlayerProxy(gameSender).getPlayerNames(link, game::Player::AdjectiveName),
-               ConfigurationProxy(gameSender).getNumberFormatter(link));
+               ConfigurationProxy(gameSender).getNumberFormatter(link),
+               ConfigurationProxy(gameSender).getOption(link, game::config::UserConfiguration::Display_HullfuncImages));
     proxy.setExistingShipId(shipId);
     dlg.run(tx("Ship Specification"));
 }
@@ -277,7 +279,8 @@ client::dialogs::showHullSpecification(const game::ShipQuery& q, ui::Root& root,
     Dialog dlg(proxy, root, tx, gameSender,
                PlayerProxy(gameSender).getAllPlayers(link),
                PlayerProxy(gameSender).getPlayerNames(link, game::Player::AdjectiveName),
-               ConfigurationProxy(gameSender).getNumberFormatter(link));
+               ConfigurationProxy(gameSender).getNumberFormatter(link),
+               ConfigurationProxy(gameSender).getOption(link, game::config::UserConfiguration::Display_HullfuncImages));
     proxy.setQuery(q);
     dlg.run(tx("Ship Specification"));
 }

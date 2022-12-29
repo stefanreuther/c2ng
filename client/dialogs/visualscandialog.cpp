@@ -810,7 +810,8 @@ client::dialogs::VisualScanDialog::SpecPeer::SpecPeer(ui::Root& root, Window& pa
                   parent.m_translator,
                   game::proxy::PlayerProxy(parent.m_gameSender).getAllPlayers(link),
                   game::proxy::PlayerProxy(parent.m_gameSender).getPlayerNames(link, game::Player::AdjectiveName),
-                  game::proxy::ConfigurationProxy(parent.m_gameSender).getNumberFormatter(link))
+                  game::proxy::ConfigurationProxy(parent.m_gameSender).getNumberFormatter(link),
+                  game::proxy::ConfigurationProxy(parent.m_gameSender).getOption(link, game::config::UserConfiguration::Display_HullfuncImages))
 {
     m_window.add(m_specSheet);
     m_window.pack();

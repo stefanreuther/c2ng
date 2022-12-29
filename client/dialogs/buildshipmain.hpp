@@ -157,6 +157,7 @@ namespace client { namespace dialogs {
 
         // State
         util::NumberFormatter m_formatter;
+        bool m_useIcons;
         game::spec::info::Page m_specPage;
         game::Id_t m_specId;
         int m_currentHull;

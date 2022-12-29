@@ -90,6 +90,7 @@ client::dialogs::BuildShipMain::BuildShipMain(ui::Root& root,
       m_moreLaunchers("+", '+', root),
       m_fewerLaunchers("-", '-', root),
       m_formatter(false, false),
+      m_useIcons(false),
       m_specPage(gsi::PlayerPage),
       m_specId(0),
       m_currentHull(),
@@ -119,6 +120,7 @@ client::dialogs::BuildShipMain::init(afl::base::Deleter& del)
 
     // NumberFormatter
     m_formatter = game::proxy::ConfigurationProxy(m_gameSender).getNumberFormatter(link);
+    m_useIcons = game::proxy::ConfigurationProxy(m_gameSender).getOption(link, game::config::UserConfiguration::Display_HullfuncImages);
     m_costDisplay.setNumberFormatter(m_formatter);
 
     // Load list content and construct list widgets
@@ -564,7 +566,7 @@ client::dialogs::BuildShipMain::renderSpecification(game::TechLevel area, const 
     DocumentView& docView = *m_pSpecificationDisplay[area];
     ui::rich::Document& doc = docView.getDocument();
     doc.clear();
-    client::dialogs::renderHullInformation(doc, m_root, content, m_translator);
+    client::dialogs::renderHullInformation(doc, m_root, content, m_useIcons, m_translator);
     doc.finish();
     docView.handleDocumentUpdate();
 }

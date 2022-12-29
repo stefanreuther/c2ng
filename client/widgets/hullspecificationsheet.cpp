@@ -116,7 +116,7 @@ namespace {
         doc.addNewline();
     }
 
-    void setHullFunctions(ui::rich::DocumentView& docView, ui::Root& root, const game::proxy::HullSpecificationProxy::HullSpecification& data, const util::NumberFormatter& fmt, afl::string::Translator& tx)
+    void setHullFunctions(ui::rich::DocumentView& docView, ui::Root& root, const game::proxy::HullSpecificationProxy::HullSpecification& data, const util::NumberFormatter& fmt, bool useIcons, afl::string::Translator& tx)
     {
         // Extra attributes
         ui::rich::Document& doc = docView.getDocument();
@@ -161,7 +161,6 @@ namespace {
         }
 
         // Hull abilities
-        const bool useIcons = true;
         client::dialogs::renderAbilityList(doc, root, data.abilities, useIcons, numLines, tx);
         doc.finish();
         docView.handleDocumentUpdate();
@@ -173,12 +172,14 @@ client::widgets::HullSpecificationSheet::HullSpecificationSheet(ui::Root& root,
                                                                 afl::string::Translator& tx,
                                                                 game::PlayerSet_t allPlayers,
                                                                 const game::PlayerArray<String_t>& playerNames,
-                                                                util::NumberFormatter fmt)
+                                                                util::NumberFormatter fmt,
+                                                                bool useIcons)
     : Group(ui::layout::VBox::instance5),
       m_deleter(),
       m_root(root),
       m_translator(tx),
       m_formatter(fmt),
+      m_useIcons(useIcons),
       m_pTitle(),
       m_pImage(),
       m_pBaseTable(),
@@ -205,7 +206,7 @@ client::widgets::HullSpecificationSheet::setContent(const HullSpecification_t& d
         setBuildTable(*m_pBuildTable, data, m_formatter);
     }
     if (m_pHullFunctions != 0) {
-        setHullFunctions(*m_pHullFunctions, m_root, data, m_formatter, m_translator);
+        setHullFunctions(*m_pHullFunctions, m_root, data, m_formatter, m_useIcons, m_translator);
     }
     for (int i = 0; i < 3; ++i) {
         if (m_pPlayerLists[i] != 0) {

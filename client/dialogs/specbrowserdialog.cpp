@@ -13,6 +13,8 @@
 #include "client/widgets/filterdisplay.hpp"
 #include "client/widgets/helpwidget.hpp"
 #include "client/widgets/playerlist.hpp"
+#include "game/config/userconfiguration.hpp"
+#include "game/proxy/configurationproxy.hpp"
 #include "game/proxy/playerproxy.hpp"
 #include "game/proxy/specbrowserproxy.hpp"
 #include "game/spec/info/utils.hpp"
@@ -286,6 +288,7 @@ namespace {
               m_availableSorts(),
               m_connImageChange(m_root.provider().sig_imageChange.add(this, &SpecBrowserDialog::onImageChange)),
               m_handleImageChange(false),
+              m_useIcons(false),
               m_handleListSelectionChange(true),
               m_lastSelectedId(-1)
             {
@@ -585,6 +588,7 @@ namespace {
                 // Player names
                 client::Downlink link(m_root, m_translator);
                 m_playerNames = game::proxy::PlayerProxy(m_gameSender).getPlayerNames(link, game::Player::AdjectiveName);
+                m_useIcons = game::proxy::ConfigurationProxy(m_gameSender).getOption(link, game::config::UserConfiguration::Display_HullfuncImages);
 
                 // Make the document view flexible
                 m_docView.setPreferredSize(m_root.provider().getFont("")->getCellSize().scaledBy(30, 30));
@@ -660,7 +664,7 @@ namespace {
                     }
                 }
 
-                client::dialogs::renderHullInformation(doc, m_root, m_pageContent, m_translator);
+                client::dialogs::renderHullInformation(doc, m_root, m_pageContent, m_useIcons, m_translator);
 
                 m_docView.handleDocumentUpdate();
                 m_docView.setTopY(0);
@@ -768,6 +772,7 @@ namespace {
 
         afl::base::SignalConnection m_connImageChange;
         bool m_handleImageChange;
+        bool m_useIcons;
 
         /* We need to protect against excess events.
            (a) when processing list updates from the proxy, do not handle onListSelectionChange().
@@ -799,7 +804,7 @@ client::dialogs::doSpecificationBrowserDialog(ui::Root& root,
 }
 
 void
-client::dialogs::renderHullInformation(ui::rich::Document& doc, ui::Root& root, const game::spec::info::PageContent& content, afl::string::Translator& tx)
+client::dialogs::renderHullInformation(ui::rich::Document& doc, ui::Root& root, const game::spec::info::PageContent& content, bool useIcons, afl::string::Translator& tx)
 {
     for (size_t i = 0, n = content.attributes.size(); i < n; ++i) {
         const gsi::Attribute& att = content.attributes[i];
@@ -811,8 +816,6 @@ client::dialogs::renderHullInformation(ui::rich::Document& doc, ui::Root& root, 
         doc.addNewline();
     }
 
-    // FIXME: make this configurable
-    const bool useIcons = true;
     renderAbilityList(doc, root, content.abilities, useIcons, content.abilities.size(), tx);
 }
 

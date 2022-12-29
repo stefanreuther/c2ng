@@ -349,6 +349,10 @@ On UserPreferences Do
 
   % TODO: Missing PCC1 Option: Preferences | User Interface | Cache ship lists
   % TODO: Missing PCC2 Option: Preferences | User Interface | Waypoint tied to scanner --> Scanner.TieWaypoint
+
+  Add Translate("Preferences | User Interface | Ship ability icons"), CCfg.Boolean.Edit, CCfg.Boolean.Value
+  LinkPref "Display.HullfuncImages"
+
   % TODO: Missing PCC1 Option: Preferences | User Interface | Scanner/Waypoint independant
   % TODO: Missing PCC1 Option: Preferences | User Interface | Display Auto Waypoints in map
   % TODO: Missing PCC1 Option: Preferences | VCR...

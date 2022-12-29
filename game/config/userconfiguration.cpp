@@ -82,6 +82,7 @@ namespace game { namespace config {
     // Display
     const IntegerOptionDescriptor UserConfiguration::Display_ThousandsSep = { "Display.ThousandsSep", &BooleanValueParser::instance };
     const IntegerOptionDescriptor UserConfiguration::Display_Clans        = { "Display.Clans", &BooleanValueParser::instance };
+    const IntegerOptionDescriptor UserConfiguration::Display_HullfuncImages = { "Display.HullfuncImages", &BooleanValueParser::instance };
     const IntegerOptionDescriptor UserConfiguration::Tax_PredictRelative  = { "Tax.PredictRelative", &BooleanValueParser::instance };
 
     // Chart
@@ -206,6 +207,7 @@ game::config::UserConfiguration::setDefaultValues()
     // Display
     me[Display_ThousandsSep].set(1);
     me[Display_Clans].set(0);
+    me[Display_HullfuncImages].set(1);
     me[Tax_PredictRelative].set(0);
 
     // Starchart

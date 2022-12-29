@@ -2336,8 +2336,8 @@
           A green marker indicates that you will be able to use the ability at a higher experience level.
           A red marker indicates that only other players can use the ability.</li>
       </ul>
-      <!-- FIXME: <p>If you prefer the abilities to be shown as text, use the
-        <a href="pcc2:settings">Settings Menu</a>, Preferences > User Interface > Ship ability icons.</p> -->
+      <p>If you prefer the abilities to be shown as text, use the
+        <a href="pcc2:settings">Settings Menu</a>, Preferences > User Interface > Ship ability icons.</p>
 
       <h3>Ability List</h3>
       <p>Use <kbd>F1</kbd> from the specification sheet to pop up the detailed ability list.

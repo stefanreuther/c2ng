@@ -24,8 +24,9 @@ namespace client { namespace dialogs {
         \param [out] doc        Document to render into
         \param [in]  root       UI root (for color scheme, font)
         \param [in]  content    PageContent to render
+        \param [in]  useIcons   true to prefer icons, false to enforce textual rendering
         \param [in]  tx         Translator */
-    void renderHullInformation(ui::rich::Document& doc, ui::Root& root, const game::spec::info::PageContent& content, afl::string::Translator& tx);
+    void renderHullInformation(ui::rich::Document& doc, ui::Root& root, const game::spec::info::PageContent& content, bool useIcons, afl::string::Translator& tx);
 
     /** Render list of abilities.
         \param [out] doc        Document to render into

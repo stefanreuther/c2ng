@@ -27,7 +27,8 @@ namespace client { namespace widgets {
                                afl::string::Translator& tx,
                                game::PlayerSet_t allPlayers,
                                const game::PlayerArray<String_t>& playerNames,
-                               util::NumberFormatter fmt);
+                               util::NumberFormatter fmt,
+                               bool useIcons);
 
         void setContent(const HullSpecification_t& data);
 
@@ -36,12 +37,13 @@ namespace client { namespace widgets {
      private:
         void init();
         void initPlayerLists(game::PlayerSet_t allPlayers, const game::PlayerArray<String_t>& playerNames);
-        
+
         afl::base::Deleter m_deleter;
         ui::Root& m_root;
         afl::string::Translator& m_translator;
 
         util::NumberFormatter m_formatter;
+        bool m_useIcons;
 
         ui::widgets::StaticText* m_pTitle;
         ui::widgets::ImageButton* m_pImage;

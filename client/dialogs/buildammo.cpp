@@ -82,6 +82,7 @@ namespace {
 
         // NumberFormatter
         util::NumberFormatter m_formatter;
+        bool m_useIcons;
 
         // Last status from BuildAmmoProxy
         BuildAmmoProxy::Status m_status;
@@ -123,6 +124,7 @@ Dialog::Dialog(ui::Root& root, util::RequestSender<game::Session> gameSender, ga
       m_specId(),
       m_specActive(false),
       m_formatter(false, false),
+      m_useIcons(false),
       m_status(),
       m_loop(root),
       m_componentList(root, 11, 18),
@@ -154,6 +156,7 @@ Dialog::init()
     // Number Formatter
     client::Downlink link(m_root, m_translator);
     m_formatter = game::proxy::ConfigurationProxy(m_gameSender).getNumberFormatter(link);
+    m_useIcons = game::proxy::ConfigurationProxy(m_gameSender).getOption(link, game::config::UserConfiguration::Display_HullfuncImages);
     m_costDisplay.setNumberFormatter(m_formatter);
 
     // Initial state
@@ -394,7 +397,7 @@ Dialog::onSpecificationChange(const gsi::PageContent& content)
     doc.clear();
     doc.add(util::rich::Text(content.title).withStyle(util::rich::StyleAttribute::Big).withColor(SkinColor::Heading));
     doc.addParagraph();
-    client::dialogs::renderHullInformation(doc, m_root, content, m_translator);
+    client::dialogs::renderHullInformation(doc, m_root, content, m_useIcons, m_translator);
     doc.finish();
     m_infoView.handleDocumentUpdate();
 }
