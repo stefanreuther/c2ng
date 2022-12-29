@@ -27,6 +27,10 @@ TestGameProxyReferenceProxy::testEmpty()
     TS_ASSERT_EQUALS(testee.getReferenceName(ind, game::Reference(game::Reference::Planet, 10), game::LongName, out), false);
     TS_ASSERT_EQUALS(testee.getReferenceName(ind, game::Reference(game::Reference::Planet, 10), game::PlainName, out), false);
     TS_ASSERT_EQUALS(testee.getReferenceName(ind, game::Reference(), game::LongName, out), false);
+
+    // Cannot retrieve any position
+    TS_ASSERT_EQUALS(testee.getReferencePosition(ind, game::Reference(game::Reference::Planet, 10)).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferencePosition(ind, game::Reference()).isValid(), false);
 }
 
 /** Test behaviour with existing units. */
@@ -37,6 +41,7 @@ TestGameProxyReferenceProxy::testNormal()
     afl::base::Ptr<game::Game> g = new game::Game();
     game::map::Planet* p = g->currentTurn().universe().planets().create(10);
     p->setName("Melmac");
+    p->setPosition(game::map::Point(1234, 2345));
 
     // Make session
     game::test::SessionThread t;
@@ -52,7 +57,10 @@ TestGameProxyReferenceProxy::testNormal()
     TS_ASSERT_EQUALS(testee.getReferenceName(ind, game::Reference(game::Reference::Planet, 10), game::PlainName, out), true);
     TS_ASSERT_EQUALS(out, "Melmac");
 
-    // Cannot retrieve name of null reference in any case
+    TS_ASSERT_EQUALS(testee.getReferencePosition(ind, game::Reference(game::Reference::Planet, 10)).orElse(game::map::Point()), game::map::Point(1234, 2345));
+
+    // Cannot retrieve name/position of null reference in any case
     TS_ASSERT_EQUALS(testee.getReferenceName(ind, game::Reference(), game::LongName, out), false);
+    TS_ASSERT_EQUALS(testee.getReferencePosition(ind, game::Reference()).isValid(), false);
 }
 

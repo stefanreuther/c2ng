@@ -5,6 +5,8 @@
 #ifndef C2NG_GAME_PROXY_REFERENCEPROXY_HPP
 #define C2NG_GAME_PROXY_REFERENCEPROXY_HPP
 
+#include "afl/base/optional.hpp"
+#include "game/map/point.hpp"
 #include "game/reference.hpp"
 #include "game/session.hpp"
 #include "game/types.hpp"
@@ -30,6 +32,11 @@ namespace game { namespace proxy {
             @retval false Invalid reference; name cannot be returned
             @see game::Session::getReferenceName() */
         bool getReferenceName(WaitIndicator& ind, Reference ref, ObjectName which, String_t& result);
+
+        /** Get position, given a reference.
+            @param [in]  ind    WaitIndicator
+            @param [in]  ref    Reference */
+        afl::base::Optional<game::map::Point> getReferencePosition(WaitIndicator& ind, Reference ref);
 
      private:
         util::RequestSender<Session> m_gameSender;

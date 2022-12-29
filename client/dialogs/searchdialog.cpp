@@ -9,6 +9,7 @@
 #include "afl/base/staticassert.hpp"
 #include "afl/string/format.hpp"
 #include "client/downlink.hpp"
+#include "client/proxy/screenhistoryproxy.hpp"
 #include "client/si/control.hpp"
 #include "client/widgets/expressionlist.hpp"
 #include "client/widgets/referencelistbox.hpp"
@@ -17,6 +18,7 @@
 #include "game/proxy/configurationproxy.hpp"
 #include "game/proxy/expressionlistproxy.hpp"
 #include "game/proxy/referencelistproxy.hpp"
+#include "game/proxy/referenceproxy.hpp"
 #include "game/proxy/searchproxy.hpp"
 #include "game/proxy/selectionproxy.hpp"
 #include "interpreter/bytecodeobject.hpp"
@@ -241,6 +243,11 @@ namespace {
         void onReturn();
         void onDown();
         void onHistory();
+        void onGoToShip();
+        void onGoToPlanet();
+        void onGoToBase();
+        void onGoToMap();
+        void onGoToHistory();
 
         void onSelectionManager();
         void onPreviousSelectionLayer();
@@ -249,6 +256,9 @@ namespace {
         void editSearchObjects();
         void editMatchType();
         void setValues();
+        void openControlScreen(game::Reference::Type refType,
+                               client::ScreenHistory::Type histType,
+                               client::si::OutputState::Target target);
 
         void setListContent(const game::ref::List& list);
     };
@@ -390,9 +400,15 @@ SearchDialog::run(bool immediate)
     disp.add(util::Key_Return, this, &SearchDialog::onReturn);
     disp.add(util::Key_Down,   this, &SearchDialog::onDown);
     disp.add(util::Key_F7,     &m_input, &ui::widgets::InputLine::requestFocus);
+    disp.add(util::Key_F1,     this, &SearchDialog::onGoToShip);
+    disp.add(util::Key_F2,     this, &SearchDialog::onGoToPlanet);
+    disp.add(util::Key_F3,     this, &SearchDialog::onGoToBase);
+    disp.add(util::Key_F4,     this, &SearchDialog::onGoToMap);
+    disp.add(util::Key_F6,     this, &SearchDialog::onGoToHistory);
     disp.add(util::KeyMod_Alt + '.', this, &SearchDialog::onSelectionManager);
     disp.add(util::KeyMod_Alt + util::Key_Left, this, &SearchDialog::onPreviousSelectionLayer);
     disp.add(util::KeyMod_Alt + util::Key_Right, this, &SearchDialog::onNextSelectionLayer);
+    disp.add(util::KeyMod_Shift + util::Key_Return, this, &SearchDialog::onGoToMap);
     win.add(disp);
 
     ui::widgets::FocusIterator& it = del.addNew(new ui::widgets::FocusIterator(ui::widgets::FocusIterator::Tab));
@@ -672,6 +688,40 @@ SearchDialog::onHistory()
 }
 
 void
+SearchDialog::onGoToShip()
+{
+    openControlScreen(game::Reference::Ship, client::ScreenHistory::Ship, client::si::OutputState::ShipScreen);
+}
+
+void
+SearchDialog::onGoToPlanet()
+{
+    openControlScreen(game::Reference::Planet, client::ScreenHistory::Planet, client::si::OutputState::PlanetScreen);
+}
+
+void
+SearchDialog::onGoToBase()
+{
+    openControlScreen(game::Reference::Planet, client::ScreenHistory::Starbase, client::si::OutputState::BaseScreen);
+}
+
+void
+SearchDialog::onGoToMap()
+{
+    client::Downlink link(root(), translator());
+    afl::base::Optional<game::map::Point> pos = game::proxy::ReferenceProxy(interface().gameSender()).getReferencePosition(link, m_refList.getCurrentReference());
+    if (const game::map::Point* pt = pos.get()) {
+        executeGoToReferenceWait("(Search)", game::Reference(*pt));
+    }
+}
+
+void
+SearchDialog::onGoToHistory()
+{
+    openControlScreen(game::Reference::Planet, client::ScreenHistory::HistoryShip, client::si::OutputState::HistoryScreen);
+}
+
+void
 SearchDialog::onSelectionManager()
 {
     executeCommandWait("UI.SelectionManager", false, "(Search)");
@@ -724,6 +774,23 @@ SearchDialog::setValues()
         .setValue(SearchQuery::formatSearchObjects(m_query.getSearchObjects(), tx));
     m_options.findItem(Option_PlayedOnly)
         .setValue(tx(createStringTable(NO_YES)(m_query.getPlayedOnly())));
+}
+
+void
+SearchDialog::openControlScreen(game::Reference::Type refType,
+                                client::ScreenHistory::Type histType,
+                                client::si::OutputState::Target target)
+{
+    game::Reference ref = m_refList.getCurrentReference();
+    if (ref.getType() == refType) {
+        client::Downlink link(root(), translator());
+        client::proxy::ScreenHistoryProxy proxy(interface().gameSender());
+        client::ScreenHistory::Reference histRef(histType, ref.getId(), 0);
+        if (proxy.validateReference(link, histRef)) {
+            proxy.activateReference(link, histRef);
+            handleStateChange(client::si::RequestLink2(), target);
+        }
+    }
 }
 
 void

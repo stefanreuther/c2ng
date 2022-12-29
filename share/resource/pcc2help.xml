@@ -1452,9 +1452,9 @@
         <ki key="Alt-G">("Global...") Open <a href="pcc2:globact">Global Actions</a> operating on the result list;</ki>
         <ki key="Alt-.">Open <a href="pcc2:selectionmgr">selection manager</a>;</ki>
         <ki key="Alt-&#x2190;, Alt-&#x2192;">Next/previous selection layer;</ki>
-        <ki key="F1, F6">When a ship is focused in the result list, go to its control screen/history screen;</ki>
-        <ki key="F2, F3">When a planet is focused in the result list, go to its control screen/starbase screen;</ki>
-        <!-- FIXME <ki key="F4, Shift-Enter">On result list, show object in starchart;</ki> -->
+        <ki key="F1, F6">When a ship is focused in the result list, go to its <a href="pcc2:shipscreen">control screen</a>/<a href="pcc2:historyscreen">history screen</a>;</ki>
+        <ki key="F2, F3">When a planet is focused in the result list, go to its <a href="pcc2:planetscreen">control screen</a>/<a href="pcc2:basescreen">starbase screen</a>;</ki>
+        <ki key="F4, Shift-Enter">On result list, show object in starchart;</ki>
         <ki key="F7">Put focus onto search query input field.</ki>
       </kl>
 
