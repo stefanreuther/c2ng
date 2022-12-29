@@ -225,7 +225,7 @@ game::spec::info::describeHullFunctions(Abilities_t& out, const HullFunctionList
 
 // Describe a list of hull functions, detailed version.
 void
-game::spec::info::describeHullFunctionDetails(AbilityDetails_t& out, const HullFunctionList& hfList, const ShipQuery* pQuery, const ShipList& shipList, const PictureNamer& picNamer, const Root& root, afl::string::Translator& tx)
+game::spec::info::describeHullFunctionDetails(AbilityDetails_t& out, const HullFunctionList& hfList, const ShipQuery* pQuery, const ShipList& shipList, const PictureNamer& picNamer, bool useNormalPictures, const Root& root, afl::string::Translator& tx)
 {
     for (HullFunctionList::Iterator_t it = hfList.begin(), e = hfList.end(); it != e; ++it) {
         // Flags
@@ -242,7 +242,7 @@ game::spec::info::describeHullFunctionDetails(AbilityDetails_t& out, const HullF
             d.name        = hf->getName();
             d.description = hf->getDescription();
             d.explanation = hf->getExplanation();
-            d.pictureName = picNamer.getAbilityPicture(hf->getPictureName(), flags);
+            d.pictureName = picNamer.getAbilityPicture(hf->getPictureName(), useNormalPictures ? AbilityFlags_t() : flags);
             if (pQuery != 0) {
                 d.damageLimit = hf->getDamageLimit(pQuery->getOwner(), root.hostConfiguration());
             }

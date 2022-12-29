@@ -775,9 +775,10 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/dialogs/vcrselection.cpp \
-    client/dialogs/vcrselection.hpp client/widgets/vcrinfo.cpp \
-    client/widgets/vcrinfo.hpp client/application.cpp client/application.hpp \
+FILES_guilib = gfx/colortransform.cpp gfx/colortransform.hpp \
+    client/dialogs/vcrselection.cpp client/dialogs/vcrselection.hpp \
+    client/widgets/vcrinfo.cpp client/widgets/vcrinfo.hpp \
+    client/application.cpp client/application.hpp \
     client/dialogs/zoomlevel.cpp client/dialogs/zoomlevel.hpp \
     client/widgets/plugininfo.cpp client/widgets/plugininfo.hpp \
     client/widgets/pluginlist.cpp client/widgets/pluginlist.hpp \
@@ -1740,8 +1741,9 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_map_info_mission.cpp u/t_game_msg_file.cpp \
-    u/t_game_interface_mailboxcontext.cpp u/t_game_v3_udata_nameprovider.cpp \
+FILES_testsuite = u/t_gfx_colortransform.cpp u/t_game_map_info_mission.cpp \
+    u/t_game_msg_file.cpp u/t_game_interface_mailboxcontext.cpp \
+    u/t_game_v3_udata_nameprovider.cpp \
     u/t_game_v3_udata_sessionnameprovider.cpp \
     u/t_game_v3_udata_messagebuilder.cpp u/t_game_msg_format.cpp \
     u/t_game_parser_binarytransfer.cpp u/t_client_widgets_pluginlist.cpp \

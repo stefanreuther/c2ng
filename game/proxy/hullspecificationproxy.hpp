@@ -91,8 +91,9 @@ namespace game { namespace proxy {
 
         /** Get hull function details.
             \param [in]  ind    WaitIndicator for UI synchronisation
-            \param [out] result Result */
-        void describeHullFunctionDetails(WaitIndicator& ind, game::spec::info::AbilityDetails_t& result);
+            \param [out] result Result
+            \param [in]  useNormalPictures If true, use normal pictures even if hull function is unavailable or broken */
+        void describeHullFunctionDetails(WaitIndicator& ind, game::spec::info::AbilityDetails_t& result, bool useNormalPictures);
 
         /** Signal: ship data to show.
             \param data Data */

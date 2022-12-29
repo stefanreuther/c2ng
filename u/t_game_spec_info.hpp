@@ -55,6 +55,7 @@ class TestGameSpecInfoInfo : public CxxTest::TestSuite {
     void testDescribeWeaponEffectsPHostExp();
     void testDescribeWeaponEffectsPHostExpNonAC();
     void testDescribeHullFunction();
+    void testDescribeHullFunctionPicture();
 };
 
 class TestGameSpecInfoNullPictureNamer : public CxxTest::TestSuite {

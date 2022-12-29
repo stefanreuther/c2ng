@@ -8,6 +8,7 @@
 #include "afl/string/format.hpp"
 #include "afl/string/parse.hpp"
 #include "gfx/blit.hpp"
+#include "gfx/colortransform.hpp"
 #include "gfx/rgbapixmap.hpp"
 #include "ui/res/manager.hpp"
 #include "util/stringparser.hpp"
@@ -136,6 +137,12 @@ ui::res::DirectoryProvider::loadImage(String_t name, Manager& mgr)
             int toAdd;
             if (ops.parseInt(toAdd) && ops.parseEnd() && pix->getBitsPerPixel() == 8) {
                 addToPixelValue(*pix, toAdd);
+            }
+        } else if (ops.parseString("mono:")) {
+            // Monochrome conversion
+            int r, g, b;
+            if (ops.parseInt(r) && ops.parseString(",") && ops.parseInt(g) && ops.parseString(",") && ops.parseInt(b) && ops.parseEnd()) {
+                pix = convertToMonochrome(*pix, COLORQUAD_FROM_RGB(r, g, b)).asPtr();
             }
         } else {
             afl::base::Ptr<afl::io::Stream> overlayStream = openResourceFile(*m_directory, op, graphicsSuffixes());

@@ -51,6 +51,12 @@ class TestGfxColorScheme : public CxxTest::TestSuite {
     void testInterface();
 };
 
+class TestGfxColorTransform : public CxxTest::TestSuite {
+ public:
+    void testPalette();
+    void testRGBA();
+};
+
 class TestGfxComplex : public CxxTest::TestSuite {
  public:
     void testFillPolyTriangle1();

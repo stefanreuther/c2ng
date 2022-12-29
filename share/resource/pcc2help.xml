@@ -2325,7 +2325,7 @@
       <p>Abilities available to all ships are considered <em>racial abilities</em>.
         Those are not shown on the normal specification sheet, but listed on the ability list you can show with <kbd>F1</kbd>.</p>
 
-      <!-- FIXME: color-coding, config still missing <h3>Ability Icons</h3>
+      <h3>Ability Icons</h3>
       <p>On the Specification Sheet and on the <a href="pcc2:buildship">Ship Build Screen</a>,
         ship abilities are normally shown as a set of icons.
         The color of the icon shows the status of the ability.</p>
@@ -2336,7 +2336,7 @@
           A green marker indicates that you will be able to use the ability at a higher experience level.
           A red marker indicates that only other players can use the ability.</li>
       </ul>
-      <p>If you prefer the abilities to be shown as text, use the
+      <!-- FIXME: <p>If you prefer the abilities to be shown as text, use the
         <a href="pcc2:settings">Settings Menu</a>, Preferences > User Interface > Ship ability icons.</p> -->
 
       <h3>Ability List</h3>

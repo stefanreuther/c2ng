@@ -53,12 +53,17 @@ client::PictureNamer::getLauncherPicture(const game::spec::TorpedoLauncher& tl) 
 String_t
 client::PictureNamer::getAbilityPicture(const String_t& abilityName, game::spec::info::AbilityFlags_t flags) const
 {
-    // Ability: 'ability.<name>'
-    (void) flags;   // FIXME
+    // Ability: 'ability.<name>', 'ability.<name>.damaged', 'ability.<name>.locked'
     if (abilityName.empty()) {
         return String_t();
     } else {
-        return RESOURCE_ID("ability.") + abilityName;
+        if (flags.contains(game::spec::info::ForeignAbility) || flags.contains(game::spec::info::ReachableAbility) || flags.contains(game::spec::info::OutgrownAbility)) {
+            return RESOURCE_ID("ability.") + abilityName + ".locked";
+        } else if (flags.contains(game::spec::info::DamagedAbility)) {
+            return RESOURCE_ID("ability.") + abilityName + ".damaged";
+        } else {
+            return RESOURCE_ID("ability.") + abilityName;
+        }
     }
 }
 

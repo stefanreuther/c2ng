@@ -154,7 +154,7 @@ TestGameProxyHullSpecificationProxy::testIt()
 
     // Hull function details
     game::spec::info::AbilityDetails_t ab;
-    testee.describeHullFunctionDetails(ind, ab);
+    testee.describeHullFunctionDetails(ind, ab, false);
     TS_ASSERT(ab.size() >= 1U);
 }
 

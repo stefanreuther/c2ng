@@ -249,7 +249,7 @@ Dialog::showHullFunctionDetails()
     // Retrieve data
     client::Downlink link(m_root, m_translator);
     game::spec::info::AbilityDetails_t details;
-    m_proxy.describeHullFunctionDetails(link, details);
+    m_proxy.describeHullFunctionDetails(link, details, true);
 
     // Show dialog
     client::dialogs::showHullFunctions(details, m_root, m_gameSender, m_translator);

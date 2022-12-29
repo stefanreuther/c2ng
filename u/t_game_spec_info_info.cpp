@@ -869,7 +869,7 @@ TestGameSpecInfoInfo::testDescribeHullFunction()
     // describeHullFunctionDetails()
     {
         gsi::AbilityDetails_t out;
-        describeHullFunctionDetails(out, hfList, 0, h.shipList, h.picNamer, h.root, h.tx);
+        describeHullFunctionDetails(out, hfList, 0, h.shipList, h.picNamer, false, h.root, h.tx);
         TS_ASSERT_EQUALS(out.size(), 2U);
         TS_ASSERT_EQUALS(out[0].name, "Cloak");
         TS_ASSERT_EQUALS(out[0].description, "cloaking device");
@@ -895,7 +895,7 @@ TestGameSpecInfoInfo::testDescribeHullFunction()
         q.setOwner(2);
 
         gsi::AbilityDetails_t out;
-        describeHullFunctionDetails(out, hfList, &q, h.shipList, h.picNamer, h.root, h.tx);
+        describeHullFunctionDetails(out, hfList, &q, h.shipList, h.picNamer, false, h.root, h.tx);
         TS_ASSERT_EQUALS(out.size(), 2U);
         TS_ASSERT_EQUALS(out[0].name, "Cloak");
         TS_ASSERT_EQUALS(out[0].description, "cloaking device");
@@ -918,3 +918,91 @@ TestGameSpecInfoInfo::testDescribeHullFunction()
     }
 }
 
+void
+TestGameSpecInfoInfo::testDescribeHullFunctionPicture()
+{
+    using game::spec::BasicHullFunction;
+    using game::spec::HullFunction;
+    using game::ExperienceLevelSet_t;
+    using game::PlayerSet_t;
+
+    // Environment
+    TestHarness h;
+    game::spec::BasicHullFunctionList& b = h.shipList.basicHullFunctions();
+    b.addFunction(16, "Cloak")
+        ->setPictureName("cloaker");
+    for (int i = 1; i <= 10; ++i) {
+        h.root.playerList().create(i);
+    }
+    h.root.hostConfiguration()[game::config::HostConfiguration::DamageLevelForCloakFail].set(10);
+
+    // HullFunctionList
+    game::spec::HullFunctionList hfList;
+    HullFunction a1(16, ExperienceLevelSet_t::allUpTo(game::MAX_EXPERIENCE_LEVELS));
+    a1.setPlayers(PlayerSet_t() + 5);
+    a1.setKind(HullFunction::AssignedToHull);
+    hfList.add(a1);
+
+    // PictureNamer for testing
+    class TestPicNamer : public game::spec::info::PictureNamer {
+     public:
+        virtual String_t getHullPicture(const game::spec::Hull& /*h*/) const
+            { return String_t(); }
+        virtual String_t getEnginePicture(const game::spec::Engine& /*e*/) const
+            { return String_t(); }
+        virtual String_t getBeamPicture(const game::spec::Beam& /*b*/) const
+            { return String_t(); }
+        virtual String_t getLauncherPicture(const game::spec::TorpedoLauncher& /*tl*/) const
+            { return String_t(); }
+        virtual String_t getAbilityPicture(const String_t& abilityName, game::spec::info::AbilityFlags_t flags) const
+            {
+                String_t result;
+                if (flags.contains(game::spec::info::DamagedAbility)) {
+                    result += "broken-";
+                } else {
+                    result += "good-";
+                }
+                result += abilityName;
+                return result;
+            }
+        virtual String_t getPlayerPicture(const game::Player& /*pl*/) const
+            { return String_t(); }
+        virtual String_t getFighterPicture(int /*raceNr*/, int /*playerNr*/) const
+            { return String_t(); }
+        virtual String_t getVcrObjectPicture(bool /*isPlanet*/, int /*pictureNumber*/) const
+            { return String_t(); }
+    };
+    TestPicNamer picNamer;
+
+    // useNormalPictures=false
+    {
+        game::ShipQuery q;
+        q.setDamage(20);
+        q.setOwner(2);
+
+        gsi::AbilityDetails_t out;
+        describeHullFunctionDetails(out, hfList, &q, h.shipList, picNamer, false, h.root, h.tx);
+        TS_ASSERT_EQUALS(out.size(), 1U);
+        TS_ASSERT_EQUALS(out[0].name, "Cloak");
+        TS_ASSERT_EQUALS(out[0].kind, game::spec::info::ClassAbility);
+        TS_ASSERT(out[0].flags.contains(game::spec::info::DamagedAbility));
+        TS_ASSERT_EQUALS(out[0].pictureName, "broken-cloaker");
+        TS_ASSERT_EQUALS(out[0].minimumExperience, 0);
+    }
+
+    // useNormalPictures=true
+    {
+        game::ShipQuery q;
+        q.setDamage(20);
+        q.setOwner(2);
+
+        gsi::AbilityDetails_t out;
+        describeHullFunctionDetails(out, hfList, &q, h.shipList, picNamer, true, h.root, h.tx);
+        TS_ASSERT_EQUALS(out.size(), 1U);
+        TS_ASSERT_EQUALS(out[0].name, "Cloak");
+        TS_ASSERT_EQUALS(out[0].kind, game::spec::info::ClassAbility);
+        TS_ASSERT(out[0].flags.contains(game::spec::info::DamagedAbility));
+        TS_ASSERT_EQUALS(out[0].pictureName, "good-cloaker");
+        TS_ASSERT_EQUALS(out[0].minimumExperience, 0);
+    }
+}

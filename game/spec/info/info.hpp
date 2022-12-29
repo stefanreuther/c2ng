@@ -54,9 +54,10 @@ namespace game { namespace spec { namespace info {
         \param [in]  pQuery           Ship query (optional, to describe ability flags)
         \param [in]  shipList         Ship list (for hull functions)
         \param [in]  picNamer         Picture namer
+        \param [in]  useNormalPictures If true, use original pictures (do not use flags)
         \param [in]  root             Root (used for configuration, host version)
         \param [in]  tx               Translator */
-    void describeHullFunctionDetails(AbilityDetails_t& out, const HullFunctionList& hfList, const ShipQuery* pQuery, const ShipList& shipList, const PictureNamer& picNamer, const Root& root, afl::string::Translator& tx);
+    void describeHullFunctionDetails(AbilityDetails_t& out, const HullFunctionList& hfList, const ShipQuery* pQuery, const ShipList& shipList, const PictureNamer& picNamer, bool useNormalPictures, const Root& root, afl::string::Translator& tx);
 
     /** Describe an engine.
         Output is intended to be human-readable.

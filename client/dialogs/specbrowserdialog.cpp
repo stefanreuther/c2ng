@@ -52,7 +52,6 @@ namespace {
 
     namespace gsi = game::spec::info;
 
-
     class EditRangeDialog {
      public:
         EditRangeDialog(ui::Root& root, const gsi::IntRange_t& range, const gsi::IntRange_t& maxRange)
@@ -184,6 +183,15 @@ namespace {
         }
     }
 
+
+    void drawCorner(gfx::Context<uint8_t>& ctx, gfx::Point pos, uint8_t color, int size)
+    {
+        ctx.setColor(color);
+        for (int i = 0; i < size; ++i) {
+            drawHLine(ctx, pos.getX(), pos.getY() + i, pos.getX() + size-i-1);
+        }
+    }
+
     class AbilityIconObject : public ui::icons::Icon {
      public:
         static const int SIZE = 32 + 2;
@@ -193,8 +201,11 @@ namespace {
               m_width(width)
             { }
 
-        void add(String_t imageName)
-            { m_imageNames.push_back(imageName); }
+        void add(String_t imageName, game::spec::info::AbilityFlags_t flags)
+            {
+                m_imageNames.push_back(imageName);
+                m_imageFlags.push_back(flags);
+            }
 
         bool empty() const
             { return m_imageNames.empty(); }
@@ -224,8 +235,22 @@ namespace {
                     gfx::drawSolidBar(ctx2, pixArea, ui::Color_Black);
 
                     afl::base::Ptr<gfx::Canvas> image = m_root.provider().getImage(m_imageNames[i]);
+
+                    // Image (has already been given appropriate color depending on flags)
                     if (image.get() != 0) {
                         ctx.canvas().blit(pixArea.getTopLeft(), *image, gfx::Rectangle(0, 0, pixArea.getWidth(), pixArea.getHeight()));
+                    }
+
+                    // Add corner marker
+                    game::spec::info::AbilityFlags_t flags = m_imageFlags[i];
+                    if (flags.contains(game::spec::info::ForeignAbility)) {
+                        // red corner
+                        drawCorner(ctx2, pixArea.getTopLeft(), ui::Color_Red, 5);
+                    } else if (flags.contains(game::spec::info::ReachableAbility) || flags.contains(game::spec::info::OutgrownAbility)) {
+                        // green corner
+                        drawCorner(ctx2, pixArea.getTopLeft(), ui::Color_DarkGreen, 5);
+                    } else {
+                        // no corner
                     }
                 }
             }
@@ -233,6 +258,7 @@ namespace {
         ui::Root& m_root;
         int m_width;
         std::vector<String_t> m_imageNames;
+        std::vector<game::spec::info::AbilityFlags_t> m_imageFlags;
     };
 
 
@@ -800,7 +826,7 @@ client::dialogs::renderAbilityList(ui::rich::Document& doc, ui::Root& root, cons
     for (size_t i = 0, n = abilities.size(); i < n; ++i) {
         const gsi::Ability& a = abilities[i];
         if (useIcons && !a.pictureName.empty()) {
-            obj->add(a.pictureName);
+            obj->add(a.pictureName, a.flags);
         } else {
             if (usedLines >= maxLines-1) {
                 if (excessLines == 0) {

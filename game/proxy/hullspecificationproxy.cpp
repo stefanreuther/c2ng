@@ -36,7 +36,7 @@ class game::proxy::HullSpecificationProxy::Trampoline {
     void setQuery(ShipQuery q);
 
     void describeWeaponEffects(game::spec::info::WeaponEffects& result);
-    void describeHullFunctionDetails(game::spec::info::AbilityDetails_t& result);
+    void describeHullFunctionDetails(game::spec::info::AbilityDetails_t& result, bool useNormalPictures);
 
     void sendResponse(const ShipList& shipList, const Root& root, const Turn* pTurn, const Game& game);
     void packResponse(HullSpecification& result, const ShipList& shipList, const Root& root, const Turn* pTurn, const Game& game);
@@ -90,7 +90,7 @@ game::proxy::HullSpecificationProxy::Trampoline::describeWeaponEffects(game::spe
 }
 
 void
-game::proxy::HullSpecificationProxy::Trampoline::describeHullFunctionDetails(game::spec::info::AbilityDetails_t& result)
+game::proxy::HullSpecificationProxy::Trampoline::describeHullFunctionDetails(game::spec::info::AbilityDetails_t& result, bool useNormalPictures)
 {
     const Game* pGame         = m_session.getGame().get();
     const ShipList* pShipList = m_session.getShipList().get();
@@ -104,7 +104,7 @@ game::proxy::HullSpecificationProxy::Trampoline::describeHullFunctionDetails(gam
         hfList.sortForNewShip(m_query.getPlayerDisplaySet());
 
         // Format it
-        game::spec::info::describeHullFunctionDetails(result, hfList, &m_query, *pShipList, *m_picNamer, *pRoot, m_session.translator());
+        game::spec::info::describeHullFunctionDetails(result, hfList, &m_query, *pShipList, *m_picNamer, useNormalPictures, *pRoot, m_session.translator());
     }
 }
 
@@ -238,24 +238,25 @@ game::proxy::HullSpecificationProxy::describeWeaponEffects(WaitIndicator& ind, g
 }
 
 void
-game::proxy::HullSpecificationProxy::describeHullFunctionDetails(WaitIndicator& ind, game::spec::info::AbilityDetails_t& result)
+game::proxy::HullSpecificationProxy::describeHullFunctionDetails(WaitIndicator& ind, game::spec::info::AbilityDetails_t& result, bool useNormalPictures)
 {
     class Task : public util::Request<Trampoline> {
      public:
-        Task(game::spec::info::AbilityDetails_t& result)
-            : m_result(result)
+        Task(game::spec::info::AbilityDetails_t& result, bool useNormalPictures)
+            : m_result(result), m_useNormalPictures(useNormalPictures)
             { }
         virtual void handle(Trampoline& tpl)
-            { tpl.describeHullFunctionDetails(m_result); }
+            { tpl.describeHullFunctionDetails(m_result, m_useNormalPictures); }
      private:
         game::spec::info::AbilityDetails_t& m_result;
+        bool m_useNormalPictures;
     };
 
     // Clear
     result.clear();
 
     // Retrieve result
-    Task t(result);
+    Task t(result, useNormalPictures);
     ind.call(m_request, t);
 }
 
