@@ -297,6 +297,7 @@ namespace {
         void onGoToShip();
         void onGoToPlanet();
         void onGoToBase();
+        void onGoToMap();
         void onGoToReference(Reference ref);
 
         // Extra dialogs
@@ -416,6 +417,7 @@ SimulatorDialog::run()
     m_keyDispatcher.add(util::Key_F1,                         this, &SimulatorDialog::onGoToShip);
     m_keyDispatcher.add(util::Key_F2,                         this, &SimulatorDialog::onGoToPlanet);
     m_keyDispatcher.add(util::Key_F3,                         this, &SimulatorDialog::onGoToBase);
+    m_keyDispatcher.add(util::Key_F4,                         this, &SimulatorDialog::onGoToMap);
 
     win.pack();
     m_root.centerWidget(win);
@@ -1515,6 +1517,14 @@ SimulatorDialog::onGoToBase()
 {
     if (isAtPlanet() && m_currentObject.relation >= GameInterface::Playable) {
         onGoToReference(Reference(Reference::Starbase, m_currentObject.id));
+    }
+}
+
+void
+SimulatorDialog::onGoToMap()
+{
+    if (const game::map::Point* pt = m_currentObject.position.get()) {
+        onGoToReference(Reference(*pt));
     }
 }
 

@@ -1904,6 +1904,7 @@
         <ki key="Ctrl-Del">Clear simulation setup;</ki>
         <ki key="F1">(ship) Show this ship on <a href="pcc2:shipscreen">ship screen</a> if possible;</ki>
         <ki key="F2">(planet) Show this planet on <a href="pcc2:planetscreen">planet screen</a> if possible;</ki>
+        <ki key="F4">Show this unit on <a href="pcc2:starchart">starchart</a> if possible;</ki>
         <ki key="Ctrl-Up, Ctrl-Down">(ship) Move ship up&#47;down (has no effect on simulation);</ki>
         <ki key="1">(ship) Edit primary weapon (beams);</ki>
         <ki key="2">(ship) Edit secondary weapon (torpedoes, fighters);</ki>

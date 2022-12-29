@@ -2310,6 +2310,7 @@ TestGameProxySimulationSetupProxy::testCopy()
     t.getObject(ind, 0, oi);
     TS_ASSERT_EQUALS(oi.id, 77);
     TS_ASSERT_EQUALS(oi.relation, game::sim::GameInterface::Playable);
+    TS_ASSERT_EQUALS(oi.position.orElse(game::map::Point()), game::map::Point(2000, 2000));
 
     // Copy from game
     game::sim::Setup::Status st = t.copyFromGame(ind, 0, 1);

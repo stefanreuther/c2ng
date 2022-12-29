@@ -437,6 +437,15 @@ game::proxy::SimulationSetupProxy::Trampoline::packObject(ObjectInfo& out, const
                        ? gi->getShipRelation(*sh)
                        : GameInterface::Unknown)
                     : GameInterface::Unknown);
+
+    // Position
+    out.position = (gi != 0
+                    ? (pl != 0
+                       ? gi->getPlanetPosition(*pl)
+                       : sh != 0
+                       ? gi->getShipPosition(*sh)
+                       : afl::base::Nothing)
+                    : afl::base::Nothing);
 }
 
 inline game::proxy::SimulationSetupProxy::Slot_t

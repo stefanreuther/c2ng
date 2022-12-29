@@ -7,8 +7,10 @@
 
 #include <vector>
 #include <utility>
+#include "afl/base/optional.hpp"
 #include "afl/base/signal.hpp"
 #include "afl/string/string.hpp"
+#include "game/map/point.hpp"
 #include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "game/sim/ability.hpp"
@@ -107,6 +109,7 @@ namespace game { namespace proxy {
             bool hasAnyNonstandardAbility;
 
             game::sim::GameInterface::Relation relation;
+            afl::base::Optional<game::map::Point> position;
 
             // Flags
             bool allowPrimaryWeapons;

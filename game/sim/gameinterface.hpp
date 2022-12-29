@@ -6,6 +6,8 @@
 #define C2NG_GAME_SIM_GAMEINTERFACE_HPP
 
 #include "afl/base/deletable.hpp"
+#include "afl/base/optional.hpp"
+#include "game/map/point.hpp"
 #include "game/types.hpp"
 
 namespace game { namespace sim {
@@ -72,6 +74,12 @@ namespace game { namespace sim {
             \return relation */
         virtual Relation getShipRelation(const Ship& in) const = 0;
 
+        /** Get position of a ship on the map.
+            Can be called for ships with relation Unknown; if an unrelated ship exists, returns that.
+            \param [in] in Ship
+            \return relation */
+        virtual afl::base::Optional<game::map::Point> getShipPosition(const Ship& in) const = 0;
+
         /** Update simulation planet from game.
             \param [in,out] out planet (identified by its Id)
             \return true on success */
@@ -86,6 +94,12 @@ namespace game { namespace sim {
             \param [in] in Planet
             \return relation */
         virtual Relation getPlanetRelation(const Planet& in) const = 0;
+
+        /** Get position of a planet on the map.
+            Can be called for planets with relation Unknown; if an unrelated planet exists, returns that.
+            \param [in] in Planet
+            \return relation */
+        virtual afl::base::Optional<game::map::Point> getPlanetPosition(const Planet& in) const = 0;
     };
 
 } }

@@ -170,6 +170,18 @@ namespace game { namespace sim { namespace {
                 return Unknown;
             }
 
+        virtual afl::base::Optional<game::map::Point> getShipPosition(const Ship& in) const
+            {
+                Game* g = m_session.getGame().get();
+                if (g != 0) {
+                    const game::map::Ship* sh = g->currentTurn().universe().ships().get(in.getId());
+                    if (sh != 0) {
+                        return sh->getPosition();
+                    }
+                }
+                return afl::base::Nothing;
+            }
+
         virtual bool copyPlanetFromGame(Planet& out) const
             {
                 // ex GSimulatorRealGameInterface::updateFromGame
@@ -219,6 +231,18 @@ namespace game { namespace sim { namespace {
                     }
                 }
                 return Unknown;
+            }
+
+        virtual afl::base::Optional<game::map::Point> getPlanetPosition(const Planet& in) const
+            {
+                Game* g = m_session.getGame().get();
+                if (g != 0) {
+                    const game::map::Planet* pl = g->currentTurn().universe().planets().get(in.getId());
+                    if (pl != 0) {
+                        return pl->getPosition();
+                    }
+                }
+                return afl::base::Nothing;
             }
 
      private:

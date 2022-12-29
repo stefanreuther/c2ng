@@ -33,12 +33,16 @@ TestGameSimSession::testIt()
             { return false; }
         virtual Relation getShipRelation(const game::sim::Ship& /*in*/) const
             { return Unknown; }
+        virtual afl::base::Optional<game::map::Point> getShipPosition(const game::sim::Ship& /*in*/) const
+            { return afl::base::Nothing; }
         virtual bool copyPlanetFromGame(game::sim::Planet& /*out*/) const
             { return false; }
         virtual bool copyPlanetToGame(const game::sim::Planet& /*in*/)
             { return false; }
         virtual Relation getPlanetRelation(const game::sim::Planet& /*in*/) const
             { return Unknown; }
+        virtual afl::base::Optional<game::map::Point> getPlanetPosition(const game::sim::Planet& /*in*/) const
+            { return afl::base::Nothing; }
     };
 
     game::sim::Session testee;

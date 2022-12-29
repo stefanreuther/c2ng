@@ -399,12 +399,16 @@ TestGameSimSetup::testFindUnused()
             { return false; }
         virtual Relation getShipRelation(const Ship& /*in*/) const
             { return Unknown; }
+        virtual afl::base::Optional<game::map::Point> getShipPosition(const Ship& /*in*/) const
+            { return afl::base::Nothing; }
         virtual bool copyPlanetFromGame(Planet& /*out*/) const
             { return false; }
         virtual bool copyPlanetToGame(const Planet& /*in*/)
             { return false; }
         virtual Relation getPlanetRelation(const Planet& /*in*/) const
             { return Unknown; }
+        virtual afl::base::Optional<game::map::Point> getPlanetPosition(const Planet& /*in*/) const
+            { return afl::base::Nothing; }
     };
 
     game::sim::Setup testee;
@@ -516,6 +520,8 @@ TestGameSimSetup::testCopy()
                 RelationMap_t::const_iterator it = shipRelations.find(in.getId());
                 return it != shipRelations.end() ? it->second : Unknown;
             }
+        virtual afl::base::Optional<game::map::Point> getShipPosition(const Ship& /*in*/) const
+            { return afl::base::Nothing; }
         virtual bool copyPlanetFromGame(Planet& out) const
             {
                 NameMap_t::const_iterator it = planetNames.find(out.getId());
@@ -541,6 +547,8 @@ TestGameSimSetup::testCopy()
                 RelationMap_t::const_iterator it = planetRelations.find(in.getId());
                 return it != planetRelations.end() ? it->second : Unknown;
             }
+        virtual afl::base::Optional<game::map::Point> getPlanetPosition(const Planet& /*in*/) const
+            { return afl::base::Nothing; }
 
         NameMap_t planetNames;
         NameMap_t shipNames;
