@@ -6,10 +6,15 @@
 #include "afl/base/countof.hpp"
 #include "afl/base/staticassert.hpp"
 #include "afl/string/format.hpp"
-#include "game/proxy/objectlistener.hpp"
 #include "game/config/userconfiguration.hpp"
+#include "game/game.hpp"
 #include "game/map/ship.hpp"
+#include "game/proxy/objectlistener.hpp"
 #include "game/root.hpp"
+#include "game/turn.hpp"
+#include "game/v3/command.hpp"
+#include "game/v3/commandcontainer.hpp"
+#include "game/v3/commandextra.hpp"
 #include "util/unicodechars.hpp"
 
 namespace {
@@ -41,6 +46,20 @@ namespace {
         button.setHoverColor(ui::Color_Fire+28);
         button.setFont(gfx::FontRequest().addSize(-1));
         button.setTextAlign(gfx::RightAlign, gfx::TopAlign);
+    }
+
+    bool hasActiveBeamUpOrder(game::Session& session, const game::map::Ship& sh)
+    {
+        if (game::Game* g = session.getGame().get()) {
+            if (const game::Turn* t = g->getViewpointTurn().get()) {
+                if (const game::v3::CommandContainer* cc = game::v3::CommandExtra::get(*t, sh.getOwner().orElse(0))) {
+                    if (cc->getCommand(game::v3::Command::BeamUp, sh.getId()) != 0) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }
 
@@ -179,11 +198,8 @@ client::tiles::ShipCargoTile::attach(game::proxy::ObjectObserver& oop)
                     // ex WShipCargoButton::onObjectChanged [sort-of]
                     job->data.transferReview = (sh->isTransporterActive(sh->TransferTransporter) ? Data::ShipTransfer : Data::NoTransfer);
 
-                    // FIXME: support bum
-                    //     /* We're observing the ship->planet transporter */
-                    //     bool bum = config.AllowBeamUpMultiple()
-                    //         && getDisplayedTurn().getCommands(s->getOwner()).getCommand(GCommand::BeamUp, s->getId()) != 0;
-                    bool bum = false;
+                    const bool bum = root->hostConfiguration()[game::config::HostConfiguration::AllowBeamUpMultiple]()
+                        && hasActiveBeamUpOrder(s, *sh);
                     job->data.unloadReview =
                         (sh->isTransporterActive(sh->UnloadTransporter)
                          ? (sh->getTransporterTargetId(sh->UnloadTransporter).orElse(0) == 0
