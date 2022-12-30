@@ -744,7 +744,7 @@ client::map::StarchartOverlay::moveToOtherPosition()
     game::Reference ref = m_location.getPreferredObject();
     game::Id_t shipId = (ref.getType() == game::Reference::Ship ? ref.getId() : 0);
     game::map::Point pt;
-    if (m_screen.locationProxy().getOtherPosition(link, shipId, pt)) {
+    if (m_screen.locationProxy().getOtherPosition(link, shipId).get(pt)) {
         if (m_location.startJump()) {
             m_location.setPosition(pt);
         }

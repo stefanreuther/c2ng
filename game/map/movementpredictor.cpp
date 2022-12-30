@@ -40,15 +40,14 @@ game::map::MovementPredictor::computeMovement(const Universe& univ,
 }
 
 // Get ship position.
-bool
-game::map::MovementPredictor::getShipPosition(Id_t sid, Point& out) const
+afl::base::Optional<game::map::Point>
+game::map::MovementPredictor::getShipPosition(Id_t sid) const
 {
     // ex GMovementPredictor::getShipPosition
     if (Info* p = m_info.get(sid)) {
-        out = p->pos;
-        return true;
+        return p->pos;
     } else {
-        return false;
+        return afl::base::Nothing;
     }
 }
 

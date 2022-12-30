@@ -61,10 +61,9 @@ namespace game { namespace proxy {
             - if circular map is active, switch between map images
             \param [in]  ind      UI synchronisation
             \param [in]  shipId   Focus ship Id; can be 0
-            \param [out] result   Result
-            \return true on success; false if no alternate position found
+            \return alternate position if found
             \see game::map::Location::getOtherPosition() */
-        bool getOtherPosition(WaitIndicator& ind, game::Id_t shipId, game::map::Point& result);
+        afl::base::Optional<game::map::Point> getOtherPosition(WaitIndicator& ind, game::Id_t shipId);
 
         /** Location callback.
             Called in response to postQueryLocation().

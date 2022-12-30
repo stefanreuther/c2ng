@@ -128,12 +128,12 @@ class game::proxy::MapLocationProxy::Trampoline {
             }
         }
 
-    bool getOtherPosition(Id_t shipId, Point& result)
+    afl::base::Optional<Point> getOtherPosition(Id_t shipId)
         {
             if (Game* pGame = m_session.getGame().get()) {
-                return pGame->cursors().location().getOtherPosition(shipId).get(result);
+                return pGame->cursors().location().getOtherPosition(shipId);
             } else {
-                return false;
+                return afl::base::Nothing;
             }
         }
 
@@ -203,34 +203,26 @@ game::proxy::MapLocationProxy::browse(game::map::Location::BrowseFlags_t flags)
     m_trampoline.postRequest(&Trampoline::browse, flags);
 }
 
-bool
-game::proxy::MapLocationProxy::getOtherPosition(WaitIndicator& ind, game::Id_t shipId, game::map::Point& result)
+afl::base::Optional<game::map::Point>
+game::proxy::MapLocationProxy::getOtherPosition(WaitIndicator& ind, game::Id_t shipId)
 {
     class Task : public util::Request<Trampoline> {
      public:
         Task(Id_t shipId)
-            : m_shipId(shipId), m_ok(false), m_result()
+            : m_shipId(shipId), m_result()
             { }
         virtual void handle(Trampoline& tpl)
-            { m_ok = tpl.getOtherPosition(m_shipId, m_result); }
-        bool isOK() const
-            { return m_ok; }
-        const Point& getResult() const
+            { m_result = tpl.getOtherPosition(m_shipId); }
+        const afl::base::Optional<Point>& getResult() const
             { return m_result; }
      private:
         const Id_t m_shipId;
-        bool m_ok;
-        Point m_result;
+        afl::base::Optional<Point> m_result;
     };
 
     Task t(shipId);
     ind.call(m_trampoline, t);
-    if (t.isOK()) {
-        result = t.getResult();
-        return true;
-    } else {
-        return false;
-    }
+    return t.getResult();
 }
 
 // Set location to reference.

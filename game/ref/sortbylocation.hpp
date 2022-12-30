@@ -18,7 +18,10 @@ namespace game { namespace ref {
         virtual int compare(const Reference& a, const Reference& b) const;
         virtual String_t getClass(const Reference& a) const;
 
-        bool getLocation(const Reference& a, game::map::Point& out) const;
+        String_t getClassFor(afl::base::Optional<game::map::Point> pt) const;
+        int comparePositions(afl::base::Optional<game::map::Point> a, afl::base::Optional<game::map::Point> b) const;
+
+        afl::base::Optional<game::map::Point> getLocation(const Reference& a) const;
 
      private:
         const game::map::Universe& m_universe;

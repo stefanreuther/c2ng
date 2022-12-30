@@ -5,6 +5,7 @@
 #ifndef C2NG_GAME_MAP_MOVEMENTPREDICTOR_HPP
 #define C2NG_GAME_MAP_MOVEMENTPREDICTOR_HPP
 
+#include "afl/base/optional.hpp"
 #include "game/element.hpp"
 #include "game/game.hpp"
 #include "game/map/objectvector.hpp"
@@ -49,10 +50,8 @@ namespace game { namespace map {
         /** Get ship position.
             Call after computeMovement().
             \param [in]  sid  Ship Id
-            \param [out] out  Position
-            \retval true success
-            \retval false ship position not known, \c out not set */
-        bool getShipPosition(Id_t sid, Point& out) const;
+            \return position if known */
+        afl::base::Optional<Point> getShipPosition(Id_t sid) const;
 
         /** Get ship cargo.
             Call after computeMovement().

@@ -10,6 +10,7 @@
 #include "game/ref/sortpredicate.hpp"
 #include "game/root.hpp"
 #include "game/spec/shiplist.hpp"
+#include "afl/base/optional.hpp"
 
 namespace game { namespace ref {
 
@@ -24,7 +25,7 @@ namespace game { namespace ref {
         virtual int compare(const Reference& a, const Reference& b) const;
         virtual String_t getClass(const Reference& a) const;
 
-        bool getLocation(const Reference& a, game::map::Point& out) const;
+        afl::base::Optional<game::map::Point> getLocation(const Reference& a) const;
 
      private:
         const game::map::Universe& m_universe;

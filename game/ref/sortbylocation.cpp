@@ -15,9 +15,32 @@ int
 game::ref::SortByLocation::compare(const Reference& a, const Reference& b) const
 {
     // ex sortByLocation, sort.pas:SortByLocation
+    return comparePositions(getLocation(a), getLocation(b));
+}
+
+String_t
+game::ref::SortByLocation::getClass(const Reference& a) const
+{
+    // ex diviLocation
+    return getClassFor(getLocation(a));
+}
+
+String_t
+game::ref::SortByLocation::getClassFor(afl::base::Optional<game::map::Point> pt) const
+{
+    if (const game::map::Point* p = pt.get()) {
+        return p->toString();
+    } else {
+        return m_translator("not on map");
+    }
+}
+
+int
+game::ref::SortByLocation::comparePositions(afl::base::Optional<game::map::Point> a, afl::base::Optional<game::map::Point> b) const
+{
     game::map::Point pa, pb;
-    bool oka = getLocation(a, pa);
-    bool okb = getLocation(b, pb);
+    bool oka = a.get(pa);
+    bool okb = b.get(pb);
     int result = util::compare3(oka, okb);
     if (result == 0) {
         result = pa.compare(pb);
@@ -25,26 +48,15 @@ game::ref::SortByLocation::compare(const Reference& a, const Reference& b) const
     return result;
 }
 
-String_t
-game::ref::SortByLocation::getClass(const Reference& a) const
+afl::base::Optional<game::map::Point>
+game::ref::SortByLocation::getLocation(const Reference& a) const
 {
-    // ex diviLocation
-    game::map::Point pt;
-    if (getLocation(a, pt)) {
-        return pt.toString();
-    } else {
-        return m_translator.translateString("not on map");
-    }
-}
-
-bool
-game::ref::SortByLocation::getLocation(const Reference& a, game::map::Point& out) const
-{
-    // FIXME: handle reference-to-position
     const game::map::Object* mo = m_universe.getObject(a);
     if (mo != 0) {
-        return mo->getPosition().get(out);
+        // It's a map object
+        return mo->getPosition();
     } else {
-        return false;
+        // Might be a position
+        return a.getPosition();
     }
 }

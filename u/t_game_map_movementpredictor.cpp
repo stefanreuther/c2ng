@@ -123,8 +123,7 @@ TestGameMapMovementPredictor::testCombinations()
 
         // We cannot verify much in a general way. Just verify that we can get all positions.
         for (int i = 1; i <= NumShips; ++i) {
-            Point pt;
-            TSM_ASSERT_EQUALS(iterationName.c_str(), testee.getShipPosition(i, pt), true);
+            TSM_ASSERT(iterationName.c_str(), testee.getShipPosition(i).isValid());
         }
     }
 }
@@ -176,18 +175,18 @@ TestGameMapMovementPredictor::testMovement()
     TS_ASSERT_THROWS_NOTHING(testee.computeMovement(univ, game, shipList, root));
 
     Point pt;
-    TS_ASSERT(testee.getShipPosition(1, pt));
+    TS_ASSERT(testee.getShipPosition(1).get(pt));
     TS_ASSERT_EQUALS(pt, Point(1000, 1009));
-    TS_ASSERT(testee.getShipPosition(2, pt));
+    TS_ASSERT(testee.getShipPosition(2).get(pt));
     TS_ASSERT_EQUALS(pt, Point(1010, 1000));
-    TS_ASSERT(testee.getShipPosition(3, pt));
+    TS_ASSERT(testee.getShipPosition(3).get(pt));
     TS_ASSERT_EQUALS(pt, Point(1009, 1000));
-    TS_ASSERT(testee.getShipPosition(4, pt));
+    TS_ASSERT(testee.getShipPosition(4).get(pt));
     TS_ASSERT_EQUALS(pt, Point(1010, 1000));
 
-    TS_ASSERT(!testee.getShipPosition(0, pt));
-    TS_ASSERT(!testee.getShipPosition(5, pt));
-    TS_ASSERT(!testee.getShipPosition(32700, pt));
+    TS_ASSERT(!testee.getShipPosition(0).isValid());
+    TS_ASSERT(!testee.getShipPosition(5).isValid());
+    TS_ASSERT(!testee.getShipPosition(32700).isValid());
 }
 
 /** Test intercept loop resolution. */
@@ -235,10 +234,10 @@ TestGameMapMovementPredictor::testInterceptLoop()
     TS_ASSERT_THROWS_NOTHING(testee.computeMovement(univ, game, shipList, root));
 
     Point pt;
-    TS_ASSERT(testee.getShipPosition(1, pt));
+    TS_ASSERT(testee.getShipPosition(1).get(pt));
     TS_ASSERT_EQUALS(pt, Point(1009, 1000));
-    TS_ASSERT(testee.getShipPosition(2, pt));
+    TS_ASSERT(testee.getShipPosition(2).get(pt));
     TS_ASSERT_EQUALS(pt, Point(1010, 1000));
-    TS_ASSERT(testee.getShipPosition(3, pt));
+    TS_ASSERT(testee.getShipPosition(3).get(pt));
     TS_ASSERT_EQUALS(pt, Point(1009, 1000));
 }

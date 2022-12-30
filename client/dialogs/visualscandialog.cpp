@@ -176,7 +176,7 @@ namespace {
                         bool posOK;
                         game::map::Point pos;
                         if (m_fromShip != 0) {
-                            posOK = pred.getShipPosition(m_fromShip, pos);
+                            posOK = pred.getShipPosition(m_fromShip).get(pos);
                         } else {
                             posOK = true;
                             pos = m_pos;
@@ -192,7 +192,7 @@ namespace {
                                 game::map::Point shPos;
 
                                 if (sh != 0
-                                    && pred.getShipPosition(id, shPos)
+                                    && pred.getShipPosition(id).get(shPos)
                                     && g->mapConfiguration().getCanonicalLocation(shPos) == pos
                                     && (m_options.contains(game::ref::List::IncludeForeignShips) || sh->isPlayable(game::map::Object::ReadOnly))
                                     && (!m_options.contains(game::ref::List::SafeShipsOnly) || sh->isReliablyVisible(0)))

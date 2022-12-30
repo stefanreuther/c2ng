@@ -305,12 +305,11 @@ TestGameProxyMapLocationProxy::testGetOtherPosition()
 
     // Verify
     // - Failure case
-    Point result;
-    TS_ASSERT_EQUALS(testee.getOtherPosition(ind, 0, result), false);
-    TS_ASSERT_EQUALS(result, Point());
+    TS_ASSERT_EQUALS(testee.getOtherPosition(ind, 0).isValid(), false);
 
     // - Success case
-    TS_ASSERT_EQUALS(testee.getOtherPosition(ind, ID, result), true);
+    Point result;
+    TS_ASSERT_EQUALS(testee.getOtherPosition(ind, ID).get(result), true);
     TS_ASSERT_EQUALS(result, WP);
 }
 
