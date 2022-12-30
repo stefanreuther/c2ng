@@ -12,7 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/map/info/mission.cpp game/map/info/mission.hpp \
+FILES_gamelib = game/ref/configuration.cpp game/ref/sortby.cpp \
+    game/ref/sortby.hpp game/map/info/mission.cpp game/map/info/mission.hpp \
     game/msg/file.cpp game/msg/file.hpp \
     game/v3/udata/sessionnameprovider.cpp \
     game/v3/udata/sessionnameprovider.hpp game/v3/udata/nameprovider.hpp \
@@ -263,11 +264,9 @@ FILES_gamelib = game/map/info/mission.cpp game/map/info/mission.hpp \
     game/map/location.cpp game/map/location.hpp \
     game/map/beamupplanettransfer.cpp game/map/beamupplanettransfer.hpp \
     game/map/beamupshiptransfer.cpp game/map/beamupshiptransfer.hpp \
-    util/vector.hpp game/ref/sortbytransfertarget.cpp \
-    game/ref/sortbytransfertarget.hpp game/map/boundingbox.cpp \
-    game/map/boundingbox.hpp game/maint/raterapplication.cpp \
-    game/maint/raterapplication.hpp game/maint/sweepapplication.cpp \
-    game/maint/sweepapplication.hpp \
+    util/vector.hpp game/map/boundingbox.cpp game/map/boundingbox.hpp \
+    game/maint/raterapplication.cpp game/maint/raterapplication.hpp \
+    game/maint/sweepapplication.cpp game/maint/sweepapplication.hpp \
     interpreter/exporter/consoleapplication.cpp \
     interpreter/exporter/consoleapplication.hpp \
     game/v3/trn/dumperapplication.cpp game/v3/trn/dumperapplication.hpp \
@@ -277,20 +276,9 @@ FILES_gamelib = game/map/info/mission.cpp game/map/info/mission.hpp \
     game/map/locker.hpp game/interface/consolecommands.cpp \
     game/interface/consolecommands.hpp interpreter/genericvalue.hpp \
     game/actions/remotecontrolaction.cpp \
-    game/actions/remotecontrolaction.hpp game/ref/sortbynewlocation.cpp \
-    game/ref/sortbynewlocation.hpp game/ref/sortbylocation.cpp \
-    game/ref/sortbylocation.hpp game/ref/sortbydamage.cpp \
-    game/ref/sortbydamage.hpp game/ref/sortbybattleorder.cpp \
-    game/ref/sortbybattleorder.hpp game/ref/sortbyhullmass.cpp \
-    game/ref/sortbyhullmass.hpp game/ref/sortbytowgroup.cpp \
-    game/ref/sortbytowgroup.hpp game/ref/sortbyfleet.cpp \
-    game/ref/sortbyfleet.hpp game/ref/sortbymass.cpp game/ref/sortbymass.hpp \
-    game/ref/configuration.cpp game/ref/configuration.hpp \
-    game/ref/sortbyhulltype.cpp game/ref/sortbyhulltype.hpp \
-    game/ref/sortbyname.cpp game/ref/sortbyname.hpp game/ref/sortbyowner.cpp \
-    game/ref/sortbyowner.hpp game/ref/sortpredicate.cpp \
-    game/ref/nullpredicate.cpp game/ref/nullpredicate.hpp \
-    game/ref/sortbyid.cpp game/ref/sortbyid.hpp game/ref/sortpredicate.hpp \
+    game/actions/remotecontrolaction.hpp game/ref/configuration.hpp \
+    game/ref/sortpredicate.cpp game/ref/nullpredicate.cpp \
+    game/ref/nullpredicate.hpp game/ref/sortpredicate.hpp \
     game/ref/listobserver.cpp game/ref/listobserver.hpp \
     game/ref/userlist.cpp game/ref/userlist.hpp game/ref/list.cpp \
     game/ref/list.hpp game/battleorderrule.cpp game/battleorderrule.hpp \
@@ -1741,9 +1729,9 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_gfx_colortransform.cpp u/t_game_map_info_mission.cpp \
-    u/t_game_msg_file.cpp u/t_game_interface_mailboxcontext.cpp \
-    u/t_game_v3_udata_nameprovider.cpp \
+FILES_testsuite = u/t_game_ref_sortby.cpp u/t_gfx_colortransform.cpp \
+    u/t_game_map_info_mission.cpp u/t_game_msg_file.cpp \
+    u/t_game_interface_mailboxcontext.cpp u/t_game_v3_udata_nameprovider.cpp \
     u/t_game_v3_udata_sessionnameprovider.cpp \
     u/t_game_v3_udata_messagebuilder.cpp u/t_game_msg_format.cpp \
     u/t_game_parser_binarytransfer.cpp u/t_client_widgets_pluginlist.cpp \

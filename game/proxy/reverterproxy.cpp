@@ -8,7 +8,7 @@
 #include "game/game.hpp"
 #include "game/map/reverter.hpp"
 #include "game/map/universe.hpp"
-#include "game/ref/sortbyid.hpp"
+#include "game/ref/sortby.hpp"
 #include "game/turn.hpp"
 
 class game::proxy::ReverterProxy::Trampoline {
@@ -36,7 +36,7 @@ class game::proxy::ReverterProxy::Trampoline {
             // Build status
             if (m_reverter.get() != 0) {
                 status.modes = m_reverter->getAvailableModes();
-                status.list.add(m_reverter->getAffectedObjects(), m_session, game::ref::SortById(), game::ref::SortById());
+                status.list.add(m_reverter->getAffectedObjects(), m_session, game::ref::SortBy::Id(), game::ref::SortBy::Id());
             }
         }
 

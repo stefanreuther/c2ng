@@ -52,6 +52,23 @@ class TestGameRefNullPredicate : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameRefSortBy : public CxxTest::TestSuite {
+ public:
+    void testId();
+    void testName();
+    void testOwner();
+    void testPosition();
+    void testNextPosition();
+    void testDamage();
+    void testMass();
+    void testHullMass();
+    void testHullType();
+    void testBattleOrder();
+    void testFleet();
+    void testTowGroup();
+    void testTransferTarget();
+};
+
 class TestGameRefSortPredicate : public CxxTest::TestSuite {
  public:
     void testInterface();

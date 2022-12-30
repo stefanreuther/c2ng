@@ -13,7 +13,7 @@
 #include "game/game.hpp"
 #include "game/map/locationreverter.hpp"
 #include "game/ref/list.hpp"
-#include "game/ref/sortbyid.hpp"
+#include "game/ref/sortby.hpp"
 #include "game/turn.hpp"
 
 using game::Element;
@@ -259,7 +259,7 @@ TestGameV3Reverter::testLocation()
     // - unit list
     game::ref::List list = rev->getAffectedObjects();
     TS_ASSERT_EQUALS(list.size(), 2U);
-    list.sort(game::ref::SortById());
+    list.sort(game::ref::SortBy::Id());
     TS_ASSERT_EQUALS(list[0], game::Reference(game::Reference::Planet, 77));
     TS_ASSERT_EQUALS(list[1], game::Reference(game::Reference::Ship, 111));
 

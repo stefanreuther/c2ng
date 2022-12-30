@@ -43,7 +43,7 @@ namespace {
         { N_("Fleet"),         gr::ConfigSortByFleet,       true },
         { N_("Tow Group"),     gr::ConfigSortByTowGroup,    true },
         { N_("Position"),      gr::ConfigSortByLocation,    true },
-        { N_("Next Position"), gr::ConfigSortByNewPosition, true },
+        { N_("Next Position"), gr::ConfigSortByNextPosition, true },
         { N_("Battle Order"),  gr::ConfigSortByBattleOrder, true },
     };
 

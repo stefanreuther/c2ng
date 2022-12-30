@@ -9,7 +9,7 @@
 #include "afl/container/ptrvector.hpp"
 #include "game/map/configuration.hpp"
 #include "game/map/object.hpp"
-#include "game/ref/sortbyid.hpp"
+#include "game/ref/sortby.hpp"
 
 using afl::container::PtrVector;
 using game::Id_t;
@@ -401,7 +401,7 @@ void
 TestGameMapObjectType::testSort()
 {
     // Similar situation as in testNormal.
-    // Use duplicate Ids to exercise tie-breaking, because SortById has no further dependencies.
+    // Use duplicate Ids to exercise tie-breaking, because SortBy::Id has no further dependencies.
     const Point A(1000, 2000);
     const Point B(1000, 4000);
     TestType t;
@@ -415,7 +415,7 @@ TestGameMapObjectType::testSort()
 
     // Test sorting
     afl::base::Deleter del;
-    game::ref::SortById pred;
+    game::ref::SortBy::Id pred;
     game::map::ObjectType& sorted = t.sort(del, pred, game::Reference::Ship);
     TS_ASSERT_EQUALS(sorted.findNextIndexNoWrap(0), 1);
     TS_ASSERT_EQUALS(sorted.findNextIndexNoWrap(1), 2);

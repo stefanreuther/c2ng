@@ -15,7 +15,7 @@ namespace game { namespace ref {
 
         A predicate is implemented as a class derived from this.
         Functions taking a SortPredicate take it by const-reference,
-        allowing use of temporary objects in code such as "sort(SortByName())".
+        allowing use of temporary objects in code such as "sort(SortBy::Name())".
         This also enforces that predicates shall be stateless,
         and not rely on a particular call order. */
     class SortPredicate : public afl::base::Deletable {

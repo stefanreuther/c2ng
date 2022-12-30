@@ -7,20 +7,9 @@
 #include "game/config/userconfiguration.hpp"
 #include "game/game.hpp"
 #include "game/ref/nullpredicate.hpp"
-#include "game/ref/sortbybattleorder.hpp"
-#include "game/ref/sortbydamage.hpp"
-#include "game/ref/sortbyfleet.hpp"
-#include "game/ref/sortbyhullmass.hpp"
-#include "game/ref/sortbyhulltype.hpp"
-#include "game/ref/sortbylocation.hpp"
-#include "game/ref/sortbymass.hpp"
-#include "game/ref/sortbyname.hpp"
-#include "game/ref/sortbynewlocation.hpp"
-#include "game/ref/sortbyowner.hpp"
-#include "game/ref/sortbytowgroup.hpp"
+#include "game/ref/sortby.hpp"
 #include "game/root.hpp"
 #include "game/turn.hpp"
-#include "game/ref/sortbytransfertarget.hpp"
 
 using game::config::UserConfiguration;
 
@@ -60,73 +49,73 @@ game::ref::createSortPredicate(int config, Session& session, afl::base::Deleter&
 
      case ConfigSortByOwner:
         if (pRoot != 0 && pTurn != 0) {
-            return del.addNew(new SortByOwner(pTurn->universe(), pRoot->playerList(), session.translator()));
+            return del.addNew(new SortBy::Owner(pTurn->universe(), pRoot->playerList(), session.translator()));
         }
         break;
 
      case ConfigSortByHull:
         if (pTurn != 0 && pShipList != 0) {
-            return del.addNew(new SortByHullType(pTurn->universe(), *pShipList, session.translator()));
+            return del.addNew(new SortBy::HullType(pTurn->universe(), *pShipList, session.translator()));
         }
         break;
 
      case ConfigSortByMass:
         if (pShipList != 0 && pTurn != 0) {
-            return del.addNew(new SortByMass(pTurn->universe(), *pShipList));
+            return del.addNew(new SortBy::Mass(pTurn->universe(), *pShipList));
         }
         break;
 
      case ConfigSortByFleet:
         if (pTurn != 0) {
-            return del.addNew(new SortByFleet(pTurn->universe(), session.translator()));
+            return del.addNew(new SortBy::Fleet(pTurn->universe(), session.translator()));
         }
         break;
 
      case ConfigSortByTowGroup:
         if (pTurn != 0) {
-            return del.addNew(new SortByTowGroup(pTurn->universe(), session.translator()));
+            return del.addNew(new SortBy::TowGroup(pTurn->universe(), session.translator()));
         }
         break;
 
      case ConfigSortByBattleOrder:
         if (pTurn != 0 && pRoot != 0) {
-            return del.addNew(new SortByBattleOrder(pTurn->universe(), pRoot->hostVersion(), session.translator()));
+            return del.addNew(new SortBy::BattleOrder(pTurn->universe(), pRoot->hostVersion(), session.translator()));
         }
         break;
 
      case ConfigSortByLocation:
         if (pTurn != 0) {
-            return del.addNew(new SortByLocation(pTurn->universe(), session.translator()));
+            return del.addNew(new SortBy::Position(pTurn->universe(), session.translator()));
         }
         break;
 
      case ConfigSortByHullMass:
         if (pTurn != 0 && pShipList != 0) {
-            return del.addNew(new SortByHullMass(pTurn->universe(), *pShipList));
+            return del.addNew(new SortBy::HullMass(pTurn->universe(), *pShipList));
         }
         break;
 
      case ConfigSortByDamage:
         if (pTurn != 0) {
-            return del.addNew(new SortByDamage(pTurn->universe()));
+            return del.addNew(new SortBy::Damage(pTurn->universe()));
         }
         break;
 
      case ConfigSortByName:
-        return del.addNew(new SortByName(session));
+        return del.addNew(new SortBy::Name(session));
 
-     case ConfigSortByNewPosition:
+     case ConfigSortByNextPosition:
         if (pTurn != 0 && pShipList != 0 && pRoot != 0 && pGame != 0) {
-            return del.addNew(new SortByNewLocation(pTurn->universe(), *pGame, *pShipList, *pRoot, session.translator()));
+            return del.addNew(new SortBy::NextPosition(pTurn->universe(), *pGame, *pShipList, *pRoot, session.translator()));
         }
         break;
 
      case ConfigSortByTransferTarget:
         if (pTurn != 0 && pRoot != 0) {
-            return del.addNew(new SortByTransferTarget(pTurn->universe(),
-                                                       game::map::Ship::TransferTransporter,
-                                                       !pRoot->hostVersion().hasParallelShipTransfers(),
-                                                       session.translator()));
+            return del.addNew(new SortBy::TransferTarget(pTurn->universe(),
+                                                         game::map::Ship::TransferTransporter,
+                                                         !pRoot->hostVersion().hasParallelShipTransfers(),
+                                                         session.translator()));
         }
         break;
     }

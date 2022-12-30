@@ -8,9 +8,7 @@
 #include "afl/string/format.hpp"
 #include "game/game.hpp"
 #include "game/map/historyshiptype.hpp"
-#include "game/ref/sortbyhulltype.hpp"
-#include "game/ref/sortbyname.hpp"
-#include "game/ref/sortbyowner.hpp"
+#include "game/ref/sortby.hpp"
 #include "game/root.hpp"
 #include "game/turn.hpp"
 #include "util/string.hpp"
@@ -187,13 +185,13 @@ game::ref::HistoryShipSelection::buildList(HistoryShipList& list, const Turn& tu
 
      case ByOwner:
         if (const Root* pRoot = session.getRoot().get()) {
-            list.sort(SortByOwner(univ, pRoot->playerList(), session.translator()));
+            list.sort(SortBy::Owner(univ, pRoot->playerList(), session.translator()));
         }
         break;
 
      case ByHull:
         if (const game::spec::ShipList* pShipList = session.getShipList().get()) {
-            list.sort(SortByHullType(univ, *pShipList, session.translator()));
+            list.sort(SortBy::HullType(univ, *pShipList, session.translator()));
         }
         break;
 
@@ -202,7 +200,7 @@ game::ref::HistoryShipSelection::buildList(HistoryShipList& list, const Turn& tu
         break;
 
      case ByName:
-        list.sort(SortByName(session));
+        list.sort(SortBy::Name(session));
         break;
     }
     list.setReferenceTurn(refTurn);

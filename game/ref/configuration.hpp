@@ -22,7 +22,7 @@ namespace game { namespace ref {
     const int ConfigSortByHullMass    = 8;
     const int ConfigSortByDamage      = 9;
     const int ConfigSortByName        = 10;
-    const int ConfigSortByNewPosition = 11;
+    const int ConfigSortByNextPosition = 11;
     const int ConfigSortByTransferTarget = 12;
 
     struct ConfigurationSelection;
