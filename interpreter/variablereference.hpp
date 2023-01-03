@@ -61,12 +61,12 @@ namespace interpreter {
             @param proc  Process
             @param name  Variable name
             @return VariableReference */
-        static VariableReference fromProcess(Process& proc, const String_t& name);
+        static VariableReference fromProcess(const Process& proc, const String_t& name);
 
         /** Resolve a VariableReference.
             @param list Process List
-            @return Value, owned by the Process/ProcessList. Null if reference is stale or null. */
-        afl::data::Value* get(const ProcessList& list) const;
+            @return Value; caller takes responsibility. Null if reference is stale or null. */
+        std::auto_ptr<afl::data::Value> get(const ProcessList& list) const;
 
      private:
         friend class Maker;

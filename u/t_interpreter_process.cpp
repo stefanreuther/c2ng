@@ -590,7 +590,7 @@ TestInterpreterProcess::testVariable()
 
     // Accessing unknown values is harmless
     TS_ASSERT_EQUALS(env.proc.setVariable("OTHER", &sv), false);
-    p.reset(env.proc.getVariable("OTHER"));
+    p = env.proc.getVariable("OTHER");
     TS_ASSERT(p.get() == 0);
 }
 

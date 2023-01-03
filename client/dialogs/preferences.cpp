@@ -76,7 +76,8 @@ namespace {
             { }
         virtual ConfigurationEditorAdaptor* call(game::Session& session)
             {
-                ConfigurationEditorContext* ctx = dynamic_cast<ConfigurationEditorContext*>(m_reference.get(session.processList()));
+                std::auto_ptr<afl::data::Value> value(m_reference.get(session.processList()));
+                ConfigurationEditorContext* ctx = dynamic_cast<ConfigurationEditorContext*>(value.get());
                 if (ctx == 0) {
                     throw interpreter::Error::typeError();
                 }
@@ -137,7 +138,8 @@ namespace {
                 { }
             virtual void handle(game::Session& session)
                 {
-                    if (ConfigurationEditorContext* ctx = dynamic_cast<ConfigurationEditorContext*>(m_reference.get(session.processList()))) {
+                    std::auto_ptr<afl::data::Value> value(m_reference.get(session.processList()));
+                    if (ConfigurationEditorContext* ctx = dynamic_cast<ConfigurationEditorContext*>(value.get())) {
                         m_out = ctx->data().ref->optionNames;
                     }
                 }
@@ -443,7 +445,8 @@ TreePage::onEdit()
             {
                 // Compile
                 interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
-                if (ConfigurationEditorContext* ctx = dynamic_cast<ConfigurationEditorContext*>(m_reference.get(session.processList()))) {
+                std::auto_ptr<afl::data::Value> value(m_reference.get(session.processList()));
+                if (ConfigurationEditorContext* ctx = dynamic_cast<ConfigurationEditorContext*>(value.get())) {
                     ctx->compileEditor(*bco, m_index);
                 }
 

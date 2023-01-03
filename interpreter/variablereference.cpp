@@ -39,19 +39,19 @@ interpreter::VariableReference::VariableReference()
 
 // Create VariableReference from a process/name.
 interpreter::VariableReference
-interpreter::VariableReference::fromProcess(Process& proc, const String_t& name)
+interpreter::VariableReference::fromProcess(const Process& proc, const String_t& name)
 {
     return VariableReference(proc.getProcessId(), name);
 }
 
 // Resolve a VariableReference.
-afl::data::Value*
+std::auto_ptr<afl::data::Value>
 interpreter::VariableReference::get(const ProcessList& list) const
 {
-    if (Process* p = list.findProcessById(m_processId)) {
+    if (const Process* p = list.findProcessById(m_processId)) {
         return p->getVariable(m_name);
     } else {
-        return 0;
+        return std::auto_ptr<afl::data::Value>();
     }
 }
 

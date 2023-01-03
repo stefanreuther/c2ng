@@ -336,7 +336,8 @@ Dialog::executeGlobalAction(size_t actionId)
             { }
         virtual void execute(uint32_t pgid, game::Session& session)
             {
-                if (GlobalActionContext* ctx = dynamic_cast<GlobalActionContext*>(m_ref.get(session.processList()))) {
+                std::auto_ptr<afl::data::Value> value(m_ref.get(session.processList()));
+                if (GlobalActionContext* ctx = dynamic_cast<GlobalActionContext*>(value.get())) {
                     interpreter::ProcessList& processList = session.processList();
                     interpreter::Process& proc = processList.create(session.world(), "(Global Actions)");
                     const GlobalActions::Action* a = ctx->data()->actions.getActionByIndex(m_actionId);
@@ -363,7 +364,8 @@ Dialog::executeListAction(size_t actionId)
             { }
         virtual void execute(uint32_t pgid, game::Session& session)
             {
-                if (GlobalActionContext* ctx = dynamic_cast<GlobalActionContext*>(m_ref.get(session.processList()))) {
+                std::auto_ptr<afl::data::Value> value(m_ref.get(session.processList()));
+                if (GlobalActionContext* ctx = dynamic_cast<GlobalActionContext*>(value.get())) {
                     interpreter::ProcessList& processList = session.processList();
                     interpreter::Process& proc = processList.create(session.world(), "(Global Actions)");
                     const GlobalActions::Action* a = ctx->data()->actions.getActionByIndex(m_actionId);

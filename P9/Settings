@@ -12,9 +12,9 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/ref/configuration.cpp game/ref/sortby.cpp \
-    game/ref/sortby.hpp game/map/info/mission.cpp game/map/info/mission.hpp \
-    game/msg/file.cpp game/msg/file.hpp \
+FILES_gamelib = interpreter/staticcontext.hpp game/ref/configuration.cpp \
+    game/ref/sortby.cpp game/ref/sortby.hpp game/map/info/mission.cpp \
+    game/map/info/mission.hpp game/msg/file.cpp game/msg/file.hpp \
     game/v3/udata/sessionnameprovider.cpp \
     game/v3/udata/sessionnameprovider.hpp game/v3/udata/nameprovider.hpp \
     game/v3/udata/messagebuilder.cpp game/v3/udata/messagebuilder.hpp \

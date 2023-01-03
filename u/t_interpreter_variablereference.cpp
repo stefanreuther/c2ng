@@ -45,12 +45,12 @@ TestInterpreterVariableReference::testIt()
     interpreter::VariableReference r2 = m.make("NULL", 0);
 
     // Verify
-    afl::data::Value* p = r1.get(env.list);
-    TS_ASSERT_DIFFERS(p, &iv);
-    TS_ASSERT_EQUALS(afl::data::Access(p).toInteger(), 42);
+    std::auto_ptr<afl::data::Value> p(r1.get(env.list));
+    TS_ASSERT_DIFFERS(p.get(), &iv);
+    TS_ASSERT_EQUALS(afl::data::Access(p.get()).toInteger(), 42);
 
-    p = r2.get(env.list);
-    TS_ASSERT(p == 0);
+    std::auto_ptr<afl::data::Value> p2(r2.get(env.list));
+    TS_ASSERT(p2.get() == 0);
 }
 
 /** Test null reference. */
@@ -65,8 +65,8 @@ TestInterpreterVariableReference::testNull()
 
     // Null reference should produce null value
     interpreter::VariableReference r;
-    afl::data::Value* p = r.get(env.list);
-    TS_ASSERT(p == 0);
+    std::auto_ptr<afl::data::Value> p(r.get(env.list));
+    TS_ASSERT(p.get() == 0);
 }
 
 /** Test overwrite behaviour. */
@@ -87,9 +87,9 @@ TestInterpreterVariableReference::testOverwrite()
     interpreter::VariableReference r2 = m.make("IV", &iv2);
 
     // Verify
-    afl::data::Value* p = r2.get(env.list);
-    TS_ASSERT_DIFFERS(p, &iv);
-    TS_ASSERT_EQUALS(afl::data::Access(p).toInteger(), 69);
+    std::auto_ptr<afl::data::Value> p(r2.get(env.list));
+    TS_ASSERT_DIFFERS(p.get(), &iv);
+    TS_ASSERT_EQUALS(afl::data::Access(p.get()).toInteger(), 69);
 
     // No statement to be made about r1
 }

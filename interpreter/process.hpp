@@ -412,7 +412,7 @@ namespace interpreter {
             \param [in]  q      Name query
             \param [out] index  On success, property index
             \return non-null PropertyAccessor if found, null on failure. */
-        Context::PropertyAccessor* lookup(const afl::data::NameQuery& q, Context::PropertyIndex_t& index);
+        virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& q, Context::PropertyIndex_t& index) const;
 
 
         /*
@@ -431,8 +431,8 @@ namespace interpreter {
         /** Get variable from this process.
             The variable is fetched from the topmost context that defines it.
             \param name Name
-            \return Value, owned by process. Null if variable is not defined. */
-        afl::data::Value* getVariable(String_t name);
+            \return Value; ownership taken by caller. Null if variable is not defined. */
+        std::auto_ptr<afl::data::Value> getVariable(String_t name) const;
 
         /** Get game object this process is working on.
             Returns the object from the innermost context that has one.

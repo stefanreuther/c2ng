@@ -21,7 +21,8 @@ game::proxy::GlobalActionProxy::getActions(WaitIndicator& ind, util::TreeList& r
             { }
         virtual void handle(Session& session)
             {
-                if (game::interface::GlobalActionContext* ctx = dynamic_cast<game::interface::GlobalActionContext*>(m_ref.get(session.processList()))) {
+                std::auto_ptr<afl::data::Value> value(m_ref.get(session.processList()));
+                if (game::interface::GlobalActionContext* ctx = dynamic_cast<game::interface::GlobalActionContext*>(value.get())) {
                     m_result = ctx->data()->actionNames;
                 }
             }

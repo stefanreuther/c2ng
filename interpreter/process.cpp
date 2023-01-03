@@ -1459,7 +1459,7 @@ interpreter::Process::suspend(std::auto_ptr<Task_t> task)
 
 // Look up value.
 interpreter::Context::PropertyAccessor*
-interpreter::Process::lookup(const afl::data::NameQuery& q, Context::PropertyIndex_t& index)
+interpreter::Process::lookup(const afl::data::NameQuery& q, Context::PropertyIndex_t& index) const
 {
     // ex IntExecutionContext::lookup
     // ex ccexpr.pas:ResolveName (part)
@@ -1488,16 +1488,16 @@ interpreter::Process::setVariable(String_t name, afl::data::Value* value)
 }
 
 // Get variable from this process.
-afl::data::Value*
-interpreter::Process::getVariable(String_t name)
+std::auto_ptr<afl::data::Value>
+interpreter::Process::getVariable(String_t name) const
 {
     // ex IntExecutionContext::getVariable
     Context::PropertyIndex_t index;
+    std::auto_ptr<afl::data::Value> result;
     if (Context::PropertyAccessor* ctx = lookup(name, index)) {
-        return ctx->get(index);
-    } else {
-        return 0;
+        result.reset(ctx->get(index));
     }
+    return result;
 }
 
 // Get game object this process is working on.

@@ -3069,7 +3069,8 @@ client::si::IFCCViewMailbox(game::Session& /*session*/, ScriptSide& si, RequestL
             { return m_session; }
         virtual game::msg::Mailbox& mailbox() const
             {
-                game::interface::MailboxContext* p = dynamic_cast<game::interface::MailboxContext*>(m_ref.get(m_session.processList()));
+                std::auto_ptr<afl::data::Value> value(m_ref.get(m_session.processList()));
+                game::interface::MailboxContext* p = dynamic_cast<game::interface::MailboxContext*>(value.get());
                 if (p == 0) {
                     throw interpreter::Error("No mailbox");
                 }
@@ -3489,7 +3490,8 @@ client::si::IFUIFileWindow(game::Session& session, ScriptSide& si, RequestLink1 
     interpreter::checkStringArg(helpId, args.getNext());
 
     // Get current directory
-    String_t dirName = interpreter::toString(link.getProcess().getVariable("UI.DIRECTORY"), false);
+    std::auto_ptr<afl::data::Value> dirValue(link.getProcess().getVariable("UI.DIRECTORY"));
+    String_t dirName = interpreter::toString(dirValue.get(), false);
     if (dirName.empty()) {
         dirName = session.world().fileSystem().getWorkingDirectoryName();
     }
