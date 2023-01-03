@@ -105,7 +105,7 @@ game::sim::Loader::load(afl::io::Stream& in, Setup& setup)
             sh->setOwner(data.object.owner);
             sh->setBeamType(data.object.beamType);
             sh->setNumBeams(data.object.numBeams);
-            sh->setTorpedoType(data.object.launcherType);
+            sh->setTorpedoType(data.object.torpedoType);
             sh->setNumLaunchers(data.object.numLaunchersPacked);
             sh->setNumBays(data.object.numBays);
             sh->setAmmo(data.object.ammo);
@@ -241,7 +241,7 @@ game::sim::Loader::save(afl::io::Stream& out, const Setup& setup)
             data.object.numBeams           = static_cast<uint8_t>(sh->getNumBeams());
             data.object.experienceLevel    = static_cast<uint8_t>(sh->getExperienceLevel());
             data.object.numBays            = static_cast<int16_t>(sh->getNumBays());
-            data.object.launcherType       = static_cast<int16_t>(sh->getTorpedoType());
+            data.object.torpedoType        = static_cast<int16_t>(sh->getTorpedoType());
             data.object.ammo               = static_cast<int16_t>(sh->getAmmo());
             data.object.numLaunchersPacked = static_cast<int16_t>(sh->getNumLaunchers());
             data.engineType                = static_cast<int16_t>(sh->getEngineType());

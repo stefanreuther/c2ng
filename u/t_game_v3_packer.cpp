@@ -46,7 +46,7 @@ TestGameV3Packer::testUnpackShip()
     TS_ASSERT_EQUALS(out.beamType.orElse(-1),            6);
     TS_ASSERT_EQUALS(out.numBeams.orElse(-1),            6);
     TS_ASSERT_EQUALS(out.numBays.orElse(-1),             0);
-    TS_ASSERT_EQUALS(out.launcherType.orElse(-1),        6);
+    TS_ASSERT_EQUALS(out.torpedoType.orElse(-1),         6);
     TS_ASSERT_EQUALS(out.ammo.orElse(-1),                30);
     TS_ASSERT_EQUALS(out.numLaunchers.orElse(-1),        2);
     TS_ASSERT_EQUALS(out.mission.orElse(-1),             5);
@@ -172,7 +172,7 @@ TestGameV3Packer::testUnpackBase()
     TS_ASSERT_EQUALS(out.shipBuildOrder.getEngineType(),    6);
     TS_ASSERT_EQUALS(out.shipBuildOrder.getBeamType(),      6);
     TS_ASSERT_EQUALS(out.shipBuildOrder.getNumBeams(),      4);
-    TS_ASSERT_EQUALS(out.shipBuildOrder.getLauncherType(),  6);
+    TS_ASSERT_EQUALS(out.shipBuildOrder.getTorpedoType(),   6);
     TS_ASSERT_EQUALS(out.shipBuildOrder.getNumLaunchers(),  2);
 }
 

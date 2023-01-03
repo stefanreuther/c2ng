@@ -58,7 +58,7 @@ namespace {
         sd.numBeams = 5;
         sd.numBays = 10;
         sd.numLaunchers = 0;
-        sd.launcherType = 0;
+        sd.torpedoType = 0;
         sd.engineType = 9;
         sd.owner = PLAYER;
         sd.x = 1000;

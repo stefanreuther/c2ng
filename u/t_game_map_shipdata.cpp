@@ -51,7 +51,7 @@ TestGameMapShipData::testGetShipMassFreighter()
 
     setCargo(testee);
     testee.numLaunchers = 0;
-    testee.launcherType = 0;
+    testee.torpedoType = 0;
     testee.numBeams = 0;
     testee.beamType = 0;
 
@@ -74,7 +74,7 @@ TestGameMapShipData::testGetShipMassCapital()
 
     setCargo(testee);
     testee.numLaunchers = 7;     /* 7*5 = 35 */
-    testee.launcherType = 3;
+    testee.torpedoType = 3;
     testee.numBeams = 5;         /* 5*6 = 30 */
     testee.beamType = 4;
 
@@ -97,7 +97,7 @@ TestGameMapShipData::testGetShipMassNoHull()
 
     setCargo(testee);
     testee.numLaunchers = 7;
-    testee.launcherType = 3;
+    testee.torpedoType = 3;
     testee.numBeams = 5;
     testee.beamType = 4;
 
@@ -120,7 +120,7 @@ TestGameMapShipData::testGetShipMassNoBeam()
 
     setCargo(testee);
     testee.numLaunchers = 7;
-    testee.launcherType = 3;
+    testee.torpedoType = 3;
     testee.numBeams = 5;
     testee.beamType = 4;
 
@@ -143,7 +143,7 @@ TestGameMapShipData::testGetShipMassNoLauncher()
 
     setCargo(testee);
     testee.numLaunchers = 7;
-    testee.launcherType = 3;
+    testee.torpedoType = 3;
     testee.numBeams = 5;
     testee.beamType = 4;
 

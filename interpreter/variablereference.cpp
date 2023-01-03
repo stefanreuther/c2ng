@@ -48,7 +48,7 @@ interpreter::VariableReference::fromProcess(Process& proc, const String_t& name)
 afl::data::Value*
 interpreter::VariableReference::get(const ProcessList& list) const
 {
-    if (Process* p = list.getProcessById(m_processId)) {
+    if (Process* p = list.findProcessById(m_processId)) {
         return p->getVariable(m_name);
     } else {
         return 0;

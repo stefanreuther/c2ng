@@ -67,7 +67,7 @@ namespace {
         sh.object.numBeams           = uint8_t(p("BEAM.COUNT").toInteger());
         sh.object.experienceLevel    = uint8_t(p("LEVEL").toInteger());
         sh.object.numBays            = int16_t(fighters ? aux_count : 0);
-        sh.object.launcherType       = int16_t(!fighters ? aux_type : 0);
+        sh.object.torpedoType        = int16_t(!fighters ? aux_type : 0);
         sh.object.ammo               = int16_t(p("AUX.AMMO").toInteger());
         sh.object.numLaunchersPacked = int16_t(!fighters ? aux_count : 0);
         sh.engineType                = int16_t(p("ENGINE").toInteger());
@@ -140,8 +140,8 @@ namespace {
                          : uint16_t(sh.flags) + 65536*sh.flags2);
 
         /* Map fighters/torps to one, as we do for ships */
-        int32_t aux_type = (sh.object.numLaunchersPacked > 0 && sh.object.launcherType > 0 && sh.object.launcherType <= gs::NUM_TORPEDO_TYPES
-                            ? sh.object.launcherType
+        int32_t aux_type = (sh.object.numLaunchersPacked > 0 && sh.object.torpedoType > 0 && sh.object.torpedoType <= gs::NUM_TORPEDO_TYPES
+                            ? sh.object.torpedoType
                             : sh.object.numBays > 0
                             ? gs::NUM_TORPEDO_TYPES+1
                             : 0);

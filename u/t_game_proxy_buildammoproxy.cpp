@@ -84,7 +84,7 @@ namespace {
         sd.engineType = 9;
         sd.beamType = 0;
         sd.numBeams = 0;
-        sd.launcherType = 2;
+        sd.torpedoType = 2;
         sd.numLaunchers = 1;
         sd.crew = 10;
         sd.ammo = 20;

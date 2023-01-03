@@ -178,7 +178,7 @@ game::map::Universe::getObject(Reference ref) const
      case Reference::Planet:
      case Reference::Starbase:
         return planets().get(ref.getId());
-     case Reference::Storm:
+     case Reference::IonStorm:
         return ionStorms().get(ref.getId());
      case Reference::Minefield:
         return minefields().get(ref.getId());

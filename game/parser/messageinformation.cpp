@@ -121,7 +121,7 @@ game::parser::MessageInformation::getObjectReference() const
      case Minefield:
         return Reference(Reference::Minefield, m_id);
      case IonStorm:
-        return Reference(Reference::Storm, m_id);
+        return Reference(Reference::IonStorm, m_id);
      case Ufo:
         return Reference(Reference::Ufo, m_id);
      case Wormhole:

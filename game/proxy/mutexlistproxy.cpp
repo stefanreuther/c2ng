@@ -8,7 +8,7 @@
 // Constructor.
 game::proxy::MutexListProxy::MutexListProxy(util::RequestSender<Session> gameSender)
     : m_gameSender(gameSender)
-{ }    
+{ }
 
 // Enumerate mutexes owned by a process.
 void
@@ -21,7 +21,7 @@ game::proxy::MutexListProxy::enumMutexes(WaitIndicator& link, Infos_t& result, u
             { }
         virtual void handle(Session& session)
             {
-                if (interpreter::Process* p = session.processList().getProcessById(m_processId)) {
+                if (interpreter::Process* p = session.processList().findProcessById(m_processId)) {
                     buildList(m_result, session, p);
                 }
             }

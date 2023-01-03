@@ -59,12 +59,12 @@ namespace game {
         /** Get type of torpedo launchers.
             Can be zero if count is also zero.
             \return type */
-        int getLauncherType() const;
+        int getTorpedoType() const;
 
         /** Set type of torpedo launchers.
             Can be zero if count is also zero.
             \param n type */
-        void setLauncherType(int n);
+        void setTorpedoType(int n);
 
         /** Get number of torpedo launchers.
             \return number */
@@ -102,7 +102,7 @@ namespace game {
         int m_engineType;
         int m_beamType;
         int m_numBeams;
-        int m_launcherType;
+        int m_torpedoType;
         int m_numLaunchers;
     };
 

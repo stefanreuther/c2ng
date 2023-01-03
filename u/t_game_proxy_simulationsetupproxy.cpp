@@ -95,7 +95,7 @@ namespace {
         sd.engineType = 5;
         sd.beamType = 7;
         sd.numBeams = 1;
-        sd.launcherType = 0;
+        sd.torpedoType = 0;
         sd.numLaunchers = 0;
         sd.ammo = 0;
         sd.friendlyCode = "abc";

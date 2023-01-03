@@ -132,7 +132,7 @@ game::interface::NotificationStore::removeOrphanedMessages()
     size_t out = 0;
     for (size_t i = 0, n = m_messages.size(); i < n; ++i) {
         uint32_t pid;
-        if (m_messages[i]->assoc.get(pid) && m_processList.getProcessById(pid) == 0) {
+        if (m_messages[i]->assoc.get(pid) && m_processList.findProcessById(pid) == 0) {
             // Message linked with a pid, but that pid does not exist - skip it
         } else {
             // Message shall be kept
@@ -211,7 +211,7 @@ game::interface::NotificationStore::getMessageDisplayText(size_t index, afl::str
         // Extra info
         uint32_t pid;
         if (msg->assoc.get(pid)) {
-            if (interpreter::Process* proc = m_processList.getProcessById(pid)) {
+            if (interpreter::Process* proc = m_processList.findProcessById(pid)) {
                 if (msg->confirmed) {
                     addStatus(result, UTF_CHECK_MARK, util::SkinColor::Green, tx("This message has been confirmed."));
                 } else if (proc->getProcessKind() != interpreter::Process::pkDefault) {

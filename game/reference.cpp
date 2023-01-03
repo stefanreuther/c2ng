@@ -77,7 +77,7 @@ game::Reference::toString(afl::string::Translator& tx) const
      case Ship:         fmt = N_("Ship #%d");         break;
      case Planet:       fmt = N_("Planet #%d");       break;
      case Starbase:     fmt = N_("Starbase #%d");     break;
-     case Storm:        fmt = N_("Ion Storm #%d");    break;
+     case IonStorm:     fmt = N_("Ion Storm #%d");    break;
      case Minefield:    fmt = N_("Minefield #%d");    break;
      case Ufo:          fmt = N_("Ufo #%d");          break;
      case Hull:         fmt = N_("Hull #%d");         break;

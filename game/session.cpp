@@ -179,7 +179,7 @@ game::Session::getAutoTaskEditor(Id_t id, interpreter::Process::ProcessKind kind
     }
 
     // Find the process
-    Process* proc = processList().getProcessByObject(obj, kind);
+    Process* proc = processList().findProcessByObject(obj, kind);
     if (proc == 0 && create) {
         // Create process
         String_t fmt = (kind == Process::pkShipTask
@@ -253,7 +253,7 @@ game::Session::getTaskStatus(const game::map::Object* obj, interpreter::Process:
     using interpreter::Process;
     using game::interface::NotificationStore;
     if (waitOnly) {
-        if (const Process* proc = m_processList.getProcessByObject(obj, kind)) {
+        if (const Process* proc = m_processList.findProcessByObject(obj, kind)) {
             if (m_notifications.isMessageConfirmed(m_notifications.findMessageByProcessId(proc->getProcessId()))) {
                 return WaitingTask;
             } else {
@@ -414,7 +414,7 @@ game::Session::getReferenceName(Reference ref, ObjectName which, String_t& resul
      case Reference::Ship:
      case Reference::Planet:
      case Reference::Starbase:
-     case Reference::Storm:
+     case Reference::IonStorm:
      case Reference::Minefield:
      case Reference::Ufo:
         // Return normal object's name.
@@ -523,11 +523,11 @@ game::Session::hasTask(Scope scope, int id)
         const interpreter::ProcessList& list = processList();
         switch (scope) {
          case Ship:
-            return list.getProcessByObject(univ.ships().get(id), Process::pkShipTask) != 0;
+            return list.findProcessByObject(univ.ships().get(id), Process::pkShipTask) != 0;
          case Planet:
-            return list.getProcessByObject(univ.planets().get(id), Process::pkPlanetTask) != 0;
+            return list.findProcessByObject(univ.planets().get(id), Process::pkPlanetTask) != 0;
          case Base:
-            return list.getProcessByObject(univ.planets().get(id), Process::pkBaseTask) != 0;
+            return list.findProcessByObject(univ.planets().get(id), Process::pkBaseTask) != 0;
         }
     }
     return false;

@@ -37,7 +37,7 @@ game::spec::ShipList::getComponent(Reference ref) const
      case Reference::Ship:
      case Reference::Planet:
      case Reference::Starbase:
-     case Reference::Storm:
+     case Reference::IonStorm:
      case Reference::Minefield:
      case Reference::Ufo:
         return 0;

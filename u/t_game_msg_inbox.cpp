@@ -525,7 +525,7 @@ TestGameMsgInbox::testPrimaryLink()
                       " 26 LY from planet\n", 3);
 
     // Check default settings
-    TS_ASSERT_EQUALS(testee.getMessageMetadata(0, tx, list).primaryLink, game::Reference(game::Reference::Storm, 6));
+    TS_ASSERT_EQUALS(testee.getMessageMetadata(0, tx, list).primaryLink, game::Reference(game::Reference::IonStorm, 6));
     TS_ASSERT_EQUALS(testee.getMessageMetadata(0, tx, list).secondaryLink, game::Reference(game::map::Point(1959, 1110)));
 
     // Override association

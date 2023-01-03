@@ -147,7 +147,7 @@ namespace {
         sd.beamType = 4;
         sd.numBeams = 5;
         sd.numBays = 0;
-        sd.launcherType = 3;
+        sd.torpedoType = 3;
         sd.ammo = 100;
         sd.numLaunchers = 8;
         sd.supplies = 1000;

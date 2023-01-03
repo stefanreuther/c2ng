@@ -113,7 +113,7 @@ namespace {
                 info.addValue(gp::mi_ShipBeamType, obj.getBeamType());
                 info.addValue(gp::mi_ShipNumBeams, obj.getNumBeams());
                 info.addValue(gp::mi_ShipNumBays, obj.getNumBays());
-                info.addValue(gp::mi_ShipLauncherType, obj.getTorpedoType());
+                info.addValue(gp::mi_ShipTorpedoType, obj.getTorpedoType());
                 info.addValue(gp::mi_ShipNumLaunchers, obj.getNumLaunchers());
                 info.addValue(gp::mi_ShipAmmo, obj.getNumBays() == 0 ? obj.getNumTorpedoes() : obj.getNumFighters());
                 info.addValue(gp::mi_Damage, obj.getDamage());

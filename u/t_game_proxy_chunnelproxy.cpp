@@ -90,7 +90,7 @@ namespace {
         data.engineType                = 1;
         data.hullType                  = hull;
         data.beamType                  = 0;
-        data.launcherType              = 0;
+        data.torpedoType               = 0;
         data.warpFactor                = 3;
         data.neutronium                = 60;
 

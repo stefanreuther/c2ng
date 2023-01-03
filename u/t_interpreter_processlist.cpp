@@ -358,12 +358,12 @@ TestInterpreterProcessList::testPriority()
     TS_ASSERT_EQUALS(testee.getProcessList()[0], &p1);
     TS_ASSERT_EQUALS(testee.getProcessList()[1], &p2);
     TS_ASSERT_EQUALS(testee.getProcessList()[2], &p3);
-    TS_ASSERT_EQUALS(testee.getProcessById(p1.getProcessId()), &p1);
-    TS_ASSERT_EQUALS(testee.getProcessById(p2.getProcessId()), &p2);
-    TS_ASSERT_EQUALS(testee.getProcessById(p3.getProcessId()), &p3);
+    TS_ASSERT_EQUALS(testee.findProcessById(p1.getProcessId()), &p1);
+    TS_ASSERT_EQUALS(testee.findProcessById(p2.getProcessId()), &p2);
+    TS_ASSERT_EQUALS(testee.findProcessById(p3.getProcessId()), &p3);
 
     uint32_t unknownPID = (p1.getProcessId() | p2.getProcessId() | p3.getProcessId()) + 1;
-    TS_ASSERT(testee.getProcessById(unknownPID) == 0);
+    TS_ASSERT(testee.findProcessById(unknownPID) == 0);
 
     // Null operation on 2's priority
     p2.setPriority(50);
@@ -861,10 +861,10 @@ TestInterpreterProcessList::testObject()
     obj.markClean();
 
     // Will not find the process with wrong kind
-    TS_ASSERT(testee.getProcessByObject(&obj, Process::pkBaseTask) == 0);
+    TS_ASSERT(testee.findProcessByObject(&obj, Process::pkBaseTask) == 0);
 
     // Find the process with correct kind
-    TS_ASSERT_EQUALS(testee.getProcessByObject(&obj, Process::pkDefault), &p2);
+    TS_ASSERT_EQUALS(testee.findProcessByObject(&obj, Process::pkDefault), &p2);
 
     // Kill it
     TS_ASSERT_EQUALS(obj.isDirty(), false);
@@ -873,6 +873,6 @@ TestInterpreterProcessList::testObject()
     TS_ASSERT_EQUALS(obj.isDirty(), true);
 
     // Will no longer find the process
-    TS_ASSERT(testee.getProcessByObject(&obj, Process::pkDefault) == 0);
+    TS_ASSERT(testee.findProcessByObject(&obj, Process::pkDefault) == 0);
 }
 

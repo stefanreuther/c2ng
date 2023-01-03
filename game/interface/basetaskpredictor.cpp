@@ -72,7 +72,7 @@ game::interface::BaseTaskPredictor::advanceTurn()
             consumeBaseParts(m_planet, EngineTech, order.getEngineType(), h->getNumEngines());
         }
         consumeBaseParts(m_planet, BeamTech, order.getBeamType(), order.getNumBeams());
-        consumeBaseParts(m_planet, TorpedoTech, order.getLauncherType(), order.getNumLaunchers());
+        consumeBaseParts(m_planet, TorpedoTech, order.getTorpedoType(), order.getNumLaunchers());
 
         // Mark done
         m_planet.setBaseBuildOrder(ShipBuildOrder());
@@ -169,7 +169,7 @@ game::interface::BaseTaskPredictor::postBuildOrder(ShipBuildOrder order)
                 buildBaseParts(m_planet, EngineTech, order.getEngineType(), h->getNumEngines());
             }
             buildBaseParts(m_planet, BeamTech, order.getBeamType(), order.getNumBeams());
-            buildBaseParts(m_planet, TorpedoTech, order.getLauncherType(), order.getNumLaunchers());
+            buildBaseParts(m_planet, TorpedoTech, order.getTorpedoType(), order.getNumLaunchers());
             order.setHullIndex(slot);
             m_planet.setBaseBuildOrder(order);
         } else {

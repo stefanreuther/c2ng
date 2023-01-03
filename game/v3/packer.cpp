@@ -80,7 +80,7 @@ game::v3::Packer::unpackShip(game::map::ShipData& out, const game::v3::structure
     out.beamType            = in.beamType;
     out.numBeams            = in.numBeams;
     out.numBays             = in.numBays;
-    out.launcherType        = in.launcherType;
+    out.torpedoType         = in.torpedoType;
     out.ammo                = in.ammo;
     out.numLaunchers        = in.numLaunchers;
     out.mission             = in.mission;
@@ -180,7 +180,7 @@ game::v3::Packer::unpackBase(game::map::BaseData& out, const game::v3::structure
     out.shipBuildOrder.setEngineType(in.shipBuildOrder.engineType);
     out.shipBuildOrder.setBeamType(in.shipBuildOrder.beamType);
     out.shipBuildOrder.setNumBeams(in.shipBuildOrder.numBeams);
-    out.shipBuildOrder.setLauncherType(in.shipBuildOrder.launcherType);
+    out.shipBuildOrder.setTorpedoType(in.shipBuildOrder.torpedoType);
     out.shipBuildOrder.setNumLaunchers(in.shipBuildOrder.numLaunchers);
 }
 
@@ -207,7 +207,7 @@ game::v3::Packer::packShip(game::v3::structures::Ship& out, int id, const game::
     copyOut(out.beamType, in.beamType);
     copyOut(out.numBeams, in.numBeams);
     copyOut(out.numBays, in.numBays);
-    copyOut(out.launcherType, in.launcherType);
+    copyOut(out.torpedoType, in.torpedoType);
     copyOut(out.ammo, in.ammo);
     copyOut(out.numLaunchers, in.numLaunchers);
 
@@ -320,7 +320,7 @@ game::v3::Packer::packBase(game::v3::structures::Base& out, int id, const game::
     out.shipBuildOrder.engineType   = static_cast<int16_t>(in.shipBuildOrder.getEngineType());
     out.shipBuildOrder.beamType     = static_cast<int16_t>(in.shipBuildOrder.getBeamType());
     out.shipBuildOrder.numBeams     = static_cast<int16_t>(in.shipBuildOrder.getNumBeams());
-    out.shipBuildOrder.launcherType = static_cast<int16_t>(in.shipBuildOrder.getLauncherType());
+    out.shipBuildOrder.torpedoType  = static_cast<int16_t>(in.shipBuildOrder.getTorpedoType());
     out.shipBuildOrder.numLaunchers = static_cast<int16_t>(in.shipBuildOrder.getNumLaunchers());
     out.shipBuildOrder.zero = 0;
 }

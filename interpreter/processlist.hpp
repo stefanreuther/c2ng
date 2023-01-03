@@ -181,13 +181,13 @@ namespace interpreter {
             \param obj Invoking object
             \param kind Process kind
             \return process if any, 0 if none */
-        Process* getProcessByObject(const game::map::Object* obj, uint8_t kind) const;
+        Process* findProcessByObject(const game::map::Object* obj, uint8_t kind) const;
 
-        /** Get process, given a process Id.
+        /** Find process, given a process Id.
             Locates a process with the given Id.
             \param processId process id
             \return process if any, 0 if none */
-        Process* getProcessById(uint32_t processId) const;
+        Process* findProcessById(uint32_t processId) const;
 
         /** Get process list.
             Use with care. */

@@ -152,7 +152,7 @@ game::map::Cursors::getReferenceTypeByNumber(int nr)
      case AllShips:      return Reference::Ship;
      case AllPlanets:    return Reference::Planet;
      case Ufos:          return Reference::Ufo;
-     case IonStorms:     return Reference::Storm;
+     case IonStorms:     return Reference::IonStorm;
      case Minefields:    return Reference::Minefield;
     }
     return Reference::Null;

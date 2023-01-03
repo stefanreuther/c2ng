@@ -104,7 +104,7 @@ namespace game { namespace parser {
         mi_ShipBeamType,
         mi_ShipNumBeams,
         mi_ShipNumBays,
-        mi_ShipLauncherType,
+        mi_ShipTorpedoType,
         mi_ShipAmmo,
         mi_ShipNumLaunchers,
         mi_ShipMission,

@@ -190,7 +190,7 @@ game::db::Packer::addShip(Turn& turn, const structures::Ship& ship)
         addValueMaybe(info, gp::mi_ShipBeamType,     ship.ship.beamType,     -1);
         addValueMaybe(info, gp::mi_ShipNumBeams,     ship.ship.numBeams,     -1);
         addValueMaybe(info, gp::mi_ShipNumBays,      ship.ship.numBays,      -1);
-        addValueMaybe(info, gp::mi_ShipLauncherType, ship.ship.launcherType, -1);
+        addValueMaybe(info, gp::mi_ShipTorpedoType,  ship.ship.torpedoType,  -1);
         addValueMaybe(info, gp::mi_ShipAmmo,         ship.ship.ammo,         -1);
         addValueMaybe(info, gp::mi_ShipNumLaunchers, ship.ship.numLaunchers, -1);
         addValueMaybe(info, gp::mi_Damage,           ship.ship.damage,       -1);

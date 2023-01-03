@@ -138,8 +138,8 @@ game::map::Ship::addMessageInformation(const game::parser::MessageInformation& i
                 updateField(m_historyTimestamps[MilitaryTime], turn, !isCurrent, m_currentData.numBays, iv->getValue());
                 break;
 
-             case gp::mi_ShipLauncherType:
-                updateField(m_historyTimestamps[MilitaryTime], turn, !isCurrent, m_currentData.launcherType, iv->getValue());
+             case gp::mi_ShipTorpedoType:
+                updateField(m_historyTimestamps[MilitaryTime], turn, !isCurrent, m_currentData.torpedoType, iv->getValue());
                 break;
 
              case gp::mi_ShipAmmo:
@@ -836,14 +836,14 @@ game::IntegerProperty_t
 game::map::Ship::getTorpedoType() const
 {
     // ex GShip::getTorpType
-    return m_currentData.launcherType;
+    return m_currentData.torpedoType;
 }
 
 void
 game::map::Ship::setTorpedoType(IntegerProperty_t type)
 {
     // ex GShip::setTorpType
-    m_currentData.launcherType = type;
+    m_currentData.torpedoType = type;
     markDirty();
 }
 
@@ -851,7 +851,7 @@ game::IntegerProperty_t
 game::map::Ship::getNumLaunchers() const
 {
     // ex GShip::getNumTorpLaunchers
-    if (m_currentData.launcherType.isSame(0)) {
+    if (m_currentData.torpedoType.isSame(0)) {
         return 0;
     } else {
         return m_currentData.numLaunchers;
@@ -1006,7 +1006,7 @@ game::IntegerProperty_t
 game::map::Ship::getCargo(Element::Type type) const
 {
     // ex GShip::getCargoRaw, GShip::getCargo
-    int numBays, expectedType, numLaunchers, launcherType;
+    int numBays, expectedType, numLaunchers, torpedoType;
     switch (type) {
      case Element::Neutronium:
         return m_currentData.neutronium;
@@ -1037,8 +1037,8 @@ game::map::Ship::getCargo(Element::Type type) const
         return m_currentData.money;
      default:
         if (Element::isTorpedoType(type, expectedType)) {
-            if (getTorpedoType().get(launcherType)) {
-                if (launcherType == expectedType) {
+            if (getTorpedoType().get(torpedoType)) {
+                if (torpedoType == expectedType) {
                     // Asking correct torpedo type
                     return m_currentData.ammo;
                 } else {
@@ -1062,7 +1062,7 @@ game::map::Ship::getCargo(Element::Type type) const
 void
 game::map::Ship::setCargo(Element::Type type, IntegerProperty_t amount)
 {
-    int numBays, expectedType, launcherType;
+    int numBays, expectedType, torpedoType;
     switch (type) {
      case Element::Neutronium:
         m_currentData.neutronium = amount;
@@ -1093,8 +1093,8 @@ game::map::Ship::setCargo(Element::Type type, IntegerProperty_t amount)
         break;
      default:
         if (Element::isTorpedoType(type, expectedType)
-            && getTorpedoType().get(launcherType)
-            && launcherType == expectedType)
+            && getTorpedoType().get(torpedoType)
+            && torpedoType == expectedType)
         {
             m_currentData.ammo = amount;
         }

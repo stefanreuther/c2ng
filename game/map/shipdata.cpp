@@ -16,7 +16,7 @@ game::map::getShipMass(const ShipData& data, const game::spec::ShipList& shipLis
     if (data.hullType.get(hull) && data.ammo.get(ammo)
         && data.neutronium.get(n) && data.tritanium.get(t) && data.duranium.get(d) && data.molybdenum.get(m)
         && data.colonists.get(col) && data.supplies.get(sup)
-        && data.numLaunchers.get(nl) && data.launcherType.get(lt)
+        && data.numLaunchers.get(nl) && data.torpedoType.get(lt)
         && data.numBeams.get(nb) && data.beamType.get(bt))
     {
         const game::spec::Hull* pHull = shipList.hulls().get(hull);

@@ -63,7 +63,7 @@ game::actions::BuildParts::getMinParts(TechLevel area, int slot) const
             requiredAmount = buildOrder.getNumBeams();
             break;
          case TorpedoTech:
-            occupiedSlot = buildOrder.getLauncherType();
+            occupiedSlot = buildOrder.getTorpedoType();
             requiredAmount = buildOrder.getNumLaunchers();
             break;
         }

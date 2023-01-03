@@ -95,7 +95,7 @@ TestGameSession::testReferenceNameEmpty()
     TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Ship, 17),         game::PlainName, s), false);
     TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Planet, 9),        game::PlainName, s), false);
     TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Starbase, 9),      game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Storm, 4),         game::PlainName, s), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::IonStorm, 4),      game::PlainName, s), false);
     TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Minefield, 150),   game::PlainName, s), false);
     TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Ufo, 42),          game::PlainName, s), false);
     TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Hull, 15),         game::PlainName, s), false);
@@ -152,7 +152,7 @@ TestGameSession::testReferenceNameNonempty()
     TS_ASSERT_EQUALS(s, "Pluto");
     TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Starbase, 9),      game::PlainName, s), true);
     TS_ASSERT_EQUALS(s, "Pluto");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Storm, 4),         game::PlainName, s), true);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::IonStorm, 4),      game::PlainName, s), true);
     TS_ASSERT_EQUALS(s, "Kathrina");
     TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Minefield, 150),   game::PlainName, s), true);
     TS_ASSERT_EQUALS(s, "Deleted Mine Field #150");
@@ -179,7 +179,7 @@ TestGameSession::testReferenceNameNonempty()
     TS_ASSERT_EQUALS(s, "Planet #9: Pluto");
     TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Starbase, 9),      game::DetailedName, s), true);
     TS_ASSERT_EQUALS(s, "Starbase #9: Pluto");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Storm, 4),         game::DetailedName, s), true);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::IonStorm, 4),      game::DetailedName, s), true);
     TS_ASSERT_EQUALS(s, "Ion storm #4: Kathrina");
     TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Minefield, 150),   game::DetailedName, s), true);
     TS_ASSERT_EQUALS(s, "Deleted Mine Field #150");
@@ -200,7 +200,7 @@ TestGameSession::testReferenceNameNonempty()
     TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Ship, 18),         game::PlainName, s), false);
     TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Planet, 8),        game::PlainName, s), false);
     TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Starbase, 8),      game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Storm, 5),         game::PlainName, s), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::IonStorm, 5),      game::PlainName, s), false);
     TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Minefield, 152),   game::PlainName, s), false);
     TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Ufo, 43),          game::PlainName, s), false);
     TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Hull, 16),         game::PlainName, s), false);

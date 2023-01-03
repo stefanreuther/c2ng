@@ -457,7 +457,7 @@ interpreter::ProcessList::handlePriorityChange(const Process& proc)
 
 // Get process, given an object.
 interpreter::Process*
-interpreter::ProcessList::getProcessByObject(const game::map::Object* obj, uint8_t kind) const
+interpreter::ProcessList::findProcessByObject(const game::map::Object* obj, uint8_t kind) const
 {
     // ex int/process.h:getProcessByObject
     for (Vector_t::const_iterator i = m_processes.begin(); i != m_processes.end(); ++i) {
@@ -470,7 +470,7 @@ interpreter::ProcessList::getProcessByObject(const game::map::Object* obj, uint8
 
 // Get process, given a process Id.
 interpreter::Process*
-interpreter::ProcessList::getProcessById(uint32_t processId) const
+interpreter::ProcessList::findProcessById(uint32_t processId) const
 {
     for (Vector_t::const_iterator i = m_processes.begin(); i != m_processes.end(); ++i) {
         if ((*i)->getProcessId() == processId) {

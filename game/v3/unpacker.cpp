@@ -81,7 +81,7 @@ namespace {
             // Dominate(?) creates ships with zero launchers of type X. Some clients
             // including ancient PCC versions erroneously treat these as torpers.
             if (in.numLaunchers == 0) {
-                in.launcherType = 0;
+                in.torpedoType = 0;
             }
         }
 

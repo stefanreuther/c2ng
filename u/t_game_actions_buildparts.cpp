@@ -346,7 +346,7 @@ TestGameActionsBuildParts::testShipBuild()
     sbo.setNumBeams(1);
     sbo.setBeamType(4);
     sbo.setNumLaunchers(1);
-    sbo.setLauncherType(3);
+    sbo.setTorpedoType(3);
     h.planet.setBaseBuildOrder(sbo);
 
     // Commit
@@ -376,7 +376,7 @@ TestGameActionsBuildParts::testShipBuildMin()
     sbo.setNumBeams(2);
     sbo.setBeamType(4);
     sbo.setNumLaunchers(1);
-    sbo.setLauncherType(3);
+    sbo.setTorpedoType(3);
     h.planet.setBaseBuildOrder(sbo);
 
     // Build the action. Check that it protects the ship build order.
@@ -414,7 +414,7 @@ TestGameActionsBuildParts::testShipBuildOther()
     sbo.setNumBeams(2);
     sbo.setBeamType(5);
     sbo.setNumLaunchers(1);
-    sbo.setLauncherType(6);
+    sbo.setTorpedoType(6);
     h.planet.setBaseBuildOrder(sbo);
 
     // Build the action. Does not match ship being built, so this goes through.

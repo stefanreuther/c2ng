@@ -343,7 +343,7 @@ game::interface::getBaseProperty(const game::map::Planet& pl, BaseProperty ibp,
      case ibpBuildTorp:
         /* @q Build.Torp$:Int (Planet Property)
            Torpedo type for ship to build on starbase. EMPTY if no base. */
-        return makeIntegerValue(pl.getBaseBuildOrder().getLauncherType());
+        return makeIntegerValue(pl.getBaseBuildOrder().getTorpedoType());
      case ibpBuildTorpCount:
         /* @q Build.Torp.Count:Int (Planet Property)
            Number of torpedo tubes for ship to build on starbase. EMPTY if no base. */

@@ -40,7 +40,7 @@ namespace {
         out.setHull(obj.hullTypeOrZero);
         out.setBeamType(obj.beamType);
         out.setNumBeams(obj.numBeams);
-        out.setTorpedoType(obj.launcherType);
+        out.setTorpedoType(obj.torpedoType);
         out.setNumBays(obj.numBays);
         out.setExperienceLevel(obj.experienceLevel);
         out.setIsPlanet(side == game::vcr::classic::RightSide && in.battleType != 0);

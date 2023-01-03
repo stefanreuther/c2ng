@@ -274,7 +274,7 @@ game::msg::formatMessage(const String_t& in, const PlayerList& players, afl::str
 
      case 'i': // ion storm
         if (int32_t id = getMessageHeaderInformation(lines, game::parser::MsgHdrId)) {
-            out.headerLink = Reference(Reference::Storm, id);
+            out.headerLink = Reference(Reference::IonStorm, id);
         }
         break;
 

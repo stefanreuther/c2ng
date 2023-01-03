@@ -68,7 +68,7 @@ TestGameProxyReferenceObserverProxy::testIt()
     String_t result;
 
     game::proxy::ReferenceObserverProxy testee(s.gameSender());
-    testee.setReference(game::Reference(game::Reference::Storm, 34));
+    testee.setReference(game::Reference(game::Reference::IonStorm, 34));
 
     // Add listener and wait for initial report
     testee.addNewListener(new Listener(sem, result));
@@ -76,7 +76,7 @@ TestGameProxyReferenceObserverProxy::testIt()
     TS_ASSERT_EQUALS(result, "Fred");
 
     // Change to new object and wait for report
-    testee.setReference(game::Reference(game::Reference::Storm, 55));
+    testee.setReference(game::Reference(game::Reference::IonStorm, 55));
     TS_ASSERT(sem.wait(1000));
     TS_ASSERT_EQUALS(result, "Wilma");
 

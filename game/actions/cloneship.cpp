@@ -94,7 +94,7 @@ game::actions::CloneShip::getBuildOrder() const
     result.setEngineType(m_ship.getEngineType().orElse(0));
     result.setBeamType(m_ship.getBeamType().orElse(0));
     result.setNumBeams(m_ship.getNumBeams().orElse(0));
-    result.setLauncherType(m_ship.getTorpedoType().orElse(0));
+    result.setTorpedoType(m_ship.getTorpedoType().orElse(0));
     result.setNumLaunchers(m_ship.getNumLaunchers().orElse(0));
     return result;
 }

@@ -87,7 +87,7 @@ TestGameActionsCloneShip::testNormal()
     TS_ASSERT_EQUALS(testee.getBuildOrder().getHullIndex(), game::test::OUTRIDER_HULL_ID);
     TS_ASSERT_EQUALS(testee.getBuildOrder().getEngineType(), game::test::NOVA_ENGINE_ID);
     TS_ASSERT_EQUALS(testee.getBuildOrder().getBeamType(), BEAM_TYPE);
-    TS_ASSERT_EQUALS(testee.getBuildOrder().getLauncherType(), 0);
+    TS_ASSERT_EQUALS(testee.getBuildOrder().getTorpedoType(), 0);
 
     // Status
     TS_ASSERT_EQUALS(testee.getOrderStatus(), game::actions::CloneShip::CanClone);

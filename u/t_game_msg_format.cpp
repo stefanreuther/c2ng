@@ -246,7 +246,7 @@ TestGameMsgFormat::testFormatMessage()
                                                          "System is growing\n", playerList, tx);
 
         TS_ASSERT_EQUALS(msg.firstLink, game::Reference(game::map::Point(1762, 2067)));
-        TS_ASSERT_EQUALS(msg.headerLink, game::Reference(game::Reference::Storm, 36));
+        TS_ASSERT_EQUALS(msg.headerLink, game::Reference(game::Reference::IonStorm, 36));
         TS_ASSERT_EQUALS(msg.reply, game::PlayerSet_t());
         TS_ASSERT_EQUALS(msg.replyAll, game::PlayerSet_t());
     }

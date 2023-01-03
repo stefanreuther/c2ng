@@ -102,7 +102,7 @@ namespace {
         data.engineType                = 1;
         data.hullType                  = HULL_NR;
         data.beamType                  = 0;
-        data.launcherType              = 0;
+        data.torpedoType               = 0;
         data.mission                   = 0;
         data.missionTowParameter       = 0;
         data.missionInterceptParameter = 0;

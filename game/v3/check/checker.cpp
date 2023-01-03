@@ -1122,7 +1122,7 @@ game::v3::check::Checker::rangeCheckShips()
         checkInvariant("Beam type",   dat->beamType, dis->beamType, 0, NUM_BEAM_TYPES);
         checkInvariant("Beam count",  dat->numBeams, dis->numBeams, 0, MAXINT);
         checkInvariant("Bay count",   dat->numBays, dis->numBays, 0, MAXINT);
-        checkInvariant("Torp type",   dat->launcherType, dis->launcherType, 0, NUM_TORPEDO_TYPES);
+        checkInvariant("Torp type",   dat->torpedoType, dis->torpedoType, 0, NUM_TORPEDO_TYPES);
         checkInvariant("Torp launcher count", dat->numLaunchers, dis->numLaunchers, 0, MAXINT);
         checkEditable ("Ammo",        dat->ammo, dis->ammo, 0, cargo);
         checkEditable ("Mission",     dat->mission, dis->mission, 0, 10000);
@@ -1238,7 +1238,7 @@ game::v3::check::Checker::rangeCheckPlanets()
                 checkEditable("Build order: Hull",       bdat->shipBuildOrder.hullIndex,    bdis->shipBuildOrder.hullIndex,    0, 20);
                 checkEditable("Build order: Engine",     bdat->shipBuildOrder.engineType,   bdis->shipBuildOrder.engineType,   0, NUM_ENGINE_TYPES);
                 checkEditable("Build order: Beam type",  bdat->shipBuildOrder.beamType,     bdis->shipBuildOrder.beamType,     0, NUM_BEAM_TYPES);
-                checkEditable("Build order: Torp type",  bdat->shipBuildOrder.launcherType, bdis->shipBuildOrder.launcherType, 0, NUM_TORPEDO_TYPES);
+                checkEditable("Build order: Torp type",  bdat->shipBuildOrder.torpedoType,  bdis->shipBuildOrder.torpedoType,  0, NUM_TORPEDO_TYPES);
                 if (bdat->shipBuildOrder.zero != 0) {
                     logDivi();
                     logStr(Format("WARNING: The last word of starbase %d's ship build order is not zero.", i));
@@ -1276,8 +1276,8 @@ game::v3::check::Checker::rangeCheckPlanets()
                         if (bdat->shipBuildOrder.beamType <= NUM_BEAM_TYPES && bdat->shipBuildOrder.beamType > 0) {
                             checkComponent("beams", bdat->shipBuildOrder.numBeams, bdat->beamStorage[bdat->shipBuildOrder.beamType-1], hulls[x-1].maxBeams);
                         }
-                        if (bdat->shipBuildOrder.launcherType <= NUM_TORPEDO_TYPES && bdat->shipBuildOrder.launcherType > 0) {
-                            checkComponent("torpedo launchers", bdat->shipBuildOrder.numLaunchers, bdat->launcherStorage[bdat->shipBuildOrder.launcherType-1], hulls[x-1].maxLaunchers);
+                        if (bdat->shipBuildOrder.torpedoType <= NUM_TORPEDO_TYPES && bdat->shipBuildOrder.torpedoType > 0) {
+                            checkComponent("torpedo launchers", bdat->shipBuildOrder.numLaunchers, bdat->launcherStorage[bdat->shipBuildOrder.torpedoType-1], hulls[x-1].maxLaunchers);
                         }
                     }
                 }
@@ -1343,8 +1343,8 @@ game::v3::check::Checker::addShip(ResourceSummary& rs, const Ship_t& s)
     // ex check.pas:AddShip
     if (s.numBays != 0) {
         rs.fighters += s.ammo;
-    } else if (s.launcherType > 0 && s.launcherType <= NUM_TORPEDO_TYPES) {
-        rs.torps[s.launcherType-1] += s.ammo;
+    } else if (s.torpedoType > 0 && s.torpedoType <= NUM_TORPEDO_TYPES) {
+        rs.torps[s.torpedoType-1] += s.ammo;
     } else {
         // no ammo
     }
@@ -1646,7 +1646,7 @@ game::v3::check::Checker::flowCheckFreeSpace()
                      sid1, int(ships[sid1-1].dis->owner),
                      int(ships[sid1-1].dis->x), int(ships[sid1-1].dis->y));
         ships[sid1-1].seen = true;
-        
+
         bool ok = true;
         ResourceSummary dat = ResourceSummary();
         ResourceSummary dis = ResourceSummary();

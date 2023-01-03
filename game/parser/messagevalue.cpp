@@ -91,7 +91,7 @@ namespace {
         { "STATUS",            game::parser::mi_IonStatus               },
         { "SUPPLIES",          game::parser::mi_PlanetSupplies          },
         { "TEMP",              game::parser::mi_PlanetTemperature       },
-        { "TORP",              game::parser::mi_ShipLauncherType        },
+        { "TORP",              game::parser::mi_ShipTorpedoType         },
         { "TORP.LCOUNT",       game::parser::mi_ShipNumLaunchers        },
         { "TOTAL.D",           game::parser::mi_PlanetTotalD            },
         { "TOTAL.M",           game::parser::mi_PlanetTotalM            },
@@ -175,7 +175,7 @@ game::parser::getNameFromIndex(MessageIntegerIndex ii, afl::string::Translator& 
      case mi_ShipBeamType:      return tx("Beam Type");
      case mi_ShipNumBeams:      return tx("Number of Beams");
      case mi_ShipNumBays:       return tx("Number of Fighter Bays");
-     case mi_ShipLauncherType:  return tx("Torpedo Type");
+     case mi_ShipTorpedoType:   return tx("Torpedo Type");
      case mi_ShipAmmo:          return tx("Ammo");
      case mi_ShipNumLaunchers:  return tx("Number of Torpedo Launchers");
      case mi_ShipMission:       return tx("Mission");

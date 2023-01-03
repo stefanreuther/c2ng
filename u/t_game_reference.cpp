@@ -89,7 +89,7 @@ TestGameReference::testToString()
     TS_ASSERT_EQUALS(Reference(Reference::Ship,       9).toString(tx), "<Ship #9>");
     TS_ASSERT_EQUALS(Reference(Reference::Planet,     9).toString(tx), "<Planet #9>");
     TS_ASSERT_EQUALS(Reference(Reference::Starbase,   9).toString(tx), "<Starbase #9>");
-    TS_ASSERT_EQUALS(Reference(Reference::Storm,      9).toString(tx), "<Ion Storm #9>");
+    TS_ASSERT_EQUALS(Reference(Reference::IonStorm,   9).toString(tx), "<Ion Storm #9>");
     TS_ASSERT_EQUALS(Reference(Reference::Minefield,  9).toString(tx), "<Minefield #9>");
     TS_ASSERT_EQUALS(Reference(Reference::Ufo,        9).toString(tx), "<Ufo #9>");
     TS_ASSERT_EQUALS(Reference(Reference::Hull,       9).toString(tx), "<Hull #9>");

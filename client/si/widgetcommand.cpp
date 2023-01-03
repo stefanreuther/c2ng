@@ -81,7 +81,7 @@ client::si::IFWidgetRun(game::Session& /*session*/, ScriptSide& ss, const Widget
             {
                 uint32_t pid;
                 if (m_link.getProcessId(pid)) {
-                    if (interpreter::Process* parent = session.processList().getProcessById(pid)) {
+                    if (interpreter::Process* parent = session.processList().findProcessById(pid)) {
                         recv.pushNewContext(interpreter::ProcessObserverContext::create(*parent));
                     }
                 }

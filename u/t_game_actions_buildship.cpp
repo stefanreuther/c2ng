@@ -185,7 +185,7 @@ TestGameActionsBuildShip::testSuccess()
     TS_ASSERT_EQUALS(a.getBuildOrder().getEngineType(), 1);
     TS_ASSERT_EQUALS(a.getBuildOrder().getBeamType(), 1);
     TS_ASSERT_EQUALS(a.getBuildOrder().getNumBeams(), 4);
-    TS_ASSERT_EQUALS(a.getBuildOrder().getLauncherType(), 1);
+    TS_ASSERT_EQUALS(a.getBuildOrder().getTorpedoType(), 1);
     TS_ASSERT_EQUALS(a.getBuildOrder().getNumLaunchers(), 5);
 
     // Verify ShipQuery
@@ -207,7 +207,7 @@ TestGameActionsBuildShip::testSuccess()
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getEngineType(), 1);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getBeamType(), 1);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getNumBeams(), 4);
-    TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getLauncherType(), 1);
+    TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getTorpedoType(), 1);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getNumLaunchers(), 5);
 
     TS_ASSERT_EQUALS(h.planet.getBaseStorage(game::HullTech, HULL_SLOT).orElse(0), 1);
@@ -244,7 +244,7 @@ TestGameActionsBuildShip::testNoBeams()
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getEngineType(), 1);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getBeamType(), 0);      // <- also set to 0 by normalisation
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getNumBeams(), 0);
-    TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getLauncherType(), 1);
+    TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getTorpedoType(), 1);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getNumLaunchers(), 5);
 }
 
@@ -273,7 +273,7 @@ TestGameActionsBuildShip::testInitialTech()
     TS_ASSERT_EQUALS(a.getBuildOrder().getEngineType(), 3);
     TS_ASSERT_EQUALS(a.getBuildOrder().getBeamType(), 4);
     TS_ASSERT_EQUALS(a.getBuildOrder().getNumBeams(), 4);
-    TS_ASSERT_EQUALS(a.getBuildOrder().getLauncherType(), 5);
+    TS_ASSERT_EQUALS(a.getBuildOrder().getTorpedoType(), 5);
     TS_ASSERT_EQUALS(a.getBuildOrder().getNumLaunchers(), 5);
 
     // Verify cost:
@@ -301,7 +301,7 @@ TestGameActionsBuildShip::testTechUpgrade()
     game::ShipBuildOrder sbo = a.getBuildOrder();
     sbo.setEngineType(2);
     sbo.setBeamType(3);
-    sbo.setLauncherType(4);
+    sbo.setTorpedoType(4);
     a.setBuildOrder(sbo);
 
     // Verify cost:
@@ -322,7 +322,7 @@ TestGameActionsBuildShip::testTechUpgrade()
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getEngineType(), 2);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getBeamType(), 3);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getNumBeams(), 4);
-    TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getLauncherType(), 4);
+    TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getTorpedoType(), 4);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getNumLaunchers(), 5);
 
     TS_ASSERT_EQUALS(h.planet.getBaseStorage(game::HullTech, HULL_SLOT).orElse(0), 1);
@@ -425,7 +425,7 @@ TestGameActionsBuildShip::testUsePartsPartial()
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getEngineType(), 1);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getBeamType(), 1);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getNumBeams(), 4);
-    TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getLauncherType(), 1);
+    TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getTorpedoType(), 1);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getNumLaunchers(), 5);
 
     TS_ASSERT_EQUALS(h.planet.getBaseStorage(game::HullTech, HULL_SLOT).orElse(0), 1);
@@ -461,7 +461,7 @@ TestGameActionsBuildShip::testPreexistingOrder()
         sbo.setEngineType(2);
         sbo.setBeamType(4);
         sbo.setNumBeams(1);
-        sbo.setLauncherType(0);
+        sbo.setTorpedoType(0);
         sbo.setNumLaunchers(0);
         h.planet.setBaseBuildOrder(sbo);
     }
@@ -475,7 +475,7 @@ TestGameActionsBuildShip::testPreexistingOrder()
     TS_ASSERT_EQUALS(a.getBuildOrder().getEngineType(), 2);
     TS_ASSERT_EQUALS(a.getBuildOrder().getBeamType(), 4);
     TS_ASSERT_EQUALS(a.getBuildOrder().getNumBeams(), 1);
-    TS_ASSERT_EQUALS(a.getBuildOrder().getLauncherType(), 7);
+    TS_ASSERT_EQUALS(a.getBuildOrder().getTorpedoType(), 7);
     TS_ASSERT_EQUALS(a.getBuildOrder().getNumLaunchers(), 0);
     TS_ASSERT(a.isUsePartsFromStorage());
     TS_ASSERT(!a.isChange());
@@ -563,7 +563,7 @@ TestGameActionsBuildShip::testTechDisabled()
     game::ShipBuildOrder sbo = a.getBuildOrder();
     sbo.setEngineType(2);
     sbo.setBeamType(3);
-    sbo.setLauncherType(4);
+    sbo.setTorpedoType(4);
     a.setBuildOrder(sbo);
 
     // Verify cost:
@@ -609,7 +609,7 @@ TestGameActionsBuildShip::testModify()
     TS_ASSERT_EQUALS(a.getBuildOrder().getEngineType(), 1);
     TS_ASSERT_EQUALS(a.getBuildOrder().getBeamType(), 1);
     TS_ASSERT_EQUALS(a.getBuildOrder().getNumBeams(), 4);
-    TS_ASSERT_EQUALS(a.getBuildOrder().getLauncherType(), 1);
+    TS_ASSERT_EQUALS(a.getBuildOrder().getTorpedoType(), 1);
     TS_ASSERT_EQUALS(a.getBuildOrder().getNumLaunchers(), 5);
 
     // Modify components
@@ -624,7 +624,7 @@ TestGameActionsBuildShip::testModify()
     TS_ASSERT_EQUALS(a.getBuildOrder().getEngineType(), 6);
     TS_ASSERT_EQUALS(a.getBuildOrder().getBeamType(), 4);
     TS_ASSERT_EQUALS(a.getBuildOrder().getNumBeams(), 2);
-    TS_ASSERT_EQUALS(a.getBuildOrder().getLauncherType(), 5);
+    TS_ASSERT_EQUALS(a.getBuildOrder().getTorpedoType(), 5);
     TS_ASSERT_EQUALS(a.getBuildOrder().getNumLaunchers(), 1);
 
     // Maximize counts
@@ -639,7 +639,7 @@ TestGameActionsBuildShip::testModify()
     TS_ASSERT_EQUALS(a.getBuildOrder().getEngineType(), 6);   // unchanged
     TS_ASSERT_EQUALS(a.getBuildOrder().getBeamType(), 4);     // unchanged
     TS_ASSERT_EQUALS(a.getBuildOrder().getNumBeams(), 3);
-    TS_ASSERT_EQUALS(a.getBuildOrder().getLauncherType(), 5); // unchanged
+    TS_ASSERT_EQUALS(a.getBuildOrder().getTorpedoType(), 5); // unchanged
     TS_ASSERT_EQUALS(a.getBuildOrder().getNumLaunchers(), 10);
 }
 
@@ -754,12 +754,12 @@ TestGameActionsBuildShip::testBadLauncher()
     o.setHullIndex(HULL_SLOT);
     o.setEngineType(9);
     o.setNumLaunchers(1);
-    o.setLauncherType(20);        // Invalid type
+    o.setTorpedoType(20);        // Invalid type
     h.planet.setBaseBuildOrder(o);
 
     game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
 
-    TS_ASSERT_EQUALS(a.getBuildOrder().getLauncherType(), 1);
+    TS_ASSERT_EQUALS(a.getBuildOrder().getTorpedoType(), 1);
 }
 
 /** Test cost summary.

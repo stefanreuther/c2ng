@@ -17,7 +17,7 @@ game::ShipBuildOrder::ShipBuildOrder()
       m_engineType(0),
       m_beamType(0),
       m_numBeams(0),
-      m_launcherType(0),
+      m_torpedoType(0),
       m_numLaunchers(0)
 { }
 
@@ -70,15 +70,15 @@ game::ShipBuildOrder::setNumBeams(int n)
 }
 
 int
-game::ShipBuildOrder::getLauncherType() const
+game::ShipBuildOrder::getTorpedoType() const
 {
-    return m_launcherType;
+    return m_torpedoType;
 }
 
 void
-game::ShipBuildOrder::setLauncherType(int n)
+game::ShipBuildOrder::setTorpedoType(int n)
 {
-    m_launcherType = n;
+    m_torpedoType = n;
 }
 
 int
@@ -98,7 +98,7 @@ game::ShipBuildOrder::canonicalize()
 {
     // ex game/actions/baseship.cc:canonicalizeBuildOrder
     if (m_numLaunchers == 0) {
-        m_launcherType = 0;
+        m_torpedoType = 0;
     }
     if (m_numBeams == 0) {
         m_beamType = 0;
@@ -129,7 +129,7 @@ game::ShipBuildOrder::describe(afl::data::StringList_t& result, const game::spec
         }
 
         if (m_numLaunchers != 0) {
-            if (const game::spec::TorpedoLauncher* pTL = shipList.launchers().get(m_launcherType)) {
+            if (const game::spec::TorpedoLauncher* pTL = shipList.launchers().get(m_torpedoType)) {
                 result.push_back(Format(fmt, m_numLaunchers, pTL->getName(namer)));
             }
         }
@@ -152,7 +152,7 @@ game::ShipBuildOrder::toScriptCommand(String_t verb, const game::spec::ShipList*
             << m_hullIndex
             << m_engineType
             << m_beamType << m_numBeams
-            << m_launcherType << m_numLaunchers;
+            << m_torpedoType << m_numLaunchers;
         if (pShipList != 0) {
             if (game::spec::Hull* h = pShipList->hulls().get(m_hullIndex)) {
                 result += afl::string::Format("   %% %s", h->getShortName(pShipList->componentNamer()));
@@ -169,7 +169,7 @@ game::ShipBuildOrder::operator==(const ShipBuildOrder& other) const
         && m_engineType == other.m_engineType
         && m_beamType == other.m_beamType
         && m_numBeams == other.m_numBeams
-        && m_launcherType == other.m_launcherType
+        && m_torpedoType == other.m_torpedoType
         && m_numLaunchers == other.m_numLaunchers;
 }
 

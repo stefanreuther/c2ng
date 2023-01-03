@@ -521,7 +521,7 @@ client::dialogs::BuildShipMain::setCursors(const game::proxy::BuildShipProxy::St
     m_pComponentList[game::HullTech]->setCurrentId(st.order.getHullIndex());
     m_pComponentList[game::EngineTech]->setCurrentId(st.order.getEngineType());
     m_pComponentList[game::BeamTech]->setCurrentId(st.order.getBeamType());
-    m_pComponentList[game::TorpedoTech]->setCurrentId(st.order.getLauncherType());
+    m_pComponentList[game::TorpedoTech]->setCurrentId(st.order.getTorpedoType());
 
     // Remember initial hull
     m_currentHull = st.order.getHullIndex();

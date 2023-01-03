@@ -39,7 +39,7 @@ namespace game { namespace map {
         IntegerProperty_t     beamType;                            ///< Beam type.
         IntegerProperty_t     numBeams;                            ///< Number of beams.
         IntegerProperty_t     numBays;                             ///< Number of fighter bays.
-        IntegerProperty_t     launcherType;                        ///< Torpedo type.
+        IntegerProperty_t     torpedoType;                         ///< Torpedo type.
         IntegerProperty_t     ammo;                                ///< Number of torpedoes or fighters.
         IntegerProperty_t     numLaunchers;                        ///< Number of torpedo launchers.
         IntegerProperty_t     mission;                             ///< Mission.

@@ -69,8 +69,8 @@ TestGameMapUniverse::testGetObject()
     TS_ASSERT_EQUALS(u.getObject(Reference(Reference::Minefield, 42)), m42);
     TS_ASSERT_EQUALS(cu.getObject(Reference(Reference::Minefield, 42)), m42);
 
-    TS_ASSERT_EQUALS(u.getObject(Reference(Reference::Storm, 7)), i7);
-    TS_ASSERT_EQUALS(cu.getObject(Reference(Reference::Storm, 7)), i7);
+    TS_ASSERT_EQUALS(u.getObject(Reference(Reference::IonStorm, 7)), i7);
+    TS_ASSERT_EQUALS(cu.getObject(Reference(Reference::IonStorm, 7)), i7);
 
     TS_ASSERT_EQUALS(u.getObject(Reference(Reference::Ufo, 51)), u51);
     TS_ASSERT_EQUALS(cu.getObject(Reference(Reference::Ufo, 51)), u51);
@@ -80,7 +80,7 @@ TestGameMapUniverse::testGetObject()
     TS_ASSERT(u.getObject(Reference(Reference::Planet, 99)) == 0);
     TS_ASSERT(u.getObject(Reference(Reference::Starbase, 99)) == 0);
     TS_ASSERT(u.getObject(Reference(Reference::Minefield, 99)) == 0);
-    TS_ASSERT(u.getObject(Reference(Reference::Storm, 99)) == 0);
+    TS_ASSERT(u.getObject(Reference(Reference::IonStorm, 99)) == 0);
     TS_ASSERT(u.getObject(Reference(Reference::Hull, 99)) == 0);
     TS_ASSERT(u.getObject(Reference(Reference::Beam, 99)) == 0);
     TS_ASSERT(u.getObject(Reference(Reference::Torpedo, 99)) == 0);

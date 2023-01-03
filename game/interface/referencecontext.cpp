@@ -52,7 +52,7 @@ namespace {
         { "engine",    Reference::Engine    },
         { "h",         Reference::Hull      },
         { "hull",      Reference::Hull      },
-        { "i",         Reference::Storm     },
+        { "i",         Reference::IonStorm  },
         { "m",         Reference::Minefield },
         { "minefield", Reference::Minefield },
         { "p",         Reference::Planet    },
@@ -61,7 +61,7 @@ namespace {
         { "s",         Reference::Ship      },
         { "ship",      Reference::Ship      },
         { "special",   Reference::Special   },
-        { "storm",     Reference::Storm     },
+        { "storm",     Reference::IonStorm  },
         { "t",         Reference::Torpedo   },
         { "torpedo",   Reference::Torpedo   },
         { "u",         Reference::Ufo       },
@@ -250,7 +250,7 @@ game::interface::makeObjectValue(Reference ref, Session& session)
      case Reference::Starbase:
         return PlanetContext::create(ref.getId(), session);
 
-     case Reference::Storm:
+     case Reference::IonStorm:
         return IonStormContext::create(ref.getId(), session);
 
      case Reference::Minefield:
@@ -294,7 +294,7 @@ game::interface::getReferenceTypeName(Reference::Type t)
      case Reference::Ship:         return "ship";
      case Reference::Planet:       return "planet";
      case Reference::Starbase:     return "base";
-     case Reference::Storm:        return "storm";
+     case Reference::IonStorm:     return "storm";
      case Reference::Minefield:    return "minefield";
      case Reference::Ufo:          return "ufo";
      case Reference::Hull:         return "hull";

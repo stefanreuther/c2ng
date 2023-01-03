@@ -171,7 +171,7 @@ game::actions::BuildShip::setPart(TechLevel area, int id)
         m_order.setBeamType(id);
         break;
      case TorpedoTech:
-        m_order.setLauncherType(id);
+        m_order.setTorpedoType(id);
         break;
     }
     update();
@@ -297,7 +297,7 @@ game::actions::BuildShip::perform(BaseBuildExecutor& exec)
         exec.setBaseStorage(BeamTech, beamType, availableBeams + buildBeams, numBeams - buildBeams);
     }
 
-    const int torpType = m_order.getLauncherType();
+    const int torpType = m_order.getTorpedoType();
     const int numLaunchers = m_order.getNumLaunchers();
     if (torpType > 0 && numLaunchers > 0) {
         const int availableLaunchers = planet().getBaseStorage(TorpedoTech, torpType).orElse(0);
@@ -335,7 +335,7 @@ game::actions::BuildShip::prepareBuildOrder(ShipBuildOrder& o,
         o.setNumLaunchers(p->getMaxLaunchers());
         o.setEngineType(findBestEngine(shipList, pl));
         o.setBeamType(findBestBeam(shipList, pl));
-        o.setLauncherType(findBestLauncher(shipList, pl));
+        o.setTorpedoType(findBestLauncher(shipList, pl));
         return false;
     } else {
         // Use existing build order
@@ -348,8 +348,8 @@ game::actions::BuildShip::prepareBuildOrder(ShipBuildOrder& o,
             o.setBeamType(findBestBeam(shipList, pl));
             o.setNumBeams(0);
         }
-        if (o.getNumLaunchers() == 0 || shipList.launchers().get(o.getLauncherType()) == 0) {
-            o.setLauncherType(findBestLauncher(shipList, pl));
+        if (o.getNumLaunchers() == 0 || shipList.launchers().get(o.getTorpedoType()) == 0) {
+            o.setTorpedoType(findBestLauncher(shipList, pl));
             o.setNumLaunchers(0);
         }
         return true;

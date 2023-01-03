@@ -161,7 +161,7 @@ namespace game { namespace v3 { namespace structures {
         Int16_t     engineType;                                 ///< Engine type (1..9).
         Int16_t     beamType;                                   ///< Beam type. Might be zero if count is zero.
         Int16_t     numBeams;                                   ///< Beam count.
-        Int16_t     launcherType;                               ///< Torpedo launcher type. Might be zero if count is zero.
+        Int16_t     torpedoType;                                ///< Torpedo launcher type. Might be zero if count is zero.
         Int16_t     numLaunchers;                               ///< Torpedo launcher count.
         Int16_t     zero;                                       ///< Called "fighter count" in cplayer.bas. Unused, actually, and must be zero.
     };
@@ -320,7 +320,7 @@ namespace game { namespace v3 { namespace structures {
         Int16_t     beamType;                                   ///< Beam type.
         Int16_t     numBeams;                                   ///< Number of beams.
         Int16_t     numBays;                                    ///< Number of fighter bays.
-        Int16_t     launcherType;                               ///< Torpedo type.
+        Int16_t     torpedoType;                                ///< Torpedo type.
         Int16_t     ammo;                                       ///< Number of torpedoes or fighters.
         Int16_t     numLaunchers;                               ///< Number of torpedo launchers.
         Int16_t     mission;                                    ///< Mission.
@@ -373,7 +373,7 @@ namespace game { namespace v3 { namespace structures {
         uint8_t     numBeams;                                   ///< Beam count.
         uint8_t     experienceLevel;                            ///< Experience level.
         Int16_t     numBays;                                    ///< Number of fighter bays.
-        Int16_t     launcherType;                               ///< Torpedo type.
+        Int16_t     torpedoType;                                ///< Torpedo type.
         Int16_t     ammo;                                       ///< Fighters, or torps.
         Int16_t     numLaunchersPacked;                         ///< Number of torpedo launchers. Encoded when PlanetsHaveTubes is used.
     };

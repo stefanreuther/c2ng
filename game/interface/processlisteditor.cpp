@@ -77,7 +77,7 @@ game::interface::ProcessListEditor::setProcessState(uint32_t pid, State state)
 {
     // client/dialogs/processmgr.cc:changeProcessState (sort-of)
     // WProcessManagerDialog::setProcessState (sort-of)
-    Process* p = m_list.getProcessById(pid);
+    Process* p = m_list.findProcessById(pid);
     if (p != 0 && p->getState() == Process::Suspended) {
         m_changes[pid] = state;
     } else {
@@ -106,7 +106,7 @@ game::interface::ProcessListEditor::setAllProcessState(State state)
 void
 game::interface::ProcessListEditor::setProcessPriority(uint32_t pid, int pri)
 {
-    if (Process* p = m_list.getProcessById(pid)) {
+    if (Process* p = m_list.findProcessById(pid)) {
         p->setPriority(pri);
         m_list.handlePriorityChange(*p);
     }

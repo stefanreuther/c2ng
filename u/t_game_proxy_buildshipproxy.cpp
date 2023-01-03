@@ -90,7 +90,7 @@ namespace {
         sd.engineType = 9;
         sd.beamType = 0;
         sd.numBeams = 0;
-        sd.launcherType = 0;
+        sd.torpedoType = 0;
         sd.numLaunchers = 0;
         sd.crew = 10;
         sh->addCurrentShipData(sd, game::PlayerSet_t(PLAYER_NR));
@@ -265,7 +265,7 @@ TestGameProxyBuildShipProxy::testSetBuildOrder()
     o.setEngineType(9);
     o.setBeamType(8);
     o.setNumBeams(2);
-    o.setLauncherType(10);
+    o.setTorpedoType(10);
     o.setNumLaunchers(7);
     testee.setBuildOrder(o);
 
@@ -275,7 +275,7 @@ TestGameProxyBuildShipProxy::testSetBuildOrder()
     TS_ASSERT_EQUALS(recv.getResult().order.getBeamType(), 8);
     TS_ASSERT_EQUALS(recv.getResult().order.getNumBeams(), 2);
     TS_ASSERT_EQUALS(recv.getResult().order.getNumLaunchers(), 7);
-    TS_ASSERT_EQUALS(recv.getResult().order.getLauncherType(), 10);
+    TS_ASSERT_EQUALS(recv.getResult().order.getTorpedoType(), 10);
     TS_ASSERT_EQUALS(recv.getResult().order.getEngineType(), 9);
 }
 

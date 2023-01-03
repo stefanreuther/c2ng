@@ -44,7 +44,7 @@ namespace game {
             Starbase,
 
             /** Ion storm. Id is storm number. */
-            Storm,
+            IonStorm,
 
             /** Minefield. Id is minefield number. */
             Minefield,

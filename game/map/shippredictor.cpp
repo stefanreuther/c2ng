@@ -662,7 +662,7 @@ game::map::ShipPredictor::computeTurn()
         && m_ship.numLaunchers.orElse(0) > 0
         && m_ship.neutronium.orElse(0) > 0)
     {
-        if (const game::spec::TorpedoLauncher* tl = m_shipList.launchers().get(m_ship.launcherType.orElse(0))) {
+        if (const game::spec::TorpedoLauncher* tl = m_shipList.launchers().get(m_ship.torpedoType.orElse(0))) {
             // Determine available resources
             Cost cargo;
             cargo.set(Cost::Tritanium,  m_ship.tritanium.orElse(0));
@@ -1148,7 +1148,7 @@ game::map::ShipPredictor::getCargo(Element::Type el) const
         return m_ship.money.orElse(0);
      default:
         int tt;
-        if (Element::isTorpedoType(el, tt) && tt == m_ship.launcherType.orElse(0) && m_ship.numLaunchers.orElse(0) > 0) {
+        if (Element::isTorpedoType(el, tt) && tt == m_ship.torpedoType.orElse(0) && m_ship.numLaunchers.orElse(0) > 0) {
             // We know it has this type of torpedoes
             return m_ship.ammo.orElse(0);
         } else {

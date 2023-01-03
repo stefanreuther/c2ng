@@ -422,7 +422,7 @@ game::interface::GlobalActions::compileListAction(const Action* a, const game::r
              case Reference::Special:
              case Reference::Player:
              case Reference::MapLocation:
-             case Reference::Storm:
+             case Reference::IonStorm:
              case Reference::Minefield:
              case Reference::Ufo:
              case Reference::Hull:

@@ -66,7 +66,7 @@ client::si::ScriptSide::continueProcessWait(uint32_t waitId, RequestLink2 link)
     if (!link.getProcessId(pid)) {
         // Null link > signal completion immediately
         onTaskComplete(waitId);
-    } else if (interpreter::Process* p = list.getProcessById(pid)) {
+    } else if (interpreter::Process* p = list.findProcessById(pid)) {
         // Valid link > run it normally
         m_waits.push_back(Wait(waitId, p->getProcessGroupId()));
         if (link.isWantResult()) {
@@ -223,7 +223,7 @@ client::si::ScriptSide::continueProcess(RequestLink2 link)
     interpreter::ProcessList& list = m_session.processList();
     uint32_t pid;
     if (link.getProcessId(pid)) {
-        if (interpreter::Process* p = list.getProcessById(pid)) {
+        if (interpreter::Process* p = list.findProcessById(pid)) {
             if (link.isWantResult()) {
                 p->pushNewValue(0);
             }
@@ -241,8 +241,8 @@ client::si::ScriptSide::joinProcess(RequestLink2 link, RequestLink2 other)
     interpreter::ProcessList& list = m_session.processList();
     uint32_t linkPid, otherPid;
     if (link.getProcessId(linkPid) && other.getProcessId(otherPid)) {
-        if (interpreter::Process* p = list.getProcessById(linkPid)) {
-            if (interpreter::Process* otherProcess = list.getProcessById(otherPid)) {
+        if (interpreter::Process* p = list.findProcessById(linkPid)) {
+            if (interpreter::Process* otherProcess = list.findProcessById(otherPid)) {
                 list.joinProcess(*otherProcess, p->getProcessGroupId());
                 if (other.isWantResult()) {
                     otherProcess->pushNewValue(0);
@@ -260,7 +260,7 @@ client::si::ScriptSide::joinProcessGroup(RequestLink2 link, uint32_t oldGroup)
     interpreter::ProcessList& list = m_session.processList();
     uint32_t linkPid;
     if (link.getProcessId(linkPid)) {
-        if (interpreter::Process* p = list.getProcessById(linkPid)) {
+        if (interpreter::Process* p = list.findProcessById(linkPid)) {
             list.joinProcessGroup(oldGroup, p->getProcessGroupId());
         }
     }
@@ -273,7 +273,7 @@ client::si::ScriptSide::continueProcessWithFailure(RequestLink2 link, String_t e
     interpreter::ProcessList& list = m_session.processList();
     uint32_t pid;
     if (link.getProcessId(pid)) {
-        if (interpreter::Process* p = list.getProcessById(pid)) {
+        if (interpreter::Process* p = list.findProcessById(pid)) {
             list.continueProcessWithFailure(*p, error);
             runProcesses();
         }
@@ -287,7 +287,7 @@ client::si::ScriptSide::detachProcess(RequestLink2 link)
     interpreter::ProcessList& list = m_session.processList();
     uint32_t pid;
     if (link.getProcessId(pid)) {
-        if (interpreter::Process* p = list.getProcessById(pid)) {
+        if (interpreter::Process* p = list.findProcessById(pid)) {
             Wait w;
             while (extractWait(p->getProcessGroupId(), w)) {
                 onTaskComplete(w.waitId);
@@ -303,7 +303,7 @@ client::si::ScriptSide::setVariable(RequestLink2 link, String_t name, std::auto_
     interpreter::ProcessList& list = m_session.processList();
     uint32_t pid;
     if (link.getProcessId(pid)) {
-        if (interpreter::Process* p = list.getProcessById(pid)) {
+        if (interpreter::Process* p = list.findProcessById(pid)) {
             p->setVariable(name, value.get());
         }
     }

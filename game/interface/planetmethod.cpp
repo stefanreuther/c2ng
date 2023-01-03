@@ -963,7 +963,7 @@ game::interface::parseBuildShipCommand(interpreter::Arguments& args, ShipBuildOr
         torpcount = pHull->getMaxLaunchers();
     }
     if (torp == 0 || torpcount == 0) {
-        o.setLauncherType(0);
+        o.setTorpedoType(0);
         o.setNumLaunchers(0);
     } else {
         if (torpcount < 0 || torpcount > pHull->getMaxLaunchers()) {
@@ -972,7 +972,7 @@ game::interface::parseBuildShipCommand(interpreter::Arguments& args, ShipBuildOr
         if (shipList.launchers().get(torp) == 0) {
             throw Error::rangeError();
         }
-        o.setLauncherType(torp);
+        o.setTorpedoType(torp);
         o.setNumLaunchers(torpcount);
     }
     return true;

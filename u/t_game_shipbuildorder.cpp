@@ -19,7 +19,7 @@ TestGameShipBuildOrder::testIt()
     TS_ASSERT_EQUALS(testee.getEngineType(), 0);
     TS_ASSERT_EQUALS(testee.getBeamType(), 0);
     TS_ASSERT_EQUALS(testee.getNumBeams(), 0);
-    TS_ASSERT_EQUALS(testee.getLauncherType(), 0);
+    TS_ASSERT_EQUALS(testee.getTorpedoType(), 0);
     TS_ASSERT_EQUALS(testee.getNumLaunchers(), 0);
 
     // Configure
@@ -27,7 +27,7 @@ TestGameShipBuildOrder::testIt()
     testee.setEngineType(9);
     testee.setBeamType(3);
     testee.setNumBeams(18);
-    testee.setLauncherType(8);
+    testee.setTorpedoType(8);
     testee.setNumLaunchers(4);
 
     // Verify
@@ -35,7 +35,7 @@ TestGameShipBuildOrder::testIt()
     TS_ASSERT_EQUALS(testee.getEngineType(), 9);
     TS_ASSERT_EQUALS(testee.getBeamType(), 3);
     TS_ASSERT_EQUALS(testee.getNumBeams(), 18);
-    TS_ASSERT_EQUALS(testee.getLauncherType(), 8);
+    TS_ASSERT_EQUALS(testee.getTorpedoType(), 8);
     TS_ASSERT_EQUALS(testee.getNumLaunchers(), 4);
     TS_ASSERT_EQUALS(testee.toScriptCommand("Make", 0), "Make 15, 9, 3, 18, 8, 4");
 }
@@ -54,7 +54,7 @@ TestGameShipBuildOrder::testComparison()
     testee.setEngineType(9);
     testee.setBeamType(3);
     testee.setNumBeams(18);
-    testee.setLauncherType(8);
+    testee.setTorpedoType(8);
     testee.setNumLaunchers(4);
     TS_ASSERT_EQUALS(testee == testee, true);
     TS_ASSERT_EQUALS(testee == game::ShipBuildOrder(), false);
@@ -69,11 +69,11 @@ TestGameShipBuildOrder::testCanonicalize()
     testee.setEngineType(9);
     testee.setBeamType(3);
     testee.setNumBeams(0);
-    testee.setLauncherType(8);
+    testee.setTorpedoType(8);
     testee.setNumLaunchers(0);
     testee.canonicalize();
 
-    TS_ASSERT_EQUALS(testee.getLauncherType(), 0);
+    TS_ASSERT_EQUALS(testee.getTorpedoType(), 0);
     TS_ASSERT_EQUALS(testee.getBeamType(), 0);
 }
 
@@ -92,7 +92,7 @@ TestGameShipBuildOrder::testDescribe()
     testee.setEngineType(5);
     testee.setBeamType(3);
     testee.setNumBeams(4);
-    testee.setLauncherType(8);
+    testee.setTorpedoType(8);
     testee.setNumLaunchers(1);
 
     afl::data::StringList_t result;
@@ -121,7 +121,7 @@ TestGameShipBuildOrder::testDescribeCarrier()
     testee.setEngineType(9);
     testee.setBeamType(10);
     testee.setNumBeams(1);
-    testee.setLauncherType(10);
+    testee.setTorpedoType(10);
     testee.setNumLaunchers(0);
 
     afl::data::StringList_t result;
