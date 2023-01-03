@@ -130,7 +130,7 @@ game::vcr::describeShip(ShipInfo& result, const Object& in, const game::spec::Sh
                              : pAssumedHull->getMaxBeams() == 0
                              ? tx("none")
                              : String_t(Format(tx("%d beam%!1{s%}"), pAssumedHull->getMaxBeams())));
-        
+
     // Secondary weapon
     const game::spec::TorpedoLauncher* tl = shipList.launchers().get(in.getBeamType());
     result.secondary.first = (in.getNumBays() != 0

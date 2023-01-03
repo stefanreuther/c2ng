@@ -23,7 +23,7 @@ namespace game { namespace vcr {
             \param nr Number, [0,getNumBattles()) */
         virtual Battle* getBattle(size_t nr) = 0;
     };
-    
+
 } }
 
 #endif

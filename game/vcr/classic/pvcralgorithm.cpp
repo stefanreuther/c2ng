@@ -253,11 +253,11 @@ game::vcr::classic::PVCRAlgorithm::PVCRAlgorithm(bool phost3Flag,
       m_seed(0),
       m_time(0),
       m_done(false),
-      one_f(0),
-      right_probab(0),
+      m_interceptProbability(0),
+      m_rightProbability(0),
       m_capabilities(9),
-      det_valid(false),
-      det_timer(0),
+      m_detectorValid(false),
+      m_detectorTimer(0),
       m_result(),
       m_alternativeCombat(false),
       m_fireOnAttackFighters(false),
@@ -375,12 +375,6 @@ game::vcr::classic::PVCRAlgorithm::initBattle(const Object& left, const Object& 
             st.f.bay_recharge = 0;
         }
 
-//         // FIXME: this is still missing, but since the original
-//         // line is bogus (should be p.Shield, not VCR.Shield) and it works,
-//         // it's probably not needed.
-//         //   IF NOT IsPlanet(Who) AND IsFreighter(Who) THEN VCR.Shield[Who]:=0;
-//         // Change line below if needed.
-
         int charge = (st.r.obj.getShield() == 100) ? 1000 : 0;
         std::fill_n(st.r.m_beamStatus, int(VCR_MAX_BEAMS), charge);
         std::fill_n(st.r.m_launcherStatus, int(VCR_MAX_TORPS), charge);
@@ -433,17 +427,17 @@ game::vcr::classic::PVCRAlgorithm::initBattle(const Object& left, const Object& 
         int right_odds = FighterKillOdds(m_status[RightSide].r.obj.getOwner());
         int left_f   = (100 - left_odds) * right_odds;
         int right_f  = (100 - right_odds) * left_odds;
-        one_f        = (left_f + right_f) / 100;
-        if (one_f == 0)
-            right_probab = 50;
-        else
-            right_probab = right_f / one_f;
-        // FIXME: battle.c seems to do `right_probab = left_f / one_f'
+        m_interceptProbability = (left_f + right_f) / 100;
+        if (m_interceptProbability == 0) {
+            m_rightProbability = 50;
+        } else {
+            m_rightProbability = left_f / m_interceptProbability;
+        }
     } else {
         // In PHost 2, combat options were not arrayized.
         // Hence, for a valid pconfig, all FighterKillOdds values are the same and we can pick any one
-        one_f        = FighterKillOdds(1);
-        right_probab = 50;
+        m_interceptProbability = FighterKillOdds(1);
+        m_rightProbability = 50;
     }
 
     initActivityDetector();
@@ -744,7 +738,7 @@ struct game::vcr::classic::PVCRAlgorithm::PVCRStatusToken : public StatusToken {
     int32_t m_seed;
     BattleResult_t m_result;
     bool m_done;
-    int one_f, right_probab;
+    int m_interceptProbability, m_rightProbability;
     PVCRStatusToken(Time_t t)
         : StatusToken(t)
         { }
@@ -752,20 +746,20 @@ struct game::vcr::classic::PVCRAlgorithm::PVCRStatusToken : public StatusToken {
 
 // Save status.
 // Easy mindless way, just save everything.
-// Actually, we could re-compute status[].f and one_f/right_probab from the VCR record, but I'm too lazy to do that now.
+// Actually, we could re-compute status[].f and m_interceptProbability/m_rightProbability from the VCR record, but I'm too lazy to do that now.
 game::vcr::classic::StatusToken*
 game::vcr::classic::PVCRAlgorithm::createStatusToken()
 {
     // ex VcrPlayerPHost::getStatusToken()
     PVCRStatusToken* s = new PVCRStatusToken(m_time);
 
-    s->m_status[LeftSide]    = m_status[LeftSide];
+    s->m_status[LeftSide]     = m_status[LeftSide];
     s->m_status[RightSide]    = m_status[RightSide];
-    s->m_seed       = m_seed;
-    s->m_result     = m_result;
-    s->m_done       = m_done;
-    s->one_f        = one_f;
-    s->right_probab = right_probab;
+    s->m_seed                 = m_seed;
+    s->m_result               = m_result;
+    s->m_done                 = m_done;
+    s->m_interceptProbability = m_interceptProbability;
+    s->m_rightProbability     = m_rightProbability;
 
     return s;
 }
@@ -775,14 +769,14 @@ game::vcr::classic::PVCRAlgorithm::restoreStatus(const StatusToken& token)
 {
     // ex VcrPlayerPHost::setStatus
     if (const PVCRStatusToken* t = dynamic_cast<const PVCRStatusToken*>(&token)) {
-        m_status[LeftSide]    = t->m_status[LeftSide];
+        m_status[LeftSide]     = t->m_status[LeftSide];
         m_status[RightSide]    = t->m_status[RightSide];
-        m_seed       = t->m_seed;
-        m_result     = t->m_result;
-        m_done       = t->m_done;
-        one_f        = t->one_f;
-        right_probab = t->right_probab;
-        m_time       = t->getTime();
+        m_seed                 = t->m_seed;
+        m_result               = t->m_result;
+        m_done                 = t->m_done;
+        m_interceptProbability = t->m_interceptProbability;
+        m_rightProbability     = t->m_rightProbability;
+        m_time                 = t->getTime();
     }
 }
 
@@ -1178,7 +1172,7 @@ game::vcr::classic::PVCRAlgorithm::fighterIntercept()
 
     /* Full version */
     for (int ls = 0; ls < lcount; ++ls) {
-        if (randomRange100LT(one_f)) {
+        if (randomRange100LT(m_interceptProbability)) {
             for (int rs = 0; rs < rcount; ++rs) {
                 if (rmatch[rs] == lmatch[ls]) {
                     int lf = lslot[ls];
@@ -1188,7 +1182,7 @@ game::vcr::classic::PVCRAlgorithm::fighterIntercept()
                        the "right" fighter survives, it can fire again
                        while a "left" one can not. Whether this is
                        relevant in practice is unknown. */
-                    if (randomRange100LT(right_probab)) {
+                    if (randomRange100LT(m_rightProbability)) {
                         visualizer().fireBeam(*this, RightSide, rf, lf, 1, m_status[RightSide].f.FighterBeamExplosive, m_status[RightSide].f.FighterBeamKill);
                         m_status[LeftSide].r.m_activeFighters--;
                         visualizer().killFighter(*this, LeftSide, lf);
@@ -1507,8 +1501,8 @@ void
 game::vcr::classic::PVCRAlgorithm::initActivityDetector()
 {
     // ex VcrPlayerPHost::initActivityDetector, ccvcr.pas:P_CheckInit
-    det_valid = false;
-    det_timer = DET_MOVEMENT_TIMER;
+    m_detectorValid = false;
+    m_detectorTimer = DET_MOVEMENT_TIMER;
 }
 
 /** Compare inactivity detector status for one side.
@@ -1575,17 +1569,17 @@ game::vcr::classic::PVCRAlgorithm::checkCombatActivity()
 {
     // ex VcrPlayerPHost::checkCombatActivity, ccvcr.pas:P_CheckActivity
     /* re-check timer expired? If not, don't check. */
-    if (det_timer > m_time)
+    if (m_detectorTimer > m_time)
         return true;
 
     /* still moving? If yes, there's progress. */
     if (getDistance() > m_standoffDistance) {
-        det_timer = m_time + DET_MOVEMENT_TIMER;
+        m_detectorTimer = m_time + DET_MOVEMENT_TIMER;
         return true;
     }
 
     /* Movement has stopped. Has there been any progress since last check? */
-    if (det_valid) {
+    if (m_detectorValid) {
         if (compareDetectorStatus(m_detectorStatus[LeftSide], m_status[LeftSide]) && compareDetectorStatus(m_detectorStatus[RightSide], m_status[RightSide])) {
             /* No progress */
             return false;
@@ -1595,7 +1589,7 @@ game::vcr::classic::PVCRAlgorithm::checkCombatActivity()
     /* Combat still runs. Compute re-check time. */
     setDetectorStatus(m_detectorStatus[LeftSide], m_status[LeftSide]);
     setDetectorStatus(m_detectorStatus[RightSide], m_status[RightSide]);
-    det_valid = true;
+    m_detectorValid = true;
 
     /* Estimate how long it takes to show some progress.
 
@@ -1622,7 +1616,7 @@ game::vcr::classic::PVCRAlgorithm::checkCombatActivity()
                 interval = L;
         }
     }
-    det_timer = m_time + interval;
+    m_detectorTimer = m_time + interval;
     return true;
 }
 

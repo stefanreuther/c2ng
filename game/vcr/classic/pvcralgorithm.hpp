@@ -103,7 +103,7 @@ namespace game { namespace vcr { namespace classic {
             int  m_activeFighters;                       ///< Number of fighters currently out.
             int  m_launchCountdown;                      ///< Countdown to next fighter launch.
             Object obj;                                  ///< Object.
-            
+
 #ifndef PVCR_INTEGER
             double shield;        ///< Shield status, [0, 100]
             double damage;        ///< Damage, [0, 150]
@@ -192,11 +192,12 @@ namespace game { namespace vcr { namespace classic {
 
         Status m_status[2];
         bool m_done;
-        int one_f, right_probab;     // FIXME
+        int m_interceptProbability;      // Probability of Fighter Intercept happening
+        int m_rightProbability;          // Probability of right fighter winning Intercept Attack
         uint16_t m_capabilities;
         DetectorStatus m_detectorStatus[2];
-        bool det_valid;              // FIXME
-        Time_t det_timer;            // FIXME
+        bool m_detectorValid;            // True if m_detectorStatus is initialized
+        Time_t m_detectorTimer;          // Time when to re-check m_detectorStatus
         BattleResult_t m_result;
         bool m_alternativeCombat;
         bool m_fireOnAttackFighters;

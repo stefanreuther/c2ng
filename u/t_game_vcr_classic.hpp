@@ -68,6 +68,7 @@ class TestGameVcrClassicPVCRAlgorithm : public CxxTest::TestSuite {
     void testCarriers();
     void testRandomBonus();
     void testToken();
+    void testAsymmetricFighterConfig();
 };
 
 class TestGameVcrClassicStatusToken : public CxxTest::TestSuite {

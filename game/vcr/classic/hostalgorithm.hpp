@@ -12,10 +12,10 @@
 
 namespace game { namespace vcr { namespace classic {
 
-
     /** HOST VCR Player.
         This is the THost VCR player, started as a port from the PCC v1.0.13 player, via PCC2 2.0's version.
-        It includes all speed optimisations (fast forward, psrandom tables). */
+        It includes all speed optimisations (fast forward, psrandom tables).
+        It can be used to play HOST and NuHost combat. */
     class HostAlgorithm : public Algorithm {
      public:
         /** Constructor.

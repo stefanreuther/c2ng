@@ -9,6 +9,10 @@ PCC2ng NEWS FILE
   details missing. Features added: configuration dialog and plugin
   manager. Messenger features, in particular, VPA data transmissions.
 
+  Major bugfix: PVCR incorrectly played carrier/carrier fights when
+  FighterKillOdds values differed between players. This bug affected
+  all PCC versions.
+
 
 2.40.13
 -------

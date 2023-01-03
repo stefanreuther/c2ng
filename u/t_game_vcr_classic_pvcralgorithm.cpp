@@ -17,7 +17,7 @@ namespace {
         game::test::initPListBeams(list);
         game::test::initPListTorpedoes(list);
     }
-    
+
     struct Object {
         int beamType;
         int numBeams;
@@ -60,148 +60,9 @@ namespace {
         {0,53958,0,"PHost 3",{{7,12,1249,0,14,129,99,492,144,0,751,"Alvilda the Goth",11,100,0,0,0,0,1,1,35,1,0},
                               {2, 2,   0,0, 3,  3, 0,425,  0,0,110,"Steenrod",        10,100,0,0,0,1,1,1,35,1,0}}},
 
-//         {"MAGIC":0,"SEED":37461,"CAPABILITIES":0,"ALGORITHM":"PHost 3","UNIT":[
-//             {"BEAM":7,"BEAM.COUNT":7,"CREW":270,"DAMAGE":0,"FIGHTER.BAYS":12,"FIGHTER.COUNT":100,
-//              "HULL":92,"ID":142,"IMAGE":135,"LEVEL":0,"MASS":537,"NAME":"Al Bundy","OWNER":11,
-//              "SHIELD":100,"TORP.COUNT":0,"TORP.LCOUNT":0,"ISPLANET":0,"CONFIG.BEAMKILLRATE":1,
-//              "CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,"CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0},
-//             {"BEAM":10,"BEAM.COUNT":6,"CREW":698,"DAMAGE":61,"FIGHTER.BAYS":0,"FIGHTER.COUNT":0,"HULL":35,
-//              "ID":2,"IMAGE":68,"LEVEL":0,"MASS":681,"NAME":"Cyc-9","OWNER":4,"SHIELD":0,"TORP":10,
-//              "TORP.COUNT":14,"TORP.LCOUNT":6,"ISPLANET":0,"CONFIG.BEAMKILLRATE":1,"CONFIG.BEAMCHARGERATE":1,
-//              "CONFIG.TORPMISSRATE":35,"CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0}]
-//         },
-//         {"MAGIC":0,"SEED":48940,"CAPABILITIES":0,"ALGORITHM":"PHost 3","UNIT":[
-//             {"BEAM":7,"BEAM.COUNT":7,"CREW":270,"DAMAGE":0,"FIGHTER.BAYS":12,
-//              "FIGHTER.COUNT":95,"HULL":92,"ID":142,"IMAGE":135,"LEVEL":0,"MASS":537,"NAME":"Al Bundy",
-//              "OWNER":11,"SHIELD":26,"TORP.COUNT":0,"TORP.LCOUNT":0,"ISPLANET":0,"CONFIG.BEAMKILLRATE":1,
-//              "CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,"CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0},
-//             {"BEAM":10,"BEAM.COUNT":15,"CREW":787,"DAMAGE":0,"FIGHTER.BAYS":0,"FIGHTER.COUNT":0,"HULL":35,
-//              "ID":149,"IMAGE":68,"LEVEL":0,"MASS":681,"NAME":"Cyc-11","OWNER":4,"SHIELD":100,"TORP":10,
-//              "TORP.COUNT":85,"TORP.LCOUNT":13,"ISPLANET":0,"CONFIG.BEAMKILLRATE":1,"CONFIG.BEAMCHARGERATE":1,
-//              "CONFIG.TORPMISSRATE":35,"CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0}]
-//         },
-//         {"MAGIC":0,"SEED":16696,"CAPABILITIES":0,"ALGORITHM":"PHost 3","UNIT":[
-//             {"BEAM":10,"BEAM.COUNT":14,"CREW":768,"DAMAGE":13,"FIGHTER.BAYS":0,
-//              "FIGHTER.COUNT":0,"HULL":35,"ID":149,"IMAGE":68,"LEVEL":0,"MASS":681,"NAME":"Cyc-11",
-//              "OWNER":4,"SHIELD":0,"TORP":10,"TORP.COUNT":43,"TORP.LCOUNT":12,"ISPLANET":0,"CONFIG.BEAMKILLRATE":1,
-//              "CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,"CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0},
-//             {"BEAM":7,"BEAM.COUNT":12,"CREW":1300,"DAMAGE":0,"FIGHTER.BAYS":14,"FIGHTER.COUNT":240,"HULL":99,
-//              "ID":180,"IMAGE":144,"LEVEL":0,"MASS":751,"NAME":"Charlotte de Berry","OWNER":11,
-//              "SHIELD":100,"TORP.COUNT":0,"TORP.LCOUNT":0,"ISPLANET":0,"CONFIG.BEAMKILLRATE":1,
-//              "CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,"CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0}]
-//         },
-//         {"MAGIC":0,"SEED":34185,"CAPABILITIES":0,"ALGORITHM":"PHost 3","UNIT":[
-//             {"BEAM":10,"BEAM.COUNT":15,
-//              "CREW":787,"DAMAGE":0,"FIGHTER.BAYS":0,"FIGHTER.COUNT":0,"HULL":35,"ID":483,"IMAGE":68,
-//              "LEVEL":0,"MASS":681,"NAME":"Cyc-10","OWNER":4,"SHIELD":100,"TORP":10,"TORP.COUNT":93,
-//              "TORP.LCOUNT":13,"ISPLANET":0,"CONFIG.BEAMKILLRATE":1,"CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,
-//              "CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0},
-//             {"BEAM":7,"BEAM.COUNT":8,"CREW":1279,"DAMAGE":34,"FIGHTER.BAYS":10,
-//              "FIGHTER.COUNT":218,"HULL":99,"ID":180,"IMAGE":144,"LEVEL":0,"MASS":751,"NAME":"Charlotte de Berry",
-//              "OWNER":11,"SHIELD":0,"TORP.COUNT":0,"TORP.LCOUNT":0,"ISPLANET":0,"CONFIG.BEAMKILLRATE":1,
-//              "CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,"CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0}]
-//         },
-//         {"MAGIC":0,"SEED":34415,"CAPABILITIES":0,"ALGORITHM":"PHost 3","UNIT":[
-//             {"BEAM":10,"BEAM.COUNT":15,
-//              "CREW":787,"DAMAGE":0,"FIGHTER.BAYS":0,"FIGHTER.COUNT":0,"HULL":35,"ID":483,"IMAGE":68,
-//              "LEVEL":0,"MASS":681,"NAME":"Cyc-10","OWNER":4,"SHIELD":30,"TORP":10,"TORP.COUNT":62,
-//              "TORP.LCOUNT":13,"ISPLANET":0,"CONFIG.BEAMKILLRATE":1,"CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,
-//              "CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0},
-//             {"BEAM":2,"BEAM.COUNT":6,"CREW":334,"DAMAGE":0,"FIGHTER.BAYS":0,
-//              "FIGHTER.COUNT":0,"HULL":7,"ID":88,"IMAGE":30,"LEVEL":0,"MASS":261,"NAME":"Bicz na Romana",
-//              "OWNER":11,"SHIELD":100,"TORP":10,"TORP.COUNT":20,"TORP.LCOUNT":3,"ISPLANET":0,"CONFIG.BEAMKILLRATE":1,
-//              "CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,"CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0}]
-//         },
-//         {"MAGIC":0,"SEED":56370,"CAPABILITIES":0,"ALGORITHM":"PHost 3","UNIT":[
-//             {"BEAM":10,"BEAM.COUNT":15,
-//              "CREW":787,"DAMAGE":0,"FIGHTER.BAYS":0,"FIGHTER.COUNT":0,"HULL":35,"ID":183,"IMAGE":68,
-//              "LEVEL":0,"MASS":681,"NAME":"Cynik","OWNER":4,"SHIELD":100,"TORP":10,"TORP.COUNT":0,
-//              "TORP.LCOUNT":13,"ISPLANET":0,"CONFIG.BEAMKILLRATE":1,"CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,
-//              "CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0},
-//             {"BEAM":0,"BEAM.COUNT":0,"CREW":0,"DAMAGE":0,"FIGHTER.BAYS":0,
-//              "FIGHTER.COUNT":0,"ID":462,"IMAGE":0,"LEVEL":0,"MASS":100,"NAME":"Turing","OWNER":1,
-//              "SHIELD":100,"TORP.COUNT":0,"TORP.LCOUNT":0,"ISPLANET":1,"CONFIG.BEAMKILLRATE":1,
-//              "CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,"CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0}]
-//         },
-//         {"MAGIC":0,"SEED":58730,"CAPABILITIES":0,"ALGORITHM":"PHost 3","UNIT":[
-//             {"BEAM":10,"BEAM.COUNT":15,"CREW":787,"DAMAGE":0,"FIGHTER.BAYS":0,"FIGHTER.COUNT":0,"HULL":35,"ID":163,"IMAGE":68,
-//              "LEVEL":0,"MASS":681,"NAME":"Cyrulik","OWNER":4,"SHIELD":100,"TORP":10,"TORP.COUNT":107,
-//              "TORP.LCOUNT":13,"ISPLANET":0,"CONFIG.BEAMKILLRATE":1,"CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,
-//              "CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0},
-//             {"BEAM":5,"BEAM.COUNT":4,"CREW":0,"DAMAGE":0,"FIGHTER.BAYS":8,
-//              "FIGHTER.COUNT":8,"ID":346,"IMAGE":0,"LEVEL":0,"MASS":157,"NAME":"Platon","OWNER":8,
-//              "SHIELD":100,"TORP.COUNT":0,"TORP.LCOUNT":0,"ISPLANET":1,"CONFIG.BEAMKILLRATE":1,
-//              "CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,"CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0}]
-//         },
-//         {"MAGIC":0,"SEED":30372,"CAPABILITIES":0,"ALGORITHM":"PHost 3","UNIT":[
-//             {"BEAM":10,"BEAM.COUNT":5,"CREW":148,"DAMAGE":0,"FIGHTER.BAYS":0,"FIGHTER.COUNT":0,"HULL":46,"ID":301,"IMAGE":76,
-//              "LEVEL":0,"MASS":171,"NAME":"Orlik-4","OWNER":5,"SHIELD":100,"TORP":1,"TORP.COUNT":0,
-//              "TORP.LCOUNT":3,"ISPLANET":0,"CONFIG.BEAMKILLRATE":3,"CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,
-//              "CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0},
-//             {"BEAM":7,"BEAM.COUNT":6,"CREW":0,"DAMAGE":0,"FIGHTER.BAYS":10,
-//              "FIGHTER.COUNT":10,"ID":67,"IMAGE":0,"LEVEL":0,"MASS":204,"NAME":"Bolzano","OWNER":9,
-//              "SHIELD":100,"TORP.COUNT":0,"TORP.LCOUNT":0,"ISPLANET":1,"CONFIG.BEAMKILLRATE":1,
-//              "CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,"CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0}]
-//         },
-//         {"MAGIC":0,"SEED":2493,"CAPABILITIES":0,"ALGORITHM":"PHost 3","UNIT":[
-//             {"BEAM":1,"BEAM.COUNT":12,"CREW":178,"DAMAGE":0,"FIGHTER.BAYS":0,"FIGHTER.COUNT":0,"HULL":41,"ID":112,"IMAGE":64,
-//              "LEVEL":0,"MASS":172,"NAME":"Wybuch-E","OWNER":4,"SHIELD":100,"TORP":1,"TORP.COUNT":0,
-//              "TORP.LCOUNT":1,"ISPLANET":0,"CONFIG.BEAMKILLRATE":1,"CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,
-//              "CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0},
-//             {"BEAM":3,"BEAM.COUNT":2,"CREW":15,"DAMAGE":0,"FIGHTER.BAYS":0,
-//              "FIGHTER.COUNT":0,"HULL":51,"ID":263,"IMAGE":86,"LEVEL":0,"MASS":162,"NAME":"HEART OF GOLD CLASS",
-//              "OWNER":7,"SHIELD":100,"TORP.COUNT":0,"TORP.LCOUNT":0,"ISPLANET":0,"CONFIG.BEAMKILLRATE":1,
-//              "CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,"CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0}]
-//         },
-//         {"MAGIC":0,"SEED":53958,"CAPABILITIES":0,"ALGORITHM":"PHost 3","UNIT":[                  // <-------------
-//             {"BEAM":7,"BEAM.COUNT":12,"CREW":1249,"DAMAGE":0,"FIGHTER.BAYS":14,"FIGHTER.COUNT":129,"HULL":99,"ID":492,"IMAGE":144,
-//              "LEVEL":0,"MASS":751,"NAME":"Alvilda the Goth","OWNER":11,"SHIELD":100,"TORP.COUNT":0,
-//              "TORP.LCOUNT":0,"ISPLANET":0,"CONFIG.BEAMKILLRATE":1,"CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,
-//              "CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0},
-//             {"BEAM":2,"BEAM.COUNT":2,"CREW":0,"DAMAGE":0,"FIGHTER.BAYS":3,
-//              "FIGHTER.COUNT":3,"ID":425,"IMAGE":0,"LEVEL":0,"MASS":110,"NAME":"Steenrod","OWNER":10,
-//              "SHIELD":100,"TORP.COUNT":0,"TORP.LCOUNT":0,"ISPLANET":1,"CONFIG.BEAMKILLRATE":1,
-//              "CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,"CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0}]
-//         },
-//         {"MAGIC":0,"SEED":3343,"CAPABILITIES":0,"ALGORITHM":"PHost 3","UNIT":[
-//             {"BEAM":6,"BEAM.COUNT":2,"CREW":306,"DAMAGE":0,"FIGHTER.BAYS":6,"FIGHTER.COUNT":35,"HULL":72,"ID":69,"IMAGE":121,
-//              "LEVEL":0,"MASS":237,"NAME":"REKA WINA","OWNER":5,"SHIELD":100,"TORP.COUNT":0,"TORP.LCOUNT":0,
-//              "ISPLANET":0,"CONFIG.BEAMKILLRATE":3,"CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,
-//              "CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0},
-//             {"BEAM":1,"BEAM.COUNT":1,"CREW":0,"DAMAGE":0,"FIGHTER.BAYS":1,
-//              "FIGHTER.COUNT":1,"ID":91,"IMAGE":0,"LEVEL":0,"MASS":101,"NAME":"Cavalieri","OWNER":9,
-//              "SHIELD":100,"TORP.COUNT":0,"TORP.LCOUNT":0,"ISPLANET":1,"CONFIG.BEAMKILLRATE":1,
-//              "CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,"CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0}]
-//         },
-//         {"MAGIC":0,"SEED":50854,"CAPABILITIES":0,"ALGORITHM":"PHost 3","UNIT":[
-//             {"BEAM":10,"BEAM.COUNT":5,"CREW":148,"DAMAGE":0,"FIGHTER.BAYS":0,"FIGHTER.COUNT":0,"HULL":46,"ID":78,"IMAGE":76,
-//              "LEVEL":0,"MASS":171,"NAME":"Grawitacja","OWNER":5,"SHIELD":100,"TORP":10,"TORP.COUNT":0,
-//              "TORP.LCOUNT":3,"ISPLANET":0,"CONFIG.BEAMKILLRATE":3,"CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,
-//              "CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0},
-//             {"BEAM":5,"BEAM.COUNT":4,"CREW":0,"DAMAGE":0,"FIGHTER.BAYS":7,
-//              "FIGHTER.COUNT":7,"ID":71,"IMAGE":0,"LEVEL":0,"MASS":144,"NAME":"Borda","OWNER":7,
-//              "SHIELD":100,"TORP.COUNT":0,"TORP.LCOUNT":0,"ISPLANET":1,"CONFIG.BEAMKILLRATE":1,
-//              "CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,"CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0}]
-//         },
-//         {"MAGIC":0,"SEED":58533,"CAPABILITIES":0,"ALGORITHM":"PHost 3","UNIT":[
-//             {"BEAM":10,"BEAM.COUNT":5,"CREW":148,"DAMAGE":0,"FIGHTER.BAYS":0,"FIGHTER.COUNT":0,"HULL":46,"ID":370,"IMAGE":76,
-//              "LEVEL":0,"MASS":171,"NAME":"Mussolini","OWNER":5,"SHIELD":100,"TORP":1,"TORP.COUNT":0,
-//              "TORP.LCOUNT":3,"ISPLANET":0,"CONFIG.BEAMKILLRATE":3,"CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,
-//              "CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0},
-//             {"BEAM":3,"BEAM.COUNT":2,"CREW":111,"DAMAGE":16,"FIGHTER.BAYS":0,
-//              "FIGHTER.COUNT":0,"HULL":3,"ID":479,"IMAGE":29,"LEVEL":0,"MASS":142,"NAME":"Bambo 479",
-//              "OWNER":6,"SHIELD":84,"TORP.COUNT":0,"TORP.LCOUNT":0,"ISPLANET":0,"CONFIG.BEAMKILLRATE":1,
-//              "CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,"CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0}]
-//         },
-//         {"MAGIC":0,"SEED":3722,"CAPABILITIES":0,"ALGORITHM":"PHost 3","UNIT":[
-//             {"BEAM":10,"BEAM.COUNT":15,"CREW":787,"DAMAGE":0,"FIGHTER.BAYS":0,"FIGHTER.COUNT":0,"HULL":35,"ID":314,"IMAGE":68,
-//              "LEVEL":0,"MASS":681,"NAME":"Chirurg","OWNER":4,"SHIELD":100,"TORP":10,"TORP.COUNT":53,
-//              "TORP.LCOUNT":13,"ISPLANET":0,"CONFIG.BEAMKILLRATE":1,"CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,
-//              "CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0},
-//             {"BEAM":6,"BEAM.COUNT":5,"CREW":0,"DAMAGE":0,"FIGHTER.BAYS":8,
-//              "FIGHTER.COUNT":8,"ID":294,"IMAGE":0,"LEVEL":0,"MASS":166,"NAME":"Mengoli","OWNER":7,
-//              "SHIELD":100,"TORP.COUNT":0,"TORP.LCOUNT":0,"ISPLANET":1,"CONFIG.BEAMKILLRATE":1,
-//              "CONFIG.BEAMCHARGERATE":1,"CONFIG.TORPMISSRATE":35,"CONFIG.TORPCHARGERATE":1,"CONFIG.CREWDEFENSERATE":0}]}];
+        // Generated by c2systest/combat/05_asyftr.pl
+        {25535,23344,3,"PHost 4", {{1,1,3100,0,20,1000,70,6,107,0,1110,"A",6,100,0,0,0,false,1,1,35,1,0},
+                                   {1,1,3100,0,20,1000,70,3,107,0,1110,"B",3,100,0,0,0,false,1,1,35,1,0}}},
     };
 
     game::vcr::Object convertObject(const Object& in)
@@ -307,7 +168,7 @@ TestGameVcrClassicPVCRAlgorithm::testTF()
     uint16_t seed = battles[0].seed;
     bool result = testee.checkBattle(left, right, seed);
     TS_ASSERT(!result);
-    
+
     testee.initBattle(left, right, seed);
     while (testee.playCycle()) {
         // nix
@@ -354,13 +215,13 @@ TestGameVcrClassicPVCRAlgorithm::testCarriers()
     uint16_t seed = battles[1].seed;
     bool result = testee.checkBattle(left, right, seed);
     TS_ASSERT(!result);
-    
+
     testee.initBattle(left, right, seed);
     while (testee.playCycle()) {
         // nix
     }
     testee.doneBattle(left, right);
-    
+
     // Record #12: (two fighter units)
     //         Ending time 245 (4:05)
     //         right-destroyed
@@ -417,13 +278,13 @@ TestGameVcrClassicPVCRAlgorithm::testRandomBonus()
     uint16_t seed = 0;
     bool result = testee.checkBattle(left, right, seed);
     TS_ASSERT(!result);
-    
+
     testee.initBattle(left, right, seed);
     while (testee.playCycle()) {
         // nix
     }
     testee.doneBattle(left, right);
-    
+
     TS_ASSERT_EQUALS(testee.getTime(), 617);
     TS_ASSERT(testee.getResult().contains(game::vcr::classic::LeftDestroyed));
     TS_ASSERT(!testee.getResult().contains(game::vcr::classic::RightDestroyed));
@@ -505,3 +366,113 @@ TestGameVcrClassicPVCRAlgorithm::testToken()
     TS_ASSERT_EQUALS(right.getNumFighters(), 0);
 }
 
+/** Test asymmetric fighter configuration. */
+void
+TestGameVcrClassicPVCRAlgorithm::testAsymmetricFighterConfig()
+{
+    // Surroundings
+    game::vcr::classic::NullVisualizer vis;
+    game::config::HostConfiguration config;
+    game::spec::ShipList list;
+    initShipList(list);
+
+    // Config (from came that created this testcase, i.e. c2systest/combat/05_asyftr.pl)
+    config[config.AllowAlternativeCombat].set(1);
+    config[config.AllowEngineShieldBonus].set(1);
+    config[config.BayLaunchInterval].set(2);
+    config[config.BayRechargeBonus].set(1);
+    config[config.BayRechargeRate].set("40,42,40,39,36,41,40,40,37,42,40");
+    config[config.BeamFiringRange].set(25000);
+    config[config.BeamHitBonus].set("12,12,12,13,12,12,12,12,10,13,12");
+    config[config.BeamHitFighterCharge].set("460,460,460,460,460,440,460,460,450,500,430");
+    config[config.BeamHitFighterRange].set(100000);
+    config[config.BeamHitOdds].set("70,70,70,70,70,70,70,70,66,71,70");
+    config[config.BeamHitShipCharge].set("600,600,600,600,600,570,600,600,630,580,550");
+    config[config.BeamRechargeBonus].set("4,4,4,5,4,3,4,4,6,4,4");
+    config[config.BeamRechargeRate].set("4,5,4,6,5,3,4,4,6,4,4");
+    config[config.CrewKillScaling].set("30,20,30,30,30,39,15,30,30,30,30");
+    config[config.EModBayRechargeBonus].set(0);
+    config[config.EModBayRechargeRate].set("4,8,5,0");
+    config[config.EModBeamHitBonus].set("2,2,3,5");
+    config[config.EModBeamHitFighterCharge].set(0);
+    config[config.EModBeamHitOdds].set("4,4,5,8");
+    config[config.EModBeamRechargeBonus].set("0,0,1,1");
+    config[config.EModBeamRechargeRate].set("0,1,1,2");
+    config[config.EModCrewKillScaling].set("-6,-9,-12,-15");
+    config[config.EModEngineShieldBonusRate].set("3,6,9,12");
+    config[config.EModExtraFighterBays].set("0,0,1,1");
+    config[config.EModFighterBeamExplosive].set(0);
+    config[config.EModFighterBeamKill].set(0);
+    config[config.EModFighterMovementSpeed].set(0);
+    config[config.EModHullDamageScaling].set(0);
+    config[config.EModMaxFightersLaunched].set("2,4,4,4");
+    config[config.EModShieldDamageScaling].set(0);
+    config[config.EModShieldKillScaling].set(0);
+    config[config.EModStrikesPerFighter].set("0,0,0,1");
+    config[config.EModTorpHitBonus].set("1,2,3,4");
+    config[config.EModTorpHitOdds].set("1,2,3,5");
+    config[config.EModTubeRechargeBonus].set("1,1,2,3");
+    config[config.EModTubeRechargeRate].set("1,2,3,5");
+    config[config.FighterBeamExplosive].set("9,9,9,10,9,9,10,9,10,6,9");
+    config[config.FighterBeamKill].set("9,12,9,10,9,9,13,9,8,6,9");
+    config[config.FighterFiringRange].set("3000,3000,2800,2800,3000,3300,2900,3200,3000,3000,3000");
+    config[config.FighterKillOdds].set("30,30,30,30,10,10,10,10,10,10,10");     // This is the option under test!
+    config[config.FighterMovementSpeed].set("300,310,300,290,300,300,300,290,275,300,320");
+    config[config.FireOnAttackFighters].set(1);
+    config[config.HullDamageScaling].set("20,20,20,21,20,20,20,20,18,20,20");
+    config[config.MaxFightersLaunched].set("0,30,30,30,30,30,30,32,30,30,30");
+    config[config.NumExperienceLevels].set(4);
+    config[config.PlayerRace].set("1,2,3,4,5,6,7,8,9,10,11");
+    config[config.ShieldDamageScaling].set("40,40,48,40,36,40,40,40,60,36,40");
+    config[config.ShieldKillScaling].set(0);
+    config[config.ShipMovementSpeed].set("100,100,100,100,110,90,100,100,90,100,100");
+    config[config.StandoffDistance].set(10000);
+    config[config.StrikesPerFighter].set("5,5,5,4,5,5,5,5,5,7,5");
+    config[config.TorpFiringRange].set(30000);
+    config[config.TorpHitBonus].set("13,13,14,13,10,13,13,13,7,12,11");
+    config[config.TorpHitOdds].set("50,50,52,52,47,52,61,51,42,49,44");
+    config[config.TubeRechargeBonus].set("7,7,8,7,8,7,4,6,9,6,8");
+    config[config.TubeRechargeRate].set("30,29,31,30,31,30,27,29,34,29,31");
+
+    // Patch up ship list
+    list.beams().get(1)->setKillPower(1);
+    list.beams().get(1)->setDamagePower(7);
+    list.beams().get(1)->cost().set(game::spec::Cost::Money, 2);
+    list.beams().get(1)->cost().set(game::spec::Cost::Tritanium, 0);
+    list.beams().get(1)->cost().set(game::spec::Cost::Duranium, 1);
+    list.beams().get(1)->cost().set(game::spec::Cost::Molybdenum, 1);
+    list.beams().get(1)->setMass(0);
+    list.beams().get(1)->setTechLevel(1);
+
+    // Initialize fight
+    game::vcr::classic::PVCRAlgorithm testee(true, vis, config, list.beams(), list.launchers());
+    game::vcr::Object left(convertObject(battles[2].object[0]));
+    game::vcr::Object right(convertObject(battles[2].object[1]));
+    uint16_t seed = battles[2].seed;
+    bool result = testee.checkBattle(left, right, seed);
+    TS_ASSERT(!result);
+
+    // Run
+    testee.initBattle(left, right, seed);
+    while (testee.playCycle()) {
+        // nix
+    }
+    testee.doneBattle(left, right);
+    TS_ASSERT_EQUALS(testee.getTime(), 576);
+
+    // Verify result
+    TS_ASSERT(testee.getResult().contains(game::vcr::classic::LeftDestroyed));
+    TS_ASSERT(!testee.getResult().contains(game::vcr::classic::RightDestroyed));
+    TS_ASSERT(!testee.getResult().contains(game::vcr::classic::LeftCaptured));
+    TS_ASSERT(!testee.getResult().contains(game::vcr::classic::RightCaptured));
+    TS_ASSERT_EQUALS(left.getDamage(), 100);
+    TS_ASSERT_EQUALS(right.getDamage(), 91);
+    TS_ASSERT_EQUALS(left.getShield(), 0);
+    TS_ASSERT_EQUALS(right.getShield(), 0);
+    TS_ASSERT_EQUALS(left.getCrew(), 2906);
+    TS_ASSERT_EQUALS(right.getCrew(), 2964);
+    TS_ASSERT_EQUALS(left.getNumTorpedoes(), 0);
+    TS_ASSERT_EQUALS(right.getNumTorpedoes(), 0);
+    TS_ASSERT_EQUALS(left.getNumFighters(), 880);
+    TS_ASSERT_EQUALS(right.getNumFighters(), 963);
+}

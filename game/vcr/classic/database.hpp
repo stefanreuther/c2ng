@@ -1,5 +1,6 @@
 /**
   *  \file game/vcr/classic/database.hpp
+  *  \brief Class game::vcr::classic::Database
   */
 #ifndef C2NG_GAME_VCR_CLASSIC_DATABASE_HPP
 #define C2NG_GAME_VCR_CLASSIC_DATABASE_HPP
@@ -13,16 +14,30 @@
 
 namespace game { namespace vcr { namespace classic {
 
+    /** Classic VCR database.
+        Implements the game::vcr::Database interface for 1:1 combat. */
     class Database : public game::vcr::Database {
      public:
+        /** Constructor.
+            Makes an empty database. */
         Database();
 
+        /** Destructor. */
         ~Database();
 
-        void load(afl::io::Stream& file,
-                  const game::config::HostConfiguration& config,
-                  afl::charset::Charset& charset);
+        /** Load from file.
+            Assumes this Database to be empty.
+            Load a VCR.DAT/VCR.HST file.
+            Recognizes (and ignores) special hacks: PHost 2's configuration battle, dummy battle added by CORR.
 
+            @param file    File
+            @param config  Host configuration (for decoding PlanetsHaveTubes)
+            @parma charset Game character set (for decoding names) */
+        void load(afl::io::Stream& file, const game::config::HostConfiguration& config, afl::charset::Charset& charset);
+
+        /** Add a newly-constructed battle.
+            @param battle Battle; must not be null
+            @return battle */
         Battle* addNewBattle(Battle* battle);
 
         // game::vcr::Database methods:

@@ -1,24 +1,12 @@
 /**
   *  \file game/vcr/classic/utils.cpp
+  *  \brief Classic VCR Utilities
   */
 
 #include "game/vcr/classic/utils.hpp"
-#include "game/vcr/classic/database.hpp"
 #include "afl/string/format.hpp"
-#include "game/game.hpp"
-#include "game/turn.hpp"
 
 using afl::string::Format;
-
-game::vcr::classic::Database*
-game::vcr::classic::getDatabase(Session& s)
-{
-    if (Game* g = s.getGame().get()) {
-        return dynamic_cast<Database*>(g->currentTurn().getBattles().get());
-    } else {
-        return 0;
-    }
-}
 
 String_t
 game::vcr::classic::formatBattleResult(BattleResult_t result,
@@ -27,7 +15,6 @@ game::vcr::classic::formatBattleResult(BattleResult_t result,
                                        const String_t& annotation,
                                        afl::string::Translator& tx)
 {
-    // FIXME: do we need this method, and do we need this signature?
     int me;
     if (leftRelation == TeamSettings::ThisPlayer) {
         me = 0;
@@ -74,7 +61,7 @@ game::vcr::classic::formatBattleResult(BattleResult_t result,
         } else if (me == 1) {
             s = Format(tx("We captured their ship%s.").c_str(), insert);
         } else {
-            s = Format(tx("%s was captured.").c_str(), leftName);
+            s = Format(tx("%s was captured%s.").c_str(), leftName, insert);
         }
     } else if (result == RightCaptured) {
         if (me == 1) {
@@ -82,7 +69,7 @@ game::vcr::classic::formatBattleResult(BattleResult_t result,
         } else if (me == 0) {
             s = Format(tx("We captured their ship%s.").c_str(), insert);
         } else {
-            s = Format(tx("%s was captured.").c_str(), rightName);
+            s = Format(tx("%s was captured%s.").c_str(), rightName, insert);
         }
     } else if (result == BattleResult_t(LeftDestroyed) + RightDestroyed) {
         s = tx("Both were destroyed.");

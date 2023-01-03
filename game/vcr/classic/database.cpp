@@ -1,5 +1,6 @@
 /**
   *  \file game/vcr/classic/database.cpp
+  *  \brief Class game::vcr::classic::Database
   */
 
 #include "game/vcr/classic/database.hpp"

@@ -221,7 +221,7 @@ game::vcr::classic::Battle::getAlgorithmName(afl::string::Translator& tx) const
         N_("PHost 4"),
         N_("NuHost"),
     };
-    return tx.translateString(NAMES[m_type]);
+    return tx(NAMES[m_type]);
 }
 
 bool

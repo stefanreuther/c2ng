@@ -22,7 +22,9 @@ namespace game { namespace vcr { namespace classic {
         NuHost              ///< NuHost.
     };
 
-    /** Check for PHost-type battle. */
+    /** Check for PHost-type battle.
+        \param t Type to check
+        \return true if PHost-style battle */
     bool isPHost(Type t);
 
     /** Status values (battle outcome). */
@@ -30,7 +32,7 @@ namespace game { namespace vcr { namespace classic {
         LeftDestroyed,      ///< Left object has been destroyed.
         RightDestroyed,     ///< Right object has been destroyed.
         LeftCaptured,       ///< Left object has been captured. Only valid if left object is a ship; planets are destroyed.
-        RightCaptured,      ///< Right object has been captured. Only valid if left object is a ship; planets are destroyed.
+        RightCaptured,      ///< Right object has been captured. Only valid if right object is a ship; planets are destroyed.
         Timeout,            ///< Battle timed out. Used alone.
         Stalemate,          ///< Stalemate (neither has ammo). Used alone.
         Invalid             ///< Battle cannot be played. Used alone.
@@ -45,7 +47,7 @@ namespace game { namespace vcr { namespace classic {
     typedef afl::bits::SmallSet<BattleResult> BattleResult_t;
 
     /** Fighter statuses.
-        FIXME: Those are hardcoded at many places, don't change! */
+        Those might still be hardcoded someplace, don't change! */
     enum FighterStatus {
         FighterIdle,
         FighterAttacks,

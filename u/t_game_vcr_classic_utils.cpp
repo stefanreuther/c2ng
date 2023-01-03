@@ -66,6 +66,11 @@ TestGameVcrClassicUtils::testFormatBattleResult()
                                              "Right", TeamSettings::EnemyPlayer,
                                              "", tx),
                      "<Right won.>");
+    TS_ASSERT_EQUALS(gvc::formatBattleResult(gvc::BattleResult_t(gvc::LeftDestroyed),
+                                             "Left", TeamSettings::EnemyPlayer,
+                                             "Right", TeamSettings::EnemyPlayer,
+                                             "anno", tx),
+                     "<Right won (anno).>");
 
     // Right destroyed
     TS_ASSERT_EQUALS(gvc::formatBattleResult(gvc::BattleResult_t(gvc::RightDestroyed),
@@ -88,6 +93,11 @@ TestGameVcrClassicUtils::testFormatBattleResult()
                                              "Right", TeamSettings::EnemyPlayer,
                                              "", tx),
                      "<Left won.>");
+    TS_ASSERT_EQUALS(gvc::formatBattleResult(gvc::BattleResult_t(gvc::RightDestroyed),
+                                             "Left", TeamSettings::EnemyPlayer,
+                                             "Right", TeamSettings::EnemyPlayer,
+                                             "anno", tx),
+                     "<Left won (anno).>");
 
     // Left captured
     TS_ASSERT_EQUALS(gvc::formatBattleResult(gvc::BattleResult_t(gvc::LeftCaptured),
@@ -110,6 +120,11 @@ TestGameVcrClassicUtils::testFormatBattleResult()
                                              "Right", TeamSettings::EnemyPlayer,
                                              "", tx),
                      "<Left was captured.>");
+    TS_ASSERT_EQUALS(gvc::formatBattleResult(gvc::BattleResult_t(gvc::LeftCaptured),
+                                             "Left", TeamSettings::EnemyPlayer,
+                                             "Right", TeamSettings::EnemyPlayer,
+                                             "anno", tx),
+                     "<Left was captured (anno).>");
 
     // Right captured
     TS_ASSERT_EQUALS(gvc::formatBattleResult(gvc::BattleResult_t(gvc::RightCaptured),
@@ -132,6 +147,11 @@ TestGameVcrClassicUtils::testFormatBattleResult()
                                              "Right", TeamSettings::EnemyPlayer,
                                              "", tx),
                      "<Right was captured.>");
+    TS_ASSERT_EQUALS(gvc::formatBattleResult(gvc::BattleResult_t(gvc::RightCaptured),
+                                             "Left", TeamSettings::EnemyPlayer,
+                                             "Right", TeamSettings::EnemyPlayer,
+                                             "anno", tx),
+                     "<Right was captured (anno).>");
 
     // Both destroyed
     TS_ASSERT_EQUALS(gvc::formatBattleResult(gvc::BattleResult_t(gvc::LeftDestroyed) + gvc::RightDestroyed,
