@@ -113,7 +113,7 @@ game::maint::SweepApplication::appMain()
                 ++numPlayers;
             }
         }
-            
+
         standardOutput().writeLine(Format(tx("%d file%!1{s%} removed.").c_str(), wrap->getNumRemovedFiles()));
         if (numPlayers == 0) {
             standardOutput().writeLine(tx("No player data remains."));
@@ -127,7 +127,7 @@ void
 game::maint::SweepApplication::help(afl::io::TextWriter& out)
 {
     afl::string::Translator& tx = translator();
-    out.writeLine(Format(tx("PCC2 Game Directory Cleaner v%s - (c) 2010-2022 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(Format(tx("PCC2 Game Directory Cleaner v%s - (c) 2010-2023 Stefan Reuther").c_str(), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(tx("Usage:\n"
                             "  %s [-h]\n"

@@ -140,7 +140,7 @@ server::doc::ServerApplication::handleConfiguration(const String_t& key, const S
 String_t
 server::doc::ServerApplication::getApplicationName() const
 {
-    return Format("PCC2 Documentation Server v%s - (c) 2021-2022 Stefan Reuther", PCC2_VERSION);
+    return Format("PCC2 Documentation Server v%s - (c) 2021-2023 Stefan Reuther", PCC2_VERSION);
 }
 
 String_t

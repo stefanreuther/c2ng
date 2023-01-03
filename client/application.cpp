@@ -744,7 +744,7 @@ namespace {
                                                          "-password=PASS\tResult file password\n")
                                             + m_rootOptions.getHelp());
                 help += "\n";
-                help += m_translator("(c) copyright 2017-2022 Stefan Reuther <streu@gmx.de>");
+                help += m_translator("(c) copyright 2017-2023 Stefan Reuther <streu@gmx.de>");
                 help += "\n";
                 dialog.showInfo(help, PROGRAM_TITLE);
                 std::exit(0);
@@ -1056,7 +1056,7 @@ client::Application::appMain(gfx::Engine& engine)
         docView.getDocument().add(util::rich::Parser::parseXml("<big>PCC2ng</big>"));
         docView.getDocument().addNewline();
         docView.getDocument().addNewline();
-        docView.getDocument().add(util::rich::Parser::parseXml("<font color=\"dim\">&#xA9; 2017-2022 Stefan Reuther &lt;streu@gmx.de&gt;</font>"));
+        docView.getDocument().add(util::rich::Parser::parseXml("<font color=\"dim\">&#xA9; 2017-2023 Stefan Reuther &lt;streu@gmx.de&gt;</font>"));
         docView.getDocument().addNewline();
         docView.getDocument().finish();
         docView.handleDocumentUpdate();

@@ -88,7 +88,7 @@ game::maint::ConfigurationApplication::appMain()
                 // --load-hconfig=FILE
                 String_t fileName = cmdl.getRequiredParameter(text);
                 afl::base::Ref<afl::io::Stream> thisStream(fileSystem().openFile(fileName, afl::io::FileSystem::OpenRead));
-                loadHConfig(subject(), *thisStream);                
+                loadHConfig(subject(), *thisStream);
             } else if (text == "D") {
                 // -D KEY=VALUE
                 String_t kv = cmdl.getRequiredParameter(text);
@@ -168,7 +168,7 @@ game::maint::ConfigurationApplication::showHelp()
 {
     afl::string::Translator& tx = translator();
     afl::io::TextWriter& w = standardOutput();
-    w.writeLine(afl::string::Format(tx("Configuration Tool v%s - (c) 2018-2022 Stefan Reuther").c_str(), PCC2_VERSION));
+    w.writeLine(afl::string::Format(tx("Configuration Tool v%s - (c) 2018-2023 Stefan Reuther").c_str(), PCC2_VERSION));
     w.writeText(afl::string::Format(tx("\n"
                                        "Usage:\n"
                                        "  %s [-OPTIONS|FILES...]\n"

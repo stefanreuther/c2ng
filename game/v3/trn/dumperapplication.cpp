@@ -193,7 +193,7 @@ game::v3::trn::DumperApplication::showHelp()
     // ex game/un-trn.cc:help
     afl::io::TextWriter& w = standardOutput();
     afl::string::Translator& tx = translator();
-    w.writeLine(Format(tx("Turn File Decompiler v%s - (c) 2001-2022 Stefan Reuther").c_str(), PCC2_VERSION));
+    w.writeLine(Format(tx("Turn File Decompiler v%s - (c) 2001-2023 Stefan Reuther").c_str(), PCC2_VERSION));
     w.writeText(Format(tx("\n"
                           "Usage:\n"
                           "  %s [-h|-v]\n"
@@ -230,7 +230,7 @@ void
 game::v3::trn::DumperApplication::showVersion()
 {
     // ex game/un-trn.cc:version
-    standardOutput().writeLine(Format(translator()("Turn File Decompiler v%s - (c) 2001-2022 Stefan Reuther").c_str(), PCC2_VERSION));
+    standardOutput().writeLine(Format(translator()("Turn File Decompiler v%s - (c) 2001-2023 Stefan Reuther").c_str(), PCC2_VERSION));
     exit(0);
 }
 

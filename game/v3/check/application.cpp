@@ -107,7 +107,7 @@ void
 game::v3::check::Application::help()
 {
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(Format("Turn Checker v%s - (c) 2005-2022 Stefan Reuther", PCC2_VERSION));
+    out.writeLine(Format("Turn Checker v%s - (c) 2005-2023 Stefan Reuther", PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format("Usage:\n"
                          "  %s -h\n"

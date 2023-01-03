@@ -1,7 +1,7 @@
 Planets Command Center II Next Generation License Terms
 ========================================================
 
-  Copyright (c) 2001-2022 by Stefan Reuther & contributors. See the
+  Copyright (c) 2001-2023 by Stefan Reuther & contributors. See the
   AUTHORS file for a list.
 
   Redistribution and use in source and binary forms, with or without

@@ -154,7 +154,7 @@ gfx::gen::Application::showHelp()
 {
     afl::string::Translator& tx = translator();
     afl::io::TextWriter& w = standardOutput();
-    w.writeLine(Format(tx("PCC2 Procedural Graphics Generator v%s - (c) 2017-2022 Stefan Reuther"), PCC2_VERSION));
+    w.writeLine(Format(tx("PCC2 Procedural Graphics Generator v%s - (c) 2017-2023 Stefan Reuther"), PCC2_VERSION));
     w.writeText(Format(tx("\n"
                           "Usage:\n"
                           "  %s [-h]\n"
@@ -386,7 +386,7 @@ gfx::gen::Application::doExplosion(afl::base::Ref<afl::sys::Environment::Command
     CommonOptions opts;
     int size = 50;
     int speed = 1;
-    
+
     // Parse command line
     afl::sys::StandardCommandLineParser parser(cmdl);
     afl::string::Translator& tx = translator();
@@ -431,7 +431,7 @@ gfx::gen::Application::doShield(afl::base::Ref<afl::sys::Environment::CommandLin
     CommonOptions opts;
     int size = 16;
     int angle = 0;
-    
+
     // Parse command line
     afl::sys::StandardCommandLineParser parser(cmdl);
     afl::string::Translator& tx = translator();
@@ -475,7 +475,7 @@ gfx::gen::Application::doTexture(afl::base::Ref<afl::sys::Environment::CommandLi
 {
     CommonOptions opts;
     std::vector<String_t> commands;
-    
+
     // Parse command line
     afl::sys::StandardCommandLineParser parser(cmdl);
     afl::string::Translator& tx = translator();
