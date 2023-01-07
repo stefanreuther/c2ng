@@ -449,6 +449,30 @@ game::proxy::BrowserProxy::setLocalDirectoryName(const String_t& dirName)
     m_sender.postNewRequest(new Task(dirName));
 }
 
+// Verify status of a directory.
+game::proxy::BrowserProxy::DirectoryStatus_t
+game::proxy::BrowserProxy::verifyLocalDirectory(WaitIndicator& ind, const String_t& dirName)
+{
+    class Verifier : public util::Request<Trampoline> {
+     public:
+        Verifier(const String_t& dirName)
+            : m_dirName(dirName),
+              m_result(Browser::Missing)
+            { }
+        virtual void handle(Trampoline& t)
+            { m_result = t.session().browser().verifyLocalDirectory(m_dirName); }
+        DirectoryStatus_t getResult() const
+            { return m_result; }
+     private:
+        String_t m_dirName;
+        DirectoryStatus_t m_result;
+    };
+
+    Verifier v(dirName);
+    ind.call(m_sender, v);
+    return v.getResult();
+}
+
 // Set local directory to none.
 void
 game::proxy::BrowserProxy::setLocalDirectoryNone()

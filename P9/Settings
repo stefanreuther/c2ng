@@ -763,7 +763,10 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = gfx/colortransform.cpp gfx/colortransform.hpp \
+FILES_guilib = client/dialogs/directorysetup.cpp \
+    client/dialogs/directorysetup.hpp client/dialogs/newaccount.cpp \
+    client/dialogs/newaccount.hpp client/si/nullcontrol.cpp \
+    client/si/nullcontrol.hpp gfx/colortransform.cpp gfx/colortransform.hpp \
     client/dialogs/vcrselection.cpp client/dialogs/vcrselection.hpp \
     client/widgets/vcrinfo.cpp client/widgets/vcrinfo.hpp \
     client/application.cpp client/application.hpp \

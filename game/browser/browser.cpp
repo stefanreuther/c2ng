@@ -471,6 +471,40 @@ game::browser::Browser::setSelectedLocalDirectoryAutomatically()
     }
 }
 
+game::browser::Browser::DirectoryStatus
+game::browser::Browser::verifyLocalDirectory(const String_t directoryName)
+{
+    try {
+        afl::base::Ref<afl::io::Directory> dir = m_fileSystem.openDirectory(directoryName);
+
+        // Try creating files
+        bool ok = false;
+        for (int i = 0; i < 1000; ++i) {
+            String_t fileName = Format("_%d.tmp", i);
+            if (dir->openFileNT(fileName, afl::io::FileSystem::CreateNew).get() != 0) {
+                dir->eraseNT(fileName);
+                ok = true;
+                break;
+            }
+        }
+        if (!ok) {
+            return NotWritable;
+        }
+
+        // Check content
+        afl::base::Ptr<afl::io::DirectoryEntry> e;
+        if (dir->getDirectoryEntries()->getNextElement(e)) {
+            return NotEmpty;
+        }
+
+        // Success
+        return Success;
+    }
+    catch (...) {
+        return Missing;
+    }
+}
+
 bool
 game::browser::Browser::trySetLocalDirectoryName(afl::io::Directory& gamesDir, String_t directoryName)
 {

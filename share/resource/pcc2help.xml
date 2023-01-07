@@ -168,6 +168,33 @@
       </dl>
     </page>
 
+    <page id="pcc2:gamedirsetup">
+      <h1>Game Directory Setup</h1>
+
+      <p>PCC2 requires a directory to store local data, for example, configuration and history (starchart database).
+        When you open a game that has no suitable directory assigned, PCC2 will ask you to provide one.</p>
+
+      <p>Choose between the following possibilities:</p>
+      <dl>
+        <di term="Automatic"> PCC2 will automatically create a directory in your profile directory
+          (<tt>$HOME/.pcc2/games</tt>, <tt>C:\Users\User\AppData\Roaming\PCC2</tt>).
+          If you're not planning to use anything other than PCC2, that is a good choice;</di>
+        <di term="Manual"> PCC2 will ask you to choose a directory.
+          The dialog allows you to pick an existing directory, or create a new one.
+          The directory should be empty to not create conflicts with the new data stored by PCC2.
+          This is a good choice if you plan to use software other than PCC2 (e.g. VPA, EchoView) as well,
+          and need to know exactly how your directory structure is set up;</di>
+        <di term="None"> PCC2 will not use a local directory.
+          The game will be opened read-only, no data will be stored locally.
+          This is a good choice if you only want to look at the game data (e.g. data of a game that's long over).</di>
+      </dl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="See also:"> <a href="pcc2:gamesel">PCC2 Game Selection</a>.</di>
+      </dl>
+    </page>
+
     <!-- FIXME: pcc2:unpack -->
     <!-- FIXME: pcc2:sweep -->
 

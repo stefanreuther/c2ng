@@ -1,14 +1,16 @@
 /**
   *  \file client/screens/browserscreen.hpp
+  *  \brief Class client::screens::BrowserScreen
   */
 #ifndef C2NG_CLIENT_SCREENS_BROWSERSCREEN_HPP
 #define C2NG_CLIENT_SCREENS_BROWSERSCREEN_HPP
 
 #include "afl/base/ptr.hpp"
 #include "afl/base/signal.hpp"
+#include "afl/container/ptrvector.hpp"
 #include "afl/string/translator.hpp"
+#include "client/si/userside.hpp"
 #include "client/widgets/folderlistbox.hpp"
-#include "game/browser/session.hpp"
 #include "game/proxy/browserproxy.hpp"
 #include "game/session.hpp"
 #include "gfx/timer.hpp"
@@ -19,7 +21,6 @@
 #include "ui/widgets/simpleiconbox.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/rich/text.hpp"
-#include "client/si/userside.hpp"
 
 namespace client { namespace screens {
 

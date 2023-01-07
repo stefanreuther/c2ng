@@ -40,6 +40,9 @@ namespace game { namespace proxy {
         /** Shortcut: optional position in list. */
         typedef game::browser::Browser::OptionalIndex_t OptionalIndex_t;
 
+        /** Shortcut: directory status. */
+        typedef game::browser::Browser::DirectoryStatus DirectoryStatus_t;
+
         /** Information about a folder (path or content item). */
         struct Item {
             String_t name;                            ///< Name (shown to user). @see game::browser::Folder::getName().
@@ -144,8 +147,15 @@ namespace game { namespace proxy {
             Updates the folder previously loaded using selectFolder();
             must be called after the sig_selectedInfoUpdate callback.
             @param dirName Directory name
-            @see game::browser::Browser::setLocalDirectoryName() */
+            @see game::browser::Browser::setSelectedLocalDirectoryName() */
         void setLocalDirectoryName(const String_t& dirName);
+
+        /** Verify status of a directory.
+            @param ind WaitIndicator
+            @param dirName Directory name to check
+            @return status
+            @see game::browser::Browser::verifyLocalDirectory() */
+        DirectoryStatus_t verifyLocalDirectory(WaitIndicator& ind, const String_t& dirName);
 
         /** Set local directory to none.
             Updates the folder previously loaded using selectFolder();

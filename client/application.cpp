@@ -39,6 +39,7 @@
 #include "client/si/commands.hpp"
 #include "client/si/control.hpp"
 #include "client/si/inputstate.hpp"
+#include "client/si/nullcontrol.hpp"
 #include "client/si/outputstate.hpp"
 #include "client/si/userside.hpp"
 #include "client/tiles/historyadaptor.hpp"
@@ -91,29 +92,6 @@ namespace {
     const char LOG_NAME[] = "main";
 
     const char PROGRAM_TITLE[] = "PCC2 v" PCC2_VERSION;
-
-    class NullControl : public client::si::Control {
-     public:
-        NullControl(client::si::UserSide& us)
-            : Control(us)
-            { }
-        virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target /*target*/)
-            { interface().continueProcessWithFailure(link, "Context error"); }
-        virtual void handleEndDialog(client::si::RequestLink2 link, int /*code*/)
-            { interface().continueProcessWithFailure(link, "Context error"); }
-        virtual void handlePopupConsole(client::si::RequestLink2 link)
-            { interface().continueProcessWithFailure(link, "Context error"); }
-        virtual void handleScanKeyboardMode(client::si::RequestLink2 link)
-            { interface().continueProcessWithFailure(link, "Context error"); }
-        virtual void handleSetView(client::si::RequestLink2 link, String_t /*name*/, bool /*withKeymap*/)
-            { interface().continueProcessWithFailure(link, "Context error"); }
-        virtual void handleUseKeymap(client::si::RequestLink2 link, String_t /*name*/, int /*prefix*/)
-            { interface().continueProcessWithFailure(link, "Context error"); }
-        virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t /*text*/)
-            { interface().continueProcessWithFailure(link, "Context error"); }
-        virtual game::interface::ContextProvider* createContextProvider()
-            { return 0; }
-    };
 
     class ScriptInitializer : public client::si::ScriptTask {
      public:
@@ -1037,7 +1015,7 @@ client::Application::appMain(gfx::Engine& engine)
     // Script initialisation, wait for completion
     // (The NullControl will make us essentially responsive to UI from scripts.)
     {
-        NullControl ctl(userSide);
+        client::si::NullControl ctl(userSide);
         std::auto_ptr<client::si::ScriptTask> t(new ScriptInitializer(resourceDirectory));
         ctl.executeTaskWait(t);
     }

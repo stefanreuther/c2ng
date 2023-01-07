@@ -63,6 +63,14 @@ namespace game { namespace browser {
      public:
         typedef afl::base::InlineOptional<size_t,size_t(-1)> OptionalIndex_t;
 
+        /** Status for a local directory. */
+        enum DirectoryStatus {
+            Missing,                                  ///< Directory does not exist.
+            Success,                                  ///< Success.
+            NotEmpty,                                 ///< Directory exists but is not empty.
+            NotWritable                               ///< Directory exists but is not writable.
+        };
+
         /** Constructor.
 
             @param fileSystem    File system instance (for browsing).
@@ -249,6 +257,13 @@ namespace game { namespace browser {
         /** Set local directory name for selected child to an automatically derived name.
             (Call is ignored if no child is selected.) */
         void setSelectedLocalDirectoryAutomatically();
+
+        /** Verify status of a directory.
+            Check whether the directory can be used as a local directory.
+
+            @param directoryName Directory name you want to use for setSelectedLocalDirectoryName
+            @return status */
+        DirectoryStatus verifyLocalDirectory(const String_t directoryName);
 
      private:
         afl::io::FileSystem& m_fileSystem;
