@@ -124,6 +124,7 @@ class TestGameV3DirectoryScanner : public CxxTest::TestSuite {
     void testResultAndBadTurn();
     void testHostVersion();
     void testHostVersionResult();
+    void testHostVersionDisabled();
 };
 
 class TestGameV3FizzFile : public CxxTest::TestSuite {

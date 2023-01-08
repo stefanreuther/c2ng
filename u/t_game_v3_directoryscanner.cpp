@@ -739,3 +739,27 @@ TestGameV3DirectoryScanner::testHostVersionResult()
     TS_ASSERT_EQUALS(env.scanner.getDirectoryHostVersion().getKind(), HostVersion::PHost);
     TS_ASSERT_EQUALS(env.scanner.getDirectoryHostVersion().getVersion(), MKVERSION(4, 1, 8));
 }
+
+/** Test disabled host version parsing from result file. */
+void
+TestGameV3DirectoryScanner::testHostVersionDisabled()
+{
+    // Environment
+    Environment env;
+    env.workDir->addStream("player7.rst", *new ConstMemoryStream(game::test::getResultFile30()));
+
+    // Create a fresh scanner that does not parse messages
+    DirectoryScanner scanner(env.tx, env.log);
+    scanner.scan(*env.workDir, env.charset);
+
+    // Check player flags [same as above]
+    TS_ASSERT_EQUALS(scanner.getPlayerFlags(7), DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveResult);
+    TS_ASSERT_EQUALS(scanner.getDirectoryFlags(), DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveResult);
+    TS_ASSERT_EQUALS(scanner.getPlayersWhere(DirectoryScanner::PlayerFlags_t(DirectoryScanner::HaveResult)), PlayerSet_t(7));
+    TS_ASSERT_EQUALS(scanner.getDefaultPlayer(), 7);
+
+    // Check host version [remains unset]
+    TS_ASSERT_EQUALS(scanner.getDirectoryHostVersion().getKind(), HostVersion::Unknown);
+    TS_ASSERT_EQUALS(scanner.getDirectoryHostVersion().getVersion(), 0);
+}
+

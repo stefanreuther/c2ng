@@ -41,10 +41,16 @@ namespace game { namespace v3 {
 
         /** Construct empty overview.
             Call scan() to fill it.
-            \param specificationDirectory Specification directory
+            \param specificationDirectory Specification directory (for host version detection)
             \param tx Message translator
             \param log Logger */
-        explicit DirectoryScanner(afl::io::Directory& specificationDirectory, afl::string::Translator& tx, afl::sys::LogListener& log);
+        DirectoryScanner(afl::io::Directory& specificationDirectory, afl::string::Translator& tx, afl::sys::LogListener& log);
+
+        /** Construct empty overview without host-version detection.
+            Call scan() to fill it.
+            \param tx Message translator
+            \param log Logger */
+        DirectoryScanner(afl::string::Translator& tx, afl::sys::LogListener& log);
 
         /** Scan for files.
             This will populate this object with information about the specified directory.
@@ -80,6 +86,10 @@ namespace game { namespace v3 {
             There is the possibility that data from different host versions is mixed in one directory.
             Normally, these will have different timestamps, and therefore one set is picked as valid, the other ones are marked conflicting.
             The assumption is that these valid files are all from the same host version.
+
+            If the two-argument constructor has been used to construct this DirectoryScanner,
+            no host version will be produced; the return value will be a default-initialized HostVersion object.
+
             \return host version */
         HostVersion getDirectoryHostVersion() const;
 

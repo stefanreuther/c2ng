@@ -38,6 +38,15 @@ game::v3::DirectoryScanner::DirectoryScanner(afl::io::Directory& specificationDi
     initMessageParser(specificationDirectory);
 }
 
+// Construct empty overview without host-version detection.
+game::v3::DirectoryScanner::DirectoryScanner(afl::string::Translator& tx, afl::sys::LogListener& log)
+    : m_translator(tx),
+      m_log(log),
+      m_messageParser()
+{
+    clear();
+}
+
 // Scan for files.
 void
 game::v3::DirectoryScanner::scan(afl::io::Directory& dir, afl::charset::Charset& charset, bool resultOnly)
@@ -314,6 +323,11 @@ void
 game::v3::DirectoryScanner::checkHostVersion(afl::io::Stream& stream, afl::charset::Charset& charset, game::HostVersion& version)
 {
     // ex game/storage/overview.cc:checkHostVersion
+
+    // Quick exit: if we do not have any templates, we won't recognize anything; don't read messages
+    if (m_messageParser.getNumTemplates() == 0) {
+        return;
+    }
 
     // Imports
     using game::parser::MessageInformation;
