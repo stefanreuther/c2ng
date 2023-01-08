@@ -244,12 +244,7 @@ game::proxy::VcrDatabaseProxy::Trampoline::packStatus(Status& st)
 inline void
 game::proxy::VcrDatabaseProxy::Trampoline::packPlayerNames(PlayerArray<String_t>& result, Player::Name which)
 {
-    const PlayerList& list = m_adaptor.root().playerList();
-    for (int i = 0; i <= MAX_PLAYERS; ++i) {
-        if (const Player* pl = list.get(i)) {
-            result.set(i, pl->getName(which, m_adaptor.translator()));
-        }
-    }
+    result = m_adaptor.root().playerList().getPlayerNames(which, m_adaptor.translator());
 }
 
 inline void

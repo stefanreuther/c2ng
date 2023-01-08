@@ -32,13 +32,15 @@ namespace game { namespace proxy {
             \param link WaitIndicator object
             \param id Slot
             \param which Which name to get
-            \return name. Empty if parameters out of range or session has no player list. */
+            \return name. Empty if parameters out of range or session has no player list.
+            \see game::PlayerList::getPlayerName */
         String_t getPlayerName(WaitIndicator& link, int id, Player::Name which);
 
         /** Get names of all players.
             \param link WaitIndicator object
             \param which Which names to get
-            \return array of names. Values for empty or out-of-range indexes are empty. */
+            \return array of names. Values for empty or out-of-range indexes are empty.
+            \see game::PlayerList::getPlayerNames */
         PlayerArray<String_t> getPlayerNames(WaitIndicator& link, Player::Name which);
 
      private:

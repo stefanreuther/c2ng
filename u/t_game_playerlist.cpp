@@ -307,7 +307,7 @@ TestGamePlayerList::testNotify()
     TS_ASSERT_EQUALS(c.get(), 4);
 }
 
-/** Test getName(). */
+/** Test getPlayerName(), getPlayerNames(). */
 void
 TestGamePlayerList::testGetName()
 {
@@ -324,5 +324,13 @@ TestGamePlayerList::testGetName()
     TS_ASSERT_EQUALS(testee.getPlayerName(1, game::Player::LongName, tx), "Player 1");
     TS_ASSERT_EQUALS(testee.getPlayerName(1, game::Player::EmailAddress, tx), "");
     TS_ASSERT_EQUALS(testee.getPlayerName(1, game::Player::AdjectiveName, tx), "Player 1");
+
+    game::PlayerArray<String_t> names = testee.getPlayerNames(game::Player::LongName, tx);
+    TS_ASSERT_EQUALS(names.get(3), "Long");
+    TS_ASSERT_EQUALS(names.get(1), "");          // No fallback names for empty slots
+
+    game::PlayerArray<String_t> adj = testee.getPlayerNames(game::Player::AdjectiveName, tx);
+    TS_ASSERT_EQUALS(adj.get(3), "Player 3");    // Fallback name for unset name
+    TS_ASSERT_EQUALS(adj.get(1), "");            // No fallback names for empty slots
 }
 

@@ -9,6 +9,7 @@
 #include "afl/container/ptrvector.hpp"
 #include "afl/string/translator.hpp"
 #include "game/player.hpp"
+#include "game/playerarray.hpp"
 #include "game/playerset.hpp"
 
 namespace game {
@@ -99,6 +100,12 @@ namespace game {
             \param tx Translator (for fallback names)
             \return name */
         String_t getPlayerName(int id, Player::Name which, afl::string::Translator& tx) const;
+
+        /** Get names of all players.
+            \param which Which names to get
+            \param tx Translator (for fallback names)
+            \return array of names. Values for empty or out-of-range indexes are empty. */
+        PlayerArray<String_t> getPlayerNames(Player::Name which, afl::string::Translator& tx) const;
 
         /** Notify listeners.
             Call eventually after modifying players.

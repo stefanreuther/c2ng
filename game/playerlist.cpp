@@ -177,6 +177,19 @@ game::PlayerList::getPlayerName(int id, Player::Name which, afl::string::Transla
     }
 }
 
+// Get names of all players.
+game::PlayerArray<String_t>
+game::PlayerList::getPlayerNames(Player::Name which, afl::string::Translator& tx) const
+{
+    PlayerArray<String_t> result;
+    for (int i = 0; i <= MAX_PLAYERS; ++i) {
+        if (const Player* pl = get(i)) {
+            result.set(i, pl->getName(which, tx));
+        }
+    }
+    return result;
+}
+
 // Notify listeners.
 void
 game::PlayerList::notifyListeners()
