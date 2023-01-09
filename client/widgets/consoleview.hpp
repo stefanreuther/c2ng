@@ -27,6 +27,8 @@ namespace client { namespace widgets {
         void clear();
         void setScrollbackIndicator(int n);
 
+        int getNumLines() const;
+
      private:
         gfx::ResourceProvider& m_provider;
         gfx::Point m_sizeCells;

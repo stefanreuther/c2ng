@@ -12,7 +12,9 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = interpreter/staticcontext.hpp game/ref/configuration.cpp \
+FILES_gamelib = game/proxy/maintenanceproxy.cpp \
+    game/proxy/maintenanceadaptor.hpp game/proxy/maintenanceproxy.hpp \
+    interpreter/staticcontext.hpp game/ref/configuration.cpp \
     game/ref/sortby.cpp game/ref/sortby.hpp game/map/info/mission.cpp \
     game/map/info/mission.hpp game/msg/file.cpp game/msg/file.hpp \
     game/v3/udata/sessionnameprovider.cpp \
@@ -763,7 +765,11 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/dialogs/directorysetup.cpp \
+FILES_guilib = client/widgets/consolecontroller.cpp \
+    client/widgets/consolecontroller.hpp client/dialogs/simpleconsole.cpp \
+    client/dialogs/simpleconsole.hpp client/dialogs/unpack.cpp \
+    client/dialogs/unpack.hpp client/dialogs/sweep.cpp \
+    client/dialogs/sweep.hpp client/dialogs/directorysetup.cpp \
     client/dialogs/directorysetup.hpp client/dialogs/newaccount.cpp \
     client/dialogs/newaccount.hpp client/si/nullcontrol.cpp \
     client/si/nullcontrol.hpp gfx/colortransform.cpp gfx/colortransform.hpp \
@@ -1732,9 +1738,11 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_ref_sortby.cpp u/t_gfx_colortransform.cpp \
-    u/t_game_map_info_mission.cpp u/t_game_msg_file.cpp \
-    u/t_game_interface_mailboxcontext.cpp u/t_game_v3_udata_nameprovider.cpp \
+FILES_testsuite = u/t_game_proxy_maintenanceadaptor.cpp \
+    u/t_game_proxy_maintenanceproxy.cpp u/t_game_ref_sortby.cpp \
+    u/t_gfx_colortransform.cpp u/t_game_map_info_mission.cpp \
+    u/t_game_msg_file.cpp u/t_game_interface_mailboxcontext.cpp \
+    u/t_game_v3_udata_nameprovider.cpp \
     u/t_game_v3_udata_sessionnameprovider.cpp \
     u/t_game_v3_udata_messagebuilder.cpp u/t_game_msg_format.cpp \
     u/t_game_parser_binarytransfer.cpp u/t_client_widgets_pluginlist.cpp \

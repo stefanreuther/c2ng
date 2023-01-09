@@ -5,7 +5,9 @@
 #ifndef C2NG_GAME_TEST_FILES_HPP
 #define C2NG_GAME_TEST_FILES_HPP
 
+#include "afl/base/growablememory.hpp"
 #include "afl/base/memory.hpp"
+#include "game/timestamp.hpp"
 
 namespace game { namespace test {
 
@@ -77,6 +79,32 @@ namespace game { namespace test {
 
     /** Get default hull assignments (truehull.dat). */
     afl::base::ConstBytes_t getDefaultHullAssignments();
+
+    /*
+     *  Generated Files
+     */
+
+    /** Make an empty result file.
+        The file contains no objects or messages.
+        @param playerId    Player number
+        @param turnNumber  Turn number
+        @param ts          Timestamp
+        @return result file image */
+    afl::base::GrowableBytes_t makeEmptyResult(int playerId, int turnNumber, const Timestamp& ts);
+
+    /** Make an simple turn file.
+        The file contains a simple "send message to host" command.
+        @param playerId    Player number
+        @param ts          Timestamp
+        @return turn file image */
+    afl::base::GrowableBytes_t makeSimpleTurn(int playerId, const Timestamp& ts);
+
+    /** Make a GENx.DAT file.
+        @param playerId    Player number
+        @param turnNumber  Turn number
+        @param ts          Timestamp
+        @return gen file image */
+    afl::base::GrowableBytes_t makeGenFile(int playerId, int turnNumber, const Timestamp& ts);
 
 } }
 

@@ -143,3 +143,14 @@ client::widgets::ConsoleView::setScrollbackIndicator(int n)
         requestRedraw();
     }
 }
+
+int
+client::widgets::ConsoleView::getNumLines() const
+{
+    int height = getExtent().getHeight();
+    int lineHeight = m_provider.getFont(gfx::FontRequest())->getLineHeight();
+    if (lineHeight > 0) {
+        height /= lineHeight;
+    }
+    return height;
+}

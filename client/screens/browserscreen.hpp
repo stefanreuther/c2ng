@@ -38,8 +38,9 @@ namespace client { namespace screens {
         /** Constructor.
             Prepares a BrowserScreen.
             \param us UserSide
-            \param proxy Browser proxy for most operations */
-        BrowserScreen(client::si::UserSide& us, game::proxy::BrowserProxy& proxy);
+            \param proxy Browser proxy for most operations
+            \param browserSender Sender for the browser */
+        BrowserScreen(client::si::UserSide& us, game::proxy::BrowserProxy& proxy, util::RequestSender<game::browser::Session> browserSender);
 
         /** Display this screen.
             Returns when the user cancels the dialog.
@@ -108,6 +109,9 @@ namespace client { namespace screens {
         void onKeyQuit(int);
         void onAddAccount(int);
         void onRootAction(size_t index);
+        void onUnpackAction();
+        void onMaketurnAction();
+        void onSweepAction();
         bool preparePlayAction(size_t index);
 
         void setState(State st);
@@ -124,6 +128,7 @@ namespace client { namespace screens {
         ui::Root& m_root;
         afl::string::Translator& m_translator;
         util::RequestSender<game::Session> m_gameSender;
+        util::RequestSender<game::browser::Session> m_browserSender;
         util::RequestReceiver<BrowserScreen> m_receiver;
         game::proxy::BrowserProxy& m_proxy;
 

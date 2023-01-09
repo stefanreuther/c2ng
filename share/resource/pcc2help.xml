@@ -135,6 +135,9 @@
         <ki key="Right">Switch to player selector; if not possible, enter directory;</ki>
         <ki key="Enter">On player selector: load game; otherwise like <kbd>Right</kbd>;</ki>
         <ki key="Ins"><a href="pcc2:addaccount">Add account</a>;</ki>
+        <ki key="U"><a href="pcc2:unpack">Unpack result files</a>;</ki>
+        <ki key="M">Make turn files;</ki>
+        <ki key="S"><a href="pcc2:sweep">Clean up directory (sweep)</a>;</ki>
         <ki key="F5"><a href="pcc2:plugins">Plugin Manager</a>;</ki>
         <ki key="ESC">Exit.</ki>
       </kl>
@@ -195,8 +198,73 @@
       </dl>
     </page>
 
-    <!-- FIXME: pcc2:unpack -->
-    <!-- FIXME: pcc2:sweep -->
+    <!-- Unpack Screen -->
+    <page id="pcc2:unpack">
+      <h1>Unpack</h1>
+
+      <p>With classic VGA Planets, you receive result (*.rst) files from your host, and send turn (*.trn) files to your host.
+        PCC2 will be able to play directly with those files.
+        However, many traditional programs require the files to be unpacked before they can be used.</p>
+
+      <p>The Unpack function displays a list of result files found.
+        Select those you want to unpack.
+        When you start from a game directory containing unpacked data,
+        the results corresponding to the unpacked data will be highlighted by default.</p>
+
+      <p>Normally, you use the Unpack function at the beginning of a turn.
+        If you Unpack mid-turn, your game will be reset to the beginning of the turn, undoing all your commands.
+        If you have matching turn files, PCC2 will by default apply these turn files as well,
+        to return you to the state when you last ran Maketurn.</p>
+
+      <kl>
+        <ki key="&#x2191;, &#x2193;">Move around;</ki>
+        <ki key="Space">Toggle;</ki>
+        <ki key="1..9, A, B">Toggle that race;</ki>
+        <ki key="*">Mark/unmark all;</ki>
+        <ki key="Alt-A">Toggle "Apply turn files" option;</ki>
+        <!-- <ki key="T"><a href="pcc2:resultattachments">Unpack attachments</a></ki> -->
+        <ki key="Enter">Unpack all selected players;</ki>
+        <ki key="ESC">Cancel.</ki>
+      </kl>
+
+      <p>You can also use the command line utility <tt>c2unpack</tt> to unpack result files.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>U</kbd> from <a href="pcc2:gamesel">Game Selection</a>, and on directory menu.</di>
+      </dl>
+    </page>
+
+    <!-- Sweep Screen -->
+    <page id="pcc2:sweep">
+      <h1>Clean Up Directory (Sweep)</h1>
+
+      <p>The <em>Sweep</em> function can be used to clean up game directories,
+        for example, when you accidentally unpacked game files, or otherwise got your files mixed up.</p>
+
+      <p>Select the player slots you you want to delete.
+        When you start from a game directory containing turn conflicts, the older files will start selected.</p>
+
+      <kl>
+        <ki key="&#x2191;, &#x2193;">Move around;</ki>
+        <ki key="Space">Toggle;</ki>
+        <ki key="1..9, A, B">Toggle that race;</ki>
+        <ki key="Alt-D">Toggle "Delete database files" option.
+          With this option enabled, this function also deletes files that are usually kept longer, such as <tt>chartX.cc</tt>, PCC's history file.
+          With this option disabled, only per-turn files are deleted, such as <tt>bdataX.dat</tt>.
+          The Sweep function will never delete result or turn files;</ki>
+        <ki key="*">Mark/unmark all;</ki>
+        <ki key="Enter">Sweep;</ki>
+        <ki key="ESC">Cancel.</ki>
+      </kl>
+
+      <p>You can also use the command line utility <tt>c2sweep</tt> to clean game directories.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>S</kbd> from <a href="pcc2:gamesel">Game Selection</a>, and on directory menu.</di>
+      </dl>
+    </page>
 
     <!-- Plugin Manager -->
     <page id="pcc2:plugins">

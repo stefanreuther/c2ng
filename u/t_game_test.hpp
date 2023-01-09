@@ -20,6 +20,9 @@ class TestGameTestDefaultShipList : public CxxTest::TestSuite {
 class TestGameTestFiles : public CxxTest::TestSuite {
  public:
     void testFiles();
+    void testMakeEmptyResult();
+    void testMakeGen();
+    void testMakeSimpleTurn();
 };
 
 class TestGameTestRegistrationKey : public CxxTest::TestSuite {

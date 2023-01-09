@@ -1044,7 +1044,7 @@ client::Application::appMain(gfx::Engine& engine)
         root.add(docView);
 
         // Browser
-        client::screens::BrowserScreen browserScreen(userSide, browserProxy);
+        client::screens::BrowserScreen browserScreen(userSide, browserProxy, browserSender);
         browserScreen.sig_gameSelection.addNewClosure(new BrowserListener(browserScreen, browserSender, gameReceiver.getSender()));
 
         int result = browserScreen.run(docColors);

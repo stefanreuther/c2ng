@@ -84,6 +84,12 @@ client::widgets::PlayerSetSelector::togglePlayers(game::PlayerSet_t set)
 }
 
 void
+client::widgets::PlayerSetSelector::toggleAll()
+{
+    togglePlayers(m_selectablePlayers);
+}
+
+void
 client::widgets::PlayerSetSelector::init(const game::PlayerArray<String_t>& names, game::PlayerSet_t set, afl::string::Translator& tx)
 {
     for (int playerNr = 1; playerNr <= game::MAX_PLAYERS; ++playerNr) {

@@ -58,6 +58,9 @@ namespace client { namespace widgets {
             \param set Set to toggle */
         void togglePlayers(game::PlayerSet_t set);
 
+        /** Toggle all selectable players. */
+        void toggleAll();
+
         /** Signal: set change.
             Emitted whenever getSelectedPlayers() changes. */
         afl::base::Signal<void()> sig_setChange;

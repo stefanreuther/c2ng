@@ -12,12 +12,19 @@
 #include "client/dialogs/helpdialog.hpp"
 #include "client/dialogs/newaccount.hpp"
 #include "client/dialogs/pluginmanager.hpp"
+#include "client/dialogs/simpleconsole.hpp"
+#include "client/dialogs/sweep.hpp"
+#include "client/dialogs/unpack.hpp"
 #include "client/downlink.hpp"
 #include "client/help.hpp"
 #include "client/si/nullcontrol.hpp"
 #include "client/si/scripttask.hpp"
+#include "client/widgets/helpwidget.hpp"
+#include "game/exception.hpp"
 #include "game/interface/plugins.hpp"
 #include "game/playerlist.hpp"
+#include "game/proxy/maintenanceadaptor.hpp"
+#include "game/proxy/maintenanceproxy.hpp"
 #include "game/root.hpp"
 #include "ui/defaultresourceprovider.hpp"
 #include "ui/eventloop.hpp"
@@ -32,10 +39,10 @@
 #include "ui/widgets/transparentwindow.hpp"
 #include "util/rich/styleattribute.hpp"
 #include "util/translation.hpp"
-#include "client/widgets/helpwidget.hpp"
 
 using afl::container::PtrVector;
 using afl::string::Format;
+using client::dialogs::SimpleConsole;
 using game::proxy::BrowserProxy;
 using util::rich::StyleAttribute;
 using util::rich::Text;
@@ -90,15 +97,53 @@ namespace {
         client::Downlink link(root, tx);
         return proxy.isSelectedFolderSetupSuggested(link);
     }
+
+    game::Root& mustHaveRoot(game::Root* pRoot)
+    {
+        if (pRoot == 0) {
+            throw game::Exception(game::Exception::eUser);
+        }
+        return *pRoot;
+    }
+
+    class MaintenanceBrowserAdaptor : public game::proxy::MaintenanceAdaptor {
+     public:
+        MaintenanceBrowserAdaptor(game::browser::Session& bro)
+            : m_browserSession(bro),
+              m_root(mustHaveRoot(bro.browser().getSelectedRoot().get()))
+            { }
+        virtual afl::io::Directory& targetDirectory()
+            { return m_root->gameDirectory(); }
+        virtual afl::string::Translator& translator()
+            { return m_browserSession.translator(); }
+        virtual afl::charset::Charset& charset()
+            { return m_root->charset(); }
+        virtual const game::PlayerList& playerList()
+            { return m_root->playerList(); }
+        virtual afl::io::FileSystem& fileSystem()
+            { return m_browserSession.browser().fileSystem(); }
+        virtual game::config::UserConfiguration& userConfiguration()
+            { return m_root->userConfiguration(); }
+     private:
+        game::browser::Session& m_browserSession;
+        afl::base::Ref<game::Root> m_root;
+    };
+
+    class MaintenanceFromBrowser : public afl::base::Closure<game::proxy::MaintenanceAdaptor*(game::browser::Session&)> {
+     public:
+        virtual game::proxy::MaintenanceAdaptor* call(game::browser::Session& bro)
+            { return new MaintenanceBrowserAdaptor(bro); }
+    };
 }
 
 /***************************** BrowserScreen *****************************/
 
-client::screens::BrowserScreen::BrowserScreen(client::si::UserSide& us, game::proxy::BrowserProxy& proxy)
+client::screens::BrowserScreen::BrowserScreen(client::si::UserSide& us, game::proxy::BrowserProxy& proxy, util::RequestSender<game::browser::Session> browserSender)
     : m_userSide(us),
       m_root(us.root()),
       m_translator(us.translator()),
       m_gameSender(us.gameSender()),
+      m_browserSender(browserSender),
       m_receiver(m_root.engine().dispatcher(), *this),
       m_proxy(proxy),
       m_list(gfx::Point(20, 20), m_root),
@@ -147,6 +192,9 @@ client::screens::BrowserScreen::run(gfx::ColorScheme<util::SkinColor::Color>& pa
     keys.add(util::Key_Right,                    this, &BrowserScreen::onKeyEnter);
     keys.add(util::Key_Left,                     this, &BrowserScreen::onKeyLeft);
     keys.add('h',                                this, &BrowserScreen::onKeyHelp);
+    keys.add('m',                                this, &BrowserScreen::onMaketurnAction);
+    keys.add('s',                                this, &BrowserScreen::onSweepAction);
+    keys.add('u',                                this, &BrowserScreen::onUnpackAction);
     keys.add(util::Key_F1,                       this, &BrowserScreen::onKeyHelp);
     keys.add(util::Key_F5,                       this, &BrowserScreen::onKeyPlugin);
     keys.add(util::Key_Quit,                     this, &BrowserScreen::onKeyQuit);
@@ -501,11 +549,64 @@ client::screens::BrowserScreen::onRootAction(size_t index)
         client::dialogs::doFolderConfigDialog(m_root, m_proxy, m_translator);
         break;
      case xSweep:
+        onSweepAction();
         break;
      case xUnpack:
+        onUnpackAction();
         break;
      case xMaketurn:
+        onMaketurnAction();
         break;
+    }
+}
+
+void
+client::screens::BrowserScreen::onUnpackAction()
+{
+    if (m_state == Working && getActions(m_infoActions).contains(xUnpack)) {
+        game::proxy::MaintenanceProxy proxy(m_browserSender.makeTemporary(new MaintenanceFromBrowser()), m_root.engine().dispatcher());
+        client::widgets::HelpWidget help(m_root, m_translator, m_gameSender, "pcc2:unpack");
+        if (client::dialogs::doUnpackDialog(proxy, &help, m_root, m_translator)) {
+            // Refresh
+            m_proxy.loadContent();
+            setState(Blocked);
+        }
+    }
+}
+
+void
+client::screens::BrowserScreen::onMaketurnAction()
+{
+    if (m_state == Working && getActions(m_infoActions).contains(xMaketurn)) {
+        game::proxy::MaintenanceProxy proxy(m_browserSender.makeTemporary(new MaintenanceFromBrowser()), m_root.engine().dispatcher());
+        Downlink link(m_root, m_translator);
+        game::proxy::MaintenanceProxy::MaketurnStatus st = proxy.prepareMaketurn(link);
+        if (st.valid) {
+            // Do it
+            SimpleConsole console(m_root, m_translator);
+            proxy.sig_message.add(&console, &SimpleConsole::addMessage);
+            proxy.sig_actionComplete.add(&console, &SimpleConsole::enableClose);
+            proxy.startMaketurn(st.availablePlayers);
+            console.run(m_translator("Maketurn"));
+
+            // Refresh
+            m_proxy.loadContent();
+            setState(Blocked);
+        }
+    }
+}
+
+void
+client::screens::BrowserScreen::onSweepAction()
+{
+    if (m_state == Working && getActions(m_infoActions).contains(xSweep)) {
+        game::proxy::MaintenanceProxy proxy(m_browserSender.makeTemporary(new MaintenanceFromBrowser()), m_root.engine().dispatcher());
+        client::widgets::HelpWidget help(m_root, m_translator, m_gameSender, "pcc2:sweep");
+        if (client::dialogs::doSweepDialog(proxy, &help, m_root, m_translator)) {
+            // Refresh
+            m_proxy.loadContent();
+            setState(Blocked);
+        }
     }
 }
 

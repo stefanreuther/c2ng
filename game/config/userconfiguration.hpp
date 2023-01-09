@@ -129,7 +129,11 @@ namespace game { namespace config {
         // Unpack
         static const IntegerOptionDescriptor Unpack_AcceptRaceNames;
         static const StringOptionDescriptor  Unpack_AttachmentTimestamp;
+        static const IntegerOptionDescriptor Unpack_Format;
+        static const IntegerOptionDescriptor Unpack_FixErrors;
+        static const IntegerOptionDescriptor Unpack_TargetExt;
         static const int Unpack_Ask = 0, Unpack_Accept = 1, Unpack_Reject = 2;
+        static const int UnpackFormat_DOS = 0, UnpackFormat_Windows = 1;
 
         // Export
         static const StringOptionDescriptor  ExportShipFields;

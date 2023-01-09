@@ -245,6 +245,10 @@ Function CCfg.Boolean.Value
   Return If(Pref(Option), Translate("Yes"), Translate("No"))
 EndFunction
 
+Function CCfg.UnpackFormat.Value
+  Return If(Pref(Option), "Windows (3.5)", "DOS (3.0)")
+EndFunction
+
 %
 %  String option
 %
@@ -314,18 +318,25 @@ On UserPreferences Do
   % TODO: Missing PCC1 Option: Maketurn | Non-Player messages
   % TODO: Missing PCC1 Option: Maketurn | PHost identification
   % TODO: Missing PCC1 Option: Maketurn | Wait after each race
-  % TODO: Missing PCC2 Option: Unpack | Data file format --> Unpack.Format
+
+  Add Translate("Unpack | Data file format"), CCfg.Boolean.Edit, CCfg.UnpackFormat.Value
+  LinkPref "Unpack.Format"
+
   % TODO: Missing PCC1 Option: Unpack | Race name changes
   % TODO: Missing PCC1 Option: Unpack | Convert text files in UTILx.DAT
-  % TODO: Missing PCC2 Option: Unpack | Create TARGETx.EXT files --> Unpack.TargetExt
+
+  Add Translate("Unpack | Create TARGETx.EXT files"), CCfg.Boolean.Edit, CCfg.Boolean.Value
+  LinkPref "Unpack.TargetExt"
+
   % TODO: Missing PCC1 Option: Unpack | Source directory...
-  % TODO: Missing PCC1 Option: Unpack | Backup directory...
 
   Add Translate("Unpack | Backup..."), CCfg.Backup.Edit, CCfg.Backup.Value
   LinkPref "Backup.Result"
   LinkExtra "%d/backups/result%p.%t"
 
-  % TODO: Missing PCC2 Option: Unpack | Error correction --> Unpack.FixErrors
+  Add Translate("Unpack | Error correction"), CCfg.Boolean.Edit, CCfg.Backup.Value
+  LinkPref "Unpack.FixErrors"
+
   % TODO: Missing PCC1 Option: Unpack | Wait after each race
   % TODO: Missing PCC1 Option: Program Interoperation | Winplan directory...
   % TODO: Missing PCC1 Option: Program Interoperation | Decompile PHost commands

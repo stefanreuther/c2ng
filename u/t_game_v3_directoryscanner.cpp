@@ -102,52 +102,8 @@ namespace {
 
     void addResult(Environment& env, String_t fileName, int16_t playerId, int16_t turnNr, Timestamp ts)
     {
-        /*
-         *     +0     8 longs  section addresses
-         *    +32       word   empty ship section
-         *    +34       word   empty target section
-         *    +36       word   empty pdata section
-         *    +38       word   empty bdata section
-         *    +40       word   empty msg section
-         *    +42  4000 bytes  shipxy section
-         *  +4042   144 bytes  gen section
-         *  +4186       word   vcr section      -> 4188 bytes
-         */
         Ref<InternalStream> rst = *new InternalStream();
-
-        // Header
-        writeLong(*rst, 33);
-        writeLong(*rst, 35);
-        writeLong(*rst, 37);
-        writeLong(*rst, 39);
-        writeLong(*rst, 41);
-        writeLong(*rst, 43);
-        writeLong(*rst, 4043);
-        writeLong(*rst, 4187);
-
-        // First 5 sections
-        for (int i = 0; i < 5; ++i) {
-            writeWord(*rst, 0);
-        }
-
-        // shipxy section
-        for (int i = 0; i < 1000; ++i) {
-            writeLong(*rst, 0);
-        }
-
-        // gen section
-        game::v3::structures::ResultGen gen;
-        afl::base::fromObject(gen).fill(0);
-        ts.storeRawData(gen.timestamp);
-        gen.playerId = playerId;
-        gen.turnNumber = turnNr;
-        gen.timestampChecksum = static_cast<int16_t>(ByteSum().add(gen.timestamp, 0));
-        rst->fullWrite(afl::base::fromObject(gen));
-
-        // vcr section
-        writeWord(*rst, 0);
-
-        // finish
+        rst->fullWrite(game::test::makeEmptyResult(playerId, turnNr, ts));
         rst->setPos(0);
         env.workDir->addStream(fileName, rst);
     }
@@ -167,15 +123,8 @@ namespace {
 
     void addGen(Environment& env, String_t fileName, int16_t playerId, int16_t turnNr, Timestamp ts)
     {
-        game::v3::structures::Gen gen;
-        afl::base::fromObject(gen).fill(0);
-        ts.storeRawData(gen.timestamp);
-        gen.playerId = playerId;
-        gen.turnNumber = turnNr;
-        gen.timestampChecksum = static_cast<int16_t>(ByteSum().add(gen.timestamp, 0));
-
         Ref<InternalStream> file = *new InternalStream();
-        file->fullWrite(afl::base::fromObject(gen));
+        file->fullWrite(game::test::makeGenFile(playerId, turnNr, ts));
         file->setPos(0);
         env.workDir->addStream(fileName, file);
     }

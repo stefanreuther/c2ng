@@ -4,6 +4,45 @@
   */
 
 #include "game/test/files.hpp"
+#include "afl/checksums/bytesum.hpp"
+#include "game/v3/structures.hpp"
+
+namespace gt = game::v3::structures;
+
+namespace {
+    struct EmptyResult {
+        gt::Int32_t shipAddress;
+        gt::Int32_t targetAddress;
+        gt::Int32_t planetAddress;
+        gt::Int32_t baseAddress;
+        gt::Int32_t messageAddress;
+        gt::Int32_t coordAddress;
+        gt::Int32_t genAddress;
+        gt::Int32_t vcrAddress;
+
+        gt::Int16_t numShips;
+        gt::Int16_t numTargets;
+        gt::Int16_t numPlanets;
+        gt::Int16_t numBases;
+        gt::Int16_t numMessages;
+        gt::ShipXY coordinates[500];
+        gt::ResultGen gen;
+        gt::Int16_t numVcrs;
+    };
+
+    struct SimpleTurn {
+        gt::TurnHeader header;
+        uint8_t unused;
+        gt::Int32_t commandAddress;
+        gt::Int16_t commandCode;
+        gt::Int16_t messageLength;
+        gt::Int16_t sender;
+        gt::Int16_t receiver;
+        uint8_t text[1];
+        gt::TurnDosTrailer trailer;
+    };
+}
+
 
 afl::base::ConstBytes_t
 game::test::getResultFile30()
@@ -4676,4 +4715,86 @@ game::test::getDefaultHullAssignments()
         0x68, 0x00, 0x12, 0x00, 0x63, 0x00, 0x69, 0x00
     };
     return afl::base::ConstBytes_t(FILE);
+}
+
+afl::base::GrowableBytes_t
+game::test::makeEmptyResult(int playerId, int turnNumber, const Timestamp& ts)
+{
+    // Initialize everything to 0 wo we don't need to explicitly zero most fields:
+    // For scores, passwords, and checksums, zero is a valid value.
+    EmptyResult rst;
+    afl::base::fromObject(rst).fill(0);
+
+    // Set all the addresses
+    int32_t addr       = 1 + 32;
+    rst.shipAddress    = addr; addr += static_cast<int32_t>(sizeof(rst.numShips));
+    rst.targetAddress  = addr; addr += static_cast<int32_t>(sizeof(rst.numTargets));
+    rst.planetAddress  = addr; addr += static_cast<int32_t>(sizeof(rst.numPlanets));
+    rst.baseAddress    = addr; addr += static_cast<int32_t>(sizeof(rst.numBases));
+    rst.messageAddress = addr; addr += static_cast<int32_t>(sizeof(rst.numMessages));
+    rst.coordAddress   = addr; addr += static_cast<int32_t>(sizeof(rst.coordinates));
+    rst.genAddress     = addr; addr += static_cast<int32_t>(sizeof(rst.gen));
+    rst.vcrAddress     = addr;
+
+    // Populate the gen field
+    ts.storeRawData(rst.gen.timestamp);
+    rst.gen.playerId          = static_cast<int16_t>(playerId);
+    rst.gen.turnNumber        = static_cast<int16_t>(turnNumber);
+    rst.gen.timestampChecksum = static_cast<int16_t>(afl::checksums::ByteSum().add(rst.gen.timestamp, 0));
+
+    // Generate result
+    afl::base::GrowableBytes_t result;
+    result.append(afl::base::fromObject(rst));
+    return result;
+}
+
+afl::base::GrowableBytes_t
+game::test::makeSimpleTurn(int playerId, const Timestamp& ts)
+{
+    // Initialize everything to 0 wo we don't need to explicitly zero most fields.
+    SimpleTurn t;
+    afl::base::fromObject(t).fill(0);
+
+    // Header
+    t.header.playerId     = static_cast<int16_t>(playerId);
+    t.header.numCommands  = 1;
+    ts.storeRawData(t.header.timestamp);
+    t.header.timeChecksum = static_cast<int16_t>(afl::checksums::ByteSum().add(t.header.timestamp, 0));
+
+    // Command
+    t.commandAddress = sizeof(t.header) + sizeof(t.unused) + sizeof(t.commandAddress) + 1;
+    t.commandCode    = 60;     // SendMessage
+    t.messageLength  = sizeof(t.text);
+    t.sender         = static_cast<int16_t>(playerId);
+    t.receiver       = 12;     // Host
+    t.text[0]        = 'x';
+
+    // Trailer
+    t.trailer.checksum = afl::checksums::ByteSum().add(afl::base::fromObject(t), 0);
+
+    // Generate result
+    afl::base::GrowableBytes_t result;
+    result.append(afl::base::fromObject(t));
+    return result;
+}
+
+afl::base::GrowableBytes_t
+game::test::makeGenFile(int playerId, int turnNumber, const Timestamp& ts)
+{
+    // Initialize everything to 0 wo we don't need to explicitly zero most fields.
+    gt::Gen g;
+    afl::base::fromObject(g).fill(0);
+
+    // Set required fields
+    ts.storeRawData(g.timestamp);
+    g.playerId          = static_cast<int16_t>(playerId);
+    // We don't care about checksums. Otherwise, the correct value would probably be 55
+    // (=byte sums over lots of zeroes, plus signature 1 (=all zero), plus signature 2 (=that, plus 1,2,3,4,...,10).
+    g.turnNumber        = static_cast<int16_t>(turnNumber);
+    g.timestampChecksum = static_cast<int16_t>(afl::checksums::ByteSum().add(g.timestamp, 0));
+
+    // Generate result
+    afl::base::GrowableBytes_t result;
+    result.append(afl::base::fromObject(g));
+    return result;
 }

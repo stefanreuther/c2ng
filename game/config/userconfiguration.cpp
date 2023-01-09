@@ -129,9 +129,13 @@ namespace game { namespace config {
     const IntegerOptionDescriptor UserConfiguration::Team_SyncTransfer = { "Team.SyncTransfer", &BooleanValueParser::instance };  // @since 2.41
 
     // Unpack
-    namespace { EnumValueParser Unpack_Parser("ask,accept,reject"); }
-    const IntegerOptionDescriptor UserConfiguration::Unpack_AcceptRaceNames = { "Unpack.RaceNames", &Unpack_Parser };
+    namespace { EnumValueParser UnpackAcceptParser("ask,accept,reject"); }
+    namespace { EnumValueParser UnpackFormatParser("DOS,Windows"); }
+    const IntegerOptionDescriptor UserConfiguration::Unpack_AcceptRaceNames = { "Unpack.RaceNames", &UnpackAcceptParser };
     const StringOptionDescriptor UserConfiguration::Unpack_AttachmentTimestamp = { "Unpack.AttachmentTimestamp" };
+    const IntegerOptionDescriptor UserConfiguration::Unpack_Format = { "Unpack.Format", &UnpackFormatParser };
+    const IntegerOptionDescriptor UserConfiguration::Unpack_FixErrors = { "Unpack.FixErrors", &BooleanValueParser::instance };
+    const IntegerOptionDescriptor UserConfiguration::Unpack_TargetExt = { "Unpack.TargetExt", &BooleanValueParser::instance };
 
     // Export
     const StringOptionDescriptor UserConfiguration::ExportShipFields   = { "Export.ShipFields" };
@@ -239,8 +243,11 @@ game::config::UserConfiguration::setDefaultValues()
     me[Team_SyncTransfer].set(0);
 
     // Unpack
-    me[Unpack_AcceptRaceNames].set(1);
+    me[Unpack_AcceptRaceNames].set(Unpack_Accept);
     // Unpack_AttachmentTimestamp is not for editing by user
+    me[Unpack_Format].set(UnpackFormat_Windows);
+    me[Unpack_FixErrors].set(1);
+    me[Unpack_TargetExt].set(0);
 
     // Export
     me[ExportShipFields].set("Id@5,Name@20");

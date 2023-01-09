@@ -360,6 +360,24 @@ class TestGameProxyMailboxProxy : public CxxTest::TestSuite {
     void testData();
 };
 
+class TestGameProxyMaintenanceAdaptor : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
+class TestGameProxyMaintenanceProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testUnpack();
+    void testUnpackTurn();
+    void testUnpackExisting();
+    void testUnpackConfig();
+    void testMaketurn();
+    void testSweep();
+    void testSweepConfig();
+    void testSweepConflict();
+};
+
 class TestGameProxyMapConfigurationProxy : public CxxTest::TestSuite {
  public:
     void testMapConfig();
