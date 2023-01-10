@@ -6,15 +6,16 @@
 #define C2NG_GAME_V3_UNPACKER_HPP
 
 #include "afl/base/growablememory.hpp"
+#include "afl/charset/codepagecharset.hpp"
 #include "afl/io/directory.hpp"
 #include "afl/string/translator.hpp"
+#include "afl/sys/log.hpp"
+#include "game/msg/outbox.hpp"
+#include "game/playerlist.hpp"
 #include "game/v3/controlfile.hpp"
 #include "game/v3/genfile.hpp"
 #include "game/v3/structures.hpp"
 #include "game/v3/trn/turnprocessor.hpp"
-#include "afl/sys/log.hpp"
-#include "game/msg/outbox.hpp"
-#include "afl/charset/codepagecharset.hpp"
 
 namespace game { namespace v3 {
 
@@ -44,8 +45,8 @@ namespace game { namespace v3 {
 
         /** Constructor.
             \param tx Translator
-            \param specDir Specification file directory (for race names) */
-        explicit Unpacker(afl::string::Translator& tx, afl::io::Directory& specDir);
+            \param playerList Player list (race names, for Windows-style messages; lifetime must exceed that of the Unpacker) */
+        explicit Unpacker(afl::string::Translator& tx, const PlayerList& playerList);
 
         /** Destructor. */
         ~Unpacker();
@@ -178,7 +179,7 @@ namespace game { namespace v3 {
         afl::base::GrowableMemory<game::v3::structures::Base> m_datBases;
         afl::base::GrowableMemory<game::v3::structures::Base> m_disBases;
 
-        afl::io::Directory& m_specificationDirectory;
+        const PlayerList& m_playerList;
 
         game::msg::Outbox m_outbox;
         String_t m_allianceCommands;

@@ -18,6 +18,7 @@
 #include "game/v3/resultfile.hpp"
 #include "game/v3/turnfile.hpp"
 #include "game/v3/unpacker.hpp"
+#include "game/v3/utils.hpp"
 #include "util/string.hpp"
 #include "version.hpp"
 
@@ -46,8 +47,8 @@ game::v3::UnpackApplication::UnpackApplication(afl::sys::Environment& env, afl::
 void
 game::v3::UnpackApplication::appMain()
 {
-    Ref<afl::io::MultiDirectory> specDir(afl::io::MultiDirectory::create());
-    Unpacker theUnpacker(translator(), *specDir);
+    PlayerList playerList;
+    Unpacker theUnpacker(translator(), playerList);
     theUnpacker.log().addListener(log());
 
     AttachmentUnpacker detacher;
@@ -112,9 +113,14 @@ game::v3::UnpackApplication::appMain()
         }
     }
 
+    // Load race names
     Ref<Directory> gameDir = fileSystem().openDirectory(gameDirName.orElse("."));
-    specDir->addDirectory(gameDir);
-    specDir->addDirectory(openSpecDirectory(fileSystem(), rootDirName, environment()));
+    {
+        Ref<afl::io::MultiDirectory> specDir(afl::io::MultiDirectory::create());
+        specDir->addDirectory(gameDir);
+        specDir->addDirectory(openSpecDirectory(fileSystem(), rootDirName, environment()));
+        loadRaceNames(playerList, *specDir, theUnpacker.charset());
+    }
 
     int retval = 0;
     int count = 0;

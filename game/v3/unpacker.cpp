@@ -144,7 +144,7 @@ namespace {
  */
 
 
-game::v3::Unpacker::Unpacker(afl::string::Translator& tx, afl::io::Directory& specDir)
+game::v3::Unpacker::Unpacker(afl::string::Translator& tx, const PlayerList& playerList)
     : m_translator(tx),
       m_format(WindowsFormat),
       m_ignore35(false),
@@ -155,7 +155,7 @@ game::v3::Unpacker::Unpacker(afl::string::Translator& tx, afl::io::Directory& sp
       m_datShips(), m_disShips(),
       m_datPlanets(), m_disPlanets(),
       m_datBases(), m_disBases(),
-      m_specificationDirectory(specDir),
+      m_playerList(playerList),
       m_outbox(),
       m_allianceCommands(),
       m_gen(),
@@ -930,11 +930,8 @@ game::v3::Unpacker::createBlankFiles(afl::io::Directory& dir)
         removeGameFile(dir, dosOutboxName);
     } else {
         // DOS: we need a player list to write correct message headers
-        PlayerList playerList;
-        loadRaceNames(playerList, m_specificationDirectory, m_charset);
-
         Ref<Stream> file = dir.openFile(dosOutboxName, FileSystem::Create);
-        Writer(m_charset, m_translator, m_log).saveOutbox(m_outbox, m_playerId, playerList, *file);
+        Writer(m_charset, m_translator, m_log).saveOutbox(m_outbox, m_playerId, m_playerList, *file);
         removeGameFile(dir, windowsOutboxName);
     }
 
