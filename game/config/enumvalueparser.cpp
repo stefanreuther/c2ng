@@ -9,6 +9,7 @@
 #include "afl/string/string.hpp"
 #include "afl/string/translator.hpp"
 #include "util/string.hpp"
+#include "afl/string/parse.hpp"
 
 game::config::EnumValueParser::EnumValueParser(const char* tpl)
     : m_template(tpl)
@@ -29,6 +30,15 @@ game::config::EnumValueParser::parse(String_t value) const
         }
         ++counter;
     }
+
+    // Must support parsing plain numbers because we can stringify that.
+    // This is also required to be able to meaningfully use it in scripts, e.g. CCfg.Boolean.Edit.
+    // Pref() will produce integer values that we want to parse.
+    int32_t result = 0;
+    if (afl::string::strToInteger(value, result)) {
+        return result;
+    }
+
     throw std::range_error(afl::string::Translator::getSystemInstance()("Invalid number"));
 }
 

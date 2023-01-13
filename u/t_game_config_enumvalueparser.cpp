@@ -34,6 +34,9 @@ TestGameConfigEnumValueParser::testIt()
     TS_ASSERT_EQUALS(t.toString(3000), "3000");
     TS_ASSERT_EQUALS(t.toString(2000000000), "2000000000");
     TS_ASSERT_EQUALS(t.toString(-1), "-1");
+
+    TS_ASSERT_EQUALS(t.parse("3000"), 3000);
+    TS_ASSERT_EQUALS(t.parse("3"), 3);
 }
 
 /** Another test. */
