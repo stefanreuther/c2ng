@@ -42,11 +42,17 @@ client::si::Control::~Control()
 void
 client::si::Control::executeCommandWait(String_t command, bool verbose, String_t name)
 {
-    // replaces int/simple.h:runHook (using command "RunHook ...")
     // replaces int/simple.h:executeStatement (using command "C2$Eval atom, prefix" or similar)
     std::auto_ptr<game::interface::ContextProvider> ctxp(createContextProvider());
     std::auto_ptr<ScriptTask> t(new CommandTask(command, verbose, name, ctxp));
     executeTaskInternal(t, Format("executeCommandWait('%s')", name));
+}
+
+void
+client::si::Control::executeHookWait(String_t name)
+{
+    // replaces int/simple.h:runHook
+    executeCommandWait(Format("RunHook %s", name), false, Format("(%s hook)", name));
 }
 
 // Execute a key command.

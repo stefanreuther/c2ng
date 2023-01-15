@@ -2163,20 +2163,22 @@ Although PCC2 allows functions, it keeps this model of user-interface interactio
 | On AfterExit Do command
 Commands registered for the %AfterExit {int:index:type:hook|hook} are run
 immediately after a the user has left a game and returned to the game/race selection screen.
-@since PCC2 1.99.25, PCC 1.0.10
+@since PCC2 1.99.25, PCC 1.0.10, PCC2 2.41
 --------------------------------------------------------------------------------
 @q BeforeLoad:Hook (Hook)
 @noproto
 | On BeforeLoad Do command
 Commands registered for the %BeforeLoad {int:index:type:hook|hook} are run
 just before game data is loaded.
-@since PCC2 1.99.25, PCC 1.0.10
+@since PCC2 1.99.25, PCC 1.0.10, PCC2 2.41
 --------------------------------------------------------------------------------
 @q EnterDirectory:Hook (Hook)
 @noproto
 | On EnterDirectory Do command
 Commands registered for the %EnterDirectory {int:index:type:hook|hook} are run
 when a directory is entered, before game data is loaded, just before {BeforeLoad}.
+
+<b>Note:</b> This hook is not supported by PCC2ng.
 @since PCC2 1.99.9
 --------------------------------------------------------------------------------
 @q Exit:Hook (Hook)
@@ -2184,7 +2186,7 @@ when a directory is entered, before game data is loaded, just before {BeforeLoad
 | On Exit Do command
 Commands registered for the %Exit {int:index:type:hook|hook} are run just before exiting a game.
 This is the right place to save state.
-@since PCC2 1.99.25, PCC 1.0.9
+@since PCC2 1.99.25, PCC 1.0.9, PCC2 2.41
 --------------------------------------------------------------------------------
 @q GamePreferences:Hook (Hook)
 @noproto
@@ -2209,7 +2211,7 @@ It can check the environment to provide a global-action list tailored for the cu
 | On Load Do command
 Commands registered for the %Load {int:index:type:hook|hook} are run immediately after a game has been loaded.
 This is the right place to load data that is needed for playing.
-@since PCC2 1.99.9, PCC 1.0.9
+@since PCC2 1.99.9, PCC 1.0.9, PCC2 2.40.1
 --------------------------------------------------------------------------------
 @q Maketurn:Hook (Hook)
 @noproto
@@ -2217,8 +2219,8 @@ This is the right place to load data that is needed for playing.
 Commands registered for the %Maketurn {int:index:type:hook|hook} are run
 after turn files have been compiled by the Maketurn function.
 
-<b>Note:</b> This functionality does not exist in PCC2.
-@since PCC 1.1.4
+<b>Note:</b> This hook is not supported by PCC2 before 2.41.
+@since PCC 1.1.4, PCC2 2.41
 --------------------------------------------------------------------------------
 @q NewTurn:Hook (Hook)
 @noproto
@@ -2248,7 +2250,7 @@ Normally, you should use {GamePreferences (Hook)|GamePreferences} or {UserPrefer
 @noproto
 | On Quit Do command
 Commands registered for the %Quit {int:index:type:hook|hook} are run just before PCC closes.
-@since PCC 1.0.10, PCC2 1.99.25
+@since PCC 1.0.10, PCC2 1.99.25, PCC2 2.41
 --------------------------------------------------------------------------------
 @q Unpack:Hook (Hook)
 @noproto
@@ -2256,8 +2258,8 @@ Commands registered for the %Quit {int:index:type:hook|hook} are run just before
 Commands registered for the %Unpack {int:index:type:hook|hook} are run
 after result files have been unpacked.
 
-<b>Note:</b> This functionality does not exist in PCC2.
-@since PCC 1.1.4
+<b>Note:</b> This hook is not supported by PCC2 before 2.41.
+@since PCC 1.1.4, PCC2 2.41
 --------------------------------------------------------------------------------
 @q UnpackScan:Hook (Hook)
 @noproto
@@ -2265,8 +2267,8 @@ after result files have been unpacked.
 Commands registered for the %UnpackScan {int:index:type:hook|hook} are run
 just before PCC looks for new result files.
 
-<b>Note:</b> This functionality does not exist in PCC2.
-@since PCC 1.1.4
+<b>Note:</b> This hook is not supported by PCC2 before 2.41.
+@since PCC 1.1.4, PCC2 2.41
 --------------------------------------------------------------------------------
 @q UserPreferences:Hook (Hook)
 @noproto

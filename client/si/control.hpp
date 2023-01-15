@@ -63,6 +63,11 @@ namespace client { namespace si {
             @param name    Name of process */
         void executeCommandWait(String_t command, bool verbose, String_t name);
 
+        /** Execute hook.
+            See executeTaskWait() for details.
+            @param name Hook name */
+        void executeHookWait(String_t name);
+
         /** Execute a key command.
             Resolves the key into a command and executes that.
             See executeTaskWait() for details.

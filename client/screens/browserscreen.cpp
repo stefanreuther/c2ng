@@ -564,9 +564,16 @@ void
 client::screens::BrowserScreen::onUnpackAction()
 {
     if (m_state == Working && getActions(m_infoActions).contains(xUnpack)) {
+        // Pre-unpack hook
+        client::si::NullControl(m_userSide).executeHookWait("UnpackScan");
+
+        // Unpack operation
         game::proxy::MaintenanceProxy proxy(m_browserSender.makeTemporary(new MaintenanceFromBrowser()), m_root.engine().dispatcher());
         client::widgets::HelpWidget help(m_root, m_translator, m_gameSender, "pcc2:unpack");
         if (client::dialogs::doUnpackDialog(proxy, &help, m_root, m_translator)) {
+            // Run hook
+            client::si::NullControl(m_userSide).executeHookWait("Unpack");
+
             // Refresh
             m_proxy.loadContent();
             setState(Blocked);
@@ -588,6 +595,9 @@ client::screens::BrowserScreen::onMaketurnAction()
             proxy.sig_actionComplete.add(&console, &SimpleConsole::enableClose);
             proxy.startMaketurn(st.availablePlayers);
             console.run(m_translator("Maketurn"));
+
+            // Run hook
+            client::si::NullControl(m_userSide).executeHookWait("Maketurn");
 
             // Refresh
             m_proxy.loadContent();

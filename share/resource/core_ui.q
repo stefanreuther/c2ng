@@ -12,14 +12,20 @@
 Sub CCUI.ExitRace
   Local UI.Result
   UI.Message Translate("Do you want to exit this game?"), Translate("Exit Game"), Translate("Yes No")
-  If UI.Result=1 Then System.ExitRace
+  If UI.Result=1 Then
+    Try RunHook Exit
+    System.ExitRace
+  EndIf
 EndSub
 
 % ExitClient with confirmation [Key_Quit]
 Sub CCUI.ExitClient
   Local UI.Result
   UI.Message Translate("Do you want to exit PCC2?"), Translate("PCC2"), Translate("Yes No")
-  If UI.Result=1 Then System.ExitClient
+  If UI.Result=1 Then
+    Try RunHook Exit
+    System.ExitClient
+  EndIf
 EndSub
 
 

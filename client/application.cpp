@@ -212,9 +212,11 @@ namespace {
     class BrowserListener : public afl::base::Closure<void(int)> {
      public:
         BrowserListener(client::screens::BrowserScreen& screen,
+                        client::si::UserSide& us,
                         util::RequestSender<game::browser::Session> browserSender,
                         util::RequestSender<game::Session> gameSender)
             : m_screen(screen),
+              m_userSide(us),
               m_uiSender(screen.getSender()),
               m_browserSender(browserSender),
               m_gameSender(gameSender)
@@ -222,6 +224,7 @@ namespace {
 
         void call(int player)
             {
+                client::si::NullControl(m_userSide).executeHookWait("BeforeLoad");
                 m_screen.setBlockState(true);
                 m_browserSender.postNewRequest(new LoadRequest(player, m_uiSender, m_gameSender));
             }
@@ -451,6 +454,7 @@ namespace {
         };
 
         client::screens::BrowserScreen& m_screen;
+        client::si::UserSide& m_userSide;
         util::RequestSender<client::screens::BrowserScreen> m_uiSender;
         util::RequestSender<game::browser::Session> m_browserSender;
         util::RequestSender<game::Session> m_gameSender;
@@ -795,7 +799,6 @@ namespace {
              case OutputState::ExitGame:
                 // FIXME: at this point, we may have a process in InputState. That one must be terminated.
                 // FIXME: save the game of course...
-                // FIXME: run EXIT hook
                 running = false;
                 break;
 
@@ -1025,7 +1028,6 @@ client::Application::appMain(gfx::Engine& engine)
     // Start game browser
     // FIXME: wrap this loop in a try/catch
     // FIXME: create the background image in the background thread
-    // FIXME: run hooks
     ui::PixmapColorScheme docColors(root, generateBrowserBackground(log(), root.getExtent().getSize(), translator()));
     while (1) {
         // Helpful information
@@ -1045,15 +1047,17 @@ client::Application::appMain(gfx::Engine& engine)
 
         // Browser
         client::screens::BrowserScreen browserScreen(userSide, browserProxy, browserSender);
-        browserScreen.sig_gameSelection.addNewClosure(new BrowserListener(browserScreen, browserSender, gameReceiver.getSender()));
+        browserScreen.sig_gameSelection.addNewClosure(new BrowserListener(browserScreen, userSide, browserSender, gameReceiver.getSender()));
 
         int result = browserScreen.run(docColors);
         if (result != 0) {
             // OK, play
             play(userSide);
+            client::si::NullControl(userSide).executeHookWait("AfterExit");
             userSide.reset();
         } else {
             // Close
+            client::si::NullControl(userSide).executeHookWait("Quit");
             break;
         }
     }
