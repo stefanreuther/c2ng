@@ -68,7 +68,7 @@ server::file::GameStatus::load(Root& root, DirectoryItem& dir)
 
         // Step 2: Load overview
         game::v3::DirectoryScanner& scanner = root.directoryScanner();
-        scanner.scan(*dirWrapper, root.defaultCharacterSet(), true);
+        scanner.scan(*dirWrapper, root.defaultCharacterSet(), game::v3::DirectoryScanner::ResultOnly);
         if (!scanner.getDirectoryFlags().empty()) {
             // Create new GameInfo object.
             // Start with a local object in case anything below throws.

@@ -96,7 +96,7 @@ game::v3::MaketurnApplication::appMain()
 
     // Check
     DirectoryScanner scanner(*specDirObj, translator(), log());
-    scanner.scan(*gameDirObj, *charset, false);
+    scanner.scan(*gameDirObj, *charset, DirectoryScanner::UnpackedOnly);
 
     if (!scanner.getDirectoryFlags().contains(DirectoryScanner::HaveUnpacked)) {
         errorExit(afl::string::Format(tx("directory '%s' does not contain unpacked game data"), gameDirObj->getDirectoryName()));

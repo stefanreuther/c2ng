@@ -39,6 +39,29 @@ namespace game { namespace v3 {
         };
         typedef afl::bits::SmallSet<PlayerFlag> PlayerFlags_t;
 
+        /** Mode for scan(). */
+        enum Mode {
+            /** Look for unpacked files; if none found, look for results.
+                If some unpacked files exist, determines their result status, but does not look at other results.
+                This is the correct mode for loading games.
+                Replaces resultOnly=false. */
+            UnpackedThenResult,
+
+            /** Only look for result files.
+                Will produce only HaveResult.
+                Replaces resultOnly=true. */
+            ResultOnly,
+
+            /** Only look for unpacked files, does not look at result files.
+                Will not produce HaveResult, HaveNewResult, HaveOtherResult.
+                Useful for Maketurn. */
+            UnpackedOnly,
+
+            /** Look for unpacked files and results.
+                Unlike UnpackedThenResult, also looks for results when some unpacked data exists. */
+            UnpackedAndResult
+        };
+
         /** Construct empty overview.
             Call scan() to fill it.
             \param specificationDirectory Specification directory (for host version detection)
@@ -60,8 +83,8 @@ namespace game { namespace v3 {
             we should of course use that instead of the RST and a probably older TRN.
             \param dir Directory to scan
             \param charset Directory character set
-            \param resultOnly true to check only result files */
-        void scan(afl::io::Directory& dir, afl::charset::Charset& charset, bool resultOnly = false);
+            \param mode Scanner mode */
+        void scan(afl::io::Directory& dir, afl::charset::Charset& charset, Mode mode);
 
         /** Clear stored state. */
         void clear();

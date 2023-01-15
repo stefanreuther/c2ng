@@ -41,7 +41,7 @@ int main(int /*argc*/, char** argv)
         game::v3::DirectoryScanner scanner(*specDir, tx, logger);
         try {
             afl::base::Ref<afl::io::Directory> dir = fs.openDirectory(dirName);
-            scanner.scan(*dir, charset);
+            scanner.scan(*dir, charset, game::v3::DirectoryScanner::UnpackedThenResult);
             std::cout << dirName << ":\n"
                       << "  directory flags = " << formatFlags(scanner.getDirectoryFlags()) << "\n"
                       << "  host version = " << scanner.getDirectoryHostVersion().toString() << "\n";

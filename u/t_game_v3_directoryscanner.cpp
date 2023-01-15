@@ -160,7 +160,7 @@ TestGameV3DirectoryScanner::testEmpty()
     Environment env;
 
     // Scan!
-    env.scanner.scan(*env.workDir, env.charset);
+    env.scanner.scan(*env.workDir, env.charset, DirectoryScanner::UnpackedThenResult);
 
     // Everything empty
     TS_ASSERT_EQUALS(env.scanner.getPlayerFlags(1), DirectoryScanner::PlayerFlags_t());
@@ -184,7 +184,7 @@ TestGameV3DirectoryScanner::testResult()
     addResult(env, "player5.rst", 5, 30, Timestamp(2000, 12, 10, 1, 1, 1));
 
     // Scan!
-    env.scanner.scan(*env.workDir, env.charset);
+    env.scanner.scan(*env.workDir, env.charset, DirectoryScanner::UnpackedThenResult);
 
     // Check player flags
     TS_ASSERT_EQUALS(env.scanner.getPlayerFlags(1), DirectoryScanner::PlayerFlags_t());
@@ -211,7 +211,7 @@ TestGameV3DirectoryScanner::testMultiResult()
     addResult(env, "player9.rst", 9, 30, Timestamp(2000, 12, 10, 1, 1, 1));
 
     // Scan!
-    env.scanner.scan(*env.workDir, env.charset);
+    env.scanner.scan(*env.workDir, env.charset, DirectoryScanner::UnpackedThenResult);
 
     // Must have found multiple results, but no default player
     TS_ASSERT_EQUALS(env.scanner.getPlayersWhere(DirectoryScanner::PlayerFlags_t(DirectoryScanner::HaveResult)), PlayerSet_t() + 5 + 7 + 9);
@@ -230,7 +230,7 @@ TestGameV3DirectoryScanner::testNewResult()
     addResult(env, "player9.rst", 9, 30, Timestamp(2000, 12, 10, 1, 1, 1));
 
     // Scan!
-    env.scanner.scan(*env.workDir, env.charset);
+    env.scanner.scan(*env.workDir, env.charset, DirectoryScanner::UnpackedThenResult);
 
     // Must have found multiple results, a conflict, and no default player
     TS_ASSERT_EQUALS(env.scanner.getDirectoryFlags(), DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveResult + DirectoryScanner::HaveConflict);
@@ -250,7 +250,7 @@ TestGameV3DirectoryScanner::testBrokenResult()
     addResult(env, "player7.rst", 4, 30, Timestamp(2000, 12, 10, 1, 1, 1));  // will be ignored due to mismatch
 
     // Scan!
-    env.scanner.scan(*env.workDir, env.charset);
+    env.scanner.scan(*env.workDir, env.charset, DirectoryScanner::UnpackedThenResult);
 
     // Must have found one result
     TS_ASSERT_EQUALS(env.scanner.getPlayersWhere(DirectoryScanner::PlayerFlags_t(DirectoryScanner::HaveResult)), PlayerSet_t(5));
@@ -268,7 +268,7 @@ TestGameV3DirectoryScanner::testTruncatedResult()
     env.workDir->addStream("player7.rst", *new ConstMemoryStream(afl::string::toBytes("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"))); // will be ignored due to format error
 
     // Scan!
-    env.scanner.scan(*env.workDir, env.charset);
+    env.scanner.scan(*env.workDir, env.charset, DirectoryScanner::UnpackedThenResult);
 
     // Must have found one result
     TS_ASSERT_EQUALS(env.scanner.getPlayersWhere(DirectoryScanner::PlayerFlags_t(DirectoryScanner::HaveResult)), PlayerSet_t(5));
@@ -285,7 +285,7 @@ TestGameV3DirectoryScanner::testGen()
     addGen(env, "gen4.dat", 4, 30, Timestamp(2000, 12, 10, 1, 1, 1));
 
     // Scan!
-    env.scanner.scan(*env.workDir, env.charset);
+    env.scanner.scan(*env.workDir, env.charset, DirectoryScanner::UnpackedThenResult);
 
     // Check player flags
     TS_ASSERT_EQUALS(env.scanner.getPlayerFlags(1), DirectoryScanner::PlayerFlags_t());
@@ -312,7 +312,7 @@ TestGameV3DirectoryScanner::testMultiGen()
     addGen(env, "gen6.dat", 6, 30, Timestamp(2000, 12, 10, 1, 1, 1));
 
     // Scan!
-    env.scanner.scan(*env.workDir, env.charset);
+    env.scanner.scan(*env.workDir, env.charset, DirectoryScanner::UnpackedThenResult);
 
     // Check flags
     TS_ASSERT_EQUALS(env.scanner.getPlayersWhere(DirectoryScanner::PlayerFlags_t(DirectoryScanner::HaveUnpacked)), PlayerSet_t() + 4 + 5 + 6);
@@ -331,7 +331,7 @@ TestGameV3DirectoryScanner::testConflictGen()
     addGen(env, "gen6.dat", 6, 31, Timestamp(2001, 12, 10, 1, 1, 1));
 
     // Scan!
-    env.scanner.scan(*env.workDir, env.charset);
+    env.scanner.scan(*env.workDir, env.charset, DirectoryScanner::UnpackedThenResult);
 
     // Check flags
     TS_ASSERT_EQUALS(env.scanner.getDirectoryFlags(), DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveUnpacked + DirectoryScanner::HaveConflict);
@@ -352,7 +352,7 @@ TestGameV3DirectoryScanner::testBadGen()
     addGen(env, "gen6.dat", 7, 30, Timestamp(2000, 12, 10, 1, 1, 1)); // will be ignored
 
     // Scan!
-    env.scanner.scan(*env.workDir, env.charset);
+    env.scanner.scan(*env.workDir, env.charset, DirectoryScanner::UnpackedThenResult);
 
     // Check flags
     TS_ASSERT_EQUALS(env.scanner.getPlayersWhere(DirectoryScanner::PlayerFlags_t(DirectoryScanner::HaveUnpacked)), PlayerSet_t() + 4 + 5);
@@ -372,7 +372,7 @@ TestGameV3DirectoryScanner::testGenAndNewResult()
     addResult(env, "player5.rst", 5, 31, Timestamp(2001, 12, 10, 1, 1, 1));
 
     // Scan!
-    env.scanner.scan(*env.workDir, env.charset);
+    env.scanner.scan(*env.workDir, env.charset, DirectoryScanner::UnpackedThenResult);
 
     // Check flags
     TS_ASSERT_EQUALS(env.scanner.getDirectoryFlags(), DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveUnpacked + DirectoryScanner::HaveNewResult);
@@ -394,7 +394,7 @@ TestGameV3DirectoryScanner::testGenAndSameResult()
     addResult(env, "player5.rst", 5, 30, Timestamp(2000, 12, 10, 1, 1, 1));
 
     // Scan!
-    env.scanner.scan(*env.workDir, env.charset);
+    env.scanner.scan(*env.workDir, env.charset, DirectoryScanner::UnpackedThenResult);
 
     // Check flags
     TS_ASSERT_EQUALS(env.scanner.getDirectoryFlags(), DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveUnpacked + DirectoryScanner::HaveResult);
@@ -416,7 +416,7 @@ TestGameV3DirectoryScanner::testGenAndOldResult()
     addResult(env, "player5.rst", 5, 29, Timestamp(2000, 12, 10, 1, 1, 1));
 
     // Scan!
-    env.scanner.scan(*env.workDir, env.charset);
+    env.scanner.scan(*env.workDir, env.charset, DirectoryScanner::UnpackedThenResult);
 
     // Check flags
     TS_ASSERT_EQUALS(env.scanner.getDirectoryFlags(), DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveUnpacked + DirectoryScanner::HaveOtherResult);
@@ -438,7 +438,7 @@ TestGameV3DirectoryScanner::testGenOnlyResult()
     addResult(env, "player5.rst", 5, 30, Timestamp(2000, 12, 10, 1, 1, 1));
 
     // Scan!
-    env.scanner.scan(*env.workDir, env.charset, true);
+    env.scanner.scan(*env.workDir, env.charset, DirectoryScanner::ResultOnly);
 
     // Check flags
     TS_ASSERT_EQUALS(env.scanner.getDirectoryFlags(), DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveResult);
@@ -457,7 +457,7 @@ TestGameV3DirectoryScanner::testResultAndTurn()
     addTurn(env, "player5.trn", 5, 30, Timestamp(2000, 12, 10, 1, 1, 1));
 
     // Scan!
-    env.scanner.scan(*env.workDir, env.charset);
+    env.scanner.scan(*env.workDir, env.charset, DirectoryScanner::UnpackedThenResult);
 
     // Check player flags
     TS_ASSERT_EQUALS(env.scanner.getPlayerFlags(5), DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveResult + DirectoryScanner::HaveTurn);
@@ -478,7 +478,7 @@ TestGameV3DirectoryScanner::testResultAndMismatchingTurn()
     addTurn(env, "player5.trn", 5, 30, Timestamp(2001, 12, 10, 1, 1, 1));
 
     // Scan!
-    env.scanner.scan(*env.workDir, env.charset);
+    env.scanner.scan(*env.workDir, env.charset, DirectoryScanner::UnpackedThenResult);
 
     // Check player flags
     TS_ASSERT_EQUALS(env.scanner.getPlayerFlags(5), DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveResult);
@@ -498,7 +498,7 @@ TestGameV3DirectoryScanner::testResultAndWrongOwnerTurn()
     addTurn(env, "player5.trn", 7, 30, Timestamp(2000, 12, 10, 1, 1, 1));
 
     // Scan!
-    env.scanner.scan(*env.workDir, env.charset);
+    env.scanner.scan(*env.workDir, env.charset, DirectoryScanner::UnpackedThenResult);
 
     // Check player flags
     TS_ASSERT_EQUALS(env.scanner.getPlayerFlags(5), DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveResult);
@@ -518,7 +518,7 @@ TestGameV3DirectoryScanner::testResultAndBadTurn()
     env.workDir->addStream("player5.trn", *new ConstMemoryStream(afl::string::toBytes("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"))); // will be ignored due to format error
 
     // Scan!
-    env.scanner.scan(*env.workDir, env.charset);
+    env.scanner.scan(*env.workDir, env.charset, DirectoryScanner::UnpackedThenResult);
 
     // Check player flags
     TS_ASSERT_EQUALS(env.scanner.getPlayerFlags(5), DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveResult);
@@ -659,7 +659,7 @@ TestGameV3DirectoryScanner::testHostVersion()
         addMessage(env, "mdata4.dat", CASES[i].msg);
 
         // Scan!
-        env.scanner.scan(*env.workDir, env.charset);
+        env.scanner.scan(*env.workDir, env.charset, DirectoryScanner::UnpackedThenResult);
 
         // Verify
         TS_ASSERT_EQUALS(env.scanner.getDirectoryHostVersion().getKind(), CASES[i].kind);
@@ -676,7 +676,7 @@ TestGameV3DirectoryScanner::testHostVersionResult()
     env.workDir->addStream("player7.rst", *new ConstMemoryStream(game::test::getResultFile30()));
 
     // Scan!
-    env.scanner.scan(*env.workDir, env.charset);
+    env.scanner.scan(*env.workDir, env.charset, DirectoryScanner::UnpackedThenResult);
 
     // Check player flags
     TS_ASSERT_EQUALS(env.scanner.getPlayerFlags(7), DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveResult);
@@ -699,7 +699,7 @@ TestGameV3DirectoryScanner::testHostVersionDisabled()
 
     // Create a fresh scanner that does not parse messages
     DirectoryScanner scanner(env.tx, env.log);
-    scanner.scan(*env.workDir, env.charset);
+    scanner.scan(*env.workDir, env.charset, DirectoryScanner::UnpackedThenResult);
 
     // Check player flags [same as above]
     TS_ASSERT_EQUALS(scanner.getPlayerFlags(7), DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveResult);
@@ -710,5 +710,53 @@ TestGameV3DirectoryScanner::testHostVersionDisabled()
     // Check host version [remains unset]
     TS_ASSERT_EQUALS(scanner.getDirectoryHostVersion().getKind(), HostVersion::Unknown);
     TS_ASSERT_EQUALS(scanner.getDirectoryHostVersion().getVersion(), 0);
+}
+
+/** Test different modes. */
+void
+TestGameV3DirectoryScanner::testModes()
+{
+    const Timestamp ts(2000, 12, 10, 1, 1, 1);
+    Environment env;
+    addGen(env, "gen4.dat", 4, 30, ts);
+    addGen(env, "gen5.dat", 5, 30, ts);
+    addResult(env, "player5.rst", 5, 30, ts);
+    addResult(env, "player6.rst", 6, 30, ts);
+
+    // UnpackedThenResult
+    {
+        DirectoryScanner scanner(env.tx, env.log);
+        scanner.scan(*env.workDir, env.charset, DirectoryScanner::UnpackedThenResult);
+        TS_ASSERT_EQUALS(scanner.getPlayerFlags(4), DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveUnpacked);
+        TS_ASSERT_EQUALS(scanner.getPlayerFlags(5), DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveUnpacked + DirectoryScanner::HaveResult);
+        TS_ASSERT_EQUALS(scanner.getPlayerFlags(6), DirectoryScanner::PlayerFlags_t());
+    }
+
+    // ResultOnly
+    {
+        DirectoryScanner scanner(env.tx, env.log);
+        scanner.scan(*env.workDir, env.charset, DirectoryScanner::ResultOnly);
+        TS_ASSERT_EQUALS(scanner.getPlayerFlags(4), DirectoryScanner::PlayerFlags_t());
+        TS_ASSERT_EQUALS(scanner.getPlayerFlags(5), DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveResult);
+        TS_ASSERT_EQUALS(scanner.getPlayerFlags(6), DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveResult);
+    }
+
+    // UnpackedOnly
+    {
+        DirectoryScanner scanner(env.tx, env.log);
+        scanner.scan(*env.workDir, env.charset, DirectoryScanner::UnpackedOnly);
+        TS_ASSERT_EQUALS(scanner.getPlayerFlags(4), DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveUnpacked);
+        TS_ASSERT_EQUALS(scanner.getPlayerFlags(5), DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveUnpacked);
+        TS_ASSERT_EQUALS(scanner.getPlayerFlags(6), DirectoryScanner::PlayerFlags_t());
+    }
+
+    // UnpackedAndResult
+    {
+        DirectoryScanner scanner(env.tx, env.log);
+        scanner.scan(*env.workDir, env.charset, DirectoryScanner::UnpackedAndResult);
+        TS_ASSERT_EQUALS(scanner.getPlayerFlags(4), DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveUnpacked);
+        TS_ASSERT_EQUALS(scanner.getPlayerFlags(5), DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveUnpacked + DirectoryScanner::HaveResult);
+        TS_ASSERT_EQUALS(scanner.getPlayerFlags(6), DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveResult);
+    }
 }
 

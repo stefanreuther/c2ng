@@ -49,7 +49,7 @@ game::v3::DirectoryScanner::DirectoryScanner(afl::string::Translator& tx, afl::s
 
 // Scan for files.
 void
-game::v3::DirectoryScanner::scan(afl::io::Directory& dir, afl::charset::Charset& charset, bool resultOnly)
+game::v3::DirectoryScanner::scan(afl::io::Directory& dir, afl::charset::Charset& charset, Mode mode)
 {
     // ex GDirectoryOverview::scan
     Timestamp times[NUM_PLAYERS];
@@ -57,13 +57,13 @@ game::v3::DirectoryScanner::scan(afl::io::Directory& dir, afl::charset::Charset&
     int numPlayers = 0;
 
     // Reset
+    clear();
     for (int i = 1; i <= NUM_PLAYERS; ++i) {
         turnNumbers[i-1] = 0;
-        m_playerFlags[i-1] = PlayerFlags_t();
     }
 
     // do we have unpacked game data?
-    if (!resultOnly) {
+    if (mode != ResultOnly) {
         for (int i = 1; i <= NUM_PLAYERS; ++i) {
             String_t fileName = afl::string::Format("gen%d.dat", i);
             try {
@@ -79,7 +79,7 @@ game::v3::DirectoryScanner::scan(afl::io::Directory& dir, afl::charset::Charset&
 
                         // Check for matching result
                         gt::ResultGen rgen;
-                        if (checkResult(dir, charset, i, rgen, 0)) {
+                        if (mode != UnpackedOnly && checkResult(dir, charset, i, rgen, 0)) {
                             if (rgen.turnNumber == gen.turnNumber && Timestamp(rgen.timestamp) == Timestamp(gen.timestamp)) {
                                 // same turn, ok
                                 m_playerFlags[i-1] += HaveResult;
@@ -90,7 +90,7 @@ game::v3::DirectoryScanner::scan(afl::io::Directory& dir, afl::charset::Charset&
                             } else {
                                 // we cannot make sense of this RST.
                                 // But do not prevent the user from unpacking in case he's trying something clever.
-                                m_playerFlags[i-1] |= HaveOtherResult;
+                                m_playerFlags[i-1] += HaveOtherResult;
                             }
                         }
                     } else {
@@ -112,11 +112,11 @@ game::v3::DirectoryScanner::scan(afl::io::Directory& dir, afl::charset::Charset&
         }
     }
 
-    if (numPlayers == 0) {
-        // we don't have an unpacked game directory. Do we have a RST?
+    if ((mode == UnpackedThenResult && numPlayers == 0) || mode == ResultOnly || mode == UnpackedAndResult) {
+        // Check for results
         for (int i = 1; i <= NUM_PLAYERS; ++i) {
             gt::ResultGen rgen;
-            if (checkResult(dir, charset, i, rgen, &m_hostVersions[i-1])) {
+            if (m_playerFlags[i-1].empty() && checkResult(dir, charset, i, rgen, &m_hostVersions[i-1])) {
                 turnNumbers[i-1] = rgen.turnNumber;
                 times[i-1] = rgen.timestamp;
                 m_playerFlags[i-1] += HaveResult;

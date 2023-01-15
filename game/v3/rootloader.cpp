@@ -34,7 +34,7 @@ game::v3::RootLoader::load(afl::base::Ref<afl::io::Directory> gameDirectory,
                            bool forceEmpty)
 {
     m_scanner.clear();
-    m_scanner.scan(*gameDirectory, charset);
+    m_scanner.scan(*gameDirectory, charset, DirectoryScanner::UnpackedThenResult);
 
     afl::base::Ptr<Root> result;
     if (!m_scanner.getDirectoryFlags().empty() || forceEmpty) {

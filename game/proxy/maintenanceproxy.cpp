@@ -73,7 +73,7 @@ void
 game::proxy::MaintenanceProxy::Trampoline::prepareMaketurn(MaketurnStatus& result)
 {
     DirectoryScanner ds(m_adaptor.translator(), *this);
-    ds.scan(m_adaptor.targetDirectory(), m_adaptor.charset(), false);
+    ds.scan(m_adaptor.targetDirectory(), m_adaptor.charset(), DirectoryScanner::UnpackedOnly);
 
     result.availablePlayers = ds.getPlayersWhere(DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveUnpacked);
     result.valid            = !result.availablePlayers.empty();
@@ -110,13 +110,7 @@ void
 game::proxy::MaintenanceProxy::Trampoline::prepareUnpack(UnpackStatus& result)
 {
     DirectoryScanner ds(m_adaptor.translator(), *this);
-
-    // First scan with resultOnly=false to find unpacked data
-    ds.scan(m_adaptor.targetDirectory(), m_adaptor.charset(), false);
-    PlayerSet_t selectedPlayers = ds.getPlayersWhere(DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveUnpacked);
-
-    // Scan again with resultOnly=true to find result files
-    ds.scan(m_adaptor.targetDirectory(), m_adaptor.charset(), true);
+    ds.scan(m_adaptor.targetDirectory(), m_adaptor.charset(), DirectoryScanner::UnpackedAndResult);
 
     // Save set of turn files for startUnpack()
     m_turnFiles = ds.getPlayersWhere(DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveTurn);
@@ -125,7 +119,7 @@ game::proxy::MaintenanceProxy::Trampoline::prepareUnpack(UnpackStatus& result)
     const PlayerList& playerList = m_adaptor.playerList();
     result.allPlayers       = playerList.getAllPlayers();
     result.availablePlayers = ds.getPlayersWhere(DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveResult + DirectoryScanner::HaveNewResult + DirectoryScanner::HaveOtherResult);
-    result.selectedPlayers  = selectedPlayers;
+    result.selectedPlayers  = ds.getPlayersWhere(DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveUnpacked);
     result.playerNames      = playerList.getPlayerNames(Player::ShortName, m_adaptor.translator());
     result.turnFilePlayers  = m_turnFiles;
     result.valid            = true;
@@ -184,7 +178,7 @@ void
 game::proxy::MaintenanceProxy::Trampoline::prepareSweep(SweepStatus& result)
 {
     DirectoryScanner ds(m_adaptor.translator(), *this);
-    ds.scan(m_adaptor.targetDirectory(), m_adaptor.charset(), false);
+    ds.scan(m_adaptor.targetDirectory(), m_adaptor.charset(), DirectoryScanner::UnpackedThenResult);
 
     const PlayerList& playerList = m_adaptor.playerList();
 
