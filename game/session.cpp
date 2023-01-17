@@ -478,10 +478,10 @@ game::Session::postprocessTurn(Turn& t, PlayerSet_t playingSet, PlayerSet_t avai
     }
 }
 
-std::auto_ptr<afl::base::Closure<void()> >
-game::Session::save(TurnLoader::SaveOptions_t opts, std::auto_ptr<afl::base::Closure<void(bool)> > then)
+std::auto_ptr<game::Task_t>
+game::Session::save(TurnLoader::SaveOptions_t opts, std::auto_ptr<StatusTask_t> then)
 {
-    std::auto_ptr<afl::base::Closure<void()> > result;
+    std::auto_ptr<Task_t> result;
 
     // Check environment
     afl::base::Ptr<Root> pRoot = getRoot();
@@ -496,6 +496,17 @@ game::Session::save(TurnLoader::SaveOptions_t opts, std::auto_ptr<afl::base::Clo
     }
 
     return pLoader->saveCurrentTurn(pGame->currentTurn(), *pGame, PlayerSet_t(pGame->getViewpointPlayer()), opts, *pRoot, *this, then);
+}
+
+std::auto_ptr<game::Task_t>
+game::Session::saveConfiguration(std::auto_ptr<Task_t> then)
+{
+    afl::base::Ptr<Root> pRoot = getRoot();
+    if (pRoot.get() != 0 && pRoot->getTurnLoader().get() != 0) {
+        return pRoot->getTurnLoader()->saveConfiguration(*pRoot, then);
+    } else {
+        return then;
+    }
 }
 
 String_t

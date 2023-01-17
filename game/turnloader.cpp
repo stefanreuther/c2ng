@@ -121,3 +121,34 @@ game::TurnLoader::saveCurrentDatabases(const Turn& turn, const Game& game, int p
     // Teams
     game.teamSettings().save(root.gameDirectory(), player, charset);
 }
+
+std::auto_ptr<game::Task_t>
+game::TurnLoader::defaultSaveConfiguration(const Root& root, util::ProfileDirectory* pProfile, afl::sys::LogListener& log, afl::string::Translator& tx, std::auto_ptr<Task_t> then)
+{
+    class SaveTask : public Task_t {
+     public:
+        SaveTask(const Root& root, util::ProfileDirectory* pProfile, afl::sys::LogListener& log, afl::string::Translator& tx, std::auto_ptr<Task_t>& then)
+            : m_root(root), m_pProfile(pProfile), m_log(log), m_translator(tx), m_then(then)
+            { }
+        virtual void call()
+            {
+                try {
+                    m_root.userConfiguration().saveGameConfiguration(m_root.gameDirectory(), m_log, m_translator);
+                    if (m_pProfile != 0) {
+                        m_root.userConfiguration().saveUserConfiguration(*m_pProfile, m_log, m_translator);
+                    }
+                }
+                catch (std::exception& e) {
+                    m_log.write(afl::sys::LogListener::Warn, LOG_NAME, m_translator("Error saving configuration"), e);
+                }
+                m_then->call();
+            }
+     private:
+        const Root& m_root;
+        util::ProfileDirectory* m_pProfile;
+        afl::sys::LogListener& m_log;
+        afl::string::Translator& m_translator;
+        std::auto_ptr<Task_t> m_then;
+    };
+    return std::auto_ptr<Task_t>(new SaveTask(root, pProfile, log, tx, then));
+}

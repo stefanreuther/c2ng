@@ -315,6 +315,12 @@ game::nu::TurnLoader::loadHistoryTurn(Turn& turn, Game& game, int player, int tu
     return makeConfirmationTask(false, then);
 }
 
+std::auto_ptr<game::Task_t>
+game::nu::TurnLoader::saveConfiguration(const Root& root, std::auto_ptr<Task_t> then)
+{
+    return defaultSaveConfiguration(root, &m_profile, m_log, m_translator, then);
+}
+
 String_t
 game::nu::TurnLoader::getProperty(Property p)
 {

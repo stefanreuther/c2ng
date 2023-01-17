@@ -900,7 +900,8 @@ game::interface::IFSaveGame(game::Session& session, interpreter::Process& proc, 
         throw interpreter::Error("No game loaded");
     }
 
-    proc.suspend(action);
+    // Save configuration and game
+    proc.suspend(session.saveConfiguration(action));
 }
 
 /* @q SendMessage player:Int, text:Str... (Global Command)

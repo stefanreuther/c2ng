@@ -462,7 +462,9 @@ namespace {
         if (action.get() == 0) {
             action.reset(new NullSaveAction(PostSaveAction::make(session, si, link, target)));
         }
-        link.getProcess().suspend(action);
+
+        // Save configuration first, then the save action sketched above. Tasks only fit together this way.
+        link.getProcess().suspend(session.saveConfiguration(action));
     }
 
     /*

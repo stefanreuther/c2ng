@@ -14,6 +14,7 @@
 #include "afl/string/translator.hpp"
 #include "game/playerset.hpp"
 #include "game/task.hpp"
+#include "util/profiledirectory.hpp"
 
 namespace game {
 
@@ -167,6 +168,16 @@ namespace game {
             \return Newly-allocated task to perform the operation; never null. */
         virtual std::auto_ptr<Task_t> loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, std::auto_ptr<StatusTask_t> then) = 0;
 
+        /** Save configuration.
+            This should save both user-specific (user profile, ConfigurationOption::Source::User)
+            and game-specific (game directory, ConfigurationOption::Source::Game) parts
+            of the UserConfiguration within the given Root.
+            This configuration is loaded by the entity that creates the Root; therefore, no loadConfiguration is needed in TurnLoader.
+            \param [in] root Root object
+            \param [in] then Task to save after saving; never null.
+            \return Newly-allocated task to perform the operation; never null */
+        virtual std::auto_ptr<Task_t> saveConfiguration(const Root& root, std::auto_ptr<Task_t> then) = 0;
+
         /** Get property for script interface.
             These values are published on the script interface (GlobalContext) and are not intended to be used in C++.
             \param p Property index
@@ -209,6 +220,14 @@ namespace game {
             - message configuration
             - teams */
         void saveCurrentDatabases(const Turn& turn, const Game& game, int player, const Root& root, Session& session, afl::charset::Charset& charset);
+
+        /** Default implementation for saveConfiguration().
+            Saves to the Root's game directory, and to the user profile.
+            \param [in] root     Root object
+            \param [in] pProfile User profile. Can be null to skip saving user configuration.
+            \param [in] then     Task to save after saving; never null.
+            \return Newly-allocated task to perform the operation; never null */
+        std::auto_ptr<Task_t> defaultSaveConfiguration(const Root& root, util::ProfileDirectory* pProfile, afl::sys::LogListener& log, afl::string::Translator& tx, std::auto_ptr<Task_t> then);
     };
 
 }

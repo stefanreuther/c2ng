@@ -181,6 +181,12 @@ game::v3::ResultLoader::loadHistoryTurn(Turn& turn, Game& game, int player, int 
     return std::auto_ptr<Task_t>(new Task(*this, turn, game, player, turnNumber, root, then));
 }
 
+std::auto_ptr<game::Task_t>
+game::v3::ResultLoader::saveConfiguration(const Root& root, std::auto_ptr<Task_t> then)
+{
+    return defaultSaveConfiguration(root, m_pProfile, m_log, m_translator, then);
+}
+
 String_t
 game::v3::ResultLoader::getProperty(Property p)
 {

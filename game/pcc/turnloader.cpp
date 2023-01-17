@@ -179,6 +179,12 @@ game::pcc::TurnLoader::loadHistoryTurn(Turn& /*turn*/, Game& /*game*/, int /*pla
     return makeConfirmationTask(false, then);
 }
 
+std::auto_ptr<game::Task_t>
+game::pcc::TurnLoader::saveConfiguration(const Root& root, std::auto_ptr<Task_t> then)
+{
+    return defaultSaveConfiguration(root, &m_profile, m_log, m_translator, then);
+}
+
 String_t
 game::pcc::TurnLoader::getProperty(Property p)
 {

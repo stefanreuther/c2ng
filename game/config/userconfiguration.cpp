@@ -310,11 +310,23 @@ game::config::UserConfiguration::loadGameConfiguration(afl::io::Directory& dir, 
 }
 
 void
+game::config::UserConfiguration::saveUserConfiguration(util::ProfileDirectory& dir, afl::sys::LogListener& log, afl::string::Translator& tx) const
+{
+    try {
+        afl::base::Ref<afl::io::Stream> stream = dir.createFile(PCC2_INI);
+        log.write(log.Debug, LOG_NAME, afl::string::Format(tx("Writing configuration to %s..."), stream->getName()));
+        saveConfiguration(*stream, *this, Sources_t(ConfigurationOption::User));
+    }
+    catch (std::exception& /*e*/) {
+    }
+}
+
+void
 game::config::UserConfiguration::saveGameConfiguration(afl::io::Directory& dir, afl::sys::LogListener& log, afl::string::Translator& tx) const
 {
     afl::base::Ptr<afl::io::Stream> stream = dir.openFileNT(PCC2_INI, afl::io::FileSystem::Create);
     if (stream.get() != 0) {
-        log.write(log.Debug, LOG_NAME, afl::string::Format(tx.translateString("Writing configuration to %s...").c_str(), stream->getName()));
+        log.write(log.Debug, LOG_NAME, afl::string::Format(tx("Writing configuration to %s..."), stream->getName()));
         saveConfiguration(*stream, *this, Sources_t(ConfigurationOption::Game));
     }
 }

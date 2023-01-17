@@ -23,6 +23,7 @@
 #include "game/map/object.hpp"
 #include "game/reference.hpp"
 #include "game/spec/shiplist.hpp"
+#include "game/task.hpp"
 #include "game/turnloader.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/processlist.hpp"
@@ -251,7 +252,13 @@ namespace game {
             \param opts Options, see TurnLoader::saveCurrentTurn()
             \param then Closure to execute after saving; will receive success/failure status
             \return Save action; null if no turn loaded */
-        std::auto_ptr<afl::base::Closure<void()> > save(TurnLoader::SaveOptions_t opts, std::auto_ptr<afl::base::Closure<void(bool)> > then);
+        std::auto_ptr<Task_t> save(TurnLoader::SaveOptions_t opts, std::auto_ptr<StatusTask_t> then);
+
+        /** Save configuration.
+            If no game is loaded, returns the @c then action as-is, making this a no-op.
+            \param then Action to execute after saving
+            \return Save action; never null */
+        std::auto_ptr<Task_t> saveConfiguration(std::auto_ptr<Task_t> then);
 
         /** Signal: request ProcessList::run() to be run.
             Code that sets a process to runnable should raise this signal.

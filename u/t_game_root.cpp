@@ -75,6 +75,8 @@ TestGameRoot::testIt()
             { }
         virtual std::auto_ptr<game::Task_t> loadHistoryTurn(game::Turn& /*turn*/, game::Game& /*game*/, int /*player*/, int /*turnNumber*/, game::Root& /*root*/, std::auto_ptr<game::StatusTask_t> then)
             { return game::makeConfirmationTask(false, then); }
+        virtual std::auto_ptr<game::Task_t> saveConfiguration(const game::Root& /*root*/, std::auto_ptr<game::Task_t> then)
+            { return then; }
         virtual String_t getProperty(Property /*p*/)
             { return String_t(); }
     };
