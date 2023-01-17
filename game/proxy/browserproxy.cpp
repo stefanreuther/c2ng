@@ -8,6 +8,7 @@
 #include "afl/string/format.hpp"
 #include "game/browser/account.hpp"
 #include "game/proxy/waitindicator.hpp"
+#include "game/registrationkey.hpp"
 #include "game/turnloader.hpp"
 #include "game/types.hpp"
 
@@ -16,6 +17,7 @@ using afl::container::PtrVector;
 using afl::sys::LogListener;
 using game::Player;
 using game::PlayerList;
+using game::RegistrationKey;
 using game::Root;
 using game::TurnLoader;
 using game::browser::Browser;
@@ -157,6 +159,14 @@ namespace {
                         buildPlayerList(*root, *loader, *m_result, m_session.translator());
                         m_result->canEnter = f->canEnter();
                         m_result->possibleActions = root->getPossibleActions();
+
+                        // Key
+                        const RegistrationKey& key = root->registrationKey();
+                        const RegistrationKey::Status keyStatus = key.getStatus();
+                        m_result->keyStatus = keyStatus;
+                        if (keyStatus == RegistrationKey::Registered) {
+                            m_result->keyName = key.getLine(RegistrationKey::Line1);
+                        }
                     } else {
                         // No game in this folder
                         buildFolderInfo(*f, *m_result);

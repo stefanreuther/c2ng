@@ -39,6 +39,7 @@
 #include "ui/widgets/transparentwindow.hpp"
 #include "util/rich/styleattribute.hpp"
 #include "util/translation.hpp"
+#include "util/unicodechars.hpp"
 
 using afl::container::PtrVector;
 using afl::string::Format;
@@ -750,6 +751,30 @@ client::screens::BrowserScreen::onSelectedInfoUpdate(game::proxy::BrowserProxy::
     }
     if (!info.subtitle.empty()) {
         out.pushBackNew(new InfoItem(info.subtitle, String_t(), NoAction, 0));
+    }
+    if (!info.availablePlayers.empty()) {
+        // ex WRegInfoDisplay::drawContent (sort-of)
+        String_t flag, text;
+        util::SkinColor::Color color = util::SkinColor::Static;
+        switch (info.keyStatus) {
+         case game::RegistrationKey::Unknown:
+            flag = UTF_BALLOT_CROSS;
+            text = m_translator("No registration in this directory!");
+            color = util::SkinColor::Red;
+            break;
+         case game::RegistrationKey::Unregistered:
+            flag = UTF_RIGHT_POINTER;
+            text = m_translator("Unregistered");
+            color = util::SkinColor::Yellow;
+            break;
+
+         case game::RegistrationKey::Registered:
+            flag = UTF_CHECK_MARK;
+            text = info.keyName.empty() ? m_translator("Registered") : info.keyName;
+            color = util::SkinColor::Green;
+            break;
+        }
+        out.pushBackNew(new InfoItem(Text(flag + " " + text).withColor(color), String_t(), NoAction, 0));
     }
 
     // Players

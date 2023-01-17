@@ -14,6 +14,7 @@
 #include "game/browser/session.hpp"
 #include "game/browser/usercallback.hpp"
 #include "game/playerarray.hpp"
+#include "game/registrationkey.hpp"
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
@@ -66,16 +67,20 @@ namespace game { namespace proxy {
             util::rich::Text subtitle;                ///< Subtitle (description of folder or game). @see game::browser::Folder::getDescription().
             bool canEnter;                            ///< Can be entered. @see game::browser::Folder::canEnter().
 
-            game::PlayerSet_t availablePlayers;       ///< Set of available players.
-            game::PlayerArray<String_t> playerNames;  ///< Names of available players.
-            game::PlayerArray<String_t> playerExtra;  ///< Extra information of available players (subtitle). @see game::TurnLoader::getPlayerStatus().
+            PlayerSet_t availablePlayers;             ///< Set of available players.
+            PlayerArray<String_t> playerNames;        ///< Names of available players.
+            PlayerArray<String_t> playerExtra;        ///< Extra information of available players (subtitle). @see game::TurnLoader::getPlayerStatus().
 
-            game::Root::Actions_t possibleActions;    ///< Set of possible actions. @see game::Root::getPossibleActions().
+            Root::Actions_t possibleActions;          ///< Set of possible actions. @see game::Root::getPossibleActions().
+
+            RegistrationKey::Status keyStatus;        ///< Status of registration key. Relevant only if availablePlayers is not empty. @see game::RegistrationKey::getStatus().
+            String_t keyName;                         ///< Name of registration key.
 
             FolderInfo()
                 : title(), subtitle(), canEnter(),
                   availablePlayers(), playerNames(), playerExtra(),
-                  possibleActions()
+                  possibleActions(),
+                  keyStatus(RegistrationKey::Unknown), keyName()
                 { }
         };
 
