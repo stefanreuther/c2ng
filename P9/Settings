@@ -12,7 +12,9 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/proxy/maintenanceproxy.cpp \
+FILES_gamelib = interpreter/metacontext.cpp interpreter/metacontext.hpp \
+    game/interface/exportapplication.cpp \
+    game/interface/exportapplication.hpp game/proxy/maintenanceproxy.cpp \
     game/proxy/maintenanceadaptor.hpp game/proxy/maintenanceproxy.hpp \
     interpreter/staticcontext.hpp game/ref/configuration.cpp \
     game/ref/sortby.cpp game/ref/sortby.hpp game/map/info/mission.cpp \
@@ -269,8 +271,6 @@ FILES_gamelib = game/proxy/maintenanceproxy.cpp \
     util/vector.hpp game/map/boundingbox.cpp game/map/boundingbox.hpp \
     game/maint/raterapplication.cpp game/maint/raterapplication.hpp \
     game/maint/sweepapplication.cpp game/maint/sweepapplication.hpp \
-    interpreter/exporter/consoleapplication.cpp \
-    interpreter/exporter/consoleapplication.hpp \
     game/v3/trn/dumperapplication.cpp game/v3/trn/dumperapplication.hpp \
     util/keymapinformation.cpp util/keymapinformation.hpp \
     game/interface/vmfile.cpp game/interface/vmfile.hpp \
@@ -1738,7 +1738,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_proxy_maintenanceadaptor.cpp \
+FILES_testsuite = u/t_interpreter_metacontext.cpp \
+    u/t_game_proxy_maintenanceadaptor.cpp \
     u/t_game_proxy_maintenanceproxy.cpp u/t_game_ref_sortby.cpp \
     u/t_gfx_colortransform.cpp u/t_game_map_info_mission.cpp \
     u/t_game_msg_file.cpp u/t_game_interface_mailboxcontext.cpp \

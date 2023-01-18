@@ -228,6 +228,12 @@ class TestInterpreterMemoryCommandSource : public CxxTest::TestSuite {
     void testAddLinesMulti();
 };
 
+class TestInterpreterMetaContext : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormal();
+};
+
 class TestInterpreterMutexContext : public CxxTest::TestSuite {
  public:
     void testSave();
