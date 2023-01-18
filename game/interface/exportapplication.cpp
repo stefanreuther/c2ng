@@ -63,6 +63,7 @@ game::interface::ExportApplication::appMain()
     afl::sys::StandardCommandLineParser commandLine(environment().getCommandLine());
     String_t p;
     bool opt;
+    consoleLogger().setConfiguration("*@Warn+=raw:*=drop", translator());
     while (commandLine.getNext(opt, p)) {
         if (opt) {
             if (p == "C") {
@@ -99,6 +100,8 @@ game::interface::ExportApplication::appMain()
                 interpreter::exporter::Configuration tmpConfig(config);
                 tmpConfig.load(*file, tx);
                 config = tmpConfig;
+            } else if (p == "v" || p == "verbose") {
+                consoleLogger().setConfiguration("*=raw", tx);
             } else if (p == "h" || p == "help") {
                 help();
             } else {
@@ -228,6 +231,7 @@ game::interface::ExportApplication::help()
                                                 "-O CHARSET\tSet output file character set (default: UTF-8)\n"
                                                 "-F\tExport list of fields instead of game data\n"
                                                 "-c FILE\tRead configuration from file\n"
+                                                "-v\tShow log messages (verbose mode)\n"
                                                 "\n"
                                                 "Types:\n"
                                                 "dbf\tdBASE file (needs '-o')\n"
