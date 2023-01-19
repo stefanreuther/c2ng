@@ -1184,7 +1184,7 @@ TestInterpreterExprBuiltinFunction::testIteration()
             { return new ElementMock(*this); }
         virtual game::map::Object* getObject()
             { return 0; }
-        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/)
+        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/) const
             { }
         virtual afl::data::Value* get(PropertyIndex_t index)
             { return interpreter::makeIntegerValue(index == 1 ? m_value : m_value*10); }
@@ -1234,7 +1234,7 @@ TestInterpreterExprBuiltinFunction::testIteration()
             { return new ContainerMock(); }
         virtual game::map::Object* getObject()
             { return 0; }
-        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/)
+        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/) const
             { }
         virtual afl::data::Value* get(PropertyIndex_t /*index*/)
             { return new ArrayMock(); }

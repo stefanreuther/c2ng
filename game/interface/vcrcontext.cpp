@@ -177,7 +177,7 @@ game::interface::VcrContext::getObject()
 }
 
 void
-game::interface::VcrContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::VcrContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     // ex IntVcrContext::enumProperties
     acceptor.enumTable(vcr_mapping);

@@ -113,7 +113,7 @@ class interpreter::Process::FrameContext : public SingleContext, public Context:
         }
     virtual game::map::Object* getObject()
         { return 0; }
-    virtual void enumProperties(PropertyAcceptor& acceptor)
+    virtual void enumProperties(PropertyAcceptor& acceptor) const
         { acceptor.enumNames(m_frame.localNames); }
 
     // BaseValue:

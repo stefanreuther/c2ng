@@ -90,7 +90,7 @@ game::interface::PlayerContext::getObject()
 }
 
 void
-game::interface::PlayerContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::PlayerContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     // ex IntPlayerContext::enumProperties
     acceptor.enumTable(player_mapping);

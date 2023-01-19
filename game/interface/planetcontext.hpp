@@ -28,7 +28,7 @@ namespace game { namespace interface {
         virtual bool next();
         virtual PlanetContext* clone() const;
         virtual game::map::Planet* getObject();
-        virtual void enumProperties(interpreter::PropertyAcceptor& acceptor);
+        virtual void enumProperties(interpreter::PropertyAcceptor& acceptor) const;
 
         // BaseValue:
         virtual String_t toString(bool readable) const;

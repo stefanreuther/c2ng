@@ -88,7 +88,7 @@ interpreter::StructureValue::getObject()
 }
 
 void
-interpreter::StructureValue::enumProperties(PropertyAcceptor& acceptor)
+interpreter::StructureValue::enumProperties(PropertyAcceptor& acceptor) const
 {
     // ex IntStructureValue::enumProperties
     acceptor.enumNames(m_value->type->names());

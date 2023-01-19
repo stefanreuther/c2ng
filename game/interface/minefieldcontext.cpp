@@ -149,7 +149,7 @@ game::interface::MinefieldContext::getObject()
 }
 
 void
-game::interface::MinefieldContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::MinefieldContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     // ex IntMinefieldContext::enumProperties
     acceptor.enumTable(minefield_mapping);

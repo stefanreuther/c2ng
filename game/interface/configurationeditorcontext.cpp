@@ -125,7 +125,7 @@ namespace {
         virtual interpreter::Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
         virtual NodeContext* clone() const;
         virtual game::map::Object* getObject();
-        virtual void enumProperties(interpreter::PropertyAcceptor& acceptor);
+        virtual void enumProperties(interpreter::PropertyAcceptor& acceptor) const;
 
         // BaseValue:
         virtual String_t toString(bool readable) const;
@@ -552,7 +552,7 @@ NodeContext::getObject()
 }
 
 void
-NodeContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+NodeContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     acceptor.enumTable(NP_TABLE);
 }
@@ -622,7 +622,7 @@ game::interface::ConfigurationEditorContext::getObject()
 }
 
 void
-game::interface::ConfigurationEditorContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::ConfigurationEditorContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     acceptor.enumTable(CE_TABLE);
 }

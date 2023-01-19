@@ -32,7 +32,7 @@ TestInterpreterVmioProcessLoadContext::testLoadMutex()
             { return new TestContext(*this); }
         virtual game::map::Object* getObject()
             { return 0; }
-        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/)
+        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/) const
             { }
         virtual String_t toString(bool /*readable*/) const
             { return String_t(); }

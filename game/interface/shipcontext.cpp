@@ -381,7 +381,7 @@ game::interface::ShipContext::getObject()
 }
 
 void
-game::interface::ShipContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::ShipContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     // ex IntShipContext::enumProperties
     // ex shipint.pas:CShipContext.EnumValues

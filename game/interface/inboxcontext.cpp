@@ -259,7 +259,7 @@ game::interface::InboxContext::getObject()
 }
 
 void
-game::interface::InboxContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::InboxContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     // ex IntMessageContext::enumProperties
     acceptor.enumTable(MSG_MAPPING);

@@ -16,7 +16,7 @@ namespace {
 }
 
 interpreter::MetaContext*
-interpreter::MetaContext::create(Context& parent)
+interpreter::MetaContext::create(const Context& parent)
 {
     afl::base::Ref<Data> p(*new Data());
     parent.enumProperties(*p);
@@ -97,7 +97,7 @@ interpreter::MetaContext::getObject()
 }
 
 void
-interpreter::MetaContext::enumProperties(PropertyAcceptor& acceptor)
+interpreter::MetaContext::enumProperties(PropertyAcceptor& acceptor) const
 {
     acceptor.enumTable(meta_mapping);
 }

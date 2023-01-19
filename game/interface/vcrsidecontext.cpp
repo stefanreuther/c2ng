@@ -152,7 +152,7 @@ game::interface::VcrSideContext::getObject()
 }
 
 void
-game::interface::VcrSideContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::VcrSideContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     acceptor.enumTable(side_mapping);
 }

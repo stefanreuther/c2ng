@@ -109,7 +109,7 @@ game::interface::BeamContext::getObject()
 }
 
 void
-game::interface::BeamContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::BeamContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     acceptor.enumTable(BEAM_MAP);
 }

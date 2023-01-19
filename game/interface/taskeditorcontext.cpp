@@ -583,7 +583,7 @@ game::interface::TaskEditorContext::getObject()
 }
 
 void
-game::interface::TaskEditorContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::TaskEditorContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     acceptor.enumTable(TASKEDITOR_MAP);
 }

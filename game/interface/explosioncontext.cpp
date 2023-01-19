@@ -80,7 +80,7 @@ game::interface::ExplosionContext::getObject()
 }
 
 void
-game::interface::ExplosionContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::ExplosionContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     acceptor.enumTable(EXPLOSION_MAP);
 }

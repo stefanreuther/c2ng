@@ -31,7 +31,7 @@ namespace interpreter {
         virtual bool next();
         virtual MutexContext* clone() const;
         virtual game::map::Object* getObject();
-        virtual void enumProperties(PropertyAcceptor& acceptor);
+        virtual void enumProperties(PropertyAcceptor& acceptor) const;
         virtual void onContextEntered(Process& proc);
         virtual void onContextLeft();
 

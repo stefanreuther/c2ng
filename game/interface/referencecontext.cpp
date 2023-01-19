@@ -107,7 +107,7 @@ game::interface::ReferenceContext::getObject()
 }
 
 void
-game::interface::ReferenceContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::ReferenceContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     acceptor.enumTable(REFERENCE_MAP);
 }

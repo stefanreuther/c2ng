@@ -43,7 +43,7 @@ namespace interpreter {
         virtual void set(PropertyIndex_t index, const afl::data::Value* value);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual game::map::Object* getObject();
-        virtual void enumProperties(PropertyAcceptor& acceptor);
+        virtual void enumProperties(PropertyAcceptor& acceptor) const;
 
      private:
         StructureValueData::Ref_t m_value;

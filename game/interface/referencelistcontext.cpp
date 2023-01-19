@@ -113,7 +113,7 @@ class game::interface::ReferenceListContext::IterableReferenceContext : public i
         { return new IterableReferenceContext(*this); }
     virtual game::map::Object* getObject()
         { return m_child->getObject(); }
-    virtual void enumProperties(interpreter::PropertyAcceptor& acceptor)
+    virtual void enumProperties(interpreter::PropertyAcceptor& acceptor) const
         { return m_child->enumProperties(acceptor); }
     virtual String_t toString(bool readable) const
         { return m_child->toString(readable); }
@@ -258,7 +258,7 @@ game::interface::ReferenceListContext::getObject()
 }
 
 void
-game::interface::ReferenceListContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::ReferenceListContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     acceptor.enumTable(REFLIST_MAP);
 }

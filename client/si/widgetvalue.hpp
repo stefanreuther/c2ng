@@ -16,7 +16,7 @@ namespace client { namespace si {
         // Methods to be implemented by child classes:
         // virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result) = 0;
         // virtual Context* clone() const = 0;
-        // virtual void enumProperties(PropertyAcceptor& acceptor) = 0;
+        // virtual void enumProperties(PropertyAcceptor& acceptor) const = 0;
 
         virtual game::map::Object* getObject();
         virtual String_t toString(bool readable) const;

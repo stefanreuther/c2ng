@@ -220,7 +220,7 @@ game::interface::GlobalContext::getObject()
 }
 
 void
-game::interface::GlobalContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::GlobalContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     // ex IntGlobalContext::enumProperties
     acceptor.enumNames(m_session.world().globalPropertyNames());

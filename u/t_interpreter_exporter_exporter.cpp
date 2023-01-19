@@ -100,7 +100,7 @@ namespace {
             { return new TestContext(m_id, m_vector); }
         virtual game::map::Object* getObject()
             { return m_vector.get(m_id); }
-        virtual void enumProperties(interpreter::PropertyAcceptor& acceptor)
+        virtual void enumProperties(interpreter::PropertyAcceptor& acceptor) const
             { acceptor.enumTable(TEST_MAP); }
         virtual bool next()
             {

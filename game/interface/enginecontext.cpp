@@ -108,7 +108,7 @@ game::interface::EngineContext::getObject()
 }
 
 void
-game::interface::EngineContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::EngineContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     // ex IntEngineContext::enumProperties
     acceptor.enumTable(ENGINE_MAP);

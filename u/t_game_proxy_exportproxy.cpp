@@ -67,7 +67,7 @@ namespace {
             { return new TestContext(); }
         virtual game::map::Object* getObject()
             { return 0; }
-        virtual void enumProperties(interpreter::PropertyAcceptor& acceptor)
+        virtual void enumProperties(interpreter::PropertyAcceptor& acceptor) const
             {
                 acceptor.addProperty("ID", interpreter::thInt);
                 acceptor.addProperty("NAME", interpreter::thString);

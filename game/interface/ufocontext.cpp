@@ -150,7 +150,7 @@ game::interface::UfoContext::getObject()
 }
 
 void
-game::interface::UfoContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::UfoContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     // ex IntUfoContext::enumProperties
     acceptor.enumTable(UFO_MAPPING);

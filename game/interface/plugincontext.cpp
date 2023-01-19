@@ -65,7 +65,7 @@ game::interface::PluginContext::getObject()
 }
 
 void
-game::interface::PluginContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::PluginContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     // ex IntPluginContext::enumProperties
     acceptor.enumTable(property_mapping);

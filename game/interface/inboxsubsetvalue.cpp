@@ -20,7 +20,7 @@ namespace {
         virtual bool next();
         virtual InboxSubsetContext* clone() const;
         virtual game::map::Object* getObject();
-        virtual void enumProperties(interpreter::PropertyAcceptor& acceptor);
+        virtual void enumProperties(interpreter::PropertyAcceptor& acceptor) const;
         virtual String_t toString(bool readable) const;
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
@@ -30,9 +30,9 @@ namespace {
         afl::string::Translator& m_translator;
         afl::base::Ref<const game::Root> m_root;
         afl::base::Ref<const game::Game> m_game;
-        std::auto_ptr<interpreter::Context> m_child;
+        mutable std::auto_ptr<interpreter::Context> m_child;
 
-        interpreter::Context& child();
+        interpreter::Context& child() const;
     };
 }
 
@@ -75,7 +75,7 @@ InboxSubsetContext::getObject()
 }
 
 void
-InboxSubsetContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+InboxSubsetContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     child().enumProperties(acceptor);
 }
@@ -93,7 +93,7 @@ InboxSubsetContext::store(interpreter::TagNode& out, afl::io::DataSink& aux, int
 }
 
 interpreter::Context&
-InboxSubsetContext::child()
+InboxSubsetContext::child() const
 {
     if (!m_child.get()) {
         assert(m_index < m_indexes.size());

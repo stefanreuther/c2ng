@@ -164,7 +164,7 @@ game::interface::MailboxContext::getObject()
 }
 
 void
-game::interface::MailboxContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::MailboxContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     acceptor.enumTable(TABLE);
 }

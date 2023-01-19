@@ -73,7 +73,7 @@ class interpreter::test::ExpressionVerifier::TestContext : public SingleContext,
         { return "#<TestContext>"; }
     virtual game::map::Object* getObject()
         { return 0; }
-    virtual void enumProperties(PropertyAcceptor&)
+    virtual void enumProperties(PropertyAcceptor&) const
         { }
     virtual TestContext* clone() const
         { return new TestContext(m_parent); }

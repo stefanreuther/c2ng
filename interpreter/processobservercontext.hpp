@@ -28,7 +28,7 @@ namespace interpreter {
         virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
         virtual ProcessObserverContext* clone() const;
         virtual game::map::Object* getObject();
-        virtual void enumProperties(PropertyAcceptor& acceptor);
+        virtual void enumProperties(PropertyAcceptor& acceptor) const;
 
         // BaseValue:
         virtual String_t toString(bool readable) const;

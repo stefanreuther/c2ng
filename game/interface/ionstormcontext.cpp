@@ -131,7 +131,7 @@ game::interface::IonStormContext::getObject()
 }
 
 void
-game::interface::IonStormContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::IonStormContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     // ex IntIonContext::enumProperties
     acceptor.enumTable(ion_storm_mapping);

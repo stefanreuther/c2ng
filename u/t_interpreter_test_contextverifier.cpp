@@ -67,7 +67,7 @@ namespace {
         virtual game::map::Object* getObject()
             { TS_FAIL("unexpected: getObject"); return 0; }
 
-        virtual void enumProperties(interpreter::PropertyAcceptor& acceptor)
+        virtual void enumProperties(interpreter::PropertyAcceptor& acceptor) const
             {
                 if (!m_table.empty()) {
                     acceptor.enumTable(m_table);

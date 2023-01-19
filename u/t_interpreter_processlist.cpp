@@ -833,7 +833,7 @@ TestInterpreterProcessList::testObject()
             { return new MyObjectContext(m_obj); }
         virtual game::map::Object* getObject()
             { return &m_obj; }
-        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/)
+        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/) const
             { }
         virtual String_t toString(bool) const
             { return "#<MyObject>"; }

@@ -27,7 +27,7 @@ namespace client { namespace si {
         virtual void set(PropertyIndex_t index, const afl::data::Value* value);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual GenericWidgetValue* clone() const;
-        virtual void enumProperties(interpreter::PropertyAcceptor& acceptor);
+        virtual void enumProperties(interpreter::PropertyAcceptor& acceptor) const;
 
         afl::base::Memory<const interpreter::NameTable> getNames() const
             { return m_names; }

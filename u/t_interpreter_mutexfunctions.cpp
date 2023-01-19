@@ -48,7 +48,7 @@ namespace {
             { return new SimpleGlobalContext(m_world); }
         virtual game::map::Object* getObject()
             { return 0; }
-        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/)
+        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/) const
             { }
 
         // BaseValue:

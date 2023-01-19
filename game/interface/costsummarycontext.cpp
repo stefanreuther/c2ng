@@ -102,7 +102,7 @@ game::interface::CostSummaryContext::getObject()
 }
 
 void
-game::interface::CostSummaryContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::CostSummaryContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     // ex BillContext::enumProperties
     acceptor.enumTable(BILL_MAPPING);

@@ -22,7 +22,7 @@ TestInterpreterContext::testIt()
             { return 0; }
         virtual game::map::Object* getObject()
             { return 0; }
-        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/)
+        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/) const
             { }
         virtual void onContextEntered(interpreter::Process& /*proc*/)
             { }

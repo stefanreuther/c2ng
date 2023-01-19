@@ -34,7 +34,7 @@ namespace game { namespace interface {
         virtual bool next();
         virtual InboxContext* clone() const;
         virtual game::map::Object* getObject();
-        virtual void enumProperties(interpreter::PropertyAcceptor& acceptor);
+        virtual void enumProperties(interpreter::PropertyAcceptor& acceptor) const;
         virtual String_t toString(bool readable) const;
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 

@@ -451,7 +451,7 @@ game::interface::IteratorContext::getObject()
 }
 
 void
-game::interface::IteratorContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::IteratorContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     // ex IntIteratorContext::enumProperties
     acceptor.enumTable(ITERATOR_MAP);

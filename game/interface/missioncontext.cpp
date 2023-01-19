@@ -85,7 +85,7 @@ game::interface::MissionContext::getObject()
 }
 
 void
-game::interface::MissionContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::MissionContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     acceptor.enumTable(MISSION_MAPPING);
 }

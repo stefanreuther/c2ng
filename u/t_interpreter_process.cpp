@@ -85,7 +85,7 @@ namespace {
             { TS_FAIL("SingularObjectContext::clone unexpected"); return 0; }
         virtual game::map::Object* getObject()
             { return m_pObject; }
-        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/)
+        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/) const
             { TS_FAIL("SingularObjectContext::enumProperties unexpected"); }
         virtual String_t toString(bool /*readable*/) const
             { TS_FAIL("SingularObjectContext::toString unexpected"); return String_t(); }
@@ -134,7 +134,7 @@ namespace {
             }
         virtual game::map::Object* getObject()
             { TS_FAIL("SingularVariableContext::getObject unexpected"); return 0; }
-        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/)
+        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/) const
             { TS_FAIL("SingularVariableContext::enumProperties unexpected"); }
         virtual String_t toString(bool /*readable*/) const
             { TS_FAIL("SingularVariableContext::toString unexpected"); return String_t(); }
@@ -175,7 +175,7 @@ namespace {
             { return new CountingContext(*this); }
         virtual game::map::Object* getObject()
             { TS_FAIL("CountingContext::getObject unexpected"); return 0; }
-        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/)
+        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/) const
             { TS_FAIL("CountingContext::enumProperties unexpected"); }
         virtual String_t toString(bool /*readable*/) const
             { TS_FAIL("CountingContext::toString unexpected"); return String_t(); }
@@ -279,7 +279,7 @@ namespace {
             { return new TracingContext(m_trace, m_reject); }
         virtual game::map::Object* getObject()
             { return 0; }
-        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/)
+        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/) const
             { }
         virtual void onContextEntered(interpreter::Process& /*proc*/)
             {

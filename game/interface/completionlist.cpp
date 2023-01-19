@@ -327,7 +327,7 @@ game::interface::buildCompletionList(CompletionList& out,
         // Script things
         CompletionBuilder builder(out, acceptCommands, onlyCommands);
         for (size_t i = 0, n = contexts.size(); i < n; ++i) {
-            if (interpreter::Context* p = contexts[i]) {
+            if (const interpreter::Context* p = contexts[i]) {
                 p->enumProperties(builder);
             }
         }

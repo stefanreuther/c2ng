@@ -22,7 +22,7 @@ namespace interpreter {
         /** Create MetaContext.
             @param parent Context to get information about
             @return newly-allocated MetaContext. Null if the given Context has no properties. */
-        static MetaContext* create(Context& parent);
+        static MetaContext* create(const Context& parent);
 
         // Context:
         virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
@@ -30,7 +30,7 @@ namespace interpreter {
         virtual bool next();
         virtual MetaContext* clone() const;
         virtual game::map::Object* getObject();
-        virtual void enumProperties(PropertyAcceptor& acceptor);
+        virtual void enumProperties(PropertyAcceptor& acceptor) const;
 
         // BaseValue:
         virtual String_t toString(bool readable) const;

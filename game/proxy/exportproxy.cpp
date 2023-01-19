@@ -188,7 +188,7 @@ game::proxy::ExportProxy::Trampoline::enumProperties(afl::data::StringList_t& ou
         afl::data::StringList_t& m_out;
     };
 
-    std::auto_ptr<Context> ctx(m_adaptor.createContext());
+    std::auto_ptr<const Context> ctx(m_adaptor.createContext());
     if (ctx.get() != 0) {
         Collector coll(out);
         ctx->enumProperties(coll);

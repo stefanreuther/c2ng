@@ -30,7 +30,7 @@ namespace {
             { throw interpreter::Error("unexpected"); }
         virtual game::map::Object* getObject()
             { throw interpreter::Error("unexpected"); }
-        virtual void enumProperties(interpreter::PropertyAcceptor& acceptor)
+        virtual void enumProperties(interpreter::PropertyAcceptor& acceptor) const
             { acceptor.enumTable(m_table); }
         virtual void onContextEntered(interpreter::Process& /*proc*/)
             { throw interpreter::Error("unexpected"); }

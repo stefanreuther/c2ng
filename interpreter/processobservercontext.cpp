@@ -71,7 +71,7 @@ interpreter::ProcessObserverContext::getObject()
 }
 
 void
-interpreter::ProcessObserverContext::enumProperties(PropertyAcceptor& /*acceptor*/)
+interpreter::ProcessObserverContext::enumProperties(PropertyAcceptor& /*acceptor*/) const
 {
     // We cannot enumerate properties
 }

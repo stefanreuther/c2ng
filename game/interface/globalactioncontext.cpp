@@ -168,7 +168,7 @@ game::interface::GlobalActionContext::getObject()
 }
 
 void
-game::interface::GlobalActionContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::GlobalActionContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     acceptor.enumTable(TABLE);
 }

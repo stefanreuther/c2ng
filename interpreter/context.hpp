@@ -67,7 +67,7 @@ namespace interpreter {
 
         /** Enumerate properties. Call acceptor.addProperty for every property.
             \param acceptor Acceptor object */
-        virtual void enumProperties(PropertyAcceptor& acceptor) = 0;
+        virtual void enumProperties(PropertyAcceptor& acceptor) const = 0;
 
         /** Context has been entered on a process ("With" statement).
             \param proc Process

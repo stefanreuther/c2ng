@@ -80,7 +80,7 @@ game::interface::FriendlyCodeContext::getObject()
 }
 
 void
-game::interface::FriendlyCodeContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::FriendlyCodeContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     acceptor.enumTable(FC_MAPPING);
 }

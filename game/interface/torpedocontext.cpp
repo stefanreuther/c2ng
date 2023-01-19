@@ -110,7 +110,7 @@ game::interface::TorpedoContext::getObject()
 }
 
 void
-game::interface::TorpedoContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::TorpedoContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     // ex IntTorpedoContext::enumProperties, IntLauncherContext::enumProperties
     acceptor.enumTable(torpedo_map);

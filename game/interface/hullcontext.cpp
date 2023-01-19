@@ -122,7 +122,7 @@ game::interface::HullContext::getObject()
 }
 
 void
-game::interface::HullContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::HullContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     // ex IntHullContext::enumProperties
     acceptor.enumTable(HULL_MAPPING);

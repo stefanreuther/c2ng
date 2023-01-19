@@ -344,7 +344,7 @@ game::interface::PlanetContext::getObject()
 }
 
 void
-game::interface::PlanetContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::interface::PlanetContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     // ex IntPlanetContext::enumProperties
     acceptor.enumNames(m_session.world().planetPropertyNames());

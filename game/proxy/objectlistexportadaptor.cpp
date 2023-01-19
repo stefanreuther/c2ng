@@ -32,16 +32,16 @@ class game::proxy::ObjectListExportAdaptor::Context : public interpreter::Simple
     virtual bool next();
     virtual interpreter::Context* clone() const;
     virtual game::map::Object* getObject();
-    virtual void enumProperties(interpreter::PropertyAcceptor& acceptor);
+    virtual void enumProperties(interpreter::PropertyAcceptor& acceptor) const;
     virtual String_t toString(bool readable) const;
     virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
  private:
     afl::base::Ref<Data> m_data;
     size_t m_index;
-    std::auto_ptr<interpreter::Context> m_child;
+    mutable std::auto_ptr<interpreter::Context> m_child;
 
-    interpreter::Context* makeChild();
+    interpreter::Context* makeChild() const;
 };
 
 inline
@@ -89,7 +89,7 @@ game::proxy::ObjectListExportAdaptor::Context::getObject()
 }
 
 void
-game::proxy::ObjectListExportAdaptor::Context::enumProperties(interpreter::PropertyAcceptor& acceptor)
+game::proxy::ObjectListExportAdaptor::Context::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     if (interpreter::Context* ch = makeChild()) {
         ch->enumProperties(acceptor);
@@ -109,7 +109,7 @@ game::proxy::ObjectListExportAdaptor::Context::store(interpreter::TagNode& out, 
 }
 
 interpreter::Context*
-game::proxy::ObjectListExportAdaptor::Context::makeChild()
+game::proxy::ObjectListExportAdaptor::Context::makeChild() const
 {
     if (m_child.get() == 0) {
         if (m_index < m_data->ids.size()) {

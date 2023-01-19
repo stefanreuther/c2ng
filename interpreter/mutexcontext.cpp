@@ -76,7 +76,7 @@ interpreter::MutexContext::getObject()
 
 /* EnumProperties implementation. Mutex has no properties. */
 void
-interpreter::MutexContext::enumProperties(PropertyAcceptor& /*acceptor*/)
+interpreter::MutexContext::enumProperties(PropertyAcceptor& /*acceptor*/) const
 {
     // ex IntMutexContext::enumProperties
 }

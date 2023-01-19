@@ -74,7 +74,7 @@ client::si::GenericWidgetValue::clone() const
 }
 
 void
-client::si::GenericWidgetValue::enumProperties(interpreter::PropertyAcceptor& acceptor)
+client::si::GenericWidgetValue::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
     acceptor.enumTable(m_names);
 }
