@@ -102,6 +102,7 @@ class TestInterpreterBytecodeObject : public CxxTest::TestSuite {
     void testCompact();
     void testAppend();
     void testDisassembly();
+    void testMergeByteCodeObjects();
 };
 
 class TestInterpreterCallableValue : public CxxTest::TestSuite {

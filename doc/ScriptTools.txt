@@ -1,0 +1,97 @@
+PCC2ng SCRIPT TOOLS
+*******************
+
+
+General
+=======
+
+The Script Interpreter primarily works on text files (*.q).
+
+As an experimental/development feature, it can compile scripts into
+binary files (*.qc). So far, this feature has not been used for any
+user-facing feature, but it is a natural consequence of the "suspend"
+ability used for saving auto tasks in a scriptX.cc file.
+
+As of PCC2 2.41, there are two utilities related to scripting:
+
+* `c2script` executes scripts. This utility is intended for users.
+
+* `c2compiler` creates and manipulates *.qc files. This utility is
+  mainly a developer playground.
+
+In PCC2ng before 2.41 (PCC 2.40.x) all functionality was collected in
+one utility `c2script`. PCC1 could execute scripts from the command
+line using the /k and /kk options, and the `ccs` utility. PCC2 Classic
+had no command-line script interpreter.
+
+
+Option Summary
+==============
+
+For each option, in parentheses the utility supporting it; in
+brackets, the "origin" of the option (C compiler, PCC1).
+
+* `--compile`, `-c` (c2compiler): produce *.qc files [C compiler]
+
+* `-C CHARSET` (c2script, c2compiler): set character set used for game
+  data and *.qc files [standard PCC2 option]
+
+* `--disassemble`, `-S` (c2compiler): produce *.qs files [C compiler]
+
+* `-f preexec-load` (c2compiler): execute "Load" during compilation
+  [gcc has lots of `-f` flags]
+
+* `-g` (c2compiler): enable debug information [C compiler]
+
+* `-G DIR` (c2script): set game directory
+
+* `-k` (c2script, c2compiler): input is commands, not files [PCC1]
+
+* `-I` (c2script, c2compiler): set load path [C compiler]
+
+* `--log CONFIG` (c2script, c2compiler): set logger format [standard PCC2ng option]
+
+* `--nostdlib` (c2script): do not use standard library (core.q)
+
+* `-o` (c2compiler): set output file name [C compiler]
+
+* `-O LEVEL` (c2script, c2compiler): set optimisation level [C compiler]
+
+* `-P NUM` (c2script): set player number
+
+* `-q` (c2script, c2compiler): quiet
+
+* `--read-only` (c2script): open game read-only
+
+* `-R DIR` (c2script): set root directory
+
+* `-s` (c2compiler): disable debug information [C compiler]
+
+
+
+PCC1 Options (for reference)
+============================
+
+    /k CMD   execute command in game context
+    /kk CMD  execute command before load
+    /n       don't auto-load game
+    /s       assume shareware key
+    /p PWD   password
+    /!       ignore default options
+    /a       ignore plugins
+
+    /u       action: "unpack"
+    /uc      action: "unpack + decompile turn"
+    /r       action: "record statistics"
+    /c       action: "maketurn"
+
+    /b       system: black/white
+    /h       system: use UMBs
+    /m       system: don't use XMS
+    /t       system: skip splashscreen
+    /w       system: Windows compatibility
+    /x       system: 256 colors
+    /d       system: no double-buffering
+    /v       system: 16 colors
+    /z       system: something something something mouse
+    /$       system: swapfile size

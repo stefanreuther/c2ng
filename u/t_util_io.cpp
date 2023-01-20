@@ -247,3 +247,65 @@ TestUtilIo::testCreateDirectoryTree()
     }
 }
 
+/** Test getFileNameExtension(). */
+void
+TestUtilIo::testGetFileNameExtension()
+{
+    afl::io::NullFileSystem fs;
+    TS_ASSERT_EQUALS(util::getFileNameExtension(fs, "file.txt"), ".txt");
+    TS_ASSERT_EQUALS(util::getFileNameExtension(fs, "file.tar.gz"), ".gz");
+    TS_ASSERT_EQUALS(util::getFileNameExtension(fs, ".hidden"), "");
+    TS_ASSERT_EQUALS(util::getFileNameExtension(fs, "file"), "");
+
+    TS_ASSERT_EQUALS(util::getFileNameExtension(fs, "/dir/file.txt"), ".txt");
+    TS_ASSERT_EQUALS(util::getFileNameExtension(fs, "/dir/file.tar.gz"), ".gz");
+    TS_ASSERT_EQUALS(util::getFileNameExtension(fs, "/dir/.hidden"), "");
+    TS_ASSERT_EQUALS(util::getFileNameExtension(fs, "/dir/file"), "");
+
+    TS_ASSERT_EQUALS(util::getFileNameExtension(fs, "/dir.ext/file.txt"), ".txt");
+    TS_ASSERT_EQUALS(util::getFileNameExtension(fs, "/dir.ext/file.tar.gz"), ".gz");
+    TS_ASSERT_EQUALS(util::getFileNameExtension(fs, "/dir.ext/.hidden"), "");
+    TS_ASSERT_EQUALS(util::getFileNameExtension(fs, "/dir.ext/file"), "");
+}
+
+void
+TestUtilIo::testMakeSearchDirectory()
+{
+    // Prepare test setting
+    afl::io::InternalFileSystem fs;
+    fs.createDirectory("/a");
+    fs.createDirectory("/b");
+    fs.createDirectory("/c");
+    fs.openFile("/a/fa", afl::io::FileSystem::Create)->fullWrite(afl::string::toBytes("1"));
+    fs.openFile("/b/fa", afl::io::FileSystem::Create)->fullWrite(afl::string::toBytes("2"));
+    fs.openFile("/c/fc", afl::io::FileSystem::Create)->fullWrite(afl::string::toBytes("3"));
+
+    // Empty
+    {
+        afl::base::Ref<afl::io::Directory> dir = util::makeSearchDirectory(fs, afl::base::Nothing);
+        TS_ASSERT_THROWS(dir->openFile("fa", afl::io::FileSystem::OpenRead), afl::except::FileProblemException);
+    }
+
+    // Single
+    {
+        String_t dirNames[] = { "/b" };
+        afl::base::Ref<afl::io::Directory> dir = util::makeSearchDirectory(fs, dirNames);
+        uint8_t tmp[1];
+        dir->openFile("fa", afl::io::FileSystem::OpenRead)->fullRead(tmp);
+        TS_ASSERT_EQUALS(tmp[0], '2');
+        TS_ASSERT_THROWS(dir->openFile("fx", afl::io::FileSystem::OpenRead), afl::except::FileProblemException);
+    }
+
+    // Multiple
+    {
+        String_t dirNames[] = { "/b", "/a", "/c" };
+        afl::base::Ref<afl::io::Directory> dir = util::makeSearchDirectory(fs, dirNames);
+        uint8_t tmp[1];
+        dir->openFile("fa", afl::io::FileSystem::OpenRead)->fullRead(tmp);
+        TS_ASSERT_EQUALS(tmp[0], '2');
+        dir->openFile("fc", afl::io::FileSystem::OpenRead)->fullRead(tmp);
+        TS_ASSERT_EQUALS(tmp[0], '3');
+        TS_ASSERT_THROWS(dir->openFile("fx", afl::io::FileSystem::OpenRead), afl::except::FileProblemException);
+    }
+}
+

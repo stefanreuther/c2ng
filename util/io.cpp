@@ -8,6 +8,7 @@
 #include "afl/except/fileproblemexception.hpp"
 #include "afl/io/directory.hpp"
 #include "afl/io/directoryentry.hpp"
+#include "afl/io/multidirectory.hpp"
 
 bool
 util::storePascalString(afl::io::DataSink& out, const String_t& str, afl::charset::Charset& charset)
@@ -84,6 +85,18 @@ util::appendFileNameExtension(afl::io::FileSystem& fs, String_t pathName, String
     }
 }
 
+String_t
+util::getFileNameExtension(afl::io::FileSystem& fs, String_t pathName)
+{
+    String_t fileName = fs.getFileName(pathName);
+    String_t::size_type dot = fileName.rfind('.');
+    if (dot != String_t::npos && dot != 0) {
+        return fileName.substr(dot);
+    } else {
+        return String_t();
+    }
+}
+
 void
 util::createDirectoryTree(afl::io::FileSystem& fs, const String_t dirName)
 {
@@ -112,5 +125,19 @@ util::createDirectoryTree(afl::io::FileSystem& fs, const String_t dirName)
             }
         }
         catch (afl::except::FileProblemException&) { }
+    }
+}
+
+afl::base::Ref<afl::io::Directory>
+util::makeSearchDirectory(afl::io::FileSystem& fs, afl::base::Memory<const String_t> dirNames)
+{
+    if (dirNames.size() == 1U) {
+        return fs.openDirectory(*dirNames.at(0));
+    } else {
+        afl::base::Ref<afl::io::MultiDirectory> dir = afl::io::MultiDirectory::create();
+        while (const String_t* p = dirNames.eat()) {
+            dir->addDirectory(fs.openDirectory(*p));
+        }
+        return dir;
     }
 }

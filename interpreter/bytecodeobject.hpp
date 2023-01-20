@@ -366,20 +366,22 @@ namespace interpreter {
         String_t              m_origin;
         std::vector<uint32_t> m_lineNumbers; ///< Line numbers. Pairs of address,line.
     };
+
+
+    /** Create BCO that executes multiple other BCOs.
+        If one BCO is given, returns that; otherwise, create one that calls them all.
+
+        Note: this function takes BCOPtr_t, not BCORef_t, because BCORef_t is not assignable
+        and thus cannot be used with std::vector.
+        Elements must still be non-null.
+
+        \param bcos  List of bytecode objects
+        \return result BCO */
+    BCORef_t mergeByteCodeObjects(const std::vector<BCOPtr_t>& bcos);
+
 }
 
 /**************************** Inline Functions ***************************/
-
-namespace std {
-    /** Total order for IntBCORef. This allows to make a std::map
-        using IntBCORef's as key. We don't need any particular order,
-        so we just use the address order. */
-    template<>
-    struct less<interpreter::BCORef_t> {
-        bool operator()(interpreter::BCORef_t a, interpreter::BCORef_t b) const
-            { return less<void*>()(&a.get(), &b.get()); }
-    };
-}
 
 // Add local variable.
 inline uint16_t

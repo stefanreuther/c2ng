@@ -5,17 +5,18 @@
 
 #include <cassert>
 #include "interpreter/bytecodeobject.hpp"
-#include "afl/data/scalarvalue.hpp"
-#include "afl/data/integervalue.hpp"
+#include "afl/base/optional.hpp"
 #include "afl/data/booleanvalue.hpp"
 #include "afl/data/floatvalue.hpp"
+#include "afl/data/integervalue.hpp"
+#include "afl/data/scalarvalue.hpp"
 #include "afl/data/stringvalue.hpp"
 #include "afl/string/format.hpp"
 #include "interpreter/compilationcontext.hpp"
-#include "interpreter/world.hpp"
-#include "interpreter/values.hpp"
-#include "afl/base/optional.hpp"
 #include "interpreter/error.hpp"
+#include "interpreter/subroutinevalue.hpp"
+#include "interpreter/values.hpp"
+#include "interpreter/world.hpp"
 
 namespace {
     /** Find literal within data segment.
@@ -664,4 +665,22 @@ interpreter::BytecodeObject::getDisassembly(PC_t index, const World& w) const
     }
 
     return result;
+}
+
+interpreter::BCORef_t
+interpreter::mergeByteCodeObjects(const std::vector<BCOPtr_t>& bcos)
+{
+    if (bcos.size() == 1) {
+        return *bcos[0];
+    } else {
+        BCORef_t result = BytecodeObject::create(true);
+        for (size_t i = 0, n = bcos.size(); i < n; ++i) {
+            // pushlit BCO
+            // callind 0
+            SubroutineValue sv(*bcos[i]);
+            result->addPushLiteral(&sv);
+            result->addInstruction(Opcode::maIndirect, Opcode::miIMCall, 0);
+        }
+        return result;
+    }
 }

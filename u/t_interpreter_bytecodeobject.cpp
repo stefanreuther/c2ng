@@ -16,6 +16,9 @@
 #include "interpreter/error.hpp"
 #include "interpreter/values.hpp"
 #include "interpreter/world.hpp"
+#include "interpreter/process.hpp"
+
+using interpreter::Opcode;
 
 /** Test getter/setters. */
 void
@@ -137,7 +140,6 @@ TestInterpreterBytecodeObject::testCopyLocalVariablesFrom()
 void
 TestInterpreterBytecodeObject::testLabel()
 {
-    using interpreter::Opcode;
     interpreter::BytecodeObject testee;
 
     // Make two labels
@@ -297,7 +299,6 @@ TestInterpreterBytecodeObject::testNames()
 void
 TestInterpreterBytecodeObject::testLineNumbers()
 {
-    using interpreter::Opcode;
     interpreter::BytecodeObject testee;
 
     // Generate some code.
@@ -339,7 +340,6 @@ void
 TestInterpreterBytecodeObject::testLineNumbers2()
 {
     interpreter::BytecodeObject testee;
-    using interpreter::Opcode;
 
     // Generate some code.
     // [Same thing as above, but missing the "line 10" entry.]
@@ -399,8 +399,6 @@ TestInterpreterBytecodeObject::testLineNumbers3()
 void
 TestInterpreterBytecodeObject::testHasUserCall()
 {
-    using interpreter::Opcode;
-
     // Boundary case: empty
     {
         interpreter::BytecodeObject t;
@@ -452,7 +450,6 @@ void
 TestInterpreterBytecodeObject::testVariableReference()
 {
     using interpreter::CompilationContext;
-    using interpreter::Opcode;
 
     // Environment
     afl::sys::Log log;
@@ -510,7 +507,6 @@ TestInterpreterBytecodeObject::testVariableReference()
 void
 TestInterpreterBytecodeObject::testCompact()
 {
-    using interpreter::Opcode;
     interpreter::BytecodeObject testee;
 
     // Generate some code
@@ -551,8 +547,6 @@ TestInterpreterBytecodeObject::testCompact()
 void
 TestInterpreterBytecodeObject::testAppend()
 {
-    using interpreter::Opcode;
-
     // Set up copy target:
     //   1 instruction
     //   2 labels
@@ -649,8 +643,6 @@ TestInterpreterBytecodeObject::testAppend()
 void
 TestInterpreterBytecodeObject::testDisassembly()
 {
-    using interpreter::Opcode;
-
     // Environment
     afl::sys::Log log;
     afl::string::NullTranslator tx;
@@ -689,5 +681,38 @@ TestInterpreterBytecodeObject::testDisassembly()
     TS_ASSERT_EQUALS(a.getDisassembly(3, world), "pushloc     1 <Y>");
     TS_ASSERT_EQUALS(a.getDisassembly(4, world), "pushint     -5");
     TS_ASSERT_EQUALS(a.getDisassembly(5, world), "sreturn     3");
+}
+
+void
+TestInterpreterBytecodeObject::testMergeByteCodeObjects()
+{
+    // A BCO that increments a variable
+    interpreter::BCORef_t p = interpreter::BytecodeObject::create(true);
+    p->addInstruction(Opcode::maUnary, interpreter::unInc, 0);
+
+    // Check different counts, including zero and one
+    for (int i = 0; i < 10; ++i) {
+        // Build object-under-test
+        std::vector<interpreter::BCOPtr_t> vec;
+        for (int j = 0; j < i; ++j) {
+            vec.push_back(p.asPtr());
+        }
+        interpreter::BCORef_t bco = interpreter::mergeByteCodeObjects(vec);
+
+        // Run it
+        afl::sys::Log log;
+        afl::string::NullTranslator tx;
+        afl::io::NullFileSystem fs;
+        interpreter::World world(log, tx, fs);
+        interpreter::Process proc(world, "test", 99);
+
+        proc.pushNewValue(interpreter::makeIntegerValue(0));
+        proc.pushFrame(bco, false);
+        proc.run();
+        TS_ASSERT_EQUALS(proc.getState(), interpreter::Process::Ended);
+
+        // Result must equal the number of iterations
+        TS_ASSERT_EQUALS(interpreter::mustBeScalarValue(proc.getResult()), i);
+    }
 }
 

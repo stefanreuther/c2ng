@@ -111,6 +111,8 @@ class TestUtilIo : public CxxTest::TestSuite {
     void testLoadPascalString();
     void testAppendExt();
     void testCreateDirectoryTree();
+    void testGetFileNameExtension();
+    void testMakeSearchDirectory();
 };
 
 class TestUtilKey : public CxxTest::TestSuite {

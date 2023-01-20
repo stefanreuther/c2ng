@@ -12,8 +12,9 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = interpreter/metacontext.cpp interpreter/metacontext.hpp \
-    game/interface/exportapplication.cpp \
+FILES_gamelib = game/interface/scriptapplication.cpp \
+    game/interface/scriptapplication.hpp interpreter/metacontext.cpp \
+    interpreter/metacontext.hpp game/interface/exportapplication.cpp \
     game/interface/exportapplication.hpp game/proxy/maintenanceproxy.cpp \
     game/proxy/maintenanceadaptor.hpp game/proxy/maintenanceproxy.hpp \
     interpreter/staticcontext.hpp game/ref/configuration.cpp \
@@ -1578,6 +1579,11 @@ TARGETS += c2check
 FILES_c2check = main/c2check.cpp
 TYPE_c2check = app
 DEPEND_c2check = gamelib afl
+
+TARGETS += c2compiler
+FILES_c2compiler = main/c2compiler.cpp
+TYPE_c2compiler = app
+DEPEND_c2compiler = gamelib afl
 
 TARGETS += c2configtool
 FILES_c2configtool = main/c2configtool.cpp
