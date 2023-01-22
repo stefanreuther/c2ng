@@ -443,7 +443,7 @@ game::interface::IteratorContext::clone() const
     return new IteratorContext(m_provider);
 }
 
-game::map::Object*
+afl::base::Deletable*
 game::interface::IteratorContext::getObject()
 {
     // ex IntIteratorContext::getObject

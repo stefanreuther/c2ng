@@ -67,7 +67,7 @@ TestGameProxyObjectListExportAdaptor::testIt()
         ctxv.verifyTypes();
         ctxv.verifyInteger("ID", 10);
 
-        game::map::Object* obj = ctx->getObject();
+        game::map::Object* obj = dynamic_cast<game::map::Object*>(ctx->getObject());
         TS_ASSERT(obj != 0);
         TS_ASSERT_EQUALS(obj->getId(), 10);
 
@@ -75,7 +75,7 @@ TestGameProxyObjectListExportAdaptor::testIt()
         TS_ASSERT_EQUALS(ctx->next(), true);
         ctxv.verifyInteger("ID", 15);
 
-        obj = ctx->getObject();
+        obj = dynamic_cast<game::map::Object*>(ctx->getObject());
         TS_ASSERT(obj != 0);
         TS_ASSERT_EQUALS(obj->getId(), 15);
 
@@ -133,7 +133,7 @@ TestGameProxyObjectListExportAdaptor::testNull()
         TS_ASSERT(propertyAccess == 0);
 
         // Cannot get an object
-        game::map::Object* obj = ctx->getObject();
+        afl::base::Deletable* obj = ctx->getObject();
         TS_ASSERT(obj == 0);
 
         // - second slot

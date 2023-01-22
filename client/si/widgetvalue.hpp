@@ -18,7 +18,7 @@ namespace client { namespace si {
         // virtual Context* clone() const = 0;
         // virtual void enumProperties(PropertyAcceptor& acceptor) const = 0;
 
-        virtual game::map::Object* getObject();
+        virtual afl::base::Deletable* getObject();
         virtual String_t toString(bool readable) const;
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 

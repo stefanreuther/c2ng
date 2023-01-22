@@ -136,7 +136,7 @@ game::interface::DrawingContext::clone() const
     return new DrawingContext(m_turn, m_root, m_iterator);
 }
 
-game::map::Object*
+afl::base::Deletable*
 game::interface::DrawingContext::getObject()
 {
     // ex IntDrawingContext::getObject

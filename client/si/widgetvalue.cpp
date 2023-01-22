@@ -8,7 +8,7 @@ client::si::WidgetValue::WidgetValue(const WidgetReference& ref)
     : m_ref(ref)
 { }
 
-game::map::Object*
+afl::base::Deletable*
 client::si::WidgetValue::getObject()
 {
     return 0;

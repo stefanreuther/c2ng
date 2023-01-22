@@ -35,7 +35,7 @@ namespace game { namespace interface {
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual bool next();
         virtual CostSummaryContext* clone() const;
-        virtual game::map::Object* getObject();
+        virtual afl::base::Deletable* getObject();
         virtual void enumProperties(interpreter::PropertyAcceptor& acceptor) const;
 
         // BaseValue:

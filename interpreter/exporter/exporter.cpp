@@ -3,6 +3,7 @@
   *  \brief Base class interpreter::exporter::Exporter
   */
 
+#include <memory>
 #include "interpreter/exporter/exporter.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/exporter/fieldlist.hpp"

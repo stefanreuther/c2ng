@@ -44,7 +44,7 @@ namespace game { namespace interface {
         virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual ReferenceContext* clone() const;
-        virtual game::map::Object* getObject();
+        virtual afl::base::Deletable* getObject();
         virtual void enumProperties(interpreter::PropertyAcceptor& acceptor) const;
 
         // BaseValue:

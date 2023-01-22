@@ -20,7 +20,7 @@ TestInterpreterContext::testIt()
             { return false; }
         virtual Context* clone() const
             { return 0; }
-        virtual game::map::Object* getObject()
+        virtual afl::base::Deletable* getObject()
             { return 0; }
         virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/) const
             { }

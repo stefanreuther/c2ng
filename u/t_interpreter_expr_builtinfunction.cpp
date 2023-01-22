@@ -1182,7 +1182,7 @@ TestInterpreterExprBuiltinFunction::testIteration()
 
         virtual Context* clone() const
             { return new ElementMock(*this); }
-        virtual game::map::Object* getObject()
+        virtual afl::base::Deletable* getObject()
             { return 0; }
         virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/) const
             { }
@@ -1232,7 +1232,7 @@ TestInterpreterExprBuiltinFunction::testIteration()
             }
         virtual Context* clone() const
             { return new ContainerMock(); }
-        virtual game::map::Object* getObject()
+        virtual afl::base::Deletable* getObject()
             { return 0; }
         virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/) const
             { }

@@ -80,7 +80,7 @@ interpreter::StructureValue::get(PropertyIndex_t index)
     return afl::data::Value::cloneOf(m_value->data[index]);
 }
 
-game::map::Object*
+afl::base::Deletable*
 interpreter::StructureValue::getObject()
 {
     // ex IntStructureValue::getObject

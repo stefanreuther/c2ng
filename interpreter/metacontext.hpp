@@ -29,7 +29,7 @@ namespace interpreter {
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual bool next();
         virtual MetaContext* clone() const;
-        virtual game::map::Object* getObject();
+        virtual afl::base::Deletable* getObject();
         virtual void enumProperties(PropertyAcceptor& acceptor) const;
 
         // BaseValue:

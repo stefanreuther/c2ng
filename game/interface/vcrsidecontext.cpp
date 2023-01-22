@@ -145,7 +145,7 @@ game::interface::VcrSideContext::clone() const
                               m_shipList);
 }
 
-game::map::Object*
+afl::base::Deletable*
 game::interface::VcrSideContext::getObject()
 {
     return 0;

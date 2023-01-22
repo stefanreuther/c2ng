@@ -90,7 +90,7 @@ interpreter::MetaContext::clone() const
     return new MetaContext(m_data, m_position);
 }
 
-game::map::Object*
+afl::base::Deletable*
 interpreter::MetaContext::getObject()
 {
     return 0;

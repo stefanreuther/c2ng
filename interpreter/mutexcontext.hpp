@@ -30,7 +30,7 @@ namespace interpreter {
         virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
         virtual bool next();
         virtual MutexContext* clone() const;
-        virtual game::map::Object* getObject();
+        virtual afl::base::Deletable* getObject();
         virtual void enumProperties(PropertyAcceptor& acceptor) const;
         virtual void onContextEntered(Process& proc);
         virtual void onContextLeft();

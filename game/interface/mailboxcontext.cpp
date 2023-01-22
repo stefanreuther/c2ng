@@ -157,7 +157,7 @@ game::interface::MailboxContext::clone() const
     return new MailboxContext(m_mailbox, m_session);
 }
 
-game::map::Object*
+afl::base::Deletable*
 game::interface::MailboxContext::getObject()
 {
     return 0;

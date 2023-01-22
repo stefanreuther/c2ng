@@ -111,7 +111,7 @@ class game::interface::ReferenceListContext::IterableReferenceContext : public i
         { return m_child->lookup(name, result); }
     virtual IterableReferenceContext* clone() const
         { return new IterableReferenceContext(*this); }
-    virtual game::map::Object* getObject()
+    virtual afl::base::Deletable* getObject()
         { return m_child->getObject(); }
     virtual void enumProperties(interpreter::PropertyAcceptor& acceptor) const
         { return m_child->enumProperties(acceptor); }
@@ -251,7 +251,7 @@ game::interface::ReferenceListContext::clone() const
     return new ReferenceListContext(m_list, m_session);
 }
 
-game::map::Object*
+afl::base::Deletable*
 game::interface::ReferenceListContext::getObject()
 {
     return 0;

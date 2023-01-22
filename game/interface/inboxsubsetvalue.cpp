@@ -19,7 +19,7 @@ namespace {
         virtual interpreter::Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
         virtual bool next();
         virtual InboxSubsetContext* clone() const;
-        virtual game::map::Object* getObject();
+        virtual afl::base::Deletable* getObject();
         virtual void enumProperties(interpreter::PropertyAcceptor& acceptor) const;
         virtual String_t toString(bool readable) const;
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
@@ -68,7 +68,7 @@ InboxSubsetContext::clone() const
     return new InboxSubsetContext(m_index, m_indexes, m_translator, m_root, m_game);
 }
 
-game::map::Object*
+afl::base::Deletable*
 InboxSubsetContext::getObject()
 {
     return child().getObject();

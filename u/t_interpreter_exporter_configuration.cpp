@@ -51,7 +51,7 @@ namespace {
             { return false; }
         virtual TestContext* clone() const
             { return new TestContext(); }
-        virtual game::map::Object* getObject()
+        virtual afl::base::Deletable* getObject()
             { return 0; }
         virtual void enumProperties(interpreter::PropertyAcceptor& acceptor) const
             {

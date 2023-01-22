@@ -114,7 +114,7 @@ game::interface::HullContext::clone() const
     return new HullContext(m_number, m_shipList, m_root);
 }
 
-game::map::Object*
+afl::base::Deletable*
 game::interface::HullContext::getObject()
 {
     // ex IntHullContext::getObject

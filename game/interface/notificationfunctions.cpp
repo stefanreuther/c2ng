@@ -111,15 +111,14 @@ game::interface::IFCCNotify(game::Session& session, interpreter::Process& proc, 
     afl::string::Translator& tx = session.translator();
     String_t header;
 
-    // FIXME: should this really be getInvokingObject()?
-    game::map::Object* obj = proc.getInvokingObject();
+    const afl::base::Deletable* obj = proc.getCurrentObject();
     Reference ref;
-    if (dynamic_cast<game::map::Planet*>(obj) != 0) {
-        header = Format(tx("(-p%04d)<<< Planet >>>\n\n"), obj->getId());
-        ref = Reference(Reference::Planet, obj->getId());
-    } else if (dynamic_cast<game::map::Ship*>(obj) != 0) {
-        header = Format(tx("(-s%04d)<<< Ship >>>\n\n"), obj->getId());
-        ref = Reference(Reference::Ship, obj->getId());
+    if (const game::map::Planet* pl = dynamic_cast<const game::map::Planet*>(obj)) {
+        header = Format(tx("(-p%04d)<<< Planet >>>\n\n"), pl->getId());
+        ref = Reference(Reference::Planet, pl->getId());
+    } else if (const game::map::Ship* sh = dynamic_cast<const game::map::Ship*>(obj)) {
+        header = Format(tx("(-s%04d)<<< Ship >>>\n\n"), sh->getId());
+        ref = Reference(Reference::Ship, sh->getId());
     } else {
         header = tx("(-X0000)<<< Notification >>>\n\n");
     }

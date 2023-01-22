@@ -4,6 +4,7 @@
   */
 
 #include <map>
+#include <memory>
 #include "interpreter/test/contextverifier.hpp"
 #include "interpreter/propertyacceptor.hpp"
 #include "afl/data/booleanvalue.hpp"
@@ -72,7 +73,7 @@ interpreter::test::ContextVerifier::verifyTypes() const
              case thBool:
                 me.check("expect bool", dynamic_cast<afl::data::BooleanValue*>(value.get()) != 0);
                 break;
-                
+
              case thInt:
                 me.check("expect integer", dynamic_cast<afl::data::IntegerValue*>(value.get()) != 0);
                 break;

@@ -85,7 +85,7 @@ namespace {
             { return afl::data::Value::cloneOf(m_world.globalValues().get(index)); }
         virtual MinGlobalContext* clone() const
             { return new MinGlobalContext(m_world); }
-        virtual game::map::Object* getObject()
+        virtual afl::base::Deletable* getObject()
             { return 0; }
         virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/) const
             { }

@@ -66,7 +66,7 @@ namespace game { namespace interface {
         virtual void set(PropertyIndex_t index, const afl::data::Value* value);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual TaskEditorContext* clone() const;
-        virtual game::map::Object* getObject();
+        virtual afl::base::Deletable* getObject();
         virtual void enumProperties(interpreter::PropertyAcceptor& acceptor) const;
 
         // BaseValue:

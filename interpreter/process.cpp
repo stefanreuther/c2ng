@@ -111,7 +111,7 @@ class interpreter::Process::FrameContext : public SingleContext, public Context:
             // ex IntExecutionFrameContext::get
             return afl::data::Value::cloneOf(m_frame.localValues[index]);
         }
-    virtual game::map::Object* getObject()
+    virtual afl::base::Deletable* getObject()
         { return 0; }
     virtual void enumProperties(PropertyAcceptor& acceptor) const
         { acceptor.enumNames(m_frame.localNames); }
@@ -1501,13 +1501,12 @@ interpreter::Process::getVariable(String_t name) const
 }
 
 // Get game object this process is working on.
-game::map::Object*
+afl::base::Deletable*
 interpreter::Process::getCurrentObject() const
 {
-    // FIXME: replace by getCurrentObjectContext to drop the game dependency?
     // ex IntExecutionContext::getCurrentObject
     for (size_t i = m_contexts.size(); i > 0; --i) {
-        if (game::map::Object* obj = m_contexts[i-1]->getObject()) {
+        if (afl::base::Deletable* obj = m_contexts[i-1]->getObject()) {
             return obj;
         }
     }
@@ -1515,12 +1514,12 @@ interpreter::Process::getCurrentObject() const
 }
 
 // Get game object this process was invoked from.
-game::map::Object*
+afl::base::Deletable*
 interpreter::Process::getInvokingObject() const
 {
     // ex IntExecutionContext::getInvokingObject
     for (size_t i = m_contextTOS; i > 0; --i) {
-        if (game::map::Object* obj = m_contexts[i-1]->getObject()) {
+        if (afl::base::Deletable* obj = m_contexts[i-1]->getObject()) {
             return obj;
         }
     }

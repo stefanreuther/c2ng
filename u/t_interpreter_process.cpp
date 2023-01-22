@@ -74,7 +74,7 @@ namespace {
        It only provides a single object we give it. */
     class SingularObjectContext : public interpreter::SimpleContext {
      public:
-        SingularObjectContext(game::map::Object* pObject)
+        SingularObjectContext(afl::base::Deletable* pObject)
             : m_pObject(pObject)
             { }
         virtual PropertyAccessor* lookup(const afl::data::NameQuery& /*name*/, PropertyIndex_t& /*result*/)
@@ -83,7 +83,7 @@ namespace {
             { TS_FAIL("SingularObjectContext::next unexpected"); return false; }
         virtual Context* clone() const
             { TS_FAIL("SingularObjectContext::clone unexpected"); return 0; }
-        virtual game::map::Object* getObject()
+        virtual afl::base::Deletable* getObject()
             { return m_pObject; }
         virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/) const
             { TS_FAIL("SingularObjectContext::enumProperties unexpected"); }
@@ -92,7 +92,7 @@ namespace {
         virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
             { TS_FAIL("SingularObjectContext::store unexpected"); }
      private:
-        game::map::Object* m_pObject;
+        afl::base::Deletable* m_pObject;
     };
 
     /* Singular variable context.
@@ -132,7 +132,7 @@ namespace {
                 TS_ASSERT(m_clonable);
                 return new SingularVariableContext(*this);
             }
-        virtual game::map::Object* getObject()
+        virtual afl::base::Deletable* getObject()
             { TS_FAIL("SingularVariableContext::getObject unexpected"); return 0; }
         virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/) const
             { TS_FAIL("SingularVariableContext::enumProperties unexpected"); }
@@ -173,7 +173,7 @@ namespace {
             { ++m_value; return true; }
         virtual Context* clone() const
             { return new CountingContext(*this); }
-        virtual game::map::Object* getObject()
+        virtual afl::base::Deletable* getObject()
             { TS_FAIL("CountingContext::getObject unexpected"); return 0; }
         virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/) const
             { TS_FAIL("CountingContext::enumProperties unexpected"); }
@@ -187,17 +187,8 @@ namespace {
     };
 
     /* Null object.
-       Just a dummy instance of game::map::Object. */
-    class NullObject : public game::map::Object {
-     public:
-        virtual String_t getName(game::ObjectName /*which*/, afl::string::Translator& /*tx*/, game::InterpreterInterface& /*iface*/) const
-            { return "null"; }
-        virtual game::Id_t getId() const
-            { return 55; }
-        virtual afl::base::Optional<int> getOwner() const
-            { return 0; }
-        virtual afl::base::Optional<game::map::Point> getPosition() const
-            { return afl::base::Nothing; }
+       Just a dummy object, we do not look into it. */
+    class NullObject : public afl::base::Deletable {
     };
 
     /* Simple callable */
@@ -277,7 +268,7 @@ namespace {
             { return false; }
         virtual interpreter::Context* clone() const
             { return new TracingContext(m_trace, m_reject); }
-        virtual game::map::Object* getObject()
+        virtual afl::base::Deletable* getObject()
             { return 0; }
         virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/) const
             { }

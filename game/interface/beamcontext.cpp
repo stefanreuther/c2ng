@@ -101,7 +101,7 @@ game::interface::BeamContext::clone() const
     return new BeamContext(m_number, m_shipList, m_root);
 }
 
-game::map::Object*
+afl::base::Deletable*
 game::interface::BeamContext::getObject()
 {
     // ex IntBeamContext::getObject

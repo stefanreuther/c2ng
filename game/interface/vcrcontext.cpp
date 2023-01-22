@@ -170,7 +170,7 @@ game::interface::VcrContext::clone() const
     return new VcrContext(m_battleNumber, m_session, m_root, m_turn, m_shipList);
 }
 
-game::map::Object*
+afl::base::Deletable*
 game::interface::VcrContext::getObject()
 {
     return 0;

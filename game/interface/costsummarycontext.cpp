@@ -95,7 +95,7 @@ game::interface::CostSummaryContext::clone() const
     return new CostSummaryContext(m_costSummary, m_index);
 }
 
-game::map::Object*
+afl::base::Deletable*
 game::interface::CostSummaryContext::getObject()
 {
     return 0;

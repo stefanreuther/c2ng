@@ -270,7 +270,7 @@ namespace {
 
         game::interface::NotificationStore& notif = session.notifications();
         notif.confirmMessage(notif.findMessageByProcessId(edit.process().getProcessId()), true);
-        if (game::map::Object* obj = edit.process().getInvokingObject()) {
+        if (game::map::Object* obj = dynamic_cast<game::map::Object*>(edit.process().getInvokingObject())) {
             obj->markDirty();
         }
     }
@@ -576,7 +576,7 @@ game::interface::TaskEditorContext::clone() const
     return new TaskEditorContext(m_edit, m_session);
 }
 
-game::map::Object*
+afl::base::Deletable*
 game::interface::TaskEditorContext::getObject()
 {
     return 0;
@@ -677,7 +677,7 @@ game::interface::getTaskEditorProperty(const afl::base::Ptr<interpreter::TaskEdi
         return 0;
 
      case iteObjectId:
-        if (const game::map::Object* p = edit->process().getInvokingObject()) {
+        if (const game::map::Object* p = dynamic_cast<const game::map::Object*>(edit->process().getInvokingObject())) {
             return makeIntegerValue(p->getId());
         } else {
             return 0;

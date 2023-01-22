@@ -64,7 +64,7 @@ interpreter::ProcessObserverContext::clone() const
     return new ProcessObserverContext(m_state);
 }
 
-game::map::Object*
+afl::base::Deletable*
 interpreter::ProcessObserverContext::getObject()
 {
     return 0;

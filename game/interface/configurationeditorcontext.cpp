@@ -124,7 +124,7 @@ namespace {
         // Context:
         virtual interpreter::Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
         virtual NodeContext* clone() const;
-        virtual game::map::Object* getObject();
+        virtual afl::base::Deletable* getObject();
         virtual void enumProperties(interpreter::PropertyAcceptor& acceptor) const;
 
         // BaseValue:
@@ -545,7 +545,7 @@ NodeContext::clone() const
     return new NodeContext(m_ref);
 }
 
-game::map::Object*
+afl::base::Deletable*
 NodeContext::getObject()
 {
     return 0;
@@ -615,7 +615,7 @@ game::interface::ConfigurationEditorContext::clone() const
     return new ConfigurationEditorContext(*this);
 }
 
-game::map::Object*
+afl::base::Deletable*
 game::interface::ConfigurationEditorContext::getObject()
 {
     return 0;

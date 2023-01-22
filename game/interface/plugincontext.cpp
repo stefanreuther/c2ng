@@ -57,7 +57,7 @@ game::interface::PluginContext::clone() const
     return new PluginContext(m_name, m_session);
 }
 
-game::map::Object*
+afl::base::Deletable*
 game::interface::PluginContext::getObject()
 {
     // ex IntPluginContext::getObject

@@ -5,6 +5,7 @@
   *  FIXME: this uses PCC2's ad-hoc JSON formatter. Use the JSON infrastructure from afl.
   */
 
+#include <memory>
 #include "interpreter/exporter/jsonexporter.hpp"
 #include "afl/charset/utf8reader.hpp"
 #include "afl/data/booleanvalue.hpp"

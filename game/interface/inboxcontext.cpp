@@ -251,7 +251,7 @@ game::interface::InboxContext::clone() const
     return new InboxContext(m_index, m_translator, m_root, m_game);
 }
 
-game::map::Object*
+afl::base::Deletable*
 game::interface::InboxContext::getObject()
 {
     // ex IntMessageContext::getObject

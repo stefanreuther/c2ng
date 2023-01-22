@@ -103,7 +103,7 @@ game::proxy::TaskEditorProxy::Trampoline::selectTask(Id_t id, Process::ProcessKi
     // Connect the signal and inform user
     if (m_editor.get() != 0) {
         conn_change = m_editor->sig_change.add(this, &Trampoline::sendStatus);
-        if (game::map::Object* obj = m_editor->process().getInvokingObject()) {
+        if (game::map::Object* obj = dynamic_cast<game::map::Object*>(m_editor->process().getInvokingObject())) {
             conn_objectChange = obj->sig_change.add(this, &Trampoline::sendStatus);
         }
 

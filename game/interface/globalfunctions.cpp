@@ -416,7 +416,7 @@ game::interface::IFObjectIsAt(game::Session& session, interpreter::Arguments& ar
         throw interpreter::Error::typeError(interpreter::Error::ExpectRecord);
     }
 
-    const game::map::Object* mapObj = ctx->getObject();
+    const game::map::Object* mapObj = dynamic_cast<const game::map::Object*>(ctx->getObject());
     if (mapObj == 0) {
         throw interpreter::Error::typeError(interpreter::Error::ExpectRecord);
     }

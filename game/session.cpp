@@ -667,6 +667,21 @@ game::Session::initWorld()
 
     // Configure files
     m_world.fileTable().setMaxFiles(MAX_SCRIPT_FILES);
+
+    // Listener
+    m_processList.sig_processStateChange.add(this, &Session::onProcessStateChange);
+}
+
+void
+game::Session::onProcessStateChange(const interpreter::Process& proc, bool /*willDelete*/)
+{
+    // This callback drives the "process here" marker.
+    // Since we're only scheduling an update, not actually rendering it,
+    // we don't care what the final situation will be (process deleted or remained).
+    // Just mark the object changed.
+    if (game::map::Object* obj = dynamic_cast<game::map::Object*>(proc.getInvokingObject())) {
+        obj->markDirty();
+    }
 }
 
 void

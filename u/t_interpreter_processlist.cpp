@@ -10,7 +10,6 @@
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
-#include "game/map/object.hpp"
 #include "game/test/counter.hpp"
 #include "interpreter/bytecodeobject.hpp"
 #include "interpreter/callablevalue.hpp"
@@ -810,15 +809,19 @@ void
 TestInterpreterProcessList::testObject()
 {
     // Mocks
-    class MyObject : public game::map::Object {
-        virtual String_t getName(game::ObjectName /*which*/, afl::string::Translator& /*tx*/, game::InterpreterInterface& /*iface*/) const
-            { return "MyObject"; }
-        virtual game::Id_t getId() const
-            { return 77; }
-        virtual afl::base::Optional<int> getOwner() const
-            { return 0; }
-        virtual afl::base::Optional<game::map::Point> getPosition() const
-            { return afl::base::Nothing; }
+    class MyObject : public afl::base::Deletable {
+     public:
+        MyObject()
+            : m_dirty()
+            { }
+        bool isDirty()
+            { return m_dirty; }
+        void markDirty()
+            { m_dirty = true; }
+        void markClean()
+            { m_dirty = false; }
+     private:
+        bool m_dirty;
     };
     class MyObjectContext : public interpreter::SimpleContext {
      public:
@@ -831,7 +834,7 @@ TestInterpreterProcessList::testObject()
             { return false; }
         virtual Context* clone() const
             { return new MyObjectContext(m_obj); }
-        virtual game::map::Object* getObject()
+        virtual MyObject* getObject()
             { return &m_obj; }
         virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/) const
             { }
@@ -843,6 +846,16 @@ TestInterpreterProcessList::testObject()
         MyObject& m_obj;
     };
 
+    // We need now explicitly
+    struct Listener {
+        static void onProcessStateChange(const interpreter::Process& proc, bool)
+            {
+                if (MyObject* p = dynamic_cast<MyObject*>(proc.getInvokingObject())) {
+                    p->markDirty();
+                }
+            }
+    };
+
     // Environment
     afl::sys::Log log;
     afl::string::NullTranslator tx;
@@ -850,6 +863,7 @@ TestInterpreterProcessList::testObject()
     interpreter::World world(log, tx, fs);
 
     interpreter::ProcessList testee;
+    testee.sig_processStateChange.add(&Listener::onProcessStateChange);
     MyObject obj;
 
     // Some processes

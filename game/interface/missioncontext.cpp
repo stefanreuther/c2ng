@@ -78,7 +78,7 @@ game::interface::MissionContext::clone() const
     return new MissionContext(m_slot, m_shipList);
 }
 
-game::map::Object*
+afl::base::Deletable*
 game::interface::MissionContext::getObject()
 {
     return 0;

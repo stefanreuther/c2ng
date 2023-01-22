@@ -64,7 +64,7 @@ namespace {
         virtual interpreter::Context* clone() const
             { TS_FAIL("unexpected: clone"); return 0; }
 
-        virtual game::map::Object* getObject()
+        virtual afl::base::Deletable* getObject()
             { TS_FAIL("unexpected: getObject"); return 0; }
 
         virtual void enumProperties(interpreter::PropertyAcceptor& acceptor) const

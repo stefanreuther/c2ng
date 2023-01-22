@@ -295,11 +295,7 @@ interpreter::ProcessList::run()
         try {
             while (Process* proc = findRunningProcess()) {
                 proc->run();
-
-                // Process may be in a state that causes the "process here" marker to change
-                if (game::map::Object* obj = proc->getInvokingObject()) {
-                    obj->markDirty();
-                }
+                sig_processStateChange.raise(*proc, false);
 
                 bool handled = false;
                 switch (proc->getState()) {
@@ -394,15 +390,8 @@ interpreter::ProcessList::removeTerminatedProcesses()
             for (Vector_t::iterator i = m_processes.begin(); i != m_processes.end(); ++i) {
                 Process* p = *i;
                 if (isTerminatedState(p->getState())) {
-                    // Killing a process invoked from an object marks that object dirty,
-                    // in order to remove the "there's a process here" marker.
-                    if (game::map::Object* obj = p->getInvokingObject()) {
-                        obj->markDirty();
-                    }
-
-                    // Remove it
+                    sig_processStateChange.raise(*p, true);
                     m_processes.erase(i);
-
                     found = true;
                     break;
                 }
@@ -457,7 +446,7 @@ interpreter::ProcessList::handlePriorityChange(const Process& proc)
 
 // Get process, given an object.
 interpreter::Process*
-interpreter::ProcessList::findProcessByObject(const game::map::Object* obj, uint8_t kind) const
+interpreter::ProcessList::findProcessByObject(const afl::base::Deletable* obj, uint8_t kind) const
 {
     // ex int/process.h:getProcessByObject
     for (Vector_t::const_iterator i = m_processes.begin(); i != m_processes.end(); ++i) {

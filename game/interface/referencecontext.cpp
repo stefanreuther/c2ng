@@ -100,7 +100,7 @@ game::interface::ReferenceContext::clone() const
     return new ReferenceContext(m_ref, m_session);
 }
 
-game::map::Object*
+afl::base::Deletable*
 game::interface::ReferenceContext::getObject()
 {
     return 0;

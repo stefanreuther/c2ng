@@ -73,7 +73,7 @@ game::interface::FriendlyCodeContext::clone() const
     return new FriendlyCodeContext(m_slot, m_root, m_shipList, m_translator);
 }
 
-game::map::Object*
+afl::base::Deletable*
 game::interface::FriendlyCodeContext::getObject()
 {
     return 0;

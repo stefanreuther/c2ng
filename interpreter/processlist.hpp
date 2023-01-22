@@ -5,9 +5,9 @@
 #ifndef C2NG_INTERPRETER_PROCESSLIST_HPP
 #define C2NG_INTERPRETER_PROCESSLIST_HPP
 
-#include "afl/container/ptrvector.hpp"
-#include "game/map/object.hpp"
 #include "afl/base/signal.hpp"
+#include "afl/container/ptrvector.hpp"
+#include "afl/string/string.hpp"
 
 namespace interpreter {
 
@@ -181,7 +181,7 @@ namespace interpreter {
             \param obj Invoking object
             \param kind Process kind
             \return process if any, 0 if none */
-        Process* findProcessByObject(const game::map::Object* obj, uint8_t kind) const;
+        Process* findProcessByObject(const afl::base::Deletable* obj, uint8_t kind) const;
 
         /** Find process, given a process Id.
             Locates a process with the given Id.
@@ -198,6 +198,16 @@ namespace interpreter {
             This means all processes have completed.
             \param pgid process group Id */
         afl::base::Signal<void(uint32_t)> sig_processGroupFinish;
+
+        /** Signal: process changed state in a relevant way.
+            This is a semi ad-hoc mechanism to drive tue UI's "process here" marker.
+
+            Called with willDelete=false after the process ran.
+            Called with willDelete=true before the process is deleted (after termination).
+
+            \param proc       Process
+            \param willDelete Whether process will be deleted */
+        afl::base::Signal<void(const Process&, bool)> sig_processStateChange;
 
      private:
         /** Allocate a process Id. */

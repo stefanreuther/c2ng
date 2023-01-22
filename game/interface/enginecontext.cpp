@@ -100,7 +100,7 @@ game::interface::EngineContext::clone() const
     return new EngineContext(m_number, m_shipList);
 }
 
-game::map::Object*
+afl::base::Deletable*
 game::interface::EngineContext::getObject()
 {
     // ex IntEngineContext::getObject

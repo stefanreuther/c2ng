@@ -82,7 +82,7 @@ game::interface::PlayerContext::clone() const
     return new PlayerContext(m_number, m_game, m_root, m_translator);
 }
 
-game::map::Object*
+afl::base::Deletable*
 game::interface::PlayerContext::getObject()
 {
     // ex IntPlayerContext::getObject

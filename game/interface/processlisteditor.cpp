@@ -46,12 +46,11 @@ game::interface::ProcessListEditor::describe(size_t slotNr, Info& info, const No
             info.isChanged = true;
         }
 
-        const game::map::Object* obj = p.getInvokingObject();
-        if (dynamic_cast<const game::map::Ship*>(obj) != 0) {
-            info.invokingObject = Reference(Reference::Ship, obj->getId());
-        } else if (dynamic_cast<const game::map::Planet*>(obj) != 0) {
-            info.invokingObject = Reference(p.getProcessKind() ==  Process::pkBaseTask ? Reference::Starbase : Reference::Planet,
-                                            obj->getId());
+        const afl::base::Deletable* obj = p.getInvokingObject();
+        if (const game::map::Ship* sh = dynamic_cast<const game::map::Ship*>(obj)) {
+            info.invokingObject = Reference(Reference::Ship, sh->getId());
+        } else if (const game::map::Planet* pl = dynamic_cast<const game::map::Planet*>(obj)) {
+            info.invokingObject = Reference(p.getProcessKind() ==  Process::pkBaseTask ? Reference::Starbase : Reference::Planet, pl->getId());
         } else {
             info.invokingObject = Reference();
         }

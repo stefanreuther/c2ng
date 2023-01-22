@@ -3,6 +3,7 @@
   *  \brief Test for interpreter::MetaContext
   */
 
+#include <memory>
 #include "interpreter/metacontext.hpp"
 
 #include "t_interpreter.hpp"
@@ -28,7 +29,7 @@ namespace {
             { throw interpreter::Error("unexpected"); }
         virtual interpreter::Context* clone() const
             { throw interpreter::Error("unexpected"); }
-        virtual game::map::Object* getObject()
+        virtual afl::base::Deletable* getObject()
             { throw interpreter::Error("unexpected"); }
         virtual void enumProperties(interpreter::PropertyAcceptor& acceptor) const
             { acceptor.enumTable(m_table); }

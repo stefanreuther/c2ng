@@ -5,8 +5,8 @@
 #ifndef C2NG_INTERPRETER_CONTEXT_HPP
 #define C2NG_INTERPRETER_CONTEXT_HPP
 
+#include "afl/base/deletable.hpp"
 #include "afl/data/namequery.hpp"
-#include "game/map/object.hpp"
 #include "interpreter/basevalue.hpp"
 
 namespace interpreter {
@@ -60,10 +60,16 @@ namespace interpreter {
         /** Clone this context. */
         virtual Context* clone() const = 0;
 
-        /** Get associated game object.
+        /** Get associated object.
             This is used for information purposes, and for type switches in various GUI function bindings.
-            This may return null if this context is not associated with a game object. */
-        virtual game::map::Object* getObject() = 0;
+            This may return null if this context is not associated with a game object.
+
+            This function is now permitted to return any type (provided it is derived from afl::base::Deletable to make it dynamic_cast-able).
+            However, be aware that this does affect behaviour towards the user:
+            if, say, FrameContext would start reporting non-null here, getCurrentObject() would no longer report the expected game objects.
+
+            \return Object, or null  */
+        virtual afl::base::Deletable* getObject() = 0;
 
         /** Enumerate properties. Call acceptor.addProperty for every property.
             \param acceptor Acceptor object */

@@ -82,7 +82,7 @@ game::proxy::ScriptEditorProxy::buildPropertyList(WaitIndicator& ind,
                 ContextCollector c;
                 c.collect(session, m_contextProvider.get());
                 for (size_t i = c.get().size(); i > 0; --i) {
-                    if (const game::map::Object* obj = c.get()[i-1]->getObject()) {
+                    if (const game::map::Object* obj = dynamic_cast<const game::map::Object*>(c.get()[i-1]->getObject())) {
                         game::interface::buildPropertyList(m_result, obj, session.world(), session.translator());
                         break;
                     }

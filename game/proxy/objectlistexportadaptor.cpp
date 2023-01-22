@@ -31,7 +31,7 @@ class game::proxy::ObjectListExportAdaptor::Context : public interpreter::Simple
     virtual PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
     virtual bool next();
     virtual interpreter::Context* clone() const;
-    virtual game::map::Object* getObject();
+    virtual afl::base::Deletable* getObject();
     virtual void enumProperties(interpreter::PropertyAcceptor& acceptor) const;
     virtual String_t toString(bool readable) const;
     virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
@@ -78,7 +78,7 @@ game::proxy::ObjectListExportAdaptor::Context::clone() const
     return new Context(m_data, m_index);
 }
 
-game::map::Object*
+afl::base::Deletable*
 game::proxy::ObjectListExportAdaptor::Context::getObject()
 {
     if (interpreter::Context* ch = makeChild()) {

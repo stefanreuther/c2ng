@@ -67,7 +67,7 @@ interpreter::MutexContext::clone() const
 }
 
 /* getObject implementation. Mutex has no object. */
-game::map::Object*
+afl::base::Deletable*
 interpreter::MutexContext::getObject()
 {
     // ex IntMutexContext::getObject

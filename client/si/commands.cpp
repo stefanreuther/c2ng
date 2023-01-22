@@ -495,7 +495,7 @@ namespace {
     }
 
     /* Get object reference, given a map object */
-    Reference getCurrentShipOrPlanetReference(const game::map::Object* obj)
+    Reference getCurrentShipOrPlanetReference(const afl::base::Deletable* obj)
     {
         if (const Planet* pl = dynamic_cast<const Planet*>(obj)) {
             return Reference(Reference::Planet, pl->getId());
@@ -1846,7 +1846,7 @@ client::si::IFCCEditShowCommand(game::Session& session, ScriptSide& si, RequestL
 
     args.checkArgumentCount(0);
     if (game::v3::CommandContainer* cc = getCommandContainer(session)) {
-        game::map::Object* obj = link.getProcess().getCurrentObject();
+        afl::base::Deletable* obj = link.getProcess().getCurrentObject();
         afl::string::Translator& tx = session.translator();
         if (Planet* pl = dynamic_cast<Planet*>(obj)) {
             si.postNewTask(link, new DialogTask(game::v3::Command::ShowPlanet, pl->getId(), *cc, tx("Show planet to...")));
@@ -3112,11 +3112,11 @@ client::si::IFCCViewMessages(game::Session& session, ScriptSide& si, RequestLink
     game::actions::mustHaveGame(session);
 
     std::auto_ptr<game::proxy::InboxAdaptor_t> p;
-    const game::map::Object* obj = link.getProcess().getCurrentObject();
-    if (dynamic_cast<const Ship*>(obj) != 0) {
-        p.reset(game::proxy::makeShipInboxAdaptor(obj->getId()));
-    } else if (dynamic_cast<const Planet*>(obj) != 0) {
-        p.reset(game::proxy::makePlanetInboxAdaptor(obj->getId()));
+    const afl::base::Deletable* obj = link.getProcess().getCurrentObject();
+    if (const Ship* sh = dynamic_cast<const Ship*>(obj)) {
+        p.reset(game::proxy::makeShipInboxAdaptor(sh->getId()));
+    } else if (const Planet* pl = dynamic_cast<const Planet*>(obj)) {
+        p.reset(game::proxy::makePlanetInboxAdaptor(pl->getId()));
     } else {
         throw Error::contextError();
     }
@@ -3961,7 +3961,7 @@ client::si::IFUIInputFCode(game::Session& session, ScriptSide& si, RequestLink1 
     std::auto_ptr<game::spec::FriendlyCodeList::Infos_t> list(new game::spec::FriendlyCodeList::Infos_t());
     if ((flags & DefaultFlag) != 0) {
         // Default mode
-        game::map::Object* obj = link.getProcess().getCurrentObject();
+        const game::map::Object* obj = dynamic_cast<const game::map::Object*>(link.getProcess().getCurrentObject());
         if (obj == 0) {
             throw Error::contextError();
         }

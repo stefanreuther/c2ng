@@ -161,7 +161,7 @@ game::interface::GlobalActionContext::clone() const
     return new GlobalActionContext(*this);
 }
 
-game::map::Object*
+afl::base::Deletable*
 game::interface::GlobalActionContext::getObject()
 {
     return 0;

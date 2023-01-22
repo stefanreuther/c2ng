@@ -71,7 +71,7 @@ class interpreter::test::ExpressionVerifier::TestContext : public SingleContext,
 
     virtual String_t toString(bool) const
         { return "#<TestContext>"; }
-    virtual game::map::Object* getObject()
+    virtual afl::base::Deletable* getObject()
         { return 0; }
     virtual void enumProperties(PropertyAcceptor&) const
         { }

@@ -306,6 +306,7 @@ namespace game {
         virtual bool getPlayerAdjective(int nr, String_t& out);
 
         void initWorld();
+        void onProcessStateChange(const interpreter::Process& proc, bool willDelete);
 
         // Signals:
         void connectSignals();

@@ -438,13 +438,13 @@ namespace interpreter {
             Returns the object from the innermost context that has one.
             Use this for command implementations that implicitly use that object's context.
             \return Object, can be null. Owned by the Context/World/... */
-        game::map::Object* getCurrentObject() const;
+        afl::base::Deletable* getCurrentObject() const;
 
         /** Get game object this process was invoked from.
             Returns the object from an outer context as defined by markContextTOS().
             Use this for labeling the process for the user.
             \return Object, can be null. Owned by the Context/World/... */
-        game::map::Object* getInvokingObject() const;
+        afl::base::Deletable* getInvokingObject() const;
 
         /** Handle user subroutine invocation.
             This is the implementation of SubroutineValue::call().

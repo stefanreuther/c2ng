@@ -212,7 +212,7 @@ game::interface::GlobalContext::clone() const
     return new GlobalContext(m_session);
 }
 
-game::map::Object*
+afl::base::Deletable*
 game::interface::GlobalContext::getObject()
 {
     // ex IntGlobalContext::getObject

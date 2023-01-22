@@ -103,7 +103,7 @@ game::interface::TorpedoContext::clone() const
     return new TorpedoContext(m_useLauncher, m_number, m_shipList, m_root);
 }
 
-game::map::Object*
+afl::base::Deletable*
 game::interface::TorpedoContext::getObject()
 {
     return 0;
