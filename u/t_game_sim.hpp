@@ -34,7 +34,6 @@ class TestGameSimFleetCost : public CxxTest::TestSuite {
     void testEmpty();
     void testNormal();
     void testTechCost();
-    void testGetInvolved();
     void testEnums();
 };
 
@@ -174,6 +173,7 @@ class TestGameSimSetup : public CxxTest::TestSuite {
     void testSort();
     void testAddData();
     void testSetFlags();
+    void testGetInvolved();
 };
 
 class TestGameSimShip : public CxxTest::TestSuite {

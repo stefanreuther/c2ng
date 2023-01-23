@@ -915,3 +915,24 @@ TestGameSimSetup::testSetFlags()
     TS_ASSERT_EQUALS(ps3->getFlags(), Object::fl_RandomFC | Object::fl_Deactivated);
 }
 
+/** Test getInvolvedPlayers(), getInvolvedTeams(). */
+void
+TestGameSimSetup::testGetInvolved()
+{
+    // Setup
+    game::sim::Setup testee;
+    testee.addShip()->setOwner(1);
+    testee.addShip()->setOwner(2);
+    testee.addShip()->setOwner(1);
+    testee.addShip()->setOwner(7);
+    testee.addPlanet()->setOwner(4);
+
+    // Team settings
+    game::TeamSettings team;
+    team.setPlayerTeam(2, 9);
+    team.setPlayerTeam(4, 9);
+
+    // Check
+    TS_ASSERT_EQUALS(testee.getInvolvedPlayers(),   game::PlayerSet_t() + 1 + 2 + 4 + 7);
+    TS_ASSERT_EQUALS(testee.getInvolvedTeams(team), game::PlayerSet_t() + 1         + 7 + 9);
+}

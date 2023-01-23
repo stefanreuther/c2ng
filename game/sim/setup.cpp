@@ -516,6 +516,35 @@ game::sim::Setup::isMatchingShipList(const game::spec::ShipList& shipList) const
     return true;
 }
 
+// Get set of involved players.
+game::PlayerSet_t
+game::sim::Setup::getInvolvedPlayers() const
+{
+    PlayerSet_t result;
+    for (size_t i = 0, n = getNumObjects(); i < n; ++i) {
+        if (const Object* obj = getObject(i)) {
+            result += obj->getOwner();
+        }
+    }
+    return result;
+}
+
+// Get set of teams involved in setup.
+game::PlayerSet_t
+game::sim::Setup::getInvolvedTeams(const TeamSettings& teams) const
+{
+    PlayerSet_t result;
+    PlayerSet_t players = getInvolvedPlayers();
+    for (int i = 1; i <= MAX_PLAYERS; ++i) {
+        if (players.contains(i)) {
+            if (int team = teams.getPlayerTeam(i)) {
+                result += team;
+            }
+        }
+    }
+    return result;
+}
+
 // Copy to game using a GameInterface, all units.
 game::sim::Setup::Status
 game::sim::Setup::copyToGame(GameInterface& gi) const

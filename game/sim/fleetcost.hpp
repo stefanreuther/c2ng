@@ -73,17 +73,6 @@ namespace game { namespace sim {
                            PlayerSet_t players,
                            afl::string::Translator& tx);
 
-    /** Get set of players involved in setup.
-        \param in Setup
-        \return player set */
-    PlayerSet_t getInvolvedPlayers(const Setup& in);
-
-    /** Get set of teams involved in setup.
-        \param in Setup
-        \param teams Team setup
-        \return team set */
-    PlayerSet_t getInvolvedTeams(const Setup& in, const TeamSettings& teams);
-
 
     /** Format a FighterMode.
         \param mode Value

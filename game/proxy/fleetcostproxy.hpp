@@ -47,13 +47,13 @@ namespace game { namespace proxy {
         /** Get set of players involved in setup.
             \param ind WaitIndicator for UI synchronisation
             \return player set
-            \see game::sim::getInvolvedPlayers */
+            \see game::sim::Setup::getInvolvedPlayers */
         PlayerSet_t getInvolvedPlayers(WaitIndicator& ind);
 
         /** Get set of teams involved in setup.
             \param ind WaitIndicator for UI synchronisation
             \return team set
-            \see game::sim::getInvolvedTeams */
+            \see game::sim::Setup::getInvolvedTeams */
         PlayerSet_t getInvolvedTeams(WaitIndicator& ind);
 
      private:

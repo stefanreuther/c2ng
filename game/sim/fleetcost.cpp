@@ -172,33 +172,6 @@ game::sim::computeFleetCosts(game::spec::CostSummary& out,
     }
 }
 
-game::PlayerSet_t
-game::sim::getInvolvedPlayers(const Setup& in)
-{
-    PlayerSet_t result;
-    for (size_t i = 0, n = in.getNumObjects(); i < n; ++i) {
-        if (const Object* obj = in.getObject(i)) {
-            result += obj->getOwner();
-        }
-    }
-    return result;
-}
-
-game::PlayerSet_t
-game::sim::getInvolvedTeams(const Setup& in, const TeamSettings& teams)
-{
-    PlayerSet_t result;
-    PlayerSet_t players = getInvolvedPlayers(in);
-    for (int i = 1; i <= MAX_PLAYERS; ++i) {
-        if (players.contains(i)) {
-            if (int team = teams.getPlayerTeam(i)) {
-                result += team;
-            }
-        }
-    }
-    return result;
-}
-
 String_t
 game::sim::toString(FleetCostOptions::FighterMode mode, afl::string::Translator& tx)
 {

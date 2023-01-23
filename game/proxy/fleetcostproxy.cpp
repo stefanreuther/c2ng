@@ -106,7 +106,7 @@ game::proxy::FleetCostProxy::getInvolvedPlayers(WaitIndicator& ind)
             : m_result()
             { }
         virtual void handle(Session& s)
-            { m_result = game::sim::getInvolvedPlayers(getSimulatorSession(s)->setup()); }
+            { m_result = getSimulatorSession(s)->setup().getInvolvedPlayers(); }
         PlayerSet_t getResult() const
             { return m_result; }
      private:
@@ -130,7 +130,7 @@ game::proxy::FleetCostProxy::getInvolvedTeams(WaitIndicator& ind)
             {
                 Game* g = s.getGame().get();
                 if (g != 0) {
-                    m_result = game::sim::getInvolvedTeams(getSimulatorSession(s)->setup(), g->teamSettings());
+                    m_result = getSimulatorSession(s)->setup().getInvolvedTeams(g->teamSettings());
                 }
             }
         PlayerSet_t getResult() const

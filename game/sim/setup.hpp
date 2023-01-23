@@ -6,11 +6,12 @@
 #define C2NG_GAME_SIM_SETUP_HPP
 
 #include <memory>
-#include "afl/container/ptrvector.hpp"
 #include "afl/base/signal.hpp"
-#include "game/types.hpp"
-#include "game/spec/shiplist.hpp"
+#include "afl/container/ptrvector.hpp"
 #include "afl/string/translator.hpp"
+#include "game/spec/shiplist.hpp"
+#include "game/teamsettings.hpp"
+#include "game/types.hpp"
 #include "util/randomnumbergenerator.hpp"
 
 namespace game { namespace sim {
@@ -247,6 +248,15 @@ namespace game { namespace sim {
             \retval true all ships are valid according to the ship list
             \retval false some ships are not valid with this ship list */
         bool isMatchingShipList(const game::spec::ShipList& shipList) const;
+
+        /** Get set of involved players.
+            \return set of all players mentioned as Object::getOwner() */
+        PlayerSet_t getInvolvedPlayers() const;
+
+        /** Get set of involved teams.
+            \param teams Team setup
+            \return set of all teams mentioned as Object::getOwner() */
+        PlayerSet_t getInvolvedTeams(const TeamSettings& teams) const;
 
         /** Copy to game using a GameInterface, all units.
             \param gi GameInterface

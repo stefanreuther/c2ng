@@ -312,27 +312,6 @@ TestGameSimFleetCost::testTechCost()
     }
 }
 
-void
-TestGameSimFleetCost::testGetInvolved()
-{
-    // Setup
-    game::sim::Setup in;
-    addCustomShip(in, 100, 1);
-    addCustomShip(in, 200, 2);
-    addCustomShip(in, 300, 1);
-    addCustomShip(in, 400, 7);
-    addPlanet(in, 4);
-
-    // Team settings
-    game::TeamSettings team;
-    team.setPlayerTeam(2, 9);
-    team.setPlayerTeam(4, 9);
-
-    // Check
-    TS_ASSERT_EQUALS(getInvolvedPlayers(in),     game::PlayerSet_t() + 1 + 2 + 4 + 7);
-    TS_ASSERT_EQUALS(getInvolvedTeams(in, team), game::PlayerSet_t() + 1         + 7 + 9);
-}
-
 /** Test enums (getNext, toString). */
 void
 TestGameSimFleetCost::testEnums()
