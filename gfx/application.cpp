@@ -17,6 +17,19 @@ typedef gfx::sdl2::Engine Engine_t;
 # define NO_ENGINE
 #endif
 
+namespace {
+    class Exit {
+     public:
+        Exit(int n)
+            : m_exitCode(n)
+            { }
+        int get()
+            { return m_exitCode; }
+     private:
+        int m_exitCode;
+    };
+}
+
 // Constructor.
 gfx::Application::Application(afl::sys::Dialog& dialog, afl::string::Translator& tx, const String_t& title)
     : m_dialog(dialog),
@@ -35,6 +48,9 @@ gfx::Application::run()
         Engine_t engine(m_log, m_translator);
         appMain(engine);
     }
+    catch (Exit& n) {
+        return n.get();
+    }
     catch (afl::except::CommandLineException& cx) {
         m_dialog.showError(cx.what(), m_title);
         return 1;
@@ -50,3 +66,9 @@ gfx::Application::run()
     return 0;
 }
 #endif
+
+void
+gfx::Application::exit(int n)
+{
+    throw Exit(n);
+}

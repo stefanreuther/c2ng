@@ -55,6 +55,19 @@ namespace client { namespace screens {
             Can be used from a callback. */
         void setBlockState(bool flag);
 
+        /** Enable automatic load of a given player number.
+            \param playerNumber Player number; can be 0 for default */
+        void setAutoLoad(int playerNumber);
+
+        /** Enable automatic focus of a given player number.
+            \param playerNumber Player number */
+        void setAutoFocus(int playerNumber);
+
+        /** Get current player number.
+            When looking at a "load player" action, returns its number.
+            \return player number */
+        int getCurrentPlayerNumber() const;
+
         /** Get sender.
             This can be used to send requests to this object. */
         util::RequestSender<BrowserScreen> getSender();
@@ -67,9 +80,16 @@ namespace client { namespace screens {
         afl::base::Signal<void(int)> sig_gameSelection;
 
      private:
+        enum AutoAction {
+            NoAuto,
+            AutoLoad,
+            AutoFocus
+        };
+
         enum State {
             Working,            // Folder list is working, info is current
             WorkingLoad,        // Folder list is working, loading info
+            BlockedAuto,        // Folder list is blocked, loading info for auto action
             Blocked,            // Folder list is blocked, info is empty, loading folder
             Disabled            // Folder list is blocked, info is empty, loading folder
         };
@@ -112,6 +132,8 @@ namespace client { namespace screens {
         void onUnpackAction();
         void onMaketurnAction();
         void onSweepAction();
+        void onAutoLoad(int playerNumber);
+        void onAutoFocus(int playerNumber);
         bool preparePlayAction(size_t index);
 
         void setState(State st);
@@ -123,6 +145,9 @@ namespace client { namespace screens {
         void onSelectedInfoUpdate(game::proxy::BrowserProxy::OptionalIndex_t index, const game::proxy::BrowserProxy::FolderInfo& info);
 
         void buildInfo();
+
+        size_t findUniquePlayAction() const;
+        size_t findPlayAction(int playerNumber) const;
 
         client::si::UserSide& m_userSide;
         ui::Root& m_root;
@@ -140,6 +165,9 @@ namespace client { namespace screens {
         size_t m_infoIndex;
         game::Root::Actions_t m_infoActions;
         ui::EventLoop m_loop;
+
+        AutoAction m_autoAction;
+        int m_autoPlayerNumber;
 
         bool m_hasUp;
         State m_state;

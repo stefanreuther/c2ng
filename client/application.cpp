@@ -9,10 +9,8 @@
 #include "client/application.hpp"
 
 #include "afl/base/closure.hpp"
-#include "afl/base/optional.hpp"
 #include "afl/base/ref.hpp"
 #include "afl/base/uncopyable.hpp"
-#include "afl/except/commandlineexception.hpp"
 #include "afl/io/directoryentry.hpp"
 #include "afl/io/filesystem.hpp"
 #include "afl/net/http/client.hpp"
@@ -28,10 +26,10 @@
 #include "afl/string/proxytranslator.hpp"
 #include "afl/sys/dialog.hpp"
 #include "afl/sys/environment.hpp"
-#include "afl/sys/longcommandlineparser.hpp"
 #include "afl/sys/mutexguard.hpp"
 #include "afl/sys/thread.hpp"
 #include "afl/test/translator.hpp"
+#include "client/applicationparameters.hpp"
 #include "client/map/screen.hpp"
 #include "client/screens/browserscreen.hpp"
 #include "client/screens/controlscreen.hpp"
@@ -563,201 +561,34 @@ namespace {
     };
 
 
-    class RootOptions {
+    /*
+     *  Browser screen initalisation actions
+     */
+
+    typedef afl::base::Closure<void(client::screens::BrowserScreen&)> BrowserAction_t;
+
+    class AutoLoadAction : public BrowserAction_t {
      public:
-        static const int MIN_WIDTH = 640;   // ex GFX_MIN_WIDTH
-        static const int MIN_HEIGHT = 480;  // ex GFX_MIN_HEIGHT
-        static const int MAX_DIM = 10000;
-        RootOptions(afl::string::Translator& tx)
-            : m_params(),
-              m_translator(tx)
-            {
-                m_params.size = gfx::Point(800, 600);
-                m_params.bitsPerPixel = 32;
-                m_params.title = m_translator("Planets Command Center II (c2ng)");
-            }
-        String_t getHelp()
-            {
-                return m_translator("-fullscreen"     "\tRun fullscreen\n"
-                                    "-windowed"       "\tRun in a window\n"
-                                    "-bpp=N"          "\tUse color depth of N bits per pixel\n"
-                                    "-size=W[xH]"     "\tUse resolution of WxH pixels\n"
-                                    "-nomousegrab"    "\tDon't grab (lock into window) mouse pointer\n");
-            }
-        bool handleOption(const String_t& option, afl::sys::CommandLineParser& parser)
-            {
-                // ex gfx/init.cc:options
-                if (option == "fullscreen") {
-                    m_params.fullScreen = true;
-                    return true;
-                } else if (option == "windowed") {
-                    m_params.fullScreen = false;
-                    return true;
-                } else if (option == "nomousegrab") {
-                    m_params.disableGrab = true;
-                    return true;
-                } else if (option == "bpp") {
-                    // ex gfx/init.cc:optSetBpp
-                    util::StringParser sp(parser.getRequiredParameter(option));
-                    int bpp = 0;
-                    if (!sp.parseInt(bpp) || !sp.parseEnd()) {
-                        throw afl::except::CommandLineException(m_translator("Invalid parameter to \"-bpp\""));
-                    }
-                    if (bpp != 8 && bpp != 16 && bpp != 32) {
-                        throw afl::except::CommandLineException(m_translator("Parameter to \"-bpp\" must be 8, 16 or 32"));
-                    }
-                    m_params.bitsPerPixel = bpp;
-                    return true;
-                } else if (option == "hw") {
-                    // FIXME: do we still need this option "-hw"? Should it be in engine options?
-                    return false;
-                } else if (option == "size") {
-                    // ex gfx/init.cc:optSetSize
-                    util::StringParser sp(parser.getRequiredParameter(option));
-                    int w = 0, h = 0;
-                    if (!sp.parseInt(w)) {
-                        throw afl::except::CommandLineException(m_translator("Invalid parameter to \"-size\""));
-                    }
-                    if (sp.parseCharacter('X') || sp.parseCharacter('x') || sp.parseCharacter('*')) {
-                        if (!sp.parseInt(h)) {
-                            throw afl::except::CommandLineException(m_translator("Invalid parameter to \"-size\""));
-                        }
-                    } else {
-                        // FIXME: PCC2 had a special case to recognize 1200 as 1200x1024, which is the only non-4:3 resolution.
-                        h = 3*w/4;
-                    }
-                    if (!sp.parseEnd()) {
-                        throw afl::except::CommandLineException(m_translator("Invalid parameter to \"-size\""));
-                    }
-                    if (w < MIN_WIDTH || h < MIN_HEIGHT || w > MAX_DIM || h > MAX_DIM) {
-                        throw afl::except::CommandLineException(m_translator("Parameter to \"-size\" is out of range"));
-                    }
-                    m_params.size = gfx::Point(w, h);
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-
-        const gfx::WindowParameters& getWindowParameters() const
-            { return m_params; }
-
-     private:
-        gfx::WindowParameters m_params;
-        afl::string::Translator& m_translator;
-    };
-
-
-    class CommandLineParameters {
-     public:
-        CommandLineParameters(afl::string::Translator& tx)
-            : m_rootOptions(tx),
-              m_haveGameDirectory(false),
-              m_gameDirectory(),
-              m_traceConfig(),
-              m_proxyAddress(),
-              m_commandLineResources(),
-              m_translator(tx),
-              m_requestThreadDelay(0)
+        AutoLoadAction(int playerNumber)
+            : m_playerNumber(playerNumber)
             { }
-
-        void parse(afl::base::Ref<afl::sys::Environment::CommandLine_t> cmdl, afl::sys::Dialog& dialog)
-            {
-                afl::sys::LongCommandLineParser parser(cmdl);
-                bool option;
-                String_t text;
-                while (parser.getNext(option, text)) {
-                    if (option) {
-                        if (m_rootOptions.handleOption(text, parser)) {
-                            // ok
-                        } else if (text == "resource") {
-                            m_commandLineResources.push_back(parser.getRequiredParameter(text));
-                        } else if (text == "proxy") {
-                            m_proxyAddress = parser.getRequiredParameter(text);
-                        } else if (text == "help") {
-                            doHelp(dialog);
-                        } else if (text == "password") {
-                            m_password = parser.getRequiredParameter(text);
-                        } else if (text == "log") {
-                            util::addListItem(m_traceConfig, ":", parser.getRequiredParameter(text));
-                        } else if (text == "debug-request-delay") {
-                            int value = 0;
-                            if (!afl::string::strToInteger(parser.getRequiredParameter(text), value) || value < 0) {
-                                throw afl::except::CommandLineException(afl::string::Format(m_translator("Invalid argument to command line parameter \"-%s\""), text));
-                            }
-                            m_requestThreadDelay = value;
-                        } else {
-                            throw afl::except::CommandLineException(afl::string::Format(m_translator("Unknown command line parameter \"-%s\""), text));
-                        }
-                    } else {
-                        if (!m_haveGameDirectory) {
-                            m_haveGameDirectory = true;
-                            m_gameDirectory = text;
-                        } else {
-                            // FIXME
-                        }
-                    }
-                }
-            }
-
-        int getRequestThreadDelay() const
-            { return m_requestThreadDelay; }
-
-        bool getGameDirectory(String_t& dir)
-            {
-                if (m_haveGameDirectory) {
-                    dir = m_gameDirectory;
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-
-        void doHelp(afl::sys::Dialog& dialog)
-            {
-                String_t help = PROGRAM_TITLE;
-                help += "\n\n";
-                help += m_translator("Usage: c2ng [-options] gamedir");
-                help += "\n\n";
-                help += m_translator("Options:");
-                help += "\n";
-                help += util::formatOptions(m_translator("-resource=NAME\tAdd resource provider\n"
-                                                         "-proxy=URL\tSet network proxy\n"
-                                                         "-password=PASS\tResult file password\n")
-                                            + m_rootOptions.getHelp());
-                help += "\n";
-                help += m_translator("(c) copyright 2017-2023 Stefan Reuther <streu@gmx.de>");
-                help += "\n";
-                dialog.showInfo(help, PROGRAM_TITLE);
-                std::exit(0);
-            }
-
-        const std::vector<String_t>& getCommandLineResources() const
-            { return m_commandLineResources; }
-
-        RootOptions& rootOptions()
-            { return m_rootOptions; }
-
-        const afl::base::Optional<String_t>& getProxyAddress() const
-            { return m_proxyAddress; }
-
-        const afl::base::Optional<String_t>& getPassword() const
-            { return m_password; }
-
-        const String_t& getTraceConfiguration() const
-            { return m_traceConfig; }
-
+        virtual void call(client::screens::BrowserScreen& screen)
+            { screen.setAutoLoad(m_playerNumber); }
      private:
-        RootOptions m_rootOptions;
-        bool m_haveGameDirectory;
-        String_t m_gameDirectory;
-        String_t m_traceConfig;
-        afl::base::Optional<String_t> m_proxyAddress;
-        afl::base::Optional<String_t> m_password;
-        std::vector<String_t> m_commandLineResources;
-        afl::string::Translator& m_translator;
-        int m_requestThreadDelay;
+        int m_playerNumber;
     };
+
+    class AutoFocusAction : public BrowserAction_t {
+     public:
+        AutoFocusAction(int playerNumber)
+            : m_playerNumber(playerNumber)
+            { }
+        virtual void call(client::screens::BrowserScreen& screen)
+            { screen.setAutoFocus(m_playerNumber); }
+     private:
+        int m_playerNumber;
+    };
+
 
     afl::base::Ref<gfx::Canvas> generateGameBackground(afl::sys::LogListener& log, gfx::Point size, afl::string::Translator& tx)
     {
@@ -923,8 +754,8 @@ client::Application::appMain(gfx::Engine& engine)
     collector.setConfiguration("*@Trace=hide", translator());
 
     // Parse command line.
-    CommandLineParameters params(translator());
-    params.parse(m_environment.getCommandLine(), dialog());
+    ApplicationParameters params(*this, PROGRAM_TITLE);
+    params.parse(m_environment.getCommandLine());
     if (!params.getTraceConfiguration().empty()) {
         console.setConfiguration(params.getTraceConfiguration(), translator());
         collector.setConfiguration(params.getTraceConfiguration(), translator());
@@ -945,7 +776,7 @@ client::Application::appMain(gfx::Engine& engine)
     mgr.addNewProvider(new ui::res::GeneratedPlanetProvider(), "(MAIN-PLANETS)");
 
     // - window parameters
-    gfx::WindowParameters windowParams = params.rootOptions().getWindowParameters();
+    gfx::WindowParameters windowParams = params.getWindowParameters();
     windowParams.icon = mgr.loadImage("playvcr"); // loads playvcr.bmp
 
     // - window
@@ -1007,11 +838,21 @@ client::Application::appMain(gfx::Engine& engine)
     // Initialize by posting requests to the background thread.
     // (This will not take time.)
     gameReceiver.getSender().postNewRequest(new PluginInitializer(resourceDirectory, profile, params.getCommandLineResources()));
-    {
-        String_t initialGameDirectory;
-        if (params.getGameDirectory(initialGameDirectory)) {
-            browserProxy.openFolder(initialGameDirectory);
+
+    // Command-line processing
+    // Keep an action to execute after loading the BrowserScreen
+    std::auto_ptr<BrowserAction_t> browserAction;
+    if (const String_t* initialGameDirectory = params.getGameDirectory().get()) {
+        switch (params.getDirectoryMode()) {
+         case ApplicationParameters::OpenGame:
+            browserProxy.openFolder(*initialGameDirectory);
             browserProxy.openParent(1);
+            browserAction.reset(new AutoLoadAction(params.getPlayerNumber()));
+            break;
+
+         case ApplicationParameters::OpenBrowser:
+            browserProxy.openFolder(*initialGameDirectory);
+            break;
         }
     }
 
@@ -1045,16 +886,19 @@ client::Application::appMain(gfx::Engine& engine)
         docView.setColorScheme(docColors);
         root.add(docView);
 
-        // Browser
         client::screens::BrowserScreen browserScreen(userSide, browserProxy, browserSender);
         browserScreen.sig_gameSelection.addNewClosure(new BrowserListener(browserScreen, userSide, browserSender, gameReceiver.getSender()));
-
+        if (browserAction.get() != 0) {
+            browserAction->call(browserScreen);
+            browserAction.reset();
+        }
         int result = browserScreen.run(docColors);
         if (result != 0) {
             // OK, play
             play(userSide);
             client::si::NullControl(userSide).executeHookWait("AfterExit");
             userSide.reset();
+            browserAction.reset(new AutoFocusAction(browserScreen.getCurrentPlayerNumber()));
         } else {
             // Close
             client::si::NullControl(userSide).executeHookWait("Quit");

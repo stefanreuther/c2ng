@@ -7,10 +7,16 @@
 
 #include "afl/base/ptr.hpp"
 #include "afl/string/string.hpp"
+#include "afl/string/translator.hpp"
+#include "afl/sys/commandlineparser.hpp"
 #include "gfx/canvas.hpp"
 #include "gfx/point.hpp"
 
 namespace gfx {
+
+    static const int MIN_WIDTH = 640;   ///< Minimum window width. ex GFX_MIN_WIDTH
+    static const int MIN_HEIGHT = 480;  ///< Minimum window height. ex GFX_MIN_HEIGHT
+    static const int MAX_DIM = 10000;   ///< Maximum accepted window width/height.
 
     /** Parameters for a graphics window.
         This is a structure and you can manipulate it as you need. */
@@ -42,6 +48,19 @@ namespace gfx {
               icon()
             { }
     };
+
+    /** Handle a window parameter option.
+        @param option Option as returned by CommandLineParser
+        @param parser CommandLineParser instance, to retrieve parameters
+        @param tx     Translator (for error messages)
+        @return true if option was accepted
+        @throw afl::except::CommandLineException on invalid parameters */
+    bool handleWindowParameterOption(WindowParameters& param, const String_t& option, afl::sys::CommandLineParser& parser, afl::string::Translator& tx);
+
+    /** Get help text for handleWindowParameterOption().
+        @param tx Translator
+        @return Help text, suitable as input to util::formatOptions(). */
+    String_t getWindowParameterHelp(afl::string::Translator& tx);
 
 }
 

@@ -766,7 +766,9 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/widgets/consolecontroller.cpp \
+FILES_guilib = client/applicationparameters.cpp \
+    client/applicationparameters.hpp gfx/windowparameters.cpp \
+    client/widgets/consolecontroller.cpp \
     client/widgets/consolecontroller.hpp client/dialogs/simpleconsole.cpp \
     client/dialogs/simpleconsole.hpp client/dialogs/unpack.cpp \
     client/dialogs/unpack.hpp client/dialogs/sweep.cpp \
@@ -1744,7 +1746,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_interpreter_metacontext.cpp \
+FILES_testsuite = u/t_client_applicationparameters.cpp \
+    u/t_gfx_windowparameters.cpp u/t_interpreter_metacontext.cpp \
     u/t_game_proxy_maintenanceadaptor.cpp \
     u/t_game_proxy_maintenanceproxy.cpp u/t_game_ref_sortby.cpp \
     u/t_gfx_colortransform.cpp u/t_game_map_info_mission.cpp \

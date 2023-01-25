@@ -232,6 +232,25 @@ class TestGfxTypes : public CxxTest::TestSuite {
     void testGetColorDistance();
 };
 
+class TestGfxWindowParameters : public CxxTest::TestSuite {
+ public:
+    void testInit();
+    void testHelp();
+    void testFullScreen();
+    void testWindowed();
+    void testDisableGrab();
+    void testBpp();
+    void testBppVariant();
+    void testBppFail();
+    void testSizeSingle();
+    void testSizePair();
+    void testSizeBad1();
+    void testSizeBad2();
+    void testSizeBad3();
+    void testSizeBad4();
+    void testSizeRange();
+};
+
 class TestGfxtypes : public CxxTest::TestSuite {
  public:
     void testParseColor();

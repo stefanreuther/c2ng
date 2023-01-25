@@ -7,6 +7,24 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestClientApplicationParameters : public CxxTest::TestSuite {
+ public:
+    void testInit();
+    void testDirectory();
+    void testPlayer();
+    void testSize();
+    void testRequestDelay();
+    void testBadRequestDelay();
+    void testDir();
+    void testLog();
+    void testPassword();
+    void testProxy();
+    void testResource();
+    void testHelp();
+    void testBadOption();
+    void testBadParameter();
+};
+
 class TestClientDownlink : public CxxTest::TestSuite {
  public:
     void testIt();

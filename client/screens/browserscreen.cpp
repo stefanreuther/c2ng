@@ -40,7 +40,7 @@
 #include "util/rich/styleattribute.hpp"
 #include "util/translation.hpp"
 #include "util/unicodechars.hpp"
-
+ 
 using afl::container::PtrVector;
 using afl::string::Format;
 using client::dialogs::SimpleConsole;
@@ -49,6 +49,8 @@ using util::rich::StyleAttribute;
 using util::rich::Text;
 
 namespace {
+    const size_t nil = size_t(-1);
+
     enum Action {
         xLocalSetup,
         xConfiguration,
@@ -154,6 +156,8 @@ client::screens::BrowserScreen::BrowserScreen(client::si::UserSide& us, game::pr
       m_infoItems(),
       m_infoIndex(0),
       m_loop(m_root),
+      m_autoAction(NoAuto),
+      m_autoPlayerNumber(0),
       m_hasUp(false),
       m_state(Working),
       m_blockState(false),
@@ -231,6 +235,31 @@ client::screens::BrowserScreen::setBlockState(bool flag)
     setState(m_state);
 }
 
+void
+client::screens::BrowserScreen::setAutoLoad(int playerNumber)
+{
+    m_autoAction = AutoLoad;
+    m_autoPlayerNumber = playerNumber;
+}
+
+void
+client::screens::BrowserScreen::setAutoFocus(int playerNumber)
+{
+    m_autoAction = AutoFocus;
+    m_autoPlayerNumber = playerNumber;
+}
+
+int
+client::screens::BrowserScreen::getCurrentPlayerNumber() const
+{
+    size_t infoIndex = m_info.getCurrentItem();
+    if (infoIndex < m_infoItems.size() && m_infoItems[infoIndex]->action == PlayAction) {
+        return m_infoItems[infoIndex]->actionParameter;
+    } else {
+        return 0;
+    }
+}
+
 util::RequestSender<client::screens::BrowserScreen>
 client::screens::BrowserScreen::getSender()
 {
@@ -290,6 +319,7 @@ client::screens::BrowserScreen::onItemDoubleClicked(size_t nr)
         m_list.requestFocus();
         break;
 
+     case BlockedAuto:
      case Disabled:
      case Blocked:
         break;
@@ -311,6 +341,7 @@ client::screens::BrowserScreen::onCrumbClicked(size_t nr)
         break;
      }
 
+     case BlockedAuto:
      case Disabled:
      case Blocked:
         break;
@@ -621,6 +652,35 @@ client::screens::BrowserScreen::onSweepAction()
     }
 }
 
+void
+client::screens::BrowserScreen::onAutoLoad(int playerNumber)
+{
+    // Determine race to enter
+    size_t index;
+    if (playerNumber == 0) {
+        index = findUniquePlayAction();
+    } else {
+        index = findPlayAction(playerNumber);
+    }
+
+    // Activate it
+    if (index != nil) {
+        m_info.requestFocus();
+        m_info.setCurrentItem(index);
+        onKeyEnter(0);
+    }
+}
+
+void
+client::screens::BrowserScreen::onAutoFocus(int playerNumber)
+{
+    size_t index = findPlayAction(playerNumber);
+    if (index != nil) {
+        m_info.requestFocus();
+        m_info.setCurrentItem(index);
+    }
+}
+
 bool
 client::screens::BrowserScreen::preparePlayAction(size_t /*index*/)
 {
@@ -657,6 +717,7 @@ client::screens::BrowserScreen::setState(State st)
         break;
 
      case Blocked:
+     case BlockedAuto:
         // List is loading, block both lists.
         m_list.setFlag(m_list.Blocked,        true);
         m_list.setState(m_list.DisabledState, false);
@@ -693,7 +754,11 @@ client::screens::BrowserScreen::setList(client::widgets::FolderListbox::Items_t&
 
     // Update info
     requestLoad();
-    setState(WorkingLoad);
+    if (m_autoAction != NoAuto) {
+        setState(BlockedAuto);
+    } else {
+        setState(WorkingLoad);
+    }
 }
 
 void
@@ -820,7 +885,7 @@ client::screens::BrowserScreen::onSelectedInfoUpdate(game::proxy::BrowserProxy::
     }
 
     // Publish
-    if (m_state == WorkingLoad) {
+    if (m_state == WorkingLoad || m_state == BlockedAuto) {
         if (getEffectiveIndex(m_list.getCurrentItem()).isSame(index)) {
             m_infoItems.swap(out);
             m_infoIndex = m_list.getCurrentItem();
@@ -832,6 +897,22 @@ client::screens::BrowserScreen::onSelectedInfoUpdate(game::proxy::BrowserProxy::
         }
     }
     m_infoActions = info.possibleActions;
+
+    // Process auto-action
+    AutoAction aa = m_autoAction;
+    m_autoAction = NoAuto;
+    switch (aa) {
+     case NoAuto:
+        break;
+
+     case AutoLoad:
+        onAutoLoad(m_autoPlayerNumber);
+        break;
+
+     case AutoFocus:
+        onAutoFocus(m_autoPlayerNumber);
+        break;
+    }
 }
 
 void
@@ -853,4 +934,32 @@ client::screens::BrowserScreen::buildInfo()
         m_info.addItem(m_infoItems[i]->text, 0 /*FIXME: use image*/, enableThis);
     }
     m_info.setCurrentItem(0, m_info.GoDown);
+}
+
+
+size_t
+client::screens::BrowserScreen::findUniquePlayAction() const
+{
+    size_t result = nil;
+    for (size_t i = 0; i < m_infoItems.size(); ++i) {
+        if (m_infoItems[i]->action == PlayAction) {
+            if (result == nil) {
+                result = i;
+            } else {
+                return nil;
+            }
+        }
+    }
+    return result;
+}
+
+size_t
+client::screens::BrowserScreen::findPlayAction(int playerNumber) const
+{
+    for (size_t i = 0; i < m_infoItems.size(); ++i) {
+        if (m_infoItems[i]->action == PlayAction && m_infoItems[i]->actionParameter == playerNumber) {
+            return i;
+        }
+    }
+    return nil;
 }

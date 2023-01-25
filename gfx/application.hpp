@@ -29,6 +29,14 @@ namespace gfx {
             \return exit code to return from main() */
         int run();
 
+        /** Exit the application.
+            \param n return code (exit code).
+
+            Note that this function is implemented by throwing an exception.
+            It will only work from the thread that called run().
+            It will not work if called inside a block that catches all exceptions (catch(...)). */
+        void exit(int n);
+
         /** Access loggeer.
             \return logger */
         afl::sys::Log& log();
