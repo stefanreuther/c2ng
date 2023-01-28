@@ -148,9 +148,9 @@ client::widgets::PluginList::drawItem(gfx::Canvas& can, gfx::Rectangle area, siz
 }
 
 void
-client::widgets::PluginList::handlePositionChange(gfx::Rectangle& oldPosition)
+client::widgets::PluginList::handlePositionChange()
 {
-    return defaultHandlePositionChange(oldPosition);
+    return defaultHandlePositionChange();
 }
 
 ui::layout::Info

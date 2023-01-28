@@ -322,14 +322,14 @@ client::map::Screen::handleChildRemove(Widget& /*child*/)
 { }
 
 void
-client::map::Screen::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::map::Screen::handlePositionChange()
 {
     m_widget.setExtent(getExtent());
     setTilePosition();
 }
 
 void
-client::map::Screen::handleChildPositionChange(Widget& /*child*/, gfx::Rectangle& /*oldPosition*/)
+client::map::Screen::handleChildPositionChange(Widget& /*child*/, const gfx::Rectangle& /*oldPosition*/)
 {
     requestRedraw();
 }

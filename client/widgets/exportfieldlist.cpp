@@ -104,9 +104,9 @@ client::widgets::ExportFieldList::drawItem(gfx::Canvas& can, gfx::Rectangle area
 
 // Widget:
 void
-client::widgets::ExportFieldList::handlePositionChange(gfx::Rectangle& oldPosition)
+client::widgets::ExportFieldList::handlePositionChange()
 {
-    return defaultHandlePositionChange(oldPosition);
+    return defaultHandlePositionChange();
 }
 
 ui::layout::Info

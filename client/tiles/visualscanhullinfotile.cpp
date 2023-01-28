@@ -160,7 +160,7 @@ client::tiles::VisualScanHullInfoTile::handleStateChange(State /*st*/, bool /*en
 { }
 
 void
-client::tiles::VisualScanHullInfoTile::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::tiles::VisualScanHullInfoTile::handlePositionChange()
 { }
 
 ui::layout::Info

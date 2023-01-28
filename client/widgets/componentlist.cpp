@@ -144,9 +144,9 @@ client::widgets::ComponentList::drawItem(gfx::Canvas& can, gfx::Rectangle area, 
 
 // Widget virtuals:
 void
-client::widgets::ComponentList::handlePositionChange(gfx::Rectangle& oldPosition)
+client::widgets::ComponentList::handlePositionChange()
 {
-    return defaultHandlePositionChange(oldPosition);
+    return defaultHandlePositionChange();
 }
 
 ui::layout::Info

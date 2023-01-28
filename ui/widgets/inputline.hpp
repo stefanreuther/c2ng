@@ -100,7 +100,7 @@ namespace ui { namespace widgets {
             \param tx     Translator
             \return true if confirmed, false if canceled */
         bool doStandardDialog(String_t title, String_t prompt, afl::string::Translator& tx);
-        
+
         // EventConsumer:
         virtual bool handleKey(util::Key_t key, int prefix);
         virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
@@ -108,7 +108,7 @@ namespace ui { namespace widgets {
         // Widget:
         virtual void draw(gfx::Canvas& can);
         virtual void handleStateChange(State st, bool enable);
-        virtual void handlePositionChange(gfx::Rectangle& oldPosition);
+        virtual void handlePositionChange();
         virtual ui::layout::Info getLayoutInfo() const;
 
         /** Signal: text changed.

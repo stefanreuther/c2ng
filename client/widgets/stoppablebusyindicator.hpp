@@ -57,8 +57,8 @@ namespace client { namespace widgets {
         virtual void requestChildRedraw(Widget& child, const gfx::Rectangle& area);
         virtual void handleChildAdded(Widget& child);
         virtual void handleChildRemove(Widget& child);
-        virtual void handlePositionChange(gfx::Rectangle& oldPosition);
-        virtual void handleChildPositionChange(Widget& child, gfx::Rectangle& oldPosition);
+        virtual void handlePositionChange();
+        virtual void handleChildPositionChange(Widget& child, const gfx::Rectangle& oldPosition);
         virtual ui::layout::Info getLayoutInfo() const;
         virtual bool handleKey(util::Key_t key, int prefix);
         virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);

@@ -33,7 +33,7 @@ namespace client { namespace widgets { namespace {
 
                 int rightWidth = ui::rich::getTextWidth(m_right, m_provider);
                 int leftWidth = std::max(0, getExtent().getWidth() - rightWidth);
-                
+
                 gfx::Rectangle leftArea = r.splitX(leftWidth);
 
                 int centerY = leftArea.getCenter().getY();
@@ -53,7 +53,7 @@ namespace client { namespace widgets { namespace {
             }
         virtual void handleStateChange(State /*st*/, bool /*enable*/)
             { }
-        virtual void handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+        virtual void handlePositionChange()
             { requestRedraw(); }
         virtual ui::layout::Info getLayoutInfo() const
             {

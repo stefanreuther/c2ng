@@ -171,9 +171,9 @@ client::widgets::CombatUnitList::drawItem(gfx::Canvas& can, gfx::Rectangle area,
 }
 
 void
-client::widgets::CombatUnitList::handlePositionChange(gfx::Rectangle& oldPosition)
+client::widgets::CombatUnitList::handlePositionChange()
 {
-    return defaultHandlePositionChange(oldPosition);
+    return defaultHandlePositionChange();
 }
 
 ui::layout::Info

@@ -340,7 +340,7 @@ ui::widgets::SimpleTable::handleStateChange(State st, bool /*enable*/)
 }
 
 void
-ui::widgets::SimpleTable::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+ui::widgets::SimpleTable::handlePositionChange()
 { }
 
 ui::layout::Info

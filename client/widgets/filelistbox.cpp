@@ -200,7 +200,7 @@ client::widgets::FileListbox::handleStateChange(State st, bool /*enable*/)
 }
 
 void
-client::widgets::FileListbox::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::widgets::FileListbox::handlePositionChange()
 {
     // ex UIFileChooser::onResize
     updateSize();

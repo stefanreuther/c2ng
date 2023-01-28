@@ -30,7 +30,7 @@ ui::SimpleWidget::handleChildRemove(Widget& /*child*/)
 }
 
 void
-ui::SimpleWidget::handleChildPositionChange(Widget& /*child*/, gfx::Rectangle& /*oldPosition*/)
+ui::SimpleWidget::handleChildPositionChange(Widget& /*child*/, const gfx::Rectangle& /*oldPosition*/)
 {
     // I don't have any children.
 }

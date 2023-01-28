@@ -47,13 +47,13 @@ ui::widgets::ScrollbarContainer::handleChildRemove(Widget& /*child*/)
 }
 
 void
-ui::widgets::ScrollbarContainer::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+ui::widgets::ScrollbarContainer::handlePositionChange()
 {
     doLayout();
 }
 
 void
-ui::widgets::ScrollbarContainer::handleChildPositionChange(Widget& /*child*/, gfx::Rectangle& /*oldPosition*/)
+ui::widgets::ScrollbarContainer::handleChildPositionChange(Widget& /*child*/, const gfx::Rectangle& /*oldPosition*/)
 {
     // We control position changes; callback not evaluated.
 }

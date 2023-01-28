@@ -55,7 +55,7 @@ ui::widgets::BaseDecimalSelector::handleStateChange(State st, bool enable)
 }
 
 void
-ui::widgets::BaseDecimalSelector::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+ui::widgets::BaseDecimalSelector::handlePositionChange()
 { }
 
 bool

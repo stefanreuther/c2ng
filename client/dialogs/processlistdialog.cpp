@@ -98,7 +98,7 @@ namespace {
         virtual void drawHeader(gfx::Canvas& can, gfx::Rectangle area);
         virtual void drawFooter(gfx::Canvas& can, gfx::Rectangle area);
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state);
-        virtual void handlePositionChange(gfx::Rectangle& oldPosition);
+        virtual void handlePositionChange();
         virtual ui::layout::Info getLayoutInfo() const;
         virtual bool handleKey(util::Key_t key, int prefix);
 
@@ -360,9 +360,9 @@ ProcessListWidget::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, 
 }
 
 void
-ProcessListWidget::handlePositionChange(gfx::Rectangle& oldPosition)
+ProcessListWidget::handlePositionChange()
 {
-    return defaultHandlePositionChange(oldPosition);
+    return defaultHandlePositionChange();
 }
 
 ui::layout::Info

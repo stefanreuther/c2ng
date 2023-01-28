@@ -89,7 +89,7 @@ ui::widgets::StaticText::handleStateChange(State /*st*/, bool /*enable*/)
 { }
 
 void
-ui::widgets::StaticText::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+ui::widgets::StaticText::handlePositionChange()
 {
     requestRedraw();
 }

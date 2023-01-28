@@ -62,7 +62,7 @@ client::vcr::PlaybackControlWidget::handleChildRemove(Widget& /*child*/)
 { }
 
 void
-client::vcr::PlaybackControlWidget::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::vcr::PlaybackControlWidget::handlePositionChange()
 {
     gfx::Rectangle r = getExtent();
     int width = (r.getWidth()-4)/5;
@@ -78,7 +78,7 @@ client::vcr::PlaybackControlWidget::handlePositionChange(gfx::Rectangle& /*oldPo
 }
 
 void
-client::vcr::PlaybackControlWidget::handleChildPositionChange(Widget& /*child*/, gfx::Rectangle& /*oldPosition*/)
+client::vcr::PlaybackControlWidget::handleChildPositionChange(Widget& /*child*/, const gfx::Rectangle& /*oldPosition*/)
 { }
 
 ui::layout::Info

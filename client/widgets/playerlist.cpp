@@ -108,7 +108,7 @@ client::widgets::PlayerList::handleStateChange(State st, bool enable)
 }
 
 void
-client::widgets::PlayerList::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::widgets::PlayerList::handlePositionChange()
 { }
 
 ui::layout::Info

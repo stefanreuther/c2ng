@@ -219,7 +219,7 @@ client::widgets::CombatDiagram::handleStateChange(State st, bool enable)
 }
 
 void
-client::widgets::CombatDiagram::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::widgets::CombatDiagram::handlePositionChange()
 {
     requestRedraw();
 }

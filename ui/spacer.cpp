@@ -35,7 +35,7 @@ ui::Spacer::handleStateChange(State /*st*/, bool /*enable*/)
 { }
 
 void
-ui::Spacer::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+ui::Spacer::handlePositionChange()
 { }
 
 ui::layout::Info

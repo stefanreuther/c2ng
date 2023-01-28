@@ -20,9 +20,9 @@ namespace {
             { }
         virtual void handleChildRemove(Widget& /*child*/)
             { }
-        virtual void handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+        virtual void handlePositionChange()
             { }
-        virtual void handleChildPositionChange(Widget& /*child*/, gfx::Rectangle& /*oldPosition*/)
+        virtual void handleChildPositionChange(Widget& /*child*/, const gfx::Rectangle& /*oldPosition*/)
             { }
         virtual ui::layout::Info getLayoutInfo() const
             { return ui::layout::Info(); }

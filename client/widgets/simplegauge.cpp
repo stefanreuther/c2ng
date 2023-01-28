@@ -52,7 +52,7 @@ client::widgets::SimpleGauge::draw(gfx::Canvas& can)
 {
     // ex WShipCargoTile::drawCargoBar
     gfx::Context<uint8_t> ctx(can, m_root.colorScheme());
-    
+
     gfx::Rectangle area = getExtent();
     ui::drawFrameDown(ctx, area);
     area.grow(-1, -1);
@@ -89,7 +89,7 @@ client::widgets::SimpleGauge::handleStateChange(State /*st*/, bool /*enable*/)
 { }
 
 void
-client::widgets::SimpleGauge::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::widgets::SimpleGauge::handlePositionChange()
 { }
 
 ui::layout::Info

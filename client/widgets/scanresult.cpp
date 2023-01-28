@@ -66,13 +66,13 @@ client::widgets::ScanResult::handleChildRemove(Widget& /*child*/)
 { }
 
 void
-client::widgets::ScanResult::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::widgets::ScanResult::handlePositionChange()
 {
     doLayout();
 }
 
 void
-client::widgets::ScanResult::handleChildPositionChange(Widget& /*child*/, gfx::Rectangle& /*oldPosition*/)
+client::widgets::ScanResult::handleChildPositionChange(Widget& /*child*/, const gfx::Rectangle& /*oldPosition*/)
 { }
 
 ui::layout::Info

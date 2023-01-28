@@ -85,7 +85,7 @@ client::si::KeymapHandler::handleStateChange(State /*st*/, bool /*enable*/)
 { }
 
 void
-client::si::KeymapHandler::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::si::KeymapHandler::handlePositionChange()
 {
     requestRedraw();
 }

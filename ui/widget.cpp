@@ -372,10 +372,10 @@ void
 ui::Widget::setExtent(const gfx::Rectangle& extent)
 {
     // ex UIBaseWidget::setExtent
-    gfx::Rectangle oldPosition = m_extent;
+    const gfx::Rectangle oldPosition = m_extent;
     if (oldPosition != extent) {
         m_extent = extent;
-        handlePositionChange(oldPosition);
+        handlePositionChange();
         if (m_parent != 0) {
             m_parent->handleChildPositionChange(*this, oldPosition);
         }

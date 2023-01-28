@@ -255,13 +255,13 @@ ui::widgets::OptionGrid::handleChildRemove(Widget& /*child*/)
 }
 
 void
-ui::widgets::OptionGrid::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+ui::widgets::OptionGrid::handlePositionChange()
 {
     doLayout(0, m_items.size());
 }
 
 void
-ui::widgets::OptionGrid::handleChildPositionChange(Widget& /*child*/, gfx::Rectangle& /*oldPosition*/)
+ui::widgets::OptionGrid::handleChildPositionChange(Widget& /*child*/, const gfx::Rectangle& /*oldPosition*/)
 {
     // All widgets added/removed under our control.
 }

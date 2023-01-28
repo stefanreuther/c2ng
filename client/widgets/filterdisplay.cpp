@@ -318,7 +318,7 @@ client::widgets::FilterDisplay::handleStateChange(State st, bool enable)
 }
 
 void
-client::widgets::FilterDisplay::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::widgets::FilterDisplay::handlePositionChange()
 {
     requestRedraw();
 }

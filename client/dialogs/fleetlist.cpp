@@ -108,8 +108,8 @@ namespace {
                 }
             }
 
-        virtual void handlePositionChange(gfx::Rectangle& oldPosition)
-            { defaultHandlePositionChange(oldPosition); }
+        virtual void handlePositionChange()
+            { defaultHandlePositionChange(); }
 
         virtual ui::layout::Info getLayoutInfo() const
             {

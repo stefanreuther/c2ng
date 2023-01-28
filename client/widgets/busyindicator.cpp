@@ -32,7 +32,7 @@ client::widgets::BusyIndicator::handleStateChange(State /*st*/, bool /*enable*/)
 { }
 
 void
-client::widgets::BusyIndicator::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::widgets::BusyIndicator::handlePositionChange()
 {
     requestRedraw();
 }

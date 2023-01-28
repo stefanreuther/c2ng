@@ -82,7 +82,7 @@ client::map::Widget::handleStateChange(State /*st*/, bool /*enable*/)
 { }
 
 void
-client::map::Widget::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::map::Widget::handlePositionChange()
 {
     m_renderer.setExtent(getExtent());
     maybeRequestNewRange();

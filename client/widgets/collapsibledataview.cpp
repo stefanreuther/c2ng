@@ -66,13 +66,13 @@ client::widgets::CollapsibleDataView::handleChildRemove(Widget& /*child*/)
 }
 
 void
-client::widgets::CollapsibleDataView::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::widgets::CollapsibleDataView::handlePositionChange()
 {
     setChildPositions();
 }
 
 void
-client::widgets::CollapsibleDataView::handleChildPositionChange(Widget& /*child*/, gfx::Rectangle& /*oldPosition*/)
+client::widgets::CollapsibleDataView::handleChildPositionChange(Widget& /*child*/, const gfx::Rectangle& /*oldPosition*/)
 { }
 
 ui::layout::Info

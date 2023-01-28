@@ -93,7 +93,7 @@ ui::widgets::ComboBox::handleStateChange(State st, bool /*enable*/)
 }
 
 void
-ui::widgets::ComboBox::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+ui::widgets::ComboBox::handlePositionChange()
 {
     requestRedraw();
 }

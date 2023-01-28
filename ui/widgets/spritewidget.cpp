@@ -39,7 +39,7 @@ ui::widgets::SpriteWidget::handleStateChange(State /*st*/, bool /*enable*/)
 { }
 
 void
-ui::widgets::SpriteWidget::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+ui::widgets::SpriteWidget::handlePositionChange()
 { }
 
 ui::layout::Info

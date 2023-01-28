@@ -85,7 +85,7 @@ client::widgets::TechBar::handleStateChange(State /*st*/, bool /*enable*/)
 }
 
 void
-client::widgets::TechBar::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::widgets::TechBar::handlePositionChange()
 {
     requestRedraw();
 }

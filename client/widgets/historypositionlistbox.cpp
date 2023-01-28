@@ -168,9 +168,9 @@ client::widgets::HistoryPositionListbox::drawItem(gfx::Canvas& can, gfx::Rectang
 }
 
 void
-client::widgets::HistoryPositionListbox::handlePositionChange(gfx::Rectangle& oldPosition)
+client::widgets::HistoryPositionListbox::handlePositionChange()
 {
-    defaultHandlePositionChange(oldPosition);
+    defaultHandlePositionChange();
 }
 
 ui::layout::Info

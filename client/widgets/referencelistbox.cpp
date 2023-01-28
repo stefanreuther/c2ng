@@ -139,9 +139,9 @@ client::widgets::ReferenceListbox::drawItem(gfx::Canvas& can, gfx::Rectangle are
 }
 
 void
-client::widgets::ReferenceListbox::handlePositionChange(gfx::Rectangle& oldPosition)
+client::widgets::ReferenceListbox::handlePositionChange()
 {
-    defaultHandlePositionChange(oldPosition);
+    defaultHandlePositionChange();
 }
 
 ui::layout::Info

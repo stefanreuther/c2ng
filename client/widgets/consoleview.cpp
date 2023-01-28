@@ -82,7 +82,7 @@ client::widgets::ConsoleView::handleStateChange(State /*st*/, bool /*enable*/)
 { }
 
 void
-client::widgets::ConsoleView::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::widgets::ConsoleView::handlePositionChange()
 {
     requestRedraw();
 }

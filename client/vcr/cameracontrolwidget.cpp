@@ -158,7 +158,7 @@ client::vcr::CameraControlWidget::handleChildRemove(Widget& /*child*/)
 { }
 
 void
-client::vcr::CameraControlWidget::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::vcr::CameraControlWidget::handlePositionChange()
 {
     gfx::Point grid = getGridSize();
     gfx::Rectangle area = getExtent();
@@ -178,7 +178,7 @@ client::vcr::CameraControlWidget::handlePositionChange(gfx::Rectangle& /*oldPosi
 }
 
 void
-client::vcr::CameraControlWidget::handleChildPositionChange(Widget& /*child*/, gfx::Rectangle& /*oldPosition*/)
+client::vcr::CameraControlWidget::handleChildPositionChange(Widget& /*child*/, const gfx::Rectangle& /*oldPosition*/)
 {
 }
 

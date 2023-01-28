@@ -90,7 +90,7 @@ ui::widgets::BaseButton::handleStateChange(State st, bool enable)
 }
 
 void
-ui::widgets::BaseButton::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+ui::widgets::BaseButton::handlePositionChange()
 {
     requestRedraw();
 }

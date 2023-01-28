@@ -135,7 +135,7 @@ client::tiles::VisualScanShipInfoTile::handleStateChange(State /*st*/, bool /*en
 { }
 
 void
-client::tiles::VisualScanShipInfoTile::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::tiles::VisualScanShipInfoTile::handlePositionChange()
 { }
 
 ui::layout::Info

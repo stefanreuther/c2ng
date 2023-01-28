@@ -71,8 +71,8 @@ namespace {
             }
 
         // Widget:
-        virtual void handlePositionChange(gfx::Rectangle& oldPosition)
-            { defaultHandlePositionChange(oldPosition); }
+        virtual void handlePositionChange()
+            { defaultHandlePositionChange(); }
         virtual ui::layout::Info getLayoutInfo() const
             {
                 int numLines = int(std::min(size_t(20), m_items.size()));

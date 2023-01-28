@@ -155,7 +155,7 @@ client::si::WidgetWrapper::handleChildRemove(Widget& /*child*/)
 }
 
 void
-client::si::WidgetWrapper::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::si::WidgetWrapper::handlePositionChange()
 {
     if (Widget* p = getFirstChild()) {
         p->setExtent(getExtent());
@@ -163,7 +163,7 @@ client::si::WidgetWrapper::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
 }
 
 void
-client::si::WidgetWrapper::handleChildPositionChange(Widget& /*child*/, gfx::Rectangle& /*oldPosition*/)
+client::si::WidgetWrapper::handleChildPositionChange(Widget& /*child*/, const gfx::Rectangle& /*oldPosition*/)
 {
     requestRedraw();
 }

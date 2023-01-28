@@ -169,9 +169,9 @@ client::widgets::FleetMemberListbox::drawItem(gfx::Canvas& can, gfx::Rectangle a
 }
 
 void
-client::widgets::FleetMemberListbox::handlePositionChange(gfx::Rectangle& oldPosition)
+client::widgets::FleetMemberListbox::handlePositionChange()
 {
-    defaultHandlePositionChange(oldPosition);
+    defaultHandlePositionChange();
 }
 
 ui::layout::Info

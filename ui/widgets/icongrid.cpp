@@ -264,7 +264,7 @@ ui::widgets::IconGrid::handleStateChange(State st, bool enable)
 }
 
 void
-ui::widgets::IconGrid::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+ui::widgets::IconGrid::handlePositionChange()
 {
     m_pageTop = std::max(0, m_currentLine - getPageSize() + 1);
 }

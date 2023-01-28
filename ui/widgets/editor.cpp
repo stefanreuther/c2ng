@@ -199,7 +199,7 @@ ui::widgets::Editor::handleStateChange(State st, bool enable)
 }
 
 void
-ui::widgets::Editor::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+ui::widgets::Editor::handlePositionChange()
 {
     requestRedraw();
 }

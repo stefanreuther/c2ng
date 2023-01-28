@@ -188,10 +188,10 @@ ui::widgets::RichListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t
 }
 
 void
-ui::widgets::RichListbox::handlePositionChange(gfx::Rectangle& oldPosition)
+ui::widgets::RichListbox::handlePositionChange()
 {
     render(0, m_items.size());
-    defaultHandlePositionChange(oldPosition);
+    defaultHandlePositionChange();
 }
 
 // Widget:

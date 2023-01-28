@@ -313,9 +313,9 @@ ui::widgets::TreeListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t
 
 // Widget virtuals:
 void
-ui::widgets::TreeListbox::handlePositionChange(gfx::Rectangle& oldPosition)
+ui::widgets::TreeListbox::handlePositionChange()
 {
-    defaultHandlePositionChange(oldPosition);
+    defaultHandlePositionChange();
 }
 
 ui::layout::Info

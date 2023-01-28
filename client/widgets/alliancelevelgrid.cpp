@@ -157,7 +157,7 @@ client::widgets::AllianceLevelGrid::handleStateChange(State st, bool enable)
 }
 
 void
-client::widgets::AllianceLevelGrid::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::widgets::AllianceLevelGrid::handlePositionChange()
 { }
 
 ui::layout::Info

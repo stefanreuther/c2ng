@@ -115,9 +115,9 @@ client::widgets::MarkerTemplateList::drawItem(gfx::Canvas& can, gfx::Rectangle a
 
 // Widget:
 void
-client::widgets::MarkerTemplateList::handlePositionChange(gfx::Rectangle& oldPosition)
+client::widgets::MarkerTemplateList::handlePositionChange()
 {
-    defaultHandlePositionChange(oldPosition);
+    defaultHandlePositionChange();
 }
 
 ui::layout::Info

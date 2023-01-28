@@ -29,13 +29,13 @@ ui::LayoutableGroup::handleChildRemove(Widget& /*child*/)
 }
 
 void
-ui::LayoutableGroup::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+ui::LayoutableGroup::handlePositionChange()
 {
     doLayout();
 }
 
 void
-ui::LayoutableGroup::handleChildPositionChange(Widget& /*child*/, gfx::Rectangle& /*oldPosition*/)
+ui::LayoutableGroup::handleChildPositionChange(Widget& /*child*/, const gfx::Rectangle& /*oldPosition*/)
 {
     // We don't expect children to change their position.
 }

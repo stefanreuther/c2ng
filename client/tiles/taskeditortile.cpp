@@ -115,8 +115,8 @@ class client::tiles::TaskEditorTile::ListWidget : public ui::widgets::AbstractLi
         }
 
     // Widget:
-    virtual void handlePositionChange(gfx::Rectangle& oldPosition)
-        { defaultHandlePositionChange(oldPosition); }
+    virtual void handlePositionChange()
+        { defaultHandlePositionChange(); }
     virtual ui::layout::Info getLayoutInfo() const
         {
             gfx::Point cellSize = m_provider.getFont(gfx::FontRequest())->getCellSize();
@@ -215,13 +215,13 @@ client::tiles::TaskEditorTile::handleChildRemove(Widget& /*child*/)
 { }
 
 void
-client::tiles::TaskEditorTile::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::tiles::TaskEditorTile::handlePositionChange()
 {
     m_childWidget->setExtent(getExtent());
 }
 
 void
-client::tiles::TaskEditorTile::handleChildPositionChange(Widget& child, gfx::Rectangle& /*oldPosition*/)
+client::tiles::TaskEditorTile::handleChildPositionChange(Widget& child, const gfx::Rectangle& /*oldPosition*/)
 {
     child.requestRedraw();
 }

@@ -257,9 +257,9 @@ client::widgets::CostSummaryList::drawItem(gfx::Canvas& can, gfx::Rectangle area
 }
 
 void
-client::widgets::CostSummaryList::handlePositionChange(gfx::Rectangle& oldPosition)
+client::widgets::CostSummaryList::handlePositionChange()
 {
-    defaultHandlePositionChange(oldPosition);
+    defaultHandlePositionChange();
 }
 
 ui::layout::Info

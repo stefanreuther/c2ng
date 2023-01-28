@@ -194,9 +194,9 @@ client::widgets::AllianceStatusList::drawItem(gfx::Canvas& can, gfx::Rectangle a
 }
 
 void
-client::widgets::AllianceStatusList::handlePositionChange(gfx::Rectangle& oldPosition)
+client::widgets::AllianceStatusList::handlePositionChange()
 {
-    defaultHandlePositionChange(oldPosition);
+    defaultHandlePositionChange();
 }
 
 ui::layout::Info

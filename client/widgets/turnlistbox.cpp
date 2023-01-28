@@ -164,9 +164,9 @@ client::widgets::TurnListbox::handleKey(util::Key_t key, int prefix)
 }
 
 void
-client::widgets::TurnListbox::handlePositionChange(gfx::Rectangle& oldPosition)
+client::widgets::TurnListbox::handlePositionChange()
 {
-    defaultHandlePositionChange(oldPosition);
+    defaultHandlePositionChange();
 }
 
 void

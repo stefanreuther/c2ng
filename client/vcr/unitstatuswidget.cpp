@@ -128,7 +128,7 @@ client::vcr::UnitStatusWidget::handleStateChange(State /*st*/, bool /*enable*/)
 { }
 
 void
-client::vcr::UnitStatusWidget::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::vcr::UnitStatusWidget::handlePositionChange()
 { }
 
 ui::layout::Info

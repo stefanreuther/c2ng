@@ -100,7 +100,7 @@ client::vcr::flak::ArenaWidget::handleStateChange(State /*st*/, bool /*enable*/)
 { }
 
 void
-client::vcr::flak::ArenaWidget::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::vcr::flak::ArenaWidget::handlePositionChange()
 {
     requestRedraw();
 }

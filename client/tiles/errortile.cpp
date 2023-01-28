@@ -37,7 +37,7 @@ client::tiles::ErrorTile::handleStateChange(State /*st*/, bool /*enable*/)
 { }
 
 void
-client::tiles::ErrorTile::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::tiles::ErrorTile::handlePositionChange()
 { }
 
 ui::layout::Info

@@ -102,9 +102,9 @@ client::widgets::FriendlyCodeList::drawItem(gfx::Canvas& can, gfx::Rectangle are
 
 // Widget virtuals:
 void
-client::widgets::FriendlyCodeList::handlePositionChange(gfx::Rectangle& oldPosition)
+client::widgets::FriendlyCodeList::handlePositionChange()
 {
-    defaultHandlePositionChange(oldPosition);
+    defaultHandlePositionChange();
 }
 
 ui::layout::Info

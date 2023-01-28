@@ -163,11 +163,11 @@ ui::widgets::TabBar::handleChildRemove(Widget& /*child*/)
 { }
 
 void
-ui::widgets::TabBar::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+ui::widgets::TabBar::handlePositionChange()
 { }
 
 void
-ui::widgets::TabBar::handleChildPositionChange(Widget& /*child*/, gfx::Rectangle& /*oldPosition*/)
+ui::widgets::TabBar::handleChildPositionChange(Widget& /*child*/, const gfx::Rectangle& /*oldPosition*/)
 { }
 
 ui::layout::Info

@@ -150,7 +150,7 @@ client::tiles::StarchartHeaderTile::handleStateChange(State /*st*/, bool /*enabl
 { }
 
 void
-client::tiles::StarchartHeaderTile::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::tiles::StarchartHeaderTile::handlePositionChange()
 { }
 
 ui::layout::Info

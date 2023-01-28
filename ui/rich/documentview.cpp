@@ -176,7 +176,7 @@ ui::rich::DocumentView::scroll(Operation op)
 }
 
 void
-ui::rich::DocumentView::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+ui::rich::DocumentView::handlePositionChange()
 {
     // ex UIRichDocument::onResize
     doc.setPageWidth(getExtent().getWidth());

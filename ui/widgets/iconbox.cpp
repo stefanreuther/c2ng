@@ -78,7 +78,7 @@ ui::widgets::IconBox::handleStateChange(State st, bool enable)
 }
 
 void
-ui::widgets::IconBox::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+ui::widgets::IconBox::handlePositionChange()
 {
     // The typical usecase for this function is that the size is set after initial layout (pack()).
     // If the widget has been configured before layout, it will have an animation scheduled based on a zero-size widget.

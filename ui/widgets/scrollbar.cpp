@@ -103,7 +103,7 @@ ui::widgets::Scrollbar::handleStateChange(State st, bool enable)
 }
 
 void
-ui::widgets::Scrollbar::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+ui::widgets::Scrollbar::handlePositionChange()
 {
     // Get rid of pressed/hovered buttons
     m_up.clear();

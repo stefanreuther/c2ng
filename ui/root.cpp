@@ -92,13 +92,13 @@ ui::Root::handleChildRemove(Widget& child)
 }
 
 void
-ui::Root::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+ui::Root::handlePositionChange()
 {
     // I do not change my position.
 }
 
 void
-ui::Root::handleChildPositionChange(Widget& child, gfx::Rectangle& oldPosition)
+ui::Root::handleChildPositionChange(Widget& child, const gfx::Rectangle& oldPosition)
 {
     m_filter->add(oldPosition);
     m_filter->add(child.getExtent());

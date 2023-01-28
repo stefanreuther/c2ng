@@ -44,7 +44,7 @@ client::widgets::StoppableBusyIndicator::run()
     m_canceled = false;
     m_quit = false;
     m_button.setState(DisabledState, false);
-    
+
     // Set my extent to preferred size and center myself
     setExtent(gfx::Rectangle(gfx::Point(), getLayoutInfo().getPreferredSize()));
     m_root.centerWidget(*this);
@@ -98,14 +98,14 @@ client::widgets::StoppableBusyIndicator::handleChildRemove(Widget& /*child*/)
 { }
 
 void
-client::widgets::StoppableBusyIndicator::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::widgets::StoppableBusyIndicator::handlePositionChange()
 {
     doLayout();
     requestRedraw();
 }
 
 void
-client::widgets::StoppableBusyIndicator::handleChildPositionChange(Widget& /*child*/, gfx::Rectangle& /*oldPosition*/)
+client::widgets::StoppableBusyIndicator::handleChildPositionChange(Widget& /*child*/, const gfx::Rectangle& /*oldPosition*/)
 { }
 
 ui::layout::Info

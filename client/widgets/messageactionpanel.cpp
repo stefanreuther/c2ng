@@ -170,14 +170,14 @@ client::widgets::MessageActionPanel::handleChildRemove(Widget& /*child*/)
 }
 
 void
-client::widgets::MessageActionPanel::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::widgets::MessageActionPanel::handlePositionChange()
 {
     updatePositions();
     requestRedraw();
 }
 
 void
-client::widgets::MessageActionPanel::handleChildPositionChange(Widget& /*child*/, gfx::Rectangle& /*oldPosition*/)
+client::widgets::MessageActionPanel::handleChildPositionChange(Widget& /*child*/, const gfx::Rectangle& /*oldPosition*/)
 { }
 
 ui::layout::Info

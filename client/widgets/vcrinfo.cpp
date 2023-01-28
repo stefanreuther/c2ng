@@ -231,13 +231,13 @@ client::widgets::VcrInfo::handleChildRemove(Widget& /*child*/)
 }
 
 void
-client::widgets::VcrInfo::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::widgets::VcrInfo::handlePositionChange()
 {
     setChildPositions();
 }
 
 void
-client::widgets::VcrInfo::handleChildPositionChange(Widget& /*child*/, gfx::Rectangle& /*oldPosition*/)
+client::widgets::VcrInfo::handleChildPositionChange(Widget& /*child*/, const gfx::Rectangle& /*oldPosition*/)
 { }
 
 ui::layout::Info

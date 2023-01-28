@@ -16,7 +16,7 @@ namespace {
         DecayingMessage(ui::Root& root, const String_t& text);
         virtual void draw(gfx::Canvas& can);
         virtual void handleStateChange(State st, bool enable);
-        virtual void handlePositionChange(gfx::Rectangle& oldPosition);
+        virtual void handlePositionChange();
         virtual ui::layout::Info getLayoutInfo() const;
         virtual bool handleKey(util::Key_t key, int prefix);
         virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
@@ -78,7 +78,7 @@ DecayingMessage::handleStateChange(State /*st*/, bool /*enable*/)
 { }
 
 void
-DecayingMessage::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+DecayingMessage::handlePositionChange()
 { }
 
 ui::layout::Info

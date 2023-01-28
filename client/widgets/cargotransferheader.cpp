@@ -40,7 +40,7 @@ client::widgets::CargoTransferHeader::handleStateChange(State /*st*/, bool /*ena
 { }
 
 void
-client::widgets::CargoTransferHeader::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::widgets::CargoTransferHeader::handlePositionChange()
 { }
 
 ui::layout::Info

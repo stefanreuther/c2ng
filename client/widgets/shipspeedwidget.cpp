@@ -37,7 +37,7 @@ client::widgets::ShipSpeedWidget::handleStateChange(State /*st*/, bool /*enable*
 { }
 
 void
-client::widgets::ShipSpeedWidget::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::widgets::ShipSpeedWidget::handlePositionChange()
 { }
 
 ui::layout::Info

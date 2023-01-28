@@ -135,7 +135,7 @@ client::widgets::SimulationResultList::drawItem(gfx::Canvas& can, gfx::Rectangle
 
 // Widget:
 void
-client::widgets::SimulationResultList::handlePositionChange(gfx::Rectangle& oldPosition)
+client::widgets::SimulationResultList::handlePositionChange()
 {
     // ex WSimClassResultList::onResize
     afl::base::Ref<gfx::Font> font(getFont(m_root));
@@ -149,7 +149,7 @@ client::widgets::SimulationResultList::handlePositionChange(gfx::Rectangle& oldP
     m_cellWidth = std::min(7 * font->getEmWidth(), remainder / numPlayers);
 
     // Adjust list
-    defaultHandlePositionChange(oldPosition);
+    defaultHandlePositionChange();
 }
 
 ui::layout::Info

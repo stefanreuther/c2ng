@@ -245,15 +245,14 @@ namespace ui {
         const gfx::Rectangle& getExtent() const;
 
         /** Callback: position changed.
-            At this time, getExtent() returns the new position.
-            \param oldPosition Old position */
-        virtual void handlePositionChange(gfx::Rectangle& oldPosition) = 0;
+            At this time, getExtent() returns the new position. */
+        virtual void handlePositionChange() = 0;
 
         /** Callback: a child has moved.
             At this time, child.getExtent() returns the new position.
             \param child Child
             \param oldPosition Old position */
-        virtual void handleChildPositionChange(Widget& child, gfx::Rectangle& oldPosition) = 0;
+        virtual void handleChildPositionChange(Widget& child, const gfx::Rectangle& oldPosition) = 0;
 
         /** Get layout parameters.
             \return parameters */

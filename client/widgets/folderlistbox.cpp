@@ -97,9 +97,9 @@ client::widgets::FolderListbox::handleKey(util::Key_t key, int prefix)
 }
 
 void
-client::widgets::FolderListbox::handlePositionChange(gfx::Rectangle& oldPosition)
+client::widgets::FolderListbox::handlePositionChange()
 {
-    defaultHandlePositionChange(oldPosition);
+    defaultHandlePositionChange();
 }
 
 void

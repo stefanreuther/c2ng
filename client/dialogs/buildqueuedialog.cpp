@@ -69,7 +69,7 @@ namespace {
         virtual void drawHeader(gfx::Canvas& can, gfx::Rectangle area);
         virtual void drawFooter(gfx::Canvas& can, gfx::Rectangle area);
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state);
-        virtual void handlePositionChange(gfx::Rectangle& oldPosition);
+        virtual void handlePositionChange();
         virtual ui::layout::Info getLayoutInfo() const;
         virtual bool handleKey(util::Key_t key, int prefix);
 
@@ -421,9 +421,9 @@ BuildQueueList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, Ite
 }
 
 void
-BuildQueueList::handlePositionChange(gfx::Rectangle& oldPosition)
+BuildQueueList::handlePositionChange()
 {
-    defaultHandlePositionChange(oldPosition);
+    defaultHandlePositionChange();
 }
 
 ui::layout::Info

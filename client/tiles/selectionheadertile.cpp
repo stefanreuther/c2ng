@@ -70,7 +70,7 @@ client::tiles::SelectionHeaderTile::handleChildRemove(Widget& /*child*/)
 { }
 
 void
-client::tiles::SelectionHeaderTile::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::tiles::SelectionHeaderTile::handlePositionChange()
 {
     const int h = getExtent().getHeight();
     gfx::Rectangle r(getExtent().getRightX(), getExtent().getTopY(), h, h);
@@ -81,7 +81,7 @@ client::tiles::SelectionHeaderTile::handlePositionChange(gfx::Rectangle& /*oldPo
 }
 
 void
-client::tiles::SelectionHeaderTile::handleChildPositionChange(Widget& /*child*/, gfx::Rectangle& /*oldPosition*/)
+client::tiles::SelectionHeaderTile::handleChildPositionChange(Widget& /*child*/, const gfx::Rectangle& /*oldPosition*/)
 {
     requestRedraw();
 }

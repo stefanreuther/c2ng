@@ -73,7 +73,7 @@ ui::CardGroup::handleChildRemove(Widget& /*child*/)
 }
 
 void
-ui::CardGroup::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+ui::CardGroup::handlePositionChange()
 {
     // ex UICardGroup::onResize
     for (Widget* w = getFirstChild(); w != 0; w = w->getNextSibling()) {
@@ -83,7 +83,7 @@ ui::CardGroup::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
 }
 
 void
-ui::CardGroup::handleChildPositionChange(Widget& /*child*/, gfx::Rectangle& /*oldPosition*/)
+ui::CardGroup::handleChildPositionChange(Widget& /*child*/, const gfx::Rectangle& /*oldPosition*/)
 { }
 
 ui::layout::Info

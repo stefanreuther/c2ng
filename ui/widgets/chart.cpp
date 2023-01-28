@@ -420,7 +420,7 @@ ui::widgets::Chart::handleStateChange(State st, bool enable)
 }
 
 void
-ui::widgets::Chart::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+ui::widgets::Chart::handlePositionChange()
 {
     m_layout.reset();
     requestRedraw();

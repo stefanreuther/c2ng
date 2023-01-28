@@ -173,7 +173,7 @@ ui::widgets::AbstractListbox::handleStateChange(State st, bool enable)
 }
 
 void
-ui::widgets::AbstractListbox::defaultHandlePositionChange(gfx::Rectangle& /*oldPosition*/)
+ui::widgets::AbstractListbox::defaultHandlePositionChange()
 {
     makeVisible(getRelativeItemPosition(m_currentItem));
 

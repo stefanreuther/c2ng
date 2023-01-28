@@ -83,7 +83,7 @@ namespace {
                     outTextF(ctx, area, e.value);
                 }
             }
-        virtual void handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+        virtual void handlePositionChange()
             { }
         virtual ui::layout::Info getLayoutInfo() const
             {

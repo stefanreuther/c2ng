@@ -133,7 +133,7 @@ namespace {
 
         virtual void handleStateChange(State /*st*/, bool /*enable*/)
             { }
-        virtual void handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+        virtual void handlePositionChange()
             { requestRedraw(); }
         virtual ui::layout::Info getLayoutInfo() const
             { return ui::layout::Info(); }

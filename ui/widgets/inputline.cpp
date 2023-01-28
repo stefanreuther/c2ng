@@ -328,7 +328,7 @@ ui::widgets::InputLine::handleStateChange(State st, bool enable)
 }
 
 void
-ui::widgets::InputLine::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+ui::widgets::InputLine::handlePositionChange()
 {
     scroll();
     requestRedraw();

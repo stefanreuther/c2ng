@@ -119,9 +119,9 @@ client::widgets::SimulationList::drawItem(gfx::Canvas& can, gfx::Rectangle area,
 
 // Widget:
 void
-client::widgets::SimulationList::handlePositionChange(gfx::Rectangle& oldPosition)
+client::widgets::SimulationList::handlePositionChange()
 {
-    return defaultHandlePositionChange(oldPosition);
+    return defaultHandlePositionChange();
 }
 
 ui::layout::Info

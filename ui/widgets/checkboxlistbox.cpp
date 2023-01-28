@@ -252,9 +252,9 @@ ui::widgets::CheckboxListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, si
 
 // Widget virtuals:
 void
-ui::widgets::CheckboxListbox::handlePositionChange(gfx::Rectangle& oldPosition)
+ui::widgets::CheckboxListbox::handlePositionChange()
 {
-    defaultHandlePositionChange(oldPosition);
+    defaultHandlePositionChange();
 }
 
 ui::layout::Info

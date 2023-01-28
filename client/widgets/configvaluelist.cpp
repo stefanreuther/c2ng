@@ -132,9 +132,9 @@ client::widgets::ConfigValueList::drawItem(gfx::Canvas& can, gfx::Rectangle area
 }
 
 void
-client::widgets::ConfigValueList::handlePositionChange(gfx::Rectangle& oldPosition)
+client::widgets::ConfigValueList::handlePositionChange()
 {
-    defaultHandlePositionChange(oldPosition);
+    defaultHandlePositionChange();
 }
 
 ui::layout::Info

@@ -41,7 +41,7 @@ namespace client { namespace widgets {
         // Widget:
         virtual ui::layout::Info getLayoutInfo() const;
         virtual bool handleKey(util::Key_t key, int prefix);
-        virtual void handlePositionChange(gfx::Rectangle& oldPosition);
+        virtual void handlePositionChange();
 
         void swapItems(Items_t& items);
         const Item* getItem(size_t n);

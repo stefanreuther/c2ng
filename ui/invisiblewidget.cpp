@@ -17,7 +17,7 @@ ui::InvisibleWidget::handleStateChange(State /*st*/, bool /*enable*/)
 { }
 
 void
-ui::InvisibleWidget::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+ui::InvisibleWidget::handlePositionChange()
 { }
 
 ui::layout::Info

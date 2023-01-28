@@ -77,7 +77,7 @@ namespace {
         barArea.setHeight(barArea.getHeight() - 1);
         drawSolidBar(paletteContext, barArea.splitX(split), barColor);
         drawSolidBar(paletteContext, barArea,               ui::Color_Shield+3);
- 
+
         // Value
         skinContext.setTextAlign(gfx::RightAlign, gfx::TopAlign);
         outTextF(skinContext, area.splitX(m.amountWidth), afl::string::Format("%d", rawValue)); // FIXME: numToString
@@ -160,7 +160,7 @@ client::widgets::PlanetMineralInfo::handleStateChange(State /*st*/, bool /*enabl
 { }
 
 void
-client::widgets::PlanetMineralInfo::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::widgets::PlanetMineralInfo::handlePositionChange()
 { }
 
 ui::layout::Info

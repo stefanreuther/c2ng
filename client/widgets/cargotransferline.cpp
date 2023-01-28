@@ -85,7 +85,7 @@ client::widgets::CargoTransferLine::handleChildRemove(Widget& /*child*/)
 { }
 
 void
-client::widgets::CargoTransferLine::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::widgets::CargoTransferLine::handlePositionChange()
 {
     // ex WCargoLine::doLayout
     gfx::Rectangle area = getExtent();
@@ -103,7 +103,7 @@ client::widgets::CargoTransferLine::handlePositionChange(gfx::Rectangle& /*oldPo
 }
 
 void
-client::widgets::CargoTransferLine::handleChildPositionChange(Widget& /*child*/, gfx::Rectangle& /*oldPosition*/)
+client::widgets::CargoTransferLine::handleChildPositionChange(Widget& /*child*/, const gfx::Rectangle& /*oldPosition*/)
 { }
 
 ui::layout::Info

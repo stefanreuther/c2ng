@@ -174,7 +174,7 @@ client::tiles::VisualScanHeaderTile::handleStateChange(State /*st*/, bool /*enab
 { }
 
 void
-client::tiles::VisualScanHeaderTile::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::tiles::VisualScanHeaderTile::handlePositionChange()
 { }
 
 ui::layout::Info

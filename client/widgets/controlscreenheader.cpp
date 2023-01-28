@@ -57,7 +57,7 @@ class client::widgets::ControlScreenHeader::TitleWidget : public ui::SimpleWidge
     // SimpleWidget:
     virtual void draw(gfx::Canvas& can);
     virtual void handleStateChange(State st, bool enable);
-    virtual void handlePositionChange(gfx::Rectangle& oldPosition);
+    virtual void handlePositionChange();
     virtual ui::layout::Info getLayoutInfo() const;
     virtual bool handleKey(util::Key_t key, int prefix);
     virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
@@ -121,7 +121,7 @@ client::widgets::ControlScreenHeader::TitleWidget::draw(gfx::Canvas& can)
     // Subtitle
     ctx.useFont(*m_root.provider().getFont(gfx::FontRequest()));
     ctx.setColor(util::SkinColor::Yellow);
-    outTextF(ctx, area, m_text[txtSubtitle]);    
+    outTextF(ctx, area, m_text[txtSubtitle]);
 }
 
 void
@@ -129,7 +129,7 @@ client::widgets::ControlScreenHeader::TitleWidget::handleStateChange(State /*st*
 { }
 
 void
-client::widgets::ControlScreenHeader::TitleWidget::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::widgets::ControlScreenHeader::TitleWidget::handlePositionChange()
 {
     requestRedraw();
 }
@@ -251,13 +251,13 @@ client::widgets::ControlScreenHeader::handleChildRemove(Widget& /*child*/)
 { }
 
 void
-client::widgets::ControlScreenHeader::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::widgets::ControlScreenHeader::handlePositionChange()
 {
     setChildWidgetPositions();
 }
 
 void
-client::widgets::ControlScreenHeader::handleChildPositionChange(Widget& /*child*/, gfx::Rectangle& /*oldPosition*/)
+client::widgets::ControlScreenHeader::handleChildPositionChange(Widget& /*child*/, const gfx::Rectangle& /*oldPosition*/)
 {
     requestRedraw();
 }

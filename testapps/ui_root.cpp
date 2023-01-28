@@ -99,7 +99,7 @@ namespace {
             { }
         virtual ui::layout::Info getLayoutInfo() const
             { return gfx::Point(200, 110); }
-        virtual void handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+        virtual void handlePositionChange()
             { }
         virtual bool handleKey(util::Key_t key, int prefix)
             { return defaultHandleKey(key, prefix); }
@@ -227,7 +227,7 @@ namespace {
             }
         virtual void handleStateChange(State /*st*/, bool /*enable*/)
             { }
-        virtual void handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+        virtual void handlePositionChange()
             { }
         virtual ui::layout::Info getLayoutInfo() const
             { return ui::layout::Info(); }

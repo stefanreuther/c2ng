@@ -48,7 +48,7 @@ namespace {
         bool hasObjects(size_t layer) const;
 
         // Widget:
-        virtual void handlePositionChange(gfx::Rectangle& oldPosition);
+        virtual void handlePositionChange();
         virtual ui::layout::Info getLayoutInfo() const;
         virtual bool handleKey(util::Key_t key, int prefix);
 
@@ -146,9 +146,9 @@ SelectionList::hasObjects(size_t layer) const
 
 // Widget:
 void
-SelectionList::handlePositionChange(gfx::Rectangle& oldPosition)
+SelectionList::handlePositionChange()
 {
-    defaultHandlePositionChange(oldPosition);
+    defaultHandlePositionChange();
 }
 
 ui::layout::Info

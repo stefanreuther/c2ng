@@ -80,9 +80,9 @@ ui::widgets::StringListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, size
 
 // Widget:
 void
-ui::widgets::StringListbox::handlePositionChange(gfx::Rectangle& oldPosition)
+ui::widgets::StringListbox::handlePositionChange()
 {
-    defaultHandlePositionChange(oldPosition);
+    defaultHandlePositionChange();
 }
 
 ui::layout::Info

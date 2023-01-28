@@ -88,7 +88,7 @@ ui::widgets::AlignedContainer::handleChildRemove(Widget& /*child*/)
 }
 
 void
-ui::widgets::AlignedContainer::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+ui::widgets::AlignedContainer::handlePositionChange()
 {
     // ex UIAlignedWidget::onResize
     if (Widget* p = getFirstChild()) {
@@ -103,7 +103,7 @@ ui::widgets::AlignedContainer::handlePositionChange(gfx::Rectangle& /*oldPositio
 }
 
 void
-ui::widgets::AlignedContainer::handleChildPositionChange(Widget& /*child*/, gfx::Rectangle& /*oldPosition*/)
+ui::widgets::AlignedContainer::handleChildPositionChange(Widget& /*child*/, const gfx::Rectangle& /*oldPosition*/)
 {
     // We control position changes; callback not evaluated.
 }

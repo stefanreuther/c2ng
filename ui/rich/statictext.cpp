@@ -40,7 +40,7 @@ ui::rich::StaticText::handleStateChange(State /*st*/, bool /*enable*/)
 { }
 
 void
-ui::rich::StaticText::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+ui::rich::StaticText::handlePositionChange()
 {
     requestRedraw();
 }

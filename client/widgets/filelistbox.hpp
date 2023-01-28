@@ -47,7 +47,7 @@ namespace client { namespace widgets {
         // Widget:
         virtual void draw(gfx::Canvas& can);
         virtual void handleStateChange(State st, bool enable);
-        virtual void handlePositionChange(gfx::Rectangle& oldPosition);
+        virtual void handlePositionChange();
         virtual ui::layout::Info getLayoutInfo() const;
         virtual bool handleKey(util::Key_t key, int prefix);
         virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);

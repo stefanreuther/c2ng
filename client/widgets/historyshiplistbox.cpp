@@ -163,9 +163,9 @@ client::widgets::HistoryShipListbox::drawItem(gfx::Canvas& can, gfx::Rectangle a
 }
 
 void
-client::widgets::HistoryShipListbox::handlePositionChange(gfx::Rectangle& oldPosition)
+client::widgets::HistoryShipListbox::handlePositionChange()
 {
-    defaultHandlePositionChange(oldPosition);
+    defaultHandlePositionChange();
 }
 
 ui::layout::Info
