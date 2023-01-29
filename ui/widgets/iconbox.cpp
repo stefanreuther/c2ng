@@ -248,13 +248,12 @@ void
 ui::widgets::IconBox::handleStructureChange(size_t n)
 {
     // ex UIIconBox::onStructureChange
-
     // Set current position
     setCurrentItem(n);
 
     // Additional adjustments
     size_t total = getNumItems();
-    if (total > 0) {
+    if (total > 0 && getExtent().getWidth() > 0) {
         /* compute width before item */
         int before_width = 0;
         for (size_t i = 0; i < m_currentItem; ++i) {
@@ -262,7 +261,6 @@ ui::widgets::IconBox::handleStructureChange(size_t n)
         }
         int item_width = getItemWidth(m_currentItem);
         int additional_width = (m_currentItem >= total-1 ? 0 : 10);
-
         if (before_width + item_width + additional_width <= getExtent().getWidth()) {
             /* everything fits into the widget */
             m_targetLeftX = 0;
@@ -287,49 +285,53 @@ bool
 ui::widgets::IconBox::adjustPosition()
 {
     // ex UIIconBox::adjustPosition
-    // Make sure item is visible
-    int this_item_width = getItemWidth(m_currentItem);
-    int this_item_x = 0;
-    for (size_t i = 0; i < m_currentItem; ++i) {
-        this_item_x += getItemWidth(i);
-    }
-
-    int new_left_x = m_leftX;
-    int this_item_right = this_item_x + this_item_width - getExtent().getWidth();
-
-    if (this_item_x < m_leftX) {
-        /* item is to the left of visible area */
-        new_left_x = this_item_x;
-    } else if (this_item_x + this_item_width > m_leftX + getExtent().getWidth()) {
-        /* item is to the right of visible area */
-        new_left_x = this_item_right;
-    } else {
-        // Item is within visible area
-    }
-
-    /* If new_left_x is at a boundary, and there is an item to the left/right of us, move that into visible range */
-    if (new_left_x <= this_item_right + 20 && m_currentItem+1 != getNumItems()) {
-        new_left_x = this_item_right + 20;
-    }
-    if (new_left_x >= this_item_x - 20 && m_currentItem != 0) {
-        new_left_x -= 20;
-        if (new_left_x < 0) {
-            new_left_x = 0;
+    if (getExtent().getWidth() > 0) {
+        // Make sure item is visible
+        int this_item_width = getItemWidth(m_currentItem);
+        int this_item_x = 0;
+        for (size_t i = 0; i < m_currentItem; ++i) {
+            this_item_x += getItemWidth(i);
         }
-    }
 
-    /* commit change */
-    m_pendingScroll = false;
-    if (new_left_x != m_targetLeftX) {
-        /* set new X */
-        m_targetLeftX = new_left_x;
+        int new_left_x = m_leftX;
+        int this_item_right = this_item_x + this_item_width - getExtent().getWidth();
 
-        /* cancel animation if we're not visible? */
-        if (getExtent().getWidth() == 0) {
-            m_leftX = m_targetLeftX;
-            m_scrollSpeed = 0;
+        if (this_item_x < m_leftX) {
+            /* item is to the left of visible area */
+            new_left_x = this_item_x;
+        } else if (this_item_x + this_item_width > m_leftX + getExtent().getWidth()) {
+            /* item is to the right of visible area */
+            new_left_x = this_item_right;
+        } else {
+            // Item is within visible area
         }
-        return true;
+
+        /* If new_left_x is at a boundary, and there is an item to the left/right of us, move that into visible range */
+        if (new_left_x <= this_item_right + 20 && m_currentItem+1 != getNumItems()) {
+            new_left_x = this_item_right + 20;
+        }
+        if (new_left_x >= this_item_x - 20 && m_currentItem != 0) {
+            new_left_x -= 20;
+            if (new_left_x < 0) {
+                new_left_x = 0;
+            }
+        }
+
+        /* commit change */
+        m_pendingScroll = false;
+        if (new_left_x != m_targetLeftX) {
+            /* set new X */
+            m_targetLeftX = new_left_x;
+
+            /* cancel animation if we're not visible? */
+            if (getExtent().getWidth() == 0) {
+                m_leftX = m_targetLeftX;
+                m_scrollSpeed = 0;
+            }
+            return true;
+        } else {
+            return false;
+        }
     } else {
         return false;
     }
