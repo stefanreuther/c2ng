@@ -194,6 +194,11 @@ class TestGameProxyDrawingProxy : public CxxTest::TestSuite {
     void testQueueing();
 };
 
+class TestGameProxyExportAdaptor : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
 class TestGameProxyExportProxy : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -771,6 +776,11 @@ class TestGameProxyVisibilityRangeProxy : public CxxTest::TestSuite {
  public:
     void testSequence();
     void testEmpty();
+};
+
+class TestGameProxyWaitIndicator : public CxxTest::TestSuite {
+ public:
+    void testIt();
 };
 
 #endif

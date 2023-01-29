@@ -7,6 +7,11 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestGfxThreedContext : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
 class TestGfxThreedVecMath : public CxxTest::TestSuite {
  public:
     void testVec3fMake();

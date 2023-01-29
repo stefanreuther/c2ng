@@ -36,6 +36,11 @@ class TestGameParserDataInterface : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameParserInformationConsumer : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
 class TestGameParserMessageInformation : public CxxTest::TestSuite {
  public:
     void testIt();

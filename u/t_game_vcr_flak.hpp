@@ -35,6 +35,11 @@ class TestGameVcrFlakDatabase : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameVcrFlakDefinitions : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
 class TestGameVcrFlakEnvironment : public CxxTest::TestSuite {
  public:
     void testInterface();
