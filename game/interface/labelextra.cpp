@@ -223,12 +223,12 @@ game::interface::LabelExtra::setConfiguration(afl::base::Optional<String_t> ship
 
         // Update public and local config; onConfigChange() will therefore not see a change.
         if (const String_t* s = shipExpr.get()) {
-            config[label_ship].set(*s);
+            config[label_ship].setAndMarkUpdated(*s, game::config::ConfigurationOption::User);
             m_shipLabels.setExpression(*s, m_session.world());
         }
 
         if (const String_t* p = planetExpr.get()) {
-            config[label_planet].set(*p);
+            config[label_planet].setAndMarkUpdated(*p, game::config::ConfigurationOption::User);
             m_planetLabels.setExpression(*p, m_session.world());
         }
 
