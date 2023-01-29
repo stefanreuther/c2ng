@@ -44,22 +44,6 @@ namespace {
      *  Game -> UI tasks
      */
 
-    /* Publish a sig_update */
-    class UpdateTask : public util::Request<BrowserProxy> {
-     public:
-        UpdateTask(const PtrVector<Folder>& path, const PtrVector<Folder>& content, Browser::OptionalIndex_t index)
-            : m_info()
-            {
-                packFolders(m_info.path, path);
-                packFolders(m_info.content, content);
-                m_info.index = index;
-            }
-        void handle(BrowserProxy& proxy)
-            { proxy.sig_update.raise(m_info); }
-     private:
-        BrowserProxy::Info m_info;
-    };
-
     /* Publish a sig_selectedInfoUpdate */
     class UpdateInfoTask : public util::Request<BrowserProxy> {
      public:
@@ -79,26 +63,6 @@ namespace {
     /*
      *  Browser tasks (part of a possibly long-lived browser task chain)
      */
-
-    /* Inform UI side of reloaded content and finish task chain */
-    class PostLoadTask : public Task_t {
-     public:
-        PostLoadTask(util::RequestSender<BrowserProxy> reply, game::browser::Session& session)
-            : m_reply(reply), m_session(session)
-            { }
-        virtual void call()
-            {
-                m_session.log().write(LogListener::Trace, LOG_NAME, "Task: PostLoadTask");
-                Browser& bro = m_session.browser();
-                m_reply.postNewRequest(new UpdateTask(bro.path(), bro.content(), bro.getSelectedChildIndex()));
-                m_session.finishTask();
-            }
-        static std::auto_ptr<Task_t> make(util::RequestSender<BrowserProxy> reply, game::browser::Session& session)
-            { return std::auto_ptr<Task_t>(new PostLoadTask(reply, session)); }
-     private:
-        util::RequestSender<BrowserProxy> m_reply;
-        game::browser::Session& m_session;
-    };
 
     /* Save accounts, then proceed chain */
     class SaveAccountsTask : public Task_t {
@@ -184,6 +148,48 @@ namespace {
     };
 }
 
+/* Publish a sig_update */
+class game::proxy::BrowserProxy::UpdateTask : public util::Request<BrowserProxy> {
+ public:
+    UpdateTask(const PtrVector<Folder>& path, const PtrVector<Folder>& content, Browser::OptionalIndex_t index)
+        : m_info()
+        {
+            packFolders(m_info.path, path);
+            packFolders(m_info.content, content);
+            m_info.index = index;
+        }
+    void handle(BrowserProxy& proxy)
+        {
+            if (--proxy.m_numUpdatesPending == 0) {
+                proxy.sig_update.raise(m_info);
+            }
+        }
+ private:
+    BrowserProxy::Info m_info;
+};
+
+
+/* Inform UI side of reloaded content and finish task chain */
+class game::proxy::BrowserProxy::PostLoadTask : public Task_t {
+ public:
+    PostLoadTask(util::RequestSender<BrowserProxy> reply, game::browser::Session& session)
+        : m_reply(reply), m_session(session)
+        { }
+    virtual void call()
+        {
+            m_session.log().write(LogListener::Trace, LOG_NAME, "Task: PostLoadTask");
+            Browser& bro = m_session.browser();
+            m_reply.postNewRequest(new UpdateTask(bro.path(), bro.content(), bro.getSelectedChildIndex()));
+            m_session.finishTask();
+        }
+    static std::auto_ptr<Task_t> make(util::RequestSender<BrowserProxy> reply, game::browser::Session& session)
+        { return std::auto_ptr<Task_t>(new PostLoadTask(reply, session)); }
+ private:
+    util::RequestSender<BrowserProxy> m_reply;
+    game::browser::Session& m_session;
+};
+
+
 class game::proxy::BrowserProxy::Trampoline : public game::browser::UserCallback,
                                               private afl::base::Uncopyable {
  public:
@@ -243,7 +249,8 @@ game::proxy::BrowserProxy::BrowserProxy(util::RequestSender<game::browser::Sessi
     : m_callback(callback),
       m_reply(reply, *this),
       m_sender(sender.makeTemporary(new TrampolineFromSession(m_reply.getSender()))),
-      conn_passwordResult(m_callback.sig_passwordResult.add(this, &BrowserProxy::onPasswordResult))
+      conn_passwordResult(m_callback.sig_passwordResult.add(this, &BrowserProxy::onPasswordResult)),
+      m_numUpdatesPending(0)
 { }
 
 // Destructor.
@@ -264,6 +271,7 @@ game::proxy::BrowserProxy::loadContent()
      private:
         util::RequestSender<BrowserProxy> m_reply;
     };
+    ++m_numUpdatesPending;
     m_sender.postNewRequest(new InitTask(m_reply.getSender()));
 }
 
@@ -287,6 +295,7 @@ game::proxy::BrowserProxy::openChild(size_t nr)
         size_t m_number;
         util::RequestSender<BrowserProxy> m_reply;
     };
+    ++m_numUpdatesPending;
     m_sender.postNewRequest(new EnterTask(nr, m_reply.getSender()));
 }
 
@@ -312,6 +321,7 @@ game::proxy::BrowserProxy::openParent(size_t nr)
         size_t m_number;
         util::RequestSender<BrowserProxy> m_reply;
     };
+    ++m_numUpdatesPending;
     m_sender.postNewRequest(new UpTask(nr, m_reply.getSender()));
 }
 
@@ -335,6 +345,7 @@ game::proxy::BrowserProxy::openFolder(String_t name)
         String_t m_name;
         util::RequestSender<BrowserProxy> m_reply;
     };
+    ++m_numUpdatesPending;
     m_sender.postNewRequest(new Task(name, m_reply.getSender()));
 }
 

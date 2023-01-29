@@ -200,6 +200,8 @@ namespace game { namespace proxy {
         util::RequestSender<afl::io::FileSystem> fileSystem();
 
         /** Signal: folder content update.
+            The proxy tries to avoid out-of-date callbacks, that is,
+            a sequence of multiple open() calls will generate only one callback.
             @param info Folder identification and content */
         afl::base::Signal<void(const Info&)> sig_update;
 
@@ -209,6 +211,8 @@ namespace game { namespace proxy {
         afl::base::Signal<void(OptionalIndex_t, const FolderInfo&)> sig_selectedInfoUpdate;
 
      private:
+        class UpdateTask;
+        class PostLoadTask;
         class Trampoline;
         class TrampolineFromSession;
 
@@ -216,6 +220,7 @@ namespace game { namespace proxy {
         util::RequestReceiver<BrowserProxy> m_reply;
         util::RequestSender<Trampoline> m_sender;
         afl::base::SignalConnection conn_passwordResult;
+        int m_numUpdatesPending;
 
         void onPasswordResult(game::browser::UserCallback::PasswordResponse resp);
     };
