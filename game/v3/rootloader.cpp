@@ -58,8 +58,10 @@ game::v3::RootLoader::load(afl::base::Ref<afl::io::Directory> gameDirectory,
         actions += Root::aConfigureReadOnly;
         actions += Root::aSweep;
         if (m_scanner.getDirectoryFlags().containsAnyOf(DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveResult + DirectoryScanner::HaveNewResult + DirectoryScanner::HaveOtherResult)) {
-            // FIXME: add a bit "suggest unpack" for HaveNewResult?
             actions += Root::aUnpack;
+            if (m_scanner.getDirectoryFlags().contains(DirectoryScanner::HaveNewResult)) {
+                actions += Root::aSuggestUnpack;
+            }
         }
         if (m_scanner.getDirectoryFlags().contains(DirectoryScanner::HaveUnpacked)) {
             actions += Root::aMaketurn;

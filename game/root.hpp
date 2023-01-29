@@ -76,6 +76,10 @@ namespace game {
                 The Root must be recreated after unpacking (Folder::loadGameRoot()). */
             aUnpack,
 
+            /** Suggest user to use the "Unpack" function.
+                To be used with aUnpack. */
+            aSuggestUnpack,
+
             /** Allow user to use the "Maketurn" function.
                 If this is set, gameDirectory() points at a file-system directory.
                 The Root should be recreated after Maketurn (Folder::loadGameRoot()). */

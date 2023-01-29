@@ -134,7 +134,7 @@ namespace client { namespace screens {
         void onSweepAction();
         void onAutoLoad(int playerNumber);
         void onAutoFocus(int playerNumber);
-        bool preparePlayAction(size_t index);
+        bool preparePlayAction(int playerNumber);
 
         void setState(State st);
         void setList(client::widgets::FolderListbox::Items_t& items,

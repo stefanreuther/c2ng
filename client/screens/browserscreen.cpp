@@ -27,6 +27,7 @@
 #include "game/proxy/maintenanceproxy.hpp"
 #include "game/root.hpp"
 #include "ui/defaultresourceprovider.hpp"
+#include "ui/dialogs/messagebox.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/group.hpp"
 #include "ui/layout/hbox.hpp"
@@ -40,7 +41,7 @@
 #include "util/rich/styleattribute.hpp"
 #include "util/translation.hpp"
 #include "util/unicodechars.hpp"
- 
+
 using afl::container::PtrVector;
 using afl::string::Format;
 using client::dialogs::SimpleConsole;
@@ -399,16 +400,16 @@ client::screens::BrowserScreen::onKeyEnter(int)
         }
     } else {
         // Focus on info list. Enter game.
-        size_t infoIndex = m_info.getCurrentItem();
+        const size_t infoIndex = m_info.getCurrentItem();
         if (infoIndex < m_infoItems.size()) {
+            const int param = m_infoItems[infoIndex]->actionParameter;
             switch (m_infoItems[infoIndex]->action) {
              case NoAction:
                 break;
 
              case PlayAction:
-                if (preparePlayAction(infoIndex)) {
-                    // FIXME: PCC2 does Unpack when it is applicable. How do we implement that?
-                    sig_gameSelection.raise(m_infoItems[infoIndex]->actionParameter);
+                if (preparePlayAction(param)) {
+                    sig_gameSelection.raise(param);
                 }
                 break;
 
@@ -682,11 +683,22 @@ client::screens::BrowserScreen::onAutoFocus(int playerNumber)
 }
 
 bool
-client::screens::BrowserScreen::preparePlayAction(size_t /*index*/)
+client::screens::BrowserScreen::preparePlayAction(int playerNumber)
 {
     if (checkLocalSetup(m_root, m_translator, m_proxy)) {
         client::widgets::HelpWidget help(m_root, m_translator, m_gameSender, "pcc2:gamedirsetup");
         if (!client::dialogs::doDirectorySetupDialog(m_proxy, &help, m_root, m_translator)) {
+            return false;
+        }
+    }
+    if (m_infoActions.contains(game::Root::aUnpack) && m_infoActions.contains(game::Root::aSuggestUnpack)) {
+        if (ui::dialogs::MessageBox(m_translator("There are new result files for this game. "
+                                                 "Do you want to unpack them now?"),
+                                    m_translator("PCC2"),
+                                    m_root).doYesNoDialog(m_translator))
+        {
+            onUnpackAction();
+            setAutoFocus(playerNumber);
             return false;
         }
     }
