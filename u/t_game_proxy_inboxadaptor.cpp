@@ -48,7 +48,7 @@ namespace {
             : tx(), fs(), session(tx, fs), ind(), recv(ind, session)
             {
                 // Create empty root
-                session.setRoot(new game::test::Root(game::HostVersion()));
+                session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
 
                 // Create empty game
                 session.setGame(new game::Game());

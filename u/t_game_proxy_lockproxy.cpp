@@ -26,7 +26,7 @@ namespace {
     using game::map::Ship;
     using game::map::Universe;
     using game::proxy::LockProxy;
-    using game::test::Root;
+    using game::Root;
     using game::test::SessionThread;
     using util::SimpleRequestDispatcher;
 
@@ -47,7 +47,7 @@ namespace {
     void prepare(SessionThread& h)
     {
         // Root
-        Ptr<Root> r = new game::test::Root(HostVersion(HostVersion::PHost, MKVERSION(4,0,0)));
+        Ptr<Root> r = game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(4,0,0))).asPtr();
         h.session().setRoot(r);
 
         // Game

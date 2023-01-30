@@ -45,7 +45,7 @@ namespace {
         t.session().setShipList(shipList);
 
         // Root
-        Ptr<game::Root> r(new game::test::Root(HostVersion(HostVersion::PHost, MKVERSION(4,0,0))));
+        Ptr<game::Root> r(game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(4,0,0))).asPtr());
         t.session().setRoot(r);
 
         // Game

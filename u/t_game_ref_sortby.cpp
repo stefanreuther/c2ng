@@ -33,7 +33,7 @@ namespace {
     game::Root& addRoot(Environment& env)
     {
         if (env.session.getRoot().get() == 0) {
-            env.session.setRoot(new game::test::Root(game::HostVersion()));
+            env.session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
         }
         return *env.session.getRoot();
     }

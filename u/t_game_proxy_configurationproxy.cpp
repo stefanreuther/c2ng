@@ -25,7 +25,7 @@ TestGameProxyConfigurationProxy::testNumberFormatter()
     game::test::SessionThread h;
 
     // - root
-    h.session().setRoot(new game::test::Root(game::HostVersion()));
+    h.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
 
     // - user configuration
     UserConfiguration& config = h.session().getRoot()->userConfiguration();
@@ -50,7 +50,7 @@ TestGameProxyConfigurationProxy::testIntAccess()
 
     // Setup
     game::test::SessionThread h;
-    h.session().setRoot(new game::test::Root(game::HostVersion()));
+    h.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     UserConfiguration& config = h.session().getRoot()->userConfiguration();
     config[desc].set(7);
     TS_ASSERT_EQUALS(config[desc].getSource(), game::config::ConfigurationOption::Default);
@@ -76,7 +76,7 @@ TestGameProxyConfigurationProxy::testStringAccess()
 
     // Setup
     game::test::SessionThread h;
-    h.session().setRoot(new game::test::Root(game::HostVersion()));
+    h.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     UserConfiguration& config = h.session().getRoot()->userConfiguration();
     config[desc].set("hi");
     TS_ASSERT_EQUALS(config[desc].getSource(), game::config::ConfigurationOption::Default);
@@ -102,7 +102,7 @@ TestGameProxyConfigurationProxy::testMarkerAccess()
 
     // Setup
     game::test::SessionThread h;
-    h.session().setRoot(new game::test::Root(game::HostVersion()));
+    h.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     UserConfiguration& config = h.session().getRoot()->userConfiguration();
     TS_ASSERT_EQUALS(config[desc]().markerKind, 3);
     TS_ASSERT_EQUALS(config[desc]().color, 7);

@@ -28,7 +28,7 @@ namespace {
         h.session().setGame(g);
 
         // Root with PlayerList, HostVersion, Configuration (required for postprocessUniverse)
-        afl::base::Ptr<game::Root> r = new game::test::Root(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)));
+        afl::base::Ptr<game::Root> r = game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0))).asPtr();
         h.session().setRoot(r);
 
         // Ship list (required for postprocessUniverse)

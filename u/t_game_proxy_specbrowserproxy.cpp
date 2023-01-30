@@ -22,7 +22,7 @@ namespace {
 
     void addRoot(SessionThread& s)
     {
-        s.session().setRoot(new game::test::Root(HostVersion(HostVersion::PHost, MKVERSION(3,4,0))));
+        s.session().setRoot(game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(3,4,0))).asPtr());
     }
 
     void addShipList(SessionThread& s)

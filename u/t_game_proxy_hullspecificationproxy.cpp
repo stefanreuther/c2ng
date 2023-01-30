@@ -72,7 +72,7 @@ namespace {
 
     void addRoot(game::test::SessionThread& h)
     {
-        Ptr<Root> r = new game::test::Root(HostVersion(HostVersion::PHost, MKVERSION(4,0,0)));
+        Ptr<Root> r = game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(4,0,0))).asPtr();
         r->hostConfiguration()[game::config::HostConfiguration::BuildQueue].set("PBP");
         h.session().setRoot(r);
     }

@@ -37,13 +37,13 @@ using afl::sys::Log;
 using game::ExperienceLevelSet_t;
 using game::HostVersion;
 using game::PlayerSet_t;
+using game::Root;
 using game::config::HostConfiguration;
 using game::spec::Hull;
 using game::spec::HullFunction;
 using game::spec::HullFunctionList;
 using game::spec::Mission;
 using game::spec::ShipList;
-using game::test::Root;
 using game::v3::SpecificationLoader;
 
 namespace {
@@ -300,12 +300,12 @@ namespace {
         then use load() to test it, then examine it. */
     struct Environment {
         Ref<InternalDirectory> dir;
-        Root root;
+        afl::base::Ref<Root> root;
         ShipList list;
 
         Environment()
             : dir(InternalDirectory::create("dir")),
-              root(HostVersion(HostVersion::PHost, MKVERSION(4,0,0))),
+              root(game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(4,0,0)))),
               list()
             { }
 
@@ -318,7 +318,7 @@ namespace {
                 NullTranslator tx;
                 Log log;
                 bool result = false;
-                SpecificationLoader(dir, charset, tx, log).loadShipList(list, root, std::auto_ptr<game::StatusTask_t>(game::makeResultTask(result)))->call();
+                SpecificationLoader(dir, charset, tx, log).loadShipList(list, *root, std::auto_ptr<game::StatusTask_t>(game::makeResultTask(result)))->call();
                 return result;
             }
     };
@@ -358,7 +358,7 @@ TestGameV3SpecificationLoader::testStandard()
     TS_ASSERT_EQUALS(env.list.hulls().get(1)->getName(env.list.componentNamer()),      "OUTRIDER CLASS SCOUT");
     TS_ASSERT_EQUALS(env.list.hulls().get(11)->getName(env.list.componentNamer()),     "THOR CLASS FRIGATE");
 
-    TS_ASSERT_EQUALS(env.list.hullAssignments().getHullFromIndex(env.root.hostConfiguration(), 1, 1), 1);
+    TS_ASSERT_EQUALS(env.list.hullAssignments().getHullFromIndex(env.root->hostConfiguration(), 1, 1), 1);
 }
 
 /** Test that bad indexes in truehull are correctly refused.
@@ -405,7 +405,7 @@ TestGameV3SpecificationLoader::testLoadHullfunc()
                          4,
                          env.list.modifiedHullFunctions(),
                          env.list.basicHullFunctions(),
-                         env.root.hostConfiguration(),
+                         env.root->hostConfiguration(),
                          cooler,
                          ExperienceLevelSet_t::allUpTo(game::MAX_EXPERIENCE_LEVELS),
                          true),
@@ -414,7 +414,7 @@ TestGameV3SpecificationLoader::testLoadHullfunc()
                          4,
                          env.list.modifiedHullFunctions(),
                          env.list.basicHullFunctions(),
-                         env.root.hostConfiguration(),
+                         env.root->hostConfiguration(),
                          cooler,
                          ExperienceLevelSet_t::allUpTo(game::MAX_EXPERIENCE_LEVELS),
                          true),
@@ -562,7 +562,7 @@ TestGameV3SpecificationLoader::testHullfuncAssignment()
                               0,
                               env.list.modifiedHullFunctions(),
                               env.list.basicHullFunctions(),
-                              env.root.hostConfiguration(),
+                              env.root->hostConfiguration(),
                               hull,
                               ExperienceLevelSet_t::allUpTo(game::MAX_EXPERIENCE_LEVELS),
                               true),
@@ -599,7 +599,7 @@ TestGameV3SpecificationLoader::testHullfuncAssignmentShip()
                          0,
                          env.list.modifiedHullFunctions(),
                          env.list.basicHullFunctions(),
-                         env.root.hostConfiguration(),
+                         env.root->hostConfiguration(),
                          hull,
                          ExperienceLevelSet_t::allUpTo(game::MAX_EXPERIENCE_LEVELS),
                          true),
@@ -608,7 +608,7 @@ TestGameV3SpecificationLoader::testHullfuncAssignmentShip()
                          0,
                          env.list.modifiedHullFunctions(),
                          env.list.basicHullFunctions(),
-                         env.root.hostConfiguration(),
+                         env.root->hostConfiguration(),
                          hull,
                          ExperienceLevelSet_t::allUpTo(game::MAX_EXPERIENCE_LEVELS),
                          true),
@@ -653,7 +653,7 @@ TestGameV3SpecificationLoader::testHullfuncAssignmentPlayerRace()
 
     for (size_t i = 0; i < countof(TESTCASES); ++i) {
         Environment env;
-        env.root.hostConfiguration()[HostConfiguration::PlayerRace].set("1,1,4,4,4,2,2,9,9,9,9");
+        env.root->hostConfiguration()[HostConfiguration::PlayerRace].set("1,1,4,4,4,2,2,9,9,9,9");
         env.addStream("beamspec.dat", BEAMSPEC);
         env.addStream("torpspec.dat", TORPSPEC);
         env.addStream("engspec.dat",  ENGSPEC);
@@ -669,7 +669,7 @@ TestGameV3SpecificationLoader::testHullfuncAssignmentPlayerRace()
                               0,
                               env.list.modifiedHullFunctions(),
                               env.list.basicHullFunctions(),
-                              env.root.hostConfiguration(),
+                              env.root->hostConfiguration(),
                               hull,
                               ExperienceLevelSet_t::allUpTo(game::MAX_EXPERIENCE_LEVELS),
                               true),
@@ -756,7 +756,7 @@ TestGameV3SpecificationLoader::testHullfuncAssignmentLevel()
         HullFunctionList out;
         hull.getHullFunctions(true).getAll(out,
                                            env.list.modifiedHullFunctions(),
-                                           env.root.hostConfiguration(),
+                                           env.root->hostConfiguration(),
                                            hull,
                                            PlayerSet_t::allUpTo(game::MAX_PLAYERS),
                                            ExperienceLevelSet_t::allUpTo(game::MAX_EXPERIENCE_LEVELS),

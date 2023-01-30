@@ -24,7 +24,7 @@ namespace {
         afl::base::Ref<game::Game> game;
 
         TestHarness()
-            : tx(), root(*new game::test::Root(game::HostVersion())), game(*new game::Game())
+            : tx(), root(game::test::makeRoot(game::HostVersion())), game(*new game::Game())
             { }
     };
 

@@ -24,7 +24,7 @@ TestServerPlayBeamPacker::testIt()
     game::Session session(tx, fs);
 
     // Populate session
-    session.setRoot(new game::test::Root(game::HostVersion()));
+    session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     session.setShipList(new game::spec::ShipList());
     game::test::initStandardBeams(*session.getShipList());
 

@@ -44,7 +44,7 @@ TestGameProxyPlayerProxy::testNormal()
     game::test::WaitIndicator ind;
 
     // Populate root
-    Ptr<Root> root = new game::test::Root(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)));
+    Ptr<Root> root = game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0))).asPtr();
 
     PlayerList& playerList = root->playerList();
     Player& p1 = *playerList.create(1);

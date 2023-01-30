@@ -27,7 +27,7 @@ TestGameProxyObjectListExportAdaptor::testIt()
     afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
     game::Session s(tx, fs);
-    s.setRoot(new game::test::Root(game::HostVersion()));
+    s.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     s.setGame(new game::Game());
     s.setShipList(new game::spec::ShipList());
     for (int i = 1; i < 30; ++i) {
@@ -152,7 +152,7 @@ TestGameProxyObjectListExportAdaptor::testConfigError()
     afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
     game::Session s(tx, fs);
-    s.setRoot(new game::test::Root(game::HostVersion()));
+    s.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     s.getRoot()->userConfiguration()[game::config::UserConfiguration::ExportShipFields].set("-");
 
     std::vector<game::Id_t> ids;

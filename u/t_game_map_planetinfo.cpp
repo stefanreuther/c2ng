@@ -38,10 +38,10 @@ namespace {
     struct Environment {
         afl::io::xml::Nodes_t nodes;
         NullTranslator tx;
-        game::test::Root root;
+        afl::base::Ref<game::Root> root;
 
         Environment()
-            : nodes(), tx(), root(HostVersion(HostVersion::PHost, MKVERSION(3, 2, 0)))
+            : nodes(), tx(), root(game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(3, 2, 0))))
             { }
     };
 
@@ -322,7 +322,7 @@ void
 TestGameMapPlanetInfo::testDescribePlanetClimate()
 {
     Environment env;
-    describePlanetClimate(env.nodes, makePlayedPlanet(), TURN, env.root, PLAYER, env.tx);
+    describePlanetClimate(env.nodes, makePlayedPlanet(), TURN, *env.root, PLAYER, env.tx);
     TS_ASSERT_EQUALS(toString(env.nodes),
                      "<ul>"
                      "<li>Climate type: warm</li>"
@@ -337,9 +337,9 @@ void
 TestGameMapPlanetInfo::testDescribePlanetClimateFormat()
 {
     Environment env;
-    env.root.userConfiguration()[game::config::UserConfiguration::Display_ThousandsSep].set(0);
-    env.root.userConfiguration()[game::config::UserConfiguration::Display_Clans].set(1);
-    describePlanetClimate(env.nodes, makePlayedPlanet(), TURN, env.root, PLAYER, env.tx);
+    env.root->userConfiguration()[game::config::UserConfiguration::Display_ThousandsSep].set(0);
+    env.root->userConfiguration()[game::config::UserConfiguration::Display_Clans].set(1);
+    describePlanetClimate(env.nodes, makePlayedPlanet(), TURN, *env.root, PLAYER, env.tx);
     TS_ASSERT_EQUALS(toString(env.nodes),
                      "<ul>"
                      "<li>Climate type: warm</li>"
@@ -353,7 +353,7 @@ void
 TestGameMapPlanetInfo::testDescribePlanetClimateEmpty()
 {
     Environment env;
-    describePlanetClimate(env.nodes, Planet(77), TURN, env.root, 6, env.tx);
+    describePlanetClimate(env.nodes, Planet(77), TURN, *env.root, 6, env.tx);
     TS_ASSERT_EQUALS(toString(env.nodes),
                      "<ul>"
                      "<li>No information on climate available.</li>"
@@ -368,7 +368,7 @@ TestGameMapPlanetInfo::testDescribePlanetClimateDifferent()
     static_assert(PLAYER != VIEWPOINT, "PLAYER");
 
     Environment env;
-    describePlanetClimate(env.nodes, makePlayedPlanet(), TURN, env.root, VIEWPOINT, env.tx);
+    describePlanetClimate(env.nodes, makePlayedPlanet(), TURN, *env.root, VIEWPOINT, env.tx);
     TS_ASSERT_EQUALS(toString(env.nodes),
                      "<ul>"
                      "<li>Climate type: warm</li>"
@@ -383,14 +383,14 @@ void
 TestGameMapPlanetInfo::testDescribePlanetClimateDeath()
 {
     Environment env;
-    env.root.hostVersion() = HostVersion(HostVersion::Host, MKVERSION(3, 22, 40));
-    env.root.hostConfiguration()[HostConfiguration::ClimateDeathRate].set(25);
+    env.root->hostVersion() = HostVersion(HostVersion::Host, MKVERSION(3, 22, 40));
+    env.root->hostConfiguration()[HostConfiguration::ClimateDeathRate].set(25);
 
     Planet p = makePlayedPlanet();
     p.setCargo(Element::Colonists, 200);
     p.setTemperature(10);
 
-    describePlanetClimate(env.nodes, p, TURN, env.root, PLAYER, env.tx);
+    describePlanetClimate(env.nodes, p, TURN, *env.root, PLAYER, env.tx);
     TS_ASSERT_EQUALS(toString(env.nodes),
                      "<ul>"
                      "<li>Climate type: arctic</li>"
@@ -406,11 +406,11 @@ void
 TestGameMapPlanetInfo::testDescribePlanetClimateUnowned()
 {
     Environment env;
-    env.root.hostVersion() = HostVersion(HostVersion::Host, MKVERSION(3, 22, 40));
+    env.root->hostVersion() = HostVersion(HostVersion::Host, MKVERSION(3, 22, 40));
 
     Planet p = makeUnownedPlanet();
 
-    describePlanetClimate(env.nodes, p, TURN, env.root, 6, env.tx);
+    describePlanetClimate(env.nodes, p, TURN, *env.root, 6, env.tx);
     TS_ASSERT_EQUALS(toString(env.nodes),
                      "<ul>"
                      "<li>Climate type: arctic</li>"
@@ -425,7 +425,7 @@ void
 TestGameMapPlanetInfo::testDescribePlanetNatives()
 {
     Environment env;
-    describePlanetNatives(env.nodes, makePlayedPlanet(), TURN, env.root, PLAYER, game::map::UnloadInfo(), env.tx);
+    describePlanetNatives(env.nodes, makePlayedPlanet(), TURN, *env.root, PLAYER, game::map::UnloadInfo(), env.tx);
     TS_ASSERT_EQUALS(toString(env.nodes),
                      "<ul>"
                      "<li>Native race: Reptilian"
@@ -442,7 +442,7 @@ void
 TestGameMapPlanetInfo::testDescribePlanetNativesEmpty()
 {
     Environment env;
-    describePlanetNatives(env.nodes, Planet(77), TURN, env.root, 6, game::map::UnloadInfo(), env.tx);
+    describePlanetNatives(env.nodes, Planet(77), TURN, *env.root, 6, game::map::UnloadInfo(), env.tx);
     TS_ASSERT_EQUALS(toString(env.nodes),
                      "<ul>"
                      "<li>No information on natives available.</li>"
@@ -457,7 +457,7 @@ TestGameMapPlanetInfo::testDescribePlanetNativesAged()
     static_assert(PLAYER != VIEWPOINT, "PLAYER");
 
     Environment env;
-    describePlanetNatives(env.nodes, makeHistoryPlanet(), TURN, env.root, PLAYER, game::map::UnloadInfo(), env.tx);
+    describePlanetNatives(env.nodes, makeHistoryPlanet(), TURN, *env.root, PLAYER, game::map::UnloadInfo(), env.tx);
     TS_ASSERT_EQUALS(toString(env.nodes),
                      "<ul>"
                      "<li>Native race: Bovinoid"
@@ -475,9 +475,9 @@ void
 TestGameMapPlanetInfo::testDescribePlanetNativesUnowned()
 {
     Environment env;
-    env.root.hostVersion() = HostVersion(HostVersion::Host, MKVERSION(3, 22, 40));
+    env.root->hostVersion() = HostVersion(HostVersion::Host, MKVERSION(3, 22, 40));
 
-    describePlanetNatives(env.nodes, makeUnownedPlanet(), TURN, env.root, 7, game::map::UnloadInfo(), env.tx);
+    describePlanetNatives(env.nodes, makeUnownedPlanet(), TURN, *env.root, 7, game::map::UnloadInfo(), env.tx);
     TS_ASSERT_EQUALS(toString(env.nodes),
                      "<ul>"
                      "<li>Native race: Reptilian"
@@ -494,9 +494,9 @@ void
 TestGameMapPlanetInfo::testDescribePlanetNativesUnownedBorg()
 {
     Environment env;
-    env.root.hostVersion() = HostVersion(HostVersion::Host, MKVERSION(3, 22, 40));
+    env.root->hostVersion() = HostVersion(HostVersion::Host, MKVERSION(3, 22, 40));
 
-    describePlanetNatives(env.nodes, makeUnownedPlanet(), TURN, env.root, 6, game::map::UnloadInfo(), env.tx);
+    describePlanetNatives(env.nodes, makeUnownedPlanet(), TURN, *env.root, 6, game::map::UnloadInfo(), env.tx);
     TS_ASSERT_EQUALS(toString(env.nodes),
                      "<ul>"
                      "<li>Native race: Reptilian"
@@ -514,7 +514,7 @@ void
 TestGameMapPlanetInfo::testDescribePlanetColony()
 {
     Environment env;
-    describePlanetColony(env.nodes, makePlayedPlanet(), TURN, env.root, PLAYER, game::map::UnloadInfo(), env.tx);
+    describePlanetColony(env.nodes, makePlayedPlanet(), TURN, *env.root, PLAYER, game::map::UnloadInfo(), env.tx);
     TS_ASSERT_EQUALS(toString(env.nodes),
                      "<ul>"
                      "<li>Colonists: Player 3</li>"
@@ -530,7 +530,7 @@ void
 TestGameMapPlanetInfo::testDescribePlanetColonyEmpty()
 {
     Environment env;
-    describePlanetColony(env.nodes, Planet(77), TURN, env.root, 6, game::map::UnloadInfo(), env.tx);
+    describePlanetColony(env.nodes, Planet(77), TURN, *env.root, 6, game::map::UnloadInfo(), env.tx);
     TS_ASSERT_EQUALS(toString(env.nodes),
                      "<ul>"
                      "<li>No information on colonists available.</li>"
@@ -545,7 +545,7 @@ TestGameMapPlanetInfo::testDescribePlanetColonyRGA()
     static_assert(PLAYER != VIEWPOINT, "PLAYER");
 
     Environment env;
-    describePlanetColony(env.nodes, makePlayedPlanet(), TURN, env.root, VIEWPOINT, game::map::UnloadInfo(), env.tx);
+    describePlanetColony(env.nodes, makePlayedPlanet(), TURN, *env.root, VIEWPOINT, game::map::UnloadInfo(), env.tx);
     TS_ASSERT_EQUALS(toString(env.nodes),
                      "<ul>"
                      "<li>Colonists: Player 3</li>"
@@ -570,7 +570,7 @@ TestGameMapPlanetInfo::testDescribePlanetColonyGroundAttack()
     u.hostileUnloadIsAssumed = true;
 
     Environment env;
-    describePlanetColony(env.nodes, makePlayedPlanet(), TURN, env.root, VIEWPOINT, u, env.tx);
+    describePlanetColony(env.nodes, makePlayedPlanet(), TURN, *env.root, VIEWPOINT, u, env.tx);
     TS_ASSERT_EQUALS(toString(env.nodes),
                      "<ul>"
                      "<li>Colonists: Player 3</li>"
@@ -593,7 +593,7 @@ TestGameMapPlanetInfo::testDescribePlanetColonyAged()
     static_assert(PLAYER != VIEWPOINT, "PLAYER");
 
     Environment env;
-    describePlanetColony(env.nodes, makeHistoryPlanet(), TURN, env.root, PLAYER, game::map::UnloadInfo(), env.tx);
+    describePlanetColony(env.nodes, makeHistoryPlanet(), TURN, *env.root, PLAYER, game::map::UnloadInfo(), env.tx);
     TS_ASSERT_EQUALS(toString(env.nodes),
                      "<ul>"
                      "<li>Colonists: Player 3</li>"
@@ -611,7 +611,7 @@ void
 TestGameMapPlanetInfo::testDescribePlanetBuildingEffects()
 {
     Environment env;
-    describePlanetBuildingEffects(env.nodes, makePlayedPlanet(), env.root, env.tx);
+    describePlanetBuildingEffects(env.nodes, makePlayedPlanet(), *env.root, env.tx);
     TS_ASSERT_EQUALS(toString(env.nodes),
                      "<ul>"
                      "<li>Sensor visibility: <font>67%, light</font></li>"
@@ -627,7 +627,7 @@ void
 TestGameMapPlanetInfo::testDescribePlanetBuildingEffectsEmpty()
 {
     Environment env;
-    describePlanetBuildingEffects(env.nodes, Planet(77), env.root, env.tx);
+    describePlanetBuildingEffects(env.nodes, Planet(77), *env.root, env.tx);
     TS_ASSERT_EQUALS(toString(env.nodes),
                      "<ul>"
                      "</ul>");
@@ -649,11 +649,11 @@ TestGameMapPlanetInfo::testDescribePlanetDefenseEffects()
 
     // Initial query; planet has 5 defense.
     {
-        game::test::Root root(HostVersion(HostVersion::PHost, MKVERSION(3, 2, 0)));
+        afl::base::Ref<game::Root> root(game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(3, 2, 0))));
         game::map::DefenseEffectInfos_t result;
         describePlanetDefenseEffects(result,
                                      p,
-                                     root,
+                                     *root,
                                      shipList,
                                      game::UnitScoreDefinitionList(),
                                      tx);
@@ -669,13 +669,13 @@ TestGameMapPlanetInfo::testDescribePlanetDefenseEffects()
 
     // Retry with PlanetsHaveTubes
     {
-        game::test::Root root(HostVersion(HostVersion::PHost, MKVERSION(3, 2, 0)));
-        root.hostConfiguration()[HostConfiguration::PlanetsHaveTubes].set(1);
+        afl::base::Ref<game::Root> root(game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(3, 2, 0))));
+        root->hostConfiguration()[HostConfiguration::PlanetsHaveTubes].set(1);
 
         game::map::DefenseEffectInfos_t result;
         describePlanetDefenseEffects(result,
                                      p,
-                                     root,
+                                     *root,
                                      shipList,
                                      game::UnitScoreDefinitionList(),
                                      tx);
@@ -694,13 +694,13 @@ TestGameMapPlanetInfo::testDescribePlanetDefenseEffects()
 
     // Try again with 7 defense, does value adapt?
     {
-        game::test::Root root(HostVersion(HostVersion::PHost, MKVERSION(3, 2, 0)));
+        afl::base::Ref<game::Root> root(game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(3, 2, 0))));
         p.setNumBuildings(game::DefenseBuilding, p.getNumBuildings(game::DefenseBuilding).orElse(0) + 2);
 
         game::map::DefenseEffectInfos_t result;
         describePlanetDefenseEffects(result,
                                      p,
-                                     root,
+                                     *root,
                                      shipList,
                                      game::UnitScoreDefinitionList(),
                                      tx);
@@ -771,15 +771,15 @@ TestGameMapPlanetInfo::testPackGroundDefenseInfo()
 {
     // Create a root with some players
     afl::string::NullTranslator tx;
-    game::test::Root root(HostVersion(HostVersion::PHost, MKVERSION(3, 2, 0)));
-    root.playerList().create(1)->setName(game::Player::LongName, "Fed");
-    root.playerList().create(2)->setName(game::Player::LongName, "Lizard");
-    root.playerList().create(3)->setName(game::Player::LongName, "Romulan");
-    root.playerList().create(4)->setName(game::Player::LongName, "Klingon");
-    root.playerList().create(5)->setName(game::Player::LongName, "Orion");
-    root.playerList().create(6)->setName(game::Player::LongName, "Borg");
+    afl::base::Ref<game::Root> root(game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(3, 2, 0))));
+    root->playerList().create(1)->setName(game::Player::LongName, "Fed");
+    root->playerList().create(2)->setName(game::Player::LongName, "Lizard");
+    root->playerList().create(3)->setName(game::Player::LongName, "Romulan");
+    root->playerList().create(4)->setName(game::Player::LongName, "Klingon");
+    root->playerList().create(5)->setName(game::Player::LongName, "Orion");
+    root->playerList().create(6)->setName(game::Player::LongName, "Borg");
 
-    game::map::GroundDefenseInfo info = game::map::packGroundDefenseInfo(makePlayedPlanet(), root, tx);
+    game::map::GroundDefenseInfo info = game::map::packGroundDefenseInfo(makePlayedPlanet(), *root, tx);
 
     TS_ASSERT_EQUALS(info.defender, PLAYER);
     TS_ASSERT_EQUALS(info.isPlayable, true);

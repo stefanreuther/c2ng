@@ -39,7 +39,7 @@ namespace {
         h.session().setGame(g);
 
         // Root with PlayerList, HostVersion, Configuration
-        afl::base::Ptr<game::Root> r = new game::test::Root(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)));
+        afl::base::Ptr<game::Root> r = game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0))).asPtr();
         r->playerList().create(1)->setName(game::Player::ShortName, "The Feds");
         r->playerList().create(2)->setName(game::Player::ShortName, "The Lizards");
         r->playerList().create(3)->setName(game::Player::ShortName, "The Birds");

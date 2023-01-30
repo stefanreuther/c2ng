@@ -1746,7 +1746,7 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_gfx_threed_context.cpp \
+FILES_testsuite = u/t_game_test_root.cpp u/t_gfx_threed_context.cpp \
     u/t_game_vcr_flak_definitions.cpp \
     u/t_game_parser_informationconsumer.cpp u/t_game_proxy_waitindicator.cpp \
     u/t_game_proxy_exportadaptor.cpp u/t_client_applicationparameters.cpp \

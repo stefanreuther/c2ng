@@ -59,7 +59,7 @@ namespace {
 
     void addRoot(SessionThread& h)
     {
-        Ptr<Root> root = new game::test::Root(HostVersion(HostVersion::PHost, MKVERSION(3,2,0)));
+        Ptr<Root> root = game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(3,2,0))).asPtr();
         root->hostConfiguration()[game::config::HostConfiguration::AllowBeamUpMultiple].set(1);
         h.session().setRoot(root);
     }

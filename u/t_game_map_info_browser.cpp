@@ -44,7 +44,7 @@ namespace {
     void createTurn(TestHarness& h)
     {
         // Root
-        afl::base::Ptr<game::Root> root = new game::test::Root(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)));
+        afl::base::Ptr<game::Root> root = game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0))).asPtr();
         h.session.setRoot(root);
         Player* p1 = root->playerList().create(1);
         p1->setName(Player::ShortName, "The First");

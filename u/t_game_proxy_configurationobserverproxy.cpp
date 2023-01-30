@@ -43,7 +43,7 @@ TestGameProxyConfigurationObserverProxy::testIt()
 {
     // Environment
     game::test::SessionThread h;
-    h.session().setRoot(new game::test::Root(game::HostVersion()));
+    h.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     UserConfiguration& config = h.session().getRoot()->userConfiguration();
     config[UserConfiguration::Backup_Chart].set("a1");
     config[UserConfiguration::Sim_NumThreads].set(3);

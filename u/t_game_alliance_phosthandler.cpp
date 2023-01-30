@@ -32,7 +32,7 @@ TestGameAlliancePHostHandler::testIt()
     afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
     game::Session session(tx, fs);
-    session.setRoot(new game::test::Root(HostVersion(HostVersion::PHost, VERSION)));
+    session.setRoot(game::test::makeRoot(HostVersion(HostVersion::PHost, VERSION)).asPtr());
 
     // Turn
     game::Turn turn;
@@ -82,7 +82,7 @@ TestGameAlliancePHostHandler::testEnemy()
     afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
     game::Session session(tx, fs);
-    session.setRoot(new game::test::Root(HostVersion(HostVersion::PHost, VERSION)));
+    session.setRoot(game::test::makeRoot(HostVersion(HostVersion::PHost, VERSION)).asPtr());
 
     // Turn
     game::Turn turn;

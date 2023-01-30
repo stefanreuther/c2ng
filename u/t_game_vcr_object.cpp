@@ -378,7 +378,7 @@ TestGameVcrObject::testDescribe()
     teamSettings.setViewpointPlayer(1);
 
     // Root
-    game::test::Root root(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)));
+    afl::base::Ref<game::Root> root(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0))));
 
     // ShipList
     game::spec::ShipList shipList;
@@ -412,7 +412,7 @@ TestGameVcrObject::testDescribe()
         obj.setPicture(9);
         obj.setMass(75);
         obj.setCrew(10);
-        game::vcr::ObjectInfo info = obj.describe(0, &root, &shipList, tx);
+        game::vcr::ObjectInfo info = obj.describe(0, &*root, &shipList, tx);
 
         TS_ASSERT_EQUALS(info.text[0], "N2 (Id #77, a Player 1 OUTRIDER CLASS SCOUT)");
         TS_ASSERT_EQUALS(info.text[1], "0% shield (75 kt), 0% damaged, 10 crewmen");
@@ -428,7 +428,7 @@ TestGameVcrObject::testDescribe()
         obj.setPicture(9);
         obj.setMass(75);
         obj.setCrew(10);
-        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &*root, &shipList, tx);
 
         TS_ASSERT_EQUALS(info.text[0], "N3 (Id #77, our OUTRIDER CLASS SCOUT)");
         TS_ASSERT_EQUALS(info.color[0], util::SkinColor::Green);
@@ -443,7 +443,7 @@ TestGameVcrObject::testDescribe()
         obj.setPicture(9);
         obj.setMass(75);
         obj.setCrew(10);
-        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &*root, &shipList, tx);
 
         TS_ASSERT_EQUALS(info.text[0], "N4 (Id #77, a Player 2 OUTRIDER CLASS SCOUT)");
         TS_ASSERT_EQUALS(info.color[0], util::SkinColor::Yellow);
@@ -458,7 +458,7 @@ TestGameVcrObject::testDescribe()
         obj.setPicture(9);
         obj.setMass(75);
         obj.setCrew(10);
-        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &*root, &shipList, tx);
 
         TS_ASSERT_EQUALS(info.text[0], "N5 (Id #77, a Player 3 OUTRIDER CLASS SCOUT)");
         TS_ASSERT_EQUALS(info.color[0], util::SkinColor::Red);
@@ -473,7 +473,7 @@ TestGameVcrObject::testDescribe()
         obj.setPicture(99);
         obj.setMass(75);
         obj.setCrew(10);
-        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &*root, &shipList, tx);
 
         TS_ASSERT_EQUALS(info.text[0], "N6 (Id #77, a Player 3 starship)");
     }
@@ -489,7 +489,7 @@ TestGameVcrObject::testDescribe()
         obj.setIsPlanet(true);
         obj.setShield(50);
         obj.setDamage(3);
-        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &*root, &shipList, tx);
 
         TS_ASSERT_EQUALS(info.text[0], "N7 (Id #77, our planet)");
         TS_ASSERT_EQUALS(info.text[1], "50% shield (175 kt), 3% damaged");
@@ -506,7 +506,7 @@ TestGameVcrObject::testDescribe()
         obj.setCrew(10);
         obj.setNumBeams(3);
         obj.setBeamType(10);
-        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &*root, &shipList, tx);
 
         TS_ASSERT_EQUALS(info.text[0], "N8 (Id #77, our starship)");
         TS_ASSERT_EQUALS(info.text[1], "0% shield (75 kt), 0% damaged, 10 crewmen");
@@ -524,7 +524,7 @@ TestGameVcrObject::testDescribe()
         obj.setCrew(10);
         obj.setNumBeams(3);
         obj.setBeamType(0);
-        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &*root, &shipList, tx);
 
         TS_ASSERT_EQUALS(info.text[0], "N8 (Id #77, our starship)");
         TS_ASSERT_EQUALS(info.text[1], "0% shield (75 kt), 0% damaged, 10 crewmen");
@@ -543,7 +543,7 @@ TestGameVcrObject::testDescribe()
         obj.setNumLaunchers(1);
         obj.setTorpedoType(3);
         obj.setNumTorpedoes(10);
-        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &*root, &shipList, tx);
 
         TS_ASSERT_EQUALS(info.text[0], "N9 (Id #77, our starship)");
         TS_ASSERT_EQUALS(info.text[1], "0% shield (75 kt), 0% damaged, 10 crewmen");
@@ -562,7 +562,7 @@ TestGameVcrObject::testDescribe()
         obj.setNumLaunchers(10);
         obj.setTorpedoType(3);
         obj.setNumTorpedoes(1);
-        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &*root, &shipList, tx);
 
         TS_ASSERT_EQUALS(info.text[0], "N10 (Id #77, our starship)");
         TS_ASSERT_EQUALS(info.text[1], "0% shield (75 kt), 0% damaged, 10 crewmen");
@@ -581,7 +581,7 @@ TestGameVcrObject::testDescribe()
         obj.setNumLaunchers(1);
         obj.setTorpedoType(0);
         obj.setNumTorpedoes(10);
-        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &*root, &shipList, tx);
 
         TS_ASSERT_EQUALS(info.text[0], "N11 (Id #77, our starship)");
         TS_ASSERT_EQUALS(info.text[1], "0% shield (75 kt), 0% damaged, 10 crewmen");
@@ -599,7 +599,7 @@ TestGameVcrObject::testDescribe()
         obj.setCrew(10);
         obj.setNumBays(4);
         obj.setNumFighters(30);
-        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &*root, &shipList, tx);
 
         TS_ASSERT_EQUALS(info.text[0], "N12 (Id #77, our starship)");
         TS_ASSERT_EQUALS(info.text[1], "0% shield (75 kt), 0% damaged, 10 crewmen");
@@ -620,7 +620,7 @@ TestGameVcrObject::testDescribe()
         obj.setTorpedoType(10);
         obj.setNumTorpedoes(20);
         obj.setNumLaunchers(2);
-        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &*root, &shipList, tx);
 
         TS_ASSERT_EQUALS(info.text[0], "N13 (Id #77, our planet)");
         TS_ASSERT_EQUALS(info.text[1], "0% shield (200 kt), 0% damaged");
@@ -641,7 +641,7 @@ TestGameVcrObject::testDescribe()
         obj.setTorpedoType(0);
         obj.setNumTorpedoes(20);
         obj.setNumLaunchers(2);
-        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &*root, &shipList, tx);
 
         TS_ASSERT_EQUALS(info.text[0], "N14 (Id #77, our planet)");
         TS_ASSERT_EQUALS(info.text[1], "0% shield (200 kt), 0% damaged");
@@ -659,7 +659,7 @@ TestGameVcrObject::testDescribe()
         obj.setNumBeams(4);
         obj.setBeamType(7);
         obj.setCrew(10);
-        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &*root, &shipList, tx);
 
         TS_ASSERT_EQUALS(info.text[0], "N15 (Id #77, our GORBIE CLASS BATTLECARRIER)");
         TS_ASSERT_EQUALS(info.text[1], "0% shield (980 kt), 0% damaged, 10 crewmen");
@@ -680,7 +680,7 @@ TestGameVcrObject::testDescribe()
         obj.setBeamType(7);
         obj.setCrew(10);
         obj.setNumFighters(66);
-        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &*root, &shipList, tx);
 
         TS_ASSERT_EQUALS(info.text[0], "N16 (Id #77, our GORBIE CLASS BATTLECARRIER)");
         TS_ASSERT_EQUALS(info.text[1], "0% shield (980 kt), 0% damaged, 10 crewmen");
@@ -700,7 +700,7 @@ TestGameVcrObject::testDescribe()
         obj.setNumBeams(4);
         obj.setBeamType(7);
         obj.setCrew(10);
-        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &*root, &shipList, tx);
 
         TS_ASSERT_EQUALS(info.text[0], "N17 (Id #77, our ANNIHILATION CLASS BATTLESHIP)");
         TS_ASSERT_EQUALS(info.text[1], "0% shield (960 kt), 0% damaged, 10 crewmen");
@@ -722,7 +722,7 @@ TestGameVcrObject::testDescribe()
         obj.setCrew(10);
         obj.setTorpedoType(5);
         obj.setNumTorpedoes(33);
-        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &*root, &shipList, tx);
 
         TS_ASSERT_EQUALS(info.text[0], "N18 (Id #77, our ANNIHILATION CLASS BATTLESHIP)");
         TS_ASSERT_EQUALS(info.text[1], "0% shield (960 kt), 0% damaged, 10 crewmen");
@@ -741,7 +741,7 @@ TestGameVcrObject::testDescribe()
         obj.setMass(75);
         obj.setCrew(10);
         obj.setRole(game::vcr::Object::AggressorRole);
-        game::vcr::ObjectInfo info = obj.describe(0, &root, &shipList, tx);
+        game::vcr::ObjectInfo info = obj.describe(0, &*root, &shipList, tx);
 
         TS_ASSERT_EQUALS(info.text[0], "N19 (Id #77, a Player 1 OUTRIDER CLASS SCOUT)");
         TS_ASSERT_EQUALS(info.text[1], "0% shield (75 kt), 0% damaged, 10 crewmen, aggressor");

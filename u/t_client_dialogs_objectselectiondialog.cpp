@@ -57,7 +57,7 @@ namespace {
                 pl->addPlanetSource(game::PlayerSet_t(1));
                 pl->setPosition(game::map::Point(2222,3333));
                 pl->setName("Planet Express");
-                session.setRoot(new game::test::Root(game::HostVersion()));
+                session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
                 session.setShipList(new game::spec::ShipList());
                 session.postprocessTurn(session.getGame()->currentTurn(), game::PlayerSet_t(1), game::PlayerSet_t(1), game::map::Object::Playable);
 

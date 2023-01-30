@@ -60,7 +60,7 @@ namespace {
     void prepare(game::test::SessionThread& t)
     {
         // Add connections
-        afl::base::Ref<game::Root> r = *new game::test::Root(game::HostVersion());
+        afl::base::Ref<game::Root> r = game::test::makeRoot(game::HostVersion());
         afl::base::Ref<game::Game> g = *new game::Game();
         t.session().setRoot(r.asPtr());
         t.session().setGame(g.asPtr());

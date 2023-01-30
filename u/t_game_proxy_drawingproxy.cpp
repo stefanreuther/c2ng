@@ -635,7 +635,7 @@ TestGameProxyDrawingProxy::testCreateCannedMarker()
 
     // Need a root for this test for configuration.
     // Hardwire the configuration here to be independant from changing defaults.
-    afl::base::Ptr<game::Root> r = new game::test::Root(game::HostVersion());
+    afl::base::Ptr<game::Root> r = game::test::makeRoot(game::HostVersion()).asPtr();
     r->userConfiguration().setOption("chart.marker4", "5,7,x", game::config::ConfigurationOption::User);
     h.session().setRoot(r);
 

@@ -20,12 +20,12 @@ namespace {
 
     struct TestHarness {
         gsi::NullPictureNamer picNamer;
-        game::test::Root root;
+        afl::base::Ref<game::Root> root;
         game::spec::ShipList shipList;
         afl::string::NullTranslator tx;
 
         TestHarness()
-            : picNamer(), root(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,1,0))),
+            : picNamer(), root(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,1,0)))),
               shipList(), tx()
             { }
     };
@@ -79,14 +79,14 @@ TestGameSpecInfoBrowser::testDescribePlayer()
 {
     // Create a player
     TestHarness h;
-    Player* pl = h.root.playerList().create(7);
+    Player* pl = h.root->playerList().create(7);
     TS_ASSERT(pl);
     pl->setName(Player::LongName, "The Sevens");
     pl->setName(Player::AdjectiveName, "sevenses");
     pl->setName(Player::EmailAddress, "e@mail.7");
 
     // Get it
-    gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
+    gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
     std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::PlayerPage, 7, true));
 
     // Verify
@@ -115,7 +115,7 @@ TestGameSpecInfoBrowser::testDescribeHull()
     createHull(h, HULL_NR, "LUDMILLA", 3);
 
     // Get it
-    gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
+    gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
     std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::HullPage, HULL_NR, true));
 
     // Verify
@@ -136,9 +136,9 @@ TestGameSpecInfoBrowser::testDescribeRacial()
     // (we have not created any hullfunc-based abilities).
     // We need to create players, though, because otherwise all abilities will be dropped.
     TestHarness h;
-    h.root.playerList().create(1);
-    h.root.playerList().create(2);
-    gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
+    h.root->playerList().create(1);
+    h.root->playerList().create(2);
+    gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
     std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::RacialAbilitiesPage, 0, true));
 
     // Verify
@@ -171,7 +171,7 @@ TestGameSpecInfoBrowser::testDescribeShip()
 
     // Get it
     // This is index-based access, 1=second (hf2)
-    gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
+    gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
     std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::ShipAbilitiesPage, 1, true));
 
     // Verify
@@ -197,7 +197,7 @@ TestGameSpecInfoBrowser::testDescribeEngine()
     createEngine(h, 8, "6 litre V8", 3);
 
     // Get it
-    gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
+    gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
     std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::EnginePage, 8, true));
 
     // Verify
@@ -219,7 +219,7 @@ TestGameSpecInfoBrowser::testDescribeBeam()
     game::test::initStandardBeams(h.shipList);
 
     // Get it
-    gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
+    gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
     std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::BeamPage, 2, true));
 
     // Verify
@@ -241,7 +241,7 @@ TestGameSpecInfoBrowser::testDescribeTorpedo()
     game::test::initStandardTorpedoes(h.shipList);
 
     // Get it
-    gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
+    gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
     std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::TorpedoPage, 7, true));
 
     // Verify
@@ -260,13 +260,13 @@ TestGameSpecInfoBrowser::testDescribeFighter()
 {
     // Create a beam
     TestHarness h;
-    Player* pl3 = h.root.playerList().create(3);
+    Player* pl3 = h.root->playerList().create(3);
     pl3->setName(Player::LongName, "The Birds");
     pl3->setName(Player::ShortName, "Birds");
     pl3->setName(Player::AdjectiveName, "Bird");
 
     // Get it
-    gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
+    gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
     std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::FighterPage, 3, true));
 
     // Verify
@@ -284,19 +284,19 @@ void
 TestGameSpecInfoBrowser::testListPlayer()
 {
     TestHarness h;
-    Player* pl1 = h.root.playerList().create(1);
+    Player* pl1 = h.root->playerList().create(1);
     pl1->setName(Player::LongName, "The Federation");
     pl1->setName(Player::ShortName, "Federation");
 
-    Player* pl2 = h.root.playerList().create(2);
+    Player* pl2 = h.root->playerList().create(2);
     pl2->setName(Player::LongName, "The Lizards");
     pl2->setName(Player::ShortName, "Lizard");
 
-    Player* pl3 = h.root.playerList().create(3);
+    Player* pl3 = h.root->playerList().create(3);
     pl3->setName(Player::LongName, "The Birds");
     pl3->setName(Player::ShortName, "Bird");
 
-    gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
+    gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
 
     // Check 1:
     std::auto_ptr<gsi::ListContent> c(testee.listItems(gsi::PlayerPage, gsi::Filter(), gsi::String_Name));
@@ -336,7 +336,7 @@ TestGameSpecInfoBrowser::testListHull()
     h.shipList.hullAssignments().add(4, 1, 5);
     h.shipList.hullAssignments().add(4, 2, 6);
     h.shipList.hullAssignments().add(4, 7, 1);
-    gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
+    gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
 
     // Check 1: full list
     std::auto_ptr<gsi::ListContent> c(testee.listItems(gsi::HullPage, gsi::Filter(), gsi::Range_Id));
@@ -378,9 +378,9 @@ void
 TestGameSpecInfoBrowser::testListRacial()
 {
     TestHarness h;
-    h.root.playerList().create(1);
-    h.root.playerList().create(2);
-    gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
+    h.root->playerList().create(1);
+    h.root->playerList().create(2);
+    gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
 
     // Check
     std::auto_ptr<gsi::ListContent> c(testee.listItems(gsi::RacialAbilitiesPage, gsi::Filter(), gsi::Range_Id));
@@ -397,7 +397,7 @@ TestGameSpecInfoBrowser::testListShip()
     createHullFunction(h, 10, "b", "Drink");
     createHullFunction(h, 3,  "c", "Sleep");
     createHullFunction(h, 9,  "d", "Repeat");
-    gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
+    gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
 
     // Check 1:
     std::auto_ptr<gsi::ListContent> c(testee.listItems(gsi::ShipAbilitiesPage, gsi::Filter(), gsi::Range_Id));
@@ -431,7 +431,7 @@ TestGameSpecInfoBrowser::testListEngine()
     createEngine(h, 2, "Two-speed", 3);
     createEngine(h, 3, "Three-speed", 4);
     createEngine(h, 4, "Four-speed", 5);
-    gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
+    gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
 
     // Check 1:
     std::auto_ptr<gsi::ListContent> c(testee.listItems(gsi::EnginePage, gsi::Filter(), gsi::Range_Id));
@@ -459,7 +459,7 @@ TestGameSpecInfoBrowser::testListBeam()
 {
     TestHarness h;
     game::test::initStandardBeams(h.shipList);
-    gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
+    gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
 
     // Check 1:
     std::auto_ptr<gsi::ListContent> c(testee.listItems(gsi::BeamPage, gsi::Filter(), gsi::Range_Id));
@@ -489,7 +489,7 @@ TestGameSpecInfoBrowser::testListTorpedo()
 {
     TestHarness h;
     game::test::initPListTorpedoes(h.shipList);
-    gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
+    gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
 
     // Check 1:
     std::auto_ptr<gsi::ListContent> c(testee.listItems(gsi::TorpedoPage, gsi::Filter(), gsi::Range_Id));
@@ -518,19 +518,19 @@ void
 TestGameSpecInfoBrowser::testListFighter()
 {
     TestHarness h;
-    Player* pl1 = h.root.playerList().create(1);
+    Player* pl1 = h.root->playerList().create(1);
     pl1->setName(Player::LongName, "The Federation");
     pl1->setName(Player::ShortName, "Federation");
     pl1->setName(Player::AdjectiveName, "Fed");
 
-    Player* pl2 = h.root.playerList().create(2);
+    Player* pl2 = h.root->playerList().create(2);
     pl2->setName(Player::LongName, "The Lizards");
     pl2->setName(Player::ShortName, "Lizard");
     pl2->setName(Player::AdjectiveName, "Liz");
 
-    h.root.hostConfiguration().setOption("FighterBeamKill", "5,3,2,2,2", game::config::ConfigurationOption::Game);
+    h.root->hostConfiguration().setOption("FighterBeamKill", "5,3,2,2,2", game::config::ConfigurationOption::Game);
 
-    gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
+    gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
 
     // Check 1:
     std::auto_ptr<gsi::ListContent> c(testee.listItems(gsi::FighterPage, gsi::Filter(), gsi::Range_Id));
@@ -566,10 +566,10 @@ TestGameSpecInfoBrowser::testDescribeFilter()
 {
     TestHarness h;
 
-    Player* pl = h.root.playerList().create(3);
+    Player* pl = h.root->playerList().create(3);
     pl->setName(Player::ShortName, "Playboy");
 
-    gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
+    gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
     gsi::Filter f;
     f.setNameFilter("bork");
     f.add(gsi::FilterElement(gsi::Value_Player, 3, gsi::IntRange_t()));

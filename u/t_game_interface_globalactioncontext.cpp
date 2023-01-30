@@ -44,7 +44,7 @@ namespace {
             {
                 const game::map::Point P(1000,1000);
                 const game::PlayerSet_t S(3);
-                session.setRoot(new game::test::Root(game::HostVersion()));
+                session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
                 session.setShipList(new game::spec::ShipList());
                 session.setGame(new game::Game());
                 Universe& univ = session.getGame()->currentTurn().universe();

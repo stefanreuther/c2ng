@@ -19,7 +19,7 @@ TestGameProxyMapConfigurationProxy::testMapConfig()
 {
     // Setup
     game::test::SessionThread h;
-    h.session().setRoot(new game::test::Root(game::HostVersion()));
+    h.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     h.session().setGame(new game::Game());
 
     // Testee
@@ -53,7 +53,7 @@ TestGameProxyMapConfigurationProxy::testRenderOptions()
 
     // Setup
     game::test::SessionThread h;
-    h.session().setRoot(new game::test::Root(game::HostVersion()));
+    h.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
 
     // Testee
     game::proxy::MapConfigurationProxy testee(h.gameSender());
@@ -82,7 +82,7 @@ TestGameProxyMapConfigurationProxy::testMarkerConfig()
 {
     // Setup
     game::test::SessionThread h;
-    h.session().setRoot(new game::test::Root(game::HostVersion()));
+    h.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
 
     // Testee
     game::proxy::MapConfigurationProxy testee(h.gameSender());

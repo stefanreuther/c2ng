@@ -37,7 +37,7 @@ namespace {
 
     void addRoot(Session& s)
     {
-        Ptr<Root> root = new game::test::Root(HostVersion(HostVersion::PHost, MKVERSION(3,2,0)));
+        Ptr<Root> root = game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(3,2,0))).asPtr();
         s.setRoot(root);
     }
 }

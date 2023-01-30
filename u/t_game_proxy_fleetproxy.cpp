@@ -18,7 +18,7 @@ namespace {
     /* Prepare a SessionThread */
     void prepare(game::test::SessionThread& h)
     {
-        h.session().setRoot(new game::test::Root(game::HostVersion(game::HostVersion::PHost, MKVERSION(3,2,0))));
+        h.session().setRoot(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(3,2,0))).asPtr());
         h.session().setShipList(new game::spec::ShipList());
         h.session().setGame(new game::Game());
     }

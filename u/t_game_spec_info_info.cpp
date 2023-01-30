@@ -19,13 +19,13 @@ using game::spec::Cost;
 namespace {
     struct TestHarness {
         game::spec::ShipList shipList;
-        game::test::Root root;
+        afl::base::Ref<game::Root> root;
         afl::string::NullTranslator tx;
         gsi::NullPictureNamer picNamer;
 
         TestHarness()
             : shipList(),
-              root(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0))),
+              root(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)))),
               tx(),
               picNamer()
             { }
@@ -34,7 +34,7 @@ namespace {
     /* Disable all host config options that would assign automatic hull functions. */
     void disableAutomaticHullFunctions(TestHarness& h)
     {
-        HostConfiguration& c = h.root.hostConfiguration();
+        HostConfiguration& c = h.root->hostConfiguration();
 
         // To be able to disable automatic Tow ability
         c[HostConfiguration::AllowOneEngineTowing].set(0);
@@ -180,7 +180,7 @@ TestGameSpecInfoInfo::testDescribeHull()
     h.shipList.hullAssignments().add(5, 9, HULL_NR);
 
     gsi::PageContent c;
-    gsi::describeHull(c, HULL_NR, h.shipList, true, h.picNamer, h.root, 2, h.tx);
+    gsi::describeHull(c, HULL_NR, h.shipList, true, h.picNamer, *h.root, 2, h.tx);
 
     TS_ASSERT_EQUALS(c.title, "BR4 CLASS GUNSHIP");
     TS_ASSERT_EQUALS(c.pictureName, "");                // would be set by PictureNamer
@@ -210,7 +210,7 @@ TestGameSpecInfoInfo::testDescribeEngine()
     makeEngine(h, ENGINE_NR);
 
     gsi::PageContent c;
-    gsi::describeEngine(c, ENGINE_NR, h.shipList, true, h.picNamer, h.root, 2, h.tx);
+    gsi::describeEngine(c, ENGINE_NR, h.shipList, true, h.picNamer, *h.root, 2, h.tx);
 
     TS_ASSERT_EQUALS(c.title, "HeavyNova Drive 6");
     TS_ASSERT_EQUALS(c.pictureName, "");                // would be set by PictureNamer
@@ -233,7 +233,7 @@ TestGameSpecInfoInfo::testDescribeBeam()
     makeBeam(h, BEAM_NR);
 
     gsi::PageContent c;
-    gsi::describeBeam(c, BEAM_NR, h.shipList, true, h.picNamer, h.root, 2, h.tx);
+    gsi::describeBeam(c, BEAM_NR, h.shipList, true, h.picNamer, *h.root, 2, h.tx);
 
     TS_ASSERT_EQUALS(c.title, "Blaster");
     TS_ASSERT_EQUALS(c.pictureName, "");                // would be set by PictureNamer
@@ -262,7 +262,7 @@ TestGameSpecInfoInfo::testDescribeTorp()
     makeLauncher(h, LAUNCHER_NR);
 
     gsi::PageContent c;
-    gsi::describeTorpedo(c, LAUNCHER_NR, h.shipList, true, h.picNamer, h.root, 2, h.tx);
+    gsi::describeTorpedo(c, LAUNCHER_NR, h.shipList, true, h.picNamer, *h.root, 2, h.tx);
 
     TS_ASSERT_EQUALS(c.title, "Mark 7 Photon");
     TS_ASSERT_EQUALS(c.pictureName, "");                // would be set by PictureNamer
@@ -290,7 +290,7 @@ TestGameSpecInfoInfo::testDescribeFighter()
     TestHarness h;
 
     gsi::PageContent c;
-    gsi::describeFighter(c, 7, h.shipList, true, h.picNamer, h.root, h.tx);
+    gsi::describeFighter(c, 7, h.shipList, true, h.picNamer, *h.root, h.tx);
 
     TS_ASSERT_EQUALS(c.title, "Player 7 fighter");
     TS_ASSERT_EQUALS(c.pictureName, "");                // would be set by PictureNamer
@@ -361,20 +361,20 @@ TestGameSpecInfoInfo::testGetBeamAttribute()
     TestHarness h;
     game::spec::Beam& b = makeBeam(h, BEAM_NR);
 
-    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_CostD,        h.root, VIEWPOINT).orElse(-1), 12);
-    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_CostM,        h.root, VIEWPOINT).orElse(-1), 1);
-    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_CostMC,       h.root, VIEWPOINT).orElse(-1), 10);
-    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_CostT,        h.root, VIEWPOINT).orElse(-1), 1);
-    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_DamagePower,  h.root, VIEWPOINT).orElse(-1), 25);
-    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_HitOdds,      h.root, VIEWPOINT).orElse(-1), 100);
-    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_KillPower,    h.root, VIEWPOINT).orElse(-1), 10);
-    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_Mass,         h.root, VIEWPOINT).orElse(-1), 4);
-    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_RechargeTime, h.root, VIEWPOINT).orElse(-1), 150);
-    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_Id,           h.root, VIEWPOINT).orElse(-1), BEAM_NR);
-    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_IsDeathRay,   h.root, VIEWPOINT).orElse(-1), 0);
-    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_Tech,         h.root, VIEWPOINT).orElse(-1), 3);
+    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_CostD,        *h.root, VIEWPOINT).orElse(-1), 12);
+    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_CostM,        *h.root, VIEWPOINT).orElse(-1), 1);
+    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_CostMC,       *h.root, VIEWPOINT).orElse(-1), 10);
+    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_CostT,        *h.root, VIEWPOINT).orElse(-1), 1);
+    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_DamagePower,  *h.root, VIEWPOINT).orElse(-1), 25);
+    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_HitOdds,      *h.root, VIEWPOINT).orElse(-1), 100);
+    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_KillPower,    *h.root, VIEWPOINT).orElse(-1), 10);
+    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_Mass,         *h.root, VIEWPOINT).orElse(-1), 4);
+    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_RechargeTime, *h.root, VIEWPOINT).orElse(-1), 150);
+    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_Id,           *h.root, VIEWPOINT).orElse(-1), BEAM_NR);
+    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_IsDeathRay,   *h.root, VIEWPOINT).orElse(-1), 0);
+    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_Tech,         *h.root, VIEWPOINT).orElse(-1), 3);
 
-    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_MaxCrew,      h.root, VIEWPOINT).isValid(), false);
+    TS_ASSERT_EQUALS(getBeamAttribute(b, gsi::Range_MaxCrew,      *h.root, VIEWPOINT).isValid(), false);
 }
 
 /** Test getTorpedoAttribute(). */
@@ -386,21 +386,21 @@ TestGameSpecInfoInfo::testGetTorpAttribute()
     TestHarness h;
     game::spec::TorpedoLauncher& tl = makeLauncher(h, LAUNCHER_NR);
 
-    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_CostD,        h.root, VIEWPOINT).orElse(-1), 3);
-    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_CostM,        h.root, VIEWPOINT).orElse(-1), 8);
-    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_CostMC,       h.root, VIEWPOINT).orElse(-1), 120);
-    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_CostT,        h.root, VIEWPOINT).orElse(-1), 1);
-    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_DamagePower,  h.root, VIEWPOINT).orElse(-1), 96);
-    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_HitOdds,      h.root, VIEWPOINT).orElse(-1), 65);
-    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_KillPower,    h.root, VIEWPOINT).orElse(-1), 50);
-    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_Mass,         h.root, VIEWPOINT).orElse(-1), 3);
-    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_RechargeTime, h.root, VIEWPOINT).orElse(-1), 44);
-    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_Id,           h.root, VIEWPOINT).orElse(-1), LAUNCHER_NR);
-    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_IsDeathRay,   h.root, VIEWPOINT).orElse(-1), 0);
-    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_Tech,         h.root, VIEWPOINT).orElse(-1), 8);
-    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_TorpCost,     h.root, VIEWPOINT).orElse(-1), 36);
+    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_CostD,        *h.root, VIEWPOINT).orElse(-1), 3);
+    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_CostM,        *h.root, VIEWPOINT).orElse(-1), 8);
+    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_CostMC,       *h.root, VIEWPOINT).orElse(-1), 120);
+    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_CostT,        *h.root, VIEWPOINT).orElse(-1), 1);
+    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_DamagePower,  *h.root, VIEWPOINT).orElse(-1), 96);
+    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_HitOdds,      *h.root, VIEWPOINT).orElse(-1), 65);
+    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_KillPower,    *h.root, VIEWPOINT).orElse(-1), 50);
+    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_Mass,         *h.root, VIEWPOINT).orElse(-1), 3);
+    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_RechargeTime, *h.root, VIEWPOINT).orElse(-1), 44);
+    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_Id,           *h.root, VIEWPOINT).orElse(-1), LAUNCHER_NR);
+    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_IsDeathRay,   *h.root, VIEWPOINT).orElse(-1), 0);
+    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_Tech,         *h.root, VIEWPOINT).orElse(-1), 8);
+    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_TorpCost,     *h.root, VIEWPOINT).orElse(-1), 36);
 
-    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_MaxCrew,      h.root, VIEWPOINT).isValid(), false);
+    TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_MaxCrew,      *h.root, VIEWPOINT).isValid(), false);
 }
 
 /** Test getFighterAttribute(). */
@@ -408,17 +408,17 @@ void
 TestGameSpecInfoInfo::testGetFighterAttribute()
 {
     TestHarness h;
-    game::spec::Fighter ftr(3, h.root.hostConfiguration(), h.root.playerList(), h.tx);
+    game::spec::Fighter ftr(3, h.root->hostConfiguration(), h.root->playerList(), h.tx);
 
-    TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_CostD,        h.root).orElse(-1), 0);
-    TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_CostM,        h.root).orElse(-1), 2);
-    TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_CostMC,       h.root).orElse(-1), 100);
-    TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_CostT,        h.root).orElse(-1), 3);
-    TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_DamagePower,  h.root).orElse(-1), 2);
-    TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_KillPower,    h.root).orElse(-1), 2);
-    TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_RechargeTime, h.root).orElse(-1), 21);
+    TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_CostD,        *h.root).orElse(-1), 0);
+    TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_CostM,        *h.root).orElse(-1), 2);
+    TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_CostMC,       *h.root).orElse(-1), 100);
+    TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_CostT,        *h.root).orElse(-1), 3);
+    TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_DamagePower,  *h.root).orElse(-1), 2);
+    TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_KillPower,    *h.root).orElse(-1), 2);
+    TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_RechargeTime, *h.root).orElse(-1), 21);
 
-    TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_MaxCrew,      h.root).isValid(), false);
+    TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_MaxCrew,      *h.root).isValid(), false);
 }
 
 /** Test describeWeaponEffects(), Tim-Host version. */
@@ -430,7 +430,7 @@ TestGameSpecInfoInfo::testDescribeWeaponEffectsTim()
     game::test::initStandardBeams(shipList);
     game::test::initStandardTorpedoes(shipList);
 
-    game::test::Root root(game::HostVersion(game::HostVersion::Host, MKVERSION(3,22,0)));
+    afl::base::Ref<game::Root> root(game::test::makeRoot(game::HostVersion(game::HostVersion::Host, MKVERSION(3,22,0))));
     afl::string::NullTranslator tx;
 
     // Ship query
@@ -441,7 +441,7 @@ TestGameSpecInfoInfo::testDescribeWeaponEffectsTim()
 
     // Action
     game::spec::info::WeaponEffects result;
-    describeWeaponEffects(result, q, shipList, root, tx);
+    describeWeaponEffects(result, q, shipList, *root, tx);
 
     // Verify
     TS_ASSERT_EQUALS(result.effectScale, 1);
@@ -488,10 +488,10 @@ TestGameSpecInfoInfo::testDescribeWeaponEffectsPHostAC()
     game::test::initPList32Beams(shipList);
     game::test::initPList32Torpedoes(shipList);
 
-    game::test::Root root(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)));
+    afl::base::Ref<game::Root> root(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0))));
     afl::string::NullTranslator tx;
 
-    HostConfiguration& config = root.hostConfiguration();
+    HostConfiguration& config = root->hostConfiguration();
     config[HostConfiguration::AllowAlternativeCombat].set(1);
     config[HostConfiguration::CrewKillScaling].set(15);
     config[HostConfiguration::ShieldKillScaling].set(0);
@@ -512,7 +512,7 @@ TestGameSpecInfoInfo::testDescribeWeaponEffectsPHostAC()
 
     // Action
     game::spec::info::WeaponEffects result;
-    describeWeaponEffects(result, q, shipList, root, tx);
+    describeWeaponEffects(result, q, shipList, *root, tx);
 
     // Verify
     TS_ASSERT_DIFFERS(result.effectScale, 1);
@@ -569,10 +569,10 @@ TestGameSpecInfoInfo::testDescribeWeaponEffectsPHostNonAC()
     game::test::initPList32Beams(shipList);
     game::test::initPList32Torpedoes(shipList);
 
-    game::test::Root root(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)));
+    afl::base::Ref<game::Root> root(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0))));
     afl::string::NullTranslator tx;
 
-    HostConfiguration& config = root.hostConfiguration();
+    HostConfiguration& config = root->hostConfiguration();
     config[HostConfiguration::AllowAlternativeCombat].set(0);   // off!
     config[HostConfiguration::CrewKillScaling].set(15);
     config[HostConfiguration::ShieldKillScaling].set(0);
@@ -593,7 +593,7 @@ TestGameSpecInfoInfo::testDescribeWeaponEffectsPHostNonAC()
 
     // Action
     game::spec::info::WeaponEffects result;
-    describeWeaponEffects(result, q, shipList, root, tx);
+    describeWeaponEffects(result, q, shipList, *root, tx);
 
     // Verify
     TS_ASSERT_EQUALS(result.effectScale, 1);
@@ -648,10 +648,10 @@ TestGameSpecInfoInfo::testDescribeWeaponEffectsPHostMixedFighters()
     game::test::initPList32Beams(shipList);
     game::test::initPList32Torpedoes(shipList);
 
-    game::test::Root root(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)));
+    afl::base::Ref<game::Root> root(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0))));
     afl::string::NullTranslator tx;
 
-    HostConfiguration& config = root.hostConfiguration();
+    HostConfiguration& config = root->hostConfiguration();
     config[HostConfiguration::AllowAlternativeCombat].set(1);
     config[HostConfiguration::CrewKillScaling].set(15);
     config[HostConfiguration::ShieldKillScaling].set(0);
@@ -668,7 +668,7 @@ TestGameSpecInfoInfo::testDescribeWeaponEffectsPHostMixedFighters()
 
     // Action
     game::spec::info::WeaponEffects result;
-    describeWeaponEffects(result, q, shipList, root, tx);
+    describeWeaponEffects(result, q, shipList, *root, tx);
 
     // Verify
     TS_ASSERT_DIFFERS(result.effectScale, 1);
@@ -719,10 +719,10 @@ TestGameSpecInfoInfo::testDescribeWeaponEffectsPHostExp()
     game::test::initPList32Beams(shipList);
     game::test::initPList32Torpedoes(shipList);
 
-    game::test::Root root(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)));
+    afl::base::Ref<game::Root> root(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0))));
     afl::string::NullTranslator tx;
 
-    HostConfiguration& config = root.hostConfiguration();
+    HostConfiguration& config = root->hostConfiguration();
     config[HostConfiguration::AllowAlternativeCombat].set(1);
     config[HostConfiguration::CrewKillScaling].set(15);
     config[HostConfiguration::ShieldKillScaling].set(0);
@@ -744,7 +744,7 @@ TestGameSpecInfoInfo::testDescribeWeaponEffectsPHostExp()
 
     // Action
     game::spec::info::WeaponEffects result;
-    describeWeaponEffects(result, q, shipList, root, tx);
+    describeWeaponEffects(result, q, shipList, *root, tx);
 
     // Verify specimen
     const double scale = 1.0 / result.effectScale;
@@ -764,10 +764,10 @@ TestGameSpecInfoInfo::testDescribeWeaponEffectsPHostExpNonAC()
     game::test::initPList32Beams(shipList);
     game::test::initPList32Torpedoes(shipList);
 
-    game::test::Root root(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)));
+    afl::base::Ref<game::Root> root(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0))));
     afl::string::NullTranslator tx;
 
-    HostConfiguration& config = root.hostConfiguration();
+    HostConfiguration& config = root->hostConfiguration();
     config[HostConfiguration::AllowAlternativeCombat].set(0);   // off!
     config[HostConfiguration::CrewKillScaling].set(15);
     config[HostConfiguration::ShieldKillScaling].set(0);
@@ -789,7 +789,7 @@ TestGameSpecInfoInfo::testDescribeWeaponEffectsPHostExpNonAC()
 
     // Action
     game::spec::info::WeaponEffects result;
-    describeWeaponEffects(result, q, shipList, root, tx);
+    describeWeaponEffects(result, q, shipList, *root, tx);
 
     // Verify specimen
     TS_ASSERT_EQUALS(result.effectScale, 1);
@@ -818,11 +818,11 @@ TestGameSpecInfoInfo::testDescribeHullFunction()
     fBoarding->setDescription("tow-capture");
     fBoarding->setExplanation("it boards!");
     for (int i = 1; i <= 10; ++i) {
-        h.root.playerList().create(i);
+        h.root->playerList().create(i);
     }
 
-    h.root.hostConfiguration()[game::config::HostConfiguration::NumExperienceLevels].set(5);
-    h.root.hostConfiguration()[game::config::HostConfiguration::DamageLevelForCloakFail].set(10);
+    h.root->hostConfiguration()[game::config::HostConfiguration::NumExperienceLevels].set(5);
+    h.root->hostConfiguration()[game::config::HostConfiguration::DamageLevelForCloakFail].set(10);
 
     // HullFunctionList
     game::spec::HullFunctionList hfList;
@@ -837,7 +837,7 @@ TestGameSpecInfoInfo::testDescribeHullFunction()
     // describeHullFunctions()
     {
         gsi::Abilities_t out;
-        describeHullFunctions(out, hfList, 0, h.shipList, h.picNamer, h.root, h.tx);
+        describeHullFunctions(out, hfList, 0, h.shipList, h.picNamer, *h.root, h.tx);
         TS_ASSERT_EQUALS(out.size(), 2U);
         TS_ASSERT_EQUALS(out[0].info, "cloaking device (player 5)");
         TS_ASSERT_EQUALS(out[1].info, "tow-capture (level 3; ship)");
@@ -855,7 +855,7 @@ TestGameSpecInfoInfo::testDescribeHullFunction()
         q.setOwner(2);
 
         gsi::Abilities_t out;
-        describeHullFunctions(out, hfList, &q, h.shipList, h.picNamer, h.root, h.tx);
+        describeHullFunctions(out, hfList, &q, h.shipList, h.picNamer, *h.root, h.tx);
         TS_ASSERT_EQUALS(out.size(), 2U);
         TS_ASSERT_EQUALS(out[0].info, "cloaking device (player 5; damaged)");
         TS_ASSERT_EQUALS(out[1].info, "tow-capture (level 3; ship)");
@@ -869,7 +869,7 @@ TestGameSpecInfoInfo::testDescribeHullFunction()
     // describeHullFunctionDetails()
     {
         gsi::AbilityDetails_t out;
-        describeHullFunctionDetails(out, hfList, 0, h.shipList, h.picNamer, false, h.root, h.tx);
+        describeHullFunctionDetails(out, hfList, 0, h.shipList, h.picNamer, false, *h.root, h.tx);
         TS_ASSERT_EQUALS(out.size(), 2U);
         TS_ASSERT_EQUALS(out[0].name, "Cloak");
         TS_ASSERT_EQUALS(out[0].description, "cloaking device");
@@ -895,7 +895,7 @@ TestGameSpecInfoInfo::testDescribeHullFunction()
         q.setOwner(2);
 
         gsi::AbilityDetails_t out;
-        describeHullFunctionDetails(out, hfList, &q, h.shipList, h.picNamer, false, h.root, h.tx);
+        describeHullFunctionDetails(out, hfList, &q, h.shipList, h.picNamer, false, *h.root, h.tx);
         TS_ASSERT_EQUALS(out.size(), 2U);
         TS_ASSERT_EQUALS(out[0].name, "Cloak");
         TS_ASSERT_EQUALS(out[0].description, "cloaking device");
@@ -932,9 +932,9 @@ TestGameSpecInfoInfo::testDescribeHullFunctionPicture()
     b.addFunction(16, "Cloak")
         ->setPictureName("cloaker");
     for (int i = 1; i <= 10; ++i) {
-        h.root.playerList().create(i);
+        h.root->playerList().create(i);
     }
-    h.root.hostConfiguration()[game::config::HostConfiguration::DamageLevelForCloakFail].set(10);
+    h.root->hostConfiguration()[game::config::HostConfiguration::DamageLevelForCloakFail].set(10);
 
     // HullFunctionList
     game::spec::HullFunctionList hfList;
@@ -981,7 +981,7 @@ TestGameSpecInfoInfo::testDescribeHullFunctionPicture()
         q.setOwner(2);
 
         gsi::AbilityDetails_t out;
-        describeHullFunctionDetails(out, hfList, &q, h.shipList, picNamer, false, h.root, h.tx);
+        describeHullFunctionDetails(out, hfList, &q, h.shipList, picNamer, false, *h.root, h.tx);
         TS_ASSERT_EQUALS(out.size(), 1U);
         TS_ASSERT_EQUALS(out[0].name, "Cloak");
         TS_ASSERT_EQUALS(out[0].kind, game::spec::info::ClassAbility);
@@ -997,7 +997,7 @@ TestGameSpecInfoInfo::testDescribeHullFunctionPicture()
         q.setOwner(2);
 
         gsi::AbilityDetails_t out;
-        describeHullFunctionDetails(out, hfList, &q, h.shipList, picNamer, true, h.root, h.tx);
+        describeHullFunctionDetails(out, hfList, &q, h.shipList, picNamer, true, *h.root, h.tx);
         TS_ASSERT_EQUALS(out.size(), 1U);
         TS_ASSERT_EQUALS(out[0].name, "Cloak");
         TS_ASSERT_EQUALS(out[0].kind, game::spec::info::ClassAbility);

@@ -29,11 +29,11 @@ game::test::initDefaultShipList(game::spec::ShipList& list)
     dir->addStream("hullspec.dat", *new ConstMemoryStream(getDefaultHulls()));
     dir->addStream("truehull.dat", *new ConstMemoryStream(getDefaultHullAssignments()));
 
-    Root root(HostVersion(HostVersion::PHost, MKVERSION(3,0,0)));
+    Ref<Root> root(makeRoot(HostVersion(HostVersion::PHost, MKVERSION(3,0,0))));
     std::auto_ptr<afl::charset::Charset> charset(new afl::charset::CodepageCharset(afl::charset::g_codepage437));
     afl::string::NullTranslator tx;
     afl::sys::Log log;
     bool result = false;
-    game::v3::SpecificationLoader(dir, charset, tx, log).loadShipList(list, root, std::auto_ptr<game::StatusTask_t>(game::makeResultTask(result)))->call();
+    game::v3::SpecificationLoader(dir, charset, tx, log).loadShipList(list, *root, std::auto_ptr<game::StatusTask_t>(game::makeResultTask(result)))->call();
     afl::except::checkAssertion(result, "loadDefaultShipList");
 }

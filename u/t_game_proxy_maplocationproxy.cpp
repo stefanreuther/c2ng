@@ -75,7 +75,7 @@ namespace {
 
     void prepare(SessionThread& s)
     {
-        s.session().setRoot(new game::test::Root(game::HostVersion(game::HostVersion::PHost, MKVERSION(3,2,0))));
+        s.session().setRoot(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(3,2,0))).asPtr());
         s.session().setGame(new game::Game());
     }
 

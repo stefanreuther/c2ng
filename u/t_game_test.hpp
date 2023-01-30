@@ -30,6 +30,11 @@ class TestGameTestRegistrationKey : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameTestRoot : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestGameTestSessionThread : public CxxTest::TestSuite {
  public:
     void testIt();

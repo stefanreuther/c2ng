@@ -59,7 +59,7 @@ TestGameProxyOutboxProxy::testNormal()
 
     // Prepare content
     // - players must be defined to determine what a universal message is (getHeadersForDisplay())
-    t.session().setRoot(new game::test::Root(game::HostVersion()));
+    t.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     for (int i = 1; i <= 11; ++i) {
         t.session().getRoot()->playerList().create(i);
     }
@@ -126,7 +126,7 @@ TestGameProxyOutboxProxy::testAdaptor()
 
     // Prepare content
     // - players must be defined to determine what a universal message is (getHeadersForDisplay())
-    t.session().setRoot(new game::test::Root(game::HostVersion()));
+    t.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     for (int i = 1; i <= 11; ++i) {
         t.session().getRoot()->playerList().create(i);
     }
@@ -170,7 +170,7 @@ TestGameProxyOutboxProxy::testMailboxProxy()
 
     // Prepare content
     // - players must be defined to determine what a universal message is (getHeadersForDisplay())
-    t.session().setRoot(new game::test::Root(game::HostVersion()));
+    t.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     for (int i = 1; i <= 11; ++i) {
         t.session().getRoot()->playerList().create(i);
     }
@@ -234,7 +234,7 @@ TestGameProxyOutboxProxy::testFileNormal()
     game::test::SessionThread t(fs);
 
     // Define a root and game
-    t.session().setRoot(new game::test::Root(game::HostVersion()));
+    t.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     for (int i = 1; i <= 11; ++i) {
         t.session().getRoot()->playerList().create(i);
     }

@@ -39,7 +39,7 @@ namespace {
         h.session().setGame(g);
 
         // Root
-        h.session().setRoot(new game::test::Root(HostVersion(HostVersion::PHost, MKVERSION(4,0,0))));
+        h.session().setRoot(game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(4,0,0))).asPtr());
     }
 
     class Initializer : public game::proxy::ReferenceListProxy::Initializer_t {

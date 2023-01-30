@@ -123,7 +123,7 @@ TestGameInterfaceCompletionList::testAddBuildCompletionList()
     afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
     game::Session session(tx, fs);
-    session.setRoot(new game::test::Root(game::HostVersion()));
+    session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     afl::container::PtrVector<interpreter::Context> ctx;
     session.world().keymaps().createKeymap("KEYBOARD");
     session.world().keymaps().createKeymap("KEYMAP");

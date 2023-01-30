@@ -23,7 +23,7 @@ namespace {
         game::Session session(tx, fs);
 
         // Populate session
-        session.setRoot(new game::test::Root(game::HostVersion()));
+        session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
         game::config::HostConfiguration& config = session.getRoot()->hostConfiguration();
         config.setOption("gamename", "ConfigPackerTest", game::config::ConfigurationOption::Game);
         config.setOption("maximumfightersonbase", "30", game::config::ConfigurationOption::Game);

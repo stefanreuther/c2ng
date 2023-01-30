@@ -67,7 +67,7 @@ namespace {
     Planet& setup(game::test::SessionThread& h)
     {
         // Root
-        h.session().setRoot(new game::test::Root(HostVersion(HostVersion::PHost, MKVERSION(3,4,0))));
+        h.session().setRoot(game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(3,4,0))).asPtr());
 
         // Game
         Ptr<Game> g = new Game();

@@ -30,7 +30,7 @@ namespace {
     void prepare(Session& session)
     {
         // Create root
-        session.setRoot(new game::test::Root(game::HostVersion()));
+        session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
 
         // Create ship list
         afl::base::Ptr<game::spec::ShipList> sl(new game::spec::ShipList());

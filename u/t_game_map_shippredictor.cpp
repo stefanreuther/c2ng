@@ -894,7 +894,7 @@ TestGameMapShipPredictor::testGetOptimumWarp()
     finish(h);
 
     // Root.
-    game::test::Root root((game::HostVersion()));
+    afl::base::Ref<game::Root> root(game::test::makeRoot(game::HostVersion()));
 
     // Test cases
     struct TestCase {
@@ -920,7 +920,7 @@ TestGameMapShipPredictor::testGetOptimumWarp()
 
     for (size_t i = 0; i < sizeof(TESTS)/sizeof(TESTS[0]); ++i) {
         const TestCase& c = TESTS[i];
-        int result = getOptimumWarp(h.univ, SHIP_ID, Point(c.fromX, c.fromY), Point(c.toX, c.toY), h.shipScores, h.shipList, h.mapConfig, root);
+        int result = getOptimumWarp(h.univ, SHIP_ID, Point(c.fromX, c.fromY), Point(c.toX, c.toY), h.shipScores, h.shipList, h.mapConfig, *root);
         TSM_ASSERT_EQUALS(c.desc, result, c.expect);
     }
 }
@@ -930,13 +930,13 @@ void
 TestGameMapShipPredictor::testGetOptimumWarpErrorCases()
 {
     const int SHIP_ID = 77;
-    game::test::Root root((game::HostVersion()));
+    afl::base::Ref<game::Root> root(game::test::makeRoot(game::HostVersion()));
 
     // Nonexistant ship
     {
         TestHarness h;
         finish(h);
-        int result = getOptimumWarp(h.univ, SHIP_ID, Point(1000, 1000), Point(1010, 1000), h.shipScores, h.shipList, h.mapConfig, root);
+        int result = getOptimumWarp(h.univ, SHIP_ID, Point(1000, 1000), Point(1010, 1000), h.shipScores, h.shipList, h.mapConfig, *root);
         TS_ASSERT_EQUALS(result, 0);
     }
 
@@ -947,7 +947,7 @@ TestGameMapShipPredictor::testGetOptimumWarpErrorCases()
         sh.setEngineType(9);
         finish(h);
 
-        int result = getOptimumWarp(h.univ, SHIP_ID, Point(1000, 1000), Point(1010, 1000), h.shipScores, h.shipList, h.mapConfig, root);
+        int result = getOptimumWarp(h.univ, SHIP_ID, Point(1000, 1000), Point(1010, 1000), h.shipScores, h.shipList, h.mapConfig, *root);
         TS_ASSERT_EQUALS(result, 0);
     }
 
@@ -959,7 +959,7 @@ TestGameMapShipPredictor::testGetOptimumWarpErrorCases()
         sh.setEngineType(game::test::NOVA_ENGINE_ID);
         finish(h);
 
-        int result = getOptimumWarp(h.univ, SHIP_ID, Point(1000, 1000), Point(1000 + 30*80, 1000), h.shipScores, h.shipList, h.mapConfig, root);
+        int result = getOptimumWarp(h.univ, SHIP_ID, Point(1000, 1000), Point(1000 + 30*80, 1000), h.shipScores, h.shipList, h.mapConfig, *root);
         TS_ASSERT_EQUALS(result, 5);
     }
 }

@@ -31,7 +31,7 @@ TestGameProxyCommandListProxy::testIt()
     // Game side
     const int PLAYER = 8;
     game::test::SessionThread h;
-    h.session().setRoot(new game::test::Root(game::HostVersion()));
+    h.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     h.session().setGame(new game::Game());
     game::Game& g = *h.session().getGame();
     CommandContainer& cc = game::v3::CommandExtra::create(g.currentTurn()).create(PLAYER);
@@ -109,7 +109,7 @@ TestGameProxyCommandListProxy::testIt()
     for (CommandContainer::Iterator_t it = cc.begin(), end = cc.end(); it != end; ++it) {
         ++n;
     }
-    TS_ASSERT_EQUALS(n, 3U);    
+    TS_ASSERT_EQUALS(n, 3U);
     TS_ASSERT_EQUALS((*cc.begin())->getCommand(), Command::GiveShip);
 }
 
@@ -125,7 +125,7 @@ TestGameProxyCommandListProxy::testCreate()
     // Game side
     const int PLAYER = 8;
     game::test::SessionThread h;
-    h.session().setRoot(new game::test::Root(game::HostVersion()));
+    h.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     h.session().setGame(new game::Game());
     game::Game& g = *h.session().getGame();
     game::v3::CommandExtra::create(g.currentTurn());
@@ -166,7 +166,7 @@ TestGameProxyCommandListProxy::testNotify()
     // Game side
     const int PLAYER = 8;
     game::test::SessionThread h;
-    h.session().setRoot(new game::test::Root(game::HostVersion()));
+    h.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     h.session().setGame(new game::Game());
     game::Game& g = *h.session().getGame();
     game::v3::CommandExtra::create(g.currentTurn()).create(PLAYER);
@@ -260,7 +260,7 @@ TestGameProxyCommandListProxy::testFailureUnsupported()
     // Game side
     const int PLAYER = 8;
     game::test::SessionThread h;
-    h.session().setRoot(new game::test::Root(game::HostVersion()));
+    h.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     h.session().setGame(new game::Game());
     game::Game& g = *h.session().getGame();
     g.setViewpointPlayer(PLAYER);

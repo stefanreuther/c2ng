@@ -117,7 +117,7 @@ namespace {
     /* Preparation */
     void prepare(SessionThread& t)
     {
-        afl::base::Ptr<game::Root> r = new game::test::Root(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)));
+        afl::base::Ptr<game::Root> r = game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0))).asPtr();
         t.session().setRoot(r);
 
         afl::base::Ptr<game::Game> g = new game::Game();

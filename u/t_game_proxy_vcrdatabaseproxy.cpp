@@ -18,7 +18,7 @@
 
 namespace {
     struct Environment {
-        game::test::Root root;
+        afl::base::Ref<game::Root> root;
         game::spec::ShipList shipList;
         game::TeamSettings* pTeamSettings;
         game::vcr::classic::Database battles;
@@ -28,7 +28,7 @@ namespace {
         game::sim::Setup setup;
 
         Environment()
-            : root(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0))),
+            : root(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)))),
               shipList(), pTeamSettings(0), battles(), translator(), currentBattle(0), setup()
             { }
     };
@@ -39,7 +39,7 @@ namespace {
             : m_env(env)
             { }
         virtual const game::Root& root() const
-            { return m_env.root; }
+            { return *m_env.root; }
         virtual const game::spec::ShipList& shipList() const
             { return m_env.shipList; }
         virtual const game::TeamSettings* getTeamSettings() const
@@ -307,8 +307,8 @@ TestGameProxyVcrDatabaseProxy::testGetPlayerNames()
 {
     // Environment
     Environment env;
-    game::Player* p3 = env.root.playerList().create(3);
-    game::Player* p9 = env.root.playerList().create(9);
+    game::Player* p3 = env.root->playerList().create(3);
+    game::Player* p9 = env.root->playerList().create(9);
     p3->setName(game::Player::AdjectiveName, "three");
     p9->setName(game::Player::LongName, "Nine");
     game::test::WaitIndicator ind;

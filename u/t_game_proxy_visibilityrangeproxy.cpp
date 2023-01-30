@@ -28,7 +28,7 @@ TestGameProxyVisibilityRangeProxy::testSequence()
     SessionThread t;
 
     // Add root
-    afl::base::Ptr<game::Root> r = new game::test::Root(game::HostVersion());
+    afl::base::Ptr<game::Root> r = game::test::makeRoot(game::HostVersion()).asPtr();
     t.session().setRoot(r);
     r->userConfiguration().setOption("chart.range.distance", "87", game::config::ConfigurationOption::Game);
 

@@ -47,7 +47,7 @@ TestGameV3UdataSessionNameProvider::testPopulated()
     game::Session session(tx, fs);
 
     // Create empty objects
-    session.setRoot(new game::test::Root(game::HostVersion()));
+    session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     session.setGame(new game::Game());
     session.setShipList(new game::spec::ShipList());
 

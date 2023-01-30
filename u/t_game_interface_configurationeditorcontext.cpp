@@ -32,7 +32,7 @@ namespace {
 
         Environment()
             : tx(), fs(), session(tx, fs)
-            { session.setRoot(new game::test::Root(game::HostVersion())); }
+            { session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr()); }
     };
 
     void runCode(game::Session& session, interpreter::Context& ctx, const char* code, Process::State expectedState)

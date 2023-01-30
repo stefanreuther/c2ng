@@ -40,7 +40,7 @@ namespace {
         thread.session().setShipList(list);
 
         // Root
-        afl::base::Ptr<game::Root> root = new game::test::Root(game::HostVersion(game::HostVersion::PHost, MKVERSION(4, 0, 0)));
+        afl::base::Ptr<game::Root> root = game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4, 0, 0))).asPtr();
         game::Player* p1 = root->playerList().create(1);
         p1->setName(game::Player::ShortName, "The Federation");
         p1->setName(game::Player::AdjectiveName, "Federal");

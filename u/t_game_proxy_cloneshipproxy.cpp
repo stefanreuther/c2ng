@@ -38,7 +38,7 @@ namespace {
         t.session().setShipList(shipList);
 
         // Root
-        afl::base::Ptr<game::Root> r(new game::test::Root(HostVersion(HostVersion::PHost, MKVERSION(4,0,0)), game::RegistrationKey::Registered, 10));
+        afl::base::Ptr<game::Root> r(game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(4,0,0)), game::RegistrationKey::Registered, 10).asPtr());
         t.session().setRoot(r);
 
         // Game

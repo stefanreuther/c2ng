@@ -108,7 +108,7 @@ void
 TestGameProxyVcrOverviewProxy::testBuildDiagram()
 {
     // Environment
-    game::test::Root root((game::HostVersion()));
+    afl::base::Ref<game::Root> root(game::test::makeRoot(game::HostVersion()));
     game::spec::ShipList shipList;
     game::test::initStandardBeams(shipList);
     game::test::initStandardTorpedoes(shipList);
@@ -119,7 +119,7 @@ TestGameProxyVcrOverviewProxy::testBuildDiagram()
         ->setType(game::vcr::classic::Host, 0);
 
     // Adaptor in a (mock) thread
-    TestAdaptor ad(root, shipList, db);
+    TestAdaptor ad(*root, shipList, db);
     game::test::WaitIndicator ind;
     util::RequestReceiver<game::proxy::VcrDatabaseAdaptor> recv(ind, ad);
 
@@ -139,7 +139,7 @@ void
 TestGameProxyVcrOverviewProxy::testBuildScores()
 {
     // Environment
-    game::test::Root root((game::HostVersion()));
+    afl::base::Ref<game::Root> root(game::test::makeRoot(game::HostVersion()));
     game::spec::ShipList shipList;
     game::test::initStandardBeams(shipList);
     game::test::initStandardTorpedoes(shipList);
@@ -150,7 +150,7 @@ TestGameProxyVcrOverviewProxy::testBuildScores()
         ->setType(game::vcr::classic::Host, 0);
 
     // Adaptor in a (mock) thread
-    TestAdaptor ad(root, shipList, db);
+    TestAdaptor ad(*root, shipList, db);
     game::test::WaitIndicator ind;
     util::RequestReceiver<game::proxy::VcrDatabaseAdaptor> recv(ind, ad);
 

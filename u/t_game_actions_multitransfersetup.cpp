@@ -107,7 +107,7 @@ TestGameActionsMultiTransferSetup::testError()
     afl::io::NullFileSystem fs;
     game::Session session(tx, fs);
     session.setShipList(new game::spec::ShipList());
-    session.setRoot(new game::test::Root(game::HostVersion()));
+    session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     game::map::Universe univ;
     game::actions::CargoTransfer action;
 
@@ -134,7 +134,7 @@ TestGameActionsMultiTransferSetup::testNormal()
     game::test::initStandardBeams(*shipList);
     game::test::initStandardTorpedoes(*shipList);
 
-    session.setRoot(new game::test::Root(game::HostVersion()));
+    session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
 
     game::map::Universe univ;
     addShip(univ, 10, 1000, 1000, "S10", 4, game::map::Object::Playable);
@@ -197,7 +197,7 @@ TestGameActionsMultiTransferSetup::testNoCargo()
     game::test::initStandardBeams(*shipList);
     game::test::initStandardTorpedoes(*shipList);
 
-    session.setRoot(new game::test::Root(game::HostVersion()));
+    session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
 
     game::map::Universe univ;
     addShip(univ, 10, 1000, 1000, "S10", 4, game::map::Object::Playable)
@@ -232,7 +232,7 @@ TestGameActionsMultiTransferSetup::testNoPeer()
     game::test::initStandardBeams(*shipList);
     game::test::initStandardTorpedoes(*shipList);
 
-    session.setRoot(new game::test::Root(game::HostVersion()));
+    session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
 
     game::map::Universe univ;
     addShip(univ, 10, 1000, 1000, "S10", 4, game::map::Object::Playable);
@@ -264,7 +264,7 @@ TestGameActionsMultiTransferSetup::testFleet()
     game::test::initStandardBeams(*shipList);
     game::test::initStandardTorpedoes(*shipList);
 
-    session.setRoot(new game::test::Root(game::HostVersion()));
+    session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
 
     game::map::Universe univ;
     addShip(univ, 1, 1000, 1000, "S1", 4, game::map::Object::Playable)
@@ -316,7 +316,7 @@ TestGameActionsMultiTransferSetup::testTypeMismatch()
     game::test::initStandardBeams(*shipList);
     game::test::initStandardTorpedoes(*shipList);
 
-    session.setRoot(new game::test::Root(game::HostVersion()));
+    session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
 
     game::map::Universe univ;
     addShip(univ, 1, 1000, 1000, "S1", 4, game::map::Object::Playable);

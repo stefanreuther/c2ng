@@ -43,7 +43,7 @@ namespace {
     {
         h.session().setGame(new game::Game());
         h.session().setShipList(new game::spec::ShipList());
-        h.session().setRoot(new game::test::Root(game::HostVersion()));
+        h.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
         h.session().getGame()->currentTurn().setTurnNumber(TURN_NR);
     }
 

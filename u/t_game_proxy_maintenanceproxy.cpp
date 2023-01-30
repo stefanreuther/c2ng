@@ -92,7 +92,7 @@ namespace {
     // Add a Root
     void addRoot(Environment& env)
     {
-        Ref<game::test::Root> root = *new game::test::Root(game::HostVersion());
+        Ref<game::Root> root = game::test::makeRoot(game::HostVersion());
 
         // Default race names
         Ref<InternalDirectory> dir = InternalDirectory::create("spec");

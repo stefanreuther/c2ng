@@ -22,7 +22,7 @@ TestServerPlayFriendlyCodePacker::testIt()
     afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
     game::Session session(tx, fs);
-    session.setRoot(new game::test::Root(game::HostVersion()));
+    session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     session.setShipList(new game::spec::ShipList());
 
     // Player list

@@ -361,7 +361,7 @@ TestGameActionsChangeBuildQueue::testPlannedBuild()
     afl::string::NullTranslator tx;
     game::Session session(tx, fs);
 
-    session.setRoot(new game::test::Root(game::HostVersion()));
+    session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     session.setShipList(new game::spec::ShipList());
     init(*session.getShipList());
 

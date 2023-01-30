@@ -97,7 +97,7 @@ TestGameProxyPlanetInfoProxy::testIt()
     const int ID = 77;
     game::test::SessionThread s;
     s.session().setShipList(new game::spec::ShipList());
-    s.session().setRoot(new game::test::Root(game::HostVersion(game::HostVersion::PHost, MKVERSION(3,2,0))));
+    s.session().setRoot(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(3,2,0))).asPtr());
     s.session().setGame(new game::Game());
     makeScannedPlanet(*s.session().getGame()->currentTurn().universe().planets().create(ID));
 
@@ -189,7 +189,7 @@ TestGameProxyPlanetInfoProxy::testOverride()
     const int ID = 77;
     game::test::SessionThread s;
     s.session().setShipList(new game::spec::ShipList());
-    s.session().setRoot(new game::test::Root(game::HostVersion(game::HostVersion::PHost, MKVERSION(3,2,0))));
+    s.session().setRoot(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(3,2,0))).asPtr());
     s.session().setGame(new game::Game());
     makeScannedPlanet(*s.session().getGame()->currentTurn().universe().planets().create(ID));
 

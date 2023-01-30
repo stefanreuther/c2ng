@@ -31,7 +31,7 @@ namespace {
         afl::base::Ref<game::Game> game;
 
         TestHarness()
-            : tx(), fs(), root(*new game::test::Root(game::HostVersion())), game(*new game::Game())
+            : tx(), fs(), root(game::test::makeRoot(game::HostVersion())), game(*new game::Game())
             { }
     };
 

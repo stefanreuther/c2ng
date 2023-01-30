@@ -33,7 +33,7 @@ namespace {
         t.session().setShipList(shipList);
 
         // Create root
-        afl::base::Ptr<game::Root> r = new game::test::Root(game::HostVersion(game::HostVersion::PHost, MKVERSION(3,0,0)), game::RegistrationKey::Unregistered, 7);
+        afl::base::Ptr<game::Root> r = game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(3,0,0)), game::RegistrationKey::Unregistered, 7).asPtr();
         t.session().setRoot(r);
 
         // Create game with universe

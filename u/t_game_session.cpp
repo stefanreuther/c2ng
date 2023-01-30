@@ -125,7 +125,7 @@ TestGameSession::testReferenceNameNonempty()
     testee.setShipList(shipList);
 
     // Populate root
-    afl::base::Ptr<game::Root> root = new game::test::Root(game::HostVersion());
+    afl::base::Ptr<game::Root> root = game::test::makeRoot(game::HostVersion()).asPtr();
     root->playerList().create(3)->setName(game::Player::ShortName, "The Romulans");
     testee.setRoot(root);
 
@@ -225,7 +225,7 @@ TestGameSession::testInterpreterInterface()
     testee.setShipList(shipList);
 
     // Populate root
-    afl::base::Ptr<game::Root> root = new game::test::Root(game::HostVersion());
+    afl::base::Ptr<game::Root> root = game::test::makeRoot(game::HostVersion()).asPtr();
     root->playerList().create(5)->setName(game::Player::AdjectiveName, "Pirate");
     testee.setRoot(root);
 
@@ -264,7 +264,7 @@ TestGameSession::testTask()
     game::Session testee(tx, fs);
 
     // Populate root
-    afl::base::Ptr<game::Root> root = new game::test::Root(game::HostVersion());
+    afl::base::Ptr<game::Root> root = game::test::makeRoot(game::HostVersion()).asPtr();
     testee.setRoot(root);
 
     // Populate game

@@ -120,7 +120,7 @@ void
 TestGameProxyImperialStatsProxy::testNonempty()
 {
     SessionThread t;
-    t.session().setRoot(new game::test::Root(game::HostVersion()));
+    t.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     t.session().setShipList(new game::spec::ShipList());
     t.session().setGame(new game::Game());
 
@@ -185,7 +185,7 @@ void
 TestGameProxyImperialStatsProxy::testContentOptions()
 {
     SessionThread t;
-    t.session().setRoot(new game::test::Root(game::HostVersion()));
+    t.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     t.session().setShipList(new game::spec::ShipList());
     t.session().setGame(new game::Game());
 
@@ -215,7 +215,7 @@ TestGameProxyImperialStatsProxy::testSaveHTML()
 {
     afl::io::InternalFileSystem fs;
     SessionThread t(fs);
-    t.session().setRoot(new game::test::Root(game::HostVersion()));
+    t.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     t.session().setShipList(new game::spec::ShipList());
     t.session().setGame(new game::Game());
 
@@ -241,7 +241,7 @@ TestGameProxyImperialStatsProxy::testSaveHTMLError()
 {
     afl::io::InternalFileSystem fs;
     SessionThread t(fs);
-    t.session().setRoot(new game::test::Root(game::HostVersion()));
+    t.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     t.session().setShipList(new game::spec::ShipList());
     t.session().setGame(new game::Game());
 

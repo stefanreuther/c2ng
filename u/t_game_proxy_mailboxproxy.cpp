@@ -91,7 +91,7 @@ namespace {
               config(),
               currentMessage(0)
             {
-                session.setRoot(new game::test::Root(game::HostVersion()));
+                session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
                 session.setGame(new game::Game());
 
                 // Filter "all" messages that have a 'x' in the pattern
@@ -431,7 +431,7 @@ void
 TestGameProxyMailboxProxy::testData()
 {
     game::test::SessionThread t;
-    t.session().setRoot(new game::test::Root(game::HostVersion()));
+    t.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     t.session().setGame(new game::Game());
     t.session().getGame()->currentTurn().setTurnNumber(10);
     t.session().getGame()->currentTurn().inbox().addMessage("(-r1000)<<< Message >>>\n"

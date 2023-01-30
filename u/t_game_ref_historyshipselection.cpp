@@ -252,7 +252,7 @@ TestGameRefHistoryShipSelection::testBuildList()
     afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
     game::Session session(tx, fs);
-    session.setRoot(new game::test::Root(game::HostVersion()));
+    session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     session.setGame(new game::Game());
 
     // Build it
@@ -302,7 +302,7 @@ TestGameRefHistoryShipSelection::testBuildListHist()
     afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
     game::Session session(tx, fs);
-    session.setRoot(new game::test::Root(game::HostVersion()));
+    session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     session.setGame(new game::Game());
     session.getGame()->teamSettings().setViewpointPlayer(ME);
     session.getGame()->teamSettings().setPlayerTeam(ALLY, ME);
@@ -394,7 +394,7 @@ TestGameRefHistoryShipSelection::testBuildListHist2()
     afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
     game::Session session(tx, fs);
-    session.setRoot(new game::test::Root(game::HostVersion()));
+    session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     session.setGame(new game::Game());
     session.getGame()->teamSettings().setViewpointPlayer(ME);
 

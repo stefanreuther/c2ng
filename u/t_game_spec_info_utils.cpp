@@ -39,10 +39,10 @@ TestGameSpecInfoUtils::testConvertRangeToSet()
 void
 TestGameSpecInfoUtils::testGetLevelRange()
 {
-    game::test::Root r(game::HostVersion(game::HostVersion::PHost, MKVERSION(3, 0, 0)));
-    r.hostConfiguration()[game::config::HostConfiguration::NumExperienceLevels].set(7);
+    afl::base::Ref<game::Root> r(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(3, 0, 0))));
+    r->hostConfiguration()[game::config::HostConfiguration::NumExperienceLevels].set(7);
 
-    TS_ASSERT_EQUALS(gsi::getLevelRange(r), gsi::IntRange_t(0, 7));
+    TS_ASSERT_EQUALS(gsi::getLevelRange(*r), gsi::IntRange_t(0, 7));
 }
 
 // Test game::spec::info::getHullRange().
@@ -60,12 +60,12 @@ TestGameSpecInfoUtils::testGetHullRange()
 void
 TestGameSpecInfoUtils::testGetPlayerRange()
 {
-    game::test::Root r(game::HostVersion(game::HostVersion::PHost, MKVERSION(3, 0, 0)));
-    r.playerList().create(1);
-    r.playerList().create(7);
-    r.playerList().create(9);
+    afl::base::Ref<game::Root> r(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(3, 0, 0))));
+    r->playerList().create(1);
+    r->playerList().create(7);
+    r->playerList().create(9);
 
-    TS_ASSERT_EQUALS(gsi::getPlayerRange(r), gsi::IntRange_t(1, 9));
+    TS_ASSERT_EQUALS(gsi::getPlayerRange(*r), gsi::IntRange_t(1, 9));
 }
 
 // Test game::spec::info::getAttributeRange().

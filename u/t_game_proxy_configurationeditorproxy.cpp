@@ -206,7 +206,7 @@ TestGameProxyConfigurationEditorProxy::testIntegration()
 {
     // Environment:
     game::test::SessionThread t;
-    t.session().setRoot(new game::test::Root(game::HostVersion()));
+    t.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     game::test::WaitIndicator ind;
 
     // Set up a ConfigurationEditorProxy
@@ -238,7 +238,7 @@ TestGameProxyConfigurationEditorProxy::testObserverIntegration()
 {
     // Environment:
     game::test::SessionThread t;
-    t.session().setRoot(new game::test::Root(game::HostVersion()));
+    t.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     game::test::WaitIndicator ind;
 
     // Set up a ConfigurationEditorProxy

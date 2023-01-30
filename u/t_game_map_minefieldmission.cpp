@@ -94,11 +94,11 @@ TestGameMapMinefieldMission::testLayEmptyShip()
     MinefieldMission testee;
     Ship ship(77);
     game::map::Universe univ;
-    game::test::Root root(HostVersion(HostVersion::PHost, MKVERSION(3,0,0)));
+    afl::base::Ref<game::Root> root = game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(3,0,0)));
     game::UnitScoreDefinitionList shipScores;     // required for hull functions, which are required to determine FCode availability
     game::spec::ShipList shipList;                // required for fcodes and hull functions
 
-    TS_ASSERT_EQUALS(testee.checkLayMission(ship, univ, root, game::map::Configuration(), shipScores, shipList), false);
+    TS_ASSERT_EQUALS(testee.checkLayMission(ship, univ, *root, game::map::Configuration(), shipScores, shipList), false);
 }
 
 /** Test mine laying with a freighter.
@@ -651,11 +651,11 @@ TestGameMapMinefieldMission::testScoopEmpty()
 {
     MinefieldMission testee;
     Ship ship(77);
-    game::test::Root root(HostVersion(HostVersion::PHost, MKVERSION(3,0,0)));
+    afl::base::Ref<game::Root> root = game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(3,0,0)));
     game::UnitScoreDefinitionList shipScores;     // required for hull functions, which are required to determine FCode availability
     game::spec::ShipList shipList;                // required for fcodes and hull functions
 
-    TS_ASSERT_EQUALS(testee.checkScoopMission(ship, root, shipScores, shipList), false);
+    TS_ASSERT_EQUALS(testee.checkScoopMission(ship, *root, shipScores, shipList), false);
 }
 
 /** Test mine scooping with a freighter.
@@ -666,13 +666,13 @@ TestGameMapMinefieldMission::testScoopFreighter()
 {
     MinefieldMission testee;
 
-    game::test::Root root(HostVersion(HostVersion::PHost, MKVERSION(3,0,0)), RegistrationKey::Registered);
+    afl::base::Ref<game::Root> root = game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(3,0,0)), RegistrationKey::Registered);
     TestHarness h;
     Ship& ship = addFreighter(h, 222, 3);
     ship.setMission(2, 0, 0);
     ship.setFriendlyCode(String_t("msc"));
 
-    TS_ASSERT_EQUALS(testee.checkScoopMission(ship, root, h.shipScores, h.turn.shipList()), false);
+    TS_ASSERT_EQUALS(testee.checkScoopMission(ship, *root, h.shipScores, h.turn.shipList()), false);
 }
 
 /** Test mine scooping (successful base case).
@@ -683,7 +683,7 @@ TestGameMapMinefieldMission::testScoopFCode()
 {
     MinefieldMission testee;
 
-    game::test::Root root(HostVersion(HostVersion::PHost, MKVERSION(3,0,0)));
+    afl::base::Ref<game::Root> root = game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(3,0,0)));
     TestHarness h;
     Ship& ship = addTorper(h, 222, 3);
     ship.setNumBeams(2);
@@ -691,7 +691,7 @@ TestGameMapMinefieldMission::testScoopFCode()
     ship.setMission(2, 0, 0);
     ship.setFriendlyCode(String_t("msc"));
 
-    TS_ASSERT_EQUALS(testee.checkScoopMission(ship, root, h.shipScores, h.turn.shipList()), true);
+    TS_ASSERT_EQUALS(testee.checkScoopMission(ship, *root, h.shipScores, h.turn.shipList()), true);
 
     TS_ASSERT_EQUALS(testee.getRequiredMinefieldId(), 0);
     TS_ASSERT_EQUALS(testee.getMinefieldOwner(), 3);
@@ -711,7 +711,7 @@ TestGameMapMinefieldMission::testScoopFCodeDisabled()
     MinefieldMission testee;
     afl::string::NullTranslator tx;
 
-    game::test::Root root(HostVersion(HostVersion::PHost, MKVERSION(3,0,0)));
+    afl::base::Ref<game::Root> root = game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(3,0,0)));
     TestHarness h;
     Ship& ship = addTorper(h, 222, 3);
     ship.setNumBeams(2);
@@ -721,7 +721,7 @@ TestGameMapMinefieldMission::testScoopFCodeDisabled()
 
     h.turn.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("msc", "p,foo", tx));
 
-    TS_ASSERT_EQUALS(testee.checkScoopMission(ship, root, h.shipScores, h.turn.shipList()), false);
+    TS_ASSERT_EQUALS(testee.checkScoopMission(ship, *root, h.shipScores, h.turn.shipList()), false);
 }
 
 /** Test mine scooping, unusable friendly code.
@@ -733,7 +733,7 @@ TestGameMapMinefieldMission::testScoopFCodeUnregistered()
     MinefieldMission testee;
     afl::string::NullTranslator tx;
 
-    game::test::Root root(HostVersion(HostVersion::PHost, MKVERSION(3,0,0)), RegistrationKey::Unregistered);
+    afl::base::Ref<game::Root> root = game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(3,0,0)), RegistrationKey::Unregistered);
     TestHarness h;
     Ship& ship = addTorper(h, 222, 3);
     ship.setNumBeams(2);
@@ -743,7 +743,7 @@ TestGameMapMinefieldMission::testScoopFCodeUnregistered()
 
     h.turn.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("msc", "sr,foo", tx));
 
-    TS_ASSERT_EQUALS(testee.checkScoopMission(ship, root, h.shipScores, h.turn.shipList()), false);
+    TS_ASSERT_EQUALS(testee.checkScoopMission(ship, *root, h.shipScores, h.turn.shipList()), false);
 }
 
 /** Test mine scooping, inapplicable friendly code.
@@ -754,7 +754,7 @@ TestGameMapMinefieldMission::testScoopFCodeNoBeamsHost()
 {
     MinefieldMission testee;
 
-    game::test::Root root(HostVersion(HostVersion::Host, MKVERSION(3,22,40)));
+    afl::base::Ref<game::Root> root = game::test::makeRoot(HostVersion(HostVersion::Host, MKVERSION(3,22,40)));
     TestHarness h;
     Ship& ship = addTorper(h, 222, 3);
     ship.setNumBeams(0);
@@ -762,7 +762,7 @@ TestGameMapMinefieldMission::testScoopFCodeNoBeamsHost()
     ship.setMission(2, 0, 0);
     ship.setFriendlyCode(String_t("msc"));
 
-    TS_ASSERT_EQUALS(testee.checkScoopMission(ship, root, h.shipScores, h.turn.shipList()), true);
+    TS_ASSERT_EQUALS(testee.checkScoopMission(ship, *root, h.shipScores, h.turn.shipList()), true);
 }
 
 /** Test mine scooping, inapplicable friendly code.
@@ -773,7 +773,7 @@ TestGameMapMinefieldMission::testScoopFCodeNoBeamsPHost()
 {
     MinefieldMission testee;
 
-    game::test::Root root(HostVersion(HostVersion::PHost, MKVERSION(3,22,40)));
+    afl::base::Ref<game::Root> root = game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(3,22,40)));
     TestHarness h;
     Ship& ship = addTorper(h, 222, 3);
     ship.setNumBeams(0);
@@ -781,7 +781,7 @@ TestGameMapMinefieldMission::testScoopFCodeNoBeamsPHost()
     ship.setMission(2, 0, 0);
     ship.setFriendlyCode(String_t("msc"));
 
-    TS_ASSERT_EQUALS(testee.checkScoopMission(ship, root, h.shipScores, h.turn.shipList()), false);
+    TS_ASSERT_EQUALS(testee.checkScoopMission(ship, *root, h.shipScores, h.turn.shipList()), false);
 }
 
 /** Test mine scooping using mission.
@@ -792,7 +792,7 @@ TestGameMapMinefieldMission::testScoopMission()
 {
     MinefieldMission testee;
 
-    game::test::Root root(HostVersion(HostVersion::PHost, MKVERSION(3,0,0)), RegistrationKey::Registered);
+    afl::base::Ref<game::Root> root = game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(3,0,0)), RegistrationKey::Registered);
     TestHarness h;
     Ship& ship = addTorper(h, 222, 3);
     ship.setNumBeams(2);
@@ -800,7 +800,7 @@ TestGameMapMinefieldMission::testScoopMission()
     ship.setMission(23, 27, 456);                 /* ExtMissionsStartAt + pmsn_ScoopTorps */
     ship.setFriendlyCode(String_t(""));
 
-    TS_ASSERT_EQUALS(testee.checkScoopMission(ship, root, h.shipScores, h.turn.shipList()), true);
+    TS_ASSERT_EQUALS(testee.checkScoopMission(ship, *root, h.shipScores, h.turn.shipList()), true);
 
     TS_ASSERT_EQUALS(testee.getRequiredMinefieldId(), 456);
     TS_ASSERT_EQUALS(testee.getMinefieldOwner(), 3);
@@ -819,7 +819,7 @@ TestGameMapMinefieldMission::testScoopMissionUnregistered()
 {
     MinefieldMission testee;
 
-    game::test::Root root(HostVersion(HostVersion::PHost, MKVERSION(3,0,0)), RegistrationKey::Unregistered);
+    afl::base::Ref<game::Root> root = game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(3,0,0)), RegistrationKey::Unregistered);
     TestHarness h;
     Ship& ship = addTorper(h, 222, 3);
     ship.setNumBeams(2);
@@ -827,6 +827,6 @@ TestGameMapMinefieldMission::testScoopMissionUnregistered()
     ship.setMission(23, 27, 456);                 /* ExtMissionsStartAt + pmsn_ScoopTorps */
     ship.setFriendlyCode(String_t(""));
 
-    TS_ASSERT_EQUALS(testee.checkScoopMission(ship, root, h.shipScores, h.turn.shipList()), false);
+    TS_ASSERT_EQUALS(testee.checkScoopMission(ship, *root, h.shipScores, h.turn.shipList()), false);
 }
 

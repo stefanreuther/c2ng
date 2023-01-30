@@ -62,7 +62,7 @@ TestGameActionsCloneShip::testNormal()
 {
     // Environment
     game::test::SimpleTurn t;
-    game::test::Root root((game::HostVersion()));
+    afl::base::Ref<game::Root> root = game::test::makeRoot(game::HostVersion());
     game::UnitScoreDefinitionList shipScores;
 
     // Units
@@ -70,7 +70,7 @@ TestGameActionsCloneShip::testNormal()
     Ship& sh = addOutrider(t);
 
     // Action
-    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), root);
+    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), *root);
     TS_ASSERT_EQUALS(&testee.ship(), &sh);
     TS_ASSERT_EQUALS(&testee.planet(), &pl);
 
@@ -113,7 +113,7 @@ TestGameActionsCloneShip::testNormalPayTech()
 {
     // Environment
     game::test::SimpleTurn t;
-    game::test::Root root((game::HostVersion()));
+    afl::base::Ref<game::Root> root = game::test::makeRoot(game::HostVersion());
     game::UnitScoreDefinitionList shipScores;
 
     // Units
@@ -123,7 +123,7 @@ TestGameActionsCloneShip::testNormalPayTech()
     pl.setCargo(game::Element::Money, 1300);
 
     // Action
-    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), root);
+    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), *root);
     TS_ASSERT_EQUALS(testee.getOrderStatus(), game::actions::CloneShip::CanClone);
     TS_ASSERT_EQUALS(testee.getPaymentStatus(), game::actions::CloneShip::CannotPayComponents);
 
@@ -144,7 +144,7 @@ TestGameActionsCloneShip::testNormalPayNone()
 {
     // Environment
     game::test::SimpleTurn t;
-    game::test::Root root((game::HostVersion()));
+    afl::base::Ref<game::Root> root = game::test::makeRoot(game::HostVersion());
     game::UnitScoreDefinitionList shipScores;
 
     // Units
@@ -155,7 +155,7 @@ TestGameActionsCloneShip::testNormalPayNone()
     sh.setFriendlyCode(String_t("xyz"));
 
     // Action
-    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), root);
+    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), *root);
     TS_ASSERT_EQUALS(testee.getOrderStatus(), game::actions::CloneShip::CanClone);
     TS_ASSERT_EQUALS(testee.getPaymentStatus(), game::actions::CloneShip::CannotPayTech);
 
@@ -174,7 +174,7 @@ TestGameActionsCloneShip::testCanBuild()
 {
     // Environment
     game::test::SimpleTurn t;
-    game::test::Root root((game::HostVersion()));
+    afl::base::Ref<game::Root> root = game::test::makeRoot(game::HostVersion());
     game::UnitScoreDefinitionList shipScores;
 
     // Units
@@ -183,7 +183,7 @@ TestGameActionsCloneShip::testCanBuild()
     t.shipList().hullAssignments().add(PLANET_OWNER, 1, game::test::OUTRIDER_HULL_ID);
 
     // Action
-    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), root);
+    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), *root);
     TS_ASSERT_EQUALS(testee.getOrderStatus(), game::actions::CloneShip::CanBuild);
 }
 
@@ -195,7 +195,7 @@ TestGameActionsCloneShip::testTholianHost()
 {
     // Environment
     game::test::SimpleTurn t;
-    game::test::Root root(game::HostVersion(game::HostVersion::Host, MKVERSION(3,22,4)));
+    afl::base::Ref<game::Root> root = game::test::makeRoot(game::HostVersion(game::HostVersion::Host, MKVERSION(3,22,4)));
     game::UnitScoreDefinitionList shipScores;
 
     // Units
@@ -205,7 +205,7 @@ TestGameActionsCloneShip::testTholianHost()
     sh.setOwner(7);
 
     // Action
-    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), root);
+    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), *root);
     TS_ASSERT_EQUALS(testee.getOrderStatus(), game::actions::CloneShip::PlayerCannotClone);
 }
 
@@ -217,7 +217,7 @@ TestGameActionsCloneShip::testTholianPHost()
 {
     // Environment
     game::test::SimpleTurn t;
-    game::test::Root root(game::HostVersion(game::HostVersion::PHost, MKVERSION(3,2,4)));
+    afl::base::Ref<game::Root> root = game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(3,2,4)));
     game::UnitScoreDefinitionList shipScores;
 
     // Units
@@ -227,7 +227,7 @@ TestGameActionsCloneShip::testTholianPHost()
     sh.setOwner(7);
 
     // Action
-    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), root);
+    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), *root);
     TS_ASSERT_EQUALS(testee.getOrderStatus(), game::actions::CloneShip::CanClone);
 
     // Cost is 1300$ for tech + 85*327.68=27851 for the ship
@@ -242,7 +242,7 @@ TestGameActionsCloneShip::testTechLimit()
 {
     // Environment
     game::test::SimpleTurn t;
-    game::test::Root root((game::HostVersion()));
+    afl::base::Ref<game::Root> root = game::test::makeRoot(game::HostVersion());
     game::UnitScoreDefinitionList shipScores;
     game::test::addTranswarp(t.shipList());
 
@@ -252,7 +252,7 @@ TestGameActionsCloneShip::testTechLimit()
     sh.setEngineType(game::test::TRANSWARP_ENGINE_ID);
 
     // Action
-    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), root);
+    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), *root);
     TS_ASSERT_EQUALS(testee.getOrderStatus(), game::actions::CloneShip::TechLimitExceeded);
 }
 
@@ -266,7 +266,7 @@ TestGameActionsCloneShip::testRemoteOwner()
 
     // Environment
     game::test::SimpleTurn t;
-    game::test::Root root(game::HostVersion(game::HostVersion::PHost, MKVERSION(3,2,4)));
+    afl::base::Ref<game::Root> root = game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(3,2,4)));
     game::UnitScoreDefinitionList shipScores;
     game::test::addTranswarp(t.shipList());
 
@@ -280,7 +280,7 @@ TestGameActionsCloneShip::testRemoteOwner()
     sh.addMessageInformation(info, game::PlayerSet_t());
 
     // Action
-    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), root);
+    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), *root);
     TS_ASSERT_EQUALS(testee.getOrderStatus(), game::actions::CloneShip::RemoteOwnerCanBuild);
 }
 
@@ -292,7 +292,7 @@ TestGameActionsCloneShip::testUnclonable()
 {
     // Environment
     game::test::SimpleTurn t;
-    game::test::Root root((game::HostVersion()));
+    afl::base::Ref<game::Root> root = game::test::makeRoot(game::HostVersion());
     game::UnitScoreDefinitionList shipScores;
     game::test::addTranswarp(t.shipList());
 
@@ -302,7 +302,7 @@ TestGameActionsCloneShip::testUnclonable()
     sh.addShipSpecialFunction(t.shipList().modifiedHullFunctions().getFunctionIdFromHostId(game::spec::BasicHullFunction::Unclonable));
 
     // Action
-    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), root);
+    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), *root);
     TS_ASSERT_EQUALS(testee.getOrderStatus(), game::actions::CloneShip::ShipIsUnclonable);
 }
 
@@ -315,7 +315,7 @@ TestGameActionsCloneShip::testFriendlyCodeGood()
 {
     // Environment
     game::test::SimpleTurn t;
-    game::test::Root root(game::HostVersion(), game::RegistrationKey::Registered, 10);
+    afl::base::Ref<game::Root> root = game::test::makeRoot(game::HostVersion(), game::RegistrationKey::Registered, 10);
     game::UnitScoreDefinitionList shipScores;
     afl::string::NullTranslator tx;
     t.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("cln", "r,foo", tx));
@@ -325,7 +325,7 @@ TestGameActionsCloneShip::testFriendlyCodeGood()
     Ship& sh = addOutrider(t);
 
     // Action
-    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), root);
+    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), *root);
     TS_ASSERT_EQUALS(testee.getOrderStatus(), game::actions::CloneShip::CanClone);
 }
 
@@ -337,7 +337,7 @@ TestGameActionsCloneShip::testFriendlyCodeBad()
 {
     // Environment
     game::test::SimpleTurn t;
-    game::test::Root root(game::HostVersion(), game::RegistrationKey::Unregistered, 6);
+    afl::base::Ref<game::Root> root = game::test::makeRoot(game::HostVersion(), game::RegistrationKey::Unregistered, 6);
     game::UnitScoreDefinitionList shipScores;
     afl::string::NullTranslator tx;
     t.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("cln", "r,foo", tx));
@@ -347,7 +347,7 @@ TestGameActionsCloneShip::testFriendlyCodeBad()
     Ship& sh = addOutrider(t);
 
     // Action
-    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), root);
+    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), *root);
     TS_ASSERT_EQUALS(testee.getOrderStatus(), game::actions::CloneShip::PlayerCannotClone);
 }
 
@@ -359,7 +359,7 @@ TestGameActionsCloneShip::testFriendlyCodeOpen()
 {
     // Environment
     game::test::SimpleTurn t;
-    game::test::Root root(game::HostVersion(), game::RegistrationKey::Unregistered, 6);
+    afl::base::Ref<game::Root> root = game::test::makeRoot(game::HostVersion(), game::RegistrationKey::Unregistered, 6);
     game::UnitScoreDefinitionList shipScores;
     afl::string::NullTranslator tx;
     t.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("cln", ",foo", tx));
@@ -369,7 +369,7 @@ TestGameActionsCloneShip::testFriendlyCodeOpen()
     Ship& sh = addOutrider(t);
 
     // Action
-    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), root);
+    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), *root);
     TS_ASSERT_EQUALS(testee.getOrderStatus(), game::actions::CloneShip::CanClone);
 }
 
@@ -381,7 +381,7 @@ TestGameActionsCloneShip::testNoConflict()
 {
     // Environment
     game::test::SimpleTurn t;
-    game::test::Root root(game::HostVersion(), game::RegistrationKey::Unregistered, 6);
+    afl::base::Ref<game::Root> root = game::test::makeRoot(game::HostVersion(), game::RegistrationKey::Unregistered, 6);
     game::UnitScoreDefinitionList shipScores;
 
     // Units
@@ -389,7 +389,7 @@ TestGameActionsCloneShip::testNoConflict()
     Ship& sh = addOutrider(t);
 
     // Action
-    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), root);
+    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), *root);
 
     afl::string::NullTranslator tx;
     game::test::InterpreterInterface iface;
@@ -405,7 +405,7 @@ TestGameActionsCloneShip::testBuildConflict()
 {
     // Environment
     game::test::SimpleTurn t;
-    game::test::Root root(game::HostVersion(), game::RegistrationKey::Unregistered, 6);
+    afl::base::Ref<game::Root> root = game::test::makeRoot(game::HostVersion(), game::RegistrationKey::Unregistered, 6);
     game::UnitScoreDefinitionList shipScores;
 
     // Units
@@ -421,7 +421,7 @@ TestGameActionsCloneShip::testBuildConflict()
     pl.setBaseBuildOrder(o);
 
     // Action
-    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), root);
+    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), *root);
 
     afl::string::NullTranslator tx;
     game::test::InterpreterInterface iface;
@@ -440,7 +440,7 @@ TestGameActionsCloneShip::testCloneConflict()
 {
     // Environment
     game::test::SimpleTurn t;
-    game::test::Root root(game::HostVersion(), game::RegistrationKey::Unregistered, 6);
+    afl::base::Ref<game::Root> root = game::test::makeRoot(game::HostVersion(), game::RegistrationKey::Unregistered, 6);
     game::UnitScoreDefinitionList shipScores;
 
     // Units
@@ -475,7 +475,7 @@ TestGameActionsCloneShip::testCloneConflict()
     c5.setName(String_t("five"));
 
     // Action
-    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), root);
+    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), *root);
 
     afl::string::NullTranslator tx;
     game::test::InterpreterInterface iface;
@@ -507,7 +507,7 @@ TestGameActionsCloneShip::testCloneConflictSelf()
 {
     // Environment
     game::test::SimpleTurn t;
-    game::test::Root root(game::HostVersion(), game::RegistrationKey::Unregistered, 6);
+    afl::base::Ref<game::Root> root = game::test::makeRoot(game::HostVersion(), game::RegistrationKey::Unregistered, 6);
     game::UnitScoreDefinitionList shipScores;
 
     // Units
@@ -516,7 +516,7 @@ TestGameActionsCloneShip::testCloneConflictSelf()
     sh.setFriendlyCode(String_t("cln"));
 
     // Action
-    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), root);
+    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), *root);
 
     afl::string::NullTranslator tx;
     game::test::InterpreterInterface iface;
@@ -532,7 +532,7 @@ TestGameActionsCloneShip::testCloneConflictMore()
 {
     // Environment
     game::test::SimpleTurn t;
-    game::test::Root root(game::HostVersion(), game::RegistrationKey::Unregistered, 6);
+    afl::base::Ref<game::Root> root = game::test::makeRoot(game::HostVersion(), game::RegistrationKey::Unregistered, 6);
     game::UnitScoreDefinitionList shipScores;
 
     // Units
@@ -546,7 +546,7 @@ TestGameActionsCloneShip::testCloneConflictMore()
     c1.setName(String_t("one"));
 
     // Action
-    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), root);
+    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), *root);
 
     afl::string::NullTranslator tx;
     game::test::InterpreterInterface iface;
@@ -565,7 +565,7 @@ TestGameActionsCloneShip::testCloneOnce()
 {
     // Environment
     game::test::SimpleTurn t;
-    game::test::Root root((game::HostVersion()));
+    afl::base::Ref<game::Root> root = game::test::makeRoot(game::HostVersion());
     game::UnitScoreDefinitionList shipScores;
     game::test::addTranswarp(t.shipList());
 
@@ -575,7 +575,7 @@ TestGameActionsCloneShip::testCloneOnce()
     sh.addShipSpecialFunction(t.shipList().modifiedHullFunctions().getFunctionIdFromHostId(game::spec::BasicHullFunction::CloneOnce));
 
     // Action
-    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), root);
+    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), *root);
     TS_ASSERT_EQUALS(testee.getOrderStatus(), game::actions::CloneShip::CanClone);
     TS_ASSERT_EQUALS(testee.isCloneOnce(), true);
 }
@@ -588,7 +588,7 @@ TestGameActionsCloneShip::testFleet()
 {
     // Environment
     game::test::SimpleTurn t;
-    game::test::Root root(game::HostVersion(), game::RegistrationKey::Unregistered, 6);
+    afl::base::Ref<game::Root> root = game::test::makeRoot(game::HostVersion(), game::RegistrationKey::Unregistered, 6);
     game::UnitScoreDefinitionList shipScores;
 
     // Units
@@ -604,7 +604,7 @@ TestGameActionsCloneShip::testFleet()
     c2.setFleetNumber(sh.getId());
 
     // Action
-    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), root);
+    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), *root);
     game::map::Configuration mapConfig;
     util::RandomNumberGenerator rng(1);
     TS_ASSERT_THROWS_NOTHING(testee.commit(mapConfig, rng));

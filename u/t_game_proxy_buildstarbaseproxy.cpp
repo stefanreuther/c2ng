@@ -30,7 +30,7 @@ namespace {
 
     void prepare(SessionThread& s)
     {
-        Ptr<Root> r = new game::test::Root(HostVersion(HostVersion::PHost, MKVERSION(4,0,0)));
+        Ptr<Root> r = game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(4,0,0))).asPtr();
         s.session().setRoot(r);
 
         Ptr<Game> g = new Game();

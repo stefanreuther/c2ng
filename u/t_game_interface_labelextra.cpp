@@ -40,7 +40,7 @@ namespace {
        Although LabelExtra does not require a ship list, PlanetFunction and ShipFunction do. */
     void addConnections(TestHarness& h)
     {
-        h.session.setRoot(new game::test::Root(game::HostVersion()));
+        h.session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
         h.session.setGame(new game::Game());
         h.session.setShipList(new game::spec::ShipList());
         h.session.sig_runRequest.add(&h.session.processList(), &interpreter::ProcessList::run);

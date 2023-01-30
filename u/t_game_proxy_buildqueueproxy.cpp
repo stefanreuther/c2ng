@@ -26,7 +26,7 @@ namespace {
 
     void initRoot(game::test::SessionThread& s)
     {
-        s.session().setRoot(new game::test::Root(HostVersion(HostVersion::PHost, MKVERSION(4,1,0))));
+        s.session().setRoot(game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(4,1,0))).asPtr());
     }
 
     void initShipList(game::test::SessionThread& s)

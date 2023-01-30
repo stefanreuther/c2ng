@@ -16,17 +16,17 @@ namespace gsi = game::spec::info;
 namespace {
     struct TestHarness {
         gsi::NullPictureNamer picNamer;
-        game::test::Root root;
+        afl::base::Ref<game::Root> root;
         game::spec::ShipList shipList;
         afl::string::NullTranslator tx;
         gsi::Browser browser;
 
         TestHarness()
             : picNamer(),
-              root(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0))),
+              root(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)))),
               shipList(),
               tx(),
-              browser(picNamer, root, shipList, 3, tx)
+              browser(picNamer, *root, shipList, 3, tx)
             { }
     };
 }
@@ -51,8 +51,8 @@ TestGameSpecInfoFilter::testDescribeElement()
     TestHarness h;
     h.shipList.hulls().create(12)->setName("AWESOME CRUISER");
     h.shipList.basicHullFunctions().addFunction(9, "Jump");
-    h.root.playerList().create(4)->setName(game::Player::ShortName, "The Frogs");
-    h.root.hostConfiguration()[game::config::HostConfiguration::NumExperienceLevels].set(3);
+    h.root->playerList().create(4)->setName(game::Player::ShortName, "The Frogs");
+    h.root->hostConfiguration()[game::config::HostConfiguration::NumExperienceLevels].set(3);
 
     gsi::Filter testee;
 
@@ -163,11 +163,11 @@ TestGameSpecInfoFilter::testDescribeElement2()
     TS_ASSERT_EQUALS(testee.describe(gsi::FilterElement(gsi::Range_IsDeathRay, 0, gsi::IntRange_t()), h.browser).value, "none");
 
     // Other specialties
-    h.root.hostConfiguration()[game::config::HostConfiguration::NumExperienceLevels].set(0);
+    h.root->hostConfiguration()[game::config::HostConfiguration::NumExperienceLevels].set(0);
     TS_ASSERT_EQUALS(testee.describe(gsi::FilterElement(gsi::ValueRange_ShipAbility, 9, gsi::IntRange_t::fromValue(0)), h.browser).value, "Jump");
     TS_ASSERT_EQUALS(testee.describe(gsi::FilterElement(gsi::ValueRange_ShipAbility, 9, gsi::IntRange_t::fromValue(0)), h.browser).mode, gsi::NotEditable);
 
-    h.root.hostConfiguration()[game::config::HostConfiguration::NumExperienceLevels].set(2);
+    h.root->hostConfiguration()[game::config::HostConfiguration::NumExperienceLevels].set(2);
     TS_ASSERT_EQUALS(testee.describe(gsi::FilterElement(gsi::ValueRange_ShipAbility, 9, gsi::IntRange_t::fromValue(0)), h.browser).value, "Jump (level 0)");
     TS_ASSERT_EQUALS(testee.describe(gsi::FilterElement(gsi::ValueRange_ShipAbility, 9, gsi::IntRange_t::fromValue(0)), h.browser).mode, gsi::EditRangeLevel);
 }
@@ -197,8 +197,8 @@ TestGameSpecInfoFilter::testModify()
 
     // Environment only required for formatting
     TestHarness h;
-    h.root.playerList().create(3)->setName(game::Player::ShortName, "The Vorticons");
-    h.root.playerList().create(5)->setName(game::Player::ShortName, "The Q");
+    h.root->playerList().create(3)->setName(game::Player::ShortName, "The Vorticons");
+    h.root->playerList().create(5)->setName(game::Player::ShortName, "The Q");
 
     // Describe
     {
