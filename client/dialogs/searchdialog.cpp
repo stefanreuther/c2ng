@@ -658,21 +658,30 @@ SearchDialog::onHistory()
         SearchQuery::SearchObjects_t obj;
         SearchQuery::MatchType type = SearchQuery::MatchTrue;
 
-        for (size_t i = 0; i < flags.size(); ++i) {
-            switch (flags[i]) {
-             case 'S': case 's':
-                obj += SearchQuery::SearchShips;
-                break;
-             case 'P': case 'p':
-                obj += SearchQuery::SearchPlanets;
-                break;
-             case 'B': case 'b':
-                obj += SearchQuery::SearchBases;
-                break;
-             case '!':
-                type = SearchQuery::MatchFalse;
-                break;
+        if (!flags.empty()) {
+            for (size_t i = 0; i < flags.size(); ++i) {
+                switch (flags[i]) {
+                 case 'S': case 's':
+                    obj += SearchQuery::SearchShips;
+                    break;
+                 case 'P': case 'p':
+                    obj += SearchQuery::SearchPlanets;
+                    break;
+                 case 'B': case 'b':
+                    obj += SearchQuery::SearchBases;
+                    break;
+                 case '!':
+                    type = SearchQuery::MatchFalse;
+                    break;
+                }
             }
+        } else {
+            obj = SearchQuery::SearchObjects_t()
+                + SearchQuery::SearchShips
+                + SearchQuery::SearchPlanets
+                + SearchQuery::SearchBases
+                + SearchQuery::SearchUfos
+                + SearchQuery::SearchOthers;
         }
 
         // If it specifies an object type, set that
