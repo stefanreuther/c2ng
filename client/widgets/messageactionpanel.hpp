@@ -71,13 +71,41 @@ namespace client { namespace widgets {
             BrowseSubjects      ///< Tab.
         };
 
+        /** Constructor.
+            @param root    UI root
+            @param tx      Translator */
         MessageActionPanel(ui::Root& root, afl::string::Translator& tx);
+
+        /** Destructor. */
         ~MessageActionPanel();
 
+        /** Enable an action.
+            This shows the action, together with an explanatory note.
+            @param a     Action
+            @param note  Note; brief human-readable text */
         void enableAction(Action a, const String_t& note);
+
+        /** Disable an action.
+            This hides the action.
+            Note that this does not prevent the action from being generated on sig_action.
+            @param a     Action */
         void disableAction(Action a);
+
+        /** Set position in mailbox.
+            Sets the position indicator ("10/30").
+            @param label  Position indicator
+            @param dim    true to show in dim color (current message is filtered) */
         void setPosition(String_t label, bool dim);
 
+        /** Set priority of Reply action.
+            With this flag set to false, Reply is the preferred default option if it is available.
+            With this flag set to true, Reply is not selected if other options are available.
+            Set this to true if default reply addressee is the Host.
+
+            @param flag Flag */
+        void setAvoidReply(bool flag);
+
+        // Widget:
         virtual bool handleKey(util::Key_t key, int prefix);
         virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
         virtual void draw(gfx::Canvas& can);
@@ -89,6 +117,11 @@ namespace client { namespace widgets {
         virtual void handleChildPositionChange(Widget& child, const gfx::Rectangle& oldPosition);
         virtual ui::layout::Info getLayoutInfo() const;
 
+        /** Signal: Action.
+            This action is emitted whenever an action is selected.
+            Note that MessageActionPanel can emit actions even if they are disabled.
+            @param action   Action
+            @param prefix   Prefix argument */
         afl::base::Signal<void(Action, int)> sig_action;
 
      private:
@@ -105,6 +138,7 @@ namespace client { namespace widgets {
         ui::widgets::Button m_nextButton;
         String_t m_positionLabel;
         bool m_positionDimmed;
+        bool m_avoidReply;
         afl::container::PtrVector<LabeledButton> m_actions;
 
         afl::base::SignalConnection conn_imageChange;
@@ -115,6 +149,7 @@ namespace client { namespace widgets {
         void onKey(int arg, util::Key_t key);
         bool handleBuiltinKey(util::Key_t key, int arg);
         void doAction(Action a, int arg);
+        bool hasAction(Action a) const;
     };
 
 } }

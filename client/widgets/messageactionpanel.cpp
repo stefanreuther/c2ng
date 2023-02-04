@@ -29,6 +29,7 @@ client::widgets::MessageActionPanel::MessageActionPanel(ui::Root& root, afl::str
       m_nextButton(UTF_DOWN_ARROW, util::Key_Down, root),
       m_positionLabel(),
       m_positionDimmed(false),
+      m_avoidReply(false),
       m_actions(),
       conn_imageChange(root.provider().sig_imageChange.add(this, (void (MessageActionPanel::*)()) &MessageActionPanel::requestRedraw))
 {
@@ -79,6 +80,11 @@ client::widgets::MessageActionPanel::setPosition(String_t label, bool dim)
     }
 }
 
+void
+client::widgets::MessageActionPanel::setAvoidReply(bool flag)
+{
+    m_avoidReply = flag;
+}
 
 bool
 client::widgets::MessageActionPanel::handleKey(util::Key_t key, int prefix)
@@ -355,20 +361,17 @@ client::widgets::MessageActionPanel::handleBuiltinKey(util::Key_t key, int arg)
         doAction(ctrl ? ReplyAll : Reply, arg);
         return true;
 
-        // FIXME: port this: // case SDLK_RETURN:
-        //    /* Do what I mean: Reply is default unless it would go to
-        //       the host and we have other options. This is because
-        //       PHost sends wormhole messages as (-h) by default. */
-        //    /* FIXME: what do we do with object transfers? Probably
-        //       the user doesn't want to reply to these. */
-        //    if (haveReply() && !((haveObject() || haveXY()) && getReply() == 12)) {
-        //        doReply();
-        //    } else if (haveObject()) {
-        //        doGoToObject();
-        //    } else {
-        //        doGoToXY();
-        //    }
-        //    return true;
+     case util::Key_Return:
+        // Do-what-I-mean: default is Reply unless it would go to the host, and we have other options.
+        // This is because PHost sends wormhole messages as (-h) by default.
+        if (hasAction(Reply) && !((hasAction(GoTo1) || hasAction(GoTo2)) && m_avoidReply)) {
+            doAction(Reply, arg);
+        } else if (hasAction(GoTo1)) {
+            doAction(GoTo1, arg);
+        } else {
+            doAction(GoTo2, arg);
+        }
+        return true;
 
      case util::Key_Tab:
         doAction(BrowseSubjects, arg);
@@ -393,4 +396,10 @@ client::widgets::MessageActionPanel::doAction(Action a, int arg)
 {
     requestActive();
     sig_action.raise(a, arg);
+}
+
+bool
+client::widgets::MessageActionPanel::hasAction(Action a) const
+{
+    return m_actions[a]->button.getParent() != 0;
 }

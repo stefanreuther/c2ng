@@ -197,6 +197,7 @@ client::dialogs::InboxDialog::onUpdate(size_t index, const game::proxy::MailboxP
     updateButton(MessageActionPanel::GoTo1, msg.goto1Name);
     updateButton(MessageActionPanel::GoTo2, msg.goto2Name);
     updateButton(MessageActionPanel::Reply, msg.replyName);
+    m_actionPanel.setAvoidReply(msg.reply.contains(0));
 
     if (msg.actions.contains(game::msg::Mailbox::ToggleConfirmed)) {
         m_actionPanel.enableAction(MessageActionPanel::Confirm, String_t());
