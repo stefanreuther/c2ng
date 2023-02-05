@@ -38,6 +38,8 @@ add_variable(ENABLE_DOC      => 0);
 add_variable(ENABLE_TEST_APPS => 0);
 add_variable(ENABLE_BUILD    => 1);
 
+add_variable(DLL_PATH        => '');
+
 my $IN = $V{IN};
 
 # Targets (previously maintained in P9/Settings as 'TARGETS' variable)
@@ -108,8 +110,10 @@ if (get_variable('ENABLE_BUILD')) {
     add_variable(TARGET => 'POSIX');
     if ($V{TARGET} =~ /POSIX/i) {
         add_to_variable(CXXFLAGS => "-DTARGET_OS_POSIX");
+        add_variable(EXE_SUFFIX => '');
     } elsif ($V{TARGET} =~ /Win(32|64)/i) {
         add_to_variable(CXXFLAGS => "-DTARGET_OS_WIN32");
+        add_variable(EXE_SUFFIX => '.exe');
     } else {
         die "Error: the specified target '$V{TARGET}' is not known; provide correct 'TARGET=' option";
     }
@@ -310,6 +314,13 @@ if (get_variable('ENABLE_BUILD')) {
     generate_copy_tree('install', "$prefix/share", "$IN/share");
     generate_copy_tree('install', "$prefix/share/server/scripts", "$IN/server/scripts");
     rule_set_phony('install');
+
+    # Copy Windows DLLs
+    if ($V{DLL_PATH}) {
+        my $script = "$IN/scripts/copy_dlls.pl";
+        generate('install', [$script],
+                 "$V{PERL} $script \$(prefix)/bin $V{DLL_PATH}");
+    }
 }
 
 # FIXME: should be in core?
@@ -338,4 +349,6 @@ sub generate_copy_strip {
     generate(generate_copy($out, $in),
              [],
              "$strip \$@");
+    rule_add_info($out, "Installing $in");
+    $out;
 }
