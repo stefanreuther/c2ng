@@ -1,15 +1,16 @@
 /**
   *  \file client/widgets/planetmineralinfo.cpp
+  *  \brief Class client::widgets::PlanetMineralInfo
   */
 
 #include "client/widgets/planetmineralinfo.hpp"
-#include "util/translation.hpp"
+#include "afl/functional/stringtable.hpp"
+#include "afl/string/format.hpp"
+#include "gfx/complex.hpp"
 #include "gfx/context.hpp"
 #include "ui/draw.hpp"
-#include "afl/functional/stringtable.hpp"
-#include "gfx/complex.hpp"
-#include "afl/string/format.hpp"
 #include "ui/rich/document.hpp"
+#include "util/translation.hpp"
 
 /*
  *  Layout is:
@@ -60,7 +61,8 @@ namespace {
                         int32_t barScale,
                         uint8_t barColor,
                         int32_t rawValue,
-                        String_t unit)
+                        String_t unit,
+                        const util::NumberFormatter& fmt)
     {
         // Label
         skinContext.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
@@ -80,7 +82,7 @@ namespace {
 
         // Value
         skinContext.setTextAlign(gfx::RightAlign, gfx::TopAlign);
-        outTextF(skinContext, area.splitX(m.amountWidth), afl::string::Format("%d", rawValue)); // FIXME: numToString
+        outTextF(skinContext, area.splitX(m.amountWidth), fmt.formatNumber(rawValue));
 
         // Unit
         skinContext.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
@@ -89,10 +91,11 @@ namespace {
     }
 }
 
-client::widgets::PlanetMineralInfo::PlanetMineralInfo(ui::Root& root, afl::string::Translator& tx)
+client::widgets::PlanetMineralInfo::PlanetMineralInfo(ui::Root& root, util::NumberFormatter fmt, afl::string::Translator& tx)
     : SimpleWidget(),
       m_root(root),
       m_translator(tx),
+      m_formatter(fmt),
       m_name(),
       m_info(),
       m_mode(Blank)
@@ -232,9 +235,9 @@ client::widgets::PlanetMineralInfo::drawBars(gfx::Canvas& can, NoteType type)
 
     // Geometry
     Metrics m;
-    m.labelWidth = font->getMaxTextWidth(afl::functional::createStringTable(labels).map(m_translator));
+    m.labelWidth = font->getMaxTextWidth(afl::functional::createStringTable(labels).map(m_translator)) + 5;
     m.unitWidth  = font->getMaxTextWidth(afl::functional::createStringTable(units) .map(m_translator)) + 5;
-    m.amountWidth = font->getTextWidth("0") * 5 + 5;
+    m.amountWidth = font->getTextWidth("0") * 6 + 5;
     const int he = font->getCellSize().getY();
 
     // Prepare canvas
@@ -279,8 +282,7 @@ client::widgets::PlanetMineralInfo::drawBars(gfx::Canvas& can, NoteType type)
             }
             skinContext.setTextAlign(gfx::RightAlign, gfx::TopAlign);
             skinContext.setColor(miningColor);
-            // FIXME: use number formatter
-            outTextF(skinContext, line, afl::string::Format(m_translator("%d kt/turn"), miningRate));
+            outTextF(skinContext, line, afl::string::Format(m_translator("%d kt/turn"), m_formatter.formatNumber(miningRate)));
         }
         break;
      }
@@ -312,11 +314,10 @@ client::widgets::PlanetMineralInfo::drawBars(gfx::Canvas& can, NoteType type)
         if (m_info.miningDuration.get(duration)) {
             skinContext.setTextAlign(gfx::RightAlign, gfx::TopAlign);
             skinContext.setColor(miningColor);
-            // FIXME: use number formatter
             outTextF(skinContext, line, afl::string::Format(duration >= game::map::MAX_MINING_DURATION
                                                             ? m_translator(">%d turns")
                                                             : m_translator("\xE2\x89\x88" "%d turn%!1{s%}"),
-                                                            duration));
+                                                            m_formatter.formatNumber(duration)));
         }
         break;
      }
@@ -338,21 +339,24 @@ client::widgets::PlanetMineralInfo::drawBars(gfx::Canvas& can, NoteType type)
                        AMOUNT_SCALE,
                        ui::Color_White,
                        mined,
-                       m_translator(units[0]));
+                       m_translator(units[0]),
+                       m_formatter);
 
         drawPercentBar(skinContext, paletteContext, m, area.splitY(he),
                        m_translator(labels[1]),
                        AMOUNT_SCALE,
                        ui::Color_White,
                        ground,
-                       m_translator(units[0]));
+                       m_translator(units[0]),
+                       m_formatter);
 
         drawPercentBar(skinContext, paletteContext, m, area.splitY(he),
                        m_translator(labels[2]),
                        1,
-                       ui::Color_White,
+                       ui::Color_Gray,
                        density,
-                       m_translator(units[1]));
+                       m_translator(units[1]),
+                       m_formatter);
     } else {
         // FIXME: this is not a perfect rendering (for example, it is not appropriate when
         // density + ground are known), but it's consistent with PCC2.
@@ -371,7 +375,8 @@ client::widgets::PlanetMineralInfo::drawBars(gfx::Canvas& can, NoteType type)
                            AMOUNT_SCALE,
                            ui::Color_White,
                            n,
-                           m_translator(units[0]));
+                           m_translator(units[0]),
+                           m_formatter);
 
             // Excuse text with word-wrap
             // (we don't have an outTextFormatted)

@@ -14,6 +14,7 @@
 #include "client/widgets/planetmineralinfo.hpp"
 #include "game/game.hpp"
 #include "game/map/universe.hpp"
+#include "game/proxy/configurationproxy.hpp"
 #include "game/proxy/planetinfoproxy.hpp"
 #include "game/proxy/referenceproxy.hpp"
 #include "game/turn.hpp"
@@ -50,6 +51,7 @@ namespace {
      public:
         PlanetInfoDialog(ui::Root& root,
                          util::RequestSender<game::Session> gameSender,
+                         const util::NumberFormatter& fmt,
                          afl::string::Translator& tx,
                          PlanetInfoProxy& proxy)
             : m_proxy(proxy),
@@ -66,7 +68,7 @@ namespace {
                                                                      ui::rich::DocumentView::fl_Scroll,
                                                                      root.provider()));
                 for (size_t i = 0; i < 4; ++i) {
-                    m_info[i] = &m_del.addNew(new PlanetMineralInfo(root, tx));
+                    m_info[i] = &m_del.addNew(new PlanetMineralInfo(root, fmt, tx));
                 }
 
                 conn_update = proxy.sig_change.add(this, &PlanetInfoDialog::update);
@@ -85,7 +87,7 @@ namespace {
                 //   VBox
                 //     4x PlanetMineralInfo
 
-                ui::Window win(title, m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::HBox::instance5);
+                ui::Window win(title, m_root.provider(), m_root.colorScheme(), ui::BLUE_DARK_WINDOW, ui::layout::HBox::instance5);
 
                 ui::Group& lgroup = m_del.addNew(new ui::Group(ui::layout::VBox::instance5));
                 ui::Group& rgroup = m_del.addNew(new ui::Group(ui::layout::VBox::instance5));
@@ -207,6 +209,7 @@ void
 client::dialogs::doPlanetInfoDialog(ui::Root& root,
                                     util::RequestSender<game::Session> gameSender,
                                     game::Id_t planetId,
+
                                     afl::string::Translator& tx)
 {
     // ex doPlanetScan
@@ -218,10 +221,13 @@ client::dialogs::doPlanetInfoDialog(ui::Root& root,
         planetName = tx("Planet");
     }
 
+    // NumberFormatter
+    util::NumberFormatter fmt = game::proxy::ConfigurationProxy(gameSender).getNumberFormatter(link);
+
     // Set up PlanetInfoProxy to retrieve data asynchronously.
     // This must be after the synchronous wait so that the window is already open when the data arrives, and word-wrap works correctly.
     PlanetInfoProxy proxy(gameSender, root.engine().dispatcher());
-    PlanetInfoDialog dlg(root, gameSender, tx, proxy);
+    PlanetInfoDialog dlg(root, gameSender, fmt, tx, proxy);
     proxy.setPlanet(planetId);
 
     dlg.run(planetName);
@@ -261,4 +267,3 @@ client::dialogs::doPlanetInfoDialog(ui::Root& root,
         doPlanetInfoDialog(root, gameSender, id, tx);
     }
 }
-

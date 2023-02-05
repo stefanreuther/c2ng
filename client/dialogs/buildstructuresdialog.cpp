@@ -593,12 +593,12 @@ namespace {
                  private:
                     PlanetMineralInfo& m_widget;
                     PlanetInfoProxy& m_proxy;
-                    PlanetInfoProxy::Mineral m_element;
-                    String_t m_name;
-                    PlanetMineralInfo::Mode m_mode;
+                    const PlanetInfoProxy::Mineral m_element;
+                    const String_t m_name;
+                    const PlanetMineralInfo::Mode m_mode;
                 };
 
-                PlanetMineralInfo& result = m_del.addNew(new PlanetMineralInfo(m_root, m_translator));
+                PlanetMineralInfo& result = m_del.addNew(new PlanetMineralInfo(m_root, m_formatter, m_translator));
                 m_infoProxy.sig_change.addNewClosure(new Callback(result, m_infoProxy, ele, name, mode));
                 return result;
             }
