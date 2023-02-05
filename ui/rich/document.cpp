@@ -95,14 +95,16 @@ bool
 ui::rich::Document::Splitter::handleText(String_t text)
 {
     // ex RichTextSplitter::handleText
-    int add = (nkey ? 7 : 0);
     gfx::FontRequest req;
     req.setSize(int16_t(nbig));
     req.setWeight(int16_t(nbold));
     req.setStyle(nfixed > 0 ? 1 : 0);
 
     util::SkinColor::Color color = !colors.empty() ? colors.back() : util::SkinColor::Static;
-    int width = m_provider.getFont(req)->getTextWidth(text) + add;
+    int width = m_provider.getFont(req)->getTextWidth(text);
+    if (nkey != 0) {
+        width = std::max(width + 7, m_provider.getFont(req)->getTextHeight(text));
+    }
     bool addIt;
     bool breakable;
     if (!m_alignmentWidths.empty()) {
@@ -649,7 +651,7 @@ ui::rich::Document::draw(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectang
                     ctx.setColor(it.color);
                     if (it.key) {
                         drawKeycap(ctx, pos.getLeftX()+1, pos.getTopY(), font->getLineHeight(), pos.getWidth()-3);
-                        outText(ctx, gfx::Point(pos.getLeftX()+3, pos.getTopY()), it.text);
+                        outText(ctx, gfx::Point(pos.getLeftX() + (pos.getWidth() - font->getTextWidth(it.text))/2, pos.getTopY()), it.text);
                     } else {
                         if (it.underline) {
                             drawHLine(ctx, pos.getLeftX(), pos.getTopY() + font->getLineHeight()*17/20, pos.getRightX()-1);
