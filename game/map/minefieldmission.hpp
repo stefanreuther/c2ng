@@ -30,7 +30,7 @@ namespace game { namespace map {
             \param root        Root (used for host version, registration key, host configuration)
             \param mapConfig   Map configuration
             \param shipScores  Ship scores (used to determine availability of friendly codes)
-            \param shipList    Ship list (used to determine availability of friendly codes
+            \param shipList    Ship list (used to determine availability of friendly codes)
             \retval true Mission recognized; object has been updated
             \retval false No "lay mines" mission found; object unchanged */
         bool checkLayMission(const Ship& ship, const Universe& univ,
@@ -47,7 +47,7 @@ namespace game { namespace map {
             \param mapConfig   Map configuration
             \param config      Host configuration
             \param shipScores  Ship scores (used to determine availability of friendly codes)
-            \param shipList    Ship list (used to determine availability of friendly codes
+            \param shipList    Ship list (used to determine availability of friendly codes)
             \retval true Mission recognized; object has been updated
             \retval false No "lay mines" mission found; object unchanged  */
         bool checkLayMission(const Ship& ship, const Universe& univ,

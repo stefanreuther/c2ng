@@ -71,9 +71,12 @@ client::map::MinefieldMissionOverlay::drawAfter(gfx::Canvas& can, const Renderer
             label = Format(m_translator("%d ly (%d torp%!1{s%})"), radius, eff.numTorps);
         }
 
+        // Limit check: more units than maximum, and growing
+        bool isOverLimit = (eff.unitLimit < eff.newUnits && eff.radiusChange > 0);
+
         // Circle
         gfx::Point center = ren.scale(eff.center);
-        ctx.setColor(eff.isEndangered ? ui::Color_Red : ui::Color_Yellow);
+        ctx.setColor(isOverLimit ? ui::Color_Dark : eff.isEndangered ? ui::Color_Red : ui::Color_Yellow);
         if (radius > 0) {
             drawCircle(ctx, center, ren.scale(radius));
         }
@@ -82,16 +85,12 @@ client::map::MinefieldMissionOverlay::drawAfter(gfx::Canvas& can, const Renderer
         ctx.setTextAlign(gfx::CenterAlign, gfx::TopAlign);
         outText(ctx, center + gfx::Point(0, 10), label);
 
-        // FIXME: missing feature: limit check for laying
-        //     // Limit check
-        //     int limit = (md.type
-        //                  ? config.MaximumWebMinefieldRadius(md.owner)
-        //                  : config.MaximumMinefieldRadius(md.owner));
-        //     if (radius > limit) {
-        //         drawCircle(ctx, p, vp.scale(limit));
-        //         ctx.setColor(COLOR_DARK);
-        //         outText(ctx, p.x, p.y + 10 + font_heights[FONT_SMALL], m_translator("<over limit>"));
-        //     }
+        // Limit check
+        if (isOverLimit) {
+            outText(ctx, center + gfx::Point(0, 10 + ctx.getFont()->getLineHeight()), m_translator("<over limit>"));
+            ctx.setColor(eff.isEndangered ? ui::Color_Fire+5 : ui::Color_Brown);
+            drawCircle(ctx, center, ren.scale(game::map::Minefield::getRadiusFromUnits(eff.unitLimit)));
+        }
     }
 }
 

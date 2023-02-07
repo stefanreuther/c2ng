@@ -207,6 +207,23 @@ class TestGameMapMinefield : public CxxTest::TestSuite {
     void testGetPassRate();
 };
 
+class TestGameMapMinefieldFormula : public CxxTest::TestSuite {
+ public:
+    void testIsMinefieldEndangered();
+    void testIsMinefieldEndangeredEnemyShip();
+    void testIsMinefieldEndangeredUnownedPlanet();
+    void testIsMinefieldEndangeredUnownedPlanetShip();
+    void testIsMinefieldEndangeredUnownedPlanet2Ships();
+    void testIsMinefieldEndangeredEnemyPlanet();
+    void testComputeMineLayEffectNew();
+    void testComputeMineLayEffectNewDanger();
+    void testComputeMineLayEffectExisting();
+    void testComputeMineLayEffectExistingPHost();
+    void testComputeMineScoopEffect();
+    void testComputeMineScoopEffectMissionLimit();
+    void testComputeMineScoopEffectRoomLimit();
+};
+
 class TestGameMapMinefieldMission : public CxxTest::TestSuite {
  public:
     void testInit();

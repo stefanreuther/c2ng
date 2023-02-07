@@ -1,5 +1,6 @@
 /**
   *  \file game/map/minefieldformula.cpp
+  *  \brief Minefield Formulas
   */
 
 #include "game/map/minefieldformula.hpp"
@@ -45,7 +46,11 @@ namespace game { namespace map { namespace {
         Point center;
         int owner;
         if (field.getPosition().get(center) && field.getOwner().get(owner)) {
-            result.push_back(MinefieldEffect(center, field.getId(), radiusChange, field.getUnits(), owner, numTorps, field.isWeb(),
+            const int32_t radiusLimit = field.isWeb()
+                ? config[HostConfiguration::MaximumWebMinefieldRadius](owner)
+                : config[HostConfiguration::MaximumMinefieldRadius](owner);
+            const int32_t unitLimit = radiusLimit*radiusLimit;
+            result.push_back(MinefieldEffect(center, field.getId(), radiusChange, field.getUnits(), unitLimit, owner, numTorps, field.isWeb(),
                                              isMinefieldEndangered(field, univ, mapConfig, host, config)));
         }
     }
@@ -163,7 +168,7 @@ game::map::computeMineScoopEffect(MinefieldEffects_t& result, const MinefieldMis
 {
     // ex WShipScannerChartWidget::drawPost (part)
     const Point shipPos = ship.getPosition().orElse(Point());
-    const int room = ship.getFreeCargo(shipList).orElse(0);
+    int room = ship.getFreeCargo(shipList).orElse(0);
     const MinefieldType& mfs = univ.minefields();
     for (Id_t mfId = 1; mfId <= mfs.size() && room > 0; ++mfId) {
         // Check whether we can scoop this field
@@ -198,6 +203,7 @@ game::map::computeMineScoopEffect(MinefieldEffects_t& result, const MinefieldMis
                 // We can clear this field
                 scoopedUnits = existingUnits;
             }
+            room -= scoopedTorps;
 
             // Check limit
             if (mission.getNumTorpedoes() > 0 && scoopedTorps > mission.getNumTorpedoes()) {
