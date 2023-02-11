@@ -40,60 +40,138 @@ namespace game { namespace map {
         virtual afl::base::Optional<int> getRadius() const;
         virtual afl::base::Optional<int32_t> getRadiusSquared() const;
 
-        // Inquiry:
+
+        /*
+         *  Inquiry
+         */
+
+        /** Check whether this Ufo is valid.
+            @return flag */
         bool isValid() const;
 
+        /** Get color code.
+            @return color */
         int getColorCode() const;
+
+        /** Set color code.
+            @param n color code (VGA color, [0,15]) */
         void setColorCode(int n);
+
+        /** Get speed.
+            @return warp factor */
         IntegerProperty_t getSpeed() const;
+
+        /** Set speed.
+            @param speed Warp factor */
         void setSpeed(IntegerProperty_t speed);
+
+        /** Get heading.
+            @return heading */
         IntegerProperty_t getHeading() const;
+
+        /** Set heading.
+            @param heading Heading */
         void setHeading(IntegerProperty_t heading);
+
+        /** Get visibility range from planets.
+            @return range */
         IntegerProperty_t getPlanetRange() const;
+
+        /** Set visibility range from planets.
+            @param range Range */
         void setPlanetRange(IntegerProperty_t range);
+
+        /** Get visibility range from ships.
+            @return range */
         IntegerProperty_t getShipRange() const;
+
+        /** Set visibility range from ships.
+            @param range Range */
         void setShipRange(IntegerProperty_t range);
+
+        /** Get type code.
+            @return code */
         IntegerProperty_t getTypeCode() const;
+
+        /** Set type code.
+            @param typeCode Code */
         void setTypeCode(IntegerProperty_t typeCode);
 
+        /** Get information string 1.
+            @return text */
         String_t getInfo1() const;
+
+        /** Set information string 1.
+            @param info Text */
         void setInfo1(String_t info);
+
+        /** Get information string 2.
+            @return text */
         String_t getInfo2() const;
+
+        /** Set information string 2.
+            @param info Text */
         void setInfo2(String_t info);
+
+        /** Get real Id.
+            @return Id */
         int32_t getRealId() const;
+
+        /** Set real Id.
+            @param id Id */
         void setRealId(int32_t id);
 
+        /** Set name.
+            @param name Name */
         void setName(String_t name);
+
+        /** Set center position.
+            @param pt Center position */
         void setPosition(Point pt);
+
+        /** Set radius.
+            @param r Radius */
         void setRadius(IntegerProperty_t r);
 
+        /** Get plain name.
+            Same as getName(PlainName), without the extra dependencies.
+            @return name */
         String_t getPlainName() const;
 
+        /** Get positiion at which Ufo was last seen.
+            @return position */
         Point getLastPosition() const;
 
+        /** Get turn number when Ufo was last seen.
+            @return turn number */
         int getLastTurn() const;
-        void setLastTurn(int n);
 
+        /** Get movement vector.
+            @return average movement per turn */
         Point getMovementVector() const;
+
+        /** Set movement vector.
+            @param vec Vector */
         void setMovementVector(Point vec);
+
 
         /*
          *  Links
          */
 
         /** Disconnect from other Ufo.
-            \post getOtherEnd()=0 */
+            @post getOtherEnd()=0 */
         void disconnect();
 
         /** Connect with another Ufo.
             This creates a bidirectional link.
             If either end is already connected, that connection is removed first.
-            \param other Other Ufo
-            \post getOtherEnd()=&other */
+            @param other Other Ufo
+            @post getOtherEnd()=&other */
         void connectWith(Ufo& other);
 
         /** Get other end.
-            \return Other end */
+            @return Other end */
         Ufo* getOtherEnd() const;
 
         /*
@@ -101,18 +179,28 @@ namespace game { namespace map {
          */
 
         /** Add message information.
-            \param info Message information addressed at this Ufo */
+            @param info Message information addressed at this Ufo */
         void addMessageInformation(const game::parser::MessageInformation& info);
 
         /** Postprocess after loading.
-            \param turn Current turn
-            \param mapConfig Map config */
+            @param turn Current turn
+            @param mapConfig Map config */
         void postprocess(int turn, const Configuration& mapConfig);
 
+        /** Get stored-in-history flag.
+            @return flag */
         bool isStoredInHistory() const;
+
+        /** Set whether Ufo is stored in history.
+            @param value Flag */
         void setIsStoredInHistory(bool value);
 
+        /** Check whether Ufo was seen this turn.
+            @return flag */
         bool isSeenThisTurn() const;
+
+        /** Set whether Ufo was seen this turn.
+            @param value Flag */
         void setIsSeenThisTurn(bool value);
 
      private:

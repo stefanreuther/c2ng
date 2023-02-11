@@ -1,5 +1,6 @@
 /**
   *  \file game/map/shiptransporter.cpp
+  *  \brief Class game::map::ShipTransporter
   *
   *  FIXME: missing feature: jettison/undo jettison money, ammo. PCC1 does it, PCC2 doesn't.
   *  FIXME: missing feature: PCC1 can limit a proxy transfer to not overload the proxy ship

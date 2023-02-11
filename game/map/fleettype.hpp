@@ -1,5 +1,6 @@
 /**
   *  \file game/map/fleettype.hpp
+  *  \brief Class game::map::FleetType
   */
 #ifndef C2NG_GAME_MAP_FLEETTYPE_HPP
 #define C2NG_GAME_MAP_FLEETTYPE_HPP
@@ -16,8 +17,11 @@ namespace game { namespace map {
         Contains all ships. */
     class FleetType : public ObjectVectorType<Ship> {
      public:
-        FleetType(ObjectVector<Ship>& vec);
+        /** Constructor.
+            \param vec Ships */
+        explicit FleetType(ObjectVector<Ship>& vec);
 
+        // ObjectVectorType:
         virtual bool isValid(const Ship& p) const;
 
         /** Handle fleet change.

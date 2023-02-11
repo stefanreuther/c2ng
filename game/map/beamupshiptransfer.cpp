@@ -1,31 +1,26 @@
 /**
   *  \file game/map/beamupshiptransfer.cpp
+  *  \brief Class game::map::BeamUpShipTransfer
   *
-  *  PCC2 Comment:
+  *  Beam up multiple is implemented by using two custom transfer objects,
+  *  completely unrelated to the normal cargo transfer partners.
+  *  The planet half contains planet content (minus existing command),
+  *  the ship half contains ship cargo (plus existing command),
+  *  with minima set such that users can overdraw.
+  *  (PCC2 used display offsets to achieve that.)
   *
-  *  Beam up multiple is implemented by using two custom transfer
-  *  objects, completely unrelated to the normal cargo transfer
-  *  partners. The planet half contains 10000 (minus existing command)
-  *  of everything; the ship half contains 0 (plus existing command).
-  *  Display is adjusted to actual content using display offsets, so
-  *  users can (and should) easily overdraw.
-  *
-  *  In PCC 1.x, the BUM halves are a little closer related, making things
-  *  a little more complex but sharing the "init from planet" part.
-  *  PCC 1.x also has a "beam up+down" mode which is a cross of BUM
-  *  and a regular cargo unload; I believe this feature to be very
-  *  hard to understand, so I left it out here.
+  *  PCC2 and c2ng do not support the "beam up and down" mode that PCC1 has.
   */
 
 #include "game/map/beamupshiptransfer.hpp"
 #include "game/actions/preconditions.hpp"
 #include "game/cargospec.hpp"
 #include "game/map/fleetmember.hpp"
+#include "game/map/reverter.hpp"
 #include "game/map/shiputils.hpp"
 #include "game/v3/command.hpp"
 #include "game/v3/commandcontainer.hpp"
 #include "game/v3/commandextra.hpp"
-#include "game/map/reverter.hpp"
 
 namespace {
     using game::v3::Command;
@@ -170,7 +165,7 @@ game::map::BeamUpShipTransfer::commit()
 }
 
 void
-game::map::parseBeamUpCommand(util::Vector<int32_t,Element::Type>& out, Turn& turn, const Ship& ship, int factor)
+game::map::parseBeamUpCommand(util::Vector<int32_t,Element::Type>& out, const Turn& turn, const Ship& ship, int factor)
 {
     const int shipOwner = ship.getOwner().orElse(0);
     if (const CommandContainer* cc = CommandExtra::get(turn, shipOwner)) {

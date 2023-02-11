@@ -1,21 +1,28 @@
 /**
   *  \file game/map/fleet.hpp
+  *  \brief Class game::map::Fleet
   */
 #ifndef C2NG_GAME_MAP_FLEET_HPP
 #define C2NG_GAME_MAP_FLEET_HPP
 
-#include "game/spec/shiplist.hpp"
 #include "game/config/hostconfiguration.hpp"
+#include "game/spec/shiplist.hpp"
 #include "game/unitscoredefinitionlist.hpp"
 
 namespace game { namespace map {
 
     class Configuration;
-    class Universe;
     class Ship;
+    class Universe;
 
+    /** Fleet operations.
+        Provides operations on entire fleets.
+        This is intended to be used as a temporary object. */
     class Fleet {
      public:
+        /** Constructor.
+            \param univ Universe
+            \param ship Fleet leader ship */
         Fleet(Universe& univ, Ship& ship);
 
         /** Mark a fleet dirty.
@@ -43,6 +50,9 @@ namespace game { namespace map {
                                 const game::spec::ShipList& shipList,
                                 const game::config::HostConfiguration& config) const;
 
+        /** Get title of this fleet.
+            \param tx Translator
+            \return title, never empty */
         String_t getTitle(afl::string::Translator& tx) const;
 
         /** Count number of fleet members.
@@ -62,6 +72,10 @@ namespace game { namespace map {
                                            const game::config::HostConfiguration& config,
                                            const game::spec::ShipList& shipList);
 
+        /** Get title of a fleet led by a given ship.
+            Same as Fleet(univ, ship).getTitle(tx), but does not require a Fleet object.
+            \param ship Fleet leader
+            \param tx   Translator */
         static String_t getTitle(const Ship& ship, afl::string::Translator& tx);
 
      private:

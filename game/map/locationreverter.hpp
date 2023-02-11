@@ -6,8 +6,8 @@
 #define C2NG_GAME_MAP_LOCATIONREVERTER_HPP
 
 #include "afl/base/deletable.hpp"
-#include "game/ref/list.hpp"
 #include "afl/bits/smallset.hpp"
+#include "game/ref/list.hpp"
 
 namespace game { namespace map {
 

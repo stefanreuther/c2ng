@@ -70,7 +70,6 @@ namespace game { namespace map {
             \param tx         Translator
             \param shipOwner  Owner of ship(s) invoking the effects
             \param config     Host configuration
-            \param host       Host version
             \return human-readable one-liner, never empty */
         String_t describe(afl::string::Translator& tx, int shipOwner, const game::config::HostConfiguration& config, const HostVersion& host) const;
 

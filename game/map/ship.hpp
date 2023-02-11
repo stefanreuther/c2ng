@@ -1,5 +1,6 @@
 /**
   *  \file game/map/ship.hpp
+  *  \brief Class game::map::Ship
   */
 #ifndef C2NG_GAME_MAP_SHIP_HPP
 #define C2NG_GAME_MAP_SHIP_HPP
@@ -54,7 +55,11 @@ namespace game { namespace map {
          *  Construction
          */
 
-        explicit Ship(int id);
+        /** Constructor.
+            \param id Ship Id */
+        explicit Ship(Id_t id);
+
+        /** Destructor. */
         ~Ship();
 
         /*
@@ -176,7 +181,8 @@ namespace game { namespace map {
         /** Get history entry for a turn.
             \param turnNr Turn number
             \return entry; null if turn too old or too new */
-        ShipHistoryData::Track* getHistoryLocation(int turnNr) const;
+        const ShipHistoryData::Track* getHistoryLocation(int turnNr) const;
+
 
         /*
          *  Test access
@@ -185,7 +191,12 @@ namespace game { namespace map {
          *  They are intended for setting up tests or for a potential host editor.
          */
 
+        /** Set owner (for testing/host editor, not for consuming history).
+            \param owner Owner. */
         void setOwner(int owner);
+
+        /** Set position (for testing/host editor, not for consuming history).
+            \param pos Position. */
         void setPosition(Point pos);
 
 
@@ -384,6 +395,7 @@ namespace game { namespace map {
             \param fc New friendly code */
         void setFriendlyCode(StringProperty_t fc);
 
+
         /*
          *  Cargo accessors
          */
@@ -453,6 +465,7 @@ namespace game { namespace map {
             Note that this can cause the ship to become overloaded.
             \param which Transporter */
         void cancelTransporter(Transporter which);
+
 
         /*
          *  Fleet accessors
@@ -526,15 +539,31 @@ namespace game { namespace map {
          *  Unit score accessors:
          */
 
+        /** Access this ship's scores.
+            \return scores */
         UnitScoreList& unitScores();
+
+        /** Access this ship's scores (const).
+            \return scores */
         const UnitScoreList& unitScores() const;
+
+        /** Get score value.
+            \param scoreId Score Id
+            \param scoreDefinitions Score definitions
+            \return Score as looked up in the scoreDefinitions; unknown if score value not known */
         NegativeProperty_t getScore(int16_t scoreId, const UnitScoreDefinitionList& scoreDefinitions) const;
 
 
         /*
          *  Message link
          */
+
+        /** Access this ship's messages.
+            \return messages */
         MessageLink& messages();
+
+        /** Access this ship's messages (const).
+            \return messages */
         const MessageLink& messages() const;
 
      private:

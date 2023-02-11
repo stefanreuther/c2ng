@@ -1,5 +1,6 @@
 /**
   *  \file game/map/ship.cpp
+  *  \brief Class game::map::Ship
   */
 
 #include "game/map/ship.hpp"
@@ -26,7 +27,7 @@ namespace {
  *  Construction
  */
 
-game::map::Ship::Ship(int id)
+game::map::Ship::Ship(Id_t id)
     : Object(),
       m_id(id),
       m_scannedMass(),
@@ -367,9 +368,7 @@ game::map::Ship::combinedCheck1(Universe& univ, PlayerSet_t availablePlayers, in
         m_scannedMass = IntegerProperty_t();
 
         // Clear current turn's history data, we know it does not exist this turn
-        if (ShipHistoryData::Track* p = getShipHistory(m_historyData, turnNumber)) {
-            *p = ShipHistoryData::Track();
-        }
+        clearShipHistory(m_historyData, turnNumber);
 
         m_kind = HistoryShip;
     }
@@ -389,7 +388,7 @@ game::map::Ship::combinedCheck1(Universe& univ, PlayerSet_t availablePlayers, in
     }
 
     // If ship-track has current info, we can transform this into a guessed ship.
-    if (ShipHistoryData::Track* p = getShipHistory(m_historyData, turnNumber)) {
+    if (const ShipHistoryData::Track* p = getShipHistory(m_historyData, turnNumber)) {
         // Warp factor
         if (!m_currentData.warpFactor.isValid()) {
             m_currentData.warpFactor = p->speed;
@@ -557,12 +556,12 @@ game::map::Ship::getHistoryNewestLocationTurn() const
     return m_historyData.trackTurn;
 }
 
-game::map::ShipHistoryData::Track*
+const game::map::ShipHistoryData::Track*
 game::map::Ship::getHistoryLocation(int turnNr) const
 {
     // ex GShip::getHistoryEntry
     // FIXME: if turnNr==current, we want to report the computed mass, speed, heading here! See db::Loader.
-    return getShipHistory(const_cast<ShipHistoryData&>(m_historyData), turnNr);
+    return getShipHistory(m_historyData, turnNr);
 }
 
 

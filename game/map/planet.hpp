@@ -47,6 +47,7 @@ namespace game { namespace map {
         - removed cargo arbiter */
     class Planet : public Object {
      public:
+        /** Overall type of starbase information. */
         enum BaseKind {
             UnknownBase,            ///< We do not know whether there is a base.
             NoBase,                 ///< We know that there is no base.
@@ -55,6 +56,7 @@ namespace game { namespace map {
             CurrentBase             ///< We have a BDATA.DAT entry for this base.
         };
 
+        /** Overall type of planet information. */
         enum PlanetKind {
             NoPlanet,               ///< The planet does not exist. We do not know its position.
             HiddenPlanet,           ///< We do not know this planet's position, but we still have some data from sensor scans.
@@ -63,17 +65,21 @@ namespace game { namespace map {
             CurrentPlanet           ///< We have a PDATAx.DAT entry for this planet.
         };
 
+        /** Identification of history timestamp. */
         enum Timestamp {
             MineralTime,            ///< Mined/ground/density
             ColonistTime,           ///< Population/owner/industry
             NativeTime,             ///< Native gov/pop/race
             CashTime                ///< Cash/supplies
         };
+
+        /** Number of history timestamps. */
         static const size_t NUM_TIMESTAMPS = 4;
 
+        /** Autobuild settings. */
         struct AutobuildSettings {
-            IntegerProperty_t goal[NUM_PLANETARY_BUILDING_TYPES];
-            IntegerProperty_t speed[NUM_PLANETARY_BUILDING_TYPES];
+            IntegerProperty_t goal[NUM_PLANETARY_BUILDING_TYPES];    ///< Build goals for each structure type.
+            IntegerProperty_t speed[NUM_PLANETARY_BUILDING_TYPES];   ///< Build speeds for each structure type.
         };
 
 
@@ -224,12 +230,15 @@ namespace game { namespace map {
             \return true iff we have full, playable data. If yes, all base accessors will work. */
         bool hasFullBaseData() const;
 
+
         /*
          *  Owner accessors:
          */
+
         /** Set owner.
             \param owner new owner */
         void setOwner(IntegerProperty_t owner);
+
 
         /*
          *  Structure accessors:
@@ -249,7 +258,7 @@ namespace game { namespace map {
             Reports the industry level from known structure counts if available, otherwise from sensor scans.
             \param host Host version (for interpretation of levels)
             \return level */
-        IntegerProperty_t  getIndustryLevel(const HostVersion& host) const;
+        IntegerProperty_t getIndustryLevel(const HostVersion& host) const;
 
         /** Get industry level for a given structure count.
             \param mifa Mines+Factories
@@ -263,57 +272,143 @@ namespace game { namespace map {
             \param host  Host version (for interpretation of levels) */
         void setIndustryLevel(IntegerProperty_t level, const HostVersion& host);
 
+
         /*
          *  Colonist accessors:
          */
 
+        /** Get colonist happiness.
+            \return happiness */
         NegativeProperty_t getColonistHappiness() const;
-        void               setColonistHappiness(NegativeProperty_t happiness);
-        IntegerProperty_t  getColonistTax() const;
-        void               setColonistTax(IntegerProperty_t tax);
+
+        /** Set colonist happiness.
+            \param happiness New value [-300,+100]*/
+        void setColonistHappiness(NegativeProperty_t happiness);
+
+        /** Get colonist tax rate
+            \return tax rate */
+        IntegerProperty_t getColonistTax() const;
+
+        /** Set colonist tax rate.
+            \param tax New value [0,100] */
+        void setColonistTax(IntegerProperty_t tax);
+
 
         /*
          *  Native accessors:
          */
 
-        IntegerProperty_t  getNativeGovernment() const;
-        void               setNativeGovernment(IntegerProperty_t gov);
-        NegativeProperty_t getNativeHappiness() const;
-        void               setNativeHappiness(NegativeProperty_t happiness);
-        IntegerProperty_t  getNativeRace() const;
-        void               setNativeRace(IntegerProperty_t race);
-        IntegerProperty_t  getNativeTax() const;
-        void               setNativeTax(IntegerProperty_t tax);
-        LongProperty_t     getNatives() const;
-        void               setNatives(LongProperty_t natives);
+        /** Get native government type.
+            \return Native government type; see game::tables::NativeGovernmentName */
+        IntegerProperty_t getNativeGovernment() const;
 
-        bool               isKnownToHaveNatives() const;
-        void               setKnownToHaveNatives(bool known);
+        /** Set native government type.
+            \param gov Native government type */
+        void setNativeGovernment(IntegerProperty_t gov);
+
+        /** Get native happiness.
+            \return happiness */
+        NegativeProperty_t getNativeHappiness() const;
+
+        /** Set native happiness.
+            \param happiness New value [-300,+100] */
+        void setNativeHappiness(NegativeProperty_t happiness);
+
+        /** Get native race.
+            \return Native race
+            \see game::NativeRace
+            \see game::tables::NativeRaceName */
+        IntegerProperty_t getNativeRace() const;
+
+        /** Set native race.
+            \param race Native race */
+        void setNativeRace(IntegerProperty_t race);
+
+        /** Set native tax rate.
+            \return Native tax rate */
+        IntegerProperty_t getNativeTax() const;
+
+        /** Set native tax rate.
+            \param tax Tax rate */
+        void setNativeTax(IntegerProperty_t tax);
+
+        /** Get native population.
+            \return Number of native clans */
+        LongProperty_t getNatives() const;
+
+        /** Set number of natives.
+            \param natives Number of native clans */
+        void setNatives(LongProperty_t natives);
+
+        /** Check known-to-have-natives status.
+            \return true if there is any indication that the planet has known natives
+                    (actual population/race might still be unknonw) */
+        bool isKnownToHaveNatives() const;
+
+        /** Set known-to-have-natives status.
+            \param known Status */
+        void setKnownToHaveNatives(bool known);
+
 
         /*
          *  FCode accessors:
          */
 
-        StringProperty_t   getFriendlyCode() const;
-        void               setFriendlyCode(StringProperty_t fc);
+        /** Get friendly code.
+            \return friendly code */
+        StringProperty_t getFriendlyCode() const;
+
+        /** Set friendly code.
+            \param fc Friendly code */
+        void setFriendlyCode(StringProperty_t fc);
+
 
         /*
          *  Starbase building accessors:
          */
 
-        bool               isBuildingBase() const;
-        void               setBuildBaseFlag(bool b);
+        /** Check whether planet is building a base.
+            \return status */
+        bool isBuildingBase() const;
+
+        /** Set build-base order.
+            \param b true to build base, false to do not build/cancel */
+        void setBuildBaseFlag(bool b);
+
 
         /*
          *  Environment accessors:
          */
 
-        IntegerProperty_t  getOreDensity(Element::Type type) const;
-        void               setOreDensity(Element::Type type, IntegerProperty_t amount);
-        LongProperty_t     getOreGround(Element::Type type) const;
-        void               setOreGround(Element::Type type, LongProperty_t amount);
-        IntegerProperty_t  getTemperature() const;
-        void               setTemperature(IntegerProperty_t value);
+        /** Get ground ore density.
+            \param type Ore type
+            \return density */
+        IntegerProperty_t getOreDensity(Element::Type type) const;
+
+        /** Set ground ore density.
+            \param type    Ore type
+            \param density Density */
+        void setOreDensity(Element::Type type, IntegerProperty_t density);
+
+        /** Get ground ore amount.
+            \param type Ore type
+            \return amount, kilotons */
+        LongProperty_t getOreGround(Element::Type type) const;
+
+        /** Set ground ore amount.
+            \param type Ore type
+            \param amount Amount, kilotons */
+        void setOreGround(Element::Type type, LongProperty_t amount);
+
+        /** Get planet temperature.
+            \return temperature [0=ice, 100=desert] */
+        IntegerProperty_t getTemperature() const;
+
+        /** Set planet temperature.
+            \param value Temperature [0=ice, 100=desert]
+            \see game::tables::TemperatureName */
+        void setTemperature(IntegerProperty_t value);
+
 
         /*
          *  Cargo accessors:
@@ -330,23 +425,58 @@ namespace game { namespace map {
             \param amount Amount */
         void setCargo(Element::Type type, LongProperty_t amount);
 
+
         /*
          *  Simple base accessors:
          */
 
-        IntegerProperty_t  getBaseDamage() const;
-        void               setBaseDamage(IntegerProperty_t n);
-        IntegerProperty_t  getBaseMission() const;
-        void               setBaseMission(IntegerProperty_t mission);
-        IntegerProperty_t  getBaseTechLevel(TechLevel level) const;
-        void               setBaseTechLevel(TechLevel level, IntegerProperty_t value);
+        /** Get starbase damage level.
+            \return damage */
+        IntegerProperty_t getBaseDamage() const;
+
+        /** Set starbase damage level.
+            \param n Damage level [0,100] */
+        void setBaseDamage(IntegerProperty_t n);
+
+        /** Get starbase mission.
+            \return mission
+            \see game::tables::BaseMissionName */
+        IntegerProperty_t getBaseMission() const;
+
+        /** Set starbase mission.
+            \param mission mission */
+        void setBaseMission(IntegerProperty_t mission);
+
+        /** Get tech level.
+            \param level Area to query
+            \return tech level */
+        IntegerProperty_t getBaseTechLevel(TechLevel level) const;
+
+        /** Set tech level.
+            \param level Area to set
+            \param value Tech level */
+        void setBaseTechLevel(TechLevel level, IntegerProperty_t value);
+
 
         /*
          *  Shipyard accessors:
          */
-        IntegerProperty_t  getBaseShipyardAction() const;
-        IntegerProperty_t  getBaseShipyardId() const;
-        void               setBaseShipyardOrder(IntegerProperty_t action, IntegerProperty_t id);
+
+        /** Get shipyard action.
+            \return action
+            \see game::ShipyardAction */
+        IntegerProperty_t getBaseShipyardAction() const;
+
+        /** Get Id of ship being worked on in shipyard.
+            \return ship Id or 0 */
+        IntegerProperty_t getBaseShipyardId() const;
+
+        /** Set shipyard action.
+            \param action Action
+            \param id     Ship Id
+            \see game::ShipyardAction */
+        void setBaseShipyardOrder(IntegerProperty_t action, IntegerProperty_t id);
+
 
         /*
          *  Component storage accessors:
@@ -374,6 +504,7 @@ namespace game { namespace map {
             \param amount New amount */
         void setBaseStorage(TechLevel area, int slot, IntegerProperty_t amount);
 
+
         /*
          *  Build order accessors:
          */
@@ -396,14 +527,28 @@ namespace game { namespace map {
             \return slot */
         IntegerProperty_t getBaseBuildOrderHullIndex() const;
 
+
         /*
          *  Build queue accessors:
          */
 
-        IntegerProperty_t  getBaseQueuePosition() const;
-        void               setBaseQueuePosition(IntegerProperty_t pos);
-        LongProperty_t     getBaseQueuePriority() const;
-        void               setBaseQueuePriority(LongProperty_t pri);
+        /** Get build queue position.
+            \return position (1=first, next ship to be built) */
+        IntegerProperty_t getBaseQueuePosition() const;
+
+        /** Set build queue position.
+            \param pos Position */
+        void setBaseQueuePosition(IntegerProperty_t pos);
+
+        /** Get build queue priority.
+            This is the priority value associated with the base; higher values mean build earlier.
+            \return priority value */
+        LongProperty_t getBaseQueuePriority() const;
+
+        /** Set build queue priority.
+            \param pri Priority */
+        void setBaseQueuePriority(LongProperty_t pri);
+
 
         /*
          *  Auto build accessors:
@@ -439,15 +584,31 @@ namespace game { namespace map {
          *  Unit score accessors:
          */
 
+        /** Access this planet's scores.
+            \return scores */
         UnitScoreList& unitScores();
+
+        /** Access this planet's scores (const).
+            \return scores */
         const UnitScoreList& unitScores() const;
+
+        /** Get score value.
+            \param scoreId Score Id
+            \param scoreDefinitions Score definitions
+            \return Score as looked up in the scoreDefinitions; unknown if score value not known */
         NegativeProperty_t getScore(int16_t scoreId, const UnitScoreDefinitionList& scoreDefinitions) const;
 
 
         /*
          *  Message link
          */
+
+        /** Access this planet's messages.
+            \return messages */
         MessageLink& messages();
+
+        /** Access this planet's messages (const).
+            \return messages */
         const MessageLink& messages() const;
 
      private:

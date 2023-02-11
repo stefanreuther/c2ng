@@ -1,5 +1,6 @@
 /**
   *  \file game/map/renderer.hpp
+  *  \brief Class game::map::Renderer
   */
 #ifndef C2NG_GAME_MAP_RENDERER_HPP
 #define C2NG_GAME_MAP_RENDERER_HPP
@@ -34,15 +35,20 @@ namespace game { namespace map {
         If a unit appears in multiple images, it is rendered multiple times as appropriate. */
     class Renderer {
      public:
-        explicit Renderer(Viewport& viewport);
-        ~Renderer();
+        /** Constructor.
+            @param viewport Viewport */
+        explicit Renderer(const Viewport& viewport);
 
+        /** Render map.
+            Renders the map section selected by the Viewport specified on construction
+            into the given RendererListener.
+            @param out Listener */
         void render(RendererListener& out) const;
 
      private:
         struct State;
 
-        Viewport& m_viewport;
+        const Viewport& m_viewport;
 
         void renderGrid(const State& st) const;
         void renderRectangularGrid(const State& st) const;

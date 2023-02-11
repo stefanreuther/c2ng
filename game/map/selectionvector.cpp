@@ -157,7 +157,7 @@ game::map::SelectionVector::executeCompiledExpression(const String_t& compiledEx
     // Determine size
     const size_t wordLimit = (limit / NUM_BITS_PER_WORD) + 1;
     m_data.resize(wordLimit);
-    
+
     // Process
     for (size_t i = 0; i < wordLimit; ++i) {
         std::vector<Word_t> stack;

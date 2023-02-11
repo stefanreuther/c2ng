@@ -92,7 +92,6 @@ void
 game::map::Drawing::setCircleRadius(int r)
 {
     // ex GDrawing::setCircleRadius
-    // ASSERT(type == CircleDrawing);
     m_x2 = r;
 }
 
@@ -101,7 +100,6 @@ void
 game::map::Drawing::setMarkerKind(int k)
 {
     // ex GDrawing::setMarkerKind
-    // ASSERT(type == MarkerDrawing);
     m_x2 = k;
 }
 

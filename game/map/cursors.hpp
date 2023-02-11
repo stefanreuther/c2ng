@@ -1,11 +1,12 @@
 /**
   *  \file game/map/cursors.hpp
+  *  \brief Class game::map::Cursors
   */
 #ifndef C2NG_GAME_MAP_CURSORS_HPP
 #define C2NG_GAME_MAP_CURSORS_HPP
 
-#include "game/map/simpleobjectcursor.hpp"
 #include "game/map/location.hpp"
+#include "game/map/simpleobjectcursor.hpp"
 #include "game/reference.hpp"
 
 namespace game { namespace map {
@@ -13,27 +14,87 @@ namespace game { namespace map {
     class Universe;
     class Configuration;
 
+    /** Cursors.
+        Aggregates object cursors and object types for all user-visible object selections.
+        The cursors drive UI object selection, and the "Iterator" script functionality.
+        The object types represent UI object sets; not every one has an associated cursor. */
     class Cursors {
      public:
+        /** Default constructor. */
         Cursors();
+
+        /** Destructor. */
         ~Cursors();
 
+        /** Set universe.
+            Makes the cursors drive the given universe, with the given map configuration.
+            Setting parameters to null makes the cursors report no current object.
+
+            @param univ       Universe
+            @param mapConfig  Map configuration */
         void setUniverse(Universe* univ, const Configuration* mapConfig);
 
-        SimpleObjectCursor& currentShip();
-        SimpleObjectCursor& currentHistoryShip();
-        SimpleObjectCursor& currentPlanet();
-        SimpleObjectCursor& currentBase();
-        SimpleObjectCursor& currentFleet();
-        SimpleObjectCursor& currentUfo();
-        SimpleObjectCursor& currentIonStorm();
-        SimpleObjectCursor& currentMinefield();
+        /** Access ship cursor (F1/ship screen).
+            @return cursor */
+        ObjectCursor& currentShip();
+
+        /** Access history ship cursor (F6/history screen).
+            @return cursor */
+        ObjectCursor& currentHistoryShip();
+
+        /** Access planet cursor (F2/planet screen).
+            @return cursor */
+        ObjectCursor& currentPlanet();
+
+        /** Access starbaes cursor (F3/starbase screen).
+            @return cursor */
+        ObjectCursor& currentBase();
+
+        /** Access fleet cursor (F10/fleet screen).
+            @return cursor */
+        ObjectCursor& currentFleet();
+
+        /** Access Ufo cursor.
+            @return cursor */
+        ObjectCursor& currentUfo();
+
+        /** Access ion storm cursor.
+            @return cursor */
+        ObjectCursor& currentIonStorm();
+
+        /** Access minefield cursor.
+            @return cursor */
+        ObjectCursor& currentMinefield();
+
+        /** Access map location.
+            @return location */
         Location& location();
 
+        /** Get object cursor, given a type number.
+            Implements the mapping required for the "Iterator" script functionality.
+            @param nr Number
+            @return cursor; null if nr is not known
+            @see game::interface::makeIteratorValue */
         ObjectCursor* getCursorByNumber(int nr);
+
+        /** Get object type, given a type number.
+            Implements the mapping required for the "Iterator" script functionality.
+            @param nr Number
+            @return object type; null if nr is not known
+            @see game::interface::makeIteratorValue */
         ObjectType* getTypeByNumber(int nr);
 
+        /** Get reference type, given a type number.
+            If getCursorByNumber()/getTypeByNumber() produce objects of a given type,
+            returns a Reference::Type suitable to form references to those objects.
+
+            @param nr Number
+            @return reference type; Reference::Null if nr is not known */
         static Reference::Type getReferenceTypeByNumber(int nr);
+
+        /*
+         *  Symbolic names for cursor numbers
+         */
 
         static const int ShipScreen = 1;
         static const int PlanetScreen = 2;

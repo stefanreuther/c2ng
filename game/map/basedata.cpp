@@ -1,5 +1,6 @@
 /**
   *  \file game/map/basedata.cpp
+  *  \brief Structure game::map::BaseData
   */
 
 #include "game/map/basedata.hpp"

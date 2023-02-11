@@ -1,5 +1,6 @@
 /**
   *  \file game/map/shiptransporter.hpp
+  *  \brief Class game::map::ShipTransporter
   */
 #ifndef C2NG_GAME_MAP_SHIPTRANSPORTER_HPP
 #define C2NG_GAME_MAP_SHIPTRANSPORTER_HPP
@@ -14,14 +15,23 @@ namespace game { namespace map {
 
     class Universe;
 
+    /** Ship transporter.
+        Implements CargoContainer for a ship's transporter (ship/ship, ship/planet, jettison). */
     class ShipTransporter : public CargoContainer {
      public:
+        /** Constructor.
+            @param sh          Ship (must live longer than ShipTransporter)
+            @param type        Transporter type to use
+            @param targetId    Target unit Id
+            @param univ        Universe (must live longer than ShipTransporter)
+            @param hostVersion Host version (HostVersion::hasParallelShipTransfers()) */
         ShipTransporter(Ship& sh,
                         Ship::Transporter type,
                         Id_t targetId,
                         const Universe& univ,
                         HostVersion hostVersion);
 
+        // CargoContainer:
         virtual String_t getName(afl::string::Translator& tx) const;
         virtual String_t getInfo1(afl::string::Translator& tx) const;
         virtual String_t getInfo2(afl::string::Translator& tx) const;

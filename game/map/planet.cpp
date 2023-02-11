@@ -1008,21 +1008,21 @@ game::map::Planet::getOreDensity(Element::Type type) const
 }
 
 void
-game::map::Planet::setOreDensity(Element::Type type, IntegerProperty_t amount)
+game::map::Planet::setOreDensity(Element::Type type, IntegerProperty_t density)
 {
     // ex GPlanet::setOreDensity
     switch (type) {
      case Element::Neutronium:
-        m_currentPlanetData.densityNeutronium = amount;
+        m_currentPlanetData.densityNeutronium = density;
         break;
      case Element::Tritanium:
-        m_currentPlanetData.densityTritanium = amount;
+        m_currentPlanetData.densityTritanium = density;
         break;
      case Element::Duranium:
-        m_currentPlanetData.densityDuranium = amount;
+        m_currentPlanetData.densityDuranium = density;
         break;
      case Element::Molybdenum:
-        m_currentPlanetData.densityMolybdenum = amount;
+        m_currentPlanetData.densityMolybdenum = density;
         break;
      default:
         break;

@@ -7,6 +7,21 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestGameMapAnyPlanetType : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestGameMapAnyShipType : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestGameMapBaseData : public CxxTest::TestSuite {
+ public:
+    void testGetBaseStorage();
+};
+
 class TestGameMapBaseStorage : public CxxTest::TestSuite {
  public:
     void testAccess();
@@ -76,6 +91,14 @@ class TestGameMapConfiguration : public CxxTest::TestSuite {
     void testSaveToConfigWrapDefault();
 };
 
+class TestGameMapCursors : public CxxTest::TestSuite {
+ public:
+    void testGetCursorByNumber();
+    void testGetTypeByNumber();
+    void testSetUniverse();
+    void testGetReferenceTypeByNumber();
+};
+
 class TestGameMapDrawing : public CxxTest::TestSuite {
  public:
     void testInit();
@@ -117,6 +140,12 @@ class TestGameMapExplosionType : public CxxTest::TestSuite {
     void testAddMessageInformation();
 };
 
+class TestGameMapFleet : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testHasSpecialFunction();
+};
+
 class TestGameMapFleetMember : public CxxTest::TestSuite {
  public:
     void testSetFleetName();
@@ -138,6 +167,11 @@ class TestGameMapFleetMember : public CxxTest::TestSuite {
     void testSetFleetNumberForeign();
 };
 
+class TestGameMapFleetType : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestGameMapHistoryShipType : public CxxTest::TestSuite {
  public:
     void testEmpty();
@@ -153,6 +187,11 @@ class TestGameMapIonStorm : public CxxTest::TestSuite {
     void testMessageInfoMissing();
     void testForecastEmpty();
     void testForecastNormal();
+};
+
+class TestGameMapIonStormType : public CxxTest::TestSuite {
+ public:
+    void testIt();
 };
 
 class TestGameMapLocation : public CxxTest::TestSuite {
@@ -327,10 +366,25 @@ class TestGameMapObjectType : public CxxTest::TestSuite {
     void testSort();
 };
 
+class TestGameMapObjectVector : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestGameMapObjectVectorType : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestGameMapPlanet : public CxxTest::TestSuite {
  public:
     void testAutobuildSettings();
     void testCopy();
+};
+
+class TestGameMapPlanetData : public CxxTest::TestSuite {
+ public:
+    void testIt();
 };
 
 class TestGameMapPlanetEffectors : public CxxTest::TestSuite {
@@ -411,6 +465,22 @@ class TestGameMapPlanetStorage : public CxxTest::TestSuite {
     void testPlanet();
 };
 
+class TestGameMapPlayedBaseType : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestGameMapPlayedPlanetType : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestGameMapPlayedShipType : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testCount();
+};
+
 class TestGameMapPoint : public CxxTest::TestSuite {
  public:
     void testBasics();
@@ -434,8 +504,6 @@ class TestGameMapRangeSet : public CxxTest::TestSuite {
 
 class TestGameMapRenderList : public CxxTest::TestSuite {
  public:
-    void testRead();
-    void testReadInsnOnly();
     void testReplay();
     void testReplayAgain();
 };
@@ -447,6 +515,81 @@ class TestGameMapRenderOptions : public CxxTest::TestSuite {
     void testTranslation();
     void testCopy();
     void testKey();
+};
+
+class TestGameMapRenderer : public CxxTest::TestSuite {
+ public:
+    void testRectangularGrid();
+    void testCircularGrid();
+    void testCircularGridOutside();
+    void testNoGrid();
+    void testRectangularBorder();
+    void testCircularBorder();
+    void testNoBorder();
+    void testMinefieldsNormal();
+    void testMinefieldsFilled();
+    void testMinefieldsOff();
+    void testMinefieldsWrap();
+    void testMinefieldsDecay();
+    void testUfoNormal();
+    void testUfoFill();
+    void testUfoOff();
+    void testUfoWrap();
+    void testUfoConnect();
+    void testIonStormNormal();
+    void testIonStormFill();
+    void testIonStormOff();
+    void testIonStormWrap();
+    void testDrawings();
+    void testDrawingsOff();
+    void testDrawingsWrap();
+    void testExplosions();
+    void testExplosionsOff();
+    void testExplosionsWrap();
+    void testShip();
+    void testShipLabel();
+    void testShipLabelOff();
+    void testShipLabelDot();
+    void testShipLabelWrap();
+    void testShipVector();
+    void testShipVectorWrap();
+    void testShipVectorWrapSeam();
+    void testShipVectorWrapCircular();
+    void testShipMessages();
+    void testShipMessagesOff();
+    void testShipMessagesWrap();
+    void testShipSelection();
+    void testShipSelectionOff();
+    void testShipSelectionWrap();
+    void testShipSelectionCircularWrap();
+    void testShipWaypoint();
+    void testShipSingleTrail();
+    void testShipFleet();
+    void testPlanet();
+    void testPlanetWrap();
+    void testPlanetLabel();
+    void testPlanetLabelWrap();
+    void testPlanetLabelOff();
+    void testPlanetMessage();
+    void testPlanetMessageWrap();
+    void testPlanetMessageOff();
+    void testPlanetSelection();
+    void testPlanetSelectionWrap();
+    void testPlanetSelectionOff();
+    void testPlanetWarpWell();
+    void testPlanetWarpWellWrap();
+    void testPlanetWarpWellSquare();
+    void testPlanetWarpWellOff();
+    void testPlanetWarpWellNone();
+    void testPlanetShips();
+    void testPlanetShipSelection();
+    void testPlanetCircularWrap();
+    void testPlanetShipLabel();
+};
+
+class TestGameMapRendererListener : public CxxTest::TestSuite {
+ public:
+    void testInterface();
 };
 
 class TestGameMapReverter : public CxxTest::TestSuite {
@@ -497,9 +640,30 @@ class TestGameMapShipData : public CxxTest::TestSuite {
     void testIsTransferActivePart();
 };
 
+class TestGameMapShipHistoryData : public CxxTest::TestSuite {
+ public:
+    void testInit();
+    void testClear();
+};
+
 class TestGameMapShipInfo : public CxxTest::TestSuite {
  public:
     void testPackShipLocationInfo();
+    void testPackShipMassRanges();
+    void testPackShipMassRanges2();
+    void testPackShipMassRanges3();
+    void testPackShipMassRanges4();
+    void testPackShipMassRanges5();
+    void testPackShipMassRanges6();
+    void testPackShipLastKnownCargo();
+    void testPackShipLastKnownCargo2();
+    void testPackShipLastKnownCargo3();
+    void testPackShipMovementInfo();
+    void testPackShipMovementInfo2();
+    void testPackShipMovementInfoTow();
+    void testPackShipMovementInfoChunnel();
+    void testPackShipMovementInfoChunnelFail();
+    void testPackShipMovementInfoFleet();
 };
 
 class TestGameMapShipPredictor : public CxxTest::TestSuite {
@@ -510,6 +674,8 @@ class TestGameMapShipPredictor : public CxxTest::TestSuite {
     void testAlchemy();
     void testRefinery();
     void testAriesRefinery();
+    void testCombinedRefinery41();
+    void testCombinedRefinery31();
     void testMovement();
     void testMovement2();
     void testDamage();
@@ -530,6 +696,24 @@ class TestGameMapShipStorage : public CxxTest::TestSuite {
 class TestGameMapShipTransporter : public CxxTest::TestSuite {
  public:
     void testNames();
+};
+
+class TestGameMapShipUtils : public CxxTest::TestSuite {
+ public:
+    void testGetShipMission();
+    void testGetShipMissionByNumber();
+    void testSetInterceptWaypoint();
+    void testCancelAllCloneOrders();
+    void testGetShipHull();
+    void testGetShipTransferMaxCargo();
+};
+
+class TestGameMapSimpleObjectCursor : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testChange();
+    void testChange2();
+    void testCopy();
 };
 
 class TestGameMapTypedObjectType : public CxxTest::TestSuite {
@@ -554,6 +738,7 @@ class TestGameMapUfoType : public CxxTest::TestSuite {
     void testMovementGuessing2();
     void testMovementGuessing3();
     void testIteration();
+    void testAddUfoFromMessageInformation();
 };
 
 class TestGameMapUniverse : public CxxTest::TestSuite {
@@ -566,6 +751,7 @@ class TestGameMapUniverse : public CxxTest::TestSuite {
 class TestGameMapViewport : public CxxTest::TestSuite {
  public:
     void testRectangle();
+    void testOptions();
 };
 
 class TestGameMapVisibilityRange : public CxxTest::TestSuite {

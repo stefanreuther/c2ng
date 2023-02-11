@@ -1,5 +1,6 @@
 /**
   *  \file game/map/planetstorage.hpp
+  *  \brief Class game::map::PlanetStorage
   */
 #ifndef C2NG_GAME_MAP_PLANETSTORAGE_HPP
 #define C2NG_GAME_MAP_PLANETSTORAGE_HPP
@@ -14,11 +15,20 @@ namespace game { namespace map {
 
     class Planet;
 
+    /** Planet cargo transfer.
+        Implements CargoContainer for a played planet.
+        Cargo can be transferred to/from mined minerals, and starbase ammo storage if present. */
     class PlanetStorage : public CargoContainer {
      public:
+        /** Constructor.
+            @param pl     Planet (must live longer than PlanetStorage)
+            @param config Host configuration (for MaximumFightersOnBase, must live longer than PlanetStorage) */
         PlanetStorage(Planet& pl, const game::config::HostConfiguration& config);
+
+        /** Destructor. */
         ~PlanetStorage();
 
+        // CargoContainer:
         virtual String_t getName(afl::string::Translator& tx) const;
         virtual String_t getInfo1(afl::string::Translator& tx) const;
         virtual String_t getInfo2(afl::string::Translator& tx) const;

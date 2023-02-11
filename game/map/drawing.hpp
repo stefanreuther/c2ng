@@ -7,9 +7,9 @@
 
 #include "afl/base/types.hpp"
 #include "afl/string/string.hpp"
+#include "game/config/markeroption.hpp"
 #include "game/map/point.hpp"
 #include "util/atomtable.hpp"           // Atom_t
-#include "game/config/markeroption.hpp"
 
 namespace game { namespace map {
 

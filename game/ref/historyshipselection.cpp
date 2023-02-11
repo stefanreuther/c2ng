@@ -23,7 +23,7 @@ namespace {
     {
         // ex WHistoryShipSelection::getShipLastTurn (sort-of)
         int t = sh.getHistoryNewestLocationTurn();
-        while (game::map::ShipHistoryData::Track* e = sh.getHistoryLocation(t)) {
+        while (const game::map::ShipHistoryData::Track* e = sh.getHistoryLocation(t)) {
             if (e->x.isValid() && e->y.isValid()) {
                 return t;
             }
@@ -124,7 +124,7 @@ game::ref::HistoryShipSelection::buildList(HistoryShipList& list, const Turn& tu
                 turn = getShipLastTurn(*sh);
                 break;
              case LocalShips:
-                while (game::map::ShipHistoryData::Track* e = sh->getHistoryLocation(turn)) {
+                while (const game::map::ShipHistoryData::Track* e = sh->getHistoryLocation(turn)) {
                     int x, y;
                     if (e->x.get(x) && e->y.get(y)) {
                         if (isInRange(x, y, pGame->mapConfiguration())) {
@@ -136,7 +136,7 @@ game::ref::HistoryShipSelection::buildList(HistoryShipList& list, const Turn& tu
                 }
                 break;
              case ExactShips:
-                while (game::map::ShipHistoryData::Track* e = sh->getHistoryLocation(turn)) {
+                while (const game::map::ShipHistoryData::Track* e = sh->getHistoryLocation(turn)) {
                     int x, y;
                     if (e->x.get(x) && e->y.get(y)) {
                         if (x == m_position.getX() && y == m_position.getY()) {
@@ -242,7 +242,7 @@ game::ref::HistoryShipSelection::getAvailableModes(const game::map::Universe& un
             // Check location modes
             if (m_positionValid) {
                 int t = sh->getHistoryNewestLocationTurn();
-                while (game::map::ShipHistoryData::Track* e = sh->getHistoryLocation(t)) {
+                while (const game::map::ShipHistoryData::Track* e = sh->getHistoryLocation(t)) {
                     int x, y;
                     if (e->x.get(x) && e->y.get(y)) {
                         if (isInRange(x, y, mapConfig)) {

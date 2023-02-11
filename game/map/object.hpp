@@ -1,5 +1,6 @@
 /**
   *  \file game/map/object.hpp
+  *  \brief Base class game::map::Object
   */
 #ifndef C2NG_GAME_MAP_OBJECT_HPP
 #define C2NG_GAME_MAP_OBJECT_HPP
@@ -14,8 +15,8 @@
 
 namespace game { namespace map {
 
-    /** Game object base class.
-        A game object has the following basic properties:
+    /** Map object base class.
+        A map object has the following basic properties:
         - a name (coming in three flavours, plain/long/detailed)
         - an owner
         - an Id
@@ -45,10 +46,21 @@ namespace game { namespace map {
             Editable                   /**< Editable. Can be manipulated, also outside the rules. */
         };
 
-        // Constructor and Destructor:
+
+        /*
+         *  Constructor and Destructor
+         */
+
+        /** Default constructor. */
         Object();
+
+        /** Copy constructor.
+            Copies the other object's playability/selection status, but not its dirtiness status and signals. */
         Object(const Object& other);
+
+        /** Destructor. */
         virtual ~Object();
+
 
         /*
          *  Abstract Methods

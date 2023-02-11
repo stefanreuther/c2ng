@@ -1,5 +1,6 @@
 /**
   *  \file game/map/beamupshiptransfer.hpp
+  *  \brief Class game::map::BeamUpShipTransfer
   */
 #ifndef C2NG_GAME_MAP_BEAMUPSHIPTRANSFER_HPP
 #define C2NG_GAME_MAP_BEAMUPSHIPTRANSFER_HPP
@@ -18,16 +19,27 @@ namespace game { namespace map {
 
     class Ship;
 
+    /** "Beam Up Multiple" cargo transfer, ship side.
+        This side implements creating the command.
+        Use together with BeamUpPlanetTransfer. */
     class BeamUpShipTransfer : public CargoContainer {
      public:
+        /** Constructor.
+            @param sh        Ship
+            @param shipList  Ship list (for cargo capacity)
+            @param turn      Turn (for retrieving/updating command)
+            @param mapConfig Map configuration (for mission update)
+            @param config    Host configuration (for AllowBeamUpClans, ExtMissionsStartAt) */
         BeamUpShipTransfer(Ship& sh,
                            const game::spec::ShipList& shipList,
                            Turn& turn,
                            const game::map::Configuration& mapConfig,
                            const game::config::HostConfiguration& config);
 
+        /** Destructor. */
         ~BeamUpShipTransfer();
 
+        // CargoContainer:
         virtual String_t getName(afl::string::Translator& tx) const;
         virtual String_t getInfo1(afl::string::Translator& tx) const;
         virtual String_t getInfo2(afl::string::Translator& tx) const;
@@ -48,7 +60,15 @@ namespace game { namespace map {
         util::Vector<int32_t,Element::Type> m_amount;
     };
 
-    void parseBeamUpCommand(util::Vector<int32_t,Element::Type>& out, Turn& turn, const Ship& ship, int factor);
+    /** Parse "beam up" command.
+        Parses the ship's "beam up" (Command::Beamup) command, and stores its cargo amount in the given vector,
+        scaled by the factor.
+
+        @param [out] out      Result produced here
+        @param [in]  turn     Turn (for retrieving command)
+        @param [in]  ship     Ship (for retrieving command)
+        @param [in]  factor   Factor */
+    void parseBeamUpCommand(util::Vector<int32_t,Element::Type>& out, const Turn& turn, const Ship& ship, int factor);
 
 } }
 

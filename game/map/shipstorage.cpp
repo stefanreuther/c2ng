@@ -1,5 +1,6 @@
 /**
   *  \file game/map/shipstorage.cpp
+  *  \brief Class game::map::ShipStorage
   */
 
 #include "game/map/shipstorage.hpp"

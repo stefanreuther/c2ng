@@ -40,7 +40,7 @@ namespace game { namespace map {
         Point getCenter() const;
 
         /** Get size of map.
-            \return center
+            \return size. For Wrapped map: width/height. For Circular map: X component is radius.
             \see setConfiguration  */
         Point getSize() const;
 
@@ -92,7 +92,7 @@ namespace game { namespace map {
             This overrides a previous configuration and marks it "not from host configuration".
             \param mode Wrap mode
             \param center Map center
-            \param size Map size
+            \param size Map size. For wrapped map: width/height. For Circular map: X component is radius.
 
             Change to PCC2: in PCC2, this function would have updated the user preferences.
             Use saveToConfiguration() to do that in c2ng. */

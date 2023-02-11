@@ -10,13 +10,16 @@
 #include "game/map/planet.hpp"
 
 namespace game { namespace map {
-    
+
     /** Played planets type.
         Contains all planets that can be played (ReadOnly or better). */
     class PlayedPlanetType : public ObjectVectorType<Planet> {
      public:
-        PlayedPlanetType(ObjectVector<Planet>& vec);
+        /** Constructor.
+            @param vec Planet vector */
+        explicit PlayedPlanetType(ObjectVector<Planet>& vec);
 
+        // ObjectVectorType:
         virtual bool isValid(const Planet& p) const;
     };
 

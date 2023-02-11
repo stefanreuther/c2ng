@@ -1,5 +1,6 @@
 /**
   *  \file game/map/shipinfo.cpp
+  *  \brief Functions to obtain information about ships
   */
 
 #include <cmath>

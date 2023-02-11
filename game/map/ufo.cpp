@@ -299,15 +299,6 @@ game::map::Ufo::getLastTurn() const
     return m_turnLastSeen;
 }
 
-void
-game::map::Ufo::setLastTurn(int n)
-{
-    if (m_turnLastSeen != n) {
-        m_turnLastSeen = n;
-        markDirty();
-    }
-}
-
 game::map::Point
 game::map::Ufo::getMovementVector() const
 {
@@ -328,7 +319,6 @@ game::map::Ufo::setMovementVector(Point vec)
     }
 }
 
-// /** Disconnect this Ufo from its other end. */
 void
 game::map::Ufo::disconnect()
 {
@@ -339,7 +329,6 @@ game::map::Ufo::disconnect()
     }
 }
 
-// /** Connect this Ufo with another one. Used to establish wormhole end links. */
 void
 game::map::Ufo::connectWith(Ufo& other)
 {

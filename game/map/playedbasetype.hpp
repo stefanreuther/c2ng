@@ -15,8 +15,11 @@ namespace game { namespace map {
         Contains all playable starbases. */
     class PlayedBaseType : public ObjectVectorType<Planet> {
      public:
-        PlayedBaseType(ObjectVector<Planet>& vec);
+        /** Constructor.
+            @param vec Planet vector (must live longer than PlayedBaseType) */
+        explicit PlayedBaseType(ObjectVector<Planet>& vec);
 
+        // ObjectVectorType:
         virtual bool isValid(const Planet& p) const;
     };
 

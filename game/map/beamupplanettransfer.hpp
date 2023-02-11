@@ -1,5 +1,6 @@
 /**
   *  \file game/map/beamupplanettransfer.hpp
+  *  \brief Class game::map::BeamUpPlanetTransfer
   */
 #ifndef C2NG_GAME_MAP_BEAMUPPLANETTRANSFER_HPP
 #define C2NG_GAME_MAP_BEAMUPPLANETTRANSFER_HPP
@@ -15,15 +16,22 @@ namespace game { namespace map {
     class Planet;
     class Ship;
 
+    /** "Beam Up Multiple" cargo transfer, planet side.
+        Displays just the status, but does not generate any commands.
+        Use together with BeamUpShipTransfer. */
     class BeamUpPlanetTransfer : public CargoContainer {
      public:
-        BeamUpPlanetTransfer(Planet& pl,
-                             const Ship& sh,
-                             Turn& turn,
-                             const game::config::HostConfiguration& config);
+        /** Constructor.
+            @param pl   Planet
+            @param sh   Ship (for retrieving command)
+            @param turn Turn (for retrieving command)
+            @param config  Host configuration (for AllowBeamUpClans) */
+        BeamUpPlanetTransfer(Planet& pl, const Ship& sh, Turn& turn, const game::config::HostConfiguration& config);
 
+        /** Destructor. */
         ~BeamUpPlanetTransfer();
 
+        // CargoContainer:
         virtual String_t getName(afl::string::Translator& tx) const;
         virtual String_t getInfo1(afl::string::Translator& tx) const;
         virtual String_t getInfo2(afl::string::Translator& tx) const;
@@ -36,7 +44,6 @@ namespace game { namespace map {
 
      private:
         Planet& m_planet;
-        Turn& m_turn;
         const game::config::HostConfiguration& m_config;
 
         util::Vector<int32_t,Element::Type> m_amount;

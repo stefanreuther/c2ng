@@ -562,3 +562,33 @@ TestGameMapUfoType::testIteration()
         TS_ASSERT_EQUALS(i, 0);
     }
 }
+void
+TestGameMapUfoType::testAddUfoFromMessageInformation()
+{
+    game::map::UfoType testee;
+
+    {
+        gp::MessageInformation info(gp::MessageInformation::Ufo, 20, TURN_NR);
+
+        // Mandatory
+        info.addValue(gp::mi_X, 1000);
+        info.addValue(gp::mi_Y, 1200);
+        info.addValue(gp::mi_Color, 5);
+        info.addValue(gp::mi_Type, 15);
+        info.addValue(gp::mi_Radius, 77);
+        info.addValue(gp::ms_Name, "Weather balloon");
+
+        // Optional
+        info.addValue(gp::mi_Mass, 400);
+        testee.addMessageInformation(info);
+    }
+
+    Ufo* pu = testee.getUfoByIndex(testee.findUfoIndexById(20));
+    TS_ASSERT(pu != 0);
+    TS_ASSERT_EQUALS(pu->getId(), 20);
+    TS_ASSERT_EQUALS(pu->getPlainName(), "Weather balloon");
+    TS_ASSERT_EQUALS(pu->getColorCode(), 5);
+    TS_ASSERT_EQUALS(pu->getTypeCode().orElse(-1), 15);
+    TS_ASSERT_EQUALS(pu->getRadius().orElse(-1), 77);
+    TS_ASSERT_EQUALS(pu->getPosition().orElse(Point()), Point(1000, 1200));
+}

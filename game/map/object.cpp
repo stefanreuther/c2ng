@@ -1,9 +1,9 @@
 /**
   *  \file game/map/object.cpp
+  *  \brief Base class game::map::Object
   */
 
 #include "game/map/object.hpp"
-
 
 game::map::Object::Object()
     : m_playability(NotPlayable),

@@ -1,5 +1,6 @@
 /**
   *  \file game/map/simpleobjectcursor.cpp
+  *  \brief Class game::map::SimpleObjectCursor
   */
 
 #include "game/map/simpleobjectcursor.hpp"

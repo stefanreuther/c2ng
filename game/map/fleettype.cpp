@@ -1,5 +1,6 @@
 /**
   *  \file game/map/fleettype.cpp
+  *  \brief Class game::map::FleetType
   */
 
 #include "game/map/fleettype.hpp"

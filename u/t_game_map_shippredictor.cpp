@@ -293,7 +293,7 @@ namespace {
     }
 
     /* Canned test case: refinery friendly codes */
-    void testRefinery(const char* friendlyCode, int suppliesBefore, int tritaniumAfter, int duraniumAfter, int molybdenumAfter, int suppliesAfter, int fuelAfter, HostVersion host, bool expectAlchemy, bool expectFriendlyCode)
+    void testGenericRefinery(const char* friendlyCode, int suppliesBefore, int tritaniumAfter, int duraniumAfter, int molybdenumAfter, int suppliesAfter, int fuelAfter, HostVersion host, bool expectAlchemy, bool expectFriendlyCode, afl::base::Memory<const int> hullFuncs)
     {
         const int SHIP_ID = 59;
 
@@ -309,44 +309,9 @@ namespace {
         s.setCargo(Element::Supplies, suppliesBefore);
         s.setFriendlyCode(String_t(friendlyCode));
 
-        t.shipList.hulls().get(61)->changeHullFunction(t.shipList.modifiedHullFunctions().getFunctionIdFromHostId(game::spec::BasicHullFunction::NeutronicRefinery),
-                                                       game::PlayerSet_t::fromInteger(-1), game::PlayerSet_t(), true);
-
-        finish(t);
-
-        game::test::RegistrationKey key(game::RegistrationKey::Registered, 10);
-
-        ShipPredictor testee(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, key);
-        testee.computeTurn();
-
-        TSM_ASSERT_EQUALS(label, testee.getCargo(Element::Tritanium),  tritaniumAfter);
-        TSM_ASSERT_EQUALS(label, testee.getCargo(Element::Duranium),   duraniumAfter);
-        TSM_ASSERT_EQUALS(label, testee.getCargo(Element::Molybdenum), molybdenumAfter);
-        TSM_ASSERT_EQUALS(label, testee.getCargo(Element::Supplies),   suppliesAfter);
-        TSM_ASSERT_EQUALS(label, testee.getCargo(Element::Neutronium), fuelAfter);
-        TSM_ASSERT_EQUALS(label, testee.getUsedProperties().contains(ShipPredictor::UsedAlchemy), expectAlchemy);
-        TSM_ASSERT_EQUALS(label, testee.getUsedProperties().contains(ShipPredictor::UsedFCode), expectFriendlyCode);
-    }
-
-    /* Canned test case: refinery friendly codes */
-    void testAriesRefinery(const char* friendlyCode, int suppliesBefore, int tritaniumAfter, int duraniumAfter, int molybdenumAfter, int suppliesAfter, int fuelAfter, HostVersion host, bool expectAlchemy, bool expectFriendlyCode)
-    {
-        const int SHIP_ID = 59;
-
-        String_t label = afl::string::Format("%s fc=%s s=%d", host.toString(), friendlyCode, suppliesBefore);
-
-        TestHarness t;
-        t.hostVersion = host;
-        Ship& s = addMerlin(t, SHIP_ID);
-        s.setCargo(Element::Neutronium, 1);
-        s.setCargo(Element::Tritanium, 10);
-        s.setCargo(Element::Duranium, 20);
-        s.setCargo(Element::Molybdenum, 30);
-        s.setCargo(Element::Supplies, suppliesBefore);
-        s.setFriendlyCode(String_t(friendlyCode));
-
-        t.shipList.hulls().get(61)->changeHullFunction(t.shipList.modifiedHullFunctions().getFunctionIdFromHostId(game::spec::BasicHullFunction::AriesRefinery),
-                                                       game::PlayerSet_t::fromInteger(-1), game::PlayerSet_t(), true);
+        while (const int* p = hullFuncs.eat()) {
+            t.shipList.hulls().get(61)->changeHullFunction(t.shipList.modifiedHullFunctions().getFunctionIdFromHostId(*p), game::PlayerSet_t::fromInteger(-1), game::PlayerSet_t(), true);
+        }
 
         finish(t);
 
@@ -397,6 +362,10 @@ TestGameMapShipPredictor::testErrorCases()
         p.computeMovement();
         p.computeTurn();
         TS_ASSERT_EQUALS(p.getNumTurns(), 0);
+
+        // For coverage...
+        TS_ASSERT_EQUALS(&p.getUniverse(), &t.univ);
+        TS_ASSERT_EQUALS(p.getTowedShipName(), "");
     }
 
     // Ship exists but hull doesn't.
@@ -496,41 +465,43 @@ TestGameMapShipPredictor::testRefinery()
     const HostVersion PHOST    = HostVersion(HostVersion::PHost, MKVERSION(4,1,5));
     const HostVersion THOST    = HostVersion(HostVersion::Host,  MKVERSION(3,22,47));
 
+    static const int HULLFUNCS[] = { game::spec::BasicHullFunction::NeutronicRefinery };
+
     // Normal
-    ::testRefinery("xyz", 900,  0,  0,  0, 840, 61, PHOST, true,  false);
-    ::testRefinery("xyz", 900,  0,  0,  0, 840, 61, THOST, true,  false);
-    ::testRefinery("xyz",  30,  0,  0, 30,   0, 31, PHOST, true,  false);
-    ::testRefinery("xyz",  30,  0,  0, 30,   0, 31, THOST, true,  false);
+    testGenericRefinery("xyz", 900,  0,  0,  0, 840, 61, PHOST, true,  false, HULLFUNCS);
+    testGenericRefinery("xyz", 900,  0,  0,  0, 840, 61, THOST, true,  false, HULLFUNCS);
+    testGenericRefinery("xyz",  30,  0,  0, 30,   0, 31, PHOST, true,  false, HULLFUNCS);
+    testGenericRefinery("xyz",  30,  0,  0, 30,   0, 31, THOST, true,  false, HULLFUNCS);
 
     // NAL
-    ::testRefinery("NAL", 900, 10, 20, 30, 900,  1, PHOST, false, true);
-    ::testRefinery("NAL", 900, 10, 20, 30, 900,  1, THOST, false, true);
+    testGenericRefinery("NAL", 900, 10, 20, 30, 900,  1, PHOST, false, true, HULLFUNCS);
+    testGenericRefinery("NAL", 900, 10, 20, 30, 900,  1, THOST, false, true, HULLFUNCS);
 
     // alX
-    ::testRefinery("alt", 900,  0, 20, 30, 890, 11, PHOST, true,  true);
-    ::testRefinery("ald", 900, 10,  0, 30, 880, 21, PHOST, true,  true);
-    ::testRefinery("alm", 900, 10, 20,  0, 870, 31, PHOST, true,  true);
+    testGenericRefinery("alt", 900,  0, 20, 30, 890, 11, PHOST, true,  true, HULLFUNCS);
+    testGenericRefinery("ald", 900, 10,  0, 30, 880, 21, PHOST, true,  true, HULLFUNCS);
+    testGenericRefinery("alm", 900, 10, 20,  0, 870, 31, PHOST, true,  true, HULLFUNCS);
 
-    ::testRefinery("alt", 900,  0,  0,  0, 840, 61, OLDPHOST, true, false);
-    ::testRefinery("ald", 900,  0,  0,  0, 840, 61, OLDPHOST, true, false);
-    ::testRefinery("alm", 900,  0,  0,  0, 840, 61, OLDPHOST, true, false);
+    testGenericRefinery("alt", 900,  0,  0,  0, 840, 61, OLDPHOST, true, false, HULLFUNCS);
+    testGenericRefinery("ald", 900,  0,  0,  0, 840, 61, OLDPHOST, true, false, HULLFUNCS);
+    testGenericRefinery("alm", 900,  0,  0,  0, 840, 61, OLDPHOST, true, false, HULLFUNCS);
 
-    ::testRefinery("alt", 900,  0,  0,  0, 840, 61, THOST, true, false);
-    ::testRefinery("ald", 900,  0,  0,  0, 840, 61, THOST, true, false);
-    ::testRefinery("alm", 900,  0,  0,  0, 840, 61, THOST, true, false);
+    testGenericRefinery("alt", 900,  0,  0,  0, 840, 61, THOST, true, false, HULLFUNCS);
+    testGenericRefinery("ald", 900,  0,  0,  0, 840, 61, THOST, true, false, HULLFUNCS);
+    testGenericRefinery("alm", 900,  0,  0,  0, 840, 61, THOST, true, false, HULLFUNCS);
 
     // naX
-    ::testRefinery("nat", 900, 10,  0,  0, 850, 51, PHOST, true,  true);
-    ::testRefinery("nad", 900,  0, 20,  0, 860, 41, PHOST, true,  true);
-    ::testRefinery("nam", 900,  0,  0, 30, 870, 31, PHOST, true,  true);
+    testGenericRefinery("nat", 900, 10,  0,  0, 850, 51, PHOST, true,  true, HULLFUNCS);
+    testGenericRefinery("nad", 900,  0, 20,  0, 860, 41, PHOST, true,  true, HULLFUNCS);
+    testGenericRefinery("nam", 900,  0,  0, 30, 870, 31, PHOST, true,  true, HULLFUNCS);
 
-    ::testRefinery("nat", 900,  0,  0,  0, 840, 61, OLDPHOST, true, false);
-    ::testRefinery("nad", 900,  0,  0,  0, 840, 61, OLDPHOST, true, false);
-    ::testRefinery("nam", 900,  0,  0,  0, 840, 61, OLDPHOST, true, false);
+    testGenericRefinery("nat", 900,  0,  0,  0, 840, 61, OLDPHOST, true, false, HULLFUNCS);
+    testGenericRefinery("nad", 900,  0,  0,  0, 840, 61, OLDPHOST, true, false, HULLFUNCS);
+    testGenericRefinery("nam", 900,  0,  0,  0, 840, 61, OLDPHOST, true, false, HULLFUNCS);
 
-    ::testRefinery("nat", 900,  0,  0,  0, 840, 61, THOST, true, false);
-    ::testRefinery("nad", 900,  0,  0,  0, 840, 61, THOST, true, false);
-    ::testRefinery("nam", 900,  0,  0,  0, 840, 61, THOST, true, false);
+    testGenericRefinery("nat", 900,  0,  0,  0, 840, 61, THOST, true, false, HULLFUNCS);
+    testGenericRefinery("nad", 900,  0,  0,  0, 840, 61, THOST, true, false, HULLFUNCS);
+    testGenericRefinery("nam", 900,  0,  0,  0, 840, 61, THOST, true, false, HULLFUNCS);
 }
 
 /** Test multiple cases of refinery. Note the PHost version dependency. */
@@ -541,39 +512,99 @@ TestGameMapShipPredictor::testAriesRefinery()
     const HostVersion PHOST    = HostVersion(HostVersion::PHost, MKVERSION(4,1,5));
     const HostVersion THOST    = HostVersion(HostVersion::Host,  MKVERSION(3,22,47));
 
+    static const int HULLFUNCS[] = { game::spec::BasicHullFunction::AriesRefinery };
+
     // Normal
-    ::testAriesRefinery("xyz", 40,  0,  0,  0,  40, 61, PHOST, true,  false);
-    ::testAriesRefinery("xyz", 40,  0,  0,  0,  40, 61, THOST, true,  false);
+    testGenericRefinery("xyz", 40,  0,  0,  0,  40, 61, PHOST, true,  false, HULLFUNCS);
+    testGenericRefinery("xyz", 40,  0,  0,  0,  40, 61, THOST, true,  false, HULLFUNCS);
 
     // NAL
-    ::testAriesRefinery("NAL", 40, 10, 20, 30,  40,  1, PHOST, false, true);
-    // ::testAriesRefinery("NAL", 40,  0,  0,  0,  40, 61, THOST, true,  false); <- FIXME: HOST does not permit NAL for Aries
+    testGenericRefinery("NAL", 40, 10, 20, 30,  40,  1, PHOST, false, true, HULLFUNCS);
+    // testGenericRefinery("NAL", 40,  0,  0,  0,  40, 61, THOST, true,  false, HULLFUNCS); <- FIXME: HOST does not permit NAL for Aries
 
     // alX
-    ::testAriesRefinery("alt", 40,  0, 20, 30,  40, 11, PHOST, true,  true);
-    ::testAriesRefinery("ald", 40, 10,  0, 30,  40, 21, PHOST, true,  true);
-    ::testAriesRefinery("alm", 40, 10, 20,  0,  40, 31, PHOST, true,  true);
+    testGenericRefinery("alt", 40,  0, 20, 30,  40, 11, PHOST, true,  true, HULLFUNCS);
+    testGenericRefinery("ald", 40, 10,  0, 30,  40, 21, PHOST, true,  true, HULLFUNCS);
+    testGenericRefinery("alm", 40, 10, 20,  0,  40, 31, PHOST, true,  true, HULLFUNCS);
 
-    ::testAriesRefinery("alt", 40,  0,  0,  0,  40, 61, OLDPHOST, true, false);
-    ::testAriesRefinery("ald", 40,  0,  0,  0,  40, 61, OLDPHOST, true, false);
-    ::testAriesRefinery("alm", 40,  0,  0,  0,  40, 61, OLDPHOST, true, false);
+    testGenericRefinery("alt", 40,  0,  0,  0,  40, 61, OLDPHOST, true, false, HULLFUNCS);
+    testGenericRefinery("ald", 40,  0,  0,  0,  40, 61, OLDPHOST, true, false, HULLFUNCS);
+    testGenericRefinery("alm", 40,  0,  0,  0,  40, 61, OLDPHOST, true, false, HULLFUNCS);
 
-    ::testAriesRefinery("alt", 40,  0,  0,  0,  40, 61, THOST, true, false);
-    ::testAriesRefinery("ald", 40,  0,  0,  0,  40, 61, THOST, true, false);
-    ::testAriesRefinery("alm", 40,  0,  0,  0,  40, 61, THOST, true, false);
+    testGenericRefinery("alt", 40,  0,  0,  0,  40, 61, THOST, true, false, HULLFUNCS);
+    testGenericRefinery("ald", 40,  0,  0,  0,  40, 61, THOST, true, false, HULLFUNCS);
+    testGenericRefinery("alm", 40,  0,  0,  0,  40, 61, THOST, true, false, HULLFUNCS);
 
     // naX
-    ::testAriesRefinery("nat", 40, 10,  0,  0,  40, 51, PHOST, true,  true);
-    ::testAriesRefinery("nad", 40,  0, 20,  0,  40, 41, PHOST, true,  true);
-    ::testAriesRefinery("nam", 40,  0,  0, 30,  40, 31, PHOST, true,  true);
+    testGenericRefinery("nat", 40, 10,  0,  0,  40, 51, PHOST, true,  true, HULLFUNCS);
+    testGenericRefinery("nad", 40,  0, 20,  0,  40, 41, PHOST, true,  true, HULLFUNCS);
+    testGenericRefinery("nam", 40,  0,  0, 30,  40, 31, PHOST, true,  true, HULLFUNCS);
 
-    ::testAriesRefinery("nat", 40,  0,  0,  0,  40, 61, OLDPHOST, true, false);
-    ::testAriesRefinery("nad", 40,  0,  0,  0,  40, 61, OLDPHOST, true, false);
-    ::testAriesRefinery("nam", 40,  0,  0,  0,  40, 61, OLDPHOST, true, false);
+    testGenericRefinery("nat", 40,  0,  0,  0,  40, 61, OLDPHOST, true, false, HULLFUNCS);
+    testGenericRefinery("nad", 40,  0,  0,  0,  40, 61, OLDPHOST, true, false, HULLFUNCS);
+    testGenericRefinery("nam", 40,  0,  0,  0,  40, 61, OLDPHOST, true, false, HULLFUNCS);
 
-    ::testAriesRefinery("nat", 40,  0,  0,  0,  40, 61, THOST, true, false);
-    ::testAriesRefinery("nad", 40,  0,  0,  0,  40, 61, THOST, true, false);
-    ::testAriesRefinery("nam", 40,  0,  0,  0,  40, 61, THOST, true, false);
+    testGenericRefinery("nat", 40,  0,  0,  0,  40, 61, THOST, true, false, HULLFUNCS);
+    testGenericRefinery("nad", 40,  0,  0,  0,  40, 61, THOST, true, false, HULLFUNCS);
+    testGenericRefinery("nam", 40,  0,  0,  0,  40, 61, THOST, true, false, HULLFUNCS);
+}
+
+/** Test multiple cases of 4:1 combined refinery. */
+void
+TestGameMapShipPredictor::testCombinedRefinery41()
+{
+    // No need to do THost tests; THost does not have this kind of ships
+    const HostVersion OLDPHOST = HostVersion(HostVersion::PHost, MKVERSION(4,0,5));
+    const HostVersion PHOST    = HostVersion(HostVersion::PHost, MKVERSION(4,1,5));
+
+    static const int HULLFUNCS[] = { game::spec::BasicHullFunction::NeutronicRefinery,
+                                     game::spec::BasicHullFunction::MerlinAlchemy };
+
+    TS_ASSERT(PHOST.hasAlchemyCombinations());
+    TS_ASSERT(!OLDPHOST.hasAlchemyCombinations());
+
+    // Normal
+    testGenericRefinery("xyz", 900,  10,  20,  30,   0, 226, PHOST,    true,  false, HULLFUNCS);
+    testGenericRefinery("xyz", 900, 110, 120, 130,   0,   1, OLDPHOST, true,  false, HULLFUNCS);
+
+    // NAL
+    testGenericRefinery("NAL", 900, 10, 20, 30, 900,  1, PHOST,    false, true, HULLFUNCS);
+    testGenericRefinery("NAL", 900, 10, 20, 30, 900,  1, OLDPHOST, false, true, HULLFUNCS);
+
+    // alX, naX has no effect for new PHost
+    testGenericRefinery("alt", 900,  10,  20,  30,   0, 226, PHOST,    true,  false, HULLFUNCS);
+    testGenericRefinery("alt", 900, 310,  20,  30,   0,   1, OLDPHOST, true,  true,  HULLFUNCS);
+    testGenericRefinery("nat", 900,  10,  20,  30,   0, 226, PHOST,    true,  false, HULLFUNCS);
+    testGenericRefinery("nat", 900,  10, 170, 180,   0,   1, OLDPHOST, true,  true,  HULLFUNCS);
+}
+
+/** Test multiple cases of 3:1 combined refinery. */
+void
+TestGameMapShipPredictor::testCombinedRefinery31()
+{
+    // No need to do THost tests; THost does not have this kind of ships
+    const HostVersion OLDPHOST = HostVersion(HostVersion::PHost, MKVERSION(4,0,5));
+    const HostVersion PHOST    = HostVersion(HostVersion::PHost, MKVERSION(4,1,5));
+
+    static const int HULLFUNCS[] = { game::spec::BasicHullFunction::AriesRefinery,
+                                     game::spec::BasicHullFunction::MerlinAlchemy };
+
+    TS_ASSERT(PHOST.hasAlchemyCombinations());
+    TS_ASSERT(!OLDPHOST.hasAlchemyCombinations());
+
+    // Normal
+    testGenericRefinery("xyz", 900,  10,  20,  30,   0, 301, PHOST,    true,  false, HULLFUNCS);
+    testGenericRefinery("xyz", 900, 110, 120, 130,   0,   1, OLDPHOST, true,  false, HULLFUNCS);
+
+    // NAL
+    testGenericRefinery("NAL", 900, 10, 20, 30, 900,  1, PHOST,    false, true, HULLFUNCS);
+    testGenericRefinery("NAL", 900, 10, 20, 30, 900,  1, OLDPHOST, false, true, HULLFUNCS);
+
+    // alX, naX has no effect for new PHost
+    testGenericRefinery("alt", 900,  10,  20,  30,   0, 301, PHOST,    true,  false, HULLFUNCS);
+    testGenericRefinery("alt", 900, 310,  20,  30,   0,   1, OLDPHOST, true,  true,  HULLFUNCS);
+    testGenericRefinery("nat", 900,  10,  20,  30,   0, 301, PHOST,    true,  false, HULLFUNCS);
+    testGenericRefinery("nat", 900,  10, 170, 180,   0,   1, OLDPHOST, true,  true,  HULLFUNCS);
 }
 
 /** Test multiple cases of movement. */
@@ -596,6 +627,7 @@ TestGameMapShipPredictor::testMovement()
         TS_ASSERT(!p.isAtTurnLimit());
         TS_ASSERT(p.isAtWaypoint());
         TS_ASSERT_EQUALS(p.getMovementFuelUsed(), 41);
+        TS_ASSERT_EQUALS(p.getCloakFuelUsed(), 0);
         TS_ASSERT(!p.isHyperdriving());
     }
 
@@ -686,6 +718,47 @@ TestGameMapShipPredictor::testMovement()
         TS_ASSERT_EQUALS(p.getCargo(Element::Neutronium), 10);
         TS_ASSERT_EQUALS(p.getWarpFactor(), 0);
         TS_ASSERT_EQUALS(p.getUsedProperties().contains(ShipPredictor::UsedMission), true);
+        TS_ASSERT(!p.isHyperdriving());
+    }
+
+    // Cloak
+    {
+        TestHarness t;
+        Ship& s = addEmerald(t, SHIP_ID);
+        s.setCargo(Element::Neutronium, 100);
+        s.setWaypoint(Point(X + 15, Y));
+        s.setWarpFactor(9);
+        s.addShipSpecialFunction(t.shipList.modifiedHullFunctions().getFunctionIdFromHostId(BasicHullFunction::Cloak));
+        s.setMission(game::spec::Mission::msn_Cloak, 0, 0);
+        t.config[HostConfiguration::CloakFuelBurn].set(5);
+
+        ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+        p.computeMovement();
+
+        TS_ASSERT(!p.isAtTurnLimit());
+        TS_ASSERT(p.isAtWaypoint());
+        TS_ASSERT_EQUALS(p.getMovementFuelUsed(), 40);
+        TS_ASSERT_EQUALS(p.getCloakFuelUsed(), 10);
+        TS_ASSERT(!p.isHyperdriving());
+    }
+
+    // Gravitonic
+    {
+        TestHarness t;
+        Ship& s = addEmerald(t, SHIP_ID);
+        s.setCargo(Element::Neutronium, 480);
+        s.addShipSpecialFunction(t.shipList.modifiedHullFunctions().getFunctionIdFromHostId(BasicHullFunction::Gravitonic));
+        s.setWaypoint(Point(X + 150, Y));
+        s.setWarpFactor(9);
+
+        ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+        p.computeMovement();
+
+        TS_ASSERT(!p.isAtTurnLimit());
+        TS_ASSERT(p.isAtWaypoint());
+        TS_ASSERT_EQUALS(p.getNumTurns(), 1);
+        TS_ASSERT_EQUALS(p.getMovementFuelUsed(), 462);
+        TS_ASSERT_EQUALS(p.getCloakFuelUsed(), 0);
         TS_ASSERT(!p.isHyperdriving());
     }
 }

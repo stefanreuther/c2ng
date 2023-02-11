@@ -12,11 +12,14 @@
 namespace game { namespace map {
 
     /** Any ships type.
-        Contains all current ships. */
+        Contains all current (visible) ships. */
     class AnyShipType : public ObjectVectorType<Ship> {
      public:
-        AnyShipType(ObjectVector<Ship>& vec);
+        /** Constructor.
+            @param vec Ship vector */
+        explicit AnyShipType(ObjectVector<Ship>& vec);
 
+        // ObjectVectorType:
         virtual bool isValid(const Ship& p) const;
     };
 

@@ -1,12 +1,13 @@
 /**
   *  \file game/map/viewport.cpp
+  *  \brief Class game::map::Viewport
   */
 
 #include "game/map/viewport.hpp"
 #include "game/map/universe.hpp"
 #include "util/math.hpp"
 
-game::map::Viewport::Viewport(Universe& univ, int turnNumber, TeamSettings& teams,
+game::map::Viewport::Viewport(Universe& univ, int turnNumber, const TeamSettings& teams,
                               game::interface::LabelExtra* labels,
                               const UnitScoreDefinitionList& shipScoreDefinitions,
                               const game::spec::ShipList& shipList,
@@ -46,7 +47,7 @@ game::map::Viewport::universe() const
     return m_universe;
 }
 
-game::TeamSettings&
+const game::TeamSettings&
 game::map::Viewport::teamSettings() const
 {
     return m_teamSettings;
@@ -104,6 +105,18 @@ game::map::Viewport::setRange(Point min, Point max)
     }
 }
 
+game::map::Point
+game::map::Viewport::getMin() const
+{
+    return m_min;
+}
+
+game::map::Point
+game::map::Viewport::getMax() const
+{
+    return m_max;
+}
+
 void
 game::map::Viewport::setOption(Option opt, bool enable)
 {
@@ -127,18 +140,6 @@ game::map::Viewport::setOptions(Options_t opts)
         m_options = opts;
         onChange();
     }
-}
-
-game::map::Point
-game::map::Viewport::getMin() const
-{
-    return m_min;
-}
-
-game::map::Point
-game::map::Viewport::getMax() const
-{
-    return m_max;
 }
 
 bool

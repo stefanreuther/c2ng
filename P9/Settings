@@ -1746,7 +1746,16 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_map_minefieldformula.cpp u/t_game_test_root.cpp \
+FILES_testsuite = u/t_game_map_renderer.cpp u/t_game_map_shiputils.cpp \
+    u/t_game_map_simpleobjectcursor.cpp u/t_game_map_shiphistorydata.cpp \
+    u/t_game_map_playedbasetype.cpp u/t_game_map_rendererlistener.cpp \
+    u/t_game_map_planetdata.cpp u/t_game_map_objectvectortype.cpp \
+    u/t_game_map_objectvector.cpp u/t_game_map_ionstormtype.cpp \
+    u/t_game_map_fleettype.cpp u/t_game_map_fleet.cpp \
+    u/t_game_map_playedshiptype.cpp u/t_game_map_anyshiptype.cpp \
+    u/t_game_map_playedplanettype.cpp u/t_game_map_anyplanettype.cpp \
+    u/t_game_map_basedata.cpp u/t_game_map_cursors.cpp \
+    u/t_game_map_minefieldformula.cpp u/t_game_test_root.cpp \
     u/t_gfx_threed_context.cpp u/t_game_vcr_flak_definitions.cpp \
     u/t_game_parser_informationconsumer.cpp u/t_game_proxy_waitindicator.cpp \
     u/t_game_proxy_exportadaptor.cpp u/t_client_applicationparameters.cpp \

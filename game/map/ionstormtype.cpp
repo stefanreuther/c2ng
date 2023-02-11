@@ -1,5 +1,6 @@
 /**
   *  \file game/map/ionstormtype.cpp
+  *  \brief Class game::map::IonStormType
   */
 
 #include "game/map/ionstormtype.hpp"

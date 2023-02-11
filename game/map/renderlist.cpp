@@ -1,5 +1,6 @@
 /**
   *  \file game/map/renderlist.cpp
+  *  \brief Class game::map::RenderList
   */
 
 #include "game/map/renderlist.hpp"
@@ -230,19 +231,6 @@ game::map::RenderList::drawWarpWellEdge(Point a, Edge e)
 }
 
 void
-game::map::RenderList::addInstruction(Instruction ins)
-{
-    StringInstructionList::addInstruction(static_cast<Instruction_t>(ins));
-}
-
-void
-game::map::RenderList::addPointParameter(Point pt)
-{
-    addParameter(pt.getX());
-    addParameter(pt.getY());
-}
-
-void
 game::map::RenderList::replay(RendererListener& listener) const
 {
     Iterator it(read());
@@ -428,6 +416,19 @@ game::map::RenderList::replay(RendererListener& listener) const
          }
         }
     }
+}
+
+void
+game::map::RenderList::addInstruction(Instruction ins)
+{
+    StringInstructionList::addInstruction(static_cast<Instruction_t>(ins));
+}
+
+void
+game::map::RenderList::addPointParameter(Point pt)
+{
+    addParameter(pt.getX());
+    addParameter(pt.getY());
 }
 
 game::map::RenderList::Iterator

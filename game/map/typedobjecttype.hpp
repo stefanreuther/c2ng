@@ -15,6 +15,7 @@ namespace game { namespace map {
         \tparam T contained object type, must be derived from game::map::Object */
     template<typename T>
     class TypedObjectType : public ObjectType {
+     public:
         /** Get object, given an index.
             \param index Index
             \return Object or null */

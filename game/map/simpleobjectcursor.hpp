@@ -1,11 +1,12 @@
 /**
   *  \file game/map/simpleobjectcursor.hpp
+  *  \brief Class game::map::SimpleObjectCursor
   */
 #ifndef C2NG_GAME_MAP_SIMPLEOBJECTCURSOR_HPP
 #define C2NG_GAME_MAP_SIMPLEOBJECTCURSOR_HPP
 
-#include "game/map/objectcursor.hpp"
 #include "afl/base/signalconnection.hpp"
+#include "game/map/objectcursor.hpp"
 
 namespace game { namespace map {
 
@@ -21,14 +22,25 @@ namespace game { namespace map {
         When not pointing at one, it correctly reports no object selected. */
     class SimpleObjectCursor : public ObjectCursor {
      public:
+        /** Default constructor.
+            Starts with no underlying ObjectType. */
         SimpleObjectCursor();
+
+        /** Copy constructor.
+            Copies the ObjectType and selected index from the other cursor.
+            @param other Cursor to copy from */
         SimpleObjectCursor(const ObjectCursor& other);
+
+        /** Destructor. */
         ~SimpleObjectCursor();
 
+        // ObjectCursor:
         virtual ObjectType* getObjectType() const;
         virtual void setCurrentIndex(Id_t index);
         virtual Id_t getCurrentIndex() const;
 
+        /** Set underlying object type.
+            @param type Type; must live longer than the SimpleObjectCursor; can be null */
         void setObjectType(ObjectType* type);
 
      private:

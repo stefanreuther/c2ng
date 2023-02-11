@@ -13,18 +13,31 @@
 
 namespace game { namespace map {
 
+    /** ObjectType implementation for objects stored in an ObjectVector.
+        Derived classes must implement isValid() to determine whether the given object should be included in the presented set. */
     template<typename T>
     class ObjectVectorType : public TypedObjectType<T> {
      public:
-        ObjectVectorType(ObjectVector<T>& vec);
+        /** Constructor.
+            @param vec ObjectVector instance. Must live longer than the ObjectVectorType. */
+        explicit ObjectVectorType(ObjectVector<T>& vec);
+
+        /** Destructor. */
         ~ObjectVectorType();
 
+        // ObjectType:
         virtual T* getObjectByIndex(Id_t index);
         virtual int getNextIndex(Id_t index) const;
         virtual int getPreviousIndex(Id_t index) const;
 
+        /** Check whether object should be included in set.
+            @param obj Object
+            @return status */
         virtual bool isValid(const T& obj) const = 0;
 
+        /** Get object by index, const version.
+            @param index Index
+            @return Object; null if index does not correspond to a valid object */
         const T* getObjectByIndex(Id_t index) const;
 
      private:

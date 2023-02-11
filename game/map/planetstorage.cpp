@@ -1,5 +1,6 @@
 /**
   *  \file game/map/planetstorage.cpp
+  *  \brief Class game::map::PlanetStorage
   */
 
 #include "game/map/planetstorage.hpp"

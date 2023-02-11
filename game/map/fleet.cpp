@@ -1,5 +1,6 @@
 /**
   *  \file game/map/fleet.cpp
+  *  \brief Class game::map::Fleet
   */
 
 #include "game/map/fleet.hpp"
@@ -12,8 +13,8 @@
 #include "game/spec/mission.hpp"
 #include "game/spec/missionlist.hpp"
 
-using game::spec::Mission;
 using afl::string::Format;
+using game::spec::Mission;
 
 namespace {
     /** Manipulating: check whether fleet member is being towed. */

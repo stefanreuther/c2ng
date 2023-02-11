@@ -17,7 +17,7 @@ namespace game { namespace map {
      public:
         /** Constructor.
             @param vec Ships */
-        PlayedShipType(ObjectVector<Ship>& vec);
+        explicit PlayedShipType(ObjectVector<Ship>& vec);
 
         // ObjectVectorType:
         virtual bool isValid(const Ship& p) const;

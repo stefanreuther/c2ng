@@ -111,8 +111,18 @@ void
 TestGameMapRenderOptions::testKey()
 {
     TS_ASSERT(RenderOptions::getOptionFromKey(util::Key_F5).empty());
-    TS_ASSERT(RenderOptions::getOptionFromKey('m').contains(RenderOptions::ShowMinefields));
-    TS_ASSERT(RenderOptions::getOptionFromKey('u').contains(RenderOptions::ShowUfos));
     TS_ASSERT(RenderOptions::getOptionFromKey('a').contains(RenderOptions::ShowShipDots));
+    TS_ASSERT(RenderOptions::getOptionFromKey('b').contains(RenderOptions::ShowBorders));
+    TS_ASSERT(RenderOptions::getOptionFromKey('d').contains(RenderOptions::ShowLabels));
+    TS_ASSERT(RenderOptions::getOptionFromKey('i').contains(RenderOptions::ShowIonStorms));
+    TS_ASSERT(RenderOptions::getOptionFromKey('m').contains(RenderOptions::ShowMinefields));
+    TS_ASSERT(RenderOptions::getOptionFromKey('n').contains(RenderOptions::ShowMessages));
+    TS_ASSERT(RenderOptions::getOptionFromKey('p').contains(RenderOptions::ShowDrawings));
+    TS_ASSERT(RenderOptions::getOptionFromKey('s').contains(RenderOptions::ShowGrid));
+    TS_ASSERT(RenderOptions::getOptionFromKey('t').contains(RenderOptions::ShowSelection));
+    TS_ASSERT(RenderOptions::getOptionFromKey('u').contains(RenderOptions::ShowUfos));
+    TS_ASSERT(RenderOptions::getOptionFromKey('v').contains(RenderOptions::ShowTrails));
+    TS_ASSERT(RenderOptions::getOptionFromKey('w').contains(RenderOptions::ShowWarpWells));
+    TS_ASSERT(RenderOptions::getOptionFromKey('y').contains(RenderOptions::ShowMineDecay));
 }
 

@@ -1,5 +1,6 @@
 /**
   *  \file game/map/renderer.cpp
+  *  \brief Class game::map::Renderer
   */
 
 #include <cmath>
@@ -112,11 +113,8 @@ class game::map::Renderer::State {
 
 
 
-game::map::Renderer::Renderer(Viewport& viewport)
+game::map::Renderer::Renderer(const Viewport& viewport)
     : m_viewport(viewport)
-{ }
-
-game::map::Renderer::~Renderer()
 { }
 
 void
@@ -549,14 +547,19 @@ game::map::Renderer::renderShipExtras(const State& st) const
             if (flags != 0) {
                 const TeamSettings::Relation rel = m_viewport.teamSettings().getPlayerRelation(shipOwner);
                 for (int img = st.getFirstImage(); img >= 0; img = st.getNextImage(img)) {
-                    st.listener().drawShip(config.getSimplePointAlias(shipPosition, img), sh->getId(), rel, flags, String_t());
+                    const Point pt = config.getSimplePointAlias(shipPosition, img);
+                    if (m_viewport.containsCircle(pt, 10)) {
+                        st.listener().drawShip(pt, sh->getId(), rel, flags, String_t());
+                    }
                 }
 
                 // Special case for circular wrap
                 if (config.getMode() == Configuration::Circular) {
                     Point pt;
                     if (config.getPointAlias(shipPosition, pt, 1, true)) {
-                        st.listener().drawShip(pt, sh->getId(), rel, flags, String_t());
+                        if (m_viewport.containsCircle(pt, 10)) {
+                            st.listener().drawShip(pt, sh->getId(), rel, flags, String_t());
+                        }
                     }
                 }
             }
@@ -613,39 +616,41 @@ game::map::Renderer::renderShipTrail(const State& st, const Ship& sh, int shipOw
             && next != 0 && next->x.get(nextX) && next->y.get(nextY))
         {
             // Both positions known, so simply connect them
-            // FIXME: wrapping code from PCC1 is missing here
-//         IF ChartConf.Wrap=cmWrap THEN BEGIN
-//           sx := ScaleL(view, ChartConf.SizeX);
-//           sy := ScaleL(view, ChartConf.SizeY);
-//           IF nX+sx < XCor THEN Inc(nX, 2*sx) ELSE
-//           IF Xcor < nX-sx THEN Dec(nX, 2*sx);
+            // Must handle wrapping to show move across the seam correctly
+            const Point mePos(meX, meY);
+            const Point nextPos(nextX, nextY);
+            switch (config.getMode()) {
+             case Configuration::Flat:
+                st.drawShipTrail(mePos, nextPos, rel, RendererListener::TrailFromPosition | RendererListener::TrailToPosition, age);
+                break;
 
-//           IF nY+sy < YCor THEN Inc(nY, 2*sy) ELSE
-//           IF Ycor < nY-sy THEN Dec(nY, 2*sy);
-//         {$IFDEF CircularWrap}
-//         END ELSE IF ChartConf.Wrap=cmCircle THEN BEGIN
-//           { check whether we wrapped this turn }
-//           sx := psh^.locs[slot+1].X - psh^.locs[slot].X;
-//           sy := psh^.locs[slot+1].Y - psh^.locs[slot].Y;
-//           IF Sqr(LONGINT(sx)) + Sqr(LONGINT(sy)) >= Sqr(LONGINT(ChartConf.SizeX)) THEN BEGIN
-//             { yes, we wrapped.
-//               Draw two lines: one from the previous location to the
-//               current point outside, one from the previous outside
-//               point to the current location }
-//             sx := psh^.locs[slot].X;
-//             sy := psh^.locs[slot].Y;
-//             qx := psh^.locs[slot+1].X;
-//             qy := psh^.locs[slot+1].Y;
-//             IF CircularMoveOutside(sx, sy, TRUE) AND CircularMoveOutside(qx, qy, TRUE) THEN BEGIN
-//               MLineTo(view.x0 + ScaleL(view, qx), view.y0 - ScaleL(view, qy));
-//               MoveTo(view.x0 + ScaleL(view, sx), view.y0 - ScaleL(view, sy));
-//             END;
-//           END;
-//         {$ENDIF}
-            Point mePos(meX, meY);
-            Point nextPos(nextX, nextY);
-            for (int img = st.getFirstImage(); img >= 0; img = st.getNextImage(img)) {
-                st.drawShipTrail(config.getSimplePointAlias(mePos, img), config.getSimplePointAlias(nextPos, img), rel, RendererListener::TrailFromPosition | RendererListener::TrailToPosition, age);
+             case Configuration::Wrapped: {
+                const Point adjNextPos = config.getSimpleNearestAlias(nextPos, mePos);
+                for (int img = st.getFirstImage(); img >= 0; img = st.getNextImage(img)) {
+                    st.drawShipTrail(config.getSimplePointAlias(mePos, img), config.getSimplePointAlias(adjNextPos, img), rel, RendererListener::TrailFromPosition | RendererListener::TrailToPosition, age);
+                }
+                break;
+             }
+
+             case Configuration::Circular:
+                // Check for wrap.
+                // Assume wrap if we moved more than diameter/2 this turn.
+                if (4*mePos.getSquaredRawDistance(nextPos) >= util::squareInteger(config.getSize().getX())) {
+                    // We wrapped this turn.
+                    // Draw two lines, one from the previous point to here (outside),
+                    // one from the previous (outside) to here.
+                    Point out;
+                    if (config.getPointAlias(mePos, out, 1, false)) {
+                        st.drawShipTrail(out, nextPos, rel, RendererListener::TrailFromPosition | RendererListener::TrailToPosition, age);
+                    }
+                    if (config.getPointAlias(nextPos, out, 1, false)) {
+                        st.drawShipTrail(mePos, out, rel, RendererListener::TrailFromPosition | RendererListener::TrailToPosition, age);
+                    }
+                } else {
+                    // We remain inside
+                    st.drawShipTrail(mePos, nextPos, rel, RendererListener::TrailFromPosition | RendererListener::TrailToPosition, age);
+                }
+                break;
             }
         } else if (me != 0 && me->x.get(meX) && me->y.get(meY) && me->heading.get(heading) && me->speed.get(speed)) {
             // This position and heading known, so draw a line leaving here
@@ -906,7 +911,8 @@ game::map::Renderer::renderShips(const State& st) const
                 }
 
                 for (int img = st.getFirstImage(); img >= 0; img = st.getNextImage(img)) {
-                    renderShip(st, *s, shipPosition, shipOwner, atPlanet, label);
+                    const Point imgPos = config.getSimplePointAlias(shipPosition, img);
+                    renderShip(st, *s, imgPos, shipOwner, atPlanet, label);
                 }
                 if (config.getMode() == Configuration::Circular) {
                     Point imgPos;
@@ -938,7 +944,10 @@ game::map::Renderer::renderShip(const State& st, const Ship& ship, Point shipPos
     if ((flag != 0 && m_viewport.containsCircle(shipPosition, 1))
         || (m_viewport.containsText(shipPosition, label)))
     {
-        st.listener().drawShip(shipPosition, ship.getId(), rel, flag | RendererListener::risAtPlanet, label);
+        if (atPlanet) {
+            flag |= RendererListener::risAtPlanet;
+        }
+        st.listener().drawShip(shipPosition, ship.getId(), rel, flag, label);
     }
 }
 

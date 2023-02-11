@@ -12,11 +12,14 @@
 namespace game { namespace map {
 
     /** Played planets type.
-        Contains all planets. */
+        Contains all visible planets. */
     class AnyPlanetType : public ObjectVectorType<Planet> {
      public:
-        AnyPlanetType(ObjectVector<Planet>& vec);
+        /** Constructor.
+            @param vec Planet vector */
+        explicit AnyPlanetType(ObjectVector<Planet>& vec);
 
+        // ObjectVectorType:
         virtual bool isValid(const Planet& p) const;
     };
 

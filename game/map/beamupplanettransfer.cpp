@@ -1,5 +1,6 @@
 /**
   *  \file game/map/beamupplanettransfer.cpp
+  *  \brief Class game::map::BeamUpPlanetTransfer
   */
 
 #include "game/map/beamupplanettransfer.hpp"
@@ -12,13 +13,12 @@ game::map::BeamUpPlanetTransfer::BeamUpPlanetTransfer(Planet& pl,
                                                       Turn& turn,
                                                       const game::config::HostConfiguration& config)
     : m_planet(pl),
-      m_turn(turn),
       m_config(config),
       m_amount()
 {
     // ex GPlanetBumTransfer::GPlanetBumTransfer
     /* No need to verify (mustBePlayed) the ship; we don't access it.
-       It will be verified by the other half (GShipBumTransfer). */
+       It will be verified by the other half (BeamUpShipTransfer). */
     parseBeamUpCommand(m_amount, turn, sh, +1);
 }
 

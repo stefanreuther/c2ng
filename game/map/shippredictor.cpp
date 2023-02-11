@@ -891,7 +891,7 @@ game::map::ShipPredictor::computeTurn()
         m_ship.warpFactor = 0;
         normalizePosition(m_ship, m_mapConfig);
         // FIXME: IF pconf<>NIL THEN s.FC := '???';
-        // // FIXME: gravity wells?
+        // FIXME: gravity wells?
     } else if (dist2 > 0 && m_ship.warpFactor.orElse(0) > 0) {
         // Normal movement
         // First, compute new position in mx,my
