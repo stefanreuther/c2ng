@@ -475,7 +475,7 @@ game::map::Planet::internalCheck(const Configuration& config, PlayerSet_t availa
         }
     } else if (!m_planetSource.empty()) {
         m_planetKind = CurrentPlanet;
-    } else if (isUsed(m_currentPlanetData)) {
+    } else if (isUsed(m_currentPlanetData) || m_isPlanetKnownToHaveNatives) {
         m_planetKind = KnownPlanet;
     } else {
         m_planetKind = UnknownPlanet;

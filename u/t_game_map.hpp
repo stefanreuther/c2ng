@@ -380,6 +380,7 @@ class TestGameMapPlanet : public CxxTest::TestSuite {
  public:
     void testAutobuildSettings();
     void testCopy();
+    void testKnownToHaveNatives();
 };
 
 class TestGameMapPlanetData : public CxxTest::TestSuite {
