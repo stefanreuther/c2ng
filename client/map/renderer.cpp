@@ -276,7 +276,7 @@ class client::map::Renderer::Listener : public game::map::RendererListener {
                 planetDotted = false;
             } else if ((flags & ripUnowned) != 0) {
                 planetRingColor = ui::Color_BlueBlack;
-                planetDotted = false;
+                planetDotted = true;
             } else {
                 planetRingColor = 0;
                 planetDotted = false;
@@ -293,7 +293,7 @@ class client::map::Renderer::Listener : public game::map::RendererListener {
 
             // Draw planet ring
             int textIncrement = 1;   // ex incy
-            int r = std::min(m_parent.scale(SCRingRadius), m_parent.scale(SCMaxRingRadius));
+            int r = std::min(m_parent.scale(SCRingRadius), SCMaxRingRadius);
             if (shipRingColor == 0 && r == 0) {
                 // In small zoom levels, the radius comes out as 0, meaning no planet ring.
                 // If we don't have a ship ring that highlights the planet, force the planet ring to be visible.
