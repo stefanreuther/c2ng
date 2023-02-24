@@ -183,20 +183,20 @@ game::map::Location::browse(BrowseFlags_t flags)
     }
 
     // Get associated object type
-    std::auto_ptr<ObjectType> ty;
+    ObjectType* ty = 0;
     if (const Ship* sh = dynamic_cast<const Ship*>(obj)) {
         // Iterate through all ships or player ships
         if (sh->isPlayable(Object::ReadOnly) && flags.contains(PlayedOnly)) {
-            ty.reset(new PlayedShipType(m_pUniverse->ships()));
+            ty = &m_pUniverse->playedShips();
         } else {
-            ty.reset(new AnyShipType(m_pUniverse->ships()));
+            ty = &m_pUniverse->allShips();
         }
     } else if (const Planet* pl = dynamic_cast<const Planet*>(obj)) {
         // Iterate through all planets or player planets
         if (pl->isPlayable(Object::ReadOnly) && flags.contains(PlayedOnly)) {
-            ty.reset(new PlayedPlanetType(m_pUniverse->planets()));
+            ty = &m_pUniverse->playedPlanets();
         } else {
-            ty.reset(new AnyPlanetType(m_pUniverse->planets()));
+            ty = &m_pUniverse->allPlanets();
         }
     } else {
         // Not known
@@ -204,7 +204,7 @@ game::map::Location::browse(BrowseFlags_t flags)
     }
 
     // Get next object
-    if (ty.get() != 0) {
+    if (ty != 0) {
         Id_t next = (flags.contains(Backwards)
                      ? ty->findPreviousIndexWrap(obj->getId(), flags.contains(MarkedOnly))
                      : ty->findNextIndexWrap    (obj->getId(), flags.contains(MarkedOnly)));
