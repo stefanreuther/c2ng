@@ -46,7 +46,7 @@ TestGameDbPacker::testUfo()
     TS_ASSERT_EQUALS(p->getPosition().get(pt), true);
     TS_ASSERT_EQUALS(pt.getX(), 1176);
     TS_ASSERT_EQUALS(pt.getY(), 1369);
-    TS_ASSERT_EQUALS(p->getSpeed().orElse(-1), 0);
+    TS_ASSERT_EQUALS(p->getWarpFactor().orElse(-1), 0);
     TS_ASSERT_EQUALS(p->getHeading().isValid(), false);
     TS_ASSERT_EQUALS(p->getPlanetRange().orElse(-1), 295);
     TS_ASSERT_EQUALS(p->getShipRange().orElse(-1), 295);

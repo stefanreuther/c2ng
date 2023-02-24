@@ -144,7 +144,7 @@ game::map::IonStorm::setVoltage(int voltage)
 }
 
 void
-game::map::IonStorm::setSpeed(int speed)
+game::map::IonStorm::setWarpFactor(int speed)
 {
     m_speed = speed;
 }
@@ -192,7 +192,7 @@ game::map::IonStorm::getHeading() const
 }
 
 game::IntegerProperty_t
-game::map::IonStorm::getSpeed() const
+game::map::IonStorm::getWarpFactor() const
 {
     // ex GIonStorm::getSpeed
     return m_speed;
@@ -242,8 +242,8 @@ game::map::IonStorm::addMessageInformation(const game::parser::MessageInformatio
 
                 // Try to set movement vector
                 int speed, heading;
-                if (info.getValue(gp::mi_Speed, speed) && info.getValue(gp::mi_Heading, heading)) {
-                    setSpeed(speed);
+                if (info.getValue(gp::mi_WarpFactor, speed) && info.getValue(gp::mi_Heading, heading)) {
+                    setWarpFactor(speed);
                     setHeading(heading);
                 }
 

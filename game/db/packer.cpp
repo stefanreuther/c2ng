@@ -48,7 +48,7 @@ game::db::Packer::addUfo(Turn& turn, const structures::Ufo& ufo)
     // FIXME: do we need to deal with -1 values here?
     info.addValue(gp::mi_Color,          ufo.ufo.color);
     info.addValue(gp::mi_UfoRealId,      ufo.realId);
-    info.addValue(gp::mi_Speed,          ufo.ufo.warpFactor);
+    info.addValue(gp::mi_WarpFactor,     ufo.ufo.warpFactor);
     if (ufo.ufo.heading >= 0) {
         info.addValue(gp::mi_Heading,    ufo.ufo.heading);
     }
@@ -237,11 +237,11 @@ game::db::Packer::addShipTrack(Turn& turn, int id, int turnNr, const structures:
 
     // Create it
     gp::MessageInformation info(gp::MessageInformation::Ship, id, turnNr);
-    addValueMaybe(info, gp::mi_X,        entry.x,       -1);
-    addValueMaybe(info, gp::mi_Y,        entry.y,       -1);
-    addValueMaybe(info, gp::mi_Speed,    entry.speed,   -1);
-    addValueMaybe(info, gp::mi_Heading,  entry.heading, -1);
-    addValueMaybe(info, gp::mi_Mass,     entry.mass,    -1);
+    addValueMaybe(info, gp::mi_X,          entry.x,       -1);
+    addValueMaybe(info, gp::mi_Y,          entry.y,       -1);
+    addValueMaybe(info, gp::mi_WarpFactor, entry.speed,   -1);
+    addValueMaybe(info, gp::mi_Heading,    entry.heading, -1);
+    addValueMaybe(info, gp::mi_Mass,       entry.mass,    -1);
 
     // Note that player set needs to be empty to create ship-track records
     sh->addMessageInformation(info, PlayerSet_t());
@@ -263,7 +263,7 @@ game::db::Packer::packUfo(structures::Ufo& out, const game::map::Ufo& in)
     out.ufo.info2       = m_charset.encode(afl::string::toMemory(in.getInfo2()));
     out.ufo.x           = static_cast<int16_t>(pos.getX());
     out.ufo.y           = static_cast<int16_t>(pos.getY());
-    out.ufo.warpFactor  = static_cast<int16_t>(in.getSpeed().orElse(-1));
+    out.ufo.warpFactor  = static_cast<int16_t>(in.getWarpFactor().orElse(-1));
     out.ufo.heading     = static_cast<int16_t>(in.getHeading().orElse(-1));
     out.ufo.planetRange = static_cast<int16_t>(in.getPlanetRange().orElse(-1));
     out.ufo.shipRange   = static_cast<int16_t>(in.getShipRange().orElse(-1));

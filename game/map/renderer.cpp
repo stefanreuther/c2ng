@@ -336,7 +336,7 @@ game::map::Renderer::renderUfos(const State& st) const
                     // Draw the Ufo
                     Point imgCenter = config.getSimplePointAlias(center, img);
                     if (m_viewport.containsCircle(imgCenter, radius)) {
-                        st.listener().drawUfo(imgCenter, i, radius, ufo->getColorCode(), ufo->getSpeed().orElse(-1), ufo->getHeading().orElse(-1), m_viewport.hasOption(Viewport::FillUfos));
+                        st.listener().drawUfo(imgCenter, i, radius, ufo->getColorCode(), ufo->getWarpFactor().orElse(-1), ufo->getHeading().orElse(-1), m_viewport.hasOption(Viewport::FillUfos));
                     }
 
                     // Draw connection to other end
@@ -368,7 +368,7 @@ game::map::Renderer::renderIonStorms(const State& st) const
                 for (int img = st.getFirstImage(); img >= 0; img = st.getNextImage(img)) {
                     Point imgCenter = config.getSimplePointAlias(center, img);
                     if (m_viewport.containsCircle(imgCenter, radius)) {
-                        st.listener().drawIonStorm(imgCenter, radius, ion->getVoltage().orElse(0), ion->getSpeed().orElse(0), ion->getHeading().orElse(-1), m_viewport.hasOption(Viewport::FillIonStorms));
+                        st.listener().drawIonStorm(imgCenter, radius, ion->getVoltage().orElse(0), ion->getWarpFactor().orElse(0), ion->getHeading().orElse(-1), m_viewport.hasOption(Viewport::FillIonStorms));
                     }
                 }
             }

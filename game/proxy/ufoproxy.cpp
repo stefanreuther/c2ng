@@ -98,7 +98,7 @@ game::proxy::UfoProxy::Trampoline::buildUfoInfo(UfoInfo& out) const
 
         // Speed
         int speed;
-        if (p->getSpeed().get(speed)) {
+        if (p->getWarpFactor().get(speed)) {
             if (speed == 0) {
                 out.text[Speed] = tx("not moving");
             } else {

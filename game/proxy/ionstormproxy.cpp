@@ -95,7 +95,7 @@ game::proxy::IonStormProxy::Trampoline::buildIonStormInfo(IonStormInfo& out) con
 
         // Speed
         int speed;
-        if (st->getSpeed().get(speed)) {
+        if (st->getWarpFactor().get(speed)) {
             out.text[Speed] = Format(tx("warp %d"), fmt.formatNumber(speed));
             out.speed = speed;
         } else {

@@ -86,7 +86,7 @@ namespace {
         { "RADIUS",            game::parser::mi_Radius                  },
         { "REASON",            game::parser::mi_MineScanReason          }, // SCANNED in the scripting language
         { "SHAPE",             game::parser::mi_DrawingShape            },
-        { "SPEED",             game::parser::mi_Speed                   },
+        { "SPEED",             game::parser::mi_WarpFactor              },
         { "STABILITY",         game::parser::mi_WormholeStabilityCode   }, // Not in scripting language
         { "STATUS",            game::parser::mi_IonStatus               },
         { "SUPPLIES",          game::parser::mi_PlanetSupplies          },
@@ -153,7 +153,7 @@ game::parser::getNameFromIndex(MessageIntegerIndex ii, afl::string::Translator& 
      case mi_Owner:             return tx("Owner");
      case mi_Damage:            return tx("Damage");
      case mi_Heading:           return tx("Heading");
-     case mi_Speed:             return tx("Speed");
+     case mi_WarpFactor:        return tx("Speed");
      case mi_Type:              return tx("Type");
      case mi_Mass:              return tx("Mass");
      case mi_Color:             return tx("Color");

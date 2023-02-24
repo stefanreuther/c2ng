@@ -482,7 +482,7 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
             info.addValue(gp::mi_Y,          report->y);
             info.addValue(gp::mi_IonVoltage, report->voltage);
             info.addValue(gp::mi_Heading,    report->heading);
-            info.addValue(gp::mi_Speed,      report->warpFactor);
+            info.addValue(gp::mi_WarpFactor, report->warpFactor);
             info.addValue(gp::mi_Radius,     report->radius);
             info.addValue(gp::mi_IonStatus,  report->growthFlag);
             // Ignore stormClass; we compute that internally
@@ -672,18 +672,18 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
         // General Object
         if (Eater<gt::Util33GO> report = data) {
             MessageInformation info(MessageInformation::Ufo, report->ufoId, getTurnNumber());
-            info.addValue(gp::mi_X,        report->x);
-            info.addValue(gp::mi_Y,        report->y);
-            info.addValue(gp::mi_Color,    report->color);
-            info.addValue(gp::mi_Radius,   report->radius);
-            info.addValue(gp::mi_Speed,    report->warpFactor);
+            info.addValue(gp::mi_X,          report->x);
+            info.addValue(gp::mi_Y,          report->y);
+            info.addValue(gp::mi_Color,      report->color);
+            info.addValue(gp::mi_Radius,     report->radius);
+            info.addValue(gp::mi_WarpFactor, report->warpFactor);
             if (report->heading >= 0) {
                 info.addValue(gp::mi_Heading, report->heading);
             }
-            info.addValue(gp::ms_Name,     m_charset.decode(report->name));
-            info.addValue(gp::ms_UfoInfo1, m_charset.decode(report->info1));
-            info.addValue(gp::ms_UfoInfo2, m_charset.decode(report->info2));
-            info.addValue(gp::mi_Type,     report->typeCode);
+            info.addValue(gp::ms_Name,       m_charset.decode(report->name));
+            info.addValue(gp::ms_UfoInfo1,   m_charset.decode(report->info1));
+            info.addValue(gp::ms_UfoInfo2,   m_charset.decode(report->info2));
+            info.addValue(gp::mi_Type,       report->typeCode);
 
             if (game::map::Ufo* pUfo = m_game.currentTurn().universe().ufos().addUfo(report->ufoId, report->typeCode, report->color)) {
                 pUfo->addMessageInformation(info);

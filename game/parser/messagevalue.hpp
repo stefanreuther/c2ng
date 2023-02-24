@@ -82,7 +82,7 @@ namespace game { namespace parser {
         mi_Owner,
         mi_Damage,
         mi_Heading,
-        mi_Speed,
+        mi_WarpFactor,
         mi_Type,                    // Mines, Ufos
         mi_Mass,
         mi_Color,                   // Ufos, drawings

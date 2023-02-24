@@ -363,7 +363,7 @@ game::map::UfoType::mergeWormhole(Ufo& ufo, int wormholeId, const Wormhole& data
         ufo.setInfo2(game::tables::WormholeStabilityName(tx)(stabilityCode));
     }
     ufo.setPosition(data.pos);
-    ufo.setSpeed(0);
+    ufo.setWarpFactor(0);
     ufo.setHeading(afl::base::Nothing);
 
     int range, radius;

@@ -43,7 +43,7 @@ namespace {
         st->setPosition(game::map::Point(x, y));
         st->setRadius(100);
         st->setVoltage(60);
-        st->setSpeed(4);
+        st->setWarpFactor(4);
         st->setHeading(135);
         st->setIsGrowing(true);
     }

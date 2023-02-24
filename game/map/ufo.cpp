@@ -118,14 +118,14 @@ game::map::Ufo::setColorCode(int n)
 }
 
 game::IntegerProperty_t
-game::map::Ufo::getSpeed() const
+game::map::Ufo::getWarpFactor() const
 {
     // ex GUfo::getSpeed
     return m_speed;
 }
 
 void
-game::map::Ufo::setSpeed(IntegerProperty_t speed)
+game::map::Ufo::setWarpFactor(IntegerProperty_t speed)
 {
     if (!speed.isSame(m_speed)) {
         m_speed = speed;
@@ -364,7 +364,7 @@ game::map::Ufo::addMessageInformation(const game::parser::MessageInformation& in
         }
 
         // Speed
-        if (info.getValue(gp::mi_Speed, iv)) {
+        if (info.getValue(gp::mi_WarpFactor, iv)) {
             m_speed = iv;
         }
 

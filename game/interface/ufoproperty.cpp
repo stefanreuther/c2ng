@@ -127,11 +127,11 @@ game::interface::getUfoProperty(const game::map::Ufo& ufo, UfoProperty iup,
      case iupSpeedInt:
         /* @q Speed$:Int (Ufo Property)
            Speed (warp factor). */
-        return makeOptionalIntegerValue(ufo.getSpeed());
+        return makeOptionalIntegerValue(ufo.getWarpFactor());
      case iupSpeedName:
         /* @q Speed:Str (Ufo Property)
            Speed, as human-readable string. */
-        if (ufo.getSpeed().get(r)) {
+        if (ufo.getWarpFactor().get(r)) {
             return makeStringValue(afl::string::Format(tx.translateString("Warp %d").c_str(), r));
         } else {
             return 0;

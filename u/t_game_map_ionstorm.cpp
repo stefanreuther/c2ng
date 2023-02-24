@@ -19,7 +19,7 @@ namespace {
         i.setPosition(game::map::Point(2001, 3014));
         i.setRadius(40);
         i.setVoltage(180);
-        i.setSpeed(6);
+        i.setWarpFactor(6);
         i.setHeading(225);
         i.setIsGrowing(true);
     }
@@ -49,7 +49,7 @@ TestGameMapIonStorm::testIt()
     TS_ASSERT_EQUALS(i.getClass().get(n), false);
     TS_ASSERT_EQUALS(i.getVoltage().get(n), false);
     TS_ASSERT_EQUALS(i.getHeading().get(n), false);
-    TS_ASSERT_EQUALS(i.getSpeed().get(n), false);
+    TS_ASSERT_EQUALS(i.getWarpFactor().get(n), false);
     TS_ASSERT(!i.isGrowing());
     TS_ASSERT(!i.isActive());
 
@@ -76,7 +76,7 @@ TestGameMapIonStorm::testIt()
     TS_ASSERT_EQUALS(n, 180);
     TS_ASSERT_EQUALS(i.getHeading().get(n), true);
     TS_ASSERT_EQUALS(n, 225);
-    TS_ASSERT_EQUALS(i.getSpeed().get(n), true);
+    TS_ASSERT_EQUALS(i.getWarpFactor().get(n), true);
     TS_ASSERT_EQUALS(n, 6);
     TS_ASSERT(i.isGrowing());
     TS_ASSERT(i.isActive());
@@ -128,7 +128,7 @@ TestGameMapIonStorm::testMessageInfoMin()
     TS_ASSERT_EQUALS(i.getClass().orElse(-1), 1);
     TS_ASSERT_EQUALS(i.getVoltage().orElse(-1), 20);
     TS_ASSERT_EQUALS(i.getHeading().orElse(-1), 225);
-    TS_ASSERT_EQUALS(i.getSpeed().orElse(-1), 6);
+    TS_ASSERT_EQUALS(i.getWarpFactor().orElse(-1), 6);
     TS_ASSERT_EQUALS(i.isGrowing(), false);
     TS_ASSERT_EQUALS(i.isActive(), true);
 }
@@ -153,7 +153,7 @@ TestGameMapIonStorm::testMessageInfoMax()
     info.addValue(gp::mi_Y, 2222);
     info.addValue(gp::mi_Radius, 33);
     info.addValue(gp::mi_Heading, 44);
-    info.addValue(gp::mi_Speed, 7);
+    info.addValue(gp::mi_WarpFactor, 7);
     info.addValue(gp::mi_IonStatus, 1);
     info.addValue(gp::ms_Name, "Wilma");
     i.addMessageInformation(info);
@@ -167,7 +167,7 @@ TestGameMapIonStorm::testMessageInfoMax()
     TS_ASSERT_EQUALS(i.getClass().orElse(-1), 1);
     TS_ASSERT_EQUALS(i.getVoltage().orElse(-1), 20);
     TS_ASSERT_EQUALS(i.getHeading().orElse(-1), 44);
-    TS_ASSERT_EQUALS(i.getSpeed().orElse(-1), 7);
+    TS_ASSERT_EQUALS(i.getWarpFactor().orElse(-1), 7);
     TS_ASSERT_EQUALS(i.isGrowing(), true);
     TS_ASSERT_EQUALS(i.isActive(), true);
 }
@@ -201,7 +201,7 @@ TestGameMapIonStorm::testMessageInfoMissing()
     TS_ASSERT_EQUALS(i.getClass().orElse(-1), 4);
     TS_ASSERT_EQUALS(i.getVoltage().orElse(-1), 180);
     TS_ASSERT_EQUALS(i.getHeading().orElse(-1), 225);
-    TS_ASSERT_EQUALS(i.getSpeed().orElse(-1), 6);
+    TS_ASSERT_EQUALS(i.getWarpFactor().orElse(-1), 6);
     TS_ASSERT_EQUALS(i.isGrowing(), true);
     TS_ASSERT_EQUALS(i.isActive(), true);
 }

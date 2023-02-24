@@ -93,7 +93,7 @@ class game::proxy::ShipSpeedProxy::Trampoline {
     const Status& getStatus() const
         { return m_status; }
 
-    void setSpeed(int n)
+    void setWarpFactor(int n)
         {
             // ex WShipSpeedSelector::widgetUpdated [sort-of]
             if (m_pTurn.get() != 0 && m_pShipList.get() != 0 && m_pRoot.get() != 0 && m_pShip != 0 && n >= 0 && n <= m_status.maxSpeed) {
@@ -166,7 +166,7 @@ game::proxy::ShipSpeedProxy::getStatus(WaitIndicator& link)
 }
 
 void
-game::proxy::ShipSpeedProxy::setSpeed(int n)
+game::proxy::ShipSpeedProxy::setWarpFactor(int n)
 {
-    m_trampoline.postRequest(&Trampoline::setSpeed, n);
+    m_trampoline.postRequest(&Trampoline::setWarpFactor, n);
 }

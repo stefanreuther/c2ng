@@ -344,7 +344,7 @@ TestGameParserMessageParser::testObjects()
         TS_ASSERT_EQUALS(getValue<game::parser::MessageIntegerValue_t>(*info[0], game::parser::mi_Y, "Y"), 2639);
         TS_ASSERT_EQUALS(getValue<game::parser::MessageIntegerValue_t>(*info[0], game::parser::mi_IonVoltage, "Voltage"), 105);
         TS_ASSERT_EQUALS(getValue<game::parser::MessageIntegerValue_t>(*info[0], game::parser::mi_Heading, "Heading"), 197);
-        TS_ASSERT_EQUALS(getValue<game::parser::MessageIntegerValue_t>(*info[0], game::parser::mi_Speed, "Speed"), 6);
+        TS_ASSERT_EQUALS(getValue<game::parser::MessageIntegerValue_t>(*info[0], game::parser::mi_WarpFactor, "Speed"), 6);
         TS_ASSERT_EQUALS(getValue<game::parser::MessageIntegerValue_t>(*info[0], game::parser::mi_Radius, "Money"), 167);
         TS_ASSERT_EQUALS(getValue<game::parser::MessageIntegerValue_t>(*info[0], game::parser::mi_IonStatus, "Status"), 1);
     }

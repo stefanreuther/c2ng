@@ -73,11 +73,11 @@ game::interface::getIonStormProperty(const game::map::IonStorm& ion, IonStormPro
      case iipSpeedInt:
         /* @q Speed$:Int (Storm Property)
            Ion storm speed (warp factor). */
-        return makeOptionalIntegerValue(ion.getSpeed());
+        return makeOptionalIntegerValue(ion.getWarpFactor());
      case iipSpeedName:
         /* @q Speed:Str (Storm Property)
            Ion storm speed, as human-readable string. */
-        if (ion.getSpeed().get(n)) {
+        if (ion.getWarpFactor().get(n)) {
             return makeStringValue(afl::string::Format("Warp %d", n));
         } else {
             return 0;

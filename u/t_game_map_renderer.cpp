@@ -542,7 +542,7 @@ TestGameMapRenderer::testUfoNormal()
     ufo->setRadius(30);
     ufo->setPosition(Point(1300, 1500));
     ufo->postprocess(TURN_NUMBER, env.mapConfig);
-    ufo->setSpeed(12);
+    ufo->setWarpFactor(12);
 
     // ...and ShowUfos enabled, FillUfos disabled...
     RenderEnvironment renv(env);
@@ -656,7 +656,7 @@ TestGameMapRenderer::testIonStormNormal()
     p->setRadius(30);
     p->setPosition(Point(1300, 1500));
     p->setVoltage(40);
-    p->setSpeed(6);
+    p->setWarpFactor(6);
     p->setHeading(120);
 
     // ...and ShowIonStorms enabled, FillIonStorms disabled...
@@ -678,7 +678,7 @@ TestGameMapRenderer::testIonStormFill()
     p->setRadius(30);
     p->setPosition(Point(1300, 1500));
     p->setVoltage(40);
-    p->setSpeed(6);
+    p->setWarpFactor(6);
     p->setHeading(120);
 
     // ...and ShowIonStorms/FillIonStorms enabled...
@@ -700,7 +700,7 @@ TestGameMapRenderer::testIonStormOff()
     p->setRadius(30);
     p->setPosition(Point(1300, 1500));
     p->setVoltage(40);
-    p->setSpeed(6);
+    p->setWarpFactor(6);
     p->setHeading(120);
 
     // ...and ShowIonStorms disabled...
@@ -721,7 +721,7 @@ TestGameMapRenderer::testIonStormWrap()
     p->setRadius(30);
     p->setPosition(Point(1800, 1700));
     p->setVoltage(40);
-    p->setSpeed(6);
+    p->setWarpFactor(6);
     p->setHeading(120);
     env.mapConfig.setConfiguration(Configuration::Wrapped, Point(2000, 2000), Point(1000, 1000));
 
@@ -992,7 +992,7 @@ TestGameMapRenderer::testShipVector()
     {
         MessageInformation info(MessageInformation::Ship, 10, TURN_NUMBER);
         info.addValue(game::parser::mi_Heading, 30);
-        info.addValue(game::parser::mi_Speed, 7);
+        info.addValue(game::parser::mi_WarpFactor, 7);
         sh.addMessageInformation(info, PlayerSet_t(4));
     }
 
@@ -1000,7 +1000,7 @@ TestGameMapRenderer::testShipVector()
     {
         MessageInformation info(MessageInformation::Ship, 10, TURN_NUMBER-1);
         info.addValue(game::parser::mi_Heading, 50);
-        info.addValue(game::parser::mi_Speed, 6);
+        info.addValue(game::parser::mi_WarpFactor, 6);
         info.addValue(game::parser::mi_X, 1750);
         info.addValue(game::parser::mi_Y, 1790);
         sh.addMessageInformation(info, PlayerSet_t());
@@ -1010,7 +1010,7 @@ TestGameMapRenderer::testShipVector()
     {
         MessageInformation info(MessageInformation::Ship, 10, TURN_NUMBER-4);
         info.addValue(game::parser::mi_Heading, 90);
-        info.addValue(game::parser::mi_Speed, 9);
+        info.addValue(game::parser::mi_WarpFactor, 9);
         info.addValue(game::parser::mi_X, 1600);
         info.addValue(game::parser::mi_Y, 1500);
         sh.addMessageInformation(info, PlayerSet_t());
@@ -1052,7 +1052,7 @@ TestGameMapRenderer::testShipVectorWrapSeam()
     {
         MessageInformation info(MessageInformation::Ship, 10, TURN_NUMBER);
         info.addValue(game::parser::mi_Heading, 30);
-        info.addValue(game::parser::mi_Speed, 7);
+        info.addValue(game::parser::mi_WarpFactor, 7);
         sh.addMessageInformation(info, PlayerSet_t(4));
     }
 
@@ -1093,7 +1093,7 @@ TestGameMapRenderer::testShipVectorWrapCircular()
     {
         MessageInformation info(MessageInformation::Ship, 10, TURN_NUMBER);
         info.addValue(game::parser::mi_Heading, 30);
-        info.addValue(game::parser::mi_Speed, 7);
+        info.addValue(game::parser::mi_WarpFactor, 7);
         sh.addMessageInformation(info, PlayerSet_t(4));
     }
     // ...and a previous position across the seam...
@@ -1139,7 +1139,7 @@ TestGameMapRenderer::testShipVectorWrap()
     {
         MessageInformation info(MessageInformation::Ship, 10, TURN_NUMBER);
         info.addValue(game::parser::mi_Heading, 30);
-        info.addValue(game::parser::mi_Speed, 7);
+        info.addValue(game::parser::mi_WarpFactor, 7);
         sh.addMessageInformation(info, PlayerSet_t(4));
     }
 

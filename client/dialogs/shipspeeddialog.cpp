@@ -19,7 +19,7 @@
 
 namespace {
     using game::proxy::ShipSpeedProxy;
-    
+
     class Window {
      public:
         Window(ShipSpeedProxy& proxy, ui::Root& root, afl::string::Translator& tx, const ShipSpeedProxy::Status& st)
@@ -83,13 +83,13 @@ namespace {
 
         void onCancel()
             {
-                m_proxy.setSpeed(m_originalStatus.currentSpeed);
+                m_proxy.setWarpFactor(m_originalStatus.currentSpeed);
                 m_loop.stop(0);
             }
 
         void onChange()
             {
-                m_proxy.setSpeed(m_value.get());
+                m_proxy.setWarpFactor(m_value.get());
             }
 
      private:

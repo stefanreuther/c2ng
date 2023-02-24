@@ -58,11 +58,11 @@ namespace game { namespace map {
 
         /** Get speed.
             @return warp factor */
-        IntegerProperty_t getSpeed() const;
+        IntegerProperty_t getWarpFactor() const;
 
         /** Set speed.
             @param speed Warp factor */
-        void setSpeed(IntegerProperty_t speed);
+        void setWarpFactor(IntegerProperty_t speed);
 
         /** Get heading.
             @return heading */

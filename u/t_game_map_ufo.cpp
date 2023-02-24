@@ -36,7 +36,7 @@ TestGameMapUfo::testAccessor()
 
     // Set it
     t.setColorCode(3);
-    t.setSpeed(7);
+    t.setWarpFactor(7);
     t.setHeading(240);
     t.setPlanetRange(200);
     t.setShipRange(150);
@@ -52,7 +52,7 @@ TestGameMapUfo::testAccessor()
     game::test::InterpreterInterface iface;
     afl::string::NullTranslator tx;
     TS_ASSERT_EQUALS(t.getColorCode(), 3);
-    TS_ASSERT_EQUALS(t.getSpeed().orElse(-1), 7);
+    TS_ASSERT_EQUALS(t.getWarpFactor().orElse(-1), 7);
     TS_ASSERT_EQUALS(t.getHeading().orElse(-1), 240);
     TS_ASSERT_EQUALS(t.getPlanetRange().orElse(-1), 200);
     TS_ASSERT_EQUALS(t.getShipRange().orElse(-1), 150);

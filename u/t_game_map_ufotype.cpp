@@ -41,7 +41,7 @@ namespace {
         pu->setInfo1("15895 KT/Bidir.");
         pu->setInfo2("mostly stable");
         pu->setPosition(Point(0x0b0b, 0x04e0));
-        pu->setSpeed(0);
+        pu->setWarpFactor(0);
         pu->setHeading(0);
         pu->setPlanetRange(0xfb);
         pu->setShipRange(0xfb);
@@ -61,7 +61,7 @@ namespace {
         pu->setInfo1("15895 KT/Bidir.");
         pu->setInfo2("mostly stable");
         pu->setPosition(Point(0x09b2, 0x03f1));
-        pu->setSpeed(0);
+        pu->setWarpFactor(0);
         pu->setHeading(0);
         pu->setPlanetRange(0xfb);
         pu->setShipRange(0xfb);
@@ -81,7 +81,7 @@ namespace {
         pu->setInfo1("28142 KT/Bidir.");
         pu->setInfo2("mostly stable");
         pu->setPosition(Point(0x0b26, 0x043d));
-        pu->setSpeed(0);
+        pu->setWarpFactor(0);
         pu->setHeading(0);
         pu->setPlanetRange(0x130);
         pu->setShipRange(0x130);
@@ -185,7 +185,7 @@ namespace {
             info.addValue(gp::ms_Name, "Wormhole #9");
             info.addValue(gp::mi_X, 2000);
             info.addValue(gp::mi_Y, 2000);
-            info.addValue(gp::mi_Speed, 0);
+            info.addValue(gp::mi_WarpFactor, 0);
             info.addValue(gp::mi_UfoShipRange, 150);
             info.addValue(gp::mi_UfoPlanetRange, 150);
             info.addValue(gp::mi_Radius, 5);

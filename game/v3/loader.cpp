@@ -423,7 +423,7 @@ game::v3::Loader::addTarget(game::map::Universe& univ, const game::v3::structure
 
         // Simple values
         info.addValue(gp::mi_Owner, target.owner);
-        info.addValue(gp::mi_Speed, target.warpFactor);
+        info.addValue(gp::mi_WarpFactor, target.warpFactor);
         info.addValue(gp::mi_X, target.x);
         info.addValue(gp::mi_Y, target.y);
         info.addValue(gp::mi_ShipHull, target.hullType);
@@ -499,7 +499,7 @@ game::v3::Loader::loadKoreIonStorms(game::map::Universe& univ, afl::io::Stream& 
                 s->setPosition(game::map::Point(st.x, st.y));
                 s->setRadius(st.radius);
                 s->setVoltage(st.voltage);
-                s->setSpeed(st.warpFactor);
+                s->setWarpFactor(st.warpFactor);
                 s->setHeading(st.heading);
                 s->setIsGrowing((st.voltage & 1) != 0);
             }
@@ -599,7 +599,7 @@ game::v3::Loader::loadUfos(game::map::Universe& univ, afl::io::Stream& file, int
                 out->setInfo1(m_charset.decode(in.info1));
                 out->setInfo2(m_charset.decode(in.info2));
                 out->setPosition(game::map::Point(in.x, in.y));
-                out->setSpeed(int(in.warpFactor));
+                out->setWarpFactor(int(in.warpFactor));
                 if (in.heading >= 0) {
                     out->setHeading(int(in.heading));
                 } else {

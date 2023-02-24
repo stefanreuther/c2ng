@@ -210,7 +210,7 @@ game::map::Ship::addMessageInformation(const game::parser::MessageInformation& i
                  */
                 // ex GShip::addShipTrackEntry (sort-of)
 
-             case gp::mi_Speed:
+             case gp::mi_WarpFactor:
                 if (ShipHistoryData::Track* p = adjustShipHistory(m_historyData, turn)) {
                     p->speed = iv->getValue();
                 }

@@ -27,7 +27,7 @@ TestGameInterfaceUfoContext::testTypes()
     // Add an Ufo
     game::map::Ufo* ufo = turn.universe().ufos().addUfo(51, 1, 2);
     TS_ASSERT(ufo != 0);
-    ufo->setSpeed(2);
+    ufo->setWarpFactor(2);
     ufo->setHeading(135);
     ufo->setPlanetRange(200);
     ufo->setShipRange(150);

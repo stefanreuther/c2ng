@@ -48,10 +48,10 @@ namespace game { namespace proxy {
             \return current parameters/status */
         Status getStatus(WaitIndicator& link);
 
-        /** Set speed.
+        /** Set warp factor.
             This will trigger a regular object change callback asynchronously.
             \param n New speed [0,getStatus().maxSpeed] */
-        void setSpeed(int n);
+        void setWarpFactor(int n);
 
      private:
         class Trampoline;

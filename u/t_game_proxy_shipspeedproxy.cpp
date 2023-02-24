@@ -94,7 +94,7 @@ TestGameProxyShipSpeedProxy::testSimple()
     TS_ASSERT_EQUALS(result.maxSpeed, 9);
 
     // - change speed
-    testee.setSpeed(7);
+    testee.setWarpFactor(7);
 
     // - query state again (also required for synchronisation)
     result = testee.getStatus(ind);
@@ -142,7 +142,7 @@ TestGameProxyShipSpeedProxy::testHyper()
     TS_ASSERT_EQUALS(result.maxSpeed, 10);          // indicates HYP capability
 
     // - change speed
-    testee.setSpeed(result.maxSpeed);
+    testee.setWarpFactor(result.maxSpeed);
 
     // - query state again (also required for synchronisation)
     result = testee.getStatus(ind);
@@ -154,7 +154,7 @@ TestGameProxyShipSpeedProxy::testHyper()
     TS_ASSERT_EQUALS(univ.ships().get(SHIP_NR+1)->getFriendlyCode().orElse(""), "HYP");
 
     // - change back
-    testee.setSpeed(1);
+    testee.setWarpFactor(1);
     testee.getStatus(ind);
 
     TS_ASSERT_EQUALS(univ.ships().get(SHIP_NR)->getFriendlyCode().orElse(""), "abc");

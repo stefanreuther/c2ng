@@ -67,7 +67,7 @@ namespace game { namespace map {
 
         /** Set speed.
             \param speed Speed */
-        void setSpeed(int speed);
+        void setWarpFactor(int speed);
 
         /** Set heading.
             \param heading Heading */
@@ -92,7 +92,7 @@ namespace game { namespace map {
 
         /** Get speed.
             \return speed */
-        IntegerProperty_t getSpeed() const;
+        IntegerProperty_t getWarpFactor() const;
 
         /** Get growing/weakening status.
             \return true if growing, false if weakening */
