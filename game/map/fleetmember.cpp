@@ -18,7 +18,6 @@ using game::spec::Mission;
 using game::Id_t;
 
 namespace {
-
     /** Remove member from a fleet.
         \param univ Universe to work on
         \param sid Ship Id
@@ -160,23 +159,24 @@ game::map::FleetMember::setFleetNumber(Id_t nfid,
             // enter or change fleet
             if (nfid == m_ship.getId()) {
                 // start new fleet
+                // - If ship is member of a fleet, this will mark that entire fleet dirty.
+                //   Otherwise, setFleetNumber() will mark the ship dirty.
+                Fleet(m_universe, m_ship).markDirty();
                 removeFleetMember(m_universe, m_ship.getId());
-                Fleet(m_universe, m_ship).markDirty();           // FIXME: needed?
                 m_ship.setFleetNumber(nfid);
                 m_universe.fleets().handleFleetChange(nfid);
-                m_ship.markDirty();                              // FIXME: needed?
                 synchronizeTowee(m_universe, m_ship.getId(), m_mapConfig, config, shipList);
                 return true;
             } else if (nsh->getFleetNumber() == nfid) {
                 // join a fleet
+                // - If ship is member of a fleet, this will mark that entire fleet dirty.
+                Fleet(m_universe, m_ship).markDirty();
                 removeFleetMember(m_universe, m_ship.getId());
-                Fleet(m_universe, m_ship).markDirty();           // FIXME: needed?
                 m_ship.setFleetNumber(nfid);
                 Fleet::synchronizeFleetMember(m_universe, m_ship.getId(), m_mapConfig, config, shipList);
-                Fleet(m_universe, *nsh).markDirty();             // FIXME: needed?
+                // - Mark entire new fleet dirty
+                Fleet(m_universe, *nsh).markDirty();
                 m_universe.fleets().handleFleetChange(nfid);
-                m_ship.markDirty();                              // FIXME: needed?
-                nsh->markDirty();                                // FIXME: needed?
                 synchronizeTowee(m_universe, m_ship.getId(), m_mapConfig, config, shipList);
                 return true;
             } else {
