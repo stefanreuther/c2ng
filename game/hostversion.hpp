@@ -174,6 +174,10 @@ namespace game {
             \return squared distance */
         int32_t getMinimumHyperjumpDistance2() const;
 
+        /** Check whether host automatically resets friendly codes after a hyperjump.
+            \return status */
+        bool hasAutomaticHyperjumpReset() const;
+
         /** Check mission.
             This allows the host implementation to filter out missions. */
         bool isMissionAllowed(int mission) const;

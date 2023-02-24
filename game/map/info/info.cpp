@@ -267,14 +267,12 @@ namespace {
                 }
 
                 /* Bovinoids */
-                produced.add(CargoSpec::Supplies, getBovinoidSupplyContributionLimited(*pl, config, host).orElse(0));
-                maxProduced.add(CargoSpec::Supplies, getBovinoidSupplyContribution(*pl, config, host).orElse(0));
+                produced.add(CargoSpec::Supplies, getBovinoidSupplyContributionLimited(*pl, config).orElse(0));
+                maxProduced.add(CargoSpec::Supplies, getBovinoidSupplyContribution(*pl, config).orElse(0));
 
                 /* Factories */
-                int32_t fact = pl->getNumBuildings(game::FactoryBuilding).orElse(0);
-                if (host.isPHost()) {
-                    fact = fact * config[HostConfiguration::ProductionRate](owner) / 100;
-                }
+                int32_t fact = pl->getNumBuildings(game::FactoryBuilding).orElse(0)
+                    * config[HostConfiguration::ProductionRate](owner) / 100;
                 produced.add(CargoSpec::Supplies, fact);
                 maxProduced.add(CargoSpec::Supplies, fact);
 

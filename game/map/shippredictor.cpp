@@ -890,7 +890,9 @@ game::map::ShipPredictor::computeTurn()
         m_ship.waypointDX = m_ship.waypointDY = 0;
         m_ship.warpFactor = 0;
         normalizePosition(m_ship, m_mapConfig);
-        // FIXME: IF pconf<>NIL THEN s.FC := '???';
+        if (m_hostVersion.hasAutomaticHyperjumpReset()) {
+            m_ship.friendlyCode = String_t("?""?""?");
+        }
         // FIXME: gravity wells?
     } else if (dist2 > 0 && m_ship.warpFactor.orElse(0) > 0) {
         // Normal movement

@@ -123,15 +123,14 @@ game::map::ChunnelMission::check(const Ship& sh, const Universe& univ,
     \param [in] sh Ship to check
     \param [in] univ Universe to check
     \param [in] minFuel Minimum fuel required on this ship
-    \param [in] root    Root (for host configuration, version)
+    \param [in] root    Root (for host configuration)
     \return bitmask of failures */
 int
 game::map::ChunnelMission::checkChunnelFailures(const Ship& sh, const Universe& univ, const int minFuel, const Root& root)
 {
     // ex shipacc.pas:CheckChunnelFailures
     int result = 0;
-    bool isPHost = root.hostVersion().getKind() == HostVersion::PHost; // FIXME: make accessors or solve this using appropriate default configuration
-    if (isPHost && sh.getDamage().orElse(0) >= root.hostConfiguration()[HostConfiguration::DamageLevelForChunnelFail]()) {
+    if (sh.getDamage().orElse(0) >= root.hostConfiguration()[HostConfiguration::DamageLevelForChunnelFail]()) {
         result |= chf_MateDamaged;
     }
     if (sh.getCargo(game::Element::Neutronium).orElse(0) <= minFuel) {

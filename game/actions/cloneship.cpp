@@ -277,12 +277,7 @@ game::actions::CloneShip::update()
     }
 
     // Determine CloneCostRate.
-    int ccr;
-    if (m_root.hostVersion().isPHost()) {
-        ccr = m_root.hostConfiguration()[game::config::HostConfiguration::ShipCloneCostRate](m_ship.getRealOwner().orElse(0));
-    } else {
-        ccr = 200;
-    }
+    int ccr = m_root.hostConfiguration()[game::config::HostConfiguration::ShipCloneCostRate](m_ship.getRealOwner().orElse(0));
 
     // Apply CloneCostRate. We must be careful to avoid overflow.
     // The naive computation, mc*ccr/100, would overflow when ccr=32767 and mc>65536.

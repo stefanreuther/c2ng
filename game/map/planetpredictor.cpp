@@ -4,6 +4,7 @@
   */
 
 #include <cmath>
+#include <algorithm>
 #include "game/map/planetpredictor.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/map/planeteffectors.hpp"
@@ -153,10 +154,7 @@ game::map::PlanetPredictor::computeTurn(const PlanetEffectors& eff,
 
     // Hiss
     if (config[config.AllowHiss]()) {
-        int nhiss = eff.get(PlanetEffectors::Hiss);
-        if (host.isPHost() && nhiss > config[config.MaxShipsHissing]()) {
-            nhiss = config[config.MaxShipsHissing]();
-        }
+        int nhiss = std::min(eff.get(PlanetEffectors::Hiss), config[config.MaxShipsHissing]());
 
         nhiss *= config[config.HissEffectRate](planetOwner);
 
@@ -169,7 +167,7 @@ game::map::PlanetPredictor::computeTurn(const PlanetEffectors& eff,
 
     // Terraform
     if (config[config.AllowScienceMissions]()) {
-        int rate = host.isPHost() ? config[config.TerraformRate](planetOwner) : 1;
+        int rate = config[config.TerraformRate](planetOwner);
         int temp = m_planet.getTemperature().orElse(0);
         if (temp > 50) {
             // Coolers
@@ -205,11 +203,9 @@ game::map::PlanetPredictor::computeTurn(const PlanetEffectors& eff,
         doMining(m_planet, Element::Molybdenum, config, host);
 
         // Supplies
-        int32_t fact = m_planet.getNumBuildings(FactoryBuilding).orElse(0);
-        if (host.isPHost()) {
-            fact = fact * config[config.ProductionRate](planetOwner) / 100;
-        }
-        fact += getBovinoidSupplyContributionLimited(m_planet, config, host).orElse(0);
+        int32_t fact = m_planet.getNumBuildings(FactoryBuilding).orElse(0)
+            * config[config.ProductionRate](planetOwner) / 100;
+        fact += getBovinoidSupplyContributionLimited(m_planet, config).orElse(0);
         m_planet.setCargo(Element::Supplies, m_planet.getCargo(Element::Supplies).orElse(0) + fact);
     }
 

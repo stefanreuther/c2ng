@@ -669,12 +669,12 @@ game::map::describePlanetNatives(afl::io::xml::Nodes_t& nodes,
         int32_t pop = 0;
         bool popOK = pl.getNatives().get(pop);
         if (race == BovinoidNatives && popOK) {
-            int32_t forMe = getBovinoidSupplyContribution(pop, viewpointPlayer, root.hostConfiguration(), root.hostVersion());
+            int32_t forMe = getBovinoidSupplyContribution(pop, viewpointPlayer, root.hostConfiguration());
             addDetail(list, UTF_HYPHEN, afl::string::Format(tx("%d kt supplies per turn"), fmt.formatNumber(forMe)));
 
             int owner;
             if (pl.getOwner().get(owner) && owner != 0) {
-                int32_t forThem = getBovinoidSupplyContribution(pop, owner, root.hostConfiguration(), root.hostVersion());
+                int32_t forThem = getBovinoidSupplyContribution(pop, owner, root.hostConfiguration());
                 if (forThem != forMe) {
                     addDetail(list, UTF_HYPHEN, afl::string::Format(tx("%d kt supplies per turn for %s"),
                                                                     fmt.formatNumber(forThem),

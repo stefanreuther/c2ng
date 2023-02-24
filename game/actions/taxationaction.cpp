@@ -101,14 +101,14 @@ game::actions::TaxationAction::getHappinessChange(Area a) const
 int
 game::actions::TaxationAction::getBovinoidSupplyContribution() const
 {
-    return game::map::getBovinoidSupplyContribution(m_planet, m_config, m_hostVersion).orElse(0);
+    return game::map::getBovinoidSupplyContribution(m_planet, m_config).orElse(0);
 }
 
 // Get bovinoid supply contribution, limited to amount collected.
 int
 game::actions::TaxationAction::getBovinoidSupplyContributionLimited() const
 {
-    return game::map::getBovinoidSupplyContributionLimited(m_planet, m_config, m_hostVersion).orElse(0);
+    return game::map::getBovinoidSupplyContributionLimited(m_planet, m_config).orElse(0);
 }
 
 // Check whether area is modifyable.
@@ -160,7 +160,7 @@ game::actions::TaxationAction::describe(Area a, afl::string::Translator& tx, con
     const int happyChange = getHappinessChange(a);
     const int32_t due = getDue(a);
     const int32_t pay = getDueLimited(a);
-    const int hissEffect = game::map::getHissEffect(planetOwner, m_effectors.get(game::map::PlanetEffectors::Hiss), m_config, m_hostVersion);
+    const int hissEffect = game::map::getHissEffect(planetOwner, m_effectors.get(game::map::PlanetEffectors::Hiss), m_config);
 
     int newHappy = 0;
 

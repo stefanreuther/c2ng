@@ -64,7 +64,7 @@ game::map::PlanetEffectors::getNumTerraformers() const
 }
 
 String_t
-game::map::PlanetEffectors::describe(afl::string::Translator& tx, int shipOwner, const game::config::HostConfiguration& config, const HostVersion& host) const
+game::map::PlanetEffectors::describe(afl::string::Translator& tx, int shipOwner, const game::config::HostConfiguration& config) const
 {
     // ex WPlanetGrowthTile::drawData (part)
     using afl::string::Format;
@@ -76,7 +76,7 @@ game::map::PlanetEffectors::describe(afl::string::Translator& tx, int shipOwner,
         }
     } else {
         if (int numHissers = get(Hiss)) {
-            int effect = getHissEffect(shipOwner, numHissers, config, host);
+            int effect = getHissEffect(shipOwner, numHissers, config);
             String_t fmt = (effect > 0
                             ? tx("%d ship%!1{s%} hissing (+%d)")
                             : tx("%d ship%!1{s%} hissing (no effect)"));

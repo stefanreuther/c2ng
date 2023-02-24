@@ -362,6 +362,14 @@ game::HostVersion::getMinimumHyperjumpDistance2() const
     }
 }
 
+// Check whether host automatically resets friendly codes after a hyperjump.
+bool
+game::HostVersion::hasAutomaticHyperjumpReset() const
+{
+    // PHost automatically resets friendly codes, Tim-Host does not. NuHost is unknown.
+    return (m_kind == PHost);
+}
+
 // Check mission.
 bool
 game::HostVersion::isMissionAllowed(int mission) const
@@ -551,12 +559,23 @@ game::HostVersion::setImpliedHostConfiguration(game::config::HostConfiguration& 
         config[HostConfiguration::CPEnableSend].set(false);
         config[HostConfiguration::DisablePasswords].set(false);
 
+        // ex WCloneCargoCostTransaction::update()
+        config[HostConfiguration::ShipCloneCostRate].set(200);
+
+        // computeTurn, pdata.pas:ComputePlanetTurn, game/planetform.h:getBovinoidSupplyContribution, game/planetform.h:getBovinoidSupplyContributionLimited, client/tiles/planetgrowth.cc:getHissEffect, client/dlg-tax.cc:getHissEffect
+        config[HostConfiguration::ProductionRate].set(100);
+        config[HostConfiguration::MaxShipsHissing].set(MAX_NUMBER);
+        config[HostConfiguration::TerraformRate].set(1);
+
         // WTorpInfo::drawContent
         for (int i = 1; i <= MAX_PLAYERS; ++i) {
             int rate = config[HostConfiguration::PlayerSpecialMission](i) == 9 ? 400 : 100;
             config[HostConfiguration::UnitsPerTorpRate].set(i, rate);
             config[HostConfiguration::UnitsPerWebRate].set(i, rate);
         }
+
+        // shipacc.pas:CheckChunnelFailures - in Host, ships can exist with >100 damage, so PHost's default 100 is not sufficient
+        config[HostConfiguration::DamageLevelForChunnelFail].set(151);
 
         // Tim-Host defaults; ex game/config.cc:initConfig
         config[HostConfiguration::RoundGravityWells].set(1);

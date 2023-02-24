@@ -39,24 +39,23 @@ TestGameMapPlanetEffectors::testDescribe()
 {
     afl::string::NullTranslator tx;
     game::config::HostConfiguration config;
-    game::HostVersion host(game::HostVersion::PHost, MKVERSION(3,0,0));
 
     {
         PlanetEffectors t;
-        TS_ASSERT_EQUALS(t.describe(tx, 3, config, host), "No ship effects considered");
+        TS_ASSERT_EQUALS(t.describe(tx, 3, config), "No ship effects considered");
     }
 
     {
         PlanetEffectors t;
         t.set(PlanetEffectors::Hiss, 3);
-        TS_ASSERT_EQUALS(t.describe(tx, 3, config, host), "3 ships hissing (+15)");
+        TS_ASSERT_EQUALS(t.describe(tx, 3, config), "3 ships hissing (+15)");
     }
 
     {
         PlanetEffectors t;
         t.set(PlanetEffectors::HeatsTo50, 3);
         t.set(PlanetEffectors::HeatsTo100, 2);
-        TS_ASSERT_EQUALS(t.describe(tx, 3, config, host), "5 ships terraforming");
+        TS_ASSERT_EQUALS(t.describe(tx, 3, config), "5 ships terraforming");
     }
 
     {
@@ -64,7 +63,7 @@ TestGameMapPlanetEffectors::testDescribe()
         t.set(PlanetEffectors::Hiss, 4);
         t.set(PlanetEffectors::HeatsTo50, 3);
         t.set(PlanetEffectors::HeatsTo100, 2);
-        TS_ASSERT_EQUALS(t.describe(tx, 3, config, host), "4 ships hissing, 5 ships terraforming");
+        TS_ASSERT_EQUALS(t.describe(tx, 3, config), "4 ships hissing, 5 ships terraforming");
     }
 }
 

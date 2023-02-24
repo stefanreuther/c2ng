@@ -86,9 +86,8 @@ namespace game { namespace map {
         @param shipOwner Ship owner
         @param numShips  Number of ships hissing
         @param config    Host configuration
-        @param host      Host version
         @return Total hiss effect */
-    int getHissEffect(int shipOwner, int numShips, const game::config::HostConfiguration& config, const HostVersion& host);
+    int getHissEffect(int shipOwner, int numShips, const game::config::HostConfiguration& config);
 
 
     /*
@@ -171,25 +170,22 @@ namespace game { namespace map {
         Returns the nominal contribution not limited by colonists.
         @param pl     Planet
         @param config Host configuration
-        @param host   Host version
         @return Supply contribution, unknown if preconditions not met */
-    LongProperty_t getBovinoidSupplyContribution(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host);
+    LongProperty_t getBovinoidSupplyContribution(const Planet& pl, const game::config::HostConfiguration& config);
 
     /** Get Bovinoid supply contribution, parameterized.
         @param pop    Native population
         @param owner  Planet owner
         @param config Host configuration
-        @param host   Host version
         @return Supply contribution */
-    int32_t getBovinoidSupplyContribution(int32_t pop, int owner, const game::config::HostConfiguration& config, const HostVersion& host);
+    int32_t getBovinoidSupplyContribution(int32_t pop, int owner, const game::config::HostConfiguration& config);
 
     /** Get Bovinoid supply contribution.
         This returns the amount of supplies finally collected, limited by what colonists can collect.
         @param pl     Planet
         @param config Host configuration
-        @param host   Host version
         @return Supply contribution, unknown if preconditions not met */
-    LongProperty_t getBovinoidSupplyContributionLimited(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host);
+    LongProperty_t getBovinoidSupplyContributionLimited(const Planet& pl, const game::config::HostConfiguration& config);
 
     /** Get Amorphous colonist breakfast.
         Returns the number of clans eaten by our lovely amorphous natives when they have a happiness as specified.

@@ -290,13 +290,11 @@ game::map::getMaxSupportedColonists(const Planet& pl, const game::config::HostCo
 }
 
 int
-game::map::getHissEffect(int shipOwner, int numShips, const game::config::HostConfiguration& config, const HostVersion& host)
+game::map::getHissEffect(int shipOwner, int numShips, const game::config::HostConfiguration& config)
 {
     // ex client/tiles/planetgrowth.cc:getHissEffect, client/dlg-tax.cc:getHissEffect
     if (config[HostConfiguration::AllowHiss]()) {
-        if (host.isPHost()) {
-            numShips = std::min(numShips, config[HostConfiguration::MaxShipsHissing]());
-        }
+        numShips = std::min(numShips, config[HostConfiguration::MaxShipsHissing]());
         return numShips * config[HostConfiguration::HissEffectRate](shipOwner);
     } else {
         return 0;
@@ -542,7 +540,7 @@ game::map::getNativeBaseTax(const Planet& pl, int owner, const game::config::Hos
 }
 
 game::LongProperty_t
-game::map::getBovinoidSupplyContribution(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host)
+game::map::getBovinoidSupplyContribution(const Planet& pl, const game::config::HostConfiguration& config)
 {
     // ex game/planetform.h:getBovinoidSupplyContribution
     // Change to PCC2: PCC2 returns 0, we return unknown
@@ -550,7 +548,7 @@ game::map::getBovinoidSupplyContribution(const Planet& pl, const game::config::H
     int32_t pop;
     if (pl.getOwner().get(owner) && pl.getNativeRace().get(race) && pl.getNatives().get(pop)) {
         if (race == BovinoidNatives) {
-            return getBovinoidSupplyContribution(pop, owner, config, host);
+            return getBovinoidSupplyContribution(pop, owner, config);
         } else {
             return 0;
         }
@@ -560,21 +558,17 @@ game::map::getBovinoidSupplyContribution(const Planet& pl, const game::config::H
 }
 
 int32_t
-game::map::getBovinoidSupplyContribution(int32_t pop, int owner, const game::config::HostConfiguration& config, const HostVersion& host)
+game::map::getBovinoidSupplyContribution(int32_t pop, int owner, const game::config::HostConfiguration& config)
 {
     // ex game/planetform.h:getBovinoidSupplyContribution
     // FIXME: for ultimate accuracy, we have to consider factories as
     // well. PHost does "(bovi + factories) * ProductionRate", not
     // "bovi * ProductionRate + factories * ProductionRate".
-    if (host.getKind() == HostVersion::PHost) {
-        return (pop / 100) * config[config.ProductionRate](owner) / 100;
-    } else {
-        return pop / 100;
-    }
+    return (pop / 100) * config[config.ProductionRate](owner) / 100;
 }
 
 game::LongProperty_t
-game::map::getBovinoidSupplyContributionLimited(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host)
+game::map::getBovinoidSupplyContributionLimited(const Planet& pl, const game::config::HostConfiguration& config)
 {
     // ex game/planetform.h:getBovinoidSupplyContributionLimited
     // FIXME: the same problem as in getBovinoidSupplyContribution(int,int)
@@ -586,8 +580,8 @@ game::map::getBovinoidSupplyContributionLimited(const Planet& pl, const game::co
     //         it should be supported
     int32_t clans, due;
     int owner;
-    if (pl.getOwner().get(owner) && pl.getCargo(Element::Colonists).get(clans) && getBovinoidSupplyContribution(pl, config, host).get(due)) {
-        int32_t limit = host.getKind() == HostVersion::PHost ? clans * config[config.ProductionRate](owner) / 100 : clans;
+    if (pl.getOwner().get(owner) && pl.getCargo(Element::Colonists).get(clans) && getBovinoidSupplyContribution(pl, config).get(due)) {
+        int32_t limit = clans * config[config.ProductionRate](owner) / 100;
         if (due < limit) {
             return due;
         } else {

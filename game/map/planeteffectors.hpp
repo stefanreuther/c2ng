@@ -9,7 +9,6 @@
 #include "afl/string/string.hpp"
 #include "afl/string/translator.hpp"
 #include "game/config/hostconfiguration.hpp"
-#include "game/hostversion.hpp"
 
 namespace game { namespace map {
 
@@ -71,7 +70,7 @@ namespace game { namespace map {
             \param shipOwner  Owner of ship(s) invoking the effects
             \param config     Host configuration
             \return human-readable one-liner, never empty */
-        String_t describe(afl::string::Translator& tx, int shipOwner, const game::config::HostConfiguration& config, const HostVersion& host) const;
+        String_t describe(afl::string::Translator& tx, int shipOwner, const game::config::HostConfiguration& config) const;
 
      private:
         int m_effectors[NUM_EFFECTS];
