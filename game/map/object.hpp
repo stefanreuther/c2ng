@@ -170,4 +170,53 @@ game::map::Object::getId() const
     return m_id;
 }
 
+inline bool
+game::map::Object::isPlayable(Playability p) const
+{
+    return m_playability >= p;
+}
+
+inline void
+game::map::Object::setPlayability(Playability p)
+{
+    m_playability = p;
+}
+
+inline game::map::Object::Playability
+game::map::Object::getPlayability() const
+{
+    return m_playability;
+}
+
+inline void
+game::map::Object::markClean()
+{
+    m_isDirty = false;
+}
+
+inline void
+game::map::Object::markDirty()
+{
+    m_isDirty = true;
+}
+
+inline bool
+game::map::Object::isDirty() const
+{
+    return m_isDirty;
+}
+
+inline bool
+game::map::Object::isMarked() const
+{
+    return m_isMarked;
+}
+
+inline void
+game::map::Object::setIsMarked(bool n)
+{
+    markDirty();
+    m_isMarked = n;
+}
+
 #endif

@@ -23,43 +23,6 @@ game::map::Object::Object(const Object& other)
 game::map::Object::~Object()
 { }
 
-bool
-game::map::Object::isPlayable(Playability p) const
-{
-    return m_playability >= p;
-}
-
-void
-game::map::Object::setPlayability(Playability p)
-{
-    m_playability = p;
-}
-
-game::map::Object::Playability
-game::map::Object::getPlayability() const
-{
-    return m_playability;
-}
-
-void
-game::map::Object::markClean()
-{
-    m_isDirty = false;
-}
-
-void
-game::map::Object::markDirty()
-{
-    m_isDirty = true;
-}
-
-bool
-game::map::Object::isDirty() const
-{
-    return m_isDirty;
-}
-
-
 void
 game::map::Object::notifyListeners()
 {
@@ -67,19 +30,6 @@ game::map::Object::notifyListeners()
         m_isDirty = false;
         sig_change.raise(getId());
     }
-}
-
-bool
-game::map::Object::isMarked() const
-{
-    return m_isMarked;
-}
-
-void
-game::map::Object::setIsMarked(bool n)
-{
-    markDirty();
-    m_isMarked = n;
 }
 
 void
