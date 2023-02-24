@@ -89,8 +89,7 @@ namespace {
         h.planet.setBaseTechLevel(game::EngineTech, 1);
         h.planet.setBaseTechLevel(game::BeamTech, 1);
         h.planet.setBaseTechLevel(game::TorpedoTech, 1);
-        h.planet.internalCheck(game::map::Configuration(), tx, log);
-        h.planet.combinedCheck2(h.univ, game::PlayerSet_t(OWNER), TURN_NR);
+        h.planet.internalCheck(game::map::Configuration(), game::PlayerSet_t(OWNER), TURN_NR, tx, log);
         h.planet.setPlayability(game::map::Object::Playable);
 
         // Define a number of components
@@ -161,8 +160,7 @@ namespace {
         TS_ASSERT(pRev != 0);
         pRev->addShipData(id, sd);
 
-        pShip->internalCheck();
-        pShip->combinedCheck1(h.univ, game::PlayerSet_t(owner), TURN_NR);
+        pShip->internalCheck(game::PlayerSet_t(owner), TURN_NR);
         pShip->setPlayability(game::map::Object::Playable);
 
         return *pShip;

@@ -78,7 +78,7 @@ TestGameProxyShipSpeedProxy::testSimple()
     Ptr<Game> g = new Game();
     Ship* sh = g->currentTurn().universe().ships().create(SHIP_NR);
     sh->addShipXYData(game::map::Point(1, 2), OWNER, 444, game::PlayerSet_t(OWNER));
-    sh->internalCheck();
+    sh->internalCheck(game::PlayerSet_t(OWNER), 15);
     sh->setPlayability(game::map::Object::ReadOnly);
     sh->setWarpFactor(3);
     sh->setHull(HULL_NR);
@@ -121,8 +121,8 @@ TestGameProxyShipSpeedProxy::testHyper()
     Ptr<Game> g = new Game();
     for (int id = SHIP_NR; id < SHIP_NR+2; ++id) {
         Ship* sh = g->currentTurn().universe().ships().create(id);
-        sh->addShipXYData(game::map::Point(1, 2), OWNER, 444, game::PlayerSet_t(OWNER));
-        sh->internalCheck();
+        sh->addShipXYData(game::map::Point(1, 2), OWNER, 444, game::PlayerSet_t(OWNER+1));
+        sh->internalCheck(game::PlayerSet_t(OWNER+1), 15);
         sh->setPlayability(game::map::Object::ReadOnly);
         sh->setWarpFactor(3);
         sh->setHull(HULL_NR);

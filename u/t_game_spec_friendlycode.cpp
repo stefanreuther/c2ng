@@ -157,7 +157,7 @@ TestGameSpecFriendlyCode::testWorksOn()
         p.addPlanetSource(game::PlayerSet_t(2));
         p.addBaseSource(game::PlayerSet_t(2));
         p.setPlayability(p.ReadOnly);
-        p.internalCheck(game::map::Configuration(), tx, log);
+        p.internalCheck(game::map::Configuration(), game::PlayerSet_t(2), 15, tx, log);
         TS_ASSERT(planetFC.worksOn(p, config));
         TS_ASSERT(baseFC.worksOn(p, config));
         TS_ASSERT(!shipFC.worksOn(p, config));

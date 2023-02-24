@@ -45,8 +45,7 @@ namespace {
         sd.money = 100;
         sd.supplies = 100;
         sh->addCurrentShipData(sd, game::PlayerSet_t(owner));
-        sh->internalCheck();
-        sh->combinedCheck1(univ, game::PlayerSet_t(owner), 10);
+        sh->internalCheck(game::PlayerSet_t(owner), 10);
         sh->setPlayability(playability);
         return *sh;
     }
@@ -73,8 +72,7 @@ namespace {
         pd.supplies = 100;
         pd.money = 100;
         pl->addCurrentPlanetData(pd, game::PlayerSet_t(owner));
-        pl->internalCheck(mapConfig, tx, log);
-        pl->combinedCheck2(univ, game::PlayerSet_t(owner), 10);
+        pl->internalCheck(mapConfig, game::PlayerSet_t(owner), 10, tx, log);
         pl->setPlayability(playability);
         return *pl;
     }

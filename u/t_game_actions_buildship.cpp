@@ -15,7 +15,6 @@
 #include "game/map/configuration.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/planetstorage.hpp"
-#include "game/map/universe.hpp"
 #include "game/root.hpp"
 #include "game/session.hpp"
 #include "game/spec/shiplist.hpp"
@@ -35,8 +34,7 @@ namespace {
     const int HULL_SLOT = 12;
 
     struct TestHarness {
-        game::map::Universe univ;
-        game::map::Planet& planet;
+        game::map::Planet planet;
         afl::base::Ref<game::spec::ShipList> shipList;
         afl::base::Ref<game::Root> root;
         afl::string::NullTranslator tx;
@@ -45,8 +43,7 @@ namespace {
         game::config::HostConfiguration& config;
 
         TestHarness()
-            : univ(),
-              planet(*univ.planets().create(PLANET_ID)),
+            : planet(PLANET_ID),
               shipList(*new game::spec::ShipList()),
               root(*new game::Root(afl::io::InternalDirectory::create("game dir"),
                                    *new game::test::SpecificationLoader(),
@@ -90,8 +87,7 @@ namespace {
         h.planet.addCurrentPlanetData(game::map::PlanetData(), game::PlayerSet_t(OWNER));
         h.planet.addCurrentBaseData(bd, game::PlayerSet_t(OWNER));
         h.planet.setOwner(OWNER);
-        h.planet.internalCheck(game::map::Configuration(), tx, log);
-        h.planet.combinedCheck2(h.univ, game::PlayerSet_t(OWNER), TURN_NR);
+        h.planet.internalCheck(game::map::Configuration(), game::PlayerSet_t(OWNER), TURN_NR, tx, log);
         h.planet.setPlayability(game::map::Object::Playable);
 
         // Define a number of components
@@ -159,8 +155,7 @@ TestGameActionsBuildShip::testError()
     h.planet.setPosition(game::map::Point(1111, 2222));
     h.planet.addCurrentPlanetData(game::map::PlanetData(), game::PlayerSet_t(7));
     h.planet.setOwner(7);
-    h.planet.internalCheck(game::map::Configuration(), h.tx, log);
-    h.planet.combinedCheck2(h.univ, game::PlayerSet_t(7), TURN_NR);
+    h.planet.internalCheck(game::map::Configuration(), game::PlayerSet_t(7), TURN_NR, h.tx, log);
     h.planet.setPlayability(game::map::Object::Playable);
 
     game::test::CargoContainer container;

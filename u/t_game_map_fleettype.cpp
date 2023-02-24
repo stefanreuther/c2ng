@@ -20,7 +20,7 @@ namespace {
         sd.y = 1300;
         sh->addCurrentShipData(sd, game::PlayerSet_t(4));
         sh->setPlayability(game::map::Object::Playable);
-        sh->internalCheck();
+        sh->internalCheck(game::PlayerSet_t(4), 10);
         sh->setFleetNumber(fleetNumber);
     }
 }

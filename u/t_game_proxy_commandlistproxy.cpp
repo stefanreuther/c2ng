@@ -176,7 +176,7 @@ TestGameProxyCommandListProxy::testNotify()
 
     // Ship must be visible
     sh->addShipXYData(game::map::Point(1,2), 3, 4, game::PlayerSet_t(PLAYER));
-    sh->internalCheck();
+    sh->internalCheck(game::PlayerSet_t(PLAYER), 15);
 
     // Change listener
     int count = 0;

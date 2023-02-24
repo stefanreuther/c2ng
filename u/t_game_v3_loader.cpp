@@ -518,7 +518,7 @@ TestGameV3Loader::testLoadBases()
         // Must pass the planet's internalCheck(), otherwise it will not give out any base properties!
         pl->setPosition(game::map::Point(1000, 2000));
         pl->addCurrentPlanetData(game::map::PlanetData(), game::PlayerSet_t(8));
-        pl->internalCheck(game::map::Configuration(), tx, log);
+        pl->internalCheck(game::map::Configuration(), game::PlayerSet_t(8), 15, tx, log);
         TS_ASSERT(pl->hasFullBaseData());
         TS_ASSERT(pl->hasBase());
 

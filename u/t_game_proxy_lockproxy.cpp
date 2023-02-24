@@ -66,7 +66,7 @@ namespace {
             Ship* p = univ.ships().create(i);
             TS_ASSERT(p);
             p->addShipXYData(Point(1000, 1100 + 10*i), 1, 100, game::PlayerSet_t(1));
-            p->internalCheck();
+            p->internalCheck(game::PlayerSet_t(2), 15);
             if (i == 7) {
                 p->setIsMarked(true);
             }
@@ -80,7 +80,7 @@ namespace {
 
         Planet& p = *univ.planets().create(333);
         p.setPosition(Point(2000, 2000));
-        p.internalCheck(g->mapConfiguration(), h.session().translator(), h.session().log());
+        p.internalCheck(g->mapConfiguration(), game::PlayerSet_t(), 15, h.session().translator(), h.session().log());
     }
 
     void createMarker(SessionThread& h, Point pt, util::Atom_t tag)

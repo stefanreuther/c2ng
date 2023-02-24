@@ -60,7 +60,7 @@ namespace {
         data.warpFactor                = 3;
 
         pShip->addCurrentShipData(data, game::PlayerSet_t(Owner));
-        pShip->internalCheck();
+        pShip->internalCheck(game::PlayerSet_t(Owner), 15);
         pShip->setPlayability(game::map::Object::Playable);
         return pShip;
     }

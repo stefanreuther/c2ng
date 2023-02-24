@@ -94,7 +94,7 @@ namespace {
         sd.numLaunchers = 0;
         sd.crew = 10;
         sh->addCurrentShipData(sd, game::PlayerSet_t(PLAYER_NR));
-        sh->internalCheck();
+        sh->internalCheck(game::PlayerSet_t(PLAYER_NR), 15);
         sh->setPlayability(game::map::Object::ReadOnly);
     }
 
@@ -381,7 +381,7 @@ TestGameProxyBuildShipProxy::testCustom()
 
                 // - internal metadata
                 game::map::Configuration config;
-                m_planet.internalCheck(config, session.translator(), session.log());
+                m_planet.internalCheck(config, game::PlayerSet_t(PLAYER_NR), 15, session.translator(), session.log());
                 m_planet.setPlayability(game::map::Object::Playable);
             }
         virtual game::map::Planet& planet()

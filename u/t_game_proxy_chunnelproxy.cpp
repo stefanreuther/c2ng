@@ -95,7 +95,7 @@ namespace {
         data.neutronium                = 60;
 
         sh.addCurrentShipData(data, game::PlayerSet_t(OWNER));
-        sh.internalCheck();
+        sh.internalCheck(game::PlayerSet_t(OWNER), 15);
         sh.setPlayability(game::map::Object::Playable);
 
         return sh;

@@ -49,7 +49,7 @@ namespace {
         game::map::Planet* pl = h.session.getGame()->currentTurn().universe().planets().create(id);
         pl->setPosition(game::map::Point(x, y));
         pl->setName("Bob");
-        pl->internalCheck(h.session.getGame()->mapConfiguration(), h.session.translator(), h.session.log());
+        pl->internalCheck(h.session.getGame()->mapConfiguration(), game::PlayerSet_t(), 15, h.session.translator(), h.session.log());
         return pl;
     }
 
@@ -127,7 +127,7 @@ TestGameInterfaceIteratorContext::testCreateObjectShip()
     game::map::Ship* sh = h.session.getGame()->currentTurn().universe().ships().create(77);
     sh->addShipXYData(game::map::Point(1000, 1000), 3, 100, game::PlayerSet_t(4));
     sh->setName("Alice");
-    sh->internalCheck();
+    sh->internalCheck(game::PlayerSet_t(4), 15);
     TS_ASSERT(sh->isVisible());
 
     // Test

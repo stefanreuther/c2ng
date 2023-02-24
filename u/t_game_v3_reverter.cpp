@@ -228,7 +228,7 @@ TestGameV3Reverter::testLocation()
         p1.setPosition(Point(2000, 2000));
         p1.addCurrentPlanetData(pd, PlayerSet_t(3));
         p1.setPlayability(Planet::Playable);
-        p1.internalCheck(game::map::Configuration(), tx, log);
+        p1.internalCheck(game::map::Configuration(), PlayerSet_t(3), 15, tx, log);
 
         PlanetData pd1 = pd;
         pd1.minedNeutronium = 20;
@@ -241,7 +241,7 @@ TestGameV3Reverter::testLocation()
         ShipData sd = makeShip();
         s1.addCurrentShipData(sd, PlayerSet_t(3));
         s1.setPlayability(Ship::Playable);
-        s1.internalCheck();
+        s1.internalCheck(PlayerSet_t(3), 15);
 
         ShipData sd1 = sd;
         sd1.name = "old name";
@@ -324,7 +324,7 @@ TestGameV3Reverter::testLocationHalf()
         p1.setPosition(Point(2000, 2000));
         p1.addCurrentPlanetData(pd, PlayerSet_t(3));
         p1.setPlayability(Planet::Playable);
-        p1.internalCheck(game::map::Configuration(), tx, log);
+        p1.internalCheck(game::map::Configuration(), PlayerSet_t(3), 15, tx, log);
 
         PlanetData pd1 = pd;
         pd1.minedNeutronium = 20;
@@ -337,7 +337,7 @@ TestGameV3Reverter::testLocationHalf()
         ShipData sd = makeShip();
         s1.addCurrentShipData(sd, PlayerSet_t(3));
         s1.setPlayability(Ship::Playable);
-        s1.internalCheck();
+        s1.internalCheck(PlayerSet_t(3), 15);
     }
 
     // Verify

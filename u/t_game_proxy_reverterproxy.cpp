@@ -38,7 +38,7 @@ namespace {
 
         afl::string::NullTranslator tx;
         afl::sys::Log log;
-        p.internalCheck(game::map::Configuration(), h.session().translator(), h.session().log());
+        p.internalCheck(game::map::Configuration(), game::PlayerSet_t(3), 15, h.session().translator(), h.session().log());
         p.setPlayability(Planet::Playable);
 
         // Attach a classic reverter

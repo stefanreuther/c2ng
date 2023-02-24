@@ -133,7 +133,7 @@ namespace {
     }
 
     /* Finish planet by filling in metainformation */
-    void finishPlanet(Planet& pl, game::Session& session)
+    void finishPlanet(Planet& pl, game::Session& session, int owner)
     {
         // Force position
         if (!pl.getPosition().isValid()) {
@@ -144,7 +144,7 @@ namespace {
         // Check against flat map, i.e. map will not refuse knowing this planet.
         // This call is required to correctly set the base flags
         game::map::Configuration config;
-        pl.internalCheck(config, session.translator(), session.log());
+        pl.internalCheck(config, game::PlayerSet_t(owner), /* arbitrary turn number: */ 15, session.translator(), session.log());
 
         // Make it editable
         pl.setPlayability(Planet::Editable);
@@ -173,7 +173,7 @@ game::proxy::FictiveStarbaseAdaptor::FictiveStarbaseAdaptor(Session& session, Id
     if (!m_planet->hasFullBaseData()) {
         populateBase(*m_planet, owner);
     }
-    finishPlanet(*m_planet, session);
+    finishPlanet(*m_planet, session, owner);
 }
 
 game::proxy::FictiveStarbaseAdaptor::~FictiveStarbaseAdaptor()

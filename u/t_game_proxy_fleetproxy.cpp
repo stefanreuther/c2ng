@@ -36,7 +36,7 @@ namespace {
         sh.setFleetNumber(fleetNumber);
         sh.setPlayability(game::map::Object::Playable);
         sh.setFriendlyCode(friendlyCode);
-        sh.internalCheck();
+        sh.internalCheck(game::PlayerSet_t(1), 15);
         return sh;
     }
 

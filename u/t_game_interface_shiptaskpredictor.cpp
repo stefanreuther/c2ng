@@ -72,8 +72,7 @@ namespace {
         sd.ammo = 0;
         sd.colonists = 0;
         sh.addCurrentShipData(sd, game::PlayerSet_t(PLAYER));
-        sh.internalCheck();
-        sh.combinedCheck1(h.univ, game::PlayerSet_t(PLAYER), 77);
+        sh.internalCheck(game::PlayerSet_t(PLAYER), 77);
         sh.setPlayability(game::map::Object::Playable);
 
         return sh;

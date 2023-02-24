@@ -59,7 +59,7 @@ namespace {
 
         game::map::Ship* sh = s.session().getGame()->currentTurn().universe().ships().create(id);
         sh->addCurrentShipData(data, game::PlayerSet_t(1));  // needed to enable ship prediction
-        sh->internalCheck();
+        sh->internalCheck(game::PlayerSet_t(1), 15);
     }
 
     void addBase(SessionThread& s, int id, Point pos)
@@ -87,6 +87,8 @@ namespace {
         }
         pl->addCurrentBaseData(base, game::PlayerSet_t(1));
         pl->internalCheck(s.session().getGame()->mapConfiguration(),
+                          game::PlayerSet_t(1),
+                          s.session().getGame()->currentTurn().getTurnNumber(),
                           s.session().translator(),
                           s.session().log());
         pl->setPlayability(game::map::Object::Playable);

@@ -72,7 +72,7 @@ namespace {
         sd.y = pos.getY();
         sd.owner = owner;
         sh.addCurrentShipData(sd, game::PlayerSet_t(owner));
-        sh.internalCheck();
+        sh.internalCheck(game::PlayerSet_t(owner), 15);
         sh.setPlayability(game::map::Object::Playable);
         return sh;
     }

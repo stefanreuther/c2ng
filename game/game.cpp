@@ -111,10 +111,7 @@ game::Game::addMessageInformation(const game::parser::MessageInformation& info,
                 pShip->messages().add(*pNr);
             }
             if (!isLoading) {
-                pShip->internalCheck();
-                pShip->combinedCheck1(currentTurn().universe(),
-                                      currentTurn().universe().getAvailablePlayers(),
-                                      currentTurn().getTurnNumber());
+                pShip->internalCheck(currentTurn().universe().getAvailablePlayers(), currentTurn().getTurnNumber());
             }
         }
         break;
@@ -129,10 +126,7 @@ game::Game::addMessageInformation(const game::parser::MessageInformation& info,
                 pPlanet->messages().add(*pNr);
             }
             if (!isLoading) {
-                pPlanet->internalCheck(mapConfiguration(), tx, log);
-                pPlanet->combinedCheck2(currentTurn().universe(),
-                                        currentTurn().universe().getAvailablePlayers(),
-                                        currentTurn().getTurnNumber());
+                pPlanet->internalCheck(mapConfiguration(), currentTurn().universe().getAvailablePlayers(), currentTurn().getTurnNumber(), tx, log);
             }
         }
         break;

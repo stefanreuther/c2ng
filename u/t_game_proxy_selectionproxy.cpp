@@ -33,7 +33,7 @@ namespace {
 
         afl::string::NullTranslator tx;
         afl::sys::Log log;
-        p.internalCheck(game::map::Configuration(), tx, log);
+        p.internalCheck(game::map::Configuration(), game::PlayerSet_t(), 15, tx, log);
         p.setPlayability(game::map::Object::NotPlayable);
         return p;
     }
@@ -42,7 +42,7 @@ namespace {
     {
         Ship& s = *u.ships().create(id);
         s.addShipXYData(game::map::Point(1000, 1000+id), 3, 222, game::PlayerSet_t(1));
-        s.internalCheck();
+        s.internalCheck(game::PlayerSet_t(1), 15);
         s.setPlayability(game::map::Object::NotPlayable);
         return s;
     }

@@ -12,7 +12,6 @@
 #include "game/actions/basebuildexecutor.hpp"
 #include "game/exception.hpp"
 #include "game/map/configuration.hpp"
-#include "game/map/universe.hpp"
 #include "game/test/cargocontainer.hpp"
 #include "game/test/registrationkey.hpp"
 #include "game/test/specificationloader.hpp"
@@ -23,8 +22,7 @@ namespace {
     class TestHarness {
      public:
         TestHarness()
-            : univ(),
-              planet(*univ.planets().create(72)),
+            : planet(72),
               container(),
               shipList(),
               root(afl::io::InternalDirectory::create("game dir"),
@@ -36,8 +34,7 @@ namespace {
                    game::Root::Actions_t())
             { root.hostConfiguration().setDefaultValues(); }
 
-        game::map::Universe univ;
-        game::map::Planet& planet;
+        game::map::Planet planet;
         game::test::CargoContainer container;
         game::spec::ShipList shipList;
         game::Root root;
@@ -56,14 +53,13 @@ namespace {
         h.planet.setBaseTechLevel(game::EngineTech, 1);
         h.planet.setBaseTechLevel(game::BeamTech, 1);
         h.planet.setBaseTechLevel(game::TorpedoTech, 1);
-        h.planet.internalCheck(game::map::Configuration(), h.tx, h.log);
-        h.planet.combinedCheck2(h.univ, game::PlayerSet_t(7), 12);
+        h.planet.internalCheck(game::map::Configuration(), game::PlayerSet_t(7), 12, h.tx, h.log);
         h.planet.setPlayability(game::map::Object::Playable);
 
         // This must have produced a base
         TS_ASSERT(h.planet.hasBase());
     }
-    
+
     class TestAction : public game::actions::BaseBuildAction {
      public:
         explicit TestAction(TestHarness& h)
@@ -93,8 +89,7 @@ TestGameActionsBaseBuildAction::testError()
     h.planet.setPosition(game::map::Point(1111, 2222));
     h.planet.addCurrentPlanetData(game::map::PlanetData(), game::PlayerSet_t(7));
     h.planet.setOwner(7);
-    h.planet.internalCheck(game::map::Configuration(), h.tx, h.log);
-    h.planet.combinedCheck2(h.univ, game::PlayerSet_t(7), 12);
+    h.planet.internalCheck(game::map::Configuration(), game::PlayerSet_t(7), 12, h.tx, h.log);
     h.planet.setPlayability(game::map::Object::Playable);
 
     TS_ASSERT_THROWS((TestAction(h)), game::Exception);

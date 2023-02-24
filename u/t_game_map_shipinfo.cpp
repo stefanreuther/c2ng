@@ -66,8 +66,7 @@ namespace {
         sd.y = pos.getY();
         sd.hullType = game::test::ANNIHILATION_HULL_ID;
         sh->addCurrentShipData(sd, game::PlayerSet_t(4));
-        sh->internalCheck();
-        sh->combinedCheck1(env.univ, game::PlayerSet_t(4), /* turn: */ 15);
+        sh->internalCheck(game::PlayerSet_t(4), /* turn: */ 15);
         sh->setPlayability(Ship::Playable);
         return *sh;
     }
@@ -105,7 +104,7 @@ TestGameMapShipInfo::testPackShipLocationInfo()
     game::map::Planet* pl = univ.planets().create(99);
     pl->setPosition(PB);
     pl->setName("Pluto");
-    pl->internalCheck(mapConfig, tx, log);
+    pl->internalCheck(mapConfig, game::PlayerSet_t(), TURN_NR, tx, log);
 
     // Create a ship
     Ship sh(33);
@@ -116,8 +115,7 @@ TestGameMapShipInfo::testPackShipLocationInfo()
     sh.setWarpFactor(3);
     addShipTrack(sh, TURN_NR-1, PB);
     addShipTrack(sh, TURN_NR-2, PC);
-    sh.internalCheck();
-    sh.combinedCheck1(univ, game::PlayerSet_t(10), TURN_NR);
+    sh.internalCheck(game::PlayerSet_t(10), TURN_NR);
 
     // Do it
     game::map::ShipLocationInfos_t result;
@@ -170,7 +168,7 @@ TestGameMapShipInfo::testPackShipMassRanges()
     Environment env;
     Ship sh(10);
     sh.addShipXYData(Point(1000, 1000), 3, 400, game::PlayerSet_t(4));
-    sh.internalCheck();
+    sh.internalCheck(game::PlayerSet_t(4), 15);
 
     // ...I expect no result.
     game::map::ShipCargoInfos_t result;
@@ -192,7 +190,7 @@ TestGameMapShipInfo::testPackShipMassRanges2()
     Ship sh(10);
     sh.addShipXYData(Point(1000, 1000), 3, 400, game::PlayerSet_t(4));
     sh.setHull(77);
-    sh.internalCheck();
+    sh.internalCheck(game::PlayerSet_t(4), 15);
 
     // ...I expect a valid result: scanned mass indicates neither tank, nor cargo hold are full, but they might be empty.
     game::map::ShipCargoInfos_t result;
@@ -229,7 +227,7 @@ TestGameMapShipInfo::testPackShipMassRanges3()
     Ship sh(10);
     sh.addShipXYData(Point(1000, 1000), 3, 510, game::PlayerSet_t(4));
     sh.setHull(77);
-    sh.internalCheck();
+    sh.internalCheck(game::PlayerSet_t(4), 15);
 
     // ...I expect a valid result: scanned mass indicates neither tank, nor cargo hold are empty, but they might be full.
     game::map::ShipCargoInfos_t result;
@@ -266,7 +264,7 @@ TestGameMapShipInfo::testPackShipMassRanges4()
     Ship sh(10);
     sh.addShipXYData(Point(1000, 1000), 3, 510, game::PlayerSet_t(4));
     sh.setHull(77);
-    sh.internalCheck();
+    sh.internalCheck(game::PlayerSet_t(4), 15);
 
     // ...I expect a valid result: scanned mass indicates fuel tank might be full or empty, cargo follows from that
     game::map::ShipCargoInfos_t result;
@@ -307,7 +305,7 @@ TestGameMapShipInfo::testPackShipMassRanges5()
     Ship sh(10);
     sh.addShipXYData(Point(1000, 1000), 3, 510, game::PlayerSet_t(4));
     sh.setHull(77);
-    sh.internalCheck();
+    sh.internalCheck(game::PlayerSet_t(4), 15);
 
     // ...I expect a valid result: reasoning includes weapons
     game::map::ShipCargoInfos_t result;
@@ -352,7 +350,7 @@ TestGameMapShipInfo::testPackShipMassRanges6()
     sh.setNumLaunchers(5);
     sh.setBeamType(4);
     sh.setNumBeams(6);
-    sh.internalCheck();
+    sh.internalCheck(game::PlayerSet_t(4), 15);
 
     // ...I expect a valid result: reasoning includes weapons
     game::map::ShipCargoInfos_t result;
@@ -388,7 +386,7 @@ TestGameMapShipInfo::testPackShipLastKnownCargo()
     Environment env;
     Ship sh(10);
     sh.addShipXYData(Point(1000, 1000), 3, 510, game::PlayerSet_t(4));
-    sh.internalCheck();
+    sh.internalCheck(game::PlayerSet_t(4), 15);
 
     // ...I expect an empty result.
     game::map::ShipCargoInfos_t result;
@@ -411,7 +409,7 @@ TestGameMapShipInfo::testPackShipLastKnownCargo2()
     sh.setAmmo(10);
     sh.setNumBays(1);
     sh.setHull(77);
-    sh.internalCheck();
+    sh.internalCheck(game::PlayerSet_t(4), 15);
 
     // ...I expect an appropriate result.
     game::map::ShipCargoInfos_t result;
@@ -448,7 +446,7 @@ TestGameMapShipInfo::testPackShipLastKnownCargo3()
     sh.setNumLaunchers(1);
     sh.setTorpedoType(3);
     sh.setHull(77);
-    sh.internalCheck();
+    sh.internalCheck(game::PlayerSet_t(4), 15);
 
     // ...I expect an appropriate result.
     game::map::ShipCargoInfos_t result;
@@ -476,7 +474,7 @@ TestGameMapShipInfo::testPackShipMovementInfo()
     MoveEnvironment env;
     Ship sh(10);
     sh.addShipXYData(Point(1000, 1000), 3, 510, game::PlayerSet_t(4));
-    sh.internalCheck();
+    sh.internalCheck(game::PlayerSet_t(4), 15);
 
     // ...I expect no movement information
     game::map::ShipMovementInfos_t result;

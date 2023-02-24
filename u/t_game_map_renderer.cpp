@@ -131,8 +131,7 @@ namespace {
         Ship* sh = env.univ.ships().create(id);
         TS_ASSERT(sh != 0);
         sh->addShipXYData(pt, owner, /* mass */ 400, PlayerSet_t(scanner));
-        sh->internalCheck();
-        sh->combinedCheck1(env.univ, PlayerSet_t(scanner), TURN_NUMBER);
+        sh->internalCheck(PlayerSet_t(scanner), TURN_NUMBER);
         return *sh;
     }
 
@@ -148,8 +147,7 @@ namespace {
     {
         afl::string::NullTranslator tx;
         afl::sys::Log log;
-        p.internalCheck(env.mapConfig, tx, log);
-        p.combinedCheck2(env.univ, PlayerSet_t(scanner), TURN_NUMBER);
+        p.internalCheck(env.mapConfig, PlayerSet_t(scanner), TURN_NUMBER, tx, log);
         return p;
     }
 

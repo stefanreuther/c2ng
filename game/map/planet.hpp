@@ -146,18 +146,15 @@ namespace game { namespace map {
             Internal checks do not require a partner to interact with.
             This will determine the planet kind,
             fix possible the problems, and log appropriate messages.
+
+            The previous second check, which needs a Universe, is no longer required.
+
             \param config Map configuration
+            \param availablePlayers Players for which we have current data
+            \param turnNumber Turn number
             \param tx Translator
             \param log Logger */
-        void internalCheck(const Configuration& config, afl::string::Translator& tx, afl::sys::LogListener& log);
-
-        /** Combined checks, phase 2.
-            This will do all post-processing which needs a partner to interact with.
-            It requires the playability to be filled in.
-            \param univ Universe
-            \param availablePlayers Players for which we have current data
-            \param turnNumber Turn number */
-        void combinedCheck2(const Universe& univ, PlayerSet_t availablePlayers, int turnNumber);
+        void internalCheck(const Configuration& config, PlayerSet_t availablePlayers, int turnNumber, afl::string::Translator& tx, afl::sys::LogListener& log);
 
 
         /*

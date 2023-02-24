@@ -35,7 +35,7 @@ namespace {
         game::map::Configuration config;
         afl::string::NullTranslator tx;
         afl::sys::Log log;
-        planet.internalCheck(config, tx, log);
+        planet.internalCheck(config, game::PlayerSet_t(1), 15, tx, log);
     }
 }
 

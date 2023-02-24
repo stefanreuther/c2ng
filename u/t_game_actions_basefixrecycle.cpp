@@ -29,7 +29,7 @@ namespace {
         // Update m_baseKind
         NullTranslator tx;
         afl::sys::Log log;
-        p.internalCheck(game::map::Configuration(), tx, log);
+        p.internalCheck(game::map::Configuration(), game::PlayerSet_t(owner), 15, tx, log);
         return p;
     }
 }

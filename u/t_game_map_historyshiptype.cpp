@@ -20,7 +20,7 @@ namespace {
     Ship& addShip(ShipVector_t& v, game::Id_t id, Point pos, int owner)
     {
         // Let source be different from owner, to make this "true" scans.
-        // With source=owner, combinedCheck1 would discard the ships as bogons,
+        // With source=owner, Ship::internalCheck would discard the ships as bogons,
         // because they should have got a proper full record (addCurrentShipData).
         game::PlayerSet_t source(owner+1);
 
@@ -45,8 +45,7 @@ namespace {
         game::map::Universe univ;
         for (game::Id_t i = 1, n = v.size(); i <= n; ++i) {
             if (Ship* sh = v.get(i)) {
-                sh->internalCheck();
-                sh->combinedCheck1(univ, game::PlayerSet_t(), TURN_NR);
+                sh->internalCheck(game::PlayerSet_t(), TURN_NR);
             }
         }
     }

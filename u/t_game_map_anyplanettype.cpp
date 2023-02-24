@@ -26,12 +26,12 @@ TestGameMapAnyPlanetType::testIt()
 
     // Blank planet object - not visible
     Planet* p1 = pv.create(100);
-    p1->internalCheck(config, tx, log);
+    p1->internalCheck(config, game::PlayerSet_t(3), 15, tx, log);
 
     // Planet with XY coordinates
     Planet* p2 = pv.create(200);
     p2->setPosition(game::map::Point(1200, 2000));
-    p2->internalCheck(config, tx, log);
+    p2->internalCheck(config, game::PlayerSet_t(3), 15, tx, log);
 
     // Planet with actual data
     Planet* p3 = pv.create(300);
@@ -39,7 +39,7 @@ TestGameMapAnyPlanetType::testIt()
     pd3.owner = 7;
     p3->setPosition(game::map::Point(1300, 2000));
     p3->addCurrentPlanetData(pd3, game::PlayerSet_t(3));
-    p3->internalCheck(config, tx, log);
+    p3->internalCheck(config, game::PlayerSet_t(3), 15, tx, log);
 
     // Test
     game::map::AnyPlanetType testee(pv);

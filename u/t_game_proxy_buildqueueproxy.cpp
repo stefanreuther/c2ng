@@ -70,7 +70,7 @@ namespace {
         bd.engineStorage.set(1, 100);
         p->addCurrentBaseData(bd, game::PlayerSet_t(PLAYER_NR));
 
-        p->internalCheck(game::map::Configuration(), s.session().translator(), s.session().log());
+        p->internalCheck(game::map::Configuration(), game::PlayerSet_t(PLAYER_NR), 15, s.session().translator(), s.session().log());
         p->setPlayability(game::map::Object::Playable);
 
         return *p;

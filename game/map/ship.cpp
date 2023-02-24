@@ -295,9 +295,9 @@ game::map::Ship::getCurrentShipData(ShipData& out) const
 }
 
 void
-game::map::Ship::internalCheck()
+game::map::Ship::internalCheck(PlayerSet_t availablePlayers, int turnNumber)
 {
-    // ex GShip::internalCheck
+    // ex GShip::internalCheck, GShip::combinedCheck1
     // figure out what kind we are
     if (!m_shipSource.empty()) {
         // current ship
@@ -329,14 +329,6 @@ game::map::Ship::internalCheck()
         // Remove known data. If this data leaks into chartX.cc files, PCC2 < 2.0.7 will crash.
         m_currentData = ShipData();
     }
-}
-
-void
-game::map::Ship::combinedCheck1(Universe& univ, PlayerSet_t availablePlayers, int turnNumber)
-{
-    // ex GShip::combinedCheck1
-    // FIXME: the univ parameter is a relic from PCC2. Remove it and merge with internalCheck?
-    (void) univ;
 
     // Update ages
     if (hasFullShipData()) {

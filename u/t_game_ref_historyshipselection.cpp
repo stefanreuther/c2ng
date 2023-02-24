@@ -27,14 +27,13 @@ namespace {
     game::map::Ship& addShip(Universe& u, game::Id_t id, Point pos, int owner)
     {
         // Let source be different from owner, to make this "true" scans.
-        // With source=owner, combinedCheck1 would discard the ships as bogons,
+        // With source=owner, Ship::internalCheck() would discard the ships as bogons,
         // because they should have got a proper full record (addCurrentShipData).
         game::PlayerSet_t source(owner+1);
 
         game::map::Ship& sh = *u.ships().create(id);
         sh.addShipXYData(pos, owner, 100, source);
-        sh.internalCheck();
-        sh.combinedCheck1(u, source, TURN_NR);
+        sh.internalCheck(source, TURN_NR);
         sh.setPlayability(game::map::Object::NotPlayable);
 
         return sh;
@@ -384,8 +383,7 @@ TestGameRefHistoryShipSelection::testBuildListHist2()
     game::Turn t;
     game::map::Ship& s1 = *t.universe().ships().create(1);
     s1.setOwner(ME);
-    s1.internalCheck();
-    s1.combinedCheck1(t.universe(), game::PlayerSet_t(), TURN_NR);
+    s1.internalCheck(game::PlayerSet_t(), TURN_NR);
     addShipNonTrack(s1, 4);
     addShipTrack(s1, 5, Point(1000, 1020));
     t.setTurnNumber(TURN_NR);

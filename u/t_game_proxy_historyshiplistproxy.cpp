@@ -45,8 +45,7 @@ namespace {
         game::map::Universe& u = h.session().getGame()->currentTurn().universe();
         game::map::Ship& sh = *u.ships().create(id);
         sh.addShipXYData(pos, owner, 100, source);
-        sh.internalCheck();
-        sh.combinedCheck1(u, source, TURN_NR);
+        sh.internalCheck(source, TURN_NR);
         sh.setPlayability(game::map::Object::NotPlayable);
         return sh;
     }

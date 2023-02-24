@@ -99,8 +99,7 @@ namespace {
         h.planet.setBaseTechLevel(game::EngineTech, 1);
         h.planet.setBaseTechLevel(game::BeamTech, 1);
         h.planet.setBaseTechLevel(game::TorpedoTech, 1);
-        h.planet.internalCheck(game::map::Configuration(), h.tx, h.log);
-        h.planet.combinedCheck2(h.univ, game::PlayerSet_t(7), 12);
+        h.planet.internalCheck(game::map::Configuration(), game::PlayerSet_t(7), 12, h.tx, h.log);
         h.planet.setPlayability(game::map::Object::Playable);
 
         // Define a number of components

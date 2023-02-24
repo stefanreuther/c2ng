@@ -166,7 +166,6 @@ namespace game { namespace map {
             Call this to make structural changes propagate.
             In particular, this calls
             - objects' internalCheck methods
-            - objects' combinedCheck methods
             - set objects' playability
             - signal sig_setChange on all containers so cursors can adapt
 

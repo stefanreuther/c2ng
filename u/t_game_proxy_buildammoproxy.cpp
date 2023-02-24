@@ -89,7 +89,7 @@ namespace {
         sd.crew = 10;
         sd.ammo = 20;
         sh->addCurrentShipData(sd, game::PlayerSet_t(PLAYER_NR));
-        sh->internalCheck();
+        sh->internalCheck(game::PlayerSet_t(PLAYER_NR), 15);
         sh->setPlayability(game::map::Object::Playable);
     }
 

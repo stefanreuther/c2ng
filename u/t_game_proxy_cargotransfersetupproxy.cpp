@@ -84,7 +84,7 @@ namespace {
         p.setPlayability(Planet::Playable);
         p.setName("Melmac");
 
-        p.internalCheck(game::map::Configuration(), h.session().translator(), h.session().log());
+        p.internalCheck(game::map::Configuration(), game::PlayerSet_t(OWNER), 15, h.session().translator(), h.session().log());
 
         return p;
     }
@@ -116,7 +116,7 @@ namespace {
         data.name                      = "Titanic";
 
         sh.addCurrentShipData(data, game::PlayerSet_t(OWNER));
-        sh.internalCheck();
+        sh.internalCheck(game::PlayerSet_t(OWNER), 15);
         sh.setPlayability(game::map::Object::Playable);
 
         return sh;

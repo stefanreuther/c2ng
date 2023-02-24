@@ -35,19 +35,19 @@ TestGameMapPlayedBaseType::testIt()
 
     // Blank planet object - not visible
     Planet* p1 = pv.create(1);
-    p1->internalCheck(config, tx, log);
+    p1->internalCheck(config, ps, 15, tx, log);
 
     // Planet with XY coordinates - not visible
     Planet* p2 = pv.create(2);
     p2->setPosition(game::map::Point(1200, 2000));
-    p2->internalCheck(config, tx, log);
+    p2->internalCheck(config, ps, 15, tx, log);
 
     // Planet with actual data - not visible, no base
     Planet* p3 = pv.create(3);
     p3->setPosition(game::map::Point(1300, 2000));
     p3->addCurrentPlanetData(pd, ps);
     p3->setPlayability(game::map::Object::Playable);
-    p3->internalCheck(config, tx, log);
+    p3->internalCheck(config, ps, 15, tx, log);
 
     // Planet with base - visible, no base
     Planet* p4 = pv.create(4);
@@ -55,7 +55,7 @@ TestGameMapPlayedBaseType::testIt()
     p4->addCurrentPlanetData(pd, ps);
     p4->addCurrentBaseData(bd, ps);
     p4->setPlayability(game::map::Object::Playable);
-    p4->internalCheck(config, tx, log);
+    p4->internalCheck(config, ps, 15, tx, log);
 
     // Another planet with base - visible, no base
     Planet* p5 = pv.create(5);
@@ -63,7 +63,7 @@ TestGameMapPlayedBaseType::testIt()
     p5->addCurrentPlanetData(pd, ps);
     p5->addCurrentBaseData(bd, ps);
     p5->setPlayability(game::map::Object::Playable);
-    p5->internalCheck(config, tx, log);
+    p5->internalCheck(config, ps, 15, tx, log);
 
     // Test
     game::map::PlayedBaseType testee(pv);

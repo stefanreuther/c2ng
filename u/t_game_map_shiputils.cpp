@@ -30,8 +30,7 @@ namespace {
         sd.friendlyCode = fc;
         sd.owner = 3;
         sh.addCurrentShipData(sd, game::PlayerSet_t(3));
-        sh.internalCheck();
-        sh.combinedCheck1(univ, game::PlayerSet_t(3), 10);
+        sh.internalCheck(game::PlayerSet_t(3), 10);
         sh.setPlayability(game::map::Object::Playable);
         return sh;
     }

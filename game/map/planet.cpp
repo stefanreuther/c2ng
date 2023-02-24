@@ -446,7 +446,7 @@ game::map::Planet::getCurrentBaseData(BaseData& data) const
 
 // Do internal checks for this planet.
 void
-game::map::Planet::internalCheck(const Configuration& config, afl::string::Translator& tx, afl::sys::LogListener& log)
+game::map::Planet::internalCheck(const Configuration& config, PlayerSet_t availablePlayers, int turnNumber, afl::string::Translator& tx, afl::sys::LogListener& log)
 {
     // ex GPlanet::internalCheck
 
@@ -503,14 +503,6 @@ game::map::Planet::internalCheck(const Configuration& config, afl::string::Trans
         // This case also applies for an own planet with "build me a base" set. combinedCheck2() will fix that up.
         m_baseKind = ExistingBase;
     }
-}
-
-// Combined checks, phase 2.
-void
-game::map::Planet::combinedCheck2(const Universe& univ, PlayerSet_t availablePlayers, int turnNumber)
-{
-    // FIXME: remove parameter?
-    (void) univ;
 
     if (isUsed(m_currentPlanetData)) {
         if (m_planetKind == CurrentPlanet) {
@@ -539,7 +531,6 @@ game::map::Planet::combinedCheck2(const Universe& univ, PlayerSet_t availablePla
         }
     }
 }
-
 
 String_t
 game::map::Planet::getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const

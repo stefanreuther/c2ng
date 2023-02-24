@@ -92,16 +92,13 @@ namespace game { namespace map {
         /** Do internal checks for this ship.
             Internal checks do not require a partner to interact with.
             This will fix the problems, and display appropriate messages.
-            It will also fill in the ship kind. */
-        void internalCheck();
+            It will also fill in the ship kind.
 
-        /** Combined checks, phase 1.
-            This will do all post-processing which possibly needs a partner to interact with.
-            It requires the playability to be filled in.
-            \param univ             Universe
+            The previous second check, which needs a Universe, is no longer required.
+
             \param availablePlayers Available players (union of all source parameters used)
             \param turnNumber       Current turn number */
-        void combinedCheck1(Universe& univ, PlayerSet_t availablePlayers, int turnNumber);
+        void internalCheck(PlayerSet_t availablePlayers, int turnNumber);
 
 
         /*

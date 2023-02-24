@@ -257,7 +257,7 @@ TestGameProxyBaseStorageProxy::testCustom()
 
                 // - internal metadata
                 game::map::Configuration config;
-                m_planet.internalCheck(config, session.translator(), session.log());
+                m_planet.internalCheck(config, game::PlayerSet_t(PLAYER_NR), 15, session.translator(), session.log());
                 m_planet.setPlayability(game::map::Object::Playable);
             }
         virtual game::map::Planet& planet()

@@ -103,8 +103,7 @@ namespace {
 
         game::map::Ship* sh = univ.ships().create(shipId);
         sh->addCurrentShipData(sd, game::PlayerSet_t(4));
-        sh->internalCheck();
-        sh->combinedCheck1(univ, game::PlayerSet_t(4), 10);
+        sh->internalCheck(game::PlayerSet_t(4), 10);
         sh->setPlayability(game::map::Object::Playable);
 
         thread.session().setGame(g);

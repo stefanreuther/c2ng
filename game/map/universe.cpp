@@ -240,7 +240,7 @@ game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePl
     // Internal check for ships and planets
     for (Id_t i = 1, n = m_planets.size(); i <= n; ++i) {
         if (Planet* p = m_planets.get(i)) {
-            p->internalCheck(mapConfig, tx, log);
+            p->internalCheck(mapConfig, availablePlayers, turnNumber, tx, log);
 
             int owner;
             if (p->getOwner().get(owner)) {
@@ -257,7 +257,7 @@ game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePl
 
     for (Id_t i = 1, n = m_ships.size(); i <= n; ++i) {
         if (Ship* s = m_ships.get(i)) {
-            s->internalCheck();
+            s->internalCheck(availablePlayers, turnNumber);
 
             int owner;
             if (s->getOwner().get(owner)) {
@@ -291,18 +291,6 @@ game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePl
     m_explosions.sig_setChange.raise(0);
     m_allShips.sig_setChange.raise(0);
     m_allPlanets.sig_setChange.raise(0);
-
-    // Combined checks
-    for (Id_t i = 1, n = m_ships.size(); i <= n; ++i) {
-        if (Ship* s = m_ships.get(i)) {
-            s->combinedCheck1(*this, availablePlayers, turnNumber);
-        }
-    }
-    for (Id_t i = 1, n = m_planets.size(); i <= n; ++i) {
-        if (Planet* p = m_planets.get(i)) {
-            p->combinedCheck2(*this, availablePlayers, turnNumber);
-        }
-    }
 
     // Fleets
     for (Id_t i = 1, n = m_ships.size(); i <= n; ++i) {

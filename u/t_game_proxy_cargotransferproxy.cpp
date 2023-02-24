@@ -84,7 +84,7 @@ namespace {
         p.setPlayability(Planet::Playable);
         p.setName("Melmac");
         p.setFriendlyCode(String_t("alf"));
-        p.internalCheck(g->mapConfiguration(), h.session().translator(), h.session().log());
+        p.internalCheck(g->mapConfiguration(), game::PlayerSet_t(OWNER), 15, h.session().translator(), h.session().log());
         TS_ASSERT(p.isVisible());
         return p;
     }
@@ -118,7 +118,7 @@ namespace {
         data.friendlyCode              = "joe";
 
         sh.addCurrentShipData(data, game::PlayerSet_t(OWNER));
-        sh.internalCheck();
+        sh.internalCheck(game::PlayerSet_t(OWNER), 15);
         sh.setPlayability(game::map::Object::Playable);
 
         return sh;

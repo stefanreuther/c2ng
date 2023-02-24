@@ -17,12 +17,12 @@ TestGameMapAnyShipType::testIt()
 
     // Blank ship
     Ship* s1 = sv.create(100);
-    s1->internalCheck();
+    s1->internalCheck(game::PlayerSet_t(5), 15);
 
     // Visible ship
     Ship* s2 = sv.create(200);
-    s2->addShipXYData(game::map::Point(1000, 1200), 5, 100, game::PlayerSet_t(5));
-    s2->internalCheck();
+    s2->addShipXYData(game::map::Point(1000, 1200), 5, 100, game::PlayerSet_t(4));
+    s2->internalCheck(game::PlayerSet_t(4), 15);
 
     // Played ship
     Ship* s3 = sv.create(300);
@@ -32,7 +32,7 @@ TestGameMapAnyShipType::testIt()
     sd3.y = 1300;
     s3->addCurrentShipData(sd3, game::PlayerSet_t(4));
     s3->setPlayability(game::map::Object::Playable);
-    s3->internalCheck();
+    s3->internalCheck(game::PlayerSet_t(4), 15);
 
     // Test
     game::map::AnyShipType testee(sv);

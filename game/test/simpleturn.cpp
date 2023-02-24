@@ -46,7 +46,7 @@ game::test::SimpleTurn::addShip(Id_t shipId, int owner, game::map::Object::Playa
     sd.y = m_position.getY();
     sd.owner = owner;
     pShip->addCurrentShipData(sd, game::PlayerSet_t(owner));
-    pShip->internalCheck();
+    pShip->internalCheck(game::PlayerSet_t(owner), m_turn.getTurnNumber());
     pShip->setPlayability(playability);
 
     // - set some nice properties
@@ -87,7 +87,7 @@ game::test::SimpleTurn::addPlanet(Id_t planetId, int owner, game::map::Object::P
 
     afl::string::NullTranslator tx;
     afl::sys::Log log;
-    pPlanet->internalCheck(game::map::Configuration(), tx, log);
+    pPlanet->internalCheck(game::map::Configuration(), game::PlayerSet_t(owner), m_turn.getTurnNumber(), tx, log);
     pPlanet->setPlayability(playability);
 
     return *pPlanet;
@@ -111,6 +111,6 @@ game::test::SimpleTurn::addBase(Id_t planetId, int owner, game::map::Object::Pla
     // Update m_baseKind
     afl::string::NullTranslator tx;
     afl::sys::Log log;
-    pl.internalCheck(game::map::Configuration(), tx, log);
+    pl.internalCheck(game::map::Configuration(), game::PlayerSet_t(owner), m_turn.getTurnNumber(), tx, log);
     return pl;
 }

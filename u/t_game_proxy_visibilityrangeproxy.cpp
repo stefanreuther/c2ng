@@ -39,7 +39,7 @@ TestGameProxyVisibilityRangeProxy::testSequence()
     game::map::Planet* p = g->currentTurn().universe().planets().create(33);
     p->setOwner(PLAYER);
     p->setPosition(game::map::Point(1000, 1000));
-    p->internalCheck(game::map::Configuration(), t.session().translator(), t.session().log());
+    p->internalCheck(game::map::Configuration(), game::PlayerSet_t(), 15, t.session().translator(), t.session().log());
     p->setPlayability(game::map::Object::ReadOnly);
 
     // Operate

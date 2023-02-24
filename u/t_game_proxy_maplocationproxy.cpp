@@ -82,8 +82,8 @@ namespace {
     game::map::Ship& addShip(SessionThread& s, int id, Point pos)
     {
         game::map::Ship* sh = s.session().getGame()->currentTurn().universe().ships().create(id);
-        sh->addShipXYData(pos, 1, 100, game::PlayerSet_t(1));
-        sh->internalCheck();
+        sh->addShipXYData(pos, 1, 100, game::PlayerSet_t(2));
+        sh->internalCheck(game::PlayerSet_t(2), 15);
         return *sh;
     }
 }

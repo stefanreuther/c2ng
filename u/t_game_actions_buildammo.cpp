@@ -92,7 +92,7 @@ namespace {
             }
     };
 
-    void preparePlanet(game::map::Universe& univ, game::map::Planet& pl, int x, int y, int owner)
+    void preparePlanet(game::map::Planet& pl, int x, int y, int owner)
     {
         // Define base storage. This is the only way to reserve memory for base storage.
         // Planet::setBaseStorage only accesses present slots and never creates new ones.
@@ -123,8 +123,7 @@ namespace {
         pl.setCargo(Element::Tritanium, 1000);
         pl.setCargo(Element::Duranium, 1000);
         pl.setCargo(Element::Molybdenum, 1000);
-        pl.internalCheck(game::map::Configuration(), tx, log);
-        pl.combinedCheck2(univ, game::PlayerSet_t(owner), TURN_NR);
+        pl.internalCheck(game::map::Configuration(), game::PlayerSet_t(owner), TURN_NR, tx, log);
         pl.setPlayability(game::map::Object::Playable);
     }
 
@@ -136,7 +135,7 @@ namespace {
         sd.y = y;
         sd.owner = owner;
         sh.addCurrentShipData(sd, game::PlayerSet_t(owner));
-        sh.internalCheck();
+        sh.internalCheck(game::PlayerSet_t(owner), TURN_NR);
         sh.setPlayability(game::map::Object::Playable);
 
         sh.setNumLaunchers(3);
@@ -146,7 +145,7 @@ namespace {
 
     void prepare(TestHarness& h)
     {
-        preparePlanet(h.univ, h.planet, X, Y, OWNER);
+        preparePlanet(h.planet, X, Y, OWNER);
 
         // Define torpedoes
         for (int i = 1; i <= 10; ++i) {
@@ -170,8 +169,7 @@ TestGameActionsBuildAmmo::testFail()
     h.planet.setPosition(game::map::Point(X, Y));
     h.planet.addCurrentPlanetData(game::map::PlanetData(), game::PlayerSet_t(7));
     h.planet.setOwner(7);
-    h.planet.internalCheck(game::map::Configuration(), h.tx, log);
-    h.planet.combinedCheck2(h.univ, game::PlayerSet_t(7), 12);
+    h.planet.internalCheck(game::map::Configuration(), game::PlayerSet_t(7), 12, h.tx, log);
     h.planet.setPlayability(game::map::Object::Playable);
 
     game::test::CargoContainer container;
@@ -529,19 +527,19 @@ TestGameActionsBuildAmmo::testIsValidCombination()
 
     // - my planet (base case)
     game::map::Planet& myPlanet = *univ.planets().create(100);
-    preparePlanet(univ, myPlanet, X, Y, OWNER);
+    preparePlanet(myPlanet, X, Y, OWNER);
 
     // - their planet
     game::map::Planet& theirPlanet = *univ.planets().create(200);
-    preparePlanet(univ, theirPlanet, X, Y, OWNER+1);
+    preparePlanet(theirPlanet, X, Y, OWNER+1);
 
     // - far planet
     game::map::Planet& farPlanet = *univ.planets().create(300);
-    preparePlanet(univ, farPlanet, X+10, Y, OWNER);
+    preparePlanet(farPlanet, X+10, Y, OWNER);
 
     // - unplayed planet
     game::map::Planet& unPlanet = *univ.planets().create(400);
-    preparePlanet(univ, unPlanet, X, Y, OWNER);
+    preparePlanet(unPlanet, X, Y, OWNER);
     unPlanet.setPlayability(game::map::Object::NotPlayable);
 
     // Create own ship and check against all planets
@@ -602,7 +600,7 @@ TestGameActionsBuildAmmo::testIsValidCombination2()
 
     // - my planet (base case)
     game::map::Planet& myPlanet = *univ.planets().create(100);
-    preparePlanet(univ, myPlanet, X, Y, OWNER);
+    preparePlanet(myPlanet, X, Y, OWNER);
 
     // - torpedo ship
     game::map::Ship& torpShip = *univ.ships().create(1);

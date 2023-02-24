@@ -46,7 +46,7 @@ namespace {
         if (owner >= 0) {
             pl->setOwner(owner);
         }
-        pl->internalCheck(env.mapConfig, env.tx, env.log);
+        pl->internalCheck(env.mapConfig, game::PlayerSet_t(12), 15, env.tx, env.log);
     }
 
     void addShip(Environment& env, int id, Point pt, int owner)

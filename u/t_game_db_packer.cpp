@@ -246,8 +246,7 @@ TestGameDbPacker::testShip()
     TS_ASSERT_EQUALS(p->getId(), SHIP_ID);
 
     // We need the checkers to merge ship track into current data
-    p->internalCheck();
-    p->combinedCheck1(turn.universe(), game::PlayerSet_t(), TURN_NR);
+    p->internalCheck(game::PlayerSet_t(), TURN_NR);
 
     // Proceed with verification
     int owner;
@@ -329,8 +328,7 @@ TestGameDbPacker::testFullShip()
     TS_ASSERT_EQUALS(p->getId(), SHIP_ID);
 
     // We need the checkers to merge ship track into current data
-    p->internalCheck();
-    p->combinedCheck1(turn.universe(), game::PlayerSet_t(), TURN_NR);
+    p->internalCheck(game::PlayerSet_t(), TURN_NR);
 
     // Proceed with verification
     int owner;

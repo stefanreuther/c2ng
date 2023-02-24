@@ -63,8 +63,7 @@ namespace {
             bd.launcherStorage.set(i, 0);
         }
         h.planet.addCurrentBaseData(bd, game::PlayerSet_t(PLAYER));
-        h.planet.internalCheck(game::map::Configuration(), tx, log);
-        h.planet.combinedCheck2(h.univ, game::PlayerSet_t(PLAYER), 77);
+        h.planet.internalCheck(game::map::Configuration(), game::PlayerSet_t(PLAYER), 77, tx, log);
         h.planet.setPlayability(game::map::Object::Playable);
     }
 
@@ -84,8 +83,7 @@ namespace {
         sd.neutronium = 100;
         sd.friendlyCode = "abc";
         sh.addCurrentShipData(sd, game::PlayerSet_t(PLAYER));
-        sh.internalCheck();
-        sh.combinedCheck1(h.univ, game::PlayerSet_t(PLAYER), 77);
+        sh.internalCheck(game::PlayerSet_t(PLAYER), 77);
         sh.setPlayability(game::map::Object::Playable);
     }
 }

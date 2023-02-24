@@ -56,8 +56,7 @@ namespace {
         sh.addCurrentShipData(sd, game::PlayerSet_t(owner));
 
         // Make visible
-        sh.internalCheck();
-        sh.combinedCheck1(h.univ, game::PlayerSet_t(owner), 82);
+        sh.internalCheck(game::PlayerSet_t(owner), 82);
         sh.setPlayability(game::map::Object::Playable);
     }
 }

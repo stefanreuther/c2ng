@@ -100,7 +100,7 @@ TestGameShipQuery::testInitForExistingShip()
     sd.owner = PLAYER_NR;
     sd.damage = 7;
     sh->addCurrentShipData(sd, game::PlayerSet_t(PLAYER_NR));
-    sh->internalCheck();
+    sh->internalCheck(game::PlayerSet_t(PLAYER_NR), 15);
     sh->setPlayability(game::map::Object::Playable);
 
     // Ship list

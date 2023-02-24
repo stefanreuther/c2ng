@@ -29,12 +29,17 @@ namespace {
     game::map::Ship& addShip(game::map::Universe& univ, game::Id_t id, String_t name, String_t friendlyCode, int x, int y, int fleetNumber)
     {
         game::map::Ship& sh = *univ.ships().create(id);
-        sh.addShipXYData(game::map::Point(x, y), 1, 1000, game::PlayerSet_t(1));
+        game::map::ShipData sd;
+        sd.x = x;
+        sd.y = y;
+        sd.owner = 1;
+        sd.name = name;
+        sh.addCurrentShipData(sd, game::PlayerSet_t(1));
         sh.setName(name);
         sh.setFleetNumber(fleetNumber);
         sh.setPlayability(game::map::Object::Playable);
         sh.setFriendlyCode(friendlyCode);
-        sh.internalCheck();
+        sh.internalCheck(game::PlayerSet_t(1), 15);
         return sh;
     }
 }

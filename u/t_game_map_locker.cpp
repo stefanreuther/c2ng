@@ -40,7 +40,7 @@ namespace {
 
         afl::string::NullTranslator tx;
         afl::sys::Log log;
-        p->internalCheck(Configuration(), tx, log);
+        p->internalCheck(Configuration(), game::PlayerSet_t(1), 15, tx, log);
     }
 
     void createShip(Universe& univ, int id, Point pt)
@@ -53,7 +53,7 @@ namespace {
         sd.hullType = HULL_TYPE;
         sd.owner = 1;
         p->addCurrentShipData(sd, game::PlayerSet_t(1));
-        p->internalCheck();
+        p->internalCheck(game::PlayerSet_t(1), 15);
     }
 
     void createUfo(Universe& univ, int id, Point pt)
