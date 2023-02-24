@@ -98,6 +98,9 @@ namespace game {
 
     // FIXME: do we need to go fully dynamic here for Nu?
     const int MAX_BASE_MISSION = 6;
+
+    const int MAX_HAPPINESS = 100;            ///< Maximum possible happiness.
+    const int MIN_HAPPINESS = -300;           ///< Minimum possible happiness.
 }
 
 #endif

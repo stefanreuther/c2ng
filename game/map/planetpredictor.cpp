@@ -20,20 +20,20 @@ namespace {
     {
         // ex planacc.pas:ComputePlanetTurn.TrimHappiness
         int chappy = pl.getColonistHappiness().orElse(0);
-        if (chappy < -300) {
-            chappy = -300;
+        if (chappy < game::MIN_HAPPINESS) {
+            chappy = game::MIN_HAPPINESS;
         }
-        if (chappy > 100) {
-            chappy = 100;
+        if (chappy > game::MAX_HAPPINESS) {
+            chappy = game::MAX_HAPPINESS;
         }
         pl.setColonistHappiness(chappy);
 
         int nhappy = pl.getNativeHappiness().orElse(0);
-        if (nhappy < -300) {
-            nhappy = -300;
+        if (nhappy < game::MIN_HAPPINESS) {
+            nhappy = game::MIN_HAPPINESS;
         }
-        if (nhappy > 100) {
-            nhappy = 100;
+        if (nhappy > game::MAX_HAPPINESS) {
+            nhappy = game::MAX_HAPPINESS;
         }
         pl.setNativeHappiness(nhappy);
     }

@@ -281,7 +281,7 @@ namespace game { namespace map {
         NegativeProperty_t getColonistHappiness() const;
 
         /** Set colonist happiness.
-            \param happiness New value [-300,+100]*/
+            \param happiness New value [MIN_HAPPINESS, MAX_HAPPINESS] */
         void setColonistHappiness(NegativeProperty_t happiness);
 
         /** Get colonist tax rate
@@ -310,7 +310,7 @@ namespace game { namespace map {
         NegativeProperty_t getNativeHappiness() const;
 
         /** Set native happiness.
-            \param happiness New value [-300,+100] */
+            \param happiness New value [MIN_HAPPINESS, MAX_HAPPINESS] */
         void setNativeHappiness(NegativeProperty_t happiness);
 
         /** Get native race.
