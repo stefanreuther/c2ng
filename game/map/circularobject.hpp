@@ -13,6 +13,14 @@ namespace game { namespace map {
         This extends Object to include a radius. */
     class CircularObject : public Object {
      public:
+        /** Constructor.
+            \param id Object Id. The object Id is the value returned by getId(), and usually remains unchanged
+                      during the object's lifetime. If needed, it can be changed using setId(). */
+        explicit CircularObject(Id_t id)
+            : Object(id)
+            { }
+
+        /** Virtual destructor. */
         virtual ~CircularObject();
 
         /** Get object radius in light-years.

@@ -45,8 +45,7 @@ namespace {
 const int game::map::IonStorm::UNCERTAINITY_LIMIT;
 
 game::map::IonStorm::IonStorm(int id)
-    : CircularObject(),
-      m_id(id),
+    : CircularObject(id),
       m_x(),
       m_y(),
       m_radius(),
@@ -77,13 +76,6 @@ game::map::IonStorm::getName(ObjectName which, afl::string::Translator& tx, Inte
         }
         return String_t();
     }
-}
-
-game::Id_t
-game::map::IonStorm::getId() const
-{
-    // ex GIonStorm::getId
-    return m_id;
 }
 
 afl::base::Optional<int>
@@ -288,5 +280,5 @@ game::map::IonStorm::getForecast(Forecast_t& result) const
 String_t
 game::map::IonStorm::getDefaultName(afl::string::Translator& tx) const
 {
-    return afl::string::Format(tx.translateString("Ion storm #%d").c_str(), m_id);
+    return afl::string::Format(tx.translateString("Ion storm #%d").c_str(), getId());
 }

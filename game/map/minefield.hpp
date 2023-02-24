@@ -71,7 +71,6 @@ namespace game { namespace map {
 
         // Object:
         virtual String_t getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const;
-        virtual Id_t getId() const;
         virtual afl::base::Optional<int> getOwner() const;
         virtual afl::base::Optional<Point> getPosition() const;
 
@@ -170,8 +169,6 @@ namespace game { namespace map {
         static int32_t getRadiusFromUnits(int32_t units);
 
      private:
-        const Id_t m_id;        // id
-
         // Main information
         Point m_position;       // x,y
         int m_owner;            // owner

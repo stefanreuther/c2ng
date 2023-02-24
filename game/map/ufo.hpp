@@ -32,7 +32,6 @@ namespace game { namespace map {
 
         // Object:
         virtual String_t getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const;
-        virtual Id_t getId() const;
         virtual afl::base::Optional<int> getOwner() const;
         virtual afl::base::Optional<Point> getPosition() const;
 
@@ -210,7 +209,6 @@ namespace game { namespace map {
         };
 
         /* Standard Ufo properties */
-        Id_t m_id;                           // id
         int  m_colorCode;                    // vga_color
         Point m_position;                    // pos
         IntegerProperty_t m_speed;           // warp;

@@ -20,20 +20,16 @@ namespace {
     class TestObject : public game::map::Object {
      public:
         TestObject(int id)
-            : m_id(id)
+            : Object(id)
             { }
 
         // Object:
         virtual String_t getName(game::ObjectName /*which*/, afl::string::Translator& /*tx*/, game::InterpreterInterface& /*iface*/) const
             { return "obj"; }
-        virtual game::Id_t getId() const
-            { return m_id; }
         virtual afl::base::Optional<int> getOwner() const
             { return 0; }
         virtual afl::base::Optional<game::map::Point> getPosition() const
             { return afl::base::Nothing; }
-     private:
-        const int m_id;
     };
 
     /* ObjectVectorType implementation */

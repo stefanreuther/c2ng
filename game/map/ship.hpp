@@ -109,7 +109,6 @@ namespace game { namespace map {
          */
 
         virtual String_t getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const;
-        virtual Id_t getId() const;
         virtual afl::base::Optional<int> getOwner() const;
         virtual afl::base::Optional<Point> getPosition() const;
 
@@ -567,7 +566,6 @@ namespace game { namespace map {
         const MessageLink& messages() const;
 
      private:
-        Id_t m_id;
         IntegerProperty_t m_scannedMass;       // ex scanned_mass; ///< Scanned mass. Known for CurrentTarget and CurrentUnknown. For CurrentShip, taken from ship_data. */
         NegativeProperty_t m_scannedHeading;   // ex ship_info.heading
         std::vector<game::spec::ModifiedHullFunctionList::Function_t> m_specialFunctions;   // ex map_info.special_functions

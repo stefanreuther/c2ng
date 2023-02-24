@@ -13,11 +13,12 @@ TestGameMapCircularObject::testIt()
 {
     class Tester : public game::map::CircularObject {
      public:
+        Tester()
+            : CircularObject(0)
+            { }
         // Object:
         virtual String_t getName(game::ObjectName /*which*/, afl::string::Translator& /*tx*/, game::InterpreterInterface& /*iface*/) const
             { return String_t(); }
-        virtual game::Id_t getId() const
-            { return game::Id_t(); }
         virtual afl::base::Optional<int> getOwner() const
             { return 0; }
         virtual afl::base::Optional<game::map::Point> getPosition() const

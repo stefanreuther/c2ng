@@ -26,13 +26,11 @@ namespace {
     class TestObject : public Object {
      public:
         TestObject(Id_t id, int owner, Point pos)
-            : m_id(id), m_owner(owner), m_pos(pos)
+            : Object(id), m_owner(owner), m_pos(pos)
             { }
 
         virtual String_t getName(game::ObjectName /*which*/, afl::string::Translator& /*tx*/, game::InterpreterInterface& /*iface*/) const
             { return String_t(); }
-        virtual game::Id_t getId() const
-            { return m_id; }
         virtual afl::base::Optional<int> getOwner() const
             {
                 if (m_owner >= 0) {
@@ -50,7 +48,6 @@ namespace {
                 }
             }
      private:
-        Id_t m_id;
         int m_owner;
         Point m_pos;
     };

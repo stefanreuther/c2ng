@@ -137,8 +137,7 @@ const size_t game::map::Planet::NUM_TIMESTAMPS;
 
 // Construct new planet.
 game::map::Planet::Planet(Id_t id)
-    : Object(),
-      m_id(id),
+    : Object(id),
       m_name("?"),
       m_position(),
       m_knownToNotExist(false),
@@ -172,7 +171,6 @@ game::map::Planet::Planet(Id_t id)
 // Copy a planet.
 game::map::Planet::Planet(const Planet& other)
     : Object(other),
-      m_id(other.m_id),
       m_name(other.m_name),
       m_position(other.m_position),
       m_knownToNotExist(other.m_knownToNotExist),
@@ -464,7 +462,7 @@ game::map::Planet::internalCheck(const Configuration& config, afl::string::Trans
         String_t fmt = (m_knownToNotExist
                         ? tx.translateString("Planet #%d has data although it is reported as non-existant, host confused?")
                         : tx.translateString("Planet #%d exists for Host, but is outside valid range"));
-        log.write(log.Warn, LOG_NAME, afl::string::Format(fmt.c_str(), m_id));
+        log.write(log.Warn, LOG_NAME, afl::string::Format(fmt.c_str(), getId()));
         exists = true;
     }
 
@@ -486,7 +484,7 @@ game::map::Planet::internalCheck(const Configuration& config, afl::string::Trans
     // Check BDATA. If we have BDATA, we also must have PDATA.
     if (!m_baseSource.empty() && m_planetSource.empty()) {
         // FIXME this will make PCC2 write invalid files, i.e. where BDATA.DAT and BDATA.DIS disagree.
-        log.write(log.Warn, LOG_NAME, afl::string::Format(tx.translateString("Starbase #%d does not have a planet, deleting it").c_str(), m_id));
+        log.write(log.Warn, LOG_NAME, afl::string::Format(tx.translateString("Starbase #%d does not have a planet, deleting it").c_str(), getId()));
         m_currentBaseData = BaseData();
         m_baseSource = PlayerSet_t();
     }
@@ -554,9 +552,9 @@ game::map::Planet::getName(ObjectName which, afl::string::Translator& tx, Interp
 
      case LongName:
      case DetailedName: {
-        String_t result = afl::string::Format(tx.translateString("Planet #%d: %s").c_str(), m_id, m_name);
+        String_t result = afl::string::Format(tx.translateString("Planet #%d: %s").c_str(), getId(), m_name);
         if (which == DetailedName) {
-            String_t comment = iface.getComment(InterpreterInterface::Planet, m_id);
+            String_t comment = iface.getComment(InterpreterInterface::Planet, getId());
             if (!comment.empty()) {
                 result += ": ";
                 result += comment;
@@ -566,13 +564,6 @@ game::map::Planet::getName(ObjectName which, afl::string::Translator& tx, Interp
      }
     }
     return String_t();
-}
-
-game::Id_t
-game::map::Planet::getId() const
-{
-    // ex GPlanet::getId
-    return m_id;
 }
 
 afl::base::Optional<int>

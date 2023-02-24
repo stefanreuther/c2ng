@@ -28,8 +28,7 @@ namespace {
  */
 
 game::map::Ship::Ship(Id_t id)
-    : Object(),
-      m_id(id),
+    : Object(id),
       m_scannedMass(),
       m_scannedHeading(),
       m_specialFunctions(),
@@ -421,13 +420,13 @@ game::map::Ship::getName(ObjectName which, afl::string::Translator& tx, Interpre
     // Add detail
     String_t result;
     if (plainName.empty()) {
-        result = afl::string::Format(tx.translateString("Ship #%d").c_str(), m_id);
+        result = afl::string::Format(tx.translateString("Ship #%d").c_str(), getId());
     } else {
-        result = afl::string::Format(tx.translateString("Ship #%d: %s").c_str(), m_id, plainName);
+        result = afl::string::Format(tx.translateString("Ship #%d: %s").c_str(), getId(), plainName);
     }
 
     if (which == DetailedName) {
-        String_t comment = iface.getComment(InterpreterInterface::Ship, m_id);
+        String_t comment = iface.getComment(InterpreterInterface::Ship, getId());
         if (!comment.empty()) {
             result += ": ";
             result += comment;
@@ -446,13 +445,6 @@ game::map::Ship::getName(ObjectName which, afl::string::Translator& tx, Interpre
         }
     }
     return result;
-}
-
-game::Id_t
-game::map::Ship::getId() const
-{
-    // ex GShip::getId
-    return m_id;
 }
 
 afl::base::Optional<int>
@@ -1250,14 +1242,14 @@ bool
 game::map::Ship::isFleetLeader() const
 {
     // ex GShip::isFleetLeader
-    return m_fleetNumber == m_id;
+    return m_fleetNumber == getId();
 }
 
 bool
 game::map::Ship::isFleetMember() const
 {
     // ex GShip::isFleetMember
-    return m_fleetNumber != 0 && m_fleetNumber != m_id;
+    return m_fleetNumber != 0 && m_fleetNumber != getId();
 }
 
 

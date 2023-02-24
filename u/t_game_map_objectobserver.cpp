@@ -46,20 +46,16 @@ TestGameMapObjectObserver::testNormal()
     class SimpleObject : public game::map::Object {
      public:
         SimpleObject(Id_t id)
-            : m_id(id)
+            : Object(id)
             { }
         virtual String_t getName(game::ObjectName /*which*/, afl::string::Translator& /*tx*/, game::InterpreterInterface& /*iface*/) const
             { return String_t(); }
-        virtual Id_t getId() const
-            { return m_id; }
         virtual afl::base::Optional<int> getOwner() const
             { return afl::base::Nothing; }
         virtual afl::base::Optional<game::map::Point> getPosition() const
             { return afl::base::Nothing; }
         void notify()
-            { sig_change.raise(m_id); }
-     private:
-        Id_t m_id;
+            { sig_change.raise(getId()); }
     };
 
     // A minimum implementation of ObjectType with two objects

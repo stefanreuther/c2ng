@@ -18,8 +18,9 @@ namespace {
     /* Object for testing; totally passive. */
     class TestObject : public Object {
      public:
-        virtual Id_t getId() const
-            { return 0; }
+        TestObject()
+            : Object(0)
+            { }
         virtual afl::base::Optional<int> getOwner() const
             { return 0; }
         virtual afl::base::Optional<game::map::Point> getPosition() const
@@ -32,10 +33,8 @@ namespace {
     class TestObjectWithPosition : public Object {
      public:
         TestObjectWithPosition(int x, int y)
-            : m_pos(x, y)
+            : Object(0), m_pos(x, y)
             { }
-        virtual Id_t getId() const
-            { return 0; }
         virtual afl::base::Optional<int> getOwner() const
             { return 0; }
         virtual afl::base::Optional<game::map::Point> getPosition() const

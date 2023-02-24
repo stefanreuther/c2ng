@@ -51,8 +51,10 @@ namespace game { namespace map {
          *  Constructor and Destructor
          */
 
-        /** Default constructor. */
-        Object();
+        /** Constructor.
+            \param id Object Id. The object Id is the value returned by getId(), and usually remains unchanged
+                      during the object's lifetime. If needed, it can be changed using setId(). */
+        explicit Object(Id_t id);
 
         /** Copy constructor.
             Copies the other object's playability/selection status, but not its dirtiness status and signals. */
@@ -75,11 +77,6 @@ namespace game { namespace map {
             \return Name */
         virtual String_t getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const = 0;
 
-        /** Get Id number of this object.
-            The Id is always known.
-            \return Id */
-        virtual Id_t getId() const = 0;
-
         /** Get owner of this object.
             \return owner if known */
         virtual afl::base::Optional<int> getOwner() const = 0;
@@ -92,6 +89,11 @@ namespace game { namespace map {
         /*
          *  Management
          */
+
+        /** Get Id number of this object.
+            The Id is always known.
+            \return Id */
+        Id_t getId() const;
 
         // Playability:
 
@@ -144,14 +146,28 @@ namespace game { namespace map {
             \param int getId() of the object */
         afl::base::Signal<void(Id_t)> sig_change;
 
+     protected:
+        /** Set Id.
+            Set the result of getId().
+            For use by derived classes.
+            \param id Id */
+        void setId(Id_t id);
+
      private:
         Playability m_playability : 8;       /**< Playability. */
         bool m_isMarked;
         bool m_isDirty;
+        Id_t m_id;
 
         Object& operator=(const Object&);
     };
 
 } }
+
+inline game::Id_t
+game::map::Object::getId() const
+{
+    return m_id;
+}
 
 #endif

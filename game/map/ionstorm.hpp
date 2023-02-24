@@ -41,7 +41,6 @@ namespace game { namespace map {
 
         // Object:
         virtual String_t getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const;
-        virtual Id_t getId() const;
         virtual afl::base::Optional<int> getOwner() const;
         virtual afl::base::Optional<Point> getPosition() const;
 
@@ -113,8 +112,6 @@ namespace game { namespace map {
         void getForecast(Forecast_t& result) const;
 
      private:
-        const int m_id;
-
         IntegerProperty_t m_x;
         IntegerProperty_t m_y;
         IntegerProperty_t m_radius;

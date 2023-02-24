@@ -46,7 +46,6 @@ namespace game { namespace map {
 
         // Object:
         virtual String_t getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const;
-        virtual Id_t getId() const;
         virtual afl::base::Optional<int> getOwner() const;
         virtual afl::base::Optional<Point> getPosition() const;
 
@@ -74,7 +73,6 @@ namespace game { namespace map {
         bool merge(const Explosion& other);
 
      private:
-        Id_t m_id;
         Point m_position;
         String_t m_shipName;
         Id_t m_shipId;

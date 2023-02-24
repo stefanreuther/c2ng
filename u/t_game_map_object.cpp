@@ -15,14 +15,17 @@ TestGameMapObject::testIt()
 
     class Tester : public Object {
      public:
+        Tester()
+            : Object(42)
+            { }
         virtual String_t getName(game::ObjectName /*which*/, afl::string::Translator& /*tx*/, game::InterpreterInterface& /*iface*/) const
             { return String_t(); }
-        virtual game::Id_t getId() const
-            { return game::Id_t(); }
         virtual afl::base::Optional<int> getOwner() const
             { return 0; }
         virtual afl::base::Optional<game::map::Point> getPosition() const
             { return afl::base::Nothing; }
+
+        using Object::setId;
     };
     Tester t;
 
@@ -37,4 +40,8 @@ TestGameMapObject::testIt()
     TS_ASSERT(t.isMarked());
     TS_ASSERT(t.isPlayable(Object::Playable));
     TS_ASSERT(t.isPlayable(Object::ReadOnly));
+
+    TS_ASSERT_EQUALS(t.getId(), 42);
+    t.setId(43);
+    TS_ASSERT_EQUALS(t.getId(), 43);
 }

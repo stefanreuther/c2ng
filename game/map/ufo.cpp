@@ -9,7 +9,7 @@
 #include "util/math.hpp"
 
 game::map::Ufo::Ufo(Id_t id)
-    : m_id(id),
+    : CircularObject(id),
       m_colorCode(),
       m_position(),
       m_speed(),
@@ -47,16 +47,9 @@ game::map::Ufo::getName(ObjectName which, afl::string::Translator& tx, Interpret
         return m_name;
      case LongName:
      case DetailedName:
-        return afl::string::Format(tx.translateString("Ufo #%d: %s").c_str(), m_id, m_name);
+        return afl::string::Format(tx.translateString("Ufo #%d: %s").c_str(), getId(), m_name);
     }
     return String_t();
-}
-
-game::Id_t
-game::map::Ufo::getId() const
-{
-    // ex GUfo::getId
-    return m_id;
 }
 
 afl::base::Optional<int>
@@ -351,7 +344,7 @@ game::map::Ufo::addMessageInformation(const game::parser::MessageInformation& in
 {
     // ex GUfo::addHistoryData (sort-of), GUfo::addWormholeData, GUfo::addObjectData
     namespace gp = game::parser;
-    assert(info.getObjectId() == m_id);
+    assert(info.getObjectId() == getId());
     if (info.getTurnNumber() >= m_turnLastSeen) {
         // FIXME: limit to !isSeenThisTurn()?
         // FIXME: some cleverer merging (accept old value if existing value is unknown? does this happen?)

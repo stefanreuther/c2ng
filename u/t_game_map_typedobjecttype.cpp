@@ -10,7 +10,12 @@
 
 namespace {
     /* Object descendant for testing. Need not be constructible. */
-    class MyObject : public game::map::Object { };
+    class MyObject : public game::map::Object {
+     public:
+        MyObject()
+            : Object(0)
+            { }
+    };
 }
 
 /** Interface test. */

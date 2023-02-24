@@ -12,8 +12,7 @@
 
 // Constructor and Destructor:
 game::map::Minefield::Minefield(Id_t id)
-    : CircularObject(),
-      m_id(id),
+    : CircularObject(id),
       m_position(),
       m_owner(0),
       m_isWeb(false),
@@ -30,8 +29,7 @@ game::map::Minefield::Minefield(Id_t id)
 }
 
 game::map::Minefield::Minefield(const Minefield& other)
-    : CircularObject(),
-      m_id(other.m_id),
+    : CircularObject(other),
       m_position(other.m_position),
       m_owner(other.m_owner),
       m_isWeb(other.m_isWeb),
@@ -46,8 +44,7 @@ game::map::Minefield::Minefield(const Minefield& other)
 { }
 
 game::map::Minefield::Minefield(Id_t id, Point center, int owner, bool isWeb, int32_t units)
-    : CircularObject(),
-      m_id(id),
+    : CircularObject(id),
       m_position(center),
       m_owner(owner),
       m_isWeb(isWeb),
@@ -71,12 +68,12 @@ game::map::Minefield::getName(ObjectName /*which*/, afl::string::Translator& tx,
     // ex GMinefield::getName
     String_t result;
     if (!isValid()) {
-        result = afl::string::Format(tx("Deleted Mine Field #%d"), m_id);
+        result = afl::string::Format(tx("Deleted Mine Field #%d"), getId());
     } else {
         if (m_isWeb) {
-            result = afl::string::Format(tx("Web Mine Field #%d"), m_id);
+            result = afl::string::Format(tx("Web Mine Field #%d"), getId());
         } else {
-            result = afl::string::Format(tx("Mine Field #%d"), m_id);
+            result = afl::string::Format(tx("Mine Field #%d"), getId());
         }
 
         String_t adj;
@@ -87,13 +84,6 @@ game::map::Minefield::getName(ObjectName /*which*/, afl::string::Translator& tx,
         }
     }
     return result;
-}
-
-game::Id_t
-game::map::Minefield::getId() const
-{
-    // ex GMinefield::getId
-    return m_id;
 }
 
 afl::base::Optional<int>

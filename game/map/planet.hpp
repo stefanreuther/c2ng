@@ -165,7 +165,6 @@ namespace game { namespace map {
          */
 
         virtual String_t getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const;
-        virtual Id_t getId() const;
         virtual afl::base::Optional<int> getOwner() const;
         virtual afl::base::Optional<Point> getPosition() const;
 
@@ -612,7 +611,6 @@ namespace game { namespace map {
         const MessageLink& messages() const;
 
      private:
-        Id_t m_id;              // ID, always known
         String_t m_name;        // Name, always known
 
         afl::base::Optional<Point> m_position;    // Position

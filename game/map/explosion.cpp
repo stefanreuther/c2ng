@@ -7,8 +7,7 @@
 #include "afl/string/format.hpp"
 
 game::map::Explosion::Explosion(Id_t id, Point pos)
-    : Object(),
-      m_id(id),
+    : Object(id),
       m_position(pos),
       m_shipName(),
       m_shipId(0)
@@ -17,8 +16,7 @@ game::map::Explosion::Explosion(Id_t id, Point pos)
 }
 
 game::map::Explosion::Explosion(const Explosion& ex)
-    : Object(),
-      m_id(ex.m_id),
+    : Object(ex),
       m_position(ex.m_position),
       m_shipName(ex.m_shipName),
       m_shipId(ex.m_shipId)
@@ -38,13 +36,6 @@ game::map::Explosion::getName(ObjectName /*which*/, afl::string::Translator& tx,
     } else {
         return tx("Explosion");
     }
-}
-
-game::Id_t
-game::map::Explosion::getId() const
-{
-    // GExplosion::getId
-    return m_id;
 }
 
 afl::base::Optional<int>
@@ -105,7 +96,7 @@ game::map::Explosion::merge(const Explosion& other)
     }
 
     /* different explosion Id? */
-    if (m_id != 0 && other.m_id != 0 && m_id != other.m_id) {
+    if (getId() != 0 && other.getId() != 0 && getId() != other.getId()) {
         return false;
     }
 
@@ -121,8 +112,8 @@ game::map::Explosion::merge(const Explosion& other)
     }
 
     /* ok, it will work. do it. */
-    if (other.m_id != 0) {
-        m_id = other.m_id;
+    if (other.getId() != 0) {
+        setId(other.getId());
     }
     if (other.m_shipName.size()) {
         m_shipName = other.m_shipName;
