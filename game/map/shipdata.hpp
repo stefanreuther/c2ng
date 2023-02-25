@@ -5,8 +5,9 @@
 #ifndef C2NG_GAME_MAP_SHIPDATA_HPP
 #define C2NG_GAME_MAP_SHIPDATA_HPP
 
-#include "game/types.hpp"
+#include "game/element.hpp"
 #include "game/spec/shiplist.hpp"
+#include "game/types.hpp"
 
 namespace game { namespace map {
 
@@ -69,6 +70,19 @@ namespace game { namespace map {
         \param [in] shipList ship list (for beams, torpedoes)
         \return mass (unknown if any value is unknown) */
     IntegerProperty_t getShipMass(const ShipData& data, const game::spec::ShipList& shipList);
+
+    /** Get cargo from ship data record.
+        \param [in] data     ship data record
+        \param [in] type     cargo type
+        \return amount */
+    IntegerProperty_t getShipCargo(const ShipData& data, Element::Type type);
+
+    /** Set cargo in ship data record.
+        If an invalid type is used, the call is ignored.
+        \param [in,out] data    ship data record
+        \param [in]     type    cargo type
+        \param [in]     amount  amount */
+    void setShipCargo(ShipData& data, Element::Type type, IntegerProperty_t amount);
 
     /** Check validity of a ship transporter.
         \param tr Transporter

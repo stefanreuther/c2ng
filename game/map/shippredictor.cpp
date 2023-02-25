@@ -1130,33 +1130,7 @@ int
 game::map::ShipPredictor::getCargo(Element::Type el) const
 {
     // ex GShipTurnPredictor::getCargo, GShipTurnPredictor::getFuel
-    // FIXME: eventually, merge with Ship::getCargo and merge into ShipData.
-    switch (el) {
-     case Element::Neutronium:
-        return m_ship.neutronium.orElse(0);
-     case Element::Tritanium:
-        return m_ship.tritanium.orElse(0);
-     case Element::Duranium:
-        return m_ship.duranium.orElse(0);
-     case Element::Molybdenum:
-        return m_ship.molybdenum.orElse(0);
-     case Element::Fighters:
-        return m_ship.numBays.orElse(0) > 0 ? m_ship.ammo.orElse(0) : 0;
-     case Element::Colonists:
-        return m_ship.colonists.orElse(0);
-     case Element::Supplies:
-        return m_ship.supplies.orElse(0);
-     case Element::Money:
-        return m_ship.money.orElse(0);
-     default:
-        int tt;
-        if (Element::isTorpedoType(el, tt) && tt == m_ship.torpedoType.orElse(0) && m_ship.numLaunchers.orElse(0) > 0) {
-            // We know it has this type of torpedoes
-            return m_ship.ammo.orElse(0);
-        } else {
-            return 0;
-        }
-    }
+    return getShipCargo(m_ship, el).orElse(0);
 }
 
 // Get computed warp factor.

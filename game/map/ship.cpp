@@ -989,100 +989,13 @@ game::IntegerProperty_t
 game::map::Ship::getCargo(Element::Type type) const
 {
     // ex GShip::getCargoRaw, GShip::getCargo
-    int numBays, expectedType, numLaunchers, torpedoType;
-    switch (type) {
-     case Element::Neutronium:
-        return m_currentData.neutronium;
-     case Element::Tritanium:
-        return m_currentData.tritanium;
-     case Element::Duranium:
-        return m_currentData.duranium;
-     case Element::Molybdenum:
-        return m_currentData.molybdenum;
-     case Element::Fighters:
-        if (getNumBays().get(numBays)) {
-            if (numBays > 0) {
-                // I know it has bays, so ammo is number of fighters
-                return m_currentData.ammo;
-            } else {
-                // I know it has no fighters
-                return 0;
-            }
-        } else {
-            // I don't know whether it has fighters
-            return afl::base::Nothing;
-        }
-     case Element::Colonists:
-        return m_currentData.colonists;
-     case Element::Supplies:
-        return m_currentData.supplies;
-     case Element::Money:
-        return m_currentData.money;
-     default:
-        if (Element::isTorpedoType(type, expectedType)) {
-            if (getTorpedoType().get(torpedoType)) {
-                if (torpedoType == expectedType) {
-                    // Asking correct torpedo type
-                    return m_currentData.ammo;
-                } else {
-                    // Asking wrong torpedo type
-                    return 0;
-                }
-            } else if (getNumLaunchers().get(numLaunchers) && numLaunchers == 0) {
-                // Asking any type, and we know we don't have torpedoes
-                return 0;
-            } else {
-                // Nothing known
-                return afl::base::Nothing;
-            }
-        } else {
-            // I don't know what cargo type this is, but I don't have it.
-            return 0;
-        }
-    }
+    return getShipCargo(m_currentData, type);
 }
 
 void
 game::map::Ship::setCargo(Element::Type type, IntegerProperty_t amount)
 {
-    int numBays, expectedType, torpedoType;
-    switch (type) {
-     case Element::Neutronium:
-        m_currentData.neutronium = amount;
-        break;
-     case Element::Tritanium:
-        m_currentData.tritanium = amount;
-        break;
-     case Element::Duranium:
-        m_currentData.duranium = amount;
-        break;
-     case Element::Molybdenum:
-        m_currentData.molybdenum = amount;
-        break;
-     case Element::Fighters:
-        if (getNumBays().get(numBays) && numBays > 0) {
-            // I know it has bays, so ammo is number of fighters
-            m_currentData.ammo = amount;
-        }
-        break;
-     case Element::Colonists:
-        m_currentData.colonists = amount;
-        break;
-     case Element::Supplies:
-        m_currentData.supplies = amount;
-        break;
-     case Element::Money:
-        m_currentData.money = amount;
-        break;
-     default:
-        if (Element::isTorpedoType(type, expectedType)
-            && getTorpedoType().get(torpedoType)
-            && torpedoType == expectedType)
-        {
-            m_currentData.ammo = amount;
-        }
-        break;
-    }
+    setShipCargo(m_currentData, type, amount);
     markDirty();
 }
 
