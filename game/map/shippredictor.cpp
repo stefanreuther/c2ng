@@ -18,6 +18,7 @@
 
 using game::spec::BasicHullFunction;
 using game::spec::Cost;
+using game::spec::FriendlyCodeList;
 using game::config::HostConfiguration;
 
 namespace {
@@ -34,7 +35,6 @@ namespace {
     {
         // ex shipacc.pas:AlchemyFCValue
         // ex game/shippredictcc:getAlchemyFCodeValue
-        // FIXME: use actual FC status, like for mine drop
         int result = AlchemyTri + AlchemyDur + AlchemyMol;
         if (enable && key.getStatus() == game::RegistrationKey::Registered) {
             if (fc == "alt") {
@@ -109,11 +109,12 @@ namespace {
         Friendly codes allow target mineral control.
 
         \param [in]     shipFCode Ship friendly code
+        \param [in]     handleFCode true whether code shall be evaluated
         \param [in/out] ship      Ship data
         \param [in]     host      Host version
         \param [in]     key       Registration key
         \param [in/out] used_properties Used properties report; will be updated */
-    void doAlchemy(const String_t& shipFCode, game::map::ShipData& ship, const game::HostVersion& host, const game::RegistrationKey& key, game::map::ShipPredictor::UsedProperties_t& used_properties)
+    void doAlchemy(const String_t& shipFCode, bool handleFCode, game::map::ShipData& ship, const game::HostVersion& host, const game::RegistrationKey& key, game::map::ShipPredictor::UsedProperties_t& used_properties)
     {
         // ex game/shippredict.cc:doAlchemy
         // Merlin converts 3 Sup -> 1 Min
@@ -122,7 +123,7 @@ namespace {
         int mins = haveSupplies / 3;
         int rounder = host.isAlchemyRounding() ? 3 : 1;
         bool used_fc;
-        switch (getAlchemyFCodeValue(shipFCode, host, key, true)) {
+        switch (getAlchemyFCodeValue(shipFCode, host, key, handleFCode)) {
          case AlchemyTri:
             t = rounder*(mins/rounder);
             used_fc = true;
@@ -655,7 +656,8 @@ game::map::ShipPredictor::computeTurn()
 
     // Special Missions I (Super Refit, Self Repair, Hiss, Rob) would go here
     const String_t shipFCode = m_ship.friendlyCode.orElse("");
-    bool is_mkt_fc = (shipFCode == "mkt");
+    const bool shipFCAccepted = m_shipList.friendlyCodes().isAcceptedFriendlyCode(shipFCode, game::spec::FriendlyCode::Filter::fromShip(*real_ship, m_scoreDefinitions, m_shipList, m_hostConfiguration), m_key, FriendlyCodeList::DefaultAvailable);
+    bool is_mkt_fc = (shipFCAccepted && shipFCode == "mkt");
     if ((is_mkt_fc
          || (m_hostVersion.isPHost()
              && m_ship.mission.orElse(0) == m_hostConfiguration[m_hostConfiguration.ExtMissionsStartAt]() + game::spec::Mission::pmsn_BuildTorpsFromCargo))
@@ -712,7 +714,7 @@ game::map::ShipPredictor::computeTurn()
                 doDirectRefinery(m_ship, 4, *pHull, m_usedProperties);
             } else {
                 // Regular Alchemy
-                doAlchemy(shipFCode, m_ship, m_hostVersion, m_key, m_usedProperties);
+                doAlchemy(shipFCode, shipFCAccepted, m_ship, m_hostVersion, m_key, m_usedProperties);
             }
         } else if (real_ship->hasSpecialFunction(BasicHullFunction::AriesRefinery, m_scoreDefinitions, m_shipList, m_hostConfiguration)
                    && m_hostConfiguration[HostConfiguration::AllowAdvancedRefinery]() != 0
@@ -721,7 +723,7 @@ game::map::ShipPredictor::computeTurn()
         {
             // Aries converts 1 Min -> 1 Neu
             // If host does not have hasAlchemyCombinations(), the lesser Refinery ability takes precedence!
-            int which = getAlchemyFCodeValue(shipFCode, m_hostVersion, m_key, m_hostVersion.hasRefineryFCodes());
+            int which = getAlchemyFCodeValue(shipFCode, m_hostVersion, m_key, shipFCAccepted && m_hostVersion.hasRefineryFCodes());
             int supplies = 0x7FFF;  // we assume that no ship has more cargo
             bool did = false;
             if ((which & AlchemyTri) != 0) {
@@ -741,7 +743,7 @@ game::map::ShipPredictor::computeTurn()
             }
         } else if (real_ship->hasSpecialFunction(BasicHullFunction::NeutronicRefinery, m_scoreDefinitions, m_shipList, m_hostConfiguration)) {
             // Neutronic refinery converts 1 Sup + 1 Min -> 1 Neu
-            int which = getAlchemyFCodeValue(shipFCode, m_hostVersion, m_key, m_hostVersion.hasRefineryFCodes());
+            int which = getAlchemyFCodeValue(shipFCode, m_hostVersion, m_key, shipFCAccepted && m_hostVersion.hasRefineryFCodes());
             int supplies = m_ship.supplies.orElse(0);
             bool did = false;
             if ((which & AlchemyTri) != 0) {
@@ -850,9 +852,7 @@ game::map::ShipPredictor::computeTurn()
     /* Actual movement here */
     int32_t dist2 = (int32_t(m_ship.waypointDX.orElse(0) * m_ship.waypointDX.orElse(0))
                      + int32_t(m_ship.waypointDY.orElse(0) * m_ship.waypointDY.orElse(0)));
-    if (real_ship->hasSpecialFunction(BasicHullFunction::Hyperdrive, m_scoreDefinitions, m_shipList, m_hostConfiguration)
-        && shipFCode == "HYP"
-        && m_ship.warpFactor.orElse(0) > 0
+    if (isHyperdriving()
         && m_ship.damage.orElse(0) < m_hostConfiguration[HostConfiguration::DamageLevelForHyperjumpFail]()
         && dist2 >= m_hostVersion.getMinimumHyperjumpDistance2())
     {
@@ -1150,7 +1150,8 @@ game::map::ShipPredictor::isHyperdriving() const
     return sh != 0
         && sh->hasSpecialFunction(BasicHullFunction::Hyperdrive, m_scoreDefinitions, m_shipList, m_hostConfiguration)
         && getFriendlyCode() == "HYP"
-        && getWarpFactor() > 0;
+        && getWarpFactor() > 0
+        && m_shipList.friendlyCodes().isAcceptedFriendlyCode("HYP", game::spec::FriendlyCode::Filter::fromShip(*sh, m_scoreDefinitions, m_shipList, m_hostConfiguration), m_key, FriendlyCodeList::DefaultAvailable);
 }
 
 // Get this ship's real owner.

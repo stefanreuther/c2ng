@@ -114,17 +114,9 @@ game::map::MinefieldMission::checkLayMission(const Ship& ship, const Universe& u
     // Postprocess fcodes
     bool used_fc = false;
     if (usemix || usemdx) {
-        /* We accept a friendly code if it
-               - is not listed in fcodes.cc (assuming that is blank, missing, unmaintained)
-           OR  -     works on the ship
-                 AND is not restricted to registered ships, or player is registered */
         const String_t fc  = ship.getFriendlyCode().orElse(String_t());
-        const game::spec::FriendlyCodeList& fcList = shipList.friendlyCodes();
-        const game::spec::FriendlyCodeList::Iterator_t fci = fcList.getCodeByName(fc);
-        const bool validfc = (fci == fcList.end()
-                              || (*fci != 0
-                                  && (*fci)->worksOn(ship, shipScores, shipList, config)
-                                  && (*fci)->isPermitted(key)));
+        const bool validfc = shipList.friendlyCodes().isAcceptedFriendlyCode(fc, game::spec::FriendlyCode::Filter::fromShip(ship, shipScores, shipList, config),
+                                                                             key, game::spec::FriendlyCodeList::DefaultAvailable);
         if (validfc && fc.size() == 3) {
             if (usemix && fc[0] == 'm' && fc[1] == 'i') {
                 // miX
@@ -291,14 +283,10 @@ game::map::MinefieldMission::checkScoopMission(const Ship& ship,
         // Check for "msc" fcode
         const String_t shipFC = ship.getFriendlyCode().orElse(String_t());
         const String_t fc  = ship.getFriendlyCode().orElse(String_t());
-        const game::spec::FriendlyCodeList& fcList = shipList.friendlyCodes();
-        const game::spec::FriendlyCodeList::Iterator_t fci = fcList.getCodeByName(fc);
 
         if (fc == "msc"
-            && (fci == fcList.end()
-                || (*fci != 0
-                    && (*fci)->worksOn(ship, shipScores, shipList, root.hostConfiguration())
-                    && (*fci)->isPermitted(root.registrationKey()))))
+            && shipList.friendlyCodes().isAcceptedFriendlyCode(fc, game::spec::FriendlyCode::Filter::fromShip(ship, shipScores, shipList, config),
+                                                               root.registrationKey(), game::spec::FriendlyCodeList::DefaultAvailable))
         {
             // accept
             m_mineId           = 0;

@@ -35,7 +35,7 @@ server::play::PlanetFriendlyCodePacker::buildValue() const
         throw std::runtime_error(ITEM_NOT_FOUND);
     }
 
-    FriendlyCodeList list(sl.friendlyCodes(), *pPlanet, game.shipScores(), sl, root.hostConfiguration());
+    FriendlyCodeList list(sl.friendlyCodes(), game::spec::FriendlyCode::Filter::fromPlanet(*pPlanet, root.hostConfiguration()), root.registrationKey());
     return ShipFriendlyCodePacker::buildFriendlyCodeList(list, root.playerList(), m_session.translator());
 }
 

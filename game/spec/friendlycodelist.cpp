@@ -4,9 +4,10 @@
   */
 
 #include "game/spec/friendlycodelist.hpp"
+#include "afl/io/textfile.hpp"
 #include "afl/string/char.hpp"
 #include "afl/string/parse.hpp"
-#include "afl/io/textfile.hpp"
+#include "game/registrationkey.hpp"
 
 namespace {
     /** Compare friendly codes.
@@ -51,16 +52,13 @@ game::spec::FriendlyCodeList::FriendlyCodeList()
 { }
 
 // Make sublist of some other list.
-game::spec::FriendlyCodeList::FriendlyCodeList(const FriendlyCodeList& originalList,
-                                               const game::map::Object& obj,
-                                               const UnitScoreDefinitionList& scoreDefinitions,
-                                               const game::spec::ShipList& shipList,
-                                               const game::config::HostConfiguration& config)
+game::spec::FriendlyCodeList::FriendlyCodeList(const FriendlyCodeList& originalList, const FriendlyCode::Filter& f, const RegistrationKey& key)
     : m_data()
 {
     // ex GFCodeList::GFCodeList(const GFCodeList& l, const GObject& o)
+    // @change This one filters registration status; PCC2 doesn't.
     for (Iterator_t i = originalList.begin(); i != originalList.end(); ++i) {
-        if ((*i)->worksOn(obj, scoreDefinitions, shipList, config)) {
+        if ((*i)->worksOn(f) && (*i)->isPermitted(key)) {
             addCode(**i);
         }
     }
@@ -351,7 +349,6 @@ game::spec::FriendlyCodeList::isAllowedRandomCode(const String_t& fc, const Host
 }
 
 // Generate a random friendly code.
-
 String_t
 game::spec::FriendlyCodeList::generateRandomCode(util::RandomNumberGenerator& rng, const HostSelection host) const
 {
@@ -369,4 +366,18 @@ game::spec::FriendlyCodeList::generateRandomCode(util::RandomNumberGenerator& rn
         rv[2] = static_cast<char>(33 + rng(90));
     } while (!isAllowedRandomCode(rv, host) && --paranoiaCounter);
     return rv;
+}
+
+// Check permission to use friendly code.
+bool
+game::spec::FriendlyCodeList::isAcceptedFriendlyCode(const String_t& fc, const FriendlyCode::Filter& f, const RegistrationKey& key, DefaultAcceptance dflt) const
+{
+    const Iterator_t fci = getCodeByName(fc);
+    if (fci != end()) {
+        return (*fci)->isPermitted(key)
+            && (*fci)->worksOn(f);
+    } else {
+        return dflt == DefaultAvailable
+            || (dflt == DefaultRegistered && key.getStatus() != RegistrationKey::Unregistered);
+    }
 }

@@ -938,39 +938,30 @@ game::proxy::SimulationSetupProxy::Trampoline::getFriendlyCodeChoices(Slot_t slo
 
     if (obj != 0 && m_shipList.get() != 0 && m_root.get() != 0) {
         // Determine matching mode
-        FriendlyCode::FlagSet_t typeFlags;
-        FriendlyCode::FlagSet_t propertyFlags;
-        FriendlyCode::FlagSet_t propertyMask = FriendlyCode::FlagSet_t() + FriendlyCode::CapitalShipCode + FriendlyCode::AlchemyShipCode;
+        FriendlyCode::FlagSet_t flags;
         if (const Ship* sh = dynamic_cast<const Ship*>(obj)) {
-            typeFlags += FriendlyCode::ShipCode;
+            flags += FriendlyCode::ShipCode;
             if (sh->getNumBays() != 0 || sh->getNumLaunchers() != 0 || sh->getNumBeams() != 0) {
-                propertyFlags += FriendlyCode::CapitalShipCode;
+                flags += FriendlyCode::CapitalShipCode;
             }
-            // FIXME: alchemy (registered?)
+            if (sh->hasImpliedFunction(game::spec::BasicHullFunction::MerlinAlchemy, *m_shipList, m_root->hostConfiguration())
+                || sh->hasImpliedFunction(game::spec::BasicHullFunction::NeutronicRefinery, *m_shipList, m_root->hostConfiguration())
+                || sh->hasImpliedFunction(game::spec::BasicHullFunction::AriesRefinery, *m_shipList, m_root->hostConfiguration()))
+            {
+                flags += FriendlyCode::AlchemyShipCode;
+            }
         }
         if (const Planet* pl = dynamic_cast<const Planet*>(obj)) {
-            typeFlags += FriendlyCode::PlanetCode;
+            flags += FriendlyCode::PlanetCode;
             if (pl->hasBase()) {
-                typeFlags += FriendlyCode::StarbaseCode;
+                flags += FriendlyCode::StarbaseCode;
             }
         }
 
-        const int player = obj->getOwner();
+        const int race = m_root->hostConfiguration().getPlayerRaceNumber(obj->getOwner());
 
         // Build list
-        // FIXME: similar code appears in IFUIInputFCode
-        const game::spec::FriendlyCodeList& originalList = m_shipList->friendlyCodes();
-        game::spec::FriendlyCodeList filteredList;
-        for (game::spec::FriendlyCodeList::Iterator_t gi = originalList.begin(); gi != originalList.end(); ++gi) {
-            FriendlyCode::FlagSet_t fcFlags = (*gi)->getFlags();
-            if (!(fcFlags & typeFlags).empty()
-                && ((fcFlags & propertyMask) - propertyFlags).empty()
-                // && (!fcFlags.contains(FriendlyCode::RegisteredCode) || r.registrationKey().getStatus() == game::RegistrationKey::Registered)
-                && (*gi)->getRaces().contains(player))
-            {
-                filteredList.addCode(**gi);
-            }
-        }
+        const game::spec::FriendlyCodeList filteredList(m_shipList->friendlyCodes(), FriendlyCode::Filter(flags, race), m_root->registrationKey());
 
         // Build output
         filteredList.pack(result, m_root->playerList(), m_translator);

@@ -114,15 +114,10 @@ game::actions::CloneShip::getOrderStatus() const
         // Check registration status
         // @change If we have a definition of 'cln', check that instead of the registration status only
         const int rso = m_ship.getRealOwner().orElse(0);
-        game::spec::FriendlyCodeList::Iterator_t it = m_shipList.friendlyCodes().getCodeByName(CLN_FCODE);
-        if (it != m_shipList.friendlyCodes().end()) {
-            if (!(*it)->isPermitted(m_root.registrationKey())) {
-                return PlayerCannotClone;
-            }
-        } else {
-            if (m_root.registrationKey().getStatus() == RegistrationKey::Unregistered) {
-                return PlayerCannotClone;
-            }
+        if (!m_shipList.friendlyCodes().isAcceptedFriendlyCode(CLN_FCODE, game::spec::FriendlyCode::Filter::fromShip(m_ship, m_shipScores, m_shipList, m_root.hostConfiguration()),
+                                                               m_root.registrationKey(), game::spec::FriendlyCodeList::DefaultRegistered))
+        {
+            return PlayerCannotClone;
         }
 
         // Check host-specific rule

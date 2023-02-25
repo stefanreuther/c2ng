@@ -3958,59 +3958,40 @@ client::si::IFUIInputFCode(game::Session& session, ScriptSide& si, RequestLink1 
     }
 
     // Construct a friendly-code list
-    std::auto_ptr<game::spec::FriendlyCodeList::Infos_t> list(new game::spec::FriendlyCodeList::Infos_t());
+    FriendlyCode::Filter filter;
     if ((flags & DefaultFlag) != 0) {
         // Default mode
         const game::map::Object* obj = dynamic_cast<const game::map::Object*>(link.getProcess().getCurrentObject());
         if (obj == 0) {
             throw Error::contextError();
         }
+        filter = FriendlyCode::Filter::fromObject(*obj, g.shipScores(), shipList, r.hostConfiguration());
 
-        FriendlyCodeList(shipList.friendlyCodes(), *obj, g.shipScores(), shipList, r.hostConfiguration())
-            .pack(*list, r.playerList(), session.translator());
     } else {
         // Parameterized mode
-        // Determine type flags
-        FriendlyCode::FlagSet_t typeFlags;
+        FriendlyCode::FlagSet_t fcFlags;
         if ((flags & ShipFlag) != 0) {
-            typeFlags += FriendlyCode::ShipCode;
+            fcFlags += FriendlyCode::ShipCode;
         }
         if ((flags & PlanetFlag) != 0) {
-            typeFlags += FriendlyCode::PlanetCode;
+            fcFlags += FriendlyCode::PlanetCode;
         }
         if ((flags & BaseFlag) != 0) {
-            typeFlags += FriendlyCode::StarbaseCode;
+            fcFlags += FriendlyCode::StarbaseCode;
         }
-
-        // Determine property flags
-        FriendlyCode::FlagSet_t propertyFlags;
-        FriendlyCode::FlagSet_t propertyMask = FriendlyCode::FlagSet_t() + FriendlyCode::CapitalShipCode + FriendlyCode::AlchemyShipCode;
         if ((flags & CapitalFlag) != 0) {
-            propertyFlags += FriendlyCode::CapitalShipCode;
+            fcFlags += FriendlyCode::CapitalShipCode;
         }
         if ((flags & AlchemyFlag) != 0) {
-            propertyFlags += FriendlyCode::AlchemyShipCode;
+            fcFlags += FriendlyCode::AlchemyShipCode;
         }
 
-        // Build filtered list
-        FriendlyCodeList filteredList;
-        const FriendlyCodeList& originalList = shipList.friendlyCodes();
-        for (FriendlyCodeList::Iterator_t gi = originalList.begin(); gi != originalList.end(); ++gi) {
-            /* An fcode is accepted if
-               - flags have ANY of the TypeFlags required by the code
-               - flags have ALL of the PropertyFlags required by the code */
-            FriendlyCode::FlagSet_t fcFlags = (*gi)->getFlags();
-            if (!(fcFlags & typeFlags).empty()
-                && ((fcFlags & propertyMask) - propertyFlags).empty()
-                && (!fcFlags.contains(FriendlyCode::RegisteredCode) || r.registrationKey().getStatus() == game::RegistrationKey::Registered)
-                && (*gi)->getRaces().contains(player))
-            {
-                filteredList.addCode(**gi);
-            }
-        }
-        filteredList.sort();
-        filteredList.pack(*list, r.playerList(), session.translator());
+        filter = FriendlyCode::Filter(fcFlags, player);
     }
+
+    std::auto_ptr<game::spec::FriendlyCodeList::Infos_t> list(new game::spec::FriendlyCodeList::Infos_t());
+    FriendlyCodeList(shipList.friendlyCodes(), filter, r.registrationKey())
+        .pack(*list, r.playerList(), session.translator());
 
     // Do it.
     class Task : public UserTask {

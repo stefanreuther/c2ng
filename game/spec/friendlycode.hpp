@@ -47,6 +47,66 @@ namespace game { namespace spec {
         /** Set of friendly code flags. */
         typedef afl::bits::SmallSet<Flag> FlagSet_t;
 
+
+        /** Friendly code filter.
+            Stores information to apply a worksOn() check.
+            This captures the necessary data to avoid that users trying to filter friendly codes
+            need to provide many/complex function signatures. */
+        class Filter {
+         public:
+            friend class FriendlyCode;
+
+            /** Default constructor.
+                Makes a filter that never matches. */
+            Filter()
+                : flags(), race()
+                { }
+
+            /** Construct from attributes.
+                Makes a filter that matches according to the given parameters.
+
+                Flags must have at least one of ShipCode, PlanetCode, StarbaseCode;
+                only friendly codes that have at least one matching type are accepted
+                (e.g. a friendly code with ShipCode+PlanetCode is accepted when the filter includes ShipCode).
+
+                Friendly codes with CapitalShipCode and/or AlchemyShipCode are accepted
+                only if the flags include those flags.
+
+                \param flags  Flags.
+                \param race   Race. Only friendly codes available to that race are accepted. */
+            Filter(FlagSet_t flags, int race)
+                : flags(flags), race(race)
+                { }
+
+            /** Construct from object.
+                Automatically decides depending on the object's dynamic type.
+                \param obj Object
+                \param scoreDefinitions Ship score definitions
+                \param shipList Ship list
+                \param config Host configuration
+                \return filter */
+            static Filter fromObject(const game::map::Object& obj, const UnitScoreDefinitionList& scoreDefinitions, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config);
+
+            /** Construct from ship.
+                \param sh Ship
+                \param scoreDefinitions Ship score definitions
+                \param shipList Ship list
+                \param config Host configuration
+                \return filter */
+            static Filter fromShip(const game::map::Ship& sh, const UnitScoreDefinitionList& scoreDefinitions, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config);
+
+            /** Construct from planet.
+                \param p Planet
+                \param config Host configuration
+                \return filter */
+            static Filter fromPlanet(const game::map::Planet& p, const game::config::HostConfiguration& config);
+
+         private:
+            FlagSet_t flags;
+            int race;
+        };
+
+
         /** Default constructor.
             Not normally used. */
         FriendlyCode();
@@ -80,33 +140,10 @@ namespace game { namespace spec {
             \return set of races */
         PlayerSet_t getRaces() const;
 
-        /** Check whether this friendly code works on an object.
-            \param o Object
-            \param scoreDefinitions Ship score definitions
-            \param shipList Ship list
-            \param config Host configuration
-            \return true if friendly code is a valid/sensible choice for this object */
-        bool worksOn(const game::map::Object& o,
-                     const UnitScoreDefinitionList& scoreDefinitions,
-                     const game::spec::ShipList& shipList,
-                     const game::config::HostConfiguration& config) const;
-
-        /** Check whether this friendly code works on a ship.
-            \param s Ship
-            \param scoreDefinitions Ship score definitions
-            \param shipList Ship list
-            \param config Host configuration
-            \return true if friendly code is a valid/sensible choice for this ship */
-        bool worksOn(const game::map::Ship& s,
-                     const UnitScoreDefinitionList& scoreDefinitions,
-                     const game::spec::ShipList& shipList,
-                     const game::config::HostConfiguration& config) const;
-
-        /** Check whether this friendly code works on a planet.
-            \param p Planet
-            \param config Host configuration
-            \return true if friendly code is a valid/sensible choice for this planet */
-        bool worksOn(const game::map::Planet& p, const game::config::HostConfiguration& config) const;
+        /** Check whether this friendly code works on an object defined by a filter.
+            \param f Filter
+            \return true if friendly code is a valid/sensible choice for the unit defined by the filter */
+        bool worksOn(const Filter& f) const;
 
         /** Check whether this friendly code is allowed according to registration status.
             \param key Key

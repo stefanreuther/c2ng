@@ -14,6 +14,72 @@
 #include "game/spec/basichullfunction.hpp"
 #include "util/string.hpp"
 
+/*
+ *  Filter
+ */
+
+game::spec::FriendlyCode::Filter
+game::spec::FriendlyCode::Filter::fromObject(const game::map::Object& obj,
+                                             const UnitScoreDefinitionList& scoreDefinitions,
+                                             const game::spec::ShipList& shipList,
+                                             const game::config::HostConfiguration& config)
+{
+    if (const game::map::Ship* s = dynamic_cast<const game::map::Ship*>(&obj)) {
+        return fromShip(*s, scoreDefinitions, shipList, config);
+    } else if (const game::map::Planet* p = dynamic_cast<const game::map::Planet*>(&obj)) {
+        return fromPlanet(*p, config);
+    } else {
+        return Filter();
+    }
+}
+
+game::spec::FriendlyCode::Filter
+game::spec::FriendlyCode::Filter::fromShip(const game::map::Ship& sh,
+                                           const UnitScoreDefinitionList& scoreDefinitions,
+                                           const game::spec::ShipList& shipList,
+                                           const game::config::HostConfiguration& config)
+{
+    Filter result;
+    int owner = 0;
+    if (sh.isPlayable(game::map::Object::ReadOnly) && sh.getRealOwner().get(owner)) {
+        result.flags += ShipCode;
+        result.race = config.getPlayerRaceNumber(owner);
+
+        if (sh.getNumBeams().orElse(0) != 0 || sh.getNumLaunchers().orElse(0) != 0 || sh.getNumBays().orElse(0) != 0) {
+            result.flags += CapitalShipCode;
+        }
+        if (   sh.hasSpecialFunction(BasicHullFunction::MerlinAlchemy,     scoreDefinitions, shipList, config)
+            || sh.hasSpecialFunction(BasicHullFunction::NeutronicRefinery, scoreDefinitions, shipList, config)
+            || sh.hasSpecialFunction(BasicHullFunction::AriesRefinery,     scoreDefinitions, shipList, config))
+        {
+            result.flags += AlchemyShipCode;
+        }
+    }
+    return result;
+}
+
+game::spec::FriendlyCode::Filter
+game::spec::FriendlyCode::Filter::fromPlanet(const game::map::Planet& p,
+                                             const game::config::HostConfiguration& config)
+{
+    Filter result;
+    int owner = 0;
+    if (p.isPlayable(game::map::Planet::ReadOnly) && p.getOwner().get(owner)) {
+        result.flags += PlanetCode;
+        result.race = config.getPlayerRaceNumber(owner);
+        if (p.hasBase()) {
+            result.flags += StarbaseCode;
+        }
+    }
+    return result;
+}
+
+
+/*
+ *  FriendlyCode
+ */
+
+
 // Default constructor.
 game::spec::FriendlyCode::FriendlyCode()
     : m_code(),
@@ -67,88 +133,32 @@ game::spec::FriendlyCode::getRaces() const
     return m_races;
 }
 
-// Check whether this friendly code works on an object.
+// Check whether this friendly code works on an object defined by a filter.
 bool
-game::spec::FriendlyCode::worksOn(const game::map::Object& o,
-                                  const UnitScoreDefinitionList& scoreDefinitions,
-                                  const game::spec::ShipList& shipList,
-                                  const game::config::HostConfiguration& config) const
+game::spec::FriendlyCode::worksOn(const Filter& f) const
 {
-    // ex GFCode::worksOn
-    if (const game::map::Ship* s = dynamic_cast<const game::map::Ship*>(&o)) {
-        return worksOn(*s, scoreDefinitions, shipList, config);
-    } else if (const game::map::Planet* p = dynamic_cast<const game::map::Planet*>(&o)) {
-        return worksOn(*p, config);
-    } else {
-        return false;
-    }
-}
-
-// Check whether this friendly code works on a ship.
-bool
-game::spec::FriendlyCode::worksOn(const game::map::Ship& s,
-                                  const UnitScoreDefinitionList& scoreDefinitions,
-                                  const game::spec::ShipList& shipList,
-                                  const game::config::HostConfiguration& config) const
-{
-    // ex GFCode::worksOn(const GShip& s)
     if (m_flags.contains(PrefixCode)) {
         return false;
     }
-    if (!s.isPlayable(s.ReadOnly)) {
+    if (!m_races.contains(f.race)) {
         return false;
     }
-    int owner = 0;
-    if (!s.getRealOwner().get(owner)) {
+
+    // Must satisfy ANY of the type flags
+    const FlagSet_t typeFlags = FlagSet_t() + ShipCode + PlanetCode + StarbaseCode;
+    if ((m_flags & f.flags & typeFlags).empty()) {
         return false;
     }
-    if (!m_races.contains(config.getPlayerRaceNumber(owner))) {
+
+    // Must satisfy ALL of the attribute flags
+    const FlagSet_t attrFlags = FlagSet_t() + CapitalShipCode + AlchemyShipCode;
+    if ((m_flags & f.flags & attrFlags) != (m_flags & attrFlags)) {
         return false;
     }
-    if (!m_flags.contains(ShipCode)) {
-        return false;
-    }
-    if (m_flags.contains(CapitalShipCode)
-        && s.getNumBeams().orElse(0) == 0
-        && s.getNumLaunchers().orElse(0) == 0
-        && s.getNumBays().orElse(0) == 0)
-    {
-        return false;
-    }
-    if (m_flags.contains(AlchemyShipCode)
-        && !s.hasSpecialFunction(BasicHullFunction::MerlinAlchemy,     scoreDefinitions, shipList, config)
-        && !s.hasSpecialFunction(BasicHullFunction::NeutronicRefinery, scoreDefinitions, shipList, config)
-        && !s.hasSpecialFunction(BasicHullFunction::AriesRefinery,     scoreDefinitions, shipList, config))
-    {
-        return false;
-    }
+
     return true;
 }
 
-// Check whether this friendly code works on a planet.
-bool
-game::spec::FriendlyCode::worksOn(const game::map::Planet& p, const game::config::HostConfiguration& config) const
-{
-    // ex GFCode::worksOn
-    // FIXME: consider moving this out of FriendlyCode. Instead, make separate filter classes. It's only used to build filtered lists.
-    if (m_flags.contains(PrefixCode)) {
-        return false;
-    }
-    if (!p.isPlayable(p.ReadOnly)) {
-        return false;
-    }
-    int owner = 0;
-    if (!p.getOwner().get(owner)) {
-        return false;
-    }
-    if (!m_races.contains(config.getPlayerRaceNumber(owner))) {
-        return false;
-    }
-    if (m_flags.contains(PlanetCode) || (m_flags.contains(StarbaseCode) && p.hasBase())) {
-        return true;
-    }
-    return false;
-}
 
 // Check whether this friendly code is allowed according to registration status.
 bool

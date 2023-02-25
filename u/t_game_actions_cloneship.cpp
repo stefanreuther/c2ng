@@ -318,11 +318,13 @@ TestGameActionsCloneShip::testFriendlyCodeGood()
     afl::base::Ref<game::Root> root = game::test::makeRoot(game::HostVersion(), game::RegistrationKey::Registered, 10);
     game::UnitScoreDefinitionList shipScores;
     afl::string::NullTranslator tx;
-    t.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("cln", "r,foo", tx));
+    t.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("cln", "sr,foo", tx));
 
     // Units
     Planet& pl = init(t);
     Ship& sh = addOutrider(t);
+    TS_ASSERT(t.shipList().friendlyCodes().isAcceptedFriendlyCode("cln", game::spec::FriendlyCode::Filter::fromShip(sh, shipScores, t.shipList(), root->hostConfiguration()), root->registrationKey(),
+                                                                  game::spec::FriendlyCodeList::DefaultAvailable));
 
     // Action
     game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), *root);
@@ -340,7 +342,7 @@ TestGameActionsCloneShip::testFriendlyCodeBad()
     afl::base::Ref<game::Root> root = game::test::makeRoot(game::HostVersion(), game::RegistrationKey::Unregistered, 6);
     game::UnitScoreDefinitionList shipScores;
     afl::string::NullTranslator tx;
-    t.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("cln", "r,foo", tx));
+    t.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("cln", "sr,foo", tx));
 
     // Units
     Planet& pl = init(t);
@@ -362,7 +364,7 @@ TestGameActionsCloneShip::testFriendlyCodeOpen()
     afl::base::Ref<game::Root> root = game::test::makeRoot(game::HostVersion(), game::RegistrationKey::Unregistered, 6);
     game::UnitScoreDefinitionList shipScores;
     afl::string::NullTranslator tx;
-    t.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("cln", ",foo", tx));
+    t.shipList().friendlyCodes().addCode(game::spec::FriendlyCode("cln", "s,foo", tx));
 
     // Units
     Planet& pl = init(t);

@@ -73,25 +73,28 @@ namespace game { namespace spec {
             bool m_hasCaseInsensitiveUniversalMinefieldFCodes;
         };
 
+        /** Mode for isAcceptedFriendlyCode(). */
+        enum DefaultAcceptance {
+            DefaultAvailable,         ///< Friendly code is available to all players.
+            DefaultRegistered,        ///< Friendly code is available to registered players.
+            DefaultUnavailable        ///< Friendly code is not available when not defined.
+        };
+
+
         /** Default constructor.
             Makes an empty list. */
         FriendlyCodeList();
 
         /** Make sublist of some other list.
-            The new list will contain all friendly codes valid for object o.
-            \param originalList Original list
-            \param obj Object to generate list for
-            \param scoreDefinitions Ship score definitions
-            \param shipList Ship list
-            \param config Host configuration
+            The new list will contain all friendly codes accepted by the filter (FriendlyCode::worksOn())
+            and the registration key (FriendlyCode::isPermitted()).
 
-            Note that this copies only actual friendly codes (which have a FriendlyCode object);
-            it does not copy the extra friendly codes (that are only reserved as special). */
-        FriendlyCodeList(const FriendlyCodeList& originalList,
-                         const game::map::Object& obj,
-                         const UnitScoreDefinitionList& scoreDefinitions,
-                         const game::spec::ShipList& shipList,
-                         const game::config::HostConfiguration& config);
+            \param originalList Original list
+            \param f Filter
+            \param key Key
+
+            Note that this copies only actual friendly codes, not prefix codes. */
+        FriendlyCodeList(const FriendlyCodeList& originalList, const FriendlyCode::Filter& f, const RegistrationKey& key);
 
         /** Destructor. */
         ~FriendlyCodeList();
@@ -230,6 +233,16 @@ namespace game { namespace spec {
             \param host Host version
             \return newly-generated code */
         String_t generateRandomCode(util::RandomNumberGenerator& rng, const HostSelection host) const;
+
+        /** Check acceptance of friendly code.
+            If the friendly code is defined, use its parameters to check permission (FriendlyCode::isPermitted) and status (worksOn).
+            Otherwise, decide according to \c dflt.
+            \param fc   Code to check
+            \param f    Filter
+            \param key  Registration key
+            \param dflt Default policy
+            \return true if code is available */
+        bool isAcceptedFriendlyCode(const String_t& fc, const FriendlyCode::Filter& f, const RegistrationKey& key, DefaultAcceptance dflt) const;
 
      private:
         /** Special friendly codes. */

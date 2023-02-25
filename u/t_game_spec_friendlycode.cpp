@@ -17,15 +17,17 @@
 #include "game/spec/shiplist.hpp"
 #include "game/test/registrationkey.hpp"
 
+using game::spec::FriendlyCode;
+
 /** Test friendly code constructors. */
 void
 TestGameSpecFriendlyCode::testFCode()
 {
     // ex GameFcodeTestSuite::testFCode
     afl::string::NullTranslator tx;
-    game::spec::FriendlyCode mkt("mkt", "sc,make torps", tx);
-    game::spec::FriendlyCode lfm("lfm", "sc+9ab,make fighters", tx);
-    game::spec::FriendlyCode att("ATT", "p,attack", tx);
+    FriendlyCode mkt("mkt", "sc,make torps", tx);
+    FriendlyCode lfm("lfm", "sc+9ab,make fighters", tx);
+    FriendlyCode att("ATT", "p,attack", tx);
 
     game::PlayerList list;
 
@@ -49,12 +51,12 @@ TestGameSpecFriendlyCode::testFCodeFail()
     afl::string::NullTranslator tx;
 
     // Player character out of range
-    TS_ASSERT_THROWS(game::spec::FriendlyCode("xy0", "+0,hi", tx), std::exception);
-    TS_ASSERT_THROWS(game::spec::FriendlyCode("xyz", "+z,hi", tx), std::exception);
+    TS_ASSERT_THROWS(FriendlyCode("xy0", "+0,hi", tx), std::exception);
+    TS_ASSERT_THROWS(FriendlyCode("xyz", "+z,hi", tx), std::exception);
 
     // Missing description
-    TS_ASSERT_THROWS(game::spec::FriendlyCode("xyz", "", tx), std::exception);
-    TS_ASSERT_THROWS(game::spec::FriendlyCode("xyz", "p", tx), std::exception);
+    TS_ASSERT_THROWS(FriendlyCode("xyz", "", tx), std::exception);
+    TS_ASSERT_THROWS(FriendlyCode("xyz", "p", tx), std::exception);
 }
 
 /** Test initial state getters. */
@@ -63,7 +65,7 @@ TestGameSpecFriendlyCode::testData()
 {
     afl::string::NullTranslator tx;
     game::PlayerList list;
-    game::spec::FriendlyCode testee;
+    FriendlyCode testee;
     TS_ASSERT_EQUALS(testee.getCode(), "");
     TS_ASSERT_EQUALS(testee.getDescription(list, tx), "");
     TS_ASSERT(testee.getFlags().empty());
@@ -87,10 +89,10 @@ TestGameSpecFriendlyCode::testDescription()
     pl->setName(pl->OriginalShortName, "OrigShort");
 
     // Verify descriptions
-    TS_ASSERT_EQUALS(game::spec::FriendlyCode("xyz",",[%3]", tx).getDescription(list, tx), "[Short]");
-    TS_ASSERT_EQUALS(game::spec::FriendlyCode("xyz",",[%-3]", tx).getDescription(list, tx), "[Adj]");
-    TS_ASSERT_EQUALS(game::spec::FriendlyCode("xyz",",[%2]", tx).getDescription(list, tx), "[2]");
-    TS_ASSERT_EQUALS(game::spec::FriendlyCode("xyz",",[%-2]", tx).getDescription(list, tx), "[2]");
+    TS_ASSERT_EQUALS(FriendlyCode("xyz",",[%3]", tx).getDescription(list, tx), "[Short]");
+    TS_ASSERT_EQUALS(FriendlyCode("xyz",",[%-3]", tx).getDescription(list, tx), "[Adj]");
+    TS_ASSERT_EQUALS(FriendlyCode("xyz",",[%2]", tx).getDescription(list, tx), "[2]");
+    TS_ASSERT_EQUALS(FriendlyCode("xyz",",[%-2]", tx).getDescription(list, tx), "[2]");
 }
 
 /** Test worksOn(). */
@@ -105,28 +107,31 @@ TestGameSpecFriendlyCode::testWorksOn()
     afl::string::NullTranslator tx;
 
     // Some fcodes
-    game::spec::FriendlyCode planetFC("pfc", "p,xxx", tx);
-    game::spec::FriendlyCode baseFC("bfc", "b,xxx", tx);
-    game::spec::FriendlyCode shipFC("sfc", "s,xxx", tx);
-    game::spec::FriendlyCode fedFC("ffc", "p+1,xxx", tx);
+    FriendlyCode planetFC("pfc", "p,xxx", tx);
+    FriendlyCode baseFC("bfc", "b,xxx", tx);
+    FriendlyCode shipFC("sfc", "s,xxx", tx);
+    FriendlyCode fedFC("ffc", "p+1,xxx", tx);
+    FriendlyCode prefixFC("p", "X,xxx", tx);
 
     // Fed planet
     {
         game::map::Planet p(9);
         p.setOwner(1);
         p.setPlayability(p.ReadOnly);
-        TS_ASSERT(planetFC.worksOn(p, config));
-        TS_ASSERT(!baseFC.worksOn(p, config));
-        TS_ASSERT(!shipFC.worksOn(p, config));
-        TS_ASSERT(fedFC.worksOn(p, config));
+        TS_ASSERT(planetFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
+        TS_ASSERT(!baseFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
+        TS_ASSERT(!shipFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
+        TS_ASSERT(fedFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
+        TS_ASSERT(!prefixFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
 
         const game::map::Object& obj = p;
         const game::spec::ShipList shipList;
         const game::UnitScoreDefinitionList scoreDefinitions;
-        TS_ASSERT(planetFC.worksOn(obj, scoreDefinitions, shipList, config));
-        TS_ASSERT(!baseFC.worksOn(obj, scoreDefinitions, shipList, config));
-        TS_ASSERT(!shipFC.worksOn(obj, scoreDefinitions, shipList, config));
-        TS_ASSERT(fedFC.worksOn(obj, scoreDefinitions, shipList, config));
+        TS_ASSERT(planetFC.worksOn(FriendlyCode::Filter::fromObject(obj, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!baseFC.worksOn(FriendlyCode::Filter::fromObject(obj, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!shipFC.worksOn(FriendlyCode::Filter::fromObject(obj, scoreDefinitions, shipList, config)));
+        TS_ASSERT(fedFC.worksOn(FriendlyCode::Filter::fromObject(obj, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!prefixFC.worksOn(FriendlyCode::Filter::fromObject(obj, scoreDefinitions, shipList, config)));
     }
 
     // Lizard planet
@@ -134,19 +139,32 @@ TestGameSpecFriendlyCode::testWorksOn()
         game::map::Planet p(9);
         p.setOwner(2);
         p.setPlayability(p.ReadOnly);
-        TS_ASSERT(planetFC.worksOn(p, config));
-        TS_ASSERT(!baseFC.worksOn(p, config));
-        TS_ASSERT(!shipFC.worksOn(p, config));
-        TS_ASSERT(!fedFC.worksOn(p, config));
+        TS_ASSERT(planetFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
+        TS_ASSERT(!baseFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
+        TS_ASSERT(!shipFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
+        TS_ASSERT(!fedFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
+        TS_ASSERT(!prefixFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
     }
 
     // Unknown planet
     {
         game::map::Planet p(9);
-        TS_ASSERT(!planetFC.worksOn(p, config));
-        TS_ASSERT(!baseFC.worksOn(p, config));
-        TS_ASSERT(!shipFC.worksOn(p, config));
-        TS_ASSERT(!fedFC.worksOn(p, config));
+        TS_ASSERT(!planetFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
+        TS_ASSERT(!baseFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
+        TS_ASSERT(!shipFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
+        TS_ASSERT(!fedFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
+        TS_ASSERT(!prefixFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
+    }
+
+    // Unknown, played planet [cannot happen]
+    {
+        game::map::Planet p(9);
+        p.setPlayability(p.ReadOnly);
+        TS_ASSERT(!planetFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
+        TS_ASSERT(!baseFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
+        TS_ASSERT(!shipFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
+        TS_ASSERT(!fedFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
+        TS_ASSERT(!prefixFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
     }
 
     // Lizard base
@@ -158,10 +176,11 @@ TestGameSpecFriendlyCode::testWorksOn()
         p.addBaseSource(game::PlayerSet_t(2));
         p.setPlayability(p.ReadOnly);
         p.internalCheck(game::map::Configuration(), game::PlayerSet_t(2), 15, tx, log);
-        TS_ASSERT(planetFC.worksOn(p, config));
-        TS_ASSERT(baseFC.worksOn(p, config));
-        TS_ASSERT(!shipFC.worksOn(p, config));
-        TS_ASSERT(!fedFC.worksOn(p, config));
+        TS_ASSERT(planetFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
+        TS_ASSERT(baseFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
+        TS_ASSERT(!shipFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
+        TS_ASSERT(!fedFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
+        TS_ASSERT(!prefixFC.worksOn(FriendlyCode::Filter::fromPlanet(p, config)));
     }
 
     // Minefield
@@ -171,10 +190,11 @@ TestGameSpecFriendlyCode::testWorksOn()
         const game::UnitScoreDefinitionList scoreDefinitions;
         m.addReport(game::map::Point(2000, 2000), 2, m.IsMine, m.RadiusKnown, 100, 5, m.MinefieldLaid);
         m.setPlayability(m.ReadOnly);
-        TS_ASSERT(!planetFC.worksOn(m, scoreDefinitions, shipList, config));
-        TS_ASSERT(!baseFC.worksOn(m, scoreDefinitions, shipList, config));
-        TS_ASSERT(!shipFC.worksOn(m, scoreDefinitions, shipList, config));
-        TS_ASSERT(!fedFC.worksOn(m, scoreDefinitions, shipList, config));
+        TS_ASSERT(!planetFC.worksOn(FriendlyCode::Filter::fromObject(m, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!baseFC.worksOn(FriendlyCode::Filter::fromObject(m, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!shipFC.worksOn(FriendlyCode::Filter::fromObject(m, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!fedFC.worksOn(FriendlyCode::Filter::fromObject(m, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!prefixFC.worksOn(FriendlyCode::Filter::fromObject(m, scoreDefinitions, shipList, config)));
     }
 }
 
@@ -195,11 +215,12 @@ TestGameSpecFriendlyCode::testWorksOnShip()
     afl::string::NullTranslator tx;
 
     // Some fcodes
-    game::spec::FriendlyCode planetFC("pfc", "p,xxx", tx);
-    game::spec::FriendlyCode shipFC("sfc", "s,xxx", tx);
-    game::spec::FriendlyCode fedFC("ffc", "s+1,xxx", tx);
-    game::spec::FriendlyCode capFC("cfc", "sc,xxx", tx);
-    game::spec::FriendlyCode alchemyFC("afc", "sa,xxx", tx);
+    FriendlyCode planetFC("pfc", "p,xxx", tx);
+    FriendlyCode shipFC("sfc", "s,xxx", tx);
+    FriendlyCode fedFC("ffc", "s+1,xxx", tx);
+    FriendlyCode capFC("cfc", "sc,xxx", tx);
+    FriendlyCode alchemyFC("afc", "sa,xxx", tx);
+    FriendlyCode prefixFC("p", "X,xxx", tx);
 
     // Fed ship
     {
@@ -207,18 +228,20 @@ TestGameSpecFriendlyCode::testWorksOnShip()
         sh.setOwner(1);
         sh.setHull(HULL_NR);
         sh.setPlayability(sh.ReadOnly);
-        TS_ASSERT(!planetFC.worksOn(sh, scoreDefinitions, shipList, config));
-        TS_ASSERT(shipFC.worksOn(sh, scoreDefinitions, shipList, config));
-        TS_ASSERT(fedFC.worksOn(sh, scoreDefinitions, shipList, config));
-        TS_ASSERT(!capFC.worksOn(sh, scoreDefinitions, shipList, config));
-        TS_ASSERT(!alchemyFC.worksOn(sh, scoreDefinitions, shipList, config));
+        TS_ASSERT(!planetFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+        TS_ASSERT(shipFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+        TS_ASSERT(fedFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!capFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!alchemyFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!prefixFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
 
         const game::map::Object& obj = sh;
-        TS_ASSERT(!planetFC.worksOn(obj, scoreDefinitions, shipList, config));
-        TS_ASSERT(shipFC.worksOn(obj, scoreDefinitions, shipList, config));
-        TS_ASSERT(fedFC.worksOn(obj, scoreDefinitions, shipList, config));
-        TS_ASSERT(!capFC.worksOn(obj, scoreDefinitions, shipList, config));
-        TS_ASSERT(!alchemyFC.worksOn(obj, scoreDefinitions, shipList, config));
+        TS_ASSERT(!planetFC.worksOn(FriendlyCode::Filter::fromObject(obj, scoreDefinitions, shipList, config)));
+        TS_ASSERT(shipFC.worksOn(FriendlyCode::Filter::fromObject(obj, scoreDefinitions, shipList, config)));
+        TS_ASSERT(fedFC.worksOn(FriendlyCode::Filter::fromObject(obj, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!capFC.worksOn(FriendlyCode::Filter::fromObject(obj, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!alchemyFC.worksOn(FriendlyCode::Filter::fromObject(obj, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!prefixFC.worksOn(FriendlyCode::Filter::fromObject(obj, scoreDefinitions, shipList, config)));
     }
 
     // Lizard warship
@@ -228,11 +251,12 @@ TestGameSpecFriendlyCode::testWorksOnShip()
         sh.setHull(HULL_NR);
         sh.setPlayability(sh.ReadOnly);
         sh.setNumBays(1);
-        TS_ASSERT(shipFC.worksOn(sh, scoreDefinitions, shipList, config));
-        TS_ASSERT(!fedFC.worksOn(sh, scoreDefinitions, shipList, config));
-        TS_ASSERT(capFC.worksOn(sh, scoreDefinitions, shipList, config));
-        TS_ASSERT(!alchemyFC.worksOn(sh, scoreDefinitions, shipList, config));
-   }
+        TS_ASSERT(shipFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!fedFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+        TS_ASSERT(capFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!alchemyFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!prefixFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+    }
 
     // Alchemy ship
     {
@@ -243,10 +267,11 @@ TestGameSpecFriendlyCode::testWorksOnShip()
         sh.setNumBeams(1);
         sh.setBeamType(10);
         sh.addShipSpecialFunction(game::spec::BasicHullFunction::NeutronicRefinery);
-        TS_ASSERT(shipFC.worksOn(sh, scoreDefinitions, shipList, config));
-        TS_ASSERT(!fedFC.worksOn(sh, scoreDefinitions, shipList, config));
-        TS_ASSERT(capFC.worksOn(sh, scoreDefinitions, shipList, config));
-        TS_ASSERT(alchemyFC.worksOn(sh, scoreDefinitions, shipList, config));
+        TS_ASSERT(shipFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!fedFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+        TS_ASSERT(capFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+        TS_ASSERT(alchemyFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!prefixFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
     }
 
     // Remote-controlled ship
@@ -260,7 +285,35 @@ TestGameSpecFriendlyCode::testWorksOnShip()
         sh.addMessageInformation(info, game::PlayerSet_t(1));
 
         sh.setPlayability(sh.ReadOnly);
-        TS_ASSERT(!fedFC.worksOn(sh, scoreDefinitions, shipList, config));
+        TS_ASSERT(!fedFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!prefixFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+    }
+
+    // Not-played ship
+    {
+        game::map::Ship sh(9);
+        sh.setOwner(2);
+        sh.setHull(HULL_NR);
+        sh.setPlayability(sh.NotPlayable);
+        sh.setNumBays(1);
+        TS_ASSERT(!shipFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!fedFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!capFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!alchemyFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!prefixFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+    }
+
+    // Ownerless ship [cannot happen normally]
+    {
+        game::map::Ship sh(9);
+        sh.setHull(HULL_NR);
+        sh.setPlayability(sh.ReadOnly);
+        sh.setNumBays(1);
+        TS_ASSERT(!shipFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!fedFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!capFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!alchemyFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
+        TS_ASSERT(!prefixFC.worksOn(FriendlyCode::Filter::fromShip(sh, scoreDefinitions, shipList, config)));
     }
 }
 
@@ -269,8 +322,8 @@ void
 TestGameSpecFriendlyCode::testIsPermitted()
 {
     afl::string::NullTranslator tx;
-    game::spec::FriendlyCode unregFC("ufc", "s,xxx", tx);
-    game::spec::FriendlyCode regFC("rfc", "sr,xxx", tx);
+    FriendlyCode unregFC("ufc", "s,xxx", tx);
+    FriendlyCode regFC("rfc", "sr,xxx", tx);
 
     game::test::RegistrationKey unregKey(game::RegistrationKey::Unregistered, 6);
     game::test::RegistrationKey regKey(game::RegistrationKey::Registered, 10);
@@ -279,5 +332,115 @@ TestGameSpecFriendlyCode::testIsPermitted()
     TS_ASSERT(unregFC.isPermitted(regKey));
     TS_ASSERT(!regFC.isPermitted(unregKey));
     TS_ASSERT(regFC.isPermitted(regKey));
+}
+
+/** Test worksOn(), generic filter. */
+void
+TestGameSpecFriendlyCode::testWorksOnGenericFilter()
+{
+    afl::string::NullTranslator tx;
+    FriendlyCode shipFC("sfc", "s,xxx", tx);
+    FriendlyCode planetFC("pfc", "p,xxx", tx);
+    FriendlyCode baseFC("bfc", "b,xxx", tx);
+    FriendlyCode genericFC("gfc", "spb,xxx", tx);
+    FriendlyCode alchemyFC("afc", "sa,xxx", tx);
+    FriendlyCode capitalFC("cfc", "sc,xxx", tx);
+    FriendlyCode bigFC("Bfc", "sca,xxx", tx);
+
+    // Null filter
+    {
+        FriendlyCode::Filter f;
+        TS_ASSERT(!shipFC.worksOn(f));
+        TS_ASSERT(!planetFC.worksOn(f));
+        TS_ASSERT(!baseFC.worksOn(f));
+        TS_ASSERT(!genericFC.worksOn(f));
+        TS_ASSERT(!alchemyFC.worksOn(f));
+        TS_ASSERT(!capitalFC.worksOn(f));
+        TS_ASSERT(!bigFC.worksOn(f));
+    }
+
+    // Ship filter
+    {
+        FriendlyCode::Filter f(FriendlyCode::FlagSet_t() + FriendlyCode::ShipCode, 1);
+        TS_ASSERT( shipFC.worksOn(f));
+        TS_ASSERT(!planetFC.worksOn(f));
+        TS_ASSERT(!baseFC.worksOn(f));
+        TS_ASSERT( genericFC.worksOn(f));
+        TS_ASSERT(!alchemyFC.worksOn(f));
+        TS_ASSERT(!capitalFC.worksOn(f));
+        TS_ASSERT(!bigFC.worksOn(f));
+    }
+
+    // Alchemy ship filter
+    {
+        FriendlyCode::Filter f(FriendlyCode::FlagSet_t() + FriendlyCode::ShipCode + FriendlyCode::AlchemyShipCode, 1);
+        TS_ASSERT( shipFC.worksOn(f));
+        TS_ASSERT(!planetFC.worksOn(f));
+        TS_ASSERT(!baseFC.worksOn(f));
+        TS_ASSERT( genericFC.worksOn(f));
+        TS_ASSERT( alchemyFC.worksOn(f));
+        TS_ASSERT(!capitalFC.worksOn(f));
+        TS_ASSERT(!bigFC.worksOn(f));
+    }
+
+    // Capital ship filter
+    {
+        FriendlyCode::Filter f(FriendlyCode::FlagSet_t() + FriendlyCode::ShipCode + FriendlyCode::CapitalShipCode, 1);
+        TS_ASSERT( shipFC.worksOn(f));
+        TS_ASSERT(!planetFC.worksOn(f));
+        TS_ASSERT(!baseFC.worksOn(f));
+        TS_ASSERT( genericFC.worksOn(f));
+        TS_ASSERT(!alchemyFC.worksOn(f));
+        TS_ASSERT( capitalFC.worksOn(f));
+        TS_ASSERT(!bigFC.worksOn(f));
+    }
+
+    // Capital alchemy ship filter
+    {
+        FriendlyCode::Filter f(FriendlyCode::FlagSet_t() + FriendlyCode::ShipCode + FriendlyCode::AlchemyShipCode + FriendlyCode::CapitalShipCode, 1);
+        TS_ASSERT( shipFC.worksOn(f));
+        TS_ASSERT(!planetFC.worksOn(f));
+        TS_ASSERT(!baseFC.worksOn(f));
+        TS_ASSERT( genericFC.worksOn(f));
+        TS_ASSERT( alchemyFC.worksOn(f));
+        TS_ASSERT( capitalFC.worksOn(f));
+        TS_ASSERT( bigFC.worksOn(f));
+    }
+
+    // Planet filter
+    {
+        FriendlyCode::Filter f(FriendlyCode::FlagSet_t() + FriendlyCode::PlanetCode, 1);
+        TS_ASSERT(!shipFC.worksOn(f));
+        TS_ASSERT( planetFC.worksOn(f));
+        TS_ASSERT(!baseFC.worksOn(f));
+        TS_ASSERT( genericFC.worksOn(f));
+        TS_ASSERT(!alchemyFC.worksOn(f));
+        TS_ASSERT(!capitalFC.worksOn(f));
+        TS_ASSERT(!bigFC.worksOn(f));
+    }
+
+    // Starbase + planet filter
+    {
+        FriendlyCode::Filter f(FriendlyCode::FlagSet_t() + FriendlyCode::PlanetCode + FriendlyCode::StarbaseCode, 1);
+        TS_ASSERT(!shipFC.worksOn(f));
+        TS_ASSERT( planetFC.worksOn(f));
+        TS_ASSERT( baseFC.worksOn(f));
+        TS_ASSERT( genericFC.worksOn(f));
+        TS_ASSERT(!alchemyFC.worksOn(f));
+        TS_ASSERT(!capitalFC.worksOn(f));
+        TS_ASSERT(!bigFC.worksOn(f));
+    }
+
+    // All types filter
+    {
+        FriendlyCode::Filter f(FriendlyCode::FlagSet_t() + FriendlyCode::PlanetCode + FriendlyCode::StarbaseCode + FriendlyCode::ShipCode, 1);
+        TS_ASSERT( shipFC.worksOn(f));
+        TS_ASSERT( planetFC.worksOn(f));
+        TS_ASSERT( baseFC.worksOn(f));
+        TS_ASSERT( genericFC.worksOn(f));
+        TS_ASSERT(!alchemyFC.worksOn(f));
+        TS_ASSERT(!capitalFC.worksOn(f));
+        TS_ASSERT(!bigFC.worksOn(f));
+    }
 }
 

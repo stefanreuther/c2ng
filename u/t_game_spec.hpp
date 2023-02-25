@@ -4,7 +4,7 @@
 #ifndef C2NG_U_T_GAME_SPEC_HPP
 #define C2NG_U_T_GAME_SPEC_HPP
 
-#include <cxxtest/TestSuite.h> 
+#include <cxxtest/TestSuite.h>
 
 class TestGameSpecBaseComponentVector : public CxxTest::TestSuite {
  public:
@@ -90,6 +90,7 @@ class TestGameSpecFriendlyCode : public CxxTest::TestSuite {
     void testWorksOn();
     void testWorksOnShip();
     void testIsPermitted();
+    void testWorksOnGenericFilter();
 };
 
 class TestGameSpecFriendlyCodeList : public CxxTest::TestSuite {
@@ -108,6 +109,7 @@ class TestGameSpecFriendlyCodeList : public CxxTest::TestSuite {
     void testPessimistic();
     void testPack();
     void testLoadExtraDup();
+    void testIsAcceptedFriendlyCode();
 };
 
 class TestGameSpecHull : public CxxTest::TestSuite {

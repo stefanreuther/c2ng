@@ -13,6 +13,7 @@
 #include "afl/test/loglistener.hpp"
 #include "game/map/planet.hpp"
 #include "game/spec/shiplist.hpp"
+#include "game/test/registrationkey.hpp"
 
 /** Test isNumeric(). */
 void
@@ -217,9 +218,8 @@ TestGameSpecFriendlyCodeList::testContainer()
     p.setPlayability(p.ReadOnly);
 
     const game::config::HostConfiguration hostConfig;
-    const game::spec::ShipList shipList;
-    const game::UnitScoreDefinitionList scoreDefinitions;
-    game::spec::FriendlyCodeList sublist(testee, p, scoreDefinitions, shipList, hostConfig);
+    game::test::RegistrationKey key(game::RegistrationKey::Registered, 10);
+    game::spec::FriendlyCodeList sublist(testee, game::spec::FriendlyCode::Filter::fromPlanet(p, hostConfig), key);
     TS_ASSERT_EQUALS(sublist.size(), 2U);
     TS_ASSERT_EQUALS(sublist.at(0)->getCode(), "ffc");
     TS_ASSERT_EQUALS(sublist.at(1)->getCode(), "pfc");
@@ -574,5 +574,108 @@ TestGameSpecFriendlyCodeList::testLoadExtraDup()
     // Verify specialness
     TS_ASSERT_EQUALS(testee.isSpecial("ATT", false), true);
     TS_ASSERT_EQUALS(testee.isSpecial("AXE", false), true);    // due to 'A'
+}
+
+/** Test isAcceptedFriendlyCode(). */
+void
+TestGameSpecFriendlyCodeList::testIsAcceptedFriendlyCode()
+{
+    // Environment
+    // - keys
+    const game::test::RegistrationKey regKey(game::RegistrationKey::Registered, 10);
+    const game::test::RegistrationKey unregKey(game::RegistrationKey::Unregistered, 6);
+
+    // - filters
+    // -- for that, a planet
+    game::map::Planet p(77);
+    p.setOwner(3);
+    p.setPlayability(game::map::Object::Playable);
+
+    // -- for that, a configuration
+    game::config::HostConfiguration hostConfig;
+
+    // -- the filters
+    game::spec::FriendlyCode::Filter emptyFilter;
+    game::spec::FriendlyCode::Filter planetFilter(game::spec::FriendlyCode::Filter::fromPlanet(p, hostConfig));
+
+    // - FriendlyCodeList
+    // -- for that, a translator
+    afl::string::NullTranslator tx;
+
+    // -- the list
+    game::spec::FriendlyCodeList testee;
+    testee.addCode(game::spec::FriendlyCode("sfc", "s,whatever", tx));
+    testee.addCode(game::spec::FriendlyCode("gp3", "p+3,give to %3", tx));
+    testee.addCode(game::spec::FriendlyCode("gp4", "p+4,give to %4", tx));
+    testee.addCode(game::spec::FriendlyCode("mf1", "pX,", tx));
+
+    // Test cases
+    // - unknown code > result tracks DefaultAcceptance flag
+    TS_ASSERT( testee.isAcceptedFriendlyCode("unk", emptyFilter, regKey, game::spec::FriendlyCodeList::DefaultAvailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("unk", emptyFilter, regKey, game::spec::FriendlyCodeList::DefaultUnavailable));
+    TS_ASSERT( testee.isAcceptedFriendlyCode("unk", emptyFilter, regKey, game::spec::FriendlyCodeList::DefaultRegistered));
+    TS_ASSERT( testee.isAcceptedFriendlyCode("unk", emptyFilter, unregKey, game::spec::FriendlyCodeList::DefaultAvailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("unk", emptyFilter, unregKey, game::spec::FriendlyCodeList::DefaultUnavailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("unk", emptyFilter, unregKey, game::spec::FriendlyCodeList::DefaultRegistered));
+
+    // - ship code > fails due to emptyFilter, planetFilter (not a planet)
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("sfc", emptyFilter, regKey, game::spec::FriendlyCodeList::DefaultAvailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("sfc", emptyFilter, regKey, game::spec::FriendlyCodeList::DefaultUnavailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("sfc", emptyFilter, regKey, game::spec::FriendlyCodeList::DefaultRegistered));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("sfc", emptyFilter, unregKey, game::spec::FriendlyCodeList::DefaultAvailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("sfc", emptyFilter, unregKey, game::spec::FriendlyCodeList::DefaultUnavailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("sfc", emptyFilter, unregKey, game::spec::FriendlyCodeList::DefaultRegistered));
+
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("sfc", planetFilter, regKey, game::spec::FriendlyCodeList::DefaultAvailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("sfc", planetFilter, regKey, game::spec::FriendlyCodeList::DefaultUnavailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("sfc", planetFilter, regKey, game::spec::FriendlyCodeList::DefaultRegistered));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("sfc", planetFilter, unregKey, game::spec::FriendlyCodeList::DefaultAvailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("sfc", planetFilter, unregKey, game::spec::FriendlyCodeList::DefaultUnavailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("sfc", planetFilter, unregKey, game::spec::FriendlyCodeList::DefaultRegistered));
+
+    // - planet code > fails on emptyFilter, accepted on planetFilter
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("gp3", emptyFilter, regKey, game::spec::FriendlyCodeList::DefaultAvailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("gp3", emptyFilter, regKey, game::spec::FriendlyCodeList::DefaultUnavailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("gp3", emptyFilter, regKey, game::spec::FriendlyCodeList::DefaultRegistered));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("gp3", emptyFilter, unregKey, game::spec::FriendlyCodeList::DefaultAvailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("gp3", emptyFilter, unregKey, game::spec::FriendlyCodeList::DefaultUnavailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("gp3", emptyFilter, unregKey, game::spec::FriendlyCodeList::DefaultRegistered));
+
+    TS_ASSERT( testee.isAcceptedFriendlyCode("gp3", planetFilter, regKey, game::spec::FriendlyCodeList::DefaultAvailable));
+    TS_ASSERT( testee.isAcceptedFriendlyCode("gp3", planetFilter, regKey, game::spec::FriendlyCodeList::DefaultUnavailable));
+    TS_ASSERT( testee.isAcceptedFriendlyCode("gp3", planetFilter, regKey, game::spec::FriendlyCodeList::DefaultRegistered));
+    TS_ASSERT( testee.isAcceptedFriendlyCode("gp3", planetFilter, unregKey, game::spec::FriendlyCodeList::DefaultAvailable));
+    TS_ASSERT( testee.isAcceptedFriendlyCode("gp3", planetFilter, unregKey, game::spec::FriendlyCodeList::DefaultUnavailable));
+    TS_ASSERT( testee.isAcceptedFriendlyCode("gp3", planetFilter, unregKey, game::spec::FriendlyCodeList::DefaultRegistered));
+
+    // - planet code > fails due to emptyFilter, planetFilter (wrong player)
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("gp4", emptyFilter, regKey, game::spec::FriendlyCodeList::DefaultAvailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("gp4", emptyFilter, regKey, game::spec::FriendlyCodeList::DefaultUnavailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("gp4", emptyFilter, regKey, game::spec::FriendlyCodeList::DefaultRegistered));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("gp4", emptyFilter, unregKey, game::spec::FriendlyCodeList::DefaultAvailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("gp4", emptyFilter, unregKey, game::spec::FriendlyCodeList::DefaultUnavailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("gp4", emptyFilter, unregKey, game::spec::FriendlyCodeList::DefaultRegistered));
+
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("gp4", planetFilter, regKey, game::spec::FriendlyCodeList::DefaultAvailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("gp4", planetFilter, regKey, game::spec::FriendlyCodeList::DefaultUnavailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("gp4", planetFilter, regKey, game::spec::FriendlyCodeList::DefaultRegistered));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("gp4", planetFilter, unregKey, game::spec::FriendlyCodeList::DefaultAvailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("gp4", planetFilter, unregKey, game::spec::FriendlyCodeList::DefaultUnavailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("gp4", planetFilter, unregKey, game::spec::FriendlyCodeList::DefaultRegistered));
+
+    // - prefix code > fails, prefix never accepted
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("mf1", emptyFilter, regKey, game::spec::FriendlyCodeList::DefaultAvailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("mf1", emptyFilter, regKey, game::spec::FriendlyCodeList::DefaultUnavailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("mf1", emptyFilter, regKey, game::spec::FriendlyCodeList::DefaultRegistered));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("mf1", emptyFilter, unregKey, game::spec::FriendlyCodeList::DefaultAvailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("mf1", emptyFilter, unregKey, game::spec::FriendlyCodeList::DefaultUnavailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("mf1", emptyFilter, unregKey, game::spec::FriendlyCodeList::DefaultRegistered));
+
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("mf1", planetFilter, regKey, game::spec::FriendlyCodeList::DefaultAvailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("mf1", planetFilter, regKey, game::spec::FriendlyCodeList::DefaultUnavailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("mf1", planetFilter, regKey, game::spec::FriendlyCodeList::DefaultRegistered));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("mf1", planetFilter, unregKey, game::spec::FriendlyCodeList::DefaultAvailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("mf1", planetFilter, unregKey, game::spec::FriendlyCodeList::DefaultUnavailable));
+    TS_ASSERT(!testee.isAcceptedFriendlyCode("mf1", planetFilter, unregKey, game::spec::FriendlyCodeList::DefaultRegistered));
 }
 
