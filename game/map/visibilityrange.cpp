@@ -16,7 +16,7 @@
 using game::config::HostConfiguration;
 
 namespace {
-    game::config::EnumValueParser vep_mode("Own,Ships,Planets,Marked");
+    const game::config::EnumValueParser vep_mode("Own,Ships,Planets,Marked");
     const game::config::IntegerOptionDescriptor opt_chart_range_mode     = { "Chart.Range.Mode",     &vep_mode };
     const game::config::IntegerOptionDescriptor opt_chart_range_team     = { "Chart.Range.Team",     &game::config::BooleanValueParser::instance };
     const game::config::IntegerOptionDescriptor opt_chart_range_distance = { "Chart.Range.Distance", &game::config::IntegerValueParser::instance };

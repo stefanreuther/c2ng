@@ -1,12 +1,13 @@
 /**
   *  \file game/config/booleanvalueparser.cpp
+  *  \brief Class game::config::BooleanValueParser
   */
 
 #include "game/config/booleanvalueparser.hpp"
 #include "util/string.hpp"
 #include "afl/string/parse.hpp"
 
-game::config::BooleanValueParser game::config::BooleanValueParser::instance;
+const game::config::BooleanValueParser game::config::BooleanValueParser::instance;
 
 game::config::BooleanValueParser::BooleanValueParser()
 {

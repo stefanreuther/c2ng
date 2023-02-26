@@ -1,5 +1,6 @@
 /**
   *  \file game/config/userconfiguration.hpp
+  *  \brief Class game::config::UserConfiguration
   */
 #ifndef C2NG_GAME_CONFIG_USERCONFIGURATION_HPP
 #define C2NG_GAME_CONFIG_USERCONFIGURATION_HPP
@@ -16,8 +17,20 @@ namespace game { namespace config {
 
     struct MarkerOptionDescriptor;
 
+    /** User configuration (preferences).
+        Represents the content of the pcc2.ini file.
+
+        Note that the UserConfiguration is extended by other modules that index it with option descriptors
+        unknown to us, to create additional configuration points.
+        Placing it here is preferred, see below.
+        The disadvantage is that knowledge about that other module's configuration needs to be here.
+
+        In addition to actual user preferences, a UserConfiguration also contains information about a game directory,
+        i.e. "this is the game directory for 'user @ planetscentral.com, game 75'".
+        It is therefore used extensively during browsing. */
     class UserConfiguration : public Configuration {
      public:
+        /** Number of canned markers that can be defined. */
         static const int NUM_CANNED_MARKERS = 10;
 
         /** Values for option ChartWheel. */
@@ -27,14 +40,42 @@ namespace game { namespace config {
             WheelPage           ///< Page through objects. ex cw_Page
         };
 
+        /** Constructor.
+            Makes a default configuration. */
         UserConfiguration();
+
+        /** Destructor. */
         ~UserConfiguration();
 
+        /** Set default values. */
         void setDefaultValues();
 
+        /** Load user configuration file (from profile).
+            If the file exists, loads it; otherwise, does nothing.
+            \param dir Profile directory
+            \param log Logger
+            \param tx  Translator */
         void loadUserConfiguration(util::ProfileDirectory& dir, afl::sys::LogListener& log, afl::string::Translator& tx);
+
+        /** Load game configuration file (from game directory).
+            If the file exists, loads it; otherwise, does nothing.
+            \param dir Game directory
+            \param log Logger
+            \param tx  Translator */
         void loadGameConfiguration(afl::io::Directory& dir, afl::sys::LogListener& log, afl::string::Translator& tx);
+
+        /** Save user configuration file (to profile).
+            Updates the file with all options tagged as Source=User.
+            \param dir Profile directory
+            \param log Logger
+            \param tx  Translator */
         void saveUserConfiguration(util::ProfileDirectory& dir, afl::sys::LogListener& log, afl::string::Translator& tx) const;
+
+        /** Save game configuration file (to game directory).
+            Updates the file with all options tagged as Source=Game.
+            \param dir Game directory
+            \param log Logger
+            \param tx  Translator */
         void saveGameConfiguration(afl::io::Directory& dir, afl::sys::LogListener& log, afl::string::Translator& tx) const;
 
         /** Get game type.

@@ -1,5 +1,6 @@
 /**
   *  \file game/config/costarrayoption.cpp
+  *  \brief Class game::config::CostArrayOption
   */
 
 #include "game/config/costarrayoption.hpp"

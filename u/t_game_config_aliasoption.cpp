@@ -6,6 +6,7 @@
 #include "game/config/aliasoption.hpp"
 
 #include "t_game_config.hpp"
+#include "game/config/configuration.hpp"
 #include "game/config/stringoption.hpp"
 
 /** Test AliasOption. */
@@ -15,7 +16,7 @@ TestGameConfigAliasOption::testIt()
     static const game::config::StringOptionDescriptor base = { "Base" };
     static const game::config::AliasOptionDescriptor one = { "One", "base" };
     static const game::config::AliasOptionDescriptor two = { "Two", "Other" };
-    
+
     game::config::Configuration fig;
     fig[base].set("hi");
 

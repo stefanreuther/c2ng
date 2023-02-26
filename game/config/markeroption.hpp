@@ -30,6 +30,7 @@ namespace game { namespace config {
         };
 
         /** Constructor.
+            Constructs an option with the given default kind and color; name will be empty.
             \param markerKind Initial kind (shape); see getMarkerKind
             \param color      Color; see getColor */
         MarkerOption(uint8_t markerKind, uint8_t color);
@@ -56,11 +57,12 @@ namespace game { namespace config {
         Data m_data;
     };
 
+    /** Descriptor for a MarkerOption. */
     struct MarkerOptionDescriptor {
         // Instantiation information
-        const char* m_name;
-        uint8_t m_markerKind;
-        uint8_t m_color;
+        const char* m_name;            ///< Name of option.
+        uint8_t m_markerKind;          ///< Default marker kind.
+        uint8_t m_color;               ///< Default marker color.
 
         // Meta-information
         typedef MarkerOption OptionType_t;

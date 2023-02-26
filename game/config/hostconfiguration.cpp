@@ -1805,7 +1805,7 @@ game::config::HostConfiguration::getPlayersWhereEnabled(const StandardOptionDesc
 {
     const StandardOption_t& optionValue = (*this)[opt];
     PlayerSet_t result;
-    for (int i = 1; i <= MAX_PLAYERS /*FIXME*/; ++i) {
+    for (int i = 1; i <= MAX_PLAYERS; ++i) {
         if (optionValue(i) != 0) {
             result += i;
         }

@@ -35,7 +35,7 @@ namespace {
     const game::config::IntegerOptionDescriptorWithDefault opt_circular_excess = { "Chart.Circle.Outside", &game::config::IntegerValueParser::instance, DEFAULT_CIRCULAR_EXCESS };
 
     /** Wrap mode. Default is 0, so no need to specify. */
-    game::config::EnumValueParser opt_map_kind_parser("flat,wrapped,circular");
+    const game::config::EnumValueParser opt_map_kind_parser("flat,wrapped,circular");
     const game::config::IntegerOptionDescriptor opt_map_kind = { "Chart.Geo.Mode", &opt_map_kind_parser };
 
     /** Map center. */

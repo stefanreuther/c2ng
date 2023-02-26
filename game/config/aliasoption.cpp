@@ -1,8 +1,10 @@
 /**
   *  \file game/config/aliasoption.cpp
+  *  \brief Class game::config::AliasOption
   */
 
 #include "game/config/aliasoption.hpp"
+#include "game/config/configuration.hpp"
 
 game::config::AliasOption::AliasOption(Configuration& container, String_t forwardedOptionName)
     : m_container(container),

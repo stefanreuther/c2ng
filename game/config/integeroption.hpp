@@ -53,7 +53,7 @@ namespace game { namespace config {
     struct IntegerOptionDescriptor {
         // Instantiation information
         const char* m_name;
-        ValueParser* m_parser;
+        const ValueParser* m_parser;
 
         // Meta-information
         typedef IntegerOption OptionType_t;
@@ -64,7 +64,7 @@ namespace game { namespace config {
     struct IntegerOptionDescriptorWithDefault {
         // Instantiation information
         const char* m_name;
-        ValueParser* m_parser;
+        const ValueParser* m_parser;
         int32_t m_defaultValue;
 
         // Meta-information

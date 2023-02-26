@@ -1746,7 +1746,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_map_renderer.cpp u/t_game_map_shiputils.cpp \
+FILES_testsuite = u/t_game_config_configurationparser.cpp \
+    u/t_game_map_renderer.cpp u/t_game_map_shiputils.cpp \
     u/t_game_map_simpleobjectcursor.cpp u/t_game_map_shiphistorydata.cpp \
     u/t_game_map_playedbasetype.cpp u/t_game_map_rendererlistener.cpp \
     u/t_game_map_planetdata.cpp u/t_game_map_objectvectortype.cpp \

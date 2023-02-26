@@ -1,5 +1,6 @@
 /**
   *  \file game/config/bitsetvalueparser.cpp
+  *  \brief Class game::config::BitsetValueParser
   */
 
 #include "game/config/bitsetvalueparser.hpp"

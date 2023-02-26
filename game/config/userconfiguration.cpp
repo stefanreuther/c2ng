@@ -1,5 +1,6 @@
 /**
   *  \file game/config/userconfiguration.cpp
+  *  \brief Class game::config::UserConfiguration
   */
 
 #include "game/config/userconfiguration.hpp"
@@ -91,12 +92,12 @@ namespace game { namespace config {
     const IntegerOptionDescriptor UserConfiguration::ChartScannerWarpWells = { "Chart.Scanner.WarpWells", &BooleanValueParser::instance };
 
     // Order of options must agree with enum WheelMode in header
-    namespace { EnumValueParser parse_chartwheel("zoom,browse,page"); }
+    namespace { const EnumValueParser parse_chartwheel("zoom,browse,page"); }
     const IntegerOptionDescriptor UserConfiguration::ChartWheel = { "Chart.Wheel", &parse_chartwheel };
 
     // Order of bits must agree with enum RenderOptions::Option.
     // Order of options must agree with RenderOptions::Area.
-    namespace { BitsetValueParser parse_chartopts("ion,mine,ufos,sectors,borders,drawings,selection,labels,trails,shipdots,warpwells,messages,decay"); }
+    namespace { const BitsetValueParser parse_chartopts("ion,mine,ufos,sectors,borders,drawings,selection,labels,trails,shipdots,warpwells,messages,decay"); }
     const IntegerOptionDescriptor UserConfiguration::ChartRenderOptions[3][2] = {
         // Small
         { { "Chart.Small.Show", &parse_chartopts, },
@@ -111,7 +112,7 @@ namespace game { namespace config {
 
     // Lock
     // Note that the order of bits must agree with the definitions of MatchPlanets etc. in game/map/locker.hpp.
-    namespace { BitsetValueParser LockOptionParser("planet,ship,ufo,marker,minefield"); }
+    namespace { const BitsetValueParser LockOptionParser("planet,ship,ufo,marker,minefield"); }
     const IntegerOptionDescriptor UserConfiguration::Lock_Left   = { "Lock.Left", &LockOptionParser };
     const IntegerOptionDescriptor UserConfiguration::Lock_Right  = { "Lock.Right", &LockOptionParser };
 
@@ -129,8 +130,8 @@ namespace game { namespace config {
     const IntegerOptionDescriptor UserConfiguration::Team_SyncTransfer = { "Team.SyncTransfer", &BooleanValueParser::instance };  // @since 2.41
 
     // Unpack
-    namespace { EnumValueParser UnpackAcceptParser("ask,accept,reject"); }
-    namespace { EnumValueParser UnpackFormatParser("DOS,Windows"); }
+    namespace { const EnumValueParser UnpackAcceptParser("ask,accept,reject"); }
+    namespace { const EnumValueParser UnpackFormatParser("DOS,Windows"); }
     const IntegerOptionDescriptor UserConfiguration::Unpack_AcceptRaceNames = { "Unpack.RaceNames", &UnpackAcceptParser };
     const StringOptionDescriptor UserConfiguration::Unpack_AttachmentTimestamp = { "Unpack.AttachmentTimestamp" };
     const IntegerOptionDescriptor UserConfiguration::Unpack_Format = { "Unpack.Format", &UnpackFormatParser };
@@ -289,11 +290,15 @@ game::config::UserConfiguration::loadUserConfiguration(util::ProfileDirectory& d
         ConfigurationParser parser(log, tx, *this, ConfigurationOption::User);
         parser.setCharsetNew(new afl::charset::Utf8Charset());
         parser.parseFile(*stream);
-
-        // Set all options to Source=User, no matter where they come from.
-        // This will make sure the main config file always contains all (standard) options.
-        setAllOptionsSource(ConfigurationOption::User);
     }
+
+    // Set all options to Source=User, no matter where they come from.
+    // This will make sure the main config file always contains all (standard) options.
+    // loadUserConfiguration() is the trigger that we actually want to have a user configuration.
+    // @change PCC2 did this only after successfully opening the file,
+    // which means that the first configuration written after a load/save cycle will be empty,
+    // and the second will be populated, which makes no sense.
+    setAllOptionsSource(ConfigurationOption::User);
 }
 
 void

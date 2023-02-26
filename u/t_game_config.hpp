@@ -53,6 +53,12 @@ class TestGameConfigConfigurationOption : public CxxTest::TestSuite {
     void testUpdate();
 };
 
+class TestGameConfigConfigurationParser : public CxxTest::TestSuite {
+ public:
+    void testNormal();
+    void testFail();
+};
+
 class TestGameConfigCostArrayOption : public CxxTest::TestSuite {
  public:
     void testSet1();
@@ -124,6 +130,9 @@ class TestGameConfigUserConfiguration : public CxxTest::TestSuite {
     void testGameType();
     void testFormat();
     void testCannedMarker();
+    void testSaveEmpty();
+    void testLoadSaveEmpty();
+    void testNonEmpty();
 };
 
 class TestGameConfigValueParser : public CxxTest::TestSuite {

@@ -12,9 +12,12 @@ namespace game { namespace config {
 
     class Configuration;
 
-    /** Integer option array.
+    /** Collapsible integer option array.
         This contains an array of int32_t values,
         parsed from a comma-separated list according to a ValueParser.
+
+        If all values are the same, the string representation is shortened to a single element.
+
         \tparam N Array size */
     template<int N>
     class CollapsibleIntegerArrayOption : public GenericIntegerArrayOption {
@@ -43,11 +46,14 @@ namespace game { namespace config {
     };
 
 
+    /** Instantiation information for CollapsibleIntegerArrayOption.
+
+        \tparam N Array size */
     template<int N>
     struct CollapsibleIntegerArrayOptionDescriptor {
         // Instantiation information
-        const char* m_name;
-        const ValueParser* m_parser;
+        const char* m_name;                    ///< Name of option. Non-null.
+        const ValueParser* m_parser;           ///< ValueParser instance. Non-null.
 
         // Meta-information
         typedef CollapsibleIntegerArrayOption<N> OptionType_t;

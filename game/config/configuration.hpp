@@ -93,6 +93,8 @@ namespace game { namespace config {
         /** Mark all options unset (default). */
         void markAllOptionsUnset();
 
+        /** Set source for all options.
+            \param source Source */
         void setAllOptionsSource(ConfigurationOption::Source source);
 
         /** Notify all listeners.
