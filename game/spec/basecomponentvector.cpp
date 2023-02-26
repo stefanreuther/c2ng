@@ -5,6 +5,11 @@
 
 #include <memory>
 #include "game/spec/basecomponentvector.hpp"
+#include "game/spec/component.hpp"
+
+// Protected destructor.
+game::spec::BaseComponentVector::~BaseComponentVector()
+{ }
 
 // Get a component by number.
 game::spec::Component*
@@ -15,6 +20,13 @@ game::spec::BaseComponentVector::get(int id) const
     } else {
         return 0;
     }
+}
+
+// Clear.
+void
+game::spec::BaseComponentVector::clear()
+{
+    m_components.clear();
 }
 
 // Find next component, given an Id.
@@ -48,7 +60,6 @@ game::spec::BaseComponentVector::setNew(int id, Component* p)
 bool
 game::spec::BaseComponentVector::Names::getFirstKey(int& a) const
 {
-    // FIXME: use findNext etc.
     a = 0;
     return getNextKey(a);
 }
@@ -56,14 +67,12 @@ game::spec::BaseComponentVector::Names::getFirstKey(int& a) const
 bool
 game::spec::BaseComponentVector::Names::getNextKey(int& a) const
 {
-    int n = m_vec.size();
-    while (a < n) {
-        ++a;
-        if (m_vec.get(a)) {
-            return true;
-        }
+    if (const Component* p = m_vec.findNext(a)) {
+        a = p->getId();
+        return true;
+    } else {
+        return false;
     }
-    return false;
 }
 
 String_t

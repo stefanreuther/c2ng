@@ -1,5 +1,6 @@
 /**
   *  \file game/spec/missionlist.cpp
+  *  \brief Class game::spec::MissionList
   */
 
 #include "game/spec/missionlist.hpp"

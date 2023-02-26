@@ -5,11 +5,14 @@
 #ifndef C2NG_GAME_SPEC_BASECOMPONENTVECTOR_HPP
 #define C2NG_GAME_SPEC_BASECOMPONENTVECTOR_HPP
 
-#include "game/spec/component.hpp"
-#include "afl/functional/mapping.hpp"
 #include "afl/container/ptrvector.hpp"
+#include "afl/functional/mapping.hpp"
+#include "afl/string/string.hpp"
 
 namespace game { namespace spec {
+
+    class Component;
+    class ComponentNameProvider;
 
     /** ComponentVector common base class.
         This class is the common base class to all ComponentVector instances to share common code.
@@ -54,6 +57,10 @@ namespace game { namespace spec {
             \param p Newly-allocated component */
         void setNew(int id, Component* p);
 
+        /** Protected destructor.
+            You're not supposed to create instances through BaseComponentVector pointers. */
+        ~BaseComponentVector();
+
      private:
         afl::container::PtrVector<Component> m_components;
     };
@@ -91,13 +98,6 @@ inline game::spec::BaseComponentVector::Names
 game::spec::BaseComponentVector::names(const ComponentNameProvider& provider) const
 {
     return Names(*this, provider, false);
-}
-
-// Clear.
-inline void
-game::spec::BaseComponentVector::clear()
-{
-    m_components.clear();
 }
 
 // Get number of components.

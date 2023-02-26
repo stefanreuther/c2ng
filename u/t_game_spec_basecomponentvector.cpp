@@ -8,6 +8,7 @@
 
 #include "t_game_spec.hpp"
 #include "game/spec/nullcomponentnameprovider.hpp"
+#include "game/spec/component.hpp"
 
 namespace {
     // setNew is protected; publish it for testing

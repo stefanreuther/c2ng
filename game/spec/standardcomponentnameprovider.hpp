@@ -1,5 +1,6 @@
 /**
   *  \file game/spec/standardcomponentnameprovider.hpp
+  *  \brief Class game::spec::StandardComponentNameProvider
   */
 #ifndef C2NG_GAME_SPEC_STANDARDCOMPONENTNAMEPROVIDER_HPP
 #define C2NG_GAME_SPEC_STANDARDCOMPONENTNAMEPROVIDER_HPP
@@ -13,15 +14,31 @@
 
 namespace game { namespace spec {
 
+    /** Standard implementation of ComponentNameProvider.
+        Stores a set of translations and satisfies requests from that.
+        Call load() to initialize this object by loading the names.cc file. */
     class StandardComponentNameProvider : public ComponentNameProvider {
      public:
+        /** Default constructor.
+            Makes an empty object. */
         StandardComponentNameProvider();
+
+        /** Destructor. */
         ~StandardComponentNameProvider();
 
+        // ComponentNameProvider:
         virtual String_t getName(Type type, int index, const String_t& name) const;
         virtual String_t getShortName(Type type, int index, const String_t& name, const String_t& shortName) const;
 
+        /** Clear.
+            Discards all translations. */
         void clear();
+
+        /** Load configuration file.
+
+            @param dir Game directory
+            @param tx  Translator (to obtain current language; and for log messages)
+            @param log Logger */
         void load(afl::io::Directory& dir, afl::string::Translator& tx, afl::sys::LogListener& log);
 
      private:
