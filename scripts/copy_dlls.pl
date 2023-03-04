@@ -31,7 +31,7 @@ while (defined(my $de = readdir(BINDIR))) {
         push @todo, "$bindir/$de";
     } elsif ($de =~ /\.dll$/i) {
         # Local DLL
-        $dlls{lc($de)} = { name => "$bindir/$de", done => 1, copy => 0 }
+        $dlls{lc($de)} = { name => "$bindir/$de", base => $de, done => 1, copy => 0 }
     } else {
         # Other
     }
@@ -48,7 +48,7 @@ my $ex = 0;
 foreach (sort keys %dlls) {
     if ($dlls{$_}{copy}) {
         my $in = $dlls{$_}{name};
-        my $out = "$bindir/$_";
+        my $out = "$bindir/$dlls{$_}{base}";
         print "\tCopying $in...\n";
         if (system('cp', $in, $out) != 0) {
             $ex = 1;
@@ -71,7 +71,7 @@ sub load_dlls {
                 if ($dlls{$n}) {
                     print STDERR "Warning: '$n' exists as '$name/$de' and as '$dlls{$n}{name}'\n";
                 } else {
-                    $dlls{$n} = { name => "$name/$de", done => 0, copy => 0 };
+                    $dlls{$n} = { name => "$name/$de", base => $de, done => 0, copy => 0 };
                 }
             } elsif (-d "$name/$de") {
                 # Directory; recurse
@@ -92,10 +92,10 @@ sub process_file {
     while (<$fh>) {
         if (/DLL Name:\s+(.*\.dll)/i) {
             my $name = lc($1);
-            if ($dlls{$1} && !$dlls{$1}{done}) {
-                $dlls{$1}{done} = 1;
-                $dlls{$1}{copy} = 1;
-                push @todo, $dlls{$1}{name};
+            if ($dlls{$name} && !$dlls{$name}{done}) {
+                $dlls{$name}{done} = 1;
+                $dlls{$name}{copy} = 1;
+                push @todo, $dlls{$name}{name};
             }
         }
     }

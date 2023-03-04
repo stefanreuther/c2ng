@@ -41,6 +41,8 @@ add_variable(ENABLE_BUILD    => 1);
 add_variable(DLL_PATH        => '');
 
 my $IN = $V{IN};
+my $bindir;
+my $prefix = get_variable('prefix');
 
 # Targets (previously maintained in P9/Settings as 'TARGETS' variable)
 if (get_variable('ENABLE_BUILD')) {
@@ -111,9 +113,11 @@ if (get_variable('ENABLE_BUILD')) {
     if ($V{TARGET} =~ /POSIX/i) {
         add_to_variable(CXXFLAGS => "-DTARGET_OS_POSIX");
         add_variable(EXE_SUFFIX => '');
+        $bindir = "$prefix/bin";
     } elsif ($V{TARGET} =~ /Win(32|64)/i) {
         add_to_variable(CXXFLAGS => "-DTARGET_OS_WIN32");
         add_variable(EXE_SUFFIX => '.exe');
+        $bindir = "$prefix";
     } else {
         die "Error: the specified target '$V{TARGET}' is not known; provide correct 'TARGET=' option";
     }
@@ -150,7 +154,6 @@ if (get_variable('ENABLE_BUILD')) {
     compile_add_prebuilt_library(afl => "$V{AFL_DIR}/lib/libafl.a",
                                  [split /\s+/, $afl_config->{CONFIG_AFL_LIBS}]);
 
-    my $prefix = get_variable('prefix');
     my $settings = load_variables("$IN/P9/Settings");
 
     # Libraries
@@ -180,7 +183,7 @@ if (get_variable('ENABLE_BUILD')) {
         my $exe = compile_executable($app,
                                      [to_prefix_list($IN, $settings->{"FILES_$app"})],
                                      [split /\s+/, $settings->{"DEPEND_$app"}]);
-        generate('install', generate_copy_strip("$prefix/bin/$exe", $exe));
+        generate('install', generate_copy_strip("$bindir/$exe", $exe));
         generate('all', $exe);
     }
 
@@ -318,8 +321,15 @@ if (get_variable('ENABLE_BUILD')) {
     # Copy Windows DLLs
     if ($V{DLL_PATH}) {
         my $script = "$IN/scripts/copy_dlls.pl";
-        generate('install', [$script],
-                 "$V{PERL} $script \$(prefix)/bin $V{DLL_PATH}");
+        my $bindir1 = $bindir; $bindir1 =~ s/\$/\$\$/g; # FIXME: Hack to avoid double-expansion
+        generate('install', [$script], "$V{PERL} $script $bindir1 $V{DLL_PATH}");
+    }
+
+    # For Windows, build an archive
+    if ($V{TARGET} =~ /Win(32|64)/i) {
+        my $script = "$IN/scripts/build_win32_zip.pl";
+        my $prefix1 = $prefix; $prefix1 =~ s/\$/\$\$/g; # FIXME: Hack to avoid double-expansion
+        generate('install', [$script], "$V{PERL} $script $IN $prefix1");
     }
 }
 
