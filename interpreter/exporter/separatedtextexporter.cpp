@@ -2,10 +2,6 @@
   *  \file interpreter/exporter/separatedtextexporter.cpp
   *  \brief Class interpreter::exporter::SeparatedTextExporter
   *
-  *  PCC2 comment:
-  *
-  *  This implements comma-separated values and derivatives.
-  *
   *  Modelled partially after PCC 1.x export.pas::CTextExporter.
   */
 

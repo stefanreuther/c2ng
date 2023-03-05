@@ -39,7 +39,7 @@ namespace interpreter {
 
             \param tok [in] Tokenizer to read from
             \param expr [out] Code will be appended here
-    
+
             expression ::= summand
                          | expression ("+"|"Or") summand
                          | expression "Xor" summand         // this production not in PCC 1.x

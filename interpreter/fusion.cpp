@@ -86,7 +86,7 @@ LocalTracer::isOverwrittenLocal(interpreter::BytecodeObject::PC_t pc, uint16_t a
     /* Check depth */
     while (depth > 0 && pc < m_bco.getNumInstructions()) {
         const interpreter::Opcode& op = m_bco(pc++);
-        --depth;       
+        --depth;
         switch (op.major) {
          case interpreter::Opcode::maPush:
          case interpreter::Opcode::maFusedUnary:
@@ -135,7 +135,7 @@ LocalTracer::isOverwrittenLocal(interpreter::BytecodeObject::PC_t pc, uint16_t a
                 return false;
             }
             break;
-            
+
          case interpreter::Opcode::maIndirect:
          case interpreter::Opcode::maMemref:
             /* These can do anything. Do not accept. */

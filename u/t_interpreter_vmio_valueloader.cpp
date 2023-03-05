@@ -220,7 +220,6 @@ TestInterpreterVmioValueLoader::testReal()
         interpreter::SaveVisitor(tagOut, auxOut, cs, saveContext).visit(&fv);
         TS_ASSERT_EQUALS(tagOut.tag, 0U);
         TS_ASSERT_EQUALS(tagOut.value, 0U);
-        // TS_ASSERT_EQUALS(IntFloatValue(itn, ms).getValue(), 0.0);
     }
     {
         // too large, serializes to maximum
@@ -229,11 +228,6 @@ TestInterpreterVmioValueLoader::testReal()
         interpreter::SaveVisitor(tagOut, auxOut, cs, saveContext).visit(&fv);
         TS_ASSERT_EQUALS(tagOut.tag, 0xFFFFU);
         TS_ASSERT_EQUALS(tagOut.value, 0x7FFFFFFFU);
-        // test approximate range:
-        // TS_ASSERT_LESS_THAN(IntFloatValue(itn, ms).getValue(), 1.0e+39);
-        // TS_ASSERT_LESS_THAN(1.0e+38, IntFloatValue(itn, ms).getValue());
-        // // it turns out we can compare with the actual value as well (works with gcc/x86):
-        // TS_ASSERT_EQUALS(IntFloatValue(itn, ms).getValue(), 170141183460314489226776631181521715200.0);
     }
     {
         // value with known serialisation
@@ -242,7 +236,6 @@ TestInterpreterVmioValueLoader::testReal()
         interpreter::SaveVisitor(tagOut, auxOut, cs, saveContext).visit(&fv);
         TS_ASSERT_EQUALS(tagOut.tag, 0x0083U);
         TS_ASSERT_EQUALS(tagOut.value, 0x60000000U);
-        // TS_ASSERT_EQUALS(IntFloatValue(itn, ms).getValue(), 7.0);
     }
 }
 
@@ -304,19 +297,6 @@ TestInterpreterVmioValueLoader::testInteger()
         TS_ASSERT_EQUALS(tagOut[i].tag,   tags[i].tag);
         TS_ASSERT_EQUALS(tagOut[i].value, tags[i].value);
     }
-
-    // // Verify printed form
-    // TS_ASSERT_EQUALS(ivs[0]->toString(false), "4711");
-    // TS_ASSERT_EQUALS(ivs[1]->toString(false), "-9999999");
-    // TS_ASSERT_EQUALS(ivs[2]->toString(false), "0");
-    // TS_ASSERT_EQUALS(ivs[3]->toString(false), "NO");
-    // TS_ASSERT_EQUALS(ivs[4]->toString(false), "YES");
-
-    // TS_ASSERT_EQUALS(ivs[0]->toString(true), "4711");
-    // TS_ASSERT_EQUALS(ivs[1]->toString(true), "-9999999");
-    // TS_ASSERT_EQUALS(ivs[2]->toString(true), "0");
-    // TS_ASSERT_EQUALS(ivs[3]->toString(true), "False");
-    // TS_ASSERT_EQUALS(ivs[4]->toString(true), "True");
 
     for (size_t i = 0; i < N; ++i) {
         delete ivs[i];

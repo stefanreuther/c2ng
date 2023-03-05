@@ -5,8 +5,8 @@
 #ifndef C2NG_INTERPRETER_PROCEDUREVALUE_HPP
 #define C2NG_INTERPRETER_PROCEDUREVALUE_HPP
 
-#include "interpreter/callablevalue.hpp"
 #include "interpreter/arguments.hpp"
+#include "interpreter/callablevalue.hpp"
 
 namespace interpreter {
 

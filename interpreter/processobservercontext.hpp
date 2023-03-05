@@ -23,6 +23,7 @@ namespace interpreter {
         /** Construct ProcessObserverContext.
             \param p Process to observe */
         static ProcessObserverContext* create(Process& p);
+        ~ProcessObserverContext();
 
         // Context:
         virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);

@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/vmio/nullloadcontext.hpp
+  *  \brief Class interpreter::vmio::NullLoadContext
   */
 #ifndef C2NG_INTERPRETER_VMIO_NULLLOADCONTEXT_HPP
 #define C2NG_INTERPRETER_VMIO_NULLLOADCONTEXT_HPP

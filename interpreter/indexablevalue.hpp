@@ -29,6 +29,7 @@ namespace interpreter {
             \return obtained value. Throws Error if request is invalid */
         virtual void set(Arguments& args, afl::data::Value* value) = 0;
 
+        // CallableValue:
         virtual bool isProcedureCall() const;
         virtual void call(Process& proc, afl::data::Segment& args, bool want_result);
 

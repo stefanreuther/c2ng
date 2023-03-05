@@ -68,8 +68,6 @@ namespace interpreter {
             It must return false if \c p is null, we are not serializing a process, or \c p refers to another process.
             \param p process pointer
             \return true if p is the current process */
-        // replaces getCurrentProcess()
-        // must handle p==0 and return false!
         virtual bool isCurrentProcess(const Process* p) = 0;
     };
 

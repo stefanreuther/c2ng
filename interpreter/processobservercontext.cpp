@@ -42,6 +42,9 @@ interpreter::ProcessObserverContext::ProcessObserverContext(afl::base::Ref<State
     : m_state(state)
 { }
 
+interpreter::ProcessObserverContext::~ProcessObserverContext()
+{ }
+
 interpreter::ProcessObserverContext*
 interpreter::ProcessObserverContext::create(Process& p)
 {

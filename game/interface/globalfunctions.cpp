@@ -54,6 +54,7 @@ namespace {
                                      ? "Invalid first argument to \"Cfg\""
                                      : "Invalid first argument to \"Pref\"");
         }
+        const char*const fn = isHostConfig ? "Cfg" : "Pref";
 
         // FIXME: ugly type switch. Can we do better?
         if (const game::config::GenericIntegerArrayOption* bopt = dynamic_cast<const game::config::GenericIntegerArrayOption*>(opt)) {
@@ -71,7 +72,7 @@ namespace {
                 if (isHostConfig && bopt->getArray().size() == size_t(game::MAX_PLAYERS) && g != 0) {
                     player = g->getViewpointPlayer();
                 } else {
-                    throw interpreter::Error("Too few arguments");
+                    throw interpreter::Error::tooFewArguments(fn);
                 }
             }
             if (const int32_t* p = bopt->getArray().at(player - 1)) {
@@ -82,7 +83,7 @@ namespace {
         } else if (const game::config::IntegerOption* intopt = dynamic_cast<const game::config::IntegerOption*>(opt)) {
             // single int, no player. Example: NumShips
             if (player != 0) {
-                throw interpreter::Error("Too many arguments");
+                throw interpreter::Error::tooManyArguments(fn);
             }
             return makeScalarValue((*intopt)(), intopt->parser());
         } else if (const game::config::CostArrayOption* costopt = dynamic_cast<const game::config::CostArrayOption*>(opt)) {
@@ -92,7 +93,7 @@ namespace {
                 if (isHostConfig && g != 0) {
                     player = g->getViewpointPlayer();
                 } else {
-                    throw interpreter::Error("Too few arguments");
+                    throw interpreter::Error::tooFewArguments(fn);
                 }
             }
             return makeStringValue((*costopt)(player).toCargoSpecString());
@@ -100,7 +101,7 @@ namespace {
             // Anything else (including StringOption): just return the value.
             // FIXME: PCC 1.x splits ExperienceLevelNames
             if (player != 0) {
-                throw interpreter::Error("Too many arguments");
+                throw interpreter::Error::tooManyArguments(fn);
             }
             return makeStringValue(opt->toString());
         }
@@ -224,7 +225,7 @@ game::interface::IFDistance(game::Session& session, interpreter::Arguments& args
     for (int i = 0; i < 2; ++i) {
         /* Do we have an argument? */
         if (args.getNumArgs() == 0) {
-            throw interpreter::Error("Too few arguments for \"Distance\"");
+            throw interpreter::Error::tooFewArguments("Distance");
         }
 
         afl::data::Value* theValue = args.getNext();
@@ -254,7 +255,7 @@ game::interface::IFDistance(game::Session& session, interpreter::Arguments& args
         } else {
             /* Possibly integer. There must be another integer. */
             if (args.getNumArgs() == 0) {
-                throw interpreter::Error("Too few arguments for \"Distance\"");
+                throw interpreter::Error::tooFewArguments("Distance");
             }
             afl::data::Value* otherValue = args.getNext();
 
@@ -269,7 +270,7 @@ game::interface::IFDistance(game::Session& session, interpreter::Arguments& args
     }
 
     if (args.getNumArgs() != 0) {
-        throw interpreter::Error("Too many arguments to \"Distance\"");
+        throw interpreter::Error::tooManyArguments("Distance");
     }
 
     // Check game

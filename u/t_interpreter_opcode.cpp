@@ -245,7 +245,7 @@ TestInterpreterOpcode::testStack()
     TS_ASSERT(!a.isLabel());
     TS_ASSERT_EQUALS(a.getExternalMajor(), Opcode::maStack);
     TS_ASSERT_EQUALS(a.getDisassemblyTemplate(), "dup\t%u");
-    
+
     // Out-of-range
     TS_ASSERT_EQUALS(make(Opcode::maStack, 222, 0).getDisassemblyTemplate(), "?\t%u");
 }

@@ -12,7 +12,9 @@ namespace interpreter { namespace exporter {
 
     /** Export text table.
         This builds a table using ASCII characters.
-        It implements the "text" and "table" output formats. */
+        It implements the "text" and "table" output formats.
+        It accumulates a complete line at a time,
+        then trims whitespace, and outputs the result. */
     class TextExporter : public Exporter {
      public:
         /** Constructor.

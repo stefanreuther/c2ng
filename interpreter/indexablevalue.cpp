@@ -4,8 +4,8 @@
   */
 
 #include "interpreter/indexablevalue.hpp"
-#include "interpreter/process.hpp"
 #include "interpreter/arguments.hpp"
+#include "interpreter/process.hpp"
 
 bool
 interpreter::IndexableValue::isProcedureCall() const

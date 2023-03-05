@@ -5,10 +5,10 @@
 #ifndef C2NG_INTERPRETER_MUTEXLIST_HPP
 #define C2NG_INTERPRETER_MUTEXLIST_HPP
 
+#include "afl/base/uncopyable.hpp"
+#include "afl/container/ptrvector.hpp"
 #include "afl/data/namemap.hpp"
 #include "afl/string/string.hpp"
-#include "afl/container/ptrvector.hpp"
-#include "afl/base/uncopyable.hpp"
 
 namespace interpreter {
 

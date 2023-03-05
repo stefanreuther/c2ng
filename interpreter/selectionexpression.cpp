@@ -101,7 +101,7 @@ interpreter::SelectionExpression::compileFactor(Tokenizer& tok, String_t& expr)
         } else {
             throw Error("Invalid operand in set expression");
         }
-    } 
+    }
 }
 
 /** Compile "summand" for set expression.

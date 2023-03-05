@@ -56,7 +56,7 @@ TestInterpreterVmioFileSaveContext::testIt()
     {
         interpreter::StructureTypeData::Ref_t st(*new interpreter::StructureTypeData());
         interpreter::StructureValueData::Ref_t svd(*new interpreter::StructureValueData(st));
-        svd->data.setNew(st->names().add("X"), interpreter::makeIntegerValue(88));
+        svd->data().setNew(st->names().add("X"), interpreter::makeIntegerValue(88));
         interpreter::StructureValue sv(svd);
         bco->addPushLiteral(&sv);
     }

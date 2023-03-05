@@ -2,15 +2,6 @@
   *  \file interpreter/exporter/dbfexporter.cpp
   *  \brief Class interpreter::exporter::DbfExporter
   *
-  *  PCC2 Comment:
-  *
-  *  Unlike the text exporters, which use the type hints only as a guide to assign
-  *  field widths, this one uses them to assign field types, and therefore require
-  *  correctly-typed values to create a well-formatted file. So far, this restriction
-  *  is implemented for bool, i.e. receiving a string or int instead of a bool will
-  *  treat that with the getBoolValue() function, just like CCScript does when such
-  *  a value is used in a boolean context.
-  *
   *  This module is modelled after PCC 1.x export.pas::CDbfExporter.
   */
 

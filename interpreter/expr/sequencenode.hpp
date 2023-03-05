@@ -12,6 +12,9 @@ namespace interpreter { namespace expr {
     /** Sequence node. Evaluates a, then b. */
     class SequenceNode : public RValueNode {
      public:
+        /** Constructor.
+            @param a First expression
+            @param b Second expression */
         SequenceNode(const Node& a, const Node& b)
             : m_a(a), m_b(b)
             { }

@@ -1,12 +1,6 @@
 /**
   *  \file interpreter/expr/parser.cpp
   *  \brief Class interpreter::expr::Parser
-  *
-  *  \todo FIXME: PCC 1.x has "#n" in the Assignment production. If we want to make
-  *  it part of regular expressions, it probably makes more sense to have it
-  *  in the Primary production. On the other hand, the most sensible solution
-  *  probably is to implement it in the respective routine taking "#"-ed
-  *  parameters.
   */
 
 #include "interpreter/expr/parser.hpp"
@@ -328,26 +322,18 @@ interpreter::expr::Parser::parsePrimary()
             throw Error::expectSymbol(")");
         }
         return p;
-    } else if (tok.getCurrentToken() == Tokenizer::tInteger || tok.getCurrentToken() == Tokenizer::tBoolean) {
+    } else if (tok.getCurrentToken() == Tokenizer::tInteger) {
         // Integer literal
-        LiteralNode& lit = m_deleter.addNew(new LiteralNode());
-        lit.setNewValue(tok.getCurrentToken() == Tokenizer::tBoolean
-                        ? makeBooleanValue(tok.getCurrentInteger())
-                        : makeIntegerValue(tok.getCurrentInteger()));
-        tok.readNextToken();
-        return lit;
+        return makeLiteral(makeIntegerValue(tok.getCurrentInteger()));
+    } else if (tok.getCurrentToken() == Tokenizer::tBoolean) {
+        // Boolean literal
+        return makeLiteral(makeBooleanValue(tok.getCurrentInteger()));
     } else if (tok.getCurrentToken() == Tokenizer::tFloat) {
         // Float literal
-        LiteralNode& lit = m_deleter.addNew(new LiteralNode());
-        lit.setNewValue(makeFloatValue(tok.getCurrentFloat()));
-        tok.readNextToken();
-        return lit;
+        return makeLiteral(makeFloatValue(tok.getCurrentFloat()));
     } else if (tok.getCurrentToken() == Tokenizer::tString) {
         // String literal
-        LiteralNode& lit = m_deleter.addNew(new LiteralNode);
-        lit.setNewValue(makeStringValue(tok.getCurrentString()));
-        tok.readNextToken();
-        return lit;
+        return makeLiteral(makeStringValue(tok.getCurrentString()));
     } else if (tok.getCurrentToken() == Tokenizer::tIdentifier) {
         // Identifier
         String_t fname = tok.getCurrentString();
@@ -363,10 +349,10 @@ interpreter::expr::Parser::parsePrimary()
             parseArglist(fcn);
             // Basic checks
             if (fcn.getNumArgs() < bif->min_args) {
-                throw Error(Format("Too few arguments for \"%s\"", fname));
+                throw Error::tooFewArguments(fname);
             }
             if (fcn.getNumArgs() > bif->max_args) {
-                throw Error(Format("Too many arguments for \"%s\"", fname));
+                throw Error::tooManyArguments(fname);
             }
             p = &fcn;
         } else {
@@ -419,4 +405,12 @@ interpreter::expr::Parser::parseArglist(FunctionCallNode& fcn)
             throw Error::expectSymbol(")");
         }
     }
+}
+
+const interpreter::expr::Node&
+interpreter::expr::Parser::makeLiteral(afl::data::Value* pValue)
+{
+    LiteralNode& lit = m_deleter.addNew(new LiteralNode(std::auto_ptr<afl::data::Value>(pValue)));
+    tok.readNextToken();
+    return lit;
 }

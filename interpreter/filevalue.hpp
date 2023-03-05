@@ -33,7 +33,7 @@ namespace interpreter {
      private:
         int32_t m_fileNr;
     };
-    
+
 }
 
 inline int32_t

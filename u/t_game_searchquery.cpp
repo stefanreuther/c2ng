@@ -72,8 +72,8 @@ namespace {
 
         // Obtain argument parameters
         int32_t xObj, yObj;
-        TS_ASSERT(interpreter::checkIntegerArg(xObj, sv->getValue()->data.get(0)));
-        TS_ASSERT(interpreter::checkIntegerArg(yObj, sv->getValue()->data.get(1)));
+        TS_ASSERT(interpreter::checkIntegerArg(xObj, sv->getValue()->data().get(0)));
+        TS_ASSERT(interpreter::checkIntegerArg(yObj, sv->getValue()->data().get(1)));
 
         // Produce return value
         return interpreter::makeBooleanValue((xArg == xObj) && (yArg == yObj));
@@ -92,9 +92,9 @@ TestGameSearchQuery::testCompileExpression()
 
     // Create a value
     StructureValueData::Ref_t value(*new StructureValueData(type));
-    value->data.setNew(0, interpreter::makeStringValue("Mambo #5"));
-    value->data.setNew(1, interpreter::makeIntegerValue(42));
-    value->data.setNew(2, interpreter::makeIntegerValue(3));
+    value->data().setNew(0, interpreter::makeStringValue("Mambo #5"));
+    value->data().setNew(1, interpreter::makeIntegerValue(42));
+    value->data().setNew(2, interpreter::makeIntegerValue(3));
 
     // MatchAny
     checkMatch(SearchQuery(SearchQuery::MatchName,     SearchQuery::allObjects(), ""),      value, 1);
@@ -153,8 +153,8 @@ TestGameSearchQuery::testLocation()
 
     // Create a value
     StructureValueData::Ref_t value(*new StructureValueData(type));
-    value->data.setNew(0, interpreter::makeIntegerValue(777));
-    value->data.setNew(1, interpreter::makeIntegerValue(888));
+    value->data().setNew(0, interpreter::makeIntegerValue(777));
+    value->data().setNew(1, interpreter::makeIntegerValue(888));
 
     // Create a world
     afl::sys::Log log;

@@ -96,7 +96,7 @@ TestInterpreterMemoryCommandSource::testAddLinesOne()
     TS_ASSERT(!testee.isEOF());
     TS_ASSERT_EQUALS(testee.tokenizer().getCurrentToken(), interpreter::Tokenizer::tIdentifier);
     TS_ASSERT_EQUALS(testee.tokenizer().getCurrentString(), "A");
-    
+
     testee.readNextLine();
     TS_ASSERT(testee.isEOF());
 }
@@ -122,7 +122,7 @@ TestInterpreterMemoryCommandSource::testAddLinesMulti()
     TS_ASSERT(!testee.isEOF());
     TS_ASSERT_EQUALS(testee.tokenizer().getCurrentToken(), interpreter::Tokenizer::tIdentifier);
     TS_ASSERT_EQUALS(testee.tokenizer().getCurrentString(), "C");
-    
+
     testee.readNextLine();
     TS_ASSERT(testee.isEOF());
 }

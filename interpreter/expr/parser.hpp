@@ -6,6 +6,7 @@
 #define C2NG_INTERPRETER_EXPR_PARSER_HPP
 
 #include "afl/base/deleter.hpp"
+#include "afl/data/value.hpp"
 #include "interpreter/tokenizer.hpp"
 
 namespace interpreter { namespace expr {
@@ -50,6 +51,8 @@ namespace interpreter { namespace expr {
 
         Tokenizer& tok;
         afl::base::Deleter& m_deleter;
+
+        const Node& makeLiteral(afl::data::Value* pValue);
     };
 
 } }

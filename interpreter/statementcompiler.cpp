@@ -1248,7 +1248,7 @@ interpreter::StatementCompiler::compileEval(BytecodeObject& bco, const Statement
     std::vector<const interpreter::expr::Node*> args;
     parseArgumentList(args, del);
     if (args.size() == 0)
-        throw Error("Too few arguments to 'Eval'");
+        throw Error::tooFewArguments("Eval");
 
     /* Compile */
     for (size_t i = 0; i < args.size(); ++i) {

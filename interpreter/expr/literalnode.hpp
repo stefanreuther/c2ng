@@ -14,14 +14,10 @@ namespace interpreter { namespace expr {
     /** Literal expression node. Generates code to return a literal value. */
     class LiteralNode : public RValueNode {
      public:
-        /** Constructor. */
-        LiteralNode();
+        /** Constructor.
+            @param value Value */
+        explicit LiteralNode(std::auto_ptr<afl::data::Value> value);
         ~LiteralNode();
-
-        /** Set value.
-            For now, we use two-step construction to ensure exception safety.
-            @param value New value. LiteralNode will take ownership. */
-        void setNewValue(afl::data::Value* value) throw();
 
         // Node:
         void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;

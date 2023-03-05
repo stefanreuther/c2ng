@@ -5,8 +5,8 @@
 #ifndef C2NG_INTERPRETER_BLOBVALUE_HPP
 #define C2NG_INTERPRETER_BLOBVALUE_HPP
 
-#include "interpreter/basevalue.hpp"
 #include "afl/base/growablememory.hpp"
+#include "interpreter/basevalue.hpp"
 
 namespace interpreter {
 

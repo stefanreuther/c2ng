@@ -12,7 +12,9 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/interface/scriptapplication.cpp \
+FILES_gamelib = interpreter/expr/rvaluefunctioncallnode.cpp \
+    interpreter/expr/rvaluefunctioncallnode.hpp \
+    game/interface/scriptapplication.cpp \
     game/interface/scriptapplication.hpp interpreter/metacontext.cpp \
     interpreter/metacontext.hpp game/interface/exportapplication.cpp \
     game/interface/exportapplication.hpp game/proxy/maintenanceproxy.cpp \
@@ -1746,18 +1748,31 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_config_configurationparser.cpp \
-    u/t_game_map_renderer.cpp u/t_game_map_shiputils.cpp \
-    u/t_game_map_simpleobjectcursor.cpp u/t_game_map_shiphistorydata.cpp \
-    u/t_game_map_playedbasetype.cpp u/t_game_map_rendererlistener.cpp \
-    u/t_game_map_planetdata.cpp u/t_game_map_objectvectortype.cpp \
-    u/t_game_map_objectvector.cpp u/t_game_map_ionstormtype.cpp \
-    u/t_game_map_fleettype.cpp u/t_game_map_fleet.cpp \
-    u/t_game_map_playedshiptype.cpp u/t_game_map_anyshiptype.cpp \
-    u/t_game_map_playedplanettype.cpp u/t_game_map_anyplanettype.cpp \
-    u/t_game_map_basedata.cpp u/t_game_map_cursors.cpp \
-    u/t_game_map_minefieldformula.cpp u/t_game_test_root.cpp \
-    u/t_gfx_threed_context.cpp u/t_game_vcr_flak_definitions.cpp \
+FILES_testsuite = u/t_interpreter_vmio_worldloadcontext.cpp \
+    u/t_interpreter_vmio_assemblersavecontext.cpp \
+    u/t_interpreter_processobservercontext.cpp \
+    u/t_interpreter_expr_functioncallnode.cpp \
+    u/t_interpreter_expr_logicalnode.cpp u/t_interpreter_expr_casenode.cpp \
+    u/t_interpreter_expr_sequencenode.cpp u/t_interpreter_expr_unarynode.cpp \
+    u/t_interpreter_expr_assignmentnode.cpp \
+    u/t_interpreter_expr_literalnode.cpp u/t_interpreter_expr_binarynode.cpp \
+    u/t_interpreter_expr_membernode.cpp \
+    u/t_interpreter_expr_rvaluefunctioncallnode.cpp \
+    u/t_interpreter_expr_rvaluenode.cpp \
+    u/t_interpreter_expr_identifiernode.cpp \
+    u/t_interpreter_expr_indirectcallnode.cpp \
+    u/t_game_config_configurationparser.cpp u/t_game_map_renderer.cpp \
+    u/t_game_map_shiputils.cpp u/t_game_map_simpleobjectcursor.cpp \
+    u/t_game_map_shiphistorydata.cpp u/t_game_map_playedbasetype.cpp \
+    u/t_game_map_rendererlistener.cpp u/t_game_map_planetdata.cpp \
+    u/t_game_map_objectvectortype.cpp u/t_game_map_objectvector.cpp \
+    u/t_game_map_ionstormtype.cpp u/t_game_map_fleettype.cpp \
+    u/t_game_map_fleet.cpp u/t_game_map_playedshiptype.cpp \
+    u/t_game_map_anyshiptype.cpp u/t_game_map_playedplanettype.cpp \
+    u/t_game_map_anyplanettype.cpp u/t_game_map_basedata.cpp \
+    u/t_game_map_cursors.cpp u/t_game_map_minefieldformula.cpp \
+    u/t_game_test_root.cpp u/t_gfx_threed_context.cpp \
+    u/t_game_vcr_flak_definitions.cpp \
     u/t_game_parser_informationconsumer.cpp u/t_game_proxy_waitindicator.cpp \
     u/t_game_proxy_exportadaptor.cpp u/t_client_applicationparameters.cpp \
     u/t_gfx_windowparameters.cpp u/t_interpreter_metacontext.cpp \

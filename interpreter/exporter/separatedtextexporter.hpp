@@ -12,10 +12,15 @@ namespace interpreter { namespace exporter {
 
     /** Export separated text.
         Writes simple plaintext files with a configurable field separator.
+        This implements comma-separated values and derivatives.
+
         The first line contains field names.
         This can be easily imported into spreadsheets. */
     class SeparatedTextExporter : public Exporter {
      public:
+        /** Constructor.
+            @param tf   Text file to write to
+            @param sep  Field separator character (e.g. ';') */
         SeparatedTextExporter(afl::io::TextWriter& tf, char sep);
 
         // Exporter:

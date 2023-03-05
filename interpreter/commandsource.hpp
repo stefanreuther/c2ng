@@ -5,10 +5,10 @@
 #ifndef C2NG_INTERPRETER_COMMANDSOURCE_HPP
 #define C2NG_INTERPRETER_COMMANDSOURCE_HPP
 
-#include "interpreter/tokenizer.hpp"
 #include "afl/charset/charset.hpp"
 #include "afl/string/string.hpp"
 #include "afl/string/translator.hpp"
+#include "interpreter/tokenizer.hpp"
 
 namespace interpreter {
 

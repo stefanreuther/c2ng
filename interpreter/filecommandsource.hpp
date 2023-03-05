@@ -5,8 +5,8 @@
 #ifndef C2NG_INTERPRETER_FILECOMMANDSOURCE_HPP
 #define C2NG_INTERPRETER_FILECOMMANDSOURCE_HPP
 
-#include "interpreter/commandsource.hpp"
 #include "afl/io/textfile.hpp"
+#include "interpreter/commandsource.hpp"
 
 namespace interpreter {
 

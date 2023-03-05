@@ -156,6 +156,14 @@ namespace interpreter {
             \return Error object */
         static Error tooComplex();
 
+        /** Generate a "too many arguments" error.
+            \param fn Function/subroutine name */
+        static Error tooManyArguments(const String_t& fn);
+
+        /** Generate a "too few arguments" error.
+            \param fn Function/subroutine name */
+        static Error tooFewArguments(const String_t& fn);
+
      private:
         String_t m_error;
         String_t m_trace;

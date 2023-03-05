@@ -20,6 +20,10 @@ namespace interpreter {
         For the user, special commands behave identical to commands implemented within the compiler core. */
     class SpecialCommand : public afl::base::Deletable {
      public:
+        /** Compile this special command.
+            @param [in]  line   Input; should be consumed entirely
+            @param [out] bco    Bytecode
+            @param [in]  scc    Compilation context */
         virtual void compileCommand(Tokenizer& line, BytecodeObject& bco, const StatementCompilationContext& scc) = 0;
     };
 

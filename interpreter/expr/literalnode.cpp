@@ -5,20 +5,13 @@
 
 #include "interpreter/expr/literalnode.hpp"
 
-interpreter::expr::LiteralNode::LiteralNode()
+interpreter::expr::LiteralNode::LiteralNode(std::auto_ptr<afl::data::Value> value)
     : RValueNode(),
-      m_value()
+      m_value(value)
 { }
 
 interpreter::expr::LiteralNode::~LiteralNode()
 { }
-
-void
-interpreter::expr::LiteralNode::setNewValue(afl::data::Value* value) throw()
-{
-    // ex IntLiteralExprNode::setValue
-    m_value.reset(value);
-}
 
 void
 interpreter::expr::LiteralNode::compileValue(BytecodeObject& bco, const CompilationContext& /*cc*/) const

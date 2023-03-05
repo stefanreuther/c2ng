@@ -5,8 +5,8 @@
 #ifndef C2NG_INTERPRETER_SUBROUTINEVALUE_HPP
 #define C2NG_INTERPRETER_SUBROUTINEVALUE_HPP
 
-#include "interpreter/callablevalue.hpp"
 #include "interpreter/bytecodeobject.hpp"
+#include "interpreter/callablevalue.hpp"
 
 namespace interpreter {
 

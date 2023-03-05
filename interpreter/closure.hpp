@@ -5,8 +5,8 @@
 #ifndef C2NG_INTERPRETER_CLOSURE_HPP
 #define C2NG_INTERPRETER_CLOSURE_HPP
 
-#include "interpreter/callablevalue.hpp"
 #include "afl/base/ptr.hpp"
+#include "interpreter/callablevalue.hpp"
 
 namespace interpreter {
 

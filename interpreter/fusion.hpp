@@ -14,7 +14,7 @@ namespace interpreter {
         To avoid unnecessary creation of temporary values, we can fuse instructions together.
         The idea is to detect patterns, and mark fusable instructions with a special major opcode.
         The interpreter then executes these major opcodes in one cycle, saving temporaries where possible.
- 
+
         Instruction fusion is an internal optimisation.
         Fused instructions are not saved to the VM file; see interpreter::Opcode::getExternalMajor().
 

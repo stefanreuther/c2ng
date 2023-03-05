@@ -2,12 +2,6 @@
   *  \file interpreter/exporter/textexporter.cpp
   *  \brief Class interpreter::exporter::TextExporter
   *
-  *  PCC2 Comment:
-  *
-  *  This implements the 'text' and 'table' output formats.
-  *  It accumulates a complete line at a time, then trims
-  *  whitespace, and outputs the result.
-  *
   *  Modelled partially after PCC 1.x export.pas::CTextExporter
   *  (PCC 1.x doesn't have 'text', only 'table').
   */
@@ -117,8 +111,7 @@ interpreter::exporter::TextExporter::endTable()
     }
 }
 
-
-// /** Start a new data line. */
+/** Start a new data line. */
 void
 interpreter::exporter::TextExporter::startLine()
 {
@@ -129,9 +122,9 @@ interpreter::exporter::TextExporter::startLine()
     }
 }
 
-// /** Add a value.
-//     \param value Formatted value
-//     \param left true to left-justify, false to right-justify. */
+/** Add a value.
+    \param value Formatted value
+    \param left true to left-justify, false to right-justify. */
 void
 interpreter::exporter::TextExporter::addValue(String_t value, bool left)
 {
@@ -179,14 +172,14 @@ interpreter::exporter::TextExporter::addValue(String_t value, bool left)
     m_fieldNumber++;
 }
 
-// /** End a line. This outputs the line. */
+/** End a line. This outputs the line. */
 void
 interpreter::exporter::TextExporter::endLine()
 {
     m_file.writeLine(afl::string::strRTrim(m_line));
 }
 
-// /** Write a divider line. */
+/** Write a divider line. */
 void
 interpreter::exporter::TextExporter::writeDivider()
 {

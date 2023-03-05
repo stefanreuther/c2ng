@@ -5,10 +5,10 @@
 #ifndef C2NG_INTERPRETER_VMIO_STRUCTURES_HPP
 #define C2NG_INTERPRETER_VMIO_STRUCTURES_HPP
 
+#include "afl/base/staticassert.hpp"
 #include "afl/bits/uint16le.hpp"
 #include "afl/bits/uint32le.hpp"
 #include "afl/bits/value.hpp"
-#include "afl/base/staticassert.hpp"
 #include "interpreter/process.hpp"
 
 namespace interpreter { namespace vmio { namespace structures {
@@ -77,8 +77,7 @@ namespace interpreter { namespace vmio { namespace structures {
         UInt32_t exceptionSP;
         UInt32_t flags;
 
-        // /** VM File Format: Frame flags. */
-        static const uint32_t WantResult = 1;     // ex frfl_WantResult; set if caller wants a result
+        static const uint32_t WantResult = 1;     ///< ex frfl_WantResult; set if caller wants a result
     };
     static_assert(sizeof(FrameHeader) == 20, "sizeof FrameHeader");
 

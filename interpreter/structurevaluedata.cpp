@@ -7,8 +7,8 @@
 
 // Constructor.
 interpreter::StructureValueData::StructureValueData(StructureTypeData::Ref_t type)
-    : type(type),
-      data()
+    : m_type(type),
+      m_data()
 {
     // ex IntStructureValueData::IntStructureValueData
 }
@@ -16,3 +16,9 @@ interpreter::StructureValueData::StructureValueData(StructureTypeData::Ref_t typ
 // Destructor.
 interpreter::StructureValueData::~StructureValueData()
 { }
+
+void
+interpreter::StructureValueData::changeType(const StructureTypeData::Ref_t& type)
+{
+    m_type.reset(*type);
+}

@@ -2,11 +2,8 @@
   *  \file interpreter/mutexlist.cpp
   *  \brief Class interpreter::MutexList
   *
-  *  PCC2 Comment:
-  *
-  *  Mutexes/locks are a convention to provide cooperation-based mutual
-  *  exclusion for game features. It is intended to avoid that the user
-  *  accidentally cancels an Auto Task action, or vice versa.
+  *  Mutexes/locks are a convention to provide cooperation-based mutual exclusion for game features.
+  *  It is intended to avoid that the user accidentally cancels an Auto Task action, or vice versa.
   *
   *  As of 1.1.18, PCC honors the following locks:
   *  - "Snnn.WAYPOINT" (ship #nnn's waypoint and intercept mission)
@@ -15,28 +12,29 @@
   *
   *  The scripting language provides a feature
   *      With Lock("...") Do
-  *  causing the content of the 'With' block to be executed with a lock
-  *  being held. Only one process can be in such a block, another process
-  *  (or the same process again) trying to enter the block will fail.
+  *  causing the content of the 'With' block to be executed with a lock being held.
+  *  Only one process can be in such a block,
+  *  another process (or the same process again) trying to enter the block will fail.
   *
-  *  When this pattern is followed, lifetime of locks will be nicely
-  *  managed by the interpreter. When a process goes away, all its
-  *  data will go away, and so does the lock. However, it is possible
-  *  to do things like
+  *  When this pattern is followed, lifetime of locks will be nicely managed by the interpreter.
+  *  When a process goes away, all its data will go away, and so does the lock.
+  *
+  *  In PCC2, it is possible to do things like
   *      sharedVar := Lock("...")
-  *  which will associate the lock with this process, but then leave a
-  *  reference in the shared variable. The lock will thus be still active
-  *  but its process will be gone. This is called an orphaned / disowned
-  *  lock.
+  *  which will associate the lock with this process, but then leave a reference in the shared variable.
+  *  The lock will thus be still active but its process will be gone.
+  *  This is called an orphaned / disowned lock.
   *
-  *  Note that we use the terms 'Lock' and 'Mutex' interchangably when
-  *  talking about these things. 'Lock' is the user-visible name. However,
-  *  there is also the internal feature 'lock' meaning "locking a sensor
-  *  beam onto an object".
+  *  In PCC2ng, we now associate the lock with a process when it is actually used as a context,
+  *  i.e. onContextEntered()/onContextLeft().
+  *  This means we no longer need to rely on destructors,
+  *  making it easier to port the logic to garbage-collected languages.
   *
-  *  This does not implement PCC 1.x's "CC$Lock" and "CC$Unlock" commands.
-  *  When needed, they can be implemented as scripts using something like
-  *  a hash-of-mutexes.
+  *  Note that we use the terms 'Lock' and 'Mutex' interchangably when talking about these things.
+  *  'Lock' is the user-visible name.
+  *  However, there is also the internal feature 'lock' meaning "locking a sensor beam onto an object".
+  *
+  *  PCC2/PCC2ng do not implement PCC 1.x's "CC$Lock" and "CC$Unlock" commands.
   */
 
 #include <cassert>

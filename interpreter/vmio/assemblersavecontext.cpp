@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/vmio/assemblersavecontext.cpp
+  *  \brief Class interpreter::vmio::AssemblerSaveContext
   */
 
 #include "interpreter/vmio/assemblersavecontext.hpp"
@@ -10,11 +11,11 @@
 #include "interpreter/bytecodeobject.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/savevisitor.hpp"
+#include "interpreter/structuretype.hpp"
 #include "interpreter/subroutinevalue.hpp"
+#include "interpreter/tokenizer.hpp"
 #include "interpreter/values.hpp"
 #include "interpreter/vmio/nullsavecontext.hpp"
-#include "interpreter/structuretype.hpp"
-#include "interpreter/tokenizer.hpp"
 
 namespace {
     String_t quoteName(const String_t& s)
@@ -177,7 +178,7 @@ interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObjec
                     out.writeLine(afl::string::Format("    .line %d, %d", lineNumbers[lineIndex+1], lineNumbers[lineIndex]));
                     lineIndex += 2;
                 }
-                
+
                 out.writeLine(afl::string::Format("End%s", keyword));
                 out.writeLine();
             }
@@ -260,7 +261,6 @@ interpreter::vmio::AssemblerSaveContext::addStructureType(const interpreter::Str
             }
         const interpreter::StructureTypeData& m_type;
     };
-
 
     Map_t::iterator it = m_metadata.find(&type);
     if (it == m_metadata.end()) {
@@ -369,7 +369,10 @@ interpreter::vmio::AssemblerSaveContext::formatLiteral(const afl::data::Value* v
                         if (aux.getSize() != 0) {
                             // FIXME: log: tag with aux value
                         }
-                        m_result = afl::string::Format("(%d,%d)", tag.tag, tag.value);
+
+                        // First value is uppermost bits of tag; if those bits were nonzero,
+                        // this would be a float value, and we'd entered the visitFloat() case.
+                        m_result = afl::string::Format("(%d,%d)", tag.tag >> 8, tag.value);
                     }
                     catch (interpreter::Error&) {
                         // FIXME: log

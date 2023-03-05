@@ -9,7 +9,8 @@
 
 namespace interpreter { namespace expr {
 
-    /** Generic r-value expression. This one refuses to be assigned-to. */
+    /** Generic r-value expression.
+        Implements a generic expression that cannot be assigned-to. */
     class RValueNode : public Node {
      public:
         virtual void compileStore(BytecodeObject& bco, const CompilationContext& cc, const Node& rhs) const;

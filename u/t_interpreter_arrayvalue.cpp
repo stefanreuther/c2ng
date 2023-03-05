@@ -129,7 +129,7 @@ TestInterpreterArrayValue::testIt()
             virtual bool isCurrentProcess(const interpreter::Process* /*p*/)
                 { return false; }
         };
-        
+
         interpreter::TagNode out;
         afl::io::InternalSink aux;
         TestSaveContext ctx;

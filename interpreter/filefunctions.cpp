@@ -2,19 +2,11 @@
   *  \file interpreter/filefunctions.cpp
   *  \brief Interpreter: File I/O Related Stuff
   *
-  *  PCC2 comment:
+  *  This module implements all file I/O related functions.
+  *  Some are implemented as builtin commands (SpecialCommand) due to their special syntax,
+  *  which internally call regular subroutines.
   *
-  *  This module implements all file I/O related functions. Some are
-  *  implemented as builtin commands due to their special syntax,
-  *  which internally call regular commands.
-  *
-  *  \todo This generates and evaluates <tt>ufilenr</tt> instructions.
-  *  Those are actually not required at runtime; we know we're dealing
-  *  with file numbers. We can, however, not remove them completely at
-  *  compile time because many commands are called regularily, and the
-  *  compiler makes no further assumptions about regular commands.
-  *  Removing the <tt>ufilenr</tt> instructions completely would mean
-  *  we accept file numbers in invalid places.
+  *  For interchangeability with PCC2, that mapping needs to remain unchanged.
   */
 
 #include <memory>

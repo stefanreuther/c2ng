@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/vmio/nullloadcontext.cpp
+  *  \brief Class interpreter::vmio::NullLoadContext
   */
 
 #include "interpreter/vmio/nullloadcontext.hpp"

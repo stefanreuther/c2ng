@@ -2,8 +2,6 @@
   *  \file interpreter/vmio/filesavecontext.cpp
   *  \brief Class interpreter::vmio::FileSaveContext
   *
-  *  PCC2 Comment:
-  *
   *  A VM file contains a pool of objects, namely
   *  - bytecode objects (BCOs, IntBytecodeObject)
   *  - processes (IntExecutionFrame)
@@ -544,12 +542,12 @@ interpreter::vmio::FileSaveContext::saveStructureValue(afl::io::Stream& out, con
     // Property 1: header
     so.startProperty(0);
     UInt32_t header[1];
-    header[0] = addStructureType(*value.type);
+    header[0] = addStructureType(value.type());
     out.fullWrite(afl::base::fromObject(header));
     so.endProperty();
 
     // Property 2: content
-    const afl::data::Segment& data = value.data;
+    const afl::data::Segment& data = value.data();
     so.startProperty(convertSize(data.size()));
     SaveVisitor::save(out, data, data.size(), m_charset, *this);
     so.endProperty();

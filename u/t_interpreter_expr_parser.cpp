@@ -388,7 +388,7 @@ TestInterpreterExprParser::testComparison()
 
     h.verifyInteger("strcase('a'='A');3", 3);
     h.verifyInteger("'a'='A';3", 3);
-    
+
     // "<>"
     h.verifyBoolean("1<>1", false);
     h.verifyBoolean("1<>2", true);

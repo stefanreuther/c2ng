@@ -164,7 +164,7 @@ TestInterpreterFusion::testInplaceUnary()
         TS_ASSERT_EQUALS(bco.getNumInstructions(), 6U);
         TS_ASSERT(isInstruction(bco(1), Opcode::maFusedUnary, Opcode::sLocal, 7));
     }
-    
+
     // catch + pushloc + uinc + poploc -> in-place [immediately overwritten, no exception risk]
     {
         BytecodeObject bco;

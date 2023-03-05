@@ -13,8 +13,8 @@ namespace interpreter {
 
     /** Structure value.
         This contains the data for a structure value:
-        - link to structure type (=name/slot mapping)
-        - values */
+        - link to structure type (=name/slot mapping), shared by all values of that type
+        - values for this instance */
     class StructureValueData : public afl::base::RefCounted {
      public:
         typedef afl::base::Ref<StructureValueData> Ref_t;
@@ -27,10 +27,32 @@ namespace interpreter {
         /** Destructor. */
         ~StructureValueData();
 
-        // FIXME: for loading we currently need to be able to modify a StructureValue's assigned type to resolve forward references.
-        // Therefore, this remains as a public member for now.
-        StructureTypeData::Ref_t type;
-        afl::data::Segment data;
+        /** Access underlying type.
+            \return type */
+        StructureTypeData& type() const
+            { return *m_type; }
+
+        /** Access data.
+            \return data */
+        afl::data::Segment& data()
+            { return m_data; }
+        const afl::data::Segment& data() const
+            { return m_data; }
+
+        /** Change type.
+            This function is intended to be used while loading ONLY.
+            If we encounter a forward reference to a structure value,
+            we need to create that value with a dummy type, and replace that by the correct type later.
+
+            This function is not to be used in normal operation
+            (which is why it's called changeType(), not setType() like a regular setter).
+
+            \param type New type */
+        void changeType(const StructureTypeData::Ref_t& type);
+
+     private:
+        StructureTypeData::Ref_t m_type;
+        afl::data::Segment m_data;
     };
 
 }

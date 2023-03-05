@@ -508,6 +508,11 @@ class TestInterpreterProcessList : public CxxTest::TestSuite {
     void testObject();
 };
 
+class TestInterpreterProcessObserverContext : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestInterpreterPropertyAcceptor : public CxxTest::TestSuite {
  public:
     void testIt();

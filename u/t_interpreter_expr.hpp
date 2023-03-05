@@ -7,6 +7,20 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestInterpreterExprAssignmentNode : public CxxTest::TestSuite {
+ public:
+    void testValue();
+    void testEffect();
+    void testOther();
+};
+
+class TestInterpreterExprBinaryNode : public CxxTest::TestSuite {
+ public:
+    void testValue();
+    void testEffect();
+    void testOther();
+};
+
 class TestInterpreterExprBuiltinFunction : public CxxTest::TestSuite {
  public:
     void testTrig();
@@ -36,6 +50,57 @@ class TestInterpreterExprBuiltinFunction : public CxxTest::TestSuite {
     void testKey();
 };
 
+class TestInterpreterExprCaseNode : public CxxTest::TestSuite {
+ public:
+    void testValueYes();
+    void testValueNo();
+    void testConvertYes();
+    void testConvertNo();
+};
+
+class TestInterpreterExprFunctionCallNode : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestInterpreterExprIdentifierNode : public CxxTest::TestSuite {
+ public:
+    void testValue();
+    void testStore();
+    void testCondition();
+    void testReadWrite();
+};
+
+class TestInterpreterExprIndirectCallNode : public CxxTest::TestSuite {
+ public:
+    void testValue();
+    void testStore();
+    void testCondition();
+    void testReadWrite();
+};
+
+class TestInterpreterExprLiteralNode : public CxxTest::TestSuite {
+ public:
+    void testValue();
+    void testOther();
+};
+
+class TestInterpreterExprLogicalNode : public CxxTest::TestSuite {
+ public:
+    void testValue();
+    void testEffect();
+    void testCondition();
+    void testOther();
+};
+
+class TestInterpreterExprMemberNode : public CxxTest::TestSuite {
+ public:
+    void testValue();
+    void testStore();
+    void testCondition();
+    void testReadWrite();
+};
+
 class TestInterpreterExprNode : public CxxTest::TestSuite {
  public:
     void testInterface();
@@ -61,6 +126,31 @@ class TestInterpreterExprParser : public CxxTest::TestSuite {
     void testPower();
     void testPrecedence();
     void testErrors();
+};
+
+class TestInterpreterExprRValueFunctionCallNode : public CxxTest::TestSuite {
+ public:
+    void testOther();
+};
+
+class TestInterpreterExprRValueNode : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestInterpreterExprSequenceNode : public CxxTest::TestSuite {
+ public:
+    void testValue();
+    void testEffect();
+    void testCondition();
+    void testOther();
+};
+
+class TestInterpreterExprUnaryNode : public CxxTest::TestSuite {
+ public:
+    void testValue();
+    void testEffect();
+    void testOther();
 };
 
 #endif

@@ -44,9 +44,7 @@
 #include "util/translation.hpp"
 
 namespace {
-
     const char LOG_NAME[] = "interpreter.process";
-
 
     void validateCalledObject(bool isProcedure, uint8_t minor)
     {

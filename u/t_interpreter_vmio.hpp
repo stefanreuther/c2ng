@@ -7,6 +7,17 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestInterpreterVmioAssemblerSaveContext : public CxxTest::TestSuite {
+ public:
+    void testBCO();
+    void testBCODupName();
+    void testBCOOptions();
+    void testBCOLink();
+    void testStructureType();
+    void testLiterals();
+    void testParameters();
+};
+
 class TestInterpreterVmioFileSaveContext : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -39,6 +50,7 @@ class TestInterpreterVmioObjectLoader : public CxxTest::TestSuite {
     void testLoadObjectFile();
     void testLoadObjectFileErrors();
     void testLoadProcess();
+    void testMutex();
 };
 
 class TestInterpreterVmioProcessLoadContext : public CxxTest::TestSuite {
@@ -62,6 +74,11 @@ class TestInterpreterVmioValueLoader : public CxxTest::TestSuite {
     void testInteger();
     void testLoadSegment();
     void testLoadSegment2();
+};
+
+class TestInterpreterVmioWorldLoadContext : public CxxTest::TestSuite {
+ public:
+    void testIt();
 };
 
 #endif

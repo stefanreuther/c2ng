@@ -451,7 +451,6 @@ interpreter::vmio::ObjectLoader::loadStructureType(uint32_t id)
 interpreter::Context*
 interpreter::vmio::ObjectLoader::loadContext(const TagNode& tag, afl::io::Stream& aux)
 {
-    // FIXME: anything we need to handle ourselves?
     return m_context.loadContext(tag, aux);
 }
 
@@ -630,12 +629,12 @@ interpreter::vmio::ObjectLoader::loadStructureValue(ChunkLoader& ldr, uint32_t i
                 // \change PCC2 would accept getting no header, but this makes no sense
                 UInt32_t type;
                 ps->fullRead(afl::base::fromObject(type));
-                value->type.reset(*getStructureType(type));
+                value->changeType(getStructureType(type));
             }
             break;
          case 2:
             // content
-            ValueLoader(m_charset, *this, m_translator).load(value->data, *ps, 0, propCount);
+            ValueLoader(m_charset, *this, m_translator).load(value->data(), *ps, 0, propCount);
             break;
 
          default:

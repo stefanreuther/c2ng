@@ -1,16 +1,6 @@
 /**
   *  \file interpreter/structurevalue.cpp
   *  \brief Class interpreter::StructureValue
-  *
-  *  PCC2 Comment:
-  *
-  *  A structure type has a fixed name/value-slot mapping for all objects
-  *  of its type (unlike a hash, which has a possibly-different mapping
-  *  for each object). We therefore have two objects, the structure type
-  *  (IntStructureTypeData) for the mapping, and the actual instance value
-  *  (IntStructureValueData). As usual, we have two C++ types for each,
-  *  the actual "heavy-weight" data object, and the "light-weight"
-  *  interpreter object.
   */
 
 #include "interpreter/structurevalue.hpp"
@@ -57,7 +47,7 @@ interpreter::Context::PropertyAccessor*
 interpreter::StructureValue::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntStructureValue::lookup
-    afl::data::NameMap::Index_t index = m_value->type->names().getIndexByName(name);
+    afl::data::NameMap::Index_t index = m_value->type().names().getIndexByName(name);
     if (index != afl::data::NameMap::nil) {
         result = index;
         return this;
@@ -70,14 +60,14 @@ void
 interpreter::StructureValue::set(PropertyIndex_t index, const afl::data::Value* value)
 {
     // ex IntStructureValue::set
-    m_value->data.set(index, value);
+    m_value->data().set(index, value);
 }
 
 afl::data::Value*
 interpreter::StructureValue::get(PropertyIndex_t index)
 {
     // ex IntStructureValue::get
-    return afl::data::Value::cloneOf(m_value->data[index]);
+    return afl::data::Value::cloneOf(m_value->data()[index]);
 }
 
 afl::base::Deletable*
@@ -91,5 +81,5 @@ void
 interpreter::StructureValue::enumProperties(PropertyAcceptor& acceptor) const
 {
     // ex IntStructureValue::enumProperties
-    acceptor.enumNames(m_value->type->names());
+    acceptor.enumNames(m_value->type().names());
 }

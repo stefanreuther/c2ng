@@ -5,8 +5,8 @@
 #ifndef C2NG_INTERPRETER_TOKENIZER_HPP
 #define C2NG_INTERPRETER_TOKENIZER_HPP
 
-#include "afl/string/string.hpp"
 #include "afl/base/types.hpp"
+#include "afl/string/string.hpp"
 
 namespace interpreter {
 

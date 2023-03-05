@@ -5,12 +5,12 @@
 
 #include <cmath>
 #include "interpreter/arguments.hpp"
-#include "interpreter/error.hpp"
-#include "afl/data/scalarvalue.hpp"
 #include "afl/data/floatvalue.hpp"
-#include "interpreter/values.hpp"
-#include "afl/string/char.hpp"
+#include "afl/data/scalarvalue.hpp"
 #include "afl/data/stringvalue.hpp"
+#include "afl/string/char.hpp"
+#include "interpreter/error.hpp"
+#include "interpreter/values.hpp"
 
 interpreter::Arguments::Arguments(const afl::data::Segment& data, size_t index, size_t numArgs)
     : m_data(data),

@@ -4,9 +4,9 @@
   */
 
 #include "interpreter/vmio/processloadcontext.hpp"
-#include "afl/bits/value.hpp"
-#include "afl/bits/uint32le.hpp"
 #include "afl/base/growablememory.hpp"
+#include "afl/bits/uint32le.hpp"
+#include "afl/bits/value.hpp"
 
 namespace {
     /** Load undelimited, unencoded string. */
@@ -30,7 +30,6 @@ namespace {
         return ctx.loadMutex(name, note);
     }
 }
-
 
 
 interpreter::vmio::ProcessLoadContext::ProcessLoadContext(LoadContext& parent, Process& proc)

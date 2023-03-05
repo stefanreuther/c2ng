@@ -12,7 +12,7 @@ namespace interpreter { namespace expr {
 
     /** Function call.
         Base class for all sorts of invocations ("something(args)"). */
-    class FunctionCallNode : public RValueNode {
+    class FunctionCallNode : public Node {
      public:
         /** Append argument.
             @param arg Argument, newly-allocated */

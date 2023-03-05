@@ -5,8 +5,8 @@
 #ifndef C2NG_INTERPRETER_BINARYEXECUTION_HPP
 #define C2NG_INTERPRETER_BINARYEXECUTION_HPP
 
-#include "afl/data/value.hpp"
 #include "afl/base/types.hpp"
+#include "afl/data/value.hpp"
 
 namespace interpreter {
 

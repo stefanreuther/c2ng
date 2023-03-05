@@ -40,7 +40,7 @@ namespace interpreter {
         class Maker {
          public:
             /** Constructor.
-                @proc Process */
+                @param proc Process */
             explicit Maker(Process& proc);
 
             /** Create a variable reference.

@@ -6,12 +6,12 @@
 #define C2NG_INTERPRETER_VMIO_FILESAVECONTEXT_HPP
 
 #include <map>
-#include "interpreter/savecontext.hpp"
-#include "afl/io/stream.hpp"
 #include "afl/base/uncopyable.hpp"
-#include "interpreter/process.hpp"
-#include "afl/container/ptrvector.hpp"
 #include "afl/charset/charset.hpp"
+#include "afl/container/ptrvector.hpp"
+#include "afl/io/stream.hpp"
+#include "interpreter/process.hpp"
+#include "interpreter/savecontext.hpp"
 
 namespace interpreter { namespace vmio {
 

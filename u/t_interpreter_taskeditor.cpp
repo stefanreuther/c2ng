@@ -40,7 +40,7 @@ TestInterpreterTaskEditor::testEmpty()
     // Create a blank process
     TestHarness h;
     TS_ASSERT_EQUALS(h.proc.getNumActiveFrames(), 0U);
-    
+
     // Create and destroy editor
     {
         interpreter::TaskEditor testee(h.proc);

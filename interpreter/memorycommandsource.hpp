@@ -6,8 +6,8 @@
 #define C2NG_INTERPRETER_MEMORYCOMMANDSOURCE_HPP
 
 #include <vector>
-#include "interpreter/commandsource.hpp"
 #include "afl/string/string.hpp"
+#include "interpreter/commandsource.hpp"
 
 namespace interpreter {
 

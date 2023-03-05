@@ -11,6 +11,9 @@ namespace interpreter {
     class World;
 
     /** Optimize the given bytecode object. It must not have been relocated yet.
+
+        Applies a sequence of optimisations until a fixed-point is reached.
+
         @param [in,out] world World
         @param [in,out] bco   Bytecode object to optimize
         @param [in]     level Optimisation level to apply */

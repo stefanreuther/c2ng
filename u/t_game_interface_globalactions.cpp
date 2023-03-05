@@ -54,14 +54,14 @@ namespace {
                     if (interpreter::StructureValue* sv = dynamic_cast<interpreter::StructureValue*>(args[i])) {
                         m_acc += "{";
                         interpreter::StructureValueData::Ref_t v = sv->getValue();
-                        const afl::data::NameMap& names = v->type->names();
+                        const afl::data::NameMap& names = v->type().names();
                         for (size_t i = 0; i < names.getNumNames(); ++i) {
                             if (i != 0) {
                                 m_acc += ",";
                             }
                             m_acc += names.getNameByIndex(i);
                             m_acc += ":";
-                            m_acc += interpreter::toString(v->data[i], true);
+                            m_acc += interpreter::toString(v->data()[i], true);
                         }
                         m_acc += "}";
                     } else {

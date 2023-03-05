@@ -2818,7 +2818,7 @@ TestInterpreterProcess::testExecInstance()
 
         const StructureValue* sv = dynamic_cast<const StructureValue*>(env.proc.getResult());
         TS_ASSERT(sv);
-        TS_ASSERT_EQUALS(&*sv->getValue()->type, &*type);
+        TS_ASSERT_EQUALS(&sv->getValue()->type(), &*type);
     }
 
     // Error case: wrong type

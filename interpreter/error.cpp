@@ -6,6 +6,8 @@
 #include "interpreter/error.hpp"
 #include "afl/string/format.hpp"
 
+using afl::string::Format;
+
 // Construct from string literal.
 interpreter::Error::Error(const char* error)
     : m_error(error),
@@ -112,14 +114,14 @@ interpreter::Error::invalidMultiline()
 interpreter::Error
 interpreter::Error::expectKeyword(const char* kw)
 {
-    return Error(afl::string::Format("Expecting \"%s\"", kw));
+    return Error(Format("Expecting \"%s\"", kw));
 }
 
 // Generate a "expecting keyword" error, two permitted keywords.
 interpreter::Error
 interpreter::Error::expectKeyword(const char* kw1, const char* kw2)
 {
-    return Error(afl::string::Format("Expecting \"%s\" or \"%s\"", kw1, kw2));
+    return Error(Format("Expecting \"%s\" or \"%s\"", kw1, kw2));
 }
 
 // Generate a "expecting symbol" error, one permitted symbol.
@@ -140,7 +142,7 @@ interpreter::Error::expectSymbol(const char* sym1, const char* sym2)
 interpreter::Error
 interpreter::Error::misplacedKeyword(const char* kw)
 {
-    return Error(afl::string::Format("\"%s\" not allowed here", kw));
+    return Error(Format("\"%s\" not allowed here", kw));
 }
 
 // Generate an "expecting end of line" error.
@@ -156,7 +158,7 @@ interpreter::Error::garbageAtEnd(bool expression)
 interpreter::Error
 interpreter::Error::expectIdentifier(const char* what)
 {
-    return Error(afl::string::Format("Expecting identifier, %s", what));
+    return Error(Format("Expecting identifier, %s", what));
 }
 
 // Generate a "command not valid in this context" error.
@@ -171,4 +173,18 @@ interpreter::Error
 interpreter::Error::tooComplex()
 {
     return Error("Code is too complex; interpreter limit exceeded");
+}
+
+// Generate a "too many arguments" error.
+interpreter::Error
+interpreter::Error::tooManyArguments(const String_t& fn)
+{
+    return Error(Format("Too many arguments for \"%s\"", fn));
+}
+
+// Generate a "too few arguments" error.
+interpreter::Error
+interpreter::Error::tooFewArguments(const String_t& fn)
+{
+    return Error(Format("Too few arguments for \"%s\"", fn));
 }

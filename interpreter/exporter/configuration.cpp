@@ -6,6 +6,7 @@
 #include "interpreter/exporter/configuration.hpp"
 #include "afl/except/assertionfailedexception.hpp"
 #include "afl/except/fileproblemexception.hpp"
+#include "afl/io/textfile.hpp"
 #include "afl/string/format.hpp"
 #include "interpreter/exporter/dbfexporter.hpp"
 #include "interpreter/exporter/htmlexporter.hpp"
@@ -13,7 +14,6 @@
 #include "interpreter/exporter/separatedtextexporter.hpp"
 #include "interpreter/exporter/textexporter.hpp"
 #include "util/configurationfileparser.hpp"
-#include "afl/io/textfile.hpp"
 #include "util/string.hpp"
 
 namespace {

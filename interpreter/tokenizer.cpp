@@ -364,5 +364,4 @@ interpreter::Tokenizer::isValidUppercaseIdentifier(const String_t& candidate)
         }
     }
     return true;
-
 }
