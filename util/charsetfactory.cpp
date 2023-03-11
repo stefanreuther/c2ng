@@ -4,11 +4,11 @@
   */
 
 #include "util/charsetfactory.hpp"
+#include "afl/base/countof.hpp"
 #include "afl/charset/codepage.hpp"
 #include "afl/charset/codepagecharset.hpp"
 #include "afl/charset/utf8charset.hpp"
 #include "util/translation.hpp"
-#include "afl/base/countof.hpp"
 
 namespace {
     /*

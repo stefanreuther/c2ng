@@ -178,7 +178,7 @@ util::ConfigurationFile::set(String_t section, String_t key, String_t value)
         assignmentKey += ".";
     }
     assignmentKey += ucKey;
-    
+
     size_t existingSection;
     if (const Element* existing = findElement(Assignment, assignmentKey)) {
         // Element exists

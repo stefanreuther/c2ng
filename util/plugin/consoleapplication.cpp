@@ -1,5 +1,6 @@
 /**
   *  \file util/plugin/consoleapplication.cpp
+  *  \brief Class util::plugin::ConsoleApplication
   */
 
 #include "util/plugin/consoleapplication.hpp"

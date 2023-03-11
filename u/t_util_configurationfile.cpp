@@ -211,7 +211,7 @@ TestUtilConfigurationFile::testMergeNamespaced()
     tfo.setSystemNewline(false);
     c1.save(tfo);
     tfo.flush();
-    
+
     TS_ASSERT_EQUALS(afl::string::fromBytes(out.getContent()),
                      "%NS\n"
                      "a=7\n"
@@ -246,7 +246,7 @@ TestUtilConfigurationFile::testRemove()
     TS_ASSERT_EQUALS(p->value, "Yes");
 
     TS_ASSERT(testee.remove("PCONFIG.allowshipnames"));
-    
+
     p = testee.findElement(util::ConfigurationFile::Assignment, "pCONFIG.Allowshipnames");
     TS_ASSERT(p == 0);
 }
@@ -275,7 +275,7 @@ TestUtilConfigurationFile::testAdd()
     tfo.setSystemNewline(false);
     testee.save(tfo);
     tfo.flush();
-    
+
     TS_ASSERT_EQUALS(afl::string::fromBytes(out.getContent()),
                      "    FILTER=f1\n"
                      "    FILTER=f2\n"
@@ -283,5 +283,46 @@ TestUtilConfigurationFile::testAdd()
                      "    other = o\n"
                      "% sec\n"
                      "  filter = f4\n");
+}
+
+/** Test set(). */
+void
+TestUtilConfigurationFile::testSet()
+{
+    // Test data
+    afl::io::ConstMemoryStream in(afl::string::toBytes(TEST_FILE));
+    afl::io::TextFile tf(in);
+
+    // Parse it
+    util::ConfigurationFile testee;
+    testee.load(tf);
+
+    // Add stuff
+    testee.set("pre", "one");
+    testee.set("section.sec", "two");
+    testee.set("more.end", "four");
+    testee.set("newpre", "n1");
+    testee.set("newsec.item", "n2");
+
+    // Verify
+    afl::io::InternalStream out;
+    afl::io::TextFile tfo(out);
+    tfo.setSystemNewline(false);
+    testee.save(tfo);
+    tfo.flush();
+
+    TS_ASSERT_EQUALS(afl::string::fromBytes(out.getContent()),
+                     " pre = one\n"
+                     " newpre = n1\n"
+                     "\n"
+                     "; note\n"
+                     "% section\n"
+                     "  sec=two\n"
+                     "[more]\n"
+                     "# note\n"
+                     "  end=four\n"
+                     "wtf?\n"
+                     "% newsec\n"
+                     "  item = n2\n");
 }
 

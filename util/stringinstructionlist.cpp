@@ -1,5 +1,6 @@
 /**
   *  \file util/stringinstructionlist.cpp
+  *  \brief Class util::StringInstructionList
   */
 
 #include "util/stringinstructionlist.hpp"

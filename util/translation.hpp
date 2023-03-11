@@ -19,6 +19,7 @@
   *  The function name can be
   *  - `tx` (local variable)
   *  - `m_translator` (member variable)
+  *  - `translator` (member function)
   *  - `translateString` (explicit invocation of function; obsolescent/being phased out)
   *  - `N_` (explicitly marked; see macro in this file)
   *  - `Translate` (CCScript function)

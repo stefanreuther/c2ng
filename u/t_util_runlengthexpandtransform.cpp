@@ -27,6 +27,7 @@ namespace {
             TS_ASSERT_EQUALS(out.size(), result.size());
             TS_ASSERT(out.equalContent(result));
             TS_ASSERT(inputReader.empty());
+            TS_ASSERT_THROWS_NOTHING(testee.flush());
         }
 
         // Test byte-wise operation (maximum context switches)
@@ -56,6 +57,7 @@ namespace {
             }
             TS_ASSERT_EQUALS(out.size(), result.size());
             TS_ASSERT(out.equalContent(result));
+            TS_ASSERT_THROWS_NOTHING(testee.flush());
         }
     }
 
@@ -69,6 +71,7 @@ namespace {
         util::RunLengthExpandTransform testee;
         testee.transform(in, result);
         TS_ASSERT(in.empty());
+        TS_ASSERT_THROWS_NOTHING(testee.flush());
     }
 }
 

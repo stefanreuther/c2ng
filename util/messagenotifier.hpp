@@ -1,5 +1,6 @@
 /**
   *  \file util/messagenotifier.hpp
+  *  \brief Class util::MessageNotifier
   */
 #ifndef C2NG_UTIL_MESSAGENOTIFIER_HPP
 #define C2NG_UTIL_MESSAGENOTIFIER_HPP

@@ -1,5 +1,6 @@
 /**
   *  \file util/messagecollector.hpp
+  *  \brief Class util::MessageCollector
   */
 #ifndef C2NG_UTIL_MESSAGECOLLECTOR_HPP
 #define C2NG_UTIL_MESSAGECOLLECTOR_HPP

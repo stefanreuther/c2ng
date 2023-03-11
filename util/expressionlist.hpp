@@ -5,9 +5,9 @@
 #ifndef C2NG_UTIL_EXPRESSIONLIST_HPP
 #define C2NG_UTIL_EXPRESSIONLIST_HPP
 
-#include "afl/string/string.hpp"
-#include "afl/container/ptrvector.hpp"
 #include "afl/base/types.hpp"
+#include "afl/container/ptrvector.hpp"
+#include "afl/string/string.hpp"
 
 namespace util {
 
@@ -67,7 +67,7 @@ namespace util {
         /** Add new item at front, with LRU-style limiting.
             The item will be added at the front.
             Duplicates will be removed (this will make it appear to move the item from its original position to the front,
-            but in case the items differ in their flags, the new flags will be used). 
+            but in case the items differ in their flags, the new flags will be used).
             The list will be limited to @c limit items.
             \param item Newly-allocated item. Will be owned by the list. Should not be null.
             \param limit Maximum number of elements to preserve */

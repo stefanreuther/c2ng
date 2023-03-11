@@ -1748,7 +1748,11 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_interpreter_vmio_worldloadcontext.cpp \
+FILES_testsuite = u/t_util_plugin_dialogapplication.cpp \
+    u/t_util_plugin_installer.cpp u/t_util_profiledirectory.cpp \
+    u/t_util_translation.cpp u/t_util_keymapinformation.cpp \
+    u/t_util_directorybrowser.cpp u/t_util_consolelogger.cpp \
+    u/t_interpreter_vmio_worldloadcontext.cpp \
     u/t_interpreter_vmio_assemblersavecontext.cpp \
     u/t_interpreter_processobservercontext.cpp \
     u/t_interpreter_expr_functioncallnode.cpp \

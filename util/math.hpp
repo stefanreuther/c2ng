@@ -65,7 +65,7 @@ namespace util {
         \pre dx!=0 || dy!=0
         \returns heading in degrees, [0, 360] */
     double getHeadingDeg(double dx, double dy);
-    
+
     /** Given coordinate offsets, compute distance.
         \param dx X (east-west) offset, positive = east
         \param dy Y (north-south) offset, positive = north

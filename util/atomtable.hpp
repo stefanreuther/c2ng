@@ -6,11 +6,11 @@
 #define C2NG_UTIL_ATOMTABLE_HPP
 
 #include <algorithm>
-#include "afl/string/string.hpp"
+#include "afl/base/growablememory.hpp"
+#include "afl/base/memory.hpp"
 #include "afl/base/types.hpp"
 #include "afl/container/ptrvector.hpp"
-#include "afl/base/memory.hpp"
-#include "afl/base/growablememory.hpp"
+#include "afl/string/string.hpp"
 
 namespace util {
 

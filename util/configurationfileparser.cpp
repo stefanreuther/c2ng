@@ -1,5 +1,6 @@
 /**
   *  \file util/configurationfileparser.cpp
+  *  \brief Class util::ConfigurationFileParser
   */
 
 #include "util/configurationfileparser.hpp"

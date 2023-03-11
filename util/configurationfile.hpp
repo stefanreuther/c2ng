@@ -5,11 +5,11 @@
 #ifndef C2NG_UTIL_CONFIGURATIONFILE_HPP
 #define C2NG_UTIL_CONFIGURATIONFILE_HPP
 
-#include "afl/string/string.hpp"
+#include "afl/base/optional.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "afl/io/textreader.hpp"
 #include "afl/io/textwriter.hpp"
-#include "afl/base/optional.hpp"
+#include "afl/string/string.hpp"
 
 namespace util {
 

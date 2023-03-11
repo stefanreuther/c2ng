@@ -23,6 +23,8 @@ class TestUtilAtomTable : public CxxTest::TestSuite {
 class TestUtilBackupFile : public CxxTest::TestSuite {
  public:
     void testExpand();
+    void testFileOperations();
+    void testFileOperationsEmpty();
 };
 
 class TestUtilCharsetFactory : public CxxTest::TestSuite {
@@ -42,11 +44,18 @@ class TestUtilConfigurationFile : public CxxTest::TestSuite {
     void testMergeNamespaced();
     void testRemove();
     void testAdd();
+    void testSet();
 };
 
 class TestUtilConfigurationFileParser : public CxxTest::TestSuite {
  public:
     void testInterface();
+};
+
+class TestUtilConsoleLogger : public CxxTest::TestSuite {
+ public:
+    void testDefault();
+    void testConfig();
 };
 
 class TestUtilDataTable : public CxxTest::TestSuite {
@@ -65,6 +74,15 @@ class TestUtilDigest : public CxxTest::TestSuite {
     void testIt();
     void testStaticInstance();
     void testDynamicType();
+};
+
+class TestUtilDirectoryBrowser : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testCreateDirectory();
+    void testSelect();
+    void testWildcard();
+    void testRoot();
 };
 
 class TestUtilExpressionList : public CxxTest::TestSuite {
@@ -136,6 +154,11 @@ class TestUtilKeymap : public CxxTest::TestSuite {
     void testDescribeMI();
 };
 
+class TestUtilKeymapInformation : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestUtilKeymapTable : public CxxTest::TestSuite {
  public:
     void testKeymapTable();
@@ -191,6 +214,12 @@ class TestUtilPrefixArgument : public CxxTest::TestSuite {
 class TestUtilProcessRunner : public CxxTest::TestSuite {
  public:
     void testIt();
+};
+
+class TestUtilProfileDirectory : public CxxTest::TestSuite {
+ public:
+    void testOpen();
+    void testOpenDir();
 };
 
 class TestUtilRandomNumberGenerator : public CxxTest::TestSuite {
@@ -300,6 +329,11 @@ class TestUtilStringParser : public CxxTest::TestSuite {
 };
 
 class TestUtilSystemInformation : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestUtilTranslation : public CxxTest::TestSuite {
  public:
     void testIt();
 };

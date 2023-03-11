@@ -273,7 +273,7 @@ util::syntax::ScriptHighlighter::scan(Segment& result)
                 result.setFormat(KeywordFormat);
             }
             break;
-            
+
          case sAfterDim:
             if (kw == interpreter::kwNone) {
                 if (m_parenLevel == 0) {

@@ -50,7 +50,7 @@ util::ExpressionList::findIndexForValue(const String_t& value, size_t& index) co
             index = i;
             return true;
         }
-                
+
         ++i;
     }
     return false;

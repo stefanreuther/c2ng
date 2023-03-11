@@ -23,7 +23,7 @@ util::RandomNumberGenerator::operator()(uint16_t max)
 {
     advance();
 
-    /* seed * max >> 32        
+    /* seed * max >> 32
         = (loword(seed) * max + hiword(seed) * max << 16) >> 32
           hence loword(result) = loword(seed)*max which is discarded anyways
         = (loword(seed) * max >> 16 + hiword(seed) * max) >> 16 */

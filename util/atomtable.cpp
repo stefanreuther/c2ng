@@ -2,7 +2,7 @@
   *  \file util/atomtable.cpp
   *  \brief Class util::AtomTable
   *
-  *  FIXME: this almost the PCC2 implementation, slightle beefed up to use afl APIs.
+  *  FIXME: this almost the PCC2 implementation, slightly beefed up to use afl APIs.
   *  It happens that NameMap (PCC2: IntVariableNames) solves a very similar problem,
   *  so it makes sense to merge these.
   */

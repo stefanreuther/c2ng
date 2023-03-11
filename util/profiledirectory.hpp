@@ -1,21 +1,23 @@
 /**
   *  \file util/profiledirectory.hpp
+  *  \brief Class util::ProfileDirectory
   */
 #ifndef C2NG_UTIL_PROFILEDIRECTORY_HPP
 #define C2NG_UTIL_PROFILEDIRECTORY_HPP
 
-#include "afl/sys/environment.hpp"
 #include "afl/base/ptr.hpp"
-#include "afl/io/stream.hpp"
-#include "afl/io/filesystem.hpp"
-#include "afl/string/translator.hpp"
-#include "afl/sys/loglistener.hpp"
 #include "afl/io/directory.hpp"
+#include "afl/io/filesystem.hpp"
+#include "afl/io/stream.hpp"
+#include "afl/string/translator.hpp"
+#include "afl/sys/environment.hpp"
+#include "afl/sys/loglistener.hpp"
 
 namespace util {
 
     /** Profile directory handling.
-        This class provides functions to operate with the profile directory. */
+        This class provides functions to operate with the profile directory.
+        The profile directory stores the user's configuration files; compare afl::sys::Environment::getSettingsDirectoryName(). */
     class ProfileDirectory {
      public:
         /** Constructor.

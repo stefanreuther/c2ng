@@ -1,5 +1,6 @@
 /**
   *  \file util/messagenotifier.cpp
+  *  \brief Class util::MessageNotifier
   */
 
 #include "util/messagenotifier.hpp"
@@ -10,7 +11,7 @@ util::MessageNotifier::MessageNotifier(RequestDispatcher& dispatcher)
       m_mutex(),
       m_signalState(Idle),
       m_receiver(dispatcher, *this)
-{ }      
+{ }
 
 // Destructor.
 util::MessageNotifier::~MessageNotifier()

@@ -1,5 +1,6 @@
 /**
   *  \file util/plugin/dialogapplication.cpp
+  *  \brief Class util::plugin::DialogApplication
   */
 
 #include "util/plugin/dialogapplication.hpp"
@@ -83,7 +84,7 @@ util::plugin::DialogApplication::doAdd(const std::vector<String_t>& items)
             Plugin* plug = installer.prepareInstall(name);
             if (!plug) {
                 m_dialog.showError(afl::string::Format(tx("File '%s' cannot be installed as a plugin. "
-                                                          "A plugin is normally specified with a *.c2p or *.c2z file.").c_str(), name),
+                                                          "A plugin is normally specified with a *.c2p or *.c2z file."), name),
                                    windowTitle());
                 err = true;
             } else {
@@ -92,7 +93,7 @@ util::plugin::DialogApplication::doAdd(const std::vector<String_t>& items)
                     const char* tpl = isUpdate
                         ? N_("Do you want to update plugin \"%s\" (%s)?)")
                         : N_("Do you want to install plugin \"%s\" (%s)?)");
-                    String_t message = afl::string::Format(tx(tpl).c_str(), plug->getName(), plug->getId());
+                    String_t message = afl::string::Format(tx(tpl), plug->getName(), plug->getId());
                     if (plug->getDescription().size() > 0) {
                         message += "\n\n";
                         message += plug->getDescription();
@@ -103,8 +104,8 @@ util::plugin::DialogApplication::doAdd(const std::vector<String_t>& items)
                         const char* tpl = isUpdate
                             ? N_("Plugin '%s' has been updated.")
                             : N_("Plugin '%s' has been installed.");
-                        
-                        m_dialog.showInfo(afl::string::Format(tx(tpl).c_str(), plug->getName()), windowTitle());
+
+                        m_dialog.showInfo(afl::string::Format(tx(tpl), plug->getName()), windowTitle());
                     }
                 } else {
                     err = true;

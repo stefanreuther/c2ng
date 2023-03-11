@@ -7,6 +7,16 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestUtilPluginDialogApplication : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestUtilPluginInstaller : public CxxTest::TestSuite {
+ public:
+    void testInstallZip();
+};
+
 class TestUtilPluginManager : public CxxTest::TestSuite {
  public:
     void testIt();

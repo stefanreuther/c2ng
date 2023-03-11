@@ -1,5 +1,6 @@
 /**
   *  \file util/rich/visitor.cpp
+  *  \brief Base class util::rich::Visitor
   */
 
 #include "util/rich/visitor.hpp"

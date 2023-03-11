@@ -1,5 +1,6 @@
 /**
   *  \file util/keymaptable.cpp
+  *  \brief Class util::KeymapTable
   */
 
 #include <stdexcept>
@@ -13,10 +14,6 @@ util::KeymapTable::KeymapTable()
 util::KeymapTable::~KeymapTable()
 { }
 
-/** Get keymap by name. Note that the name must be in upper-case, because that's how it
-    comes in from the script interface.
-    \param name Name to find
-    \return Found keymap, 0 if it does not exist. */
 util::KeymapRef_t
 util::KeymapTable::getKeymapByName(String_t name) const
 {
@@ -29,17 +26,11 @@ util::KeymapTable::getKeymapByName(String_t name) const
     return 0;
 }
 
-/** Create keymap. Note that the name must be in upper-case, because that's how it
-    comes in from the script interface.
-    \param name Name to create
-    \return New keymap.
-    \throw IntError if keymap by this name already exists */
 util::KeymapRef_t
 util::KeymapTable::createKeymap(String_t name)
 {
     // IntKeymap::createKeymap
-    // FIXME: PCC2 throws IntError
-    if (getKeymapByName(name)) {
+    if (getKeymapByName(name) != 0) {
         throw std::runtime_error("Keymap already exists");
     }
     return m_keymaps.pushBackNew(new Keymap(name));

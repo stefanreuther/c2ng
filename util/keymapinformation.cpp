@@ -1,5 +1,6 @@
 /**
   *  \file util/keymapinformation.cpp
+  *  \brief Class util::KeymapInformation
   */
 
 #include "util/keymapinformation.hpp"

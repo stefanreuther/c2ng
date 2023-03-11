@@ -4,8 +4,8 @@
   */
 
 #include "util/consolelogger.hpp"
-#include "afl/sys/mutexguard.hpp"
 #include "afl/string/format.hpp"
+#include "afl/sys/mutexguard.hpp"
 
 /***************************** ConsoleLogger *****************************/
 

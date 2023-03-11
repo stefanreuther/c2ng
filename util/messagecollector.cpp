@@ -1,5 +1,6 @@
 /**
   *  \file util/messagecollector.cpp
+  *  \brief Class util::MessageCollector
   */
 
 #include "util/messagecollector.hpp"

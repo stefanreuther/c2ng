@@ -64,12 +64,12 @@ namespace {
                     return true;
                 }
             }
-        
+
      private:
         bool m_limitOK;
         rlimit m_limit;
         std::vector<int> m_fds;
-    };        
+    };
 }
 #endif
 

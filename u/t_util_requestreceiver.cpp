@@ -36,7 +36,7 @@ namespace {
      private:
         int m_n;
     };
-}    
+}
 
 /** Simple test. */
 void

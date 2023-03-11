@@ -341,7 +341,7 @@ TestUtilSyntaxCHighlighter::testC()
 {
     util::syntax::CHighlighter testee(util::syntax::CHighlighter::LangC);
     util::syntax::Segment r;
-    
+
     // Keywords
     testee.init(afl::string::toMemory(" foo _Bool abstract const_cast break var "));
     TS_ASSERT(testee.scan(r));
@@ -371,7 +371,7 @@ TestUtilSyntaxCHighlighter::testCXX()
 {
     util::syntax::CHighlighter testee(util::syntax::CHighlighter::LangCXX);
     util::syntax::Segment r;
-    
+
     // Keywords
     testee.init(afl::string::toMemory(" foo _Bool abstract const_cast break var "));
     TS_ASSERT(testee.scan(r));
@@ -401,7 +401,7 @@ TestUtilSyntaxCHighlighter::testJS()
 {
     util::syntax::CHighlighter testee(util::syntax::CHighlighter::LangJavaScript);
     util::syntax::Segment r;
-    
+
     // Keywords
     testee.init(afl::string::toMemory(" foo _Bool abstract const_cast break var "));
     TS_ASSERT(testee.scan(r));
@@ -473,7 +473,7 @@ TestUtilSyntaxCHighlighter::testJava()
 {
     util::syntax::CHighlighter testee(util::syntax::CHighlighter::LangJava);
     util::syntax::Segment r;
-    
+
     // Keywords
     testee.init(afl::string::toMemory(" foo _Bool abstract const_cast break var "));
     TS_ASSERT(testee.scan(r));

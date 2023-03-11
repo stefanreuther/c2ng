@@ -1,10 +1,11 @@
 /**
   *  \file util/profiledirectory.cpp
+  *  \brief Class util::ProfileDirectory
   */
 
 #include "util/profiledirectory.hpp"
-#include "afl/io/directory.hpp"
 #include "afl/except/fileproblemexception.hpp"
+#include "afl/io/directory.hpp"
 #include "afl/io/directoryentry.hpp"
 
 namespace {
