@@ -17,11 +17,15 @@ class interpreter::ProcessObserverContext::State : public afl::base::RefCounted 
           conn_invalidate(proc.sig_invalidate.add(this, &State::onProcessInvalidate))
         { }
     ~State()
-        { }
+        {
+            // This destructor will disconnect the SignalConnection.
+            // This is only required if the containing ProcessObserverContext has not been pushed on a Process' stack;
+            // otherwise it will be disconnected when the ProcessObserverContext is removed from the stack (onContextLeft).
+            // TL;DR: destructor not required for Java{,Script} version.
+        }
     Process* getProcess()
         { return m_process; }
 
- private:
     void onProcessInvalidate()
         {
             if (m_process != 0) {
@@ -30,6 +34,7 @@ class interpreter::ProcessObserverContext::State : public afl::base::RefCounted 
             }
         }
 
+ private:
     Process* m_process;
     afl::base::SignalConnection conn_invalidate;
 };
@@ -61,6 +66,12 @@ interpreter::ProcessObserverContext::lookup(const afl::data::NameQuery& name, Pr
     }
 }
 
+bool
+interpreter::ProcessObserverContext::next()
+{
+    return false;
+}
+
 interpreter::ProcessObserverContext*
 interpreter::ProcessObserverContext::clone() const
 {
@@ -77,6 +88,22 @@ void
 interpreter::ProcessObserverContext::enumProperties(PropertyAcceptor& /*acceptor*/) const
 {
     // We cannot enumerate properties
+}
+
+void
+interpreter::ProcessObserverContext::onContextEntered(Process& /*proc*/)
+{
+    // Ignore; signal is connected upon creation
+}
+
+void
+interpreter::ProcessObserverContext::onContextLeft()
+{
+    // Disconnect signal.
+    // This means we lose contact once the first clone of ProcessObserverContext is removed from the stack.
+    // As of 20230312, we are not creating any clones during normal operation, so this is fine.
+    // Otherwise, we'd have to track reference counts somehow.
+    m_state->onProcessInvalidate();
 }
 
 String_t

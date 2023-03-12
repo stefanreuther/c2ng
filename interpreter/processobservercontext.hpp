@@ -5,7 +5,7 @@
 #ifndef C2NG_INTERPRETER_PROCESSOBSERVERCONTEXT_HPP
 #define C2NG_INTERPRETER_PROCESSOBSERVERCONTEXT_HPP
 
-#include "interpreter/singlecontext.hpp"
+#include "interpreter/context.hpp"
 #include "afl/base/ref.hpp"
 #include "afl/base/signalconnection.hpp"
 #include "afl/base/refcounted.hpp"
@@ -18,7 +18,7 @@ namespace interpreter {
         As long as the other process does not execute, this context provides access to its current namespace
         (current context stack, frames, etc.)
         If the other process continues execution or dies, the association is removed. */
-    class ProcessObserverContext : public SingleContext {
+    class ProcessObserverContext : public Context {
      public:
         /** Construct ProcessObserverContext.
             \param p Process to observe */
@@ -27,9 +27,12 @@ namespace interpreter {
 
         // Context:
         virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
+        virtual bool next();
         virtual ProcessObserverContext* clone() const;
         virtual afl::base::Deletable* getObject();
         virtual void enumProperties(PropertyAcceptor& acceptor) const;
+        virtual void onContextEntered(Process& proc);
+        virtual void onContextLeft();
 
         // BaseValue:
         virtual String_t toString(bool readable) const;
