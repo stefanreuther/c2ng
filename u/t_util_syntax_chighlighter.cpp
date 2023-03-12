@@ -373,7 +373,7 @@ TestUtilSyntaxCHighlighter::testCXX()
     util::syntax::Segment r;
 
     // Keywords
-    testee.init(afl::string::toMemory(" foo _Bool abstract const_cast break var "));
+    testee.init(afl::string::toMemory(" foo _Bool abstract const_cast break requires var "));
     TS_ASSERT(testee.scan(r));
     TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
     TS_ASSERT_EQUALS(parseContinuation(testee, r), " foo _Bool abstract ");
@@ -383,6 +383,10 @@ TestUtilSyntaxCHighlighter::testCXX()
     TS_ASSERT_EQUALS(parseContinuation(testee, r), " ");
     TS_ASSERT_EQUALS(r.getFormat(), util::syntax::KeywordFormat);
     TS_ASSERT_EQUALS(parseContinuation(testee, r), "break");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), " ");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::KeywordFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "requires");
     TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
     TS_ASSERT_EQUALS(parseContinuation(testee, r), " var ");
     TS_ASSERT(!testee.scan(r));

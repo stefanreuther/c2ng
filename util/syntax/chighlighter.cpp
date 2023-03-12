@@ -175,6 +175,7 @@ namespace {
      *  Keywords have been taken from
      *    C99 (iso-9899-1999.pdf)
      *    C++11 (n3242.pdf)
+     *    C++20 (n4860.pdf)
      *    Java5 (langspec-3.0.pdf)
      *    ES5 (ECMA-262 (ECMAScript 5th edition).pdf)
      */
@@ -206,12 +207,19 @@ namespace {
         { "char",             CHighlighter::LangC | CHighlighter::LangCXX | CHighlighter::LangJava },               // C++11, C99, Java5
         { "char16_t",         CHighlighter::LangCXX  },                                                             // C++11
         { "char32_t",         CHighlighter::LangCXX  },                                                             // C++11
+        { "char8_t",          CHighlighter::LangCXX },                                                              // C++20
         { "class",            CHighlighter::LangCXX | CHighlighter::LangJava | CHighlighter::LangJavaScript },      // C++11, ES5 (future), Java5
+        { "co_await",         CHighlighter::LangCXX },                                                              // C++20
+        { "co_return",        CHighlighter::LangCXX },                                                              // C++20
+        { "co_yield",         CHighlighter::LangCXX },                                                              // C++20
         { "compl",            CHighlighter::LangCXX },                                                              // C++11
         { "complex",          CHighlighter::LangC },                                                                // C99 (pseudo)
+        { "concept",          CHighlighter::LangCXX },                                                              // C++20
         { "const",            -1 },                                                                                 // common (future reserved word in ES5)
         { "const_cast",       CHighlighter::LangCXX },                                                              // C++11
+        { "consteval",        CHighlighter::LangCXX  },                                                             // C++20
         { "constexpr",        CHighlighter::LangCXX  },                                                             // C++11
+        { "constinit",        CHighlighter::LangCXX  },                                                             // C++20
         { "continue",         -1 },                                                                                 // common
         { "debugger",         CHighlighter::LangJavaScript },                                                       // ES5
         { "decltype",         CHighlighter::LangCXX },                                                              // C++11
@@ -236,7 +244,7 @@ namespace {
         { "goto",             CHighlighter::LangC | CHighlighter::LangCXX | CHighlighter::LangJava },               // C++11, C99, Java5
         { "if",               -1 },                                                                                 // common
         { "implements",       CHighlighter::LangJava | CHighlighter::LangJavaScript  },                             // ES5 (future strict), Java5
-        { "import",           CHighlighter::LangJava | CHighlighter::LangJavaScript },                              // ES5 (future), Java5
+        { "import",           CHighlighter::LangCXX | CHighlighter::LangJava | CHighlighter::LangJavaScript },      // C++20, ES5 (future), Java5
         { "in",               CHighlighter::LangJavaScript },                                                       // ES5
         { "inline",           CHighlighter::LangC | CHighlighter::LangCXX },                                        // C++11, C99
         { "instanceof",       CHighlighter::LangJavaScript | CHighlighter::LangJava },                              // ES5, Java5
@@ -244,6 +252,7 @@ namespace {
         { "interface",        CHighlighter::LangJavaScript | CHighlighter::LangJava },                              // ES5 (future strict), Java5
         { "let",              CHighlighter::LangJavaScript },                                                       // ES5 (future strict)
         { "long",             CHighlighter::LangCXX | CHighlighter::LangC | CHighlighter::LangJava },               // C++11, C99, Java5
+        { "module",           CHighlighter::LangCXX },                                                              // C++20
         { "mutable",          CHighlighter::LangCXX },                                                              // C++11
         { "namespace",        CHighlighter::LangCXX },                                                              // C++11
         { "native",           CHighlighter::LangJava },                                                             // Java5
@@ -262,6 +271,7 @@ namespace {
         { "public",           CHighlighter::LangCXX | CHighlighter::LangJavaScript | CHighlighter::LangJava },      // C++11, ES5 (future strict), Java5
         { "register",         CHighlighter::LangCXX | CHighlighter::LangC },                                        // C++11,C99
         { "reinterpret_cast", CHighlighter::LangCXX },                                                              // C++11
+        { "requires",         CHighlighter::LangCXX },                                                              // C++20
         { "restrict",         CHighlighter::LangC },                                                                // C99
         { "return",           -1 },                                                                                 // common
         { "short",            CHighlighter::LangCXX | CHighlighter::LangC | CHighlighter::LangJava },               // C++11, C99, Java5
