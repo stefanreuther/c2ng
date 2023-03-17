@@ -1,5 +1,6 @@
 /**
   *  \file game/ref/nullpredicate.cpp
+  *  \brief Class game::ref::NullPredicate
   */
 
 #include "game/ref/nullpredicate.hpp"

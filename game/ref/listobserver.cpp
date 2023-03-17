@@ -1,5 +1,6 @@
 /**
   *  \file game/ref/listobserver.cpp
+  *  \brief Class game::ref::ListObserver
   */
 
 #include "game/ref/listobserver.hpp"
@@ -71,7 +72,7 @@ game::ref::ListObserver::setConfig(const Configuration& config)
 }
 
 const game::ref::UserList&
-game::ref::ListObserver::getList()
+game::ref::ListObserver::getList() const
 {
     return m_resultList;
 }
@@ -86,8 +87,8 @@ game::ref::ListObserver::updateResultList()
         Configuration fig;
         fetchConfiguration(*m_pSession, *m_pConfigurationSelection, fig);
         afl::base::Deleter del;
-        SortPredicate& firstPredicate  = createSortPredicate(fig.order.first,  *m_pSession, del);
-        SortPredicate& secondPredicate = createSortPredicate(fig.order.second, *m_pSession, del);
+        const SortPredicate& firstPredicate  = createSortPredicate(fig.order.first,  *m_pSession, del);
+        const SortPredicate& secondPredicate = createSortPredicate(fig.order.second, *m_pSession, del);
 
         // Main list
         m_mainList.sort(firstPredicate.then(secondPredicate));

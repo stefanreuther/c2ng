@@ -12,7 +12,7 @@ void
 TestGameRefNullPredicate::testIt()
 {
     game::Reference a;
-    
+
     TS_ASSERT_EQUALS(game::ref::NullPredicate().compare(a, a), 0);
     TS_ASSERT_EQUALS(game::ref::NullPredicate().getClass(a), "");
 }

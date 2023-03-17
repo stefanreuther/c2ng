@@ -7,6 +7,26 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestGameRefConfiguration : public CxxTest::TestSuite {
+ public:
+    void testPreferences();
+    void testCreatePredicateSortById();
+    void testCreatePredicateSortByOwner();
+    void testCreatePredicateSortByHull();
+    void testCreatePredicateSortByMass();
+    void testCreatePredicateSortByFleet();
+    void testCreatePredicateSortByTowGroup();
+    void testCreatePredicateSortByBattleOrder();
+    void testCreatePredicateSortByPosition();
+    void testCreatePredicateSortByHullMass();
+    void testCreatePredicateSortByDamage();
+    void testCreatePredicateSortByName();
+    void testCreatePredicateSortByNextPosition();
+    void testCreatePredicateSortByTransferTarget();
+    void testCreatePredicateFromConfig();
+    void testBlank();
+};
+
 class TestGameRefFleetList : public CxxTest::TestSuite {
  public:
     void testBasic();
@@ -47,6 +67,11 @@ class TestGameRefList : public CxxTest::TestSuite {
     void testAddObjectsAt();
 };
 
+class TestGameRefListObserver : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestGameRefNullPredicate : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -78,6 +103,13 @@ class TestGameRefSortPredicate : public CxxTest::TestSuite {
 class TestGameRefTypeAdaptor : public CxxTest::TestSuite {
  public:
     void testIt();
+};
+
+class TestGameRefUserList : public CxxTest::TestSuite {
+ public:
+    void testMakeReferenceItem();
+    void testAdd();
+    void testAddList();
 };
 
 #endif

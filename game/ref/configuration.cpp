@@ -1,5 +1,6 @@
 /**
   *  \file game/ref/configuration.cpp
+  *  \brief Reference List Configuration
   */
 
 #include "game/ref/configuration.hpp"
@@ -34,14 +35,14 @@ const game::ref::ConfigurationSelection game::ref::SEARCH = {
     &UserConfiguration::Sort_Search_Secondary
 };
 
-game::ref::SortPredicate&
+const game::ref::SortPredicate&
 game::ref::createSortPredicate(int config, Session& session, afl::base::Deleter& del)
 {
     // ex GObjectList::postprocessUser (sort-of)
-    Root* pRoot = session.getRoot().get();
-    Game* pGame = session.getGame().get();
-    game::spec::ShipList* pShipList = session.getShipList().get();
-    Turn* pTurn = (pGame != 0 ? pGame->getViewpointTurn().get() : 0);
+    const Root* pRoot = session.getRoot().get();
+    const Game* pGame = session.getGame().get();
+    const game::spec::ShipList* pShipList = session.getShipList().get();
+    const Turn* pTurn = (pGame != 0 ? pGame->getViewpointTurn().get() : 0);
 
     switch (config) {
      case ConfigSortById:
@@ -83,7 +84,7 @@ game::ref::createSortPredicate(int config, Session& session, afl::base::Deleter&
         }
         break;
 
-     case ConfigSortByLocation:
+     case ConfigSortByPosition:
         if (pTurn != 0) {
             return del.addNew(new SortBy::Position(pTurn->universe(), session.translator()));
         }
@@ -123,12 +124,12 @@ game::ref::createSortPredicate(int config, Session& session, afl::base::Deleter&
     return del.addNew(new NullPredicate());
 }
 
-game::ref::SortPredicate&
+const game::ref::SortPredicate&
 game::ref::createSortPredicate(const ConfigurationSelection& sel, Session& session, afl::base::Deleter& del)
 {
     if (Root* pRoot = session.getRoot().get()) {
-        SortPredicate& first  = createSortPredicate(pRoot->userConfiguration()[*sel.primary](), session, del);
-        SortPredicate& second = createSortPredicate(pRoot->userConfiguration()[*sel.secondary](), session, del);
+        const SortPredicate& first  = createSortPredicate(pRoot->userConfiguration()[*sel.primary](), session, del);
+        const SortPredicate& second = createSortPredicate(pRoot->userConfiguration()[*sel.secondary](), session, del);
         return del.addNew(new SortPredicate::CombinedPredicate(first, second));
     } else {
         return createSortPredicate(ConfigSortById, session, del);

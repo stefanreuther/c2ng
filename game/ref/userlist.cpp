@@ -1,5 +1,6 @@
 /**
   *  \file game/ref/userlist.cpp
+  *  \brief Class game::ref::UserList
   */
 
 #include "game/ref/userlist.hpp"
