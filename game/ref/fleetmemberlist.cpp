@@ -104,16 +104,15 @@ game::ref::FleetMemberList::empty() const
     return m_items.empty();
 }
 
-bool
-game::ref::FleetMemberList::find(Reference ref, size_t& pos) const
+afl::base::Optional<size_t>
+game::ref::FleetMemberList::find(Reference ref) const
 {
     for (size_t i = 0, n = m_items.size(); i < n; ++i) {
         if (ref == m_items[i].reference) {
-            pos = i;
-            return true;
+            return i;
         }
     }
-    return false;
+    return afl::base::Nothing;
 }
 
 void

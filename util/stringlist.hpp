@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <utility>
+#include "afl/base/optional.hpp"
 #include "afl/string/string.hpp"
 
 namespace util {
@@ -55,11 +56,11 @@ namespace util {
         bool get(size_t index, int32_t& key, String_t& s) const;
 
         /** Find key.
-            \param [in]  key    Key to find
-            \param [out] index  Found index
+            \param key    Key to find
+            \return Found index, if any
             \retval true Key found; index has been set
             \retval false Key not found; index unchanged */
-        bool find(int32_t key, size_t& index) const;
+        afl::base::Optional<size_t> find(int32_t key) const;
 
      private:
         typedef std::pair<int32_t, String_t> Element_t;

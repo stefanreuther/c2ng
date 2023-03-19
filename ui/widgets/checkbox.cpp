@@ -49,7 +49,7 @@ ui::widgets::Checkbox::onClick()
     // ex UICheckbox::click
     // Find next index
     size_t index;
-    if (m_imageMap.find(m_value.get(), index) && index+1 < m_imageMap.size()) {
+    if (m_imageMap.find(m_value.get()).get(index) && index+1 < m_imageMap.size()) {
         ++index;
     } else {
         index = 0;
@@ -76,7 +76,7 @@ ui::widgets::Checkbox::updateImage()
     size_t index;
     int32_t value;
     String_t image;
-    if (m_imageMap.find(m_value.get(), index) && m_imageMap.get(index, value, image)) {
+    if (m_imageMap.find(m_value.get()).get(index) && m_imageMap.get(index, value, image)) {
         setImage(image);
     }
 }

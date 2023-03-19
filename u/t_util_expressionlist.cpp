@@ -18,7 +18,7 @@ TestUtilExpressionList::testAccess()
     TS_ASSERT(testee.empty());
     TS_ASSERT_EQUALS(testee.size(), 0U);
     TS_ASSERT(testee.get(0) == 0);
-    TS_ASSERT(!testee.findIndexForValue("v", pos));
+    TS_ASSERT(!testee.findIndexForValue("v").get(pos));
 
     // Add some values
     testee.pushBackNew(new util::ExpressionList::Item("n1", "[f1]", "v1"));
@@ -36,14 +36,14 @@ TestUtilExpressionList::testAccess()
     TS_ASSERT_EQUALS(testee.get(0)->flags, "[f1]");
     TS_ASSERT_EQUALS(testee.get(0)->value, "v1");
 
-    TS_ASSERT(testee.findIndexForValue("v", pos));
+    TS_ASSERT(testee.findIndexForValue("v").get(pos));
     TS_ASSERT_EQUALS(pos, 2U);
 
     // Move to front
     testee.moveToFront(2);
     TS_ASSERT_EQUALS(testee.size(), 4U);
     TS_ASSERT_EQUALS(testee.get(0)->name, "n");
-    TS_ASSERT(testee.findIndexForValue("v", pos));
+    TS_ASSERT(testee.findIndexForValue("v").get(pos));
     TS_ASSERT_EQUALS(pos, 0U);
 
     // Clear
@@ -51,7 +51,7 @@ TestUtilExpressionList::testAccess()
     TS_ASSERT(testee.empty());
     TS_ASSERT_EQUALS(testee.size(), 0U);
     TS_ASSERT(testee.get(0) == 0);
-    TS_ASSERT(!testee.findIndexForValue("v", pos));
+    TS_ASSERT(!testee.findIndexForValue("v").get(pos));
 }
 
 /** Test LRU behaviour. */

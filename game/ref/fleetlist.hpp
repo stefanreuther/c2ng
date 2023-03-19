@@ -83,11 +83,9 @@ namespace game { namespace ref {
         bool empty() const;
 
         /** Find a reference.
-            \param [in]  ref Reference to find
-            \param [out] pos Found index
-            \retval true reference found; pos has been set
-            \retval false reference not found */
-        bool find(Reference ref, size_t& pos) const;
+            \param ref Reference to find
+            \return Found index if any */
+        afl::base::Optional<size_t> find(Reference ref) const;
 
         /** Find initial selection.
             Used to place initial cursor.

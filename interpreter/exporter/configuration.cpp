@@ -80,7 +80,7 @@ interpreter::exporter::Configuration::setCharsetIndex(util::CharsetFactory::Inde
 void
 interpreter::exporter::Configuration::setCharsetByName(const String_t& name, afl::string::Translator& tx)
 {
-    if (!util::CharsetFactory().findIndexByKey(name, m_charsetIndex)) {
+    if (!util::CharsetFactory().findIndexByKey(name).get(m_charsetIndex)) {
         throw std::runtime_error(tx("the specified character set is not known"));
     }
 }

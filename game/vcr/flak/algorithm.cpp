@@ -932,24 +932,23 @@ game::vcr::flak::Algorithm::isFleetAlive(size_t number) const
  *  Result Access
  */
 
-bool
-game::vcr::flak::Algorithm::findCaptor(size_t shipIndex, util::RandomNumberGenerator& rng, size_t& captorIndex) const
+afl::base::Optional<size_t>
+game::vcr::flak::Algorithm::findCaptor(size_t shipIndex, util::RandomNumberGenerator& rng) const
 {
     // ex FlakBattle::findCaptor
     if (shipIndex >= m_ships.size()) {
-        return false;
+        return afl::base::Nothing;
     }
     const Ship& victim = *m_ships[shipIndex];
 
     /* captor still alive? */
     if (victim.status.lastHitBy == 0) {
-        return false;
+        return afl::base::Nothing;
     }
     if (victim.status.lastHitBy->isAlive()) {
         for (size_t i = 0; i < getNumShips(); ++i) {
             if (victim.status.lastHitBy == m_ships[i]) {
-                captorIndex = i;
-                return true;
+                return i;
             }
         }
     }
@@ -975,8 +974,7 @@ game::vcr::flak::Algorithm::findCaptor(size_t shipIndex, util::RandomNumberGener
             const Ship& sh = *m_ships[i];
             if (sh.isAlive() && sh.data.player == player) {
                 if (--pick < 0) {
-                    captorIndex = i;
-                    return true;
+                    return i;
                 }
             }
         }
@@ -990,8 +988,7 @@ game::vcr::flak::Algorithm::findCaptor(size_t shipIndex, util::RandomNumberGener
             const Ship& sh = *m_ships[i];
             if (sh.isAlive() && sh.data.player == player) {
                 if (--pick < 0) {
-                    captorIndex = i;
-                    return true;
+                    return i;
                 }
             }
         }
@@ -1004,15 +1001,14 @@ game::vcr::flak::Algorithm::findCaptor(size_t shipIndex, util::RandomNumberGener
             const Ship& sh = *m_ships[i];
             if (sh.isAlive()) {
                 if (--pick < 0) {
-                    captorIndex = i;
-                    return true;
+                    return i;
                 }
             }
         }
     }
 
     /* nobody hearing me? */
-    return false;
+    return afl::base::Nothing;
 }
 
 void
@@ -1049,7 +1045,7 @@ game::vcr::flak::Algorithm::findEndingStatus(size_t shipIndex, const Environment
         } else {
             // Captured or died
             size_t captorIndex;
-            if (findCaptor(shipIndex, rng, captorIndex)) {
+            if (findCaptor(shipIndex, rng).get(captorIndex)) {
                 // Captor exists
                 int captorPlayer = m_ships[captorIndex]->data.player;
                 int limit = (env.getPlayerRaceNumber(in.data.player) == 2 && env.getPlayerRaceNumber(captorPlayer) == 2) ? 150 : 99;

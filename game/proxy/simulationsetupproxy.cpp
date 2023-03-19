@@ -595,7 +595,7 @@ game::proxy::SimulationSetupProxy::Trampoline::sortShips(SortOrder order)
 
     // If we were observing an object, re-observe that
     Slot_t newPosition;
-    if (observedObject != 0 && m_sim->setup().findIndex(observedObject, newPosition)) {
+    if (observedObject != 0 && m_sim->setup().findIndex(observedObject).get(newPosition)) {
         m_observedSlot = newPosition;
     }
 

@@ -1052,8 +1052,7 @@ void
 client::dialogs::VisualScanDialog::Window::browse(bool forward, bool marked)
 {
     size_t limit = m_userList.size();
-    size_t pos = 0;
-    m_userList.find(m_currentReference, pos);
+    size_t pos = m_userList.find(m_currentReference).orElse(0);
     for (size_t i = 0; i < limit; ++i) {
         if (forward) {
             ++pos;
@@ -1322,9 +1321,9 @@ client::dialogs::VisualScanDialog::Window::onListChange(const game::ref::UserLis
 {
     size_t pos;
     Reference ref = m_currentReference;
-    if (!ref.isSet() || !list.find(m_currentReference, pos)) {
+    if (!ref.isSet() || !list.find(m_currentReference).get(pos)) {
         Reference initialShip(Reference::Ship, m_initialShipId);
-        if (list.find(initialShip, pos)) {
+        if (list.find(initialShip).get(pos)) {
             ref = initialShip;
         } else {
             for (size_t i = 0; i < list.size(); ++i) {

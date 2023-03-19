@@ -75,13 +75,13 @@ TestGameRefFleetList::testBasic()
     // Verify find: unsuccessfully
     {
         size_t pos = 9999;
-        TS_ASSERT_EQUALS(testee.find(Reference(Reference::Ship, 66), pos), false);
+        TS_ASSERT_EQUALS(testee.find(Reference(Reference::Ship, 66)).get(pos), false);
     }
 
     // Verify find: successfully
     {
         size_t pos = 9999;
-        TS_ASSERT_EQUALS(testee.find(Reference(Reference::Ship, 99), pos), true);
+        TS_ASSERT_EQUALS(testee.find(Reference(Reference::Ship, 99)).get(pos), true);
         TS_ASSERT_EQUALS(pos, 1U);
     }
 

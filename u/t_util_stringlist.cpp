@@ -42,9 +42,9 @@ TestUtilStringList::testIt()
 
     // Verify find
     size_t n;
-    TS_ASSERT(!testee.find(0, n));
-    TS_ASSERT(!testee.find(1, n));
-    TS_ASSERT(testee.find(42, n));
+    TS_ASSERT(!testee.find(0).get(n));
+    TS_ASSERT(!testee.find(1).get(n));
+    TS_ASSERT(testee.find(42).get(n));
     TS_ASSERT_EQUALS(n, 1U);
 
     // Add some more
@@ -53,7 +53,7 @@ TestUtilStringList::testIt()
     testee.add(4, "z");         // 4
     testee.add(1, "a");         // 5
     testee.add(5, "b");         // 6
-    TS_ASSERT(testee.find(1, n));
+    TS_ASSERT(testee.find(1).get(n));
     TS_ASSERT_EQUALS(n, 3U);    // first instance of 1
 }
 

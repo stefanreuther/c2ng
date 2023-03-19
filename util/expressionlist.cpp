@@ -40,20 +40,19 @@ util::ExpressionList::get(size_t index) const
 }
 
 
-bool
-util::ExpressionList::findIndexForValue(const String_t& value, size_t& index) const
+afl::base::Optional<size_t>
+util::ExpressionList::findIndexForValue(const String_t& value) const
 {
     // ex LRUList::findValue
     size_t i = 0;
     while (i < m_items.size()) {
         if (m_items[i]->value == value) {
-            index = i;
-            return true;
+            return i;
         }
 
         ++i;
     }
-    return false;
+    return afl::base::Nothing;
 }
 
 void

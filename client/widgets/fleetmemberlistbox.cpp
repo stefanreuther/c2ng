@@ -39,7 +39,7 @@ void
 client::widgets::FleetMemberListbox::setCurrentFleetMember(game::Id_t shipId)
 {
     size_t pos;
-    if (m_content.find(Reference(Reference::Ship, shipId), pos)) {
+    if (m_content.find(Reference(Reference::Ship, shipId)).get(pos)) {
         setCurrentItem(pos);
     }
 }

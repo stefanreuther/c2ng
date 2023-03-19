@@ -65,7 +65,7 @@ const game::map::ShipLocationInfo*
 client::tiles::HistoryAdaptor::getCurrentTurnInformation() const
 {
     size_t pos;
-    if (findTurnNumber(m_locations, m_turnNumber, pos)) {
+    if (findTurnNumber(m_locations, m_turnNumber).get(pos)) {
         return &m_locations[pos];
     } else {
         return 0;
@@ -80,8 +80,7 @@ client::tiles::HistoryAdaptor::onChange(const game::proxy::HistoryShipProxy::Sta
         // Proxy has provided a new turn number
     } else {
         // Proxy did not provide a turn number. If ship changed, or current turn no longer valid, pick one.
-        size_t pos;
-        if (m_shipId != st.shipId || !findTurnNumber(st.locations, m_turnNumber, pos)) {
+        if (m_shipId != st.shipId || !findTurnNumber(st.locations, m_turnNumber).isValid()) {
             m_turnNumber = pickTurnNumber(st.locations);
         }
     }
@@ -94,14 +93,13 @@ client::tiles::HistoryAdaptor::onChange(const game::proxy::HistoryShipProxy::Sta
     sig_turnChange.raise();
 }
 
-bool
-client::tiles::findTurnNumber(const game::map::ShipLocationInfos_t& infos, int turnNumber, size_t& pos)
+afl::base::Optional<size_t>
+client::tiles::findTurnNumber(const game::map::ShipLocationInfos_t& infos, int turnNumber)
 {
     for (size_t i = 0, n = infos.size(); i < n; ++i) {
         if (infos[i].turnNumber == turnNumber) {
-            pos = i;
-            return true;
+            return i;
         }
     }
-    return false;
+    return afl::base::Nothing;
 }

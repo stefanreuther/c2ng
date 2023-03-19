@@ -47,10 +47,9 @@ namespace game { namespace interface {
         Message* findMessageByProcessId(uint32_t processId) const;
 
         /** Find message index by process Id.
-            \param [in]  processId Process ID
-            \param [out] index Index, if any
-            \return true on success */
-        bool findIndexByProcessId(uint32_t processId, size_t& index) const;
+            \param processId Process ID
+            \return Index, if any */
+        afl::base::Optional<size_t> findIndexByProcessId(uint32_t processId) const;
 
         /** Get message by index.
             \param index Index [0,getNumMessages())
@@ -102,7 +101,7 @@ namespace game { namespace interface {
         virtual void receiveMessageData(size_t index, game::parser::InformationConsumer& consumer, const TeamSettings& teamSettings, bool onRequest, afl::charset::Charset& cs);
 
      private:
-        bool findMessage(ProcessAssociation_t assoc, size_t& index) const;
+        afl::base::Optional<size_t> findMessage(ProcessAssociation_t assoc) const;
 
         afl::container::PtrVector<Message> m_messages;
         interpreter::ProcessList& m_processList;

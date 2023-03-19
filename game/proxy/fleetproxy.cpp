@@ -156,18 +156,18 @@ game::proxy::FleetProxy::Trampoline::findSuggestedMember(Id_t currentShipId, Id_
 {
     // If ship is part of this fleet, keep it
     size_t pos;
-    if (newList.find(Reference(Reference::Ship, currentShipId), pos)) {
+    if (newList.find(Reference(Reference::Ship, currentShipId)).get(pos)) {
         return currentShipId;
     }
 
     // If ship was part of the previous reported list, and the ship now in its place is part of the fleet, use that.
     // This is the common case of deleting a single ship.
-    if (m_lastList.find(Reference(Reference::Ship, currentShipId), pos)) {
+    if (m_lastList.find(Reference(Reference::Ship, currentShipId)).get(pos)) {
         if (pos >= newList.size() && pos > 0) {
             --pos;
         }
         if (const FleetMemberList::Item* p = newList.get(pos)) {
-            if (m_lastList.find(p->reference, pos)) {
+            if (m_lastList.find(p->reference).isValid()) {
                 return p->reference.getId();
             }
         }

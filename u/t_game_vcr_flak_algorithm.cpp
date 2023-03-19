@@ -976,7 +976,7 @@ TestGameVcrFlakAlgorithm::testSetupCapture()
 
     // Determine captors
     size_t captorIndex;
-    TS_ASSERT_EQUALS(algo.findCaptor(0, rng, captorIndex), true);
+    TS_ASSERT_EQUALS(algo.findCaptor(0, rng).get(captorIndex), true);
     TS_ASSERT_EQUALS(captorIndex, 1U);
 }
 
@@ -1075,7 +1075,7 @@ TestGameVcrFlakAlgorithm::testSetupCaptureDeathRay()
 
     // Determine captors
     size_t captorIndex;
-    TS_ASSERT_EQUALS(algo.findCaptor(0, rng, captorIndex), true);
+    TS_ASSERT_EQUALS(algo.findCaptor(0, rng).get(captorIndex), true);
     TS_ASSERT_EQUALS(captorIndex, 1U);
 }
 

@@ -64,7 +64,7 @@ ui::widgets::ComboBox::draw(gfx::Canvas& can)
     int32_t key;
     String_t label;
     size_t index;
-    if (m_list.find(value().get(), index) && m_list.get(index, key, label)) {
+    if (m_list.find(value().get()).get(index) && m_list.get(index, key, label)) {
         removeAnnotation(label);
     } else {
         label = afl::string::Format("%d", value().get());

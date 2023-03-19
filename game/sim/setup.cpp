@@ -227,16 +227,15 @@ game::sim::Setup::getObject(Slot_t slot)
 }
 
 // Find slot, given an object.
-bool
-game::sim::Setup::findIndex(const Object* obj, Slot_t& result) const
+afl::base::Optional<game::sim::Setup::Slot_t>
+game::sim::Setup::findIndex(const Object* obj) const
 {
     if (obj != 0 && obj == m_planet.get()) {
-        result = m_ships.size();
-        return true;
+        return m_ships.size();
     } else if (const Ship* ship = dynamic_cast<const Ship*>(obj)) {
-        return findIndex(ship, result);
+        return findIndex(ship);
     } else {
-        return false;
+        return afl::base::Nothing;
     }
 }
 
@@ -287,31 +286,29 @@ game::sim::Setup::swapShips(Slot_t a, Slot_t b)
 }
 
 // Find ship slot, given an object.
-bool
-game::sim::Setup::findIndex(const Ship* ship, Slot_t& result) const
+afl::base::Optional<game::sim::Setup::Slot_t>
+game::sim::Setup::findIndex(const Ship* ship) const
 {
     // ex GSimState::getIndexOf
     for (Slot_t i = 0, n = m_ships.size(); i < n; ++i) {
         if (m_ships[i] == ship) {
-            result = i;
-            return true;
+            return i;
         }
     }
-    return false;
+    return afl::base::Nothing;
 }
 
 // Find ship slot, given an Id.
-bool
-game::sim::Setup::findShipSlotById(Id_t id, Slot_t& result) const
+afl::base::Optional<game::sim::Setup::Slot_t>
+game::sim::Setup::findShipSlotById(Id_t id) const
 {
     // ex GSimState::getIndexOf
     for (Slot_t i = 0, n = m_ships.size(); i < n; ++i) {
         if (m_ships[i]->getId() == id) {
-            result = i;
-            return true;
+            return i;
         }
     }
-    return false;
+    return afl::base::Nothing;
 }
 
 // Find ship, given an Id.
@@ -320,7 +317,7 @@ game::sim::Setup::findShipById(Id_t id)
 {
     // ex GSimState::getShipById
     Slot_t slot;
-    if (findShipSlotById(id, slot)) {
+    if (findShipSlotById(id).get(slot)) {
         return getShip(slot);
     } else {
         return 0;
@@ -341,9 +338,8 @@ game::sim::Setup::findUnusedShipId(Id_t firstToCheck, const GameInterface* gi) c
     // ex GSimState::getFreeId, ccsim.pas:NewId
     // \change add firstToCheck to bring the "add N ships" operation down from O(n**3)
     // \change no limit to the maximum setup size
-    Slot_t tmp;
     Id_t i = firstToCheck;
-    while ((gi != 0 && gi->hasShip(i)) || findShipSlotById(i, tmp)) {
+    while ((gi != 0 && gi->hasShip(i)) || findShipSlotById(i).isValid()) {
         ++i;
     }
     return i;

@@ -38,7 +38,7 @@ server::play::OutMessagePacker::buildValue() const
     game::Game& g = game::actions::mustHaveGame(m_session);
     game::msg::Outbox& outbox = g.currentTurn().outbox();
     size_t index = 0;
-    if (outbox.findMessageById(m_id, index)) {
+    if (outbox.findMessageById(m_id).get(index)) {
         afl::base::Ref<afl::data::Hash> hv = afl::data::Hash::create();
         addValueNew(*hv, makeStringValue(outbox.getMessageRawText(index)), "TEXT");
         addValueNew(*hv, packPlayerSet(outbox.getMessageReceivers(index)), "TO");

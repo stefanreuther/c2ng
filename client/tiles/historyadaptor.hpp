@@ -5,6 +5,7 @@
 #ifndef C2NG_CLIENT_TILES_HISTORYADAPTOR_HPP
 #define C2NG_CLIENT_TILES_HISTORYADAPTOR_HPP
 
+#include "afl/base/optional.hpp"
 #include "afl/base/signal.hpp"
 #include "afl/base/signalconnection.hpp"
 #include "game/proxy/historyshipproxy.hpp"
@@ -77,11 +78,10 @@ namespace client { namespace tiles {
     };
 
     /** Find a turn number in a ShipLocationInfos_t.
-        @param [in]  infos      Data to search in
-        @param [in]  turnNumber Turn number
-        @param [out] pos        Position such that infos[pos].turnNumber==turnNumber
-        @return true on success, false if not found (pos not updated) */
-    bool findTurnNumber(const game::map::ShipLocationInfos_t& infos, int turnNumber, size_t& pos);
+        @param infos      Data to search in
+        @param turnNumber Turn number
+        @return Position such that infos[pos].turnNumber==turnNumber, if any */
+    afl::base::Optional<size_t> findTurnNumber(const game::map::ShipLocationInfos_t& infos, int turnNumber);
 
 } }
 

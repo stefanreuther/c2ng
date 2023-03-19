@@ -27,7 +27,7 @@ server::play::OutMessageCommandHandler::processCommand(const String_t& cmd, inte
 
     if (cmd == "settext") {
         args.checkArgumentCount(1);
-        if (!outbox.findMessageById(m_id, index)) {
+        if (!outbox.findMessageById(m_id).get(index)) {
             throw std::runtime_error(ITEM_NOT_FOUND);
         }
 
@@ -38,7 +38,7 @@ server::play::OutMessageCommandHandler::processCommand(const String_t& cmd, inte
         }
     } else if (cmd == "setreceivers") {
         args.checkArgumentCount(1);
-        if (!outbox.findMessageById(m_id, index)) {
+        if (!outbox.findMessageById(m_id).get(index)) {
             throw std::runtime_error(ITEM_NOT_FOUND);
         }
 
@@ -49,7 +49,7 @@ server::play::OutMessageCommandHandler::processCommand(const String_t& cmd, inte
         }
     } else if (cmd == "delete") {
         args.checkArgumentCount(0);
-        if (outbox.findMessageById(m_id, index)) {
+        if (outbox.findMessageById(m_id).get(index)) {
             outbox.deleteMessage(index);
             objs.addNew(new OutMessageIndexPacker(m_session));
             objs.addNew(new MainPacker(m_session));

@@ -42,7 +42,7 @@ client::widgets::ReferenceListbox::setContent(const game::ref::UserList& list)
     // Find new position
     size_t newPos = 0;
     if (const Item_t* pItem = getItem(getCurrentItem())) {
-        list.find(pItem->reference, newPos);
+        newPos = list.find(pItem->reference).orElse(0);
     }
 
     // Update
@@ -55,7 +55,7 @@ void
 client::widgets::ReferenceListbox::setCurrentReference(game::Reference ref)
 {
     size_t pos = 0;
-    if (m_content.find(ref, pos)) {
+    if (m_content.find(ref).get(pos)) {
         setCurrentItem(pos);
     }
 }

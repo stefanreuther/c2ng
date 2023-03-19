@@ -18,7 +18,7 @@ namespace {
               m_currentMessage(0)
             {
                 if (const uint32_t* p = processId.get()) {
-                    m_session.notifications().findIndexByProcessId(*p, m_currentMessage);
+                    m_currentMessage = m_session.notifications().findIndexByProcessId(*p).orElse(0);
                 }
             }
 

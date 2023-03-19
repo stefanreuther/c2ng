@@ -98,9 +98,9 @@ namespace {
        However, a search result may contain Starbase references which we want to treat identically to Planet. */
     bool findObject(const game::ref::UserList& list, game::Reference currentObject, size_t& newPos)
     {
-        return list.find(currentObject, newPos)
+        return list.find(currentObject).get(newPos)
             || (currentObject.getType() == game::Reference::Planet
-                && list.find(game::Reference(game::Reference::Starbase, currentObject.getId()), newPos));
+                && list.find(game::Reference(game::Reference::Starbase, currentObject.getId())).get(newPos));
     }
 
 

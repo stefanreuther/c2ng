@@ -122,7 +122,7 @@ Dialog::updateData()
         } else {
             util::CharsetFactory::Index_t index;
             util::CharsetFactory f;
-            if (f.findIndexByKey(*p, index)) {
+            if (f.findIndexByKey(*p).get(index)) {
                 name = f.getCharsetName(index, m_translator);
             } else {
                 name = *p;
@@ -145,8 +145,7 @@ Dialog::onOptionClick(int id)
      case ID_CHARSET: {
         // Convert name to proper index
         using util::CharsetFactory;
-        CharsetFactory::Index_t index = CharsetFactory::LATIN1_INDEX;
-        CharsetFactory().findIndexByKey(m_state.charsetId.orElse(""), index);
+        const CharsetFactory::Index_t index = CharsetFactory().findIndexByKey(m_state.charsetId.orElse("")).orElse(CharsetFactory::LATIN1_INDEX);
 
         // List dialog uses int32_t
         int32_t i = int32_t(index);

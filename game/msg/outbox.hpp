@@ -5,6 +5,7 @@
 #ifndef C2NG_GAME_MSG_OUTBOX_HPP
 #define C2NG_GAME_MSG_OUTBOX_HPP
 
+#include "afl/base/optional.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "game/msg/mailbox.hpp"
 #include "game/types.hpp"
@@ -111,11 +112,9 @@ namespace game { namespace msg {
         void deleteMessage(size_t index);
 
         /** Find message, given a Id.
-            \param [in] id Message Id
-            \param [out] index Index
-            \retval true message found; index has been set
-            \retval false message not found */
-        bool findMessageById(Id_t id, size_t& index) const;
+            \param id Message Id
+            \return Index if found */
+        afl::base::Optional<size_t> findMessageById(Id_t id) const;
 
         /** Add a new message (send).
             \param sender sender

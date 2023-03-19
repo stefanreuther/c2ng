@@ -220,7 +220,7 @@ ui::widgets::StringListbox::setCurrentKey(int32_t key)
     // ex UIStandardListbox::scrollToKey
     // FIXME: PCC2 has a way to mark items inaccessible
     size_t pos;
-    if (m_content.find(key, pos)) {
+    if (m_content.find(key).get(pos)) {
         setCurrentItem(pos);
     }
 }

@@ -260,8 +260,7 @@ game::config::ExpressionLists::pack(Items_t& out, Area a, afl::string::Translato
 void
 game::config::ExpressionLists::pushRecent(Area a, String_t flags, String_t expr)
 {
-    size_t predefIndex;
-    if (!get(a, Predefined)->findIndexForValue(expr, predefIndex)) {
+    if (!get(a, Predefined)->findIndexForValue(expr).isValid()) {
         get(a, Recent)->pushFrontNew(new util::ExpressionList::Item(expr, flags, expr), LRU_LIMIT);
     }
 }

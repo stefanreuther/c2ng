@@ -104,11 +104,11 @@ TestGameMsgOutbox::testAddDelete()
     TS_ASSERT_DIFFERS(b, 0);
     TS_ASSERT_DIFFERS(c, 0);
 
-    TS_ASSERT(testee.findMessageById(a, tmp));
+    TS_ASSERT(testee.findMessageById(a).get(tmp));
     TS_ASSERT_EQUALS(tmp, 0U);
-    TS_ASSERT(testee.findMessageById(b, tmp));
+    TS_ASSERT(testee.findMessageById(b).get(tmp));
     TS_ASSERT_EQUALS(tmp, 1U);
-    TS_ASSERT(testee.findMessageById(c, tmp));
+    TS_ASSERT(testee.findMessageById(c).get(tmp));
     TS_ASSERT_EQUALS(tmp, 2U);
 
     TS_ASSERT_EQUALS(testee.getMessageId(0), a);
@@ -123,12 +123,12 @@ TestGameMsgOutbox::testAddDelete()
     TS_ASSERT_DIFFERS(d, b);
     TS_ASSERT_DIFFERS(d, c);
 
-    TS_ASSERT(testee.findMessageById(a, tmp));
+    TS_ASSERT(testee.findMessageById(a).get(tmp));
     TS_ASSERT_EQUALS(tmp, 0U);
-    TS_ASSERT(!testee.findMessageById(b, tmp));
-    TS_ASSERT(testee.findMessageById(c, tmp));
+    TS_ASSERT(!testee.findMessageById(b).get(tmp));
+    TS_ASSERT(testee.findMessageById(c).get(tmp));
     TS_ASSERT_EQUALS(tmp, 1U);
-    TS_ASSERT(testee.findMessageById(d, tmp));
+    TS_ASSERT(testee.findMessageById(d).get(tmp));
     TS_ASSERT_EQUALS(tmp, 2U);
 
     TS_ASSERT_EQUALS(testee.getMessageId(0), a);

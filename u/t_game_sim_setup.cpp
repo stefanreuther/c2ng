@@ -63,12 +63,12 @@ TestGameSimSetup::testObj()
 
     // Find
     game::sim::Setup::Slot_t slot;
-    TS_ASSERT(testee.findIndex(s1, slot)); TS_ASSERT_EQUALS(slot, 0U);
-    TS_ASSERT(testee.findIndex(s2, slot)); TS_ASSERT_EQUALS(slot, 1U);
+    TS_ASSERT(testee.findIndex(s1).get(slot)); TS_ASSERT_EQUALS(slot, 0U);
+    TS_ASSERT(testee.findIndex(s2).get(slot)); TS_ASSERT_EQUALS(slot, 1U);
 
-    TS_ASSERT(testee.findIndex((Object*) s1, slot)); TS_ASSERT_EQUALS(slot, 0U);
-    TS_ASSERT(testee.findIndex((Object*) s2, slot)); TS_ASSERT_EQUALS(slot, 1U);
-    TS_ASSERT(testee.findIndex(p, slot)); TS_ASSERT_EQUALS(slot, 2U);
+    TS_ASSERT(testee.findIndex((Object*) s1).get(slot)); TS_ASSERT_EQUALS(slot, 0U);
+    TS_ASSERT(testee.findIndex((Object*) s2).get(slot)); TS_ASSERT_EQUALS(slot, 1U);
+    TS_ASSERT(testee.findIndex(p).get(slot)); TS_ASSERT_EQUALS(slot, 2U);
 
     // Copy
     game::sim::Setup a(testee);
@@ -122,17 +122,17 @@ TestGameSimSetup::testShip()
 
     // Find
     game::sim::Setup::Slot_t slot = 0;
-    TS_ASSERT(testee.findIndex(s5, slot));
+    TS_ASSERT(testee.findIndex(s5).get(slot));
     TS_ASSERT_EQUALS(slot, 3U);
-    TS_ASSERT(!testee.findIndex(&other, slot));
-    TS_ASSERT(!testee.findIndex((Ship*) 0, slot));
-    TS_ASSERT(!testee.findIndex((Object*) 0, slot));
+    TS_ASSERT(!testee.findIndex(&other).get(slot));
+    TS_ASSERT(!testee.findIndex((Ship*) 0).get(slot));
+    TS_ASSERT(!testee.findIndex((Object*) 0).get(slot));
 
-    TS_ASSERT(testee.findShipSlotById(4, slot));
+    TS_ASSERT(testee.findShipSlotById(4).get(slot));
     TS_ASSERT_EQUALS(slot, 0U);
-    TS_ASSERT(testee.findShipSlotById(2, slot));
+    TS_ASSERT(testee.findShipSlotById(2).get(slot));
     TS_ASSERT_EQUALS(slot, 2U);
-    TS_ASSERT(!testee.findShipSlotById(3, slot));
+    TS_ASSERT(!testee.findShipSlotById(3).get(slot));
 
     TS_ASSERT_EQUALS(testee.findShipById(1), s1);
     TS_ASSERT_EQUALS(testee.findShipById(2), s2);

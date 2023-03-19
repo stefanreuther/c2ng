@@ -374,9 +374,8 @@ client::map::Location::getNumObjects() const
 size_t
 client::map::Location::getCurrentObjectIndex() const
 {
-    size_t n = 0;
-    if (m_pState->hasFocusedObject() && m_objectList.find(m_focusedObject, n)) {
-        return n;
+    if (m_pState->hasFocusedObject()) {
+        return m_objectList.find(m_focusedObject).orElse(0);
     } else {
         return 0;
     }
@@ -526,8 +525,7 @@ client::map::Location::verifyFocusedObject()
 {
     // Cancel focused object if it is not in the list
     if (m_focusedObject.isSet()) {
-        size_t pos;
-        if (!m_objectList.find(m_focusedObject, pos)) {
+        if (!m_objectList.find(m_focusedObject).isValid()) {
             afl::string::NullTranslator tx;
             m_log.write(afl::sys::Log::Trace, LOG_NAME, afl::string::Format("Unit not on current place: %s", m_focusedObject.toString(tx)));
             m_focusedObject = game::Reference();
@@ -536,8 +534,7 @@ client::map::Location::verifyFocusedObject()
 
     // If we have a list, we should have a focused object; focus on preferred or first possible.
     if (!m_focusedObject.isSet() && m_preferredObject.isSet()) {
-        size_t pos;
-        if (m_objectList.find(m_preferredObject, pos)) {
+        if (m_objectList.find(m_preferredObject).isValid()) {
             m_focusedObject = m_preferredObject;
         }
     }

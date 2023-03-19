@@ -24,7 +24,7 @@ TestUtilCharsetFactory::testIteration()
 
         // Reverse-lookup
         util::CharsetFactory::Index_t other = 0;
-        TS_ASSERT(testee.findIndexByKey(testee.getCharsetKey(i), other));
+        TS_ASSERT(testee.findIndexByKey(testee.getCharsetKey(i)).get(other));
         TS_ASSERT_EQUALS(other, i);
 
         // Creation
@@ -46,24 +46,24 @@ TestUtilCharsetFactory::testNames()
 
     // UTF-8, variants
     result = 99;
-    TS_ASSERT(testee.findIndexByKey("utf-8", result));
+    TS_ASSERT(testee.findIndexByKey("utf-8").get(result));
     TS_ASSERT_EQUALS(result, util::CharsetFactory::UNICODE_INDEX);
 
     result = 99;
-    TS_ASSERT(testee.findIndexByKey("UTF-8", result));
+    TS_ASSERT(testee.findIndexByKey("UTF-8").get(result));
     TS_ASSERT_EQUALS(result, util::CharsetFactory::UNICODE_INDEX);
 
     result = 99;
-    TS_ASSERT(testee.findIndexByKey("utf8", result));
+    TS_ASSERT(testee.findIndexByKey("utf8").get(result));
     TS_ASSERT_EQUALS(result, util::CharsetFactory::UNICODE_INDEX);
 
     // Latin-1, variants
     result = 99;
-    TS_ASSERT(testee.findIndexByKey("latin1", result));
+    TS_ASSERT(testee.findIndexByKey("latin1").get(result));
     TS_ASSERT_EQUALS(result, util::CharsetFactory::LATIN1_INDEX);
 
     result = 99;
-    TS_ASSERT(testee.findIndexByKey("ISO-8859-1", result));
+    TS_ASSERT(testee.findIndexByKey("ISO-8859-1").get(result));
     TS_ASSERT_EQUALS(result, util::CharsetFactory::LATIN1_INDEX);
 }
 

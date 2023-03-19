@@ -97,7 +97,7 @@ namespace {
     Statistic* getStatistic(const afl::base::Memory<Statistic>& stats, const Setup& setup, const Object* obj)
     {
         Setup::Slot_t slot;
-        if (setup.findIndex(obj, slot)) {
+        if (setup.findIndex(obj).get(slot)) {
             return stats.at(slot);
         } else {
             return 0;
@@ -2424,7 +2424,7 @@ namespace {
                 }
             } else {
                 Setup::Slot_t slot = 0;
-                if (setup.findShipSlotById(oldObj.getId(), slot)) {
+                if (setup.findShipSlotById(oldObj.getId()).get(slot)) {
                     if (Ship* sh = setup.getShip(slot)) {
                         unpackFlakShip(newObj, *sh);
                     }

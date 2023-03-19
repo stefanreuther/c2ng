@@ -7,6 +7,7 @@
 
 #include <iosfwd>
 #include <vector>
+#include "afl/base/optional.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "game/vcr/flak/definitions.hpp"
 #include "game/vcr/flak/object.hpp"
@@ -123,10 +124,8 @@ namespace game { namespace vcr { namespace flak {
             This function shall be called once for each captured ship; when called multiple times, it might return different results.
             \param [in]     shipIndex     Index to a captured ship
             \param [in,out] rng           Host-side RNG
-            \param [out]    captorIndex   Index to captor
-            \retval true   Captor found, captorIndex has been set
-            \retval false  No captor found */
-        bool findCaptor(size_t shipIndex, util::RandomNumberGenerator& rng, size_t& captorIndex) const;
+            \return Captor, if any found */
+        afl::base::Optional<size_t> findCaptor(size_t shipIndex, util::RandomNumberGenerator& rng) const;
 
         /** Copy result to Object.
             Updates shield/damage/crew/ammo.

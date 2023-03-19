@@ -76,15 +76,14 @@ util::StringList::get(size_t index, int32_t& key, String_t& s) const
     }
 }
 
-bool
-util::StringList::find(int32_t key, size_t& index) const
+afl::base::Optional<size_t>
+util::StringList::find(int32_t key) const
 {
     // ex StringList::getItemByKey, StringList::getItemIndexByKey
     for (size_t i = 0, n = m_data.size(); i < n; ++i) {
         if (m_data[i].first == key) {
-            index = i;
-            return true;
+            return i;
         }
     }
-    return false;
+    return afl::base::Nothing;
 }

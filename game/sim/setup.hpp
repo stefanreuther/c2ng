@@ -145,11 +145,9 @@ namespace game { namespace sim {
         Object* getObject(Slot_t slot);
 
         /** Find slot, given an object.
-            \param [in] obj Object, as obtained from a call on this object
-            \param [out] result Slot number such that getObject(result) == obj
-            \retval true Object was found, \c result has been updated
-            \retval false Object not found */
-        bool findIndex(const Object* obj, Slot_t& result) const;
+            \param obj Object, as obtained from a call on this object
+            \return Slot number such that getObject(result) == obj, if found */
+        afl::base::Optional<Slot_t> findIndex(const Object* obj) const;
 
         /*
          *  Operations on the list of ships
@@ -175,19 +173,14 @@ namespace game { namespace sim {
         void swapShips(Slot_t a, Slot_t b);
 
         /** Find ship slot, given an object.
-            \param [in] ship Ship object, as obtained from a call on this object
-            \param [out] result Slot number such that getShip(result) == ship
-            \retval true Ship was found, \c result has been updated
-            \retval false Ship not found */
-        // FIXME: rename to findShipSlot?
-        bool findIndex(const Ship* ship, Slot_t& result) const;
+            \param ship Ship object, as obtained from a call on this object
+            \return Slot number such that getShip(result) == ship, if any */
+        afl::base::Optional<Slot_t> findIndex(const Ship* ship) const;
 
         /** Find ship slot, given an Id.
-            \param [in] id Ship Id
-            \param [out] result Slot number such that getShip(result)->getId() == id
-            \retval true Ship was found, \c result has been updated
-            \retval false Ship not found */
-        bool findShipSlotById(Id_t id, Slot_t& result) const;
+            \param id Ship Id
+            \return Slot number such that getShip(result)->getId() == id, if found */
+        afl::base::Optional<Slot_t> findShipSlotById(Id_t id) const;
 
         /** Find ship, given an Id.
             \param id Ship Id

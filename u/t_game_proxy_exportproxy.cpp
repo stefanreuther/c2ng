@@ -189,7 +189,7 @@ TestGameProxyExportProxy::testSetCharsetIndex()
 
     // Action: set a character set that is not default
     CharsetFactory::Index_t csx = 0;
-    TS_ASSERT(CharsetFactory().findIndexByKey("koi8r", csx));
+    TS_ASSERT(CharsetFactory().findIndexByKey("koi8r").get(csx));
     testee.setCharsetIndex(csx);
     ind.processQueue();
 

@@ -321,16 +321,15 @@ game::msg::Outbox::deleteMessage(size_t index)
 }
 
 // Find message, given a Id.
-bool
-game::msg::Outbox::findMessageById(Id_t id, size_t& index) const
+afl::base::Optional<size_t>
+game::msg::Outbox::findMessageById(Id_t id) const
 {
     for (size_t i = 0, n = m_messages.size(); i < n; ++i) {
         if (m_messages[i]->id == id) {
-            index = i;
-            return true;
+            return i;
         }
     }
-    return false;
+    return afl::base::Nothing;
 }
 
 // Add a new message (send).

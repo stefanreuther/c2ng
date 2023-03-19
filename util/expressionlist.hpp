@@ -5,6 +5,7 @@
 #ifndef C2NG_UTIL_EXPRESSIONLIST_HPP
 #define C2NG_UTIL_EXPRESSIONLIST_HPP
 
+#include "afl/base/optional.hpp"
 #include "afl/base/types.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "afl/string/string.hpp"
@@ -55,10 +56,9 @@ namespace util {
         const Item* get(size_t index) const;
 
         /** Find value.
-            \param [in]  value Value to search
-            \param [out] index Found index
-            \return true Index [0,size()) if found, size() if not found */
-        bool findIndexForValue(const String_t& value, size_t& index) const;
+            \param value Value to search
+            \return Index [0,size()) if found */
+        afl::base::Optional<size_t> findIndexForValue(const String_t& value) const;
 
         /** Append new item at end.
             \param item Newly-allocated item. Will be owned by the list. Should not be null. */

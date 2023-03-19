@@ -56,7 +56,7 @@ game::interface::NotificationStore::Message*
 game::interface::NotificationStore::findMessageByProcessId(uint32_t processId) const
 {
     size_t index;
-    if (findMessage(ProcessAssociation_t(processId), index)) {
+    if (findMessage(ProcessAssociation_t(processId)).get(index)) {
         return m_messages[index];
     } else {
         return 0;
@@ -64,10 +64,10 @@ game::interface::NotificationStore::findMessageByProcessId(uint32_t processId) c
 }
 
 // Find message index by process Id.
-bool
-game::interface::NotificationStore::findIndexByProcessId(uint32_t processId, size_t& index) const
+afl::base::Optional<size_t>
+game::interface::NotificationStore::findIndexByProcessId(uint32_t processId) const
 {
-    return findMessage(ProcessAssociation_t(processId), index);
+    return findMessage(ProcessAssociation_t(processId));
 }
 
 // Get message by index.
@@ -89,7 +89,7 @@ game::interface::NotificationStore::addMessage(ProcessAssociation_t assoc, Strin
     // ex IntNotificationMessageStore::addNewMessage (sort-of)
     // Remove previous message
     size_t index;
-    if (findMessage(assoc, index)) {
+    if (findMessage(assoc).get(index)) {
         m_messages.erase(m_messages.begin() + index);
     }
 
@@ -298,22 +298,19 @@ void
 game::interface::NotificationStore::receiveMessageData(size_t /*index*/, game::parser::InformationConsumer& /*consumer*/, const TeamSettings& /*teamSettings*/, bool /*onRequest*/, afl::charset::Charset& /*cs*/)
 { }
 
-bool
-game::interface::NotificationStore::findMessage(ProcessAssociation_t assoc, size_t& index) const
+afl::base::Optional<size_t>
+game::interface::NotificationStore::findMessage(ProcessAssociation_t assoc) const
 {
-    bool found = false;
     uint32_t pid;
     if (assoc.get(pid)) {
         for (size_t i = 0, n = m_messages.size(); i < n; ++i) {
             uint32_t theirPid;
             if (m_messages[i]->assoc.get(theirPid)) {
                 if (theirPid == pid) {
-                    index = i;
-                    found = true;
-                    break;
+                    return i;
                 }
             }
         }
     }
-    return found;
+    return afl::base::Nothing;
 }

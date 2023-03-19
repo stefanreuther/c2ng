@@ -5,6 +5,7 @@
 #ifndef C2NG_GAME_REF_FLEETMEMBERLIST_HPP
 #define C2NG_GAME_REF_FLEETMEMBERLIST_HPP
 
+#include "afl/base/optional.hpp"
 #include "afl/bits/smallset.hpp"
 #include "game/map/universe.hpp"
 #include "game/ref/userlist.hpp"
@@ -101,11 +102,9 @@ namespace game { namespace ref {
         bool empty() const;
 
         /** Find a reference.
-            @param [in]  ref Reference to find
-            @param [out] pos Found index
-            @retval true reference found; pos has been set
-            @retval false reference not found */
-        bool find(Reference ref, size_t& pos) const;
+            @param ref Reference to find
+            @return Found index, if any */
+        afl::base::Optional<size_t> find(Reference ref) const;
 
         /** Sort (FleetList predicate).
             Will sort the items and add appropriate dividers.

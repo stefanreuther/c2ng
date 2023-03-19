@@ -5,6 +5,7 @@
 #ifndef C2NG_UTIL_CHARSETFACTORY_HPP
 #define C2NG_UTIL_CHARSETFACTORY_HPP
 
+#include "afl/base/optional.hpp"
 #include "afl/charset/charsetfactory.hpp"
 #include "afl/string/translator.hpp"
 
@@ -67,11 +68,9 @@ namespace util {
 
         /** Look up a key, producing an index.
             Each character set can be recognized under multiple keys.
-            \param name [in] Key
-            \param result [out] Resulting key
-            \retval true Key was found, \c result was set
-            \retval false Key not found, \c result unchanged */
-        bool findIndexByKey(String_t name, Index_t& result) const;
+            \param Key
+            \return Resulting index if found */
+        afl::base::Optional<Index_t> findIndexByKey(String_t name) const;
 
         // CharsetFactory:
         virtual afl::charset::Charset* createCharset(String_t name);

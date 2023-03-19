@@ -73,7 +73,7 @@ game::proxy::OutboxProxy::getMessage(WaitIndicator& ind, Id_t id, Info& result)
             {
                 const Outbox& mbx = getOutbox(session);
                 size_t index;
-                if (mbx.findMessageById(m_id, index)) {
+                if (mbx.findMessageById(m_id).get(index)) {
                     m_result.receivers = mbx.getMessageReceivers(index);
                     m_result.text      = mbx.getMessageRawText(index);
                     m_result.sender    = mbx.getMessageSender(index);
@@ -141,7 +141,7 @@ game::proxy::OutboxProxy::setMessageText(Id_t id, String_t text)
             {
                 Outbox& mbx = getOutbox(session);
                 size_t index;
-                if (mbx.findMessageById(m_id, index)) {
+                if (mbx.findMessageById(m_id).get(index)) {
                     mbx.setMessageText(index, m_text);
                 }
             }
@@ -164,7 +164,7 @@ game::proxy::OutboxProxy::setMessageReceivers(Id_t id, PlayerSet_t receivers)
             {
                 Outbox& mbx = getOutbox(session);
                 size_t index;
-                if (mbx.findMessageById(m_id, index)) {
+                if (mbx.findMessageById(m_id).get(index)) {
                     mbx.setMessageReceivers(index, m_receivers);
                 }
             }
@@ -187,7 +187,7 @@ game::proxy::OutboxProxy::deleteMessage(Id_t id)
             {
                 Outbox& mbx = getOutbox(session);
                 size_t index;
-                if (mbx.findMessageById(m_id, index)) {
+                if (mbx.findMessageById(m_id).get(index)) {
                     mbx.deleteMessage(index);
                 }
             }

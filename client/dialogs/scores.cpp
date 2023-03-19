@@ -574,7 +574,7 @@ ScoreDialog::init()
 
     // Go to viewpoint turn
     size_t viewpointTurnIndex;
-    if (m_overview.viewpointTurn != 0 && m_turnList.find(m_overview.viewpointTurn, viewpointTurnIndex)) {
+    if (m_overview.viewpointTurn != 0 && m_turnList.find(m_overview.viewpointTurn).get(viewpointTurnIndex)) {
         m_tableTurnIndex = viewpointTurnIndex;
     }
 

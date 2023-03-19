@@ -88,8 +88,9 @@ namespace {
     }
 }
 
-// Index for Unicode character set.
+// Index for character sets.
 const util::CharsetFactory::Index_t util::CharsetFactory::UNICODE_INDEX;
+const util::CharsetFactory::Index_t util::CharsetFactory::LATIN1_INDEX;
 
 
 // Get number of known character sets.
@@ -144,8 +145,8 @@ util::CharsetFactory::getCharsetDescription(Index_t index, afl::string::Translat
 }
 
 // Look up a key, producing an index.
-bool
-util::CharsetFactory::findIndexByKey(String_t name, Index_t& result) const
+afl::base::Optional<util::CharsetFactory::Index_t>
+util::CharsetFactory::findIndexByKey(String_t name) const
 {
     // Remove dashes. "ISO-8859-1" is the same as "iso88591".
     String_t::size_type n;
@@ -156,11 +157,10 @@ util::CharsetFactory::findIndexByKey(String_t name, Index_t& result) const
     // Find
     for (size_t i = 0; i < countof(DEFINITIONS); ++i) {
         if (match(name, DEFINITIONS[i].primaryKey) || match(name, DEFINITIONS[i].secondaryKey) || match(name, DEFINITIONS[i].tertiaryKey)) {
-            result = i;
-            return true;
+            return i;
         }
     }
-    return false;
+    return afl::base::Nothing;
 }
 
 // CharsetFactory:
@@ -168,7 +168,7 @@ afl::charset::Charset*
 util::CharsetFactory::createCharset(String_t name)
 {
     Index_t index;
-    if (findIndexByKey(name, index)) {
+    if (findIndexByKey(name).get(index)) {
         return createCharsetByIndex(index);
     } else {
         return 0;

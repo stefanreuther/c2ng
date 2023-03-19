@@ -131,7 +131,7 @@ TestGameRefUserList::testAdd()
     TS_ASSERT_EQUALS(testee.get(0)->color, util::SkinColor::Blue);
 
     size_t pos = 999;
-    TS_ASSERT_EQUALS(testee.find(game::Reference(game::Reference::Planet, 7), pos), true);
+    TS_ASSERT_EQUALS(testee.find(game::Reference(game::Reference::Planet, 7)).get(pos), true);
     TS_ASSERT_EQUALS(pos, 1U);
     TS_ASSERT_EQUALS(testee.get(pos)->name, "pl");
 

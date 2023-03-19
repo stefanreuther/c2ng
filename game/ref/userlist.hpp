@@ -5,6 +5,7 @@
 #ifndef C2NG_GAME_REF_USERLIST_HPP
 #define C2NG_GAME_REF_USERLIST_HPP
 
+#include "afl/base/optional.hpp"
 #include "game/map/object.hpp"
 #include "game/reference.hpp"
 #include "game/session.hpp"
@@ -100,10 +101,9 @@ namespace game { namespace ref {
         bool empty() const;
 
         /** Find reference.
-            @param [in]  ref Reference to find
-            @param [out] pos Position of reference such that get(pos)->reference == ref.
-            @return true on success, false if no matching item found */
-        bool find(Reference ref, size_t& pos) const;
+            @param ref Reference to find
+            @return Index of reference such that get(pos)->reference == ref, if any. */
+        afl::base::Optional<size_t> find(Reference ref) const;
 
         /** Compare for equality.
             @param other Other list
