@@ -7,12 +7,12 @@
 WHAT IS PCC2 (c2ng)?
 =====================
 
-  PCC2 is a re-write of the semi-popular VGA Planets 3 client PCC 1.x.
+  Planets Command Center (PCC) is a game client for VGA Planets 3.
 
   VGA Planets is a play-by-email space-combat strategy game for DOS,
-  written by Tim Wisseman. Planets Command Center (PCC) 1.x is a
-  closed-source DOS program since 1995. PCC2 is an open-source version
-  for 32-bit operating systems in work since 2001.
+  written by Tim Wisseman. PCC 1.x is a closed-source DOS program
+  since 1995. PCC2 is an open-source version for 32-bit operating
+  systems in work since 2001.
 
   PCC2 Next Generation (c2ng) is the next step in the evolution of
   PCC2. It is intended to be 100% compatible to PCC2. However, it does
@@ -38,13 +38,23 @@ Project Goals
   - history. The single most often requested feature.
   - more scriptability.
 
+  Basically, this is the VGA Planets client for the 21st century.
+
 
 Status
 =======
 
   This is a complete, playable Planets client at a feature level
-  comparable to PCC1/PCC2. The GUI is still rough at times, but we
-  have a rock-solid engine under the hood.
+  comparable to PCC1/PCC2. It is pretty solid and mature and can be
+  used by everyone.
+
+  The user interface is still rough at times; I hope to clean that up
+  in the future. In particular, it flickers a bit more than I like to
+  admit.
+
+
+User Features
+--------------
 
   Browsing and loading local and network games ................. done
     Browse your hard disk as well as network.
@@ -52,6 +62,29 @@ Status
 
   Manage multiple turns ........................................ done
     Browse history while playing.
+
+  Multithreaded combat simulation .............................. done
+    We can use multiple threads for simulation and thus (again)
+    offer the fastest and most feature-rich combat simulation ever.
+
+  Lots of utilities ............................................ done
+    All the PCC2 command-line utilities, plus some more, for all your
+    scripting needs, e.g. c2unpack, c2check, c2export, etc.
+
+  SDL2 ......................................................... done
+    The SDL2 graphics library is more up-to-date than SDL1 that PCC2
+    is using. In particular, it allows painless full-screen mode on
+    current computers.
+
+  All the features of PCC1/PCC2 .......................... 99.9% done
+    Scripting. Battle simulator. History. Zoomable map. And so on.
+    New features nowadays often get born in PCC2ng.
+
+
+Technical Features
+-------------------
+
+  (Not directly relevant for players, but I like them.)
 
   Manage multiple games ........................................ done
     PCC2 used global variables. This one does not, so it can have
@@ -62,10 +95,6 @@ Status
 
   Scripting engine ............................................. done
     Controls most of the GUI and data displays.
-
-  Multithreaded combat simulation .............................. done
-    We can use multiple threads for simulation and thus (again)
-    offer the fastest and most feature-rich combat simulation ever.
 
   Meaningful test coverage ..................................... done
     PCC2 has a meager test coverage of around 10%. c2ng currently
@@ -79,23 +108,42 @@ Status
     in better quality than before. c2ng serves as an architectural
     blueprint for PCC2 Web.
 
-  SDL2 ......................................................... done
-    Milestone four can be built using SDL2.
 
-  All the features of PCC1/PCC2 ......................... 99.99% done
+Still Missing
+--------------
+
+  Installer (for Windows), Package (for Linux).
+
+  Full network play, in particular, for Nu.
+
+  Standalone simulator, maybe?
 
 
-What can you do with it?
-========================
+Installation Instructions
+=========================
 
-  c2ng(.exe) is the player client (pcc-v2).
+  As of 2.41, the Windows version is distributed in a *.zip file. To
+  install, just unzip into an empty directory (e.g. C:\Planets\PCC2).
+
+  Install an artwork plugin from <http://phost.de/~stefan/plugins/> by
+  downloading the *.c2z file, and dropping it on c2pluginw.exe.
+
+  Linux users need to install from source; see doc/HackingGuide.txt.
+
+
+How to use it
+=============
+
+  The main program is c2ng(.exe); it replaces the former pcc-v2(.exe).
 
   When you start the program, you will be shown a browser starting
-  with "My Computer". Note that the GUI is still incomplete.
+  with "My Computer".
 
-  (a) Use the browser to browse to a game directory on your hard disk.
+  (a) To play a local game, use the browser to browse to a game
+  directory on your hard disk.
 
-  (b) Press [Ins] to add a network account. c2ng will ask for
+  (b) To play a network game, press [Ins] to add a network account.
+  c2ng will ask for
   - user name
   - server type (PlanetsCentral or planets.nu)
   - server address (you can leave this blank)
@@ -106,8 +154,9 @@ What can you do with it?
   choose the default, c2ng will store the files in your user profile.
 
   Use arrow keys and [Enter] to browse. After entering a game, you
-  will see a screen with F1/F2/F3 buttons. Use these to select a ship,
-  planet, or base, and view its control screen.
+  will see the regular PCC2 main screen with F1/F2/F3 buttons and all
+  the usual playing options. Play normally. When you exit, a turn file
+  will be written.
 
   If you have configured PCC2 to make backups of your result files,
   [Alt]+[Up] will show the previous turn. (If you have not configured
@@ -122,6 +171,7 @@ Program List
 
   - Utilities
     . c2check: turn checker
+    . c2compiler: script compiler
     . c2configtool: configuration handler
     . c2export: game data export
     . c2gfxgen: procedural graphics generation
