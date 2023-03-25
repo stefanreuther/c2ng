@@ -9,10 +9,12 @@
 #include "afl/io/internaltextwriter.hpp"
 #include "afl/base/ref.hpp"
 #include "afl/string/nulltranslator.hpp"
+#include "afl/sys/parsedtime.hpp"
 
 using afl::base::Ref;
 using afl::io::InternalTextWriter;
 using afl::sys::LogListener;
+using afl::sys::ParsedTime;
 using afl::sys::Time;
 
 namespace {
@@ -38,8 +40,10 @@ TestUtilConsoleLogger::testDefault()
     testee.attachWriter(true, err.asPtr());
     testee.attachWriter(false, out.asPtr());
 
-    testee.handleMessage(makeMessage(Time(1500000000000), LogListener::Info, "ch.inf", "Informational message"));
-    testee.handleMessage(makeMessage(Time(1500000001000), LogListener::Error, "ch.err", "Error message"));
+    ParsedTime pt = { 2017, 7, 14, 4, 40, 0, 0, 0 };
+    testee.handleMessage(makeMessage(Time(pt, Time::LocalTime), LogListener::Info, "ch.inf", "Informational message"));
+    ++pt.m_second;
+    testee.handleMessage(makeMessage(Time(pt, Time::LocalTime), LogListener::Error, "ch.err", "Error message"));
 
     TS_ASSERT_EQUALS(afl::string::fromMemory(out->getContent()), "04:40:00 [ch.inf] <Info> Informational message\n");
     TS_ASSERT_EQUALS(afl::string::fromMemory(err->getContent()), "04:40:01 [ch.err] <Error> Error message\n");
@@ -56,11 +60,16 @@ TestUtilConsoleLogger::testConfig()
     testee.attachWriter(false, out.asPtr());
     testee.setConfiguration("ch.hidden=hide:ch.plain=raw:ch.normal=show", tx);
 
-    testee.handleMessage(makeMessage(Time(1600000000000), LogListener::Info, "ch.hidden", "Hidden message"));
-    testee.handleMessage(makeMessage(Time(1600000001000), LogListener::Info, "ch.plain", "Raw message"));
-    testee.handleMessage(makeMessage(Time(1600000002000), LogListener::Trace, "ch.normal", "Normal message"));
-    testee.handleMessage(makeMessage(Time(1600000003000), LogListener::Debug, "ch.unmapped", "Unmapped message"));
-    testee.handleMessage(makeMessage(Time(1600000002000), LogListener::Warn, "ch.normal", "Warning message"));      // not shown, wrong channel
+    ParsedTime pt = { 2020, 9, 13, 14, 26, 40, 0, 0 };
+    testee.handleMessage(makeMessage(Time(pt, Time::LocalTime), LogListener::Info, "ch.hidden", "Hidden message"));
+    ++pt.m_second;
+    testee.handleMessage(makeMessage(Time(pt, Time::LocalTime), LogListener::Info, "ch.plain", "Raw message"));
+    ++pt.m_second;
+    testee.handleMessage(makeMessage(Time(pt, Time::LocalTime), LogListener::Trace, "ch.normal", "Normal message"));
+    ++pt.m_second;
+    testee.handleMessage(makeMessage(Time(pt, Time::LocalTime), LogListener::Debug, "ch.unmapped", "Unmapped message"));
+    ++pt.m_second;
+    testee.handleMessage(makeMessage(Time(pt, Time::LocalTime), LogListener::Warn, "ch.normal", "Warning message"));      // not shown, wrong channel
 
     TS_ASSERT_EQUALS(afl::string::fromMemory(out->getContent()),
                      "Raw message\n"
