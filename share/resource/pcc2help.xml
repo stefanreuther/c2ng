@@ -2660,7 +2660,7 @@
       <p>You can sell supplies to get money.</p>
 
       <p>With PCC, this is rarely needed because PCC automatically sells supplies when needed for buying something,
-        and you can sell supplies during <a href="pcc2:cargotransfer">cargo transfer</a>,
+        and you can sell supplies during <a href="pcc2:cargo">cargo transfer</a>,
         but sometimes can still be useful.</p>
 
       <p>The "Sell Supplies" dialog will ask you how many supplies you want to sell.
@@ -3158,7 +3158,7 @@
       <h2>Reference</h2>
       <dl>
         <di term="See also:"> <a href="config:intro">Configuration Introduction</a>, <a href="pcc2:settings">settings dialog"</a>,
-          <a href="pcc2:chartconfig">starchart configuration dialog</a>.</di>
+          <a href="pcc2:starchartopts">starchart configuration dialog</a>.</di>
       </dl>
     </page>
 

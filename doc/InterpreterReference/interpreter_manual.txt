@@ -2489,3 +2489,47 @@ Although keys can be defined, they will not be honored.
 @since PCC 1.0.15
 @@ defined since 1.99.9
 --------------------------------------------------------------------------------
+@q SelectionDialog:Keymap (Keymap)
+@noproto
+| Bind SelectionDialog key := command
+Keys on this {int:index:type:keymap|keymap} are active on all <a href="pcc2:unitsel">unit selection dialogs</a>.
+- ship selection (via {ShipSelectionDialog (Keymap)|ShipSelectionDialog})
+- planet selection (via {PlanetSelectionDialog (Keymap)|PlanetSelectionDialog})
+- base selection (via {BaseSelectionDialog (Keymap)|BaseSelectionDialog})
+- fleet selection (via {FleetSelectionDialog (Keymap)|FleetSelectionDialog})
+
+This keymap includes (derives from) {Global (Keymap)|Global}.
+@since PCC2 2.40
+--------------------------------------------------------------------------------
+@q ShipSelectionDialog:Keymap (Keymap)
+@noproto
+| Bind ShipSelectionDialog key := command
+Keys on this {int:index:type:keymap|keymap} are active on the <a href="pcc2:unitsel">ship selection dialog</a>.
+
+This keymap includes (derives from) {SelectionDialog (Keymap)|SelectionDialog}.
+@since PCC2 2.40
+--------------------------------------------------------------------------------
+@q PlanetSelectionDialog:Keymap (Keymap)
+@noproto
+| Bind PlanetSelectionDialog key := command
+Keys on this {int:index:type:keymap|keymap} are active on the <a href="pcc2:unitsel">planet selection dialog</a>.
+
+This keymap includes (derives from) {SelectionDialog (Keymap)|SelectionDialog}.
+@since PCC2 2.40
+--------------------------------------------------------------------------------
+@q BaseSelectionDialog:Keymap (Keymap)
+@noproto
+| Bind BaseSelectionDialog key := command
+Keys on this {int:index:type:keymap|keymap} are active on the <a href="pcc2:unitsel">starbase selection dialog</a>.
+
+This keymap includes (derives from) {SelectionDialog (Keymap)|SelectionDialog}.
+@since PCC2 2.40
+--------------------------------------------------------------------------------
+@q FleetSelectionDialog:Keymap (Keymap)
+@noproto
+| Bind FleetSelectionDialog key := command
+Keys on this {int:index:type:keymap|keymap} are active on the <a href="pcc2:unitsel">fleet selection dialog</a>.
+
+This keymap includes (derives from) {SelectionDialog (Keymap)|SelectionDialog}.
+@since PCC2 2.40.13
+--------------------------------------------------------------------------------
