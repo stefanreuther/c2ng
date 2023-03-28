@@ -1,25 +1,40 @@
 /**
   *  \file game/interface/shipcontext.hpp
+  *  \brief Class game::interface::ShipContext
   */
 #ifndef C2NG_GAME_INTERFACE_SHIPCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_SHIPCONTEXT_HPP
 
-#include "interpreter/simplecontext.hpp"
 #include "afl/base/ref.hpp"
-#include "game/root.hpp"
 #include "game/game.hpp"
-#include "game/session.hpp"
 #include "game/map/ship.hpp"
+#include "game/root.hpp"
+#include "game/session.hpp"
+#include "interpreter/simplecontext.hpp"
 
 namespace game { namespace interface {
 
+    /** Ship context.
+        Implements the result of the "Ship()" function.
+        Publishes properties of a ship.
+        To create, usually use ShipContext::create();
+
+        @see ShipFunction */
     class ShipContext : public interpreter::SimpleContext, public interpreter::Context::PropertyAccessor {
      public:
-        ShipContext(int id,
+        /** Constructor.
+            @param id        Ship Id
+            @param session   Session (for translator)
+            @param root      Root
+            @param game      Game
+            @param shipList  Ship list */
+        ShipContext(Id_t id,
                     Session& session,
                     afl::base::Ref<Root> root,
                     afl::base::Ref<Game> game,
-                    afl::base::Ref<game::spec::ShipList> shipList);
+                    afl::base::Ref<const game::spec::ShipList> shipList);
+
+        /** Destructor. */
         ~ShipContext();
 
         // Context:
@@ -35,14 +50,18 @@ namespace game { namespace interface {
         virtual String_t toString(bool readable) const;
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
-        static ShipContext* create(int id, Session& session);
+        /** Create ShipContext.
+            @param id        Ship Id
+            @param session   Session
+            @return newly-allocated ShipContext; null if preconditions not satisfied */
+        static ShipContext* create(Id_t id, Session& session);
 
      private:
         Id_t m_id;
         Session& m_session;
         afl::base::Ref<Root> m_root;
         afl::base::Ref<Game> m_game;
-        afl::base::Ref<game::spec::ShipList> m_shipList;
+        afl::base::Ref<const game::spec::ShipList> m_shipList;
     };
 
 } }

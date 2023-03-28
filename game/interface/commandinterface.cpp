@@ -1,21 +1,22 @@
 /**
   *  \file game/interface/commandinterface.cpp
+  *  \brief Commands and Functions to access a CommandContainer
   */
 
 #include "game/interface/commandinterface.hpp"
-#include "game/v3/commandcontainer.hpp"
-#include "game/v3/commandextra.hpp"
-#include "game/v3/command.hpp"
 #include "game/actions/preconditions.hpp"
 #include "game/game.hpp"
 #include "game/turn.hpp"
+#include "game/v3/command.hpp"
+#include "game/v3/commandcontainer.hpp"
+#include "game/v3/commandextra.hpp"
 #include "interpreter/values.hpp"
 
-using interpreter::checkIntegerArg;
-using interpreter::checkStringArg;
 using game::v3::Command;
 using game::v3::CommandContainer;
 using game::v3::CommandExtra;
+using interpreter::checkIntegerArg;
+using interpreter::checkStringArg;
 
 /* @q AddCommand cmd:Str (Global Command)
    Add a command message.

@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/vcrsidefunction.cpp
+  *  \brief Class game::interface::VcrSideFunction
   */
 
 #include "game/interface/vcrsidefunction.hpp"
@@ -7,9 +8,9 @@
 
 game::interface::VcrSideFunction::VcrSideFunction(size_t battleNumber,
                                                   Session& session,
-                                                  afl::base::Ref<Root> root,     // for PlayerList
-                                                  afl::base::Ref<Turn> turn,     // for Turn
-                                                  afl::base::Ref<game::spec::ShipList> shipList)
+                                                  afl::base::Ref<const Root> root,
+                                                  afl::base::Ref<const Turn> turn,
+                                                  afl::base::Ref<const game::spec::ShipList> shipList)
     : m_battleNumber(battleNumber),
       m_session(session),
       m_root(root),

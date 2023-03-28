@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/drawingfunction.cpp
+  *  \brief Class game::interface::DrawingFunction
   */
 
 #include "game/interface/drawingfunction.hpp"

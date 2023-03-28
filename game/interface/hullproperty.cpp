@@ -1,33 +1,36 @@
 /**
   *  \file game/interface/hullproperty.cpp
+  *  \brief Enum game::interface::HullProperty
   */
 
 #include "game/interface/hullproperty.hpp"
+#include "game/experiencelevelset.hpp"
+#include "game/limits.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/values.hpp"
-#include "game/experiencelevelset.hpp"
-#include "game/limits.hpp"
 
 using interpreter::makeIntegerValue;
 using interpreter::makeStringValue;
+using game::spec::BasicHullFunction;
 
 namespace {
+    // Function definitions; need to be grouped by 'ch'. Similar table appears in ShipProperty.
     struct FunctionMap {
         char ch;
         int basicFunction : 8;
     };
     const FunctionMap functions[] = {
-        {'C', game::spec::BasicHullFunction::Cloak},
-        {'C', game::spec::BasicHullFunction::AdvancedCloak},
-        {'C', game::spec::BasicHullFunction::HardenedCloak},
-        {'H', game::spec::BasicHullFunction::Hyperdrive},
-        {'G', game::spec::BasicHullFunction::Gravitonic},
-        {'B', game::spec::BasicHullFunction::Bioscan},
-        {'B', game::spec::BasicHullFunction::FullBioscan},
-        {'A', game::spec::BasicHullFunction::MerlinAlchemy},
-        {'A', game::spec::BasicHullFunction::AriesRefinery},
-        {'A', game::spec::BasicHullFunction::NeutronicRefinery},
+        {'C', BasicHullFunction::Cloak},
+        {'C', BasicHullFunction::AdvancedCloak},
+        {'C', BasicHullFunction::HardenedCloak},
+        {'H', BasicHullFunction::Hyperdrive},
+        {'G', BasicHullFunction::Gravitonic},
+        {'B', BasicHullFunction::Bioscan},
+        {'B', BasicHullFunction::FullBioscan},
+        {'A', BasicHullFunction::MerlinAlchemy},
+        {'A', BasicHullFunction::AriesRefinery},
+        {'A', BasicHullFunction::NeutronicRefinery},
         {'\0', 0} // dummy element to simplify loop
     };
 
@@ -44,6 +47,10 @@ namespace {
         afl::base::Memory<const FunctionMap> fs(functions);
         char last = '\0';
         game::PlayerSet_t playerSum;
+
+        // Scan through the FunctionMap, collecting players for each function.
+        // If we end up at a full player complement (playerSum.contains),
+        // this hull has the function for all players.
         while (const FunctionMap* f = fs.eat()) {
             if (f->ch != last) {
                 if (playerSum.contains(players)) {

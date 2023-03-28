@@ -1,13 +1,14 @@
 /**
   *  \file game/interface/vcrsideproperty.hpp
+  *  \brief Enum game::interface::VcrSideProperty
   */
 #ifndef C2NG_GAME_INTERFACE_VCRSIDEPROPERTY_HPP
 #define C2NG_GAME_INTERFACE_VCRSIDEPROPERTY_HPP
 
-#include "game/vcr/battle.hpp"
-#include "game/spec/shiplist.hpp"
 #include "afl/string/translator.hpp"
 #include "game/playerlist.hpp"
+#include "game/spec/shiplist.hpp"
+#include "game/vcr/battle.hpp"
 
 namespace game { namespace interface {
 

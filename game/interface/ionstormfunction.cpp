@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/ionstormfunction.cpp
+  *  \brief Class game::interface::IonStormFunction
   */
 
 #include "game/interface/ionstormfunction.hpp"
@@ -28,7 +29,7 @@ game::interface::IonStormFunction::IonStormFunction(Session& session)
 { }
 
 // IndexableValue:
-afl::data::Value*
+interpreter::Context*
 game::interface::IonStormFunction::get(interpreter::Arguments& args)
 {
     // ex IFIonGet
@@ -54,9 +55,9 @@ game::interface::IonStormFunction::getDimension(int32_t which) const
 {
     // ex int/if/ionif.h:IFIonDim
     if (which == 0) {
-        return 0;
+        return 1;
     } else if (Game* g = m_session.getGame().get()) {
-        return g->currentTurn().universe().ionStorms().size();
+        return g->currentTurn().universe().ionStorms().size()+1;
     } else {
         return 0;
     }

@@ -6,15 +6,27 @@
 #include "game/interface/notificationstore.hpp"
 
 #include "t_game_interface.hpp"
+#include "afl/charset/utf8charset.hpp"
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 #include "game/interface/processlisteditor.hpp"
+#include "game/parser/informationconsumer.hpp"
 #include "game/playerlist.hpp"
+#include "game/teamsettings.hpp"
 #include "interpreter/process.hpp"
 #include "interpreter/world.hpp"
 
 using game::Reference;
+
+namespace {
+    class NullInformationConsumer : public game::parser::InformationConsumer {
+     public:
+        virtual void addMessageInformation(const game::parser::MessageInformation& /*info*/)
+            { }
+    };
+}
+
 
 /** Simple sequence test.
     This test is mostly taken from PCC2 that had more complex interaction with processes.
@@ -36,6 +48,18 @@ TestGameInterfaceNotificationStore::testIt()
     interpreter::ProcessList procList;
     game::interface::NotificationStore store(procList);
     TS_ASSERT_EQUALS(store.getNumMessages(), 0U);
+
+    // Out-of-bounds access correctly rejected
+    TS_ASSERT(store.getMessageByIndex(0) == 0);
+    TS_ASSERT_EQUALS(store.getMessageHeaderText(0, tx, list), "");
+    TS_ASSERT_EQUALS(store.getMessageBodyText(0, tx, list), "");
+    TS_ASSERT_EQUALS(store.getMessageDisplayText(0, tx, list).getText(), "");
+    {
+        game::TeamSettings teams;
+        afl::charset::Utf8Charset cs;
+        NullInformationConsumer consumer;
+        TS_ASSERT_THROWS_NOTHING(store.receiveMessageData(0, consumer, teams, true, cs));
+    }
 
     // Add a message
     game::interface::NotificationStore::Message* msg = store.addMessage(77777, "foo\n", "bar", Reference(Reference::Ship, 77));
@@ -66,6 +90,9 @@ TestGameInterfaceNotificationStore::testIt()
 
     TS_ASSERT_EQUALS(store.findMessageByProcessId(proc.getProcessId()), msg2);
     TS_ASSERT(!store.findMessageByProcessId(88888));
+
+    TS_ASSERT_EQUALS(store.findIndexByProcessId(proc.getProcessId()).orElse(9999), 1U);
+    TS_ASSERT(!store.findIndexByProcessId(8888).isValid());
 
     // Delete first message; it has no associated process
     store.removeOrphanedMessages();
@@ -131,6 +158,55 @@ TestGameInterfaceNotificationStore::testResume()
     game::interface::NotificationStore::Message* msg = store.findMessageByProcessId(p2.getProcessId());
     store.confirmMessage(msg, true);
     TS_ASSERT_EQUALS(store.isMessageConfirmed(msg), true);
+
+    // Resume
+    game::interface::ProcessListEditor editor(procList);
+    store.resumeConfirmedProcesses(editor);
+    editor.commit(procList.allocateProcessGroup());
+
+    // Verify
+    TS_ASSERT_EQUALS(p1.getState(), interpreter::Process::Suspended);
+    TS_ASSERT_EQUALS(p2.getState(), interpreter::Process::Runnable);
+}
+
+/** Test resumeConfirmedProcesses(), use general API.
+
+    A: Create two processes with a message each. Resume one message.
+    E: One process resumed, one unchanged */
+void
+TestGameInterfaceNotificationStore::testResume2()
+{
+    // Environment
+    afl::io::NullFileSystem fs;
+    afl::string::NullTranslator tx;
+    afl::sys::Log log;
+    game::PlayerList list;
+    interpreter::World world(log, tx, fs);
+
+    // Message store
+    interpreter::ProcessList procList;
+    game::interface::NotificationStore store(procList);
+
+    // Two processes
+    interpreter::Process& p1 = procList.create(world, "p1");
+    interpreter::Process& p2 = procList.create(world, "p2");
+    TS_ASSERT_EQUALS(p1.getState(), interpreter::Process::Suspended);
+    TS_ASSERT_EQUALS(p2.getState(), interpreter::Process::Suspended);
+
+    // Messages for each
+    store.addMessage(p1.getProcessId(), "m1", "b", Reference());
+    store.addMessage(p2.getProcessId(), "m2", "b", Reference());
+    TS_ASSERT_EQUALS(store.getNumMessages(), 2U);
+
+    TS_ASSERT(!store.getMessageMetadata(1, tx, list).flags.contains(game::msg::Mailbox::Confirmed));
+    TS_ASSERT(store.getMessageActions(1).contains(game::msg::Mailbox::ToggleConfirmed));
+
+    // Confirm m2 using general API
+    size_t index = store.findIndexByProcessId(p2.getProcessId()).orElse(9999);
+    TS_ASSERT_EQUALS(index, 1U);
+    store.performMessageAction(index, game::msg::Mailbox::ToggleConfirmed);
+    TS_ASSERT(store.getMessageMetadata(1, tx, list).flags.contains(game::msg::Mailbox::Confirmed));
+    TS_ASSERT(!store.getMessageActions(1).contains(game::msg::Mailbox::ToggleConfirmed));
 
     // Resume
     game::interface::ProcessListEditor editor(procList);

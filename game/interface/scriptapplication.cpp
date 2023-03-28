@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/scriptapplication.cpp
+  *  \brief Class game::interface::ScriptApplication
   */
 
 #include <stdexcept>
@@ -298,7 +299,7 @@ game::interface::ScriptApplication::appMain()
 }
 
 /** Parse parameters.
-    @params [out] Parameters */
+    @param [out] params Parameters */
 void
 game::interface::ScriptApplication::parseParameters(Parameters& params)
 {

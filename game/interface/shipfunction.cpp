@@ -1,12 +1,13 @@
 /**
   *  \file game/interface/shipfunction.cpp
+  *  \brief Class game::interface::ShipFunction
   */
 
 #include "game/interface/shipfunction.hpp"
-#include "interpreter/arguments.hpp"
-#include "game/turn.hpp"
 #include "game/game.hpp"
 #include "game/interface/shipcontext.hpp"
+#include "game/turn.hpp"
+#include "interpreter/arguments.hpp"
 
 game::interface::ShipFunction::ShipFunction(Session& session)
     : m_session(session)
@@ -56,7 +57,7 @@ game::interface::ShipFunction::getDimension(int32_t which) const
         return 1;
     } else {
         if (Game* game = m_session.getGame().get()) {
-            return game->currentTurn().universe().ships().size();
+            return game->currentTurn().universe().ships().size() + 1;
         } else {
             return 0;
         }

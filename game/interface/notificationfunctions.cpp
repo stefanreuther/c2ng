@@ -1,23 +1,29 @@
 /**
   *  \file game/interface/notificationfunctions.cpp
+  *  \brief Notification-related script commands
   */
 
 #include "game/interface/notificationfunctions.hpp"
+#include "afl/string/format.hpp"
+#include "game/map/object.hpp"
+#include "game/map/planet.hpp"
+#include "game/map/ship.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/values.hpp"
-#include "game/map/ship.hpp"
-#include "game/map/planet.hpp"
-#include "game/map/object.hpp"
-#include "afl/string/format.hpp"
 
 using afl::string::Format;
 
 /*
  *  CC$NotifyConfirmed() function
- *
- *  SimpleFunction does not give us a process, so we need to implement a full CallableValue here.
  */
 
+/* @q CCNotifyConfirmed():Bool (Internal)
+   Checks whether the process calling this function has a confirmed message.
+
+   This function is part of the implementation of {Notify}.
+   It is not part of the public API, but part of the ABI shared with PCC2 (serialized VM format).
+
+   @since PCC2 2.40.8, PCC2 1.99.16 */
 game::interface::NotifyConfirmedFunction::NotifyConfirmedFunction(Session& session)
     : m_session(session)
 {
@@ -90,8 +96,9 @@ game::interface::NotifyConfirmedFunction::store(interpreter::TagNode& out, afl::
  */
 
 /* @q CC$Notify msg:Str, associateWithProcess:Bool (Internal)
-   Back-end to {Notify} and {AddNotify}.
-   @since PCC2 2.40.8 */
+   This function is part of the implementation of {Notify} and {AddNotify}.
+   It is not part of the public API, but part of the ABI shared with PCC2 (serialized VM format).
+   @since PCC2 2.40.8, PCC2 1.99.16 */
 void
 game::interface::IFCCNotify(game::Session& session, interpreter::Process& proc, interpreter::Arguments& args)
 {
@@ -139,5 +146,5 @@ afl::data::Value*
 game::interface::IFCCNumNotifications(game::Session& session, interpreter::Arguments& args)
 {
     args.checkArgumentCount(0);
-    return interpreter::makeIntegerValue(int(session.notifications().getNumMessages()));
+    return interpreter::makeSizeValue(session.notifications().getNumMessages());
 }

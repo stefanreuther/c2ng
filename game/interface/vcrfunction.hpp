@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/vcrfunction.hpp
+  *  \brief Class game::interface::VcrFunction
   */
 #ifndef C2NG_GAME_INTERFACE_VCRFUNCTION_HPP
 #define C2NG_GAME_INTERFACE_VCRFUNCTION_HPP
@@ -9,9 +10,12 @@
 
 namespace game { namespace interface {
 
+    /** Implementation of the "Vcr()" function. */
     class VcrFunction : public interpreter::IndexableValue {
      public:
-        VcrFunction(Session& session);
+        /** Constructor.
+            @param session Session */
+        explicit VcrFunction(Session& session);
 
         // IndexableValue:
         virtual VcrContext* get(interpreter::Arguments& args);
@@ -26,9 +30,9 @@ namespace game { namespace interface {
         virtual String_t toString(bool readable) const;
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
+     private:
         int32_t getNumBattles() const;
 
-     private:
         Session& m_session;
     };
 

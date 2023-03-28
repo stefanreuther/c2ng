@@ -1,16 +1,17 @@
 /**
   *  \file game/interface/vcrsidecontext.cpp
+  *  \brief Class game::interface::VcrSideContext
   */
 
 #include "game/interface/vcrsidecontext.hpp"
-#include "interpreter/nametable.hpp"
+#include "game/game.hpp"
 #include "game/interface/vcrsideproperty.hpp"
-#include "interpreter/typehint.hpp"
-#include "interpreter/values.hpp"
 #include "game/vcr/battle.hpp"
 #include "game/vcr/database.hpp"
+#include "interpreter/nametable.hpp"
 #include "interpreter/propertyacceptor.hpp"
-#include "game/game.hpp"
+#include "interpreter/typehint.hpp"
+#include "interpreter/values.hpp"
 
 using interpreter::makeSizeValue;
 
@@ -56,7 +57,7 @@ namespace {
         { "ROLE",                   game::interface::ivsRole,            SidePropertyDomain,  interpreter::thString },
         { "SHIELD",                 game::interface::ivsShield,          SidePropertyDomain,  interpreter::thInt },
         { "STATUS",                 game::interface::ivsStatus,          SidePropertyDomain,  interpreter::thString },
-        { "STATUS$",                game::interface::ivsStatusRaw,       SidePropertyDomain,  interpreter::thString },
+        { "STATUS$",                game::interface::ivsStatusRaw,       SidePropertyDomain,  interpreter::thInt },
         { "TORP",                   game::interface::ivsTorpName,        SidePropertyDomain,  interpreter::thString },
         { "TORP$",                  game::interface::ivsTorpId,          SidePropertyDomain,  interpreter::thInt },
         { "TORP.COUNT",             game::interface::ivsTorpCount,       SidePropertyDomain,  interpreter::thInt },
@@ -70,9 +71,9 @@ namespace {
 game::interface::VcrSideContext::VcrSideContext(size_t battleNumber,
                                                 size_t side,
                                                 Session& session,
-                                                afl::base::Ref<Root> root,     // for PlayerList
-                                                afl::base::Ref<Turn> turn,     // for Turn
-                                                afl::base::Ref<game::spec::ShipList> shipList)
+                                                afl::base::Ref<const Root> root,
+                                                afl::base::Ref<const Turn> turn,
+                                                afl::base::Ref<const game::spec::ShipList> shipList)
     : m_battleNumber(battleNumber),
       m_side(side),
       m_session(session),
@@ -186,9 +187,9 @@ game::interface::VcrSideContext*
 game::interface::VcrSideContext::create(size_t battleNumber, size_t side, Session& session)
 {
     // Check major objects
-    Root* r = session.getRoot().get();
+    const Root* r = session.getRoot().get();
     Game* g = session.getGame().get();
-    game::spec::ShipList* s = session.getShipList().get();
+    const game::spec::ShipList* s = session.getShipList().get();
     if (r == 0 || g == 0 || s == 0) {
         return 0;
     }

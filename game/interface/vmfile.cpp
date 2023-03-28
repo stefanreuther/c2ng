@@ -1,7 +1,6 @@
 /**
   *  \file game/interface/vmfile.cpp
-  *
-  *  PCC2 Comment:
+  *  \brief VM File I/O
   *
   *  Format of VM file:
   *  <code>
@@ -37,9 +36,9 @@
 #include "interpreter/vmio/worldloadcontext.hpp"
 #include "interpreter/world.hpp"
 
-using game::v3::structures::UInt32_t;
-using game::v3::structures::UInt16_t;
 using game::v3::structures::Timestamp_t;
+using game::v3::structures::UInt16_t;
+using game::v3::structures::UInt32_t;
 using interpreter::Process;
 
 namespace {
@@ -84,7 +83,7 @@ namespace {
          case Process::Frozen:
             // Auto-task being edited. Do not lose it.
             return true;
-            
+
          case Process::Runnable:
             // Scheduled for running. Typically, this is a UI process joined with another one.
             return false;
@@ -92,7 +91,7 @@ namespace {
          case Process::Running:
             // This is the process that triggered the save. Typically, this is a UI process which we do not want to save.
             return false;
-            
+
          case Process::Waiting:
          case Process::Ended:
          case Process::Terminated:
@@ -104,7 +103,7 @@ namespace {
     }
 }
 
-
+// Load script VM file.
 void
 game::interface::loadVM(Session& session, int playerNr)
 {
@@ -146,18 +145,16 @@ game::interface::loadVM(Session& session, int playerNr)
 
     // - do it!
     interpreter::vmio::ObjectLoader(pRoot->charset(), session.translator(), ctx2).load(*file);
-
-    // FIXME-> runRunnableProcesses();
-    // FIXME-> killTerminatedProcesses();
 }
 
+// Save script VM file.
 void
 game::interface::saveVM(Session& session, int playerNr)
 {
     // ex int/vmfile.cc:saveVM
     // Determine directory
-    Root* pRoot = session.getRoot().get();
-    Game* pGame = session.getGame().get();
+    const Root* pRoot = session.getRoot().get();
+    const Game* pGame = session.getGame().get();
     if (pRoot == 0 || pGame == 0) {
         return;
     }

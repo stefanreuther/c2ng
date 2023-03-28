@@ -46,8 +46,17 @@ TestGameInterfaceInboxSubsetValue::testEmpty()
     TestHarness h;
     std::vector<size_t> indexes;
 
-    std::auto_ptr<InboxSubsetValue> value(InboxSubsetValue::create(indexes, h.tx, h.root, h.game));
-    TS_ASSERT(value.get() == 0);
+    // Factory method
+    {
+        std::auto_ptr<InboxSubsetValue> value(InboxSubsetValue::create(indexes, h.tx, h.root, h.game));
+        TS_ASSERT(value.get() == 0);
+    }
+
+    // Explicit creation
+    {
+        InboxSubsetValue value(indexes, h.tx, h.root, h.game);
+        TS_ASSERT(value.makeFirstContext() == 0);
+    }
 }
 
 /** Test iteration over a InboxSubsetValue ("ForEach (unit).Messages"). */
@@ -68,8 +77,11 @@ TestGameInterfaceInboxSubsetValue::testIteration()
     TS_ASSERT_DIFFERS(value->toString(false), "");
     TS_ASSERT_EQUALS(value->getDimension(0), 1);
     TS_ASSERT_EQUALS(value->getDimension(1), 3);
+    interpreter::test::ValueVerifier vv(*value, "testIteration value");
+    vv.verifyBasics();
+    vv.verifyNotSerializable();
 
-    // Access first and iterate
+    // Access first and verify
     std::auto_ptr<interpreter::Context> ctx(value->makeFirstContext());
     TS_ASSERT(ctx.get() != 0);
     TS_ASSERT_DIFFERS(ctx->toString(false), "");
@@ -77,11 +89,13 @@ TestGameInterfaceInboxSubsetValue::testIteration()
     interpreter::test::ContextVerifier v(*ctx, "testIteration");
     v.verifyTypes();
     v.verifyBasics();
-    v.verifyInteger("ID", 4);
+    v.verifyNotSerializable();
+    TS_ASSERT(ctx->getObject() == 0);
 
+    // Iterate
+    v.verifyInteger("ID", 4);
     TS_ASSERT(ctx->next());
     v.verifyInteger("ID", 1);
-
     TS_ASSERT(!ctx->next());
 }
 
@@ -138,6 +152,15 @@ TestGameInterfaceInboxSubsetValue::testIndexing()
         seg.pushBackString("x");
         interpreter::Arguments args(seg, 0, 1);
         TS_ASSERT_THROWS(value->get(args), interpreter::Error);
+    }
+
+    // Cannot assign
+    {
+        afl::data::Segment seg;
+        seg.pushBackInteger(2);
+        interpreter::Arguments args(seg, 0, 1);
+
+        TS_ASSERT_THROWS(value->set(args, 0), interpreter::Error);
     }
 }
 

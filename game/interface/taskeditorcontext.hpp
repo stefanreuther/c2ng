@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/taskeditorcontext.hpp
+  *  \brief Class game::interface::TaskEditorContext
   */
 #ifndef C2NG_GAME_INTERFACE_TASKEDITORCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_TASKEDITORCONTEXT_HPP
@@ -73,6 +74,13 @@ namespace game { namespace interface {
         virtual String_t toString(bool readable) const;
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
+        /** Create TaskEditorContext for an auto-task.
+            Create the auto-task if needed.
+            \param session Session
+            \param k       Type of auto-task
+            \param id      Object Id
+            \return newly-allocated TaskEditorContext; null if no auto-task can be created
+            \see Session::getAutoTaskEditor() */
         static TaskEditorContext* create(game::Session& session, interpreter::Process::ProcessKind k, Id_t id);
 
      private:
@@ -93,7 +101,7 @@ namespace game { namespace interface {
         \param prop    Property
         \param value   Value
         \throw interpreter::Error if property cannot be set or value is out of range */
-    void setTaskEditorProperty(const afl::base::Ptr<interpreter::TaskEditor>& edit, TaskEditorProperty prop, const afl::data::Value* value);
+    void setTaskEditorProperty(interpreter::TaskEditor& edit, TaskEditorProperty prop, const afl::data::Value* value);
 
     /** Call method on TaskEditor.
         \param edit    TaskEditor

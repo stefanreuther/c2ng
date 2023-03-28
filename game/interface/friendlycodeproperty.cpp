@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/friendlycodeproperty.cpp
+  *  \brief Enum game::interface::FriendlyCodeProperty
   */
 
 #include "game/interface/friendlycodeproperty.hpp"

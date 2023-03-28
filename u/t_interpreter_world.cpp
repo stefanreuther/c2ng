@@ -61,6 +61,9 @@ TestInterpreterWorld::testIt()
     TS_ASSERT_DIFFERS(ix, afl::data::NameMap::nil);
     TS_ASSERT(w.globalValues()[ix] != 0);
     TS_ASSERT_EQUALS(interpreter::toString(w.globalValues()[ix], false), "hi");
+
+    TS_ASSERT(w.globalValues()[ix] == w.getGlobalValue("NEW_VALUE"));
+    TS_ASSERT(w.globalValues()[ix] == cw.getGlobalValue("NEW_VALUE"));
 }
 
 /** Test special command handling. */

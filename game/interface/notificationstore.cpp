@@ -12,10 +12,7 @@
   *  This is normally harmless, but unnecessary and unexpected.
   *  PCC1 tracks that more precisely (ms_Stopped, ms_Continue, ms_Continued, ms_Terminate).
   *
-  *  FIXME: it seems we don't need the distinction between header and body;
-  *  it could be just a single long string.
-  *
-  *  Change to PCC2: our notifications live completely outside the interpreter function.
+  *  @change Our notifications live completely outside the interpreter world.
   *  In PCC2, processes have a pointer to their associated message.
   *  We perform the mapping using process Ids, and explicitly clean up when processes are removed.
   */

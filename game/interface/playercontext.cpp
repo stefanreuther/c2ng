@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/playercontext.cpp
+  *  \brief Class game::interface::PlayerContext
   */
 
 #include "game/interface/playercontext.hpp"

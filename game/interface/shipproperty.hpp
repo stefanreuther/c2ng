@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/shipproperty.hpp
+  *  \brief Enum game::interface::ShipProperty
   */
 #ifndef C2NG_GAME_INTERFACE_SHIPPROPERTY_HPP
 #define C2NG_GAME_INTERFACE_SHIPPROPERTY_HPP
@@ -110,20 +111,30 @@ namespace game { namespace interface {
     /** Get ship property.
         \param sh        Ship to inquire.
         \param isp       Ship property to inquire.
-        \param session   Session
+        \param session   Session (for names, auto-tasks)
         \param root      Root (needed for configuration)
         \param shipList  Ship list (needed for specifications)
         \param game      Game (needed for unit score definitions)
         \param turn      Turn (needed for related units to name locations)
-        \return property value */
+        \return newly-allocated property value */
     afl::data::Value* getShipProperty(const game::map::Ship& sh, ShipProperty isp,
                                       Session& session,
                                       afl::base::Ref<const Root> root,
                                       afl::base::Ref<const game::spec::ShipList> shipList,
                                       afl::base::Ref<const Game> game,
                                       afl::base::Ref<const Turn> turn);
+
+    /** Set ship property.
+        \param sh        Ship.
+        \param isp       Ship property to inquire.
+        \param value     Value to set (owned by caller)
+        \param root      Root (needed for configuration)
+        \param shipList  Ship list (for mission definitions)
+        \param mapConfig Map configuration
+        \param turn      Turn (for fleets)
+        \throw interpreter::Error if property is not assignable */
     void setShipProperty(game::map::Ship& sh, ShipProperty isp, const afl::data::Value* value,
-                         Root& root,
+                         const Root& root,
                          const game::spec::ShipList& shipList,
                          const game::map::Configuration& mapConfig,
                          Turn& turn);

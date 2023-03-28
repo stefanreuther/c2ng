@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/ufomethod.cpp
+  *  \brief Enum game::interface::UfoMethod
   */
 
 #include "game/interface/ufomethod.hpp"

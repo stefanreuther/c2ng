@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/globalcommands.hpp
+  *  \brief Global Commands
   */
 #ifndef C2NG_GAME_INTERFACE_GLOBALCOMMANDS_HPP
 #define C2NG_GAME_INTERFACE_GLOBALCOMMANDS_HPP
@@ -10,7 +11,22 @@
 
 namespace game { namespace interface {
 
+    /** Parse player-set argument.
+        Expects a
+        - one-dimensional script array (IndexableValue) containing player numbers;
+        - data array (VectorValue) containing player numbers;
+        - scalar with a player number.
+
+        @param [out] result   Result
+        @param [in]  value    User-provided parameter
+        @return true if parameter was given, false if parameter was null
+        @throw interpreter::Error on type error */
     bool checkPlayerSetArg(PlayerSet_t& result, afl::data::Value* value);
+
+
+    /*
+     *  Global Commands, provided to the script world using SimpleProcedure
+     */
 
     void IFAddConfig(game::Session& session, interpreter::Process& proc, interpreter::Arguments& args);
     void IFAddFCode(game::Session& session, interpreter::Process& proc, interpreter::Arguments& args);

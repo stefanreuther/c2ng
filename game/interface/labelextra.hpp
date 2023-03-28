@@ -5,11 +5,11 @@
 #ifndef C2NG_GAME_INTERFACE_LABELEXTRA_HPP
 #define C2NG_GAME_INTERFACE_LABELEXTRA_HPP
 
+#include "afl/base/optional.hpp"
 #include "afl/base/signal.hpp"
 #include "game/extra.hpp"
 #include "game/interface/labelvector.hpp"
 #include "game/session.hpp"
-#include "afl/base/optional.hpp"
 
 namespace game { namespace interface {
 

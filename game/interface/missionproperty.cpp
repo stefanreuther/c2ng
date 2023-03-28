@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/missionproperty.cpp
+  *  \brief Enum game::interface::MissionProperty
   */
 
 #include "game/interface/missionproperty.hpp"

@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/playerproperty.hpp
+  *  \brief Enum game::interface::PlayerProperty
   */
 #ifndef C2NG_GAME_INTERFACE_PLAYERPROPERTY_HPP
 #define C2NG_GAME_INTERFACE_PLAYERPROPERTY_HPP

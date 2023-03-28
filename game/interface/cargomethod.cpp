@@ -1,13 +1,14 @@
 /**
   *  \file game/interface/cargomethod.cpp
+  *  \brief Foundations of cargo-related script commands
   */
 
 #include "game/interface/cargomethod.hpp"
-#include "game/actions/preconditions.hpp"
-#include "game/actions/cargotransfersetup.hpp"
-#include "game/actions/cargotransfer.hpp"
-#include "game/exception.hpp"
 #include "afl/data/stringvalue.hpp"
+#include "game/actions/cargotransfer.hpp"
+#include "game/actions/cargotransfersetup.hpp"
+#include "game/actions/preconditions.hpp"
+#include "game/exception.hpp"
 
 using game::Exception;
 
@@ -66,8 +67,8 @@ namespace {
         if (proxyId != 0) {
             // Error handling behaviour:
             // PCC 1.x validates the proxy to be correct position, owner, status, and produces ERANGE/EPOS/ENOTOWNER.
-            // Howver, it ignores the valid proxy if it is not needed.
-            // This one at least provides validation when the proxy is needed.
+            // However, it ignores the valid proxy if it is not needed.
+            // We only validate the proxy when needed.
             if (setup.getStatus() == game::actions::CargoTransferSetup::NeedProxy) {
                 if (!setup.setProxy(turn.universe(), proxyId)) {
                     throw Exception(Exception::ePos);
@@ -94,7 +95,11 @@ game::interface::doCargoTransfer(game::map::Planet& pl, interpreter::Process& pr
     if (!interpreter::checkStringArg(cargospec, args.getNext())) {
         return;
     }
-    if (!interpreter::checkIntegerArg(target_sid, args.getNext(), 1, turn.universe().ships().size())) {
+    if (!interpreter::checkIntegerArg(target_sid, args.getNext(), 1, MAX_NUMBER)) {
+        // This used to limit to turn.universe().ships().size(). We now limit to MAX_NUMBER instead
+        // so the error message will be the same no matter whether the given Id is higher or lower
+        // than the maximum existing ship Id (game::Exception). Only numbers that are clearly out
+        // of range still generate a interpreter::Error.
         return;
     }
     interpreter::checkFlagArg(flags, &proxyId, args.getNext(), "OSN");
@@ -120,7 +125,7 @@ game::interface::doCargoTransfer(game::map::Ship& sh, interpreter::Process& proc
     if (!interpreter::checkStringArg(cargospec, args.getNext())) {
         return;
     }
-    if (!interpreter::checkIntegerArg(target_sid, args.getNext(), 1, turn.universe().ships().size())) {
+    if (!interpreter::checkIntegerArg(target_sid, args.getNext(), 1, MAX_NUMBER)) {
         return;
     }
     interpreter::checkFlagArg(flags, 0, args.getNext(), "OSN");

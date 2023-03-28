@@ -14,14 +14,31 @@
 #include "interpreter/arguments.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/values.hpp"
+#include "util/rich/alignmentattribute.hpp"
+#include "util/rich/colorattribute.hpp"
+#include "util/rich/styleattribute.hpp"
 #include "util/rich/visitor.hpp"
 #include "util/unicodechars.hpp"
-#include "util/rich/styleattribute.hpp"
-#include "util/rich/colorattribute.hpp"
 
 namespace {
     typedef std::auto_ptr<afl::data::Value> Value_t;
     typedef game::interface::RichTextValue::Ptr_t Ptr_t;
+
+    class AttributeLister : public util::rich::Visitor {
+     public:
+        virtual bool handleText(String_t /*text*/)
+            { return true; }
+        virtual bool startAttribute(const util::rich::Attribute& att)
+            { m_attributes.push_back(&att); return true; }
+        virtual bool endAttribute(const util::rich::Attribute& /*att*/)
+            { return true; }
+        size_t size() const
+            { return m_attributes.size(); }
+        const util::rich::Attribute* operator[](size_t x) const
+            { return m_attributes[x]; }
+     private:
+        std::vector<const util::rich::Attribute*> m_attributes;
+    };
 }
 
 /** Test IFRAdd. */
@@ -154,6 +171,13 @@ TestGameInterfaceRichTextFunctions::testRMid()
         afl::data::Segment seg;
         interpreter::Arguments args(seg, 0, 4);
         TS_ASSERT_THROWS(game::interface::IFRMid(s, args), interpreter::Error);
+    }
+    {
+        // RMid(EMPTY, EMPTY) = EMPTY
+        afl::data::Segment seg;
+        interpreter::Arguments args(seg, 0, 2);
+        Value_t result(game::interface::IFRMid(s, args));
+        TS_ASSERT(result.get() == 0);
     }
 }
 
@@ -291,22 +315,6 @@ TestGameInterfaceRichTextFunctions::testRStyle()
     afl::io::NullFileSystem fs;
     game::Session s(tx, fs);
 
-    class AttributeLister : public util::rich::Visitor {
-     public:
-        virtual bool handleText(String_t /*text*/)
-            { return true; }
-        virtual bool startAttribute(const util::rich::Attribute& att)
-            { m_attributes.push_back(&att); return true; }
-        virtual bool endAttribute(const util::rich::Attribute& /*att*/)
-            { return true; }
-        size_t size() const
-            { return m_attributes.size(); }
-        const util::rich::Attribute* operator[](size_t x) const
-            { return m_attributes[x]; }
-     private:
-        std::vector<const util::rich::Attribute*> m_attributes;
-    };
-
     // Test a number of invocations
     {
         // RStyle("red", "the text") = "the text"
@@ -370,6 +378,56 @@ TestGameInterfaceRichTextFunctions::testRStyle()
         TS_ASSERT(satt != 0);
         TS_ASSERT_EQUALS(satt->getStyle(), util::rich::StyleAttribute::Big);
     }
+    {
+        // RStyle("big,red", "the text") = "the text"
+        afl::data::Segment seg;
+        seg.setNew(0, interpreter::makeStringValue("big,red"));
+        seg.setNew(1, interpreter::makeStringValue("the text"));
+        interpreter::Arguments args(seg, 0, 2);
+        Value_t result(game::interface::IFRStyle(s, args));
+        Ptr_t p;
+        TS_ASSERT(game::interface::checkRichArg(p, result.get()));
+        TS_ASSERT_EQUALS(p->getText(), "the text");
+        TS_ASSERT_EQUALS(p->getNumAttributes(), 2U);
+    }
+    {
+        // RStyle("", "text") = "text", with no attributes
+        afl::data::Segment seg;
+        seg.setNew(0, interpreter::makeStringValue(""));
+        seg.setNew(1, interpreter::makeStringValue("text"));
+        interpreter::Arguments args(seg, 0, 2);
+        Value_t result(game::interface::IFRStyle(s, args));
+        Ptr_t p;
+        TS_ASSERT(game::interface::checkRichArg(p, result.get()));
+        TS_ASSERT_EQUALS(p->getText(), "text");
+        TS_ASSERT_EQUALS(p->getNumAttributes(), 0U);
+    }
+    {
+        // RStyle("<invalid>", "text") -> fails
+        afl::data::Segment seg;
+        seg.setNew(0, interpreter::makeStringValue("<invalid>"));
+        seg.setNew(1, interpreter::makeStringValue("text"));
+        interpreter::Arguments args(seg, 0, 2);
+        TS_ASSERT_THROWS(game::interface::IFRStyle(s, args), interpreter::Error);
+    }
+    {
+        // RStyle(EMPTY, "text") -> EMPTY
+        afl::data::Segment seg;
+        seg.setNew(0, 0);
+        seg.setNew(1, interpreter::makeStringValue("text"));
+        interpreter::Arguments args(seg, 0, 2);
+        Value_t result(game::interface::IFRStyle(s, args));
+        TS_ASSERT(result.get() == 0);
+    }
+    {
+        // RStyle("red", EMPTY) -> EMPTY
+        afl::data::Segment seg;
+        seg.setNew(0, interpreter::makeStringValue("red"));
+        seg.setNew(1, 0);
+        interpreter::Arguments args(seg, 0, 2);
+        Value_t result(game::interface::IFRStyle(s, args));
+        TS_ASSERT(result.get() == 0);
+    }
 }
 
 /** Test IFRLink. */
@@ -392,6 +450,24 @@ TestGameInterfaceRichTextFunctions::testRLink()
         TS_ASSERT(game::interface::checkRichArg(p, result.get()));
         TS_ASSERT_EQUALS(p->getText(), "the text");
         TS_ASSERT_EQUALS(p->getNumAttributes(), 1U);
+    }
+    {
+        // RStyle(EMPTY, "the text") = EMTPY
+        afl::data::Segment seg;
+        seg.setNew(0, 0);
+        seg.setNew(1, interpreter::makeStringValue("the text"));
+        interpreter::Arguments args(seg, 0, 2);
+        Value_t result(game::interface::IFRLink(s, args));
+        TS_ASSERT(result.get() == 0);
+    }
+    {
+        // RStyle("link", EMPTY) = EMPTY
+        afl::data::Segment seg;
+        seg.setNew(0, interpreter::makeStringValue("link"));
+        seg.setNew(1, 0);
+        interpreter::Arguments args(seg, 0, 2);
+        Value_t result(game::interface::IFRLink(s, args));
+        TS_ASSERT(result.get() == 0);
     }
 }
 
@@ -416,5 +492,111 @@ TestGameInterfaceRichTextFunctions::testRXml()
         TS_ASSERT_EQUALS(p->getText(), "x>3");
         TS_ASSERT_EQUALS(p->getNumAttributes(), 2U);
     }
-
+    {
+        // RXml("<b>&0;</b>&gt;<b>&1;</b>") = "x>3"
+        afl::data::Segment seg;
+        seg.setNew(0, interpreter::makeStringValue("<b>&0;</b>&gt;<b>&1;</b>"));
+        interpreter::Arguments args(seg, 0, 3);
+        Value_t result(game::interface::IFRXml(s, args));
+        Ptr_t p;
+        TS_ASSERT(game::interface::checkRichArg(p, result.get()));
+        TS_ASSERT_EQUALS(p->getText(), ">");
+    }
+    {
+        // RXml(EMPTY, "x", 3) = EMPTY
+        afl::data::Segment seg;
+        seg.setNew(0, 0);
+        seg.setNew(1, interpreter::makeStringValue("x"));
+        seg.setNew(2, interpreter::makeIntegerValue(3));
+        interpreter::Arguments args(seg, 0, 3);
+        Value_t result(game::interface::IFRXml(s, args));
+        TS_ASSERT(result.get() == 0);
+    }
 }
+
+/** Test IFRAlign. */
+void
+TestGameInterfaceRichTextFunctions::testRAlign()
+{
+    afl::string::NullTranslator tx;
+    afl::io::NullFileSystem fs;
+    game::Session s(tx, fs);
+
+    {
+        // RAlign("text", 100, 1)
+        afl::data::Segment seg;
+        seg.setNew(0, interpreter::makeStringValue("text"));
+        seg.setNew(1, interpreter::makeIntegerValue(100));
+        seg.setNew(2, interpreter::makeIntegerValue(1));
+        interpreter::Arguments args(seg, 0, 3);
+        Value_t result(game::interface::IFRAlign(s, args));
+        Ptr_t p;
+        TS_ASSERT(game::interface::checkRichArg(p, result.get()));
+        TS_ASSERT_EQUALS(p->getText(), "text");
+        TS_ASSERT_EQUALS(p->getNumAttributes(), 1U);
+
+        AttributeLister att;
+        att.visit(*p);
+        TS_ASSERT_EQUALS(att.size(), 1U);
+        const util::rich::AlignmentAttribute* aatt = dynamic_cast<const util::rich::AlignmentAttribute*>(att[0]);
+        TS_ASSERT(aatt != 0);
+        TS_ASSERT_EQUALS(aatt->getWidth(), 100);
+        TS_ASSERT_EQUALS(aatt->getAlignment(), 1);
+    }
+    {
+        // RAlign("text", 200)
+        afl::data::Segment seg;
+        seg.setNew(0, interpreter::makeStringValue("text"));
+        seg.setNew(1, interpreter::makeIntegerValue(100));
+        interpreter::Arguments args(seg, 0, 2);
+        Value_t result(game::interface::IFRAlign(s, args));
+        Ptr_t p;
+        TS_ASSERT(game::interface::checkRichArg(p, result.get()));
+        TS_ASSERT_EQUALS(p->getText(), "text");
+        TS_ASSERT_EQUALS(p->getNumAttributes(), 1U);
+
+        AttributeLister att;
+        att.visit(*p);
+        TS_ASSERT_EQUALS(att.size(), 1U);
+        const util::rich::AlignmentAttribute* aatt = dynamic_cast<const util::rich::AlignmentAttribute*>(att[0]);
+        TS_ASSERT(aatt != 0);
+        TS_ASSERT_EQUALS(aatt->getWidth(), 100);
+        TS_ASSERT_EQUALS(aatt->getAlignment(), 0);   // default
+    }
+    {
+        // RAlign("text", "x") -> error
+        afl::data::Segment seg;
+        seg.setNew(0, interpreter::makeStringValue("text"));
+        seg.setNew(1, interpreter::makeStringValue("x"));
+        interpreter::Arguments args(seg, 0, 2);
+        TS_ASSERT_THROWS(game::interface::IFRAlign(s, args), interpreter::Error);
+    }
+    {
+        // RAlign("text", 100, 4) -> error
+        afl::data::Segment seg;
+        seg.setNew(0, interpreter::makeStringValue("text"));
+        seg.setNew(1, interpreter::makeIntegerValue(100));
+        seg.setNew(2, interpreter::makeIntegerValue(4));
+        interpreter::Arguments args(seg, 0, 3);
+        TS_ASSERT_THROWS(game::interface::IFRAlign(s, args), interpreter::Error);
+    }
+    {
+        // RAlign("text", EMPTY) = EMPTY
+        afl::data::Segment seg;
+        seg.setNew(0, interpreter::makeStringValue("text"));
+        seg.setNew(1, 0);
+        interpreter::Arguments args(seg, 0, 2);
+        Value_t result(game::interface::IFRAlign(s, args));
+        TS_ASSERT(result.get() == 0);
+    }
+    {
+        // RAlign(EMPTY, 100) = EMPTY
+        afl::data::Segment seg;
+        seg.setNew(0, 0);
+        seg.setNew(1, interpreter::makeIntegerValue(1));
+        interpreter::Arguments args(seg, 0, 2);
+        Value_t result(game::interface::IFRAlign(s, args));
+        TS_ASSERT(result.get() == 0);
+    }
+}
+

@@ -1,19 +1,20 @@
 /**
   *  \file game/interface/globalcontext.cpp
+  *  \brief Class game::interface::GlobalContext
   */
 
 #include "game/interface/globalcontext.hpp"
-#include "game/interface/globalproperty.hpp"
 #include "afl/base/countof.hpp"
-#include "interpreter/nametable.hpp"
-#include "interpreter/typehint.hpp"
-#include "interpreter/propertyacceptor.hpp"
-#include "interpreter/error.hpp"
 #include "game/game.hpp"
+#include "game/interface/globalproperty.hpp"
 #include "game/interface/playerproperty.hpp"
-#include "game/root.hpp"
 #include "game/interface/userinterfaceproperty.hpp"
 #include "game/interface/userinterfacepropertyaccessor.hpp"
+#include "game/root.hpp"
+#include "interpreter/error.hpp"
+#include "interpreter/nametable.hpp"
+#include "interpreter/propertyacceptor.hpp"
+#include "interpreter/typehint.hpp"
 
 namespace {
     enum GlobalDomain {
@@ -62,12 +63,12 @@ namespace {
         // SYSTEM.ERR -> global variable (localizable!)
         { "SYSTEM.GAMEDIRECTORY",  game::interface::igpGameDirectory,     GlobalPropertyDomain,   interpreter::thString },
         { "SYSTEM.GAMETYPE",       game::interface::igpRegSharewareText,  GlobalPropertyDomain,   interpreter::thString },
-        { "SYSTEM.GAMETYPE$",      game::interface::igpRegSharewareFlag,  GlobalPropertyDomain,   interpreter::thInt },
+        { "SYSTEM.GAMETYPE$",      game::interface::igpRegSharewareFlag,  GlobalPropertyDomain,   interpreter::thBool },
         // SYSTEM.GUI -> game::interface::registerConsoleCommands, client::si::registerCommands
         { "SYSTEM.HASPASSWORD",    game::interface::igpSystemHasPassword, GlobalPropertyDomain,   interpreter::thBool },
         { "SYSTEM.HOST",           game::interface::igpSystemHost,        GlobalPropertyDomain,   interpreter::thString },
         { "SYSTEM.HOST$",          game::interface::igpSystemHostCode,    GlobalPropertyDomain,   interpreter::thInt },
-        { "SYSTEM.HOSTVERSION",    game::interface::igpSystemHostVersion, GlobalPropertyDomain,   interpreter::thString },
+        { "SYSTEM.HOSTVERSION",    game::interface::igpSystemHostVersion, GlobalPropertyDomain,   interpreter::thInt },
         { "SYSTEM.LANGUAGE",       game::interface::igpSystemLanguage,    GlobalPropertyDomain,   interpreter::thString },
         { "SYSTEM.LOCAL",          game::interface::igpFileFormatLocal,   GlobalPropertyDomain,   interpreter::thInt },
         { "SYSTEM.PROGRAM",        game::interface::igpSystemProgram,     GlobalPropertyDomain,   interpreter::thString },
@@ -185,8 +186,8 @@ game::interface::GlobalContext::get(PropertyIndex_t index)
          case GlobalPropertyDomain:
             return getGlobalProperty(GlobalProperty(global_mapping[index].index), m_session);
          case MyPlayerPropertyDomain: {
-            Game* game = m_session.getGame().get();
-            Root* root = m_session.getRoot().get();
+            const Game* game = m_session.getGame().get();
+            const Root* root = m_session.getRoot().get();
             if (game != 0 && root != 0) {
                 return getPlayerProperty(game->getViewpointPlayer(),
                                          PlayerProperty(global_mapping[index].index),

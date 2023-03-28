@@ -99,10 +99,12 @@ namespace game {
         /** Access object cursors.
             \return object cursors */
         game::map::Cursors& cursors();
+        const game::map::Cursors& cursors() const;
 
         /** Access object selections.
             \return object selections */
         game::map::Selections& selections();
+        const game::map::Selections& selections() const;
 
         /** Access map configuration.
             \return map configuration */
@@ -276,8 +278,20 @@ game::Game::cursors()
     return m_cursors;
 }
 
+inline const game::map::Cursors&
+game::Game::cursors() const
+{
+    return m_cursors;
+}
+
 inline game::map::Selections&
 game::Game::selections()
+{
+    return m_selections;
+}
+
+inline const game::map::Selections&
+game::Game::selections() const
 {
     return m_selections;
 }

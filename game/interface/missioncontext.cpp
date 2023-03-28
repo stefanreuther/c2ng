@@ -1,12 +1,13 @@
 /**
   *  \file game/interface/missioncontext.cpp
+  *  \brief Class game::interface::MissionContext
   */
 
 #include "game/interface/missioncontext.hpp"
-#include "interpreter/nametable.hpp"
-#include "interpreter/typehint.hpp"
-#include "interpreter/propertyacceptor.hpp"
 #include "game/interface/missionproperty.hpp"
+#include "interpreter/nametable.hpp"
+#include "interpreter/propertyacceptor.hpp"
+#include "interpreter/typehint.hpp"
 
 namespace {
     enum MissionDomain {
@@ -33,8 +34,7 @@ namespace {
     };
 }
 
-game::interface::MissionContext::MissionContext(size_t slot,
-                                                afl::base::Ref<game::spec::ShipList> shipList)
+game::interface::MissionContext::MissionContext(size_t slot, afl::base::Ref<game::spec::ShipList> shipList)
     : m_slot(slot),
       m_shipList(shipList)
 { }

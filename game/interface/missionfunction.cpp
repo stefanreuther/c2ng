@@ -1,10 +1,11 @@
 /**
   *  \file game/interface/missionfunction.cpp
+  *  \brief Class game::interface::MissionFunction
   */
 
 #include "game/interface/missionfunction.hpp"
-#include "interpreter/arguments.hpp"
 #include "game/root.hpp"
+#include "interpreter/arguments.hpp"
 
 game::interface::MissionFunction::MissionFunction(Session& session)
     : m_session(session)

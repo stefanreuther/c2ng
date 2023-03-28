@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/vcrfunction.cpp
+  *  \brief Class game::interface::VcrFunction
   */
 
 #include <algorithm>
@@ -44,7 +45,7 @@ int32_t
 game::interface::VcrFunction::getDimension(int32_t which) const
 {
     if (which == 0) {
-        return 0;
+        return 1;
     } else {
         return getNumBattles() + 1;
     }

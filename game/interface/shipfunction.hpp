@@ -1,18 +1,22 @@
 /**
   *  \file game/interface/shipfunction.hpp
+  *  \brief Class game::interface::ShipFunction
   */
 #ifndef C2NG_GAME_INTERFACE_SHIPFUNCTION_HPP
 #define C2NG_GAME_INTERFACE_SHIPFUNCTION_HPP
 
-#include "interpreter/indexablevalue.hpp"
-#include "game/session.hpp"
 #include "game/interface/shipcontext.hpp"
+#include "game/session.hpp"
+#include "interpreter/indexablevalue.hpp"
 
 namespace game { namespace interface {
 
+    /** Implementation of the "Ship()" function. */
     class ShipFunction : public interpreter::IndexableValue {
      public:
-        ShipFunction(Session& session);
+        /** Constructor.
+            @param session Session */
+        explicit ShipFunction(Session& session);
 
         // IndexableValue:
         virtual ShipContext* get(interpreter::Arguments& args);

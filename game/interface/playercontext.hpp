@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/playercontext.hpp
+  *  \brief Class game::interface::PlayerContext
   */
 #ifndef C2NG_GAME_INTERFACE_PLAYERCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_PLAYERCONTEXT_HPP
@@ -12,9 +13,21 @@
 
 namespace game { namespace interface {
 
+    /** Player context.
+        Implements the result of the Player() function.
+        To create, usually use PlayerContext::create().
+
+        @see PlayerFunction */
     class PlayerContext : public interpreter::SimpleContext, public interpreter::Context::ReadOnlyAccessor {
      public:
+        /** Constructor.
+            @param nr    Player number
+            @param game  Game (for teams, scores)
+            @param root  Root (for host configuration, players)
+            @param tx    Translator */
         PlayerContext(int nr, afl::base::Ref<Game> game, afl::base::Ref<Root> root, afl::string::Translator& tx);
+
+        /** Destructor. */
         ~PlayerContext();
 
         // Context:
@@ -29,6 +42,10 @@ namespace game { namespace interface {
         virtual String_t toString(bool readable) const;
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
+        /** Create PlayerContext.
+            @param nr      Player number
+            @param session Session
+            @return newly-allocated PlayerContext; null if preconditions are missing */
         static PlayerContext* create(int nr, Session& session);
 
      private:

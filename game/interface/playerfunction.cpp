@@ -1,12 +1,13 @@
 /**
   *  \file game/interface/playerfunction.cpp
+  *  \brief Class game::interface::PlayerFunction
   */
 
 #include "game/interface/playerfunction.hpp"
-#include "interpreter/arguments.hpp"
-#include "game/root.hpp"
 #include "game/game.hpp"
 #include "game/interface/playercontext.hpp"
+#include "game/root.hpp"
+#include "interpreter/arguments.hpp"
 
 /* @q Player(uid:Int):Obj (Function, Context)
    Access player properties such as other players' race names and scores.
@@ -26,7 +27,7 @@ game::interface::PlayerFunction::PlayerFunction(Session& session)
 { }
 
 // IndexableValue:
-afl::data::Value*
+interpreter::Context*
 game::interface::PlayerFunction::get(interpreter::Arguments& args)
 {
     // Check player number

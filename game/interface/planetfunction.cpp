@@ -1,12 +1,13 @@
 /**
   *  \file game/interface/planetfunction.cpp
+  *  \brief Class game::interface::PlanetFunction
   */
 
 #include "game/interface/planetfunction.hpp"
-#include "interpreter/arguments.hpp"
-#include "game/turn.hpp"
 #include "game/game.hpp"
 #include "game/interface/planetcontext.hpp"
+#include "game/turn.hpp"
+#include "interpreter/arguments.hpp"
 
 game::interface::PlanetFunction::PlanetFunction(Session& session)
     : m_session(session)
@@ -57,7 +58,7 @@ game::interface::PlanetFunction::getDimension(int32_t which) const
         return 1;
     } else {
         if (Game* game = m_session.getGame().get()) {
-            return game->currentTurn().universe().planets().size();
+            return game->currentTurn().universe().planets().size() + 1;
         } else {
             return 0;
         }

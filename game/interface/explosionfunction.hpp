@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/explosionfunction.hpp
+  *  \brief Class game::interface::ExplosionFunction
   */
 #ifndef C2NG_GAME_INTERFACE_EXPLOSIONFUNCTION_HPP
 #define C2NG_GAME_INTERFACE_EXPLOSIONFUNCTION_HPP
@@ -9,9 +10,12 @@
 
 namespace game { namespace interface {
 
+    /** Implementation of the "Explosion" function. */
     class ExplosionFunction : public interpreter::IndexableValue {
      public:
-        ExplosionFunction(Session& session);
+        /** Constructor.
+            @param session Session */
+        explicit ExplosionFunction(Session& session);
 
         // IndexableValue:
         virtual ExplosionContext* get(interpreter::Arguments& args);

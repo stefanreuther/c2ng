@@ -114,12 +114,12 @@ game::interface::BaseTaskPredictor::predictInstruction(const String_t& name, int
 {
     // ex WBaseTaskPredictor::predictInstruction, CBaseTaskScreen.PredictOne
     if (name == "BUILDSHIP" || name == "ENQUEUESHIP") {
-        ShipBuildOrder order;
-        if (parseBuildShipCommand(args, order, m_shipList)) {
-            if (name == "ENQUEUESHIP" && order.getHullIndex() > 0 && m_planet.getBaseBuildOrder().getHullIndex() > 0) {
+        afl::base::Optional<ShipBuildOrder> order = parseBuildShipCommand(args, m_shipList);
+        if (const ShipBuildOrder* p = order.get()) {
+            if (name == "ENQUEUESHIP" && p->getHullIndex() > 0 && m_planet.getBaseBuildOrder().getHullIndex() > 0) {
                 advanceTurn();
             }
-            postBuildOrder(order);
+            postBuildOrder(*p);
         }
         return true;
     } else if (name == "SETFCODE") {

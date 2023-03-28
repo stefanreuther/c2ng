@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/richtextvalue.cpp
+  *  \brief Class game::interface::RichTextValue
   */
 
 #include "game/interface/richtextvalue.hpp"
@@ -34,7 +35,7 @@ game::interface::RichTextValue::clone() const
     return new RichTextValue(m_value);
 }
 
-game::interface::RichTextValue::Ref_t
+const game::interface::RichTextValue::Ref_t&
 game::interface::RichTextValue::get() const
 {
     return m_value;

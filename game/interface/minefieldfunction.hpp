@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/minefieldfunction.hpp
+  *  \brief Class game::interface::MinefieldFunction
   */
 #ifndef C2NG_GAME_INTERFACE_MINEFIELDFUNCTION_HPP
 #define C2NG_GAME_INTERFACE_MINEFIELDFUNCTION_HPP
@@ -9,12 +10,15 @@
 
 namespace game { namespace interface {
 
+    /** Implementation of "Minefield()" function. */
     class MinefieldFunction : public interpreter::IndexableValue {
      public:
-        MinefieldFunction(Session& session);
+        /** Constructor.
+            @param session Session */
+        explicit MinefieldFunction(Session& session);
 
         // IndexableValue:
-        virtual afl::data::Value* get(interpreter::Arguments& args);
+        virtual interpreter::Context* get(interpreter::Arguments& args);
         virtual void set(interpreter::Arguments& args, afl::data::Value* value);
 
         // CallableValue:

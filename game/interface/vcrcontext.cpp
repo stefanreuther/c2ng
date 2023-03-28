@@ -1,15 +1,16 @@
 /**
   *  \file game/interface/vcrcontext.cpp
+  *  \brief Class game::interface::VcrContext
   */
 
 #include "game/interface/vcrcontext.hpp"
-#include "interpreter/nametable.hpp"
+#include "afl/string/format.hpp"
+#include "game/game.hpp"
 #include "game/interface/vcrproperty.hpp"
 #include "game/interface/vcrsideproperty.hpp"
-#include "interpreter/typehint.hpp"
-#include "afl/string/format.hpp"
+#include "interpreter/nametable.hpp"
 #include "interpreter/propertyacceptor.hpp"
-#include "game/game.hpp"
+#include "interpreter/typehint.hpp"
 
 namespace {
     enum VcrDomain {
@@ -48,7 +49,7 @@ namespace {
         { "LEFT.OWNER.ADJ",           game::interface::ivsOwnerAdj,      LeftPropertyDomain,  interpreter::thString },
         { "LEFT.SHIELD",              game::interface::ivsShield,        LeftPropertyDomain,  interpreter::thInt },
         { "LEFT.STATUS",              game::interface::ivsStatus,        LeftPropertyDomain,  interpreter::thString },
-        { "LEFT.STATUS$",             game::interface::ivsStatusRaw,     LeftPropertyDomain,  interpreter::thString },
+        { "LEFT.STATUS$",             game::interface::ivsStatusRaw,     LeftPropertyDomain,  interpreter::thInt },
         { "LEFT.TORP",                game::interface::ivsTorpName,      LeftPropertyDomain,  interpreter::thString },
         { "LEFT.TORP$",               game::interface::ivsTorpId,        LeftPropertyDomain,  interpreter::thInt },
         { "LEFT.TORP.COUNT",          game::interface::ivsTorpCount,     LeftPropertyDomain,  interpreter::thInt },
@@ -85,7 +86,7 @@ namespace {
         { "RIGHT.OWNER.ADJ",          game::interface::ivsOwnerAdj,      RightPropertyDomain, interpreter::thString },
         { "RIGHT.SHIELD",             game::interface::ivsShield,        RightPropertyDomain, interpreter::thInt },
         { "RIGHT.STATUS",             game::interface::ivsStatus,        RightPropertyDomain, interpreter::thString },
-        { "RIGHT.STATUS$",            game::interface::ivsStatusRaw,     RightPropertyDomain, interpreter::thString },
+        { "RIGHT.STATUS$",            game::interface::ivsStatusRaw,     RightPropertyDomain, interpreter::thInt },
         { "RIGHT.TORP",               game::interface::ivsTorpName,      RightPropertyDomain, interpreter::thString },
         { "RIGHT.TORP$",              game::interface::ivsTorpId,        RightPropertyDomain, interpreter::thInt },
         { "RIGHT.TORP.COUNT",         game::interface::ivsTorpCount,     RightPropertyDomain, interpreter::thInt },
@@ -101,9 +102,9 @@ namespace {
 
 game::interface::VcrContext::VcrContext(size_t battleNumber,
                                         Session& session,
-                                        afl::base::Ref<Root> root,     // for PlayerList
-                                        afl::base::Ref<Turn> turn,     // for Turn
-                                        afl::base::Ref<game::spec::ShipList> shipList)
+                                        afl::base::Ref<const Root> root,
+                                        afl::base::Ref<const Turn> turn,
+                                        afl::base::Ref<const game::spec::ShipList> shipList)
     : m_battleNumber(battleNumber),
       m_session(session),
       m_root(root),
@@ -155,7 +156,7 @@ bool
 game::interface::VcrContext::next()
 {
     // ex IntVcrContext::next
-    if (game::vcr::Database* db = m_turn->getBattles().get()) {
+    if (const game::vcr::Database* db = m_turn->getBattles().get()) {
         if (m_battleNumber + 1 < db->getNumBattles()) {
             ++m_battleNumber;
             return true;
@@ -198,6 +199,28 @@ game::interface::VcrContext::store(interpreter::TagNode& out, afl::io::DataSink&
     rejectStore(out, aux, ctx);
 }
 
+game::interface::VcrContext*
+game::interface::VcrContext::create(size_t battleNumber, Session& session)
+{
+    // Check major objects
+    const Root* r = session.getRoot().get();
+    const Game* g = session.getGame().get();
+    const game::spec::ShipList* s = session.getShipList().get();
+    if (r == 0 || g == 0 || s == 0) {
+        return 0;
+    }
+
+    // Check presence of battle
+    const Turn& t = g->currentTurn();
+    game::vcr::Database* db = t.getBattles().get();
+    if (db == 0 || db->getBattle(battleNumber) == 0) {
+        return 0;
+    }
+
+    // OK
+    return new VcrContext(battleNumber, session, *r, t, *s);
+}
+
 game::vcr::Battle*
 game::interface::VcrContext::getBattle() const
 {
@@ -206,26 +229,4 @@ game::interface::VcrContext::getBattle() const
     } else {
         return 0;
     }
-}
-
-game::interface::VcrContext*
-game::interface::VcrContext::create(size_t battleNumber, Session& session)
-{
-    // Check major objects
-    Root* r = session.getRoot().get();
-    Game* g = session.getGame().get();
-    game::spec::ShipList* s = session.getShipList().get();
-    if (r == 0 || g == 0 || s == 0) {
-        return 0;
-    }
-
-    // Check presence of battle
-    Turn& t = g->currentTurn();
-    game::vcr::Database* db = t.getBattles().get();
-    if (db == 0 || db->getBattle(battleNumber) == 0) {
-        return 0;
-    }
-
-    // OK
-    return new VcrContext(battleNumber, session, *r, t, *s);
 }

@@ -9,16 +9,18 @@
 #include "afl/io/textreader.hpp"
 #include "afl/io/textwriter.hpp"
 #include "game/session.hpp"
-#include "interpreter/arguments.hpp"
-#include "interpreter/process.hpp"
 
 namespace game { namespace interface {
 
-    void IFUIInput(game::Session& session, interpreter::Process& proc, interpreter::Arguments& args);
-
     /** Register console commands.
         Call this function only when operating in a console application.
-        For a GUI application, use client::si::registerCommands(). */
+        For a GUI application, use client::si::registerCommands().
+
+        Console commands bypass the regular logger and work directly on the program's standard input/output.
+
+        @param session Session
+        @param in      Standard input stream
+        @param out     Standard output stream */
     void registerConsoleCommands(Session& session, afl::base::Ref<afl::io::TextReader> in, afl::base::Ref<afl::io::TextWriter> out);
 
 } }

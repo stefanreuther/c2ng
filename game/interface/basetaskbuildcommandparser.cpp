@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/basetaskbuildcommandparser.cpp
+  *  \brief Class game::interface::BaseTaskBuildCommandParser
   */
 
 #include "game/interface/basetaskbuildcommandparser.hpp"
@@ -16,10 +17,9 @@ game::interface::BaseTaskBuildCommandParser::predictInstruction(const String_t& 
 {
     // ex WBaseTaskBuildCommandParser::predictInstruction
     if (name == "BUILDSHIP" || name == "ENQUEUESHIP") {
-        // parseBuildShipCommand may produce a partial, invalid order when it returns false!
-        ShipBuildOrder newOrder;
-        if (parseBuildShipCommand(args, newOrder, m_shipList)) {
-            m_order = newOrder;
+        afl::base::Optional<ShipBuildOrder> newOrder = parseBuildShipCommand(args, m_shipList);
+        if (const ShipBuildOrder* p = newOrder.get()) {
+            m_order = *p;
             m_verb = name;
         }
     }

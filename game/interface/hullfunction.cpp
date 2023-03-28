@@ -1,10 +1,11 @@
 /**
   *  \file game/interface/hullfunction.cpp
+  *  \brief Class game::interface::HullFunction
   */
 
 #include "game/interface/hullfunction.hpp"
-#include "interpreter/arguments.hpp"
 #include "game/interface/hullcontext.hpp"
+#include "interpreter/arguments.hpp"
 
 /* @q Hull(id:Int):Obj (Function, Context)
    Access hull properties.
@@ -24,7 +25,7 @@ game::interface::HullFunction::HullFunction(Session& session)
 { }
 
 // IndexableValue:
-afl::data::Value*
+interpreter::Context*
 game::interface::HullFunction::get(interpreter::Arguments& args)
 {
     // ex int/if/hullif.h:IFHullGet
@@ -59,9 +60,11 @@ game::interface::HullFunction::makeFirstContext()
 {
     // ex int/if/hullif.h:IFHullMake
     game::spec::ShipList* list = m_session.getShipList().get();
-    Root* root = m_session.getRoot().get();
-    if (list != 0 && root != 0 && list->hulls().size() > 0) {
-        return new HullContext(1, *list, *m_session.getRoot());
+    const Root* root = m_session.getRoot().get();
+    if (list != 0 && root != 0) {
+        if (const game::spec::Hull* firstHull = list->hulls().findNext(0)) {
+            return new HullContext(firstHull->getId(), *list, *root);
+        }
     }
     return 0;
 }

@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/minefieldcontext.cpp
+  *  \brief Class game::interface::MinefieldContext
   */
 
 #include "game/interface/minefieldcontext.hpp"
@@ -34,6 +35,7 @@ namespace {
         { "UNITS",           game::interface::impUnits,          MinefieldPropertyDomain, interpreter::thInt },
         { "UNMARK",          game::interface::immUnmark,         MinefieldMethodDomain,   interpreter::thProcedure },
     };
+
     class MinefieldMethodValue : public interpreter::ProcedureValue {
      public:
         MinefieldMethodValue(int id,
@@ -62,7 +64,7 @@ namespace {
     };
 }
 
-game::interface::MinefieldContext::MinefieldContext(int id, afl::base::Ref<Root> root, afl::base::Ref<Game> game, afl::string::Translator& tx)
+game::interface::MinefieldContext::MinefieldContext(Id_t id, afl::base::Ref<const Root> root, afl::base::Ref<Game> game, afl::string::Translator& tx)
     : m_id(id),
       m_root(root),
       m_game(game),
@@ -176,8 +178,7 @@ game::interface::MinefieldContext::create(int id, Session& session, bool force)
 {
     // ex values.pas:CreateMinefieldContext
     Game* g = session.getGame().get();
-    Root* r = session.getRoot().get();
-    // FIXME: the minefields().get() test is not in PCC2 for MinefieldFunction::get()
+    const Root* r = session.getRoot().get();
     if (g != 0 && r != 0 && (force || g->currentTurn().universe().minefields().get(id) != 0)) {
         return new MinefieldContext(id, *r, *g, session.translator());
     } else {

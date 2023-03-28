@@ -1,15 +1,16 @@
 /**
   *  \file game/interface/inboxsubsetvalue.hpp
+  *  \brief Class game::interface::InboxSubsetValue
   */
 #ifndef C2NG_GAME_INTERFACE_INBOXSUBSETVALUE_HPP
 #define C2NG_GAME_INTERFACE_INBOXSUBSETVALUE_HPP
 
 #include <vector>
 #include <cstddef>
-#include "interpreter/indexablevalue.hpp"
+#include "afl/string/translator.hpp"
 #include "game/game.hpp"
 #include "game/root.hpp"
-#include "afl/string/translator.hpp"
+#include "interpreter/indexablevalue.hpp"
 
 namespace game { namespace interface {
 
@@ -20,13 +21,22 @@ namespace game { namespace interface {
 
         This needs to be a separate context instead of a (generalized) InboxContext looking at a SubsetMailbox
         because the Ids it publishes are Ids of the original inbox
-        (i.e. Messages(2).Id=17 if InMsg(17).FullText=Messages(2).FullText (not Messages(2).Id=2). */
+        (i.e. Messages(2).Id=17 if InMsg(17).FullText=Messages(2).FullText (not Messages(2).Id=2).
+
+        To create, usually use InboxSubsetValue::create(). */
     class InboxSubsetValue : public interpreter::IndexableValue {
      public:
+        /** Constructor.
+            @param indexes   Indexes (0-based)
+            @param tx        Translator
+            @param root      Root
+            @param game      Game */
         InboxSubsetValue(const std::vector<size_t>& indexes,
                          afl::string::Translator& tx,
                          afl::base::Ref<const Root> root,
                          afl::base::Ref<const Game> game);
+
+        /** Destructor. */
         ~InboxSubsetValue();
 
         virtual afl::data::Value* get(interpreter::Arguments& args);
@@ -37,6 +47,12 @@ namespace game { namespace interface {
         virtual String_t toString(bool readable) const;
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
+        /** Constructor.
+            @param indexes   Indexes (0-based)
+            @param tx        Translator
+            @param root      Root
+            @param game      Game
+            @return newly-allocated InboxSubsetValue. Null if indexes is empty. */
         static InboxSubsetValue* create(const std::vector<size_t>& indexes, afl::string::Translator& tx, afl::base::Ref<const Root> root, afl::base::Ref<const Game> game);
 
      private:

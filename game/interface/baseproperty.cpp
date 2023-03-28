@@ -1,33 +1,47 @@
 /**
   *  \file game/interface/baseproperty.cpp
+  *  \brief Enum game::interface::BaseProperty
   */
 
 #include "game/interface/baseproperty.hpp"
-#include "interpreter/values.hpp"
-#include "game/map/planetformula.hpp"
-#include "interpreter/error.hpp"
-#include "interpreter/arguments.hpp"
-#include "game/tables/basemissionname.hpp"
-#include "game/map/ship.hpp"
-#include "game/turn.hpp"
 #include "afl/string/format.hpp"
+#include "game/map/planetformula.hpp"
+#include "game/map/ship.hpp"
+#include "game/tables/basemissionname.hpp"
+#include "game/turn.hpp"
+#include "interpreter/arguments.hpp"
+#include "interpreter/error.hpp"
 #include "interpreter/indexablevalue.hpp"
+#include "interpreter/values.hpp"
 
-using interpreter::makeIntegerValue;
-using interpreter::makeStringValue;
+using afl::base::Ptr;
+using afl::base::Ref;
+using interpreter::Arguments;
+using interpreter::Error;
 using interpreter::makeBooleanValue;
+using interpreter::makeIntegerValue;
 using interpreter::makeOptionalIntegerValue;
 using interpreter::makeOptionalStringValue;
-using interpreter::Error;
-using interpreter::Arguments;
+using interpreter::makeStringValue;
 
 namespace {
+    /*
+     *  Implementation of an Array property
+     */
+    enum BaseArrayPropertyIdentifier {
+        bapEngineStorage,
+        bapHullStorage,
+        bapBeamStorage,
+        bapLauncherStorage,
+        bapAmmoStorage
+    };
+
     class BaseArrayProperty : public interpreter::IndexableValue {
      public:
         BaseArrayProperty(const game::map::Planet& planet,
-                          const game::config::HostConfiguration& config,
-                          afl::base::Ptr<const game::spec::ShipList> shipList,
-                          game::interface::BaseProperty property);
+                          const Ref<const game::Root>& root,
+                          const Ref<const game::spec::ShipList>& shipList,
+                          BaseArrayPropertyIdentifier property);
 
         // IndexableValue:
         virtual afl::data::Value* get(Arguments& args);
@@ -49,9 +63,9 @@ namespace {
         afl::data::Value* performArrayReference(Function_t func, int limit, int32_t arg, bool hull);
 
         const game::map::Planet& m_planet;
-        const game::config::HostConfiguration& m_config;
-        afl::base::Ptr<const game::spec::ShipList> m_shipList;
-        const game::interface::BaseProperty m_property;
+        Ref<const game::Root> m_root;
+        Ref<const game::spec::ShipList> m_shipList;
+        const BaseArrayPropertyIdentifier m_property;
     };
 
     game::IntegerProperty_t getBaseEngineStore(const game::map::Planet& p, const game::spec::ShipList& /*shipList*/, int n)
@@ -86,14 +100,26 @@ namespace {
             return p.getCargo(game::Element::fromTorpedoType(n));
         }
     }
+
+    BaseArrayProperty* makeArrayProperty(const game::map::Planet& pl,
+                                         const Ref<const game::Root>& root,
+                                         const Ptr<const game::spec::ShipList>& shipList,
+                                         BaseArrayPropertyIdentifier id)
+    {
+        if (shipList.get() != 0) {
+            return new BaseArrayProperty(pl, root, *shipList, id);
+        } else {
+            return 0;
+        }
+    }
 }
 
 BaseArrayProperty::BaseArrayProperty(const game::map::Planet& planet,
-                                     const game::config::HostConfiguration& config,
-                                     afl::base::Ptr<const game::spec::ShipList> shipList,
-                                     game::interface::BaseProperty property)
+                                     const Ref<const game::Root>& root,
+                                     const Ref<const game::spec::ShipList>& shipList,
+                                     BaseArrayPropertyIdentifier property)
     : m_planet(planet),
-      m_config(config),
+      m_root(root),
       m_shipList(shipList),
       m_property(property)
 { }
@@ -111,23 +137,22 @@ BaseArrayProperty::get(Arguments& args)
 
     int owner;
     switch (m_property) {
-     case game::interface::ibpEngineStorage:
+     case bapEngineStorage:
         return performArrayReference(getBaseEngineStore, m_shipList->engines().size(), arg, false);
-     case game::interface::ibpHullStorage:
+     case bapHullStorage:
         if (m_planet.getOwner().get(owner)) {
-            return performArrayReference(getBaseHullStoreSlot, m_shipList->hullAssignments().getMaxIndex(m_config, owner), arg, true);
+            return performArrayReference(getBaseHullStoreSlot, m_shipList->hullAssignments().getMaxIndex(m_root->hostConfiguration(), owner), arg, true);
         } else {
             return 0;
         }
-     case game::interface::ibpBeamStorage:
+     case bapBeamStorage:
         return performArrayReference(getBaseBeamStore, m_shipList->beams().size(), arg, false);
-     case game::interface::ibpLauncherStorage:
+     case bapLauncherStorage:
         return performArrayReference(getBaseLauncherStore, m_shipList->launchers().size(), arg, false);
-     case game::interface::ibpAmmoStorage:
+     case bapAmmoStorage:
         return performArrayReference(getBaseAmmoStore, m_shipList->launchers().size()+1, arg, false);
-     default:
-        return 0;
     }
+    return 0;
 }
 
 void
@@ -151,19 +176,18 @@ BaseArrayProperty::getDimension(int32_t which) const
         // Note: must add "+1" because nonexistant 0th element is counted as well!
         // "dim a(10)" produces an array that has "dim(a) = 10", and indexes 0..9.
         switch (m_property) {
-         case game::interface::ibpEngineStorage:
+         case bapEngineStorage:
             return m_shipList->engines().size() + 1;
-         case game::interface::ibpHullStorage:
+         case bapHullStorage:
             return m_shipList->hulls().size() + 1;
-         case game::interface::ibpBeamStorage:
+         case bapBeamStorage:
             return m_shipList->beams().size() + 1;
-         case game::interface::ibpLauncherStorage:
+         case bapLauncherStorage:
             return m_shipList->launchers().size() + 1;
-         case game::interface::ibpAmmoStorage:
+         case bapAmmoStorage:
             return m_shipList->launchers().size() + 1 + 1;
-         default:
-            return 0;
         }
+        return 0;
     }
 }
 
@@ -193,7 +217,7 @@ BaseArrayProperty::store(interpreter::TagNode& out, afl::io::DataSink& aux, inte
 BaseArrayProperty*
 BaseArrayProperty::clone() const
 {
-    return new BaseArrayProperty(m_planet, m_config, m_shipList, m_property);
+    return new BaseArrayProperty(m_planet, m_root, m_shipList, m_property);
 }
 
 /** Perform array reference.
@@ -225,7 +249,7 @@ BaseArrayProperty::performArrayReference(Function_t func, int limit, int32_t arg
     } else if (hull) {
         int owner;
         if (m_planet.getOwner().get(owner)) {
-            if (int slot = m_shipList->hullAssignments().getIndexFromHull(m_config, owner, arg)) {
+            if (int slot = m_shipList->hullAssignments().getIndexFromHull(m_root->hostConfiguration(), owner, arg)) {
                 return makeOptionalIntegerValue(func(m_planet, *m_shipList, slot));
             } else {
                 return makeIntegerValue(0);
@@ -238,17 +262,18 @@ BaseArrayProperty::performArrayReference(Function_t func, int limit, int32_t arg
     }
 }
 
-
+/*
+ *  Public Entry Points
+ */
 
 afl::data::Value*
 game::interface::getBaseProperty(const game::map::Planet& pl, BaseProperty ibp,
                                  afl::string::Translator& tx,
-                                 const game::config::HostConfiguration& config,
+                                 afl::base::Ref<const Root> root,
                                  afl::base::Ptr<const game::spec::ShipList> shipList,
-                                 afl::base::Ptr<Turn> turn)
+                                 afl::base::Ref<Turn> turn)
 {
     // ex int/if/baseif.h:getBaseProperty
-    // FIXME: check lifetime issues. If this gives out an array property, that one must keep config alive.
     if (!pl.isPlayable(game::map::Object::ReadOnly) || !pl.hasBase()) {
         return 0;
     }
@@ -266,7 +291,7 @@ game::interface::getBaseProperty(const game::map::Planet& pl, BaseProperty ibp,
         /* @q Defense.Base.Max:Int (Planet Property)
            Maximum starbase defense allowed. EMPTY if no base.
            @since PCC 1.1.16, PCC2 1.99.8 */
-        return makeOptionalIntegerValue(game::map::getMaxBuildings(pl, BaseDefenseBuilding, config));
+        return makeOptionalIntegerValue(game::map::getMaxBuildings(pl, BaseDefenseBuilding, root->hostConfiguration()));
      case ibpBaseFighters:
         /* @q Fighters:Int (Planet Property)
            Number of fighters on starbase. EMPTY if no base. */
@@ -277,7 +302,7 @@ game::interface::getBaseProperty(const game::map::Planet& pl, BaseProperty ibp,
            @since PCC 1.1.16, PCC2 1.99.8 */
         int owner;
         if (pl.getOwner().get(owner)) {
-            return makeIntegerValue(config[config.MaximumFightersOnBase](owner));
+            return makeIntegerValue(root->hostConfiguration()[game::config::HostConfiguration::MaximumFightersOnBase](owner));
         } else {
             return 0;
         }
@@ -306,7 +331,7 @@ game::interface::getBaseProperty(const game::map::Planet& pl, BaseProperty ibp,
         /* @q Build.Hull$:Int (Planet Property)
            Type of ship (hull Id) to build on starbase. EMPTY if no base, or no ship being built. */
         if (shipList.get() != 0) {
-            return makeOptionalIntegerValue(pl.getBaseBuildHull(config, shipList->hullAssignments()));
+            return makeOptionalIntegerValue(pl.getBaseBuildHull(root->hostConfiguration(), shipList->hullAssignments()));
         } else {
             return 0;
         }
@@ -316,7 +341,7 @@ game::interface::getBaseProperty(const game::map::Planet& pl, BaseProperty ibp,
            @see Name (Hull Property) */
         if (shipList.get() != 0) {
             int nr;
-            if (pl.getBaseBuildHull(config, shipList->hullAssignments()).get(nr)) {
+            if (pl.getBaseBuildHull(root->hostConfiguration(), shipList->hullAssignments()).get(nr)) {
                 if (const game::spec::Hull* hull = shipList->hulls().get(nr)) {
                     return makeStringValue(hull->getName(shipList->componentNamer()));
                 }
@@ -329,7 +354,7 @@ game::interface::getBaseProperty(const game::map::Planet& pl, BaseProperty ibp,
            @see Name.Short (Hull Property) */
         if (shipList.get() != 0) {
             int nr;
-            if (pl.getBaseBuildHull(config, shipList->hullAssignments()).get(nr)) {
+            if (pl.getBaseBuildHull(root->hostConfiguration(), shipList->hullAssignments()).get(nr)) {
                 if (const game::spec::Hull* hull = shipList->hulls().get(nr)) {
                     return makeStringValue(hull->getShortName(shipList->componentNamer()));
                 }
@@ -384,37 +409,35 @@ game::interface::getBaseProperty(const game::map::Planet& pl, BaseProperty ibp,
         /* @q Shipyard.Id:Int (Planet Property)
            Id of ship being worked on by starbase. EMPTY if no base. */
         return makeOptionalIntegerValue(pl.getBaseShipyardId());
-     case ibpShipyardName:
+     case ibpShipyardName: {
         /* @q Shipyard.Name:Str (Planet Property)
            Name of ship being worked on by starbase. EMPTY if no base, or no shipyard order set. */
-        if (Turn* t = turn.get()) {
-            int id;
-            if (pl.getBaseShipyardId().get(id)) {
-                if (const game::map::Ship* ship = t->universe().ships().get(id)) {
-                    return makeStringValue(ship->getName());
-                }
+        int id;
+        if (pl.getBaseShipyardId().get(id)) {
+            if (const game::map::Ship* ship = turn->universe().ships().get(id)) {
+                return makeStringValue(ship->getName());
             }
         }
         return 0;
-     case ibpShipyardStr:
+     }
+     case ibpShipyardStr: {
         /* @q Shipyard:Str (Planet Property)
            Shipyard order in human-readable form.
            A combination of {Shipyard.Action} and {Shipyard.Name}.
            EMPTY if no base, or no shipyard order set. */
-        if (Turn* t = turn.get()) {
-            int id, nr;
-            if (pl.getBaseShipyardId().get(id) && pl.getBaseShipyardAction().get(nr)) {
-                if (const game::map::Ship* ship = t->universe().ships().get(id)) {
-                    if (nr == FixShipyardAction) {
-                        return makeStringValue(afl::string::Format("Fix %s", ship->getName()));
-                    }
-                    if (nr == RecycleShipyardAction) {
-                        return makeStringValue(afl::string::Format("Recycle %s", ship->getName()));
-                    }
+        int id, nr;
+        if (pl.getBaseShipyardId().get(id) && pl.getBaseShipyardAction().get(nr)) {
+            if (const game::map::Ship* ship = turn->universe().ships().get(id)) {
+                if (nr == FixShipyardAction) {
+                    return makeStringValue(afl::string::Format("Fix %s", ship->getName()));
+                }
+                if (nr == RecycleShipyardAction) {
+                    return makeStringValue(afl::string::Format("Recycle %s", ship->getName()));
                 }
             }
         }
         return 0;
+     }
      case ibpTorpedoTech:
         /* @q Tech.Torpedo:Int (Planet Property)
            Torpedo tech level on starbase. EMPTY if no base. */
@@ -425,36 +448,39 @@ game::interface::getBaseProperty(const game::map::Planet& pl, BaseProperty ibp,
            Number of engines in starbase storage.
            Index can be 0 (=total number of engines) or an engine type (=number of engines of that type).
            EMPTY if no base. */
+        return makeArrayProperty(pl, root, shipList, bapEngineStorage);
+
      case ibpHullStorage:
         /* @q Storage.Hulls:Int() (Planet Property)
            Number of engines in starbase storage.
            Index can be 0 (=total number of hulls) or a hull type (=number of engines of that type).
            EMPTY if no base. */
+        return makeArrayProperty(pl, root, shipList, bapHullStorage);
+
      case ibpBeamStorage:
         /* @q Storage.Beams:Int() (Planet Property)
            Number of beams in starbase storage.
            Index can be 0 (=total number of beams) or a beam type (=number of beams of that type).
            EMPTY if no base. */
+        return makeArrayProperty(pl, root, shipList, bapBeamStorage);
+
      case ibpLauncherStorage:
         /* @q Storage.Launchers:Int() (Planet Property)
            Number of torpedo launchers in starbase storage.
            Index can be 0 (=total number of launchers) or a torpedo type (=number of launchers of that type).
            EMPTY if no base. */
+        return makeArrayProperty(pl, root, shipList, bapLauncherStorage);
+
      case ibpAmmoStorage:
         /* @q Storage.Ammo:Int() (Planet Property)
            Number of torpedoes or fighters in starbase storage.
            Index can be 0 (=total number of weapons), a torpedo type (=number of torpedoes of that type),
            or 11 (=number of fighters, see {Fighters (Planet Property)}.
            EMPTY if no base. */
-        if (shipList.get() != 0) {
-            return new BaseArrayProperty(pl, config, shipList, ibp);
-        } else {
-            return 0;
-        }
+        return makeArrayProperty(pl, root, shipList, bapAmmoStorage);
     }
     return 0;
 }
-
 
 void
 game::interface::setBaseProperty(game::map::Planet& pl, BaseProperty ibp, const afl::data::Value* value)

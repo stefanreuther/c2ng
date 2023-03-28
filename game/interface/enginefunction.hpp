@@ -1,20 +1,24 @@
 /**
   *  \file game/interface/enginefunction.hpp
+  *  \brief Class game::interface::EngineFunction
   */
 #ifndef C2NG_GAME_INTERFACE_ENGINEFUNCTION_HPP
 #define C2NG_GAME_INTERFACE_ENGINEFUNCTION_HPP
 
-#include "interpreter/indexablevalue.hpp"
 #include "game/session.hpp"
+#include "interpreter/indexablevalue.hpp"
 
 namespace game { namespace interface {
 
+    /** Implementation of the "Engine" function. */
     class EngineFunction : public interpreter::IndexableValue {
      public:
-        EngineFunction(Session& session);
+        /** Constructor.
+            @param session Session */
+        explicit EngineFunction(Session& session);
 
         // IndexableValue:
-        virtual afl::data::Value* get(interpreter::Arguments& args);
+        virtual interpreter::Context* get(interpreter::Arguments& args);
         virtual void set(interpreter::Arguments& args, afl::data::Value* value);
 
         // CallableValue:

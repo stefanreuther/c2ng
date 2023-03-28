@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/ionstormfunction.hpp
+  *  \brief Class game::interface::IonStormFunction
   */
 #ifndef C2NG_GAME_INTERFACE_IONSTORMFUNCTION_HPP
 #define C2NG_GAME_INTERFACE_IONSTORMFUNCTION_HPP
@@ -9,12 +10,15 @@
 
 namespace game { namespace interface {
 
+    /** Implementation of the "Storm" function. */
     class IonStormFunction : public interpreter::IndexableValue {
      public:
-        IonStormFunction(Session& session);
+        /** Constructor.
+            @param session Session */
+        explicit IonStormFunction(Session& session);
 
         // IndexableValue:
-        virtual afl::data::Value* get(interpreter::Arguments& args);
+        virtual interpreter::Context* get(interpreter::Arguments& args);
         virtual void set(interpreter::Arguments& args, afl::data::Value* value);
 
         // CallableValue:

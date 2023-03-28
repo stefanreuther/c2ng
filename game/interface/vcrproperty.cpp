@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/vcrproperty.cpp
+  *  \brief Enum game::interface::VcrProperty
   */
 
 #include "game/interface/vcrproperty.hpp"
@@ -19,9 +20,9 @@ afl::data::Value*
 game::interface::getVcrProperty(size_t battleNumber,
                                 VcrProperty ivp,
                                 Session& session,
-                                afl::base::Ref<Root> root,     // for PlayerList
-                                afl::base::Ref<Turn> turn,     // for Turn
-                                afl::base::Ref<game::spec::ShipList> shipList)
+                                afl::base::Ref<const Root> root,     // for PlayerList
+                                afl::base::Ref<const Turn> turn,     // for Turn
+                                afl::base::Ref<const game::spec::ShipList> shipList)
 {
     // ex int/if/vcrif.h:getVcrProperty
     Battle* battle;

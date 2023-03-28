@@ -1,17 +1,18 @@
 /**
   *  \file game/interface/ionstormproperty.cpp
+  *  \brief Enum game::interface::IonStormProperty
   */
 
 #include "game/interface/ionstormproperty.hpp"
+#include "afl/string/format.hpp"
+#include "game/tables/headingname.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/values.hpp"
-#include "game/tables/headingname.hpp"
-#include "afl/string/format.hpp"
 
+using interpreter::makeBooleanValue;
 using interpreter::makeIntegerValue;
 using interpreter::makeOptionalIntegerValue;
 using interpreter::makeOptionalStringValue;
-using interpreter::makeBooleanValue;
 using interpreter::makeStringValue;
 
 afl::data::Value*

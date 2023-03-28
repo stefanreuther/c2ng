@@ -1,18 +1,22 @@
 /**
   *  \file game/interface/planetfunction.hpp
+  *  \brief Class game::interface::PlanetFunction
   */
 #ifndef C2NG_GAME_INTERFACE_PLANETFUNCTION_HPP
 #define C2NG_GAME_INTERFACE_PLANETFUNCTION_HPP
 
-#include "interpreter/indexablevalue.hpp"
-#include "game/session.hpp"
 #include "game/interface/planetcontext.hpp"
+#include "game/session.hpp"
+#include "interpreter/indexablevalue.hpp"
 
 namespace game { namespace interface {
 
+    /** Implementation of "Planet()" function. */
     class PlanetFunction : public interpreter::IndexableValue {
      public:
-        PlanetFunction(Session& session);
+        /** Constructor.
+            @param session Session */
+        explicit PlanetFunction(Session& session);
 
         // IndexableValue:
         virtual PlanetContext* get(interpreter::Arguments& args);

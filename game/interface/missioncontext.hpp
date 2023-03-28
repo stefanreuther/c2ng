@@ -1,19 +1,27 @@
 /**
   *  \file game/interface/missioncontext.hpp
+  *  \brief Class game::interface::MissionContext
   */
 #ifndef C2NG_GAME_INTERFACE_MISSIONCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_MISSIONCONTEXT_HPP
 
-#include "interpreter/simplecontext.hpp"
 #include "afl/base/ref.hpp"
 #include "game/spec/shiplist.hpp"
+#include "interpreter/simplecontext.hpp"
 
 namespace game { namespace interface {
 
+    /** Mission context.
+        Publishes a mission definition from a ship list.
+        Implements the return value of the "Mission()" function. */
     class MissionContext : public interpreter::SimpleContext, public interpreter::Context::ReadOnlyAccessor {
      public:
-        MissionContext(size_t slot,
-                       afl::base::Ref<game::spec::ShipList> shipList);
+        /** Constructor.
+            @param slot      Index into ShipList's MissionList, see game::spec::MissionList::at().
+            @param shipList  Ship list */
+        MissionContext(size_t slot, afl::base::Ref<game::spec::ShipList> shipList);
+
+        /** Destructor. */
         ~MissionContext();
 
         // Context:
@@ -30,6 +38,8 @@ namespace game { namespace interface {
 
      private:
         size_t m_slot;
+
+        // As of 20230404, intentionally not const to allow possible future modifications
         afl::base::Ref<game::spec::ShipList> m_shipList;
     };
 

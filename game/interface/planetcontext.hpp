@@ -1,24 +1,34 @@
 /**
   *  \file game/interface/planetcontext.hpp
+  *  \brief Class game::interface::PlanetContext
   */
 #ifndef C2NG_GAME_INTERFACE_PLANETCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_PLANETCONTEXT_HPP
 
-#include "interpreter/simplecontext.hpp"
 #include "afl/base/ref.hpp"
-#include "game/root.hpp"
 #include "game/game.hpp"
-#include "game/session.hpp"
 #include "game/map/planet.hpp"
+#include "game/root.hpp"
+#include "game/session.hpp"
+#include "interpreter/simplecontext.hpp"
 
 namespace game { namespace interface {
 
+    /** Planet context.
+        Implements the result of the Planet() function.
+        To create, usually use PlanetContext::create().
+
+        @see PlanetFunction */
     class PlanetContext : public interpreter::SimpleContext, public interpreter::Context::PropertyAccessor {
      public:
-        PlanetContext(int id,
-                      Session& session,
-                      afl::base::Ref<Root> root,
-                      afl::base::Ref<Game> game);
+        /** Constructor.
+            @param id       Planet Id
+            @param session  Session (for translator, ship list)
+            @param root     Root; mutable to attach listeners
+            @param game     Game */
+        PlanetContext(Id_t id, Session& session, afl::base::Ref<Root> root, afl::base::Ref<Game> game);
+
+        /** Destructor. */
         ~PlanetContext();
 
         // Context:
@@ -34,7 +44,11 @@ namespace game { namespace interface {
         virtual String_t toString(bool readable) const;
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
-        static PlanetContext* create(int id, Session& session);
+        /** Constructor.
+            @param id       Planet Id
+            @param session  Session (for translator, ship list)
+            @return newly-allocated PlanetContext; null if preconditions not satisfied */
+        static PlanetContext* create(Id_t id, Session& session);
 
      private:
         Id_t m_id;

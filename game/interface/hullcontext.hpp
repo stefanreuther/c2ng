@@ -1,20 +1,32 @@
 /**
   *  \file game/interface/hullcontext.hpp
+  *  \brief Class game::interface::HullContext
   */
 #ifndef C2NG_GAME_INTERFACE_HULLCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_HULLCONTEXT_HPP
 
-#include "interpreter/simplecontext.hpp"
-#include "game/spec/shiplist.hpp"
-#include "game/root.hpp"
 #include "afl/base/ref.hpp"
+#include "game/root.hpp"
 #include "game/session.hpp"
+#include "game/spec/shiplist.hpp"
+#include "interpreter/simplecontext.hpp"
 
 namespace game { namespace interface {
 
+    /** Hull context.
+        Implements the result of the Hull() function.
+        To create, usually use HullContext::create().
+
+        @see HullFunction */
     class HullContext : public interpreter::SimpleContext, public interpreter::Context::PropertyAccessor {
      public:
-        HullContext(int nr, afl::base::Ref<game::spec::ShipList> shipList, afl::base::Ref<game::Root> root);
+        /** Constructor.
+            @param nr       Hull number
+            @param shipList Ship list
+            @param root     Root */
+        HullContext(int nr, afl::base::Ref<game::spec::ShipList> shipList, afl::base::Ref<const Root> root);
+
+        /** Destructor. */
         ~HullContext();
 
         // Context:
@@ -30,12 +42,16 @@ namespace game { namespace interface {
         virtual String_t toString(bool readable) const;
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
+        /** Create HullContext.
+            @param nr      Hull number
+            @param session Session
+            @return newly-allocated HullContext; null if preconditions are missing */
         static HullContext* create(int nr, Session& session);
 
      private:
         int m_number;
         afl::base::Ref<game::spec::ShipList> m_shipList;
-        afl::base::Ref<game::Root> m_root;
+        afl::base::Ref<const Root> m_root;
     };
 
 } }

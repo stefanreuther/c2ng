@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/drawingmethod.cpp
+  *  \brief Enum game::interface::DrawingMethod
   */
 
 #include "game/interface/drawingmethod.hpp"
@@ -31,11 +32,6 @@ namespace {
         // ex values.pas:Marker_SetComment
         args.checkArgumentCount(1);
         if (*it != 0) {
-            // FIXME: PCC1 limits to markers:
-            // IF (context^.pp^.Typ<>3) THEN BEGIN
-            //   FPError_Str := 'Not a marker';
-            //   Exit;
-            // END;
             setDrawingProperty(**it, game::interface::idpComment, args.getNext());
             container.sig_change.raise();
         }

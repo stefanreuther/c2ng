@@ -81,10 +81,15 @@ namespace interpreter {
             \param value Newly-allocated value */
         void setNewGlobalValue(const char* name, afl::data::Value* value);
 
-        /** Get a global value.
+        /** Get a global value (const).
             \param name Name of value
             \return Value */
         const afl::data::Value* getGlobalValue(const char* name) const;
+
+        /** Get a global value (mutable).
+            \param name Name of value
+            \return Value */
+        afl::data::Value* getGlobalValue(const char* name);
 
         /** Access global property names.
             \return global property names */

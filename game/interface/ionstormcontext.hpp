@@ -5,14 +5,23 @@
 #ifndef C2NG_GAME_INTERFACE_IONSTORMCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_IONSTORMCONTEXT_HPP
 
-#include "interpreter/simplecontext.hpp"
-#include "game/session.hpp"
 #include "game/map/ionstorm.hpp"
+#include "game/session.hpp"
+#include "interpreter/simplecontext.hpp"
 
 namespace game { namespace interface {
 
+    /** Ion Storm context.
+        Implements the result of enumerating the "IonStorm" function.
+        To create, usually use IonStormContext::create().
+
+        @see IonStormFunction */
     class IonStormContext : public interpreter::SimpleContext, public interpreter::Context::PropertyAccessor {
      public:
+        /** Constructor.
+            @param id      Id
+            @param session Session
+            @param game    Game */
         IonStormContext(int id, Session& session, afl::base::Ref<Game> game);
         ~IonStormContext();
 
@@ -29,6 +38,10 @@ namespace game { namespace interface {
         virtual String_t toString(bool readable) const;
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
+        /** Create IonStormContext.
+            @param id      Id
+            @param session Session
+            @return newly-allocated IonStormContext; null if preconditions are missing (e.g. storm does not exist) */
         static IonStormContext* create(int id, Session& session);
 
      private:

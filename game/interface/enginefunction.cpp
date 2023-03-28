@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/enginefunction.cpp
+  *  \brief Class game::interface::EngineFunction
   */
 
 #include "game/interface/enginefunction.hpp"
@@ -24,7 +25,7 @@ game::interface::EngineFunction::EngineFunction(Session& session)
 { }
 
 // IndexableValue:
-afl::data::Value*
+interpreter::Context*
 game::interface::EngineFunction::get(interpreter::Arguments& args)
 {
     // ex int/if/specif.h:IFEngineGet
@@ -60,8 +61,8 @@ game::interface::EngineFunction::makeFirstContext()
 {
     // ex int/if/specif.h:IFEngineMake
     if (game::spec::ShipList* list = m_session.getShipList().get()) {
-        if (list->engines().size() > 0) {
-            return new EngineContext(1, *list);
+        if (const game::spec::Engine* e = list->engines().findNext(0)) {
+            return new EngineContext(e->getId(), *list);
         }
     }
     return 0;

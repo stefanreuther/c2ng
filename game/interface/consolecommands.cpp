@@ -10,6 +10,8 @@
 #include "game/extra.hpp"
 #include "game/root.hpp"
 #include "game/stringverifier.hpp"
+#include "interpreter/arguments.hpp"
+#include "interpreter/process.hpp"
 #include "interpreter/simpleprocedure.hpp"
 #include "interpreter/values.hpp"
 
@@ -30,7 +32,7 @@ namespace {
 
     class ConsoleExtra : public game::Extra {
      public:
-        ConsoleExtra(Ref<TextReader> in, Ref<TextWriter> out)
+        ConsoleExtra(const Ref<TextReader>& in, const Ref<TextWriter>& out)
             : m_in(in),
               m_out(out)
             { }
@@ -85,83 +87,91 @@ namespace {
         }
         return true;
     }
-}
 
-/* Global command "UI.Input", console version. */
-void
-game::interface::IFUIInput(game::Session& session, interpreter::Process& proc, interpreter::Arguments& args)
-{
-    // ex int/if/conif.cc:IFUIInput
-    // UI.Input <prompt>[, <title>, <maxChars>, <flags>, <default>]
-    args.checkArgumentCount(1, 5);
 
-    String_t prompt;
-    String_t title;
-    String_t defaultText;
-    int32_t  maxChars = 255;
-    int32_t  flags = 0;
-    int32_t  width = 0;
+    /*
+     *  Command Implementation
+     */
 
-    // Mandatory argument
-    if (!interpreter::checkStringArg(prompt, args.getNext())) {
-        return;
-    }
+    /* Global command "UI.Input", console version. */
+    void IFUIInput(game::Session& session, interpreter::Process& proc, interpreter::Arguments& args)
+    {
+        // ex int/if/conif.cc:IFUIInput
+        // UI.Input <prompt>[, <title>, <maxChars>, <flags>, <default>]
+        args.checkArgumentCount(1, 5);
 
-    // Optional arguments
-    title = prompt;
-    interpreter::checkStringArg(title, args.getNext());
-    interpreter::checkIntegerArg(maxChars, args.getNext(), 0, 32000);
-    interpreter::checkFlagArg(flags, &width, args.getNext(), "NHPFGM");
-    interpreter::checkStringArg(defaultText, args.getNext());
+        String_t prompt;
+        String_t title;
+        String_t defaultText;
+        int32_t  maxChars = 255;
+        int32_t  flags = 0;
+        int32_t  width = 0;
 
-    // Check status
-    ConsoleExtra* cx = getConsole(session);
-    if (!cx) {
-        throw interpreter::Error("No console");
-    }
-
-    // Convert flags
-    //   N = 1 = numeric
-    //   H = 2 = no high ASCII
-    //   P = 4 = password masking [ignored]
-    //   F = 8 = frame [ignored]
-    //   G = 16 = game charset
-    //   M = 32 = width is in ems [ignored]
-    while (1) {
-        // Show prompt and get initial input
-        String_t line;
-        cx->output().writeText(prompt + "> ");
-        cx->output().flush();
-        if (!cx->input().readLine(line)) {
-            // EOF
-            proc.setVariable("UI.RESULT", 0);
+        // Mandatory argument
+        if (!interpreter::checkStringArg(prompt, args.getNext())) {
             return;
         }
 
-        // Check whether input is valid, by decoding and sanitizing the UTF-8.
-        String_t result;
-        bool hadInvalidChars = false;
-        Utf8Reader rdr(afl::string::toBytes(line), UTF_FLAGS);
-        for (int32_t i = 0; rdr.hasMore() && i < maxChars; ++i) {
-            Unichar_t ch = rdr.eat();
-            if (acceptUnicode(session, ch, flags)) {
-                Utf8(UTF_FLAGS).append(result, ch);
-            } else {
-                hadInvalidChars = true;
-                Utf8(UTF_FLAGS).append(result, (flags & 1) ? '0' : '?');
+        // Optional arguments
+        title = prompt;
+        interpreter::checkStringArg(title, args.getNext());
+        interpreter::checkIntegerArg(maxChars, args.getNext(), 0, 32000);
+        interpreter::checkFlagArg(flags, &width, args.getNext(), "NHPFGM");
+        interpreter::checkStringArg(defaultText, args.getNext());
+
+        // Check status
+        ConsoleExtra* cx = getConsole(session);
+        if (!cx) {
+            throw interpreter::Error("No console");
+        }
+
+        // Convert flags
+        //   N = 1 = numeric
+        //   H = 2 = no high ASCII
+        //   P = 4 = password masking [ignored]
+        //   F = 8 = frame [ignored]
+        //   G = 16 = game charset
+        //   M = 32 = width is in ems [ignored]
+        while (1) {
+            // Show prompt and get initial input
+            String_t line;
+            cx->output().writeText(prompt + "> ");
+            cx->output().flush();
+            if (!cx->input().readLine(line)) {
+                // EOF
+                proc.setVariable("UI.RESULT", 0);
+                return;
             }
-        }
-        if (!hadInvalidChars) {
-            // Accepted input
-            afl::data::StringValue sv(result);
-            proc.setVariable("UI.RESULT", &sv);
-            return;
-        }
 
-        // Not accepted, continue
-        cx->output().writeLine(session.translator()("Your input contains characters that are not permitted at this place.\nPlease try again.\n"));
+            // Check whether input is valid, by decoding and sanitizing the UTF-8.
+            String_t result;
+            bool hadInvalidChars = false;
+            Utf8Reader rdr(afl::string::toBytes(line), UTF_FLAGS);
+            for (int32_t i = 0; rdr.hasMore() && i < maxChars; ++i) {
+                Unichar_t ch = rdr.eat();
+                if (acceptUnicode(session, ch, flags)) {
+                    Utf8(UTF_FLAGS).append(result, ch);
+                } else {
+                    hadInvalidChars = true;
+                    Utf8(UTF_FLAGS).append(result, (flags & 1) ? '0' : '?');
+                }
+            }
+            if (!hadInvalidChars) {
+                // Accepted input
+                afl::data::StringValue sv(result);
+                proc.setVariable("UI.RESULT", &sv);
+                return;
+            }
+
+            // Not accepted, continue
+            cx->output().writeLine(session.translator()("Your input contains characters that are not permitted at this place.\nPlease try again.\n"));
+        }
     }
 }
+
+/*
+ *  Main Entry Point
+ */
 
 void
 game::interface::registerConsoleCommands(Session& session, afl::base::Ref<afl::io::TextReader> in, afl::base::Ref<afl::io::TextWriter> out)

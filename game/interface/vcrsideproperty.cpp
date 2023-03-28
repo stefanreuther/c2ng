@@ -1,15 +1,16 @@
 /**
   *  \file game/interface/vcrsideproperty.cpp
+  *  \brief Enum game::interface::VcrSideProperty
   */
 
 #include "game/interface/vcrsideproperty.hpp"
-#include "interpreter/values.hpp"
-#include "game/vcr/object.hpp"
 #include "afl/string/format.hpp"
+#include "game/vcr/object.hpp"
+#include "interpreter/values.hpp"
 
+using interpreter::makeBooleanValue;
 using interpreter::makeIntegerValue;
 using interpreter::makeStringValue;
-using interpreter::makeBooleanValue;
 
 namespace {
     /** Convert status flags to script value.
@@ -108,7 +109,7 @@ game::interface::getVcrSideProperty(game::vcr::Battle& battle, size_t side, VcrS
         if (obj->getNumBays() > 0) {
             return makeStringValue("Fighters");
         } else if (obj->getNumLaunchers() > 0) {
-            if (game::spec::Component* comp = shipList.launchers().get(obj->getTorpedoType())) {
+            if (const game::spec::Component* comp = shipList.launchers().get(obj->getTorpedoType())) {
                 return makeStringValue(comp->getName(shipList.componentNamer()));
             } else {
                 return 0;
@@ -124,7 +125,7 @@ game::interface::getVcrSideProperty(game::vcr::Battle& battle, size_t side, VcrS
         if (obj->getNumBays() > 0) {
             return makeStringValue("Ftr");
         } else if (obj->getNumLaunchers() > 0) {
-            if (game::spec::Component* comp = shipList.launchers().get(obj->getTorpedoType())) {
+            if (const game::spec::Component* comp = shipList.launchers().get(obj->getTorpedoType())) {
                 return makeStringValue(comp->getShortName(shipList.componentNamer()));
             } else {
                 return 0;
@@ -175,8 +176,8 @@ game::interface::getVcrSideProperty(game::vcr::Battle& battle, size_t side, VcrS
         /* @q Left.Torp.Short:Str (Combat Property), Right.Torp.Short:Str (Combat Property)
            Torpedo type, short name. */
         if (obj->getNumLaunchers() > 0) {
-            if (game::spec::Component* comp = shipList.launchers().get(obj->getTorpedoType())) {
-                return makeStringValue(comp->getName(shipList.componentNamer()));
+            if (const game::spec::Component* comp = shipList.launchers().get(obj->getTorpedoType())) {
+                return makeStringValue(comp->getShortName(shipList.componentNamer()));
             } else {
                 return 0;
             }
@@ -188,8 +189,8 @@ game::interface::getVcrSideProperty(game::vcr::Battle& battle, size_t side, VcrS
         /* @q Left.Torp:Str (Combat Property), Right.Torp:Str (Combat Property)
            Torpedo type, full name. */
         if (obj->getNumLaunchers() > 0) {
-            if (game::spec::Component* comp = shipList.launchers().get(obj->getTorpedoType())) {
-                return makeStringValue(comp->getShortName(shipList.componentNamer()));
+            if (const game::spec::Component* comp = shipList.launchers().get(obj->getTorpedoType())) {
+                return makeStringValue(comp->getName(shipList.componentNamer()));
             } else {
                 return 0;
             }

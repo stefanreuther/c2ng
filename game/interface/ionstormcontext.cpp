@@ -4,15 +4,15 @@
   */
 
 #include "game/interface/ionstormcontext.hpp"
-#include "interpreter/typehint.hpp"
-#include "interpreter/nametable.hpp"
-#include "game/interface/ionstormproperty.hpp"
-#include "game/game.hpp"
-#include "game/turn.hpp"
-#include "game/map/universe.hpp"
-#include "interpreter/propertyacceptor.hpp"
 #include "afl/string/format.hpp"
+#include "game/game.hpp"
+#include "game/interface/ionstormproperty.hpp"
 #include "game/interface/objectcommand.hpp"
+#include "game/map/universe.hpp"
+#include "game/turn.hpp"
+#include "interpreter/nametable.hpp"
+#include "interpreter/propertyacceptor.hpp"
+#include "interpreter/typehint.hpp"
 
 namespace {
     enum IonStormDomain {

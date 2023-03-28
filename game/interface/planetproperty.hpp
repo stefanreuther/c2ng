@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/planetproperty.hpp
+  *  \brief Enum game::interface::PlanetProperty
   */
 #ifndef C2NG_GAME_INTERFACE_PLANETPROPERTY_HPP
 #define C2NG_GAME_INTERFACE_PLANETPROPERTY_HPP
@@ -14,6 +15,7 @@
 
 namespace game { namespace interface {
 
+    /** Planet property identifier. */
     enum PlanetProperty {
         ippBaseBuildFlag,
         ippBaseDefenseSpeed,
@@ -97,10 +99,24 @@ namespace game { namespace interface {
         ippTypeStr
     };
 
+    /** Get planet property.
+        @param pl      Planet
+        @param ipp     Property to retrieve
+        @param session Session (for translator, ReferenceContext, interface)
+        @param root    Root (for host configuration, host version, charset)
+        @param game    Game (for score definitions)
+        @return newly-allocated value */
     afl::data::Value* getPlanetProperty(const game::map::Planet& pl, PlanetProperty ipp,
                                         Session& session,
                                         afl::base::Ref<Root> root,
                                         afl::base::Ref<Game> game);
+
+    /** Set planet property.
+        @param pl      Planet
+        @param ipp     Property to set
+        @param value   Value to set
+        @param root    Root (for StringVerifier)
+        @throw interpreter::Error if value cannot be assigned */
     void setPlanetProperty(game::map::Planet& pl, PlanetProperty ipp, const afl::data::Value* value, Root& root);
 
 } }

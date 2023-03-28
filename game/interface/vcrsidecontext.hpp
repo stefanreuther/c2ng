@@ -1,27 +1,42 @@
 /**
   *  \file game/interface/vcrsidecontext.hpp
+  *  \brief Class game::interface::VcrSideContext
   */
 #ifndef C2NG_GAME_INTERFACE_VCRSIDECONTEXT_HPP
 #define C2NG_GAME_INTERFACE_VCRSIDECONTEXT_HPP
 
-#include "interpreter/simplecontext.hpp"
+#include "afl/base/ref.hpp"
 #include "game/root.hpp"
 #include "game/session.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/turn.hpp"
-#include "afl/base/ref.hpp"
 #include "game/vcr/battle.hpp"
+#include "interpreter/simplecontext.hpp"
 
 namespace game { namespace interface {
 
+    /** Properties of a VCR side.
+        Implements the result of the "Vcr().Unit()" function.
+        Use VcrSideContext::create() to create.
+
+        @see VcrContext, VcrSideFunction */
     class VcrSideContext : public interpreter::SimpleContext, public interpreter::Context::ReadOnlyAccessor {
      public:
+        /** Constructor.
+            @param battleNumber   Battle number, index into game::vcr::Database::getBattle()
+            @param side           Side, index into game::vcr::Battle::getObject()
+            @param session        Session (for translator)
+            @param root           Root (for players)
+            @param turn           Turn (for battles)
+            @param shipList       Ship list (for unit names) */
         VcrSideContext(size_t battleNumber,
                        size_t side,
                        Session& session,
-                       afl::base::Ref<Root> root,     // for PlayerList
-                       afl::base::Ref<Turn> turn,     // for Turn
-                       afl::base::Ref<game::spec::ShipList> shipList);
+                       afl::base::Ref<const Root> root,
+                       afl::base::Ref<const Turn> turn,
+                       afl::base::Ref<const game::spec::ShipList> shipList);
+
+        /** Destructor. */
         ~VcrSideContext();
 
         // Context:
@@ -39,18 +54,19 @@ namespace game { namespace interface {
         game::vcr::Battle* getBattle() const;
 
         /** Create a VcrSideContext for the current turn.
-            \param battleNumber Number of battle (0-based!)
-            \param side Side (0-based!)
-            \param session Session */
+            @param battleNumber   Battle number, index into game::vcr::Database::getBattle()
+            @param side           Side, index into game::vcr::Battle::getObject()
+            @param session        Session
+            @return newly-allocated VcrSideContext or null */
         static VcrSideContext* create(size_t battleNumber, size_t side, Session& session);
 
      private:
         const size_t m_battleNumber;
         size_t m_side;
         Session& m_session;
-        afl::base::Ref<Root> m_root;
-        afl::base::Ref<Turn> m_turn;
-        afl::base::Ref<game::spec::ShipList> m_shipList;
+        afl::base::Ref<const Root> m_root;
+        afl::base::Ref<const Turn> m_turn;
+        afl::base::Ref<const game::spec::ShipList> m_shipList;
     };
 
 } }

@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/planetproperty.cpp
+  *  \brief Enum game::interface::PlanetProperty
   */
 
 #include "game/interface/planetproperty.hpp"
@@ -23,17 +24,23 @@
 #include "interpreter/functionvalue.hpp"
 #include "interpreter/values.hpp"
 
-using interpreter::makeIntegerValue;
-using interpreter::makeBooleanValue;
-using interpreter::makeStringValue;
-using interpreter::makeOptionalIntegerValue;
-using interpreter::makeOptionalStringValue;
+using interpreter::Arguments;
+using interpreter::Error;
 using interpreter::checkIntegerArg;
 using interpreter::checkStringArg;
-using interpreter::Error;
-using interpreter::Arguments;
+using interpreter::makeBooleanValue;
+using interpreter::makeIntegerValue;
+using interpreter::makeOptionalIntegerValue;
+using interpreter::makeOptionalStringValue;
+using interpreter::makeStringValue;
 
 namespace {
+    /*
+     *  Implementation of planet's array properties
+     *
+     *  If we give out an array property, we must keep the appropriate objects alive.
+     *  For now, this is fulfilled by a Game never discarding Turns.
+     */
     class PlanetArrayProperty : public interpreter::FunctionValue {
      public:
         PlanetArrayProperty(const game::map::Planet& planet, afl::base::Ref<game::Game> game, game::interface::PlanetProperty property);
@@ -72,7 +79,7 @@ PlanetArrayProperty::get(Arguments& args)
     // ex planint.pas:ResolveScoreFunction
     switch (m_property) {
      case game::interface::ippScore: {
-        // FIXME: /* Documented in shipproperty.cc */
+        // Documented in shipproperty.cpp
         int32_t id;
         game::UnitScoreList::Index_t index;
         int16_t value, turn;
@@ -110,7 +117,6 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
                                    afl::base::Ref<Game> game)
 {
     // ex int/if/planetif.h:getPlanetProperty
-    // FIXME: check lifetime issues. If this gives out an array property, that one must keep config/shipList alive.
     int32_t n;
     switch (ipp) {
      case ippBaseDefenseSpeed:
@@ -508,7 +514,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
            Tax income from natives, megacredits.
            @since PCC2 1.99.15 */
         if (pl.getNativeTax().get(n)) {
-            // FIXME: PCC2 returns null when there are no natives, this return 0.
+            // @change PCC2 returns null when there are no natives, this return 0.
             return makeOptionalIntegerValue(getNativeDue(pl, root->hostConfiguration(), root->hostVersion(), n));
         } else {
             return 0;
@@ -674,7 +680,7 @@ game::interface::setPlanetProperty(game::map::Planet& pl, PlanetProperty ipp, co
      }
      case ippNativeTax:
         if (checkIntegerArg(iv, value, 0, 100)) {
-            if (!pl.getNativeRace().isValid()) {
+            if (pl.getNativeRace().orElse(-1) <= 0 || pl.getNatives().orElse(-1) <= 0) {
                 throw Error::notAssignable();
             } else {
                 pl.setNativeTax(iv);

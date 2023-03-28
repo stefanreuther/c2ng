@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/componentproperty.cpp
+  *  \brief Enum game::interface::ComponentProperty
   */
 
 #include "game/interface/componentproperty.hpp"

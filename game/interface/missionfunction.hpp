@@ -1,18 +1,22 @@
 /**
   *  \file game/interface/missionfunction.hpp
+  *  \brief Class game::interface::MissionFunction
   */
 #ifndef C2NG_GAME_INTERFACE_MISSIONFUNCTION_HPP
 #define C2NG_GAME_INTERFACE_MISSIONFUNCTION_HPP
 
+#include "game/interface/missioncontext.hpp"
 #include "game/session.hpp"
 #include "interpreter/indexablevalue.hpp"
-#include "game/interface/missioncontext.hpp"
 
 namespace game { namespace interface {
 
+    /** Implementation of the "Mission()" function. */
     class MissionFunction : public interpreter::IndexableValue {
      public:
-        MissionFunction(Session& session);
+        /** Constructor.
+            @param session Session */
+        explicit MissionFunction(Session& session);
 
         // IndexableValue:
         virtual MissionContext* get(interpreter::Arguments& args);

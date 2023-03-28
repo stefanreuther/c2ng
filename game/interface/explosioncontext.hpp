@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/explosioncontext.hpp
+  *  \brief Class game::interface::ExplosionContext
   */
 #ifndef C2NG_GAME_INTERFACE_EXPLOSIONCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_EXPLOSIONCONTEXT_HPP
@@ -11,9 +12,20 @@
 
 namespace game { namespace interface {
 
+    /** Explosion context.
+        Implements the result of enumerating the "Explosion" function.
+        To create, usually use ExplosionContext::create().
+
+        @see ExplosionFunction */
     class ExplosionContext : public interpreter::SimpleContext, public interpreter::Context::ReadOnlyAccessor {
      public:
+        /** Constructor.
+            @param id       Id (index into ExplosionType)
+            @param session  Session (for translator, interface)
+            @param turn     Turn */
         ExplosionContext(Id_t id, Session& session, afl::base::Ref<Turn> turn);
+
+        /** Destructor. */
         ~ExplosionContext();
 
         // Context:
@@ -28,6 +40,10 @@ namespace game { namespace interface {
         virtual String_t toString(bool readable) const;
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
+        /** Create ExplosionContext.
+            @param id      Id (index into ExplosionType)
+            @param session Session
+            @return newly-allocated ExplosionContext; null if preconditions are missing */
         static ExplosionContext* create(Id_t id, Session& session);
 
      private:

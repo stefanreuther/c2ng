@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/ufoproperty.cpp
+  *  \brief Enum game::interface::UfoProperty
   */
 
 #include "game/interface/ufoproperty.hpp"

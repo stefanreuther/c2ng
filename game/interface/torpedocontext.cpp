@@ -1,15 +1,16 @@
 /**
   *  \file game/interface/torpedocontext.cpp
+  *  \brief Class game::interface::TorpedoContext
   */
 
 #include "game/interface/torpedocontext.hpp"
-#include "interpreter/nametable.hpp"
-#include "interpreter/propertyacceptor.hpp"
-#include "interpreter/error.hpp"
-#include "game/spec/torpedo.hpp"
+#include "afl/string/format.hpp"
 #include "game/interface/componentproperty.hpp"
 #include "game/interface/weaponproperty.hpp"
-#include "afl/string/format.hpp"
+#include "game/spec/torpedo.hpp"
+#include "interpreter/error.hpp"
+#include "interpreter/nametable.hpp"
+#include "interpreter/propertyacceptor.hpp"
 
 namespace {
     enum TorpedoDomain { ComponentPropertyDomain, WeaponPropertyDomain };
@@ -32,7 +33,7 @@ namespace {
     };
 }
 
-game::interface::TorpedoContext::TorpedoContext(bool useLauncher, int nr, afl::base::Ref<game::spec::ShipList> shipList, afl::base::Ref<game::Root> root)
+game::interface::TorpedoContext::TorpedoContext(bool useLauncher, int nr, afl::base::Ref<game::spec::ShipList> shipList, afl::base::Ref<const Root> root)
     : m_useLauncher(useLauncher),
       m_number(nr),
       m_shipList(shipList),

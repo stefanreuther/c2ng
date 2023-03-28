@@ -36,7 +36,7 @@ namespace {
         { "NAME",      game::interface::irpPlainName,     0, interpreter::thString },
         { "NAME$",     game::interface::irpReferenceName, 0, interpreter::thString },
         { "NAME.FULL", game::interface::irpDetailedName,  0, interpreter::thString },
-        { "OBJECT",    game::interface::irpObject,        0, interpreter::thInt    },
+        { "OBJECT",    game::interface::irpObject,        0, interpreter::thNone   },
     };
 
     /* Reference type name table. */

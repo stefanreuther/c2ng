@@ -59,14 +59,19 @@ interpreter::World::setNewGlobalValue(const char* name, afl::data::Value* value)
     m_globalValues.setNew(index, value);
 }
 
-// Get a global value.
+// Get a global value (const).
 const afl::data::Value*
 interpreter::World::getGlobalValue(const char* name) const
 {
     return m_globalValues[m_globalPropertyNames.getIndexByName(name)];
 }
 
-
+// Get a global value (mutable).
+afl::data::Value*
+interpreter::World::getGlobalValue(const char* name)
+{
+    return m_globalValues[m_globalPropertyNames.getIndexByName(name)];
+}
 
 // Define a special command.
 void

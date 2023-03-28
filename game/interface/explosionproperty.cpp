@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/explosionproperty.cpp
+  *  \brief Enum game::interface::ExplosionProperty
   */
 
 #include "game/interface/explosionproperty.hpp"

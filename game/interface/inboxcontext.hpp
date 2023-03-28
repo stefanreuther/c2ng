@@ -27,6 +27,8 @@ namespace game { namespace interface {
                      afl::string::Translator& tx,
                      afl::base::Ref<const Root> root,
                      afl::base::Ref<const Game> game);
+
+        /** Destructor. */
         ~InboxContext();
 
         virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);

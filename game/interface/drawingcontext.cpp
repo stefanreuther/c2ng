@@ -1,17 +1,18 @@
 /**
   *  \file game/interface/drawingcontext.cpp
+  *  \brief Class game::interface::DrawingContext
   */
 
 #include "game/interface/drawingcontext.hpp"
-#include "interpreter/nametable.hpp"
-#include "interpreter/error.hpp"
-#include "interpreter/propertyacceptor.hpp"
-#include "game/interface/drawingproperty.hpp"
 #include "game/game.hpp"
 #include "game/interface/drawingmethod.hpp"
+#include "game/interface/drawingproperty.hpp"
 #include "interpreter/callablevalue.hpp"
-#include "interpreter/process.hpp"
+#include "interpreter/error.hpp"
+#include "interpreter/nametable.hpp"
 #include "interpreter/procedurevalue.hpp"
+#include "interpreter/process.hpp"
+#include "interpreter/propertyacceptor.hpp"
 
 namespace {
     enum DrawingDomain { DrawingPropertyDomain, DrawingMethodDomain };
@@ -57,7 +58,7 @@ namespace {
     };
 }
 
-game::interface::DrawingContext::DrawingContext(afl::base::Ref<Turn> turn, afl::base::Ref<Root> root, game::map::DrawingContainer::Iterator_t it)
+game::interface::DrawingContext::DrawingContext(afl::base::Ref<Turn> turn, afl::base::Ref<const Root> root, game::map::DrawingContainer::Iterator_t it)
     : m_turn(turn),
       m_root(root),
       m_iterator(it)
@@ -173,7 +174,7 @@ game::interface::DrawingContext::create(Session& session)
         return 0;
     }
 
-    Root* root = session.getRoot().get();
+    const Root* root = session.getRoot().get();
     if (root == 0) {
         return 0;
     }

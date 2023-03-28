@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/weaponproperty.cpp
+  *  \brief Enum game::interface::WeaponProperty
   */
 
 #include "game/interface/weaponproperty.hpp"
@@ -7,7 +8,6 @@
 
 using interpreter::makeIntegerValue;
 
-// /** Get property of a weapon. */
 afl::data::Value*
 game::interface::getWeaponProperty(const game::spec::Weapon& w, WeaponProperty iwp,
                                    const game::config::HostConfiguration& config,

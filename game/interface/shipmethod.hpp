@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/shipmethod.hpp
+  *  \brief Enum game::interface::ShipMethod
   */
 #ifndef C2NG_GAME_INTERFACE_SHIPMETHOD_HPP
 #define C2NG_GAME_INTERFACE_SHIPMETHOD_HPP
@@ -14,6 +15,7 @@
 
 namespace game { namespace interface {
 
+    /** Ship method identifier. */
     enum ShipMethod {
         ismMark,
         ismUnmark,
@@ -32,13 +34,25 @@ namespace game { namespace interface {
         ismSetFleet
     };
 
+    /** Call ship method.
+        @param sh        Ship
+        @param ism       Method to invoke
+        @param args      Parameters
+        @param process   Process (for cargo transfer return value, CARGO.REMAINDER)
+        @param session   Session (for translator, logger, ship properties)
+        @param root      Root (for setShipProperty() which needs it for config)
+        @param mapConfig Map configuration (for position lookups, e.g. in cargo transfer setup)
+        @param shipList  Ship list (for setShipProperty() which needs it for engines)
+        @param turn      Turn (for setShipProperty(), cargo transfer)
+        @throw interpreter::Error on error
+        @throw game::Exception on error */
     void callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter::Arguments& args,
-                        interpreter::Process& process,                        // needed for cargo transfer which needs it for CARGO.REMAINDER
-                        Session& session,                                     // needed for world()
-                        Root& root,                                           // needed for setShipProperty() which needs it for config
-                        const game::map::Configuration& mapConfig,            // needed for position lookups, e.g. in cargo transfer setup
-                        game::spec::ShipList& shipList,                       // needed for setShipProperty() which needs it for Engines
-                        Turn& turn);                                          // needed for setShipProperty() which needs it for universe
+                        interpreter::Process& process,
+                        Session& session,
+                        Root& root,
+                        const game::map::Configuration& mapConfig,
+                        const game::spec::ShipList& shipList,
+                        Turn& turn);
 
 } }
 

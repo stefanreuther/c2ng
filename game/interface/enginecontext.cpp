@@ -1,15 +1,16 @@
 /**
   *  \file game/interface/enginecontext.cpp
+  *  \brief Class game::interface::EngineContext
   */
 
 #include "game/interface/enginecontext.hpp"
-#include "interpreter/nametable.hpp"
-#include "interpreter/typehint.hpp"
+#include "afl/string/format.hpp"
 #include "game/interface/componentproperty.hpp"
 #include "game/interface/engineproperty.hpp"
-#include "interpreter/propertyacceptor.hpp"
-#include "afl/string/format.hpp"
 #include "interpreter/error.hpp"
+#include "interpreter/nametable.hpp"
+#include "interpreter/propertyacceptor.hpp"
+#include "interpreter/typehint.hpp"
 
 namespace {
     enum EngineDomain { ComponentPropertyDomain, EnginePropertyDomain };

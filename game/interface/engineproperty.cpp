@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/engineproperty.cpp
+  *  \brief Engine Properties
   */
 
 #include "game/interface/engineproperty.hpp"

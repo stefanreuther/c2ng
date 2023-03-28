@@ -1,22 +1,21 @@
 /**
   *  \file game/interface/hullcontext.cpp
+  *  \brief Class game::interface::HullContext
   */
 
 #include "game/interface/hullcontext.hpp"
 #include "afl/string/format.hpp"
-#include "interpreter/nametable.hpp"
-#include "interpreter/typehint.hpp"
-#include "interpreter/propertyacceptor.hpp"
-#include "interpreter/error.hpp"
-#include "game/interface/hullproperty.hpp"
 #include "game/interface/componentproperty.hpp"
+#include "game/interface/hullproperty.hpp"
+#include "interpreter/error.hpp"
+#include "interpreter/nametable.hpp"
+#include "interpreter/propertyacceptor.hpp"
+#include "interpreter/typehint.hpp"
 
 namespace {
-
     enum HullDomain { HullPropertyDomain, ComponentPropertyDomain };
 
-
-    // FIXME: PCC 1.x items currently not implemented here:
+    // PCC 1.x items currently not implemented here; also missing in PCC2:
     //   Hull (same as Name)
     //   Hull$ (same as Id)
     //   Hull.Short (same as Name.Short)
@@ -47,7 +46,7 @@ namespace {
     };
 }
 
-game::interface::HullContext::HullContext(int nr, afl::base::Ref<game::spec::ShipList> shipList, afl::base::Ref<game::Root> root)
+game::interface::HullContext::HullContext(int nr, afl::base::Ref<game::spec::ShipList> shipList, afl::base::Ref<const Root> root)
     : m_number(nr),
       m_shipList(shipList), m_root(root)
 {
@@ -73,8 +72,9 @@ game::interface::HullContext::set(PropertyIndex_t index, const afl::data::Value*
          case HullPropertyDomain:
             setHullProperty(*hull, HullProperty(HULL_MAPPING[index].index), value, *m_shipList);
             break;
-         default:
-            throw interpreter::Error::notAssignable();
+         case ComponentPropertyDomain:
+            setComponentProperty(*hull, ComponentProperty(HULL_MAPPING[index].index), value, *m_shipList);
+            break;
         }
     } else {
         throw interpreter::Error::notAssignable();
@@ -148,10 +148,11 @@ game::interface::HullContext*
 game::interface::HullContext::create(int nr, Session& session)
 {
     // ex shipint.pas:CreateHullspecContext
-    // FIXME: this refuses creating a HullContext for nonexistant hulls.
-    // Nu has discontinuous hull Ids. Should we allow creating them?
+    // This refuses creating a HullContext for nonexistant hulls.
+    // Nu has discontinuous hull Ids.
+    // Users are supposed to do 'ForEach Hull', not 'For i:=1 To Dim(Hull)-1', which would make this work nicely.
     game::spec::ShipList* list = session.getShipList().get();
-    Root* root = session.getRoot().get();
+    const Root* root = session.getRoot().get();
     if (list != 0 && root != 0 && list->hulls().get(nr) != 0) {
         return new HullContext(nr, *list, *root);
     }

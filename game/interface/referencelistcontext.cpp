@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/referencelistcontext.cpp
+  *  \brief Class game::interface::ReferenceListContext
   */
 
 #include "game/interface/referencelistcontext.hpp"
@@ -217,8 +218,7 @@ game::interface::ReferenceListContext::ReferenceListContext(afl::base::Ref<Data>
     : SingleContext(),
       m_list(list),
       m_session(session)
-{
-}
+{ }
 
 game::interface::ReferenceListContext::~ReferenceListContext()
 { }

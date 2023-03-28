@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/inboxsubsetvalue.cpp
+  *  \brief Class game::interface::InboxSubsetValue
   */
 
 #include "game/interface/inboxsubsetvalue.hpp"

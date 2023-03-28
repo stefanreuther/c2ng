@@ -1,15 +1,16 @@
 /**
   *  \file game/interface/objectcommand.hpp
+  *  \brief Class game::interface::ObjectCommand
   */
 #ifndef C2NG_GAME_INTERFACE_OBJECTCOMMAND_HPP
 #define C2NG_GAME_INTERFACE_OBJECTCOMMAND_HPP
 
-#include "interpreter/procedurevalue.hpp"
-#include "game/session.hpp"
-#include "game/map/object.hpp"
-#include "interpreter/process.hpp"
 #include "game/game.hpp"
+#include "game/map/object.hpp"
+#include "game/session.hpp"
 #include "interpreter/arguments.hpp"
+#include "interpreter/procedurevalue.hpp"
+#include "interpreter/process.hpp"
 
 namespace game { namespace interface {
 
@@ -22,12 +23,24 @@ namespace game { namespace interface {
         We therefore keep a smart pointer to Game to keep it alive.
 
         FIXME: we must also keep the object alive, see bug #308.
-        Alternatively, refer to the object by name somehow. */
+        Alternatively, refer to the object by name somehow.
+        For minefields, this is now solved by a custom MinefieldMethod. */
     class ObjectCommand : public interpreter::ProcedureValue {
      public:
+        /** Function to call.
+            @param session Session
+            @param obj     Object
+            @param proc    Process
+            @param args    Parameters */
         typedef void (*Function_t)(game::Session&, game::map::Object&, interpreter::Process&, interpreter::Arguments&);
 
+        /** Constructor.
+            @param session Session
+            @param obj     Object
+            @param func    Function */
         ObjectCommand(game::Session& session, game::map::Object& obj, Function_t func);
+
+        /** Destructor. */
         ~ObjectCommand();
 
         // ProcedureValue:
@@ -41,9 +54,28 @@ namespace game { namespace interface {
         Function_t m_function;
     };
 
+    /** Implementation of "Mark" command, ObjectCommand version.
+        @param session Session
+        @param obj     Object
+        @param proc    Process
+        @param args    Parameters */
     void IFObjMark(game::Session& session, game::map::Object& obj, interpreter::Process& proc, interpreter::Arguments& args);
+
+    /** Implementation of "Mark" command, simple version.
+        @param obj     Object
+        @param args    Parameters */
     void IFObjMark(game::map::Object& obj, interpreter::Arguments& args);
+
+    /** Implementation of "Unmark" command, ObjectCommand version.
+        @param session Session
+        @param obj     Object
+        @param proc    Process
+        @param args    Parameters */
     void IFObjUnmark(game::Session& session, game::map::Object& obj, interpreter::Process& proc, interpreter::Arguments& args);
+
+    /** Implementation of "Unmark" command, simple version.
+        @param obj     Object
+        @param args    Parameters */
     void IFObjUnmark(game::map::Object& obj, interpreter::Arguments& args);
 
 } }

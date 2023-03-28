@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/richtextvalue.hpp
+  *  \brief Class game::interface::RichTextValue
   */
 #ifndef C2NG_GAME_INTERFACE_RICHTEXTVALUE_HPP
 #define C2NG_GAME_INTERFACE_RICHTEXTVALUE_HPP
@@ -11,12 +12,23 @@
 
 namespace game { namespace interface {
 
+    /** Rich-text value.
+        Stores a read-only, shared copy of a util::rich::Text object.
+
+        (This does not use GenericValue to support a custom toString().) */
     class RichTextValue : public interpreter::BaseValue {
      public:
-        typedef afl::base::Ptr<util::rich::Text> Ptr_t;
-        typedef afl::base::Ref<util::rich::Text> Ref_t;
+        /** Shortcut for nullable pointer to rich-text object. */
+        typedef afl::base::Ptr<const util::rich::Text> Ptr_t;
 
-        RichTextValue(Ref_t value);
+        /** Shortcut for non-nullable pointer to rich-text object. */
+        typedef afl::base::Ref<const util::rich::Text> Ref_t;
+
+        /** Constructor.
+            @param value Value */
+        explicit RichTextValue(Ref_t value);
+
+        /** Destructor. */
         ~RichTextValue();
 
         // BaseValue:
@@ -26,7 +38,9 @@ namespace game { namespace interface {
         // Value:
         virtual RichTextValue* clone() const;
 
-        Ref_t get() const;
+        /** Get contained pointer.
+            @return contained rich-text object */
+        const Ref_t& get() const;
 
      private:
         Ref_t m_value;

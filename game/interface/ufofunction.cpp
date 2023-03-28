@@ -1,10 +1,12 @@
 /**
   *  \file game/interface/ufofunction.cpp
+  *  \brief Class game::interface::UfoFunction
   */
 
 #include "game/interface/ufofunction.hpp"
-#include "interpreter/error.hpp"
+#include "game/game.hpp"
 #include "interpreter/arguments.hpp"
+#include "interpreter/error.hpp"
 
 /* @q Ufo(uid:Int):Obj (Function, Context)
    Access Ufo properties.

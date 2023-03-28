@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/torpedofunction.cpp
+  *  \brief Class game::interface::TorpedoFunction
   */
 
 #include "game/interface/torpedofunction.hpp"
@@ -38,7 +39,7 @@ game::interface::TorpedoFunction::TorpedoFunction(bool useLauncher, Session& ses
 { }
 
 // IndexableValue:
-afl::data::Value*
+interpreter::Context*
 game::interface::TorpedoFunction::get(interpreter::Arguments& args)
 {
     // ex int/if/specif.h:IFTorpedoGet, IFLauncherGet
@@ -74,9 +75,11 @@ game::interface::TorpedoFunction::makeFirstContext()
 {
     // ex int/if/specif.h:IFTorpedoMake,IFLauncherMake
     game::spec::ShipList* list = m_session.getShipList().get();
-    Root* root = m_session.getRoot().get();
-    if (list != 0 && root != 0 && list->launchers().size() > 0) {
-        return new TorpedoContext(m_useLauncher, 1, *list, *root);
+    const Root* root = m_session.getRoot().get();
+    if (list != 0 && root != 0) {
+        if (const game::spec::TorpedoLauncher* tl = list->launchers().findNext(0)) {
+            return new TorpedoContext(m_useLauncher, tl->getId(), *list, *root);
+        }
     }
     return 0;
 }

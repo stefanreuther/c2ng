@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/ionstormproperty.hpp
+  *  \brief Enum game::interface::IonStormProperty
   */
 #ifndef C2NG_GAME_INTERFACE_IONSTORMPROPERTY_HPP
 #define C2NG_GAME_INTERFACE_IONSTORMPROPERTY_HPP
@@ -27,7 +28,19 @@ namespace game { namespace interface {
         iipVoltage
     };
 
+    /** Get ion storm property.
+        @param ion  Storm
+        @param iip  Property
+        @param tx   Translator (for names)
+        @param iface Interpreter interface (for names)
+        @return Newly-allocated value */
     afl::data::Value* getIonStormProperty(const game::map::IonStorm& ion, IonStormProperty iip, afl::string::Translator& tx, InterpreterInterface& iface);
+
+    /** Set ion storm property.
+        @param ion  Storm
+        @param iip  Property
+        @param value Value to set, owned by caller
+        @throw interpreter::Error if not assignable */
     void setIonStormProperty(game::map::IonStorm& ion, IonStormProperty iip, const afl::data::Value* value);
 
 } }

@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/richtextfunctions.cpp
+  *  \brief Rich-Text Functions
   */
 
 #include <climits>
@@ -19,14 +20,21 @@
 #include "util/rich/styleattribute.hpp"
 #include "util/skincolor.hpp"
 
+// Shortcuts
 using interpreter::checkIntegerArg;
 using interpreter::checkStringArg;
 using interpreter::makeSizeValue;
 using interpreter::makeStringValue;
-using util::rich::StyleAttribute;
 using util::SkinColor;
+using util::rich::StyleAttribute;
+
+// Immutable pointer/reference
 typedef game::interface::RichTextValue::Ptr_t Ptr_t;
 typedef game::interface::RichTextValue::Ref_t Ref_t;
+
+// Mutable pointer/reference
+typedef afl::base::Ptr<util::rich::Text> MPtr_t;
+typedef afl::base::Ref<util::rich::Text> MRef_t;
 
 namespace {
     enum StyleKind {
@@ -62,7 +70,7 @@ namespace {
         util::SkinColor::Color color;
         if (util::SkinColor::parse(style, color)) {
             // Color
-            Ptr_t tmp = new util::rich::Text(*text);
+            MPtr_t tmp = new util::rich::Text(*text);
             tmp->withNewAttribute(new util::rich::ColorAttribute(color));
             return tmp;
         } else {
@@ -85,7 +93,7 @@ namespace {
                 return text;
              case kStyle:
              {
-                 Ptr_t tmp = new util::rich::Text(*text);
+                 MPtr_t tmp = new util::rich::Text(*text);
                  tmp->withNewAttribute(new StyleAttribute(StyleAttribute::Style(p->value)));
                  return tmp;
              }
@@ -123,8 +131,9 @@ game::interface::IFRAdd(game::Session& /*session*/, interpreter::Arguments& args
        If any argument is EMPTY, returns EMPTY.
        If no arguments are given, returns an empty (=zero length) rich text string.
 
-       In text mode, this function produces plain strings instead,
+       In PCC2 text mode, this function produces plain strings instead,
        as rich text attributes have no meaning to the text mode applications.
+       In PCC2ng, this function always operates on rich text.
 
        @since PCC2 1.99.21, PCC2 2.40 */
     // ex int/if/richif.h:IFRAdd
@@ -138,7 +147,7 @@ game::interface::IFRAdd(game::Session& /*session*/, interpreter::Arguments& args
         }
     } else {
         // General case
-        Ref_t result = *new util::rich::Text();
+        MRef_t result = *new util::rich::Text();
         while (args.getNumArgs() > 0) {
             Ptr_t tmp;
             if (!checkRichArg(tmp, args.getNext())) {
@@ -177,10 +186,10 @@ game::interface::IFRAlign(game::Session& /*session*/, interpreter::Arguments& ar
     if (!checkRichArg(text, args.getNext()) || !checkIntegerArg(width, args.getNext(), 0, 10000)) {
         return 0;
     }
-    checkIntegerArg(align, args.getNext(), 0, 2);   // FIXME: preliminary!!!
+    checkIntegerArg(align, args.getNext(), 0, 2);
 
     // Create result
-    Ref_t clone = *new util::rich::Text(*text);
+    MRef_t clone = *new util::rich::Text(*text);
     clone->withNewAttribute(new util::rich::AlignmentAttribute(width, align));
     return new RichTextValue(clone);
 }
@@ -197,8 +206,9 @@ game::interface::IFRMid(game::Session& /*session*/, interpreter::Arguments& args
 
        If %str or %first are EMPTY, returns EMPTY.
 
-       In text mode, this function deals with plain strings instead,
+       In PCC2 text mode, this function deals with plain strings instead,
        as rich text attributes have no meaning to the text mode applications.
+       In PCC2ng, this function always operates on rich text.
 
        @since PCC2 1.99.21, PCC2 2.40 */
     // ex int/if/richif.h:IFRMid
@@ -215,7 +225,6 @@ game::interface::IFRMid(game::Session& /*session*/, interpreter::Arguments& args
     }
 
     // Convert BASIC indexes to C++ indexes
-    // FIXME: this needs some optimisation
     const String_t& text = str->getText();
     afl::charset::Utf8 u8(0);
     size_t nStart  = u8.charToBytePos(text, iStart == 0 ? 0 : static_cast<size_t>(iStart) - 1);
@@ -236,8 +245,9 @@ game::interface::IFRString(game::Session& /*session*/, interpreter::Arguments& a
 
        If %str is EMPTY, returns EMPTY.
 
-       In text mode, this function deals with plain strings instead,
+       In PCC2 text mode, this function deals with plain strings instead,
        as rich text attributes have no meaning to the text mode applications.
+       In PCC2ng, this function always operates on rich text.
 
        @since PCC2 1.99.21, PCC2 2.40 */
     // ex int/if/richif.h:IFRString
@@ -258,8 +268,9 @@ game::interface::IFRLen(game::Session& /*session*/, interpreter::Arguments& args
 
        If %str is EMPTY, returns EMPTY.
 
-       In text mode, this function deals with plain strings instead,
+       In PCC2 text mode, this function deals with plain strings instead,
        as rich text attributes have no meaning to the text mode applications.
+       In PCC2ng, this function always operates on rich text.
 
        @since PCC2 1.99.21, PCC2 2.40 */
     // ex int/if/richif.h:IFRLen
@@ -286,8 +297,9 @@ game::interface::IFRStyle(game::Session& session, interpreter::Arguments& args)
 
        If any argument is EMPTY, returns EMPTY.
 
-       In text mode, this function just returns the concatenation of the %content,
+       In PCC2 text mode, this function just returns the concatenation of the %content,
        as rich text attributes have no meaning to the text mode applications.
+       In PCC2ng, this function always operates on rich text.
 
        @todo document the styles
        @since PCC2 1.99.21, PCC2 2.40
@@ -326,8 +338,9 @@ game::interface::IFRLink(game::Session& session, interpreter::Arguments& args)
 
        If any argument is EMPTY, returns EMPTY.
 
-       In text mode, this function just returns the concatenation of the %content,
+       In PCC2 text mode, this function just returns the concatenation of the %content,
        as rich text attributes have no meaning to the text mode applications.
+       In PCC2ng, this function always operates on rich text.
 
        @since PCC2 1.99.21, PCC2 2.40
        @see RStyle, RXml */
@@ -347,7 +360,7 @@ game::interface::IFRLink(game::Session& session, interpreter::Arguments& args)
     }
 
     // Build a link
-    Ref_t clone = *new util::rich::Text(*result);
+    MRef_t clone = *new util::rich::Text(*result);
     clone->withNewAttribute(new util::rich::LinkAttribute(link));
     return new RichTextValue(clone);
 }
@@ -368,8 +381,9 @@ game::interface::IFRXml(game::Session& /*session*/, interpreter::Arguments& args
        </pre>
        produces <font color="red">This is <b>great</b></font>.
 
-       In text mode, this function uses a simpler XML parser, and returns a plain string,
+       In PCC2 text mode, this function uses a simpler XML parser, and returns a plain string,
        as rich text attributes have no meaning to the text mode applications.
+       In PCC2ng, this function always operates on rich text.
 
        @todo document the styles
        @since PCC2 1.99.21, PCC2 2.40

@@ -62,7 +62,8 @@ namespace game { namespace interface {
 
         /** Constructor.
             Makes a ConfigurationEditorContext from pre-existing data.
-            @param session Session */
+            @param ref  Data
+            @param root Index of root node */
         explicit ConfigurationEditorContext(const afl::base::Ref<Data>& ref, size_t root);
 
         /** Destructor. */

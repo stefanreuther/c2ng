@@ -1,24 +1,20 @@
 /**
   *  \file game/interface/loadcontext.cpp
+  *  \brief Class game::interface::LoadContext
   */
 
 #include "game/interface/loadcontext.hpp"
-#include "game/session.hpp"
-#include "game/turn.hpp"
-#include "game/map/universe.hpp"
-#include "game/interface/shipcontext.hpp"
-#include "game/interface/planetcontext.hpp"
 #include "game/interface/beamcontext.hpp"
 #include "game/interface/enginecontext.hpp"
 #include "game/interface/globalcontext.hpp"
 #include "game/interface/hullcontext.hpp"
 #include "game/interface/ionstormcontext.hpp"
-#include "game/interface/minefieldcontext.hpp"
-#include "game/interface/playercontext.hpp"
-#include "game/interface/torpedocontext.hpp"
 #include "game/interface/iteratorcontext.hpp"
-#include "interpreter/mutexlist.hpp"
-#include "interpreter/mutexcontext.hpp"
+#include "game/interface/minefieldcontext.hpp"
+#include "game/interface/planetcontext.hpp"
+#include "game/interface/playercontext.hpp"
+#include "game/interface/shipcontext.hpp"
+#include "game/interface/torpedocontext.hpp"
 
 game::interface::LoadContext::LoadContext(Session& session)
     : m_session(session)

@@ -10,18 +10,17 @@
 #include "afl/data/scalarvalue.hpp"
 #include "afl/data/stringvalue.hpp"
 #include "afl/string/format.hpp"
-#include "game/actions/preconditions.hpp"
 #include "game/config/booleanvalueparser.hpp"
 #include "game/game.hpp"
+#include "game/interface/taskeditorcontext.hpp"
 #include "game/map/circularobject.hpp"
 #include "game/root.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/turn.hpp"
 #include "interpreter/context.hpp"
 #include "interpreter/error.hpp"
-#include "interpreter/values.hpp"
 #include "interpreter/process.hpp"
-#include "game/interface/taskeditorcontext.hpp"
+#include "interpreter/values.hpp"
 
 using interpreter::checkBooleanArg;
 using interpreter::checkIntegerArg;
@@ -56,7 +55,6 @@ namespace {
         }
         const char*const fn = isHostConfig ? "Cfg" : "Pref";
 
-        // FIXME: ugly type switch. Can we do better?
         if (const game::config::GenericIntegerArrayOption* bopt = dynamic_cast<const game::config::GenericIntegerArrayOption*>(opt)) {
             // Integers; optional player
             if (player == 0) {
@@ -121,8 +119,8 @@ namespace {
 
    An auto task can only be accessed when it is suspended.
    Accessing the auto task will prevent it from executing.
-   An auto task is blocked as long as one object returned by AutoTask() exists.
-   Multiple distinct AutoTask() objects exist and all show the same state.
+   An auto task is blocked as long as at least one object returned by AutoTask() exists.
+   Multiple distinct AutoTask() objects can exist and all show the same state.
 
    The <a href="pcc2:taskscreen">auto task screens</a> show a cursor which is also part of an auto task being edited.
    The cursor state is maintained as long as an AutoTask() object or the auto task screen is active.
@@ -185,7 +183,7 @@ game::interface::IFCfg(game::Session& session, interpreter::Arguments& args)
     int32_t player = 0;
     if (args.getNumArgs() > 0) {
         if (!checkIntegerArg(player, args.getNext(), 1, MAX_PLAYERS)) {
-            throw interpreter::Error("Invalid second argument to \"Cfg\"");
+            return 0;
         }
     }
 
@@ -373,11 +371,15 @@ game::interface::IFIsSpecialFCode(game::Session& session, interpreter::Arguments
     }
 
     // Do it
-    game::spec::FriendlyCodeList& list = game::actions::mustHaveShipList(session).friendlyCodes();
+    // @change If there is no ship list, return null
+    const game::spec::ShipList* sl = session.getShipList().get();
+    if (sl == 0) {
+        return 0;
+    }
     if (str.size() > 3) {
         str.erase(3);
     }
-    return makeBooleanValue(list.isSpecial(str, true));
+    return makeBooleanValue(sl->friendlyCodes().isSpecial(str, true));
 }
 
 /* @q ObjectIsAt(obj:Any, x:Int, y:Int):Bool (Function)
@@ -423,8 +425,12 @@ game::interface::IFObjectIsAt(game::Session& session, interpreter::Arguments& ar
     }
 
     // Must have a current turn to access map configuration
-    const Game& g = game::actions::mustHaveGame(session);
-    const game::map::Configuration& config = g.mapConfiguration();
+    // @change If there is no game, return null [probably cannot happen because then we cannot create the respective Context]
+    const Game* g = session.getGame().get();
+    if (g == 0) {
+        return 0;
+    }
+    const game::map::Configuration& config = g->mapConfiguration();
 
     // Different handling depending on object type
     game::map::Point thisPoint(x, y);
@@ -509,7 +515,7 @@ game::interface::IFPref(game::Session& session, interpreter::Arguments& args)
     int32_t index = 0;
     if (args.getNumArgs() > 0) {
         if (!checkIntegerArg(index, args.getNext(), 1, 100)) {
-            throw interpreter::Error("Invalid second argument to \"Cfg\"");
+            return 0;
         }
     }
 
@@ -553,7 +559,7 @@ game::interface::IFQuote(game::Session& /*session*/, interpreter::Arguments& arg
    <tt>Random(500,1)</tt> generates random numbers between 2 and 500
    (the first parameter always included in the range, the second one is not).
 
-   The maximum value for either parameter ix 32767 (=15 bit).
+   The maximum value for either parameter is 32767 (=15 bit).
 
    @since PCC 1.0.7, PCC2 1.99.9, PCC2 2.40 */
 afl::data::Value*

@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/drawingproperty.cpp
+  *  \brief Drawing Properties
   */
 
 #include "game/interface/drawingproperty.hpp"
@@ -166,7 +167,6 @@ game::interface::setDrawingProperty(game::map::Drawing& d, DrawingProperty idp, 
                 throw interpreter::Error::notAssignable();
             }
             d.setCircleRadius(i);
-            // FIXME -> getDisplayedTurn().getChartBBox().addDrawing(d);
         }
         break;
      case idpShape:

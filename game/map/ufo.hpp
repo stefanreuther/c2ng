@@ -137,7 +137,7 @@ namespace game { namespace map {
             @return name */
         String_t getPlainName() const;
 
-        /** Get positiion at which Ufo was last seen.
+        /** Get position at which Ufo was last seen.
             @return position */
         Point getLastPosition() const;
 

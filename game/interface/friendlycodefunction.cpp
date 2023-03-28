@@ -1,10 +1,11 @@
 /**
   *  \file game/interface/friendlycodefunction.cpp
+  *  \brief Class game::interface::FriendlyCodeFunction
   */
 
 #include "game/interface/friendlycodefunction.hpp"
-#include "interpreter/values.hpp"
 #include "interpreter/arguments.hpp"
+#include "interpreter/values.hpp"
 
 game::interface::FriendlyCodeFunction::FriendlyCodeFunction(Session& session)
     : IndexableValue(),

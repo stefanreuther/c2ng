@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/shipmethod.cpp
+  *  \brief Enum game::interface::ShipMethod
   */
 
 #include "game/interface/shipmethod.hpp"
@@ -45,7 +46,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
                                 Session& session,
                                 Root& root,
                                 const game::map::Configuration& mapConfig,
-                                game::spec::ShipList& shipList,
+                                const game::spec::ShipList& shipList,
                                 Turn& turn)
 {
     // ex int/if/shipif.h:callShipMethod
@@ -162,7 +163,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
         /* @q RecycleShip (Ship Command)
            Recycle this ship at the starbase.
            Changes the base's order to recycle this ship.
-           @see FixShip (Planet Command)
+           @see RecycleShip (Planet Command)
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.1 */
         // ex int/if/shipif.h:IFShipRecycleShip
         // ex shipint.pas:Ship_RecycleShip

@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/explosionfunction.cpp
+  *  \brief Class game::interface::ExplosionFunction
   */
 
 #include "game/interface/explosionfunction.hpp"

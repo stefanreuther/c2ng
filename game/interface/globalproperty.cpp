@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/globalproperty.cpp
+  *  \brief Enum game::interface::GlobalProperty
   */
 
 #include "game/interface/globalproperty.hpp"
@@ -107,7 +108,7 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
      case igpMyInMsgs:
         /* @q My.InMsgs:Int (Global Property)
            Number of incoming (received) messages this turn. */
-        if (Game* game = session.getGame().get()) {
+        if (const Game* game = session.getGame().get()) {
             return makeSizeValue(game->currentTurn().inbox().getNumMessages());
         } else {
             return 0;
@@ -115,7 +116,7 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
      case igpMyOutMsgs:
         /* @q My.OutMsgs:Int (Global Property)
            Number of outgoing (sent) messages this turn. */
-        if (Game* game = session.getGame().get()) {
+        if (const Game* game = session.getGame().get()) {
             return makeSizeValue(game->currentTurn().outbox().getNumMessages());
         } else {
             return 0;
@@ -123,8 +124,8 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
      case igpMyVCRs:
         /* @q My.VCRs:Int (Global Property)
            Number of incoming combat recordings this turn. */
-        if (Game* game = session.getGame().get()) {
-            if (game::vcr::Database* db = game->currentTurn().getBattles().get()) {
+        if (const Game* game = session.getGame().get()) {
+            if (const game::vcr::Database* db = game->currentTurn().getBattles().get()) {
                 return makeSizeValue(db->getNumBattles());
             } else {
                 return makeSizeValue(0);
@@ -159,7 +160,7 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
            Current selection layer.
            A number from 0 to 7.
            @assignable */
-        if (Game* game = session.getGame().get()) {
+        if (const Game* game = session.getGame().get()) {
             return makeSizeValue(game->selections().getCurrentLayer());
         } else {
             return 0;
@@ -202,9 +203,9 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
            This property is True if there is a result file password, False if there is none.
            If the game does not support result file passwords, the value is EMPTY.
            @since PCC2 2.41 */
-        if (Game* g = session.getGame().get()) {
-            Turn& t = g->currentTurn();
-            if (game::v3::GenFile* p = game::v3::GenExtra::get(t, g->getViewpointPlayer())) {
+        if (const Game* g = session.getGame().get()) {
+            const Turn& t = g->currentTurn();
+            if (const game::v3::GenFile* p = game::v3::GenExtra::get(t, g->getViewpointPlayer())) {
                 return makeBooleanValue(p->hasPassword());
             }
         }
@@ -328,7 +329,7 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
      case igpTurnNumber:
         /* @q Turn:Int (Global Property)
            Turn number. */
-        if (Game* game = session.getGame().get()) {
+        if (const Game* game = session.getGame().get()) {
             return makeIntegerValue(game->currentTurn().getTurnNumber());
         } else {
             return 0;
@@ -337,7 +338,7 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
         /* @q Turn.IsNew:Bool (Global Property)
            New-turn flag.
            True if this is a new turn, false if you have opened PCC for the second time this turn. */
-        if (Game* game = session.getGame().get()) {
+        if (const Game* game = session.getGame().get()) {
             return makeBooleanValue(game->currentTurn().getDatabaseTurnNumber() < game->currentTurn().getTurnNumber());
         } else {
             return 0;
@@ -347,7 +348,7 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
            Turn time.
            Time of last host run, in <tt>hh:mm:ss</tt> format,
            using the host's timezone and 24-hour format. */
-        if (Game* game = session.getGame().get()) {
+        if (const Game* game = session.getGame().get()) {
             const Timestamp& ts = game->currentTurn().getTimestamp();
             if (ts.isValid()) {
                 return makeStringValue(ts.getTimeAsString());
@@ -362,7 +363,7 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
            Turn date.
            Date of last host run, in <tt>mm-dd-yyyy</tt> format,
            using the host's timezone. */
-        if (Game* game = session.getGame().get()) {
+        if (const Game* game = session.getGame().get()) {
             const Timestamp& ts = game->currentTurn().getTimestamp();
             if (ts.isValid()) {
                 return makeStringValue(ts.getDateAsString());

@@ -1,14 +1,16 @@
 /**
   *  \file game/interface/missionproperty.hpp
+  *  \brief Enum game::interface::MissionProperty
   */
 #ifndef C2NG_GAME_INTERFACE_MISSIONPROPERTY_HPP
 #define C2NG_GAME_INTERFACE_MISSIONPROPERTY_HPP
 
-#include "game/spec/mission.hpp"
 #include "afl/data/value.hpp"
+#include "game/spec/mission.hpp"
 
 namespace game { namespace interface {
 
+    /** Mission definition property. */
     enum MissionProperty {
         impName,                // Name:Str
         impNumber,              // Number:Int
@@ -28,6 +30,10 @@ namespace game { namespace interface {
         impHotkey               // Key:Str
     };
 
+    /** Get mission definition property.
+        @param mission Mission definition
+        @param imp     Property to get
+        @return Newly-allocated value */
     afl::data::Value* getMissionProperty(const game::spec::Mission& mission, MissionProperty imp);
 
 } }

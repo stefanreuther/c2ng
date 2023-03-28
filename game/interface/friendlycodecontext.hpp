@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/friendlycodecontext.hpp
+  *  \brief Class game::interface::FriendlyCodeContext
   */
 #ifndef C2NG_GAME_INTERFACE_FRIENDLYCODECONTEXT_HPP
 #define C2NG_GAME_INTERFACE_FRIENDLYCODECONTEXT_HPP
@@ -12,12 +13,23 @@
 
 namespace game { namespace interface {
 
+    /** Friendly code context.
+        Implements the result of the "FriendlyCode" function, which publishes friendly code definitions.
+
+        @see FriendlyCodeFunction */
     class FriendlyCodeContext : public interpreter::SimpleContext, public interpreter::Context::ReadOnlyAccessor {
      public:
+        /** Constructor.
+            @param slot     Slot in friendly code definitions (game::spec::FriendlyCodeList::at)
+            @param root     Root (for player names)
+            @param shipList Ship list (for friendly code definitions)
+            @param tx       Translator (for player names) */
         FriendlyCodeContext(size_t slot,
-                            afl::base::Ref<Root> root,
+                            afl::base::Ref<const Root> root,
                             afl::base::Ref<game::spec::ShipList> shipList,
                             afl::string::Translator& tx);
+
+        /** Destructor. */
         ~FriendlyCodeContext();
 
         // Context:
@@ -34,7 +46,7 @@ namespace game { namespace interface {
 
      private:
         size_t m_slot;
-        afl::base::Ref<Root> m_root;
+        afl::base::Ref<const Root> m_root;
         afl::base::Ref<game::spec::ShipList> m_shipList;
         afl::string::Translator& m_translator;
     };

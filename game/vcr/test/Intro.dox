@@ -1,0 +1,7 @@
+/*!
+     \namespace game::vcr::test
+     \brief Test Combat Recordings
+
+     This namespace contains classes for testing consumers of combat recordings.
+     It is not used in production.
+ */

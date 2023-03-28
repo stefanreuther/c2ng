@@ -1,16 +1,17 @@
 /**
   *  \file game/interface/playerproperty.cpp
+  *  \brief Enum game::interface::PlayerProperty
   */
 
 #include "game/interface/playerproperty.hpp"
-#include "interpreter/values.hpp"
 #include "game/score/compoundscore.hpp"
 #include "game/turn.hpp"
+#include "interpreter/values.hpp"
 
-using interpreter::makeStringValue;
+using game::score::CompoundScore;
 using interpreter::makeIntegerValue;
 using interpreter::makeOptionalIntegerValue;
-using game::score::CompoundScore;
+using interpreter::makeStringValue;
 
 afl::data::Value*
 game::interface::getPlayerProperty(int pid, PlayerProperty ipl,
@@ -31,7 +32,7 @@ game::interface::getPlayerProperty(int pid, PlayerProperty ipl,
         }
     }
 
-    // Regular handling
+    // Regular handling. We can assume p!=0 here.
     switch (ipl) {
      case iplAdjName:
         /* @q My.Race.Adj:Str (Global Property)
@@ -39,21 +40,13 @@ game::interface::getPlayerProperty(int pid, PlayerProperty ipl,
            @q Enemy.Adj:Str (Ship Property)
            @q Race.Adj:Str (Player Property)
            Adjective name of this player. */
-        if (const Player* p = list.get(pid)) {
-            return makeStringValue(p->getName(Player::AdjectiveName, tx));
-        } else {
-            return 0;
-        }
+        return makeStringValue(p->getName(Player::AdjectiveName, tx));
 
      case iplFullName:
         /* @q My.Race.Full:Str (Global Property)
            @q Race:Str (Player Property)
            Full name of this player. */
-        if (const Player* p = list.get(pid)) {
-            return makeStringValue(p->getName(Player::LongName, tx));
-        } else {
-            return 0;
-        }
+        return makeStringValue(p->getName(Player::LongName, tx));
 
      case iplId:
         /* @q My.Race$:Int (Global Property)
@@ -89,11 +82,7 @@ game::interface::getPlayerProperty(int pid, PlayerProperty ipl,
            @q Race.Short:Str (Player Property)
            @q Enemy:Str (Ship Property)
            Short name of this player. */
-        if (const Player* p = list.get(pid)) {
-            return makeStringValue(p->getName(Player::ShortName, tx));
-        } else {
-            return 0;
-        }
+        return makeStringValue(p->getName(Player::ShortName, tx));
 
      case iplTeam:
         /* @q My.Team:Int (Global Property)
@@ -151,7 +140,6 @@ game::interface::getPlayerProperty(int pid, PlayerProperty ipl,
         /* @q Total.Capital:Int (Global Property)
            Total number of capital ships (from this player's score information). */
         return makeOptionalIntegerValue(CompoundScore(game.scores(), game::score::ScoreId_Capital, 1).get(game.scores(), game.currentTurn().getTurnNumber(), PlayerSet_t::allUpTo(MAX_PLAYERS)));
-
     }
     return 0;
 }

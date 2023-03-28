@@ -1,21 +1,22 @@
 /**
   *  \file game/interface/planetcontext.cpp
+  *  \brief Class game::interface::PlanetContext
   */
 
 #include "game/interface/planetcontext.hpp"
 #include "afl/base/countof.hpp"
-#include "interpreter/nametable.hpp"
+#include "afl/string/format.hpp"
 #include "game/interface/baseproperty.hpp"
+#include "game/interface/planetmethod.hpp"
 #include "game/interface/planetproperty.hpp"
-#include "interpreter/typehint.hpp"
+#include "game/interface/playerproperty.hpp"
 #include "game/turn.hpp"
 #include "interpreter/error.hpp"
-#include "interpreter/values.hpp"
-#include "afl/string/format.hpp"
-#include "interpreter/propertyacceptor.hpp"
-#include "game/interface/playerproperty.hpp"
-#include "game/interface/planetmethod.hpp"
+#include "interpreter/nametable.hpp"
 #include "interpreter/procedurevalue.hpp"
+#include "interpreter/propertyacceptor.hpp"
+#include "interpreter/typehint.hpp"
+#include "interpreter/values.hpp"
 
 namespace {
     enum PlanetDomain {
@@ -221,10 +222,7 @@ namespace {
     };
 }
 
-game::interface::PlanetContext::PlanetContext(int id,
-                                              Session& session,
-                                              afl::base::Ref<Root> root,
-                                              afl::base::Ref<Game> game)
+game::interface::PlanetContext::PlanetContext(Id_t id, Session& session, afl::base::Ref<Root> root, afl::base::Ref<Game> game)
     : m_id(id),
       m_session(session),
       m_root(root),
@@ -275,7 +273,7 @@ game::interface::PlanetContext::set(PropertyIndex_t index, const afl::data::Valu
             pl->markDirty();
         }
     } else {
-        // Nonexistant ships will still have a Planet object, so this branch is only taken for out-of-range Ids
+        // Nonexistant planets will still have a Planet object, so this branch is only taken for out-of-range Ids
         throw interpreter::Error::notAssignable();
     }
 }
@@ -290,16 +288,9 @@ game::interface::PlanetContext::get(PropertyIndex_t index)
             int owner;
             switch (PlanetDomain(planet_mapping[index].domain)) {
              case PlanetPropertyDomain:
-                return getPlanetProperty(*pl, PlanetProperty(planet_mapping[index].index),
-                                         m_session,
-                                         m_root,
-                                         m_game);
+                return getPlanetProperty(*pl, PlanetProperty(planet_mapping[index].index), m_session, m_root, m_game);
              case BasePropertyDomain:
-                return getBaseProperty(*pl, BaseProperty(planet_mapping[index].index),
-                                       m_session.translator(),
-                                       m_root->hostConfiguration(),
-                                       m_session.getShipList(),
-                                       &m_game->currentTurn());
+                return getBaseProperty(*pl, BaseProperty(planet_mapping[index].index), m_session.translator(), m_root, m_session.getShipList(), m_game->currentTurn());
              case OwnerPropertyDomain:
                 if (pl->getOwner().get(owner)) {
                     return getPlayerProperty(owner, PlayerProperty(planet_mapping[index].index), m_root->playerList(), *m_game, m_root->hostConfiguration(), m_session.translator());
@@ -315,7 +306,7 @@ game::interface::PlanetContext::get(PropertyIndex_t index)
             return afl::data::Value::cloneOf(m_session.world().planetProperties().get(m_id, index - NUM_PLANET_PROPERTIES));
         }
     } else {
-        // Nonexistant ships will still have a Planet object, so this branch is only taken for out-of-range Ids
+        // Nonexistant planets will still have a Planet object, so this branch is only taken for out-of-range Ids
         return 0;
     }
 }
@@ -368,7 +359,7 @@ game::interface::PlanetContext::store(interpreter::TagNode& out, afl::io::DataSi
 }
 
 game::interface::PlanetContext*
-game::interface::PlanetContext::create(int id, Session& session)
+game::interface::PlanetContext::create(Id_t id, Session& session)
 {
     // ex planint.pas:CPlanetContext.Load (sort-of), planint.pas:CreatePlanetContext
     Game* game = session.getGame().get();

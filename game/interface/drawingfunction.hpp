@@ -1,18 +1,22 @@
 /**
   *  \file game/interface/drawingfunction.hpp
+  *  \brief Class game::interface::DrawingFunction
   */
 #ifndef C2NG_GAME_INTERFACE_DRAWINGFUNCTION_HPP
 #define C2NG_GAME_INTERFACE_DRAWINGFUNCTION_HPP
 
-#include "interpreter/indexablevalue.hpp"
-#include "game/session.hpp"
 #include "game/interface/drawingcontext.hpp"
+#include "game/session.hpp"
+#include "interpreter/indexablevalue.hpp"
 
 namespace game { namespace interface {
 
+    /** Implementation of the "Drawing" function. */
     class DrawingFunction : public interpreter::IndexableValue {
      public:
-        DrawingFunction(Session& session);
+        /** Constructor.
+            @param session Session */
+        explicit DrawingFunction(Session& session);
 
         // IndexableValue:
         virtual afl::data::Value* get(interpreter::Arguments& args);

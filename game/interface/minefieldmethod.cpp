@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/minefieldmethod.cpp
+  *  \brief Enum game::interface::MinefieldMethod
   */
 
 #include "game/interface/minefieldmethod.hpp"

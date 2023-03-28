@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/beamfunction.cpp
+  *  \brief Class game::interface::BeamFunction
   */
 
 #include "game/interface/beamfunction.hpp"
@@ -24,7 +25,7 @@ game::interface::BeamFunction::BeamFunction(Session& session)
 { }
 
 // IndexableValue:
-afl::data::Value*
+interpreter::Context*
 game::interface::BeamFunction::get(interpreter::Arguments& args)
 {
     // ex int/if/specif.h:IFBeamGet
@@ -60,9 +61,11 @@ game::interface::BeamFunction::makeFirstContext()
 {
     // ex int/if/specif.h:IFBeamMake
     game::spec::ShipList* list = m_session.getShipList().get();
-    Root* root = m_session.getRoot().get();
-    if (list != 0 && root != 0 && list->beams().size() > 0) {
-        return new BeamContext(1, *list, *root);
+    const Root* root = m_session.getRoot().get();
+    if (list != 0 && root != 0) {
+        if (const game::spec::Beam* firstBeam = list->beams().findNext(0)) {
+            return new BeamContext(firstBeam->getId(), *list, *root);
+        }
     }
     return 0;
 }

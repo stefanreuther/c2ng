@@ -1,16 +1,17 @@
 /**
   *  \file game/interface/beamcontext.cpp
+  *  \brief Class game::interface::BeamContext
   */
 
 #include "game/interface/beamcontext.hpp"
-#include "interpreter/nametable.hpp"
-#include "interpreter/typehint.hpp"
 #include "afl/string/format.hpp"
-#include "game/spec/beam.hpp"
 #include "game/interface/componentproperty.hpp"
 #include "game/interface/weaponproperty.hpp"
-#include "interpreter/propertyacceptor.hpp"
+#include "game/spec/beam.hpp"
 #include "interpreter/error.hpp"
+#include "interpreter/nametable.hpp"
+#include "interpreter/propertyacceptor.hpp"
+#include "interpreter/typehint.hpp"
 
 namespace {
     enum BeamDomain { ComponentPropertyDomain, WeaponPropertyDomain };
@@ -34,7 +35,7 @@ namespace {
 
 }
 
-game::interface::BeamContext::BeamContext(int nr, afl::base::Ref<game::spec::ShipList> shipList, afl::base::Ref<game::Root> root)
+game::interface::BeamContext::BeamContext(int nr, afl::base::Ref<game::spec::ShipList> shipList, afl::base::Ref<const Root> root)
     : m_number(nr),
       m_shipList(shipList),
       m_root(root)

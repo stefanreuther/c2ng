@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/shipproperty.cpp
+  *  \brief Enum game::interface::ShipProperty
   */
 
 #include <cmath>
@@ -26,14 +27,14 @@
 #include "interpreter/values.hpp"
 #include "util/math.hpp"
 
-using interpreter::makeStringValue;
-using interpreter::makeIntegerValue;
-using interpreter::makeFloatValue;
-using interpreter::makeBooleanValue;
-using interpreter::makeOptionalIntegerValue;
-using interpreter::makeOptionalStringValue;
 using interpreter::checkIntegerArg;
 using interpreter::checkStringArg;
+using interpreter::makeBooleanValue;
+using interpreter::makeFloatValue;
+using interpreter::makeIntegerValue;
+using interpreter::makeOptionalIntegerValue;
+using interpreter::makeOptionalStringValue;
+using interpreter::makeStringValue;
 
 namespace {
     class ShipArrayProperty : public interpreter::FunctionValue {
@@ -90,6 +91,7 @@ namespace {
         }
     }
 
+    // Function definitions; need to be grouped by 'ch'. Similar table appears in HullProperty.
     struct FunctionMap {
         char ch;
         int basicFunction : 8;
@@ -789,7 +791,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
      case ispTransferUnloadName:
         /* @q Transfer.Unload.Name:Int (Ship Property)
            Name of planet cargo is being unloaded to. "Jettison" for jettison. */
-        if (sh.isTransporterActive(sh.TransferTransporter) && sh.getTransporterTargetId(sh.TransferTransporter).get(n)) {
+        if (sh.isTransporterActive(sh.UnloadTransporter) && sh.getTransporterTargetId(sh.UnloadTransporter).get(n)) {
             if (n == 0) {
                 return makeStringValue("Jettison");
             }
@@ -903,7 +905,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
 
 void
 game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, const afl::data::Value* value,
-                                 Root& root,
+                                 const Root& root,
                                  const game::spec::ShipList& shipList,
                                  const game::map::Configuration& mapConfig,
                                  Turn& turn)
@@ -935,7 +937,7 @@ game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, const af
      case ispMissionIntercept:
      case ispMissionTow:
         if (checkIntegerArg(iv, value, 0, MAX_NUMBER)) {
-            // FIXME: this changes other values to 0 if they were unknown (PCC2 probably crashes)
+            // This changes other values to 0 if they were unknown (PCC2 probably crashes)
             int m = (isp == ispMissionId        ? iv : sh.getMission().orElse(0));
             int i = (isp == ispMissionIntercept ? iv : sh.getMissionParameter(InterceptParameter).orElse(0));
             int t = (isp == ispMissionTow       ? iv : sh.getMissionParameter(TowParameter).orElse(0));

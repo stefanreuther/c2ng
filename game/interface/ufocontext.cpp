@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/ufocontext.cpp
+  *  \brief Class game::interface::UfoContext
   */
 
 #include "game/interface/ufocontext.hpp"
@@ -12,7 +13,6 @@
 #include "interpreter/typehint.hpp"
 
 namespace {
-
     enum UfoDomain { UfoPropertyDomain, UfoMethodDomain };
 
     const interpreter::NameTable UFO_MAPPING[] = {
@@ -161,7 +161,6 @@ String_t
 game::interface::UfoContext::toString(bool /*readable*/) const
 {
     // ex IntUfoContext::toString
-    // FIXME?
     return "#<ufo>";
 }
 
@@ -169,6 +168,5 @@ void
 game::interface::UfoContext::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
     // ex IntUfoContext::store
-    // FIXME?
     rejectStore(out, aux, ctx);
 }

@@ -1,5 +1,6 @@
 /**
  *  \file game/interface/objectcommand.cpp
+  *  \brief Class game::interface::ObjectCommand
  */
 
 #include "game/interface/objectcommand.hpp"

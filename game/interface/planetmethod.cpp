@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/planetmethod.cpp
+  *  \brief Enum game::interface::PlanetMethod
   */
 
 #include "game/interface/planetmethod.hpp"
@@ -11,6 +12,7 @@
 #include "game/actions/buildship.hpp"
 #include "game/actions/buildstarbase.hpp"
 #include "game/actions/buildstructures.hpp"
+#include "game/actions/convertsupplies.hpp"
 #include "game/actions/preconditions.hpp"
 #include "game/actions/techupgrade.hpp"
 #include "game/exception.hpp"
@@ -25,9 +27,8 @@
 #include "game/map/shipstorage.hpp"
 #include "game/root.hpp"
 #include "interpreter/error.hpp"
-#include "interpreter/values.hpp"
-#include "game/actions/convertsupplies.hpp"
 #include "interpreter/genericvalue.hpp"
+#include "interpreter/values.hpp"
 
 using game::Exception;
 
@@ -53,7 +54,7 @@ namespace {
         } else {
             ship = turn.universe().ships().get(n);
             if (ship == 0) {
-                throw interpreter::Error::rangeError();
+                throw Exception(Exception::eRange);
             }
         }
 
@@ -383,7 +384,7 @@ namespace {
         // Parse args
         game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
         game::ShipBuildOrder o;
-        if (!game::interface::parseBuildShipCommand(args, o, shipList)) {
+        if (!game::interface::parseBuildShipCommand(args, shipList).get(o)) {
             return;
         }
 
@@ -561,10 +562,12 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
 {
     switch (ipm) {
      case ipmMark:
+        // documented in objectcommand.cpp
         IFObjMark(pl, args);
         break;
 
      case ipmUnmark:
+        // documented in objectcommand.cpp
         IFObjUnmark(pl, args);
         break;
 
@@ -872,6 +875,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
         break;
 
      case ipmCargoTransfer:
+        // documented in shipmethod.cpp
         doCargoTransfer(pl, process, args, session, mapConfig, turn, root);
         break;
 
@@ -901,8 +905,8 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
     }
 }
 
-bool
-game::interface::parseBuildShipCommand(interpreter::Arguments& args, ShipBuildOrder& o, const game::spec::ShipList& shipList)
+afl::base::Optional<game::ShipBuildOrder>
+game::interface::parseBuildShipCommand(interpreter::Arguments& args, const game::spec::ShipList& shipList)
 {
     using interpreter::Error;
     args.checkArgumentCount(1, 6);
@@ -910,7 +914,7 @@ game::interface::parseBuildShipCommand(interpreter::Arguments& args, ShipBuildOr
     // Mandatory arg
     int32_t hull;
     if (!interpreter::checkIntegerArg(hull, args.getNext())) {
-        return false;
+        return afl::base::Nothing;
     }
 
     // Optional args
@@ -922,10 +926,11 @@ game::interface::parseBuildShipCommand(interpreter::Arguments& args, ShipBuildOr
     interpreter::checkIntegerArg(torpcount, args.getNext());
 
     // Check mandatory arg
+    ShipBuildOrder o;
     o.setHullIndex(hull);
     if (hull == 0) {
         // Canceling a build
-        return true;
+        return o;
     }
 
     // This is a ship build order. Validate remaining args
@@ -975,6 +980,6 @@ game::interface::parseBuildShipCommand(interpreter::Arguments& args, ShipBuildOr
         o.setTorpedoType(torp);
         o.setNumLaunchers(torpcount);
     }
-    return true;
+    return o;
 }
 

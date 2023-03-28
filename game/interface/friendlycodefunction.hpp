@@ -1,18 +1,22 @@
 /**
   *  \file game/interface/friendlycodefunction.hpp
+  *  \brief Class game::interface::FriendlyCodeFunction
   */
 #ifndef C2NG_GAME_INTERFACE_FRIENDLYCODEFUNCTION_HPP
 #define C2NG_GAME_INTERFACE_FRIENDLYCODEFUNCTION_HPP
 
+#include "game/interface/friendlycodecontext.hpp"
 #include "game/session.hpp"
 #include "interpreter/indexablevalue.hpp"
-#include "game/interface/friendlycodecontext.hpp"
 
 namespace game { namespace interface {
 
+    /** Implementation of the "FriendlyCode" function. */
     class FriendlyCodeFunction : public interpreter::IndexableValue {
      public:
-        FriendlyCodeFunction(Session& session);
+        /** Constructor.
+            @param session Session */
+        explicit FriendlyCodeFunction(Session& session);
 
         // IndexableValue:
         virtual FriendlyCodeContext* get(interpreter::Arguments& args);

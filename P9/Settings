@@ -12,8 +12,9 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = interpreter/test/valueverifier.cpp \
-    interpreter/test/valueverifier.hpp \
+FILES_gamelib = game/vcr/test/database.cpp game/vcr/test/database.hpp \
+    game/vcr/test/battle.cpp game/vcr/test/battle.hpp \
+    interpreter/test/valueverifier.cpp interpreter/test/valueverifier.hpp \
     interpreter/expr/rvaluefunctioncallnode.cpp \
     interpreter/expr/rvaluefunctioncallnode.hpp \
     game/interface/scriptapplication.cpp \
@@ -1750,13 +1751,67 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_interpreter_test_valueverifier.cpp \
-    u/t_game_ref_listobserver.cpp u/t_game_ref_userlist.cpp \
-    u/t_game_ref_configuration.cpp u/t_util_plugin_dialogapplication.cpp \
-    u/t_util_plugin_installer.cpp u/t_util_profiledirectory.cpp \
-    u/t_util_translation.cpp u/t_util_keymapinformation.cpp \
-    u/t_util_directorybrowser.cpp u/t_util_consolelogger.cpp \
-    u/t_interpreter_vmio_worldloadcontext.cpp \
+FILES_testsuite = u/t_game_interface_vmfile.cpp \
+    u/t_game_interface_loadcontext.cpp \
+    u/t_game_interface_taskeditorcontext.cpp \
+    u/t_game_interface_selectionfunctions.cpp \
+    u/t_game_interface_notificationfunctions.cpp \
+    u/t_game_interface_consolecommands.cpp \
+    u/t_game_interface_shipfunction.cpp u/t_game_interface_shipcontext.cpp \
+    u/t_game_interface_shipmethod.cpp u/t_game_interface_shipproperty.cpp \
+    u/t_game_interface_planetfunction.cpp \
+    u/t_game_interface_planetcontext.cpp u/t_game_interface_baseproperty.cpp \
+    u/t_game_interface_planetmethod.cpp u/t_game_interface_cargomethod.cpp \
+    u/t_game_interface_planetproperty.cpp \
+    u/t_game_interface_referencelistcontext.cpp \
+    u/t_game_interface_referencecontext.cpp \
+    u/t_game_interface_inboxfunction.cpp \
+    u/t_game_interface_globalcontext.cpp \
+    u/t_game_interface_globalfunctions.cpp \
+    u/t_game_interface_globalproperty.cpp u/t_game_interface_vcrfunction.cpp \
+    u/t_game_interface_vcrcontext.cpp u/t_game_interface_vcrproperty.cpp \
+    u/t_game_interface_vcrsidefunction.cpp \
+    u/t_game_interface_vcrsidecontext.cpp \
+    u/t_game_interface_vcrsideproperty.cpp u/t_game_vcr_test_database.cpp \
+    u/t_game_vcr_test_battle.cpp u/t_game_vcr_test.hpp \
+    u/t_game_interface_ufofunction.cpp u/t_game_interface_ufomethod.cpp \
+    u/t_game_interface_ufoproperty.cpp \
+    u/t_game_interface_minefieldfunction.cpp \
+    u/t_game_interface_minefieldcontext.cpp \
+    u/t_game_interface_minefieldmethod.cpp \
+    u/t_game_interface_minefieldproperty.cpp \
+    u/t_game_interface_objectcommand.cpp \
+    u/t_game_interface_missionfunction.cpp \
+    u/t_game_interface_missionproperty.cpp \
+    u/t_game_interface_playerfunction.cpp \
+    u/t_game_interface_playercontext.cpp \
+    u/t_game_interface_playerproperty.cpp \
+    u/t_game_interface_basetaskbuildcommandparser.cpp \
+    u/t_game_interface_friendlycodefunction.cpp \
+    u/t_game_interface_friendlycodeproperty.cpp \
+    u/t_game_interface_ionstormfunction.cpp \
+    u/t_game_interface_ionstormcontext.cpp \
+    u/t_game_interface_ionstormproperty.cpp \
+    u/t_game_interface_commandinterface.cpp \
+    u/t_game_interface_drawingfunction.cpp \
+    u/t_game_interface_drawingcontext.cpp \
+    u/t_game_interface_drawingmethod.cpp \
+    u/t_game_interface_explosionfunction.cpp \
+    u/t_game_interface_explosionproperty.cpp \
+    u/t_game_interface_richtextvalue.cpp u/t_game_interface_hullfunction.cpp \
+    u/t_game_interface_hullcontext.cpp u/t_game_interface_hullproperty.cpp \
+    u/t_game_interface_torpedofunction.cpp \
+    u/t_game_interface_enginefunction.cpp \
+    u/t_game_interface_beamfunction.cpp \
+    u/t_game_interface_torpedocontext.cpp u/t_game_interface_beamcontext.cpp \
+    u/t_game_interface_weaponproperty.cpp \
+    u/t_game_interface_componentproperty.cpp \
+    u/t_interpreter_test_valueverifier.cpp u/t_game_ref_listobserver.cpp \
+    u/t_game_ref_userlist.cpp u/t_game_ref_configuration.cpp \
+    u/t_util_plugin_dialogapplication.cpp u/t_util_plugin_installer.cpp \
+    u/t_util_profiledirectory.cpp u/t_util_translation.cpp \
+    u/t_util_keymapinformation.cpp u/t_util_directorybrowser.cpp \
+    u/t_util_consolelogger.cpp u/t_interpreter_vmio_worldloadcontext.cpp \
     u/t_interpreter_vmio_assemblersavecontext.cpp \
     u/t_interpreter_processobservercontext.cpp \
     u/t_interpreter_expr_functioncallnode.cpp \

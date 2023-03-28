@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/referencelistcontext.hpp
+  *  \brief Class game::interface::ReferenceListContext
   */
 #ifndef C2NG_GAME_INTERFACE_REFERENCELISTCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_REFERENCELISTCONTEXT_HPP

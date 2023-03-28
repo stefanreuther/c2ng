@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/inboxfunction.cpp
+  *  \brief Class game::interface::InboxFunction
   */
 
 #include "game/interface/inboxfunction.hpp"
@@ -28,7 +29,7 @@ game::interface::InboxFunction::~InboxFunction()
 { }
 
 // IndexableValue:
-afl::data::Value*
+interpreter::Context*
 game::interface::InboxFunction::get(interpreter::Arguments& args)
 {
     // ex IFInmsgGet
@@ -63,12 +64,12 @@ game::interface::InboxFunction::getDimension(int32_t which) const
     // ex IFInmsgDim
     afl::base::Ptr<Game> g = m_session.getGame();
     afl::base::Ptr<Root> r = m_session.getRoot();
-    if (g.get() == 0 || r.get() == 0) {
-        return 0;
-    } else if (which == 0) {
+    if (which == 0) {
         return 1;
+    } else if (g.get() == 0 || r.get() == 0) {
+        return 0;
     } else {
-        return int32_t(g->currentTurn().inbox().getNumMessages());
+        return int32_t(g->currentTurn().inbox().getNumMessages()) + 1;
     }
 }
 

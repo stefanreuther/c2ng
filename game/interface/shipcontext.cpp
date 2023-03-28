@@ -1,29 +1,22 @@
 /**
   *  \file game/interface/shipcontext.cpp
-  *
-  *  PCC2 comment:
-  *
-  *  Ship context.
-  *  This class must override getObject() to achieve the same semantics as PCC 1.x
-  *  (which seems to be the most useful semantics for the SHIP() array):
-  *  - iteration uses ty_any_ships to iterate over everything visible
-  *  - indexing uses ty_history_ships to allow accessing a history ship directly
+  *  \brief Class game::interface::ShipContext
   */
 
 #include "game/interface/shipcontext.hpp"
-#include "interpreter/nametable.hpp"
-#include "game/interface/shipproperty.hpp"
-#include "interpreter/typehint.hpp"
 #include "afl/base/countof.hpp"
-#include "interpreter/error.hpp"
-#include "game/turn.hpp"
-#include "interpreter/propertyacceptor.hpp"
 #include "afl/string/format.hpp"
-#include "game/interface/playerproperty.hpp"
 #include "game/interface/componentproperty.hpp"
 #include "game/interface/hullproperty.hpp"
+#include "game/interface/playerproperty.hpp"
 #include "game/interface/shipmethod.hpp"
+#include "game/interface/shipproperty.hpp"
+#include "game/turn.hpp"
+#include "interpreter/error.hpp"
+#include "interpreter/nametable.hpp"
 #include "interpreter/procedurevalue.hpp"
+#include "interpreter/propertyacceptor.hpp"
+#include "interpreter/typehint.hpp"
 
 namespace {
     enum ShipDomain {
@@ -187,11 +180,11 @@ namespace {
 
     class ShipMethodValue : public interpreter::ProcedureValue {
      public:
-        ShipMethodValue(int id,
+        ShipMethodValue(game::Id_t id,
                         game::Session& session,
                         game::interface::ShipMethod ism,
                         afl::base::Ref<game::Root> root,
-                        afl::base::Ref<game::spec::ShipList> shipList,
+                        afl::base::Ref<const game::spec::ShipList> shipList,
                         afl::base::Ref<game::Game> game,
                         afl::base::Ref<game::Turn> turn)
             : m_id(id),
@@ -219,17 +212,17 @@ namespace {
         game::Session& m_session;
         game::interface::ShipMethod m_method;
         afl::base::Ref<game::Root> m_root;
-        afl::base::Ref<game::spec::ShipList> m_shipList;
+        afl::base::Ref<const game::spec::ShipList> m_shipList;
         afl::base::Ref<game::Game> m_game;
         afl::base::Ref<game::Turn> m_turn;
     };
 }
 
-game::interface::ShipContext::ShipContext(int id,
+game::interface::ShipContext::ShipContext(Id_t id,
                                           Session& session,
                                           afl::base::Ref<Root> root,
                                           afl::base::Ref<Game> game,
-                                          afl::base::Ref<game::spec::ShipList> shipList)
+                                          afl::base::Ref<const game::spec::ShipList> shipList)
     : m_id(id),
       m_session(session),
       m_root(root),
@@ -341,9 +334,8 @@ game::interface::ShipContext::get(PropertyIndex_t index)
                                            m_shipList,
                                            *m_game,
                                            m_game->currentTurn());
-             default:
-                return 0;
             }
+            return 0;
         } else {
             // User property
             return afl::data::Value::cloneOf(m_session.world().shipProperties().get(m_id, index - NUM_SHIP_PROPERTIES));
@@ -406,12 +398,12 @@ game::interface::ShipContext::store(interpreter::TagNode& out, afl::io::DataSink
 }
 
 game::interface::ShipContext*
-game::interface::ShipContext::create(int id, Session& session)
+game::interface::ShipContext::create(Id_t id, Session& session)
 {
     // ex shipint.pas:CreateShipContext
     Game* game = session.getGame().get();
     Root* root = session.getRoot().get();
-    game::spec::ShipList* shipList = session.getShipList().get();
+    const game::spec::ShipList* shipList = session.getShipList().get();
     if (game != 0 && root != 0 && shipList != 0 && game->currentTurn().universe().ships().get(id) != 0) {
         return new ShipContext(id, session, *root, *game, *shipList);
     } else {

@@ -1,19 +1,20 @@
 /**
   *  \file game/interface/minefieldfunction.cpp
+  *  \brief Class game::interface::MinefieldFunction
   */
 
 #include "game/interface/minefieldfunction.hpp"
-#include "game/turn.hpp"
 #include "game/game.hpp"
-#include "interpreter/arguments.hpp"
 #include "game/interface/minefieldcontext.hpp"
+#include "game/turn.hpp"
+#include "interpreter/arguments.hpp"
 
 game::interface::MinefieldFunction::MinefieldFunction(Session& session)
     : m_session(session)
 { }
 
 // IndexableValue:
-afl::data::Value*
+interpreter::Context*
 game::interface::MinefieldFunction::get(interpreter::Arguments& args)
 {
     // ex int/if/mineif.h:IFMinefieldGet
@@ -53,7 +54,7 @@ game::interface::MinefieldFunction::getDimension(int32_t which) const
         return 1;
     } else {
         if (Game* game = m_session.getGame().get()) {
-            return game->currentTurn().universe().minefields().size();
+            return game->currentTurn().universe().minefields().size()+1;
         } else {
             return 0;
         }

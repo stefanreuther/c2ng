@@ -51,6 +51,8 @@ namespace game { namespace interface {
         virtual String_t toString(bool readable) const;
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
+        /** Get contained reference.
+            @return reference */
         Reference getReference() const;
 
      private:

@@ -42,6 +42,38 @@ TestGameInterfaceDrawingProperty::testGetLine()
     interpreter::test::verifyNewInteger("idpTag",        gi::getDrawingProperty(d, gi::idpTag,        cs), 99);
     interpreter::test::verifyNewString ("idpTypeString", gi::getDrawingProperty(d, gi::idpTypeString, cs), "Line");
     interpreter::test::verifyNewInteger("idpTypeCode",   gi::getDrawingProperty(d, gi::idpTypeCode,   cs), 0);
+
+    interpreter::test::verifyNewString ("idpEncodedMessage", gi::getDrawingProperty(d, gi::idpEncodedMessage, cs),
+                                        "<<< VPA Data Transmission >>>\n"
+                                        "\n"
+                                        "OBJECT: Marker\n"
+                                        "DATA: -1321271283\n"
+                                        "iajbmeeaaleaaaaaimaaimaaaa\n");
+}
+
+/** Test getDrawingProperty() for a RectangleDrawing. */
+void
+TestGameInterfaceDrawingProperty::testGetRectangle()
+{
+    afl::charset::Utf8Charset cs;
+    Drawing d(Point(1100, 1200), Drawing::RectangleDrawing);
+    d.setColor(7);
+    d.setTag(99);
+    d.setPos2(Point(1300, 1400));
+    d.setExpire(12);
+
+    interpreter::test::verifyNewInteger("idpColor",      gi::getDrawingProperty(d, gi::idpColor,      cs), 7);
+    interpreter::test::verifyNewString ("idpComment",    gi::getDrawingProperty(d, gi::idpComment,    cs), "");
+    interpreter::test::verifyNewInteger("idpEndX",       gi::getDrawingProperty(d, gi::idpEndX,       cs), 1300);
+    interpreter::test::verifyNewInteger("idpEndY",       gi::getDrawingProperty(d, gi::idpEndY,       cs), 1400);
+    interpreter::test::verifyNewInteger("idpExpire",     gi::getDrawingProperty(d, gi::idpExpire,     cs), 12);
+    interpreter::test::verifyNewInteger("idpLocX",       gi::getDrawingProperty(d, gi::idpLocX,       cs), 1100);
+    interpreter::test::verifyNewInteger("idpLocY",       gi::getDrawingProperty(d, gi::idpLocY,       cs), 1200);
+    interpreter::test::verifyNewNull   ("idpRadius",     gi::getDrawingProperty(d, gi::idpRadius,     cs));
+    interpreter::test::verifyNewNull   ("idpShape",      gi::getDrawingProperty(d, gi::idpShape,      cs));
+    interpreter::test::verifyNewInteger("idpTag",        gi::getDrawingProperty(d, gi::idpTag,        cs), 99);
+    interpreter::test::verifyNewString ("idpTypeString", gi::getDrawingProperty(d, gi::idpTypeString, cs), "Rectangle");
+    interpreter::test::verifyNewInteger("idpTypeCode",   gi::getDrawingProperty(d, gi::idpTypeCode,   cs), 1);
 }
 
 /** Test getDrawingProperty() for a CircleDrawing. */

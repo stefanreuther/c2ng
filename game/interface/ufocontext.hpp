@@ -1,10 +1,10 @@
 /**
   *  \file game/interface/ufocontext.hpp
+  *  \brief Class game::interface::UfoContext
   */
 #ifndef C2NG_GAME_INTERFACE_UFOCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_UFOCONTEXT_HPP
 
-#include "game/game.hpp"
 #include "game/map/ufo.hpp"
 #include "game/session.hpp"
 #include "game/turn.hpp"
@@ -12,9 +12,20 @@
 
 namespace game { namespace interface {
 
+    /** Ufo context.
+        Publishes properties and methods of an Ufo.
+        Implements the result of the "Ufo()" function.
+
+        @see UfoFunction */
     class UfoContext : public interpreter::SimpleContext, public interpreter::Context::PropertyAccessor {
      public:
+        /** Constructor.
+            @param slot     Slot; see UfoType::getObjectByIndex()
+            @param turn     Turn
+            @param session  Session (for translator, InterpreterInterface) */
         UfoContext(Id_t slot, afl::base::Ref<Turn> turn, Session& session);
+
+        /** Destructor. */
         ~UfoContext();
 
         // Context:

@@ -1,18 +1,32 @@
 /**
   *  \file game/interface/globalcontext.hpp
+  *  \brief Class game::interface::GlobalContext
   */
 #ifndef C2NG_GAME_INTERFACE_GLOBALCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_GLOBALCONTEXT_HPP
 
-#include "interpreter/context.hpp"
 #include "game/session.hpp"
+#include "interpreter/context.hpp"
 #include "interpreter/singlecontext.hpp"
 
 namespace game { namespace interface {
 
+    /** Global context.
+        Publishes
+        - global variables (interpreter::World::globalPropertyNames() / interpreter::World::globalValues())
+        - global properties (GlobalProperty)
+        - user interface properties (UserInterfaceProperty / UserInterfacePropertyStack)
+        - properties of viewpoint player (PlayerProperty)
+
+        Compatibility with the external interface (VM file format) requires that all global properties are
+        published by one context implementation (Tag_Global). */
     class GlobalContext : public interpreter::SingleContext, public interpreter::Context::PropertyAccessor {
      public:
+        /** Constructor.
+            @param session Session */
         explicit GlobalContext(Session& session);
+
+        /** Destructor. */
         ~GlobalContext();
 
         // Context:

@@ -1,10 +1,12 @@
 /**
   *  \file game/interface/taskeditorcontext.cpp
+  *  \brief Class game::interface::TaskEditorContext
   */
 
 #include "game/interface/taskeditorcontext.hpp"
 #include "afl/base/staticassert.hpp"
 #include "afl/data/stringlist.hpp"
+#include "afl/except/assertionfailedexception.hpp"
 #include "afl/string/format.hpp"
 #include "game/actions/preconditions.hpp"
 #include "game/game.hpp"
@@ -50,6 +52,7 @@ namespace {
     /*
      *  Conversion utilities
      */
+
     int32_t limitRange(size_t n)
     {
         if (n >= 0x7FFFFFFF) {
@@ -176,7 +179,7 @@ namespace {
             { return new TaskEditorLinesProperty(m_edit, m_session); }
 
      private:
-        afl::base::Ptr<TaskEditor> m_edit;
+        afl::base::Ptr<TaskEditor> m_edit;  // must be Ptr<> to allow releaseAutoTaskEditor()
         game::Session& m_session;
     };
 
@@ -197,7 +200,7 @@ namespace {
         virtual ProcedureValue* clone() const
             { return new TaskEditorClosure(m_edit, m_method, m_session); }
      private:
-        afl::base::Ptr<TaskEditor> m_edit;
+        afl::base::Ptr<TaskEditor> m_edit;  // must be Ptr<> to allow releaseAutoTaskEditor()
         game::interface::TaskEditorMethod m_method;
         game::Session& m_session;
     };
@@ -533,7 +536,9 @@ game::interface::TaskEditorContext::TaskEditorContext(afl::base::Ptr<interpreter
     : SingleContext(),
       m_edit(edit),
       m_session(session)
-{ }
+{
+    afl::except::checkAssertion(edit.get() != 0, "edit != 0");
+}
 
 game::interface::TaskEditorContext::~TaskEditorContext()
 {
@@ -552,7 +557,7 @@ game::interface::TaskEditorContext::set(PropertyIndex_t index, const afl::data::
 {
     switch (TaskEditorDomain(TASKEDITOR_MAP[index].domain)) {
      case TaskEditorPropertyDomain:
-        return setTaskEditorProperty(m_edit, TaskEditorProperty(TASKEDITOR_MAP[index].index), value);
+        return setTaskEditorProperty(*m_edit, TaskEditorProperty(TASKEDITOR_MAP[index].index), value);
      case TaskEditorMethodDomain:
         throw interpreter::Error::notAssignable();
     }
@@ -613,7 +618,6 @@ game::interface::TaskEditorContext::create(game::Session& session, interpreter::
 }
 
 
-
 /*
  *  Global Functions
  */
@@ -621,85 +625,87 @@ game::interface::TaskEditorContext::create(game::Session& session, interpreter::
 afl::data::Value*
 game::interface::getTaskEditorProperty(const afl::base::Ptr<interpreter::TaskEditor>& edit, TaskEditorProperty prop, game::Session& session)
 {
-    switch (prop) {
-     case iteLines:
-        return new TaskEditorLinesProperty(edit, session);
+    if (edit.get() != 0) {
+        switch (prop) {
+         case iteLines:
+            return new TaskEditorLinesProperty(edit, session);
 
-     case iteCursor:
-        return makeIntegerValue(limitRange(edit->getCursor()));
+         case iteCursor:
+            return makeIntegerValue(limitRange(edit->getCursor()));
 
-     case itePC:
-        return makeIntegerValue(limitRange(edit->getPC()));
+         case itePC:
+            return makeIntegerValue(limitRange(edit->getPC()));
 
-     case iteIsInSubroutine:
-        return makeBooleanValue(edit->isInSubroutineCall());
+         case iteIsInSubroutine:
+            return makeBooleanValue(edit->isInSubroutineCall());
 
-     case itePredictedFCode:
-        return getPredictedValue(*edit, session, pvFriendlyCode);
+         case itePredictedFCode:
+            return getPredictedValue(*edit, session, pvFriendlyCode);
 
-     case itePredictedCloakFuel:
-        return getPredictedValue(*edit, session, pvCloakFuel);
+         case itePredictedCloakFuel:
+            return getPredictedValue(*edit, session, pvCloakFuel);
 
-     case itePredictedFuel:
-        return getPredictedValue(*edit, session, pvRemainingFuel);
+         case itePredictedFuel:
+            return getPredictedValue(*edit, session, pvRemainingFuel);
 
-     case itePredictedMission:
-        return getPredictedValue(*edit, session, pvMission);
+         case itePredictedMission:
+            return getPredictedValue(*edit, session, pvMission);
 
-     case itePredictedMovementFuel:
-        return getPredictedValue(*edit, session, pvMovementFuel);
+         case itePredictedMovementFuel:
+            return getPredictedValue(*edit, session, pvMovementFuel);
 
-     case itePredictedPositionX:
-        return getPredictedValue(*edit, session, pvPositionX);
+         case itePredictedPositionX:
+            return getPredictedValue(*edit, session, pvPositionX);
 
-     case itePredictedPositionY:
-        return getPredictedValue(*edit, session, pvPositionY);
+         case itePredictedPositionY:
+            return getPredictedValue(*edit, session, pvPositionY);
 
-     case itePredictedSpeed:
-        return getPredictedValue(*edit, session, pvWarpFactor);
+         case itePredictedSpeed:
+            return getPredictedValue(*edit, session, pvWarpFactor);
 
-     case iteTypeStr:
-        switch (edit->process().getProcessKind()) {
-         case Process::pkDefault:    break;
-         case Process::pkShipTask:   return makeStringValue("ship");
-         case Process::pkPlanetTask: return makeStringValue("planet");
-         case Process::pkBaseTask:   return makeStringValue("base");
-        }
-        return 0;
-
-     case iteTypeInt:
-        switch (edit->process().getProcessKind()) {
-         case Process::pkDefault:    break;
-         case Process::pkShipTask:   return makeIntegerValue(1);
-         case Process::pkPlanetTask: return makeIntegerValue(2);
-         case Process::pkBaseTask:   return makeIntegerValue(3);
-        }
-        return 0;
-
-     case iteObjectId:
-        if (const game::map::Object* p = dynamic_cast<const game::map::Object*>(edit->process().getInvokingObject())) {
-            return makeIntegerValue(p->getId());
-        } else {
+         case iteTypeStr:
+            switch (edit->process().getProcessKind()) {
+             case Process::pkDefault:    break;
+             case Process::pkShipTask:   return makeStringValue("ship");
+             case Process::pkPlanetTask: return makeStringValue("planet");
+             case Process::pkBaseTask:   return makeStringValue("base");
+            }
             return 0;
+
+         case iteTypeInt:
+            switch (edit->process().getProcessKind()) {
+             case Process::pkDefault:    break;
+             case Process::pkShipTask:   return makeIntegerValue(1);
+             case Process::pkPlanetTask: return makeIntegerValue(2);
+             case Process::pkBaseTask:   return makeIntegerValue(3);
+            }
+            return 0;
+
+         case iteObjectId:
+            if (const game::map::Object* p = dynamic_cast<const game::map::Object*>(edit->process().getInvokingObject())) {
+                return makeIntegerValue(p->getId());
+            } else {
+                return 0;
+            }
         }
     }
     return 0;
 }
 
 void
-game::interface::setTaskEditorProperty(const afl::base::Ptr<interpreter::TaskEditor>& edit, TaskEditorProperty prop, const afl::data::Value* value)
+game::interface::setTaskEditorProperty(interpreter::TaskEditor& edit, TaskEditorProperty prop, const afl::data::Value* value)
 {
     size_t n;
     switch (prop) {
      case iteCursor:
-        if (checkIndexArg(n, value, edit->getNumInstructions() + 1)) {
-            edit->setCursor(n);
+        if (checkIndexArg(n, value, edit.getNumInstructions() + 1)) {
+            edit.setCursor(n);
         }
         break;
 
      case itePC:
-        if (checkIndexArg(n, value, edit->getNumInstructions())) {
-            edit->setPC(n);
+        if (checkIndexArg(n, value, edit.getNumInstructions())) {
+            edit.setPC(n);
         }
         break;
 
@@ -745,6 +751,7 @@ game::interface::callTaskEditorMethod(interpreter::TaskEditor& edit, TaskEditorM
 void
 game::interface::insertMovementCommand(interpreter::TaskEditor& edit, String_t verb, game::map::Point pt, int flags, Session& session)
 {
+    // ex WShipAutoTaskSelection::insertWaypointCommand
     const bool wantSetSpeed = (flags & imc_SetSpeed) != 0;
     const bool wantDuplicate = (flags & imc_AcceptDuplicate) != 0;
 
@@ -782,7 +789,7 @@ game::interface::insertMovementCommand(interpreter::TaskEditor& edit, String_t v
             commands.push_back(Format("SetFCode \"HYP\"   %% %s", session.translator()("hyperjump")));
         } else {
             /* Not a hyperjump */
-            if (shipCanJump && pred.getWarpFactor() > 0 && pred.getFriendlyCode() == "HYP" && !r.hostVersion().isExactHyperjumpDistance2(dist2)) {
+            if (shipCanJump && pred.getFriendlyCode() == "HYP" && !r.hostVersion().isExactHyperjumpDistance2(dist2)) {
                 commands.push_back(Format("SetFCode %s   %% %s",
                                           interpreter::quoteString(shipList.friendlyCodes().generateRandomCode(session.rng(), r.hostVersion())),
                                           session.translator()("cancel hyperjump")));

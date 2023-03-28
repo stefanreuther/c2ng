@@ -1,13 +1,14 @@
 /**
   *  \file game/interface/friendlycodecontext.cpp
+  *  \brief Class game::interface::FriendlyCodeContext
   */
 
 #include "game/interface/friendlycodecontext.hpp"
-#include "interpreter/nametable.hpp"
-#include "game/interface/friendlycodeproperty.hpp"
-#include "interpreter/typehint.hpp"
-#include "interpreter/propertyacceptor.hpp"
 #include "afl/string/format.hpp"
+#include "game/interface/friendlycodeproperty.hpp"
+#include "interpreter/nametable.hpp"
+#include "interpreter/propertyacceptor.hpp"
+#include "interpreter/typehint.hpp"
 #include "interpreter/values.hpp"
 
 namespace {
@@ -24,7 +25,7 @@ namespace {
 }
 
 game::interface::FriendlyCodeContext::FriendlyCodeContext(size_t slot,
-                                                          afl::base::Ref<Root> root,
+                                                          afl::base::Ref<const Root> root,
                                                           afl::base::Ref<game::spec::ShipList> shipList,
                                                           afl::string::Translator& tx)
     : SimpleContext(),

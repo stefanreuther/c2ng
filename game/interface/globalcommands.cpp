@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/globalcommands.cpp
+  *  \brief Global Commands
   */
 
 #include "game/interface/globalcommands.hpp"
@@ -132,7 +133,6 @@ namespace {
 bool
 game::interface::checkPlayerSetArg(PlayerSet_t& result, afl::data::Value* value)
 {
-    // FIXME: here?
     result.clear();
     if (interpreter::IndexableValue* iv = dynamic_cast<interpreter::IndexableValue*>(value)) {
         // We need to use IndexableValue because that allows retrieving values without having a process.
@@ -287,9 +287,10 @@ game::interface::IFAddFCode(game::Session& session, interpreter::Process& /*proc
    FIXME: Need to have a way to have configuration without a loaded game
 
    If the option you're setting has not be defined before, this command will produce a new option of type "string".
+   (In PCC2, the command will fail for unknown options.)
 
    @see CreatePrefOption
-   @since PCC2 2.40.1 */
+   @since PCC2 2.40.1, PCC2 2.0.12 */
 void
 game::interface::IFAddPref(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
@@ -531,7 +532,7 @@ game::interface::IFExport(game::Session& session, interpreter::Process& /*proc*/
 /* @q NewCannedMarker x:Int, y:Int, slot:Int, Optional tag:Int, expire:Int (Global Command)
    Create a new canned marker drawing.
    Users can predefine a number of marker shapes/colors.
-   The %slot parameter selects which type to create.
+   The %slot parameter selects which type to create, starting at 0.
 
    The %tag is a value between 0 and 32767 you can use to identify your drawings,
    usually this value is created using {Atom}.

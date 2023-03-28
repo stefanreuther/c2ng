@@ -6,9 +6,9 @@
 #include "game/interface/completionlist.hpp"
 
 #include "t_game_interface.hpp"
-#include "game/session.hpp"
+#include "afl/io/internalfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
-#include "afl/io/nullfilesystem.hpp"
+#include "game/session.hpp"
 #include "game/test/root.hpp"
 
 namespace {
@@ -121,12 +121,16 @@ void
 TestGameInterfaceCompletionList::testAddBuildCompletionList()
 {
     afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
+    afl::io::InternalFileSystem fs;
     game::Session session(tx, fs);
     session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     afl::container::PtrVector<interpreter::Context> ctx;
     session.world().keymaps().createKeymap("KEYBOARD");
     session.world().keymaps().createKeymap("KEYMAP");
+    fs.createDirectory("/root");
+    fs.createDirectory("/home");
+    fs.openFile("/home/file1", afl::io::FileSystem::Create);
+    fs.openFile("/home/file2", afl::io::FileSystem::Create);
 
     // Regular command
     game::interface::CompletionList list;
@@ -188,5 +192,18 @@ TestGameInterfaceCompletionList::testAddBuildCompletionList()
     buildCompletionList(list, "pla ", session, false, ctx);
     TS_ASSERT_EQUALS(list.getStem(), "");
     TS_ASSERT(list.isEmpty());
+
+    // Directory
+    buildCompletionList(list, "open \"/r", session, false, ctx);
+    TS_ASSERT_EQUALS(list.getStem(), "/r");
+    TS_ASSERT_EQUALS(list.getImmediateCompletion(), "/root/");
+    TS_ASSERT(hasCompletion(list, "/root/"));
+
+    // File
+    buildCompletionList(list, "open \"/home/f", session, false, ctx);
+    TS_ASSERT_EQUALS(list.getStem(), "/home/f");
+    TS_ASSERT_EQUALS(list.getImmediateCompletion(), "/home/file");
+    TS_ASSERT(hasCompletion(list, "/home/file1"));
+    TS_ASSERT(hasCompletion(list, "/home/file2"));
 }
 
