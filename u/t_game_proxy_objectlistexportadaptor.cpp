@@ -15,9 +15,7 @@
 #include "game/map/planet.hpp"
 #include "afl/data/access.hpp"
 #include "interpreter/test/contextverifier.hpp"
-#include "afl/io/nullstream.hpp"
 #include "interpreter/tagnode.hpp"
-#include "interpreter/vmio/nullsavecontext.hpp"
 
 /** Test normal behaviour.
     Set up a normal situation and exercise general methods and sequences. */
@@ -83,27 +81,14 @@ TestGameProxyObjectListExportAdaptor::testIt()
         TS_ASSERT_EQUALS(ctx->next(), false);
     }
 
-    // Verify cloning
+    // Verify basics/cloning
     {
         std::auto_ptr<interpreter::Context> ctx(testee.createContext());
         TS_ASSERT(ctx.get() != 0);
 
-        std::auto_ptr<interpreter::Context> cctx(ctx->clone());
-        TS_ASSERT(cctx.get() != 0);
-
-        TS_ASSERT_DIFFERS(ctx->toString(false), "");
-        TS_ASSERT_EQUALS(ctx->toString(false), cctx->toString(false));
-    }
-
-    // Verify inability to persist
-    {
-        std::auto_ptr<interpreter::Context> ctx(testee.createContext());
-        TS_ASSERT(ctx.get() != 0);
-
-        interpreter::TagNode tag;
-        afl::io::NullStream sink;
-        interpreter::vmio::NullSaveContext sc;
-        TS_ASSERT_THROWS(ctx->store(tag, sink, sc), interpreter::Error);
+        interpreter::test::ContextVerifier verif(*ctx, "testIt: basics");
+        verif.verifyBasics();
+        verif.verifyNotSerializable();
     }
 }
 

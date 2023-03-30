@@ -9,7 +9,6 @@
 #include "t_game_interface.hpp"
 #include "afl/io/constmemorystream.hpp"
 #include "afl/io/nullfilesystem.hpp"
-#include "afl/io/nullstream.hpp"
 #include "afl/io/textfile.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "game/test/root.hpp"
@@ -17,7 +16,6 @@
 #include "interpreter/filecommandsource.hpp"
 #include "interpreter/statementcompiler.hpp"
 #include "interpreter/test/contextverifier.hpp"
-#include "interpreter/vmio/nullsavecontext.hpp"
 
 using game::interface::ConfigurationEditorContext;
 using interpreter::Process;
@@ -71,26 +69,20 @@ TestGameInterfaceConfigurationEditorContext::testBasics()
     ConfigurationEditorContext testee(env.session);
 
     // General verification
-    ContextVerifier(testee, "testBasics").verifyTypes();
+    ContextVerifier verif(testee, "testBasics");
+    verif.verifyTypes();
+    verif.verifyBasics();
+    verif.verifyNotSerializable();
 
     // Some properties
     TS_ASSERT(testee.getObject() == 0);
-    TS_ASSERT_DIFFERS(testee.toString(true), "");
-    TS_ASSERT_DIFFERS(testee.toString(false), "");
     TS_ASSERT_EQUALS(testee.next(), false);
 
     // Cloning
     std::auto_ptr<ConfigurationEditorContext> clone(testee.clone());
     TS_ASSERT(clone.get() != 0);
-    TS_ASSERT_EQUALS(clone->toString(false), testee.toString(false));
     TS_ASSERT_EQUALS(&*clone->data().ref, &*testee.data().ref);
     TS_ASSERT_EQUALS(clone->data().root, testee.data().root);
-
-    // Storing
-    interpreter::TagNode out;
-    afl::io::NullStream aux;
-    interpreter::vmio::NullSaveContext ctx;
-    TS_ASSERT_THROWS(testee.store(out, aux, ctx), std::exception);
 
     // Ids
     TS_ASSERT_EQUALS(ConfigurationEditorContext::getTreeIdFromEditorIndex(0), 1);

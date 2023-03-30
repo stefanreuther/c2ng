@@ -7,14 +7,13 @@
 
 #include "t_interpreter.hpp"
 #include "afl/io/nullfilesystem.hpp"
-#include "afl/io/nullstream.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/process.hpp"
 #include "interpreter/propertyacceptor.hpp"
-#include "interpreter/vmio/nullsavecontext.hpp"
+#include "interpreter/test/contextverifier.hpp"
 #include "interpreter/world.hpp"
 
 namespace {
@@ -66,12 +65,11 @@ TestInterpreterProcessObserverContext::testIt()
     TS_ASSERT(testee.get() != 0);
     TS_ASSERT(testee->getObject() == 0);
     TS_ASSERT_EQUALS(testee->toString(false).substr(0, 1), "#");
-    {
-        interpreter::TagNode tag;
-        afl::io::NullStream aux;
-        interpreter::vmio::NullSaveContext ctx;
-        TS_ASSERT_THROWS(testee->store(tag, aux, ctx), interpreter::Error);
-    }
+
+    interpreter::test::ContextVerifier verif(*testee, "testIt");
+    verif.verifyBasics();
+    verif.verifyNotSerializable();
+
     {
         NullPA pa;
         testee->enumProperties(pa);

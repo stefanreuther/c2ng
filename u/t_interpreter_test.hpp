@@ -18,6 +18,7 @@ class TestInterpreterTestContextVerifier : public CxxTest::TestSuite {
     void testVerifyBoolean();
     void testVerifyString();
     void testVerifyNull();
+    void testSet();
 };
 
 class TestInterpreterTestExpressionVerifier : public CxxTest::TestSuite {
@@ -33,6 +34,21 @@ class TestInterpreterTestExpressionVerifier : public CxxTest::TestSuite {
     void testVerifyCompileError();
     void testVerifyParseError();
     void testVerifyStatement();
+};
+
+class TestInterpreterTestValueVerifier : public CxxTest::TestSuite {
+ public:
+    void testFailBasicString();
+    void testFailBasicClone();
+    void testFailBasicClonedString();
+    void testFailSerializeGood();
+    void testFailSerializeBad();
+    void testFailSerializeFail();
+    void testVerifyNewInteger();
+    void testVerifyNewFloat();
+    void testVerifyNewBoolean();
+    void testVerifyNewString();
+    void testVerifyNewNull();
 };
 
 #endif

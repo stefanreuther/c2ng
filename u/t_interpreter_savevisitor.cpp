@@ -208,7 +208,7 @@ TestInterpreterSaveVisitor::testOther2()
             { return "#<other>"; }
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
             { out.tag = 0x4444; out.value = 0x55555555; }
-        virtual afl::data::Value* clone() const
+        virtual interpreter::BaseValue* clone() const
             { return new OtherBaseValue(); }
     };
     Environment env;

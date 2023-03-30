@@ -13,7 +13,7 @@
 #include "afl/sys/log.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/process.hpp"
-#include "interpreter/vmio/nullsavecontext.hpp"
+#include "interpreter/test/valueverifier.hpp"
 #include "interpreter/world.hpp"
 
 /** Interface test. */
@@ -52,12 +52,7 @@ TestInterpreterProcedureValue::testIt()
     TS_ASSERT_THROWS(t.makeFirstContext(), interpreter::Error);
 
     // - store
-    {
-        interpreter::TagNode node;
-        afl::io::InternalSink sink;
-        interpreter::vmio::NullSaveContext ctx;
-        TS_ASSERT_THROWS(t.store(node, sink, ctx), interpreter::Error);
-    }
+    interpreter::test::ValueVerifier(t, "testIt").verifyNotSerializable();
 
     // - clone
     interpreter::ProcedureValue& pv = t;

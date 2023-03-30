@@ -10,7 +10,6 @@
 #include "afl/io/constmemorystream.hpp"
 #include "afl/io/internaldirectory.hpp"
 #include "afl/io/nullfilesystem.hpp"
-#include "afl/io/nullstream.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "game/game.hpp"
 #include "game/interface/referencecontext.hpp"
@@ -19,7 +18,6 @@
 #include "game/test/stringverifier.hpp"
 #include "interpreter/callablevalue.hpp"
 #include "interpreter/test/contextverifier.hpp"
-#include "interpreter/vmio/nullsavecontext.hpp"
 
 using afl::base::Ref;
 using afl::io::InternalDirectory;
@@ -39,9 +37,8 @@ TestGameInterfaceMailboxContext::testBasics()
     // Verify
     interpreter::test::ContextVerifier verif(*ctx, "testBasics");
     verif.verifyTypes();
-
-    TS_ASSERT_DIFFERS(ctx->toString(false), "");
-    TS_ASSERT_EQUALS(ctx->toString(false), ctx->toString(true));
+    verif.verifyBasics();
+    verif.verifyNotSerializable();
 
     TS_ASSERT_EQUALS(ctx->next(), false);
     TS_ASSERT(ctx->getObject() == 0);
@@ -49,11 +46,6 @@ TestGameInterfaceMailboxContext::testBasics()
     std::auto_ptr<game::interface::MailboxContext> copy(ctx->clone());
     TS_ASSERT(copy.get() != 0);
     TS_ASSERT_EQUALS(&ctx->mailbox(), &copy->mailbox());
-
-    interpreter::TagNode tag;
-    afl::io::NullStream sink;
-    interpreter::vmio::NullSaveContext saveContext;
-    TS_ASSERT_THROWS(ctx->store(tag, sink, saveContext), interpreter::Error);
 }
 
 /** Test Add command. */

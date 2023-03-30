@@ -36,6 +36,11 @@ namespace interpreter {
             \throw Error if object cannot be serialized */
         virtual void store(TagNode& out, afl::io::DataSink& aux, SaveContext& ctx) const = 0;
 
+        /** Clone.
+            Co-variant specialisation.
+            \return newly-created copy, never null */
+        virtual BaseValue* clone() const = 0;
+
         // afl::data::Value:
         virtual void visit(afl::data::Visitor& visitor) const;
 

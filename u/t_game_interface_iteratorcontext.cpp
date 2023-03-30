@@ -84,30 +84,12 @@ namespace {
             }
 
         void checkNull()
-            {
-                std::auto_ptr<afl::data::Value> result(call());
-                m_assert.check("expect null", result.get() == 0);
-            }
+            { interpreter::test::verifyNewNull(m_assert, call()); }
 
         void checkInteger(int value)
-            {
-                std::auto_ptr<afl::data::Value> result(call());
-                m_assert.check("expect non-null", result.get() != 0);
-
-                afl::data::IntegerValue* iv = dynamic_cast<afl::data::IntegerValue*>(result.get());
-                m_assert.check("expect integer", iv != 0);
-                m_assert.checkEqual("expect value", iv->getValue(), value);
-            }
-
+            { interpreter::test::verifyNewInteger(m_assert, call(), value); }
         void checkString(const String_t& value)
-            {
-                std::auto_ptr<afl::data::Value> result(call());
-                m_assert.check("expect non-null", result.get() != 0);
-
-                afl::data::StringValue* sv = dynamic_cast<afl::data::StringValue*>(result.get());
-                m_assert.check("expect string", sv != 0);
-                m_assert.checkEqual("expect value", sv->getValue(), value);
-            }
+            { interpreter::test::verifyNewString(m_assert, call(), value.c_str()); }
 
      private:
         afl::test::Assert m_assert;

@@ -10,7 +10,7 @@
 #include "afl/io/internalsink.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/tagnode.hpp"
-#include "interpreter/vmio/nullsavecontext.hpp"
+#include "interpreter/test/valueverifier.hpp"
 
 /** Simple test. */
 void
@@ -22,13 +22,9 @@ TestInterpreterGenericValue::testIt()
     TS_ASSERT_EQUALS(testee.toString(false), "#<builtin>");
     TS_ASSERT_EQUALS(testee.toString(true), "#<builtin>");
 
-    // Store
-    {
-        interpreter::TagNode n;
-        afl::io::InternalSink sink;
-        interpreter::vmio::NullSaveContext sc;
-        TS_ASSERT_THROWS(testee.store(n, sink, sc), interpreter::Error);
-    }
+    interpreter::test::ValueVerifier verif(testee, "testIt");
+    verif.verifyBasics();
+    verif.verifyNotSerializable();
 
     // Clone, receiving base class
     std::auto_ptr<interpreter::BaseValue> c1(testee.clone());

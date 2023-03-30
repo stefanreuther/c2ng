@@ -282,3 +282,63 @@ TestInterpreterTestContextVerifier::testVerifyNull()
     TS_ASSERT_THROWS(testee.verifyString("N", "s"), AssertionFailedException);
 }
 
+void
+TestInterpreterTestContextVerifier::testSet()
+{
+    class Tester : public interpreter::SimpleContext, public interpreter::Context::PropertyAccessor {
+     public:
+        const String_t& getLastValue() const
+            { return m_value; }
+        virtual interpreter::Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
+            {
+                if (name.match("V")) {
+                    result = 42;
+                    return this;
+                } else {
+                    return 0;
+                }
+            }
+
+        virtual void set(PropertyIndex_t index, const afl::data::Value* value)
+            {
+                TS_ASSERT_EQUALS(index, 42U);
+                m_value = interpreter::toString(value, true);
+            }
+
+        virtual afl::data::Value* get(PropertyIndex_t /*index*/)
+            { TS_FAIL("unexpected: get"); return 0; }
+        virtual bool next()
+            { TS_FAIL("unexpected: next"); return false; }
+        virtual interpreter::Context* clone() const
+            { TS_FAIL("unexpected: clone"); return 0; }
+        virtual afl::base::Deletable* getObject()
+            { TS_FAIL("unexpected: getObject"); return 0; }
+        virtual void enumProperties(interpreter::PropertyAcceptor& /*acceptor*/) const
+            { TS_FAIL("unexpected: enumProperties"); }
+        virtual String_t toString(bool /*readable*/) const
+            { return "#<TestContext>"; }
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+            { TS_FAIL("unexpected: store"); }
+     private:
+        String_t m_value;
+    };
+
+    Tester ctx;
+    interpreter::test::ContextVerifier testee(ctx, "testSet");
+
+    // Success cases
+    TS_ASSERT_THROWS_NOTHING(testee.setIntegerValue("V", 55));
+    TS_ASSERT_EQUALS(ctx.getLastValue(), "55");
+    TS_ASSERT_THROWS_NOTHING(testee.setStringValue("V", "x"));
+    TS_ASSERT_EQUALS(ctx.getLastValue(), "\"x\"");
+    TS_ASSERT_THROWS_NOTHING(testee.setValue("V", 0));
+    TS_ASSERT_EQUALS(ctx.getLastValue(), "Z(0)");
+    TS_ASSERT_THROWS_NOTHING(testee.setValue("V", &ctx));
+    TS_ASSERT_EQUALS(ctx.getLastValue(), "#<TestContext>");
+
+    // Failure cases (bad name)
+    TS_ASSERT_THROWS(testee.setIntegerValue("X", 55), AssertionFailedException);
+    TS_ASSERT_THROWS(testee.setStringValue("X", "x"), AssertionFailedException);
+    TS_ASSERT_THROWS(testee.setValue("X", 0), AssertionFailedException);
+}
+

@@ -8,14 +8,12 @@
 
 #include "t_interpreter.hpp"
 #include "afl/base/memory.hpp"
-#include "afl/io/nullstream.hpp"
 #include "interpreter/context.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/nametable.hpp"
 #include "interpreter/propertyacceptor.hpp"
 #include "interpreter/tagnode.hpp"
 #include "interpreter/test/contextverifier.hpp"
-#include "interpreter/vmio/nullsavecontext.hpp"
 
 namespace {
     class TestContext : public interpreter::Context {
@@ -73,24 +71,13 @@ TestInterpreterMetaContext::testNormal()
     std::auto_ptr<interpreter::MetaContext> t(interpreter::MetaContext::create(ctx));
     TS_ASSERT(t.get() != 0);
 
-    // Verify clone
-    std::auto_ptr<interpreter::MetaContext> clone(t->clone());
-    TS_ASSERT(clone.get() != 0);
-    TS_ASSERT(t.get() != clone.get());
-
-    // Verify toString()
-    TS_ASSERT_DIFFERS(t->toString(false), "");
-    TS_ASSERT_EQUALS(t->toString(false), clone->toString(false));
-
-    // Verify dummies
+    // Verify basics
+    interpreter::test::ContextVerifier verif(*t, "testNormal");
+    verif.verifyNotSerializable();
+    verif.verifyBasics();
     TS_ASSERT(t->getObject() == 0);
-    interpreter::TagNode tag;
-    afl::io::NullStream sink;
-    interpreter::vmio::NullSaveContext saveContext;
-    TS_ASSERT_THROWS(t->store(tag, sink, saveContext), interpreter::Error);
 
     // Verify attributes
-    interpreter::test::ContextVerifier verif(*t, "testNormal");
     verif.verifyTypes();
     verif.verifyString("NAME", "IV");
     verif.verifyString("TYPE", "int");

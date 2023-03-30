@@ -7,11 +7,9 @@
 
 #include "t_game_interface.hpp"
 #include "afl/io/nullfilesystem.hpp"
-#include "afl/io/nullstream.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/test/contextverifier.hpp"
-#include "interpreter/vmio/nullsavecontext.hpp"
 
 namespace {
     struct Environment {
@@ -38,23 +36,13 @@ TestGameInterfacePluginContext::testIt()
     // Verify some properties
     interpreter::test::ContextVerifier verif(testee, "testIt");
     verif.verifyTypes();
+    verif.verifyBasics();
+    verif.verifyNotSerializable();
     verif.verifyString("ID", "T");
 
     // Other attributes
     TS_ASSERT(testee.getObject() == 0);
-    TS_ASSERT_DIFFERS(testee.toString(false), "");
     TS_ASSERT_EQUALS(testee.toString(true), "System.Plugin(\"T\")");
-
-    // Check store()
-    interpreter::TagNode tag;
-    afl::io::NullStream aux;
-    interpreter::vmio::NullSaveContext ctx;
-    TS_ASSERT_THROWS(testee.store(tag, aux, ctx), interpreter::Error);
-
-    // Check clone()
-    std::auto_ptr<interpreter::Context> v(testee.clone());
-    TS_ASSERT(v.get() != 0);
-    TS_ASSERT_EQUALS(v->toString(false), testee.toString(false));
 }
 
 /** Test operation with nonexistant plugin.

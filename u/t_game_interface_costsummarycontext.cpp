@@ -9,8 +9,6 @@
 #include "game/spec/costsummary.hpp"
 #include "interpreter/test/contextverifier.hpp"
 #include "interpreter/error.hpp"
-#include "afl/io/internalsink.hpp"
-#include "interpreter/vmio/nullsavecontext.hpp"
 
 /** Test null/empty cases. */
 void
@@ -47,19 +45,11 @@ TestGameInterfaceCostSummaryContext::testNormal()
     TS_ASSERT_DIFFERS(p->toString(false), "");
     TS_ASSERT(p->getObject() == 0);
 
-    std::auto_ptr<game::interface::CostSummaryContext> clone(p->clone());
-    TS_ASSERT(clone.get() != 0);
-    TS_ASSERT(clone.get() != p.get());
-
-    {
-        interpreter::TagNode tag;
-        afl::io::InternalSink out;
-        interpreter::vmio::NullSaveContext saveContext;
-        TS_ASSERT_THROWS(p->store(tag, out, saveContext), interpreter::Error);
-    }
-
     // Verify first instance
     interpreter::test::ContextVerifier verif(*p, "testNormal: first");
+    verif.verifyBasics();
+    verif.verifyNotSerializable();
+
     verif.verifyTypes();
     verif.verifyInteger("COUNT",    4);
     verif.verifyString("NAME",      "Quad");

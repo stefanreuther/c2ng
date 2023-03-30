@@ -40,6 +40,7 @@ TestGameInterfaceFriendlyCodeContext::testIt()
     game::interface::FriendlyCodeContext testee(0, root, shipList, tx);
     interpreter::test::ContextVerifier v(testee, "testIt");
     v.verifyTypes();
+    v.verifyBasics();
 
     // Verify individual properties
     v.verifyString("NAME", "cln");

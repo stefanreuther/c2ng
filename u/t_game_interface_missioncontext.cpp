@@ -20,6 +20,10 @@ TestGameInterfaceMissionContext::testIt()
 
     // Test
     game::interface::MissionContext testee(0, shipList);
-    interpreter::test::ContextVerifier(testee, "testIt").verifyTypes();
+    interpreter::test::ContextVerifier verif(testee, "testIt");
+    verif.verifyTypes();
+    verif.verifyBasics();
+    verif.verifyNotSerializable();
+    TS_ASSERT(testee.getObject() == 0);
 }
 

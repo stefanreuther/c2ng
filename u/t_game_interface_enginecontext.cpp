@@ -27,6 +27,7 @@ TestGameInterfaceEngineContext::testIt()
     game::interface::EngineContext ctx(NR, shipList);
     interpreter::test::ContextVerifier v(ctx, "testIt");
     v.verifyTypes();
+    v.verifyBasics();
 
     // Verify individual properties
     v.verifyInteger("ID", NR);

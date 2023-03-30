@@ -7,11 +7,10 @@
 
 #include "t_interpreter.hpp"
 #include "afl/data/segment.hpp"
-#include "afl/io/nullstream.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/tagnode.hpp"
-#include "interpreter/vmio/nullsavecontext.hpp"
+#include "interpreter/test/valueverifier.hpp"
 
 /** Interface test. */
 void
@@ -40,13 +39,8 @@ TestInterpreterFunctionValue::testIt()
     TS_ASSERT_THROWS(t.makeFirstContext(), interpreter::Error);
 
     // - toString
-    TS_ASSERT_DIFFERS(t.toString(false), "");
-    TS_ASSERT_DIFFERS(t.toString(true), "");
-
-    // - store
-    interpreter::TagNode out;
-    afl::io::NullStream aux;
-    interpreter::vmio::NullSaveContext ctx;
-    TS_ASSERT_THROWS(t.store(out, aux, ctx), interpreter::Error);
+    interpreter::test::ValueVerifier verif(t, "testIt");
+    verif.verifyBasics();
+    verif.verifyNotSerializable();
 }
 

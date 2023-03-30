@@ -41,6 +41,8 @@ TestGameInterfaceUfoContext::testTypes()
     game::interface::UfoContext testee(1, turn, session);
     interpreter::test::ContextVerifier v(testee, "testTypes");
     v.verifyTypes();
+    v.verifyBasics();
+    v.verifyNotSerializable();
 
     // Verify some values
     v.verifyInteger("ID", 51);

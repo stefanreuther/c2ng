@@ -5,15 +5,16 @@
 #ifndef C2NG_INTERPRETER_TEST_CONTEXTVERIFIER_HPP
 #define C2NG_INTERPRETER_TEST_CONTEXTVERIFIER_HPP
 
-#include "interpreter/context.hpp"
-#include "afl/test/assert.hpp"
 #include "afl/data/value.hpp"
+#include "afl/test/assert.hpp"
+#include "interpreter/context.hpp"
+#include "interpreter/test/valueverifier.hpp"
 
 namespace interpreter { namespace test {
 
     /** Context verifier.
         Utilities to verify a Context implementation. */
-    class ContextVerifier {
+    class ContextVerifier : public ValueVerifier {
      public:
         /** Constructor.
             \param ctx Context to verify
@@ -53,6 +54,27 @@ namespace interpreter { namespace test {
             \param name Name
             \return Newly-allocated value */
         afl::data::Value* getValue(const char* name) const;
+
+        /** Set property value by name.
+            Look up the named property and set it.
+            An exception created by the assignment is passed through.
+            \param name Name
+            \param value Value, owned by caller */
+        void setValue(const char* name, const afl::data::Value* value) const;
+
+        /** Set property value by name, string version.
+            Look up the named property and set it.
+            An exception created by the assignment is passed through.
+            \param name Name
+            \param str  String value */
+        void setStringValue(const char* name, const String_t& str) const;
+
+        /** Set property value by name, integer version.
+            Look up the named property and set it.
+            An exception created by the assignment is passed through.
+            \param name Name
+            \param value Integer value */
+        void setIntegerValue(const char* name, int32_t value) const;
 
      private:
         Context& m_context;

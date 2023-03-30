@@ -7,13 +7,12 @@
 #include "game/interface/pluginproperty.hpp"
 
 #include "t_game_interface.hpp"
-#include "afl/data/access.hpp"
 #include "afl/io/constmemorystream.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
+#include "interpreter/test/valueverifier.hpp"
 
 namespace gi = game::interface;
-using afl::data::Access;
 
 void
 TestGameInterfacePluginProperty::testGet()
@@ -27,17 +26,9 @@ TestGameInterfacePluginProperty::testGet()
     plug.initFromPluginFile("/base", "pl.c2p", ms, log, tx);
 
     // Verify
-    std::auto_ptr<afl::data::Value> p;
-    p.reset(gi::getPluginProperty(plug, gi::ipiId));
-    TS_ASSERT_EQUALS(Access(p.get()).toString(), "PLID");
-
-    p.reset(gi::getPluginProperty(plug, gi::ipiName));
-    TS_ASSERT_EQUALS(Access(p.get()).toString(), "The Name");
-
-    p.reset(gi::getPluginProperty(plug, gi::ipiDescription));
-    TS_ASSERT_EQUALS(Access(p.get()).toString(), "Description...");
-
-    p.reset(gi::getPluginProperty(plug, gi::ipiBaseDirectory));
-    TS_ASSERT_EQUALS(Access(p.get()).toString(), "/base");
+    interpreter::test::verifyNewString("ipiId",            gi::getPluginProperty(plug, gi::ipiId), "PLID");
+    interpreter::test::verifyNewString("ipiName",          gi::getPluginProperty(plug, gi::ipiName), "The Name");
+    interpreter::test::verifyNewString("ipiDescription",   gi::getPluginProperty(plug, gi::ipiDescription), "Description...");
+    interpreter::test::verifyNewString("ipiBaseDirectory", gi::getPluginProperty(plug, gi::ipiBaseDirectory), "/base");
 }
 

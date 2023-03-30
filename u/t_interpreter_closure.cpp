@@ -7,13 +7,12 @@
 #include "interpreter/closure.hpp"
 
 #include "t_interpreter.hpp"
-#include "afl/io/internalsink.hpp"
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/process.hpp"
+#include "interpreter/test/valueverifier.hpp"
 #include "interpreter/values.hpp"
-#include "interpreter/vmio/nullsavecontext.hpp"
 #include "interpreter/world.hpp"
 #include "util/consolelogger.hpp"
 
@@ -103,13 +102,10 @@ TestInterpreterClosure::testClosure()
     TS_ASSERT(!c->isProcedureCall());
     TS_ASSERT_THROWS(c->makeFirstContext(), interpreter::Error);
     TS_ASSERT_EQUALS(c->toString(false).substr(0, 2), "#<");
-    TS_ASSERT_EQUALS(c->toString(false), c->toString(true));
-    {
-        interpreter::TagNode out;
-        afl::io::InternalSink aux;
-        interpreter::vmio::NullSaveContext ctx;
-        TS_ASSERT_THROWS(c->store(out, aux, ctx), interpreter::Error);
-    }
+
+    interpreter::test::ValueVerifier verif(*c, "testClosure");
+    verif.verifyBasics();
+    verif.verifyNotSerializable();
 
     // Clone the closure
     {

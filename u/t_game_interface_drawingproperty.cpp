@@ -3,7 +3,6 @@
   *  \brief Test for game::interface::DrawingProperty
   */
 
-#include <memory>
 #include <stdexcept>
 #include "game/interface/drawingproperty.hpp"
 
@@ -12,6 +11,7 @@
 #include "afl/data/access.hpp"
 #include "afl/data/integervalue.hpp"
 #include "afl/data/stringvalue.hpp"
+#include "interpreter/test/valueverifier.hpp"
 
 namespace gi = game::interface;
 using afl::data::Value;
@@ -30,42 +30,18 @@ TestGameInterfaceDrawingProperty::testGetLine()
     d.setPos2(Point(1300, 1400));
     d.setExpire(12);
 
-    std::auto_ptr<Value> p;
-    p.reset(gi::getDrawingProperty(d, gi::idpColor, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 7);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpComment, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toString(), "");
-
-    p.reset(gi::getDrawingProperty(d, gi::idpEndX, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 1300);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpEndY, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 1400);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpExpire, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 12);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpLocX, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 1100);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpLocY, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 1200);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpRadius, cs));
-    TS_ASSERT(p.get() == 0);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpShape, cs));
-    TS_ASSERT(p.get() == 0);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpTag, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 99);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpTypeString, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toString(), "Line");
-
-    p.reset(gi::getDrawingProperty(d, gi::idpTypeCode, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 0);
+    interpreter::test::verifyNewInteger("idpColor",      gi::getDrawingProperty(d, gi::idpColor,      cs), 7);
+    interpreter::test::verifyNewString ("idpComment",    gi::getDrawingProperty(d, gi::idpComment,    cs), "");
+    interpreter::test::verifyNewInteger("idpEndX",       gi::getDrawingProperty(d, gi::idpEndX,       cs), 1300);
+    interpreter::test::verifyNewInteger("idpEndY",       gi::getDrawingProperty(d, gi::idpEndY,       cs), 1400);
+    interpreter::test::verifyNewInteger("idpExpire",     gi::getDrawingProperty(d, gi::idpExpire,     cs), 12);
+    interpreter::test::verifyNewInteger("idpLocX",       gi::getDrawingProperty(d, gi::idpLocX,       cs), 1100);
+    interpreter::test::verifyNewInteger("idpLocY",       gi::getDrawingProperty(d, gi::idpLocY,       cs), 1200);
+    interpreter::test::verifyNewNull   ("idpRadius",     gi::getDrawingProperty(d, gi::idpRadius,     cs));
+    interpreter::test::verifyNewNull   ("idpShape",      gi::getDrawingProperty(d, gi::idpShape,      cs));
+    interpreter::test::verifyNewInteger("idpTag",        gi::getDrawingProperty(d, gi::idpTag,        cs), 99);
+    interpreter::test::verifyNewString ("idpTypeString", gi::getDrawingProperty(d, gi::idpTypeString, cs), "Line");
+    interpreter::test::verifyNewInteger("idpTypeCode",   gi::getDrawingProperty(d, gi::idpTypeCode,   cs), 0);
 }
 
 /** Test getDrawingProperty() for a CircleDrawing. */
@@ -79,42 +55,18 @@ TestGameInterfaceDrawingProperty::testGetCircle()
     d.setCircleRadius(220);
     d.setExpire(15);
 
-    std::auto_ptr<Value> p;
-    p.reset(gi::getDrawingProperty(d, gi::idpColor, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 9);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpComment, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toString(), "");
-
-    p.reset(gi::getDrawingProperty(d, gi::idpEndX, cs));
-    TS_ASSERT(p.get() == 0);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpEndY, cs));
-    TS_ASSERT(p.get() == 0);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpExpire, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 15);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpLocX, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 1500);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpLocY, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 1400);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpRadius, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 220);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpShape, cs));
-    TS_ASSERT(p.get() == 0);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpTag, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 77);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpTypeString, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toString(), "Circle");
-
-    p.reset(gi::getDrawingProperty(d, gi::idpTypeCode, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 2);
+    interpreter::test::verifyNewInteger("idpColor",      gi::getDrawingProperty(d, gi::idpColor,      cs), 9);
+    interpreter::test::verifyNewString ("idpComment",    gi::getDrawingProperty(d, gi::idpComment,    cs), "");
+    interpreter::test::verifyNewNull   ("idpEndX",       gi::getDrawingProperty(d, gi::idpEndX,       cs));
+    interpreter::test::verifyNewNull   ("idpEndY",       gi::getDrawingProperty(d, gi::idpEndY,       cs));
+    interpreter::test::verifyNewInteger("idpExpire",     gi::getDrawingProperty(d, gi::idpExpire,     cs), 15);
+    interpreter::test::verifyNewInteger("idpLocX",       gi::getDrawingProperty(d, gi::idpLocX,       cs), 1500);
+    interpreter::test::verifyNewInteger("idpLocY",       gi::getDrawingProperty(d, gi::idpLocY,       cs), 1400);
+    interpreter::test::verifyNewInteger("idpRadius",     gi::getDrawingProperty(d, gi::idpRadius,     cs), 220);
+    interpreter::test::verifyNewNull   ("idpShape",      gi::getDrawingProperty(d, gi::idpShape,      cs));
+    interpreter::test::verifyNewInteger("idpTag",        gi::getDrawingProperty(d, gi::idpTag,        cs), 77);
+    interpreter::test::verifyNewString ("idpTypeString", gi::getDrawingProperty(d, gi::idpTypeString, cs), "Circle");
+    interpreter::test::verifyNewInteger("idpTypeCode",   gi::getDrawingProperty(d, gi::idpTypeCode,   cs), 2);
 }
 
 /** Test getDrawingProperty() for a MarkerDrawing. */
@@ -129,42 +81,18 @@ TestGameInterfaceDrawingProperty::testGetMarker()
     d.setExpire(-1);
     d.setComment("note!");
 
-    std::auto_ptr<Value> p;
-    p.reset(gi::getDrawingProperty(d, gi::idpColor, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 11);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpComment, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toString(), "note!");
-
-    p.reset(gi::getDrawingProperty(d, gi::idpEndX, cs));
-    TS_ASSERT(p.get() == 0);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpEndY, cs));
-    TS_ASSERT(p.get() == 0);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpExpire, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toInteger(), -1);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpLocX, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 2200);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpLocY, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 2105);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpRadius, cs));
-    TS_ASSERT(p.get() == 0);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpShape, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 2);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpTag, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 22);
-
-    p.reset(gi::getDrawingProperty(d, gi::idpTypeString, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toString(), "Marker");
-
-    p.reset(gi::getDrawingProperty(d, gi::idpTypeCode, cs));
-    TS_ASSERT_EQUALS(Access(p.get()).toInteger(), 3);
+    interpreter::test::verifyNewInteger("idpColor",      gi::getDrawingProperty(d, gi::idpColor,      cs), 11);
+    interpreter::test::verifyNewString ("idpComment",    gi::getDrawingProperty(d, gi::idpComment,    cs), "note!");
+    interpreter::test::verifyNewNull   ("idpEndX",       gi::getDrawingProperty(d, gi::idpEndX,       cs));
+    interpreter::test::verifyNewNull   ("idpEndY",       gi::getDrawingProperty(d, gi::idpEndY,       cs));
+    interpreter::test::verifyNewInteger("idpExpire",     gi::getDrawingProperty(d, gi::idpExpire,     cs), -1);
+    interpreter::test::verifyNewInteger("idpLocX",       gi::getDrawingProperty(d, gi::idpLocX,       cs), 2200);
+    interpreter::test::verifyNewInteger("idpLocY",       gi::getDrawingProperty(d, gi::idpLocY,       cs), 2105);
+    interpreter::test::verifyNewNull   ("idpRadius",     gi::getDrawingProperty(d, gi::idpRadius,     cs));
+    interpreter::test::verifyNewInteger("idpShape",      gi::getDrawingProperty(d, gi::idpShape,      cs), 2);
+    interpreter::test::verifyNewInteger("idpTag",        gi::getDrawingProperty(d, gi::idpTag,        cs), 22);
+    interpreter::test::verifyNewString ("idpTypeString", gi::getDrawingProperty(d, gi::idpTypeString, cs), "Marker");
+    interpreter::test::verifyNewInteger("idpTypeCode",   gi::getDrawingProperty(d, gi::idpTypeCode,   cs), 3);
 }
 
 /** Test setDrawingProperty() for a LineDrawing. */

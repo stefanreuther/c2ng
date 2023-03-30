@@ -8,7 +8,6 @@
 #include "t_game_interface.hpp"
 #include "afl/io/constmemorystream.hpp"
 #include "afl/io/nullfilesystem.hpp"
-#include "afl/io/nullstream.hpp"
 #include "afl/io/textfile.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "game/game.hpp"
@@ -23,7 +22,6 @@
 #include "interpreter/statementcompiler.hpp"
 #include "interpreter/test/contextverifier.hpp"
 #include "interpreter/values.hpp"
-#include "interpreter/vmio/nullsavecontext.hpp"
 
 using game::interface::GlobalActionContext;
 using game::interface::GlobalActions;
@@ -167,24 +165,18 @@ TestGameInterfaceGlobalActionContext::testContext()
     GlobalActionContext testee;
 
     // General verification
-    interpreter::test::ContextVerifier(testee, "testContext").verifyTypes();
+    interpreter::test::ContextVerifier verif(testee, "testContext");
+    verif.verifyTypes();
+    verif.verifyBasics();
+    verif.verifyNotSerializable();
 
     // Some properties
     TS_ASSERT(testee.getObject() == 0);
-    TS_ASSERT_DIFFERS(testee.toString(true), "");
-    TS_ASSERT_DIFFERS(testee.toString(false), "");
 
     // Cloning
     std::auto_ptr<GlobalActionContext> clone(testee.clone());
     TS_ASSERT(clone.get() != 0);
-    TS_ASSERT_EQUALS(clone->toString(false), testee.toString(false));
     TS_ASSERT_EQUALS(&*clone->data(), &*testee.data());
-
-    // Storing
-    interpreter::TagNode out;
-    afl::io::NullStream aux;
-    interpreter::vmio::NullSaveContext ctx;
-    TS_ASSERT_THROWS(testee.store(out, aux, ctx), std::exception);
 }
 
 /** Test IFGlobalActionContext, success case. */

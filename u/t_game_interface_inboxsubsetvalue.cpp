@@ -76,6 +76,7 @@ TestGameInterfaceInboxSubsetValue::testIteration()
 
     interpreter::test::ContextVerifier v(*ctx, "testIteration");
     v.verifyTypes();
+    v.verifyBasics();
     v.verifyInteger("ID", 4);
 
     TS_ASSERT(ctx->next());

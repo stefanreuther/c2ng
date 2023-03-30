@@ -12,7 +12,9 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = interpreter/expr/rvaluefunctioncallnode.cpp \
+FILES_gamelib = interpreter/test/valueverifier.cpp \
+    interpreter/test/valueverifier.hpp \
+    interpreter/expr/rvaluefunctioncallnode.cpp \
     interpreter/expr/rvaluefunctioncallnode.hpp \
     game/interface/scriptapplication.cpp \
     game/interface/scriptapplication.hpp interpreter/metacontext.cpp \
@@ -1748,7 +1750,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_ref_listobserver.cpp u/t_game_ref_userlist.cpp \
+FILES_testsuite = u/t_interpreter_test_valueverifier.cpp \
+    u/t_game_ref_listobserver.cpp u/t_game_ref_userlist.cpp \
     u/t_game_ref_configuration.cpp u/t_util_plugin_dialogapplication.cpp \
     u/t_util_plugin_installer.cpp u/t_util_profiledirectory.cpp \
     u/t_util_translation.cpp u/t_util_keymapinformation.cpp \

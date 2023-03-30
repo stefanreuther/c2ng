@@ -9,8 +9,8 @@
 #include "t_interpreter.hpp"
 #include "util/keymap.hpp"
 #include "afl/io/internalsink.hpp"
-#include "interpreter/vmio/nullsavecontext.hpp"
 #include "interpreter/error.hpp"
+#include "interpreter/test/valueverifier.hpp"
 
 /** Test KeymapValue. */
 void
@@ -39,10 +39,7 @@ TestInterpreterKeymapValue::testIt()
     TS_ASSERT_EQUALS(copy->toString(false), testee.toString(false));
 
     // Store
-    interpreter::TagNode out;
-    afl::io::InternalSink aux;
-    interpreter::vmio::NullSaveContext ctx;
-    TS_ASSERT_THROWS(testee.store(out, aux, ctx), interpreter::Error);
+    interpreter::test::ValueVerifier(testee, "testIt").verifyNotSerializable();
 }
 
 /** Test makeKeymapValue(). */

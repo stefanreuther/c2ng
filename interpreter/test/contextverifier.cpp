@@ -18,7 +18,8 @@
 using afl::test::Assert;
 
 interpreter::test::ContextVerifier::ContextVerifier(Context& ctx, afl::test::Assert as)
-    : m_context(ctx),
+    : ValueVerifier(ctx, as),
+      m_context(ctx),
       m_assert(as)
 { }
 
@@ -118,65 +119,28 @@ void
 interpreter::test::ContextVerifier::verifyInteger(const char* name, int value) const
 {
     Assert me(m_assert(name));
-
-    // Look up
-    Context::PropertyIndex_t index;
-    Context::PropertyAccessor* foundContext = m_context.lookup(name, index);
-    me.check("lookup", foundContext != 0);
-
-    // Get it
-    std::auto_ptr<afl::data::Value> result(foundContext->get(index));
-    me.check("expect non-null", result.get() != 0);
-
-    afl::data::IntegerValue* iv = dynamic_cast<afl::data::IntegerValue*>(result.get());
-    me.check("expect integer", iv != 0);
-    me.checkEqual("expect value", iv->getValue(), value);
+    verifyNewInteger(me, getValue(name), value);
 }
 
 void
 interpreter::test::ContextVerifier::verifyBoolean(const char* name, bool value) const
 {
     Assert me(m_assert(name));
-
-    // Look up
-    Context::PropertyIndex_t index;
-    Context::PropertyAccessor* foundContext = m_context.lookup(name, index);
-    me.check("lookup", foundContext != 0);
-
-    // Get it
-    std::auto_ptr<afl::data::Value> result(foundContext->get(index));
-    me.check("expect non-null", result.get() != 0);
-
-    afl::data::BooleanValue* bv = dynamic_cast<afl::data::BooleanValue*>(result.get());
-    me.check("expect boolean", bv != 0);
-    me.checkEqual("expect value", int(bv->getValue()), int(value));
+    verifyNewBoolean(me, getValue(name), value);
 }
 
 void
 interpreter::test::ContextVerifier::verifyString(const char* name, const char* value) const
 {
     Assert me(m_assert(name));
-
-    // Look up
-    Context::PropertyIndex_t index;
-    Context::PropertyAccessor* foundContext = m_context.lookup(name, index);
-    me.check("lookup", foundContext != 0);
-
-    // Get it
-    std::auto_ptr<afl::data::Value> result(foundContext->get(index));
-    me.check("expect non-null", result.get() != 0);
-
-    afl::data::StringValue* sv = dynamic_cast<afl::data::StringValue*>(result.get());
-    me.check("expect string", sv != 0);
-    me.checkEqual("expect value", sv->getValue(), value);
+    verifyNewString(me, getValue(name), value);
 }
 
 void
 interpreter::test::ContextVerifier::verifyNull(const char* name) const
 {
     Assert me(m_assert(name));
-    std::auto_ptr<afl::data::Value> result(getValue(name));
-    me.check("expect null", result.get() == 0);
+    verifyNewNull(me, getValue(name));
 }
 
 afl::data::Value*
@@ -188,4 +152,29 @@ interpreter::test::ContextVerifier::getValue(const char* name) const
     me.check("lookup", foundContext != 0);
 
     return foundContext->get(index);
+}
+
+void
+interpreter::test::ContextVerifier::setValue(const char* name, const afl::data::Value* value) const
+{
+    Assert me(m_assert(name));
+    Context::PropertyIndex_t index;
+    Context::PropertyAccessor* foundContext = m_context.lookup(name, index);
+    me.check("lookup", foundContext != 0);
+
+    foundContext->set(index, value);
+}
+
+void
+interpreter::test::ContextVerifier::setStringValue(const char* name, const String_t& str) const
+{
+    const afl::data::StringValue sv(str);
+    setValue(name, &sv);
+}
+
+void
+interpreter::test::ContextVerifier::setIntegerValue(const char* name, int32_t value) const
+{
+    const afl::data::IntegerValue iv(value);
+    setValue(name, &iv);
 }

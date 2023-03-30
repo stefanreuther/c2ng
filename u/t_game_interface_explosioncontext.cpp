@@ -31,6 +31,7 @@ TestGameInterfaceExplosionContext::testIt()
     game::interface::ExplosionContext testee(1, session, session.getGame()->currentTurn());
     interpreter::test::ContextVerifier v(testee, "testIt");
     v.verifyTypes();
+    v.verifyBasics();
 
     // Verify some values
     v.verifyInteger("ID", 1);

@@ -63,6 +63,8 @@ TestGameInterfaceInboxContext::testProperties()
     // Values (lookup, get)
     interpreter::test::ContextVerifier v(testee, "testProperties");
     v.verifyTypes();
+    v.verifyBasics();
+    v.verifyNotSerializable();
     v.verifyInteger("ID", 3);                 // 1-based
     v.verifyString("GROUP", "(a) Third");
     v.verifyInteger("LINES", 2);

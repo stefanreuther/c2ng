@@ -9,13 +9,12 @@
 #include "t_game_interface.hpp"
 #include "afl/data/access.hpp"
 #include "afl/data/integervalue.hpp"
-#include "afl/io/internalsink.hpp"
+#include "game/spec/shiplist.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/indexablevalue.hpp"
 #include "interpreter/tagnode.hpp"
-#include "interpreter/vmio/nullsavecontext.hpp"
-#include "game/spec/shiplist.hpp"
+#include "interpreter/test/valueverifier.hpp"
 
 /** Test getEngineProperty. */
 void
@@ -52,12 +51,7 @@ TestGameInterfaceEngineProperty::testGet()
 
     // - not iterable, not serializable
     TS_ASSERT_THROWS(iv->makeFirstContext(), interpreter::Error);
-    {
-        interpreter::TagNode n;
-        afl::io::InternalSink sink;
-        interpreter::vmio::NullSaveContext ctx;
-        TS_ASSERT_THROWS(iv->store(n, sink, ctx), interpreter::Error);
-    }
+    interpreter::test::ValueVerifier(*iv, "testGet").verifyNotSerializable();
 
     // - accessing values
     {
