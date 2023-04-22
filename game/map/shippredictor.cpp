@@ -530,6 +530,7 @@ namespace {
         pred.setPosition(moveFrom);
         pred.setWaypoint(moveTo);
         pred.setWarpFactor(warp);
+        pred.setFriendlyCode("?""?""?");
         pred.computeMovement();
         return pred.getNumTurns();
     }

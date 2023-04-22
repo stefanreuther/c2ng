@@ -1035,6 +1035,21 @@ TestGameMapShipPredictor::testGetOptimumWarpErrorCases()
         int result = getOptimumWarp(h.univ, SHIP_ID, Point(1000, 1000), Point(1000 + 30*80, 1000), h.shipScores, h.shipList, h.mapConfig, *root);
         TS_ASSERT_EQUALS(result, 5);
     }
+
+    // Hyperjump
+    {
+        TestHarness h;
+        game::map::Ship& sh = addEmerald(h, SHIP_ID);
+        game::test::addNovaDrive(h.shipList);
+        sh.setEngineType(game::test::NOVA_ENGINE_ID);
+        sh.setFriendlyCode(String_t("HYP"));
+        sh.setWarpFactor(1);
+        sh.addShipSpecialFunction(h.shipList.modifiedHullFunctions().getFunctionIdFromHostId(BasicHullFunction::Hyperdrive));
+        finish(h);
+
+        int result = getOptimumWarp(h.univ, SHIP_ID, Point(1000, 1000), Point(1024, 1000), h.shipScores, h.shipList, h.mapConfig, *root);
+        TS_ASSERT_EQUALS(result, 5);
+    }
 }
 
 /** Test hyperjump: regular jump. */
