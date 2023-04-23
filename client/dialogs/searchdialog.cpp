@@ -578,6 +578,7 @@ SearchDialog::onOptionClick(int id)
         break;
     }
     setValues();
+    m_input.requestFocus();
 }
 
 void
