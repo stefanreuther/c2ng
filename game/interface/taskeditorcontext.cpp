@@ -147,7 +147,7 @@ namespace {
                 }
                 return makeStringValue((*m_edit)[index]);
             }
-        virtual void set(interpreter::Arguments& args, afl::data::Value* value)
+        virtual void set(interpreter::Arguments& args, const afl::data::Value* value)
             {
                 size_t index;
                 args.checkArgumentCount(1);

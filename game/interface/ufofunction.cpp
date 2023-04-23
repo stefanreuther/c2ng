@@ -47,7 +47,7 @@ game::interface::UfoFunction::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::UfoFunction::set(interpreter::Arguments& args, afl::data::Value* value)
+game::interface::UfoFunction::set(interpreter::Arguments& args, const afl::data::Value* value)
 {
     rejectSet(args, value);
 }

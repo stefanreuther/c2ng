@@ -53,7 +53,7 @@ game::interface::TorpedoFunction::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::TorpedoFunction::set(interpreter::Arguments& args, afl::data::Value* value)
+game::interface::TorpedoFunction::set(interpreter::Arguments& args, const afl::data::Value* value)
 {
     rejectSet(args, value);
 }

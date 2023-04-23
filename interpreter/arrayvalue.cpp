@@ -27,7 +27,7 @@ interpreter::ArrayValue::get(Arguments& args)
 }
 
 void
-interpreter::ArrayValue::set(Arguments& args, afl::data::Value* value)
+interpreter::ArrayValue::set(Arguments& args, const afl::data::Value* value)
 {
     // ex IntArray::set
     size_t index;

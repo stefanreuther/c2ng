@@ -176,7 +176,7 @@ class game::interface::ReferenceListContext::ObjectArrayValue : public interpret
             }
         }
 
-    virtual void set(interpreter::Arguments& args, afl::data::Value* value)
+    virtual void set(interpreter::Arguments& args, const afl::data::Value* value)
         {
             size_t index;
             if (!fetchIndex(index, args, m_list->list)) {

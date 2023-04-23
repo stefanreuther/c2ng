@@ -39,7 +39,7 @@ namespace {
      public:
         virtual afl::data::Value* get(interpreter::Arguments& args)
             { return afl::data::Value::cloneOf(args.getNext()); }
-        virtual void set(interpreter::Arguments& args, afl::data::Value* value)
+        virtual void set(interpreter::Arguments& args, const afl::data::Value* value)
             { rejectSet(args, value); }
         virtual int32_t getDimension(int32_t which) const
             { return which == 0 ? 1 : 5; }

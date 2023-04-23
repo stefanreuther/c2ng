@@ -378,7 +378,7 @@ game::interface::IFLocationReference(game::Session& session, interpreter::Argume
 }
 
 bool
-game::interface::checkReferenceArg(Reference& out, afl::data::Value* p)
+game::interface::checkReferenceArg(Reference& out, const afl::data::Value* p)
 {
     // Null?
     if (p == 0) {
@@ -386,7 +386,7 @@ game::interface::checkReferenceArg(Reference& out, afl::data::Value* p)
     }
 
     // Needs to be a context.
-    interpreter::Context* cv = dynamic_cast<interpreter::Context*>(p);
+    const interpreter::Context* cv = dynamic_cast<const interpreter::Context*>(p);
     if (cv == 0) {
         throw interpreter::Error::typeError();
     }
@@ -395,7 +395,7 @@ game::interface::checkReferenceArg(Reference& out, afl::data::Value* p)
     // We use this two-step process instead of directly casting p -> ReferenceContext
     // to allow wrappers/forwarders of the ReferenceContext, namely: ReferenceListContext::IterableReferenceContext.
     interpreter::Context::PropertyIndex_t pi;
-    ReferenceContext* rcv = dynamic_cast<ReferenceContext*>(cv->lookup("ID", pi));
+    ReferenceContext* rcv = dynamic_cast<ReferenceContext*>(const_cast<interpreter::Context*>(cv)->lookup("ID", pi));
     if (rcv == 0) {
         throw interpreter::Error::typeError();
     }

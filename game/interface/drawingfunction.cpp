@@ -19,7 +19,7 @@ game::interface::DrawingFunction::get(interpreter::Arguments& /*args*/)
 }
 
 void
-game::interface::DrawingFunction::set(interpreter::Arguments& args, afl::data::Value* value)
+game::interface::DrawingFunction::set(interpreter::Arguments& args, const afl::data::Value* value)
 {
     rejectSet(args, value);
 }

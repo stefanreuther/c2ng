@@ -42,7 +42,7 @@ game::interface::PlanetFunction::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::PlanetFunction::set(interpreter::Arguments& args, afl::data::Value* value)
+game::interface::PlanetFunction::set(interpreter::Arguments& args, const afl::data::Value* value)
 {
     // ex IntSimpleIndexableValue::set
     rejectSet(args, value);

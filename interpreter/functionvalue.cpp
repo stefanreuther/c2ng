@@ -6,7 +6,7 @@
 #include "interpreter/functionvalue.hpp"
 
 void
-interpreter::FunctionValue::set(Arguments& args, afl::data::Value* value)
+interpreter::FunctionValue::set(Arguments& args, const afl::data::Value* value)
 {
     rejectSet(args, value);
 }

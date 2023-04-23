@@ -38,7 +38,7 @@ game::interface::HullFunction::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::HullFunction::set(interpreter::Arguments& args, afl::data::Value* value)
+game::interface::HullFunction::set(interpreter::Arguments& args, const afl::data::Value* value)
 {
     rejectSet(args, value);
 }

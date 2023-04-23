@@ -41,7 +41,7 @@ game::interface::PlayerFunction::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::PlayerFunction::set(interpreter::Arguments& args, afl::data::Value* value)
+game::interface::PlayerFunction::set(interpreter::Arguments& args, const afl::data::Value* value)
 {
     rejectSet(args, value);
 }

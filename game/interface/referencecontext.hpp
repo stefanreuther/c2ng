@@ -100,7 +100,7 @@ namespace game { namespace interface {
         \retval true Value was a valid reference
         \retval false Value was empty
         \throw interpreter::Error type error */
-    bool checkReferenceArg(Reference& out, afl::data::Value* p);
+    bool checkReferenceArg(Reference& out, const afl::data::Value* p);
 
 } }
 

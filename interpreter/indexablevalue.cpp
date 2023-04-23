@@ -28,7 +28,7 @@ interpreter::IndexableValue::call(Process& proc, afl::data::Segment& args, bool 
 }
 
 void
-interpreter::IndexableValue::rejectSet(Arguments& /*args*/, afl::data::Value* /*value*/) const
+interpreter::IndexableValue::rejectSet(Arguments& /*args*/, const afl::data::Value* /*value*/) const
 {
     throw Error::notAssignable();
 }

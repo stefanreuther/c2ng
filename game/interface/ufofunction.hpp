@@ -20,7 +20,7 @@ namespace game { namespace interface {
 
         // IndexableValue:
         virtual UfoContext* get(interpreter::Arguments& args);
-        virtual void set(interpreter::Arguments& args, afl::data::Value* value);
+        virtual void set(interpreter::Arguments& args, const afl::data::Value* value);
 
         // CallableValue:
         virtual int32_t getDimension(int32_t which) const;

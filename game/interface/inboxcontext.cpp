@@ -66,7 +66,7 @@ namespace {
                 return interpreter::makeStringValue((*m_lines)[index-1]);
             }
 
-        virtual void set(interpreter::Arguments& args, afl::data::Value* value)
+        virtual void set(interpreter::Arguments& args, const afl::data::Value* value)
             { rejectSet(args, value); }
 
         // CallableValue:

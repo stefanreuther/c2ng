@@ -129,7 +129,7 @@ interpreter::HashValue::get(Arguments& args)
 }
 
 void
-interpreter::HashValue::set(Arguments& args, afl::data::Value* value)
+interpreter::HashValue::set(Arguments& args, const afl::data::Value* value)
 {
     // ex IntHash::set
     String_t key;

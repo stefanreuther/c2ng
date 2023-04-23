@@ -44,7 +44,7 @@ game::interface::IonStormFunction::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::IonStormFunction::set(interpreter::Arguments& args, afl::data::Value* value)
+game::interface::IonStormFunction::set(interpreter::Arguments& args, const afl::data::Value* value)
 {
     rejectSet(args, value);
 }

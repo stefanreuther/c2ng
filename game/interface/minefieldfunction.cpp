@@ -41,7 +41,7 @@ game::interface::MinefieldFunction::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::MinefieldFunction::set(interpreter::Arguments& args, afl::data::Value* value)
+game::interface::MinefieldFunction::set(interpreter::Arguments& args, const afl::data::Value* value)
 {
     rejectSet(args, value);
 }

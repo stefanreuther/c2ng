@@ -40,7 +40,7 @@ namespace {
             { }
         virtual afl::data::Value* get(interpreter::Arguments& args)
             { return interpreter::makeIntegerValue(m_data[packArgs(args)]); }
-        virtual void set(interpreter::Arguments& args, afl::data::Value* value)
+        virtual void set(interpreter::Arguments& args, const afl::data::Value* value)
             {
                 int32_t iv = 0;
                 interpreter::checkIntegerArg(iv, value);

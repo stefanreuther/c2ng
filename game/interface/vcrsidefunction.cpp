@@ -34,7 +34,7 @@ game::interface::VcrSideFunction::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::VcrSideFunction::set(interpreter::Arguments& args, afl::data::Value* value)
+game::interface::VcrSideFunction::set(interpreter::Arguments& args, const afl::data::Value* value)
 {
     // ex IntVcrSideArray::set
     rejectSet(args, value);

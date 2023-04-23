@@ -35,7 +35,7 @@ game::interface::VcrFunction::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::VcrFunction::set(interpreter::Arguments& args, afl::data::Value* value)
+game::interface::VcrFunction::set(interpreter::Arguments& args, const afl::data::Value* value)
 {
     rejectSet(args, value);
 }

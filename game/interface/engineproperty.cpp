@@ -35,7 +35,7 @@ namespace {
                     return 0;
                 }
             }
-        virtual void set(interpreter::Arguments& args, afl::data::Value* value)
+        virtual void set(interpreter::Arguments& args, const afl::data::Value* value)
             { rejectSet(args, value); }
 
         // CallableValue:

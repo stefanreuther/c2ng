@@ -27,7 +27,7 @@ namespace interpreter {
             \param args Parameters
             \param value Value to assign, owned by caller.
             \return obtained value. Throws Error if request is invalid */
-        virtual void set(Arguments& args, afl::data::Value* value) = 0;
+        virtual void set(Arguments& args, const afl::data::Value* value) = 0;
 
         // CallableValue:
         virtual bool isProcedureCall() const;
@@ -38,7 +38,7 @@ namespace interpreter {
             Throws an Error::notAssignable().
             \param args Parameters; pass from set()
             \param value Value to assign; pass from set() */
-        void rejectSet(Arguments& args, afl::data::Value* value) const;
+        void rejectSet(Arguments& args, const afl::data::Value* value) const;
     };
 
 }

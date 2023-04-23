@@ -42,7 +42,7 @@ game::interface::ShipFunction::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::ShipFunction::set(interpreter::Arguments& args, afl::data::Value* value)
+game::interface::ShipFunction::set(interpreter::Arguments& args, const afl::data::Value* value)
 {
     rejectSet(args, value);
 }

@@ -236,7 +236,7 @@ namespace {
                 args.checkArgumentCount(m_numArgs);
                 return interpreter::makeStringValue(m_value);
             }
-        virtual void set(interpreter::Arguments& args, afl::data::Value* value)
+        virtual void set(interpreter::Arguments& args, const afl::data::Value* value)
             {
                 args.checkArgumentCount(m_numArgs);
                 m_value = interpreter::toString(value, false);

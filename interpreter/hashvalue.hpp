@@ -29,7 +29,7 @@ namespace interpreter {
 
         // IndexableValue:
         virtual afl::data::Value* get(Arguments& args);
-        virtual void set(Arguments& args, afl::data::Value* value);
+        virtual void set(Arguments& args, const afl::data::Value* value);
 
         // CallableValue:
         virtual int32_t getDimension(int32_t which) const;

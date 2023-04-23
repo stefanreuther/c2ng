@@ -1201,7 +1201,7 @@ TestInterpreterExprBuiltinFunction::testIteration()
      public:
         virtual afl::data::Value* get(interpreter::Arguments& /*args*/)
             { throw interpreter::Error("not invokable"); }
-        virtual void set(interpreter::Arguments& /*args*/, afl::data::Value* /*value*/)
+        virtual void set(interpreter::Arguments& /*args*/, const afl::data::Value* /*value*/)
             { throw interpreter::Error("not assignable"); }
         virtual int32_t getDimension(int32_t /*which*/) const
             { return 0; }

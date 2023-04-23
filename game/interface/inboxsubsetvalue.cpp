@@ -134,7 +134,7 @@ game::interface::InboxSubsetValue::get(interpreter::Arguments& args)
 }
 
 void
-game::interface::InboxSubsetValue::set(interpreter::Arguments& args, afl::data::Value* value)
+game::interface::InboxSubsetValue::set(interpreter::Arguments& args, const afl::data::Value* value)
 {
     // ex IntMappedMessageValue::set
     rejectSet(args, value);
