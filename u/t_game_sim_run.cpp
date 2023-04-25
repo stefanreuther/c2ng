@@ -2107,3 +2107,58 @@ TestGameSimRun::testOrderPHostPlanet()
     TS_ASSERT_EQUALS(h.result.battles->getBattle(0)->getObject(0, false)->getId(), 455);
     TS_ASSERT_EQUALS(h.result.battles->getBattle(0)->getObject(1, false)->getId(), 450);
 }
+
+/** Test ShieldGenerator.
+    A: set up two capital ships of player 1, the second has a shield generator. Add multiple freighters.
+    E: observe that shields of first ship increase. */
+void
+TestGameSimRun::testShieldGenerator()
+{
+    // Environment
+    TestHarness h;
+    game::TeamSettings team;
+    h.opts.setMode(game::sim::Configuration::VcrHost, team, h.config);
+    h.opts.setRandomLeftRight(false);
+
+    // Setup
+    // - attackers
+    Ship* a1 = addAnnihilation(h.setup, 1, 6, h.list);
+    a1->setShield(10);
+    a1->setBeamType(10);
+    a1->setNumBeams(10);
+    Ship* a2 = addAnnihilation(h.setup, 2, 6, h.list);
+    a2->setFlags(Ship::fl_ShieldGenerator | Ship::fl_ShieldGeneratorSet);
+
+    // - defenders
+    for (int i = 0; i < 5; ++i) {
+        addOutrider(h.setup, 10+i, 7, h.list);
+    }
+
+    // Do it
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+
+    // Verify result
+    // THost places aggressor to the right, thus, freighters always on the left.
+    TS_ASSERT(h.result.battles.get() != 0);
+    TS_ASSERT_EQUALS(h.result.battles->getNumBattles(), 5U);
+
+    TS_ASSERT_EQUALS(h.result.battles->getBattle(0)->getObject(1, false)->getId(), 1);
+    TS_ASSERT_EQUALS(h.result.battles->getBattle(0)->getObject(1, false)->getShield(), 35);
+    TS_ASSERT_EQUALS(h.result.battles->getBattle(0)->getObject(0, false)->getId(), 10);
+
+    TS_ASSERT_EQUALS(h.result.battles->getBattle(1)->getObject(1, false)->getId(), 1);
+    TS_ASSERT_EQUALS(h.result.battles->getBattle(1)->getObject(1, false)->getShield(), 60);
+    TS_ASSERT_EQUALS(h.result.battles->getBattle(1)->getObject(0, false)->getId(), 11);
+
+    TS_ASSERT_EQUALS(h.result.battles->getBattle(2)->getObject(1, false)->getId(), 1);
+    TS_ASSERT_EQUALS(h.result.battles->getBattle(2)->getObject(1, false)->getShield(), 85);
+    TS_ASSERT_EQUALS(h.result.battles->getBattle(2)->getObject(0, false)->getId(), 12);
+
+    TS_ASSERT_EQUALS(h.result.battles->getBattle(3)->getObject(1, false)->getId(), 1);
+    TS_ASSERT_EQUALS(h.result.battles->getBattle(3)->getObject(1, false)->getShield(), 110);
+    TS_ASSERT_EQUALS(h.result.battles->getBattle(3)->getObject(0, false)->getId(), 13);
+
+    TS_ASSERT_EQUALS(h.result.battles->getBattle(4)->getObject(1, false)->getId(), 1);
+    TS_ASSERT_EQUALS(h.result.battles->getBattle(4)->getObject(1, false)->getShield(), 125);  // Maximum reached
+    TS_ASSERT_EQUALS(h.result.battles->getBattle(4)->getObject(0, false)->getId(), 14);
+}

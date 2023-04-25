@@ -375,7 +375,7 @@ game::vcr::classic::PVCRAlgorithm::initBattle(const Object& left, const Object& 
             st.f.bay_recharge = 0;
         }
 
-        int charge = (st.r.obj.getShield() == 100) ? 1000 : 0;
+        int charge = (st.r.obj.getShield() >= 100) ? 1000 : 0;
         std::fill_n(st.r.m_beamStatus, int(VCR_MAX_BEAMS), charge);
         std::fill_n(st.r.m_launcherStatus, int(VCR_MAX_TORPS), charge);
         std::fill_n(st.r.m_bayStatus,  int(VCR_MAX_BAYS),  0); // !!!

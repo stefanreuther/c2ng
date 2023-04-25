@@ -139,6 +139,7 @@ class TestGameSimRun : public CxxTest::TestSuite {
     void testOrderHostPlanet();
     void testOrderPHostShip();
     void testOrderPHostPlanet();
+    void testShieldGenerator();
 };
 
 class TestGameSimRunner : public CxxTest::TestSuite {

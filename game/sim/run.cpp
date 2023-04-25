@@ -776,7 +776,7 @@ namespace {
         }
 
         /* Shield limit incl. shield generator */
-        const int shield_limit = 100 + 50*num_sg;
+        const int shield_limit = 100 + 25*num_sg;
         obj.setShield(std::max(0, std::min(obj.getShield() + num_sg*25, shield_limit - obj.getDamage())));
 
         if (!hosty) {

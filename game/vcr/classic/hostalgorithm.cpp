@@ -992,7 +992,7 @@ void
 game::vcr::classic::HostAlgorithm::preloadWeapons(Status& st)
 {
     // ex VcrPlayerTHost::preloadWeapons, ccvcr.pas:PreloadWeapons
-    if (st.m_obj.getShield() == 100) {
+    if (st.m_obj.getShield() >= 100) {
         for (int i = 0; i < VCR_MAX_BEAMS; ++i) {
             st.m_launcherStatus[i] = 30;
             st.m_beamStatus[i] = 100;
