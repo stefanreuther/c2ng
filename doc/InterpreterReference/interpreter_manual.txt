@@ -320,6 +320,7 @@ The number &#x3c0;=3.141592 (circumference/diameter ratio of a circle) can be sp
 - Using <em>double quotes</em>: those support escaping. A backslash "\" performs a special function:
   <dl>
    <di term="\n"> is a newline character.</di>
+   <di term="\t"> is a tab character.</di>
    <di term="\\"> is a backslash character.</di>
    <di term="\&quot;"> is a double-quote character.</di>
   </dl>
@@ -1649,10 +1650,20 @@ First "Next Generation" version.
 @version PCC2 2.0.14
 --------------------------------------------------------------------------------
 @version PCC2 2.0.12
+This version adds access to the user configuration file (<tt>pcc2.ini</tt>).
 --------------------------------------------------------------------------------
 @version PCC2 2.0.8
+- some new functions;
+- multi-line {On} command;
+- minor PCC 1.x compatibility adjustments.
 --------------------------------------------------------------------------------
 @version PCC2 2.0.7
+This version closes some gaps to PCC 1.x and adds minor changes:
+- {AddItem (Listbox Command)|List boxes} now support two-column layout;
+- can use "\t" in a {int:expr:lit|string literal} to generate a Tab character;
+- division produces integer if possible (same as PCC 1.x);
+- {Cfg()} can split <tt>ExperienceLevelNames</tt> and <tt>Language</tt> options;
+  into individual values. If the second parameter is EMTPY, the result is EMPTY.
 --------------------------------------------------------------------------------
 @version PCC2 2.0.6
 --------------------------------------------------------------------------------
