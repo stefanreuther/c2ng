@@ -56,6 +56,7 @@ namespace {
                          PlanetInfoProxy& proxy)
             : m_proxy(proxy),
               m_gameSender(gameSender),
+              m_formatter(fmt),
               m_translator(tx),
               m_root(root),
               m_loop(root),
@@ -176,7 +177,7 @@ namespace {
             {
                 if (m_proxy.getGroundDefenseInfo().isPlayable) {
                     // ex WPlanetScanWindow::onGroundCombat
-                    client::dialogs::doGroundDefenseDialog(m_root, m_proxy.getGroundDefenseInfo(), m_translator);
+                    client::dialogs::doGroundDefenseDialog(m_root, m_proxy.getGroundDefenseInfo(), m_formatter, m_translator);
                 } else {
                     afl::base::Observable<int32_t> value(m_proxy.getUnloadInfo().hostileUnload);
                     ui::widgets::DecimalSelector sel(m_root, m_translator, value, 0, 10000, 10);
@@ -188,6 +189,7 @@ namespace {
 
         PlanetInfoProxy& m_proxy;
         util::RequestSender<game::Session> m_gameSender;
+        util::NumberFormatter m_formatter;
         afl::string::Translator& m_translator;
         ui::Root& m_root;
         ui::EventLoop m_loop;

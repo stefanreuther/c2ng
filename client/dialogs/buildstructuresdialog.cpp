@@ -939,7 +939,7 @@ namespace {
 
         void onGroundCombat()
             {
-                client::dialogs::doGroundDefenseDialog(m_root, m_infoProxy.getGroundDefenseInfo(), m_translator);
+                client::dialogs::doGroundDefenseDialog(m_root, m_infoProxy.getGroundDefenseInfo(), m_formatter, m_translator);
             }
     };
 }

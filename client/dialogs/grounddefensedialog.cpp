@@ -22,7 +22,7 @@ namespace {
 }
 
 void
-client::dialogs::doGroundDefenseDialog(ui::Root& root, const game::map::GroundDefenseInfo& info, afl::string::Translator& tx)
+client::dialogs::doGroundDefenseDialog(ui::Root& root, const game::map::GroundDefenseInfo& info, util::NumberFormatter fmt, afl::string::Translator& tx)
 {
     // ex doGroundCombatPrediction
     // ex envscan.pas:CGroundCombatWindow.DrawInterior, ShowGroundCombatChances
@@ -51,12 +51,10 @@ client::dialogs::doGroundDefenseDialog(ui::Root& root, const game::map::GroundDe
             ++row;
             tab.cell(0, row).setText(info.name.get(i));
             if (i == info.defender) {
-                // FIXME: use NumberFormatter
-                tab.cell(1, row).setText(afl::string::Format(tx("(defense) %d"), info.strength.get(i)));
+                tab.cell(1, row).setText(afl::string::Format(tx("(defense) %d"), fmt.formatNumber(info.strength.get(i))));
                 tab.row(row).setColor(ui::Color_GreenBlack);
             } else {
-                // FIXME: use NumberFormatter
-                tab.cell(1, row).setText(afl::string::Format("%d", info.strength.get(i)));
+                tab.cell(1, row).setText(fmt.formatNumber(info.strength.get(i)));
             }
         }
     }
