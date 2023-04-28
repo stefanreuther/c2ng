@@ -22,6 +22,7 @@ client::widgets::HistoryShipListbox::HistoryShipListbox(ui::Root& root, afl::str
     : m_root(root),
       m_translator(tx),
       m_content(),
+      m_pendingReference(),
       m_numLines(15),
       m_width(root.provider().getFont(gfx::FontRequest())->getCellSize().getX() * TotalWidth)
 { }
@@ -48,8 +49,15 @@ client::widgets::HistoryShipListbox::setContent(const game::ref::HistoryShipList
     // FIXME: optimize for common case of just one item changed (=selection toggle)?
     // Find new position
     size_t newPos = 0;
-    if (const Item_t* pItem = getItem(getCurrentItem())) {
-        newPos = list.find(pItem->reference).orElse(0);
+    if (!list.empty()) {
+        if (m_pendingReference.isSet()) {
+            newPos = list.find(m_pendingReference).orElse(0);
+        } else {
+            if (const Item_t* pItem = getItem(getCurrentItem())) {
+                newPos = list.find(pItem->reference).orElse(0);
+            }
+        }
+        m_pendingReference = game::Reference();
     }
 
     // Update
@@ -61,9 +69,13 @@ client::widgets::HistoryShipListbox::setContent(const game::ref::HistoryShipList
 void
 client::widgets::HistoryShipListbox::setCurrentReference(game::Reference ref)
 {
-    size_t pos = 0;
-    if (m_content.find(ref).get(pos)) {
-        setCurrentItem(pos);
+    if (m_content.empty()) {
+        m_pendingReference = ref;
+    } else {
+        size_t pos = 0;
+        if (m_content.find(ref).get(pos)) {
+            setCurrentItem(pos);
+        }
     }
 }
 
@@ -73,7 +85,7 @@ client::widgets::HistoryShipListbox::getCurrentReference() const
     if (const Item_t* p = getItem(getCurrentItem())) {
         return p->reference;
     } else {
-        return game::Reference();
+        return m_pendingReference;
     }
 }
 

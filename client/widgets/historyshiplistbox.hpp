@@ -68,6 +68,7 @@ namespace client { namespace widgets {
         ui::Root& m_root;
         afl::string::Translator& m_translator;
         game::ref::HistoryShipList m_content;
+        game::Reference m_pendingReference;
 
         int m_numLines;
         int m_width;

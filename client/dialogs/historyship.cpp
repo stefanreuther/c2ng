@@ -63,6 +63,7 @@ namespace {
         void setConfiguration(const HistoryShipSelection& sel, HistoryShipSelection::Modes_t modes);
         bool run();
         int getCurrentShipId() const;
+        void setCurrentShipId(game::Id_t id);
         HistoryShipSelection::SortOrder getCurrentSortOrder() const;
 
      private:
@@ -143,6 +144,12 @@ int
 HistoryShipDialog::getCurrentShipId() const
 {
     return m_list.getCurrentReference().getId();
+}
+
+void
+HistoryShipDialog::setCurrentShipId(game::Id_t id)
+{
+    m_list.setCurrentReference(game::Reference(game::Reference::Ship, id));
 }
 
 HistoryShipSelection::SortOrder
@@ -227,6 +234,7 @@ HistoryShipDialog::updateConfiguration()
 int
 client::dialogs::chooseHistoryShip(game::ref::HistoryShipSelection sel,
                                    game::ref::HistoryShipSelection::Modes_t modes,
+                                   game::Id_t shipId,
                                    ui::Root& root,
                                    afl::string::Translator& tx,
                                    util::RequestSender<game::Session> gameSender)
@@ -239,6 +247,9 @@ client::dialogs::chooseHistoryShip(game::ref::HistoryShipSelection sel,
     // Run the dialog
     HistoryShipDialog dlg(root, tx, gameSender);
     dlg.setConfiguration(sel, modes);
+    if (shipId != 0) {
+        dlg.setCurrentShipId(shipId);
+    }
     bool ok = dlg.run();
 
     // Save configuration

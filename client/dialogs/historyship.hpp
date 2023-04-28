@@ -16,11 +16,13 @@ namespace client { namespace dialogs {
 
         \param sel        Initial selection. Sort order will be taken from user preferences.
         \param modes      Available filter modes
+        \param shipId     Id of ship to select first
         \param root       UI root
         \param tx         Translator
         \param gameSender Game sender */
     int chooseHistoryShip(game::ref::HistoryShipSelection sel,
                           game::ref::HistoryShipSelection::Modes_t modes,
+                          game::Id_t shipId,
                           ui::Root& root,
                           afl::string::Translator& tx,
                           util::RequestSender<game::Session> gameSender);

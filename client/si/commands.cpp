@@ -570,13 +570,13 @@ namespace {
         // Task
         class Task : public UserTask {
          public:
-            Task(HistoryShipSelection sel, HistoryShipSelection::Modes_t modes)
-                : m_sel(sel), m_modes(modes)
+            Task(HistoryShipSelection sel, HistoryShipSelection::Modes_t modes, game::Id_t currentShipId)
+                : m_sel(sel), m_modes(modes), m_currentShipId(currentShipId)
                 { }
             void handle(Control& ctl, RequestLink2 link)
                 {
                     UserSide& iface = ctl.interface();
-                    int n = client::dialogs::chooseHistoryShip(m_sel, m_modes, ctl.root(), ctl.translator(), iface.gameSender());
+                    int n = client::dialogs::chooseHistoryShip(m_sel, m_modes, m_currentShipId, ctl.root(), ctl.translator(), iface.gameSender());
 
                     // Produce result for calling process
                     std::auto_ptr<afl::data::Value> result;
@@ -590,6 +590,7 @@ namespace {
          private:
             HistoryShipSelection m_sel;
             HistoryShipSelection::Modes_t m_modes;
+            game::Id_t m_currentShipId;
         };
 
         // Prepare initial position.
@@ -608,6 +609,12 @@ namespace {
             hasPosition = true;
         }
 
+        // Current ship Id
+        game::Id_t currentShipId = 0;
+        if (const game::map::Ship* sh = dynamic_cast<const game::map::Ship*>(link.getProcess().getCurrentObject())) {
+            currentShipId = sh->getId();
+        }
+
         // Prepare initial mode
         const Game& g = game::actions::mustHaveGame(session);
         const Universe& univ = g.currentTurn().universe();
@@ -620,7 +627,7 @@ namespace {
         } else {
             // Normal operation
             sel.setMode(sel.getInitialMode(univ, g.mapConfiguration(), teams));
-            si.postNewTask(link, new Task(sel, modes));
+            si.postNewTask(link, new Task(sel, modes, currentShipId));
         }
     }
 
