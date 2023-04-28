@@ -226,7 +226,7 @@ ui::rich::DocumentParser::parseBulletList(int listLevel)
                 }
                 m_parser.readNext();
             }
-            
+
             int margin = m_document.getLeftMargin();
             m_document.addAt(margin, bullet);
             m_document.add(" "); /* needed to make sure setLeftMargin does not indent the bullet! */
@@ -240,7 +240,7 @@ ui::rich::DocumentParser::parseBulletList(int listLevel)
             m_parser.readNext();
         } else {
             // Unknown, skip it
-            m_parser.readNext();
+            m_parser.skipTag();
         }
     }
     if (listLevel == 0 && compact) {
@@ -279,7 +279,7 @@ ui::rich::DocumentParser::parseCountedList(int listLevel)
             m_parser.readNext();
         } else {
             /* Unknown, skip it */
-            m_parser.readNext();
+            m_parser.skipTag();
         }
     }
     if (listLevel == 0 && compact) {
@@ -317,7 +317,7 @@ ui::rich::DocumentParser::parseKeyList(int listLevel)
             m_parser.readNext();
         } else {
             /* Unknown, skip it */
-            m_parser.readNext();
+            m_parser.skipTag();
         }
     }
     if (listLevel == 0) {
@@ -356,7 +356,7 @@ ui::rich::DocumentParser::parseDefinitionList(int listLevel)
             m_parser.readNext();
         } else {
             /* Unknown, skip it */
-            m_parser.readNext();
+            m_parser.skipTag();
         }
     }
 }
@@ -411,6 +411,7 @@ ui::rich::DocumentParser::parseListItem(int listLevel)
             haveSpace = true;
         } else if (m_parser.isOpeningTag("pre")) {
             /* Preformatted */
+            flushLine(line);
             parsePre();
             m_parser.readNext();
             haveSpace = true;

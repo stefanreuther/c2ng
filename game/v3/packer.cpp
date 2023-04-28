@@ -8,7 +8,7 @@
 namespace {
     void unpackTransfer(game::map::ShipData::Transfer& out, const game::v3::structures::ShipTransfer& in)
     {
-        // ex ccmain.pas:FrobShipRecord (part)
+        // ex ccmain.pas:FrobShipRecord (part), fixDullTransfer
         out.neutronium = in.ore[game::v3::structures::Neutronium];
         out.tritanium  = in.ore[game::v3::structures::Tritanium];
         out.duranium   = in.ore[game::v3::structures::Duranium];

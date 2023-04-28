@@ -170,10 +170,19 @@ TestUtilMath::testRound()
     TS_ASSERT_EQUALS(util::roundToInt(-1.51), -2);
 }
 
-/** Test getDistanceFromDX. */
+/** Test getDistanceFromDX, getDistance2FromDX. */
 void
 TestUtilMath::testDistance()
 {
+    TS_ASSERT_EQUALS(util::getDistance2FromDX(0, 0), 0);
+    TS_ASSERT_EQUALS(util::getDistance2FromDX(0, 1), 1);
+    TS_ASSERT_EQUALS(util::getDistance2FromDX(0, 10), 100);
+    TS_ASSERT_EQUALS(util::getDistance2FromDX(0, 162), 26244);
+    TS_ASSERT_EQUALS(util::getDistance2FromDX(1, 0), 1);
+    TS_ASSERT_EQUALS(util::getDistance2FromDX(10, 0), 100);
+    TS_ASSERT_EQUALS(util::getDistance2FromDX(162, 0), 26244);
+    TS_ASSERT_EQUALS(util::getDistance2FromDX(3, 4), 25);
+
     TS_ASSERT_EQUALS(util::getDistanceFromDX(0, 0), 0.0);
     TS_ASSERT_EQUALS(util::getDistanceFromDX(0, 1), 1.0);
     TS_ASSERT_EQUALS(util::getDistanceFromDX(0, 10), 10.0);

@@ -59,6 +59,7 @@ game::formatPlayerSet(PlayerSet_t set, const PlayerList& list, afl::string::Tran
 String_t
 game::formatPlayerHostSet(PlayerSet_t set, const PlayerList& list, afl::string::Translator& tx)
 {
+    // ex game/playerset.cc:formatPlayerHostSet
     const bool hasHost = set.contains(0);
     const PlayerSet_t allPlayers = (list.getAllPlayers() - 0);
     set &= allPlayers;

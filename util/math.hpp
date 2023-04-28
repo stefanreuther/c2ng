@@ -66,6 +66,12 @@ namespace util {
         \returns heading in degrees, [0, 360] */
     double getHeadingDeg(double dx, double dy);
 
+    /** Given coordinate offsets, compute squared distance.
+        \param dx X (east-west) offset, positive = east
+        \param dy Y (north-south) offset, positive = north
+        \return distance */
+    int32_t getDistance2FromDX(int dx, int dy);
+
     /** Given coordinate offsets, compute distance.
         \param dx X (east-west) offset, positive = east
         \param dy Y (north-south) offset, positive = north

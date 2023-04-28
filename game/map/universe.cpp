@@ -238,6 +238,10 @@ game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePl
     m_availablePlayers = availablePlayers;
 
     // Internal check for ships and planets
+    // @change PCC2 sets units with "full data" that are not played to NotPlayable instead of ReadOnly.
+    // This is mainly because it cannot handle that the full data is actually partial (c2nu allied planets).
+    // We can hopefully do better.
+    // Should it turn out that we can't, change ReadOnly to NotPlayable in both setPlayability() calls here.
     for (Id_t i = 1, n = m_planets.size(); i <= n; ++i) {
         if (Planet* p = m_planets.get(i)) {
             p->internalCheck(mapConfig, availablePlayers, turnNumber, tx, log);

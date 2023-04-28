@@ -523,9 +523,54 @@ Function CCVP.ShipHasMissionWarning
   EndIf
 EndFunction
 
-% @sunce PCC2 2.40.9
+% @since PCC2 2.40.9
 Function CCVP.ShipHasEnemyWarning
+  % ex client/tiles/shipmission.cc:isShipPEWarning
   Return Enemy And Mission$ = Cfg('ExtMissionsStartAt') + 18
+EndFunction
+
+% @since PCC2 2.41.1
+Function CCVP.ShipHasCloakMission
+  % same as game::spec::MissionList::isMissionCloaking
+  Local hasXM = System.Host="PHost" And Cfg("AllowExtendedMissions")
+  Local emsa = Cfg("ExtMissionsStartAt")
+  Select Case Mission$
+    Case 10
+      Return True
+    Case emsa+10
+      Return hasXM
+    Case 9
+      Return Global.Player(Owner.Real).Race.Id=3
+    Case emsa+9, emsa+11
+      Return hasXM And Global.Player(Owner.Real).Race.Id=3
+    Case Else
+      Return False
+  EndSelect
+EndFunction
+
+% @since PCC2 2.41.1
+Function CCVP.ShipCloakFuel(eta)
+  % same as shipmovementtile.cpp:computeCloakFuel
+  Local cfb
+  If CCVP.ShipHasCloakMission() And (HasFunction('Cloak') Or HasFunction('HardenedCloak')) And Not HasFunction('AdvancedCloak') Then
+    % Regular cloaking that burns fuel
+    % PHost/HOST 3.22.20 formula
+    cfb := Cfg('CloakFuelBurn', Owner.Real)
+    cfb := Max(cfb, Global.Hull(Hull$).Mass * cfb \ 100)
+    If eta Then cfb := cfb * eta
+    Return cfb
+  Else
+    Return 0
+  EndIf
+EndFunction
+
+% @since PCC2 2.41.1
+Function CCVP.ShipTurnFuel(eta)
+  % same as shipmovementtile.cpp:computeTurnFuel
+  Local f
+  f := (Global.Hull(Hull$).Mass * Cfg('FuelUsagePerTurnFor100KT', Owner.Real) + 99) \ 100
+  If eta Then f := f * eta
+  Return f
 EndFunction
 
 % @since PCC2 2.40.13

@@ -374,7 +374,7 @@ game::spec::info::describeFighter(PageContent& content, int player, const ShipLi
     //   Type:    fighter
     //   Kill:
     //   Destroy:
-    //   Recharge: (recharge time in seconds)
+    //   Recharge time: (recharge time in seconds)
     //   Strikes:
     //   Fighter Cost:
 
@@ -388,10 +388,10 @@ game::spec::info::describeFighter(PageContent& content, int player, const ShipLi
             // This 'if' is to make it match with the torpedoes
             content.attributes.push_back(Attribute(tx("Type"),     tx("fighter")));
         }
-        content.attributes.push_back(Attribute(tx("Kill"),     fmt.formatNumber(ftr.getKillPower())));
-        content.attributes.push_back(Attribute(tx("Destroy"),  fmt.formatNumber(ftr.getDamagePower())));
-        content.attributes.push_back(Attribute(tx("Recharge"), util::toString(ftr.getRechargeTime(root.hostVersion(), root.hostConfiguration()), Fighter::Range_t(0, Fighter::MAX_INTERVAL), false, fmt, tx)));
-        content.attributes.push_back(Attribute(tx("Strikes"),  util::toString(ftr.getNumStrikes  (root.hostVersion(), root.hostConfiguration()), Fighter::Range_t(0, Fighter::MAX_INTERVAL), false, fmt, tx)));
+        content.attributes.push_back(Attribute(tx("Kill"),          fmt.formatNumber(ftr.getKillPower())));
+        content.attributes.push_back(Attribute(tx("Destroy"),       fmt.formatNumber(ftr.getDamagePower())));
+        content.attributes.push_back(Attribute(tx("Recharge time"), util::toString(ftr.getRechargeTime(root.hostVersion(), root.hostConfiguration()), Fighter::Range_t(0, Fighter::MAX_INTERVAL), false, fmt, tx) + "s"));
+        content.attributes.push_back(Attribute(tx("Strikes"),       util::toString(ftr.getNumStrikes  (root.hostVersion(), root.hostConfiguration()), Fighter::Range_t(0, Fighter::MAX_INTERVAL), false, fmt, tx)));
         if (withCost) {
             content.attributes.push_back(Attribute(tx("Fighter Cost"), ftr.cost().format(tx, fmt)));
         }

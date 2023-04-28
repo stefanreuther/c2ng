@@ -792,7 +792,7 @@ SearchDialog::openControlScreen(game::Reference::Type refType,
                                 client::si::OutputState::Target target)
 {
     game::Reference ref = m_refList.getCurrentReference();
-    if (ref.getType() == refType) {
+    if (m_refList.hasState(ui::Widget::FocusedState) && ref.getType() == refType) {
         client::Downlink link(root(), translator());
         client::proxy::ScreenHistoryProxy proxy(interface().gameSender());
         client::ScreenHistory::Reference histRef(histType, ref.getId(), 0);

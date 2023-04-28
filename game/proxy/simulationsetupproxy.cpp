@@ -1260,6 +1260,10 @@ void
 game::proxy::SimulationSetupProxy::Trampoline::setConfiguration(const Configuration& config, Configuration::Areas_t areas)
 {
     m_sim->configuration().copyFrom(config, areas);
+
+    // A configuration change may cause the current object to change
+    // (abilities, namely: DoubleBeamChargeAbility)
+    sendObjectChange();
 }
 
 inline Setup&

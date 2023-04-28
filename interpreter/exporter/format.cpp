@@ -50,6 +50,7 @@ interpreter::exporter::getFormatDescription(Format fmt, afl::string::Translator&
 bool
 interpreter::exporter::parseFormat(const String_t& str, Format& result)
 {
+    // ex parseOutputFormatType
     for (size_t i = 0; i < countof(MAP); ++i) {
         if (afl::string::strCaseCompare(str, MAP[i].name) == 0) {
             result = Format(i);

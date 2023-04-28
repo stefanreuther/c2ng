@@ -208,11 +208,11 @@ ExportDialog::handleKey(util::Key_t key, int prefix)
         insertField();
         return true;
 
-     case ' ': // not in PCC2
+     case ' ':
         editField();
         return true;
 
-     case '*': // not in PCC2
+     case '*':
         if (isAtField()) {
             m_proxy.toggleFieldAlignment(m_fieldList.getCurrentItem());
         }

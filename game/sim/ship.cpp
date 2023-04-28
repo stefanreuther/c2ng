@@ -404,7 +404,7 @@ game::sim::Ship::getNumBaysRange(const game::spec::ShipList& shipList) const
 int
 game::sim::Ship::getEffectiveMass(const Configuration& opts, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const
 {
-    // ex ccsim.pas:ComputeMass
+    // ex ccsim.pas:ComputeMass, GSimShip::getEffectiveMass
     const int level = getExperienceLevel();
     int mass = getMass();
 
@@ -428,7 +428,7 @@ game::sim::Ship::getEffectiveMass(const Configuration& opts, const game::spec::S
 int32_t
 game::sim::Ship::getDefaultFlakRating(const game::vcr::flak::Configuration& flakConfig, const Configuration& opts, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const
 {
-    // ex ccsim.pas:ComputeTargetingRating
+    // ex ccsim.pas:ComputeTargetingRating, GSimShip::getDefaultFlakRating
     // Also in game/vcr/flak/object.cpp, operating on FLAK VCR objects
     const int mass = getEffectiveMass(opts, shipList, config);
     return mass * flakConfig.RatingMassScale
@@ -441,7 +441,7 @@ game::sim::Ship::getDefaultFlakRating(const game::vcr::flak::Configuration& flak
 int
 game::sim::Ship::getDefaultFlakCompensation(const game::vcr::flak::Configuration& flakConfig, const Configuration& opts, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const
 {
-    // ex ccsim.pas:ComputeCompensationRating
+    // ex ccsim.pas:ComputeCompensationRating, GSimShip::getDefaultFlakCompensation
     // Also in game/vcr/flak/object.cpp, operating on FLAK VCR objects
     const int32_t strength = flakConfig.CompensationShipScale
         + getNumLaunchers() * flakConfig.CompensationTorpScale
@@ -507,6 +507,7 @@ game::sim::Ship::isMatchingShipList(const game::spec::ShipList& shipList) const
 bool
 game::sim::Ship::hasImpliedFunction(int basicFunctionId, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const
 {
+    // ex GSimShip::hasImpliedSpecial
     /* FIXME: PCC 1.1.17 decides upon host version here, and checks ImperialAssault
        on older hosts instead of PlanetImmunity. Ideally, the hull function module
        would isolate us from these differences. */

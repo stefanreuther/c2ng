@@ -6,6 +6,7 @@
 #include <memory>
 #include "game/config/configurationeditor.hpp"
 #include "game/config/aliasoption.hpp"
+#include "util/translation.hpp"
 #include "util/updater.hpp"
 
 using game::config::AliasOption;
@@ -270,7 +271,7 @@ game::config::ConfigurationEditor::addToggle(int level, const String_t& name, co
                 // so we cannot just convert to Yes/No by hand.
                 // But we can translate Yes/No if we get it.
                 String_t result = config[m_option].toString();
-                if (result == "Yes" || result == "No") {
+                if (result == N_("Yes") || result == N_("No")) {
                     result = tx(result);
                 }
                 return result;

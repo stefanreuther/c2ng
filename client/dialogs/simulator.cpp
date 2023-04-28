@@ -1192,7 +1192,7 @@ SimulatorDialog::onEditOwner()
         prependDigits(elems);
 
         int32_t value = m_currentObject.owner.first;
-        if (doList(m_root, m_gameSender, elems, value, m_translator("Set Owner Level"), "pcc2:bsim", m_translator)) {
+        if (doList(m_root, m_gameSender, elems, value, m_translator("Set Owner"), "pcc2:bsim", m_translator)) {
             m_proxy.setOwner(m_currentSlot, value);
         }
     }

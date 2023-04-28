@@ -62,9 +62,9 @@ Sub CCfg.RaceName.Edit
   aa->NewLabel(Translate("Full name"))
   Local fi := aa->NewFrame("lowered", 1)->NewInput(30, "15mg", fn, "alt-f")
   aa->NewLabel(Translate("Short name"))
-  Local si := aa->NewFrame("lowered", 1)->NewInput(20, "15mg", sn, "alt-f")
+  Local si := aa->NewFrame("lowered", 1)->NewInput(20, "15mg", sn, "alt-s")
   aa->NewLabel(Translate("Adjective"))
-  Local ai := aa->NewFrame("lowered", 1)->NewInput(12, "15mg", an, "alt-f")
+  Local ai := aa->NewFrame("lowered", 1)->NewInput(12, "15mg", an, "alt-a")
 
   a->NewLabel(Translate("Changes will get effective next turn."), "-")
 

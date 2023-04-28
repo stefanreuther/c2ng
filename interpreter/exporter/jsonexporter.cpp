@@ -49,8 +49,8 @@ namespace {
             return false;
         }
 
-        // Has any dimensions?
-        if (iv->getDimension(0) == 0) {
+        // Has exactly one dimension?
+        if (iv->getDimension(0) != 1) {
             return false;
         }
 

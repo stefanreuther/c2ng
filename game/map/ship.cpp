@@ -317,7 +317,7 @@ game::map::Ship::internalCheck(PlayerSet_t availablePlayers, int turnNumber)
     }
 
     // Database sanitisation: make sure owner is known, nonzero for everything but NoShip.
-    if (m_currentData.owner.isSame(0)) {
+    if (m_currentData.owner.orElse(0) == 0) {
         // Ships without owner are generated from explosion records (Util1Bang).
         // If anything else reports an unowned ship, that's an error in the data files.
         // Reset ship type

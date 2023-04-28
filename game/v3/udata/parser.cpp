@@ -253,8 +253,11 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
             fromObject(hit).copyFrom(data);
 
             MessageInformation info(MessageInformation::Ship, hit.shipId, getTurnNumber());
-            info.addValue(gp::mi_X,      hit.x);
-            info.addValue(gp::mi_Y,      hit.y);
+            // Do NOT generate a position.
+            // This would cause unreliable targets to be generated (e.g., ship moves on after hit),
+            // and - worse - possibly damage more precise guesses.
+            //   info.addValue(gp::mi_X,      hit.x);
+            //   info.addValue(gp::mi_Y,      hit.y);
             info.addValue(gp::mi_Damage, hit.damage);
             if (data.size() >= 28) {
                 info.addValue(gp::ms_Name, m_charset.decode(hit.shipName));

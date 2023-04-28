@@ -676,7 +676,7 @@ game::v3::Loader::loadHConfig(Root& root, afl::io::Stream& hconfig, game::config
 void
 game::v3::Loader::loadRaceMapping(Root& root, afl::io::Stream& file, game::config::ConfigurationOption::Source source)
 {
-    // ex ccload.pas:LoadSRaceMappings
+    // ex ccload.pas:LoadSRaceMappings, loadRaceMapping
     gt::Int16_t mapping[gt::NUM_PLAYERS];
     if (file.read(afl::base::fromObject(mapping)) == sizeof(mapping)) {
         // Load configuration option

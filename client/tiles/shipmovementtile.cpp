@@ -2,15 +2,16 @@
   *  \file client/tiles/shipmovementtile.cpp
   */
 
+#include <cmath>
 #include "client/tiles/shipmovementtile.hpp"
 #include "afl/base/countof.hpp"
 #include "afl/base/staticassert.hpp"
 #include "afl/string/format.hpp"
-#include "game/proxy/objectlistener.hpp"
 #include "game/game.hpp"
 #include "game/map/chunnelmission.hpp"
 #include "game/map/ship.hpp"
 #include "game/map/shippredictor.hpp"
+#include "game/proxy/objectlistener.hpp"
 #include "game/turn.hpp"
 #include "ui/draw.hpp"
 #include "ui/layout/hbox.hpp"
@@ -180,28 +181,28 @@ client::tiles::ShipMovementTile::attach(game::proxy::ObjectObserver& oop)
                     }
 
                     // Distance
-                    double dist = util::getDistanceFromDX(sh->getWaypointDX().orElse(0), sh->getWaypointDY().orElse(0));
-                    job->data.text[Data::Distance] = afl::string::Format(tx("%.2f ly"), dist);
+                    int32_t dist2 = util::getDistance2FromDX(sh->getWaypointDX().orElse(0), sh->getWaypointDY().orElse(0));
+                    job->data.text[Data::Distance] = afl::string::Format(tx("%.2f ly"), std::sqrt(double(dist2)));
                     job->data.colors[Data::Distance] = is_chunnel
                         ? ((chd.getFailureReasons() & chd.chf_Distance) != 0
                            ? SkinColor::Yellow
                            : SkinColor::Green)
                         : !is_chunnel
                         ? SkinColor::Green
-                        : 20 > dist                    // yoda conditionals because otherwise emacs thinks this is a template.
+                        : 20*20 > dist2                    // yoda conditionals because otherwise emacs thinks this is a template.
                         ? SkinColor::Red
-                        : !root->hostVersion().isExactHyperjumpDistance2(int32_t(dist*dist+.1)) /* FIXME: this may lose precision, hence the +.1 */
+                        : !root->hostVersion().isExactHyperjumpDistance2(dist2)
                         ? SkinColor::Yellow
                         : SkinColor::Green;
 
                     // Warp
                     int warpFactor = sh->getWarpFactor().orElse(0);
-                    if (warpFactor == 0 && (sh->getWaypointDX().orElse(0) != 0 || sh->getWaypointDY().orElse(0) != 0)) {
+                    if (warpFactor == 0 && dist2 != 0) {
                         job->data.text[Data::WarpFactor] = tx("not moving");
                         job->data.colors[Data::WarpFactor] = SkinColor::Red;
                     } else {
                         if (is_hyper) {
-                            job->data.text[Data::WarpFactor] = tx("Hyperdrive");
+                            job->data.text[Data::WarpFactor] = afl::string::Format(tx("Hyperdrive (warp %d)"), warpFactor);
                             job->data.colors[Data::WarpFactor] = SkinColor::Green;
                         } else if (warpFactor == 0 && !is_chunnel) {
                             job->data.text[Data::WarpFactor] = tx("not moving");

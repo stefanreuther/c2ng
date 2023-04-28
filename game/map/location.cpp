@@ -101,6 +101,7 @@ game::map::Location::getPosition() const
 afl::base::Optional<game::map::Point>
 game::map::Location::getOtherPosition(Id_t shipId) const
 {
+    // ex GChartLocation::getOtherPosition
     Point currentPosition;
     if (getPosition().get(currentPosition)) {
         if (m_pUniverse != 0 && m_pConfig != 0) {

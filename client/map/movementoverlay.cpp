@@ -414,6 +414,9 @@ client::map::MovementOverlay::lockItem(game::map::Point target, bool left, bool 
     if (optimizeWarp) {
         flags += LockProxy::ToggleOptimizeWarp;
     }
+    if (m_parent.getOptions().getOption(game::map::RenderOptions::ShowDrawings) == game::map::RenderOptions::Disabled) {
+        flags += LockProxy::NoDrawings;
+    }
 
     // Range limit
     configureLockProxy(ren);

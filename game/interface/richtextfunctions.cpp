@@ -301,7 +301,37 @@ game::interface::IFRStyle(game::Session& session, interpreter::Arguments& args)
        as rich text attributes have no meaning to the text mode applications.
        In PCC2ng, this function always operates on rich text.
 
-       @todo document the styles
+       <b>Styles:</b> the style parameter can contain a list of comma-separated keywords.
+       Keywords are a superset of tag and color names used in {RXml}.
+       <table>
+        <tr><td width="10">b, bold, em</td>     <td width="15"><b>bold font</b></td></tr>
+        <tr><td width="10">background-color</td><td width="15">UI color: background</td></tr>
+        <tr><td width="10">big</td>             <td width="15">bigger font size</td></tr>
+        <tr><td width="10">blue</td>            <td width="15"><font color="blue">text color</font></td></tr>
+        <tr><td width="10">contrast-color</td>  <td width="15">UI color: contrast</td></tr>
+        <tr><td width="10">dim</td>             <td width="15"><font color="dim">text color</font></td></tr>
+        <tr><td width="10">fixed, tt</td>       <td width="15"><tt>typewriter font</tt></td></tr>
+        <tr><td width="10">green</td>           <td width="15"><font color="green">text color</font></td></tr>
+        <tr><td width="10">heading-color</td>   <td width="15">UI color: heading</td></tr>
+        <tr><td width="10">input-color</td>     <td width="15">UI color: text input</td></tr>
+        <tr><td width="10">inverse-color</td>   <td width="15">UI color: inverse</td></tr>
+        <tr><td width="10">kbd, key</td>        <td width="15">keycaps (<kbd>Like</kbd> <kbd>This</kbd>)</td></tr>
+        <tr><td width="10">link-color</td>      <td width="15">UI color: link</td></tr>
+        <tr><td width="10">link-focus-color</td><td width="15">UI color: link focus</td></tr>
+        <tr><td width="10">link-shade-color</td><td width="15">UI color: link shade (hover)</td></tr>
+        <tr><td width="10">none</td>            <td width="15">no style</td></tr>
+        <tr><td width="10">red</td>             <td width="15"><font color="red">text color</font></td></tr>
+        <tr><td width="10">selection-color</td> <td width="15">UI color: link shade</td></tr>
+        <tr><td width="10">small</td>           <td width="15">smaller font size</td></tr>
+        <tr><td width="10">static</td>          <td width="15"><font color="static">default text color</font></td></tr>
+        <tr><td width="10">u, underline</td>    <td width="15"><u>underlined text</u></td></tr>
+        <tr><td width="10">white</td>           <td width="15"><font color="white">text color</font></td></tr>
+        <tr><td width="10">yellow</td>          <td width="15"><font color="yellow">text color</font></td></tr>
+       </table>
+
+       <p>The UI colors are supported since 2.0.14 and can be used to match specific UI elements.
+        Otherwise, they have no guaranteed appearance.</p>
+
        @since PCC2 1.99.21, PCC2 2.40
        @see RLink, RXml */
     // ex int/if/richif.h:IFRStyle
@@ -385,7 +415,32 @@ game::interface::IFRXml(game::Session& /*session*/, interpreter::Arguments& args
        as rich text attributes have no meaning to the text mode applications.
        In PCC2ng, this function always operates on rich text.
 
-       @todo document the styles
+       <b>XML format:</b> the following XML tags are allowed.
+       They are inspired by XHTML tags.
+
+       <table>
+       <tr><td width="10">&lt;a href="..."&gt;</td><td width="25">Link</td></tr>
+       <tr><td width="10">&lt;b&gt;</td>           <td width="25"><b>Bold font</b></td></tr>
+       <tr><td width="10">&lt;big&gt;</td>         <td width="25">Bigger font size</td></tr>
+       <tr><td width="10">&lt;br /&gt;</td>        <td width="25">Line break</td></tr>
+       <tr><td width="10">&lt;em&gt;</td>          <td width="25">Currently, <b>bold font</b></td></tr>
+       <tr><td width="10">&lt;font color="..."&gt;</td><td width="25">Text color; one of
+                                                   <font color="static">static (default)</font>,
+                                                   <font color="green">green</font>,
+                                                   <font color="yellow">yellow</font>,
+                                                   <font color="red">red</font>,
+                                                   <font color="white">white</font>,
+                                                   <font color="blue">blue</font>,
+                                                   <font color="dim">dim</font>.</td></tr>
+       <tr><td width="10">&lt;kbd&gt;, &lt;key&gt;</td><td width="25">Key caps (<kbd>Like</kbd> <kbd>This</kbd>)</td></tr>
+       <tr><td width="10">&lt;small&gt;</td>       <td width="25">Smaller font size</td></tr>
+       <tr><td width="10">&lt;tt&gt;</td>          <td width="25"><tt>Typewriter font</tt></td></tr>
+       <tr><td width="10">&lt;u&gt;</td>           <td width="25"><u>Underlined font</u></td></tr>
+       </table>
+
+       Note that PCC2 expects actual XML, not HTML, so you must write &lt;br /&gt;,
+       and you must otherwise match each opening tag with a closing tag.
+
        @since PCC2 1.99.21, PCC2 2.40
        @see RStyle, RLink */
 

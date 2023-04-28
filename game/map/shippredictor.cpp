@@ -832,7 +832,8 @@ game::map::ShipPredictor::computeTurn()
 
     /* damage speed limit */
     shipDamage = m_ship.damage.orElse(0);
-    if (shipDamage > 0 && !real_ship->hasSpecialFunction(BasicHullFunction::HardenedEngines, m_scoreDefinitions, m_shipList, m_hostConfiguration)) {
+    int shipSpeed = m_ship.warpFactor.orElse(0);
+    if (shipDamage > 0 && shipSpeed > 0 && !real_ship->hasSpecialFunction(BasicHullFunction::HardenedEngines, m_scoreDefinitions, m_shipList, m_hostConfiguration)) {
         int limit = (m_hostConfiguration.getPlayerRaceNumber(m_ship.owner.orElse(0)) == 2
                      ? (m_hostVersion.getKind() == HostVersion::PHost
                         ? 15 - shipDamage/10
@@ -841,7 +842,7 @@ game::map::ShipPredictor::computeTurn()
         if (limit < 0) {
             limit = 0;
         }
-        if (m_ship.warpFactor.orElse(0) > limit) {
+        if (shipSpeed > limit) {
             m_ship.warpFactor = limit;
         }
 

@@ -112,7 +112,7 @@ Sub Tile.ShipOverview
   If Waypoint.DX=0 And Waypoint.DY=0 Then
     s := Translate("at waypoint")
   Else
-    s := Format(Translate("%.2f ly"), Waypoint.Dist) & ", " & If(Speed$, Speed, Translate("not moving"))
+    s := Format(Translate("%.2f ly"), Waypoint.Dist) & ", " & If(Speed$, If(Speed="Hyperdrive", Format(Translate("Hyperdrive, warp %d"), Speed$), Speed), Translate("not moving"))
   EndIf
   t := RAdd(t, "  (", s, ")\n\n")
 
@@ -300,7 +300,7 @@ EndSub
 % - call SetButton to configure buttons "b","e","m","f" if desired
 Sub Tile.ShipMission
   % ex WShipMissionTile::drawData
-  Local t, bc, System.Err
+  Local t, bc, System.Err, isCloning
 
   % Line 1: Mission
   t := RAdd(Translate("Mission:"), " ", RStyle(If(CCVP.ShipHasMissionWarning(), "yellow", "green"), CCVP.ShipMissionLabel()), "\n")
@@ -326,15 +326,22 @@ Sub Tile.ShipMission
 
   % Buttons
   bc := "none"
+  isCloning := StrCase(FCode="cln")
   Try
-    % FIXME: handle cloning. PCC 1.x uses green if cloning, yellow if conflict (multiple cloners)
-    If Planet(Orbit$).Shipyard.Id = Id Then
-      Select Case Planet(Orbit$).Shipyard.Action
-        Case "Fix"
-          bc := "green"
-        Case "Recycle"
-          bc := "red"
-      EndSelect
+    If Orbit$ And Planet(Orbit$).Base.YesNo Then
+      If Planet(Orbit$).Shipyard.Id = Id Then
+        Select Case Planet(Orbit$).Shipyard.Action
+          Case "Fix"
+            bc := "green"
+          Case "Recycle"
+            bc := "red"
+        EndSelect
+      EndIf
+      If bc= "none" And isCloning Then
+        bc := If(FindShipCloningAt(Orbit$)=Id, "green", "yellow")
+      EndIf
+    Else
+      If isCloning Then bc := "yellow"
     EndIf
   EndTry
   SetButton "b", bc
@@ -349,7 +356,7 @@ Sub Tile.NarrowShipMission
     Return RAdd(RAlign(left, 80), right, "\n")
   EndFunction
 
-  Local t, s, n, c, e
+  Local t, s, n, c, e, cloak_fuel, turn_fuel
 
   % PE
   t :=         Row(Translate("Enemy:"), If(Not IsEmpty(Enemy$), RStyle("green", If(Enemy, Enemy, Translate("none"))), ""))
@@ -384,6 +391,8 @@ Sub Tile.NarrowShipMission
   If Not IsEmpty(Speed$) Then
     If Speed$=0 Then
       s := RStyle(If(Waypoint.Dist, "red", "green"), Translate("not moving"))
+    Else If Speed='Hyperdrive' Then
+      s := RStyle("green", Format(Translate("Hyperdrive (warp %d)"), Speed$))
     Else
       s := RStyle("green", Speed)
     EndIf
@@ -405,7 +414,23 @@ Sub Tile.NarrowShipMission
     Else If e>=30 Then          % FIXME: 30 is replacement for 'if (crystal_ball.isAtTurnLimit())'
       s := RStyle("yellow", Translate("too long"))
     Else
-      s := RStyle(If(n > Cargo.N, "red", "green"), Format(Translate("%d turn%!1{s%}, %d kt fuel"), CCVP.NumberToString(e), CCVP.NumberToString(n)))
+      s := Format(Translate("%d turn%!1{s%}, %d kt fuel"), CCVP.NumberToString(e), CCVP.NumberToString(n))
+      cloak_fuel := CCVP.ShipCloakFuel(e)
+      turn_fuel := CCVP.ShipTurnFuel(e)
+      If cloak_fuel Or turn_fuel Then
+        If turn_fuel Then
+          s := s + Format(Translate(" (+%d kt)"), CCVP.NumberToString(turn_fuel + cloak_fuel))
+        Else
+          s := s + Format(Translate(" (+%d kt cloak)"), CCVP.NumberToString(cloak_fuel))
+        EndIf
+      EndIf
+      If n > Cargo.N Or (Cargo.N=0 And Not Cfg("AllowNoFuelMovement")) Then
+        s := RStyle("red", s)
+      Else If n + turn_fuel + cloak_fuel > Cargo.N Then
+        s := RStyle("yellow", s)
+      Else
+        s := RStyle("green", s)
+      EndIf
     EndIf
   Else
     s := ''
@@ -543,6 +568,10 @@ Sub Tile$ShipEquipment.Common(forHistory)
       t := RAdd(t, RStyle("yellow", Format(Translate("%d%% (fixed by base)"), Damage)))
     Else
       s := Cargo.Supplies \ 5
+      If Cfg('PlayerSpecialMission', Owner.Real)=6 And (Mission$=9 Or Mission$=Cfg('ExtMissionsStartAt')+11) Then
+        % Borg self repair
+        s := s + 10
+      EndIf
       If s Then
         t := RAdd(t, RStyle(If(s >= Damage, "yellow", "red"), Format("%d%% (-%d: %d%%)", Damage, s, Damage-s)))
       Else

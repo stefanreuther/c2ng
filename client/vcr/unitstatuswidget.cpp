@@ -179,9 +179,9 @@ client::vcr::UnitStatusWidget::drawMainColumn(gfx::Canvas& can, gfx::Rectangle r
 {
     // Prepare
     gfx::Context<uint8_t> ctx(can, m_root.colorScheme());
-    afl::base::Ref<gfx::Font> font = m_root.provider().getFont(gfx::FontRequest());
-    ctx.useFont(*font);
-    const int lineHeight = font->getCellSize().getY();
+    afl::base::Ref<gfx::Font> normalFont = m_root.provider().getFont(gfx::FontRequest());
+    afl::base::Ref<gfx::Font> boldFont = m_root.provider().getFont("b");
+    const int lineHeight = normalFont->getCellSize().getY();
 
     // Ship image
     const gfx::Rectangle imageArea = r.splitY(100);
@@ -198,8 +198,10 @@ client::vcr::UnitStatusWidget::drawMainColumn(gfx::Canvas& can, gfx::Rectangle r
     const int shieldWidth = shieldArea.getWidth() * std::min(100, std::max(0, shield)) / 100;
     drawSolidBar(ctx, gfx::Rectangle(shieldArea.getTopLeft(), gfx::Point(shieldWidth, shieldArea.getHeight())), uint8_t(shieldColor));
 
-    ctx.setColor(shield > 50 ? ui::Color_White : shield > 0 ? ui::Color_Gray : ui::Color_Dark);
+    // ctx.setColor(shield > 50 ? ui::Color_White : shield > 0 ? ui::Color_Gray : ui::Color_Dark);
+    ctx.setColor(shield > 85 ? ui::Color_GreenBlack : shield > 50 ? ui::Color_White : shield > 0 ? ui::Color_Gray : ui::Color_Dark);
     ctx.setTextAlign(gfx::CenterAlign, gfx::MiddleAlign);
+    ctx.useFont(shield > 100 ? *boldFont : *normalFont);
     outText(ctx, shieldArea.getCenter(), afl::string::Format(m_translator("Shields: %d%%").c_str(), shield));
     r.consumeY(GAP);
 
@@ -208,6 +210,7 @@ client::vcr::UnitStatusWidget::drawMainColumn(gfx::Canvas& can, gfx::Rectangle r
     ctx.setColor(ui::Color_White);
     ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
     ctx.setTransparentBackground();
+    ctx.useFont(*normalFont);
     outTextF(ctx, r.splitY(lineHeight), afl::string::Format(m_translator("Damage: %d%%").c_str(), m_status.damage));
     if (!m_data.isPlanet) {
         outTextF(ctx, r.splitY(lineHeight), afl::string::Format(m_translator("Crew: %d").c_str(), m_status.crew));

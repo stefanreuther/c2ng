@@ -105,6 +105,7 @@ game::interface::ShipTaskPredictor::getWarpFactor() const
 bool
 game::interface::ShipTaskPredictor::isHyperdriving() const
 {
+    // ex IntShipPredictor::isHyperdriving
     return m_predictor.isHyperdriving();
 }
 

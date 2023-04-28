@@ -489,6 +489,7 @@ game::sim::Setup::setSequentialFriendlyCode(Slot_t slot)
 void
 game::sim::Setup::setFlags(int32_t clear, int32_t toggle)
 {
+    // ex GSimState::setFlags
     for (size_t i = 0, n = getNumObjects(); i < n; ++i) {
         if (Object* p = getObject(i)) {
             p->setFlags((p->getFlags() & ~clear) ^ toggle);

@@ -75,12 +75,14 @@ namespace {
         //   3xBeamTyp
         //   Max Beams: x
         //   No beams
-        // FIXME: handle history
-        if (pShip->getShipKind() == Ship::CurrentShip) {
-            int numBeams = pShip->getNumBeams().orElse(0);
-            const game::spec::Component* pBeam = pShipList->beams().get(pShip->getBeamType().orElse(0));
-            if (numBeams != 0 && pBeam != 0) {
-                result.text[VisualScanHullInfoTile::Beams] = Format("%d" UTF_TIMES "%s", numBeams, pBeam->getName(pShipList->componentNamer()));
+        int numBeams;
+        if (pShip->getNumBeams().get(numBeams)) {
+            if (numBeams > 0) {
+                if (const game::spec::Component* pBeam = pShipList->beams().get(pShip->getBeamType().orElse(0))) {
+                    result.text[VisualScanHullInfoTile::Beams] = Format("%d" UTF_TIMES "%s", numBeams, pBeam->getName(pShipList->componentNamer()));
+                } else {
+                    result.text[VisualScanHullInfoTile::Beams] = Format("%d beam%!1{s%}", numBeams);
+                }
             } else {
                 result.text[VisualScanHullInfoTile::Beams] = tx.translateString("No beams");
             }
@@ -98,12 +100,14 @@ namespace {
         //   No torps
         //   Fighter bays: x
         //   No fighter bays
-        if (pShip->getShipKind() == Ship::CurrentShip) {
-            const int numLaunchers = pShip->getNumLaunchers().orElse(0);
-            const int numBays = pShip->getNumBays().orElse(0);
-            const game::spec::Component*const pLauncher = pShipList->launchers().get(pShip->getTorpedoType().orElse(0));
-            if (numLaunchers != 0 && pLauncher != 0) {
-                result.text[VisualScanHullInfoTile::Secondary] = Format("%d" UTF_TIMES "%s", numLaunchers, pLauncher->getName(pShipList->componentNamer()));
+        int numLaunchers, numBays;
+        if (pShip->getNumLaunchers().get(numLaunchers) && pShip->getNumBays().get(numBays)) {
+            if (numLaunchers != 0) {
+                if (const game::spec::Component*const pLauncher = pShipList->launchers().get(pShip->getTorpedoType().orElse(0))) {
+                    result.text[VisualScanHullInfoTile::Secondary] = Format("%d" UTF_TIMES "%s", numLaunchers, pLauncher->getName(pShipList->componentNamer()));
+                } else {
+                    result.text[VisualScanHullInfoTile::Secondary] = Format("%d launcher%!1{s%}", numLaunchers);
+                }
             } else if (numBays > 0) {
                 result.text[VisualScanHullInfoTile::Secondary] = Format(tx.translateString("Fighter bays: %d").c_str(), numBays);
             } else if (pHull->getNumBays() != 0) {

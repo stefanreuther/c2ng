@@ -358,6 +358,7 @@ namespace {
 
     PluginContext findPluginContext(RequestLink1 link)
     {
+        // ex getPluginContext(IntExecutionContext& exc)
         PluginContext result;
         result.name = "Script";
         result.directory = "";

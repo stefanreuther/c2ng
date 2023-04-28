@@ -436,7 +436,6 @@ void
 interpreter::BytecodeObject::compact()
 {
     // ex IntBytecodeObject::compact
-    // Turn symbolic jumps into absolute.
     std::vector<Opcode> oldCode;
     std::vector<uint32_t> oldDebug;
     m_code.swap(oldCode);

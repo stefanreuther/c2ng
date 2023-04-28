@@ -41,10 +41,18 @@ util::getHeadingDeg(double dx, double dy)
     return getHeadingRad(dx, dy) * (180 / PI);
 }
 
+// Given coordinate offsets, compute squared distance.
+int32_t
+util::getDistance2FromDX(int dx, int dy)
+{
+    // ex game/formula.h:dist2FromDX
+    return dx*dx + dy*dy;
+}
 
+// Given coordinate offsets, compute distance.
 double
 util::getDistanceFromDX(int dx, int dy)
 {
     // ex game/formula.h:distFromDX
-    return std::sqrt(double(dx*dx + dy*dy));
+    return std::sqrt(double(getDistance2FromDX(dx, dy)));
 }

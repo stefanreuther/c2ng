@@ -153,15 +153,10 @@ game::map::PlanetPredictor::computeTurn(const PlanetEffectors& eff,
     int planetOwner = m_planet.getOwner().orElse(0);
 
     // Hiss
-    if (config[config.AllowHiss]()) {
-        int nhiss = std::min(eff.get(PlanetEffectors::Hiss), config[config.MaxShipsHissing]());
-
-        nhiss *= config[config.HissEffectRate](planetOwner);
-
-        m_planet.setColonistHappiness(m_planet.getColonistHappiness().orElse(0) + nhiss);
-        m_planet.setNativeHappiness  (m_planet.getNativeHappiness()  .orElse(0) + nhiss);
-        trimHappiness(m_planet);
-    }
+    const int nhiss = getHissEffect(planetOwner, eff.get(PlanetEffectors::Hiss), config);
+    m_planet.setColonistHappiness(m_planet.getColonistHappiness().orElse(0) + nhiss);
+    m_planet.setNativeHappiness  (m_planet.getNativeHappiness()  .orElse(0) + nhiss);
+    trimHappiness(m_planet);
 
     // LFM, Gather-build, free fighters would be here
 
@@ -194,6 +189,8 @@ game::map::PlanetPredictor::computeTurn(const PlanetEffectors& eff,
         }
         m_planet.setTemperature(temp);
     }
+
+    // FIXME: structure decay is before everything in THost
 
     // Mining
     if (planetOwner > 0) {
@@ -242,6 +239,7 @@ game::map::PlanetPredictor::computeTurn(const PlanetEffectors& eff,
         m_planet.setCargo(Element::Money, m_planet.getCargo(Element::Money).orElse(0) + income);
 
         // PHost: Assimilation
+        // FIXME: seems to be here as well in HOST?
         if (host.isPHost()) {
             doAssimilation(m_planet, config);
         }

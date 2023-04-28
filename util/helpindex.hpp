@@ -96,9 +96,6 @@ namespace util {
         void find(String_t page, NodeVector_t& out, afl::io::FileSystem& fs, afl::sys::LogListener& log, afl::string::Translator& tx);
 
      private:
-        struct Page {
-            std::vector<Node> nodes;
-        };
         afl::container::PtrVector<File> m_files;
         std::multimap<String_t, Node> m_nodes;
         int m_counter;

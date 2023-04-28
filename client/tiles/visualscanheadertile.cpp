@@ -14,6 +14,7 @@
 #include "game/session.hpp"
 #include "game/spec/hull.hpp"
 #include "gfx/context.hpp"
+#include "util/string.hpp"
 #include "util/translation.hpp"
 
 using afl::string::Format;
@@ -105,10 +106,15 @@ namespace {
             // Line 3: Unknown type
             //         HULL CLASS
             //         Experienced HULL CLASS
+            result.type.clear();
+            int level;
+            if (s->getScore(game::ScoreId_ExpLevel, pGame->shipScores()).get(level)) {
+                util::addListItem(result.type, " ", pRoot->hostConfiguration().getExperienceLevelName(level, tx));
+            }
             if (const game::spec::Hull* h = pShipList->hulls().get(hullId)) {
-                // FIXME: experience levels
-                result.type = h->getName(pShipList->componentNamer());
-            } else {
+                util::addListItem(result.type, " ", h->getName(pShipList->componentNamer()));
+            }
+            if (result.type.empty()) {
                 result.type = tx.translateString("Unknown type");
             }
 

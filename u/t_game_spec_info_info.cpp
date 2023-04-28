@@ -298,7 +298,7 @@ TestGameSpecInfoInfo::testDescribeFighter()
                      "Type:fighter\n"
                      "Kill:2\n"
                      "Destroy:2\n"
-                     "Recharge:21\xE2\x80\x93""36\n"
+                     "Recharge time:21\xE2\x80\x93""36s\n"
                      "Strikes:7\n"
                      "Fighter Cost:100 mc, 3 T, 2 M\n");
     TS_ASSERT_EQUALS(c.pageLinks, gsi::Pages_t());

@@ -650,6 +650,7 @@ TestInterpreterExprParser::testDivide()
     // Integers
     h.verifyInteger("16/4", 4);
     h.verifyInteger("10/1", 10);
+    h.verifyFloat("5/2", 2.5);
     h.verifyNull("z(0) / 10");
     h.verifyNull("10 / z(0)");
 
