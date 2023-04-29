@@ -143,6 +143,16 @@ class TestInterpreterDefaultStatementCompilationContext : public CxxTest::TestSu
     void testParented();
 };
 
+class TestInterpreterDirectoryFunctions : public CxxTest::TestSuite {
+ public:
+    void testDirectoryEntryNormal();
+    void testDirectoryEntryEmpty();
+    void testDirectoryEntryNull();
+    void testDirectoryEntryNonExistant();
+    void testDirectoryEntryArityError();
+    void testDirectoryEntryCallResult();
+};
+
 class TestInterpreterError : public CxxTest::TestSuite {
  public:
     void testTrace();

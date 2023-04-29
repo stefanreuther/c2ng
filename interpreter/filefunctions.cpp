@@ -41,6 +41,7 @@ using interpreter::checkArgumentCount;
 using interpreter::checkBooleanArg;
 using interpreter::checkIntegerArg;
 using interpreter::checkStringArg;
+using interpreter::makeFileSizeValue;
 using interpreter::makeIntegerValue;
 using interpreter::makeStringValue;
 using interpreter::expr::Node;
@@ -378,19 +379,6 @@ namespace {
             return makeIntegerValue(int16_t(result));
         } else {
             return makeIntegerValue(result);
-        }
-    }
-
-    /** Convert file size into script-side value.
-        The value is returned as integer or float if it fits, otherwise an error is generated. */
-    afl::data::Value* makeFileSizeValue(afl::io::Stream::FileSize_t n)
-    {
-        if (n <= 0x7FFFFFFF) {
-            return interpreter::makeIntegerValue(static_cast<int32_t>(n));
-        } else if (n <= 0x20000000000000ULL) {
-            return interpreter::makeFloatValue(static_cast<double>(n));
-        } else {
-            throw interpreter::Error::rangeError();
         }
     }
 

@@ -4,17 +4,18 @@
   */
 
 #include "interpreter/world.hpp"
-#include "interpreter/specialcommand.hpp"
-#include "interpreter/propertyacceptor.hpp"
-#include "interpreter/context.hpp"
-#include "interpreter/error.hpp"
-#include "interpreter/mutexfunctions.hpp"
-#include "interpreter/filefunctions.hpp"
 #include "afl/io/textfile.hpp"
-#include "interpreter/filecommandsource.hpp"
-#include "interpreter/statementcompiler.hpp"
+#include "interpreter/context.hpp"
 #include "interpreter/defaultstatementcompilationcontext.hpp"
+#include "interpreter/directoryfunctions.hpp"
+#include "interpreter/error.hpp"
+#include "interpreter/filecommandsource.hpp"
+#include "interpreter/filefunctions.hpp"
 #include "interpreter/memorycommandsource.hpp"
+#include "interpreter/mutexfunctions.hpp"
+#include "interpreter/propertyacceptor.hpp"
+#include "interpreter/specialcommand.hpp"
+#include "interpreter/statementcompiler.hpp"
 
 const afl::data::NameMap::Index_t interpreter::World::sp_Comment;
 const afl::data::NameMap::Index_t interpreter::World::pp_Comment;
@@ -350,4 +351,5 @@ interpreter::World::init()
 
     registerMutexFunctions(*this);
     registerFileFunctions(*this);
+    registerDirectoryFunctions(*this);
 }
