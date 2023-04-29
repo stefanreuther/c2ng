@@ -806,6 +806,16 @@ client::screens::ControlScreen::handleKey(util::Key_t key, int prefix)
         return true;
     }
 
+    // Starchart option toggles
+    const util::Key_t ctrlAlt = (util::KeyMod_Alt | util::KeyMod_Ctrl);
+    if ((key & ctrlAlt) == ctrlAlt) {
+        game::map::RenderOptions::Options_t opts = game::map::RenderOptions::getOptionFromKey(key & ~ctrlAlt);
+        if (!opts.empty()) {
+            m_mapWidget.toggleOptions(opts);
+            return true;
+        }
+    }
+
     return false;
 }
 
