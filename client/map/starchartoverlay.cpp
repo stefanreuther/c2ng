@@ -299,7 +299,8 @@ client::map::StarchartOverlay::handleKey(util::Key_t key, int prefix, const Rend
         return true;
     }
 
-    switch (remapWheelKey(m_screen.getMouseWheelMode(), key)) {
+    key = remapWheelKey(m_screen.getMouseWheelMode(), key);
+    switch (key) {
      case util::Key_Left:
      case util::Key_Left + util::KeyMod_Shift:
      case util::Key_Left + util::KeyMod_Ctrl:
