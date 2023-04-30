@@ -403,8 +403,10 @@ const game::config::IntegerOptionDescriptor game::config::HostConfiguration::Gra
     "GravityWellRange",
     &IntegerValueParser::instance,
 };
-const game::config::StringOptionDescriptor game::config::HostConfiguration::Language = {
+const game::config::StringArrayOptionDescriptor game::config::HostConfiguration::Language = {
     "Language",
+    0,
+    game::MAX_PLAYERS+1
 };
 const game::config::IntegerOptionDescriptor game::config::HostConfiguration::AllowPlayerMessages = {
     "AllowPlayerMessages",
@@ -980,8 +982,10 @@ const game::config::HostConfiguration::ExperienceOptionDescriptor_t game::config
     "ExperienceLevels",
     &IntegerValueParser::instance,
 };
-const game::config::StringOptionDescriptor game::config::HostConfiguration::ExperienceLevelNames = {
+const game::config::StringArrayOptionDescriptor game::config::HostConfiguration::ExperienceLevelNames = {
     "ExperienceLevelNames",
+    0,
+    MAX_EXPERIENCE_LEVELS+1
 };
 const game::config::IntegerOptionDescriptor game::config::HostConfiguration::ExperienceLimit = {
     "ExperienceLimit",
@@ -1753,18 +1757,11 @@ game::config::HostConfiguration::getExperienceLevelName(int level, afl::string::
 {
     // ex game/config.cc::getExperienceLevelName
     // ex pconfig.pas:ExperienceLevelName
-    String_t s = (*this)[ExperienceLevelNames]();
-    for (int i = 0; i < level; ++i) {
-        if (!afl::string::strRemove(s, ",")) {
-            s.clear();
-            break;
-        }
-    }
-    s = afl::string::strTrim(afl::string::strFirst(s, ","));
+    String_t s = (*this)[ExperienceLevelNames](level);
     if (s.size()) {
         return s;
     } else {
-        return afl::string::Format(tx.translateString("Level %d").c_str(), level);
+        return afl::string::Format(tx("Level %d"), level);
     }
 }
 

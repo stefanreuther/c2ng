@@ -422,10 +422,7 @@ EndSub
 % @since PCC2 2.40.1
 Function CCVP.GetExperienceLevelName (n)
   If Not IsEmpty(n)
-    Local s = Cfg("ExperienceLevelNames")
-    Local i
-    For i:=1 To n Do s := Rest(',', s)
-    s := Trim(First(',', s))
+    Local s = Cfg("ExperienceLevelNames", n)
     If Not s Then s := Format(Translate("Level %d"), n)
     Return s
   EndIf

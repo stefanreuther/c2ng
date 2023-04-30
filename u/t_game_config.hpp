@@ -119,6 +119,11 @@ class TestGameConfigMarkerOption : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameConfigStringArrayOption : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestGameConfigStringOption : public CxxTest::TestSuite {
  public:
     void testIt();

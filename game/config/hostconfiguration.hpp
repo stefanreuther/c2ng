@@ -12,6 +12,7 @@
 #include "game/config/costarrayoption.hpp"
 #include "game/config/integerarrayoption.hpp"
 #include "game/config/integeroption.hpp"
+#include "game/config/stringarrayoption.hpp"
 #include "game/config/stringoption.hpp"
 #include "game/limits.hpp"
 #include "game/playerset.hpp"
@@ -140,7 +141,7 @@ namespace game { namespace config {
         static const IntegerOptionDescriptor              WebHitDamageFor100KT;
         static const IntegerOptionDescriptor              AllowRegisteredFunctions;
         static const IntegerOptionDescriptor              GravityWellRange;
-        static const StringOptionDescriptor               Language;
+        static const StringArrayOptionDescriptor          Language;
         static const IntegerOptionDescriptor              AllowPlayerMessages;
         static const StringOptionDescriptor               ScoringMethod;
         static const IntegerOptionDescriptor              TowedShipsBreakFree;
@@ -286,7 +287,7 @@ namespace game { namespace config {
         static const StandardOptionDescriptor_t           MaximumDefenseOnBase;
         static const IntegerOptionDescriptor              NumExperienceLevels;
         static const ExperienceOptionDescriptor_t         ExperienceLevels;
-        static const StringOptionDescriptor               ExperienceLevelNames;
+        static const StringArrayOptionDescriptor          ExperienceLevelNames;
         static const IntegerOptionDescriptor              ExperienceLimit;
         static const StandardOptionDescriptor_t           EPRecrewScaling;
         static const IntegerOptionDescriptor              EPShipAging;

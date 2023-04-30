@@ -5,6 +5,7 @@
 
 #include <cmath>
 #include "game/interface/globalfunctions.hpp"
+#include "afl/base/optional.hpp"
 #include "afl/base/staticassert.hpp"
 #include "afl/data/floatvalue.hpp"
 #include "afl/data/scalarvalue.hpp"
@@ -40,7 +41,7 @@ namespace {
         }
     }
 
-    afl::data::Value* getConfigValue(game::Session& session, game::config::Configuration& config, const String_t& optName, int player, bool isHostConfig)
+    afl::data::Value* getConfigValue(game::Session& session, game::config::Configuration& config, const String_t& optName, afl::base::Optional<int32_t> player, bool isHostConfig)
     {
         // Fetch option
         // (Unlike PCC2, resolve the alias first, so we automatically deal with badly-configured aliases.)
@@ -57,7 +58,8 @@ namespace {
 
         if (const game::config::GenericIntegerArrayOption* bopt = dynamic_cast<const game::config::GenericIntegerArrayOption*>(opt)) {
             // Integers; optional player
-            if (player == 0) {
+            int index;
+            if (!player.get(index)) {
                 /* Possible limits are
                    2    NewNativesPopulationRange
                    4    WraparoundRectangle
@@ -68,37 +70,51 @@ namespace {
                    \change c2ng has MAX_PLAYERS instead of 11, but otherwise, the logic remains the same. */
                 game::Game* g = session.getGame().get();
                 if (isHostConfig && bopt->getArray().size() == size_t(game::MAX_PLAYERS) && g != 0) {
-                    player = g->getViewpointPlayer();
+                    index = g->getViewpointPlayer();
                 } else {
                     throw interpreter::Error::tooFewArguments(fn);
                 }
             }
-            if (const int32_t* p = bopt->getArray().at(player - 1)) {
+            if (const int32_t* p = bopt->getArray().at(index - 1)) {
                 return makeScalarValue(*p, bopt->parser());
             } else {
                 throw interpreter::Error::rangeError();
             }
         } else if (const game::config::IntegerOption* intopt = dynamic_cast<const game::config::IntegerOption*>(opt)) {
             // single int, no player. Example: NumShips
-            if (player != 0) {
+            if (player.isValid()) {
                 throw interpreter::Error::tooManyArguments(fn);
             }
             return makeScalarValue((*intopt)(), intopt->parser());
         } else if (const game::config::CostArrayOption* costopt = dynamic_cast<const game::config::CostArrayOption*>(opt)) {
             // Array of costs. Example: StarbaseCost
-            if (player == 0) {
+            int index;
+            if (!player.get(index)) {
                 game::Game* g = session.getGame().get();
                 if (isHostConfig && g != 0) {
-                    player = g->getViewpointPlayer();
+                    index = g->getViewpointPlayer();
                 } else {
                     throw interpreter::Error::tooFewArguments(fn);
                 }
             }
-            return makeStringValue((*costopt)(player).toCargoSpecString());
+            if (index <= 0 || index >= game::MAX_PLAYERS) {
+                throw interpreter::Error::rangeError();
+            }
+            return makeStringValue((*costopt)(index).toCargoSpecString());
+        } else if (const game::config::StringArrayOption* saopt = dynamic_cast<const game::config::StringArrayOption*>(opt)) {
+            // String array, applies to Language, ExperienceLevelNames. Parameter must be given.
+            int index;
+            if (player.get(index)) {
+                if (index < saopt->getFirstIndex() || index >= saopt->getFirstIndex() + saopt->getNumSlots()) {
+                    throw interpreter::Error::rangeError();
+                }
+                return makeStringValue((*saopt)(index));
+            } else {
+                return makeStringValue((*saopt).toString());
+            }
         } else {
             // Anything else (including StringOption): just return the value.
-            // FIXME: PCC 1.x splits ExperienceLevelNames
-            if (player != 0) {
+            if (player.isValid()) {
                 throw interpreter::Error::tooManyArguments(fn);
             }
             return makeStringValue(opt->toString());
@@ -165,6 +181,15 @@ game::interface::IFAutoTask(game::Session& session, interpreter::Arguments& args
    @diff This function was available with a different, more complicated definition in PCC 0.98.5 up to 1.0.8,
    under the names %Cfg and %CfgL.
 
+   @diff The detail behaviour for array options differs between versions. Since 2.0.7 and 2.41.1, the behaviour is as follows:
+   - for regular per-player options, the second argument is optional and defaults to the current player.
+     If EMPTY is given, the result is empty. Earlier versions of PCC2 reject EMPTY.
+   - for ExperienceLevelNames and Language, if the second argument is given, the respective element is returned.
+     If no second argument is given, the entire option is returned as a string.
+     Versions before 2.0.7/2.41.1 only support the no-argument version.
+   - for other array options, the argument is mandatory; passing EMPTY yields empty.
+   PCC 1.x behaves subtly different, which is often considered a bug.
+
    @since PCC 1.0.9, PCC2 1.99.8, PCC2 2.40.1 */
 afl::data::Value*
 game::interface::IFCfg(game::Session& session, interpreter::Arguments& args)
@@ -180,11 +205,13 @@ game::interface::IFCfg(game::Session& session, interpreter::Arguments& args)
     }
 
     // Player number
-    int32_t player = 0;
+    afl::base::Optional<int32_t> player;
     if (args.getNumArgs() > 0) {
-        if (!checkIntegerArg(player, args.getNext(), 1, MAX_PLAYERS)) {
+        int p;
+        if (!checkIntegerArg(p, args.getNext())) {
             return 0;
         }
+        player = p;
     }
 
     // Available?
@@ -512,11 +539,13 @@ game::interface::IFPref(game::Session& session, interpreter::Arguments& args)
     }
 
     // Index
-    int32_t index = 0;
+    afl::base::Optional<int32_t> index;
     if (args.getNumArgs() > 0) {
-        if (!checkIntegerArg(index, args.getNext(), 1, 100)) {
+        int p;
+        if (!checkIntegerArg(p, args.getNext())) {
             return 0;
         }
+        index = p;
     }
 
     // Available?

@@ -169,6 +169,7 @@ TestGameInterfaceGlobalFunctions::testCfg()
     config[HostConfiguration::FreeFighterCost].set("t10, t20, 30M, 40S");  // deliberately whacky format to prove it goes through the parser
     config[HostConfiguration::EModBayRechargeRate].set("1,2,3,4");
     config[HostConfiguration::GameName].set("G!");
+    config[HostConfiguration::Language].set("en,de,ua,es,kr,ru");
 
     // Integer option
     {
@@ -320,6 +321,33 @@ TestGameInterfaceGlobalFunctions::testCfg()
         afl::data::Segment seg;
         seg.pushBackString("GameName");
         seg.pushBackInteger(10);
+        interpreter::Arguments args(seg, 0, 2);
+        TS_ASSERT_THROWS(game::interface::IFCfg(env.session, args), interpreter::Error);
+    }
+
+    // String array, returns entire array
+    {
+        afl::data::Segment seg;
+        seg.pushBackString("Language");
+        interpreter::Arguments args(seg, 0, 1);
+        String_t result = verifyNewString("Language", game::interface::IFCfg(env.session, args));
+        TS_ASSERT_EQUALS(result.substr(0, 12), "en,de,ua,es,");
+    }
+
+    // String array, index given
+    {
+        afl::data::Segment seg;
+        seg.pushBackString("Language");
+        seg.pushBackInteger(0);
+        interpreter::Arguments args(seg, 0, 2);
+        verifyNewString("Language", game::interface::IFCfg(env.session, args), "en");
+    }
+
+    // String array, bad index
+    {
+        afl::data::Segment seg;
+        seg.pushBackString("Language");
+        seg.pushBackInteger(100);
         interpreter::Arguments args(seg, 0, 2);
         TS_ASSERT_THROWS(game::interface::IFCfg(env.session, args), interpreter::Error);
     }
