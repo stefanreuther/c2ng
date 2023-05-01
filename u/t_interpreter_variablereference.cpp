@@ -60,9 +60,6 @@ TestInterpreterVariableReference::testNull()
     // Environment
     Environment env;
 
-    // Create a process
-    interpreter::Process& proc = env.list.create(env.world, "testIt");
-
     // Null reference should produce null value
     interpreter::VariableReference r;
     std::auto_ptr<afl::data::Value> p(r.get(env.list));

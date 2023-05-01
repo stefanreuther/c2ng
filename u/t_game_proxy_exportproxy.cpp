@@ -121,7 +121,7 @@ namespace {
             : m_config(),
               m_ok()
             { }
-        virtual void onChange(const interpreter::exporter::Configuration& config)
+        void onChange(const interpreter::exporter::Configuration& config)
             {
                 m_config = config;
                 m_ok = true;

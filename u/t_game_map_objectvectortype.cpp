@@ -24,7 +24,7 @@ namespace {
     class Tester : public game::map::ObjectVectorType<TestObj> {
      public:
         Tester(game::map::ObjectVector<TestObj>& vec)
-            : ObjectVectorType(vec)
+            : game::map::ObjectVectorType<TestObj>(vec)
             { }
         virtual bool isValid(const TestObj& obj) const
             { return obj.getId() % 2 == 0; }
