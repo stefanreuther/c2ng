@@ -215,6 +215,15 @@ namespace interpreter {
             \param arg   Argument */
         void addInstruction(Opcode::Major major, uint8_t minor, uint16_t arg);
 
+        /** Add an instruction with an index parameter.
+            The \c idx parameter is an index, represented as the native type for indexes.
+            If it cannot be represented as an instruction parameter, this call fails with a "code too complex" error.
+            \param major Major opcode
+            \param minor Minor opcode
+            \param idx   Index argument
+            \throw Error if arg is out of range */
+        void addIndexInstruction(Opcode::Major major, uint8_t minor, size_t idx);
+
         /** Add a variable-referencing instruction.
             Selects the optimum minor/arg for referencing the given variable in the current context.
             \param major Major opcode (maPush, maPop, maStore)

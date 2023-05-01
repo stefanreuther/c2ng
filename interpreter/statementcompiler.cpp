@@ -922,7 +922,7 @@ interpreter::StatementCompiler::compileCall(BytecodeObject& bco, const Statement
 
     /* Call */
     procedure.compileValue(bco, scc);
-    bco.addInstruction(Opcode::maIndirect, Opcode::miIMCall + Opcode::miIMRefuseFunctions, uint16_t(args.size()));
+    bco.addIndexInstruction(Opcode::maIndirect, Opcode::miIMCall + Opcode::miIMRefuseFunctions, args.size());
 
     return CompiledStatement;
 }
@@ -1254,7 +1254,7 @@ interpreter::StatementCompiler::compileEval(BytecodeObject& bco, const Statement
     for (size_t i = 0; i < args.size(); ++i) {
         args[i]->compileValue(bco, scc);
     }
-    bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialEvalStatement, uint16_t(args.size()));
+    bco.addIndexInstruction(Opcode::maSpecial, Opcode::miSpecialEvalStatement, args.size());
 
     return CompiledStatement;
 }
@@ -2156,7 +2156,7 @@ interpreter::StatementCompiler::compileReDim(BytecodeObject& bco, const Statemen
         }
 
         /* Do it */
-        bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialResizeArray, uint16_t(numDims));
+        bco.addIndexInstruction(Opcode::maSpecial, Opcode::miSpecialResizeArray, numDims);
         if (!parseNext(tok)) {
             break;
         }
@@ -3049,7 +3049,7 @@ interpreter::StatementCompiler::compileProcedureCall(BytecodeObject& bco, const 
 
     /* Call */
     bco.addVariableReferenceInstruction(Opcode::maPush, name, scc);
-    bco.addInstruction(Opcode::maIndirect, Opcode::miIMCall + Opcode::miIMRefuseFunctions, uint16_t(args.size()));
+    bco.addIndexInstruction(Opcode::maIndirect, Opcode::miIMCall + Opcode::miIMRefuseFunctions, args.size());
 
     return CompiledStatement;
 }
@@ -3175,7 +3175,7 @@ interpreter::StatementCompiler::compileInitializer(BytecodeObject& bco, const St
     //   ( dimension ) as type
     Tokenizer& tok = m_commandSource.tokenizer();
     if (tok.checkAdvance(tok.tLParen)) {
-        int n = 0;
+        size_t n = 0;
         while (1) {
             compileArgumentExpression(bco, scc);
             ++n;
@@ -3186,7 +3186,7 @@ interpreter::StatementCompiler::compileInitializer(BytecodeObject& bco, const St
                 throw Error::expectSymbol(",", ")");
             }
         }
-        bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialNewArray, uint16_t(n));
+        bco.addIndexInstruction(Opcode::maSpecial, Opcode::miSpecialNewArray, n);
         if (tok.checkAdvance("AS")) {
             // Type initializer
             if (tok.getCurrentToken() != tok.tIdentifier) {
@@ -3199,7 +3199,7 @@ interpreter::StatementCompiler::compileInitializer(BytecodeObject& bco, const St
                 // (this means it is reallocated only once).
                 std::vector<BytecodeObject::Label_t> label_skip;
                 std::vector<BytecodeObject::Label_t> label_loop;
-                for (int i = 0; i < n; ++i) {
+                for (size_t i = 0; i < n; ++i) {
                     label_skip.push_back(bco.makeLabel());
                     label_loop.push_back(bco.makeLabel());
                 }
@@ -3211,9 +3211,9 @@ interpreter::StatementCompiler::compileInitializer(BytecodeObject& bco, const St
                 //     jf skipn
                 //  loopn:
                 //     udec
-                for (int i = 0; i < n; ++i) {
-                    bco.addInstruction(Opcode::maStack, Opcode::miStackDup, uint16_t(i));
-                    bco.addInstruction(Opcode::maPush,  Opcode::sInteger, uint16_t(n - i));
+                for (size_t i = 0; i < n; ++i) {
+                    bco.addIndexInstruction(Opcode::maStack, Opcode::miStackDup, i);
+                    bco.addIndexInstruction(Opcode::maPush,  Opcode::sInteger, n - i);
                     bco.addInstruction(Opcode::maBinary, biArrayDim, 0);
                     bco.addJump(Opcode::jIfFalse | Opcode::jIfEmpty, label_skip[n-1-i]);
                     bco.addLabel(label_loop[n-1-i]);
@@ -3225,21 +3225,21 @@ interpreter::StatementCompiler::compileInitializer(BytecodeObject& bco, const St
                 //     <initializer>
                 //     dup 2N+1      (duplicate array)
                 //     popind N
-                for (int i = 0; i < n; ++i) {
-                    bco.addInstruction(Opcode::maStack, Opcode::miStackDup, uint16_t(2*i));
+                for (size_t i = 0; i < n; ++i) {
+                    bco.addIndexInstruction(Opcode::maStack, Opcode::miStackDup, 2*i);
                 }
                 if (!compileTypeInitializer(bco, scc, typeName)) {
                     // Cannot happen, compileTypeInitializer() returns false only for tkAny
                     bco.addPushLiteral(0);
                 }
-                bco.addInstruction(Opcode::maStack, Opcode::miStackDup, uint16_t(2*n+1));
-                bco.addInstruction(Opcode::maIndirect, Opcode::miIMPop, uint16_t(n));
+                bco.addIndexInstruction(Opcode::maStack, Opcode::miStackDup, 2*n+1);
+                bco.addIndexInstruction(Opcode::maIndirect, Opcode::miIMPop, n);
 
                 // Loop tails:
                 //     jt loopn
                 //  skipn:
                 //     drop 1
-                for (int i = 0; i < n; ++i) {
+                for (size_t i = 0; i < n; ++i) {
                     bco.addJump(Opcode::jIfTrue, label_loop[i]);
                     bco.addLabel(label_skip[i]);
                     bco.addInstruction(Opcode::maStack, Opcode::miStackDrop, 1);

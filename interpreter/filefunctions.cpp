@@ -121,7 +121,7 @@ namespace {
                     xn[2]->compileValue(bco, scc);
                 }
                 bco.addInstruction(Opcode::maPush, Opcode::sNamedShared, bco.addName("CC$INPUT"));
-                bco.addInstruction(Opcode::maIndirect, Opcode::miIMLoad, static_cast<uint16_t>(xn.size()));
+                bco.addIndexInstruction(Opcode::maIndirect, Opcode::miIMLoad, xn.size());
                 xn[1]->compileWrite(bco, scc);
                 bco.addInstruction(Opcode::maStack, Opcode::miStackDrop, 1);
             }
@@ -256,7 +256,7 @@ namespace {
 
                 // Call routine to do the work
                 bco.addInstruction(Opcode::maPush, Opcode::sNamedShared, bco.addName("CC$SETINT"));
-                bco.addInstruction(Opcode::maIndirect, Opcode::miIMLoad, static_cast<uint16_t>(xn.size() + 1));
+                bco.addIndexInstruction(Opcode::maIndirect, Opcode::miIMLoad, xn.size() + 1);
 
                 // Write cycle for first arg
                 xn[0]->compileWrite(bco, scc);
@@ -303,7 +303,7 @@ namespace {
 
                 // Call routine to do the work
                 bco.addInstruction(Opcode::maPush, Opcode::sNamedShared, bco.addName("CC$SETSTR"));
-                bco.addInstruction(Opcode::maIndirect, Opcode::miIMLoad, static_cast<uint16_t>(xn.size())); // always 4, see checkArgumentCount
+                bco.addIndexInstruction(Opcode::maIndirect, Opcode::miIMLoad, xn.size()); // always 4, see checkArgumentCount
 
                 // Write cycle for first arg
                 xn[0]->compileWrite(bco, scc);

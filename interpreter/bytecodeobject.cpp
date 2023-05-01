@@ -67,11 +67,30 @@ namespace {
     template<typename T>
     uint16_t packIndex(T nativeIndex)
     {
+        // ex verifyAddress
         uint16_t packedIndex = uint16_t(nativeIndex);
         if (nativeIndex != packedIndex) {
             throw interpreter::Error::tooComplex();
         }
         return packedIndex;
+    }
+
+    void addLineNumber(uint32_t lineNr, const std::vector<interpreter::Opcode>& code, std::vector<uint32_t>& lineNumbers)
+    {
+        uint32_t address = uint32_t(code.size());
+
+        if (lineNumbers.size() == 0
+            || (lineNr != lineNumbers[lineNumbers.size()-1] && address != lineNumbers[lineNumbers.size()-2]))
+        {
+            /* First pair, or new line at new address */
+            lineNumbers.push_back(address);
+            lineNumbers.push_back(lineNr);
+        } else if (address == lineNumbers[lineNumbers.size()-2]) {
+            /* Same address as last pair, i.e. last line compiled to 0 instructions */
+            lineNumbers[lineNumbers.size()-1] = lineNr;
+        } else {
+            /* Same line as last pair, but different address, i.e. nested statement */
+        }
     }
 }
 
@@ -173,20 +192,7 @@ void
 interpreter::BytecodeObject::addLineNumber(uint32_t line)
 {
     // ex IntBytecodeObject::addLineNumber
-    uint32_t address = uint32_t(m_code.size());
-
-    if (m_lineNumbers.size() == 0
-        || (line != m_lineNumbers[m_lineNumbers.size()-1] && address != m_lineNumbers[m_lineNumbers.size()-2]))
-    {
-        /* First pair, or new line at new address */
-        m_lineNumbers.push_back(address);
-        m_lineNumbers.push_back(line);
-    } else if (address == m_lineNumbers[m_lineNumbers.size()-2]) {
-        /* Same address as last pair, i.e. last line compiled to 0 instructions */
-        m_lineNumbers[m_lineNumbers.size()-1] = line;
-    } else {
-        /* Same line as last pair, but different address, i.e. nested statement */
-    }
+    ::addLineNumber(line, m_code, m_lineNumbers);
 }
 
 // Add line/address pair.
@@ -239,6 +245,14 @@ interpreter::BytecodeObject::addInstruction(Opcode::Major major, uint8_t minor, 
     o.minor = minor;
     o.arg   = arg;
     m_code.push_back(o);
+}
+
+// Add an instruction with size parameter.
+void
+interpreter::BytecodeObject::addIndexInstruction(Opcode::Major major, uint8_t minor, size_t idx)
+{
+    // ex IntBytecodeObject::addVerifyInstruction
+    addInstruction(major, minor, packIndex(idx));
 }
 
 // Add a variable-referencing instruction.
@@ -378,6 +392,7 @@ interpreter::BytecodeObject::relocate()
 
     // Find existing labels
     PC_t outAdr = 0;
+    PC_t lastAdr = 0;
     for (PC_t i = 0; i != m_code.size(); ++i) {
         if (m_code[i].isLabel()) {
             /* It's a label. Those do not produce output. */
@@ -389,6 +404,7 @@ interpreter::BytecodeObject::relocate()
                     return;
                 }
                 addresses[m_code[i].arg] = static_cast<uint16_t>(outAdr);
+                lastAdr = outAdr;
             } else {
                 /* Absolute label aka NOP */
             }
@@ -397,38 +413,43 @@ interpreter::BytecodeObject::relocate()
         }
     }
 
+    if (lastAdr > 0xFFFF) {
+        // Unrelocatable
+        return;
+    }
+
     // Turn symbolic jumps into absolute.
-    std::vector<Opcode> oldCode;
-    std::vector<uint32_t> oldDebug;
-    m_code.swap(oldCode);
-    m_lineNumbers.swap(oldDebug);
+    std::vector<Opcode> newCode;
+    std::vector<uint32_t> newDebug;
     uint32_t dbgIndex = 0;
-    for (PC_t i = 0; i != oldCode.size(); ++i) {
+    for (PC_t i = 0; i != m_code.size(); ++i) {
         /* Update debug information */
-        if (dbgIndex < oldDebug.size() && oldDebug[dbgIndex] == i) {
-            addLineNumber(oldDebug[dbgIndex+1]);
+        if (dbgIndex < m_lineNumbers.size() && m_lineNumbers[dbgIndex] == i) {
+            ::addLineNumber(m_lineNumbers[dbgIndex+1], newCode, newDebug);
             dbgIndex += 2;
         }
         /* Update code */
-        if (oldCode[i].major == Opcode::maJump) {
-            if (oldCode[i].isLabel()) {
+        if (m_code[i].major == Opcode::maJump) {
+            if (m_code[i].isLabel()) {
                 /* Label. Drop it. */
-            } else if ((oldCode[i].minor & Opcode::jSymbolic) != 0) {
+            } else if ((m_code[i].minor & Opcode::jSymbolic) != 0) {
                 /* Make it absolute */
-                assert(oldCode[i].arg < addresses.size());
+                assert(m_code[i].arg < addresses.size());
                 Opcode c;
-                c.major = oldCode[i].major;
-                c.minor = uint8_t(oldCode[i].minor & ~Opcode::jSymbolic);
-                c.arg   = addresses[oldCode[i].arg];
-                m_code.push_back(c);
+                c.major = m_code[i].major;
+                c.minor = uint8_t(m_code[i].minor & ~Opcode::jSymbolic);
+                c.arg   = addresses[m_code[i].arg];
+                newCode.push_back(c);
             } else {
                 /* Already absolute? Should not happen. */
-                m_code.push_back(oldCode[i]);
+                newCode.push_back(m_code[i]);
             }
         } else {
-            m_code.push_back(oldCode[i]);
+            newCode.push_back(m_code[i]);
         }
     }
+    m_code.swap(newCode);
+    m_lineNumbers.swap(newDebug);
 }
 
 // Compact code.
