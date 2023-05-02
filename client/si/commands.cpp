@@ -4683,6 +4683,7 @@ client::si::IFUISelectionManager(game::Session& session, ScriptSide& si, Request
    - "B": include starbases in search.
    - "U": include UFOs in search.
    - "O": include the other objects in search.
+   - "M": include only my units in the search (PCC 2.0.2+, 2.41.1+).
    - "1": search for name or Id.
    - "2": search for expression which is true (default).
    - "3": search for expression which is false.
@@ -4699,7 +4700,7 @@ client::si::IFUISearch(game::Session& session, ScriptSide& si, RequestLink1 link
     // ex IFUISearch
     // ex userint.pas:UserInt_UI_Search
     /* UI.Search [text, flags]
-       flags: PSBUO = planets, ships, bases, ufos, others
+       flags: PSBUOM = planets, ships, bases, ufos, others, mine
               1234  = name, true, false, location */
     using game::SearchQuery;
     SearchQuery q = game::proxy::SearchProxy::savedQuery(session);
@@ -4718,16 +4719,39 @@ client::si::IFUISearch(game::Session& session, ScriptSide& si, RequestLink1 link
     if (args.getNumArgs() > 0) {
         // Fetch flags
         int32_t kind = 1;
-        int32_t objs = 0;
-        static_assert(SearchQuery::SearchShips   == 0, "SearchShips");
-        static_assert(SearchQuery::SearchPlanets == 1, "SearchPlanets");
-        static_assert(SearchQuery::SearchBases   == 2, "SearchBases");
-        static_assert(SearchQuery::SearchUfos    == 3, "SearchUfos");
-        static_assert(SearchQuery::SearchOthers  == 4, "SearchOthers");
+        int32_t flags = 0;
+        const int32_t FlagShips = 1;
+        const int32_t FlagPlanets = 2;
+        const int32_t FlagBases = 4;
+        const int32_t FlagUfos = 8;
+        const int32_t FlagOthers = 16;
+        const int32_t FlagOwn = 32;
 
-        if (!interpreter::checkFlagArg(objs, &kind, args.getNext(), "SPBUO")) {
+        if (!interpreter::checkFlagArg(flags, &kind, args.getNext(), "SPBUOM")) {
             return;
         }
+
+        // Search objects
+        SearchQuery::SearchObjects_t objs;
+        if ((flags & FlagShips) != 0) {
+            objs += SearchQuery::SearchShips;
+        }
+        if ((flags & FlagPlanets) != 0) {
+            objs += SearchQuery::SearchPlanets;
+        }
+        if ((flags & FlagBases) != 0) {
+            objs += SearchQuery::SearchBases;
+        }
+        if ((flags & FlagUfos) != 0) {
+            objs += SearchQuery::SearchUfos;
+        }
+        if ((flags & FlagOthers) != 0) {
+            objs += SearchQuery::SearchOthers;
+        }
+        q.setSearchObjects(objs);
+
+        // Own only?
+        q.setPlayedOnly((flags & FlagOwn) != 0);
 
         // Kind
         switch (kind) {
@@ -4737,9 +4761,6 @@ client::si::IFUISearch(game::Session& session, ScriptSide& si, RequestLink1 link
          case 4:  q.setMatchType(SearchQuery::MatchLocation); break;
          default: throw Error::rangeError();
         }
-
-        // Objects
-        q.setSearchObjects(SearchQuery::SearchObjects_t::fromInteger(objs));
     }
 
     class Task : public UserTask {
