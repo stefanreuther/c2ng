@@ -1721,7 +1721,9 @@
           This makes it easier to see events like the ship limit or progress of planet colonisation.
           This kind of diagram is sometimes known as <em>stacked area chart</em>;</ki>
         <ki key="+, -">(overview) Browse through turns;</ki>
-        <ki key="Ctrl-U">(overview) Unsorted;</ki>
+        <ki key="R">(overview) Toggle differences-to-previous-turn mode;</ki>
+        <ki key="%">(overview) Toggle percentages mode;</ki>
+        <ki key="Ctrl-U">(overview) Unsorted.</ki>
       </kl>
 
       <p>To sort overview tables, click the heading of the column you want to sort by,

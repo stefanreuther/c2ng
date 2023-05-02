@@ -206,6 +206,7 @@ namespace {
             = (1 << ('d'-'a'))                      // display mode menu
             | (1 << ('y'-'a'))                      // team toggle
             | (1 << ('x'-'a'))                      // cumulative toggle
+            | (1 << ('r'-'a'))                      // relative toggle
             | (1 << ('u'-'a'))                      // with Ctrl, unsorted
             | (1 << ('h'-'a'));                     // help
 
@@ -395,6 +396,7 @@ namespace {
         void setTableTurnIndex(size_t index);
         void setTableSortColumn(int column);
         void setTableMode(TableMode mode);
+        void toggleTableMode(TableMode mode);
         void changeHighlighedPlayer(bool forward);
         void setHighlightedPlayer(int playerNr);
         void toggleTeams();
@@ -872,6 +874,20 @@ ScoreDialog::handleKey(util::Key_t key, int /*prefix*/)
         }
         break;
 
+     case 'r':
+        if (isTable) {
+            toggleTableMode(DifferenceToPrevious);
+            return true;
+        }
+        break;
+
+     case '%':
+        if (isTable) {
+            toggleTableMode(Percentages);
+            return true;
+        }
+        break;
+
      default:
         break;
     }
@@ -1141,6 +1157,17 @@ ScoreDialog::setTableMode(TableMode mode)
     m_tableTurnOtherIndex = m_tableTurnIndex;
     requestTableData();
     renderMode();
+}
+
+void
+ScoreDialog::toggleTableMode(TableMode mode)
+{
+    // ex WScoreWindow::toggleMode
+    if (m_tableMode == mode) {
+        setTableMode(Normal);
+    } else {
+        setTableMode(mode);
+    }
 }
 
 void
