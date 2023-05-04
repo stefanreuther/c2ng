@@ -23,6 +23,7 @@ ui::widgets::IconGrid::IconGrid(gfx::Engine& engine, gfx::Point cellSize, int wi
       m_padding(0),
       m_cursorOn(true),
       m_icons(),
+      m_itemInaccessible(),
       m_timer(engine.createTimer())
 {
     // ex UIIconGrid::UIIconGrid
@@ -74,6 +75,24 @@ ui::widgets::IconGrid::setCurrentItem(size_t index)
 }
 
 void
+ui::widgets::IconGrid::setItemAccessible(size_t index, bool flag)
+{
+    // We store inverse values so the default is "accessible"
+    if (m_itemInaccessible.size() <= index) {
+        m_itemInaccessible.resize(index+1);
+    }
+    m_itemInaccessible[index] = !flag;
+}
+
+void
+ui::widgets::IconGrid::setItemAccessible(int x, int y, bool flag)
+{
+    if (x >= 0 && y >= 0) {
+        setItemAccessible(static_cast<size_t>(y * m_widthInCells + x), flag);
+    }
+}
+
+void
 ui::widgets::IconGrid::setCurrentItem(int x, int y)
 {
     // ex UIIconGrid::setCurrentPos
@@ -87,8 +106,8 @@ ui::widgets::IconGrid::setCurrentItem(int x, int y)
     // - at most width, on last line at most on last icon if uneven
     const int effX = std::max(0, std::min(x, std::min(int(m_icons.size()) - effY * m_widthInCells, m_widthInCells)-1));
 
-    // Check for change
-    if (m_currentColumn != effX || m_currentLine != effY) {
+    // Check for accessibility, change
+    if (isItemAccessible(x, y) && (m_currentColumn != effX || m_currentLine != effY)) {
         gfx::Rectangle dirty = getCellPosition(m_currentColumn, m_currentLine);
         m_currentColumn = effX;
         m_currentLine = effY;
@@ -186,16 +205,16 @@ ui::widgets::IconGrid::scroll(Operation op)
 {
     switch (op) {
      case LineUp:
-        handleScrollKey(-1);
+        handleVerticalScroll(-1, -1);
         break;
      case LineDown:
-        handleScrollKey(+1);
+        handleVerticalScroll(+1, +1);
         break;
      case PageUp:
-        handleScrollKey(-getPageSize());
+        handleVerticalScroll(-getPageSize(), -1);
         break;
      case PageDown:
-        handleScrollKey(getPageSize());
+        handleVerticalScroll(getPageSize(), +1);
         break;
     }
 }
@@ -282,25 +301,44 @@ ui::widgets::IconGrid::handleKey(util::Key_t key, int /*prefix*/)
 {
     // ex UIIconGrid::handleEvent (part)
     if (hasState(FocusedState)) {
+        size_t n;
         switch (key) {
          case util::Key_Right:
-            requestActive();
-            setCurrentItem(getCurrentItem() + 1);
-            return true;
+            n = getCurrentItem() + 1;
+            while (n < m_icons.size() && !isItemAccessible(n)) {
+                ++n;
+            }
+            if (isItemAccessible(n)) {
+                requestActive();
+                setCurrentItem(n);
+                return true;
+            } else {
+                return false;
+            }
          case util::Key_Left:
             requestActive();
-            if (size_t n = getCurrentItem()) {
-                setCurrentItem(n-1);
+            n = getCurrentItem();
+            while (n > 0) {
+                --n;
+                if (isItemAccessible(n)) {
+                    break;
+                }
             }
-            return true;
+            if (isItemAccessible(n)) {
+                requestActive();
+                setCurrentItem(n);
+                return true;
+            } else {
+                return false;
+            }
          case util::Key_Up:
-            return handleScrollKey(-1);
+            return handleVerticalScroll(-1, -1);
          case util::Key_Down:
-            return handleScrollKey(+1);
+            return handleVerticalScroll(+1, +1);
          case util::Key_PgUp:
-            return handleScrollKey(-getPageSize());
+            return handleVerticalScroll(-getPageSize(), -1);
          case util::Key_PgDn:
-            return handleScrollKey(getPageSize());
+            return handleVerticalScroll(getPageSize(), +1);
          case util::Key_Home:
             requestActive();
             setCurrentItem(0);
@@ -354,16 +392,41 @@ ui::widgets::IconGrid::getCellPosition(int x, int y) const
 }
 
 bool
-ui::widgets::IconGrid::handleScrollKey(int delta)
+ui::widgets::IconGrid::handleVerticalScroll(int delta, int adjust)
 {
     const bool isMultiline = m_icons.size() > size_t(m_widthInCells);
     if (isMultiline) {
-        requestActive();
-        setCurrentItem(m_currentColumn, m_currentLine + delta);
-        return true;
+        int newLine = m_currentLine + delta;
+        int numLines = getTotalSize();
+        while (newLine >= 0 && newLine <= numLines && !isItemAccessible(m_currentColumn, newLine)) {
+            newLine += adjust;
+        }
+        if (isItemAccessible(m_currentColumn, newLine)) {
+            requestActive();
+            setCurrentItem(m_currentColumn, newLine);
+            return true;
+        } else {
+            return false;
+        }
     } else {
         return false;
     }
+}
+
+bool
+ui::widgets::IconGrid::isItemAccessible(size_t pos) const
+{
+    return (pos < m_icons.size())
+        && !(pos < m_itemInaccessible.size()
+             && m_itemInaccessible[pos]);
+}
+
+bool
+ui::widgets::IconGrid::isItemAccessible(int x, int y) const
+{
+    return x >= 0
+        && y >= 0
+        && isItemAccessible(static_cast<size_t>(y * m_widthInCells + x));
 }
 
 void

@@ -409,6 +409,8 @@ TestGameSimSetup::testFindUnused()
             { return Unknown; }
         virtual afl::base::Optional<game::map::Point> getPlanetPosition(const Planet& /*in*/) const
             { return afl::base::Nothing; }
+        virtual void getPlayerRelations(game::PlayerBitMatrix& /*alliances*/, game::PlayerBitMatrix& /*enemies*/) const
+            { }
     };
 
     game::sim::Setup testee;
@@ -549,6 +551,8 @@ TestGameSimSetup::testCopy()
             }
         virtual afl::base::Optional<game::map::Point> getPlanetPosition(const Planet& /*in*/) const
             { return afl::base::Nothing; }
+        virtual void getPlayerRelations(game::PlayerBitMatrix& /*alliances*/, game::PlayerBitMatrix& /*enemies*/) const
+            { }
 
         NameMap_t planetNames;
         NameMap_t shipNames;

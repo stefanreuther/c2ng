@@ -28,7 +28,8 @@ namespace game { namespace alliance {
             IsOffer,                 ///< This alliance level is the "offer an alliance" flag.
             NeedsOffer,              ///< This alliance level requires the "offer an alliance" flag set.
             IsEnemy,                 ///< This alliance level is an "enemy" flag.
-            AllowConditional         ///< This alliance level allows conditional offers.
+            AllowConditional,        ///< This alliance level allows conditional offers.
+            IsCombat                 ///< This alliance level is a "combat" level.
         };
 
         /** Set of flags. */

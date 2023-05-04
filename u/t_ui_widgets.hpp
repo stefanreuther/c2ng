@@ -51,6 +51,7 @@ class TestUiWidgetsIconGrid : public CxxTest::TestSuite {
     void testKeySingle();
     void testKeyMulti();
     void testScrollPageTop();
+    void testInaccessible();
 };
 
 class TestUiWidgetsInputLine : public CxxTest::TestSuite {

@@ -43,6 +43,8 @@ TestGameSimSession::testIt()
             { return Unknown; }
         virtual afl::base::Optional<game::map::Point> getPlanetPosition(const game::sim::Planet& /*in*/) const
             { return afl::base::Nothing; }
+        virtual void getPlayerRelations(game::PlayerBitMatrix& alliances, game::PlayerBitMatrix& enemies) const
+            { alliances.set(1, 1, true); enemies.set(2, 2, true); }
     };
 
     game::sim::Session testee;
@@ -56,5 +58,28 @@ TestGameSimSession::testIt()
     testee.setNewGameInterface(new Tester());
     TS_ASSERT(testee.getGameInterface() != 0);
     TS_ASSERT_EQUALS(testee.getGameInterface()->getMaxShipId(), 777);
+
+    // Default is player relations enabled
+    TS_ASSERT(testee.isUsePlayerRelations());
+
+    // Explicitly retrieve relations
+    {
+        game::PlayerBitMatrix a, e;
+        testee.getPlayerRelations(a, e);
+        TS_ASSERT(a.get(1, 1));
+        TS_ASSERT(e.get(2, 2));
+    }
+
+    // Implicitly use relations
+    testee.usePlayerRelations();
+    TS_ASSERT(testee.configuration().allianceSettings().get(1, 1));
+    TS_ASSERT(testee.configuration().enemySettings().get(2, 2));
+
+    // Turn off use of player relations; request to use it does not modify alliances
+    testee.configuration().allianceSettings().set(1, 1, false);
+    testee.setUsePlayerRelations(false);
+    testee.usePlayerRelations();
+    TS_ASSERT(!testee.configuration().allianceSettings().get(1, 1));
+    TS_ASSERT(testee.configuration().enemySettings().get(2, 2));
 }
 

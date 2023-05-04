@@ -8,6 +8,7 @@
 #include "afl/base/deletable.hpp"
 #include "afl/base/optional.hpp"
 #include "game/map/point.hpp"
+#include "game/playerbitmatrix.hpp"
 #include "game/types.hpp"
 
 namespace game { namespace sim {
@@ -100,6 +101,11 @@ namespace game { namespace sim {
             \param [in] in Planet
             \return relation */
         virtual afl::base::Optional<game::map::Point> getPlanetPosition(const Planet& in) const = 0;
+
+        /** Get player relations.
+            \param [out] alliances Alliance relations
+            \param [out] enemies   Enemy relations */
+        virtual void getPlayerRelations(PlayerBitMatrix& alliances, PlayerBitMatrix& enemies) const = 0;
     };
 
 } }

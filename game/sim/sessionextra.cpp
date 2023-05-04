@@ -4,6 +4,8 @@
   */
 
 #include "game/sim/sessionextra.hpp"
+#include "game/alliance/level.hpp"
+#include "game/alliance/offer.hpp"
 #include "game/extra.hpp"
 #include "game/game.hpp"
 #include "game/map/planet.hpp"
@@ -17,8 +19,18 @@
 #include "game/turn.hpp"
 
 using afl::base::Ref;
+using game::alliance::Level;
+using game::alliance::Offer;
 using game::map::Universe;
 using game::spec::ShipList;
+
+namespace {
+    bool isActiveOffer(Offer::Type offer, Offer::Type recipient)
+    {
+        return offer == Offer::Yes
+            || (offer == Offer::Conditional && Offer::isOffer(recipient));
+    }
+}
 
 namespace game { namespace sim { namespace {
 
@@ -245,6 +257,66 @@ namespace game { namespace sim { namespace {
                 return afl::base::Nothing;
             }
 
+        virtual void getPlayerRelations(PlayerBitMatrix& alliances, PlayerBitMatrix& enemies) const
+            {
+                // GSimulatorRealGameInterface::setDefaultRelations
+                alliances.clear();
+                enemies.clear();
+
+                Game* g = m_session.getGame().get();
+                if (g != 0) {
+                    // Lo-fi defaults from teams
+                    const TeamSettings& teams = g->teamSettings();
+                    for (int a = 1; a <= MAX_PLAYERS; ++a) {
+                        for (int b = 1; b <= MAX_PLAYERS; ++b) {
+                            if (a != b && teams.getPlayerTeam(a) != 0 && teams.getPlayerTeam(a) == teams.getPlayerTeam(b)) {
+                                alliances.set(a, b, true);
+                            }
+                        }
+                    }
+
+                    // liveAllies is not necessarily in sync with command messages; update it.
+                    game::alliance::Container& liveAllies = g->currentTurn().alliances();
+                    liveAllies.postprocess();
+
+                    const game::alliance::Levels_t& levels = liveAllies.getLevels();
+                    const int me = g->getViewpointPlayer();
+                    for (size_t i = 0, n = levels.size(); i < n; ++i) {
+                        if (levels[i].hasFlag(Level::IsCombat)) {
+                            // It's the combat level.
+                            // Do NOT validate the NeedsOffer/IsOffer relationship here
+                            // assuming that a possible alliance is completed.
+                            const Offer* offer = liveAllies.getOffer(i);
+                            assert(offer != 0);
+                            for (int playerNr = 1; playerNr <= MAX_PLAYERS; ++playerNr) {
+                                if (isActiveOffer(offer->theirOffer.get(playerNr), offer->newOffer.get(playerNr))) {
+                                    // Player offers to us
+                                    alliances.set(playerNr, me, true);
+                                }
+                                if (isActiveOffer(offer->newOffer.get(playerNr), offer->theirOffer.get(playerNr))) {
+                                    // We offer to player
+                                    alliances.set(me, playerNr, true);
+                                }
+                            }
+                        }
+                        if (levels[i].hasFlag(Level::IsEnemy)) {
+                            // It's the persistent enemy order
+                            const Offer* offer = liveAllies.getOffer(i);
+                            assert(offer != 0);
+                            for (int playerNr = 1; playerNr <= MAX_PLAYERS; ++playerNr) {
+                                if (Offer::isOffer(offer->theirOffer.get(playerNr))) {
+                                    // Player attacks us
+                                    enemies.set(playerNr, me, true);
+                                }
+                                if (Offer::isOffer(offer->newOffer.get(playerNr))) {
+                                    // We attack them
+                                    enemies.set(me, playerNr, true);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
      private:
         game::Session& m_session;
     };

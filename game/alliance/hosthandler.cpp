@@ -38,7 +38,7 @@ game::alliance::HostHandler::init(Container& allies, afl::string::Translator& tx
     // ex GTHostAllianceHandler::processVersion, phost.pas:InitAlliances (part)
     // We pretend all host versions have alliances.
     // This is the same as PCC 1.x.
-    allies.addLevel(Level(tx("Standard alliance"), ALLIANCE_ID, Level::Flags_t(Level::IsOffer)));
+    allies.addLevel(Level(tx("Standard alliance"), ALLIANCE_ID, Level::Flags_t(Level::IsOffer) + Level::IsCombat));
     if (m_version == 0 || m_version >= MKVERSION(3,22,39)) {
         allies.addLevel(Level(tx("Vision alliance"), STRONG_ID, Level::Flags_t(Level::NeedsOffer)));
     }

@@ -23,10 +23,13 @@ namespace ui { namespace widgets {
 
         The widget allows the user to move around on the displayed list.
         The width (number of icons displayed next to each other) is fixed.
-        The height (number of lines) is fixed;
+        The height (number of lines) is fixed for display;
         if more icons are added to the IconGrid, it can scroll and therefore implements the ScrollableWidget interface.
 
-        An icon is drawn with the FocusedButton when it is selected.
+        An icon is drawn with the FocusedButton flag when it is selected.
+
+        Icons can be marked accessible (default) or inaccessible.
+        Inaccessible icons cannot be selected using setCurrentItem(), and are skipped using keyboard/scrollbar navigation.
 
         Signals:
         - ScrollableWidget::sig_change: raised when the widget scrolls or the cursor moves in vertical direction,
@@ -72,6 +75,17 @@ namespace ui { namespace widgets {
             \param x Column [0,widthInCells)
             \param y Line (starting at 0) */
         void setCurrentItem(int x, int y);
+
+        /** Set item accessibility, linear position.
+            \param index Index (starting at 0)
+            \param flag  true if item is accessible (default), false if not */
+        void setItemAccessible(size_t index, bool flag);
+
+        /** Set item accessibility.
+            \param x     Column [0,widthInCells)
+            \param y     Line (starting at 0)
+            \param flag  true if item is accessible (default), false if not */
+        void setItemAccessible(int x, int y, bool flag);
 
         /** Get current linear position.
             \return Index (starting at 0) */
@@ -124,10 +138,13 @@ namespace ui { namespace widgets {
         int m_padding;
         bool m_cursorOn;
         std::vector<ui::icons::Icon*> m_icons;
+        std::vector<uint8_t> m_itemInaccessible;
         const afl::base::Ref<gfx::Timer> m_timer;
 
         gfx::Rectangle getCellPosition(int x, int y) const;
-        bool handleScrollKey(int delta);
+        bool handleVerticalScroll(int delta, int adjust);
+        bool isItemAccessible(size_t pos) const;
+        bool isItemAccessible(int x, int y) const;
 
         void onTimer();
         void resetCursorBlink();

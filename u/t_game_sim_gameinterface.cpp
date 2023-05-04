@@ -41,6 +41,8 @@ TestGameSimGameInterface::testInterface()
             { return Unknown; }
         virtual afl::base::Optional<game::map::Point> getPlanetPosition(const game::sim::Planet& /*in*/) const
             { return afl::base::Nothing; }
+        virtual void getPlayerRelations(game::PlayerBitMatrix& /*alliances*/, game::PlayerBitMatrix& /*enemies*/) const
+            { }
     };
     Tester t;
 }

@@ -29,6 +29,7 @@ namespace {
 
     /* Levels */
     const size_t NUM_LEVELS = 5;
+    const size_t COMBAT_LEVEL_INDEX = 3;
 
     const char*const LEVEL_IDS[NUM_LEVELS] = {
         "phost.s",
@@ -138,7 +139,13 @@ game::alliance::PHostHandler::init(Container& allies, afl::string::Translator& t
 
             // Add the sub levels
             for (size_t i = 0; i < NUM_LEVELS; ++i) {
-                allies.addLevel(Level(tx(LEVEL_NAMES[i]), LEVEL_IDS[i], Level::Flags_t(Level::NeedsOffer) + Level::AllowConditional));
+                Level::Flags_t flags;
+                flags += Level::NeedsOffer;
+                flags += Level::AllowConditional;
+                if (i == COMBAT_LEVEL_INDEX) {
+                    flags += Level::IsCombat;
+                }
+                allies.addLevel(Level(tx(LEVEL_NAMES[i]), LEVEL_IDS[i], flags));
             }
         }
 

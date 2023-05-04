@@ -2028,11 +2028,11 @@
         <ki key="Y">Edit <a href="pcc2:simfunctions">abilities (hullfuncs)</a>;</ki>
         <ki key=".">Temporarily disable unit (remove from simulation without deleting it) or enable it again;</ki>
         <ki key="# or \">(or right mouse button) Sort ship list;</ki>
-        <!-- FIXME <ki key="Ctrl-A">Edit alliance relations;</ki> -->
         <ki key="U">Update this unit's simulation data with information from game;</ki>
         <ki key="Ctrl-U">Update all unit's simulation data with information from game;</ki>
         <ki key="W">Write this unit's simulation data to game;</ki>
         <ki key="Ctrl-W">Write all unit's simulation data to game;</ki>
+        <ki key="Ctrl-A"><a href="pcc2:simallies">Edit alliance relations</a>;</ki>
         <ki key="Ctrl-C"><a href="pcc2:fleetcost">Fleet cost comparison</a>;</ki>
         <ki key="Ctrl-O">Edit <a href="pcc2:simopts">options</a>;</ki>
         <ki key="Ctrl-R">Read saved simulation from a file (.ccb);</ki>
@@ -2056,7 +2056,7 @@
         <ki key="C">Toggle Fed Crew Bonus (should correspond to Host setting);</ki>
         <ki key="R">Toggle random left&#47;right side assignment. PHost does this, THost doesn't;</ki>
         <ki key="L">Choose balancing mode for THost left&#47;right imbalance. Default implemented in THost is "360 kt", PHost doesn't need this and has "none";</ki>
-        <ki key="A">Choose whether to honor alliances. When this setting is enabled (default), ships belonging to the same <a href="pcc2:teams">team</a> do not attack each other;</ki>
+        <ki key="A">Choose whether to honor alliances. When this setting is enabled (default), ships <a href="pcc2:simallies">declared as allies</a> are not attacked;</ki>
         <ki key="B">Set to "one" to limit simulations to one fight per battle. Default is to simulate all;</ki>
         <ki key="S">Toggle seed control. If enabled, a "series" (see <a href="pcc2:simresult">Simulator Result</a>) is guaranteed to simulate all possible results; if disabled, random battles are simulated. Only supported for one-fight THost battles;</ki>
         <ki key="F">Choose whether random friendly codes are applied when you start the simulation with <kbd>Enter</kbd>, or for each simulated battle.</ki>
@@ -2135,6 +2135,48 @@
       <h2>Reference</h2>
       <dl>
         <di term="Keys:"> <kbd>Y</kbd> from <a href="pcc2:bsim">battle simulator</a>.</di>
+      </dl>
+    </page>
+
+
+    <!-- Simulator Alliance Settings -->
+    <page id="pcc2:simallies">
+      <h1>Battle Simulator Alliances</h1>
+
+      <p>The simulator can honor alliance and enemy settings.</p>
+      <ul>
+        <li>If player A offers an alliance to player B, A's ships will not attack B's, even if they are aggressive;</li>
+        <li>If player A declares B to be an enemy, A's ships will attack B's when they have a Primary Enemy, even if the Primary Enemy is not B.</li>
+      </ul>
+      <p>The dialog displays the alliance/enemy matrix, where each line represents an offering/declaring player A,
+        and each column represents a receiving player B.
+        Move around with the arrows, and use <kbd>Space</kbd> to toggle.
+        With the mouse, double-click a field to toggle.</p>
+
+      <kl>
+        <ki key="Space">Toggle;</ki>
+        <ki key="Ctrl-Tab, F6">Switch page;</ki>
+        <ki key="A">Activate Alliance page;</ki>
+        <ki key="E">Activate Enemy page;</ki>
+        <ki key="S">Toggle symmetric relations. When enabled, declaring an offer/enemy from A to B automatically produces a reverse offer from B to A;</ki>
+        <ki key="U">Toggle use of default (game) alliances; see below;</ki>
+        <ki key="Enter">Confirm;</ki>
+        <ki key="ESC">Cancel.</ki>
+      </kl>
+
+      <p>When the option "Use default/game relations" is enabled (default), PCC2 automatically sets these options:</p>
+      <ul>
+        <li>Players belonging to the same <a href="pcc2:teams">team</a> are treated as allies and do not attack each other;</li>
+        <li>Your <a href="pcc2:allies">alliance and enemy settings</a> are used to determine whom you treat friendly or hostile.</li>
+      </ul>
+
+      <p>Alliance settings are only honored when the respective option is enabled in the <a href="pcc2:simopts">Simulator Options</a>.
+        Enemy settings are always honored.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Ctrl-A</kbd> from <a href="pcc2:bsim">Battle Simulator</a>;</di>
+        <di term="See also:"> <a href="pcc2:teams">Teams</a>, <a href="pcc2:allies">Alliances</a>, <a href="pcc2:simopts">Options</a>.</di>
       </dl>
     </page>
 

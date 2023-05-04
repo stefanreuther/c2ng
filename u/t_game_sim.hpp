@@ -157,6 +157,7 @@ class TestGameSimSession : public CxxTest::TestSuite {
 class TestGameSimSessionExtra : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testAlliances();
 };
 
 class TestGameSimSetup : public CxxTest::TestSuite {

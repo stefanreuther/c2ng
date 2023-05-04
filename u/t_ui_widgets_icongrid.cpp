@@ -80,6 +80,12 @@ TestUiWidgetsIconGrid::testScroll()
 
     // Go down again: this is too far so it is limited
     testee.scroll(ui::ScrollableWidget::LineDown);
+    TS_ASSERT_EQUALS(testee.getCurrentItem(), 9U);
+    TS_ASSERT_EQUALS(testee.getCurrentLine(), 1);
+    TS_ASSERT_EQUALS(testee.getCurrentColumn(), 4);
+
+    // Place cursor
+    testee.setCurrentItem(11);
     TS_ASSERT_EQUALS(testee.getCurrentItem(), 11U);
     TS_ASSERT_EQUALS(testee.getCurrentLine(), 2);
     TS_ASSERT_EQUALS(testee.getCurrentColumn(), 1);
@@ -204,5 +210,51 @@ TestUiWidgetsIconGrid::testScrollPageTop()
     testee.setCurrentItem(1);
     TS_ASSERT_EQUALS(testee.getPageTop(), 0);
     TS_ASSERT_EQUALS(testee.getCurrentItem(), 1U);
+}
+
+/** Test handling of inaccessible items. */
+void
+TestUiWidgetsIconGrid::testInaccessible()
+{
+    // IconGrid containing 3x3 icons of 10x10 each:
+    //   . x x
+    //   x . x
+    //   x x .
+    // (similar to Alliance Grid)
+    gfx::NullEngine engine;
+    ui::widgets::IconGrid testee(engine, gfx::Point(10, 10), 3, 3);
+    testee.setState(ui::Widget::FocusedState, true);
+    testee.setIcon(2, 2, 0);
+    testee.setItemAccessible(0, 0, false);
+    testee.setItemAccessible(1, 1, false);
+    testee.setItemAccessible(2, 2, false);
+    testee.setCurrentItem(1);
+    TS_ASSERT_EQUALS(testee.getTotalSize(), 3)
+
+    // Down; skips an item
+    TS_ASSERT(testee.handleKey(util::Key_Down, 0));
+    TS_ASSERT_EQUALS(testee.getCurrentItem(), 7U);
+    TS_ASSERT_EQUALS(testee.getCurrentLine(), 2);
+    TS_ASSERT_EQUALS(testee.getCurrentColumn(), 1);
+
+    // Cannot go further down
+    TS_ASSERT(!testee.handleKey(util::Key_Down, 0));
+    TS_ASSERT_EQUALS(testee.getCurrentItem(), 7U);
+    TS_ASSERT_EQUALS(testee.getCurrentLine(), 2);
+    TS_ASSERT_EQUALS(testee.getCurrentColumn(), 1);
+
+    // Cannot go right
+    TS_ASSERT(!testee.handleKey(util::Key_Right, 0));
+    TS_ASSERT_EQUALS(testee.getCurrentItem(), 7U);
+    TS_ASSERT_EQUALS(testee.getCurrentLine(), 2);
+    TS_ASSERT_EQUALS(testee.getCurrentColumn(), 1);
+
+    // Go left thrice
+    TS_ASSERT(testee.handleKey(util::Key_Left, 0));
+    TS_ASSERT(testee.handleKey(util::Key_Left, 0));
+    TS_ASSERT(testee.handleKey(util::Key_Left, 0));
+    TS_ASSERT_EQUALS(testee.getCurrentItem(), 3U);
+    TS_ASSERT_EQUALS(testee.getCurrentLine(), 1);
+    TS_ASSERT_EQUALS(testee.getCurrentColumn(), 0);
 }
 

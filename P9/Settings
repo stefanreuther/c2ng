@@ -774,7 +774,8 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/applicationparameters.cpp \
+FILES_guilib = client/dialogs/simulationalliances.cpp \
+    client/dialogs/simulationalliances.hpp client/applicationparameters.cpp \
     client/applicationparameters.hpp gfx/windowparameters.cpp \
     client/widgets/consolecontroller.cpp \
     client/widgets/consolecontroller.hpp client/dialogs/simpleconsole.cpp \

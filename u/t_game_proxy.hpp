@@ -680,6 +680,8 @@ class TestGameProxySimulationSetupProxy : public CxxTest::TestSuite {
     void testCopy();
     void testLoad();
     void testLoadFail();
+    void testRelations();
+    void testRelationsOff();
 };
 
 class TestGameProxySimulationTransferProxy : public CxxTest::TestSuite {

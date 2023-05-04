@@ -109,6 +109,14 @@ namespace {
         thread.session().setGame(g);
     }
 
+    void prepareAlliances(SessionThread& thread)
+    {
+        afl::base::Ptr<game::Game> g = new game::Game();
+        g->setViewpointPlayer(3);
+        g->teamSettings().setPlayerTeam(4, 3);
+        thread.session().setGame(g);
+    }
+
     void makeHullCloakable(SessionThread& thread, int hullId)
     {
         game::spec::ShipList& list = *thread.session().getShipList();
@@ -2396,5 +2404,72 @@ TestGameProxySimulationSetupProxy::testLoadFail()
     // Verify
     TS_ASSERT_EQUALS(result, false);
     TS_ASSERT_DIFFERS(error, "");
+}
+
+/** Test player relations functions.
+    A: set up universe with an alliance (team). Call player-relation functions.
+    E: alliances are properly reported and copied to configuration. */
+void
+TestGameProxySimulationSetupProxy::testRelations()
+{
+    SessionThread thread;
+    WaitIndicator ind;
+    prepare(thread);
+    prepareAlliances(thread);
+    SimulationSetupProxy t(thread.gameSender(), ind);
+
+    // Get status
+    // - initially, no alliances
+    game::sim::Configuration config;
+    t.getConfiguration(ind, config);
+    TS_ASSERT(!config.allianceSettings().get(3, 4));
+
+    // - get status
+    game::proxy::SimulationSetupProxy::PlayerRelations rel;
+    t.getPlayerRelations(ind, rel);
+    TS_ASSERT(rel.alliances.get(3, 4));
+    TS_ASSERT(rel.usePlayerRelations);
+
+    // - use alliances
+    t.usePlayerRelations();
+
+    // - get configuration status
+    t.getConfiguration(ind, config);
+    TS_ASSERT(config.allianceSettings().get(3, 4));
+}
+
+/** Test player relations functions, with auto-sync disabled.
+    A: set up universe with an alliance (team). Disable auto-sync. Call player-relation functions.
+    E: alliances are properly reported, but not copied to configuration. */
+void
+TestGameProxySimulationSetupProxy::testRelationsOff()
+{
+    SessionThread thread;
+    WaitIndicator ind;
+    prepare(thread);
+    prepareAlliances(thread);
+    SimulationSetupProxy t(thread.gameSender(), ind);
+
+    // Disable
+    t.setUsePlayerRelations(false);
+
+    // Get status
+    // - initially, no alliances
+    game::sim::Configuration config;
+    t.getConfiguration(ind, config);
+    TS_ASSERT(!config.allianceSettings().get(3, 4));
+
+    // - get status
+    game::proxy::SimulationSetupProxy::PlayerRelations rel;
+    t.getPlayerRelations(ind, rel);
+    TS_ASSERT(rel.alliances.get(3, 4));
+    TS_ASSERT(!rel.usePlayerRelations);
+
+    // - use alliances
+    t.usePlayerRelations();
+
+    // - get configuration status
+    t.getConfiguration(ind, config);
+    TS_ASSERT(!config.allianceSettings().get(3, 4));
 }
 

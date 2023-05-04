@@ -47,9 +47,8 @@ namespace game { namespace sim {
         /** Default constructor. */
         Configuration();
 
-        /** Load defaults.
-            \param teams Teams (to initialize alliances from) */
-        void loadDefaults(const TeamSettings& teams);
+        /** Load defaults. */
+        void loadDefaults();
 
         /** Copy (parts) from another configuration.
             To copy everything, just assign.

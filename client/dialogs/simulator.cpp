@@ -9,6 +9,7 @@
 #include "client/dialogs/friendlycodedialog.hpp"
 #include "client/dialogs/sessionfileselectiondialog.hpp"
 #include "client/dialogs/simulationabilities.hpp"
+#include "client/dialogs/simulationalliances.hpp"
 #include "client/dialogs/simulationbasetorpedoes.hpp"
 #include "client/dialogs/simulationconfiguration.hpp"
 #include "client/dialogs/simulationflakratings.hpp"
@@ -285,6 +286,7 @@ namespace {
         void onToggleCloak();
         void onEditIntercept();
         void onEditAbilities();
+        void onEditAlliances();
         void onFleetCostSummary();
         void onEditConfiguration();
         void onUpdateThis();
@@ -404,6 +406,7 @@ SimulatorDialog::run()
     m_keyDispatcher.add('w', this, &SimulatorDialog::onWriteBackThis);
     m_keyDispatcher.add('x', this, &SimulatorDialog::onEditIntercept);
     m_keyDispatcher.add('y', this, &SimulatorDialog::onEditAbilities);
+    m_keyDispatcher.add('a'  | util::KeyMod_Ctrl, this, &SimulatorDialog::onEditAlliances);
     m_keyDispatcher.add('c'  | util::KeyMod_Ctrl, this, &SimulatorDialog::onFleetCostSummary);
     m_keyDispatcher.add('o'  | util::KeyMod_Ctrl, this, &SimulatorDialog::onEditConfiguration);
     m_keyDispatcher.add('u'  | util::KeyMod_Ctrl, this, &SimulatorDialog::onUpdateAll);
@@ -1329,6 +1332,12 @@ SimulatorDialog::onEditAbilities()
 }
 
 void
+SimulatorDialog::onEditAlliances()
+{
+    client::dialogs::editAlliances(m_proxy, m_gameSender, m_root, m_translator);
+}
+
+void
 SimulatorDialog::onFleetCostSummary()
 {
     if (isAtObject()) {
@@ -1569,6 +1578,7 @@ client::dialogs::doBattleSimulator(client::si::UserSide& iface,
     SimulationSetupProxy proxy(iface.gameSender(), ctl.root().engine().dispatcher());
     Downlink link(ctl.root(), ctl.translator());
     SimulationSetupProxy::ListItems_t list;
+    proxy.usePlayerRelations();
     proxy.getList(link, list);
 
     SimulatorDialog dlg(ctl, iface.gameSender(), proxy, ctl.root(), outputState, ctl.translator());

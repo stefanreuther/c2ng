@@ -187,6 +187,17 @@ namespace game { namespace proxy {
             SortByName
         };
 
+        /** Player relations info package. */
+        struct PlayerRelations {
+            PlayerBitMatrix alliances;
+            PlayerBitMatrix enemies;
+            bool usePlayerRelations;
+
+            PlayerRelations()
+                : alliances(), enemies(), usePlayerRelations()
+                { }
+        };
+
 
         /** Constructor.
             \param gameSender Sender
@@ -663,6 +674,27 @@ namespace game { namespace proxy {
             \param areas  Areas of configuration to update */
         void setConfiguration(const game::sim::Configuration& config, game::sim::Configuration::Areas_t areas);
 
+        /** Get player relations.
+            Retrieves the current player relations and status of the "use player relations" setting,
+            to provide defaults for setConfiguration() and setUsePlayerRelations(), respectively.
+            \param [in]  ind  WaitIndicator for UI synchronisation
+            \param [out] rel  Relations
+            \see game::sim::Session::getPlayerRelations() */
+        void getPlayerRelations(WaitIndicator& ind, PlayerRelations& rel);
+
+        /** Configure use of game's player relations.
+            If enabled, usePlayerRelations() will use the actual game's relations;
+            if disabled, configuration remains unchanged.
+            This function call only configures the settings, but does not yet use them.
+            \param flag Flag
+            \see game::sim::Session::setUsePlayerRelations() */
+        void setUsePlayerRelations(bool flag);
+
+        /** Use player relations.
+            If use of player relations is enabled, updates the configuration accordingly
+            (the updated configuration can be retrieved using getConfiguration()).
+            Should be called whenever the simulation editor is opened. */
+        void usePlayerRelations();
 
 
         /** Signal: list changed.

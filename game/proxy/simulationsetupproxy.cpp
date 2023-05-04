@@ -256,6 +256,9 @@ class game::proxy::SimulationSetupProxy::Trampoline {
     // Configuration
     void getConfiguration(Configuration& config);
     void setConfiguration(const Configuration& config, Configuration::Areas_t areas);
+    void getPlayerRelations(PlayerRelations& rel);
+    void setUsePlayerRelations(bool flag);
+    void usePlayerRelations();
 
  private:
     Setup& getSetup() const;
@@ -1266,6 +1269,25 @@ game::proxy::SimulationSetupProxy::Trampoline::setConfiguration(const Configurat
     sendObjectChange();
 }
 
+void
+game::proxy::SimulationSetupProxy::Trampoline::getPlayerRelations(PlayerRelations& rel)
+{
+    m_sim->getPlayerRelations(rel.alliances, rel.enemies);
+    rel.usePlayerRelations = m_sim->isUsePlayerRelations();
+}
+
+void
+game::proxy::SimulationSetupProxy::Trampoline::setUsePlayerRelations(bool flag)
+{
+    m_sim->setUsePlayerRelations(flag);
+}
+
+void
+game::proxy::SimulationSetupProxy::Trampoline::usePlayerRelations()
+{
+    m_sim->usePlayerRelations();
+}
+
 inline Setup&
 game::proxy::SimulationSetupProxy::Trampoline::getSetup() const
 {
@@ -2176,6 +2198,36 @@ game::proxy::SimulationSetupProxy::setConfiguration(const game::sim::Configurati
     };
 
     m_trampoline.postNewRequest(new Task(config, areas));
+}
+
+void
+game::proxy::SimulationSetupProxy::getPlayerRelations(WaitIndicator& ind, PlayerRelations& rel)
+{
+    class Task : public Trampoline::Request_t {
+     public:
+        Task(PlayerRelations& rel)
+            : m_result(rel)
+            { }
+        virtual void handle(Trampoline& tpl)
+            { tpl.getPlayerRelations(m_result); }
+     private:
+        PlayerRelations& m_result;
+    };
+
+    Task t(rel);
+    ind.call(m_trampoline, t);
+}
+
+void
+game::proxy::SimulationSetupProxy::setUsePlayerRelations(bool flag)
+{
+    m_trampoline.postRequest(&Trampoline::setUsePlayerRelations, flag);
+}
+
+void
+game::proxy::SimulationSetupProxy::usePlayerRelations()
+{
+    m_trampoline.postRequest(&Trampoline::usePlayerRelations);
 }
 
 util::RequestSender<game::Session>

@@ -78,7 +78,7 @@ TestGameSimConfiguration::testIt()
     TS_ASSERT(t.hasSeedControl());
 
     // Load defaults
-    t.loadDefaults(teams);
+    t.loadDefaults();
     TS_ASSERT(t.hasHonorAlliances());
     TS_ASSERT(!t.hasOnlyOneSimulation());
     TS_ASSERT(!t.hasSeedControl());

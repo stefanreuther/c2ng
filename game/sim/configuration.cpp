@@ -25,7 +25,7 @@ game::sim::Configuration::Configuration()
 
 // Load defaults.
 void
-game::sim::Configuration::loadDefaults(const TeamSettings& teams)
+game::sim::Configuration::loadDefaults()
 {
     // FIXME: this function has interesting semantics - do we need it?
     // ex GSimOptions::loadDefaults (sort-of). Original loadDefaults also implies setMode()
@@ -36,15 +36,6 @@ game::sim::Configuration::loadDefaults(const TeamSettings& teams)
     m_onlyOneSimulation = false;
     m_seedControl = false;
     m_randomizeFCodesOnEveryFight = false;
-
-    // Initialize alliances from teams:
-    for (int a = 1; a <= MAX_PLAYERS; ++a) {
-        for (int b = 1; b <= MAX_PLAYERS; ++b) {
-            if (a != b && teams.getPlayerTeam(a) != 0 && teams.getPlayerTeam(a) == teams.getPlayerTeam(b)) {
-                m_allianceSettings.set(a, b, true);
-            }
-        }
-    }
 }
 
 // Copy (parts) from another configuration.
