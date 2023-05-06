@@ -146,7 +146,6 @@ ui::widgets::ComboBox::addButtons(afl::base::Deleter& del)
 {
     // ex createComboBoxControls
     // Note different invocation than original code!
-
     FocusableGroup& frame = del.addNew(new FocusableGroup(ui::layout::HBox::instance5, 5));
     Button& btnDec = del.addNew(new Button("-", '-', m_root));
     Button& btnInc = del.addNew(new Button("+", '+', m_root));
@@ -157,9 +156,10 @@ ui::widgets::ComboBox::addButtons(afl::base::Deleter& del)
     frame.add(btnTab);
     frame.add(btnInc);
 
-    btnInc.sig_fire.add(this, &NumberSelector::increment);
-    btnDec.sig_fire.add(this, &NumberSelector::decrement);
+    btnInc.dispatchKeyAndFocus(*this);
+    btnDec.dispatchKeyAndFocus(*this);
     btnTab.sig_fire.add(this, &ComboBox::popupMenu);
+    requestFocus();
 
     return frame;
 }

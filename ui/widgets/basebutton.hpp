@@ -74,6 +74,11 @@ namespace ui { namespace widgets {
             \param target Consumer. Lifetime must equal/exceed that of the button. */
         void dispatchKeyTo(gfx::KeyEventConsumer& target);
 
+        /** Dispatch key activation to widget, and focus it.
+            If this button is triggered, focus the widget and call its handleKey() method.
+            \param target Consumer. Lifetime must equal/exceed that of the button. */
+        void dispatchKeyAndFocus(Widget& target);
+
         /** Get associated key.
             \return key */
         util::Key_t getKey() const;

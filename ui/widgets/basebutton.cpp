@@ -183,6 +183,28 @@ ui::widgets::BaseButton::dispatchKeyTo(gfx::KeyEventConsumer& target)
     sig_fireKey.addNewClosure(new Handler(target));
 }
 
+// Dispatch key activation to widget, and focus it.
+void
+ui::widgets::BaseButton::dispatchKeyAndFocus(Widget& target)
+{
+    class Handler : public afl::base::Closure<void(int, util::Key_t)> {
+     public:
+        Handler(Widget& target)
+            : m_target(target)
+            { }
+        void call(int prefix, util::Key_t key)
+            {
+                m_target.requestFocus();
+                m_target.handleKey(key, prefix);
+            }
+        Handler* clone() const
+            { return new Handler(*this); }
+     private:
+        Widget& m_target;
+    };
+    sig_fireKey.addNewClosure(new Handler(target));
+}
+
 // Get associated key.
 util::Key_t
 ui::widgets::BaseButton::getKey() const

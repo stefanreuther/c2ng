@@ -150,7 +150,9 @@ namespace {
     {
         afl::base::Observable<int32_t> observableValue(value);
         ui::widgets::DecimalSelector sel(root, tx, observableValue, range.min(), range.max(), 10);
-        if (ui::widgets::doStandardDialog(title, Format("%s [%d..%d]:", label, range.min(), range.max()), sel, true, root, tx)) {
+
+        afl::base::Deleter del;
+        if (ui::widgets::doStandardDialog(title, Format("%s [%d..%d]:", label, range.min(), range.max()), sel.addButtons(del, root), false, root, tx)) {
             value = observableValue.get();
             return true;
         }
@@ -821,7 +823,7 @@ SimulatorDialog::onEditPrimary()
 
         // Combo box for type
         afl::base::Deleter del;
-        ui::Widget& typedCombo = del.addNew(new ui::widgets::ComboBox(m_root, type, info.beamTypes.front().first, info.beamTypes.back().first, convertList(info.beamTypes)))
+        ui::Widget& typeCombo = del.addNew(new ui::widgets::ComboBox(m_root, type, info.beamTypes.front().first, info.beamTypes.back().first, convertList(info.beamTypes)))
             .addButtons(del);
 
         // Decimal selector for count
@@ -834,7 +836,7 @@ SimulatorDialog::onEditPrimary()
 
         ui::Group& controls = del.addNew(new ui::Group(del.addNew(new ui::layout::Grid(2))));
         controls.add(del.addNew(new ui::widgets::StaticText(m_translator("Type:"), util::SkinColor::Static, "+", m_root.provider())));
-        controls.add(typedCombo);
+        controls.add(typeCombo);
         controls.add(del.addNew(new ui::widgets::StaticText(m_translator("Count:"), util::SkinColor::Static, "+", m_root.provider())));
         controls.add(countCombo);
 
@@ -842,7 +844,7 @@ SimulatorDialog::onEditPrimary()
         btn.addStop(loop);
 
         ui::widgets::FocusIterator& it = del.addNew(new ui::widgets::FocusIterator(ui::widgets::FocusIterator::Vertical));
-        it.add(typedCombo);
+        it.add(typeCombo);
         it.add(countCombo);
 
         win.add(controls);
@@ -850,7 +852,7 @@ SimulatorDialog::onEditPrimary()
         win.add(it);
         win.add(del.addNew(new ui::widgets::Quit(m_root, loop)));
         win.pack();
-        typedCombo.requestFocus();
+        typeCombo.requestFocus();
 
         m_root.centerWidget(win);
         m_root.add(win);
@@ -888,7 +890,8 @@ SimulatorDialog::onEditSecondary()
             }
 
             // Do we offer fighters?
-            const int32_t FIGHTERS = -99;
+            // ComboBox is a NumberSelector and thus requires contiguous numbering.
+            const int32_t FIGHTERS = info.torpedoTypes.back().first + 1;
             if (!isEmptyOrUnit(info.numBays)) {
                 info.torpedoTypes.push_back(SimulationSetupProxy::Element_t(FIGHTERS, m_translator("Fighters")));
             }
@@ -909,7 +912,7 @@ SimulatorDialog::onEditSecondary()
 
             // Combo box for type
             afl::base::Deleter del;
-            ui::Widget& typedCombo = del.addNew(new ui::widgets::ComboBox(m_root, type, info.torpedoTypes.front().first, info.torpedoTypes.back().first, convertList(info.torpedoTypes)))
+            ui::Widget& typeCombo = del.addNew(new ui::widgets::ComboBox(m_root, type, info.torpedoTypes.front().first, info.torpedoTypes.back().first, convertList(info.torpedoTypes)))
                 .addButtons(del);
 
             // Decimal selector for count
@@ -926,7 +929,7 @@ SimulatorDialog::onEditSecondary()
 
             ui::Group& controls = del.addNew(new ui::Group(del.addNew(new ui::layout::Grid(2))));
             controls.add(del.addNew(new ui::widgets::StaticText(m_translator("Type:"), util::SkinColor::Static, "+", m_root.provider())));
-            controls.add(typedCombo);
+            controls.add(typeCombo);
             controls.add(del.addNew(new ui::widgets::StaticText(m_translator("Count:"), util::SkinColor::Static, "+", m_root.provider())));
             controls.add(countCombo);
             controls.add(del.addNew(new ui::widgets::StaticText(m_translator("Ammo:"), util::SkinColor::Static, "+", m_root.provider())));
@@ -936,7 +939,7 @@ SimulatorDialog::onEditSecondary()
             btn.addStop(loop);
 
             ui::widgets::FocusIterator& it = del.addNew(new ui::widgets::FocusIterator(ui::widgets::FocusIterator::Vertical));
-            it.add(typedCombo);
+            it.add(typeCombo);
             it.add(countCombo);
             it.add(ammoCombo);
 
@@ -945,7 +948,7 @@ SimulatorDialog::onEditSecondary()
             win.add(it);
             win.add(del.addNew(new ui::widgets::Quit(m_root, loop)));
             win.pack();
-            typedCombo.requestFocus();
+            typeCombo.requestFocus();
 
             m_root.centerWidget(win);
             m_root.add(win);

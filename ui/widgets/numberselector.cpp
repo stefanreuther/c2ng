@@ -152,8 +152,8 @@ ui::widgets::NumberSelector::addButtons(afl::base::Deleter& del, Root& root)
     Group& g = del.addNew(new Group(ui::layout::HBox::instance5));
     Button& btnMinus = del.addNew(new Button("-", '-', root));
     Button& btnPlus  = del.addNew(new Button("+", '+', root));
-    btnMinus.dispatchKeyTo(*this);
-    btnPlus.dispatchKeyTo(*this);
+    btnMinus.dispatchKeyAndFocus(*this);
+    btnPlus.dispatchKeyAndFocus(*this);
     g.add(btnMinus);
     g.add(*this);
     g.add(btnPlus);
