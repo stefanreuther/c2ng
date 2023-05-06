@@ -129,7 +129,7 @@ namespace client { namespace dialogs {
         void onStorageUpdate(game::TechLevel area, const game::proxy::BaseStorageProxy::Parts_t& parts);
         void onOrderUpdate(const game::proxy::BuildShipProxy::Status& st);
         void onSelectionChange();
-        void onSpecificationChange(const game::spec::info::PageContent& content);
+        void onSpecificationChange(const game::spec::info::PageContent& content, game::spec::info::Page page);
 
         ui::Root& m_root;
         util::RequestSender<game::Session> m_gameSender;

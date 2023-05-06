@@ -52,16 +52,24 @@ namespace {
 
     struct ListReceiver {
         gsi::ListContent list;
+        gsi::Page page;
 
-        void onListChange(const gsi::ListContent& list, size_t)
-            { this->list = list; }
+        ListReceiver()
+            : list(), page()
+            { }
+        void onListChange(const gsi::ListContent& list, size_t, gsi::Page page)
+            { this->list = list; this->page = page; }
     };
 
     struct PageReceiver {
         gsi::PageContent content;
+        gsi::Page page;
 
-        void onPageChange(const gsi::PageContent& content)
-            { this->content = content; }
+        PageReceiver()
+            : content(), page()
+            { }
+        void onPageChange(const gsi::PageContent& content, gsi::Page page)
+            { this->content = content; this->page = page; }
     };
 
     class NamedPageReceiver {
@@ -70,7 +78,7 @@ namespace {
             : m_expectedName(expectedName), m_count(0)
             { }
 
-        void onPageChange(const gsi::PageContent& content)
+        void onPageChange(const gsi::PageContent& content, gsi::Page)
             {
                 TS_ASSERT_EQUALS(content.title, m_expectedName);
                 ++m_count;
@@ -137,6 +145,7 @@ TestGameProxySpecBrowserProxy::testIt()
     TS_ASSERT_EQUALS(list.list.content[1].id, 3);
     TS_ASSERT_EQUALS(list.list.content[2].name, "Four-speed");
     TS_ASSERT_EQUALS(list.list.content[2].id, 4);
+    TS_ASSERT_EQUALS(list.page, gsi::EnginePage);
 
     // Select an entry
     PageReceiver page;
@@ -145,6 +154,7 @@ TestGameProxySpecBrowserProxy::testIt()
     while (page.content.title != "Three-speed") {
         TS_ASSERT(disp.wait(1000));
     }
+    TS_ASSERT_EQUALS(page.page, gsi::EnginePage);
 
     // Set some filters
     FilterReceiver filter;

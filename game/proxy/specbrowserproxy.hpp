@@ -84,12 +84,14 @@ namespace game { namespace proxy {
 
         /** Signal: list changed.
             \param list Current list content
-            \param index Desired index to select */
-        afl::base::Signal<void(const game::spec::info::ListContent& list, size_t index)> sig_listChange;
+            \param index Desired index to select
+            \param page Page this list belongs to */
+        afl::base::Signal<void(const game::spec::info::ListContent& list, size_t index, game::spec::info::Page page)> sig_listChange;
 
         /** Signal: page content changed.
-            \param content New page content */
-        afl::base::Signal<void(const game::spec::info::PageContent& content)> sig_pageChange;
+            \param content New page content
+            \param page Page this list belongs to */
+        afl::base::Signal<void(const game::spec::info::PageContent& content, game::spec::info::Page page)> sig_pageChange;
 
         /** Signal: filter changed.
             \param existing Existing filters (for eraseFilter, setFilter)

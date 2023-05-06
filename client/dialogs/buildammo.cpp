@@ -108,7 +108,7 @@ namespace {
 
         void onOK();
         void onSelectionChange();
-        void onSpecificationChange(const gsi::PageContent& content);
+        void onSpecificationChange(const gsi::PageContent& content, game::spec::info::Page page);
         void onProxyUpdate(const BuildAmmoProxy::Status& st);
     };
 }
@@ -390,7 +390,7 @@ Dialog::onSelectionChange()
 
 /* Specification report from SpecBrowserProxy */
 void
-Dialog::onSpecificationChange(const gsi::PageContent& content)
+Dialog::onSpecificationChange(const gsi::PageContent& content, game::spec::info::Page /*page*/)
 {
     // FIXME: show an image?
     ui::rich::Document& doc = m_infoView.getDocument();

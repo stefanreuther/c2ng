@@ -453,7 +453,7 @@ client::dialogs::BuildShipMain::onSelectionChange()
 
 /* Specification update from SpecBrowserProxy. */
 void
-client::dialogs::BuildShipMain::onSpecificationChange(const game::spec::info::PageContent& content)
+client::dialogs::BuildShipMain::onSpecificationChange(const game::spec::info::PageContent& content, game::spec::info::Page /*page*/)
 {
     TechLevel area = getCurrentArea();
     m_pImageButtons[area]->setImage(content.pictureName);

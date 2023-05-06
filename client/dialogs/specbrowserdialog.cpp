@@ -365,7 +365,7 @@ namespace {
                 m_root.remove(m_window);
             }
 
-        void onListChange(const gsi::ListContent& content, size_t index)
+        void onListChange(const gsi::ListContent& content, size_t index, game::spec::info::Page /*page*/)
             {
                 util::StringList list;
                 for (size_t i = 0, n = content.content.size(); i < n; ++i) {
@@ -378,7 +378,7 @@ namespace {
                 m_handleListSelectionChange = true;
             }
 
-        void onPageChange(const gsi::PageContent& content)
+        void onPageChange(const gsi::PageContent& content, game::spec::info::Page /*page*/)
             {
                 bool pageChange = (m_pageContent.pageLinks != content.pageLinks);
                 m_pageContent = content;

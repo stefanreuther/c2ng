@@ -40,7 +40,7 @@ namespace {
         int32_t getCurrent();
 
      private:
-        void onListChange(const gsi::ListContent& content, size_t index);
+        void onListChange(const gsi::ListContent& content, size_t index, game::spec::info::Page page);
         void onFilterChange(const gsi::FilterInfos_t& existing, const gsi::FilterInfos_t& available);
         void onSortChange(gsi::FilterAttribute active, gsi::FilterAttributes_t available);
         void onItemDoubleClick();
@@ -118,21 +118,23 @@ ChooseHullDialog::getCurrent()
 }
 
 void
-ChooseHullDialog::onListChange(const gsi::ListContent& content, size_t /*index*/)
+ChooseHullDialog::onListChange(const gsi::ListContent& content, size_t /*index*/, game::spec::info::Page page)
 {
     // Fetch current. If list is still empty, this is a nop.
-    m_list.getCurrentKey(m_current);
+    if (page == gsi::HullPage) {
+        m_list.getCurrentKey(m_current);
 
-    // Replace list
-    util::StringList list;
-    if (m_withCustom && m_playerFilter == 0) {
-        list.add(0, m_translator("Custom Ship"));
+        // Replace list
+        util::StringList list;
+        if (m_withCustom && m_playerFilter == 0) {
+            list.add(0, m_translator("Custom Ship"));
+        }
+        for (size_t i = 0, n = content.content.size(); i < n; ++i) {
+            list.add(content.content[i].id, content.content[i].name);
+        }
+        m_list.swapItems(list);
+        m_list.setCurrentKey(m_current);
     }
-    for (size_t i = 0, n = content.content.size(); i < n; ++i) {
-        list.add(content.content[i].id, content.content[i].name);
-    }
-    m_list.swapItems(list);
-    m_list.setCurrentKey(m_current);
 }
 
 void

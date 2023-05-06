@@ -222,16 +222,17 @@ game::proxy::SpecBrowserProxy::Trampoline::sendList()
 
     class Response : public util::Request<SpecBrowserProxy> {
      public:
-        Response(std::auto_ptr<game::spec::info::ListContent> p, size_t slot)
-            : m_p(p), m_slot(slot)
+        Response(std::auto_ptr<game::spec::info::ListContent> p, size_t slot, game::spec::info::Page page)
+            : m_p(p), m_slot(slot), m_page(page)
             { }
         virtual void handle(SpecBrowserProxy& proxy)
-            { proxy.sig_listChange.raise(*m_p, m_slot); }
+            { proxy.sig_listChange.raise(*m_p, m_slot, m_page); }
      private:
         std::auto_ptr<game::spec::info::ListContent> m_p;
-        size_t m_slot;
+        const size_t m_slot;
+        const game::spec::info::Page m_page;
     };
-    m_reply.postNewRequest(new Response(content, slot));
+    m_reply.postNewRequest(new Response(content, slot, m_page));
 
     sendPage();
 }
@@ -260,15 +261,16 @@ game::proxy::SpecBrowserProxy::Trampoline::sendPage()
 
     class Response : public util::Request<SpecBrowserProxy> {
      public:
-        Response(std::auto_ptr<game::spec::info::PageContent> p)
-            : m_p(p)
+        Response(std::auto_ptr<game::spec::info::PageContent> p, game::spec::info::Page page)
+            : m_p(p), m_page(page)
             { }
         virtual void handle(SpecBrowserProxy& proxy)
-            { proxy.sig_pageChange.raise(*m_p); }
+            { proxy.sig_pageChange.raise(*m_p, m_page); }
      private:
         std::auto_ptr<game::spec::info::PageContent> m_p;
+        game::spec::info::Page m_page;
     };
-    m_reply.postNewRequest(new Response(content));
+    m_reply.postNewRequest(new Response(content, m_page));
 }
 
 void
