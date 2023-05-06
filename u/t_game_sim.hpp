@@ -27,6 +27,7 @@ class TestGameSimConfiguration : public CxxTest::TestSuite {
     void testToString();
     void testCopyFrom();
     void testGetNext();
+    void testInitFromHost();
 };
 
 class TestGameSimFleetCost : public CxxTest::TestSuite {
@@ -158,6 +159,7 @@ class TestGameSimSessionExtra : public CxxTest::TestSuite {
  public:
     void testIt();
     void testAlliances();
+    void testInit();
 };
 
 class TestGameSimSetup : public CxxTest::TestSuite {

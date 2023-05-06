@@ -38,8 +38,7 @@ namespace {
 
     void setDeterministicConfig(game::sim::Configuration& opts, const game::config::HostConfiguration& config, game::sim::Configuration::VcrMode mode, game::sim::Configuration::BalancingMode balance)
     {
-        game::TeamSettings team;
-        opts.setMode(mode, team, config);
+        opts.setMode(mode, 0, config);
         opts.setEngineShieldBonus(0);
         opts.setScottyBonus(true);
         opts.setRandomLeftRight(false);
@@ -589,8 +588,7 @@ TestGameSimRun::testHostMulti()
 {
     // Environment
     TestHarness h;
-    game::TeamSettings team;
-    h.opts.setMode(game::sim::Configuration::VcrHost, team, h.config);
+    h.opts.setMode(game::sim::Configuration::VcrHost, 0, h.config);
 
     // Setup
     Ship* s1 = addOutrider(h.setup, 1, 1, h.list);
@@ -1012,8 +1010,7 @@ TestGameSimRun::testPHostMulti()
 {
     // Environment
     TestHarness h;
-    game::TeamSettings team;
-    h.opts.setMode(game::sim::Configuration::VcrPHost2, team, h.config);
+    h.opts.setMode(game::sim::Configuration::VcrPHost2, 0, h.config);
 
     // Setup
     Ship* s1 = addOutrider(h.setup, 1, 1, h.list);
@@ -1906,8 +1903,7 @@ TestGameSimRun::testFLAKMulti()
 {
     // Environment
     TestHarness h;
-    game::TeamSettings team;
-    h.opts.setMode(game::sim::Configuration::VcrFLAK, team, h.config);
+    h.opts.setMode(game::sim::Configuration::VcrFLAK, 0, h.config);
 
     // Setup
     Ship* s1 = addOutrider(h.setup, 1, 1, h.list);
@@ -1979,8 +1975,7 @@ TestGameSimRun::testOrderHostShip()
 {
     // Environment
     TestHarness h;
-    game::TeamSettings team;
-    h.opts.setMode(game::sim::Configuration::VcrHost, team, h.config);
+    h.opts.setMode(game::sim::Configuration::VcrHost, 0, h.config);
     h.opts.setRandomLeftRight(false);
 
     // Setup
@@ -2016,8 +2011,7 @@ TestGameSimRun::testOrderHostPlanet()
 {
     // Environment
     TestHarness h;
-    game::TeamSettings team;
-    h.opts.setMode(game::sim::Configuration::VcrHost, team, h.config);
+    h.opts.setMode(game::sim::Configuration::VcrHost, 0, h.config);
     h.opts.setRandomLeftRight(false);
 
     // Setup
@@ -2045,8 +2039,7 @@ TestGameSimRun::testOrderPHostShip()
 {
     // Environment
     TestHarness h;
-    game::TeamSettings team;
-    h.opts.setMode(game::sim::Configuration::VcrPHost4, team, h.config);
+    h.opts.setMode(game::sim::Configuration::VcrPHost4, 0, h.config);
     h.opts.setRandomLeftRight(false);
 
     // Setup
@@ -2088,8 +2081,7 @@ TestGameSimRun::testOrderPHostPlanet()
 {
     // Environment
     TestHarness h;
-    game::TeamSettings team;
-    h.opts.setMode(game::sim::Configuration::VcrPHost4, team, h.config);
+    h.opts.setMode(game::sim::Configuration::VcrPHost4, 0, h.config);
     h.opts.setRandomLeftRight(false);
 
     // Setup
@@ -2116,8 +2108,7 @@ TestGameSimRun::testShieldGenerator()
 {
     // Environment
     TestHarness h;
-    game::TeamSettings team;
-    h.opts.setMode(game::sim::Configuration::VcrHost, team, h.config);
+    h.opts.setMode(game::sim::Configuration::VcrHost, 0, h.config);
     h.opts.setRandomLeftRight(false);
 
     // Setup

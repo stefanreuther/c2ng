@@ -180,8 +180,7 @@ TestGameSimRunner::testRegression1()
 
     // Configuration
     game::sim::Configuration opts;
-    game::TeamSettings team;
-    opts.setMode(game::sim::Configuration::VcrHost, team, config);
+    opts.setMode(game::sim::Configuration::VcrHost, 0, config);
 
     // Stop signal (not used)
     util::StopSignal sig;
@@ -237,8 +236,7 @@ TestGameSimRunner::testRegression2()
 
     // Configuration
     game::sim::Configuration opts;
-    game::TeamSettings team;
-    opts.setMode(game::sim::Configuration::VcrHost, team, config);
+    opts.setMode(game::sim::Configuration::VcrHost, 0, config);
 
     // Stop signal (not used)
     util::StopSignal sig;
@@ -291,8 +289,7 @@ TestGameSimRunner::testInterrupt()
 
     // Configuration
     game::sim::Configuration opts;
-    game::TeamSettings team;
-    opts.setMode(game::sim::Configuration::VcrHost, team, config);
+    opts.setMode(game::sim::Configuration::VcrHost, 0, config);
 
     // Logger (not used)
     afl::sys::Log log;

@@ -307,8 +307,7 @@ TestGameSimShip::testAbilities()
     game::sim::Configuration opts;
 
     game::sim::Configuration nuOpts;
-    game::TeamSettings team;
-    nuOpts.setMode(game::sim::Configuration::VcrNuHost, team, config);
+    nuOpts.setMode(game::sim::Configuration::VcrNuHost, 0, config);
 
     // Test
     game::sim::Ship testee;

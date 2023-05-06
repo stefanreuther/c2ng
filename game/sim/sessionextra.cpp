@@ -335,3 +335,16 @@ game::sim::getSimulatorSession(game::Session& session)
     }
     return px->simSession;
 }
+
+void
+game::sim::initSimulatorSession(game::Session& session)
+{
+    // ex initSimulatorSession(), GSimOptions::loadDefaults() (part)
+    const Game* g = session.getGame().get();
+    const Root* r = session.getRoot().get();
+    if (g != 0 && r != 0) {
+        Session& simSession = *getSimulatorSession(session);
+        simSession.configuration() = Configuration();
+        simSession.configuration().setModeFromHostVersion(r->hostVersion(), g->getViewpointPlayer(), r->hostConfiguration());
+    }
+}

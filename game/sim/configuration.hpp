@@ -5,11 +5,11 @@
 #ifndef C2NG_GAME_SIM_CONFIGURATION_HPP
 #define C2NG_GAME_SIM_CONFIGURATION_HPP
 
-#include "game/playerbitmatrix.hpp"
-#include "game/teamsettings.hpp"
-#include "game/config/hostconfiguration.hpp"
-#include "afl/string/translator.hpp"
 #include "afl/bits/smallset.hpp"
+#include "afl/string/translator.hpp"
+#include "game/config/hostconfiguration.hpp"
+#include "game/hostversion.hpp"
+#include "game/playerbitmatrix.hpp"
 
 namespace game { namespace sim {
 
@@ -47,9 +47,6 @@ namespace game { namespace sim {
         /** Default constructor. */
         Configuration();
 
-        /** Load defaults. */
-        void loadDefaults();
-
         /** Copy (parts) from another configuration.
             To copy everything, just assign.
             \param other Other configuration
@@ -59,9 +56,15 @@ namespace game { namespace sim {
         /** Set mode (host version).
             Sets other parameters (ES-Bonus, Scotty bonus, left/right, balancing) to mode/configuration dependant defaults.
             \param mode Mode
-            \param teams Team settings (for viewpoint player)
+            \param player Player number (for configuration; in game, use viewpoint player)
             \param config Host configuration */
-        void setMode(VcrMode mode, const TeamSettings& teams, const game::config::HostConfiguration& config);
+        void setMode(VcrMode mode, int player, const game::config::HostConfiguration& config);
+
+        /** Set mode according to a host version.
+            \param host   Host version
+            \param player Player number (for configuration; in game, use viewpoint player)
+            \param config Host configuration */
+        void setModeFromHostVersion(HostVersion host, int player, const game::config::HostConfiguration& config);
 
         /** Check enabled experience.
             \param config Host configuration

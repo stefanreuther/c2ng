@@ -55,6 +55,7 @@
 #include "game/pcc/browserhandler.hpp"
 #include "game/proxy/browserproxy.hpp"
 #include "game/session.hpp"
+#include "game/sim/sessionextra.hpp"
 #include "game/specificationloader.hpp"
 #include "game/turn.hpp"
 #include "game/turnloader.hpp"
@@ -333,6 +334,8 @@ namespace {
                             m_session.log().write(afl::sys::LogListener::Error, LOG_NAME, m_session.translator()("Compiling starchart..."));
                             m_session.postprocessTurn(m_session.getGame()->currentTurn(), game::PlayerSet_t(m_player), game::PlayerSet_t(m_player), playability);
                             m_session.getGame()->currentTurn().alliances().postprocess();
+
+                            game::sim::initSimulatorSession(m_session);
 
                             // Load VM
                             try {

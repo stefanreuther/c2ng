@@ -508,8 +508,7 @@ game::sim::ConsoleApplication::runSimulation(Setup& setup, const Session& sessio
     // Build configuration
     Configuration opts;
     if (const Configuration::VcrMode* vcrMode = params.vcrMode.get()) {
-        TeamSettings team;             // FIXME: configurable
-        opts.setMode(*vcrMode, team, session.root->hostConfiguration());
+        opts.setMode(*vcrMode, 0, session.root->hostConfiguration());
     }
     if (const int* engineShieldBonus = params.engineShieldBonus.get()) {
         opts.setEngineShieldBonus(*engineShieldBonus);

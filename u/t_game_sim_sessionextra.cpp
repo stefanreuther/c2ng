@@ -100,3 +100,27 @@ TestGameSimSessionExtra::testAlliances()
     TS_ASSERT(!e.get(10, 3));
 }
 
+/** Test initSimulatorSession().
+    A: create session with a specific host version. Call initSimulatorSession().
+    E: session configuration must use matching host version */
+void
+TestGameSimSessionExtra::testInit()
+{
+    afl::string::NullTranslator tx;
+    afl::io::NullFileSystem fs;
+    game::Session gs(tx, fs);
+    gs.setRoot(game::test::makeRoot(game::HostVersion(game::HostVersion::Host, MKVERSION(3,22,48))).asPtr());
+    gs.setGame(new game::Game());
+
+    // Set some defaults
+    afl::base::Ref<game::sim::Session> ss = game::sim::getSimulatorSession(gs);
+    game::config::HostConfiguration config;
+    ss->configuration().setMode(game::sim::Configuration::VcrPHost4, 0, config);
+
+    // Load game defaults
+    game::sim::initSimulatorSession(gs);
+
+    // Verify
+    TS_ASSERT_EQUALS(ss->configuration().getMode(), game::sim::Configuration::VcrHost);
+}
+

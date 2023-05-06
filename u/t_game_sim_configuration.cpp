@@ -8,11 +8,14 @@
 #include "t_game_sim.hpp"
 #include "afl/string/nulltranslator.hpp"
 
+using game::HostVersion;
+using game::sim::Configuration;
+
 /** Setter/getter test. */
 void
 TestGameSimConfiguration::testIt()
 {
-    game::sim::Configuration t;
+    Configuration t;
 
     // Initial state
     TS_ASSERT_EQUALS(t.getEngineShieldBonus(), 0);
@@ -27,14 +30,13 @@ TestGameSimConfiguration::testIt()
     TS_ASSERT(t.hasAlternativeCombat());
 
     // Accessors
-    const game::sim::Configuration& ct = t;
+    const Configuration& ct = t;
     TS_ASSERT_EQUALS(&t.enemySettings(), &ct.enemySettings());
     TS_ASSERT_EQUALS(&t.allianceSettings(), &ct.allianceSettings());
 
     // Modify
     const game::config::HostConfiguration hostConfig;
-    const game::TeamSettings teams;
-    t.setMode(t.VcrHost, teams, hostConfig);
+    t.setMode(t.VcrHost, 0, hostConfig);
     TS_ASSERT_EQUALS(t.getMode(), t.VcrHost);
     TS_ASSERT(t.hasHonorAlliances());
     TS_ASSERT(!t.hasOnlyOneSimulation());
@@ -78,7 +80,7 @@ TestGameSimConfiguration::testIt()
     TS_ASSERT(t.hasSeedControl());
 
     // Load defaults
-    t.loadDefaults();
+    t = Configuration();      // formerly, loadDefaults
     TS_ASSERT(t.hasHonorAlliances());
     TS_ASSERT(!t.hasOnlyOneSimulation());
     TS_ASSERT(!t.hasSeedControl());
@@ -89,15 +91,14 @@ TestGameSimConfiguration::testIt()
 void
 TestGameSimConfiguration::testConfig()
 {
-    const game::TeamSettings emptyTeams;
     {
-        game::sim::Configuration t;
+        Configuration t;
         game::config::HostConfiguration config;
         config[config.AllowEngineShieldBonus].set(true);
         config[config.EngineShieldBonusRate].set(30);
         config[config.AllowFedCombatBonus].set(true);
         config[config.NumExperienceLevels].set(3);
-        t.setMode(t.VcrPHost4, emptyTeams, config);
+        t.setMode(t.VcrPHost4, 0, config);
 
         TS_ASSERT_EQUALS(t.getEngineShieldBonus(), 30);
         TS_ASSERT_EQUALS(t.hasScottyBonus(), true);
@@ -106,13 +107,13 @@ TestGameSimConfiguration::testConfig()
         TS_ASSERT_EQUALS(t.isExperienceEnabled(config), true);
     }
     {
-        game::sim::Configuration t;
+        Configuration t;
         game::config::HostConfiguration config;
         config[config.AllowEngineShieldBonus].set(false);
         config[config.EngineShieldBonusRate].set(30);
         config[config.AllowFedCombatBonus].set(true);
         config[config.NumExperienceLevels].set(0);
-        t.setMode(t.VcrPHost4, emptyTeams, config);
+        t.setMode(t.VcrPHost4, 0, config);
 
         TS_ASSERT_EQUALS(t.getEngineShieldBonus(), 0);
         TS_ASSERT_EQUALS(t.hasScottyBonus(), true);
@@ -121,13 +122,13 @@ TestGameSimConfiguration::testConfig()
         TS_ASSERT_EQUALS(t.isExperienceEnabled(config), false);
     }
     {
-        game::sim::Configuration t;
+        Configuration t;
         game::config::HostConfiguration config;
         config[config.AllowEngineShieldBonus].set(true);
         config[config.EngineShieldBonusRate].set(30);
         config[config.AllowFedCombatBonus].set(true);
         config[config.NumExperienceLevels].set(3);
-        t.setMode(t.VcrHost, emptyTeams, config);
+        t.setMode(t.VcrHost, 0, config);
 
         TS_ASSERT_EQUALS(t.getEngineShieldBonus(), 30);
         TS_ASSERT_EQUALS(t.hasScottyBonus(), true);
@@ -136,13 +137,13 @@ TestGameSimConfiguration::testConfig()
         TS_ASSERT_EQUALS(t.isExperienceEnabled(config), false);
     }
     {
-        game::sim::Configuration t;
+        Configuration t;
         game::config::HostConfiguration config;
         config[config.AllowEngineShieldBonus].set(false);
         config[config.EngineShieldBonusRate].set(30);
         config[config.AllowFedCombatBonus].set(false);
         config[config.NumExperienceLevels].set(3);
-        t.setMode(t.VcrHost, emptyTeams, config);
+        t.setMode(t.VcrHost, 0, config);
 
         TS_ASSERT_EQUALS(t.getEngineShieldBonus(), 00);
         TS_ASSERT_EQUALS(t.hasScottyBonus(), false);
@@ -156,7 +157,6 @@ TestGameSimConfiguration::testConfig()
 void
 TestGameSimConfiguration::testToString()
 {
-    using game::sim::Configuration;
     afl::string::NullTranslator tx;
     TS_ASSERT(!toString(Configuration::VcrHost, tx).empty());
     TS_ASSERT(!toString(Configuration::VcrPHost2, tx).empty());
@@ -174,8 +174,6 @@ TestGameSimConfiguration::testToString()
 void
 TestGameSimConfiguration::testCopyFrom()
 {
-    using game::sim::Configuration;
-
     Configuration orig;
     orig.setEngineShieldBonus(77);
     orig.allianceSettings().set(4, 5, true);
@@ -210,8 +208,6 @@ TestGameSimConfiguration::testCopyFrom()
 void
 TestGameSimConfiguration::testGetNext()
 {
-    using game::sim::Configuration;
-
     // BalancingMode
     {
         Configuration::BalancingMode mode = Configuration::BalanceNone;
@@ -234,3 +230,37 @@ TestGameSimConfiguration::testGetNext()
         } while (mode != Configuration::VcrPHost4);
     }
 }
+
+/** Test setModeFromHostVersion(). */
+void
+TestGameSimConfiguration::testInitFromHost()
+{
+    game::config::HostConfiguration config;
+
+    {
+        Configuration t;
+        t.setModeFromHostVersion(HostVersion(HostVersion::Host, MKVERSION(3,22,0)), 0, config);
+        TS_ASSERT_EQUALS(t.getMode(), Configuration::VcrHost);
+    }
+    {
+        Configuration t;
+        t.setModeFromHostVersion(HostVersion(HostVersion::NuHost, MKVERSION(3,22,0)), 0, config);
+        TS_ASSERT_EQUALS(t.getMode(), Configuration::VcrNuHost);
+    }
+    {
+        Configuration t;
+        t.setModeFromHostVersion(HostVersion(HostVersion::PHost, MKVERSION(2,0,1)), 0, config);
+        TS_ASSERT_EQUALS(t.getMode(), Configuration::VcrPHost2);
+    }
+    {
+        Configuration t;
+        t.setModeFromHostVersion(HostVersion(HostVersion::PHost, MKVERSION(3,0,0)), 0, config);
+        TS_ASSERT_EQUALS(t.getMode(), Configuration::VcrPHost3);
+    }
+    {
+        Configuration t;
+        t.setModeFromHostVersion(HostVersion(HostVersion::PHost, MKVERSION(4,0,0)), 0, config);
+        TS_ASSERT_EQUALS(t.getMode(), Configuration::VcrPHost4);
+    }
+}
+

@@ -295,11 +295,10 @@ SimulationConfigurationEditor::setMode(Configuration::VcrMode mode)
             { }
         virtual void handle(game::Session& session)
             {
-                game::Root* r = session.getRoot().get();
-                game::Game* g = session.getGame().get();
-                if (r != 0 && g != 0) {
-                    // FIXME: this requires a game just for the team settings which makes it fail in a standalone simulator
-                    m_config.setMode(m_mode, g->teamSettings(), r->hostConfiguration());
+                if (const game::Root* r = session.getRoot().get()) {
+                    const game::Game* g = session.getGame().get();
+                    int player = (g != 0 ? g->getViewpointPlayer() : 0);
+                    m_config.setMode(m_mode, player, r->hostConfiguration());
                 }
             }
      private:

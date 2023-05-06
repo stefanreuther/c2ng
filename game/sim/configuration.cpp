@@ -23,20 +23,7 @@ game::sim::Configuration::Configuration()
     // ex GSimOptions::GSimOptions
 }
 
-// Load defaults.
-void
-game::sim::Configuration::loadDefaults()
-{
-    // FIXME: this function has interesting semantics - do we need it?
-    // ex GSimOptions::loadDefaults (sort-of). Original loadDefaults also implies setMode()
-    // ex ccsim.pas:InitSimConfig (part)
-    m_allianceSettings.clear();
-    m_enemySettings.clear();
-    m_honorAlliances = true;
-    m_onlyOneSimulation = false;
-    m_seedControl = false;
-    m_randomizeFCodesOnEveryFight = false;
-}
+// Instead of loadDefaults() / InitSimConfig(), assign a default-initialized config and do setMode() / setModeFromHostVersion().
 
 // Copy (parts) from another configuration.
 void
@@ -63,11 +50,10 @@ game::sim::Configuration::copyFrom(const Configuration& other, Areas_t areas)
 
 // Set mode (host version).
 void
-game::sim::Configuration::setMode(VcrMode mode, const TeamSettings& teams, const game::config::HostConfiguration& config)
+game::sim::Configuration::setMode(VcrMode mode, int player, const game::config::HostConfiguration& config)
 {
     // ex GSimOptions::setMode, ccsim.pas:InitSimConfig (part)
-    // FIXME: replace TeamSettings -> int viewpointPlayer?
-    m_engineShieldBonus = config[config.AllowEngineShieldBonus]() ? config[config.EngineShieldBonusRate](teams.getViewpointPlayer()) : 0;
+    m_engineShieldBonus = config[config.AllowEngineShieldBonus]() ? config[config.EngineShieldBonusRate](player) : 0;
     m_scottyBonus       = config[config.AllowFedCombatBonus]();
     m_vcrMode           = mode;
     switch (mode) {
@@ -85,6 +71,38 @@ game::sim::Configuration::setMode(VcrMode mode, const TeamSettings& teams, const
         m_balancingMode = Balance360k;
         break;
     }
+}
+
+// Set mode according to a host version.
+void
+game::sim::Configuration::setModeFromHostVersion(HostVersion host, int player, const game::config::HostConfiguration& config)
+{
+    // ex initSimulatorState (part)
+    // This function is placed here, not in class HostVersion, to keep the number of dependencies of HostVersion low.
+    VcrMode mode = VcrPHost4;
+    switch (host.getKind()) {
+     case HostVersion::Unknown:
+     case HostVersion::Host:
+     case HostVersion::SRace:
+        mode = VcrHost;
+        break;
+
+     case HostVersion::PHost:
+        if (host.getVersion() < MKVERSION(3,0,0)) {
+            mode = VcrPHost2;
+        } else if (host.getVersion() < MKVERSION(4,0,0)) {
+            mode = VcrPHost3;
+        } else {
+            mode = VcrPHost4;
+        }
+        break;
+
+     case HostVersion::NuHost:
+        mode = VcrNuHost;
+        break;
+    }
+
+    setMode(mode, player, config);
 }
 
 // Check enabled experience.

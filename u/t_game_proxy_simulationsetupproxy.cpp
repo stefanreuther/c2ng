@@ -2252,9 +2252,8 @@ TestGameProxySimulationSetupProxy::testSortByBattleOrder()
     // Configure PHost
     {
         Configuration config;
-        game::TeamSettings teams;
         game::config::HostConfiguration hostConfiguration;
-        config.setMode(Configuration::VcrPHost4, teams, hostConfiguration);
+        config.setMode(Configuration::VcrPHost4, 0, hostConfiguration);
         t.setConfiguration(config, Configuration::Areas_t(Configuration::MainArea));
     }
 
@@ -2274,9 +2273,8 @@ TestGameProxySimulationSetupProxy::testSortByBattleOrder()
     // Configure Host
     {
         Configuration config;
-        game::TeamSettings teams;
         game::config::HostConfiguration hostConfiguration;
-        config.setMode(Configuration::VcrHost, teams, hostConfiguration);
+        config.setMode(Configuration::VcrHost, 0, hostConfiguration);
         t.setConfiguration(config, Configuration::Areas_t(Configuration::MainArea));
     }
 

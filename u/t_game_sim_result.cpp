@@ -17,9 +17,8 @@ TestGameSimResult::testIt()
 
     // Initialize
     game::sim::Configuration config;
-    game::TeamSettings team;
-    game::config::HostConfiguration hostConfiguration; 
-    config.setMode(config.VcrHost, team, hostConfiguration);
+    game::config::HostConfiguration hostConfiguration;
+    config.setMode(config.VcrHost, 0, hostConfiguration);
     result.init(config, 120);
 
     TS_ASSERT_EQUALS(result.series_length, 110);
