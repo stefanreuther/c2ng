@@ -224,6 +224,7 @@ namespace {
         client::widgets::SimulationList m_list;
         client::widgets::SimulationObjectInfo m_objectInfo;
         ui::widgets::Button m_runButton;
+        ui::widgets::Button m_extraButton;
         ui::EventLoop m_loop;
 
         SimulationSetupProxy::Slot_t m_currentSlot;
@@ -261,6 +262,7 @@ namespace {
         void onLoad();
         void onSave();
         void onRun();
+        void onExtraMenu();
         void onToggleDisabled();
         void onReplicate();
         void onEditPrimary();
@@ -319,6 +321,7 @@ SimulatorDialog::SimulatorDialog(Control& parentControl, util::RequestSender<gam
       m_list(root, tx),
       m_objectInfo(root, m_keyDispatcher, tx),
       m_runButton(tx("Simulate!"), util::Key_Return, root),
+      m_extraButton(tx("F10 - Extras"), util::Key_F10, root),
       m_loop(root),
       m_currentSlot(-1U),
       m_currentObject()
@@ -329,6 +332,7 @@ SimulatorDialog::SimulatorDialog(Control& parentControl, util::RequestSender<gam
     m_list.sig_menuRequest.add(this, &SimulatorDialog::onContextMenu);
     m_list.setFlag(ui::widgets::AbstractListbox::KeyboardMenu, true);
     m_runButton.sig_fire.add(this, &SimulatorDialog::onRun);
+    m_extraButton.sig_fire.add(this, &SimulatorDialog::onExtraMenu);
 }
 
 void
@@ -344,17 +348,18 @@ SimulatorDialog::run()
     win.add(g1);
 
     ui::Group& g2 = del.addNew(new ui::Group(ui::layout::HBox::instance5));
-    ui::widgets::Button& btnAddShip = del.addNew(new ui::widgets::Button(m_translator("Ins - Add Ship"), util::Key_Insert, m_root));
-    ui::widgets::Button& btnAddPlanet = del.addNew(new ui::widgets::Button(m_translator("P - Add Planet"), 'p', m_root));
+    ui::widgets::Button& btnAddShip = del.addNew(new ui::widgets::Button(m_translator("Add Ship"), util::Key_Insert, m_root));
+    ui::widgets::Button& btnAddPlanet = del.addNew(new ui::widgets::Button(m_translator("Add Planet"), 'p', m_root));
     ui::widgets::Button& btnDelete = del.addNew(new ui::widgets::Button(m_translator("Delete"), util::Key_Delete, m_root));
-    ui::widgets::Button& btnLoad = del.addNew(new ui::widgets::Button(m_translator("Ctrl-R - Load"), 'r' + util::KeyMod_Ctrl, m_root));
-    ui::widgets::Button& btnSave = del.addNew(new ui::widgets::Button(m_translator("Ctrl-S - Save"), 's' + util::KeyMod_Ctrl, m_root));
+    ui::widgets::Button& btnLoad = del.addNew(new ui::widgets::Button(m_translator("Load"), 'r' + util::KeyMod_Ctrl, m_root));
+    ui::widgets::Button& btnSave = del.addNew(new ui::widgets::Button(m_translator("Save"), 's' + util::KeyMod_Ctrl, m_root));
     g2.add(btnAddShip);
     g2.add(btnAddPlanet);
     g2.add(btnDelete);
     g2.add(btnLoad);
     g2.add(btnSave);
     g2.add(del.addNew(new ui::Spacer()));
+    g2.add(m_extraButton);
     win.add(g2);
 
     ui::Group& g3 = del.addNew(new ui::Group(ui::layout::HBox::instance5));
@@ -724,6 +729,43 @@ SimulatorDialog::onRun()
             MessageBox(st.reference.toString(m_translator), "ref", m_root).doOkDialog(m_translator);
             onGoToReference(st.reference);
             break;
+        }
+    }
+}
+
+void
+SimulatorDialog::onExtraMenu()
+{
+    // WSimScreen::onExtraMenu
+    enum {
+        IdOptions,
+        IdAlliances,
+        IdFleetCost
+    };
+
+    ui::widgets::StringListbox list(m_root.provider(), m_root.colorScheme());
+    list.addItem(IdOptions, m_translator("Options...\t[Ctrl-O]"));
+    list.addItem(IdAlliances, m_translator("Alliances...\t[Ctrl-A]"));
+    if (m_list.getNumItems() > 0) {
+        list.addItem(IdFleetCost, m_translator("Fleet Cost Comparison...\t[Ctrl-C]"));
+    }
+
+    const gfx::Point pt = m_extraButton.getExtent().getBottomLeft();
+    ui::EventLoop loop(m_root);
+    if (ui::widgets::MenuFrame(ui::layout::HBox::instance0, m_root, loop).doMenu(list, pt)) {
+        int32_t k = 0;
+        if (list.getCurrentKey(k)) {
+            switch (k) {
+             case IdOptions:
+                onEditConfiguration();
+                break;
+             case IdAlliances:
+                onEditAlliances();
+                break;
+             case IdFleetCost:
+                onFleetCostSummary();
+                break;
+            }
         }
     }
 }
