@@ -274,6 +274,9 @@ client::si::IFListboxAddItem(ScriptSide& ss, const WidgetReference& ref, interpr
        The %text is displayed on the listbox.
        The %id will be used to select an item and report the user selection.
 
+       If the text contains a single tab character ("\t", {Chr}(9)),
+       the list will use a two-column layout.
+
        If the listbox is used to prepare a menu, the %id should be an {Atom()|atom}.
 
        @see Listbox(), UI.Menu

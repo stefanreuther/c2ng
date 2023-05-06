@@ -15,7 +15,9 @@ ui::widgets::StringListbox::StringListbox(gfx::ResourceProvider& provider, ui::C
       m_colorScheme(scheme),
       m_preferredWidth(0),
       m_preferredHeight(0),
-      m_preferredWidthInPixels(0)
+      m_preferredWidthInPixels(0),
+      m_tabWidth(0),
+      m_totalWidth(0)
 { }
 
 ui::widgets::StringListbox::~StringListbox()
@@ -74,7 +76,13 @@ ui::widgets::StringListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, size
     int32_t key;
     String_t text;
     if (m_content.get(item, key, text)) {
-        outTextF(ctx, area, text);
+        String_t::size_type n = text.find('\t');
+        if (n == String_t::npos) {
+            outTextF(ctx, area, text);
+        } else {
+            outTextF(ctx, area.splitX(m_tabWidth), text.substr(0, n));
+            outTextF(ctx, area, text.substr(n+1));
+        }
     }
 }
 
@@ -97,14 +105,7 @@ ui::widgets::StringListbox::getLayoutInfo() const
         width *= cellSize.getX();
     }
     if (width == 0) {
-        for (size_t i = 0, n = m_content.size(); i < n; ++i) {
-            String_t s;
-            int32_t k;
-            if (m_content.get(i, k, s)) {
-                width = std::max(width, font->getTextWidth(s));
-            }
-        }
-        width += 10;
+        width = m_totalWidth + 10;
     }
 
     // Find height
@@ -164,6 +165,7 @@ void
 ui::widgets::StringListbox::addItem(int32_t key, const String_t& s)
 {
     m_content.add(key, s);
+    updateMetrics(m_content.size()-1, m_content.size());
     handleModelChange();
 }
 
@@ -171,9 +173,11 @@ void
 ui::widgets::StringListbox::addItems(const afl::functional::StringTable_t& tab)
 {
     int32_t i;
+    size_t pos = m_content.size();
     for (bool v = tab.getFirstKey(i); v; v = tab.getNextKey(i)) {
         m_content.add(i, tab(i));
     }
+    updateMetrics(pos, m_content.size());
     handleModelChange();
 }
 
@@ -190,6 +194,8 @@ ui::widgets::StringListbox::swapItems(util::StringList& other)
 {
     // FIXME: preserve current key
     m_content.swap(other);
+    clearMetrics();
+    updateMetrics(0, m_content.size());
     handleModelChange();
 }
 
@@ -198,6 +204,8 @@ ui::widgets::StringListbox::setItems(const util::StringList& other)
 {
     // FIXME: preserve current key
     m_content = other;
+    clearMetrics();
+    updateMetrics(0, m_content.size());
     handleModelChange();
 }
 
@@ -236,4 +244,32 @@ void
 ui::widgets::StringListbox::setPreferredHeight(int n)
 {
     m_preferredHeight = n;
+}
+
+void
+ui::widgets::StringListbox::updateMetrics(size_t from, size_t to)
+{
+    const afl::base::Ref<gfx::Font> font = m_provider.getFont(gfx::FontRequest());
+    for (size_t i = from; i < to; ++i) {
+        String_t text;
+        int key;
+        if (m_content.get(i, key, text)) {
+            String_t::size_type n = text.find('\t');
+            int w;
+            if (n == String_t::npos) {
+                w = font->getTextWidth(text);
+            } else {
+                m_tabWidth = std::max(m_tabWidth, font->getTextWidth(text.substr(0, n)) + 5);
+                w = m_tabWidth + font->getTextWidth(text.substr(n+1));
+            }
+            m_totalWidth = std::max(m_totalWidth, w);
+        }
+    }
+}
+
+void
+ui::widgets::StringListbox::clearMetrics()
+{
+    m_tabWidth = 0;
+    m_totalWidth = 0;
 }

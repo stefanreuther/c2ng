@@ -61,6 +61,12 @@ namespace ui { namespace widgets {
         int m_preferredWidth;   // in ems, 0 for automatic
         int m_preferredHeight;  // in lines, 0 for automatic
         bool m_preferredWidthInPixels;
+
+        int m_tabWidth;
+        int m_totalWidth;
+
+        void updateMetrics(size_t from, size_t to);
+        void clearMetrics();
     };
 
 } }

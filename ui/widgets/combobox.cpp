@@ -39,8 +39,6 @@ void
 ui::widgets::ComboBox::popupMenu()
 {
     // ex UIComboBox::popupMenu
-    // FIXME: StringList is missing tab handling!
-
     StringListbox list(m_root.provider(), m_root.colorScheme());
     util::StringList content(m_list);
     list.swapItems(content);
