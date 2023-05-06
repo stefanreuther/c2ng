@@ -182,8 +182,8 @@ namespace {
     bool hasDisabledUnits(const client::widgets::SimulationList& list)
     {
         size_t n = list.getNumItems();
-        if (n > 0) {
-            if (const client::widgets::SimulationList::ListItem_t* it = list.getItem(n-1)) {
+        for (size_t i = 0; i < n; ++i) {
+            if (const client::widgets::SimulationList::ListItem_t* it = list.getItem(i)) {
                 if (it->disabled) {
                     return true;
                 }
