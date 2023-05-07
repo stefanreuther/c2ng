@@ -364,7 +364,7 @@ Dialog::onOptions()
 
         if (ui::widgets::MenuFrame(ui::layout::HBox::instance5, root, loop).doMenu(list, m_optionsButton.getExtent().getBottomLeft())) {
             int32_t opts;
-            if (list.getCurrentKey(opts)) {
+            if (list.getCurrentKey().get(opts)) {
                 m_proxy.setPageOptions(m_currentPage, static_cast<PageOptions_t>(opts));
                 requestPage();
             }

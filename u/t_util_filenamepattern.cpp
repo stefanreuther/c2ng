@@ -13,7 +13,6 @@ void
 TestUtilFileNamePattern::testIt()
 {
     // ex IoGlobTestSuite::testGlob
-    String_t tmp;
     {
         util::FileNamePattern m("foo*.*");
         TS_ASSERT(!m.match("foo"));
@@ -23,7 +22,7 @@ TestUtilFileNamePattern::testIt()
         TS_ASSERT(m.match("foobar.blub"));
         TS_ASSERT(m.match("foo.bar"));
         TS_ASSERT(m.hasWildcard());
-        TS_ASSERT(!m.getFileName(tmp));
+        TS_ASSERT(!m.getFileName().isValid());
         TS_ASSERT(!m.empty());
     }
 
@@ -124,12 +123,10 @@ TestUtilFileNamePattern::testIt()
         TS_ASSERT(m.hasWildcard());
     }
     {
-        String_t s = "hu?";
         util::FileNamePattern m("");
         TS_ASSERT(m.empty());
-        TS_ASSERT(m.getFileName(s));
+        TS_ASSERT_EQUALS(m.getFileName().orElse("?"), "");
         TS_ASSERT(!m.hasWildcard());
-        TS_ASSERT_EQUALS(s, "");
     }
 }
 
@@ -151,29 +148,25 @@ TestUtilFileNamePattern::testFail()
 void
 TestUtilFileNamePattern::testLiterals()
 {
-    String_t tmp;
     {
         util::FileNamePattern m("foo");
         TS_ASSERT(!m.match("fo"));
         TS_ASSERT( m.match("foo"));
         TS_ASSERT(!m.match("fooo"));
         TS_ASSERT(!m.hasWildcard());
-        TS_ASSERT(m.getFileName(tmp));
-        TS_ASSERT_EQUALS(tmp, "foo");
+        TS_ASSERT_EQUALS(m.getFileName().orElse(""), "foo");
     }
     {
         util::FileNamePattern m("a\\*b");
         TS_ASSERT(m.match("a*b"));
         TS_ASSERT(!m.hasWildcard());
-        TS_ASSERT(m.getFileName(tmp));
-        TS_ASSERT_EQUALS(tmp, "a*b");
+        TS_ASSERT_EQUALS(m.getFileName().orElse(""), "a*b");
     }
     {
         util::FileNamePattern m("a\\?b");
         TS_ASSERT(m.match("a?b"));
         TS_ASSERT(!m.hasWildcard());
-        TS_ASSERT(m.getFileName(tmp));
-        TS_ASSERT_EQUALS(tmp, "a?b");
+        TS_ASSERT_EQUALS(m.getFileName().orElse(""), "a?b");
     }
 }
 

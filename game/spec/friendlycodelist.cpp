@@ -39,8 +39,7 @@ namespace {
         Thus, if a definition already exists, ignore the extra code. */
     void addExtraCode(game::spec::FriendlyCodeList& list, const String_t& code, afl::string::Translator& tx)
     {
-        size_t pos;
-        if (!list.getIndexByName(code, pos)) {
+        if (!list.findIndexByName(code).isValid()) {
             list.addCode(game::spec::FriendlyCode(code, "X,", tx));
         }
     }
@@ -103,21 +102,20 @@ game::spec::FriendlyCodeList::at(size_t n) const
 }
 
 // Get index, given a friendly code.
-bool
-game::spec::FriendlyCodeList::getIndexByName(const String_t& fc, size_t& index) const
+afl::base::Optional<size_t>
+game::spec::FriendlyCodeList::findIndexByName(const String_t& fc) const
 {
-    Iterator_t it = getCodeByName(fc);
+    Iterator_t it = findCodeByName(fc);
     if (it != end()) {
-        index = it - begin();
-        return true;
+        return it - begin();
     } else {
-        return false;
+        return afl::base::Nothing;
     }
 }
 
 // Look up friendly code by name.
 game::spec::FriendlyCodeList::Iterator_t
-game::spec::FriendlyCodeList::getCodeByName(const String_t& fc) const
+game::spec::FriendlyCodeList::findCodeByName(const String_t& fc) const
 {
     // ex GFCodeList::getFCodeByName
     Iterator_t i = begin();
@@ -372,7 +370,7 @@ game::spec::FriendlyCodeList::generateRandomCode(util::RandomNumberGenerator& rn
 bool
 game::spec::FriendlyCodeList::isAcceptedFriendlyCode(const String_t& fc, const FriendlyCode::Filter& f, const RegistrationKey& key, DefaultAcceptance dflt) const
 {
-    const Iterator_t fci = getCodeByName(fc);
+    const Iterator_t fci = findCodeByName(fc);
     if (fci != end()) {
         return (*fci)->isPermitted(key)
             && (*fci)->worksOn(f);

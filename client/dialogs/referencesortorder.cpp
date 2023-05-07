@@ -245,7 +245,7 @@ client::dialogs::doReferenceSortOrderMenu(game::ref::Configuration& order, gfx::
     }
 
     int32_t result;
-    if (!box.getCurrentKey(result)) {
+    if (!box.getCurrentKey().get(result)) {
         return false;
     }
     if (result == 999) {

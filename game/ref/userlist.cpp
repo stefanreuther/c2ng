@@ -114,7 +114,7 @@ game::ref::UserList::makeReferenceItem(Reference r, Session& session)
 {
     // - name
     String_t name;
-    if (!session.getReferenceName(r, DetailedName, name)) {
+    if (!session.getReferenceName(r, DetailedName).get(name)) {
         name = r.toString(session.translator());
     }
 

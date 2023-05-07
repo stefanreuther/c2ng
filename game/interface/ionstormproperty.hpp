@@ -34,7 +34,7 @@ namespace game { namespace interface {
         @param tx   Translator (for names)
         @param iface Interpreter interface (for names)
         @return Newly-allocated value */
-    afl::data::Value* getIonStormProperty(const game::map::IonStorm& ion, IonStormProperty iip, afl::string::Translator& tx, InterpreterInterface& iface);
+    afl::data::Value* getIonStormProperty(const game::map::IonStorm& ion, IonStormProperty iip, afl::string::Translator& tx, const InterpreterInterface& iface);
 
     /** Set ion storm property.
         @param ion  Storm

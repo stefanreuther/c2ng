@@ -178,7 +178,7 @@ game::actions::CloneShip::getTechUpgradeAction() const
 }
 
 game::actions::CloneShip::ConflictStatus
-game::actions::CloneShip::findConflict(Conflict* result, afl::string::Translator& tx, InterpreterInterface& iface) const
+game::actions::CloneShip::findConflict(Conflict* result, afl::string::Translator& tx, const InterpreterInterface& iface) const
 {
     // ex doCloneShip (part), bdata.pas:CloneAShip (part)
     if (Id_t previousCloningShip = findPreviousCloningShip(m_universe, m_planet.getId(), m_ship.getId())) {

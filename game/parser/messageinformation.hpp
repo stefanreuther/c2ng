@@ -15,6 +15,7 @@
 #ifndef C2NG_GAME_PARSER_MESSAGEINFORMATION_HPP
 #define C2NG_GAME_PARSER_MESSAGEINFORMATION_HPP
 
+#include "afl/base/optional.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "game/alliance/offer.hpp"
 #include "game/parser/messagevalue.hpp"
@@ -92,28 +93,22 @@ namespace game { namespace parser {
         void addAllianceValue(String_t id, const game::alliance::Offer& offer);
 
         /** Get string value.
-            \param si  [in] String value index
-            \param out [out] Result
-            \retval true Value was found, \c out updated
-            \retval false Value not found, \c out unchanged */
-        bool getValue(MessageStringIndex si, String_t& out) const;
+            \param si String value index
+            \return Value if found */
+        afl::base::Optional<String_t> getValue(MessageStringIndex si) const;
 
         /** Get integer value.
-            \param ii [in] Integer value index
-            \param out [out] Result
-            \retval true Value was found, \c out updated
-            \retval false Value not found, \c out unchanged */
-        bool getValue(MessageIntegerIndex ii, int32_t& out) const;
+            \param ii Integer value index
+            \return value if found */
+        afl::base::Optional<int32_t> getValue(MessageIntegerIndex ii) const;
 
         /** Get integer value, with range checking.
             Same as the two-argument getValue(), but returns success only if the value is within the given range.
-            \param ii [in] Integer value index
-            \param out [out] Result
-            \param min [in] Minimum (inclusive)
-            \param max [in] Maximum (inclusive)
-            \retval true Value was found, \c out updated
-            \retval false Value not found, \c out unchanged */
-        bool getValue(MessageIntegerIndex ii, int32_t& out, int32_t min, int32_t max) const;
+            \param ii  Integer value index
+            \param min Minimum (inclusive)
+            \param max Maximum (inclusive)
+            \return value if found and in range */
+        afl::base::Optional<int32_t> getValue(MessageIntegerIndex ii, int32_t min, int32_t max) const;
 
         /** Get iterator to first contained value.
             \return iterator */

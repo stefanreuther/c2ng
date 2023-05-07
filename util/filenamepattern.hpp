@@ -6,6 +6,7 @@
 #define C2NG_UTIL_FILENAMEPATTERN_HPP
 
 #include <memory>
+#include "afl/base/optional.hpp"
 #include "afl/string/string.hpp"
 
 namespace util {
@@ -54,10 +55,8 @@ namespace util {
         bool hasWildcard() const;
 
         /** Get file name.
-            \param out [out] File name
-            \retval true Pattern contained a single file name that has been returned
-            \retval false Pattern contained wildcards, no file name could be returned */
-        bool getFileName(String_t& out) const;
+            \return If the pattern contains a single file name, that name. Nothing if pattern contains wildcards */
+        afl::base::Optional<String_t> getFileName() const;
 
         /** Match.
             \param filename File name to test

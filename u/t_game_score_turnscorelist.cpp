@@ -19,34 +19,34 @@ TestGameScoreTurnScoreList::testSchema()
     game::score::ScoreId_t scoreId;
 
     // Default schema must contain these scores:
-    TS_ASSERT(testee.getSlot(game::score::ScoreId_Planets, slot));
-    TS_ASSERT(testee.getSlot(game::score::ScoreId_Capital, slot));
-    TS_ASSERT(testee.getSlot(game::score::ScoreId_Freighters, slot));
-    TS_ASSERT(testee.getSlot(game::score::ScoreId_Bases, slot));
-    TS_ASSERT(testee.getSlot(game::score::ScoreId_BuildPoints, slot));
+    TS_ASSERT(testee.getSlot(game::score::ScoreId_Planets).isValid());
+    TS_ASSERT(testee.getSlot(game::score::ScoreId_Capital).isValid());
+    TS_ASSERT(testee.getSlot(game::score::ScoreId_Freighters).isValid());
+    TS_ASSERT(testee.getSlot(game::score::ScoreId_Bases).isValid());
+    TS_ASSERT(testee.getSlot(game::score::ScoreId_BuildPoints).isValid());
 
     // Forward mapping:
     TS_ASSERT_EQUALS(testee.getNumScores(), 5U);
-    TS_ASSERT(testee.getScoreByIndex(0, scoreId));
-    TS_ASSERT(!testee.getScoreByIndex(5, scoreId));
+    TS_ASSERT(testee.getScoreByIndex(0).get(scoreId));
+    TS_ASSERT(!testee.getScoreByIndex(5).isValid());
 
     // File must still be "safe"
     TS_ASSERT(!testee.hasFutureFeatures());
 
     // Add a slot
-    TS_ASSERT(!testee.getSlot(1000, slot));
+    TS_ASSERT(!testee.getSlot(1000).isValid());
     slot2 = testee.addSlot(1000);
-    TS_ASSERT(testee.getSlot(1000, slot));
+    TS_ASSERT(testee.getSlot(1000).get(slot));
     TS_ASSERT_EQUALS(slot, slot2);
     TS_ASSERT_EQUALS(testee.getNumScores(), 6U);
-    TS_ASSERT(testee.getScoreByIndex(5, scoreId));
+    TS_ASSERT(testee.getScoreByIndex(5).get(scoreId));
     TS_ASSERT_EQUALS(scoreId, 1000);
 
     // Adding existing slot
-    TS_ASSERT(testee.getSlot(game::score::ScoreId_BuildPoints, slot));
+    TS_ASSERT(testee.getSlot(game::score::ScoreId_BuildPoints).get(slot));
     slot2 = testee.addSlot(game::score::ScoreId_BuildPoints);
     TS_ASSERT_EQUALS(slot, slot2);
-    TS_ASSERT(testee.getSlot(game::score::ScoreId_BuildPoints, slot));
+    TS_ASSERT(testee.getSlot(game::score::ScoreId_BuildPoints).get(slot));
     TS_ASSERT_EQUALS(slot, slot2);
 
     // Verify the "future" flag
@@ -236,7 +236,7 @@ TestGameScoreTurnScoreList::testAddMessageInformationComplete()
 
     // Verify resulting slot
     game::score::TurnScoreList::Slot_t id;
-    TS_ASSERT(testee.getSlot(300, id));
+    TS_ASSERT(testee.getSlot(300).get(id));
 
     // Verify resulting score
     const game::score::TurnScore* ts = testee.getTurn(42);
@@ -279,7 +279,7 @@ TestGameScoreTurnScoreList::testAddMessageInformationJustId()
 
     // Verify resulting slot
     game::score::TurnScoreList::Slot_t id;
-    TS_ASSERT(testee.getSlot(30, id));
+    TS_ASSERT(testee.getSlot(30).get(id));
 
     // Verify resulting score
     const game::score::TurnScore* ts = testee.getTurn(42);
@@ -320,7 +320,7 @@ TestGameScoreTurnScoreList::testAddMessageInformationJustName()
 
     // Verify resulting slot
     game::score::TurnScoreList::Slot_t id;
-    TS_ASSERT(testee.getSlot(777, id));
+    TS_ASSERT(testee.getSlot(777).get(id));
 
     // Verify resulting score
     const game::score::TurnScore* ts = testee.getTurn(42);

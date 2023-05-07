@@ -144,7 +144,7 @@ game::score::TurnScoreList::addSlot(ScoreId_t id)
 {
     // ex GStatFile::getAddIndexForScore
     Slot_t result;
-    if (!getSlot(id, result)) {
+    if (!getSlot(id).get(result)) {
         result = m_slotMapping.size();
         m_slotMapping.push_back(id);
     }
@@ -152,17 +152,16 @@ game::score::TurnScoreList::addSlot(ScoreId_t id)
 }
 
 // Get a score slot by type.
-bool
-game::score::TurnScoreList::getSlot(ScoreId_t id, Slot_t& out) const
+afl::base::Optional<game::score::TurnScoreList::Slot_t>
+game::score::TurnScoreList::getSlot(ScoreId_t id) const
 {
     // ex GStatFile::getIndexForScore
     for (size_t i = 0, n = m_slotMapping.size(); i < n; ++i) {
         if (m_slotMapping[i] == id) {
-            out = i;
-            return true;
+            return i;
         }
     }
-    return false;
+    return afl::base::Nothing;
 }
 
 // Add a score description.
@@ -312,14 +311,13 @@ game::score::TurnScoreList::getNumScores() const
 }
 
 // Get score Id by index.
-bool
-game::score::TurnScoreList::getScoreByIndex(size_t index, ScoreId_t& result) const
+afl::base::Optional<game::score::ScoreId_t>
+game::score::TurnScoreList::getScoreByIndex(size_t index) const
 {
     if (index < m_slotMapping.size()) {
-        result = m_slotMapping[index];
-        return true;
+        return m_slotMapping[index];
     } else {
-        return false;
+        return afl::base::Nothing;
     }
 }
 

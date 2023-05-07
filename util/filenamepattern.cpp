@@ -23,7 +23,7 @@ class util::FileNamePattern::Impl {
     bool match(String_t arg) const;
     bool empty() const;
     bool hasWildcard() const;
-    bool getFileName(String_t& out) const;
+    afl::base::Optional<String_t> getFileName() const;
 
  private:
     enum OpType {
@@ -122,18 +122,16 @@ util::FileNamePattern::Impl::hasWildcard() const
 
 /** Get file name.
     \pre !hasWildcard() */
-bool
-util::FileNamePattern::Impl::getFileName(String_t& out) const
+afl::base::Optional<String_t>
+util::FileNamePattern::Impl::getFileName() const
 {
     // ex FileNameMatcher::getFileName (reworked)
     if (m_operations.empty()) {
-        out.clear();
-        return true;
+        return String_t();
     } else if (m_operations.size() == 1 && m_operations.front().type == MatchLiteral) {
-        out = m_operations.front().arg;
-        return true;
+        return m_operations.front().arg;
     } else {
-        return false;
+        return afl::base::Nothing;
     }
 }
 
@@ -295,11 +293,11 @@ util::FileNamePattern::hasWildcard() const
 }
 
 // Get file name.
-bool
-util::FileNamePattern::getFileName(String_t& out) const
+afl::base::Optional<String_t>
+util::FileNamePattern::getFileName() const
 {
     // ex FileNamePattern::getFileName
-    return m_pImpl->getFileName(out);
+    return m_pImpl->getFileName();
 }
 
 // Match.

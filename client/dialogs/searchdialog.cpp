@@ -612,8 +612,7 @@ SearchDialog::onMark()
     SelectionProxy proxy(interface().gameSender(), root().engine().dispatcher());
 
     // Commands
-    int32_t key = 0;
-    list.getCurrentKey(key);
+    const int32_t key = list.getCurrentKey().orElse(0);
     switch (key) {
      case Mark:
         proxy.markList(game::map::Selections::CurrentLayer, m_result, true);
@@ -768,7 +767,7 @@ SearchDialog::editMatchType()
     box.setCurrentKey(m_query.getMatchType());
     if (ui::widgets::doStandardDialog(tx("Search Object"), tx("Search type"), box, true, root(), tx)) {
         int32_t k;
-        if (box.getCurrentKey(k)) {
+        if (box.getCurrentKey().get(k)) {
             m_query.setMatchType(SearchQuery::MatchType(k));
         }
     }

@@ -631,7 +631,7 @@ MultiTransferDialog::doContextMenu(gfx::Point anchor, bool context)
     ui::EventLoop loop(m_root);
     if (ui::widgets::MenuFrame(ui::layout::HBox::instance0, m_root, loop).doMenu(box, anchor)) {
         int32_t key;
-        if (box.getCurrentKey(key)) {
+        if (box.getCurrentKey().get(key)) {
             handleKey(key, 0);
         }
     }

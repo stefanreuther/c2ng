@@ -16,7 +16,7 @@ using interpreter::makeOptionalStringValue;
 using interpreter::makeStringValue;
 
 afl::data::Value*
-game::interface::getIonStormProperty(const game::map::IonStorm& ion, IonStormProperty iip, afl::string::Translator& tx, InterpreterInterface& iface)
+game::interface::getIonStormProperty(const game::map::IonStorm& ion, IonStormProperty iip, afl::string::Translator& tx, const InterpreterInterface& iface)
 {
     // ex int/if/ionif.h:getIonProperty
     if (!ion.isActive()) {

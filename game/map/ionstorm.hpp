@@ -40,7 +40,7 @@ namespace game { namespace map {
         virtual ~IonStorm();
 
         // Object:
-        virtual String_t getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const;
+        virtual String_t getName(ObjectName which, afl::string::Translator& tx, const InterpreterInterface& iface) const;
         virtual afl::base::Optional<int> getOwner() const;
         virtual afl::base::Optional<Point> getPosition() const;
 

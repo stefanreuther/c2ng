@@ -132,7 +132,7 @@ game::score::TableBuilder::init(const SingleBuilder& b, bool isPBPGame)
     // Add remaining scores
     for (size_t i = 0, n = m_scores.getNumScores(); i < n; ++i) {
         ScoreId_t id;
-        if (m_scores.getScoreByIndex(i, id)) {
+        if (m_scores.getScoreByIndex(i).get(id)) {
             String_t name;
             if (id == ScoreId_MinesAllowed) {
                 name = m_translator("MF all.");

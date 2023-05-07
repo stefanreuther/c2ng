@@ -88,20 +88,19 @@ TestGameSession::testReferenceNameEmpty()
     game::Session testee(tx, fs);
 
     String_t s;
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(),                            game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Player, 3),        game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(game::map::Point(2000,3000)), game::PlainName, s), true);
-    TS_ASSERT_EQUALS(s, "(2000,3000)");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Ship, 17),         game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Planet, 9),        game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Starbase, 9),      game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::IonStorm, 4),      game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Minefield, 150),   game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Ufo, 42),          game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Hull, 15),         game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Engine, 2),        game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Beam, 3),          game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Torpedo, 7),       game::PlainName, s), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(),                            game::PlainName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Player, 3),        game::PlainName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(game::map::Point(2000,3000)), game::PlainName).orElse(""), "(2000,3000)");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Ship, 17),         game::PlainName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Planet, 9),        game::PlainName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Starbase, 9),      game::PlainName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::IonStorm, 4),      game::PlainName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Minefield, 150),   game::PlainName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Ufo, 42),          game::PlainName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Hull, 15),         game::PlainName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Engine, 2),        game::PlainName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Beam, 3),          game::PlainName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Torpedo, 7),       game::PlainName).isValid(), false);
 }
 
 /** Test getReferenceName().
@@ -138,75 +137,49 @@ TestGameSession::testReferenceNameNonempty()
     g->currentTurn().universe().ufos().addUfo(42, 1, 1)->setName("Hui");
     testee.setGame(g);
 
-    String_t s;
-
     // Query plain names
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(),                            game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Player, 3),        game::PlainName, s), true);
-    TS_ASSERT_EQUALS(s, "The Romulans");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(game::map::Point(2000,3000)), game::PlainName, s), true);
-    TS_ASSERT_EQUALS(s, "(2000,3000)");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Ship, 17),         game::PlainName, s), true);
-    TS_ASSERT_EQUALS(s, "Voyager");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Planet, 9),        game::PlainName, s), true);
-    TS_ASSERT_EQUALS(s, "Pluto");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Starbase, 9),      game::PlainName, s), true);
-    TS_ASSERT_EQUALS(s, "Pluto");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::IonStorm, 4),      game::PlainName, s), true);
-    TS_ASSERT_EQUALS(s, "Kathrina");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Minefield, 150),   game::PlainName, s), true);
-    TS_ASSERT_EQUALS(s, "Deleted Mine Field #150");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Ufo, 42),          game::PlainName, s), true);
-    TS_ASSERT_EQUALS(s, "Hui");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Hull, 15),         game::PlainName, s), true);
-    TS_ASSERT_EQUALS(s, "SMALL FREIGHTER");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Engine, 2),        game::PlainName, s), true);
-    TS_ASSERT_EQUALS(s, "2-cyl. engine");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Beam, 3),          game::PlainName, s), true);
-    TS_ASSERT_EQUALS(s, "Pink Laser");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Torpedo, 7),       game::PlainName, s), true);
-    TS_ASSERT_EQUALS(s, "Mark 7 Torpedo");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(),                            game::PlainName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Player, 3),        game::PlainName).orElse(""), "The Romulans");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(game::map::Point(2000,3000)), game::PlainName).orElse(""), "(2000,3000)");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Ship, 17),         game::PlainName).orElse(""), "Voyager");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Planet, 9),        game::PlainName).orElse(""), "Pluto");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Starbase, 9),      game::PlainName).orElse(""), "Pluto");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::IonStorm, 4),      game::PlainName).orElse(""), "Kathrina");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Minefield, 150),   game::PlainName).orElse(""), "Deleted Mine Field #150");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Ufo, 42),          game::PlainName).orElse(""), "Hui");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Hull, 15),         game::PlainName).orElse(""), "SMALL FREIGHTER");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Engine, 2),        game::PlainName).orElse(""), "2-cyl. engine");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Beam, 3),          game::PlainName).orElse(""), "Pink Laser");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Torpedo, 7),       game::PlainName).orElse(""), "Mark 7 Torpedo");
 
     // Query detailed names
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(),                            game::DetailedName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Player, 3),        game::DetailedName, s), true);
-    TS_ASSERT_EQUALS(s, "Player #3: The Romulans");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(game::map::Point(2000,3000)), game::DetailedName, s), true);
-    TS_ASSERT_EQUALS(s, "(2000,3000)");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Ship, 17),         game::DetailedName, s), true);
-    TS_ASSERT_EQUALS(s, "Ship #17: Voyager");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Planet, 9),        game::DetailedName, s), true);
-    TS_ASSERT_EQUALS(s, "Planet #9: Pluto");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Starbase, 9),      game::DetailedName, s), true);
-    TS_ASSERT_EQUALS(s, "Starbase #9: Pluto");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::IonStorm, 4),      game::DetailedName, s), true);
-    TS_ASSERT_EQUALS(s, "Ion storm #4: Kathrina");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Minefield, 150),   game::DetailedName, s), true);
-    TS_ASSERT_EQUALS(s, "Deleted Mine Field #150");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Ufo, 42),          game::DetailedName, s), true);
-    TS_ASSERT_EQUALS(s, "Ufo #42: Hui");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Hull, 15),         game::DetailedName, s), true);
-    TS_ASSERT_EQUALS(s, "Hull #15: SMALL FREIGHTER");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Engine, 2),        game::DetailedName, s), true);
-    TS_ASSERT_EQUALS(s, "Engine #2: 2-cyl. engine");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Beam, 3),          game::DetailedName, s), true);
-    TS_ASSERT_EQUALS(s, "Beam Weapon #3: Pink Laser");
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Torpedo, 7),       game::DetailedName, s), true);
-    TS_ASSERT_EQUALS(s, "Torpedo Type #7: Mark 7 Torpedo");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(),                            game::DetailedName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Player, 3),        game::DetailedName).orElse(""), "Player #3: The Romulans");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(game::map::Point(2000,3000)), game::DetailedName).orElse(""), "(2000,3000)");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Ship, 17),         game::DetailedName).orElse(""), "Ship #17: Voyager");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Planet, 9),        game::DetailedName).orElse(""), "Planet #9: Pluto");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Starbase, 9),      game::DetailedName).orElse(""), "Starbase #9: Pluto");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::IonStorm, 4),      game::DetailedName).orElse(""), "Ion storm #4: Kathrina");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Minefield, 150),   game::DetailedName).orElse(""), "Deleted Mine Field #150");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Ufo, 42),          game::DetailedName).orElse(""), "Ufo #42: Hui");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Hull, 15),         game::DetailedName).orElse(""), "Hull #15: SMALL FREIGHTER");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Engine, 2),        game::DetailedName).orElse(""), "Engine #2: 2-cyl. engine");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Beam, 3),          game::DetailedName).orElse(""), "Beam Weapon #3: Pink Laser");
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Torpedo, 7),       game::DetailedName).orElse(""), "Torpedo Type #7: Mark 7 Torpedo");
 
     // Access off-by-one Ids (that is, container exists but object doesn't)
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(),                            game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Player, 4),        game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Ship, 18),         game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Planet, 8),        game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Starbase, 8),      game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::IonStorm, 5),      game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Minefield, 152),   game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Ufo, 43),          game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Hull, 16),         game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Engine, 3),        game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Beam, 4),          game::PlainName, s), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Torpedo, 8),       game::PlainName, s), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(),                            game::PlainName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Player, 4),        game::PlainName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Ship, 18),         game::PlainName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Planet, 8),        game::PlainName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Starbase, 8),      game::PlainName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::IonStorm, 5),      game::PlainName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Minefield, 152),   game::PlainName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Ufo, 43),          game::PlainName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Hull, 16),         game::PlainName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Engine, 3),        game::PlainName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Beam, 4),          game::PlainName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Torpedo, 8),       game::PlainName).isValid(), false);
 }
 
 /** Test InterpreterInterface implementation.
@@ -242,17 +215,12 @@ TestGameSession::testInterpreterInterface()
     TS_ASSERT_EQUALS(iface.hasTask(iface.Ship, 17), false);
 
     // - getHullShortName
-    String_t s;
-    TS_ASSERT_EQUALS(iface.getHullShortName(3, s), true);
-    TS_ASSERT_EQUALS(s, "SCOUT");
-
-    TS_ASSERT_EQUALS(iface.getHullShortName(10, s), false);
+    TS_ASSERT_EQUALS(iface.getHullShortName(3).orElse(""), "SCOUT");
+    TS_ASSERT_EQUALS(iface.getHullShortName(10).isValid(), false);
 
     // - getPlayerAdjective
-    TS_ASSERT_EQUALS(iface.getPlayerAdjective(5, s), true);
-    TS_ASSERT_EQUALS(s, "Pirate");
-
-    TS_ASSERT_EQUALS(iface.getPlayerAdjective(10, s), false);
+    TS_ASSERT_EQUALS(iface.getPlayerAdjective(5).orElse(""), "Pirate");
+    TS_ASSERT_EQUALS(iface.getPlayerAdjective(10).isValid(), false);
 }
 
 /** Test task handling/inquiry. */

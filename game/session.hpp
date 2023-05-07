@@ -6,6 +6,7 @@
 #define C2NG_GAME_SESSION_HPP
 
 #include <memory>
+#include "afl/base/optional.hpp"
 #include "afl/base/ptr.hpp"
 #include "afl/base/signal.hpp"
 #include "afl/base/signalconnection.hpp"
@@ -102,7 +103,7 @@ namespace game {
 
         /** Access translator.
             \return translator */
-        afl::string::Translator& translator();
+        afl::string::Translator& translator() const;
 
         /** Get root.
             \return root. Can be null. */
@@ -224,12 +225,10 @@ namespace game {
         void notifyListeners();
 
         /** Get name, given a reference.
-            \param [in]  ref    Reference
-            \param [in]  which  Which name to return
-            \param [out] result Name returned here
-            \retval true Name returned
-            \retval false Invalid reference; name cannot be returned */
-        bool getReferenceName(Reference ref, ObjectName which, String_t& result);
+            \param ref    Reference
+            \param which  Which name to return
+            \return Name if reference can successfully be resolved */
+        afl::base::Optional<String_t> getReferenceName(Reference ref, ObjectName which) const;
 
         /** Postprocess a turn.
             Used as part of the loading sequence.
@@ -300,10 +299,10 @@ namespace game {
         afl::base::SignalConnection conn_userConfigToMap;
 
         // InterpreterInterface:
-        virtual String_t getComment(Scope scope, int id);
-        virtual bool hasTask(Scope scope, int id);
-        virtual bool getHullShortName(int nr, String_t& out);
-        virtual bool getPlayerAdjective(int nr, String_t& out);
+        virtual String_t getComment(Scope scope, int id) const;
+        virtual bool hasTask(Scope scope, int id) const;
+        virtual afl::base::Optional<String_t> getHullShortName(int nr) const;
+        virtual afl::base::Optional<String_t> getPlayerAdjective(int nr) const;
 
         void initWorld();
         void onProcessStateChange(const interpreter::Process& proc, bool willDelete);
@@ -333,7 +332,7 @@ game::Session::logError(const interpreter::Error& e)
 }
 
 inline afl::string::Translator&
-game::Session::translator()
+game::Session::translator() const
 {
     return m_world.translator();
 }

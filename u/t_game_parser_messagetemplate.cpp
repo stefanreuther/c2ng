@@ -531,10 +531,8 @@ TestGameParserMessageTemplate::testMatchMeta()
     TS_ASSERT_EQUALS(testee.getVariableName(0), "ID");
     TS_ASSERT_EQUALS(testee.getVariableName(1), "");      // out-of-range
 
-    size_t n = 99;
-    TS_ASSERT(testee.getVariableSlotByName("ID", n));     // variables are internally upcased...
-    TS_ASSERT_EQUALS(n, 0u);
-    TS_ASSERT(!testee.getVariableSlotByName("id", n));    // ...but matched case-sensitively
+    TS_ASSERT_EQUALS(testee.getVariableSlotByName("ID").orElse(99), 0u);     // variables are internally upcased...
+    TS_ASSERT(!testee.getVariableSlotByName("id").isValid());                // ...but matched case-sensitively
 
     TS_ASSERT_EQUALS(testee.getNumRestrictions(), 1U);
     TS_ASSERT_EQUALS(testee.getNumWildcards(), 1U);

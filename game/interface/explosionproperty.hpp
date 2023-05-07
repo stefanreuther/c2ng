@@ -31,7 +31,7 @@ namespace game { namespace interface {
     afl::data::Value* getExplosionProperty(const game::map::Explosion& expl,
                                            ExplosionProperty iep,
                                            afl::string::Translator& tx,
-                                           InterpreterInterface& iface);
+                                           const InterpreterInterface& iface);
 
 } }
 

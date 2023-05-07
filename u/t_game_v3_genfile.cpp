@@ -108,7 +108,7 @@ TestGameV3GenFile::testResult()
     afl::io::Stream::FileSize_t pos;
     TS_ASSERT(rst.getSectionOffset(rst.GenSection, pos));
     ms.setPos(pos);
-        
+
     GenFile t;
     t.loadFromResult(ms);
 
@@ -138,10 +138,10 @@ TestGameV3GenFile::testScore()
     TS_ASSERT_EQUALS(score->getTimestamp().getTimestampAsString(), "12-17-201517:48:02");
 
     game::score::TurnScore::Slot_t pla, cap, fre, bas;
-    TS_ASSERT(scores.getSlot(game::score::ScoreId_Planets,    pla));
-    TS_ASSERT(scores.getSlot(game::score::ScoreId_Capital,    cap));
-    TS_ASSERT(scores.getSlot(game::score::ScoreId_Freighters, fre));
-    TS_ASSERT(scores.getSlot(game::score::ScoreId_Bases,      bas));
+    TS_ASSERT(scores.getSlot(game::score::ScoreId_Planets)   .get(pla));
+    TS_ASSERT(scores.getSlot(game::score::ScoreId_Capital)   .get(cap));
+    TS_ASSERT(scores.getSlot(game::score::ScoreId_Freighters).get(fre));
+    TS_ASSERT(scores.getSlot(game::score::ScoreId_Bases)     .get(bas));
 
     TS_ASSERT_EQUALS(score->get(pla, 1).orElse(-1), 7);
     TS_ASSERT_EQUALS(score->get(cap, 1).orElse(-1), 1);

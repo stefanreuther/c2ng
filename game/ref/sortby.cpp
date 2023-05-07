@@ -25,7 +25,7 @@ namespace {
     {
         // Resolve as plain name; if that does not work, as reference name.
         String_t name;
-        if (!session.getReferenceName(a, game::PlainName, name)) {
+        if (!session.getReferenceName(a, game::PlainName).get(name)) {
             name = a.toString(session.translator());
         }
         return name;

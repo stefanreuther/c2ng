@@ -139,7 +139,7 @@ namespace {
         ui::widgets::ScrollbarContainer cont(list, root);
 
         if (ui::widgets::doStandardDialog(title, String_t(), cont, true, root, tx)) {
-            if (list.getCurrentKey(value)) {
+            if (list.getCurrentKey().get(value)) {
                 return true;
             }
         }
@@ -755,19 +755,16 @@ SimulatorDialog::onExtraMenu()
     const gfx::Point pt = m_extraButton.getExtent().getBottomLeft();
     ui::EventLoop loop(m_root);
     if (ui::widgets::MenuFrame(ui::layout::HBox::instance0, m_root, loop).doMenu(list, pt)) {
-        int32_t k = 0;
-        if (list.getCurrentKey(k)) {
-            switch (k) {
-             case IdOptions:
-                onEditConfiguration();
-                break;
-             case IdAlliances:
-                onEditAlliances();
-                break;
-             case IdFleetCost:
-                onFleetCostSummary();
-                break;
-            }
+        switch (list.getCurrentKey().orElse(0)) {
+         case IdOptions:
+            onEditConfiguration();
+            break;
+         case IdAlliances:
+            onEditAlliances();
+            break;
+         case IdFleetCost:
+            onFleetCostSummary();
+            break;
         }
     }
 }
@@ -1534,17 +1531,14 @@ SimulatorDialog::onContextMenu(gfx::Point pt)
 
     ui::EventLoop loop(m_root);
     if (ui::widgets::MenuFrame(ui::layout::HBox::instance0, m_root, loop).doMenu(list, pt)) {
-        int32_t key = -1;
-        if (list.getCurrentKey(key)) {
-            switch (key) {
-             case SortById:          m_proxy.sortShips(SimulationSetupProxy::SortById);          break;
-             case SortByOwner:       m_proxy.sortShips(SimulationSetupProxy::SortByOwner);       break;
-             case SortByHull:        m_proxy.sortShips(SimulationSetupProxy::SortByHull);        break;
-             case SortByBattleOrder: m_proxy.sortShips(SimulationSetupProxy::SortByBattleOrder); break;
-             case SortByName:        m_proxy.sortShips(SimulationSetupProxy::SortByName);        break;
-             case SwapUp:            onSwapUp();                                                 break;
-             case SwapDown:          onSwapDown();                                               break;
-            }
+        switch (list.getCurrentKey().orElse(0)) {
+         case SortById:          m_proxy.sortShips(SimulationSetupProxy::SortById);          break;
+         case SortByOwner:       m_proxy.sortShips(SimulationSetupProxy::SortByOwner);       break;
+         case SortByHull:        m_proxy.sortShips(SimulationSetupProxy::SortByHull);        break;
+         case SortByBattleOrder: m_proxy.sortShips(SimulationSetupProxy::SortByBattleOrder); break;
+         case SortByName:        m_proxy.sortShips(SimulationSetupProxy::SortByName);        break;
+         case SwapUp:            onSwapUp();                                                 break;
+         case SwapDown:          onSwapDown();                                               break;
         }
     }
 }

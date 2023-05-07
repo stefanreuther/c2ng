@@ -48,7 +48,7 @@ ui::widgets::ComboBox::popupMenu()
     bool ok = MenuFrame(ui::layout::HBox::instance0, m_root, loop).doMenu(list, getExtent().getBottomLeft());
 
     int32_t newValue;
-    if (ok && list.getCurrentKey(newValue)) {
+    if (ok && list.getCurrentKey().get(newValue)) {
         value().set(newValue);
     }
 }

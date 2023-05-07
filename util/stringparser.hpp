@@ -5,6 +5,7 @@
 #ifndef C2NG_UTIL_STRINGPARSER_HPP
 #define C2NG_UTIL_STRINGPARSER_HPP
 
+#include "afl/base/optional.hpp"
 #include "afl/string/string.hpp"
 
 namespace util {
@@ -70,9 +71,8 @@ namespace util {
 
         /** Get current character.
             Does not modify the state.
-            \param ch [out] Character
-            \return true if character could be obtained, false if end has been reached */
-        bool getCurrentCharacter(char& ch) const;
+            \return character if available; Nothing if end has been reached */
+        afl::base::Optional<char> getCurrentCharacter() const;
 
         /** Get remaining unparsed text.
             \return text */

@@ -22,6 +22,10 @@ using game::parser::MessageInformation;
 using afl::container::PtrVector;
 
 namespace {
+    template<typename Index> struct Ret;
+    template<> struct Ret<game::parser::MessageIntegerIndex> { typedef int32_t Result_t; };
+    template<> struct Ret<game::parser::MessageStringIndex>  { typedef String_t Result_t; };
+
     class Finder {
      public:
         Finder(const PtrVector<MessageInformation>& info, MessageInformation::Type type, int id, int turnNumber)
@@ -49,17 +53,18 @@ namespace {
                 return n;
             }
 
-        template<typename Index, typename Value>
-        bool getValue(Index idx, Value& value)
+        template<typename Index>
+        afl::base::Optional<typename Ret<Index>::Result_t> getValue(Index idx)
             {
                 for (size_t i = 0; i < m_info.size(); ++i) {
                     if (match(m_info[i])) {
-                        if (m_info[i]->getValue(idx, value)) {
-                            return true;
+                        afl::base::Optional<typename Ret<Index>::Result_t> v = m_info[i]->getValue(idx);
+                        if (v.isValid()) {
+                            return v;
                         }
                     }
                 }
-                return false;
+                return afl::base::Nothing;
             }
 
         bool getScoreValue(int player, int& result)
@@ -281,17 +286,11 @@ TestGameParserBinaryTransfer::testUnpackMinefield()
     TS_ASSERT(f.find() != 0);
 
     // Verify values
-    int32_t value;
-    TS_ASSERT(f.getValue(game::parser::mi_X, value));
-    TS_ASSERT_EQUALS(value, 2635);
-    TS_ASSERT(f.getValue(game::parser::mi_Y, value));
-    TS_ASSERT_EQUALS(value, 1818);
-    TS_ASSERT(f.getValue(game::parser::mi_MineUnits, value));
-    TS_ASSERT_EQUALS(value, 11416);
-    TS_ASSERT(f.getValue(game::parser::mi_Owner, value));
-    TS_ASSERT_EQUALS(value, 3);
-    TS_ASSERT(f.getValue(game::parser::mi_Type, value));
-    TS_ASSERT_EQUALS(value, 0);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_X).orElse(-1), 2635);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_Y).orElse(-1), 1818);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_MineUnits).orElse(-1), 11416);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_Owner).orElse(-1), 3);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_Type).orElse(-1), 0);
 }
 
 /** Test unpackBinaryMessage(), planet. */
@@ -319,67 +318,37 @@ TestGameParserBinaryTransfer::testUnpackPlanet()
     TS_ASSERT(f.find() != 0);
 
     // Verify values
-    int32_t value;
-    String_t sv;
-    TS_ASSERT(f.getValue(game::parser::mi_Owner, value));
-    TS_ASSERT_EQUALS(value, 6);
-    TS_ASSERT(f.getValue(game::parser::ms_FriendlyCode, sv));
-    TS_ASSERT_EQUALS(sv, "f*p");
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetMines, value));
-    TS_ASSERT_EQUALS(value, 16);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetFactories, value));
-    TS_ASSERT_EQUALS(value, 16);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetDefense, value));
-    TS_ASSERT_EQUALS(value, 15);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetMinedN, value));
-    TS_ASSERT_EQUALS(value, 59);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetMinedT, value));
-    TS_ASSERT_EQUALS(value, 6);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetMinedD, value));
-    TS_ASSERT_EQUALS(value, 23);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetMinedM, value));
-    TS_ASSERT_EQUALS(value, 20);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetColonists, value));
-    TS_ASSERT_EQUALS(value, 17);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetSupplies, value));
-    TS_ASSERT_EQUALS(value, 22);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetCash, value));
-    TS_ASSERT_EQUALS(value, 0);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetTotalN, value));
-    TS_ASSERT_EQUALS(value, 235);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetTotalT, value));
-    TS_ASSERT_EQUALS(value, 2711);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetTotalD, value));
-    TS_ASSERT_EQUALS(value, 321);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetTotalM, value));
-    TS_ASSERT_EQUALS(value, 479);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetDensityN, value));
-    TS_ASSERT_EQUALS(value, 93);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetDensityT, value));
-    TS_ASSERT_EQUALS(value, 21);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetDensityD, value));
-    TS_ASSERT_EQUALS(value, 75);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetDensityM, value));
-    TS_ASSERT_EQUALS(value, 65);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetColonistTax, value));
-    TS_ASSERT_EQUALS(value, 0);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetColonistHappiness, value));
-    TS_ASSERT_EQUALS(value, 100);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetNativeTax, value));
-    TS_ASSERT_EQUALS(value, 0);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetNativeGov, value));
-    TS_ASSERT_EQUALS(value, 0);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetNatives, value));
-    TS_ASSERT_EQUALS(value, 0);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetNativeRace, value));
-    TS_ASSERT_EQUALS(value, 0);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetNativeHappiness, value));
-    TS_ASSERT_EQUALS(value, 100);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetTemperature, value));
-    TS_ASSERT_EQUALS(value, 54);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_Owner).orElse(-1), 6);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::ms_FriendlyCode).orElse(""), "f*p");
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetMines).orElse(-1), 16);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetFactories).orElse(-1), 16);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetDefense).orElse(-1), 15);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetMinedN).orElse(-1), 59);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetMinedT).orElse(-1), 6);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetMinedD).orElse(-1), 23);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetMinedM).orElse(-1), 20);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetColonists).orElse(-1), 17);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetSupplies).orElse(-1), 22);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetCash).orElse(-1), 0);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetTotalN).orElse(-1), 235);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetTotalT).orElse(-1), 2711);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetTotalD).orElse(-1), 321);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetTotalM).orElse(-1), 479);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetDensityN).orElse(-1), 93);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetDensityT).orElse(-1), 21);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetDensityD).orElse(-1), 75);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetDensityM).orElse(-1), 65);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetColonistTax).orElse(-1), 0);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetColonistHappiness).orElse(-1), 100);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetNativeTax).orElse(-1), 0);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetNativeGov).orElse(-1), 0);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetNatives).orElse(-1), 0);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetNativeRace).orElse(-1), 0);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetNativeHappiness).orElse(-1), 100);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetTemperature).orElse(-1), 54);
 
     // No information about base in report
-    TS_ASSERT(!f.getValue(game::parser::mi_PlanetHasBase, value));
+    TS_ASSERT(!f.getValue(game::parser::mi_PlanetHasBase).isValid());
 }
 
 /** Test unpackBinaryMessage(), planet which has only sensor sweep. */
@@ -407,22 +376,18 @@ TestGameParserBinaryTransfer::testUnpackPlanet2()
     TS_ASSERT(f.find() != 0);
 
     // Verify values
-    int32_t value;
-    String_t sv;
-    TS_ASSERT(f.getValue(game::parser::mi_Owner, value));
-    TS_ASSERT_EQUALS(value, 3);
-    TS_ASSERT(f.getValue(game::parser::mi_PlanetActivity, value));
-    TS_ASSERT_EQUALS(value, 4);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_Owner).orElse(-1), 3);
+    TS_ASSERT_EQUALS(f.getValue(game::parser::mi_PlanetActivity).orElse(-1), 4);
 
     // Nothing else
     TS_ASSERT_EQUALS(f.count(), 2U);
 
     // Therefore everything else reports not-found
-    TS_ASSERT(!f.getValue(game::parser::ms_FriendlyCode, sv));
-    TS_ASSERT(!f.getValue(game::parser::mi_PlanetMines, value));
-    TS_ASSERT(!f.getValue(game::parser::mi_PlanetColonists, value));
-    TS_ASSERT(!f.getValue(game::parser::mi_PlanetMinedM, value));
-    TS_ASSERT(!f.getValue(game::parser::mi_PlanetHasBase, value));
+    TS_ASSERT(!f.getValue(game::parser::ms_FriendlyCode).isValid());
+    TS_ASSERT(!f.getValue(game::parser::mi_PlanetMines).isValid());
+    TS_ASSERT(!f.getValue(game::parser::mi_PlanetColonists).isValid());
+    TS_ASSERT(!f.getValue(game::parser::mi_PlanetMinedM).isValid());
+    TS_ASSERT(!f.getValue(game::parser::mi_PlanetHasBase).isValid());
 }
 
 /** Test unpackBinaryMessage(), marker. */
@@ -446,21 +411,13 @@ TestGameParserBinaryTransfer::testUnpackDrawing()
     TS_ASSERT_EQUALS(info[0]->getObjectType(), MessageInformation::MarkerDrawing);
 
     // Verify
-    int32_t value;
-    String_t sv;
-    TS_ASSERT(info[0]->getValue(game::parser::mi_X, value));
-    TS_ASSERT_EQUALS(value, 2060);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_Y, value));
-    TS_ASSERT_EQUALS(value, 1934);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_Color, value));
-    TS_ASSERT_EQUALS(value, 11);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_DrawingShape, value));
-    TS_ASSERT_EQUALS(value, 1);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_DrawingExpire, value));
-    TS_ASSERT_EQUALS(value, -1);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_X).orElse(-1), 2060);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_Y).orElse(-1), 1934);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_Color).orElse(-1), 11);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_DrawingShape).orElse(-1), 1);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_DrawingExpire).orElse(-99), -1);
 
-    TS_ASSERT(info[0]->getValue(game::parser::ms_DrawingComment, sv));
-    TS_ASSERT_EQUALS(sv, "flag");
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::ms_DrawingComment).orElse(""), "flag");
 }
 
 /** Test unpackBinaryMessage(), line. */
@@ -484,20 +441,13 @@ TestGameParserBinaryTransfer::testUnpackDrawing2()
     TS_ASSERT_EQUALS(info[0]->getObjectType(), MessageInformation::LineDrawing);
 
     // Verify
-    int32_t value;
-    String_t sv;
-    TS_ASSERT(info[0]->getValue(game::parser::mi_X, value));
-    TS_ASSERT_EQUALS(value, 1304);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_Y, value));
-    TS_ASSERT_EQUALS(value, 1794);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_EndX, value));
-    TS_ASSERT_EQUALS(value, 1359);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_EndY, value));
-    TS_ASSERT_EQUALS(value, 1744);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_Color, value));
-    TS_ASSERT_EQUALS(value, 21);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_X).orElse(-1), 1304);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_Y).orElse(-1), 1794);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_EndX).orElse(-1), 1359);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_EndY).orElse(-1), 1744);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_Color).orElse(-1), 21);
 
-    TS_ASSERT(!info[0]->getValue(game::parser::ms_DrawingComment, sv));
+    TS_ASSERT(!info[0]->getValue(game::parser::ms_DrawingComment).isValid());
 }
 
 /** Test unpackBinaryMessage(), circle. */
@@ -521,18 +471,12 @@ TestGameParserBinaryTransfer::testUnpackDrawing3()
     TS_ASSERT_EQUALS(info[0]->getObjectType(), MessageInformation::CircleDrawing);
 
     // Verify
-    int32_t value;
-    String_t sv;
-    TS_ASSERT(info[0]->getValue(game::parser::mi_X, value));
-    TS_ASSERT_EQUALS(value, 1876);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_Y, value));
-    TS_ASSERT_EQUALS(value, 2575);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_Radius, value));
-    TS_ASSERT_EQUALS(value, 50);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_Color, value));
-    TS_ASSERT_EQUALS(value, 24);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_X).orElse(-1), 1876);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_Y).orElse(-1), 2575);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_Radius).orElse(-1), 50);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_Color).orElse(-1), 24);
 
-    TS_ASSERT(!info[0]->getValue(game::parser::ms_DrawingComment, sv));
+    TS_ASSERT(!info[0]->getValue(game::parser::ms_DrawingComment).isValid());
 }
 
 /** Test unpackBinaryMessage(), rectangle. */
@@ -556,20 +500,13 @@ TestGameParserBinaryTransfer::testUnpackDrawing4()
     TS_ASSERT_EQUALS(info[0]->getObjectType(), MessageInformation::RectangleDrawing);
 
     // Verify
-    int32_t value;
-    String_t sv;
-    TS_ASSERT(info[0]->getValue(game::parser::mi_X, value));
-    TS_ASSERT_EQUALS(value, 2336);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_Y, value));
-    TS_ASSERT_EQUALS(value, 2328);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_EndX, value));
-    TS_ASSERT_EQUALS(value, 2432);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_EndY, value));
-    TS_ASSERT_EQUALS(value, 2391);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_Color, value));
-    TS_ASSERT_EQUALS(value, 2);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_X).orElse(-1), 2336);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_Y).orElse(-1), 2328);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_EndX).orElse(-1), 2432);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_EndY).orElse(-1), 2391);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_Color).orElse(-1), 2);
 
-    TS_ASSERT(!info[0]->getValue(game::parser::ms_DrawingComment, sv));
+    TS_ASSERT(!info[0]->getValue(game::parser::ms_DrawingComment).isValid());
 }
 
 /** Test that we can correctly transmit all drawing colors. */
@@ -596,9 +533,7 @@ TestGameParserBinaryTransfer::testDrawingColors()
         TS_ASSERT_EQUALS(info.size(), 1U);
         TS_ASSERT(info[0] != 0);
         TS_ASSERT_EQUALS(info[0]->getObjectType(), MessageInformation::MarkerDrawing);
-        int32_t value;
-        TS_ASSERT(info[0]->getValue(game::parser::mi_Color, value));
-        TS_ASSERT_EQUALS(value, i);
+        TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_Color).orElse(-1), i);
     }
 }
 
@@ -625,9 +560,7 @@ TestGameParserBinaryTransfer::testDrawingMarkerShapes()
         TS_ASSERT_EQUALS(info.size(), 1U);
         TS_ASSERT(info[0] != 0);
         TS_ASSERT_EQUALS(info[0]->getObjectType(), MessageInformation::MarkerDrawing);
-        int32_t value;
-        TS_ASSERT(info[0]->getValue(game::parser::mi_DrawingShape, value));
-        TS_ASSERT_EQUALS(value, i);
+        TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_DrawingShape).orElse(-1), i);
     }
 }
 
@@ -652,20 +585,13 @@ TestGameParserBinaryTransfer::testUnpackVPA1()
     TS_ASSERT_EQUALS(info[0]->getObjectType(), MessageInformation::MarkerDrawing);
 
     // Verify
-    int32_t value;
-    String_t sv;
-    TS_ASSERT(info[0]->getValue(game::parser::mi_X, value));
-    TS_ASSERT_EQUALS(value, 2478);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_Y, value));
-    TS_ASSERT_EQUALS(value, 2207);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_Color, value));
-    TS_ASSERT_EQUALS(value, 15);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_DrawingShape, value));
-    TS_ASSERT_EQUALS(value, 3);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_DrawingExpire, value));
-    TS_ASSERT_EQUALS(value, -1);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_X).orElse(-1), 2478);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_Y).orElse(-1), 2207);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_Color).orElse(-1), 15);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_DrawingShape).orElse(-1), 3);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_DrawingExpire).orElse(-1), -1);
 
-    TS_ASSERT(!info[0]->getValue(game::parser::ms_DrawingComment, sv));
+    TS_ASSERT(!info[0]->getValue(game::parser::ms_DrawingComment).isValid());
 }
 
 /** Test VPA marker: brown "Ne" (translated to type 2, color 17, with comment). */
@@ -690,21 +616,13 @@ TestGameParserBinaryTransfer::testUnpackVPA2()
     TS_ASSERT_EQUALS(info[0]->getObjectType(), MessageInformation::MarkerDrawing);
 
     // Verify
-    int32_t value;
-    String_t sv;
-    TS_ASSERT(info[0]->getValue(game::parser::mi_X, value));
-    TS_ASSERT_EQUALS(value, 2473);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_Y, value));
-    TS_ASSERT_EQUALS(value, 2232);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_Color, value));
-    TS_ASSERT_EQUALS(value, 16);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_DrawingShape, value));
-    TS_ASSERT_EQUALS(value, 2);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_DrawingExpire, value));
-    TS_ASSERT_EQUALS(value, -1);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_X).orElse(-1), 2473);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_Y).orElse(-1), 2232);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_Color).orElse(-1), 16);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_DrawingShape).orElse(-1), 2);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_DrawingExpire).orElse(-1), -1);
 
-    TS_ASSERT(info[0]->getValue(game::parser::ms_DrawingComment, sv));
-    TS_ASSERT_EQUALS(sv, "Ne");
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::ms_DrawingComment).orElse(""), "Ne");
 }
 
 /** Test VPA marker: brown "Tr" (translated to type 2, color 17; comment is preserved). */
@@ -728,21 +646,13 @@ TestGameParserBinaryTransfer::testUnpackVPA3()
     TS_ASSERT_EQUALS(info[0]->getObjectType(), MessageInformation::MarkerDrawing);
 
     // Verify
-    int32_t value;
-    String_t sv;
-    TS_ASSERT(info[0]->getValue(game::parser::mi_X, value));
-    TS_ASSERT_EQUALS(value, 2490);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_Y, value));
-    TS_ASSERT_EQUALS(value, 2236);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_Color, value));
-    TS_ASSERT_EQUALS(value, 16);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_DrawingShape, value));
-    TS_ASSERT_EQUALS(value, 2);
-    TS_ASSERT(info[0]->getValue(game::parser::mi_DrawingExpire, value));
-    TS_ASSERT_EQUALS(value, -1);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_X).orElse(-1), 2490);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_Y).orElse(-1), 2236);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_Color).orElse(-1), 16);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_DrawingShape).orElse(-1), 2);
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::mi_DrawingExpire).orElse(-99), -1);
 
-    TS_ASSERT(info[0]->getValue(game::parser::ms_DrawingComment, sv));
-    TS_ASSERT_EQUALS(sv, "try it");
+    TS_ASSERT_EQUALS(info[0]->getValue(game::parser::ms_DrawingComment).orElse(""), "try it");
 }
 
 /** Test unpacking a Statistic entry. */

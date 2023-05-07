@@ -136,14 +136,13 @@ util::StringParser::consumeCharacter()
 }
 
 // Get current character.
-bool
-util::StringParser::getCurrentCharacter(char& ch) const
+afl::base::Optional<char>
+util::StringParser::getCurrentCharacter() const
 {
     if (m_pos < m_string.size()) {
-        ch = m_string[m_pos];
-        return true;
+        return m_string[m_pos];
     } else {
-        return false;
+        return afl::base::Nothing;
     }
 }
 

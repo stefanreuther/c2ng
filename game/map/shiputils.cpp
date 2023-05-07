@@ -18,7 +18,7 @@ game::map::getShipMission(const Ship& ship, const game::config::HostConfiguratio
 {
     int nr, owner;
     if (ship.getMission().get(nr) && ship.getRealOwner().get(owner)) {
-        return missions.getMissionByNumber(nr, PlayerSet_t(config.getPlayerMissionNumber(owner)));
+        return missions.findMissionByNumber(nr, PlayerSet_t(config.getPlayerMissionNumber(owner)));
     } else {
         return 0;
     }
@@ -29,7 +29,7 @@ game::map::getShipMissionByNumber(int nr, const Ship& ship, const game::config::
 {
     int owner;
     if (ship.getRealOwner().get(owner)) {
-        return missions.getMissionByNumber(nr, PlayerSet_t(config.getPlayerMissionNumber(owner)));
+        return missions.findMissionByNumber(nr, PlayerSet_t(config.getPlayerMissionNumber(owner)));
     } else {
         return 0;
     }

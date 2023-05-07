@@ -191,7 +191,7 @@ HistoryShipDialog::onMenuRequest(gfx::Point anchor)
 
     // Evaluate result
     int32_t found;
-    if (ok && box.getCurrentKey(found)) {
+    if (ok && box.getCurrentKey().get(found)) {
         if (found >= SORT_BASE && found <= SORT_BASE + int32_t(HistoryShipSelection::SortMax)) {
             m_selection.setSortOrder(HistoryShipSelection::SortOrder(found - SORT_BASE));
             updateConfiguration();

@@ -28,7 +28,7 @@ namespace {
 
         // Fetch X
         int32_t x, y;
-        if (!info.getValue(game::parser::mi_X, x, 1, MAX_NUMBER) || !info.getValue(game::parser::mi_Y, y, 1, MAX_NUMBER)) {
+        if (!info.getValue(game::parser::mi_X, 1, MAX_NUMBER).get(x) || !info.getValue(game::parser::mi_Y, 1, MAX_NUMBER).get(y)) {
             return 0;
         }
 
@@ -40,20 +40,20 @@ namespace {
         switch (type) {
          case Drawing::MarkerDrawing:
             // Requires shape
-            if (!info.getValue(game::parser::mi_DrawingShape, shape, 0, Drawing::NUM_USER_MARKERS-1)) {
+            if (!info.getValue(game::parser::mi_DrawingShape, 0, Drawing::NUM_USER_MARKERS-1).get(shape)) {
                 return 0;
             }
             d->setMarkerKind(int(shape));
 
             // Optional comment
-            if (info.getValue(game::parser::ms_DrawingComment, comment)) {
+            if (info.getValue(game::parser::ms_DrawingComment).get(comment)) {
                 d->setComment(comment);
             }
             break;
 
          case Drawing::CircleDrawing:
             // Requires radius
-            if (!info.getValue(game::parser::mi_Radius, radius, 1, Drawing::MAX_CIRCLE_RADIUS)) {
+            if (!info.getValue(game::parser::mi_Radius, 1, Drawing::MAX_CIRCLE_RADIUS).get(radius)) {
                 return 0;
             }
             d->setCircleRadius(radius);
@@ -62,7 +62,7 @@ namespace {
          case Drawing::LineDrawing:
          case Drawing::RectangleDrawing:
             // Requires X2,Y2
-            if (!info.getValue(game::parser::mi_EndX, x2, 1, MAX_NUMBER) || !info.getValue(game::parser::mi_EndY, y2, 1, MAX_NUMBER)) {
+            if (!info.getValue(game::parser::mi_EndX, 1, MAX_NUMBER).get(x2) || !info.getValue(game::parser::mi_EndY, 1, MAX_NUMBER).get(y2)) {
                 return 0;
             }
             d->setPos2(Point(x2, y2));
@@ -72,20 +72,20 @@ namespace {
         // Common parameters:
         // - color
         int32_t color;
-        if (info.getValue(game::parser::mi_Color, color, 0, Drawing::NUM_USER_COLORS)) {
+        if (info.getValue(game::parser::mi_Color, 0, Drawing::NUM_USER_COLORS).get(color)) {
             d->setColor(static_cast<uint8_t>(color));
         }
 
         // - tag
         String_t tag;
-        if (info.getValue(game::parser::ms_DrawingTag, tag)) {
+        if (info.getValue(game::parser::ms_DrawingTag).get(tag)) {
             d->setTag(atomTable.getAtomFromString(tag));
         }
 
         // - expire
         // If not given, defaults to 0, so markers created by message templates are temporary.
         int32_t expire;
-        if (info.getValue(game::parser::mi_DrawingExpire, expire)) {
+        if (info.getValue(game::parser::mi_DrawingExpire).get(expire)) {
             d->setExpire(expire);
         } else {
             d->setExpire(0);

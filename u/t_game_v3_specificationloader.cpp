@@ -824,11 +824,11 @@ TestGameV3SpecificationLoader::testLoadMissions()
     env.addStream("mission.cc", afl::string::toBytes(MSN_FILE));
     TS_ASSERT_EQUALS(env.load(), true);
 
-    const Mission* p = env.list.missions().getMissionByNumber(1, PlayerSet_t::allUpTo(game::MAX_PLAYERS));
+    const Mission* p = env.list.missions().findMissionByNumber(1, PlayerSet_t::allUpTo(game::MAX_PLAYERS));
     TS_ASSERT(p != 0);
     TS_ASSERT_EQUALS(p->getName(), "Explore");
 
-    p = env.list.missions().getMissionByNumber(7, PlayerSet_t::allUpTo(game::MAX_PLAYERS));
+    p = env.list.missions().findMissionByNumber(7, PlayerSet_t::allUpTo(game::MAX_PLAYERS));
     TS_ASSERT(p != 0);
     TS_ASSERT_EQUALS(p->getName(), "Tow a ship");
     TS_ASSERT_EQUALS(p->getShortName(), "Tow");

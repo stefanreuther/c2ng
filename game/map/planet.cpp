@@ -533,7 +533,7 @@ game::map::Planet::internalCheck(const Configuration& config, PlayerSet_t availa
 }
 
 String_t
-game::map::Planet::getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const
+game::map::Planet::getName(ObjectName which, afl::string::Translator& tx, const InterpreterInterface& iface) const
 {
     // ex GPlanet::getName
     // FIXME: make the default name "", and handle that specially here

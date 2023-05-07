@@ -464,7 +464,7 @@ game::map::Universe::findLocationUnitNames(Point pt,
                                            const PlayerList& players,
                                            const game::map::Configuration& mapConfig,
                                            afl::string::Translator& tx,
-                                           InterpreterInterface& iface) const
+                                           const InterpreterInterface& iface) const
 {
     // ex WScannerChartWidget::doTooltip (part)
     const Point realPos = mapConfig.getCanonicalLocation(pt);

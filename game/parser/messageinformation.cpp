@@ -65,46 +65,44 @@ game::parser::MessageInformation::addAllianceValue(String_t id, const game::alli
 }
 
 // Get string value.
-bool
-game::parser::MessageInformation::getValue(MessageStringIndex si, String_t& out) const
+afl::base::Optional<String_t>
+game::parser::MessageInformation::getValue(MessageStringIndex si) const
 {
     for (ConstIterator_t it = begin(), e = end(); it != e; ++it) {
         if (MessageStringValue_t* sv = dynamic_cast<MessageStringValue_t*>(*it)) {
             if (sv->getIndex() == si) {
-                out = sv->getValue();
-                return true;
+                return sv->getValue();
             }
         }
     }
-    return false;
+    return afl::base::Nothing;
 }
 
 // Get integer value.
-bool
-game::parser::MessageInformation::getValue(MessageIntegerIndex ii, int32_t& out) const
+afl::base::Optional<int32_t>
+game::parser::MessageInformation::getValue(MessageIntegerIndex ii) const
 {
     for (ConstIterator_t it = begin(), e = end(); it != e; ++it) {
         if (MessageIntegerValue_t* sv = dynamic_cast<MessageIntegerValue_t*>(*it)) {
             if (sv->getIndex() == ii) {
-                out = sv->getValue();
-                return true;
+                return sv->getValue();
             }
         }
     }
-    return false;
+    return afl::base::Nothing;
 }
 
 // Get integer value, with range checking.
-bool
-game::parser::MessageInformation::getValue(MessageIntegerIndex ii, int32_t& out, int32_t min, int32_t max) const
+afl::base::Optional<int32_t>
+game::parser::MessageInformation::getValue(MessageIntegerIndex ii, int32_t min, int32_t max) const
 {
-    int32_t tmp;
-    if (getValue(ii, tmp) && tmp >= min && tmp <= max) {
-        out = tmp;
-        return true;
-    } else {
-        return false;
+    afl::base::Optional<int32_t> result = getValue(ii);
+    if (const int32_t* p = result.get()) {
+        if (*p < min || *p > max) {
+            result = afl::base::Nothing;
+        }
     }
+    return result;
 }
 
 // Get object type/Id in Reference format.

@@ -571,7 +571,7 @@ client::screens::BrowserScreen::onRootAction(size_t index)
     }
 
     int32_t k = 0;
-    if (!list.getCurrentKey(k)) {
+    if (!list.getCurrentKey().get(k)) {
         return;
     }
 

@@ -249,7 +249,7 @@ game::pcc::BrowserHandler::getGameListPreAuthenticated(game::browser::Account& a
 
     String_t token;
     String_t user;
-    if (acc.getEncoded("api_token", token) && acc.getEncoded("api_user", user)) {
+    if (acc.getEncoded("api_token").get(token) && acc.getEncoded("api_user").get(user)) {
         afl::net::HeaderTable tab;
         tab.set("api_token", token);
         tab.set("dir", "u/" + user);
@@ -264,7 +264,7 @@ game::pcc::BrowserHandler::getDirectoryContentPreAuthenticated(game::browser::Ac
 {
     String_t token;
     std::auto_ptr<afl::data::Value> result;
-    if (acc.getEncoded("api_token", token)) {
+    if (acc.getEncoded("api_token").get(token)) {
         afl::net::HeaderTable tab;
         tab.set("api_token", token);
         tab.set("dir", dirName);
@@ -288,7 +288,7 @@ game::pcc::BrowserHandler::getFilePreAuthenticated(game::browser::Account& acc, 
     log().write(LogListener::Trace, LOG_NAME, Format(translator()("Downloading \"%s\""), fileUrl.toString()));
 
     String_t token;
-    if (acc.getEncoded("api_token", token)) {
+    if (acc.getEncoded("api_token").get(token)) {
         // Attach token to URL
         String_t filePath(fileUrl.getPath());
         afl::net::ParameterEncoder(filePath, '?').handleHeader("api_token", token);
@@ -306,7 +306,7 @@ std::auto_ptr<afl::data::Value>
 game::pcc::BrowserHandler::putFilePreAuthenticated(game::browser::Account& acc, String_t fileName, afl::base::ConstBytes_t content)
 {
     String_t token;
-    if (acc.getEncoded("api_token", token)) {
+    if (acc.getEncoded("api_token").get(token)) {
         afl::net::HeaderTable tab;
         tab.set("api_token", token);
         tab.set("action", "put");
@@ -322,7 +322,7 @@ std::auto_ptr<afl::data::Value>
 game::pcc::BrowserHandler::uploadTurnPreAuthenticated(game::browser::Account& acc, int32_t hostGameNumber, int slot, afl::base::ConstBytes_t content)
 {
     String_t token;
-    if (acc.getEncoded("api_token", token)) {
+    if (acc.getEncoded("api_token").get(token)) {
         afl::net::HeaderTable tab;
         tab.set("api_token", token);
         tab.set("action", "trn");
@@ -339,7 +339,7 @@ void
 game::pcc::BrowserHandler::markTurnTemporaryPreAuthenticated(game::browser::Account& acc, int32_t hostGameNumber, int slot, int flag)
 {
     String_t token;
-    if (acc.getEncoded("api_token", token)) {
+    if (acc.getEncoded("api_token").get(token)) {
         afl::net::HeaderTable tab;
         tab.set("api_token", token);
         tab.set("action", "trnmarktemp");

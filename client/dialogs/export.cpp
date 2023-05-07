@@ -411,7 +411,7 @@ ExportDialog::chooseField(String_t& fieldName, String_t title)
     // Dialog
     if (listBox.doStandardDialog(title, String_t(), 0, m_root, m_translator)) {
         int32_t chosenKey;
-        if (listBox.getCurrentKey(chosenKey) && chosenKey >= 0 && chosenKey < int32_t(list.size())) {
+        if (listBox.getCurrentKey().get(chosenKey) && chosenKey >= 0 && chosenKey < int32_t(list.size())) {
             fieldName = list[size_t(chosenKey)];
         }
         return true;
@@ -470,7 +470,7 @@ ExportDialog::changeFormat()
     listBox.setCurrentKey(int(m_config.getFormat()));
     if (listBox.doStandardDialog(m_translator("Change File Type"), String_t(), 0, m_root, m_translator)) {
         int32_t key;
-        if (listBox.getCurrentKey(key)) {
+        if (listBox.getCurrentKey().get(key)) {
             m_proxy.setFormat(interpreter::exporter::Format(key));
         }
     }
@@ -489,7 +489,7 @@ ExportDialog::changeCharset()
     listBox.setCurrentKey(int(m_config.getCharsetIndex()));
     if (listBox.doStandardDialog(m_translator("Change Character Set"), String_t(), 0, m_root, m_translator)) {
         int32_t key;
-        if (listBox.getCurrentKey(key)) {
+        if (listBox.getCurrentKey().get(key)) {
             m_proxy.setCharsetIndex(CharsetFactory::Index_t(key));
         }
     }

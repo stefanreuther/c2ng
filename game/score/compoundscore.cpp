@@ -75,7 +75,7 @@ game::score::CompoundScore::add(const TurnScoreList& list, ScoreId_t id, int fac
     if (m_numParts >= MAX) {
         // Cannot represent this; fail
         m_valid = false;
-    } else if (!list.getSlot(id, m_slot[m_numParts])) {
+    } else if (!list.getSlot(id).get(m_slot[m_numParts])) {
         // Slot not present in source data; fail
         m_valid = false;
     } else {

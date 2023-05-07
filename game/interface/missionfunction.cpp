@@ -54,7 +54,7 @@ game::interface::MissionFunction::get(interpreter::Arguments& args)
 
     // Create result
     size_t slot;
-    if (!shipList->missions().getIndexByNumber(number, playerSet, slot)) {
+    if (!shipList->missions().findIndexByNumber(number, playerSet).get(slot)) {
         return 0;
     }
     return new MissionContext(slot, *shipList);

@@ -211,7 +211,7 @@ void
 ClassicVcrObjectDialog::onListScroll()
 {
     int32_t n;
-    if (m_hullList.getCurrentKey(n)) {
+    if (m_hullList.getCurrentKey().get(n)) {
         m_proxy.setHullType(n);
     }
 }
@@ -278,7 +278,7 @@ ClassicVcrObjectDialog::addToSimulation(bool after)
     // ex WVcrInfoMain::addToSim
     // Proxy needs the hull type
     int32_t n;
-    if (!m_hullList.getCurrentKey(n)) {
+    if (!m_hullList.getCurrentKey().get(n)) {
         return;
     }
 

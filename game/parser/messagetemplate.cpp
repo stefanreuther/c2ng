@@ -259,17 +259,16 @@ game::parser::MessageTemplate::getNumRestrictions() const
 }
 
 // Find variable slot by name.
-bool
-game::parser::MessageTemplate::getVariableSlotByName(const String_t name, size_t& out) const
+afl::base::Optional<size_t>
+game::parser::MessageTemplate::getVariableSlotByName(const String_t name) const
 {
     // ex GMessageTemplate::getVariableSlotByName
     for (size_t i = 0; i < m_variables.size(); ++i) {
         if (name == m_variables[i]) {
-            out = i;
-            return true;
+            return i;
         }
     }
-    return false;
+    return afl::base::Nothing;
 }
 
 // Get variable name by index.

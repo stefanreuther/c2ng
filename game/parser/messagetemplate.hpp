@@ -6,6 +6,7 @@
 #define C2NG_GAME_PARSER_MESSAGETEMPLATE_HPP
 
 #include <vector>
+#include "afl/base/optional.hpp"
 #include "afl/string/string.hpp"
 #include "game/parser/messageinformation.hpp"
 
@@ -119,11 +120,9 @@ namespace game { namespace parser {
         size_t getNumRestrictions() const;
 
         /** Find variable slot by name.
-            \param name [in] Name to search for, in upper-case
-            \param out [out] Result slot
-            \retval true Variable was found, \c out was updated such that getVariableName(out) == name
-            \retval false Variable not found */
-        bool getVariableSlotByName(String_t name, size_t& out) const;
+            \param name Name to search for, in upper-case
+            \return Index such that getVariableName(out) == name if name was found */
+        afl::base::Optional<size_t> getVariableSlotByName(String_t name) const;
 
         /** Get variable name by index.
             \param index Index [0,getNumVariables())

@@ -27,7 +27,7 @@ game::map::Explosion::~Explosion()
 
 // Object:
 String_t
-game::map::Explosion::getName(ObjectName /*which*/, afl::string::Translator& tx, InterpreterInterface& /*iface*/) const
+game::map::Explosion::getName(ObjectName /*which*/, afl::string::Translator& tx, const InterpreterInterface& /*iface*/) const
 {
     if (!m_shipName.empty()) {
         return afl::string::Format(tx("Explosion of %s%!d%!0{ (#%1$d)%}"), m_shipName, m_shipId);

@@ -560,7 +560,7 @@ ProcessListKeyHandler::listMutexes(bool all)
     if (box.run(m_root, m_translator, m_gameSender)) {
         if (all) {
             int32_t key;
-            if (box.getCurrentKey(key)) {
+            if (box.getCurrentKey().get(key)) {
                 m_list.scrollToProcess(uint32_t(key));
             }
         }

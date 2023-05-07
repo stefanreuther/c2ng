@@ -6,6 +6,7 @@
 #define C2NG_GAME_SPEC_FRIENDLYCODELIST_HPP
 
 #include "afl/base/growablememory.hpp"
+#include "afl/base/optional.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "afl/io/stream.hpp"
 #include "afl/string/translator.hpp"
@@ -121,17 +122,15 @@ namespace game { namespace spec {
             \return Friendly code if found; null if index out of range. */
         const FriendlyCode* at(size_t n) const;
 
-        /** Get index, given a friendly code.
-            \param fc [in] Friendly code to look for, case-sensitive
-            \param index [out] Index
-            \retval true Code found; index has been set such that at(index)->getCode() == fc.
-            \retval false Code not found */
-        bool getIndexByName(const String_t& fc, size_t& index) const;
+        /** Find index, given a friendly code.
+            \param fc Friendly code to look for, case-sensitive
+            \return Index  such that at(index)->getCode() == fc if code is found; otherwise, Nothing. */
+        afl::base::Optional<size_t> findIndexByName(const String_t& fc) const;
 
         /** Look up friendly code by name.
             \param fc Friendly code to look for, case-sensitive
             \return iterator pointing to friendly code, or end() if none */
-        Iterator_t getCodeByName(const String_t& fc) const;
+        Iterator_t findCodeByName(const String_t& fc) const;
 
 
         /*

@@ -1019,7 +1019,7 @@ ScoreDialog::onTableMode()
     }
 
     int32_t result;
-    if (menu.getCurrentKey(result)) {
+    if (menu.getCurrentKey().get(result)) {
         if (result >= 0 && result < NUM_TABLE_MODES) {
             setTableMode(TableMode(result));
         } else if (result == BY_TEAM) {

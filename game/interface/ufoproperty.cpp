@@ -27,7 +27,7 @@ namespace {
 afl::data::Value*
 game::interface::getUfoProperty(const game::map::Ufo& ufo, UfoProperty iup,
                                 afl::string::Translator& tx,
-                                InterpreterInterface& iface)
+                                const InterpreterInterface& iface)
 {
     // ex int/if/ufoif.h:getUfoProperty
     game::map::Point pt;

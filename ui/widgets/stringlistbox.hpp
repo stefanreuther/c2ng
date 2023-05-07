@@ -47,7 +47,7 @@ namespace ui { namespace widgets {
         void setItems(const util::StringList& other);
         const util::StringList& getStringList() const;
 
-        bool getCurrentKey(int32_t& key) const;
+        afl::base::Optional<int32_t> getCurrentKey() const;
         void setCurrentKey(int32_t key);
 
         void setPreferredWidth(int n, bool pixels);

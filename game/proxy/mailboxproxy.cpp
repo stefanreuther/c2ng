@@ -264,9 +264,9 @@ game::proxy::MailboxProxy::Trampoline::sendResponse(bool requested)
     m.isFiltered = Browser(mbox, tx, root.playerList(), m_adaptor.getConfiguration()).isMessageFiltered(index);
 
     m.goto1 = md.primaryLink;
-    session.getReferenceName(m.goto1, LongName, m.goto1Name);
+    session.getReferenceName(m.goto1, LongName).get(m.goto1Name);
     m.goto2 = md.secondaryLink;
-    session.getReferenceName(m.goto2, LongName, m.goto2Name);
+    session.getReferenceName(m.goto2, LongName).get(m.goto2Name);
     m.reply = md.reply;
     m.replyAll = md.replyAll;
     if (m.replyAll != PlayerSet_t(viewpointPlayer) && !m.replyAll.contains(root.playerList().getAllPlayers())) {

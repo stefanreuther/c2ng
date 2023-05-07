@@ -379,21 +379,20 @@ game::Session::notifyListeners()
     m_world.notifyListeners();
 }
 
-bool
-game::Session::getReferenceName(Reference ref, ObjectName which, String_t& result)
+afl::base::Optional<String_t>
+game::Session::getReferenceName(Reference ref, ObjectName which) const
 {
     // ex PCC1.x ThingName
-    // FIXME: can we find a better location for this function
-    // FIXME: cannot currently be const because InterpreterInterface is not const
     switch (ref.getType()) {
      case Reference::Null:
      case Reference::Special:
-        return false;
+        return afl::base::Nothing;
 
      case Reference::Player:
         // Report reference name plus player name
-        if (Root* r = m_root.get()) {
+        if (const Root* r = m_root.get()) {
             if (const Player* p = r->playerList().get(ref.getId())) {
+                String_t result;
                 if (which == PlainName) {
                     result = p->getName(Player::ShortName, translator());
                 } else {
@@ -401,15 +400,14 @@ game::Session::getReferenceName(Reference ref, ObjectName which, String_t& resul
                     result += ": ";
                     result += p->getName(Player::ShortName, translator());
                 }
-                return true;
+                return result;
             }
         }
-        return false;
+        return afl::base::Nothing;
 
      case Reference::MapLocation:
         // Reference name is good enough.
-        result = ref.toString(translator());
-        return true;
+        return ref.toString(translator());
 
      case Reference::Ship:
      case Reference::Planet:
@@ -418,13 +416,13 @@ game::Session::getReferenceName(Reference ref, ObjectName which, String_t& resul
      case Reference::Minefield:
      case Reference::Ufo:
         // Return normal object's name.
-        if (Game* g = m_game.get()) {
-            if (Turn* t = g->getViewpointTurn().get()) {
+        if (const Game* g = m_game.get()) {
+            if (const Turn* t = g->getViewpointTurn().get()) {
                 if (const game::map::Object* obj = t->universe().getObject(ref)) {
                     if (ref.getType() == Reference::Starbase && which != PlainName) {
                         // Special case: report the reference name plus object's name, if any.
                         // This allows a starbase reference to be shown as "Starbase #123: Melmac".
-                        result = ref.toString(translator());
+                        String_t result = ref.toString(translator());
                         result += ": ";
                         result += obj->getName(PlainName, translator(), *this);
                         if (which == DetailedName) {
@@ -434,15 +432,19 @@ game::Session::getReferenceName(Reference ref, ObjectName which, String_t& resul
                                 result += comment;
                             }
                         }
-                        return true;
+                        return result;
                     } else {
-                        result = obj->getName(which, translator(), *this);
-                        return !result.empty();
+                        String_t result = obj->getName(which, translator(), *this);
+                        if (!result.empty()) {
+                            return result;
+                        } else {
+                            return afl::base::Nothing;
+                        }
                     }
                 }
             }
         }
-        return false;
+        return afl::base::Nothing;
 
      case Reference::Hull:
      case Reference::Engine:
@@ -451,6 +453,7 @@ game::Session::getReferenceName(Reference ref, ObjectName which, String_t& resul
         // Report the reference name plus component name.
         if (const game::spec::ShipList* shipList = m_shipList.get()) {
             if (const game::spec::Component* p = shipList->getComponent(ref)) {
+                String_t result;
                 if (which == PlainName) {
                     result = p->getName(shipList->componentNamer());
                 } else {
@@ -458,12 +461,12 @@ game::Session::getReferenceName(Reference ref, ObjectName which, String_t& resul
                     result += ": ";
                     result += p->getName(shipList->componentNamer());
                 }
-                return true;
+                return result;
             }
         }
-        return false;
+        return afl::base::Nothing;
     }
-    return false;
+    return afl::base::Nothing;
 }
 
 void
@@ -510,7 +513,7 @@ game::Session::saveConfiguration(std::auto_ptr<Task_t> then)
 }
 
 String_t
-game::Session::getComment(Scope scope, int id)
+game::Session::getComment(Scope scope, int id) const
 {
     switch (scope) {
      case Ship:
@@ -524,7 +527,7 @@ game::Session::getComment(Scope scope, int id)
 }
 
 bool
-game::Session::hasTask(Scope scope, int id)
+game::Session::hasTask(Scope scope, int id) const
 {
     // FIXME: consider changing the signature to take an object,
     // to avoid the reverse-mapping into a universe.
@@ -544,28 +547,26 @@ game::Session::hasTask(Scope scope, int id)
     return false;
 }
 
-bool
-game::Session::getHullShortName(int nr, String_t& out)
+afl::base::Optional<String_t>
+game::Session::getHullShortName(int nr) const
 {
     if (const game::spec::ShipList* list = m_shipList.get()) {
         if (const game::spec::Hull* hull = list->hulls().get(nr)) {
-            out = hull->getShortName(list->componentNamer());
-            return true;
+            return hull->getShortName(list->componentNamer());
         }
     }
-    return false;
+    return afl::base::Nothing;
 }
 
-bool
-game::Session::getPlayerAdjective(int nr, String_t& out)
+afl::base::Optional<String_t>
+game::Session::getPlayerAdjective(int nr) const
 {
     if (const Root* root = m_root.get()) {
         if (const Player* player = root->playerList().get(nr)) {
-            out = player->getName(Player::AdjectiveName, translator());
-            return true;
+            return player->getName(Player::AdjectiveName, translator());
         }
     }
-    return false;
+    return afl::base::Nothing;
 }
 
 void

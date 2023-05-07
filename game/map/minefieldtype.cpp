@@ -95,7 +95,7 @@ game::map::MinefieldType::addMessageInformation(const game::parser::MessageInfor
     // Find position
     Point pt;
     int32_t x, y;
-    if (info.getValue(gp::mi_X, x) && info.getValue(gp::mi_Y, y)) {
+    if (info.getValue(gp::mi_X).get(x) && info.getValue(gp::mi_Y).get(y)) {
         // New position
         pt = Point(x, y);
     } else if (existing != 0 && existing->getPosition().get(pt)) {
@@ -107,7 +107,7 @@ game::map::MinefieldType::addMessageInformation(const game::parser::MessageInfor
 
     // Find owner
     int32_t owner;
-    if (info.getValue(gp::mi_Owner, owner)) {
+    if (info.getValue(gp::mi_Owner).get(owner)) {
         // New owner
     } else if (existing != 0 && existing->getOwner().get(owner)) {
         // Keep old owner
@@ -119,9 +119,9 @@ game::map::MinefieldType::addMessageInformation(const game::parser::MessageInfor
     // Find size. A report without a size is useless and therefore ignored.
     int32_t size;
     Minefield::SizeReport sizeType;
-    if (info.getValue(gp::mi_MineUnits, size)) {
+    if (info.getValue(gp::mi_MineUnits).get(size)) {
         sizeType = Minefield::UnitsKnown;
-    } else if (info.getValue(gp::mi_Radius, size)) {
+    } else if (info.getValue(gp::mi_Radius).get(size)) {
         sizeType = Minefield::RadiusKnown;
     } else {
         // FIXME: can we deal with mi_MineUnitsRemoved?
@@ -131,7 +131,7 @@ game::map::MinefieldType::addMessageInformation(const game::parser::MessageInfor
     // Find type
     int32_t rawType;
     Minefield::TypeReport type;
-    if (info.getValue(gp::mi_Type, rawType)) {
+    if (info.getValue(gp::mi_Type).get(rawType)) {
         type = (rawType != 0 ? Minefield::IsWeb : Minefield::IsMine);
     } else {
         type = Minefield::UnknownType;
@@ -140,7 +140,7 @@ game::map::MinefieldType::addMessageInformation(const game::parser::MessageInfor
     // Find reason
     int32_t rawReason;
     Minefield::ReasonReport reason;
-    if (info.getValue(gp::mi_MineScanReason, rawReason)) {
+    if (info.getValue(gp::mi_MineScanReason).get(rawReason)) {
         if (rawReason <= 0) {
             reason = Minefield::NoReason;
         } else if (rawReason == 1) {

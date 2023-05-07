@@ -44,7 +44,7 @@ namespace game { namespace interface {
         @return newly-allocated value */
     afl::data::Value* getUfoProperty(const game::map::Ufo& ufo, UfoProperty iup,
                                      afl::string::Translator& tx,
-                                     InterpreterInterface& iface);
+                                     const InterpreterInterface& iface);
 
     /** Set Ufo property.
         @param ufo   Ufo

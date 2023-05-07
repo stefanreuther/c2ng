@@ -219,7 +219,7 @@ client::dialogs::doPlanetInfoDialog(ui::Root& root,
     // Determine planet name, synchronously
     String_t planetName;
     Downlink link(root, tx);
-    if (!ReferenceProxy(gameSender).getReferenceName(link, Reference(Reference::Planet, planetId), game::LongName /* Planet #x: nnn */, planetName)) {
+    if (!ReferenceProxy(gameSender).getReferenceName(link, Reference(Reference::Planet, planetId), game::LongName /* Planet #x: nnn */).get(planetName)) {
         planetName = tx("Planet");
     }
 

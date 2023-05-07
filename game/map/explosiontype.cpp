@@ -29,17 +29,17 @@ game::map::ExplosionType::addMessageInformation(const game::parser::MessageInfor
 {
     namespace gp = game::parser;
     int32_t x, y;
-    if (info.getValue(gp::mi_X, x) && info.getValue(gp::mi_Y, y)) {
+    if (info.getValue(gp::mi_X).get(x) && info.getValue(gp::mi_Y).get(y)) {
         // Minimum values are X, Y.
         Explosion e(info.getObjectId(), Point(x, y));
 
         // Try to get ship information
         int32_t shipId;
-        if (info.getValue(gp::mi_ExplodedShipId, shipId)) {
+        if (info.getValue(gp::mi_ExplodedShipId).get(shipId)) {
             e.setShipId(shipId);
         }
         String_t shipName;
-        if (info.getValue(gp::ms_Name, shipName)) {
+        if (info.getValue(gp::ms_Name).get(shipName)) {
             e.setShipName(shipName);
         }
 

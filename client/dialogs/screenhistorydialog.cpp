@@ -54,7 +54,7 @@ client::dialogs::doScreenHistoryDialog(ui::Root& root,
     bool ok = list.doStandardDialog(tx("Screen History"), String_t(), 0, root, tx);
 
     int32_t result;
-    if (ok && list.getCurrentKey(result)) {
+    if (ok && list.getCurrentKey().get(result)) {
         return result + excludeCurrent;
     } else {
         return -1;

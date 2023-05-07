@@ -23,10 +23,9 @@ TestGameProxyReferenceProxy::testEmpty()
 
     // Cannot retrieve any name
     game::test::WaitIndicator ind;
-    String_t out;
-    TS_ASSERT_EQUALS(testee.getReferenceName(ind, game::Reference(game::Reference::Planet, 10), game::LongName, out), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(ind, game::Reference(game::Reference::Planet, 10), game::PlainName, out), false);
-    TS_ASSERT_EQUALS(testee.getReferenceName(ind, game::Reference(), game::LongName, out), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(ind, game::Reference(game::Reference::Planet, 10), game::LongName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(ind, game::Reference(game::Reference::Planet, 10), game::PlainName).isValid(), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(ind, game::Reference(), game::LongName).isValid(), false);
 
     // Cannot retrieve any position
     TS_ASSERT_EQUALS(testee.getReferencePosition(ind, game::Reference(game::Reference::Planet, 10)).isValid(), false);
@@ -50,17 +49,13 @@ TestGameProxyReferenceProxy::testNormal()
 
     // Retrieve different names
     game::test::WaitIndicator ind;
-    String_t out;
-    TS_ASSERT_EQUALS(testee.getReferenceName(ind, game::Reference(game::Reference::Planet, 10), game::LongName, out), true);
-    TS_ASSERT_EQUALS(out, "Planet #10: Melmac");
-
-    TS_ASSERT_EQUALS(testee.getReferenceName(ind, game::Reference(game::Reference::Planet, 10), game::PlainName, out), true);
-    TS_ASSERT_EQUALS(out, "Melmac");
+    TS_ASSERT_EQUALS(testee.getReferenceName(ind, game::Reference(game::Reference::Planet, 10), game::LongName).orElse(""), "Planet #10: Melmac");
+    TS_ASSERT_EQUALS(testee.getReferenceName(ind, game::Reference(game::Reference::Planet, 10), game::PlainName).orElse(""), "Melmac");
 
     TS_ASSERT_EQUALS(testee.getReferencePosition(ind, game::Reference(game::Reference::Planet, 10)).orElse(game::map::Point()), game::map::Point(1234, 2345));
 
     // Cannot retrieve name/position of null reference in any case
-    TS_ASSERT_EQUALS(testee.getReferenceName(ind, game::Reference(), game::LongName, out), false);
+    TS_ASSERT_EQUALS(testee.getReferenceName(ind, game::Reference(), game::LongName).isValid(), false);
     TS_ASSERT_EQUALS(testee.getReferencePosition(ind, game::Reference()).isValid(), false);
 }
 

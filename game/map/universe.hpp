@@ -267,7 +267,7 @@ namespace game { namespace map {
                                        const PlayerList& players,
                                        const game::map::Configuration& mapConfig,
                                        afl::string::Translator& tx,
-                                       InterpreterInterface& iface) const;
+                                       const InterpreterInterface& iface) const;
 
         /** Check whether a ship is being towed.
             \param sid Ship Id

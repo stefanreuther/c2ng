@@ -215,11 +215,16 @@ ui::widgets::StringListbox::getStringList() const
     return m_content;
 }
 
-bool
-ui::widgets::StringListbox::getCurrentKey(int32_t& key) const
+afl::base::Optional<int32_t>
+ui::widgets::StringListbox::getCurrentKey() const
 {
     String_t tmp;
-    return m_content.get(getCurrentItem(), key, tmp);
+    int32_t key;
+    if (m_content.get(getCurrentItem(), key, tmp)) {
+        return key;
+    } else {
+        return afl::base::Nothing;
+    }
 }
 
 void

@@ -119,44 +119,20 @@ TestGameParserMessageInformation::testGetValue()
     TS_ASSERT_EQUALS(testee.getObjectReference(), game::Reference(game::Reference::Ship, 77));
 
     // Normal
-    {
-        int32_t i = 0;
-        TS_ASSERT(testee.getValue(game::parser::mi_ShipHull, i));
-        TS_ASSERT_EQUALS(i, 15);
-    }
+    TS_ASSERT_EQUALS(testee.getValue(game::parser::mi_ShipHull).orElse(0), 15);
 
     // Range check, success
-    {
-        int32_t i = 0;
-        TS_ASSERT(testee.getValue(game::parser::mi_ShipHull, i, 0, 100));
-        TS_ASSERT_EQUALS(i, 15);
-    }
+    TS_ASSERT_EQUALS(testee.getValue(game::parser::mi_ShipHull, 0, 100).orElse(0), 15);
 
     // Range check, failure
-    {
-        int32_t i = 0;
-        TS_ASSERT(!testee.getValue(game::parser::mi_ShipHull, i, 0, 10));
-        TS_ASSERT_EQUALS(i, 0);
-    }
+    TS_ASSERT(!testee.getValue(game::parser::mi_ShipHull, 0, 10).isValid());
 
     // String
-    {
-        String_t s;
-        TS_ASSERT(testee.getValue(game::parser::ms_Name, s));
-        TS_ASSERT_EQUALS(s, "NN");
-    }
+    TS_ASSERT_EQUALS(testee.getValue(game::parser::ms_Name).orElse(""), "NN");
 
     // Missing index: integer
-    {
-        int32_t i = 0;
-        TS_ASSERT(!testee.getValue(game::parser::mi_Owner, i));
-        TS_ASSERT_EQUALS(i, 0);
-    }
+    TS_ASSERT(!testee.getValue(game::parser::mi_Owner).isValid());
 
     // Missing index: string
-    {
-        String_t s;
-        TS_ASSERT(!testee.getValue(game::parser::ms_DrawingComment, s));
-        TS_ASSERT_EQUALS(s, "");
-    }
+    TS_ASSERT(!testee.getValue(game::parser::ms_DrawingComment).isValid());
 }

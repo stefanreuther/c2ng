@@ -191,14 +191,12 @@ TestGameSpecFriendlyCodeList::testContainer()
     TS_ASSERT_EQUALS(testee.at(2)->getCode(), "sfc");
     TS_ASSERT_EQUALS(testee.at(3)->getCode(), "ffc");
 
-    size_t index;
-    TS_ASSERT(testee.getIndexByName("sfc", index));
-    TS_ASSERT_EQUALS(index, 2U);
-    TS_ASSERT(!testee.getIndexByName("SFC", index));
-    TS_ASSERT(!testee.getIndexByName("mkt", index));
+    TS_ASSERT_EQUALS(testee.findIndexByName("sfc").orElse(9999), 2U);
+    TS_ASSERT(!testee.findIndexByName("SFC").isValid());
+    TS_ASSERT(!testee.findIndexByName("mkt").isValid());
 
-    TS_ASSERT_EQUALS(testee.getCodeByName("sfc"), testee.begin() + 2);
-    TS_ASSERT_EQUALS(testee.getCodeByName("mkt"), testee.end());
+    TS_ASSERT_EQUALS(testee.findCodeByName("sfc"), testee.begin() + 2);
+    TS_ASSERT_EQUALS(testee.findCodeByName("mkt"), testee.end());
 
     // Sort
     testee.sort();
@@ -209,8 +207,7 @@ TestGameSpecFriendlyCodeList::testContainer()
     TS_ASSERT_EQUALS(testee.at(3)->getCode(), "sfc");
     TS_ASSERT_EQUALS((*testee.begin())->getCode(), "bfc");
 
-    TS_ASSERT(testee.getIndexByName("sfc", index));
-    TS_ASSERT_EQUALS(index, 3U);
+    TS_ASSERT_EQUALS(testee.findIndexByName("sfc").orElse(9999), 3U);
 
     // Create a sub-list
     game::map::Planet p(9);

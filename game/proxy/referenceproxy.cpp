@@ -14,37 +14,27 @@ game::proxy::ReferenceProxy::ReferenceProxy(util::RequestSender<Session> gameSen
     : m_gameSender(gameSender)
 { }
 
-bool
-game::proxy::ReferenceProxy::getReferenceName(WaitIndicator& ind, Reference ref, ObjectName which, String_t& result)
+afl::base::Optional<String_t>
+game::proxy::ReferenceProxy::getReferenceName(WaitIndicator& ind, Reference ref, ObjectName which)
 {
     class Task : public util::Request<Session> {
      public:
-        Task(Reference ref, ObjectName which)
-            : m_ref(ref), m_which(which), m_result(), m_ok(false)
+        Task(Reference ref, ObjectName which, afl::base::Optional<String_t>& result)
+            : m_ref(ref), m_which(which), m_result(result)
             { }
 
         void handle(Session& session)
-            { m_ok = session.getReferenceName(m_ref, m_which, m_result); }
-
-        bool isOK() const
-            { return m_ok; }
-
-        const String_t& getResult() const
-            { return m_result; }
+            { m_result = session.getReferenceName(m_ref, m_which); }
      private:
         const Reference m_ref;
         const ObjectName m_which;
-        String_t m_result;
-        bool m_ok;
+        afl::base::Optional<String_t>& m_result;
     };
-    Task t(ref, which);
+
+    afl::base::Optional<String_t> result;
+    Task t(ref, which, result);
     ind.call(m_gameSender, t);
-    if (t.isOK()) {
-        result = t.getResult();
-        return true;
-    } else {
-        return false;
-    }
+    return result;
 }
 
 afl::base::Optional<game::map::Point>

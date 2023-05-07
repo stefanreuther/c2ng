@@ -150,28 +150,27 @@ game::spec::MissionList::clear()
 }
 
 const game::spec::Mission*
-game::spec::MissionList::getMissionByNumber(int id, PlayerSet_t raceMask) const
+game::spec::MissionList::findMissionByNumber(int id, PlayerSet_t raceMask) const
 {
     // ex GMissionList::getMissionByNumber
     size_t slot;
-    if (getIndexByNumber(id, raceMask, slot)) {
+    if (findIndexByNumber(id, raceMask).get(slot)) {
         return at(slot);
     } else {
         return 0;
     }
 }
 
-bool
-game::spec::MissionList::getIndexByNumber(int id, PlayerSet_t raceMask, size_t& index) const
+afl::base::Optional<size_t>
+game::spec::MissionList::findIndexByNumber(int id, PlayerSet_t raceMask) const
 {
     for (size_t i = 0, n = m_data.size(); i < n; ++i) {
         const Mission& msn = m_data[i];
         if (msn.getNumber() == id && msn.getRaceMask().containsAnyOf(raceMask)) {
-            index = i;
-            return true;
+            return i;
         }
     }
-    return false;
+    return afl::base::Nothing;
 }
 
 

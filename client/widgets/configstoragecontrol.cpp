@@ -93,7 +93,7 @@ client::widgets::ConfigStorageControl::onButtonClick()
     ui::EventLoop loop(m_root);
     if (ui::widgets::MenuFrame(ui::layout::HBox::instance0, m_root, loop).doMenu(list, m_button.getExtent().getBottomLeft())) {
         int32_t result;
-        if (list.getCurrentKey(result)) {
+        if (list.getCurrentKey().get(result)) {
             sig_change.raise(static_cast<ConfigurationOption::Source>(result));
         }
     }

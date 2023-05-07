@@ -67,25 +67,25 @@ namespace {
             break;
 
          case ScreenHistory::Ship:
-            if (session.getReferenceName(Reference(Reference::Ship, ref.getX()), LongName, tmp)) {
+            if (session.getReferenceName(Reference(Reference::Ship, ref.getX()), LongName).get(tmp)) {
                 return tmp;
             }
             break;
 
          case ScreenHistory::Planet:
-            if (session.getReferenceName(Reference(Reference::Planet, ref.getX()), LongName, tmp)) {
+            if (session.getReferenceName(Reference(Reference::Planet, ref.getX()), LongName).get(tmp)) {
                 return tmp;
             }
             break;
 
          case ScreenHistory::Starbase:
-            if (session.getReferenceName(Reference(Reference::Planet, ref.getX()), PlainName, tmp)) {
+            if (session.getReferenceName(Reference(Reference::Planet, ref.getX()), PlainName).get(tmp)) {
                 return Format(tx("Starbase #%d: %s"), ref.getX(), tmp);
             }
             break;
 
          case ScreenHistory::HistoryShip:
-            if (session.getReferenceName(Reference(Reference::Ship, ref.getX()), PlainName, tmp)) {
+            if (session.getReferenceName(Reference(Reference::Ship, ref.getX()), PlainName).get(tmp)) {
                 return Format(tx("Ship History #%d: %s"), ref.getX(), tmp);
             }
             break;
@@ -101,19 +101,19 @@ namespace {
             return Format(tx("Fleet #%d"), ref.getX());
 
          case ScreenHistory::ShipTask:
-            if (session.getReferenceName(Reference(Reference::Ship, ref.getX()), PlainName, tmp)) {
+            if (session.getReferenceName(Reference(Reference::Ship, ref.getX()), PlainName).get(tmp)) {
                 return Format(tx("Ship Task #%d: %s"), ref.getX(), tmp);
             }
             break;
 
          case ScreenHistory::PlanetTask:
-            if (session.getReferenceName(Reference(Reference::Planet, ref.getX()), PlainName, tmp)) {
+            if (session.getReferenceName(Reference(Reference::Planet, ref.getX()), PlainName).get(tmp)) {
                 return Format(tx("Planet Task #%d: %s"), ref.getX(), tmp);
             }
             break;
 
          case ScreenHistory::StarbaseTask:
-            if (session.getReferenceName(Reference(Reference::Planet, ref.getX()), PlainName, tmp)) {
+            if (session.getReferenceName(Reference(Reference::Planet, ref.getX()), PlainName).get(tmp)) {
                 return Format(tx("Starbase Task #%d: %s"), ref.getX(), tmp);
             }
             break;

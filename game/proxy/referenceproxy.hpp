@@ -27,11 +27,9 @@ namespace game { namespace proxy {
             @param [in]  ind    WaitIndicator
             @param [in]  ref    Reference
             @param [in]  which  Which name to return
-            @param [out] result Name returned here
-            @retval true Name returned
-            @retval false Invalid reference; name cannot be returned
+            @return Name if reference is valid and name could be produced
             @see game::Session::getReferenceName() */
-        bool getReferenceName(WaitIndicator& ind, Reference ref, ObjectName which, String_t& result);
+        afl::base::Optional<String_t> getReferenceName(WaitIndicator& ind, Reference ref, ObjectName which);
 
         /** Get position, given a reference.
             @param [in]  ind    WaitIndicator

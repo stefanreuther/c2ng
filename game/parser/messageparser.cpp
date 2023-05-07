@@ -214,7 +214,7 @@ namespace {
          case MessageInformation::ExtraMinefield:
          case MessageInformation::ExtraPlanet:
             /* Those are identified by a mandatory Id */
-            if (tpl.getVariableSlotByName("ID", skipSlot) && skipSlot < processLimit) {
+            if (tpl.getVariableSlotByName("ID").get(skipSlot) && skipSlot < processLimit) {
                 id = parseIntegerValue(values[skipSlot]);
             }
             if (!id) {
@@ -237,7 +237,7 @@ namespace {
          case MessageInformation::PlayerScore:
          case MessageInformation::Explosion:
             /* These can have an optional Id */
-            if (tpl.getVariableSlotByName("ID", skipSlot) && skipSlot < processLimit) {
+            if (tpl.getVariableSlotByName("ID").get(skipSlot) && skipSlot < processLimit) {
                 id = parseIntegerValue(values[skipSlot]);
             }
             mergeable = (id != 0);

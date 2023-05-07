@@ -200,7 +200,7 @@ RangeDialog::onDropdownClick()
     ui::EventLoop loop(m_root);
     if (ui::widgets::MenuFrame(ui::layout::VBox::instance0, m_root, loop).doMenu(list, m_dropdownButton.getExtent().getBottomLeft())) {
         int32_t key;
-        if (list.getCurrentKey(key) && key >= 0 && key < int32_t(settings.size())) {
+        if (list.getCurrentKey().get(key) && key >= 0 && key < int32_t(settings.size())) {
             m_visConfig.mode = settings[key].mode;
             m_visConfig.range = settings[key].range;
             renderOptions();

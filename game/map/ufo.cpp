@@ -39,7 +39,7 @@ game::map::Ufo::~Ufo()
 
 // Object:
 String_t
-game::map::Ufo::getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& /*iface*/) const
+game::map::Ufo::getName(ObjectName which, afl::string::Translator& tx, const InterpreterInterface& /*iface*/) const
 {
     // ex GUfo::getName
     switch (which) {
@@ -354,55 +354,55 @@ game::map::Ufo::addMessageInformation(const game::parser::MessageInformation& in
         // -- Scalars --
         // Real ID
         int32_t iv;
-        if (info.getValue(gp::mi_UfoRealId, iv)) {
+        if (info.getValue(gp::mi_UfoRealId).get(iv)) {
             m_realId = iv;
         }
 
         // Color
-        if (info.getValue(gp::mi_Color, iv)) {
+        if (info.getValue(gp::mi_Color).get(iv)) {
             m_colorCode = iv;
         }
 
         // Speed
-        if (info.getValue(gp::mi_WarpFactor, iv)) {
+        if (info.getValue(gp::mi_WarpFactor).get(iv)) {
             m_speed = iv;
         }
 
         // Heading
-        if (info.getValue(gp::mi_Heading, iv)) {
+        if (info.getValue(gp::mi_Heading).get(iv)) {
             m_heading = iv;
         }
 
         // Ranges
-        if (info.getValue(gp::mi_UfoShipRange, iv)) {
+        if (info.getValue(gp::mi_UfoShipRange).get(iv)) {
             m_shipRange = iv;
         }
-        if (info.getValue(gp::mi_UfoPlanetRange, iv)) {
+        if (info.getValue(gp::mi_UfoPlanetRange).get(iv)) {
             m_planetRange = iv;
         }
 
         // Radius
-        if (info.getValue(gp::mi_Radius, iv)) {
+        if (info.getValue(gp::mi_Radius).get(iv)) {
             m_radius = iv;
         }
 
         // Type
-        if (info.getValue(gp::mi_Type, iv)) {
+        if (info.getValue(gp::mi_Type).get(iv)) {
             m_typeCode = iv;
         }
 
         // -- Strings --
         // (parse directly into subject variables; no type conversion needed)
-        info.getValue(gp::ms_Name, m_name);
-        info.getValue(gp::ms_UfoInfo1, m_info1);
-        info.getValue(gp::ms_UfoInfo2, m_info2);
+        info.getValue(gp::ms_Name).get(m_name);
+        info.getValue(gp::ms_UfoInfo1).get(m_info1);
+        info.getValue(gp::ms_UfoInfo2).get(m_info2);
 
         // -- Pairs --
         int32_t x, y;
-        if (info.getValue(gp::mi_X, x) && info.getValue(gp::mi_Y, y)) {
+        if (info.getValue(gp::mi_X).get(x) && info.getValue(gp::mi_Y).get(y)) {
             m_position = m_posLastSeen = Point(x, y);
         }
-        if (info.getValue(gp::mi_UfoSpeedX, x) && info.getValue(gp::mi_UfoSpeedY, y)) {
+        if (info.getValue(gp::mi_UfoSpeedX).get(x) && info.getValue(gp::mi_UfoSpeedY).get(y)) {
             m_movementVector = Point(x, y);
         }
     }

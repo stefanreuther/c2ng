@@ -24,6 +24,7 @@ using game::Reference;
 using interpreter::checkIntegerArg;
 using interpreter::checkStringArg;
 using interpreter::makeIntegerValue;
+using interpreter::makeOptionalStringValue;
 using interpreter::makeStringValue;
 
 namespace {
@@ -172,29 +173,18 @@ game::interface::getReferenceProperty(Reference ref, ReferenceProperty prop, Ses
            @since PCC2 2.40.7 */
         return makeStringValue(ref.toString(session.translator()));
 
-     case irpPlainName: {
+     case irpPlainName:
         /* @q Name:Str (Reference Property)
            Returns the user-friendly name of the reference, for example, the ship or planet name.
            @since PCC2 2.40.7 */
-        String_t result;
-        if (session.getReferenceName(ref, PlainName, result)) {
-            return makeStringValue(result);
-        } else {
-            return 0;
-        }
-     }
+        return makeOptionalStringValue(session.getReferenceName(ref, PlainName));
 
-     case irpDetailedName: {
+     case irpDetailedName:
         /* @q Name.Full:Str (Reference Property)
            Returns the full user-friendly name of the reference, for example, "Ship #13: NSEA Protector".
            @since PCC2 2.40.7 */
-        String_t result;
-        if (session.getReferenceName(ref, DetailedName, result)) {
-            return makeStringValue(result);
-        } else {
-            return 0;
-        }
-     }
+        return makeOptionalStringValue(session.getReferenceName(ref, DetailedName));
+
      case irpKind:
         /* @q Kind:Str (Reference Property)
            Returns the kind of the reference, one of:

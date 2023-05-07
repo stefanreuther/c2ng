@@ -74,7 +74,7 @@ game::map::info::renderShipPredictorUsedProperties(TagNode& list, const ShipPred
         if (!missionName.empty()) {
             makeText(makeDetail(item), missionName);
         } else {
-            if (const game::spec::Mission* msn = pred.shipList().missions().getMissionByNumber(pred.getMission(), PlayerSet_t(pred.getRealOwner()))) {
+            if (const game::spec::Mission* msn = pred.shipList().missions().findMissionByNumber(pred.getMission(), PlayerSet_t(pred.getRealOwner()))) {
                 makeText(makeDetail(item), msn->getName());
             }
         }
@@ -87,7 +87,7 @@ game::map::info::renderShipPredictorUsedProperties(TagNode& list, const ShipPred
 
         String_t shipFC = pred.getFriendlyCode();
         const game::spec::FriendlyCodeList& fcl = pred.shipList().friendlyCodes();
-        game::spec::FriendlyCodeList::Iterator_t it = fcl.getCodeByName(shipFC);
+        game::spec::FriendlyCodeList::Iterator_t it = fcl.findCodeByName(shipFC);
         if (it != fcl.end()) {
             TagNode& detail = makeDetail(item);
             makeText(makeBold(detail), shipFC);

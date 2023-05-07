@@ -107,7 +107,7 @@ client::si::StringListDialogWidget::run(ui::Root& root, afl::string::Translator&
 
     // Update current
     if (result) {
-        getCurrentKey(m_current);
+        getCurrentKey().get(m_current);
     }
     return result;
 }

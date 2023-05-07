@@ -93,35 +93,35 @@ TestGameBrowserAccount::testEncode()
     const String_t* p;
 
     p = testee.get("0");
-    TS_ASSERT(!testee.getEncoded("0", result));
+    TS_ASSERT(!testee.getEncoded("0").isValid());
     TS_ASSERT(p == 0);
 
     p = testee.get("1");
-    TS_ASSERT(testee.getEncoded("1", result));
+    TS_ASSERT(testee.getEncoded("1").get(result));
     TS_ASSERT(p != 0);
     TS_ASSERT_EQUALS(*p, "");
     TS_ASSERT_EQUALS(result, "");;
 
     p = testee.get("2");
-    TS_ASSERT(testee.getEncoded("2", result));
+    TS_ASSERT(testee.getEncoded("2").get(result));
     TS_ASSERT(p != 0);
     TS_ASSERT_EQUALS(*p, "YQ==");
     TS_ASSERT_EQUALS(result, "a");
 
     p = testee.get("3");
-    TS_ASSERT(testee.getEncoded("3", result));
+    TS_ASSERT(testee.getEncoded("3").get(result));
     TS_ASSERT(p != 0);
     TS_ASSERT_EQUALS(*p, "YWE=");
     TS_ASSERT_EQUALS(result, "aa");
 
     p = testee.get("4");
-    TS_ASSERT(testee.getEncoded("4", result));
+    TS_ASSERT(testee.getEncoded("4").get(result));
     TS_ASSERT(p != 0);
     TS_ASSERT_EQUALS(*p, "YWFh");
     TS_ASSERT_EQUALS(result, "aaa");
 
     p = testee.get("5");
-    TS_ASSERT(testee.getEncoded("5", result));
+    TS_ASSERT(testee.getEncoded("5").get(result));
     TS_ASSERT(p != 0);
     TS_ASSERT_EQUALS(*p, "YWFhYQ==");
     TS_ASSERT_EQUALS(result, "aaaa");;

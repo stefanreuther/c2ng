@@ -13,7 +13,7 @@ afl::data::Value*
 game::interface::getExplosionProperty(const game::map::Explosion& expl,
                                       ExplosionProperty iep,
                                       afl::string::Translator& tx,
-                                      InterpreterInterface& iface)
+                                      const InterpreterInterface& iface)
 {
     game::map::Point pt;
     switch (iep) {

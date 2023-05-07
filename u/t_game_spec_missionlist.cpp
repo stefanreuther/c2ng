@@ -296,26 +296,26 @@ TestGameSpecMissionList::testAddMerge()
 
     // Test lookup
     const Mission* p;
-    p = testee.getMissionByNumber(1, game::PlayerSet_t(1));
+    p = testee.findMissionByNumber(1, game::PlayerSet_t(1));
     TS_ASSERT(p != 0);
     TS_ASSERT_EQUALS(p->getName(), "Explore");
 
-    p = testee.getMissionByNumber(9, game::PlayerSet_t(1));
+    p = testee.findMissionByNumber(9, game::PlayerSet_t(1));
     TS_ASSERT(p != 0);
     TS_ASSERT_EQUALS(p->getName(), "Special 1");
 
-    p = testee.getMissionByNumber(9, game::PlayerSet_t(4));
+    p = testee.findMissionByNumber(9, game::PlayerSet_t(4));
     TS_ASSERT(p == 0);
 
     // Test position lookup
     size_t index = 9999;
-    TS_ASSERT(testee.getIndexByNumber(1, game::PlayerSet_t(3), index));
+    TS_ASSERT(testee.findIndexByNumber(1, game::PlayerSet_t(3)).get(index));
     TS_ASSERT_EQUALS(index, 0U);
 
-    TS_ASSERT(testee.getIndexByNumber(9, game::PlayerSet_t(2), index));
+    TS_ASSERT(testee.findIndexByNumber(9, game::PlayerSet_t(2)).get(index));
     TS_ASSERT_EQUALS(index, 3U);
 
-    TS_ASSERT(!testee.getIndexByNumber(9, game::PlayerSet_t(4), index));
+    TS_ASSERT(!testee.findIndexByNumber(9, game::PlayerSet_t(4)).isValid());
 }
 
 /** Test addMission(), letter assignment. */

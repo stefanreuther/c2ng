@@ -63,7 +63,7 @@ game::map::Minefield::~Minefield()
 
 // Object:
 String_t
-game::map::Minefield::getName(ObjectName /*which*/, afl::string::Translator& tx, InterpreterInterface& iface) const
+game::map::Minefield::getName(ObjectName /*which*/, afl::string::Translator& tx, const InterpreterInterface& iface) const
 {
     // ex GMinefield::getName
     String_t result;
@@ -77,7 +77,7 @@ game::map::Minefield::getName(ObjectName /*which*/, afl::string::Translator& tx,
         }
 
         String_t adj;
-        if (iface.getPlayerAdjective(m_owner, adj)) {
+        if (iface.getPlayerAdjective(m_owner).get(adj)) {
             result += " (";
             result += adj;
             result += ")";

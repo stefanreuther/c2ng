@@ -113,7 +113,7 @@ ChooseHullDialog::run(const String_t& title)
 int32_t
 ChooseHullDialog::getCurrent()
 {
-    m_list.getCurrentKey(m_current);
+    m_list.getCurrentKey().get(m_current);
     return m_current;
 }
 
@@ -122,7 +122,7 @@ ChooseHullDialog::onListChange(const gsi::ListContent& content, size_t /*index*/
 {
     // Fetch current. If list is still empty, this is a nop.
     if (page == gsi::HullPage) {
-        m_list.getCurrentKey(m_current);
+        m_list.getCurrentKey().get(m_current);
 
         // Replace list
         util::StringList list;
@@ -195,7 +195,7 @@ ChooseHullDialog::doMenu(gfx::Point pt)
     ui::EventLoop loop(m_root);
     ui::widgets::MenuFrame frame(ui::layout::VBox::instance5, m_root, loop);
     int32_t choice = 0;
-    if (frame.doMenu(list, pt) && list.getCurrentKey(choice)) {
+    if (frame.doMenu(list, pt) && list.getCurrentKey().get(choice)) {
         if (choice == 0) {
             // Show all
             if (m_playerFilter != 0) {

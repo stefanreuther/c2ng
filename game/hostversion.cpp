@@ -64,7 +64,7 @@ namespace {
             }
         } else {
             char ch;
-            if (p.getCurrentCharacter(ch) && ch >= 'a' && ch <= 'z') {
+            if (p.getCurrentCharacter().get(ch) && ch >= 'a' && ch <= 'z') {
                 patch = (ch - 'a' + 1);
             }
         }

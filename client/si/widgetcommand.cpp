@@ -343,10 +343,7 @@ client::si::IFListboxDialogRun(game::Session& /*session*/, ScriptSide& ss, const
                     // Do it.
                     std::auto_ptr<afl::data::Value> result;
                     if (w->run(ctl.root(), ctl.translator(), us.gameSender())) {
-                        int32_t i;
-                        if (w->getCurrentKey(i)) {
-                            result.reset(interpreter::makeIntegerValue(i));
-                        }
+                        result.reset(interpreter::makeOptionalIntegerValue(w->getCurrentKey()));
                     }
                     us.setVariable(link, "UI.RESULT", result);
                     us.continueProcess(link);
@@ -381,10 +378,7 @@ client::si::IFListboxDialogRunMenu(game::Session& /*session*/, ScriptSide& ss, c
                     // Do it.
                     std::auto_ptr<afl::data::Value> result;
                     if (w->runMenu(ctl.root(), m_anchor)) {
-                        int32_t i;
-                        if (w->getCurrentKey(i)) {
-                            result.reset(interpreter::makeIntegerValue(i));
-                        }
+                        result.reset(interpreter::makeOptionalIntegerValue(w->getCurrentKey()));
                     }
                     us.setVariable(link, "UI.RESULT", result);
                     us.continueProcess(link);

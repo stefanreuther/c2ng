@@ -6,25 +6,25 @@
 #include "game/test/interpreterinterface.hpp"
 
 String_t
-game::test::InterpreterInterface::getComment(Scope /*scope*/, int /*id*/)
+game::test::InterpreterInterface::getComment(Scope /*scope*/, int /*id*/) const
 {
     return String_t();
 }
 
 bool
-game::test::InterpreterInterface::hasTask(Scope /*scope*/, int /*id*/)
+game::test::InterpreterInterface::hasTask(Scope /*scope*/, int /*id*/) const
 {
     return false;
 }
 
-bool
-game::test::InterpreterInterface::getHullShortName(int /*nr*/, String_t& /*out*/)
+afl::base::Optional<String_t>
+game::test::InterpreterInterface::getHullShortName(int /*nr*/) const
 {
-    return false;
+    return afl::base::Nothing;
 }
 
-bool
-game::test::InterpreterInterface::getPlayerAdjective(int /*nr*/, String_t& /*out*/)
+afl::base::Optional<String_t>
+game::test::InterpreterInterface::getPlayerAdjective(int /*nr*/) const
 {
-    return false;
+    return afl::base::Nothing;
 }

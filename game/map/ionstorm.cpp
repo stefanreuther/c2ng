@@ -61,7 +61,7 @@ game::map::IonStorm::~IonStorm()
 
 // Object:
 String_t
-game::map::IonStorm::getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& /*iface*/) const
+game::map::IonStorm::getName(ObjectName which, afl::string::Translator& tx, const InterpreterInterface& /*iface*/) const
 {
     // ex GIonStorm::getName
     if (m_name.empty()) {
@@ -219,14 +219,14 @@ game::map::IonStorm::addMessageInformation(const game::parser::MessageInformatio
     // Allow voltage=0 to remove a storm. Otherwise, we need at minimum position, radius.
     namespace gp = game::parser;
     int32_t x, y, radius, voltage;
-    if (info.getValue(gp::mi_IonVoltage, voltage)) {
+    if (info.getValue(gp::mi_IonVoltage).get(voltage)) {
         if (voltage == 0) {
             // Remove the storm
             setVoltage(voltage);
             setIsGrowing(false);
         } else {
             // Try to create the storm
-            if (info.getValue(gp::mi_X, x) && info.getValue(gp::mi_Y, y) && info.getValue(gp::mi_Radius, radius)) {
+            if (info.getValue(gp::mi_X).get(x) && info.getValue(gp::mi_Y).get(y) && info.getValue(gp::mi_Radius).get(radius)) {
                 // Success
                 setPosition(Point(x, y));
                 setVoltage(voltage);
@@ -234,7 +234,7 @@ game::map::IonStorm::addMessageInformation(const game::parser::MessageInformatio
 
                 // Try to set status. Either explicit from message, or implicit from voltage
                 int status;
-                if (info.getValue(gp::mi_IonStatus, status)) {
+                if (info.getValue(gp::mi_IonStatus).get(status)) {
                     setIsGrowing(status != 0);
                 } else {
                     setIsGrowing((voltage & 1) != 0);
@@ -242,13 +242,13 @@ game::map::IonStorm::addMessageInformation(const game::parser::MessageInformatio
 
                 // Try to set movement vector
                 int speed, heading;
-                if (info.getValue(gp::mi_WarpFactor, speed) && info.getValue(gp::mi_Heading, heading)) {
+                if (info.getValue(gp::mi_WarpFactor).get(speed) && info.getValue(gp::mi_Heading).get(heading)) {
                     setWarpFactor(speed);
                     setHeading(heading);
                 }
 
                 // Try to set the name
-                info.getValue(gp::ms_Name, m_name);
+                info.getValue(gp::ms_Name).get(m_name);
             }
         }
     }

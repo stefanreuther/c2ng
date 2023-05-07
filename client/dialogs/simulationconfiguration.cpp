@@ -264,7 +264,7 @@ SimulationConfigurationEditor::editMode()
     // Ask user
     if (ui::widgets::doStandardDialog(m_translator("Mode"), String_t(), box, true, m_root, m_translator)) {
         int32_t value;
-        if (box.getCurrentKey(value)) {
+        if (box.getCurrentKey().get(value)) {
             setMode(Configuration::VcrMode(value));
         }
     }

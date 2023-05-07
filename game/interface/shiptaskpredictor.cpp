@@ -193,7 +193,7 @@ game::interface::ShipTaskPredictor::predictInstruction(const String_t& name, int
         interpreter::checkIntegerArg(t, args.getNext(), 0, MAX_NUMBER);
         m_predictor.setMission(m, i, t);
 
-        const game::spec::Mission* msn = m_shipList.missions().getMissionByNumber(m, PlayerSet_t(m_config.getPlayerMissionNumber(m_predictor.getRealOwner())));
+        const game::spec::Mission* msn = m_shipList.missions().findMissionByNumber(m, PlayerSet_t(m_config.getPlayerMissionNumber(m_predictor.getRealOwner())));
         if (msn != 0 && msn->hasFlag(game::spec::Mission::WaypointMission)) {
             const game::map::Ship* sh = m_universe.ships().get(i);
             game::map::Point shipPos;

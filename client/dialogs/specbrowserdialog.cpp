@@ -164,7 +164,7 @@ namespace {
         // Dialog
         ui::widgets::ScrollbarContainer cont(list, root);
         if (ui::widgets::doStandardDialog(title, String_t(), cont, true, root, tx)) {
-            list.getCurrentKey(player);
+            list.getCurrentKey().get(player);
             return true;
         } else {
             return false;
@@ -374,7 +374,7 @@ namespace {
                 m_handleListSelectionChange = false;
                 m_list.swapItems(list);
                 m_list.setCurrentItem(index);
-                m_list.getCurrentKey(m_lastSelectedId);
+                m_list.getCurrentKey().get(m_lastSelectedId);
                 m_handleListSelectionChange = true;
             }
 
@@ -393,7 +393,7 @@ namespace {
             {
                 if (m_handleListSelectionChange) {
                     int32_t key;
-                    if (m_list.getCurrentKey(key)) {
+                    if (m_list.getCurrentKey().get(key)) {
                         if (key != m_lastSelectedId) {
                             m_proxy.setId(key);
                             m_lastSelectedId = key;
@@ -433,7 +433,7 @@ namespace {
                     // Need to validate index because proxy could have updated the list in the meantime.
                     // If it does (it normally doesn't) this means our index will be off, but at least do not crash.
                     int32_t key;
-                    if (list.getCurrentKey(key)) {
+                    if (list.getCurrentKey().get(key)) {
                         size_t index = size_t(key);
                         if (index < m_availableFilters.size()) {
                             addFilter(m_availableFilters[index]);
@@ -484,7 +484,7 @@ namespace {
                     ui::EventLoop loop(m_root);
                     if (ui::widgets::MenuFrame(ui::layout::HBox::instance0, m_root, loop).doMenu(list, m_filterDisplay.getSortAnchor())) {
                         int32_t key = 0;
-                        if (list.getCurrentKey(key)) {
+                        if (list.getCurrentKey().get(key)) {
                             m_proxy.setSortOrder(gsi::FilterAttribute(key));
                         }
                     }

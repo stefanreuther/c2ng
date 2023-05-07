@@ -174,8 +174,7 @@ game::score::Loader::save(const TurnScoreList& list, afl::io::Stream& out)
     header.headerFieldAddress[0] = uint16_t(out.getPos());
     header.numRecordFields = uint16_t(numScores);
     for (size_t i = 0; i < numScores; ++i) {
-        ScoreId_t id = 0;
-        list.getScoreByIndex(i, id);
+        ScoreId_t id = list.getScoreByIndex(i).orElse(0);
 
         st::UInt16_t packedId;
         packedId = uint16_t(id);

@@ -39,7 +39,7 @@ game::interface::FriendlyCodeFunction::get(interpreter::Arguments& args)
     }
 
     size_t slot;
-    if (!shipList->friendlyCodes().getIndexByName(fc, slot)) {
+    if (!shipList->friendlyCodes().findIndexByName(fc).get(slot)) {
         return 0;
     }
 

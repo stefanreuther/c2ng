@@ -6,8 +6,9 @@
 #define C2NG_GAME_BROWSER_ACCOUNT_HPP
 
 #include <map>
-#include "afl/string/string.hpp"
+#include "afl/base/optional.hpp"
 #include "afl/io/textfile.hpp"
+#include "afl/string/string.hpp"
 
 namespace game { namespace browser {
 
@@ -97,11 +98,9 @@ namespace game { namespace browser {
 
         /** Get encoded attribute.
             The attribute is stored in base64 encoding.
-            \param key [in] Name of attribute. Must consist of identifier letters (alphanumerics) only.
-            \param result [out] Value of attribute.
-            \retval true Attribute found and decoded
-            \retval false Attribute not found */
-        bool getEncoded(String_t key, String_t& result) const;
+            \param key Name of attribute. Must consist of identifier letters (alphanumerics) only.
+            \return Decoded attribute value if found; otherwise, Nothing */
+        afl::base::Optional<String_t> getEncoded(String_t key) const;
 
         /** Check validity.
             A valid account has all required mandatory fields.

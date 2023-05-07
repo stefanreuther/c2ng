@@ -212,8 +212,7 @@ namespace {
                 game::proxy::SelectionProxy proxy(m_gameSender, m_root.engine().dispatcher());
 
                 // Commands
-                int32_t key = 0;
-                list.getCurrentKey(key);
+                int32_t key = list.getCurrentKey().orElse(0);
                 switch (key) {
                  case Mark:
                     proxy.markList(game::map::Selections::CurrentLayer, bases, true);

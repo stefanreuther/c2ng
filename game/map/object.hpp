@@ -75,7 +75,7 @@ namespace game { namespace map {
             \param tx    Translator
             \param iface Interface to access interpreter properties
             \return Name */
-        virtual String_t getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const = 0;
+        virtual String_t getName(ObjectName which, afl::string::Translator& tx, const InterpreterInterface& iface) const = 0;
 
         /** Get owner of this object.
             \return owner if known */

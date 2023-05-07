@@ -17,7 +17,7 @@ TestGameMapCircularObject::testIt()
             : CircularObject(0)
             { }
         // Object:
-        virtual String_t getName(game::ObjectName /*which*/, afl::string::Translator& /*tx*/, game::InterpreterInterface& /*iface*/) const
+        virtual String_t getName(game::ObjectName /*which*/, afl::string::Translator& /*tx*/, const game::InterpreterInterface& /*iface*/) const
             { return String_t(); }
         virtual afl::base::Optional<int> getOwner() const
             { return 0; }

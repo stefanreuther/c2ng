@@ -81,14 +81,13 @@ game::browser::Account::setEncoded(String_t key, String_t value, bool persistent
 }
 
 // Get encoded attribute.
-bool
-game::browser::Account::getEncoded(String_t key, String_t& result) const
+afl::base::Optional<String_t>
+game::browser::Account::getEncoded(String_t key) const
 {
     if (const String_t* p = get(key)) {
-        result = Base64().decode(afl::string::toBytes(*p));
-        return true;
+        return Base64().decode(afl::string::toBytes(*p));
     } else {
-        return false;
+        return afl::base::Nothing;
     }
 }
 

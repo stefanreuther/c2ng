@@ -25,7 +25,7 @@ namespace {
             { return 0; }
         virtual afl::base::Optional<game::map::Point> getPosition() const
             { return afl::base::Nothing; }
-        virtual String_t getName(game::ObjectName, afl::string::Translator&, game::InterpreterInterface&) const
+        virtual String_t getName(game::ObjectName, afl::string::Translator&, const game::InterpreterInterface&) const
             { return String_t(); }
     };
 
@@ -39,7 +39,7 @@ namespace {
             { return 0; }
         virtual afl::base::Optional<game::map::Point> getPosition() const
             { return m_pos; }
-        virtual String_t getName(game::ObjectName, afl::string::Translator&, game::InterpreterInterface&) const
+        virtual String_t getName(game::ObjectName, afl::string::Translator&, const game::InterpreterInterface&) const
             { return String_t(); }
      private:
         game::map::Point m_pos;

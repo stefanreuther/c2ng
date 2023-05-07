@@ -156,7 +156,7 @@ namespace game { namespace actions {
             @param [out] result If non-null, information about the conflict is placed here
             @param [in]  tx     Translator (for generating resulting name)
             @param [in]  iface  Interface (for generating resulting name) */
-        ConflictStatus findConflict(Conflict* result, afl::string::Translator& tx, InterpreterInterface& iface) const;
+        ConflictStatus findConflict(Conflict* result, afl::string::Translator& tx, const InterpreterInterface& iface) const;
 
         /** Check whether ship has the CloneOnce ability.
             This means the copy will be Unclonable.

@@ -73,7 +73,7 @@ namespace {
         box.setCurrentKey(current);
 
         if (doStandardDialog(title, String_t(), box, true, root, tx)) {
-            return box.getCurrentKey(current);
+            return box.getCurrentKey().get(current);
         } else {
             return false;
         }

@@ -105,7 +105,7 @@ namespace game { namespace map {
          *  Object interface
          */
 
-        virtual String_t getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const;
+        virtual String_t getName(ObjectName which, afl::string::Translator& tx, const InterpreterInterface& iface) const;
         virtual afl::base::Optional<int> getOwner() const;
         virtual afl::base::Optional<Point> getPosition() const;
 

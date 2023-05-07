@@ -412,7 +412,7 @@ game::map::Ship::internalCheck(PlayerSet_t availablePlayers, int turnNumber)
 
 
 String_t
-game::map::Ship::getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const
+game::map::Ship::getName(ObjectName which, afl::string::Translator& tx, const InterpreterInterface& iface) const
 {
     // ex GShip::getName, global.pas:ShipNameRaw (PlainName), global.pas:Shipname (LongName)
     // Figure out plain name
@@ -440,10 +440,10 @@ game::map::Ship::getName(ObjectName which, afl::string::Translator& tx, Interpre
         } else {
             int owner;
             String_t ownerName;
-            if (getOwner().get(owner) && iface.getPlayerAdjective(owner, ownerName)) {
+            if (getOwner().get(owner) && iface.getPlayerAdjective(owner).get(ownerName)) {
                 int hullNr;
                 String_t hullName;
-                if (getHull().get(hullNr) && iface.getHullShortName(hullNr, hullName)) {
+                if (getHull().get(hullNr) && iface.getHullShortName(hullNr).get(hullName)) {
                     result += afl::string::Format(" (%s %s)", ownerName, hullName);
                 } else {
                     result += afl::string::Format(tx.translateString(" (%s starship)").c_str(), ownerName);

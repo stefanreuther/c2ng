@@ -5,6 +5,7 @@
 #ifndef C2NG_GAME_SCORE_TURNSCORELIST_HPP
 #define C2NG_GAME_SCORE_TURNSCORELIST_HPP
 
+#include "afl/base/optional.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "game/parser/messageinformation.hpp"
 #include "game/score/scoreid.hpp"
@@ -74,11 +75,9 @@ namespace game { namespace score {
         Slot_t addSlot(ScoreId_t id);
 
         /** Get a score slot by type.
-            \param id  [in] Score Id
-            \param out [out] Slot number
-            \retval true Score Id was known, \c out was set
-            \retval false Score Id was not known, \c out not set */
-        bool getSlot(ScoreId_t id, Slot_t& out) const;
+            \param id  Score Id
+            \return Slot number if Score Id is known */
+        afl::base::Optional<Slot_t> getSlot(ScoreId_t id) const;
 
         /** Add a score description.
             A score description provides additional meta-information for a score Id.
@@ -139,11 +138,9 @@ namespace game { namespace score {
         size_t getNumScores() const;
 
         /** Get score Id by index.
-            \param index [in] Index [0,getNumScores())
-            \param result [out] Score Id
-            \retval true Index ok, \c result has been set
-            \retval false Index out of range, \c result not set */
-        bool getScoreByIndex(size_t index, ScoreId_t& result) const;
+            \param index Index [0,getNumScores())
+            \return Score Id if index is valid */
+        afl::base::Optional<ScoreId_t> getScoreByIndex(size_t index) const;
 
         /** Set "future features" flag.
             This flag is for convenience of the user and does not affect TurnScoreList's behaviour.

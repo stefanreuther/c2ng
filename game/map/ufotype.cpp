@@ -132,7 +132,7 @@ game::map::UfoType::addMessageInformation(const game::parser::MessageInformation
             // Does not exist. Do we have the essential information to create it?
             // type/color are essential for addUfo().
             int32_t type, color, x, y;
-            if (info.getValue(gp::mi_Type, type) && info.getValue(gp::mi_Color, color) && info.getValue(gp::mi_X, x) && info.getValue(gp::mi_Y, y)) {
+            if (info.getValue(gp::mi_Type).get(type) && info.getValue(gp::mi_Color).get(color) && info.getValue(gp::mi_X).get(x) && info.getValue(gp::mi_Y).get(y)) {
                 existing = addUfo(info.getObjectId(), type, color);
             }
         }

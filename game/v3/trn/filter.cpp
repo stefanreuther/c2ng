@@ -61,7 +61,7 @@ namespace game { namespace v3 { namespace trn { namespace {
     {
         // ex game/un-trnflt.cc:isSingle
         char ch;
-        return p.getCurrentCharacter(ch)
+        return p.getCurrentCharacter().get(ch)
             && (ch == '('
                 || ch == '\''
                 || ch == '"'

@@ -127,12 +127,12 @@ TestGameScoreLoader::testSimple()
     TS_ASSERT_EQUALS(list.getTurnByIndex(1)->getTurnNumber(), 8);
 
     game::score::TurnScore::Slot_t planetSlot, freighterSlot, capitalSlot, baseSlot, pbpSlot, milSlot;
-    TS_ASSERT(list.getSlot(game::score::ScoreId_Planets,     planetSlot));
-    TS_ASSERT(list.getSlot(game::score::ScoreId_Freighters,  freighterSlot));
-    TS_ASSERT(list.getSlot(game::score::ScoreId_Capital,     capitalSlot));
-    TS_ASSERT(list.getSlot(game::score::ScoreId_Bases,       baseSlot));
-    TS_ASSERT(list.getSlot(game::score::ScoreId_BuildPoints, pbpSlot));
-    TS_ASSERT(list.getSlot(1000,                             milSlot));
+    TS_ASSERT(list.getSlot(game::score::ScoreId_Planets)    .get(planetSlot));
+    TS_ASSERT(list.getSlot(game::score::ScoreId_Freighters) .get(freighterSlot));
+    TS_ASSERT(list.getSlot(game::score::ScoreId_Capital)    .get(capitalSlot));
+    TS_ASSERT(list.getSlot(game::score::ScoreId_Bases)      .get(baseSlot));
+    TS_ASSERT(list.getSlot(game::score::ScoreId_BuildPoints).get(pbpSlot));
+    TS_ASSERT(list.getSlot(1000)                            .get(milSlot));
 
     // Verify scores
     const game::score::TurnScore* p = list.getTurn(7);
@@ -255,11 +255,11 @@ TestGameScoreLoader::testLoadOld()
 
     // Slots
     game::score::TurnScore::Slot_t planetSlot, freighterSlot, capitalSlot, baseSlot, pbpSlot;
-    TS_ASSERT(list.getSlot(game::score::ScoreId_Planets,     planetSlot));
-    TS_ASSERT(list.getSlot(game::score::ScoreId_Freighters,  freighterSlot));
-    TS_ASSERT(list.getSlot(game::score::ScoreId_Capital,     capitalSlot));
-    TS_ASSERT(list.getSlot(game::score::ScoreId_Bases,       baseSlot));
-    TS_ASSERT(list.getSlot(game::score::ScoreId_BuildPoints, pbpSlot));
+    TS_ASSERT(list.getSlot(game::score::ScoreId_Planets)    .get(planetSlot));
+    TS_ASSERT(list.getSlot(game::score::ScoreId_Freighters) .get(freighterSlot));
+    TS_ASSERT(list.getSlot(game::score::ScoreId_Capital)    .get(capitalSlot));
+    TS_ASSERT(list.getSlot(game::score::ScoreId_Bases)      .get(baseSlot));
+    TS_ASSERT(list.getSlot(game::score::ScoreId_BuildPoints).get(pbpSlot));
 
     // Verify scores
     const game::score::TurnScore* p = list.getTurn(3);
@@ -388,11 +388,11 @@ TestGameScoreLoader::testSave()
 
     // Slots
     game::score::TurnScore::Slot_t planetSlot, freighterSlot, capitalSlot, baseSlot, pbpSlot;
-    TS_ASSERT(list.getSlot(game::score::ScoreId_Planets,     planetSlot));
-    TS_ASSERT(list.getSlot(game::score::ScoreId_Freighters,  freighterSlot));
-    TS_ASSERT(list.getSlot(game::score::ScoreId_Capital,     capitalSlot));
-    TS_ASSERT(list.getSlot(game::score::ScoreId_Bases,       baseSlot));
-    TS_ASSERT(list.getSlot(game::score::ScoreId_BuildPoints, pbpSlot));
+    TS_ASSERT(list.getSlot(game::score::ScoreId_Planets)    .get(planetSlot));
+    TS_ASSERT(list.getSlot(game::score::ScoreId_Freighters) .get(freighterSlot));
+    TS_ASSERT(list.getSlot(game::score::ScoreId_Capital)    .get(capitalSlot));
+    TS_ASSERT(list.getSlot(game::score::ScoreId_Bases)      .get(baseSlot));
+    TS_ASSERT(list.getSlot(game::score::ScoreId_BuildPoints).get(pbpSlot));
 
     // Verify scores
     const game::score::TurnScore* p = list.getTurn(3);
