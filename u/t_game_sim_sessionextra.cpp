@@ -70,7 +70,7 @@ TestGameSimSessionExtra::testAlliances()
     cc.addCommand(game::v3::Command::Enemies, 10, "drop");
 
     // Alliance handler
-    t.alliances().addNewHandler(new game::alliance::PHostHandler(MKVERSION(4,2,0), t, gs, 3), tx);
+    t.alliances().addNewHandler(new game::alliance::PHostHandler(t, *gs.getRoot(), 3), tx);
     t.alliances().postprocess();
 
     // Simulator session

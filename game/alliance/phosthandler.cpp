@@ -116,10 +116,9 @@ namespace {
 }
 
 
-game::alliance::PHostHandler::PHostHandler(int32_t version, Turn& turn, Session& session, int player)
-    : m_version(version),
-      m_turn(turn),
-      m_session(session),
+game::alliance::PHostHandler::PHostHandler(Turn& turn, const afl::base::Ref<const Root>& root, int player)
+    : m_turn(turn),
+      m_root(root),
       m_player(player)
 { }
 
@@ -130,29 +129,26 @@ void
 game::alliance::PHostHandler::init(Container& allies, afl::string::Translator& tx)
 {
     // ex GPHostAllianceHandler::processVersion (sort-of), phost.pas:InitAlliances (part)
-    afl::base::Ptr<Root> root = m_session.getRoot();
-    if (root.get() != 0) {
-        // FIXME: if CPEnableAllies is disabled, still show the allies in case they are preconfigured (same as PCC 1.1.21)
-        if (root->hostConfiguration()[HostConfiguration::CPEnableAllies]()) {
-            // Add the main alliance level
-            allies.addLevel(Level(tx("Alliance offer"), MAIN_ID, Level::Flags_t(Level::IsOffer)));
+    // FIXME: if CPEnableAllies is disabled, still show the allies in case they are preconfigured (same as PCC 1.1.21)
+    if (m_root->hostConfiguration()[HostConfiguration::CPEnableAllies]()) {
+        // Add the main alliance level
+        allies.addLevel(Level(tx("Alliance offer"), MAIN_ID, Level::Flags_t(Level::IsOffer)));
 
-            // Add the sub levels
-            for (size_t i = 0; i < NUM_LEVELS; ++i) {
-                Level::Flags_t flags;
-                flags += Level::NeedsOffer;
-                flags += Level::AllowConditional;
-                if (i == COMBAT_LEVEL_INDEX) {
-                    flags += Level::IsCombat;
-                }
-                allies.addLevel(Level(tx(LEVEL_NAMES[i]), LEVEL_IDS[i], flags));
+        // Add the sub levels
+        for (size_t i = 0; i < NUM_LEVELS; ++i) {
+            Level::Flags_t flags;
+            flags += Level::NeedsOffer;
+            flags += Level::AllowConditional;
+            if (i == COMBAT_LEVEL_INDEX) {
+                flags += Level::IsCombat;
             }
+            allies.addLevel(Level(tx(LEVEL_NAMES[i]), LEVEL_IDS[i], flags));
         }
+    }
 
-        if (m_version >= MKVERSION(4,0,8) && root->hostConfiguration()[HostConfiguration::CPEnableEnemies]()) {
-            // Add the enemies, if supported by host
-            allies.addLevel(Level(tx("Enemy"), ENEMY_ID, Level::Flags_t(Level::IsEnemy)));
-        }
+    if (m_root->hostVersion().getVersion() >= MKVERSION(4,0,8) && m_root->hostConfiguration()[HostConfiguration::CPEnableEnemies]()) {
+        // Add the enemies, if supported by host
+        allies.addLevel(Level(tx("Enemy"), ENEMY_ID, Level::Flags_t(Level::IsEnemy)));
     }
 }
 

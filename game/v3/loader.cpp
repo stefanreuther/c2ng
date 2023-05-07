@@ -187,7 +187,7 @@ game::v3::Loader::prepareTurn(Turn& turn, const Root& root, Session& session, in
 
     // Alliances
     if (root.hostVersion().isPHost()) {
-        turn.alliances().addNewHandler(new game::alliance::PHostHandler(root.hostVersion().getVersion(), turn, session, player), session.translator());
+        turn.alliances().addNewHandler(new game::alliance::PHostHandler(turn, root, player), session.translator());
     } else {
         turn.alliances().addNewHandler(new game::alliance::HostHandler(root.hostVersion().getVersion(), turn, player), session.translator());
     }

@@ -30,9 +30,7 @@ TestGameAlliancePHostHandler::testIt()
     // Session
     const uint32_t VERSION = MKVERSION(4,0,0);
     afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session session(tx, fs);
-    session.setRoot(game::test::makeRoot(HostVersion(HostVersion::PHost, VERSION)).asPtr());
+    afl::base::Ref<game::Root> root(game::test::makeRoot(HostVersion(HostVersion::PHost, VERSION)));
 
     // Turn
     game::Turn turn;
@@ -40,7 +38,7 @@ TestGameAlliancePHostHandler::testIt()
     // Create the container
     const int PLAYER = 9;
     Container c;
-    c.addNewHandler(new game::alliance::PHostHandler(VERSION, turn, session, PLAYER), tx);
+    c.addNewHandler(new game::alliance::PHostHandler(turn, root, PLAYER), tx);
 
     // Container must contain some levels
     TS_ASSERT(c.getLevels().size() >= 6U);
@@ -80,9 +78,7 @@ TestGameAlliancePHostHandler::testEnemy()
     // Session
     const uint32_t VERSION = MKVERSION(4,1,0);
     afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session session(tx, fs);
-    session.setRoot(game::test::makeRoot(HostVersion(HostVersion::PHost, VERSION)).asPtr());
+    afl::base::Ref<game::Root> root(game::test::makeRoot(HostVersion(HostVersion::PHost, VERSION)));
 
     // Turn
     game::Turn turn;
@@ -90,7 +86,7 @@ TestGameAlliancePHostHandler::testEnemy()
     // Create the container
     const int PLAYER = 9;
     Container c;
-    c.addNewHandler(new game::alliance::PHostHandler(VERSION, turn, session, PLAYER), tx);
+    c.addNewHandler(new game::alliance::PHostHandler(turn, root, PLAYER), tx);
 
     // Container must contain some levels
     TS_ASSERT(c.getLevels().size() >= 6U);

@@ -6,7 +6,7 @@
 #define C2NG_GAME_ALLIANCE_PHOSTHANDLER_HPP
 
 #include "game/alliance/handler.hpp"
-#include "game/session.hpp"
+#include "game/root.hpp"
 #include "game/turn.hpp"
 
 namespace game { namespace alliance {
@@ -20,11 +20,10 @@ namespace game { namespace alliance {
     class PHostHandler : public Handler {
      public:
         /** Constructor.
-            \param version Version (used to determine available levels; see HostVersion::getVersion())
             \param turn    Turn (used to obtain game::v3::CommandExtra)
-            \param session Session (used for Root > HostConfiguration)
+            \param root    Root (used for game::config::HostConfiguration, game::HostVersion)
             \param player  Player */
-        PHostHandler(int32_t version, Turn& turn, Session& session, int player);
+        PHostHandler(Turn& turn, const afl::base::Ref<const Root>& root, int player);
         ~PHostHandler();
 
         virtual void init(Container& allies, afl::string::Translator& tx);
@@ -32,13 +31,8 @@ namespace game { namespace alliance {
         virtual void handleChanges(const Container& allies);
 
      private:
-        int32_t m_version;
-        Turn& m_turn;
-
-        // FIXME: I'm giving this guy a Session because that is guaranteed to out-live
-        // the PHostHandler and the Turn. May we give it a Ref<Root> instead?
-        Session& m_session;
-
+        Turn& m_turn;                       ///< Turn. As reference because PHostHandler lives inside it.
+        afl::base::Ref<const Root> m_root;  ///< Root. Reference-counted because it is a separate object.
         int m_player;
     };
 
