@@ -20,6 +20,18 @@ namespace {
             }
         }
     }
+
+    /** Check for dummy name.
+        PHost can filter out ship names; we detect such names to avoid overwriting a known name by a dummy.
+        \param name [in] Name, 20 bytes
+        \param ship_id [in] Ship Id
+        \return true iff it is a dummy name
+        \todo maybe recognize other client's dummy names? */
+    bool isDummyName(const String_t& name, int shipId)
+    {
+        // ex ccmain.pas:IsStubName
+        return name == String_t(afl::string::Format("Ship %d", shipId));
+    }
 }
 
 
@@ -269,7 +281,10 @@ game::map::Ship::addMessageInformation(const game::parser::MessageInformation& i
                 updateField(m_historyTimestamps[RestTime], turn, !isCurrent, m_currentData.friendlyCode, sv->getValue());
                 break;
              case gp::ms_Name:
-                updateField(m_historyTimestamps[RestTime], turn, !isCurrent, m_currentData.name, sv->getValue());
+                // Reject dummy names, unless the existing name is unknown/empty
+                if (!isDummyName(sv->getValue(), getId()) || m_currentData.name.orElse(String_t()).empty()) {
+                    updateField(m_historyTimestamps[RestTime], turn, !isCurrent, m_currentData.name, sv->getValue());
+                }
                 break;
 
              default:

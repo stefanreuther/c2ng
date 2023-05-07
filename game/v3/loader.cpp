@@ -61,18 +61,6 @@ namespace {
         gt::UInt32_t num;
     };
 
-    /** Check for dummy name.
-        PHost can filter out ship names; we detect such names to avoid overwriting a known name by a dummy.
-        \param name [in] Name, 20 bytes
-        \param ship_id [in] Ship Id
-        \return true iff it is a dummy name
-        \todo maybe recognize other client's dummy names? */
-    bool isDummyName(const String_t& name, int shipId)
-    {
-        // ex ccmain.pas:IsStubName
-        return name == String_t(afl::string::Format("Ship %d", shipId));
-    }
-
     /* Extract commands from a message.
        This figures out the PHost commands from a message a player sent to himself.
        \param trn     Game turn object
@@ -434,11 +422,8 @@ game::v3::Loader::addTarget(game::map::Universe& univ, const game::v3::structure
             info.addValue(gp::mi_Heading, heading);
         }
 
-        // Name (optional)
-        String_t name = m_charset.decode(target.name);
-        if (!isDummyName(name, shipId)) {
-            info.addValue(gp::ms_Name, name);
-        }
+        // Name
+        info.addValue(gp::ms_Name, m_charset.decode(target.name));
 
         s->addMessageInformation(info, source);
     }
