@@ -11,10 +11,21 @@
 % ExitRace with confirmation [ESC on race screen]
 Sub CCUI.ExitRace
   Local UI.Result
-  UI.Message Translate("Do you want to exit this game?"), Translate("Exit Game"), Translate("Yes No")
-  If UI.Result=1 Then
-    Try RunHook Exit
-    System.ExitRace
+  CC$ConfirmExit
+  If InStr(UI.Result, 's') Then
+    If InStr(UI.Result, 'x') Then
+      % Save and exit
+      Try RunHook Exit
+      System.ExitRace 1
+    Else
+      % Save only [temporary turn]
+      SaveGame
+    EndIf
+  Else
+    If InStr(UI.Result, 'x') Then
+      % Exit only
+      System.ExitRace 0
+    EndIf
   EndIf
 EndSub
 

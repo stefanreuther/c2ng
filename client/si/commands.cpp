@@ -30,6 +30,7 @@
 #include "client/dialogs/cloneship.hpp"
 #include "client/dialogs/commandlistdialog.hpp"
 #include "client/dialogs/entercoordinates.hpp"
+#include "client/dialogs/exitconfirmation.hpp"
 #include "client/dialogs/export.hpp"
 #include "client/dialogs/fileselectiondialog.hpp"
 #include "client/dialogs/fleetlist.hpp"
@@ -870,16 +871,27 @@ client::si::IFSystemExitClient(game::Session& session, ScriptSide& si, RequestLi
     trySaveSession(session, si, link, OutputState::ExitProgram);
 }
 
-/* @q System.ExitRace (Global Command)
+/* @q System.ExitRace Optional doSave:Int (Global Command)
    Leave current race.
-   Saves the game and returns to the <a href="pcc2:gamesel">game selection</a> menu.
+   If doSave is given as nonzero or missing, saves the game and returns to the <a href="pcc2:gamesel">game selection</a> menu.
+   If doSave is given as zero, exit without saving.
    @since PCC2 1.99.10, PCC2 2.40 */
 void
 client::si::IFSystemExitRace(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     // ex IFSystemExitRace
-    args.checkArgumentCount(0);
-    trySaveSession(session, si, link, OutputState::ExitGame);
+    args.checkArgumentCount(0, 1);
+
+    int doSave = 1;
+    if (args.getNumArgs() == 0 || !interpreter::checkIntegerArg(doSave, args.getNext())) {
+        doSave = 1;
+    }
+
+    if (doSave != 0) {
+        trySaveSession(session, si, link, OutputState::ExitGame);
+    } else {
+        si.postNewTask(link, new StateChangeTask(OutputState::ExitGame));
+    }
 }
 
 // @since PCC2 2.40.10
@@ -1634,6 +1646,37 @@ client::si::IFCCChooseInterceptTarget(game::Session& session, ScriptSide& si, Re
     } else {
         throw Error::contextError();
     }
+}
+
+// @since PCC2 2.41.1
+void
+client::si::IFCCConfirmExit(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    class Task : public UserTask {
+     public:
+        virtual void handle(Control& ctl, RequestLink2 link)
+            {
+                UserSide& iface = ctl.interface();
+                int exitFlags = client::dialogs::askExitConfirmation(ctl.root(), ctl.translator());
+                std::auto_ptr<afl::data::Value> result;
+                if (exitFlags != 0) {
+                    String_t resultStr;
+                    if ((exitFlags & client::dialogs::ExitDialog_Save) != 0) {
+                        resultStr += 's';
+                    }
+                    if ((exitFlags & client::dialogs::ExitDialog_Exit) != 0) {
+                        resultStr += 'x';
+                    }
+                    result.reset(interpreter::makeStringValue(resultStr));
+                }
+                iface.setVariable(link, "UI.RESULT", result);
+                iface.continueProcess(link);
+            }
+    };
+
+    args.checkArgumentCount(0);
+    si.postNewTask(link, new Task());
+
 }
 
 // @since PCC2 2.40.13
@@ -4884,6 +4927,7 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("CC$CHANGETECH",         new ScriptProcedure(s, &si, IFCCChangeTech));
                 s.world().setNewGlobalValue("CC$CHANGEWAYPOINT",     new ScriptProcedure(s, &si, IFCCChangeWaypoint));
                 s.world().setNewGlobalValue("CC$CHOOSEINTERCEPTTARGET", new ScriptProcedure(s, &si, IFCCChooseInterceptTarget));
+                s.world().setNewGlobalValue("CC$CONFIRMEXIT",        new ScriptProcedure(s, &si, IFCCConfirmExit));
                 s.world().setNewGlobalValue("CC$EDITAUTOBUILDSETTINGS", new ScriptProcedure(s, &si, IFCCEditAutobuildSettings));
                 s.world().setNewGlobalValue("CC$EDITBACKUP",         new ScriptProcedure(s, &si, IFCCEditBackup));
                 s.world().setNewGlobalValue("CC$EDITCOMMANDS",       new ScriptProcedure(s, &si, IFCCEditCommands));
