@@ -63,6 +63,7 @@ namespace {
         Flags_t targetFlags;          ///< Target flags (required criteria; from user-specified options).
         Flags_t fileFlags;            ///< File flags (available criteria).
         String_t fileTime;            ///< File timestamp.
+        afl::io::Stream::FileSize_t filePos;  ///< Original file position.
         bool useUI;                   ///< UI flag (from user-specified options).
     };
     typedef afl::base::Ref<State> StateRef_t;
@@ -273,56 +274,64 @@ game::interface::IFCCSelReadHeader(Session& session, interpreter::Arguments& arg
     // Read file
     afl::io::TextFile* tf = session.world().fileTable().getFile(fd);
     afl::except::checkAssertion(tf, "file not open");
+    afl::io::Stream::FileSize_t savedPosition = tf->getPos();
 
-    // - header line
-    String_t header;
-    if (!tf->readLine(header)) {
-        throw afl::except::FileTooShortException(*tf);
-    }
-    if (afl::string::strNthWord(header, 0) != "CCsel0") {
-        throw afl::except::FileFormatException(*tf, session.translator()("File is missing required signature"));
-    }
+    try {
+        // - header line
+        String_t header;
+        if (!tf->readLine(header)) {
+            throw afl::except::FileTooShortException(*tf);
+        }
+        if (afl::string::strNthWord(header, 0) != "CCsel0") {
+            throw afl::except::FileFormatException(*tf, session.translator()("File is missing required signature"));
+        }
 
-    // - layers
-    Flags_t fileFlags;
-    String_t fileLayer = afl::string::strNthWord(header, 2);
-    if (fileLayer == "1") {
-        fileFlags += AcceptSingleFlag;
-    } else if (fileLayer == "8") {
-        fileFlags += AcceptAllFlag;
-    } else {
-        throw afl::except::FileFormatException(*tf, session.translator()("Invalid layer count"));
-    }
+        // - layers
+        Flags_t fileFlags;
+        String_t fileLayer = afl::string::strNthWord(header, 2);
+        if (fileLayer == "1") {
+            fileFlags += AcceptSingleFlag;
+        } else if (fileLayer == "8") {
+            fileFlags += AcceptAllFlag;
+        } else {
+            throw afl::except::FileFormatException(*tf, session.translator()("Invalid layer count"));
+        }
 
-    // - time
-    String_t fileTime = afl::string::strNthWord(header, 1);
-    if (fileTime != "-" && fileTime != mustExist(g.getViewpointTurn().get()).getTimestamp().getTimestampAsString()) {
-        fileFlags += TimelessFlag;
-    } else {
-        fileFlags += AcceptCurrentFlag;
-    }
+        // - time
+        String_t fileTime = afl::string::strNthWord(header, 1);
+        if (fileTime != "-" && fileTime != mustExist(g.getViewpointTurn().get()).getTimestamp().getTimestampAsString()) {
+            fileFlags += TimelessFlag;
+        } else {
+            fileFlags += AcceptCurrentFlag;
+        }
 
-    // If no UI requested, and file does not match, bail out now
-    if (!useUI) {
-        if ((targetFlags & fileFlags) != fileFlags) {
-            // Using 'Error' here because those are not translated, in case anyone wants to test the text.
-            if (fileFlags.contains(TimelessFlag)) {
-                throw Error("Stale file");
-            } else {
-                throw Error("File doesn't match requested content");
+        // If no UI requested, and file does not match, bail out now
+        if (!useUI) {
+            if ((targetFlags & fileFlags) != fileFlags) {
+                // Using 'Error' here because those are not translated, in case anyone wants to test the text.
+                if (fileFlags.contains(TimelessFlag)) {
+                    throw Error("Stale file");
+                } else {
+                    throw Error("File doesn't match requested content");
+                }
             }
         }
-    }
 
-    // Build result
-    StateRef_t result(*new State());
-    result->fd = fd;
-    result->targetLayer = targetLayer;
-    result->targetFlags = targetFlags;
-    result->fileFlags = fileFlags;
-    result->fileTime = fileTime;
-    result->useUI = useUI;
-    return new StateValue_t(result);
+        // Build result
+        StateRef_t result(*new State());
+        result->fd = fd;
+        result->targetLayer = targetLayer;
+        result->targetFlags = targetFlags;
+        result->fileFlags = fileFlags;
+        result->fileTime = fileTime;
+        result->filePos = savedPosition;
+        result->useUI = useUI;
+        return new StateValue_t(result);
+    }
+    catch (...) {
+        tf->setPos(savedPosition);
+        throw;
+    }
 }
 
 /* @q CC$SelReadContent(Obj:Any):void (Internal)
@@ -348,35 +357,41 @@ game::interface::IFCCSelReadContent(Session& session, interpreter::Arguments& ar
     }
 
     // Read it
-    Selections& result = g.selections();
-    game::map::Universe& univ = mustExist(g.getViewpointTurn().get()).universe();
-    Selections tmp;
-    if (!readSelection(*tf, tmp, univ)) {
-        throw afl::except::FileFormatException(*tf, session.translator()("File format error"));
-    }
+    try {
+        Selections& result = g.selections();
+        game::map::Universe& univ = mustExist(g.getViewpointTurn().get()).universe();
+        Selections tmp;
+        if (!readSelection(*tf, tmp, univ)) {
+            throw afl::except::FileFormatException(*tf, session.translator()("File format error"));
+        }
 
-    // Assimilate into main database
-    size_t nlayers, firstlayer;
-    if (st.fileFlags.contains(AcceptAllFlag)) {
-        nlayers    = result.getNumLayers();
-        firstlayer = 0;
-    } else {
-        nlayers    = 1;
-        firstlayer = st.targetLayer;
-    }
+        // Assimilate into main database
+        size_t nlayers, firstlayer;
+        if (st.fileFlags.contains(AcceptAllFlag)) {
+            nlayers    = result.getNumLayers();
+            firstlayer = 0;
+        } else {
+            nlayers    = 1;
+            firstlayer = st.targetLayer;
+        }
 
-    bool merge = st.targetFlags.contains(MergeFlag);
-    result.copyFrom(univ, result.getCurrentLayer());
-    for (size_t L = 0; L < nlayers; ++L) {
-        mergeSelections(result, firstlayer + L, tmp, L, merge, Selections::Ship);
-        mergeSelections(result, firstlayer + L, tmp, L, merge, Selections::Planet);
-        result.limitToExistingObjects(univ, firstlayer + L);
-    }
+        bool merge = st.targetFlags.contains(MergeFlag);
+        result.copyFrom(univ, result.getCurrentLayer());
+        for (size_t L = 0; L < nlayers; ++L) {
+            mergeSelections(result, firstlayer + L, tmp, L, merge, Selections::Ship);
+            mergeSelections(result, firstlayer + L, tmp, L, merge, Selections::Planet);
+            result.limitToExistingObjects(univ, firstlayer + L);
+        }
 
-    // In any case, this operation has caused the main selection to be changed, so update everything.
-    result.copyTo(univ, result.getCurrentLayer());
-    result.sig_selectionChange.raise();
-    return 0;
+        // In any case, this operation has caused the main selection to be changed, so update everything.
+        result.copyTo(univ, result.getCurrentLayer());
+        result.sig_selectionChange.raise();
+        return 0;
+    }
+    catch (...) {
+        tf->setPos(st.filePos);
+        throw;
+    }
 }
 
 /* @q CC$SelGetQuestion(obj:Any):Str (Internal)

@@ -107,6 +107,14 @@ namespace {
         env.session.world().fileTable().closeFile(fd);
     }
 
+    // Get file position.
+    int getFilePosition(Environment& env, size_t fd)
+    {
+        afl::io::TextFile* tf = env.session.world().fileTable().getFile(fd);
+        TS_ASSERT(tf != 0);
+        return static_cast<int>(tf->getPos());
+    }
+
     // Get file content
     String_t getFile(Environment& env, String_t name)
     {
@@ -453,6 +461,7 @@ TestGameInterfaceSelectionFunctions::testSelectionLoad()
         openFile(env, 7, "/test", FileSystem::OpenRead);
 
         TS_ASSERT_THROWS(callReadHeader(env, 7), interpreter::Error);
+        TS_ASSERT_EQUALS(getFilePosition(env, 7), 0);
     }
 
     // Accepting mismatching timestamp
@@ -499,6 +508,7 @@ TestGameInterfaceSelectionFunctions::testSelectionLoad()
         openFile(env, 7, "/test", FileSystem::OpenRead);
 
         TS_ASSERT_THROWS(callReadHeader(env, 7), interpreter::Error);
+        TS_ASSERT_EQUALS(getFilePosition(env, 7), 0);
     }
 
     // Accept multiple layers
@@ -589,6 +599,7 @@ TestGameInterfaceSelectionFunctions::testSelectionLoad()
 
         std::auto_ptr<afl::data::Value> state(callReadHeader(env, 7));
         TS_ASSERT_THROWS(callReadContent(env, state.get()), afl::except::FileProblemException);
+        TS_ASSERT_EQUALS(getFilePosition(env, 7), 0);
 
         TS_ASSERT(!isShipMarked(env, 25));    // No modification
     }
@@ -605,6 +616,7 @@ TestGameInterfaceSelectionFunctions::testSelectionLoad()
 
         std::auto_ptr<afl::data::Value> state(callReadHeader(env, 7));
         TS_ASSERT_THROWS(callReadContent(env, state.get()), afl::except::FileProblemException);
+        TS_ASSERT_EQUALS(getFilePosition(env, 7), 0);
 
         TS_ASSERT(!isShipMarked(env, 25));    // No modification
     }
@@ -621,6 +633,7 @@ TestGameInterfaceSelectionFunctions::testSelectionLoad()
 
         std::auto_ptr<afl::data::Value> state(callReadHeader(env, 7));
         TS_ASSERT_THROWS(callReadContent(env, state.get()), afl::except::FileProblemException);
+        TS_ASSERT_EQUALS(getFilePosition(env, 7), 0);
 
         TS_ASSERT(!isShipMarked(env, 25));    // No modification
     }
@@ -637,6 +650,7 @@ TestGameInterfaceSelectionFunctions::testSelectionLoad()
 
         std::auto_ptr<afl::data::Value> state(callReadHeader(env, 7));
         TS_ASSERT_THROWS(callReadContent(env, state.get()), afl::except::FileProblemException);
+        TS_ASSERT_EQUALS(getFilePosition(env, 7), 0);
 
         TS_ASSERT(!isShipMarked(env, 25));    // No modification
     }
@@ -653,6 +667,7 @@ TestGameInterfaceSelectionFunctions::testSelectionLoad()
 
         std::auto_ptr<afl::data::Value> state(callReadHeader(env, 7));
         TS_ASSERT_THROWS(callReadContent(env, state.get()), afl::except::FileProblemException);
+        TS_ASSERT_EQUALS(getFilePosition(env, 7), 0);
 
         TS_ASSERT(!isShipMarked(env, 25));    // No modification
     }
@@ -665,6 +680,7 @@ TestGameInterfaceSelectionFunctions::testSelectionLoad()
         openFile(env, 7, "/test", FileSystem::OpenRead);
 
         TS_ASSERT_THROWS(callReadHeaderWithFlags(env, 7, "99"), interpreter::Error);
+        TS_ASSERT_EQUALS(getFilePosition(env, 7), 0);
     }
 
     // Null fd
