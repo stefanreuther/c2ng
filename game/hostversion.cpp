@@ -580,6 +580,7 @@ game::HostVersion::setImpliedHostConfiguration(game::config::HostConfiguration& 
         // Tim-Host defaults; ex game/config.cc:initConfig
         config[HostConfiguration::RoundGravityWells].set(1);
         config[HostConfiguration::CPEnableRemote].set(0);
+        config[HostConfiguration::MapTruehullByPlayerRace].set(0);
         break;
 
      case PHost:

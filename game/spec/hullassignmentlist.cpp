@@ -7,8 +7,7 @@
 
 // Default constructor.
 game::spec::HullAssignmentList::HullAssignmentList()
-    : m_mode(PlayerIndexed),
-      m_mapping()
+    : m_mapping()
 { }
 
 // Destructor.
@@ -20,13 +19,6 @@ void
 game::spec::HullAssignmentList::clear()
 {
     m_mapping.clear();
-}
-
-// Set access mode.
-void
-game::spec::HullAssignmentList::setMode(Mode mode)
-{
-    m_mode = mode;
 }
 
 // Add a mapping.
@@ -122,12 +114,9 @@ game::spec::HullAssignmentList::getPlayersForHull(const game::config::HostConfig
 int
 game::spec::HullAssignmentList::mapPlayer(const game::config::HostConfiguration& config, int player) const
 {
-    switch (m_mode) {
-     case PlayerIndexed:
+    if (config[game::config::HostConfiguration::MapTruehullByPlayerRace]() == 0) {
         return player;
-
-     case RaceIndexed:
+    } else {
         return config.getPlayerRaceNumber(player);
     }
-    return 0;
 }

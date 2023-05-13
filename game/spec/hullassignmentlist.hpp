@@ -13,23 +13,9 @@ namespace game { namespace spec {
 
     /** Hull assignment list (truehull).
         This stores a mapping of players and slot numbers (positions) to hull numbers
-        and allows forward and reverse queries.
-
-        Details can be configured (setMode()) to match host configurations. */
+        and allows forward and reverse queries. */
     class HullAssignmentList {
      public:
-        /** Access mode. */
-        enum Mode {
-            /** Player-indexed mode.
-                Player numbers are actual player numbers.
-                This is the default. */
-            PlayerIndexed,
-            /** Race-indexed mode.
-                Player numbers are actually race numbers and are indexed through PlayerRace.
-                This is PHost's MapTruehullByPlayerRace mode. */
-            RaceIndexed
-        };
-
         /** Default constructor.
             Makes an empty mapping. */
         HullAssignmentList();
@@ -40,10 +26,6 @@ namespace game { namespace spec {
         /** Clear.
             Resets the object into its default state. */
         void clear();
-
-        /** Set access mode.
-            \param mode New mode */
-        void setMode(Mode mode);
 
         /** Add a mapping.
             If parameters are out of range, the call is ignored.
@@ -87,9 +69,6 @@ namespace game { namespace spec {
         PlayerSet_t getPlayersForHull(const game::config::HostConfiguration& config, int hullNr) const;
 
      private:
-        /** Access mode. */
-        Mode m_mode;
-
         /** Mapping; first by player, then by index.
             Note that as of 20170412, we include the unused 0th element in both dimensions. */
         std::vector<std::vector<int> > m_mapping;

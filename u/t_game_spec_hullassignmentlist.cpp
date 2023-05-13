@@ -77,7 +77,7 @@ TestGameSpecHullAssignmentList::testPlayerRace()
 {
     // A configuration
     game::config::HostConfiguration config;
-    config[config.MapTruehullByPlayerRace].set(true);
+    config[config.MapTruehullByPlayerRace].set(false);
     config[config.PlayerRace].set("6,5,4,3,2,1");
 
     // Configure a testee
@@ -93,8 +93,8 @@ TestGameSpecHullAssignmentList::testPlayerRace()
     TS_ASSERT_EQUALS(testee.getHullFromIndex(config, 2, 5), 205);
 
     // Reconfigure
-    testee.setMode(testee.RaceIndexed);
-    
+    config[config.MapTruehullByPlayerRace].set(true);
+
     // Default
     TS_ASSERT_EQUALS(testee.getHullFromIndex(config, 1, 5), 0);
     TS_ASSERT_EQUALS(testee.getHullFromIndex(config, 2, 5), 505);
