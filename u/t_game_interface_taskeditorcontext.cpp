@@ -455,7 +455,7 @@ TestGameInterfaceTaskEditorContext::testInsertMovementCommand()
         sh.setWarpFactor(0);
         game::interface::insertMovementCommand(*edit, "MoveTo", game::map::Point(SHIP_X + 350, SHIP_Y), game::interface::imc_SetSpeed, env.session);
         TS_ASSERT_EQUALS(edit->getNumInstructions(), 3U);
-        TS_ASSERT_EQUALS((*edit)[0], "SetSpeed 2");
+        TS_ASSERT_EQUALS((*edit)[0], "SetSpeed 9");
         TS_ASSERT_EQUALS((*edit)[1], "SetFCode \"HYP\"   % hyperjump");
         TS_ASSERT_EQUALS((*edit)[2], "MoveTo 1350, 1000");
     }

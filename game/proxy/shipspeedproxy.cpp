@@ -56,6 +56,7 @@ class game::proxy::ShipSpeedProxy::Trampoline {
             // Default values
             m_status.currentSpeed = 0;
             m_status.maxSpeed = 0;
+            m_status.maxEfficientWarp = 0;
             m_status.hyperSpeedMarker = HYPER_WARP;
 
             // Determine preconditions
@@ -86,6 +87,9 @@ class game::proxy::ShipSpeedProxy::Trampoline {
                         m_pFriendlyCodeChanger.reset(new ChangeShipFriendlyCode(m_pTurn->universe()));
                         m_pFriendlyCodeChanger->addFleet(m_shipId, pShipList->friendlyCodes(), session.rng());
                     }
+
+                    // Engine speed
+                    m_status.maxEfficientWarp = f.getMaxEfficientWarp(*pShipList);
                 }
             }
         }
@@ -102,7 +106,7 @@ class game::proxy::ShipSpeedProxy::Trampoline {
                     if (m_pFriendlyCodeChanger.get() != 0) {
                         m_pFriendlyCodeChanger->setFriendlyCode("HYP");
                     }
-                    fm.setWarpFactor(WARP_FOR_HYP, m_pRoot->hostConfiguration(), *m_pShipList);
+                    fm.setWarpFactor(std::max(WARP_FOR_HYP, m_status.maxEfficientWarp), m_pRoot->hostConfiguration(), *m_pShipList);
                 } else {
                     if (m_pFriendlyCodeChanger.get() != 0) {
                         m_pFriendlyCodeChanger->unsetFriendlyCode("HYP");
@@ -159,7 +163,7 @@ game::proxy::ShipSpeedProxy::getStatus(WaitIndicator& link)
         Status& m_result;
     };
 
-    Status result = {0,0,0};
+    Status result = {0,0,0,0};
     InitTask t(result);
     link.call(m_trampoline, t);
     return result;

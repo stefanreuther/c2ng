@@ -55,6 +55,11 @@ namespace game { namespace map {
             \return title, never empty */
         String_t getTitle(afl::string::Translator& tx) const;
 
+        /** Get fleet's maximum efficient speed.
+            \param shipList  Ship list
+            \return speed */
+        int getMaxEfficientWarp(const game::spec::ShipList& shipList) const;
+
         /** Count number of fleet members.
             \return number of fleet members */
         int countFleetMembers() const;

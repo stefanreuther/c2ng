@@ -10,6 +10,7 @@
 #include "game/map/shiputils.hpp"
 #include "game/map/universe.hpp"
 #include "game/playerset.hpp"
+#include "game/spec/engine.hpp"
 #include "game/spec/mission.hpp"
 #include "game/spec/missionlist.hpp"
 
@@ -39,6 +40,14 @@ namespace {
         return false;
     }
 
+    int getShipMaxEfficientWarp(const game::map::Ship& sh, const game::spec::ShipList& shipList)
+    {
+        if (const game::spec::Engine* e = shipList.engines().get(sh.getEngineType().orElse(0))) {
+            return e->getMaxEfficientWarp();
+        } else {
+            return game::spec::Engine::MAX_WARP;
+        }
+    }
 }
 
 game::map::Fleet::Fleet(Universe& univ, Ship& ship)
@@ -112,6 +121,29 @@ game::map::Fleet::getTitle(afl::string::Translator& tx) const
 }
 
 int
+game::map::Fleet::getMaxEfficientWarp(const game::spec::ShipList& shipList) const
+{
+    // ex getFleetEngineSpeed(GUniverse& univ, int fid)
+    if (m_ship.getFleetNumber() == 0) {
+        // Lone ship: just check it
+        return getShipMaxEfficientWarp(m_ship, shipList);
+    } else {
+        // Fleet: check all members
+        int result = game::spec::Engine::MAX_WARP;
+        AnyShipType& ships(m_universe.allShips());
+        const int fleetNumber = m_ship.getId();
+        for (Id_t i = ships.getNextIndex(0); i != 0; i = ships.getNextIndex(i)) {
+            if (const Ship* sh = ships.getObjectByIndex(i)) {
+                if (sh->getFleetNumber() == fleetNumber) {
+                    result = std::min(result, getShipMaxEfficientWarp(*sh, shipList));
+                }
+            }
+        }
+        return result;
+    }
+}
+
+int
 game::map::Fleet::countFleetMembers() const
 {
     AnyShipType& ships(m_universe.allShips());
@@ -159,13 +191,7 @@ game::map::Fleet::synchronizeFleetMember(Universe& univ, Id_t sid,
                     // Fleet is intercepting this very ship.
                     sh->setMission(Mission::msn_Explore, 0, 0);
                     sh->clearWaypoint();
-
-                    int engineType;
-                    if (sh->getEngineType().get(engineType)) {
-                        if (game::spec::Engine* engine = shipList.engines().get(engineType)) {
-                            sh->setWarpFactor(engine->getMaxEfficientWarp());
-                        }
-                    }
+                    sh->setWarpFactor(getShipMaxEfficientWarp(*sh, shipList));
                 } else {
                     // Fleet is intercepting someone else.
                     sh->setMission(leader->getMission(),

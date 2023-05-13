@@ -13,6 +13,7 @@
 #include "game/interface/basetaskpredictor.hpp"
 #include "game/interface/shiptaskpredictor.hpp"
 #include "game/limits.hpp"
+#include "game/map/fleet.hpp"
 #include "game/map/object.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/ship.hpp"
@@ -756,15 +757,15 @@ game::interface::insertMovementCommand(interpreter::TaskEditor& edit, String_t v
     const bool wantDuplicate = (flags & imc_AcceptDuplicate) != 0;
 
     // We need a ship to work
-    const game::map::Ship* sh = dynamic_cast<const game::map::Ship*>(edit.process().getInvokingObject());
+    game::map::Ship* sh = dynamic_cast<game::map::Ship*>(edit.process().getInvokingObject());
     if (sh == 0) {
         throw Error("Not a ship auto-task");
     }
 
     // Ship prediction to find current state
     const Root& r = game::actions::mustHaveRoot(session);
-    const Game& g = game::actions::mustHaveGame(session);
-    const Universe& u = g.currentTurn().universe();
+    Game& g = game::actions::mustHaveGame(session);
+    Universe& u = g.currentTurn().universe();
     const ShipList& shipList = game::actions::mustHaveShipList(session);
     ShipTaskPredictor pred(u, sh->getId(), g.shipScores(), shipList, g.mapConfiguration(), r.hostConfiguration(), r.hostVersion(), r.registrationKey());
     pred.predictTask(edit, edit.getCursor());
@@ -783,8 +784,9 @@ game::interface::insertMovementCommand(interpreter::TaskEditor& edit, String_t v
         if (shipCanJump && r.hostVersion().isExactHyperjumpDistance2(dist2)) {
             /* Looks like a hyperjump, so make one. This code is not in the regular
                auto-warp function, but is's very convenient for planning double-jumps. */
-            if (pred.getWarpFactor() < 2) {
-                commands.push_back("SetSpeed 2");
+            int speed = std::max(2, game::map::Fleet(u, *sh).getMaxEfficientWarp(shipList));
+            if (pred.getWarpFactor() < speed) {
+                commands.push_back(Format("SetSpeed %d", speed));
             }
             commands.push_back(Format("SetFCode \"HYP\"   %% %s", session.translator()("hyperjump")));
         } else {

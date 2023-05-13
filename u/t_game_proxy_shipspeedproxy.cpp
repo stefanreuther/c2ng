@@ -25,13 +25,16 @@ using game::spec::ShipList;
 
 namespace {
     const int HULL_NR = 3;
+    const int ENGINE_NR = 6;
     const int SHIP_NR = 47;
     const int OWNER = 5;
+    const int WARP = 8;
 
     void addShipList(Session& s)
     {
         Ptr<ShipList> shipList = new ShipList();
         shipList->hulls().create(HULL_NR);
+        shipList->engines().create(ENGINE_NR)->setMaxEfficientWarp(WARP);
         s.setShipList(shipList);
     }
 
@@ -82,6 +85,7 @@ TestGameProxyShipSpeedProxy::testSimple()
     sh->setPlayability(game::map::Object::ReadOnly);
     sh->setWarpFactor(3);
     sh->setHull(HULL_NR);
+    sh->setEngineType(ENGINE_NR);
     h.session().setGame(g);
 
     // Test subject
@@ -92,6 +96,7 @@ TestGameProxyShipSpeedProxy::testSimple()
     game::proxy::ShipSpeedProxy::Status result = testee.getStatus(ind);
     TS_ASSERT_EQUALS(result.currentSpeed, 3);
     TS_ASSERT_EQUALS(result.maxSpeed, 9);
+    TS_ASSERT_EQUALS(result.maxEfficientWarp, WARP);
 
     // - change speed
     testee.setWarpFactor(7);

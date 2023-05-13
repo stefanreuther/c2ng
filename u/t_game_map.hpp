@@ -144,6 +144,8 @@ class TestGameMapFleet : public CxxTest::TestSuite {
  public:
     void testIt();
     void testHasSpecialFunction();
+    void testGetMaxEfficientWarp();
+    void testSyncIntercept();
 };
 
 class TestGameMapFleetMember : public CxxTest::TestSuite {

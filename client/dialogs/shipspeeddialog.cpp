@@ -57,7 +57,7 @@ namespace {
 
                 ui::Group& hg = del.addNew(new ui::Group(ui::layout::HBox::instance5));
 
-                client::widgets::ShipSpeedWidget& ssw = del.addNew(new client::widgets::ShipSpeedWidget(m_value, m_originalStatus.maxSpeed, m_originalStatus.hyperSpeedMarker, m_root));
+                client::widgets::ShipSpeedWidget& ssw = del.addNew(new client::widgets::ShipSpeedWidget(m_value, m_originalStatus.maxSpeed, m_originalStatus.hyperSpeedMarker, m_originalStatus.maxEfficientWarp, m_root));
                 hg.add(ui::widgets::FrameGroup::wrapWidget(del, m_root.colorScheme(),
                                                            ui::LoweredFrame,
                                                            ssw.addButtons(del, m_root)));

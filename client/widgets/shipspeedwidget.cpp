@@ -7,9 +7,10 @@
 #include "gfx/context.hpp"
 #include "util/skincolor.hpp"
 
-client::widgets::ShipSpeedWidget::ShipSpeedWidget(afl::base::Observable<int32_t>& value, int32_t limit, int32_t hyp, ui::Root& root)
+client::widgets::ShipSpeedWidget::ShipSpeedWidget(afl::base::Observable<int32_t>& value, int32_t limit, int32_t hyp, int32_t opt, ui::Root& root)
     : NumberSelector(value, 0, limit, 1),
       m_hyp(hyp),
+      m_optimum(opt),
       m_root(root)
 { }
 
@@ -63,12 +64,11 @@ client::widgets::ShipSpeedWidget::handleKey(util::Key_t key, int prefix)
             setValue(m_hyp);
             return true;
         }
-        // FIXME: new in PCC2; PCC1 even does setOptimumWarp() considering all movement effects
-        // if (e.key.code == ' ') {
-        //     const GEngine& e = getEngine(ship.getEngineType());
-        //     setValue(e.getMaxEfficientWarp());
-        //     return true;
-        // }
+        if (key == ' ' && m_optimum > 0) {
+            requestActive();
+            setValue(m_optimum);
+            return true;
+        }
     }
     return defaultHandleKey(key, prefix);
 }

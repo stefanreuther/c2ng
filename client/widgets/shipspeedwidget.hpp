@@ -11,7 +11,7 @@ namespace client { namespace widgets {
 
     class ShipSpeedWidget : public ui::widgets::NumberSelector {
      public:
-        ShipSpeedWidget(afl::base::Observable<int32_t>& value, int32_t limit, int32_t hyp, ui::Root& root);
+        ShipSpeedWidget(afl::base::Observable<int32_t>& value, int32_t limit, int32_t hyp, int32_t opt, ui::Root& root);
 
         virtual void draw(gfx::Canvas& can);
         virtual void handleStateChange(State st, bool enable);
@@ -22,6 +22,7 @@ namespace client { namespace widgets {
 
      private:
         int32_t m_hyp;
+        int32_t m_optimum;
         ui::Root& m_root;
     };
 
