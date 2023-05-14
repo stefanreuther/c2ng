@@ -6,6 +6,7 @@
 
 #include "afl/string/string.hpp"
 #include "afl/string/translator.hpp"
+#include "game/element.hpp"
 #include "ui/root.hpp"
 #include "ui/widget.hpp"
 #include "ui/widgets/button.hpp"
@@ -15,7 +16,7 @@ namespace client { namespace widgets {
 
     class CargoTransferLine : public ui::Widget {
      public:
-        CargoTransferLine(ui::Root& root, afl::string::Translator& tx, String_t name, int id, util::NumberFormatter fmt);
+        CargoTransferLine(ui::Root& root, afl::string::Translator& tx, String_t name, game::Element::Type id, util::NumberFormatter fmt);
 
         void setAmounts(bool right, int32_t available, int32_t remaining);
 
@@ -32,13 +33,14 @@ namespace client { namespace widgets {
         virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
 
         // id,target,amount
-        afl::base::Signal<void(int,bool,int)> sig_move;
+        afl::base::Signal<void(game::Element::Type,bool,int)> sig_move;
+        afl::base::Signal<void(game::Element::Type,bool,int)> sig_loadAmount;
 
      private:
         ui::Root& m_root;
         afl::string::Translator& m_translator;
         String_t m_name;
-        int m_id;
+        game::Element::Type m_id;
         util::NumberFormatter m_numberFormatter;
         int32_t m_available[2];
         int32_t m_remaining[2];

@@ -7,7 +7,7 @@
 #include "util/unicodechars.hpp"
 #include "util/updater.hpp"
 
-client::widgets::CargoTransferLine::CargoTransferLine(ui::Root& root, afl::string::Translator& tx, String_t name, int id, util::NumberFormatter fmt)
+client::widgets::CargoTransferLine::CargoTransferLine(ui::Root& root, afl::string::Translator& tx, String_t name, game::Element::Type id, util::NumberFormatter fmt)
     : m_root(root),
       m_translator(tx),
       m_name(name),
@@ -140,13 +140,7 @@ client::widgets::CargoTransferLine::handleKey(util::Key_t key, int prefix)
          case util::KeyMod_Alt + util::Key_Left:
          case util::KeyMod_Alt + util::Key_Right:
             if (prefix != 0) {
-                int32_t delta = prefix - m_available[target];
-                if (delta > 0) {
-                    sig_move.raise(m_id, target, delta);
-                }
-                if (delta < 0) {
-                    sig_move.raise(m_id, !target, -delta);
-                }
+                sig_loadAmount.raise(m_id, target, prefix);
             } else {
                 sig_move.raise(m_id, target, m_available[!target]);
             }

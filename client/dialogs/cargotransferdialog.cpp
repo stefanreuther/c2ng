@@ -36,6 +36,7 @@ client::dialogs::CargoTransferDialog::CargoTransferDialog(ui::Root& root, afl::s
     : m_root(root),
       m_translator(tx),
       m_proxy(proxy),
+      m_cargo(),
       m_loop(root),
       m_lines(),
       m_sellSupplies(false),
@@ -59,6 +60,8 @@ client::dialogs::CargoTransferDialog::run(util::RequestSender<game::Session> gam
     m_proxy.getGeneralInformation(link, helper.gen);
     m_proxy.getParticipantInformation(link, 0, helper.left);
     m_proxy.getParticipantInformation(link, 1, helper.right);
+    m_cargo[0] = helper.left.cargo;
+    m_cargo[1] = helper.right.cargo;
     helper.fmt = game::proxy::ConfigurationProxy(gameSender).getNumberFormatter(link);
 
     if (helper.gen.validTypes.empty()) {
@@ -148,9 +151,32 @@ client::dialogs::CargoTransferDialog::run(util::RequestSender<game::Session> gam
 }
 
 void
-client::dialogs::CargoTransferDialog::onMove(int id, bool target, int amount)
+client::dialogs::CargoTransferDialog::onMove(game::Element::Type id, bool target, int amount)
 {
-    m_proxy.move(Element::Type(id), amount, !target, target, m_sellSupplies.get());
+    m_proxy.move(id, amount, !target, target, m_sellSupplies.get());
+}
+
+void
+client::dialogs::CargoTransferDialog::onLoadAmount(game::Element::Type id, bool target, int amount)
+{
+    // ex getEffectiveAmount, sort of
+    bool s2m = m_sellSupplies.get();
+    int toMove;
+    if (id == Element::Supplies && s2m) {
+        // Converting supplies to money: allow converting more toward a fixed goal
+        // (=add to target), but do not allow removing.
+        int32_t have = m_cargo[target].amount.get(Element::Money);
+        if (amount >= have) {
+            toMove = amount - have;
+        } else {
+            toMove = 0;
+        }
+    } else {
+        // Normal behaviour: allow add and remove
+        toMove = amount - m_cargo[target].amount.get(id);
+    }
+
+    m_proxy.move(id, toMove, !target, target, s2m);
 }
 
 void
@@ -164,6 +190,7 @@ client::dialogs::CargoTransferDialog::onChange(size_t side, const game::proxy::C
 {
     if (side == 0 || side == 1) {
         bool right = (side==1);
+        m_cargo[side] = cargo;
         for (Element::Type e = Element::Type(0); e != m_lines.size(); ++e) {
             if (client::widgets::CargoTransferLine* line = m_lines.get(e)) {
                 line->setAmounts(right, cargo.amount.get(e), cargo.remaining.get(e));
@@ -211,10 +238,11 @@ client::dialogs::CargoTransferDialog::addCargoTransferLine(game::Element::Type t
         name += "]";
     }
 
-    client::widgets::CargoTransferLine& line = del.addNew(new client::widgets::CargoTransferLine(m_root, m_translator, name, int(type), helper.fmt));
+    client::widgets::CargoTransferLine& line = del.addNew(new client::widgets::CargoTransferLine(m_root, m_translator, name, type, helper.fmt));
     line.setAmounts(false, helper.left.cargo.amount.get(type), helper.left.cargo.remaining.get(type));
     line.setAmounts(true, helper.right.cargo.amount.get(type), helper.right.cargo.remaining.get(type));
     line.sig_move.add(this, &CargoTransferDialog::onMove);
+    line.sig_loadAmount.add(this, &CargoTransferDialog::onLoadAmount);
     ui::Widget& w = ui::widgets::FocusableGroup::wrapWidget(del, 1, line);
     lineGroup.add(w);
     iter.add(w);

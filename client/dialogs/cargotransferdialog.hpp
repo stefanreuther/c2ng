@@ -32,13 +32,15 @@ namespace client { namespace dialogs {
         ui::Root& m_root;
         afl::string::Translator& m_translator;
         game::proxy::CargoTransferProxy& m_proxy;
+        game::proxy::CargoTransferProxy::Cargo m_cargo[2];
         ui::EventLoop m_loop;
         util::Vector<client::widgets::CargoTransferLine*, game::Element::Type> m_lines;
         afl::base::Observable<int> m_sellSupplies;
         ui::widgets::AbstractCheckbox m_overloadCheckbox;
         bool m_overload;
 
-        void onMove(int id, bool target, int amount);
+        void onMove(game::Element::Type id, bool target, int amount);
+        void onLoadAmount(game::Element::Type id, bool target, int amount);
         void onUnload();
         void onChange(size_t side, const game::proxy::CargoTransferProxy::Cargo& cargo);
         void onEnableOverload();
