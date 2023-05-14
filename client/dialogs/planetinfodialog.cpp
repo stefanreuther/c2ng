@@ -66,7 +66,7 @@ namespace {
                 // ex WPlanetScanWindow::WPlanetScanWindow
                 // ex WPlanetScanWindow::init
                 m_docView = &m_del.addNew(new ui::rich::DocumentView(gfx::Point(315, 400), // <- FIXME
-                                                                     ui::rich::DocumentView::fl_Scroll,
+                                                                     ui::rich::DocumentView::fl_Scroll | ui::rich::DocumentView::fl_ScrollMark,
                                                                      root.provider()));
                 for (size_t i = 0; i < 4; ++i) {
                     m_info[i] = &m_del.addNew(new PlanetMineralInfo(root, fmt, tx));

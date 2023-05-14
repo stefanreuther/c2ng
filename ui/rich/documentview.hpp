@@ -23,6 +23,7 @@ namespace ui { namespace rich {
             fl_Return = 2,
             fl_Space  = 4,
             fl_Scroll = 8,
+            fl_ScrollMark = 16,
 
             /* Combination: single-page hypertext */
             fl_SingleHyper = fl_Tab + fl_Return + fl_Space,

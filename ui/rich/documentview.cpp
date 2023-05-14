@@ -5,6 +5,7 @@
 #include "ui/rich/documentview.hpp"
 #include "gfx/clipfilter.hpp"
 #include "gfx/complex.hpp"
+#include "util/unicodechars.hpp"
 
 ui::rich::DocumentView::DocumentView(gfx::Point pref_size, uint16_t key_flags, gfx::ResourceProvider& provider)
     : ScrollableWidget(),
@@ -198,6 +199,19 @@ ui::rich::DocumentView::draw(gfx::Canvas& can)
     gfx::Context<util::SkinColor::Color> ctx(filter, getColorScheme());
     drawBackground(ctx, getExtent());
     doc.draw(ctx, getExtent(), getPageTop());
+
+    if ((key_flags & fl_ScrollMark) != 0) {
+        ctx.setColor(util::SkinColor::White);
+        ctx.useFont(*m_provider.getFont(gfx::FontRequest()));
+        if (getPageTop() > 0) {
+            ctx.setTextAlign(gfx::RightAlign, gfx::TopAlign);
+            outText(ctx, getExtent().getTopRight(), UTF_UP_ARROW);
+        }
+        if (getPageTop() < getTotalSize() - getPageSize()) {
+            ctx.setTextAlign(gfx::RightAlign, gfx::BottomAlign);
+            outText(ctx, getExtent().getBottomRight(), UTF_DOWN_ARROW);
+        }
+    }
 }
 
 void
