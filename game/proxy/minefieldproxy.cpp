@@ -36,7 +36,7 @@ class game::proxy::MinefieldProxy::Trampoline {
 
     void addNewListener(ObjectListener* pl);
     void setPassageDistance(int distance);
-    void buildSweepInfo(SweepInfo& out) const;
+    void buildSweepInfo(SweepInfo& out, Id_t viewpointShip) const;
     void buildMinefieldInfo(MinefieldInfo& out) const;
     void buildPassageInfo(PassageInfo& out) const;
     void browse(game::map::ObjectCursor::Mode mode, bool marked);
@@ -96,7 +96,7 @@ game::proxy::MinefieldProxy::Trampoline::setPassageDistance(int distance)
 }
 
 inline void
-game::proxy::MinefieldProxy::Trampoline::buildSweepInfo(SweepInfo& out) const
+game::proxy::MinefieldProxy::Trampoline::buildSweepInfo(SweepInfo& out, Id_t viewpointShip) const
 {
     // ex showSweepInfo (part)
     const Minefield* p = getMinefield();
@@ -105,6 +105,8 @@ game::proxy::MinefieldProxy::Trampoline::buildSweepInfo(SweepInfo& out) const
     if (r != 0 && g != 0 && p != 0 && p->isValid()) {
         // Environment
         const int viewpointPlayer = g->getViewpointPlayer();
+        const game::Turn* t = g->getViewpointTurn().get();
+        const game::map::Ship* sh = t != 0 ? t->universe().ships().get(viewpointShip) : 0;
 
         // Figure out fighter sweep rate
         int frace = viewpointPlayer;
@@ -128,12 +130,15 @@ game::proxy::MinefieldProxy::Trampoline::buildSweepInfo(SweepInfo& out) const
         // Beam weapons
         const game::spec::ShipList* sl = m_session.getShipList().get();
         if (sl != 0) {
-            // FIXME: mark current ship's type
             const game::spec::BeamVector_t& vec = sl->beams();
             for (const game::spec::Beam* b = vec.findNext(0); b != 0; b = vec.findNext(b->getId())) {
                 int rate = b->getNumMinesSwept(viewpointPlayer, p->isWeb(), r->hostConfiguration());
                 if (rate > 0) {
-                    out.weapons.push_back(SweepItem(util::divideAndRoundUp(units, rate), 0, b->getName(sl->componentNamer())));
+                    int have = 0;
+                    if (sh != 0 && sh->getBeamType().orElse(0) == b->getId()) {
+                        have = sh->getNumBeams().orElse(0);
+                    }
+                    out.weapons.push_back(SweepItem(util::divideAndRoundUp(units, rate), have, b->getName(sl->componentNamer())));
                 }
             }
         }
@@ -346,19 +351,20 @@ game::proxy::MinefieldProxy::setPassageDistance(int distance)
 }
 
 void
-game::proxy::MinefieldProxy::getSweepInfo(WaitIndicator& ind, SweepInfo& out)
+game::proxy::MinefieldProxy::getSweepInfo(WaitIndicator& ind, Id_t viewpointShip, SweepInfo& out)
 {
     class Task : public util::Request<Trampoline> {
      public:
-        Task(SweepInfo& out)
-            : m_out(out)
+        Task(SweepInfo& out, Id_t viewpointShip)
+            : m_out(out), m_viewpointShip(viewpointShip)
             { }
         virtual void handle(Trampoline& tpl)
-            { tpl.buildSweepInfo(m_out); }
+            { tpl.buildSweepInfo(m_out, m_viewpointShip); }
      private:
         SweepInfo& m_out;
+        Id_t m_viewpointShip;
     };
-    Task t(out);
+    Task t(out, viewpointShip);
     ind.call(m_trampoline, t);
 }
 

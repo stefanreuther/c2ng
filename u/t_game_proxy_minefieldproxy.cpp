@@ -51,6 +51,7 @@ namespace {
         // Ship list
         afl::base::Ptr<game::spec::ShipList> sl = new game::spec::ShipList();
         game::test::initStandardBeams(*sl);
+        game::test::addOutrider(*sl);
         h.session().setShipList(sl);
     }
 
@@ -58,6 +59,19 @@ namespace {
     {
         h.session().getGame()->currentTurn().universe().minefields().create(id)
             ->addReport(pos, owner, isWeb ? Minefield::IsWeb : Minefield::IsMine, Minefield::UnitsKnown, units, turn, Minefield::MinefieldScanned);
+    }
+
+    void addShip(SessionThread& h, game::Id_t id, int owner, Point pos)
+    {
+        game::map::Ship* sh = h.session().getGame()->currentTurn().universe().ships().create(id);
+        game::map::ShipData sd;
+        sd.x = pos.getX();
+        sd.y = pos.getY();
+        sd.owner = owner;
+        sd.hullType = game::test::OUTRIDER_HULL_ID;
+        sd.beamType = 5;
+        sd.numBeams = 7;
+        sh->addCurrentShipData(sd, game::PlayerSet_t(owner));
     }
 
     void addPlanet(SessionThread& h, game::Id_t pid, int owner, Point pos, String_t name)
@@ -109,7 +123,7 @@ TestGameProxyMinefieldProxy::testEmpty()
     MinefieldProxy t(ind, thread.gameSender());
 
     MinefieldProxy::SweepInfo info;
-    t.getSweepInfo(ind, info);
+    t.getSweepInfo(ind, 0, info);
 
     TS_ASSERT_EQUALS(info.units, 0);
     TS_ASSERT_EQUALS(info.isWeb, false);
@@ -311,17 +325,56 @@ TestGameProxyMinefieldProxy::testSweepInfo()
 
     // Request data
     MinefieldProxy::SweepInfo info;
-    t.getSweepInfo(ind, info);
+    t.getSweepInfo(ind, 0, info);
 
     // Verify
     TS_ASSERT_EQUALS(info.units, 19000);
     TS_ASSERT_EQUALS(info.isWeb, false);
     TS_ASSERT_EQUALS(info.weapons.size(), 11U);
     TS_ASSERT_EQUALS(info.weapons[0].needed, 4750);
+    TS_ASSERT_EQUALS(info.weapons[0].have, 0);
     TS_ASSERT_EQUALS(info.weapons[0].name, "Laser");
     TS_ASSERT_EQUALS(info.weapons[9].needed, 48);
+    TS_ASSERT_EQUALS(info.weapons[9].have, 0);
     TS_ASSERT_EQUALS(info.weapons[9].name, "Heavy Phaser");
     TS_ASSERT_EQUALS(info.weapons[10].needed, 950);
+    TS_ASSERT_EQUALS(info.weapons[10].have, 0);
+    TS_ASSERT_EQUALS(info.weapons[10].name, "Player 11 fighter");
+}
+
+/** Test getSweepInfo() with ship.
+    A: create session with minefield and ship. Create MinefieldProxy. Call getSweepInfo.
+    E: correct value reported */
+void
+TestGameProxyMinefieldProxy::testSweepInfoShip()
+{
+    WaitIndicator ind;
+    SessionThread thread;
+    prepare(thread);
+    addMinefield(thread, 200, ME, false, Point(1000, 2000), 20000, TURN_NR);
+    addShip(thread, 77, ME, Point(1000, 2000));
+    postprocessUniverse(thread);
+    MinefieldProxy t(ind, thread.gameSender());
+
+    // Request data
+    MinefieldProxy::SweepInfo info;
+    t.getSweepInfo(ind, 77, info);
+
+    // Verify
+    TS_ASSERT_EQUALS(info.units, 19000);
+    TS_ASSERT_EQUALS(info.isWeb, false);
+    TS_ASSERT_EQUALS(info.weapons.size(), 11U);
+    TS_ASSERT_EQUALS(info.weapons[0].needed, 4750);
+    TS_ASSERT_EQUALS(info.weapons[0].have, 0);
+    TS_ASSERT_EQUALS(info.weapons[0].name, "Laser");
+    TS_ASSERT_EQUALS(info.weapons[4].needed, 190);
+    TS_ASSERT_EQUALS(info.weapons[4].have, 7);
+    TS_ASSERT_EQUALS(info.weapons[4].name, "Positron Beam");
+    TS_ASSERT_EQUALS(info.weapons[9].needed, 48);
+    TS_ASSERT_EQUALS(info.weapons[9].have, 0);
+    TS_ASSERT_EQUALS(info.weapons[9].name, "Heavy Phaser");
+    TS_ASSERT_EQUALS(info.weapons[10].needed, 950);
+    TS_ASSERT_EQUALS(info.weapons[10].have, 0);
     TS_ASSERT_EQUALS(info.weapons[10].name, "Player 11 fighter");
 }
 

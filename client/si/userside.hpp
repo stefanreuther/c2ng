@@ -270,6 +270,12 @@ namespace client { namespace si {
             Called by ScriptSide.
             @param id Wait Id */
         void onTaskComplete(uint32_t id);
+
+        /** Get focused object of a given type.
+            Examines the user-interface focus.
+            @param type Desired object type
+            @return If an object of the given type is in focus, its Id. Otherwise, 0 */
+        game::Id_t getFocusedObjectId(game::Reference::Type type) const;
         ///@}
 
 

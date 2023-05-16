@@ -549,6 +549,7 @@ class client::dialogs::VisualScanDialog::Window : public client::si::Control {
     virtual void handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap);
     virtual void handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix);
     virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text);
+    virtual afl::base::Optional<game::Id_t> getFocusedObjectId(game::Reference::Type type) const;
     virtual game::interface::ContextProvider* createContextProvider();
 
     afl::base::Signal<void(Reference)> sig_referenceChange;
@@ -1306,6 +1307,17 @@ void
 client::dialogs::VisualScanDialog::Window::handleOverlayMessage(client::si::RequestLink2 link, String_t text)
 {
     defaultHandleOverlayMessage(link, text);
+}
+
+afl::base::Optional<game::Id_t>
+client::dialogs::VisualScanDialog::Window::getFocusedObjectId(game::Reference::Type type) const
+{
+    game::Reference ref = getCurrentReference();
+    if (type == ref.getType()) {
+        return ref.getId();
+    } else {
+        return defaultGetFocusedObjectId(type);
+    }
 }
 
 game::interface::ContextProvider*

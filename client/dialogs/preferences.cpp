@@ -294,6 +294,8 @@ namespace {
             { return defaultHandleUseKeymap(link, name, prefix); }
         virtual void handleOverlayMessage(RequestLink2 link, String_t text)
             { return defaultHandleOverlayMessage(link, text); }
+        afl::base::Optional<game::Id_t> getFocusedObjectId(game::Reference::Type type) const
+            { return defaultGetFocusedObjectId(type); }
         virtual game::interface::ContextProvider* createContextProvider()
             { return 0; }
 

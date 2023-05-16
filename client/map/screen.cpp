@@ -508,6 +508,16 @@ client::map::Screen::handleOverlayMessage(client::si::RequestLink2 link, String_
     interface().continueProcess(link);
 }
 
+afl::base::Optional<game::Id_t>
+client::map::Screen::getFocusedObjectId(game::Reference::Type type) const
+{
+    if (type == m_currentObject.getType()) {
+        return m_currentObject.getId();
+    } else {
+        return 0;
+    }
+}
+
 game::interface::ContextProvider*
 client::map::Screen::createContextProvider()
 {

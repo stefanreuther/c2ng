@@ -64,6 +64,7 @@ namespace {
         virtual void handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap);
         virtual void handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix);
         virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text);
+        virtual afl::base::Optional<game::Id_t> getFocusedObjectId(game::Reference::Type type) const;
         virtual game::interface::ContextProvider* createContextProvider();
 
      private:
@@ -270,6 +271,16 @@ void
 IonStormInfoDialog::handleOverlayMessage(client::si::RequestLink2 link, String_t text)
 {
     defaultHandleOverlayMessage(link, text);
+}
+
+afl::base::Optional<game::Id_t>
+IonStormInfoDialog::getFocusedObjectId(game::Reference::Type type) const
+{
+    if (type == game::Reference::IonStorm) {
+        return m_info.stormId;
+    } else {
+        return defaultGetFocusedObjectId(type);
+    }
 }
 
 game::interface::ContextProvider*

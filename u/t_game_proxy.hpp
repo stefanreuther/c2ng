@@ -420,6 +420,7 @@ class TestGameProxyMinefieldProxy : public CxxTest::TestSuite {
     void testPlanetOther();
     void testPassageRate();
     void testSweepInfo();
+    void testSweepInfoShip();
     void testObjectListener();
     void testBrowse();
     void testBrowseUnmarked();

@@ -157,6 +157,10 @@ namespace {
                             // We do not expect a UI.OverlayMessage directed at this control
                             TS_ASSERT(0);
                         }
+                    virtual afl::base::Optional<game::Id_t> getFocusedObjectId(game::Reference::Type /*type*/) const
+                        {
+                            return 0;
+                        }
                     virtual game::interface::ContextProvider* createContextProvider()
                         {
                             // We do not provide context

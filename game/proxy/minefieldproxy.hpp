@@ -105,9 +105,10 @@ namespace game { namespace proxy {
         void setPassageDistance(int distance);
 
         /** Get minesweep informtion.
-            \param [in,out] ind WaitIndicator for UI synchronisation
-            \param [out]    out Result */
-        void getSweepInfo(WaitIndicator& ind, SweepInfo& out);
+            \param [in,out] ind            WaitIndicator for UI synchronisation
+            \param [in]     viewpointShip  Viewpoint ship Id, for SweepItem::have
+            \param [out]    out            Result */
+        void getSweepInfo(WaitIndicator& ind, Id_t viewpointShip, SweepInfo& out);
 
         /** Browse minefields.
             Updated information will be reported on sig_passageChange, sig_minefieldChange.

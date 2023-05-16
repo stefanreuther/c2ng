@@ -221,6 +221,13 @@ client::si::Control::defaultHandleOverlayMessage(RequestLink2 link, String_t tex
     interface().continueProcess(link);
 }
 
+// Default implementation of getFocusedObjectId().
+afl::base::Optional<game::Id_t>
+client::si::Control::defaultGetFocusedObjectId(game::Reference::Type /*type*/) const
+{
+    return afl::base::Nothing;
+}
+
 // Implementation of handleStateChange() for dialogs.
 void
 client::si::Control::dialogHandleStateChange(RequestLink2 link, OutputState::Target target, OutputState& out, ui::EventLoop& loop, int n)

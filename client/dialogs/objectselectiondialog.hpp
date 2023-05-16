@@ -4,16 +4,18 @@
 #ifndef C2NG_CLIENT_DIALOGS_OBJECTSELECTIONDIALOG_HPP
 #define C2NG_CLIENT_DIALOGS_OBJECTSELECTIONDIALOG_HPP
 
-#include "client/si/userside.hpp"
-#include "ui/root.hpp"
 #include "afl/base/optional.hpp"
-#include "client/si/requestlink2.hpp"
 #include "client/si/outputstate.hpp"
+#include "client/si/requestlink2.hpp"
+#include "client/si/userside.hpp"
+#include "game/reference.hpp"
+#include "ui/root.hpp"
 
 namespace client { namespace dialogs {
 
     struct ObjectSelectionDialog {
         int screenNumber;
+        game::Reference::Type refType;
         const char* keymapName;
         const char* layoutName;
         const char* titleUT;

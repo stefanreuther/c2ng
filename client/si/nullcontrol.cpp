@@ -48,6 +48,12 @@ client::si::NullControl::handleOverlayMessage(RequestLink2 link, String_t /*text
     fail(link);
 }
 
+afl::base::Optional<game::Id_t>
+client::si::NullControl::getFocusedObjectId(game::Reference::Type type) const
+{
+    return defaultGetFocusedObjectId(type);
+}
+
 game::interface::ContextProvider*
 client::si::NullControl::createContextProvider()
 {

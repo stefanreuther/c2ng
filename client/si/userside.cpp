@@ -258,6 +258,19 @@ client::si::UserSide::onTaskComplete(uint32_t id)
     }
 }
 
+// Get focused object of a given type.
+game::Id_t
+client::si::UserSide::getFocusedObjectId(game::Reference::Type type) const
+{
+    for (size_t i = m_controls.size(); i > 0; --i) {
+        afl::base::Optional<game::Id_t> value = m_controls[i-1]->getFocusedObjectId(type);
+        if (const game::Id_t* p = value.get()) {
+            return *p;
+        }
+    }
+    return 0;
+}
+
 /*
  *  Script-side Actions
  */

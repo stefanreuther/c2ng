@@ -443,6 +443,8 @@ namespace {
             { defaultHandleUseKeymap(link, name, prefix); }
         virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text)
             { defaultHandleOverlayMessage(link, text); }
+        virtual afl::base::Optional<game::Id_t> getFocusedObjectId(game::Reference::Type type) const
+            { return defaultGetFocusedObjectId(type); }
         virtual game::interface::ContextProvider* createContextProvider()
             {
                 return m_parentControl.createContextProvider();

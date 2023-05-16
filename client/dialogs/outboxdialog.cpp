@@ -154,6 +154,12 @@ client::dialogs::OutboxDialog::handleOverlayMessage(client::si::RequestLink2 lin
     defaultHandleOverlayMessage(link, text);
 }
 
+afl::base::Optional<game::Id_t>
+client::dialogs::OutboxDialog::getFocusedObjectId(game::Reference::Type type) const
+{
+    return defaultGetFocusedObjectId(type);
+}
+
 game::interface::ContextProvider*
 client::dialogs::OutboxDialog::createContextProvider()
 {

@@ -192,6 +192,7 @@ namespace {
         virtual void handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap);
         virtual void handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix);
         virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text);
+        virtual afl::base::Optional<game::Id_t> getFocusedObjectId(game::Reference::Type type) const;
         virtual game::interface::ContextProvider* createContextProvider();
 
      private:
@@ -474,6 +475,12 @@ void
 SearchDialog::handleOverlayMessage(client::si::RequestLink2 link, String_t text)
 {
     defaultHandleOverlayMessage(link, text);
+}
+
+afl::base::Optional<game::Id_t>
+SearchDialog::getFocusedObjectId(game::Reference::Type type) const
+{
+    return defaultGetFocusedObjectId(type);
 }
 
 game::interface::ContextProvider*
@@ -870,6 +877,8 @@ client::dialogs::doSearchDialog(const game::SearchQuery& initialQuery,
                 { defaultHandleUseKeymap(link, name, prefix); }
             virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text)
                 { defaultHandleOverlayMessage(link, text); }
+            virtual afl::base::Optional<game::Id_t> getFocusedObjectId(game::Reference::Type type) const
+                { return defaultGetFocusedObjectId(type); }
             virtual game::interface::ContextProvider* createContextProvider()
                 { return 0; }
          private:

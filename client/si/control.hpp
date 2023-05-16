@@ -5,6 +5,7 @@
 #ifndef C2NG_CLIENT_SI_CONTROL_HPP
 #define C2NG_CLIENT_SI_CONTROL_HPP
 
+#include "afl/base/optional.hpp"
 #include "afl/base/types.hpp"
 #include "client/si/outputstate.hpp"
 #include "client/si/requestlink2.hpp"
@@ -181,6 +182,15 @@ namespace client { namespace si {
         virtual void handleOverlayMessage(RequestLink2 link, String_t text) = 0;
         ///@}
 
+        /** Get focused object of a given type.
+            Examines the user-interface focus.
+            - if the focused user-interface object is of the given type, return its Id;
+            - if additional objects might be in perceived focus in addition to this one, return Nothing to continue the search (see defaultGetFocusedObjectId());
+            - if no additional objects are in focus (i.e. this is a control screen blocking anything below), return 0.
+            @param type Desired object type
+            @return Id or Nothing, as described */
+        virtual afl::base::Optional<game::Id_t> getFocusedObjectId(game::Reference::Type type) const = 0;
+
         /** Create context provider.
             Used for newly-created processes (e.g. command on ship screen executes in ship context).
             @return ContextProvider, may be null */
@@ -222,6 +232,11 @@ namespace client { namespace si {
             @param link   Originating process (link parameter for handleOverlayMessage)
             @param text   Text (text parameter for handleOverlayMessage) */
         void defaultHandleOverlayMessage(RequestLink2 link, String_t text);
+
+        /** Default implementation of getFocusedObjectId().
+            @param type   Desired type (parameter from getFocusedObjectId())
+            @return Nothing */
+        afl::base::Optional<game::Id_t> defaultGetFocusedObjectId(game::Reference::Type type) const;
 
         /** Implementation of handleStateChange() for dialogs.
             Use if this Control represents a dialog.

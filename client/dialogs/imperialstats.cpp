@@ -188,6 +188,8 @@ namespace {
             { defaultHandleUseKeymap(link, name, prefix); }
         virtual void handleOverlayMessage(RequestLink2 link, String_t text)
             { defaultHandleOverlayMessage(link, text); }
+        virtual afl::base::Optional<game::Id_t> getFocusedObjectId(game::Reference::Type type) const
+            { return defaultGetFocusedObjectId(type); }
         virtual game::interface::ContextProvider* createContextProvider()
             { return 0; }
 

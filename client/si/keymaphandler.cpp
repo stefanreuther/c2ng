@@ -207,6 +207,12 @@ client::si::KeymapHandler::handleOverlayMessage(RequestLink2 link, String_t text
     defaultHandleOverlayMessage(link, text);
 }
 
+afl::base::Optional<game::Id_t>
+client::si::KeymapHandler::getFocusedObjectId(game::Reference::Type type) const
+{
+    return defaultGetFocusedObjectId(type);
+}
+
 game::interface::ContextProvider*
 client::si::KeymapHandler::createContextProvider()
 {

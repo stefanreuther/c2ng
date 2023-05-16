@@ -240,6 +240,7 @@ namespace {
         virtual void handleSetView(RequestLink2 link, String_t name, bool withKeymap);
         virtual void handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix);
         virtual void handleOverlayMessage(RequestLink2 link, String_t text);
+        virtual afl::base::Optional<game::Id_t> getFocusedObjectId(game::Reference::Type type) const;
         virtual game::interface::ContextProvider* createContextProvider();
 
         // Event handlers
@@ -488,6 +489,12 @@ void
 SimulatorDialog::handleOverlayMessage(RequestLink2 link, String_t text)
 {
     defaultHandleOverlayMessage(link, text);
+}
+
+afl::base::Optional<game::Id_t>
+SimulatorDialog::getFocusedObjectId(game::Reference::Type type) const
+{
+    return defaultGetFocusedObjectId(type);
 }
 
 game::interface::ContextProvider*

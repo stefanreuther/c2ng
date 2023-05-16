@@ -172,6 +172,12 @@ client::dialogs::InboxDialog::handleOverlayMessage(client::si::RequestLink2 link
     defaultHandleOverlayMessage(link, text);
 }
 
+afl::base::Optional<game::Id_t>
+client::dialogs::InboxDialog::getFocusedObjectId(game::Reference::Type type) const
+{
+    return defaultGetFocusedObjectId(type);
+}
+
 game::interface::ContextProvider*
 client::dialogs::InboxDialog::createContextProvider()
 {

@@ -40,9 +40,10 @@ namespace {
     class CommonState : public afl::base::RefCounted {
      public:
         // Constructor.
-        CommonState(int screenNumber, const String_t& keymapName)
+        CommonState(int screenNumber, const String_t& keymapName, game::Reference::Type refType)
             : m_screenNumber(screenNumber),
               m_keymapName(keymapName),
+              m_referenceType(refType),
               m_game(),
               m_cursor(),
               conn_viewpointTurnChange()
@@ -82,9 +83,14 @@ namespace {
         int getScreenNumber() const
             { return m_screenNumber; }
 
+        // Get Reference type.
+        game::Reference::Type getReferenceType() const
+            { return m_referenceType; }
+
      private:
         const int m_screenNumber;
         const String_t m_keymapName;
+        const game::Reference::Type m_referenceType;
         afl::base::Ptr<game::Game> m_game;
         game::map::SimpleObjectCursor m_cursor;
         afl::base::SignalConnection conn_viewpointTurnChange;
@@ -171,6 +177,14 @@ namespace {
             { defaultHandleUseKeymap(link, name, prefix); }
         virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text)
             { defaultHandleOverlayMessage(link, text); }
+        virtual afl::base::Optional<game::Id_t> getFocusedObjectId(game::Reference::Type type) const
+            {
+                if (type == m_state->getReferenceType()) {
+                    return m_currentId;
+                } else {
+                    return defaultGetFocusedObjectId(type);
+                }
+            }
         virtual game::interface::ContextProvider* createContextProvider()
             { return new DialogContextProvider(m_state); }
 
@@ -290,6 +304,7 @@ namespace {
 
 const client::dialogs::ObjectSelectionDialog client::dialogs::SHIP_SELECTION_DIALOG = {
     game::map::Cursors::ShipScreen,
+    game::Reference::Ship,
     "SHIPSELECTIONDIALOG",
     "SHIPSELECTIONDIALOG",
     N_("Select Ship"),
@@ -298,6 +313,7 @@ const client::dialogs::ObjectSelectionDialog client::dialogs::SHIP_SELECTION_DIA
 
 const client::dialogs::ObjectSelectionDialog client::dialogs::PLANET_SELECTION_DIALOG = {
     game::map::Cursors::PlanetScreen,
+    game::Reference::Planet,
     "PLANETSELECTIONDIALOG",
     "PLANETSELECTIONDIALOG",
     N_("Select Planet"),
@@ -306,6 +322,7 @@ const client::dialogs::ObjectSelectionDialog client::dialogs::PLANET_SELECTION_D
 
 const client::dialogs::ObjectSelectionDialog client::dialogs::BASE_SELECTION_DIALOG = {
     game::map::Cursors::BaseScreen,
+    game::Reference::Planet,
     "BASESELECTIONDIALOG",
     "BASESELECTIONDIALOG",
     N_("Select Starbase"),
@@ -314,6 +331,7 @@ const client::dialogs::ObjectSelectionDialog client::dialogs::BASE_SELECTION_DIA
 
 const client::dialogs::ObjectSelectionDialog client::dialogs::FLEET_SELECTION_DIALOG = {
     game::map::Cursors::FleetScreen,
+    game::Reference::Ship,
     "FLEETSELECTIONDIALOG",
     "FLEETSELECTIONDIALOG",
     N_("Select Fleet"),
@@ -331,7 +349,7 @@ client::dialogs::doObjectSelectionDialog(const ObjectSelectionDialog& def,
     afl::string::Translator& tx = parentControl.translator();
 
     // Create common state
-    afl::base::Ref<CommonState> state(*new CommonState(def.screenNumber, def.keymapName));
+    afl::base::Ref<CommonState> state(*new CommonState(def.screenNumber, def.keymapName, def.refType));
 
     // Create ObjectObserver. This cause the CommonState to be initialized with the cursor we want.
     game::proxy::CursorObserverProxy oop(iface.gameSender(), std::auto_ptr<game::map::ObjectCursorFactory>(new DialogCursorFactory(state)));

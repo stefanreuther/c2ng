@@ -210,6 +210,7 @@ ControlScreenColorScheme::requestImage()
 const client::screens::ControlScreen::Definition client::screens::ControlScreen::ShipScreen = {
     client::si::OutputState::ShipScreen,
     ScreenHistory::Ship,
+    game::Reference::Ship,
     interpreter::Process::pkDefault,
     true,
     "SHIPSCREEN",
@@ -218,6 +219,7 @@ const client::screens::ControlScreen::Definition client::screens::ControlScreen:
 const client::screens::ControlScreen::Definition client::screens::ControlScreen::PlanetScreen = {
     client::si::OutputState::PlanetScreen,
     ScreenHistory::Planet,
+    game::Reference::Planet,
     interpreter::Process::pkDefault,
     false,
     "PLANETSCREEN",
@@ -226,6 +228,7 @@ const client::screens::ControlScreen::Definition client::screens::ControlScreen:
 const client::screens::ControlScreen::Definition client::screens::ControlScreen::BaseScreen = {
     client::si::OutputState::BaseScreen,
     ScreenHistory::Starbase,
+    game::Reference::Planet,
     interpreter::Process::pkDefault,
     false,
     "BASESCREEN",
@@ -234,6 +237,7 @@ const client::screens::ControlScreen::Definition client::screens::ControlScreen:
 const client::screens::ControlScreen::Definition client::screens::ControlScreen::HistoryScreen = {
     client::si::OutputState::HistoryScreen,
     ScreenHistory::HistoryShip,
+    game::Reference::Ship,
     interpreter::Process::pkDefault,
     true,
     "HISTORYSCREEN",
@@ -242,6 +246,7 @@ const client::screens::ControlScreen::Definition client::screens::ControlScreen:
 const client::screens::ControlScreen::Definition client::screens::ControlScreen::FleetScreen = {
     client::si::OutputState::FleetScreen,
     ScreenHistory::Fleet,
+    game::Reference::Ship,
     interpreter::Process::pkDefault,
     true,
     "FLEETSCREEN",
@@ -250,6 +255,7 @@ const client::screens::ControlScreen::Definition client::screens::ControlScreen:
 const client::screens::ControlScreen::Definition client::screens::ControlScreen::ShipTaskScreen = {
     client::si::OutputState::ShipTaskScreen,
     ScreenHistory::ShipTask,
+    game::Reference::Ship,
     interpreter::Process::pkShipTask,
     true,
     "SHIPTASKSCREEN",
@@ -258,6 +264,7 @@ const client::screens::ControlScreen::Definition client::screens::ControlScreen:
 const client::screens::ControlScreen::Definition client::screens::ControlScreen::PlanetTaskScreen = {
     client::si::OutputState::PlanetTaskScreen,
     ScreenHistory::PlanetTask,
+    game::Reference::Planet,
     interpreter::Process::pkPlanetTask,
     false,
     "PLANETTASKSCREEN",
@@ -266,6 +273,7 @@ const client::screens::ControlScreen::Definition client::screens::ControlScreen:
 const client::screens::ControlScreen::Definition client::screens::ControlScreen::BaseTaskScreen = {
     client::si::OutputState::BaseTaskScreen,
     ScreenHistory::StarbaseTask,
+    game::Reference::Planet,
     interpreter::Process::pkBaseTask,
     false,
     "BASETASKSCREEN",
@@ -769,6 +777,17 @@ void
 client::screens::ControlScreen::handleOverlayMessage(client::si::RequestLink2 link, String_t text)
 {
     defaultHandleOverlayMessage(link, text);
+}
+
+afl::base::Optional<game::Id_t>
+client::screens::ControlScreen::getFocusedObjectId(game::Reference::Type type) const
+{
+    if (type == m_definition.referenceType) {
+        return m_id;
+    } else {
+        // ControlScreen obscures anything below
+        return 0;
+    }
 }
 
 game::interface::ContextProvider*

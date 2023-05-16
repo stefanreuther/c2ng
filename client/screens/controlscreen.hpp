@@ -32,6 +32,7 @@ namespace client { namespace screens {
         struct Definition {
             client::si::OutputState::Target target;
             ScreenHistory::Type historyType;
+            game::Reference::Type referenceType;
             interpreter::Process::ProcessKind taskType;
             bool isShip;
             const char* layoutName;
@@ -95,6 +96,7 @@ namespace client { namespace screens {
         virtual void handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap);
         virtual void handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix);
         virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text);
+        virtual afl::base::Optional<game::Id_t> getFocusedObjectId(game::Reference::Type type) const;
         virtual game::interface::ContextProvider* createContextProvider();
 
         // KeyEventConsumer:

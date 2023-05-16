@@ -69,6 +69,7 @@ namespace {
         virtual void handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap);
         virtual void handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix);
         virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text);
+        virtual afl::base::Optional<game::Id_t> getFocusedObjectId(game::Reference::Type type) const;
         virtual game::interface::ContextProvider* createContextProvider();
 
      private:
@@ -91,6 +92,7 @@ namespace {
 
         // Status cache
         game::map::Point m_ufoCenter;
+        game::Id_t m_ufoId;
 
         void initWidgets();
 
@@ -123,7 +125,8 @@ UfoInfoDialog::UfoInfoDialog(client::si::UserSide& iface,
       m_otherButton("X", 'x', root),
       m_colorTile(root, gfx::Point(10, 10), ui::Color_Gray),
       m_colorButton(root, 0),
-      m_ufoCenter()
+      m_ufoCenter(),
+      m_ufoId()
 {
     m_proxy.sig_ufoChange.add(this, &UfoInfoDialog::onUfoChange);
     initWidgets();
@@ -297,6 +300,16 @@ UfoInfoDialog::handleOverlayMessage(client::si::RequestLink2 link, String_t text
     defaultHandleOverlayMessage(link, text);
 }
 
+afl::base::Optional<game::Id_t>
+UfoInfoDialog::getFocusedObjectId(game::Reference::Type type) const
+{
+    if (type == game::Reference::Ufo) {
+        return m_ufoId;
+    } else {
+        return defaultGetFocusedObjectId(type);
+    }
+}
+
 game::interface::ContextProvider*
 UfoInfoDialog::createContextProvider()
 {
@@ -384,6 +397,7 @@ UfoInfoDialog::onUfoChange(const UfoProxy::UfoInfo& info)
 
         // Save state for use by user input
         m_ufoCenter = info.center;
+        m_ufoId = info.ufoId;
     }
 }
 

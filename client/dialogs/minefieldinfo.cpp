@@ -52,6 +52,15 @@ namespace {
         }
     }
 
+    util::rich::Text boldIf(const String_t& in, bool flag)
+    {
+        util::rich::Text text(in);
+        if (flag) {
+            text.withStyle(util::rich::StyleAttribute::Bold);
+        }
+        return text;
+    }
+
     class MinefieldInfoDialog : public client::si::Control, public gfx::KeyEventConsumer {
      public:
         MinefieldInfoDialog(client::si::UserSide& iface, ui::Root& root, afl::string::Translator& tx, client::si::OutputState& out);
@@ -66,6 +75,7 @@ namespace {
         virtual void handleSetView(client::si::RequestLink2 link, String_t name, bool withKeymap);
         virtual void handleUseKeymap(client::si::RequestLink2 link, String_t name, int prefix);
         virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t text);
+        virtual afl::base::Optional<game::Id_t> getFocusedObjectId(game::Reference::Type type) const;
         virtual game::interface::ContextProvider* createContextProvider();
 
      private:
@@ -363,6 +373,16 @@ MinefieldInfoDialog::handleOverlayMessage(client::si::RequestLink2 link, String_
     defaultHandleOverlayMessage(link, text);
 }
 
+afl::base::Optional<game::Id_t>
+MinefieldInfoDialog::getFocusedObjectId(game::Reference::Type type) const
+{
+    if (type == game::Reference::Minefield) {
+        return m_minefieldId;
+    } else {
+        return defaultGetFocusedObjectId(type);
+    }
+}
+
 game::interface::ContextProvider*
 MinefieldInfoDialog::createContextProvider()
 {
@@ -491,7 +511,7 @@ MinefieldInfoDialog::showSweepInfo()
     // Retrieve mine sweep information
     client::Downlink link(m_root, m_translator);
     MinefieldProxy::SweepInfo info;
-    m_proxy.getSweepInfo(link, info);
+    m_proxy.getSweepInfo(link, interface().getFocusedObjectId(game::Reference::Ship), info);
     if (info.weapons.empty()) {
         ui::dialogs::MessageBox(m_translator("Mine sweep information not available."), m_translator("Minefield Information"), m_root).doOkDialog(m_translator);
         return;
@@ -508,8 +528,9 @@ MinefieldInfoDialog::showSweepInfo()
     doc.add(String_t(afl::string::Format(info.isWeb ? m_translator("To sweep %d web mines, use...") : m_translator("To sweep %d mines, use..."), fmt.formatNumber(info.units))));
     doc.addParagraph();
     for (size_t i = 0; i < info.weapons.size(); ++i) {
-        doc.addRight(5*em, fmt.formatNumber(info.weapons[i].needed));
-        doc.add(" " + info.weapons[i].name);
+        bool have = info.weapons[i].have != 0;
+        doc.addRight(5*em, boldIf(fmt.formatNumber(info.weapons[i].needed), have));
+        doc.add(boldIf(" " + info.weapons[i].name, have));
         doc.addNewline();
     }
     doc.finish();

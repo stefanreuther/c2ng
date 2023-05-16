@@ -47,6 +47,8 @@ namespace {
             { interface().continueProcessWithFailure(link, "Context error"); }
         virtual void handleOverlayMessage(client::si::RequestLink2 link, String_t /*text*/)
             { interface().continueProcessWithFailure(link, "Context error"); }
+        virtual afl::base::Optional<game::Id_t> getFocusedObjectId(game::Reference::Type /*type*/) const
+            { return 0; }
         virtual game::interface::ContextProvider* createContextProvider()
             { return 0; }
     };
@@ -77,7 +79,7 @@ WidgetVerifier::run()
 
     // Session
     util::RequestReceiver<game::Session> gameReceiver(gameThread, session);
-    
+
     // Now everything has been set up. Do the test.
     {
         // GUI mock
