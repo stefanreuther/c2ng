@@ -199,10 +199,20 @@ namespace {
                             if (m_fromShip != 0) {
                                 try {
                                     game::interface::UserInterfacePropertyStack& uiProps = session.uiPropertyStack();
-                                    afl::data::IntegerValue xv(pos.getX());
-                                    afl::data::IntegerValue yv(pos.getY());
-                                    uiProps.set(game::interface::iuiScanX, &xv);
-                                    uiProps.set(game::interface::iuiScanY, &yv);
+
+                                    // Consider current position to place cursor correctly across wrap
+                                    std::auto_ptr<afl::data::Value> chartX(uiProps.get(game::interface::iuiChartX));
+                                    std::auto_ptr<afl::data::Value> chartY(uiProps.get(game::interface::iuiChartY));
+                                    const afl::data::IntegerValue* chartXIV = dynamic_cast<const afl::data::IntegerValue*>(chartX.get());
+                                    const afl::data::IntegerValue* chartYIV = dynamic_cast<const afl::data::IntegerValue*>(chartY.get());
+
+                                    if (chartXIV != 0 && chartYIV != 0) {
+                                        game::map::Point adjPos = g->mapConfiguration().getSimpleNearestAlias(pos, game::map::Point(chartXIV->getValue(), chartYIV->getValue()));
+                                        afl::data::IntegerValue xv(adjPos.getX());
+                                        afl::data::IntegerValue yv(adjPos.getY());
+                                        uiProps.set(game::interface::iuiScanX, &xv);
+                                        uiProps.set(game::interface::iuiScanY, &yv);
+                                    }
                                 }
                                 catch (...) {
                                     // set() may fail; don't deprive user of this functionality then
