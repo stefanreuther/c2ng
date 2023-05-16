@@ -82,7 +82,7 @@ namespace {
                     game::map::Point pos,
                     game::ref::List::Options_t options,
                     game::Id_t& excludeShip)
-            : m_list(list), m_pos(pos), m_options(options), m_excludeShip(excludeShip), m_initialShipId(0), m_isUniquePlayable(false), m_hasRemoteControl(false)
+            : m_list(list), m_pos(pos), m_options(options), m_excludeShip(excludeShip), m_isUniquePlayable(false), m_hasRemoteControl(false)
             { }
 
         virtual void handle(game::Session& session)
@@ -113,9 +113,6 @@ namespace {
                                 m_isUniquePlayable = (pObj->isPlayable(game::map::Object::ReadOnly));
                             }
                         }
-
-                        // Initial cursor
-                        m_initialShipId = g->cursors().currentShip().getCurrentIndex();
                     }
                 }
                 if (!excludeValid) {
@@ -136,15 +133,11 @@ namespace {
         bool hasRemoteControl() const
             { return m_hasRemoteControl; }
 
-        game::Id_t getInitialShipId() const
-            { return m_initialShipId; }
-
      private:
         game::ref::List& m_list;
         game::map::Point m_pos;
         game::ref::List::Options_t m_options;
         game::Id_t& m_excludeShip;
-        game::Id_t m_initialShipId;
         String_t m_hidingPlanetName;
         bool m_isUniquePlayable;
         bool m_hasRemoteControl;
@@ -1411,7 +1404,7 @@ client::dialogs::VisualScanDialog::loadCurrent(Downlink& link, game::map::Point 
     link.call(m_gameSender, b);
     m_canEarlyExit = b.isUniquePlayable();
     m_allowRemoteControl = b.hasRemoteControl();
-    m_initialShipId = b.getInitialShipId();
+    m_initialShipId = m_userSide.getFocusedObjectId(game::Reference::Ship);
 
     // Verify
     if (list.size() == 0) {
