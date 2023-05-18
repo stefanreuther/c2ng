@@ -85,6 +85,7 @@ namespace game { namespace config {
     const IntegerOptionDescriptor UserConfiguration::Display_Clans        = { "Display.Clans", &BooleanValueParser::instance };
     const IntegerOptionDescriptor UserConfiguration::Display_HullfuncImages = { "Display.HullfuncImages", &BooleanValueParser::instance };
     const IntegerOptionDescriptor UserConfiguration::Tax_PredictRelative  = { "Tax.PredictRelative", &BooleanValueParser::instance };
+    const IntegerOptionDescriptor UserConfiguration::Tax_PredictRatio     = { "Tax.PredictRatio", &BooleanValueParser::instance };
 
     // Chart
     const IntegerOptionDescriptor UserConfiguration::ChartAnimThreshold    = { "Chart.AnimThreshold", &IntegerValueParser::instance };
@@ -214,6 +215,7 @@ game::config::UserConfiguration::setDefaultValues()
     me[Display_Clans].set(0);
     me[Display_HullfuncImages].set(1);
     me[Tax_PredictRelative].set(0);
+    me[Tax_PredictRatio].set(0);
 
     // Starchart
     me[ChartAnimThreshold].set(11);

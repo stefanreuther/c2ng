@@ -3,6 +3,7 @@
   *  \brief Taxation Dialog
   */
 
+#include <cmath>
 #include "client/dialogs/taxationdialog.hpp"
 #include "afl/base/deleter.hpp"
 #include "afl/container/ptrvector.hpp"
@@ -24,6 +25,7 @@
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/focusablegroup.hpp"
 #include "ui/widgets/focusiterator.hpp"
+#include "ui/widgets/keyforwarder.hpp"
 #include "ui/widgets/listlikedecimalselector.hpp"
 #include "ui/widgets/quit.hpp"
 #include "ui/widgets/simpletable.hpp"
@@ -56,6 +58,7 @@ namespace {
                                     int line,
                                     const PlanetPredictorProxy::Vector_t& data,
                                     bool relative,
+                                    bool ratio,
                                     util::NumberFormatter fmt)
     {
         // ex WPlanetGrowthTile::drawData (part), WPlanetGrowthTile::showItem
@@ -65,7 +68,9 @@ namespace {
             if (newPop == 0 && (oldPop == 0 || !relative)) {
                 tab.cell(i, line).setText(UTF_MIDDLE_DOT);
             } else if (relative) {
-                String_t diffs = fmt.formatPopulation(std::abs(newPop - oldPop));
+                String_t diffs = ratio && oldPop != 0
+                    ? String_t(afl::string::Format("%.1f%%", std::fabs(100.0 * double(newPop - oldPop) / oldPop)))
+                    : fmt.formatPopulation(std::abs(newPop - oldPop));
                 if (newPop < oldPop) {
                     diffs.insert(0, "-");
                 }
@@ -234,7 +239,7 @@ namespace {
     /*
      *  TaxationDialog: entire dialog
      */
-    class TaxationDialog {
+    class TaxationDialog : private gfx::KeyEventConsumer {
      public:
         TaxationDialog(afl::string::Translator& tx, ui::Root& root, TaxationProxy& proxy, PlanetPredictorProxy& ppProxy, util::RequestSender<game::Session> gameSender, util::NumberFormatter fmt);
         bool run(const TaxationProxy::Status& initialStatus, const PlanetPredictorProxy::Status& initialPrediction);
@@ -243,10 +248,16 @@ namespace {
         void renderPrediction();
         void setEffectors(const PlanetEffectors& eff);
 
-        void toggleRelative();
+        void toggleMode();
+        void toggleRatio();
+
         void setRelative(bool flag);
         bool isRelative() const;
+        void setRatio(bool flag);
+        bool isRatio() const;
         void editEffectors();
+
+        virtual bool handleKey(util::Key_t key, int prefix);
 
      private:
         // Links
@@ -269,6 +280,7 @@ namespace {
         PlanetPredictorProxy::Status m_lastPrediction;
         PlanetEffectors m_effectors;
         bool m_relative;
+        bool m_ratio;
     };
 }
 
@@ -505,7 +517,8 @@ TaxationDialog::TaxationDialog(afl::string::Translator& tx, ui::Root& root, Taxa
       conn_predictionChange(ppProxy.sig_update.add(this, &TaxationDialog::updatePrediction)),
       m_lastPrediction(),
       m_effectors(),
-      m_relative(false)
+      m_relative(false),
+      m_ratio(false)
 { }
 
 bool
@@ -591,6 +604,7 @@ TaxationDialog::run(const TaxationProxy::Status& initialStatus, const PlanetPred
     ui::widgets::Button& btnCancel = del.addNew(new ui::widgets::Button(m_translator("Cancel"), util::Key_Escape, m_root));
     ui::widgets::Button& btnAuto   = del.addNew(new ui::widgets::Button(m_translator("Space - Auto Tax"), ' ', m_root));
     ui::widgets::Button& btnHelp   = del.addNew(new ui::widgets::Button(m_translator("Help"), 'h', m_root));
+    ui::widgets::KeyForwarder& forwarder = del.addNew(new ui::widgets::KeyForwarder(*this));
     g.add(btnOK);
     g.add(btnCancel);
     g.add(btnAuto);
@@ -600,13 +614,15 @@ TaxationDialog::run(const TaxationProxy::Status& initialStatus, const PlanetPred
     win.add(it);
     win.add(del.addNew(new ui::widgets::Quit(m_root, loop)));
     win.add(helpWidget);
+    win.add(forwarder);
     win.pack();
+
 
     btnOK.sig_fire.addNewClosure(loop.makeStop(1));
     btnCancel.sig_fire.addNewClosure(loop.makeStop(0));
     btnAuto.dispatchKeyTo(top);
     btnHelp.dispatchKeyTo(helpWidget);
-    btnR.sig_fire.add(this, &TaxationDialog::toggleRelative);
+    btnR.dispatchKeyTo(forwarder);
     btnW.sig_fire.add(this, &TaxationDialog::editEffectors);
 
     m_root.centerWidget(win);
@@ -647,14 +663,14 @@ TaxationDialog::renderPrediction()
         // Colonists
         if (!m_lastPrediction.colonistClans.empty()) {
             m_pPredictionTable->cell(0, line).setText(m_translator("Colonists"));
-            renderPopulationPrediction(*m_pPredictionTable, line, m_lastPrediction.colonistClans, m_relative, m_formatter);
+            renderPopulationPrediction(*m_pPredictionTable, line, m_lastPrediction.colonistClans, m_relative, m_ratio, m_formatter);
             ++line;
         }
 
         // Natives
         if (!m_lastPrediction.nativeClans.empty()) {
             m_pPredictionTable->cell(0, line).setText(m_translator("Natives"));
-            renderPopulationPrediction(*m_pPredictionTable, line, m_lastPrediction.nativeClans, m_relative, m_formatter);
+            renderPopulationPrediction(*m_pPredictionTable, line, m_lastPrediction.nativeClans, m_relative, m_ratio, m_formatter);
             ++line;
         }
 
@@ -681,9 +697,26 @@ TaxationDialog::setEffectors(const PlanetEffectors& eff)
 }
 
 void
-TaxationDialog::toggleRelative()
+TaxationDialog::toggleMode()
 {
-    setRelative(!m_relative);
+    if (!m_relative) {
+        m_relative = true;
+        m_ratio = false;
+    } else if (m_ratio) {
+        m_relative = false;
+        m_ratio = false;
+    } else {
+        m_ratio = true;
+    }
+    renderPrediction();
+}
+
+void
+TaxationDialog::toggleRatio()
+{
+    m_ratio = !m_ratio || !m_relative;
+    m_relative = true;
+    renderPrediction();
 }
 
 void
@@ -700,6 +733,19 @@ TaxationDialog::isRelative() const
 }
 
 void
+TaxationDialog::setRatio(bool flag)
+{
+    m_ratio = flag;
+    renderPrediction();
+}
+
+bool
+TaxationDialog::isRatio() const
+{
+    return m_ratio;
+}
+
+void
 TaxationDialog::editEffectors()
 {
     // ex WTaxationDialog::editEffectors
@@ -711,6 +757,25 @@ TaxationDialog::editEffectors()
     EffectorDialog dlg(m_root, m_effectors, sig, m_translator);
     if (!dlg.run(m_gameSender)) {
         setEffectors(oldValues);
+    }
+}
+
+bool
+TaxationDialog::handleKey(util::Key_t key, int /*prefix*/)
+{
+    switch (key) {
+     case 'r':
+        toggleMode();
+        return true;
+
+     case 'R':                           // regular input
+     case 'r' + util::KeyMod_Shift:      // Shift-Click to button
+        // Cannot use '%', that already is "set to X% tax"
+        toggleRatio();
+        return true;
+
+     default:
+        return false;
     }
 }
 
@@ -761,8 +826,10 @@ client::dialogs::doTaxationDialog(game::Id_t planetId,
     TaxationDialog dlg(tx, root, proxy, ppProxy, gameSender, cfgProxy.getNumberFormatter(link));
     dlg.setEffectors(eff);
     dlg.setRelative(cfgProxy.getOption(link, game::config::UserConfiguration::Tax_PredictRelative));
+    dlg.setRatio(cfgProxy.getOption(link, game::config::UserConfiguration::Tax_PredictRatio));
     if (dlg.run(st, ppStatus)) {
         proxy.commit();
     }
     cfgProxy.setOption(game::config::UserConfiguration::Tax_PredictRelative, dlg.isRelative());
+    cfgProxy.setOption(game::config::UserConfiguration::Tax_PredictRatio, dlg.isRatio());
 }

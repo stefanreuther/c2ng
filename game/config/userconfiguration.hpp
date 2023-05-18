@@ -143,6 +143,7 @@ namespace game { namespace config {
         static const IntegerOptionDescriptor Display_Clans;
         static const IntegerOptionDescriptor Display_HullfuncImages;
         static const IntegerOptionDescriptor Tax_PredictRelative;
+        static const IntegerOptionDescriptor Tax_PredictRatio;
 
         // Starchart
         // More chart options in game::map::Configuration, those are maintained by session setup and need not be here
