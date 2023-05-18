@@ -882,10 +882,20 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
         }
      case ispWaypointName:
         /* @q Waypoint:Str (Ship Property)
-           Waypoint, as a human-readable string. */
+           Waypoint, as a human-readable string.
+           @diff For ships on intercept course, PCC2 version 2.0.7, 2.41.1, and later as well as PCC 1.x will return
+           the name of the intercept target. Earlier PCC2 versions only return the name of the location
+           (planet or X,Y's). */
         if (sh.getWaypoint().get(pt)) {
-            // FIXME: PCC 1.x also handles Intercept here
-            if (sh.getWaypointDX().isSame(0) && sh.getWaypointDY().isSame(0)) {
+            game::map::Ship* target;
+            if (sh.getMission().orElse(0) == game::spec::Mission::msn_Intercept && (target = turn->universe().ships().get(sh.getMissionParameter(InterceptParameter).orElse(0))) != 0) {
+                String_t name = target->getName();
+                if (name.empty()) {
+                    return makeStringValue(afl::string::Format("Ship #%d", target->getId()));
+                } else {
+                    return makeStringValue(afl::string::Format("%s (#%d)", name, target->getId()));
+                }
+            } else if (sh.getWaypointDX().isSame(0) && sh.getWaypointDY().isSame(0)) {
                 return makeStringValue("(Location)");
             } else {
                 return makeStringValue(turn->universe().findLocationName(pt, 0, game->mapConfiguration(), root->hostConfiguration(), root->hostVersion(), session.translator()));

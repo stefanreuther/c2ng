@@ -953,7 +953,7 @@ TestGameInterfaceShipProperty::testFreighter()
     verifyNewInteger("ispWaypointPlanetId",        getShipProperty(sh, game::interface::ispWaypointPlanetId,        session, root, shipList, g, turn), 0);
     verifyNewInteger("ispWaypointX",               getShipProperty(sh, game::interface::ispWaypointX,               session, root, shipList, g, turn), X);
     verifyNewInteger("ispWaypointY",               getShipProperty(sh, game::interface::ispWaypointY,               session, root, shipList, g, turn), Y);
-    verifyNewString ("ispWaypointName",            getShipProperty(sh, game::interface::ispWaypointName,            session, root, shipList, g, turn), "(Location)");
+    verifyNewString ("ispWaypointName",            getShipProperty(sh, game::interface::ispWaypointName,            session, root, shipList, g, turn), "USS Far (#111)");
 
     // Writing properties
     {
@@ -974,5 +974,76 @@ TestGameInterfaceShipProperty::testFreighter()
         afl::data::StringValue sv("name");
         TS_ASSERT_THROWS(setShipProperty(sh, game::interface::ispFleetName,        &sv, *root, *shipList, g->mapConfiguration(), *turn), interpreter::Error);
     }
+}
+
+/** Test intercept usecases. */
+void
+TestGameInterfaceShipProperty::testIntercept()
+{
+    const int PLAYER = 3;
+    const int SHIP_ID = 77;
+    const int NAMED_ID = 20;
+    const int UNNAMED_ID = 30;
+    const int X = 1100;
+    const int Y = 1300;
+
+    afl::string::NullTranslator tx;
+    afl::io::NullFileSystem fs;
+    game::Session session(tx, fs);
+
+    // Root
+    afl::base::Ref<game::Root> root(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,1,0))));
+
+    // Ship List
+    afl::base::Ref<game::spec::ShipList> shipList(*new game::spec::ShipList());
+
+    // Game/Turn
+    afl::base::Ref<game::Game> g(*new game::Game());
+    afl::base::Ref<game::Turn> turn(g->currentTurn());
+    g->setViewpointPlayer(PLAYER);
+
+    // Ship under test
+    game::map::ShipData sd;
+    sd.owner                     = PLAYER;
+    sd.waypointDX                = 10;
+    sd.waypointDY                = 10;
+    sd.x                         = X;
+    sd.y                         = Y;
+    sd.hullType                  = game::test::GORBIE_HULL_ID;
+    sd.mission                   = 8;
+    sd.missionTowParameter       = 10;
+    sd.missionInterceptParameter = NAMED_ID;
+
+    // Create ship. Must be part of the universe because MovementPredictor resolves it through it.
+    game::map::Ship& sh = *turn->universe().ships().create(SHIP_ID);
+    sh.addCurrentShipData(sd, game::PlayerSet_t(PLAYER));
+    sh.setPlayability(game::map::Object::Playable);
+    sh.internalCheck(game::PlayerSet_t(PLAYER), TURN_NR);
+
+    // Target ships
+    game::map::Ship& named = *turn->universe().ships().create(NAMED_ID);
+    named.addShipXYData(game::map::Point(X+100, Y), PLAYER+1, 100, game::PlayerSet_t(PLAYER));
+    named.setName("Named");
+    named.setPlayability(game::map::Object::NotPlayable);
+    named.internalCheck(game::PlayerSet_t(PLAYER), TURN_NR);
+
+    game::map::Ship& unnamed = *turn->universe().ships().create(UNNAMED_ID);
+    unnamed.addShipXYData(game::map::Point(X, Y+100), PLAYER+2, 100, game::PlayerSet_t(PLAYER));
+    unnamed.setPlayability(game::map::Object::NotPlayable);
+    unnamed.internalCheck(game::PlayerSet_t(PLAYER), TURN_NR);
+
+    // Initial state: intercepting NAMED_ID
+    verifyNewInteger("ispMissionId",               getShipProperty(sh, game::interface::ispMissionId,               session, root, shipList, g, turn), 8);
+    verifyNewInteger("ispMissionIntercept",        getShipProperty(sh, game::interface::ispMissionIntercept,        session, root, shipList, g, turn), NAMED_ID);
+    verifyNewString ("ispWaypointName",            getShipProperty(sh, game::interface::ispWaypointName,            session, root, shipList, g, turn), "Named (#20)");
+
+    // Modify target
+    afl::data::IntegerValue iv(UNNAMED_ID);
+    TS_ASSERT_THROWS_NOTHING(setShipProperty(sh, game::interface::ispMissionIntercept, &iv, *root, *shipList, g->mapConfiguration(), *turn));
+
+    // Initial state: intercepting UNNAMED_ID
+    verifyNewInteger("ispMissionId",               getShipProperty(sh, game::interface::ispMissionId,               session, root, shipList, g, turn), 8);
+    verifyNewInteger("ispMissionIntercept",        getShipProperty(sh, game::interface::ispMissionIntercept,        session, root, shipList, g, turn), UNNAMED_ID);
+    verifyNewString ("ispWaypointName",            getShipProperty(sh, game::interface::ispWaypointName,            session, root, shipList, g, turn), "Ship #30");
 }
 

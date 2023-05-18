@@ -716,6 +716,7 @@ class TestGameInterfaceShipProperty : public CxxTest::TestSuite {
     void testCarrier();
     void testEmpty();
     void testFreighter();
+    void testIntercept();
 };
 
 class TestGameInterfaceShipTaskPredictor : public CxxTest::TestSuite {
