@@ -130,11 +130,14 @@ namespace client { namespace screens {
         void onAddAccount(int);
         void onRootAction(size_t index);
         void onUnpackAction();
+        void onReceiveAttachmentsAction();
         void onMaketurnAction();
         void onSweepAction();
         void onAutoLoad(int playerNumber);
         void onAutoFocus(int playerNumber);
+        bool receiveAttachments(game::PlayerSet_t players, bool isImplicit);
         bool preparePlayAction(int playerNumber);
+        void addMessage(String_t str);
 
         void setState(State st);
         void setList(client::widgets::FolderListbox::Items_t& items,

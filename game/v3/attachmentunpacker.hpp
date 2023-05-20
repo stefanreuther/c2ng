@@ -74,6 +74,7 @@ namespace game { namespace v3 {
 
         /** Load attachments from directory.
             Loads result and utildata files if they exist.
+            Errors are ignored.
             \param dir Directory
             \param playerNumber Player number
             \param log Logger (for traces)

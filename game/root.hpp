@@ -80,6 +80,11 @@ namespace game {
                 To be used with aUnpack. */
             aSuggestUnpack,
 
+            /** Allow user to use the "Receive Attachments" function.
+                If this is set, gameDirectory() points at a file-system directory.
+                The Root must be recreated after unpacking (Folder::loadGameRoot()). */
+            aReceiveAttachments,
+
             /** Allow user to use the "Maketurn" function.
                 If this is set, gameDirectory() points at a file-system directory.
                 The Root should be recreated after Maketurn (Folder::loadGameRoot()). */

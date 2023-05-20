@@ -14,10 +14,10 @@
 
 using ui::widgets::KeyDispatcher;
 
-client::dialogs::SimpleConsole::SimpleConsole(ui::Root& root, afl::string::Translator& tx)
+client::dialogs::SimpleConsole::SimpleConsole(ui::Root& root, afl::string::Translator& tx, int numLines)
     : m_root(root),
       m_translator(tx),
-      m_consoleView(root.provider(), gfx::Point(35, 18)),
+      m_consoleView(root.provider(), gfx::Point(35, numLines)),
       m_consoleController(m_consoleView),
       m_closeButton(tx("Close"), ' ', root),
       m_loop(root),

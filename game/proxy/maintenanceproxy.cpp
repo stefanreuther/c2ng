@@ -136,7 +136,7 @@ game::proxy::MaintenanceProxy::Trampoline::startUnpack(PlayerSet_t players, bool
         theUnpacker.log().addListener(*this);
 
         // Configure it
-        const UserConfiguration& config = m_adaptor.userConfiguration();
+        UserConfiguration& config = m_adaptor.userConfiguration();
         theUnpacker.setFormat(config[UserConfiguration::Unpack_Format]() == UserConfiguration::UnpackFormat_DOS ? Unpacker::DosFormat : Unpacker::WindowsFormat);
         theUnpacker.setCreateTargetExt(config[UserConfiguration::Unpack_TargetExt]() != 0);
         theUnpacker.setFixErrors(config[UserConfiguration::Unpack_FixErrors]() != 0);
@@ -160,11 +160,15 @@ game::proxy::MaintenanceProxy::Trampoline::startUnpack(PlayerSet_t players, bool
                 }
                 theUnpacker.finish(dir, rstFile);
                 ++num;
-
-                // FIXME: detacher.loadDirectory(*gameDir, i, log(), tx);
             }
         }
         write(Info, LOG_NAME, Format(tx("Unpacked %d result file%!1{s%}."), num));
+
+        // Clear attachment timestamp.
+        // If we declined an attachment the last time, this means it will be offered again.
+        game::config::StringOption& opt = config[UserConfiguration::Unpack_AttachmentTimestamp];
+        opt.set(String_t());
+        opt.setSource(game::config::ConfigurationOption::Default);
     }
     catch (std::exception& e) {
         write(Error, LOG_NAME, tx("Error"), e);

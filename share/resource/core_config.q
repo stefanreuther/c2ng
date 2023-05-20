@@ -300,6 +300,27 @@ Function CCfg.Backup.Value
 EndFunction
 
 %
+%  Race name changes
+%
+
+Sub CCfg.RaceNameChange.Edit
+  AddPref Option & " = " & ((Pref(Option) + 1) Mod 3)
+EndSub
+
+Function CCfg.RaceNameChange.Value
+  % ex WConfigTriboolEditor::toString
+  Select Case Pref(Option)
+    Case 0
+      Return Translate("ask")
+    Case 1
+      Return Translate("accept")
+    Case 2
+      Return Translate("reject")
+  EndSelect
+EndFunction
+
+
+%
 %  Define all the User Preferences
 %
 
@@ -322,7 +343,9 @@ On UserPreferences Do
   Add Translate("Unpack | Data file format"), CCfg.Boolean.Edit, CCfg.UnpackFormat.Value
   LinkPref "Unpack.Format"
 
-  % TODO: Missing PCC1 Option: Unpack | Race name changes
+  Add Translate("Unpack | Race name changes"), CCfg.RaceNameChange.Edit, CCfg.RaceNameChange.Value
+  LinkPref "Unpack.RaceNames"
+
   % TODO: Missing PCC1 Option: Unpack | Convert text files in UTILx.DAT
 
   Add Translate("Unpack | Create TARGETx.EXT files"), CCfg.Boolean.Edit, CCfg.Boolean.Value

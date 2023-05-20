@@ -157,6 +157,7 @@ TestGameProxyMaintenanceProxy::testUnpack()
     addFile(env, "player2.rst", game::test::makeEmptyResult(2, 70, Timestamp(2003, 12, 10, 12, 0, 0)));
     addFile(env, "player4.rst", game::test::makeEmptyResult(4, 70, Timestamp(2003, 12, 10, 12, 0, 0)));
     addFile(env, "player7.rst", game::test::makeEmptyResult(7, 69, Timestamp(2003, 11, 10, 12, 0, 0)));
+    env.session().getRoot()->userConfiguration()[game::config::UserConfiguration::Unpack_AttachmentTimestamp].set("1-2-3");
 
     // Prepare
     MaintenanceProxy::UnpackStatus st = env.testee.prepareUnpack(env.waitIndicator);
@@ -179,6 +180,9 @@ TestGameProxyMaintenanceProxy::testUnpack()
 
     // Default is Winplan format, so we should have a Winplan outbox
     TS_ASSERT(hasFile(env, "mess357.dat"));
+
+    // Verify that attachment timestamp has been reset
+    TS_ASSERT_EQUALS(env.session().getRoot()->userConfiguration()[game::config::UserConfiguration::Unpack_AttachmentTimestamp](), "");
 }
 
 /** Test unpack, with turn file. */

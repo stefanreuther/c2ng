@@ -7,6 +7,7 @@
 #include "client/screens/browserscreen.hpp"
 #include "afl/base/countof.hpp"
 #include "afl/string/format.hpp"
+#include "client/dialogs/attachmentselection.hpp"
 #include "client/dialogs/directorysetup.hpp"
 #include "client/dialogs/folderconfigdialog.hpp"
 #include "client/dialogs/helpdialog.hpp"
@@ -23,6 +24,7 @@
 #include "game/exception.hpp"
 #include "game/interface/plugins.hpp"
 #include "game/playerlist.hpp"
+#include "game/proxy/attachmentproxy.hpp"
 #include "game/proxy/maintenanceadaptor.hpp"
 #include "game/proxy/maintenanceproxy.hpp"
 #include "game/root.hpp"
@@ -57,6 +59,7 @@ namespace {
         xConfiguration,
         xSweep,
         xUnpack,
+        xReceiveAttachments,
         xMaketurn
     };
     typedef afl::bits::SmallSet<Action> Actions_t;
@@ -67,11 +70,12 @@ namespace {
         bool isAction;
     };
     const ActionInfo ACTION_INFO[] = {
-        { N_("Set up for playing"), xLocalSetup,    false },
-        { N_("Configure"),          xConfiguration, false },
-        { N_("Unpack"),             xUnpack,        true },
-        { N_("Maketurn"),           xMaketurn,      true },
-        { N_("Sweep"),              xSweep,         true },
+        { N_("Set up for playing"),  xLocalSetup,         false },
+        { N_("Configure"),           xConfiguration,      false },
+        { N_("Unpack"),              xUnpack,             true },
+        { N_("Maketurn"),            xMaketurn,           true },
+        { N_("Sweep"),               xSweep,              true },
+        { N_("Receive attachments"), xReceiveAttachments, true },
     };
 
     static Actions_t getActions(const game::Root::Actions_t as)
@@ -89,6 +93,9 @@ namespace {
         }
         if (as.contains(Root::aUnpack)) {
             result += xUnpack;
+        }
+        if (as.contains(Root::aReceiveAttachments)) {
+            result += xReceiveAttachments;
         }
         if (as.contains(Root::aMaketurn)) {
             result += xMaketurn;
@@ -201,6 +208,7 @@ client::screens::BrowserScreen::run(gfx::ColorScheme<util::SkinColor::Color>& pa
     keys.add('m',                                this, &BrowserScreen::onMaketurnAction);
     keys.add('s',                                this, &BrowserScreen::onSweepAction);
     keys.add('u',                                this, &BrowserScreen::onUnpackAction);
+    keys.add('t',                                this, &BrowserScreen::onReceiveAttachmentsAction);
     keys.add(util::Key_F1,                       this, &BrowserScreen::onKeyHelp);
     keys.add(util::Key_F5,                       this, &BrowserScreen::onKeyPlugin);
     keys.add(util::Key_Quit,                     this, &BrowserScreen::onKeyQuit);
@@ -587,6 +595,9 @@ client::screens::BrowserScreen::onRootAction(size_t index)
      case xUnpack:
         onUnpackAction();
         break;
+     case xReceiveAttachments:
+        onReceiveAttachmentsAction();
+        break;
      case xMaketurn:
         onMaketurnAction();
         break;
@@ -603,11 +614,29 @@ client::screens::BrowserScreen::onUnpackAction()
         // Unpack operation
         game::proxy::MaintenanceProxy proxy(m_browserSender.makeTemporary(new MaintenanceFromBrowser()), m_root.engine().dispatcher());
         client::widgets::HelpWidget help(m_root, m_translator, m_gameSender, "pcc2:unpack");
-        if (client::dialogs::doUnpackDialog(proxy, &help, m_root, m_translator)) {
+        game::PlayerSet_t players = client::dialogs::doUnpackDialog(proxy, &help, m_root, m_translator);
+        if (!players.empty()) {
+            // Attachments
+            receiveAttachments(players, true);
+
             // Run hook
             client::si::NullControl(m_userSide).executeHookWait("Unpack");
 
             // Refresh
+            m_proxy.updateConfiguration();
+            m_proxy.loadContent();
+            setState(Blocked);
+        }
+    }
+}
+
+void
+client::screens::BrowserScreen::onReceiveAttachmentsAction()
+{
+    // ex WUnpackWindow::onAttachments
+    if (m_state == Working && getActions(m_infoActions).contains(xReceiveAttachments)) {
+        if (receiveAttachments(game::PlayerSet_t::allUpTo(game::MAX_PLAYERS), false)) {
+            m_proxy.updateConfiguration();
             m_proxy.loadContent();
             setState(Blocked);
         }
@@ -623,7 +652,7 @@ client::screens::BrowserScreen::onMaketurnAction()
         game::proxy::MaintenanceProxy::MaketurnStatus st = proxy.prepareMaketurn(link);
         if (st.valid) {
             // Do it
-            SimpleConsole console(m_root, m_translator);
+            SimpleConsole console(m_root, m_translator, 0);
             proxy.sig_message.add(&console, &SimpleConsole::addMessage);
             proxy.sig_actionComplete.add(&console, &SimpleConsole::enableClose);
             proxy.startMaketurn(st.availablePlayers);
@@ -683,6 +712,40 @@ client::screens::BrowserScreen::onAutoFocus(int playerNumber)
 }
 
 bool
+client::screens::BrowserScreen::receiveAttachments(game::PlayerSet_t players, bool isImplicit)
+{
+    game::proxy::AttachmentProxy proxy(m_browserSender.makeTemporary(new MaintenanceFromBrowser()), m_root.engine().dispatcher());
+    Downlink link(m_root, m_translator);
+
+    SimpleConsole console(m_root, m_translator, 10);
+    proxy.sig_message.add(&console, &SimpleConsole::addMessage);
+    proxy.sig_message.add(this, &BrowserScreen::addMessage);
+    proxy.sig_actionComplete.add(&console, &SimpleConsole::enableClose);
+
+    game::proxy::AttachmentProxy::Infos_t infos;
+    bool proceed = false;
+    proxy.loadDirectory(link, players, isImplicit, infos, proceed);
+    if (infos.empty()) {
+        if (!isImplicit) {
+            ui::dialogs::MessageBox(m_translator("You did not receive any new files with your result this turn, or these files have already been unpacked."),
+                                    m_translator("Attachments"), m_root)
+                .doOkDialog(m_translator);
+        }
+        return false;
+    } else {
+        bool doIt = (isImplicit && proceed) || client::dialogs::chooseAttachments(infos, m_gameSender, m_root, m_translator);
+        if (doIt) {
+            proxy.selectAttachments(infos);
+            proxy.saveFiles();
+            console.run(m_translator("Attachments"));
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+
+bool
 client::screens::BrowserScreen::preparePlayAction(int playerNumber)
 {
     if (checkLocalSetup(m_root, m_translator, m_proxy)) {
@@ -702,7 +765,18 @@ client::screens::BrowserScreen::preparePlayAction(int playerNumber)
             return false;
         }
     }
+    if (m_infoActions.contains(game::Root::aReceiveAttachments)) {
+        if (receiveAttachments(game::PlayerSet_t(playerNumber), true)) {
+            m_proxy.updateConfiguration();
+        }
+    }
     return true;
+}
+
+void
+client::screens::BrowserScreen::addMessage(String_t str)
+{
+    m_userSide.mainLog().write(afl::sys::LogListener::Info, "browser", str);
 }
 
 void

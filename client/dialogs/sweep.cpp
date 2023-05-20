@@ -162,7 +162,7 @@ client::dialogs::doSweepDialog(game::proxy::MaintenanceProxy& proxy, ui::Widget*
     }
 
     // Run it
-    SimpleConsole console(root, tx);
+    SimpleConsole console(root, tx, 18);
     afl::base::SignalConnection conn_message(proxy.sig_message.add(&console, &SimpleConsole::addMessage));
     afl::base::SignalConnection conn_actionComplete(proxy.sig_actionComplete.add(&console, &SimpleConsole::enableClose));
     dlg.startSweep(proxy);

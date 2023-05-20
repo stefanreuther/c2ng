@@ -21,8 +21,8 @@ namespace client { namespace dialogs {
         @param root     UI Root
         @param tx       Translator
 
-        @return true if user executed the operation (file system was changed) */
-    bool doUnpackDialog(game::proxy::MaintenanceProxy& proxy, ui::Widget* pHelp, ui::Root& root, afl::string::Translator& tx);
+        @return set of unpacked players (file system was changed); empty if dialog was cancelled */
+    game::PlayerSet_t doUnpackDialog(game::proxy::MaintenanceProxy& proxy, ui::Widget* pHelp, ui::Root& root, afl::string::Translator& tx);
 
 } }
 

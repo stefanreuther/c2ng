@@ -30,8 +30,9 @@ namespace client { namespace dialogs {
      public:
         /** Constructor.
             @param root UI root
-            @param tx   Translator */
-        SimpleConsole(ui::Root& root, afl::string::Translator& tx);
+            @param tx   Translator
+            @param numLines Number of lines to show */
+        SimpleConsole(ui::Root& root, afl::string::Translator& tx, int numLines);
 
         /** Add a message.
             The message will be added as plain text.

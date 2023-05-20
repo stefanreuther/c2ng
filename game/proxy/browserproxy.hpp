@@ -187,6 +187,11 @@ namespace game { namespace proxy {
             @param [in]     config  Configuration */
         void setConfiguration(WaitIndicator& ind, const Configuration& config);
 
+        /** Update configuration.
+            Saves configuration possibly modified by other operations (e.g. unpack).
+            Similar to setConfiguration() with an empty Configuration object. */
+        void updateConfiguration();
+
         /** Add an account.
             @param ind WaitIndicator
             @param user User name

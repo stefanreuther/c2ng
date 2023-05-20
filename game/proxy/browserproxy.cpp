@@ -589,6 +589,21 @@ game::proxy::BrowserProxy::setConfiguration(WaitIndicator& ind, const Configurat
     ind.call(m_sender, t);
 }
 
+// Update configuration.
+void
+game::proxy::BrowserProxy::updateConfiguration()
+{
+    class Task : public util::Request<Trampoline> {
+     public:
+        virtual void handle(Trampoline& t)
+            {
+                game::browser::Session& s = t.session();
+                s.addTask(s.browser().updateConfiguration(std::auto_ptr<Task_t>(Task_t::makeBound(&s, &game::browser::Session::finishTask))));
+            }
+    };
+    m_sender.postNewRequest(new Task());
+}
+
 // Add an account.
 bool
 game::proxy::BrowserProxy::addAccount(WaitIndicator& ind, String_t user, String_t type, String_t host)

@@ -59,9 +59,7 @@ namespace {
                 }
             }
 
-        bool run(ui::Widget* pHelp);
-
-        void onOK();
+        game::PlayerSet_t run(ui::Widget* pHelp);
 
         void startUnpack(game::proxy::MaintenanceProxy& proxy)
             { proxy.startUnpack(m_playerSelector.getSelectedPlayers(), m_applyTurnFlag.get() != 0); }
@@ -76,7 +74,7 @@ namespace {
     };
 }
 
-bool
+game::PlayerSet_t
 Dialog::run(ui::Widget* pHelp)
 {
     // ex WUnpackWindow::init
@@ -117,8 +115,7 @@ Dialog::run(ui::Widget* pHelp)
         btn.addHelp(*pHelp);
         win.add(*pHelp);
     }
-    btn.ok().sig_fire.add(this, &Dialog::onOK);
-    btn.cancel().sig_fire.addNewClosure(m_loop.makeStop(0));
+    btn.addStop(m_loop);
     win.add(btn);
 
     // Focus
@@ -137,23 +134,12 @@ Dialog::run(ui::Widget* pHelp)
     win.pack();
     m_root.centerWidget(win);
     m_root.add(win);
-    return m_loop.run() != 0;
+    return m_loop.run() != 0
+        ? m_playerSelector.getSelectedPlayers()
+        : game::PlayerSet_t();
 }
 
-void
-Dialog::onOK()
-{
-    // WUnpackWindow::onOK()
-    if (m_playerSelector.getSelectedPlayers().empty()) {
-        // Nothing selected - cancel
-        m_loop.stop(0);
-    } else {
-        // OK
-        m_loop.stop(1);
-    }
-}
-
-bool
+game::PlayerSet_t
 client::dialogs::doUnpackDialog(game::proxy::MaintenanceProxy& proxy, ui::Widget* pHelp, ui::Root& root, afl::string::Translator& tx)
 {
     // ex doUnpack
@@ -162,20 +148,21 @@ client::dialogs::doUnpackDialog(game::proxy::MaintenanceProxy& proxy, ui::Widget
     game::proxy::MaintenanceProxy::UnpackStatus st = proxy.prepareUnpack(link);
     if (!st.valid || st.availablePlayers.empty()) {
         ui::dialogs::MessageBox(tx("This directory contains no files to unpack."), tx("Unpack"), root).doOkDialog(tx);
-        return false;
+        return game::PlayerSet_t();
     }
 
     // Main dialog
     Dialog dlg(st, root, tx);
-    if (!dlg.run(pHelp)) {
-        return false;
+    game::PlayerSet_t result = dlg.run(pHelp);
+    if (result.empty()) {
+        return game::PlayerSet_t();
     }
 
     // Run it
-    SimpleConsole console(root, tx);
+    SimpleConsole console(root, tx, 18);
     afl::base::SignalConnection conn_message(proxy.sig_message.add(&console, &SimpleConsole::addMessage));
     afl::base::SignalConnection conn_actionComplete(proxy.sig_actionComplete.add(&console, &SimpleConsole::enableClose));
     dlg.startUnpack(proxy);
     console.run(tx("Unpack"));
-    return true;
+    return result;
 }

@@ -324,12 +324,22 @@ game::v3::AttachmentUnpacker::loadDirectory(afl::io::Directory& dir, int playerN
 {
     afl::base::Ptr<Stream> in = dir.openFileNT(Format("player%d.rst", playerNumber), FileSystem::OpenRead);
     if (in.get() != 0) {
-        loadResultFile(*in, playerNumber, log, tx);
+        try {
+            loadResultFile(*in, playerNumber, log, tx);
+        }
+        catch (std::exception& e) {
+            log.write(LogListener::Warn, LOG_NAME, tx("Error reading file"), e);
+        }
     }
 
     in = dir.openFileNT(Format("util%d.dat", playerNumber), FileSystem::OpenRead);
     if (in.get() != 0) {
-        loadUtilData(*in, playerNumber, log, tx);
+        try {
+            loadUtilData(*in, playerNumber, log, tx);
+        }
+        catch (std::exception& e) {
+            log.write(LogListener::Warn, LOG_NAME, tx("Error reading file"), e);
+        }
     }
 }
 

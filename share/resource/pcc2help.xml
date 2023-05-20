@@ -136,6 +136,7 @@
         <ki key="Enter">On player selector: load game; otherwise like <kbd>Right</kbd>;</ki>
         <ki key="Ins"><a href="pcc2:addaccount">Add account</a>;</ki>
         <ki key="U"><a href="pcc2:unpack">Unpack result files</a>;</ki>
+        <ki key="T"><a href="pcc2:resultattachments">Unpack attachments</a>;</ki>
         <ki key="M">Make turn files;</ki>
         <ki key="S"><a href="pcc2:sweep">Clean up directory (sweep)</a>;</ki>
         <ki key="F5"><a href="pcc2:plugins">Plugin Manager</a>;</ki>
@@ -222,7 +223,6 @@
         <ki key="1..9, A, B">Toggle that race;</ki>
         <ki key="*">Mark/unmark all;</ki>
         <ki key="Alt-A">Toggle "Apply turn files" option;</ki>
-        <!-- <ki key="T"><a href="pcc2:resultattachments">Unpack attachments</a></ki> -->
         <ki key="Enter">Unpack all selected players;</ki>
         <ki key="ESC">Cancel.</ki>
       </kl>
@@ -309,7 +309,30 @@
       </dl>
     </page>
 
-    <!-- FIXME: pcc2:resultattachments -->
+    <!-- Attachments -->
+    <page id="pcc2:resultattachments">
+      <h1>Receive Result Attachments</h1>
+      <p>Host can send you additional files with your result file package.
+        This includes Race name updates included with standard Winplan-style RST files,
+        and configuration files included with PHost's <tt>util.dat</tt> files.</p>
+      <p>Whenever PCC2 detects that your result package contains an attachment, it offers you to receive them.</p>
+      <kl>
+        <ki key="Space">Toggle reception of the selected file</ki>
+        <ki key="Enter">Proceed with receiving the files</ki>
+        <ki key="ESC">Cancel, receiving no files</ki>
+      </kl>
+      <p>If you choose not to receive a file, PCC2 will not prompt you again this turn;
+        to receive the file anyway, use <kbd>T</kbd> on the <a href="pcc2:gamesel">Game Selection</a> screen.</p>
+      <p>PCC2 will not offer you files that you already have with the same content.
+        PCC2 will by default refuse to receive files that it considers dangerous (e.g. <tt>*.exe</tt> files).</p>
+      <p>Result attachments are only processed for local game directories.
+        If you are playing with a server-side game directory,
+        we assume that the server has already set up everything correctly.</p>
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>T</kbd> from <a href="pcc2:unpack">Game Selection</a>, or automatically when loading a game or unpacking.</di>
+      </dl>
+    </page>
 
     <!-- Race Screen -->
     <page id="pcc2:racescreen">
