@@ -2,6 +2,21 @@ PCC2ng NEWS FILE
 ================
 
 
+2.41.1
+------
+
+  Client features: exit confirmation. Receive attachments. Relative
+  (percentage) population growth display. Alliances in simulator.
+
+  In addition, lots of bugfixes and small improvements that PCC2 got
+  in the meantime.
+
+  Major fixes: Linux SSL code was unstable, causing crashes when
+  talking to PlanetsCentral. Windows network code was accidentally
+  built without compression support, causing communication with
+  Planets.nu to fail.
+
+
 2.41
 ----
 
