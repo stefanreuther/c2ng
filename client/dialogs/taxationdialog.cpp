@@ -459,6 +459,8 @@ TaxationWidget::TaxationWidget(afl::base::Deleter& del, afl::string::Translator&
     g1.add(*m_pInfo);
     add(g1);
 
+    add(del.addNew(new ui::Spacer())); // FIXME: this should not be needed
+
     ui::Group& g2 = del.addNew(new ui::Group(ui::layout::VBox::instance5));
     ui::widgets::Button& btnInc = del.addNew(new ui::widgets::Button("+", '+', root));
     ui::widgets::Button& btnDec = del.addNew(new ui::widgets::Button("-", '-', root));
@@ -573,7 +575,7 @@ TaxationDialog::run(const TaxationProxy::Status& initialStatus, const PlanetPred
         ui::widgets::SimpleTable& table = del.addNew(new ui::widgets::SimpleTable(m_root, NUM_TURNS + 1, numLines));
         for (int i = 1; i <= NUM_TURNS; ++i) {
             table.column(i).setTextAlign(gfx::RightAlign, gfx::TopAlign);
-            table.setColumnWidth(i, 6*m_root.provider().getFont(gfx::FontRequest())->getEmWidth());
+            table.setColumnWidth(i, m_root.provider().getFont(gfx::FontRequest())->getTextWidth(" +99,999,999"));
         }
         table.all().setColor(ui::Color_Black);
         m_pPredictionTable = &table;
