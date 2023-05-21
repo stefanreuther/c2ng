@@ -10,6 +10,7 @@
 #include "game/config/hostconfiguration.hpp"
 #include "game/root.hpp"
 #include "game/spec/shiplist.hpp"
+#include "game/teamsettings.hpp"
 #include "game/unitscoredefinitionlist.hpp"
 
 namespace game { namespace map {
@@ -62,6 +63,7 @@ namespace game { namespace map {
             \param univ              Containing universe
             \param mapConfig         Map configuration
             \param scoreDefinitions  Ship score definitions (required for experience/hull functions)
+            \param teams             Team settings (for allied chunnel)
             \param shipList          Ship list (required for hull functions)
             \param root              Root (required for host config/version)
 
@@ -69,6 +71,7 @@ namespace game { namespace map {
         bool check(const Ship& sh, const Universe& univ,
                    const Configuration& mapConfig,
                    const UnitScoreDefinitionList& scoreDefinitions,
+                   const TeamSettings& teams,
                    const game::spec::ShipList& shipList,
                    const Root& root);
 
@@ -110,6 +113,7 @@ namespace game { namespace map {
         \param mapConfig         Starchart geometry configuration (used for distance computations)
         \param root              Root (used for host version, configuration)
         \param shipScores        Ship score definitions (required for experience/hull functions)
+        \param teams             Teams (for allied chunnel)
         \param shipList          Ship list (required for hull functions)
 
         \retval true Should offer to set up a channel from Initiator to Potential mate
@@ -119,6 +123,7 @@ namespace game { namespace map {
                             const Configuration& mapConfig,
                             const Root& root,
                             const UnitScoreDefinitionList& shipScores,
+                            const TeamSettings& teams,
                             const game::spec::ShipList& shipList);
 
     /** Set up a chunnel.

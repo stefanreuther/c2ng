@@ -196,6 +196,15 @@ namespace {
         int m_owner;
         game::map::Point m_position;
     };
+
+    void drawDiamond(gfx::BaseContext& ctx, gfx::Point pt, int r)
+    {
+        ctx.setCursor(pt - gfx::Point(r, 0));
+        drawLineRel(ctx, r, -r);
+        drawLineRel(ctx, r, r);
+        drawLineRel(ctx, -r, r);
+        drawLineRel(ctx, -r, -r);
+    }
 }
 
 
@@ -235,15 +244,17 @@ NavChartOverlay::drawBefore(gfx::Canvas& can, const client::map::Renderer& ren)
         }
 
         // Possible targets
-        ctx.setColor(ui::Color_BrightCyan); /* PCC 1.x uses GREENSCALE+15 */
         const int r = std::min(20, std::max(5, ren.scale(10)));
         for (size_t i = 0, n = m_chunnelData.candidates.size(); i < n; ++i) {
             const gfx::Point pt = ren.scale(m_chunnelData.candidates[i].pos);
-            ctx.setCursor(pt - gfx::Point(r, 0));
-            drawLineRel(ctx, r, -r);
-            drawLineRel(ctx, r, r);
-            drawLineRel(ctx, -r, r);
-            drawLineRel(ctx, -r, -r);
+            if (m_chunnelData.candidates[i].hasOwn) {
+                ctx.setColor(ui::Color_BrightCyan); /* PCC 1.x uses GREENSCALE+15 */
+                drawDiamond(ctx, pt, r);
+            }
+            if (m_chunnelData.candidates[i].hasAllied) {
+                ctx.setColor(ui::Color_DarkCyan);
+                drawDiamond(ctx, pt, r+1);
+            }
         }
     } else {
         // Regular mode, warp circles

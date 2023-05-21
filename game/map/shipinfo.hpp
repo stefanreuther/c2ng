@@ -9,6 +9,7 @@
 #include "game/map/point.hpp"
 #include "game/root.hpp"
 #include "game/spec/shiplist.hpp"
+#include "game/teamsettings.hpp"
 #include "game/types.hpp"
 #include "game/unitscoredefinitionlist.hpp"
 
@@ -66,6 +67,7 @@ namespace game { namespace map {
         \param [in] univ             Universe (used for other ships)
         \param [in] scoreDefinitions Ship score definitions (used for hull functions)
         \param [in] mapConfig        Map configuration
+        \param [in] teamSettings     Team settings (for allied chunnel)
         \param [in] shipList         Ship list (used for hull functions)
         \param [in] root             Root (used for host configuration) */
     void packShipMovementInfo(ShipMovementInfos_t& result,
@@ -73,6 +75,7 @@ namespace game { namespace map {
                               const Universe& univ,
                               const UnitScoreDefinitionList& scoreDefinitions,
                               const Configuration& mapConfig,
+                              const TeamSettings& teamSettings,
                               const game::spec::ShipList& shipList,
                               const Root& root);
 

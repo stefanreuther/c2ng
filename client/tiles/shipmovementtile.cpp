@@ -138,7 +138,7 @@ client::tiles::ShipMovementTile::attach(game::proxy::ObjectObserver& oop)
                     crystal_ball.computeMovement();
 
                     ChunnelMission chd;
-                    chd.check(*sh, g->currentTurn().universe(), g->mapConfiguration(), g->shipScores(), *shipList, *root);
+                    chd.check(*sh, g->currentTurn().universe(), g->mapConfiguration(), g->shipScores(), g->teamSettings(), *shipList, *root);
                     const bool is_chunnel = chd.getTargetId() != 0
                         && sh->getWaypointDX().orElse(0) == 0
                         && sh->getWaypointDY().orElse(0) == 0;

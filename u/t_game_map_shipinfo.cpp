@@ -36,11 +36,12 @@ namespace {
         game::map::Universe univ;
         game::UnitScoreDefinitionList shipScores;
         game::map::Configuration mapConfig;
+        game::TeamSettings teams;
         game::spec::ShipList shipList;
         afl::base::Ref<game::Root> root;
 
         MoveEnvironment()
-            : univ(), shipScores(), mapConfig(), shipList(), root(game::test::makeRoot(game::HostVersion()))
+            : univ(), shipScores(), mapConfig(), teams(), shipList(), root(game::test::makeRoot(game::HostVersion()))
             {
                 game::test::addAnnihilation(shipList);
             }
@@ -478,7 +479,7 @@ TestGameMapShipInfo::testPackShipMovementInfo()
 
     // ...I expect no movement information
     game::map::ShipMovementInfos_t result;
-    packShipMovementInfo(result, sh, env.univ, env.shipScores, env.mapConfig, env.shipList, *env.root);
+    packShipMovementInfo(result, sh, env.univ, env.shipScores, env.mapConfig, env.teams, env.shipList, *env.root);
     TS_ASSERT_EQUALS(result.size(), 0U);
 }
 
@@ -492,7 +493,7 @@ TestGameMapShipInfo::testPackShipMovementInfo2()
 
     // ...I regular movement information
     game::map::ShipMovementInfos_t result;
-    packShipMovementInfo(result, sh, env.univ, env.shipScores, env.mapConfig, env.shipList, *env.root);
+    packShipMovementInfo(result, sh, env.univ, env.shipScores, env.mapConfig, env.teams, env.shipList, *env.root);
 
     TS_ASSERT_EQUALS(result.size(), 1U);
     TS_ASSERT_EQUALS(result[0].action, ShipMovementInfo::Movement);
@@ -520,7 +521,7 @@ TestGameMapShipInfo::testPackShipMovementInfoTow()
 
     // ...I regular movement information and tow information.
     game::map::ShipMovementInfos_t result;
-    packShipMovementInfo(result, sh, env.univ, env.shipScores, env.mapConfig, env.shipList, *env.root);
+    packShipMovementInfo(result, sh, env.univ, env.shipScores, env.mapConfig, env.teams, env.shipList, *env.root);
 
     TS_ASSERT(hasInfo(result, ShipMovementInfo(ShipMovementInfo::Movement, ShipMovementInfo::Success, 0,  Point(1000, 1100), Point(1200, 1500))));
     TS_ASSERT(hasInfo(result, ShipMovementInfo(ShipMovementInfo::Tow,      ShipMovementInfo::Success, 20, Point(1000, 1100), Point(1300, 1200))));
@@ -547,7 +548,7 @@ TestGameMapShipInfo::testPackShipMovementInfoChunnel()
 
     // ...I expect chunnel information.
     game::map::ShipMovementInfos_t result;
-    packShipMovementInfo(result, sh, env.univ, env.shipScores, env.mapConfig, env.shipList, *env.root);
+    packShipMovementInfo(result, sh, env.univ, env.shipScores, env.mapConfig, env.teams, env.shipList, *env.root);
 
     TS_ASSERT(hasInfo(result, ShipMovementInfo(ShipMovementInfo::Chunnel, ShipMovementInfo::Success, 123, Point(1000, 1100), Point(2000, 1100))));
 }
@@ -573,7 +574,7 @@ TestGameMapShipInfo::testPackShipMovementInfoChunnelFail()
 
     // ...I expect chunnel information with failure notice.
     game::map::ShipMovementInfos_t result;
-    packShipMovementInfo(result, sh, env.univ, env.shipScores, env.mapConfig, env.shipList, *env.root);
+    packShipMovementInfo(result, sh, env.univ, env.shipScores, env.mapConfig, env.teams, env.shipList, *env.root);
 
     TS_ASSERT(hasInfo(result, ShipMovementInfo(ShipMovementInfo::Chunnel, ShipMovementInfo::MateFails, 123, Point(1000, 1100), Point(2000, 1100))));
 }
@@ -594,7 +595,7 @@ TestGameMapShipInfo::testPackShipMovementInfoFleet()
 
     // ...I regular movement information and fleet leader information.
     game::map::ShipMovementInfos_t result;
-    packShipMovementInfo(result, sh, env.univ, env.shipScores, env.mapConfig, env.shipList, *env.root);
+    packShipMovementInfo(result, sh, env.univ, env.shipScores, env.mapConfig, env.teams, env.shipList, *env.root);
 
     TS_ASSERT(hasInfo(result, ShipMovementInfo(ShipMovementInfo::Movement,    ShipMovementInfo::Success, 0,  Point(1000, 1100), Point(1200, 1500))));
     TS_ASSERT(hasInfo(result, ShipMovementInfo(ShipMovementInfo::FleetLeader, ShipMovementInfo::Success, 42, Point(1000, 1100), Point(1300, 1000))));

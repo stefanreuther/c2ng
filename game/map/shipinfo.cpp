@@ -56,6 +56,7 @@ game::map::packShipMovementInfo(ShipMovementInfos_t& result,
                                 const Universe& univ,
                                 const UnitScoreDefinitionList& scoreDefinitions,
                                 const Configuration& mapConfig,
+                                const TeamSettings& teamSettings,
                                 const game::spec::ShipList& shipList,
                                 const Root& root)
 {
@@ -76,7 +77,7 @@ game::map::packShipMovementInfo(ShipMovementInfos_t& result,
     // FIXME: PCC 1.x also parses when this ship goes through another ship's chunnel.
     // To do that, it computes turn movement.
     ChunnelMission ch;
-    if (ch.check(ship, univ, mapConfig, scoreDefinitions, shipList, root)) {
+    if (ch.check(ship, univ, mapConfig, scoreDefinitions, teamSettings, shipList, root)) {
         const Ship* target = univ.ships().get(ch.getTargetId());
         Point targetPos;
         if (target != 0 && target->getPosition().get(targetPos)) {

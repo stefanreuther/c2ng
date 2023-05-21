@@ -62,6 +62,7 @@ class TestGameMapChunnelMission : public CxxTest::TestSuite {
     void testRangesTHost();
     void testAbilities();
     void testCombinationAbilities();
+    void testAllianceHandling();
 };
 
 class TestGameMapCircularObject : public CxxTest::TestSuite {

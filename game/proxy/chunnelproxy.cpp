@@ -47,6 +47,9 @@ namespace {
 
         if (pos == end || *pos != cand) {
             result.candidates.insert(pos, cand);
+        } else {
+            pos->hasOwn |= cand.hasOwn;
+            pos->hasAllied |= cand.hasAllied;
         }
     }
 
@@ -67,10 +70,11 @@ namespace {
             const game::map::AnyShipType& ty(univ.allShips());
             for (Id_t id = ty.findNextIndex(0); id != 0; id = ty.findNextIndex(id)) {
                 if (const Ship* mate = univ.ships().get(id)) {
-                    if (game::map::isValidChunnelMate(*initiator, *mate, g.mapConfiguration(), r, g.shipScores(), sl)) {
+                    if (game::map::isValidChunnelMate(*initiator, *mate, g.mapConfiguration(), r, g.shipScores(), g.teamSettings(), sl)) {
                         const Point initPos = initiator->getPosition().orElse(Point());
                         const Point matePos = mate->getPosition().orElse(Point());
-                        addCandidateLocation(result, ChunnelProxy::Candidate(g.mapConfiguration().getSimpleNearestAlias(matePos, initPos)));
+                        const bool isOwn = (mate->getOwner().orElse(0) == initiator->getOwner().orElse(0));
+                        addCandidateLocation(result, ChunnelProxy::Candidate(g.mapConfiguration().getSimpleNearestAlias(matePos, initPos), isOwn, !isOwn));
                     }
                 }
             }
@@ -93,7 +97,7 @@ namespace {
             for (Id_t id = ty.findNextIndex(0); id != 0; id = ty.findNextIndex(id)) {
                 const Ship* mate = univ.ships().get(id);
                 Point matePos;
-                if (mate != 0 && mate->getPosition().get(matePos) && matePos == canonicalPosition && game::map::isValidChunnelMate(*initiator, *mate, g.mapConfiguration(), r, g.shipScores(), sl)) {
+                if (mate != 0 && mate->getPosition().get(matePos) && matePos == canonicalPosition && game::map::isValidChunnelMate(*initiator, *mate, g.mapConfiguration(), r, g.shipScores(), g.teamSettings(), sl)) {
                     list.add(game::Reference(game::Reference::Ship, id));
                 }
             }
@@ -117,7 +121,7 @@ namespace {
 
         // Check whether chunnel works
         game::map::ChunnelMission msn;
-        if (msn.check(initiator, univ, g.mapConfiguration(), g.shipScores(), sl, r)) {
+        if (msn.check(initiator, univ, g.mapConfiguration(), g.shipScores(), g.teamSettings(), sl, r)) {
             return game::map::formatChunnelFailureReasons(msn.getFailureReasons(), session.translator());
         } else {
             afl::data::StringList_t result;

@@ -30,12 +30,14 @@ namespace game { namespace proxy {
             This is a structure instead of just a game::map::Point so we can add more information as required. */
         struct Candidate {
             game::map::Point pos;
+            bool hasOwn;
+            bool hasAllied;
 
             Candidate()
-                : pos()
+                : pos(), hasOwn(), hasAllied()
                 { }
-            Candidate(game::map::Point pos)
-                : pos(pos)
+            Candidate(game::map::Point pos, bool hasOwn, bool hasAllied)
+                : pos(pos), hasOwn(hasOwn), hasAllied(hasAllied)
                 { }
 
             bool operator==(const Candidate& b) const;

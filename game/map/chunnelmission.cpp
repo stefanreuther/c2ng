@@ -49,6 +49,19 @@ namespace {
         }
         return result;
     }
+
+    bool isAlliedOrOwn(const game::map::Ship& sh, const game::map::Ship& mate,
+                       const game::config::HostConfiguration& config,
+                       const game::TeamSettings& teams)
+    {
+        int mateOwner, shipOwner;
+        return mate.getOwner().get(mateOwner)
+            && sh.getOwner().get(shipOwner)
+            && mate.isReliablyVisible(shipOwner)    /* @change: PCC2 explicitly checks getShipKind() which is implicit in isReliablyVisible() */
+            && (mateOwner == shipOwner
+                || (config[HostConfiguration::AllowAlliedChunneling]()
+                    && teams.getPlayerTeam(shipOwner) == teams.getPlayerTeam(mateOwner)));
+    }
 }
 
 
@@ -62,6 +75,7 @@ bool
 game::map::ChunnelMission::check(const Ship& sh, const Universe& univ,
                                  const Configuration& mapConfig,
                                  const UnitScoreDefinitionList& scoreDefinitions,
+                                 const TeamSettings& teams,
                                  const game::spec::ShipList& shipList,
                                  const Root& root)
 {
@@ -81,7 +95,7 @@ game::map::ChunnelMission::check(const Ship& sh, const Universe& univ,
         && sid != sh.getId()
         && (mate = univ.ships().get(sid)) != 0)
     {
-        if (mate->isPlayable(Object::Playable) && canReceiveChunnel(*mate, scoreDefinitions, shipList, root)) {
+        if (isAlliedOrOwn(sh, *mate, root.hostConfiguration(), teams) && canReceiveChunnel(*mate, scoreDefinitions, shipList, root)) {
             /* Target exists and can receive a chunnel. Can we start one?
                Note that we have rejected self-chunnel above. Hosts fail it
                implicitly for violating minimum distance. */
@@ -130,14 +144,18 @@ game::map::ChunnelMission::checkChunnelFailures(const Ship& sh, const Universe& 
 {
     // ex shipacc.pas:CheckChunnelFailures
     int result = 0;
-    if (sh.getDamage().orElse(0) >= root.hostConfiguration()[HostConfiguration::DamageLevelForChunnelFail]()) {
-        result |= chf_MateDamaged;
-    }
-    if (sh.getCargo(game::Element::Neutronium).orElse(0) <= minFuel) {
-        result |= chf_MateFuel;
-    }
-    if (sh.getWarpFactor().orElse(0) > 0) {
-        result |= chf_MateMoving;
+    if (sh.isPlayable(game::map::Object::ReadOnly)) {
+        // Only give advice such as "please set its warp factor" if our data is trusted,
+        // and there is a realistic chance that the player can actually change it.
+        if (sh.getDamage().orElse(0) >= root.hostConfiguration()[HostConfiguration::DamageLevelForChunnelFail]()) {
+            result |= chf_MateDamaged;
+        }
+        if (sh.getCargo(game::Element::Neutronium).orElse(0) <= minFuel) {
+            result |= chf_MateFuel;
+        }
+        if (sh.getWarpFactor().orElse(0) > 0) {
+            result |= chf_MateMoving;
+        }
     }
     if (univ.findShipTowing(sh.getId()) != 0) {
         result |= chf_MateTowed;
@@ -191,20 +209,17 @@ game::map::isValidChunnelMate(const Ship& initiator,
                               const Configuration& mapConfig,
                               const Root& root,
                               const UnitScoreDefinitionList& shipScores,
+                              const TeamSettings& teams,
                               const game::spec::ShipList& shipList)
 {
     // ex client/widgets/navwidget.cc:isValidChunnelMate
-    int initOwner, mateOwner;
     Point initPos, matePos;
 
     return initiator.getId() != mate.getId()
-        && initiator.getOwner().get(initOwner)
+        && isAlliedOrOwn(initiator, mate, root.hostConfiguration(), teams)
         && initiator.getPosition().get(initPos)
         && getInitiatorCapabilities(initiator, shipScores, shipList, root) != 0
-        && mate.getOwner().get(mateOwner)
         && mate.getPosition().get(matePos)
-        && mate.isPlayable(game::map::Object::ReadOnly)
-        && mateOwner == initOwner
         && mate.getFleetNumber() == 0
         && canReceiveChunnel(mate, shipScores, shipList, root)
         && root.hostVersion().isValidChunnelDistance2(mapConfig.getSquaredDistance(initPos, matePos), root.hostConfiguration());

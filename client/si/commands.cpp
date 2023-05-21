@@ -1551,7 +1551,7 @@ client::si::IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLi
 
             game::map::ChunnelMission chm;
             Universe& univ = g.currentTurn().universe(); // FIXME: is this the same where the ship is from?
-            if (chm.check(*sh, univ, g.mapConfiguration(), g.shipScores(), shipList, root)) {
+            if (chm.check(*sh, univ, g.mapConfiguration(), g.shipScores(), g.teamSettings(), shipList, root)) {
                 if (Ship* mate = univ.ships().get(chm.getTargetId())) {
                     in.chunnelMode = true;
 
@@ -1942,7 +1942,7 @@ client::si::IFCCExplainPrediction(game::Session& session, ScriptSide& si, Reques
 
     // Chunnel mission
     game::map::ChunnelMission chunnel;
-    chunnel.check(*sh, univ, g.mapConfiguration(), g.shipScores(), sl, r);
+    chunnel.check(*sh, univ, g.mapConfiguration(), g.shipScores(), g.teamSettings(), sl, r);
 
     // Anything to say?
     if (pred.getUsedProperties().empty() && chunnel.getFailureReasons() == 0) {

@@ -119,12 +119,16 @@ TestGameProxyChunnelProxy::testCandidates()
     CxxTest::setAbortTestOnFail(true);
     SessionThread h;
     prepare(h);
+    h.session().getRoot()->hostConfiguration()[game::config::HostConfiguration::AllowAlliedChunneling].set(1);
+    h.session().getGame()->teamSettings().setPlayerTeam(OWNER+1, OWNER);
 
     Ship& init = addShip(h, 5, 1000, 1000, FIRECLOUD_ID);   // initiator
     addShip(h,  10,  1050, 1000, FIRECLOUD_ID);   // too close
     addShip(h,  11,  1200, 1000, FIRECLOUD_ID);   // acceptable distance
     addShip(h,  12,  1200, 1000, FIRECLOUD_ID);   // -"-
     addShip(h,  13,  1300, 1000, FIRECLOUD_ID);   // -"-
+    addShip(h,  14,  1700, 1000, FIRECLOUD_ID);   // -"-
+    addShip(h,  15,  1700, 1000, FIRECLOUD_ID).setOwner(OWNER+1);
 
     TS_ASSERT(init.hasSpecialFunction(game::spec::BasicHullFunction::FirecloudChunnel,
                                       h.session().getGame()->shipScores(),
@@ -146,9 +150,16 @@ TestGameProxyChunnelProxy::testCandidates()
 
     // Verify
     TS_ASSERT_EQUALS(recv.list.minDistance, 100);
-    TS_ASSERT_EQUALS(recv.list.candidates.size(), 2U);
+    TS_ASSERT_EQUALS(recv.list.candidates.size(), 3U);
     TS_ASSERT_EQUALS(recv.list.candidates[0].pos, game::map::Point(1200, 1000));
+    TS_ASSERT_EQUALS(recv.list.candidates[0].hasOwn, true);
+    TS_ASSERT_EQUALS(recv.list.candidates[0].hasAllied, false);
     TS_ASSERT_EQUALS(recv.list.candidates[1].pos, game::map::Point(1300, 1000));
+    TS_ASSERT_EQUALS(recv.list.candidates[1].hasOwn, true);
+    TS_ASSERT_EQUALS(recv.list.candidates[1].hasAllied, false);
+    TS_ASSERT_EQUALS(recv.list.candidates[2].pos, game::map::Point(1700, 1000));
+    TS_ASSERT_EQUALS(recv.list.candidates[2].hasOwn, true);
+    TS_ASSERT_EQUALS(recv.list.candidates[2].hasAllied, true);
 }
 
 /** Test postCandidateRequest.
