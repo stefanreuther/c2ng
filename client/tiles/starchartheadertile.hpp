@@ -29,7 +29,7 @@ namespace client { namespace tiles {
             String_t image;
         };
 
-        StarchartHeaderTile(ui::Root& root);
+        StarchartHeaderTile(ui::Root& root, bool base);
 
         virtual void draw(gfx::Canvas& can);
         virtual void handleStateChange(State st, bool enable);
@@ -49,6 +49,7 @@ namespace client { namespace tiles {
         util::RequestReceiver<StarchartHeaderTile> m_reply;
         afl::base::SignalConnection conn_imageChange;
         bool m_isMissingImage;
+        bool m_base;
     };
 
 } }

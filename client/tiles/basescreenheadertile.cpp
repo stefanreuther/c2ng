@@ -58,11 +58,7 @@ client::tiles::BaseScreenHeaderTile::attach(game::proxy::ObjectObserver& oop)
                                                      r->hostConfiguration().getExperienceLevelName(level, session.translator()));
 
                     // ex WBaseScreenHeaderTile::getPictureId
-                    int tech = std::max(std::max(p->getBaseTechLevel(game::EngineTech).orElse(0),
-                                                 p->getBaseTechLevel(game::HullTech).orElse(0)),
-                                        std::max(p->getBaseTechLevel(game::BeamTech).orElse(0),
-                                                 p->getBaseTechLevel(game::TorpedoTech).orElse(0)));
-                    m_image = ui::res::makeResourceId(ui::res::BASE, tech, p->getId());
+                    m_image = ui::res::makeResourceId(ui::res::BASE, p->getMaxBaseTechLevel().orElse(0), p->getId());
                     m_hasMessages = (!m_forTask && !p->messages().empty());
                 }
             }

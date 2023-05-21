@@ -117,7 +117,7 @@ namespace {
     };
 
     const TileConfig base_lock[] = {
-        { "NARROWHEADER",        0 },
+        { "NARROWBASEHEADER",    0 },
         { "NARROWPLANETMINERAL", 0 },
         { "NARROWBASETECH",      0 },
         { "NARROWBASEORDER",     0 },
@@ -622,7 +622,13 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
 
     // Narrow
     if (name == "NARROWHEADER") {
-        StarchartHeaderTile& tile = deleter.addNew(new StarchartHeaderTile(root));
+        StarchartHeaderTile& tile = deleter.addNew(new StarchartHeaderTile(root, false));
+        tile.attach(m_observer);
+        tile.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
+        return &tile;
+    }
+    if (name == "NARROWBASEHEADER") {
+        StarchartHeaderTile& tile = deleter.addNew(new StarchartHeaderTile(root, true));
         tile.attach(m_observer);
         tile.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
         return &tile;

@@ -1208,6 +1208,21 @@ game::map::Planet::getBaseTechLevel(TechLevel level) const
     return m_currentBaseData.techLevels[level];
 }
 
+game::IntegerProperty_t
+game::map::Planet::getMaxBaseTechLevel() const
+{
+    IntegerProperty_t result;
+    for (size_t i = 0; i < NUM_TECH_AREAS; ++i) {
+        int current, next;
+        if (m_currentBaseData.techLevels[i].get(next)) {
+            if (!result.get(current) || next > current) {
+                result = next;
+            }
+        }
+    }
+    return result;
+}
+
 void
 game::map::Planet::setBaseTechLevel(TechLevel level, IntegerProperty_t value)
 {

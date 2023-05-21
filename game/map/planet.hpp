@@ -448,6 +448,10 @@ namespace game { namespace map {
             \return tech level */
         IntegerProperty_t getBaseTechLevel(TechLevel level) const;
 
+        /** Get current maximum tech level.
+            \return maximum tech level currently on base (NOT maximum achievable!) */
+        IntegerProperty_t getMaxBaseTechLevel() const;
+
         /** Set tech level.
             \param level Area to set
             \param value Tech level */

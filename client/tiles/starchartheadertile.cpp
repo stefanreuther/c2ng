@@ -25,7 +25,7 @@ using game::map::Object;
 using util::SkinColor;
 
 namespace {
-    void prepareContent(game::Session& session, Object* obj, client::tiles::StarchartHeaderTile::Content& result)
+    void prepareContent(game::Session& session, Object* obj, bool base, client::tiles::StarchartHeaderTile::Content& result)
     {
         // ex WNarrowHeaderTile::drawData
         using client::tiles::StarchartHeaderTile;
@@ -55,7 +55,12 @@ namespace {
             if (pl->getTemperature().get(temp)) {
                 // Note: xgettext will parse the following thing wrong:
                 result.text[StarchartHeaderTile::Type] = Format(tx("%d" "\xC2\xB0" "F, %s"), temp, game::tables::TemperatureName(tx).get(temp));
-                result.image = ui::res::makeResourceId(ui::res::PLANET, temp, pl->getId());
+
+                if (base && pl->isPlayable(Planet::ReadOnly) && pl->hasBase()) {
+                    result.image = ui::res::makeResourceId(ui::res::BASE, pl->getMaxBaseTechLevel().orElse(0), pl->getId());
+                } else {
+                    result.image = ui::res::makeResourceId(ui::res::PLANET, temp, pl->getId());
+                }
             } else {
                 result.image = ui::res::PLANET;
             }
@@ -97,12 +102,13 @@ namespace {
 }
 
 
-client::tiles::StarchartHeaderTile::StarchartHeaderTile(ui::Root& root)
+client::tiles::StarchartHeaderTile::StarchartHeaderTile(ui::Root& root, bool base)
     : m_root(root),
       m_content(),
       m_reply(root.engine().dispatcher(), *this),
       conn_imageChange(root.provider().sig_imageChange.add(this, &StarchartHeaderTile::onImageChange)),
-      m_isMissingImage(false)
+      m_isMissingImage(false),
+      m_base(base)
 { }
 
 void
@@ -203,18 +209,19 @@ client::tiles::StarchartHeaderTile::attach(game::proxy::ObjectObserver& oop)
 
     class Listener : public game::proxy::ObjectListener {
      public:
-        Listener(util::RequestSender<StarchartHeaderTile> reply)
-            : m_reply(reply)
+        Listener(util::RequestSender<StarchartHeaderTile> reply, bool base)
+            : m_reply(reply), m_base(base)
             { }
         virtual void handle(game::Session& session, game::map::Object* obj)
             {
                 Content result;
-                prepareContent(session, obj, result);
+                prepareContent(session, obj, m_base, result);
                 m_reply.postNewRequest(new Updater(result));
             }
      private:
         util::RequestSender<StarchartHeaderTile> m_reply;
+        bool m_base;
     };
 
-    oop.addNewListener(new Listener(m_reply.getSender()));
+    oop.addNewListener(new Listener(m_reply.getSender(), m_base));
 }
