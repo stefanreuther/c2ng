@@ -50,22 +50,22 @@ client::map::PrefixOverlay::drawAfter(gfx::Canvas& can, const Renderer& ren)
 
     // Draw.
     gfx::Context<uint8_t> ctx(can, m_screen.root().colorScheme());
-    drawSolidBar(ctx, r, ui::Color_Fire + 29);
+    drawSolidBar(ctx, r, ui::Color_Tooltip);
 
-    ctx.setColor(ui::Color_DarkYellow);
+    ctx.setColor(ui::Color_Tooltip_Shade);
     drawHLine(ctx, r.getLeftX(), r.getBottomY()-1, r.getRightX()-1);
     drawVLine(ctx, r.getRightX()-1, r.getTopY(), r.getBottomY()-2);
 
-    ctx.setColor(ui::Color_Fire + 30);
+    ctx.setColor(ui::Color_Tooltip_Light);
     drawHLine(ctx, r.getLeftX()+1, r.getTopY(), r.getRightX()-1);
     drawVLine(ctx, r.getLeftX(), r.getTopY(), r.getBottomY()-2);
 
-    ctx.setColor(ui::Color_Black);
+    ctx.setColor(ui::Color_Tooltip_Text);
     ctx.useFont(*font);
     outText(ctx, gfx::Point(r.getLeftX() + 3, r.getTopY() + 1), text);
 
     if (!m_blink) {
-        drawSolidBar(ctx, gfx::Rectangle(r.getRightX() - 10, r.getBottomY() - 5, 7, 2), ui::Color_Black);
+        drawSolidBar(ctx, gfx::Rectangle(r.getRightX() - 10, r.getBottomY() - 5, 7, 2), ui::Color_Tooltip_Text);
     }
 }
 

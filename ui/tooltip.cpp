@@ -45,9 +45,9 @@ namespace {
                 // ex UITooltip::drawContent
                 // Colors
                 enum {
-                    BODY  = ui::Color_Fire + 29,
-                    SHADE = ui::Color_DarkYellow,
-                    LIGHT = ui::Color_Fire + 30
+                    BODY  = ui::Color_Tooltip,
+                    SHADE = ui::Color_Tooltip_Shade,
+                    LIGHT = ui::Color_Tooltip_Light
                 };
 
 

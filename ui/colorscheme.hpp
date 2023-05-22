@@ -84,6 +84,14 @@ namespace ui {
         Color_Avail            = 160
     };
 
+    enum {
+        /* Derived */
+        Color_Tooltip       = Color_Fire + 29,     /* A rather bright yellow for tooltips */
+        Color_Tooltip_Light = Color_Fire + 30,     /* Brighter, for sunny edges */
+        Color_Tooltip_Shade = Color_DarkYellow,    /* Dark, for shady edges */
+        Color_Tooltip_Text  = Color_Black
+    };
+
     extern const gfx::ColorQuad_t STANDARD_COLORS[Color_Avail];
 
     class ColorScheme : public gfx::ColorScheme<uint8_t> {

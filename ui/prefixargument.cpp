@@ -66,20 +66,18 @@ ui::PrefixPopup::draw(gfx::Canvas& can)
     const gfx::Rectangle& r = getExtent();
     gfx::Context<uint8_t> ctx(can, m_root.colorScheme());
 
-    // FIXME: define this color elsewhere? It's the same as used
-    // in PCC 1.x, a rather bright yellow.
-    drawSolidBar(ctx, r, Color_Fire + 29);
+    drawSolidBar(ctx, r, Color_Tooltip);
 
-    ctx.setColor(Color_DarkYellow);
+    ctx.setColor(Color_Tooltip_Shade);
     drawHLine(ctx, r.getLeftX(), r.getBottomY()-1, r.getRightX()-1);
     drawVLine(ctx, r.getRightX()-1, r.getTopY(), r.getBottomY()-2);
 
-    ctx.setColor(Color_Fire + 30);
+    ctx.setColor(Color_Tooltip_Light);
     drawHLine(ctx, r.getLeftX()+1, r.getTopY(), r.getRightX()-1);
     drawVLine(ctx, r.getLeftX(), r.getTopY(), r.getBottomY()-2);
 
     const afl::base::Ref<gfx::Font> font = m_root.provider().getFont(gfx::FontRequest().setStyle(FixedFont));
-    ctx.setColor(Color_Black);
+    ctx.setColor(Color_Tooltip_Text);
     ctx.useFont(*font);
     outText(ctx, gfx::Point(r.getLeftX() + 3, r.getTopY() + 1), m_logic.getText(afl::string::Translator::getSystemInstance()));
 
