@@ -8,6 +8,7 @@
 #include "afl/base/ptr.hpp"
 #include "afl/data/access.hpp"
 #include "afl/data/value.hpp"
+#include "afl/except/fileproblemexception.hpp"
 #include "afl/io/filesystem.hpp"
 #include "afl/io/internalstream.hpp"
 #include "afl/io/multidirectory.hpp"
@@ -247,7 +248,12 @@ game::pcc::TurnLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, gam
 
     // Load fleets from local game directory
     // Must be after loading the result/turn because it requires shipsource flags
-    game::db::FleetLoader(*m_charset, m_translator).load(root.gameDirectory(), turn.universe(), player);
+    try {
+        game::db::FleetLoader(*m_charset, m_translator).load(root.gameDirectory(), turn.universe(), player);
+    }
+    catch (afl::except::FileProblemException& e) {
+        m_log.write(afl::sys::LogListener::Error, LOG_NAME, m_translator("File has been ignored"), e);
+    }
 
     // Load FLAK from remote
     ldr.loadFlakBattles(turn, *m_serverDirectory, player);

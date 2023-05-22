@@ -5,6 +5,7 @@
 
 #include "game/v3/resultloader.hpp"
 #include "afl/base/ptr.hpp"
+#include "afl/except/fileproblemexception.hpp"
 #include "afl/io/filesystem.hpp"
 #include "afl/io/stream.hpp"
 #include "afl/string/format.hpp"
@@ -264,7 +265,12 @@ game::v3::ResultLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, ga
 
     // Load fleets.
     // Must be after loading the result/turn because it requires shipsource flags
-    game::db::FleetLoader(*m_charset, m_translator).load(root.gameDirectory(), turn.universe(), player);
+    try {
+        game::db::FleetLoader(*m_charset, m_translator).load(root.gameDirectory(), turn.universe(), player);
+    }
+    catch (afl::except::FileProblemException& e) {
+        m_log.write(afl::sys::LogListener::Error, LOG_NAME, m_translator("File has been ignored"), e);
+    }
 
     // FLAK
     ldr.loadFlakBattles(turn, root.gameDirectory(), player);

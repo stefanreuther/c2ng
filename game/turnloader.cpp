@@ -82,7 +82,13 @@ game::TurnLoader::loadCurrentDatabases(Turn& turn, Game& game, int player, Root&
     game.messageConfiguration().load(root.gameDirectory(), player);
 
     // Teams
-    game.teamSettings().load(root.gameDirectory(), player, charset, tx);
+    try {
+        game.teamSettings().load(root.gameDirectory(), player, charset, tx);
+    }
+    catch (afl::except::FileProblemException& e) {
+        log.write(afl::sys::LogListener::Error, LOG_NAME, tx("File has been ignored"), e);
+        game.teamSettings().clear();
+    }
 }
 
 void
