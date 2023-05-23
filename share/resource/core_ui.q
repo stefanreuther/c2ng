@@ -810,15 +810,23 @@ Sub CC$WithShipWaypoint (cmd, opt, Optional overrideAT)
   With Ship(sid) Do Eval cmd
 
   % Set optimum speed
-  If opt Then
+  If opt And Pref('Ship.AutoWarp') Then
     If Ship(sid).Speed<>"Hyperdrive" And Ship(sid).Waypoint.Dist>0 Then
       % Find out how long it takes to get there at this speed
       s := Global.Engine(Ship(sid).Engine$).Speed$
       Ship(sid).Speed$ := s
       T := Ship(sid).Move.Eta
       If T < 30 Then % FIXME: hardcoded value
+        % Find lowest possible speed.
+        % - into deep space: allow all speeds down to warp 1
+        % - into warp well: assume they want to reach the planet. Do not go below warp 2.
+        % - stay in same warp well: allow all speeds down to warp 1 */
+        Local old_planet = PlanetAt(Ship(sid).Loc.X, Ship(sid).Loc.Y, True)
+        Local new_planet = PlanetAt(Ship(sid).Waypoint.X, Ship(sid).Waypoint.Y, True)
+        Local lower_limit = If(new_planet And new_planet <> old_planet, 2, 1)
+
         % Find whether we can reach the target with a slower speed
-        Do While s > 1
+        Do While s > lower_limit
           s := s-1
           Ship(sid).Speed$ := s
           If Ship(sid).Move.Eta > T Then
@@ -1783,13 +1791,13 @@ EndSub
 
 % @since PCC2 2.40.12
 Sub CCUI.Task.AddMoveTo
-  CC$AddWaypoint Translate("Move To"), "MoveTo", "s"
+  CC$AddWaypoint Translate("Move To"), "MoveTo", If(Pref('Ship.AutoWarp'), "s")
 EndSub
 
 % @since PCC2 2.40.12
 Sub CCUI.Task.AddMoveToScanner
   % ex WShipTaskScannerChartWidget::onDblClick
-  Call UI.AutoTask->AddMovement "MoveTo", UI.X, UI.Y, "s"
+  Call UI.AutoTask->AddMovement "MoveTo", UI.X, UI.Y, If(Pref('Ship.AutoWarp'), "s")
 EndSub
 
 % @since PCC2 2.40.12

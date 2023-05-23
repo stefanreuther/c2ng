@@ -191,6 +191,9 @@ namespace game { namespace config {
         static const IntegerOptionDescriptor Sort_Search;
         static const IntegerOptionDescriptor Sort_Search_Secondary;
 
+        // Ships
+        static const IntegerOptionDescriptor Ship_AutoWarp;
+
         // Task screen
         static const IntegerOptionDescriptor Task_PredictToEnd;
         static const IntegerOptionDescriptor Task_ShowDistances;

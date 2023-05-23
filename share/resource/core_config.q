@@ -412,6 +412,10 @@ On UserPreferences Do
   LinkPref "Tax.PredictRelative"
 
   % TODO: Missing PCC2 Option: Preferences | Instant battle result --> VCR.InstantResult
+
+  Add Translate("Preferences | Automatic optimum warp"), CCfg.Boolean.Edit, CCfg.Boolean.Value
+  LinkPref "Ship.AutoWarp"
+
   % TODO: Missing PCC1 Option: Preferences | Guess ship positions
   % TODO: Missing PCC1 Option: Preferences | Starcharts file (CHARTx.CC)
   % TODO: Missing PCC1 Option: Preferences | Auto load...

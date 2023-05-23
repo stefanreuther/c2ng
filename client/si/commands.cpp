@@ -1462,7 +1462,11 @@ client::si::IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLi
                 // Set optimum warp
                 // ex setOptimumWarp
                 Point shipPos;
-                if (!sh.isHyperdriving(g.shipScores(), sl, r.hostConfiguration()) && sh.getPosition().get(shipPos) && shipPos != m_position) {
+                if (r.userConfiguration()[game::config::UserConfiguration::Ship_AutoWarp]() != 0
+                    && !sh.isHyperdriving(g.shipScores(), sl, r.hostConfiguration())
+                    && sh.getPosition().get(shipPos)
+                    && shipPos != m_position)
+                {
                     // Determine optimum warp factor
                     int speed = getOptimumWarp(univ, sh.getId(), shipPos, m_position, g.shipScores(), sl, g.mapConfiguration(), r);
                     fm.setWarpFactor(speed, r.hostConfiguration(), sl);

@@ -152,6 +152,9 @@ namespace game { namespace config {
     const IntegerOptionDescriptor UserConfiguration::Sort_Search           = { "Sort.Search",           &IntegerValueParser::instance };
     const IntegerOptionDescriptor UserConfiguration::Sort_Search_Secondary = { "Sort.Search.Secondary", &IntegerValueParser::instance };
 
+    // Ships
+    const IntegerOptionDescriptor UserConfiguration::Ship_AutoWarp = { "Ship.AutoWarp", &BooleanValueParser::instance };
+
     // Task screen
     const IntegerOptionDescriptor UserConfiguration::Task_PredictToEnd  = { "Task.PredictToEnd",  &BooleanValueParser::instance };
     const IntegerOptionDescriptor UserConfiguration::Task_ShowDistances = { "Task.ShowDistances", &BooleanValueParser::instance };
@@ -270,6 +273,9 @@ game::config::UserConfiguration::setDefaultValues()
         const MarkerOptionDescriptor& desc = MARKER_CONFIG[i];
         me[desc].set(MarkerOption::Data(desc.m_markerKind, desc.m_color, ""));
     }
+
+    // Ships
+    me[Ship_AutoWarp].set(1);
 
     // Task screen
     me[Task_PredictToEnd].set(0);
