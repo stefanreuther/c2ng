@@ -64,9 +64,14 @@ namespace {
         return *addGame(env).currentTurn().universe().planets().create(nr);
     }
 
+    game::map::Ship& addShip(Environment& env, int nr)
+    {
+        return *addGame(env).currentTurn().universe().ships().create(nr);
+    }
+
     game::map::Ship& addPlayedShip(Environment& env, int nr, int owner, Point pos)
     {
-        game::map::Ship& sh = *addGame(env).currentTurn().universe().ships().create(nr);
+        game::map::Ship& sh = addShip(env, nr);
         game::map::ShipData sd;
         sd.x = pos.getX();
         sd.y = pos.getY();
@@ -80,6 +85,11 @@ namespace {
     game::spec::Hull& addHull(Environment& env, int nr)
     {
         return *addShipList(env).hulls().create(nr);
+    }
+
+    game::spec::Beam& addBeam(Environment& env, int nr)
+    {
+        return *addShipList(env).beams().create(nr);
     }
 
     void clearShipCargo(game::map::Ship& sh)
@@ -368,13 +378,17 @@ TestGameRefSortBy::testHullType()
     addPlayedShip(env, 1, 1, Point(1000, 1000)).setHull(game::test::ANNIHILATION_HULL_ID);
     addPlayedShip(env, 2, 1, Point(1000, 1000)).setHull(game::test::OUTRIDER_HULL_ID);
     addPlayedShip(env, 3, 1, Point(1000, 1000)).setHull(game::test::ANNIHILATION_HULL_ID);
+    addShip(env, 4);
     addPlanet(env, 33);
+    addBeam(env, 9);
 
     const Reference r1(Reference::Ship, 1);
     const Reference r2(Reference::Ship, 2);
     const Reference r3(Reference::Ship, 3);
+    const Reference r4(Reference::Ship, 77);
     const Reference rPlanet(Reference::Planet, 33);
     const Reference rHull(Reference::Hull, game::test::OUTRIDER_HULL_ID);
+    const Reference rBeam(Reference::Beam, 9);
 
     game::ref::SortBy::HullType t(addGame(env).currentTurn().universe(), addShipList(env), env.tx);
 
@@ -382,16 +396,22 @@ TestGameRefSortBy::testHullType()
     TS_ASSERT(t.compare(r1, r2) > 0);       // Anni after Outrider
     TS_ASSERT(t.compare(r1, r1) == 0);
     TS_ASSERT(t.compare(r2, r3) < 0);
+    TS_ASSERT(t.compare(r4, r3) < 0);       // Unknown before known ship
+    TS_ASSERT(t.compare(r4, r2) < 0);
     TS_ASSERT(t.compare(rHull, r1) < 0);    // Outrider before Anni
     TS_ASSERT(t.compare(rHull, r2) == 0);
     TS_ASSERT(t.compare(rPlanet, r2) < 0);  // Planet before outrider
+    TS_ASSERT(t.compare(rPlanet, rBeam) < 0);  // Planet before beam
+    TS_ASSERT(t.compare(rPlanet, r4) < 0);  // Planet before unknown ship
 
     // Verify class names
     TS_ASSERT_EQUALS(t.getClass(r1), "ANNIHILATION CLASS BATTLESHIP");
     TS_ASSERT_EQUALS(t.getClass(r2), "OUTRIDER CLASS SCOUT");
     TS_ASSERT_EQUALS(t.getClass(r3), "ANNIHILATION CLASS BATTLESHIP");
+    TS_ASSERT_EQUALS(t.getClass(r4), "unknown");
     TS_ASSERT_EQUALS(t.getClass(rHull), "OUTRIDER CLASS SCOUT");
-    TS_ASSERT_EQUALS(t.getClass(rPlanet), "unknown");
+    TS_ASSERT_EQUALS(t.getClass(rPlanet), "Planet");
+    TS_ASSERT_EQUALS(t.getClass(rBeam), "unknown");
 }
 
 /** Test game::ref::SortBy::BattleOrder. */

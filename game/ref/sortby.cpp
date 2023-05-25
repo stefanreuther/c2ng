@@ -71,6 +71,12 @@ namespace {
         }
     }
 
+    /* Check for planet/starbase reference */
+    bool isReferencePlanet(const Reference& a)
+    {
+        return a.getType() == Reference::Planet || a.getType() == Reference::Starbase;
+    }
+
     /* Get class name for a position: stringify the position */
     String_t getClassForPosition(afl::base::Optional<Point> pt, afl::string::Translator& tx)
     {
@@ -409,15 +415,21 @@ int
 game::ref::SortBy::HullType::compare(const Reference& a, const Reference& b) const
 {
     // ex sortByHull, sort.pas:SortByHull
-    return util::compare3(getReferenceHullType(m_universe, a),
-                          getReferenceHullType(m_universe, b));
+    int result = util::compare3(isReferencePlanet(b), isReferencePlanet(a));
+    if (result == 0) {
+        result = util::compare3(getReferenceHullType(m_universe, a),
+                                getReferenceHullType(m_universe, b));
+    }
+    return result;
 }
 
 String_t
 game::ref::SortBy::HullType::getClass(const Reference& a) const
 {
     // ex diviHull
-    if (const game::spec::Hull* pHull = m_shipList.hulls().get(getReferenceHullType(m_universe, a))) {
+    if (isReferencePlanet(a)) {
+        return m_translator("Planet");
+    } else if (const game::spec::Hull* pHull = m_shipList.hulls().get(getReferenceHullType(m_universe, a))) {
         return pHull->getName(m_shipList.componentNamer());
     } else {
         return m_translator("unknown");
