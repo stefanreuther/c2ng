@@ -102,5 +102,5 @@ ui::widgets::DecimalSelector::getLayoutInfo() const
     int ems = (m_flags.contains(ShowMaximum) ? 10 : 5);
     gfx::Point size = m_root.provider().getFont(gfx::FontRequest().addSize(1))->getCellSize().scaledBy(ems, 1);
 
-    return ui::layout::Info(size, size, ui::layout::Info::GrowHorizontal);
+    return ui::layout::Info(size, ui::layout::Info::GrowHorizontal);
 }

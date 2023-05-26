@@ -26,14 +26,14 @@ namespace ui { namespace layout {
             : m_numLines(numLines), m_rightJustified(rightJust), m_horizontalGap(horizontalGap), m_verticalGap(verticalGap)
             { }
 
-        virtual void doLayout(Widget& container, gfx::Rectangle area);
-        virtual Info getLayoutInfo(const Widget& container);
+        virtual void doLayout(Widget& container, gfx::Rectangle area) const;
+        virtual Info getLayoutInfo(const Widget& container) const;
 
      private:
-        const int  m_numLines;
-        const bool m_rightJustified;
-        const int  m_horizontalGap;
-        const int  m_verticalGap;
+        int  m_numLines;
+        bool m_rightJustified;
+        int  m_horizontalGap;
+        int  m_verticalGap;
     };
 
 } }

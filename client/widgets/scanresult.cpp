@@ -78,15 +78,13 @@ client::widgets::ScanResult::handleChildPositionChange(Widget& /*child*/, const 
 ui::layout::Info
 client::widgets::ScanResult::getLayoutInfo() const
 {
-    gfx::Point minSize, prefSize;
+    gfx::Point prefSize;
     for (Widget* p = getFirstChild(); p != 0; p = p->getNextSibling()) {
         ui::layout::Info theirLayout = p->getLayoutInfo();
-        minSize.extendRight(theirLayout.getMinSize());
-        minSize.addX(GAP);
         prefSize.extendRight(theirLayout.getPreferredSize());
         prefSize.addX(GAP);
     }
-    return ui::layout::Info(minSize, prefSize, ui::layout::Info::GrowHorizontal);
+    return ui::layout::Info(prefSize, ui::layout::Info::GrowHorizontal);
 }
 
 bool
@@ -181,14 +179,14 @@ client::widgets::ScanResult::doLayout()
     for (Widget* p = getFirstChild(); p != 0; p = p->getNextSibling()) {
         if (p != &m_table) {
             ui::layout::Info theirLayout = p->getLayoutInfo();
-            int theirWidth = theirLayout.getMinSize().getX();
-            int theirHeight = theirLayout.getMinSize().getY();
+            int theirWidth = theirLayout.getPreferredSize().getX();
+            int theirHeight = theirLayout.getPreferredSize().getY();
 
             // Assign widget position along the top, starting from the right
             p->setExtent(gfx::Rectangle(area.getRightX() - theirWidth, area.getTopY(), theirWidth, theirHeight));
 
             // Reduce remaining space
-            area.setWidth(area.getWidth() - GAP - theirLayout.getMinSize().getX());
+            area.setWidth(area.getWidth() - GAP - theirLayout.getPreferredSize().getX());
         }
     }
 

@@ -117,7 +117,7 @@ ui::layout::Info
 ui::widgets::Scrollbar::getLayoutInfo() const
 {
     // ex UIScrollbar::getLayoutInfo
-    return ui::layout::Info(gfx::Point(20, 60), gfx::Point(20, 80), ui::layout::Info::GrowVertical);
+    return ui::layout::Info(gfx::Point(20, 80), ui::layout::Info::GrowVertical);
 }
 
 bool

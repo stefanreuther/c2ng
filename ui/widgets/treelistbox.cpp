@@ -323,7 +323,7 @@ ui::widgets::TreeListbox::getLayoutInfo() const
 {
     int preferredHeight = m_numLines * m_root.provider().getFont(gfx::FontRequest())->getLineHeight();
     gfx::Point preferredSize(m_preferredWidth, preferredHeight);
-    return ui::layout::Info(preferredSize, preferredSize, ui::layout::Info::GrowBoth);
+    return ui::layout::Info(preferredSize, ui::layout::Info::GrowBoth);
 }
 
 bool

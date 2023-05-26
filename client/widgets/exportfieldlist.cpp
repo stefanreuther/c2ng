@@ -113,9 +113,7 @@ ui::layout::Info
 client::widgets::ExportFieldList::getLayoutInfo() const
 {
     const gfx::Point cellSize = getFont()->getCellSize();
-    return ui::layout::Info(cellSize.scaledBy(10, 15),
-                            cellSize.scaledBy(15, 20),
-                            ui::layout::Info::GrowBoth);
+    return ui::layout::Info(cellSize.scaledBy(15, 20), ui::layout::Info::GrowBoth);
 }
 
 bool

@@ -76,7 +76,6 @@ namespace ui { namespace rich {
         gfx::ResourceProvider& m_provider;
         Document doc;
         gfx::Point pref_size;
-        gfx::Point m_minSize;
 
         uint16_t key_flags;
         bool mdown;

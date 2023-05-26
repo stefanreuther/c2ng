@@ -5,8 +5,8 @@
 #ifndef C2NG_UI_LAYOUT_GRID_HPP
 #define C2NG_UI_LAYOUT_GRID_HPP
 
-#include "ui/layout/manager.hpp"
 #include "afl/base/optional.hpp"
+#include "ui/layout/manager.hpp"
 
 namespace ui { namespace layout {
 
@@ -24,8 +24,8 @@ namespace ui { namespace layout {
         Grid(size_t numColumns, int space = 5, int outer = 0);
 
         // Manager:
-        virtual void doLayout(Widget& container, gfx::Rectangle area);
-        virtual Info getLayoutInfo(const Widget& container);
+        virtual void doLayout(Widget& container, gfx::Rectangle area) const;
+        virtual Info getLayoutInfo(const Widget& container) const;
 
         /** Set forced cell size.
             You can force cells to have a particular size, with no respect to the contained widgets' wishes.
@@ -34,8 +34,13 @@ namespace ui { namespace layout {
             \param forcedCellHeight required height for cells; Nothing to accept any size. */
         void setForcedCellSize(afl::base::Optional<int> forcedCellWidth, afl::base::Optional<int> forcedCellHeight);
 
+        /** Get forced cell width.
+            \return value set using setForcedCellSize(): required width for cells; Nothing to accept any size */
         afl::base::Optional<int> getForcedCellWidth() const
             { return m_forcedCellWidth; }
+
+        /** Get forced cell height.
+            \return value set using setForcedCellSize(): required height for cells; Nothing to accept any size */
         afl::base::Optional<int> getForcedCellHeight() const
             { return m_forcedCellHeight; }
 

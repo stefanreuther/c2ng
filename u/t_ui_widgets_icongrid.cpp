@@ -20,7 +20,6 @@ TestUiWidgetsIconGrid::testInit()
     // Each icon now is (3+20+3)+1=27 pixels wide and (3+10+3)+1=17 pixels tall,
     // giving a width of 27*5+1 = 136 pixels, and a height of 17*3+1 = 51 pixels.
     ui::layout::Info info = testee.getLayoutInfo();
-    TS_ASSERT_EQUALS(info.getMinSize(), gfx::Point(136, 52));
     TS_ASSERT_EQUALS(info.getPreferredSize(), gfx::Point(136, 52));
     TS_ASSERT_EQUALS(info.isGrowHorizontal(), false);
     TS_ASSERT_EQUALS(info.isGrowVertical(), true);

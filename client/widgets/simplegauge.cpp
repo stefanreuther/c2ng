@@ -97,7 +97,7 @@ client::widgets::SimpleGauge::getLayoutInfo() const
 {
     int textHeight = m_root.provider().getFont(gfx::FontRequest().addSize(-1))->getTextHeight("Tp");
     gfx::Point size(m_width, textHeight + 2);
-    return ui::layout::Info(size, size, ui::layout::Info::GrowHorizontal);
+    return ui::layout::Info(size, ui::layout::Info::GrowHorizontal);
 }
 
 bool

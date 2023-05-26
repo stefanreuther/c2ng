@@ -7,10 +7,23 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestUiLayoutAxisLayout : public CxxTest::TestSuite {
+ public:
+    void testData();
+    void testLayout();
+};
+
 class TestUiLayoutGrid : public CxxTest::TestSuite {
  public:
     void testFixed();
     void testEmpty();
+};
+
+class TestUiLayoutHBox : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testEmpty();
+    void testSingle();
 };
 
 class TestUiLayoutInfo : public CxxTest::TestSuite {
@@ -20,6 +33,18 @@ class TestUiLayoutInfo : public CxxTest::TestSuite {
     void testInitIgnored();
     void testAnd();
     void testMake();
+};
+
+class TestUiLayoutManager : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
+class TestUiLayoutVBox : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testEmpty();
+    void testSingle();
 };
 
 #endif

@@ -4,7 +4,7 @@
 
 #include "ui/widgets/panel.hpp"
 
-ui::widgets::Panel::Panel(ui::layout::Manager& mgr, int padding)
+ui::widgets::Panel::Panel(const ui::layout::Manager& mgr, int padding)
     : LayoutableGroup(mgr),
       m_padding(padding)
 { }

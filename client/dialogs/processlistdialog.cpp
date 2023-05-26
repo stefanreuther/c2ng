@@ -373,7 +373,7 @@ ui::layout::Info
 ProcessListWidget::getLayoutInfo() const
 {
     gfx::Point pt = getFont()->getCellSize().scaledBy(TotalWidth, 14);
-    return ui::layout::Info(pt, pt, ui::layout::Info::GrowBoth);
+    return ui::layout::Info(pt, ui::layout::Info::GrowBoth);
 }
 
 bool

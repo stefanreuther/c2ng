@@ -278,9 +278,7 @@ ui::widgets::OptionGrid::getLayoutInfo() const
         + m_rightWidth;
     const int height = lineHeight * int(m_items.size());
 
-    return ui::layout::Info(gfx::Point(width, height),
-                            gfx::Point(width, height),
-                            ui::layout::Info::GrowHorizontal);
+    return ui::layout::Info(gfx::Point(width, height), ui::layout::Info::GrowHorizontal);
 }
 
 bool

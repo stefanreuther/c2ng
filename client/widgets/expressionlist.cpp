@@ -77,7 +77,7 @@ namespace {
             {
                 int numLines = int(std::min(size_t(20), m_items.size()));
                 gfx::Point size = getFont()->getCellSize().scaledBy(30, numLines);
-                return ui::layout::Info(size, size, ui::layout::Info::GrowBoth);
+                return ui::layout::Info(size, ui::layout::Info::GrowBoth);
             }
         virtual bool handleKey(util::Key_t key, int prefix)
             { return defaultHandleKey(key, prefix); }

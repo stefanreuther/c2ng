@@ -787,7 +787,7 @@ int main(int, char** argv)
         root.addChild(*new MyWidget(root, stop, 0), 0);
 
         ui::widgets::Button btn("Hi there", 'h', root);
-        btn.setExtent(gfx::Rectangle(gfx::Point(20, 20), btn.getLayoutInfo().getMinSize()));
+        btn.setExtent(gfx::Rectangle(gfx::Point(20, 20), btn.getLayoutInfo().getPreferredSize()));
         root.addChild(btn, 0);
         while (!stop) {
             root.handleEvent();

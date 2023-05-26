@@ -51,7 +51,7 @@ ui::widgets::ListLikeDecimalSelector::getLayoutInfo() const
         + 2*font->getEmWidth();
     const int height = font->getLineHeight();
     const gfx::Point size(width, height);
-    return ui::layout::Info(size, size, ui::layout::Info::GrowHorizontal);
+    return ui::layout::Info(size, ui::layout::Info::GrowHorizontal);
 }
 
 

@@ -13,17 +13,18 @@ namespace ui { namespace layout {
         Widgets report their layout wishes using this class.
 
         Widgets can opt out of layouting (NoLayout).
-        Widgets that take part in layouting have a minimum and preferred size:
+        Widgets that take part in layouting have a preferred size:
         - if possible, the widget is given its preferred size
-        - if less room is available, the widget is given its minimum size
         - if more room is available, and the widget allows growing in that direction,
           it is given more room
+        - if too little room is available, and the widget allows growing in that direction,
+          the widget is shrunk
 
         Note that if too little room is available, or layout constraints conflict,
         widgets may still be given more or less room than they request.
         For example, a widget A may be made wider even if it is not marked GrowHorizontal
         if it is put in a VBox together with a wide widget B (VBox(A,B)).
-        This problem is normally countered by putting the no-grow widget into a HBox
+        This problem can be countered by putting the no-grow widget into a HBox
         together with a spacer (VBox(HBox(A,Spacer),B)).
 
         \see ui::Widget::getLayoutInfo() */
@@ -39,10 +40,9 @@ namespace ui { namespace layout {
         };
 
         /** General constructor.
-            \param minSize Minimum size
             \param prefSize Preferred size
             \param growth Growth behaviour */
-        Info(gfx::Point minSize, gfx::Point prefSize, Growth growth) throw();
+        Info(gfx::Point prefSize, Growth growth) throw();
 
         /** Fixed-size constructor.
             \param fixedSize Fixed size (used as preferred and minimum size).
@@ -52,10 +52,6 @@ namespace ui { namespace layout {
         /** No-layout/invisible constructor.
             \post getGrowthBehaviour() == NoLayout */
         Info() throw();
-
-        /** Get minimum size.
-            \result size */
-        gfx::Point getMinSize() const;
 
         /** Get preferred size.
             \result size */
@@ -107,19 +103,11 @@ namespace ui { namespace layout {
         static Growth andGrowthBehaviour(Growth a, Growth b);
 
      private:
-        gfx::Point m_minSize;
         gfx::Point m_preferredSize;
         Growth m_growth;
     };
 
 } }
-
-// Get minimum size.
-inline gfx::Point
-ui::layout::Info::getMinSize() const
-{
-    return m_minSize;
-}
 
 // Get preferred size.
 inline gfx::Point

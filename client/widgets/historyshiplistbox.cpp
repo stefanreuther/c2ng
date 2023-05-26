@@ -184,7 +184,7 @@ ui::layout::Info
 client::widgets::HistoryShipListbox::getLayoutInfo() const
 {
     gfx::Point size(m_width, m_root.provider().getFont(gfx::FontRequest())->getCellSize().getY() * m_numLines);
-    return ui::layout::Info(size, size, ui::layout::Info::GrowBoth);
+    return ui::layout::Info(size, ui::layout::Info::GrowBoth);
 }
 
 bool

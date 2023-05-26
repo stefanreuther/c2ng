@@ -204,7 +204,7 @@ ui::layout::Info
 AttachmentList::getLayoutInfo() const
 {
     gfx::Point size(getWidth(m_root), getItemHeight(0));
-    return ui::layout::Info(size, size, ui::layout::Info::GrowBoth);
+    return ui::layout::Info(size, ui::layout::Info::GrowBoth);
 }
 
 bool

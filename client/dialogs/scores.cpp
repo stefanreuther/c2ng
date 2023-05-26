@@ -432,7 +432,7 @@ ScoreIconBox::getLayoutInfo() const
     gfx::Point mySize(30 * titleSize.getX(),
                       titleSize.getY() + subtitleSize.getY() + 10);
 
-    return ui::layout::Info(mySize, mySize, ui::layout::Info::GrowHorizontal);
+    return ui::layout::Info(mySize, ui::layout::Info::GrowHorizontal);
 }
 
 int

@@ -1759,8 +1759,9 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_proxy_attachmentproxy.cpp \
-    u/t_game_config_stringarrayoption.cpp \
+FILES_testsuite = u/t_ui_layout_axislayout.cpp u/t_ui_layout_vbox.cpp \
+    u/t_ui_layout_manager.cpp u/t_ui_layout_hbox.cpp \
+    u/t_game_proxy_attachmentproxy.cpp u/t_game_config_stringarrayoption.cpp \
     u/t_interpreter_directoryfunctions.cpp u/t_game_interface_vmfile.cpp \
     u/t_game_interface_loadcontext.cpp \
     u/t_game_interface_taskeditorcontext.cpp \

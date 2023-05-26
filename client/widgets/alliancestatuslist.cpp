@@ -206,13 +206,9 @@ client::widgets::AllianceStatusList::getLayoutInfo() const
     int leftWidth, rightWidth;
     computeWidth(leftWidth, rightWidth, 0);
 
-    // Layout constraints:
-    // - we will need at minimum 11 lines (=standard VGAP), but will take as many as will fit on the screen if the game has more
-    // - we prefer to have an extra margin of 50 pixels to make it look nice, but don't insist on it
     int itemHeight = getItemHeight();
     int numItems = static_cast<int>(m_items.size());
-    return ui::layout::Info(gfx::Point(leftWidth + rightWidth, itemHeight * std::min(numItems, 11)),
-                            gfx::Point(leftWidth + rightWidth + 50, itemHeight * numItems),
+    return ui::layout::Info(gfx::Point(leftWidth + rightWidth + 50, itemHeight * numItems),
                             ui::layout::Info::Fixed);
 }
 

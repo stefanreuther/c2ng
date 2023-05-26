@@ -26,7 +26,7 @@ ui::layout::Info
 ui::widgets::SimpleIconBox::getLayoutInfo() const
 {
     gfx::Point pt(m_size.getX(), m_size.getY() + GAP_Y*2);
-    return ui::layout::Info(pt, pt, ui::layout::Info::GrowHorizontal);
+    return ui::layout::Info(pt, ui::layout::Info::GrowHorizontal);
 }
 
 // IconBox:

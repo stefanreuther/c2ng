@@ -12,9 +12,7 @@ void
 TestUiWidgetsAlignedContainer::testIt()
 {
     // Content widget
-    ui::Spacer content(ui::layout::Info(gfx::Point(200, 150),
-                                        gfx::Point(300, 200),
-                                        ui::layout::Info::GrowBoth));
+    ui::Spacer content(ui::layout::Info(gfx::Point(300, 200), ui::layout::Info::GrowBoth));
 
     // Object under test
     ui::widgets::AlignedContainer testee(content, gfx::RightAlign, gfx::MiddleAlign);
@@ -22,7 +20,6 @@ TestUiWidgetsAlignedContainer::testIt()
 
     // Verify layout
     ui::layout::Info layoutResult = testee.getLayoutInfo();
-    TS_ASSERT_EQUALS(layoutResult.getMinSize(), gfx::Point(260, 164));
     TS_ASSERT_EQUALS(layoutResult.getPreferredSize(), gfx::Point(360, 214));
     TS_ASSERT_EQUALS(layoutResult.getGrowthBehaviour(), ui::layout::Info::GrowBoth);
 
@@ -30,15 +27,11 @@ TestUiWidgetsAlignedContainer::testIt()
     testee.setExtent(gfx::Rectangle(10, 5, 400, 500));
     TS_ASSERT_EQUALS(content.getExtent(), gfx::Rectangle(80, 155, 300, 200));
 
-    // Give it its preferred width, and slightly more than minimum height
-    testee.setExtent(gfx::Rectangle(5, 10, 360, 170));
-    TS_ASSERT_EQUALS(content.getExtent(), gfx::Rectangle(35, 17, 300, 156));
+    // Give it its preferred width, and slightly more than preferred height
+    testee.setExtent(gfx::Rectangle(5, 10, 360, 202));
+    TS_ASSERT_EQUALS(content.getExtent(), gfx::Rectangle(35, 11, 300, 200));
 
-    // Give it just above minimum
-    testee.setExtent(gfx::Rectangle(20, 20, 202, 152));
-    TS_ASSERT_EQUALS(content.getExtent(), gfx::Rectangle(21, 21, 200, 150));
-
-    // Give it less than minimum
+    // Give it less than preferred
     testee.setExtent(gfx::Rectangle(20, 20, 70, 60));
     TS_ASSERT_EQUALS(content.getExtent(), gfx::Rectangle(20, 20, 70, 60));
 }

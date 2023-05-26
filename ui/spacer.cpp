@@ -8,7 +8,7 @@
 // Construct growable spacer.
 ui::Spacer::Spacer() throw()
     : SimpleWidget(),
-      m_info(gfx::Point(), gfx::Point(), ui::layout::Info::GrowBoth)
+      m_info(gfx::Point(), ui::layout::Info::GrowBoth)
 { }
 
 // Construct fixed-size spacer.

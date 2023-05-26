@@ -138,7 +138,7 @@ namespace {
         virtual ui::layout::Info getLayoutInfo() const
             {
                 gfx::Point sz = getFont()->getCellSize().scaledBy(30, 10);
-                return ui::layout::Info(sz, sz, ui::layout::Info::GrowBoth);
+                return ui::layout::Info(sz, ui::layout::Info::GrowBoth);
             }
         virtual bool handleKey(util::Key_t key, int prefix)
             { return defaultHandleKey(key, prefix); }

@@ -112,7 +112,7 @@ client::widgets::CargoTransferLine::getLayoutInfo() const
     // ex WCargoLine::getLayoutInfo
     // same as CargoTransferHeader, but without the extra pixel which is taken by the focus grid for us
     gfx::Point size = m_root.provider().getFont(gfx::FontRequest())->getCellSize().scaledBy(50, 1) + gfx::Point(0, 2);
-    return ui::layout::Info(size, size, ui::layout::Info::GrowHorizontal);
+    return ui::layout::Info(size, ui::layout::Info::GrowHorizontal);
 }
 
 bool

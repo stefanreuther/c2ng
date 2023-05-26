@@ -6,23 +6,20 @@
 #include "ui/layout/info.hpp"
 
 // General constructor.
-ui::layout::Info::Info(gfx::Point minSize, gfx::Point prefSize, Growth growth) throw()
-    : m_minSize(minSize),
-      m_preferredSize(prefSize),
+ui::layout::Info::Info(gfx::Point prefSize, Growth growth) throw()
+    : m_preferredSize(prefSize),
       m_growth(growth)
 { }
 
 // Fixed-size constructor.
 ui::layout::Info::Info(gfx::Point fixedSize) throw()
-    : m_minSize(fixedSize),
-      m_preferredSize(fixedSize),
+    : m_preferredSize(fixedSize),
       m_growth(Fixed)
 { }
 
 // No-layout/invisible constructor.
 ui::layout::Info::Info() throw()
-    : m_minSize(),
-      m_preferredSize(),
+    : m_preferredSize(),
       m_growth(NoLayout)
 { }
 

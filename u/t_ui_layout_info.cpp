@@ -13,9 +13,7 @@ using ui::layout::Info;
 void
 TestUiLayoutInfo::testInit()
 {
-    Info a(gfx::Point(2,3), gfx::Point(4,5), Info::GrowHorizontal);
-    TS_ASSERT_EQUALS(a.getMinSize().getX(), 2);
-    TS_ASSERT_EQUALS(a.getMinSize().getY(), 3);
+    Info a(gfx::Point(4,5), Info::GrowHorizontal);
     TS_ASSERT_EQUALS(a.getPreferredSize().getX(), 4);
     TS_ASSERT_EQUALS(a.getPreferredSize().getY(), 5);
     TS_ASSERT_EQUALS(a.getGrowthBehaviour(), Info::GrowHorizontal);
@@ -29,8 +27,6 @@ void
 TestUiLayoutInfo::testInitFixed()
 {
     Info a(gfx::Point(7,8));
-    TS_ASSERT_EQUALS(a.getMinSize().getX(), 7);
-    TS_ASSERT_EQUALS(a.getMinSize().getY(), 8);
     TS_ASSERT_EQUALS(a.getPreferredSize().getX(), 7);
     TS_ASSERT_EQUALS(a.getPreferredSize().getY(), 8);
     TS_ASSERT_EQUALS(a.getGrowthBehaviour(), Info::Fixed);
@@ -44,8 +40,6 @@ void
 TestUiLayoutInfo::testInitIgnored()
 {
     Info a;
-    TS_ASSERT_EQUALS(a.getMinSize().getX(), 0);
-    TS_ASSERT_EQUALS(a.getMinSize().getY(), 0);
     TS_ASSERT_EQUALS(a.getPreferredSize().getX(), 0);
     TS_ASSERT_EQUALS(a.getPreferredSize().getY(), 0);
     TS_ASSERT_EQUALS(a.getGrowthBehaviour(), Info::NoLayout);

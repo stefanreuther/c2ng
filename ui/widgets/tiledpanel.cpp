@@ -13,7 +13,7 @@ namespace {
 
 ui::widgets::TiledPanel::TiledPanel(gfx::ResourceProvider& provider,
                                     ui::ColorScheme& scheme,
-                                    ui::layout::Manager& mgr)
+                                    const ui::layout::Manager& mgr)
     : LayoutableGroup(mgr),
       m_resourceProvider(provider),
       m_colorScheme(scheme),

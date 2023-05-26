@@ -92,7 +92,7 @@ client::map::Widget::handlePositionChange()
 ui::layout::Info
 client::map::Widget::getLayoutInfo() const
 {
-    return ui::layout::Info(m_preferredSize, m_preferredSize, ui::layout::Info::GrowBoth);
+    return ui::layout::Info(m_preferredSize, ui::layout::Info::GrowBoth);
 }
 
 bool

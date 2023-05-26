@@ -16,7 +16,7 @@ namespace ui {
 
     class Window : public LayoutableGroup {
      public:
-        Window(String_t title, gfx::ResourceProvider& provider, ColorScheme& uiColorScheme, const WindowStyle& style, ui::layout::Manager& manager);
+        Window(String_t title, gfx::ResourceProvider& provider, ColorScheme& uiColorScheme, const WindowStyle& style, const ui::layout::Manager& manager);
         ~Window();
 
         virtual void draw(gfx::Canvas& can);
@@ -44,7 +44,7 @@ namespace ui {
         WindowColorScheme m_colorScheme;
         afl::base::SignalConnection conn_providerImageChange;
     };
-    
+
 }
 
 #endif

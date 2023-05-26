@@ -14,7 +14,7 @@ namespace {
     const int PAD = 10;
 }
 
-ui::widgets::TransparentWindow::TransparentWindow(gfx::ColorScheme<util::SkinColor::Color>& parentColors, ui::layout::Manager& manager)
+ui::widgets::TransparentWindow::TransparentWindow(gfx::ColorScheme<util::SkinColor::Color>& parentColors, const ui::layout::Manager& manager)
     : LayoutableGroup(manager),
       m_colorScheme(parentColors)
 {

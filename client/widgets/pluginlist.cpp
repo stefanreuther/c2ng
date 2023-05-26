@@ -157,7 +157,7 @@ ui::layout::Info
 client::widgets::PluginList::getLayoutInfo() const
 {
     gfx::Point size(20 * getNormalFont()->getEmWidth(), 7 * getItemHeight());
-    return ui::layout::Info(size, size, ui::layout::Info::GrowBoth);
+    return ui::layout::Info(size, ui::layout::Info::GrowBoth);
 }
 
 bool

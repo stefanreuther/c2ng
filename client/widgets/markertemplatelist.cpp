@@ -125,7 +125,7 @@ client::widgets::MarkerTemplateList::getLayoutInfo() const
 {
     gfx::Point size(20 * getFont()->getEmWidth(),
                     10 * getLineHeight());
-    return ui::layout::Info(size, size, ui::layout::Info::GrowBoth);
+    return ui::layout::Info(size, ui::layout::Info::GrowBoth);
 }
 
 bool

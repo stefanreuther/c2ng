@@ -298,7 +298,7 @@ MultiTransferList::getLayoutInfo() const
     int width = (FreeWidth_ems + HaveWidth_ems + UnitWidth_ems) * cellSize.getX() + RightMargin_px;
 
     gfx::Point size(width, height);
-    return ui::layout::Info(size, size, ui::layout::Info::GrowBoth);
+    return ui::layout::Info(size, ui::layout::Info::GrowBoth);
 }
 
 bool

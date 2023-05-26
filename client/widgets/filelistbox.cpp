@@ -211,7 +211,7 @@ client::widgets::FileListbox::getLayoutInfo() const
 {
     // ex UIFileChooser::getLayoutInfo
     gfx::Point size = getPreferredCellSize().scaledBy(m_columns, m_lines);
-    return ui::layout::Info(size, size, ui::layout::Info::GrowBoth);
+    return ui::layout::Info(size, ui::layout::Info::GrowBoth);
 }
 
 bool

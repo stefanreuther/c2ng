@@ -128,7 +128,7 @@ client::widgets::PlayerList::getLayoutInfo() const
         return gfx::Point(m_preferredWidth, br.getY());
 
      case VerticalLayout:
-        return ui::layout::Info(br, br, ui::layout::Info::GrowHorizontal);
+        return ui::layout::Info(br, ui::layout::Info::GrowHorizontal);
 
      case HorizontalLayout:
         return br;

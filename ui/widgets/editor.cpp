@@ -207,7 +207,7 @@ ui::widgets::Editor::handlePositionChange()
 ui::layout::Info
 ui::widgets::Editor::getLayoutInfo() const
 {
-    return ui::layout::Info(m_preferredSize, m_preferredSize, ui::layout::Info::GrowBoth);
+    return ui::layout::Info(m_preferredSize, ui::layout::Info::GrowBoth);
 }
 
 bool

@@ -41,7 +41,6 @@ TestUiLayoutGrid::testFixed()
 
     // Check layout info
     Info i = g.getLayoutInfo();
-    TS_ASSERT_EQUALS(i.getMinSize(),       Point(34, 16));
     TS_ASSERT_EQUALS(i.getPreferredSize(), Point(34, 16));
 
     // Perform layout
@@ -55,7 +54,6 @@ TestUiLayoutGrid::testFixed()
     // Fix one size
     testee.setForcedCellSize(100, afl::base::Nothing);
     i = g.getLayoutInfo();
-    TS_ASSERT_EQUALS(i.getMinSize(),       Point(310, 16));
     TS_ASSERT_EQUALS(i.getPreferredSize(), Point(310, 16));
 
     g.setExtent(Rectangle(100, 100, 310, 16));
@@ -68,7 +66,6 @@ TestUiLayoutGrid::testFixed()
     // Fix both sizes
     testee.setForcedCellSize(100, 50);
     i = g.getLayoutInfo();
-    TS_ASSERT_EQUALS(i.getMinSize(),       Point(310, 105));
     TS_ASSERT_EQUALS(i.getPreferredSize(), Point(310, 105));
 
     g.setExtent(Rectangle(100, 100, 310, 105));
@@ -91,7 +88,6 @@ TestUiLayoutGrid::testEmpty()
         ui::layout::Grid testee(5);
         ui::Group g(testee);
         Info info = g.getLayoutInfo();
-        TS_ASSERT_EQUALS(info.getMinSize(), Point(0, 0));
         TS_ASSERT_EQUALS(info.getPreferredSize(), Point(0, 0));
     }
 
@@ -100,7 +96,6 @@ TestUiLayoutGrid::testEmpty()
         ui::layout::Grid testee(5, 5, 23);
         ui::Group g(testee);
         Info info = g.getLayoutInfo();
-        TS_ASSERT_EQUALS(info.getMinSize(), Point(46, 46));
         TS_ASSERT_EQUALS(info.getPreferredSize(), Point(46, 46));
     }
 
@@ -111,7 +106,6 @@ TestUiLayoutGrid::testEmpty()
         ui::Spacer ignore((Info()));
         g.add(ignore);
         Info info = g.getLayoutInfo();
-        TS_ASSERT_EQUALS(info.getMinSize(), Point(46, 46));
         TS_ASSERT_EQUALS(info.getPreferredSize(), Point(46, 46));
     }
 }

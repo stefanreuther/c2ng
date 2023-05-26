@@ -58,7 +58,7 @@ namespace client { namespace widgets { namespace {
         virtual ui::layout::Info getLayoutInfo() const
             {
                 gfx::Point size = m_provider.getFont(gfx::FontRequest())->getCellSize().scaledBy(20, 1);
-                return ui::layout::Info(size, size, ui::layout::Info::GrowHorizontal);
+                return ui::layout::Info(size, ui::layout::Info::GrowHorizontal);
             }
         virtual bool handleKey(util::Key_t /*key*/, int /*prefix*/)
             { return false; }

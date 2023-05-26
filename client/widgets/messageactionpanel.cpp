@@ -193,7 +193,7 @@ client::widgets::MessageActionPanel::getLayoutInfo() const
     // 1 em FONT_TITLE     = 18 px, so we need 2.7 em for the buttons.
     // 1 digit FONT_NORMAL = 8 px, so we need 2.7 em for 6 digits.
     gfx::Point size = m_root.provider().getFont(gfx::FontRequest().addSize(1))->getCellSize().scaledBy(7, 10);
-    return ui::layout::Info(size, size, ui::layout::Info::GrowBoth);
+    return ui::layout::Info(size, ui::layout::Info::GrowBoth);
 }
 
 void

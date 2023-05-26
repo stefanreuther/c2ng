@@ -16,7 +16,7 @@ namespace ui { namespace widgets {
      public:
         TiledPanel(gfx::ResourceProvider& provider,
                    ui::ColorScheme& scheme,
-                   ui::layout::Manager& mgr);
+                   const ui::layout::Manager& mgr);
         ~TiledPanel();
 
         // Widget:
@@ -35,7 +35,7 @@ namespace ui { namespace widgets {
         afl::base::Ptr<gfx::Canvas> m_tile;
 
         void onImageChange();
-        
+
     };
 
 } }

@@ -5,7 +5,7 @@
 
 #include "ui/layoutablegroup.hpp"
 
-ui::LayoutableGroup::LayoutableGroup(ui::layout::Manager& mgr) throw()
+ui::LayoutableGroup::LayoutableGroup(const ui::layout::Manager& mgr) throw()
     : Widget(),
       m_manager(mgr)
 { }
@@ -45,9 +45,7 @@ ui::LayoutableGroup::getLayoutInfo() const
 {
     // ex UILayoutableWidget::getLayoutInfo
     layout::Info info = m_manager.getLayoutInfo(*this);
-    return layout::Info(transformPoint(info.getMinSize(), InnerToOuter),
-                        transformPoint(info.getPreferredSize(), InnerToOuter),
-                        info.getGrowthBehaviour());
+    return layout::Info(transformPoint(info.getPreferredSize(), InnerToOuter), info.getGrowthBehaviour());
 }
 
 void

@@ -101,7 +101,7 @@ ui::widgets::StaticText::getLayoutInfo() const
     afl::base::Ref<gfx::Font> font = m_provider.getFont(m_font);
     const int *pWidth = m_forcedWidth.get();
     gfx::Point pt(pWidth != 0 ? *pWidth : font->getTextWidth(m_text), font->getTextHeight(m_text));
-    return ui::layout::Info(pt, pt, m_isFlexible ? ui::layout::Info::GrowHorizontal : ui::layout::Info::Fixed);
+    return ui::layout::Info(pt, m_isFlexible ? ui::layout::Info::GrowHorizontal : ui::layout::Info::Fixed);
 }
 
 bool

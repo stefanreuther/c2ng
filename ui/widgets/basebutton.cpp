@@ -72,7 +72,7 @@ ui::widgets::BaseButton::getLayoutInfo() const
     const gfx::Point size = m_pIcon != 0
         ? m_pIcon->getSize()
         : gfx::Point();
-    return ui::layout::Info(size, size, m_growthBehaviour);
+    return ui::layout::Info(size, m_growthBehaviour);
 }
 
 // Implementation for handleStateChange.

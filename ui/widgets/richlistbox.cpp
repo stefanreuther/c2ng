@@ -212,10 +212,7 @@ ui::widgets::RichListbox::getLayoutInfo() const
         totalHeight += 4;
     }
 
-    int minHeight = (m_preferredHeight > 0 && totalHeight > m_preferredHeight ? m_preferredHeight : totalHeight);
-    return ui::layout::Info(gfx::Point(m_preferredWidth, minHeight),
-                            gfx::Point(m_preferredWidth, totalHeight),
-                            ui::layout::Info::GrowBoth);
+    return ui::layout::Info(gfx::Point(m_preferredWidth, totalHeight), ui::layout::Info::GrowBoth);
 }
 
 bool

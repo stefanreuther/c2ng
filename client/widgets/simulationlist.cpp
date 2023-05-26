@@ -128,7 +128,7 @@ ui::layout::Info
 client::widgets::SimulationList::getLayoutInfo() const
 {
     gfx::Point size(m_root.provider().getFont(gfx::FontRequest())->getEmWidth() * 20, getLineHeight() * m_numLines);
-    return ui::layout::Info(size, size, ui::layout::Info::GrowBoth);
+    return ui::layout::Info(size, ui::layout::Info::GrowBoth);
 }
 
 bool

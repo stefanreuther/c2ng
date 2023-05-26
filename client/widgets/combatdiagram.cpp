@@ -234,10 +234,9 @@ client::widgets::CombatDiagram::getLayoutInfo() const
     int numBattles = static_cast<int>(m_content.battles.size());
     int numUnits = static_cast<int>(m_content.units.size());
 
-    gfx::Point minSize (std::min(400, numBattles*5  + addX), std::min(300, numUnits*2));
     gfx::Point prefSize(std::min(400, numBattles*20 + addX), std::min(300, numUnits*10));
 
-    return ui::layout::Info(minSize, prefSize, ui::layout::Info::GrowBoth);
+    return ui::layout::Info(prefSize, ui::layout::Info::GrowBoth);
 }
 
 bool

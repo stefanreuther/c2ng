@@ -10,7 +10,7 @@ namespace ui {
 
     class Group : public LayoutableGroup {
      public:
-        Group(ui::layout::Manager& mgr) throw();
+        Group(const ui::layout::Manager& mgr) throw();
 
         // LayoutableGroup:
         virtual gfx::Rectangle transformSize(gfx::Rectangle size, Transformation kind) const;

@@ -21,7 +21,7 @@ namespace ui { namespace widgets {
             \param mgr Layout manager for content
             \param colors UI color scheme to allow palette access
             \param type Frame type (color) */
-        FrameGroup(ui::layout::Manager& mgr, ColorScheme& colors, FrameType type);
+        FrameGroup(const ui::layout::Manager& mgr, ColorScheme& colors, FrameType type);
 
         /** Set frame width.
             This function should only be called during dialog setup (before layout).

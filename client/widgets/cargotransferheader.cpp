@@ -47,7 +47,7 @@ ui::layout::Info
 client::widgets::CargoTransferHeader::getLayoutInfo() const
 {
     gfx::Point size = m_root.provider().getFont(gfx::FontRequest())->getCellSize().scaledBy(50, 3) + gfx::Point(2, 0);
-    return ui::layout::Info(size, size, ui::layout::Info::GrowHorizontal);
+    return ui::layout::Info(size, ui::layout::Info::GrowHorizontal);
 }
 
 bool

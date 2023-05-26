@@ -14,9 +14,9 @@ TestUiGroup::testIt()
     // Layout manager mock for testing
     class MyLayout : public ui::layout::Manager {
      public:
-        virtual void doLayout(ui::Widget& /*container*/, gfx::Rectangle /*area*/)
+        virtual void doLayout(ui::Widget& /*container*/, gfx::Rectangle /*area*/) const
             { }
-        virtual ui::layout::Info getLayoutInfo(const ui::Widget& /*container*/)
+        virtual ui::layout::Info getLayoutInfo(const ui::Widget& /*container*/) const
             { return ui::layout::Info(); }
     };
     MyLayout layout;

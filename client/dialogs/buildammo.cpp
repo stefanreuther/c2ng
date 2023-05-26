@@ -199,7 +199,7 @@ Dialog::run()
     leftGroup.add(del.addNew(new ui::Spacer()));
 
     labelGroup.add(m_targetName);
-    labelGroup.add(del.addNew(new ui::Spacer(ui::layout::Info(gfx::Point(20*em, 5), gfx::Point(20*em, 5), ui::layout::Info::GrowHorizontal))));
+    labelGroup.add(del.addNew(new ui::Spacer(ui::layout::Info(gfx::Point(20*em, 5), ui::layout::Info::GrowHorizontal))));
     labelGroup.add(m_targetAmount);
     labelGroup.add(m_targetRoom);
 

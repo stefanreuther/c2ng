@@ -20,7 +20,7 @@ namespace ui { namespace widgets {
         /** Constructor.
             \param parentColors ColorScheme that provides widget colors in getColor(), and the background image in drawBackground()
             \param manager Layout manager */
-        TransparentWindow(gfx::ColorScheme<util::SkinColor::Color>& parentColors, ui::layout::Manager& manager);
+        TransparentWindow(gfx::ColorScheme<util::SkinColor::Color>& parentColors, const ui::layout::Manager& manager);
 
         virtual void draw(gfx::Canvas& can);
         virtual void handleStateChange(State st, bool enable);

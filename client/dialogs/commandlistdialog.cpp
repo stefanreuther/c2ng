@@ -86,7 +86,7 @@ namespace {
                 int width = 30;
                 gfx::Point size = m_root.provider().getFont(gfx::FontRequest())->getCellSize()
                     .scaledBy(width, lines);
-                return ui::layout::Info(size, size, ui::layout::Info::GrowBoth);
+                return ui::layout::Info(size, ui::layout::Info::GrowBoth);
             }
         virtual bool handleKey(util::Key_t key, int prefix)
             { return defaultHandleKey(key, prefix); }

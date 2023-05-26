@@ -181,7 +181,7 @@ client::widgets::CombatUnitList::getLayoutInfo() const
 {
     // ex FlakShipList::getLayoutInfo
     gfx::Point size = getFont()->getCellSize().scaledBy(12, 20);
-    return ui::layout::Info(size, size, ui::layout::Info::GrowBoth);
+    return ui::layout::Info(size, ui::layout::Info::GrowBoth);
 }
 
 bool

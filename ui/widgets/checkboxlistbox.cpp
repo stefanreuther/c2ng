@@ -275,7 +275,7 @@ ui::widgets::CheckboxListbox::getLayoutInfo() const
     }
 
     gfx::Point size(width, lineHeight * numLines);
-    return ui::layout::Info(size, size, ui::layout::Info::GrowBoth);
+    return ui::layout::Info(size, ui::layout::Info::GrowBoth);
 }
 
 bool

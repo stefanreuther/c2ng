@@ -25,53 +25,33 @@ namespace {
             // Copy values
             int prefX = info.getPreferredSize().getX();
             int prefY = info.getPreferredSize().getY();
-            int minX  = info.getMinSize().getX();
-            int minY  = info.getMinSize().getY();
             uint8_t flexH = info.isGrowHorizontal();
             uint8_t flexV = info.isGrowVertical();
 
             // override with required values
             int n;
             if (layout.getForcedCellWidth().get(n)) {
-                prefX = minX = n;
+                prefX = n;
                 flexH = false;
             }
             if (layout.getForcedCellHeight().get(n)) {
-                prefY = minY = n;
+                prefY = n;
                 flexV = false;
             }
 
             if (row == 0) {
                 // first row, populate hinfo
-                hinfo.pref_sizes.push_back(prefX);
-                hinfo.min_sizes.push_back(minX);
-                hinfo.flex_flags.push_back(flexH);
-                hinfo.ignore_flags.push_back(false);
+                hinfo.add(prefX, flexH, false);
             } else {
                 // not first row, update hinfo accordingly
-                if (hinfo.pref_sizes[col] < prefX) {
-                    hinfo.pref_sizes[col] = prefX;
-                }
-                if (hinfo.min_sizes[col] < minX) {
-                    hinfo.min_sizes[col] = minX;
-                }
-                hinfo.flex_flags[col] |= flexH;
+                hinfo.update(col, prefX, flexH);
             }
 
             if (col == 0) {
                 // first column, populate vinfo
-                vinfo.pref_sizes.push_back(prefY);
-                vinfo.min_sizes.push_back(minY);
-                vinfo.flex_flags.push_back(flexV);
-                vinfo.ignore_flags.push_back(false);
+                vinfo.add(prefY, flexV, false);
             } else {
-                if (vinfo.pref_sizes.back() < prefY) {
-                    vinfo.pref_sizes.back() = prefY;
-                }
-                if (vinfo.min_sizes.back() < minY) {
-                    vinfo.min_sizes.back() = minY;
-                }
-                vinfo.flex_flags.back() |= flexV;
+                vinfo.update(row, prefY, flexV);
             }
 
             ++col;
@@ -97,24 +77,21 @@ ui::layout::Grid::Grid(size_t numColumns, int space, int outer)
 }
 
 void
-ui::layout::Grid::doLayout(Widget& container, gfx::Rectangle area)
+ui::layout::Grid::doLayout(Widget& container, gfx::Rectangle area) const
 {
     // ex UIGridLayout::doLayout
     AxisLayout h, v;
     computeGridLayoutInfo(*this, container, h, v, m_numColumns);
 
-    if (!area.exists() || h.min_sizes.empty()) {
+    if (!area.exists() || h.empty()) {
         return;
     }
 
-    const std::vector<int>& hsizes = h.doLayout(m_space, m_outer, area.getWidth());
-    const std::vector<int>& vsizes = v.doLayout(m_space, m_outer, area.getHeight());
+    const std::vector<AxisLayout::Position> hsizes = h.computeLayout(m_space, m_outer, area.getWidth());
+    const std::vector<AxisLayout::Position> vsizes = v.computeLayout(m_space, m_outer, area.getHeight());
 
     size_t row = 0;
     size_t col = 0;
-    int x = h.used_outer;
-    int y = v.used_outer;
-
     for (Widget* p = container.getFirstChild(); p != 0; p = p->getNextSibling()) {
         if (!p->getLayoutInfo().isIgnored()) {
             if (col >= hsizes.size() || row >= vsizes.size()) {
@@ -122,50 +99,32 @@ ui::layout::Grid::doLayout(Widget& container, gfx::Rectangle area)
                 break;
             }
 
-            p->setExtent(gfx::Rectangle(area.getLeftX() + x, area.getTopY() + y, hsizes[col], vsizes[row]));
+            p->setExtent(gfx::Rectangle(area.getLeftX() + hsizes[col].position, area.getTopY() + vsizes[row].position, hsizes[col].size, vsizes[row].size));
 
             ++col;
             if (col >= m_numColumns) {
-                x = h.used_outer;
-                y += vsizes[row] + v.used_space;
                 col = 0;
                 ++row;
-            } else {
-                x += hsizes[col-1] + h.used_space;
             }
         }
     }
 }
 
 ui::layout::Info
-ui::layout::Grid::getLayoutInfo(const Widget& container)
+ui::layout::Grid::getLayoutInfo(const Widget& container) const
 {
     // ex UIGridLayout::getLayoutInfo
     AxisLayout h, v;
     computeGridLayoutInfo(*this, container, h, v, m_numColumns);
 
-    if (h.min_sizes.empty()) {
+    if (h.empty()) {
         return gfx::Point(2*m_outer, 2*m_outer);
     } else {
-        int minX = 2 * m_outer + int(h.min_sizes.size()-1) * m_space;
-        int minY = 2 * m_outer + int(v.min_sizes.size()-1) * m_space;
-        int prefX = minX;
-        int prefY = minY;
-        bool flexH = false;
-        bool flexV = false;
-
-        for (std::vector<int>::size_type i = 0; i < h.min_sizes.size(); ++i) {
-            minX += h.min_sizes[i];
-            prefX += h.pref_sizes[i];
-            flexH |= h.flex_flags[i];
-        }
-        for (std::vector<int>::size_type i = 0; i < v.min_sizes.size(); ++i) {
-            minY += v.min_sizes[i];
-            prefY += v.pref_sizes[i];
-            flexV |= v.flex_flags[i];
-        }
-
-        return Info(gfx::Point(minX, minY), gfx::Point(prefX, prefY), Info::makeGrowthBehaviour(flexH, flexV, false));
+        int prefX = 2 * m_outer + int(h.size()-1) * m_space + h.getTotalSize();
+        int prefY = 2 * m_outer + int(v.size()-1) * m_space + v.getTotalSize();
+        bool flexH = h.isFlexible();
+        bool flexV = v.isFlexible();
+        return Info(gfx::Point(prefX, prefY), Info::makeGrowthBehaviour(flexH, flexV, false));
     }
 }
 

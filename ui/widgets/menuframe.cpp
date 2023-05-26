@@ -16,7 +16,7 @@ namespace {
 }
 
 // Constructor.
-ui::widgets::MenuFrame::MenuFrame(ui::layout::Manager& mgr, Root& root, EventLoop& loop)
+ui::widgets::MenuFrame::MenuFrame(const ui::layout::Manager& mgr, Root& root, EventLoop& loop)
     : LayoutableGroup(mgr),
       m_root(root),
       m_loop(loop),

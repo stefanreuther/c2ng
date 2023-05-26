@@ -630,7 +630,7 @@ client::si::IFWidgetNewSpacer(game::Session& session, ScriptSide& ss, const Widg
                     m_info = gfx::Point(width, height);
                 } else {
                     // Growing
-                    m_info = ui::layout::Info(gfx::Point(), gfx::Point(), ui::layout::Info::GrowBoth);
+                    m_info = ui::layout::Info(gfx::Point(), ui::layout::Info::GrowBoth);
                 }
                 return true;
             }

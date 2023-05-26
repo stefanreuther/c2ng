@@ -91,7 +91,7 @@ client::tiles::SelectionHeaderTile::getLayoutInfo() const
 {
     // ex WObjectSelectionHeaderTile::getLayoutInfo
     gfx::Point size = m_root.provider().getFont(gfx::FontRequest().addWeight(1))->getCellSize().scaledBy(20, 1);
-    return ui::layout::Info(size, size, ui::layout::Info::GrowHorizontal);
+    return ui::layout::Info(size, ui::layout::Info::GrowHorizontal);
 }
 
 bool

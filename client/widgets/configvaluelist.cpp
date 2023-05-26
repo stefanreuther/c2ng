@@ -143,7 +143,7 @@ client::widgets::ConfigValueList::getLayoutInfo() const
     afl::base::Ref<gfx::Font> normalFont = m_root.provider().getFont("");
     gfx::Point pt(normalFont->getCellSize().scaledBy(m_nameColumnWidth + m_valueColumnWidth, m_preferredHeight));
     pt.addX(10);
-    return ui::layout::Info(pt, pt, ui::layout::Info::GrowBoth);
+    return ui::layout::Info(pt, ui::layout::Info::GrowBoth);
 }
 
 bool

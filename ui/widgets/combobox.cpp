@@ -112,9 +112,7 @@ ui::widgets::ComboBox::getLayoutInfo() const
         }
     }
 
-    return ui::layout::Info(gfx::Point(width, height),
-                            gfx::Point(width, height),
-                            ui::layout::Info::GrowHorizontal);
+    return ui::layout::Info(gfx::Point(width, height), ui::layout::Info::GrowHorizontal);
 }
 
 bool

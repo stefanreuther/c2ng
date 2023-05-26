@@ -41,15 +41,15 @@ TestUiLayoutableGroup::testIt()
     Tester t;
 
     // Add a widget with given layout
-    ui::Spacer content(ui::layout::Info(gfx::Point(20, 30),  // min
-                                        gfx::Point(40, 55),  // pref
-                                        ui::layout::Info::GrowBoth));
+    ui::Spacer content(ui::layout::Info(gfx::Point(40, 55), ui::layout::Info::GrowBoth));
     t.add(content);
 
     // Verify layout produced by pack()
     t.pack();
     TS_ASSERT_EQUALS(t.getExtent(), gfx::Rectangle(0, 0, 60, 65));
     TS_ASSERT_EQUALS(content.getExtent(), gfx::Rectangle(10, 5, 40, 55));
+    TS_ASSERT_EQUALS(content.getExtent().getWidth(), 40);
+    TS_ASSERT_EQUALS(content.getExtent().getHeight(), 55);
 
     // Set fixed layout
     t.setExtent(gfx::Rectangle(20, 30, 100, 120));

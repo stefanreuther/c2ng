@@ -328,7 +328,7 @@ client::widgets::FilterDisplay::getLayoutInfo() const
 {
     int w = m_root.provider().getFont(gfx::FontRequest())->getEmWidth() * 20;
     int h = getFilterHeight() * int(m_content.size()) + getMenuHeight();
-    return ui::layout::Info(gfx::Point(w, h), gfx::Point(w, h), ui::layout::Info::GrowHorizontal);
+    return ui::layout::Info(gfx::Point(w, h), ui::layout::Info::GrowHorizontal);
 }
 
 bool

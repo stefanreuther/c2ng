@@ -353,9 +353,11 @@ UfoInfoDialog::initWidgets()
     // Buttons
     m_keepButton.setFont("-");
     m_keepButton.sig_fire.add(&m_proxy, &UfoProxy::toggleStoredInHistory);
+    m_keepButton.setGrowthBehaviour(ui::layout::Info::GrowHorizontal);
     m_otherButton.setFont("-");
     m_otherButton.setState(ui::Widget::DisabledState, true);
     m_otherButton.sig_fire.add(&m_proxy, &UfoProxy::browseToOtherEnd);
+    m_otherButton.setGrowthBehaviour(ui::layout::Info::GrowHorizontal);
 
     // Color
     m_colorTile.setFrameType(ui::LoweredFrame);

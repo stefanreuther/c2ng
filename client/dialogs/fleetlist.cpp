@@ -115,7 +115,7 @@ namespace {
             {
                 int numLines = int(std::min(size_t(15), std::max(size_t(5), m_content.size())));
                 gfx::Point size(getFont()->getCellSize().scaledBy(30, numLines));
-                return ui::layout::Info(size, size, ui::layout::Info::GrowBoth);
+                return ui::layout::Info(size, ui::layout::Info::GrowBoth);
             }
 
         virtual bool handleKey(util::Key_t key, int prefix)

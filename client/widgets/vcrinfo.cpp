@@ -253,7 +253,7 @@ client::widgets::VcrInfo::getLayoutInfo() const
         .extendBelow(normalCell.scaledBy(40, 13));
     size.addY(normalCell.getY() / 2);
 
-    return ui::layout::Info(size, size, ui::layout::Info::GrowBoth);
+    return ui::layout::Info(size, ui::layout::Info::GrowBoth);
 }
 
 bool
@@ -351,7 +351,7 @@ client::widgets::VcrInfo::setChildPositions()
         m_scoreButton.setExtent(lastRow.splitRightX(buttonSize));
         lastRow.consumeRightX(pad);
 
-        m_showMapButton.setExtent(lastRow.splitRightX(m_showMapButton.getLayoutInfo().getMinSize().getX()));
+        m_showMapButton.setExtent(lastRow.splitRightX(m_showMapButton.getLayoutInfo().getPreferredSize().getX()));
     } else {
         // Fleet-combat layout with just L button
         m_tabButton.setExtent(lastRow.splitRightX(tabSize));
@@ -363,7 +363,7 @@ client::widgets::VcrInfo::setChildPositions()
         m_leftButton.setExtent(lastRow.splitRightX(buttonSize));
         lastRow.consumeRightX(pad);
 
-        m_showMapButton.setExtent(lastRow.splitRightX(m_showMapButton.getLayoutInfo().getMinSize().getX()));
+        m_showMapButton.setExtent(lastRow.splitRightX(m_showMapButton.getLayoutInfo().getPreferredSize().getX()));
     }
 }
 

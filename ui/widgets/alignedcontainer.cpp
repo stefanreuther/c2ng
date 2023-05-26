@@ -14,25 +14,19 @@ namespace {
     /** Compute layout.
         \param cs       [out] Result
         \param avail    [in] Number of pixels we have
-        \param minsize  [in] Minimum size requested by client
         \param prefsize [in] Preferred size requested by client
         \param align    [in] Alignment parameter, 0=left, 1=center, 2=right
         \param margin   [in] Margin parameter, number of pixels on each side to leave free */
-    void computeLayout(Pair& cs, const int avail, const int minsize, const int prefsize, const int align, const int margin)
+    void computeLayout(Pair& cs, const int avail, const int prefsize, const int align, const int margin)
     {
         if (avail >= prefsize + 2*margin) {
             /* We have more room than required to give this item its preferred size. */
             cs.pos = margin + (avail - 2*margin - prefsize)*align/2;
             cs.size = prefsize;
-        } else if (avail >= minsize + 2*margin) {
-            /* We do not have enough room to give it its preferred size, but we have
-               more than its minimum. Thus, expand it to full size. */
-            cs.pos = margin;
-            cs.size = avail - 2*margin;
-        } else if (avail >= minsize) {
-            /* We have enough room to give it its minimum size when we reduce the margin */
-            cs.pos = (avail - minsize) / 2;
-            cs.size = minsize;
+        } else if (avail >= prefsize) {
+            /* We have enough room to give it its preferred size when we reduce the margin */
+            cs.pos = (avail - prefsize) / 2;
+            cs.size = prefsize;
         } else {
             /* We're even smaller than its minimum size. Give it everything we have. */
             cs.pos = 0;
@@ -96,8 +90,8 @@ ui::widgets::AlignedContainer::handlePositionChange()
         ui::layout::Info info = p->getLayoutInfo();
 
         Pair xs, ys;
-        computeLayout(xs, r.getWidth(),  info.getMinSize().getX(), info.getPreferredSize().getX(), m_alignX, m_padX);
-        computeLayout(ys, r.getHeight(), info.getMinSize().getY(), info.getPreferredSize().getY(), m_alignY, m_padY);
+        computeLayout(xs, r.getWidth(),  info.getPreferredSize().getX(), m_alignX, m_padX);
+        computeLayout(ys, r.getHeight(), info.getPreferredSize().getY(), m_alignY, m_padY);
         p->setExtent(gfx::Rectangle(r.getLeftX() + xs.pos,   r.getTopY() + ys.pos, xs.size, ys.size));
     }
 }
@@ -114,13 +108,9 @@ ui::widgets::AlignedContainer::getLayoutInfo() const
     // ex UIAlignedWidget::getLayoutInfo
     if (Widget* p = getFirstChild()) {
         ui::layout::Info info = p->getLayoutInfo();
-        return ui::layout::Info(info.getMinSize()       + gfx::Point(2*m_padX, 2*m_padY),
-                                info.getPreferredSize() + gfx::Point(2*m_padX, 2*m_padY),
-                                info.getGrowthBehaviour());
+        return ui::layout::Info(info.getPreferredSize() + gfx::Point(2*m_padX, 2*m_padY), info.getGrowthBehaviour());
     } else {
-        return ui::layout::Info(gfx::Point(),
-                                gfx::Point(),
-                                ui::layout::Info::GrowBoth);
+        return ui::layout::Info(gfx::Point(), ui::layout::Info::GrowBoth);
     }
 }
 

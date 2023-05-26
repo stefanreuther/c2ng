@@ -178,8 +178,7 @@ ui::layout::Info
 client::widgets::FleetMemberListbox::getLayoutInfo() const
 {
     int lineHeight = getFont()->getLineHeight();
-    return ui::layout::Info(gfx::Point(m_preferredWidth, 3*lineHeight),
-                            gfx::Point(m_preferredWidth, m_preferredNumLines*lineHeight),
+    return ui::layout::Info(gfx::Point(m_preferredWidth, m_preferredNumLines*lineHeight),
                             ui::layout::Info::GrowBoth);
 }
 

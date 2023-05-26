@@ -167,8 +167,8 @@ namespace {
         virtual void handlePositionChange()
             {
                 // ex WPlanetStructureHeader::onResize
-                gfx::Point prevSize = m_btnPrev.getLayoutInfo().getMinSize();
-                gfx::Point nextSize = m_btnPrev.getLayoutInfo().getMinSize();
+                gfx::Point prevSize = m_btnPrev.getLayoutInfo().getPreferredSize();
+                gfx::Point nextSize = m_btnNext.getLayoutInfo().getPreferredSize();
 
                 gfx::Rectangle r = getExtent();
 
@@ -188,8 +188,8 @@ namespace {
         virtual ui::layout::Info getLayoutInfo() const
             {
                 // ex WPlanetStructureHeader::getLayoutInfo
-                gfx::Point prevSize = m_btnPrev.getLayoutInfo().getMinSize();
-                gfx::Point nextSize = m_btnPrev.getLayoutInfo().getMinSize();
+                gfx::Point prevSize = m_btnPrev.getLayoutInfo().getPreferredSize();
+                gfx::Point nextSize = m_btnNext.getLayoutInfo().getPreferredSize();
 
                 gfx::Point mainSize = m_root.provider().getFont(gfx::FontRequest().addSize(1))->getCellSize().scaledBy(30, 1);
                 gfx::Point subSize  = m_root.provider().getFont(gfx::FontRequest())           ->getCellSize().scaledBy(30, 1);
@@ -199,7 +199,7 @@ namespace {
                 mainSize.addX(5);
                 mainSize.extendRight(nextSize);
 
-                return ui::layout::Info(mainSize, mainSize, ui::layout::Info::GrowHorizontal);
+                return ui::layout::Info(mainSize, ui::layout::Info::GrowHorizontal);
             }
         virtual bool handleKey(util::Key_t key, int prefix)
             {

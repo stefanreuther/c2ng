@@ -156,12 +156,9 @@ ui::layout::Info
 SelectionList::getLayoutInfo() const
 {
     const gfx::Point cellSize = getFont()->getCellSize();
-    const int minLines = std::min(10, int(m_info.layers.size()));
     const int maxLines = std::min(20, int(m_info.layers.size()));
     const int width = 20;
-    return ui::layout::Info(cellSize.scaledBy(width, minLines),
-                            cellSize.scaledBy(width, maxLines),
-                            ui::layout::Info::GrowBoth);
+    return ui::layout::Info(cellSize.scaledBy(width, maxLines), ui::layout::Info::GrowBoth);
 }
 
 bool

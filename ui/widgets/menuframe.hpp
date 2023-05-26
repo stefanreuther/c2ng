@@ -30,7 +30,7 @@ namespace ui { namespace widgets {
             \param mgr Layout manager (pass ui::layout::HBox::instance0 if you don't care)
             \param root Root (provides gfx::Engine/gfx::Timer, ColorScheme)
             \param loop EventLoop */
-        MenuFrame(ui::layout::Manager& mgr, Root& root, EventLoop& loop);
+        MenuFrame(const ui::layout::Manager& mgr, Root& root, EventLoop& loop);
 
         // LayoutableGroup/Widget:
         virtual gfx::Rectangle transformSize(gfx::Rectangle size, Transformation kind) const;

@@ -108,9 +108,7 @@ client::vcr::flak::ArenaWidget::handlePositionChange()
 ui::layout::Info
 client::vcr::flak::ArenaWidget::getLayoutInfo() const
 {
-    return ui::layout::Info(gfx::Point(400, 400),
-                            gfx::Point(400, 400),
-                            ui::layout::Info::GrowBoth);
+    return ui::layout::Info(gfx::Point(400, 400), ui::layout::Info::GrowBoth);
 }
 
 bool

@@ -116,9 +116,7 @@ ui::widgets::StringListbox::getLayoutInfo() const
     height *= cellSize.getY();
 
     // Result
-    return ui::layout::Info(gfx::Point(width, height),
-                            gfx::Point(width, height),
-                            ui::layout::Info::GrowBoth);
+    return ui::layout::Info(gfx::Point(width, height), ui::layout::Info::GrowBoth);
 }
 
 bool

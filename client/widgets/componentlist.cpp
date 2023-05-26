@@ -153,7 +153,7 @@ ui::layout::Info
 client::widgets::ComponentList::getLayoutInfo() const
 {
     gfx::Point size = getFont()->getCellSize().scaledBy(m_widthInEms, m_numLines);
-    return ui::layout::Info(size, size, ui::layout::Info::GrowBoth);
+    return ui::layout::Info(size, ui::layout::Info::GrowBoth);
 }
 
 bool

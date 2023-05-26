@@ -91,12 +91,11 @@ ui::CardGroup::getLayoutInfo() const
 {
     // ex UICardGroup::getLayoutInfo
     using ui::layout::Info;
-    Info result(gfx::Point(1, 1), gfx::Point(1, 1), Info::GrowBoth);
+    Info result(gfx::Point(1, 1), Info::GrowBoth);
 
     for (Widget* w = getFirstChild(); w != 0; w = w->getNextSibling()) {
         Info child = w->getLayoutInfo();
-        result = Info(maxPoint(result.getMinSize(), child.getMinSize()),
-                      maxPoint(result.getPreferredSize(), child.getPreferredSize()),
+        result = Info(maxPoint(result.getPreferredSize(), child.getPreferredSize()),
                       Info::andGrowthBehaviour(result.getGrowthBehaviour(), child.getGrowthBehaviour()));
     }
     return result;

@@ -26,7 +26,7 @@ namespace ui {
      public:
         /** Constructor.
             \param mgr Layout manager. Needs to live at least as long as the widget. */
-        explicit LayoutableGroup(ui::layout::Manager& mgr) throw();
+        explicit LayoutableGroup(const ui::layout::Manager& mgr) throw();
 
         // virtual void draw(gfx::Canvas& can);
         // virtual void handleStateChange(State st, bool enable);
@@ -63,7 +63,7 @@ namespace ui {
         void doLayout();
 
      private:
-        ui::layout::Manager& m_manager;
+        const ui::layout::Manager& m_manager;
 
         gfx::Point transformPoint(gfx::Point pt, Transformation kind) const;
     };

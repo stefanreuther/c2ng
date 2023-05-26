@@ -4,7 +4,7 @@
 
 #include "ui/group.hpp"
 
-ui::Group::Group(ui::layout::Manager& mgr) throw()
+ui::Group::Group(const ui::layout::Manager& mgr) throw()
     : LayoutableGroup(mgr)
 { }
 

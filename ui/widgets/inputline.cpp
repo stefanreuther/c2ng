@@ -339,9 +339,7 @@ ui::widgets::InputLine::getLayoutInfo() const
 {
     // ex UIInputLine::getLayoutInfo
     afl::base::Ref<gfx::Font> font = m_root.provider().getFont(m_font);
-    return ui::layout::Info(font->getCellSize().scaledBy(4, 1),
-                            font->getCellSize().scaledBy(m_preferredLength, 1),
-                            ui::layout::Info::GrowHorizontal);
+    return ui::layout::Info(font->getCellSize().scaledBy(m_preferredLength, 1), ui::layout::Info::GrowHorizontal);
 }
 
 /** Adjust display so that cursor is visible. */

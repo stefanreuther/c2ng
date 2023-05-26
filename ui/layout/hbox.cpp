@@ -1,23 +1,16 @@
 /**
   *  \file ui/layout/hbox.cpp
+  *  \brief Class ui::layout::HBox
   */
 
 #include <algorithm>
 #include "ui/layout/hbox.hpp"
 #include "ui/layout/axislayout.hpp"
 
-ui::layout::HBox ui::layout::HBox::instance0(0);
-ui::layout::HBox ui::layout::HBox::instance5(5);
+const ui::layout::HBox ui::layout::HBox::instance0(0);
+const ui::layout::HBox ui::layout::HBox::instance5(5);
 
-// /** Horizontal Box Layout
 
-//     Widgets will be arranged horizontally, all the same height, from
-//     left to right. This layout will completely cover the container
-//     with widgets (subject to space/outer settings, of course). */
-
-// /** Create a Horizontal Box layout.
-//     \param space space to leave between widgets, in pixels.
-//     \param outer space to leave at left/right side. */
 ui::layout::HBox::HBox(int space, int outer)
     : space(space), outer(outer)
 {
@@ -25,40 +18,34 @@ ui::layout::HBox::HBox(int space, int outer)
 }
 
 void
-ui::layout::HBox::doLayout(Widget& container, gfx::Rectangle area)
+ui::layout::HBox::doLayout(Widget& container, gfx::Rectangle area) const
 {
     // ex UIHBoxLayout::doLayout
     AxisLayout lay;
     for (Widget* w = container.getFirstChild(); w; w = w->getNextSibling()) {
-        Info i = w->getLayoutInfo();
-        lay.pref_sizes.push_back(i.getPreferredSize().getX());
-        lay.min_sizes.push_back(i.getMinSize().getX());
-        lay.ignore_flags.push_back(i.isIgnored());
-        lay.flex_flags.push_back(i.isGrowHorizontal());
+        const Info i = w->getLayoutInfo();
+        lay.add(i.getPreferredSize().getX(), i.isGrowHorizontal(), i.isIgnored());
     }
     if (area.getWidth() == 0) {
         return;
     }
 
-    std::vector<int>& sizes = lay.doLayout(space, outer, area.getWidth());
+    const std::vector<AxisLayout::Position> sizes = lay.computeLayout(space, outer, area.getWidth());
     size_t i = 0;
 
-    int size_x = area.getLeftX() + lay.used_outer;
-    int size_y = area.getTopY();
+    const int size_x = area.getLeftX();
+    const int size_y = area.getTopY();
     for (Widget* w = container.getFirstChild(); w; w = w->getNextSibling(), ++i) {
-        if (!lay.ignore_flags[i]) {
-            w->setExtent(gfx::Rectangle(size_x, size_y, sizes[i], area.getHeight()));
-            size_x += sizes[i];
-            size_x += lay.used_space;
+        if (!lay.isIgnored(i)) {
+            w->setExtent(gfx::Rectangle(size_x + sizes[i].position, size_y, sizes[i].size, area.getHeight()));
         }
     }
 }
 
 ui::layout::Info
-ui::layout::HBox::getLayoutInfo(const Widget& container)
+ui::layout::HBox::getLayoutInfo(const Widget& container) const
 {
     // ex UIHBoxLayout::getLayoutInfo
-    gfx::Point minSize(2*outer, 0);
     gfx::Point prefSize(2*outer, 0);
 
     /* A HBox is...
@@ -86,16 +73,13 @@ ui::layout::HBox::getLayoutInfo(const Widget& container)
         // Update sizes
         if (!i.isIgnored()) {
             ++n;
-            minSize.addX(i.getMinSize().getX());
-            minSize.setY(std::max(minSize.getY(), i.getMinSize().getY()));
             prefSize.addX(i.getPreferredSize().getX());
             prefSize.setY(std::max(prefSize.getY(), i.getPreferredSize().getY()));
         }
     }
     if (n != 0) {
-        minSize.addX((n-1) * space);
         prefSize.addX((n-1) * space);
     }
 
-    return Info(minSize, prefSize, Info::makeGrowthBehaviour(anyH, allV, allIgnore));
+    return Info(prefSize, Info::makeGrowthBehaviour(anyH, allV, allIgnore));
 }

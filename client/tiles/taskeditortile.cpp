@@ -120,9 +120,7 @@ class client::tiles::TaskEditorTile::ListWidget : public ui::widgets::AbstractLi
     virtual ui::layout::Info getLayoutInfo() const
         {
             gfx::Point cellSize = m_provider.getFont(gfx::FontRequest())->getCellSize();
-            return ui::layout::Info(cellSize.scaledBy(20, 5),
-                                    cellSize.scaledBy(30, 18),
-                                    ui::layout::Info::GrowBoth);
+            return ui::layout::Info(cellSize.scaledBy(30, 18), ui::layout::Info::GrowBoth);
         }
 
     virtual bool handleKey(util::Key_t key, int prefix)

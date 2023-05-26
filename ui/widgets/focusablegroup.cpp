@@ -10,7 +10,7 @@
 
 const int ui::widgets::FocusableGroup::DEFAULT_PAD;
 
-ui::widgets::FocusableGroup::FocusableGroup(ui::layout::Manager& mgr, int pad)
+ui::widgets::FocusableGroup::FocusableGroup(const ui::layout::Manager& mgr, int pad)
     : LayoutableGroup(mgr),
       m_pad(pad)
 {

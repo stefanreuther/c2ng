@@ -10,7 +10,7 @@ namespace ui { namespace widgets {
 
     class Panel : public LayoutableGroup {
      public:
-        Panel(ui::layout::Manager& mgr, int padding = 0);
+        Panel(const ui::layout::Manager& mgr, int padding = 0);
 
         void setPadding(int padding);
 

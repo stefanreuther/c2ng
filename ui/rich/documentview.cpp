@@ -12,7 +12,6 @@ ui::rich::DocumentView::DocumentView(gfx::Point pref_size, uint16_t key_flags, g
       m_provider(provider),
       doc(provider),
       pref_size(pref_size),
-      m_minSize(pref_size),
       key_flags(key_flags),
       mdown(false),
       selected_link(Document::nil),
@@ -228,7 +227,7 @@ ui::layout::Info
 ui::rich::DocumentView::getLayoutInfo() const
 {
     // ex UIRichDocument::getLayoutInfo (sort-of)
-    return ui::layout::Info(m_minSize, pref_size, ui::layout::Info::GrowBoth);
+    return ui::layout::Info(pref_size, ui::layout::Info::GrowBoth);
 }
 
 bool

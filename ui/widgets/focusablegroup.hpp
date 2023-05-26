@@ -21,7 +21,7 @@ namespace ui { namespace widgets {
      public:
         static const int DEFAULT_PAD = 2;
 
-        FocusableGroup(ui::layout::Manager& mgr, int pad = DEFAULT_PAD);
+        FocusableGroup(const ui::layout::Manager& mgr, int pad = DEFAULT_PAD);
         ~FocusableGroup();
 
         // LayoutableGroup:

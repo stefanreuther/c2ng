@@ -30,7 +30,7 @@ ui::Window::WindowColorScheme::drawBackground(gfx::Canvas& can, const gfx::Recta
 
 
 
-ui::Window::Window(String_t title, gfx::ResourceProvider& provider, ColorScheme& uiColorScheme, const WindowStyle& style, ui::layout::Manager& manager)
+ui::Window::Window(String_t title, gfx::ResourceProvider& provider, ColorScheme& uiColorScheme, const WindowStyle& style, const ui::layout::Manager& manager)
     : LayoutableGroup(manager),
       m_title(title),
       m_resourceProvider(provider),

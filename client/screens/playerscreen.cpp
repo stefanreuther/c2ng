@@ -124,7 +124,7 @@ namespace {
                 rightGroup.add(m_docView);
 
                 // Panels
-                ui::LayoutableGroup& menuGroup = del.addNew(new ui::Group(del.addNew(new ui::layout::Flow(5, false))));
+                ui::LayoutableGroup& menuGroup = del.addNew(new ui::Group(del.addNew(new ui::layout::Flow(2, false))));
 
                 ui::LayoutableGroup& diploGroup = createGroup(del, tx("Diplomacy"), menuGroup, root, colorScheme);
                 createActionButton(del, root, diploGroup, tx("Alliances"), 'a').dispatchKeyTo(keys);

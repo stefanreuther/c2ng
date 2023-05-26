@@ -64,9 +64,7 @@ ui::widgets::ScrollbarContainer::getLayoutInfo() const
     ui::layout::Info widgetInfo = m_widget.getLayoutInfo();
     ui::layout::Info scrollInfo = m_scrollbar.getLayoutInfo();
 
-    return ui::layout::Info(widgetInfo.getMinSize().extendRight(scrollInfo.getMinSize()),
-                            widgetInfo.getPreferredSize().extendRight(scrollInfo.getPreferredSize()),
-                            widgetInfo.getGrowthBehaviour());
+    return ui::layout::Info(widgetInfo.getPreferredSize().extendRight(scrollInfo.getPreferredSize()), widgetInfo.getGrowthBehaviour());
 }
 
 bool

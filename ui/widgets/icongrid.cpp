@@ -293,7 +293,7 @@ ui::widgets::IconGrid::getLayoutInfo() const
 {
     // ex UIIconGrid::getLayoutInfo (totally different!)
     const gfx::Point prefSize = (m_cellSize + gfx::Point(1+2*m_padding, 1+2*m_padding)).scaledBy(m_widthInCells, m_heightInCells) + gfx::Point(1, 1);
-    return ui::layout::Info(prefSize, prefSize, ui::layout::Info::GrowVertical);
+    return ui::layout::Info(prefSize, ui::layout::Info::GrowVertical);
 }
 
 bool

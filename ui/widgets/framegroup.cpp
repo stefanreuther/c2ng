@@ -10,7 +10,7 @@
 #include "ui/layout/hbox.hpp"
 
 // Constructor.
-ui::widgets::FrameGroup::FrameGroup(ui::layout::Manager& mgr,
+ui::widgets::FrameGroup::FrameGroup(const ui::layout::Manager& mgr,
                                     ColorScheme& colors,
                                     FrameType type)
     : LayoutableGroup(mgr),

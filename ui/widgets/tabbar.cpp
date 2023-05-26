@@ -183,9 +183,7 @@ ui::widgets::TabBar::getLayoutInfo() const
 
     int height = font->getLineHeight() + 3;
 
-    return ui::layout::Info(gfx::Point(min_x, height),
-                            gfx::Point(min_x, height),
-                            ui::layout::Info::GrowHorizontal);
+    return ui::layout::Info(gfx::Point(min_x, height), ui::layout::Info::GrowHorizontal);
 }
 
 bool
