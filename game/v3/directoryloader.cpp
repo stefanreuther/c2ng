@@ -11,6 +11,7 @@
 #include "afl/except/filetooshortexception.hpp"
 #include "afl/string/format.hpp"
 #include "game/actions/preconditions.hpp"
+#include "game/db/fleetloader.hpp"
 #include "game/v3/commandcontainer.hpp"
 #include "game/v3/commandextra.hpp"
 #include "game/v3/controlfile.hpp"
@@ -218,7 +219,7 @@ game::v3::DirectoryLoader::saveCurrentTurn(const Turn& turn, const Game& game, P
 {
     // ex saveDirectory
     try {
-        doSaveCurrentTurn(turn, game, players, root);
+        doSaveCurrentTurn(turn, game, players, root, session);
         return makeConfirmationTask(true, then);
     }
     catch (std::exception& e) {
@@ -464,6 +465,15 @@ game::v3::DirectoryLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player,
         }
     }
 
+    // Load fleets.
+    // Must be after loading main data because it requires shipsource flags
+    try {
+        game::db::FleetLoader(*m_charset, m_translator).load(root.gameDirectory(), turn.universe(), player);
+    }
+    catch (afl::except::FileProblemException& e) {
+        m_log.write(afl::sys::LogListener::Error, LOG_NAME, m_translator("File has been ignored"), e);
+    }
+
     // FLAK
     ldr.loadFlakBattles(turn, dir, player);
 
@@ -520,7 +530,7 @@ game::v3::DirectoryLoader::doLoadHistoryTurn(Turn& turn, Game& game, int player,
 }
 
 void
-game::v3::DirectoryLoader::doSaveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t players, const Root& root)
+game::v3::DirectoryLoader::doSaveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t players, const Root& root, Session& session)
 {
     Directory& dir = root.gameDirectory();
 
@@ -614,6 +624,13 @@ game::v3::DirectoryLoader::doSaveCurrentTurn(const Turn& turn, const Game& game,
                 ->fullWrite(afl::base::fromObject(genData));
 
             control.save(dir, m_translator, m_log);
+
+            // Database
+            saveCurrentDatabases(turn, game, player, root, session, *m_charset);
+
+            // Fleets
+            game::db::FleetLoader(*m_charset, m_translator).save(root.gameDirectory(), turn.universe(), player);
+
         }
     }
 

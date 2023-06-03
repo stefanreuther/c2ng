@@ -103,8 +103,9 @@ namespace game { namespace v3 {
             \param turn Turn
             \param game Game
             \param players Players
-            \param root Root */
-        void doSaveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t players, const Root& root);
+            \param root Root
+            \param session Session */
+        void doSaveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t players, const Root& root, Session& session);
 
         /** Load KORE file.
             \param file File
