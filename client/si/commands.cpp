@@ -4713,7 +4713,7 @@ client::si::IFUISelectionManager(game::Session& session, ScriptSide& si, Request
             {
                 UserSide& ui = ctl.interface();
                 OutputState out;
-                client::dialogs::doSelectionManager(ui, ctl, out);
+                client::dialogs::doSelectionManager(ui, out);
                 ui.joinProcess(link, out.getProcess());
                 ctl.handleStateChange(link, out.getTarget());
             }

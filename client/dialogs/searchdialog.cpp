@@ -8,6 +8,7 @@
 #include "afl/base/deleter.hpp"
 #include "afl/base/staticassert.hpp"
 #include "afl/string/format.hpp"
+#include "client/dialogs/selectionmanager.hpp"
 #include "client/downlink.hpp"
 #include "client/proxy/screenhistoryproxy.hpp"
 #include "client/si/control.hpp"
@@ -740,7 +741,22 @@ SearchDialog::onGoToHistory()
 void
 SearchDialog::onSelectionManager()
 {
-    executeCommandWait("UI.SelectionManager", false, "(Search)");
+    client::si::OutputState out;
+    afl::base::Optional<SearchQuery> q = client::dialogs::doSelectionManagerFromSearch(interface(), out);
+    if (out.isValid()) {
+        // Outbound process.
+        // Selection manager will not generate this together with a search query.
+        // but if it did, handling the outbound process would be more important than handling the query.
+        handleStateChange(out.getProcess(), out.getTarget());
+    } else if (q.get(m_query)) {
+        // Search query (i.e. F7)
+        setValues();
+        m_input.setText(m_query.getQuery());
+        m_input.requestFocus();
+        onSearch();
+    } else {
+        // No change (i.e. ESC)
+    }
 }
 
 void

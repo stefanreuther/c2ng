@@ -1,6 +1,6 @@
 /**
   *  \file client/dialogs/selectionmanager.cpp
-  *  \brief Class client::dialogs::SelectionManager
+  *  \brief Selection Manager dialog
   */
 
 #include "client/dialogs/selectionmanager.hpp"
@@ -580,38 +580,42 @@ SelectionManager::executeScriptOperationWait(String_t funcName, String_t title, 
     executeTaskWait(std::auto_ptr<client::si::ScriptTask>(new Task(funcName, title, flags)));
 }
 
+namespace {
+    int doSelectionManagerMain(client::si::UserSide& iface,
+                               client::si::OutputState& out)
+    {
+        // Set up proxy
+        SelectionProxy proxy(iface.gameSender(), iface.root().engine().dispatcher());
+        SelectionProxy::Info info;
+        {
+            client::Downlink link(iface.root(), iface.translator());
+            proxy.init(link, info);
+        }
+
+        // Early exit if proxy not functional
+        if (info.layers.empty()) {
+            return StopNormal;
+        }
+
+        // Dialog
+        SelectionManager mgr(iface, iface.root(), proxy, info, iface.translator());
+        int code = mgr.run();
+        out = mgr.outputState();
+        return code;
+    }
+}
+
+
 /*
  *  Main Entry Point
  */
 
 void
 client::dialogs::doSelectionManager(client::si::UserSide& iface,
-                                    client::si::Control& ctl,
                                     client::si::OutputState& out)
 {
     // ex doSelectionManager, search.pas:SelectionManager
-    // Set up proxy
-    SelectionProxy proxy(iface.gameSender(), ctl.root().engine().dispatcher());
-    SelectionProxy::Info info;
-    {
-        Downlink link(ctl.root(), ctl.translator());
-        proxy.init(link, info);
-    }
-
-    // Early exit if proxy not functional
-    if (info.layers.empty()) {
-        return;
-    }
-
-    // Dialog
-    int code;
-    {
-        SelectionManager mgr(iface, ctl.root(), proxy, info, ctl.translator());
-        code = mgr.run();
-        out = mgr.outputState();
-    }
-
-    // Postprocess: optional search
+    const int code = doSelectionManagerMain(iface, out);
     if (code == StopSearchMarked) {
         // Search
         client::si::OutputState out2;
@@ -626,5 +630,19 @@ client::dialogs::doSelectionManager(client::si::UserSide& iface,
         } else {
             out = out2;
         }
+    }
+}
+
+afl::base::Optional<game::SearchQuery>
+client::dialogs::doSelectionManagerFromSearch(client::si::UserSide& iface,
+                                              client::si::OutputState& out)
+{
+    const int code = doSelectionManagerMain(iface, out);
+    if (code == StopSearchMarked) {
+        return SearchQuery(SearchQuery::MatchTrue,
+                           SearchQuery::SearchObjects_t() + SearchQuery::SearchShips + SearchQuery::SearchPlanets,
+                           "Marked");
+    } else {
+        return afl::base::Nothing;
     }
 }
