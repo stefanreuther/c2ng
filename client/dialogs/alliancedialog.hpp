@@ -8,7 +8,7 @@
 #include "afl/string/translator.hpp"
 #include "client/widgets/alliancelevelgrid.hpp"
 #include "client/widgets/alliancestatuslist.hpp"
-#include "game/alliance/container.hpp"
+#include "game/proxy/allianceproxy.hpp"
 #include "game/session.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/root.hpp"
@@ -37,17 +37,7 @@ namespace client { namespace dialogs {
         client::widgets::AllianceStatusList* m_pList;
         client::widgets::AllianceLevelGrid* m_pGrid;
 
-        struct Data {
-            game::alliance::Container alliances;
-            game::PlayerArray<String_t> names;
-            game::PlayerSet_t players;
-            int self;
-
-            Data()
-                : alliances(), names(), players(), self()
-                { }
-        };
-        Data m_data;
+        game::proxy::AllianceProxy::Status m_data;
 
         client::widgets::AllianceStatusList::ItemFlags_t getPlayerFlags(int player) const;
 

@@ -7,6 +7,12 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestGameProxyAllianceProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testIt();
+};
+
 class TestGameProxyAttachmentProxy : public CxxTest::TestSuite {
  public:
     void testIt();

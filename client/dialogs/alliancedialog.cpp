@@ -86,25 +86,7 @@ client::dialogs::AllianceDialog::run(util::RequestSender<game::Session> gameSend
 void
 client::dialogs::AllianceDialog::writeBack(util::RequestSender<game::Session> gameSender)
 {
-    class Query : public util::Request<game::Session> {
-     public:
-        Query(const Data& data)
-            : m_data(data)
-            { }
-        void handle(game::Session& session)
-            {
-                if (game::Game* pGame = session.getGame().get()) {
-                    pGame->currentTurn().alliances().copyFrom(m_data.alliances);
-                    // FIXME-> // Update teams if configured
-                    // FIXME-> syncTeamsFromAlliances(liveAllies);
-                }
-            }
-     private:
-        const Data& m_data;
-    };
-    Downlink link(m_root, m_translator);
-    Query q(m_data);
-    link.call(gameSender, q);
+    game::proxy::AllianceProxy(gameSender).setAlliances(m_data.alliances);
 }
 
 void
@@ -176,43 +158,13 @@ void
 client::dialogs::AllianceDialog::initContent(util::RequestSender<game::Session> gameSender)
 {
     // Get alliances
-    class Query : public util::Request<game::Session> {
-     public:
-        Query(Data& data)
-            : m_data(data)
-            { }
-        void handle(game::Session& session)
-            {
-                if (game::Game* pGame = session.getGame().get()) {
-                    // FIXME: how do we solve this? // liveAllies is not necessarily in sync with command messages; update it.
-                    pGame->currentTurn().alliances().postprocess();
-
-                    m_data.alliances = pGame->currentTurn().alliances();
-                    m_data.self = pGame->getViewpointPlayer();
-                }
-                if (game::Root* pRoot = session.getRoot().get()) {
-                    for (int i = 1; i <= game::MAX_PLAYERS; ++i) {
-                        if (game::Player* pl = pRoot->playerList().get(i)) {
-                            if (pl->isReal()) {
-                                m_data.names.set(i, pl->getName(game::Player::ShortName, session.translator()));
-                                m_data.players += i;
-                            }
-                        }
-                    }
-                }
-            }
-
-     private:
-        Data& m_data;
-    };
     Downlink link(m_root, m_translator);
-    Query q(m_data);
-    link.call(gameSender, q);
+    m_data = game::proxy::AllianceProxy(gameSender).getStatus(link);
 
     // Initialize player list
     for (int i = 1; i <= game::MAX_PLAYERS; ++i) {
         if (m_data.players.contains(i)) {
-            m_pList->add(i, m_data.names.get(i), getPlayerFlags(i));
+            m_pList->add(i, m_data.playerNames.get(i), getPlayerFlags(i));
         }
     }
     m_pList->setCurrentItem(0);     // This selects the first valid player
@@ -230,7 +182,7 @@ client::widgets::AllianceStatusList::ItemFlags_t
 client::dialogs::AllianceDialog::getPlayerFlags(int player) const
 {
     AllianceStatusList::ItemFlags_t result;
-    if (player == m_data.self) {
+    if (player == m_data.viewpointPlayer) {
         result += AllianceStatusList::Self;
     } else {
         if (m_data.alliances.isAny(player, Level::IsOffer, true)) {
