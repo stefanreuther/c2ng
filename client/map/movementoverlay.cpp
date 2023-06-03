@@ -184,11 +184,13 @@ client::map::MovementOverlay::handleKey(util::Key_t key, int prefix, const Rende
 bool
 client::map::MovementOverlay::handleMouse(gfx::Point pt, MouseButtons_t pressedButtons, const Renderer& ren)
 {
+    bool isInside = ren.getExtent().contains(pt);
+
     // Drive the tooltip
-    m_toolTip.handleMouse(pt, pressedButtons, ren.getExtent().contains(pt));
+    m_toolTip.handleMouse(pt, pressedButtons, isInside);
 
     // Click-to-lock
-    if (!pressedButtons.empty()) {
+    if (isInside && !pressedButtons.empty()) {
         bool dbl   = pressedButtons.contains(gfx::EventConsumer::DoubleClick);
         bool shift = pressedButtons.contains(gfx::EventConsumer::ShiftKey);
         bool ctrl  = pressedButtons.contains(gfx::EventConsumer::CtrlKey);
