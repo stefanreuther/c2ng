@@ -227,6 +227,23 @@ game::map::Planet::addMessageInformation(const game::parser::MessageInformation&
        sequential order, msg_turn is either the current turn number or
        the one before. */
     const int16_t msg_turn = static_cast<int16_t>(info.getTurnNumber());
+
+    /* Process ownership change first.
+       If ownership changes, planet has been captured; this means its defense and population is gone.
+       (If it was a friendly takeover, we will hopefully get a new report.)
+       Processing the owner change first ensures that if the same report includes a new defense/population,
+       that is not overwritten independant of the order it comes in. */
+    if (getPlanetSource().empty()) {
+        int oldOwner = getOwner().orElse(-1);
+        int32_t newOwner;
+        if (info.getValue(gp::mi_Owner).get(newOwner) && newOwner != oldOwner) {
+            m_currentPlanetData.numDefensePosts = afl::base::Nothing;
+            m_currentPlanetData.colonistClans = afl::base::Nothing;
+            updateField16(m_historyTimestamps[ColonistTime], msg_turn, m_currentPlanetData.owner, newOwner);
+        }
+    }
+
+    /* Process everything else. */
     for (gp::MessageInformation::Iterator_t i = info.begin(); i != info.end(); ++i) {
         if (!acceptMessageInformation(*this, **i)) {
             // ignore
@@ -249,10 +266,6 @@ game::map::Planet::addMessageInformation(const game::parser::MessageInformation&
              case gp::mi_X:
              case gp::mi_Y:
                 // Is it useful to support these for planets?
-                break;
-             case gp::mi_Owner:
-                // FIXME: clear number of colonists (and defense?) on ownership change
-                updateField16(m_historyTimestamps[ColonistTime], msg_turn, m_currentPlanetData.owner, iv->getValue());
                 break;
              case gp::mi_PlanetTotalN:
                 // Total is reported by Dark Sense. Treat it as Ground.
