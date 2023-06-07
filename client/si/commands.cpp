@@ -3563,6 +3563,11 @@ client::si::IFUIFileWindow(game::Session& session, ScriptSide& si, RequestLink1 
    Go to starchart.
    This command activates the <a href="pcc2:starchart">starchart</a> at the specified position.
    If the coordinates are out of range, they are corrected.
+
+   If this command is invoked from an object, passing the object's coordinates, as in
+   | With Planet(10) Do UI.GotoScreen Loc.X, Loc.Y
+   that object is selected as current object in the starchart (since PCC2 2.41.1).
+
    To switch to a the starcharts without affecting the current position, use
    | UI.GotoScreen 4
 
@@ -3581,8 +3586,16 @@ client::si::IFUIGotoChart(game::Session& session, ScriptSide& si, RequestLink1 l
     }
 
     // Place cursor
-    // FIXME: if X,Y refer to an object, lock onto that instead of X,Y
-    game::actions::mustHaveGame(session).cursors().location().set(Point(x, y));
+    // If we are going to the current object, lock onto object directly instead of X,Y
+    game::Game& g = game::actions::mustHaveGame(session);
+    game::map::Object* mo = dynamic_cast<game::map::Object*>(link.getProcess().getCurrentObject());
+    game::map::Point pt;
+    Reference ref;
+    if (mo != 0 && (ref = getCurrentShipOrPlanetReference(mo)).isSet() && mo->getPosition().get(pt) && pt == Point(x, y)) {
+        g.cursors().location().set(ref);
+    } else {
+        g.cursors().location().set(Point(x, y));
+    }
 
     // Change screen
     si.postNewTask(link, new StateChangeTask(OutputState::Starchart));

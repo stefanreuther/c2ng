@@ -1369,13 +1369,15 @@ Function CCUI$TryGotoScreen(screen, id)
 EndFunction
 
 % @since PCC2 2.40.7
-Function CCUI$TryGotoChart(x, y)
+% Takes X,Y until 2.41
+Function CCUI$TryGotoChart(obj)
   % ex postGoToChart (sort-of)
   Local System.Err
-  If IsEmpty(x) Or IsEmpty(y) Then
+  If IsEmpty(obj->Loc.X) Or IsEmpty(obj->Loc.Y) Then
     Return False
   Else
-    UI.GotoChart x, y
+    % Invoke UI.GotoChart in object context, to use implicit lock on object.
+    With obj Do UI.GotoChart Loc.X, Loc.Y
     Return True
   EndIf
 EndFunction
@@ -1427,19 +1429,19 @@ Sub UI.GotoReference(ref)
   % ex postGoToObject
   Select Case ref->Kind
     Case 'ship'
-      CCUI$TryGotoScreen(1, ref->Id) Or CCUI$TryGotoChart(ref->Object->Loc.X, ref->Object->Loc.Y)
+      CCUI$TryGotoScreen(1, ref->Id) Or CCUI$TryGotoChart(ref->Object)
     Case 'planet'
-      CCUI$TryGotoScreen(2, ref->Id) Or CCUI$TryGotoChart(ref->Object->Loc.X, ref->Object->Loc.Y)
+      CCUI$TryGotoScreen(2, ref->Id) Or CCUI$TryGotoChart(ref->Object)
     Case 'base'
-      CCUI$TryGotoScreen(3, ref->Id) Or CCUI$TryGotoScreen(2, ref->Id) Or CCUI$TryGotoChart(ref->Object->Loc.X, ref->Object->Loc.Y)
+      CCUI$TryGotoScreen(3, ref->Id) Or CCUI$TryGotoScreen(2, ref->Id) Or CCUI$TryGotoChart(ref->Object)
     Case 'location'
-      CCUI$TryGotoChart(ref->Loc.X, ref->Loc.Y)
+      CCUI$TryGotoChart(ref)
     Case 'minefield'
-      CCUI$TryGotoMinefield(ref->Id) Or CCUI$TryGotoChart(ref->Object->Loc.X, ref->Object->Loc.Y)
+      CCUI$TryGotoMinefield(ref->Id) Or CCUI$TryGotoChart(ref->Object)
     Case 'storm'
-      CCUI$TryGotoIonStorm(ref->Id) Or CCUI$TryGotoChart(ref->Object->Loc.X, ref->Object->Loc.Y)
+      CCUI$TryGotoIonStorm(ref->Id) Or CCUI$TryGotoChart(ref->Object)
     Case 'ufo'
-      CCUI$TryGotoUfo(ref->Id) Or CCUI$TryGotoChart(ref->Object->Loc.X, ref->Object->Loc.Y)
+      CCUI$TryGotoUfo(ref->Id) Or CCUI$TryGotoChart(ref->Object)
   EndSelect
 EndSub
 
