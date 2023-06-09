@@ -408,7 +408,7 @@ void
 UfoInfoDialog::onGoto()
 {
     if (m_ufoCenter.getX() != 0) {
-        executeGoToReferenceWait("(Ufo)", m_ufoCenter);
+        executeGoToReferenceWait("(Ufo)", m_ufoCenter, ShowOnMap);
     }
 }
 

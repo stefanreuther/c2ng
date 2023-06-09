@@ -343,7 +343,7 @@ Dialog::onLinkClick(String_t link)
     // ex WImperialStatisticsWindow::onLinkClick(string_t link)
     PlanetLink pl;
     if (parsePlanetLink(link, pl)) {
-        executeGoToReferenceWait(TASK_NAME, Reference(Reference::Planet, pl.id));
+        executeGoToReferenceWait(TASK_NAME, Reference(Reference::Planet, pl.id), ShowUnit);
     } else if (const char* cmd = util::strStartsWith(link, "q:")) {
         executeCommandWait(cmd, false, TASK_NAME);
     } else {
@@ -416,19 +416,19 @@ Dialog::handleKey(util::Key_t key, int /*prefix*/)
 
      case util::Key_F2:
         if (parseCurrentPlanetLink(pl)) {
-            executeGoToReferenceWait(TASK_NAME, Reference(Reference::Planet, pl.id));
+            executeGoToReferenceWait(TASK_NAME, Reference(Reference::Planet, pl.id), ShowUnit);
         }
         return true;
 
      case util::Key_F3:
         if (parseCurrentPlanetLink(pl) && pl.hasBase != 0) {
-            executeGoToReferenceWait(TASK_NAME, Reference(Reference::Starbase, pl.id));
+            executeGoToReferenceWait(TASK_NAME, Reference(Reference::Starbase, pl.id), ShowUnit);
         }
         return true;
 
      case util::Key_F4:
         if (parseCurrentPlanetLink(pl)) {
-            executeGoToReferenceWait(TASK_NAME, Reference(game::map::Point(pl.x, pl.y)));
+            executeGoToReferenceWait(TASK_NAME, Reference(game::map::Point(pl.x, pl.y)), ShowUnit);
         }
         return true;
 

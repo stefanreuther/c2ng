@@ -1424,7 +1424,7 @@ EndFunction
 % If that object has a control screen or information window, opens that.
 % Otherwise, shows it on the starchart.
 % @since PCC2 2.40.7
-% @see UI.GotoScreen
+% @see UI.GotoScreen, UI.GotoReferenceLocation
 Sub UI.GotoReference(ref)
   % ex postGoToObject
   Select Case ref->Kind
@@ -1443,6 +1443,18 @@ Sub UI.GotoReference(ref)
     Case 'ufo'
       CCUI$TryGotoUfo(ref->Id) Or CCUI$TryGotoChart(ref->Object)
   EndSelect
+EndSub
+
+% @q UI.GotoReferenceLocation ref:Reference (Global Command)
+% Show referenced object on starchart.
+% @since PCC2 2.41
+% @see UI.GotoScreen, UI.GotoReference
+Sub UI.GotoReferenceLocation(ref)
+  If ref->Kind = 'location' Then
+    CCUI$TryGotoChart(ref)
+  Else
+    CCUI$TryGotoChart(ref->Object)
+  EndIf
 EndSub
 
 

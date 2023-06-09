@@ -194,7 +194,7 @@ namespace {
             {
                 // ex WCommandEditDialog::onGoto
                 if (const game::proxy::CommandListProxy::Info* p = m_listbox.getCurrentCommand()) {
-                    executeGoToReferenceWait("Auxiliary Commands", p->ref);
+                    executeGoToReferenceWait("Auxiliary Commands", p->ref, ShowUnit);
                 }
             }
 

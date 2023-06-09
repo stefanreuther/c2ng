@@ -595,7 +595,7 @@ SearchDialog::onGoto()
     if (m_isSubDialog) {
         m_loop.stop(Stop_Normal);
     } else {
-        executeGoToReferenceWait("(Search Result)", m_refList.getCurrentReference());
+        executeGoToReferenceWait("(Search Result)", m_refList.getCurrentReference(), ShowUnit);
     }
 }
 
@@ -725,11 +725,7 @@ SearchDialog::onGoToBase()
 void
 SearchDialog::onGoToMap()
 {
-    client::Downlink link(root(), translator());
-    afl::base::Optional<game::map::Point> pos = game::proxy::ReferenceProxy(interface().gameSender()).getReferencePosition(link, m_refList.getCurrentReference());
-    if (const game::map::Point* pt = pos.get()) {
-        executeGoToReferenceWait("(Search)", game::Reference(*pt));
-    }
+    executeGoToReferenceWait("(Search)", m_refList.getCurrentReference(), ShowOnMap);
 }
 
 void

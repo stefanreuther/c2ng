@@ -241,13 +241,13 @@ client::dialogs::InboxDialog::onAction(client::widgets::MessageActionPanel::Acti
     switch (a) {
      case MessageActionPanel::GoTo1:
         if (m_data.goto1.isSet()) {
-            executeGoToReferenceWait("(Message)", m_data.goto1);
+            executeGoToReferenceWait("(Message)", m_data.goto1, ShowUnit);
         }
         break;
 
      case MessageActionPanel::GoTo2:
         if (m_data.goto2.isSet()) {
-            executeGoToReferenceWait("(Message)", m_data.goto2);
+            executeGoToReferenceWait("(Message)", m_data.goto2, ShowUnit);
         }
         break;
 
@@ -415,7 +415,7 @@ client::dialogs::InboxDialog::onLinkClick(String_t str)
     util::StringParser p(str);
     int x, y;
     if (p.parseInt(x) && p.parseCharacter(',') && p.parseInt(y) && p.parseEnd()) {
-        executeGoToReferenceWait("(Message)", game::map::Point(x, y));
+        executeGoToReferenceWait("(Message)", game::map::Point(x, y), ShowOnMap);
     }
 }
 

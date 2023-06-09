@@ -318,7 +318,7 @@ MinefieldInfoDialog::handleKey(util::Key_t key, int /*prefix*/)
 
      case 'p':
         if (m_planetId != 0) {
-            executeGoToReferenceWait("(Controlling Planet)", game::Reference(game::Reference::Planet, m_planetId));
+            executeGoToReferenceWait("(Controlling Planet)", game::Reference(game::Reference::Planet, m_planetId), ShowUnit);
         }
         return true;
 
@@ -479,7 +479,7 @@ void
 MinefieldInfoDialog::onGoto()
 {
     if (m_minefieldCenter.getX() != 0) {
-        executeGoToReferenceWait("(Minefield)", m_minefieldCenter);
+        executeGoToReferenceWait("(Minefield)", m_minefieldCenter, ShowOnMap);
     }
 }
 

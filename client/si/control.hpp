@@ -32,6 +32,11 @@ namespace client { namespace si {
     // and an actual implementation (EventLoop/Root etc.)
     class Control : public afl::base::Uncopyable {
      public:
+        enum ReferenceMode {
+            ShowUnit,                   ///< Prefer to show unit directly (UI.GotoReference).
+            ShowOnMap                   ///< Prefer to show unit on map (UI.GotoReferenceLocation).
+        };
+
         /** Constructor.
             @param us       UserSide */
         Control(UserSide& us);
@@ -81,8 +86,9 @@ namespace client { namespace si {
             Same as executeCommandWait(), but avoids stringifying/parsing the game::Reference.
             See executeTaskWait() for details.
             @param taskName   Name of process
-            @param ref        Reference */
-        void executeGoToReferenceWait(String_t taskName, game::Reference ref);
+            @param ref        Reference
+            @param mode       Mode */
+        void executeGoToReferenceWait(String_t taskName, game::Reference ref, ReferenceMode mode);
 
         /** Execute a script task.
             Will execute the (process created by the) task.

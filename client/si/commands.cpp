@@ -3082,7 +3082,7 @@ client::si::IFCCViewCombat(game::Session& session, ScriptSide& si, RequestLink1 
                 if (ref.isSet()) {
                     // Re-using the existing executeGoToReferenceWait function requires use of a Control,
                     // and will produce a potential second process that we need to join with ours.
-                    JoiningControl(ctl, link).executeGoToReferenceWait("(Battle Simulator)", ref);
+                    JoiningControl(ctl, link).executeGoToReferenceWait("(Battle Simulator)", ref, Control::ShowUnit);
                 }
                 us.continueProcess(link);
             }

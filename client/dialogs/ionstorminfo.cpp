@@ -349,7 +349,7 @@ void
 IonStormInfoDialog::onGoto()
 {
     if (m_info.center.getX() != 0) {
-        executeGoToReferenceWait("(Ion Storm)", m_info.center);
+        executeGoToReferenceWait("(Ion Storm)", m_info.center, ShowOnMap);
     }
 }
 

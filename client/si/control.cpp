@@ -89,12 +89,12 @@ client::si::Control::executeKeyCommandWait(String_t keymapName, util::Key_t key,
 
 // Execute a "UI.GotoReference" command with the given game::Reference.
 void
-client::si::Control::executeGoToReferenceWait(String_t taskName, game::Reference ref)
+client::si::Control::executeGoToReferenceWait(String_t taskName, game::Reference ref, ReferenceMode mode)
 {
     class ReferenceTask : public client::si::ScriptTask {
      public:
-        ReferenceTask(String_t taskName, game::Reference ref)
-            : m_taskName(taskName), m_ref(ref)
+        ReferenceTask(String_t taskName, game::Reference ref, const char* name)
+            : m_taskName(taskName), m_ref(ref), m_name(name)
             { }
         virtual void execute(uint32_t pgid, game::Session& session)
             {
@@ -103,7 +103,7 @@ client::si::Control::executeGoToReferenceWait(String_t taskName, game::Reference
                 game::interface::ReferenceContext ctx(m_ref, session);
                 bco->setSubroutineName(m_taskName);
                 bco->addPushLiteral(&ctx);
-                bco->addInstruction(interpreter::Opcode::maPush, interpreter::Opcode::sNamedShared, bco->addName("UI.GOTOREFERENCE"));
+                bco->addInstruction(interpreter::Opcode::maPush, interpreter::Opcode::sNamedShared, bco->addName(m_name));
                 bco->addInstruction(interpreter::Opcode::maIndirect, interpreter::Opcode::miIMCall, 1);
 
                 // Create process
@@ -115,11 +115,19 @@ client::si::Control::executeGoToReferenceWait(String_t taskName, game::Reference
      private:
         String_t m_taskName;
         game::Reference m_ref;
+        String_t m_name;
     };
 
     if (ref.isSet()) {
-        std::auto_ptr<client::si::ScriptTask> t(new ReferenceTask(taskName, ref));
-        executeTaskInternal(t, "executeGoToReferenceWait()");
+        const char* name = 0;
+        switch (mode) {
+         case ShowUnit:  name = "UI.GOTOREFERENCE";         break;
+         case ShowOnMap: name = "UI.GOTOREFERENCELOCATION"; break;
+        }
+        if (name != 0) {
+            std::auto_ptr<client::si::ScriptTask> t(new ReferenceTask(taskName, ref, name));
+            executeTaskInternal(t, "executeGoToReferenceWait()");
+        }
     }
 }
 

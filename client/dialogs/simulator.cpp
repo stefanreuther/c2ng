@@ -1586,7 +1586,7 @@ SimulatorDialog::onGoToMap()
 void
 SimulatorDialog::onGoToReference(game::Reference ref)
 {
-    executeGoToReferenceWait("(Battle Simulator)", ref);
+    executeGoToReferenceWait("(Battle Simulator)", ref, ShowUnit);
 }
 
 void

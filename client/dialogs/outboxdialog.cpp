@@ -212,13 +212,13 @@ client::dialogs::OutboxDialog::onAction(client::widgets::MessageActionPanel::Act
     switch (a) {
      case MessageActionPanel::GoTo1:
         if (m_data.goto1.isSet()) {
-            executeGoToReferenceWait("(Message)", m_data.goto1);
+            executeGoToReferenceWait("(Message)", m_data.goto1, ShowUnit);
         }
         break;
 
      case MessageActionPanel::GoTo2:
         if (m_data.goto2.isSet()) {
-            executeGoToReferenceWait("(Message)", m_data.goto2);
+            executeGoToReferenceWait("(Message)", m_data.goto2, ShowUnit);
         }
         break;
 
