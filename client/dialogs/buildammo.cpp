@@ -299,7 +299,6 @@ Dialog::build(int amount)
                                           m_translator("Build Torpedoes"));
 
         // Traditionally, PCC doesn't build immediately after upgrading tech.
-        // FIXME: the tech upgrade may invalidate the build-ammo order!
     } else {
         // Okay, we're building stuff
         m_proxy.addLimitCash(p->type, amount);

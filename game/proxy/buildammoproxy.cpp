@@ -39,10 +39,11 @@ class game::proxy::BuildAmmoProxy::Trampoline {
     afl::base::Ptr<Turn> m_pTurn;                       // Turn (to keep it alive)
     game::map::Planet& m_planet;                        // Planet
     String_t m_targetName;                              // Name of target planet/ship
-    afl::base::SignalConnection conn_targetChange;      // Signal for change of target
+    afl::base::SignalConnection conn_targetChange;      // Signal for change of target container
+    afl::base::SignalConnection conn_sourceChange;      // Signal for change of source container
 
     bool isValidReceiver(const game::map::Ship& ship) const;
-    void finishAction(String_t targetName, game::CargoContainer& cc);
+    void finishAction(String_t targetName, game::CargoContainer& target, game::CargoContainer& source);
     void reset();
     void addPart(Status& out, Part& pt) const;
     void sendStatus();
@@ -58,7 +59,8 @@ game::proxy::BuildAmmoProxy::Trampoline::Trampoline(util::RequestSender<BuildAmm
       // Obtain planet
       m_planet(mustExist(mustExist(m_pTurn.get()).universe().planets().get(planetId))),
       m_targetName(),
-      conn_targetChange()
+      conn_targetChange(),
+      conn_sourceChange()
 {
     game::actions::mustHavePlayedBase(m_planet);
 }
@@ -73,7 +75,7 @@ game::proxy::BuildAmmoProxy::Trampoline::setPlanet()
 
     game::map::PlanetStorage& ps = m_deleter.addNew(new game::map::PlanetStorage(m_planet, r.hostConfiguration()));
     m_pAction.reset(new game::actions::BuildAmmo(m_planet, ps, ps, sl, r));
-    finishAction(m_planet.getName(m_session.translator()), ps);
+    finishAction(m_planet.getName(m_session.translator()), ps, ps);
 }
 
 void
@@ -89,7 +91,7 @@ game::proxy::BuildAmmoProxy::Trampoline::setShip(Id_t shipId)
         game::map::ShipStorage& ss = m_deleter.addNew(new game::map::ShipStorage(ship, sl));
         game::map::PlanetStorage& ps = m_deleter.addNew(new game::map::PlanetStorage(m_planet, r.hostConfiguration()));
         m_pAction.reset(new game::actions::BuildAmmo(m_planet, ps, ss, sl, r));
-        finishAction(ship.getName(), ss);
+        finishAction(ship.getName(), ss, ps);
     }
 }
 
@@ -165,11 +167,14 @@ game::proxy::BuildAmmoProxy::Trampoline::isValidReceiver(const game::map::Ship& 
 }
 
 void
-game::proxy::BuildAmmoProxy::Trampoline::finishAction(String_t targetName, game::CargoContainer& cc)
+game::proxy::BuildAmmoProxy::Trampoline::finishAction(String_t targetName, game::CargoContainer& target, game::CargoContainer& source)
 {
     m_pAction->setUndoInformation(m_pTurn->universe());
     m_targetName = targetName;
-    conn_targetChange = cc.sig_change.add(this, &Trampoline::sendStatus);
+    conn_targetChange = target.sig_change.add(this, &Trampoline::sendStatus);
+    if (&target != &source) {
+        conn_sourceChange = source.sig_change.add(this, &Trampoline::sendStatus);
+    }
     sendStatus();
 }
 
@@ -177,6 +182,7 @@ void
 game::proxy::BuildAmmoProxy::Trampoline::reset()
 {
     conn_targetChange.disconnect();
+    conn_sourceChange.disconnect();
     m_pAction.reset();
     m_deleter.clear();
 }
