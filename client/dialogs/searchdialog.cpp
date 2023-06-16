@@ -115,7 +115,8 @@ namespace {
         SearchObjectDialog(ui::Root& root, afl::string::Translator& tx)
             : m_root(root),
               m_translator(tx),
-              m_buttons(root, tx)
+              m_buttons(root, tx),
+              m_inhibitClick()
             { }
 
         void run(SearchQuery::SearchObjects_t& objs)
@@ -123,6 +124,13 @@ namespace {
                 afl::base::Deleter del;
                 ui::Window& win = del.addNew(new ui::Window(m_translator("Search Object"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
                 ui::widgets::FocusIterator& it = del.addNew(new ui::widgets::FocusIterator(ui::widgets::FocusIterator::Tab + ui::widgets::FocusIterator::Vertical));
+
+                ui::widgets::Checkbox& cbAll = del.addNew(new ui::widgets::Checkbox(m_root, 'a', m_translator("All"), m_all));
+                cbAll.addDefaultImages();
+                win.add(cbAll);
+                it.add(cbAll);
+                m_all.sig_change.add(this, &SearchObjectDialog::onAllChange);
+
                 for (size_t i = 0; i < NUM_SEARCH_OBJECT; ++i) {
                     ui::widgets::Checkbox& cb = del.addNew(new ui::widgets::Checkbox(m_root, SEARCH_OBJECTS[i].key, m_translator(SEARCH_OBJECTS[i].name), m_values[i]));
                     cb.addDefaultImages();
@@ -148,7 +156,33 @@ namespace {
 
         void onClick()
             {
-                m_buttons.ok().setState(ui::Widget::DisabledState, getStatus().empty());
+                if (!m_inhibitClick) {
+                    m_buttons.ok().setState(ui::Widget::DisabledState, getStatus().empty());
+                    m_all.set(isAll());
+                }
+            }
+
+        bool isAll()
+            {
+                for (size_t i = 0; i < NUM_SEARCH_OBJECT; ++i) {
+                    if (m_values[i].get() == 0) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+        void onAllChange()
+            {
+                if (m_all.get() != 0) {
+                    // This will trigger onClick() notifications; suppress processing those.
+                    // They would re-trigger this callback, which is harmless, but unnecessary.
+                    m_inhibitClick = true;
+                    for (size_t i = 0; i < NUM_SEARCH_OBJECT; ++i) {
+                        m_values[i].set(1);
+                    }
+                    m_inhibitClick = false;
+                }
             }
 
         SearchQuery::SearchObjects_t getStatus() const
@@ -165,8 +199,10 @@ namespace {
      private:
         ui::Root& m_root;
         afl::string::Translator& m_translator;
+        afl::base::Observable<int> m_all;
         afl::base::Observable<int> m_values[NUM_SEARCH_OBJECT];
         ui::widgets::StandardDialogButtons m_buttons;
+        bool m_inhibitClick;
     };
 
 
