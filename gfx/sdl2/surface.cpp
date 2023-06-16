@@ -451,5 +451,11 @@ gfx::sdl2::Surface::presentUpdate(SDL_Texture* tex, SDL_Renderer* renderer)
     }
 }
 
+void
+gfx::sdl2::Surface::invalidate()
+{
+    m_updateRegion = Rectangle(0, 0, m_surface->w, m_surface->h);
+}
+
 #endif
 

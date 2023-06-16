@@ -15,7 +15,7 @@ namespace gfx { namespace sdl2 {
         This wraps an SDL_Surface into the Canvas interface. */
     class Surface : public Canvas {
      public:
-       
+
         /** Use existing surface.
             We'll draw on the specified surface.
             If \c owned is true, the surface will be deleted when this object is destroyed.
@@ -52,6 +52,7 @@ namespace gfx { namespace sdl2 {
         void ensureUnlocked();
 
         void presentUpdate(SDL_Texture* tex, SDL_Renderer* renderer);
+        void invalidate();
 
      private:
         SDL_Surface* m_surface;

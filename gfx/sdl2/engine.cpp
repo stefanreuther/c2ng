@@ -639,6 +639,16 @@ gfx::sdl2::Engine::convertEvent(const SDL_Event& se, gfx::EventConsumer& consume
         consumer.handleKey(util::Key_Quit, 0);
         return true;
 
+     case SDL_WINDOWEVENT:
+        if (se.window.event == SDL_WINDOWEVENT_EXPOSED) {
+            if (m_window.get() != 0) {
+                m_window->invalidate();
+            }
+            return true;
+        } else {
+            return false;
+        }
+
      default:
         return false;
     }
