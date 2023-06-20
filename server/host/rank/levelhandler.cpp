@@ -99,13 +99,13 @@ void
 server::host::rank::LevelHandler::handlePlayerTurn(String_t userId, bool submit, uint32_t level)
 {
     // ex planetscentral/host/ranking.h:handlePlayerTurn
-    afl::net::redis::HashKey profile(User(m_root, userId).profile());
+    User u(m_root, userId);
 
     // Count this turn
     if (submit) {
-        ++profile.intField("turnsplayed");
+        ++u.numTurnsPlayed();
     } else {
-        ++profile.intField("turnsmissed");
+        ++u.numTurnsMissed();
     }
 
     // Adjust reliability
@@ -113,7 +113,7 @@ server::host::rank::LevelHandler::handlePlayerTurn(String_t userId, bool submit,
     if (!submit && level < 30) {
         newPoints -= newPoints >> level;
     }
-    profile.intField("turnreliability").set(profile.intField("turnreliability").get() * (100 - RELIABILITY_SPEED) / 100 + newPoints);
+    u.turnReliability().set(u.turnReliability().get() * (100 - RELIABILITY_SPEED) / 100 + newPoints);
 
     // Log
     m_root.log().write(afl::sys::LogListener::Info, LOG_NAME,
@@ -160,10 +160,10 @@ server::host::rank::LevelHandler::handlePlayerDrop(String_t userId, Game& game, 
     }
 
     // Give penalty
-    afl::net::redis::HashKey profile(User(m_root, userId).profile());
-    int32_t oldReliability = profile.intField("turnreliability").get();
+    User u(m_root, userId);
+    int32_t oldReliability = u.turnReliability().get();
     int32_t newReliability = int32_t(oldReliability * double(maxScore*100 - playerScore*DROP_PENALTY) / (maxScore*100));
-    profile.intField("turnreliability").set(newReliability);
+    u.turnReliability().set(newReliability);
     m_root.log().write(afl::sys::LogListener::Info, LOG_NAME,
                        afl::string::Format("player '%s': reliability %d->%d due to dropout, score %d/%d") << userId << oldReliability << newReliability << playerScore << maxScore);
 }
@@ -173,8 +173,7 @@ void
 server::host::rank::LevelHandler::addPlayerRankPoints(String_t userId, int32_t pts)
 {
     // ex planetscentral/host/ranking.h:addPlayerRankPoints
-    afl::net::redis::HashKey profile(User(m_root, userId).profile());
-    profile.intField("rankpoints") += pts;
+    User(m_root, userId).rankPoints() += pts;
 }
 
 // Check possible required rank changes.
@@ -182,12 +181,12 @@ void
 server::host::rank::LevelHandler::handlePlayerRankChanges(String_t userId)
 {
     // ex planetscentral/host/ranking.h:handlePlayerRankChanges
-    afl::net::redis::HashKey profile(User(m_root, userId).profile());
+    User user(m_root, userId);
 
-    int32_t currentRank        = profile.intField("rank").get();
-    int32_t currentRankPoints  = profile.intField("rankpoints").get();
-    int32_t currentReliability = profile.intField("turnreliability").get();
-    int32_t currentTurns       = profile.intField("turnsplayed").get();
+    int32_t currentRank        = user.rankLevel().get();
+    int32_t currentRankPoints  = user.rankPoints().get();
+    int32_t currentReliability = user.turnReliability().get();
+    int32_t currentTurns       = user.numTurnsPlayed().get();
 
     int32_t roundedReliability = (currentReliability + RELIABILITY_SCALE/2) / RELIABILITY_SCALE;
 
@@ -199,7 +198,7 @@ server::host::rank::LevelHandler::handlePlayerRankChanges(String_t userId)
     {
         // promotion
         ++currentRank;
-        profile.intField("rank").set(currentRank);
+        user.rankLevel().set(currentRank);
         mail = "rank-promotion";
     }
 
@@ -210,7 +209,7 @@ server::host::rank::LevelHandler::handlePlayerRankChanges(String_t userId)
     {
         // demotion
         --currentRank;
-        profile.intField("rank").set(currentRank);
+        user.rankLevel().set(currentRank);
         mail = "rank-demotion";
     }
 

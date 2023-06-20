@@ -61,3 +61,38 @@ server::host::User::keyStore()
 {
     return tree().subtree("key");
 }
+
+// Access user's rank-level.
+afl::net::redis::IntegerField
+server::host::User::rankLevel()
+{
+    return profile().intField("rank");
+}
+
+// Access user's skill points.
+afl::net::redis::IntegerField
+server::host::User::rankPoints()
+{
+    return profile().intField("rankpoints");
+}
+
+// Access user's turn reliability.
+afl::net::redis::IntegerField
+server::host::User::turnReliability()
+{
+    return profile().intField("turnreliability");
+}
+
+// Access number of turns played.
+afl::net::redis::IntegerField
+server::host::User::numTurnsPlayed()
+{
+    return profile().intField("turnsplayed");
+}
+
+// Access number of turns missed.
+afl::net::redis::IntegerField
+server::host::User::numTurnsMissed()
+{
+    return profile().intField("turnsmissed");
+}

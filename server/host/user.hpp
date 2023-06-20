@@ -54,6 +54,31 @@ namespace server { namespace host {
         /** Access key store.
             \return keystore subtree */
         afl::net::redis::Subtree keyStore();
+
+
+        /*
+         *  Profile Access
+         */
+
+        /** Access user's rank-level.
+            \return rank level (0=recruit, etc.) */
+        afl::net::redis::IntegerField rankLevel();
+
+        /** Access user's skill points.
+            \return skill points */
+        afl::net::redis::IntegerField rankPoints();
+
+        /** Access user's turn reliability.
+            \return turn reliability */
+        afl::net::redis::IntegerField turnReliability();
+
+        /** Access number of turns played.
+            \return number of turns played */
+        afl::net::redis::IntegerField numTurnsPlayed();
+
+        /** Access number of turns missed.
+            \return number of turns played */
+        afl::net::redis::IntegerField numTurnsMissed();
     };
 
 } }

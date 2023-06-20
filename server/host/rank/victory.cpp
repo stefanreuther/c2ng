@@ -15,6 +15,7 @@
 #include "afl/string/format.hpp"
 #include "server/host/rank/levelhandler.hpp"
 #include "server/host/rank/refereefilereader.hpp"
+#include "server/host/user.hpp"
 #include "server/interface/filebaseclient.hpp"
 
 namespace {
@@ -324,7 +325,7 @@ server::host::rank::computeGameRankings(Root& root, Game& game)
             std::map<String_t, PlayerInfo>::iterator it = players.find(player);
             if (it == players.end()) {
                 it = players.insert(std::make_pair(player, PlayerInfo())).first;
-                it->second.rankLevel = root.userRoot().subtree(player).hashKey("profile").intField("rank").get() + 1;
+                it->second.rankLevel = User(root, player).rankLevel().get() + 1;
             }
 
             // Count slot
