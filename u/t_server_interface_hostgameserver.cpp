@@ -228,6 +228,10 @@ namespace {
         i.scores              = sc;
         i.scoreName           = "escore";
         i.scoreDescription    = "A Score";
+        i.minRankLevelToJoin  = 10;
+        i.maxRankLevelToJoin  = 11;
+        i.minRankPointsToJoin = 22;
+        i.maxRankPointsToJoin = 23;
         i.hostName            = "qhost";
         i.hostDescription     = "Quality Host";
         i.hostKind            = "qq";
@@ -315,6 +319,10 @@ TestServerInterfaceHostGameServer::testIt()
         TS_ASSERT_EQUALS(a("scores")[2].toInteger(), 150);
         TS_ASSERT_EQUALS(a("scoreName").toString(), "escore");
         TS_ASSERT_EQUALS(a("scoreDescription").toString(), "A Score");
+        TS_ASSERT_EQUALS(a("minRankLevelToJoin").toInteger(), 10);
+        TS_ASSERT_EQUALS(a("maxRankLevelToJoin").toInteger(), 11);
+        TS_ASSERT_EQUALS(a("minRankPointsToJoin").toInteger(), 22);
+        TS_ASSERT_EQUALS(a("maxRankPointsToJoin").toInteger(), 23);
         TS_ASSERT_EQUALS(a("host").toString(), "qhost");
         TS_ASSERT_EQUALS(a("hostDescription").toString(), "Quality Host");
         TS_ASSERT_EQUALS(a("hostKind").toString(), "qq");

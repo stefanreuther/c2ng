@@ -344,6 +344,12 @@ server::interface::HostGameClient::unpackInfo(const Value_t* value)
     // scoreDescription [optional]
     result.scoreDescription = toOptionalString(a("scoreDescription").getValue());
 
+    // rank levels
+    result.minRankLevelToJoin = toOptionalInteger(a("minRankLevelToJoin").getValue());
+    result.maxRankLevelToJoin = toOptionalInteger(a("maxRankLevelToJoin").getValue());
+    result.minRankPointsToJoin = toOptionalInteger(a("minRankPointsToJoin").getValue());
+    result.maxRankPointsToJoin = toOptionalInteger(a("maxRankPointsToJoin").getValue());
+
     // hostName / "host"
     result.hostName = a("host").toString();
 

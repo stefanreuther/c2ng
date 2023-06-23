@@ -135,6 +135,7 @@ TestServerHostGame::testDescribe()
     t.hashKey("settings").stringField("master").set("M");
     t.hashKey("settings").stringField("shiplist").set("S");
     t.hashKey("settings").intField("forum").set(46);
+    t.hashKey("settings").intField("minRankLevelToJoin").set(4);
 
     // Player 3 has a yellow turn
     t.hashKey("player:3:status").intField("slot").set(1);
@@ -161,6 +162,8 @@ TestServerHostGame::testDescribe()
     HashKey(h.db(), "prog:master:prog:M").stringField("kind").set("master kind");
     HashKey(h.db(), "prog:sl:prog:S").stringField("description").set("a shiplist");
     HashKey(h.db(), "prog:sl:prog:S").stringField("kind").set("shiplist kind");
+    HashKey(h.db(), "user:user-c:profile").intField("rank").set(4);
+    HashKey(h.db(), "user:user-d:profile").intField("rank").set(3);
 
     // Query
     {
@@ -205,6 +208,11 @@ TestServerHostGame::testDescribe()
         TS_ASSERT(i.joinable.isSame(false));
         TS_ASSERT(i.userPlays.isSame(true));
 
+        TS_ASSERT_EQUALS(i.minRankLevelToJoin.orElse(-1), 4);
+        TS_ASSERT_EQUALS(i.maxRankLevelToJoin.isValid(), false);
+        TS_ASSERT_EQUALS(i.minRankPointsToJoin.isValid(), false);
+        TS_ASSERT_EQUALS(i.maxRankPointsToJoin.isValid(), false);
+
         TS_ASSERT(i.scores.isValid());
         TS_ASSERT_EQUALS(i.scores.get()->at(2), 3);
 
@@ -230,6 +238,11 @@ TestServerHostGame::testDescribe()
 
         TS_ASSERT(i.joinable.isSame(true));
         TS_ASSERT(i.userPlays.isSame(false));
+    }
+    {
+        // Verbose, as user D - not joinable
+        HostGame::Info i = server::host::Game(h.root(), GAME_ID).describe(true, "user-d", "", h.root());
+        TS_ASSERT(i.joinable.isSame(false));
     }
 }
 
@@ -540,10 +553,10 @@ TestServerHostGame::testDescribeSlot()
     server::host::Game g(h.root(), 61);
     TS_ASSERT(!g.isMultiJoinAllowed());
 
-    HostPlayer::Info a = g.describeSlot(1, "a", raceNames);
-    HostPlayer::Info b = g.describeSlot(1, "b", raceNames);
-    HostPlayer::Info c = g.describeSlot(1, "c", raceNames);
-    HostPlayer::Info d = g.describeSlot(1, "d", raceNames);
+    HostPlayer::Info a = g.describeSlot(1, "a", h.root(), raceNames);
+    HostPlayer::Info b = g.describeSlot(1, "b", h.root(), raceNames);
+    HostPlayer::Info c = g.describeSlot(1, "c", h.root(), raceNames);
+    HostPlayer::Info d = g.describeSlot(1, "d", h.root(), raceNames);
 
     // Verify
     // - a
@@ -574,9 +587,9 @@ TestServerHostGame::testDescribeSlot()
     TS_ASSERT_EQUALS(d.joinable, false);
 
     // Test slot 2
-    HostPlayer::Info a2 = g.describeSlot(2, "a", raceNames);
-    HostPlayer::Info b2 = g.describeSlot(2, "b", raceNames);
-    HostPlayer::Info d2 = g.describeSlot(2, "d", raceNames);
+    HostPlayer::Info a2 = g.describeSlot(2, "a", h.root(), raceNames);
+    HostPlayer::Info b2 = g.describeSlot(2, "b", h.root(), raceNames);
+    HostPlayer::Info d2 = g.describeSlot(2, "d", h.root(), raceNames);
 
     // - a
     TS_ASSERT_EQUALS(a2.longName, "The Lizard Alliance");

@@ -74,6 +74,10 @@ namespace server { namespace interface {
             afl::base::Optional<std::vector<int32_t> > scores;             ///< Scores for all slots.
             afl::base::Optional<String_t> scoreName;                       ///< Name of score given in @c scores.
             afl::base::Optional<String_t> scoreDescription;                ///< Description (subtitle) of score given in @c scores.
+            afl::base::Optional<int32_t> minRankLevelToJoin;               ///< Minimum rank level (rank) to join.
+            afl::base::Optional<int32_t> maxRankLevelToJoin;               ///< Maximum rank level (rank) to join.
+            afl::base::Optional<int32_t> minRankPointsToJoin;              ///< Minimum rank points (skill) to join.
+            afl::base::Optional<int32_t> maxRankPointsToJoin;              ///< Maximum rank points (skill) to join.
             String_t hostName;                                             ///< Machine-readable name of host program.
             String_t hostDescription;                                      ///< Human-readable description of host program.
             String_t hostKind;                                             ///< Machine-readable kind of host program.

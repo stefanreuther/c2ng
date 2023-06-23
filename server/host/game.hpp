@@ -19,6 +19,7 @@ namespace server { namespace host {
 
     class TalkListener;
     class Root;
+    class User;
     class Cron;
 
     /** Handle to a game.
@@ -432,6 +433,10 @@ namespace server { namespace host {
             \return value */
         bool isMultiJoinAllowed();
 
+        /** If game has join restrictions (rank), check those for a player.
+            \param user */
+        bool isJoinRestrictionSatisfied(User& u);
+
         /** Describe this game.
             This function creates a user-dependant view (turn states, joinability),
             but otherwise assumes the user has read access.
@@ -447,9 +452,10 @@ namespace server { namespace host {
             but otherwise assumes the user has read access.
             \param slot Slot to describe
             \param forUser user who is requesting this information (for viewpoint-dependant values)
+            \param root Root (for user profile access)
             \param raceNames race names (see loadRaceNames())
             \return description */
-        server::interface::HostPlayer::Info describeSlot(int32_t slot, String_t forUser, const server::common::RaceNames& raceNames);
+        server::interface::HostPlayer::Info describeSlot(int32_t slot, String_t forUser, Root& root, const server::common::RaceNames& raceNames);
 
         /** Describe victory condition.
             \param root Service root
@@ -513,6 +519,22 @@ namespace server { namespace host {
         /** Access "kick after missed turns" value.
             \return field */
         afl::net::redis::IntegerField numMissedTurnsForKick();
+
+        /** Access "minimum level to join" value.
+            \return field */
+        afl::net::redis::IntegerField minRankLevelToJoin();
+
+        /** Access "maximum level to join" value.
+            \return field */
+        afl::net::redis::IntegerField maxRankLevelToJoin();
+
+        /** Access "minimum skill to join" value.
+            \return field */
+        afl::net::redis::IntegerField minRankPointsToJoin();
+
+        /** Access "maximum skill to join" value.
+            \return field */
+        afl::net::redis::IntegerField maxRankPointsToJoin();
 
         /** Access history.
             \return string list */

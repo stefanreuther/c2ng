@@ -786,6 +786,47 @@ server::host::Game::isMultiJoinAllowed()
     return getConfigInt("joinMulti") != 0 || getType() == HostGame::TestGame;
 }
 
+// If game has join restrictions (rank), check those for a player.
+bool
+server::host::Game::isJoinRestrictionSatisfied(User& u)
+{
+    afl::base::Optional<int32_t> level;
+
+    // Check minimum level
+    level = minRankLevelToJoin().getOptional();
+    if (int32_t* p = level.get()) {
+        if (u.rankLevel().get() < *p) {
+            return false;
+        }
+    }
+
+    // Check maximum level
+    level = maxRankLevelToJoin().getOptional();
+    if (int32_t* p = level.get()) {
+        if (u.rankLevel().get() > *p) {
+            return false;
+        }
+    }
+
+    // Check minimum skill
+    level = minRankPointsToJoin().getOptional();
+    if (int32_t* p = level.get()) {
+        if (u.rankPoints().get() < *p) {
+            return false;
+        }
+    }
+
+    // Check maximum skill
+    level = maxRankPointsToJoin().getOptional();
+    if (int32_t* p = level.get()) {
+        if (u.rankPoints().get() > *p) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 // Describe this game.
 server::interface::HostGame::Info
 server::host::Game::describe(bool verbose, String_t forUser, String_t otherUser, Root& root)
@@ -807,6 +848,12 @@ server::host::Game::describe(bool verbose, String_t forUser, String_t otherUser,
        @key joinable:Int                 (**1 if user can join this game)
        @key userPlays:Int                (1 if invoking user plays in this game)
        @key scores:IntList               (**Scores, if game is running or finished)
+       @key scoreName:Str                (**Name of score)
+       @key scoreDescription:Str         (**Description of score)
+       @key minRankLevelToJoin:Int       (**Minimum rank level to join)
+       @key maxRankLevelToJoin:Int       (**Maximum rank level to join)
+       @key minRankPointsToJoin:Int      (**Minimum rank points (skill) to join)
+       @key maxRankPointsToJoin:Int      (**Maximum rank points (skill) to join)
        @key host:Str                     (Host Id, {game:$GID:settings}->host)
        @key hostDescription:Str          (Description for that host)
        @key hostKind:Str                 (Kind for that host)
@@ -904,6 +951,12 @@ server::host::Game::describe(bool verbose, String_t forUser, String_t otherUser,
         result.slotStates = slotStates;
         result.turnStates = turnStates;
         result.joinable = (!onGameAsPrimary || isMultiJoinAllowed());
+        if (!forUser.empty()) {
+            User u(root, forUser);
+            if (!isJoinRestrictionSatisfied(u)) {
+                result.joinable = false;
+            }
+        }
     }
 
     // Play status
@@ -929,6 +982,14 @@ server::host::Game::describe(bool verbose, String_t forUser, String_t otherUser,
             result.scoreName = scorename;
             result.scoreDescription = scoredesc;
         }
+    }
+
+    // Join limits
+    if (verbose) {
+        result.minRankLevelToJoin = minRankLevelToJoin().getOptional();
+        result.maxRankLevelToJoin = maxRankLevelToJoin().getOptional();
+        result.minRankPointsToJoin = minRankPointsToJoin().getOptional();
+        result.maxRankPointsToJoin = maxRankPointsToJoin().getOptional();
     }
 
     // Host
@@ -991,7 +1052,7 @@ server::host::Game::describe(bool verbose, String_t forUser, String_t otherUser,
 
 // Describe a slot.
 server::interface::HostPlayer::Info
-server::host::Game::describeSlot(int32_t slot, String_t forUser, const server::common::RaceNames& raceNames)
+server::host::Game::describeSlot(int32_t slot, String_t forUser, Root& root, const server::common::RaceNames& raceNames)
 {
     // ex Game::describeSlot
     server::interface::HostPlayer::Info result;
@@ -1024,6 +1085,12 @@ server::host::Game::describeSlot(int32_t slot, String_t forUser, const server::c
     result.joinable = !occupied
         && isSlotInGame(slot)
         && (!isUserOnGameAsPrimary(forUser) || isMultiJoinAllowed());
+    if (!forUser.empty()) {
+        User u(root, forUser);
+        if (!isJoinRestrictionSatisfied(u)) {
+            result.joinable = false;
+        }
+    }
     return result;
 }
 
@@ -1222,6 +1289,30 @@ afl::net::redis::IntegerField
 server::host::Game::numMissedTurnsForKick()
 {
     return settings().intField("kickAfterMissed");
+}
+
+afl::net::redis::IntegerField
+server::host::Game::minRankLevelToJoin()
+{
+    return settings().intField("minRankLevelToJoin");
+}
+
+afl::net::redis::IntegerField
+server::host::Game::maxRankLevelToJoin()
+{
+    return settings().intField("maxRankLevelToJoin");
+}
+
+afl::net::redis::IntegerField
+server::host::Game::minRankPointsToJoin()
+{
+    return settings().intField("minRankPointsToJoin");
+}
+
+afl::net::redis::IntegerField
+server::host::Game::maxRankPointsToJoin()
+{
+    return settings().intField("maxRankPointsToJoin");
 }
 
 // Access history.

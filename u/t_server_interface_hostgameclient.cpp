@@ -46,6 +46,10 @@ namespace {
         h->setNew("scores",              new VectorValue(Vector::create(Segment().pushBackInteger(130).pushBackInteger(140).pushBackInteger(135))));
         h->setNew("scoreName",           server::makeStringValue("test"));
         h->setNew("scoreDescription",    server::makeStringValue("Test Score"));
+        h->setNew("minRankLevelToJoin",  server::makeIntegerValue(3));
+        h->setNew("maxRankLevelToJoin",  server::makeIntegerValue(4));
+        h->setNew("minRankPointsToJoin", server::makeIntegerValue(5));
+        h->setNew("maxRankPointsToJoin", server::makeIntegerValue(6));
         h->setNew("host",                server::makeStringValue("thost"));
         h->setNew("hostDescription",     server::makeStringValue("Tim Host"));
         h->setNew("hostKind",            server::makeStringValue("th"));
@@ -343,6 +347,10 @@ TestServerInterfaceHostGameClient::testStat()
 
         TS_ASSERT(i.scoreName.isSame(String_t("test")));
         TS_ASSERT(i.scoreDescription.isSame(String_t("Test Score")));
+        TS_ASSERT_EQUALS(i.minRankLevelToJoin.orElse(-1), 3);
+        TS_ASSERT_EQUALS(i.maxRankLevelToJoin.orElse(-1), 4);
+        TS_ASSERT_EQUALS(i.minRankPointsToJoin.orElse(-1), 5);
+        TS_ASSERT_EQUALS(i.maxRankPointsToJoin.orElse(-1), 6);
         TS_ASSERT_EQUALS(i.hostName, "thost");
         TS_ASSERT_EQUALS(i.hostDescription, "Tim Host");
         TS_ASSERT_EQUALS(i.hostKind, "th");

@@ -562,6 +562,12 @@ server::interface::HostGameServer::packInfo(const HostGame::Info& info)
     // scoreDescription
     addOptionalStringKey(*h, "scoreDescription", info.scoreDescription);
 
+    // rank levels
+    addOptionalIntegerKey(*h, "minRankLevelToJoin", info.minRankLevelToJoin);
+    addOptionalIntegerKey(*h, "maxRankLevelToJoin", info.maxRankLevelToJoin);
+    addOptionalIntegerKey(*h, "minRankPointsToJoin", info.minRankPointsToJoin);
+    addOptionalIntegerKey(*h, "maxRankPointsToJoin", info.maxRankPointsToJoin);
+
     // hostName
     h->setNew("host", makeStringValue(info.hostName));
 

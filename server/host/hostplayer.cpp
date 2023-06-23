@@ -83,6 +83,14 @@ server::host::HostPlayer::join(int32_t gameId, int32_t slot, String_t userId)
         throw std::runtime_error(PERMISSION_DENIED);
     }
 
+    /* Rank limits mus be satisfied */
+    if (!isAdminAccess) {
+        User u(m_root, userId);
+        if (!game.isJoinRestrictionSatisfied(u)) {
+            throw std::runtime_error(PERMISSION_DENIED);
+        }
+    }
+
     /* Slot must be empty */
     if (!game.isSlotInGame(slot) || game.isSlotPlayed(slot)) {
         throw std::runtime_error(SLOT_NOT_AVAILABLE);
@@ -284,7 +292,7 @@ server::host::HostPlayer::list(int32_t gameId, bool all, std::map<int,Info>& res
              && afl::bits::Int16LE::unpack(*reinterpret_cast<const afl::bits::Int16LE::Bytes_t*>(turn1State.data() + 2*(i-1))) >= 0)
             || game.isSlotInGame(i))
         {
-            result.insert(std::make_pair(i, game.describeSlot(i, m_session.getUser(), raceNames)));
+            result.insert(std::make_pair(i, game.describeSlot(i, m_session.getUser(), m_root, raceNames)));
         }
     }
 }
@@ -309,7 +317,7 @@ server::host::HostPlayer::getInfo(int32_t gameId, int32_t slot)
     game.loadRaceNames(raceNames, m_root);
 
     // Produce result
-    return game.describeSlot(slot, m_session.getUser(), raceNames);
+    return game.describeSlot(slot, m_session.getUser(), m_root, raceNames);
 }
 
 void

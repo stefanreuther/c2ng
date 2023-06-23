@@ -895,3 +895,92 @@ TestServerHostHostPlayer::testProfilePermission()
         TS_ASSERT_THROWS_NOTHING(HostPlayer(rootSession, h.root()).join(gid, 3, "u3"));
     }
 }
+
+/** Test join limit handling, base case. */
+void
+TestServerHostHostPlayer::testJoinLimit()
+{
+    using server::host::HostPlayer;
+    using server::host::Game;
+
+    TestHarness h;
+    h.addUsers();
+
+    // User
+    HashKey(h.db(), "user:u3:profile").intField("rank").set(3);
+    HashKey(h.db(), "user:u3:profile").intField("rankpoints").set(777);
+    HashKey(h.db(), "user:u3:profile").intField("turnsplayed").set(77);
+
+    server::host::Session userSession;
+    userSession.setUser("u3");
+
+    HostPlayer userInstance(userSession, h.root());
+
+    // Base case
+    {
+        int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
+        TS_ASSERT_EQUALS(userInstance.getInfo(gid, 3).joinable, true);
+        TS_ASSERT_THROWS_NOTHING(userInstance.join(gid, 3, "u3"));
+        TS_ASSERT_EQUALS(userInstance.getInfo(gid, 3).userIds[0], "u3");
+    }
+
+    // Minimum level violated
+    {
+        int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
+        Game(h.root(), gid).minRankLevelToJoin().set(4);
+        TS_ASSERT_EQUALS(userInstance.getInfo(gid, 3).joinable, false);
+        TS_ASSERT_THROWS(userInstance.join(gid, 3, "u3"), std::exception);
+        TS_ASSERT(userInstance.getInfo(gid, 3).userIds.empty());
+    }
+
+    // Maximum level violated
+    {
+        int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
+        Game(h.root(), gid).maxRankLevelToJoin().set(2);
+        TS_ASSERT_EQUALS(userInstance.getInfo(gid, 3).joinable, false);
+        TS_ASSERT_THROWS(userInstance.join(gid, 3, "u3"), std::exception);
+        TS_ASSERT(userInstance.getInfo(gid, 3).userIds.empty());
+    }
+
+    // Minimum skill violated
+    {
+        int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
+        Game(h.root(), gid).minRankPointsToJoin().set(10000);
+        TS_ASSERT_EQUALS(userInstance.getInfo(gid, 3).joinable, false);
+        TS_ASSERT_THROWS(userInstance.join(gid, 3, "u3"), std::exception);
+        TS_ASSERT(userInstance.getInfo(gid, 3).userIds.empty());
+    }
+
+    // Maximum skill violated
+    {
+        int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
+        Game(h.root(), gid).maxRankPointsToJoin().set(500);
+        TS_ASSERT_EQUALS(userInstance.getInfo(gid, 3).joinable, false);
+        TS_ASSERT_THROWS(userInstance.join(gid, 3, "u3"), std::exception);
+        TS_ASSERT(userInstance.getInfo(gid, 3).userIds.empty());
+    }
+
+    // All tests pass
+    {
+        int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
+        Game(h.root(), gid).minRankLevelToJoin().set(3);
+        Game(h.root(), gid).maxRankLevelToJoin().set(3);
+        Game(h.root(), gid).minRankPointsToJoin().set(777);
+        Game(h.root(), gid).maxRankPointsToJoin().set(777);
+        TS_ASSERT_EQUALS(userInstance.getInfo(gid, 3).joinable, true);
+        TS_ASSERT_THROWS_NOTHING(userInstance.join(gid, 3, "u3"));
+        TS_ASSERT_EQUALS(userInstance.getInfo(gid, 3).userIds[0], "u3");
+    }
+
+    // All tests pass with margin
+    {
+        int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
+        Game(h.root(), gid).minRankLevelToJoin().set(1);
+        Game(h.root(), gid).maxRankLevelToJoin().set(4);
+        Game(h.root(), gid).minRankPointsToJoin().set(400);
+        Game(h.root(), gid).maxRankPointsToJoin().set(900);
+        TS_ASSERT_EQUALS(userInstance.getInfo(gid, 3).joinable, true);
+        TS_ASSERT_THROWS_NOTHING(userInstance.join(gid, 3, "u3"));
+        TS_ASSERT_EQUALS(userInstance.getInfo(gid, 3).userIds[0], "u3");
+    }
+}

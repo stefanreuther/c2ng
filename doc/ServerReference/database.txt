@@ -682,6 +682,10 @@ Game settings
 @key joinMulti:Int             (allow joining as multiple players)
 @c       [- joinConfirmTime (time in minutes after join when to send confirmation request)]
 @c        [- joinKickTime (time in minutes after confirmation when to kick)]
+@key minRankLevelToJoin:Int    (minimum rank to join; if missing, no restriction; see {user:$UID:profile}->rank)
+@key maxRankLevelToJoin:Int    (maximum rank to join; if missing, no restriction; see {user:$UID:profile}->rank)
+@key minRankPointsToJoin:Int   (minimum rank points (skill) to join; if missing, no restriction; see {user:$UID:profile}->rankpoints)
+@key maxRankPointsToJoin:Int   (maximum rank points (skill) to join; if missing, no restriction; see {user:$UID:profile}->rankpoints)
 
 These parameters are passed to host scripts as environment variables <tt>game_settings_<em>key</em></tt>.
 ---
