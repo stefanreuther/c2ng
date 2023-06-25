@@ -257,11 +257,14 @@ game::v3::ResultLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, ga
     }
 
     if (m_playerFlags.get(player).contains(DirectoryScanner::HaveTurn)) {
-        Ref<Stream> file = root.gameDirectory().openFile(Format("player%d.trn", player), afl::io::FileSystem::OpenRead);
-        loadTurnfile(turn, root, *file, player);
+        try {
+            Ref<Stream> file = root.gameDirectory().openFile(Format("player%d.trn", player), afl::io::FileSystem::OpenRead);
+            loadTurnfile(turn, root, *file, player);
+        }
+        catch (afl::except::FileProblemException& e) {
+            m_log.write(afl::sys::LogListener::Error, LOG_NAME, m_translator("File has been ignored"), e);
+        }
     }
-
-    // Backup
 
     // Load fleets.
     // Must be after loading the result/turn because it requires shipsource flags

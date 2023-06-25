@@ -805,6 +805,9 @@ game::v3::Loader::loadTurnfile(Turn& turn, const Root& root, afl::io::Stream& fi
     if (f.getPlayer() != player) {
         throw FileFormatException(file, Format(m_translator("Turn file belongs to player %d"), f.getPlayer()));
     }
+    if (f.getTimestamp() != turn.getTimestamp()) {
+        throw FileFormatException(file, Format(m_translator("Turn file has wrong timestamp (%s != %s)"), f.getTimestamp().getTimestampAsString(), turn.getTimestamp().getTimestampAsString()));
+    }
     if (f.getFeatures().contains(TurnFile::TaccomFeature)) {
         m_log.write(LogListener::Info, LOG_NAME, Format(m_translator("Turn file contains %d attachment%!1{s%}"), f.getNumFiles()));
     }

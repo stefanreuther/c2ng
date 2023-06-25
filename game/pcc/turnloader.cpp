@@ -238,12 +238,15 @@ game::pcc::TurnLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, gam
     }
 
     // Try to load turn from remote
-    {
+    try {
         Ptr<Stream> file = m_serverDirectory->openFileNT(Format("player%d.trn", player), afl::io::FileSystem::OpenRead);
         if (file.get() != 0) {
             m_log.write(LogListener::Info, LOG_NAME, Format(m_translator("Loading %s TRN file..."), root.playerList().getPlayerName(player, Player::AdjectiveName, m_translator)));
             Loader(*m_charset, m_translator, m_log).loadTurnfile(turn, root, *file, player);
         }
+    }
+    catch (afl::except::FileProblemException& e) {
+        m_log.write(afl::sys::LogListener::Error, LOG_NAME, m_translator("File has been ignored"), e);
     }
 
     // Load fleets from local game directory

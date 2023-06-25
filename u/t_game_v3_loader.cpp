@@ -190,6 +190,11 @@ namespace {
         0x00, 0x04, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x87, 0x10, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x09, 0x00, 0x00,
         0x00, 0x0a, 0x00, 0x00, 0x00, 0x0b, 0x00, 0x00, 0x00
     };
+
+    /* The timestamp used in all of the above. Yeah I know it's wrong... */
+    const uint8_t MOCK_TIMESTAMP[] = {
+        0x32, 0x32, 0x2d, 0x33, 0x33, 0x2d, 0x34, 0x34, 0x34, 0x34, 0x3a, 0x35, 0x35, 0x3a, 0x36, 0x36, 0x3a, 0x37
+    };
 }
 
 
@@ -588,6 +593,7 @@ TestGameV3Loader::testLoadTurnFile()
     TS_ASSERT_EQUALS(h.turn.universe().ships().get(9)->getFriendlyCode().orElse(""), "xyz");
     TS_ASSERT_EQUALS(h.turn.universe().planets().get(270)->getColonistTax().orElse(0), 12);
     TS_ASSERT_EQUALS(h.turn.universe().planets().get(400)->getBaseMission().orElse(0), 1);
+    h.turn.setTimestamp(MOCK_TIMESTAMP);
 
     // File to test
     afl::io::ConstMemoryStream file(THREE_COMMAND_TURN);
@@ -753,6 +759,7 @@ TestGameV3Loader::testAllianceCommand()
         p->setPlayability(game::map::Object::Playable);
     }
     TS_ASSERT_EQUALS(h.turn.universe().ships().get(9)->getFriendlyCode().orElse(""), "xyz");
+    h.turn.setTimestamp(MOCK_TIMESTAMP);
 
     // File to test
     afl::io::ConstMemoryStream file(ALLIES_COMMAND_TURN);
@@ -776,6 +783,7 @@ TestGameV3Loader::testMessageCommand()
 {
     // Prepare
     TestHarness h;
+    h.turn.setTimestamp(MOCK_TIMESTAMP);
 
     // File to test
     afl::io::ConstMemoryStream file(MESSAGE_COMMAND_TURN);
