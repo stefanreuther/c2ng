@@ -200,8 +200,8 @@ server::host::Installer::installGameData(Game& game, game::PlayerSet_t players, 
             afl::base::Optional<String_t> trnContent = hostFile.getFileNT(afl::string::Format("%s/in/%s", gameDir, trnName));
             if (const String_t* p = trnContent.get()) {
                 installFile(*p, userFile, dirName, trnName);
+                filesToDelete.erase(trnName);
             }
-            filesToDelete.erase(trnName);
         }
     }
 
