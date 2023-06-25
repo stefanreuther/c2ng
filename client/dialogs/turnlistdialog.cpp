@@ -6,16 +6,6 @@
 #include "client/dialogs/turnlistdialog.hpp"
 #include "afl/base/deleter.hpp"
 #include "game/game.hpp"
-#include "game/historyturn.hpp"
-#include "game/interface/globalcommands.hpp"
-#include "game/root.hpp"
-#include "game/turn.hpp"
-#include "game/turnloader.hpp"
-#include "interpreter/bytecodeobject.hpp"
-#include "interpreter/opcode.hpp"
-#include "interpreter/process.hpp"
-#include "interpreter/simpleprocedure.hpp"
-#include "interpreter/values.hpp"
 #include "ui/dialogs/messagebox.hpp"
 #include "ui/group.hpp"
 #include "ui/layout/hbox.hpp"
@@ -26,7 +16,7 @@
 #include "util/rich/parser.hpp"
 
 using client::widgets::TurnListbox;
-using game::HistoryTurn;
+using game::proxy::HistoryTurnProxy;
 
 namespace {
     /*
@@ -52,16 +42,17 @@ namespace {
         This allows fluent usage using the keyboard even in the presence of network / I/O latencies. */
     const afl::sys::Timeout_t ACTIVATION_GRACE_PERIOD = 500;
 
-    /** Convert HistoryTurn::Status into TurnListbox::Status. */
-    TurnListbox::Status convertStatus(HistoryTurn::Status status)
+    /** Convert HistoryTurnProxy::Status into TurnListbox::Status. */
+    TurnListbox::Status convertStatus(HistoryTurnProxy::Status status)
     {
         switch (status) {
-         case HistoryTurn::Unknown:           return TurnListbox::Unknown;
-         case HistoryTurn::Unavailable:       return TurnListbox::Unavailable;
-         case HistoryTurn::StronglyAvailable: return TurnListbox::StronglyAvailable;
-         case HistoryTurn::WeaklyAvailable:   return TurnListbox::WeaklyAvailable;
-         case HistoryTurn::Failed:            return TurnListbox::Failed;
-         case HistoryTurn::Loaded:            return TurnListbox::Loaded;
+         case HistoryTurnProxy::Unknown:           return TurnListbox::Unknown;
+         case HistoryTurnProxy::Unavailable:       return TurnListbox::Unavailable;
+         case HistoryTurnProxy::StronglyAvailable: return TurnListbox::StronglyAvailable;
+         case HistoryTurnProxy::WeaklyAvailable:   return TurnListbox::WeaklyAvailable;
+         case HistoryTurnProxy::Failed:            return TurnListbox::Failed;
+         case HistoryTurnProxy::Loaded:            return TurnListbox::Loaded;
+         case HistoryTurnProxy::Current:           return TurnListbox::Current;
         }
         return TurnListbox::Unknown;
     }
@@ -76,167 +67,10 @@ namespace {
         }
     }
 
-    /** Prepare list item for a history turn.
-        \param content [out] List item will be appended here
-        \param game [in] Game
-        \param turnNumber [in] Turn number */
-    void prepareListItem(std::vector<TurnListbox::Item>& content, const game::Game& game, int turnNumber)
+    TurnListbox::Item convertItem(const HistoryTurnProxy::Item& item)
     {
-        content.push_back(TurnListbox::Item(turnNumber,
-                                            convertTimestamp(game.previousTurns().getTurnTimestamp(turnNumber)),
-                                            convertStatus(game.previousTurns().getTurnStatus(turnNumber))));
+        return TurnListbox::Item(item.turnNumber, convertTimestamp(item.timestamp), convertStatus(item.status));
     }
-
-    /*
-     *  Initial (handleSetup()) response
-     */
-    class InitialResponse : public util::Request<client::dialogs::TurnListDialog> {
-     public:
-        InitialResponse(std::vector<TurnListbox::Item>& content, int turnNumber)
-            : m_content(),
-              m_turnNumber(turnNumber)
-            { m_content.swap(content); }
-        void handle(client::dialogs::TurnListDialog& dialog)
-            { dialog.handleSetup(m_content, m_turnNumber); }
-     private:
-        std::vector<TurnListbox::Item> m_content;
-        int m_turnNumber;
-    };
-
-    /*
-     *  Initial request.
-     *  Determines what to display and creates dialog initialisation data.
-     */
-    class InitialRequest : public util::Request<game::Session> {
-     public:
-        InitialRequest(util::RequestSender<client::dialogs::TurnListDialog> response)
-            : m_response(response)
-            { }
-        void handle(game::Session& s)
-            {
-                std::vector<TurnListbox::Item> content;
-                int activeTurn = 0;
-                if (game::Game* g = s.getGame().get()) {
-                    // Fetch current turn
-                    int currentTurn = g->currentTurn().getTurnNumber();
-                    activeTurn = g->getViewpointTurnNumber();
-
-                    // Fetch status of all turns below that.
-                    // Limit turn count to avoid bogus data overloading us.
-                    int minTurn = (currentTurn <= MAX_TURNS_TO_DISPLAY ? 1 : currentTurn - MAX_TURNS_TO_DISPLAY);
-                    for (int i = minTurn; i < currentTurn; ++i) {
-                        prepareListItem(content, *g, i);
-                    }
-
-                    // Current turn
-                    content.push_back(TurnListbox::Item(currentTurn, convertTimestamp(g->currentTurn().getTimestamp()), TurnListbox::Current));
-                }
-                m_response.postNewRequest(new InitialResponse(content, activeTurn));
-            }
-     private:
-        util::RequestSender<client::dialogs::TurnListDialog> m_response;
-    };
-
-    /*
-     *  Partial update (handleUpdate()) response
-     */
-    class UpdateResponse : public util::Request<client::dialogs::TurnListDialog> {
-     public:
-        UpdateResponse(std::vector<TurnListbox::Item>& content)
-            : m_content()
-            { m_content.swap(content); }
-        void handle(client::dialogs::TurnListDialog& dialog)
-            { dialog.handleUpdate(m_content); }
-     private:
-        std::vector<TurnListbox::Item> m_content;
-    };
-
-    /*
-     *  Update request.
-     *  Determines whether there are any turns that can be updated, and if so, updates their metainformation.
-     */
-    class UpdateRequest : public util::Request<game::Session> {
-     public:
-        /** Constructor.
-            \param response Response channel
-            \param firstTurn First turn we're interested in. If the dialog display turns 300 .. 1300, it makes no sense to update turn 100. */
-        UpdateRequest(util::RequestSender<client::dialogs::TurnListDialog> response, int firstTurn)
-            : m_response(response),
-              m_firstTurn(firstTurn)
-            { }
-        void handle(game::Session& s)
-            {
-                std::vector<TurnListbox::Item> content;
-                game::Game* g = s.getGame().get();
-                game::Root* r = s.getRoot().get();
-                if (g != 0 && r != 0 && r->getTurnLoader().get() != 0) {
-                    int lastTurn = g->previousTurns().findNewestUnknownTurnNumber(g->currentTurn().getTurnNumber());
-                    if (lastTurn >= m_firstTurn) {
-                        // Update
-                        int firstTurn = std::max(m_firstTurn, lastTurn - (MAX_TURNS_TO_UPDATE-1));
-                        g->previousTurns().initFromTurnScores(g->scores(), firstTurn, lastTurn - firstTurn + 1);
-                        g->previousTurns().initFromTurnLoader(*r->getTurnLoader(), *r, g->getViewpointPlayer(), firstTurn, lastTurn - firstTurn + 1);
-
-                        // Build result
-                        for (int i = firstTurn; i <= lastTurn; ++i) {
-                            prepareListItem(content, *g, i);
-                        }
-                    }
-                }
-                m_response.postNewRequest(new UpdateResponse(content));
-            }
-     private:
-        util::RequestSender<client::dialogs::TurnListDialog> m_response;
-        const int m_firstTurn;
-    };
-
-    class LoadRequest : public util::Request<game::Session> {
-     public:
-        LoadRequest(util::RequestSender<client::dialogs::TurnListDialog> response, int turnNumber)
-            : m_response(response),
-              m_turnNumber(turnNumber)
-            { }
-        void handle(game::Session& s)
-            {
-                // Implemented as a helper process to re-use the IFHistoryLoadTurn command and its ability to suspend/interact;
-                // otherwise, we'd have to implement storage for a suspended process.
-                class Finalizer : public interpreter::Process::Finalizer {
-                 public:
-                    Finalizer(util::RequestSender<client::dialogs::TurnListDialog> response, game::Session& session, int turnNumber)
-                        : m_response(response), m_session(session), m_turnNumber(turnNumber)
-                        { }
-                    void finalizeProcess(interpreter::Process& /*proc*/)
-                        {
-                            std::vector<TurnListbox::Item> content;
-                            if (game::Game* g = m_session.getGame().get()) {
-                                prepareListItem(content, *g, m_turnNumber);
-                            }
-                            m_response.postNewRequest(new UpdateResponse(content));
-                        }
-                 private:
-                    util::RequestSender<client::dialogs::TurnListDialog> m_response;
-                    game::Session& m_session;
-                    const int m_turnNumber;
-                };
-
-                interpreter::Process& proc = s.processList().create(s.world(), "<LoadRequest>");
-                interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
-                proc.pushNewValue(interpreter::makeIntegerValue(m_turnNumber));
-                proc.pushNewValue(new interpreter::SimpleProcedure<game::Session&>(s, game::interface::IFHistoryLoadTurn));
-                bco->addInstruction(interpreter::Opcode::maIndirect, interpreter::Opcode::miIMCall, 1);
-                proc.pushFrame(bco, false);
-                proc.setNewFinalizer(new Finalizer(m_response, s, m_turnNumber));
-
-                uint32_t pgid = s.processList().allocateProcessGroup();
-                s.processList().resumeProcess(proc, pgid);
-                s.processList().startProcessGroup(pgid);
-                s.processList().run();
-                s.processList().removeTerminatedProcesses();
-            }
-     private:
-        util::RequestSender<client::dialogs::TurnListDialog> m_response;
-        const int m_turnNumber;
-    };
 }
 
 /***************************** TurnListDialog ****************************/
@@ -250,16 +84,16 @@ client::dialogs::TurnListDialog::TurnListDialog(ui::Root& root,
       m_initialDelta(initialDelta),
       m_root(root),
       m_translator(tx),
-      m_sender(sender),
-      m_receiver(root.engine().dispatcher(), *this),
+      m_proxy(sender, root.engine().dispatcher()),
       m_list(gfx::Point(12, 15), // FIXME: magic numbers
              root, tx),
       m_loop(root),
       m_activationTimer(root.engine().createTimer()),
       m_pendingActivation(false)
 {
-    // LoadingInitial: post an InitialRequest, will answer with handleSetup().
-    m_sender.postNewRequest(new InitialRequest(m_receiver.getSender()));
+    m_proxy.sig_setup.add(this, &TurnListDialog::onSetup);
+    m_proxy.sig_update.add(this, &TurnListDialog::onUpdate);
+    m_proxy.requestSetup(MAX_TURNS_TO_DISPLAY);
     m_list.sig_change.add(this, &TurnListDialog::onScroll);
     m_list.sig_itemDoubleClick.add(this, &TurnListDialog::onOK);
     m_activationTimer->sig_fire.add(this, &TurnListDialog::onActivationTimer);
@@ -274,9 +108,9 @@ int
 client::dialogs::TurnListDialog::run()
 {
     afl::base::Deleter del;
-    ui::Window&          win       = del.addNew(new ui::Window(m_translator.translateString("Turn History"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
-    ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(m_translator.translateString("OK"),     util::Key_Return, m_root));
-    ui::widgets::Button& btnCancel = del.addNew(new ui::widgets::Button(m_translator.translateString("Cancel"), util::Key_Escape, m_root));
+    ui::Window&          win       = del.addNew(new ui::Window(m_translator("Turn History"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
+    ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(m_translator("OK"),     util::Key_Return, m_root));
+    ui::widgets::Button& btnCancel = del.addNew(new ui::widgets::Button(m_translator("Cancel"), util::Key_Escape, m_root));
 
     win.add(m_list);
 
@@ -306,16 +140,16 @@ client::dialogs::TurnListDialog::run()
 
 // Callback: initial dialog setup.
 void
-client::dialogs::TurnListDialog::handleSetup(std::vector<TurnListbox::Item>& content, int turnNumber)
+client::dialogs::TurnListDialog::onSetup(const game::proxy::HistoryTurnProxy::Items_t& content, int turnNumber)
 {
     // Configure list
-    m_list.swapItems(content);
-    if (const TurnListbox::Item* firstItem = m_list.getItem(0)) {
-        // Place cursor on current turn
-        m_list.setCurrentItem(turnNumber - firstItem->turnNumber + m_initialDelta,
-                              m_initialDelta <= 0 ? TurnListbox::GoDown : TurnListbox::GoUp);
-        // FIXME: should center display
+    std::vector<TurnListbox::Item> items;
+    for (size_t i = 0, n = content.size(); i < n; ++i) {
+        items.push_back(convertItem(content[i]));
     }
+    m_list.swapItems(items);
+    m_list.setCurrentTurnNumber(turnNumber + m_initialDelta);
+    m_list.setActiveTurnNumber(turnNumber);
 
     // Request new data
     postNextRequest(true);
@@ -323,7 +157,7 @@ client::dialogs::TurnListDialog::handleSetup(std::vector<TurnListbox::Item>& con
 
 // Callback: partial data update.
 void
-client::dialogs::TurnListDialog::handleUpdate(std::vector<TurnListbox::Item>& content)
+client::dialogs::TurnListDialog::onUpdate(const game::proxy::HistoryTurnProxy::Items_t& content)
 {
     bool did = false;
 
@@ -331,7 +165,7 @@ client::dialogs::TurnListDialog::handleUpdate(std::vector<TurnListbox::Item>& co
     if (const TurnListbox::Item* firstItem = m_list.getItem(0)) {
         for (size_t i = 0, n = content.size(); i < n; ++i) {
             if (content[i].turnNumber >= firstItem->turnNumber) {
-                m_list.setItem(content[i].turnNumber - firstItem->turnNumber, content[i]);
+                m_list.setItem(convertItem(content[i]));
                 did = true;
             }
         }
@@ -426,7 +260,6 @@ client::dialogs::TurnListDialog::handleSelect()
 
          case TurnListbox::Loaded:
          case TurnListbox::Current:
-         case TurnListbox::Active:
             // Success
             m_loop.stop(1);
             return true;
@@ -444,12 +277,12 @@ client::dialogs::TurnListDialog::postNextRequest(bool allowUpdate)
     const TurnListbox::Item* firstItem = m_list.getItem(0);
     if (currentItem != 0 && (currentItem->status == TurnListbox::WeaklyAvailable || currentItem->status == TurnListbox::StronglyAvailable)) {
         // Cursor is on an item that is possibly available: load it
-        m_sender.postNewRequest(new LoadRequest(m_receiver.getSender(), currentItem->turnNumber));
         m_state = LoadingTurn;
+        m_proxy.requestLoad(currentItem->turnNumber);
     } else if (firstItem != 0 && allowUpdate) {
         // Load more status data
-        m_sender.postNewRequest(new UpdateRequest(m_receiver.getSender(), firstItem->turnNumber));
         m_state = LoadingStatus;
+        m_proxy.requestUpdate(firstItem->turnNumber, MAX_TURNS_TO_UPDATE);
     } else {
         // Nothing to do
         m_state = NoMoreWork;

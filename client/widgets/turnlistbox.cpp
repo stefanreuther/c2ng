@@ -19,7 +19,8 @@ client::widgets::TurnListbox::TurnListbox(gfx::Point cells, ui::Root& root, afl:
       m_root(root),
       m_translator(tx),
       m_bigFont(root.provider().getFont(gfx::FontRequest().addSize(+1))),
-      m_smallFont(root.provider().getFont(gfx::FontRequest().addSize(-1)))
+      m_smallFont(root.provider().getFont(gfx::FontRequest().addSize(-1))),
+      m_activeTurnNumber()
 { }
 
 // AbstractListbox virtuals:
@@ -118,11 +119,6 @@ client::widgets::TurnListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, si
             stateText = m_translator("loaded");
             turnText = m_translator("Current");
             break;
-         case Active:
-            boxColor = ui::Color_GreenScale + 6;
-            stateColor = ui::Color_GreenScale + 15;
-            stateText = m_translator("active");
-            break;
         }
 
         area.grow(-OUTLINE_SIZE, -OUTLINE_SIZE);
@@ -146,6 +142,10 @@ client::widgets::TurnListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, si
                 ctx.setColor(c);
                 outTextF(ctx, area, stateText);
             }
+
+            if (pItem->turnNumber == m_activeTurnNumber) {
+                drawSolidBar(ctx, area.splitRightX(5), ui::Color_GreenScale + 15);
+            }
         }
     }
 }
@@ -160,7 +160,9 @@ client::widgets::TurnListbox::getLayoutInfo() const
 bool
 client::widgets::TurnListbox::handleKey(util::Key_t key, int prefix)
 {
-    return defaultHandleKey(key, prefix);
+    return defaultHandleKey(key, prefix)
+        || ((key == util::Key_Up + util::KeyMod_Alt || key == util::Key_Down + util::KeyMod_Alt)
+            && defaultHandleKey(key & ~util::KeyMod_Alt, prefix));
 }
 
 void
@@ -192,5 +194,64 @@ client::widgets::TurnListbox::getItem(size_t n)
         return &m_items[n];
     } else {
         return 0;
+    }
+}
+
+afl::base::Optional<size_t>
+client::widgets::TurnListbox::findTurn(int turnNumber)
+{
+    // Guess in O(1) assuming regular content
+    if (!m_items.empty()) {
+        size_t guess = turnNumber - m_items[0].turnNumber;
+        if (guess < m_items.size()) {
+            return guess;
+        }
+    }
+
+    // Irregular case, O(n)
+    for (size_t i = 0, n = m_items.size(); i < n; ++i) {
+        if (m_items[i].turnNumber == turnNumber) {
+            return i;
+        }
+    }
+    return afl::base::Nothing;
+}
+
+void
+client::widgets::TurnListbox::setItem(const Item& content)
+{
+    afl::base::Optional<size_t> index = findTurn(content.turnNumber);
+    if (const size_t* p = index.get()) {
+        setItem(*p, content);
+    }
+}
+
+void
+client::widgets::TurnListbox::setCurrentTurnNumber(int turnNumber)
+{
+    afl::base::Optional<size_t> index = findTurn(turnNumber);
+    if (const size_t* p = index.get()) {
+        const size_t index = *p;
+        setCurrentItem(index);
+    } else if (!m_items.empty()) {
+        // Try to adjust when going across boundaries
+        if (turnNumber <= m_items.front().turnNumber) {
+            // "Previous" invoked from turn 1
+            setCurrentItem(0);
+        } else if (turnNumber >= m_items.back().turnNumber) {
+            // "Next" invoked from last turn
+            setCurrentItem(m_items.size()-1);
+        } else {
+            // Cannot solve.
+        }
+    }
+}
+
+void
+client::widgets::TurnListbox::setActiveTurnNumber(int turnNumber)
+{
+    if (m_activeTurnNumber != turnNumber) {
+        m_activeTurnNumber = turnNumber;
+        requestRedraw();
     }
 }

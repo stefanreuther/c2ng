@@ -22,8 +22,7 @@ namespace client { namespace widgets {
             WeaklyAvailable,    // I guess it's available
             Failed,             // Loading failed
             Loaded,             // It is loaded
-            Current,            // This is the current turn
-            Active              // Loaded and active
+            Current             // This is the current turn
         };
         struct Item {
             int turnNumber;
@@ -56,6 +55,11 @@ namespace client { namespace widgets {
         void setItem(size_t index, const Item& content);
         const Item* getItem(size_t n);
 
+        afl::base::Optional<size_t> findTurn(int turnNumber);
+        void setItem(const Item& content);
+        void setCurrentTurnNumber(int turnNumber);
+        void setActiveTurnNumber(int turnNumber);
+
      private:
         Items_t m_items;
         gfx::Point m_cells;
@@ -63,6 +67,7 @@ namespace client { namespace widgets {
         afl::string::Translator& m_translator;
         afl::base::Ref<gfx::Font> m_bigFont;
         afl::base::Ref<gfx::Font> m_smallFont;
+        int m_activeTurnNumber;
     };
 
 } }

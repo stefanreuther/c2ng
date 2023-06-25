@@ -7,10 +7,10 @@
 
 #include "afl/string/translator.hpp"
 #include "client/widgets/turnlistbox.hpp"
+#include "game/proxy/historyturnproxy.hpp"
 #include "game/session.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/root.hpp"
-#include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
 
 namespace client { namespace dialogs {
@@ -37,19 +37,10 @@ namespace client { namespace dialogs {
             \return Chosen turn number; 0 if dialog cancelled. */
         int run();
 
-        /** Callback: initial dialog setup.
-            \param content [in/out] data for all turns; can be destroyed.
-            \param turnNumber [in] currently displayed turn number */
-        void handleSetup(std::vector<client::widgets::TurnListbox::Item>& content, int turnNumber);
-
-        /** Callback: partial data update.
-            \param content [in/out] data to update; can be destroyed. An empty vector means there was a problem with updating data. */
-        void handleUpdate(std::vector<client::widgets::TurnListbox::Item>& content);
-
      private:
         /** Status of communication with game session. */
         enum State {
-            LoadingInitial,            ///< Loading initial content; expecting handleSetup() callback.
+            LoadingInitial,            ///< Loading initial content; expecting onSetup() callback.
             LoadingStatus,             ///< Loading status of some turns; expecting handleUpdate() callback.
             LoadingTurn,               ///< Loading a turn; expecting handleUpdate() callback.
             NoMoreWork                 ///< Not doing anything.
@@ -59,14 +50,16 @@ namespace client { namespace dialogs {
 
         ui::Root& m_root;
         afl::string::Translator& m_translator;
-        util::RequestSender<game::Session> m_sender;
-        util::RequestReceiver<TurnListDialog> m_receiver;
+        game::proxy::HistoryTurnProxy m_proxy;
 
         client::widgets::TurnListbox m_list;
         ui::EventLoop m_loop;
 
         afl::base::Ref<gfx::Timer> m_activationTimer;
         bool m_pendingActivation;
+
+        void onSetup(const game::proxy::HistoryTurnProxy::Items_t& content, int turnNumber);
+        void onUpdate(const game::proxy::HistoryTurnProxy::Items_t& content);
 
         void onOK();
         void onCancel();

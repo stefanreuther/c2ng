@@ -295,6 +295,13 @@ class TestGameProxyHistoryShipProxy : public CxxTest::TestSuite {
     void testExtBrowse();
 };
 
+class TestGameProxyHistoryTurnProxy : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testNoTurnLoader();
+    void testEmpty();
+};
+
 class TestGameProxyHullSpecificationProxy : public CxxTest::TestSuite {
  public:
     void testIt();
