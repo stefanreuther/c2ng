@@ -341,7 +341,7 @@ game::map::Renderer::renderUfos(const State& st) const
 
                     // Draw connection to other end
                     if (drawOther) {
-                        Point imgOtherCenter = config.getSimplePointAlias(otherCenter, img);
+                        Point imgOtherCenter = config.getSimplePointAlias(config.getSimpleNearestAlias(otherCenter, center), img);
                         if (m_viewport.containsLine(imgCenter, imgOtherCenter)) {
                             st.listener().drawUfoConnection(imgCenter, imgOtherCenter, ufo->getColorCode());
                         }
