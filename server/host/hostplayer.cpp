@@ -103,8 +103,11 @@ server::host::HostPlayer::join(int32_t gameId, int32_t slot, String_t userId)
         // CronImpl needs lastPlayerJoined to generate the correct time.
         // Because we're running under mutex protection, CronImpl will not interfere with us and see a partial state.
         game.setConfigInt("lastPlayerJoined", m_root.getTime());
-        m_root.handleGameChange(gameId);
     }
+
+    // Reconsider scheduler. Joining can turn a game from "all turns in" to "not all turns in"
+    // which would defer an early host.
+    m_root.handleGameChange(gameId);
 }
 
 void
@@ -237,6 +240,10 @@ server::host::HostPlayer::resign(int32_t gameId, int32_t slot, String_t userId)
 
         /* History */
         game.addUserHistoryItem(m_root, userId == m_session.getUser() ? dead ? "game-resign-dead" : "game-resign" : "game-resign-other", afl::string::Format("%s:%d", userId, slot), userId);
+
+        /* Pretend that a turn was submitted so if this makes the game empty,
+           we do not run immediately; instead, wait for hostDelay() to allow adding a player. */
+        game.lastTurnSubmissionTime().set(m_root.getTime());
 
         /* Notify cron to recompute host time */
         m_root.handleGameChange(gameId);

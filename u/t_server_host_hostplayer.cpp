@@ -144,6 +144,7 @@ TestServerHostHostPlayer::testJoin()
 
     // Join users
     for (int i = 1; i <= 10; ++i) {
+        cron.expectCall("handleGameChange(1)");
         testee.join(gid, i, Format("u%d", i));
     }
 
@@ -238,8 +239,11 @@ TestServerHostHostPlayer::testResign()
     TS_ASSERT_EQUALS(gid, 1);
 
     // Join some users
+    cron.expectCall("handleGameChange(1)");
     testee.join(gid, 1, "u1");
+    cron.expectCall("handleGameChange(1)");
     testee.join(gid, 2, "u2");
+    cron.expectCall("handleGameChange(1)");
     testee.join(gid, 3, "u3");
     testee.substitute(gid, 3, "u4");
 
