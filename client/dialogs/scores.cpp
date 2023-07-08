@@ -21,6 +21,7 @@
 #include "ui/icons/skintext.hpp"
 #include "ui/layout/hbox.hpp"
 #include "ui/layout/vbox.hpp"
+#include "ui/prefixargument.hpp"
 #include "ui/spacer.hpp"
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/chart.hpp"
@@ -391,8 +392,8 @@ namespace {
         void sortTableData();
 
         // User actions
-        void nextTurn();
-        void previousTurn();
+        void nextTurn(int n);
+        void previousTurn(int n);
         void setTableTurnIndex(size_t index);
         void setTableSortColumn(int column);
         void setTableMode(TableMode mode);
@@ -726,6 +727,7 @@ ScoreDialog::run()
     win.add(help);
     win.add(del.addNew(new ui::widgets::Quit(m_root, loop)));
     win.add(del.addNew(new ui::widgets::KeyForwarder(*this)));
+    win.add(del.addNew(new ui::PrefixArgument(m_root)));
 
     btnNextTurn.sig_fire.add(this, &ScoreDialog::nextTurn);
     btnPreviousTurn.sig_fire.add(this, &ScoreDialog::previousTurn);
@@ -781,7 +783,7 @@ ScoreDialog::openTab(size_t tab)
 }
 
 bool
-ScoreDialog::handleKey(util::Key_t key, int /*prefix*/)
+ScoreDialog::handleKey(util::Key_t key, int prefix)
 {
     // ex WScoreIconBox::handleEvent, WScoreTable::handleEvent
     const ScoreTab*const tab = getTab(m_currentTab);
@@ -816,7 +818,7 @@ ScoreDialog::handleKey(util::Key_t key, int /*prefix*/)
      case util::Key_PgUp:
      case util::Key_WheelUp:
         if (isTable) {
-            previousTurn();
+            previousTurn(prefix);
             return true;
         }
         break;
@@ -825,7 +827,7 @@ ScoreDialog::handleKey(util::Key_t key, int /*prefix*/)
      case util::Key_PgDn:
      case util::Key_WheelDown:
         if (isTable) {
-            nextTurn();
+            nextTurn(prefix);
             return true;
         }
         break;
@@ -1116,20 +1118,22 @@ ScoreDialog::sortTableData()
 /* User actions */
 
 void
-ScoreDialog::nextTurn()
+ScoreDialog::nextTurn(int n)
 {
     // ex WScoreTable::nextTurn
-    if (m_tableTurnIndex < m_turnList.size()-1) {
-        setTableTurnIndex(m_tableTurnIndex+1);
+    size_t amount = std::min(size_t(std::max(1, n)), m_turnList.size()-m_tableTurnIndex-1);
+    if (amount != 0) {
+        setTableTurnIndex(m_tableTurnIndex+amount);
     }
 }
 
 void
-ScoreDialog::previousTurn()
+ScoreDialog::previousTurn(int n)
 {
     // ex WScoreTable::previousTurn
-    if (m_tableTurnIndex > 0) {
-        setTableTurnIndex(m_tableTurnIndex-1);
+    size_t amount = std::min(size_t(std::max(1, n)), m_tableTurnIndex);
+    if (amount) {
+        setTableTurnIndex(m_tableTurnIndex-amount);
     }
 }
 
