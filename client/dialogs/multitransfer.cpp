@@ -31,6 +31,7 @@
 #include "ui/draw.hpp"
 #include "ui/layout/hbox.hpp"
 #include "ui/layout/vbox.hpp"
+#include "ui/prefixargument.hpp"
 #include "ui/widgets/abstractlistbox.hpp"
 #include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/keyforwarder.hpp"
@@ -426,6 +427,7 @@ MultiTransferDialog::run(String_t title)
     ui::Widget& keyHandler = del.addNew(new ui::widgets::KeyForwarder(*this));
     win.add(keyHandler);
     win.add(del.addNew(new ui::widgets::Quit(m_root, m_loop)));
+    win.add(del.addNew(new ui::PrefixArgument(m_root)));
     win.add(help);
     win.pack();
 
