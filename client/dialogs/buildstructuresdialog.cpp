@@ -316,6 +316,9 @@ namespace {
                 setData(b.have, b.want, b.max);
             }
 
+        game::PlanetaryBuilding getStructureType() const
+            { return m_type; }
+
      private:
         ui::Root& m_root;
         BuildStructuresProxy& m_proxy;
@@ -488,25 +491,24 @@ namespace {
                 ui::widgets::Panel& panel = m_del.addNew(new ui::widgets::Panel(ui::layout::VBox::instance5, 2));
                 panel.setColorScheme(m_panelColors);
 
-                ui::CardGroup cards;
-                StructureHeader header(m_root, cards);
+                StructureHeader header(m_root, m_cards);
 
                 Widget& helpWidget = m_del.addNew(new client::widgets::HelpWidget(m_root, m_translator, m_gameSender, "pcc2:buildings"));
 
                 Widget& page1 = buildBuildScreen1(helpWidget);
                 header.addPage(m_info.planetName + m_translator(" - Planetary Economy"), m_info.planetInfo, page1);
-                cards.add(page1);
+                m_cards.add(page1);
 
                 Widget& page2 = buildBuildScreen2(helpWidget);
                 header.addPage(m_info.planetName + m_translator(" - Mining Industry"), m_info.planetInfo, page2);
-                cards.add(page2);
+                m_cards.add(page2);
 
                 Widget& page3 = buildBuildScreen3(helpWidget);
                 header.addPage(m_info.planetName + m_translator(" - Defense"), m_info.planetInfo, page3);
-                cards.add(page3);
+                m_cards.add(page3);
 
                 panel.add(header);
-                panel.add(cards);
+                panel.add(m_cards);
                 panel.add(m_del.addNew(new ui::PrefixArgument(m_root)));
                 panel.add(m_del.addNew(new ui::widgets::Quit(m_root, m_loop)));
                 panel.add(helpWidget);
@@ -541,6 +543,7 @@ namespace {
         ui::widgets::KeyDispatcher m_dispatcher;
         game::Id_t m_planetId;
         util::RequestSender<game::Session> m_gameSender;
+        ui::CardGroup m_cards;
 
         StructureWidget& makeStructure(game::PlanetaryBuilding which)
             { return m_del.addNew(new StructureWidget(m_root, m_proxy, which, m_formatter, m_translator)); }
@@ -912,6 +915,9 @@ namespace {
                     dlg.setGoal(bb, m_status.buildings[i].want);
                     dlg.setSpeed(bb, m_status.buildings[i].speed);
                 }
+                if (const StructureWidget* w = findFocusedStructure()) {
+                    dlg.setFocusToStructure(w->getStructureType());
+                }
                 if (dlg.run()) {
                     m_proxy.applyAutobuildSettings(dlg.getResult());
                 }
@@ -940,6 +946,16 @@ namespace {
         void onGroundCombat()
             {
                 client::dialogs::doGroundDefenseDialog(m_root, m_infoProxy.getGroundDefenseInfo(), m_formatter, m_translator);
+            }
+
+        const StructureWidget* findFocusedStructure() const
+            {
+                for (const ui::Widget* p = &m_cards; p != 0; p = p->getFocusedChild()) {
+                    if (const StructureWidget* sw = dynamic_cast<const StructureWidget*>(p)) {
+                        return sw;
+                    }
+                }
+                return 0;
             }
     };
 }
