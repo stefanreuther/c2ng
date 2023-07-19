@@ -28,7 +28,8 @@ namespace {
 
     int clampComponent(float f)
     {
-        return f > 255 ? 255 : f < 0 ? 0 : int(f);
+        // The '& 255' is required to handle NaN, which will otherwise produce INT_MIN despite reporting to be in range [0,255]...
+        return f > 255 ? 255 : f < 0 ? 0 : (int(f) & 255);
     }
 
     static const uint8_t GAMMA[] = {
@@ -320,6 +321,7 @@ class gfx::threed::SoftwareContext::TriangleRendererImpl : public TriangleRender
 
     virtual void addTriangles(size_t base, afl::base::Memory<const size_t> indexes)
         {
+            afl::except::checkAssertion(indexes.size() % 3 == 0, "SoftwareContext::LineRenderer::addVertices: bad number of points");
             while (const size_t* p = indexes.eat()) {
                 size_t n = base + *p;
                 afl::except::checkAssertion(n < m_vertices.size(), "SoftwareContext::LineRenderer::addVertices: bad index");
