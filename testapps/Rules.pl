@@ -15,6 +15,7 @@ build_test_app('testflak',      ['gamelib', 'afl']);
 build_test_app('msgparse',      ['gamelib', 'afl']);
 build_test_app('ui_root',       ['guilib', 'gamelib', 'afl']);
 build_test_app('threed',        ['guilib', 'gamelib', 'afl']);
+build_test_app('threedmodel',   ['guilib', 'gamelib', 'afl']);
 
 rule_set_phony($target);
 

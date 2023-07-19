@@ -12,6 +12,28 @@ class TestGfxThreedContext : public CxxTest::TestSuite {
     void testInterface();
 };
 
+class TestGfxThreedModel : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testLoad();
+    void testLoadTruncate();
+    void testLoadErrors();
+    void testUnsupportedBlock();
+};
+
+class TestGfxThreedPositionList : public CxxTest::TestSuite {
+ public:
+    void testInit();
+    void testAccess();
+    void testFindPointsTwoRanges();
+    void testFindPointsOneRange();
+    void testFindPointsSingleRange();
+    void testFindPointsFixedOnlyOdd();
+    void testFindPointsFixedOnlyEven();
+    void testFindPointsEmpty();
+    void testFindPointsOne();
+};
+
 class TestGfxThreedVecMath : public CxxTest::TestSuite {
  public:
     void testVec3fMake();

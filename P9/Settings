@@ -777,7 +777,9 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/dialogs/attachmentselection.cpp \
+FILES_guilib = gfx/threed/positionlist.cpp gfx/threed/positionlist.hpp \
+    gfx/threed/model.cpp gfx/threed/model.hpp \
+    client/dialogs/attachmentselection.cpp \
     client/dialogs/attachmentselection.hpp \
     client/dialogs/exitconfirmation.cpp client/dialogs/exitconfirmation.hpp \
     client/dialogs/simulationalliances.cpp \
@@ -1761,9 +1763,10 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_proxy_historyturnproxy.cpp \
-    u/t_game_proxy_allianceproxy.cpp u/t_ui_layout_axislayout.cpp \
-    u/t_ui_layout_vbox.cpp u/t_ui_layout_manager.cpp u/t_ui_layout_hbox.cpp \
+FILES_testsuite = u/t_gfx_threed_positionlist.cpp u/t_gfx_threed_model.cpp \
+    u/t_game_proxy_historyturnproxy.cpp u/t_game_proxy_allianceproxy.cpp \
+    u/t_ui_layout_axislayout.cpp u/t_ui_layout_vbox.cpp \
+    u/t_ui_layout_manager.cpp u/t_ui_layout_hbox.cpp \
     u/t_game_proxy_attachmentproxy.cpp u/t_game_config_stringarrayoption.cpp \
     u/t_interpreter_directoryfunctions.cpp u/t_game_interface_vmfile.cpp \
     u/t_game_interface_loadcontext.cpp \
