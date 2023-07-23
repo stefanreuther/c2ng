@@ -345,12 +345,12 @@ class gfx::threed::SoftwareContext::TriangleRendererImpl : public TriangleRender
                 const Vertex& a = m_vertices[m_indexes[i]];
                 const Vertex& b = m_vertices[m_indexes[i+1]];
                 const Vertex& c = m_vertices[m_indexes[i+2]];
-                Vec3f amod = a.pos.transform(modelView);
-                Vec3f bmod = b.pos.transform(modelView);
-                Vec3f cmod = c.pos.transform(modelView);
-                Vec3f aproj = amod.transform(proj);
-                Vec3f bproj = bmod.transform(proj);
-                Vec3f cproj = cmod.transform(proj);
+                const Vec3f amod = a.pos.transform(modelView);
+                const Vec3f bmod = b.pos.transform(modelView);
+                const Vec3f cmod = c.pos.transform(modelView);
+                const Vec3f aproj = amod.transform(proj);
+                const Vec3f bproj = bmod.transform(proj);
+                const Vec3f cproj = cmod.transform(proj);
 
                 // Clipping: a triangle is clipped if all its points are on one side of the [-1,1] cube.
                 // If points are outside but on different sides, it can still be visible.
@@ -364,23 +364,60 @@ class gfx::threed::SoftwareContext::TriangleRendererImpl : public TriangleRender
                     continue;
                 }
 
-                // Determine Z position for sorting
-                float z = (aproj(2) + bproj(2) + cproj(2)) * (1.0f/3.0f);
-
                 // Determine color. Flat shading for now, i.e. all the same color.
                 const Vec3f norm = (bmod - amod).prod(cmod - amod).norm();
-                float directional = std::max(norm.dot(directionalVector), 0.0f);
-                Vec3f lighting = ambientLight + directionalLightColor * directional;
+                const float directional = std::max(norm.dot(directionalVector), 0.0f);
+                const Vec3f lighting = ambientLight + directionalLightColor * directional;
+                const ColorQuad_t color = makeColor(a.color, lighting);
 
-                m_parent->addPrimitive(z, instanceNr,
-                                       instance->add(convertCoordinates(m_parent->m_viewport, aproj),
-                                                     convertCoordinates(m_parent->m_viewport, bproj),
-                                                     convertCoordinates(m_parent->m_viewport, cproj),
-                                                     makeColor(a.color, lighting)));
+                // Subdivide or add
+                const size_t MAX_AGE = 3;
+                std::vector<Segment> stack;
+                stack.reserve(20);
+                stack.push_back(Segment(aproj, bproj, cproj, MAX_AGE));
+                while (!stack.empty()) {
+                    Segment seg = stack.back();
+                    stack.pop_back();
+                    if (isnan(seg.a(0)) || isnan(seg.a(1)) || isnan(seg.a(2))
+                        || isnan(seg.b(0)) || isnan(seg.b(1)) || isnan(seg.b(2))
+                        || isnan(seg.c(0)) || isnan(seg.c(1)) || isnan(seg.c(2)))
+                    {
+                        // Ignore - FP madness
+                    } else if ((classifyPoint(aproj) & classifyPoint(bproj) & classifyPoint(cproj)) != 0) {
+                        // Ignore - out of view
+                    } else if (seg.age > 0 && (checkSplitLine(seg.a, seg.b) || checkSplitLine(seg.a, seg.c) || checkSplitLine(seg.b, seg.c))) {
+                        // Subdivide
+                        const Vec3f ab = (seg.a + seg.b) * 0.5;
+                        const Vec3f ac = (seg.a + seg.c) * 0.5;
+                        const Vec3f bc = (seg.b + seg.c) * 0.5;
+                        stack.push_back(Segment(seg.a, ab, ac, seg.age-1));
+                        stack.push_back(Segment(ab, seg.b, bc, seg.age-1));
+                        stack.push_back(Segment(ac, bc, seg.c, seg.age-1));
+                        stack.push_back(Segment(ab, bc, ac, seg.age-1));
+                    } else {
+                        const float z = (seg.a(2) + seg.b(2) + seg.c(2)) * (1.0f/3.0f);
+                        m_parent->addPrimitive(z, instanceNr,
+                                               instance->add(convertCoordinates(m_parent->m_viewport, seg.a),
+                                                             convertCoordinates(m_parent->m_viewport, seg.b),
+                                                             convertCoordinates(m_parent->m_viewport, seg.c),
+                                                             color));
+                    }
+                }
             }
         }
 
  private:
+    struct Segment {
+        Vec3f a;
+        Vec3f b;
+        Vec3f c;
+        size_t age;
+
+        Segment(const Vec3f& a, const Vec3f& b, const Vec3f& c, size_t age)
+            : a(a), b(b), c(c), age(age)
+            { }
+    };
+
     afl::base::Ref<SoftwareContext> m_parent;
     struct Vertex {
         Vec3f pos;
