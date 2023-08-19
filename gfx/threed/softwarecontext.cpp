@@ -202,8 +202,8 @@ class gfx::threed::SoftwareContext::LineRendererImpl : public LineRenderer {
 
                     // Check 'w' of transformed value
                     // Negative 'w' essentially means the point is beyond the camera plane.
-                    const float fromw = m(3)*from(0) + m(7)*from(1) + m(11)*from(3) + m(15);
-                    const float tow   = m(3)*to(0)   + m(7)*to(1)   + m(11)*to(3)   + m(15);
+                    const float fromw = m(3)*from(0) + m(7)*from(1) + m(11)*from(2) + m(15);
+                    const float tow   = m(3)*to(0)   + m(7)*to(1)   + m(11)*to(2)   + m(15);
                     if (fromw <= 0 && tow <= 0) {
                         // Both 'w' are negative. Ignore this segment.
                     } else if (fromw <= 0 || tow <= 0) {
