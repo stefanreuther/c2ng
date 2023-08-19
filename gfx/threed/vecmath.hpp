@@ -68,7 +68,7 @@ namespace gfx { namespace threed {
             /** Vector addition, in-place.
                 \param other Other vector
                 \return *this */
-            UserType operator+=(const UserType& other)
+            UserType& operator+=(const UserType& other)
                 {
                     // ex vAdd
                     for (size_t i = 0; i < Dim; ++i) {
