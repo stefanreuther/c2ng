@@ -62,7 +62,7 @@ class client::tiles::TaskEditorTile::ListWidget : public ui::widgets::AbstractLi
 
             // Draw content
             size_t numLines = m_status.commands.size();
-            if (item < numLines) {
+            if (item <= numLines) {
                 // Cursor
                 int cursorSize = getItemHeight(0);
                 gfx::Rectangle cursorArea = area.splitX(cursorSize);
@@ -99,13 +99,15 @@ class client::tiles::TaskEditorTile::ListWidget : public ui::widgets::AbstractLi
                 }
 
                 // Program line
-                const String_t& cmd = m_status.commands[item];
-                if (!cmd.empty() && cmd[0] == '%') {
-                    ctx.setColor(util::SkinColor::Faded);
-                } else {
-                    ctx.setColor(util::SkinColor::Static);
+                if (item < numLines) {
+                    const String_t& cmd = m_status.commands[item];
+                    if (!cmd.empty() && cmd[0] == '%') {
+                        ctx.setColor(util::SkinColor::Faded);
+                    } else {
+                        ctx.setColor(util::SkinColor::Static);
+                    }
+                    outTextF(ctx, area, cmd);
                 }
-                outTextF(ctx, area, cmd);
             }
             if (item == numLines + 1) {
                 // Divider at end
