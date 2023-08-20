@@ -9,6 +9,7 @@
 #include "afl/bits/uint32le.hpp"
 #include "afl/bits/value.hpp"
 #include "afl/except/fileformatexception.hpp"
+#include "gfx/threed/colortransformation.hpp"
 #include "gfx/threed/linerenderer.hpp"
 #include "gfx/threed/trianglerenderer.hpp"
 #include "gfx/threed/vecmath.hpp"
@@ -341,6 +342,23 @@ gfx::threed::Model::renderMesh(size_t index, TriangleRenderer& r) const
     if (index < m_meshes.size()) {
         const Mesh* p = m_meshes[index];
         r.addTriangles(r.addVertices(p->m_points, p->m_normals, p->m_colors), p->m_indexes);
+    }
+}
+
+void
+gfx::threed::Model::renderMesh(size_t index, TriangleRenderer& r, const ColorTransformation& tr) const
+{
+    // TODO: consider moving the color transformation inside the TriangleRenderer to execute on the GPU?
+    if (index < m_meshes.size()) {
+        const Mesh* p = m_meshes[index];
+
+        std::vector<ColorQuad_t> colors;
+        const size_t n = p->m_colors.size();
+        colors.reserve(n);
+        for (size_t i = 0; i < n; ++i) {
+            colors.push_back(tr.transform(p->m_colors[i]));
+        }
+        r.addTriangles(r.addVertices(p->m_points, p->m_normals, colors), p->m_indexes);
     }
 }
 

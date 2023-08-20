@@ -18,6 +18,7 @@
 #include "gfx/defaultfont.hpp"
 #include "gfx/eventconsumer.hpp"
 #include "gfx/font.hpp"
+#include "gfx/threed/colortransformation.hpp"
 #include "gfx/threed/model.hpp"
 #include "gfx/threed/softwarecontext.hpp"
 #include "gfx/threed/vecmath.hpp"
@@ -37,6 +38,7 @@ typedef gfx::sdl2::Engine Engine_t;
 #endif
 
 using gfx::threed::Vec3f;
+using gfx::threed::ColorTransformation;
 using gfx::threed::Mat4f;
 
 namespace {
@@ -46,6 +48,21 @@ namespace {
         COLORQUAD_FROM_RGB(32,32,32),
         COLORQUAD_FROM_RGB(96,96,96),
         COLORQUAD_FROM_RGB(255,255,255),
+    };
+
+    static const gfx::ColorQuad_t PLAYER_COLORS[] = {
+        0,
+        COLORQUAD_FROM_RGB(128,128,150),
+        COLORQUAD_FROM_RGB(255,255,255),
+        COLORQUAD_FROM_RGB(255,255,0),
+        COLORQUAD_FROM_RGB(97,242,97),
+        COLORQUAD_FROM_RGB(97,97,194),
+        COLORQUAD_FROM_RGB(255,0,0),
+        COLORQUAD_FROM_RGB(255,85,255),
+        COLORQUAD_FROM_RGB(194,97,0),
+        COLORQUAD_FROM_RGB(255,194,0),
+        COLORQUAD_FROM_RGB(85,255,255),
+        COLORQUAD_FROM_RGB(0,170,0),
     };
 
     gfx::Point convertCoordinates(const gfx::Rectangle& area, const Vec3f& pos)
@@ -107,11 +124,13 @@ namespace {
         App(gfx::Canvas& can, afl::base::Ref<gfx::threed::Context> ctx, gfx::threed::Model& model)
             : m_stop(false),
               m_canvas(can),
+              m_model(model),
               m_projection(Mat4f::perspective(45 * util::PI / 180, double(can.getSize().getX()) / can.getSize().getY(), 0.1)),
               m_azimut(),
               m_height(),
               m_distance(6.0),
               m_backgroundColor(0),
+              m_playerColor(0),
               m_context(ctx),
               m_showModel(!false),
               m_showOutline(!true),
@@ -123,16 +142,28 @@ namespace {
               m_posList(),
               m_font(gfx::createDefaultFont())
             {
-                updateModel(model);
+                updateModel();
                 draw();
             }
 
-        void updateModel(gfx::threed::Model& model)
+        void updateModel()
             {
-                model.renderMesh(0, *m_modelRenderer);
-                model.renderGrid(0, *m_outlineRenderer, COLORQUAD_FROM_RGB(192, 192, 192));
-                model.renderGrid(1, *m_wireframeRenderer, COLORQUAD_FROM_RGB(192, 255, 192));
-                m_posList = model.positions();
+                updateMesh();
+                m_model.renderGrid(0, *m_outlineRenderer, COLORQUAD_FROM_RGB(192, 192, 192));
+                m_model.renderGrid(1, *m_wireframeRenderer, COLORQUAD_FROM_RGB(192, 255, 192));
+                m_posList = m_model.positions();
+            }
+
+        void updateMesh()
+            {
+                m_modelRenderer->clear();
+                if (m_playerColor == 0) {
+                    m_model.renderMesh(0, *m_modelRenderer);
+                } else {
+                    ColorTransformation dim = ColorTransformation::identity().scale(0.3f);
+                    ColorTransformation gray = ColorTransformation::toGrayscale(PLAYER_COLORS[m_playerColor]).scale(0.7f);
+                    m_model.renderMesh(0, *m_modelRenderer, dim + gray);
+                }
             }
 
         void draw()
@@ -229,6 +260,12 @@ namespace {
                     draw();
                     return true;
 
+                 case 'p':
+                    m_playerColor = (m_playerColor+1) % countof(PLAYER_COLORS);
+                    updateMesh();
+                    draw();
+                    return true;
+
                  case 'a':
                     m_distance -= 0.1;
                     draw();
@@ -277,12 +314,14 @@ namespace {
      private:
         bool m_stop;
         gfx::Canvas& m_canvas;
+        gfx::threed::Model& m_model;
 
         Mat4f m_projection;
         double m_azimut;
         double m_height;
         double m_distance;
         size_t m_backgroundColor;
+        size_t m_playerColor;
 
         afl::base::Ref<gfx::threed::Context> m_context;
 

@@ -15,6 +15,7 @@
 
 namespace gfx { namespace threed {
 
+    class ColorTransformation;
     class LineRenderer;
     class TriangleRenderer;
 
@@ -58,7 +59,11 @@ namespace gfx { namespace threed {
             @param r     Renderer */
         void renderMesh(size_t index, TriangleRenderer& r) const;
 
-        // TODO: void renderMesh(size_t index, TriangleRenderer& r, const ColorTransformationMatrix& mtx) const;
+        /** Render mesh on a TriangleRenderer, with color transformation.
+            @param index Index, [0,getNumMeshes()). Call is ignored if out-of-range.
+            @param r     Renderer
+            @param tr    Color transformation */
+        void renderMesh(size_t index, TriangleRenderer& r, const ColorTransformation& tr) const;
 
         /** Render grid on a LineRenderer.
             @param index Index, [0,getNumGrids()). Call is ignored if out-of-range.

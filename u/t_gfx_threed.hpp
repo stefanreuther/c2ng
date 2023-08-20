@@ -7,6 +7,11 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestGfxThreedColorTransformation : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestGfxThreedContext : public CxxTest::TestSuite {
  public:
     void testInterface();
