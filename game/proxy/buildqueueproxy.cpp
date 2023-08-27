@@ -12,6 +12,8 @@
 #include "game/score/compoundscore.hpp"
 #include "game/turn.hpp"
 
+using game::score::CompoundScore;
+
 class game::proxy::BuildQueueProxy::Trampoline {
  public:
     typedef game::actions::ChangeBuildQueue Action_t;
@@ -32,7 +34,7 @@ class game::proxy::BuildQueueProxy::Trampoline {
                                             session.rng(),
                                             g->getViewpointPlayer()));
                 m_action->addPlannedBuilds(session.processList());
-                m_action->setAvailableBuildPoints(game::score::CompoundScore(g->scores(), game::score::ScoreId_BuildPoints, 1).get(g->scores(), g->currentTurn().getTurnNumber(), g->getViewpointPlayer()));
+                m_action->setAvailableBuildPoints(CompoundScore(g->scores(), game::score::ScoreId_BuildPoints, 1).get(g->scores(), g->currentTurn().getTurnNumber(), g->getViewpointPlayer()));
             }
         }
 
@@ -60,6 +62,24 @@ class game::proxy::BuildQueueProxy::Trampoline {
     Session& session()
         { return m_session; }
 
+    void getStatus(Infos_t& data, GlobalInfo& global)
+        {
+            // Action
+            if (Trampoline::Action_t* p = get()) {
+                p->describe(data, session().translator());
+            }
+
+            // Extra info
+            if (Game* g = m_session.getGame().get()) {
+                // My bases (count normally)
+                global.numBases = g->currentTurn().universe().playedBases().countObjects();
+
+                // All bases (from scores)
+                global.totalBases = CompoundScore(g->scores(), game::score::ScoreId_Bases, 1).get(g->scores(), g->currentTurn().getTurnNumber(), PlayerSet_t::allUpTo(MAX_PLAYERS))
+                    .orElse(0);
+            }
+        }
+
  private:
     Session& m_session;
     util::RequestSender<BuildQueueProxy> m_reply;
@@ -86,23 +106,20 @@ game::proxy::BuildQueueProxy::BuildQueueProxy(util::RequestSender<Session> gameS
 { }
 
 void
-game::proxy::BuildQueueProxy::getStatus(WaitIndicator& link, Infos_t& data)
+game::proxy::BuildQueueProxy::getStatus(WaitIndicator& link, Infos_t& data, GlobalInfo& global)
 {
     class Task : public util::Request<Trampoline> {
      public:
-        Task(Infos_t& data)
-            : m_data(data)
+        Task(Infos_t& data, GlobalInfo& global)
+            : m_data(data), m_global(global)
             { }
         virtual void handle(Trampoline& tpl)
-            {
-                if (Trampoline::Action_t* p = tpl.get()) {
-                    p->describe(m_data, tpl.session().translator());
-                }
-            }
+            { tpl.getStatus(m_data, m_global); }
      private:
         Infos_t& m_data;
+        GlobalInfo& m_global;
     };
-    Task t(data);
+    Task t(data, global);
     link.call(m_request, t);
 }
 

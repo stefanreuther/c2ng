@@ -31,6 +31,14 @@ namespace game { namespace proxy {
         typedef game::actions::ChangeBuildQueue::Infos_t Infos_t;
         typedef game::actions::ChangeBuildQueue::Info Info_t;
 
+        struct GlobalInfo {
+            int numBases;       ///< Number of bases owned by player.
+            int totalBases;     ///< Total number of bases in game. 0 if not known.
+            GlobalInfo()
+                : numBases(), totalBases()
+                { }
+        };
+
         /** Constructor.
             \param gameSender Sender
             \param reply RequestDispatcher to send replies back */
@@ -39,8 +47,9 @@ namespace game { namespace proxy {
         /** Get current status.
             Call this to synchronously obtain the current status.
             \param link [in] WaitIndicator
-            \param data [out] Current status */
-        void getStatus(WaitIndicator& link, Infos_t& data);
+            \param data [out] Current status
+            \param global [out] Global status */
+        void getStatus(WaitIndicator& link, Infos_t& data, GlobalInfo& global);
 
         /** Set priority of a build order.
             Will produce a sig_update callback with new status.

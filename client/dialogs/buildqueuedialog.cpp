@@ -23,6 +23,7 @@
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/widgets/statictext.hpp"
 #include "util/unicodechars.hpp"
+#include "util/vector.hpp"
 
 namespace {
     using client::ScreenHistory;
@@ -82,6 +83,38 @@ namespace {
         Columns_t m_columns;
     };
 
+    class BuildQueueBar : public ui::SimpleWidget {
+     public:
+        typedef BuildQueueProxy::Infos_t Infos_t;
+        typedef BuildQueueProxy::GlobalInfo GlobalInfo_t;
+
+        BuildQueueBar(ui::Root& root);
+
+        void setContent(const Infos_t& content, const GlobalInfo_t& global);
+        void setPlanetId(game::Id_t planetId);
+
+        virtual void draw(gfx::Canvas& can);
+        virtual void handleStateChange(State st, bool enable);
+        virtual void handlePositionChange();
+        virtual ui::layout::Info getLayoutInfo() const;
+        virtual bool handleKey(util::Key_t key, int prefix);
+        virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
+
+     private:
+        static const int IdShift = 1;
+        static const int PlannedFlag = 1;
+
+        ui::Root& m_root;
+        int m_maxBases;
+        int m_planetId;
+
+        /* 0 = foreign order, otherwise: id << IdShift, optionally + PlannedFlag */
+        util::Vector<int,int> m_content;
+
+        uint8_t getColorBySlot(int slot) const;
+        int getCoordinateBySlot(const gfx::Rectangle& a, int slot) const;
+    };
+
     class BuildQueueKeyHandler : public ui::InvisibleWidget {
      public:
         BuildQueueKeyHandler(BuildQueueProxy& proxy, BuildQueueList& list);
@@ -99,26 +132,50 @@ namespace {
         BuildQueueDialog(ui::Root& root, afl::string::Translator& tx, BuildQueueProxy& proxy, BuildQueueList::Columns_t cols, util::RequestSender<game::Session> gameSender)
             : m_root(root),
               m_list(root, tx, cols),
+              m_bar(root),
               m_loop(root),
               m_translator(tx),
               m_proxy(proxy),
               m_gameSender(gameSender),
-              m_reference()
+              m_reference(),
+              m_wantBar(cols.contains(BuildQueueList::QueuePositionColumn))
             {
-                proxy.sig_update.add(this, &BuildQueueDialog::setContent);
+                proxy.sig_update.add(this, &BuildQueueDialog::setListContent);
+                m_list.sig_change.add(this, &BuildQueueDialog::updatePlanetId);
             }
 
-        void setContent(const Infos_t& data)
-            { m_list.setContent(data); }
+        void setListContent(const Infos_t& data)
+            {
+                m_list.setContent(data);
+            }
+
+        void setContent(const Infos_t& data, const BuildQueueProxy::GlobalInfo& global)
+            {
+                m_list.setContent(data);
+                m_bar.setContent(data, global);
+            }
 
         void scrollToPlanet(game::Id_t planetId)
-            { m_list.scrollToPlanet(planetId); }
+            {
+                m_list.scrollToPlanet(planetId);
+                updatePlanetId();
+            }
+
+        void updatePlanetId()
+            {
+                if (m_wantBar) {
+                    m_bar.setPlanetId(m_list.getCurrentPlanetId());
+                }
+            }
 
         void run()
             {
                 afl::base::Deleter del;
                 ui::Window win(m_translator("Manage Build Queue"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5);
                 win.add(ui::widgets::FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame, del.addNew(new ui::widgets::ScrollbarContainer(m_list, m_root))));
+                if (m_wantBar) {
+                    win.add(m_bar);
+                }
 
                 ui::Widget& keys = del.addNew(new BuildQueueKeyHandler(m_proxy, m_list));
                 win.add(keys);
@@ -200,11 +257,13 @@ namespace {
      private:
         ui::Root& m_root;
         BuildQueueList m_list;
+        BuildQueueBar m_bar;
         ui::EventLoop m_loop;
         afl::string::Translator& m_translator;
         BuildQueueProxy& m_proxy;
         util::RequestSender<game::Session> m_gameSender;
         ScreenHistory::Reference m_reference;
+        bool m_wantBar;
     };
 
 }
@@ -456,6 +515,133 @@ BuildQueueList::getItemHeight() const
         + 2*PAD_PX;
 }
 
+
+/*
+ *  BuildQueueBar
+ */
+
+BuildQueueBar::BuildQueueBar(ui::Root& root)
+    : m_root(root),
+      m_maxBases(),
+      m_planetId(),
+      m_content(1)
+{ }
+
+void
+BuildQueueBar::setContent(const Infos_t& content, const GlobalInfo_t& global)
+{
+    int maxPos = 0;
+
+    // Queued orders
+    for (size_t i = 0, n = content.size(); i < n; ++i) {
+        if (int thisPos = content[i].queuePosition) {
+            maxPos = std::max(maxPos, thisPos);
+            m_content.set(thisPos, content[i].planetId << IdShift);
+        }
+    }
+
+    // Planned orders (and orders submitted this turn)
+    for (size_t i = 0, n = content.size(); i < n; ++i) {
+        if (content[i].queuePosition == 0) {
+            ++maxPos;
+            m_content.set(maxPos, (content[i].planetId << IdShift) | PlannedFlag);
+        }
+    }
+
+    // Total size
+    m_maxBases = std::max(maxPos, global.totalBases);
+}
+
+void
+BuildQueueBar::setPlanetId(game::Id_t planetId)
+{
+    if (m_planetId != planetId) {
+        m_planetId = planetId;
+        requestRedraw();
+    }
+}
+
+void
+BuildQueueBar::draw(gfx::Canvas& can)
+{
+    gfx::Context<uint8_t> ctx(can, m_root.colorScheme());
+    gfx::Rectangle area = getExtent();
+
+    // Outer frame
+    ui::drawFrameDown(ctx, area);
+    area.grow(-1, -1);
+
+    // Content
+    if (m_maxBases > 0) {
+        int pos = 1;
+        while (pos <= m_maxBases) {
+            int firstPos = pos;
+            uint8_t color = getColorBySlot(pos);
+            ++pos;
+            while (pos <= m_maxBases && getColorBySlot(pos) == color) {
+                ++pos;
+            }
+            int x1 = getCoordinateBySlot(area, firstPos);
+            int x2 = getCoordinateBySlot(area, pos);
+            drawSolidBar(ctx, gfx::Rectangle(area.getLeftX() + x1, area.getTopY(), x2-x1, area.getHeight()), color);
+        }
+    } else {
+        drawSolidBar(ctx, area, ui::Color_Gray);
+    }
+}
+
+void
+BuildQueueBar::handleStateChange(State /*st*/, bool /*enable*/)
+{ }
+
+void
+BuildQueueBar::handlePositionChange()
+{
+    requestRedraw();
+}
+
+ui::layout::Info
+BuildQueueBar::getLayoutInfo() const
+{
+    return ui::layout::Info(gfx::Point(100, 14), ui::layout::Info::GrowHorizontal);
+}
+
+bool
+BuildQueueBar::handleKey(util::Key_t /*key*/, int /*prefix*/)
+{
+    return false;
+}
+
+bool
+BuildQueueBar::handleMouse(gfx::Point /*pt*/, MouseButtons_t /*pressedButtons*/)
+{
+    return false;
+}
+
+uint8_t
+BuildQueueBar::getColorBySlot(int slot) const
+{
+    int value = m_content.get(slot);
+    if (value != 0) {
+        if ((value >> IdShift) == m_planetId) {
+            return ui::Color_Yellow;
+        } else if ((value & PlannedFlag) != 0) {
+            return ui::Color_GreenBlack;
+        } else {
+            return ui::Color_Green;
+        }
+    } else {
+        return ui::Color_Grayscale+3;
+    }
+}
+
+int
+BuildQueueBar::getCoordinateBySlot(const gfx::Rectangle& a, int slot) const
+{
+    return a.getWidth() * (slot-1) / m_maxBases;
+}
+
+
 /*
  *  BuildQueueKeyHandler - special keys for the dialog
  */
@@ -497,8 +683,9 @@ client::dialogs::doBuildQueueDialog(game::Id_t baseId,
     // Set up proxy
     BuildQueueProxy proxy(gameSender, root.engine().dispatcher());
     BuildQueueProxy::Infos_t infos;
+    BuildQueueProxy::GlobalInfo global;
     Downlink link(root, tx);
-    proxy.getStatus(link, infos);
+    proxy.getStatus(link, infos, global);
     if (infos.empty()) {
         ui::dialogs::MessageBox(tx("You have no active ship build orders."),
                                 tx("Manage Build Queue"),
@@ -519,7 +706,7 @@ client::dialogs::doBuildQueueDialog(game::Id_t baseId,
 
     // Set up dialog
     BuildQueueDialog dlg(root, tx, proxy, cols, gameSender);
-    dlg.setContent(infos);
+    dlg.setContent(infos, global);
     dlg.scrollToPlanet(baseId);
     dlg.run();
 

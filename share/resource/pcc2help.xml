@@ -2825,7 +2825,9 @@
           The number consumed is shown in red if you do not have enough points.</li>
       </ul>
       <p>The list is shown in approximate order the ships will be built, first ships first (highest priority, PB1).
-        Scroll around using the arrows, or use the following keys:</p>
+        If the build queue positions are known, PCC2 will also show a graphical overview of your positions as a bar below the list;
+        each green block is one of your build orders, the entire bar shows all starbases in the game.</p>
+      <p>Scroll around using the arrows, or use the following keys:</p>
       <kl>
         <ki key="+, Shift-&#x2191;">Increase this build order's priority (build earlier);</ki>
         <ki key="-, Shift-&#x2193;">Decrease this build order's priority (build later);</ki>

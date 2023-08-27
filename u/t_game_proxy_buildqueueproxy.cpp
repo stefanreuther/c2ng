@@ -88,6 +88,19 @@ namespace {
         addPlanet(s, 4, "abc");
     }
 
+    void initScore(game::test::SessionThread& s)
+    {
+        game::Game* g = s.session().getGame().get();
+        g->currentTurn().setTurnNumber(77);
+
+        game::score::TurnScore::Slot_t slot = g->scores().addSlot(game::score::ScoreId_Bases);
+        game::score::TurnScore& t = g->scores().addTurn(77, game::Timestamp(2000, 12, 24, 12, 0, 0));
+
+        t.set(slot, PLAYER_NR+1, 3);
+        t.set(slot, PLAYER_NR+2, 7);
+        t.set(slot, PLAYER_NR,   5);
+    }
+
     struct UpdateReceiver {
         game::proxy::BuildQueueProxy::Infos_t result;
 
@@ -105,6 +118,7 @@ TestGameProxyBuildQueueProxy::testInit()
     // Environment
     game::test::SessionThread s;
     init(s);
+    initScore(s);
 
     // Testee
     game::test::WaitIndicator ind;
@@ -112,7 +126,8 @@ TestGameProxyBuildQueueProxy::testInit()
 
     // Get initial status
     game::proxy::BuildQueueProxy::Infos_t data;
-    testee.getStatus(ind, data);
+    game::proxy::BuildQueueProxy::GlobalInfo global;
+    testee.getStatus(ind, data, global);
     TS_ASSERT_EQUALS(data.size(), 4U);
     TS_ASSERT_EQUALS(data[0].planetId, 3);
     TS_ASSERT_EQUALS(data[1].planetId, 2);
@@ -122,6 +137,8 @@ TestGameProxyBuildQueueProxy::testInit()
     TS_ASSERT_EQUALS(data[1].friendlyCode, "PB3");
     TS_ASSERT_EQUALS(data[2].friendlyCode, "xyz");
     TS_ASSERT_EQUALS(data[3].friendlyCode, "abc");
+    TS_ASSERT_EQUALS(global.numBases, 4);
+    TS_ASSERT_EQUALS(global.totalBases, 15);
 }
 
 /** Test increasePriority().
@@ -141,7 +158,8 @@ TestGameProxyBuildQueueProxy::testIncrease()
     // Increase 'abc'
     testee.increasePriority(3);
     game::proxy::BuildQueueProxy::Infos_t data;
-    testee.getStatus(ind, data);
+    game::proxy::BuildQueueProxy::GlobalInfo global;
+    testee.getStatus(ind, data, global);
     TS_ASSERT_EQUALS(data.size(), 4U);
     TS_ASSERT_EQUALS(data[0].planetId, 3);
     TS_ASSERT_EQUALS(data[1].planetId, 2);
@@ -170,7 +188,8 @@ TestGameProxyBuildQueueProxy::testDecrease()
     // Decrease 'PB1'
     testee.decreasePriority(0);
     game::proxy::BuildQueueProxy::Infos_t data;
-    testee.getStatus(ind, data);
+    game::proxy::BuildQueueProxy::GlobalInfo global;
+    testee.getStatus(ind, data, global);
     TS_ASSERT_EQUALS(data.size(), 4U);
     TS_ASSERT_EQUALS(data[0].planetId, 3);
     TS_ASSERT_EQUALS(data[1].planetId, 2);
@@ -199,7 +218,8 @@ TestGameProxyBuildQueueProxy::testSet()
     // Change abc -> 2
     testee.setPriority(3, 2);
     game::proxy::BuildQueueProxy::Infos_t data;
-    testee.getStatus(ind, data);
+    game::proxy::BuildQueueProxy::GlobalInfo global;
+    testee.getStatus(ind, data, global);
     TS_ASSERT_EQUALS(data.size(), 4U);
     TS_ASSERT_EQUALS(data[0].planetId, 3);
     TS_ASSERT_EQUALS(data[1].planetId, 4);
@@ -282,7 +302,10 @@ TestGameProxyBuildQueueProxy::testEmpty()
 
     // Get initial status
     game::proxy::BuildQueueProxy::Infos_t data;
-    testee.getStatus(ind, data);
+    game::proxy::BuildQueueProxy::GlobalInfo global;
+    testee.getStatus(ind, data, global);
     TS_ASSERT_EQUALS(data.size(), 0U);
+    TS_ASSERT_EQUALS(global.numBases, 0);
+    TS_ASSERT_EQUALS(global.totalBases, 0);
 }
 
