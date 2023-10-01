@@ -98,6 +98,7 @@ ClassicVcrObjectDialog::ClassicVcrObjectDialog(ui::Root& root, util::NumberForma
 {
     m_nameWidget.setIsFlexible(true);
     m_subtitleWidget.setIsFlexible(true);
+    m_image.setBackgroundColor(ui::Color_Black);
 
     // WVcrHullList::WVcrHullList
     m_hullList.setPreferredWidth(20, false);

@@ -38,9 +38,5 @@ ui::res::GeneratedPlanetProvider::renderPlanet(int temp, int id)
 
     afl::base::Ref<gfx::RGBAPixmap> pix = cfg.render(rng);
 
-    // FIXME: this should not be necessary.
-    // 20180101: ImageButton::draw() uses blitSized(), which assumes that the image is fully opaque.
-    pix->setAlpha(gfx::OPAQUE_ALPHA);
-
     return pix->makeCanvas().asPtr();
 }

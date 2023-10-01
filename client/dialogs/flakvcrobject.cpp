@@ -101,6 +101,7 @@ Dialog::Dialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<
       conn_sideUpdate(proxy.sig_sideUpdate.add(this, &Dialog::onSideUpdate)),
       conn_hullUpdate(proxy.sig_hullUpdate.add(this, &Dialog::onHullUpdate))
 {
+    m_image.setBackgroundColor(ui::Color_Black);
     m_nameWidget.setIsFlexible(true);
     m_subtitleWidget.setIsFlexible(true);
     m_gotoButton.sig_fire.add(this, &Dialog::onGoTo);

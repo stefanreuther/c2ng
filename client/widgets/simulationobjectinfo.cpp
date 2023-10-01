@@ -109,6 +109,7 @@ class client::widgets::SimulationObjectInfo::Header : public CollapsibleDataView
           m_firstTable(root, 2, 6),
           m_secondTable(root, 2, 3)
         {
+            m_imageButton.setBackgroundColor(ui::Color_Black);
             init(keyHandler);
         }
 

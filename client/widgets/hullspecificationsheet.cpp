@@ -229,6 +229,7 @@ client::widgets::HullSpecificationSheet::init()
 
     // Image || First Table
     m_pImage = &m_deleter.addNew(new ui::widgets::ImageButton(String_t(), 0, m_root, gfx::Point(105, 95)));
+    m_pImage->setBackgroundColor(ui::Color_Black);
     m_pBaseTable = &m_deleter.addNew(new ui::widgets::SimpleTable(m_root, 3, 6));
     initBaseTable(*m_pBaseTable, em, m_translator);
 

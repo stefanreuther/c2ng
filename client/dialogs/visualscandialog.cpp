@@ -923,6 +923,7 @@ client::dialogs::VisualScanDialog::Window::run(String_t title, String_t okName)
     FrameGroup& frmImage = wrapWidget(h, FrameGroup::wrapWidget(h, m_root.colorScheme(), ui::LoweredFrame, btnImage), m_root);
     group111.add(frmImage);
     btnImage.dispatchKeyTo(keys);
+    btnImage.setBackgroundColor(ui::Color_Black);
     m_pImage = &btnImage;
     m_pImageFrame = &frmImage;
 

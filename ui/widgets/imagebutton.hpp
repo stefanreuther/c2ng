@@ -36,6 +36,10 @@ namespace ui { namespace widgets {
             \param text New text */
         void setText(String_t text);
 
+        /** Set background color.
+            \param color Color. By default, skin background (potentially patterned) is drawn. */
+        void setBackgroundColor(uint8_t color);
+
      private:
         /* Private Icon implementation. We could probably use Image? */
         class Icon : public ui::icons::Icon {
@@ -49,6 +53,7 @@ namespace ui { namespace widgets {
             Root& m_root;
             gfx::Point m_size;
             gfx::FontRequest m_font;
+            int m_backgroundColor;
         };
 
         Icon m_icon;

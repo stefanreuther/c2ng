@@ -137,6 +137,7 @@ client::dialogs::BuildShipMain::init(afl::base::Deleter& del)
 
         // More widgets
         m_pImageButtons[i] = &del.addNew(new ui::widgets::ImageButton(String_t(), 0, m_root, gfx::Point(105, 93)));
+        m_pImageButtons[i]->setBackgroundColor(ui::Color_Black);
         m_pSpecificationDisplay[i] = &del.addNew(new DocumentView(getSpecificationDisplaySize(m_root), 0, m_root.provider()));
         m_pInStorage[i] = &del.addNew(new StaticText(String_t(), SkinColor::Static, gfx::FontRequest(), m_root.provider()));
     }

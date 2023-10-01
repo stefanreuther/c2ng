@@ -14,7 +14,7 @@
 
 inline
 ui::widgets::ImageButton::Icon::Icon(String_t imageName, Root& root, gfx::Point size)
-    : m_imageName(imageName), m_root(root), m_size(size), m_font()
+    : m_imageName(imageName), m_root(root), m_size(size), m_font(), m_backgroundColor(-1)
 {
     m_font.addSize(-1);
 }
@@ -28,13 +28,18 @@ ui::widgets::ImageButton::Icon::getSize() const
 void
 ui::widgets::ImageButton::Icon::draw(gfx::Context<SkinColor::Color>& ctx, gfx::Rectangle area, ButtonFlags_t /*flags*/) const
 {
+    gfx::Context<uint8_t> ctx2(ctx.canvas(), m_root.colorScheme());
+
     // Draw background. The image may have transparency, so we must produce a solid color.
-    drawBackground(ctx, area);
+    if (m_backgroundColor < 0) {
+        drawBackground(ctx, area);
+    } else {
+        drawSolidBar(ctx2, area, static_cast<uint8_t>(m_backgroundColor));
+    }
 
     // Draw the image.
     afl::base::Ptr<gfx::Canvas> image = m_root.provider().getImage(m_imageName);
     if (image.get() != 0) {
-        // FIXME: 20180101: blitSized() assumes that the image is fully opaque.
         blitSized(ctx, area, *image);
     }
 
@@ -56,7 +61,6 @@ ui::widgets::ImageButton::Icon::draw(gfx::Context<SkinColor::Color>& ctx, gfx::R
 
         // Draw
         afl::base::Ref<gfx::Font> font = m_root.provider().getFont(m_font);
-        gfx::Context<uint8_t> ctx2(ctx.canvas(), m_root.colorScheme());
         ctx2.useFont(*font);
         ctx2.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
         int x = area.getLeftX();
@@ -97,6 +101,15 @@ ui::widgets::ImageButton::setText(String_t text)
 {
     if (text != m_icon.m_text) {
         m_icon.m_text = text;
+        requestRedraw();
+    }
+}
+
+void
+ui::widgets::ImageButton::setBackgroundColor(uint8_t color)
+{
+    if (color != m_icon.m_backgroundColor) {
+        m_icon.m_backgroundColor = color;
         requestRedraw();
     }
 }

@@ -294,6 +294,7 @@ client::widgets::ControlScreenHeader::createChildWidgets(ui::Root& root, gfx::Ke
             ui::widgets::FrameGroup& innerFrame = m_deleter.addNew(new ui::widgets::FrameGroup(ui::layout::HBox::instance0, root.colorScheme(), ui::LoweredFrame));
             innerFrame.add(btn);
             btn.dispatchKeyTo(kmw);
+            btn.setBackgroundColor(ui::Color_Black);
             w = &innerFrame;
             m_image = &btn;
         } else {
