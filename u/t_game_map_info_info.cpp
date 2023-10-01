@@ -65,7 +65,7 @@ namespace {
 
     struct ExperienceTestHarness {
         Universe univ;
-        UnitScoreDefinitionList shipScores;
+        UnitScoreDefinitionList theScores;
         UnitScoreDefinitionList::Index_t expIndex;
         HostConfiguration config;
 
@@ -73,10 +73,10 @@ namespace {
         afl::string::NullTranslator tx;
 
         ExperienceTestHarness()
-            : univ(), shipScores(), expIndex(), config(), fmt(true, true), tx()
+            : univ(), theScores(), expIndex(), config(), fmt(true, true), tx()
             {
                 UnitScoreDefinitionList::Definition defn = { "Experience", game::ScoreId_ExpLevel, 10 };
-                expIndex = shipScores.add(defn);
+                expIndex = theScores.add(defn);
 
                 config[HostConfiguration::NumExperienceLevels].set(3);
                 config[HostConfiguration::ExperienceLevelNames].set("Noob,Apprentice,Wizard,God");
@@ -89,6 +89,14 @@ namespace {
         sh->setOwner(PLAYER);
         sh->setPlayability(game::map::Object::Playable);
         sh->unitScores().set(h.expIndex, level, 10);
+    }
+
+    void addPlanet(ExperienceTestHarness& h, game::Id_t id, int16_t level)
+    {
+        game::map::Planet* pl = h.univ.planets().create(id);
+        pl->setOwner(PLAYER);
+        pl->setPlayability(game::map::Object::Playable);
+        pl->unitScores().set(h.expIndex, level, 10);
     }
 
 
@@ -258,7 +266,7 @@ TestGameMapInfoInfo::testExperience()
     // With ScriptLinkBuilder
     {
         TagNode tab("table");
-        gmi::renderShipExperienceSummary(tab, h.univ, true, h.shipScores, h.config, h.fmt, h.tx, game::map::info::ScriptLinkBuilder());
+        gmi::renderShipExperienceSummary(tab, h.univ, true, h.theScores, h.config, h.fmt, h.tx, game::map::info::ScriptLinkBuilder());
 
         TS_ASSERT_EQUALS(toString(tab),
                          "<table><tr><td width=\"17\"><font color=\"white\">Ships by Experience Level</font></td><td align=\"right\" width=\"3\"/></tr>"
@@ -270,13 +278,54 @@ TestGameMapInfoInfo::testExperience()
     // With NullLinkBuilder
     {
         TagNode tab("table");
-        gmi::renderShipExperienceSummary(tab, h.univ, true, h.shipScores, h.config, h.fmt, h.tx, game::map::info::NullLinkBuilder());
+        gmi::renderShipExperienceSummary(tab, h.univ, true, h.theScores, h.config, h.fmt, h.tx, game::map::info::NullLinkBuilder());
 
         TS_ASSERT_EQUALS(toString(tab),
                          "<table><tr><td width=\"17\"><font color=\"white\">Ships by Experience Level</font></td><td align=\"right\" width=\"3\"/></tr>"
                          "<tr><td>Noob</td><td align=\"right\"><font color=\"green\">5</font></td></tr>"
                          "<tr><td>Wizard</td><td align=\"right\"><font color=\"green\">2</font></td></tr>"
                          "<tr><td>God</td><td align=\"right\"><font color=\"green\">7</font></td></tr></table>");
+    }
+}
+
+void
+TestGameMapInfoInfo::testPlanetExperience()
+{
+    ExperienceTestHarness h;
+
+    // 3 noobs, no apprentice, 4 wizards, 5 gods
+    for (int i = 1; i <= 3; ++i) {
+        addPlanet(h, i, 0);
+    }
+    for (int i = 1; i <= 4; ++i) {
+        addPlanet(h, 10 + i, 2);
+    }
+    for (int i = 1; i <= 5; ++i) {
+        addPlanet(h, 20 + i, 3);
+    }
+
+    // With ScriptLinkBuilder
+    {
+        TagNode tab("table");
+        gmi::renderPlanetExperienceSummary(tab, h.univ, h.theScores, h.config, h.fmt, h.tx, game::map::info::ScriptLinkBuilder());
+
+        TS_ASSERT_EQUALS(toString(tab),
+                         "<table><tr><td width=\"17\"><font color=\"white\">Planets by Experience Level</font></td><td align=\"right\" width=\"3\"/></tr>"
+                         "<tr><td><a href=\"q:UI.Search &quot;Level=0 And Owner$=My.Race$&quot;,&quot;p2&quot;\">Noob</a></td><td align=\"right\"><font color=\"green\">3</font></td></tr>"
+                         "<tr><td><a href=\"q:UI.Search &quot;Level=2 And Owner$=My.Race$&quot;,&quot;p2&quot;\">Wizard</a></td><td align=\"right\"><font color=\"green\">4</font></td></tr>"
+                         "<tr><td><a href=\"q:UI.Search &quot;Level=3 And Owner$=My.Race$&quot;,&quot;p2&quot;\">God</a></td><td align=\"right\"><font color=\"green\">5</font></td></tr></table>");
+    }
+
+    // With NullLinkBuilder
+    {
+        TagNode tab("table");
+        gmi::renderPlanetExperienceSummary(tab, h.univ, h.theScores, h.config, h.fmt, h.tx, game::map::info::NullLinkBuilder());
+
+        TS_ASSERT_EQUALS(toString(tab),
+                         "<table><tr><td width=\"17\"><font color=\"white\">Planets by Experience Level</font></td><td align=\"right\" width=\"3\"/></tr>"
+                         "<tr><td>Noob</td><td align=\"right\"><font color=\"green\">3</font></td></tr>"
+                         "<tr><td>Wizard</td><td align=\"right\"><font color=\"green\">4</font></td></tr>"
+                         "<tr><td>God</td><td align=\"right\"><font color=\"green\">5</font></td></tr></table>");
     }
 }
 

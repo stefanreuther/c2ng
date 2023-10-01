@@ -468,6 +468,29 @@ namespace {
         }
         makeTwoColumnTextRow(tab, left, right);
     }
+
+    /*
+     *  Experience Summary
+     */
+    void renderExperienceSummary(TagNode& tab,
+                                 const util::Vector<int, int>& levelCounts,
+                                 SearchQuery::SearchObjects_t searchObjs,
+                                 String_t querySuffix,
+                                 const HostConfiguration& config,
+                                 const util::NumberFormatter& fmt,
+                                 afl::string::Translator& tx,
+                                 const LinkBuilder& link)
+    {
+        for (int i = 0; i <= game::MAX_EXPERIENCE_LEVELS; ++i) {
+            int n = levelCounts.get(i);
+            if (n > 0) {
+                TagNode& row = makeRow(tab);
+                makeLink(makeLeftCell(row), config.getExperienceLevelName(i, tx),
+                         link.makeSearchLink(SearchQuery(SearchQuery::MatchTrue, searchObjs, Format("Level=%d%s", i, querySuffix))));
+                makeText(makeGreen(makeRightCell(row)), fmt.formatNumber(n));
+            }
+        }
+    }
 }
 
 /*
@@ -900,6 +923,36 @@ game::map::info::renderPlanetDefenseSummary(TagNode& tab, const Universe& univ, 
     }
 }
 
+// Render planet experience level summary (part of PlanetsPage).
+void
+game::map::info::renderPlanetExperienceSummary(TagNode& tab,
+                                               const Universe& univ,
+                                               const UnitScoreDefinitionList& planetScores,
+                                               const game::config::HostConfiguration& config,
+                                               util::NumberFormatter fmt,
+                                               afl::string::Translator& tx,
+                                               const LinkBuilder& link)
+{
+    // Acquire data
+    util::Vector<int, int> levelCounts;
+    const PlayedPlanetType& type = univ.playedPlanets();
+    for (Id_t pid = type.findNextIndex(0); pid != 0; pid = type.findNextIndex(pid)) {
+        if (const Planet* pl = type.getObjectByIndex(pid)) {
+            int level;
+            if (pl->getScore(ScoreId_ExpLevel, planetScores).get(level) && level >= 0 && level <= MAX_EXPERIENCE_LEVELS) {
+                levelCounts.set(level, levelCounts.get(level) + 1);
+            }
+        }
+    }
+
+    // Render
+    TagNode& row = makeRow(tab);
+    makeText(makeWhite(makeLeftCell(row, 17)), tx("Planets by Experience Level"));
+    makeRightCell(row, 3);
+
+    renderExperienceSummary(tab, levelCounts, SearchQuery::SearchObjects_t(SearchQuery::SearchPlanets), makeQuerySuffix(true), config, fmt, tx, link);
+}
+
 // Render starbase summary (part of StarbasePage).
 void
 game::map::info::renderStarbaseSummary(TagNode& tab,
@@ -1162,22 +1215,11 @@ game::map::info::renderShipExperienceSummary(TagNode& tab,
     }
 
     // Render
-    {
-        TagNode& row = makeRow(tab);
-        makeText(makeWhite(makeLeftCell(row, 17)), tx("Ships by Experience Level"));
-        makeRightCell(row, 3);
-    }
-    for (int i = 0; i <= MAX_EXPERIENCE_LEVELS; ++i) {
-        int n = levelCounts.get(i);
-        if (n > 0) {
-            TagNode& row = makeRow(tab);
-            makeLink(makeLeftCell(row), config.getExperienceLevelName(i, tx),
-                     link.makeSearchLink(SearchQuery(SearchQuery::MatchTrue,
-                                                     SearchQuery::SearchObjects_t(SearchQuery::SearchShips),
-                                                     Format("Level=%d%s", i, makeQuerySuffix(withFreighters)))));
-            makeText(makeGreen(makeRightCell(row)), fmt.formatNumber(n));
-        }
-    }
+    TagNode& row = makeRow(tab);
+    makeText(makeWhite(makeLeftCell(row, 17)), tx("Ships by Experience Level"));
+    makeRightCell(row, 3);
+
+    renderExperienceSummary(tab, levelCounts, SearchQuery::SearchObjects_t(SearchQuery::SearchShips), makeQuerySuffix(withFreighters), config, fmt, tx, link);
 }
 
 // Render starship type summary (part of StarshipPage).

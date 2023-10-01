@@ -243,6 +243,24 @@ namespace game { namespace map { namespace info {
                                     afl::string::Translator& tx,
                                     const LinkBuilder& link);
 
+    /** Render planet experience level summary (part of PlanetsPage).
+        Shows planets by experience level.
+
+        @param [out]  tab          Output target (empty <table> tag)
+        @param [in]   univ         Universe
+        @param [in]   planetScores Planet score definitions (for experience levels)
+        @param [in]   config       Host configuration (for experience levels)
+        @param [in]   fmt          Number formatter
+        @param [in]   tx           Translator
+        @param [in]   link         LinkBuilder */
+    void renderPlanetExperienceSummary(TagNode& tab,
+                                       const Universe& univ,
+                                       const UnitScoreDefinitionList& planetScores,
+                                       const game::config::HostConfiguration& config,
+                                       util::NumberFormatter fmt,
+                                       afl::string::Translator& tx,
+                                       const LinkBuilder& link);
+
     /** Render starbase summary (part of StarbasePage).
         Shows counts of starbases that stand out somehow.
 

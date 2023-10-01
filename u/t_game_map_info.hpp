@@ -23,6 +23,7 @@ class TestGameMapInfoBrowser : public CxxTest::TestSuite {
     void testSampleMinerals();
     void testSampleMineralsMinedT();
     void testSamplePlanets();
+    void testSamplePlanetsExperience();
     void testSamplePlanetsByNativeRace();
     void testSampleColony();
     void testSampleColonyTopSupplies();
@@ -56,6 +57,7 @@ class TestGameMapInfoInfo : public CxxTest::TestSuite {
     void testEmpireWrap();
     void testEmpireWrap2();
     void testExperience();
+    void testPlanetExperience();
 };
 
 class TestGameMapInfoLinkBuilder : public CxxTest::TestSuite {

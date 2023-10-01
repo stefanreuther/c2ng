@@ -232,6 +232,7 @@ game::map::info::Browser::renderPlanetsPage(Nodes_t& out, PageOptions_t opts)
 
     // Environment
     const Root& root = game::actions::mustHaveRoot(m_session);
+    const Game& g = game::actions::mustHaveGame(m_session);
     const Universe& univ = universe();
 
     // Render
@@ -240,6 +241,9 @@ game::map::info::Browser::renderPlanetsPage(Nodes_t& out, PageOptions_t opts)
         renderPlanetNativeSummary(makeTable(out), univ, opts, m_numberFormatter, tx, m_link);
         renderPlanetClimateSummary(makeTable(out), univ, m_numberFormatter, tx, m_link);
         renderPlanetDefenseSummary(makeTable(out), univ, root.hostConfiguration(), m_numberFormatter, tx, m_link);
+        if (root.hostConfiguration()[HostConfiguration::NumExperienceLevels]() > 0) {
+            renderPlanetExperienceSummary(makeTable(out), univ, g.planetScores(), root.hostConfiguration(), m_numberFormatter, tx, m_link);
+        }
     }
 }
 

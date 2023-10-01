@@ -470,6 +470,55 @@ TestGameMapInfoBrowser::testSamplePlanets()
 }
 
 void
+TestGameMapInfoBrowser::testSamplePlanetsExperience()
+{
+    TestHarness h;
+    createTurn(h);
+    populateTurn(h);
+
+    // Configur experience. Everyone is a Soldier.
+    {
+        h.session.getRoot()->hostConfiguration()[game::config::HostConfiguration::NumExperienceLevels].set(4);
+        const game::UnitScoreDefinitionList::Definition defn = { "Experience", game::ScoreId_ExpLevel, 10 };
+        const game::UnitScoreDefinitionList::Index_t idx = h.session.getGame()->planetScores().add(defn);
+
+        game::map::PlayedPlanetType& ty = h.session.getGame()->currentTurn().universe().playedPlanets();
+        for (game::Id_t id = ty.findNextIndex(0); id != 0; id = ty.findNextIndex(id)) {
+            if (game::map::Planet* pl = ty.getObjectByIndex(id)) {
+                pl->unitScores().set(idx, 1, 10);
+            }
+        }
+    }
+
+    Nodes_t out;
+    h.browser.renderPage(game::map::info::PlanetsPage, out);
+    TS_ASSERT_EQUALS(h.browser.getPageOptions(game::map::info::PlanetsPage), 0);
+
+    TS_ASSERT_EQUALS(toString(out),
+                     "<h1>Planets</h1><table align=\"left\"><tr><td width=\"15\">Total:</td><td align=\"right\" width=\"3\"><font color=\"green\">35</font></td></tr></table>"
+                     "<table align=\"left\"><tr><td width=\"12\"><font color=\"white\">Natives</font></td><td align=\"right\" width=\"6\">Planets</td><td align=\"right\" width=\"8\">Natives</td></tr>"
+                     "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=0&quot;,&quot;p2&quot;\">none</a></td><td align=\"right\"><font color=\"green\">16</font></td><td align=\"right\"><font color=\"green\">0</font></td></tr>"
+                     "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=6&quot;,&quot;p2&quot;\">Insectoid</a></td><td align=\"right\"><font color=\"green\">5</font></td><td align=\"right\"><font color=\"green\">27,286,000</font></td></tr>"
+                     "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=8&quot;,&quot;p2&quot;\">Ghipsoldal</a></td><td align=\"right\"><font color=\"green\">5</font></td><td align=\"right\"><font color=\"green\">14,416,200</font></td></tr>"
+                     "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=3&quot;,&quot;p2&quot;\">Reptilian</a></td><td align=\"right\"><font color=\"green\">3</font></td><td align=\"right\"><font color=\"green\">11,736,700</font></td></tr>"
+                     "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=4&quot;,&quot;p2&quot;\">Avian</a></td><td align=\"right\"><font color=\"green\">2</font></td><td align=\"right\"><font color=\"green\">4,097,700</font></td></tr>"
+                     "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=1&quot;,&quot;p2&quot;\">Humanoid</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">4,544,500</font></td></tr>"
+                     "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=2&quot;,&quot;p2&quot;\">Bovinoid</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">1,120,200</font></td></tr>"
+                     "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=7&quot;,&quot;p2&quot;\">Amphibian</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">11,312,700</font></td></tr>"
+                     "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=9&quot;,&quot;p2&quot;\">Siliconoid</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">1,193,200</font></td></tr></table>"
+                     "<table align=\"left\"><tr><td width=\"12\"><font color=\"white\">Climate</font></td><td align=\"right\" width=\"6\">Planets</td></tr>"
+                     "<tr><td><a href=\"q:UI.Search &quot;Temp$&gt;=0 And Temp$&lt;=14 And Owner$=My.Race$&quot;,&quot;p2&quot;\">arctic</a></td><td align=\"right\"><font color=\"green\">7</font></td></tr>"
+                     "<tr><td><a href=\"q:UI.Search &quot;Temp$&gt;=15 And Temp$&lt;=39 And Owner$=My.Race$&quot;,&quot;p2&quot;\">cool</a></td><td align=\"right\"><font color=\"green\">13</font></td></tr>"
+                     "<tr><td><a href=\"q:UI.Search &quot;Temp$&gt;=40 And Temp$&lt;=64 And Owner$=My.Race$&quot;,&quot;p2&quot;\">warm</a></td><td align=\"right\"><font color=\"green\">7</font></td></tr>"
+                     "<tr><td><a href=\"q:UI.Search &quot;Temp$&gt;=65 And Temp$&lt;=84 And Owner$=My.Race$&quot;,&quot;p2&quot;\">tropical</a></td><td align=\"right\"><font color=\"green\">3</font></td></tr>"
+                     "<tr><td><a href=\"q:UI.Search &quot;Temp$&gt;=85 And Temp$&lt;=100 And Owner$=My.Race$&quot;,&quot;p2&quot;\">desert</a></td><td align=\"right\"><font color=\"green\">5</font></td></tr></table>"
+                     "<table align=\"left\"><tr><td width=\"15\"><a href=\"q:UI.Search &quot;Defense&lt;10 And Owner$=My.Race$&quot;,&quot;p2&quot;\">Nearly undefended:</a></td><td align=\"right\" width=\"3\"><font color=\"green\">8</font></td></tr>"
+                     "<tr><td width=\"15\"><a href=\"q:UI.Search &quot;Defense&lt;15 And Owner$=My.Race$&quot;,&quot;p2&quot;\">Visible by sensor scan:</a></td><td align=\"right\" width=\"3\"><font color=\"green\">9</font></td></tr></table>"
+                     "<table align=\"left\"><tr><td width=\"17\"><font color=\"white\">Planets by Experience Level</font></td>"
+                     "<td align=\"right\" width=\"3\"/></tr><tr><td><a href=\"q:UI.Search &quot;Level=1 And Owner$=My.Race$&quot;,&quot;p2&quot;\">Soldier</a></td><td align=\"right\"><font color=\"green\">35</font></td></tr></table>");
+}
+
+void
 TestGameMapInfoBrowser::testSamplePlanetsByNativeRace()
 {
     TestHarness h;
