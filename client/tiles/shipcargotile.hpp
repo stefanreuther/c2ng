@@ -29,11 +29,13 @@ namespace client { namespace tiles {
             enum Transfer { NoTransfer, ShipTransfer, UnloadTransfer, GatherTransfer, BidiTransfer, JettisonTransfer };
             Transfer unloadReview;
             Transfer transferReview;
+            bool noFuelWarning;
 
             Data()
                 {
                     gaugeHave[0] = gaugeHave[1] = gaugeTotal[0] = gaugeTotal[1] = 0;
                     unloadReview = transferReview = NoTransfer;
+                    noFuelWarning = false;
                 }
         };
 

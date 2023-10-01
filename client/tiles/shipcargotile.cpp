@@ -167,6 +167,7 @@ client::tiles::ShipCargoTile::attach(game::proxy::ObjectObserver& oop)
                     job->data.formattedAmounts[Data::Tritanium]  = uc.formatNumber(sh->getCargo(game::Element::Tritanium));
                     job->data.formattedAmounts[Data::Duranium]   = uc.formatNumber(sh->getCargo(game::Element::Duranium));
                     job->data.formattedAmounts[Data::Molybdenum] = uc.formatNumber(sh->getCargo(game::Element::Molybdenum));
+                    job->data.noFuelWarning = (sh->getCargo(game::Element::Neutronium).orElse(-1) == 0);
 
                     // Right column
                     job->data.formattedAmounts[Data::Colonists]  = uc.formatPopulation(sh->getCargo(game::Element::Colonists));
@@ -229,6 +230,10 @@ client::tiles::ShipCargoTile::setData(const Data& data)
         m_table.cell(MineralValue, i).setText(data.formattedAmounts[i]);
         m_table.cell(OtherValue,   i).setText(data.formattedAmounts[i+NumLines]);
     }
+
+    uint8_t fuelWarningColor = data.noFuelWarning ? ui::Color_Red : ui::Color_Green;
+    m_table.cell(MineralValue, 0).setColor(fuelWarningColor);
+    m_table.cell(MineralUnit,  0).setColor(fuelWarningColor);
 
     // Update gauges
     setGaugeData(m_fuelGauge,  data, Data::FuelGauge);

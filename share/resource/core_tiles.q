@@ -784,22 +784,23 @@ EndSub
 % - call SetContent with 25x4 rich-text string
 Sub Tile.NarrowShipCargo
   Local t, kt
-  Local Function Column(n, v, u)
+  Local Function Column(n, v, u, w)
+    Local color = If(w, "red", "green")
     If IsEmpty(v) Then
-      Return RAdd(RAlign(n, 40), RAlign(" ",                                     50, 2), RAlign(" ", 30))
+      Return RAdd(RAlign(n, 40), RAlign(" ",                                   50, 2), RAlign(" ", 30))
     Else
-      Return RAdd(RAlign(n, 40), RAlign(RStyle("green", CCVP.NumberToString(v)), 50, 2), RAlign(RStyle("green", " " + u), 30))
+      Return RAdd(RAlign(n, 40), RAlign(RStyle(color, CCVP.NumberToString(v)), 50, 2), RAlign(RStyle(color, " " + u), 30))
     EndIf
   EndFunction
-  Local Function Row(n1, v1, u1, n2, v2, u2)
-    Return RAdd(Column(n1, v1, u1), " ", Column(n2, v2, u2), "\n")
+  Local Function Row(n1, v1, u1, w1, n2, v2, u2, w2)
+    Return RAdd(Column(n1, v1, u1, w1), " ", Column(n2, v2, u2, w2), "\n")
   EndFunction
 
   kt := Translate("kt")
-  t :=         Row(Translate("Neu:"), Cargo.N, kt, Translate("Sup:"),  Cargo.Supplies, kt)
-  t := RAdd(t, Row(Translate("Tri:"), Cargo.T, kt, Translate("Col:"),  Cargo.Colonists, Translate("cl.")))
-  t := RAdd(t, Row(Translate("Dur:"), Cargo.D, kt, Translate("Cash:"), Cargo.Money, Translate("mc")))
-  t := RAdd(t, Row(Translate("Mol:"), Cargo.M, kt, "", Z(0), ""))
+  t :=         Row(Translate("Neu:"), Cargo.N, kt, Cargo.N<=0, Translate("Sup:"),  Cargo.Supplies,  kt,               False)
+  t := RAdd(t, Row(Translate("Tri:"), Cargo.T, kt, False,      Translate("Col:"),  Cargo.Colonists, Translate("cl."), False))
+  t := RAdd(t, Row(Translate("Dur:"), Cargo.D, kt, False,      Translate("Cash:"), Cargo.Money,     Translate("mc"),  False))
+  t := RAdd(t, Row(Translate("Mol:"), Cargo.M, kt, False,      "",                 Z(0),            "",               False))
 
   SetContent t
 EndSub
