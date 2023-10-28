@@ -27,6 +27,7 @@ TestServerPlayBasicHullFunctionPacker::testIt()
 
     game::spec::BasicHullFunction* f2 = funcs.addFunction(12, "Sleep");
     f2->setPictureName("zzz.gif");
+    f2->setCode("Z");
 
     // Testee
     server::play::BasicHullFunctionPacker testee(session);
@@ -43,5 +44,6 @@ TestServerPlayBasicHullFunctionPacker::testIt()
     TS_ASSERT_EQUALS(a[1]("ID").toInteger(), 12);
     TS_ASSERT_EQUALS(a[1]("NAME").toString(), "Sleep");
     TS_ASSERT_EQUALS(a[1]("IMAGE").toString(), "zzz.gif");
+    TS_ASSERT_EQUALS(a[1]("CODE").toString(), "Z");
 }
 

@@ -17,6 +17,7 @@ TestGameSpecBasicHullFunction::testIt()
     // Initial state
     TS_ASSERT_EQUALS(testee.getId(), 3);
     TS_ASSERT_EQUALS(testee.getName(), "Exterminate");
+    TS_ASSERT_EQUALS(testee.getCode(), "");
     TS_ASSERT_EQUALS(testee.getDescription(), "Exterminate");
     TS_ASSERT_EQUALS(testee.getExplanation(), "");
     TS_ASSERT_EQUALS(testee.getPictureName(), "");
@@ -31,10 +32,12 @@ TestGameSpecBasicHullFunction::testIt()
     testee.setDescription("Description");
     testee.setExplanation("Text");
     testee.setPictureName("boom");
+    testee.setCode("Ex");
     testee.setImpliedFunctionId(12);
 
     // Verify
     TS_ASSERT_EQUALS(testee.getName(), "Extinguish");
+    TS_ASSERT_EQUALS(testee.getCode(), "Ex");
     TS_ASSERT_EQUALS(testee.getDescription(), "Description");
     TS_ASSERT_EQUALS(testee.getExplanation(), "Text");
     TS_ASSERT_EQUALS(testee.getPictureName(), "boom");

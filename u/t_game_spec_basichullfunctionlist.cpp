@@ -23,6 +23,7 @@ TestGameSpecBasicHullFunctionList::testIO()
     static const char SAMPLE_FILE[] =
         "; Comment\n"
         "7,a,Alchemy\n"
+        "c = A\n"
         "d = 3-to-1\n"
         "e = does this\n"
         "s = 105\n"
@@ -32,6 +33,7 @@ TestGameSpecBasicHullFunctionList::testIO()
         "s = 104\n"
         "p = ref\n"
         "2,a,AdvancedRefinery\n"
+        "c = R\n"
         "d = 1-to-1\n"
         " s = 97 \n"
         " i = 1\n"
@@ -52,6 +54,7 @@ TestGameSpecBasicHullFunctionList::testIO()
     TS_ASSERT_EQUALS(p->getImpliedFunctionId(), -1);
     TS_ASSERT_EQUALS(p->getExplanation(), "does this\nand that");
     TS_ASSERT_EQUALS(p->getPictureName(), "");
+    TS_ASSERT_EQUALS(p->getCode(), "A");
 
     p = testee.getFunctionById(1);
     TS_ASSERT(p != 0);
@@ -60,6 +63,7 @@ TestGameSpecBasicHullFunctionList::testIO()
     TS_ASSERT_EQUALS(p->getDescription(), "2-to-1");
     TS_ASSERT_EQUALS(p->getImpliedFunctionId(), -1);
     TS_ASSERT_EQUALS(p->getPictureName(), "ref");
+    TS_ASSERT_EQUALS(p->getCode(), "");
 
     p = testee.getFunctionById(2);
     TS_ASSERT(p != 0);
@@ -68,6 +72,7 @@ TestGameSpecBasicHullFunctionList::testIO()
     TS_ASSERT_EQUALS(p->getDescription(), "improved!");
     TS_ASSERT_EQUALS(p->getImpliedFunctionId(), 1);
     TS_ASSERT_EQUALS(p->getPictureName(), "");
+    TS_ASSERT_EQUALS(p->getCode(), "R");
 
     TS_ASSERT(testee.getFunctionById(3) == 0);
 

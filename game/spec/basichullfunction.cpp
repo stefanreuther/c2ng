@@ -9,6 +9,7 @@
 game::spec::BasicHullFunction::BasicHullFunction(int id, String_t name)
     : m_id(id),
       m_name(name),
+      m_code(),
       m_description(),
       m_explanation(),
       m_pictureName(),
@@ -24,6 +25,13 @@ void
 game::spec::BasicHullFunction::setName(const String_t& name)
 {
     m_name = name;
+}
+
+// Set function code/key.
+void
+game::spec::BasicHullFunction::setCode(const String_t& code)
+{
+    m_code = code;
 }
 
 // Set short description of function.
@@ -78,6 +86,13 @@ game::spec::BasicHullFunction::getName() const
 {
     // ex hullfunc.pas:GetBasicFunctionName
     return m_name;
+}
+
+// Get function code/key.
+const String_t&
+game::spec::BasicHullFunction::getCode() const
+{
+    return m_code;
 }
 
 // Get function description.

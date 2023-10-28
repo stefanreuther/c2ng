@@ -128,6 +128,9 @@ BasicHullFunctionReader::handleLine(const String_t& fileName, int lineNr, String
         } else if (util::stringMatch("Picture", name)) {
             // 'p' takes string
             m_lastFunction->setPictureName(value);
+        } else if (util::stringMatch("Code", name)) {
+            // 'c' takes string
+            m_lastFunction->setCode(value);
         } else if (util::stringMatch("Standard", name)) {
             // 's' takes list of hull numbers
             trimComments(value);
@@ -151,7 +154,7 @@ BasicHullFunctionReader::handleIgnoredLine(const String_t& /*fileName*/, int /*l
 { }
 
 
-// /** Shortcut function to display errors. */
+// Shortcut function to display errors.
 void
 BasicHullFunctionReader::handleError(const String_t& fileName, int lineNr, String_t message)
 {

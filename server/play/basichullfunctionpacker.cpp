@@ -24,6 +24,7 @@ server::play::BasicHullFunctionPacker::buildValue() const
         if (const game::spec::BasicHullFunction* hf = list.getFunctionByIndex(i)) {
             afl::base::Ref<afl::data::Hash> hv(afl::data::Hash::create());
             addValueNew(*hv, makeStringValue(hf->getName()), "NAME");
+            addValueNew(*hv, makeStringValue(hf->getCode()), "CODE");
             addValueNew(*hv, makeIntegerValue(hf->getId()), "ID");
             addValueNew(*hv, makeStringValue(hf->getDescription()), "INFO");
             addValueNew(*hv, makeStringValue(hf->getExplanation()), "INFO2");

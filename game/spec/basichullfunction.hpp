@@ -75,6 +75,10 @@ namespace game { namespace spec {
             \param name Name */
         void setName(const String_t& name);
 
+        /** Set function code/key.
+            \param code Code. A short (<= 3 character), case-sensitive code identifying this function. */
+        void setCode(const String_t& code);
+
         /** Set short description of function.
             This is what we show to users, a short one-liner.
             \param description new description */
@@ -112,6 +116,10 @@ namespace game { namespace spec {
             \return function name, see setName() */
         const String_t& getName() const;
 
+        /** Get function code/key.
+            \return code/key, see setCode() */
+        const String_t& getCode() const;
+
         /** Get function description.
             \return description, see setDescription() */
         const String_t& getDescription() const;
@@ -140,6 +148,7 @@ namespace game { namespace spec {
      private:
         const int m_id;
         String_t m_name;
+        String_t m_code;
         String_t m_description;
         String_t m_explanation;
         String_t m_pictureName;
