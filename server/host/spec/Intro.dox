@@ -1,0 +1,8 @@
+/*!
+     \namespace server::host::spec
+     \brief c2host server - specification access
+
+     This namespace contains functionality to access ship specifications.
+     Basically, it acts as a bridge between server::interface::HostSpecification interface,
+     and the actual data packers implemented in server::play.
+ */

@@ -5,6 +5,7 @@
 
 #include "server/host/root.hpp"
 #include "afl/charset/codepage.hpp"
+#include "afl/io/internaldirectory.hpp"
 #include "afl/net/reconnectable.hpp"
 #include "afl/sys/time.hpp"
 #include "server/host/cron.hpp"
@@ -64,7 +65,8 @@ server::host::Root::Root(afl::net::CommandHandler& db,
       m_pCron(0),
       m_pRouter(0),
       m_config(config),
-      m_rng(afl::sys::Time::getTickCounter())
+      m_rng(afl::sys::Time::getTickCounter()),
+      m_specPublisher(config.specDirectory.empty() ? afl::base::Ref<afl::io::Directory>(afl::io::InternalDirectory::create("<spec>")) : fs.openDirectory(config.specDirectory), m_hostFile, m_log)
 { }
 
 server::host::Root::~Root()
@@ -208,6 +210,22 @@ server::host::Root::handleGameChange(int32_t gameId)
 }
 
 void
+server::host::Root::invalidateGameData(int32_t gameId)
+{
+    // xref HostSpecificationImpl::getGameData
+    (void) gameId;
+    m_specPublisher.invalidateCache();
+}
+
+void
+server::host::Root::invalidateShipListData(const String_t& shiplistId)
+{
+    // xref HostSpecificationImpl::getShiplistData
+    (void) shiplistId;
+    m_specPublisher.invalidateCache();
+}
+
+void
 server::host::Root::tryCloseRouterSessions(String_t key)
 {
     static const char LOG_NAME[] = "host.router";
@@ -220,6 +238,12 @@ server::host::Root::tryCloseRouterSessions(String_t key)
             m_log.write(afl::sys::LogListener::Info, LOG_NAME, "router failure", e);
         }
     }
+}
+
+server::host::spec::PublisherImpl&
+server::host::Root::specPublisher()
+{
+    return m_specPublisher;
 }
 
 server::host::Root::ToolTree

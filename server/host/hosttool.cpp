@@ -126,10 +126,11 @@ namespace {
     }
 }
 
-server::host::HostTool::HostTool(const Session& session, Root& root, Root::ToolTree tree)
+server::host::HostTool::HostTool(const Session& session, Root& root, Root::ToolTree tree, Area area)
     : m_session(session),
       m_root(root),
-      m_tree(tree)
+      m_tree(tree),
+      m_area(area)
 { }
 
 void
@@ -156,6 +157,9 @@ server::host::HostTool::add(String_t id, String_t path, String_t program, String
         if (m_tree.defaultName().get().empty()) {
             m_tree.defaultName().set(id);
         }
+        if (m_area == ShipList) {
+            m_root.invalidateShipListData(id);
+        }
     }
 }
 
@@ -169,6 +173,9 @@ server::host::HostTool::set(String_t id, String_t key, String_t value)
         throw std::runtime_error(INVALID_IDENTIFIER);
     }
     m_tree.byName(id).stringField(key).set(value);
+    if (m_area == ShipList) {
+        m_root.invalidateShipListData(id);
+    }
 }
 
 String_t
@@ -196,6 +203,9 @@ server::host::HostTool::remove(String_t id)
     if (m_tree.defaultName().get() == id) {
         // This was the default, pick another one
         m_tree.defaultName().set(m_tree.all().getRandom());
+    }
+    if (m_area == ShipList) {
+        m_root.invalidateShipListData(id);
     }
 
     return result;
@@ -240,6 +250,10 @@ server::host::HostTool::copy(String_t sourceId, String_t destinationId)
     m_tree.byName(destinationId).setAll(data);
 
     list.add(destinationId);
+
+    if (m_area == ShipList) {
+        m_root.invalidateShipListData(destinationId);
+    }
 }
 
 void

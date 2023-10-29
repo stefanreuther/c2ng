@@ -32,6 +32,9 @@ namespace server { namespace host {
         /** Binary directory. */
         String_t binDirectory;
 
+        /** Default specification directory. */
+        String_t specDirectory;
+
         /** Cron. */
         bool useCron;
 

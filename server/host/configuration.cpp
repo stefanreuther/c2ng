@@ -11,6 +11,7 @@ server::host::Configuration::Configuration()
     : timeScale(60),
       workDirectory(),
       binDirectory("."),
+      specDirectory(),
       useCron(true),
       unpackBackups(false),
       usersSeeTemporaryTurns(true),

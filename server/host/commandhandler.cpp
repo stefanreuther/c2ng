@@ -17,6 +17,7 @@
 #include "server/host/hostranking.hpp"
 #include "server/host/hostschedule.hpp"
 #include "server/host/hostslot.hpp"
+#include "server/host/hostspecificationimpl.hpp"
 #include "server/host/hosttool.hpp"
 #include "server/host/hostturn.hpp"
 #include "server/host/root.hpp"
@@ -30,6 +31,7 @@
 #include "server/interface/hostrankingserver.hpp"
 #include "server/interface/hostscheduleserver.hpp"
 #include "server/interface/hostslotserver.hpp"
+#include "server/interface/hostspecificationserver.hpp"
 #include "server/interface/hosttoolserver.hpp"
 #include "server/interface/hostturnserver.hpp"
 #include "server/types.hpp"
@@ -80,22 +82,22 @@ server::host::CommandHandler::handleCommand(const String_t& upcasedCommand, inte
     }
     if (!ok) {
         // HOSTxxx
-        HostTool impl(m_session, m_root, m_root.hostRoot());
+        HostTool impl(m_session, m_root, m_root.hostRoot(), HostTool::Host);
         ok = server::interface::HostToolServer(impl, HostTool::Host).handleCommand(upcasedCommand, args, result);
     }
     if (!ok) {
         // MASTERxxx
-        HostTool impl(m_session, m_root, m_root.masterRoot());
+        HostTool impl(m_session, m_root, m_root.masterRoot(), HostTool::Master);
         ok = server::interface::HostToolServer(impl, HostTool::Master).handleCommand(upcasedCommand, args, result);
     }
     if (!ok) {
         // SHIPLISTxxx
-        HostTool impl(m_session, m_root, m_root.shipListRoot());
+        HostTool impl(m_session, m_root, m_root.shipListRoot(), HostTool::ShipList);
         ok = server::interface::HostToolServer(impl, HostTool::ShipList).handleCommand(upcasedCommand, args, result);
     }
     if (!ok) {
         // TOOLxxx
-        HostTool impl(m_session, m_root, m_root.toolRoot());
+        HostTool impl(m_session, m_root, m_root.toolRoot(), HostTool::Tool);
         ok = server::interface::HostToolServer(impl, HostTool::Tool).handleCommand(upcasedCommand, args, result);
     }
     if (!ok) {
@@ -138,6 +140,11 @@ server::host::CommandHandler::handleCommand(const String_t& upcasedCommand, inte
         // RANKxxx
         HostRanking impl(m_session, m_root);
         ok = server::interface::HostRankingServer(impl).handleCommand(upcasedCommand, args, result);
+    }
+    if (!ok) {
+        // SPECxxx
+        HostSpecificationImpl impl(m_session, m_root, m_root.specPublisher());
+        ok = server::interface::HostSpecificationServer(impl).handleCommand(upcasedCommand, args, result);
     }
     if (!ok) {
         // KEYxxx
@@ -236,6 +243,11 @@ server::host::CommandHandler::getHelp(String_t topic) const
             " SLOTLS gid\n"
             " SLOTADD gid slot...\n"
             " SLOTRM gid slot...\n";
+    } else if (topic == "SPEC") {
+        return "Specification Commands:\n"
+            " SPECSHIPLIST sl fmt keys...\n"
+            " SPECGAME gid fmt keys...\n"
+            "fmt is 'direct', 'json'\n";
     } else if (topic == "HIST") {
         return "History Commands:\n"
             " HISTEVENTS [GAME gid] [USER uid] [LIMIT n]\n"
@@ -259,6 +271,7 @@ server::host::CommandHandler::getHelp(String_t topic) const
             " PLAYER->\n"
             " SCHEDULE->\n"
             " SHIPLIST->\n"
+            " SPEC->\n"
             " SLOT->\n"
             " TOOL->\n"
             " RANKLIST [SORT <field>] [REVERSE] [FIELDS <field>...]\n"

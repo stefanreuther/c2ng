@@ -55,9 +55,18 @@ server::host::ServerApplication::ServerApplication(afl::sys::Environment& env, a
             m_config.binDirectory = entry->getPathName();
         }
     }
-    catch (...)
-    {
+    catch (...) {
         // Ignore errors. These mean 'bin' does not exist.
+    }
+
+    try {
+        afl::base::Ref<afl::io::DirectoryEntry> entry = fs.openDirectory(fs.makePathName(env.getInstallationDirectoryName(), "share"))->getDirectoryEntryByName("specs");
+        if (entry->getFileType() == afl::io::DirectoryEntry::tDirectory) {
+            m_config.specDirectory = entry->getPathName();
+        }
+    }
+    catch (...) {
+        // Ignore errors. These mean 'share/specs' does not exist.
     }
 }
 

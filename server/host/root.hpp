@@ -16,6 +16,7 @@
 #include "server/common/root.hpp"
 #include "server/host/configuration.hpp"
 #include "server/host/gamearbiter.hpp"
+#include "server/host/spec/publisherimpl.hpp"
 #include "server/interface/mailqueue.hpp"
 #include "server/interface/sessionrouter.hpp"
 #include "server/types.hpp"
@@ -155,10 +156,26 @@ namespace server { namespace host {
             \param gameId Game Id */
         void handleGameChange(int32_t gameId);
 
+        /** Invalidate game data.
+            Discards cached ship list data for the game.
+            If that data is requested again, it is reloaded.
+            \param gameId Game Id */
+        void invalidateGameData(int32_t gameId);
+
+        /** Invalidate ship list data.
+            Discards cached data for the ship list.
+            If that data is requested again, it is reloaded.
+            \param shiplistId Ship list Id */
+        void invalidateShipListData(const String_t& shiplistId);
+
         /** Try to close active game sessions, given a key.
             \param key key to identify sessions to close
             \see server::interface::SessionRouter::groupAction() */
         void tryCloseRouterSessions(String_t key);
+
+        /** Access specification publisher.
+            \return specification publisher */
+        server::host::spec::PublisherImpl& specPublisher();
 
 
         /*
@@ -218,6 +235,8 @@ namespace server { namespace host {
 
         Configuration m_config;
         util::RandomNumberGenerator m_rng;
+
+        server::host::spec::PublisherImpl m_specPublisher;
     };
 
 } }

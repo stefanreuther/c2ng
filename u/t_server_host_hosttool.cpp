@@ -60,7 +60,7 @@ TestServerHostHostTool::testBasic()
 {
     TestHarness h;
     server::host::Session session;
-    HostTool testee(session, h.root(), h.root().toolRoot());
+    HostTool testee(session, h.root(), h.root().toolRoot(), HostTool::Tool);
 
     // Create a tool that does not need a file
     TS_ASSERT_THROWS_NOTHING(testee.add("tool-id", "", "", "toolkind"));
@@ -83,7 +83,7 @@ TestServerHostHostTool::testList()
 {
     TestHarness h;
     server::host::Session session;
-    HostTool testee(session, h.root(), h.root().toolRoot());
+    HostTool testee(session, h.root(), h.root().toolRoot(), HostTool::Tool);
 
     // Create some tools
     testee.add("a", "", "", "ak");
@@ -139,7 +139,7 @@ TestServerHostHostTool::testCopy()
 {
     TestHarness h;
     server::host::Session session;
-    HostTool testee(session, h.root(), h.root().toolRoot());
+    HostTool testee(session, h.root(), h.root().toolRoot(), HostTool::Tool);
 
     // Create a tool
     TS_ASSERT_THROWS_NOTHING(testee.add("a", "", "", "kk"));
@@ -168,7 +168,7 @@ TestServerHostHostTool::testErrors()
 {
     TestHarness h;
     server::host::Session session;
-    HostTool testee(session, h.root(), h.root().toolRoot());
+    HostTool testee(session, h.root(), h.root().toolRoot(), HostTool::Tool);
 
     TS_ASSERT_THROWS_NOTHING(testee.add("x", "", "", "k"));
 
@@ -201,7 +201,7 @@ TestServerHostHostTool::testDifficulty()
 {
     TestHarness h;
     server::host::Session session;
-    HostTool testee(session, h.root(), h.root().toolRoot());
+    HostTool testee(session, h.root(), h.root().toolRoot(), HostTool::Tool);
 
     // Add a tool
     testee.add("t", "", "", "k");
@@ -222,7 +222,7 @@ TestServerHostHostTool::testComputedDifficulty()
 {
     TestHarness h;
     server::host::Session session;
-    HostTool testee(session, h.root(), h.root().toolRoot());
+    HostTool testee(session, h.root(), h.root().toolRoot(), HostTool::Tool);
 
     // Upload a config file for an ultra-rich game
     server::interface::FileBaseClient(h.hostFile()).createDirectory("dir");

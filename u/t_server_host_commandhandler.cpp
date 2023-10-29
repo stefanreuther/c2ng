@@ -17,6 +17,7 @@
 #include "afl/net/redis/stringsetkey.hpp"
 #include "afl/string/format.hpp"
 #include "afl/test/callreceiver.hpp"
+#include "game/test/files.hpp"
 #include "server/file/internalfileserver.hpp"
 #include "server/host/cron.hpp"
 #include "server/host/root.hpp"
@@ -143,6 +144,14 @@ TestServerHostCommandHandler::testIt()
     h.hostFile().createDirectoryTree("defaults");
     h.hostFile().putFile("bin/checkturn.sh", "exit 0");
 
+    h.hostFile().createDirectoryTree("sdir");
+    h.hostFile().putFile("sdir/beamspec.dat", afl::string::fromBytes(game::test::getDefaultBeams()));
+    h.hostFile().putFile("sdir/torpspec.dat", afl::string::fromBytes(game::test::getDefaultTorpedoes()));
+    h.hostFile().putFile("sdir/engspec.dat",  afl::string::fromBytes(game::test::getDefaultEngines()));
+    h.hostFile().putFile("sdir/hullspec.dat", afl::string::fromBytes(game::test::getDefaultHulls()));
+    h.hostFile().putFile("sdir/truehull.dat", afl::string::fromBytes(game::test::getDefaultHullAssignments()));
+    h.hostFile().putFile("sdir/race.nm", afl::string::fromBytes(game::test::getDefaultRaceNames()));
+
     // Testee
     server::host::CommandHandler testee(h.root(), session);
 
@@ -168,7 +177,7 @@ TestServerHostCommandHandler::testIt()
     // This produces a working command sequence
     TS_ASSERT_THROWS_NOTHING(testee.callVoid(Segment().pushBackString("HOSTADD").pushBackString("H").pushBackString("").pushBackString("").pushBackString("h")));
     TS_ASSERT_THROWS_NOTHING(testee.callVoid(Segment().pushBackString("MASTERADD").pushBackString("M").pushBackString("").pushBackString("").pushBackString("m")));
-    TS_ASSERT_THROWS_NOTHING(testee.callVoid(Segment().pushBackString("SHIPLISTADD").pushBackString("S").pushBackString("").pushBackString("").pushBackString("s")));
+    TS_ASSERT_THROWS_NOTHING(testee.callVoid(Segment().pushBackString("SHIPLISTADD").pushBackString("S").pushBackString("sdir").pushBackString("").pushBackString("s")));
     TS_ASSERT_THROWS_NOTHING(testee.callVoid(Segment().pushBackString("TOOLADD").pushBackString("T").pushBackString("").pushBackString("").pushBackString("t")));
     TS_ASSERT_THROWS_NOTHING(testee.callVoid(Segment().pushBackString("STAT").pushBackString("game")));
 
@@ -178,6 +187,7 @@ TestServerHostCommandHandler::testIt()
     TS_ASSERT_THROWS_NOTHING(testee.callVoid(Segment().pushBackString("SCHEDULEADD").pushBackInteger(gid).pushBackString("MANUAL")));
     TS_ASSERT_THROWS_NOTHING(testee.callVoid(Segment().pushBackString("PLAYERJOIN").pushBackInteger(gid).pushBackInteger(7).pushBackString("zz")));
     TS_ASSERT_THROWS_NOTHING(testee.callVoid(Segment().pushBackString("TRN").pushBackString(h.createTurn()).pushBackString("GAME").pushBackInteger(gid).pushBackString("SLOT").pushBackInteger(7)));
+    TS_ASSERT_THROWS_NOTHING(testee.callVoid(Segment().pushBackString("SPECSHIPLIST").pushBackString("S").pushBackString("json").pushBackString("beamspec")));
 
     cron.expectCall("getGameEvent(1)");
     cron.provideReturnValue(HostCron::Event(1, HostCron::MasterAction, 99));
@@ -201,7 +211,7 @@ TestServerHostCommandHandler::testHelp()
 
     String_t mainHelp = testee.callString(Segment().pushBackString("HELP"));
 
-    static const char*const SECTIONS[] = { "HOST", "MASTER", "TOOL", "SHIPLIST", "CRON", "FILE", "GAME", "PLAYER", "SCHEDULE", "SLOT", "HIST", "KEY", 0 };
+    static const char*const SECTIONS[] = { "HOST", "MASTER", "TOOL", "SHIPLIST", "CRON", "FILE", "GAME", "PLAYER", "SCHEDULE", "SLOT", "HIST", "KEY", "SPEC", 0 };
     for (size_t i = 0; SECTIONS[i] != 0; ++i) {
         // Verify help page
         String_t sectionHelp = testee.callString(Segment().pushBackString("HELP").pushBackString(SECTIONS[i]));

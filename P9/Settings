@@ -1217,7 +1217,18 @@ DEPEND_guilib = afl
 PROJ_AUTO += guilib:gfx/*.cpp,gfx/*.hpp,ui/*.cpp,ui/*.hpp,client/*.cpp,client/*.hpp
 
 TARGETS += serverlib
-FILES_serverlib = server/file/readonlydirectoryhandler.cpp \
+FILES_serverlib = server/host/spec/directory.cpp \
+    server/host/spec/directory.hpp server/host/spec/publisherimpl.cpp \
+    server/host/spec/publisherimpl.hpp server/host/spec/publisher.hpp \
+    server/host/hostspecificationimpl.cpp \
+    server/host/hostspecificationimpl.hpp \
+    server/interface/hostspecificationserver.cpp \
+    server/interface/hostspecificationserver.hpp \
+    server/interface/hostspecificationclient.cpp \
+    server/interface/hostspecificationclient.hpp \
+    server/interface/hostspecification.cpp \
+    server/interface/hostspecification.hpp \
+    server/file/readonlydirectoryhandler.cpp \
     server/file/readonlydirectoryhandler.hpp \
     server/file/ca/garbagecollector.cpp server/file/ca/garbagecollector.hpp \
     server/monitor/statusobserver.hpp server/host/file/historyitem.hpp \
@@ -1764,12 +1775,19 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_server_play_enginepacker.cpp \
-    u/t_server_play_truehullpacker.cpp u/t_server_play_gameaccess.cpp \
-    u/t_gfx_threed_colortransformation.cpp u/t_gfx_threed_positionlist.cpp \
-    u/t_gfx_threed_model.cpp u/t_game_proxy_historyturnproxy.cpp \
-    u/t_game_proxy_allianceproxy.cpp u/t_ui_layout_axislayout.cpp \
-    u/t_ui_layout_vbox.cpp u/t_ui_layout_manager.cpp u/t_ui_layout_hbox.cpp \
+FILES_testsuite = u/t_server_host_hostspecificationimpl.cpp \
+    u/t_server_host_spec_directory.cpp \
+    u/t_server_host_spec_publisherimpl.cpp \
+    u/t_server_host_spec_publisher.cpp u/t_server_host_spec.hpp \
+    u/t_server_interface_hostspecificationserver.cpp \
+    u/t_server_interface_hostspecificationclient.cpp \
+    u/t_server_interface_hostspecification.cpp \
+    u/t_server_play_enginepacker.cpp u/t_server_play_truehullpacker.cpp \
+    u/t_server_play_gameaccess.cpp u/t_gfx_threed_colortransformation.cpp \
+    u/t_gfx_threed_positionlist.cpp u/t_gfx_threed_model.cpp \
+    u/t_game_proxy_historyturnproxy.cpp u/t_game_proxy_allianceproxy.cpp \
+    u/t_ui_layout_axislayout.cpp u/t_ui_layout_vbox.cpp \
+    u/t_ui_layout_manager.cpp u/t_ui_layout_hbox.cpp \
     u/t_game_proxy_attachmentproxy.cpp u/t_game_config_stringarrayoption.cpp \
     u/t_interpreter_directoryfunctions.cpp u/t_game_interface_vmfile.cpp \
     u/t_game_interface_loadcontext.cpp \

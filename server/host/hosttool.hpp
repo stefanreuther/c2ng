@@ -21,8 +21,9 @@ namespace server { namespace host {
         /** Constructor.
             \param session Session
             \param root    Service root
-            \param tree    Database tree to use */
-        HostTool(const Session& session, Root& root, Root::ToolTree tree);
+            \param tree    Database tree to use
+            \param area    Area */
+        HostTool(const Session& session, Root& root, Root::ToolTree tree, Area area);
 
         // HostTool:
         virtual void add(String_t id, String_t path, String_t program, String_t kind);
@@ -40,6 +41,7 @@ namespace server { namespace host {
         const Session& m_session;
         Root& m_root;
         Root::ToolTree m_tree;
+        Area m_area;
     };
 
 } }

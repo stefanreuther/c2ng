@@ -268,6 +268,25 @@ class TestServerInterfaceHostSlotServer : public CxxTest::TestSuite {
     void testRoundtrip();
 };
 
+class TestServerInterfaceHostSpecification : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+    void testFormat();
+    void testParse();
+};
+
+class TestServerInterfaceHostSpecificationClient : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestServerInterfaceHostSpecificationServer : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testError();
+    void testRoundtrip();
+};
+
 class TestServerInterfaceHostTool : public CxxTest::TestSuite {
  public:
     void testInterface();

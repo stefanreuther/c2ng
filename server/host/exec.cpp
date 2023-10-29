@@ -227,6 +227,7 @@ namespace {
         game.setState(HostGame::Running, root.getForum(), root);
 
         game.clearCache();
+        root.invalidateGameData(game.getId());
 
         // Check pending copy
         if (game.getConfigInt("copyPending")) {
@@ -791,6 +792,7 @@ server::host::resetToTurn(Root& root, Game& g, int turnNr)
 
     // - forget cached data
     g.clearCache();
+    root.invalidateGameData(g.getId());
 
     // - no need to execute a copyPending request
 

@@ -191,6 +191,18 @@ class TestServerHostHostSchedule : public CxxTest::TestSuite {
     void testPreview();
 };
 
+class TestServerHostHostSpecificationImpl : public CxxTest::TestSuite {
+ public:
+    void testGetShipListData();
+    void testGetShipListDataDirect();
+    void testGetShipListDataDirectProtocol();
+    void testGetShipListDataFlak();
+    void testGetGameDataNew();
+    void testGetGameDataFlak();
+    void testGetGameDataMasteredGame();
+    void testError();
+};
+
 class TestServerHostHostTool : public CxxTest::TestSuite {
  public:
     void testBasic();

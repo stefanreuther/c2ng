@@ -233,6 +233,7 @@ server::host::HostGame::setConfig(int32_t gameId, const afl::data::StringList_t&
         game.setConfig(keyValues[i], keyValues[i+1]);
     }
     game.clearCache();
+    m_root.invalidateGameData(gameId);
 
     // Set status bits
     if (endChanged && !endSet) {
@@ -682,6 +683,7 @@ server::host::HostGame::addRemoveTool(int32_t gameId, String_t toolId, bool add)
             game.toolData(toolId).hashKey("settings").remove();
         }
         game.clearCache();
+        m_root.invalidateGameData(gameId);
         game.configChanged().set(1);
     }
 
