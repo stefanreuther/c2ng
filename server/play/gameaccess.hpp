@@ -1,5 +1,6 @@
 /**
   *  \file server/play/gameaccess.hpp
+  *  \brief Class server::play::GameAccess
   */
 #ifndef C2NG_SERVER_PLAY_GAMEACCESS_HPP
 #define C2NG_SERVER_PLAY_GAMEACCESS_HPP
@@ -15,10 +16,16 @@ namespace server { namespace play {
     class Packer;
     class CommandHandler;
 
+    /** Implementation of GameAccess interface.
+        Published properties of a game::Session. */
     class GameAccess : public server::interface::GameAccess {
      public:
+        /** Constructor.
+            @param session The session
+            @param console Message collector (for getStatus()) */
         GameAccess(game::Session& session, util::MessageCollector& console);
 
+        // GameAccess virtuals:
         virtual void save();
         virtual String_t getStatus();
         virtual Value_t* get(String_t objName);

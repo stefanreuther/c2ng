@@ -8,16 +8,15 @@
 #include "afl/data/hashvalue.hpp"
 #include "afl/data/vector.hpp"
 #include "afl/data/vectorvalue.hpp"
-#include "game/actions/preconditions.hpp"
 
-server::play::BasicHullFunctionPacker::BasicHullFunctionPacker(game::Session& session)
-    : m_session(session)
+server::play::BasicHullFunctionPacker::BasicHullFunctionPacker(const game::spec::ShipList& shipList)
+    : m_shipList(shipList)
 { }
 
 server::Value_t*
 server::play::BasicHullFunctionPacker::buildValue() const
 {
-    const game::spec::BasicHullFunctionList& list = game::actions::mustHaveShipList(m_session).basicHullFunctions();
+    const game::spec::BasicHullFunctionList& list = m_shipList.basicHullFunctions();
 
     afl::base::Ref<afl::data::Vector> vv(afl::data::Vector::create());
     for (size_t i = 0, n = list.getNumFunctions(); i != n; ++i) {

@@ -8,30 +8,22 @@
 #include <memory>
 #include "t_server_play.hpp"
 #include "afl/data/access.hpp"
-#include "afl/io/nullfilesystem.hpp"
-#include "afl/string/nulltranslator.hpp"
-#include "game/session.hpp"
 #include "game/test/root.hpp"
 #include "game/config/hostconfiguration.hpp"
 
 namespace {
     std::auto_ptr<server::Value_t> fetchSlice(int n, String_t name)
     {
-        // Session
-        afl::io::NullFileSystem fs;
-        afl::string::NullTranslator tx;
-        game::Session session(tx, fs);
-
-        // Populate session
-        session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
-        game::config::HostConfiguration& config = session.getRoot()->hostConfiguration();
+        // Populate a root
+        afl::base::Ref<game::Root> r(game::test::makeRoot(game::HostVersion()));
+        game::config::HostConfiguration& config = r->hostConfiguration();
         config.setOption("gamename", "ConfigPackerTest", game::config::ConfigurationOption::Game);
         config.setOption("maximumfightersonbase", "30", game::config::ConfigurationOption::Game);
         config.setOption("strikesperfighter", "12",     game::config::ConfigurationOption::Game);
         config.setOption("terraformrate", "3,4,5",      game::config::ConfigurationOption::Game);
 
         // Produce value
-        server::play::ConfigurationPacker testee(session, n);
+        server::play::ConfigurationPacker testee(*r, n);
         TSM_ASSERT_EQUALS(name, testee.getName(), name);
         return std::auto_ptr<server::Value_t>(testee.buildValue());
     }

@@ -8,26 +8,18 @@
 
 #include "t_server_play.hpp"
 #include "afl/data/access.hpp"
-#include "afl/io/nullfilesystem.hpp"
-#include "afl/string/nulltranslator.hpp"
-#include "game/session.hpp"
 #include "game/test/root.hpp"
 
 void
 TestServerPlayFlakConfigurationPacker::testIt()
 {
-    // Environment
-    afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session session(tx, fs);
-    session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
-
-    // Set some recognizable valuess
-    session.getRoot()->flakConfiguration().StartingDistanceShip = 23456;
-    session.getRoot()->flakConfiguration().RatingPEBonus = 42;
+    // Create configuration with some recognizable valuess
+    afl::base::Ref<game::Root> root(game::test::makeRoot(game::HostVersion()));
+    root->flakConfiguration().StartingDistanceShip = 23456;
+    root->flakConfiguration().RatingPEBonus = 42;
 
     // Verify constructor
-    server::play::FlakConfigurationPacker testee(session);
+    server::play::FlakConfigurationPacker testee(*root);
     TS_ASSERT_EQUALS(testee.getName(), "flakconfig");
 
     // Verify buildValue

@@ -1,5 +1,6 @@
 /**
   *  \file server/play/gameaccess.cpp
+  *  \brief Class server::play::GameAccess
   */
 
 #include <stdexcept>
@@ -7,6 +8,7 @@
 #include "afl/data/vector.hpp"
 #include "afl/data/vectorvalue.hpp"
 #include "afl/string/format.hpp"
+#include "game/actions/preconditions.hpp"
 #include "server/errors.hpp"
 #include "server/play/basichullfunctionpacker.hpp"
 #include "server/play/beampacker.hpp"
@@ -40,6 +42,9 @@
 #include "server/play/ufopacker.hpp"
 #include "server/play/vcrpacker.hpp"
 #include "util/stringparser.hpp"
+
+using game::actions::mustHaveRoot;
+using game::actions::mustHaveShipList;
 
 server::play::GameAccess::GameAccess(game::Session& session, util::MessageCollector& console)
     : m_session(session),
@@ -206,11 +211,11 @@ server::play::GameAccess::createPacker(util::StringParser& p)
     } else if (p.parseString("player")) {
         return new PlayerPacker(session);
     } else if (p.parseString("torp")) {
-        return new TorpedoPacker(session);
+        return new TorpedoPacker(mustHaveShipList(session), mustHaveRoot(session), 0);
     } else if (p.parseString("beam")) {
-        return new BeamPacker(session);
+        return new BeamPacker(mustHaveShipList(session), mustHaveRoot(session), 0);
     } else if (p.parseString("engine")) {
-        return new EnginePacker(session);
+        return new EnginePacker(mustHaveShipList(session), 0);
     } else if (p.parseString("zstorm")) {
         return new IonStormPacker(session);
     } else if (p.parseString("zmine")) {
@@ -218,17 +223,17 @@ server::play::GameAccess::createPacker(util::StringParser& p)
     } else if (p.parseString("zufo")) {
         return new UfoPacker(session);
     } else if (p.parseString("truehull")) {
-        return new TruehullPacker(session);
+        return new TruehullPacker(mustHaveShipList(session), mustHaveRoot(session), 0);
     } else if (p.parseString("zvcr")) {
         return new VcrPacker(session);
     } else if (p.parseString("zab")) {
-        return new BasicHullFunctionPacker(session);
+        return new BasicHullFunctionPacker(mustHaveShipList(session));
     } else if (p.parseString("fcode")) {
-        return new FriendlyCodePacker(session);
+        return new FriendlyCodePacker(mustHaveShipList(session), mustHaveRoot(session), session.translator());
     } else if (p.parseString("outidx")) {
         return new OutMessageIndexPacker(session);
     } else if (p.parseString("hull") && p.parseInt(n)) {
-        return new HullPacker(session, n);
+        return new HullPacker(mustHaveShipList(session), mustHaveRoot(session), n);
     } else if (p.parseString("ship") && p.parseInt(n)) {
         return new ShipPacker(session, n);
     } else if (p.parseString("planet") && p.parseInt(n)) {
@@ -238,9 +243,9 @@ server::play::GameAccess::createPacker(util::StringParser& p)
     } else if (p.parseString("outmsg") && p.parseInt(n)) {
         return new OutMessagePacker(session, n);
     } else if (p.parseString("cfg") && p.parseInt(n)) {
-        return new ConfigurationPacker(session, n);
+        return new ConfigurationPacker(mustHaveRoot(session), n);
     } else if (p.parseString("flakconfig")) {
-        return new FlakConfigurationPacker(session);
+        return new FlakConfigurationPacker(mustHaveRoot(session));
     } else {
         return 0;
     }

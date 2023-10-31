@@ -6,7 +6,7 @@
 #define C2NG_SERVER_PLAY_FLAKCONFIGURATIONPACKER_HPP
 
 #include "server/play/packer.hpp"
-#include "game/session.hpp"
+#include "game/root.hpp"
 
 namespace server { namespace play {
 
@@ -15,13 +15,13 @@ namespace server { namespace play {
      public:
         /** Constructor.
             \param session Session */
-        FlakConfigurationPacker(game::Session& session);
+        explicit FlakConfigurationPacker(const game::Root& root);
 
         virtual Value_t* buildValue() const;
         virtual String_t getName() const;
 
      private:
-        game::Session& m_session;
+        const game::Root& m_root;
     };
 
 } }

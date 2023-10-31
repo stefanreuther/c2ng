@@ -7,8 +7,6 @@
 #include "afl/base/ref.hpp"
 #include "afl/data/hash.hpp"
 #include "afl/data/hashvalue.hpp"
-#include "game/actions/preconditions.hpp"
-#include "game/root.hpp"
 #include "game/vcr/flak/configuration.hpp"
 
 using afl::base::Ref;
@@ -22,14 +20,14 @@ namespace {
     }
 }
 
-server::play::FlakConfigurationPacker::FlakConfigurationPacker(game::Session& session)
-    : m_session(session)
+server::play::FlakConfigurationPacker::FlakConfigurationPacker(const game::Root& root)
+    : m_root(root)
 { }
 
 server::Value_t*
 server::play::FlakConfigurationPacker::buildValue() const
 {
-    const game::vcr::flak::Configuration& config = game::actions::mustHaveRoot(m_session).flakConfiguration();
+    const game::vcr::flak::Configuration& config = m_root.flakConfiguration();
     Ref<Hash> hv(Hash::create());
 
     addIntegerValue(*hv, "RatingBeamScale",            config.RatingBeamScale);

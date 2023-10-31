@@ -1,5 +1,6 @@
 /**
   *  \file server/play/hullpacker.cpp
+  *  \brief Class server::play::HullPacker
   */
 
 #include "server/play/hullpacker.hpp"
@@ -12,8 +13,9 @@
 #include "game/actions/preconditions.hpp"
 #include "game/spec/shiplist.hpp"
 
-server::play::HullPacker::HullPacker(game::Session& session, int hullNr)
-    : m_session(session),
+server::play::HullPacker::HullPacker(game::spec::ShipList& shipList, const game::Root& root, int hullNr)
+    : m_shipList(shipList),
+      m_root(root),
       m_hullNr(hullNr)
 { }
 
@@ -21,11 +23,8 @@ server::Value_t*
 server::play::HullPacker::buildValue() const
 {
     // ex ServerHullWriter::write
-    game::Root& r = game::actions::mustHaveRoot(m_session);
-    game::spec::ShipList& sl = game::actions::mustHaveShipList(m_session);
-
     afl::base::Ref<afl::data::Hash> hv(afl::data::Hash::create());
-    game::interface::HullContext ctx(m_hullNr, sl, r);
+    game::interface::HullContext ctx(m_hullNr, m_shipList, m_root);
 
     // Cost
     afl::base::Ref<afl::data::Hash> cost(afl::data::Hash::create());
@@ -51,7 +50,7 @@ server::play::HullPacker::buildValue() const
     // Hull functions
     {
         game::spec::HullFunctionList list;
-        sl.enumerateHullFunctions(list, m_hullNr, r.hostConfiguration(), game::PlayerSet_t::allUpTo(game::MAX_PLAYERS), game::ExperienceLevelSet_t::allUpTo(game::MAX_EXPERIENCE_LEVELS), true, true);
+        m_shipList.enumerateHullFunctions(list, m_hullNr, m_root.hostConfiguration(), game::PlayerSet_t::allUpTo(game::MAX_PLAYERS), game::ExperienceLevelSet_t::allUpTo(game::MAX_EXPERIENCE_LEVELS), true, true);
         addValueNew(*hv, packHullFunctionList(list), "FUNC");
     }
 

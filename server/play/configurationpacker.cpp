@@ -10,9 +10,7 @@
 #include "afl/data/vectorvalue.hpp"
 #include "afl/string/format.hpp"
 #include "afl/string/string.hpp"
-#include "game/actions/preconditions.hpp"
 #include "game/config/hostconfiguration.hpp"
-#include "game/root.hpp"
 
 using afl::base::Ref;
 using afl::data::Hash;
@@ -67,8 +65,8 @@ namespace {
 }
 
 
-server::play::ConfigurationPacker::ConfigurationPacker(game::Session& session, int slice)
-    : m_session(session),
+server::play::ConfigurationPacker::ConfigurationPacker(game::Root& root, int slice)
+    : m_root(root),
       m_slice(slice)
 { }
 
@@ -76,7 +74,7 @@ server::Value_t*
 server::play::ConfigurationPacker::buildValue() const
 {
     // ex ServerConfigWriter::write
-    const HostConfiguration& config = game::actions::mustHaveRoot(m_session).hostConfiguration();
+    const HostConfiguration& config = m_root.hostConfiguration();
     Ref<Hash> hv(Hash::create());
 
     switch (m_slice) {

@@ -8,26 +8,22 @@
 #include "afl/data/hashvalue.hpp"
 #include "afl/data/vector.hpp"
 #include "afl/data/vectorvalue.hpp"
-#include "game/actions/preconditions.hpp"
 #include "game/interface/beamcontext.hpp"
 #include "game/spec/shiplist.hpp"
 
-server::play::BeamPacker::BeamPacker(game::Session& session)
-    : m_session(session)
+server::play::BeamPacker::BeamPacker(game::spec::ShipList& shipList, const game::Root& root, int firstSlot)
+    : m_shipList(shipList), m_root(root), m_firstSlot(firstSlot)
 { }
 
 server::Value_t*
 server::play::BeamPacker::buildValue() const
 {
     // ex ServerBeamWriter::write
-    game::Root& r = game::actions::mustHaveRoot(m_session);
-    game::spec::ShipList& sl = game::actions::mustHaveShipList(m_session);
-
     afl::base::Ref<afl::data::Vector> vv(afl::data::Vector::create());
-    for (int i = 0, n = sl.beams().size(); i <= n; ++i) {
-        if (sl.beams().get(i) != 0) {
+    for (int i = m_firstSlot, n = m_shipList.beams().size(); i <= n; ++i) {
+        if (m_shipList.beams().get(i) != 0) {
             afl::base::Ref<afl::data::Hash> hv(afl::data::Hash::create());
-            game::interface::BeamContext ctx(i, sl, r);
+            game::interface::BeamContext ctx(i, m_shipList, m_root);
 
             // Cost
             afl::base::Ref<afl::data::Hash> cost(afl::data::Hash::create());

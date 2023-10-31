@@ -20,20 +20,18 @@ void
 TestServerPlayFriendlyCodePacker::testIt()
 {
     afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session session(tx, fs);
-    session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
-    session.setShipList(new game::spec::ShipList());
+    afl::base::Ref<game::Root> root(game::test::makeRoot(game::HostVersion()));
+    afl::base::Ref<game::spec::ShipList> shipList(*new game::spec::ShipList());
 
     // Player list
-    game::PlayerList& pl = session.getRoot()->playerList();
+    game::PlayerList& pl = root->playerList();
     game::Player* p3 = pl.create(3);
     TS_ASSERT(p3);
     p3->setName(game::Player::ShortName, "Threes");
     p3->setName(game::Player::AdjectiveName, "threeish");
 
     // Friendly code list
-    game::spec::FriendlyCodeList& fcList = session.getShipList()->friendlyCodes();
+    game::spec::FriendlyCodeList& fcList = shipList->friendlyCodes();
     fcList.addCode(game::spec::FriendlyCode("pfc", "p,whatever", tx));
     fcList.addCode(game::spec::FriendlyCode("gs3", "s-3,give to %3", tx));
     fcList.addCode(game::spec::FriendlyCode("gs4", "s,give to %4", tx));
@@ -41,7 +39,7 @@ TestServerPlayFriendlyCodePacker::testIt()
     fcList.loadExtraCodes(ms, tx);
 
     // Testee
-    server::play::FriendlyCodePacker testee(session);
+    server::play::FriendlyCodePacker testee(*shipList, *root, tx);
     TS_ASSERT_EQUALS(testee.getName(), "fcode");
 
     std::auto_ptr<server::Value_t> result(testee.buildValue());

@@ -8,28 +8,24 @@
 #include "afl/data/hashvalue.hpp"
 #include "afl/data/vector.hpp"
 #include "afl/data/vectorvalue.hpp"
-#include "game/actions/preconditions.hpp"
 #include "game/interface/torpedocontext.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/spec/torpedolauncher.hpp"
 
-server::play::TorpedoPacker::TorpedoPacker(game::Session& session)
-    : m_session(session)
+server::play::TorpedoPacker::TorpedoPacker(game::spec::ShipList& shipList, const game::Root& root, int firstSlot)
+    : m_shipList(shipList), m_root(root), m_firstSlot(firstSlot)
 { }
 
 server::Value_t*
 server::play::TorpedoPacker::buildValue() const
 {
     // ex ServerTorpWriter::write
-    game::Root& r = game::actions::mustHaveRoot(m_session);
-    game::spec::ShipList& sl = game::actions::mustHaveShipList(m_session);
-
     afl::base::Ref<afl::data::Vector> vv(afl::data::Vector::create());
-    for (int i = 0, n = sl.launchers().size(); i <= n; ++i) {
-        if (const game::spec::TorpedoLauncher* p = sl.launchers().get(i)) {
+    for (int i = m_firstSlot, n = m_shipList.launchers().size(); i <= n; ++i) {
+        if (const game::spec::TorpedoLauncher* p = m_shipList.launchers().get(i)) {
             afl::base::Ref<afl::data::Hash> hv(afl::data::Hash::create());
-            game::interface::TorpedoContext tctx(false, i, sl, r);
-            game::interface::TorpedoContext lctx(true, i, sl, r);
+            game::interface::TorpedoContext tctx(false, i, m_shipList, m_root);
+            game::interface::TorpedoContext lctx(true, i, m_shipList, m_root);
 
             // Torpedo costs
             afl::base::Ref<afl::data::Hash> torpCost(afl::data::Hash::create());

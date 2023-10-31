@@ -7,21 +7,15 @@
 
 #include "t_server_play.hpp"
 #include "afl/data/access.hpp"
-#include "afl/io/nullfilesystem.hpp"
-#include "afl/string/nulltranslator.hpp"
+#include "game/spec/shiplist.hpp"
 
 /** Simple functionality test. */
 void
 TestServerPlayBasicHullFunctionPacker::testIt()
 {
-    // Session
-    afl::io::NullFileSystem fs;
-    afl::string::NullTranslator tx;
-    game::Session session(tx, fs);
-
     // Populate session
-    session.setShipList(new game::spec::ShipList());
-    game::spec::BasicHullFunctionList& funcs = session.getShipList()->basicHullFunctions();
+    afl::base::Ref<game::spec::ShipList> sl(*new game::spec::ShipList());
+    game::spec::BasicHullFunctionList& funcs = sl->basicHullFunctions();
     game::spec::BasicHullFunction* f1 = funcs.addFunction(9, "Eat");
     f1->setDescription("quarterpounder with cheese");
 
@@ -30,7 +24,7 @@ TestServerPlayBasicHullFunctionPacker::testIt()
     f2->setCode("Z");
 
     // Testee
-    server::play::BasicHullFunctionPacker testee(session);
+    server::play::BasicHullFunctionPacker testee(*sl);
     TS_ASSERT_EQUALS(testee.getName(), "zab");
 
     std::auto_ptr<server::Value_t> value(testee.buildValue());

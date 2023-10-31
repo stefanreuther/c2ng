@@ -5,7 +5,7 @@
 #ifndef C2NG_SERVER_PLAY_BASICHULLFUNCTIONPACKER_HPP
 #define C2NG_SERVER_PLAY_BASICHULLFUNCTIONPACKER_HPP
 
-#include "game/session.hpp"
+#include "game/spec/shiplist.hpp"
 #include "server/play/packer.hpp"
 
 namespace server { namespace play {
@@ -14,14 +14,15 @@ namespace server { namespace play {
     class BasicHullFunctionPacker : public Packer {
      public:
         /** Constructor.
-            \param session Session */
-        explicit BasicHullFunctionPacker(game::Session& session);
+            @param shipList ShipList instance */
+        explicit BasicHullFunctionPacker(const game::spec::ShipList& shipList);
 
+        // Packer:
         virtual Value_t* buildValue() const;
         virtual String_t getName() const;
 
      private:
-        game::Session& m_session;
+        const game::spec::ShipList& m_shipList;
     };
 
 } }

@@ -1764,11 +1764,12 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_gfx_threed_colortransformation.cpp \
-    u/t_gfx_threed_positionlist.cpp u/t_gfx_threed_model.cpp \
-    u/t_game_proxy_historyturnproxy.cpp u/t_game_proxy_allianceproxy.cpp \
-    u/t_ui_layout_axislayout.cpp u/t_ui_layout_vbox.cpp \
-    u/t_ui_layout_manager.cpp u/t_ui_layout_hbox.cpp \
+FILES_testsuite = u/t_server_play_enginepacker.cpp \
+    u/t_server_play_truehullpacker.cpp u/t_server_play_gameaccess.cpp \
+    u/t_gfx_threed_colortransformation.cpp u/t_gfx_threed_positionlist.cpp \
+    u/t_gfx_threed_model.cpp u/t_game_proxy_historyturnproxy.cpp \
+    u/t_game_proxy_allianceproxy.cpp u/t_ui_layout_axislayout.cpp \
+    u/t_ui_layout_vbox.cpp u/t_ui_layout_manager.cpp u/t_ui_layout_hbox.cpp \
     u/t_game_proxy_attachmentproxy.cpp u/t_game_config_stringarrayoption.cpp \
     u/t_interpreter_directoryfunctions.cpp u/t_game_interface_vmfile.cpp \
     u/t_game_interface_loadcontext.cpp \

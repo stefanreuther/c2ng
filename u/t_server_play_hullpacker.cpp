@@ -43,15 +43,12 @@ TestServerPlayHullPacker::testIt()
     const int HULL_NR = 12;
 
     // Environment
-    afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session session(tx, fs);
-    session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
-    session.setShipList(new game::spec::ShipList());
-    disableAutomaticHullFunctions(session.getRoot()->hostConfiguration());
+    afl::base::Ref<game::Root> r(game::test::makeRoot(game::HostVersion()));
+    afl::base::Ref<game::spec::ShipList> sl(*new game::spec::ShipList());
+    disableAutomaticHullFunctions(r->hostConfiguration());
 
     // Define a hull
-    game::spec::Hull* h = session.getShipList()->hulls().create(HULL_NR);
+    game::spec::Hull* h = sl->hulls().create(HULL_NR);
     h->setName("BEETLE");
     h->setTechLevel(2);
     h->setMaxBeams(3);
@@ -61,7 +58,7 @@ TestServerPlayHullPacker::testIt()
     h->changeHullFunction(9, game::PlayerSet_t(2), game::PlayerSet_t(), false);
 
     // Verify constructor
-    server::play::HullPacker testee(session, HULL_NR);
+    server::play::HullPacker testee(*sl, *r, HULL_NR);
     TS_ASSERT_EQUALS(testee.getName(), "hull12");
 
     // Verify buildValue

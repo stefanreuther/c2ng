@@ -6,7 +6,8 @@
 #define C2NG_SERVER_PLAY_TORPEDOPACKER_HPP
 
 #include "server/play/packer.hpp"
-#include "game/session.hpp"
+#include "game/root.hpp"
+#include "game/spec/shiplist.hpp"
 
 namespace server { namespace play {
 
@@ -14,15 +15,20 @@ namespace server { namespace play {
     class TorpedoPacker : public Packer {
      public:
         /** Constructor.
-            \param session Session
-            \see game::interface::TorpedoContext */
-        explicit TorpedoPacker(game::Session& session);
+            @param shipList  Ship list (must be dynamically allocated)
+            @param root      Root (must be dynamically allocated)
+            @param firstSlot First slot to return (0=start with empty slot, 1=start with first launcher)
+            @see game::interface::TorpedoContext */
+        TorpedoPacker(game::spec::ShipList& shipList, const game::Root& root, int firstSlot);
 
+        // Packer:
         virtual Value_t* buildValue() const;
         virtual String_t getName() const;
 
      private:
-        game::Session& m_session;
+        game::spec::ShipList& m_shipList;
+        const game::Root& m_root;
+        int m_firstSlot;
     };
 
 } }

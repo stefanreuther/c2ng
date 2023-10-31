@@ -24,28 +24,23 @@ using game::spec::ShipList;
 using game::Root;
 namespace gi = game::interface;
 
-server::play::FriendlyCodePacker::FriendlyCodePacker(game::Session& session)
-    : m_session(session)
+server::play::FriendlyCodePacker::FriendlyCodePacker(const game::spec::ShipList& shipList, const game::Root& root, afl::string::Translator& tx)
+    : m_shipList(shipList), m_root(root), m_translator(tx)
 { }
 
 server::Value_t*
 server::play::FriendlyCodePacker::buildValue() const
 {
     Vector::Ref_t result = Vector::create();
-    const ShipList* list = m_session.getShipList().get();
-    const Root* root = m_session.getRoot().get();
-
-    if (list != 0 && root != 0) {
-        const FriendlyCodeList& friendlyCodes = list->friendlyCodes();
-        for (size_t i = 0, n = friendlyCodes.size(); i < n; ++i) {
-            if (const FriendlyCode* fc = friendlyCodes.at(i)) {
-                Hash::Ref_t data = Hash::create();
-                data->setNew("NAME",        gi::getFriendlyCodeProperty(*fc, gi::ifpName,        root->playerList(), m_session.translator()));
-                data->setNew("DESCRIPTION", gi::getFriendlyCodeProperty(*fc, gi::ifpDescription, root->playerList(), m_session.translator()));
-                data->setNew("FLAGS",       gi::getFriendlyCodeProperty(*fc, gi::ifpFlags,       root->playerList(), m_session.translator()));
-                data->setNew("RACES",       gi::getFriendlyCodeProperty(*fc, gi::ifpRaces,       root->playerList(), m_session.translator()));
-                result->pushBackNew(new HashValue(data));
-            }
+    const FriendlyCodeList& friendlyCodes = m_shipList.friendlyCodes();
+    for (size_t i = 0, n = friendlyCodes.size(); i < n; ++i) {
+        if (const FriendlyCode* fc = friendlyCodes.at(i)) {
+            Hash::Ref_t data = Hash::create();
+            data->setNew("NAME",        gi::getFriendlyCodeProperty(*fc, gi::ifpName,        m_root.playerList(), m_translator));
+            data->setNew("DESCRIPTION", gi::getFriendlyCodeProperty(*fc, gi::ifpDescription, m_root.playerList(), m_translator));
+            data->setNew("FLAGS",       gi::getFriendlyCodeProperty(*fc, gi::ifpFlags,       m_root.playerList(), m_translator));
+            data->setNew("RACES",       gi::getFriendlyCodeProperty(*fc, gi::ifpRaces,       m_root.playerList(), m_translator));
+            result->pushBackNew(new HashValue(data));
         }
     }
     return new VectorValue(result);

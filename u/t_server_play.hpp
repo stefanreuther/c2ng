@@ -15,6 +15,7 @@ class TestServerPlayBasicHullFunctionPacker : public CxxTest::TestSuite {
 class TestServerPlayBeamPacker : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testOffset1();
 };
 
 class TestServerPlayCommandHandler : public CxxTest::TestSuite {
@@ -28,6 +29,12 @@ class TestServerPlayConfigurationPacker : public CxxTest::TestSuite {
     void testSlices();
 };
 
+class TestServerPlayEnginePacker : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testOffset1();
+};
+
 class TestServerPlayFlakConfigurationPacker : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -36,6 +43,18 @@ class TestServerPlayFlakConfigurationPacker : public CxxTest::TestSuite {
 class TestServerPlayFriendlyCodePacker : public CxxTest::TestSuite {
  public:
     void testIt();
+};
+
+class TestServerPlayGameAccess : public CxxTest::TestSuite {
+ public:
+    void testGetStatus();
+    void testGetBeam();
+    void testGetTorp();
+    void testGetEngine();
+    void testGetHull();
+    void testGetTruehull();
+    void testGetAbilities();
+    void testGetMultiple();
 };
 
 class TestServerPlayHullPacker : public CxxTest::TestSuite {
@@ -70,6 +89,12 @@ class TestServerPlayPackerList : public CxxTest::TestSuite {
 };
 
 class TestServerPlayTorpedoPacker : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testOffset1();
+};
+
+class TestServerPlayTruehullPacker : public CxxTest::TestSuite {
  public:
     void testIt();
 };
