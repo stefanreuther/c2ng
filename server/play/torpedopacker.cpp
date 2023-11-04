@@ -40,7 +40,7 @@ server::play::TorpedoPacker::buildValue() const
             addValue(*hv, tctx, "KILL", "KILL");
             addValue(*hv, tctx, "NAME", "NAME");
             addValue(*hv, tctx, "TECH", "TECH");
-            addValue(*hv, tctx, "MASS", "MASS");
+            addValue(*hv, lctx, "MASS", "MASS");
 
             // Special case: KILL and DAMAGE are possibly doubled.
             // Write KILL1/DAMAGE1 values for convenience of JavaScript VCR.

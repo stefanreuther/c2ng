@@ -49,7 +49,7 @@ TestServerPlayTorpedoPacker::testIt()
     TS_ASSERT_EQUALS(a[1]("DAMAGE").toInteger(), 10);
     TS_ASSERT_EQUALS(a[1]("KILL").toInteger(), 8);
     TS_ASSERT_EQUALS(a[1]("TECH").toInteger(), 1);
-    TS_ASSERT_EQUALS(a[1]("MASS").toInteger(), 1);
+    TS_ASSERT_EQUALS(a[1]("MASS").toInteger(), 2);
 
     TS_ASSERT_EQUALS(a[10]("NAME").toString(), "Mark 8 Photon");
     TS_ASSERT_EQUALS(a[10]("TORPCOST")("MC").toInteger(), 54);
@@ -65,7 +65,7 @@ TestServerPlayTorpedoPacker::testIt()
     TS_ASSERT_EQUALS(a[10]("DAMAGE").toInteger(), 110);
     TS_ASSERT_EQUALS(a[10]("KILL").toInteger(), 70);
     TS_ASSERT_EQUALS(a[10]("TECH").toInteger(), 10);
-    TS_ASSERT_EQUALS(a[10]("MASS").toInteger(), 1);
+    TS_ASSERT_EQUALS(a[10]("MASS").toInteger(), 3);
 }
 
 /** Test offset 1.
