@@ -29,6 +29,7 @@ class TestServerHostSpecPublisherImpl : public CxxTest::TestSuite {
     void testFCodes();
     void testFlakConfig();
     void testFlakConfigSeparate();
+    void testRaceName();
     void testTorps();
     void testTruehull();
     void testHullfunc();

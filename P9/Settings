@@ -1217,7 +1217,8 @@ DEPEND_guilib = afl
 PROJ_AUTO += guilib:gfx/*.cpp,gfx/*.hpp,ui/*.cpp,ui/*.hpp,client/*.cpp,client/*.hpp
 
 TARGETS += serverlib
-FILES_serverlib = server/host/spec/directory.cpp \
+FILES_serverlib = server/play/racenamepacker.cpp \
+    server/play/racenamepacker.hpp server/host/spec/directory.cpp \
     server/host/spec/directory.hpp server/host/spec/publisherimpl.cpp \
     server/host/spec/publisherimpl.hpp server/host/spec/publisher.hpp \
     server/host/hostspecificationimpl.cpp \
@@ -1775,7 +1776,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_server_host_hostspecificationimpl.cpp \
+FILES_testsuite = u/t_server_play_racenamepacker.cpp \
+    u/t_server_host_hostspecificationimpl.cpp \
     u/t_server_host_spec_directory.cpp \
     u/t_server_host_spec_publisherimpl.cpp \
     u/t_server_host_spec_publisher.cpp u/t_server_host_spec.hpp \

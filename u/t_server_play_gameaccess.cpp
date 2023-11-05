@@ -43,9 +43,9 @@ namespace {
 
                 // Add root
                 afl::base::Ref<game::Root> r(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,1,0))));
-                r->playerList().create(1);
-                r->playerList().create(2);
-                r->playerList().create(3);
+                r->playerList().create(1)->setName(game::Player::AdjectiveName, "Fed");
+                r->playerList().create(2)->setName(game::Player::AdjectiveName, "Lizard");
+                r->playerList().create(3)->setName(game::Player::AdjectiveName, "Bird");
                 session.setRoot(r.asPtr());
             }
     };
@@ -142,6 +142,18 @@ TestServerPlayGameAccess::testGetTruehull()
     std::auto_ptr<server::Value_t> result(env.testee.get("obj/truehull"));
     Access a(result.get());
     TS_ASSERT_EQUALS(a("truehull")[/*player:*/2][/*slot-1:*/4].toInteger(), 1);
+}
+
+/** Test get(), racename.
+    A: 'GET obj/racename'
+    E: correct result returned */
+void
+TestServerPlayGameAccess::testGetRaceName()
+{
+    Environment env;
+    std::auto_ptr<server::Value_t> result(env.testee.get("obj/racename"));
+    Access a(result.get());
+    TS_ASSERT_EQUALS(a("racename")[/*player:*/2]("RACE.ADJ").toString(), "Lizard");
 }
 
 /** Test get(), abilities.

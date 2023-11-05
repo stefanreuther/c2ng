@@ -163,6 +163,22 @@ TestServerHostSpecPublisherImpl::testFlakConfigSeparate()
     TS_ASSERT_EQUALS(a("RatingBeamScale").toInteger(), 77);           // taken from config
 }
 
+/** Single object access: race names. */
+void
+TestServerHostSpecPublisherImpl::testRaceName()
+{
+    Environment env;
+    addFilesToHost(env);
+    env.hostFileClient.putFile("sdir/pconfig.src.frag", "PlayerRace = 7,8,9,10\n");
+
+    afl::data::StringList_t keys;
+    keys.push_back("racename");
+    afl::data::Hash::Ref_t result = env.testee.getSpecificationData(PATH_NAME, "", keys);
+    Access a(result->get("racename"));
+    TS_ASSERT_EQUALS(a[1]("RACE.ADJ").toString(), "Lizard");
+    TS_ASSERT_EQUALS(a[1]("RACE.ID").toInteger(), 8);
+}
+
 /** Single object access: torpedoes.
     Indexes are off-by-one, we do not report a zeroth element. */
 void

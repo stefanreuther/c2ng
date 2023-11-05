@@ -53,6 +53,7 @@ class TestServerPlayGameAccess : public CxxTest::TestSuite {
     void testGetEngine();
     void testGetHull();
     void testGetTruehull();
+    void testGetRaceName();
     void testGetAbilities();
     void testGetMultiple();
 };
@@ -86,6 +87,12 @@ class TestServerPlayPacker : public CxxTest::TestSuite {
 class TestServerPlayPackerList : public CxxTest::TestSuite {
  public:
     void testIt();
+};
+
+class TestServerPlayRaceNamePacker : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testOffset1();
 };
 
 class TestServerPlayTorpedoPacker : public CxxTest::TestSuite {

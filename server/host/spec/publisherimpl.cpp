@@ -29,6 +29,7 @@
 #include "server/play/flakconfigurationpacker.hpp"
 #include "server/play/friendlycodepacker.hpp"
 #include "server/play/hullpacker.hpp"
+#include "server/play/racenamepacker.hpp"
 #include "server/play/torpedopacker.hpp"
 #include "server/play/truehullpacker.hpp"
 #include "util/stringparser.hpp"
@@ -112,6 +113,8 @@ namespace {
             return server::play::FriendlyCodePacker(sl, root, tx).buildValue();
         } else if (key.parseString("flakconfig")) {
             return server::play::FlakConfigurationPacker(root).buildValue();
+        } else if (key.parseString("racename")) {
+            return server::play::RaceNamePacker(root, 1, tx).buildValue();
         } else if (key.parseString("torpspec")) {
             return server::play::TorpedoPacker(sl, root, 1).buildValue();
         } else if (key.parseString("truehull")) {

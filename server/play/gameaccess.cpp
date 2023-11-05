@@ -32,6 +32,7 @@
 #include "server/play/planetpacker.hpp"
 #include "server/play/planetxypacker.hpp"
 #include "server/play/playerpacker.hpp"
+#include "server/play/racenamepacker.hpp"
 #include "server/play/shipcommandhandler.hpp"
 #include "server/play/shipfriendlycodepacker.hpp"
 #include "server/play/shipmissionpacker.hpp"
@@ -210,6 +211,8 @@ server::play::GameAccess::createPacker(util::StringParser& p)
         return new MainPacker(session);
     } else if (p.parseString("player")) {
         return new PlayerPacker(session);
+    } else if (p.parseString("racename")) {
+        return new RaceNamePacker(mustHaveRoot(session), 0, session.translator());
     } else if (p.parseString("torp")) {
         return new TorpedoPacker(mustHaveShipList(session), mustHaveRoot(session), 0);
     } else if (p.parseString("beam")) {
