@@ -573,7 +573,11 @@ Sub Tile$ShipEquipment.Common(forHistory)
         s := s + 10
       EndIf
       If s Then
-        t := RAdd(t, RStyle(If(s >= Damage, "yellow", "red"), Format("%d%% (-%d: %d%%)", Damage, s, Damage-s)))
+        If s >= Damage Then
+          t := RAdd(t, RStyle("yellow", Format("%d%% (-%d: %d%%)", Damage, s, 0)))
+        Else
+          t := RAdd(t, RStyle("red", Format("%d%% (-%d: %d%%)", Damage, s, Damage-s)))
+        EndIf
       Else
         t := RAdd(t, RStyle("red", Format("%d%%", Damage)))
       EndIf
