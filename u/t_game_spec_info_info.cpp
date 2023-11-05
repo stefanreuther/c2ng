@@ -306,6 +306,30 @@ TestGameSpecInfoInfo::testDescribeFighter()
     TS_ASSERT_EQUALS(c.players, game::PlayerSet_t());
 }
 
+/** Test describeFighter() for Empire. */
+void
+TestGameSpecInfoInfo::testDescribeFighter8()
+{
+    TestHarness h;
+
+    gsi::PageContent c;
+    gsi::describeFighter(c, 8, h.shipList, true, h.picNamer, *h.root, h.tx);
+
+    TS_ASSERT_EQUALS(c.title, "Player 8 fighter");
+    TS_ASSERT_EQUALS(c.pictureName, "");                // would be set by PictureNamer
+    TS_ASSERT_EQUALS(toString(c.attributes),
+                     "Type:fighter\n"
+                     "Kill:2\n"
+                     "Destroy:2\n"
+                     "Recharge time:21\xE2\x80\x93""36s\n"
+                     "Strikes:7\n"
+                     "Fighter Cost:100 mc, 3 T, 2 M\n"
+                     "Auto-build:10 per turn for 3 T, 2 M each\n");
+    TS_ASSERT_EQUALS(c.pageLinks, gsi::Pages_t());
+    TS_ASSERT_EQUALS(c.abilities.size(), 0U);
+    TS_ASSERT_EQUALS(c.players, game::PlayerSet_t());
+}
+
 /** Test getHullAttribute(). */
 void
 TestGameSpecInfoInfo::testGetHullAttribute()

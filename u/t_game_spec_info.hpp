@@ -43,6 +43,7 @@ class TestGameSpecInfoInfo : public CxxTest::TestSuite {
     void testDescribeBeam();
     void testDescribeTorp();
     void testDescribeFighter();
+    void testDescribeFighter8();
     void testGetHullAttribute();
     void testGetEngineAttribute();
     void testGetBeamAttribute();

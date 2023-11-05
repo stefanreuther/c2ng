@@ -395,6 +395,13 @@ game::spec::info::describeFighter(PageContent& content, int player, const ShipLi
         if (withCost) {
             content.attributes.push_back(Attribute(tx("Fighter Cost"), ftr.cost().format(tx, fmt)));
         }
+
+        int freeFighters = root.hostConfiguration()[HostConfiguration::FreeFighters](player);
+        if (freeFighters != 0) {
+            content.attributes.push_back(Attribute(tx("Auto-build"),
+                                                   Format(tx("%d per turn for %s each"), freeFighters,
+                                                          root.hostConfiguration()[HostConfiguration::FreeFighterCost](player).format(tx, fmt))));
+        }
     }
 }
 
