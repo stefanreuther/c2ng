@@ -20,11 +20,77 @@ using game::spec::BasicHullFunction;
 using game::spec::Cost;
 using game::spec::FriendlyCodeList;
 using game::config::HostConfiguration;
+using game::HostVersion;
 
 namespace {
     int sgn(double d)
     {
         return d < 0 ? -1 : d > 0 ? +1 : 0;
+    }
+
+
+    /*
+     *  Movement
+     */
+
+    struct MovementStep {
+        int dx;
+        int dy;
+        double distance;
+    };
+
+    MovementStep computeMovementStep(int mx, int my, int way, const HostVersion& host)
+    {
+        MovementStep result;
+        result.distance = util::getDistanceFromDX(mx, my);
+
+        if (result.distance > way) {
+            int dx, dy;
+            if (host.getKind() != HostVersion::PHost) {
+                // THost movement formulas, from Donovan's
+                if (std::abs(mx) > std::abs(my)) {
+                    dx = int(double(way) * std::abs(mx) / result.distance + 0.5);
+                    dy = int(double(dx) * std::abs(my) / std::abs(mx) + 0.5);
+                } else {
+                    dy = int(double(way) * std::abs(my) / result.distance + 0.5);
+                    dx = int(double(dy) * std::abs(mx) / std::abs(my) + 0.5);
+                }
+                if (mx < 0) {
+                    dx = -dx;
+                }
+                if (my < 0) {
+                    dy = -dy;
+                }
+            } else {
+                // PHost. From docs and source.
+                double head = util::getHeadingRad(mx, my);
+                double fx = std::sin(head) * way;
+                double fy = std::cos(head) * way;
+                dx = int(fx);
+                dy = int(fy);
+                if (dx != fx) {
+                    dx += sgn(fx);
+                }
+                if (dy != fy) {
+                    dy += sgn(fy);
+                }
+                if (mx == 0) {
+                    dx = 0;
+                }
+                if (my == 0) {
+                    dy = 0;
+                }
+            }
+
+            // we now have the dx,dy we want to move
+            result.dx = dx;
+            result.dy = dy;
+            result.distance = way;
+        } else {
+            result.dx = mx;
+            result.dy = my;
+        }
+        return result;
     }
 
     const int AlchemyTri = 1;
@@ -898,57 +964,12 @@ game::map::ShipPredictor::computeTurn()
         // FIXME: gravity wells?
     } else if (dist2 > 0 && m_ship.warpFactor.orElse(0) > 0) {
         // Normal movement
-        // First, compute new position in mx,my
-        double dist = std::sqrt(double(dist2));
+        // First, compute a movement step distance
         int way = m_ship.warpFactor.orElse(0) * m_ship.warpFactor.orElse(0);
         if (real_ship->hasSpecialFunction(BasicHullFunction::Gravitonic, m_scoreDefinitions, m_shipList, m_hostConfiguration)) {
             way *= 2;
         }
-
-        int mx = m_ship.waypointDX.orElse(0), my = m_ship.waypointDY.orElse(0);
-        if (dist > way) {
-            int dx, dy;
-            if (m_hostVersion.getKind() != HostVersion::PHost) {
-                // THost movement formulas, from Donovan's
-                if (std::abs(mx) > std::abs(my)) {
-                    dx = int(double(way) * std::abs(mx) / dist + 0.5);
-                    dy = int(double(dx) * std::abs(my) / std::abs(mx) + 0.5);
-                } else {
-                    dy = int(double(way) * std::abs(my) / dist + 0.5);
-                    dx = int(double(dy) * std::abs(mx) / std::abs(my) + 0.5);
-                }
-                if (mx < 0) {
-                    dx = -dx;
-                }
-                if (my < 0) {
-                    dy = -dy;
-                }
-            } else {
-                // PHost. From docs and source.
-                double head = util::getHeadingRad(mx, my);
-                double fx = std::sin(head) * way;
-                double fy = std::cos(head) * way;
-                dx = int(fx);
-                dy = int(fy);
-                if (dx != fx) {
-                    dx += sgn(fx);
-                }
-                if (dy != fy) {
-                    dy += sgn(fy);
-                }
-                if (mx == 0) {
-                    dx = 0;
-                }
-                if (my == 0) {
-                    dy = 0;
-                }
-            }
-
-            // we now have the dx,dy we want to move
-            mx = dx;
-            my = dy;
-            dist = way;         // FIXME: use distFromDX(dx,dy) instead?
-        }
+        const MovementStep step = computeMovementStep(m_ship.waypointDX.orElse(0), m_ship.waypointDY.orElse(0), way, m_hostVersion);
 
         // Advance time in towee. Must be here because we need to know its "post-movement" mass.
         if (m_pTowee.get() != 0) {
@@ -968,16 +989,16 @@ game::map::ShipPredictor::computeTurn()
                                     m_pTowee.get() != 0 ? m_pTowee->m_shipId : 0,
                                     m_pTowee.get() != 0 ? &m_pTowee->m_ship : 0,
                                     real_ship->hasSpecialFunction(BasicHullFunction::Gravitonic, m_scoreDefinitions, m_shipList, m_hostConfiguration),
-                                    dist,
+                                    step.distance,
                                     m_shipList, m_hostConfiguration, m_hostVersion);
         m_ship.neutronium = m_ship.neutronium.orElse(0) - fuel;
         m_movementFuelUsed += fuel;
 
         // We still have the position offset in mx,my. Move it.
-        m_ship.x = m_ship.x.orElse(0) + mx;
-        m_ship.y = m_ship.y.orElse(0) + my;
-        m_ship.waypointDX = m_ship.waypointDX.orElse(0) - mx;
-        m_ship.waypointDY = m_ship.waypointDY.orElse(0) - my;
+        m_ship.x = m_ship.x.orElse(0) + step.dx;
+        m_ship.y = m_ship.y.orElse(0) + step.dy;
+        m_ship.waypointDX = m_ship.waypointDX.orElse(0) - step.dx;
+        m_ship.waypointDY = m_ship.waypointDY.orElse(0) - step.dy;
         normalizePosition(m_ship, m_mapConfig);
 
         // Warp wells
@@ -1271,4 +1292,32 @@ game::map::getOptimumWarp(const Universe& univ, Id_t shipId,
         }
     }
     return thisSpeed;
+}
+
+int
+game::map::computeMovementTime(Point moveFrom, Point moveTo, int way, const Universe& univ, const Configuration& mapConfig, const Root& root)
+{
+    int timeTaken = 0;
+    while (timeTaken < ShipPredictor::MOVEMENT_TIME_LIMIT && moveFrom != moveTo) {
+        // We'll need this turn
+        ++timeTaken;
+
+        // Perform step
+        MovementStep step = computeMovementStep(moveTo.getX() - moveFrom.getX(), moveTo.getY() - moveFrom.getY(), way, root.hostVersion());
+        moveFrom += Point(step.dx, step.dy);
+
+        // Warp wells
+        if (univ.findPlanetAt(moveFrom) == 0) {
+            Id_t gpid = univ.findGravityPlanetAt(moveFrom, mapConfig, root.hostConfiguration(), root.hostVersion());
+            if (const Planet* p = univ.planets().get(gpid)) {
+                // Target reached?
+                if (univ.findGravityPlanetAt(moveTo, mapConfig, root.hostConfiguration(), root.hostVersion()) == gpid) {
+                    moveFrom = moveTo;
+                } else {
+                    moveFrom = p->getPosition().orElse(moveFrom);
+                }
+            }
+        }
+    }
+    return timeTaken;
 }

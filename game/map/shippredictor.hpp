@@ -235,6 +235,16 @@ namespace game { namespace map {
                        const Configuration& mapConfig,
                        const Root& root);
 
+    /** Compute ship-independante movement time.
+        \param moveFrom          Starting point of movement (ship position)
+        \param moveTo            Target of movement (waypoint)
+        \param way               Distance covered per turn (warp-squared, times-two for gravitonic)
+        \param univ              Universe (for warp wells)
+        \param mapConfig         Map configuration
+        \param root              Root (for configuration, host version)
+        \return Time taken; MOVEMENT_TIME_LIMIT if limit exceeded */
+    int computeMovementTime(Point moveFrom, Point moveTo, int way, const Universe& univ, const Configuration& mapConfig, const Root& root);
+
 } }
 
 #endif

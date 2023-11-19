@@ -1163,3 +1163,70 @@ TestGameMapShipPredictor::testHyperjumpFailDamage()
     TS_ASSERT_EQUALS(p.getCargo(Element::Neutronium), 60);
 }
 
+/** Test computeMovementTime(), simple cases. */
+void
+TestGameMapShipPredictor::testComputeMovementTime()
+{
+    game::map::Universe univ;
+    game::map::Configuration config;
+    afl::base::Ref<game::Root> root(game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(4,0,0))));
+
+    // Move 80 ly in steps of 20, all cardinal directions
+    TS_ASSERT_EQUALS(game::map::computeMovementTime(Point(1000, 2000), Point(1000, 2080), 20, univ, config, *root), 4);
+    TS_ASSERT_EQUALS(game::map::computeMovementTime(Point(1000, 2000), Point(1000, 1920), 20, univ, config, *root), 4);
+    TS_ASSERT_EQUALS(game::map::computeMovementTime(Point(1000, 2000), Point(1080, 2000), 20, univ, config, *root), 4);
+    TS_ASSERT_EQUALS(game::map::computeMovementTime(Point(1000, 2000), Point( 920, 2000), 20, univ, config, *root), 4);
+
+    // Move 0 ly
+    TS_ASSERT_EQUALS(game::map::computeMovementTime(Point(1000, 2000), Point(1000, 2000), 20, univ, config, *root), 0);
+
+    // Move 300 ly in steps of 2 --> overrun
+    TS_ASSERT_EQUALS(game::map::computeMovementTime(Point(1000, 2000), Point(1000, 2300), 2, univ, config, *root), game::map::ShipPredictor::MOVEMENT_TIME_LIMIT);
+
+    // Non-cardinal direction (slightly > 80 ly)
+    TS_ASSERT_EQUALS(game::map::computeMovementTime(Point(1000, 2000), Point(1020, 2080), 20, univ, config, *root), 4);
+
+    // Original test case: Merah-5 (#461) to Albireo (#22) on Echo Cluster map
+    TS_ASSERT_EQUALS(game::map::computeMovementTime(Point(2164, 1277), Point(2078, 1418), 81, univ, config, *root), 3);
+    TS_ASSERT_EQUALS(game::map::computeMovementTime(Point(2164, 1277), Point(2078, 1417), 81, univ, config, *root), 2);
+}
+
+/** Test computeMovementTime(), with gravity at the end. Original test case. */
+void
+TestGameMapShipPredictor::testComputeMovementTimeGravity()
+{
+    afl::string::NullTranslator tx;
+    afl::sys::Log log;
+    game::map::Universe univ;
+    game::map::Configuration config;
+    afl::base::Ref<game::Root> root(game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(4,0,0))));
+
+    game::map::Planet* pl = univ.planets().create(22);
+    pl->setPosition(Point(2078, 1418));
+    pl->internalCheck(config, game::PlayerSet_t(), 77, tx, log);
+
+    // Original test case: Merah-5 (#461) to Albireo (#22) on Echo Cluster map, now with gravity
+    TS_ASSERT_EQUALS(game::map::computeMovementTime(Point(2164, 1277), Point(2078, 1418), 81, univ, config, *root), 2);
+}
+
+/** Test computeMovementTime(), with gravity in the middle. Synthetic test case. */
+void
+TestGameMapShipPredictor::testComputeMovementTimeGravity2()
+{
+    afl::string::NullTranslator tx;
+    afl::sys::Log log;
+    game::map::Universe univ;
+    game::map::Configuration config;
+    afl::base::Ref<game::Root> root(game::test::makeRoot(HostVersion(HostVersion::PHost, MKVERSION(4,0,0))));
+
+    game::map::Planet* pl = univ.planets().create(3);
+    pl->setPosition(Point(2000, 1051));
+    pl->internalCheck(config, game::PlayerSet_t(), 77, tx, log);
+
+    // Cover 100 ly with 49 ly/turn. After first step, we end in the gravity of the planet at 1051.
+    TS_ASSERT_EQUALS(game::map::computeMovementTime(Point(2000, 1000), Point(2000, 1100), 49, univ, config, *root), 2);
+
+    // We start the second turn from 1051, so we do not reach 1101 or farther.
+    TS_ASSERT_EQUALS(game::map::computeMovementTime(Point(2000, 1000), Point(2000, 1101), 49, univ, config, *root), 3);
+    TS_ASSERT_EQUALS(game::map::computeMovementTime(Point(2000, 1000), Point(2000, 1102), 49, univ, config, *root), 3);
+}

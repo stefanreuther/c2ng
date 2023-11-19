@@ -690,6 +690,9 @@ class TestGameMapShipPredictor : public CxxTest::TestSuite {
     void testHyperjumpDirect();
     void testHyperjumpFailMinDist();
     void testHyperjumpFailDamage();
+    void testComputeMovementTime();
+    void testComputeMovementTimeGravity();
+    void testComputeMovementTimeGravity2();
 };
 
 class TestGameMapShipStorage : public CxxTest::TestSuite {

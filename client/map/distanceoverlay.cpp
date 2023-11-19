@@ -16,20 +16,9 @@
 #include "gfx/complex.hpp"
 #include "gfx/context.hpp"
 #include "util/math.hpp"
+#include "util/unicodechars.hpp"
 
 using afl::string::Format;
-
-namespace {
-    /* Given distance and speed, compute estimated time. */
-    int estimateTime(double d, int warp)
-    {
-        int32_t r = util::roundToInt(d);
-        int32_t way = warp*warp;
-
-        return (r + way-1) / way;
-    }
-}
-
 
 client::map::DistanceOverlay::DistanceOverlay(Screen& parent, Location& loc, game::map::Point origin, game::Id_t shipId)
     : Overlay(),
@@ -308,7 +297,17 @@ client::map::DistanceOverlay::buildStatus(Status& out, game::Session& session, g
     out.distanceInfo = Format(tx("Distance from first point: %.1f ly"), dist);
 
     // Flight info
-    out.flightInfo = Format(tx("Warp/Time: 6/%d 7/%d 8/%d 9/%d"), estimateTime(dist, 6), estimateTime(dist, 7), estimateTime(dist, 8), estimateTime(dist, 9));
+    String_t times[4];
+    for (int i = 0; i < 4; ++i) {
+        int warp = i+6;
+        int time = game::map::computeMovementTime(origin, target, warp*warp, t.universe(), g.mapConfiguration(), r);
+        if (time >= game::map::ShipPredictor::MOVEMENT_TIME_LIMIT) {
+            times[i] = Format(UTF_GEQ "%d", time);
+        } else {
+            times[i] = Format("%d", time);
+        }
+    }
+    out.flightInfo = Format(tx("Warp/Time: 6/%d 7/%d 8/%d 9/%d"), times[0], times[1], times[2], times[3]);
     if (dist > 0) {
         out.flightInfo += Format(", %d" "\xC2\xB0", util::roundToInt(util::getHeadingDeg(dx, dy)));
     }
