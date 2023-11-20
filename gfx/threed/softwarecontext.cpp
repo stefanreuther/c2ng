@@ -12,12 +12,31 @@
   *    (on the plus side, this means that particles just work.)
   */
 
+#include <math.h>               // import into global namespace, isnan
 #include <algorithm>
 #include <stdexcept>
 #include "gfx/threed/softwarecontext.hpp"
 #include "afl/except/assertionfailedexception.hpp"
 #include "gfx/basecontext.hpp"
 #include "gfx/complex.hpp"
+
+/* Fallback implementation of isnan.
+   If we have a macro, assume it works.
+   Otherwise, define a function that defers to any other function definition in overload resolution. */
+#ifndef isnan
+namespace {
+    struct Wrap {
+        Wrap(double d)
+            : d(d)
+            { }
+        double d;
+    };
+}
+static inline bool isnan(Wrap d, ...)
+{
+    return d.d != d.d;
+}
+#endif
 
 namespace {
     gfx::Point convertCoordinates(const gfx::Rectangle& area, const gfx::threed::Vec3f& pos)
