@@ -12,15 +12,18 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/proxy/historyturnproxy.cpp \
-    game/proxy/historyturnproxy.hpp game/proxy/allianceproxy.cpp \
-    game/proxy/allianceproxy.hpp game/proxy/attachmentproxy.cpp \
-    game/proxy/attachmentproxy.hpp game/config/stringarrayoption.cpp \
-    game/config/stringarrayoption.hpp interpreter/directoryfunctions.cpp \
-    interpreter/directoryfunctions.hpp game/vcr/test/database.cpp \
-    game/vcr/test/database.hpp game/vcr/test/battle.cpp \
-    game/vcr/test/battle.hpp interpreter/test/valueverifier.cpp \
-    interpreter/test/valueverifier.hpp \
+FILES_gamelib = util/resourcefileapplication.cpp \
+    util/resourcefileapplication.hpp util/resourcefilewriter.cpp \
+    util/resourcefilewriter.hpp util/resourcefilereader.cpp \
+    util/resourcefilereader.hpp util/resourcefile.hpp \
+    game/proxy/historyturnproxy.cpp game/proxy/historyturnproxy.hpp \
+    game/proxy/allianceproxy.cpp game/proxy/allianceproxy.hpp \
+    game/proxy/attachmentproxy.cpp game/proxy/attachmentproxy.hpp \
+    game/config/stringarrayoption.cpp game/config/stringarrayoption.hpp \
+    interpreter/directoryfunctions.cpp interpreter/directoryfunctions.hpp \
+    game/vcr/test/database.cpp game/vcr/test/database.hpp \
+    game/vcr/test/battle.cpp game/vcr/test/battle.hpp \
+    interpreter/test/valueverifier.cpp interpreter/test/valueverifier.hpp \
     interpreter/expr/rvaluefunctioncallnode.cpp \
     interpreter/expr/rvaluefunctioncallnode.hpp \
     game/interface/scriptapplication.cpp \
@@ -1134,8 +1137,7 @@ FILES_guilib = gfx/threed/colortransformation.cpp \
     client/si/widgetholder.hpp ui/res/winplanbitmapprovider.cpp \
     ui/res/winplanbitmapprovider.hpp ui/res/factory.cpp ui/res/factory.hpp \
     ui/res/resourcefileprovider.cpp ui/res/resourcefileprovider.hpp \
-    ui/res/resourcefile.cpp ui/res/resourcefile.hpp ui/res/resid.cpp \
-    ui/res/resid.hpp client/widgets/controlscreenheader.cpp \
+    ui/res/resid.cpp ui/res/resid.hpp client/widgets/controlscreenheader.cpp \
     client/widgets/controlscreenheader.hpp \
     client/tiles/shipscreenheadertile.cpp \
     client/tiles/shipscreenheadertile.hpp ui/widgets/imagebutton.cpp \
@@ -1652,6 +1654,11 @@ FILES_c2rater = main/c2rater.cpp
 TYPE_c2rater = app
 DEPEND_c2rater = gamelib afl
 
+TARGETS += c2restool
+FILES_c2restool = main/c2restool.cpp
+TYPE_c2restool = app
+DEPEND_c2restool = gamelib afl
+
 TARGETS += c2script
 FILES_c2script = main/c2script.cpp
 TYPE_c2script = app
@@ -1776,7 +1783,9 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_server_play_racenamepacker.cpp \
+FILES_testsuite = u/t_util_resourcefileapplication.cpp \
+    u/t_util_resourcefilewriter.cpp u/t_util_resourcefilereader.cpp \
+    u/t_util_resourcefile.cpp u/t_server_play_racenamepacker.cpp \
     u/t_server_host_hostspecificationimpl.cpp \
     u/t_server_host_spec_directory.cpp \
     u/t_server_host_spec_publisherimpl.cpp \

@@ -26,6 +26,19 @@ util::StringParser::parseString(const char* s)
     }
 }
 
+// Check constant string segment, case-insensitively.
+bool
+util::StringParser::parseCaseInsensitiveString(const char* s)
+{
+    const String_t::size_type len = std::strlen(s);
+    if (m_string.size() - m_pos >= len && afl::string::strCaseCompare(afl::string::toMemory(m_string).subrange(m_pos, len), afl::string::toMemory(s)) == 0) {
+        m_pos += len;
+        return true;
+    } else {
+        return false;
+    }
+}
+
 // Check character literal.
 bool
 util::StringParser::parseCharacter(char ch)

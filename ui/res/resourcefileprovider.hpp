@@ -6,7 +6,7 @@
 
 #include "afl/string/translator.hpp"
 #include "ui/res/provider.hpp"
-#include "ui/res/resourcefile.hpp"
+#include "util/resourcefilereader.hpp"
 
 namespace ui { namespace res {
 
@@ -18,7 +18,7 @@ namespace ui { namespace res {
         virtual afl::base::Ptr<gfx::Canvas> loadImage(String_t name, Manager& mgr);
 
      private:
-        ResourceFile m_file;
+        util::ResourceFileReader m_file;
 
         afl::base::Ptr<gfx::Canvas> loadImageById(uint16_t id, Manager& mgr);
     };

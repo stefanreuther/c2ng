@@ -269,6 +269,52 @@ class TestUtilRequestThread : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestUtilResourceFile : public CxxTest::TestSuite {
+ public:
+    void testHeader();
+};
+
+class TestUtilResourceFileApplication : public CxxTest::TestSuite {
+ public:
+    void testNoArgs();
+    void testList();
+    void testListFileNotFound();
+    void testListBadFile();
+    void testExtract();
+    void testExtractFail();
+    void testExtractFileNotFound();
+    void testExtractSyntax();
+    void testExtractSyntax2();
+    void testExtractSyntax3();
+    void testExtractAllOne();
+    void testExtractAllTwo();
+    void testExtractAllError();
+    void testCreate();
+    void testCreateCRLF();
+    void testCreateErrors();
+    void testCreateSyntaxError();
+    void testCreateSyntaxError2();
+    void testCreateSearch();
+    void testHelp();
+};
+
+class TestUtilResourceFileReader : public CxxTest::TestSuite {
+ public:
+    void testNormal();
+    void testAlias();
+    void testError();
+    void testParallelRead();
+};
+
+class TestUtilResourceFileWriter : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormal();
+    void testWriteDetails();
+    void testHardlink();
+    void testDirectoryOverflow();
+};
+
 class TestUtilRunLengthExpandTransform : public CxxTest::TestSuite {
  public:
     void testIt();

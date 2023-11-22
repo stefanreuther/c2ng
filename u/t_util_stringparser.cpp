@@ -142,4 +142,22 @@ TestUtilStringParser::testIt()
         TS_ASSERT_EQUALS(e, -99);
         TS_ASSERT_EQUALS(f, 99);
     }
+
+    // Case-insensitivity
+    {
+        util::StringParser p("hello!");
+        TS_ASSERT(!p.parseString("hElLo"));
+        TS_ASSERT(p.parseCaseInsensitiveString("hElLo"));
+        TS_ASSERT(p.parseCharacter('!'));
+        TS_ASSERT(p.parseEnd());
+    }
+
+    // Case-insensitivity
+    {
+        util::StringParser p("hello!");
+        TS_ASSERT(!p.parseCaseInsensitiveString("hAlLo"));
+        TS_ASSERT(p.parseString("hello"));
+        TS_ASSERT(p.parseCharacter('!'));
+        TS_ASSERT(p.parseEnd());
+    }
 }

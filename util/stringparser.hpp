@@ -24,6 +24,11 @@ namespace util {
             \return true on match, false on mismatch */
         bool parseString(const char* s);
 
+        /** Check constant string segment, case-insensitively.
+            \param s String literal
+            \return true on match, false on mismatch */
+        bool parseCaseInsensitiveString(const char* s);
+
         /** Check character literal.
             \param ch Character
             \return true on match, false on mismatch */
