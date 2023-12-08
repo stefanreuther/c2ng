@@ -577,6 +577,11 @@ game::HostVersion::setImpliedHostConfiguration(game::config::HostConfiguration& 
         // shipacc.pas:CheckChunnelFailures - in Host, ships can exist with >100 damage, so PHost's default 100 is not sufficient
         config[HostConfiguration::DamageLevelForChunnelFail].set(151);
 
+        // getSensorVisibility
+        config[HostConfiguration::DefenseForUndetectable].set(15);
+        config[HostConfiguration::MinesForDetectable].set(21);
+        config[HostConfiguration::FactoriesForDetectable].set(16);
+
         // Tim-Host defaults; ex game/config.cc:initConfig
         config[HostConfiguration::RoundGravityWells].set(1);
         config[HostConfiguration::CPEnableRemote].set(0);

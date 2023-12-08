@@ -850,7 +850,7 @@ game::map::describePlanetBuildingEffects(afl::io::xml::Nodes_t& nodes,
         String_t color = "yellow";
 
         int level;
-        if (getSensorVisibility(pl, root.hostConfiguration(), root.hostVersion()).get(level)) {
+        if (getSensorVisibility(pl, root.hostConfiguration()).get(level)) {
             util::addListItem(vis, ", ", fmt.formatNumber(level) + "%");
             if (level == 0) {
                 color = "green";

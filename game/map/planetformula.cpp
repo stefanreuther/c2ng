@@ -654,7 +654,7 @@ game::map::getMiningCapacity(const Planet& pl, const game::config::HostConfigura
 }
 
 game::IntegerProperty_t
-game::map::getSensorVisibility(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host)
+game::map::getSensorVisibility(const Planet& pl, const game::config::HostConfiguration& config)
 {
     int mines, factories, defense;
     if (pl.getNumBuildings(MineBuilding).get(mines)
@@ -662,16 +662,9 @@ game::map::getSensorVisibility(const Planet& pl, const game::config::HostConfigu
         && pl.getNumBuildings(DefenseBuilding).get(defense))
     {
         // Parameters
-        int dfu, mfd, ffd;
-        if (host.isPHost()) {
-            dfu = config[HostConfiguration::DefenseForUndetectable]();
-            mfd = config[HostConfiguration::MinesForDetectable]();
-            ffd = config[HostConfiguration::FactoriesForDetectable]();
-        } else {
-            dfu = 15;
-            mfd = 21;
-            ffd = 16;
-        }
+        int dfu = config[HostConfiguration::DefenseForUndetectable]();
+        int mfd = config[HostConfiguration::MinesForDetectable]();
+        int ffd = config[HostConfiguration::FactoriesForDetectable]();
 
         if (defense >= dfu
             || dfu <= 0                   // avoid division by zero in pathological case

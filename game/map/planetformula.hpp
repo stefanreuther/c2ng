@@ -211,9 +211,8 @@ namespace game { namespace map {
     /** Get sensor visibility.
         @param pl     Planet
         @param config Host configuration
-        @param host   Host version
         @return Sensor visibility in % (0=invisible, 100=always visible); unknown if preconditions not met */
-    IntegerProperty_t  getSensorVisibility(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host);
+    IntegerProperty_t  getSensorVisibility(const Planet& pl, const game::config::HostConfiguration& config);
 
 
     /*
