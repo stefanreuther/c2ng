@@ -20,7 +20,7 @@ namespace game { namespace map {
         explicit PlayedShipType(ObjectVector<Ship>& vec);
 
         // ObjectVectorType:
-        virtual bool isValid(const Ship& p) const;
+        virtual bool isValid(const Ship& s) const;
 
         /** Count capital ships.
             @return number of capital ships

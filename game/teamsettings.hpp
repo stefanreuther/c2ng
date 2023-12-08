@@ -161,7 +161,7 @@ namespace game {
         void synchronizeDataTransferConfigurationFromTeams();
 
         /** Set passcode for PlanetList transmissions.
-            \param passcode New passcode (0..9999) */
+            \param code New passcode (0..9999) */
         void setPasscode(int code);
 
         /** Get passcode for PlanetList transmissions.

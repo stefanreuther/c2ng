@@ -281,8 +281,7 @@ game::map::MinefieldMission::checkScoopMission(const Ship& ship,
     // Do we want to scoop?
     if (mission == Mission::msn_MineSweep) {
         // Check for "msc" fcode
-        const String_t shipFC = ship.getFriendlyCode().orElse(String_t());
-        const String_t fc  = ship.getFriendlyCode().orElse(String_t());
+        const String_t fc = ship.getFriendlyCode().orElse(String_t());
 
         if (fc == "msc"
             && shipList.friendlyCodes().isAcceptedFriendlyCode(fc, game::spec::FriendlyCode::Filter::fromShip(ship, shipScores, shipList, config),

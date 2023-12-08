@@ -84,7 +84,7 @@ namespace game { namespace map {
             \param mapConfig Map configuration
             \param config host configuration
             \param tx translator
-        \param log logger */
+            \param log logger */
         void postprocess(int turn, const Configuration& mapConfig, const game::config::HostConfiguration& config, afl::string::Translator& tx, afl::sys::LogListener& log);
 
 

@@ -52,10 +52,10 @@ namespace game { namespace v3 {
         void packPlanet(game::v3::structures::Planet& out, int id, const game::map::PlanetData& in);
 
         /** Pack a starbase.
-            \param out [out] Target, on-disk
-            \param id  [in] Base Id
-            \param in  [in] Source, internal
-            \param in  [in] Base owner */
+            \param out   [out] Target, on-disk
+            \param id    [in] Base Id
+            \param in    [in] Source, internal
+            \param owner [in] Base owner */
         void packBase(game::v3::structures::Base& out, int id, const game::map::BaseData& in, int owner);
 
      private:

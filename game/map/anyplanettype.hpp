@@ -11,7 +11,7 @@
 
 namespace game { namespace map {
 
-    /** Played planets type.
+    /** All planets type.
         Contains all visible planets. */
     class AnyPlanetType : public ObjectVectorType<Planet> {
      public:

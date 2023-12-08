@@ -33,8 +33,6 @@ namespace game { namespace map {
         };
 
         /** Actions that lead to Minefield Update.
-            These must keep their relative and absolute values,
-            because these equal the 'ScanType' of a UTILx.DAT entry, plus one.
 
             The order indicates a priority reason:
             a minefield can be laid, then swept, then scanned;
@@ -99,7 +97,7 @@ namespace game { namespace map {
 
         /** Erase this minefield by making it not valid.
             As per the rule that objects that are part of a Universe never disappear, the object remains existant.
-            \param sig sig_setChange signal to raise in the process */
+            \param sig sig_setChange signal to raise in the process, before raising this object's sig_change */
         void erase(afl::base::Signal<void(Id_t)>* sig);
 
         /** Set number of mine units.

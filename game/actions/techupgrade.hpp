@@ -6,6 +6,7 @@
 #define C2NG_GAME_ACTIONS_TECHUPGRADE_HPP
 
 #include "game/actions/basebuildaction.hpp"
+#include "game/map/universe.hpp"
 #include "game/types.hpp"
 
 namespace game { namespace actions {

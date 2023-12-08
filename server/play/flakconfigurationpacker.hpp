@@ -14,7 +14,7 @@ namespace server { namespace play {
     class FlakConfigurationPacker : public Packer {
      public:
         /** Constructor.
-            \param session Session */
+            \param root Root */
         explicit FlakConfigurationPacker(const game::Root& root);
 
         virtual Value_t* buildValue() const;

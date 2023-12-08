@@ -118,7 +118,6 @@ TestGameMapBoundingBox::testAddUniverse()
     // East: planet, west: ship. North/south borders determined by map config
     {
         game::map::Universe univ;
-        game::map::Configuration mapConfig;
         TS_ASSERT_EQUALS(mapConfig.getMinimumCoordinates(), Point(1000, 1000));
         TS_ASSERT_EQUALS(mapConfig.getMaximumCoordinates(), Point(3000, 3000));
 
@@ -142,7 +141,6 @@ TestGameMapBoundingBox::testAddUniverse()
     // North: ion storm, south: minefield, east: drawing, west: ufo
     {
         game::map::Universe univ;
-        game::map::Configuration mapConfig;
         game::map::IonStorm* st = univ.ionStorms().create(10);
         st->setPosition(Point(2000, 600));
         st->setRadius(250);
@@ -175,7 +173,6 @@ TestGameMapBoundingBox::testAddUniverse()
     // East: explosion
     {
         game::map::Universe univ;
-        game::map::Configuration mapConfig;
 
         univ.explosions().add(game::map::Explosion(0, Point(700, 3000)));
 

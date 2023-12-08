@@ -88,7 +88,7 @@ namespace gfx { namespace threed {
 
         /** Add (mix in color), color version.
             Updates the transformation in-place.
-            @param vec Color
+            @param color Color
             @return *this */
         ColorTransformation& add(ColorQuad_t color);
 

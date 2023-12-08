@@ -6,8 +6,9 @@
 #define C2NG_GAME_ACTIONS_BUILDPARTS_HPP
 
 #include <vector>
-#include "game/actions/basebuildaction.hpp"
 #include "afl/base/signalconnection.hpp"
+#include "game/actions/basebuildaction.hpp"
+#include "game/map/universe.hpp"
 
 namespace game { namespace actions {
 

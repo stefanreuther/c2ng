@@ -516,7 +516,7 @@ TestGameMsgInbox::testPrimaryLink()
     game::PlayerList list;
     game::msg::Inbox testee;
 
-    testee.addMessage("(-i0006)<<< ION Advisory >>>"
+    testee.addMessage("(-i0006)<<< ION Advisory >>>\n"
                       "ION Disturbance\n"
                       "ID Number:  6\n"
                       "Centered At: (  1959, 1110)\n"

@@ -188,25 +188,18 @@ namespace {
             virtual void visitTag(const afl::io::xml::TagNode& node)
                 {
                     m_result += "<" + node.getName() + ">";
-                    visitNodes(node.getChildren());
+                    visit(node.getChildren());
                     m_result += "</" + node.getName() + ">";
                 }
             virtual void visitText(const afl::io::xml::TextNode& node)
                 { m_result += node.get(); }
-
-            void visitNodes(const afl::io::xml::Nodes_t& nodes)
-                {
-                    for (size_t i = 0, n = nodes.size(); i < n; ++i) {
-                        visit(*nodes[i]);
-                    }
-                }
 
          private:
             String_t& m_result;
         };
 
         String_t result;
-        Visitor(result).visitNodes(nodes);
+        Visitor(result).visit(nodes);
         return result;
     }
 

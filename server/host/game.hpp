@@ -434,7 +434,7 @@ namespace server { namespace host {
         bool isMultiJoinAllowed();
 
         /** If game has join restrictions (rank), check those for a player.
-            \param user */
+            \param u user */
         bool isJoinRestrictionSatisfied(User& u);
 
         /** Describe this game.

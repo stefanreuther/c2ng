@@ -11,6 +11,7 @@
 #include "game/element.hpp"
 #include "game/exception.hpp"
 #include "game/map/planet.hpp"
+#include "game/map/universe.hpp"
 #include "game/root.hpp"
 
 namespace game { namespace actions {

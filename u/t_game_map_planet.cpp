@@ -28,9 +28,15 @@ TestGameMapPlanet::testCopy()
 {
     game::map::Planet t(19);
     t.setPlayability(game::map::Planet::Playable);
+    t.setAutobuildGoal(game::MineBuilding, 333);
+    t.setAutobuildSpeed(game::MineBuilding, 77);
+    t.messages().add(3);
 
     game::map::Planet t2(t);
     TS_ASSERT_EQUALS(t2.getPlayability(), game::map::Planet::Playable);
+    TS_ASSERT_EQUALS(t2.getAutobuildGoal(game::MineBuilding), 333);
+    TS_ASSERT_EQUALS(t2.getAutobuildSpeed(game::MineBuilding), 77);
+    TS_ASSERT_EQUALS(t2.messages().get().size(), 1U);
 }
 
 /** Test isKnownToHaveNatives() status. */

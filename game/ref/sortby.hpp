@@ -36,7 +36,7 @@ namespace game { namespace ref {
         class Name : public SortPredicate {
          public:
             /** Constructor.
-                @param Session  Session (resolve reference names) */
+                @param session  Session (resolve reference names) */
             explicit Name(Session& session);
 
             // SortPredicate:

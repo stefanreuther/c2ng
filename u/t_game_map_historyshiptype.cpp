@@ -7,7 +7,6 @@
 
 #include "t_game_map.hpp"
 #include "game/map/ship.hpp"
-#include "game/map/universe.hpp"
 
 using game::map::Point;
 using game::map::Ship;
@@ -42,7 +41,6 @@ namespace {
 
     void finish(ShipVector_t& v)
     {
-        game::map::Universe univ;
         for (game::Id_t i = 1, n = v.size(); i <= n; ++i) {
             if (Ship* sh = v.get(i)) {
                 sh->internalCheck(game::PlayerSet_t(), TURN_NR);

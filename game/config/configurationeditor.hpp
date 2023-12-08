@@ -257,7 +257,7 @@ namespace game { namespace config {
 
         /** Add nodes for all options from a given configuration.
             @param level Indentation level (0=top)
-            @param name  Human-readable, translated name
+            @param type  Fixed type to report in getType()
             @param config Configuration */
         void addAll(int level, int type, const Configuration& config);
 

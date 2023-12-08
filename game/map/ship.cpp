@@ -5,7 +5,6 @@
 
 #include "game/map/ship.hpp"
 #include "afl/string/format.hpp"
-#include "game/map/universe.hpp"
 #include "game/parser/messagevalue.hpp"
 #include "util/math.hpp"
 
@@ -675,17 +674,15 @@ game::map::Ship::getWaypoint() const
 }
 
 void
-game::map::Ship::setWaypoint(afl::base::Optional<Point> pt)
+game::map::Ship::setWaypoint(Point pt)
 {
     // ex GShip::setWaypoint
     // Note different condition than in PCC2; PCC2 checks isVisible()
     int x, y;
-    if (const Point* p = pt.get()) {
-        if (m_currentData.x.get(x) && m_currentData.y.get(y)) {
-            m_currentData.waypointDX = p->getX() - x;
-            m_currentData.waypointDY = p->getY() - y;
-            markDirty();
-        }
+    if (m_currentData.x.get(x) && m_currentData.y.get(y)) {
+        m_currentData.waypointDX = pt.getX() - x;
+        m_currentData.waypointDY = pt.getY() - y;
+        markDirty();
     }
 }
 
@@ -1041,16 +1038,14 @@ bool
 game::map::Ship::isTransporterActive(Transporter which) const
 {
     // ex GShip::isTransporterActive
-    const ShipData::Transfer& tr = which==UnloadTransporter ? m_currentData.unload : m_currentData.transfer;
-    return m_kind == CurrentShip && isTransferActive(tr);
+    return m_kind == CurrentShip && isTransferActive(getTransporter(which));
 }
 
 game::IntegerProperty_t
 game::map::Ship::getTransporterTargetId(Transporter which) const
 {
     if (m_kind == CurrentShip) {
-        const ShipData::Transfer& tr = which==UnloadTransporter ? m_currentData.unload : m_currentData.transfer;
-        return tr.targetId;
+        return getTransporter(which).targetId;
     } else {
         return IntegerProperty_t();
     }
@@ -1059,8 +1054,7 @@ game::map::Ship::getTransporterTargetId(Transporter which) const
 void
 game::map::Ship::setTransporterTargetId(Transporter which, IntegerProperty_t id)
 {
-    ShipData::Transfer& tr = which==UnloadTransporter ? m_currentData.unload : m_currentData.transfer;
-    tr.targetId = id;
+    getTransporter(which).targetId = id;
     markDirty();
 }
 
@@ -1068,7 +1062,7 @@ game::IntegerProperty_t
 game::map::Ship::getTransporterCargo(Transporter which, Element::Type type) const
 {
     if (m_kind == CurrentShip) {
-        const ShipData::Transfer& tr = which==UnloadTransporter ? m_currentData.unload : m_currentData.transfer;
+        const ShipData::Transfer& tr = getTransporter(which);
         switch (type) {
          case Element::Neutronium: return tr.neutronium;
          case Element::Tritanium:  return tr.tritanium;
@@ -1086,7 +1080,7 @@ game::map::Ship::getTransporterCargo(Transporter which, Element::Type type) cons
 void
 game::map::Ship::setTransporterCargo(Transporter which, Element::Type type, IntegerProperty_t amount)
 {
-    ShipData::Transfer& tr = which==UnloadTransporter ? m_currentData.unload : m_currentData.transfer;
+    ShipData::Transfer& tr = getTransporter(which);
     switch (type) {
      case Element::Neutronium: tr.neutronium = amount; break;
      case Element::Tritanium:  tr.tritanium  = amount; break;

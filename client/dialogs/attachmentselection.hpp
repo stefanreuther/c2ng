@@ -15,7 +15,7 @@ namespace client { namespace dialogs {
 
     /** Choose attachments.
         @param [in,out] infos        Attachment information. Dialog will update the @c selected members.
-        @param [in]     gameSession  Game session (for help dialog)
+        @param [in]     gameSender   Game session (for help dialog)
         @param [in]     root         UI root
         @param [in]     tx           Translator */
     bool chooseAttachments(game::proxy::AttachmentProxy::Infos_t& infos, util::RequestSender<game::Session> gameSender, ui::Root& root, afl::string::Translator& tx);

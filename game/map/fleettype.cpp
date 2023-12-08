@@ -11,10 +11,10 @@ game::map::FleetType::FleetType(ObjectVector<Ship>& vec)
 { }
 
 bool
-game::map::FleetType::isValid(const Ship& p) const
+game::map::FleetType::isValid(const Ship& s) const
 {
     // ex GFleetType::isValidIndex
-    return p.isPlayable(Object::Playable) && p.isFleetLeader();
+    return s.isPlayable(Object::Playable) && s.isFleetLeader();
 }
 
 void

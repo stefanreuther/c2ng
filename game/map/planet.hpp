@@ -22,7 +22,6 @@
 namespace game { namespace map {
 
     class Configuration;
-    class Universe;
 
     /** Planet.
         This stores data of a planet and possibly a starbase.

@@ -68,7 +68,7 @@ namespace util {
 
         /** Look up a key, producing an index.
             Each character set can be recognized under multiple keys.
-            \param Key
+            \param name Key (name of charset)
             \return Resulting index if found */
         afl::base::Optional<Index_t> findIndexByKey(String_t name) const;
 

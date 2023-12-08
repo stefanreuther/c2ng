@@ -20,8 +20,6 @@
 
 namespace game { namespace map {
 
-    class Universe;
-
     /** Ship.
         Represents all sorts of ship information:
         - current ships, i.e. seen this turn, and possibly played
@@ -240,7 +238,7 @@ namespace game { namespace map {
         /** Set waypoint.
             A waypoint can only be set when the ship's position is known; this call is ignored if it's not.
             \param pt New waypoint (absolute position) */
-        void setWaypoint(afl::base::Optional<Point> pt);
+        void setWaypoint(Point pt);
 
         /** Clear waypoint (set waypoint to same as location). */
         void clearWaypoint();

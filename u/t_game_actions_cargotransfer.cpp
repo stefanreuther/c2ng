@@ -353,7 +353,7 @@ TestGameActionsCargoTransfer::testOverloadBefore()
     TS_ASSERT(testee.get(0)->isOverload());
 }
 
-/** Test overload configuration, configuration before add.
+/** Test overload configuration, configuration after add.
     Containers must receive the correct value. */
 void
 TestGameActionsCargoTransfer::testOverloadAfter()

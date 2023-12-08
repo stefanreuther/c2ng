@@ -50,9 +50,10 @@ namespace gfx {
     };
 
     /** Handle a window parameter option.
-        @param option Option as returned by CommandLineParser
-        @param parser CommandLineParser instance, to retrieve parameters
-        @param tx     Translator (for error messages)
+        @param param  [in,out] WindowParameters structure
+        @param option [in]     Option as returned by CommandLineParser
+        @param parser [in]     CommandLineParser instance, to retrieve parameters
+        @param tx     [in]     Translator (for error messages)
         @return true if option was accepted
         @throw afl::except::CommandLineException on invalid parameters */
     bool handleWindowParameterOption(WindowParameters& param, const String_t& option, afl::sys::CommandLineParser& parser, afl::string::Translator& tx);

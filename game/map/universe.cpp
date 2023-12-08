@@ -27,7 +27,7 @@ namespace {
                                        : tx.translateString("Orbit of %s (#%d)"))
                                     : ((flags & game::map::Universe::NameVerbose) != 0
                                        ? tx.translateString("%s (Planet #%d)")
-                                       : tx.translateString("%s (#%d)"))).c_str(),
+                                       : tx.translateString("%s (#%d)"))),
                                    pl.getName(tx),
                                    pl.getId());
     }
@@ -213,8 +213,8 @@ game::map::Universe::notifyListeners()
 
     /* Update individual objects */
     // changed |= updateType(ty_history_ships);
-    changed |= AnyShipType(m_ships).notifyObjectListeners();
-    changed |= AnyPlanetType(m_planets).notifyObjectListeners();
+    changed |= m_allShips.notifyObjectListeners();
+    changed |= m_allPlanets.notifyObjectListeners();
     changed |= m_ionStormType.notifyObjectListeners();
     changed |= m_minefields.notifyObjectListeners();
     changed |= m_ufos.notifyObjectListeners();
@@ -330,7 +330,7 @@ game::Id_t
 game::map::Universe::findPlanetAt(Point pt) const
 {
     // ex GUniverse::getPlanetAt, global.pas:PlanetAt
-    return AnyPlanetType(const_cast<Universe&>(*this).planets()).findNextObjectAt(pt, 0, false);
+    return const_cast<AnyPlanetType&>(m_allPlanets).findNextObjectAt(pt, 0, false);
 }
 
 game::Id_t
@@ -362,7 +362,7 @@ game::map::Universe::findGravityPlanetAt(Point pt,
         return 0;
     }
 
-    AnyPlanetType ty(const_cast<Universe&>(*this).planets());
+    AnyPlanetType& ty = const_cast<AnyPlanetType&>(m_allPlanets);
     switch (host.getKind()) {
      case HostVersion::Unknown:
      case HostVersion::PHost: {
@@ -373,12 +373,14 @@ game::map::Universe::findGravityPlanetAt(Point pt,
                 Point pos;
                 if (p->getPosition().get(pos)) {
                     if (config[config.RoundGravityWells]()) {
-                        if (mapConfig.getSquaredDistance(pos, pt) <= sqs)
+                        if (mapConfig.getSquaredDistance(pos, pt) <= sqs) {
                             return i;
+                        }
                     } else {
                         Point p2 = mapConfig.getSimpleNearestAlias(pos, pt);
-                        if (util::squareInteger(p2.getX() - pt.getX()) <= sqs && util::squareInteger(p2.getY() - pt.getY()) <= sqs)
+                        if (util::squareInteger(p2.getX() - pt.getX()) <= sqs && util::squareInteger(p2.getY() - pt.getY()) <= sqs) {
                             return i;
+                        }
                     }
                 }
             }
@@ -413,7 +415,7 @@ game::map::Universe::findFirstShipAt(Point pt) const
 {
     // ex GUniverse::getAnyShipAt
     // ex shipacc.pas:ShipAt
-    return AnyShipType(const_cast<Universe&>(*this).ships()).findNextObjectAt(pt, 0, false);
+    return const_cast<AnyShipType&>(m_allShips).findNextObjectAt(pt, 0, false);
 }
 
 String_t
@@ -444,7 +446,7 @@ game::map::Universe::findLocationName(Point pt, int flags,
             if (const Planet* pl = planets().get(pid)) {
                 return afl::string::Format(((flags & NameVerbose) != 0
                                             ? tx.translateString("near %s (Planet #%d)")
-                                            : tx.translateString("near %s (#%d)")).c_str(),
+                                            : tx.translateString("near %s (#%d)")),
                                            pl->getName(tx),
                                            pl->getId());
             }
@@ -479,7 +481,7 @@ game::map::Universe::findLocationUnitNames(Point pt,
     PlayerArray<int> numShips;
     Id_t myShipId = 0;
     String_t myShipName;
-    AnyShipType ty(const_cast<Universe&>(*this).ships());
+    AnyShipType& ty = const_cast<AnyShipType&>(m_allShips);
     for (Id_t sid = ty.findNextIndex(0); sid != 0; sid = ty.findNextIndex(sid)) {
         if (const Ship* sh = ty.getObjectByIndex(sid)) {
             Point shipPos;
@@ -519,7 +521,7 @@ game::Id_t
 game::map::Universe::findShipTowing(Id_t sid, Id_t after) const
 {
     // ex GUniverse::isShipTowed
-    AnyShipType ty(const_cast<Universe&>(*this).ships());
+    AnyShipType& ty = const_cast<AnyShipType&>(m_allShips);
 
     Id_t i = after;
     while ((i = ty.findNextIndex(i)) != 0) {
@@ -566,7 +568,7 @@ game::map::Universe::findControllingPlanetId(const Minefield& mf, const Configur
     Point minePos;
     int mineOwner;
     if (mf.getPosition().get(minePos) && mf.getOwner().get(mineOwner)) {
-        AnyPlanetType ty(const_cast<Universe&>(*this).planets());
+        AnyPlanetType& ty = const_cast<AnyPlanetType&>(m_allPlanets);
         for (Id_t i = ty.findNextIndex(0); i != 0; i = ty.findNextIndex(i)) {
             if (const Planet* p = m_planets.get(i)) {
                 int planetOwner;
@@ -622,12 +624,8 @@ int
 game::map::Universe::markObjectsInRange(Point a, Point b, const game::map::Configuration& mapConfig)
 {
     // ex WSelectChartMode::rebuildSelection, part; chartusr.pas:MarkRange
-    AnyShipType ships(m_ships);
-    int numShips = markTypeObjectsInRange(ships, a, b, mapConfig);
-
-    AnyPlanetType planets(m_planets);
-    int numPlanets = markTypeObjectsInRange(planets, a, b, mapConfig);
-
+    int numShips = markTypeObjectsInRange(m_allShips, a, b, mapConfig);
+    int numPlanets = markTypeObjectsInRange(m_allPlanets, a, b, mapConfig);
     return numShips + numPlanets;
 }
 

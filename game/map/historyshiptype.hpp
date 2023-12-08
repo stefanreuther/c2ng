@@ -20,7 +20,7 @@ namespace game { namespace map {
         explicit HistoryShipType(ObjectVector<Ship>& vec);
 
         // ObjectVectorType:
-        virtual bool isValid(const Ship& p) const;
+        virtual bool isValid(const Ship& s) const;
 
         /** Find next ship at position, after index.
             Optionally, limit search to only marked ships.

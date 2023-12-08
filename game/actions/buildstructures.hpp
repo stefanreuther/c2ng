@@ -5,11 +5,12 @@
 #ifndef C2NG_GAME_ACTIONS_BUILDSTRUCTURES_HPP
 #define C2NG_GAME_ACTIONS_BUILDSTRUCTURES_HPP
 
-#include "game/types.hpp"
-#include "game/map/planet.hpp"
-#include "game/cargocontainer.hpp"
 #include "game/actions/cargocostaction.hpp"
+#include "game/cargocontainer.hpp"
 #include "game/config/hostconfiguration.hpp"
+#include "game/map/planet.hpp"
+#include "game/map/universe.hpp"
+#include "game/types.hpp"
 
 namespace game { namespace actions {
 

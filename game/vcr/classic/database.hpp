@@ -32,7 +32,7 @@ namespace game { namespace vcr { namespace classic {
 
             @param file    File
             @param config  Host configuration (for decoding PlanetsHaveTubes)
-            @parma charset Game character set (for decoding names) */
+            @param charset Game character set (for decoding names) */
         void load(afl::io::Stream& file, const game::config::HostConfiguration& config, afl::charset::Charset& charset);
 
         /** Add a newly-constructed battle.

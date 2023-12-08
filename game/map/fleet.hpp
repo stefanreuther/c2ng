@@ -61,7 +61,7 @@ namespace game { namespace map {
         int getMaxEfficientWarp(const game::spec::ShipList& shipList) const;
 
         /** Count number of fleet members.
-            \return number of fleet members */
+            \return number of fleet members (including leader) */
         int countFleetMembers() const;
 
         /** Synchronize a fleet member.

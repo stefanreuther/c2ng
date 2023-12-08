@@ -20,7 +20,7 @@ namespace game { namespace map {
         explicit AnyShipType(ObjectVector<Ship>& vec);
 
         // ObjectVectorType:
-        virtual bool isValid(const Ship& p) const;
+        virtual bool isValid(const Ship& s) const;
     };
 
 } }

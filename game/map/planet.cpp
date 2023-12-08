@@ -8,7 +8,6 @@
 #include "afl/base/memory.hpp"
 #include "afl/string/format.hpp"
 #include "game/map/configuration.hpp"
-#include "game/map/universe.hpp"
 
 namespace gp = game::parser;
 
@@ -184,8 +183,13 @@ game::map::Planet::Planet(const Planet& other)
       m_industryLevel(other.m_industryLevel),
       m_queuePosition(other.m_queuePosition),
       m_queuePriority(other.m_queuePriority),
-      m_unitScores(other.m_unitScores)
-{ }
+      m_unitScores(other.m_unitScores),
+      m_messages(other.m_messages)
+{
+    afl::base::Memory<int>(m_historyTimestamps).copyFrom(other.m_historyTimestamps);
+    afl::base::Memory<int>(m_autobuildGoals).copyFrom(other.m_autobuildGoals);
+    afl::base::Memory<int>(m_autobuildSpeeds).copyFrom(other.m_autobuildSpeeds);
+}
 
 // Destructor.
 game::map::Planet::~Planet()

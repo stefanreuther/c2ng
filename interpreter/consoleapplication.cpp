@@ -307,7 +307,7 @@ interpreter::ConsoleApplication::appMain()
 }
 
 /** Parse parameters.
-    @params [out] Parameters */
+    @param params [out] Parameters */
 void
 interpreter::ConsoleApplication::parseParameters(Parameters& params)
 {

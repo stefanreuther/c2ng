@@ -223,9 +223,11 @@ namespace game {
 
         /** Default implementation for saveConfiguration().
             Saves to the Root's game directory, and to the user profile.
-            \param [in] root     Root object
-            \param [in] pProfile User profile. Can be null to skip saving user configuration.
-            \param [in] then     Task to save after saving; never null.
+            \param root     Root object
+            \param pProfile User profile. Can be null to skip saving user configuration.
+            \param log      Logger
+            \param tx       Translator
+            \param then     Task to save after saving; never null.
             \return Newly-allocated task to perform the operation; never null */
         std::auto_ptr<Task_t> defaultSaveConfiguration(const Root& root, util::ProfileDirectory* pProfile, afl::sys::LogListener& log, afl::string::Translator& tx, std::auto_ptr<Task_t> then);
     };
