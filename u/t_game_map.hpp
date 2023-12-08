@@ -384,6 +384,7 @@ class TestGameMapPlanet : public CxxTest::TestSuite {
     void testAutobuildSettings();
     void testCopy();
     void testKnownToHaveNatives();
+    void testAddMineral();
 };
 
 class TestGameMapPlanetData : public CxxTest::TestSuite {

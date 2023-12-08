@@ -100,7 +100,7 @@ namespace {
         }
     }
 
-    void updateAdd32(int& field_time, int time, game::LongProperty_t& field_value, int32_t added)
+    void updateAdd32(int& field_time, int time, bool accept, game::LongProperty_t& field_value, int32_t added)
     {
         /* We want this to be idempotent in some way, so we cannot add on every
            iteration we go through this. Since these reports come from meteorites,
@@ -108,7 +108,7 @@ namespace {
         if (!field_value.isValid()) {
             field_value = added;
             field_time = time;
-        } else if (field_time < time) {
+        } else if (accept) {
             field_value = field_value.orElse(0) + added;
             field_time = time;
         } else {
@@ -243,6 +243,11 @@ game::map::Planet::addMessageInformation(const game::parser::MessageInformation&
         }
     }
 
+    /* We accept mi_PlanetAddX only if previous data is older, to make this idempotent.
+       However, the first accepted value will invalidate the condition.
+       Therefore, check first for all, so if we accept one, we accept the others as well. */
+    bool acceptAddition = (m_historyTimestamps[MineralTime] < msg_turn);
+
     /* Process everything else. */
     for (gp::MessageInformation::Iterator_t i = info.begin(); i != info.end(); ++i) {
         if (!acceptMessageInformation(*this, **i)) {
@@ -281,16 +286,16 @@ game::map::Planet::addMessageInformation(const game::parser::MessageInformation&
                 updateField32(m_historyTimestamps[MineralTime], msg_turn, m_currentPlanetData.groundMolybdenum, iv->getValue());
                 break;
              case gp::mi_PlanetAddedN:
-                updateAdd32(m_historyTimestamps[MineralTime], msg_turn, m_currentPlanetData.groundNeutronium, iv->getValue());
+                updateAdd32(m_historyTimestamps[MineralTime], msg_turn, acceptAddition, m_currentPlanetData.groundNeutronium, iv->getValue());
                 break;
              case gp::mi_PlanetAddedT:
-                updateAdd32(m_historyTimestamps[MineralTime], msg_turn, m_currentPlanetData.groundTritanium, iv->getValue());
+                updateAdd32(m_historyTimestamps[MineralTime], msg_turn, acceptAddition, m_currentPlanetData.groundTritanium, iv->getValue());
                 break;
              case gp::mi_PlanetAddedD:
-                updateAdd32(m_historyTimestamps[MineralTime], msg_turn, m_currentPlanetData.groundDuranium, iv->getValue());
+                updateAdd32(m_historyTimestamps[MineralTime], msg_turn, acceptAddition, m_currentPlanetData.groundDuranium, iv->getValue());
                 break;
              case gp::mi_PlanetAddedM:
-                updateAdd32(m_historyTimestamps[MineralTime], msg_turn, m_currentPlanetData.groundMolybdenum, iv->getValue());
+                updateAdd32(m_historyTimestamps[MineralTime], msg_turn, acceptAddition, m_currentPlanetData.groundMolybdenum, iv->getValue());
                 break;
              case gp::mi_PlanetMinedN:
                 updateField32(m_historyTimestamps[MineralTime], msg_turn, m_currentPlanetData.minedNeutronium, iv->getValue());
