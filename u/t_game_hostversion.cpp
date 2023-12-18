@@ -483,6 +483,13 @@ TestGameHostVersion::testProperties()
     TS_ASSERT_EQUALS(HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).getMinimumFuelToInitiateChunnel(), 50);
     TS_ASSERT_EQUALS(HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).getMinimumFuelToInitiateChunnel(), 51);
     TS_ASSERT_EQUALS(HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).getMinimumFuelToInitiateChunnel(), 50);
+
+    // hasPermissiveClimateLimits
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).hasPermissiveClimateLimits(), false);
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).hasPermissiveClimateLimits(), true);
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).hasPermissiveClimateLimits(), true);
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).hasPermissiveClimateLimits(), false);
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).hasPermissiveClimateLimits(), false);
 }
 
 /** Test setImpliedHostConfiguration(). */

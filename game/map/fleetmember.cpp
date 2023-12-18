@@ -202,7 +202,6 @@ game::map::FleetMember::setFleetName(String_t nname)
     } else {
         return false;
     }
-
 }
 
 // Set fleet waypoint.

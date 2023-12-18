@@ -220,9 +220,8 @@ namespace {
 
             /* Host-style CDR: according to PCC 1.x, this rule is active unless a special
                Rebel/Robot/Colony/Klingon rule kicks in. */
-            game::HostVersion::Kind k = root.hostVersion().getKind();
             int temp;
-            if ((k == game::HostVersion::Host || k == game::HostVersion::SRace) && pl.getTemperature().get(temp)) {
+            if (root.hostVersion().hasPermissiveClimateLimits() && pl.getTemperature().get(temp)) {
                 /* CDR is only applicable for Climate <16 or >=86.
                    - Rebel rule: Climate > 80
                    - Kli/Reb/Rob/Col rule: Climate < 20, and main rule yields less than 60.

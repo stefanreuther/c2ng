@@ -251,6 +251,10 @@ namespace game {
             Host accepts ships that run dry. */
         int getMinimumFuelToInitiateChunnel() const;
 
+        /** Check for premissive climate population limits.
+            If true, HOST's permissive formula ("won't die if less than") applies. */
+        bool hasPermissiveClimateLimits() const;
+
         /** Set configuration options implied by this host version.
             This way, code can just use the configuration
             instead of implementing a "should I query hconfig or use fixed value" switch.

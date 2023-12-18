@@ -213,7 +213,7 @@ game::map::Locker::findWarpWellEdge(Point origin,
     Id_t foundPlanetId = univ.findPlanetAt(m_config.getCanonicalLocation(m_foundPoint));
     if (foundPlanetId != 0
         && config[HostConfiguration::AllowGravityWells]()
-        && (!isHyperdriving || !host.isPHost() || config[HostConfiguration::AllowHyperjumpGravWells]())
+        && (!isHyperdriving || config[HostConfiguration::AllowHyperjumpGravWells]())
         && foundPlanetId != originPlanetId)
     {
         /* We try to find the edge of a gravity well unless

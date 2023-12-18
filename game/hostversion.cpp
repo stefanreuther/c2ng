@@ -525,6 +525,13 @@ game::HostVersion::getMinimumFuelToInitiateChunnel() const
     }
 }
 
+// Check for premissive climate population limits.
+bool
+game::HostVersion::hasPermissiveClimateLimits() const
+{
+    return m_kind == Host || m_kind == SRace;
+}
+
 // Set configuration options implied by this host version.
 void
 game::HostVersion::setImpliedHostConfiguration(game::config::HostConfiguration& config)
@@ -582,10 +589,16 @@ game::HostVersion::setImpliedHostConfiguration(game::config::HostConfiguration& 
         config[HostConfiguration::MinesForDetectable].set(21);
         config[HostConfiguration::FactoriesForDetectable].set(16);
 
+        // Locker::findWarpWellEdge
+        config[HostConfiguration::AllowHyperjumpGravWells].set(1);
+
         // Tim-Host defaults; ex game/config.cc:initConfig
         config[HostConfiguration::RoundGravityWells].set(1);
         config[HostConfiguration::CPEnableRemote].set(0);
         config[HostConfiguration::MapTruehullByPlayerRace].set(0);
+
+        // Intentionally not handled here:
+        // - AllowAlternativeCombat (could be THost with FLAK)
         break;
 
      case PHost:
