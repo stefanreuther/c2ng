@@ -333,7 +333,7 @@ bool
 game::map::FleetMember::isMissionLocked(int flags,
                                         const game::config::HostConfiguration& config,
                                         const game::spec::ShipList& shipList,
-                                        const interpreter::MutexList& mtxl) const
+                                        const interpreter::LockAccess& mtxl) const
 {
     // ex game/fleet.h:isMissionLocked
     // Is it an intercept mission after all?
@@ -350,7 +350,7 @@ game::map::FleetMember::isMissionLocked(int flags,
     }
 
     // Is it locked because someone has the waypoint mutex?
-    if ((flags & OverrideLocks) == 0 && mtxl.query(afl::string::Format("S%d.WAYPOINT", m_ship.getId())) != 0) {
+    if ((flags & OverrideLocks) == 0 && mtxl.hasLock(afl::string::Format("S%d.WAYPOINT", m_ship.getId()))) {
         return true;
     }
 

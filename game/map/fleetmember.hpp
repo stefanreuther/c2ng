@@ -8,7 +8,7 @@
 #include "game/map/point.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/spec/shiplist.hpp"
-#include "interpreter/mutexlist.hpp"
+#include "interpreter/lockaccess.hpp"
 
 namespace game { namespace map {
 
@@ -102,7 +102,7 @@ namespace game { namespace map {
         bool isMissionLocked(int flags,
                              const game::config::HostConfiguration& config,
                              const game::spec::ShipList& shipList,
-                             const interpreter::MutexList& mtxl) const;
+                             const interpreter::LockAccess& mtxl) const;
 
      private:
         Universe& m_universe;

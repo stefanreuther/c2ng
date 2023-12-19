@@ -12,7 +12,7 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = util/resourcefileapplication.cpp \
+FILES_gamelib = interpreter/lockaccess.hpp util/resourcefileapplication.cpp \
     util/resourcefileapplication.hpp util/resourcefilewriter.cpp \
     util/resourcefilewriter.hpp util/resourcefilereader.cpp \
     util/resourcefilereader.hpp util/resourcefile.hpp \
@@ -1783,9 +1783,10 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_util_resourcefileapplication.cpp \
-    u/t_util_resourcefilewriter.cpp u/t_util_resourcefilereader.cpp \
-    u/t_util_resourcefile.cpp u/t_server_play_racenamepacker.cpp \
+FILES_testsuite = u/t_interpreter_lockaccess.cpp \
+    u/t_util_resourcefileapplication.cpp u/t_util_resourcefilewriter.cpp \
+    u/t_util_resourcefilereader.cpp u/t_util_resourcefile.cpp \
+    u/t_server_play_racenamepacker.cpp \
     u/t_server_host_hostspecificationimpl.cpp \
     u/t_server_host_spec_directory.cpp \
     u/t_server_host_spec_publisherimpl.cpp \

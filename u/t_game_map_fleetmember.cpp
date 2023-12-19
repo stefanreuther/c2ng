@@ -3,6 +3,7 @@
   *  \brief Test for game::map::FleetMember
   */
 
+#include <set>
 #include "game/map/fleetmember.hpp"
 
 #include "t_game_map.hpp"
@@ -10,13 +11,23 @@
 #include "game/map/configuration.hpp"
 #include "game/map/universe.hpp"
 #include "game/spec/shiplist.hpp"
-#include "interpreter/mutexlist.hpp"
+#include "interpreter/lockaccess.hpp"
 
 using game::map::FleetMember;
 
 namespace {
     /* Id to use as Intercept mission. Used to catch if anyone hardcodes the Id. */
     const int MY_INTERCEPT_MISSION = 12;
+
+    class LockAccessMock : public interpreter::LockAccess {
+     public:
+        bool hasLock(const String_t& name) const
+            { return m_locks.find(name) != m_locks.end(); }
+        void addLock(const String_t& name)
+            { m_locks.insert(name); }
+     private:
+        std::set<String_t> m_locks;
+    };
 
     class TestHarness {
      public:
@@ -35,7 +46,7 @@ namespace {
         game::map::Configuration mapConfig;
         game::config::HostConfiguration config;
         game::spec::ShipList shipList;
-        interpreter::MutexList mutexList;
+        LockAccessMock mutexList;
 
         game::map::Ship& ship(int n)
             { return *univ.ships().get(n); }
@@ -509,8 +520,7 @@ TestGameMapFleetMember::testIsMissionLockedMutex()
         createShip(h, i, 7, 1000, 1000);
         h.ship(i).setMission(MY_INTERCEPT_MISSION, 7, 0);
     }
-    interpreter::MutexList::Mutex* mtx = h.mutexList.create("S3.WAYPOINT", "note", 0);
-    TS_ASSERT(mtx != 0);
+    h.mutexList.addLock("S3.WAYPOINT");
 
     // Ship 1: not locked
     TS_ASSERT(!FleetMember(h.univ, h.ship(1), h.mapConfig).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
@@ -519,8 +529,6 @@ TestGameMapFleetMember::testIsMissionLockedMutex()
     // Ship 3: locked waypoint
     TS_ASSERT( FleetMember(h.univ, h.ship(3), h.mapConfig).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
     TS_ASSERT(!FleetMember(h.univ, h.ship(3), h.mapConfig).isMissionLocked(FleetMember::OverrideLocks, h.config, h.shipList, h.mutexList));
-
-    mtx->removeReference();
 }
 
 /** Test setFleetNumber(), failure case, foreign ship.

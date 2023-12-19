@@ -227,6 +227,11 @@ class TestInterpreterKeywords : public CxxTest::TestSuite {
     void testLookup();
 };
 
+class TestInterpreterLockAccess : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
 class TestInterpreterMemoryCommandSource : public CxxTest::TestSuite {
  public:
     void testIt();

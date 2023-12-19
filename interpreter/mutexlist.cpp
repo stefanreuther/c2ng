@@ -225,6 +225,13 @@ interpreter::MutexList::enumMutexes(std::vector<Mutex*>& data, const Process* pr
     }
 }
 
+// Check presence of a lock.
+bool
+interpreter::MutexList::hasLock(const String_t& name) const
+{
+    return query(name) != 0;
+}
+
 // Create a mutex.
 interpreter::MutexList::Mutex*
 interpreter::MutexList::createMutex(Index_t slot, const String_t& note, const Process* owner)

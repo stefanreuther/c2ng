@@ -9,6 +9,7 @@
 #include "afl/container/ptrvector.hpp"
 #include "afl/data/namemap.hpp"
 #include "afl/string/string.hpp"
+#include "interpreter/lockaccess.hpp"
 
 namespace interpreter {
 
@@ -26,7 +27,7 @@ namespace interpreter {
         Normally, the MutexContext lives on a process' stack and will go away when the process goes away.
         If the value escapes the process, and the process dies, the mutex gets disowned,
         that is, it remains active but no longer associated with a process. */
-    class MutexList : afl::base::Uncopyable {
+    class MutexList : public LockAccess, afl::base::Uncopyable {
      public:
         /** Shortcut for a mutex index. */
         typedef afl::data::NameMap::Index_t Index_t;
@@ -143,6 +144,9 @@ namespace interpreter {
             \param [out] data     List will be produced here
             \param [in]  process  Filter. If non-null, only list mutexes owned by this process. If null, list all mutexes. */
         void enumMutexes(std::vector<Mutex*>& data, const Process* process) const;
+
+        // LockAccess:
+        bool hasLock(const String_t& name) const;
 
      private:
         /** Create a mutex.
