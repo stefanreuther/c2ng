@@ -1,0 +1,12 @@
+/*!
+     \namespace gfx
+     \brief Image file codecs
+
+     This namespace contains basic image codecs.
+     These codecs are independant of the actual graphics engine,
+     and have fewer features.
+
+     <b>Entry points:</b>
+
+     - gfx::codec::Codec
+  */

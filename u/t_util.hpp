@@ -315,6 +315,14 @@ class TestUtilResourceFileWriter : public CxxTest::TestSuite {
     void testDirectoryOverflow();
 };
 
+class TestUtilRunLengthCompress : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testCompressible();
+    void testIncompressible();
+    void testLarge();
+};
+
 class TestUtilRunLengthExpandTransform : public CxxTest::TestSuite {
  public:
     void testIt();

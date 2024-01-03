@@ -10,13 +10,13 @@
 #include "afl/string/parse.hpp"
 #include "afl/sys/standardcommandlineparser.hpp"
 #include "afl/sys/time.hpp"
+#include "gfx/codec/bmp.hpp"
 #include "gfx/gen/explosionrenderer.hpp"
 #include "gfx/gen/orbitconfig.hpp"
 #include "gfx/gen/planetconfig.hpp"
 #include "gfx/gen/shieldrenderer.hpp"
 #include "gfx/gen/spaceviewconfig.hpp"
 #include "gfx/gen/texture.hpp"
-#include "gfx/save.hpp"
 #include "util/randomnumbergenerator.hpp"
 #include "util/string.hpp"
 #include "version.hpp"
@@ -94,6 +94,12 @@ namespace gfx { namespace gen { namespace {
             throw std::runtime_error(Format("Command syntax error at '%s'", p.getRemainder().substr(0, 20)));
         }
     }
+
+    void saveCanvas(gfx::Canvas& can, afl::io::Stream& stream)
+    {
+        gfx::codec::BMP().save(can, stream);
+    }
+
 } } }
 
 

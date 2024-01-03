@@ -46,6 +46,15 @@ class TestGfxCanvas : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGfxColorQuantizer : public CxxTest::TestSuite {
+ public:
+    void testFixed();
+    void testDynamic();
+    void testMixed();
+    void testLarge();
+    void testDither();
+};
+
 class TestGfxColorScheme : public CxxTest::TestSuite {
  public:
     void testInterface();
@@ -197,11 +206,6 @@ class TestGfxRectangle : public CxxTest::TestSuite {
 class TestGfxResourceProvider : public CxxTest::TestSuite {
  public:
     void testIt();
-};
-
-class TestGfxSave : public CxxTest::TestSuite {
- public:
-    void testUnaligned();
 };
 
 class TestGfxScan : public CxxTest::TestSuite {

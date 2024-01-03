@@ -12,7 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = interpreter/lockaccess.hpp util/resourcefileapplication.cpp \
+FILES_gamelib = util/runlengthcompress.cpp util/runlengthcompress.hpp \
+    interpreter/lockaccess.hpp util/resourcefileapplication.cpp \
     util/resourcefileapplication.hpp util/resourcefilewriter.cpp \
     util/resourcefilewriter.hpp util/resourcefilereader.cpp \
     util/resourcefilereader.hpp util/resourcefile.hpp \
@@ -780,7 +781,10 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = gfx/threed/colortransformation.cpp \
+FILES_guilib = gfx/codec/custom.cpp gfx/codec/custom.hpp \
+    gfx/codec/application.cpp gfx/codec/application.hpp gfx/codec/bmp.cpp \
+    gfx/codec/bmp.hpp gfx/codec/codec.hpp gfx/colorquantizer.cpp \
+    gfx/colorquantizer.hpp gfx/threed/colortransformation.cpp \
     gfx/threed/colortransformation.hpp gfx/threed/positionlist.cpp \
     gfx/threed/positionlist.hpp gfx/threed/model.cpp gfx/threed/model.hpp \
     client/dialogs/attachmentselection.cpp \
@@ -1105,10 +1109,9 @@ FILES_guilib = gfx/threed/colortransformation.cpp \
     ui/widgets/quit.cpp ui/widgets/quit.hpp ui/widgets/radiobutton.cpp \
     ui/widgets/radiobutton.hpp ui/widgets/checkbox.cpp \
     ui/widgets/checkbox.hpp ui/screenshotlistener.cpp \
-    ui/screenshotlistener.hpp gfx/save.cpp gfx/save.hpp \
-    ui/widgets/abstractcheckbox.cpp ui/widgets/abstractcheckbox.hpp \
-    gfx/nullresourceprovider.cpp gfx/nullresourceprovider.hpp \
-    ui/prefixargument.cpp ui/prefixargument.hpp \
+    ui/screenshotlistener.hpp ui/widgets/abstractcheckbox.cpp \
+    ui/widgets/abstractcheckbox.hpp gfx/nullresourceprovider.cpp \
+    gfx/nullresourceprovider.hpp ui/prefixargument.cpp ui/prefixargument.hpp \
     client/si/stringlistdialogwidget.cpp \
     client/si/stringlistdialogwidget.hpp client/si/listboxfunction.cpp \
     client/si/listboxfunction.hpp ui/widgets/stringlistbox.cpp \
@@ -1689,6 +1692,11 @@ FILES_c2gfxgen = main/c2gfxgen.cpp
 TYPE_c2gfxgen = app
 DEPEND_c2gfxgen = guilib gamelib afl
 
+TARGETS += c2gfxcodec
+FILES_c2gfxcodec = main/c2gfxcodec.cpp
+TYPE_c2gfxcodec = app
+DEPEND_c2gfxcodec = guilib gamelib afl
+
 TARGETS += c2docmanager
 FILES_c2docmanager = main/c2docmanager.cpp
 TYPE_c2docmanager = app
@@ -1783,7 +1791,10 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_interpreter_lockaccess.cpp \
+FILES_testsuite = u/t_gfx_codec_application.cpp \
+    u/t_util_runlengthcompress.cpp u/t_gfx_codec_custom.cpp \
+    u/t_gfx_codec_bmp.cpp u/t_gfx_codec_codec.cpp u/t_gfx_codec.hpp \
+    u/t_gfx_colorquantizer.cpp u/t_interpreter_lockaccess.cpp \
     u/t_util_resourcefileapplication.cpp u/t_util_resourcefilewriter.cpp \
     u/t_util_resourcefilereader.cpp u/t_util_resourcefile.cpp \
     u/t_server_play_racenamepacker.cpp \
@@ -2387,14 +2398,14 @@ FILES_testsuite = u/t_interpreter_lockaccess.cpp \
     u/t_game_v3_commandcontainer.cpp u/t_client_si_widgetfunction.cpp \
     u/t_ui_layout_grid.cpp u/t_ui_layout.hpp u/t_ui_root.cpp \
     u/t_ui_widgets_radiobutton.cpp u/t_ui_widgets_checkbox.cpp \
-    u/t_interpreter_error.cpp u/t_gfx_save.cpp \
-    u/t_gfx_nullresourceprovider.cpp u/t_ui_prefixargument.cpp \
-    u/t_util_prefixargument.cpp u/t_game_v3_controlfile.cpp \
-    u/t_util_stringlist.cpp u/t_util_fileparser.cpp \
-    u/t_util_configurationfileparser.cpp u/t_gfx_defaultfont.cpp \
-    u/t_util_messagenotifier.cpp u/t_util_messagecollector.cpp \
-    u/t_util_messagematcher.cpp u/t_util_filenamepattern.cpp \
-    u/t_gfx_types.cpp u/t_gfx_gen_perlinnoise.cpp u/t_gfx_gen.hpp \
+    u/t_interpreter_error.cpp u/t_gfx_nullresourceprovider.cpp \
+    u/t_ui_prefixargument.cpp u/t_util_prefixargument.cpp \
+    u/t_game_v3_controlfile.cpp u/t_util_stringlist.cpp \
+    u/t_util_fileparser.cpp u/t_util_configurationfileparser.cpp \
+    u/t_gfx_defaultfont.cpp u/t_util_messagenotifier.cpp \
+    u/t_util_messagecollector.cpp u/t_util_messagematcher.cpp \
+    u/t_util_filenamepattern.cpp u/t_gfx_types.cpp \
+    u/t_gfx_gen_perlinnoise.cpp u/t_gfx_gen.hpp \
     u/t_client_si_scriptprocedure.cpp u/t_game_sim_loader.cpp \
     u/t_game_sim_planet.cpp u/t_game_sim_ship.cpp u/t_game_sim_object.cpp \
     u/t_game_sim.hpp u/t_game_actions_preconditions.cpp u/t_game_actions.hpp \

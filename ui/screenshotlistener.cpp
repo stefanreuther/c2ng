@@ -5,7 +5,7 @@
 
 #include "ui/screenshotlistener.hpp"
 #include "afl/string/format.hpp"
-#include "gfx/save.hpp"
+#include "gfx/codec/bmp.hpp"
 
 namespace {
     const char LOG_NAME[] = "ui";
@@ -29,7 +29,7 @@ ui::ScreenshotListener::call(gfx::Canvas& can)
         afl::base::Ptr<afl::io::Stream> file = m_fileSystem.openFileNT(fileName, afl::io::FileSystem::CreateNew);
         if (file.get() != 0) {
             // OK, save screenshot
-            saveCanvas(can, *file);
+            gfx::codec::BMP().save(can, *file);
             file = 0;
             m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator("Screenshot saved as \"%s\"").c_str(), fileName));
             break;
