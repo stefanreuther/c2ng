@@ -168,7 +168,7 @@ game::maint::ConfigurationApplication::showHelp()
 {
     afl::string::Translator& tx = translator();
     afl::io::TextWriter& w = standardOutput();
-    w.writeLine(afl::string::Format(tx("Configuration Tool v%s - (c) 2018-2023 Stefan Reuther").c_str(), PCC2_VERSION));
+    w.writeLine(afl::string::Format(tx("Configuration Tool v%s - (c) 2018-2024 Stefan Reuther").c_str(), PCC2_VERSION));
     w.writeText(afl::string::Format(tx("\n"
                                        "Usage:\n"
                                        "  %s [-OPTIONS|FILES...]\n"

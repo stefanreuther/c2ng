@@ -379,7 +379,7 @@ server::file::ClientApplication::help()
 {
     afl::string::Translator& tx = translator();
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(afl::string::Format(tx("PCC2 File Client v%s - (c) 2017-2023 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(afl::string::Format(tx("PCC2 File Client v%s - (c) 2017-2024 Stefan Reuther").c_str(), PCC2_VERSION));
     out.writeLine();
     out.writeLine(afl::string::Format(tx("Usage:\n"
                                          "  %s [-h]\n"

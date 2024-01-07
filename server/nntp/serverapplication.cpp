@@ -120,7 +120,7 @@ server::nntp::ServerApplication::handleConfiguration(const String_t& key, const 
 String_t
 server::nntp::ServerApplication::getApplicationName() const
 {
-    return afl::string::Format("PCC2 NNTP Server v%s - (c) 2017-2023 Stefan Reuther", PCC2_VERSION);
+    return afl::string::Format("PCC2 NNTP Server v%s - (c) 2017-2024 Stefan Reuther", PCC2_VERSION);
 }
 
 String_t

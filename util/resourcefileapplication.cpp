@@ -335,7 +335,7 @@ util::ResourceFileApplication::help()
 {
     Translator& tx = translator();
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(Format(tx("PCC2 Resource File Utility v%s - (c) 2023 Stefan Reuther"), PCC2_VERSION));
+    out.writeLine(Format(tx("PCC2 Resource File Utility v%s - (c) 2023-2024 Stefan Reuther"), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(tx("Usage:\n"
                             "  %s [-h]\n"

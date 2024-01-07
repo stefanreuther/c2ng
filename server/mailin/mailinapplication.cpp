@@ -220,7 +220,7 @@ server::mailin::MailInApplication::saveRejectedMail(afl::base::ConstBytes_t buff
 String_t
 server::mailin::MailInApplication::getApplicationName() const
 {
-    return afl::string::Format("PCC2 Incoming Mail Processor v%s - (c) 2017-2023 Stefan Reuther", PCC2_VERSION);
+    return afl::string::Format("PCC2 Incoming Mail Processor v%s - (c) 2017-2024 Stefan Reuther", PCC2_VERSION);
 }
 
 String_t

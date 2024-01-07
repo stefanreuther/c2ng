@@ -391,7 +391,7 @@ game::interface::ScriptApplication::help()
                                "-q\tQuiet; show only script output (predefined log config)\n"));
 
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(Format(tx("PCC2 Script Engine v%s - (c) 2017-2023 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(Format(tx("PCC2 Script Engine v%s - (c) 2017-2024 Stefan Reuther").c_str(), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(tx("Usage:\n"
                             "  %s [-h]\n"

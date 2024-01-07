@@ -880,7 +880,7 @@ client::Application::appMain(gfx::Engine& engine)
         docView.getDocument().add(util::rich::Parser::parseXml("<big>PCC2ng</big>"));
         docView.getDocument().addNewline();
         docView.getDocument().addNewline();
-        docView.getDocument().add(util::rich::Parser::parseXml("<font color=\"dim\">&#xA9; 2017-2023 Stefan Reuther &lt;streu@gmx.de&gt;</font>"));
+        docView.getDocument().add(util::rich::Parser::parseXml("<font color=\"dim\">&#xA9; 2017-2024 Stefan Reuther &lt;streu@gmx.de&gt;</font>"));
         docView.getDocument().addNewline();
         docView.getDocument().finish();
         docView.handleDocumentUpdate();

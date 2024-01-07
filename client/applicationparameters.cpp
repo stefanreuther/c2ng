@@ -91,7 +91,7 @@ client::ApplicationParameters::doHelp()
                                    "-resource=NAME\tAdd resource provider\n")
                                 + gfx::getWindowParameterHelp(tx));
     help += "\n";
-    help += tx("(c) copyright 2017-2023 Stefan Reuther <streu@gmx.de>");
+    help += tx("(c) copyright 2017-2024 Stefan Reuther <streu@gmx.de>");
     help += "\n";
     m_app.dialog().showInfo(help, m_programTitle);
     m_app.exit(0);
