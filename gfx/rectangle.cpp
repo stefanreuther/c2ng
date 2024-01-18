@@ -8,6 +8,7 @@
 
 #include <ostream>
 #include "gfx/rectangle.hpp"
+#include "afl/string/format.hpp"
 
 // Construct empty rectangle.
 gfx::Rectangle::Rectangle() throw()
@@ -264,7 +265,14 @@ gfx::Rectangle::splitBottomY(int pix)
 {
     const int removeY = std::min(std::max(0, pix), m_height);
     m_height -= removeY;
-    return Rectangle(m_left, m_top + m_height, m_width, removeY);    
+    return Rectangle(m_left, m_top + m_height, m_width, removeY);
+}
+
+// makePrintable for testing.
+String_t
+gfx::makePrintable(const Rectangle& r)
+{
+    return afl::string::Format("%dx%d+%d+%d", r.getWidth(), r.getHeight(), r.getLeftX(), r.getTopY());
 }
 
 // Output rectangle.

@@ -170,6 +170,13 @@ namespace game {
         int32_t m_amounts[LIMIT];
     };
 
+    /** makePrintable for testing.
+        \param ref Reference */
+    inline String_t makePrintable(const CargoSpec& c)
+    {
+        return c.toCargoSpecString();
+    }
+
 }
 
 #endif

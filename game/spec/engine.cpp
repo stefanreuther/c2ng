@@ -7,6 +7,8 @@
 #include "game/spec/engine.hpp"
 #include "afl/base/countof.hpp"
 
+const int game::spec::Engine::MAX_WARP;
+
 // Constructor.
 game::spec::Engine::Engine(int id)
     : Component(ComponentNameProvider::Engine, id),

@@ -5,6 +5,8 @@
 
 #include "util/keymapinformation.hpp"
 
+const util::KeymapInformation::Index_t util::KeymapInformation::nil;
+
 util::KeymapInformation::KeymapInformation()
     : m_data()
 { }

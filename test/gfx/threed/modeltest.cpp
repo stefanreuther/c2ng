@@ -1,0 +1,408 @@
+/**
+  *  \file test/gfx/threed/modeltest.cpp
+  *  \brief Test for gfx::threed::Model
+  */
+
+#include "gfx/threed/model.hpp"
+
+#include "afl/except/fileproblemexception.hpp"
+#include "afl/io/constmemorystream.hpp"
+#include "afl/string/format.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "afl/test/callreceiver.hpp"
+#include "afl/test/testrunner.hpp"
+#include "gfx/threed/linerenderer.hpp"
+#include "gfx/threed/trianglerenderer.hpp"
+
+using afl::string::Format;
+using gfx::threed::Vec3f;
+using gfx::ColorQuad_t;
+
+namespace {
+    // Minimum sensible scene (cc2res/models/TestScenes/min.pl)
+    // - one Mesh, containing a single triangle (3 vertices, 1 triangle)
+    // - two grids containing a single line each
+    // - one position list with one position
+    static const uint8_t CONTENT[] = {
+        // 0x43, 0x43, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x1a, 0x01, 0x00, 0x03, 0x00, 0x01, 0x00, 0x00, 0x00,
+        // // sig                                          version     num obj     type 1
+        // 0x40, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x0e, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00,
+        // // size 64              type 2                  size 14                 type 2
+        // 0x0e, 0x00, 0x00, 0x00, 0x03, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        // // size 14             | 3 vertices 1 triangle  x           x           x           y
+        // 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        // // y        y           z           z           z           nx          nx          nx
+        // 0x00, 0x40, 0x00, 0x40, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x03,
+        // // ny       ny          ny          nz          nz          nz          r           r
+        // 0xff, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        // // r        g           g           g           b           b           b           index1
+        // 0x02, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00,
+        // // index2   index3    | 1 line      x           x           y           y           z
+        // 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x66, 0x46, 0x00, 0x00, 0x00, 0x00
+        // // z       | 1 line   | x           x           y           y           z           z
+
+        0x43, 0x43, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x1a, 0x01, 0x00, 0x04, 0x00, 0x01, 0x00, 0x00, 0x00,
+        // sig                                          version     num obj     type 1
+        0x40, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x0e, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00,
+        // size 64              type 2                  size 14                 type 2
+        0x0e, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x0a, 0x00, 0x00, 0x00, 0x03, 0x00, 0x01, 0x00,
+        // size 14              type 3                  size 10                | 3 vertices 1 triangle
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        // x        x           x           y           y           y           z           z
+        0x00, 0x40, 0x00, 0x40, 0x00, 0x40, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        // z        nx          nx          nx          ny          ny          ny          nz
+        0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x03, 0xff, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        // nz       nz          r           r           r           g           g           g
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00,
+        // b        b           b           index1      index2      index3     | 1 line     x
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
+        // x        y           y           z           z          | 1 line    | x          x
+        0x00, 0x00, 0x66, 0x46, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x77, 0x00, 0x00, 0x40, 0x01, 0xe0,
+        // y        y           z           z          | 1 point   | id          x          y
+        0x00, 0x00
+        // z
+    };
+
+
+    /*
+     *  Utilities
+     */
+
+    String_t toString(Vec3f vec)
+    {
+        return Format("<%.2f, %.2f, %.2f>", vec(0), vec(1), vec(2));
+    }
+
+    String_t toString(ColorQuad_t c)
+    {
+        return Format("#%08x", c);
+    }
+
+
+    /*
+     *  Mock Renderers
+     *
+     *  A bit more flexible than they need to be.
+     *  In particular, caller could partition the 'add' calls as needed.
+     */
+
+    class MockTriangleRenderer : public gfx::threed::TriangleRenderer, public afl::test::CallReceiver {
+     public:
+        MockTriangleRenderer(afl::test::Assert a)
+            : CallReceiver(a), m_assert(a), m_count(777)
+            { }
+        virtual void clear()
+            { checkCall("clear()"); }
+        virtual size_t addVertices(afl::base::Memory<const Vec3f> points,
+                                   afl::base::Memory<const Vec3f> normals,
+                                   afl::base::Memory<const ColorQuad_t> colors)
+            {
+                size_t n = m_count;
+                while (!points.empty() && !normals.empty() && !colors.empty()) {
+                    checkCall(Format("addVertex(%s,%s,%s)", toString(*points.eat()), toString(*normals.eat()), toString(*colors.eat())));
+                    ++m_count;
+                }
+                m_assert.check("01. points empty",  points.empty());
+                m_assert.check("02. normals empty", normals.empty());
+                m_assert.check("03. colors empty",  colors.empty());
+                return n;
+            }
+        virtual void addTriangles(size_t base, afl::base::Memory<const size_t> indexes)
+            {
+                while (indexes.size() >= 3) {
+                    size_t a = *indexes.eat() + base - 777;
+                    size_t b = *indexes.eat() + base - 777;
+                    size_t c = *indexes.eat() + base - 777;
+                    checkCall(Format("addTriangles(%d,%d,%d)", a, b, c));
+                }
+            }
+
+        virtual void render(const gfx::threed::Mat4f& /*proj*/, const gfx::threed::Mat4f& /*modelView*/)
+            { checkCall("render()"); }
+     private:
+        afl::test::Assert m_assert;
+        size_t m_count;
+    };
+
+    class MockLineRenderer : public gfx::threed::LineRenderer, public afl::test::CallReceiver {
+     public:
+        MockLineRenderer(afl::test::Assert a)
+            : CallReceiver(a)
+            { }
+        virtual void clear()
+            { checkCall("clear()"); }
+        virtual void add(const Vec3f& from, const Vec3f& to, ColorQuad_t color)
+            { checkCall(Format("add(%s,%s,%s)", toString(from), toString(to), toString(color))); }
+        virtual void render(const gfx::threed::Mat4f& /*proj*/, const gfx::threed::Mat4f& /*modelView*/)
+            { checkCall("render()"); }
+    };
+
+    /* Canned test case: verify that data is rejected by parser */
+    void verifyReject(afl::test::Assert a, afl::base::ConstBytes_t data)
+    {
+        afl::io::ConstMemoryStream ms(data);
+        afl::string::NullTranslator tx;
+        afl::base::Ref<gfx::threed::Model> testee = gfx::threed::Model::create();
+        AFL_CHECK_THROWS(a, testee->load(ms, tx), afl::except::FileProblemException);
+    }
+}
+
+/** Test behaviour of empty object. */
+AFL_TEST("gfx.threed.Model:empty", a)
+{
+    afl::base::Ref<gfx::threed::Model> testee = gfx::threed::Model::create();
+    a.checkEqual("01. getNumMeshes", testee->getNumMeshes(), 0U);
+    a.checkEqual("02. getNumGrids", testee->getNumGrids(), 0U);
+
+    // Attempt to render
+    {
+        MockTriangleRenderer r(a("MockTriangleRenderer"));
+        testee->renderMesh(0, r);
+        r.checkFinish();
+    }
+    {
+        MockLineRenderer r(a("MockLineRenderer"));
+        testee->renderGrid(0, r, COLORQUAD_FROM_RGB(128, 0, 0));
+        r.checkFinish();
+    }
+}
+
+/** Test loading. */
+AFL_TEST("gfx.threed.Model:load", a)
+{
+    afl::io::ConstMemoryStream ms(CONTENT);
+    afl::string::NullTranslator tx;
+
+    afl::base::Ref<gfx::threed::Model> testee = gfx::threed::Model::create();
+    testee->load(ms, tx);
+
+    a.checkEqual("01. getNumMeshes", testee->getNumMeshes(), 1U);
+    a.checkEqual("02. getNumGrids", testee->getNumGrids(), 2U);
+
+    // Mesh
+    {
+        MockTriangleRenderer r(a("MockTriangleRenderer"));
+        r.expectCall("addVertex(<0.00, 0.00, 0.00>,<1.00, 0.00, 0.00>,#ff0000ff)");
+        r.expectCall("addVertex(<0.00, 1.00, 0.00>,<1.00, 0.00, 0.00>,#ff0000ff)");
+        r.expectCall("addVertex(<0.00, 0.00, 1.00>,<1.00, 0.00, 0.00>,#ff0000ff)");
+        r.expectCall("addTriangles(0,2,1)");
+        testee->renderMesh(0, r);
+        r.checkFinish();
+    }
+
+
+    // First grid
+    {
+        MockLineRenderer r(a("MockLineRenderer, grid 0"));
+        r.expectCall("add(<0.00, 0.00, 0.00>,<0.00, 1.00, 0.00>,#008040ff)");
+        testee->renderGrid(0, r, COLORQUAD_FROM_RGB(0, 128, 64));
+        r.checkFinish();
+    }
+
+    // Second grid
+    {
+        MockLineRenderer r(a("MockLineRenderer, grid 1"));
+        r.expectCall("add(<0.00, 0.00, 0.00>,<0.00, 1.10, 0.00>,#004080ff)");
+        testee->renderGrid(1, r, COLORQUAD_FROM_RGB(0, 64, 128));
+        r.checkFinish();
+    }
+
+    // Positions
+    a.checkEqual("11. getNumPositions",      testee->positions().getNumPositions(), 1U);
+    a.checkEqual("12. getIdByIndex",         testee->positions().getIdByIndex(0), 119U /* CrewQuarters */);
+    a.checkEqual("13. getPositionByIndex 0", testee->positions().getPositionByIndex(0)(0), 1.0);
+    a.checkNear ("14. getPositionByIndex 1", testee->positions().getPositionByIndex(0)(1), -0.5, 0.001);
+    a.checkEqual("15. getPositionByIndex 2", testee->positions().getPositionByIndex(0)(2), 0.0);
+}
+
+/** Test loading of truncated file. */
+AFL_TEST("gfx.threed.Model:load:truncate", a)
+{
+    afl::base::ConstBytes_t bytes(CONTENT);
+    while (!bytes.empty()) {
+        // Remove one more byte
+        bytes.trim(bytes.size()-1);
+        verifyReject(a(Format("size %d", bytes.size())), bytes);
+    }
+}
+
+/*
+ *  Test further load errors.
+ */
+
+// Header checks
+AFL_TEST("gfx.threed.Model:load:error:bad-signature", a)
+{
+    static const uint8_t BAD_SIG[] = {
+        0x43, 0x43, 0x63, 0x63, 0x63, 0x63, 0x3c, 0x1a, 0x01, 0x00, 0x03, 0x00, 0x01, 0x00, 0x00, 0x00,
+    };
+    verifyReject(a, BAD_SIG);
+}
+
+AFL_TEST("gfx.threed.Model:load:error:bad-version", a)
+{
+    static const uint8_t BAD_VERSION[] = {
+        0x43, 0x43, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x1a, 0xff, 0x00, 0x03, 0x00, 0x01, 0x00, 0x00, 0x00,
+        //                                              ^^^^ unsupported
+    };
+    verifyReject(a, BAD_VERSION);
+}
+
+AFL_TEST("gfx.threed.Model:load:error:bad-count", a)
+{
+    static const uint8_t BAD_COUNT[] = {
+        0x43, 0x43, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x1a, 0x01, 0x00, 0x03, 0xff, 0x01, 0x00, 0x00, 0x00,
+        //                                                          ^^^^^^^^^^ too big
+    };
+    verifyReject(a, BAD_COUNT);
+}
+
+// loadContent checks
+AFL_TEST("gfx.threed.Model:load:error:bad-mesh-size", a)
+{
+    static const uint8_t BAD_MESH_SIZE[] = {
+        0x43, 0x43, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x1a, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00,
+        0x1f, 0x00, 0x00, 0x00, 0x03, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        // ^^ odd size
+        0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    };
+    verifyReject(a, BAD_MESH_SIZE);
+}
+
+AFL_TEST("gfx.threed.Model:load:error:bad-grid-size", a)
+{
+    static const uint8_t BAD_GRID_SIZE[] = {
+        0x43, 0x43, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x1a, 0x01, 0x00, 0x01, 0x00, 0x02, 0x00, 0x00, 0x00,
+        0x1f, 0x00, 0x00, 0x00, 0x03, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        // ^^ odd size
+        0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    };
+    verifyReject(a, BAD_GRID_SIZE);
+}
+
+AFL_TEST("gfx.threed.Model:load:error:mesh-too-small", a)
+{
+    // Mesh::load checks
+    static const uint8_t MESH_TOO_SMALL[] = {
+        0x43, 0x43, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x1a, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00,
+        0x02, 0x00, 0x00, 0x00, 0x03, 0x00
+        // ^^^ size is 2, min is 4
+    };
+    verifyReject(a, MESH_TOO_SMALL);
+}
+
+AFL_TEST("gfx.threed.Model:load:error:mesh-missing-data", a)
+{
+    static const uint8_t MESH_MISSING_DATA[] = {
+        0x43, 0x43, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x1a, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00,
+        0x40, 0x00, 0x00, 0x00, 0x13, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        //                      ^^^^ num vertices too big, not enough data
+        0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x40, 0x00, 0x40, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x03,
+        0xff, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x02, 0x00, 0x01, 0x00
+    };
+    verifyReject(a, MESH_MISSING_DATA);
+}
+
+AFL_TEST("gfx.threed.Model:load:error:mesh-bad-vertex", a)
+{
+    static const uint8_t MESH_BAD_VERTEX[] = {
+        0x43, 0x43, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x1a, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00,
+        0x40, 0x00, 0x00, 0x00, 0x03, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x40, 0x00, 0x40, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x03,
+        0xff, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x07, 0x00, 0x01, 0x00
+        // ^^^ bad index
+    };
+    verifyReject(a, MESH_BAD_VERTEX);
+}
+
+// Grid::load checks
+AFL_TEST("gfx.threed.Model:load:error:grid-too-short", a)
+{
+    static const uint8_t GRID_TOO_SHORT[] = {
+        0x43, 0x43, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x1a, 0x01, 0x00, 0x01, 0x00, 0x02, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00,
+        // ^^ size is 0
+        0x00, 0x00,
+    };
+    verifyReject(a, GRID_TOO_SHORT);
+}
+
+AFL_TEST("gfx.threed.Model:load:error:grid-missing-data", a)
+{
+    static const uint8_t GRID_MISSING_DATA[] = {
+        0x43, 0x43, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x1a, 0x01, 0x00, 0x01, 0x00, 0x02, 0x00, 0x00, 0x00,
+        0x0e, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00,
+        //                      ^^^^^^^^^^ too big
+        0x00, 0x00,
+    };
+    verifyReject(a, GRID_MISSING_DATA);
+}
+
+// loadPosList checks
+AFL_TEST("gfx.threed.Model:load:error:bad-poslist-size", a)
+{
+    static const uint8_t BAD_POSLIST_SIZE[] = {
+        0x43, 0x43, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x1a, 0x01, 0x00, 0x01, 0x00, 0x03, 0x00, 0x00, 0x00,
+        0x0f, 0x00, 0x00, 0x00, 0x03, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        // ^^ odd size
+        0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    };
+    verifyReject(a, BAD_POSLIST_SIZE);
+}
+
+AFL_TEST("gfx.threed.Model:load:error:zero-poslist-size", a)
+{
+    static const uint8_t ZERO_POSLIST_SIZE[] = {
+        0x43, 0x43, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x1a, 0x01, 0x00, 0x01, 0x00, 0x03, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        // ^^ zero size, minimum is 2
+    };
+    verifyReject(a, ZERO_POSLIST_SIZE);
+}
+
+AFL_TEST("gfx.threed.Model:load:error:poslist-too-short", a)
+{
+    static const uint8_t POSLIST_TOO_SHORT[] = {
+        0x43, 0x43, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x1a, 0x01, 0x00, 0x01, 0x00, 0x03, 0x00, 0x00, 0x00,
+        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x40, 0x00,
+        //                      ^^ one element, requires at least 8 bytes (+2 bytes count)
+    };
+    verifyReject(a, POSLIST_TOO_SHORT);
+}
+
+/** Test loading (=skipping) an unsupported block. */
+AFL_TEST("gfx.threed.Model:load:unsupported", a)
+{
+    static const uint8_t CONTENT[] = {
+        0x43, 0x43, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x1a, 0x01, 0x00, 0x03, 0x00, 0x77, 0x66, 0x00, 0x00,
+        // sig                                          version     num obj     ^^^^^^^^^^ block type
+        0x40, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x0e, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00,
+        0x0e, 0x00, 0x00, 0x00, 0x03, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x40, 0x00, 0x40, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x03,
+        0xff, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x02, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00,
+        0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x66, 0x46, 0x00, 0x00, 0x00, 0x00
+    };
+
+    afl::io::ConstMemoryStream ms(CONTENT);
+    afl::string::NullTranslator tx;
+
+    afl::base::Ref<gfx::threed::Model> testee = gfx::threed::Model::create();
+    testee->load(ms, tx);
+
+    a.checkEqual("01. getNumMeshes", testee->getNumMeshes(), 0U);
+    a.checkEqual("02. getNumGrids", testee->getNumGrids(), 2U);     // loaded normally
+
+    // Second grid
+    {
+        MockLineRenderer r(a("MockLineRenderer"));
+        r.expectCall("add(<0.00, 0.00, 0.00>,<0.00, 1.10, 0.00>,#004080ff)");
+        testee->renderGrid(1, r, COLORQUAD_FROM_RGB(0, 64, 128));
+        r.checkFinish();
+    }
+}

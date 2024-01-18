@@ -90,6 +90,30 @@ game::Reference::toString(afl::string::Translator& tx) const
         : String_t();
 }
 
+// Implementation of makePrintable for testing.
+String_t
+game::Reference::makePrintable() const
+{
+    const char* fmt = "?";
+    switch (m_type) {
+     case Null:         fmt = "Null";             break;
+     case Special:      fmt = "Special %d";       break;
+     case Player:       fmt = "Player #%d";       break;
+     case MapLocation:  fmt = "(%d,%d)";          break;
+     case Ship:         fmt = "Ship #%d";         break;
+     case Planet:       fmt = "Planet #%d";       break;
+     case Starbase:     fmt = "Starbase #%d";     break;
+     case IonStorm:     fmt = "Ion Storm #%d";    break;
+     case Minefield:    fmt = "Minefield #%d";    break;
+     case Ufo:          fmt = "Ufo #%d";          break;
+     case Hull:         fmt = "Hull #%d";         break;
+     case Engine:       fmt = "Engine #%d";       break;
+     case Beam:         fmt = "Beam Weapon #%d";  break;
+     case Torpedo:      fmt = "Torpedo Type #%d"; break;
+    }
+    return String_t(afl::string::Format(fmt, m_x, m_y));
+}
+
 // Compare equality.
 bool
 game::Reference::operator==(const Reference& other) const

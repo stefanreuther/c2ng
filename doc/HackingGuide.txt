@@ -89,8 +89,8 @@ Building on Linux
   Unlike PCC's previous build systems, it supports out-of-tree builds,
   automatic worry-free dependencies, and generates fast makefiles.
 
-  Make a scratch directory and unpack the `afl`, `c2ng`,
-  `accidental-build`, and `cxxtest` archives next to each other.
+  Make a scratch directory and unpack the `afl`, `c2ng`, and
+  `accidental-build` archives next to each other.
 
   Build afl:
 
@@ -490,7 +490,7 @@ Source Code Structure
     server       |         | resources for servers
     specs        |         | ex "specs"
   ---------------+---------+---------------------------------------
-  u              | source  | unit tests
+  test           | source  | unit tests
   ---------------+---------+---------------------------------------
   ui             | guilib  | user interface kernel
   ---------------+---------+---------------------------------------
@@ -622,6 +622,21 @@ Testing
   was used to test c2ng implementations against earlier PCC2/PCC1
   versions.
 
+  The testsuite uses a simple "pure C++" test framework. It does not
+  have as many features as some others might have; its main bonus is
+  not having another dependency.
+
+  Usage should be straightforward: `AFL_TEST("name", a) { ... }`
+  defines a testcase with the given name, that is being passed an
+  `afl::test::Assert` object to do the actual assertions. Each
+  assertion check needs to be named (`a.check("success", ok)`). The
+  name of assertion and testsuite is shown on assertion failure, so
+  they should be reasonably expressive.
+
+  This should sort-of encourage writing small tests, but lots of them.
+  This means test cases get a meaningful name, but not so much effort
+  needs to be spent on assertion names. The default way to name
+  assertions is just to number them.
 
 
 Scripting

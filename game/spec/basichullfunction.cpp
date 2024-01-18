@@ -5,6 +5,48 @@
 
 #include "game/spec/basichullfunction.hpp"
 
+const int game::spec::BasicHullFunction::MerlinAlchemy;
+const int game::spec::BasicHullFunction::NeutronicRefinery;
+const int game::spec::BasicHullFunction::AriesRefinery;
+const int game::spec::BasicHullFunction::HeatsTo50;
+const int game::spec::BasicHullFunction::CoolsTo50;
+const int game::spec::BasicHullFunction::HeatsTo100;
+const int game::spec::BasicHullFunction::Hyperdrive;
+const int game::spec::BasicHullFunction::Gravitonic;
+const int game::spec::BasicHullFunction::ScansAllWormholes;
+const int game::spec::BasicHullFunction::LadyRoyale;
+const int game::spec::BasicHullFunction::LokiAnticloak;
+const int game::spec::BasicHullFunction::ImperialAssault;
+const int game::spec::BasicHullFunction::FirecloudChunnel;
+const int game::spec::BasicHullFunction::Ramscoop;
+const int game::spec::BasicHullFunction::FullBioscan;
+const int game::spec::BasicHullFunction::AdvancedCloak;
+const int game::spec::BasicHullFunction::Cloak;
+const int game::spec::BasicHullFunction::Bioscan;
+const int game::spec::BasicHullFunction::SaberGlory;
+const int game::spec::BasicHullFunction::D19bGlory;
+const int game::spec::BasicHullFunction::Unclonable;
+const int game::spec::BasicHullFunction::CloneOnce;
+const int game::spec::BasicHullFunction::Ungiveable;
+const int game::spec::BasicHullFunction::GiveOnce;
+const int game::spec::BasicHullFunction::Level2Tow;
+const int game::spec::BasicHullFunction::Tow;
+const int game::spec::BasicHullFunction::ChunnelSelf;
+const int game::spec::BasicHullFunction::ChunnelOthers;
+const int game::spec::BasicHullFunction::ChunnelTarget;
+const int game::spec::BasicHullFunction::PlanetImmunity;
+const int game::spec::BasicHullFunction::OreCondenser;
+const int game::spec::BasicHullFunction::Boarding;
+const int game::spec::BasicHullFunction::AntiCloakImmunity;
+const int game::spec::BasicHullFunction::Academy;
+const int game::spec::BasicHullFunction::Repairs;
+const int game::spec::BasicHullFunction::FullWeaponry;
+const int game::spec::BasicHullFunction::HardenedEngines;
+const int game::spec::BasicHullFunction::Commander;
+const int game::spec::BasicHullFunction::IonShield;
+const int game::spec::BasicHullFunction::HardenedCloak;
+const int game::spec::BasicHullFunction::AdvancedAntiCloak;
+
 // Constructor.
 game::spec::BasicHullFunction::BasicHullFunction(int id, String_t name)
     : m_id(id),

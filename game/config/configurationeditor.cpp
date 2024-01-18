@@ -13,6 +13,10 @@ using game::config::AliasOption;
 using game::config::ConfigurationEditor;
 using game::config::ConfigurationOption;
 
+const int game::config::ConfigurationEditor::NoEditor;
+const int game::config::ConfigurationEditor::DefaultEditor;
+const int game::config::ConfigurationEditor::ToggleEditor;
+
 namespace {
     /* Resolve an option alias */
     ConfigurationOption& resolveAlias(ConfigurationOption& opt)

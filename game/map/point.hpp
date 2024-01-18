@@ -122,6 +122,13 @@ namespace game { namespace map {
         int m_y;
     };
 
+    /** makePrintable for testing.
+        \param pt Point */
+    inline String_t makePrintable(const Point& pt)
+    {
+        return pt.toString();
+    }
+
 } }
 
 // Constructor.

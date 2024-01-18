@@ -6,6 +6,8 @@
 #include "game/battleorderrule.hpp"
 #include "game/spec/friendlycodelist.hpp"
 
+const int game::BattleOrderRule::UNKNOWN;
+
 game::BattleOrderRule::BattleOrderRule(HostVersion host)
     : m_host(host)
 { }

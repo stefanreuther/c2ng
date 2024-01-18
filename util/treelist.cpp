@@ -5,6 +5,8 @@
 
 #include "util/treelist.hpp"
 
+const size_t util::TreeList::nil, util::TreeList::root;
+
 // Constructor.
 util::TreeList::TreeList()
     : m_data()

@@ -5,6 +5,8 @@
 
 #include "game/alliance/container.hpp"
 
+const game::alliance::Container::Index_t game::alliance::Container::nil;
+
 // Default constructor.
 game::alliance::Container::Container()
     : m_levels(),

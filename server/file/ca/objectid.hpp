@@ -27,6 +27,13 @@ namespace server { namespace file { namespace ca {
         static const ObjectId nil;
     };
 
+    /** makePrintable for testing.
+        \param id Point */
+    inline String_t makePrintable(const ObjectId& id)
+    {
+        return id.toHex();
+    }
+
 } } }
 
 #endif

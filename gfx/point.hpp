@@ -6,6 +6,7 @@
 #define C2NG_GFX_POINT_HPP
 
 #include <iosfwd>
+#include "afl/string/string.hpp"
 
 namespace gfx {
 
@@ -28,7 +29,7 @@ namespace gfx {
             \return value */
         int getX() const
             { return m_x; }
-                
+
         /** Get Y coordinate.
             \return value */
         int getY() const
@@ -125,6 +126,10 @@ namespace gfx {
         int m_x;    ///< X coordinate.
         int m_y;    ///< Y coordinate.
     };
+
+    /** makePrintable for testing.
+        \param pt Point */
+    String_t makePrintable(const Point& pt);
 
 }
 

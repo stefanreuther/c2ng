@@ -8,6 +8,37 @@
 
 using util::Updater;
 
+const int32_t game::sim::Object::fl_RandomFC,
+    game::sim::Object::fl_RandomFC1,
+    game::sim::Object::fl_RandomFC2,
+    game::sim::Object::fl_RandomFC3,
+    game::sim::Object::fl_RatingOverride,
+    game::sim::Object::fl_Cloaked,
+    game::sim::Object::fl_Deactivated,
+    game::sim::Object::fl_PlanetImmunity,
+    game::sim::Object::fl_PlanetImmunitySet,
+    game::sim::Object::fl_FullWeaponry,
+    game::sim::Object::fl_FullWeaponrySet,
+    game::sim::Object::fl_Commander,
+    game::sim::Object::fl_CommanderSet,
+    game::sim::Object::fl_WasCaptured,
+    game::sim::Object::fl_TripleBeamKill,
+    game::sim::Object::fl_TripleBeamKillSet,
+    game::sim::Object::fl_DoubleBeamCharge,
+    game::sim::Object::fl_DoubleBeamChargeSet,
+    game::sim::Object::fl_DoubleTorpCharge,
+    game::sim::Object::fl_DoubleTorpChargeSet,
+    game::sim::Object::fl_Elusive,
+    game::sim::Object::fl_ElusiveSet,
+    game::sim::Object::fl_Squadron,
+    game::sim::Object::fl_SquadronSet,
+    game::sim::Object::fl_ShieldGenerator,
+    game::sim::Object::fl_ShieldGeneratorSet,
+    game::sim::Object::fl_CloakedBays,
+    game::sim::Object::fl_CloakedBaysSet,
+    game::sim::Object::fl_RandomDigits,
+    game::sim::Object::fl_FunctionSetBits;
+
 // Default constructor.
 game::sim::Object::Object()
     : m_id(1),

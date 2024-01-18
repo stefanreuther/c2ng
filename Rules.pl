@@ -53,19 +53,13 @@ if (get_variable('ENABLE_BUILD')) {
 
     # Find afl
     find_directory('AFL_DIR',
-                   files => [qw(config.mk include/afl/base/types.hpp include/cxxtest/TestController.h)],
+                   files => [qw(config.mk include/afl/base/types.hpp)],
                    guess => [glob('../afl* ../afl*/result ../../afl* ../../afl*/result')]);
     add_to_variable(CXXFLAGS => "-I$V{AFL_DIR}/include");
 
     my $afl_config_file = "$V{AFL_DIR}/config.mk";
     my $afl_config = load_variables($afl_config_file);
     add_to_variable(LDFLAGS => $afl_config->{CONFIG_AFL_LDFLAGS});
-
-    # Find cxxtest
-    find_directory('CXXTESTDIR',
-                   files =>[qw(cxxtest/TestSuite.h cxxtestgen.pl)],
-                   guess => [glob('../cxxtest* ../../cxxtest* ../../../cxxtest*')],
-                   allow_missing => 1);
 
     # Find SDLs
     set_variable(WITH_SDL =>
@@ -188,98 +182,80 @@ if (get_variable('ENABLE_BUILD')) {
     }
 
     # Testsuite
-    if ($V{CXXTESTDIR} ne '') {
-        # Split files into individual testsuites
-        # This originally built one huge all-in-one testsuite binary.
-        # That binary became increasingly difficult to build on MinGW because the driver exceeded COFF file limits.
-        # Building each section's files separately should give us enough room for expansion.
-        # For now, we have
-        #    u/t_foo_bar.hpp           containing class declarations
-        #    u/t_foo_bar_baz.cpp       containing implementations of the tests
-        # We build one testsuite u/t_foo_bar from that header file and all implementations.
-        # (This strange file structure is a remainder of the old PCC2 build system where we needed to get hold of
-        # all *.hpp files using a single wildcard for generating the driver.
-        # It is no longer needed; we no longer use a wildcard.)
-        my %files_by_suite;
-        foreach (split /\s+/, to_list($settings->{FILES_testsuite})) {
-            if (/^(.+)_[^_]+\.cpp$/) {
-                push @{$files_by_suite{$1}{cpp}}, normalize_filename($V{IN}, $_);
-            } elsif (/^(.+)\.hpp$/) {
-                $files_by_suite{$1}{hpp} = normalize_filename($V{IN}, $_);
-            } else {
-                die "Unknown file in testsuite: $_";
-            }
+    # Split files into individual testsuites
+    # This originally built one huge all-in-one testsuite binary.
+    # That binary became increasingly difficult to build on MinGW because it exceeded COFF file limits.
+    # Building each namespace's files separately should give us enough room for expansion.
+    # We build one testsuite test-foo-bar for all files in test/foo/bar.
+    my %files_by_suite;
+    foreach (split /\s+/, to_list($settings->{FILES_testsuite})) {
+        if (m|^test/main.cpp$|) {
+            # skip, will be added manually
+        } elsif (m|^test/(.*)/.*\.cpp$|) {
+            my $stem = $1;
+            $stem =~ s|/|-|g;
+            push @{$files_by_suite{"test-".$stem}}, normalize_filename($V{IN}, $_);
+        } else {
+            die "Unknown file in testsuite: $_";
         }
+    }
 
-        # Build individual testsuites
-        my @testsuites;
-        foreach (sort keys %files_by_suite) {
-            # Validate
-            die "Testsuite has no header file: $_" unless $files_by_suite{$_}{hpp};
-            die "Testsuite has no implementation: $_" unless $files_by_suite{$_}{cpp};
+    # Build individual testsuites
+    my @testsuites;
+    foreach (sort keys %files_by_suite) {
+        my $driver = normalize_filename($V{IN}, 'test/main.cpp');
+        my @test_obj = map {compile_file($_, {CXXFLAGS=>"-g -O1"})} $driver, sort @{$files_by_suite{$_}};
+        my $exe = compile_executable($_, [@test_obj], [@LIBS, 'afl']);
+        push @testsuites, $exe;
+    }
 
-            # Test driver
-            my $driver_name = normalize_filename($V{TMP}, "$_.cpp");
-            generate($driver_name, $files_by_suite{$_}{hpp}, "$V{PERL} $V{CXXTESTDIR}/cxxtestgen.pl --gui=TestController --have-eh --error-printer -o $driver_name $files_by_suite{$_}{hpp}");
-            rule_add_info($driver_name, "Generating $driver_name");
+    generate('test', [@testsuites, 'resources'], map {"$V{RUN} ./$_ -p"} @testsuites);
+    rule_add_info('test', 'Running testsuite');
+    rule_set_phony('test');
 
-            my $driver_obj = compile_file($driver_name, {CXXFLAGS=>"-I$V{CXXTESTDIR} -I$V{AFL_DIR} -g0 -O0"});
+    # Alternative entry points for parallel/incremental test execution
+    # This runs testsuites in parallel. When modifying a single testsuite, runs only that.
+    # Experimental: this SHOULD have a dependency to 'resources', but since that is a phony rule,
+    # it would run all the testsuites all the time, defeating the purpose.
+    foreach (@testsuites) {
+        generate('validate', generate_anonymous('.ok', [$_], "$V{RUN} ./$_ -p", 'touch $@'));
+    }
+    rule_set_phony('validate');
 
-            # Individual tests files
-            my @test_obj = map {compile_file($_, {CXXFLAGS=>"-I$V{CXXTESTDIR} -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -O0"})} sort @{$files_by_suite{$_}{cpp}};
+    # Coverage
+    if ($V{WITH_COVERAGE}) {
+        # Empty coverage (baseline)
+        my $base = generate_anonymous('.info', [@testsuites],
+                                      "lcov -q -c -d $V{TMP} -i -o \$@");
 
-            # Link
-            my $exe = compile_executable($_, [$driver_obj, @test_obj], [@LIBS, 'afl']);
-            push @testsuites, $exe;
-        }
-        generate('test', [@testsuites, 'resources'], map {"$V{RUN} ./$_"} @testsuites);
-        rule_add_info('test', 'Running testsuite');
-        rule_set_phony('test');
+        # Test run
+        my $result = generate_anonymous('.info', [@testsuites],
+                                        "lcov -q -z -d $V{TMP}",            # Reset counters (delete all *.gcda)
+                                        (map {"$V{RUN} ./$_"} @testsuites), # Run testsuites
+                                        "lcov -q -c -d $V{TMP} -o \$@");    # Capture coverage (*.gcda -> info)
 
-        # Alternative entry points for parallel/incremental test execution
-        # This runs testsuites in parallel. When modifying a single testsuite, runs only that.
-        # Experimental: this SHOULD have a dependency to 'resources', but since that is a phony rule,
-        # it would run all the testsuites all the time, defeating the purpose.
-        foreach (@testsuites) {
-            generate('validate', generate_anonymous('.ok', [$_], "$V{RUN} ./$_", 'touch $@'));
-        }
-        rule_set_phony('validate');
+        # Combine captured and baseline so we can see unreferenced lines
+        my $combined = generate_anonymous('.info', [$base, $result], "lcov -q -a $base -a $result -o \$@");
 
-        # Coverage
-        if ($V{WITH_COVERAGE}) {
-            # Empty coverage (baseline)
-            my $base = generate_anonymous('.info', [@testsuites],
-                                          "lcov -q -c -d $V{TMP} -i -o \$@");
+        # Filter only source code
+        my $abs_in = abs_path($V{IN});
+        my $abs_tmp = abs_path($V{TMP});
+        my $filtered_source = generate_anonymous('.info', [$combined], "lcov -q -e \$< '$abs_in/*' -o \$@");
+        my $filtered_source2 = generate_anonymous('.info', [$filtered_source], "lcov -q -r \$< '$abs_tmp/*' -o \$@");
+        my $filtered = generate_anonymous('.info', $filtered_source2, "lcov -q -r \$< '$abs_in/u/*' -r \$< '$abs_in/test/*' -o \$@");
 
-            # Test run
-            my $result = generate_anonymous('.info', [@testsuites],
-                                            "lcov -q -z -d $V{TMP}",            # Reset counters (delete all *.gcda)
-                                            (map {"$V{RUN} ./$_"} @testsuites), # Run testsuites
-                                            "lcov -q -c -d $V{TMP} -o \$@");    # Capture coverage (*.gcda -> info)
+        # Optimize
+        my $script = normalize_filename($V{AFL_DIR}, 'bin/coverage_optimize.pl');
+        my $optimized = generate_anonymous('.info', [$filtered, $script], "$V{PERL} $script <\$< >\$@");
 
-            # Combine captured and baseline so we can see unreferenced lines
-            my $combined = generate_anonymous('.info', [$base, $result], "lcov -q -a $base -a $result -o \$@");
-
-            # Filter only source code
-            my $abs_in = abs_path($V{IN});
-            my $abs_tmp = abs_path($V{TMP});
-            my $filtered_source = generate_anonymous('.info', [$combined], "lcov -q -e \$< '$abs_in/*' -o \$@");
-            my $filtered_source2 = generate_anonymous('.info', [$filtered_source], "lcov -q -r \$< '$abs_tmp/*' -o \$@");
-            my $filtered = generate_anonymous('.info', $filtered_source2, "lcov -q -r \$< '$abs_in/u/*' -o \$@");
-
-            # Optimize
-            my $script = normalize_filename($V{AFL_DIR}, 'bin/coverage_optimize.pl');
-            my $optimized = generate_anonymous('.info', [$filtered, $script], "$V{PERL} $script <\$< >\$@");
-
-            # Generate HTML
-            my $rm = $V{RM};
-            my $report = $V{COVERAGE_RESULT};
-            generate("$report/index.html", $optimized,
-                     "$rm -r $result/*",              # "/*" to keep the .mark file intact which buildsys creates for us
-                     "genhtml -q --ignore-errors source -t c2ng -o $report \$<");
-            generate("coverage", "$report/index.html");
-            rule_set_phony('coverage');
-        }
+        # Generate HTML
+        my $rm = $V{RM};
+        my $report = $V{COVERAGE_RESULT};
+        generate("$report/index.html", $optimized,
+                 "$rm -r $result/*",              # "/*" to keep the .mark file intact which buildsys creates for us
+                 "genhtml -q --ignore-errors source -t c2ng -o $report \$<");
+        generate("coverage", "$report/index.html");
+        rule_set_phony('coverage');
     }
 
     # Test apps

@@ -90,6 +90,13 @@ namespace game {
         uint8_t m_data[SIZE];
     };
 
+    /** makePrintable for testing.
+        \param ref Reference */
+    inline String_t makePrintable(const Timestamp& ts)
+    {
+        return ts.getTimestampAsString();
+    }
+
 }
 
 #endif

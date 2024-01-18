@@ -1,0 +1,188 @@
+/**
+  *  \file test/server/interface/mailqueueservertest.cpp
+  *  \brief Test for server::interface::MailQueueServer
+  */
+
+#include "server/interface/mailqueueserver.hpp"
+
+#include "afl/data/access.hpp"
+#include "afl/string/format.hpp"
+#include "afl/test/callreceiver.hpp"
+#include "afl/test/testrunner.hpp"
+#include "server/interface/mailqueue.hpp"
+#include "server/interface/mailqueueclient.hpp"
+#include <stdexcept>
+
+using afl::string::Format;
+using afl::data::Access;
+
+namespace {
+    class MailQueueMock : public server::interface::MailQueue, public afl::test::CallReceiver {
+     public:
+        MailQueueMock(afl::test::Assert a)
+            : CallReceiver(a)
+            { }
+        virtual void startMessage(String_t templateName, afl::base::Optional<String_t> uniqueId)
+            { checkCall(Format("startMessage(%s,%s)", templateName, uniqueId.orElse("no-id"))); }
+
+        virtual void addParameter(String_t parameterName, String_t value)
+            { checkCall(Format("addParameter(%s,%s)", parameterName, value)); }
+
+        virtual void addAttachment(String_t url)
+            { checkCall(Format("addAttachment(%s)", url)); }
+
+        virtual void send(afl::base::Memory<const String_t> receivers)
+            {
+                String_t cmd = "send(";
+                const char* sep = "";
+                while (const String_t* p = receivers.eat()) {
+                    cmd += sep;
+                    cmd += *p;
+                    sep = ",";
+                }
+                cmd += ")";
+                checkCall(cmd);
+            }
+
+        virtual void cancelMessage(String_t uniqueId)
+            { checkCall(Format("cancelMessage(%s)", uniqueId)); }
+
+        virtual void confirmAddress(String_t address, String_t key, afl::base::Optional<String_t> info)
+            { checkCall(Format("confirmAddress(%s,%s,%s)", address, key, info.orElse("no-info"))); }
+
+        virtual void requestAddress(String_t user)
+            { checkCall(Format("requestAddress(%s)", user)); }
+
+        virtual void runQueue()
+            { checkCall("runQueue()"); }
+        virtual UserStatus getUserStatus(String_t user)
+            {
+                checkCall(Format("getUserStatus(%s)", user));
+                return consumeReturnValue<UserStatus>();
+            }
+    };
+}
+
+/** Mail queue server tests. */
+AFL_TEST("server.interface.MailQueueServer:commands", a)
+{
+    using afl::data::Segment;
+
+    MailQueueMock mock(a);
+    server::interface::MailQueueServer testee(mock);
+
+    // Commands
+    mock.expectCall("startMessage(the-template,no-id)");
+    testee.callVoid(Segment().pushBackString("MAIL").pushBackString("the-template"));
+    mock.expectCall("startMessage(the-template,the-uniqueId)");
+    testee.callVoid(Segment().pushBackString("MAIL").pushBackString("the-template").pushBackString("the-uniqueId"));
+
+    mock.expectCall("addParameter(key,value)");
+    testee.callVoid(Segment().pushBackString("PARAM").pushBackString("key").pushBackString("value"));
+
+    mock.expectCall("addAttachment(http://foo)");
+    testee.callVoid(Segment().pushBackString("ATTACH").pushBackString("http://foo"));
+
+    mock.expectCall("send(fred,wilma,barney,betty)");
+    testee.callVoid(Segment().pushBackString("SEND").pushBackString("fred").pushBackString("wilma").pushBackString("barney").pushBackString("betty"));
+    mock.expectCall("send()");
+    testee.callVoid(Segment().pushBackString("SEND"));
+
+    mock.expectCall("cancelMessage(oops)");
+    testee.callVoid(Segment().pushBackString("CANCEL").pushBackString("oops"));
+
+    mock.expectCall("confirmAddress(trump@whitehouse.gov,whatever,no-info)");
+    testee.callVoid(Segment().pushBackString("CONFIRM").pushBackString("trump@whitehouse.gov").pushBackString("whatever"));
+    mock.expectCall("confirmAddress(billg@microsoft.com,whatever,info here)");
+    testee.callVoid(Segment().pushBackString("CONFIRM").pushBackString("billg@microsoft.com").pushBackString("whatever").pushBackString("info here"));
+
+    mock.expectCall("requestAddress(batman)");
+    testee.callVoid(Segment().pushBackString("REQUEST").pushBackString("batman"));
+
+    mock.expectCall("runQueue()");
+    testee.callVoid(Segment().pushBackString("RUNQUEUE"));
+
+    {
+        server::interface::MailQueue::UserStatus us;
+        us.address = "j@arkham.gov";
+        us.status = server::interface::MailQueue::Confirmed;
+        mock.expectCall("getUserStatus(joker)");
+        mock.provideReturnValue(us);
+
+        std::auto_ptr<afl::data::Value> p(testee.call(Segment().pushBackString("STATUS").pushBackString("joker")));
+        a.checkEqual("01. address", Access(p)("address").toString(), "j@arkham.gov");
+        a.checkEqual("02. status",  Access(p)("status").toString(), "c");
+    }
+
+    // Variations
+    mock.expectCall("startMessage(The-Template,no-id)");
+    testee.callVoid(Segment().pushBackString("mail").pushBackString("The-Template"));
+
+    // Additional commands
+    a.checkEqual("11. ping", testee.callString(Segment().pushBackString("PING")), "PONG");
+    a.check("12. help", testee.callString(Segment().pushBackString("HELP")).size() > 0);
+
+    // Errors
+    Segment empty;    // g++-3.4 sees an invocation of a copy constructor if I construct this object in-place.
+    AFL_CHECK_THROWS(a("21. missing verb"),  testee.callVoid(empty), std::exception);
+    AFL_CHECK_THROWS(a("22. missing arg"),   testee.callVoid(Segment().pushBackString("MAIL")), std::exception);
+    AFL_CHECK_THROWS(a("23. too many args"), testee.callVoid(Segment().pushBackString("MAIL").pushBackString("a").pushBackString("b").pushBackString("c")), std::exception);
+    AFL_CHECK_THROWS(a("24. bad verb"),      testee.callVoid(Segment().pushBackString("HUH")), std::exception);
+
+    mock.checkFinish();
+}
+
+/** Test roundtrip. */
+AFL_TEST("server.interface.MailQueueServer:roundtrip", a)
+{
+    MailQueueMock mock(a);
+    server::interface::MailQueueServer level1(mock);
+    server::interface::MailQueueClient level2(level1);
+    server::interface::MailQueueServer level3(level2);
+    server::interface::MailQueueClient level4(level3);
+
+    mock.expectCall("startMessage(t,no-id)");
+    level4.startMessage("t", afl::base::Nothing);
+    mock.expectCall("startMessage(tt,u)");
+    level4.startMessage("tt", String_t("u"));
+
+    mock.expectCall("addParameter(p,v)");
+    level4.addParameter("p", "v");
+
+    mock.expectCall("addAttachment(a)");
+    level4.addAttachment("a");
+
+    mock.expectCall("send(1,2,3,4,5)");
+    String_t rxs[] = { "1", "2", "3", "4", "5" };
+    level4.send(rxs);
+    mock.expectCall("send()");
+    level4.send(afl::base::Memory<const String_t>());
+
+    mock.expectCall("cancelMessage(q)");
+    level4.cancelMessage("q");
+
+    mock.expectCall("confirmAddress(a,k,no-info)");
+    level4.confirmAddress("a", "k", afl::base::Nothing);
+    mock.expectCall("confirmAddress(a,k,47)");
+    level4.confirmAddress("a", "k", String_t("47"));
+
+    mock.expectCall("requestAddress(u)");
+    level4.requestAddress("u");
+
+    mock.expectCall("runQueue()");
+    level4.runQueue();
+
+    {
+        server::interface::MailQueue::UserStatus us;
+        us.address = "j@arkham.gov";
+        us.status = server::interface::MailQueue::Confirmed;
+        mock.expectCall("getUserStatus(joker)");
+        mock.provideReturnValue(us);
+
+        server::interface::MailQueue::UserStatus out = level4.getUserStatus("joker");
+        a.checkEqual("01. address", out.address, "j@arkham.gov");
+        a.checkEqual("02. status", out.status, server::interface::MailQueue::Confirmed);
+    }
+
+    mock.checkFinish();
+}

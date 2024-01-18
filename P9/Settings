@@ -12,7 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = util/runlengthcompress.cpp util/runlengthcompress.hpp \
+FILES_gamelib = game/vcr/flak/visualizer.cpp interpreter/tagnode.cpp \
+    util/runlengthcompress.cpp util/runlengthcompress.hpp \
     interpreter/lockaccess.hpp util/resourcefileapplication.cpp \
     util/resourcefileapplication.hpp util/resourcefilewriter.cpp \
     util/resourcefilewriter.hpp util/resourcefilereader.cpp \
@@ -1791,723 +1792,895 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_gfx_codec_application.cpp \
-    u/t_util_runlengthcompress.cpp u/t_gfx_codec_custom.cpp \
-    u/t_gfx_codec_bmp.cpp u/t_gfx_codec_codec.cpp u/t_gfx_codec.hpp \
-    u/t_gfx_colorquantizer.cpp u/t_interpreter_lockaccess.cpp \
-    u/t_util_resourcefileapplication.cpp u/t_util_resourcefilewriter.cpp \
-    u/t_util_resourcefilereader.cpp u/t_util_resourcefile.cpp \
-    u/t_server_play_racenamepacker.cpp \
-    u/t_server_host_hostspecificationimpl.cpp \
-    u/t_server_host_spec_directory.cpp \
-    u/t_server_host_spec_publisherimpl.cpp \
-    u/t_server_host_spec_publisher.cpp u/t_server_host_spec.hpp \
-    u/t_server_interface_hostspecificationserver.cpp \
-    u/t_server_interface_hostspecificationclient.cpp \
-    u/t_server_interface_hostspecification.cpp \
-    u/t_server_play_enginepacker.cpp u/t_server_play_truehullpacker.cpp \
-    u/t_server_play_gameaccess.cpp u/t_gfx_threed_colortransformation.cpp \
-    u/t_gfx_threed_positionlist.cpp u/t_gfx_threed_model.cpp \
-    u/t_game_proxy_historyturnproxy.cpp u/t_game_proxy_allianceproxy.cpp \
-    u/t_ui_layout_axislayout.cpp u/t_ui_layout_vbox.cpp \
-    u/t_ui_layout_manager.cpp u/t_ui_layout_hbox.cpp \
-    u/t_game_proxy_attachmentproxy.cpp u/t_game_config_stringarrayoption.cpp \
-    u/t_interpreter_directoryfunctions.cpp u/t_game_interface_vmfile.cpp \
-    u/t_game_interface_loadcontext.cpp \
-    u/t_game_interface_taskeditorcontext.cpp \
-    u/t_game_interface_selectionfunctions.cpp \
-    u/t_game_interface_notificationfunctions.cpp \
-    u/t_game_interface_consolecommands.cpp \
-    u/t_game_interface_shipfunction.cpp u/t_game_interface_shipcontext.cpp \
-    u/t_game_interface_shipmethod.cpp u/t_game_interface_shipproperty.cpp \
-    u/t_game_interface_planetfunction.cpp \
-    u/t_game_interface_planetcontext.cpp u/t_game_interface_baseproperty.cpp \
-    u/t_game_interface_planetmethod.cpp u/t_game_interface_cargomethod.cpp \
-    u/t_game_interface_planetproperty.cpp \
-    u/t_game_interface_referencelistcontext.cpp \
-    u/t_game_interface_referencecontext.cpp \
-    u/t_game_interface_inboxfunction.cpp \
-    u/t_game_interface_globalcontext.cpp \
-    u/t_game_interface_globalfunctions.cpp \
-    u/t_game_interface_globalproperty.cpp u/t_game_interface_vcrfunction.cpp \
-    u/t_game_interface_vcrcontext.cpp u/t_game_interface_vcrproperty.cpp \
-    u/t_game_interface_vcrsidefunction.cpp \
-    u/t_game_interface_vcrsidecontext.cpp \
-    u/t_game_interface_vcrsideproperty.cpp u/t_game_vcr_test_database.cpp \
-    u/t_game_vcr_test_battle.cpp u/t_game_vcr_test.hpp \
-    u/t_game_interface_ufofunction.cpp u/t_game_interface_ufomethod.cpp \
-    u/t_game_interface_ufoproperty.cpp \
-    u/t_game_interface_minefieldfunction.cpp \
-    u/t_game_interface_minefieldcontext.cpp \
-    u/t_game_interface_minefieldmethod.cpp \
-    u/t_game_interface_minefieldproperty.cpp \
-    u/t_game_interface_objectcommand.cpp \
-    u/t_game_interface_missionfunction.cpp \
-    u/t_game_interface_missionproperty.cpp \
-    u/t_game_interface_playerfunction.cpp \
-    u/t_game_interface_playercontext.cpp \
-    u/t_game_interface_playerproperty.cpp \
-    u/t_game_interface_basetaskbuildcommandparser.cpp \
-    u/t_game_interface_friendlycodefunction.cpp \
-    u/t_game_interface_friendlycodeproperty.cpp \
-    u/t_game_interface_ionstormfunction.cpp \
-    u/t_game_interface_ionstormcontext.cpp \
-    u/t_game_interface_ionstormproperty.cpp \
-    u/t_game_interface_commandinterface.cpp \
-    u/t_game_interface_drawingfunction.cpp \
-    u/t_game_interface_drawingcontext.cpp \
-    u/t_game_interface_drawingmethod.cpp \
-    u/t_game_interface_explosionfunction.cpp \
-    u/t_game_interface_explosionproperty.cpp \
-    u/t_game_interface_richtextvalue.cpp u/t_game_interface_hullfunction.cpp \
-    u/t_game_interface_hullcontext.cpp u/t_game_interface_hullproperty.cpp \
-    u/t_game_interface_torpedofunction.cpp \
-    u/t_game_interface_enginefunction.cpp \
-    u/t_game_interface_beamfunction.cpp \
-    u/t_game_interface_torpedocontext.cpp u/t_game_interface_beamcontext.cpp \
-    u/t_game_interface_weaponproperty.cpp \
-    u/t_game_interface_componentproperty.cpp \
-    u/t_interpreter_test_valueverifier.cpp u/t_game_ref_listobserver.cpp \
-    u/t_game_ref_userlist.cpp u/t_game_ref_configuration.cpp \
-    u/t_util_plugin_dialogapplication.cpp u/t_util_plugin_installer.cpp \
-    u/t_util_profiledirectory.cpp u/t_util_translation.cpp \
-    u/t_util_keymapinformation.cpp u/t_util_directorybrowser.cpp \
-    u/t_util_consolelogger.cpp u/t_interpreter_vmio_worldloadcontext.cpp \
-    u/t_interpreter_vmio_assemblersavecontext.cpp \
-    u/t_interpreter_processobservercontext.cpp \
-    u/t_interpreter_expr_functioncallnode.cpp \
-    u/t_interpreter_expr_logicalnode.cpp u/t_interpreter_expr_casenode.cpp \
-    u/t_interpreter_expr_sequencenode.cpp u/t_interpreter_expr_unarynode.cpp \
-    u/t_interpreter_expr_assignmentnode.cpp \
-    u/t_interpreter_expr_literalnode.cpp u/t_interpreter_expr_binarynode.cpp \
-    u/t_interpreter_expr_membernode.cpp \
-    u/t_interpreter_expr_rvaluefunctioncallnode.cpp \
-    u/t_interpreter_expr_rvaluenode.cpp \
-    u/t_interpreter_expr_identifiernode.cpp \
-    u/t_interpreter_expr_indirectcallnode.cpp \
-    u/t_game_config_configurationparser.cpp u/t_game_map_renderer.cpp \
-    u/t_game_map_shiputils.cpp u/t_game_map_simpleobjectcursor.cpp \
-    u/t_game_map_shiphistorydata.cpp u/t_game_map_playedbasetype.cpp \
-    u/t_game_map_rendererlistener.cpp u/t_game_map_planetdata.cpp \
-    u/t_game_map_objectvectortype.cpp u/t_game_map_objectvector.cpp \
-    u/t_game_map_ionstormtype.cpp u/t_game_map_fleettype.cpp \
-    u/t_game_map_fleet.cpp u/t_game_map_playedshiptype.cpp \
-    u/t_game_map_anyshiptype.cpp u/t_game_map_playedplanettype.cpp \
-    u/t_game_map_anyplanettype.cpp u/t_game_map_basedata.cpp \
-    u/t_game_map_cursors.cpp u/t_game_map_minefieldformula.cpp \
-    u/t_game_test_root.cpp u/t_gfx_threed_context.cpp \
-    u/t_game_vcr_flak_definitions.cpp \
-    u/t_game_parser_informationconsumer.cpp u/t_game_proxy_waitindicator.cpp \
-    u/t_game_proxy_exportadaptor.cpp u/t_client_applicationparameters.cpp \
-    u/t_gfx_windowparameters.cpp u/t_interpreter_metacontext.cpp \
-    u/t_game_proxy_maintenanceadaptor.cpp \
-    u/t_game_proxy_maintenanceproxy.cpp u/t_game_ref_sortby.cpp \
-    u/t_gfx_colortransform.cpp u/t_game_map_info_mission.cpp \
-    u/t_game_msg_file.cpp u/t_game_interface_mailboxcontext.cpp \
-    u/t_game_v3_udata_nameprovider.cpp \
-    u/t_game_v3_udata_sessionnameprovider.cpp \
-    u/t_game_v3_udata_messagebuilder.cpp u/t_game_msg_format.cpp \
-    u/t_game_parser_binarytransfer.cpp u/t_client_widgets_pluginlist.cpp \
-    u/t_client_widgets.hpp u/t_game_proxy_pluginmanagerproxy.cpp \
-    u/t_game_interface_plugins.cpp u/t_game_interface_plugincontext.cpp \
-    u/t_game_interface_configurationeditorcontext.cpp \
-    u/t_interpreter_variablereference.cpp \
-    u/t_game_interface_globalactioncontext.cpp \
-    u/t_interpreter_savevisitor.cpp u/t_interpreter_expr_node.cpp \
-    u/t_interpreter_singlecontext.cpp u/t_game_proxy_referenceproxy.cpp \
-    u/t_server_file_readonlydirectoryhandler.cpp \
-    u/t_game_v3_passwordchecker.cpp u/t_game_v3_genextra.cpp \
-    u/t_interpreter_simplecontext.cpp u/t_game_interface_iteratorcontext.cpp \
-    u/t_gfx_antialiased.cpp u/t_interpreter_simpleprocedure.cpp \
-    u/t_interpreter_simplefunction.cpp u/t_interpreter_indexablevalue.cpp \
-    u/t_interpreter_functionvalue.cpp u/t_game_db_loader.cpp \
-    u/t_game_test_defaultshiplist.cpp u/t_game_browser_types.cpp \
-    u/t_game_score_scoreid.cpp u/t_game_score_structures.cpp \
-    u/t_game_ref_list.cpp u/t_game_proxy_objectlistexportadaptor.cpp \
-    u/t_game_proxy_globalactionproxy.cpp \
-    u/t_game_interface_globalactions.cpp u/t_util_treelist.cpp \
-    u/t_game_ref_typeadaptor.cpp u/t_game_proxy_historyshipproxy.cpp \
-    u/t_game_map_shipinfo.cpp u/t_game_map_historyshiptype.cpp \
-    u/t_game_proxy_fleetproxy.cpp u/t_game_ref_fleetmemberlist.cpp \
-    u/t_game_ref_fleetlist.cpp u/t_game_proxy_cloneshipproxy.cpp \
-    u/t_game_actions_cloneship.cpp u/t_game_proxy_mapconfigurationproxy.cpp \
-    u/t_game_proxy_configurationeditoradaptor.cpp \
-    u/t_game_proxy_configurationeditorproxy.cpp \
-    u/t_game_config_configurationeditor.cpp \
-    u/t_game_proxy_configurationobserverproxy.cpp \
-    u/t_game_proxy_visibilityrangeproxy.cpp u/t_game_map_visibilityrange.cpp \
-    u/t_game_map_movementcontroller.cpp u/t_client_map_location.cpp \
-    u/t_game_proxy_costsummaryadaptor.cpp \
-    u/t_game_interface_costsummarycontext.cpp u/t_game_proxy_exportproxy.cpp \
-    u/t_game_map_info_nulllinkbuilder.cpp \
-    u/t_game_map_info_scriptlinkbuilder.cpp \
-    u/t_game_map_info_linkbuilder.cpp u/t_game_proxy_labelproxy.cpp \
-    u/t_game_interface_labelextra.cpp u/t_game_interface_labelvector.cpp \
-    u/t_game_proxy_fictivestarbaseadaptor.cpp \
-    u/t_game_proxy_predictedstarbaseadaptor.cpp \
-    u/t_game_proxy_currentstarbaseadaptor.cpp \
-    u/t_game_proxy_starbaseadaptor.cpp u/t_game_proxy_scripteditorproxy.cpp \
-    u/t_game_interface_propertylist.cpp \
-    u/t_game_interface_contextprovider.cpp u/t_interpreter_staticcontext.cpp \
-    u/t_interpreter_contextreceiver.cpp u/t_interpreter_taskpredictor.cpp \
-    u/t_game_test_files.cpp u/t_game_proxy_imperialstatsproxy.cpp \
-    u/t_game_map_info_info.cpp u/t_game_map_info_types.cpp \
-    u/t_game_map_info_browser.cpp u/t_game_map_info.hpp \
-    u/t_game_map_typedobjecttype.cpp u/t_server_file_ca_garbagecollector.cpp \
-    u/t_game_task.cpp u/t_util_doc_verifier.cpp \
-    u/t_util_doc_summarizingverifier.cpp u/t_util_doc_loggingverifier.cpp \
-    u/t_server_doc_documentationimpl.cpp u/t_server_doc.hpp \
-    u/t_server_interface_documentationserver.cpp \
-    u/t_server_interface_documentationclient.cpp \
-    u/t_server_interface_documentation.cpp u/t_util_doc_singleblobstore.cpp \
-    u/t_util_doc_textimport.cpp u/t_util_doc_htmlrenderer.cpp \
-    u/t_util_doc_renderoptions.cpp u/t_util_doc_helpimport.cpp \
-    u/t_util_doc_fileblobstore.cpp u/t_util_doc_internalblobstore.cpp \
-    u/t_util_doc_index.cpp u/t_util_doc_blobstore.cpp u/t_util_doc.hpp \
-    u/t_game_map_objecttype.cpp u/t_game_v3_utils.cpp \
-    u/t_game_v3_directoryscanner.cpp u/t_game_v3_turnfile.cpp \
-    u/t_game_v3_specificationloader.cpp u/t_game_v3_inboxfile.cpp \
-    u/t_game_map_universe.cpp u/t_util_systeminformation.cpp \
-    u/t_game_proxy_buildammoproxy.cpp u/t_game_spec_info_utils.cpp \
-    u/t_game_vcr_flak_visualisationsettings.cpp \
-    u/t_game_vcr_flak_visualisationstate.cpp \
-    u/t_game_proxy_flakvcrplayerproxy.cpp \
-    u/t_game_vcr_flak_eventrecorder.cpp u/t_gfx_keyeventconsumer.cpp \
-    u/t_gfx_threed_vecmath.cpp u/t_gfx_threed.hpp u/t_gfx_complex.cpp \
-    u/t_game_proxy_outboxproxy.cpp u/t_util_editor_editor.cpp \
-    u/t_util_editor_command.cpp u/t_util_editor.hpp \
-    u/t_game_proxy_vcroverviewproxy.cpp u/t_game_vcr_overview.cpp \
-    u/t_ui_icons_vbox.cpp u/t_server_play_flakconfigurationpacker.cpp \
-    u/t_game_vcr_flak_object.cpp u/t_game_vcr_flak_database.cpp \
-    u/t_game_vcr_flak_setup.cpp u/t_game_vcr_flak_algorithm.cpp \
-    u/t_game_vcr_flak_battle.cpp u/t_game_vcr_flak_gameenvironment.cpp \
-    u/t_game_vcr_flak_environment.cpp u/t_game_vcr_flak_configuration.cpp \
-    u/t_game_vcr_flak_position.cpp u/t_game_vcr_flak_structures.cpp \
-    u/t_game_vcr_flak.hpp u/t_ui_widgets_alignedcontainer.cpp \
-    u/t_ui_widgets_treelistbox.cpp u/t_game_proxy_historyshiplistproxy.cpp \
-    u/t_game_ref_historyshiplist.cpp u/t_game_ref_historyshipselection.cpp \
-    u/t_game_actions_multitransfersetup.cpp \
-    u/t_game_proxy_expressionlistproxy.cpp \
-    u/t_game_config_expressionlists.cpp u/t_util_expressionlist.cpp \
-    u/t_game_proxy_inboxadaptor.cpp u/t_game_proxy_mailboxproxy.cpp \
-    u/t_game_proxy_mailboxadaptor.cpp u/t_game_msg_configuration.cpp \
-    u/t_game_msg_browser.cpp u/t_game_interface_inboxsubsetvalue.cpp \
-    u/t_game_msg_subsetmailbox.cpp u/t_game_msg_inbox.cpp \
-    u/t_game_interface_inboxcontext.cpp u/t_game_map_messagelink.cpp \
-    u/t_game_proxy_classicvcrplayerproxy.cpp \
-    u/t_game_proxy_vcrdatabaseadaptor.cpp u/t_game_vcr_info.cpp \
-    u/t_game_proxy_vcrdatabaseproxy.cpp u/t_game_vcr_nulldatabase.cpp \
-    u/t_game_vcr_classic_battle.cpp u/t_game_interface_shiptaskpredictor.cpp \
-    u/t_game_interface_basetaskpredictor.cpp \
-    u/t_game_proxy_buildpartsproxy.cpp u/t_game_proxy_techupgradeproxy.cpp \
-    u/t_game_proxy_buildshipproxy.cpp u/t_game_proxy_basestorageproxy.cpp \
-    u/t_game_map_rangeset.cpp u/t_game_map_objectobserver.cpp \
-    u/t_ui_eventloop.cpp u/t_ui_layoutablegroup.cpp u/t_client_marker.cpp \
-    u/t_game_proxy_simulationrunproxy.cpp u/t_game_proxy_ufoproxy.cpp \
-    u/t_game_proxy_ionstormproxy.cpp u/t_game_proxy_maprendererproxy.cpp \
-    u/t_game_proxy_drawingproxy.cpp u/t_game_map_renderoptions.cpp \
-    u/t_game_config_markeroption.cpp u/t_game_proxy_minefieldproxy.cpp \
-    u/t_util_layout.cpp u/t_game_score_scorebuilderbase.cpp \
-    u/t_ui_widgets_chart.cpp u/t_game_score_tablebuilder.cpp \
-    u/t_game_proxy_scoreproxy.cpp u/t_game_score_chartbuilder.cpp \
-    u/t_util_datatable.cpp u/t_game_proxy_planetpredictorproxy.cpp \
-    u/t_game_map_planeteffectors.cpp \
-    u/t_game_proxy_simulationtransferproxy.cpp u/t_game_vcr_objectinfo.cpp \
-    u/t_game_sim_sort.cpp u/t_game_proxy_fleetcostproxy.cpp \
-    u/t_game_sim_fleetcost.cpp u/t_game_spec_costsummary.cpp \
-    u/t_game_sim_sessionextra.cpp u/t_game_sim_session.cpp \
-    u/t_game_proxy_simulationsetupproxy.cpp u/t_game_sim_gameinterface.cpp \
-    u/t_game_proxy_teamproxy.cpp u/t_ui_widgets_icongrid.cpp \
-    u/t_ui_icons_hbox.cpp u/t_ui_icons_colortile.cpp u/t_ui_icons_spacer.cpp \
-    u/t_ui_icons_icon.cpp u/t_ui_icons.hpp u/t_ui_widgets_basebutton.cpp \
-    u/t_game_v3_attachmentconfiguration.cpp \
-    u/t_game_v3_attachmentunpacker.cpp u/t_game_interface_pluginproperty.cpp \
-    u/t_interpreter_test_expressionverifier.cpp \
-    u/t_server_test_consolecommandhandlermock.cpp u/t_server_test.hpp \
-    u/t_interpreter_test_contextverifier.cpp u/t_interpreter_test.hpp \
-    u/t_game_interface_completionlist.cpp u/t_game_db_packer.cpp \
-    u/t_game_interface_drawingproperty.cpp u/t_game_map_drawingcontainer.cpp \
-    u/t_game_map_drawing.cpp u/t_game_map_boundingbox.cpp \
-    u/t_game_map_minefieldtype.cpp u/t_game_v3_fizzfile.cpp \
-    u/t_game_map_explosiontype.cpp \
-    u/t_game_actions_changeshipfriendlycode.cpp u/t_game_shipquery.cpp \
-    u/t_game_session.cpp u/t_game_map_ufotype.cpp u/t_game_map_ufo.cpp \
-    u/t_game_sim_runner.cpp u/t_util_stopsignal.cpp \
-    u/t_game_proxy_reverterproxy.cpp u/t_game_map_locationreverter.cpp \
-    u/t_game_map_reverter.cpp u/t_game_sim_transfer.cpp \
-    u/t_game_map_beamupplanettransfer.cpp u/t_game_map_shiptransporter.cpp \
-    u/t_game_map_planetstorage.cpp u/t_game_actions_basefixrecycle.cpp \
-    u/t_game_actions_remotecontrolaction.cpp \
-    u/t_game_vcr_classic_database.cpp u/t_game_sim_run.cpp \
-    u/t_game_sim_resultlist.cpp u/t_game_sim_classresult.cpp \
-    u/t_game_sim_unitresult.cpp u/t_game_sim_result.cpp \
-    u/t_game_vcr_statistic.cpp u/t_game_map_shipdata.cpp \
-    u/t_game_alliance_phosthandler.cpp u/t_game_alliance_hosthandler.cpp \
-    u/t_game_alliance_container.cpp u/t_game_map_minefieldmission.cpp \
-    u/t_game_proxy_selectionproxy.cpp u/t_server_host_hostkey.cpp \
-    u/t_server_interface_hostkeyserver.cpp \
-    u/t_server_interface_hostkeyclient.cpp u/t_server_interface_hostkey.cpp \
-    u/t_server_host_keystore.cpp u/t_game_v3_registrationkey.cpp \
-    u/t_server_router_root.cpp u/t_server_router_session.cpp \
-    u/t_server_router_configuration.cpp u/t_server_router.hpp \
-    u/t_game_proxy_taskeditorproxy.cpp u/t_game_proxy_specbrowserproxy.cpp \
-    u/t_game_proxy_searchproxy.cpp u/t_game_proxy_processlistproxy.cpp \
-    u/t_game_proxy_planetinfoproxy.cpp u/t_game_proxy_mutexlistproxy.cpp \
-    u/t_game_proxy_maplocationproxy.cpp u/t_game_map_location.cpp \
-    u/t_game_proxy_lockproxy.cpp u/t_game_map_locker.cpp \
-    u/t_game_proxy_hullspecificationproxy.cpp \
-    u/t_game_proxy_referencelistproxy.cpp \
-    u/t_game_proxy_referenceobserverproxy.cpp \
-    u/t_game_proxy_cursorobserverproxy.cpp u/t_game_proxy_objectobserver.cpp \
-    u/t_game_proxy_objectlistener.cpp u/t_game_map_objectcursorfactory.cpp \
-    u/t_game_actions_convertsupplies.cpp \
-    u/t_game_proxy_convertsuppliesproxy.cpp u/t_game_proxy_chunnelproxy.cpp \
-    u/t_game_proxy_cargotransfersetupproxy.cpp \
-    u/t_game_proxy_cargotransferproxy.cpp \
-    u/t_game_proxy_buildstructuresproxy.cpp \
-    u/t_game_proxy_buildstarbaseproxy.cpp u/t_game_proxy_buildqueueproxy.cpp \
-    u/t_game_proxy_taxationproxy.cpp u/t_game_proxy_friendlycodeproxy.cpp \
-    u/t_game_proxy_playerproxy.cpp u/t_game_proxy_shipspeedproxy.cpp \
-    u/t_game_test_sessionthread.cpp u/t_game_proxy_configurationproxy.cpp \
-    u/t_game_proxy_commandlistproxy.cpp u/t_util_simplerequestdispatcher.cpp \
-    u/t_game_proxy_keymapproxy.cpp u/t_game_proxy.hpp \
-    u/t_game_test_waitindicator.cpp u/t_server_play_friendlycodepacker.cpp \
-    u/t_game_v3_genfile.cpp u/t_interpreter_mutexfunctions.cpp \
-    u/t_game_interface_notificationstore.cpp \
-    u/t_util_process_posixfactory.cpp u/t_util_process_nullfactory.cpp \
-    u/t_game_interface_processlisteditor.cpp u/t_util_plugin_manager.cpp \
-    u/t_game_reference.cpp u/t_interpreter_subroutinevalue.cpp \
-    u/t_interpreter_statementcompilationcontext.cpp \
-    u/t_interpreter_ternaryexecution.cpp u/t_interpreter_binaryexecution.cpp \
-    u/t_game_map_selections.cpp u/t_game_map_selectionvector.cpp \
-    u/t_server_play_packerlist.cpp \
-    u/t_server_play_outmessagecommandhandler.cpp \
-    u/t_server_play_outmessageindexpacker.cpp \
-    u/t_server_play_outmessagepacker.cpp u/t_server_play_hullpacker.cpp \
-    u/t_server_play_basichullfunctionpacker.cpp \
-    u/t_game_spec_info_browser.cpp u/t_game_spec_racialabilitylist.cpp \
-    u/t_ui_res_generatedengineprovider.cpp \
-    u/t_server_play_configurationpacker.cpp \
-    u/t_server_play_torpedopacker.cpp u/t_server_play_beampacker.cpp \
-    u/t_game_test_shiplist.cpp u/t_game_v3_udata_reader.cpp \
-    u/t_game_v3_udata.hpp u/t_game_test_cargocontainer.cpp \
-    u/t_game_test_stringverifier.cpp u/t_game_test_registrationkey.cpp \
-    u/t_game_test.hpp u/t_game_spec_info_info.cpp \
-    u/t_game_spec_info_filter.cpp u/t_client_picturenamer.cpp \
-    u/t_game_spec_info_nullpicturenamer.cpp \
-    u/t_game_spec_info_picturenamer.cpp u/t_game_spec_info_types.cpp \
-    u/t_game_spec_info.hpp u/t_util_range.cpp \
-    u/t_game_actions_changebuildqueue.cpp u/t_game_map_planetinfo.cpp \
-    u/t_game_map_chunnelmission.cpp u/t_game_limits.cpp \
-    u/t_server_common_idgenerator.cpp u/t_util_vector.cpp \
-    u/t_server_ports.cpp u/t_client_map_overlay.cpp u/t_client_map.hpp \
-    u/t_game_interface_globalcommands.cpp u/t_game_map_planetformula.cpp \
-    u/t_game_authcache.cpp u/t_game_map_planet.cpp \
-    u/t_game_map_minefield.cpp u/t_game_spec_fighter.cpp \
-    u/t_interpreter_unaryexecution.cpp u/t_game_interface_cargofunctions.cpp \
-    u/t_server_user_saltedpasswordencrypter.cpp \
-    u/t_server_user_multipasswordencrypter.cpp \
-    u/t_interpreter_taskeditor.cpp u/t_game_actions_taxationaction.cpp \
-    u/t_game_map_shippredictor.cpp u/t_util_requestsender.cpp \
-    u/t_ui_layout_info.cpp u/t_game_searchquery.cpp \
-    u/t_game_alliance_offer.cpp u/t_game_map_beamupshiptransfer.cpp \
-    u/t_game_map_shipstorage.cpp u/t_gfx_application.cpp \
-    u/t_server_interface_hostrankingserver.cpp \
-    u/t_server_interface_hostrankingclient.cpp \
-    u/t_server_interface_hostranking.cpp \
-    u/t_server_interface_hosthistoryserver.cpp \
-    u/t_server_interface_hosthistoryclient.cpp \
-    u/t_server_interface_hosthistory.cpp u/t_server_talk_talkaddress.cpp \
-    u/t_server_interface_talkaddressserver.cpp \
-    u/t_server_interface_talkaddressclient.cpp \
-    u/t_server_interface_talkaddress.cpp u/t_server_user_userdata.cpp \
-    u/t_server_user_commandhandler.cpp \
-    u/t_server_interface_userdataserver.cpp \
-    u/t_server_interface_userdataclient.cpp \
-    u/t_server_interface_userdata.cpp u/t_server_user_user.cpp \
-    u/t_server_common_randomidgenerator.cpp u/t_server_user_usertoken.cpp \
-    u/t_server_user_token.cpp u/t_server_user_usermanagement.cpp \
-    u/t_server_user_classicencrypter.cpp \
-    u/t_server_user_passwordencrypter.cpp u/t_server_user_configuration.cpp \
-    u/t_server_user.hpp u/t_server_common_util.cpp \
-    u/t_server_interface_usermanagementserver.cpp \
-    u/t_server_interface_usermanagementclient.cpp \
-    u/t_server_interface_usermanagement.cpp \
-    u/t_server_interface_usertokenserver.cpp \
-    u/t_server_interface_usertokenclient.cpp \
-    u/t_server_interface_usertoken.cpp u/t_util_process_subprocess.cpp \
-    u/t_util_process_factory.cpp u/t_util_process.hpp \
-    u/t_game_ref_nullpredicate.cpp u/t_game_ref_sortpredicate.cpp \
-    u/t_game_ref.hpp u/t_game_battleorderrule.cpp \
-    u/t_game_map_basestorage.cpp u/t_server_interface_hostslotserver.cpp \
-    u/t_server_interface_hostslotclient.cpp \
-    u/t_server_interface_hostslot.cpp u/t_server_play_commandhandler.cpp \
-    u/t_server_play_packer.cpp u/t_server_play.hpp \
-    u/t_server_interface_gameaccess.cpp u/t_util_numberformatter.cpp \
-    u/t_interpreter_mutexcontext.cpp u/t_game_alliance_handler.cpp \
-    u/t_interpreter_genericvalue.cpp u/t_game_alliance_level.cpp \
-    u/t_game_alliance.hpp u/t_util_helpindex.cpp \
-    u/t_server_host_hostfile.cpp u/t_server_host_file_rootitem.cpp \
-    u/t_server_host_file_gamerootitem.cpp u/t_server_host_file_toolitem.cpp \
-    u/t_server_host_file_item.cpp u/t_server_host_file_fileitem.cpp \
-    u/t_server_host_file.hpp u/t_server_interface_hostfileserver.cpp \
-    u/t_server_interface_hostfileclient.cpp \
-    u/t_server_interface_hostfile.cpp u/t_game_map_movementpredictor.cpp \
-    u/t_game_v3_reverter.cpp u/t_game_map_ship.cpp \
-    u/t_game_map_planetpredictor.cpp u/t_util_updater.cpp \
-    u/t_game_vcr_classic_utils.cpp \
-    u/t_game_vcr_classic_mirroringeventlistener.cpp u/t_gfx_scan.cpp \
-    u/t_gfx_anim_sprite.cpp u/t_gfx_anim_controller.cpp u/t_gfx_anim.hpp \
-    u/t_util_syntax_lisphighlighter.cpp u/t_gfx_gen_colorrange.cpp \
-    u/t_util_syntax_pascalhighlighter.cpp \
-    u/t_game_vcr_classic_eventrecorder.cpp \
-    u/t_game_vcr_classic_eventlistener.cpp \
-    u/t_util_stringinstructionlist.cpp u/t_util_instructionlist.cpp \
-    u/t_game_map_renderlist.cpp u/t_game_config_userconfiguration.cpp \
-    u/t_client_downlink.cpp u/t_server_application.cpp \
-    u/t_game_v3_resultloader.cpp u/t_util_digest.cpp \
-    u/t_util_configurationfile.cpp u/t_server_monitor_timeseriesloader.cpp \
-    u/t_server_monitor_timeserieswriter.cpp u/t_game_v3_hconfig.cpp \
-    u/t_server_monitor_statusobserver.cpp u/t_server_monitor_timeseries.cpp \
-    u/t_gfx_sdl_streaminterface.cpp u/t_game_map_fleetmember.cpp \
-    u/t_game_db_fleetloader.cpp u/t_gfx_gen_planetconfig.cpp \
-    u/t_gfx_gen_planet.cpp u/t_gfx_gen_vector3d.cpp \
-    u/t_game_actions_cargotransfersetup.cpp \
-    u/t_game_actions_cargotransfer.cpp u/t_game_actions_buildammo.cpp \
-    u/t_game_actions_buildship.cpp u/t_game_actions_buildstarbase.cpp \
-    u/t_game_actions_buildstructures.cpp u/t_game_actions_techupgrade.cpp \
-    u/t_game_v3_undoinformation.cpp u/t_game_actions_buildparts.cpp \
-    u/t_game_actions_basebuildaction.cpp \
-    u/t_game_actions_basebuildexecutor.cpp u/t_server_monitor_status.cpp \
-    u/t_interpreter_exporter_configuration.cpp \
-    u/t_interpreter_exporter_format.cpp u/t_util_charsetfactory.cpp \
-    u/t_game_interface_engineproperty.cpp u/t_game_v3_packer.cpp \
-    u/t_game_v3_loader.cpp u/t_game_actions_cargocostaction.cpp \
-    u/t_game_cargocontainer.cpp u/t_game_v3_outboxreader.cpp \
-    u/t_game_msg_outbox.cpp u/t_server_monitor_badnessfileobserver.cpp \
-    u/t_server_monitor_observer.cpp u/t_server_monitor.hpp \
-    u/t_server_mailout_transmitterimpl.cpp u/t_server_mailout_root.cpp \
-    u/t_server_mailout_commandhandler.cpp u/t_server_mailout_mailqueue.cpp \
-    u/t_server_mailout_message.cpp u/t_server_mailout_template.cpp \
-    u/t_server_mailout_session.cpp u/t_server_mailout_configuration.cpp \
-    u/t_server_mailout_transmitter.cpp u/t_server_mailout.hpp \
-    u/t_server_dbexport_dbexporter.cpp u/t_server_dbexport.hpp \
-    u/t_server_nntp_root.cpp u/t_server_nntp.hpp \
-    u/t_server_console_routercontextfactory.cpp \
-    u/t_server_console_fundamentalcommandhandler.cpp \
-    u/t_server_console_pipeterminal.cpp u/t_server_console_dumbterminal.cpp \
-    u/t_server_console_colorterminal.cpp \
-    u/t_server_console_integercommandhandler.cpp \
-    u/t_server_console_stringcommandhandler.cpp \
-    u/t_server_console_nullterminal.cpp u/t_server_console_parser.cpp \
-    u/t_server_console_environment.cpp u/t_server_console_commandhandler.cpp \
-    u/t_server_console_contextfactory.cpp u/t_server_console_context.cpp \
-    u/t_server_console_terminal.cpp u/t_server_console.hpp \
-    u/t_server_mailin_mailinapplication.cpp \
-    u/t_server_file_clientdirectory.cpp u/t_server_errors.cpp \
-    u/t_server_talk_session.cpp u/t_game_vcr_classic_types.cpp \
-    u/t_server_host_resultsender.cpp u/t_server_common_user.cpp \
-    u/t_server_common_sessionprotocolhandlerfactory.cpp \
-    u/t_server_common_sessionprotocolhandler.cpp u/t_server_common_root.cpp \
-    u/t_server_mailin_mailprocessor.cpp u/t_server_mailin.hpp \
-    u/t_server_host_commandhandler.cpp u/t_server_host_hostturn.cpp \
-    u/t_server_host_hostschedule.cpp u/t_server_host_hostplayer.cpp \
-    u/t_server_host_hostgame.cpp u/t_server_common_racenames.cpp \
-    u/t_server_host_installer.cpp u/t_server_file_internalfileserver.cpp \
-    u/t_server_host_game.cpp u/t_server_host_cronimpl.cpp \
-    u/t_server_host_exporter.cpp u/t_server_host_configuration.cpp \
-    u/t_server_host_hostcron.cpp u/t_server_host_hosttool.cpp \
-    u/t_server_host_talkadapter.cpp u/t_server_host_rank_victory.cpp \
-    u/t_server_host_rank_levelhandler.cpp u/t_server_host_cron.cpp \
-    u/t_server_interface_sessionrouter.cpp \
-    u/t_server_host_rank_scorefilereader.cpp \
-    u/t_server_host_rank_refereefilereader.cpp u/t_server_host_rank_rank.cpp \
-    u/t_server_host_rank.hpp u/t_server_host_configurationbuilder.cpp \
-    u/t_server_host_gamearbiter.cpp \
-    u/t_server_interface_hostplayerserver.cpp \
-    u/t_server_interface_hostplayerclient.cpp \
-    u/t_server_interface_hostturnserver.cpp \
-    u/t_server_interface_hostturnclient.cpp \
-    u/t_server_interface_hostgameserver.cpp \
-    u/t_server_interface_hostscheduleserver.cpp \
-    u/t_server_interface_hostscheduleclient.cpp \
-    u/t_server_interface_hostgameclient.cpp u/t_server_host_gamecreator.cpp \
-    u/t_server_host_talklistener.cpp u/t_server_interface_hostplayer.cpp \
-    u/t_server_interface_hostturn.cpp u/t_server_interface_hostschedule.cpp \
-    u/t_server_interface_hostgame.cpp u/t_server_host_schedule.cpp \
-    u/t_util_processrunner.cpp u/t_server_host_session.cpp \
-    u/t_server_host.hpp u/t_server_interface_hosttoolserver.cpp \
-    u/t_server_interface_hosttoolclient.cpp \
-    u/t_server_interface_hostcronserver.cpp \
-    u/t_server_interface_hosttool.cpp \
-    u/t_interpreter_vmio_filesavecontext.cpp \
-    u/t_interpreter_vmio_processsavecontext.cpp \
-    u/t_interpreter_vmio_structures.cpp \
-    u/t_interpreter_vmio_processloadcontext.cpp u/t_gfx_filter.cpp \
-    u/t_game_config_stringoption.cpp u/t_game_config_integerarrayoption.cpp \
-    u/t_gfx_font.cpp u/t_game_config_enumvalueparser.cpp \
-    u/t_gfx_bitmapfont.cpp u/t_gfx_bitmapglyph.cpp u/t_gfx_primitives.cpp \
-    u/t_gfx_pixmapcanvasimpl.cpp u/t_gfx_fontlist.cpp u/t_gfx_context.cpp \
-    u/t_gfx_nullcolorscheme.cpp u/t_gfx_colorscheme.cpp \
-    u/t_gfx_basecontext.cpp u/t_gfx_rgbapixmap.cpp u/t_gfx_fontrequest.cpp \
-    u/t_gfx_palettizedpixmap.cpp u/t_gfx_gen_spaceviewconfig.cpp \
-    u/t_gfx_gen_spaceview.cpp u/t_game_sim_setup.cpp \
-    u/t_game_sim_configuration.cpp u/t_game_sim_ability.cpp \
-    u/t_server_configurationhandler.cpp u/t_interpreter_opcode.cpp \
-    u/t_interpreter_keymapvalue.cpp u/t_interpreter_simplespecialcommand.cpp \
-    u/t_interpreter_memorycommandsource.cpp u/t_interpreter_fusion.cpp \
-    u/t_interpreter_filetable.cpp u/t_interpreter_filevalue.cpp \
-    u/t_gfx_graphicsexception.cpp u/t_interpreter_filecommandsource.cpp \
-    u/t_interpreter_defaultstatementcompilationcontext.cpp \
-    u/t_interpreter_compilationcontext.cpp \
-    u/t_interpreter_propertyacceptor.cpp u/t_interpreter_callablevalue.cpp \
-    u/t_interpreter_basevalue.cpp u/t_interpreter_commandsource.cpp \
-    u/t_interpreter_arrayvalue.cpp u/t_interpreter_arguments.cpp \
-    u/t_interpreter_structurevalue.cpp \
-    u/t_interpreter_structurevaluedata.cpp u/t_interpreter_structuretype.cpp \
-    u/t_interpreter_structuretypedata.cpp \
-    u/t_interpreter_objectpropertyvector.cpp u/t_interpreter_world.cpp \
-    u/t_interpreter_arraydata.cpp u/t_interpreter_hashvalue.cpp \
-    u/t_util_rich_alignmentattribute.cpp u/t_util_syntax_format.cpp \
-    u/t_game_sim_structures.cpp u/t_game_v3_structures.cpp \
-    u/t_game_db_structures.cpp u/t_game_extra.cpp \
-    u/t_interpreter_savecontext.cpp u/t_interpreter_specialcommand.cpp \
-    u/t_interpreter_typehint.cpp u/t_interpreter_tagnode.cpp \
-    u/t_interpreter_exporter_exporter.cpp \
-    u/t_interpreter_exporter_dbfexporter.cpp \
-    u/t_interpreter_exporter_jsonexporter.cpp \
-    u/t_interpreter_exporter_textexporter.cpp \
-    u/t_interpreter_exporter_separatedtextexporter.cpp \
-    u/t_interpreter_exporter_htmlexporter.cpp \
-    u/t_interpreter_filefunctions.cpp u/t_game_parser_messageparser.cpp \
-    u/t_game_parser_messageinformation.cpp u/t_game_parser_messagevalue.cpp \
-    u/t_game_root.cpp u/t_game_turn.cpp u/t_game_playerset.cpp \
-    u/t_game_shipbuildorder.cpp u/t_game_spec_shiplist.cpp \
-    u/t_game_spec_standardcomponentnameprovider.cpp u/t_game_spec_hull.cpp \
-    u/t_game_spec_hullfunctionassignmentlist.cpp \
-    u/t_game_spec_modifiedhullfunctionlist.cpp \
-    u/t_game_spec_hullfunction.cpp u/t_game_spec_hullassignmentlist.cpp \
-    u/t_game_spec_mission.cpp u/t_game_spec_basichullfunctionlist.cpp \
-    u/t_game_spec_nullcomponentnameprovider.cpp u/t_game_spec_torpedo.cpp \
-    u/t_game_spec_torpedolauncher.cpp u/t_game_spec_beam.cpp \
-    u/t_game_spec_weapon.cpp u/t_game_spec_basichullfunction.cpp \
-    u/t_game_spec_basecomponentvector.cpp u/t_game_score_loader.cpp \
-    u/t_game_score_compoundscore.cpp u/t_game_score_turnscorelist.cpp \
-    u/t_game_score_turnscore.cpp u/t_game_score.hpp \
-    u/t_server_talk_render_bbrenderer.cpp u/t_game_map_ionstorm.cpp \
-    u/t_game_maint_sweeper.cpp u/t_server_format_format.cpp \
-    u/t_server_format_truehullpacker.cpp u/t_server_format_stringpacker.cpp \
-    u/t_server_format_hullpacker.cpp u/t_server_format_enginepacker.cpp \
-    u/t_server_format_torpedopacker.cpp u/t_server_format_beampacker.cpp \
-    u/t_server_interface_composablecommandhandler.cpp \
-    u/t_server_talk_commandhandler.cpp u/t_server_talk_talknntp.cpp \
-    u/t_server_talk_talkthread.cpp u/t_server_talk_talkfolder.cpp \
-    u/t_server_talk_talkgroup.cpp u/t_server_talk_userfolder.cpp \
-    u/t_server_talk_topic.cpp u/t_server_talk_user.cpp \
-    u/t_server_talk_talkforum.cpp u/t_server_talk_talkrender.cpp \
-    u/t_interpreter_vmio_objectloader.cpp u/t_server_common_session.cpp \
-    u/t_server_common.hpp u/t_server_interface_hostcronclient.cpp \
-    u/t_server_interface_hostcron.cpp u/t_util_io.cpp \
-    u/t_game_maint_difficultyrater.cpp u/t_game_maint.hpp \
-    u/t_game_config_collapsibleintegerarrayoption.cpp \
-    u/t_server_file_directorywrapper.cpp \
-    u/t_server_file_clientdirectoryhandler.cpp \
-    u/t_server_file_ca_internalobjectcache.cpp \
-    u/t_server_file_ca_objectcache.cpp \
-    u/t_server_file_ca_referencecounter.cpp \
-    u/t_server_file_ca_internalreferencecounter.cpp \
-    u/t_server_file_directoryhandlerfactory.cpp u/t_server_file_utils.cpp \
-    u/t_server_file_ca_root.cpp u/t_server_file_ca_directoryhandler.cpp \
-    u/t_server_file_ca_referenceupdater.cpp u/t_server_file_ca_commit.cpp \
-    u/t_server_file_ca_directoryentry.cpp u/t_server_file_ca_objectid.cpp \
-    u/t_server_file_ca_objectstore.cpp u/t_server_file_ca.hpp \
-    u/t_server_file_filegame.cpp u/t_server_file_gamestatus.cpp \
-    u/t_server_interface_filegameserver.cpp \
-    u/t_server_interface_filegameclient.cpp \
-    u/t_server_interface_filegame.cpp u/t_server_file_commandhandler.cpp \
-    u/t_server_file_item.cpp u/t_server_file_directoryhandler.cpp \
-    u/t_server_file_root.cpp u/t_server_file_session.cpp \
-    u/t_server_file_filebase.cpp u/t_server_file.hpp \
-    u/t_ui_res_ccimageloader.cpp u/t_ui_res_engineimageloader.cpp \
-    u/t_server_interface_filebaseserver.cpp \
-    u/t_server_interface_filebaseclient.cpp \
-    u/t_server_interface_filebase.cpp u/t_server_talk_message.cpp \
-    u/t_server_talk_accesschecker.cpp u/t_server_talk_forum.cpp \
-    u/t_server_talk_configuration.cpp u/t_server_talk_userpm.cpp \
-    u/t_server_interface_baseclient.cpp u/t_server_interface_base.cpp \
-    u/t_server_interface_talknntpserver.cpp \
-    u/t_server_interface_talknntpclient.cpp \
-    u/t_server_interface_talknntp.cpp u/t_server_talk_talkpm.cpp \
-    u/t_server_interface_talkpmserver.cpp \
-    u/t_server_interface_talkpmclient.cpp u/t_server_interface_talkpm.cpp \
-    u/t_server_interface_talkfolderserver.cpp \
-    u/t_server_interface_talkfolderclient.cpp \
-    u/t_server_interface_talkfolder.cpp \
-    u/t_server_talk_render_htmlrenderer.cpp u/t_server_talk_talkpost.cpp \
-    u/t_server_format_simpacker.cpp u/t_server_talk_spam.cpp \
-    u/t_server_talk_talkuser.cpp u/t_server_interface_talkuserserver.cpp \
-    u/t_server_interface_talkuserclient.cpp \
-    u/t_server_interface_talkuser.cpp u/t_server_talk_newsrc.cpp \
-    u/t_server_talk_talksyntax.cpp u/t_server_talk_textnode.cpp \
-    u/t_server_interface_formatserver.cpp \
-    u/t_server_interface_talkthreadserver.cpp \
-    u/t_server_interface_talkthreadclient.cpp \
-    u/t_server_interface_talkthread.cpp \
-    u/t_server_interface_talkgroupserver.cpp \
-    u/t_server_interface_talkgroupclient.cpp u/t_server_talk_sorter.cpp \
-    u/t_server_interface_talkforumserver.cpp \
-    u/t_server_interface_talkforumclient.cpp \
-    u/t_server_interface_talkforum.cpp \
-    u/t_server_interface_mailqueueserver.cpp \
-    u/t_server_interface_mailqueueclient.cpp \
-    u/t_server_interface_mailqueue.cpp \
-    u/t_server_interface_talkpostserver.cpp \
-    u/t_server_interface_talkpostclient.cpp \
-    u/t_server_interface_talkpost.cpp u/t_game_db_drawingatommap.cpp \
-    u/t_game_db.hpp u/t_server_talk_parse_bbparser.cpp \
-    u/t_server_talk_parse_bblexer.cpp u/t_server_talk_parse.hpp \
-    u/t_server_interface_talkrenderserver.cpp \
-    u/t_server_interface_talkrenderclient.cpp u/t_server_format_utils.cpp \
-    u/t_server_talk_root.cpp u/t_server_talk_render_context.cpp \
-    u/t_server_talk_render_options.cpp u/t_server_talk_render.hpp \
-    u/t_server_interface_talksyntaxserver.cpp \
-    u/t_server_interface_talksyntaxclient.cpp \
-    u/t_server_interface_talkrender.cpp u/t_server_interface_talkgroup.cpp \
-    u/t_server_talk_linkformatter.cpp u/t_server_talk_group.cpp \
-    u/t_server_types.cpp u/t_server.hpp u/t_server_interface_talksyntax.cpp \
-    u/t_server_talk_inlinerecognizer.cpp u/t_server_talk.hpp \
-    u/t_server_format_packer.cpp u/t_server_format.hpp \
-    u/t_server_interface_formatclient.cpp u/t_server_interface_format.cpp \
-    u/t_server_interface.hpp u/t_util_syntax_factory.cpp \
-    u/t_util_syntax_inihighlighter.cpp u/t_util_syntax_chighlighter.cpp \
-    u/t_util_syntax_keywordtable.cpp u/t_util_syntax_segment.cpp \
-    u/t_util_syntax_nullhighlighter.cpp \
-    u/t_util_syntax_scripthighlighter.cpp u/t_util_syntax_highlighter.cpp \
-    u/t_util_syntax.hpp u/t_game_v3_trn_parseexception.cpp \
-    u/t_game_v3_trn_filter.cpp u/t_game_v3_trn_namefilter.cpp \
-    u/t_game_v3_trn_stringfilter.cpp u/t_game_v3_trn_idfilter.cpp \
-    u/t_game_v3_trn_negatefilter.cpp u/t_game_v3_trn_orfilter.cpp \
-    u/t_game_v3_trn_indexfilter.cpp u/t_game_v3_trn_andfilter.cpp \
-    u/t_game_v3_trn_constantfilter.cpp u/t_game_v3_trn.hpp \
-    u/t_util_application.cpp u/t_interpreter_vmio_nullloadcontext.cpp \
-    u/t_interpreter_selectionexpression.cpp \
-    u/t_interpreter_ternaryoperation.cpp u/t_interpreter_unaryoperation.cpp \
-    u/t_interpreter_binaryoperation.cpp u/t_interpreter_optimizer.cpp \
-    u/t_gfx_basecolorscheme.cpp u/t_ui_widgets_inputline.cpp \
-    u/t_game_v3_commandextra.cpp u/t_game_v3_command.cpp \
-    u/t_game_v3_commandcontainer.cpp u/t_client_si_widgetfunction.cpp \
-    u/t_ui_layout_grid.cpp u/t_ui_layout.hpp u/t_ui_root.cpp \
-    u/t_ui_widgets_radiobutton.cpp u/t_ui_widgets_checkbox.cpp \
-    u/t_interpreter_error.cpp u/t_gfx_nullresourceprovider.cpp \
-    u/t_ui_prefixargument.cpp u/t_util_prefixargument.cpp \
-    u/t_game_v3_controlfile.cpp u/t_util_stringlist.cpp \
-    u/t_util_fileparser.cpp u/t_util_configurationfileparser.cpp \
-    u/t_gfx_defaultfont.cpp u/t_util_messagenotifier.cpp \
-    u/t_util_messagecollector.cpp u/t_util_messagematcher.cpp \
-    u/t_util_filenamepattern.cpp u/t_gfx_types.cpp \
-    u/t_gfx_gen_perlinnoise.cpp u/t_gfx_gen.hpp \
-    u/t_client_si_scriptprocedure.cpp u/t_game_sim_loader.cpp \
-    u/t_game_sim_planet.cpp u/t_game_sim_ship.cpp u/t_game_sim_object.cpp \
-    u/t_game_sim.hpp u/t_game_actions_preconditions.cpp u/t_game_actions.hpp \
-    u/t_util_runlengthexpandtransform.cpp u/t_util_stringparser.cpp \
-    u/t_ui_res_resid.cpp u/t_game_interface_explosioncontext.cpp \
-    u/t_game_map_explosion.cpp u/t_interpreter_procedurevalue.cpp \
-    u/t_util_plugin_plugin.cpp u/t_util_plugin.hpp u/t_game_playerlist.cpp \
-    u/t_interpreter_vmio_valueloader.cpp u/t_interpreter_mutexlist.cpp \
-    u/t_interpreter_vmio_nullsavecontext.cpp \
-    u/t_interpreter_vmio_loadcontext.cpp u/t_interpreter_vmio.hpp \
-    u/t_interpreter_blobvalue.cpp u/t_game_interface_ufocontext.cpp \
-    u/t_game_interface_enginecontext.cpp \
-    u/t_game_interface_friendlycodecontext.cpp \
-    u/t_game_interface_missioncontext.cpp u/t_interpreter_context.cpp \
-    u/t_game_config_genericintegerarrayoption.cpp \
-    u/t_game_config_integeroption.cpp u/t_game_config_aliasoption.cpp \
-    u/t_game_hostversion.cpp u/t_game_experiencelevelset.cpp \
-    u/t_game_spec_engine.cpp u/t_game_historyturnlist.cpp \
-    u/t_game_element.cpp u/t_game_historyturn.cpp u/t_game_turnloader.cpp \
-    u/t_game_registrationkey.cpp u/t_game_specificationloader.cpp \
-    u/t_game_timestamp.cpp u/t_util_backupfile.cpp \
-    u/t_interpreter_exporter_fieldlist.cpp u/t_interpreter_exporter.hpp \
-    u/t_ui_widgets_focusiterator.cpp u/t_ui_widgets.hpp \
-    u/t_ui_colorscheme.cpp u/t_ui_widget.cpp \
-    u/t_client_dialogs_objectselectiondialog.cpp u/t_client_dialogs.hpp \
-    u/t_game_game.cpp u/t_game_interface_userinterfacepropertystack.cpp \
-    u/t_util_skincolor.cpp u/t_util_math.cpp u/t_game_extraidentifier.cpp \
-    u/t_game_extracontainer.cpp u/t_game_map_viewport.cpp \
-    u/t_game_map_circularobject.cpp u/t_game_map_object.cpp \
-    u/t_game_tables_basemissionname.cpp u/t_game_teamsettings.cpp \
-    u/t_game_tables_ionstormclassname.cpp \
-    u/t_game_tables_wormholestabilityname.cpp \
-    u/t_game_tables_mineraldensityclassname.cpp \
-    u/t_game_tables_headingname.cpp u/t_game_interface_iteratorprovider.cpp \
-    u/t_client_si_control.cpp u/t_gfx_eventconsumer.cpp \
-    u/t_gfx_nullengine.cpp u/t_ui_res_imageloader.cpp u/t_ui_res_manager.cpp \
-    u/t_client.hpp u/t_interpreter_keywords.cpp u/t_game_vcr_score.cpp \
-    u/t_game_vcr_object.cpp u/t_game_parser_datainterface.cpp \
-    u/t_game_interface_richtextfunctions.cpp u/t_game_v3_stringverifier.cpp \
-    u/t_game_stringverifier.cpp u/t_client_si_usertask.cpp \
-    u/t_client_si_requestlink2.cpp u/t_client_si_requestlink1.cpp \
-    u/t_client_si.hpp u/t_game_cargospec.cpp \
-    u/t_game_interface_userinterfacepropertyaccessor.cpp \
-    u/t_game_interface_userinterfaceproperty.cpp u/t_game_interface.hpp \
-    u/t_game_map_objectcursor.cpp u/t_game_types.cpp \
-    u/t_game_interpreterinterface.cpp u/t_game_vcr_battle.cpp \
-    u/t_game_vcr_database.cpp u/t_game_vcr.hpp \
-    u/t_game_vcr_classic_statustoken.cpp u/t_game_vcr_classic_algorithm.cpp \
-    u/t_game_vcr_classic_nullvisualizer.cpp \
-    u/t_game_vcr_classic_visualizer.cpp \
-    u/t_game_spec_componentnameprovider.cpp \
-    u/t_game_spec_componentvector.cpp u/t_game_spec_component.cpp \
-    u/t_util_keystring.cpp u/t_interpreter_process.cpp \
-    u/t_interpreter_processlist.cpp u/t_interpreter_bytecodeobject.cpp \
-    u/t_game_browser_handlerlist.cpp u/t_game_player.cpp \
-    u/t_game_config_configurationoption.cpp \
-    u/t_game_config_costarrayoption.cpp u/t_game_msg_mailbox.cpp \
-    u/t_game_msg.hpp u/t_game_browser_unsupportedaccountfolder.cpp \
-    u/t_ui_invisiblewidget.cpp u/t_game_exception.cpp \
-    u/t_gfx_resourceprovider.cpp u/t_util_rich_parser.cpp u/t_gfx_canvas.cpp \
-    u/t_game_browser_account.cpp u/t_util_unicodechars.cpp \
-    u/t_util_rich_visitor.cpp u/t_util_rich_attribute.cpp \
-    u/t_util_rich_styleattribute.cpp u/t_util_rich_linkattribute.cpp \
-    u/t_util_rich_colorattribute.cpp u/t_util_rich_text.cpp \
-    u/t_util_rich.hpp u/t_gfx_engine.cpp u/t_util_requestthread.cpp \
-    u/t_ui_group.cpp u/t_ui.hpp u/t_game_browser_handler.cpp \
-    u/t_game_browser_folder.cpp u/t_game_browser.hpp u/t_ui_res_provider.cpp \
-    u/t_ui_res.hpp u/t_gfx_timerqueue.cpp u/t_gfx_timer.cpp \
-    u/t_gfx_sdl_engine.cpp u/t_gfx_sdl.hpp u/t_util_requestreceiver.cpp \
-    u/t_util_request.cpp u/t_util_requestdispatcher.cpp \
-    u/t_gfx_nullcanvas.cpp u/t_interpreter_nametable.cpp \
-    u/t_game_tables_happinesschangename.cpp u/t_game_spec_missionlist.cpp \
-    u/t_game_tables_mineralmassclassname.cpp \
-    u/t_game_tables_happinessname.cpp u/t_game_tables_temperaturename.cpp \
-    u/t_game_tables_nativeracename.cpp \
-    u/t_game_tables_nativegovernmentname.cpp \
-    u/t_game_tables_industrylevel.cpp u/t_game_tables.hpp \
-    u/t_interpreter_closure.cpp u/t_interpreter_values.cpp \
-    u/t_game_unitscoredefinitionlist.cpp u/t_game_unitscorelist.cpp \
-    u/t_interpreter_statementcompiler.cpp \
-    u/t_interpreter_expr_builtinfunction.cpp u/t_interpreter_expr_parser.cpp \
-    u/t_interpreter_expr.hpp u/t_util_keymaptable.cpp u/t_util_keymap.cpp \
-    u/t_util_atomtable.cpp u/t_util_key.cpp u/t_game_parser.hpp \
-    u/t_game_parser_messagetemplate.cpp u/t_game_playerbitmatrix.cpp \
-    u/t_game.hpp u/t_game_playerarray.cpp u/t_interpreter_tokenizer.cpp \
-    u/t_interpreter.hpp u/t_game_spec_friendlycodelist.cpp \
-    u/t_game_spec_friendlycode.cpp u/t_game_map_configuration.cpp \
-    u/t_game_map_point.cpp u/t_game_map.hpp \
-    u/t_game_vcr_classic_pvcralgorithm.cpp u/t_game_vcr_classic.hpp \
-    u/t_game_vcr_classic_hostalgorithm.cpp u/t_gfx_rectangle.cpp \
-    u/t_gfx_point.cpp u/t_gfx.hpp u/t_gfx_fillpattern.cpp \
-    u/t_util_randomnumbergenerator.cpp u/t_util_string.cpp u/t_util.hpp \
-    u/t_game_config_valueparser.cpp u/t_game_config_hostconfiguration.cpp \
-    u/t_game_config_bitsetvalueparser.cpp \
-    u/t_game_config_booleanvalueparser.cpp \
-    u/t_game_config_integervalueparser.cpp u/t_game_config.hpp \
-    u/t_game_config_configuration.cpp u/t_game_spec_hullfunctionlist.cpp \
-    u/t_game_v3_resultfile.cpp u/t_game_v3.hpp u/t_game_spec.hpp \
-    u/t_game_spec_cost.cpp
+FILES_testsuite = test/util/syntax/segmenttest.cpp \
+    test/util/syntax/scripthighlightertest.cpp \
+    test/util/syntax/pascalhighlightertest.cpp \
+    test/util/syntax/nullhighlightertest.cpp \
+    test/util/syntax/lisphighlightertest.cpp \
+    test/util/syntax/keywordtabletest.cpp \
+    test/util/syntax/inihighlightertest.cpp \
+    test/util/syntax/highlightertest.cpp test/util/syntax/formattest.cpp \
+    test/util/syntax/factorytest.cpp test/util/syntax/chighlightertest.cpp \
+    test/util/rich/visitortest.cpp test/util/rich/texttest.cpp \
+    test/util/rich/styleattributetest.cpp test/util/rich/parsertest.cpp \
+    test/util/rich/linkattributetest.cpp \
+    test/util/rich/colorattributetest.cpp test/util/rich/attributetest.cpp \
+    test/util/rich/alignmentattributetest.cpp \
+    test/util/process/subprocesstest.cpp \
+    test/util/process/posixfactorytest.cpp \
+    test/util/process/nullfactorytest.cpp test/util/process/factorytest.cpp \
+    test/util/plugin/plugintest.cpp test/util/plugin/managertest.cpp \
+    test/util/plugin/installertest.cpp \
+    test/util/plugin/dialogapplicationtest.cpp \
+    test/util/editor/editortest.cpp test/util/editor/commandtest.cpp \
+    test/util/doc/verifiertest.cpp test/util/doc/textimporttest.cpp \
+    test/util/doc/summarizingverifiertest.cpp \
+    test/util/doc/singleblobstoretest.cpp \
+    test/util/doc/renderoptionstest.cpp \
+    test/util/doc/loggingverifiertest.cpp \
+    test/util/doc/internalblobstoretest.cpp test/util/doc/indextest.cpp \
+    test/util/doc/htmlrenderertest.cpp test/util/doc/helpimporttest.cpp \
+    test/util/doc/fileblobstoretest.cpp test/util/doc/blobstoretest.cpp \
+    test/util/vectortest.cpp test/util/updatertest.cpp \
+    test/util/unicodecharstest.cpp test/util/treelisttest.cpp \
+    test/util/translationtest.cpp test/util/systeminformationtest.cpp \
+    test/util/stringparsertest.cpp test/util/stringlisttest.cpp \
+    test/util/stringinstructionlisttest.cpp test/util/stringtest.cpp \
+    test/util/stopsignaltest.cpp test/util/skincolortest.cpp \
+    test/util/simplerequestdispatchertest.cpp \
+    test/util/runlengthexpandtransformtest.cpp \
+    test/util/runlengthcompresstest.cpp test/util/resourcefilewritertest.cpp \
+    test/util/resourcefilereadertest.cpp \
+    test/util/resourcefileapplicationtest.cpp test/util/resourcefiletest.cpp \
+    test/util/requestthreadtest.cpp test/util/requestsendertest.cpp \
+    test/util/requestreceivertest.cpp test/util/requestdispatchertest.cpp \
+    test/util/requesttest.cpp test/util/rangetest.cpp \
+    test/util/randomnumbergeneratortest.cpp \
+    test/util/profiledirectorytest.cpp test/util/processrunnertest.cpp \
+    test/util/prefixargumenttest.cpp test/util/numberformattertest.cpp \
+    test/util/messagenotifiertest.cpp test/util/messagematchertest.cpp \
+    test/util/messagecollectortest.cpp test/util/mathtest.cpp \
+    test/util/layouttest.cpp test/util/keymaptabletest.cpp \
+    test/util/keymapinformationtest.cpp test/util/keymaptest.cpp \
+    test/util/keystringtest.cpp test/util/keytest.cpp test/util/iotest.cpp \
+    test/util/instructionlisttest.cpp test/util/helpindextest.cpp \
+    test/util/fileparsertest.cpp test/util/filenamepatterntest.cpp \
+    test/util/expressionlisttest.cpp test/util/directorybrowsertest.cpp \
+    test/util/digesttest.cpp test/util/datatabletest.cpp \
+    test/util/consoleloggertest.cpp \
+    test/util/configurationfileparsertest.cpp \
+    test/util/configurationfiletest.cpp test/util/charsetfactorytest.cpp \
+    test/util/backupfiletest.cpp test/util/atomtabletest.cpp \
+    test/util/applicationtest.cpp test/ui/widgets/treelistboxtest.cpp \
+    test/ui/widgets/radiobuttontest.cpp test/ui/widgets/inputlinetest.cpp \
+    test/ui/widgets/icongridtest.cpp test/ui/widgets/focusiteratortest.cpp \
+    test/ui/widgets/checkboxtest.cpp test/ui/widgets/charttest.cpp \
+    test/ui/widgets/basebuttontest.cpp \
+    test/ui/widgets/alignedcontainertest.cpp test/ui/res/residtest.cpp \
+    test/ui/res/providertest.cpp test/ui/res/managertest.cpp \
+    test/ui/res/imageloadertest.cpp \
+    test/ui/res/generatedengineprovidertest.cpp \
+    test/ui/res/engineimageloadertest.cpp test/ui/res/ccimageloadertest.cpp \
+    test/ui/layout/vboxtest.cpp test/ui/layout/managertest.cpp \
+    test/ui/layout/infotest.cpp test/ui/layout/hboxtest.cpp \
+    test/ui/layout/gridtest.cpp test/ui/layout/axislayouttest.cpp \
+    test/ui/icons/vboxtest.cpp test/ui/icons/spacertest.cpp \
+    test/ui/icons/icontest.cpp test/ui/icons/hboxtest.cpp \
+    test/ui/icons/colortiletest.cpp test/ui/widgettest.cpp \
+    test/ui/roottest.cpp test/ui/prefixargumenttest.cpp \
+    test/ui/layoutablegrouptest.cpp test/ui/invisiblewidgettest.cpp \
+    test/ui/grouptest.cpp test/ui/eventlooptest.cpp \
+    test/ui/colorschemetest.cpp test/server/user/tokentest.cpp \
+    test/server/user/usermanagementtest.cpp \
+    test/server/user/userdatatest.cpp test/server/user/usertest.cpp \
+    test/server/user/usertokentest.cpp \
+    test/server/user/saltedpasswordencryptertest.cpp \
+    test/server/user/passwordencryptertest.cpp \
+    test/server/user/multipasswordencryptertest.cpp \
+    test/server/user/configurationtest.cpp \
+    test/server/user/commandhandlertest.cpp \
+    test/server/user/classicencryptertest.cpp \
+    test/server/test/consolecommandhandlermocktest.cpp \
+    test/server/talk/render/optionstest.cpp \
+    test/server/talk/render/htmlrenderertest.cpp \
+    test/server/talk/render/contexttest.cpp \
+    test/server/talk/render/bbrenderertest.cpp \
+    test/server/talk/parse/bbparsertest.cpp \
+    test/server/talk/parse/bblexertest.cpp test/server/talk/userpmtest.cpp \
+    test/server/talk/userfoldertest.cpp test/server/talk/usertest.cpp \
+    test/server/talk/topictest.cpp test/server/talk/textnodetest.cpp \
+    test/server/talk/talkusertest.cpp test/server/talk/talkthreadtest.cpp \
+    test/server/talk/talksyntaxtest.cpp test/server/talk/talkrendertest.cpp \
+    test/server/talk/talkposttest.cpp test/server/talk/talkpmtest.cpp \
+    test/server/talk/talknntptest.cpp test/server/talk/talkgrouptest.cpp \
+    test/server/talk/talkforumtest.cpp test/server/talk/talkfoldertest.cpp \
+    test/server/talk/talkaddresstest.cpp test/server/talk/spamtest.cpp \
+    test/server/talk/sortertest.cpp test/server/talk/sessiontest.cpp \
+    test/server/talk/roottest.cpp test/server/talk/newsrctest.cpp \
+    test/server/talk/messagetest.cpp test/server/talk/linkformattertest.cpp \
+    test/server/talk/inlinerecognizertest.cpp test/server/talk/grouptest.cpp \
+    test/server/talk/forumtest.cpp test/server/talk/configurationtest.cpp \
+    test/server/talk/commandhandlertest.cpp \
+    test/server/talk/accesscheckertest.cpp \
+    test/server/router/sessiontest.cpp test/server/router/roottest.cpp \
+    test/server/router/configurationtest.cpp \
+    test/server/play/truehullpackertest.cpp \
+    test/server/play/torpedopackertest.cpp \
+    test/server/play/racenamepackertest.cpp \
+    test/server/play/packerlisttest.cpp test/server/play/packertest.cpp \
+    test/server/play/outmessagepackertest.cpp \
+    test/server/play/outmessageindexpackertest.cpp \
+    test/server/play/outmessagecommandhandlertest.cpp \
+    test/server/play/hullpackertest.cpp test/server/play/gameaccesstest.cpp \
+    test/server/play/friendlycodepackertest.cpp \
+    test/server/play/flakconfigurationpackertest.cpp \
+    test/server/play/enginepackertest.cpp \
+    test/server/play/configurationpackertest.cpp \
+    test/server/play/commandhandlertest.cpp \
+    test/server/play/beampackertest.cpp \
+    test/server/play/basichullfunctionpackertest.cpp \
+    test/server/nntp/roottest.cpp \
+    test/server/monitor/timeserieswritertest.cpp \
+    test/server/monitor/timeseriesloadertest.cpp \
+    test/server/monitor/timeseriestest.cpp \
+    test/server/monitor/statusobservertest.cpp \
+    test/server/monitor/statustest.cpp test/server/monitor/observertest.cpp \
+    test/server/monitor/badnessfileobservertest.cpp \
+    test/server/mailout/transmitterimpltest.cpp \
+    test/server/mailout/transmittertest.cpp \
+    test/server/mailout/templatetest.cpp test/server/mailout/sessiontest.cpp \
+    test/server/mailout/roottest.cpp test/server/mailout/messagetest.cpp \
+    test/server/mailout/mailqueuetest.cpp \
+    test/server/mailout/configurationtest.cpp \
+    test/server/mailout/commandhandlertest.cpp \
+    test/server/mailin/mailprocessortest.cpp \
+    test/server/mailin/mailinapplicationtest.cpp \
+    test/server/interface/usertokenservertest.cpp \
+    test/server/interface/usertokenclienttest.cpp \
+    test/server/interface/usertokentest.cpp \
+    test/server/interface/usermanagementservertest.cpp \
+    test/server/interface/usermanagementclienttest.cpp \
+    test/server/interface/usermanagementtest.cpp \
+    test/server/interface/userdataservertest.cpp \
+    test/server/interface/userdataclienttest.cpp \
+    test/server/interface/userdatatest.cpp \
+    test/server/interface/talkuserservertest.cpp \
+    test/server/interface/talkuserclienttest.cpp \
+    test/server/interface/talkusertest.cpp \
+    test/server/interface/talkthreadservertest.cpp \
+    test/server/interface/talkthreadclienttest.cpp \
+    test/server/interface/talkthreadtest.cpp \
+    test/server/interface/talksyntaxservertest.cpp \
+    test/server/interface/talksyntaxclienttest.cpp \
+    test/server/interface/talksyntaxtest.cpp \
+    test/server/interface/talkrenderservertest.cpp \
+    test/server/interface/talkrenderclienttest.cpp \
+    test/server/interface/talkrendertest.cpp \
+    test/server/interface/talkpostservertest.cpp \
+    test/server/interface/talkpostclienttest.cpp \
+    test/server/interface/talkposttest.cpp \
+    test/server/interface/talkpmservertest.cpp \
+    test/server/interface/talkpmclienttest.cpp \
+    test/server/interface/talkpmtest.cpp \
+    test/server/interface/talknntpservertest.cpp \
+    test/server/interface/talknntpclienttest.cpp \
+    test/server/interface/talknntptest.cpp \
+    test/server/interface/talkgroupservertest.cpp \
+    test/server/interface/talkgroupclienttest.cpp \
+    test/server/interface/talkgrouptest.cpp \
+    test/server/interface/talkforumservertest.cpp \
+    test/server/interface/talkforumclienttest.cpp \
+    test/server/interface/talkforumtest.cpp \
+    test/server/interface/talkfolderservertest.cpp \
+    test/server/interface/talkfolderclienttest.cpp \
+    test/server/interface/talkfoldertest.cpp \
+    test/server/interface/talkaddressservertest.cpp \
+    test/server/interface/talkaddressclienttest.cpp \
+    test/server/interface/talkaddresstest.cpp \
+    test/server/interface/sessionroutertest.cpp \
+    test/server/interface/mailqueueservertest.cpp \
+    test/server/interface/mailqueueclienttest.cpp \
+    test/server/interface/mailqueuetest.cpp \
+    test/server/interface/hostturnservertest.cpp \
+    test/server/interface/hostturnclienttest.cpp \
+    test/server/interface/hostturntest.cpp \
+    test/server/interface/hosttoolservertest.cpp \
+    test/server/interface/hosttoolclienttest.cpp \
+    test/server/interface/hosttooltest.cpp \
+    test/server/interface/hostspecificationservertest.cpp \
+    test/server/interface/hostspecificationclienttest.cpp \
+    test/server/interface/hostspecificationtest.cpp \
+    test/server/interface/hostslotservertest.cpp \
+    test/server/interface/hostslotclienttest.cpp \
+    test/server/interface/hostslottest.cpp \
+    test/server/interface/hostscheduleservertest.cpp \
+    test/server/interface/hostscheduleclienttest.cpp \
+    test/server/interface/hostscheduletest.cpp \
+    test/server/interface/hostrankingservertest.cpp \
+    test/server/interface/hostrankingclienttest.cpp \
+    test/server/interface/hostrankingtest.cpp \
+    test/server/interface/hostplayerservertest.cpp \
+    test/server/interface/hostplayerclienttest.cpp \
+    test/server/interface/hostplayertest.cpp \
+    test/server/interface/hostkeyservertest.cpp \
+    test/server/interface/hostkeyclienttest.cpp \
+    test/server/interface/hostkeytest.cpp \
+    test/server/interface/hosthistoryservertest.cpp \
+    test/server/interface/hosthistoryclienttest.cpp \
+    test/server/interface/hosthistorytest.cpp \
+    test/server/interface/hostgameservertest.cpp \
+    test/server/interface/hostgameclienttest.cpp \
+    test/server/interface/hostgametest.cpp \
+    test/server/interface/hostfileservertest.cpp \
+    test/server/interface/hostfileclienttest.cpp \
+    test/server/interface/hostfiletest.cpp \
+    test/server/interface/hostcronservertest.cpp \
+    test/server/interface/hostcronclienttest.cpp \
+    test/server/interface/hostcrontest.cpp \
+    test/server/interface/gameaccesstest.cpp \
+    test/server/interface/formatservertest.cpp \
+    test/server/interface/formatclienttest.cpp \
+    test/server/interface/formattest.cpp \
+    test/server/interface/filegameservertest.cpp \
+    test/server/interface/filegameclienttest.cpp \
+    test/server/interface/filegametest.cpp \
+    test/server/interface/filebaseservertest.cpp \
+    test/server/interface/filebaseclienttest.cpp \
+    test/server/interface/filebasetest.cpp \
+    test/server/interface/documentationservertest.cpp \
+    test/server/interface/documentationclienttest.cpp \
+    test/server/interface/documentationtest.cpp \
+    test/server/interface/composablecommandhandlertest.cpp \
+    test/server/interface/baseclienttest.cpp \
+    test/server/interface/basetest.cpp \
+    test/server/host/spec/publisherimpltest.cpp \
+    test/server/host/spec/publishertest.cpp \
+    test/server/host/spec/directorytest.cpp \
+    test/server/host/rank/victorytest.cpp \
+    test/server/host/rank/scorefilereadertest.cpp \
+    test/server/host/rank/refereefilereadertest.cpp \
+    test/server/host/rank/ranktest.cpp \
+    test/server/host/rank/levelhandlertest.cpp \
+    test/server/host/file/toolitemtest.cpp \
+    test/server/host/file/rootitemtest.cpp \
+    test/server/host/file/itemtest.cpp \
+    test/server/host/file/gamerootitemtest.cpp \
+    test/server/host/file/fileitemtest.cpp \
+    test/server/host/talklistenertest.cpp \
+    test/server/host/talkadaptertest.cpp test/server/host/sessiontest.cpp \
+    test/server/host/scheduletest.cpp test/server/host/resultsendertest.cpp \
+    test/server/host/keystoretest.cpp test/server/host/installertest.cpp \
+    test/server/host/hostturntest.cpp test/server/host/hosttooltest.cpp \
+    test/server/host/hostspecificationimpltest.cpp \
+    test/server/host/hostscheduletest.cpp \
+    test/server/host/hostplayertest.cpp test/server/host/hostkeytest.cpp \
+    test/server/host/hostgametest.cpp test/server/host/hostfiletest.cpp \
+    test/server/host/hostcrontest.cpp test/server/host/gamecreatortest.cpp \
+    test/server/host/gamearbitertest.cpp test/server/host/gametest.cpp \
+    test/server/host/exportertest.cpp test/server/host/cronimpltest.cpp \
+    test/server/host/crontest.cpp \
+    test/server/host/configurationbuildertest.cpp \
+    test/server/host/configurationtest.cpp \
+    test/server/host/commandhandlertest.cpp test/server/format/utilstest.cpp \
+    test/server/format/truehullpackertest.cpp \
+    test/server/format/torpedopackertest.cpp \
+    test/server/format/stringpackertest.cpp \
+    test/server/format/simpackertest.cpp test/server/format/packertest.cpp \
+    test/server/format/hullpackertest.cpp test/server/format/formattest.cpp \
+    test/server/format/enginepackertest.cpp \
+    test/server/format/beampackertest.cpp test/server/file/ca/roottest.cpp \
+    test/server/file/ca/referenceupdatertest.cpp \
+    test/server/file/ca/referencecountertest.cpp \
+    test/server/file/ca/objectstoretest.cpp \
+    test/server/file/ca/objectidtest.cpp \
+    test/server/file/ca/objectcachetest.cpp \
+    test/server/file/ca/internalreferencecountertest.cpp \
+    test/server/file/ca/internalobjectcachetest.cpp \
+    test/server/file/ca/garbagecollectortest.cpp \
+    test/server/file/ca/directoryhandlertest.cpp \
+    test/server/file/ca/directoryentrytest.cpp \
+    test/server/file/ca/committest.cpp test/server/file/utilstest.cpp \
+    test/server/file/sessiontest.cpp test/server/file/roottest.cpp \
+    test/server/file/readonlydirectoryhandlertest.cpp \
+    test/server/file/itemtest.cpp \
+    test/server/file/internalfileservertest.cpp \
+    test/server/file/gamestatustest.cpp test/server/file/filegametest.cpp \
+    test/server/file/filebasetest.cpp \
+    test/server/file/directorywrappertest.cpp \
+    test/server/file/directoryhandlerfactorytest.cpp \
+    test/server/file/directoryhandlertest.cpp \
+    test/server/file/commandhandlertest.cpp \
+    test/server/file/clientdirectoryhandlertest.cpp \
+    test/server/file/clientdirectorytest.cpp \
+    test/server/doc/documentationimpltest.cpp \
+    test/server/dbexport/dbexportertest.cpp \
+    test/server/console/terminaltest.cpp \
+    test/server/console/stringcommandhandlertest.cpp \
+    test/server/console/routercontextfactorytest.cpp \
+    test/server/console/pipeterminaltest.cpp \
+    test/server/console/parsertest.cpp \
+    test/server/console/nullterminaltest.cpp \
+    test/server/console/integercommandhandlertest.cpp \
+    test/server/console/fundamentalcommandhandlertest.cpp \
+    test/server/console/environmenttest.cpp \
+    test/server/console/dumbterminaltest.cpp \
+    test/server/console/contextfactorytest.cpp \
+    test/server/console/contexttest.cpp \
+    test/server/console/commandhandlertest.cpp \
+    test/server/console/colorterminaltest.cpp \
+    test/server/common/utiltest.cpp test/server/common/usertest.cpp \
+    test/server/common/sessionprotocolhandlerfactorytest.cpp \
+    test/server/common/sessionprotocolhandlertest.cpp \
+    test/server/common/sessiontest.cpp test/server/common/roottest.cpp \
+    test/server/common/randomidgeneratortest.cpp \
+    test/server/common/racenamestest.cpp \
+    test/server/common/idgeneratortest.cpp test/server/typestest.cpp \
+    test/server/portstest.cpp test/server/errorstest.cpp \
+    test/server/configurationhandlertest.cpp test/server/applicationtest.cpp \
+    test/interpreter/worldtest.cpp \
+    test/interpreter/variablereferencetest.cpp \
+    test/interpreter/valuestest.cpp test/interpreter/unaryoperationtest.cpp \
+    test/interpreter/unaryexecutiontest.cpp \
+    test/interpreter/typehinttest.cpp test/interpreter/tokenizertest.cpp \
+    test/interpreter/ternaryoperationtest.cpp \
+    test/interpreter/ternaryexecutiontest.cpp \
+    test/interpreter/taskpredictortest.cpp \
+    test/interpreter/taskeditortest.cpp test/interpreter/tagnodetest.cpp \
+    test/interpreter/subroutinevaluetest.cpp \
+    test/interpreter/structurevaluedatatest.cpp \
+    test/interpreter/structurevaluetest.cpp \
+    test/interpreter/structuretypedatatest.cpp \
+    test/interpreter/structuretypetest.cpp \
+    test/interpreter/staticcontexttest.cpp \
+    test/interpreter/statementcompilertest.cpp \
+    test/interpreter/statementcompilationcontexttest.cpp \
+    test/interpreter/simplespecialcommandtest.cpp \
+    test/interpreter/singlecontexttest.cpp \
+    test/interpreter/specialcommandtest.cpp \
+    test/interpreter/simpleproceduretest.cpp \
+    test/interpreter/simplefunctiontest.cpp \
+    test/interpreter/simplecontexttest.cpp \
+    test/interpreter/selectionexpressiontest.cpp \
+    test/interpreter/savevisitortest.cpp \
+    test/interpreter/savecontexttest.cpp \
+    test/interpreter/propertyacceptortest.cpp \
+    test/interpreter/processobservercontexttest.cpp \
+    test/interpreter/processlisttest.cpp test/interpreter/processtest.cpp \
+    test/interpreter/procedurevaluetest.cpp \
+    test/interpreter/optimizertest.cpp test/interpreter/opcodetest.cpp \
+    test/interpreter/objectpropertyvectortest.cpp \
+    test/interpreter/nametabletest.cpp test/interpreter/mutexlisttest.cpp \
+    test/interpreter/mutexfunctionstest.cpp \
+    test/interpreter/mutexcontexttest.cpp \
+    test/interpreter/metacontexttest.cpp \
+    test/interpreter/memorycommandsourcetest.cpp \
+    test/interpreter/lockaccesstest.cpp test/interpreter/keywordstest.cpp \
+    test/interpreter/keymapvaluetest.cpp \
+    test/interpreter/indexablevaluetest.cpp \
+    test/interpreter/hashvaluetest.cpp test/interpreter/genericvaluetest.cpp \
+    test/interpreter/fusiontest.cpp test/interpreter/functionvaluetest.cpp \
+    test/interpreter/filevaluetest.cpp test/interpreter/filetabletest.cpp \
+    test/interpreter/filefunctionstest.cpp \
+    test/interpreter/filecommandsourcetest.cpp \
+    test/interpreter/errortest.cpp \
+    test/interpreter/directoryfunctionstest.cpp \
+    test/interpreter/defaultstatementcompilationcontexttest.cpp \
+    test/interpreter/contextreceivertest.cpp \
+    test/interpreter/contexttest.cpp \
+    test/interpreter/compilationcontexttest.cpp \
+    test/interpreter/commandsourcetest.cpp test/interpreter/closuretest.cpp \
+    test/interpreter/callablevaluetest.cpp \
+    test/interpreter/bytecodeobjecttest.cpp \
+    test/interpreter/blobvaluetest.cpp \
+    test/interpreter/binaryoperationtest.cpp \
+    test/interpreter/binaryexecutiontest.cpp \
+    test/interpreter/basevaluetest.cpp test/interpreter/arrayvaluetest.cpp \
+    test/interpreter/arraydatatest.cpp test/interpreter/argumentstest.cpp \
+    test/interpreter/vmio/worldloadcontexttest.cpp \
+    test/interpreter/vmio/valueloadertest.cpp \
+    test/interpreter/vmio/structurestest.cpp \
+    test/interpreter/vmio/processsavecontexttest.cpp \
+    test/interpreter/vmio/processloadcontexttest.cpp \
+    test/interpreter/vmio/objectloadertest.cpp \
+    test/interpreter/vmio/nullsavecontexttest.cpp \
+    test/interpreter/vmio/nullloadcontexttest.cpp \
+    test/interpreter/vmio/loadcontexttest.cpp \
+    test/interpreter/vmio/filesavecontexttest.cpp \
+    test/interpreter/vmio/assemblersavecontexttest.cpp \
+    test/interpreter/test/valueverifiertest.cpp \
+    test/interpreter/test/expressionverifiertest.cpp \
+    test/interpreter/test/contextverifiertest.cpp \
+    test/interpreter/expr/unarynodetest.cpp \
+    test/interpreter/expr/sequencenodetest.cpp \
+    test/interpreter/expr/rvaluenodetest.cpp \
+    test/interpreter/expr/rvaluefunctioncallnodetest.cpp \
+    test/interpreter/expr/parsertest.cpp test/interpreter/expr/nodetest.cpp \
+    test/interpreter/expr/membernodetest.cpp \
+    test/interpreter/expr/logicalnodetest.cpp \
+    test/interpreter/expr/literalnodetest.cpp \
+    test/interpreter/expr/indirectcallnodetest.cpp \
+    test/interpreter/expr/identifiernodetest.cpp \
+    test/interpreter/expr/functioncallnodetest.cpp \
+    test/interpreter/expr/casenodetest.cpp \
+    test/interpreter/expr/builtinfunctiontest.cpp \
+    test/interpreter/expr/binarynodetest.cpp \
+    test/interpreter/expr/assignmentnodetest.cpp \
+    test/interpreter/exporter/textexportertest.cpp \
+    test/interpreter/exporter/separatedtextexportertest.cpp \
+    test/interpreter/exporter/jsonexportertest.cpp \
+    test/interpreter/exporter/htmlexportertest.cpp \
+    test/interpreter/exporter/formattest.cpp \
+    test/interpreter/exporter/fieldlisttest.cpp \
+    test/interpreter/exporter/exportertest.cpp \
+    test/interpreter/exporter/dbfexportertest.cpp \
+    test/interpreter/exporter/configurationtest.cpp \
+    test/gfx/threed/vecmathtest.cpp test/gfx/threed/positionlisttest.cpp \
+    test/gfx/threed/modeltest.cpp test/gfx/threed/contexttest.cpp \
+    test/gfx/threed/colortransformationtest.cpp \
+    test/gfx/sdl/streaminterfacetest.cpp test/gfx/sdl/enginetest.cpp \
+    test/gfx/gen/vector3dtest.cpp test/gfx/gen/spaceviewconfigtest.cpp \
+    test/gfx/gen/spaceviewtest.cpp test/gfx/gen/planetconfigtest.cpp \
+    test/gfx/gen/planettest.cpp test/gfx/gen/perlinnoisetest.cpp \
+    test/gfx/gen/colorrangetest.cpp test/gfx/codec/customtest.cpp \
+    test/gfx/codec/codectest.cpp test/gfx/codec/bmptest.cpp \
+    test/gfx/codec/applicationtest.cpp test/gfx/anim/spritetest.cpp \
+    test/gfx/anim/controllertest.cpp test/gfx/windowparameterstest.cpp \
+    test/gfx/typestest.cpp test/gfx/timerqueuetest.cpp \
+    test/gfx/timertest.cpp test/gfx/scantest.cpp \
+    test/gfx/resourceprovidertest.cpp test/gfx/rectangletest.cpp \
+    test/gfx/rgbapixmaptest.cpp test/gfx/primitivestest.cpp \
+    test/gfx/pointtest.cpp test/gfx/pixmapcanvasimpltest.cpp \
+    test/gfx/palettizedpixmaptest.cpp test/gfx/nullresourceprovidertest.cpp \
+    test/gfx/nullenginetest.cpp test/gfx/nullcolorschemetest.cpp \
+    test/gfx/nullcanvastest.cpp test/gfx/keyeventconsumertest.cpp \
+    test/gfx/graphicsexceptiontest.cpp test/gfx/fontrequesttest.cpp \
+    test/gfx/fontlisttest.cpp test/gfx/fonttest.cpp test/gfx/filtertest.cpp \
+    test/gfx/fillpatterntest.cpp test/gfx/eventconsumertest.cpp \
+    test/gfx/enginetest.cpp test/gfx/defaultfonttest.cpp \
+    test/gfx/contexttest.cpp test/gfx/complextest.cpp \
+    test/gfx/colortransformtest.cpp test/gfx/colorschemetest.cpp \
+    test/gfx/colorquantizertest.cpp test/gfx/canvastest.cpp \
+    test/gfx/bitmapglyphtest.cpp test/gfx/bitmapfonttest.cpp \
+    test/gfx/basecontexttest.cpp test/gfx/basecolorschemetest.cpp \
+    test/gfx/applicationtest.cpp test/gfx/antialiasedtest.cpp \
+    test/game/unitscorelisttest.cpp \
+    test/game/unitscoredefinitionlisttest.cpp test/game/typestest.cpp \
+    test/game/turnloadertest.cpp test/game/turntest.cpp \
+    test/game/timestamptest.cpp test/game/teamsettingstest.cpp \
+    test/game/tasktest.cpp test/game/stringverifiertest.cpp \
+    test/game/specificationloadertest.cpp test/game/shipquerytest.cpp \
+    test/game/shipbuildordertest.cpp test/game/sessiontest.cpp \
+    test/game/searchquerytest.cpp test/game/roottest.cpp \
+    test/game/registrationkeytest.cpp test/game/referencetest.cpp \
+    test/game/playersettest.cpp test/game/playerlisttest.cpp \
+    test/game/playerbitmatrixtest.cpp test/game/playerarraytest.cpp \
+    test/game/playertest.cpp test/game/limitstest.cpp \
+    test/game/interpreterinterfacetest.cpp test/game/hostversiontest.cpp \
+    test/game/historyturnlisttest.cpp test/game/historyturntest.cpp \
+    test/game/gametest.cpp test/game/extraidentifiertest.cpp \
+    test/game/extracontainertest.cpp test/game/extratest.cpp \
+    test/game/experiencelevelsettest.cpp test/game/exceptiontest.cpp \
+    test/game/elementtest.cpp test/game/cargospectest.cpp \
+    test/game/cargocontainertest.cpp test/game/battleorderruletest.cpp \
+    test/game/authcachetest.cpp test/game/vcr/test/databasetest.cpp \
+    test/game/vcr/test/battletest.cpp \
+    test/game/vcr/flak/visualisationstatetest.cpp \
+    test/game/vcr/flak/visualisationsettingstest.cpp \
+    test/game/vcr/flak/structurestest.cpp test/game/vcr/flak/setuptest.cpp \
+    test/game/vcr/flak/positiontest.cpp test/game/vcr/flak/objecttest.cpp \
+    test/game/vcr/flak/gameenvironmenttest.cpp \
+    test/game/vcr/flak/eventrecordertest.cpp \
+    test/game/vcr/flak/environmenttest.cpp \
+    test/game/vcr/flak/definitionstest.cpp \
+    test/game/vcr/flak/databasetest.cpp \
+    test/game/vcr/flak/configurationtest.cpp \
+    test/game/vcr/flak/battletest.cpp test/game/vcr/flak/algorithmtest.cpp \
+    test/game/vcr/classic/visualizertest.cpp \
+    test/game/vcr/classic/utilstest.cpp test/game/vcr/classic/typestest.cpp \
+    test/game/vcr/classic/statustokentest.cpp \
+    test/game/vcr/classic/pvcralgorithmtest.cpp \
+    test/game/vcr/classic/nullvisualizertest.cpp \
+    test/game/vcr/classic/mirroringeventlistenertest.cpp \
+    test/game/vcr/classic/hostalgorithmtest.cpp \
+    test/game/vcr/classic/eventrecordertest.cpp \
+    test/game/vcr/classic/eventlistenertest.cpp \
+    test/game/vcr/classic/databasetest.cpp \
+    test/game/vcr/classic/battletest.cpp \
+    test/game/vcr/classic/algorithmtest.cpp test/game/vcr/statistictest.cpp \
+    test/game/vcr/scoretest.cpp test/game/vcr/overviewtest.cpp \
+    test/game/vcr/objectinfotest.cpp test/game/vcr/objecttest.cpp \
+    test/game/vcr/nulldatabasetest.cpp test/game/vcr/infotest.cpp \
+    test/game/vcr/databasetest.cpp test/game/vcr/battletest.cpp \
+    test/game/v3/udata/sessionnameprovidertest.cpp \
+    test/game/v3/udata/readertest.cpp \
+    test/game/v3/udata/nameprovidertest.cpp \
+    test/game/v3/udata/messagebuildertest.cpp \
+    test/game/v3/trn/stringfiltertest.cpp \
+    test/game/v3/trn/parseexceptiontest.cpp \
+    test/game/v3/trn/orfiltertest.cpp test/game/v3/trn/negatefiltertest.cpp \
+    test/game/v3/trn/namefiltertest.cpp test/game/v3/trn/indexfiltertest.cpp \
+    test/game/v3/trn/idfiltertest.cpp test/game/v3/trn/filtertest.cpp \
+    test/game/v3/trn/constantfiltertest.cpp \
+    test/game/v3/trn/andfiltertest.cpp test/game/v3/utilstest.cpp \
+    test/game/v3/undoinformationtest.cpp test/game/v3/turnfiletest.cpp \
+    test/game/v3/structurestest.cpp test/game/v3/stringverifiertest.cpp \
+    test/game/v3/specificationloadertest.cpp test/game/v3/revertertest.cpp \
+    test/game/v3/resultloadertest.cpp test/game/v3/resultfiletest.cpp \
+    test/game/v3/registrationkeytest.cpp \
+    test/game/v3/passwordcheckertest.cpp test/game/v3/packertest.cpp \
+    test/game/v3/outboxreadertest.cpp test/game/v3/loadertest.cpp \
+    test/game/v3/inboxfiletest.cpp test/game/v3/hconfigtest.cpp \
+    test/game/v3/genfiletest.cpp test/game/v3/genextratest.cpp \
+    test/game/v3/fizzfiletest.cpp test/game/v3/directoryscannertest.cpp \
+    test/game/v3/controlfiletest.cpp test/game/v3/commandextratest.cpp \
+    test/game/v3/commandcontainertest.cpp test/game/v3/commandtest.cpp \
+    test/game/v3/attachmentunpackertest.cpp \
+    test/game/v3/attachmentconfigurationtest.cpp \
+    test/game/test/waitindicatortest.cpp \
+    test/game/test/stringverifiertest.cpp \
+    test/game/test/sessionthreadtest.cpp test/game/test/roottest.cpp \
+    test/game/test/registrationkeytest.cpp test/game/test/filestest.cpp \
+    test/game/test/defaultshiplisttest.cpp test/game/test/shiplisttest.cpp \
+    test/game/test/cargocontainertest.cpp \
+    test/game/tables/wormholestabilitynametest.cpp \
+    test/game/tables/temperaturenametest.cpp \
+    test/game/tables/nativeracenametest.cpp \
+    test/game/tables/nativegovernmentnametest.cpp \
+    test/game/tables/mineralmassclassnametest.cpp \
+    test/game/tables/mineraldensityclassnametest.cpp \
+    test/game/tables/ionstormclassnametest.cpp \
+    test/game/tables/industryleveltest.cpp \
+    test/game/tables/headingnametest.cpp \
+    test/game/tables/happinessnametest.cpp \
+    test/game/tables/happinesschangenametest.cpp \
+    test/game/tables/basemissionnametest.cpp \
+    test/game/spec/info/utilstest.cpp test/game/spec/info/typestest.cpp \
+    test/game/spec/info/picturenamertest.cpp \
+    test/game/spec/info/nullpicturenamertest.cpp \
+    test/game/spec/info/infotest.cpp test/game/spec/info/filtertest.cpp \
+    test/game/spec/info/browsertest.cpp test/game/spec/weapontest.cpp \
+    test/game/spec/torpedolaunchertest.cpp test/game/spec/torpedotest.cpp \
+    test/game/spec/standardcomponentnameprovidertest.cpp \
+    test/game/spec/shiplisttest.cpp test/game/spec/racialabilitylisttest.cpp \
+    test/game/spec/nullcomponentnameprovidertest.cpp \
+    test/game/spec/modifiedhullfunctionlisttest.cpp \
+    test/game/spec/missionlisttest.cpp test/game/spec/missiontest.cpp \
+    test/game/spec/hullfunctionlisttest.cpp \
+    test/game/spec/hullfunctionassignmentlisttest.cpp \
+    test/game/spec/hullfunctiontest.cpp \
+    test/game/spec/hullassignmentlisttest.cpp test/game/spec/hulltest.cpp \
+    test/game/spec/friendlycodelisttest.cpp \
+    test/game/spec/friendlycodetest.cpp test/game/spec/fightertest.cpp \
+    test/game/spec/enginetest.cpp test/game/spec/costsummarytest.cpp \
+    test/game/spec/costtest.cpp test/game/spec/componentvectortest.cpp \
+    test/game/spec/componentnameprovidertest.cpp \
+    test/game/spec/componenttest.cpp test/game/spec/beamtest.cpp \
+    test/game/spec/basichullfunctionlisttest.cpp \
+    test/game/spec/basichullfunctiontest.cpp \
+    test/game/spec/basecomponentvectortest.cpp \
+    test/game/sim/unitresulttest.cpp test/game/sim/transfertest.cpp \
+    test/game/sim/structurestest.cpp test/game/sim/sorttest.cpp \
+    test/game/sim/shiptest.cpp test/game/sim/setuptest.cpp \
+    test/game/sim/sessionextratest.cpp test/game/sim/sessiontest.cpp \
+    test/game/sim/runnertest.cpp test/game/sim/runtest.cpp \
+    test/game/sim/resultlisttest.cpp test/game/sim/resulttest.cpp \
+    test/game/sim/planettest.cpp test/game/sim/objecttest.cpp \
+    test/game/sim/loadertest.cpp test/game/sim/gameinterfacetest.cpp \
+    test/game/sim/fleetcosttest.cpp test/game/sim/configurationtest.cpp \
+    test/game/sim/classresulttest.cpp test/game/sim/abilitytest.cpp \
+    test/game/score/turnscorelisttest.cpp test/game/score/turnscoretest.cpp \
+    test/game/score/tablebuildertest.cpp test/game/score/structurestest.cpp \
+    test/game/score/scoreidtest.cpp test/game/score/scorebuilderbasetest.cpp \
+    test/game/score/loadertest.cpp test/game/score/compoundscoretest.cpp \
+    test/game/score/chartbuildertest.cpp test/game/ref/userlisttest.cpp \
+    test/game/ref/typeadaptortest.cpp test/game/ref/sortpredicatetest.cpp \
+    test/game/ref/sortbytest.cpp test/game/ref/nullpredicatetest.cpp \
+    test/game/ref/listobservertest.cpp test/game/ref/listtest.cpp \
+    test/game/ref/historyshipselectiontest.cpp \
+    test/game/ref/historyshiplisttest.cpp \
+    test/game/ref/fleetmemberlisttest.cpp test/game/ref/fleetlisttest.cpp \
+    test/game/ref/configurationtest.cpp \
+    test/game/proxy/waitindicatortest.cpp \
+    test/game/proxy/visibilityrangeproxytest.cpp \
+    test/game/proxy/vcroverviewproxytest.cpp \
+    test/game/proxy/vcrdatabaseproxytest.cpp \
+    test/game/proxy/vcrdatabaseadaptortest.cpp \
+    test/game/proxy/ufoproxytest.cpp \
+    test/game/proxy/techupgradeproxytest.cpp \
+    test/game/proxy/teamproxytest.cpp test/game/proxy/taxationproxytest.cpp \
+    test/game/proxy/taskeditorproxytest.cpp \
+    test/game/proxy/starbaseadaptortest.cpp \
+    test/game/proxy/specbrowserproxytest.cpp \
+    test/game/proxy/simulationtransferproxytest.cpp \
+    test/game/proxy/simulationsetupproxytest.cpp \
+    test/game/proxy/simulationrunproxytest.cpp \
+    test/game/proxy/shipspeedproxytest.cpp \
+    test/game/proxy/selectionproxytest.cpp \
+    test/game/proxy/searchproxytest.cpp \
+    test/game/proxy/scripteditorproxytest.cpp \
+    test/game/proxy/scoreproxytest.cpp test/game/proxy/reverterproxytest.cpp \
+    test/game/proxy/referenceproxytest.cpp \
+    test/game/proxy/referenceobserverproxytest.cpp \
+    test/game/proxy/referencelistproxytest.cpp \
+    test/game/proxy/processlistproxytest.cpp \
+    test/game/proxy/predictedstarbaseadaptortest.cpp \
+    test/game/proxy/pluginmanagerproxytest.cpp \
+    test/game/proxy/playerproxytest.cpp \
+    test/game/proxy/planetpredictorproxytest.cpp \
+    test/game/proxy/planetinfoproxytest.cpp \
+    test/game/proxy/outboxproxytest.cpp \
+    test/game/proxy/objectobservertest.cpp \
+    test/game/proxy/objectlistenertest.cpp \
+    test/game/proxy/objectlistexportadaptortest.cpp \
+    test/game/proxy/mutexlistproxytest.cpp \
+    test/game/proxy/minefieldproxytest.cpp \
+    test/game/proxy/maprendererproxytest.cpp \
+    test/game/proxy/maplocationproxytest.cpp \
+    test/game/proxy/mapconfigurationproxytest.cpp \
+    test/game/proxy/maintenanceproxytest.cpp \
+    test/game/proxy/maintenanceadaptortest.cpp \
+    test/game/proxy/mailboxproxytest.cpp \
+    test/game/proxy/mailboxadaptortest.cpp test/game/proxy/lockproxytest.cpp \
+    test/game/proxy/labelproxytest.cpp test/game/proxy/keymapproxytest.cpp \
+    test/game/proxy/ionstormproxytest.cpp \
+    test/game/proxy/inboxadaptortest.cpp \
+    test/game/proxy/imperialstatsproxytest.cpp \
+    test/game/proxy/hullspecificationproxytest.cpp \
+    test/game/proxy/historyturnproxytest.cpp \
+    test/game/proxy/historyshipproxytest.cpp \
+    test/game/proxy/historyshiplistproxytest.cpp \
+    test/game/proxy/globalactionproxytest.cpp \
+    test/game/proxy/friendlycodeproxytest.cpp \
+    test/game/proxy/fleetproxytest.cpp \
+    test/game/proxy/fleetcostproxytest.cpp \
+    test/game/proxy/flakvcrplayerproxytest.cpp \
+    test/game/proxy/fictivestarbaseadaptortest.cpp \
+    test/game/proxy/expressionlistproxytest.cpp \
+    test/game/proxy/exportproxytest.cpp \
+    test/game/proxy/exportadaptortest.cpp \
+    test/game/proxy/drawingproxytest.cpp \
+    test/game/proxy/cursorobserverproxytest.cpp \
+    test/game/proxy/currentstarbaseadaptortest.cpp \
+    test/game/proxy/costsummaryadaptortest.cpp \
+    test/game/proxy/convertsuppliesproxytest.cpp \
+    test/game/proxy/configurationproxytest.cpp \
+    test/game/proxy/configurationobserverproxytest.cpp \
+    test/game/proxy/configurationeditorproxytest.cpp \
+    test/game/proxy/configurationeditoradaptortest.cpp \
+    test/game/proxy/commandlistproxytest.cpp \
+    test/game/proxy/cloneshipproxytest.cpp \
+    test/game/proxy/classicvcrplayerproxytest.cpp \
+    test/game/proxy/chunnelproxytest.cpp \
+    test/game/proxy/cargotransfersetupproxytest.cpp \
+    test/game/proxy/cargotransferproxytest.cpp \
+    test/game/proxy/buildstructuresproxytest.cpp \
+    test/game/proxy/buildstarbaseproxytest.cpp \
+    test/game/proxy/buildshipproxytest.cpp \
+    test/game/proxy/buildqueueproxytest.cpp \
+    test/game/proxy/buildpartsproxytest.cpp \
+    test/game/proxy/buildammoproxytest.cpp \
+    test/game/proxy/basestorageproxytest.cpp \
+    test/game/proxy/attachmentproxytest.cpp \
+    test/game/proxy/allianceproxytest.cpp \
+    test/game/parser/messagevaluetest.cpp \
+    test/game/parser/messagetemplatetest.cpp \
+    test/game/parser/messageparsertest.cpp \
+    test/game/parser/messageinformationtest.cpp \
+    test/game/parser/informationconsumertest.cpp \
+    test/game/parser/datainterfacetest.cpp \
+    test/game/parser/binarytransfertest.cpp \
+    test/game/msg/subsetmailboxtest.cpp test/game/msg/outboxtest.cpp \
+    test/game/msg/mailboxtest.cpp test/game/msg/inboxtest.cpp \
+    test/game/msg/formattest.cpp test/game/msg/filetest.cpp \
+    test/game/msg/configurationtest.cpp test/game/msg/browsertest.cpp \
+    test/game/map/info/typestest.cpp \
+    test/game/map/info/scriptlinkbuildertest.cpp \
+    test/game/map/info/nulllinkbuildertest.cpp \
+    test/game/map/info/missiontest.cpp \
+    test/game/map/info/linkbuildertest.cpp test/game/map/info/infotest.cpp \
+    test/game/map/info/browsertest.cpp test/game/map/visibilityrangetest.cpp \
+    test/game/map/viewporttest.cpp test/game/map/universetest.cpp \
+    test/game/map/ufotypetest.cpp test/game/map/ufotest.cpp \
+    test/game/map/typedobjecttypetest.cpp \
+    test/game/map/simpleobjectcursortest.cpp test/game/map/shiputilstest.cpp \
+    test/game/map/shiptransportertest.cpp test/game/map/shipstoragetest.cpp \
+    test/game/map/shippredictortest.cpp test/game/map/shipinfotest.cpp \
+    test/game/map/shiphistorydatatest.cpp test/game/map/shipdatatest.cpp \
+    test/game/map/shiptest.cpp test/game/map/selectionvectortest.cpp \
+    test/game/map/selectionstest.cpp test/game/map/revertertest.cpp \
+    test/game/map/rendererlistenertest.cpp test/game/map/renderertest.cpp \
+    test/game/map/renderoptionstest.cpp test/game/map/renderlisttest.cpp \
+    test/game/map/rangesettest.cpp test/game/map/pointtest.cpp \
+    test/game/map/playedshiptypetest.cpp \
+    test/game/map/playedplanettypetest.cpp \
+    test/game/map/playedbasetypetest.cpp test/game/map/planetstoragetest.cpp \
+    test/game/map/planetpredictortest.cpp test/game/map/planetinfotest.cpp \
+    test/game/map/planetformulatest.cpp \
+    test/game/map/planeteffectorstest.cpp test/game/map/planetdatatest.cpp \
+    test/game/map/planettest.cpp test/game/map/objectvectortypetest.cpp \
+    test/game/map/objectvectortest.cpp test/game/map/objecttypetest.cpp \
+    test/game/map/objectobservertest.cpp \
+    test/game/map/objectcursorfactorytest.cpp \
+    test/game/map/objectcursortest.cpp test/game/map/objecttest.cpp \
+    test/game/map/movementpredictortest.cpp \
+    test/game/map/movementcontrollertest.cpp \
+    test/game/map/minefieldtypetest.cpp \
+    test/game/map/minefieldmissiontest.cpp \
+    test/game/map/minefieldformulatest.cpp test/game/map/minefieldtest.cpp \
+    test/game/map/messagelinktest.cpp test/game/map/lockertest.cpp \
+    test/game/map/locationrevertertest.cpp test/game/map/locationtest.cpp \
+    test/game/map/ionstormtypetest.cpp test/game/map/ionstormtest.cpp \
+    test/game/map/historyshiptypetest.cpp test/game/map/fleettypetest.cpp \
+    test/game/map/fleetmembertest.cpp test/game/map/fleettest.cpp \
+    test/game/map/explosiontypetest.cpp test/game/map/explosiontest.cpp \
+    test/game/map/drawingcontainertest.cpp test/game/map/drawingtest.cpp \
+    test/game/map/cursorstest.cpp test/game/map/configurationtest.cpp \
+    test/game/map/circularobjecttest.cpp \
+    test/game/map/chunnelmissiontest.cpp test/game/map/boundingboxtest.cpp \
+    test/game/map/beamupshiptransfertest.cpp \
+    test/game/map/beamupplanettransfertest.cpp \
+    test/game/map/basestoragetest.cpp test/game/map/basedatatest.cpp \
+    test/game/map/anyshiptypetest.cpp test/game/map/anyplanettypetest.cpp \
+    test/game/maint/sweepertest.cpp test/game/maint/difficultyratertest.cpp \
+    test/game/interface/weaponpropertytest.cpp \
+    test/game/interface/vmfiletest.cpp \
+    test/game/interface/vcrsidepropertytest.cpp \
+    test/game/interface/vcrsidefunctiontest.cpp \
+    test/game/interface/vcrsidecontexttest.cpp \
+    test/game/interface/vcrpropertytest.cpp \
+    test/game/interface/vcrfunctiontest.cpp \
+    test/game/interface/vcrcontexttest.cpp \
+    test/game/interface/userinterfacepropertystacktest.cpp \
+    test/game/interface/userinterfacepropertyaccessortest.cpp \
+    test/game/interface/userinterfacepropertytest.cpp \
+    test/game/interface/ufopropertytest.cpp \
+    test/game/interface/ufomethodtest.cpp \
+    test/game/interface/ufofunctiontest.cpp \
+    test/game/interface/ufocontexttest.cpp \
+    test/game/interface/torpedofunctiontest.cpp \
+    test/game/interface/torpedocontexttest.cpp \
+    test/game/interface/taskeditorcontexttest.cpp \
+    test/game/interface/shiptaskpredictortest.cpp \
+    test/game/interface/shippropertytest.cpp \
+    test/game/interface/shipmethodtest.cpp \
+    test/game/interface/shipfunctiontest.cpp \
+    test/game/interface/shipcontexttest.cpp \
+    test/game/interface/selectionfunctionstest.cpp \
+    test/game/interface/richtextvaluetest.cpp \
+    test/game/interface/richtextfunctionstest.cpp \
+    test/game/interface/referencelistcontexttest.cpp \
+    test/game/interface/referencecontexttest.cpp \
+    test/game/interface/propertylisttest.cpp \
+    test/game/interface/processlisteditortest.cpp \
+    test/game/interface/pluginstest.cpp \
+    test/game/interface/pluginpropertytest.cpp \
+    test/game/interface/plugincontexttest.cpp \
+    test/game/interface/playerpropertytest.cpp \
+    test/game/interface/playerfunctiontest.cpp \
+    test/game/interface/playercontexttest.cpp \
+    test/game/interface/planetpropertytest.cpp \
+    test/game/interface/planetmethodtest.cpp \
+    test/game/interface/planetfunctiontest.cpp \
+    test/game/interface/planetcontexttest.cpp \
+    test/game/interface/objectcommandtest.cpp \
+    test/game/interface/notificationstoretest.cpp \
+    test/game/interface/notificationfunctionstest.cpp \
+    test/game/interface/missionpropertytest.cpp \
+    test/game/interface/missionfunctiontest.cpp \
+    test/game/interface/missioncontexttest.cpp \
+    test/game/interface/minefieldpropertytest.cpp \
+    test/game/interface/minefieldmethodtest.cpp \
+    test/game/interface/minefieldfunctiontest.cpp \
+    test/game/interface/minefieldcontexttest.cpp \
+    test/game/interface/mailboxcontexttest.cpp \
+    test/game/interface/loadcontexttest.cpp \
+    test/game/interface/labelvectortest.cpp \
+    test/game/interface/labelextratest.cpp \
+    test/game/interface/iteratorprovidertest.cpp \
+    test/game/interface/iteratorcontexttest.cpp \
+    test/game/interface/ionstormpropertytest.cpp \
+    test/game/interface/ionstormfunctiontest.cpp \
+    test/game/interface/ionstormcontexttest.cpp \
+    test/game/interface/inboxsubsetvaluetest.cpp \
+    test/game/interface/inboxfunctiontest.cpp \
+    test/game/interface/inboxcontexttest.cpp \
+    test/game/interface/hullpropertytest.cpp \
+    test/game/interface/hullfunctiontest.cpp \
+    test/game/interface/hullcontexttest.cpp \
+    test/game/interface/globalpropertytest.cpp \
+    test/game/interface/globalfunctionstest.cpp \
+    test/game/interface/globalcontexttest.cpp \
+    test/game/interface/globalcommandstest.cpp \
+    test/game/interface/globalactionstest.cpp \
+    test/game/interface/globalactioncontexttest.cpp \
+    test/game/interface/friendlycodepropertytest.cpp \
+    test/game/interface/friendlycodefunctiontest.cpp \
+    test/game/interface/friendlycodecontexttest.cpp \
+    test/game/interface/explosionpropertytest.cpp \
+    test/game/interface/explosionfunctiontest.cpp \
+    test/game/interface/explosioncontexttest.cpp \
+    test/game/interface/enginepropertytest.cpp \
+    test/game/interface/enginefunctiontest.cpp \
+    test/game/interface/enginecontexttest.cpp \
+    test/game/interface/drawingpropertytest.cpp \
+    test/game/interface/drawingmethodtest.cpp \
+    test/game/interface/drawingfunctiontest.cpp \
+    test/game/interface/drawingcontexttest.cpp \
+    test/game/interface/costsummarycontexttest.cpp \
+    test/game/interface/contextprovidertest.cpp \
+    test/game/interface/consolecommandstest.cpp \
+    test/game/interface/configurationeditorcontexttest.cpp \
+    test/game/interface/componentpropertytest.cpp \
+    test/game/interface/completionlisttest.cpp \
+    test/game/interface/commandinterfacetest.cpp \
+    test/game/interface/cargomethodtest.cpp \
+    test/game/interface/cargofunctionstest.cpp \
+    test/game/interface/beamfunctiontest.cpp \
+    test/game/interface/beamcontexttest.cpp \
+    test/game/interface/basetaskpredictortest.cpp \
+    test/game/interface/basetaskbuildcommandparsertest.cpp \
+    test/game/interface/basepropertytest.cpp test/game/db/structurestest.cpp \
+    test/game/db/packertest.cpp test/game/db/loadertest.cpp \
+    test/game/db/fleetloadertest.cpp test/game/db/drawingatommaptest.cpp \
+    test/game/config/genericintegerarrayoptiontest.cpp \
+    test/game/config/valueparsertest.cpp \
+    test/game/config/userconfigurationtest.cpp \
+    test/game/config/stringoptiontest.cpp \
+    test/game/config/stringarrayoptiontest.cpp \
+    test/game/config/markeroptiontest.cpp \
+    test/game/config/integervalueparsertest.cpp \
+    test/game/config/integeroptiontest.cpp \
+    test/game/config/hostconfigurationtest.cpp \
+    test/game/config/integerarrayoptiontest.cpp \
+    test/game/config/expressionliststest.cpp \
+    test/game/config/enumvalueparsertest.cpp \
+    test/game/config/costarrayoptiontest.cpp \
+    test/game/config/configurationparsertest.cpp \
+    test/game/config/configurationoptiontest.cpp \
+    test/game/config/configurationeditortest.cpp \
+    test/game/config/configurationtest.cpp \
+    test/game/config/collapsibleintegerarrayoptiontest.cpp \
+    test/game/config/booleanvalueparsertest.cpp \
+    test/game/config/bitsetvalueparsertest.cpp \
+    test/game/config/aliasoptiontest.cpp \
+    test/game/browser/unsupportedaccountfoldertest.cpp \
+    test/game/browser/typestest.cpp test/game/browser/handlerlisttest.cpp \
+    test/game/browser/handlertest.cpp test/game/browser/foldertest.cpp \
+    test/game/browser/accounttest.cpp \
+    test/game/alliance/phosthandlertest.cpp test/game/alliance/offertest.cpp \
+    test/game/alliance/leveltest.cpp test/game/alliance/hosthandlertest.cpp \
+    test/game/alliance/handlertest.cpp test/game/alliance/containertest.cpp \
+    test/game/actions/techupgradetest.cpp \
+    test/game/actions/taxationactiontest.cpp \
+    test/game/actions/remotecontrolactiontest.cpp \
+    test/game/actions/preconditionstest.cpp \
+    test/game/actions/multitransfersetuptest.cpp \
+    test/game/actions/convertsuppliestest.cpp \
+    test/game/actions/cloneshiptest.cpp \
+    test/game/actions/changeshipfriendlycodetest.cpp \
+    test/game/actions/changebuildqueuetest.cpp \
+    test/game/actions/cargotransfersetuptest.cpp \
+    test/game/actions/cargotransfertest.cpp \
+    test/game/actions/cargocostactiontest.cpp \
+    test/game/actions/buildstructurestest.cpp \
+    test/game/actions/buildstarbasetest.cpp \
+    test/game/actions/buildshiptest.cpp test/game/actions/buildpartstest.cpp \
+    test/game/actions/buildammotest.cpp \
+    test/game/actions/basefixrecycletest.cpp \
+    test/game/actions/basebuildexecutortest.cpp \
+    test/game/actions/basebuildactiontest.cpp \
+    test/client/widgets/pluginlisttest.cpp \
+    test/client/si/widgetfunctiontest.cpp test/client/si/usertasktest.cpp \
+    test/client/si/scriptproceduretest.cpp \
+    test/client/si/requestlink2test.cpp test/client/si/requestlink1test.cpp \
+    test/client/si/controltest.cpp test/client/map/overlaytest.cpp \
+    test/client/map/locationtest.cpp \
+    test/client/dialogs/objectselectiondialogtest.cpp \
+    test/client/picturenamertest.cpp test/client/markertest.cpp \
+    test/client/downlinktest.cpp test/client/applicationparameterstest.cpp
 TYPE_testsuite = testapp
 DEPEND_testsuite = serverlib guilib gamelib afl
-PROJ_AUTO += testsuite:u/*.cpp,u/*.hpp
+PROJ_AUTO += testsuite:u/*.cpp,u/*.hpp,test/*.cpp
 
 # List text files here so they appear in 'proj9 grep'
 TARGETS += extra

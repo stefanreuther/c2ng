@@ -26,6 +26,8 @@ using interpreter::Opcode;
 using interpreter::SimpleFunction;
 using interpreter::SimpleProcedure;
 
+const int game::interface::ConfigurationEditorContext::ScriptEditor;
+
 namespace {
     /*
      *  Class Declarations

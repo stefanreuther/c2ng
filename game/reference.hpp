@@ -5,6 +5,7 @@
 #ifndef C2NG_GAME_REFERENCE_HPP
 #define C2NG_GAME_REFERENCE_HPP
 
+#include "afl/string/string.hpp"
 #include "afl/string/translator.hpp"
 #include "game/map/point.hpp"
 #include "game/types.hpp"
@@ -111,6 +112,11 @@ namespace game {
             \return name */
         String_t toString(afl::string::Translator& tx) const;
 
+        /** Implementation of makePrintable for testing.
+            Stripped down/more technical version of toString().
+            \return text */
+        String_t makePrintable() const;
+
         /** Compare equality.
             \param other Other reference
             \return true if both references are identical */
@@ -132,6 +138,13 @@ namespace game {
         int m_x;
         int m_y;
     };
+
+    /** makePrintable for testing.
+        \param ref Reference */
+    inline String_t makePrintable(const Reference& ref)
+    {
+        return ref.makePrintable();
+    }
 
 }
 

@@ -20,6 +20,7 @@ namespace {
     }
 }
 
+const int gfx::gen::ColorRange::MIN_STEPS, gfx::gen::ColorRange::MAX_STEPS, gfx::gen::ColorRange::MAX_INDEX;
 
 gfx::gen::ColorRange::ColorRange()
     : m_start(), m_end(), m_steps(MAX_STEPS)
