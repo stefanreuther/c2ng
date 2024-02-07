@@ -17,14 +17,19 @@
 #include "util/configurationfile.hpp"
 
 namespace {
+    bool wantSnoop(const String_t& fileName)
+    {
+        return fileName == "pconfig.src";
+    }
+
     void snoopFileContent(server::file::DirectoryItem& dir,
                           const String_t& fileName,
-                          const String_t& content)
+                          afl::base::ConstBytes_t content)
     {
         if (fileName == "pconfig.src") {
             // Load
             using util::ConfigurationFile;
-            afl::io::ConstMemoryStream ms(afl::string::toBytes(content));
+            afl::io::ConstMemoryStream ms(content);
             afl::io::TextFile rdr(ms);
             ConfigurationFile file;
             file.load(rdr);
@@ -64,7 +69,7 @@ server::file::FileBase::copyFile(String_t sourceFile, String_t destFile)
     destRes.getDirectory().readContent(m_root);
 
     // Try underlay copy
-    if (destRes.getDirectory().copyFile(sourceRes.getDirectory(), sourceItem, destFile)) {
+    if (!wantSnoop(destFile) && destRes.getDirectory().copyFile(sourceRes.getDirectory(), sourceItem, destFile)) {
         // ok
     } else {
         // Local copy
@@ -77,6 +82,7 @@ server::file::FileBase::copyFile(String_t sourceFile, String_t destFile)
 
         // Write the file
         destRes.getDirectory().createFile(destFile, bytes);
+        snoopFileContent(destRes.getDirectory(), destFile, bytes);
     }
 }
 
@@ -259,7 +265,7 @@ server::file::FileBase::putFile(String_t fileName, String_t content)
     DirectoryItem& dir = res.getDirectory();
     dir.readContent(m_root);
     dir.createFile(fileName, afl::string::toBytes(content));
-    snoopFileContent(dir, fileName, content);
+    snoopFileContent(dir, fileName, afl::string::toBytes(content));
 }
 
 void

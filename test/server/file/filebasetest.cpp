@@ -1254,3 +1254,19 @@ AFL_TEST("server.file.FileBase:putFile:snoop", a)
     std::auto_ptr<afl::data::Value> p(testee.getDirectoryProperty("a/b", "name"));
     a.checkEqual("01. getDirectoryProperty", afl::data::Access(p).toString(), "Hi There");
 }
+
+/** Test file upload content snooping on copy. */
+AFL_TEST("server.file.FileBase:putFile:snoop:copy", a)
+{
+    Testbench tb;
+    server::file::FileBase testee(tb.session, tb.root);
+
+    testee.createDirectory("a");
+    testee.createDirectory("a/b");
+    testee.createDirectory("a/c");
+    testee.putFile("a/b/file.txt", "GAMENAME = Hi There");
+    testee.copyFile("a/b/file.txt", "a/c/pconfig.src");
+
+    std::auto_ptr<afl::data::Value> p(testee.getDirectoryProperty("a/c", "name"));
+    a.checkEqual("01. getDirectoryProperty", afl::data::Access(p).toString(), "Hi There");
+}
