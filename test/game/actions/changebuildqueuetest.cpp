@@ -128,6 +128,7 @@ namespace {
         afl::sys::Log log;
         game::PlayerSet_t p(PLAYER);
         env.univ.postprocess(p, p, game::map::Object::Playable, env.mapConfig, env.host, env.config, 77, env.shipList, tx, log);
+        env.host.setImpliedHostConfiguration(env.config);
     }
 }
 

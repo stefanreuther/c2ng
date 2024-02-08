@@ -127,7 +127,7 @@ namespace game { namespace sim { namespace {
                 if (g != 0 && r != 0 && sl != 0) {
                     game::map::Ship* sh = g->currentTurn().universe().ships().get(out.getId());
                     if (sh != 0) {
-                        return Transfer(g->shipScores(), g->planetScores(), *sl, r->hostConfiguration(), r->hostVersion(), m_session.translator())
+                        return Transfer(g->shipScores(), g->planetScores(), *sl, r->hostConfiguration(), m_session.translator())
                             .copyShipFromGame(out, *sh);
                     }
                 }
@@ -143,7 +143,7 @@ namespace game { namespace sim { namespace {
                     Universe& univ = g->currentTurn().universe();
                     game::map::Ship* sh = univ.ships().get(in.getId());
                     if (sh != 0) {
-                        return Transfer(g->shipScores(), g->planetScores(), *sl, r->hostConfiguration(), r->hostVersion(), m_session.translator())
+                        return Transfer(g->shipScores(), g->planetScores(), *sl, r->hostConfiguration(), m_session.translator())
                             .copyShipToGame(*sh, in, univ, g->mapConfiguration());
                     }
                 }
@@ -203,7 +203,7 @@ namespace game { namespace sim { namespace {
                 if (g != 0 && r != 0 && sl != 0) {
                     game::map::Planet* pl = g->currentTurn().universe().planets().get(out.getId());
                     if (pl != 0) {
-                        return Transfer(g->shipScores(), g->planetScores(), *sl, r->hostConfiguration(), r->hostVersion(), m_session.translator())
+                        return Transfer(g->shipScores(), g->planetScores(), *sl, r->hostConfiguration(), m_session.translator())
                             .copyPlanetFromGame(out, *pl);
                     }
                 }
@@ -219,7 +219,7 @@ namespace game { namespace sim { namespace {
                 if (g != 0 && r != 0 && sl != 0) {
                     game::map::Planet* pl = g->currentTurn().universe().planets().get(out.getId());
                     if (pl != 0) {
-                        return Transfer(g->shipScores(), g->planetScores(), *sl, r->hostConfiguration(), r->hostVersion(), m_session.translator())
+                        return Transfer(g->shipScores(), g->planetScores(), *sl, r->hostConfiguration(), m_session.translator())
                             .copyPlanetToGame(*pl, out);
                     }
                 }

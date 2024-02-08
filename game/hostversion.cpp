@@ -412,46 +412,11 @@ game::HostVersion::isBeamRequiredForMineScooping() const
     return m_kind == PHost;
 }
 
-// Check whether the build system of this host has PBP style.
-bool
-game::HostVersion::isPBPGame(const game::config::HostConfiguration& config) const
-{
-    // ex GHost::isPBPGame
-    // ex pconfig.pas:IsPBPGame
-    return m_kind != PHost
-        || afl::string::strCaseCompare(config[config.BuildQueue]().substr(0, 3), "pbp") == 0;
-}
-
-// Check whether this is a game where ships burn fuel each turn for just being there.
-bool
-game::HostVersion::isEugeneGame(const game::config::HostConfiguration& config) const
-{
-    // ex pconfig.pas:IsEugeneGame
-    return m_kind == PHost
-        && (config.getPlayersWhereEnabled(config.FuelUsagePerFightFor100KT).nonempty()
-            || config.getPlayersWhereEnabled(config.FuelUsagePerTurnFor100KT).nonempty());
-}
-
-// Check for doubled effective torpedo power.
-bool
-game::HostVersion::hasDoubleTorpedoPower(const game::config::HostConfiguration& config) const
-{
-    return !(m_kind == PHost && config[config.AllowAlternativeCombat]());
-}
-
 // Check for ability to do two cargo transfers from a ship.
 bool
 game::HostVersion::hasParallelShipTransfers() const
 {
     return m_kind != NuHost;
-}
-
-// Check for extended missions.
-bool
-game::HostVersion::hasExtendedMissions(const game::config::HostConfiguration& config) const
-{
-    return m_kind == PHost
-        && config[config.AllowExtendedMissions]() != 0;
 }
 
 // Check for bug in UseAccurateFuelModel computation.
@@ -596,6 +561,17 @@ game::HostVersion::setImpliedHostConfiguration(game::config::HostConfiguration& 
         config[HostConfiguration::RoundGravityWells].set(1);
         config[HostConfiguration::CPEnableRemote].set(0);
         config[HostConfiguration::MapTruehullByPlayerRace].set(0);
+
+        // No extended missions
+        config[HostConfiguration::AllowExtendedMissions].set(0);
+
+        // No per-turn fuel usage
+        config[HostConfiguration::FuelUsagePerFightFor100KT].set(0);
+        config[HostConfiguration::FuelUsagePerTurnFor100KT].set(0);
+
+        // PBP queue
+        // ex GHost::isPBPGame, pconfig.pas:IsPBPGame
+        config[HostConfiguration::BuildQueue].set("PBP");
 
         // Intentionally not handled here:
         // - AllowAlternativeCombat (could be THost with FLAK)

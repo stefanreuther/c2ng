@@ -24,7 +24,7 @@ game::score::ChartBuilder::ChartBuilder(const TurnScoreList& scores,
       m_byTeam(false),
       m_cumulative(false)
 {
-    init(SingleBuilder(*this, scores, teams, host, config), host.isPBPGame(config));
+    init(SingleBuilder(*this, scores, teams, host, config), config.isPBPGame());
 }
 
 void

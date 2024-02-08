@@ -529,7 +529,7 @@ EndFunction
 % @since PCC2 2.41.1
 Function CCVP.ShipHasCloakMission
   % same as game::spec::MissionList::isMissionCloaking
-  Local hasXM = System.Host="PHost" And Cfg("AllowExtendedMissions")
+  Local hasXM = Cfg("AllowExtendedMissions")
   Local emsa = Cfg("ExtMissionsStartAt")
   Select Case Mission$
     Case 10

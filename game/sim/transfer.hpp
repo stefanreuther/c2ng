@@ -76,7 +76,6 @@ namespace game { namespace sim {
                  const UnitScoreDefinitionList& planetScores,
                  const game::spec::ShipList& shipList,
                  const game::config::HostConfiguration& config,
-                 HostVersion hostVersion,
                  afl::string::Translator& tx);
 
         /** Copy ship from game into simulation.
@@ -114,7 +113,6 @@ namespace game { namespace sim {
      private:
         const UnitScoreDefinitionList& m_shipScores;
         const UnitScoreDefinitionList& m_planetScores;
-        const HostVersion m_hostVersion;
 
         void setHullFunction(int32_t& flags, const Ship& out, const game::map::Ship& in, Ability a, int basicHullFunction) const;
     };

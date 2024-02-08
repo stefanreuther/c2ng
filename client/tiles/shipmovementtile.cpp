@@ -37,12 +37,11 @@ namespace {
                          const game::config::HostConfiguration& config,
                          const game::UnitScoreDefinitionList& scoreDefinitions,
                          const game::spec::ShipList& shipList,
-                         const game::HostVersion& host,
                          int eta)
     {
         // FIXME: similar function in ShipPredictor.
         // FIXME: use Hull::getCloakFuelUsage, make separate function
-        if (shipList.missions().isMissionCloaking(ship.getMission().orElse(0), ship.getRealOwner().orElse(0), config, host)
+        if (shipList.missions().isMissionCloaking(ship.getMission().orElse(0), ship.getRealOwner().orElse(0), config)
             && (ship.hasSpecialFunction(BasicHullFunction::Cloak, scoreDefinitions, shipList, config)
                 || ship.hasSpecialFunction(BasicHullFunction::HardenedCloak, scoreDefinitions, shipList, config))
             && !ship.hasSpecialFunction(BasicHullFunction::AdvancedCloak, scoreDefinitions, shipList, config))
@@ -248,7 +247,7 @@ client::tiles::ShipMovementTile::attach(game::proxy::ObjectObserver& oop)
                     bool footnotes = !crystal_ball.getUsedProperties().empty() || chd.getFailureReasons() != 0;
                     int eta        = crystal_ball.getNumTurns();
                     int move_fuel  = crystal_ball.getMovementFuelUsed();
-                    int cloak_fuel = computeCloakFuel(*sh, root->hostConfiguration(), g->shipScores(), *shipList, root->hostVersion(), eta);
+                    int cloak_fuel = computeCloakFuel(*sh, root->hostConfiguration(), g->shipScores(), *shipList, eta);
                     int turn_fuel  = computeTurnFuel(*sh, root->hostConfiguration(), *shipList, eta);
                     int have_fuel  = sh->getCargo(game::Element::Neutronium).orElse(0);
 

@@ -24,7 +24,7 @@ game::score::TableBuilder::TableBuilder(const TurnScoreList& scores,
       m_turnIndex(0),
       m_otherTurnIndex(0)
 {
-    init(SingleBuilder(*this, scores, teams, host, config), host.isPBPGame(config));
+    init(SingleBuilder(*this, scores, teams, host, config), config.isPBPGame());
 }
 
 void

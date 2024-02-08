@@ -104,9 +104,8 @@ namespace game { namespace spec {
             \param mission_id   Mission number
             \param owner        Ship owner
             \param config       Host configuration
-            \param host         Host version
             \return true if mission cloaks the ship */
-        bool isMissionCloaking(int mission_id, int owner, const game::config::HostConfiguration& config, const HostVersion& host) const;
+        bool isMissionCloaking(int mission_id, int owner, const game::config::HostConfiguration& config) const;
 
      private:
         Container_t m_data;

@@ -18,7 +18,7 @@ namespace {
 
     int getTorpDamageScale(const game::Root& root)
     {
-        return root.hostVersion().hasDoubleTorpedoPower(root.hostConfiguration()) ? 2 : 1;
+        return root.hostConfiguration().hasDoubleTorpedoPower() ? 2 : 1;
     }
 
 
@@ -154,7 +154,7 @@ game::spec::info::describeHull(PageContent& content, Id_t id, const ShipList& sh
         content.attributes.push_back(Attribute(tx("Mine hit damage"), Format("%d%%", h->getMineHitDamage(viewpointPlayer, false, root.hostVersion(), root.hostConfiguration()))));
 
         // Fuel burn
-        if (root.hostVersion().isEugeneGame(root.hostConfiguration())) {
+        if (root.hostConfiguration().hasExtraFuelConsumption()) {
             content.attributes.push_back(Attribute(tx("Fuel burn"),
                                                    Format(tx("%d kt/turn, %d kt/fight"),
                                                           h->getTurnFuelUsage(viewpointPlayer, false, root.hostConfiguration()),

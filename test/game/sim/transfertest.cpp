@@ -7,7 +7,6 @@
 
 #include "afl/string/nulltranslator.hpp"
 #include "afl/test/testrunner.hpp"
-#include "game/hostversion.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/ship.hpp"
 #include "game/sim/planet.hpp"
@@ -17,7 +16,6 @@
 
 using afl::string::NullTranslator;
 using game::Element;
-using game::HostVersion;
 using game::map::Object;
 using game::map::Planet;
 using game::map::Ship;
@@ -33,12 +31,11 @@ AFL_TEST("game.sim.Transfer:copyShipFromGame:empty", a)
     UnitScoreDefinitionList shipScores;
     UnitScoreDefinitionList planetScores;
     NullTranslator tx;
-    HostVersion h(HostVersion::Host, MKVERSION(3,22,0));
     SimpleTurn t;
     Ship* in = t.universe().ships().create(77);
 
     // Test
-    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
+    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), tx);
     game::sim::Ship out;
     a.checkEqual("01. copyShipFromGame", tr.copyShipFromGame(out, *in), false);
 }
@@ -50,7 +47,6 @@ AFL_TEST("game.sim.Transfer:copyShipFromGame:normal", a)
     UnitScoreDefinitionList shipScores;
     UnitScoreDefinitionList planetScores;
     NullTranslator tx;
-    HostVersion h(HostVersion::Host, MKVERSION(3,22,0));
     SimpleTurn t;
 
     // Define a ship
@@ -71,7 +67,7 @@ AFL_TEST("game.sim.Transfer:copyShipFromGame:normal", a)
     in.addShipSpecialFunction(t.shipList().modifiedHullFunctions().getFunctionIdFromHostId(game::spec::BasicHullFunction::Commander));
 
     // Transfer
-    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
+    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), tx);
     game::sim::Ship out;
     a.checkEqual("01. copyShipFromGame", tr.copyShipFromGame(out, in), true);
 
@@ -99,7 +95,6 @@ AFL_TEST("game.sim.Transfer:copyShipToGame:normal", a)
     UnitScoreDefinitionList shipScores;
     UnitScoreDefinitionList planetScores;
     NullTranslator tx;
-    HostVersion h(HostVersion::Host, MKVERSION(3,22,0));
     SimpleTurn t;
 
     // Define a ship
@@ -123,7 +118,7 @@ AFL_TEST("game.sim.Transfer:copyShipToGame:normal", a)
     in.setAggressiveness(game::sim::Ship::agg_Kill);
 
     // Transfer
-    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
+    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), tx);
     a.checkEqual("01. copyShipToGame", tr.copyShipToGame(out, in, t.universe(), t.mapConfiguration()), true);
 
     // Verify changes
@@ -139,7 +134,6 @@ AFL_TEST("game.sim.Transfer:copyShipToGame:mismatch", a)
     UnitScoreDefinitionList shipScores;
     UnitScoreDefinitionList planetScores;
     NullTranslator tx;
-    HostVersion h(HostVersion::Host, MKVERSION(3,22,0));
     SimpleTurn t;
 
     // Define a ship
@@ -155,7 +149,7 @@ AFL_TEST("game.sim.Transfer:copyShipToGame:mismatch", a)
     in.setHullTypeOnly(HULL_NR);
 
     // Test
-    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
+    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), tx);
     a.checkEqual("01. copyShipToGame", tr.copyShipToGame(out, in, t.universe(), t.mapConfiguration()), false);
 }
 
@@ -166,7 +160,6 @@ AFL_TEST("game.sim.Transfer:copyShipToGame:fighters", a)
     UnitScoreDefinitionList shipScores;
     UnitScoreDefinitionList planetScores;
     NullTranslator tx;
-    HostVersion h(HostVersion::Host, MKVERSION(3,22,0));
     SimpleTurn t;
 
     // Define a ship
@@ -192,7 +185,7 @@ AFL_TEST("game.sim.Transfer:copyShipToGame:fighters", a)
     in.setAmmo(60);             // 10 more than in universe
 
     // Transfer
-    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
+    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), tx);
     a.checkEqual("01. copyShipToGame", tr.copyShipToGame(out, in, t.universe(), t.mapConfiguration()), true);
 
     // Verify
@@ -207,7 +200,6 @@ AFL_TEST("game.sim.Transfer:copyShipToGame:torpedoes", a)
     UnitScoreDefinitionList shipScores;
     UnitScoreDefinitionList planetScores;
     NullTranslator tx;
-    HostVersion h(HostVersion::Host, MKVERSION(3,22,0));
     SimpleTurn t;
 
     // Define a ship
@@ -236,7 +228,7 @@ AFL_TEST("game.sim.Transfer:copyShipToGame:torpedoes", a)
     in.setAmmo(40);             // 10 less than in universe
 
     // Transfer
-    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
+    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), tx);
     a.checkEqual("01. copyShipToGame", tr.copyShipToGame(out, in, t.universe(), t.mapConfiguration()), true);
 
     // Verify
@@ -251,12 +243,11 @@ AFL_TEST("game.sim.Transfer:copyPlanetFromGame:empty", a)
     UnitScoreDefinitionList shipScores;
     UnitScoreDefinitionList planetScores;
     NullTranslator tx;
-    HostVersion h(HostVersion::Host, MKVERSION(3,22,0));
     SimpleTurn t;
     Planet* in = t.universe().planets().create(77);
 
     // Test
-    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
+    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), tx);
     game::sim::Planet out;
     a.checkEqual("01. copyPlanetFromGame", tr.copyPlanetFromGame(out, *in), false);
 }
@@ -268,7 +259,6 @@ AFL_TEST("game.sim.Transfer:copyPlanetFromGame:normal", a)
     UnitScoreDefinitionList shipScores;
     UnitScoreDefinitionList planetScores;
     NullTranslator tx;
-    HostVersion h(HostVersion::Host, MKVERSION(3,22,0));
     SimpleTurn t;
 
     // Define a planet
@@ -280,7 +270,7 @@ AFL_TEST("game.sim.Transfer:copyPlanetFromGame:normal", a)
     in.setCargo(Element::Colonists, 171);
 
     // Transfer
-    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
+    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), tx);
     game::sim::Planet out;
     a.checkEqual("01. copyPlanetFromGame", tr.copyPlanetFromGame(out, in), true);
 
@@ -302,7 +292,6 @@ AFL_TEST("game.sim.Transfer:copyPlanetFromGame:base", a)
     UnitScoreDefinitionList shipScores;
     UnitScoreDefinitionList planetScores;
     NullTranslator tx;
-    HostVersion h(HostVersion::Host, MKVERSION(3,22,0));
     SimpleTurn t;
 
     // Define a planet
@@ -319,7 +308,7 @@ AFL_TEST("game.sim.Transfer:copyPlanetFromGame:base", a)
     in.setBaseTechLevel(game::TorpedoTech, 7);
 
     // Transfer
-    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
+    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), tx);
     game::sim::Planet out;
     a.checkEqual("01. copyPlanetFromGame", tr.copyPlanetFromGame(out, in), true);
 
@@ -342,7 +331,6 @@ AFL_TEST("game.sim.Transfer:copyPlanetToGame:normal", a)
     UnitScoreDefinitionList shipScores;
     UnitScoreDefinitionList planetScores;
     NullTranslator tx;
-    HostVersion h(HostVersion::Host, MKVERSION(3,22,0));
     SimpleTurn t;
 
     // Define a planet
@@ -353,7 +341,7 @@ AFL_TEST("game.sim.Transfer:copyPlanetToGame:normal", a)
     out.setName(String_t("Florida"));
 
     // Transfer
-    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
+    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), tx);
     game::sim::Planet in;
     in.setId(PLANET_ID);
     in.setOwner(PLAYER_NR);
@@ -371,7 +359,6 @@ AFL_TEST("game.sim.Transfer:copyPlanetToGame:mismatch", a)
     UnitScoreDefinitionList shipScores;
     UnitScoreDefinitionList planetScores;
     NullTranslator tx;
-    HostVersion h(HostVersion::Host, MKVERSION(3,22,0));
     SimpleTurn t;
 
     // Define a planet
@@ -382,7 +369,7 @@ AFL_TEST("game.sim.Transfer:copyPlanetToGame:mismatch", a)
     out.setName(String_t("Florida"));
 
     // Transfer
-    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
+    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), tx);
     game::sim::Planet in;
     in.setId(PLANET_ID);
     in.setOwner(PLAYER_NR+1);

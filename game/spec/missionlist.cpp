@@ -348,13 +348,12 @@ game::spec::MissionList::loadFromIniFile(afl::io::Stream& in, afl::charset::Char
 bool
 game::spec::MissionList::isMissionCloaking(int mission_id,
                                            int owner,
-                                           const game::config::HostConfiguration& config,
-                                           const HostVersion& host) const
+                                           const game::config::HostConfiguration& config) const
 {
     // ex game/mission.cc:isMissionCloaking
     // ex shipacc.pas:ShipIsCloaking (...which checks ship abilities, too)
     // This is an instance function to allow some configurable logic later
-    const bool hasXM = host.hasExtendedMissions(config);
+    const bool hasXM = config[config.AllowExtendedMissions]();
     const int  emsa = config[config.ExtMissionsStartAt]();
     return (mission_id == Mission::msn_Cloak
             || (hasXM && mission_id == emsa + Mission::pmsn_Cloak)

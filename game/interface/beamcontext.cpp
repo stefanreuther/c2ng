@@ -78,7 +78,7 @@ game::interface::BeamContext::get(PropertyIndex_t index)
          case ComponentPropertyDomain:
             return getComponentProperty(*b, ComponentProperty(BEAM_MAP[index].index), *m_shipList);
          case WeaponPropertyDomain:
-            return getWeaponProperty(*b, WeaponProperty(BEAM_MAP[index].index), m_root->hostConfiguration(), m_root->hostVersion(), false);
+            return getWeaponProperty(*b, WeaponProperty(BEAM_MAP[index].index), m_root->hostConfiguration(), false);
         }
     }
     return 0;

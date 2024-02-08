@@ -1837,3 +1837,27 @@ game::config::HostConfiguration::getPlayersWhere(const CostArrayOptionDescriptor
     }
     return result;
 }
+
+// Check for presence of extra per-turn/per-fight fuel consumption.
+bool
+game::config::HostConfiguration::hasExtraFuelConsumption() const
+{
+    // ex pconfig.pas:IsEugeneGame, HostVersion::isEugeneGame()
+    return getPlayersWhereEnabled(FuelUsagePerFightFor100KT).nonempty()
+        || getPlayersWhereEnabled(FuelUsagePerTurnFor100KT).nonempty();
+}
+
+// Check for PBP build queue.
+bool
+game::config::HostConfiguration::isPBPGame() const
+{
+    return afl::string::strCaseCompare((*this)[BuildQueue]().substr(0, 3), "pbp") == 0;
+}
+
+// Check for doubled torpedo power.
+bool
+game::config::HostConfiguration::hasDoubleTorpedoPower() const
+{
+    // ex HostVersion::hasDoubleTorpedoPower
+    return (*this)[AllowAlternativeCombat]() == 0;
+}

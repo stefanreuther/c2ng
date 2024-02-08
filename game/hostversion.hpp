@@ -197,22 +197,9 @@ namespace game {
         /** Check whether mine scooping needs beams. */
         bool isBeamRequiredForMineScooping() const;
 
-        /** Check whether the build system of this host has PBP style. */
-        bool isPBPGame(const game::config::HostConfiguration& config) const;
-
-        /** Check whether this is a game where ships burn fuel each turn for just being there. */
-        bool isEugeneGame(const game::config::HostConfiguration& config) const;
-
-        /** Check for doubled effective torpedo power.
-            Games with non-alternative combat internally double the torpedo powers. */
-        bool hasDoubleTorpedoPower(const game::config::HostConfiguration& config) const;
-
         /** Check for ability to do two cargo transfers from a ship.
             Classic VGAP can do that, Nu has only one slot to store the transfer. */
         bool hasParallelShipTransfers() const;
-
-        /** Check for extended missions. */
-        bool hasExtendedMissions(const game::config::HostConfiguration& config) const;
 
         /** Check for bug in UseAccurateFuelModel computation.
             For PHost with UseAccurateFuelModel enabled, a ship can burn, say, 3.2 kt fuel.

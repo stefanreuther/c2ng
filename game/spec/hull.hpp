@@ -136,7 +136,7 @@ namespace game { namespace spec {
             \param fight false: per turn; true: per fight
             \param config Host configuration
             \return fuel usage per turn
-            \see HostVersion::isEugeneGame() */
+            \see HostConfiguration::hasExtraFuelConsumption() */
         int getTurnFuelUsage(int forPlayer, bool fight, const game::config::HostConfiguration& config) const;
 
         /** Get mine hit damage.

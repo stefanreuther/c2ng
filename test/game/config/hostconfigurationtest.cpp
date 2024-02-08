@@ -157,3 +157,52 @@ AFL_TEST("game.config.HostConfiguration:getExperienceLevelFromPoints:enabled", a
     a.checkEqual("06", testee.getExperienceLevelFromPoints(4500), 4);
     a.checkEqual("07", testee.getExperienceLevelFromPoints(8000), 4);
 }
+
+/*
+ *  hasExtraFuelConsumption
+ */
+
+// Disabled
+AFL_TEST("game.config.HostConfiguration:hasExtraFuelConsumption:off", a)
+{
+    game::config::HostConfiguration testee;
+    testee.setOption("FuelUsagePerFightFor100KT", "0", game::config::ConfigurationOption::Game);
+    testee.setOption("FuelUsagePerTurnFor100KT", "0", game::config::ConfigurationOption::Game);
+    a.checkEqual("", testee.hasExtraFuelConsumption(), false);
+}
+
+// Partially enabled
+AFL_TEST("game.config.HostConfiguration:hasExtraFuelConsumption:part", a)
+{
+    game::config::HostConfiguration testee;
+    testee.setOption("FuelUsagePerFightFor100KT", "0", game::config::ConfigurationOption::Game);
+    testee.setOption("FuelUsagePerTurnFor100KT", "0,0,0,0,0,1,0,0", game::config::ConfigurationOption::Game);
+    a.checkEqual("", testee.hasExtraFuelConsumption(), true);
+}
+
+// Fully enabled
+AFL_TEST("game.config.HostConfiguration:hasExtraFuelConsumption:on", a)
+{
+    game::config::HostConfiguration testee;
+    testee.setOption("FuelUsagePerFightFor100KT", "5", game::config::ConfigurationOption::Game);
+    testee.setOption("FuelUsagePerTurnFor100KT", "3", game::config::ConfigurationOption::Game);
+    a.checkEqual("", testee.hasExtraFuelConsumption(), true);
+}
+
+/*
+ *  hasDoubleTorpedoPower
+ */
+
+AFL_TEST("game.config.HostConfiguration:hasDoubleTorpedoPower:on", a)
+{
+    game::config::HostConfiguration testee;
+    testee.setOption("AllowAlternativeCombat", "No", game::config::ConfigurationOption::Game);
+    a.checkEqual("", testee.hasDoubleTorpedoPower(), true);
+}
+
+AFL_TEST("game.config.HostConfiguration:hasDoubleTorpedoPower:off", a)
+{
+    game::config::HostConfiguration testee;
+    testee.setOption("AllowAlternativeCombat", "Yes", game::config::ConfigurationOption::Game);
+    a.checkEqual("", testee.hasDoubleTorpedoPower(), false);
+}

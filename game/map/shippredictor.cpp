@@ -873,7 +873,7 @@ game::map::ShipPredictor::computeTurn()
     // Cloak Fuel Burn
     bool canCloak = real_ship->hasSpecialFunction(BasicHullFunction::Cloak, m_scoreDefinitions, m_shipList, m_hostConfiguration);
     bool canAdvancedCloak = real_ship->hasSpecialFunction(BasicHullFunction::AdvancedCloak, m_scoreDefinitions, m_shipList, m_hostConfiguration);
-    if ((canCloak || canAdvancedCloak) && m_shipList.missions().isMissionCloaking(m_ship.mission.orElse(0), m_ship.owner.orElse(0), m_hostConfiguration, m_hostVersion)) {
+    if ((canCloak || canAdvancedCloak) && m_shipList.missions().isMissionCloaking(m_ship.mission.orElse(0), m_ship.owner.orElse(0), m_hostConfiguration)) {
         // ex shipacc.pas:CloakFuel (sort-of)
         int neededFuel = canAdvancedCloak ? 0 : getCloakFuel(0, real_ship->getRealOwner().orElse(0), m_hostConfiguration, *pHull);
         int haveFuel = m_ship.neutronium.orElse(0);

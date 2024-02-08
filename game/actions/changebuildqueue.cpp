@@ -268,7 +268,7 @@ game::actions::ChangeBuildQueue::describe(Infos_t& result, afl::string::Translat
         }
 
         // Points
-        if (m_host.isPBPGame(m_config)) {
+        if (m_config.isPBPGame()) {
             out.pointsRequired = pointsRequired;
             if (pointsOK) {
                 out.pointsAvailable = points;

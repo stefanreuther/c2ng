@@ -152,7 +152,7 @@ game::proxy::HullSpecificationProxy::Trampoline::packResponse(HullSpecification&
         result.cost = pHull->cost();
 
         // Build points
-        if (root.hostVersion().isPBPGame(config)) {
+        if (config.isPBPGame()) {
             result.pointsToBuild      = pHull->getPointsToBuild     (player, root.hostVersion(), config);
             result.pointsForKilling   = pHull->getPointsForKilling  (player, root.hostVersion(), config);
             result.pointsForScrapping = pHull->getPointsForScrapping(player, root.hostVersion(), config);

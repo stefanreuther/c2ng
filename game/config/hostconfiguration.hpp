@@ -436,6 +436,18 @@ namespace game { namespace config {
             \param opt descriptor of option to query
             \param value Value to check for */
         PlayerSet_t getPlayersWhere(const CostArrayOptionDescriptor& opt, const game::spec::Cost& value) const;
+
+        /** Check for presence of extra per-turn/per-fight fuel consumption.
+            \return flag */
+        bool hasExtraFuelConsumption() const;
+
+        /** Check for PBP build queue.
+            \return true for PBP build queue */
+        bool isPBPGame() const;
+
+        /** Check for doubled torpedo power.
+            Unless AlternativeCombat is used, torpedo kill/damage values are effectively doubled. */
+        bool hasDoubleTorpedoPower() const;
     };
 
 } }

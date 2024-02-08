@@ -135,7 +135,7 @@ game::proxy::SimulationTransferProxy::copyObjectFromGame(Session& session, Refer
     if (g != 0 && r != 0 && sl != 0) {
         afl::base::Ptr<Turn> t = g->getViewpointTurn();
         if (t.get() != 0) {
-            game::sim::Transfer transfer(g->shipScores(), g->planetScores(), *sl, r->hostConfiguration(), r->hostVersion(), session.translator());
+            game::sim::Transfer transfer(g->shipScores(), g->planetScores(), *sl, r->hostConfiguration(), session.translator());
             switch (ref.getType()) {
              case Reference::Ship:
                 if (game::map::Ship* in = t->universe().ships().get(ref.getId())) {

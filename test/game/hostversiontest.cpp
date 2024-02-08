@@ -409,85 +409,6 @@ AFL_TEST("game.HostVersion:isBeamRequiredForMineScooping", a)
     a.check("05", !HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).isBeamRequiredForMineScooping());
 }
 
-// isPBPGame: all TimHost, and PHost if configured
-AFL_TEST("game.HostVersion:isPBPGame:PAL", a)
-{
-    HostConfiguration config;
-    config[config.BuildQueue].set("PAL");
-    a.check("01",  HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).isPBPGame(config));
-    a.check("02",  HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).isPBPGame(config));
-    a.check("03",  HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).isPBPGame(config));
-    a.check("04", !HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).isPBPGame(config));
-    a.check("05",  HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).isPBPGame(config));
-}
-
-AFL_TEST("game.HostVersion:isPBPGame:PBP", a)
-{
-    HostConfiguration config;
-    config[config.BuildQueue].set("PBP");
-    a.check("01",  HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).isPBPGame(config));
-}
-
-// isEugeneGame:
-AFL_TEST("game.HostVersion:isEugeneGame:off", a)
-{
-    HostConfiguration config;
-    config[config.FuelUsagePerFightFor100KT].set(0);
-    config[config.FuelUsagePerTurnFor100KT].set(0);
-    a.check("01", !HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).isEugeneGame(config));
-    a.check("02", !HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).isEugeneGame(config));
-    a.check("03", !HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).isEugeneGame(config));
-    a.check("04", !HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).isEugeneGame(config));
-    a.check("05", !HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).isEugeneGame(config));
-}
-
-AFL_TEST("game.HostVersion:isEugeneGame:fight", a)
-{
-    HostConfiguration config;
-    config[config.FuelUsagePerFightFor100KT].set("0,1,0,0,0");
-    config[config.FuelUsagePerTurnFor100KT].set(0);
-    a.check("01", !HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).isEugeneGame(config));
-    a.check("02", !HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).isEugeneGame(config));
-    a.check("03", !HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).isEugeneGame(config));
-    a.check("04",  HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).isEugeneGame(config));
-    a.check("05", !HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).isEugeneGame(config));
-}
-
-AFL_TEST("game.HostVersion:isEugeneGame:turn", a)
-{
-    HostConfiguration config;
-    config[config.FuelUsagePerFightFor100KT].set(0);
-    config[config.FuelUsagePerTurnFor100KT].set("0,1,0,0,0");
-    a.check("01", !HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).isEugeneGame(config));
-    a.check("02", !HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).isEugeneGame(config));
-    a.check("03", !HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).isEugeneGame(config));
-    a.check("04",  HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).isEugeneGame(config));
-    a.check("05", !HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).isEugeneGame(config));
-}
-
-// hasDoubleTorpedoPower: everything with non-AlternativeCombat
-AFL_TEST("game.HostVersion:hasDoubleTorpedoPower:standard-combat", a)
-{
-    HostConfiguration config;
-    config[config.AllowAlternativeCombat].set(false);
-    a.check("01",  HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).hasDoubleTorpedoPower(config));
-    a.check("02",  HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).hasDoubleTorpedoPower(config));
-    a.check("03",  HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).hasDoubleTorpedoPower(config));
-    a.check("04",  HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).hasDoubleTorpedoPower(config));
-    a.check("05",  HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).hasDoubleTorpedoPower(config));
-}
-
-AFL_TEST("game.HostVersion:hasDoubleTorpedoPower:alternative-combat", a)
-{
-    HostConfiguration config;
-    config[config.AllowAlternativeCombat].set(true);
-    a.check("01",  HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).hasDoubleTorpedoPower(config));
-    a.check("02",  HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).hasDoubleTorpedoPower(config));
-    a.check("03",  HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).hasDoubleTorpedoPower(config));
-    a.check("04", !HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).hasDoubleTorpedoPower(config));
-    a.check("05",  HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).hasDoubleTorpedoPower(config));
-}
-
 // hasParallelShipTransfers: all but NuHost
 AFL_TEST("game.HostVersion:hasParallelShipTransfers", a)
 {
@@ -496,29 +417,6 @@ AFL_TEST("game.HostVersion:hasParallelShipTransfers", a)
     a.check("03",  HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).hasParallelShipTransfers());
     a.check("04",  HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).hasParallelShipTransfers());
     a.check("05", !HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).hasParallelShipTransfers());
-}
-
-// hasExtendedMissions: PHost, if enabled
-AFL_TEST("game.HostVersion:hasExtendedMissions:off", a)
-{
-    HostConfiguration config;
-    config[config.AllowExtendedMissions].set(false);
-    a.check("01", !HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).hasExtendedMissions(config));
-    a.check("02", !HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).hasExtendedMissions(config));
-    a.check("03", !HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).hasExtendedMissions(config));
-    a.check("04", !HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).hasExtendedMissions(config));
-    a.check("05", !HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).hasExtendedMissions(config));
-}
-
-AFL_TEST("game.HostVersion:hasExtendedMissions:on", a)
-{
-    HostConfiguration config;
-    config[config.AllowExtendedMissions].set(true);
-    a.check("01", !HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).hasExtendedMissions(config));
-    a.check("02", !HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).hasExtendedMissions(config));
-    a.check("03", !HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).hasExtendedMissions(config));
-    a.check("04",  HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).hasExtendedMissions(config));
-    a.check("05", !HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).hasExtendedMissions(config));
 }
 
 // hasAccurateFuelModelBug: PHost <3.4h, 4.0e
@@ -642,7 +540,8 @@ AFL_TEST("game.HostVersion:setImpliedHostConfiguration:base", a)
 {
     HostConfiguration c;
     c.setDefaultValues();
-    a.checkEqual("", c[HostConfiguration::CPEnableShow](), true);
+    a.checkEqual("CPEnableShow", c[HostConfiguration::CPEnableShow](), true);
+    a.checkEqual("AllowExtendedMissions", c[HostConfiguration::AllowExtendedMissions](), true);
 }
 
 // Host
@@ -651,7 +550,8 @@ AFL_TEST("game.HostVersion:setImpliedHostConfiguration:Host", a)
     HostConfiguration c;
     c.setDefaultValues();
     HostVersion(HostVersion::Host, MKVERSION(3,22,0)).setImpliedHostConfiguration(c);
-    a.checkEqual("", c[HostConfiguration::CPEnableShow](), false);
+    a.checkEqual("CPEnableShow", c[HostConfiguration::CPEnableShow](), false);
+    a.checkEqual("AllowExtendedMissions", c[HostConfiguration::AllowExtendedMissions](), false);
 }
 
 // Old PHost
@@ -660,7 +560,8 @@ AFL_TEST("game.HostVersion:setImpliedHostConfiguration:PHost:old", a)
     HostConfiguration c;
     c.setDefaultValues();
     HostVersion(HostVersion::PHost, MKVERSION(3,2,5)).setImpliedHostConfiguration(c);
-    a.checkEqual("", c[HostConfiguration::CPEnableShow](), false);
+    a.checkEqual("CPEnableShow", c[HostConfiguration::CPEnableShow](), false);
+    a.checkEqual("AllowExtendedMissions", c[HostConfiguration::AllowExtendedMissions](), true);
 }
 
 // New PHost
@@ -669,7 +570,8 @@ AFL_TEST("game.HostVersion:setImpliedHostConfiguration:PHost:new", a)
     HostConfiguration c;
     c.setDefaultValues();
     HostVersion(HostVersion::PHost, MKVERSION(4,1,5)).setImpliedHostConfiguration(c);
-    a.checkEqual("", c[HostConfiguration::CPEnableShow](), true);
+    a.checkEqual("CPEnableShow", c[HostConfiguration::CPEnableShow](), true);
+    a.checkEqual("AllowExtendedMissions", c[HostConfiguration::AllowExtendedMissions](), true);
 }
 
 // ...but it's not unconditionally enabled
@@ -678,8 +580,10 @@ AFL_TEST("game.HostVersion:setImpliedHostConfiguration:PHost:disabled", a)
     HostConfiguration c;
     c.setDefaultValues();
     c[HostConfiguration::CPEnableShow].set(false);
+    c[HostConfiguration::AllowExtendedMissions].set(false);
     HostVersion(HostVersion::PHost, MKVERSION(4,1,5)).setImpliedHostConfiguration(c);
-    a.checkEqual("", c[HostConfiguration::CPEnableShow](), false);
+    a.checkEqual("CPEnableShow", c[HostConfiguration::CPEnableShow](), false);
+    a.checkEqual("AllowExtendedMissions", c[HostConfiguration::AllowExtendedMissions](), false);
 }
 
 AFL_TEST("game.HostVersion:setImpliedHostConfiguration:Host:minefields", a)
@@ -706,6 +610,51 @@ AFL_TEST("game.HostVersion:setImpliedHostConfiguration:PHost:minefields", a)
     a.checkEqual("04", c[HostConfiguration::UnitsPerWebRate](1), 100);  // default
     a.checkEqual("05", c[HostConfiguration::UnitsPerWebRate](6), 100);
     a.checkEqual("06", c[HostConfiguration::UnitsPerWebRate](9), 400);
+}
+
+// Host
+AFL_TEST("game.HostVersion:setImpliedHostConfiguration:Host:fuel-usage", a)
+{
+    HostConfiguration c;
+    c.setDefaultValues();
+    c[HostConfiguration::FuelUsagePerFightFor100KT].set(3);
+    c[HostConfiguration::FuelUsagePerTurnFor100KT].set(2);
+    HostVersion(HostVersion::Host, MKVERSION(3,22,48)).setImpliedHostConfiguration(c);
+    a.checkEqual("FuelUsagePerFightFor100KT", c[HostConfiguration::FuelUsagePerFightFor100KT](1), 0);
+    a.checkEqual("FuelUsagePerTurnFor100KT",  c[HostConfiguration::FuelUsagePerTurnFor100KT](1), 0);
+    a.checkEqual("hasExtraFuelConsumption",   c.hasExtraFuelConsumption(), false);
+}
+
+// PHost
+AFL_TEST("game.HostVersion:setImpliedHostConfiguration:PHost:fuel-usage", a)
+{
+    HostConfiguration c;
+    c.setDefaultValues();
+    c[HostConfiguration::FuelUsagePerFightFor100KT].set(3);
+    c[HostConfiguration::FuelUsagePerTurnFor100KT].set(2);
+    HostVersion(HostVersion::PHost, MKVERSION(4,1,0)).setImpliedHostConfiguration(c);
+    a.checkEqual("FuelUsagePerFightFor100KT", c[HostConfiguration::FuelUsagePerFightFor100KT](1), 3);
+    a.checkEqual("FuelUsagePerTurnFor100KT",  c[HostConfiguration::FuelUsagePerTurnFor100KT](1), 2);
+    a.checkEqual("hasExtraFuelConsumption",   c.hasExtraFuelConsumption(), true);
+}
+
+// Host
+AFL_TEST("game.HostVersion:setImpliedHostConfiguration:Host:build-queue", a)
+{
+    HostConfiguration c;
+    c.setDefaultValues();
+    HostVersion(HostVersion::Host, MKVERSION(3,22,48)).setImpliedHostConfiguration(c);
+    a.checkEqual("isPBPGame", c.isPBPGame(), true);
+}
+
+// PHost
+AFL_TEST("game.HostVersion:setImpliedHostConfiguration:PHost:build-queue", a)
+{
+    HostConfiguration c;
+    c.setDefaultValues();
+    HostVersion(HostVersion::PHost, MKVERSION(4,1,0)).setImpliedHostConfiguration(c);
+    // Default is PAL!
+    a.checkEqual("isPBPGame", c.isPBPGame(), false);
 }
 
 /** Test fromString(). */

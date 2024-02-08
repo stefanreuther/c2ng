@@ -8,7 +8,6 @@
 #include "afl/data/value.hpp"
 #include "game/spec/weapon.hpp"
 #include "game/config/hostconfiguration.hpp"
-#include "game/hostversion.hpp"
 
 namespace game { namespace interface {
 
@@ -21,12 +20,10 @@ namespace game { namespace interface {
     /** Get weapon property.
         @param w       Weapon
         @param iwp     Property
-        @param config  Host configuration (for HostVersion::hasDoubleTorpedoPower())
-        @param host    Host version (for HostVersion::hasDoubleTorpedoPower())
+        @param config  Host configuration (for hasDoubleTorpedoPower())
         @param isTorpedo  true if torpedo */
     afl::data::Value* getWeaponProperty(const game::spec::Weapon& w, WeaponProperty iwp,
                                         const game::config::HostConfiguration& config,
-                                        const game::HostVersion& host,
                                         bool isTorpedo);
 
 } }

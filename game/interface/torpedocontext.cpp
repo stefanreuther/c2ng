@@ -153,7 +153,7 @@ game::interface::TorpedoContext::getProperty(const game::spec::Weapon& w, Proper
      case ComponentPropertyDomain:
         return getComponentProperty(w, ComponentProperty(torpedo_map[index].index), *m_shipList);
      case WeaponPropertyDomain:
-        return getWeaponProperty(w, WeaponProperty(torpedo_map[index].index), m_root->hostConfiguration(), m_root->hostVersion(), true);
+        return getWeaponProperty(w, WeaponProperty(torpedo_map[index].index), m_root->hostConfiguration(), true);
     }
     return 0;
 }

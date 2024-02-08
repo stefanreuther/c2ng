@@ -1,5 +1,9 @@
 ;=============================================================================
-; Starship Mission List for PCC
+; Starship Mission List for PCC2 NG
+;
+; Note: this file has been modified for PCC2 NG and is not intended
+; for the other PCC/PCC2 versions.
+;
 ; Format for each mission:    code,flags,name
 ;                               key=value
 ; * code = Mission Code
@@ -158,54 +162,54 @@
 ; so I can include that rule in PCC.
 20,,Build Torpedoes from Cargo
                 s = B-Torps
-                c = System.Host$=2 AND Torp AND Cfg("AllowExtendedMissions")
+                c = Torp AND Cfg("AllowExtendedMissions")
 21,*y#,Lay Minefield
                 t = "Lay " # Z(Mission.Intercept) # " mines"
-                c = System.Host$=2 AND Torp AND Cfg("AllowExtendedMissions")
+                c = Torp AND Cfg("AllowExtendedMissions")
                 i = Torps
                 j = Player
                 w = Torp.Count
 22,*y#+7,Lay Web Mines
                 t = "Lay " # Z(Mission.Intercept) # " web mines"
-                c = System.Host$=2 AND Torp AND Cfg("AllowExtendedMissions")
+                c = Torp AND Cfg("AllowExtendedMissions")
                 i = Torps
                 j = Player
                 w = Torp.Count
 23,*#,Scoop Torpedoes
                 t = "Scoop " & Mission.Intercept & " torps" & (" from field #" # Z(Mission.Tow))
                 s = Scoop
-                c = System.Host$=2 AND Torp AND Beam AND Cfg("AllowExtendedMissions")
+                c = Torp AND Beam AND Cfg("AllowExtendedMissions")
                 i = Torps
                 j = Mine Id
 24,*,Gather-Build Torpedoes
                 t = "Gather-Build " # Z(Mission.Intercept) # " torps"
                 s = GB-Torp
-                c = System.Host$=2 AND Torp AND Cfg("AllowExtendedMissions")
+                c = Torp AND Cfg("AllowExtendedMissions")
 25,*,Beam Down Credits
                 t = "Beam down " # Z(Mission.Intercept) # " mc"
                 s = BD mc
-                c = System.Host$=2 AND Cfg("AllowExtendedMissions")
+                c = Cfg("AllowExtendedMissions")
 26,#!h*,Transfer Torpedoes
                 t = "Transfer " # Mission.Tow # " torps to " # ShipNameAndId(Mission.Intercept)
                 s = XferTor
-                c = System.Host$=2 AND Torp AND Cfg("AllowExtendedMissions")
+                c = Torp AND Cfg("AllowExtendedMissions")
                 i = Target
                 j = Amount
 27,#!h*,Transfer Fighters
                 t = "Transfer " # Mission.Tow # " fighters to " # ShipNameAndId(Mission.Intercept)
                 s = XferFtr
-                c = System.Host$=2 AND Fighter.Bays AND Cfg("AllowExtendedMissions")
+                c = Fighter.Bays AND Cfg("AllowExtendedMissions")
                 i = Target
                 j = Amount
 28,#!h*,Transfer Money
                 t = "Transfer " # Mission.Tow # " mc to " # ShipNameAndId(Mission.Intercept)
                 s = Xfer mc
-                c = System.Host$=2 AND Cfg("AllowExtendedMissions")
+                c = Cfg("AllowExtendedMissions")
                 i = Target
                 j = Amount
 29,+3,Standard Super Spy
                 s = Std Spy
-                c = System.Host$=2 AND Cfg("AllowExtendedMissions")
+                c = Cfg("AllowExtendedMissions")
 30,,Cloak
                 c = False
                 w = True
@@ -215,15 +219,15 @@
 32,*+9ab,Gather-Build Fighters
                 t = "Gather-Build " # Z(Mission.Intercept) # " fighters"
                 s = GB-Ftrs
-                c = System.Host$=2 AND Fighter.Bays AND Cfg("AllowExtendedMissions")
+                c = Fighter.Bays AND Cfg("AllowExtendedMissions")
 33,*,Beam Up Credits
                 t = "Beam up " # Z(Mission.Intercept) # " mc"
                 s = BU mc
-                c = System.Host$=2 AND Cfg("AllowExtendedMissions")
+                c = Cfg("AllowExtendedMissions")
 34,*,Beam Up Clans
                 t = "Beam up " # Z(Mission.Intercept) # " clans"
                 s = BU Clan
-                c = System.Host$=2 AND Cfg("AllowBeamUpClans") AND Cfg("AllowExtendedMissions")
+                c = Cfg("AllowBeamUpClans") AND Cfg("AllowExtendedMissions")
 35,,Beam Up Multiple
                 s = BU Many
                 c = False
@@ -231,13 +235,13 @@
 36,*#,Add Mines to Field
                 t = "Add " & If(Mission.Intercept, Mission.Intercept, "all") & " torps" & (" to minefield #" # Mission.Tow)
                 s = Add Min
-                c = System.Host$=2 AND Torp AND Cfg("AllowExtendedMissions")
+                c = Torp AND Cfg("AllowExtendedMissions")
                 i = Amount
                 j = Mine Id
 37,*#+7,Add Web Mines to Field
                 t = "Add " & If(Mission.Intercept, Mission.Intercept, "all") & " torps to web #" # Mission.Tow
                 s = Add Web
-                c = System.Host$=2 AND Torp AND Cfg("AllowExtendedMissions")
+                c = Torp AND Cfg("AllowExtendedMissions")
                 i = Amount
                 j = Mine Id
 38,*,Training

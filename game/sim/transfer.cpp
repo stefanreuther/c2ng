@@ -45,12 +45,10 @@ game::sim::Transfer::Transfer(const UnitScoreDefinitionList& shipScores,
                               const UnitScoreDefinitionList& planetScores,
                               const game::spec::ShipList& shipList,
                               const game::config::HostConfiguration& config,
-                              HostVersion hostVersion,
                               afl::string::Translator& tx)
     : BaseTransfer(shipList, config, tx),
       m_shipScores(shipScores),
-      m_planetScores(planetScores),
-      m_hostVersion(hostVersion)
+      m_planetScores(planetScores)
 { }
 
 bool
@@ -158,7 +156,7 @@ game::sim::Transfer::copyShipFromGame(Ship& out, const game::map::Ship& in) cons
 
     // Flags
     int32_t flags = 0;
-    if (fuel > 0 && cloakable && m_shipList.missions().isMissionCloaking(mission, out.getOwner(), m_config, m_hostVersion)) {
+    if (fuel > 0 && cloakable && m_shipList.missions().isMissionCloaking(mission, out.getOwner(), m_config)) {
         flags |= Ship::fl_Cloaked;
     }
     setHullFunction(flags, out, in, FullWeaponryAbility,   BasicHullFunction::FullWeaponry);
@@ -190,7 +188,7 @@ game::sim::Transfer::copyShipToGame(game::map::Ship& out, const Ship& in, game::
             mem.setMission(Mission::msn_Kill, 0, 0, m_config, m_shipList);
         } else {
             const int oldMission = out.getMission().orElse(0);
-            const bool isCloaking = m_shipList.missions().isMissionCloaking(oldMission, realOwner, m_config, m_hostVersion);
+            const bool isCloaking = m_shipList.missions().isMissionCloaking(oldMission, realOwner, m_config);
             if (out.hasSpecialFunction(BasicHullFunction::Cloak, m_shipScores, m_shipList, m_config) && (in.getFlags() & Ship::fl_Cloaked) != 0) {
                 // Ship can cloak -> set a cloak mission unless it already has one
                 if (!isCloaking) {

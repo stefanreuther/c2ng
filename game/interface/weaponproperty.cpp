@@ -11,13 +11,12 @@ using interpreter::makeIntegerValue;
 afl::data::Value*
 game::interface::getWeaponProperty(const game::spec::Weapon& w, WeaponProperty iwp,
                                    const game::config::HostConfiguration& config,
-                                   const game::HostVersion& host,
                                    bool isTorpedo)
 {
     // ex int/if/specif.h:getWeaponProperty
     /* We're doubling torpedo bang/kill values when appropriate */
     int factor;
-    if (isTorpedo && host.hasDoubleTorpedoPower(config)) {
+    if (isTorpedo && config.hasDoubleTorpedoPower()) {
         factor = 2;
     } else {
         factor = 1;
