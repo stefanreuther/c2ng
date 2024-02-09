@@ -90,11 +90,11 @@ AFL_TEST("gfx.codec.Custom:save", a)
         Custom(Custom::EightBit, false).save(*can, out);
 
         // (0,48,0) is mapped to (0,44,0) = 0xA2 (external) = 130 (internal)
-        // (0,0,64) is mapped to (0,0,56) = 0x62 (external) = 66 (internal)
         // (64,0,64) is allocated dynamically as 0xC0
+        // (0,0,64) is allocated dynamically as 0xC1
         static const uint8_t EXPECTED[] = {
             'C','D',3,0,5,0,
-            16,0,16, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0,
+            16,0,16, 0,0,16, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0,
             0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0,
             0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0,
             0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0,
@@ -105,8 +105,8 @@ AFL_TEST("gfx.codec.Custom:save", a)
             0xC0, 0xC0, 0xC0,
             0xC0, 0xA2, 0xC0,
             0xC0, 0xC0, 0xC0,
-            0xC0, 0x62, 0xC0,
-            0xC0, 0x62, 0xC0,
+            0xC0, 0xC1, 0xC0,
+            0xC0, 0xC1, 0xC0,
         };
         a.checkEqualContent<uint8_t>("31. 8-bit uncompressed", out.getContent(), EXPECTED);
     }
@@ -120,12 +120,12 @@ AFL_TEST("gfx.codec.Custom:save", a)
             213,0,0,0,
             213,0,255,
             'C','D',3,0,5,0,
-            16,0,16, 255,189,0,
+            16,0,16, 0,0,16, 255,186,0,
             255,4,0xC0,
             0xA2,
             255,5,0xC0,
-            0x62, 0xC0,
-            0xC0, 0x62, 0xC0,
+            0xC1, 0xC0,
+            0xC0, 0xC1, 0xC0,
             0,0,
         };
         a.checkEqualContent<uint8_t>("41. 8-bit compressed", out.getContent(), EXPECTED);

@@ -430,7 +430,7 @@ namespace {
         afl::base::Ref<gfx::PalettizedPixmap> encodedImage = gfx::ColorQuantizer()
             .setPalette(0,  pal.subrange(0, 16))
             .setPalette(48, pal.subrange(16))
-            .setUsablePaletteRange(0, 255)
+            .setUsablePaletteRange(0, 256)
             .setDynamicPaletteRange(192, 64)
             .quantize(can);
 

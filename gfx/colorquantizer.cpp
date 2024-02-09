@@ -168,7 +168,6 @@ namespace {
 
         // Determine threshold for allocating a color.
         // PCC1 uses threshold 0 for 256-color pictures (64 dynamic colors), 20 for 16-color (5 dynamic colors).
-        // This produces threshold 1 for the former.
         const size_t threshold = 100 / st.numDynamic;
 
         while (st.numDynamic > 0) {
@@ -186,7 +185,7 @@ namespace {
             const size_t closest = findClosestColor(st, c);
 
             // If not close enough to an existing color, allocate one
-            if (closest == nil || getColorDistance(c, st.palette[closest]) > threshold) {
+            if (closest == nil || getColorDistance(c, st.palette[closest]) >= threshold) {
                 st.palette[st.firstDynamic++] = c;
                 --st.numDynamic;
             }
