@@ -183,7 +183,7 @@ game::nu::BrowserHandler::callServer(game::browser::Account& acc,
      case afl::net::http::SimpleDownloadListener::Succeeded:
         break;
      case afl::net::http::SimpleDownloadListener::Failed:
-        log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: network access failed"), url));
+        log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: network access failed (%s)"), url, toString(listener.getFailureReason())));
         return std::auto_ptr<afl::data::Value>();
      case afl::net::http::SimpleDownloadListener::TimedOut:
         log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: network access timed out"), url));

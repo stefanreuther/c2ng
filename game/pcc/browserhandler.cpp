@@ -464,7 +464,7 @@ game::pcc::BrowserHandler::processResult(const String_t& url, afl::net::http::Si
      case SimpleDownloadListener::Succeeded:
         break;
      case SimpleDownloadListener::Failed:
-        log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: network access failed"), url));
+        log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: network access failed (%s)"), url, toString(listener.getFailureReason())));
         return std::auto_ptr<afl::data::Value>();
      case SimpleDownloadListener::TimedOut:
         log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: network access timed out"), url));
