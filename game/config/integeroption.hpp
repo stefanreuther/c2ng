@@ -75,4 +75,18 @@ namespace game { namespace config {
 
 } }
 
+// Get value.
+inline int32_t
+game::config::IntegerOption::operator()() const
+{
+    return m_value;
+}
+
+// Access ValueParser.
+inline const game::config::ValueParser&
+game::config::IntegerOption::parser() const
+{
+    return m_parser;
+}
+
 #endif

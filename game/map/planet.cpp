@@ -606,20 +606,6 @@ game::map::Planet::isVisible() const
         && m_planetKind != HiddenPlanet;
 }
 
-game::PlayerSet_t
-game::map::Planet::getPlanetSource() const
-{
-    // ex GPlanet::getPlanetSource
-    return m_planetSource;
-}
-
-void
-game::map::Planet::addPlanetSource(PlayerSet_t p)
-{
-    m_planetSource += p;
-}
-
-
 bool
 game::map::Planet::hasAnyPlanetData() const
 {
@@ -629,30 +615,10 @@ game::map::Planet::hasAnyPlanetData() const
         && m_planetKind != UnknownPlanet;
 }
 
-bool
-game::map::Planet::hasFullPlanetData() const
-{
-    // ex GPlanet::hasFullPlanetData
-    return !m_planetSource.empty();
-}
-
 int
 game::map::Planet::getHistoryTimestamp(Timestamp kind) const
 {
     return m_historyTimestamps[kind];
-}
-
-game::PlayerSet_t
-game::map::Planet::getBaseSource() const
-{
-    // ex GPlanet::getBaseSource
-    return m_baseSource;
-}
-
-void
-game::map::Planet::addBaseSource(PlayerSet_t p)
-{
-    m_baseSource += p;
 }
 
 bool
@@ -661,13 +627,6 @@ game::map::Planet::hasBase() const
     // ex GPlanet::hasBase
     return m_baseKind != UnknownBase
         && m_baseKind != NoBase;
-}
-
-bool
-game::map::Planet::hasFullBaseData() const
-{
-    // ex GPlanet::hasFullBaseData
-    return !m_baseSource.empty();
 }
 
 
@@ -814,26 +773,12 @@ game::map::Planet::setIndustryLevel(IntegerProperty_t level, const HostVersion& 
  *  Colonist accessors:
  */
 
-game::NegativeProperty_t
-game::map::Planet::getColonistHappiness() const
-{
-    // ex GPlanet::getColonistHappiness
-    return m_currentPlanetData.colonistHappiness;
-}
-
 void
 game::map::Planet::setColonistHappiness(NegativeProperty_t happiness)
 {
     // ex GPlanet::setColonistHappiness
     m_currentPlanetData.colonistHappiness = happiness;
     markDirty();
-}
-
-game::IntegerProperty_t
-game::map::Planet::getColonistTax() const
-{
-    // ex GPlanet::getColonistTax
-    return m_currentPlanetData.colonistTax;
 }
 
 void
@@ -849,26 +794,12 @@ game::map::Planet::setColonistTax(IntegerProperty_t tax)
  *  Native accessors:
  */
 
-game::IntegerProperty_t
-game::map::Planet::getNativeGovernment() const
-{
-    // ex GPlanet::getNativeGovernment
-    return m_currentPlanetData.nativeGovernment;
-}
-
 void
 game::map::Planet::setNativeGovernment(IntegerProperty_t gov)
 {
     // ex GPlanet::setNativeGovernment
     m_currentPlanetData.nativeGovernment = gov;
     markDirty();
-}
-
-game::NegativeProperty_t
-game::map::Planet::getNativeHappiness() const
-{
-    // ex GPlanet::getNativeHappiness
-    return m_currentPlanetData.nativeHappiness;
 }
 
 void
@@ -879,13 +810,6 @@ game::map::Planet::setNativeHappiness(NegativeProperty_t happiness)
     markDirty();
 }
 
-game::IntegerProperty_t
-game::map::Planet::getNativeRace() const
-{
-    // ex GPlanet::getNativeRace
-    return m_currentPlanetData.nativeRace;
-}
-
 void
 game::map::Planet::setNativeRace(IntegerProperty_t race)
 {
@@ -894,27 +818,12 @@ game::map::Planet::setNativeRace(IntegerProperty_t race)
     markDirty();
 }
 
-game::IntegerProperty_t
-game::map::Planet::getNativeTax() const
-{
-    // ex GPlanet::getNativeTax
-    return m_currentPlanetData.nativeTax;
-}
-
 void
 game::map::Planet::setNativeTax(IntegerProperty_t tax)
 {
     // ex GPlanet::setNativeTax
     m_currentPlanetData.nativeTax = tax;
     markDirty();
-}
-
-game::LongProperty_t
-game::map::Planet::getNatives() const
-{
-    // ex GPlanet::getNatives
-    // FIXME: rename?
-    return m_currentPlanetData.nativeClans;
 }
 
 void
@@ -953,15 +862,8 @@ game::map::Planet::setKnownToHaveNatives(bool known)
  *  FCode accessors:
  */
 
-game::StringProperty_t
-game::map::Planet::getFriendlyCode() const
-{
-    // ex GPlanet::getFCode, GPlanet::isFCodeKnown
-    return m_currentPlanetData.friendlyCode;
-}
-
 void
-game::map::Planet::setFriendlyCode(StringProperty_t fc)
+game::map::Planet::setFriendlyCode(const StringProperty_t& fc)
 {
     // ex GPlanet::setFCode
     m_currentPlanetData.friendlyCode = fc;
@@ -1080,12 +982,6 @@ game::map::Planet::setOreGround(Element::Type type, LongProperty_t amount)
     markDirty();
 }
 
-game::IntegerProperty_t
-game::map::Planet::getTemperature() const
-{
-    return m_currentPlanetData.temperature;
-}
-
 void
 game::map::Planet::setTemperature(IntegerProperty_t value)
 {
@@ -1193,26 +1089,12 @@ game::map::Planet::setCargo(Element::Type type, LongProperty_t amount)
  *  Simple base accessors:
  */
 
-game::IntegerProperty_t
-game::map::Planet::getBaseDamage() const
-{
-    // ex GPlanet::getBaseDamage
-    return m_currentBaseData.damage;
-}
-
 void
 game::map::Planet::setBaseDamage(IntegerProperty_t n)
 {
     // ex GPlanet::setBaseDamage
     m_currentBaseData.damage = n;
     markDirty();
-}
-
-game::IntegerProperty_t
-game::map::Planet::getBaseMission() const
-{
-    // GPlanet::getBaseMission
-    return m_currentBaseData.mission;
 }
 
 void
@@ -1257,20 +1139,6 @@ game::map::Planet::setBaseTechLevel(TechLevel level, IntegerProperty_t value)
 /*
  *  Shipyard accessors:
  */
-
-game::IntegerProperty_t
-game::map::Planet::getBaseShipyardAction() const
-{
-    // ex GPlanet::getBaseShipyardOrder
-    return m_currentBaseData.shipyardAction;
-}
-
-game::IntegerProperty_t
-game::map::Planet::getBaseShipyardId() const
-{
-    // ex GPlanet::getBaseShipyardId
-    return m_currentBaseData.shipyardId;
-}
 
 void
 game::map::Planet::setBaseShipyardOrder(IntegerProperty_t action, IntegerProperty_t id)
@@ -1370,26 +1238,12 @@ game::map::Planet::getBaseBuildOrderHullIndex() const
  *  Build queue accessors:
  */
 
-game::IntegerProperty_t
-game::map::Planet::getBaseQueuePosition() const
-{
-    // ex GPlanet::getBaseQueuePosition
-    return m_queuePosition;
-}
-
 void
 game::map::Planet::setBaseQueuePosition(IntegerProperty_t pos)
 {
     // ex GPlanet::setBaseQueuePosition
     m_queuePosition = pos;
     markDirty();
-}
-
-game::LongProperty_t
-game::map::Planet::getBaseQueuePriority() const
-{
-    // ex GPlanet::getBaseQueuePriority
-    return m_queuePriority;
 }
 
 void
@@ -1459,18 +1313,6 @@ game::map::Planet::applyAutobuildSettings(const AutobuildSettings& settings)
  *  Unit score accessors:
  */
 
-game::UnitScoreList&
-game::map::Planet::unitScores()
-{
-    return m_unitScores;
-}
-
-const game::UnitScoreList&
-game::map::Planet::unitScores() const
-{
-    return m_unitScores;
-}
-
 game::NegativeProperty_t
 game::map::Planet::getScore(int16_t scoreId, const UnitScoreDefinitionList& scoreDefinitions) const
 {
@@ -1483,22 +1325,4 @@ game::map::Planet::getScore(int16_t scoreId, const UnitScoreDefinitionList& scor
     } else {
         return afl::base::Nothing;
     }
-}
-
-
-/*
- *  MessageLink
- */
-
-game::map::MessageLink&
-game::map::Planet::messages()
-{
-    // ex GPlanet::getAssociatedMessages
-    return m_messages;
-}
-
-const game::map::MessageLink&
-game::map::Planet::messages() const
-{
-    return m_messages;
 }

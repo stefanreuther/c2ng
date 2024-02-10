@@ -351,11 +351,11 @@ namespace game { namespace map {
 
         /** Get friendly code.
             \return friendly code */
-        StringProperty_t getFriendlyCode() const;
+        const StringProperty_t& getFriendlyCode() const;
 
         /** Set friendly code.
             \param fc Friendly code */
-        void setFriendlyCode(StringProperty_t fc);
+        void setFriendlyCode(const StringProperty_t& fc);
 
 
         /*
@@ -648,5 +648,175 @@ namespace game { namespace map {
     };
 
 } }
+
+inline game::PlayerSet_t
+game::map::Planet::getPlanetSource() const
+{
+    // ex GPlanet::getPlanetSource
+    return m_planetSource;
+}
+
+inline void
+game::map::Planet::addPlanetSource(PlayerSet_t p)
+{
+    m_planetSource += p;
+}
+
+inline bool
+game::map::Planet::hasFullPlanetData() const
+{
+    // ex GPlanet::hasFullPlanetData
+    return !m_planetSource.empty();
+}
+
+inline game::PlayerSet_t
+game::map::Planet::getBaseSource() const
+{
+    // ex GPlanet::getBaseSource
+    return m_baseSource;
+}
+
+inline void
+game::map::Planet::addBaseSource(PlayerSet_t p)
+{
+    m_baseSource += p;
+}
+
+inline bool
+game::map::Planet::hasFullBaseData() const
+{
+    // ex GPlanet::hasFullBaseData
+    return !m_baseSource.empty();
+}
+
+inline game::NegativeProperty_t
+game::map::Planet::getColonistHappiness() const
+{
+    // ex GPlanet::getColonistHappiness
+    return m_currentPlanetData.colonistHappiness;
+}
+
+inline game::IntegerProperty_t
+game::map::Planet::getColonistTax() const
+{
+    // ex GPlanet::getColonistTax
+    return m_currentPlanetData.colonistTax;
+}
+
+inline game::IntegerProperty_t
+game::map::Planet::getNativeGovernment() const
+{
+    // ex GPlanet::getNativeGovernment
+    return m_currentPlanetData.nativeGovernment;
+}
+
+inline game::NegativeProperty_t
+game::map::Planet::getNativeHappiness() const
+{
+    // ex GPlanet::getNativeHappiness
+    return m_currentPlanetData.nativeHappiness;
+}
+
+inline game::IntegerProperty_t
+game::map::Planet::getNativeRace() const
+{
+    // ex GPlanet::getNativeRace
+    return m_currentPlanetData.nativeRace;
+}
+
+inline game::IntegerProperty_t
+game::map::Planet::getNativeTax() const
+{
+    // ex GPlanet::getNativeTax
+    return m_currentPlanetData.nativeTax;
+}
+
+inline game::LongProperty_t
+game::map::Planet::getNatives() const
+{
+    // ex GPlanet::getNatives
+    // FIXME: rename?
+    return m_currentPlanetData.nativeClans;
+}
+
+inline const game::StringProperty_t&
+game::map::Planet::getFriendlyCode() const
+{
+    // ex GPlanet::getFCode, GPlanet::isFCodeKnown
+    return m_currentPlanetData.friendlyCode;
+}
+
+inline game::IntegerProperty_t
+game::map::Planet::getTemperature() const
+{
+    return m_currentPlanetData.temperature;
+}
+
+inline game::IntegerProperty_t
+game::map::Planet::getBaseDamage() const
+{
+    // ex GPlanet::getBaseDamage
+    return m_currentBaseData.damage;
+}
+
+inline game::IntegerProperty_t
+game::map::Planet::getBaseMission() const
+{
+    // GPlanet::getBaseMission
+    return m_currentBaseData.mission;
+}
+
+inline game::IntegerProperty_t
+game::map::Planet::getBaseShipyardAction() const
+{
+    // ex GPlanet::getBaseShipyardOrder
+    return m_currentBaseData.shipyardAction;
+}
+
+inline game::IntegerProperty_t
+game::map::Planet::getBaseShipyardId() const
+{
+    // ex GPlanet::getBaseShipyardId
+    return m_currentBaseData.shipyardId;
+}
+
+inline game::IntegerProperty_t
+game::map::Planet::getBaseQueuePosition() const
+{
+    // ex GPlanet::getBaseQueuePosition
+    return m_queuePosition;
+}
+
+inline game::LongProperty_t
+game::map::Planet::getBaseQueuePriority() const
+{
+    // ex GPlanet::getBaseQueuePriority
+    return m_queuePriority;
+}
+
+inline game::UnitScoreList&
+game::map::Planet::unitScores()
+{
+    return m_unitScores;
+}
+
+inline const game::UnitScoreList&
+game::map::Planet::unitScores() const
+{
+    return m_unitScores;
+}
+
+inline game::map::MessageLink&
+game::map::Planet::messages()
+{
+    // ex GPlanet::getAssociatedMessages
+    return m_messages;
+}
+
+inline const game::map::MessageLink&
+game::map::Planet::messages() const
+{
+    return m_messages;
+}
 
 #endif

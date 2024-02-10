@@ -65,7 +65,17 @@ namespace {
         return *p;
     }
 
+    TagNode& makeTag(TagNode& out, const char* tagName)
+    {
+        return makeTag(out, String_t(tagName));
+    }
+
     void makeText(TagNode& out, const String_t& text)
+    {
+        out.addNewChild(new TextNode(text));
+    }
+
+    void makeText(TagNode& out, const char* text)
     {
         out.addNewChild(new TextNode(text));
     }

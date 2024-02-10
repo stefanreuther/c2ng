@@ -43,23 +43,9 @@ game::config::IntegerOption::set(int32_t newValue)
     }
 }
 
-// Get value.
-int32_t
-game::config::IntegerOption::operator()() const
-{
-    return m_value;
-}
-
 // Copy from another option.
 void
 game::config::IntegerOption::copyFrom(const IntegerOption& other)
 {
     set(other.m_value);
-}
-
-// Access ValueParser.
-const game::config::ValueParser&
-game::config::IntegerOption::parser() const
-{
-    return m_parser;
 }

@@ -383,11 +383,11 @@ namespace game { namespace map {
 
         /** Get friendly code.
             \return friendly code, if known */
-        StringProperty_t getFriendlyCode() const;
+        const StringProperty_t& getFriendlyCode() const;
 
         /** Set friendly code.
             \param fc New friendly code */
-        void setFriendlyCode(StringProperty_t fc);
+        void setFriendlyCode(const StringProperty_t& fc);
 
 
         /*
@@ -588,5 +588,207 @@ namespace game { namespace map {
     };
 
 } }
+
+inline game::PlayerSet_t
+game::map::Ship::getShipSource() const
+{
+    // ex GShip::getShipSource
+    return m_shipSource;
+}
+
+inline void
+game::map::Ship::addShipSource(PlayerSet_t p)
+{
+    m_shipSource += p;
+}
+
+inline game::map::Ship::Kind
+game::map::Ship::getShipKind() const
+{
+    // ex GShip::getShipKind
+    return m_kind;
+}
+
+inline bool
+game::map::Ship::hasAnyShipData() const
+{
+    // ex GShip::hasAnyShipData
+    // Note that this is implemented differently than in PCC2!
+    // PCC2: check whether any historic data is available
+    // c2ng: check for known owner
+    return m_currentData.owner.isValid();
+}
+
+inline bool
+game::map::Ship::hasFullShipData() const
+{
+    // ex GShip::hasFullShipData
+    return !m_shipSource.empty();
+}
+
+inline int
+game::map::Ship::getHistoryNewestLocationTurn() const
+{
+    // ex GShip::getHistoryNewestTurn
+    return m_historyData.trackTurn;
+}
+
+inline game::IntegerProperty_t
+game::map::Ship::getHull() const
+{
+    // ex GShip::getHullId() const
+    return m_currentData.hullType;
+}
+
+inline int
+game::map::Ship::getRemoteControlFlag() const
+{
+    // ex GShip::getRemoteControlFlag
+    return m_remoteControlFlag;
+}
+
+inline game::NegativeProperty_t
+game::map::Ship::getWaypointDX() const
+{
+    // ex GShip::getWaypointDX
+    return m_currentData.waypointDX;
+}
+
+inline game::NegativeProperty_t
+game::map::Ship::getWaypointDY() const
+{
+    // ex GShip::getWaypointDY
+    return m_currentData.waypointDY;
+}
+
+inline game::IntegerProperty_t
+game::map::Ship::getWarpFactor() const
+{
+    // ex GShip::getWarp
+    return m_currentData.warpFactor;
+}
+
+inline game::IntegerProperty_t
+game::map::Ship::getEngineType() const
+{
+    // ex GShip::getEngineType
+    return m_currentData.engineType;
+}
+
+inline game::IntegerProperty_t
+game::map::Ship::getBeamType() const
+{
+    // ex GShip::getBeamType
+    return m_currentData.beamType;
+}
+
+inline game::IntegerProperty_t
+game::map::Ship::getNumBays() const
+{
+    // ex GShip::getNumBays
+    return m_currentData.numBays;
+}
+
+inline game::IntegerProperty_t
+game::map::Ship::getTorpedoType() const
+{
+    // ex GShip::getTorpType
+    return m_currentData.torpedoType;
+}
+
+inline game::IntegerProperty_t
+game::map::Ship::getMission() const
+{
+    // ex GShip::getMission
+    return m_currentData.mission;
+}
+
+inline game::IntegerProperty_t
+game::map::Ship::getPrimaryEnemy() const
+{
+    // ex GShip::getPrimaryEnemy
+    return m_currentData.primaryEnemy;
+}
+
+inline game::IntegerProperty_t
+game::map::Ship::getDamage() const
+{
+    // ex GShip::getDamage
+    return m_currentData.damage;
+}
+
+inline game::IntegerProperty_t
+game::map::Ship::getCrew() const
+{
+    // ex GShip::getCrew
+    return m_currentData.crew;
+}
+
+inline const game::StringProperty_t&
+game::map::Ship::getFriendlyCode() const
+{
+    // ex GShip::getFCode, GShip::isFCodeKnown
+    return m_currentData.friendlyCode;
+}
+
+inline game::IntegerProperty_t
+game::map::Ship::getAmmo() const
+{
+    // ex GShip::getAmmoRaw; also replaces GShip::getAmmo
+    return m_currentData.ammo;
+}
+
+inline int
+game::map::Ship::getFleetNumber() const
+{
+    // ex GShip::getFleetNumber
+    return m_fleetNumber;
+}
+
+inline const String_t&
+game::map::Ship::getFleetName() const
+{
+    // ex GShip::getFleetName
+    return m_fleetName;
+}
+
+inline bool
+game::map::Ship::isFleetLeader() const
+{
+    // ex GShip::isFleetLeader
+    return m_fleetNumber == getId();
+}
+
+inline bool
+game::map::Ship::hasAnyShipSpecialFunctions() const
+{
+    // ex GShip::hasAnyShipSpecificSpecials
+    return !m_specialFunctions.empty();
+}
+
+inline game::UnitScoreList&
+game::map::Ship::unitScores()
+{
+    return m_unitScores;
+}
+
+inline const game::UnitScoreList&
+game::map::Ship::unitScores() const
+{
+    return m_unitScores;
+}
+
+inline game::map::MessageLink&
+game::map::Ship::messages()
+{
+    // ex GShip::getAssociatedMessages
+    return m_messages;
+}
+
+inline const game::map::MessageLink&
+game::map::Ship::messages() const
+{
+    return m_messages;
+}
 
 #endif

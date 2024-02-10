@@ -499,43 +499,6 @@ game::map::Ship::isReliablyVisible(const int forPlayer) const
     }
 }
 
-game::PlayerSet_t
-game::map::Ship::getShipSource() const
-{
-    // ex GShip::getShipSource
-    return m_shipSource;
-}
-
-void
-game::map::Ship::addShipSource(PlayerSet_t p)
-{
-    m_shipSource += p;
-}
-
-game::map::Ship::Kind
-game::map::Ship::getShipKind() const
-{
-    // ex GShip::getShipKind
-    return m_kind;
-}
-
-bool
-game::map::Ship::hasAnyShipData() const
-{
-    // ex GShip::hasAnyShipData
-    // Note that this is implemented differently than in PCC2!
-    // PCC2: check whether any historic data is available
-    // c2ng: check for known owner
-    return m_currentData.owner.isValid();
-}
-
-bool
-game::map::Ship::hasFullShipData() const
-{
-    // ex GShip::hasFullShipData
-    return !m_shipSource.empty();
-}
-
 
 /*
  *  History accessors
@@ -545,13 +508,6 @@ int
 game::map::Ship::getHistoryTimestamp(Timestamp kind) const
 {
     return m_historyTimestamps[kind];
-}
-
-int
-game::map::Ship::getHistoryNewestLocationTurn() const
-{
-    // ex GShip::getHistoryNewestTurn
-    return m_historyData.trackTurn;
 }
 
 const game::map::ShipHistoryData::Track*
@@ -598,13 +554,6 @@ game::map::Ship::getMass(const game::spec::ShipList& shipList) const
     }
 }
 
-game::IntegerProperty_t
-game::map::Ship::getHull() const
-{
-    // ex GShip::getHullId() const
-    return m_currentData.hullType;
-}
-
 void
 game::map::Ship::setHull(IntegerProperty_t h)
 {
@@ -649,13 +598,6 @@ game::map::Ship::getRealOwner() const
     }
 }
 
-int
-game::map::Ship::getRemoteControlFlag() const
-{
-    // ex GShip::getRemoteControlFlag
-    return m_remoteControlFlag;
-}
-
 
 /*
  *  Course accessors
@@ -696,20 +638,6 @@ game::map::Ship::clearWaypoint()
     }
 }
 
-game::NegativeProperty_t
-game::map::Ship::getWaypointDX() const
-{
-    // ex GShip::getWaypointDX
-    return m_currentData.waypointDX;
-}
-
-game::NegativeProperty_t
-game::map::Ship::getWaypointDY() const
-{
-    // ex GShip::getWaypointDY
-    return m_currentData.waypointDY;
-}
-
 game::IntegerProperty_t
 game::map::Ship::getHeading() const
 {
@@ -723,13 +651,6 @@ game::map::Ship::getHeading() const
     } else {
         return m_scannedHeading;
     }
-}
-
-game::IntegerProperty_t
-game::map::Ship::getWarpFactor() const
-{
-    // ex GShip::getWarp
-    return m_currentData.warpFactor;
 }
 
 void
@@ -763,26 +684,12 @@ game::map::Ship::isHyperdriving(const UnitScoreDefinitionList& scoreDefinitions,
  *  Equipment accessors
  */
 
-game::IntegerProperty_t
-game::map::Ship::getEngineType() const
-{
-    // ex GShip::getEngineType
-    return m_currentData.engineType;
-}
-
 void
 game::map::Ship::setEngineType(IntegerProperty_t engineType)
 {
     // ex GShip::setEngineType
     m_currentData.engineType = engineType;
     markDirty();
-}
-
-game::IntegerProperty_t
-game::map::Ship::getBeamType() const
-{
-    // ex GShip::getBeamType
-    return m_currentData.beamType;
 }
 
 void
@@ -812,26 +719,12 @@ game::map::Ship::setNumBeams(IntegerProperty_t count)
     markDirty();
 }
 
-game::IntegerProperty_t
-game::map::Ship::getNumBays() const
-{
-    // ex GShip::getNumBays
-    return m_currentData.numBays;
-}
-
 void
 game::map::Ship::setNumBays(IntegerProperty_t count)
 {
     // ex GShip::setNumBays
     m_currentData.numBays = count;
     markDirty();
-}
-
-game::IntegerProperty_t
-game::map::Ship::getTorpedoType() const
-{
-    // ex GShip::getTorpType
-    return m_currentData.torpedoType;
 }
 
 void
@@ -890,13 +783,6 @@ game::map::Ship::setName(const String_t& str)
     markDirty();
 }
 
-game::IntegerProperty_t
-game::map::Ship::getMission() const
-{
-    // ex GShip::getMission
-    return m_currentData.mission;
-}
-
 void
 game::map::Ship::setMission(IntegerProperty_t m, IntegerProperty_t i, IntegerProperty_t t)
 {
@@ -918,26 +804,12 @@ game::map::Ship::getMissionParameter(MissionParameter which) const
         : m_currentData.missionTowParameter;
 }
 
-game::IntegerProperty_t
-game::map::Ship::getPrimaryEnemy() const
-{
-    // ex GShip::getPrimaryEnemy
-    return m_currentData.primaryEnemy;
-}
-
 void
 game::map::Ship::setPrimaryEnemy(IntegerProperty_t pe)
 {
     // ex GShip::setPrimaryEnemy
     m_currentData.primaryEnemy = pe;
     markDirty();
-}
-
-game::IntegerProperty_t
-game::map::Ship::getDamage() const
-{
-    // ex GShip::getDamage
-    return m_currentData.damage;
 }
 
 void
@@ -948,13 +820,6 @@ game::map::Ship::setDamage(IntegerProperty_t damage)
     markDirty();
 }
 
-game::IntegerProperty_t
-game::map::Ship::getCrew() const
-{
-    // ex GShip::getCrew
-    return m_currentData.crew;
-}
-
 void
 game::map::Ship::setCrew(IntegerProperty_t crew)
 {
@@ -963,15 +828,8 @@ game::map::Ship::setCrew(IntegerProperty_t crew)
     markDirty();
 }
 
-game::StringProperty_t
-game::map::Ship::getFriendlyCode() const
-{
-    // ex GShip::getFCode, GShip::isFCodeKnown
-    return m_currentData.friendlyCode;
-}
-
 void
-game::map::Ship::setFriendlyCode(StringProperty_t fc)
+game::map::Ship::setFriendlyCode(const StringProperty_t& fc)
 {
     // ex GShip::setFCode
     m_currentData.friendlyCode = fc;
@@ -982,13 +840,6 @@ game::map::Ship::setFriendlyCode(StringProperty_t fc)
 /*
  *  Cargo accessors
  */
-
-game::IntegerProperty_t
-game::map::Ship::getAmmo() const
-{
-    // ex GShip::getAmmoRaw; also replaces GShip::getAmmo
-    return m_currentData.ammo;
-}
 
 void
 game::map::Ship::setAmmo(IntegerProperty_t amount)
@@ -1130,33 +981,12 @@ game::map::Ship::setFleetNumber(int fno)
     markDirty();
 }
 
-int
-game::map::Ship::getFleetNumber() const
-{
-    // ex GShip::getFleetNumber
-    return m_fleetNumber;
-}
-
 void
 game::map::Ship::setFleetName(String_t name)
 {
     // ex GShip::setFleetName
     m_fleetName = name;
     markDirty();
-}
-
-const String_t&
-game::map::Ship::getFleetName() const
-{
-    // ex GShip::getFleetName
-    return m_fleetName;
-}
-
-bool
-game::map::Ship::isFleetLeader() const
-{
-    // ex GShip::isFleetLeader
-    return m_fleetNumber == getId();
 }
 
 bool
@@ -1251,25 +1081,6 @@ game::map::Ship::enumerateShipFunctions(game::spec::HullFunctionList& list,
     }
 }
 
-bool
-game::map::Ship::hasAnyShipSpecialFunctions() const
-{
-    // ex GShip::hasAnyShipSpecificSpecials
-    return !m_specialFunctions.empty();
-}
-
-game::UnitScoreList&
-game::map::Ship::unitScores()
-{
-    return m_unitScores;
-}
-
-const game::UnitScoreList&
-game::map::Ship::unitScores() const
-{
-    return m_unitScores;
-}
-
 game::NegativeProperty_t
 game::map::Ship::getScore(int16_t scoreId, const UnitScoreDefinitionList& scoreDefinitions) const
 {
@@ -1287,19 +1098,6 @@ game::map::Ship::getScore(int16_t scoreId, const UnitScoreDefinitionList& scoreD
 /*
  *  MessageLink
  */
-
-game::map::MessageLink&
-game::map::Ship::messages()
-{
-    // ex GShip::getAssociatedMessages
-    return m_messages;
-}
-
-const game::map::MessageLink&
-game::map::Ship::messages() const
-{
-    return m_messages;
-}
 
 game::map::ShipData::Transfer&
 game::map::Ship::getTransporter(Transporter which)
