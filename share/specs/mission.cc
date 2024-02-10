@@ -91,7 +91,7 @@
                 s = M-Sweep
 3,,Lay Mines
                 c = Torp
-                w = Torp.Count
+                w = Torp.Count Or (FCode="mkt" And CCompare(Cargo.Str, Torpedo(Torp$).Cost.Str))
 4,,Kill
 5,,Sensor Sweep
                 s = Sensor
@@ -121,7 +121,7 @@
                 s = Repair
 9,+7,Lay Web Mines
                 c = Torp
-                w = Torp.Count
+                w = Torp.Count Or (FCode="mkt" And CCompare(Cargo.Str, Torpedo(Torp$).Cost.Str))
                 s = LayWeb
 9,+8,Dark Sense
                 s = DkSense
@@ -168,13 +168,13 @@
                 c = Torp AND Cfg("AllowExtendedMissions")
                 i = Torps
                 j = Player
-                w = Torp.Count
+                w = Torp.Count Or (FCode="mkt" And CCompare(Cargo.Str, Torpedo(Torp$).Cost.Str))
 22,*y#+7,Lay Web Mines
                 t = "Lay " # Z(Mission.Intercept) # " web mines"
                 c = Torp AND Cfg("AllowExtendedMissions")
                 i = Torps
                 j = Player
-                w = Torp.Count
+                w = Torp.Count Or (FCode="mkt" And CCompare(Cargo.Str, Torpedo(Torp$).Cost.Str))
 23,*#,Scoop Torpedoes
                 t = "Scoop " & Mission.Intercept & " torps" & (" from field #" # Z(Mission.Tow))
                 s = Scoop
@@ -238,12 +238,14 @@
                 c = Torp AND Cfg("AllowExtendedMissions")
                 i = Amount
                 j = Mine Id
+                w = Torp.Count Or (FCode="mkt" And CCompare(Cargo.Str, Torpedo(Torp$).Cost.Str))
 37,*#+7,Add Web Mines to Field
                 t = "Add " & If(Mission.Intercept, Mission.Intercept, "all") & " torps to web #" # Mission.Tow
                 s = Add Web
                 c = Torp AND Cfg("AllowExtendedMissions")
                 i = Amount
                 j = Mine Id
+                w = Torp.Count Or (FCode="mkt" And CCompare(Cargo.Str, Torpedo(Torp$).Cost.Str))
 38,*,Training
                 t = "Training for " # Z(Mission.Intercept) # " supplies"
                 i = Supplies
