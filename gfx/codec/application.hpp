@@ -28,6 +28,7 @@ namespace gfx { namespace codec {
         void showHelp();
         void doConvert(afl::base::Ref<afl::sys::Environment::CommandLine_t> cmdl);
         void doCreateResource(afl::base::Ref<afl::sys::Environment::CommandLine_t> cmdl);
+        void doGallery(afl::base::Ref<afl::sys::Environment::CommandLine_t> cmdl);
 
         bool openInput(Status& st, util::StringParser& p);
         bool openOutput(Status& st, util::StringParser& p);

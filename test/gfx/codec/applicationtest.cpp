@@ -76,6 +76,19 @@ namespace {
         0xBA, 0x0A,
         0xBA, 0x0A,
     };
+
+    // A *.res file containing a single image 9x7 image in two formats (100, 20100)
+    static const uint8_t RES_FILE[] = {
+        0x52, 0x5a, 0x7a, 0x00, 0x00, 0x00, 0x02, 0x00, 0x38, 0x00, 0x00, 0x00, 0x38, 0x00, 0xff, 0x43,
+        0x43, 0x09, 0x00, 0x07, 0xff, 0x11, 0x00, 0x66, 0x66, 0x06, 0x00, 0x20, 0xff, 0x03, 0x22, 0x00,
+        0x20, 0x11, 0x22, 0x12, 0x02, 0x20, 0x22, 0x22, 0x12, 0x02, 0x20, 0x11, 0x22, 0x12, 0x02, 0x20,
+        0xff, 0x03, 0x22, 0x00, 0x00, 0x66, 0x66, 0x06, 0x00, 0x00, 0x00, 0x05, 0x01, 0x00, 0x00, 0x05,
+        0x01, 0xff, 0x43, 0x44, 0x09, 0x00, 0x07, 0xff, 0xc3, 0x00, 0xff, 0x05, 0x06, 0xff, 0x03, 0x00,
+        0xff, 0x07, 0x02, 0x00, 0x00, 0x02, 0x01, 0x01, 0xff, 0x03, 0x02, 0x01, 0x02, 0x00, 0xff, 0x06,
+        0x02, 0x01, 0x02, 0x00, 0x02, 0x01, 0x01, 0xff, 0x03, 0x02, 0x01, 0x02, 0x00, 0xff, 0x07, 0x02,
+        0xff, 0x03, 0x00, 0xff, 0x05, 0x06, 0x00, 0x00, 0x00, 0x00, 0x64, 0x00, 0x08, 0x00, 0x00, 0x00,
+        0x33, 0x00, 0x00, 0x00, 0x84, 0x4e, 0x3b, 0x00, 0x00, 0x00, 0x3f, 0x00, 0x00, 0x00
+    };
 }
 
 /** Test invocation with no arguments.
@@ -256,6 +269,69 @@ AFL_TEST("gfx.codec.Application:create:error:syntax", a)
     env.fs.openFile("in.cc", FileSystem::Create)->fullWrite(FOUR_BIT_FILE);
 
     String_t args[] = { "create", "out.res", "100=whatever:in.cc" };
+    setCommandLine(env, args);
+
+    a.checkEqual    ("01. run",    runApplication(env), 1);
+    a.checkDifferent("02. output", getOutput(env), "");
+}
+
+/** Test successful invocation of "gallery" subcommand. */
+AFL_TEST("gfx.codec.Application:gallery", a)
+{
+    Environment env;
+    env.fs.openFile("in.res", FileSystem::Create)->fullWrite(RES_FILE);
+
+    String_t args[] = { "gallery", "in.res" };
+    setCommandLine(env, args);
+
+    a.checkEqual    ("01. run",    runApplication(env), 0);
+    a.checkEqual    ("02. output", getOutput(env), "");
+
+    // Quick check of the HTML
+    // Try to preserve freedom of choosing any naming scheme, any codec.
+    String_t html = getFileContent(env, "index.html");
+    String_t::size_type start = html.find("<img src=\"");
+    a.checkDifferent("11. html start", start, String_t::npos);
+    String_t::size_type end   = html.find("\"", start + 10);
+    a.checkDifferent("12. html end",   end, String_t::npos);
+
+    String_t fileName = html.substr(start+10, end-start-10);
+    a.checkDifferent("21. image file", fileName, "");
+    a.checkNonNull  ("22. image file", env.fs.openFileNT(fileName, FileSystem::OpenRead).get());
+}
+
+/** Test unsuccessful invocation of "gallery" subcommand: no file given. */
+AFL_TEST("gfx.codec.Application:gallery:error:too-few-args", a)
+{
+    Environment env;
+
+    String_t args[] = { "gallery" };
+    setCommandLine(env, args);
+
+    a.checkEqual    ("01. run",    runApplication(env), 1);
+    a.checkDifferent("02. output", getOutput(env), "");
+}
+
+/** Test unsuccessful invocation of "gallery" subcommand: file not found. */
+AFL_TEST("gfx.codec.Application:gallery:error:file-not-found", a)
+{
+    Environment env;
+
+    String_t args[] = { "gallery", "in.res" };
+    setCommandLine(env, args);
+
+    a.checkEqual    ("01. run",    runApplication(env), 1);
+    a.checkDifferent("02. output", getOutput(env), "");
+}
+
+/** Test unsuccessful invocation of "gallery" subcommand: output not creatible. */
+AFL_TEST("gfx.codec.Application:gallery:error:file-conflict", a)
+{
+    Environment env;
+    env.fs.openFile("in.res", FileSystem::Create)->fullWrite(RES_FILE);
+    env.fs.createDirectory("index.html");
+
+    String_t args[] = { "gallery", "in.res" };
     setCommandLine(env, args);
 
     a.checkEqual    ("01. run",    runApplication(env), 1);

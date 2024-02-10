@@ -3,14 +3,18 @@
   *  \brief Class gfx::codec::Application
   */
 
+#include <map>
+#include <set>
 #include "gfx/codec/application.hpp"
 #include "afl/io/filesystem.hpp"
 #include "afl/io/stream.hpp"
+#include "afl/io/textfile.hpp"
 #include "afl/string/format.hpp"
 #include "afl/string/translator.hpp"
 #include "gfx/codec/bmp.hpp"
 #include "gfx/codec/codec.hpp"
 #include "gfx/codec/custom.hpp"
+#include "util/resourcefilereader.hpp"
 #include "util/resourcefilewriter.hpp"
 #include "util/string.hpp"
 #include "util/stringparser.hpp"
@@ -20,10 +24,58 @@ using afl::base::Ptr;
 using afl::base::Ref;
 using afl::io::FileSystem;
 using afl::io::Stream;
+using afl::io::TextFile;
 using afl::string::Format;
 using afl::string::Translator;
 using gfx::codec::Application;
 using util::StringParser;
+
+namespace {
+    typedef std::map<uint16_t, String_t> Map_t;
+    typedef std::set<uint16_t> Set_t;
+
+    struct GalleryStatus {
+        Map_t files;
+    };
+
+    void saveGallery(const GalleryStatus& st, Stream& out)
+    {
+        TextFile tf(out);
+        tf.writeLine("<html><head><title>Gallery</title></head><body><h1>Gallery</h1><table>");
+
+        // Build set of keys
+        Set_t keys;
+        for (Map_t::const_iterator it = st.files.begin(), end = st.files.end(); it != end; ++it) {
+            if (it->first >= 20000 && it->first < 40000) {
+                keys.insert(uint16_t(it->first - 20000));
+            } else {
+                keys.insert(it->first);
+            }
+        }
+
+        // Do it
+        for (Set_t::const_iterator it = keys.begin(), end = keys.end(); it != end; ++it) {
+            tf.writeLine(Format("<tr><td>%d</td>", *it));
+
+            Map_t::const_iterator mit;
+            if ((mit = st.files.find(*it)) != st.files.end()) {
+                tf.writeLine(Format("<td><img src=\"%s\" /></td>", mit->second));
+            } else {
+                tf.writeLine(Format("<td>&nbsp;</td>"));
+            }
+
+            if ((*it) < 20000 && (mit = st.files.find(uint16_t(*it + 20000))) != st.files.end()) {
+                tf.writeLine(Format("<td><img src=\"%s\" /></td>", mit->second));
+            } else {
+                tf.writeLine(Format("<td>&nbsp;</td>"));
+            }
+        }
+
+        tf.writeLine("</table></body></html>");
+        tf.flush();
+    }
+}
+
 
 struct gfx::codec::Application::Status {
     std::auto_ptr<Codec> codec;
@@ -53,6 +105,8 @@ gfx::codec::Application::appMain()
         doConvert(*cmdl);
     } else if (verb == "create") {
         doCreateResource(*cmdl);
+    } else if (verb == "gallery") {
+        doGallery(*cmdl);
     } else {
         errorExit(Format(tx("invalid command \"%s\" specified. Use \"%s -h\" for help"), verb, environment().getInvocationName()));
     }
@@ -75,6 +129,7 @@ gfx::codec::Application::showHelp()
                        util::formatOptions(tx("Commands:\n"
                                               "  convert INFILE OUTFILE\n"
                                               "  create FILE.res ID=INFILE...\n"
+                                              "  gallery FILE.res...\n"
                                               "\n"
                                               "File specification:\n"
                                               "bmp:PATH.bmp\tBitmap file\n"
@@ -150,6 +205,45 @@ gfx::codec::Application::doCreateResource(afl::base::Ref<afl::sys::Environment::
         }
     }
     resFile.finishFile();
+}
+
+void
+gfx::codec::Application::doGallery(afl::base::Ref<afl::sys::Environment::CommandLine_t> cmdl)
+{
+    Translator& tx = translator();
+    bool did = false;
+    String_t resFileName;
+    GalleryStatus st;
+
+    // Process all files.
+    // In case a member is mentioned multiple times, the file is repeatedly overwritten,
+    // and only the final one is shown.
+    // This is precisely what happens if the files are registered as resource files.
+    while (cmdl->getNextElement(resFileName)) {
+        util::ResourceFileReader resFile(fileSystem().openFile(resFileName, FileSystem::OpenRead), tx);
+        for (size_t i = 0, n = resFile.getNumMembers(); i < n; ++i) {
+            Ptr<Stream> in = resFile.openMemberByIndex(i);
+            if (in.get() != 0) {
+                try {
+                    Ref<Canvas> can = Custom().load(*in);
+
+                    uint16_t id = resFile.getMemberIdByIndex(i);
+                    String_t fileName = Format("img%05d.bmp", id);
+                    BMP().save(*can, *fileSystem().openFile(fileName, FileSystem::Create));
+                    st.files.insert(std::make_pair(id, fileName));
+                }
+                catch (...) { }
+            }
+        }
+        did = true;
+    }
+
+    // Must have had at least one input
+    if (!did) {
+        errorExit(tx("missing input file name"));
+    }
+
+    saveGallery(st, *fileSystem().openFile("index.html", FileSystem::Create));
 }
 
 bool
