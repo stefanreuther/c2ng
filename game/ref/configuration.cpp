@@ -42,7 +42,7 @@ game::ref::createSortPredicate(int config, Session& session, afl::base::Deleter&
     const Root* pRoot = session.getRoot().get();
     const Game* pGame = session.getGame().get();
     const game::spec::ShipList* pShipList = session.getShipList().get();
-    const Turn* pTurn = (pGame != 0 ? pGame->getViewpointTurn().get() : 0);
+    const Turn* pTurn = (pGame != 0 ? &pGame->viewpointTurn() : 0);
 
     switch (config) {
      case ConfigSortById:

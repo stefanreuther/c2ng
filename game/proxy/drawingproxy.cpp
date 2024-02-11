@@ -371,7 +371,7 @@ game::Turn*
 game::proxy::DrawingProxy::Trampoline::getTurn() const
 {
     if (Game* g = m_session.getGame().get()) {
-        return g->getViewpointTurn().get();
+        return &g->viewpointTurn();
     } else {
         return 0;
     }

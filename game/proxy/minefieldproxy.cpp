@@ -105,8 +105,7 @@ game::proxy::MinefieldProxy::Trampoline::buildSweepInfo(SweepInfo& out, Id_t vie
     if (r != 0 && g != 0 && p != 0 && p->isValid()) {
         // Environment
         const int viewpointPlayer = g->getViewpointPlayer();
-        const game::Turn* t = g->getViewpointTurn().get();
-        const game::map::Ship* sh = t != 0 ? t->universe().ships().get(viewpointShip) : 0;
+        const game::map::Ship* sh = g->viewpointTurn().universe().ships().get(viewpointShip);
 
         // Figure out fighter sweep rate
         int frace = viewpointPlayer;
@@ -161,7 +160,7 @@ game::proxy::MinefieldProxy::Trampoline::buildMinefieldInfo(MinefieldInfo& out) 
     if (r != 0 && p != 0 && p->isValid()) {
         // Environment
         const Game* g = m_session.getGame().get();
-        const Turn* t = g != 0 ? g->getViewpointTurn().get() : 0;
+        const Turn* t = g != 0 ? &g->viewpointTurn() : 0;
         util::NumberFormatter fmt = r->userConfiguration().getNumberFormatter();
         afl::string::Translator& tx = m_session.translator();
 

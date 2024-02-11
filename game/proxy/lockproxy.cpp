@@ -54,7 +54,7 @@ game::proxy::LockProxy::Query::handle(Session& session)
     // We need a root, a game, and a viewpoint turn. If we haven't, just respond with a dummy answer.
     Root* pRoot = session.getRoot().get();
     Game* pGame = session.getGame().get();
-    Turn* pTurn = pGame ? pGame->getViewpointTurn().get() : 0;
+    Turn* pTurn = pGame ? &pGame->viewpointTurn() : 0;
     if (pRoot == 0 || pGame == 0 || pTurn == 0) {
         sendResponse(m_target);
         return;
@@ -117,7 +117,7 @@ game::proxy::LockProxy::UnitNameQuery::handle(Session& session)
     // ex WScannerChartWidget::doTooltip (part)
     Root* pRoot = session.getRoot().get();
     Game* pGame = session.getGame().get();
-    Turn* pTurn = pGame ? pGame->getViewpointTurn().get() : 0;
+    Turn* pTurn = pGame ? &pGame->viewpointTurn() : 0;
     if (pRoot == 0 || pGame == 0 || pTurn == 0) {
         sendResponse(m_target, String_t());
         return;

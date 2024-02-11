@@ -36,7 +36,7 @@ class game::proxy::BuildAmmoProxy::Trampoline {
     Session& m_session;                                 // Session
     afl::base::Deleter m_deleter;                       // Deleter; stored objects related to BuildAmmo action
     std::auto_ptr<game::actions::BuildAmmo> m_pAction;  // Action (can be null)
-    afl::base::Ptr<Turn> m_pTurn;                       // Turn (to keep it alive)
+    afl::base::Ref<Turn> m_pTurn;                       // Turn (to keep it alive)
     game::map::Planet& m_planet;                        // Planet
     String_t m_targetName;                              // Name of target planet/ship
     afl::base::SignalConnection conn_targetChange;      // Signal for change of target container
@@ -55,9 +55,9 @@ game::proxy::BuildAmmoProxy::Trampoline::Trampoline(util::RequestSender<BuildAmm
       m_deleter(),
       m_pAction(),
       // Obtain turn and keep it alive
-      m_pTurn(game::actions::mustHaveGame(session).getViewpointTurn()),
+      m_pTurn(game::actions::mustHaveGame(session).viewpointTurn()),
       // Obtain planet
-      m_planet(mustExist(mustExist(m_pTurn.get()).universe().planets().get(planetId))),
+      m_planet(mustExist(m_pTurn->universe().planets().get(planetId))),
       m_targetName(),
       conn_targetChange(),
       conn_sourceChange()
@@ -86,7 +86,7 @@ game::proxy::BuildAmmoProxy::Trampoline::setShip(Id_t shipId)
     Root& r = game::actions::mustHaveRoot(m_session);
     game::spec::ShipList& sl = game::actions::mustHaveShipList(m_session);
 
-    game::map::Ship& ship = mustExist(mustExist(m_pTurn.get()).universe().ships().get(shipId));
+    game::map::Ship& ship = mustExist(m_pTurn->universe().ships().get(shipId));
     if (isValidReceiver(ship)) {
         game::map::ShipStorage& ss = m_deleter.addNew(new game::map::ShipStorage(ship, sl));
         game::map::PlanetStorage& ps = m_deleter.addNew(new game::map::PlanetStorage(m_planet, r.hostConfiguration()));

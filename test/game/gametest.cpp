@@ -45,7 +45,7 @@ AFL_TEST("game.Game:init", a)
     game::Game t;
     a.checkEqual("01. getViewpointPlayer",     t.getViewpointPlayer(), 0);
     a.checkEqual("02. getViewpointTurnNumber", t.getViewpointTurnNumber(), 0);
-    a.checkEqual("03. getViewpointTurn",       t.getViewpointTurn().get(), &t.currentTurn());
+    a.checkEqual("03. viewpointTurn",          &t.viewpointTurn(), &t.currentTurn());
 }
 
 /** Test subobjects.
@@ -76,7 +76,7 @@ AFL_TEST("game.Game:viewpoint-turn", a)
     game::Game t;
     t.currentTurn().setTurnNumber(12);
     a.checkEqual("01. getViewpointTurnNumber", t.getViewpointTurnNumber(), 12);
-    a.checkEqual("02. getViewpointTurn", t.getViewpointTurn().get(), &t.currentTurn());
+    a.checkEqual("02. viewpointTurn", &t.viewpointTurn(), &t.currentTurn());
 
     // Add a history turn. Must be retrievable.
     afl::base::Ref<game::Turn> ht = *new game::Turn();
@@ -85,7 +85,7 @@ AFL_TEST("game.Game:viewpoint-turn", a)
 
     AFL_CHECK_SUCCEEDS(a("11. setViewpointTurnNumber"), t.setViewpointTurnNumber(7));
     a.checkEqual("12. getViewpointTurnNumber", t.getViewpointTurnNumber(), 7);
-    a.checkEqual("13. getViewpointTurn", t.getViewpointTurn().get(), &*ht);
+    a.checkEqual("13. viewpointTurn", &t.viewpointTurn(), &*ht);
 }
 
 /** Test alliance synchronisation.

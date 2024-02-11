@@ -16,6 +16,7 @@
 using game::spec::ShipList;
 using game::spec::Cost;
 using afl::base::Ptr;
+using afl::base::Ref;
 using game::actions::mustExist;
 
 
@@ -41,7 +42,7 @@ class game::proxy::TechUpgradeProxy::Trampoline {
     Session& m_session;
     util::RequestSender<TechUpgradeProxy> m_reply;
 
-    Ptr<Turn> m_pTurn;
+    Ref<Turn> m_pTurn;
     Ptr<ShipList> m_pShipList;
     Ptr<Root> m_pRoot;
 
@@ -58,12 +59,12 @@ game::proxy::TechUpgradeProxy::Trampoline::Trampoline(Session& session, util::Re
       m_reply(reply),
 
       // Keep objects alive
-      m_pTurn(game::actions::mustHaveGame(session).getViewpointTurn()),
+      m_pTurn(game::actions::mustHaveGame(session).viewpointTurn()),
       m_pShipList(session.getShipList()),
       m_pRoot(session.getRoot()),
 
       // Readymade objects
-      m_turn(mustExist(m_pTurn.get())),
+      m_turn(*m_pTurn),
       m_root(game::actions::mustHaveRoot(session)),
       m_planet(mustExist(m_turn.universe().planets().get(planetId))),
       m_container(m_planet, m_root.hostConfiguration()),

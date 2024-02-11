@@ -337,14 +337,11 @@ game::map::info::Browser::renderStarchartPage(Nodes_t& out)
     // Environment
     const Root& root = game::actions::mustHaveRoot(m_session);
     const Game& g = game::actions::mustHaveGame(m_session);
-    const Turn* turn = g.getViewpointTurn().get();
-    if (turn == 0) {
-        throw Exception(Exception::eUser);
-    }
-    const Universe& univ = turn->universe();
+    const Turn& turn = g.viewpointTurn();
+    const Universe& univ = turn.universe();
 
     // Acquire data
-    const StarchartInfo t = computeStarchartInfo(*turn, g.teamSettings());
+    const StarchartInfo t = computeStarchartInfo(turn, g.teamSettings());
 
     // Render
     renderStarchartEmpireSummary(makeTable(out), t, univ, g.teamSettings(), g.mapConfiguration(), m_numberFormatter, tx);
@@ -395,9 +392,5 @@ game::map::info::Browser::addSortOrders(util::StringList& out, uint8_t hi)
 game::map::Universe&
 game::map::info::Browser::universe()
 {
-    Turn* t = game::actions::mustHaveGame(m_session).getViewpointTurn().get();
-    if (t == 0) {
-        throw Exception(Exception::eUser);
-    }
-    return t->universe();
+    return game::actions::mustHaveGame(m_session).viewpointTurn().universe();
 }

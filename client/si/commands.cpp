@@ -703,8 +703,7 @@ namespace {
     game::v3::CommandContainer* getCommandContainer(game::Session& session)
     {
         game::Game& g = game::actions::mustHaveGame(session);
-        game::Turn& t = game::actions::mustExist(g.getViewpointTurn().get());
-        return game::v3::CommandExtra::get(t, g.getViewpointPlayer());
+        return game::v3::CommandExtra::get(g.viewpointTurn(), g.getViewpointPlayer());
     }
 
 
@@ -4292,7 +4291,7 @@ client::si::IFUIListFleets(game::Session& session, ScriptSide& si, RequestLink1 
     // Validate
     // @change PCC2 would verify range of 'except'
     Game& g = game::actions::mustHaveGame(session);
-    Turn& t = game::actions::mustExist(g.getViewpointTurn().get());
+    Turn& t = g.viewpointTurn();
 
     // Prepare
     std::auto_ptr<game::ref::FleetList> list(new game::ref::FleetList());

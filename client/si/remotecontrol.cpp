@@ -47,21 +47,18 @@ namespace {
 
         // Obtain turn
         game::Game& g = game::actions::mustHaveGame(session);
-        game::Turn* t = g.getViewpointTurn().get();
-        if (t == 0) {
-            return 0;    // should not happen
-        }
+        game::Turn& t = g.viewpointTurn();
 
         // Obtain viewpoint player
         const int playerId = g.getViewpointPlayer();
 
         // Refuse totally invalid ship Ids
-        if (t->universe().ships().get(shipId) == 0) {
+        if (t.universe().ships().get(shipId) == 0) {
             return 0;
         }
 
         // Create action
-        return new RemoteControlAction(*t, shipId, playerId);
+        return new RemoteControlAction(t, shipId, playerId);
     }
 }
 

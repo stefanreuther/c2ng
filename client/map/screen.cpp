@@ -543,9 +543,7 @@ client::map::Screen::requestObjectList(game::map::Point pos)
 
                 List list;
                 if (Game* pGame = session.getGame().get()) {
-                    if (Turn* pTurn = pGame->getViewpointTurn().get()) {
-                        list.addObjectsAt(pTurn->universe(), pGame->mapConfiguration().getCanonicalLocation(m_pos), List::Options_t() + List::IncludeForeignShips + List::IncludePlanet, 0);
-                    }
+                    list.addObjectsAt(pGame->viewpointTurn().universe(), pGame->mapConfiguration().getCanonicalLocation(m_pos), List::Options_t() + List::IncludeForeignShips + List::IncludePlanet, 0);
                 }
                 obs.setList(list);
             }

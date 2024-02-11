@@ -43,13 +43,6 @@ namespace game { namespace actions {
         \throw game::Exception on precondition violation */
     game::map::Ship& mustExist(game::map::Ship* ship);
 
-    /** Check for existing turn.
-        Throws if the given Turn pointer is null.
-        \param turn Turn
-        \return *turn
-        \throw game::Exception on precondition violation */
-    Turn& mustExist(Turn* turn);
-
     /** Check for ship list.
         Returns the session's ship list; throws if it has none.
         \param session Session

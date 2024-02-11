@@ -248,12 +248,11 @@ game::interface::makeObjectValue(Reference ref, Session& session)
 
      case Reference::Ufo:
         if (Game* g = session.getGame().get()) {
-            if (Turn* t = g->getViewpointTurn().get()) {
-                game::map::UfoType& ty = t->universe().ufos();
-                Id_t slot = ty.findIndexForId(ref.getId());
-                if (ty.getObjectByIndex(slot) != 0) {
-                    return new game::interface::UfoContext(slot, *t, session);
-                }
+            Turn& t = g->viewpointTurn();
+            game::map::UfoType& ty = t.universe().ufos();
+            Id_t slot = ty.findIndexForId(ref.getId());
+            if (ty.getObjectByIndex(slot) != 0) {
+                return new game::interface::UfoContext(slot, t, session);
             }
         }
         return 0;

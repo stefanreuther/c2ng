@@ -138,10 +138,7 @@ client::widgets::ScanResult::setPositions(game::map::Point origin, game::map::Po
                 game::Game* pGame = session.getGame().get();
                 game::Root* pRoot = session.getRoot().get();
                 if (pGame != 0 && pRoot != 0) {
-                    afl::base::Ptr<game::Turn> pTurn = pGame->getViewpointTurn();
-                    if (pTurn.get() != 0) {
-                        resultText = pTurn->universe().findLocationName(m_target, NAME_FLAGS, pGame->mapConfiguration(), pRoot->hostConfiguration(), pRoot->hostVersion(), tx);
-                    }
+                    resultText = pGame->viewpointTurn().universe().findLocationName(m_target, NAME_FLAGS, pGame->mapConfiguration(), pRoot->hostConfiguration(), pRoot->hostVersion(), tx);
                 }
 
                 // Distance

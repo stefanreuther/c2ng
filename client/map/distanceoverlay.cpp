@@ -256,14 +256,13 @@ client::map::DistanceOverlay::setWaypoint()
                 game::Game& g = game::actions::mustHaveGame(session);
                 game::Root& r = game::actions::mustHaveRoot(session);
                 game::spec::ShipList& sl = game::actions::mustHaveShipList(session);
-                if (game::Turn* t = g.getViewpointTurn().get()) {
-                    game::map::Ship& sh = game::actions::mustExist(t->universe().ships().get(m_shipId));
-                    game::actions::mustBePlayed(sh);
+                game::Turn& t = g.viewpointTurn();
+                game::map::Ship& sh = game::actions::mustExist(t.universe().ships().get(m_shipId));
+                game::actions::mustBePlayed(sh);
 
-                    // FIXME: shouldn't call this if FleetMember will refuse (bug also in PCC2)
-                    game::map::FleetMember(t->universe(), sh, g.mapConfiguration()).setWaypoint(m_waypoint, r.hostConfiguration(), sl);
-                    session.notifyListeners();
-                }
+                // FIXME: shouldn't call this if FleetMember will refuse (bug also in PCC2)
+                game::map::FleetMember(t.universe(), sh, g.mapConfiguration()).setWaypoint(m_waypoint, r.hostConfiguration(), sl);
+                session.notifyListeners();
             }
 
      private:
@@ -283,10 +282,7 @@ client::map::DistanceOverlay::buildStatus(Status& out, game::Session& session, g
     const game::Game& g = *session.getGame();
     const game::Root& r = *session.getRoot();
     const game::spec::ShipList& sl = *session.getShipList();
-    if (g.getViewpointTurn().get() == 0) {
-        return;
-    }
-    const game::Turn& t = *g.getViewpointTurn();
+    const game::Turn& t = g.viewpointTurn();
     afl::string::Translator& tx = session.translator();
     util::NumberFormatter fmt = r.userConfiguration().getNumberFormatter();
 

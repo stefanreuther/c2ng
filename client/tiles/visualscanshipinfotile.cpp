@@ -69,10 +69,8 @@ namespace {
             game::map::Point pt;
             if (pShip->getWaypoint().get(pt)) {
                 if (game::Game* pGame = session.getGame().get()) {
-                    if (game::Turn* pTurn = pGame->getViewpointTurn().get()) {
-                        result.text[VisualScanShipInfoTile::Waypoint] =
-                            Format(tx("Waypoint: %s"), pTurn->universe().findLocationName(pt, game::map::Universe::NameGravity, pGame->mapConfiguration(), pRoot->hostConfiguration(), pRoot->hostVersion(), tx));
-                    }
+                    result.text[VisualScanShipInfoTile::Waypoint] =
+                        Format(tx("Waypoint: %s"), pGame->viewpointTurn().universe().findLocationName(pt, game::map::Universe::NameGravity, pGame->mapConfiguration(), pRoot->hostConfiguration(), pRoot->hostVersion(), tx));
                 }
             }
         }

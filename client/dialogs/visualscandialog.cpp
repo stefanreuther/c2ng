@@ -89,29 +89,28 @@ namespace {
             {
                 bool excludeValid = false;
                 if (game::Game* g = session.getGame().get()) {
-                    if (game::Turn* t = g->getViewpointTurn().get()) {
-                        m_list.addObjectsAt(t->universe(), g->mapConfiguration().getCanonicalLocation(m_pos), m_options, m_excludeShip);
+                    game::map::Universe& univ = g->viewpointTurn().universe();
+                    m_list.addObjectsAt(univ, g->mapConfiguration().getCanonicalLocation(m_pos), m_options, m_excludeShip);
 
-                        // Verify that the ship to be excluded is actually eligible.
-                        // This is needed to pick the correct error message.
-                        if (game::map::Ship* pShip = t->universe().ships().get(m_excludeShip)) {
-                            game::map::Point excludePos;
-                            excludeValid = (pShip->getPosition().get(excludePos) && excludePos == m_pos);
+                    // Verify that the ship to be excluded is actually eligible.
+                    // This is needed to pick the correct error message.
+                    if (game::map::Ship* pShip = univ.ships().get(m_excludeShip)) {
+                        game::map::Point excludePos;
+                        excludeValid = (pShip->getPosition().get(excludePos) && excludePos == m_pos);
+                    }
+
+                    // Remember planet if it's empty
+                    if (game::map::Planet* pPlanet = univ.planets().get(univ.findPlanetAt(g->mapConfiguration().getCanonicalLocation(m_pos)))) {
+                        if (!pPlanet->isPlayable(game::map::Object::Playable)) {
+                            m_hidingPlanetName = pPlanet->getName(session.translator());
                         }
+                    }
 
-                        // Remember planet if it's empty
-                        if (game::map::Planet* pPlanet = t->universe().planets().get(t->universe().findPlanetAt(g->mapConfiguration().getCanonicalLocation(m_pos)))) {
-                            if (!pPlanet->isPlayable(game::map::Object::Playable)) {
-                                m_hidingPlanetName = pPlanet->getName(session.translator());
-                            }
-                        }
-
-                        // Verify playability
-                        // FIXME: right?
-                        if (m_list.size() == 1) {
-                            if (const game::map::Object* pObj = t->universe().getObject(m_list[0])) {
-                                m_isUniquePlayable = (pObj->isPlayable(game::map::Object::ReadOnly));
-                            }
+                    // Verify playability
+                    // FIXME: right?
+                    if (m_list.size() == 1) {
+                        if (const game::map::Object* pObj = univ.getObject(m_list[0])) {
+                            m_isUniquePlayable = (pObj->isPlayable(game::map::Object::ReadOnly));
                         }
                     }
                 }
@@ -159,67 +158,66 @@ namespace {
                 game::spec::ShipList* list = session.getShipList().get();
                 game::Game* g = session.getGame().get();
                 if (root != 0 && list != 0 && g != 0) {
-                    if (game::Turn* t = g->getViewpointTurn().get()) {
-                        // Compute movement
-                        const game::map::Universe& univ = t->universe();
-                        game::map::MovementPredictor pred;
-                        pred.computeMovement(univ, *g, *list, *root);
+                    // Compute movement
+                    const game::map::Universe& univ = g->viewpointTurn().universe();
+                    game::map::MovementPredictor pred;
+                    pred.computeMovement(univ, *g, *list, *root);
 
-                        // If looking at a ship, resolve its position
-                        bool posOK;
-                        game::map::Point pos;
-                        if (m_fromShip != 0) {
-                            posOK = pred.getShipPosition(m_fromShip).get(pos);
-                        } else {
-                            posOK = true;
-                            pos = m_pos;
+                    // If looking at a ship, resolve its position
+                    bool posOK;
+                    game::map::Point pos;
+                    if (m_fromShip != 0) {
+                        posOK = pred.getShipPosition(m_fromShip).get(pos);
+                    } else {
+                        posOK = true;
+                        pos = m_pos;
+                    }
+
+                    // Build list
+                    if (posOK) {
+                        pos = g->mapConfiguration().getCanonicalLocation(pos);
+
+                        const game::map::AnyShipType& ty(univ.allShips());
+                        for (game::Id_t id = ty.findNextIndex(0); id != 0; id = ty.findNextIndex(id)) {
+                            const game::map::Ship* sh = univ.ships().get(id);
+                            game::map::Point shPos;
+
+                            if (sh != 0
+                                && pred.getShipPosition(id).get(shPos)
+                                && g->mapConfiguration().getCanonicalLocation(shPos) == pos
+                                && (m_options.contains(game::ref::List::IncludeForeignShips) || sh->isPlayable(game::map::Object::ReadOnly))
+                                && (!m_options.contains(game::ref::List::SafeShipsOnly) || sh->isReliablyVisible(0)))
+                            {
+                                m_list.add(Reference(Reference::Ship, id));
+                            }
                         }
 
-                        // Build list
-                        if (posOK) {
-                            pos = g->mapConfiguration().getCanonicalLocation(pos);
+                        // If list is not empty, AND we're coming from a ship, place scanner.
+                        // (Otherwise, we're likely coming from a context where the scanner is already at the correct place.)
+                        if (m_fromShip != 0) {
+                            try {
+                                game::interface::UserInterfacePropertyStack& uiProps = session.uiPropertyStack();
 
-                            const game::map::AnyShipType& ty(univ.allShips());
-                            for (game::Id_t id = ty.findNextIndex(0); id != 0; id = ty.findNextIndex(id)) {
-                                const game::map::Ship* sh = univ.ships().get(id);
-                                game::map::Point shPos;
+                                // Consider current position to place cursor correctly across wrap
+                                std::auto_ptr<afl::data::Value> chartX(uiProps.get(game::interface::iuiChartX));
+                                std::auto_ptr<afl::data::Value> chartY(uiProps.get(game::interface::iuiChartY));
+                                const afl::data::IntegerValue* chartXIV = dynamic_cast<const afl::data::IntegerValue*>(chartX.get());
+                                const afl::data::IntegerValue* chartYIV = dynamic_cast<const afl::data::IntegerValue*>(chartY.get());
 
-                                if (sh != 0
-                                    && pred.getShipPosition(id).get(shPos)
-                                    && g->mapConfiguration().getCanonicalLocation(shPos) == pos
-                                    && (m_options.contains(game::ref::List::IncludeForeignShips) || sh->isPlayable(game::map::Object::ReadOnly))
-                                    && (!m_options.contains(game::ref::List::SafeShipsOnly) || sh->isReliablyVisible(0)))
-                                {
-                                    m_list.add(Reference(Reference::Ship, id));
+                                if (chartXIV != 0 && chartYIV != 0) {
+                                    game::map::Point adjPos = g->mapConfiguration().getSimpleNearestAlias(pos, game::map::Point(chartXIV->getValue(), chartYIV->getValue()));
+                                    afl::data::IntegerValue xv(adjPos.getX());
+                                    afl::data::IntegerValue yv(adjPos.getY());
+                                    uiProps.set(game::interface::iuiScanX, &xv);
+                                    uiProps.set(game::interface::iuiScanY, &yv);
                                 }
                             }
-
-                            // If list is not empty, AND we're coming from a ship, place scanner.
-                            // (Otherwise, we're likely coming from a context where the scanner is already at the correct place.)
-                            if (m_fromShip != 0) {
-                                try {
-                                    game::interface::UserInterfacePropertyStack& uiProps = session.uiPropertyStack();
-
-                                    // Consider current position to place cursor correctly across wrap
-                                    std::auto_ptr<afl::data::Value> chartX(uiProps.get(game::interface::iuiChartX));
-                                    std::auto_ptr<afl::data::Value> chartY(uiProps.get(game::interface::iuiChartY));
-                                    const afl::data::IntegerValue* chartXIV = dynamic_cast<const afl::data::IntegerValue*>(chartX.get());
-                                    const afl::data::IntegerValue* chartYIV = dynamic_cast<const afl::data::IntegerValue*>(chartY.get());
-
-                                    if (chartXIV != 0 && chartYIV != 0) {
-                                        game::map::Point adjPos = g->mapConfiguration().getSimpleNearestAlias(pos, game::map::Point(chartXIV->getValue(), chartYIV->getValue()));
-                                        afl::data::IntegerValue xv(adjPos.getX());
-                                        afl::data::IntegerValue yv(adjPos.getY());
-                                        uiProps.set(game::interface::iuiScanX, &xv);
-                                        uiProps.set(game::interface::iuiScanY, &yv);
-                                    }
-                                }
-                                catch (...) {
-                                    // set() may fail; don't deprive user of this functionality then
-                                }
+                            catch (...) {
+                                // set() may fail; don't deprive user of this functionality then
                             }
                         }
                     }
+
                     m_hasRemoteControl = ::hasRemoteControl(*root);
                 }
             }
@@ -238,18 +236,17 @@ namespace {
     void buildCurrentCargoSummary(game::Session& session, game::ref::List& in, CostSummary& out)
     {
         if (game::Game* pGame = session.getGame().get()) {
-            if (game::Turn* pTurn = pGame->getViewpointTurn().get()) {
-                for (size_t i = 0, n = in.size(); i < n; ++i) {
-                    if (const game::map::Ship* ship = dynamic_cast<const game::map::Ship*>(pTurn->universe().getObject(in[i]))) {
-                        if (ship->isPlayable(game::map::Object::ReadOnly)) {
-                            Cost cargo;
-                            cargo.set(Cost::Tritanium,  ship->getCargo(game::Element::Tritanium).orElse(0));
-                            cargo.set(Cost::Duranium,   ship->getCargo(game::Element::Duranium).orElse(0));
-                            cargo.set(Cost::Molybdenum, ship->getCargo(game::Element::Molybdenum).orElse(0));
-                            cargo.set(Cost::Supplies,   ship->getCargo(game::Element::Supplies).orElse(0));
-                            cargo.set(Cost::Money,      ship->getCargo(game::Element::Money).orElse(0));
-                            out.add(CostSummary::Item(ship->getId(), 1, ship->getName(game::LongName, session.translator(), session.interface()), cargo));
-                        }
+            game::map::Universe& univ = pGame->viewpointTurn().universe();
+            for (size_t i = 0, n = in.size(); i < n; ++i) {
+                if (const game::map::Ship* ship = dynamic_cast<const game::map::Ship*>(univ.getObject(in[i]))) {
+                    if (ship->isPlayable(game::map::Object::ReadOnly)) {
+                        Cost cargo;
+                        cargo.set(Cost::Tritanium,  ship->getCargo(game::Element::Tritanium).orElse(0));
+                        cargo.set(Cost::Duranium,   ship->getCargo(game::Element::Duranium).orElse(0));
+                        cargo.set(Cost::Molybdenum, ship->getCargo(game::Element::Molybdenum).orElse(0));
+                        cargo.set(Cost::Supplies,   ship->getCargo(game::Element::Supplies).orElse(0));
+                        cargo.set(Cost::Money,      ship->getCargo(game::Element::Money).orElse(0));
+                        out.add(CostSummary::Item(ship->getId(), 1, ship->getName(game::LongName, session.translator(), session.interface()), cargo));
                     }
                 }
             }
@@ -262,19 +259,17 @@ namespace {
         game::spec::ShipList* list = session.getShipList().get();
         game::Game* g = session.getGame().get();
         if (root != 0 && list != 0 && g != 0) {
-            if (game::Turn* t = g->getViewpointTurn().get()) {
-                // Compute movement
-                const game::map::Universe& univ = t->universe();
-                game::map::MovementPredictor pred;
-                pred.computeMovement(univ, *g, *list, *root);
+            // Compute movement
+            const game::map::Universe& univ = g->viewpointTurn().universe();
+            game::map::MovementPredictor pred;
+            pred.computeMovement(univ, *g, *list, *root);
 
-                // Build list
-                for (size_t i = 0, n = in.size(); i < n; ++i) {
-                    if (const game::map::Ship* ship = dynamic_cast<const game::map::Ship*>(univ.getObject(in[i]))) {
-                        Cost cargo;
-                        if (pred.getShipCargo(ship->getId(), cargo)) {
-                            out.add(CostSummary::Item(ship->getId(), 1, ship->getName(game::LongName, session.translator(), session.interface()), cargo));
-                        }
+            // Build list
+            for (size_t i = 0, n = in.size(); i < n; ++i) {
+                if (const game::map::Ship* ship = dynamic_cast<const game::map::Ship*>(univ.getObject(in[i]))) {
+                    Cost cargo;
+                    if (pred.getShipCargo(ship->getId(), cargo)) {
+                        out.add(CostSummary::Item(ship->getId(), 1, ship->getName(game::LongName, session.translator(), session.interface()), cargo));
                     }
                 }
             }
@@ -301,16 +296,15 @@ namespace {
                 game::Game* pGame = session.getGame().get();
                 game::spec::ShipList* pList =  session.getShipList().get();
                 if (pRoot != 0 && pGame != 0) {
-                    if (game::Turn* pTurn = pGame->getViewpointTurn().get()) {
-                        if (const game::map::Ship* ship = dynamic_cast<const game::map::Ship*>(pTurn->universe().getObject(m_reference))) {
-                            if (ship->isPlayable(game::map::Object::Playable)) {
-                                m_result = Transfer;
-                            } else {
-                                util::NumberFormatter fmt = pRoot->userConfiguration().getNumberFormatter();
-                                packShipLastKnownCargo(m_data, *ship, pTurn->getTurnNumber(), fmt, *pList, session.translator());
-                                packShipMassRanges    (m_data, *ship,                         fmt, *pList, session.translator());
-                                m_result = Info;
-                            }
+                    game::Turn& turn = pGame->viewpointTurn();
+                    if (const game::map::Ship* ship = dynamic_cast<const game::map::Ship*>(turn.universe().getObject(m_reference))) {
+                        if (ship->isPlayable(game::map::Object::Playable)) {
+                            m_result = Transfer;
+                        } else {
+                            util::NumberFormatter fmt = pRoot->userConfiguration().getNumberFormatter();
+                            packShipLastKnownCargo(m_data, *ship, turn.getTurnNumber(), fmt, *pList, session.translator());
+                            packShipMassRanges    (m_data, *ship,                       fmt, *pList, session.translator());
+                            m_result = Info;
                         }
                     }
                 }
@@ -358,11 +352,9 @@ namespace {
         virtual void handle(game::Session& session)
             {
                 if (game::Game* pGame = session.getGame().get()) {
-                    if (game::Turn* pTurn = pGame->getViewpointTurn().get()) {
-                        if (game::map::Object* pObj = pTurn->universe().getObject(m_reference)) {
-                            pObj->setIsMarked(!pObj->isMarked());
-                            session.notifyListeners();
-                        }
+                    if (game::map::Object* pObj = pGame->viewpointTurn().universe().getObject(m_reference)) {
+                        pObj->setIsMarked(!pObj->isMarked());
+                        session.notifyListeners();
                     }
                 }
             }

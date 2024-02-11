@@ -118,11 +118,8 @@ game::ref::ListObserver::onViewpointTurnChange()
     if (m_pSession != 0) {
         afl::base::Ptr<Game> g = m_pSession->getGame();
         if (g.get() != 0) {
-            afl::base::Ptr<Turn> t = g->getViewpointTurn();
-            if (t.get() != 0) {
-                conn_universeChange = t->universe().sig_universeChange.add(this, &ListObserver::onUniverseChange);
-                onUniverseChange();
-            }
+            conn_universeChange = g->viewpointTurn().universe().sig_universeChange.add(this, &ListObserver::onUniverseChange);
+            onUniverseChange();
         }
     }
 }

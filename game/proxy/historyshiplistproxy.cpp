@@ -60,7 +60,7 @@ game::proxy::HistoryShipListProxy::Trampoline::buildList()
     // Obtain new turn
     Ptr<Game> g = m_session.getGame();
     if (g.get() != 0) {
-        m_turn = g->getViewpointTurn();
+        m_turn = &g->viewpointTurn();
     } else {
         m_turn = 0;
     }

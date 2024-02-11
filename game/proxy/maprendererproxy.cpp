@@ -71,7 +71,7 @@ game::proxy::MapRendererProxy::Trampoline::Trampoline(game::Session& session, co
     m_shipList = session.getShipList();
     if (m_game.get() != 0) {
         conn_viewpointTurnChange = m_game->sig_viewpointTurnChange.add(this, &Trampoline::onViewpointTurnChange);
-        m_turn = m_game->getViewpointTurn();
+        m_turn = &m_game->viewpointTurn();
         attachTurn();
     }
     if (m_root.get() != 0) {
@@ -107,7 +107,7 @@ void
 game::proxy::MapRendererProxy::Trampoline::onViewpointTurnChange()
 {
     if (m_game.get() != 0) {
-        m_turn = m_game->getViewpointTurn();
+        m_turn = &m_game->viewpointTurn();
         attachTurn();
     }
 }

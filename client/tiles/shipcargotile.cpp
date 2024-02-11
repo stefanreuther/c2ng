@@ -51,11 +51,9 @@ namespace {
     bool hasActiveBeamUpOrder(game::Session& session, const game::map::Ship& sh)
     {
         if (game::Game* g = session.getGame().get()) {
-            if (const game::Turn* t = g->getViewpointTurn().get()) {
-                if (const game::v3::CommandContainer* cc = game::v3::CommandExtra::get(*t, sh.getOwner().orElse(0))) {
-                    if (cc->getCommand(game::v3::Command::BeamUp, sh.getId()) != 0) {
-                        return true;
-                    }
+            if (const game::v3::CommandContainer* cc = game::v3::CommandExtra::get(g->viewpointTurn(), sh.getOwner().orElse(0))) {
+                if (cc->getCommand(game::v3::Command::BeamUp, sh.getId()) != 0) {
+                    return true;
                 }
             }
         }

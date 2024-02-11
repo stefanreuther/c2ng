@@ -64,9 +64,7 @@ namespace {
     Universe* getUniverse(game::Session& session)
     {
         if (game::Game* g = session.getGame().get()) {
-            if (game::Turn* t = g->getViewpointTurn().get()) {
-                return &t->universe();
-            }
+            return &g->viewpointTurn().universe();
         }
         return 0;
     }

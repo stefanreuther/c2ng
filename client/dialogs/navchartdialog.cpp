@@ -172,11 +172,9 @@ namespace {
                     void handle(game::Session& session)
                         {
                             if (const game::Game* g = session.getGame().get()) {
-                                if (const game::Turn* t = g->getViewpointTurn().get()) {
-                                    if (const game::map::Ship* s = t->universe().ships().get(m_id)) {
-                                        m_parent.m_owner = s->getOwner().orElse(0);
-                                        s->getPosition().get(m_parent.m_position);
-                                    }
+                                if (const game::map::Ship* s = g->viewpointTurn().universe().ships().get(m_id)) {
+                                    m_parent.m_owner = s->getOwner().orElse(0);
+                                    s->getPosition().get(m_parent.m_position);
                                 }
                             }
                         }

@@ -61,22 +61,20 @@ class game::proxy::FleetProxy::Trampoline {
 void
 game::proxy::FleetProxy::Trampoline::selectFleetMember(Id_t shipId)
 {
-    if (const Turn* t = m_game.getViewpointTurn().get()) {
-        if (const game::map::Ship* sh = t->universe().ships().get(shipId)) {
-            const Id_t shipId = sh->getId();
-            const Id_t fleetId = sh->getFleetNumber();
-            if (fleetId != 0) {
-                // Update ship (this is the actual selection)
-                m_game.cursors().currentShip().setCurrentIndex(shipId);
+    if (const game::map::Ship* sh = m_game.viewpointTurn().universe().ships().get(shipId)) {
+        const Id_t shipId = sh->getId();
+        const Id_t fleetId = sh->getFleetNumber();
+        if (fleetId != 0) {
+            // Update ship (this is the actual selection)
+            m_game.cursors().currentShip().setCurrentIndex(shipId);
 
-                // Update fleet.
-                // If we actually selected a ship from the current fleet, this is a no-op.
-                // Otherwise, clean up by selecting the correct fleet; this will trigger onFleetChange().
-                m_game.cursors().currentFleet().setCurrentIndex(fleetId);
+            // Update fleet.
+            // If we actually selected a ship from the current fleet, this is a no-op.
+            // Otherwise, clean up by selecting the correct fleet; this will trigger onFleetChange().
+            m_game.cursors().currentFleet().setCurrentIndex(fleetId);
 
-                // Update UI.
-                m_reply.postRequest(&FleetProxy::onFleetMemberSelected, shipId);
-            }
+            // Update UI.
+            m_reply.postRequest(&FleetProxy::onFleetMemberSelected, shipId);
         }
     }
 }
@@ -84,20 +82,15 @@ game::proxy::FleetProxy::Trampoline::selectFleetMember(Id_t shipId)
 void
 game::proxy::FleetProxy::Trampoline::onViewpointTurnChange()
 {
-    if (Turn* t = m_game.getViewpointTurn().get()) {
-        conn_universeChange = t->universe().sig_universeChange.add(this, &Trampoline::onUniverseChange);
-        conn_fleetSetChange = t->universe().fleets().sig_setChange.add(this, &Trampoline::onFleetSetChange);
-    } else {
-        conn_universeChange.disconnect();
-        conn_fleetSetChange.disconnect();
-    }
+    Turn& t = m_game.viewpointTurn();
+    conn_universeChange = t.universe().sig_universeChange.add(this, &Trampoline::onUniverseChange);
+    conn_fleetSetChange = t.universe().fleets().sig_setChange.add(this, &Trampoline::onFleetSetChange);
 }
 
 void
 game::proxy::FleetProxy::Trampoline::onFleetChange()
 {
-    Turn* t = m_game.getViewpointTurn().get();
-    game::map::Universe* univ = t != 0 ? &t->universe() : 0;
+    game::map::Universe& univ = m_game.viewpointTurn().universe();
     game::map::Object* ship = m_game.cursors().currentFleet().getCurrentObject();
 
     // Deflect intermediate state: we are sitting on the same event that ObjectCursor uses to recover from a deleted fleet.
@@ -105,17 +98,17 @@ game::proxy::FleetProxy::Trampoline::onFleetChange()
     // However, we don't want under any circumstances report "0/empty" to the UI unless we truly have no more fleets.
     // Therefore, ignore a null report if we're certain that there still are fleets;
     // we will get an additional signal when ObjectCursor has decided.
-    if (ship == 0 && univ != 0 && univ->fleets().findNextIndex(0) != 0) {
+    if (ship == 0 && univ.fleets().findNextIndex(0) != 0) {
         return;
     }
 
     // Update
     std::auto_ptr<FleetMemberList> memList(new FleetMemberList());
     Id_t memId = 0;
-    if (univ != 0 && ship != 0) {
+    if (ship != 0) {
         // Build new member list
         const Id_t fleetId = ship->getId();
-        memList->setFleet(*univ, fleetId);
+        memList->setFleet(univ, fleetId);
 
         // Determine current fleet member Id
         memId = findSuggestedMember(m_game.cursors().currentShip().getCurrentIndex(), fleetId, *memList);

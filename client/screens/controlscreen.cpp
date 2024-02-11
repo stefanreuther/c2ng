@@ -109,10 +109,8 @@ namespace {
         game::map::Ship* sh = dynamic_cast<game::map::Ship*>(mo);
         game::Game* pGame = session.getGame().get();
         if (sh != 0 && pGame != 0 && sh->getFleetNumber() != 0) {
-            if (game::Turn* pTurn = pGame->getViewpointTurn().get()) {
-                if (game::map::Ship* leader = pTurn->universe().ships().get(sh->getFleetNumber())) {
-                    return leader;
-                }
+            if (game::map::Ship* leader = pGame->viewpointTurn().universe().ships().get(sh->getFleetNumber())) {
+                return leader;
             }
         }
         return mo;

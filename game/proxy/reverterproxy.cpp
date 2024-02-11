@@ -26,10 +26,8 @@ class game::proxy::ReverterProxy::Trampoline {
 
             // Obtain new LocationReverter
             if (Game* g = m_session.getGame().get()) {
-                if (Turn* t = g->getViewpointTurn().get()) {
-                    if (game::map::Reverter* rev = t->universe().getReverter()) {
-                        m_reverter.reset(rev->createLocationReverter(pt));
-                    }
+                if (game::map::Reverter* rev = g->viewpointTurn().universe().getReverter()) {
+                    m_reverter.reset(rev->createLocationReverter(pt));
                 }
             }
 

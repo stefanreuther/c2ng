@@ -103,15 +103,13 @@ game::proxy::PlanetPredictorProxy::Trampoline::init(Session& session)
     m_root = session.getRoot();
     m_shipList = session.getShipList();
     if (m_game.get() != 0 && m_root.get() != 0 && m_shipList.get() != 0) {
-        m_turn = m_game->getViewpointTurn();
+        m_turn = &m_game->viewpointTurn();
 
         // Attach to planet
-        if (m_turn.get() != 0) {
-            m_planet = m_turn->universe().planets().get(m_planetId);
-            if (m_planet != 0) {
-                conn_planetChange = m_planet->sig_change.add(this, &Trampoline::onPlanetChange);
-                m_effectors = preparePlanetEffectors(m_turn->universe(), m_planetId, m_game->shipScores(), *m_shipList, m_root->hostConfiguration());
-            }
+        m_planet = m_turn->universe().planets().get(m_planetId);
+        if (m_planet != 0) {
+            conn_planetChange = m_planet->sig_change.add(this, &Trampoline::onPlanetChange);
+            m_effectors = preparePlanetEffectors(m_turn->universe(), m_planetId, m_game->shipScores(), *m_shipList, m_root->hostConfiguration());
         }
     }
 }

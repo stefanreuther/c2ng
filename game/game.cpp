@@ -27,17 +27,28 @@ game::Game::Game()
 game::Game::~Game()
 { }
 
-afl::base::Ptr<game::Turn>
-game::Game::getViewpointTurn() const
+game::Turn&
+game::Game::viewpointTurn()
 {
-    // FIXME: restrict setViewpointTurnNumber so that this never returns null
-    if (m_viewpointTurnNumber == 0 || m_viewpointTurnNumber == currentTurn().getTurnNumber()) {
-        return m_currentTurn.asPtr();
-    } else if (HistoryTurn* ht = m_previousTurns.get(m_viewpointTurnNumber)) {
-        return ht->getTurn();
-    } else {
-        return 0;
+    if (m_viewpointTurnNumber != 0 && m_viewpointTurnNumber != currentTurn().getTurnNumber()) {
+        if (HistoryTurn* ht = m_previousTurns.get(m_viewpointTurnNumber)) {
+            afl::base::Ptr<Turn> t = ht->getTurn();
+            if (t.get() != 0) {
+                return *t;
+            }
+        }
     }
+
+    // setViewpointTurnNumber will have made sure that we only end up here if
+    // m_viewpointTurnNumber actually points at the current turn.
+    // Otherwise, this is a fail-safe.
+    return currentTurn();
+}
+
+const game::Turn&
+game::Game::viewpointTurn() const
+{
+    return const_cast<Game&>(*this).viewpointTurn();
 }
 
 int
@@ -53,30 +64,39 @@ game::Game::getViewpointTurnNumber() const
 void
 game::Game::setViewpointTurnNumber(int nr)
 {
-    // Change turn number
-    Turn* oldTurn = getViewpointTurn().get();
-    m_viewpointTurnNumber = nr;
-    Turn* newTurn = getViewpointTurn().get();
+    // Validate
+    bool ok;
+    if (nr == 0 || nr == currentTurn().getTurnNumber()) {
+        ok = true;
+    } else if (HistoryTurn* ht = m_previousTurns.get(nr)) {
+        ok = (ht->getTurn().get() != 0);
+    } else {
+        ok = false;
+    }
 
-    // Update
-    if (oldTurn != newTurn) {
-        // Transfer selection to new turn
-        // FIXME: the limitToExistingObjects() will unmark objects that don't exist in the new turn.
-        // It would be nice if we could avoid that.
-        // However, the copyFrom() will already unmark nonexistant objects,
-        // effectively doing the equivalent of limitToExistingObjects().
-        // Until we can somehow avoid that, keep the limitToExistingObjects().
-        if (oldTurn != 0) {
-            m_selections.copyFrom(oldTurn->universe(), m_selections.getCurrentLayer());
-        }
-        if (newTurn != 0) {
-            m_selections.copyTo(newTurn->universe(), m_selections.getCurrentLayer());
-            m_selections.limitToExistingObjects(newTurn->universe(), m_selections.getCurrentLayer());
-        }
+    if (ok) {
+        // Change turn number
+        Turn& oldTurn = viewpointTurn();
+        m_viewpointTurnNumber = nr;
+        Turn& newTurn = viewpointTurn();
 
-        // Change cursor
-        m_cursors.setUniverse(newTurn != 0 ? &newTurn->universe() : 0, &m_mapConfiguration);
-        sig_viewpointTurnChange.raise();
+        // Update
+        if (&oldTurn != &newTurn) {
+            // Transfer selection to new turn
+            // FIXME: the limitToExistingObjects() will unmark objects that don't exist in the new turn.
+            // It would be nice if we could avoid that.
+            // However, the copyFrom() will already unmark nonexistant objects,
+            // effectively doing the equivalent of limitToExistingObjects().
+            // Until we can somehow avoid that, keep the limitToExistingObjects().
+            m_selections.copyFrom(oldTurn.universe(), m_selections.getCurrentLayer());
+
+            m_selections.copyTo(newTurn.universe(), m_selections.getCurrentLayer());
+            m_selections.limitToExistingObjects(newTurn.universe(), m_selections.getCurrentLayer());
+
+            // Change cursor
+            m_cursors.setUniverse(&newTurn.universe(), &m_mapConfiguration);
+            sig_viewpointTurnChange.raise();
+        }
     }
 }
 
@@ -258,8 +278,8 @@ game::Game::notifyListeners()
     t1->notifyListeners();
 
     // Viewpoint turn
-    Turn* t2 = getViewpointTurn().get();
-    if (t2 != 0 && t2 != t1) {
+    Turn* t2 = &viewpointTurn();
+    if (t2 != t1) {
         t2->notifyListeners();
     }
 }
@@ -269,17 +289,16 @@ game::Game::isGameObject(const game::vcr::Object& obj, const game::spec::HullVec
 {
     // ex WVcrSelectorWindowRealGameInterface::isGameObject
     // FIXME: 20210417 Is this a nice place for this function?
-    if (Turn* t = getViewpointTurn().get()) {
-        if (!obj.isPlanet()) {
-            const game::map::Ship* sh = t->universe().allShips().getObjectByIndex(obj.getId());
-            int hullId;
-            return sh != 0
-                && sh->getHull().get(hullId)
-                && obj.canBeHull(hulls, hullId);
-        } else {
-            const game::map::Planet* pl = t->universe().allPlanets().getObjectByIndex(obj.getId());
-            return pl != 0;
-        }
+    const game::map::Universe& univ = viewpointTurn().universe();
+    if (!obj.isPlanet()) {
+        const game::map::Ship* sh = univ.allShips().getObjectByIndex(obj.getId());
+        int hullId;
+        return sh != 0
+            && sh->getHull().get(hullId)
+            && obj.canBeHull(hulls, hullId);
+    } else {
+        const game::map::Planet* pl = univ.allPlanets().getObjectByIndex(obj.getId());
+        return pl != 0;
     }
     return false;
 }

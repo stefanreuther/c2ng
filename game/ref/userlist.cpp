@@ -123,18 +123,16 @@ game::ref::UserList::makeReferenceItem(Reference r, Session& session)
     game::map::Object::Playability playability = game::map::Object::NotPlayable;
     util::SkinColor::Color color = util::SkinColor::Static;
     if (const Game* g = session.getGame().get()) {
-        if (const Turn* t = g->getViewpointTurn().get()) {
-            if (const game::map::Object* p = t->universe().getObject(r)) {
-                marked = p->isMarked();
-                playability = p->getPlayability();
+        if (const game::map::Object* p = g->viewpointTurn().universe().getObject(r)) {
+            marked = p->isMarked();
+            playability = p->getPlayability();
 
-                const int owner = p->getOwner().orElse(0);
-                if (owner != 0) {
-                    switch (g->teamSettings().getPlayerRelation(owner)) {
-                     case TeamSettings::ThisPlayer:    color = util::SkinColor::Green;  break;
-                     case TeamSettings::AlliedPlayer:  color = util::SkinColor::Yellow; break;
-                     case TeamSettings::EnemyPlayer:   color = util::SkinColor::Red;    break;
-                    }
+            const int owner = p->getOwner().orElse(0);
+            if (owner != 0) {
+                switch (g->teamSettings().getPlayerRelation(owner)) {
+                 case TeamSettings::ThisPlayer:    color = util::SkinColor::Green;  break;
+                 case TeamSettings::AlliedPlayer:  color = util::SkinColor::Yellow; break;
+                 case TeamSettings::EnemyPlayer:   color = util::SkinColor::Red;    break;
                 }
             }
         }

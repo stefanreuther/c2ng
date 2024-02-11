@@ -45,15 +45,6 @@ game::actions::mustExist(game::map::Ship* ship)
     return *ship;
 }
 
-game::Turn&
-game::actions::mustExist(Turn* turn)
-{
-    if (turn == 0) {
-        throw Exception(Exception::eRange);
-    }
-    return *turn;
-}
-
 game::spec::ShipList&
 game::actions::mustHaveShipList(game::Session& session)
 {

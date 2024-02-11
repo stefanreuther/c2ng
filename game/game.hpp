@@ -73,9 +73,10 @@ namespace game {
             \see TeamSettings::setViewpointPlayer */
         void setViewpointPlayer(int playerNr);
 
-        /** Get viewpoint turn.
-            \return turn (can be null) */
-        afl::base::Ptr<Turn> getViewpointTurn() const;
+        /** Access viewpoint turn.
+            \return turn */
+        Turn& viewpointTurn();
+        const Turn& viewpointTurn() const;
 
         /** Get viewpoint turn number.
             \return turn number */

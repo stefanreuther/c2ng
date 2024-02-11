@@ -33,12 +33,9 @@ class game::proxy::TaxationProxy::Trampoline {
             Game* g = session.getGame().get();
             Root* r = session.getRoot().get();
             if (g != 0 && r != 0) {
-                Turn* t = g->getViewpointTurn().get();
-                if (t != 0) {
-                    game::map::Planet* p = t->universe().planets().get(m_planetId);
-                    if (p != 0) {
-                        m_action.reset(new TaxationAction(*p, r->hostConfiguration(), r->hostVersion()));
-                    }
+                game::map::Planet* p = g->viewpointTurn().universe().planets().get(m_planetId);
+                if (p != 0) {
+                    m_action.reset(new TaxationAction(*p, r->hostConfiguration(), r->hostVersion()));
                 }
             }
 

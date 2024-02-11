@@ -417,29 +417,27 @@ game::Session::getReferenceName(Reference ref, ObjectName which) const
      case Reference::Ufo:
         // Return normal object's name.
         if (const Game* g = m_game.get()) {
-            if (const Turn* t = g->getViewpointTurn().get()) {
-                if (const game::map::Object* obj = t->universe().getObject(ref)) {
-                    if (ref.getType() == Reference::Starbase && which != PlainName) {
-                        // Special case: report the reference name plus object's name, if any.
-                        // This allows a starbase reference to be shown as "Starbase #123: Melmac".
-                        String_t result = ref.toString(translator());
-                        result += ": ";
-                        result += obj->getName(PlainName, translator(), *this);
-                        if (which == DetailedName) {
-                            String_t comment = this->getComment(Planet, ref.getId());
-                            if (!comment.empty()) {
-                                result += ": ";
-                                result += comment;
-                            }
+            if (const game::map::Object* obj = g->viewpointTurn().universe().getObject(ref)) {
+                if (ref.getType() == Reference::Starbase && which != PlainName) {
+                    // Special case: report the reference name plus object's name, if any.
+                    // This allows a starbase reference to be shown as "Starbase #123: Melmac".
+                    String_t result = ref.toString(translator());
+                    result += ": ";
+                    result += obj->getName(PlainName, translator(), *this);
+                    if (which == DetailedName) {
+                        String_t comment = this->getComment(Planet, ref.getId());
+                        if (!comment.empty()) {
+                            result += ": ";
+                            result += comment;
                         }
+                    }
+                    return result;
+                } else {
+                    String_t result = obj->getName(which, translator(), *this);
+                    if (!result.empty()) {
                         return result;
                     } else {
-                        String_t result = obj->getName(which, translator(), *this);
-                        if (!result.empty()) {
-                            return result;
-                        } else {
-                            return afl::base::Nothing;
-                        }
+                        return afl::base::Nothing;
                     }
                 }
             }

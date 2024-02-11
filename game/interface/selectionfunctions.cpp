@@ -189,7 +189,7 @@ namespace {
         // ex search.pas:ScriptSaveSelection
         // Make sure selection is consistent with universe
         // g/t/univ are mutable, because copyFrom requires a mutable universe, because it uses ObjectType::getObjectByIndex() which is mutable.
-        game::Turn& t = mustExist(g.getViewpointTurn().get());
+        game::Turn& t = g.viewpointTurn();
         game::map::Universe& univ = t.universe();
         g.selections().copyFrom(univ, g.selections().getCurrentLayer());
 
@@ -299,7 +299,7 @@ game::interface::IFCCSelReadHeader(Session& session, interpreter::Arguments& arg
 
         // - time
         String_t fileTime = afl::string::strNthWord(header, 1);
-        if (fileTime != "-" && fileTime != mustExist(g.getViewpointTurn().get()).getTimestamp().getTimestampAsString()) {
+        if (fileTime != "-" && fileTime != g.viewpointTurn().getTimestamp().getTimestampAsString()) {
             fileFlags += TimelessFlag;
         } else {
             fileFlags += AcceptCurrentFlag;
@@ -359,7 +359,7 @@ game::interface::IFCCSelReadContent(Session& session, interpreter::Arguments& ar
     // Read it
     try {
         Selections& result = g.selections();
-        game::map::Universe& univ = mustExist(g.getViewpointTurn().get()).universe();
+        game::map::Universe& univ = g.viewpointTurn().universe();
         Selections tmp;
         if (!readSelection(*tf, tmp, univ)) {
             throw afl::except::FileFormatException(*tf, session.translator()("File format error"));

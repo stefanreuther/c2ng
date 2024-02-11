@@ -41,8 +41,8 @@ client::tiles::FleetScreenHeaderTile::attach(game::proxy::ObjectObserver& oop)
 
                 // ex WShipScreenHeaderTile::getSubtitle
                 const game::map::Ship* sh = dynamic_cast<game::map::Ship*>(obj);
-                const game::Game* g = session.getGame().get();
-                game::Turn* t = (g != 0 ? g->getViewpointTurn().get() : 0);
+                game::Game* g = session.getGame().get();
+                game::Turn* t = (g != 0 ? &g->viewpointTurn() : 0);
                 const game::spec::ShipList* sl = session.getShipList().get();
                 game::map::Ship* leader = (sh != 0 && t != 0 ? t->universe().ships().get(sh->getFleetNumber()) : 0);
                 if (sh != 0 && sl != 0 && t != 0 && leader != 0) {

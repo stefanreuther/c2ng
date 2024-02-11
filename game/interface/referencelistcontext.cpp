@@ -365,10 +365,7 @@ game::interface::IFReferenceList_AddObjectsAt(game::ref::List& list, Session& se
 
     // Environment
     Game& g = game::actions::mustHaveGame(session);
-    if (Turn* t = g.getViewpointTurn().get()) {
-        // getViewpointTurn()==0 cannot happen normally, so no need to generate an error for now
-        list.addObjectsAt(t->universe(), g.mapConfiguration().getCanonicalLocation(game::map::Point(x, y)), opts, excludeShipId);
-    }
+    list.addObjectsAt(g.viewpointTurn().universe(), g.mapConfiguration().getCanonicalLocation(game::map::Point(x, y)), opts, excludeShipId);
 }
 
 /* @q ReferenceList():Obj (Function)

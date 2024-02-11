@@ -17,14 +17,9 @@ namespace {
         game::Game* pGame = session.getGame().get();
         if (pGame == 0) {
             return 0;
+        } else {
+            return pGame->viewpointTurn().universe().getObject(ref);
         }
-
-        game::Turn* pTurn = pGame->getViewpointTurn().get();
-        if (pTurn == 0) {
-            return 0;
-        }
-
-        return pTurn->universe().getObject(ref);
     }
 }
 

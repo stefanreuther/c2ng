@@ -23,31 +23,28 @@ namespace {
         if (pGame == 0) {
             return false;
         }
-        game::Turn* pTurn = pGame->getViewpointTurn().get();
-        if (pTurn == 0) {
-            return false;
-        }
+        game::Turn& turn = pGame->viewpointTurn();
         switch (ref.getType()) {
          case ScreenHistory::Null:
             return false;
 
          case ScreenHistory::Ship:
          case ScreenHistory::ShipTask:
-            return pTurn->universe().playedShips().getObjectByIndex(ref.getX()) != 0;
+            return turn.universe().playedShips().getObjectByIndex(ref.getX()) != 0;
 
          case ScreenHistory::Planet:
          case ScreenHistory::PlanetTask:
-            return pTurn->universe().playedPlanets().getObjectByIndex(ref.getX()) != 0;
+            return turn.universe().playedPlanets().getObjectByIndex(ref.getX()) != 0;
 
          case ScreenHistory::Starbase:
          case ScreenHistory::StarbaseTask:
-            return pTurn->universe().playedBases().getObjectByIndex(ref.getX()) != 0;
+            return turn.universe().playedBases().getObjectByIndex(ref.getX()) != 0;
 
          case ScreenHistory::HistoryShip:
-            return pTurn->universe().historyShips().getObjectByIndex(ref.getX()) != 0;
+            return turn.universe().historyShips().getObjectByIndex(ref.getX()) != 0;
 
          case ScreenHistory::Fleet:
-            return pTurn->universe().fleets().getObjectByIndex(ref.getX()) != 0;
+            return turn.universe().fleets().getObjectByIndex(ref.getX()) != 0;
 
          case ScreenHistory::Starchart:
             return true;
@@ -92,10 +89,8 @@ namespace {
 
          case ScreenHistory::Fleet:
             if (const game::Game* g = session.getGame().get()) {
-                if (const game::Turn* t = g->getViewpointTurn().get()) {
-                    if (const game::map::Ship* sh = t->universe().ships().get(ref.getX())) {
-                        return game::map::Fleet::getTitle(*sh, session.translator());
-                    }
+                if (const game::map::Ship* sh = g->viewpointTurn().universe().ships().get(ref.getX())) {
+                    return game::map::Fleet::getTitle(*sh, session.translator());
                 }
             }
             return Format(tx("Fleet #%d"), ref.getX());
@@ -144,10 +139,6 @@ namespace {
         // ex scrhist.pas:GotoHistoryScreen
         game::Game* pGame = session.getGame().get();
         if (pGame == 0) {
-            return false;
-        }
-        game::Turn* pTurn = pGame->getViewpointTurn().get();
-        if (pTurn == 0) {
             return false;
         }
         switch (ref.getType()) {

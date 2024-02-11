@@ -78,9 +78,7 @@ game::proxy::VisibilityRangeProxy::buildVisibilityRange(WaitIndicator& ind, cons
         virtual void handle(Session& session)
             {
                 if (Game* g = session.getGame().get()) {
-                    if (Turn* t = g->getViewpointTurn().get()) {
-                        game::map::buildVisibilityRange(m_result, t->universe(), m_visConfig, g->teamSettings());
-                    }
+                    game::map::buildVisibilityRange(m_result, g->viewpointTurn().universe(), m_visConfig, g->teamSettings());
                 }
                 if (Root* r = session.getRoot().get()) {
                     game::map::saveVisibilityConfiguration(r->userConfiguration(), m_visConfig);

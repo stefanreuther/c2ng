@@ -38,8 +38,8 @@ class game::proxy::HullSpecificationProxy::Trampoline {
     void describeWeaponEffects(game::spec::info::WeaponEffects& result);
     void describeHullFunctionDetails(game::spec::info::AbilityDetails_t& result, bool useNormalPictures);
 
-    void sendResponse(const ShipList& shipList, const Root& root, const Turn* pTurn, const Game& game);
-    void packResponse(HullSpecification& result, const ShipList& shipList, const Root& root, const Turn* pTurn, const Game& game);
+    void sendResponse(const ShipList& shipList, const Root& root, const Turn& turn, const Game& game);
+    void packResponse(HullSpecification& result, const ShipList& shipList, const Root& root, const Turn& turn, const Game& game);
 
  private:
     util::RequestSender<HullSpecificationProxy> m_reply;
@@ -56,11 +56,9 @@ game::proxy::HullSpecificationProxy::Trampoline::setExistingShipId(Id_t id)
     const ShipList* pShipList = m_session.getShipList().get();
     const Root* pRoot         = m_session.getRoot().get();
     if (pGame != 0 && pShipList != 0 && pRoot != 0) {
-        const Turn* pTurn = pGame->getViewpointTurn().get();
-        if (pTurn != 0) {
-            m_query.initForExistingShip(pTurn->universe(), id, *pShipList, pRoot->hostConfiguration(), pGame->shipScores());
-            sendResponse(*pShipList, *pRoot, pTurn, *pGame);
-        }
+        const Turn& t = pGame->viewpointTurn();
+        m_query.initForExistingShip(t.universe(), id, *pShipList, pRoot->hostConfiguration(), pGame->shipScores());
+        sendResponse(*pShipList, *pRoot, t, *pGame);
     }
 }
 
@@ -71,11 +69,8 @@ game::proxy::HullSpecificationProxy::Trampoline::setQuery(ShipQuery q)
     const ShipList* pShipList = m_session.getShipList().get();
     const Root* pRoot         = m_session.getRoot().get();
     if (pGame != 0 && pShipList != 0 && pRoot != 0) {
-        const Turn* pTurn = pGame->getViewpointTurn().get();
-        if (pTurn != 0) {
-            m_query = q;
-            sendResponse(*pShipList, *pRoot, pTurn, *pGame);
-        }
+        m_query = q;
+        sendResponse(*pShipList, *pRoot, pGame->viewpointTurn(), *pGame);
     }
 }
 
@@ -95,7 +90,7 @@ game::proxy::HullSpecificationProxy::Trampoline::describeHullFunctionDetails(gam
     const Game* pGame         = m_session.getGame().get();
     const ShipList* pShipList = m_session.getShipList().get();
     const Root* pRoot         = m_session.getRoot().get();
-    const Turn* pTurn         = (pGame != 0 ? pGame->getViewpointTurn().get() : 0);
+    const Turn* pTurn         = (pGame != 0 ? &pGame->viewpointTurn() : 0);
     if (pGame != 0 && pShipList != 0 && pRoot != 0 && pTurn != 0) {
         // Obtain list
         game::spec::HullFunctionList hfList;
@@ -109,15 +104,15 @@ game::proxy::HullSpecificationProxy::Trampoline::describeHullFunctionDetails(gam
 }
 
 void
-game::proxy::HullSpecificationProxy::Trampoline::sendResponse(const ShipList& shipList, const Root& root, const Turn* pTurn, const Game& game)
+game::proxy::HullSpecificationProxy::Trampoline::sendResponse(const ShipList& shipList, const Root& root, const Turn& turn, const Game& game)
 {
     HullSpecification result;
-    packResponse(result, shipList, root, pTurn, game);
+    packResponse(result, shipList, root, turn, game);
     m_reply.postRequest(&HullSpecificationProxy::sendUpdate, result);
 }
 
 void
-game::proxy::HullSpecificationProxy::Trampoline::packResponse(HullSpecification& result, const ShipList& shipList, const Root& root, const Turn* pTurn, const Game& game)
+game::proxy::HullSpecificationProxy::Trampoline::packResponse(HullSpecification& result, const ShipList& shipList, const Root& root, const Turn& turn, const Game& game)
 {
     // ex shipspec.pas:ShowShipSpec (sort-of)
     if (const game::spec::Hull* pHull = shipList.hulls().get(m_query.getHullType())) {
@@ -156,23 +151,19 @@ game::proxy::HullSpecificationProxy::Trampoline::packResponse(HullSpecification&
             result.pointsToBuild      = pHull->getPointsToBuild     (player, root.hostVersion(), config);
             result.pointsForKilling   = pHull->getPointsForKilling  (player, root.hostVersion(), config);
             result.pointsForScrapping = pHull->getPointsForScrapping(player, root.hostVersion(), config);
-            if (pTurn != 0) {
-                result.pointsAvailable = game::score::CompoundScore(game.scores(), game::score::ScoreId_BuildPoints, 1).get(game.scores(), pTurn->getTurnNumber(), player).orElse(0);
-            }
+            result.pointsAvailable = game::score::CompoundScore(game.scores(), game::score::ScoreId_BuildPoints, 1).get(game.scores(), turn.getTurnNumber(), player).orElse(0);
         }
 
         // Players
         result.players = shipList.hullAssignments().getPlayersForHull(root.hostConfiguration(), pHull->getId());
 
         // Abilities
-        if (pTurn != 0) {
-            game::spec::HullFunctionList hfList;
-            m_query.enumerateShipFunctions(hfList, pTurn->universe(), shipList, root.hostConfiguration(), false);
-            hfList.simplify();
-            hfList.sortForNewShip(m_query.getPlayerDisplaySet());
+        game::spec::HullFunctionList hfList;
+        m_query.enumerateShipFunctions(hfList, turn.universe(), shipList, root.hostConfiguration(), false);
+        hfList.simplify();
+        hfList.sortForNewShip(m_query.getPlayerDisplaySet());
 
-            game::spec::info::describeHullFunctions(result.abilities, hfList, &m_query, shipList, *m_picNamer, root, m_session.translator());
-        }
+        game::spec::info::describeHullFunctions(result.abilities, hfList, &m_query, shipList, *m_picNamer, root, m_session.translator());
     }
 }
 

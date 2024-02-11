@@ -550,7 +550,7 @@ AFL_TEST("game.interface.GlobalCommands:IFCCHistoryShowTurn:success:turn", a)
     interpreter::Arguments args(seg, 0, 1);
     AFL_CHECK_SUCCEEDS(a, game::interface::IFCCHistoryShowTurn(env.session, env.proc, args));
 
-    a.checkEqual("getViewpointTurn", env.session.getGame()->getViewpointTurn()->getTurnNumber(), 15);
+    a.checkEqual("viewpointTurn", env.session.getGame()->viewpointTurn().getTurnNumber(), 15);
 }
 
 // Success case: "CC$HistoryShowTurn 0" must select current turn (which is 20)
@@ -565,7 +565,7 @@ AFL_TEST("game.interface.GlobalCommands:IFCCHistoryShowTurn:success:current", a)
     interpreter::Arguments args(seg, 0, 1);
     AFL_CHECK_SUCCEEDS(a, game::interface::IFCCHistoryShowTurn(env.session, env.proc, args));
 
-    a.checkEqual("getViewpointTurn", env.session.getGame()->getViewpointTurn()->getTurnNumber(), 20);
+    a.checkEqual("viewpointTurn", env.session.getGame()->viewpointTurn().getTurnNumber(), 20);
 }
 
 // Failure case: command fails if unknown turn is selected
@@ -605,7 +605,7 @@ AFL_TEST("game.interface.GlobalCommands:IFCCHistoryShowTurn:null", a)
     interpreter::Arguments args(seg, 0, 1);
     AFL_CHECK_SUCCEEDS(a, game::interface::IFCCHistoryShowTurn(env.session, env.proc, args));
 
-    a.checkEqual("getViewpointTurn", env.session.getGame()->getViewpointTurn()->getTurnNumber(), 20);
+    a.checkEqual("viewpointTurn", env.session.getGame()->viewpointTurn().getTurnNumber(), 20);
 }
 
 // Type error, command must fail

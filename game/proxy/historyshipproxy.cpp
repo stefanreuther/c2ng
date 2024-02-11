@@ -51,7 +51,7 @@ game::proxy::HistoryShipProxy::Trampoline::browseAt(Point pt, Mode mode, bool ma
     int turnNumber = 0;
 
     Game* g = m_session.getGame().get();
-    Turn* t = (g != 0 ? g->getViewpointTurn().get() : 0);
+    Turn* t = (g != 0 ? &g->viewpointTurn() : 0);
     if (t != 0) {
         game::map::HistoryShipType& ty = t->universe().historyShips();
         switch (mode) {
@@ -85,7 +85,7 @@ game::proxy::HistoryShipProxy::Trampoline::sendUpdate(afl::base::Optional<int> t
 {
     const game::map::Ship* sh = dynamic_cast<game::map::Ship*>(m_observer.getCurrentObject());
     const Game* g = m_session.getGame().get();
-    const Turn* t = (g != 0 ? g->getViewpointTurn().get() : 0);
+    const Turn* t = (g != 0 ? &g->viewpointTurn() : 0);
     const Root* r = m_session.getRoot().get();
     const game::spec::ShipList* sl = m_session.getShipList().get();
 

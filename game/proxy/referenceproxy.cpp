@@ -49,10 +49,8 @@ game::proxy::ReferenceProxy::getReferencePosition(WaitIndicator& ind, Reference 
         void handle(Session& session)
             {
                 if (Game* g = session.getGame().get()) {
-                    if (Turn* t = g->getViewpointTurn().get()) {
-                        if (game::map::Object* obj = t->universe().getObject(m_ref)) {
-                            m_result = obj->getPosition();
-                        }
+                    if (game::map::Object* obj = g->viewpointTurn().universe().getObject(m_ref)) {
+                        m_result = obj->getPosition();
                     }
                 }
             }
