@@ -3,17 +3,14 @@
   *  \brief Test for gfx::sdl::StreamInterface
   */
 
-#include "gfx/sdl/streaminterface.hpp"
-
-#include "afl/base/memory.hpp"
-#include "afl/io/memorystream.hpp"
-#include "afl/test/testrunner.hpp"
 #include "config.h"
-
 #if HAVE_SDL
 # include "gfx/sdl/streaminterface.hpp"
 #endif
 
+#include "afl/base/memory.hpp"
+#include "afl/io/memorystream.hpp"
+#include "afl/test/testrunner.hpp"
 
 /** Simple test. */
 AFL_TEST("gfx.sdl.StreamInterface", a)

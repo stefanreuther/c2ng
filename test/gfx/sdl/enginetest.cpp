@@ -3,17 +3,14 @@
   *  \brief Test for gfx::sdl::Engine
   */
 
-#include "gfx/sdl/engine.hpp"
-
-#include "afl/string/nulltranslator.hpp"
-#include "afl/sys/log.hpp"
-#include "afl/test/testrunner.hpp"
 #include "config.h"
-
 #if HAVE_SDL
 # include "gfx/sdl/engine.hpp"
 #endif
 
+#include "afl/string/nulltranslator.hpp"
+#include "afl/sys/log.hpp"
+#include "afl/test/testrunner.hpp"
 
 AFL_TEST_NOARG("gfx.sdl.Engine:instantiation")
 {

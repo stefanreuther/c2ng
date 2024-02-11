@@ -7,7 +7,7 @@
 #include "afl/test/testrunner.hpp"
 
 /** Interface test. */
-AFL_TEST("interpreter.LockAccess", a)
+AFL_TEST_NOARG("interpreter.LockAccess")
 {
     class Tester : public interpreter::LockAccess {
      public:
