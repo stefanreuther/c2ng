@@ -16,6 +16,7 @@
 #include "game/session.hpp"
 #include "ui/root.hpp"
 #include "util/requestsender.hpp"
+#include "game/proxy/listproxy.hpp"
 
 namespace client { namespace dialogs {
 
@@ -87,10 +88,6 @@ namespace client { namespace dialogs {
      private:
         struct ShipData;
 
-        class CargoSummaryBuilder;
-        class CurrentSummaryBuilder;
-        class NextSummaryBuilder;
-
         class Listener;
         class KeyHandler;
         class ListPeer;
@@ -102,6 +99,7 @@ namespace client { namespace dialogs {
         util::RequestSender<game::Session> m_gameSender;
         afl::string::Translator& m_translator;
         client::si::OutputState m_outputState;
+        game::proxy::ListProxy m_proxy;
         String_t m_title;
         String_t m_okName;
         bool m_allowForeignShips;
@@ -109,8 +107,6 @@ namespace client { namespace dialogs {
         bool m_allowRemoteControl;
         bool m_canEarlyExit;
         game::Id_t m_initialShipId;
-        game::ref::List m_list;
-        std::auto_ptr<CargoSummaryBuilder> m_cargoSummaryBuilder;
     };
 
 } }

@@ -19,7 +19,7 @@ my @namespace = split /::/, shift @ARGV;
 my $className = pop @namespace;
 my @testNames = @ARGV;
 
-my $testFileName = lc(join('/', 'test', @namespace, $className)).'.cpp';
+my $testFileName = lc(join('/', 'test', @namespace, $className)).'test.cpp';
 my $classHeaderName = lc(join('/', @namespace, $className)).'.hpp';
 
 #print "class: $testClassName\n";

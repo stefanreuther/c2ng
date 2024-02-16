@@ -23,8 +23,6 @@
 #include "client/widgets/hullspecificationsheet.hpp"
 #include "client/widgets/referencelistbox.hpp"
 #include "game/game.hpp"
-#include "game/map/anyshiptype.hpp"
-#include "game/map/movementpredictor.hpp"
 #include "game/map/ship.hpp"
 #include "game/map/shipinfo.hpp"
 #include "game/proxy/configurationproxy.hpp"
@@ -53,7 +51,6 @@
 using client::si::OutputState;
 using client::widgets::CostSummaryList;
 using game::Reference;
-using game::spec::Cost;
 using game::spec::CostSummary;
 using ui::widgets::BaseButton;
 using ui::widgets::Button;
@@ -67,214 +64,6 @@ namespace {
         return frame;
     }
 
-    bool hasRemoteControl(const game::Root& r)
-    {
-        return r.hostConfiguration()[game::config::HostConfiguration::CPEnableRemote]();
-    }
-
-    /*
-     *  List builders
-     */
-
-    class ListBuilder : public util::Request<game::Session> {
-     public:
-        ListBuilder(game::ref::List& list,
-                    game::map::Point pos,
-                    game::ref::List::Options_t options,
-                    game::Id_t& excludeShip)
-            : m_list(list), m_pos(pos), m_options(options), m_excludeShip(excludeShip), m_isUniquePlayable(false), m_hasRemoteControl(false)
-            { }
-
-        virtual void handle(game::Session& session)
-            {
-                bool excludeValid = false;
-                if (game::Game* g = session.getGame().get()) {
-                    game::map::Universe& univ = g->viewpointTurn().universe();
-                    m_list.addObjectsAt(univ, g->mapConfiguration().getCanonicalLocation(m_pos), m_options, m_excludeShip);
-
-                    // Verify that the ship to be excluded is actually eligible.
-                    // This is needed to pick the correct error message.
-                    if (game::map::Ship* pShip = univ.ships().get(m_excludeShip)) {
-                        game::map::Point excludePos;
-                        excludeValid = (pShip->getPosition().get(excludePos) && excludePos == m_pos);
-                    }
-
-                    // Remember planet if it's empty
-                    if (game::map::Planet* pPlanet = univ.planets().get(univ.findPlanetAt(g->mapConfiguration().getCanonicalLocation(m_pos)))) {
-                        if (!pPlanet->isPlayable(game::map::Object::Playable)) {
-                            m_hidingPlanetName = pPlanet->getName(session.translator());
-                        }
-                    }
-
-                    // Verify playability
-                    // FIXME: right?
-                    if (m_list.size() == 1) {
-                        if (const game::map::Object* pObj = univ.getObject(m_list[0])) {
-                            m_isUniquePlayable = (pObj->isPlayable(game::map::Object::ReadOnly));
-                        }
-                    }
-                }
-                if (!excludeValid) {
-                    m_excludeShip = 0;
-                }
-
-                if (game::Root* r = session.getRoot().get()) {
-                    m_hasRemoteControl = ::hasRemoteControl(*r);
-                }
-            }
-
-        const String_t& getHidingPlanetName() const
-            { return m_hidingPlanetName; }
-
-        bool isUniquePlayable() const
-            { return m_isUniquePlayable; }
-
-        bool hasRemoteControl() const
-            { return m_hasRemoteControl; }
-
-     private:
-        game::ref::List& m_list;
-        game::map::Point m_pos;
-        game::ref::List::Options_t m_options;
-        game::Id_t& m_excludeShip;
-        String_t m_hidingPlanetName;
-        bool m_isUniquePlayable;
-        bool m_hasRemoteControl;
-    };
-
-    class NextBuilder : public util::Request<game::Session> {
-     public:
-        NextBuilder(game::ref::List& list,
-                    game::map::Point pos,
-                    game::Id_t fromShip,
-                    game::ref::List::Options_t options)
-            : m_list(list), m_pos(pos), m_fromShip(fromShip), m_options(options), m_hasRemoteControl(false)
-            { }
-
-        virtual void handle(game::Session& session)
-            {
-                // ex doListNextShips (part)
-                game::Root* root = session.getRoot().get();
-                game::spec::ShipList* list = session.getShipList().get();
-                game::Game* g = session.getGame().get();
-                if (root != 0 && list != 0 && g != 0) {
-                    // Compute movement
-                    const game::map::Universe& univ = g->viewpointTurn().universe();
-                    game::map::MovementPredictor pred;
-                    pred.computeMovement(univ, *g, *list, *root);
-
-                    // If looking at a ship, resolve its position
-                    bool posOK;
-                    game::map::Point pos;
-                    if (m_fromShip != 0) {
-                        posOK = pred.getShipPosition(m_fromShip).get(pos);
-                    } else {
-                        posOK = true;
-                        pos = m_pos;
-                    }
-
-                    // Build list
-                    if (posOK) {
-                        pos = g->mapConfiguration().getCanonicalLocation(pos);
-
-                        const game::map::AnyShipType& ty(univ.allShips());
-                        for (game::Id_t id = ty.findNextIndex(0); id != 0; id = ty.findNextIndex(id)) {
-                            const game::map::Ship* sh = univ.ships().get(id);
-                            game::map::Point shPos;
-
-                            if (sh != 0
-                                && pred.getShipPosition(id).get(shPos)
-                                && g->mapConfiguration().getCanonicalLocation(shPos) == pos
-                                && (m_options.contains(game::ref::List::IncludeForeignShips) || sh->isPlayable(game::map::Object::ReadOnly))
-                                && (!m_options.contains(game::ref::List::SafeShipsOnly) || sh->isReliablyVisible(0)))
-                            {
-                                m_list.add(Reference(Reference::Ship, id));
-                            }
-                        }
-
-                        // If list is not empty, AND we're coming from a ship, place scanner.
-                        // (Otherwise, we're likely coming from a context where the scanner is already at the correct place.)
-                        if (m_fromShip != 0) {
-                            try {
-                                game::interface::UserInterfacePropertyStack& uiProps = session.uiPropertyStack();
-
-                                // Consider current position to place cursor correctly across wrap
-                                std::auto_ptr<afl::data::Value> chartX(uiProps.get(game::interface::iuiChartX));
-                                std::auto_ptr<afl::data::Value> chartY(uiProps.get(game::interface::iuiChartY));
-                                const afl::data::IntegerValue* chartXIV = dynamic_cast<const afl::data::IntegerValue*>(chartX.get());
-                                const afl::data::IntegerValue* chartYIV = dynamic_cast<const afl::data::IntegerValue*>(chartY.get());
-
-                                if (chartXIV != 0 && chartYIV != 0) {
-                                    game::map::Point adjPos = g->mapConfiguration().getSimpleNearestAlias(pos, game::map::Point(chartXIV->getValue(), chartYIV->getValue()));
-                                    afl::data::IntegerValue xv(adjPos.getX());
-                                    afl::data::IntegerValue yv(adjPos.getY());
-                                    uiProps.set(game::interface::iuiScanX, &xv);
-                                    uiProps.set(game::interface::iuiScanY, &yv);
-                                }
-                            }
-                            catch (...) {
-                                // set() may fail; don't deprive user of this functionality then
-                            }
-                        }
-                    }
-
-                    m_hasRemoteControl = ::hasRemoteControl(*root);
-                }
-            }
-
-        bool hasRemoteControl() const
-            { return m_hasRemoteControl; }
-
-     private:
-        game::ref::List& m_list;
-        game::map::Point m_pos;
-        game::Id_t m_fromShip;
-        game::ref::List::Options_t m_options;
-        bool m_hasRemoteControl;
-    };
-
-    void buildCurrentCargoSummary(game::Session& session, game::ref::List& in, CostSummary& out)
-    {
-        if (game::Game* pGame = session.getGame().get()) {
-            game::map::Universe& univ = pGame->viewpointTurn().universe();
-            for (size_t i = 0, n = in.size(); i < n; ++i) {
-                if (const game::map::Ship* ship = dynamic_cast<const game::map::Ship*>(univ.getObject(in[i]))) {
-                    if (ship->isPlayable(game::map::Object::ReadOnly)) {
-                        Cost cargo;
-                        cargo.set(Cost::Tritanium,  ship->getCargo(game::Element::Tritanium).orElse(0));
-                        cargo.set(Cost::Duranium,   ship->getCargo(game::Element::Duranium).orElse(0));
-                        cargo.set(Cost::Molybdenum, ship->getCargo(game::Element::Molybdenum).orElse(0));
-                        cargo.set(Cost::Supplies,   ship->getCargo(game::Element::Supplies).orElse(0));
-                        cargo.set(Cost::Money,      ship->getCargo(game::Element::Money).orElse(0));
-                        out.add(CostSummary::Item(ship->getId(), 1, ship->getName(game::LongName, session.translator(), session.interface()), cargo));
-                    }
-                }
-            }
-        }
-    }
-
-    void buildNextCargoSummary(game::Session& session, game::ref::List& in, CostSummary& out)
-    {
-        game::Root* root = session.getRoot().get();
-        game::spec::ShipList* list = session.getShipList().get();
-        game::Game* g = session.getGame().get();
-        if (root != 0 && list != 0 && g != 0) {
-            // Compute movement
-            const game::map::Universe& univ = g->viewpointTurn().universe();
-            game::map::MovementPredictor pred;
-            pred.computeMovement(univ, *g, *list, *root);
-
-            // Build list
-            for (size_t i = 0, n = in.size(); i < n; ++i) {
-                if (const game::map::Ship* ship = dynamic_cast<const game::map::Ship*>(univ.getObject(in[i]))) {
-                    Cost cargo;
-                    if (pred.getShipCargo(ship->getId(), cargo)) {
-                        out.add(CostSummary::Item(ship->getId(), 1, ship->getName(game::LongName, session.translator(), session.interface()), cargo));
-                    }
-                }
-            }
-        }
-    }
 
     /*
      *  Game-side implementation of "cargo transfer/history" function
@@ -401,37 +190,6 @@ struct client::dialogs::VisualScanDialog::ShipData {
         { }
 };
 
-/*
- *  CargoSummaryBuilder
- */
-
-class client::dialogs::VisualScanDialog::CargoSummaryBuilder : public util::Request<game::Session> {
- public:
-    virtual ~CargoSummaryBuilder()
-        { }
-    virtual String_t getDialogTitle(afl::string::Translator& tx) = 0;
-
-    // Keep it simple:
-    game::ref::List m_list;
-    CostSummary m_summary;
-};
-
-class client::dialogs::VisualScanDialog::CurrentSummaryBuilder : public CargoSummaryBuilder {
- public:
-    virtual void handle(game::Session& session)
-        { buildCurrentCargoSummary(session, m_list, m_summary); }
-    virtual String_t getDialogTitle(afl::string::Translator& tx)
-        { return tx("Cargo Summary"); }
-};
-
-class client::dialogs::VisualScanDialog::NextSummaryBuilder : public CargoSummaryBuilder {
- public:
-    virtual void handle(game::Session& session)
-        { buildNextCargoSummary(session, m_list, m_summary); }
-    virtual String_t getDialogTitle(afl::string::Translator& tx)
-        { return tx("Cargo Summary (Prediction)"); }
-};
-
 
 /*
  *  Listener: ObjectListener to produce ShipData (data not processed by tiles)
@@ -517,7 +275,7 @@ class client::dialogs::VisualScanDialog::Window : public client::si::Control {
         ListMode
     };
 
-    Window(client::si::UserSide& iface, ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx, const game::ref::List& list, CargoSummaryBuilder* csb, OutputState& outputState);
+    Window(client::si::UserSide& iface, ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx, game::proxy::ListProxy& proxy, OutputState& outputState);
     ~Window();
 
     bool run(String_t title, String_t okName);
@@ -562,8 +320,7 @@ class client::dialogs::VisualScanDialog::Window : public client::si::Control {
 
     Reference m_currentReference;
     game::ref::UserList m_userList;
-    const game::ref::List m_list;
-    CargoSummaryBuilder*const m_cargoSummaryBuilder;
+    game::proxy::ListProxy& m_proxy;
     game::Id_t m_initialShipId;
 
     ui::Widget* m_pWindow;
@@ -664,7 +421,7 @@ client::dialogs::VisualScanDialog::KeyHandler::handleKey(util::Key_t key, int /*
         return true;
 
      case util::Key_Insert + util::KeyMod_Ctrl:
-        addObjectsToSimulation(m_parent.m_root, m_parent.m_gameSender, m_parent.m_list, m_parent.m_translator);
+        addObjectsToSimulation(m_parent.m_root, m_parent.m_gameSender, m_parent.m_proxy.getList(), m_parent.m_translator);
         return true;
 
      case '+':
@@ -822,7 +579,7 @@ client::dialogs::VisualScanDialog::SpecPeer::SpecPeer(ui::Root& root, Window& pa
  *  Implementation of Window
  */
 
-client::dialogs::VisualScanDialog::Window::Window(client::si::UserSide& us, ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx, const game::ref::List& list, CargoSummaryBuilder* csb, OutputState& outputState)
+client::dialogs::VisualScanDialog::Window::Window(client::si::UserSide& us, ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx, game::proxy::ListProxy& proxy, OutputState& outputState)
     : Control(us),
       m_root(root),
       m_gameSender(gameSender),
@@ -835,8 +592,7 @@ client::dialogs::VisualScanDialog::Window::Window(client::si::UserSide& us, ui::
       m_outputState(outputState),
       m_currentReference(),
       m_userList(),
-      m_list(list),
-      m_cargoSummaryBuilder(csb),
+      m_proxy(proxy),
       m_initialShipId(0),
       m_pWindow(0),
       m_pImage(0),
@@ -855,7 +611,7 @@ client::dialogs::VisualScanDialog::Window::Window(client::si::UserSide& us, ui::
       m_specPeer()
 {
     m_listProxy.sig_listChange.add(this, &Window::onListChange);
-    m_listProxy.setContentNew(std::auto_ptr<game::proxy::ReferenceListProxy::Initializer_t>(new Initializer(list)));
+    m_listProxy.setContentNew(std::auto_ptr<game::proxy::ReferenceListProxy::Initializer_t>(new Initializer(m_proxy.getList())));
 }
 
 client::dialogs::VisualScanDialog::Window::~Window()
@@ -1157,76 +913,75 @@ void
 client::dialogs::VisualScanDialog::Window::showCargoList()
 {
     // ex WVisualScanWindow::showCargoList, CListShipsWindow.SumCargo
-    if (m_cargoSummaryBuilder != 0) {
-        Downlink link(m_root, m_translator);
-        m_cargoSummaryBuilder->m_list = m_list;
-        m_cargoSummaryBuilder->m_summary.clear();
-        link.call(m_gameSender, *m_cargoSummaryBuilder);
+    Downlink link(m_root, m_translator);
+    CostSummary sum = m_proxy.getCargoSummary(link);
 
-        const String_t title = m_cargoSummaryBuilder->getDialogTitle(m_translator);
-        if (m_cargoSummaryBuilder->m_summary.getNumItems() == 0) {
-            ui::dialogs::MessageBox(m_translator("This list does not include any of your ships."), title, m_root)
-                .doOkDialog(m_translator);
-            return;
-        }
+    const String_t title =
+        m_proxy.isCurrent()
+        ? m_translator("Cargo Summary")
+        : m_translator("Cargo Summary (Prediction)");
+    if (sum.getNumItems() == 0) {
+        ui::dialogs::MessageBox(m_translator("This list does not include any of your ships."), title, m_root)
+            .doOkDialog(m_translator);
+        return;
+    }
 
-        util::NumberFormatter fmt = game::proxy::ConfigurationProxy(m_gameSender).getNumberFormatter(link);
+    util::NumberFormatter fmt = game::proxy::ConfigurationProxy(m_gameSender).getNumberFormatter(link);
 
-        // Show the dialog
-        // VBox
-        //   HBox
-        //     VBox
-        //       WBillDisplay
-        //       WBillTotalDisplay
-        //     UIScrollbar
-        //   HBox
-        //     "Export"
-        //     UISpacer
-        //     "OK"
-        //     "Cancel"
-        afl::base::Deleter del;
-        ui::Window& win = del.addNew(new ui::Window(title, m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
-        CostSummaryList& list = del.addNew(
-            new CostSummaryList(int(std::max(size_t(5), std::min(size_t(20), m_cargoSummaryBuilder->m_summary.getNumItems()))),
-                                true,
-                                CostSummaryList::TotalsFooter,
-                                m_root, fmt, m_translator));
-        list.setContent(m_cargoSummaryBuilder->m_summary);
+    // Show the dialog
+    // VBox
+    //   HBox
+    //     VBox
+    //       WBillDisplay
+    //       WBillTotalDisplay
+    //     UIScrollbar
+    //   HBox
+    //     "Export"
+    //     UISpacer
+    //     "OK"
+    //     "Cancel"
+    afl::base::Deleter del;
+    ui::Window& win = del.addNew(new ui::Window(title, m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
+    CostSummaryList& list = del.addNew(
+        new CostSummaryList(int(std::max(size_t(5), std::min(size_t(20), sum.getNumItems()))),
+                            true,
+                            CostSummaryList::TotalsFooter,
+                            m_root, fmt, m_translator));
+    list.setContent(sum);
 
-        ui::Group& listGroup = del.addNew(new ui::Group(ui::layout::HBox::instance0));
-        listGroup.add(list);
-        listGroup.add(del.addNew(new ui::widgets::Scrollbar(list, m_root)));
-        win.add(listGroup);
+    ui::Group& listGroup = del.addNew(new ui::Group(ui::layout::HBox::instance0));
+    listGroup.add(list);
+    listGroup.add(del.addNew(new ui::widgets::Scrollbar(list, m_root)));
+    win.add(listGroup);
 
-        ui::widgets::Button& btnExport = del.addNew(new ui::widgets::Button(util::KeyString(m_translator("E - Export")), m_root));
-        ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(m_translator("OK"), util::Key_Return, m_root));
-        ui::widgets::Button& btnCancel = del.addNew(new ui::widgets::Button(m_translator("Cancel"), util::Key_Escape, m_root));
-        ui::EventLoop loop(m_root);
-        btnOK.sig_fire.addNewClosure(loop.makeStop(1));
-        btnCancel.sig_fire.addNewClosure(loop.makeStop(0));
-        btnExport.sig_fire.addNewClosure(list.makeExporter(m_gameSender));
+    ui::widgets::Button& btnExport = del.addNew(new ui::widgets::Button(util::KeyString(m_translator("E - Export")), m_root));
+    ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(m_translator("OK"), util::Key_Return, m_root));
+    ui::widgets::Button& btnCancel = del.addNew(new ui::widgets::Button(m_translator("Cancel"), util::Key_Escape, m_root));
+    ui::EventLoop loop(m_root);
+    btnOK.sig_fire.addNewClosure(loop.makeStop(1));
+    btnCancel.sig_fire.addNewClosure(loop.makeStop(0));
+    btnExport.sig_fire.addNewClosure(list.makeExporter(m_gameSender));
 
-        ui::Group& g = del.addNew(new ui::Group(ui::layout::HBox::instance5));
-        g.add(btnExport);
-        g.add(del.addNew(new ui::Spacer()));
-        g.add(btnOK);
-        g.add(btnCancel);
-        win.add(g);
-        win.add(del.addNew(new ui::widgets::Quit(m_root, loop)));
-        win.pack();
+    ui::Group& g = del.addNew(new ui::Group(ui::layout::HBox::instance5));
+    g.add(btnExport);
+    g.add(del.addNew(new ui::Spacer()));
+    g.add(btnOK);
+    g.add(btnCancel);
+    win.add(g);
+    win.add(del.addNew(new ui::widgets::Quit(m_root, loop)));
+    win.pack();
 
-        // Place cursor on current ship
-        size_t myIndex = 0;
-        if (m_currentReference.getType() == Reference::Ship && m_cargoSummaryBuilder->m_summary.find(m_currentReference.getId(), &myIndex)) {
-            list.setCurrentItem(myIndex);
-        }
+    // Place cursor on current ship
+    size_t myIndex = 0;
+    if (m_currentReference.getType() == Reference::Ship && sum.find(m_currentReference.getId(), &myIndex)) {
+        list.setCurrentItem(myIndex);
+    }
 
-        m_root.centerWidget(win);
-        m_root.add(win);
-        if (loop.run() != 0) {
-            if (const CostSummary::Item* it = m_cargoSummaryBuilder->m_summary.get(list.getCurrentItem())) {
-                setCurrentReference(Reference(Reference::Ship, it->id));
-            }
+    m_root.centerWidget(win);
+    m_root.add(win);
+    if (loop.run() != 0) {
+        if (const CostSummary::Item* it = sum.get(list.getCurrentItem())) {
+            setCurrentReference(Reference(Reference::Ship, it->id));
         }
     }
 }
@@ -1246,7 +1001,7 @@ client::dialogs::VisualScanDialog::Window::showCargo()
      case CargoRequest::None:
         break;
      case CargoRequest::Transfer:
-        if (dynamic_cast<CurrentSummaryBuilder*>(m_cargoSummaryBuilder) != 0) {
+        if (m_proxy.isCurrent()) {
             doShipCargoTransfer(m_root, m_gameSender, m_translator, r.getId());
         }
         break;
@@ -1360,14 +1115,14 @@ client::dialogs::VisualScanDialog::VisualScanDialog(client::si::UserSide& iface,
       m_gameSender(iface.gameSender()),
       m_translator(tx),
       m_outputState(),
+      m_proxy(iface.gameSender()),
       m_title(tx.translateString("List Ships")),
       m_okName(tx.translateString("OK")),
       m_allowForeignShips(false),
       m_earlyExit(false),
       m_allowRemoteControl(true),
       m_canEarlyExit(false),
-      m_initialShipId(0),
-      m_list()
+      m_initialShipId(0)
 { }
 
 client::dialogs::VisualScanDialog::~VisualScanDialog()
@@ -1402,40 +1157,35 @@ client::dialogs::VisualScanDialog::loadCurrent(Downlink& link, game::map::Point 
 {
     // ex listship.pas:NListShips (sort-of)
     // Build initial list
-    game::ref::List list;
-    ListBuilder b(list, pos, options, excludeShip);
-    link.call(m_gameSender, b);
-    m_canEarlyExit = b.isUniquePlayable();
-    m_allowRemoteControl = b.hasRemoteControl();
+    m_proxy.buildCurrent(link, pos, options, excludeShip);
+    m_canEarlyExit = m_proxy.isUniquePlayable();
+    m_allowRemoteControl = m_proxy.hasRemoteControl();
     m_initialShipId = m_userSide.getFocusedObjectId(game::Reference::Ship);
 
     // Verify
-    if (list.size() == 0) {
+    if (m_proxy.getList().size() == 0) {
         String_t msg;
 
         if (!options.contains(game::ref::List::IncludeForeignShips)) {
-            if (excludeShip != 0) {
+            if (m_proxy.hasExcludedShip()) {
                 msg = m_translator("There is no other ship of ours at that position.");
             } else {
                 msg = m_translator("There is no ship of ours at that position.");
             }
         } else {
-            if (excludeShip != 0) {
+            if (m_proxy.hasExcludedShip()) {
                 msg = m_translator("We can't locate another ship at that position.");
             } else {
                 msg = m_translator("We can't locate a ship at that position.");
-                if (!b.getHidingPlanetName().empty()) {
+                if (m_proxy.hasHidingPlanet()) {
                     // This message must start with a space
-                    msg += afl::string::Format(m_translator(" The planet %s may be hiding ships from our sensors."), b.getHidingPlanetName());
+                    msg += afl::string::Format(m_translator(" The planet %s may be hiding ships from our sensors."), m_proxy.getHidingPlanetName());
                 }
             }
         }
         ui::dialogs::MessageBox(msg, m_translator("Scanner"), m_root).doOkDialog(m_translator);
         return false;
     }
-
-    m_list = list;
-    m_cargoSummaryBuilder.reset(new CurrentSummaryBuilder());
 
     return true;
 }
@@ -1445,20 +1195,15 @@ client::dialogs::VisualScanDialog::loadNext(Downlink& link, game::map::Point pos
 {
     // ex doListNextShips (part), listship.pas:NListShipsNextTurnAt
     // Build initial list
-    game::ref::List list;
-    NextBuilder b(list, pos, fromShip, options);
-    link.call(m_gameSender, b);
-    m_allowRemoteControl = b.hasRemoteControl();
+    m_proxy.buildNext(link, pos, fromShip, options);
+    m_allowRemoteControl = m_proxy.hasRemoteControl();
     m_initialShipId = fromShip;
 
     // List empty? Show message.
-    if (list.size() == 0) {
+    if (m_proxy.getList().size() == 0) {
         ui::dialogs::MessageBox(m_translator("We can't find a ship that will be at this position next turn."), m_translator("Scanner"), m_root).doOkDialog(m_translator);
         return false;
     }
-
-    m_list = list;
-    m_cargoSummaryBuilder.reset(new NextSummaryBuilder());
 
     return true;
 }
@@ -1468,11 +1213,11 @@ client::dialogs::VisualScanDialog::run()
 {
     // One object only? Bail out early if allowed.
     if (m_earlyExit && m_canEarlyExit) {
-        return m_list[0];
+        return m_proxy.getList()[0];
     }
 
     // Build window
-    Window w(m_userSide, m_root, m_gameSender, m_translator, m_list, m_cargoSummaryBuilder.get(), m_outputState);
+    Window w(m_userSide, m_root, m_gameSender, m_translator, m_proxy, m_outputState);
     w.setAllowRemoteControl(m_allowRemoteControl);
     w.setAllowForeignShips(m_allowForeignShips);
     w.setInitialShipId(m_initialShipId);
