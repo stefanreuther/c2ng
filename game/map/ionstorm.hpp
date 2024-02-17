@@ -77,6 +77,11 @@ namespace game { namespace map {
             \param flag True if growing, false if weakening */
         void setIsGrowing(bool flag);
 
+        /** Get name.
+            \param tx Translator
+            \return name (same as getName(PlainName), but with fewer dependencies) */
+        String_t getName(afl::string::Translator& tx) const;
+
         /** Get ion storm class.
             The class is derived from the voltage.
             \return class [1,5] if known */

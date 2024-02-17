@@ -5,6 +5,7 @@
 
 #include "game/interface/shipmethod.hpp"
 #include "game/actions/basefixrecycle.hpp"
+#include "game/actions/preconditions.hpp"
 #include "game/exception.hpp"
 #include "game/interface/cargomethod.hpp"
 #include "game/interface/objectcommand.hpp"
@@ -44,7 +45,7 @@ void
 game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter::Arguments& args,
                                 interpreter::Process& process,
                                 Session& session,
-                                Root& root,
+                                const Root& root,
                                 const game::map::Configuration& mapConfig,
                                 const game::spec::ShipList& shipList,
                                 Turn& turn)
@@ -83,7 +84,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
         // ex int/if/shipif.h:IFShipSetFCode
         // ex shipint.pas:Ship_SetFCode
         args.checkArgumentCount(1);
-        setShipProperty(sh, ispFCode, args.getNext(), root, shipList, mapConfig, turn);
+        setShipProperty(sh, ispFCode, args.getNext(), root, shipList, mapConfig, turn.universe());
         break;
 
      case ismSetEnemy:
@@ -94,7 +95,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
         // ex int/if/shipif.h:IFShipSetEnemy
         // ex shipint.pas:Ship_SetEnemy
         args.checkArgumentCount(1);
-        setShipProperty(sh, ispEnemyId, args.getNext(), root, shipList, mapConfig, turn);
+        setShipProperty(sh, ispEnemyId, args.getNext(), root, shipList, mapConfig, turn.universe());
         break;
 
      case ismSetSpeed:
@@ -105,7 +106,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
         // ex int/if/shipif.h:IFShipSetSpeed
         // ex shipint.pas:Ship_SetSpeed
         args.checkArgumentCount(1);
-        setShipProperty(sh, ispSpeedId, args.getNext(), root, shipList, mapConfig, turn);
+        setShipProperty(sh, ispSpeedId, args.getNext(), root, shipList, mapConfig, turn.universe());
         break;
 
      case ismSetName:
@@ -116,7 +117,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
         // ex int/if/shipif.h:IFShipSetName
         // ex shipint.pas:Ship_SetName
         args.checkArgumentCount(1);
-        setShipProperty(sh, ispName, args.getNext(), root, shipList, mapConfig, turn);
+        setShipProperty(sh, ispName, args.getNext(), root, shipList, mapConfig, turn.universe());
         break;
 
      case ismSetMission: {
@@ -236,7 +237,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
            @see CargoUnload, CargoUpload, CargoTransferWait
            @since PCC 1.0.10, PCC2 1.99.12, PCC2 2.40.3
            @diff The "proxy" ability is present in PCC 1.0.10, and PCC2 2.40.3 (PCC2ng), but not in PCC2. */
-        doCargoTransfer(sh, process, args, session, mapConfig, turn, root);
+        doCargoTransfer(sh, process, args, game::actions::mustHaveShipList(session), mapConfig, turn, root);
         break;
 
      case ismCargoUnload:
@@ -256,7 +257,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
            @see CargoUpload, CargoTransfer
            @since PCC 1.0.10, PCC2 1.99.12, PCC2 2.40.3 */
         // ex IFShipCargoUnload
-        doCargoUnload(sh, false, process, args, session, mapConfig, turn, root);
+        doCargoUnload(sh, false, process, args, game::actions::mustHaveShipList(session), mapConfig, turn, root);
         break;
 
      case ismCargoUpload:
@@ -274,7 +275,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
            @see CargoUnload, CargoTransfer, CargoUploadWait
            @since PCC 1.0.10, PCC2 1.99.12, PCC2 2.40.3 */
         // ex IFShipCargoUpload
-        doCargoUnload(sh, true, process, args, session, mapConfig, turn, root);
+        doCargoUnload(sh, true, process, args, game::actions::mustHaveShipList(session), mapConfig, turn, root);
         break;
 
      case ismSetFleet:
@@ -293,7 +294,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
         // ex IFShipSetFleet
         // ex shipint.pas:Ship_SetFleet
         args.checkArgumentCount(1);
-        setShipProperty(sh, ispFleetId, args.getNext(), root, shipList, mapConfig, turn);
+        setShipProperty(sh, ispFleetId, args.getNext(), root, shipList, mapConfig, turn.universe());
         break;
     }
 }

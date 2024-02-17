@@ -7,7 +7,6 @@
 #include "afl/io/textfile.hpp"
 #include "afl/string/format.hpp"
 #include "game/root.hpp"
-#include "game/turn.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/indexablevalue.hpp"
 #include "interpreter/nametable.hpp"
@@ -164,12 +163,14 @@ MessageWriteCommand::call(interpreter::Process& proc, interpreter::Arguments& ar
 
 game::interface::InboxContext::InboxContext(size_t index,
                                             afl::string::Translator& tx,
-                                            afl::base::Ref<const Root> root,
-                                            afl::base::Ref<const Game> game)
+                                            const afl::base::Ref<const Root>& root,
+                                            const afl::base::Ref<const Game>& game,
+                                            const afl::base::Ref<const Turn>& turn)
     : m_index(index),
       m_translator(tx),
       m_root(root),
       m_game(game),
+      m_turn(turn),
       m_lineCache()
 { }
 
@@ -247,7 +248,7 @@ game::interface::InboxContext*
 game::interface::InboxContext::clone() const
 {
     // ex IntMessageContext::clone
-    return new InboxContext(m_index, m_translator, m_root, m_game);
+    return new InboxContext(m_index, m_translator, m_root, m_game, m_turn);
 }
 
 afl::base::Deletable*
@@ -282,7 +283,7 @@ game::interface::InboxContext::store(interpreter::TagNode& out, afl::io::DataSin
 const game::msg::Mailbox&
 game::interface::InboxContext::mailbox()
 {
-    return m_game->currentTurn().inbox();
+    return m_turn->inbox();
 }
 
 void

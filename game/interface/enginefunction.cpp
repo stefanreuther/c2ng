@@ -62,7 +62,7 @@ game::interface::EngineFunction::makeFirstContext()
     // ex int/if/specif.h:IFEngineMake
     if (game::spec::ShipList* list = m_session.getShipList().get()) {
         if (const game::spec::Engine* e = list->engines().findNext(0)) {
-            return new EngineContext(e->getId(), *list);
+            return EngineContext::create(e->getId(), m_session);
         }
     }
     return 0;

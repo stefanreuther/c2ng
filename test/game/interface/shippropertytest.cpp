@@ -422,54 +422,54 @@ AFL_TEST("game.interface.ShipProperty:basics", a)
     // Writable properties
     {
         afl::data::StringValue sv("qrs");
-        setShipProperty(sh, game::interface::ispFCode, &sv, *root, *shipList, g->mapConfiguration(), *turn);
+        setShipProperty(sh, game::interface::ispFCode, &sv, *root, *shipList, g->mapConfiguration(), turn->universe());
         a.checkEqual("set ispFCode", sh.getFriendlyCode().orElse(""), "qrs");
     }
     {
         afl::data::IntegerValue iv(42);
-        setShipProperty(sh, game::interface::ispMissionId, &iv, *root, *shipList, g->mapConfiguration(), *turn);
+        setShipProperty(sh, game::interface::ispMissionId, &iv, *root, *shipList, g->mapConfiguration(), turn->universe());
         a.checkEqual("set ispMissionId", sh.getMission().orElse(-1), 42);
     }
     {
         afl::data::IntegerValue iv(42);
-        setShipProperty(sh, game::interface::ispMissionIntercept, &iv, *root, *shipList, g->mapConfiguration(), *turn);
+        setShipProperty(sh, game::interface::ispMissionIntercept, &iv, *root, *shipList, g->mapConfiguration(), turn->universe());
         a.checkEqual("set ispMissionIntercept", sh.getMissionParameter(game::InterceptParameter).orElse(-1), 42);
     }
     {
         afl::data::IntegerValue iv(42);
-        setShipProperty(sh, game::interface::ispMissionTow, &iv, *root, *shipList, g->mapConfiguration(), *turn);
+        setShipProperty(sh, game::interface::ispMissionTow, &iv, *root, *shipList, g->mapConfiguration(), turn->universe());
         a.checkEqual("set ispMissionTow", sh.getMissionParameter(game::TowParameter).orElse(-1), 42);
     }
     {
         afl::data::StringValue sv("USS Incognito");
-        setShipProperty(sh, game::interface::ispName, &sv, *root, *shipList, g->mapConfiguration(), *turn);
+        setShipProperty(sh, game::interface::ispName, &sv, *root, *shipList, g->mapConfiguration(), turn->universe());
         a.checkEqual("set ispName", sh.getName(), "USS Incognito");
     }
     {
         afl::data::IntegerValue iv(3);
-        setShipProperty(sh, game::interface::ispSpeedId, &iv, *root, *shipList, g->mapConfiguration(), *turn);
+        setShipProperty(sh, game::interface::ispSpeedId, &iv, *root, *shipList, g->mapConfiguration(), turn->universe());
         a.checkEqual("set ispSpeedId", sh.getWarpFactor().orElse(-1), 3);
     }
     {
         afl::data::IntegerValue iv(10);
-        setShipProperty(sh, game::interface::ispEnemyId, &iv, *root, *shipList, g->mapConfiguration(), *turn);
+        setShipProperty(sh, game::interface::ispEnemyId, &iv, *root, *shipList, g->mapConfiguration(), turn->universe());
         a.checkEqual("set ispEnemyId", sh.getPrimaryEnemy().orElse(-1), 10);
     }
 
     // Error case: not assignable
     {
         afl::data::IntegerValue iv(10);
-        AFL_CHECK_THROWS(a("set ispCrew"), setShipProperty(sh, game::interface::ispCrew, &iv, *root, *shipList, g->mapConfiguration(), *turn), interpreter::Error);
+        AFL_CHECK_THROWS(a("set ispCrew"), setShipProperty(sh, game::interface::ispCrew, &iv, *root, *shipList, g->mapConfiguration(), turn->universe()), interpreter::Error);
     }
 
     // Error case: range error
     {
         afl::data::IntegerValue iv(160);
-        AFL_CHECK_THROWS(a("set ispSpeedId: range"), setShipProperty(sh, game::interface::ispSpeedId, &iv, *root, *shipList, g->mapConfiguration(), *turn), interpreter::Error);
+        AFL_CHECK_THROWS(a("set ispSpeedId: range"), setShipProperty(sh, game::interface::ispSpeedId, &iv, *root, *shipList, g->mapConfiguration(), turn->universe()), interpreter::Error);
     }
     {
         afl::data::IntegerValue iv(16);
-        AFL_CHECK_THROWS(a("set ispEnemyId: range"), setShipProperty(sh, game::interface::ispEnemyId, &iv, *root, *shipList, g->mapConfiguration(), *turn), interpreter::Error);
+        AFL_CHECK_THROWS(a("set ispEnemyId: range"), setShipProperty(sh, game::interface::ispEnemyId, &iv, *root, *shipList, g->mapConfiguration(), turn->universe()), interpreter::Error);
     }
 }
 
@@ -657,12 +657,12 @@ AFL_TEST("game.interface.ShipProperty:carrier", a)
     // Writable properties: fleet stuff
     {
         afl::data::StringValue sv("peacekeeper");
-        setShipProperty(sh, game::interface::ispFleetName, &sv, *root, *shipList, g->mapConfiguration(), *turn);
+        setShipProperty(sh, game::interface::ispFleetName, &sv, *root, *shipList, g->mapConfiguration(), turn->universe());
         a.checkEqual("set ispFleetName", sh.getFleetName(), "peacekeeper");
     }
     {
         afl::data::IntegerValue iv(0);
-        setShipProperty(sh, game::interface::ispFleetId, &iv, *root, *shipList, g->mapConfiguration(), *turn);
+        setShipProperty(sh, game::interface::ispFleetId, &iv, *root, *shipList, g->mapConfiguration(), turn->universe());
         a.checkEqual("set ispFleetId", sh.getFleetNumber(), 0);
     }
 }
@@ -790,7 +790,7 @@ AFL_TEST("game.interface.ShipProperty:empty", a)
     {
         // Cannot change fcode
         afl::data::StringValue sv("qrs");
-        AFL_CHECK_THROWS(a("set ispFCode"), setShipProperty(sh, game::interface::ispFCode, &sv, *root, *shipList, g->mapConfiguration(), *turn), interpreter::Error);
+        AFL_CHECK_THROWS(a("set ispFCode"), setShipProperty(sh, game::interface::ispFCode, &sv, *root, *shipList, g->mapConfiguration(), turn->universe()), interpreter::Error);
     }
 }
 
@@ -955,20 +955,20 @@ AFL_TEST("game.interface.ShipProperty:freighter", a)
     {
         // Cannot change speed or mission, is controlled by fleet leader
         afl::data::IntegerValue iv(3);
-        AFL_CHECK_THROWS(a("set ispSpeedId"),          setShipProperty(sh, game::interface::ispSpeedId,          &iv, *root, *shipList, g->mapConfiguration(), *turn), game::Exception);
-        AFL_CHECK_THROWS(a("set ispMissionId"),        setShipProperty(sh, game::interface::ispMissionId,        &iv, *root, *shipList, g->mapConfiguration(), *turn), game::Exception);
-        AFL_CHECK_THROWS(a("set ispMissionIntercept"), setShipProperty(sh, game::interface::ispMissionIntercept, &iv, *root, *shipList, g->mapConfiguration(), *turn), game::Exception);
-        AFL_CHECK_THROWS(a("set ispMissionTow"),       setShipProperty(sh, game::interface::ispMissionTow,       &iv, *root, *shipList, g->mapConfiguration(), *turn), game::Exception);
+        AFL_CHECK_THROWS(a("set ispSpeedId"),          setShipProperty(sh, game::interface::ispSpeedId,          &iv, *root, *shipList, g->mapConfiguration(), turn->universe()), game::Exception);
+        AFL_CHECK_THROWS(a("set ispMissionId"),        setShipProperty(sh, game::interface::ispMissionId,        &iv, *root, *shipList, g->mapConfiguration(), turn->universe()), game::Exception);
+        AFL_CHECK_THROWS(a("set ispMissionIntercept"), setShipProperty(sh, game::interface::ispMissionIntercept, &iv, *root, *shipList, g->mapConfiguration(), turn->universe()), game::Exception);
+        AFL_CHECK_THROWS(a("set ispMissionTow"),       setShipProperty(sh, game::interface::ispMissionTow,       &iv, *root, *shipList, g->mapConfiguration(), turn->universe()), game::Exception);
     }
     {
         // Cannot change fleet number to unrelated ship
         afl::data::IntegerValue iv(TARGET_ID);
-        AFL_CHECK_THROWS(a("set ispFleetId"),          setShipProperty(sh, game::interface::ispFleetId,          &iv, *root, *shipList, g->mapConfiguration(), *turn), interpreter::Error);
+        AFL_CHECK_THROWS(a("set ispFleetId"),          setShipProperty(sh, game::interface::ispFleetId,          &iv, *root, *shipList, g->mapConfiguration(), turn->universe()), interpreter::Error);
     }
     {
         // Cannot change fleet name
         afl::data::StringValue sv("name");
-        AFL_CHECK_THROWS(a("set ispFleetName"),        setShipProperty(sh, game::interface::ispFleetName,        &sv, *root, *shipList, g->mapConfiguration(), *turn), interpreter::Error);
+        AFL_CHECK_THROWS(a("set ispFleetName"),        setShipProperty(sh, game::interface::ispFleetName,        &sv, *root, *shipList, g->mapConfiguration(), turn->universe()), interpreter::Error);
     }
 }
 
@@ -1034,7 +1034,7 @@ AFL_TEST("game.interface.ShipProperty:intercept", a)
 
     // Modify target
     afl::data::IntegerValue iv(UNNAMED_ID);
-    AFL_CHECK_SUCCEEDS(a("set ispMissionIntercept"), setShipProperty(sh, game::interface::ispMissionIntercept, &iv, *root, *shipList, g->mapConfiguration(), *turn));
+    AFL_CHECK_SUCCEEDS(a("set ispMissionIntercept"), setShipProperty(sh, game::interface::ispMissionIntercept, &iv, *root, *shipList, g->mapConfiguration(), turn->universe()));
 
     // Initial state: intercepting UNNAMED_ID
     verifyNewInteger(a("ispMissionId"),               getShipProperty(sh, game::interface::ispMissionId,               session, root, shipList, g, turn), 8);

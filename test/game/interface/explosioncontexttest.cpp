@@ -17,18 +17,16 @@ AFL_TEST("game.interface.ExplosionContext:basics", a)
 {
     // Infrastructure
     afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session session(tx, fs);
-    session.setGame(new game::Game());
+    afl::base::Ref<game::Turn> turn(*new game::Turn());
 
     // Add an explosion
     game::map::Explosion expl(1, game::map::Point(1000, 1020));
     expl.setShipName("Excalibur");
     expl.setShipId(23);
-    session.getGame()->currentTurn().universe().explosions().add(expl);
+    turn->universe().explosions().add(expl);
 
     // Test it
-    game::interface::ExplosionContext testee(1, session, session.getGame()->currentTurn());
+    game::interface::ExplosionContext testee(1, turn, tx);
     interpreter::test::ContextVerifier v(testee, a);
     v.verifyTypes();
     v.verifyBasics();
@@ -50,15 +48,13 @@ AFL_TEST("game.interface.ExplosionContext:iteration", a)
 {
     // Infrastructure
     afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session session(tx, fs);
-    session.setGame(new game::Game());
+    afl::base::Ref<game::Turn> turn(*new game::Turn());
 
-    session.getGame()->currentTurn().universe().explosions().add(game::map::Explosion(1, game::map::Point(1000, 1020)));
-    session.getGame()->currentTurn().universe().explosions().add(game::map::Explosion(0, game::map::Point(2000, 1020)));
+    turn->universe().explosions().add(game::map::Explosion(1, game::map::Point(1000, 1020)));
+    turn->universe().explosions().add(game::map::Explosion(0, game::map::Point(2000, 1020)));
 
     // Test it
-    game::interface::ExplosionContext testee(1, session, session.getGame()->currentTurn());
+    game::interface::ExplosionContext testee(1, turn, tx);
     interpreter::test::ContextVerifier v(testee, a);
     v.verifyInteger("LOC.X", 1000);
     a.check("01. next", testee.next());
@@ -72,12 +68,10 @@ AFL_TEST("game.interface.ExplosionContext:null", a)
 {
     // Infrastructure
     afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session session(tx, fs);
-    session.setGame(new game::Game());
+    afl::base::Ref<game::Turn> turn(*new game::Turn());
 
     // Test it
-    game::interface::ExplosionContext testee(1, session, session.getGame()->currentTurn());
+    game::interface::ExplosionContext testee(1, turn, tx);
     interpreter::test::ContextVerifier v(testee, a);
     v.verifyNull("LOC.X");
     v.verifyNull("NAME");
@@ -100,33 +94,20 @@ AFL_TEST("game.interface.ExplosionContext:create", a)
 
     // Can create an ExplosionContext for ID 1
     {
-        std::auto_ptr<game::interface::ExplosionContext> p(game::interface::ExplosionContext::create(1, session));
+        std::auto_ptr<game::interface::ExplosionContext> p(game::interface::ExplosionContext::create(1, session, session.getGame()->viewpointTurn()));
         a.checkNonNull("01. create", p.get());
         interpreter::test::ContextVerifier(*p, a("02. create")).verifyInteger("LOC.X", 1000);
     }
 
     // ...but not for any other Id.
     {
-        std::auto_ptr<game::interface::ExplosionContext> p(game::interface::ExplosionContext::create(0, session));
+        std::auto_ptr<game::interface::ExplosionContext> p(game::interface::ExplosionContext::create(0, session, session.getGame()->viewpointTurn()));
         a.checkNull("11. create 0", p.get());
     }
     {
-        std::auto_ptr<game::interface::ExplosionContext> p(game::interface::ExplosionContext::create(10, session));
+        std::auto_ptr<game::interface::ExplosionContext> p(game::interface::ExplosionContext::create(10, session, session.getGame()->viewpointTurn()));
         a.checkNull("12. create 10", p.get());
     }
-}
-
-/** Test creation using factory function, empty session. */
-AFL_TEST("game.interface.ExplosionContext:create:empty", a)
-{
-    // Infrastructure
-    afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session session(tx, fs);
-
-    // Cannot create an ExplosionContext
-    std::auto_ptr<game::interface::ExplosionContext> p(game::interface::ExplosionContext::create(1, session));
-    a.checkNull("01. create", p.get());
 }
 
 /** Test (inability to) set property values. */
@@ -134,14 +115,12 @@ AFL_TEST("game.interface.ExplosionContext:set", a)
 {
     // Infrastructure
     afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session session(tx, fs);
-    session.setGame(new game::Game());
+    afl::base::Ref<game::Turn> turn(*new game::Turn());
 
-    session.getGame()->currentTurn().universe().explosions().add(game::map::Explosion(1, game::map::Point(1000, 1020)));
+    turn->universe().explosions().add(game::map::Explosion(1, game::map::Point(1000, 1020)));
 
     // Test it
-    game::interface::ExplosionContext testee(1, session, session.getGame()->currentTurn());
+    game::interface::ExplosionContext testee(1, turn, tx);
     interpreter::test::ContextVerifier v(testee, a);
     AFL_CHECK_THROWS(a, v.setIntegerValue("LOC.X", 2000), interpreter::Error);
 }

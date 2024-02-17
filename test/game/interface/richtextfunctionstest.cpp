@@ -6,11 +6,8 @@
 #include "game/interface/richtextfunctions.hpp"
 
 #include "afl/data/segment.hpp"
-#include "afl/io/nullfilesystem.hpp"
-#include "afl/string/nulltranslator.hpp"
 #include "afl/test/testrunner.hpp"
 #include "game/interface/richtextvalue.hpp"
-#include "game/session.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/values.hpp"
@@ -49,10 +46,6 @@ namespace {
 /** Test IFRAdd. */
 AFL_TEST("game.interface.RichTextFunctions:IFRAdd", a)
 {
-    afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session s(tx, fs);
-
     // Build a bunch of parameters
     afl::data::Segment seg;
     seg.pushBackNew(0);
@@ -66,7 +59,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRAdd", a)
     {
         // RAdd() ==> ''
         interpreter::Arguments args(seg, 0, 0);
-        Value_t result(game::interface::IFRAdd(s, args));
+        Value_t result(game::interface::IFRAdd(args));
         Ptr_t p;
         a.check("01. checkRichArg", game::interface::checkRichArg(p, result.get()));
         a.checkEqual("02. size", p->size(), 0U);
@@ -74,7 +67,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRAdd", a)
     {
         // RAdd(EMPTY) ==> EMPTY
         interpreter::Arguments args(seg, 0, 1);
-        Value_t result(game::interface::IFRAdd(s, args));
+        Value_t result(game::interface::IFRAdd(args));
         Ptr_t p;
         a.check("03. checkRichArg", !game::interface::checkRichArg(p, result.get()));
         a.checkNull("04. result", result.get());
@@ -82,7 +75,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRAdd", a)
     {
         // RAdd(EMPTY, 1) ==> EMPTY
         interpreter::Arguments args(seg, 0, 2);
-        Value_t result(game::interface::IFRAdd(s, args));
+        Value_t result(game::interface::IFRAdd(args));
         Ptr_t p;
         a.check("05. checkRichArg", !game::interface::checkRichArg(p, result.get()));
         a.checkNull("06. result", result.get());
@@ -90,7 +83,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRAdd", a)
     {
         // RAdd(1, 2) ==> "12"
         interpreter::Arguments args(seg, 1, 2);
-        Value_t result(game::interface::IFRAdd(s, args));
+        Value_t result(game::interface::IFRAdd(args));
         Ptr_t p;
         a.check("07. checkRichArg", game::interface::checkRichArg(p, result.get()));
         a.checkEqual("08. getText", p->getText(), "12");
@@ -99,7 +92,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRAdd", a)
     {
         // RAdd(2, "three", "four") ==> "2threefour"
         interpreter::Arguments args(seg, 2, 3);
-        Value_t result(game::interface::IFRAdd(s, args));
+        Value_t result(game::interface::IFRAdd(args));
         Ptr_t p;
         a.check("10. checkRichArg", game::interface::checkRichArg(p, result.get()));
         a.checkEqual("11. getText", p->getText(), "2threefour");
@@ -108,7 +101,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRAdd", a)
     {
         // RAdd("four", RStyle("red", "red")) ==> "fourred"
         interpreter::Arguments args(seg, 4, 2);
-        Value_t result(game::interface::IFRAdd(s, args));
+        Value_t result(game::interface::IFRAdd(args));
         Ptr_t p;
         a.check("13. checkRichArg", game::interface::checkRichArg(p, result.get()));
         a.checkEqual("14. getText", p->getText(), "fourred");
@@ -119,10 +112,6 @@ AFL_TEST("game.interface.RichTextFunctions:IFRAdd", a)
 /** Test IFRMid. */
 AFL_TEST("game.interface.RichTextFunctions:IFRMid", a)
 {
-    afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session s(tx, fs);
-
     // Test a number of invocations
     {
         // RMid("foo", 2) = "oo"
@@ -130,7 +119,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRMid", a)
         seg.setNew(0, interpreter::makeStringValue("foo"));
         seg.setNew(1, interpreter::makeIntegerValue(2));
         interpreter::Arguments args(seg, 0, 2);
-        Value_t result(game::interface::IFRMid(s, args));
+        Value_t result(game::interface::IFRMid(args));
         Ptr_t p;
         a.check("01. checkRichArg", game::interface::checkRichArg(p, result.get()));
         a.checkEqual("02. getText", p->getText(), "oo");
@@ -141,7 +130,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRMid", a)
         seg.setNew(0, interpreter::makeStringValue("foo"));
         seg.setNew(1, interpreter::makeIntegerValue(100));
         interpreter::Arguments args(seg, 0, 2);
-        Value_t result(game::interface::IFRMid(s, args));
+        Value_t result(game::interface::IFRMid(args));
         Ptr_t p;
         a.check("03. checkRichArg", game::interface::checkRichArg(p, result.get()));
         a.checkEqual("04. getText", p->getText(), "");
@@ -153,7 +142,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRMid", a)
         seg.setNew(1, interpreter::makeIntegerValue(1));
         seg.setNew(2, interpreter::makeIntegerValue(2));
         interpreter::Arguments args(seg, 0, 3);
-        Value_t result(game::interface::IFRMid(s, args));
+        Value_t result(game::interface::IFRMid(args));
         Ptr_t p;
         a.check("05. checkRichArg", game::interface::checkRichArg(p, result.get()));
         a.checkEqual("06. getText", p->getText(), "fo");
@@ -164,7 +153,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRMid", a)
         seg.setNew(0, interpreter::makeStringValue(UTF_BULLET UTF_UP_ARROW));
         seg.setNew(1, interpreter::makeIntegerValue(2));
         interpreter::Arguments args(seg, 0, 2);
-        Value_t result(game::interface::IFRMid(s, args));
+        Value_t result(game::interface::IFRMid(args));
         Ptr_t p;
         a.check("07. checkRichArg", game::interface::checkRichArg(p, result.get()));
         a.checkEqual("08. getText", p->getText(), UTF_UP_ARROW);
@@ -173,13 +162,13 @@ AFL_TEST("game.interface.RichTextFunctions:IFRMid", a)
         // RMid(?,?,?,?) = too many args
         afl::data::Segment seg;
         interpreter::Arguments args(seg, 0, 4);
-        AFL_CHECK_THROWS(a("09. arity error"), game::interface::IFRMid(s, args), interpreter::Error);
+        AFL_CHECK_THROWS(a("09. arity error"), game::interface::IFRMid(args), interpreter::Error);
     }
     {
         // RMid(EMPTY, EMPTY) = EMPTY
         afl::data::Segment seg;
         interpreter::Arguments args(seg, 0, 2);
-        Value_t result(game::interface::IFRMid(s, args));
+        Value_t result(game::interface::IFRMid(args));
         a.checkNull("10. result", result.get());
     }
 }
@@ -187,10 +176,6 @@ AFL_TEST("game.interface.RichTextFunctions:IFRMid", a)
 /** Test IFRString. */
 AFL_TEST("game.interface.RichTextFunctions:IFRString", a)
 {
-    afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session s(tx, fs);
-
     // Build a bunch of parameters
     afl::data::Segment seg;
     seg.pushBackNew(0);
@@ -202,23 +187,23 @@ AFL_TEST("game.interface.RichTextFunctions:IFRString", a)
     {
         // RString() -> arity error
         interpreter::Arguments args(seg, 0, 0);
-        AFL_CHECK_THROWS(a("01. arity error"), game::interface::IFRString(s, args), interpreter::Error);
+        AFL_CHECK_THROWS(a("01. arity error"), game::interface::IFRString(args), interpreter::Error);
     }
     {
         // RString(?,?) -> arity error
         interpreter::Arguments args(seg, 0, 2);
-        AFL_CHECK_THROWS(a("02. arity error"), game::interface::IFRString(s, args), interpreter::Error);
+        AFL_CHECK_THROWS(a("02. arity error"), game::interface::IFRString(args), interpreter::Error);
     }
     {
         // RString(EMPTY) => EMPTY
         interpreter::Arguments args(seg, 0, 1);
-        Value_t result(game::interface::IFRString(s, args));
+        Value_t result(game::interface::IFRString(args));
         a.checkNull("03. result", result.get());
     }
     {
         // RString(2) => "2"
         interpreter::Arguments args(seg, 1, 1);
-        Value_t result(game::interface::IFRString(s, args));
+        Value_t result(game::interface::IFRString(args));
         String_t sv;
         a.check("04. checkStringArg", interpreter::checkStringArg(sv, result.get()));
         a.checkEqual("05. value", sv, "2");
@@ -226,7 +211,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRString", a)
     {
         // RString("three") => "three"
         interpreter::Arguments args(seg, 2, 1);
-        Value_t result(game::interface::IFRString(s, args));
+        Value_t result(game::interface::IFRString(args));
         String_t sv;
         a.check("06. checkStringArg", interpreter::checkStringArg(sv, result.get()));
         a.checkEqual("07. value", sv, "three");
@@ -234,7 +219,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRString", a)
     {
         // RString(RStyle("red","four") => "four"
         interpreter::Arguments args(seg, 3, 1);
-        Value_t result(game::interface::IFRString(s, args));
+        Value_t result(game::interface::IFRString(args));
         String_t sv;
         a.check("08. checkStringArg", interpreter::checkStringArg(sv, result.get()));
         a.checkEqual("09. value", sv, "four");
@@ -244,10 +229,6 @@ AFL_TEST("game.interface.RichTextFunctions:IFRString", a)
 /** Test IFRLen. */
 AFL_TEST("game.interface.RichTextFunctions:IFRLen", a)
 {
-    afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session s(tx, fs);
-
     // Build a bunch of parameters
     afl::data::Segment seg;
     seg.pushBackNew(0);
@@ -259,23 +240,23 @@ AFL_TEST("game.interface.RichTextFunctions:IFRLen", a)
     {
         // RLen() -> arity error
         interpreter::Arguments args(seg, 0, 0);
-        AFL_CHECK_THROWS(a("01. arity error"), game::interface::IFRLen(s, args), interpreter::Error);
+        AFL_CHECK_THROWS(a("01. arity error"), game::interface::IFRLen(args), interpreter::Error);
     }
     {
         // RLen(?,?) -> arity error
         interpreter::Arguments args(seg, 0, 2);
-        AFL_CHECK_THROWS(a("02. arity error"), game::interface::IFRLen(s, args), interpreter::Error);
+        AFL_CHECK_THROWS(a("02. arity error"), game::interface::IFRLen(args), interpreter::Error);
     }
     {
         // RLen(EMPTY) => EMPTY
         interpreter::Arguments args(seg, 0, 1);
-        Value_t result(game::interface::IFRLen(s, args));
+        Value_t result(game::interface::IFRLen(args));
         a.checkNull("03. result", result.get());
     }
     {
         // RLen(2) => 1
         interpreter::Arguments args(seg, 1, 1);
-        Value_t result(game::interface::IFRLen(s, args));
+        Value_t result(game::interface::IFRLen(args));
         int32_t iv;
         a.check("04. checkIntegerArg", interpreter::checkIntegerArg(iv, result.get()));
         a.checkEqual("05. result", iv, 1);
@@ -283,7 +264,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRLen", a)
     {
         // RLen("three") => 5
         interpreter::Arguments args(seg, 2, 1);
-        Value_t result(game::interface::IFRLen(s, args));
+        Value_t result(game::interface::IFRLen(args));
         int32_t iv;
         a.check("06. checkIntegerArg", interpreter::checkIntegerArg(iv, result.get()));
         a.checkEqual("07. result", iv, 5);
@@ -291,7 +272,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRLen", a)
     {
         // RLen(RStyle("red","four") => 4
         interpreter::Arguments args(seg, 3, 1);
-        Value_t result(game::interface::IFRLen(s, args));
+        Value_t result(game::interface::IFRLen(args));
         int32_t iv;
         a.check("08. checkIntegerArg", interpreter::checkIntegerArg(iv, result.get()));
         a.checkEqual("09. result", iv, 4);
@@ -301,7 +282,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRLen", a)
         afl::data::Segment seg2;
         seg2.pushBackNew(new game::interface::RichTextValue(*new util::rich::Text("\xE2\x86\x90")));
         interpreter::Arguments args(seg2, 0, 1);
-        Value_t result(game::interface::IFRLen(s, args));
+        Value_t result(game::interface::IFRLen(args));
         int32_t iv;
         a.check("10. checkIntegerArg", interpreter::checkIntegerArg(iv, result.get()));
         a.checkEqual("11. result", iv, 1);
@@ -311,10 +292,6 @@ AFL_TEST("game.interface.RichTextFunctions:IFRLen", a)
 /** Test IFRStyle. */
 AFL_TEST("game.interface.RichTextFunctions:IFRStyle", a)
 {
-    afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session s(tx, fs);
-
     // Test a number of invocations
     {
         // RStyle("red", "the text") = "the text"
@@ -322,7 +299,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRStyle", a)
         seg.setNew(0, interpreter::makeStringValue("red"));
         seg.setNew(1, interpreter::makeStringValue("the text"));
         interpreter::Arguments args(seg, 0, 2);
-        Value_t result(game::interface::IFRStyle(s, args));
+        Value_t result(game::interface::IFRStyle(args));
         Ptr_t p;
         a.check("01. checkRichArg", game::interface::checkRichArg(p, result.get()));
         a.checkEqual("02. getText", p->getText(), "the text");
@@ -344,7 +321,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRStyle", a)
         seg.setNew(2, interpreter::makeStringValue("b"));
         seg.setNew(3, interpreter::makeIntegerValue(3));
         interpreter::Arguments args(seg, 0, 4);
-        Value_t result(game::interface::IFRStyle(s, args));
+        Value_t result(game::interface::IFRStyle(args));
         Ptr_t p;
         a.check("14. checkRichArg", game::interface::checkRichArg(p, result.get()));
         a.checkEqual("15. getText", p->getText(), "ab3");
@@ -364,7 +341,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRStyle", a)
         seg.setNew(0, interpreter::makeStringValue("big"));
         seg.setNew(1, interpreter::makeStringValue("the text"));
         interpreter::Arguments args(seg, 0, 2);
-        Value_t result(game::interface::IFRStyle(s, args));
+        Value_t result(game::interface::IFRStyle(args));
         Ptr_t p;
         a.check("24. checkRichArg", game::interface::checkRichArg(p, result.get()));
         a.checkEqual("25. getText", p->getText(), "the text");
@@ -384,7 +361,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRStyle", a)
         seg.setNew(0, interpreter::makeStringValue("big,red"));
         seg.setNew(1, interpreter::makeStringValue("the text"));
         interpreter::Arguments args(seg, 0, 2);
-        Value_t result(game::interface::IFRStyle(s, args));
+        Value_t result(game::interface::IFRStyle(args));
         Ptr_t p;
         a.check("34. checkRichArg", game::interface::checkRichArg(p, result.get()));
         a.checkEqual("35. getText", p->getText(), "the text");
@@ -396,7 +373,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRStyle", a)
         seg.setNew(0, interpreter::makeStringValue(""));
         seg.setNew(1, interpreter::makeStringValue("text"));
         interpreter::Arguments args(seg, 0, 2);
-        Value_t result(game::interface::IFRStyle(s, args));
+        Value_t result(game::interface::IFRStyle(args));
         Ptr_t p;
         a.check("37. checkRichArg", game::interface::checkRichArg(p, result.get()));
         a.checkEqual("38. getText", p->getText(), "text");
@@ -408,7 +385,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRStyle", a)
         seg.setNew(0, interpreter::makeStringValue("<invalid>"));
         seg.setNew(1, interpreter::makeStringValue("text"));
         interpreter::Arguments args(seg, 0, 2);
-        AFL_CHECK_THROWS(a("40. invalid attribute"), game::interface::IFRStyle(s, args), interpreter::Error);
+        AFL_CHECK_THROWS(a("40. invalid attribute"), game::interface::IFRStyle(args), interpreter::Error);
     }
     {
         // RStyle(EMPTY, "text") -> EMPTY
@@ -416,7 +393,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRStyle", a)
         seg.setNew(0, 0);
         seg.setNew(1, interpreter::makeStringValue("text"));
         interpreter::Arguments args(seg, 0, 2);
-        Value_t result(game::interface::IFRStyle(s, args));
+        Value_t result(game::interface::IFRStyle(args));
         a.checkNull("41. result", result.get());
     }
     {
@@ -425,7 +402,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRStyle", a)
         seg.setNew(0, interpreter::makeStringValue("red"));
         seg.setNew(1, 0);
         interpreter::Arguments args(seg, 0, 2);
-        Value_t result(game::interface::IFRStyle(s, args));
+        Value_t result(game::interface::IFRStyle(args));
         a.checkNull("42. result", result.get());
     }
 }
@@ -433,10 +410,6 @@ AFL_TEST("game.interface.RichTextFunctions:IFRStyle", a)
 /** Test IFRLink. */
 AFL_TEST("game.interface.RichTextFunctions:IFRLink", a)
 {
-    afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session s(tx, fs);
-
     // This is essentially the same as RStyle...
     {
         // RStyle("link", "the text") = "the text"
@@ -444,7 +417,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRLink", a)
         seg.setNew(0, interpreter::makeStringValue("link"));
         seg.setNew(1, interpreter::makeStringValue("the text"));
         interpreter::Arguments args(seg, 0, 2);
-        Value_t result(game::interface::IFRLink(s, args));
+        Value_t result(game::interface::IFRLink(args));
         Ptr_t p;
         a.check("01. checkRichArg", game::interface::checkRichArg(p, result.get()));
         a.checkEqual("02. getText", p->getText(), "the text");
@@ -456,7 +429,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRLink", a)
         seg.setNew(0, 0);
         seg.setNew(1, interpreter::makeStringValue("the text"));
         interpreter::Arguments args(seg, 0, 2);
-        Value_t result(game::interface::IFRLink(s, args));
+        Value_t result(game::interface::IFRLink(args));
         a.checkNull("04. result", result.get());
     }
     {
@@ -465,7 +438,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRLink", a)
         seg.setNew(0, interpreter::makeStringValue("link"));
         seg.setNew(1, 0);
         interpreter::Arguments args(seg, 0, 2);
-        Value_t result(game::interface::IFRLink(s, args));
+        Value_t result(game::interface::IFRLink(args));
         a.checkNull("05. result", result.get());
     }
 }
@@ -473,10 +446,6 @@ AFL_TEST("game.interface.RichTextFunctions:IFRLink", a)
 /** Test IFRXml. */
 AFL_TEST("game.interface.RichTextFunctions:RXml", a)
 {
-    afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session s(tx, fs);
-
     {
         // RXml("<b>&0;</b>&gt;<b>&1;</b>", "x", 3) = "x>3"
         afl::data::Segment seg;
@@ -484,7 +453,7 @@ AFL_TEST("game.interface.RichTextFunctions:RXml", a)
         seg.setNew(1, interpreter::makeStringValue("x"));
         seg.setNew(2, interpreter::makeIntegerValue(3));
         interpreter::Arguments args(seg, 0, 3);
-        Value_t result(game::interface::IFRXml(s, args));
+        Value_t result(game::interface::IFRXml(args));
         Ptr_t p;
         a.check("01. checkRichArg", game::interface::checkRichArg(p, result.get()));
         a.checkEqual("02. getText", p->getText(), "x>3");
@@ -495,7 +464,7 @@ AFL_TEST("game.interface.RichTextFunctions:RXml", a)
         afl::data::Segment seg;
         seg.setNew(0, interpreter::makeStringValue("<b>&0;</b>&gt;<b>&1;</b>"));
         interpreter::Arguments args(seg, 0, 3);
-        Value_t result(game::interface::IFRXml(s, args));
+        Value_t result(game::interface::IFRXml(args));
         Ptr_t p;
         a.check("04. checkRichArg", game::interface::checkRichArg(p, result.get()));
         a.checkEqual("05. getText", p->getText(), ">");
@@ -507,7 +476,7 @@ AFL_TEST("game.interface.RichTextFunctions:RXml", a)
         seg.setNew(1, interpreter::makeStringValue("x"));
         seg.setNew(2, interpreter::makeIntegerValue(3));
         interpreter::Arguments args(seg, 0, 3);
-        Value_t result(game::interface::IFRXml(s, args));
+        Value_t result(game::interface::IFRXml(args));
         a.checkNull("06. result", result.get());
     }
 }
@@ -515,10 +484,6 @@ AFL_TEST("game.interface.RichTextFunctions:RXml", a)
 /** Test IFRAlign. */
 AFL_TEST("game.interface.RichTextFunctions:IFRAlign", a)
 {
-    afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session s(tx, fs);
-
     {
         // RAlign("text", 100, 1)
         afl::data::Segment seg;
@@ -526,7 +491,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRAlign", a)
         seg.setNew(1, interpreter::makeIntegerValue(100));
         seg.setNew(2, interpreter::makeIntegerValue(1));
         interpreter::Arguments args(seg, 0, 3);
-        Value_t result(game::interface::IFRAlign(s, args));
+        Value_t result(game::interface::IFRAlign(args));
         Ptr_t p;
         a.check("01. checkRichArg", game::interface::checkRichArg(p, result.get()));
         a.checkEqual("02. getText", p->getText(), "text");
@@ -546,7 +511,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRAlign", a)
         seg.setNew(0, interpreter::makeStringValue("text"));
         seg.setNew(1, interpreter::makeIntegerValue(100));
         interpreter::Arguments args(seg, 0, 2);
-        Value_t result(game::interface::IFRAlign(s, args));
+        Value_t result(game::interface::IFRAlign(args));
         Ptr_t p;
         a.check("15. checkRichArg", game::interface::checkRichArg(p, result.get()));
         a.checkEqual("16. getText", p->getText(), "text");
@@ -566,7 +531,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRAlign", a)
         seg.setNew(0, interpreter::makeStringValue("text"));
         seg.setNew(1, interpreter::makeStringValue("x"));
         interpreter::Arguments args(seg, 0, 2);
-        AFL_CHECK_THROWS(a("25. type error"), game::interface::IFRAlign(s, args), interpreter::Error);
+        AFL_CHECK_THROWS(a("25. type error"), game::interface::IFRAlign(args), interpreter::Error);
     }
     {
         // RAlign("text", 100, 4) -> error
@@ -575,7 +540,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRAlign", a)
         seg.setNew(1, interpreter::makeIntegerValue(100));
         seg.setNew(2, interpreter::makeIntegerValue(4));
         interpreter::Arguments args(seg, 0, 3);
-        AFL_CHECK_THROWS(a("26. type error"), game::interface::IFRAlign(s, args), interpreter::Error);
+        AFL_CHECK_THROWS(a("26. type error"), game::interface::IFRAlign(args), interpreter::Error);
     }
     {
         // RAlign("text", EMPTY) = EMPTY
@@ -583,7 +548,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRAlign", a)
         seg.setNew(0, interpreter::makeStringValue("text"));
         seg.setNew(1, 0);
         interpreter::Arguments args(seg, 0, 2);
-        Value_t result(game::interface::IFRAlign(s, args));
+        Value_t result(game::interface::IFRAlign(args));
         a.checkNull("27. result", result.get());
     }
     {
@@ -592,7 +557,7 @@ AFL_TEST("game.interface.RichTextFunctions:IFRAlign", a)
         seg.setNew(0, 0);
         seg.setNew(1, interpreter::makeIntegerValue(1));
         interpreter::Arguments args(seg, 0, 2);
-        Value_t result(game::interface::IFRAlign(s, args));
+        Value_t result(game::interface::IFRAlign(args));
         a.checkNull("28. result", result.get());
     }
 }

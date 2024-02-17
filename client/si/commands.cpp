@@ -619,7 +619,7 @@ namespace {
 
         // Prepare initial mode
         const Game& g = game::actions::mustHaveGame(session);
-        const Universe& univ = g.currentTurn().universe();
+        const Universe& univ = g.viewpointTurn().universe();
         const game::TeamSettings& teams = g.teamSettings();
         HistoryShipSelection::Modes_t modes = sel.getAvailableModes(univ, g.mapConfiguration(), teams);
         if (modes.empty() || (hasPosition && !modes.contains(HistoryShipSelection::LocalShips) && !modes.contains(HistoryShipSelection::ExactShips))) {
@@ -1000,7 +1000,7 @@ client::si::IFCCAddWaypoint(game::Session& session, ScriptSide& si, RequestLink1
     }
 
     // Edit ship task
-    game::interface::ShipTaskPredictor pred(g.currentTurn().universe(), sh->getId(), g.shipScores(), shipList, g.mapConfiguration(), root.hostConfiguration(), root.hostVersion(), root.registrationKey());
+    game::interface::ShipTaskPredictor pred(g.viewpointTurn().universe(), sh->getId(), g.shipScores(), shipList, g.mapConfiguration(), root.hostConfiguration(), root.hostVersion(), root.registrationKey());
     afl::base::Ptr<interpreter::TaskEditor> task(session.getAutoTaskEditor(sh->getId(), interpreter::Process::pkShipTask, false));
     if (task.get() != 0) {
         pred.predictTask(*task, task->getCursor());
@@ -1055,7 +1055,7 @@ client::si::IFCCBuildAmmo(game::Session& session, ScriptSide& si, RequestLink1 l
 
     args.checkArgumentCount(0);
     Game& g = game::actions::mustHaveGame(session);
-    Universe& univ = g.currentTurn().universe();
+    Universe& univ = g.viewpointTurn().universe();
 
     bool ok = false;
     if (Planet* pl = dynamic_cast<Planet*>(link.getProcess().getCurrentObject())) {
@@ -1231,13 +1231,13 @@ client::si::IFCCCargoHistory(game::Session& session, ScriptSide& si, RequestLink
         DialogTask(game::Session& session, const Ship& ship)
             : m_data()
             {
-                int currentTurn = game::actions::mustHaveGame(session).currentTurn().getTurnNumber();
+                int viewpointTurn = game::actions::mustHaveGame(session).viewpointTurn().getTurnNumber();
                 util::NumberFormatter fmt = game::actions::mustHaveRoot(session).userConfiguration().getNumberFormatter();
                 ShipList& shipList = game::actions::mustHaveShipList(session);
                 afl::string::Translator& tx = session.translator();
 
-                packShipLastKnownCargo(m_data, ship, currentTurn, fmt, shipList, tx);
-                packShipMassRanges    (m_data, ship,              fmt, shipList, tx);
+                packShipLastKnownCargo(m_data, ship, viewpointTurn, fmt, shipList, tx);
+                packShipMassRanges    (m_data, ship,                fmt, shipList, tx);
             }
 
         virtual void handle(Control& ctl, RequestLink2 link)
@@ -1279,7 +1279,7 @@ client::si::IFCCCloneShip(game::Session& session, ScriptSide& si, RequestLink1 l
     game::actions::mustBePlayed(sh);
 
     // Some pre-validation (similar to CloneShipProxy)
-    Universe& univ = game::actions::mustHaveGame(session).currentTurn().universe();
+    Universe& univ = game::actions::mustHaveGame(session).viewpointTurn().universe();
     Point pt;
     if (!sh.getPosition().get(pt)) {
         throw game::Exception(game::Exception::eNoBase);
@@ -1452,7 +1452,7 @@ client::si::IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLi
                 Root& r = game::actions::mustHaveRoot(session);
                 ShipList& sl = game::actions::mustHaveShipList(session);
                 Game& g = game::actions::mustHaveGame(session);
-                Universe& univ = g.currentTurn().universe();
+                Universe& univ = g.viewpointTurn().universe();
                 Ship& sh = game::actions::mustExist(univ.ships().get(m_id));
                 game::map::FleetMember fm(univ, sh, g.mapConfiguration());
 
@@ -1553,7 +1553,7 @@ client::si::IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLi
                 || sh->hasSpecialFunction(game::spec::BasicHullFunction::ChunnelOthers, g.shipScores(), shipList, root.hostConfiguration());
 
             game::map::ChunnelMission chm;
-            Universe& univ = g.currentTurn().universe(); // FIXME: is this the same where the ship is from?
+            Universe& univ = g.viewpointTurn().universe(); // FIXME: is this the same where the ship is from?
             if (chm.check(*sh, univ, g.mapConfiguration(), g.shipScores(), g.teamSettings(), shipList, root)) {
                 if (Ship* mate = univ.ships().get(chm.getTargetId())) {
                     in.chunnelMode = true;
@@ -1899,6 +1899,10 @@ client::si::IFCCEditShowCommand(game::Session& session, ScriptSide& si, RequestL
     };
 
     args.checkArgumentCount(0);
+
+    game::Game& g = game::actions::mustHaveGame(session);
+    game::actions::mustAllowCommands(g.viewpointTurn(), g.getViewpointPlayer());
+
     if (game::v3::CommandContainer* cc = getCommandContainer(session)) {
         afl::base::Deletable* obj = link.getProcess().getCurrentObject();
         afl::string::Translator& tx = session.translator();
@@ -1936,7 +1940,7 @@ client::si::IFCCExplainPrediction(game::Session& session, ScriptSide& si, Reques
     game::Game& g = game::actions::mustHaveGame(session);
     game::spec::ShipList& sl = game::actions::mustHaveShipList(session);
     game::Root& r = game::actions::mustHaveRoot(session);
-    game::map::Universe& univ = g.currentTurn().universe();
+    game::map::Universe& univ = g.viewpointTurn().universe();
 
     // Ship prediction
     game::map::ShipPredictor pred(univ, sh->getId(), g.shipScores(), sl, g.mapConfiguration(), r.hostConfiguration(), r.hostVersion(), r.registrationKey());
@@ -2536,7 +2540,8 @@ client::si::IFCCSendMessage(game::Session& session, ScriptSide& si, RequestLink1
     }
 
     Game& g = game::actions::mustHaveGame(session);
-    si.postNewTask(link, new DialogTask(text, g.getViewpointPlayer(), g.currentTurn().outbox().getNumMessages() != 0));
+    game::actions::mustAllowCommands(g.viewpointTurn(), g.getViewpointPlayer());
+    si.postNewTask(link, new DialogTask(text, g.getViewpointPlayer(), g.viewpointTurn().outbox().getNumMessages() != 0));
 }
 
 // @since PCC2 1.99.19 (as CC$Settings)
@@ -2761,7 +2766,7 @@ client::si::IFCCTransferMulti(game::Session& session, ScriptSide& si, RequestLin
         util::StringList m_cargoTypes;
     };
 
-    si.postNewTask(link, new Task(setup, g.currentTurn().universe(), shipList, session.translator()));
+    si.postNewTask(link, new Task(setup, g.viewpointTurn().universe(), shipList, session.translator()));
 }
 
 // @since PCC2 2.40.6
@@ -2823,7 +2828,7 @@ client::si::IFCCTransferShip(game::Session& session, ScriptSide& si, RequestLink
     game::actions::mustBePlayed(*pShip);
 
     // Parse mode/target
-    Universe& univ = game::actions::mustHaveGame(session).currentTurn().universe();
+    Universe& univ = game::actions::mustHaveGame(session).viewpointTurn().universe();
     switch (mode) {
      case 0:
         // Choose target
@@ -2882,7 +2887,7 @@ client::si::IFCCTransferUnload(game::Session& session, ScriptSide& si, RequestLi
     afl::except::checkAssertion(ok, "pShip->getPosition");
 
     // Find planet
-    Universe& univ = game::actions::mustHaveGame(session).currentTurn().universe();
+    Universe& univ = game::actions::mustHaveGame(session).viewpointTurn().universe();
     game::Id_t pid = univ.findPlanetAt(shipPos);
     if (pid == 0) {
         throw game::Exception(game::Exception::ePos);
@@ -2975,7 +2980,7 @@ client::si::IFCCViewCombat(game::Session& session, ScriptSide& si, RequestLink1 
     game::actions::mustHaveShipList(session);
 
     // Likewise, there needs to be a VCR database. Not having one is not an error, though.
-    game::vcr::Database* db = g.currentTurn().getBattles().get();
+    game::vcr::Database* db = g.viewpointTurn().getBattles().get();
     if (db == 0) {
         return;
     }
@@ -2994,7 +2999,7 @@ client::si::IFCCViewCombat(game::Session& session, ScriptSide& si, RequestLink1 
             { return &game::actions::mustHaveGame(m_session).teamSettings(); }
         virtual game::vcr::Database& battles()
             {
-                game::vcr::Database* db = game::actions::mustHaveGame(m_session).currentTurn().getBattles().get();
+                game::vcr::Database* db = game::actions::mustHaveGame(m_session).viewpointTurn().getBattles().get();
                 afl::except::checkAssertion(db != 0, "VCR db present");
                 return *db;
             }
@@ -4653,7 +4658,7 @@ client::si::IFUIPlanetInfo(game::Session& session, ScriptSide& si, RequestLink1 
     if (!interpreter::checkIntegerArg(pid, args.getNext())) {
         return;
     }
-    if (!game::actions::mustHaveGame(session).currentTurn().universe().planets().get(pid)) {
+    if (!game::actions::mustHaveGame(session).viewpointTurn().universe().planets().get(pid)) {
         throw Error::rangeError();
     }
 

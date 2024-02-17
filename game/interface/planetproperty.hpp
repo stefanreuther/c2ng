@@ -12,6 +12,7 @@
 #include "game/map/universe.hpp"
 #include "game/root.hpp"
 #include "game/session.hpp"
+#include "game/turn.hpp"
 
 namespace game { namespace interface {
 
@@ -105,11 +106,13 @@ namespace game { namespace interface {
         @param session Session (for translator, ReferenceContext, interface)
         @param root    Root (for host configuration, host version, charset)
         @param game    Game (for score definitions)
+        @param turn    Turn (for messages, location info)
         @return newly-allocated value */
     afl::data::Value* getPlanetProperty(const game::map::Planet& pl, PlanetProperty ipp,
                                         Session& session,
-                                        afl::base::Ref<Root> root,
-                                        afl::base::Ref<Game> game);
+                                        const afl::base::Ref<Root>& root,
+                                        const afl::base::Ref<Game>& game,
+                                        const afl::base::Ref<Turn>& turn);
 
     /** Set planet property.
         @param pl      Planet

@@ -562,8 +562,8 @@ AFL_TEST("game.interface.GlobalFunctions:IFDistance:planet+planet", a)
     Environment env;
     prepareDistance(env);
     afl::data::Segment seg;
-    seg.pushBackNew(game::interface::PlanetContext::create(222, env.session));
-    seg.pushBackNew(game::interface::PlanetContext::create(333, env.session));
+    seg.pushBackNew(game::interface::PlanetContext::create(222, env.session, *env.session.getGame(), env.session.getGame()->currentTurn()));
+    seg.pushBackNew(game::interface::PlanetContext::create(333, env.session, *env.session.getGame(), env.session.getGame()->currentTurn()));
     interpreter::Arguments args(seg, 0, 2);
     verifyNewFloat(a, game::interface::IFDistance(env.session, args), 500, 0.01);
 }
@@ -574,7 +574,7 @@ AFL_TEST("game.interface.GlobalFunctions:IFDistance:planet+xy", a)
     Environment env;
     prepareDistance(env);
     afl::data::Segment seg;
-    seg.pushBackNew(game::interface::PlanetContext::create(222, env.session));
+    seg.pushBackNew(game::interface::PlanetContext::create(222, env.session, *env.session.getGame(), env.session.getGame()->currentTurn()));
     seg.pushBackInteger(1000);
     seg.pushBackInteger(1210);
     interpreter::Arguments args(seg, 0, 3);
@@ -589,7 +589,7 @@ AFL_TEST("game.interface.GlobalFunctions:IFDistance:xy+planet", a)
     afl::data::Segment seg;
     seg.pushBackInteger(1000);
     seg.pushBackInteger(1210);
-    seg.pushBackNew(game::interface::PlanetContext::create(222, env.session));
+    seg.pushBackNew(game::interface::PlanetContext::create(222, env.session, *env.session.getGame(), env.session.getGame()->currentTurn()));
     interpreter::Arguments args(seg, 0, 3);
     verifyNewFloat(a, game::interface::IFDistance(env.session, args), 10, 0.01);
 }
@@ -614,7 +614,7 @@ AFL_TEST("game.interface.GlobalFunctions:IFDistance:planet+null", a)
     Environment env;
     prepareDistance(env);
     afl::data::Segment seg;
-    seg.pushBackNew(game::interface::PlanetContext::create(222, env.session));
+    seg.pushBackNew(game::interface::PlanetContext::create(222, env.session, *env.session.getGame(), env.session.getGame()->currentTurn()));
     seg.pushBackNew(0);
     interpreter::Arguments args(seg, 0, 2);
     verifyNewNull(a, game::interface::IFDistance(env.session, args));
@@ -640,7 +640,7 @@ AFL_TEST("game.interface.GlobalFunctions:IFDistance:error:too-few-args:planet", 
     Environment env;
     prepareDistance(env);
     afl::data::Segment seg;
-    seg.pushBackNew(game::interface::PlanetContext::create(222, env.session));
+    seg.pushBackNew(game::interface::PlanetContext::create(222, env.session, *env.session.getGame(), env.session.getGame()->currentTurn()));
     interpreter::Arguments args(seg, 0, 1);
     AFL_CHECK_THROWS(a, game::interface::IFDistance(env.session, args), interpreter::Error);
 }
@@ -650,7 +650,7 @@ AFL_TEST("game.interface.GlobalFunctions:IFDistance:error:too-few-args:planet+x"
     Environment env;
     prepareDistance(env);
     afl::data::Segment seg;
-    seg.pushBackNew(game::interface::PlanetContext::create(222, env.session));
+    seg.pushBackNew(game::interface::PlanetContext::create(222, env.session, *env.session.getGame(), env.session.getGame()->currentTurn()));
     seg.pushBackInteger(1000);
     interpreter::Arguments args(seg, 0, 2);
     AFL_CHECK_THROWS(a, game::interface::IFDistance(env.session, args), interpreter::Error);
@@ -673,8 +673,8 @@ AFL_TEST("game.interface.GlobalFunctions:IFDistance:too-many-args", a)
     Environment env;
     prepareDistance(env);
     afl::data::Segment seg;
-    seg.pushBackNew(game::interface::PlanetContext::create(222, env.session));
-    seg.pushBackNew(game::interface::PlanetContext::create(333, env.session));
+    seg.pushBackNew(game::interface::PlanetContext::create(222, env.session, *env.session.getGame(), env.session.getGame()->currentTurn()));
+    seg.pushBackNew(game::interface::PlanetContext::create(333, env.session, *env.session.getGame(), env.session.getGame()->currentTurn()));
     seg.pushBackInteger(10);
     interpreter::Arguments args(seg, 0, 3);
     AFL_CHECK_THROWS(a, game::interface::IFDistance(env.session, args), interpreter::Error);
@@ -699,7 +699,7 @@ AFL_TEST("game.interface.GlobalFunctions:IFDistance:error:type:object", a)
     Environment env;
     prepareDistance(env);
     afl::data::Segment seg;
-    seg.pushBackNew(game::interface::PlanetContext::create(333, env.session));
+    seg.pushBackNew(game::interface::PlanetContext::create(333, env.session, *env.session.getGame(), env.session.getGame()->currentTurn()));
     seg.pushBackNew(game::interface::BeamContext::create(3, env.session));
     interpreter::Arguments args(seg, 0, 4);
     AFL_CHECK_THROWS(a, game::interface::IFDistance(env.session, args), interpreter::Error);
@@ -893,7 +893,7 @@ AFL_TEST("game.interface.GlobalFunctions:IFObjectIsAt:planet:match", a)
     Environment env;
     prepareObjectIsAt(env);
     afl::data::Segment seg;
-    seg.pushBackNew(game::interface::PlanetContext::create(222, env.session));
+    seg.pushBackNew(game::interface::PlanetContext::create(222, env.session, *env.session.getGame(), env.session.getGame()->currentTurn()));
     seg.pushBackInteger(1000);
     seg.pushBackInteger(1200);
     interpreter::Arguments args(seg, 0, 3);
@@ -906,7 +906,7 @@ AFL_TEST("game.interface.GlobalFunctions:IFObjectIsAt:planet:mismatch", a)
     Environment env;
     prepareObjectIsAt(env);
     afl::data::Segment seg;
-    seg.pushBackNew(game::interface::PlanetContext::create(222, env.session));
+    seg.pushBackNew(game::interface::PlanetContext::create(222, env.session, *env.session.getGame(), env.session.getGame()->currentTurn()));
     seg.pushBackInteger(1000);
     seg.pushBackInteger(1201);
     interpreter::Arguments args(seg, 0, 3);
@@ -919,7 +919,7 @@ AFL_TEST("game.interface.GlobalFunctions:IFObjectIsAt:planet:no-position", a)
     Environment env;
     prepareObjectIsAt(env);
     afl::data::Segment seg;
-    seg.pushBackNew(game::interface::PlanetContext::create(333, env.session));
+    seg.pushBackNew(game::interface::PlanetContext::create(333, env.session, *env.session.getGame(), env.session.getGame()->currentTurn()));
     seg.pushBackInteger(1000);
     seg.pushBackInteger(1200);
     interpreter::Arguments args(seg, 0, 3);
@@ -932,7 +932,7 @@ AFL_TEST("game.interface.GlobalFunctions:IFObjectIsAt:minefield:exact-match", a)
     Environment env;
     prepareObjectIsAt(env);
     afl::data::Segment seg;
-    seg.pushBackNew(game::interface::MinefieldContext::create(444, env.session, false));
+    seg.pushBackNew(game::interface::MinefieldContext::create(444, env.session, *env.session.getGame(), env.session.getGame()->currentTurn(), false));
     seg.pushBackInteger(2000);
     seg.pushBackInteger(2100);
     interpreter::Arguments args(seg, 0, 3);
@@ -945,7 +945,7 @@ AFL_TEST("game.interface.GlobalFunctions:IFObjectIsAt:minefield:inexact-match", 
     Environment env;
     prepareObjectIsAt(env);
     afl::data::Segment seg;
-    seg.pushBackNew(game::interface::MinefieldContext::create(444, env.session, false));
+    seg.pushBackNew(game::interface::MinefieldContext::create(444, env.session, *env.session.getGame(), env.session.getGame()->currentTurn(), false));
     seg.pushBackInteger(2030);
     seg.pushBackInteger(2100);
     interpreter::Arguments args(seg, 0, 3);
@@ -958,7 +958,7 @@ AFL_TEST("game.interface.GlobalFunctions:IFObjectIsAt:minefield:mismatch", a)
     Environment env;
     prepareObjectIsAt(env);
     afl::data::Segment seg;
-    seg.pushBackNew(game::interface::MinefieldContext::create(444, env.session, false));
+    seg.pushBackNew(game::interface::MinefieldContext::create(444, env.session, *env.session.getGame(), env.session.getGame()->currentTurn(), false));
     seg.pushBackInteger(2031);
     seg.pushBackInteger(2100);
     interpreter::Arguments args(seg, 0, 3);
@@ -984,7 +984,7 @@ AFL_TEST("game.interface.GlobalFunctions:IFObjectIsAt:null:x", a)
     Environment env;
     prepareObjectIsAt(env);
     afl::data::Segment seg;
-    seg.pushBackNew(game::interface::MinefieldContext::create(444, env.session, false));
+    seg.pushBackNew(game::interface::MinefieldContext::create(444, env.session, *env.session.getGame(), env.session.getGame()->currentTurn(), false));
     seg.pushBackNew(0);
     seg.pushBackInteger(2031);
     interpreter::Arguments args(seg, 0, 3);
@@ -997,7 +997,7 @@ AFL_TEST("game.interface.GlobalFunctions:IFObjectIsAt:null:y", a)
     Environment env;
     prepareObjectIsAt(env);
     afl::data::Segment seg;
-    seg.pushBackNew(game::interface::MinefieldContext::create(444, env.session, false));
+    seg.pushBackNew(game::interface::MinefieldContext::create(444, env.session, *env.session.getGame(), env.session.getGame()->currentTurn(), false));
     seg.pushBackInteger(2031);
     seg.pushBackNew(0);
     interpreter::Arguments args(seg, 0, 3);
@@ -1036,7 +1036,7 @@ AFL_TEST("game.interface.GlobalFunctions:IFObjectIsAt:error:bad-coordinate", a)
     Environment env;
     prepareObjectIsAt(env);
     afl::data::Segment seg;
-    seg.pushBackNew(game::interface::MinefieldContext::create(444, env.session, false));
+    seg.pushBackNew(game::interface::MinefieldContext::create(444, env.session, *env.session.getGame(), env.session.getGame()->currentTurn(), false));
     seg.pushBackString("X");
     seg.pushBackInteger(2100);
     interpreter::Arguments args(seg, 0, 3);
@@ -1059,7 +1059,7 @@ AFL_TEST("game.interface.GlobalFunctions:IFObjectIsAt:error:too-many-args", a)
     Environment env;
     prepareObjectIsAt(env);
     afl::data::Segment seg;
-    seg.pushBackNew(game::interface::MinefieldContext::create(444, env.session, false));
+    seg.pushBackNew(game::interface::MinefieldContext::create(444, env.session, *env.session.getGame(), env.session.getGame()->currentTurn(), false));
     seg.pushBackInteger(1000);
     seg.pushBackInteger(2000);
     seg.pushBackInteger(3000);

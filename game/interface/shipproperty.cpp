@@ -45,9 +45,9 @@ namespace {
         };
         ShipArrayProperty(Type type,
                           const game::map::Ship& ship,
-                          afl::base::Ref<const game::Game> game,
-                          afl::base::Ref<const game::Root> root,
-                          afl::base::Ref<const game::spec::ShipList> shipList);
+                          const afl::base::Ref<const game::Game>& game,
+                          const afl::base::Ref<const game::Root>& root,
+                          const afl::base::Ref<const game::spec::ShipList>& shipList);
 
         virtual afl::data::Value* get(interpreter::Arguments& args);
         virtual ShipArrayProperty* clone() const;
@@ -133,9 +133,9 @@ namespace {
 
 ShipArrayProperty::ShipArrayProperty(Type type,
                                      const game::map::Ship& ship,
-                                     afl::base::Ref<const game::Game> game,                // needed for shipScores (Score)
-                                     afl::base::Ref<const game::Root> root,                // needed for hostConfiguration (HasFunction)
-                                     afl::base::Ref<const game::spec::ShipList> shipList)  // needed for hull functions
+                                     const afl::base::Ref<const game::Game>& game,                // needed for shipScores (Score)
+                                     const afl::base::Ref<const game::Root>& root,                // needed for hostConfiguration (HasFunction)
+                                     const afl::base::Ref<const game::spec::ShipList>& shipList)  // needed for hull functions
     : m_type(type),
       m_ship(ship),
       m_game(game),
@@ -218,11 +218,11 @@ ShipArrayProperty::clone() const
 
 afl::data::Value*
 game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
-                                 Session& session,                                     // needed for names, HasTask
-                                 afl::base::Ref<const Root> root,                      // needed for configuration
-                                 afl::base::Ref<const game::spec::ShipList> shipList,  // needed for spec access
-                                 afl::base::Ref<const Game> game,                      // needed for ship scores
-                                 afl::base::Ref<const Turn> turn)                      // needed for location names
+                                 Session& session,                                            // needed for names, HasTask
+                                 const afl::base::Ref<const Root>& root,                      // needed for configuration
+                                 const afl::base::Ref<const game::spec::ShipList>& shipList,  // needed for spec access
+                                 const afl::base::Ref<const Game>& game,                      // needed for ship scores
+                                 const afl::base::Ref<const Turn>& turn)                      // needed for location names, messages
 {
     // ex int/if/shipif.h:getShipProperty
     /* Combat participant properties often share names and meaning with ship properties,
@@ -544,7 +544,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            Individual messages have the same form as the inbox messages (InMsg()).
            @see int:index:group:incomingmessageproperty|Incoming Message Properties
            @since PCC2 2.0.3, PCC2 2.40.10 */
-        return InboxSubsetValue::create(sh.messages().get(), session.translator(), root, game);
+        return InboxSubsetValue::create(sh.messages().get(), session.translator(), root, game, turn);
      case ispMissionId:
         /* @q Mission$:Int (Ship Property)
            Mission number.
@@ -918,7 +918,7 @@ game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, const af
                                  const Root& root,
                                  const game::spec::ShipList& shipList,
                                  const game::map::Configuration& mapConfig,
-                                 Turn& turn)
+                                 game::map::Universe& univ)
 {
     // ex int/if/shipif.h:setShipProperty
 
@@ -951,7 +951,7 @@ game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, const af
             int m = (isp == ispMissionId        ? iv : sh.getMission().orElse(0));
             int i = (isp == ispMissionIntercept ? iv : sh.getMissionParameter(InterceptParameter).orElse(0));
             int t = (isp == ispMissionTow       ? iv : sh.getMissionParameter(TowParameter).orElse(0));
-            if (!game::map::FleetMember(turn.universe(), sh, mapConfig).setMission(m, i, t, root.hostConfiguration(), shipList)) {
+            if (!game::map::FleetMember(univ, sh, mapConfig).setMission(m, i, t, root.hostConfiguration(), shipList)) {
                 throw Exception(Exception::eFleet);
             }
         }
@@ -966,7 +966,7 @@ game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, const af
         break;
      case ispSpeedId:
         if (checkIntegerArg(iv, value, 0, game::spec::Engine::MAX_WARP)) {
-            if (!game::map::FleetMember(turn.universe(), sh, mapConfig).setWarpFactor(iv, root.hostConfiguration(), shipList)) {
+            if (!game::map::FleetMember(univ, sh, mapConfig).setWarpFactor(iv, root.hostConfiguration(), shipList)) {
                 throw Exception(Exception::eFleet);
             }
         }
@@ -983,14 +983,14 @@ game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, const af
         break;
      case ispFleetName:
         if (checkStringArg(sv, value)) {
-            if (!game::map::FleetMember(turn.universe(), sh, mapConfig).setFleetName(sv)) {
+            if (!game::map::FleetMember(univ, sh, mapConfig).setFleetName(sv)) {
                 throw interpreter::Error::notAssignable();
             }
         }
         break;
      case ispFleetId:
         if (checkIntegerArg(iv, value)) {
-            if (!game::map::FleetMember(turn.universe(), sh, mapConfig).setFleetNumber(iv, root.hostConfiguration(), shipList)) {
+            if (!game::map::FleetMember(univ, sh, mapConfig).setFleetNumber(iv, root.hostConfiguration(), shipList)) {
                 throw interpreter::Error::rangeError();
             }
         }

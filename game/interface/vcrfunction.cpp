@@ -7,6 +7,7 @@
 #include "game/interface/vcrfunction.hpp"
 #include "interpreter/arguments.hpp"
 #include "game/game.hpp"
+#include "game/turn.hpp"
 
 /* @q Vcr(uid:Int):Obj (Function, Context)
    Access properties of combat recordings.
@@ -31,7 +32,11 @@ game::interface::VcrFunction::get(interpreter::Arguments& args)
     }
 
     // OK, build result. Note that the user indexes are 1-based!
-    return VcrContext::create(i-1, m_session);
+    if (Game* g = m_session.getGame().get()) {
+        return VcrContext::create(i-1, m_session, g->viewpointTurn().getBattles());
+    } else {
+        return 0;
+    }
 }
 
 void
@@ -54,7 +59,11 @@ game::interface::VcrFunction::getDimension(int32_t which) const
 game::interface::VcrContext*
 game::interface::VcrFunction::makeFirstContext()
 {
-    return VcrContext::create(0, m_session);
+    if (Game* g = m_session.getGame().get()) {
+        return VcrContext::create(0, m_session, g->viewpointTurn().getBattles());
+    } else {
+        return 0;
+    }
 }
 
 game::interface::VcrFunction*
@@ -80,7 +89,7 @@ int32_t
 game::interface::VcrFunction::getNumBattles() const
 {
     if (Game* g = m_session.getGame().get()) {
-        if (game::vcr::Database* db = g->currentTurn().getBattles().get()) {
+        if (game::vcr::Database* db = g->viewpointTurn().getBattles().get()) {
             return int32_t(std::min(db->getNumBattles(), size_t(0x7FFFFFFE)));
         }
     }

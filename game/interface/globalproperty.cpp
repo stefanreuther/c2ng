@@ -109,7 +109,7 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
         /* @q My.InMsgs:Int (Global Property)
            Number of incoming (received) messages this turn. */
         if (const Game* game = session.getGame().get()) {
-            return makeSizeValue(game->currentTurn().inbox().getNumMessages());
+            return makeSizeValue(game->viewpointTurn().inbox().getNumMessages());
         } else {
             return 0;
         }
@@ -117,7 +117,7 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
         /* @q My.OutMsgs:Int (Global Property)
            Number of outgoing (sent) messages this turn. */
         if (const Game* game = session.getGame().get()) {
-            return makeSizeValue(game->currentTurn().outbox().getNumMessages());
+            return makeSizeValue(game->viewpointTurn().outbox().getNumMessages());
         } else {
             return 0;
         }
@@ -125,7 +125,7 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
         /* @q My.VCRs:Int (Global Property)
            Number of incoming combat recordings this turn. */
         if (const Game* game = session.getGame().get()) {
-            if (const game::vcr::Database* db = game->currentTurn().getBattles().get()) {
+            if (const game::vcr::Database* db = game->viewpointTurn().getBattles().get()) {
                 return makeSizeValue(db->getNumBattles());
             } else {
                 return makeSizeValue(0);
@@ -204,6 +204,7 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
            If the game does not support result file passwords, the value is EMPTY.
            @since PCC2 2.41 */
         if (const Game* g = session.getGame().get()) {
+            // We intentionally use currentTurn here. There's no point in asking the password status of a history RST.
             const Turn& t = g->currentTurn();
             if (const game::v3::GenFile* p = game::v3::GenExtra::get(t, g->getViewpointPlayer())) {
                 return makeBooleanValue(p->hasPassword());
@@ -330,7 +331,7 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
         /* @q Turn:Int (Global Property)
            Turn number. */
         if (const Game* game = session.getGame().get()) {
-            return makeIntegerValue(game->currentTurn().getTurnNumber());
+            return makeIntegerValue(game->viewpointTurn().getTurnNumber());
         } else {
             return 0;
         }
@@ -339,7 +340,7 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
            New-turn flag.
            True if this is a new turn, false if you have opened PCC for the second time this turn. */
         if (const Game* game = session.getGame().get()) {
-            return makeBooleanValue(game->currentTurn().getDatabaseTurnNumber() < game->currentTurn().getTurnNumber());
+            return makeBooleanValue(game->viewpointTurn().getDatabaseTurnNumber() < game->viewpointTurn().getTurnNumber());
         } else {
             return 0;
         }
@@ -349,7 +350,7 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
            Time of last host run, in <tt>hh:mm:ss</tt> format,
            using the host's timezone and 24-hour format. */
         if (const Game* game = session.getGame().get()) {
-            const Timestamp& ts = game->currentTurn().getTimestamp();
+            const Timestamp& ts = game->viewpointTurn().getTimestamp();
             if (ts.isValid()) {
                 return makeStringValue(ts.getTimeAsString());
             } else {
@@ -364,7 +365,7 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
            Date of last host run, in <tt>mm-dd-yyyy</tt> format,
            using the host's timezone. */
         if (const Game* game = session.getGame().get()) {
-            const Timestamp& ts = game->currentTurn().getTimestamp();
+            const Timestamp& ts = game->viewpointTurn().getTimestamp();
             if (ts.isValid()) {
                 return makeStringValue(ts.getDateAsString());
             } else {
@@ -386,7 +387,7 @@ game::interface::setGlobalProperty(GlobalProperty igp, Session& session, const a
      case igpSelectionLayer:
         if (Game* game = session.getGame().get()) {
             if (interpreter::checkIntegerArg(iv, value, 0, int(game->selections().get(game::map::Selections::Ship).size()) - 1)) {
-                game->selections().setCurrentLayer(iv, game->currentTurn().universe());
+                game->selections().setCurrentLayer(iv, game->viewpointTurn().universe());
             }
         } else {
             throw interpreter::Error::notAssignable();

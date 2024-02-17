@@ -64,10 +64,11 @@ namespace {
     };
 }
 
-game::interface::MinefieldContext::MinefieldContext(Id_t id, afl::base::Ref<const Root> root, afl::base::Ref<Game> game, afl::string::Translator& tx)
+game::interface::MinefieldContext::MinefieldContext(Id_t id, const afl::base::Ref<const Root>& root, const afl::base::Ref<Game>& game, const afl::base::Ref<Turn>& turn, afl::string::Translator& tx)
     : m_id(id),
       m_root(root),
       m_game(game),
+      m_turn(turn),
       m_translator(tx)
 {
     // ex IntMinefieldContext::IntMinefieldContext
@@ -120,7 +121,7 @@ game::interface::MinefieldContext::get(PropertyIndex_t index)
             }
 
          case MinefieldMethodDomain:
-            return new MinefieldMethodValue(mf->getId(), MinefieldMethod(minefield_mapping[index].index), m_game->currentTurn());
+            return new MinefieldMethodValue(mf->getId(), MinefieldMethod(minefield_mapping[index].index), m_turn);
         }
     }
     return 0;
@@ -130,7 +131,7 @@ bool
 game::interface::MinefieldContext::next()
 {
     // ex values.pas:CMineContext.Next
-    if (int id = m_game->currentTurn().universe().minefields().findNextIndex(m_id)) {
+    if (int id = m_turn->universe().minefields().findNextIndex(m_id)) {
         m_id = id;
         return true;
     } else {
@@ -141,13 +142,13 @@ game::interface::MinefieldContext::next()
 game::interface::MinefieldContext*
 game::interface::MinefieldContext::clone() const
 {
-    return new MinefieldContext(m_id, m_root, m_game, m_translator);
+    return new MinefieldContext(m_id, m_root, m_game, m_turn, m_translator);
 }
 
 game::map::Minefield*
 game::interface::MinefieldContext::getObject()
 {
-    return m_game->currentTurn().universe().minefields().get(m_id);
+    return m_turn->universe().minefields().get(m_id);
 }
 
 void
@@ -166,21 +167,24 @@ game::interface::MinefieldContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::MinefieldContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::MinefieldContext::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
     // ex IntMinefieldContext::store
-    out.tag   = out.Tag_Minefield;
-    out.value = m_id;
+    if (&*m_turn == &m_game->currentTurn()) {
+        out.tag   = out.Tag_Minefield;
+        out.value = m_id;
+    } else {
+        rejectStore(out, aux, ctx);
+    }
 }
 
 game::interface::MinefieldContext*
-game::interface::MinefieldContext::create(int id, Session& session, bool force)
+game::interface::MinefieldContext::create(int id, Session& session, const afl::base::Ref<Game>& g, const afl::base::Ref<Turn>& t, bool force)
 {
     // ex values.pas:CreateMinefieldContext
-    Game* g = session.getGame().get();
     const Root* r = session.getRoot().get();
-    if (g != 0 && r != 0 && (force || g->currentTurn().universe().minefields().get(id) != 0)) {
-        return new MinefieldContext(id, *r, *g, session.translator());
+    if (r != 0 && (force || t->universe().minefields().get(id) != 0)) {
+        return new MinefieldContext(id, *r, g, t, session.translator());
     } else {
         return 0;
     }

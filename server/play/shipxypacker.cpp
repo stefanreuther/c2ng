@@ -31,7 +31,7 @@ server::play::ShipXYPacker::buildValue() const
     for (int i = 0, n = t.universe().ships().size(); i <= n; ++i) {
         if (ty.getObjectByIndex(i) != 0) {
             afl::base::Ref<afl::data::Hash> hv(afl::data::Hash::create());
-            game::interface::ShipContext ctx(i, m_session, r, g, sl);
+            game::interface::ShipContext ctx(i, m_session, r, g, g.currentTurn(), sl);
             addValue(*hv, ctx, "LOC.X", "X");
             addValue(*hv, ctx, "LOC.Y", "Y");
             addValue(*hv, ctx, "MASS", "MASS");

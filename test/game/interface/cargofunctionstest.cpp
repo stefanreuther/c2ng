@@ -18,36 +18,24 @@
  *  Convenience Macros
  *
  *  Each requires 'seg' to be a afl::data::Segment with the parameters,
- *  and sets up 'session, args' as parameters for FUNC.
+ *  and sets up 'args' as parameters for FUNC.
  */
 
 #define CF_ASSERT_THROWS(a, FUNC)                       \
-    afl::string::NullTranslator tx;                     \
-    afl::io::NullFileSystem fs;                         \
-    game::Session session(tx, fs);                      \
     interpreter::Arguments args(seg, 0, seg.size());    \
     AFL_CHECK_THROWS(a, FUNC, interpreter::Error);
 
 #define CF_ASSERT_NULL(a, FUNC)                         \
-    afl::string::NullTranslator tx;                     \
-    afl::io::NullFileSystem fs;                         \
-    game::Session session(tx, fs);                      \
     interpreter::Arguments args(seg, 0, seg.size());    \
     std::auto_ptr<afl::data::Value> result(FUNC);       \
     a.checkNull("result", result.get())
 
 #define CF_ASSERT_STRING(a, FUNC, STR)                                  \
-    afl::string::NullTranslator tx;                                     \
-    afl::io::NullFileSystem fs;                                         \
-    game::Session session(tx, fs);                                      \
     interpreter::Arguments args(seg, 0, seg.size());                    \
     std::auto_ptr<afl::data::Value> result(FUNC);                       \
     a.checkEqual("toString", interpreter::toString(result.get(), false), STR)
 
 #define CF_ASSERT_INTEGER(a, FUNC, VAL)                                 \
-    afl::string::NullTranslator tx;                                     \
-    afl::io::NullFileSystem fs;                                         \
-    game::Session session(tx, fs);                                      \
     int32_t iv;                                                         \
     interpreter::Arguments args(seg, 0, seg.size());                    \
     std::auto_ptr<afl::data::Value> result(FUNC);                       \
@@ -111,7 +99,7 @@ AFL_TEST("game.interface.CargoFunctions:CAdd:str+str", a)
     afl::data::Segment seg;
     seg.pushBackString("10T");
     seg.pushBackString("5T 3M");
-    CF_ASSERT_STRING(a, game::interface::IFCAdd(session, args), "15T 3M");
+    CF_ASSERT_STRING(a, game::interface::IFCAdd(args), "15T 3M");
 }
 
 // CAdd("") = ""
@@ -119,14 +107,14 @@ AFL_TEST("game.interface.CargoFunctions:CAdd:blank", a)
 {
     afl::data::Segment seg;
     seg.pushBackString("");
-    CF_ASSERT_STRING(a, game::interface::IFCAdd(session, args), "");
+    CF_ASSERT_STRING(a, game::interface::IFCAdd(args), "");
 }
 
 // CAdd() = error
 AFL_TEST("game.interface.CargoFunctions:CAdd:nullary", a)
 {
     afl::data::Segment seg;
-    CF_ASSERT_THROWS(a, game::interface::IFCAdd(session, args));
+    CF_ASSERT_THROWS(a, game::interface::IFCAdd(args));
 }
 
 // CAdd("10T", null) = null
@@ -135,7 +123,7 @@ AFL_TEST("game.interface.CargoFunctions:CAdd:str+null", a)
     afl::data::Segment seg;
     seg.pushBackString("10T");
     seg.pushBackNew(0);
-    CF_ASSERT_NULL(a, game::interface::IFCAdd(session, args));
+    CF_ASSERT_NULL(a, game::interface::IFCAdd(args));
 }
 
 /*
@@ -146,7 +134,7 @@ AFL_TEST("game.interface.CargoFunctions:CAdd:str+null", a)
 AFL_TEST("game.interface.CargoFunctions:CCompare:nullary", a)
 {
     afl::data::Segment seg;
-    CF_ASSERT_THROWS(a, game::interface::IFCCompare(session, args));
+    CF_ASSERT_THROWS(a, game::interface::IFCCompare(args));
 }
 
 // CCompare("10T", null) = null
@@ -155,7 +143,7 @@ AFL_TEST("game.interface.CargoFunctions:CCompare:str+null", a)
     afl::data::Segment seg;
     seg.pushBackString("10T");
     seg.pushBackNew(0);
-    CF_ASSERT_NULL(a, game::interface::IFCCompare(session, args));
+    CF_ASSERT_NULL(a, game::interface::IFCCompare(args));
 }
 
 // CCompare(null, "10T") = null
@@ -164,7 +152,7 @@ AFL_TEST("game.interface.CargoFunctions:CCompare:null+str", a)
     afl::data::Segment seg;
     seg.pushBackNew(0);
     seg.pushBackString("10T");
-    CF_ASSERT_NULL(a, game::interface::IFCCompare(session, args));
+    CF_ASSERT_NULL(a, game::interface::IFCCompare(args));
 }
 
 // CCompare("10T", "10T") = true
@@ -173,7 +161,7 @@ AFL_TEST("game.interface.CargoFunctions:CCompare:str-equal", a)
     afl::data::Segment seg;
     seg.pushBackString("10T");
     seg.pushBackString("10T");
-    CF_ASSERT_INTEGER(a, game::interface::IFCCompare(session, args), 1);
+    CF_ASSERT_INTEGER(a, game::interface::IFCCompare(args), 1);
 }
 
 // CCompare("11T", "10T") = true
@@ -182,7 +170,7 @@ AFL_TEST("game.interface.CargoFunctions:CCompare:str-gt", a)
     afl::data::Segment seg;
     seg.pushBackString("11T");
     seg.pushBackString("10T");
-    CF_ASSERT_INTEGER(a, game::interface::IFCCompare(session, args), 1);
+    CF_ASSERT_INTEGER(a, game::interface::IFCCompare(args), 1);
 }
 
 // CCompare("10T", "11T") = true
@@ -191,7 +179,7 @@ AFL_TEST("game.interface.CargoFunctions:CCompare:str-lt", a)
     afl::data::Segment seg;
     seg.pushBackString("10T");
     seg.pushBackString("11T");
-    CF_ASSERT_INTEGER(a, game::interface::IFCCompare(session, args), 0);
+    CF_ASSERT_INTEGER(a, game::interface::IFCCompare(args), 0);
 }
 
 /*
@@ -202,7 +190,7 @@ AFL_TEST("game.interface.CargoFunctions:CCompare:str-lt", a)
 AFL_TEST("game.interface.CargoFunctions:CDiv:nullary", a)
 {
     afl::data::Segment seg;
-    CF_ASSERT_THROWS(a, game::interface::IFCDiv(session, args));
+    CF_ASSERT_THROWS(a, game::interface::IFCDiv(args));
 }
 
 // CDiv("10T", null) = null
@@ -211,7 +199,7 @@ AFL_TEST("game.interface.CargoFunctions:CDiv:str+null", a)
     afl::data::Segment seg;
     seg.pushBackString("10T");
     seg.pushBackNew(0);
-    CF_ASSERT_NULL(a, game::interface::IFCDiv(session, args));
+    CF_ASSERT_NULL(a, game::interface::IFCDiv(args));
 }
 
 // CDiv(null, "10T") = null
@@ -220,7 +208,7 @@ AFL_TEST("game.interface.CargoFunctions:CDiv:null+str", a)
     afl::data::Segment seg;
     seg.pushBackNew(0);
     seg.pushBackString("10T");
-    CF_ASSERT_NULL(a, game::interface::IFCDiv(session, args));
+    CF_ASSERT_NULL(a, game::interface::IFCDiv(args));
 }
 
 // CDiv("25T", "10T") = 2
@@ -229,7 +217,7 @@ AFL_TEST("game.interface.CargoFunctions:CDiv:str+str", a)
     afl::data::Segment seg;
     seg.pushBackString("25T");
     seg.pushBackString("10T");
-    CF_ASSERT_INTEGER(a, game::interface::IFCDiv(session, args), 2);
+    CF_ASSERT_INTEGER(a, game::interface::IFCDiv(args), 2);
 }
 
 // CDiv("25T", 3) = "8T"
@@ -238,7 +226,7 @@ AFL_TEST("game.interface.CargoFunctions:CDiv:str+num", a)
     afl::data::Segment seg;
     seg.pushBackString("25T");
     seg.pushBackInteger(3);
-    CF_ASSERT_STRING(a, game::interface::IFCDiv(session, args), "8T");
+    CF_ASSERT_STRING(a, game::interface::IFCDiv(args), "8T");
 }
 
 // CDiv("25T", 0) = error
@@ -247,7 +235,7 @@ AFL_TEST("game.interface.CargoFunctions:CDiv:str+zero", a)
     afl::data::Segment seg;
     seg.pushBackString("25T");
     seg.pushBackInteger(0);
-    CF_ASSERT_THROWS(a, game::interface::IFCDiv(session, args));
+    CF_ASSERT_THROWS(a, game::interface::IFCDiv(args));
 }
 
 // CDiv("25T", "") = error
@@ -256,7 +244,7 @@ AFL_TEST("game.interface.CargoFunctions:CDiv:str+empty", a)
     afl::data::Segment seg;
     seg.pushBackString("25T");
     seg.pushBackString("");
-    CF_ASSERT_THROWS(a, game::interface::IFCDiv(session, args));
+    CF_ASSERT_THROWS(a, game::interface::IFCDiv(args));
 }
 
 // CDiv("25T", object) = error
@@ -265,7 +253,7 @@ AFL_TEST("game.interface.CargoFunctions:CDiv:str+object", a)
     afl::data::Segment seg;
     seg.pushBackString("25T");
     seg.pushBackNew(new interpreter::FileValue(3));
-    CF_ASSERT_THROWS(a, game::interface::IFCDiv(session, args));
+    CF_ASSERT_THROWS(a, game::interface::IFCDiv(args));
 }
 
 /*
@@ -276,7 +264,7 @@ AFL_TEST("game.interface.CargoFunctions:CDiv:str+object", a)
 AFL_TEST("game.interface.CargoFunctions:CExtract:nullary", a)
 {
     afl::data::Segment seg;
-    CF_ASSERT_THROWS(a, game::interface::IFCExtract(session, args));
+    CF_ASSERT_THROWS(a, game::interface::IFCExtract(args));
 }
 
 // CExtract("10T", null) = null
@@ -285,7 +273,7 @@ AFL_TEST("game.interface.CargoFunctions:CExtract:str+null", a)
     afl::data::Segment seg;
     seg.pushBackString("10T");
     seg.pushBackNew(0);
-    CF_ASSERT_NULL(a, game::interface::IFCExtract(session, args));
+    CF_ASSERT_NULL(a, game::interface::IFCExtract(args));
 }
 
 // CExtract(null, "t") = null
@@ -294,7 +282,7 @@ AFL_TEST("game.interface.CargoFunctions:CExtract:null+str", a)
     afl::data::Segment seg;
     seg.pushBackNew(0);
     seg.pushBackString("t");
-    CF_ASSERT_NULL(a, game::interface::IFCExtract(session, args));
+    CF_ASSERT_NULL(a, game::interface::IFCExtract(args));
 }
 
 // CExtract("10T 20M 30D", "tmm") = 30
@@ -303,7 +291,7 @@ AFL_TEST("game.interface.CargoFunctions:CExtract:str+str", a)
     afl::data::Segment seg;
     seg.pushBackString("10T 20M 30D");
     seg.pushBackString("tmm");
-    CF_ASSERT_INTEGER(a, game::interface::IFCExtract(session, args), 30);
+    CF_ASSERT_INTEGER(a, game::interface::IFCExtract(args), 30);
 }
 
 // CExtract("10T 20M 30D", "") = 0
@@ -312,7 +300,7 @@ AFL_TEST("game.interface.CargoFunctions:CExtract:str+empty", a)
     afl::data::Segment seg;
     seg.pushBackString("10T 20M 30D");
     seg.pushBackString("");
-    CF_ASSERT_INTEGER(a, game::interface::IFCExtract(session, args), 0);
+    CF_ASSERT_INTEGER(a, game::interface::IFCExtract(args), 0);
 }
 
 // CExtract("10T", "q") = error
@@ -321,7 +309,7 @@ AFL_TEST("game.interface.CargoFunctions:CExtract:str+bad", a)
     afl::data::Segment seg;
     seg.pushBackString("10T 20M 30D");
     seg.pushBackString("q");
-    CF_ASSERT_THROWS(a, game::interface::IFCExtract(session, args));
+    CF_ASSERT_THROWS(a, game::interface::IFCExtract(args));
 }
 
 /*
@@ -332,7 +320,7 @@ AFL_TEST("game.interface.CargoFunctions:CExtract:str+bad", a)
 AFL_TEST("game.interface.CargoFunctions:CMul:nullary", a)
 {
     afl::data::Segment seg;
-    CF_ASSERT_THROWS(a, game::interface::IFCMul(session, args));
+    CF_ASSERT_THROWS(a, game::interface::IFCMul(args));
 }
 
 // CMul("10T", null) = null
@@ -341,7 +329,7 @@ AFL_TEST("game.interface.CargoFunctions:CMul:str+null", a)
     afl::data::Segment seg;
     seg.pushBackString("10T");
     seg.pushBackNew(0);
-    CF_ASSERT_NULL(a, game::interface::IFCMul(session, args));
+    CF_ASSERT_NULL(a, game::interface::IFCMul(args));
 }
 
 // CMul(null, 7) = null
@@ -350,7 +338,7 @@ AFL_TEST("game.interface.CargoFunctions:CMul:null+str", a)
     afl::data::Segment seg;
     seg.pushBackNew(0);
     seg.pushBackInteger(7);
-    CF_ASSERT_NULL(a, game::interface::IFCMul(session, args));
+    CF_ASSERT_NULL(a, game::interface::IFCMul(args));
 }
 
 // CMul("10T 20M 30D", 4) = "40T 120M 80D"
@@ -359,7 +347,7 @@ AFL_TEST("game.interface.CargoFunctions:CMul:str+int", a)
     afl::data::Segment seg;
     seg.pushBackString("10T 20M 30D");
     seg.pushBackInteger(4);
-    CF_ASSERT_STRING(a, game::interface::IFCMul(session, args), "40T 120D 80M");
+    CF_ASSERT_STRING(a, game::interface::IFCMul(args), "40T 120D 80M");
 }
 
 /*
@@ -370,7 +358,7 @@ AFL_TEST("game.interface.CargoFunctions:CMul:str+int", a)
 AFL_TEST("game.interface.CargoFunctions:CRemove:nullary", a)
 {
     afl::data::Segment seg;
-    CF_ASSERT_THROWS(a, game::interface::IFCRemove(session, args));
+    CF_ASSERT_THROWS(a, game::interface::IFCRemove(args));
 }
 
 // CRemove("10T", null) = null
@@ -379,7 +367,7 @@ AFL_TEST("game.interface.CargoFunctions:CRemove:str+null", a)
     afl::data::Segment seg;
     seg.pushBackString("10T");
     seg.pushBackNew(0);
-    CF_ASSERT_NULL(a, game::interface::IFCRemove(session, args));
+    CF_ASSERT_NULL(a, game::interface::IFCRemove(args));
 }
 
 // CRemove(null, "t") = null
@@ -388,7 +376,7 @@ AFL_TEST("game.interface.CargoFunctions:CRemove:null+str", a)
     afl::data::Segment seg;
     seg.pushBackNew(0);
     seg.pushBackString("t");
-    CF_ASSERT_NULL(a, game::interface::IFCRemove(session, args));
+    CF_ASSERT_NULL(a, game::interface::IFCRemove(args));
 }
 
 // CRemove("10T 20M 40D 50S", "tmm") = "40D 50S"
@@ -397,7 +385,7 @@ AFL_TEST("game.interface.CargoFunctions:CRemove:str+str", a)
     afl::data::Segment seg;
     seg.pushBackString("10T 20M 40D 50S");
     seg.pushBackString("tmm");
-    CF_ASSERT_STRING(a, game::interface::IFCRemove(session, args), "40D 50S");
+    CF_ASSERT_STRING(a, game::interface::IFCRemove(args), "40D 50S");
 }
 
 // CRemove("10T 20M 30D", "") = "10T 30D 20M"
@@ -406,7 +394,7 @@ AFL_TEST("game.interface.CargoFunctions:CRemove:str+empty", a)
     afl::data::Segment seg;
     seg.pushBackString("10T 20M 30D");
     seg.pushBackString("");
-    CF_ASSERT_STRING(a, game::interface::IFCRemove(session, args), "10T 30D 20M");
+    CF_ASSERT_STRING(a, game::interface::IFCRemove(args), "10T 30D 20M");
 }
 
 // CRemove("10T", "q") = error
@@ -415,7 +403,7 @@ AFL_TEST("game.interface.CargoFunctions:CRemove:str+bad", a)
     afl::data::Segment seg;
     seg.pushBackString("10T 20M 30D");
     seg.pushBackString("q");
-    CF_ASSERT_THROWS(a, game::interface::IFCRemove(session, args));
+    CF_ASSERT_THROWS(a, game::interface::IFCRemove(args));
 }
 
 /*
@@ -428,14 +416,14 @@ AFL_TEST("game.interface.CargoFunctions:CSub:str+str", a)
     afl::data::Segment seg;
     seg.pushBackString("10T 3M");
     seg.pushBackString("5T");
-    CF_ASSERT_STRING(a, game::interface::IFCSub(session, args), "5T 3M");
+    CF_ASSERT_STRING(a, game::interface::IFCSub(args), "5T 3M");
 }
 
 // CSub() = error
 AFL_TEST("game.interface.CargoFunctions:CSub:nullary", a)
 {
     afl::data::Segment seg;
-    CF_ASSERT_THROWS(a, game::interface::IFCSub(session, args));
+    CF_ASSERT_THROWS(a, game::interface::IFCSub(args));
 }
 
 // CSub("10T", null) = null
@@ -444,7 +432,7 @@ AFL_TEST("game.interface.CargoFunctions:CSub:str+null", a)
     afl::data::Segment seg;
     seg.pushBackString("10T");
     seg.pushBackNew(0);
-    CF_ASSERT_NULL(a, game::interface::IFCSub(session, args));
+    CF_ASSERT_NULL(a, game::interface::IFCSub(args));
 }
 
 // CSub(null, "10T") = null
@@ -453,7 +441,7 @@ AFL_TEST("game.interface.CargoFunctions:CSub:null+str", a)
     afl::data::Segment seg;
     seg.pushBackNew(0);
     seg.pushBackString("10T");
-    CF_ASSERT_NULL(a, game::interface::IFCSub(session, args));
+    CF_ASSERT_NULL(a, game::interface::IFCSub(args));
 }
 
 // CSub("10T", "1T", "2T", "3T") = "4T"
@@ -464,7 +452,7 @@ AFL_TEST("game.interface.CargoFunctions:CSub:multiple", a)
     seg.pushBackString("1T");
     seg.pushBackString("2T");
     seg.pushBackString("3T");
-    CF_ASSERT_STRING(a, game::interface::IFCSub(session, args), "4T");
+    CF_ASSERT_STRING(a, game::interface::IFCSub(args), "4T");
 }
 
 // CSub("10$", "5S") = "-5S 100$"
@@ -473,7 +461,7 @@ AFL_TEST("game.interface.CargoFunctions:CSub:underflow", a)
     afl::data::Segment seg;
     seg.pushBackString("10$");
     seg.pushBackString("5S");
-    CF_ASSERT_STRING(a, game::interface::IFCSub(session, args), "-5S 10$");
+    CF_ASSERT_STRING(a, game::interface::IFCSub(args), "-5S 10$");
 }
 
 // CSub("10S", "5$") = "5S"
@@ -482,7 +470,7 @@ AFL_TEST("game.interface.CargoFunctions:CSub:supply-sale", a)
     afl::data::Segment seg;
     seg.pushBackString("10S");
     seg.pushBackString("5$");
-    CF_ASSERT_STRING(a, game::interface::IFCSub(session, args), "5S");
+    CF_ASSERT_STRING(a, game::interface::IFCSub(args), "5S");
 }
 
 // CSub("-5S", "3$") = "-5S -3$"
@@ -491,5 +479,5 @@ AFL_TEST("game.interface.CargoFunctions:CSub:negative", a)
     afl::data::Segment seg;
     seg.pushBackString("-5S");
     seg.pushBackString("3$");
-    CF_ASSERT_STRING(a, game::interface::IFCSub(session, args), "-5S -3$");
+    CF_ASSERT_STRING(a, game::interface::IFCSub(args), "-5S -3$");
 }

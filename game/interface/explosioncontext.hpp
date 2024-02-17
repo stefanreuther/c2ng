@@ -5,9 +5,10 @@
 #ifndef C2NG_GAME_INTERFACE_EXPLOSIONCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_EXPLOSIONCONTEXT_HPP
 
+#include "afl/string/translator.hpp"
 #include "game/map/explosion.hpp"
-#include "game/turn.hpp"
 #include "game/session.hpp"
+#include "game/turn.hpp"
 #include "interpreter/simplecontext.hpp"
 
 namespace game { namespace interface {
@@ -21,9 +22,9 @@ namespace game { namespace interface {
      public:
         /** Constructor.
             @param id       Id (index into ExplosionType)
-            @param session  Session (for translator, interface)
-            @param turn     Turn */
-        ExplosionContext(Id_t id, Session& session, afl::base::Ref<Turn> turn);
+            @param turn     Turn
+            @param tx       Translator */
+        ExplosionContext(Id_t id, const afl::base::Ref<Turn>& turn, afl::string::Translator& tx);
 
         /** Destructor. */
         ~ExplosionContext();
@@ -43,13 +44,14 @@ namespace game { namespace interface {
         /** Create ExplosionContext.
             @param id      Id (index into ExplosionType)
             @param session Session
+            @param t       Turn
             @return newly-allocated ExplosionContext; null if preconditions are missing */
-        static ExplosionContext* create(Id_t id, Session& session);
+        static ExplosionContext* create(Id_t id, Session& session, const afl::base::Ref<Turn>& t);
 
      private:
         Id_t m_id;
-        Session& m_session;
         afl::base::Ref<Turn> m_turn;
+        afl::string::Translator& m_translator;
     };
 
 } }

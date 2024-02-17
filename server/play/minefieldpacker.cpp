@@ -28,7 +28,7 @@ server::play::MinefieldPacker::buildValue() const
     game::map::MinefieldType& ty = g.currentTurn().universe().minefields();
     for (game::Id_t i = ty.findNextIndex(0); i != 0; i = ty.findNextIndex(i)) {
         afl::base::Ref<afl::data::Hash> hv(afl::data::Hash::create());
-        game::interface::MinefieldContext ctx(i, r, g, m_session.translator());
+        game::interface::MinefieldContext ctx(i, r, g, g.currentTurn(), m_session.translator());
         addValue(*hv, ctx, "ID", "ID");
         addValue(*hv, ctx, "LASTSCAN", "LASTSCAN");
         addValue(*hv, ctx, "LOC.X", "X");

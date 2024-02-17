@@ -27,10 +27,10 @@ namespace {
     };
 }
 
-game::interface::ExplosionContext::ExplosionContext(Id_t id, Session& session, afl::base::Ref<Turn> turn)
+game::interface::ExplosionContext::ExplosionContext(Id_t id, const afl::base::Ref<Turn>& turn, afl::string::Translator& tx)
     : m_id(id),
-      m_session(session),
-      m_turn(turn)
+      m_turn(turn),
+      m_translator(tx)
 { }
 
 game::interface::ExplosionContext::~ExplosionContext()
@@ -49,7 +49,7 @@ game::interface::ExplosionContext::get(PropertyIndex_t index)
     if (game::map::Explosion* expl = getObject()) {
         switch (ExplosionDomain(EXPLOSION_MAP[index].domain)) {
          case ExplosionPropertyDomain:
-            return getExplosionProperty(*expl, ExplosionProperty(EXPLOSION_MAP[index].index), m_session.translator(), m_session.interface());
+            return getExplosionProperty(*expl, ExplosionProperty(EXPLOSION_MAP[index].index), m_translator);
         }
         return 0;
     } else {
@@ -71,7 +71,7 @@ game::interface::ExplosionContext::next()
 game::interface::ExplosionContext*
 game::interface::ExplosionContext::clone() const
 {
-    return new ExplosionContext(m_id, m_session, m_turn);
+    return new ExplosionContext(m_id, m_turn, m_translator);
 }
 
 game::map::Explosion*
@@ -100,18 +100,11 @@ game::interface::ExplosionContext::store(interpreter::TagNode& out, afl::io::Dat
 }
 
 game::interface::ExplosionContext*
-game::interface::ExplosionContext::create(Id_t id, Session& session)
+game::interface::ExplosionContext::create(Id_t id, Session& session, const afl::base::Ref<Turn>& t)
 {
-    Game* g = session.getGame().get();
-    if (g == 0) {
-        return 0;
-    }
-    Turn& t = g->currentTurn();
-
-    game::map::Explosion* expl = t.universe().explosions().getObjectByIndex(id);
+    game::map::Explosion* expl = t->universe().explosions().getObjectByIndex(id);
     if (expl == 0) {
         return 0;
     }
-
-    return new ExplosionContext(id, session, t);
+    return new ExplosionContext(id, t, session.translator());
 }

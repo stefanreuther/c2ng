@@ -100,7 +100,6 @@ game::Game::setViewpointTurnNumber(int nr)
     }
 }
 
-
 void
 game::Game::addMessageInformation(const game::parser::MessageInformation& info,
                                   game::config::HostConfiguration& config,
@@ -270,7 +269,7 @@ game::Game::synchronizeTeamsFromAlliances()
 void
 game::Game::notifyListeners()
 {
-    // FIXME: as of 20180101, the script side only operates on "current", but the C++ GUI side partially displays "viewpoint".
+    // Some parts may see current, some see viewpoint.
     // Thus, notify both.
 
     // Current turn

@@ -24,7 +24,7 @@ namespace game { namespace interface {
             @param turn  Turn
             @param root  Root (for charset)
             @param it    Iterator identifying the drawing, must point into Turn */
-        DrawingContext(afl::base::Ref<Turn> turn, afl::base::Ref<const Root> root, game::map::DrawingContainer::Iterator_t it);
+        DrawingContext(const afl::base::Ref<Turn>& turn, const afl::base::Ref<const Root>& root, const game::map::DrawingContainer::Iterator_t& it);
 
         /** Destructor. */
         ~DrawingContext();
@@ -43,8 +43,9 @@ namespace game { namespace interface {
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
         /** Create DrawingContext for first drawing.
-            @param session Session */
-        static DrawingContext* create(Session& session);
+            @param session Session
+            @param turn    Turn */
+        static DrawingContext* create(Session& session, const afl::base::Ref<Turn>& turn);
 
      private:
         // Turn, to keep the turn object alive

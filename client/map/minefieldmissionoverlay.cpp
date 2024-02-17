@@ -126,8 +126,7 @@ client::map::MinefieldMissionOverlay::attach(game::proxy::ObjectObserver& oop)
                 const game::spec::ShipList* pShipList = s.getShipList().get();
                 if (pShip != 0 && pRoot != 0 && pGame != 0 && pShipList != 0) {
                     game::map::MinefieldMission msn;
-                    // FIXME: correct universe?
-                    const game::map::Universe& univ = pGame->currentTurn().universe();
+                    const game::map::Universe& univ = pGame->viewpointTurn().universe();
                     if (msn.checkLayMission(*pShip, univ, *pRoot, pGame->mapConfiguration(), pGame->shipScores(), *pShipList)) {
                         computeMineLayEffect(m_data, msn, *pShip, univ, pGame->mapConfiguration(), *pRoot);
                     }

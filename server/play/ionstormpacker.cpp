@@ -27,7 +27,7 @@ server::play::IonStormPacker::buildValue() const
     game::map::IonStormType& ty = g.currentTurn().universe().ionStormType();
     for (game::Id_t i = ty.findNextIndex(0); i != 0; i = ty.findNextIndex(i)) {
         afl::base::Ref<afl::data::Hash> hv(afl::data::Hash::create());
-        game::interface::IonStormContext ctx(i, m_session, g);
+        game::interface::IonStormContext ctx(i, m_session, g.currentTurn());
         addValue(*hv, ctx, "HEADING$", "HEADING");
         addValue(*hv, ctx, "ID", "ID");
         addValue(*hv, ctx, "LOC.X", "X");

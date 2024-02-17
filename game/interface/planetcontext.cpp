@@ -10,7 +10,6 @@
 #include "game/interface/planetmethod.hpp"
 #include "game/interface/planetproperty.hpp"
 #include "game/interface/playerproperty.hpp"
-#include "game/turn.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/nametable.hpp"
 #include "interpreter/procedurevalue.hpp"
@@ -190,9 +189,9 @@ namespace {
         PlanetMethodValue(int id,
                           game::Session& session,
                           game::interface::PlanetMethod ipm,
-                          afl::base::Ref<game::Root> root,
-                          afl::base::Ref<game::Game> game,
-                          afl::base::Ref<game::Turn> turn)
+                          const afl::base::Ref<game::Root>& root,
+                          const afl::base::Ref<game::Game>& game,
+                          const afl::base::Ref<game::Turn>& turn)
             : m_id(id),
               m_session(session),
               m_method(ipm),
@@ -222,11 +221,12 @@ namespace {
     };
 }
 
-game::interface::PlanetContext::PlanetContext(Id_t id, Session& session, afl::base::Ref<Root> root, afl::base::Ref<Game> game)
+game::interface::PlanetContext::PlanetContext(Id_t id, Session& session, const afl::base::Ref<Root>& root, const afl::base::Ref<Game>& game, const afl::base::Ref<Turn>& turn)
     : m_id(id),
       m_session(session),
       m_root(root),
-      m_game(game)
+      m_game(game),
+      m_turn(turn)
 {
     // ex IntPlanetContext::IntPlanetContext (sort-of)
     // FIXME: ShipContext takes and keeps a ship list. Should we do the same?
@@ -288,9 +288,9 @@ game::interface::PlanetContext::get(PropertyIndex_t index)
             int owner;
             switch (PlanetDomain(planet_mapping[index].domain)) {
              case PlanetPropertyDomain:
-                return getPlanetProperty(*pl, PlanetProperty(planet_mapping[index].index), m_session, m_root, m_game);
+                return getPlanetProperty(*pl, PlanetProperty(planet_mapping[index].index), m_session, m_root, m_game, m_turn);
              case BasePropertyDomain:
-                return getBaseProperty(*pl, BaseProperty(planet_mapping[index].index), m_session.translator(), m_root, m_session.getShipList(), m_game->currentTurn());
+                return getBaseProperty(*pl, BaseProperty(planet_mapping[index].index), m_session.translator(), m_root, m_session.getShipList(), m_turn);
              case OwnerPropertyDomain:
                 if (pl->getOwner().get(owner)) {
                     return getPlayerProperty(owner, PlayerProperty(planet_mapping[index].index), m_root->playerList(), *m_game, m_root->hostConfiguration(), m_session.translator());
@@ -298,7 +298,7 @@ game::interface::PlanetContext::get(PropertyIndex_t index)
                     return 0;
                 }
              case PlanetMethodDomain:
-                return new PlanetMethodValue(pl->getId(), m_session, PlanetMethod(planet_mapping[index].index), m_root, m_game, m_game->currentTurn());
+                return new PlanetMethodValue(pl->getId(), m_session, PlanetMethod(planet_mapping[index].index), m_root, m_game, m_turn);
             }
             return 0;
         } else {
@@ -315,7 +315,7 @@ bool
 game::interface::PlanetContext::next()
 {
     // ex planint.pas:CPlanetContext.Next
-    if (Id_t id = m_game->currentTurn().universe().allPlanets().findNextIndex(m_id)) {
+    if (Id_t id = m_turn->universe().allPlanets().findNextIndex(m_id)) {
         m_id = id;
         return true;
     }
@@ -331,7 +331,7 @@ game::interface::PlanetContext::clone() const
 game::map::Planet*
 game::interface::PlanetContext::getObject()
 {
-    return m_game->currentTurn().universe().planets().get(m_id);
+    return m_turn->universe().planets().get(m_id);
 }
 
 void
@@ -351,21 +351,24 @@ game::interface::PlanetContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::PlanetContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::PlanetContext::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
     // ex IntPlanetContext::store
-    out.tag = out.Tag_Planet;
-    out.value = m_id;
+    if (&*m_turn == &m_game->currentTurn()) {
+        out.tag = out.Tag_Planet;
+        out.value = m_id;
+    } else {
+        rejectStore(out, aux, ctx);
+    }
 }
 
 game::interface::PlanetContext*
-game::interface::PlanetContext::create(Id_t id, Session& session)
+game::interface::PlanetContext::create(Id_t id, Session& session, const afl::base::Ref<Game>& g, const afl::base::Ref<Turn>& t)
 {
     // ex planint.pas:CPlanetContext.Load (sort-of), planint.pas:CreatePlanetContext
-    Game* game = session.getGame().get();
     Root* root = session.getRoot().get();
-    if (game != 0 && root != 0 && game->currentTurn().universe().planets().get(id) != 0) {
-        return new PlanetContext(id, session, *root, *game);
+    if (root != 0 && t->universe().planets().get(id) != 0) {
+        return new PlanetContext(id, session, *root, g, t);
     } else {
         return 0;
     }

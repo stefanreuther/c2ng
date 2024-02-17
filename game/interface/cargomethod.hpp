@@ -7,7 +7,7 @@
 
 #include "game/map/planet.hpp"
 #include "game/root.hpp"
-#include "game/session.hpp"
+#include "game/spec/shiplist.hpp"
 #include "game/turn.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/process.hpp"
@@ -22,14 +22,14 @@ namespace game { namespace interface {
         @param pl        Planet
         @param process   Process
         @param args      Parameters
-        @param session   Session (for ship list)
+        @param shipList  Ship list
         @param mapConfig Map configuration (for mission update)
         @param turn      Turn (for other units)
         @param root      Root (for host configuration/version)
 
         @throw interpreter::Error on parser error
         @throw game::Exception on rule violation */
-    void doCargoTransfer(game::map::Planet& pl, interpreter::Process& process, interpreter::Arguments& args, Session& session, const game::map::Configuration& mapConfig, Turn& turn, const Root& root);
+    void doCargoTransfer(game::map::Planet& pl, interpreter::Process& process, interpreter::Arguments& args, const game::spec::ShipList& shipList, const game::map::Configuration& mapConfig, Turn& turn, const Root& root);
 
     /** Cargo transfer, starting from ship.
         Parses cargospec, target ship Id, flags parameters.
@@ -39,14 +39,14 @@ namespace game { namespace interface {
         @param sh        Ship
         @param process   Process
         @param args      Parameters
-        @param session   Session (for ship list)
+        @param shipList  Ship list
         @param mapConfig Map configuration (for mission update)
         @param turn      Turn (for other units)
         @param root      Root (for host configuration/version)
 
         @throw interpreter::Error on parser error
         @throw game::Exception on rule violation */
-    void doCargoTransfer(game::map::Ship& sh, interpreter::Process& process, interpreter::Arguments& args, Session& session, const game::map::Configuration& mapConfig, Turn& turn, const Root& root);
+    void doCargoTransfer(game::map::Ship& sh, interpreter::Process& process, interpreter::Arguments& args, const game::spec::ShipList& shipList, const game::map::Configuration& mapConfig, Turn& turn, const Root& root);
 
     /** Cargo unload from ship.
         Parses cargospec, flags parameters.
@@ -57,14 +57,14 @@ namespace game { namespace interface {
         @param reverse   Reverse direction (upload, not unload)
         @param process   Process
         @param args      Parameters
-        @param session   Session (for ship list)
+        @param shipList  Ship list
         @param mapConfig Map configuration (for mission update)
         @param turn      Turn (for other units)
         @param root      Root (for host configuration/version)
 
         @throw interpreter::Error on parser error
         @throw game::Exception on rule violation */
-    void doCargoUnload(game::map::Ship& sh, bool reverse, interpreter::Process& process, interpreter::Arguments& args, Session& session, const game::map::Configuration& mapConfig, Turn& turn, const Root& root);
+    void doCargoUnload(game::map::Ship& sh, bool reverse, interpreter::Process& process, interpreter::Arguments& args, const game::spec::ShipList& shipList, const game::map::Configuration& mapConfig, Turn& turn, const Root& root);
 
 } }
 

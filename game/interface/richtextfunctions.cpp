@@ -11,6 +11,7 @@
 #include "afl/io/xml/entityhandler.hpp"
 #include "afl/io/xml/reader.hpp"
 #include "afl/string/parse.hpp"
+#include "interpreter/error.hpp"
 #include "interpreter/values.hpp"
 #include "util/charsetfactory.hpp"
 #include "util/rich/alignmentattribute.hpp"
@@ -122,7 +123,7 @@ game::interface::checkRichArg(RichTextValue::Ptr_t& out, const afl::data::Value*
 }
 
 afl::data::Value*
-game::interface::IFRAdd(game::Session& /*session*/, interpreter::Arguments& args)
+game::interface::IFRAdd(interpreter::Arguments& args)
 {
     /* @q RAdd(args:RichText...):RichText (Function)
        Concatenate all arguments, which can be strings or rich text, to a new rich text string,
@@ -160,7 +161,7 @@ game::interface::IFRAdd(game::Session& /*session*/, interpreter::Arguments& args
 }
 
 afl::data::Value*
-game::interface::IFRAlign(game::Session& /*session*/, interpreter::Arguments& args)
+game::interface::IFRAlign(interpreter::Arguments& args)
 {
     /* @q RAlign(str:RichText, width:Int, Optional align:Int):RichText (Function)
        Place rich text in an alignment block.
@@ -195,7 +196,7 @@ game::interface::IFRAlign(game::Session& /*session*/, interpreter::Arguments& ar
 }
 
 afl::data::Value*
-game::interface::IFRMid(game::Session& /*session*/, interpreter::Arguments& args)
+game::interface::IFRMid(interpreter::Arguments& args)
 {
     /* @q RMid(str:RichText, first:Int, Optional length:Int):RichText (Function)
        Returns a substring of a rich text string.
@@ -237,7 +238,7 @@ game::interface::IFRMid(game::Session& /*session*/, interpreter::Arguments& args
 }
 
 afl::data::Value*
-game::interface::IFRString(game::Session& /*session*/, interpreter::Arguments& args)
+game::interface::IFRString(interpreter::Arguments& args)
 {
     /* @q RString(str:RichText):Str (Function)
        Returns the text content of a rich text string,
@@ -261,7 +262,7 @@ game::interface::IFRString(game::Session& /*session*/, interpreter::Arguments& a
 }
 
 afl::data::Value*
-game::interface::IFRLen(game::Session& /*session*/, interpreter::Arguments& args)
+game::interface::IFRLen(interpreter::Arguments& args)
 {
     /* @q RLen(str:RichText):Int (Function)
        Returns the number of characters in a rich text string.
@@ -284,7 +285,7 @@ game::interface::IFRLen(game::Session& /*session*/, interpreter::Arguments& args
 }
 
 afl::data::Value*
-game::interface::IFRStyle(game::Session& session, interpreter::Arguments& args)
+game::interface::IFRStyle(interpreter::Arguments& args)
 {
     /* @q RStyle(style:Str, content:RichText...):RichText (Function)
        Attaches a new style to a rich text string.
@@ -343,7 +344,7 @@ game::interface::IFRStyle(game::Session& session, interpreter::Arguments& args)
     }
 
     // Read remaining arguments, converting them to Rich Text. This is just what IFRAdd does.
-    std::auto_ptr<afl::data::Value> tmp(IFRAdd(session, args));
+    std::auto_ptr<afl::data::Value> tmp(IFRAdd(args));
     Ptr_t result;
     if (!checkRichArg(result, tmp.get())) {
         return 0;
@@ -359,7 +360,7 @@ game::interface::IFRStyle(game::Session& session, interpreter::Arguments& args)
 }
 
 afl::data::Value*
-game::interface::IFRLink(game::Session& session, interpreter::Arguments& args)
+game::interface::IFRLink(interpreter::Arguments& args)
 {
     /* @q RLink(target:Str, content:RichText...):RichText (Function)
        Attaches a link to a rich text string.
@@ -383,7 +384,7 @@ game::interface::IFRLink(game::Session& session, interpreter::Arguments& args)
     }
 
     // Read remaining arguments, converting them to Rich Text. This is just what IFRAdd does.
-    std::auto_ptr<afl::data::Value> tmp(IFRAdd(session, args));
+    std::auto_ptr<afl::data::Value> tmp(IFRAdd(args));
     Ptr_t result;
     if (!checkRichArg(result, tmp.get())) {
         return 0;
@@ -396,7 +397,7 @@ game::interface::IFRLink(game::Session& session, interpreter::Arguments& args)
 }
 
 afl::data::Value*
-game::interface::IFRXml(game::Session& /*session*/, interpreter::Arguments& args)
+game::interface::IFRXml(interpreter::Arguments& args)
 {
     /* @q RXml(xml:Str, args:Str...):RichText (Function)
        Create rich text string from XML.

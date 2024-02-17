@@ -49,6 +49,11 @@ namespace game { namespace map {
         virtual afl::base::Optional<int> getOwner() const;
         virtual afl::base::Optional<Point> getPosition() const;
 
+        /** Get name.
+            Simplified version with less dependencies.
+            \param tx Translator */
+        String_t getName(afl::string::Translator& tx) const;
+
         /** Get name of ship that exploded here.
             \return name; empty if unknown. */
         String_t getShipName() const;

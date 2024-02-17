@@ -68,7 +68,7 @@ namespace game { namespace sim { namespace {
             {
                 const Game* g = m_session.getGame().get();
                 if (g != 0) {
-                    const game::map::Ship* sh = g->currentTurn().universe().ships().get(shipId);
+                    const game::map::Ship* sh = g->viewpointTurn().universe().ships().get(shipId);
                     return sh != 0 && sh->isVisible();
                 }
                 return false;
@@ -79,7 +79,7 @@ namespace game { namespace sim { namespace {
                 // ex GSimulatorRealGameInterface::getPlanetName
                 const Game* g = m_session.getGame().get();
                 if (g) {
-                    const game::map::Planet* pl = g->currentTurn().universe().planets().get(id);
+                    const game::map::Planet* pl = g->viewpointTurn().universe().planets().get(id);
                     if (pl) {
                         return pl->getName(m_session.translator());
                     }
@@ -91,7 +91,7 @@ namespace game { namespace sim { namespace {
             {
                 const Game* g = m_session.getGame().get();
                 if (g != 0) {
-                    return g->currentTurn().universe().planets().size();
+                    return g->viewpointTurn().universe().planets().size();
                 } else {
                     return 0;
                 }
@@ -101,7 +101,7 @@ namespace game { namespace sim { namespace {
             {
                 // ex GSimulatorRealGameInterface::getShipOwner
                 if (const Game* g = m_session.getGame().get()) {
-                    if (const game::map::Ship* sh = g->currentTurn().universe().ships().get(id)) {
+                    if (const game::map::Ship* sh = g->viewpointTurn().universe().ships().get(id)) {
                         return sh->getOwner().orElse(0);
                     }
                 }
@@ -112,7 +112,7 @@ namespace game { namespace sim { namespace {
             {
                 const Game* g = m_session.getGame().get();
                 if (g != 0) {
-                    return g->currentTurn().universe().ships().size();
+                    return g->viewpointTurn().universe().ships().size();
                 } else {
                     return 0;
                 }
@@ -125,7 +125,7 @@ namespace game { namespace sim { namespace {
                 Root* r = m_session.getRoot().get();
                 ShipList* sl = m_session.getShipList().get();
                 if (g != 0 && r != 0 && sl != 0) {
-                    game::map::Ship* sh = g->currentTurn().universe().ships().get(out.getId());
+                    game::map::Ship* sh = g->viewpointTurn().universe().ships().get(out.getId());
                     if (sh != 0) {
                         return Transfer(g->shipScores(), g->planetScores(), *sl, r->hostConfiguration(), m_session.translator())
                             .copyShipFromGame(out, *sh);
@@ -140,7 +140,7 @@ namespace game { namespace sim { namespace {
                 Root* r = m_session.getRoot().get();
                 ShipList* sl = m_session.getShipList().get();
                 if (g != 0 && r != 0 && sl != 0) {
-                    Universe& univ = g->currentTurn().universe();
+                    Universe& univ = g->viewpointTurn().universe();
                     game::map::Ship* sh = univ.ships().get(in.getId());
                     if (sh != 0) {
                         return Transfer(g->shipScores(), g->planetScores(), *sl, r->hostConfiguration(), m_session.translator())
@@ -157,7 +157,7 @@ namespace game { namespace sim { namespace {
                 Root* r = m_session.getRoot().get();
                 ShipList* sl = m_session.getShipList().get();
                 if (g != 0 && r != 0 && sl != 0) {
-                    game::map::Ship* sh = g->currentTurn().universe().ships().get(in.getId());
+                    game::map::Ship* sh = g->viewpointTurn().universe().ships().get(in.getId());
                     if (sh != 0) {
                         int owner = 0;
                         int hull = 0;
@@ -186,7 +186,7 @@ namespace game { namespace sim { namespace {
             {
                 Game* g = m_session.getGame().get();
                 if (g != 0) {
-                    const game::map::Ship* sh = g->currentTurn().universe().ships().get(in.getId());
+                    const game::map::Ship* sh = g->viewpointTurn().universe().ships().get(in.getId());
                     if (sh != 0) {
                         return sh->getPosition();
                     }
@@ -201,7 +201,7 @@ namespace game { namespace sim { namespace {
                 Root* r = m_session.getRoot().get();
                 ShipList* sl = m_session.getShipList().get();
                 if (g != 0 && r != 0 && sl != 0) {
-                    game::map::Planet* pl = g->currentTurn().universe().planets().get(out.getId());
+                    game::map::Planet* pl = g->viewpointTurn().universe().planets().get(out.getId());
                     if (pl != 0) {
                         return Transfer(g->shipScores(), g->planetScores(), *sl, r->hostConfiguration(), m_session.translator())
                             .copyPlanetFromGame(out, *pl);
@@ -217,7 +217,7 @@ namespace game { namespace sim { namespace {
                 Root* r = m_session.getRoot().get();
                 ShipList* sl = m_session.getShipList().get();
                 if (g != 0 && r != 0 && sl != 0) {
-                    game::map::Planet* pl = g->currentTurn().universe().planets().get(out.getId());
+                    game::map::Planet* pl = g->viewpointTurn().universe().planets().get(out.getId());
                     if (pl != 0) {
                         return Transfer(g->shipScores(), g->planetScores(), *sl, r->hostConfiguration(), m_session.translator())
                             .copyPlanetToGame(*pl, out);
@@ -231,7 +231,7 @@ namespace game { namespace sim { namespace {
                 // ex GSimulatorRealGameInterface::isGamePlanet
                 Game* g = m_session.getGame().get();
                 if (g != 0) {
-                    const game::map::Planet* pl = g->currentTurn().universe().planets().get(in.getId());
+                    const game::map::Planet* pl = g->viewpointTurn().universe().planets().get(in.getId());
                     if (pl != 0) {
                         if (pl->isPlayable(game::map::Planet::Playable)) {
                             return Playable;
@@ -249,7 +249,7 @@ namespace game { namespace sim { namespace {
             {
                 Game* g = m_session.getGame().get();
                 if (g != 0) {
-                    const game::map::Planet* pl = g->currentTurn().universe().planets().get(in.getId());
+                    const game::map::Planet* pl = g->viewpointTurn().universe().planets().get(in.getId());
                     if (pl != 0) {
                         return pl->getPosition();
                     }
@@ -276,7 +276,7 @@ namespace game { namespace sim { namespace {
                     }
 
                     // liveAllies is not necessarily in sync with command messages; update it.
-                    game::alliance::Container& liveAllies = g->currentTurn().alliances();
+                    game::alliance::Container& liveAllies = g->viewpointTurn().alliances();
                     liveAllies.postprocess();
 
                     const game::alliance::Levels_t& levels = liveAllies.getLevels();

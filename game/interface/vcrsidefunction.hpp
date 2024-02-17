@@ -9,6 +9,7 @@
 #include "game/root.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/turn.hpp"
+#include "game/vcr/database.hpp"
 #include "interpreter/indexablevalue.hpp"
 
 namespace game { namespace interface {
@@ -19,15 +20,15 @@ namespace game { namespace interface {
      public:
         /** Constructor.
             @param battleNumber   Battle number, index into game::vcr::Database::getBattle()
-            @param session        Session (for translator)
-            @param root           Root (for players)
-            @param turn           Turn (for battles)
-            @param shipList       Ship list (for unit names) */
+            @param tx             Translator
+            @param root           Root (for players, config)
+            @param battles        Battles
+            @param shipList       Ship list (for component names, battle outcome) */
         VcrSideFunction(size_t battleNumber,
-                        Session& session,
-                        afl::base::Ref<const Root> root,
-                        afl::base::Ref<const Turn> turn,
-                        afl::base::Ref<const game::spec::ShipList> shipList);
+                        afl::string::Translator& tx,
+                        const afl::base::Ref<const Root>& root,
+                        const afl::base::Ptr<game::vcr::Database>& battles,
+                        const afl::base::Ref<const game::spec::ShipList>& shipList);
 
         // IndexableValue:
         virtual VcrSideContext* get(interpreter::Arguments& args);
@@ -46,9 +47,9 @@ namespace game { namespace interface {
         int32_t getNumObjects() const;
 
         const size_t m_battleNumber;
-        Session& m_session;
+        afl::string::Translator& m_translator;
         const afl::base::Ref<const Root> m_root;
-        const afl::base::Ref<const Turn> m_turn;
+        const afl::base::Ptr<game::vcr::Database> m_battles;
         const afl::base::Ref<const game::spec::ShipList> m_shipList;
     };
 

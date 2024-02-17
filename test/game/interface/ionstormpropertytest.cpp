@@ -21,7 +21,6 @@ using interpreter::test::verifyNewString;
 AFL_TEST("game.interface.IonStormProperty:get:full", a)
 {
     afl::string::NullTranslator tx;
-    game::test::InterpreterInterface iface;
     game::map::IonStorm storm(42);
     storm.setName("Kyrill");
     storm.setPosition(game::map::Point(4503, 1701));
@@ -31,20 +30,20 @@ AFL_TEST("game.interface.IonStormProperty:get:full", a)
     storm.setHeading(70);
     storm.setIsGrowing(true);
 
-    verifyNewInteger(a("iipClass"),       getIonStormProperty(storm, game::interface::iipClass,       tx, iface), 1);
-    verifyNewInteger(a("iipHeadingInt"),  getIonStormProperty(storm, game::interface::iipHeadingInt,  tx, iface), 70);
-    verifyNewString (a("iipHeadingName"), getIonStormProperty(storm, game::interface::iipHeadingName, tx, iface), "ENE");
-    verifyNewInteger(a("iipId"),          getIonStormProperty(storm, game::interface::iipId,          tx, iface), 42);
-    verifyNewInteger(a("iipLocX"),        getIonStormProperty(storm, game::interface::iipLocX,        tx, iface), 4503);
-    verifyNewInteger(a("iipLocY"),        getIonStormProperty(storm, game::interface::iipLocY,        tx, iface), 1701);
-    verifyNewBoolean(a("iipMarked"),      getIonStormProperty(storm, game::interface::iipMarked,      tx, iface), false);
-    verifyNewString (a("iipName"),        getIonStormProperty(storm, game::interface::iipName,        tx, iface), "Kyrill");
-    verifyNewInteger(a("iipRadius"),      getIonStormProperty(storm, game::interface::iipRadius,      tx, iface), 20);
-    verifyNewInteger(a("iipSpeedInt"),    getIonStormProperty(storm, game::interface::iipSpeedInt,    tx, iface), 4);
-    verifyNewString (a("iipSpeedName"),   getIonStormProperty(storm, game::interface::iipSpeedName,   tx, iface), "Warp 4");
-    verifyNewBoolean(a("iipStatusFlag"),  getIonStormProperty(storm, game::interface::iipStatusFlag,  tx, iface), true);
-    verifyNewString (a("iipStatusName"),  getIonStormProperty(storm, game::interface::iipStatusName,  tx, iface), "Growing");
-    verifyNewInteger(a("iipVoltage"),     getIonStormProperty(storm, game::interface::iipVoltage,     tx, iface), 40);
+    verifyNewInteger(a("iipClass"),       getIonStormProperty(storm, game::interface::iipClass,       tx), 1);
+    verifyNewInteger(a("iipHeadingInt"),  getIonStormProperty(storm, game::interface::iipHeadingInt,  tx), 70);
+    verifyNewString (a("iipHeadingName"), getIonStormProperty(storm, game::interface::iipHeadingName, tx), "ENE");
+    verifyNewInteger(a("iipId"),          getIonStormProperty(storm, game::interface::iipId,          tx), 42);
+    verifyNewInteger(a("iipLocX"),        getIonStormProperty(storm, game::interface::iipLocX,        tx), 4503);
+    verifyNewInteger(a("iipLocY"),        getIonStormProperty(storm, game::interface::iipLocY,        tx), 1701);
+    verifyNewBoolean(a("iipMarked"),      getIonStormProperty(storm, game::interface::iipMarked,      tx), false);
+    verifyNewString (a("iipName"),        getIonStormProperty(storm, game::interface::iipName,        tx), "Kyrill");
+    verifyNewInteger(a("iipRadius"),      getIonStormProperty(storm, game::interface::iipRadius,      tx), 20);
+    verifyNewInteger(a("iipSpeedInt"),    getIonStormProperty(storm, game::interface::iipSpeedInt,    tx), 4);
+    verifyNewString (a("iipSpeedName"),   getIonStormProperty(storm, game::interface::iipSpeedName,   tx), "Warp 4");
+    verifyNewBoolean(a("iipStatusFlag"),  getIonStormProperty(storm, game::interface::iipStatusFlag,  tx), true);
+    verifyNewString (a("iipStatusName"),  getIonStormProperty(storm, game::interface::iipStatusName,  tx), "Growing");
+    verifyNewInteger(a("iipVoltage"),     getIonStormProperty(storm, game::interface::iipVoltage,     tx), 40);
 }
 
 /** Test property retrieval, empty storm.
@@ -52,24 +51,23 @@ AFL_TEST("game.interface.IonStormProperty:get:full", a)
 AFL_TEST("game.interface.IonStormProperty:get:empty", a)
 {
     afl::string::NullTranslator tx;
-    game::test::InterpreterInterface iface;
     game::map::IonStorm storm(17);
     a.check("isActive", !storm.isActive());
 
-    verifyNewNull(a("iipClass"),       getIonStormProperty(storm, game::interface::iipClass,       tx, iface));
-    verifyNewNull(a("iipHeadingInt"),  getIonStormProperty(storm, game::interface::iipHeadingInt,  tx, iface));
-    verifyNewNull(a("iipHeadingName"), getIonStormProperty(storm, game::interface::iipHeadingName, tx, iface));
-    verifyNewNull(a("iipId"),          getIonStormProperty(storm, game::interface::iipId,          tx, iface));
-    verifyNewNull(a("iipLocX"),        getIonStormProperty(storm, game::interface::iipLocX,        tx, iface));
-    verifyNewNull(a("iipLocY"),        getIonStormProperty(storm, game::interface::iipLocY,        tx, iface));
-    verifyNewNull(a("iipMarked"),      getIonStormProperty(storm, game::interface::iipMarked,      tx, iface));
-    verifyNewNull(a("iipName"),        getIonStormProperty(storm, game::interface::iipName,        tx, iface));
-    verifyNewNull(a("iipRadius"),      getIonStormProperty(storm, game::interface::iipRadius,      tx, iface));
-    verifyNewNull(a("iipSpeedInt"),    getIonStormProperty(storm, game::interface::iipSpeedInt,    tx, iface));
-    verifyNewNull(a("iipSpeedName"),   getIonStormProperty(storm, game::interface::iipSpeedName,   tx, iface));
-    verifyNewNull(a("iipStatusFlag"),  getIonStormProperty(storm, game::interface::iipStatusFlag,  tx, iface));
-    verifyNewNull(a("iipStatusName"),  getIonStormProperty(storm, game::interface::iipStatusName,  tx, iface));
-    verifyNewNull(a("iipVoltage"),     getIonStormProperty(storm, game::interface::iipVoltage,     tx, iface));
+    verifyNewNull(a("iipClass"),       getIonStormProperty(storm, game::interface::iipClass,       tx));
+    verifyNewNull(a("iipHeadingInt"),  getIonStormProperty(storm, game::interface::iipHeadingInt,  tx));
+    verifyNewNull(a("iipHeadingName"), getIonStormProperty(storm, game::interface::iipHeadingName, tx));
+    verifyNewNull(a("iipId"),          getIonStormProperty(storm, game::interface::iipId,          tx));
+    verifyNewNull(a("iipLocX"),        getIonStormProperty(storm, game::interface::iipLocX,        tx));
+    verifyNewNull(a("iipLocY"),        getIonStormProperty(storm, game::interface::iipLocY,        tx));
+    verifyNewNull(a("iipMarked"),      getIonStormProperty(storm, game::interface::iipMarked,      tx));
+    verifyNewNull(a("iipName"),        getIonStormProperty(storm, game::interface::iipName,        tx));
+    verifyNewNull(a("iipRadius"),      getIonStormProperty(storm, game::interface::iipRadius,      tx));
+    verifyNewNull(a("iipSpeedInt"),    getIonStormProperty(storm, game::interface::iipSpeedInt,    tx));
+    verifyNewNull(a("iipSpeedName"),   getIonStormProperty(storm, game::interface::iipSpeedName,   tx));
+    verifyNewNull(a("iipStatusFlag"),  getIonStormProperty(storm, game::interface::iipStatusFlag,  tx));
+    verifyNewNull(a("iipStatusName"),  getIonStormProperty(storm, game::interface::iipStatusName,  tx));
+    verifyNewNull(a("iipVoltage"),     getIonStormProperty(storm, game::interface::iipVoltage,     tx));
 }
 
 /** Test property retrieval, mostly empty storm.
@@ -77,26 +75,25 @@ AFL_TEST("game.interface.IonStormProperty:get:empty", a)
 AFL_TEST("game.interface.IonStormProperty:get:mostly-empty", a)
 {
     afl::string::NullTranslator tx;
-    game::test::InterpreterInterface iface;
     game::map::IonStorm storm(23);
     storm.setVoltage(120);              // This makes the storm active
     storm.setIsMarked(true);
     a.check("isActive", storm.isActive());
 
-    verifyNewInteger(a("iipClass"),       getIonStormProperty(storm, game::interface::iipClass,       tx, iface), 3);
-    verifyNewNull   (a("iipHeadingInt"),  getIonStormProperty(storm, game::interface::iipHeadingInt,  tx, iface));
-    verifyNewNull   (a("iipHeadingName"), getIonStormProperty(storm, game::interface::iipHeadingName, tx, iface));
-    verifyNewInteger(a("iipId"),          getIonStormProperty(storm, game::interface::iipId,          tx, iface), 23);
-    verifyNewNull   (a("iipLocX"),        getIonStormProperty(storm, game::interface::iipLocX,        tx, iface));
-    verifyNewNull   (a("iipLocY"),        getIonStormProperty(storm, game::interface::iipLocY,        tx, iface));
-    verifyNewBoolean(a("iipMarked"),      getIonStormProperty(storm, game::interface::iipMarked,      tx, iface), true);
-    verifyNewString (a("iipName"),        getIonStormProperty(storm, game::interface::iipName,        tx, iface), "Ion storm #23");
-    verifyNewNull   (a("iipRadius"),      getIonStormProperty(storm, game::interface::iipRadius,      tx, iface));
-    verifyNewNull   (a("iipSpeedInt"),    getIonStormProperty(storm, game::interface::iipSpeedInt,    tx, iface));
-    verifyNewNull   (a("iipSpeedName"),   getIonStormProperty(storm, game::interface::iipSpeedName,   tx, iface));
-    verifyNewBoolean(a("iipStatusFlag"),  getIonStormProperty(storm, game::interface::iipStatusFlag,  tx, iface), false);
-    verifyNewString (a("iipStatusName"),  getIonStormProperty(storm, game::interface::iipStatusName,  tx, iface), "Weakening");
-    verifyNewInteger(a("iipVoltage"),     getIonStormProperty(storm, game::interface::iipVoltage,     tx, iface), 120);
+    verifyNewInteger(a("iipClass"),       getIonStormProperty(storm, game::interface::iipClass,       tx), 3);
+    verifyNewNull   (a("iipHeadingInt"),  getIonStormProperty(storm, game::interface::iipHeadingInt,  tx));
+    verifyNewNull   (a("iipHeadingName"), getIonStormProperty(storm, game::interface::iipHeadingName, tx));
+    verifyNewInteger(a("iipId"),          getIonStormProperty(storm, game::interface::iipId,          tx), 23);
+    verifyNewNull   (a("iipLocX"),        getIonStormProperty(storm, game::interface::iipLocX,        tx));
+    verifyNewNull   (a("iipLocY"),        getIonStormProperty(storm, game::interface::iipLocY,        tx));
+    verifyNewBoolean(a("iipMarked"),      getIonStormProperty(storm, game::interface::iipMarked,      tx), true);
+    verifyNewString (a("iipName"),        getIonStormProperty(storm, game::interface::iipName,        tx), "Ion storm #23");
+    verifyNewNull   (a("iipRadius"),      getIonStormProperty(storm, game::interface::iipRadius,      tx));
+    verifyNewNull   (a("iipSpeedInt"),    getIonStormProperty(storm, game::interface::iipSpeedInt,    tx));
+    verifyNewNull   (a("iipSpeedName"),   getIonStormProperty(storm, game::interface::iipSpeedName,   tx));
+    verifyNewBoolean(a("iipStatusFlag"),  getIonStormProperty(storm, game::interface::iipStatusFlag,  tx), false);
+    verifyNewString (a("iipStatusName"),  getIonStormProperty(storm, game::interface::iipStatusName,  tx), "Weakening");
+    verifyNewInteger(a("iipVoltage"),     getIonStormProperty(storm, game::interface::iipVoltage,     tx), 120);
 }
 
 /** Test setIonStormProperty().
@@ -104,7 +101,6 @@ AFL_TEST("game.interface.IonStormProperty:get:mostly-empty", a)
 AFL_TEST("game.interface.IonStormProperty:set", a)
 {
     afl::string::NullTranslator tx;
-    game::test::InterpreterInterface iface;
     game::map::IonStorm storm(23);
     storm.setVoltage(120);              // This makes the storm active
 

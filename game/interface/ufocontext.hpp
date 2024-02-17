@@ -5,8 +5,8 @@
 #ifndef C2NG_GAME_INTERFACE_UFOCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_UFOCONTEXT_HPP
 
+#include "afl/string/translator.hpp"
 #include "game/map/ufo.hpp"
-#include "game/session.hpp"
 #include "game/turn.hpp"
 #include "interpreter/simplecontext.hpp"
 
@@ -22,8 +22,8 @@ namespace game { namespace interface {
         /** Constructor.
             @param slot     Slot; see UfoType::getObjectByIndex()
             @param turn     Turn
-            @param session  Session (for translator, InterpreterInterface) */
-        UfoContext(Id_t slot, afl::base::Ref<Turn> turn, Session& session);
+            @param tx       Translator */
+        UfoContext(Id_t slot, const afl::base::Ref<Turn>& turn, afl::string::Translator& tx);
 
         /** Destructor. */
         ~UfoContext();
@@ -44,7 +44,7 @@ namespace game { namespace interface {
      private:
         Id_t m_slot;
         afl::base::Ref<Turn> m_turn;
-        Session& m_session;
+        afl::string::Translator& m_translator;
     };
 
 } }

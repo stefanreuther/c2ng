@@ -11,12 +11,13 @@
 #include "game/interface/playerproperty.hpp"
 #include "game/interface/shipmethod.hpp"
 #include "game/interface/shipproperty.hpp"
-#include "game/turn.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/nametable.hpp"
 #include "interpreter/procedurevalue.hpp"
 #include "interpreter/propertyacceptor.hpp"
 #include "interpreter/typehint.hpp"
+
+using afl::base::Ref;
 
 namespace {
     enum ShipDomain {
@@ -183,17 +184,17 @@ namespace {
         ShipMethodValue(game::Id_t id,
                         game::Session& session,
                         game::interface::ShipMethod ism,
-                        afl::base::Ref<game::Root> root,
-                        afl::base::Ref<const game::spec::ShipList> shipList,
-                        afl::base::Ref<game::Game> game,
-                        afl::base::Ref<game::Turn> turn)
+                        const Ref<const game::Root>& root,
+                        const Ref<game::Game>& game,
+                        const Ref<game::Turn>& turn,
+                        const Ref<const game::spec::ShipList>& shipList)
             : m_id(id),
               m_session(session),
               m_method(ism),
               m_root(root),
-              m_shipList(shipList),
               m_game(game),
-              m_turn(turn)
+              m_turn(turn),
+              m_shipList(shipList)
             { }
 
         // ProcedureValue:
@@ -205,28 +206,30 @@ namespace {
             }
 
         virtual ShipMethodValue* clone() const
-            { return new ShipMethodValue(m_id, m_session, m_method, m_root, m_shipList, m_game, m_turn); }
+            { return new ShipMethodValue(m_id, m_session, m_method, m_root, m_game, m_turn, m_shipList); }
 
      private:
         game::Id_t m_id;
         game::Session& m_session;
         game::interface::ShipMethod m_method;
-        afl::base::Ref<game::Root> m_root;
-        afl::base::Ref<const game::spec::ShipList> m_shipList;
-        afl::base::Ref<game::Game> m_game;
-        afl::base::Ref<game::Turn> m_turn;
+        Ref<const game::Root> m_root;
+        Ref<game::Game> m_game;
+        Ref<game::Turn> m_turn;
+        Ref<const game::spec::ShipList> m_shipList;
     };
 }
 
 game::interface::ShipContext::ShipContext(Id_t id,
                                           Session& session,
-                                          afl::base::Ref<Root> root,
-                                          afl::base::Ref<Game> game,
-                                          afl::base::Ref<const game::spec::ShipList> shipList)
+                                          const afl::base::Ref<const Root>& root,
+                                          const afl::base::Ref<Game>& game,
+                                          const afl::base::Ref<Turn>& turn,
+                                          const afl::base::Ref<const game::spec::ShipList>& shipList)
     : m_id(id),
       m_session(session),
       m_root(root),
       m_game(game),
+      m_turn(turn),
       m_shipList(shipList)
 { }
 
@@ -255,7 +258,7 @@ game::interface::ShipContext::set(PropertyIndex_t index, const afl::data::Value*
             // Builtin property
             switch (ShipDomain(ship_mapping[index].domain)) {
              case ShipPropertyDomain:
-                setShipProperty(*sh, ShipProperty(ship_mapping[index].index), value, *m_root, *m_shipList, m_game->mapConfiguration(), m_game->currentTurn());
+                setShipProperty(*sh, ShipProperty(ship_mapping[index].index), value, *m_root, *m_shipList, m_game->mapConfiguration(), m_turn->universe());
                 break;
              case HullPropertyDomain:
              case ComponentPropertyDomain:
@@ -286,13 +289,7 @@ game::interface::ShipContext::get(PropertyIndex_t index)
             int n;
             switch (ShipDomain(ship_mapping[index].domain)) {
              case ShipPropertyDomain:
-                return getShipProperty(*sh,
-                                       ShipProperty(ship_mapping[index].index),
-                                       m_session,
-                                       m_root,
-                                       m_shipList,
-                                       m_game,
-                                       m_game->currentTurn());
+                return getShipProperty(*sh, ShipProperty(ship_mapping[index].index), m_session, m_root, m_shipList, m_game, m_turn);
              case HullPropertyDomain:
                 if (const game::spec::Hull* h = getShipHull(*sh, m_shipList.get())) {
                     return getHullProperty(*h, HullProperty(ship_mapping[index].index), m_shipList.get(), m_root.get().hostConfiguration());
@@ -328,12 +325,7 @@ game::interface::ShipContext::get(PropertyIndex_t index)
                     return 0;
                 }
              case ShipMethodDomain:
-                return new ShipMethodValue(m_id, m_session,
-                                           ShipMethod(ship_mapping[index].index),
-                                           m_root,
-                                           m_shipList,
-                                           *m_game,
-                                           m_game->currentTurn());
+                return new ShipMethodValue(m_id, m_session, ShipMethod(ship_mapping[index].index), m_root, *m_game, *m_turn, m_shipList);
             }
             return 0;
         } else {
@@ -351,7 +343,7 @@ bool
 game::interface::ShipContext::next()
 {
     // ex shipint.pas:CShipContext.Next
-    if (Id_t id = m_game->currentTurn().universe().allShips().findNextIndex(m_id)) {
+    if (Id_t id = m_turn->universe().allShips().findNextIndex(m_id)) {
         m_id = id;
         return true;
     }
@@ -369,7 +361,7 @@ game::map::Ship*
 game::interface::ShipContext::getObject()
 {
     // ex IntShipContext::getObject
-    return m_game->currentTurn().universe().ships().get(m_id);
+    return m_turn->universe().ships().get(m_id);
 }
 
 void
@@ -390,22 +382,25 @@ game::interface::ShipContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::ShipContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
+game::interface::ShipContext::store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
 {
     // ex IntShipContext::store
-    out.tag = out.Tag_Ship;
-    out.value = m_id;
+    if (&*m_turn == &m_game->currentTurn()) {
+        out.tag = out.Tag_Ship;
+        out.value = m_id;
+    } else {
+        rejectStore(out, aux, ctx);
+    }
 }
 
 game::interface::ShipContext*
-game::interface::ShipContext::create(Id_t id, Session& session)
+game::interface::ShipContext::create(Id_t id, Session& session, const afl::base::Ref<Game>& g, const afl::base::Ref<Turn>& t)
 {
     // ex shipint.pas:CreateShipContext
-    Game* game = session.getGame().get();
-    Root* root = session.getRoot().get();
+    const Root* root = session.getRoot().get();
     const game::spec::ShipList* shipList = session.getShipList().get();
-    if (game != 0 && root != 0 && shipList != 0 && game->currentTurn().universe().ships().get(id) != 0) {
-        return new ShipContext(id, session, *root, *game, *shipList);
+    if (root != 0 && shipList != 0 && t->universe().ships().get(id) != 0) {
+        return new ShipContext(id, session, *root, g, t, *shipList);
     } else {
         return 0;
     }

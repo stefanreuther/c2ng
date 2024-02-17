@@ -65,22 +65,24 @@ namespace {
             { }
         virtual void createContext(game::Session& session, interpreter::ContextReceiver& recv)
             {
-                switch (m_ref.getType()) {
-                 case game::Reference::Ship:
-                    if (interpreter::Context* ctx = game::interface::ShipContext::create(m_ref.getId(), session)) {
-                        recv.pushNewContext(ctx);
-                    }
-                    break;
+                if (game::Game* g = session.getGame().get()) {
+                    switch (m_ref.getType()) {
+                     case game::Reference::Ship:
+                        if (interpreter::Context* ctx = game::interface::ShipContext::create(m_ref.getId(), session, *g, g->viewpointTurn())) {
+                            recv.pushNewContext(ctx);
+                        }
+                        break;
 
-                 case game::Reference::Planet:
-                 case game::Reference::Starbase:
-                    if (interpreter::Context* ctx = game::interface::PlanetContext::create(m_ref.getId(), session)) {
-                        recv.pushNewContext(ctx);
-                    }
-                    break;
+                     case game::Reference::Planet:
+                     case game::Reference::Starbase:
+                        if (interpreter::Context* ctx = game::interface::PlanetContext::create(m_ref.getId(), session, *g, g->viewpointTurn())) {
+                            recv.pushNewContext(ctx);
+                        }
+                        break;
 
-                 default:
-                    break;
+                     default:
+                        break;
+                    }
                 }
             }
      private:

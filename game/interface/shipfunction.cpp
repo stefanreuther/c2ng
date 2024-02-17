@@ -38,7 +38,11 @@ game::interface::ShipFunction::get(interpreter::Arguments& args)
         return 0;
     }
 
-    return ShipContext::create(id, m_session);
+    if (Game* g = m_session.getGame().get()) {
+        return ShipContext::create(id, m_session, *g, g->viewpointTurn());
+    } else {
+        return 0;
+    }
 }
 
 void
@@ -57,7 +61,7 @@ game::interface::ShipFunction::getDimension(int32_t which) const
         return 1;
     } else {
         if (Game* game = m_session.getGame().get()) {
-            return game->currentTurn().universe().ships().size() + 1;
+            return game->viewpointTurn().universe().ships().size() + 1;
         } else {
             return 0;
         }
@@ -67,16 +71,8 @@ game::interface::ShipFunction::getDimension(int32_t which) const
 game::interface::ShipContext*
 game::interface::ShipFunction::makeFirstContext()
 {
-    Game* game = m_session.getGame().get();
-    Root* root = m_session.getRoot().get();
-    game::spec::ShipList* shipList = m_session.getShipList().get();
-    if (game != 0 && root != 0 && shipList != 0) {
-        Id_t id = game->currentTurn().universe().allShips().findNextIndex(0);
-        if (id != 0) {
-            return new ShipContext(id, m_session, *root, *game, *shipList);
-        } else {
-            return 0;
-        }
+    if (Game* g = m_session.getGame().get()) {
+        return ShipContext::create(g->viewpointTurn().universe().allShips().findNextIndex(0), m_session, *g, g->viewpointTurn());
     } else {
         return 0;
     }

@@ -5,10 +5,11 @@
 #ifndef C2NG_GAME_INTERFACE_VCRCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_VCRCONTEXT_HPP
 
+#include "afl/string/translator.hpp"
 #include "game/root.hpp"
 #include "game/session.hpp"
 #include "game/spec/shiplist.hpp"
-#include "game/turn.hpp"
+#include "game/vcr/database.hpp"
 #include "interpreter/simplecontext.hpp"
 
 namespace game { namespace interface {
@@ -20,11 +21,17 @@ namespace game { namespace interface {
         @see VcrFunction */
     class VcrContext : public interpreter::SimpleContext, public interpreter::Context::ReadOnlyAccessor {
      public:
+        /** Constructor.
+            @param battleNumber   Battle number, index into game::vcr::Database::getBattle()
+            @param tx             Translator
+            @param root           Root (for players, config)
+            @param battles        Battles
+            @param shipList       Ship list (for component names, battle outcome) */
         VcrContext(size_t battleNumber,
-                   Session& session,
-                   afl::base::Ref<const Root> root,
-                   afl::base::Ref<const Turn> turn,
-                   afl::base::Ref<const game::spec::ShipList> shipList);
+                   afl::string::Translator& tx,
+                   const afl::base::Ref<const Root>& root,
+                   const afl::base::Ptr<game::vcr::Database>& battles,
+                   const afl::base::Ref<const game::spec::ShipList>& shipList);
         ~VcrContext();
 
         // Context:
@@ -41,16 +48,17 @@ namespace game { namespace interface {
 
         /** Create a VcrContext for the current turn.
             \param battleNumber Number of battle (0-based!)
-            \param session Session */
-        static VcrContext* create(size_t battleNumber, Session& session);
+            \param session Session (translator, shiplist, root)
+            \param battles Battles */
+        static VcrContext* create(size_t battleNumber, Session& session, const afl::base::Ptr<game::vcr::Database>& battles);
 
      private:
         game::vcr::Battle* getBattle() const;
 
         size_t m_battleNumber;
-        Session& m_session;
+        afl::string::Translator& m_translator;
         afl::base::Ref<const Root> m_root;
-        afl::base::Ref<const Turn> m_turn;
+        afl::base::Ptr<game::vcr::Database> m_battles;
         afl::base::Ref<const game::spec::ShipList> m_shipList;
     };
 

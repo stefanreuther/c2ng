@@ -29,13 +29,7 @@ game::map::Explosion::~Explosion()
 String_t
 game::map::Explosion::getName(ObjectName /*which*/, afl::string::Translator& tx, const InterpreterInterface& /*iface*/) const
 {
-    if (!m_shipName.empty()) {
-        return afl::string::Format(tx("Explosion of %s%!d%!0{ (#%1$d)%}"), m_shipName, m_shipId);
-    } else if (m_shipId != 0) {
-        return afl::string::Format(tx("Explosion of ship #%d"), m_shipId);
-    } else {
-        return tx("Explosion");
-    }
+    return getName(tx);
 }
 
 afl::base::Optional<int>
@@ -50,6 +44,18 @@ game::map::Explosion::getPosition() const
 {
     // ex GExplosion::getPos
     return m_position;
+}
+
+String_t
+game::map::Explosion::getName(afl::string::Translator& tx) const
+{
+    if (!m_shipName.empty()) {
+        return afl::string::Format(tx("Explosion of %s%!d%!0{ (#%1$d)%}"), m_shipName, m_shipId);
+    } else if (m_shipId != 0) {
+        return afl::string::Format(tx("Explosion of ship #%d"), m_shipId);
+    } else {
+        return tx("Explosion");
+    }
 }
 
 String_t

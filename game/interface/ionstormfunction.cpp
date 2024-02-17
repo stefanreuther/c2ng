@@ -40,7 +40,11 @@ game::interface::IonStormFunction::get(interpreter::Arguments& args)
         return 0;
     }
 
-    return IonStormContext::create(id, m_session);
+    if (Game* g = m_session.getGame().get()) {
+        return IonStormContext::create(id, m_session, g->viewpointTurn());
+    } else {
+        return 0;
+    }
 }
 
 void
@@ -57,7 +61,7 @@ game::interface::IonStormFunction::getDimension(int32_t which) const
     if (which == 0) {
         return 1;
     } else if (Game* g = m_session.getGame().get()) {
-        return g->currentTurn().universe().ionStorms().size()+1;
+        return g->viewpointTurn().universe().ionStorms().size()+1;
     } else {
         return 0;
     }
@@ -68,9 +72,9 @@ game::interface::IonStormFunction::makeFirstContext()
 {
     Game* game = m_session.getGame().get();
     if (game != 0) {
-        int id = game->currentTurn().universe().ionStormType().findNextIndex(0);
+        int id = game->viewpointTurn().universe().ionStormType().findNextIndex(0);
         if (id != 0) {
-            return new IonStormContext(id, m_session, *game);
+            return new IonStormContext(id, m_session, game->viewpointTurn());
         } else {
             return 0;
         }

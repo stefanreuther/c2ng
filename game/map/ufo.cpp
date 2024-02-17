@@ -102,6 +102,12 @@ game::map::Ufo::isValid() const
     return m_colorCode != 0;
 }
 
+const String_t&
+game::map::Ufo::getName() const
+{
+    return m_name;
+}
+
 int
 game::map::Ufo::getColorCode() const
 {

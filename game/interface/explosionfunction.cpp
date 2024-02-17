@@ -4,6 +4,7 @@
   */
 
 #include "game/interface/explosionfunction.hpp"
+#include "game/game.hpp"
 #include "interpreter/error.hpp"
 
 /* @q Explosion:Any (Context)
@@ -46,7 +47,11 @@ game::interface::ExplosionContext*
 game::interface::ExplosionFunction::makeFirstContext()
 {
     // The first explosion always is 1. If there is no first explosion, this returns null.
-    return ExplosionContext::create(1, m_session);
+    if (Game* g = m_session.getGame().get()) {
+        return ExplosionContext::create(1, m_session, g->viewpointTurn());
+    } else {
+        return 0;
+    }
 }
 
 game::interface::ExplosionFunction*

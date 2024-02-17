@@ -63,7 +63,7 @@ game::interface::checkCargoSpecArg(CargoSpec& out, const afl::data::Value* value
    @since PCC 1.0.10, PCC2 1.99.9, PCC2 2.40.1
    @see CSub */
 afl::data::Value*
-game::interface::IFCAdd(game::Session& /*session*/, interpreter::Arguments& args)
+game::interface::IFCAdd(interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFCAdd
     // ex ccexpr.pas:op_CADD_func
@@ -89,7 +89,7 @@ game::interface::IFCAdd(game::Session& /*session*/, interpreter::Arguments& args
    @since PCC 1.0.10, PCC2 1.99.9, PCC2 2.40.1
    @see CSub */
 afl::data::Value*
-game::interface::IFCCompare(game::Session& /*session*/, interpreter::Arguments& args)
+game::interface::IFCCompare(interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFCCompare
     // ex ccexpr.pas:op_CCOMPARE_func
@@ -120,7 +120,7 @@ game::interface::IFCCompare(game::Session& /*session*/, interpreter::Arguments& 
 
    @since PCC 1.1.17, PCC2 1.99.9, PCC2 2.40.1 */
 afl::data::Value*
-game::interface::IFCDiv(game::Session& /*session*/, interpreter::Arguments& args)
+game::interface::IFCDiv(interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFCDiv
     // ex ccexpr.pas:op_CDIV_func
@@ -163,7 +163,7 @@ game::interface::IFCDiv(game::Session& /*session*/, interpreter::Arguments& args
    will report the total number of supplies and money in cargo set %e.
    @since PCC 1.0.10, PCC2 1.99.9, PCC2 2.40.1 */
 afl::data::Value*
-game::interface::IFCExtract(game::Session& /*session*/, interpreter::Arguments& args)
+game::interface::IFCExtract(interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFCExtract
     // ex ccexpr.pas:op_CEXTRACT_func
@@ -193,7 +193,7 @@ game::interface::IFCExtract(game::Session& /*session*/, interpreter::Arguments& 
    Returns a new cargo set containing %n times %a.
    @since PCC 1.0.10, PCC2 1.99.9, PCC2 2.40.1 */
 afl::data::Value*
-game::interface::IFCMul(game::Session& /*session*/, interpreter::Arguments& args)
+game::interface::IFCMul(interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFCMul
     // ex ccexpr.pas:op_CMUL_func
@@ -222,7 +222,7 @@ game::interface::IFCMul(game::Session& /*session*/, interpreter::Arguments& args
    %ele can also contain multiple cargo types to remove.
    @since PCC 1.0.10, PCC2 1.99.9, PCC2 2.40.1 */
 afl::data::Value*
-game::interface::IFCRemove(game::Session& /*session*/, interpreter::Arguments& args)
+game::interface::IFCRemove(interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFCRemove
     // ex ccexpr.pas:op_CREMOVE_func
@@ -254,7 +254,7 @@ game::interface::IFCRemove(game::Session& /*session*/, interpreter::Arguments& a
    @since PCC 1.0.10, PCC2 1.99.9, PCC2 2.40.1
    @see CCompare, CAdd */
 afl::data::Value*
-game::interface::IFCSub(game::Session& /*session*/, interpreter::Arguments& args)
+game::interface::IFCSub(interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFCSub
     // ex ccexpr.pas:op_CSUB_func

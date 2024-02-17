@@ -50,7 +50,7 @@ AFL_TEST("game.interface.IonStormContext:basics", a)
     addStorm(env, ID+1, "Barney");
 
     // Instance
-    game::interface::IonStormContext testee(ID, env.session, *env.session.getGame());
+    game::interface::IonStormContext testee(ID, env.session, env.session.getGame()->viewpointTurn());
     interpreter::test::ContextVerifier verif(testee, a);
     verif.verifyBasics();
     verif.verifySerializable(interpreter::TagNode::Tag_Ion, ID, afl::base::Nothing);
@@ -74,7 +74,7 @@ AFL_TEST("game.interface.IonStormContext:set", a)
     addStorm(env, ID, "Fred");
 
     // Property access fails
-    game::interface::IonStormContext testee(ID, env.session, *env.session.getGame());
+    game::interface::IonStormContext testee(ID, env.session, env.session.getGame()->viewpointTurn());
     interpreter::test::ContextVerifier verif(testee, a);
     AFL_CHECK_THROWS(a("01. LOC.X"), verif.setIntegerValue("LOC.X", 1000), interpreter::Error);
     AFL_CHECK_THROWS(a("02. MARK"), verif.setIntegerValue("MARK", 1000), interpreter::Error);
@@ -88,7 +88,7 @@ AFL_TEST("game.interface.IonStormContext:command", a)
     a.check("01. isMarked", !st.isMarked());
 
     // Retrieve
-    game::interface::IonStormContext testee(ID, env.session, *env.session.getGame());
+    game::interface::IonStormContext testee(ID, env.session, env.session.getGame()->viewpointTurn());
     std::auto_ptr<afl::data::Value> meth(interpreter::test::ContextVerifier(testee, a).getValue("MARK"));
 
     // Invoke as command
@@ -111,7 +111,7 @@ AFL_TEST("game.interface.IonStormContext:create:success", a)
 {
     Environment env;
     game::map::IonStorm& st = addStorm(env, ID, "Fred");
-    std::auto_ptr<game::interface::IonStormContext> ctx(game::interface::IonStormContext::create(ID, env.session));
+    std::auto_ptr<game::interface::IonStormContext> ctx(game::interface::IonStormContext::create(ID, env.session, env.session.getGame()->viewpointTurn()));
     a.checkNonNull("ctx", ctx.get());
     a.checkEqual("getObject", ctx->getObject(), &st);
 }
@@ -121,18 +121,7 @@ AFL_TEST("game.interface.IonStormContext:create:bad-id", a)
 {
     Environment env;
     game::map::IonStorm& st = addStorm(env, ID, "Fred");
-    std::auto_ptr<game::interface::IonStormContext> ctx(game::interface::IonStormContext::create(ID+1, env.session));
-    a.checkNull("ctx", ctx.get());
-}
-
-/** Test factory function, empty session case. */
-AFL_TEST("game.interface.IonStormContext:create:empty", a)
-{
-    afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session session(tx, fs);
-
-    std::auto_ptr<game::interface::IonStormContext> ctx(game::interface::IonStormContext::create(ID+1, session));
+    std::auto_ptr<game::interface::IonStormContext> ctx(game::interface::IonStormContext::create(ID+1, env.session, env.session.getGame()->viewpointTurn()));
     a.checkNull("ctx", ctx.get());
 }
 
@@ -140,7 +129,7 @@ AFL_TEST("game.interface.IonStormContext:create:empty", a)
 AFL_TEST("game.interface.IonStormContext:null", a)
 {
     Environment env;
-    game::interface::IonStormContext testee(ID, env.session, *env.session.getGame());
+    game::interface::IonStormContext testee(ID, env.session, env.session.getGame()->viewpointTurn());
 
     interpreter::test::ContextVerifier verif(testee, a);
     verif.verifyNull("ID");

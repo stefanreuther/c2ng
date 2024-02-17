@@ -33,8 +33,9 @@ namespace game { namespace interface {
             @param game      Game */
         InboxSubsetValue(const std::vector<size_t>& indexes,
                          afl::string::Translator& tx,
-                         afl::base::Ref<const Root> root,
-                         afl::base::Ref<const Game> game);
+                         const afl::base::Ref<const Root>& root,
+                         const afl::base::Ref<const Game>& game,
+                         const afl::base::Ref<const Turn>& turn);
 
         /** Destructor. */
         ~InboxSubsetValue();
@@ -53,13 +54,17 @@ namespace game { namespace interface {
             @param root      Root
             @param game      Game
             @return newly-allocated InboxSubsetValue. Null if indexes is empty. */
-        static InboxSubsetValue* create(const std::vector<size_t>& indexes, afl::string::Translator& tx, afl::base::Ref<const Root> root, afl::base::Ref<const Game> game);
+        static InboxSubsetValue* create(const std::vector<size_t>& indexes, afl::string::Translator& tx,
+                                        const afl::base::Ref<const Root>& root,
+                                        const afl::base::Ref<const Game>& game,
+                                        const afl::base::Ref<const Turn>& turn);
 
      private:
         std::vector<size_t> m_indexes;
         afl::string::Translator& m_translator;
         afl::base::Ref<const Root> m_root;
         afl::base::Ref<const Game> m_game;
+        afl::base::Ref<const Turn> m_turn;
     };
 
 } }

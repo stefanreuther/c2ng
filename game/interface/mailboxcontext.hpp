@@ -41,7 +41,7 @@ namespace game { namespace interface {
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
      private:
-        MailboxContext(const afl::base::Ptr<game::msg::Inbox> mailbox, Session& session);
+        MailboxContext(const afl::base::Ptr<game::msg::Inbox>& mailbox, Session& session);
 
         afl::base::Ptr<game::msg::Inbox> m_mailbox;
         Session& m_session;

@@ -25,7 +25,7 @@ namespace game { namespace interface {
             @param game  Game (for teams, scores)
             @param root  Root (for host configuration, players)
             @param tx    Translator */
-        PlayerContext(int nr, afl::base::Ref<Game> game, afl::base::Ref<Root> root, afl::string::Translator& tx);
+        PlayerContext(int nr, const afl::base::Ref<Game>& game, const afl::base::Ref<Root>& root, afl::string::Translator& tx);
 
         /** Destructor. */
         ~PlayerContext();

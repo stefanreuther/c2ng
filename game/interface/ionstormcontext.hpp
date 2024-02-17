@@ -7,6 +7,7 @@
 
 #include "game/map/ionstorm.hpp"
 #include "game/session.hpp"
+#include "game/turn.hpp"
 #include "interpreter/simplecontext.hpp"
 
 namespace game { namespace interface {
@@ -20,9 +21,9 @@ namespace game { namespace interface {
      public:
         /** Constructor.
             @param id      Id
-            @param session Session
-            @param game    Game */
-        IonStormContext(int id, Session& session, afl::base::Ref<Game> game);
+            @param session Session (translator, current turn for serialisation)
+            @param turn    Turn */
+        IonStormContext(int id, Session& session, const afl::base::Ref<Turn>& turn);
         ~IonStormContext();
 
         // Context:
@@ -41,13 +42,14 @@ namespace game { namespace interface {
         /** Create IonStormContext.
             @param id      Id
             @param session Session
+            @param turn    Turn
             @return newly-allocated IonStormContext; null if preconditions are missing (e.g. storm does not exist) */
-        static IonStormContext* create(int id, Session& session);
+        static IonStormContext* create(int id, Session& session, const afl::base::Ref<Turn>& turn);
 
      private:
         int m_id;
         Session& m_session;
-        afl::base::Ref<Game> m_game;
+        afl::base::Ref<Turn> m_turn;
     };
 
 } }

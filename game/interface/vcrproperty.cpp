@@ -7,7 +7,7 @@
 #include "afl/string/nulltranslator.hpp"
 #include "game/interface/vcrsidefunction.hpp"
 #include "game/turn.hpp"
-#include "game/vcr/database.hpp"
+#include "game/vcr/battle.hpp"
 #include "interpreter/values.hpp"
 
 using interpreter::makeIntegerValue;
@@ -19,18 +19,13 @@ using game::vcr::Battle;
 afl::data::Value*
 game::interface::getVcrProperty(size_t battleNumber,
                                 VcrProperty ivp,
-                                Session& session,
-                                afl::base::Ref<const Root> root,     // for PlayerList
-                                afl::base::Ref<const Turn> turn,     // for Turn
-                                afl::base::Ref<const game::spec::ShipList> shipList)
+                                afl::string::Translator& tx,
+                                const afl::base::Ref<const Root>& root,
+                                const afl::base::Ptr<game::vcr::Database>& battles,
+                                const afl::base::Ref<const game::spec::ShipList>& shipList)
 {
     // ex int/if/vcrif.h:getVcrProperty
-    Battle* battle;
-    if (game::vcr::Database* db = turn->getBattles().get()) {
-        battle = db->getBattle(battleNumber);
-    } else {
-        battle = 0;
-    }
+    Battle*const battle = (battles.get() != 0 ? battles->getBattle(battleNumber) : 0);
     if (battle == 0) {
         return 0;
     }
@@ -54,7 +49,7 @@ game::interface::getVcrProperty(size_t battleNumber,
            Unit type identification value.
            - 0: this is a ship/ship fight.
            - 1: this is a ship/planet fight, {Right (Combat Property)|Right} resp.
-                {Unit (Combat Property)|Unit(1)} is a planet.
+           {Unit (Combat Property)|Unit(1)} is a planet.
            Valid only for classic combat, EMPTY for others. */
         return makeOptionalIntegerValue(battle->getAuxiliaryInformation(Battle::aiType));
 
@@ -87,7 +82,7 @@ game::interface::getVcrProperty(size_t battleNumber,
            %Left.XXX and %Right.XXX, mainly for classic 1:1 combat.
 
            @since PCC2 1.99.19 */
-        return new VcrSideFunction(battleNumber, session, root, turn, shipList);
+        return new VcrSideFunction(battleNumber, tx, root, battles, shipList);
 
      case ivpLocX:
      case ivpLocY: {

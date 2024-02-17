@@ -14,10 +14,10 @@
 #include "game/map/planetdata.hpp"
 #include "game/map/shipdata.hpp"
 #include "game/map/universe.hpp"
-#include "game/session.hpp"
 #include "game/test/root.hpp"
 #include "game/turn.hpp"
 #include "interpreter/test/valueverifier.hpp"
+#include "interpreter/world.hpp"
 
 using game::Element;
 using game::map::Object;
@@ -32,7 +32,8 @@ namespace {
     struct Environment {
         afl::string::NullTranslator tx;
         afl::io::NullFileSystem fs;
-        game::Session session;
+        afl::sys::Log log;
+        interpreter::World world;
         interpreter::Process proc;
         afl::base::Ref<game::Root> root;
         afl::base::Ref<game::Turn> turn;
@@ -40,8 +41,9 @@ namespace {
         afl::base::Ref<game::spec::ShipList> shipList;
 
         Environment()
-            : tx(), fs(), session(tx, fs),
-              proc(session.world(), "tester", 777),
+            : tx(), fs(), log(),
+              world(log, tx, fs),
+              proc(world, "tester", 777),
               root(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,1,0)))),
               turn(*new game::Turn()),
               shipList(*new game::spec::ShipList())
@@ -54,9 +56,6 @@ namespace {
                 game::spec::Hull& h = *shipList->hulls().create(HULL_ID);
                 h.setMaxCargo(200);
                 h.setMaxFuel(100);
-
-                // Session: connect ship list (no need to connect root, game; they're not supposed to be taken from session!)
-                session.setShipList(shipList.asPtr());
             }
     };
 
@@ -104,7 +103,7 @@ namespace {
         pd.baseFlag = 0;
         pl.addCurrentPlanetData(pd, game::PlayerSet_t(owner));
         pl.setPosition(game::map::Point(X, Y));
-        pl.internalCheck(env.mapConfig, game::PlayerSet_t(owner), 10, env.tx, env.session.log());
+        pl.internalCheck(env.mapConfig, game::PlayerSet_t(owner), 10, env.tx, env.log);
         pl.setPlayability(playability);
         return pl;
     }
@@ -126,7 +125,7 @@ AFL_TEST("game.interface.CargoMethod:planet-ship", a)
     seg.pushBackInteger(17);
     interpreter::Arguments args(seg, 0, 2);
 
-    game::interface::doCargoTransfer(pl, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root);
+    game::interface::doCargoTransfer(pl, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root);
 
     a.checkEqual("planet tri", pl.getCargo(Element::Tritanium).orElse(-1), 980);
     a.checkEqual("ship tri",   sh.getCargo(Element::Tritanium).orElse(-1), 30);
@@ -145,7 +144,7 @@ AFL_TEST("game.interface.CargoMethod:planet-ship:supply-sale", a)
     seg.pushBackString("s");
     interpreter::Arguments args(seg, 0, 3);
 
-    game::interface::doCargoTransfer(pl, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root);
+    game::interface::doCargoTransfer(pl, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root);
 
     a.checkEqual("planet sup", pl.getCargo(Element::Supplies).orElse(-1), 980);
     a.checkEqual("ship mcc",   sh.getCargo(Element::Money).orElse(-1), 120);
@@ -163,7 +162,7 @@ AFL_TEST("game.interface.CargoMethod:planet-ship:overload-fail", a)
     seg.pushBackInteger(17);
     interpreter::Arguments args(seg, 0, 2);
 
-    AFL_CHECK_THROWS(a, game::interface::doCargoTransfer(pl, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root), game::Exception);
+    AFL_CHECK_THROWS(a, game::interface::doCargoTransfer(pl, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root), game::Exception);
 }
 
 // Overload, with overload flag enabled: 'CargoTransfer "t200", 17, "o"'
@@ -179,7 +178,7 @@ AFL_TEST("game.interface.CargoMethod:planet-ship:overload-enabled", a)
     seg.pushBackString("o");
     interpreter::Arguments args(seg, 0, 3);
 
-    game::interface::doCargoTransfer(pl, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root);
+    game::interface::doCargoTransfer(pl, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root);
 
     a.checkEqual("planet tri", pl.getCargo(Element::Tritanium).orElse(-1), 800);
     a.checkEqual("ship tri",   sh.getCargo(Element::Tritanium).orElse(-1), 210);
@@ -198,7 +197,7 @@ AFL_TEST("game.interface.CargoMethod:planet-ship:partial", a)
     seg.pushBackString("n");
     interpreter::Arguments args(seg, 0, 3);
 
-    game::interface::doCargoTransfer(pl, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root);
+    game::interface::doCargoTransfer(pl, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root);
 
     a.checkEqual("planet tri", pl.getCargo(Element::Tritanium).orElse(-1), 840);
     a.checkEqual("ship tri",   sh.getCargo(Element::Tritanium).orElse(-1), 170);
@@ -219,7 +218,7 @@ AFL_TEST("game.interface.CargoMethod:planet-ship:proxy", a)
     seg.pushBackInteger(17);
     interpreter::Arguments args(seg, 0, 3);
 
-    game::interface::doCargoTransfer(pl, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root);
+    game::interface::doCargoTransfer(pl, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root);
 
     a.checkEqual("planet tri",            pl.getCargo(Element::Tritanium).orElse(-1), 980);
     a.checkEqual("proxy tri",             proxy.getCargo(Element::Tritanium).orElse(-1), 10);
@@ -239,7 +238,7 @@ AFL_TEST("game.interface.CargoMethod:planet-ship:null-amount", a)
     seg.pushBackInteger(17);
     interpreter::Arguments args(seg, 0, 2);
 
-    AFL_CHECK_SUCCEEDS(a, game::interface::doCargoTransfer(pl, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root));
+    AFL_CHECK_SUCCEEDS(a, game::interface::doCargoTransfer(pl, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root));
 }
 
 // Null target
@@ -253,7 +252,7 @@ AFL_TEST("game.interface.CargoMethod:planet-ship:null-target", a)
     seg.pushBackNew(0);
     interpreter::Arguments args(seg, 0, 2);
 
-    AFL_CHECK_SUCCEEDS(a, game::interface::doCargoTransfer(pl, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root));
+    AFL_CHECK_SUCCEEDS(a, game::interface::doCargoTransfer(pl, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root));
 }
 
 // Error: invalid cargospec
@@ -268,7 +267,7 @@ AFL_TEST("game.interface.CargoMethod:planet-ship:error:cargospec", a)
     seg.pushBackInteger(17);
     interpreter::Arguments args(seg, 0, 2);
 
-    AFL_CHECK_THROWS(a, game::interface::doCargoTransfer(pl, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root), game::Exception);
+    AFL_CHECK_THROWS(a, game::interface::doCargoTransfer(pl, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root), game::Exception);
 }
 
 // Error: invalid target
@@ -282,7 +281,7 @@ AFL_TEST("game.interface.CargoMethod:planet-ship:error:target", a)
     seg.pushBackInteger(17);
     interpreter::Arguments args(seg, 0, 2);
 
-    AFL_CHECK_THROWS(a, game::interface::doCargoTransfer(pl, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root), game::Exception);
+    AFL_CHECK_THROWS(a, game::interface::doCargoTransfer(pl, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root), game::Exception);
 }
 
 // Arity errror
@@ -295,7 +294,7 @@ AFL_TEST("game.interface.CargoMethod:planet-ship:error:proxy", a)
     seg.pushBackString("T20");
     interpreter::Arguments args(seg, 0, 1);
 
-    AFL_CHECK_THROWS(a, game::interface::doCargoTransfer(pl, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root), interpreter::Error);
+    AFL_CHECK_THROWS(a, game::interface::doCargoTransfer(pl, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root), interpreter::Error);
 }
 
 // Type errror
@@ -309,7 +308,7 @@ AFL_TEST("game.interface.CargoMethod:planet-ship:error:type", a)
     seg.pushBackString("17");
     interpreter::Arguments args(seg, 0, 2);
 
-    AFL_CHECK_THROWS(a, game::interface::doCargoTransfer(pl, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root), interpreter::Error);
+    AFL_CHECK_THROWS(a, game::interface::doCargoTransfer(pl, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root), interpreter::Error);
 }
 
 /*
@@ -328,7 +327,7 @@ AFL_TEST("game.interface.CargoMethod:ship-ship:normal", a)
     seg.pushBackInteger(34);
     interpreter::Arguments args(seg, 0, 2);
 
-    game::interface::doCargoTransfer(from, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root);
+    game::interface::doCargoTransfer(from, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root);
 
     a.checkEqual("from tri", from.getCargo(Element::Tritanium).orElse(-1), 3);
     a.checkEqual("to tri",   to.getCargo(Element::Tritanium).orElse(-1), 17);
@@ -346,7 +345,7 @@ AFL_TEST("game.interface.CargoMethod:ship-ship:underflow", a)
     seg.pushBackInteger(34);
     interpreter::Arguments args(seg, 0, 2);
 
-    AFL_CHECK_THROWS(a, game::interface::doCargoTransfer(from, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root), game::Exception);
+    AFL_CHECK_THROWS(a, game::interface::doCargoTransfer(from, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root), game::Exception);
 }
 
 // Underflow, with "n" flag: 'CargoTransfer "t7", 34, "n"'
@@ -362,7 +361,7 @@ AFL_TEST("game.interface.CargoMethod:ship-ship:underflow:partial", a)
     seg.pushBackString("n");
     interpreter::Arguments args(seg, 0, 3);
 
-    game::interface::doCargoTransfer(from, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root);
+    game::interface::doCargoTransfer(from, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root);
 
     a.checkEqual("from tri", from.getCargo(Element::Tritanium).orElse(-1), 0);
     a.checkEqual("to tri",   to.getCargo(Element::Tritanium).orElse(-1), 20);
@@ -383,7 +382,7 @@ AFL_TEST("game.interface.CargoMethod:ship-ship:overflow", a)
     seg.pushBackInteger(34);
     interpreter::Arguments args(seg, 0, 2);
 
-    AFL_CHECK_THROWS(a, game::interface::doCargoTransfer(from, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root), game::Exception);
+    AFL_CHECK_THROWS(a, game::interface::doCargoTransfer(from, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root), game::Exception);
 
     a.checkEqual("from neu", from.getCargo(Element::Neutronium).orElse(-1), 90);
     a.checkEqual("to neu",   to.getCargo(Element::Neutronium).orElse(-1), 90);
@@ -404,7 +403,7 @@ AFL_TEST("game.interface.CargoMethod:ship-ship:overload-enabled", a)
     seg.pushBackString("o");
     interpreter::Arguments args(seg, 0, 3);
 
-    AFL_CHECK_SUCCEEDS(a, game::interface::doCargoTransfer(from, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root));
+    AFL_CHECK_SUCCEEDS(a, game::interface::doCargoTransfer(from, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root));
 
     a.checkEqual("from neu", from.getCargo(Element::Neutronium).orElse(-1), 50);
     a.checkEqual("to neu",   to.getCargo(Element::Neutronium).orElse(-1), 130);
@@ -422,7 +421,7 @@ AFL_TEST("game.interface.CargoMethod:ship-ship:null-amount", a)
     seg.pushBackInteger(34);
     interpreter::Arguments args(seg, 0, 2);
 
-    AFL_CHECK_SUCCEEDS(a, game::interface::doCargoTransfer(from, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root));
+    AFL_CHECK_SUCCEEDS(a, game::interface::doCargoTransfer(from, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root));
 }
 
 // Null target: 'CargoTransfer "t7", EMPTY'
@@ -437,7 +436,7 @@ AFL_TEST("game.interface.CargoMethod:ship-ship:null-target", a)
     seg.pushBackNew(0);
     interpreter::Arguments args(seg, 0, 2);
 
-    AFL_CHECK_SUCCEEDS(a, game::interface::doCargoTransfer(from, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root));
+    AFL_CHECK_SUCCEEDS(a, game::interface::doCargoTransfer(from, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root));
 
     a.checkEqual("from tri", from.getCargo(Element::Tritanium).orElse(-1), 10);
 }
@@ -453,7 +452,7 @@ AFL_TEST("game.interface.CargoMethod:ship-ship:error:target", a)
     seg.pushBackInteger(34);
     interpreter::Arguments args(seg, 0, 2);
 
-    AFL_CHECK_THROWS(a, game::interface::doCargoTransfer(from, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root), game::Exception);
+    AFL_CHECK_THROWS(a, game::interface::doCargoTransfer(from, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root), game::Exception);
 }
 
 // Arity errror
@@ -466,7 +465,7 @@ AFL_TEST("game.interface.CargoMethod:ship-ship:error:arity", a)
     seg.pushBackString("T20");
     interpreter::Arguments args(seg, 0, 1);
 
-    AFL_CHECK_THROWS(a, game::interface::doCargoTransfer(from, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root), interpreter::Error);
+    AFL_CHECK_THROWS(a, game::interface::doCargoTransfer(from, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root), interpreter::Error);
 }
 
 // Type errror
@@ -480,7 +479,7 @@ AFL_TEST("game.interface.CargoMethod:ship-ship:error:type", a)
     seg.pushBackString("17");
     interpreter::Arguments args(seg, 0, 2);
 
-    AFL_CHECK_THROWS(a, game::interface::doCargoTransfer(from, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root), interpreter::Error);
+    AFL_CHECK_THROWS(a, game::interface::doCargoTransfer(from, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root), interpreter::Error);
 }
 
 /*
@@ -498,7 +497,7 @@ AFL_TEST("game.interface.CargoMethod:unload:normal", a)
     seg.pushBackString("t7");
     interpreter::Arguments args(seg, 0, 1);
 
-    game::interface::doCargoUnload(sh, false, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root);
+    game::interface::doCargoUnload(sh, false, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root);
 
     a.checkEqual("planet tri", pl.getCargo(Element::Tritanium).orElse(-1), 1007);
     a.checkEqual("ship tri", sh.getCargo(Element::Tritanium).orElse(-1), 3);
@@ -515,7 +514,7 @@ AFL_TEST("game.interface.CargoMethod:upload", a)
     seg.pushBackString("t7");
     interpreter::Arguments args(seg, 0, 1);
 
-    game::interface::doCargoUnload(sh, true, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root);
+    game::interface::doCargoUnload(sh, true, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root);
 
     a.checkEqual("planet tri", pl.getCargo(Element::Tritanium).orElse(-1), 993);
     a.checkEqual("ship tri", sh.getCargo(Element::Tritanium).orElse(-1), 17);
@@ -532,7 +531,7 @@ AFL_TEST("game.interface.CargoMethod:upload:overflow", a)
     seg.pushBackString("500n");
     interpreter::Arguments args(seg, 0, 1);
 
-    AFL_CHECK_THROWS(a, game::interface::doCargoUnload(sh, true, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root), game::Exception);
+    AFL_CHECK_THROWS(a, game::interface::doCargoUnload(sh, true, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root), game::Exception);
 }
 
 // Upload with overflow, overload permission: 'CargoUpload "500n", "o"'
@@ -547,7 +546,7 @@ AFL_TEST("game.interface.CargoMethod:upload:overflow:partial", a)
     seg.pushBackString("O");
     interpreter::Arguments args(seg, 0, 2);
 
-    AFL_CHECK_SUCCEEDS(a, game::interface::doCargoUnload(sh, true, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root));
+    AFL_CHECK_SUCCEEDS(a, game::interface::doCargoUnload(sh, true, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root));
 
     a.checkEqual("planet neu", pl.getCargo(Element::Neutronium).orElse(-1), 500);
     a.checkEqual("ship neu",   sh.getCargo(Element::Neutronium).orElse(-1), 510);
@@ -565,7 +564,7 @@ AFL_TEST("game.interface.CargoMethod:upload:underflow:partial", a)
     seg.pushBackString("N");
     interpreter::Arguments args(seg, 0, 2);
 
-    AFL_CHECK_SUCCEEDS(a, game::interface::doCargoUnload(sh, true, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root));
+    AFL_CHECK_SUCCEEDS(a, game::interface::doCargoUnload(sh, true, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root));
 
     a.checkEqual("planet neu", pl.getCargo(Element::Neutronium).orElse(-1), 910);
     a.checkEqual("ship neu",   sh.getCargo(Element::Neutronium).orElse(-1), 100);
@@ -582,7 +581,7 @@ AFL_TEST("game.interface.CargoMethod:unload:deep-space", a)
     seg.pushBackString("t7");
     interpreter::Arguments args(seg, 0, 1);
 
-    AFL_CHECK_THROWS(a, game::interface::doCargoUnload(sh, false, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root), game::Exception);
+    AFL_CHECK_THROWS(a, game::interface::doCargoUnload(sh, false, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root), game::Exception);
 }
 
 // Unload in deep space, with jettison clearance: 'CargoUnload "t7", "j"'
@@ -596,7 +595,7 @@ AFL_TEST("game.interface.CargoMethod:unload:jettison", a)
     seg.pushBackString("j");
     interpreter::Arguments args(seg, 0, 2);
 
-    game::interface::doCargoUnload(sh, false, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root);
+    game::interface::doCargoUnload(sh, false, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root);
     a.checkEqual("ship tri",        sh.getCargo(Element::Tritanium).orElse(-1), 3);
     a.checkEqual("transporter tri", sh.getTransporterCargo(Ship::UnloadTransporter, Element::Tritanium).orElse(-1), 7);
 }
@@ -613,7 +612,7 @@ AFL_TEST("game.interface.CargoMethod:unload:supply-sale", a)
     seg.pushBackString("s");
     interpreter::Arguments args(seg, 0, 2);
 
-    game::interface::doCargoUnload(sh, false, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root);
+    game::interface::doCargoUnload(sh, false, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root);
 
     a.checkEqual("planet sup", pl.getCargo(Element::Supplies).orElse(-1), 1000);
     a.checkEqual("planet mc",  pl.getCargo(Element::Money).orElse(-1), 5007);
@@ -633,7 +632,7 @@ AFL_TEST("game.interface.CargoMethod:upload:foreign:proxy", a)
     seg.pushBackString("20");
     interpreter::Arguments args(seg, 0, 2);
 
-    game::interface::doCargoUnload(them, true, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root);
+    game::interface::doCargoUnload(them, true, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root);
 
     a.checkEqual("planet tri",         pl.getCargo(Element::Tritanium).orElse(-1), 990);
     a.checkEqual("transporter target", me.getTransporterTargetId(Ship::TransferTransporter).orElse(-1), 17);
@@ -653,7 +652,7 @@ AFL_TEST("game.interface.CargoMethod:upload:proxy:invalid", a)
     seg.pushBackInteger(20);
     interpreter::Arguments args(seg, 0, 2);
 
-    AFL_CHECK_THROWS(a, game::interface::doCargoUnload(them, true, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root), game::Exception);
+    AFL_CHECK_THROWS(a, game::interface::doCargoUnload(them, true, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root), game::Exception);
 }
 
 // Null amount
@@ -667,7 +666,7 @@ AFL_TEST("game.interface.CargoMethod:unload:null-amount", a)
     seg.pushBackNew(0);
     interpreter::Arguments args(seg, 0, 1);
 
-    game::interface::doCargoUnload(sh, false, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root);
+    game::interface::doCargoUnload(sh, false, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root);
 
     a.checkEqual("121. planet tri", pl.getCargo(Element::Tritanium).orElse(-1), 1000);
     a.checkEqual("122. ship tri", sh.getCargo(Element::Tritanium).orElse(-1), 10);
@@ -682,7 +681,7 @@ AFL_TEST("game.interface.CargoMethod:unload:error:arity", a)
     afl::data::Segment seg;
     interpreter::Arguments args(seg, 0, 0);
 
-    AFL_CHECK_THROWS(a, game::interface::doCargoUnload(sh, false, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root), interpreter::Error);
+    AFL_CHECK_THROWS(a, game::interface::doCargoUnload(sh, false, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root), interpreter::Error);
 }
 
 // Unknown ship
@@ -696,5 +695,5 @@ AFL_TEST("game.interface.CargoMethod:unload:error:unknown-ship", a)
     seg.pushBackString("t7");
     interpreter::Arguments args(seg, 0, 1);
 
-    AFL_CHECK_THROWS(a, game::interface::doCargoUnload(sh, false, env.proc, args, env.session, env.mapConfig, *env.turn, *env.root), game::Exception);
+    AFL_CHECK_THROWS(a, game::interface::doCargoUnload(sh, false, env.proc, args, *env.shipList, env.mapConfig, *env.turn, *env.root), game::Exception);
 }

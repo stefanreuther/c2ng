@@ -13,6 +13,7 @@
 #include "game/interface/vcrsideproperty.hpp"
 #include "game/playerlist.hpp"
 #include "game/root.hpp"
+#include "game/turn.hpp"
 #include "game/vcr/flak/battle.hpp"
 #include "game/vcr/flak/object.hpp"
 #include "interpreter/values.hpp"
@@ -79,13 +80,13 @@ server::play::VcrPacker::buildValue() const
     if (db.get() != 0) {
         for (size_t i = 0, n = db->getNumBattles(); i < n; ++i) {
             Ref<Hash> hv(Hash::create());
-            addValueNew(*hv, gi::getVcrProperty(i, gi::ivpMagic,     m_session, r, t, sl), "MAGIC");
-            addValueNew(*hv, gi::getVcrProperty(i, gi::ivpSeed,      m_session, r, t, sl), "SEED");
-            addValueNew(*hv, gi::getVcrProperty(i, gi::ivpFlags,     m_session, r, t, sl), "CAPABILITIES");
-            addValueNew(*hv, gi::getVcrProperty(i, gi::ivpAlgorithm, m_session, r, t, sl), "ALGORITHM");
-            addValueNew(*hv, gi::getVcrProperty(i, gi::ivpLocX,      m_session, r, t, sl), "X");
-            addValueNew(*hv, gi::getVcrProperty(i, gi::ivpLocY,      m_session, r, t, sl), "Y");
-            addValueNew(*hv, gi::getVcrProperty(i, gi::ivpAmbient,   m_session, r, t, sl), "AMBIENT");
+            addValueNew(*hv, gi::getVcrProperty(i, gi::ivpMagic,     tx, r, db, sl), "MAGIC");
+            addValueNew(*hv, gi::getVcrProperty(i, gi::ivpSeed,      tx, r, db, sl), "SEED");
+            addValueNew(*hv, gi::getVcrProperty(i, gi::ivpFlags,     tx, r, db, sl), "CAPABILITIES");
+            addValueNew(*hv, gi::getVcrProperty(i, gi::ivpAlgorithm, tx, r, db, sl), "ALGORITHM");
+            addValueNew(*hv, gi::getVcrProperty(i, gi::ivpLocX,      tx, r, db, sl), "X");
+            addValueNew(*hv, gi::getVcrProperty(i, gi::ivpLocY,      tx, r, db, sl), "Y");
+            addValueNew(*hv, gi::getVcrProperty(i, gi::ivpAmbient,   tx, r, db, sl), "AMBIENT");
 
             Ref<Vector> units(Vector::create());
             game::vcr::Battle* battle = db->getBattle(i);

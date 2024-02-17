@@ -74,11 +74,9 @@ interpreter::Context*
 game::interface::TorpedoFunction::makeFirstContext()
 {
     // ex int/if/specif.h:IFTorpedoMake,IFLauncherMake
-    game::spec::ShipList* list = m_session.getShipList().get();
-    const Root* root = m_session.getRoot().get();
-    if (list != 0 && root != 0) {
+    if (game::spec::ShipList* list = m_session.getShipList().get()) {
         if (const game::spec::TorpedoLauncher* tl = list->launchers().findNext(0)) {
-            return new TorpedoContext(m_useLauncher, tl->getId(), *list, *root);
+            return TorpedoContext::create(m_useLauncher, tl->getId(), m_session);
         }
     }
     return 0;

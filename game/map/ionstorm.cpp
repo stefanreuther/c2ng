@@ -161,6 +161,14 @@ game::map::IonStorm::setIsGrowing(bool flag)
     m_isGrowing = flag;
 }
 
+String_t
+game::map::IonStorm::getName(afl::string::Translator& tx) const
+{
+    return m_name.empty()
+        ? getDefaultName(tx)
+        : m_name;
+}
+
 game::IntegerProperty_t
 game::map::IonStorm::getClass() const
 {

@@ -6,11 +6,9 @@
 #include "game/interface/vcrsidefunction.hpp"
 
 #include "afl/data/segment.hpp"
-#include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/test/testrunner.hpp"
 #include "game/game.hpp"
-#include "game/session.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/test/root.hpp"
 #include "game/vcr/test/battle.hpp"
@@ -18,6 +16,12 @@
 #include "interpreter/arguments.hpp"
 #include "interpreter/test/contextverifier.hpp"
 #include "interpreter/test/valueverifier.hpp"
+
+using game::vcr::Database;
+using afl::base::Ref;
+using afl::base::Ptr;
+using game::Root;
+using game::spec::ShipList;
 
 namespace {
     game::vcr::Object makeShip(game::Id_t id, int owner)
@@ -30,14 +34,14 @@ namespace {
         return o;
     }
 
-    void addDefaultBattle(game::Session& session)
+    Ptr<Database> makeDefaultBattle()
     {
-        afl::base::Ptr<game::vcr::test::Database> db = new game::vcr::test::Database();
+        Ptr<game::vcr::test::Database> db = new game::vcr::test::Database();
         game::vcr::test::Battle& b = db->addBattle();
         b.addObject(makeShip(10, 5), 0);
         b.addObject(makeShip(20, 6), 7);
         b.addObject(makeShip(30, 7), 7);
-        session.getGame()->currentTurn().setBattles(db);
+        return db;
     }
 }
 
@@ -45,15 +49,12 @@ AFL_TEST("game.interface.VcrSideFunction:basics", a)
 {
     // Environment
     afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session session(tx, fs);
-    session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
-    session.setShipList(new game::spec::ShipList());
-    session.setGame(new game::Game());
-    addDefaultBattle(session);
+    Ref<Root> r(game::test::makeRoot(game::HostVersion()));
+    Ref<ShipList> sl(*new ShipList());
+    Ptr<Database> db = makeDefaultBattle();
 
     // Test basic properties
-    game::interface::VcrSideFunction testee(0, session, *session.getRoot(), session.getGame()->currentTurn(), *session.getShipList());
+    game::interface::VcrSideFunction testee(0, tx, r, db, sl);
     interpreter::test::ValueVerifier verif(testee, a);
     verif.verifyBasics();
     verif.verifyNotSerializable();
@@ -129,13 +130,11 @@ AFL_TEST("game.interface.VcrSideFunction:basics", a)
 AFL_TEST("game.interface.VcrSideFunction:error:no-battles", a)
 {
     afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session session(tx, fs);
-    session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
-    session.setShipList(new game::spec::ShipList());
-    session.setGame(new game::Game());
+    Ref<Root> r(game::test::makeRoot(game::HostVersion()));
+    Ref<ShipList> sl(*new ShipList());
+    Ptr<Database> db; // null
 
-    game::interface::VcrSideFunction testee(0, session, *session.getRoot(), session.getGame()->currentTurn(), *session.getShipList());
+    game::interface::VcrSideFunction testee(0, tx, r, db, sl);
     std::auto_ptr<interpreter::Context> result(testee.makeFirstContext());
     a.checkNull("ctx", result.get());
 }
@@ -144,15 +143,11 @@ AFL_TEST("game.interface.VcrSideFunction:error:no-battles", a)
 AFL_TEST("game.interface.VcrSideFunction:error:empty-battles", a)
 {
     afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session session(tx, fs);
-    session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
-    session.setShipList(new game::spec::ShipList());
-    session.setGame(new game::Game());
+    Ref<Root> r(game::test::makeRoot(game::HostVersion()));
+    Ref<ShipList> sl(*new ShipList());
+    Ptr<Database> db(new game::vcr::test::Database());
 
-    session.getGame()->currentTurn().setBattles(new game::vcr::test::Database());
-
-    game::interface::VcrSideFunction testee(0, session, *session.getRoot(), session.getGame()->currentTurn(), *session.getShipList());
+    game::interface::VcrSideFunction testee(0, tx, r, db, sl);
     std::auto_ptr<interpreter::Context> result(testee.makeFirstContext());
     a.checkNull("ctx", result.get());
 }

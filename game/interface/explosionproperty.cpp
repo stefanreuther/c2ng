@@ -12,8 +12,7 @@ using interpreter::makeStringValue;
 afl::data::Value*
 game::interface::getExplosionProperty(const game::map::Explosion& expl,
                                       ExplosionProperty iep,
-                                      afl::string::Translator& tx,
-                                      const InterpreterInterface& iface)
+                                      afl::string::Translator& tx)
 {
     game::map::Point pt;
     switch (iep) {
@@ -63,7 +62,7 @@ game::interface::getExplosionProperty(const game::map::Explosion& expl,
         /* @q Name:Str (Explosion Property)
            User-friendly name of this explosion.
            @since PCC2 2.40.1 */
-        return makeStringValue(expl.getName(PlainName, tx, iface));
+        return makeStringValue(expl.getName(tx));
 
      case iepTypeStr:
         /* @q Type:Str (Explosion Property)

@@ -876,7 +876,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
 
      case ipmCargoTransfer:
         // documented in shipmethod.cpp
-        doCargoTransfer(pl, process, args, session, mapConfig, turn, root);
+        doCargoTransfer(pl, process, args, game::actions::mustHaveShipList(session), mapConfig, turn, root);
         break;
 
      case ipmAutoTaxColonists:

@@ -132,7 +132,7 @@ client::doShipCargoTransfer(ui::Root& root,
                     game::ref::List objectList;
                     game::ref::UserList otherList;
 
-                    game::map::Universe& univ = pGame->currentTurn().universe();
+                    game::map::Universe& univ = pGame->viewpointTurn().universe();
                     game::map::Ship* pShip = univ.ships().get(m_shipId);
                     game::map::Point pt;
                     int owner;
@@ -142,7 +142,7 @@ client::doShipCargoTransfer(ui::Root& root,
                             if (game::actions::CargoTransferSetup::fromPlanetShip(univ, pid, m_shipId).isValid()) {
                                 objectList.add(game::Reference(game::Reference::Planet, pid));
                             }
-                            if (game::actions::CargoTransferSetup::fromShipBeamUp(pGame->currentTurn(), m_shipId, pRoot->hostConfiguration()).isValid()) {
+                            if (game::actions::CargoTransferSetup::fromShipBeamUp(pGame->viewpointTurn(), m_shipId, pRoot->hostConfiguration()).isValid()) {
                                 otherList.add(game::ref::UserList::OtherItem,
                                               session.translator()("Beam up multiple"),
                                               game::Reference(game::Reference::Special, Special_BeamUpMultiple),
@@ -247,7 +247,7 @@ client::doPlanetCargoTransfer(ui::Root& root,
                     game::ref::List objectList;
 
                     // Add ships
-                    game::map::Universe& univ = pGame->currentTurn().universe();
+                    game::map::Universe& univ = pGame->viewpointTurn().universe();
                     const game::map::AnyShipType& ty(univ.allShips());
                     for (game::Id_t sid = ty.findNextIndex(0); sid != 0; sid = ty.findNextIndex(sid)) {
                         if (game::actions::CargoTransferSetup::fromPlanetShip(univ, m_planetId, sid).isValid()) {

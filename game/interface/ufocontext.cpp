@@ -46,7 +46,7 @@ namespace {
      public:
         UfoMethodValue(game::Id_t slot,
                        game::interface::UfoMethod ism,
-                       afl::base::Ref<game::Turn> turn)
+                       const afl::base::Ref<game::Turn>& turn)
             : m_slot(slot),
               m_method(ism),
               m_turn(turn)
@@ -71,11 +71,11 @@ namespace {
 }
 
 
-game::interface::UfoContext::UfoContext(Id_t slot, afl::base::Ref<Turn> turn, Session& session)
+game::interface::UfoContext::UfoContext(Id_t slot, const afl::base::Ref<Turn>& turn, afl::string::Translator& tx)
     : SimpleContext(),
       m_slot(slot),
       m_turn(turn),
-      m_session(session)
+      m_translator(tx)
 { }
 
 game::interface::UfoContext::~UfoContext()
@@ -113,7 +113,7 @@ game::interface::UfoContext::get(PropertyIndex_t index)
     if (game::map::Ufo* ufo = getObject()) {
         switch (UfoDomain(UFO_MAPPING[index].domain)) {
          case UfoPropertyDomain:
-            return getUfoProperty(*ufo, UfoProperty(UFO_MAPPING[index].index), m_session.translator(), m_session.interface());
+            return getUfoProperty(*ufo, UfoProperty(UFO_MAPPING[index].index), m_translator);
          case UfoMethodDomain:
             return new UfoMethodValue(m_slot, UfoMethod(UFO_MAPPING[index].index), m_turn);
         }
@@ -139,7 +139,7 @@ game::interface::UfoContext*
 game::interface::UfoContext::clone() const
 {
     // ex IntUfoContext::clone
-    return new UfoContext(m_slot, m_turn, m_session);
+    return new UfoContext(m_slot, m_turn, m_translator);
 }
 
 game::map::Ufo*

@@ -40,7 +40,8 @@ AFL_TEST("game.map.Explosion:getName:default", a)
     game::test::InterpreterInterface iface;
     afl::string::NullTranslator tx;
     Explosion t(0, Point(1,1));
-    a.checkEqual("", t.getName(game::PlainName, tx, iface), "Explosion");
+    a.checkEqual("getName/3", t.getName(game::PlainName, tx, iface), "Explosion");
+    a.checkEqual("getName/1", t.getName(tx), "Explosion");
 }
 
 // Just a ship name
@@ -50,7 +51,8 @@ AFL_TEST("game.map.Explosion:getName:just-ship-name", a)
     afl::string::NullTranslator tx;
     Explosion t(0, Point(1,1));
     t.setShipName("USS Dull");
-    a.checkEqual("", t.getName(game::PlainName, tx, iface), "Explosion of USS Dull");
+    a.checkEqual("getName/3", t.getName(game::PlainName, tx, iface), "Explosion of USS Dull");
+    a.checkEqual("getName/1", t.getName(tx), "Explosion of USS Dull");
 }
 
 // Just a ship Id
@@ -60,7 +62,8 @@ AFL_TEST("game.map.Explosion:getName:just-ship-id", a)
     afl::string::NullTranslator tx;
     Explosion t(0, Point(1,1));
     t.setShipId(42);
-    a.checkEqual("", t.getName(game::PlainName, tx, iface), "Explosion of ship #42");
+    a.checkEqual("getName/3", t.getName(game::PlainName, tx, iface), "Explosion of ship #42");
+    a.checkEqual("getName/1", t.getName(tx), "Explosion of ship #42");
 }
 
 // Name and Id
@@ -71,7 +74,8 @@ AFL_TEST("game.map.Explosion:getName:name-and-id", a)
     Explosion t(0, Point(1,1));
     t.setShipName("USS Dull");
     t.setShipId(42);
-    a.checkEqual("", t.getName(game::PlainName, tx, iface), "Explosion of USS Dull (#42)");
+    a.checkEqual("getName/3", t.getName(game::PlainName, tx, iface), "Explosion of USS Dull (#42)");
+    a.checkEqual("getName/1", t.getName(tx), "Explosion of USS Dull (#42)");
 }
 
 

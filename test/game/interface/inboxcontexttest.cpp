@@ -57,7 +57,7 @@ AFL_TEST("game.interface.InboxContext:properties", a)
     TestHarness h;
     prepare(a, h);
 
-    game::interface::InboxContext testee(2, h.tx, h.root, h.game);
+    game::interface::InboxContext testee(2, h.tx, h.root, h.game, h.game->currentTurn());
 
     // Values (lookup, get)
     interpreter::test::ContextVerifier v(testee, a);
@@ -88,7 +88,7 @@ AFL_TEST("game.interface.InboxContext:write", a)
     prepare(a, h);
 
     // Fetch 'WRITE' property
-    game::interface::InboxContext testee(2, h.tx, h.root, h.game);
+    game::interface::InboxContext testee(2, h.tx, h.root, h.game, h.game->currentTurn());
     std::auto_ptr<afl::data::Value> write(interpreter::test::ContextVerifier(testee, a).getValue("WRITE"));
     a.checkNonNull("01. write", write.get());
 
@@ -139,7 +139,7 @@ AFL_TEST("game.interface.InboxContext:text", a)
     prepare(a, h);
 
     // Fetch 'TEXT' property
-    game::interface::InboxContext testee(2, h.tx, h.root, h.game);
+    game::interface::InboxContext testee(2, h.tx, h.root, h.game, h.game->currentTurn());
     std::auto_ptr<afl::data::Value> text(interpreter::test::ContextVerifier(testee, a).getValue("TEXT"));
     a.checkNonNull("01. text", text.get());
 
@@ -206,7 +206,7 @@ AFL_TEST("game.interface.InboxContext:iteration", a)
     TestHarness h;
     prepare(a, h);
 
-    game::interface::InboxContext testee(0, h.tx, h.root, h.game);
+    game::interface::InboxContext testee(0, h.tx, h.root, h.game, h.game->currentTurn());
     interpreter::test::ContextVerifier v(testee, a);
     v.verifyInteger("ID", 1);
 

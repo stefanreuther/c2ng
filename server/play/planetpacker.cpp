@@ -34,7 +34,7 @@ server::play::PlanetPacker::buildValue() const
     }
 
     afl::base::Ref<afl::data::Hash> hv(afl::data::Hash::create());
-    game::interface::PlanetContext ctx(m_planetNr, m_session, r, g);
+    game::interface::PlanetContext ctx(m_planetNr, m_session, r, g, g.currentTurn());
     addValue(*hv, ctx, "BASE.BUILDING", "BASE.BUILDING");
     addValue(*hv, ctx, "COLONISTS.HAPPY$", "COLONISTS.HAPPY");
     addValue(*hv, ctx, "COLONISTS.SUPPORTED", "COLONISTS.SUPPORTED");

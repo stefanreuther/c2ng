@@ -60,11 +60,9 @@ interpreter::Context*
 game::interface::BeamFunction::makeFirstContext()
 {
     // ex int/if/specif.h:IFBeamMake
-    game::spec::ShipList* list = m_session.getShipList().get();
-    const Root* root = m_session.getRoot().get();
-    if (list != 0 && root != 0) {
+    if (game::spec::ShipList* list = m_session.getShipList().get()) {
         if (const game::spec::Beam* firstBeam = list->beams().findNext(0)) {
-            return new BeamContext(firstBeam->getId(), *list, *root);
+            return BeamContext::create(firstBeam->getId(), m_session);
         }
     }
     return 0;

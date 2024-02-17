@@ -60,9 +60,9 @@ namespace game { namespace interface {
         \return newly-allocated property value */
     afl::data::Value* getBaseProperty(const game::map::Planet& pl, BaseProperty ibp,
                                       afl::string::Translator& tx,
-                                      afl::base::Ref<const Root> root,
-                                      afl::base::Ptr<const game::spec::ShipList> shipList,
-                                      afl::base::Ref<Turn> turn);
+                                      const afl::base::Ref<const Root>& root,
+                                      const afl::base::Ptr<const game::spec::ShipList>& shipList,
+                                      const afl::base::Ref<const Turn>& turn);
 
     /** Set starbase property.
         \param pl    Planet

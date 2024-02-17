@@ -24,7 +24,7 @@ namespace {
     class ContextProvider : public game::interface::ContextProvider {
      public:
         virtual void createContext(game::Session& session, interpreter::ContextReceiver& recv)
-            { recv.pushNewContext(game::interface::ShipContext::create(SHIP_ID, session)); }
+            { recv.pushNewContext(game::interface::ShipContext::create(SHIP_ID, session, *session.getGame(), session.getGame()->viewpointTurn())); }
     };
 
     void createShip(game::test::SessionThread& h)

@@ -269,9 +269,9 @@ BaseArrayProperty::performArrayReference(Function_t func, int limit, int32_t arg
 afl::data::Value*
 game::interface::getBaseProperty(const game::map::Planet& pl, BaseProperty ibp,
                                  afl::string::Translator& tx,
-                                 afl::base::Ref<const Root> root,
-                                 afl::base::Ptr<const game::spec::ShipList> shipList,
-                                 afl::base::Ref<Turn> turn)
+                                 const afl::base::Ref<const Root>& root,
+                                 const afl::base::Ptr<const game::spec::ShipList>& shipList,
+                                 const afl::base::Ref<const Turn>& turn)
 {
     // ex int/if/baseif.h:getBaseProperty
     if (!pl.isPlayable(game::map::Object::ReadOnly) || !pl.hasBase()) {

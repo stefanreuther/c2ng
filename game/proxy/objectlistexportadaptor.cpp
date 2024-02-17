@@ -115,11 +115,15 @@ game::proxy::ObjectListExportAdaptor::Context::makeChild() const
         if (m_index < m_data->ids.size()) {
             switch (m_data->mode) {
              case Ships:
-                m_child.reset(game::interface::ShipContext::create(m_data->ids[m_index], m_data->session));
+                if (Game* g = m_data->session.getGame().get()) {
+                    m_child.reset(game::interface::ShipContext::create(m_data->ids[m_index], m_data->session, *g, g->viewpointTurn()));
+                }
                 break;
 
              case Planets:
-                m_child.reset(game::interface::PlanetContext::create(m_data->ids[m_index], m_data->session));
+                if (Game* g = m_data->session.getGame().get()) {
+                    m_child.reset(game::interface::PlanetContext::create(m_data->ids[m_index], m_data->session, *g, g->viewpointTurn()));
+                }
                 break;
             }
         }

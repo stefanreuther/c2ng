@@ -122,8 +122,7 @@ client::map::WaypointOverlay::attach(game::proxy::ObjectObserver& oop)
                 const game::Game* pGame = s.getGame().get();
                 const game::spec::ShipList* pShipList = s.getShipList().get();
                 if (pShip != 0 && pRoot != 0 && pGame != 0 && pShipList != 0) {
-                    // FIXME: correct universe?
-                    const game::map::Universe& univ = pGame->currentTurn().universe();
+                    const game::map::Universe& univ = pGame->viewpointTurn().universe();
                     packShipMovementInfo(m_infos, *pShip, univ, pGame->shipScores(), pGame->mapConfiguration(), pGame->teamSettings(), *pShipList, *pRoot);
                 }
             }

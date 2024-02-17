@@ -46,7 +46,7 @@ AFL_TEST("game.interface.MinefieldContext:basics", a)
     afl::string::NullTranslator tx;
 
     // Instance
-    game::interface::MinefieldContext testee(MINEFIELD_NR, root, g, tx);
+    game::interface::MinefieldContext testee(MINEFIELD_NR, root, g, g->currentTurn(), tx);
     interpreter::test::ContextVerifier verif(testee, a);
     verif.verifyBasics();
     verif.verifySerializable(interpreter::TagNode::Tag_Minefield, MINEFIELD_NR, afl::base::Nothing);
@@ -88,7 +88,7 @@ AFL_TEST("game.interface.MinefieldContext:iteration", a)
     afl::string::NullTranslator tx;
 
     // Instance
-    game::interface::MinefieldContext testee(100, root, g, tx);
+    game::interface::MinefieldContext testee(100, root, g, g->currentTurn(), tx);
     interpreter::test::ContextVerifier verif(testee, a);
     verif.verifyInteger("ID", 100);
     a.check("01. next", testee.next());
@@ -112,7 +112,7 @@ AFL_TEST("game.interface.MinefieldContext:commands", a)
     afl::string::NullTranslator tx;
 
     // Instance
-    game::interface::MinefieldContext testee(MINEFIELD_NR, root, g, tx);
+    game::interface::MinefieldContext testee(MINEFIELD_NR, root, g, g->currentTurn(), tx);
     std::auto_ptr<afl::data::Value> meth(interpreter::test::ContextVerifier(testee, a).getValue("MARK"));
 
     // Invoke as command
@@ -150,20 +150,20 @@ AFL_TEST("game.interface.MinefieldContext:create", a)
 
     // Success case
     {
-        std::auto_ptr<game::interface::MinefieldContext> ctx(game::interface::MinefieldContext::create(MINEFIELD_NR, session, false));
+        std::auto_ptr<game::interface::MinefieldContext> ctx(game::interface::MinefieldContext::create(MINEFIELD_NR, session, *session.getGame(), session.getGame()->currentTurn(), false));
         a.checkNonNull("01. create", ctx.get());
         a.checkEqual("02. getObject", ctx->getObject(), &mf);
     }
 
     // Failure case
     {
-        std::auto_ptr<game::interface::MinefieldContext> ctx(game::interface::MinefieldContext::create(MINEFIELD_NR+1, session, false));
+        std::auto_ptr<game::interface::MinefieldContext> ctx(game::interface::MinefieldContext::create(MINEFIELD_NR+1, session, *session.getGame(), session.getGame()->currentTurn(), false));
         a.checkNull("11. wrong id", ctx.get());
     }
 
     // Force
     {
-        std::auto_ptr<game::interface::MinefieldContext> ctx(game::interface::MinefieldContext::create(MINEFIELD_NR+1, session, true));
+        std::auto_ptr<game::interface::MinefieldContext> ctx(game::interface::MinefieldContext::create(MINEFIELD_NR+1, session, *session.getGame(), session.getGame()->currentTurn(), true));
         a.checkNonNull("21. create", ctx.get());
         a.checkNull("22. getObject", ctx->getObject());
 
@@ -178,17 +178,6 @@ AFL_TEST("game.interface.MinefieldContext:create", a)
 /** Test factory function on empty session.
     Even with force=true, this will not create an object. */
 
-// No game
-AFL_TEST("game.interface.MinefieldContext:create:no-game", a)
-{
-    afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session session(tx, fs);
-    session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
-    std::auto_ptr<game::interface::MinefieldContext> ctx(game::interface::MinefieldContext::create(1, session, true));
-    a.checkNull("", ctx.get());
-}
-
 // No root
 AFL_TEST("game.interface.MinefieldContext:create:no-root", a)
 {
@@ -196,6 +185,6 @@ AFL_TEST("game.interface.MinefieldContext:create:no-root", a)
     afl::io::NullFileSystem fs;
     game::Session session(tx, fs);
     session.setGame(new game::Game());
-    std::auto_ptr<game::interface::MinefieldContext> ctx(game::interface::MinefieldContext::create(1, session, true));
+    std::auto_ptr<game::interface::MinefieldContext> ctx(game::interface::MinefieldContext::create(1, session, *session.getGame(), session.getGame()->currentTurn(), true));
     a.checkNull("", ctx.get());
 }

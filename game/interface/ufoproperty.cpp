@@ -25,9 +25,7 @@ namespace {
 }
 
 afl::data::Value*
-game::interface::getUfoProperty(const game::map::Ufo& ufo, UfoProperty iup,
-                                afl::string::Translator& tx,
-                                const InterpreterInterface& iface)
+game::interface::getUfoProperty(const game::map::Ufo& ufo, UfoProperty iup, afl::string::Translator& tx)
 {
     // ex int/if/ufoif.h:getUfoProperty
     game::map::Point pt;
@@ -120,7 +118,7 @@ game::interface::getUfoProperty(const game::map::Ufo& ufo, UfoProperty iup,
      case iupName:
         /* @q Name:Str (Ufo Property)
            Name of Ufo. */
-        return makeStringValue(ufo.getName(PlainName, tx, iface));
+        return makeStringValue(ufo.getName());
      case iupRadius:
         /* @q Radius:Int (Ufo Property)
            Radius of Ufo in ly. */
@@ -133,7 +131,7 @@ game::interface::getUfoProperty(const game::map::Ufo& ufo, UfoProperty iup,
         /* @q Speed:Str (Ufo Property)
            Speed, as human-readable string. */
         if (ufo.getWarpFactor().get(r)) {
-            return makeStringValue(afl::string::Format(tx.translateString("Warp %d").c_str(), r));
+            return makeStringValue(afl::string::Format(tx("Warp %d"), r));
         } else {
             return 0;
         }

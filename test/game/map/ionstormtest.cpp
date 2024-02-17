@@ -51,6 +51,7 @@ AFL_TEST("game.map.IonStorm", a)
     a.checkEqual("11. getWarpFactor",    i.getWarpFactor().get(n), false);
     a.check("12. isGrowing",            !i.isGrowing());
     a.check("13. isActive",             !i.isActive());
+    a.checkEqual("14. getName/1",        i.getName(tx), "Ion storm #3");
 
     // Populate it
     configureIonStorm(i);
@@ -79,6 +80,7 @@ AFL_TEST("game.map.IonStorm", a)
     a.checkEqual("41. warp",             n, 6);
     a.check("42. isGrowing",             i.isGrowing());
     a.check("43. isActive",              i.isActive());
+    a.checkEqual("44. getName/1",        i.getName(tx), "Klothilde");
 }
 
 /** Test addMessageInformation to clear a storm.

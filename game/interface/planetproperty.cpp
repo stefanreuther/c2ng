@@ -18,7 +18,6 @@
 #include "game/tables/nativegovernmentname.hpp"
 #include "game/tables/nativeracename.hpp"
 #include "game/tables/temperaturename.hpp"
-#include "game/turn.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/functionvalue.hpp"
@@ -113,8 +112,9 @@ PlanetArrayProperty::clone() const
 afl::data::Value*
 game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty ipp,
                                    Session& session,
-                                   afl::base::Ref<Root> root,
-                                   afl::base::Ref<Game> game)
+                                   const afl::base::Ref<Root>& root,
+                                   const afl::base::Ref<Game>& game,
+                                   const afl::base::Ref<Turn>& turn)
 {
     // ex int/if/planetif.h:getPlanetProperty
     int32_t n;
@@ -353,7 +353,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
            Individual messages have the same form as the inbox messages (InMsg()).
            @see int:index:group:incomingmessageproperty|Incoming Message Properties
            @since PCC2 2.0.3, PCC2 2.40.10 */
-        return InboxSubsetValue::create(pl.messages().get(), session.translator(), root, game);
+        return InboxSubsetValue::create(pl.messages().get(), session.translator(), root, game, turn);
      case ippMinedD:
         /* @q Mined.D:Int (Planet Property)
            Mined Duranium, in kilotons. */
@@ -533,7 +533,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
            Number of enemy (=not own) ships in orbit of this planet. */
         game::map::Point pt;
         if (pl.getPosition().get(pt)) {
-            return makeIntegerValue(game->currentTurn().universe().allShips().countObjectsAt(pt, PlayerSet_t::allUpTo(MAX_PLAYERS) - game->getViewpointPlayer()));
+            return makeIntegerValue(turn->universe().allShips().countObjectsAt(pt, PlayerSet_t::allUpTo(MAX_PLAYERS) - game->getViewpointPlayer()));
         } else {
             return 0;
         }
@@ -543,7 +543,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
            Number of own ships in orbit of this planet. */
         game::map::Point pt;
         if (pl.getPosition().get(pt)) {
-            return makeIntegerValue(game->currentTurn().universe().allShips().countObjectsAt(pt, PlayerSet_t(game->getViewpointPlayer())));
+            return makeIntegerValue(turn->universe().allShips().countObjectsAt(pt, PlayerSet_t(game->getViewpointPlayer())));
         } else {
             return 0;
         }
@@ -553,7 +553,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
            Total number of ships in orbit of this planet. */
         game::map::Point pt;
         if (pl.getPosition().get(pt)) {
-            return makeIntegerValue(game->currentTurn().universe().allShips().countObjectsAt(pt, PlayerSet_t::allUpTo(MAX_PLAYERS)));
+            return makeIntegerValue(turn->universe().allShips().countObjectsAt(pt, PlayerSet_t::allUpTo(MAX_PLAYERS)));
         } else {
             return 0;
         }

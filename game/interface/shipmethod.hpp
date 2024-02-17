@@ -43,13 +43,13 @@ namespace game { namespace interface {
         @param root      Root (for setShipProperty() which needs it for config)
         @param mapConfig Map configuration (for position lookups, e.g. in cargo transfer setup)
         @param shipList  Ship list (for setShipProperty() which needs it for engines)
-        @param turn      Turn (for setShipProperty(), cargo transfer)
+        @param turn      Turn (for setShipProperty(), cargo transfer [commands])
         @throw interpreter::Error on error
         @throw game::Exception on error */
     void callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter::Arguments& args,
                         interpreter::Process& process,
                         Session& session,
-                        Root& root,
+                        const Root& root,
                         const game::map::Configuration& mapConfig,
                         const game::spec::ShipList& shipList,
                         Turn& turn);

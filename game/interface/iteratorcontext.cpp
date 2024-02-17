@@ -581,14 +581,18 @@ game::interface::makeIteratorValue(Session& session, int nr)
 interpreter::Context*
 game::interface::createObjectContext(game::map::Object* obj, Session& session)
 {
-    if (dynamic_cast<game::map::Ship*>(obj) != 0) {
-        return ShipContext::create(obj->getId(), session);
-    } else if (dynamic_cast<game::map::Planet*>(obj) != 0) {
-        return PlanetContext::create(obj->getId(), session);
-    } else if (dynamic_cast<game::map::IonStorm*>(obj) != 0) {
-        return IonStormContext::create(obj->getId(), session);
-    } else if (dynamic_cast<game::map::Minefield*>(obj) != 0) {
-        return MinefieldContext::create(obj->getId(), session, false);
+    if (Game* g = session.getGame().get()) {
+        if (dynamic_cast<game::map::Ship*>(obj) != 0) {
+            return ShipContext::create(obj->getId(), session, *g, g->viewpointTurn());
+        } else if (dynamic_cast<game::map::Planet*>(obj) != 0) {
+            return PlanetContext::create(obj->getId(), session, *g, g->viewpointTurn());
+        } else if (dynamic_cast<game::map::IonStorm*>(obj) != 0) {
+            return IonStormContext::create(obj->getId(), session, g->viewpointTurn());
+        } else if (dynamic_cast<game::map::Minefield*>(obj) != 0) {
+            return MinefieldContext::create(obj->getId(), session, *g, g->viewpointTurn(), false);
+        } else {
+            return 0;
+        }
     } else {
         return 0;
     }

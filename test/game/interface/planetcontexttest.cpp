@@ -74,7 +74,7 @@ AFL_TEST("game.interface.PlanetContext:basics", a)
     pl.internalCheck(g->mapConfiguration(), game::PlayerSet_t(PLAYER), TURN_NR, tx, session.log());
 
     // Testee
-    game::interface::PlanetContext testee(PLANET_ID, session, root, g);
+    game::interface::PlanetContext testee(PLANET_ID, session, root, g, g->currentTurn());
     interpreter::test::ContextVerifier verif(testee, a);
     verif.verifyBasics();
     verif.verifySerializable(interpreter::TagNode::Tag_Planet, PLANET_ID, afl::base::Nothing);
@@ -142,7 +142,7 @@ AFL_TEST("game.interface.PlanetContext:empty", a)
     game::map::Planet& pl = *g->currentTurn().universe().planets().create(PLANET_ID);
 
     // Testee
-    game::interface::PlanetContext testee(PLANET_ID, session, root, g);
+    game::interface::PlanetContext testee(PLANET_ID, session, root, g, g->currentTurn());
     interpreter::test::ContextVerifier verif(testee, a);
     a.checkEqual("01. getObject", testee.getObject(), &pl);
 
@@ -181,7 +181,7 @@ AFL_TEST("game.interface.PlanetContext:null", a)
     afl::base::Ref<game::Game> g(*new game::Game());
 
     // Testee
-    game::interface::PlanetContext testee(PLANET_ID, session, root, g);
+    game::interface::PlanetContext testee(PLANET_ID, session, root, g, g->currentTurn());
     interpreter::test::ContextVerifier verif(testee, a);
     a.checkNull("01. getObject", testee.getObject());
 
@@ -222,7 +222,7 @@ AFL_TEST("game.interface.PlanetContext:iteration", a)
     addPlanetXY(session, *g, 200, 1200, 1010);
     addPlanetXY(session, *g, 250, 1300, 1000);
 
-    game::interface::PlanetContext testee(100, session, root, g);
+    game::interface::PlanetContext testee(100, session, root, g, g->currentTurn());
     interpreter::test::ContextVerifier verif(testee, a);
     verif.verifyInteger("ID", 100);
     a.check("01. next", testee.next());
@@ -246,7 +246,7 @@ AFL_TEST("game.interface.PlanetContext:create:normal", a)
     session.setGame(new game::Game());
     addPlanetXY(session, *session.getGame(), 100, 1000, 1020);
 
-    std::auto_ptr<game::interface::PlanetContext> ctx(game::interface::PlanetContext::create(100, session));
+    std::auto_ptr<game::interface::PlanetContext> ctx(game::interface::PlanetContext::create(100, session, *session.getGame(), session.getGame()->currentTurn()));
     a.checkNonNull("ctx", ctx.get());
     interpreter::test::ContextVerifier(*ctx, a).verifyInteger("ID", 100);
 }
@@ -260,7 +260,7 @@ AFL_TEST("game.interface.PlanetContext:create:no-planet", a)
     session.setRoot(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,1,0))).asPtr());
     session.setGame(new game::Game());
 
-    std::auto_ptr<game::interface::PlanetContext> ctx(game::interface::PlanetContext::create(100, session));
+    std::auto_ptr<game::interface::PlanetContext> ctx(game::interface::PlanetContext::create(100, session, *session.getGame(), session.getGame()->currentTurn()));
     a.checkNull("ctx", ctx.get());
 }
 
@@ -273,18 +273,6 @@ AFL_TEST("game.interface.PlanetContext:create:no-root", a)
     session.setGame(new game::Game());
     addPlanetXY(session, *session.getGame(), 100, 1000, 1020);
 
-    std::auto_ptr<game::interface::PlanetContext> ctx(game::interface::PlanetContext::create(100, session));
-    a.checkNull("ctx", ctx.get());
-}
-
-// No game
-AFL_TEST("game.interface.PlanetContext:create:no-game", a)
-{
-    afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session session(tx, fs);
-    session.setRoot(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,1,0))).asPtr());
-
-    std::auto_ptr<game::interface::PlanetContext> ctx(game::interface::PlanetContext::create(100, session));
+    std::auto_ptr<game::interface::PlanetContext> ctx(game::interface::PlanetContext::create(100, session, *session.getGame(), session.getGame()->currentTurn()));
     a.checkNull("ctx", ctx.get());
 }

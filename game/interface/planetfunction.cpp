@@ -38,7 +38,11 @@ game::interface::PlanetFunction::get(interpreter::Arguments& args)
         return 0;
     }
 
-    return PlanetContext::create(id, m_session);
+    if (Game* g = m_session.getGame().get()) {
+        return PlanetContext::create(id, m_session, *g, g->viewpointTurn());
+    } else {
+        return 0;
+    }
 }
 
 void
@@ -58,7 +62,7 @@ game::interface::PlanetFunction::getDimension(int32_t which) const
         return 1;
     } else {
         if (Game* game = m_session.getGame().get()) {
-            return game->currentTurn().universe().planets().size() + 1;
+            return game->viewpointTurn().universe().planets().size() + 1;
         } else {
             return 0;
         }
@@ -68,15 +72,8 @@ game::interface::PlanetFunction::getDimension(int32_t which) const
 interpreter::Context*
 game::interface::PlanetFunction::makeFirstContext()
 {
-    Game* game = m_session.getGame().get();
-    Root* root = m_session.getRoot().get();
-    if (game != 0 && root != 0) {
-        Id_t id = game->currentTurn().universe().allPlanets().findNextIndex(0);
-        if (id != 0) {
-            return new PlanetContext(id, m_session, *root, *game);
-        } else {
-            return 0;
-        }
+    if (Game* g = m_session.getGame().get()) {
+        return PlanetContext::create(g->viewpointTurn().universe().allPlanets().findNextIndex(0), m_session, *g, g->viewpointTurn());
     } else {
         return 0;
     }

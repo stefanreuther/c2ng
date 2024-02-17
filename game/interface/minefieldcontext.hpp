@@ -25,9 +25,10 @@ namespace game { namespace interface {
         /** Constructor.
             @param id   Id
             @param root Root (for player names)
-            @param game Game
+            @param game Game (for player properties)
+            @param turn Turn (for minefield)
             @param tx   Translator */
-        MinefieldContext(Id_t id, afl::base::Ref<const Root> root, afl::base::Ref<Game> game, afl::string::Translator& tx);
+        MinefieldContext(Id_t id, const afl::base::Ref<const Root>& root, const afl::base::Ref<Game>& game, const afl::base::Ref<Turn>& turn, afl::string::Translator& tx);
 
         /** Destructor. */
         ~MinefieldContext();
@@ -49,13 +50,16 @@ namespace game { namespace interface {
             @param id      Id
             @param session Session
             @param force   true to force creation even if minefield does not currently exist
+            @param g       Game
+            @param t       Turn (part of game)
             @return newly-allocated MinefieldContext; null if preconditions not fulfilled */
-        static MinefieldContext* create(int id, Session& session, bool force);
+        static MinefieldContext* create(int id, Session& session, const afl::base::Ref<Game>& g, const afl::base::Ref<Turn>& t, bool force);
 
      private:
         Id_t m_id;
         afl::base::Ref<const Root> m_root;
         afl::base::Ref<Game> m_game;
+        afl::base::Ref<Turn> m_turn;
         afl::string::Translator& m_translator;
     };
 

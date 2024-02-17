@@ -16,7 +16,7 @@ using interpreter::makeOptionalStringValue;
 using interpreter::makeStringValue;
 
 afl::data::Value*
-game::interface::getIonStormProperty(const game::map::IonStorm& ion, IonStormProperty iip, afl::string::Translator& tx, const InterpreterInterface& iface)
+game::interface::getIonStormProperty(const game::map::IonStorm& ion, IonStormProperty iip, afl::string::Translator& tx)
 {
     // ex int/if/ionif.h:getIonProperty
     if (!ion.isActive()) {
@@ -66,7 +66,7 @@ game::interface::getIonStormProperty(const game::map::IonStorm& ion, IonStormPro
      case iipName:
         /* @q Name:Str (Storm Property)
            Ion storm name. */
-        return makeStringValue(ion.getName(PlainName, tx, iface));
+        return makeStringValue(ion.getName(tx));
      case iipRadius:
         /* @q Radius:Int (Storm Property)
            Ion storm radius in ly. */

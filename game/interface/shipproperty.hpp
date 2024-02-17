@@ -114,15 +114,15 @@ namespace game { namespace interface {
         \param session   Session (for names, auto-tasks)
         \param root      Root (needed for configuration)
         \param shipList  Ship list (needed for specifications)
-        \param game      Game (needed for unit score definitions)
-        \param turn      Turn (needed for related units to name locations)
+        \param game      Game (needed for unit score definitions, and to ensure proper lifetime of ship)
+        \param univ      Turn (needed for related units to name locations, and messages)
         \return newly-allocated property value */
     afl::data::Value* getShipProperty(const game::map::Ship& sh, ShipProperty isp,
                                       Session& session,
-                                      afl::base::Ref<const Root> root,
-                                      afl::base::Ref<const game::spec::ShipList> shipList,
-                                      afl::base::Ref<const Game> game,
-                                      afl::base::Ref<const Turn> turn);
+                                      const afl::base::Ref<const Root>& root,
+                                      const afl::base::Ref<const game::spec::ShipList>& shipList,
+                                      const afl::base::Ref<const Game>& game,
+                                      const afl::base::Ref<const Turn>& turn);
 
     /** Set ship property.
         \param sh        Ship.
@@ -131,13 +131,13 @@ namespace game { namespace interface {
         \param root      Root (needed for configuration)
         \param shipList  Ship list (for mission definitions)
         \param mapConfig Map configuration
-        \param turn      Turn (for fleets)
+        \param univ      Universe (for fleets)
         \throw interpreter::Error if property is not assignable */
     void setShipProperty(game::map::Ship& sh, ShipProperty isp, const afl::data::Value* value,
                          const Root& root,
                          const game::spec::ShipList& shipList,
                          const game::map::Configuration& mapConfig,
-                         Turn& turn);
+                         game::map::Universe& univ);
 
 } }
 

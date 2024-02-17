@@ -35,7 +35,7 @@ server::play::ShipPacker::buildValue() const
 
     // Build result
     afl::base::Ref<afl::data::Hash> hv(afl::data::Hash::create());
-    game::interface::ShipContext ctx(m_shipNr, m_session, r, g, sl);
+    game::interface::ShipContext ctx(m_shipNr, m_session, r, g, g.currentTurn(), sl);
 
     addValue(*hv, ctx, "AUX$", "AUX");
     addValue(*hv, ctx, "AUX.AMMO", "AUX.AMMO");

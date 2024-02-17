@@ -48,6 +48,10 @@ namespace game { namespace map {
             @return flag */
         bool isValid() const;
 
+        /** Get name.
+            @return name */
+        const String_t& getName() const;
+
         /** Get color code.
             @return color */
         int getColorCode() const;

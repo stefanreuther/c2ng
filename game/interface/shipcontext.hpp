@@ -10,6 +10,7 @@
 #include "game/map/ship.hpp"
 #include "game/root.hpp"
 #include "game/session.hpp"
+#include "game/turn.hpp"
 #include "interpreter/simplecontext.hpp"
 
 namespace game { namespace interface {
@@ -30,9 +31,10 @@ namespace game { namespace interface {
             @param shipList  Ship list */
         ShipContext(Id_t id,
                     Session& session,
-                    afl::base::Ref<Root> root,
-                    afl::base::Ref<Game> game,
-                    afl::base::Ref<const game::spec::ShipList> shipList);
+                    const afl::base::Ref<const Root>& root,
+                    const afl::base::Ref<Game>& game,
+                    const afl::base::Ref<Turn>& turn,
+                    const afl::base::Ref<const game::spec::ShipList>& shipList);
 
         /** Destructor. */
         ~ShipContext();
@@ -50,17 +52,20 @@ namespace game { namespace interface {
         virtual String_t toString(bool readable) const;
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
-        /** Create ShipContext.
+        /** Create ShipContext for ship in viewpoint-turn.
             @param id        Ship Id
             @param session   Session
+            @param g         Game
+            @param t         Turn (part of game)
             @return newly-allocated ShipContext; null if preconditions not satisfied */
-        static ShipContext* create(Id_t id, Session& session);
+        static ShipContext* create(Id_t id, Session& session, const afl::base::Ref<Game>& g, const afl::base::Ref<Turn>& t);
 
      private:
         Id_t m_id;
         Session& m_session;
-        afl::base::Ref<Root> m_root;
+        afl::base::Ref<const Root> m_root;
         afl::base::Ref<Game> m_game;
+        afl::base::Ref<Turn> m_turn;
         afl::base::Ref<const game::spec::ShipList> m_shipList;
     };
 

@@ -7,14 +7,14 @@
 #include "interpreter/arguments.hpp"
 
 game::interface::VcrSideFunction::VcrSideFunction(size_t battleNumber,
-                                                  Session& session,
-                                                  afl::base::Ref<const Root> root,
-                                                  afl::base::Ref<const Turn> turn,
-                                                  afl::base::Ref<const game::spec::ShipList> shipList)
+                                                  afl::string::Translator& tx,
+                                                  const afl::base::Ref<const Root>& root,
+                                                  const afl::base::Ptr<game::vcr::Database>& battles,
+                                                  const afl::base::Ref<const game::spec::ShipList>& shipList)
     : m_battleNumber(battleNumber),
-      m_session(session),
+      m_translator(tx),
       m_root(root),
-      m_turn(turn),
+      m_battles(battles),
       m_shipList(shipList)
 { }
 
@@ -30,7 +30,7 @@ game::interface::VcrSideFunction::get(interpreter::Arguments& args)
     }
 
     // OK, build result. Note that the user indexes are 1-based!
-    return new VcrSideContext(m_battleNumber, i-1, m_session, m_root, m_turn, m_shipList);
+    return new VcrSideContext(m_battleNumber, i-1, m_translator, m_root, m_battles, m_shipList);
 }
 
 void
@@ -55,7 +55,7 @@ game::interface::VcrSideContext*
 game::interface::VcrSideFunction::makeFirstContext()
 {
     if (getNumObjects() > 0) {
-        return new VcrSideContext(m_battleNumber, 0, m_session, m_root, m_turn, m_shipList);
+        return new VcrSideContext(m_battleNumber, 0, m_translator, m_root, m_battles, m_shipList);
     } else {
         return 0;
     }
@@ -65,7 +65,7 @@ game::interface::VcrSideFunction*
 game::interface::VcrSideFunction::clone() const
 {
     // ex IntVcrSideArray::clone
-    return new VcrSideFunction(m_battleNumber, m_session, m_root, m_turn, m_shipList);
+    return new VcrSideFunction(m_battleNumber, m_translator, m_root, m_battles, m_shipList);
 }
 
 // BaseValue:
@@ -86,7 +86,7 @@ game::interface::VcrSideFunction::store(interpreter::TagNode& out, afl::io::Data
 int32_t
 game::interface::VcrSideFunction::getNumObjects() const
 {
-    if (game::vcr::Database* db = m_turn->getBattles().get()) {
+    if (game::vcr::Database* db = m_battles.get()) {
         if (game::vcr::Battle* battle = db->getBattle(m_battleNumber)) {
             // yay!
             return int32_t(std::min(battle->getNumObjects(), size_t(0x7FFFFFFE)));

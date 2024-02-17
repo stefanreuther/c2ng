@@ -116,7 +116,7 @@ AFL_TEST("game.interface.DrawingContext:create", a)
     session.getGame()->currentTurn().universe().drawings().addNew(new game::map::Drawing(game::map::Point(1100, 1200), game::map::Drawing::MarkerDrawing));
 
     // Create
-    std::auto_ptr<game::interface::DrawingContext> ctx(game::interface::DrawingContext::create(session));
+    std::auto_ptr<game::interface::DrawingContext> ctx(game::interface::DrawingContext::create(session, session.getGame()->currentTurn()));
     a.checkNonNull("01. create", ctx.get());
 
     interpreter::test::ContextVerifier verif(*ctx, a);
@@ -127,25 +127,6 @@ AFL_TEST("game.interface.DrawingContext:create", a)
  *  Test creating through factory function, given empty session
  */
 
-// Entirely empty session
-AFL_TEST("game.interface.DrawingContext:create:empty", a)
-{
-    afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session session(tx, fs);
-    a.checkNull("", game::interface::DrawingContext::create(session));
-}
-
-// Only root
-AFL_TEST("game.interface.DrawingContext:create:only-root", a)
-{
-    afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session session(tx, fs);
-    session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
-    a.checkNull("", game::interface::DrawingContext::create(session));
-}
-
 // Only game
 AFL_TEST("game.interface.DrawingContext:create:only-game", a)
 {
@@ -153,7 +134,7 @@ AFL_TEST("game.interface.DrawingContext:create:only-game", a)
     afl::io::NullFileSystem fs;
     game::Session session(tx, fs);
     session.setGame(new game::Game());
-    a.checkNull("", game::interface::DrawingContext::create(session));
+    a.checkNull("", game::interface::DrawingContext::create(session, session.getGame()->currentTurn()));
 }
 
 // No Drawing
@@ -164,5 +145,5 @@ AFL_TEST("game.interface.DrawingContext:create:no-drawing", a)
     game::Session session(tx, fs);
     session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
     session.setGame(new game::Game());
-    a.checkNull("", game::interface::DrawingContext::create(session));
+    a.checkNull("", game::interface::DrawingContext::create(session, session.getGame()->currentTurn()));
 }

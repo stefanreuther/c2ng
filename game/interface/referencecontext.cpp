@@ -234,17 +234,33 @@ game::interface::makeObjectValue(Reference ref, Session& session)
         return 0;
 
      case Reference::Ship:
-        return ShipContext::create(ref.getId(), session);
+        if (Game* g = session.getGame().get()) {
+            return ShipContext::create(ref.getId(), session, *g, g->viewpointTurn());
+        } else {
+            return 0;
+        }
 
      case Reference::Planet:
      case Reference::Starbase:
-        return PlanetContext::create(ref.getId(), session);
+        if (Game* g = session.getGame().get()) {
+            return PlanetContext::create(ref.getId(), session, *g, g->viewpointTurn());
+        } else {
+            return 0;
+        }
 
      case Reference::IonStorm:
-        return IonStormContext::create(ref.getId(), session);
+        if (Game* g = session.getGame().get()) {
+            return IonStormContext::create(ref.getId(), session, g->viewpointTurn());
+        } else {
+            return 0;
+        }
 
      case Reference::Minefield:
-        return MinefieldContext::create(ref.getId(), session, false);
+        if (Game* g = session.getGame().get()) {
+            return MinefieldContext::create(ref.getId(), session, *g, g->viewpointTurn(), false);
+        } else {
+            return 0;
+        }
 
      case Reference::Ufo:
         if (Game* g = session.getGame().get()) {
@@ -252,7 +268,7 @@ game::interface::makeObjectValue(Reference ref, Session& session)
             game::map::UfoType& ty = t.universe().ufos();
             Id_t slot = ty.findIndexForId(ref.getId());
             if (ty.getObjectByIndex(slot) != 0) {
-                return new game::interface::UfoContext(slot, t, session);
+                return new game::interface::UfoContext(slot, t, session.translator());
             }
         }
         return 0;

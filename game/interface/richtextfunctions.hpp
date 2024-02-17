@@ -6,7 +6,6 @@
 #define C2NG_GAME_INTERFACE_RICHTEXTFUNCTIONS_HPP
 
 #include "game/interface/richtextvalue.hpp"
-#include "game/session.hpp"
 #include "interpreter/arguments.hpp"
 
 namespace game { namespace interface {
@@ -24,14 +23,14 @@ namespace game { namespace interface {
      *  Function Implementations
      */
 
-    afl::data::Value* IFRAdd(Session& session, interpreter::Arguments& args);
-    afl::data::Value* IFRAlign(Session& session, interpreter::Arguments& args);
-    afl::data::Value* IFRMid(Session& session, interpreter::Arguments& args);
-    afl::data::Value* IFRString(Session& session, interpreter::Arguments& args);
-    afl::data::Value* IFRLen(Session& session, interpreter::Arguments& args);
-    afl::data::Value* IFRStyle(Session& session, interpreter::Arguments& args);
-    afl::data::Value* IFRLink(Session& session, interpreter::Arguments& args);
-    afl::data::Value* IFRXml(Session& session, interpreter::Arguments& args);
+    afl::data::Value* IFRAdd(interpreter::Arguments& args);
+    afl::data::Value* IFRAlign(interpreter::Arguments& args);
+    afl::data::Value* IFRMid(interpreter::Arguments& args);
+    afl::data::Value* IFRString(interpreter::Arguments& args);
+    afl::data::Value* IFRLen(interpreter::Arguments& args);
+    afl::data::Value* IFRStyle(interpreter::Arguments& args);
+    afl::data::Value* IFRLink(interpreter::Arguments& args);
+    afl::data::Value* IFRXml(interpreter::Arguments& args);
 
 } }
 

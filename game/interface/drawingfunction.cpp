@@ -4,8 +4,9 @@
   */
 
 #include "game/interface/drawingfunction.hpp"
-#include "interpreter/arguments.hpp"
+#include "game/game.hpp"
 #include "game/interface/drawingcontext.hpp"
+#include "interpreter/arguments.hpp"
 
 game::interface::DrawingFunction::DrawingFunction(Session& session)
     : m_session(session)
@@ -34,7 +35,11 @@ game::interface::DrawingFunction::getDimension(int32_t /*which*/) const
 game::interface::DrawingContext*
 game::interface::DrawingFunction::makeFirstContext()
 {
-    return DrawingContext::create(m_session);
+    if (Game* g = m_session.getGame().get()) {
+        return DrawingContext::create(m_session, g->viewpointTurn());
+    } else {
+        return 0;
+    }
 }
 
 game::interface::DrawingFunction*

@@ -60,16 +60,32 @@ game::interface::LoadContext::loadContext(const interpreter::TagNode& tag, afl::
     using interpreter::TagNode;
     switch (tag.tag) {
      case TagNode::Tag_Ship:
-        return ShipContext::create(tag.value, m_session);
+        if (Game* g = m_session.getGame().get()) {
+            return ShipContext::create(tag.value, m_session, *g, g->viewpointTurn());
+        } else {
+            return 0;
+        }
 
      case TagNode::Tag_Planet:
-        return PlanetContext::create(tag.value, m_session);
+        if (Game* g = m_session.getGame().get()) {
+            return PlanetContext::create(tag.value, m_session, *g, g->viewpointTurn());
+        } else {
+            return 0;
+        }
 
      case TagNode::Tag_Minefield:
-        return MinefieldContext::create(tag.value, m_session, true);
+        if (Game* g = m_session.getGame().get()) {
+            return MinefieldContext::create(tag.value, m_session, *g, g->viewpointTurn(), true);
+        } else {
+            return 0;
+        }
 
      case TagNode::Tag_Ion:
-        return IonStormContext::create(tag.value, m_session);
+        if (Game* g = m_session.getGame().get()) {
+            return IonStormContext::create(tag.value, m_session, g->viewpointTurn());
+        } else {
+            return 0;
+        }
 
      case TagNode::Tag_Hull:
         return HullContext::create(tag.value, m_session);

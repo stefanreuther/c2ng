@@ -26,12 +26,10 @@ namespace game { namespace interface {
     /** Get property of an explosion.
         @param expl  Explosion
         @param iep   Property
-        @param tx    Translator (for names)
-        @param iface Interface (for names) */
+        @param tx    Translator (for names) */
     afl::data::Value* getExplosionProperty(const game::map::Explosion& expl,
                                            ExplosionProperty iep,
-                                           afl::string::Translator& tx,
-                                           const InterpreterInterface& iface);
+                                           afl::string::Translator& tx);
 
 } }
 

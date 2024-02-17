@@ -43,11 +43,11 @@ game::interface::InboxFunction::get(interpreter::Arguments& args)
     }
 
     size_t index;
-    if (!interpreter::checkIndexArg(index, args.getNext(), 1, g->currentTurn().inbox().getNumMessages())) {
+    if (!interpreter::checkIndexArg(index, args.getNext(), 1, g->viewpointTurn().inbox().getNumMessages())) {
         return 0;
     }
 
-    return new InboxContext(index, m_session.translator(), *r, *g);
+    return new InboxContext(index, m_session.translator(), *r, *g, g->viewpointTurn());
 }
 
 void
@@ -68,7 +68,7 @@ game::interface::InboxFunction::getDimension(int32_t which) const
     } else if (g.get() == 0 || r.get() == 0) {
         return 0;
     } else {
-        return int32_t(g->currentTurn().inbox().getNumMessages()) + 1;
+        return int32_t(g->viewpointTurn().inbox().getNumMessages()) + 1;
     }
 }
 
@@ -80,10 +80,10 @@ game::interface::InboxFunction::makeFirstContext()
     afl::base::Ptr<Root> r = m_session.getRoot();
     if (g.get() == 0 || r.get() == 0) {
         return 0;
-    } else if (g->currentTurn().inbox().getNumMessages() == 0) {
+    } else if (g->viewpointTurn().inbox().getNumMessages() == 0) {
         return 0;
     } else {
-        return new InboxContext(0, m_session.translator(), *r, *g);
+        return new InboxContext(0, m_session.translator(), *r, *g, g->viewpointTurn());
     }
 }
 

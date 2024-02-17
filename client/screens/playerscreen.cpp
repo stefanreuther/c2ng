@@ -425,10 +425,14 @@ namespace {
             Trampoline(game::Session& session, util::RequestSender<PlayerScreen> sender)
                 : m_session(session),
                   m_sender(sender),
-                  conn_root()
+                  conn_root(),
+                  conn_turn()
                 {
                     if (game::Root* root = session.getRoot().get()) {
                         conn_root = root->playerList().sig_change.add(this, &Trampoline::onChange);
+                    }
+                    if (game::Game* g = session.getGame().get()) {
+                        conn_turn = g->sig_viewpointTurnChange.add(this, &Trampoline::onChange);
                     }
                     onChange();
                 }
@@ -446,8 +450,15 @@ namespace {
                             info = afl::string::Format(tx("Player %d"), game->getViewpointPlayer());
                         }
                         info += "\n";
-                        info += afl::string::Format(tx("%d message%!1{s%}"), game->currentTurn().inbox().getNumMessages());
+
+                        game::Turn& vt = game->viewpointTurn();
+                        game::Turn& ct = game->currentTurn();
+                        info += afl::string::Format(tx("%d message%!1{s%}"), vt.inbox().getNumMessages());
                         info += "\n";
+
+                        if (&vt != &ct) {
+                            info += afl::string::Format(tx("Viewing history turn %d"), vt.getTurnNumber());
+                        }
                     }
                     m_sender.postNewRequest(new UpdateTask(info));
                 }
@@ -465,6 +476,7 @@ namespace {
             game::Session& m_session;
             util::RequestSender<PlayerScreen> m_sender;
             afl::base::SignalConnection conn_root;
+            afl::base::SignalConnection conn_turn;
         };
 
         class TrampolineFromSession : public afl::base::Closure<Trampoline*(game::Session&)> {

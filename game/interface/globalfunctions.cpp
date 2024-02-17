@@ -515,7 +515,7 @@ game::interface::IFPlanetAt(game::Session& session, interpreter::Arguments& args
         return 0;
     }
 
-    return makeIntegerValue(game->currentTurn().universe().findPlanetAt(game::map::Point(x, y), flag, game->mapConfiguration(), root->hostConfiguration(), root->hostVersion()));
+    return makeIntegerValue(game->viewpointTurn().universe().findPlanetAt(game::map::Point(x, y), flag, game->mapConfiguration(), root->hostConfiguration(), root->hostVersion()));
 }
 
 /* @q Pref(key:Str, Optional index:Int):Any (Function)

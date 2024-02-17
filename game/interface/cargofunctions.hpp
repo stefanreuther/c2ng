@@ -7,7 +7,6 @@
 
 #include "game/cargospec.hpp"
 #include "afl/data/value.hpp"
-#include "game/session.hpp"
 #include "interpreter/arguments.hpp"
 
 namespace game { namespace interface {
@@ -20,13 +19,13 @@ namespace game { namespace interface {
     bool checkCargoSpecArg(CargoSpec& out, const afl::data::Value* value);
 
     // Script function implementations
-    afl::data::Value* IFCAdd(game::Session& session, interpreter::Arguments& args);
-    afl::data::Value* IFCCompare(game::Session& session, interpreter::Arguments& args);
-    afl::data::Value* IFCDiv(game::Session& session, interpreter::Arguments& args);
-    afl::data::Value* IFCExtract(game::Session& session, interpreter::Arguments& args);
-    afl::data::Value* IFCMul(game::Session& session, interpreter::Arguments& args);
-    afl::data::Value* IFCRemove(game::Session& session, interpreter::Arguments& args);
-    afl::data::Value* IFCSub(game::Session& session, interpreter::Arguments& args);
+    afl::data::Value* IFCAdd(interpreter::Arguments& args);
+    afl::data::Value* IFCCompare(interpreter::Arguments& args);
+    afl::data::Value* IFCDiv(interpreter::Arguments& args);
+    afl::data::Value* IFCExtract(interpreter::Arguments& args);
+    afl::data::Value* IFCMul(interpreter::Arguments& args);
+    afl::data::Value* IFCRemove(interpreter::Arguments& args);
+    afl::data::Value* IFCSub(interpreter::Arguments& args);
 
 } }
 

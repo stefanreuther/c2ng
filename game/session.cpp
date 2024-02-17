@@ -191,14 +191,16 @@ game::Session::getAutoTaskEditor(Id_t id, interpreter::Process::ProcessKind kind
 
         // Place in appropriate context
         // (Note that this fails if the Session is not fully-populated, e.g. has no ship list.)
-        interpreter::Context* ctx = 0;
-        if (kind == Process::pkShipTask) {
-            ctx = game::interface::ShipContext::create(id, *this);
-        } else {
-            ctx = game::interface::PlanetContext::create(id, *this);
-        }
-        if (ctx != 0) {
-            proc->pushNewContext(ctx);
+        if (Game* g = m_game.get()) {
+            interpreter::Context* ctx = 0;
+            if (kind == Process::pkShipTask) {
+                ctx = game::interface::ShipContext::create(id, *this, *g, g->viewpointTurn());
+            } else {
+                ctx = game::interface::PlanetContext::create(id, *this, *g, g->viewpointTurn());
+            }
+            if (ctx != 0) {
+                proc->pushNewContext(ctx);
+            }
         }
         proc->markContextTOS();
 
@@ -573,17 +575,18 @@ game::Session::initWorld()
     // ex initInterpreterGameInterface()
     typedef interpreter::SimpleFunction<Session&> SessionFunction_t;
     typedef interpreter::SimpleProcedure<Session&> SessionProcedure_t;
+    typedef interpreter::SimpleFunction<void> GlobalFunction_t;
     m_world.setNewGlobalValue("AUTOTASK",      new SessionFunction_t(*this, game::interface::IFAutoTask));
     m_world.setNewGlobalValue("BEAM",          new game::interface::BeamFunction(*this));
-    m_world.setNewGlobalValue("CADD",          new SessionFunction_t(*this, game::interface::IFCAdd));
+    m_world.setNewGlobalValue("CADD",          new GlobalFunction_t(game::interface::IFCAdd));
     m_world.setNewGlobalValue("CC$NOTIFYCONFIRMED", new game::interface::NotifyConfirmedFunction(*this));
-    m_world.setNewGlobalValue("CCOMPARE",      new SessionFunction_t(*this, game::interface::IFCCompare));
-    m_world.setNewGlobalValue("CDIV",          new SessionFunction_t(*this, game::interface::IFCDiv));
-    m_world.setNewGlobalValue("CEXTRACT",      new SessionFunction_t(*this, game::interface::IFCExtract));
+    m_world.setNewGlobalValue("CCOMPARE",      new GlobalFunction_t(game::interface::IFCCompare));
+    m_world.setNewGlobalValue("CDIV",          new GlobalFunction_t(game::interface::IFCDiv));
+    m_world.setNewGlobalValue("CEXTRACT",      new GlobalFunction_t(game::interface::IFCExtract));
     m_world.setNewGlobalValue("CFG",           new SessionFunction_t(*this, game::interface::IFCfg));
-    m_world.setNewGlobalValue("CMUL",          new SessionFunction_t(*this, game::interface::IFCMul));
-    m_world.setNewGlobalValue("CREMOVE",       new SessionFunction_t(*this, game::interface::IFCRemove));
-    m_world.setNewGlobalValue("CSUB",          new SessionFunction_t(*this, game::interface::IFCSub));
+    m_world.setNewGlobalValue("CMUL",          new GlobalFunction_t(game::interface::IFCMul));
+    m_world.setNewGlobalValue("CREMOVE",       new GlobalFunction_t(game::interface::IFCRemove));
+    m_world.setNewGlobalValue("CSUB",          new GlobalFunction_t(game::interface::IFCSub));
     m_world.setNewGlobalValue("DISTANCE",      new SessionFunction_t(*this, game::interface::IFDistance));
     m_world.setNewGlobalValue("ENGINE",        new game::interface::EngineFunction(*this));
     m_world.setNewGlobalValue("EXPLOSION",     new game::interface::ExplosionFunction(*this));
@@ -615,14 +618,14 @@ game::Session::initWorld()
     m_world.setNewGlobalValue("UFO",           new game::interface::UfoFunction(*this));
     m_world.setNewGlobalValue("VCR",           new game::interface::VcrFunction(*this));
 
-    m_world.setNewGlobalValue("RADD",          new SessionFunction_t(*this, game::interface::IFRAdd));
-    m_world.setNewGlobalValue("RALIGN",        new SessionFunction_t(*this, game::interface::IFRAlign));
-    m_world.setNewGlobalValue("RLEN",          new SessionFunction_t(*this, game::interface::IFRLen));
-    m_world.setNewGlobalValue("RLINK",         new SessionFunction_t(*this, game::interface::IFRLink));
-    m_world.setNewGlobalValue("RMID",          new SessionFunction_t(*this, game::interface::IFRMid));
-    m_world.setNewGlobalValue("RSTRING",       new SessionFunction_t(*this, game::interface::IFRString));
-    m_world.setNewGlobalValue("RSTYLE",        new SessionFunction_t(*this, game::interface::IFRStyle));
-    m_world.setNewGlobalValue("RXML",          new SessionFunction_t(*this, game::interface::IFRXml));
+    m_world.setNewGlobalValue("RADD",          new GlobalFunction_t(game::interface::IFRAdd));
+    m_world.setNewGlobalValue("RALIGN",        new GlobalFunction_t(game::interface::IFRAlign));
+    m_world.setNewGlobalValue("RLEN",          new GlobalFunction_t(game::interface::IFRLen));
+    m_world.setNewGlobalValue("RLINK",         new GlobalFunction_t(game::interface::IFRLink));
+    m_world.setNewGlobalValue("RMID",          new GlobalFunction_t(game::interface::IFRMid));
+    m_world.setNewGlobalValue("RSTRING",       new GlobalFunction_t(game::interface::IFRString));
+    m_world.setNewGlobalValue("RSTYLE",        new GlobalFunction_t(game::interface::IFRStyle));
+    m_world.setNewGlobalValue("RXML",          new GlobalFunction_t(game::interface::IFRXml));
 
     m_world.setNewGlobalValue("REFERENCE",         new SessionFunction_t(*this, game::interface::IFReference));
     m_world.setNewGlobalValue("LOCATIONREFERENCE", new SessionFunction_t(*this, game::interface::IFLocationReference));

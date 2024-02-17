@@ -47,13 +47,13 @@ AFL_TEST("game.interface.InboxSubsetValue:empty", a)
 
     // Factory method
     {
-        std::auto_ptr<InboxSubsetValue> value(InboxSubsetValue::create(indexes, h.tx, h.root, h.game));
+        std::auto_ptr<InboxSubsetValue> value(InboxSubsetValue::create(indexes, h.tx, h.root, h.game, h.game->currentTurn()));
         a.checkNull("01. factory method", value.get());
     }
 
     // Explicit creation
     {
-        InboxSubsetValue value(indexes, h.tx, h.root, h.game);
+        InboxSubsetValue value(indexes, h.tx, h.root, h.game, h.game->currentTurn());
         a.checkNull("11. explicit", value.makeFirstContext());
     }
 }
@@ -68,7 +68,7 @@ AFL_TEST("game.interface.InboxSubsetValue:iteration", a)
     indexes.push_back(3);                 // "Fourth"
     indexes.push_back(0);                 // "First"
 
-    std::auto_ptr<InboxSubsetValue> value(InboxSubsetValue::create(indexes, h.tx, h.root, h.game));
+    std::auto_ptr<InboxSubsetValue> value(InboxSubsetValue::create(indexes, h.tx, h.root, h.game, h.game->currentTurn()));
     a.checkNonNull("01. create", value.get());
 
     // Basic properties
@@ -107,7 +107,7 @@ AFL_TEST("game.interface.InboxSubsetValue:indexing", a)
     indexes.push_back(3);                 // "Fourth"
     indexes.push_back(0);                 // "First"
 
-    std::auto_ptr<InboxSubsetValue> value(InboxSubsetValue::create(indexes, h.tx, h.root, h.game));
+    std::auto_ptr<InboxSubsetValue> value(InboxSubsetValue::create(indexes, h.tx, h.root, h.game, h.game->currentTurn()));
     a.checkNonNull("01. create", value.get());
 
     // Success case

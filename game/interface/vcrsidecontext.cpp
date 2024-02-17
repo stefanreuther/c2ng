@@ -70,15 +70,15 @@ namespace {
 
 game::interface::VcrSideContext::VcrSideContext(size_t battleNumber,
                                                 size_t side,
-                                                Session& session,
-                                                afl::base::Ref<const Root> root,
-                                                afl::base::Ref<const Turn> turn,
-                                                afl::base::Ref<const game::spec::ShipList> shipList)
+                                                afl::string::Translator& tx,
+                                                const afl::base::Ref<const Root>& root,
+                                                const afl::base::Ptr<game::vcr::Database>& battles,
+                                                const afl::base::Ref<const game::spec::ShipList>& shipList)
     : m_battleNumber(battleNumber),
       m_side(side),
-      m_session(session),
+      m_translator(tx),
       m_root(root),
-      m_turn(turn),
+      m_battles(battles),
       m_shipList(shipList)
 {
     // ex IntVcrSideContext::IntVcrSideContext
@@ -105,7 +105,7 @@ game::interface::VcrSideContext::get(PropertyIndex_t index)
             return getVcrSideProperty(*battle,
                                       m_side,
                                       VcrSideProperty(side_mapping[index].index),
-                                      m_session.translator(),
+                                      m_translator,
                                       *m_shipList,
                                       m_root->hostConfiguration(),
                                       m_root->playerList());
@@ -138,12 +138,7 @@ game::interface::VcrSideContext*
 game::interface::VcrSideContext::clone() const
 {
     // ex IntVcrSideContext::clone
-    return new VcrSideContext(m_battleNumber,
-                              m_side,
-                              m_session,
-                              m_root,
-                              m_turn,
-                              m_shipList);
+    return new VcrSideContext(m_battleNumber, m_side, m_translator, m_root, m_battles, m_shipList);
 }
 
 afl::base::Deletable*
@@ -176,35 +171,9 @@ game::interface::VcrSideContext::store(interpreter::TagNode& out, afl::io::DataS
 game::vcr::Battle*
 game::interface::VcrSideContext::getBattle() const
 {
-    if (game::vcr::Database* db = m_turn->getBattles().get()) {
+    if (game::vcr::Database* db = m_battles.get()) {
         return db->getBattle(m_battleNumber);
     } else {
         return 0;
     }
-}
-
-game::interface::VcrSideContext*
-game::interface::VcrSideContext::create(size_t battleNumber, size_t side, Session& session)
-{
-    // Check major objects
-    const Root* r = session.getRoot().get();
-    Game* g = session.getGame().get();
-    const game::spec::ShipList* s = session.getShipList().get();
-    if (r == 0 || g == 0 || s == 0) {
-        return 0;
-    }
-
-    // Check battle
-    Turn& t = g->currentTurn();
-    game::vcr::Database* db = t.getBattles().get();
-    if (db == 0) {
-        return 0;
-    }
-
-    game::vcr::Battle* battle = db->getBattle(battleNumber);
-    if (battle == 0 || battle->getObject(side, false) == 0) {
-        return 0;
-    }
-
-    return new VcrSideContext(battleNumber, side, session, *r, t, *s);
 }

@@ -65,6 +65,7 @@ AFL_TEST("game.map.Ufo:accessor", a)
     a.checkEqual("33. getPosition",    t.getPosition().get(pt), true);
     a.checkEqual("34. getX", pt.getX(), 1000);
     a.checkEqual("35. getY", pt.getY(), 1400);
+    a.checkEqual("36. getName",        t.getName(), "Area 51");
 
     a.checkEqual("41. getRadius", t.getRadius().get(radius), true);
     a.checkEqual("42. radius", radius, 25);

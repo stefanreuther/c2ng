@@ -10,6 +10,7 @@
 #include "game/game.hpp"
 #include "game/msg/inbox.hpp"
 #include "game/parser/messagetemplate.hpp"
+#include "game/turn.hpp"
 #include "interpreter/simplecontext.hpp"
 
 namespace game { namespace interface {
@@ -21,12 +22,14 @@ namespace game { namespace interface {
         /** Constructor.
             \param index Message index (0-based)
             \param tx    Translator
-            \param root  Root
-            \param game  Game */
+            \param root  Root (for playerList())
+            \param game  Game (for messageConfiguration())
+            \param turn  Turn (for messages) */
         InboxContext(size_t index,
                      afl::string::Translator& tx,
-                     afl::base::Ref<const Root> root,
-                     afl::base::Ref<const Game> game);
+                     const afl::base::Ref<const Root>& root,
+                     const afl::base::Ref<const Game>& game,
+                     const afl::base::Ref<const Turn>& turn);
 
         /** Destructor. */
         ~InboxContext();
@@ -49,6 +52,7 @@ namespace game { namespace interface {
         afl::string::Translator& m_translator;
         afl::base::Ref<const Root> m_root;
         afl::base::Ref<const Game> m_game;
+        afl::base::Ref<const Turn> m_turn;
 
         afl::base::Ptr<game::parser::MessageLines_t> m_lineCache;
     };

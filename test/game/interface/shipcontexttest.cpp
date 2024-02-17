@@ -91,7 +91,7 @@ AFL_TEST("game.interface.ShipContext:basics", a)
     sh.internalCheck(game::PlayerSet_t(PLAYER), TURN_NR);
 
     // Test object
-    game::interface::ShipContext testee(SHIP_ID, session, root, g, shipList);
+    game::interface::ShipContext testee(SHIP_ID, session, root, g, g->currentTurn(), shipList);
     interpreter::test::ContextVerifier verif(testee, a);
     verif.verifyBasics();
     verif.verifyTypes();
@@ -178,7 +178,7 @@ AFL_TEST("game.interface.ShipContext:empty", a)
     game::map::Ship& sh = *g->currentTurn().universe().ships().create(SHIP_ID);
 
     // Test object
-    game::interface::ShipContext testee(SHIP_ID, session, root, g, shipList);
+    game::interface::ShipContext testee(SHIP_ID, session, root, g, g->currentTurn(), shipList);
     interpreter::test::ContextVerifier verif(testee, a);
     a.checkEqual("01. getObject", testee.getObject(), &sh);
 
@@ -226,7 +226,7 @@ AFL_TEST("game.interface.ShipContext:null", a)
     afl::base::Ref<game::Game> g(*new game::Game());
 
     // Test object
-    game::interface::ShipContext testee(SHIP_ID, session, root, g, shipList);
+    game::interface::ShipContext testee(SHIP_ID, session, root, g, g->currentTurn(), shipList);
     interpreter::test::ContextVerifier verif(testee, a);
     a.checkNull("01. getObject", testee.getObject());
 
@@ -277,7 +277,7 @@ AFL_TEST("game.interface.ShipContext:iteration", a)
     addShipXY(*univ.ships().get(21));
 
     // Create
-    game::interface::ShipContext testee(10, session, root, g, shipList);
+    game::interface::ShipContext testee(10, session, root, g, g->currentTurn(), shipList);
     interpreter::test::ContextVerifier verif(testee, a);
     verif.verifyInteger("ID", 10);
     a.check("01. next", testee.next());
@@ -302,7 +302,7 @@ AFL_TEST("game.interface.ShipContext:create:normal", a)
     session.setShipList(new game::spec::ShipList());
     addShipXY(*session.getGame()->currentTurn().universe().ships().create(100));
 
-    std::auto_ptr<game::interface::ShipContext> ctx(game::interface::ShipContext::create(100, session));
+    std::auto_ptr<game::interface::ShipContext> ctx(game::interface::ShipContext::create(100, session, *session.getGame(), session.getGame()->viewpointTurn()));
     a.checkNonNull("ctx", ctx.get());
     interpreter::test::ContextVerifier(*ctx, a).verifyInteger("ID", 100);
 }
@@ -317,7 +317,7 @@ AFL_TEST("game.interface.ShipContext:create:no-ship", a)
     session.setGame(new game::Game());
     session.setShipList(new game::spec::ShipList());
 
-    std::auto_ptr<game::interface::ShipContext> ctx(game::interface::ShipContext::create(100, session));
+    std::auto_ptr<game::interface::ShipContext> ctx(game::interface::ShipContext::create(100, session, *session.getGame(), session.getGame()->viewpointTurn()));
     a.checkNull("ctx", ctx.get());
 }
 
@@ -331,20 +331,7 @@ AFL_TEST("game.interface.ShipContext:create:no-root", a)
     session.setShipList(new game::spec::ShipList());
     addShipXY(*session.getGame()->currentTurn().universe().ships().create(100));
 
-    std::auto_ptr<game::interface::ShipContext> ctx(game::interface::ShipContext::create(100, session));
-    a.checkNull("ctx", ctx.get());
-}
-
-// No game
-AFL_TEST("game.interface.ShipContext:create:no-game", a)
-{
-    afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    game::Session session(tx, fs);
-    session.setRoot(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,1,0))).asPtr());
-    session.setShipList(new game::spec::ShipList());
-
-    std::auto_ptr<game::interface::ShipContext> ctx(game::interface::ShipContext::create(100, session));
+    std::auto_ptr<game::interface::ShipContext> ctx(game::interface::ShipContext::create(100, session, *session.getGame(), session.getGame()->viewpointTurn()));
     a.checkNull("ctx", ctx.get());
 }
 
@@ -358,6 +345,6 @@ AFL_TEST("game.interface.ShipContext:create:no-shiplist", a)
     session.setGame(new game::Game());
     addShipXY(*session.getGame()->currentTurn().universe().ships().create(100));
 
-    std::auto_ptr<game::interface::ShipContext> ctx(game::interface::ShipContext::create(100, session));
+    std::auto_ptr<game::interface::ShipContext> ctx(game::interface::ShipContext::create(100, session, *session.getGame(), session.getGame()->viewpointTurn()));
     a.checkNull("ctx", ctx.get());
 }

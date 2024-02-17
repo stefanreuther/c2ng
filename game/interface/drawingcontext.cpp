@@ -4,9 +4,9 @@
   */
 
 #include "game/interface/drawingcontext.hpp"
-#include "game/game.hpp"
 #include "game/interface/drawingmethod.hpp"
 #include "game/interface/drawingproperty.hpp"
+#include "game/root.hpp"
 #include "interpreter/callablevalue.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/nametable.hpp"
@@ -38,7 +38,7 @@ namespace {
 
     class DrawingMethodValue : public interpreter::ProcedureValue {
      public:
-        DrawingMethodValue(afl::base::Ref<game::Turn> turn, game::map::DrawingContainer::Iterator_t it, game::interface::DrawingMethod method)
+        DrawingMethodValue(const afl::base::Ref<game::Turn>& turn, const game::map::DrawingContainer::Iterator_t& it, game::interface::DrawingMethod method)
             : m_turn(turn),
               m_iterator(it),
               m_method(method)
@@ -58,7 +58,7 @@ namespace {
     };
 }
 
-game::interface::DrawingContext::DrawingContext(afl::base::Ref<Turn> turn, afl::base::Ref<const Root> root, game::map::DrawingContainer::Iterator_t it)
+game::interface::DrawingContext::DrawingContext(const afl::base::Ref<Turn>& turn, const afl::base::Ref<const Root>& root, const game::map::DrawingContainer::Iterator_t& it)
     : m_turn(turn),
       m_root(root),
       m_iterator(it)
@@ -166,21 +166,15 @@ game::interface::DrawingContext::store(interpreter::TagNode& out, afl::io::DataS
 }
 
 game::interface::DrawingContext*
-game::interface::DrawingContext::create(Session& session)
+game::interface::DrawingContext::create(Session& session, const afl::base::Ref<Turn>& turn)
 {
     // ex values.pas:CreateMarkerContext
-    Game* game = session.getGame().get();
-    if (game == 0) {
-        return 0;
-    }
-
     const Root* root = session.getRoot().get();
     if (root == 0) {
         return 0;
     }
 
-    Turn& turn = game->currentTurn();
-    game::map::DrawingContainer& d = turn.universe().drawings();
+    game::map::DrawingContainer& d = turn->universe().drawings();
     game::map::DrawingContainer::Iterator_t it = d.begin();
     if (it == d.end()) {
         return 0;

@@ -10,6 +10,7 @@
 #include "game/map/planet.hpp"
 #include "game/root.hpp"
 #include "game/session.hpp"
+#include "game/turn.hpp"
 #include "interpreter/simplecontext.hpp"
 
 namespace game { namespace interface {
@@ -24,9 +25,10 @@ namespace game { namespace interface {
         /** Constructor.
             @param id       Planet Id
             @param session  Session (for translator, ship list)
-            @param root     Root; mutable to attach listeners
-            @param game     Game */
-        PlanetContext(Id_t id, Session& session, afl::base::Ref<Root> root, afl::base::Ref<Game> game);
+            @param root     Root; mutable to attach listeners for actions
+            @param game     Game
+            @param turn     Turn */
+        PlanetContext(Id_t id, Session& session, const afl::base::Ref<Root>& root, const afl::base::Ref<Game>& game, const afl::base::Ref<Turn>& turn);
 
         /** Destructor. */
         ~PlanetContext();
@@ -44,17 +46,20 @@ namespace game { namespace interface {
         virtual String_t toString(bool readable) const;
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
-        /** Constructor.
+        /** Create PlanetContext for planet in viewpoint turn.
             @param id       Planet Id
             @param session  Session (for translator, ship list)
+            @param g        Game
+            @param t        Turn (part of game)
             @return newly-allocated PlanetContext; null if preconditions not satisfied */
-        static PlanetContext* create(Id_t id, Session& session);
+        static PlanetContext* create(Id_t id, Session& session, const afl::base::Ref<Game>& g, const afl::base::Ref<Turn>& t);
 
      private:
         Id_t m_id;
         Session& m_session;
         afl::base::Ref<Root> m_root;
         afl::base::Ref<Game> m_game;
+        afl::base::Ref<Turn> m_turn;
     };
 
 } }

@@ -125,7 +125,7 @@ client::tiles::ShipMovementTile::attach(game::proxy::ObjectObserver& oop)
                 game::spec::ShipList* shipList = s.getShipList().get();
                 afl::string::Translator& tx = s.translator();
                 if (sh != 0 && root != 0 && shipList != 0 && g != 0 && sh->getShipKind() == game::map::Ship::CurrentShip) {
-                    game::map::ShipPredictor crystal_ball(g->currentTurn().universe(),
+                    game::map::ShipPredictor crystal_ball(g->viewpointTurn().universe(),
                                                           sh->getId(),
                                                           g->shipScores(),
                                                           *shipList,
@@ -137,7 +137,7 @@ client::tiles::ShipMovementTile::attach(game::proxy::ObjectObserver& oop)
                     crystal_ball.computeMovement();
 
                     ChunnelMission chd;
-                    chd.check(*sh, g->currentTurn().universe(), g->mapConfiguration(), g->shipScores(), g->teamSettings(), *shipList, *root);
+                    chd.check(*sh, g->viewpointTurn().universe(), g->mapConfiguration(), g->shipScores(), g->teamSettings(), *shipList, *root);
                     const bool is_chunnel = chd.getTargetId() != 0
                         && sh->getWaypointDX().orElse(0) == 0
                         && sh->getWaypointDY().orElse(0) == 0;
@@ -147,22 +147,22 @@ client::tiles::ShipMovementTile::attach(game::proxy::ObjectObserver& oop)
                     game::map::Point pos = sh->getPosition().orElse(game::map::Point());
 
                     // Location
-                    job->data.text[Data::Location] = g->currentTurn().universe().findLocationName(pos,
-                                                                                                  game::map::Universe::NameGravity | game::map::Universe::NameVerbose,
-                                                                                                  g->mapConfiguration(),
-                                                                                                  root->hostConfiguration(),
-                                                                                                  root->hostVersion(),
-                                                                                                  s.translator());
+                    job->data.text[Data::Location] = g->viewpointTurn().universe().findLocationName(pos,
+                                                                                                    game::map::Universe::NameGravity | game::map::Universe::NameVerbose,
+                                                                                                    g->mapConfiguration(),
+                                                                                                    root->hostConfiguration(),
+                                                                                                    root->hostVersion(),
+                                                                                                    s.translator());
                     job->data.colors[Data::Location] = SkinColor::Green;
 
                     // Waypoint
                     game::map::Ship* otherShip = 0;
                     if (sh->getMission().orElse(0) == game::spec::Mission::msn_Intercept
-                        && (otherShip = g->currentTurn().universe().ships().get(sh->getMissionParameter(game::InterceptParameter).orElse(0))) != 0)
+                        && (otherShip = g->viewpointTurn().universe().ships().get(sh->getMissionParameter(game::InterceptParameter).orElse(0))) != 0)
                     {
                         job->data.text[Data::Waypoint] = otherShip->getName();
                         job->data.colors[Data::Waypoint] = SkinColor::Green;
-                    } else if (is_chunnel && (otherShip = g->currentTurn().universe().ships().get(chd.getTargetId())) != 0) {
+                    } else if (is_chunnel && (otherShip = g->viewpointTurn().universe().ships().get(chd.getTargetId())) != 0) {
                         job->data.text[Data::Waypoint] = afl::string::Format(tx("chunnel to %s"), otherShip->getName());
                         job->data.colors[Data::Waypoint] = (chd.getFailureReasons() & ~(ChunnelMission::chf_Fuel | ChunnelMission::chf_Distance)) != 0
                             ? SkinColor::Yellow
@@ -170,12 +170,12 @@ client::tiles::ShipMovementTile::attach(game::proxy::ObjectObserver& oop)
                     } else {
                         game::map::Point wp;
                         sh->getWaypoint().get(wp);
-                        job->data.text[Data::Waypoint] = g->currentTurn().universe().findLocationName(wp,
-                                                                                                      game::map::Universe::NameGravity | game::map::Universe::NameVerbose | game::map::Universe::NameShips,
-                                                                                                      g->mapConfiguration(),
-                                                                                                      root->hostConfiguration(),
-                                                                                                      root->hostVersion(),
-                                                                                                      s.translator());
+                        job->data.text[Data::Waypoint] = g->viewpointTurn().universe().findLocationName(wp,
+                                                                                                        game::map::Universe::NameGravity | game::map::Universe::NameVerbose | game::map::Universe::NameShips,
+                                                                                                        g->mapConfiguration(),
+                                                                                                        root->hostConfiguration(),
+                                                                                                        root->hostVersion(),
+                                                                                                        s.translator());
                         job->data.colors[Data::Waypoint] = SkinColor::Green;
                     }
 
@@ -282,7 +282,7 @@ client::tiles::ShipMovementTile::attach(game::proxy::ObjectObserver& oop)
                     int towee_mass = 0;
                     if (sh->getMission().orElse(0) == game::spec::Mission::msn_Tow) {
                         // FIXME: self-tow?
-                        if (game::map::Ship* towee = g->currentTurn().universe().ships().get(sh->getMissionParameter(game::TowParameter).orElse(0))) {
+                        if (game::map::Ship* towee = g->viewpointTurn().universe().ships().get(sh->getMissionParameter(game::TowParameter).orElse(0))) {
                             towee->getMass(*shipList).get(towee_mass);
                         }
                     }

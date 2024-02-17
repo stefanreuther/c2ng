@@ -36,14 +36,14 @@ game::interface::UfoFunction::get(interpreter::Arguments& args)
     if (g == 0) {
         return 0;
     }
-    Turn& t = g->currentTurn();
+    Turn& t = g->viewpointTurn();
 
     Id_t index = t.universe().ufos().findIndexForId(id);
     if (index == 0) {
         return 0;
     }
 
-    return new UfoContext(index, t, m_session);
+    return new UfoContext(index, t, m_session.translator());
 }
 
 void
@@ -68,14 +68,14 @@ game::interface::UfoFunction::makeFirstContext()
     if (g == 0) {
         return 0;
     }
-    Turn& t = g->currentTurn();
+    Turn& t = g->viewpointTurn();
 
     Id_t index = t.universe().ufos().findNextIndexNoWrap(0, false);
     if (index == 0) {
         return 0;
     }
 
-    return new UfoContext(index, t, m_session);
+    return new UfoContext(index, t, m_session.translator());
 }
 
 game::interface::UfoFunction*

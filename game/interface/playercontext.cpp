@@ -32,7 +32,7 @@ namespace {
     };
 }
 
-game::interface::PlayerContext::PlayerContext(int nr, afl::base::Ref<Game> game, afl::base::Ref<Root> root, afl::string::Translator& tx)
+game::interface::PlayerContext::PlayerContext(int nr, const afl::base::Ref<Game>& game, const afl::base::Ref<Root>& root, afl::string::Translator& tx)
     : m_number(nr),
       m_game(game),
       m_root(root),

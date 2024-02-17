@@ -8,6 +8,7 @@
 #include "game/game.hpp"
 #include "game/interface/vcrproperty.hpp"
 #include "game/interface/vcrsideproperty.hpp"
+#include "game/turn.hpp"
 #include "interpreter/nametable.hpp"
 #include "interpreter/propertyacceptor.hpp"
 #include "interpreter/typehint.hpp"
@@ -101,14 +102,14 @@ namespace {
 }
 
 game::interface::VcrContext::VcrContext(size_t battleNumber,
-                                        Session& session,
-                                        afl::base::Ref<const Root> root,
-                                        afl::base::Ref<const Turn> turn,
-                                        afl::base::Ref<const game::spec::ShipList> shipList)
+                                        afl::string::Translator& tx,
+                                        const afl::base::Ref<const Root>& root,
+                                        const afl::base::Ptr<game::vcr::Database>& battles,
+                                        const afl::base::Ref<const game::spec::ShipList>& shipList)
     : m_battleNumber(battleNumber),
-      m_session(session),
+      m_translator(tx),
       m_root(root),
-      m_turn(turn),
+      m_battles(battles),
       m_shipList(shipList)
 {
     // ex IntVcrContext::IntVcrContext
@@ -132,21 +133,13 @@ game::interface::VcrContext::get(PropertyIndex_t index)
     if (game::vcr::Battle* battle = getBattle()) {
         switch (VcrDomain(vcr_mapping[index].domain)) {
          case VcrPropertyDomain:
-            return getVcrProperty(m_battleNumber, VcrProperty(vcr_mapping[index].index), m_session, m_root, m_turn, m_shipList);
+            return getVcrProperty(m_battleNumber, VcrProperty(vcr_mapping[index].index), m_translator, m_root, m_battles, m_shipList);
 
          case LeftPropertyDomain:
-            return getVcrSideProperty(*battle, 0, VcrSideProperty(vcr_mapping[index].index),
-                                      m_session.translator(),
-                                      *m_shipList,
-                                      m_root->hostConfiguration(),
-                                      m_root->playerList());
+            return getVcrSideProperty(*battle, 0, VcrSideProperty(vcr_mapping[index].index), m_translator, *m_shipList, m_root->hostConfiguration(), m_root->playerList());
 
          case RightPropertyDomain:
-            return getVcrSideProperty(*battle, 1, VcrSideProperty(vcr_mapping[index].index),
-                                      m_session.translator(),
-                                      *m_shipList,
-                                      m_root->hostConfiguration(),
-                                      m_root->playerList());
+            return getVcrSideProperty(*battle, 1, VcrSideProperty(vcr_mapping[index].index), m_translator, *m_shipList, m_root->hostConfiguration(), m_root->playerList());
         }
     }
     return 0;
@@ -156,8 +149,8 @@ bool
 game::interface::VcrContext::next()
 {
     // ex IntVcrContext::next
-    if (const game::vcr::Database* db = m_turn->getBattles().get()) {
-        if (m_battleNumber + 1 < db->getNumBattles()) {
+    if (m_battles.get() != 0) {
+        if (m_battleNumber + 1 < m_battles->getNumBattles()) {
             ++m_battleNumber;
             return true;
         }
@@ -168,7 +161,7 @@ game::interface::VcrContext::next()
 game::interface::VcrContext*
 game::interface::VcrContext::clone() const
 {
-    return new VcrContext(m_battleNumber, m_session, m_root, m_turn, m_shipList);
+    return new VcrContext(m_battleNumber, m_translator, m_root, m_battles, m_shipList);
 }
 
 afl::base::Deletable*
@@ -200,32 +193,29 @@ game::interface::VcrContext::store(interpreter::TagNode& out, afl::io::DataSink&
 }
 
 game::interface::VcrContext*
-game::interface::VcrContext::create(size_t battleNumber, Session& session)
+game::interface::VcrContext::create(size_t battleNumber, Session& session, const afl::base::Ptr<game::vcr::Database>& battles)
 {
     // Check major objects
     const Root* r = session.getRoot().get();
-    const Game* g = session.getGame().get();
     const game::spec::ShipList* s = session.getShipList().get();
-    if (r == 0 || g == 0 || s == 0) {
+    if (r == 0 || s == 0) {
         return 0;
     }
 
     // Check presence of battle
-    const Turn& t = g->currentTurn();
-    game::vcr::Database* db = t.getBattles().get();
-    if (db == 0 || db->getBattle(battleNumber) == 0) {
+    if (battles.get() == 0 || battles->getBattle(battleNumber) == 0) {
         return 0;
     }
 
     // OK
-    return new VcrContext(battleNumber, session, *r, t, *s);
+    return new VcrContext(battleNumber, session.translator(), *r, battles, *s);
 }
 
 game::vcr::Battle*
 game::interface::VcrContext::getBattle() const
 {
-    if (game::vcr::Database* db = m_turn->getBattles().get()) {
-        return db->getBattle(m_battleNumber);
+    if (m_battles.get() != 0) {
+        return m_battles->getBattle(m_battleNumber);
     } else {
         return 0;
     }

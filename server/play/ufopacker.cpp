@@ -27,7 +27,7 @@ server::play::UfoPacker::buildValue() const
     game::map::UfoType& ty = g.currentTurn().universe().ufos();
     for (game::Id_t i = ty.findNextIndex(0); i != 0; i = ty.findNextIndex(i)) {
         afl::base::Ref<afl::data::Hash> hv(afl::data::Hash::create());
-        game::interface::UfoContext ctx(i, g.currentTurn(), m_session);
+        game::interface::UfoContext ctx(i, g.currentTurn(), m_session.translator());
 
         addValue(*hv, ctx, "COLOR.EGA", "COLOR");
         addValue(*hv, ctx, "HEADING$", "HEADING");

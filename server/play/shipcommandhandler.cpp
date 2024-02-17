@@ -61,22 +61,22 @@ server::play::ShipCommandHandler::processCommand(const String_t& cmd, interprete
         objs.addNew(new ShipPacker(m_session, m_id));
     } else if (cmd == "setfcode") {
         args.checkArgumentCount(1);
-        gi::setShipProperty(*pShip, gi::ispFCode, args.getNext(), root, sl, g.mapConfiguration(), turn);
+        gi::setShipProperty(*pShip, gi::ispFCode, args.getNext(), root, sl, g.mapConfiguration(), turn.universe());
         objs.addNew(new ShipPacker(m_session, m_id));
     } else if (cmd == "setname") {
         args.checkArgumentCount(1);
-        gi::setShipProperty(*pShip, gi::ispName, args.getNext(), root, sl, g.mapConfiguration(), turn);
+        gi::setShipProperty(*pShip, gi::ispName, args.getNext(), root, sl, g.mapConfiguration(), turn.universe());
         objs.addNew(new ShipXYPacker(m_session));
     } else if (cmd == "setwaypoint") {
         gi::callShipMethod(*pShip, gi::ismSetWaypoint, args, process, m_session, root, g.mapConfiguration(), sl, turn);
         objs.addNew(new ShipPacker(m_session, m_id));
     } else if (cmd == "setenemy") {
         args.checkArgumentCount(1);
-        gi::setShipProperty(*pShip, gi::ispEnemyId, args.getNext(), root, sl, g.mapConfiguration(), turn);
+        gi::setShipProperty(*pShip, gi::ispEnemyId, args.getNext(), root, sl, g.mapConfiguration(), turn.universe());
         objs.addNew(new ShipPacker(m_session, m_id));
     } else if (cmd == "setspeed") {
         args.checkArgumentCount(1);
-        gi::setShipProperty(*pShip, gi::ispSpeedId, args.getNext(), root, sl, g.mapConfiguration(), turn);
+        gi::setShipProperty(*pShip, gi::ispSpeedId, args.getNext(), root, sl, g.mapConfiguration(), turn.universe());
         objs.addNew(new ShipPacker(m_session, m_id));
     } else if (cmd == "setmission") {
         gi::callShipMethod(*pShip, gi::ismSetMission, args, process, m_session, root, g.mapConfiguration(), sl, turn);

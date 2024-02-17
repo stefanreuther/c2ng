@@ -19,12 +19,19 @@
 #include "interpreter/propertyacceptor.hpp"
 #include "interpreter/simpleprocedure.hpp"
 
+using afl::base::Ptr;
+using afl::base::Ref;
+using afl::io::FileSystem;
+using afl::io::Stream;
+using game::Session;
+using game::msg::Inbox;
+
 namespace {
     struct Data {
-        afl::base::Ptr<game::msg::Inbox> mailbox;
-        game::Session& session;
+        Ptr<Inbox> mailbox;
+        Session& session;
 
-        Data(const afl::base::Ptr<game::msg::Inbox>& mailbox, game::Session& session)
+        Data(const Ptr<Inbox>& mailbox, Session& session)
             : mailbox(mailbox), session(session)
             { }
     };
@@ -32,18 +39,22 @@ namespace {
     // @since PCC2 2.41
     void IFMailbox_Add(Data d, interpreter::Process& /*proc*/, interpreter::Arguments& args)
     {
-        // Preconditions
-        game::Game& g = game::actions::mustHaveGame(d.session);
-
         // Parse arguments
+        // - text
         args.checkArgumentCount(1, 3);
         String_t text;
-        int turnNumber = g.currentTurn().getTurnNumber();
-        game::Reference ref;
         if (!interpreter::checkStringArg(text, args.getNext())) {
             return;
         }
-        interpreter::checkIntegerArg(turnNumber, args.getNext());
+
+        // - turn
+        int turnNumber = 0;
+        if (!interpreter::checkIntegerArg(turnNumber, args.getNext())) {
+            turnNumber = game::actions::mustHaveGame(d.session).viewpointTurn().getTurnNumber();
+        }
+
+        // - reference
+        game::Reference ref;
         game::interface::checkReferenceArg(ref, args.getNext());
 
         // Do it
@@ -59,19 +70,19 @@ namespace {
 
         // Preconditions
         game::Root& root = game::actions::mustHaveRoot(d.session);
-        game::Game& g = game::actions::mustHaveGame(d.session);
+        const game::Game& g = game::actions::mustHaveGame(d.session);
 
         // Load parser definition
         game::v3::udata::SessionNameProvider provider(d.session);
         game::v3::udata::MessageBuilder builder(provider, root.charset(), d.session.translator());
         {
-            afl::base::Ref<afl::io::Stream> file(root.specificationLoader().openSpecificationFile("utildata.ini"));
+            Ref<Stream> file(root.specificationLoader().openSpecificationFile("utildata.ini"));
             builder.loadDefinition(*file, d.session.log());
         }
 
         // Load messages
         {
-            afl::base::Ref<afl::io::Stream> file(root.gameDirectory().openFile(afl::string::Format("util%d.dat", g.getViewpointPlayer()), afl::io::FileSystem::OpenRead));
+            Ref<Stream> file(root.gameDirectory().openFile(afl::string::Format("util%d.dat", g.getViewpointPlayer()), FileSystem::OpenRead));
             builder.loadFile(*file, *d.mailbox);
         }
     }
@@ -109,7 +120,7 @@ namespace {
 }
 
 
-game::interface::MailboxContext::MailboxContext(const afl::base::Ptr<game::msg::Inbox> mailbox, Session& session)
+game::interface::MailboxContext::MailboxContext(const afl::base::Ptr<game::msg::Inbox>& mailbox, Session& session)
     : SingleContext(),
       m_mailbox(mailbox),
       m_session(session)
@@ -127,7 +138,7 @@ game::interface::MailboxContext::mailbox()
 game::interface::MailboxContext*
 game::interface::MailboxContext::create(Session& session)
 {
-    return new MailboxContext(new game::msg::Inbox(), session);
+    return new MailboxContext(new Inbox(), session);
 }
 
 // Context:
@@ -188,7 +199,8 @@ game::interface::MailboxContext::store(interpreter::TagNode& out, afl::io::DataS
 
    For now, this interface is temporary.
    Operations on the mailbox:
-   - Add msg:Str, Optional turn:Int, ref:Reference] (add single message)
+   - Add msg:Str, Optional turn:Int, ref:Reference (add single message)
+   - LoadFile #fd:File (load messages from file)
    - LoadUtilData (load util.dat)
 
    @since PCC2 2.41 */

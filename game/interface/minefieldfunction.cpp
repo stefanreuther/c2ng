@@ -37,7 +37,11 @@ game::interface::MinefieldFunction::get(interpreter::Arguments& args)
         return 0;
     }
 
-    return MinefieldContext::create(mid, m_session, false);
+    if (Game* g = m_session.getGame().get()) {
+        return MinefieldContext::create(mid, m_session, *g, g->viewpointTurn(), false);
+    } else {
+        return 0;
+    }
 }
 
 void
@@ -54,7 +58,7 @@ game::interface::MinefieldFunction::getDimension(int32_t which) const
         return 1;
     } else {
         if (Game* game = m_session.getGame().get()) {
-            return game->currentTurn().universe().minefields().size()+1;
+            return game->viewpointTurn().universe().minefields().size()+1;
         } else {
             return 0;
         }
@@ -64,14 +68,8 @@ game::interface::MinefieldFunction::getDimension(int32_t which) const
 interpreter::Context*
 game::interface::MinefieldFunction::makeFirstContext()
 {
-    Game* g = m_session.getGame().get();
-    Root* r = m_session.getRoot().get();
-    if (g != 0 || r != 0) {
-        if (int mid = g->currentTurn().universe().minefields().findNextIndex(0)) {
-            return new MinefieldContext(mid, *r, *g, m_session.translator());
-        } else {
-            return 0;
-        }
+    if (Game* g = m_session.getGame().get()) {
+        return MinefieldContext::create(g->viewpointTurn().universe().minefields().findNextIndex(0), m_session, *g, g->viewpointTurn(), false);
     } else {
         return 0;
     }

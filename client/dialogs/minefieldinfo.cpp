@@ -11,9 +11,11 @@
 #include "client/si/control.hpp"
 #include "client/tiles/selectionheadertile.hpp"
 #include "client/widgets/helpwidget.hpp"
+#include "game/game.hpp"
 #include "game/interface/minefieldcontext.hpp"
 #include "game/proxy/configurationproxy.hpp"
 #include "game/proxy/minefieldproxy.hpp"
+#include "game/turn.hpp"
 #include "ui/dialogs/messagebox.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/group.hpp"
@@ -393,8 +395,10 @@ MinefieldInfoDialog::createContextProvider()
             { }
         virtual void createContext(game::Session& session, interpreter::ContextReceiver& recv)
             {
-                if (interpreter::Context* ctx = game::interface::MinefieldContext::create(m_id, session, false)) {
-                    recv.pushNewContext(ctx);
+                if (game::Game* g = session.getGame().get()) {
+                    if (interpreter::Context* ctx = game::interface::MinefieldContext::create(m_id, session, *g, g->viewpointTurn(), false)) {
+                        recv.pushNewContext(ctx);
+                    }
                 }
             }
      private:
