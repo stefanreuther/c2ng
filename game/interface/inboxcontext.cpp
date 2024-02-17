@@ -58,12 +58,11 @@ namespace {
             {
                 args.checkArgumentCount(1);
 
-                // FIXME: use checkIndexArg
-                int32_t index;
-                if (!interpreter::checkIntegerArg(index, args.getNext(), 1, int32_t(m_lines->size()))) {
+                size_t index;
+                if (!interpreter::checkIndexArg(index, args.getNext(), 1, m_lines->size())) {
                     return 0;
                 }
-                return interpreter::makeStringValue((*m_lines)[index-1]);
+                return interpreter::makeStringValue((*m_lines)[index]);
             }
 
         virtual void set(interpreter::Arguments& args, const afl::data::Value* value)

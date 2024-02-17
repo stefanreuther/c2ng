@@ -116,6 +116,25 @@ interpreter::checkIntegerArg(int32_t& out, const afl::data::Value* value, int32_
     return result;
 }
 
+// Check size argument.
+bool
+interpreter::checkIndexArg(size_t& out, const afl::data::Value* value, size_t first, size_t num)
+{
+    int32_t iv;
+    bool result = checkIntegerArg(iv, value);
+    if (result) {
+        if (iv < 0) {
+            throw Error::rangeError();
+        }
+        size_t n = iv - first;
+        if (n >= num) {
+            throw Error::rangeError();
+        }
+        out = n;
+    }
+    return result;
+}
+
 // Check boolean argument.
 bool
 interpreter::checkBooleanArg(bool& out, const afl::data::Value* value)

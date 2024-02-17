@@ -42,13 +42,12 @@ game::interface::InboxFunction::get(interpreter::Arguments& args)
         return 0;
     }
 
-    // FIXME: use checkIndexArg
-    int32_t index;
-    if (!interpreter::checkIntegerArg(index, args.getNext(), 1, int32_t(g->currentTurn().inbox().getNumMessages()))) {
+    size_t index;
+    if (!interpreter::checkIndexArg(index, args.getNext(), 1, g->currentTurn().inbox().getNumMessages())) {
         return 0;
     }
 
-    return new InboxContext(size_t(index-1), m_session.translator(), *r, *g);
+    return new InboxContext(index, m_session.translator(), *r, *g);
 }
 
 void

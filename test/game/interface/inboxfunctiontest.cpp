@@ -78,6 +78,12 @@ AFL_TEST("game.interface.InboxFunction:basics", a)
         interpreter::Arguments args(seg, 0, 1);
         AFL_CHECK_THROWS(a("31. out-of-range"), testee.get(args), interpreter::Error);
     }
+    {
+        afl::data::Segment seg;
+        seg.pushBackInteger(0);
+        interpreter::Arguments args(seg, 0, 1);
+        AFL_CHECK_THROWS(a("32. out-of-range"), testee.get(args), interpreter::Error);
+    }
 
     // Type error
     {

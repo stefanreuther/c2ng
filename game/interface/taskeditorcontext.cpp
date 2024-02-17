@@ -63,23 +63,6 @@ namespace {
         }
     }
 
-    bool checkIndexArg(size_t& out, const afl::data::Value* v, size_t limit)
-    {
-        // Parse value
-        int32_t i;
-        if (!checkIntegerArg(i, v)) {
-            return false;
-        }
-
-        // Check range
-        if (i < 0 || i >= limitRange(limit)) {
-            throw Error::rangeError();
-        }
-
-        out = static_cast<size_t>(i);
-        return true;
-    }
-
     void validateCommand(const String_t& str)
     {
         if (!TaskEditor::isValidCommand(str)) {
@@ -143,7 +126,7 @@ namespace {
             {
                 size_t index;
                 args.checkArgumentCount(1);
-                if (!checkIndexArg(index, args.getNext(), m_edit->getNumInstructions())) {
+                if (!interpreter::checkIndexArg(index, args.getNext(), 0, m_edit->getNumInstructions())) {
                     return 0;
                 }
                 return makeStringValue((*m_edit)[index]);
@@ -152,7 +135,7 @@ namespace {
             {
                 size_t index;
                 args.checkArgumentCount(1);
-                if (!checkIndexArg(index, args.getNext(), m_edit->getNumInstructions())) {
+                if (!interpreter::checkIndexArg(index, args.getNext(), 0, m_edit->getNumInstructions())) {
                     return;
                 }
 
@@ -316,7 +299,7 @@ namespace {
             }
         } else {
             size_t index = 0;
-            checkIndexArg(index, pos, edit.getNumInstructions()+1);
+            interpreter::checkIndexArg(index, pos, 0, edit.getNumInstructions()+1);
             if (!lines.empty()) {
                 edit.replace(index, 0, lines, TaskEditor::DefaultCursor, TaskEditor::DefaultPC);
             }
@@ -334,13 +317,13 @@ namespace {
 
         // Index: [0, getNumInstructions()]
         size_t index = 0;
-        if (!checkIndexArg(index, args.getNext(), edit.getNumInstructions()+1)) {
+        if (!interpreter::checkIndexArg(index, args.getNext(), 0, edit.getNumInstructions()+1)) {
             return;
         }
 
         // Count: unrestricted, will be limited, defaults to 1
         size_t count = 1;
-        checkIndexArg(count, args.getNext(), size_t(-1));
+        interpreter::checkIndexArg(count, args.getNext(), 0, size_t(-1));
         count = std::min(count, edit.getNumInstructions() - index);
 
         // Do it
@@ -699,13 +682,13 @@ game::interface::setTaskEditorProperty(interpreter::TaskEditor& edit, TaskEditor
     size_t n;
     switch (prop) {
      case iteCursor:
-        if (checkIndexArg(n, value, edit.getNumInstructions() + 1)) {
+        if (interpreter::checkIndexArg(n, value, 0, edit.getNumInstructions() + 1)) {
             edit.setCursor(n);
         }
         break;
 
      case itePC:
-        if (checkIndexArg(n, value, edit.getNumInstructions())) {
+        if (interpreter::checkIndexArg(n, value, 0, edit.getNumInstructions())) {
             edit.setPC(n);
         }
         break;

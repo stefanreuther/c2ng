@@ -98,14 +98,9 @@ interpreter::ArrayData::computeIndex(Arguments& args, size_t& result) const
     result = 0;
     for (size_t i = 0; i < m_dimensions.size(); ++i) {
         // Read arg. Check for null.
-        int32_t me;
-        if (!checkIntegerArg(me, args.getNext())) {
+        size_t me = 0;
+        if (!checkIndexArg(me, args.getNext(), 0, m_dimensions[i])) {
             return false;
-        }
-
-        // Range check.
-        if (me < 0 || int32_t(size_t(me)) != me || size_t(me) >= m_dimensions[i]) {
-            throw Error::rangeError();
         }
 
         // Compute index. Horner schema.

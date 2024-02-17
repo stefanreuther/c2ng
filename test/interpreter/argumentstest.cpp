@@ -185,6 +185,81 @@ AFL_TEST("interpreter.Arguments:checkIntegerArg:float:overflow", a)
     AFL_CHECK_THROWS(a("range"),     interpreter::checkIntegerArg(iv, p.get(), 1, 10), interpreter::Error);
 }
 
+/*
+ *  checkIndexArg
+ */
+
+// Null
+AFL_TEST("interpreter.Arguments:checkIndexArg:null", a)
+{
+    size_t iv = 0;
+    a.check("", !interpreter::checkIndexArg(iv, 0, 1, 10));
+}
+
+// Integer
+AFL_TEST("interpreter.Arguments:checkIndexArg:int", a)
+{
+    size_t iv = 0;
+    std::auto_ptr<afl::data::Value> p(interpreter::makeIntegerValue(3));
+    a.check("checkIndexArg", interpreter::checkIndexArg(iv, p.get(), 0, 10));
+    a.checkEqual("value", iv, 3U);
+}
+
+AFL_TEST("interpreter.Arguments:checkIndexArg:int:offset", a)
+{
+    size_t iv = 0;
+    std::auto_ptr<afl::data::Value> p(interpreter::makeIntegerValue(3));
+    a.check("checkIndexArg", interpreter::checkIndexArg(iv, p.get(), 2, 10));
+    a.checkEqual("value", iv, 1U);
+}
+
+AFL_TEST("interpreter.Arguments:checkIndexArg:int:out-of-range", a)
+{
+    size_t iv = 0;
+    std::auto_ptr<afl::data::Value> p(interpreter::makeIntegerValue(3));
+    AFL_CHECK_THROWS(a, interpreter::checkIndexArg(iv, p.get(), 0, 2), interpreter::Error);
+}
+
+AFL_TEST("interpreter.Arguments:checkIndexArg:int:offset:out-of-range", a)
+{
+    size_t iv = 0;
+    std::auto_ptr<afl::data::Value> p(interpreter::makeIntegerValue(0));
+    AFL_CHECK_THROWS(a, interpreter::checkIndexArg(iv, p.get(), 1, 10), interpreter::Error);
+}
+
+// String
+AFL_TEST("interpreter.Arguments:checkIndexArg::str", a)
+{
+    size_t iv = 0;
+    std::auto_ptr<afl::data::Value> p(interpreter::makeStringValue("hi"));
+    AFL_CHECK_THROWS(a, interpreter::checkIndexArg(iv, p.get(), 1, 10), interpreter::Error);
+}
+
+// String: no implicit destringification!
+AFL_TEST("interpreter.Arguments:checkIndexArg:str:2", a)
+{
+    size_t iv = 0;
+    std::auto_ptr<afl::data::Value> p(interpreter::makeStringValue("7"));
+    AFL_CHECK_THROWS(a, interpreter::checkIndexArg(iv, p.get(), 1, 10), interpreter::Error);
+}
+
+// Bool
+AFL_TEST("interpreter.Arguments:checkIndexArg:bool", a)
+{
+    size_t iv = 0;
+    std::auto_ptr<afl::data::Value> p(interpreter::makeBooleanValue(1));
+    a.check("checkIndexArg", interpreter::checkIndexArg(iv, p.get(), 0, 10));
+    a.checkEqual("value", iv, 1U);
+}
+
+// Float
+AFL_TEST("interpreter.Arguments:checkIndexArg:float", a)
+{
+    size_t iv = 0;
+    std::auto_ptr<afl::data::Value> p(interpreter::makeFloatValue(16.25));
+    a.check("checkIndexArg", interpreter::checkIndexArg(iv, p.get(), 0, 20));
+    a.checkEqual("value", iv, 16U);
+}
 
 /*
  *  checkBooleanArg()

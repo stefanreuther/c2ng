@@ -161,6 +161,14 @@ AFL_TEST("game.interface.InboxContext:text", a)
         a.checkNonNull("21. get", result.get());
         a.checkEqual("22. value", afl::data::Access(result.get()).toString(), "(-a000)<<< Third >>>");
     }
+    {
+        afl::data::Segment args;
+        args.pushBackInteger(2);
+        interpreter::Arguments ap(args, 0, 1);
+        std::auto_ptr<afl::data::Value> result(iv->get(ap));
+        a.checkNonNull("26. get", result.get());
+        a.checkEqual("27. value", afl::data::Access(result.get()).toString(), "This is the third message.");
+    }
 
     // Wrong-number-of-arguments case
     {
@@ -175,6 +183,20 @@ AFL_TEST("game.interface.InboxContext:text", a)
         interpreter::Arguments ap(args, 0, 1);
         std::auto_ptr<afl::data::Value> result(iv->get(ap));
         a.checkNull("41. null", result.get());
+    }
+
+    // Range error
+    {
+        afl::data::Segment args;
+        args.pushBackInteger(0);
+        interpreter::Arguments ap(args, 0, 1);
+        AFL_CHECK_THROWS(a("51. range error"), iv->get(ap), interpreter::Error);
+    }
+    {
+        afl::data::Segment args;
+        args.pushBackInteger(3);
+        interpreter::Arguments ap(args, 0, 1);
+        AFL_CHECK_THROWS(a("52. range error"), iv->get(ap), interpreter::Error);
     }
 }
 

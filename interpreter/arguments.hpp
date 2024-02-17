@@ -74,6 +74,17 @@ namespace interpreter {
         \throw Error if value is invalid */
     bool checkIntegerArg(int32_t& out, const afl::data::Value* value, int32_t min, int32_t max);
 
+    /** Check index argument.
+        \param [out] out   Result will be placed here
+        \param [in]  value Value given by user
+        \param [in]  offset Offset (first allowed value).
+        \param [in]  num   Number of permitted values.
+                           If valid user values are 1..5, pass first=1, num=5, producing result 0..4.
+                           If valid values are 0..10, pass first=0, num=11, producing result 0..10.
+        \return true if value was specified, false if value was null (out not changed)
+        \throw Error if value is invalid */
+    bool checkIndexArg(size_t& out, const afl::data::Value* value, size_t offset, size_t num);
+
     /** Check boolean argument.
         \param out   [out] Result will be placed here
         \param value [in] Value given by user

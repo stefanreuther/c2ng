@@ -123,14 +123,14 @@ game::interface::InboxSubsetValue::get(interpreter::Arguments& args)
     // ex IntMappedMessageValue::get
     args.checkArgumentCount(1);
 
-    int32_t n;
-    if (!interpreter::checkIntegerArg(n, args.getNext(), 1, static_cast<int32_t>(m_indexes.size()))) {
+    size_t n;
+    if (!interpreter::checkIndexArg(n, args.getNext(), 1, m_indexes.size())) {
         return 0;
     }
 
     // In theory, we could return a InboxContext here,
     // but for now, let's preserve the identity as coming from a Inbox subset.
-    return new InboxSubsetContext(n-1, m_indexes, m_translator, m_root, m_game);
+    return new InboxSubsetContext(n, m_indexes, m_translator, m_root, m_game);
 }
 
 void
