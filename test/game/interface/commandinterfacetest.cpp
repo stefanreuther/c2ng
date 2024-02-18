@@ -43,6 +43,7 @@ namespace {
         if (env.session.getGame().get() == 0) {
             env.session.setGame(new game::Game());
             env.session.getGame()->setViewpointPlayer(PLAYER_NR);
+            env.session.getGame()->currentTurn().setCommandPlayers(game::PlayerSet_t(PLAYER_NR));
         }
         return *env.session.getGame();
     }

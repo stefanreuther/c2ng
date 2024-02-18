@@ -81,6 +81,7 @@ namespace {
 
         // Context check
         game::Game& g = game::actions::mustHaveGame(session);
+        game::Turn& t = game::actions::mustBeLocallyEditable(g.viewpointTurn());
 
         // Normalize coordinates if needed
         game::map::Point a(x1, y1);
@@ -96,7 +97,7 @@ namespace {
         drawing->setTag(tag);
         drawing->setExpire(expire);
 
-        g.currentTurn().universe().drawings().addNew(drawing.release());
+        t.universe().drawings().addNew(drawing.release());
     }
 
     void createConfigOption(game::config::Configuration& config, interpreter::Arguments& args)
@@ -380,7 +381,7 @@ game::interface::IFCCSelectionExec(game::Session& session, interpreter::Process&
                        ? g.selections().getCurrentLayer()
                        : size_t(layer-1));
 
-    g.selections().executeCompiledExpression(code, effLayer, g.currentTurn().universe());
+    g.selections().executeCompiledExpression(code, effLayer, g.viewpointTurn().universe());
 }
 
 /* @q CC$History.ShowTurn n:Int (Internal)
@@ -567,6 +568,7 @@ game::interface::IFNewCannedMarker(game::Session& session, interpreter::Process&
     // Context check
     Root& r = game::actions::mustHaveRoot(session);
     Game& g = game::actions::mustHaveGame(session);
+    Turn& t = game::actions::mustBeLocallyEditable(g.viewpointTurn());
 
     // Obtain configuration
     const game::config::MarkerOptionDescriptor* opt = game::config::UserConfiguration::getCannedMarker(shape);
@@ -579,7 +581,7 @@ game::interface::IFNewCannedMarker(game::Session& session, interpreter::Process&
     drawing->setTag(tag);
     drawing->setExpire(expire);
 
-    g.currentTurn().universe().drawings().addNew(drawing.release());
+    t.universe().drawings().addNew(drawing.release());
 }
 
 /* @q NewCircle x:Int, y:Int, radius:Int, Optional color:Int, tag:Int, expire:Int (Global Command)
@@ -619,6 +621,7 @@ game::interface::IFNewCircle(game::Session& session, interpreter::Process& /*pro
 
     // Context check
     Game& g = game::actions::mustHaveGame(session);
+    Turn& t = game::actions::mustBeLocallyEditable(g.viewpointTurn());
 
     // Do it
     std::auto_ptr<Drawing> drawing(new Drawing(game::map::Point(x, y), Drawing::CircleDrawing));
@@ -627,7 +630,7 @@ game::interface::IFNewCircle(game::Session& session, interpreter::Process& /*pro
     drawing->setTag(tag);
     drawing->setExpire(expire);
 
-    g.currentTurn().universe().drawings().addNew(drawing.release());
+    t.universe().drawings().addNew(drawing.release());
 }
 
 /* @q NewRectangle x1:Int, y1:Int, x2:Int, y2:Int, Optional color:Int, tag:Int, expire:Int (Global Command)
@@ -761,6 +764,7 @@ game::interface::IFNewMarker(game::Session& session, interpreter::Process& /*pro
 
     // Context check
     Game& g = game::actions::mustHaveGame(session);
+    Turn& t = game::actions::mustBeLocallyEditable(g.viewpointTurn());
 
     // Draw it
     std::auto_ptr<Drawing> drawing(new Drawing(game::map::Point(x, y), Drawing::MarkerDrawing));
@@ -770,7 +774,7 @@ game::interface::IFNewMarker(game::Session& session, interpreter::Process& /*pro
     drawing->setExpire(expire);
     drawing->setComment(text);
 
-    g.currentTurn().universe().drawings().addNew(drawing.release());
+    t.universe().drawings().addNew(drawing.release());
 }
 
 /* @q History.LoadTurn nr:Int (Global Command)
@@ -937,5 +941,6 @@ game::interface::IFSendMessage(game::Session& session, interpreter::Process& /*p
     }
 
     Game& g = game::actions::mustHaveGame(session);
-    g.currentTurn().outbox().addMessage(g.getViewpointPlayer(), text, receivers);
+    Turn& t = game::actions::mustAllowCommands(g.viewpointTurn(), g.getViewpointPlayer());
+    t.outbox().addMessage(g.getViewpointPlayer(), text, receivers);
 }

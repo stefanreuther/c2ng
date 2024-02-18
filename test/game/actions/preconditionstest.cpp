@@ -22,6 +22,7 @@
 #include "game/test/registrationkey.hpp"
 #include "game/test/specificationloader.hpp"
 #include "game/test/stringverifier.hpp"
+#include "game/turn.hpp"
 
 namespace {
     void addBase(game::map::Planet& planet)
@@ -222,4 +223,41 @@ AFL_TEST("game.actions.Preconditions:session:full", a)
     AFL_CHECK_SUCCEEDS(a("mustHaveShipList"), game::actions::mustHaveShipList(session));
     AFL_CHECK_SUCCEEDS(a("mustHaveRoot"), game::actions::mustHaveRoot(session));
     AFL_CHECK_SUCCEEDS(a("mustHaveGame"), game::actions::mustHaveGame(session));
+}
+
+/*
+ *  mustAllowCommands, mustBeLocallyEditable
+ */
+
+AFL_TEST("game.actions.Preconditions:mustAllowCommands:success", a)
+{
+    game::Turn t;
+    t.setLocalDataPlayers(game::PlayerSet_t(1));
+    AFL_CHECK_THROWS(a, game::actions::mustAllowCommands(t, 1), game::Exception);
+}
+
+AFL_TEST("game.actions.Preconditions:mustAllowCommands:failure:empty", a)
+{
+    game::Turn t;
+    AFL_CHECK_THROWS(a, game::actions::mustAllowCommands(t, 1), game::Exception);
+}
+
+AFL_TEST("game.actions.Preconditions:mustAllowCommands:failure:mismatch", a)
+{
+    game::Turn t;
+    t.setLocalDataPlayers(game::PlayerSet_t(2));
+    AFL_CHECK_THROWS(a, game::actions::mustAllowCommands(t, 1), game::Exception);
+}
+
+AFL_TEST("game.actions.Preconditions:mustBeLocallyEditable:success", a)
+{
+    game::Turn t;
+    t.setCommandPlayers(game::PlayerSet_t(1));
+    AFL_CHECK_THROWS(a, game::actions::mustBeLocallyEditable(t), game::Exception);
+}
+
+AFL_TEST("game.actions.Preconditions:mustBeLocallyEditable:failure", a)
+{
+    game::Turn t;
+    AFL_CHECK_THROWS(a, game::actions::mustBeLocallyEditable(t), game::Exception);
 }

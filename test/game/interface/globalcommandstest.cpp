@@ -58,6 +58,12 @@ namespace {
         env.session.setGame(new game::Game());
     }
 
+    void addEditableGame(Environment& env)
+    {
+        addGame(env);
+        env.session.getGame()->currentTurn().setLocalDataPlayers(game::PlayerSet_t(1));
+    }
+
     void addShipList(Environment& env)
     {
         env.session.setShipList(new game::spec::ShipList());
@@ -1121,7 +1127,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewCannedMarker:success", a)
 {
     Environment env;
     addRoot(env);
-    addGame(env);
+    addEditableGame(env);
     env.session.getRoot()->userConfiguration().setOption("Chart.Marker3", "2,7,", game::config::ConfigurationOption::Game);
 
     afl::data::Segment seg;
@@ -1147,7 +1153,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewCannedMarker:success:extra", a)
 {
     Environment env;
     addRoot(env);
-    addGame(env);
+    addEditableGame(env);
     env.session.getRoot()->userConfiguration().setOption("Chart.Marker3", "2,7,", game::config::ConfigurationOption::Game);
 
     afl::data::Segment seg;
@@ -1175,7 +1181,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewCannedMarker:null", a)
 {
     Environment env;
     addRoot(env);
-    addGame(env);
+    addEditableGame(env);
     env.session.getRoot()->userConfiguration().setOption("Chart.Marker3", "2,7,", game::config::ConfigurationOption::Game);
 
     afl::data::Segment seg;
@@ -1194,7 +1200,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewCannedMarker:error:arity", a)
 {
     Environment env;
     addRoot(env);
-    addGame(env);
+    addEditableGame(env);
     env.session.getRoot()->userConfiguration().setOption("Chart.Marker3", "2,7,", game::config::ConfigurationOption::Game);
 
     afl::data::Segment seg;
@@ -1209,7 +1215,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewCannedMarker:error:range", a)
 {
     Environment env;
     addRoot(env);
-    addGame(env);
+    addEditableGame(env);
 
     afl::data::Segment seg;
     seg.pushBackInteger(2000);
@@ -1237,7 +1243,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewCannedMarker:error:no-game", a)
 AFL_TEST("game.interface.GlobalCommands:IFNewCannedMarker:error:no-root", a)
 {
     Environment env;
-    addGame(env);
+    addEditableGame(env);
 
     afl::data::Segment seg;
     seg.pushBackInteger(2000);
@@ -1245,6 +1251,25 @@ AFL_TEST("game.interface.GlobalCommands:IFNewCannedMarker:error:no-root", a)
     seg.pushBackInteger(1);
     interpreter::Arguments args(seg, 0, 3);
     AFL_CHECK_THROWS(a, game::interface::IFNewCannedMarker(env.session, env.proc, args), game::Exception);
+}
+
+// Error case, game not played
+AFL_TEST("game.interface.GlobalCommands:IFNewCannedMarker:error:not-played", a)
+{
+    Environment env;
+    addRoot(env);
+    addGame(env);
+    env.session.getRoot()->userConfiguration().setOption("Chart.Marker3", "2,7,", game::config::ConfigurationOption::Game);
+
+    afl::data::Segment seg;
+    seg.pushBackInteger(2000);
+    seg.pushBackInteger(1200);
+    seg.pushBackInteger(3);
+    interpreter::Arguments args(seg, 0, 3);
+    AFL_CHECK_THROWS(a, game::interface::IFNewCannedMarker(env.session, env.proc, args), game::Exception);
+
+    game::map::DrawingContainer& dc = env.session.getGame()->currentTurn().universe().drawings();
+    a.check("still empty", dc.begin() == dc.end());
 }
 
 /*
@@ -1255,7 +1280,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewCannedMarker:error:no-root", a)
 AFL_TEST("game.interface.GlobalCommands:IFNewCircle:success", a)
 {
     Environment env;
-    addGame(env);
+    addEditableGame(env);
 
     afl::data::Segment seg;
     seg.pushBackInteger(2000);
@@ -1279,7 +1304,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewCircle:success", a)
 AFL_TEST("game.interface.GlobalCommands:IFNewCircle:success:extra", a)
 {
     Environment env;
-    addGame(env);
+    addEditableGame(env);
 
     afl::data::Segment seg;
     seg.pushBackInteger(2000);
@@ -1306,7 +1331,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewCircle:success:extra", a)
 AFL_TEST("game.interface.GlobalCommands:IFNewCircle:null", a)
 {
     Environment env;
-    addGame(env);
+    addEditableGame(env);
 
     afl::data::Segment seg;
     seg.pushBackInteger(2000);
@@ -1324,7 +1349,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewCircle:null", a)
 AFL_TEST("game.interface.GlobalCommands:IFNewCircle:error:type", a)
 {
     Environment env;
-    addGame(env);
+    addEditableGame(env);
 
     afl::data::Segment seg;
     seg.pushBackInteger(2000);
@@ -1338,7 +1363,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewCircle:error:type", a)
 AFL_TEST("game.interface.GlobalCommands:IFNewCircle:error:arity", a)
 {
     Environment env;
-    addGame(env);
+    addEditableGame(env);
 
     afl::data::Segment seg;
     seg.pushBackInteger(2000);
@@ -1360,6 +1385,23 @@ AFL_TEST("game.interface.GlobalCommands:IFNewCircle:error:no-game", a)
     AFL_CHECK_THROWS(a, game::interface::IFNewCircle(env.session, env.proc, args), game::Exception);
 }
 
+// Error case, game not played
+AFL_TEST("game.interface.GlobalCommands:IFNewCircle:error:not-played", a)
+{
+    Environment env;
+    addGame(env);
+
+    afl::data::Segment seg;
+    seg.pushBackInteger(2000);
+    seg.pushBackInteger(1200);
+    seg.pushBackInteger(50);
+    interpreter::Arguments args(seg, 0, 3);
+    AFL_CHECK_THROWS(a, game::interface::IFNewCircle(env.session, env.proc, args), game::Exception);
+
+    game::map::DrawingContainer& dc = env.session.getGame()->currentTurn().universe().drawings();
+    a.check("still empty", dc.begin() == dc.end());
+}
+
 /*
  *  IFNewRectangle
  */
@@ -1368,7 +1410,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewCircle:error:no-game", a)
 AFL_TEST("game.interface.GlobalCommands:IFNewRectangle:success", a)
 {
     Environment env;
-    addGame(env);
+    addEditableGame(env);
 
     afl::data::Segment seg;
     seg.pushBackInteger(2000);
@@ -1393,7 +1435,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewRectangle:success", a)
 AFL_TEST("game.interface.GlobalCommands:IFNewRectangle:success:extra", a)
 {
     Environment env;
-    addGame(env);
+    addEditableGame(env);
 
     afl::data::Segment seg;
     seg.pushBackInteger(2000);
@@ -1421,7 +1463,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewRectangle:success:extra", a)
 AFL_TEST("game.interface.GlobalCommands:IFNewRectangle:null", a)
 {
     Environment env;
-    addGame(env);
+    addEditableGame(env);
 
     afl::data::Segment seg;
     seg.pushBackInteger(2000);
@@ -1440,7 +1482,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewRectangle:null", a)
 AFL_TEST("game.interface.GlobalCommands:IFNewRectangle:error:excess-size", a)
 {
     Environment env;
-    addGame(env);
+    addEditableGame(env);
 
     afl::data::Segment seg;
     seg.pushBackInteger(100);
@@ -1455,7 +1497,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewRectangle:error:excess-size", a)
 AFL_TEST("game.interface.GlobalCommands:IFNewRectangle:success:wrapped-map", a)
 {
     Environment env;
-    addGame(env);
+    addEditableGame(env);
     env.session.getGame()->mapConfiguration().setConfiguration(game::map::Configuration::Wrapped, game::map::Point(1000, 1000), game::map::Point(3000, 3000));
 
     afl::data::Segment seg;
@@ -1481,7 +1523,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewRectangle:success:wrapped-map", a)
 AFL_TEST("game.interface.GlobalCommands:IFNewRectangle:error:type", a)
 {
     Environment env;
-    addGame(env);
+    addEditableGame(env);
 
     afl::data::Segment seg;
     seg.pushBackInteger(2000);
@@ -1496,7 +1538,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewRectangle:error:type", a)
 AFL_TEST("game.interface.GlobalCommands:IFNewRectangle:error:arity", a)
 {
     Environment env;
-    addGame(env);
+    addEditableGame(env);
 
     afl::data::Segment seg;
     seg.pushBackInteger(2000);
@@ -1519,6 +1561,24 @@ AFL_TEST("game.interface.GlobalCommands:IFNewRectangle:error:no-game", a)
     AFL_CHECK_THROWS(a, game::interface::IFNewRectangle(env.session, env.proc, args), game::Exception);
 }
 
+// Error case, game not played
+AFL_TEST("game.interface.GlobalCommands:IFNewRectangle:error:not-played", a)
+{
+    Environment env;
+    addGame(env);
+
+    afl::data::Segment seg;
+    seg.pushBackInteger(2000);
+    seg.pushBackInteger(1200);
+    seg.pushBackInteger(2500);
+    seg.pushBackInteger(1000);
+    interpreter::Arguments args(seg, 0, 4);
+    AFL_CHECK_THROWS(a, game::interface::IFNewRectangle(env.session, env.proc, args), game::Exception);
+
+    game::map::DrawingContainer& dc = env.session.getGame()->currentTurn().universe().drawings();
+    a.check("still empty", dc.begin() == dc.end());
+}
+
 /*
  *  IFNewRectangleRaw
  *
@@ -1529,7 +1589,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewRectangle:error:no-game", a)
 AFL_TEST("game.interface.GlobalCommands:IFNewRectangleRaw", a)
 {
     Environment env;
-    addGame(env);
+    addEditableGame(env);
     env.session.getGame()->mapConfiguration().setConfiguration(game::map::Configuration::Wrapped, game::map::Point(1000, 1000), game::map::Point(3000, 3000));
 
     afl::data::Segment seg;
@@ -1562,7 +1622,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewRectangleRaw", a)
 AFL_TEST("game.interface.GlobalCommands:IFNewLine:success", a)
 {
     Environment env;
-    addGame(env);
+    addEditableGame(env);
 
     afl::data::Segment seg;
     seg.pushBackInteger(2000);
@@ -1587,7 +1647,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewLine:success", a)
 AFL_TEST("game.interface.GlobalCommands:IFNewLine:success:wrapped-map", a)
 {
     Environment env;
-    addGame(env);
+    addEditableGame(env);
     env.session.getGame()->mapConfiguration().setConfiguration(game::map::Configuration::Wrapped, game::map::Point(1000, 1000), game::map::Point(3000, 3000));
 
     afl::data::Segment seg;
@@ -1619,7 +1679,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewLine:success:wrapped-map", a)
 AFL_TEST("game.interface.GlobalCommands:IFNewLineRaw", a)
 {
     Environment env;
-    addGame(env);
+    addEditableGame(env);
     env.session.getGame()->mapConfiguration().setConfiguration(game::map::Configuration::Wrapped, game::map::Point(1000, 1000), game::map::Point(3000, 3000));
 
     afl::data::Segment seg;
@@ -1649,7 +1709,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewLineRaw", a)
 AFL_TEST("game.interface.GlobalCommands:IFNewMarker:success", a)
 {
     Environment env;
-    addGame(env);
+    addEditableGame(env);
 
     afl::data::Segment seg;
     seg.pushBackInteger(1200);
@@ -1673,7 +1733,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewMarker:success", a)
 AFL_TEST("game.interface.GlobalCommands:IFNewMarker:success:extra", a)
 {
     Environment env;
-    addGame(env);
+    addEditableGame(env);
 
     afl::data::Segment seg;
     seg.pushBackInteger(1200);
@@ -1702,7 +1762,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewMarker:success:extra", a)
 AFL_TEST("game.interface.GlobalCommands:IFNewMarker:null", a)
 {
     Environment env;
-    addGame(env);
+    addEditableGame(env);
 
     afl::data::Segment seg;
     seg.pushBackInteger(1200);
@@ -1720,7 +1780,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewMarker:null", a)
 AFL_TEST("game.interface.GlobalCommands:IFNewMarker:error:type", a)
 {
     Environment env;
-    addGame(env);
+    addEditableGame(env);
 
     afl::data::Segment seg;
     seg.pushBackInteger(1200);
@@ -1734,7 +1794,7 @@ AFL_TEST("game.interface.GlobalCommands:IFNewMarker:error:type", a)
 AFL_TEST("game.interface.GlobalCommands:IFNewMarker:error:arity", a)
 {
     Environment env;
-    addGame(env);
+    addEditableGame(env);
 
     afl::data::Segment seg;
     seg.pushBackInteger(1200);
@@ -1754,6 +1814,23 @@ AFL_TEST("game.interface.GlobalCommands:IFNewMarker:error:no-game", a)
     seg.pushBackInteger(6);
     interpreter::Arguments args(seg, 0, 3);
     AFL_CHECK_THROWS(a, game::interface::IFNewMarker(env.session, env.proc, args), game::Exception);
+}
+
+// Error case, game not played
+AFL_TEST("game.interface.GlobalCommands:IFNewMarker:error:not-played", a)
+{
+    Environment env;
+    addGame(env);
+
+    afl::data::Segment seg;
+    seg.pushBackInteger(1200);
+    seg.pushBackInteger(1300);
+    seg.pushBackInteger(6);
+    interpreter::Arguments args(seg, 0, 3);
+    AFL_CHECK_THROWS(a, game::interface::IFNewMarker(env.session, env.proc, args), game::Exception);
+
+    game::map::DrawingContainer& dc = env.session.getGame()->currentTurn().universe().drawings();
+    a.check("still empty", dc.begin() == dc.end());
 }
 
 /*
@@ -2102,6 +2179,7 @@ AFL_TEST("game.interface.GlobalCommands:IFSendMessage:success", a)
     Environment env;
     addGame(env);
     env.session.getGame()->setViewpointPlayer(3);
+    env.session.getGame()->currentTurn().setCommandPlayers(game::PlayerSet_t(3));
 
     afl::data::Segment seg;
     seg.pushBackInteger(7);
@@ -2122,6 +2200,7 @@ AFL_TEST("game.interface.GlobalCommands:IFSendMessage:success:array", a)
     Environment env;
     addGame(env);
     env.session.getGame()->setViewpointPlayer(3);
+    env.session.getGame()->currentTurn().setCommandPlayers(game::PlayerSet_t(3));
 
     afl::base::Ref<interpreter::ArrayData> ad = *new interpreter::ArrayData();
     ad->addDimension(3);
@@ -2147,6 +2226,7 @@ AFL_TEST("game.interface.GlobalCommands:IFSendMessage:null-receiver", a)
     Environment env;
     addGame(env);
     env.session.getGame()->setViewpointPlayer(3);
+    env.session.getGame()->currentTurn().setCommandPlayers(game::PlayerSet_t(3));
 
     afl::data::Segment seg;
     seg.pushBackNew(0);
@@ -2165,6 +2245,7 @@ AFL_TEST("game.interface.GlobalCommands:IFSendMessage:null-text", a)
     Environment env;
     addGame(env);
     env.session.getGame()->setViewpointPlayer(3);
+    env.session.getGame()->currentTurn().setCommandPlayers(game::PlayerSet_t(3));
 
     afl::data::Segment seg;
     seg.pushBackInteger(7);
@@ -2196,9 +2277,25 @@ AFL_TEST("game.interface.GlobalCommands:IFSendMessage:error:arity", a)
     Environment env;
     addGame(env);
     env.session.getGame()->setViewpointPlayer(3);
+    env.session.getGame()->currentTurn().setCommandPlayers(game::PlayerSet_t(3));
 
     afl::data::Segment seg;
     seg.pushBackInteger(7);
     interpreter::Arguments args(seg, 0, 1);
     AFL_CHECK_THROWS(a, game::interface::IFSendMessage(env.session, env.proc, args), interpreter::Error);
+}
+
+// Viewpoint player not editable
+AFL_TEST("game.interface.GlobalCommands:IFSendMessage:error:not-played", a)
+{
+    Environment env;
+    addGame(env);
+    env.session.getGame()->setViewpointPlayer(3);
+
+    afl::data::Segment seg;
+    seg.pushBackInteger(7);
+    seg.pushBackString("hi");
+    seg.pushBackString("there");
+    interpreter::Arguments args(seg, 0, 3);
+    AFL_CHECK_THROWS(a, game::interface::IFSendMessage(env.session, env.proc, args), game::Exception);
 }

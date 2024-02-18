@@ -52,6 +52,7 @@ AFL_TEST("game.interface.DrawingContext:set", a)
 {
     afl::base::Ref<game::Root> r = game::test::makeRoot(game::HostVersion());
     afl::base::Ref<game::Turn> t = *new game::Turn();
+    t->setLocalDataPlayers(game::PlayerSet_t(1));
     game::map::DrawingContainer::Iterator_t it = t->universe().drawings().addNew(new game::map::Drawing(game::map::Point(1100, 1200), game::map::Drawing::MarkerDrawing));
     (*it)->setColor(9);
 
@@ -83,6 +84,38 @@ AFL_TEST("game.interface.DrawingContext:set", a)
 
     // Cannot modify methods
     AFL_CHECK_THROWS(a("21. setIntegerValue SETCOLOR"), verif.setIntegerValue("SETCOLOR", 1), interpreter::Error);
+}
+
+/** Test changing properties, turn is not locally editable. */
+AFL_TEST("game.interface.DrawingContext:set:not-editable", a)
+{
+    afl::base::Ref<game::Root> r = game::test::makeRoot(game::HostVersion());
+    afl::base::Ref<game::Turn> t = *new game::Turn();
+    // no setLocalDataPlayers
+    game::map::DrawingContainer::Iterator_t it = t->universe().drawings().addNew(new game::map::Drawing(game::map::Point(1100, 1200), game::map::Drawing::MarkerDrawing));
+    (*it)->setColor(9);
+
+    // Instance
+    game::interface::DrawingContext testee(t, r, t->universe().drawings().begin());
+    interpreter::test::ContextVerifier verif(testee, a);
+
+    // Try to modify
+    AFL_CHECK_THROWS(a("01. setIntegerValue COLOR"), verif.setIntegerValue("COLOR", 11), std::exception);
+
+    // Try to modify via method call
+    std::auto_ptr<afl::data::Value> meth(verif.getValue("SETCOLOR"));
+    interpreter::CallableValue* cv = dynamic_cast<interpreter::CallableValue*>(meth.get());
+    a.checkNonNull("11. CallableValue", cv);
+    {
+        afl::sys::Log log;
+        afl::string::NullTranslator tx;
+        afl::io::NullFileSystem fs;
+        afl::data::Segment seg;
+        seg.pushBackInteger(13);
+        interpreter::World world(log, tx, fs);
+        interpreter::Process proc(world, "dummy", 1);
+        AFL_CHECK_THROWS(a("12. call"), cv->call(proc, seg, false), std::exception);
+    }
 }
 
 /** Test changing properties on deleted object. */

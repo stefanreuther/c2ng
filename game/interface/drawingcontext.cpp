@@ -13,6 +13,7 @@
 #include "interpreter/procedurevalue.hpp"
 #include "interpreter/process.hpp"
 #include "interpreter/propertyacceptor.hpp"
+#include "game/actions/preconditions.hpp"
 
 namespace {
     enum DrawingDomain { DrawingPropertyDomain, DrawingMethodDomain };
@@ -46,6 +47,7 @@ namespace {
         virtual void call(interpreter::Process& /*proc*/, interpreter::Arguments& args)
             {
                 // ex IntDrawingMethod::call
+                game::actions::mustBeLocallyEditable(*m_turn);
                 callDrawingMethod(m_turn->universe().drawings(), m_iterator, m_method, args);
             }
         virtual DrawingMethodValue* clone() const
@@ -82,6 +84,7 @@ game::interface::DrawingContext::set(PropertyIndex_t index, const afl::data::Val
     if (game::map::Drawing* d = *m_iterator) {
         switch (DrawingDomain(drawing_mapping[index].domain)) {
          case DrawingPropertyDomain:
+            game::actions::mustBeLocallyEditable(*m_turn);
             setDrawingProperty(*d, DrawingProperty(drawing_mapping[index].index), value);
             m_turn->universe().drawings().sig_change.raise();
             break;

@@ -64,6 +64,25 @@ namespace game { namespace actions {
         \throw game::Exception on precondition violation */
     Game& mustHaveGame(game::Session& session);
 
+    /** Check whether turn is locally editable.
+        Checks Turn::getLocalDataPlayers().
+        Because local data is typically not specific to a player,
+        this checks for any player.
+
+        \param t turn
+        \return turn
+        \throw game.:Exception if turn is not locally editable */
+    Turn& mustBeLocallyEditable(Turn& t);
+
+    /** Check whether turn is locally editable.
+        Checks Turn::getCommandPlayers() for the given player.
+
+        \param t turn
+        \param forPlayer player to chack for
+        \return turn
+        \throw game.:Exception if turn is not locally editable */
+    Turn& mustAllowCommands(Turn& t, int forPlayer);
+
 } }
 
 #endif

@@ -7,6 +7,7 @@
 #include "game/exception.hpp"
 #include "game/game.hpp"
 #include "game/root.hpp"
+#include "game/turn.hpp"
 
 void
 game::actions::mustBePlayed(const game::map::Object& obj)
@@ -73,4 +74,22 @@ game::actions::mustHaveGame(game::Session& session)
         throw Exception(Exception::eUser);
     }
     return *g;
+}
+
+game::Turn&
+game::actions::mustBeLocallyEditable(Turn& t)
+{
+    if (t.getLocalDataPlayers().empty()) {
+        throw Exception("Read-only");
+    }
+    return t;
+}
+
+game::Turn&
+game::actions::mustAllowCommands(Turn& t, int forPlayer)
+{
+    if (!t.getCommandPlayers().contains(forPlayer)) {
+        throw Exception("Read-only");
+    }
+    return t;
 }

@@ -40,9 +40,11 @@ game::interface::IFAddCommand(game::Session& session, interpreter::Process& /*pr
 
     // Do it
     Game& g = game::actions::mustHaveGame(session);
+    Turn& t = g.viewpointTurn();
 
     // Do we allow commands?
-    CommandExtra* ex = CommandExtra::get(g.currentTurn());
+    game::actions::mustAllowCommands(t, g.getViewpointPlayer());
+    CommandExtra* ex = CommandExtra::get(t);
     if (ex == 0) {
         throw interpreter::Error("Not allowed on this host");
     }
@@ -74,7 +76,10 @@ game::interface::IFDeleteCommand(game::Session& session, interpreter::Process& /
 
     // Do it
     Game& g = game::actions::mustHaveGame(session);
-    CommandExtra* ex = CommandExtra::get(g.currentTurn());
+    Turn& t = g.viewpointTurn();
+    game::actions::mustAllowCommands(t, g.getViewpointPlayer());
+
+    CommandExtra* ex = CommandExtra::get(g.viewpointTurn());
     if (ex == 0) {
         return;
     }
@@ -108,7 +113,7 @@ game::interface::IFGetCommand(game::Session& session, interpreter::Arguments& ar
 
     // Do it
     Game& g = game::actions::mustHaveGame(session);
-    CommandExtra* ex = CommandExtra::get(g.currentTurn());
+    CommandExtra* ex = CommandExtra::get(g.viewpointTurn());
     if (ex == 0) {
         return 0;
     }
