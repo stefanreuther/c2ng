@@ -41,19 +41,13 @@ AFL_TEST("game.Session:init", a)
     a.checkNull     ("02. getRoot",                testee.getRoot().get());
     a.checkNull     ("03. getShipList",            testee.getShipList().get());
     a.checkNull     ("04. getGame",                testee.getGame().get());
-    a.check         ("05. getEditableAreas",       testee.getEditableAreas().empty());
-    a.checkDifferent("06. fileTable",              testee.world().fileTable().getFreeFile(), 0U);
-    a.check         ("07. globalPropertyNames",    testee.world().globalPropertyNames().getIndexByName("HULL") != afl::data::NameMap::nil);
-    a.checkEqual    ("08. getPluginDirectoryName", testee.getPluginDirectoryName(), "");
-
-    // EditableAreas is modifiable
-    game::Session::AreaSet_t as(game::Session::CommandArea);
-    testee.setEditableAreas(as);
-    a.checkEqual("11. getEditableAreas", testee.getEditableAreas(), as);
+    a.checkDifferent("05. fileTable",              testee.world().fileTable().getFreeFile(), 0U);
+    a.check         ("06. globalPropertyNames",    testee.world().globalPropertyNames().getIndexByName("HULL") != afl::data::NameMap::nil);
+    a.checkEqual    ("07. getPluginDirectoryName", testee.getPluginDirectoryName(), "");
 
     // Plugin directory is modifiable
     testee.setPluginDirectoryName("/pp");
-    a.checkEqual("21. getPluginDirectoryName", testee.getPluginDirectoryName(), "/pp");
+    a.checkEqual("11. getPluginDirectoryName", testee.getPluginDirectoryName(), "/pp");
 }
 
 /** Test subobjects.

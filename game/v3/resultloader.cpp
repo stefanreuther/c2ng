@@ -335,7 +335,7 @@ game::v3::ResultLoader::doLoadHistoryTurn(Turn& turn, Game& game, int player, in
 void
 game::v3::ResultLoader::doSaveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t players, const Root& root, Session& session)
 {
-    if (session.getEditableAreas().contains(Session::CommandArea)) {
+    if (turn.getCommandPlayers().containsAnyOf(players)) {
         game::v3::trn::FileSet turns(root.gameDirectory(), *m_charset);
         m_log.write(m_log.Info, LOG_NAME, m_translator("Generating turn commands..."));
 
@@ -352,9 +352,9 @@ game::v3::ResultLoader::doSaveCurrentTurn(const Turn& turn, const Game& game, Pl
         turns.saveAll(m_log, root.playerList(), m_fileSystem, root.userConfiguration(), m_translator);
     }
 
-    if (session.getEditableAreas().contains(Session::LocalDataArea)) {
-        for (int player = 1; player <= MAX_PLAYERS; ++player) {
-            if (players.contains(player)) {
+    for (int player = 1; player <= MAX_PLAYERS; ++player) {
+        if (players.contains(player)) {
+            if (turn.getLocalDataPlayers().contains(player)) {
                 // chart.cc
                 saveCurrentDatabases(turn, game, player, root, session, *m_charset);
 

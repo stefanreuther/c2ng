@@ -7,13 +7,14 @@
 
 #include "afl/base/refcounted.hpp"
 #include "afl/container/ptrmap.hpp"
+#include "game/alliance/container.hpp"
 #include "game/extracontainer.hpp"
 #include "game/map/universe.hpp"
 #include "game/msg/inbox.hpp"
 #include "game/msg/outbox.hpp"
+#include "game/playerset.hpp"
 #include "game/timestamp.hpp"
 #include "game/vcr/database.hpp"
-#include "game/alliance/container.hpp"
 
 namespace game {
 
@@ -45,6 +46,49 @@ namespace game {
         /** Get turn number.
             \return turn number */
         int getTurnNumber() const;
+
+        /** Set players for which commands can be given.
+            Primarily applies to data that is exchanged with the host, but not stored in map objects:
+            - alliances
+            - outgoing messages
+            - data in turn extras (i.e. commands)
+
+            If any map objects are Playable or better, this flag must be set.
+            That aside, ability to edit map objects is controlled individually by their playability.
+
+            This flag is usually set if this is the currentTurn() of a playable game;
+            it is not set for allied or history turns, and read-only games.
+
+            \param set Player set */
+        void setCommandPlayers(PlayerSet_t set);
+
+        /** Get set of players for which commands can be given.
+            \return set
+            \see setCommandPlayers */
+        PlayerSet_t getCommandPlayers() const;
+
+        /** Set players for which local data can be edited.
+            Applies to data managed locally:
+            - history
+            - map drawings
+
+            This flag is usually set for a player if this is the currentTurn() of a playable game.
+            It can be set for finished games that still have a writable starchart file.
+
+            Note that the change protection cannot be absolute;
+            object properties (and thus, comments) can always be changed.
+
+            The controlled data is not inherently player-specific.
+            This is a player set for consistency with setCommandPlayers(),
+            and controls whose files we access.
+
+            \param set Player set */
+        void setLocalDataPlayers(PlayerSet_t set);
+
+        /** Get set of players for which local data can be edited.
+            \return set
+            \see setLocalDataPlayers */
+        PlayerSet_t getLocalDataPlayers() const;
 
         /** Set database turn number.
             \param turnNumber database turn number */
@@ -109,12 +153,11 @@ namespace game {
         int m_turnNumber;
         int m_databaseTurnNumber;
         Timestamp m_timestamp;
+        PlayerSet_t m_commandPlayers;
+        PlayerSet_t m_localDataPlayers;
 
         // FIXME: should be player-specific?
         game::alliance::Container m_alliances;
-
-        // (Gen)
-        // (data set)                          whose players' data we have
     };
 
 }
@@ -129,6 +172,30 @@ inline int
 game::Turn::getTurnNumber() const
 {
     return m_turnNumber;
+}
+
+inline void
+game::Turn::setCommandPlayers(PlayerSet_t set)
+{
+    m_commandPlayers = set;
+}
+
+inline game::PlayerSet_t
+game::Turn::getCommandPlayers() const
+{
+    return m_commandPlayers;
+}
+
+inline void
+game::Turn::setLocalDataPlayers(PlayerSet_t set)
+{
+    m_localDataPlayers = set;
+}
+
+inline game::PlayerSet_t
+game::Turn::getLocalDataPlayers() const
+{
+    return m_localDataPlayers;
 }
 
 inline game::map::Universe&

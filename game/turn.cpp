@@ -15,6 +15,8 @@ game::Turn::Turn()
       m_turnNumber(0),
       m_databaseTurnNumber(0),
       m_timestamp(),
+      m_commandPlayers(),
+      m_localDataPlayers(),
       m_alliances()
 { }
 

@@ -27,6 +27,8 @@ AFL_TEST("game.Turn:basics", a)
     a.checkEqual("02. getDatabaseTurnNumber", testee.getDatabaseTurnNumber(), 0);
     a.checkEqual("03. getTimestamp", testee.getTimestamp(), game::Timestamp());
     a.checkNull("04. getBattles", testee.getBattles().get());
+    a.check("05. getCommandPlayers", testee.getCommandPlayers().empty());
+    a.check("06. getLocalDataPlayers", testee.getLocalDataPlayers().empty());
 
     // Modify
     afl::base::Ptr<game::vcr::Database> db(new NullDatabase());
@@ -40,6 +42,14 @@ AFL_TEST("game.Turn:basics", a)
     a.checkEqual("12. getDatabaseTurnNumber", testee.getDatabaseTurnNumber(), 76);
     a.checkEqual("13. getTimestamp", testee.getTimestamp(), game::Timestamp(1,2,3,4,5,6));
     a.checkEqual("14. getBattles", testee.getBattles().get(), db.get());
+
+    // Player sets are modifiable
+    game::PlayerSet_t one(1);
+    game::PlayerSet_t two(2);
+    testee.setLocalDataPlayers(one);
+    testee.setCommandPlayers(two);
+    a.checkEqual("15. getLocalDataPlayers", testee.getLocalDataPlayers(), one);
+    a.checkEqual("16. getCommandPlayers", testee.getCommandPlayers(), two);
 
     // Test subobject accessors
     const game::Turn& ct = testee;

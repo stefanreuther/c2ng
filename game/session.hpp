@@ -60,20 +60,6 @@ namespace game {
         - Root, Session, Game, or Turn objects must not refer to each other. */
     class Session : private InterpreterInterface {
      public:
-        /** Editable area.
-            A session may have different parts editable or read-only. */
-        enum Area {
-            /** Commands can be given.
-                Map objects are Playable or better. */
-            CommandArea,
-            /** Local data (for example, history) can be edited. */
-            LocalDataArea
-        };
-
-        /** Set of editable areas. */
-        typedef afl::bits::SmallSet<Area> AreaSet_t;
-
-
         /** Task status.
             \see getTaskStatus() */
         enum TaskStatus {
@@ -139,13 +125,6 @@ namespace game {
         game::interface::NotificationStore& notifications();
         const game::interface::NotificationStore& notifications() const;
 
-        /** Set editable areas.
-            \param set New set */
-        void setEditableAreas(AreaSet_t set);
-
-        /** Get editable areas.
-            \return set */
-        AreaSet_t getEditableAreas() const;
 
         /** Get auto-task editor.
             If the object does not have an auto-task, this creates one.
@@ -275,7 +254,6 @@ namespace game {
         afl::base::Ptr<game::spec::ShipList> m_shipList;
         afl::base::Ptr<Game> m_game;
         game::interface::UserInterfacePropertyStack m_uiPropertyStack;
-        AreaSet_t m_editableAreas;
         interpreter::World m_world;
 
         /** System information. */
@@ -353,12 +331,6 @@ inline const afl::base::Ptr<game::Game>&
 game::Session::getGame()
 {
     return m_game;
-}
-
-inline game::Session::AreaSet_t
-game::Session::getEditableAreas() const
-{
-    return m_editableAreas;
 }
 
 inline interpreter::World&

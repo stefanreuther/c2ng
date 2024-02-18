@@ -128,7 +128,7 @@ namespace game {
 
         /** Save current turn.
             This function produces a task that will save the current game, create and/or upload a turn file, etc.
-            It must honor read/write mode restrictions defined by session.getEditableAreas().
+            It must honor read/write mode restrictions defined by turn.getCommandPlayers(), turn.getLocalDataPlayers().
             After completion, the task must emit a callback on \c then reporting success/failure.
 
             \param turn [in] Turn to save.

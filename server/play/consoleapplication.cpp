@@ -153,7 +153,8 @@ server::play::ConsoleApplication::appMain()
 
     session.getGame()->setViewpointPlayer(params.playerNumber);
     // FIXME? sync teams from alliances
-    session.setEditableAreas(game::Session::AreaSet_t(session.LocalDataArea) + session.CommandArea);
+    session.getGame()->currentTurn().setLocalDataPlayers(game::PlayerSet_t(params.playerNumber));
+    session.getGame()->currentTurn().setCommandPlayers(game::PlayerSet_t(params.playerNumber));
     session.postprocessTurn(session.getGame()->currentTurn(), game::PlayerSet_t(params.playerNumber), game::PlayerSet_t(params.playerNumber), game::map::Object::Playable);
 
     // Store properties in session

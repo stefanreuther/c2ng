@@ -314,7 +314,8 @@ namespace {
                             }
 
                             game::map::Object::Playability playability;
-                            game::Session::AreaSet_t editableAreas;
+                            game::PlayerSet_t commandPlayers;
+                            game::PlayerSet_t localDataPlayers;
                             if (root.getPossibleActions().contains(game::Root::aLoadEditable) && !root.userConfiguration()[game::config::UserConfiguration::Game_ReadOnly]()) {
                                 if (root.userConfiguration()[game::config::UserConfiguration::Game_Finished]()) {
                                     // Finished game
@@ -322,15 +323,16 @@ namespace {
                                 } else {
                                     // Active game
                                     playability = game::map::Object::Playable;
-                                    editableAreas += game::Session::CommandArea;
+                                    commandPlayers += m_player;
                                 }
-                                editableAreas += game::Session::LocalDataArea;
+                                localDataPlayers += m_player;
                             } else {
                                 // View only
                                 playability = game::map::Object::ReadOnly;
                             }
 
-                            m_session.setEditableAreas(editableAreas);
+                            m_session.getGame()->currentTurn().setCommandPlayers(commandPlayers);
+                            m_session.getGame()->currentTurn().setLocalDataPlayers(localDataPlayers);
                             m_session.log().write(afl::sys::LogListener::Error, LOG_NAME, m_session.translator()("Compiling starchart..."));
                             m_session.postprocessTurn(m_session.getGame()->currentTurn(), game::PlayerSet_t(m_player), game::PlayerSet_t(m_player), playability);
                             m_session.getGame()->currentTurn().alliances().postprocess();

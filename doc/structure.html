@@ -246,6 +246,8 @@
             <div class="owned">TurnNumber <em>: int</em></div>
             <div class="owned">TimeStamp <em>: game::Timestamp</em></div>
             <div class="owned">DatabaseTurn <em>: int</em></div>
+            <div class="owned">CommandPlayers <em>: PlayerSet_t</em><strong>Read-only/read-write status for turn data</strong></div>
+            <div class="owned">LocalDataPlayers <em>: PlayerSet_t</em><strong>Read-only/read-write status for chart database</strong></div>
             <div class="owned hasnotify">Universe <em>: game::map::Universe</em>
               <div class="owned">Ships <em>: game::map::ObjectVector</em>
                 <div class="owned haschange">Ship <em>: game::map::Ship[]</em></div>
@@ -286,7 +288,6 @@
         <div class="owned">RandomNumberGenerator <em>: util::RandomNumberGenerator</em></div>
         <div class="owned">InterpreterInterface <em>: game::InterpreterInterface</em></div>
         <div class="owned virtual">UserInterfacePropertyAccessor <em>: game::interface::UserInterfacePropertyAccessor[]</em></div>
-        <div class="owned">EditableAreas <em>: AreaSet_t</em><strong>Read-only/read-write status for database and turn data</strong></div>
         <div class="owned hasnotify">World <em>: interpreterinterface::World</em>
           <strong>Interpreter core with little VGAP interdependencies</strong>
           <div class="owned">GlobalPropertyNames, ShipPropertyNames, PlanetPropertyNames <em>: afl::data::NameMap</em></div>

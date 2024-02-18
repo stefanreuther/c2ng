@@ -78,7 +78,6 @@ game::Session::Session(afl::string::Translator& tx, afl::io::FileSystem& fs)
       m_shipList(),
       m_game(),
       m_uiPropertyStack(),
-      m_editableAreas(),
       m_world(m_log, tx, fs),
       m_systemInformation(),
       m_processList(),
@@ -140,12 +139,6 @@ const game::interface::NotificationStore&
 game::Session::notifications() const
 {
     return m_notifications;
-}
-
-void
-game::Session::setEditableAreas(AreaSet_t set)
-{
-    m_editableAreas = set;
 }
 
 afl::base::Ptr<interpreter::TaskEditor>
