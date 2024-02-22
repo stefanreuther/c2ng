@@ -24,10 +24,12 @@ game::proxy::AllianceProxy::getStatus(WaitIndicator& ind)
         void handle(Session& session)
             {
                 if (Game* pGame = session.getGame().get()) {
-                    pGame->currentTurn().alliances().postprocess();
+                    Turn& t = pGame->currentTurn();
+                    t.alliances().postprocess();
 
-                    m_status.alliances = pGame->currentTurn().alliances();
+                    m_status.alliances = t.alliances();
                     m_status.viewpointPlayer = pGame->getViewpointPlayer();
+                    m_status.editable = t.getCommandPlayers().contains(m_status.viewpointPlayer);
                 }
                 if (const Root* pRoot = session.getRoot().get()) {
                     for (int i = 1; i <= MAX_PLAYERS; ++i) {

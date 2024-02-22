@@ -1,5 +1,6 @@
 /**
   *  \file client/dialogs/alliancedialog.cpp
+  *  \brief Class client::dialogs::AllianceDialog
   */
 
 #include "client/dialogs/alliancedialog.hpp"
@@ -52,8 +53,9 @@ client::dialogs::AllianceDialog::AllianceDialog(ui::Root& root,
       m_data()
 {
     // ex WAllyWindow::WAllyWindow, phost.pas:CAllyWindow
+    initData(gameSender);
     initDialog(gameSender, tx);
-    initContent(gameSender);
+    initContent();
 }
 
 void
@@ -76,7 +78,7 @@ client::dialogs::AllianceDialog::run(util::RequestSender<game::Session> gameSend
         int result = m_loop.run();
         m_root.remove(*this);
 
-        if (result != 0) {
+        if (result != 0 && m_data.editable) {
             // User confirmed; write back. This will update command messages.
             writeBack(gameSender);
         }
@@ -84,13 +86,21 @@ client::dialogs::AllianceDialog::run(util::RequestSender<game::Session> gameSend
 }
 
 void
-client::dialogs::AllianceDialog::writeBack(util::RequestSender<game::Session> gameSender)
+client::dialogs::AllianceDialog::writeBack(util::RequestSender<game::Session>& gameSender)
 {
     game::proxy::AllianceProxy(gameSender).setAlliances(m_data.alliances);
 }
 
 void
-client::dialogs::AllianceDialog::initDialog(util::RequestSender<game::Session> gameSender, afl::string::Translator& tx)
+client::dialogs::AllianceDialog::initData(util::RequestSender<game::Session>& gameSender)
+{
+    // Get alliances
+    Downlink link(m_root, m_translator);
+    m_data = game::proxy::AllianceProxy(gameSender).getStatus(link);
+}
+
+void
+client::dialogs::AllianceDialog::initDialog(util::RequestSender<game::Session>& gameSender, afl::string::Translator& tx)
 {
     // Build the dialog
     // VBox
@@ -130,8 +140,11 @@ client::dialogs::AllianceDialog::initDialog(util::RequestSender<game::Session> g
     g1.add(g12);
     add(g1);
 
-    Group& g2 = m_deleter.addNew(new Group(HBox::instance5));
+    if (!m_data.editable) {
+        add(m_deleter.addNew(new StaticText(tx("Read-only"), ui::SkinColor::Red, gfx::FontRequest(), m_root.provider())));
+    }
 
+    Group& g2 = m_deleter.addNew(new Group(HBox::instance5));
     ui::Widget& helper = m_deleter.addNew(new client::widgets::HelpWidget(m_root, tx, gameSender, "pcc2:allies"));
     Button& btnOK     = m_deleter.addNew(new Button(tx("OK"),     util::Key_Return, m_root));
     Button& btnCancel = m_deleter.addNew(new Button(tx("Cancel"), util::Key_Escape, m_root));
@@ -155,12 +168,8 @@ client::dialogs::AllianceDialog::initDialog(util::RequestSender<game::Session> g
 }
 
 void
-client::dialogs::AllianceDialog::initContent(util::RequestSender<game::Session> gameSender)
+client::dialogs::AllianceDialog::initContent()
 {
-    // Get alliances
-    Downlink link(m_root, m_translator);
-    m_data = game::proxy::AllianceProxy(gameSender).getStatus(link);
-
     // Initialize player list
     for (int i = 1; i <= game::MAX_PLAYERS; ++i) {
         if (m_data.players.contains(i)) {
@@ -211,12 +220,14 @@ void
 client::dialogs::AllianceDialog::onToggleAlliance(int player)
 {
     // ex WAllyList::toggleCurrent
-    // FIXME: cascading operation?
-    m_data.alliances.setAll(player, Level::IsOffer, !m_data.alliances.isAny(player, Level::IsOffer, true));
+    if (m_data.editable) {
+        // FIXME: cascading operation?
+        m_data.alliances.setAll(player, Level::IsOffer, !m_data.alliances.isAny(player, Level::IsOffer, true));
 
-    // FIXME: manually propagate changes
-    onChange();
-    onSelectPlayer(player);
+        // FIXME: manually propagate changes
+        onChange();
+        onSelectPlayer(player);
+    }
 }
 
 void
@@ -237,7 +248,7 @@ client::dialogs::AllianceDialog::onToggleOffer(size_t index)
     const Level* level = m_data.alliances.getLevel(index);
     const Offer* offer = m_data.alliances.getOffer(index);
     int player = m_pList->getCurrentPlayer();
-    if (level && offer) {
+    if (level != 0 && offer != 0 && m_data.editable) {
         // Cycling order is (Unknown/No) -> (Yes) -> (Conditional)
         switch (offer->newOffer.get(player)) {
          case Offer::No:

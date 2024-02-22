@@ -24,6 +24,8 @@ namespace game { namespace proxy {
         Asynchronous:
         - modification (update the alliance settings)
 
+        AllianceProxy always operates on currentTurn().
+
         @see game::alliance::Container */
     class AllianceProxy {
      public:
@@ -34,9 +36,10 @@ namespace game { namespace proxy {
             PlayerArray<String_t> playerNames;        ///< Player names.
             PlayerSet_t players;                      ///< Set of available players.
             int viewpointPlayer;                      ///< Viewpoint player.
+            bool editable;                            ///< Flag whether alliances are editable. False on read-only game.
 
             Status()
-                : alliances(), playerNames(), players(), viewpointPlayer()
+                : alliances(), playerNames(), players(), viewpointPlayer(), editable()
                 { }
         };
 

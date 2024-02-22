@@ -1,5 +1,6 @@
 /**
   *  \file client/dialogs/alliancedialog.hpp
+  *  \brief Class client::dialogs::AllianceDialog
   */
 #ifndef C2NG_CLIENT_DIALOGS_ALLIANCEDIALOG_HPP
 #define C2NG_CLIENT_DIALOGS_ALLIANCEDIALOG_HPP
@@ -17,16 +18,33 @@
 
 namespace client { namespace dialogs {
 
+    /** Alliance dialog.
+        Controls an AllianceProxy to display and edit alliances. */
     class AllianceDialog : public ui::Window {
      public:
+        /** Constructor.
+
+            Loads data from the proxy (and thus, blocks!).
+
+            @param root       UI root
+            @param gameSender Game sender
+            @param tx         Translator */
         AllianceDialog(ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx);
 
+        /** Run dialog.
+
+            Opens the dialog, lets user interact with it, and optionally writes back;
+            displays an error if alliances are not available.
+
+            @param gameSender Game sender
+            @param tx         Translator */
         void run(util::RequestSender<game::Session> gameSender, afl::string::Translator& tx);
 
      private:
-        void initDialog(util::RequestSender<game::Session> gameSender, afl::string::Translator& tx);
-        void initContent(util::RequestSender<game::Session> gameSender);
-        void writeBack(util::RequestSender<game::Session> gameSender);
+        void writeBack(util::RequestSender<game::Session>& gameSender);
+        void initData(util::RequestSender<game::Session>& gameSender);
+        void initDialog(util::RequestSender<game::Session>& gameSender, afl::string::Translator& tx);
+        void initContent();
 
         afl::base::Deleter m_deleter;
 

@@ -32,6 +32,7 @@ AFL_TEST("game.proxy.AllianceProxy:empty", a)
     a.checkEqual("04. playerNames", st.playerNames.get(3), "");
     a.checkEqual("05. players", st.players, game::PlayerSet_t());
     a.checkEqual("06. viewpointPlayer", st.viewpointPlayer, 0);
+    a.checkEqual("06. editable", st.editable, false);
 }
 
 /** Test normal behaviour. Use a HostHandler to verify alliance transfer. */
@@ -48,6 +49,7 @@ AFL_TEST("game.proxy.AllianceProxy:normal", a)
     afl::base::Ptr<game::Game> g = new game::Game();
     h.session().setGame(g);
     g->setViewpointPlayer(2);
+    g->currentTurn().setCommandPlayers(game::PlayerSet_t(2));
     g->currentTurn().alliances().addNewHandler(new game::alliance::HostHandler(root->hostVersion().getVersion(), g->currentTurn(), g->getViewpointPlayer()),
                                                h.session().translator());
 
@@ -67,6 +69,7 @@ AFL_TEST("game.proxy.AllianceProxy:normal", a)
     a.checkDifferent("06. playerNames", st.playerNames.get(3), "");
     a.checkEqual("07. players", st.players, game::PlayerSet_t() + 1 + 2 + 3 + 4 + 5);
     a.checkEqual("08. viewpointPlayer", st.viewpointPlayer, 2);
+    a.checkEqual("09. editable", st.editable, true);
 
     // Offer alliance to 4, verify
     st.alliances.set(0, 4, game::alliance::Offer::Yes);
