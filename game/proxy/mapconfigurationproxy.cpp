@@ -56,7 +56,7 @@ game::proxy::MapConfigurationProxy::setMapConfiguration(const game::map::Configu
                     mapConfig = m_config;
 
                     // Mark universe as changed to trigger redraw
-                    g->currentTurn().universe().markChanged();
+                    g->viewpointTurn().universe().markChanged();
 
                     // Update user configuration
                     if (Root* r = session.getRoot().get()) {

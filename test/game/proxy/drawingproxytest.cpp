@@ -43,6 +43,7 @@ namespace {
     void prepare(SessionThread& h)
     {
         afl::base::Ptr<game::Game> g = new game::Game();
+        g->currentTurn().setLocalDataPlayers(game::PlayerSet_t(1));
         h.session().setGame(g);
     }
 
@@ -138,6 +139,27 @@ AFL_TEST("game.proxy.DrawingProxy:create:MarkerDrawing", a)
     h.sync();
     ind.processQueue();
     a.check("31. isValid", !recv.get().isValid());
+}
+
+/** Test creating a marker, not-editable case.
+    A: create session with turn. Create DrawingProxy. Create and populate a marker.
+    E: marker created; correct status reported. Verify all stages. */
+AFL_TEST("game.proxy.DrawingProxy:create:MarkerDrawing:not-editable", a)
+{
+    SessionThread h;
+    WaitIndicator ind;
+    prepare(h);
+    h.session().getGame()->currentTurn().setLocalDataPlayers(game::PlayerSet_t());
+    DrawingProxy testee(h.gameSender(), ind);
+    StatusReceiver recv(testee);
+
+    // Create a marker
+    testee.create(Point(2100, 2200), Drawing::MarkerDrawing);
+
+    // Verify that correct update is eventually received
+    h.sync();
+    ind.processQueue();
+    a.check("isValid", !recv.get().isValid());
 }
 
 /** Test creating lines.
@@ -674,4 +696,32 @@ AFL_TEST("game.proxy.DrawingProxy:queueing", a)
     a.checkEqual("02. getPos",          (**it).getPos(),          Point(1300, 1400));
     a.checkEqual("03. getCircleRadius", (**it).getCircleRadius(), 190);
     a.checkEqual("04. getType",         (**it).getType(),         Drawing::CircleDrawing);
+}
+
+/** Test lifetime behaviour.
+    A: create session and DrawingProxy. Create a circle. Clear session.
+    E: verify result. */
+AFL_TEST_NOARG("game.proxy.DrawingProxy:create:lifecycle")
+{
+    SessionThread h;
+    WaitIndicator ind;
+    prepare(h);
+    DrawingProxy testee(h.gameSender(), ind);
+
+    // Create
+    testee.create(Point(1300, 1400), Drawing::CircleDrawing);
+    h.sync();
+    ind.processQueue();
+
+    // Clear session
+    h.session().setGame(0);
+    h.session().setShipList(0);
+    h.session().setRoot(0);
+
+    // Continue operating. Must not crash.
+    testee.setCircleRadius(20);
+    testee.changeCircleRadius(50);
+    testee.finish();
+    h.sync();
+    ind.processQueue();
 }

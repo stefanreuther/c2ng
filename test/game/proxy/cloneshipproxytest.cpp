@@ -132,3 +132,33 @@ AFL_TEST("game.proxy.CloneShipProxy:normal", a)
     a.checkEqual("21. getFriendlyCode", t.session().getGame()->currentTurn().universe().ships().get(SHIP_ID)->getFriendlyCode().orElse(""), "cln");
     a.checkEqual("22. getBaseTechLevel", t.session().getGame()->currentTurn().universe().planets().get(PLANET_ID)->getBaseTechLevel(game::EngineTech).orElse(0), 5);
 }
+
+/** Test lifetime behaviour.
+    A: create a session with ship and planet. Create CloneShipProxy. Destroy session.
+    E: No crash. */
+AFL_TEST("game.proxy.CloneShipProxy:lifetime", a)
+{
+    game::test::SessionThread t;
+    game::test::WaitIndicator ind;
+    prepare(t);
+    game::map::Ship& sh = *t.session().getGame()->currentTurn().universe().ships().get(SHIP_ID);
+
+    game::proxy::CloneShipProxy testee(t.gameSender(), SHIP_ID);
+
+    // Get current status -> returns successful
+    game::proxy::CloneShipProxy::Status st;
+    testee.getStatus(ind, st);
+    a.checkEqual("01. valid", st.valid, true);
+
+    // Clear session
+    t.session().setRoot(0);
+    t.session().setGame(0);
+    t.session().setShipList(0);
+
+    // Commit
+    testee.commit();
+    t.sync();
+    ind.processQueue();
+
+    a.checkEqual("11. getFriendlyCode", sh.getFriendlyCode().orElse(""), "cln");
+}

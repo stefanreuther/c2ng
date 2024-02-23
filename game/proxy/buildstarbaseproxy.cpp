@@ -20,13 +20,19 @@ class game::proxy::BuildStarbaseProxy::Trampoline {
 
     void init(Id_t id, Status& status)
         {
+            // Lifetime management
+            m_container.reset();
+            m_action.reset();
+            m_root = m_session.getRoot();
+            m_game = m_session.getGame();
+
             try {
                 // Preconditions
                 Root& root = game::actions::mustHaveRoot(m_session);
-                Game& game = game::actions::mustHaveGame(m_session);
+                Turn& turn = game::actions::mustHaveGame(m_session).viewpointTurn();
 
                 // Fetch planet
-                game::map::Planet& planet = game::actions::mustExist(game.currentTurn().universe().planets().get(id));
+                game::map::Planet& planet = game::actions::mustExist(turn.universe().planets().get(id));
 
                 // Construct stuff
                 bool wantBase = !planet.isBuildingBase();
@@ -67,6 +73,8 @@ class game::proxy::BuildStarbaseProxy::Trampoline {
     Session& m_session;
     std::auto_ptr<CargoContainer> m_container;
     std::auto_ptr<game::actions::BuildStarbase> m_action;
+    afl::base::Ptr<Root> m_root;
+    afl::base::Ptr<Game> m_game;
 };
 
 class game::proxy::BuildStarbaseProxy::TrampolineFromSession : public afl::base::Closure<Trampoline*(Session&)> {

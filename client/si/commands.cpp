@@ -115,7 +115,6 @@
 #include "game/map/shippredictor.hpp"
 #include "game/proxy/buildammoproxy.hpp"
 #include "game/proxy/chunnelproxy.hpp"
-#include "game/proxy/currentstarbaseadaptor.hpp"
 #include "game/proxy/fictivestarbaseadaptor.hpp"
 #include "game/proxy/inboxadaptor.hpp"
 #include "game/proxy/maplocationproxy.hpp"
@@ -124,6 +123,7 @@
 #include "game/proxy/playerproxy.hpp"
 #include "game/proxy/predictedstarbaseadaptor.hpp"
 #include "game/proxy/searchproxy.hpp"
+#include "game/proxy/viewpointstarbaseadaptor.hpp"
 #include "game/ref/configuration.hpp"
 #include "game/ref/fleetlist.hpp"
 #include "game/ref/sortpredicate.hpp"
@@ -2600,7 +2600,7 @@ client::si::IFCCShipCostCalc(game::Session& session, ScriptSide& si, RequestLink
             {
                 util::RequestSender<game::proxy::StarbaseAdaptor> adaptor =
                     m_hasBase
-                    ? ctl.interface().gameSender().makeTemporary(new game::proxy::CurrentStarbaseAdaptorFromSession(m_planetId))
+                    ? ctl.interface().gameSender().makeTemporary(new game::proxy::ViewpointStarbaseAdaptorFromSession(m_planetId))
                     : ctl.interface().gameSender().makeTemporary(new game::proxy::FictiveStarbaseAdaptorFromSession(m_planetId));
                 bool useStorage = m_hasBase;
 

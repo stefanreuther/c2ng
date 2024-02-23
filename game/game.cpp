@@ -96,6 +96,9 @@ game::Game::setViewpointTurnNumber(int nr)
             // Change cursor
             m_cursors.setUniverse(&newTurn.universe(), &m_mapConfiguration);
             sig_viewpointTurnChange.raise();
+
+            // We may have updated selection totals, e.g. objects not existing in new turn
+            m_selections.sig_selectionChange.raise();
         }
     }
 }

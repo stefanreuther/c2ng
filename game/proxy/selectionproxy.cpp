@@ -71,7 +71,7 @@ game::proxy::SelectionProxy::Trampoline::Trampoline(Session& session, const util
 
         // Update multi-selection view
         // ex client/dialogs/selmgr.cc:doSelectionManager, WSelectChartMode::WSelectChartMode
-        game::map::Universe& univ = m_game->currentTurn().universe();
+        game::map::Universe& univ = m_game->viewpointTurn().universe();
         sel.copyFrom(univ, sel.getCurrentLayer());
         sel.limitToExistingObjects(univ, sel.getCurrentLayer());
     }
@@ -113,7 +113,7 @@ game::proxy::SelectionProxy::Trampoline::setCurrentLayer(LayerReference_t newLay
 {
     // Perform action
     if (m_game.get() != 0) {
-        m_game->selections().setCurrentLayer(newLayer.resolve(m_game->selections()), m_game->currentTurn().universe());
+        m_game->selections().setCurrentLayer(newLayer.resolve(m_game->selections()), m_game->viewpointTurn().universe());
     }
 
     // Signal other listeners
@@ -125,7 +125,7 @@ game::proxy::SelectionProxy::Trampoline::executeCompiledExpression(String_t comp
 {
     // Perform action
     if (m_game.get() != 0) {
-        m_game->selections().executeCompiledExpression(compiledExpression, targetLayer, m_game->currentTurn().universe());
+        m_game->selections().executeCompiledExpression(compiledExpression, targetLayer, m_game->viewpointTurn().universe());
     }
 
     // Signal other listeners
@@ -137,7 +137,7 @@ game::proxy::SelectionProxy::Trampoline::executeCompiledExpressionAll(String_t c
 {
     // Perform action
     if (m_game.get() != 0) {
-        m_game->selections().executeCompiledExpressionAll(compiledExpression, m_game->currentTurn().universe());
+        m_game->selections().executeCompiledExpressionAll(compiledExpression, m_game->viewpointTurn().universe());
     }
 
     // Signal other listeners
@@ -159,7 +159,7 @@ game::proxy::SelectionProxy::Trampoline::executeExpression(const String_t& expre
 
     // Execute
     if (m_game.get() != 0) {
-        m_game->selections().executeCompiledExpression(compiledExpression, targetLayer, m_game->currentTurn().universe());
+        m_game->selections().executeCompiledExpression(compiledExpression, targetLayer, m_game->viewpointTurn().universe());
     }
     m_session.notifyListeners();
 }
@@ -169,7 +169,7 @@ game::proxy::SelectionProxy::Trampoline::markList(LayerReference_t targetLayer, 
 {
     // Perform action
     if (m_game.get() != 0) {
-        m_game->selections().markList(targetLayer, list, mark, m_game->currentTurn().universe());
+        m_game->selections().markList(targetLayer, list, mark, m_game->viewpointTurn().universe());
     }
 
     // Signal other listeners
@@ -181,7 +181,7 @@ game::proxy::SelectionProxy::Trampoline::markObjectsInRange(game::map::Point a, 
 {
     // Perform action
     if (m_game.get() != 0) {
-        game::map::Universe& univ = m_game->currentTurn().universe();
+        game::map::Universe& univ = m_game->viewpointTurn().universe();
         game::map::Selections& sel = m_game->selections();
         if (revertFirst) {
             sel.copyTo(univ, sel.getCurrentLayer());
@@ -201,7 +201,7 @@ game::proxy::SelectionProxy::Trampoline::revertCurrentLayer()
 {
     // Perform action
     if (m_game.get() != 0) {
-        game::map::Universe& univ = m_game->currentTurn().universe();
+        game::map::Universe& univ = m_game->viewpointTurn().universe();
         game::map::Selections& sel = m_game->selections();
 
         sel.copyTo(univ, sel.getCurrentLayer());

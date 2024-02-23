@@ -115,6 +115,34 @@ AFL_TEST("game.proxy.ConvertSuppliesProxy:sellSupplies", a)
     a.checkEqual("12. Money",    p.getCargo(Element::Money).orElse(-1), 800);
 }
 
+/** Test supply sale, lifetime handling.
+    A: create universe with a planet. Destroy session. Sell supplies.
+    E: no crash. */
+AFL_TEST("game.proxy.ConvertSuppliesProxy:sellSupplies:lifetime", a)
+{
+    // Environment
+    SessionThread h;
+    Planet& p = prepare(h);
+    ConvertSuppliesProxy testee(h.gameSender());
+
+    // Set up
+    WaitIndicator ind;
+    ConvertSuppliesProxy::Status st = testee.init(ind, PLANET_ID, 0, 0);
+    a.checkEqual("01. valid", st.valid, true);
+
+    // Clear session
+    h.session().setGame(0);
+    h.session().setRoot(0);
+    h.session().setShipList(0);
+
+    // Sell supplies
+    testee.sellSupplies(300);
+
+    // Verify
+    h.sync();
+    a.checkEqual("11. Supplies", p.getCargo(Element::Supplies).orElse(-1), 700);
+}
+
 /** Test buying supplies.
     A: create universe with a planet and a reverter. Buy supplies.
     E: correct results reported. */

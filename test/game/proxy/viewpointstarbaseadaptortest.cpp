@@ -1,9 +1,9 @@
 /**
-  *  \file test/game/proxy/currentstarbaseadaptortest.cpp
-  *  \brief Test for game::proxy::CurrentStarbaseAdaptor
+  *  \file test/game/proxy/viewpointstarbaseadaptortest.cpp
+  *  \brief Test for game::proxy::ViewpointStarbaseAdaptor
   */
 
-#include "game/proxy/currentstarbaseadaptor.hpp"
+#include "game/proxy/viewpointstarbaseadaptor.hpp"
 
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
@@ -18,7 +18,7 @@
 namespace {
     void addShip(game::Session& session, game::Id_t id, int x, int y, game::map::Object::Playability playability, String_t fcode, String_t name)
     {
-        game::map::Ship* sh = session.getGame()->currentTurn().universe().ships().create(id);
+        game::map::Ship* sh = session.getGame()->viewpointTurn().universe().ships().create(id);
 
         game::map::ShipData sd;
         sd.friendlyCode = fcode;
@@ -32,39 +32,39 @@ namespace {
 }
 
 /** Test operation on empty session: construction throws. */
-AFL_TEST("game.proxy.CurrentStarbaseAdaptor:empty", a)
+AFL_TEST("game.proxy.ViewpointStarbaseAdaptor:empty", a)
 {
     afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
     game::Session session(tx, fs);
-    AFL_CHECK_THROWS(a, game::proxy::CurrentStarbaseAdaptor(session, 99), game::Exception);
+    AFL_CHECK_THROWS(a, game::proxy::ViewpointStarbaseAdaptor(session, 99), game::Exception);
 }
 
 /** Test normal operation.
-    As far as CurrentStarbaseAdaptor is concerned, the planet must exist. */
-AFL_TEST("game.proxy.CurrentStarbaseAdaptor:normal", a)
+    As far as ViewpointStarbaseAdaptor is concerned, the planet must exist. */
+AFL_TEST("game.proxy.ViewpointStarbaseAdaptor:normal", a)
 {
     afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
     game::Session session(tx, fs);
     session.setShipList(new game::spec::ShipList());
     session.setGame(new game::Game());
-    game::map::Planet* pl = session.getGame()->currentTurn().universe().planets().create(55);
+    game::map::Planet* pl = session.getGame()->viewpointTurn().universe().planets().create(55);
 
-    game::proxy::CurrentStarbaseAdaptor testee(session, 55);
+    game::proxy::ViewpointStarbaseAdaptor testee(session, 55);
     a.checkEqual("01. session", &testee.session(), &session);
     a.checkEqual("02. planet", &testee.planet(), pl);
 }
 
 /** Test findShipCloningHere(). */
-AFL_TEST("game.proxy.CurrentStarbaseAdaptor:findShipCloningHere", a)
+AFL_TEST("game.proxy.ViewpointStarbaseAdaptor:findShipCloningHere", a)
 {
     afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
     game::Session session(tx, fs);
     session.setShipList(new game::spec::ShipList());
     session.setGame(new game::Game());
-    session.getGame()->currentTurn().universe().planets().create(55)
+    session.getGame()->viewpointTurn().universe().planets().create(55)
         ->setPosition(game::map::Point(777, 888));
 
     // Add some ships
@@ -74,7 +74,7 @@ AFL_TEST("game.proxy.CurrentStarbaseAdaptor:findShipCloningHere", a)
     addShip(session, 40, 777, 888, game::map::Object::Playable, "cln", "betty");
 
     // Verify
-    game::proxy::CurrentStarbaseAdaptor testee(session, 55);
+    game::proxy::ViewpointStarbaseAdaptor testee(session, 55);
     game::Id_t id = 0;
     String_t name;
     a.check("01. findShipCloningHere", testee.findShipCloningHere(id, name));

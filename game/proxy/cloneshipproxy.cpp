@@ -19,9 +19,12 @@ using game::map::Universe;
 
 class game::proxy::CloneShipProxy::Trampoline {
  public:
-    Trampoline(Session& session, Planet& planet, Ship& ship, Universe& univ)
+    Trampoline(Session& session, Planet& planet, Ship& ship, Universe& univ, Game& g)
         : m_session(session),
-          m_action(planet, ship, univ, game::actions::mustHaveGame(session).shipScores(), game::actions::mustHaveShipList(session), game::actions::mustHaveRoot(session))
+          m_game(g),
+          m_root(game::actions::mustHaveRoot(session)),
+          m_shipList(game::actions::mustHaveShipList(session)),
+          m_action(planet, ship, univ, g.shipScores(), *m_shipList, *m_root)
         { }
 
     void getStatus(Status& st)
@@ -43,13 +46,15 @@ class game::proxy::CloneShipProxy::Trampoline {
 
     void commit()
         {
-            m_action.commit(game::actions::mustHaveGame(m_session).mapConfiguration(), m_session.rng());
+            m_action.commit(m_game->mapConfiguration(), m_session.rng());
         }
 
  private:
     Session& m_session;
+    afl::base::Ref<Game> m_game;
+    afl::base::Ref<Root> m_root;
+    afl::base::Ref<game::spec::ShipList> m_shipList;
     game::actions::CloneShip m_action;
-    Id_t m_planetId;
 };
 
 class game::proxy::CloneShipProxy::TrampolineFromSession : public afl::base::Closure<Trampoline*(Session&)> {
@@ -59,7 +64,8 @@ class game::proxy::CloneShipProxy::TrampolineFromSession : public afl::base::Clo
         { }
     virtual Trampoline* call(Session& session)
         {
-            Universe& univ = game::actions::mustHaveGame(session).currentTurn().universe();
+            Game& g = game::actions::mustHaveGame(session);
+            Universe& univ = g.viewpointTurn().universe();
             Ship& sh = game::actions::mustExist(univ.ships().get(m_id));
             Point pt;
             if (!sh.getPosition().get(pt)) {
@@ -67,7 +73,7 @@ class game::proxy::CloneShipProxy::TrampolineFromSession : public afl::base::Clo
             }
             Planet& pl = game::actions::mustExist(univ.planets().get(univ.findPlanetAt(pt)));
 
-            return new Trampoline(session, pl, sh, univ);
+            return new Trampoline(session, pl, sh, univ, g);
         }
  private:
     const Id_t m_id;

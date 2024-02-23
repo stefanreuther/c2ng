@@ -12,21 +12,23 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/proxy/listproxy.cpp game/proxy/listproxy.hpp \
-    game/vcr/flak/visualizer.cpp interpreter/tagnode.cpp \
-    util/runlengthcompress.cpp util/runlengthcompress.hpp \
-    interpreter/lockaccess.hpp util/resourcefileapplication.cpp \
-    util/resourcefileapplication.hpp util/resourcefilewriter.cpp \
-    util/resourcefilewriter.hpp util/resourcefilereader.cpp \
-    util/resourcefilereader.hpp util/resourcefile.hpp \
-    game/proxy/historyturnproxy.cpp game/proxy/historyturnproxy.hpp \
-    game/proxy/allianceproxy.cpp game/proxy/allianceproxy.hpp \
-    game/proxy/attachmentproxy.cpp game/proxy/attachmentproxy.hpp \
-    game/config/stringarrayoption.cpp game/config/stringarrayoption.hpp \
-    interpreter/directoryfunctions.cpp interpreter/directoryfunctions.hpp \
-    game/vcr/test/database.cpp game/vcr/test/database.hpp \
-    game/vcr/test/battle.cpp game/vcr/test/battle.hpp \
-    interpreter/test/valueverifier.cpp interpreter/test/valueverifier.hpp \
+FILES_gamelib = game/proxy/viewpointstarbaseadaptor.cpp \
+    game/proxy/viewpointstarbaseadaptor.hpp game/proxy/listproxy.cpp \
+    game/proxy/listproxy.hpp game/vcr/flak/visualizer.cpp \
+    interpreter/tagnode.cpp util/runlengthcompress.cpp \
+    util/runlengthcompress.hpp interpreter/lockaccess.hpp \
+    util/resourcefileapplication.cpp util/resourcefileapplication.hpp \
+    util/resourcefilewriter.cpp util/resourcefilewriter.hpp \
+    util/resourcefilereader.cpp util/resourcefilereader.hpp \
+    util/resourcefile.hpp game/proxy/historyturnproxy.cpp \
+    game/proxy/historyturnproxy.hpp game/proxy/allianceproxy.cpp \
+    game/proxy/allianceproxy.hpp game/proxy/attachmentproxy.cpp \
+    game/proxy/attachmentproxy.hpp game/config/stringarrayoption.cpp \
+    game/config/stringarrayoption.hpp interpreter/directoryfunctions.cpp \
+    interpreter/directoryfunctions.hpp game/vcr/test/database.cpp \
+    game/vcr/test/database.hpp game/vcr/test/battle.cpp \
+    game/vcr/test/battle.hpp interpreter/test/valueverifier.cpp \
+    interpreter/test/valueverifier.hpp \
     interpreter/expr/rvaluefunctioncallnode.cpp \
     interpreter/expr/rvaluefunctioncallnode.hpp \
     game/interface/scriptapplication.cpp \
@@ -91,9 +93,7 @@ FILES_gamelib = game/proxy/listproxy.cpp game/proxy/listproxy.hpp \
     game/interface/labelvector.hpp game/proxy/fictivestarbaseadaptor.cpp \
     game/proxy/fictivestarbaseadaptor.hpp \
     game/proxy/predictedstarbaseadaptor.cpp \
-    game/proxy/predictedstarbaseadaptor.hpp \
-    game/proxy/currentstarbaseadaptor.cpp \
-    game/proxy/currentstarbaseadaptor.hpp game/proxy/starbaseadaptor.hpp \
+    game/proxy/predictedstarbaseadaptor.hpp game/proxy/starbaseadaptor.hpp \
     game/interface/propertylist.cpp game/interface/propertylist.hpp \
     game/proxy/scripteditorproxy.cpp game/proxy/scripteditorproxy.hpp \
     game/interface/contextprovider.hpp interpreter/contextreceiver.hpp \
@@ -1793,8 +1793,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/game/proxy/listproxytest.cpp \
-    test/util/syntax/segmenttest.cpp \
+FILES_testsuite = test/game/proxy/viewpointstarbaseadaptortest.cpp \
+    test/game/proxy/listproxytest.cpp test/util/syntax/segmenttest.cpp \
     test/util/syntax/scripthighlightertest.cpp \
     test/util/syntax/pascalhighlightertest.cpp \
     test/util/syntax/nullhighlightertest.cpp \
@@ -2442,7 +2442,6 @@ FILES_testsuite = test/game/proxy/listproxytest.cpp \
     test/game/proxy/exportadaptortest.cpp \
     test/game/proxy/drawingproxytest.cpp \
     test/game/proxy/cursorobserverproxytest.cpp \
-    test/game/proxy/currentstarbaseadaptortest.cpp \
     test/game/proxy/costsummaryadaptortest.cpp \
     test/game/proxy/convertsuppliesproxytest.cpp \
     test/game/proxy/configurationproxytest.cpp \

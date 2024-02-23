@@ -10,7 +10,7 @@
 #include "game/map/planetstorage.hpp"
 #include "game/map/shiputils.hpp"
 #include "game/map/universe.hpp"
-#include "game/proxy/currentstarbaseadaptor.hpp"
+#include "game/proxy/viewpointstarbaseadaptor.hpp"
 #include "game/proxy/waitindicator.hpp"
 #include "game/registrationkey.hpp"
 #include "game/turn.hpp"
@@ -43,13 +43,11 @@ class game::proxy::BuildShipProxy::Trampoline {
     Session& m_session;
     util::RequestSender<BuildShipProxy> m_reply;
 
-    // We'll be making dumb pointers to these objects, so make smart ones to keep them alive:
-    afl::base::Ptr<Root> m_pRoot;
-    afl::base::Ptr<game::spec::ShipList> m_pShipList;
+    // Keep objects alive:
+    afl::base::Ref<Root> m_root;
+    afl::base::Ref<game::spec::ShipList> m_shipList;
 
     // Working objects:
-    Root& m_root;
-    game::spec::ShipList& m_shipList;
     game::map::Planet& m_planet;
     game::map::PlanetStorage m_container;
     game::actions::BuildShip m_action;
@@ -63,13 +61,11 @@ game::proxy::BuildShipProxy::Trampoline::Trampoline(StarbaseAdaptor& adaptor, ut
     : m_adaptor(adaptor),
       m_session(adaptor.session()),
       m_reply(reply),
-      m_pRoot(m_session.getRoot()),
-      m_pShipList(m_session.getShipList()),
       m_root(game::actions::mustHaveRoot(m_session)),
       m_shipList(game::actions::mustHaveShipList(m_session)),
       m_planet(adaptor.planet()),
-      m_container(m_planet, m_root.hostConfiguration()),
-      m_action(m_planet, m_container, m_shipList, m_root),
+      m_container(m_planet, m_root->hostConfiguration()),
+      m_action(m_planet, m_container, *m_shipList, *m_root),
       m_partArea(HullTech),
       m_partId(m_action.getBuildOrder().getHullIndex())
 {
@@ -147,7 +143,7 @@ game::proxy::BuildShipProxy::Trampoline::packStatus(Status& st) /*const - cannot
     st.missing   = m_action.costAction().getMissingAmountAsCost();
 
     // Part
-    if (const game::spec::Component* p = m_shipList.getComponent(m_partArea, m_partId)) {
+    if (const game::spec::Component* p = m_shipList->getComponent(m_partArea, m_partId)) {
         st.partTech = p->getTechLevel();
         st.availableTech = m_planet.getBaseTechLevel(m_partArea).orElse(0);
         st.partCost = p->cost();
@@ -155,10 +151,10 @@ game::proxy::BuildShipProxy::Trampoline::packStatus(Status& st) /*const - cannot
 
     // Order
     st.order = m_action.getBuildOrder();
-    st.order.describe(st.description, m_shipList, m_session.translator());
+    st.order.describe(st.description, *m_shipList, m_session.translator());
 
     // Engine limits
-    if (const game::spec::Hull* h = m_shipList.hulls().get(m_action.getBuildOrder().getHullIndex())) {
+    if (const game::spec::Hull* h = m_shipList->hulls().get(m_action.getBuildOrder().getHullIndex())) {
         st.numEngines = h->getNumEngines();
         st.maxBeams = h->getMaxBeams();
         st.maxLaunchers = h->getMaxLaunchers();
@@ -186,7 +182,7 @@ game::proxy::BuildShipProxy::Trampoline::getQuery(ShipQuery& result)
 inline String_t
 game::proxy::BuildShipProxy::Trampoline::toScriptCommand(const String_t& verb)
 {
-    return m_action.getBuildOrder().toScriptCommand(verb, &m_shipList);
+    return m_action.getBuildOrder().toScriptCommand(verb, &*m_shipList);
 }
 
 inline bool
@@ -239,7 +235,7 @@ class game::proxy::BuildShipProxy::TrampolineFromAdaptor : public afl::base::Clo
 
 game::proxy::BuildShipProxy::BuildShipProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& receiver, Id_t planetId)
     : m_receiver(receiver, *this),
-      m_sender(gameSender.makeTemporary(new CurrentStarbaseAdaptorFromSession(planetId)).makeTemporary(new TrampolineFromAdaptor(m_receiver.getSender())))
+      m_sender(gameSender.makeTemporary(new ViewpointStarbaseAdaptorFromSession(planetId)).makeTemporary(new TrampolineFromAdaptor(m_receiver.getSender())))
 { }
 
 game::proxy::BuildShipProxy::BuildShipProxy(util::RequestSender<StarbaseAdaptor> adaptorSender, util::RequestDispatcher& receiver)

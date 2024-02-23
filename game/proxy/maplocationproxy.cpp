@@ -22,7 +22,7 @@ namespace {
 
 class game::proxy::MapLocationProxy::Trampoline {
  public:
-    Trampoline(Session& session, util::RequestSender<MapLocationProxy> reply)
+    Trampoline(Session& session, const util::RequestSender<MapLocationProxy>& reply)
         : m_reply(reply),
           m_session(session),
           m_inhibitPositionChange(false),

@@ -17,7 +17,7 @@ namespace game { namespace proxy {
     /** Fleet proxy.
         Asynchronous, bidirectional proxy to access the current fleet.
         While this proxy is alive, it makes sure that whenever a fleet is selected (game::map::Cursors::currentFleet()),
-        a member of the fleat is selected as current ship (game::map::Cursors::currentShip()).
+        a member of the fleet is selected as current ship (game::map::Cursors::currentShip()).
         Information about this fleet is published using the FleetProxy.
 
         Bidirectional, asynchronous:

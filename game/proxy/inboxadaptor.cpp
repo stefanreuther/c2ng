@@ -26,9 +26,9 @@ namespace {
     afl::base::Optional<size_t> getCurrentMessage(game::Session& session)
     {
         try {
-            int32_t i;
-            if (interpreter::checkIntegerArg(i, session.world().getGlobalValue(INDEX_VAR_NAME))) {
-                return static_cast<size_t>(i);
+            size_t i;
+            if (interpreter::checkIndexArg(i, session.world().getGlobalValue(INDEX_VAR_NAME), 0, size_t(-1))) {
+                return i;
             }
         }
         catch (...)
@@ -38,7 +38,7 @@ namespace {
 
     void setCurrentMessage(game::Session& session, size_t msgNr)
     {
-        session.world().setNewGlobalValue(INDEX_VAR_NAME, interpreter::makeIntegerValue(int32_t(msgNr)));
+        session.world().setNewGlobalValue(INDEX_VAR_NAME, interpreter::makeSizeValue(msgNr));
     }
 
 
@@ -57,7 +57,7 @@ namespace {
             { return m_session; }
 
         virtual game::msg::Mailbox& mailbox() const
-            { return m_game->currentTurn().inbox(); }
+            { return m_game->viewpointTurn().inbox(); }
 
         virtual game::msg::Configuration* getConfiguration() const
             { return &m_game->messageConfiguration(); }
@@ -91,7 +91,7 @@ namespace {
         InboxSubsetAdaptor(game::Session& session, std::vector<size_t> indexes)
             : m_session(session),
               m_game(game::actions::mustHaveGame(session)),
-              m_mailbox(m_game->currentTurn().inbox(), indexes)
+              m_mailbox(m_game->viewpointTurn().inbox(), indexes)
             { }
 
         virtual game::Session& session() const
@@ -154,7 +154,7 @@ game::proxy::makePlanetInboxAdaptor(Id_t planetId)
             {
                 std::vector<size_t> indexes;
                 if (const Game* g = s.getGame().get()) {
-                    if (const game::map::Planet* p = g->currentTurn().universe().planets().get(m_planetId)) {
+                    if (const game::map::Planet* p = g->viewpointTurn().universe().planets().get(m_planetId)) {
                         indexes = p->messages().get();
                     }
                 }
@@ -179,7 +179,7 @@ game::proxy::makeShipInboxAdaptor(Id_t shipId)
             {
                 std::vector<size_t> indexes;
                 if (const Game* g = s.getGame().get()) {
-                    if (const game::map::Ship* p = g->currentTurn().universe().ships().get(m_shipId)) {
+                    if (const game::map::Ship* p = g->viewpointTurn().universe().ships().get(m_shipId)) {
                         indexes = p->messages().get();
                     }
                 }

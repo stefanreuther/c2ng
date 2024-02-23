@@ -27,14 +27,14 @@ class game::proxy::BuildQueueProxy::Trampoline {
             Root* r = session.getRoot().get();
             game::spec::ShipList* sl = session.getShipList().get();
             if (g != 0 && r != 0 && sl != 0) {
-                m_action.reset(new Action_t(g->currentTurn().universe(),
+                m_action.reset(new Action_t(g->viewpointTurn().universe(),
                                             *sl,
                                             r->hostVersion(),
                                             r->hostConfiguration(),
                                             session.rng(),
                                             g->getViewpointPlayer()));
                 m_action->addPlannedBuilds(session.processList());
-                m_action->setAvailableBuildPoints(CompoundScore(g->scores(), game::score::ScoreId_BuildPoints, 1).get(g->scores(), g->currentTurn().getTurnNumber(), g->getViewpointPlayer()));
+                m_action->setAvailableBuildPoints(CompoundScore(g->scores(), game::score::ScoreId_BuildPoints, 1).get(g->scores(), g->viewpointTurn().getTurnNumber(), g->getViewpointPlayer()));
             }
         }
 
@@ -72,10 +72,10 @@ class game::proxy::BuildQueueProxy::Trampoline {
             // Extra info
             if (Game* g = m_session.getGame().get()) {
                 // My bases (count normally)
-                global.numBases = g->currentTurn().universe().playedBases().countObjects();
+                global.numBases = g->viewpointTurn().universe().playedBases().countObjects();
 
                 // All bases (from scores)
-                global.totalBases = CompoundScore(g->scores(), game::score::ScoreId_Bases, 1).get(g->scores(), g->currentTurn().getTurnNumber(), PlayerSet_t::allUpTo(MAX_PLAYERS))
+                global.totalBases = CompoundScore(g->scores(), game::score::ScoreId_Bases, 1).get(g->scores(), g->viewpointTurn().getTurnNumber(), PlayerSet_t::allUpTo(MAX_PLAYERS))
                     .orElse(0);
             }
         }

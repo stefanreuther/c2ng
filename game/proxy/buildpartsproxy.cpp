@@ -36,17 +36,13 @@ class game::proxy::BuildPartsProxy::Trampoline {
     util::RequestSender<BuildPartsProxy> m_reply;
     Id_t m_id;
 
-    // We'll be making dumb pointers to these objects, so make smart ones to keep them alive:
-    afl::base::Ptr<Game> m_pGame;
-    afl::base::Ptr<Root> m_pRoot;
-    afl::base::Ptr<game::spec::ShipList> m_pShipList;
+    // Keep objects alive:
+    afl::base::Ref<Turn> m_turn;
+    afl::base::Ref<Root> m_root;
+    afl::base::Ref<game::spec::ShipList> m_shipList;
 
     // Working objects
-    Game& m_game;
-    Root& m_root;
-    game::spec::ShipList& m_shipList;
     game::map::Planet& m_planet;
-
     game::map::PlanetStorage m_storage;
     game::actions::BuildParts m_action;
 
@@ -59,20 +55,17 @@ game::proxy::BuildPartsProxy::Trampoline::Trampoline(Session& session, util::Req
     : m_session(session),
       m_reply(reply),
       m_id(id),
-      m_pGame(session.getGame()),
-      m_pRoot(session.getRoot()),
-      m_pShipList(session.getShipList()),
-      m_game(game::actions::mustHaveGame(session)),
+      m_turn(game::actions::mustHaveGame(session).viewpointTurn()),
       m_root(game::actions::mustHaveRoot(session)),
       m_shipList(game::actions::mustHaveShipList(session)),
-      m_planet(game::actions::mustExist(m_game.currentTurn().universe().planets().get(id))),
-      m_storage(m_planet, m_root.hostConfiguration()),
-      m_action(m_planet, m_storage, m_shipList, m_root),
+      m_planet(game::actions::mustExist(m_turn->universe().planets().get(id))),
+      m_storage(m_planet, m_root->hostConfiguration()),
+      m_action(m_planet, m_storage, *m_shipList, *m_root),
       m_currentArea(HullTech),
       m_currentId(0),
       m_currentPart(0)
 {
-    m_action.setUndoInformation(m_game.currentTurn().universe());
+    m_action.setUndoInformation(m_turn->universe());
     m_action.sig_change.add(this, &Trampoline::onChange);
 }
 
@@ -89,9 +82,9 @@ void
 game::proxy::BuildPartsProxy::Trampoline::selectPart(TechLevel area, int id)
 {
     m_currentArea = area;
-    m_currentPart = m_shipList.getComponent(area, id);
+    m_currentPart = m_shipList->getComponent(area, id);
     if (area == HullTech) {
-        m_currentId = m_shipList.hullAssignments().getIndexFromHull(m_root.hostConfiguration(), getPlanetOwner(), id);
+        m_currentId = m_shipList->hullAssignments().getIndexFromHull(m_root->hostConfiguration(), getPlanetOwner(), id);
     } else {
         m_currentId = id;
     }
@@ -120,7 +113,7 @@ game::proxy::BuildPartsProxy::Trampoline::packStatus(Status& st)
     st.status           = m_action.getStatus();
 
     // Current part
-    st.name             = (m_currentPart != 0 ? m_currentPart->getName(m_shipList.componentNamer()) : String_t());
+    st.name             = (m_currentPart != 0 ? m_currentPart->getName(m_shipList->componentNamer()) : String_t());
     st.numExistingParts = m_action.getNumExistingParts(m_currentArea, m_currentId);
     st.numParts         = m_action.getNumParts(m_currentArea, m_currentId);
 

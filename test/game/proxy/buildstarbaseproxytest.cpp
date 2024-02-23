@@ -99,6 +99,30 @@ AFL_TEST("game.proxy.BuildStarbaseProxy:normal", a)
     a.checkEqual("12. isBuildingBase", p.isBuildingBase(), true);
 }
 
+/** Test lifetime behaviour.
+    A: create session containing a planet. Call init(). Destroy session content. Call commit.
+    E: Call must succeed (not segfault). */
+AFL_TEST_NOARG("game.proxy.BuildStarbaseProxy:lifetime")
+{
+    SessionThread h;
+    prepare(h);
+    Planet& p = addPlanet(h);
+
+    BuildStarbaseProxy testee(h.gameSender());
+
+    // Prepare
+    WaitIndicator ind;
+    BuildStarbaseProxy::Status st;
+    testee.init(ind, PLANET_ID, st);
+
+    // Clear session
+    h.session().setGame(0);
+    h.session().setRoot(0);
+
+    // Commit
+    testee.commit(ind);
+}
+
 /** Test cancellation behaviour.
     A: create session containing a planet that is building a starbase. Call init().
     E: result reports CanCancel. */

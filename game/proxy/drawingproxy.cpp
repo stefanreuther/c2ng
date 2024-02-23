@@ -23,13 +23,14 @@ namespace {
         // ex WDrawCircleChartMode::setRadius (sort-of)
         return std::max(1, std::min(Drawing::MAX_CIRCLE_RADIUS, r));
     }
+
+    bool isEditable(const game::Turn& t)
+    {
+        return !t.getLocalDataPlayers().empty();
+    }
 }
 
 
-/*
- *  FIXME: consider: automatically lose focus when viewpoint turn changes
- *  FIXME: consider: refuse modifying non-current turn
- */
 class game::proxy::DrawingProxy::Trampoline {
  public:
     Trampoline(Session& session, const util::RequestSender<DrawingProxy>& reply);
@@ -59,14 +60,20 @@ class game::proxy::DrawingProxy::Trampoline {
     util::RequestSender<DrawingProxy> m_reply;
 
     DrawingContainer::Iterator_t m_current;
-    Turn* m_currentTurn;
+
+    /* We probably need not keep the turn as a reference-counted pointer, but it does not hurt.
+       Most accesses are guarded by a check of m_current, which automatically becomes null if the turn dies.
+       However, having this a dumb pointer means we could have a pointer to a dead object. */
+    afl::base::Ptr<Turn> m_currentTurn;
 
     afl::base::SignalConnection conn_drawingChange;
+    afl::base::SignalConnection conn_viewpointTurnChange;
 
     void sendDrawingUpdate();
     void sendStatus();
     void flushRequests();
     void onDrawingChange();
+    void onViewpointTurnChange();
     Turn* getTurn() const;
     Game* getGame() const;
     void setCurrentDrawing(DrawingContainer::Iterator_t it, Turn* t);
@@ -118,8 +125,12 @@ void
 game::proxy::DrawingProxy::Trampoline::create(game::map::Point pos, Drawing::Type type)
 {
     if (Turn* t = getTurn()) {
-        setCurrentDrawing(t->universe().drawings().addNew(new Drawing(pos, type)), t);
-        m_session.notifyListeners();
+        if (isEditable(*t)) {
+            setCurrentDrawing(t->universe().drawings().addNew(new Drawing(pos, type)), t);
+            m_session.notifyListeners();
+        } else {
+            sendStatus();
+        }
     }
 }
 
@@ -127,17 +138,21 @@ void
 game::proxy::DrawingProxy::Trampoline::createCannedMarker(game::map::Point pos, int slot)
 {
     if (Turn* t = getTurn()) {
-        if (Root* r = m_session.getRoot().get()) {
-            // Obtain configuration
-            const game::config::MarkerOptionDescriptor* opt = game::config::UserConfiguration::getCannedMarker(slot);
-            if (opt != 0) {
-                // Draw it
-                std::auto_ptr<Drawing> drawing(new Drawing(pos, r->userConfiguration()[*opt]()));
+        if (isEditable(*t)) {
+            if (Root* r = m_session.getRoot().get()) {
+                // Obtain configuration
+                const game::config::MarkerOptionDescriptor* opt = game::config::UserConfiguration::getCannedMarker(slot);
+                if (opt != 0) {
+                    // Draw it
+                    std::auto_ptr<Drawing> drawing(new Drawing(pos, r->userConfiguration()[*opt]()));
 
-                // Add it
-                setCurrentDrawing(t->universe().drawings().addNew(drawing.release()), t);
-                m_session.notifyListeners();
+                    // Add it
+                    setCurrentDrawing(t->universe().drawings().addNew(drawing.release()), t);
+                    m_session.notifyListeners();
+                }
             }
+        } else {
+            sendStatus();
         }
     }
 }
@@ -148,10 +163,12 @@ game::proxy::DrawingProxy::Trampoline::selectNearestVisibleDrawing(game::map::Po
     // ex chartusr.pas:NTryDelete (sort-of)
     if (Game* g = getGame()) {
         if (Turn* t = getTurn()) {
-            DrawingContainer& cont = t->universe().drawings();
-            DrawingContainer::Iterator_t it = cont.findNearestVisibleDrawing(pos, g->mapConfiguration(), maxDistance, tagFilter);
-            if (it != cont.end()) {
-                setCurrentDrawing(it, t);
+            if (isEditable(*t)) {
+                DrawingContainer& cont = t->universe().drawings();
+                DrawingContainer::Iterator_t it = cont.findNearestVisibleDrawing(pos, g->mapConfiguration(), maxDistance, tagFilter);
+                if (it != cont.end()) {
+                    setCurrentDrawing(it, t);
+                }
             }
         }
     }
@@ -162,10 +179,12 @@ game::proxy::DrawingProxy::Trampoline::selectMarkerAt(game::map::Point pos, afl:
 {
     // ex chartusr.pas:FindMarkerAt
     if (Turn* t = getTurn()) {
-        DrawingContainer& cont = t->universe().drawings();
-        DrawingContainer::Iterator_t it = cont.findMarkerAt(pos, tagFilter);
-        if (it != cont.end()) {
-            setCurrentDrawing(it, t);
+        if (isEditable(*t)) {
+            DrawingContainer& cont = t->universe().drawings();
+            DrawingContainer::Iterator_t it = cont.findMarkerAt(pos, tagFilter);
+            if (it != cont.end()) {
+                setCurrentDrawing(it, t);
+            }
         }
     }
 }
@@ -251,7 +270,7 @@ game::proxy::DrawingProxy::Trampoline::setColor(uint8_t color, bool adjacent)
     if (Drawing* d = *m_current) {
         d->setColor(color);
         if (adjacent && d->getType() == Drawing::LineDrawing) {
-            if (m_currentTurn != 0) {
+            if (m_currentTurn.get() != 0) {
                 if (Game* g = getGame()) {
                     m_currentTurn->universe().drawings().setAdjacentLinesColor(d->getPos(),  color, g->mapConfiguration());
                     m_currentTurn->universe().drawings().setAdjacentLinesColor(d->getPos2(), color, g->mapConfiguration());
@@ -268,7 +287,7 @@ game::proxy::DrawingProxy::Trampoline::setTag(util::Atom_t tag, bool adjacent)
     if (Drawing* d = *m_current) {
         d->setTag(tag);
         if (adjacent && d->getType() == Drawing::LineDrawing) {
-            if (m_currentTurn != 0) {
+            if (m_currentTurn.get() != 0) {
                 if (Game* g = getGame()) {
                     m_currentTurn->universe().drawings().setAdjacentLinesTag(d->getPos(),  tag, g->mapConfiguration());
                     m_currentTurn->universe().drawings().setAdjacentLinesTag(d->getPos2(), tag, g->mapConfiguration());
@@ -295,7 +314,7 @@ game::proxy::DrawingProxy::Trampoline::erase(bool adjacent)
 {
     Drawing* d = *m_current;
     Game* g = getGame();
-    if (d != 0 && m_currentTurn != 0 && g != 0) {
+    if (d != 0 && m_currentTurn.get() != 0 && g != 0) {
         game::map::DrawingContainer& drawings = m_currentTurn->universe().drawings();
         if (adjacent && d->getType() == Drawing::LineDrawing) {
             // ex chartusr.pas:DeleteObjAndAdjacent
@@ -326,7 +345,7 @@ game::proxy::DrawingProxy::Trampoline::sendDrawingUpdate()
 {
     // Update the drawing container.
     // This will indirectly call sendStatus() which will report back to the user.
-    if (m_currentTurn != 0) {
+    if (m_currentTurn.get() != 0) {
         m_currentTurn->universe().drawings().sig_change.raise();
     }
 
@@ -367,6 +386,14 @@ game::proxy::DrawingProxy::Trampoline::onDrawingChange()
     }
 }
 
+void
+game::proxy::DrawingProxy::Trampoline::onViewpointTurnChange()
+{
+    if (*m_current != 0 && m_currentTurn != getTurn()) {
+        finish();
+    }
+}
+
 game::Turn*
 game::proxy::DrawingProxy::Trampoline::getTurn() const
 {
@@ -388,11 +415,12 @@ game::proxy::DrawingProxy::Trampoline::setCurrentDrawing(DrawingContainer::Itera
 {
     // Disconnect old
     conn_drawingChange.disconnect();
+    conn_viewpointTurnChange.disconnect();
 
     // If previous drawing is invisible, remove it
     // ex WDrawMarkerChartMode::finishDrawing
     if (Drawing* prev = *m_current) {
-        if (m_currentTurn != 0
+        if (m_currentTurn.get() != 0
             && (prev->getType() == Drawing::LineDrawing || prev->getType() == Drawing::RectangleDrawing)
             && prev->getPos() == prev->getPos2())
         {
@@ -405,6 +433,10 @@ game::proxy::DrawingProxy::Trampoline::setCurrentDrawing(DrawingContainer::Itera
         m_current = it;
         m_currentTurn = t;
         conn_drawingChange = t->universe().drawings().sig_change.add(this, &Trampoline::onDrawingChange);
+
+        if (Game* g = getGame()) {
+            conn_viewpointTurnChange = g->sig_viewpointTurnChange.add(this, &Trampoline::onViewpointTurnChange);
+        }
     } else {
         m_current = DrawingContainer::Iterator_t();
         m_currentTurn = 0;

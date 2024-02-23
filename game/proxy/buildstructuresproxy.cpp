@@ -18,24 +18,31 @@ using game::map::Planet;
 
 class game::proxy::BuildStructuresProxy::Trampoline {
  public:
-    Trampoline(Session& session, util::RequestSender<BuildStructuresProxy> reply)
+    Trampoline(Session& session, const util::RequestSender<BuildStructuresProxy>& reply)
         : m_session(session),
-          m_reply(reply)
+          m_reply(reply),
+          m_game(), m_root(), m_container(), m_action(), conn_change()
         { }
 
      void init(Id_t id, HeaderInfo& info, Status& status)
         {
+            // Lifetimes
+            m_game = m_session.getGame();
+            m_root = m_session.getRoot();
+            m_container.reset();
+            m_action.reset();
+
             afl::string::Translator& tx = m_session.translator();
             try {
                 // Preconditions
                 Root& root = game::actions::mustHaveRoot(m_session);
-                Game& game = game::actions::mustHaveGame(m_session);
+                Turn& turn = game::actions::mustHaveGame(m_session).viewpointTurn();
 
                 // Fetch planet
-                Planet& planet = game::actions::mustExist(game.currentTurn().universe().planets().get(id));
+                Planet& planet = game::actions::mustExist(turn.universe().planets().get(id));
                 m_container.reset(new game::map::PlanetStorage(planet, root.hostConfiguration()));
                 m_action.reset(new BuildStructures(planet, *m_container, root.hostConfiguration()));
-                m_action->setUndoInformation(game.currentTurn().universe());
+                m_action->setUndoInformation(turn.universe());
 
                 // Produce output
                 const int temp = planet.getTemperature().orElse(0);
@@ -95,6 +102,8 @@ class game::proxy::BuildStructuresProxy::Trampoline {
  private:
     Session& m_session;
     util::RequestSender<BuildStructuresProxy> m_reply;
+    afl::base::Ptr<Game> m_game;
+    afl::base::Ptr<Root> m_root;
     std::auto_ptr<CargoContainer> m_container;
     std::auto_ptr<BuildStructures> m_action;
     afl::base::SignalConnection conn_change;

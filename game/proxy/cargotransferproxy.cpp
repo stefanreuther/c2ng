@@ -6,9 +6,13 @@
 #include "game/proxy/cargotransferproxy.hpp"
 #include "game/actions/cargotransfer.hpp"
 #include "game/actions/preconditions.hpp"
-#include "game/turn.hpp"
-#include "game/root.hpp"
 #include "game/game.hpp"
+#include "game/root.hpp"
+#include "game/turn.hpp"
+
+using afl::base::Ref;
+using game::actions::CargoTransferSetup;
+using game::actions::MultiTransferSetup;
 
 /*
  *  Notifier: callback to UI
@@ -31,14 +35,17 @@ class game::proxy::CargoTransferProxy::Notifier : public util::Request<CargoTran
  */
 class game::proxy::CargoTransferProxy::Observer {
  public:
-    Observer(Session& session, util::RequestSender<CargoTransferProxy> reply)
+    Observer(Session& session, const util::RequestSender<CargoTransferProxy>& reply)
         : session(session),
+          game(game::actions::mustHaveGame(session)),
+          root(game::actions::mustHaveRoot(session)),
+          shipList(game::actions::mustHaveShipList(session)),
+          turn(game->viewpointTurn()),
           transfer(),
-          limit(),
+          limit(Element::end(*shipList)),
           reply(reply)
         {
             transfer.sig_change.add(this, &Observer::onChange);
-            limit = Element::end(game::actions::mustHaveShipList(session));
         }
 
     void onChange()
@@ -54,8 +61,12 @@ class game::proxy::CargoTransferProxy::Observer {
 
     // Data
     Session& session;
+    Ref<Game> game;
+    Ref<const Root> root;
+    Ref<const game::spec::ShipList> shipList;
+    Turn& turn;
     game::actions::CargoTransfer transfer;
-    Element::Type limit;
+    const Element::Type limit;
     util::RequestSender<CargoTransferProxy> reply;
 };
 
@@ -85,23 +96,13 @@ game::proxy::CargoTransferProxy::init(const game::actions::CargoTransferSetup& s
 {
     class Task : public util::Request<Observer> {
      public:
-        Task(const game::actions::CargoTransferSetup& setup)
+        Task(const CargoTransferSetup& setup)
             : m_setup(setup)
             { }
         virtual void handle(Observer& obs)
-            {
-                Game& g = game::actions::mustHaveGame(obs.session);
-                Root& root = game::actions::mustHaveRoot(obs.session);
-
-                m_setup.build(obs.transfer,
-                              g.currentTurn(),
-                              g.mapConfiguration(),
-                              root.hostConfiguration(),
-                              game::actions::mustHaveShipList(obs.session),
-                              root.hostVersion());
-            }
+            { m_setup.build(obs.transfer, obs.turn, obs.game->mapConfiguration(), obs.root->hostConfiguration(), *obs.shipList, obs.root->hostVersion()); }
      private:
-        game::actions::CargoTransferSetup m_setup;
+        CargoTransferSetup m_setup;
     };
     m_observerSender.postNewRequest(new Task(setup));
 }
@@ -110,15 +111,13 @@ game::proxy::CargoTransferProxy::init(const game::actions::CargoTransferSetup& s
 game::actions::MultiTransferSetup::Result
 game::proxy::CargoTransferProxy::init(WaitIndicator& link, const game::actions::MultiTransferSetup& setup)
 {
-    using game::actions::MultiTransferSetup;
-
     class Task : public util::Request<Observer> {
      public:
         Task(MultiTransferSetup::Result& result, const MultiTransferSetup& setup)
             : m_result(result), m_setup(setup)
             { }
         virtual void handle(Observer& obs)
-            { m_result = m_setup.build(obs.transfer, game::actions::mustHaveGame(obs.session).currentTurn().universe(), obs.session); }
+            { m_result = m_setup.build(obs.transfer, obs.turn.universe(), obs.session); }
      private:
         MultiTransferSetup::Result& m_result;
         MultiTransferSetup m_setup;
@@ -162,16 +161,15 @@ game::proxy::CargoTransferProxy::getGeneralInformation(WaitIndicator& link, Gene
                 // Clear in case the following throws
                 m_info = General();
 
-                game::spec::ShipList& shipList = game::actions::mustHaveShipList(obs.session);
                 afl::string::Translator& tx = obs.session.translator();
 
                 // Valid types
-                m_info.validTypes = obs.transfer.getElementTypes(shipList);
+                m_info.validTypes = obs.transfer.getElementTypes(*obs.shipList);
 
                 // Names etc
-                for (Element::Type t = Element::begin(), e = Element::end(shipList); t != e; ++t) {
-                    m_info.typeNames.set(t, Element::getName(t, tx, shipList));
-                    m_info.typeUnits.set(t, Element::getUnit(t, tx, shipList));
+                for (Element::Type t = Element::begin(), e = obs.limit; t != e; ++t) {
+                    m_info.typeNames.set(t, Element::getName(t, tx, *obs.shipList));
+                    m_info.typeUnits.set(t, Element::getUnit(t, tx, *obs.shipList));
                 }
 
                 // Actions
@@ -216,7 +214,7 @@ game::proxy::CargoTransferProxy::getParticipantInformation(WaitIndicator& link, 
                     m_info.name = c->getName(obs.session.translator());
                     m_info.info1 = c->getInfo1(obs.session.translator());
                     m_info.info2 = c->getInfo2(obs.session.translator());
-                    getCargo(m_info.cargo, *c, Element::end(game::actions::mustHaveShipList(obs.session)));
+                    getCargo(m_info.cargo, *c, obs.limit);
 
                     CargoContainer::Flags_t flags = c->getFlags();
                     m_info.isUnloadTarget = flags.contains(CargoContainer::UnloadTarget);

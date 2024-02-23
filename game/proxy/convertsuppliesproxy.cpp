@@ -16,7 +16,9 @@ using game::actions::ConvertSupplies;
 class game::proxy::ConvertSuppliesProxy::Trampoline {
  public:
     Trampoline(Session& session)
-        : m_session(session)
+        : m_session(session),
+          m_turn(game::actions::mustHaveGame(session).viewpointTurn()),
+          m_action()
         { }
 
     Status init(Id_t planetId, int32_t reservedSupplies, int32_t reservedMoney)
@@ -27,8 +29,7 @@ class game::proxy::ConvertSuppliesProxy::Trampoline {
             // Build new state
             Status st;
             try {
-                Game& g = game::actions::mustHaveGame(m_session);
-                game::map::Universe& univ = g.currentTurn().universe();
+                game::map::Universe& univ = m_turn->universe();
                 game::map::Planet& pl = game::actions::mustExist(univ.planets().get(planetId));
 
                 m_action.reset(new ConvertSupplies(pl));
@@ -54,6 +55,7 @@ class game::proxy::ConvertSuppliesProxy::Trampoline {
 
  private:
     Session& m_session;
+    afl::base::Ref<Turn> m_turn;
     std::auto_ptr<ConvertSupplies> m_action;
 };
 

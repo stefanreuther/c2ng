@@ -12,6 +12,8 @@
 using game::actions::CargoTransferSetup;
 using game::actions::mustHaveGame;
 using game::actions::mustHaveRoot;
+using game::map::Ship;
+using game::map::Universe;
 
 game::proxy::CargoTransferSetupProxy::CargoTransferSetupProxy(util::RequestSender<Session> gameSender)
     : m_status(), m_gameSender(gameSender)
@@ -29,7 +31,7 @@ game::proxy::CargoTransferSetupProxy::createPlanetShip(WaitIndicator& link, int 
 
         void handle(Session& session)
             {
-                m_result.setup = CargoTransferSetup::fromPlanetShip(mustHaveGame(session).currentTurn().universe(), m_planetId, m_shipId);
+                m_result.setup = CargoTransferSetup::fromPlanetShip(mustHaveGame(session).viewpointTurn().universe(), m_planetId, m_shipId);
                 checkConflict(session, m_result);
             }
 
@@ -56,7 +58,7 @@ game::proxy::CargoTransferSetupProxy::createShipShip(WaitIndicator& link, int le
 
         void handle(Session& session)
             {
-                m_result.setup = CargoTransferSetup::fromShipShip(mustHaveGame(session).currentTurn().universe(), m_leftId, m_rightId);
+                m_result.setup = CargoTransferSetup::fromShipShip(mustHaveGame(session).viewpointTurn().universe(), m_leftId, m_rightId);
                 checkConflict(session, m_result);
             }
 
@@ -84,7 +86,7 @@ game::proxy::CargoTransferSetupProxy::createShipJettison(WaitIndicator& link, in
         void handle(Session& session)
             {
                 Game& g = mustHaveGame(session);
-                m_result.setup = CargoTransferSetup::fromShipJettison(g.currentTurn().universe(), m_shipId);
+                m_result.setup = CargoTransferSetup::fromShipJettison(g.viewpointTurn().universe(), m_shipId);
                 checkConflict(session, m_result);
             }
 
@@ -111,7 +113,7 @@ game::proxy::CargoTransferSetupProxy::createShipBeamUp(WaitIndicator& link, int 
         void handle(Session& session)
             {
                 Game& g = mustHaveGame(session);
-                m_result.setup = CargoTransferSetup::fromShipBeamUp(g.currentTurn(), m_shipId, mustHaveRoot(session).hostConfiguration());
+                m_result.setup = CargoTransferSetup::fromShipBeamUp(g.viewpointTurn(), m_shipId, mustHaveRoot(session).hostConfiguration());
                 checkConflict(session, m_result);
             }
 
@@ -157,7 +159,7 @@ game::proxy::CargoTransferSetupProxy::cancelConflictingTransfer(WaitIndicator& l
 
         void handle(Session& session)
             {
-                m_result.setup.cancelConflictingTransfer(mustHaveGame(session).currentTurn().universe(), m_result.conflict.fromId);
+                m_result.setup.cancelConflictingTransfer(mustHaveGame(session).viewpointTurn().universe(), m_result.conflict.fromId);
                 checkConflict(session, m_result);
                 session.notifyListeners();
             }
@@ -174,16 +176,16 @@ game::proxy::CargoTransferSetupProxy::cancelConflictingTransfer(WaitIndicator& l
 void
 game::proxy::CargoTransferSetupProxy::checkConflict(Session& s, Status& st)
 {
-    const game::map::Universe& univ = mustHaveGame(s).currentTurn().universe();
+    const Universe& univ = mustHaveGame(s).viewpointTurn().universe();
 
     st.conflict.fromId = st.setup.getConflictingTransferShipId(univ);
     st.conflict.fromName = String_t();
     st.conflict.toId = 0;
     st.conflict.toName = String_t();
-    if (const game::map::Ship* fromShip = univ.ships().get(st.conflict.fromId)) {
+    if (const Ship* fromShip = univ.ships().get(st.conflict.fromId)) {
         st.conflict.fromName = fromShip->getName();
-        st.conflict.toId = fromShip->getTransporterTargetId(game::map::Ship::TransferTransporter).orElse(0);
-        if (const game::map::Ship* toShip = univ.ships().get(st.conflict.toId)) {
+        st.conflict.toId = fromShip->getTransporterTargetId(Ship::TransferTransporter).orElse(0);
+        if (const Ship* toShip = univ.ships().get(st.conflict.toId)) {
             st.conflict.toName = toShip->getName();
         }
     }

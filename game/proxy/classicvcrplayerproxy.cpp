@@ -24,7 +24,7 @@ namespace {
 
 class game::proxy::ClassicVcrPlayerProxy::Trampoline {
  public:
-    Trampoline(util::RequestSender<ClassicVcrPlayerProxy> reply, VcrDatabaseAdaptor& adaptor);
+    Trampoline(const util::RequestSender<ClassicVcrPlayerProxy>& reply, VcrDatabaseAdaptor& adaptor);
 
     void initRequest(size_t index);
     void eventRequest();
@@ -37,14 +37,14 @@ class game::proxy::ClassicVcrPlayerProxy::Trampoline {
     util::RequestSender<ClassicVcrPlayerProxy> m_reply;
     VcrDatabaseAdaptor& m_adaptor;
 
-    game::vcr::classic::EventRecorder m_recorder;
-    game::vcr::classic::EventVisualizer m_visualizer;
-    std::auto_ptr<game::vcr::classic::Algorithm> m_algorithm;
+    gvc::EventRecorder m_recorder;
+    gvc::EventVisualizer m_visualizer;
+    std::auto_ptr<gvc::Algorithm> m_algorithm;
     size_t m_index;
 };
 
 
-game::proxy::ClassicVcrPlayerProxy::Trampoline::Trampoline(util::RequestSender<ClassicVcrPlayerProxy> reply, VcrDatabaseAdaptor& adaptor)
+game::proxy::ClassicVcrPlayerProxy::Trampoline::Trampoline(const util::RequestSender<ClassicVcrPlayerProxy>& reply, VcrDatabaseAdaptor& adaptor)
     : m_reply(reply), m_adaptor(adaptor),
       m_recorder(), m_visualizer(m_recorder), m_algorithm(), m_index(0)
 { }

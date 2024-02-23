@@ -77,6 +77,7 @@ namespace game { namespace proxy {
         };
 
         /** Constructor (current planet).
+            Provides access to the given planet in viewpointTurn().
             \param gameSender Game sender
             \param receiver   RequestDispatcher to receive updates in this thread
             \param planetId   Planet Id */

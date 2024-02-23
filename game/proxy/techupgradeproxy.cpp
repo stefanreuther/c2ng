@@ -26,7 +26,7 @@ using game::actions::mustExist;
 
 class game::proxy::TechUpgradeProxy::Trampoline {
  public:
-    Trampoline(Session& session, util::RequestSender<TechUpgradeProxy> reply, Id_t planetId);
+    Trampoline(Session& session, const util::RequestSender<TechUpgradeProxy>& reply, Id_t planetId);
 
     void packStatus(Status& st);
 
@@ -42,35 +42,30 @@ class game::proxy::TechUpgradeProxy::Trampoline {
     Session& m_session;
     util::RequestSender<TechUpgradeProxy> m_reply;
 
-    Ref<Turn> m_pTurn;
-    Ptr<ShipList> m_pShipList;
-    Ptr<Root> m_pRoot;
-
-    Turn& m_turn;
-    Root& m_root;
+    Ref<Turn> m_turn;
+    Ref<ShipList> m_shipList;
+    Ref<Root> m_root;
 
     game::map::Planet& m_planet;
     game::map::PlanetStorage m_container;
     game::actions::TechUpgrade m_action;
 };
 
-game::proxy::TechUpgradeProxy::Trampoline::Trampoline(Session& session, util::RequestSender<TechUpgradeProxy> reply, Id_t planetId)
+game::proxy::TechUpgradeProxy::Trampoline::Trampoline(Session& session, const util::RequestSender<TechUpgradeProxy>& reply, Id_t planetId)
     : m_session(session),
       m_reply(reply),
 
       // Keep objects alive
-      m_pTurn(game::actions::mustHaveGame(session).viewpointTurn()),
-      m_pShipList(session.getShipList()),
-      m_pRoot(session.getRoot()),
+      m_turn(game::actions::mustHaveGame(session).viewpointTurn()),
+      m_shipList(game::actions::mustHaveShipList(session)),
+      m_root(game::actions::mustHaveRoot(session)),
 
       // Readymade objects
-      m_turn(*m_pTurn),
-      m_root(game::actions::mustHaveRoot(session)),
-      m_planet(mustExist(m_turn.universe().planets().get(planetId))),
-      m_container(m_planet, m_root.hostConfiguration()),
-      m_action(m_planet, m_container, game::actions::mustHaveShipList(session), m_root)
+      m_planet(mustExist(m_turn->universe().planets().get(planetId))),
+      m_container(m_planet, m_root->hostConfiguration()),
+      m_action(m_planet, m_container, *m_shipList, *m_root)
 {
-    m_action.setUndoInformation(m_pTurn->universe());
+    m_action.setUndoInformation(m_turn->universe());
     m_action.sig_change.add(this, &Trampoline::onChange);
 }
 

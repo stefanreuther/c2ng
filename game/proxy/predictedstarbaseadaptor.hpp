@@ -43,12 +43,9 @@ namespace game { namespace proxy {
         Session& m_session;
 
         // Smart pointers to keep these objects alive:
-        afl::base::Ptr<Game> m_pGame;
-        afl::base::Ptr<game::spec::ShipList> m_pShipList;
-        afl::base::Ptr<Root> m_pRoot;
-
-        // Convenience
-        Game& m_game;
+        afl::base::Ref<Turn> m_turn;
+        afl::base::Ref<game::spec::ShipList> m_shipList;
+        afl::base::Ref<Root> m_root;
 
         // Predictor (containing the subject planet)
         game::interface::BaseTaskPredictor m_pred;

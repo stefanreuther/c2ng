@@ -212,6 +212,46 @@ AFL_TEST("game.proxy.CargoTransferProxy:normal", a)
     a.checkEqual("44. Molybdenum", pl.getCargo(Element::Molybdenum).orElse(-1), 4000 + 6);
 }
 
+/** Test lifetime behaviour.
+    A: create a setup. Destroy session content. Move some cargo.
+    E: Operation must succeed (not segfault). */
+AFL_TEST("game.proxy.CargoTransferProxy:lifetime", a)
+{
+    const int SHIP_ID = 78;
+    const int PLANET_ID = 150;
+
+    // Preconditions
+    SessionThread h;
+    prepare(h);
+    Ship& sh = addShip(a, h, SHIP_ID);
+    Planet& pl = addPlanet(a, h, PLANET_ID);
+    CargoTransferSetup setup = CargoTransferSetup::fromPlanetShip(h.session().getGame()->currentTurn().universe(), PLANET_ID, SHIP_ID);
+
+    // Testee
+    WaitIndicator ind;
+    CargoTransferProxy testee(h.gameSender(), ind);
+    testee.init(setup);
+
+    // Verify creation; initialisation is asynchronous, so we need to make sure it completes!
+    CargoTransferProxy::General gen;
+    testee.getGeneralInformation(ind, gen);
+    a.check("01. validTypes Tri", gen.validTypes.contains(Element::Tritanium));
+
+    // Clear session
+    h.session().setGame(0);
+    h.session().setRoot(0);
+    h.session().setShipList(0);
+
+    // Move some cargo
+    testee.unload(false);
+    testee.move(Element::Tritanium, 20, 0, 1, false);
+    testee.commit();
+    h.sync();
+
+    // This will segfault if CargoTransferProxy does not properly handle lifetimes
+    a.checkEqual("11. getCargo Tri", sh.getCargo(Element::Tritanium).orElse(-1),  20);
+}
+
 /** Test overload behaviour.
     A: create universe with two units. Initialize with correct setup. Move exercising overload.
     E: status must be reported correctly. Commit must correctly update participants. */

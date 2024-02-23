@@ -13,7 +13,7 @@
 namespace game { namespace proxy {
 
     /** StarbaseAdaptor for a fictive starbase.
-        Uses the given planet, if existant, to provide a fictive starbase.
+        Uses the given planet from viewpoint turn, if existant, to provide a fictive starbase.
         Partial information is completed with defaults;
         if the given planet does not exist at all (e.g. due to Id 0 being specified), it is created from scratch.
 

@@ -22,13 +22,12 @@ using game::ref::FleetMemberList;
 
 class game::proxy::FleetProxy::Trampoline {
  public:
-    Trampoline(Session& session, util::RequestSender<FleetProxy> reply)
+    Trampoline(Session& session, const util::RequestSender<FleetProxy>& reply)
         : m_session(session),
-          m_pGame(session.getGame()),     // to keep it alive
           m_game(game::actions::mustHaveGame(session)),
           m_reply(reply),
-          conn_fleetChange(m_game.cursors().currentFleet().sig_indexChange.add(this, &Trampoline::onFleetChange)),
-          conn_viewpointTurnChange(m_game.sig_viewpointTurnChange.add(this, &Trampoline::onViewpointTurnChange)),
+          conn_fleetChange(m_game->cursors().currentFleet().sig_indexChange.add(this, &Trampoline::onFleetChange)),
+          conn_viewpointTurnChange(m_game->sig_viewpointTurnChange.add(this, &Trampoline::onViewpointTurnChange)),
           conn_universeChange(),
           conn_fleetSetChange()
         {
@@ -47,8 +46,7 @@ class game::proxy::FleetProxy::Trampoline {
     Id_t findSuggestedMember(Id_t currentShipId, Id_t fleetId, const FleetMemberList& newList) const;
 
     Session& m_session;
-    afl::base::Ptr<Game> m_pGame;
-    Game& m_game;
+    afl::base::Ref<Game> m_game;
     util::RequestSender<FleetProxy> m_reply;
     FleetMemberList m_lastList;
 
@@ -61,17 +59,17 @@ class game::proxy::FleetProxy::Trampoline {
 void
 game::proxy::FleetProxy::Trampoline::selectFleetMember(Id_t shipId)
 {
-    if (const game::map::Ship* sh = m_game.viewpointTurn().universe().ships().get(shipId)) {
+    if (const game::map::Ship* sh = m_game->viewpointTurn().universe().ships().get(shipId)) {
         const Id_t shipId = sh->getId();
         const Id_t fleetId = sh->getFleetNumber();
         if (fleetId != 0) {
             // Update ship (this is the actual selection)
-            m_game.cursors().currentShip().setCurrentIndex(shipId);
+            m_game->cursors().currentShip().setCurrentIndex(shipId);
 
             // Update fleet.
             // If we actually selected a ship from the current fleet, this is a no-op.
             // Otherwise, clean up by selecting the correct fleet; this will trigger onFleetChange().
-            m_game.cursors().currentFleet().setCurrentIndex(fleetId);
+            m_game->cursors().currentFleet().setCurrentIndex(fleetId);
 
             // Update UI.
             m_reply.postRequest(&FleetProxy::onFleetMemberSelected, shipId);
@@ -82,7 +80,7 @@ game::proxy::FleetProxy::Trampoline::selectFleetMember(Id_t shipId)
 void
 game::proxy::FleetProxy::Trampoline::onViewpointTurnChange()
 {
-    Turn& t = m_game.viewpointTurn();
+    Turn& t = m_game->viewpointTurn();
     conn_universeChange = t.universe().sig_universeChange.add(this, &Trampoline::onUniverseChange);
     conn_fleetSetChange = t.universe().fleets().sig_setChange.add(this, &Trampoline::onFleetSetChange);
 }
@@ -90,8 +88,8 @@ game::proxy::FleetProxy::Trampoline::onViewpointTurnChange()
 void
 game::proxy::FleetProxy::Trampoline::onFleetChange()
 {
-    game::map::Universe& univ = m_game.viewpointTurn().universe();
-    game::map::Object* ship = m_game.cursors().currentFleet().getCurrentObject();
+    game::map::Universe& univ = m_game->viewpointTurn().universe();
+    game::map::Object* ship = m_game->cursors().currentFleet().getCurrentObject();
 
     // Deflect intermediate state: we are sitting on the same event that ObjectCursor uses to recover from a deleted fleet.
     // ObjectCursor might therefore not yet have cleaned up.
@@ -111,7 +109,7 @@ game::proxy::FleetProxy::Trampoline::onFleetChange()
         memList->setFleet(univ, fleetId);
 
         // Determine current fleet member Id
-        memId = findSuggestedMember(m_game.cursors().currentShip().getCurrentIndex(), fleetId, *memList);
+        memId = findSuggestedMember(m_game->cursors().currentShip().getCurrentIndex(), fleetId, *memList);
     }
 
     // Inform UI side
@@ -122,7 +120,7 @@ game::proxy::FleetProxy::Trampoline::onFleetChange()
 
     // Select desired member (no-op if already selected)
     if (memId != 0) {
-        m_game.cursors().currentShip().setCurrentIndex(memId);
+        m_game->cursors().currentShip().setCurrentIndex(memId);
     }
 }
 

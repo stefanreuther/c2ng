@@ -9,7 +9,7 @@ using game::interface::ProcessListEditor;
 
 class game::proxy::ProcessListProxy::Trampoline {
  public:
-    Trampoline(Session& session, util::RequestSender<ProcessListProxy> reply)
+    Trampoline(Session& session, const util::RequestSender<ProcessListProxy>& reply)
         : m_session(session),
           m_reply(reply),
           m_editor(session.processList())

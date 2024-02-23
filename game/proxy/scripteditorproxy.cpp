@@ -42,7 +42,7 @@ game::proxy::ScriptEditorProxy::buildCompletionList(WaitIndicator& ind,
 {
     class Query : public util::Request<Session> {
      public:
-        Query(game::interface::CompletionList& result, const String_t& text, bool onlyCommands, std::auto_ptr<game::interface::ContextProvider> ctxp)
+        Query(game::interface::CompletionList& result, const String_t& text, bool onlyCommands, std::auto_ptr<game::interface::ContextProvider>& ctxp)
             : m_result(result),
               m_text(text),
               m_onlyCommands(onlyCommands),
@@ -73,7 +73,7 @@ game::proxy::ScriptEditorProxy::buildPropertyList(WaitIndicator& ind,
     class Query : public util::Request<Session> {
      public:
         Query(game::interface::PropertyList& result,
-              std::auto_ptr<game::interface::ContextProvider> ctxp)
+              std::auto_ptr<game::interface::ContextProvider>& ctxp)
             : m_result(result),
               m_contextProvider(ctxp)
             { }

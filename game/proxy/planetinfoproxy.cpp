@@ -39,11 +39,11 @@ game::proxy::PlanetInfoProxy::Response::Response(Session& session, Id_t id, Inte
     Root* r = session.getRoot().get();
 
     if (g != 0 && r != 0) {
-        const int turnNr = g->currentTurn().getTurnNumber();
+        const int turnNr = g->viewpointTurn().getTurnNumber();
         const game::config::HostConfiguration& config = r->hostConfiguration();
         const HostVersion& host = r->hostVersion();
 
-        if (const game::map::Planet* pl = g->currentTurn().universe().planets().get(id)) {
+        if (const game::map::Planet* pl = g->viewpointTurn().universe().planets().get(id)) {
             // Mineral Info
             const IntegerProperty_t mineOverride = buildingOverride[MineBuilding];
             m_mineralInfo[Neutronium] = packPlanetMineralInfo(*pl, Element::Neutronium, turnNr, config, host, mineOverride, tx);
@@ -113,7 +113,7 @@ game::proxy::PlanetInfoProxy::Response::handle(PlanetInfoProxy& proxy)
 
 class game::proxy::PlanetInfoProxy::Trampoline {
  public:
-    Trampoline(Session& session, util::RequestSender<PlanetInfoProxy> reply)
+    Trampoline(Session& session, const util::RequestSender<PlanetInfoProxy>& reply)
         : m_session(session),
           m_reply(reply),
           m_planetId(0)
@@ -181,7 +181,7 @@ game::proxy::PlanetInfoProxy::Trampoline::updateUnloadInfo()
     Root* r = m_session.getRoot().get();
     game::spec::ShipList* sl = m_session.getShipList().get();
     if (g != 0 && r != 0 && sl != 0) {
-        m_unloadInfo = prepareUnloadInfo(g->currentTurn().universe(), m_planetId, g->getViewpointPlayer(), g->shipScores(), *sl, r->hostConfiguration());
+        m_unloadInfo = prepareUnloadInfo(g->viewpointTurn().universe(), m_planetId, g->getViewpointPlayer(), g->shipScores(), *sl, r->hostConfiguration());
     }
 }
 

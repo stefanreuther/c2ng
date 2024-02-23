@@ -10,14 +10,10 @@
 
 game::proxy::PredictedStarbaseAdaptor::PredictedStarbaseAdaptor(Session& session, Id_t planetId, bool waitClear)
     : m_session(session),
-      m_pGame(session.getGame()),
-      m_pShipList(session.getShipList()),
-      m_pRoot(session.getRoot()),
-      m_game(game::actions::mustHaveGame(session)),
-      m_pred(game::actions::mustExist(m_game.currentTurn().universe().planets().get(planetId)),
-             m_game.currentTurn().universe(),
-             game::actions::mustHaveShipList(session),
-             game::actions::mustHaveRoot(session).hostConfiguration())
+      m_turn(game::actions::mustHaveGame(session).viewpointTurn()),
+      m_shipList(game::actions::mustHaveShipList(session)),
+      m_root(game::actions::mustHaveRoot(session)),
+      m_pred(game::actions::mustExist(m_turn->universe().planets().get(planetId)), m_turn->universe(), *m_shipList, m_root->hostConfiguration())
 {
     // Predict
     // Because this will usually be called from the auto-task screen,

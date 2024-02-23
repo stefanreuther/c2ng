@@ -6,7 +6,7 @@
 #include "game/proxy/basestorageproxy.hpp"
 #include "game/game.hpp"
 #include "game/map/universe.hpp"
-#include "game/proxy/currentstarbaseadaptor.hpp"
+#include "game/proxy/viewpointstarbaseadaptor.hpp"
 #include "game/proxy/waitindicator.hpp"
 #include "game/registrationkey.hpp"
 #include "game/root.hpp"
@@ -214,7 +214,7 @@ class game::proxy::BaseStorageProxy::TrampolineFromAdaptor : public afl::base::C
 
 game::proxy::BaseStorageProxy::BaseStorageProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& receiver, Id_t planetId, bool allHulls)
     : m_receiver(receiver, *this),
-      m_sender(gameSender.makeTemporary(new CurrentStarbaseAdaptorFromSession(planetId)).makeTemporary(new TrampolineFromAdaptor(m_receiver.getSender(), allHulls))),
+      m_sender(gameSender.makeTemporary(new ViewpointStarbaseAdaptorFromSession(planetId)).makeTemporary(new TrampolineFromAdaptor(m_receiver.getSender(), allHulls))),
       m_allHulls(allHulls)
 { }
 

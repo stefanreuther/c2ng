@@ -64,7 +64,7 @@ class game::proxy::ShipSpeedProxy::Trampoline {
             Game* pGame = session.getGame().get();
             game::spec::ShipList* pShipList = session.getShipList().get();
             if (pRoot != 0 && pGame != 0 && pShipList != 0) {
-                m_pTurn = &pGame->currentTurn();
+                m_pTurn = &pGame->viewpointTurn();
                 m_pGame = pGame;
                 m_pShipList = pShipList;
                 m_pRoot = pRoot;

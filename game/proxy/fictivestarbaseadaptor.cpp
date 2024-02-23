@@ -157,7 +157,7 @@ game::proxy::FictiveStarbaseAdaptor::FictiveStarbaseAdaptor(Session& session, Id
 {
     // Fetch template planet, if any
     if (Game* g = session.getGame().get()) {
-        if (const Planet* pl = g->currentTurn().universe().planets().get(planetId)) {
+        if (const Planet* pl = g->viewpointTurn().universe().planets().get(planetId)) {
             m_planet.reset(new Planet(*pl));
         }
     }

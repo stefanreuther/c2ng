@@ -65,7 +65,7 @@ namespace {
         result.minDistance = r.hostConfiguration()[HostConfiguration::MinimumChunnelDistance]();
 
         // Possible targets
-        Universe& univ = g.currentTurn().universe();
+        Universe& univ = g.viewpointTurn().universe();
         if (const Ship* initiator = univ.ships().get(shipId)) {
             const game::map::AnyShipType& ty(univ.allShips());
             for (Id_t id = ty.findNextIndex(0); id != 0; id = ty.findNextIndex(id)) {
@@ -90,7 +90,7 @@ namespace {
 
         // Build raw list
         game::ref::List list;
-        Universe& univ = g.currentTurn().universe();
+        Universe& univ = g.viewpointTurn().universe();
         const Point canonicalPosition = g.mapConfiguration().getCanonicalLocation(pos);
         if (const Ship* initiator = univ.ships().get(shipId)) {
             const game::map::AnyShipType& ty(univ.allShips());
@@ -113,7 +113,7 @@ namespace {
         const Root& r = game::actions::mustHaveRoot(session);
         const ShipList& sl = game::actions::mustHaveShipList(session);
 
-        Universe& univ = g.currentTurn().universe();
+        Universe& univ = g.viewpointTurn().universe();
         Ship& initiator = game::actions::mustExist(univ.ships().get(fromShipId));
         Ship& mate = game::actions::mustExist(univ.ships().get(toShipId));
 

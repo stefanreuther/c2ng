@@ -50,6 +50,7 @@ class game::proxy::MinefieldProxy::Trampoline {
     void sendPassageInfo();
 
     Session& m_session;
+    afl::base::Ptr<Game> m_game;
     util::RequestSender<MinefieldProxy> m_reply;
     std::auto_ptr<game::map::ObjectObserver> m_observer;
     afl::container::PtrVector<ObjectListener> m_listeners;
@@ -65,6 +66,7 @@ class game::proxy::MinefieldProxy::Trampoline {
 
 game::proxy::MinefieldProxy::Trampoline::Trampoline(Session& session, const util::RequestSender<MinefieldProxy>& reply)
     : m_session(session),
+      m_game(session.getGame()),
       m_reply(reply),
       m_observer(),
       m_listeners(),
@@ -72,7 +74,7 @@ game::proxy::MinefieldProxy::Trampoline::Trampoline(Session& session, const util
       m_passageDistance(0),
       m_lastObject(0)
 {
-    if (Game* g = session.getGame().get()) {
+    if (Game* g = m_game.get()) {
         m_observer.reset(new game::map::ObjectObserver(g->cursors().currentMinefield()));
         conn_objectChange = m_observer->sig_objectChange.add(this, &Trampoline::onObjectChange);
         onObjectChange();
@@ -101,7 +103,7 @@ game::proxy::MinefieldProxy::Trampoline::buildSweepInfo(SweepInfo& out, Id_t vie
     // ex showSweepInfo (part)
     const Minefield* p = getMinefield();
     const Root* r = m_session.getRoot().get();
-    const Game* g = m_session.getGame().get();
+    const Game* g = m_game.get();
     if (r != 0 && g != 0 && p != 0 && p->isValid()) {
         // Environment
         const int viewpointPlayer = g->getViewpointPlayer();
@@ -159,7 +161,7 @@ game::proxy::MinefieldProxy::Trampoline::buildMinefieldInfo(MinefieldInfo& out) 
     const Root* r = m_session.getRoot().get();
     if (r != 0 && p != 0 && p->isValid()) {
         // Environment
-        const Game* g = m_session.getGame().get();
+        const Game* g = m_game.get();
         const Turn* t = g != 0 ? &g->viewpointTurn() : 0;
         util::NumberFormatter fmt = r->userConfiguration().getNumberFormatter();
         afl::string::Translator& tx = m_session.translator();
@@ -188,7 +190,7 @@ game::proxy::MinefieldProxy::Trampoline::buildMinefieldInfo(MinefieldInfo& out) 
                                       fmt.formatNumber(Minefield::getRadiusFromUnits(afterDecay)));
 
         // - Last info
-        out.text[LastInfo] = util::formatAge(g->currentTurn().getTurnNumber(), p->getTurnLastSeen(), tx);
+        out.text[LastInfo] = util::formatAge(g->viewpointTurn().getTurnNumber(), p->getTurnLastSeen(), tx);
 
         // - Controlling planet
         if (const game::map::Planet* pl = t->universe().planets().get(out.controllingPlanetId)) {
@@ -220,7 +222,7 @@ game::proxy::MinefieldProxy::Trampoline::buildPassageInfo(PassageInfo& out) cons
     // Ratios
     const Minefield* p = getMinefield();
     const Root* r = m_session.getRoot().get();
-    const Game* g = m_session.getGame().get();
+    const Game* g = m_game.get();
     if (p != 0 && r != 0 && g != 0) {
         out.normalPassageRate  = p->getPassRate(m_passageDistance, false, g->getViewpointPlayer(), r->hostConfiguration());
         out.cloakedPassageRate = p->getPassRate(m_passageDistance, true,  g->getViewpointPlayer(), r->hostConfiguration());

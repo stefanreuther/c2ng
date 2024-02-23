@@ -47,7 +47,7 @@ namespace {
 
 class game::proxy::PlanetPredictorProxy::Trampoline {
  public:
-    Trampoline(Session& session, Id_t planetId, util::RequestSender<PlanetPredictorProxy> reply)
+    Trampoline(Session& session, Id_t planetId, const util::RequestSender<PlanetPredictorProxy>& reply)
         : m_numTurns(0),
           m_numMines(),
           m_numFactories(),
