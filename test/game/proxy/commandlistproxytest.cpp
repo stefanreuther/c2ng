@@ -36,6 +36,7 @@ AFL_TEST("game.proxy.CommandListProxy:sequence", a)
     CommandContainer& cc = game::v3::CommandExtra::create(g.currentTurn()).create(PLAYER);
     g.setViewpointPlayer(PLAYER);
     g.currentTurn().universe().ships().create(150);
+    g.currentTurn().setCommandPlayers(game::PlayerSet_t(PLAYER));
 
     cc.addNewCommand(new Command(Command::GiveShip, 150, "3"));
     cc.addNewCommand(new Command(Command::GiveShip, 250, "4"));
@@ -47,7 +48,8 @@ AFL_TEST("game.proxy.CommandListProxy:sequence", a)
     // Initialize
     {
         CommandListProxy::Infos_t out;
-        bool ok = testee.init(link, out);
+        CommandListProxy::MetaInfo metaOut;
+        bool ok = testee.init(link, out, metaOut);
         a.check("01. ok", ok);
         a.checkEqual("02. size", out.size(), 3U);
         a.checkEqual("03. text", out[0].text, "give ship 150 to 3");
@@ -56,6 +58,8 @@ AFL_TEST("game.proxy.CommandListProxy:sequence", a)
         a.checkEqual("06. ref",  out[0].ref, Reference(Reference::Ship, 150));  // target ship exists
         a.checkEqual("07. ref",  out[1].ref, Reference());                      // target ship does not exist
         a.checkEqual("08. ref",  out[2].ref, Reference());                      // no target
+        a.checkEqual("09. editable", metaOut.editable, true);
+        a.checkEqual("10. playerNr", metaOut.playerNr, PLAYER);
     }
 
     // Modify
@@ -128,6 +132,7 @@ AFL_TEST("game.proxy.CommandListProxy:create", a)
     game::Game& g = *h.session().getGame();
     game::v3::CommandExtra::create(g.currentTurn());
     g.setViewpointPlayer(PLAYER);
+    g.currentTurn().setCommandPlayers(game::PlayerSet_t(PLAYER));
 
     // Test
     CommandListProxy testee(h.gameSender());
@@ -135,9 +140,11 @@ AFL_TEST("game.proxy.CommandListProxy:create", a)
     // Initialize
     {
         CommandListProxy::Infos_t out;
-        bool ok = testee.init(link, out);
+        CommandListProxy::MetaInfo metaOut;
+        bool ok = testee.init(link, out, metaOut);
         a.check("01. ok", ok);
         a.checkEqual("02. size", out.size(), 0U);
+        a.checkEqual("03. editable", metaOut.editable, true);
     }
 
     // Modify
@@ -168,6 +175,7 @@ AFL_TEST("game.proxy.CommandListProxy:notify", a)
     game::Game& g = *h.session().getGame();
     game::v3::CommandExtra::create(g.currentTurn()).create(PLAYER);
     g.setViewpointPlayer(PLAYER);
+    g.currentTurn().setCommandPlayers(game::PlayerSet_t(PLAYER));
     game::map::Ship* sh = g.currentTurn().universe().ships().create(150);
     a.check("01. ship created", sh);
 
@@ -231,8 +239,10 @@ AFL_TEST("game.proxy.CommandListProxy:error:empty-session", a)
     // Initialize
     {
         CommandListProxy::Infos_t out;
-        bool ok = testee.init(link, out);
+        CommandListProxy::MetaInfo metaOut;
+        bool ok = testee.init(link, out, metaOut);
         a.check("01. ok", !ok);
+        a.check("02. editable", !metaOut.editable);
     }
 
     // Add
@@ -259,6 +269,7 @@ AFL_TEST("game.proxy.CommandListProxy:error:unuspported", a)
     h.session().setGame(new game::Game());
     game::Game& g = *h.session().getGame();
     g.setViewpointPlayer(PLAYER);
+    g.currentTurn().setCommandPlayers(game::PlayerSet_t(PLAYER));
 
     // Test
     CommandListProxy testee(h.gameSender());
@@ -266,8 +277,10 @@ AFL_TEST("game.proxy.CommandListProxy:error:unuspported", a)
     // Initialize
     {
         CommandListProxy::Infos_t out;
-        bool ok = testee.init(link, out);
+        CommandListProxy::MetaInfo metaOut;
+        bool ok = testee.init(link, out, metaOut);
         a.check("01. ok", !ok);
+        a.check("02. editable", !metaOut.editable);
     }
 
     // Add
@@ -277,4 +290,39 @@ AFL_TEST("game.proxy.CommandListProxy:error:unuspported", a)
         bool ok = testee.addCommand(link, "allies add 3", out, pos);
         a.check("11. ok", !ok);
     }
+}
+
+/** Test CommandListProxy, read-only.
+    A: set up a game with no setCommandPlayers().
+    E: MetaInfo reportes not editable */
+AFL_TEST("game.proxy.CommandListProxy:read-only", a)
+{
+    // User interface side: Root / Downlink
+    game::test::WaitIndicator link;
+
+    // Game side
+    const int PLAYER = 8;
+    game::test::SessionThread h;
+    h.session().setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
+    h.session().setGame(new game::Game());
+    game::Game& g = *h.session().getGame();
+    CommandContainer& cc = game::v3::CommandExtra::create(g.currentTurn()).create(PLAYER);
+    g.setViewpointPlayer(PLAYER);
+    g.currentTurn().universe().ships().create(150);
+
+    cc.addNewCommand(new Command(Command::GiveShip, 150, "3"));
+    cc.addNewCommand(new Command(Command::GiveShip, 250, "4"));
+    cc.addNewCommand(new Command(Command::Filter, 0, "no"));
+
+    // Test
+    CommandListProxy testee(h.gameSender());
+
+    // Initialize
+    CommandListProxy::Infos_t out;
+    CommandListProxy::MetaInfo metaOut;
+    bool ok = testee.init(link, out, metaOut);
+    a.check("01. ok", ok);
+    a.checkEqual("02. size", out.size(), 3U);
+    a.checkEqual("03. editable", metaOut.editable, false);
+    a.checkEqual("04. playerNr", metaOut.playerNr, PLAYER);
 }

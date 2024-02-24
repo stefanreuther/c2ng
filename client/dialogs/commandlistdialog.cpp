@@ -18,6 +18,7 @@
 #include "ui/widgets/inputline.hpp"
 #include "ui/widgets/keydispatcher.hpp"
 #include "ui/widgets/quit.hpp"
+#include "ui/widgets/statictext.hpp"
 #include "ui/window.hpp"
 
 namespace {
@@ -106,6 +107,7 @@ namespace {
               m_loop(root),
               m_outputState(outputState),
               m_proxy(side.gameSender()),
+              m_metaInfo(),
               m_listbox(root),
               m_gotoButton(tx("Go to"), 'g', root),
               m_delButton(tx("Del"), util::Key_Delete, root),
@@ -120,7 +122,7 @@ namespace {
             {
                 client::Downlink link(root(), translator());
                 game::proxy::CommandListProxy::Infos_t list;
-                if (m_proxy.init(link, list)) {
+                if (m_proxy.init(link, list, m_metaInfo)) {
                     m_listbox.setContent(list, 0);
                     return true;
                 } else {
@@ -159,6 +161,10 @@ namespace {
                 g1.add(g11);
                 win.add(g1);
 
+                if (!m_metaInfo.editable) {
+                    win.add(del.addNew(new ui::widgets::StaticText(tx("Read-only"), ui::SkinColor::Red, gfx::FontRequest(), root().provider())));
+                }
+
                 ui::Widget& helper = del.addNew(new client::widgets::HelpWidget(root(), tx, interface().gameSender(), "pcc2:auxcmds"));
                 ui::Group& g2 = del.addNew(new ui::Group(ui::layout::HBox::instance5));
                 ui::widgets::Button& btnOK  = del.addNew(new ui::widgets::Button(tx("Close"), util::Key_Escape, root()));
@@ -175,6 +181,8 @@ namespace {
                 win.add(g2);
                 win.add(del.addNew(new ui::widgets::Quit(root(), m_loop)));
                 win.add(helper);
+
+                btnAdd.setState(ui::Widget::DisabledState, !m_metaInfo.editable);
 
                 ui::widgets::KeyDispatcher& disp = del.addNew(new ui::widgets::KeyDispatcher());
                 disp.add(' ', this, &CommandListDialog::onEdit);
@@ -202,13 +210,15 @@ namespace {
             {
                 // ex WCommandList::handleEvent (part), WCommandList::deleteCurrent
                 afl::string::Translator& tx = translator();
-                if (const game::proxy::CommandListProxy::Info* p = m_listbox.getCurrentCommand()) {
-                    if (ui::dialogs::MessageBox(tx("Delete this command?"), tx("Auxiliary Commands"), root()).doYesNoDialog(tx)) {
-                        client::Downlink link(root(), tx);
-                        game::proxy::CommandListProxy::Infos_t newList;
-                        m_proxy.removeCommand(link, p->text, newList);
-                        m_listbox.setContent(newList, m_listbox.getCurrentItem());
-                        m_listbox.requestActive();
+                if (m_metaInfo.editable) {
+                    if (const game::proxy::CommandListProxy::Info* p = m_listbox.getCurrentCommand()) {
+                        if (ui::dialogs::MessageBox(tx("Delete this command?"), tx("Auxiliary Commands"), root()).doYesNoDialog(tx)) {
+                            client::Downlink link(root(), tx);
+                            game::proxy::CommandListProxy::Infos_t newList;
+                            m_proxy.removeCommand(link, p->text, newList);
+                            m_listbox.setContent(newList, m_listbox.getCurrentItem());
+                            m_listbox.requestActive();
+                        }
                     }
                 }
             }
@@ -222,8 +232,10 @@ namespace {
         void onEdit()
             {
                 // ex WCommandList::editCurrent
-                if (const game::proxy::CommandListProxy::Info* p = m_listbox.getCurrentCommand()) {
-                    edit(p->text);
+                if (m_metaInfo.editable) {
+                    if (const game::proxy::CommandListProxy::Info* p = m_listbox.getCurrentCommand()) {
+                        edit(p->text);
+                    }
                 }
             }
 
@@ -233,7 +245,7 @@ namespace {
 
                 // ex WCommandEditDialog::onScroll
                 m_gotoButton.setState(ui::widgets::Button::DisabledState, !p || !p->ref.isSet());
-                m_delButton.setState(ui::widgets::Button::DisabledState, !p);
+                m_delButton.setState(ui::widgets::Button::DisabledState, !p || !m_metaInfo.editable);
 
                 // ex WCommandInfo::drawContent (very far relative; different style)
                 ui::rich::Document& doc = m_infoView.getDocument();
@@ -249,24 +261,25 @@ namespace {
         void edit(String_t s)
             {
                 // ex phost.pas:CCommandEditor.EditCommand
-                afl::string::Translator& tx = translator();
-                ui::widgets::InputLine input(30, root());
-                input.setText(s);
-                input.setFlag(ui::widgets::InputLine::GameChars, true);
-                input.setFont("+");
-                if (input.doStandardDialog(tx("Auxiliary Commands"), tx("Edit command:"), tx)) {
-                    client::Downlink link(root(), tx);
-                    game::proxy::CommandListProxy::Infos_t newList;
-                    size_t newPos;
-                    if (m_proxy.addCommand(link, input.getText(), newList, newPos)) {
-                        m_listbox.setContent(newList, newPos);
-                    } else {
-                        ui::dialogs::MessageBox(tx("This command was not recognized."), tx("Auxiliary Commands"), root()).doOkDialog(tx);
+                if (m_metaInfo.editable) {
+                    afl::string::Translator& tx = translator();
+                    ui::widgets::InputLine input(30, root());
+                    input.setText(s);
+                    input.setFlag(ui::widgets::InputLine::GameChars, true);
+                    input.setFont("+");
+                    if (input.doStandardDialog(tx("Auxiliary Commands"), tx("Edit command:"), tx)) {
+                        client::Downlink link(root(), tx);
+                        game::proxy::CommandListProxy::Infos_t newList;
+                        size_t newPos;
+                        if (m_proxy.addCommand(link, input.getText(), newList, newPos)) {
+                            m_listbox.setContent(newList, newPos);
+                        } else {
+                            ui::dialogs::MessageBox(tx("This command was not recognized."), tx("Auxiliary Commands"), root()).doOkDialog(tx);
+                        }
+                        m_listbox.requestActive();
                     }
-                    m_listbox.requestActive();
                 }
             }
-
 
         virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target target)
             { dialogHandleStateChange(link, target, m_outputState, m_loop, 0); }
@@ -291,6 +304,7 @@ namespace {
         ui::EventLoop m_loop;
         client::si::OutputState& m_outputState;
         game::proxy::CommandListProxy m_proxy;
+        game::proxy::CommandListProxy::MetaInfo m_metaInfo;
         CommandListbox m_listbox;
         ui::widgets::Button m_gotoButton;
         ui::widgets::Button m_delButton;

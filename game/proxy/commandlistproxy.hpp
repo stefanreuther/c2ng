@@ -24,7 +24,6 @@ namespace game { namespace proxy {
     class CommandListProxy {
      public:
         /** Information about a command. */
-        // 20200728: consider adding a Id to the commands.
         struct Info {
             /** Command text ("give ship 3 to 4"). */
             String_t text;
@@ -44,6 +43,19 @@ namespace game { namespace proxy {
         /** Information about all commands. */
         typedef std::vector<Info> Infos_t;
 
+        /** Meta-information. */
+        struct MetaInfo {
+            /** Player number. */
+            int playerNr;
+
+            /** Editable flag. */
+            bool editable;
+
+            MetaInfo()
+                : playerNr(), editable()
+                { }
+        };
+
 
         /** Constructor.
             \param gameSender Game sender */
@@ -51,8 +63,9 @@ namespace game { namespace proxy {
 
         /** Load initial state.
             \param link      WaitIndicator object for UI synchronisation
-            \param out [out] List of commands */
-        bool init(WaitIndicator& link, Infos_t& out);
+            \param out [out] List of commands
+            \param metaOut [out] Metadata */
+        bool init(WaitIndicator& link, Infos_t& out, MetaInfo& metaOut);
 
         /** Add a command.
             \param link          WaitIndicator object for UI synchronisation
