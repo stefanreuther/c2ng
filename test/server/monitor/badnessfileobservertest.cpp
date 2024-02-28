@@ -8,25 +8,26 @@
 #include "afl/io/directory.hpp"
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/io/stream.hpp"
+#include "afl/io/temporarydirectory.hpp"
 #include "afl/test/testrunner.hpp"
 
 namespace {
     void testFile(afl::test::Assert a, String_t content, server::monitor::Observer::Status expectedResult)
     {
         // Create file
-        const char*const FILE_NAME = "__test.tmp";
+        // Must use a real file system here because InternalFileSystem does not implement getModificationTime().
         afl::io::FileSystem& fs = afl::io::FileSystem::getInstance();
-        fs.openFile(FILE_NAME, fs.Create)->fullWrite(afl::string::toBytes(content));
+        afl::io::TemporaryDirectory dir(fs.openDirectory(fs.getWorkingDirectoryName()));
+
+        const char*const FILE_NAME = "__test.tmp";
+        dir.get()->openFile(FILE_NAME, fs.Create)->fullWrite(afl::string::toBytes(content));
 
         // Create testee
         server::monitor::BadnessFileObserver testee("n", "KEY", fs);
-        testee.handleConfiguration("KEY", FILE_NAME);
+        testee.handleConfiguration("KEY", fs.makePathName(dir.get()->getDirectoryName(), FILE_NAME));
 
         // Test
         a(content).checkEqual("checkStatus", testee.checkStatus(), expectedResult);
-
-        // Cleanup
-        fs.openDirectory(fs.getDirectoryName(FILE_NAME))->eraseNT(fs.getFileName(FILE_NAME));
     }
 }
 

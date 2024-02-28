@@ -9,6 +9,7 @@
 #include "afl/io/directory.hpp"
 #include "afl/io/directoryentry.hpp"
 #include "afl/io/filesystem.hpp"
+#include "afl/io/internalfilesystem.hpp"
 #include "afl/string/format.hpp"
 #include "afl/test/testrunner.hpp"
 
@@ -19,77 +20,19 @@ using afl::except::FileProblemException;
 using afl::io::Directory;
 using afl::io::DirectoryEntry;
 using afl::io::FileSystem;
+using afl::io::InternalFileSystem;
 using afl::string::Format;
 using util::doc::BlobStore;
 using util::doc::FileBlobStore;
-
-namespace {
-    class TemporaryDirectory {
-     public:
-        TemporaryDirectory(FileSystem& fs)
-            : m_dirEntry(createWorkDirectory(fs))
-            { }
-
-        ~TemporaryDirectory()
-            {
-                removeDirectoryContent(m_dirEntry);
-                m_dirEntry->erase();
-            }
-
-        const Ref<DirectoryEntry>& get()
-            { return m_dirEntry; }
-
-     private:
-        Ref<DirectoryEntry> m_dirEntry;
-
-        static Ref<DirectoryEntry> createWorkDirectory(FileSystem& fs)
-            {
-                Ref<Directory> currentDirectory = fs.openDirectory(fs.getWorkingDirectoryName());
-                int i = 0;
-                while (1) {
-                    try {
-                        String_t name = Format("__test%d", ++i);
-                        Ref<DirectoryEntry> entry = currentDirectory->getDirectoryEntryByName(name);
-                        entry->createAsDirectory();
-                        return entry;
-                    }
-                    catch (std::exception&) {
-                        if (i > 1000) {
-                            throw;
-                        }
-                    }
-                }
-            }
-
-        static void removeDirectoryContent(Ref<DirectoryEntry> dir)
-            {
-                std::vector<Ptr<DirectoryEntry> > stuff;
-
-                // Read everything so we don't delete and iterate at the same time
-                Ref<Enumerator<Ptr<DirectoryEntry> > > it = dir->openDirectory()->getDirectoryEntries();
-                Ptr<DirectoryEntry> e;
-                while (it->getNextElement(e)) {
-                    stuff.push_back(e);
-                }
-
-                // Remove everything
-                for (size_t i = 0; i < stuff.size(); ++i) {
-                    if (stuff[i]->getFileType() == DirectoryEntry::tDirectory) {
-                        removeDirectoryContent(*stuff[i]);
-                    }
-                    stuff[i]->erase();
-                }
-            }
-    };
-}
 
 /** Basic test case.
     A: create a FileBlobStore. Store data.
     E: storing the same data produces same object Id, different data produces different Id, retrieving nonexistant Id fails. */
 AFL_TEST("util.doc.FileBlobStore:basics", a)
 {
-    TemporaryDirectory dir(FileSystem::getInstance());
-    FileBlobStore testee(dir.get()->openDirectory());
+    InternalFileSystem fs;
+    fs.createDirectory("/dir");
+    FileBlobStore testee(fs.openDirectory("/dir"));
 
     // Store an object and retrieve it again
     BlobStore::ObjectId_t objId = testee.addObject(afl::string::toBytes("hello there"));
@@ -114,15 +57,16 @@ AFL_TEST("util.doc.FileBlobStore:basics", a)
     E: data retrieved correctly. */
 AFL_TEST("util.doc.FileBlobStore:portability", a)
 {
-    TemporaryDirectory dir(FileSystem::getInstance());
+    InternalFileSystem fs;
+    fs.createDirectory("/dir");
     BlobStore::ObjectId_t objId;
 
     {
-        FileBlobStore testee(dir.get()->openDirectory());
+        FileBlobStore testee(fs.openDirectory("/dir"));
         objId = testee.addObject(afl::string::toBytes("hello there"));
     }
     {
-        FileBlobStore testee(dir.get()->openDirectory());
+        FileBlobStore testee(fs.openDirectory("/dir"));
         String_t objContent = afl::string::fromBytes(testee.getObject(objId)->get());
         a.checkEqual("objContent", objContent, "hello there");
     }

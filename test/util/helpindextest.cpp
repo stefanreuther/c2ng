@@ -6,6 +6,7 @@
 #include "util/helpindex.hpp"
 
 #include "afl/io/directory.hpp"
+#include "afl/io/internalfilesystem.hpp"
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/io/stream.hpp"
 #include "afl/string/nulltranslator.hpp"
@@ -15,7 +16,7 @@
 /** Test scenarios. */
 AFL_TEST("util.HelpIndex:basics", a)
 {
-    afl::io::FileSystem& fs = afl::io::FileSystem::getInstance();
+    afl::io::InternalFileSystem fs;
     afl::sys::Log log;
     afl::string::NullTranslator tx;
 

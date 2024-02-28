@@ -6,6 +6,7 @@
 #include "game/proxy/simulationsetupproxy.hpp"
 
 #include "afl/base/staticassert.hpp"
+#include "afl/io/internalfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/test/testrunner.hpp"
 #include "game/game.hpp"
@@ -2280,7 +2281,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:load", a)
     };
 
     // Set up file system
-    afl::io::FileSystem& fs = afl::io::FileSystem::getInstance();
+    afl::io::InternalFileSystem fs;
     afl::base::Ref<afl::io::Directory> currentDir = fs.openDirectory(fs.getWorkingDirectoryName());
     currentDir->openFile(FILE_NAME, afl::io::FileSystem::Create)
         ->fullWrite(FILE_CONTENT);

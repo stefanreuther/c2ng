@@ -7,6 +7,7 @@
 
 #include "afl/io/directoryentry.hpp"
 #include "afl/io/internaldirectory.hpp"
+#include "afl/io/temporarydirectory.hpp"
 #include "afl/io/textfile.hpp"
 #include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/hashkey.hpp"
@@ -41,12 +42,12 @@ namespace {
         TestHarness(const server::host::Configuration& config)
             : m_hostfile(),
               m_db(), m_null(), m_mail(m_null), m_runner(), m_fs(afl::io::FileSystem::getInstance()),
-              m_root(m_db, m_hostfile, m_null, m_mail, m_runner, m_fs, config),
-              m_workDirName()
-            { createWorkDirectory(); }
+              m_tempDir(m_fs.openDirectory(m_fs.getWorkingDirectoryName())),
+              m_root(m_db, m_hostfile, m_null, m_mail, m_runner, m_fs, config)
+            { }
 
         ~TestHarness()
-            { removeWorkDirectory(); }
+            { }
 
         server::host::Root& root()
             { return m_root; }
@@ -60,8 +61,8 @@ namespace {
         afl::net::CommandHandler& hostFile()
             { return m_hostfile; }
 
-        const String_t& getWorkDirName() const
-            { return m_workDirName; }
+        String_t getWorkDirName()
+            { return m_tempDir.get()->getDirectoryName(); }
 
         void addTool(String_t id, String_t cat);
 
@@ -73,11 +74,8 @@ namespace {
         server::interface::MailQueueClient m_mail;
         util::ProcessRunner m_runner;
         afl::io::FileSystem& m_fs;
+        afl::io::TemporaryDirectory m_tempDir;
         server::host::Root m_root;
-        String_t m_workDirName;
-
-        void createWorkDirectory();
-        void removeWorkDirectory();
     };
 
     String_t readFileContent(afl::io::FileSystem& fs, String_t name)
@@ -105,40 +103,6 @@ TestHarness::addTool(String_t id, String_t cat)
     HashKey(m_db, Format("prog:%s:prog:%s", cat, id)).stringField("kind").set(id);
     StringSetKey(m_db, Format("prog:%s:all", cat)).add(id);
 }
-
-void
-TestHarness::createWorkDirectory()
-{
-    afl::base::Ref<afl::io::Directory> currentDirectory = m_fs.openDirectory(m_fs.getWorkingDirectoryName());
-    int i = 0;
-    while (1) {
-        try {
-            String_t name = Format("__test%d", ++i);
-            afl::base::Ref<afl::io::DirectoryEntry> entry = currentDirectory->getDirectoryEntryByName(name);
-            entry->createAsDirectory();
-            m_workDirName = name;
-            break;
-        }
-        catch (std::exception&) {
-            if (i > 1000) {
-                throw;
-            }
-        }
-    }
-}
-
-void
-TestHarness::removeWorkDirectory()
-{
-    // Sanity check. We're assigning it 6+ characters when it is successfully created
-    if (m_workDirName.size() > 6) {
-        server::file::FileSystemHandler handler(m_fs, m_workDirName);
-        removeDirectoryContent(handler);
-
-        m_fs.openDirectory(m_fs.getWorkingDirectoryName())->getDirectoryEntryByName(m_workDirName)->eraseNT();
-    }
-}
-
 
 /********************************** Test *********************************/
 

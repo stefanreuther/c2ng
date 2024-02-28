@@ -8,6 +8,7 @@
 #include "afl/io/directory.hpp"
 #include "afl/io/directoryentry.hpp"
 #include "afl/io/filemapping.hpp"
+#include "afl/io/internalfilesystem.hpp"
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/io/stream.hpp"
 #include "afl/string/nulltranslator.hpp"
@@ -24,6 +25,7 @@ using afl::io::Directory;
 using afl::io::DirectoryEntry;
 using afl::io::FileMapping;
 using afl::io::FileSystem;
+using afl::io::InternalFileSystem;
 using afl::io::Stream;
 using interpreter::Context;
 using interpreter::SimpleContext;
@@ -400,7 +402,7 @@ AFL_TEST("game.proxy.ExportProxy:toggleFieldAlignment", a)
 AFL_TEST("game.proxy.ExportProxy:exportFile", a)
 {
     // File system
-    FileSystem& fs = FileSystem::getInstance();
+    InternalFileSystem fs;
     Ref<Directory> dir = fs.openDirectory(fs.getWorkingDirectoryName());
     Ref<DirectoryEntry> entry = dir->getDirectoryEntryByName("__testex.tmp");
 
@@ -476,7 +478,7 @@ AFL_TEST("game.proxy.ExportProxy:exportFile:null-context", a)
     };
 
     // File system
-    FileSystem& fs = FileSystem::getInstance();
+    InternalFileSystem fs;
     Ref<Directory> dir = fs.openDirectory(fs.getWorkingDirectoryName());
     Ref<DirectoryEntry> entry = dir->getDirectoryEntryByName("__testex.tmp");
     entry->eraseNT();
@@ -514,7 +516,7 @@ AFL_TEST("game.proxy.ExportProxy:exportFile:null-context", a)
 AFL_TEST("game.proxy.ExportProxy:load", a)
 {
     // File system
-    FileSystem& fs = FileSystem::getInstance();
+    InternalFileSystem fs;
     Ref<Directory> dir = fs.openDirectory(fs.getWorkingDirectoryName());
     Ref<DirectoryEntry> entry = dir->getDirectoryEntryByName("__testex.tmp");
     entry->openFile(FileSystem::Create)->fullWrite(afl::string::toBytes("fields=name\n"
@@ -566,7 +568,7 @@ AFL_TEST("game.proxy.ExportProxy:load:error", a)
 AFL_TEST("game.proxy.ExportProxy:save", a)
 {
     // File system
-    FileSystem& fs = FileSystem::getInstance();
+    InternalFileSystem fs;
     Ref<Directory> dir = fs.openDirectory(fs.getWorkingDirectoryName());
     Ref<DirectoryEntry> entry = dir->getDirectoryEntryByName("__testex.tmp");
     entry->eraseNT();

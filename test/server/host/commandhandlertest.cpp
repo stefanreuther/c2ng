@@ -7,6 +7,7 @@
 
 #include "afl/data/access.hpp"
 #include "afl/data/segment.hpp"
+#include "afl/io/temporarydirectory.hpp"
 #include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/hashkey.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
@@ -41,6 +42,7 @@ namespace {
      public:
         TestHarness()
             : m_db(), m_hostFile(), m_userFile(), m_null(), m_mail(m_null), m_runner(), m_fs(afl::io::FileSystem::getInstance()),
+              m_tempDir(m_fs.openDirectory(m_fs.getWorkingDirectoryName())),
               m_root(m_db, m_hostFile, m_userFile, m_mail, m_runner, m_fs, makeConfig()),
               m_hostFileClient(m_hostFile)
             { }
@@ -59,7 +61,7 @@ namespace {
         String_t createTurn();
 
      private:
-        static server::host::Configuration makeConfig();
+        server::host::Configuration makeConfig();
 
         afl::net::redis::InternalDatabase m_db;
         server::file::InternalFileServer m_hostFile;
@@ -68,6 +70,7 @@ namespace {
         server::interface::MailQueueClient m_mail;
         util::ProcessRunner m_runner;
         afl::io::FileSystem& m_fs;
+        afl::io::TemporaryDirectory m_tempDir;
         server::host::Root m_root;
         server::interface::FileBaseClient m_hostFileClient;
     };
@@ -122,7 +125,7 @@ server::host::Configuration
 TestHarness::makeConfig()
 {
     server::host::Configuration config;
-    config.workDirectory = "/tmp";
+    config.workDirectory = m_tempDir.get()->getDirectoryName();
     return config;
 }
 

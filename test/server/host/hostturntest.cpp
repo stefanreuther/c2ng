@@ -6,6 +6,7 @@
 #include "server/host/hostturn.hpp"
 
 #include "afl/io/nullfilesystem.hpp"
+#include "afl/io/temporarydirectory.hpp"
 #include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/hashkey.hpp"
 #include "afl/net/redis/integerkey.hpp"
@@ -43,6 +44,7 @@ namespace {
      public:
         TestHarness(bool ustt)
             : m_db(), m_hostFile(), m_userFile(), m_null(), m_mail(m_null), m_runner(), m_fs(afl::io::FileSystem::getInstance()),
+              m_tempDir(m_fs.openDirectory(m_fs.getWorkingDirectoryName())),
               m_root(m_db, m_hostFile, m_userFile, m_mail, m_runner, m_fs, makeConfig(ustt)),
               m_hostFileClient(m_hostFile)
             { }
@@ -65,7 +67,7 @@ namespace {
         String_t createTurn(const char* timestamp);
 
      private:
-        static server::host::Configuration makeConfig(bool ustt);
+        server::host::Configuration makeConfig(bool ustt);
 
         afl::net::redis::InternalDatabase m_db;
         server::file::InternalFileServer m_hostFile;
@@ -74,6 +76,7 @@ namespace {
         server::interface::MailQueueClient m_mail;
         util::ProcessRunner m_runner;
         afl::io::FileSystem& m_fs;
+        afl::io::TemporaryDirectory m_tempDir;
         server::host::Root m_root;
         server::interface::FileBaseClient m_hostFileClient;
     };
@@ -141,7 +144,7 @@ server::host::Configuration
 TestHarness::makeConfig(bool ustt)
 {
     server::host::Configuration config;
-    config.workDirectory = "/tmp";
+    config.workDirectory = m_tempDir.get()->getDirectoryName();
     config.usersSeeTemporaryTurns = ustt;
     return config;
 }
