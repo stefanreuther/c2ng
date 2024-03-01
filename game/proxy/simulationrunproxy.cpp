@@ -50,6 +50,7 @@ class game::proxy::SimulationRunProxy::Trampoline {
 
     afl::base::Ref<game::sim::Session> m_sim;
     afl::sys::LogListener& m_log;
+    afl::io::FileSystem& m_fileSystem;
     afl::string::Translator& m_translator;
     afl::base::Ptr<game::spec::ShipList> m_shipList;
     afl::base::Ptr<Root> m_root;
@@ -64,16 +65,16 @@ class game::proxy::SimulationRunProxy::Trampoline {
 
 class game::proxy::SimulationRunProxy::Adaptor : public VcrDatabaseAdaptor {
  public:
-    Adaptor(Trampoline& tpl, game::sim::Database_t b)
+    Adaptor(Trampoline& tpl, game::vcr::Database& b)
         : m_trampoline(tpl),
           m_battles(b)
         { }
-    virtual const Root& root() const
+    virtual afl::base::Ref<const Root> getRoot() const
         {
             afl::except::checkAssertion(m_trampoline.m_root.get() != 0, "<SimulationRunProxy.Adaptor.Root>");
             return *m_trampoline.m_root;
         }
-    virtual const game::spec::ShipList& shipList() const
+    virtual afl::base::Ref<const game::spec::ShipList> getShipList() const
         {
             afl::except::checkAssertion(m_trampoline.m_shipList.get() != 0, "<SimulationRunProxy.Adaptor.ShipList>");
             return *m_trampoline.m_shipList;
@@ -83,10 +84,12 @@ class game::proxy::SimulationRunProxy::Adaptor : public VcrDatabaseAdaptor {
             Game* g = m_trampoline.m_game.get();
             return g != 0 ? &g->teamSettings() : 0;
         }
-    virtual game::vcr::Database& battles()
-        { return *m_battles; }
+    virtual afl::base::Ref<game::vcr::Database> getBattles()
+        { return m_battles; }
     virtual afl::sys::LogListener& log()
         { return m_trampoline.m_log; }
+    virtual afl::io::FileSystem& fileSystem()
+        { return m_trampoline.m_fileSystem; }
     virtual afl::string::Translator& translator()
         { return m_trampoline.m_translator; }
     virtual size_t getCurrentBattle() const
@@ -98,17 +101,18 @@ class game::proxy::SimulationRunProxy::Adaptor : public VcrDatabaseAdaptor {
     virtual bool isGameObject(const game::vcr::Object& obj) const
         {
             Game* g = m_trampoline.m_game.get();
-            return g != 0 && g->isGameObject(obj, shipList().hulls());
+            return g != 0 && g->isGameObject(obj, getShipList()->hulls());
         }
  private:
     Trampoline& m_trampoline;
-    game::sim::Database_t m_battles;
+    afl::base::Ref<game::vcr::Database> m_battles;
 };
 
 game::proxy::SimulationRunProxy::Trampoline::Trampoline(util::RequestSender<SimulationRunProxy> reply, Session& session)
     : m_reply(reply),
       m_sim(game::sim::getSimulatorSession(session)),
       m_log(session.log()),
+      m_fileSystem(session.world().fileSystem()),
       m_translator(session.translator()),
       m_shipList(session.getShipList()),
       m_root(session.getRoot()),
@@ -199,7 +203,7 @@ game::proxy::SimulationRunProxy::Trampoline::makeClassResultBattleAdaptor(size_t
     game::sim::Database_t b = r->getSampleBattle();
     afl::except::checkAssertion(b.get() != 0, "<makeClassResultBattleAdaptor.Database>");
 
-    return new Adaptor(*this, b);
+    return new Adaptor(*this, *b);
 }
 
 inline game::proxy::VcrDatabaseAdaptor*
@@ -212,7 +216,7 @@ game::proxy::SimulationRunProxy::Trampoline::makeUnitResultBattleAdaptor(size_t 
     game::sim::Database_t b = m_runner->resultList().getUnitSampleBattle(index, type, max);
     afl::except::checkAssertion(b.get() != 0, "<makeClassResultBattleAdaptor.Database>");
 
-    return new Adaptor(*this, b);
+    return new Adaptor(*this, *b);
 }
 
 void

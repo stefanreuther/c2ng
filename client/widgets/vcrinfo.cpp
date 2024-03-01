@@ -7,6 +7,10 @@
 #include "afl/string/format.hpp"
 #include "gfx/complex.hpp"
 #include "gfx/context.hpp"
+#include "ui/eventloop.hpp"
+#include "ui/layout/hbox.hpp"
+#include "ui/widgets/menuframe.hpp"
+#include "ui/widgets/stringlistbox.hpp"
 #include "util/string.hpp"
 
 namespace {
@@ -31,7 +35,7 @@ client::widgets::VcrInfo::VcrInfo(ui::Root& root, afl::string::Translator& tx)
       m_leftButton("L", 'l', root),
       m_rightButton("R", 'r', root),
       m_tabButton("Tab", util::Key_Tab, root),
-      m_scoreButton("S", 's', root),
+      m_menuButton("#", '#', root),
       m_showMapButton("F4", util::Key_F4, root),
       m_data(),
       m_adjectiveNames(),
@@ -41,13 +45,13 @@ client::widgets::VcrInfo::VcrInfo(ui::Root& root, afl::string::Translator& tx)
     // Do not add m_rightButton yet
     addChild(m_leftButton, 0);
     addChild(m_tabButton, 0);
-    addChild(m_scoreButton, 0);
+    addChild(m_menuButton, 0);
     addChild(m_showMapButton, 0);
 
     m_leftButton.sig_fire.add(this, &VcrInfo::onLeft);
     m_rightButton.sig_fire.add(this, &VcrInfo::onRight);
     m_tabButton.sig_fire.add(this, &VcrInfo::onTab);
-    m_scoreButton.sig_fire.add(this, &VcrInfo::onScore);
+    m_menuButton.sig_fire.add(this, &VcrInfo::onMenu);
     m_showMapButton.sig_fire.add(this, &VcrInfo::onMap);
 
     updateButtonState();
@@ -259,7 +263,13 @@ client::widgets::VcrInfo::getLayoutInfo() const
 bool
 client::widgets::VcrInfo::handleKey(util::Key_t key, int prefix)
 {
-    return defaultHandleKey(key, prefix);
+    switch (key) {
+     case 's':
+        sig_action.raise(ShowScoreSummary);
+        return true;
+     default:
+        return defaultHandleKey(key, prefix);
+    }
 }
 
 bool
@@ -348,7 +358,7 @@ client::widgets::VcrInfo::setChildPositions()
         m_tabButton.setExtent(lastRow.splitRightX(tabSize));
         lastRow.consumeRightX(pad);
 
-        m_scoreButton.setExtent(lastRow.splitRightX(buttonSize));
+        m_menuButton.setExtent(lastRow.splitRightX(buttonSize));
         lastRow.consumeRightX(pad);
 
         m_showMapButton.setExtent(lastRow.splitRightX(m_showMapButton.getLayoutInfo().getPreferredSize().getX()));
@@ -357,7 +367,7 @@ client::widgets::VcrInfo::setChildPositions()
         m_tabButton.setExtent(lastRow.splitRightX(tabSize));
         lastRow.consumeRightX(pad);
 
-        m_scoreButton.setExtent(lastRow.splitRightX(buttonSize));
+        m_menuButton.setExtent(lastRow.splitRightX(buttonSize));
         lastRow.consumeRightX(pad);
 
         m_leftButton.setExtent(lastRow.splitRightX(buttonSize));
@@ -400,13 +410,25 @@ client::widgets::VcrInfo::onRight()
 void
 client::widgets::VcrInfo::onTab()
 {
-    sig_tab.raise();
+    sig_action.raise(ShowCombatDiagram);
 }
 
 void
-client::widgets::VcrInfo::onScore()
+client::widgets::VcrInfo::onMenu()
 {
-    sig_score.raise();
+    ui::widgets::StringListbox box(m_root.provider(), m_root.colorScheme());
+    box.addItem(ShowScoreSummary, m_translator("Scores [S]"));
+    box.addItem(ExportBattles,    m_translator("Export all battles"));
+    box.addItem(ExportUnits,      m_translator("Export units in this battle"));
+
+    gfx::Point anchor = m_menuButton.getExtent().getBottomLeft();
+    ui::EventLoop loop(m_root);
+    if (ui::widgets::MenuFrame(ui::layout::HBox::instance0, m_root, loop).doMenu(box, anchor)) {
+        int32_t id = 0;
+        if (box.getCurrentKey().get(id)) {
+            sig_action.raise(Action(id));
+        }
+    }
 }
 
 void

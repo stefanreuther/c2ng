@@ -2287,7 +2287,16 @@
           <ki key="T">Toggle team colors. By default, lines are colored by owner. With this option enabled, they are colored by <a href="pcc2:teams">teams</a>;</ki>
           <ki key="S">Combat score summary. Shows how much experience and build points each race got this turn, and how many tons they sunk;</ki>
         </kl></ki>
-        <ki key="S">Combat score summary;</ki>
+        <ki key="#">Show menu with extra options:
+        <ul>
+          <li><b>Scores</b>: show combat score summary (<kbd>S</kbd>):
+          for all players taking part in all your combat recordings, shows the estimated amount of
+          experience points, build points, and tons sunk total;</li>
+          <li><b>Export all battles</b>: <a href="pcc2:export">export</a> properties of all battles;</li>
+          <li><b>Export units in this battle</b>: <a href="pcc2:export">export</a> properties of all units in this fight.
+          This is particularly useful for FLAK combat, when there are more than two units.
+          The other Export option only allows access to the first two units (Left and Right, respectively).</li>
+        </ul></ki>
         <ki key="L, R"><a href="pcc2:vcrinfo">Display information about one side of the fight</a>;</ki>
         <ki key="F4">Show location of fight on <a href="pcc2:starchart">starchart</a>, if position is known;</ki>
         <ki key="Enter">Watch fight. See <a href="pcc2:vcr:playback">Classic Playback</a> and <a href="pcc2:flak">FLAK playback</a>.</ki>

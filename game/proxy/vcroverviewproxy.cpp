@@ -14,9 +14,9 @@ using game::vcr::Overview;
 class game::proxy::VcrOverviewProxy::Trampoline {
  public:
     Trampoline(VcrDatabaseAdaptor& adaptor)
-        : m_overview(adaptor.battles(),
-                     adaptor.root().hostConfiguration(),
-                     adaptor.shipList()),
+        : m_overview(*adaptor.getBattles(),
+                     adaptor.getRoot()->hostConfiguration(),
+                     *adaptor.getShipList()),
           m_adaptor(adaptor)
         { }
 
@@ -24,7 +24,7 @@ class game::proxy::VcrOverviewProxy::Trampoline {
         { return m_overview; }
 
     const Root& root()
-        { return m_adaptor.root(); }
+        { return *m_adaptor.getRoot(); }
 
     afl::string::Translator& translator()
         { return m_adaptor.translator(); }

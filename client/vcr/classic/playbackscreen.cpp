@@ -71,11 +71,11 @@ namespace {
      public:
         virtual void handle(game::proxy::VcrDatabaseAdaptor& adaptor)
             {
-                gvc::Database* db = dynamic_cast<gvc::Database*>(&adaptor.battles());
+                gvc::Database* db = dynamic_cast<gvc::Database*>(&*adaptor.getBattles());
                 if (db != 0) {
                     for (size_t i = 0, n = db->getNumBattles(); i < n; ++i) {
                         if (gvc::Battle* b = db->getBattle(i)) {
-                            handleBattle(*b, adaptor.shipList(), adaptor.root().hostConfiguration());
+                            handleBattle(*b, *adaptor.getShipList(), adaptor.getRoot()->hostConfiguration());
                         }
                     }
                 }

@@ -7,12 +7,14 @@
 #include "client/dialogs/classicvcrobject.hpp"
 #include "client/dialogs/combatoverview.hpp"
 #include "client/dialogs/combatscoresummary.hpp"
+#include "client/dialogs/export.hpp"
 #include "client/dialogs/flakvcrobject.hpp"
 #include "client/downlink.hpp"
 #include "client/picturenamer.hpp"
 #include "client/widgets/helpwidget.hpp"
 #include "game/proxy/playerproxy.hpp"
 #include "game/proxy/teamproxy.hpp"
+#include "game/proxy/vcrexportadaptor.hpp"
 #include "ui/group.hpp"
 #include "ui/layout/hbox.hpp"
 #include "ui/layout/vbox.hpp"
@@ -23,6 +25,7 @@
 #include "ui/window.hpp"
 #include "util/unicodechars.hpp"
 
+using client::widgets::VcrInfo;
 using game::proxy::VcrDatabaseProxy;
 
 client::dialogs::VcrSelection::VcrSelection(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::proxy::VcrDatabaseAdaptor> vcrSender, util::RequestSender<game::Session> gameSender)
@@ -40,9 +43,7 @@ client::dialogs::VcrSelection::VcrSelection(ui::Root& root, afl::string::Transla
       m_kind()
 {
     m_proxy.sig_update.add(this, &VcrSelection::onUpdate);
-    m_info.sig_info.add(this, &VcrSelection::onInfo);
-    m_info.sig_tab.add(this, &VcrSelection::onTab);
-    m_info.sig_score.add(this, &VcrSelection::onScore);
+    m_info.sig_action.add(this, &VcrSelection::onAction);
     m_info.sig_showMap.add(this, &VcrSelection::onShowMap);
 }
 
@@ -230,6 +231,25 @@ client::dialogs::VcrSelection::onInfo(size_t index)
 }
 
 void
+client::dialogs::VcrSelection::onAction(client::widgets::VcrInfo::Action a)
+{
+    switch (a) {
+     case VcrInfo::ShowCombatDiagram:
+        onTab();
+        break;
+     case VcrInfo::ShowScoreSummary:
+        showCombatScoreSummary(m_root, m_translator, m_vcrSender, m_gameSender);
+        break;
+     case VcrInfo::ExportBattles:
+        doExport(m_root, m_vcrSender.makeTemporary(game::proxy::makeVcrExportAdaptor()), m_gameSender, m_translator);
+        break;
+     case VcrInfo::ExportUnits:
+        doExport(m_root, m_vcrSender.makeTemporary(game::proxy::makeVcrSideExportAdaptor(m_currentIndex)), m_gameSender, m_translator);
+        break;
+    }
+}
+
+void
 client::dialogs::VcrSelection::onTab()
 {
     // ex FlakVcrSelector::showDiagram
@@ -239,13 +259,6 @@ client::dialogs::VcrSelection::onTab()
         setCurrentIndex(pos);
     }
 }
-
-void
-client::dialogs::VcrSelection::onScore()
-{
-    showCombatScoreSummary(m_root, m_translator, m_vcrSender, m_gameSender);
-}
-
 
 void
 client::dialogs::VcrSelection::onShowMap(game::map::Point pt)

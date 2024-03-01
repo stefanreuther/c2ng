@@ -18,7 +18,7 @@ namespace client { namespace widgets {
         Displays information about a single fight:
         - "Battle 1 of X", type, location, seed
         - ship details, list of ships, fleets, or players depending on available room
-        - List (L,R), Overview (Tab), Score (S) buttons
+        - List (L,R), Overview (Tab), Menu (S) buttons
 
         This is a merge of the previous FlakVcrInfo and ClassicVcrInfo widgets.
         It supports all types of combat and chooses an optimum layout internally.
@@ -29,6 +29,14 @@ namespace client { namespace widgets {
     class VcrInfo : public ui::Widget {
      public:
         typedef game::vcr::BattleInfo Data_t;
+
+        /** Generic parameterless action. */
+        enum Action {
+            ShowCombatDiagram,
+            ShowScoreSummary,
+            ExportBattles,
+            ExportUnits
+        };
 
         /** Constructor.
             @param root   UI root
@@ -72,11 +80,8 @@ namespace client { namespace widgets {
             @param slot Unit number to display information for. For classic combat, 0=left, 1=right */
         afl::base::Signal<void(size_t)> sig_info;
 
-        /** Signal: show combat diagram. */
-        afl::base::Signal<void()> sig_tab;
-
-        /** Signal: show score summary. */
-        afl::base::Signal<void()> sig_score;
+        /** Signal: generic action. */
+        afl::base::Signal<void(Action)> sig_action;
 
         /** Signal: show fight location on map.
             @param pos Position */
@@ -88,7 +93,7 @@ namespace client { namespace widgets {
         ui::widgets::Button m_leftButton;          ///< "L" (left, list).
         ui::widgets::Button m_rightButton;         ///< "R" (right).
         ui::widgets::Button m_tabButton;           ///< "Tab" (table).
-        ui::widgets::Button m_scoreButton;         ///< "S" (score).
+        ui::widgets::Button m_menuButton;          ///< "#" (menu).
         ui::widgets::Button m_showMapButton;       ///< "F4" (map).
         Data_t m_data;
         game::PlayerArray<String_t> m_adjectiveNames;
@@ -104,7 +109,7 @@ namespace client { namespace widgets {
         void onLeft();
         void onRight();
         void onTab();
-        void onScore();
+        void onMenu();
         void onMap();
     };
 

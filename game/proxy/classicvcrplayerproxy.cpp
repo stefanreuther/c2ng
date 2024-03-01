@@ -54,10 +54,10 @@ game::proxy::ClassicVcrPlayerProxy::Trampoline::initRequest(size_t index)
 {
     m_index = index;
 
-    gvc::Database* db = dynamic_cast<gvc::Database*>(&m_adaptor.battles());
+    gvc::Database* db = dynamic_cast<gvc::Database*>(&*m_adaptor.getBattles());
     gvc::Battle* b = db != 0 ? db->getBattle(index) : 0;
-    const Root& root = m_adaptor.root();
-    const game::spec::ShipList& shipList = m_adaptor.shipList();
+    const Root& root = *m_adaptor.getRoot();
+    const game::spec::ShipList& shipList = *m_adaptor.getShipList();
     if (db != 0 && b != 0) {
         m_algorithm.reset(b->createAlgorithm(m_visualizer, root.hostConfiguration(), shipList));
         if (m_algorithm.get() == 0) {
@@ -100,7 +100,7 @@ void
 game::proxy::ClassicVcrPlayerProxy::Trampoline::jumpRequest(game::vcr::classic::Time_t time)
 {
     // ex VcrSpriteVisualizer::windTo [sort-of]
-    gvc::Database* db = dynamic_cast<gvc::Database*>(&m_adaptor.battles());
+    gvc::Database* db = dynamic_cast<gvc::Database*>(&*m_adaptor.getBattles());
     gvc::Battle* b = db != 0 ? db->getBattle(m_index) : 0;
     if (db != 0 && b != 0 && m_algorithm.get() != 0) {
         const gvc::Time_t now = m_algorithm->getTime();

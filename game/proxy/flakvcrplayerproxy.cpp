@@ -62,11 +62,11 @@ game::proxy::FlakVcrPlayerProxy::Trampoline::initRequest(size_t index)
     m_algorithm.reset();
 
     // Obtain battle
-    gvf::Battle* battle = dynamic_cast<gvf::Battle*>(m_adaptor.battles().getBattle(index));
+    gvf::Battle* battle = dynamic_cast<gvf::Battle*>(m_adaptor.getBattles()->getBattle(index));
     afl::sys::LogListener& log = m_adaptor.log();
     if (battle != 0) {
         // Create algorithm
-        gvf::GameEnvironment env(m_adaptor.root().hostConfiguration(), m_adaptor.shipList().beams(), m_adaptor.shipList().launchers());
+        gvf::GameEnvironment env(m_adaptor.getRoot()->hostConfiguration(), m_adaptor.getShipList()->beams(), m_adaptor.getShipList()->launchers());
         m_algorithm.reset(new gvf::Algorithm(battle->setup(), env));
 
         // Initialize
@@ -86,7 +86,7 @@ game::proxy::FlakVcrPlayerProxy::Trampoline::eventRequest()
 {
     if (m_algorithm.get() != 0) {
         // Environment
-        gvf::GameEnvironment env(m_adaptor.root().hostConfiguration(), m_adaptor.shipList().beams(), m_adaptor.shipList().launchers());
+        gvf::GameEnvironment env(m_adaptor.getRoot()->hostConfiguration(), m_adaptor.getShipList()->beams(), m_adaptor.getShipList()->launchers());
         gvf::EventRecorder r;
 
         // Play
@@ -106,7 +106,7 @@ game::proxy::FlakVcrPlayerProxy::Trampoline::jumpRequest(int32_t time)
 {
     if (m_algorithm.get() != 0) {
         // Environment
-        gvf::GameEnvironment env(m_adaptor.root().hostConfiguration(), m_adaptor.shipList().beams(), m_adaptor.shipList().launchers());
+        gvf::GameEnvironment env(m_adaptor.getRoot()->hostConfiguration(), m_adaptor.getShipList()->beams(), m_adaptor.getShipList()->launchers());
         gvf::NullVisualizer null;
         bool done = false;
         if (time == 0) {

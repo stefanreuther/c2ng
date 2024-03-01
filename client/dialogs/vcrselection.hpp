@@ -70,9 +70,12 @@ namespace client { namespace dialogs {
 
         void onUpdate(size_t index, const game::vcr::BattleInfo& data);
         void onInfo(size_t pos);
+        void onAction(client::widgets::VcrInfo::Action a);
         void onTab();
         void onScore();
         void onShowMap(game::map::Point pt);
+        void onExportBattles();
+        void onExportUnits();
     };
 
 } }

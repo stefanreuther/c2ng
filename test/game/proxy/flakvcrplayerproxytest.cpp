@@ -7,6 +7,7 @@
 
 #include "afl/charset/utf8charset.hpp"
 #include "afl/io/constmemorystream.hpp"
+#include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 #include "afl/test/testrunner.hpp"
@@ -49,16 +50,16 @@ namespace {
 
     struct Environment {
         afl::base::Ref<game::Root> root;
-        game::spec::ShipList shipList;
+        afl::base::Ref<game::spec::ShipList> shipList;
         game::TeamSettings* pTeamSettings;
-        game::vcr::flak::Database battles;
+        afl::base::Ref<game::vcr::flak::Database> battles;
         afl::string::NullTranslator translator;
         afl::sys::Log log;
         size_t currentBattle;
 
         Environment()
             : root(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)))),
-              shipList(), pTeamSettings(0), battles(), translator(), currentBattle(0)
+              shipList(*new game::spec::ShipList()), pTeamSettings(0), battles(*new game::vcr::flak::Database()), translator(), currentBattle(0)
             { }
     };
 
@@ -67,18 +68,20 @@ namespace {
         TestAdaptor(Environment& env)
             : m_env(env)
             { }
-        virtual const game::Root& root() const
-            { return *m_env.root; }
-        virtual const game::spec::ShipList& shipList() const
+        virtual afl::base::Ref<const game::Root> getRoot() const
+            { return m_env.root; }
+        virtual afl::base::Ref<const game::spec::ShipList> getShipList() const
             { return m_env.shipList; }
         virtual const game::TeamSettings* getTeamSettings() const
             { return m_env.pTeamSettings; }
-        virtual game::vcr::Database& battles()
+        virtual afl::base::Ref<game::vcr::Database> getBattles()
             { return m_env.battles; }
         virtual afl::string::Translator& translator()
             { return m_env.translator; }
         virtual afl::sys::LogListener& log()
             { return m_env.log; }
+        virtual afl::io::FileSystem& fileSystem()
+            { return m_fileSystem; }
         virtual size_t getCurrentBattle() const
             { return m_env.currentBattle; }
         virtual void setCurrentBattle(size_t n)
@@ -89,6 +92,7 @@ namespace {
             { return false; }
      private:
         Environment& m_env;
+        afl::io::NullFileSystem m_fileSystem;
     };
 
     struct EventReceiver {
@@ -162,11 +166,11 @@ AFL_TEST("game.proxy.FlakVcrPlayerProxy", a)
 {
     // Make simple environment
     Environment env;
-    game::test::initStandardBeams(env.shipList);
-    game::test::initStandardTorpedoes(env.shipList);
+    game::test::initStandardBeams(*env.shipList);
+    game::test::initStandardTorpedoes(*env.shipList);
     afl::charset::Utf8Charset cs;
     afl::io::ConstMemoryStream file(FILE_CONTENT);
-    env.battles.load(file, cs, env.translator);
+    env.battles->load(file, cs, env.translator);
 
     // Set up tasking
     // Use just one RequestDispatcher to serve both sides

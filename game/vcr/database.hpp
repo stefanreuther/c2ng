@@ -7,6 +7,7 @@
 
 #include "afl/base/deletable.hpp"
 #include "afl/base/types.hpp"
+#include "afl/base/refcounted.hpp"
 
 namespace game { namespace vcr {
 
@@ -14,7 +15,7 @@ namespace game { namespace vcr {
 
     /** Basic VCR database.
         A VCR database contains (owns) a list of battles. */
-    class Database : public afl::base::Deletable {
+    class Database : public afl::base::Deletable, public afl::base::RefCounted {
      public:
         /** Get number of battles in this database. */
         virtual size_t getNumBattles() const = 0;

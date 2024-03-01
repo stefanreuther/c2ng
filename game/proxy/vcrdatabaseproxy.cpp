@@ -51,16 +51,16 @@ game::proxy::VcrDatabaseProxy::Trampoline::Trampoline(VcrDatabaseAdaptor& adapto
 inline size_t
 game::proxy::VcrDatabaseProxy::Trampoline::getNumBattles()
 {
-    return m_adaptor.battles().getNumBattles();
+    return m_adaptor.getBattles()->getNumBattles();
 }
 
 void
 game::proxy::VcrDatabaseProxy::Trampoline::requestData(size_t index)
 {
     game::vcr::BattleInfo d;
-    if (game::vcr::Battle* b = m_adaptor.battles().getBattle(index)) {
-        const Root& root = m_adaptor.root();
-        const game::spec::ShipList& shipList = m_adaptor.shipList();
+    if (game::vcr::Battle* b = m_adaptor.getBattles()->getBattle(index)) {
+        const Root& root = *m_adaptor.getRoot();
+        const game::spec::ShipList& shipList = *m_adaptor.getShipList();
         b->prepareResult(root.hostConfiguration(), shipList, game::vcr::Battle::NeedQuickOutcome);
         b->getBattleInfo(d, m_adaptor.getTeamSettings(), shipList, root, m_adaptor.translator());
     }
@@ -73,14 +73,14 @@ void
 game::proxy::VcrDatabaseProxy::Trampoline::requestSideInfo(size_t index, size_t side, bool setHull)
 {
     // Environment
-    const Root& root = m_adaptor.root();
-    const game::spec::ShipList& shipList = m_adaptor.shipList();
+    const Root& root = *m_adaptor.getRoot();
+    const game::spec::ShipList& shipList = *m_adaptor.getShipList();
     afl::string::Translator& tx = m_adaptor.translator();
 
     // Produce output
     SideInfo info;
     int firstHull = 0;
-    if (game::vcr::Battle* b = m_adaptor.battles().getBattle(index)) {
+    if (game::vcr::Battle* b = m_adaptor.getBattles()->getBattle(index)) {
         if (const game::vcr::Object* obj = b->getObject(side, false)) {
             // Name and header information
             info.name = obj->getName();
@@ -123,13 +123,13 @@ void
 game::proxy::VcrDatabaseProxy::Trampoline::requestHullInfo(size_t index, size_t side, int hullType)
 {
     // Environment
-    const Root& root = m_adaptor.root();
-    const game::spec::ShipList& shipList = m_adaptor.shipList();
+    const Root& root = *m_adaptor.getRoot();
+    const game::spec::ShipList& shipList = *m_adaptor.getShipList();
     afl::string::Translator& tx = m_adaptor.translator();
 
     // Produce output
     HullInfo info;
-    if (game::vcr::Battle* b = m_adaptor.battles().getBattle(index)) {
+    if (game::vcr::Battle* b = m_adaptor.getBattles()->getBattle(index)) {
         if (const game::vcr::Object* obj = b->getObject(side, false)) {
             // Image
             const game::spec::Hull* pHull = shipList.hulls().get(hullType);
@@ -172,11 +172,11 @@ game::proxy::VcrDatabaseProxy::AddResult
 game::proxy::VcrDatabaseProxy::Trampoline::addToSimulation(size_t index, size_t side, int hullType, bool after)
 {
     // ex WVcrInfoMain::addToSim
-    const game::config::HostConfiguration& config = m_adaptor.root().hostConfiguration();
-    const game::spec::ShipList& shipList = m_adaptor.shipList();
+    const game::config::HostConfiguration& config = m_adaptor.getRoot()->hostConfiguration();
+    const game::spec::ShipList& shipList = *m_adaptor.getShipList();
 
     // Obtain battle
-    game::vcr::Battle* b = m_adaptor.battles().getBattle(index);
+    game::vcr::Battle* b = m_adaptor.getBattles()->getBattle(index);
     if (b == 0) {
         return Error;
     }
@@ -231,7 +231,7 @@ game::proxy::VcrDatabaseProxy::Trampoline::packStatus(Status& st)
     st.numBattles = getNumBattles();
     st.currentBattle = m_adaptor.getCurrentBattle();
 
-    const game::vcr::Database& db = m_adaptor.battles();
+    const game::vcr::Database& db = *m_adaptor.getBattles();
     if (dynamic_cast<const game::vcr::classic::Database*>(&db) != 0) {
         st.kind = ClassicCombat;
     } else if (dynamic_cast<const game::vcr::flak::Database*>(&db) != 0) {
@@ -244,7 +244,7 @@ game::proxy::VcrDatabaseProxy::Trampoline::packStatus(Status& st)
 inline void
 game::proxy::VcrDatabaseProxy::Trampoline::packPlayerNames(PlayerArray<String_t>& result, Player::Name which)
 {
-    result = m_adaptor.root().playerList().getPlayerNames(which, m_adaptor.translator());
+    result = m_adaptor.getRoot()->playerList().getPlayerNames(which, m_adaptor.translator());
 }
 
 inline void

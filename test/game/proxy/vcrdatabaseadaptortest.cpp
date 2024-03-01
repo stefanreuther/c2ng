@@ -11,17 +11,19 @@ AFL_TEST_NOARG("game.proxy.VcrDatabaseAdaptor")
 {
     class Tester : public game::proxy::VcrDatabaseAdaptor {
      public:
-        virtual const game::Root& root() const
+        virtual afl::base::Ref<const game::Root> getRoot() const
             { throw 0; }
-        virtual const game::spec::ShipList& shipList() const
+        virtual afl::base::Ref<const game::spec::ShipList> getShipList() const
             { throw 0; }
         virtual const game::TeamSettings* getTeamSettings() const
             { return 0; }
-        virtual game::vcr::Database& battles()
+        virtual afl::base::Ref<game::vcr::Database> getBattles()
             { throw 0; }
         virtual afl::string::Translator& translator()
             { throw 0; }
         virtual afl::sys::LogListener& log()
+            { throw 0; }
+        virtual afl::io::FileSystem& fileSystem()
             { throw 0; }
         virtual size_t getCurrentBattle() const
             { return 0; }

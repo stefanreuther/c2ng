@@ -5,6 +5,7 @@
 
 #include "game/proxy/classicvcrplayerproxy.hpp"
 
+#include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 #include "afl/test/testrunner.hpp"
@@ -24,19 +25,19 @@ namespace {
 
     struct Environment {
         afl::base::Ref<game::Root> root;
-        game::spec::ShipList shipList;
+        afl::base::Ref<game::spec::ShipList> shipList;
         game::TeamSettings* pTeamSettings;
-        game::vcr::classic::Database battles;
+        afl::base::Ref<game::vcr::classic::Database> battles;
         afl::string::NullTranslator translator;
         afl::sys::Log log;
         size_t currentBattle;
 
         Environment()
             : root(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)))),
-              shipList(), pTeamSettings(0), battles(), translator(), currentBattle(0)
+              shipList(*new game::spec::ShipList()), pTeamSettings(0), battles(*new game::vcr::classic::Database()), translator(), currentBattle(0)
             {
-                game::test::initStandardBeams(shipList);
-                game::test::initStandardTorpedoes(shipList);
+                game::test::initStandardBeams(*shipList);
+                game::test::initStandardTorpedoes(*shipList);
             }
     };
 
@@ -45,18 +46,20 @@ namespace {
         TestAdaptor(Environment& env)
             : m_env(env)
             { }
-        virtual const game::Root& root() const
-            { return *m_env.root; }
-        virtual const game::spec::ShipList& shipList() const
+        virtual afl::base::Ref<const game::Root> getRoot() const
+            { return m_env.root; }
+        virtual afl::base::Ref<const game::spec::ShipList> getShipList() const
             { return m_env.shipList; }
         virtual const game::TeamSettings* getTeamSettings() const
             { return m_env.pTeamSettings; }
-        virtual game::vcr::Database& battles()
+        virtual afl::base::Ref<game::vcr::Database> getBattles()
             { return m_env.battles; }
         virtual afl::string::Translator& translator()
             { return m_env.translator; }
         virtual afl::sys::LogListener& log()
             { return m_env.log; }
+        virtual afl::io::FileSystem& fileSystem()
+            { return m_fileSystem; }
         virtual size_t getCurrentBattle() const
             { return m_env.currentBattle; }
         virtual void setCurrentBattle(size_t n)
@@ -67,6 +70,7 @@ namespace {
             { return false; }
      private:
         Environment& m_env;
+        afl::io::NullFileSystem m_fileSystem;
     };
 
     game::vcr::Object makeLeftShip()
@@ -198,7 +202,7 @@ AFL_TEST("game.proxy.ClassicVcrPlayerProxy:normal", a)
 {
     // Make simple environment
     Environment env;
-    env.battles.addNewBattle(new game::vcr::classic::Battle(makeLeftShip(), makeRightShip(), 42, 0, 0))
+    env.battles->addNewBattle(new game::vcr::classic::Battle(makeLeftShip(), makeRightShip(), 42, 0, 0))
         ->setType(game::vcr::classic::PHost4, 0);
 
     // Set up tasking
@@ -258,7 +262,7 @@ AFL_TEST("game.proxy.ClassicVcrPlayerProxy:normal", a)
 AFL_TEST("game.proxy.ClassicVcrPlayerProxy:error:bad-algorithm", a)
 {
     Environment env;
-    env.battles.addNewBattle(new game::vcr::classic::Battle(makeLeftShip(), makeRightShip(), 42, 0, 0))
+    env.battles->addNewBattle(new game::vcr::classic::Battle(makeLeftShip(), makeRightShip(), 42, 0, 0))
         ->setType(game::vcr::classic::UnknownPHost, 0);
 
     testError(a, env, 0);
@@ -272,7 +276,7 @@ AFL_TEST("game.proxy.ClassicVcrPlayerProxy:error:bad-content", a)
     Environment env;
     game::vcr::Object leftShip = makeLeftShip();
     leftShip.setNumBeams(77);
-    env.battles.addNewBattle(new game::vcr::classic::Battle(leftShip, makeRightShip(), 42, 0, 0))
+    env.battles->addNewBattle(new game::vcr::classic::Battle(leftShip, makeRightShip(), 42, 0, 0))
         ->setType(game::vcr::classic::PHost4, 0);
 
     testError(a, env, 0);
@@ -295,7 +299,7 @@ AFL_TEST("game.proxy.ClassicVcrPlayerProxy:error:bad-capabilities", a)
     Environment env;
     game::vcr::Object leftShip = makeLeftShip();
     leftShip.setNumBeams(77);
-    env.battles.addNewBattle(new game::vcr::classic::Battle(leftShip, makeRightShip(), 42, 0, 0))
+    env.battles->addNewBattle(new game::vcr::classic::Battle(leftShip, makeRightShip(), 42, 0, 0))
         ->setType(game::vcr::classic::PHost4, -1);    /* all bits set = lots of unknown capabilities */
 
     testError(a, env, 0);

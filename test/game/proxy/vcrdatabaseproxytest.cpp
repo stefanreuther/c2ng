@@ -5,6 +5,7 @@
 
 #include "game/proxy/vcrdatabaseproxy.hpp"
 
+#include "afl/io/nullfilesystem.hpp"
 #include "afl/string/format.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
@@ -19,9 +20,9 @@
 namespace {
     struct Environment {
         afl::base::Ref<game::Root> root;
-        game::spec::ShipList shipList;
+        afl::base::Ref<game::spec::ShipList> shipList;
         game::TeamSettings* pTeamSettings;
-        game::vcr::classic::Database battles;
+        afl::base::Ref<game::vcr::classic::Database> battles;
         afl::string::NullTranslator translator;
         afl::sys::Log log;
         size_t currentBattle;
@@ -29,7 +30,7 @@ namespace {
 
         Environment()
             : root(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)))),
-              shipList(), pTeamSettings(0), battles(), translator(), currentBattle(0), setup()
+              shipList(*new game::spec::ShipList()), pTeamSettings(0), battles(*new game::vcr::classic::Database()), translator(), currentBattle(0), setup()
             { }
     };
 
@@ -38,18 +39,20 @@ namespace {
         TestAdaptor(Environment& env)
             : m_env(env)
             { }
-        virtual const game::Root& root() const
-            { return *m_env.root; }
-        virtual const game::spec::ShipList& shipList() const
+        virtual afl::base::Ref<const game::Root> getRoot() const
+            { return m_env.root; }
+        virtual afl::base::Ref<const game::spec::ShipList> getShipList() const
             { return m_env.shipList; }
         virtual const game::TeamSettings* getTeamSettings() const
             { return m_env.pTeamSettings; }
-        virtual game::vcr::Database& battles()
+        virtual afl::base::Ref<game::vcr::Database> getBattles()
             { return m_env.battles; }
         virtual afl::string::Translator& translator()
             { return m_env.translator; }
         virtual afl::sys::LogListener& log()
             { return m_env.log; }
+        virtual afl::io::FileSystem& fileSystem()
+            { return m_fileSystem; }
         virtual size_t getCurrentBattle() const
             { return m_env.currentBattle; }
         virtual void setCurrentBattle(size_t n)
@@ -60,6 +63,7 @@ namespace {
             { return false; }
      private:
         Environment& m_env;
+        afl::io::NullFileSystem m_fileSystem;
     };
 
     class TestPictureNamer : public game::spec::info::PictureNamer {
@@ -148,12 +152,12 @@ AFL_TEST("game.proxy.VcrDatabaseProxy:basics", a)
 {
     // Make simple environment
     Environment env;
-    game::test::initStandardBeams(env.shipList);
-    game::test::initStandardTorpedoes(env.shipList);
-    game::test::addAnnihilation(env.shipList);
-    env.battles.addNewBattle(new game::vcr::classic::Battle(makeRightShip(), makeLeftShip(), 42, 0, 0))
+    game::test::initStandardBeams(*env.shipList);
+    game::test::initStandardTorpedoes(*env.shipList);
+    game::test::addAnnihilation(*env.shipList);
+    env.battles->addNewBattle(new game::vcr::classic::Battle(makeRightShip(), makeLeftShip(), 42, 0, 0))
         ->setType(game::vcr::classic::PHost4, 0);
-    env.battles.addNewBattle(new game::vcr::classic::Battle(makeLeftShip(), makeRightShip(), 42, 0, 0))
+    env.battles->addNewBattle(new game::vcr::classic::Battle(makeLeftShip(), makeRightShip(), 42, 0, 0))
         ->setType(game::vcr::classic::PHost4, 0);
 
     // Set up tasking

@@ -2991,13 +2991,13 @@ client::si::IFCCViewCombat(game::Session& session, ScriptSide& si, RequestLink1 
         Adaptor(game::Session& session)
             : m_session(session)
             { }
-        virtual const Root& root() const
+        virtual afl::base::Ref<const Root> getRoot() const
             { return game::actions::mustHaveRoot(m_session); }
-        virtual const ShipList& shipList() const
+        virtual afl::base::Ref<const ShipList> getShipList() const
             { return game::actions::mustHaveShipList(m_session); }
         virtual const game::TeamSettings* getTeamSettings() const
             { return &game::actions::mustHaveGame(m_session).teamSettings(); }
-        virtual game::vcr::Database& battles()
+        virtual afl::base::Ref<game::vcr::Database> getBattles()
             {
                 game::vcr::Database* db = game::actions::mustHaveGame(m_session).viewpointTurn().getBattles().get();
                 afl::except::checkAssertion(db != 0, "VCR db present");
@@ -3007,6 +3007,8 @@ client::si::IFCCViewCombat(game::Session& session, ScriptSide& si, RequestLink1 
             { return m_session.translator(); }
         virtual afl::sys::LogListener& log()
             { return m_session.log(); }
+        virtual afl::io::FileSystem& fileSystem()
+            { return m_session.world().fileSystem(); }
         virtual size_t getCurrentBattle() const
             {
                 try {
@@ -3027,7 +3029,7 @@ client::si::IFCCViewCombat(game::Session& session, ScriptSide& si, RequestLink1 
         virtual bool isGameObject(const game::vcr::Object& obj) const
             {
                 Game* g = m_session.getGame().get();
-                return g != 0 && g->isGameObject(obj, shipList().hulls());
+                return g != 0 && g->isGameObject(obj, getShipList()->hulls());
             }
      private:
         game::Session& m_session;

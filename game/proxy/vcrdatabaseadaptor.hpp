@@ -6,6 +6,8 @@
 #define C2NG_GAME_PROXY_VCRDATABASEADAPTOR_HPP
 
 #include <cstddef>
+#include "afl/base/ref.hpp"
+#include "afl/io/filesystem.hpp"
 #include "afl/string/translator.hpp"
 #include "afl/sys/loglistener.hpp"
 #include "game/root.hpp"
@@ -31,12 +33,12 @@ namespace game { namespace proxy {
         /** Access game root.
             Required for host configuration, preferences, host type.
             \return root */
-        virtual const Root& root() const = 0;
+        virtual afl::base::Ref<const Root> getRoot() const = 0;
 
         /** Access ship list.
             Required for component names.
             \return ship list */
-        virtual const game::spec::ShipList& shipList() const = 0;
+        virtual afl::base::Ref<const game::spec::ShipList> getShipList() const = 0;
 
         /** Access team settings.
             Required to determine player relations.
@@ -46,7 +48,7 @@ namespace game { namespace proxy {
 
         /** Access battles.
             \return battles */
-        virtual game::vcr::Database& battles() = 0;
+        virtual afl::base::Ref<game::vcr::Database> getBattles() = 0;
 
         /** Access translator.
             \return translator */
@@ -55,6 +57,11 @@ namespace game { namespace proxy {
         /** Access logger.
             \return logger */
         virtual afl::sys::LogListener& log() = 0;
+
+        /** Access file system.
+            Note that the file system is not required for simulation as is, but will be needed for export.
+            \return file system */
+        virtual afl::io::FileSystem& fileSystem() = 0;
 
         /** Get index of last viewed battle.
             If you don't persist that status, return 0.

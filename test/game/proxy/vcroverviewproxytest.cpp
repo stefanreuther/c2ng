@@ -5,6 +5,7 @@
 
 #include "game/proxy/vcroverviewproxy.hpp"
 
+#include "afl/io/nullfilesystem.hpp"
 #include "afl/string/format.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
@@ -48,21 +49,23 @@ namespace {
 
     class TestAdaptor : public game::proxy::VcrDatabaseAdaptor {
      public:
-        TestAdaptor(game::Root& root, game::spec::ShipList& shipList, game::vcr::Database& battles)
+        TestAdaptor(afl::base::Ref<game::Root> root, afl::base::Ref<game::spec::ShipList> shipList, afl::base::Ref<game::vcr::Database> battles)
             : m_root(root), m_shipList(shipList), m_battles(battles)
             { }
-        virtual const game::Root& root() const
+        virtual afl::base::Ref<const game::Root> getRoot() const
             { return m_root; }
-        virtual const game::spec::ShipList& shipList() const
+        virtual afl::base::Ref<const game::spec::ShipList> getShipList() const
             { return m_shipList; }
         virtual const game::TeamSettings* getTeamSettings() const
             { return 0; }
-        virtual game::vcr::Database& battles()
+        virtual afl::base::Ref<game::vcr::Database> getBattles()
             { return m_battles; }
         virtual afl::string::Translator& translator()
             { return m_translator; }
         virtual afl::sys::LogListener& log()
             { return m_log; }
+        virtual afl::io::FileSystem& fileSystem()
+            { return m_fileSystem; }
         virtual size_t getCurrentBattle() const
             { return 0; }
         virtual void setCurrentBattle(size_t /*n*/)
@@ -72,11 +75,12 @@ namespace {
         virtual bool isGameObject(const game::vcr::Object& /*obj*/) const
             { return false; }
      private:
-        game::Root& m_root;
-        game::spec::ShipList& m_shipList;
-        game::vcr::Database& m_battles;
+        afl::base::Ref<game::Root> m_root;
+        afl::base::Ref<game::spec::ShipList> m_shipList;
+        afl::base::Ref<game::vcr::Database> m_battles;
         afl::string::NullTranslator m_translator;
         afl::sys::Log m_log;
+        afl::io::NullFileSystem m_fileSystem;
     };
 }
 
@@ -107,17 +111,17 @@ AFL_TEST("game.proxy.VcrOverviewProxy:buildDiagram", a)
 {
     // Environment
     afl::base::Ref<game::Root> root(game::test::makeRoot(game::HostVersion()));
-    game::spec::ShipList shipList;
-    game::test::initStandardBeams(shipList);
-    game::test::initStandardTorpedoes(shipList);
+    afl::base::Ref<game::spec::ShipList> shipList(*new game::spec::ShipList());
+    game::test::initStandardBeams(*shipList);
+    game::test::initStandardTorpedoes(*shipList);
 
     // Battles
-    game::vcr::classic::Database db;
-    db.addNewBattle(new game::vcr::classic::Battle(makeFreighter(110, 1), makeCaptor(120, 2), 1, 0, 0))
+    afl::base::Ref<game::vcr::classic::Database> db = *new game::vcr::classic::Database();
+    db->addNewBattle(new game::vcr::classic::Battle(makeFreighter(110, 1), makeCaptor(120, 2), 1, 0, 0))
         ->setType(game::vcr::classic::Host, 0);
 
     // Adaptor in a (mock) thread
-    TestAdaptor ad(*root, shipList, db);
+    TestAdaptor ad(root, shipList, db);
     game::test::WaitIndicator ind;
     util::RequestReceiver<game::proxy::VcrDatabaseAdaptor> recv(ind, ad);
 
@@ -137,17 +141,17 @@ AFL_TEST("game.proxy.VcrOverviewProxy:buildScoreSummary", a)
 {
     // Environment
     afl::base::Ref<game::Root> root(game::test::makeRoot(game::HostVersion()));
-    game::spec::ShipList shipList;
-    game::test::initStandardBeams(shipList);
-    game::test::initStandardTorpedoes(shipList);
+    afl::base::Ref<game::spec::ShipList> shipList(*new game::spec::ShipList());
+    game::test::initStandardBeams(*shipList);
+    game::test::initStandardTorpedoes(*shipList);
 
     // Battles
-    game::vcr::classic::Database db;
-    db.addNewBattle(new game::vcr::classic::Battle(makeFreighter(110, 1), makeCaptor(120, 2), 1, 0, 0))
+    afl::base::Ref<game::vcr::classic::Database> db = *new game::vcr::classic::Database();
+    db->addNewBattle(new game::vcr::classic::Battle(makeFreighter(110, 1), makeCaptor(120, 2), 1, 0, 0))
         ->setType(game::vcr::classic::Host, 0);
 
     // Adaptor in a (mock) thread
-    TestAdaptor ad(*root, shipList, db);
+    TestAdaptor ad(root, shipList, db);
     game::test::WaitIndicator ind;
     util::RequestReceiver<game::proxy::VcrDatabaseAdaptor> recv(ind, ad);
 
