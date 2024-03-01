@@ -137,7 +137,11 @@ server::talk::render::renderText(TextNode* node, const Context& ctx, Root& root)
     } else {
         String_t result;
         for (size_t i = 0, n = node->children.size(); i < n && result.size() < 10000; ++i) {
-            result += renderText(node->children[i], ctx, root);
+            String_t next = renderText(node->children[i], ctx, root);
+            if (!next.empty() && node->children[i]->major == TextNode::maParagraph && !result.empty() && result[result.size()] != ' ') {
+                result += ' ';
+            }
+            result += next;
         }
         if (result.empty() && node->major == TextNode::maLink) {
             switch (TextNode::LinkFormat(node->minor)) {

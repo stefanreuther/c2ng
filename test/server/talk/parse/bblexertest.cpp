@@ -62,6 +62,24 @@ AFL_TEST("server.talk.parse.BBLexer:paragraph", a)
     a.checkEqual("31", t, BBLexer::Eof);
 }
 
+/** Test paragraphs. */
+AFL_TEST("server.talk.parse.BBLexer:paragraph:crlf", a)
+{
+    BBLexer testee("a\r\nb\r\n\r\nc");
+    BBLexer::Token t = testee.read();
+    String_t text;
+    parseText(a("t1"), testee, t, text);
+    a.checkEqual("01", text, "a\nb");
+
+    a.checkEqual("11", t, BBLexer::Paragraph);
+
+    t = testee.read();
+    parseText(a("t2"), testee, t, text);
+    a.checkEqual("21", text, "c");
+
+    a.checkEqual("31", t, BBLexer::Eof);
+}
+
 /** Test some tags. */
 AFL_TEST("server.talk.parse.BBLexer:tags", a)
 {

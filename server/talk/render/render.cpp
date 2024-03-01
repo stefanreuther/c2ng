@@ -185,8 +185,9 @@ namespace server { namespace talk { namespace render { namespace {
                 --paras;
             }
 
-            // No break, keep it
-            return false;
+            // If this is a link that we made empty, discard it  to avoid that renderer renders it.
+            // Otherwise, keep it.
+            return n->major == TextNode::maLink;
         }
     }
 

@@ -191,6 +191,12 @@ server::talk::parse::BBLexer::read()
     }
     m_tokenLength = m_cursor - m_tokenStart;
     m_token = result;
+
+    // If token ends in a '\r', strip that.
+    // Otherwise, paragraphs might be left ending in a \r if user submitted \r\n linefeeds.
+    if (m_tokenLength > 0 && m_text[m_cursor-1] == '\r') {
+        --m_tokenLength;
+    }
     return result;
 }
 
