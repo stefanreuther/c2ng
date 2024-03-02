@@ -420,6 +420,8 @@ client::widgets::VcrInfo::onMenu()
     box.addItem(ShowScoreSummary, m_translator("Scores [S]"));
     box.addItem(ExportBattles,    m_translator("Export all battles"));
     box.addItem(ExportUnits,      m_translator("Export units in this battle"));
+    box.addItem(SaveAllBattles,   m_translator("Save all battles"));
+    box.addItem(SaveThisBattle,   m_translator("Save this battle"));
 
     gfx::Point anchor = m_menuButton.getExtent().getBottomLeft();
     ui::EventLoop loop(m_root);

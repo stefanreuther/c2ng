@@ -5,7 +5,7 @@
 
 #include "game/proxy/vcrdatabaseproxy.hpp"
 
-#include "afl/io/nullfilesystem.hpp"
+#include "afl/io/internalfilesystem.hpp"
 #include "afl/string/format.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
@@ -27,10 +27,12 @@ namespace {
         afl::sys::Log log;
         size_t currentBattle;
         game::sim::Setup setup;
+        afl::io::InternalFileSystem fileSystem;
 
         Environment()
             : root(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)))),
-              shipList(*new game::spec::ShipList()), pTeamSettings(0), battles(*new game::vcr::classic::Database()), translator(), currentBattle(0), setup()
+              shipList(*new game::spec::ShipList()), pTeamSettings(0), battles(*new game::vcr::classic::Database()), translator(), currentBattle(0), setup(),
+              fileSystem()
             { }
     };
 
@@ -52,7 +54,7 @@ namespace {
         virtual afl::sys::LogListener& log()
             { return m_env.log; }
         virtual afl::io::FileSystem& fileSystem()
-            { return m_fileSystem; }
+            { return m_env.fileSystem; }
         virtual size_t getCurrentBattle() const
             { return m_env.currentBattle; }
         virtual void setCurrentBattle(size_t n)
@@ -63,7 +65,6 @@ namespace {
             { return false; }
      private:
         Environment& m_env;
-        afl::io::NullFileSystem m_fileSystem;
     };
 
     class TestPictureNamer : public game::spec::info::PictureNamer {
@@ -325,4 +326,52 @@ AFL_TEST("game.proxy.VcrDatabaseProxy:getPlayerNames", a)
     a.checkEqual("02. adj", adj.get(9), "Player 9");
     a.checkEqual("03. full", full.get(3), "Player 3");
     a.checkEqual("04. full", full.get(9), "Nine");
+}
+
+AFL_TEST("game.proxy.VcrDatabaseProxy:save", a)
+{
+    // Make simple environment
+    Environment env;
+    game::test::initStandardBeams(*env.shipList);
+    game::test::initStandardTorpedoes(*env.shipList);
+    game::test::addAnnihilation(*env.shipList);
+    env.battles->addNewBattle(new game::vcr::classic::Battle(makeRightShip(), makeLeftShip(), 42, 0, 0))
+        ->setType(game::vcr::classic::PHost4, 0);
+    game::test::WaitIndicator ind;
+    TestAdaptor ad(env);
+    util::RequestReceiver<game::proxy::VcrDatabaseAdaptor> recv(ind, ad);
+
+    // Make proxy
+    game::proxy::VcrDatabaseProxy proxy(recv.getSender(), ind, env.translator, std::auto_ptr<game::spec::info::PictureNamer>(new TestPictureNamer()));
+
+    // Save
+    String_t err;
+    a.check("01. save", proxy.save(ind, "/test.vcr", 0, 1, err));
+
+    // Verify content
+    afl::base::Ptr<afl::io::Stream> in = env.fileSystem.openFileNT("/test.vcr", afl::io::FileSystem::OpenRead);
+    a.checkNonNull("11. file", in.get());
+    a.checkEqual("12. file size", in->getSize(), 102U);
+}
+
+AFL_TEST("game.proxy.VcrDatabaseProxy:save:error", a)
+{
+    // Make simple environment
+    Environment env;
+    game::test::initStandardBeams(*env.shipList);
+    game::test::initStandardTorpedoes(*env.shipList);
+    game::test::addAnnihilation(*env.shipList);
+    env.battles->addNewBattle(new game::vcr::classic::Battle(makeRightShip(), makeLeftShip(), 42, 0, 0))
+        ->setType(game::vcr::classic::PHost4, 0);
+    game::test::WaitIndicator ind;
+    TestAdaptor ad(env);
+    util::RequestReceiver<game::proxy::VcrDatabaseAdaptor> recv(ind, ad);
+
+    // Make proxy
+    game::proxy::VcrDatabaseProxy proxy(recv.getSender(), ind, env.translator, std::auto_ptr<game::spec::info::PictureNamer>(new TestPictureNamer()));
+
+    // Save
+    String_t err;
+    a.check("01. save fails", !proxy.save(ind, "/nonexistant-subdir/test.vcr", 0, 1, err));
+    a.checkDifferent("02. error message", err, "");
 }

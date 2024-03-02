@@ -76,6 +76,7 @@ namespace client { namespace dialogs {
         void onShowMap(game::map::Point pt);
         void onExportBattles();
         void onExportUnits();
+        void onSave(size_t first, size_t num);
     };
 
 } }

@@ -35,7 +35,9 @@ namespace client { namespace widgets {
             ShowCombatDiagram,
             ShowScoreSummary,
             ExportBattles,
-            ExportUnits
+            ExportUnits,
+            SaveAllBattles,
+            SaveThisBattle
         };
 
         /** Constructor.

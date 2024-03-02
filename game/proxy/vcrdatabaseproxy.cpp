@@ -4,6 +4,7 @@
   */
 
 #include "game/proxy/vcrdatabaseproxy.hpp"
+#include "afl/except/fileproblemexception.hpp"
 #include "afl/string/format.hpp"
 #include "game/proxy/waitindicator.hpp"
 #include "game/sim/transfer.hpp"
@@ -31,6 +32,7 @@ class game::proxy::VcrDatabaseProxy::Trampoline {
     void requestHullInfo(size_t index, size_t side, int hullType);
 
     AddResult addToSimulation(size_t index, size_t side, int hullType, bool after);
+    void save(const String_t& fileName, size_t first, size_t num);
 
     void packStatus(Status& st);
     void packPlayerNames(PlayerArray<String_t>& result, Player::Name which);
@@ -226,6 +228,14 @@ game::proxy::VcrDatabaseProxy::Trampoline::addToSimulation(size_t index, size_t 
 }
 
 void
+game::proxy::VcrDatabaseProxy::Trampoline::save(const String_t& fileName, size_t first, size_t num)
+{
+    afl::base::Ref<afl::io::Stream> out = m_adaptor.fileSystem().openFile(fileName, afl::io::FileSystem::Create);
+    afl::base::Ref<const Root> root = m_adaptor.getRoot();
+    m_adaptor.getBattles()->save(*out, first, num, root->hostConfiguration(), root->charset());
+}
+
+void
 game::proxy::VcrDatabaseProxy::Trampoline::packStatus(Status& st)
 {
     st.numBattles = getNumBattles();
@@ -399,6 +409,49 @@ game::proxy::VcrDatabaseProxy::addToSimulation(WaitIndicator& ind, int hullType,
     Task t(m_currentIndex, m_currentSide, hullType, after);
     ind.call(m_request, t);
     return t.getResult();
+}
+
+bool
+game::proxy::VcrDatabaseProxy::save(WaitIndicator& ind, String_t fileName, size_t first, size_t num, String_t& errorMessage)
+{
+    class Task : public util::Request<Trampoline> {
+     public:
+        Task(const String_t& fileName, size_t first, size_t num)
+            : m_fileName(fileName), m_first(first), m_num(num), m_result(false), m_errorMessage()
+            { }
+        virtual void handle(Trampoline& tpl)
+            {
+                try {
+                    tpl.save(m_fileName, m_first, m_num);
+                    m_result = true;
+                }
+                catch (afl::except::FileProblemException& e) {
+                    m_errorMessage = Format("%s: %s", e.getFileName(), e.what());
+                    m_result = false;
+                }
+                catch (std::exception& e) {
+                    m_errorMessage = e.what();
+                    m_result = false;
+                }
+            }
+        bool getResult() const
+            { return m_result; }
+        const String_t& getErrorMessage()
+            { return m_errorMessage; }
+     private:
+        String_t m_fileName;
+        size_t m_first;
+        size_t m_num;
+        bool m_result;
+        String_t m_errorMessage;
+    };
+    Task t(fileName, first, num);
+    ind.call(m_request, t);
+    bool result = t.getResult();
+    if (!result) {
+        errorMessage = t.getErrorMessage();
+    }
+    return result;
 }
 
 void

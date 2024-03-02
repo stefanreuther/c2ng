@@ -21,7 +21,6 @@ void
 game::vcr::flak::Database::load(afl::io::Stream& file, afl::charset::Charset& charset, afl::string::Translator& tx)
 {
     // ex GFlakVcrDatabase::loadFromFile
-
     structures::Header header;
     file.fullRead(afl::base::fromObject(header));
 
@@ -69,6 +68,35 @@ game::vcr::flak::Database::getBattle(size_t nr)
         return m_battles[nr];
     } else {
         return 0;
+    }
+}
+
+void
+game::vcr::flak::Database::save(afl::io::Stream& out, size_t first, size_t num, const game::config::HostConfiguration& /*config*/, afl::charset::Charset& cs)
+{
+    // Check parameters
+    first = std::min(first, m_battles.size());
+    num   = std::min(num, m_battles.size() - first);
+    num   = std::min(num, size_t(0x7FFF));
+
+    // Header
+    structures::Header header;
+    std::memcpy(header.magic, structures::FLAK_MAGIC, sizeof(structures::FLAK_MAGIC));
+    header.filefmt_version = 0;
+    header.player          = 0;
+    header.turn            = 0;
+    header.num_battles     = static_cast<int16_t>(num);
+    m_timestamp.storeRawData(header.timestamp);
+    header.reserved        = 0;
+    out.fullWrite(afl::base::fromObject(header));
+
+    // Content
+    for (size_t i = 0; i < num; ++i) {
+        if (Battle* b = getBattle(first + i)) {
+            afl::base::GrowableBytes_t data;
+            b->setup().save(data, cs);
+            out.fullWrite(data);
+        }
     }
 }
 

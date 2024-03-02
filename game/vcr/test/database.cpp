@@ -33,3 +33,7 @@ game::vcr::test::Database::getBattle(size_t nr)
         return 0;
     }
 }
+
+void
+game::vcr::test::Database::save(afl::io::Stream& /*out*/, size_t /*first*/, size_t /*num*/, const game::config::HostConfiguration& /*config*/, afl::charset::Charset& /*cs*/)
+{ }

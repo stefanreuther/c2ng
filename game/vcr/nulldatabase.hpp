@@ -15,6 +15,7 @@ namespace game { namespace vcr {
      public:
         virtual size_t getNumBattles() const;
         virtual Battle* getBattle(size_t nr);
+        virtual void save(afl::io::Stream& out, size_t first, size_t num, const game::config::HostConfiguration& config, afl::charset::Charset& cs);
     };
 
 } }

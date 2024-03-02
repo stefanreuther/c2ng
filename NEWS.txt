@@ -8,7 +8,7 @@ PCC2ng NEWS FILE
   - Build Queue Dialog: show build queue positions graphically;
   - Imperial Stats: show planets by experience;
   - Starchart: show actual (not estimated) flight times for distance
-  - VCR: export
+  - VCR: export and save
 
   History viewing is more consistent; scripts and actions access
   viewpoint turn.

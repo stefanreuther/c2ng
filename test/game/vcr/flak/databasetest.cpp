@@ -8,8 +8,10 @@
 #include "afl/charset/codepage.hpp"
 #include "afl/charset/codepagecharset.hpp"
 #include "afl/io/constmemorystream.hpp"
+#include "afl/io/internalstream.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/test/testrunner.hpp"
+#include "game/config/hostconfiguration.hpp"
 
 namespace {
     // FLAK0 flak.hst
@@ -430,6 +432,7 @@ namespace {
 AFL_TEST("game.vcr.flak.Database", a)
 {
     game::vcr::flak::Database testee;
+    game::config::HostConfiguration config;
     a.checkEqual("01. getNumBattles", testee.getNumBattles(), 0U);
     a.checkNull("02. getBattle", testee.getBattle(0));
 
@@ -443,4 +446,12 @@ AFL_TEST("game.vcr.flak.Database", a)
     a.checkEqual("23. getNumObjects", testee.getBattle(2)->getNumObjects(), 8U);
     a.checkEqual("24. getObject",     testee.getBattle(2)->getObject(7, false)->getName(), "Grautvornix");
     a.checkEqual("25. getTimestamp",  testee.getTimestamp().getTimestampAsString(), "09-22-200623:00:51");
+
+    // Verify save.
+    // Skip header because that contains the player assignment that we do not reproduce.
+    const size_t SKIP = sizeof(game::vcr::flak::structures::Header);
+    afl::io::InternalStream out;
+    testee.save(out, 0, 3, config, cs);
+    a.checkEqual("31. save size", out.getContent().size(), sizeof(FILE_CONTENT));
+    a.checkEqualContent("32. content", out.getContent().subrange(SKIP), afl::base::ConstBytes_t(FILE_CONTENT).subrange(SKIP));
 }

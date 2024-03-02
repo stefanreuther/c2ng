@@ -19,6 +19,8 @@ AFL_TEST("game.Turn:basics", a)
             { return 0; }
         virtual game::vcr::Battle* getBattle(size_t /*nr*/)
             { return 0; }
+        virtual void save(afl::io::Stream& /*out*/, size_t /*first*/, size_t /*num*/, const game::config::HostConfiguration& /*config*/, afl::charset::Charset& /*cs*/)
+            { }
     };
 
     // Test initial values

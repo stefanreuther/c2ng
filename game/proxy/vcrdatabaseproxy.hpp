@@ -158,6 +158,15 @@ namespace game { namespace proxy {
             \return status */
         AddResult addToSimulation(WaitIndicator& ind, int hullType, bool after);
 
+        /** Save battles to file.
+            \param [in]  ind      WaitIndicator
+            \param [in]  fileName Name of file to save to
+            \param [in]  first    0-based index of first battle to save
+            \param [in]  num      Number of battles to save
+            \param [out] errorMessage Error message
+            \return true on success, false on error */
+        bool save(WaitIndicator& ind, String_t fileName, size_t first, size_t num, String_t& errorMessage);
+
         /** Signal: data update.
             \param index Battle index
             \param data  Data */

@@ -397,6 +397,45 @@ namespace game { namespace v3 { namespace structures {
     const uint16_t ExperienceCapability = 2;                    ///< Experience in use.
     const uint16_t BeamCapability       = 4;                    ///< New beam/fighter behaviour from 4.0k.
 
+    /** VCR configuration battle.
+        Note that we are only writing this, not reading. */
+    struct VcrConfiguration {
+        Int32_t     signature;                                  ///< Signature.
+        Int16_t     version;                                    ///< Version. LSB has major version.
+        Int16_t     size;                                       ///< Number of configuration bytes following (=64).
+        Int16_t     BayRechargeRate;                            ///< BayRechargeRate configuration option.
+        Int16_t     BayRechargeBonus;                           ///< BayRechargeBonus configuration option.
+        Int16_t     BeamRechargeRate;                           ///< BeamRechargeRate configuration option.
+        Int16_t     BeamRechargeBonus;                          ///< BeamRechargeBonus configuration option.
+        Int16_t     TubeRechargeRate;                           ///< TubeRechargeRate configuration option.
+        Int16_t     BeamHitFighterCharge;                       ///< BeamHitFighterCharge configuration option.
+        Int16_t     BeamHitShipCharge;                          ///< BeamHitShipCharge configuration option.
+        Int32_t     TorpFiringRange;                            ///< TorpFiringRange configuration option.
+        Int32_t     BeamFiringRange;                            ///< BeamFiringRange configuration option.
+        Int16_t     TorpHitOdds;                                ///< TorpHitOdds configuration option.
+        Int16_t     BeamHitOdds;                                ///< BeamHitOdds configuration option.
+        Int16_t     BeamHitBonus;                               ///< BeamHitBonus configuration option.
+        Int16_t     StrikesPerFighter;                          ///< StrikesPerFighter configuration option.
+        Int16_t     FighterKillOdds;                            ///< FighterKillOdds configuration option.
+        Int16_t     FighterBeamExplosive;                       ///< FighterBeamExplosive configuration option.
+        Int16_t     FighterBeamKill;                            ///< FighterBeamKill configuration option.
+        Int16_t     ShipMovementSpeed;                          ///< ShipMovementSpeed configuration option.
+        Int16_t     FighterMovementSpeed;                       ///< FighterMovementSpeed configuration option.
+        Int16_t     BayLaunchInterval;                          ///< BayLaunchInterval configuration option.
+        Int16_t     MaxFightersLaunched;                        ///< MaxFightersLaunched configuration option.
+        Int16_t     AlternativeCombat;                          ///< AlternativeCombat configuration option.
+        Int32_t     StandoffDistance;                           ///< StandoffDistance configuration option.
+        Int16_t     PlanetsHaveTubes;                           ///< PlanetsHaveTubes configuration option.
+        Int16_t     FireOnAttackFighters;                       ///< FireOnAttackFighters configuration option.
+        Int16_t     TorpHitBonus;                               ///< TorpHitBonus configuration option.
+        Int16_t     TubeRechargeBonus;                          ///< TubeRechargeBonus configuration option.
+        Int16_t     ShieldDamageScaling;                        ///< ShieldDamageScaling configuration option.
+        Int16_t     HullDamageScaling;                          ///< HullDamageScaling configuration option.
+        Int16_t     CrewKillScaling;                            ///< CrewKillScaling configuration option.
+        uint8_t     unused[28];                                 ///< Not used.
+    };
+    static_assert(sizeof(VcrConfiguration) == 100, "sizeof VcrConfiguration");
+
     /** Ufo. Stored in the KORE/SKORE files. */
     struct Ufo {
         Int16_t     color;                                      ///< Color. VGA color number, [1,15]. Zero for non-existant Ufos.

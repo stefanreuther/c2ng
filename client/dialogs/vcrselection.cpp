@@ -4,17 +4,20 @@
   */
 
 #include "client/dialogs/vcrselection.hpp"
+#include "afl/string/format.hpp"
 #include "client/dialogs/classicvcrobject.hpp"
 #include "client/dialogs/combatoverview.hpp"
 #include "client/dialogs/combatscoresummary.hpp"
 #include "client/dialogs/export.hpp"
 #include "client/dialogs/flakvcrobject.hpp"
+#include "client/dialogs/sessionfileselectiondialog.hpp"
 #include "client/downlink.hpp"
 #include "client/picturenamer.hpp"
 #include "client/widgets/helpwidget.hpp"
 #include "game/proxy/playerproxy.hpp"
 #include "game/proxy/teamproxy.hpp"
 #include "game/proxy/vcrexportadaptor.hpp"
+#include "ui/dialogs/messagebox.hpp"
 #include "ui/group.hpp"
 #include "ui/layout/hbox.hpp"
 #include "ui/layout/vbox.hpp"
@@ -25,8 +28,12 @@
 #include "ui/window.hpp"
 #include "util/unicodechars.hpp"
 
+using afl::string::Format;
+using client::dialogs::SessionFileSelectionDialog;
 using client::widgets::VcrInfo;
 using game::proxy::VcrDatabaseProxy;
+using ui::dialogs::MessageBox;
+using util::FileNamePattern;
 
 client::dialogs::VcrSelection::VcrSelection(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::proxy::VcrDatabaseAdaptor> vcrSender, util::RequestSender<game::Session> gameSender)
     : m_root(root),
@@ -246,6 +253,12 @@ client::dialogs::VcrSelection::onAction(client::widgets::VcrInfo::Action a)
      case VcrInfo::ExportUnits:
         doExport(m_root, m_vcrSender.makeTemporary(game::proxy::makeVcrSideExportAdaptor(m_currentIndex)), m_gameSender, m_translator);
         break;
+     case VcrInfo::SaveAllBattles:
+        onSave(0, m_numBattles);
+        break;
+     case VcrInfo::SaveThisBattle:
+        onSave(m_currentIndex, 1);
+        break;
     }
 }
 
@@ -265,4 +278,21 @@ client::dialogs::VcrSelection::onShowMap(game::map::Point pt)
 {
     m_result = pt;
     m_loop.stop(1);
+}
+
+void
+client::dialogs::VcrSelection::onSave(size_t first, size_t num)
+{
+    client::Downlink link(m_root, m_translator);
+    SessionFileSelectionDialog dlg(m_root, m_translator, m_gameSender, m_translator("Save"));
+    dlg.setPattern(FileNamePattern::getAllFilesWithExtensionPattern("vcr"));
+    dlg.setDefaultExtension("vcr");
+    if (dlg.runDefault(link)) {
+        String_t name = dlg.getResult();
+        String_t err;
+        if (!m_proxy.save(link, name, first, num, err)) {
+            MessageBox(Format(m_translator("Error during save: %s"), err), m_translator("Save"), m_root)
+                .doOkDialog(m_translator);
+        }
+    }
 }
