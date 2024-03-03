@@ -120,6 +120,11 @@ game::map::info::renderShipPredictorUsedProperties(TagNode& list, const ShipPred
         makeText(makeListItem(list), tx("Damage speed limit"));
     }
 
+    // Fighter building
+    if (used.contains(ShipPredictor::UsedBuildFighters)) {
+        makeText(makeListItem(list), tx("Built fighters"));
+    }
+
     // Towee
     if (used.contains(ShipPredictor::UsedTowee)) {
         TagNode& item = makeListItem(list);

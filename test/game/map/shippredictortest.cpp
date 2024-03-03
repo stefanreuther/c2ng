@@ -94,6 +94,54 @@ namespace {
         return s;
     }
 
+    Ship& addCarrier(TestHarness& t, int shipId)
+    {
+        /*
+         *  Test case: Golem
+         */
+        const int HULL_ID = 79;
+        const int ENGINE_ID = 6;
+
+        // Emerald:
+        game::spec::Hull& h = *t.shipList.hulls().create(HULL_ID);
+        h.setMaxFuel(2000);
+        h.setMaxCargo(300);
+        h.setMaxCrew(1958);
+        h.setNumEngines(8);
+        h.setMass(850);
+
+        // HeavyNovaDrive 6:
+        game::spec::Engine& e = *t.shipList.engines().create(ENGINE_ID);
+        e.setFuelFactor(9, 72900);
+
+        // Add a ship
+        // - required properties
+        Ship& s = *t.univ.ships().create(shipId);
+        s.addCurrentShipData(game::map::ShipData(), game::PlayerSet_t(1));
+        s.setOwner(1);
+        s.setHull(HULL_ID);
+        s.setEngineType(ENGINE_ID);
+        s.setPosition(game::map::Point(X, Y));
+        s.setWarpFactor(9);
+
+        // - types and cargo need to be set to be able to compute a mass
+        s.setBeamType(0);
+        s.setNumBeams(0);
+        s.setTorpedoType(0);
+        s.setNumLaunchers(0);
+        s.setNumBays(10);
+        s.setCargo(Element::Neutronium, 100);
+        s.setCargo(Element::Tritanium, 0);
+        s.setCargo(Element::Duranium, 0);
+        s.setCargo(Element::Molybdenum, 0);
+        s.setCargo(Element::Supplies, 0);
+        s.setCargo(Element::Money, 0);
+        s.setCargo(Element::Colonists, 0);
+        s.setAmmo(0);
+
+        return s;
+    }
+
     Ship& addJumper(TestHarness& t, int shipId)
     {
         /*
@@ -948,6 +996,177 @@ AFL_TEST("game.map.ShipPredictor:lay-mines", a)
     a.checkEqual("12. UsedFCode",   p.getUsedProperties().contains(ShipPredictor::UsedFCode), true);
     a.checkEqual("13. UsedMission", p.getUsedProperties().contains(ShipPredictor::UsedMission), true);
 }
+
+/*
+ *  Fighter building
+ */
+
+// Fighter building
+AFL_TEST("game.map.ShipPredictor:build-fighter:robot", a)
+{
+    const int SHIP_ID = 235;
+    TestHarness t;
+    game::test::initStandardTorpedoes(t.shipList);
+    game::test::initStandardBeams(t.shipList);
+
+    Ship& s = addCarrier(t, SHIP_ID);
+    s.setOwner(9);
+    s.setMission(9, 0, 0);
+    s.setCargo(Element::Tritanium,  30);
+    s.setCargo(Element::Duranium,   30);
+    s.setCargo(Element::Molybdenum, 30);
+    s.setCargo(Element::Supplies,   30);
+    s.setCargo(Element::Fighters,   10);
+    finish(t);
+
+    game::test::RegistrationKey key(game::RegistrationKey::Registered, 10);
+
+    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, key);
+    p.computeTurn();
+
+    // 6 fighters built
+    a.checkEqual("01. Tritanium",  p.getCargo(Element::Tritanium),  12);
+    a.checkEqual("02. Duranium",   p.getCargo(Element::Duranium),   30);
+    a.checkEqual("03. Molybdenum", p.getCargo(Element::Molybdenum), 18);
+    a.checkEqual("04. Supplies",   p.getCargo(Element::Supplies),    0);
+    a.checkEqual("05. Fighters",   p.getCargo(Element::Fighters),   16);
+
+    a.checkEqual("11. UsedBuildFighters", p.getUsedProperties().contains(ShipPredictor::UsedBuildFighters), true);
+}
+
+// Fighter building, missing mineral
+AFL_TEST("game.map.ShipPredictor:build-fighter:robot:missing", a)
+{
+    const int SHIP_ID = 235;
+    TestHarness t;
+    game::test::initStandardTorpedoes(t.shipList);
+    game::test::initStandardBeams(t.shipList);
+
+    Ship& s = addCarrier(t, SHIP_ID);
+    s.setOwner(9);
+    s.setMission(9, 0, 0);
+    s.setCargo(Element::Tritanium,   0);
+    s.setCargo(Element::Duranium,   30);
+    s.setCargo(Element::Molybdenum, 30);
+    s.setCargo(Element::Supplies,   30);
+    s.setCargo(Element::Fighters,   10);
+    finish(t);
+
+    game::test::RegistrationKey key(game::RegistrationKey::Registered, 10);
+
+    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, key);
+    p.computeTurn();
+
+    // 6 fighters built
+    a.checkEqual("01. Fighters", p.getCargo(Element::Fighters), 10);
+    a.checkEqual("12. UsedBuildFighters", p.getUsedProperties().contains(ShipPredictor::UsedBuildFighters), false);
+}
+
+// Fighter building, unlimited due to zero cost
+AFL_TEST("game.map.ShipPredictor:build-fighter:robot:unlimited", a)
+{
+    const int SHIP_ID = 235;
+    TestHarness t;
+    game::test::initStandardTorpedoes(t.shipList);
+    game::test::initStandardBeams(t.shipList);
+    t.config[HostConfiguration::ShipFighterCost].set("S0");
+
+    Ship& s = addCarrier(t, SHIP_ID);
+    s.setOwner(9);
+    s.setMission(9, 0, 0);
+    s.setCargo(Element::Tritanium,  30);
+    s.setCargo(Element::Duranium,   30);
+    s.setCargo(Element::Molybdenum, 30);
+    s.setCargo(Element::Supplies,   30);
+    s.setCargo(Element::Fighters,   10);
+    finish(t);
+
+    game::test::RegistrationKey key(game::RegistrationKey::Registered, 10);
+
+    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, key);
+    p.computeTurn();
+
+    // 6 fighters built
+    a.checkEqual("01. Tritanium",  p.getCargo(Element::Tritanium),  30);
+    a.checkEqual("02. Duranium",   p.getCargo(Element::Duranium),   30);
+    a.checkEqual("03. Molybdenum", p.getCargo(Element::Molybdenum), 30);
+    a.checkEqual("04. Supplies",   p.getCargo(Element::Supplies),   30);
+    a.checkEqual("05. Fighters",   p.getCargo(Element::Fighters),  180);
+
+    a.checkEqual("11. UsedBuildFighters", p.getUsedProperties().contains(ShipPredictor::UsedBuildFighters), true);
+}
+
+// Fighter building, limited by mission
+AFL_TEST("game.map.ShipPredictor:build-fighter:robot:limited", a)
+{
+    const int SHIP_ID = 235;
+    TestHarness t;
+    game::test::initStandardTorpedoes(t.shipList);
+    game::test::initStandardBeams(t.shipList);
+    t.config[HostConfiguration::ShipFighterCost].set("S0");
+
+    Ship& s = addCarrier(t, SHIP_ID);
+    s.setOwner(9);
+    s.setMission(32, 17, 0);
+    s.setCargo(Element::Tritanium,  30);
+    s.setCargo(Element::Duranium,   30);
+    s.setCargo(Element::Molybdenum, 30);
+    s.setCargo(Element::Supplies,   30);
+    s.setCargo(Element::Fighters,   10);
+    finish(t);
+
+    game::test::RegistrationKey key(game::RegistrationKey::Registered, 10);
+
+    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, key);
+    p.computeTurn();
+
+    // 6 fighters built
+    a.checkEqual("01. Tritanium",  p.getCargo(Element::Tritanium),  30);
+    a.checkEqual("02. Duranium",   p.getCargo(Element::Duranium),   30);
+    a.checkEqual("03. Molybdenum", p.getCargo(Element::Molybdenum), 30);
+    a.checkEqual("04. Supplies",   p.getCargo(Element::Supplies),   30);
+    a.checkEqual("05. Fighters",   p.getCargo(Element::Fighters),   27);
+
+    a.checkEqual("11. UsedBuildFighters", p.getUsedProperties().contains(ShipPredictor::UsedBuildFighters), true);
+    a.checkEqual("11. UsedMission",       p.getUsedProperties().contains(ShipPredictor::UsedMission),       true);
+}
+
+// Fighter building, rebel
+AFL_TEST("game.map.ShipPredictor:build-fighter:rebel", a)
+{
+    const int SHIP_ID = 235;
+    TestHarness t;
+    game::test::initStandardTorpedoes(t.shipList);
+    game::test::initStandardBeams(t.shipList);
+
+    Ship& s = addCarrier(t, SHIP_ID);
+    s.setOwner(10);
+    s.setMission(1, 0, 0);
+    s.setCargo(Element::Tritanium,  30);
+    s.setCargo(Element::Duranium,   30);
+    s.setCargo(Element::Molybdenum, 30);
+    s.setCargo(Element::Supplies,   30);
+    s.setCargo(Element::Fighters,   10);
+    finish(t);
+
+    game::test::RegistrationKey key(game::RegistrationKey::Registered, 10);
+
+    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, key);
+    p.computeTurn();
+
+    // 6 fighters built
+    a.checkEqual("01. Tritanium",  p.getCargo(Element::Tritanium),  12);
+    a.checkEqual("02. Duranium",   p.getCargo(Element::Duranium),   30);
+    a.checkEqual("03. Molybdenum", p.getCargo(Element::Molybdenum), 18);
+    a.checkEqual("04. Supplies",   p.getCargo(Element::Supplies),    0);
+    a.checkEqual("05. Fighters",   p.getCargo(Element::Fighters),   16);
+
+    a.checkEqual("11. UsedBuildFighters", p.getUsedProperties().contains(ShipPredictor::UsedBuildFighters), true);
+}
+
+/*
+ *  Others
+ */
 
 /** Test getOptimumWarp(). */
 AFL_TEST("game.map.ShipPredictor:getOptimumWarp", a)

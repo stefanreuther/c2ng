@@ -18,6 +18,7 @@
 
 using game::spec::BasicHullFunction;
 using game::spec::Cost;
+using game::spec::Mission;
 using game::spec::FriendlyCodeList;
 using game::config::HostConfiguration;
 using game::HostVersion;
@@ -92,6 +93,70 @@ namespace {
         }
         return result;
     }
+
+    /*
+     *  Fighter production
+     */
+
+    bool doBuildFightersFromCargo(game::map::ShipData& ship, int realOwner, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config)
+    {
+        // Check hull
+        const game::spec::Hull* h = shipList.hulls().get(ship.hullType.orElse(0));
+        if (h == 0) {
+            return false;
+        }
+
+        // Get cost
+        Cost c = config[HostConfiguration::ShipFighterCost](realOwner);
+
+        // Compute amount ordered
+        int orderedAmount = h->getMaxCargo();
+        if (c.get(Cost::Tritanium) + c.get(Cost::Duranium) + c.get(Cost::Molybdenum) + c.get(Cost::Supplies) == 0) {
+            // Pathological case: we're not consuming cargo room
+            orderedAmount -= ship.tritanium.orElse(0);
+            orderedAmount -= ship.duranium.orElse(0);
+            orderedAmount -= ship.molybdenum.orElse(0);
+            orderedAmount -= ship.ammo.orElse(0);
+            orderedAmount -= ship.colonists.orElse(0);
+            orderedAmount -= ship.supplies.orElse(0);
+        }
+
+        // Cross-check mission
+        if (shipList.missions().isExtendedMission(ship.mission.orElse(0), Mission::pmsn_GatherBuildFtr, config)) {
+            int limit = ship.missionInterceptParameter.orElse(0);
+            if (limit > 0 && orderedAmount > limit) {
+                orderedAmount = limit;
+            }
+        }
+
+        // Compute buildable amount
+        Cost av;
+        av.set(Cost::Tritanium,  ship.tritanium.orElse(0));
+        av.set(Cost::Duranium,   ship.duranium.orElse(0));
+        av.set(Cost::Molybdenum, ship.molybdenum.orElse(0));
+        av.set(Cost::Supplies,   ship.supplies.orElse(0));
+        av.set(Cost::Money,      ship.money.orElse(0));
+        int toBuild = av.getMaxAmount(orderedAmount, c);
+
+        // Do it!
+        if (toBuild <= 0) {
+            return false;
+        }
+
+        av -= c * toBuild;
+        ship.tritanium  = av.get(Cost::Tritanium);
+        ship.duranium   = av.get(Cost::Duranium);
+        ship.molybdenum = av.get(Cost::Molybdenum);
+        ship.supplies   = av.get(Cost::Supplies);
+        ship.money      = av.get(Cost::Money);
+
+        ship.ammo = ship.ammo.orElse(0) + toBuild;
+        return true;
+    }
+
+    /*
+     *  Alchemy
+     */
 
     const int AlchemyTri = 1;
     const int AlchemyDur = 2;
@@ -271,7 +336,7 @@ namespace {
     {
         // ex global.pas:EngineLoad
         int mass = getShipMass(ship, shipList).orElse(0);
-        if (ship.mission.orElse(0) == game::spec::Mission::msn_Tow) {
+        if (ship.mission.orElse(0) == Mission::msn_Tow) {
             int towee_mass = 0;
             int mission_towee_id = ship.missionTowParameter.orElse(0);
             if (towee_override != 0 && towee_id == mission_towee_id) {
@@ -630,7 +695,7 @@ game::map::ShipPredictor::ShipPredictor(const Universe& univ, Id_t id,
 void
 game::map::ShipPredictor::addTowee()
 {
-    if (m_valid && m_ship.mission.orElse(0) == game::spec::Mission::msn_Tow) {
+    if (m_valid && m_ship.mission.orElse(0) == Mission::msn_Tow) {
         const Ship* p = m_universe.ships().get(m_ship.missionTowParameter.orElse(0));
         if (p != 0 && p->hasFullShipData()) {
             m_pTowee.reset(new ShipPredictor(m_universe, p->getId(), m_scoreDefinitions, m_shipList, m_mapConfig, m_hostConfiguration, m_hostVersion, m_key));
@@ -700,7 +765,7 @@ game::map::ShipPredictor::computeTurn()
     }
 
     // Training
-    if (m_shipList.missions().isExtendedMission(m_ship.mission.orElse(0), game::spec::Mission::pmsn_Training, m_hostConfiguration)) {
+    if (m_shipList.missions().isExtendedMission(m_ship.mission.orElse(0), Mission::pmsn_Training, m_hostConfiguration)) {
         m_ship.warpFactor = 0;
         m_ship.primaryEnemy = 0;
         m_usedProperties |= UsedMission;
@@ -723,9 +788,36 @@ game::map::ShipPredictor::computeTurn()
 
     // Special Missions I (Super Refit, Self Repair, Hiss, Rob) would go here
     const String_t shipFCode = m_ship.friendlyCode.orElse("");
+    const int shipMission = m_ship.mission.orElse(0);
+    const int shipRealOwner = real_ship->getRealOwner().orElse(0);
+    const int shipRaceMission = m_hostConfiguration.getPlayerMissionNumber(shipRealOwner);
     const bool shipFCAccepted = m_shipList.friendlyCodes().isAcceptedFriendlyCode(shipFCode, game::spec::FriendlyCode::Filter::fromShip(*real_ship, m_scoreDefinitions, m_shipList, m_hostConfiguration), m_key, FriendlyCodeList::DefaultAvailable);
-    bool is_mkt_fc = (shipFCAccepted && shipFCode == "mkt");
-    if ((is_mkt_fc || m_shipList.missions().isExtendedMission(m_ship.mission.orElse(0), game::spec::Mission::pmsn_BuildTorpsFromCargo, m_hostConfiguration))
+
+    // Fighter building
+    const bool is_lfm_fc        = (shipFCAccepted && shipFCode == "lfm");
+    const bool is_lfm_mission   = m_shipList.missions().isExtendedMission(shipMission, Mission::pmsn_GatherBuildFtr, m_hostConfiguration);
+    const bool is_build_mission = (m_shipList.missions().isSpecialMission(shipMission, m_hostConfiguration) && (shipRaceMission == 9 || shipRaceMission == 11));
+    if ((is_lfm_fc || is_lfm_mission || is_build_mission || (shipRaceMission == 10))
+        && m_hostConfiguration[HostConfiguration::AllowBuildFighters](shipRealOwner) != 0
+        && m_ship.numBays.orElse(0) > 0
+        && m_ship.neutronium.orElse(0) > 0)
+    {
+        if (is_lfm_fc || is_lfm_mission) {
+            // FIXME: implement actual gathering
+        }
+
+        // For now, do NOT set UsedFCode to avoid the implication that we were actually gathering stuff
+        if (doBuildFightersFromCargo(m_ship, shipRealOwner, m_shipList, m_hostConfiguration)) {
+            if (is_build_mission || is_lfm_mission) {
+                m_usedProperties += UsedMission;
+            }
+            m_usedProperties += UsedBuildFighters;
+        }
+    }
+
+    // Torpedo building
+    const bool is_mkt_fc = (shipFCAccepted && shipFCode == "mkt");
+    if ((is_mkt_fc || m_shipList.missions().isExtendedMission(shipMission, Mission::pmsn_BuildTorpsFromCargo, m_hostConfiguration))
         && m_ship.numLaunchers.orElse(0) > 0
         && m_ship.neutronium.orElse(0) > 0)
     {
@@ -928,7 +1020,7 @@ game::map::ShipPredictor::computeTurn()
         m_usedProperties |= UsedFCode;
 
         // If it's jumping, it can't tow. Advance time in towee's world anyway.
-        if (m_ship.mission.orElse(0) == game::spec::Mission::msn_Tow) {
+        if (m_ship.mission.orElse(0) == Mission::msn_Tow) {
             m_ship.mission = 0;
         }
         if (m_pTowee.get() != 0) {
@@ -971,9 +1063,9 @@ game::map::ShipPredictor::computeTurn()
 
         // Advance time in towee. Must be here because we need to know its "post-movement" mass.
         if (m_pTowee.get() != 0) {
-            if (m_ship.mission.orElse(0) == game::spec::Mission::msn_Tow) {
+            if (m_ship.mission.orElse(0) == Mission::msn_Tow) {
                 // we assume the tow succeeds. FIXME: be more clever?
-                if (m_pTowee->m_ship.mission.orElse(0) == game::spec::Mission::msn_Tow) {
+                if (m_pTowee->m_ship.mission.orElse(0) == Mission::msn_Tow) {
                     m_pTowee->m_ship.mission = 0;
                 }
                 m_pTowee->m_ship.warpFactor = 0;
@@ -1033,7 +1125,7 @@ game::map::ShipPredictor::computeTurn()
 
         // Update towee position
         if (m_pTowee.get() != 0) {
-            if (m_ship.mission.orElse(0) == game::spec::Mission::msn_Tow) {
+            if (m_ship.mission.orElse(0) == Mission::msn_Tow) {
                 m_pTowee->m_ship.x = m_ship.x;
                 m_pTowee->m_ship.y = m_ship.y;
                 m_pTowee->m_ship.waypointDX = 0;

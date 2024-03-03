@@ -246,7 +246,7 @@ namespace game { namespace spec {
             pmsn_StandardSuperSpy    = 9,
             pmsn_Cloak               = 10,
             pmsn_Special             = 11,
-            // pmsn_GatherBuildFtr      = 12,
+            pmsn_GatherBuildFtr      = 12,
             // pmsn_BUmc                = 13,
             // pmsn_BUclans             = 14,
             pmsn_BeamUpMultiple      = 15,

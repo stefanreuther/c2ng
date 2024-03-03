@@ -42,7 +42,8 @@ namespace game { namespace map {
             UsedCloak,
             UsedDamageLimit,
             UsedTowee,
-            UsedAlchemy
+            UsedAlchemy,
+            UsedBuildFighters
         };
 
         /** Set of properties used in prediction. */
