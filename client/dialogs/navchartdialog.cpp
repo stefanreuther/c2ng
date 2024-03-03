@@ -332,14 +332,9 @@ NavChartOverlay::handleKey(util::Key_t key, int /*prefix*/, const client::map::R
         m_parent.doSearchShips();
         return true;
 
-     case util::Key_F5:
-     case util::Key_F5 + util::KeyMod_Ctrl:
-        // Planet info
-        client::dialogs::doPlanetInfoDialog(m_parent.m_root, m_parent.m_userSide.gameSender(), st.target, m_parent.m_translator);
-        return true;
-
      case util::Key_F5 + util::KeyMod_Shift:
         // Planet info here
+        // (F5, Ctrl+F5 handled by MovementOverlay)
         client::dialogs::doPlanetInfoDialog(m_parent.m_root, m_parent.m_userSide.gameSender(), st.origin, m_parent.m_translator);
         return true;
 

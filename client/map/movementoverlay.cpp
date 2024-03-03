@@ -4,6 +4,7 @@
 
 #include <cstdlib>
 #include "client/map/movementoverlay.hpp"
+#include "client/dialogs/planetinfodialog.hpp"
 #include "client/dialogs/zoomlevel.hpp"
 #include "client/map/renderer.hpp"
 #include "client/map/widget.hpp"
@@ -152,6 +153,11 @@ client::map::MovementOverlay::handleKey(util::Key_t key, int prefix, const Rende
             game::proxy::DrawingProxy(m_gameSender, m_parent.root().engine().dispatcher())
                 .createCannedMarker(m_position, prefix % game::config::UserConfiguration::NUM_CANNED_MARKERS);
             return true;
+
+         case util::Key_F5:
+         case util::Key_F5 + util::KeyMod_Ctrl:
+            client::dialogs::doPlanetInfoDialog(m_parent.root(), m_gameSender, m_position, m_translator);
+            return true;
         }
     }
     if (m_valid && m_modes.contains(AcceptZoomKeys)) {
@@ -293,7 +299,6 @@ client::map::MovementOverlay::doKeyboardMode(const Renderer& ren)
                  case util::Key_F2 + util::KeyMod_Ctrl:
                  case util::Key_F3 + util::KeyMod_Ctrl:
                  case util::Key_F4 + util::KeyMod_Ctrl:
-                 case util::Key_F5 + util::KeyMod_Ctrl:
                  case 'x':
                  case 'w' + util::KeyMod_Ctrl:
                  case 'L':
