@@ -12,14 +12,18 @@
 #include "afl/string/string.hpp"
 #include "afl/sys/log.hpp"
 #include "afl/test/testrunner.hpp"
+#include "game/hostversion.hpp"
 #include "game/limits.hpp"
+
+using game::HostVersion;
+using game::config::HostConfiguration;
+using game::spec::Mission;
+using game::spec::MissionList;
 
 /** Test mission.ini parsing. */
 AFL_TEST("game.spec.MissionList:loadFromIniFile", a)
 {
     // ex GameMissionTestSuite::testMissionIni
-    using game::spec::Mission;
-
     // Generate a pseudo file
     static const char data[] = ";22 comment\n"
         "10 one\n"
@@ -33,7 +37,7 @@ AFL_TEST("game.spec.MissionList:loadFromIniFile", a)
     afl::charset::CodepageCharset cp(afl::charset::g_codepageLatin1);
 
     // Read it
-    game::spec::MissionList list;
+    MissionList list;
     list.loadFromIniFile(ms, cp);
 
     // Must have seven missions
@@ -101,8 +105,6 @@ AFL_TEST("game.spec.MissionList:loadFromIniFile", a)
 AFL_TEST("game.spec.MissionList:loadFromIniFile:races", a)
 {
     // ex GameMissionTestSuite::testMissionIniRaces
-    using game::spec::Mission;
-
     // Generate a pseudo file
     static const char data[] =
         "10 one/1\n"
@@ -116,7 +118,7 @@ AFL_TEST("game.spec.MissionList:loadFromIniFile:races", a)
     afl::charset::CodepageCharset cp(afl::charset::g_codepageLatin1);
 
     // Read it
-    game::spec::MissionList list;
+    MissionList list;
     list.loadFromIniFile(ms, cp);
 
     // Must have seven missions
@@ -211,7 +213,7 @@ AFL_TEST("game.spec.MissionList:loadFromFile", a)
     afl::string::NullTranslator tx;
 
     // Load
-    game::spec::MissionList testee;
+    MissionList testee;
     testee.loadFromFile(ms, log, tx);
 
     // Verify
@@ -257,9 +259,7 @@ AFL_TEST("game.spec.MissionList:loadFromFile", a)
 /** Test addMission(), merge missions, and, implicitly, sort(). */
 AFL_TEST("game.spec.MissionList:addMission:merge", a)
 {
-    using game::spec::Mission;
-
-    game::spec::MissionList testee;
+    MissionList testee;
 
     // Add some "mission.cc" missions
     testee.addMission(Mission(1, ",Explore"));
@@ -317,10 +317,8 @@ AFL_TEST("game.spec.MissionList:addMission:merge", a)
 /** Test addMission(), letter assignment. */
 AFL_TEST("game.spec.MissionList:getHotkey", a)
 {
-    using game::spec::Mission;
-
     // Assign many missions
-    game::spec::MissionList testee;
+    MissionList testee;
     for (int i = 0; i < 30; ++i) {
         testee.addMission(Mission(20+i, ",egal"));
     }
@@ -344,10 +342,8 @@ AFL_TEST("game.spec.MissionList:getHotkey", a)
 /** Test addMission(), letter assignment. */
 AFL_TEST("game.spec.MissionList:getHotkey:2", a)
 {
-    using game::spec::Mission;
-
     // Preload, then assign many missions
-    game::spec::MissionList testee;
+    MissionList testee;
     testee.addMission(Mission(98, ",~kill"));
     testee.addMission(Mission(99, ",~jump"));
     for (int i = 0; i < 40; ++i) {
@@ -372,4 +368,154 @@ AFL_TEST("game.spec.MissionList:getHotkey:2", a)
 
     a.checkEqual("51", testee.at(35)->getHotkey(), 'z');
     a.checkEqual("52", testee.at(36)->getHotkey(), 'a');
+}
+
+/*
+ *  isMissionCloaking
+ */
+
+AFL_TEST("game.spec.MissionList:isMissionCloaking", a)
+{
+    HostConfiguration config;
+    config.setDefaultValues();
+    HostVersion(HostVersion::PHost, MKVERSION(3,4,0)).setImpliedHostConfiguration(config);
+    MissionList testee;
+
+    // Normal
+    a.check("1  / 3", !testee.isMissionCloaking( 1, 3, config));
+    a.check("1  / 5", !testee.isMissionCloaking( 1, 5, config));
+
+    // Special
+    a.check("9  / 3",  testee.isMissionCloaking( 9, 3, config));
+    a.check("9  / 5", !testee.isMissionCloaking( 9, 5, config));
+
+    // Cloak
+    a.check("10 / 3",  testee.isMissionCloaking(10, 3, config));
+    a.check("10 / 5",  testee.isMissionCloaking(10, 5, config));
+
+    // Extended spy
+    a.check("29 / 3",  testee.isMissionCloaking(29, 3, config));
+    a.check("29 / 5", !testee.isMissionCloaking(29, 5, config));
+
+    // Extended cloak
+    a.check("30 / 3",  testee.isMissionCloaking(30, 3, config));
+    a.check("30 / 5",  testee.isMissionCloaking(30, 5, config));
+
+    // Extended special
+    a.check("31 / 3",  testee.isMissionCloaking(31, 3, config));
+    a.check("31 / 5", !testee.isMissionCloaking(31, 5, config));
+}
+
+/*
+ *  isExtendedMission
+ */
+
+AFL_TEST("game.spec.MissionList:isExtendedMission:phost:default", a)
+{
+    HostConfiguration config;
+    config.setDefaultValues();
+    HostVersion(HostVersion::PHost, MKVERSION(3,4,0)).setImpliedHostConfiguration(config);
+    MissionList testee;
+
+    a.check("01",  testee.isExtendedMission(20, Mission::pmsn_BuildTorpsFromCargo, config));
+    a.check("02", !testee.isExtendedMission(10, Mission::pmsn_BuildTorpsFromCargo, config));
+    a.check("03", !testee.isExtendedMission(50, Mission::pmsn_BuildTorpsFromCargo, config));
+}
+
+AFL_TEST("game.spec.MissionList:isExtendedMission:phost:off", a)
+{
+    HostConfiguration config;
+    config.setDefaultValues();
+    config[HostConfiguration::AllowExtendedMissions].set(0);
+    HostVersion(HostVersion::PHost, MKVERSION(3,4,0)).setImpliedHostConfiguration(config);
+    MissionList testee;
+
+    a.check("01", !testee.isExtendedMission(20, Mission::pmsn_BuildTorpsFromCargo, config));
+    a.check("02", !testee.isExtendedMission(10, Mission::pmsn_BuildTorpsFromCargo, config));
+    a.check("03", !testee.isExtendedMission(50, Mission::pmsn_BuildTorpsFromCargo, config));
+}
+
+AFL_TEST("game.spec.MissionList:isExtendedMission:phost:moved", a)
+{
+    HostConfiguration config;
+    config.setDefaultValues();
+    config[HostConfiguration::ExtMissionsStartAt].set(50);
+    HostVersion(HostVersion::PHost, MKVERSION(3,4,0)).setImpliedHostConfiguration(config);
+    MissionList testee;
+
+    a.check("01", !testee.isExtendedMission(20, Mission::pmsn_BuildTorpsFromCargo, config));
+    a.check("02", !testee.isExtendedMission(10, Mission::pmsn_BuildTorpsFromCargo, config));
+    a.check("03",  testee.isExtendedMission(50, Mission::pmsn_BuildTorpsFromCargo, config));
+}
+
+AFL_TEST("game.spec.MissionList:isExtendedMission:host", a)
+{
+    HostConfiguration config;
+    config.setDefaultValues();
+    config[HostConfiguration::AllowExtendedMissions].set(0);
+    HostVersion(HostVersion::Host, MKVERSION(3,22,0)).setImpliedHostConfiguration(config);
+    MissionList testee;
+
+    a.check("01", !testee.isExtendedMission(20, Mission::pmsn_BuildTorpsFromCargo, config));
+    a.check("02", !testee.isExtendedMission(10, Mission::pmsn_BuildTorpsFromCargo, config));
+    a.check("03", !testee.isExtendedMission(50, Mission::pmsn_BuildTorpsFromCargo, config));
+}
+
+/*
+ *  isSpecialMission
+ */
+
+AFL_TEST("game.spec.MissionList:isSpecialMission:phost:default", a)
+{
+    HostConfiguration config;
+    config.setDefaultValues();
+    HostVersion(HostVersion::PHost, MKVERSION(3,4,0)).setImpliedHostConfiguration(config);
+    MissionList testee;
+
+    a.check("01", !testee.isSpecialMission( 5, config));
+    a.check("02",  testee.isSpecialMission( 9, config));
+    a.check("03",  testee.isSpecialMission(31, config));
+    a.check("04", !testee.isSpecialMission(61, config));
+}
+
+AFL_TEST("game.spec.MissionList:isSpecialMission:phost:off", a)
+{
+    HostConfiguration config;
+    config.setDefaultValues();
+    config[HostConfiguration::AllowExtendedMissions].set(0);
+    HostVersion(HostVersion::PHost, MKVERSION(3,4,0)).setImpliedHostConfiguration(config);
+    MissionList testee;
+
+    a.check("01", !testee.isSpecialMission( 5, config));
+    a.check("02",  testee.isSpecialMission( 9, config));
+    a.check("03", !testee.isSpecialMission(31, config));
+    a.check("04", !testee.isSpecialMission(61, config));
+}
+
+AFL_TEST("game.spec.MissionList:isSpecialMission:phost:moved", a)
+{
+    HostConfiguration config;
+    config.setDefaultValues();
+    config[HostConfiguration::ExtMissionsStartAt].set(50);
+    HostVersion(HostVersion::PHost, MKVERSION(3,4,0)).setImpliedHostConfiguration(config);
+    MissionList testee;
+
+    a.check("01", !testee.isSpecialMission( 5, config));
+    a.check("02",  testee.isSpecialMission( 9, config));
+    a.check("03", !testee.isSpecialMission(31, config));
+    a.check("04",  testee.isSpecialMission(61, config));
+}
+
+AFL_TEST("game.spec.MissionList:isSpecialMission:host", a)
+{
+    HostConfiguration config;
+    config.setDefaultValues();
+    config[HostConfiguration::AllowExtendedMissions].set(0);
+    HostVersion(HostVersion::Host, MKVERSION(3,22,0)).setImpliedHostConfiguration(config);
+    MissionList testee;
+
+    a.check("01", !testee.isSpecialMission( 5, config));
+    a.check("02",  testee.isSpecialMission( 9, config));
+    a.check("03", !testee.isSpecialMission(31, config));
+    a.check("04", !testee.isSpecialMission(61, config));
 }

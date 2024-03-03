@@ -1159,7 +1159,7 @@ game::map::preparePlanetEffectors(const Universe& univ,
                 int shipMission;
                 if (config.getPlayerMissionNumber(shipOwner) == 2
                     && sh->getMission().get(shipMission)
-                    && (shipMission == game::spec::Mission::msn_Special || shipMission == config[HostConfiguration::ExtMissionsStartAt]() + game::spec::Mission::pmsn_Special)
+                    && shipList.missions().isSpecialMission(shipMission, config)
                     && sh->getNumBeams().orElse(0) > 0)
                 {
                     // Hiss

@@ -107,6 +107,19 @@ namespace game { namespace spec {
             \return true if mission cloaks the ship */
         bool isMissionCloaking(int mission_id, int owner, const game::config::HostConfiguration& config) const;
 
+        /** Check for extended mission.
+            \param shipMission Mission number (from ship)
+            \param checkFor    Extended mission number to check for (pmsn_XXX)
+            \param config      Host configuration
+            \return true on match */
+        bool isExtendedMission(int shipMission, int checkFor, const game::config::HostConfiguration& config) const;
+
+        /** Check for special mission.
+            \param shipMission Mission number (from ship)
+            \param config      Host configuration
+            \return true if shipMission is either the special mission (msn_Special), or the special extended mission (pmsn_Special). */
+        bool isSpecialMission(int shipMission, const game::config::HostConfiguration& config) const;
+
      private:
         Container_t m_data;
         uint32_t m_usedLetters;

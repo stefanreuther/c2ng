@@ -10,10 +10,12 @@
 #include "game/config/aliasoption.hpp"
 #include "game/limits.hpp"
 
+using game::config::HostConfiguration;
+
 /** Test race number accesses. */
 AFL_TEST("game.config.HostConfiguration:getPlayerRaceNumber", a)
 {
-    game::config::HostConfiguration testee;
+    HostConfiguration testee;
 
     a.checkEqual("01", testee.getPlayerRaceNumber(1), 1);
     a.checkEqual("02", testee.getPlayerRaceNumber(5), 5);
@@ -25,8 +27,8 @@ AFL_TEST("game.config.HostConfiguration:getPlayerRaceNumber", a)
     a.checkEqual("13", testee.getPlayerMissionNumber(20), 20);
     a.checkEqual("14", testee.getPlayerMissionNumber(1000), 1000);
 
-    testee[testee.PlayerRace].set(5, 3);
-    testee[testee.PlayerSpecialMission].set(1, 7);
+    testee[HostConfiguration::PlayerRace].set(5, 3);
+    testee[HostConfiguration::PlayerSpecialMission].set(1, 7);
     a.checkEqual("21", testee.getPlayerRaceNumber(1), 1);
     a.checkEqual("22", testee.getPlayerRaceNumber(5), 3);
     a.checkEqual("23", testee.getPlayerRaceNumber(20), 20);
@@ -41,7 +43,6 @@ AFL_TEST("game.config.HostConfiguration:getPlayerRaceNumber", a)
 /** Test configuration of aliases. */
 AFL_TEST("game.config.HostConfiguration:aliases", a)
 {
-    using game::config::HostConfiguration;
     HostConfiguration testee;
 
     // Get enumerator
@@ -76,7 +77,6 @@ AFL_TEST("game.config.HostConfiguration:aliases", a)
     SensorRange propagates to DarkSenseRange. */
 AFL_TEST("game.config.HostConfiguration:setDependantOptions:unset", a)
 {
-    using game::config::HostConfiguration;
     HostConfiguration testee;
 
     testee.setOption("sensorrange", "125", game::config::ConfigurationOption::Game);
@@ -90,7 +90,6 @@ AFL_TEST("game.config.HostConfiguration:setDependantOptions:unset", a)
     SensorRange does not propagate to DarkSenseRange if set previously. */
 AFL_TEST("game.config.HostConfiguration:setDependantOptions:set", a)
 {
-    using game::config::HostConfiguration;
     HostConfiguration testee;
 
     testee.setOption("darksenserange", "204", game::config::ConfigurationOption::Game);
@@ -105,7 +104,7 @@ AFL_TEST("game.config.HostConfiguration:setDependantOptions:set", a)
 AFL_TEST("game.config.HostConfiguration:getExperienceLevelName", a)
 {
     afl::string::NullTranslator tx;
-    game::config::HostConfiguration testee;
+    HostConfiguration testee;
 
     testee.setOption("experiencelevelnames", "Erdwurm,Flugwapps, Ladehugo ,Nieswurz,Brotfahrer", game::config::ConfigurationOption::Game);
 
@@ -118,24 +117,24 @@ AFL_TEST("game.config.HostConfiguration:getExperienceLevelName", a)
 /** Get getExperienceBonus(). */
 AFL_TEST("game.config.HostConfiguration:getExperienceBonus", a)
 {
-    game::config::HostConfiguration testee;
+    HostConfiguration testee;
 
     testee.setOption("emodbayrechargerate", "1,5,8,3", game::config::ConfigurationOption::Game);
 
-    a.checkEqual("01", testee.getExperienceBonus(game::config::HostConfiguration::EModBayRechargeRate, 0), 0);
-    a.checkEqual("02", testee.getExperienceBonus(game::config::HostConfiguration::EModBayRechargeRate, 1), 1);
-    a.checkEqual("03", testee.getExperienceBonus(game::config::HostConfiguration::EModBayRechargeRate, 2), 5);
-    a.checkEqual("04", testee.getExperienceBonus(game::config::HostConfiguration::EModBayRechargeRate, 4), 3);
-    a.checkEqual("05", testee.getExperienceBonus(game::config::HostConfiguration::EModBayRechargeRate, 5), 3);  // option filled up
-    a.checkEqual("06", testee.getExperienceBonus(game::config::HostConfiguration::EModBayRechargeRate, game::MAX_EXPERIENCE_LEVELS), 3);  // option filled up
-    a.checkEqual("07", testee.getExperienceBonus(game::config::HostConfiguration::EModBayRechargeRate, 11), 0);  // out of range
+    a.checkEqual("01", testee.getExperienceBonus(HostConfiguration::EModBayRechargeRate, 0), 0);
+    a.checkEqual("02", testee.getExperienceBonus(HostConfiguration::EModBayRechargeRate, 1), 1);
+    a.checkEqual("03", testee.getExperienceBonus(HostConfiguration::EModBayRechargeRate, 2), 5);
+    a.checkEqual("04", testee.getExperienceBonus(HostConfiguration::EModBayRechargeRate, 4), 3);
+    a.checkEqual("05", testee.getExperienceBonus(HostConfiguration::EModBayRechargeRate, 5), 3);  // option filled up
+    a.checkEqual("06", testee.getExperienceBonus(HostConfiguration::EModBayRechargeRate, game::MAX_EXPERIENCE_LEVELS), 3);  // option filled up
+    a.checkEqual("07", testee.getExperienceBonus(HostConfiguration::EModBayRechargeRate, 11), 0);  // out of range
 }
 
 /** Test getExperienceLevelFromPoints(). */
 // Experience disabled
 AFL_TEST("game.config.HostConfiguration:getExperienceLevelFromPoints:disabled", a)
 {
-    game::config::HostConfiguration testee;
+    HostConfiguration testee;
     testee.setOption("NumExperienceLevels", "0", game::config::ConfigurationOption::Game);
 
     a.checkEqual("01", testee.getExperienceLevelFromPoints(0), 0);
@@ -145,7 +144,7 @@ AFL_TEST("game.config.HostConfiguration:getExperienceLevelFromPoints:disabled", 
 // Experience enabled
 AFL_TEST("game.config.HostConfiguration:getExperienceLevelFromPoints:enabled", a)
 {
-    game::config::HostConfiguration testee;
+    HostConfiguration testee;
     testee.setOption("NumExperienceLevels", "4", game::config::ConfigurationOption::Game);
     testee.setOption("ExperienceLevels", "750,1500,3000,4500,7000", game::config::ConfigurationOption::Game);
 
@@ -165,7 +164,7 @@ AFL_TEST("game.config.HostConfiguration:getExperienceLevelFromPoints:enabled", a
 // Disabled
 AFL_TEST("game.config.HostConfiguration:hasExtraFuelConsumption:off", a)
 {
-    game::config::HostConfiguration testee;
+    HostConfiguration testee;
     testee.setOption("FuelUsagePerFightFor100KT", "0", game::config::ConfigurationOption::Game);
     testee.setOption("FuelUsagePerTurnFor100KT", "0", game::config::ConfigurationOption::Game);
     a.checkEqual("", testee.hasExtraFuelConsumption(), false);
@@ -174,7 +173,7 @@ AFL_TEST("game.config.HostConfiguration:hasExtraFuelConsumption:off", a)
 // Partially enabled
 AFL_TEST("game.config.HostConfiguration:hasExtraFuelConsumption:part", a)
 {
-    game::config::HostConfiguration testee;
+    HostConfiguration testee;
     testee.setOption("FuelUsagePerFightFor100KT", "0", game::config::ConfigurationOption::Game);
     testee.setOption("FuelUsagePerTurnFor100KT", "0,0,0,0,0,1,0,0", game::config::ConfigurationOption::Game);
     a.checkEqual("", testee.hasExtraFuelConsumption(), true);
@@ -183,7 +182,7 @@ AFL_TEST("game.config.HostConfiguration:hasExtraFuelConsumption:part", a)
 // Fully enabled
 AFL_TEST("game.config.HostConfiguration:hasExtraFuelConsumption:on", a)
 {
-    game::config::HostConfiguration testee;
+    HostConfiguration testee;
     testee.setOption("FuelUsagePerFightFor100KT", "5", game::config::ConfigurationOption::Game);
     testee.setOption("FuelUsagePerTurnFor100KT", "3", game::config::ConfigurationOption::Game);
     a.checkEqual("", testee.hasExtraFuelConsumption(), true);
@@ -195,14 +194,14 @@ AFL_TEST("game.config.HostConfiguration:hasExtraFuelConsumption:on", a)
 
 AFL_TEST("game.config.HostConfiguration:hasDoubleTorpedoPower:on", a)
 {
-    game::config::HostConfiguration testee;
+    HostConfiguration testee;
     testee.setOption("AllowAlternativeCombat", "No", game::config::ConfigurationOption::Game);
     a.checkEqual("", testee.hasDoubleTorpedoPower(), true);
 }
 
 AFL_TEST("game.config.HostConfiguration:hasDoubleTorpedoPower:off", a)
 {
-    game::config::HostConfiguration testee;
+    HostConfiguration testee;
     testee.setOption("AllowAlternativeCombat", "Yes", game::config::ConfigurationOption::Game);
     a.checkEqual("", testee.hasDoubleTorpedoPower(), false);
 }

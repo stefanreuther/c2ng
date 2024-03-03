@@ -82,25 +82,25 @@ game::map::MinefieldMission::checkLayMission(const Ship& ship, const Universe& u
         // Lay web (race is checked later): honors, mix, mdx, but no other parameters
         usemix = usemdx = true;
         makeweb = true;
-    } else if (!hostVersion.isPHost() || key.getStatus() != RegistrationKey::Registered) {
-        // Following missions only for registered players in PHost
+    } else if (key.getStatus() != RegistrationKey::Registered) {
+        // Following missions only for registered players (PHost check implicit via AllowExtendedMissions in isExtendedMission)
         // FIXME: as for fcodes, we could query mission.cc for presence of these missions
         return false;
-    } else if (mission == config[config.ExtMissionsStartAt]() + Mission::pmsn_LayMines) {
+    } else if (shipList.missions().isExtendedMission(mission, Mission::pmsn_LayMines, config)) {
         // Lay Minefield: honors no fcodes, registered-only
         torplimit = interceptId;
         race      = towId;
-    } else if (mission == config[config.ExtMissionsStartAt]() + Mission::pmsn_LayWeb) {
+    } else if (shipList.missions().isExtendedMission(mission, Mission::pmsn_LayWeb, config)) {
         // Lay Web Minefield: honors no fcodes, registered-only
         torplimit = interceptId;
         race      = towId;
         makeweb   = true;
-    } else if (mission == config[config.ExtMissionsStartAt]() + Mission::pmsn_LayMinesIn) {
+    } else if (shipList.missions().isExtendedMission(mission, Mission::pmsn_LayMinesIn, config)) {
         // Lay Mines In: honors miX
         usemix    = true;
         torplimit = interceptId;
         reqid     = towId;
-    } else if (mission == config[config.ExtMissionsStartAt]() + Mission::pmsn_LayWebIn) {
+    } else if (shipList.missions().isExtendedMission(mission, Mission::pmsn_LayWebIn, config)) {
         // Lay Web Mines In: honors miX
         usemix    = true;
         torplimit = interceptId;
@@ -300,9 +300,8 @@ game::map::MinefieldMission::checkScoopMission(const Ship& ship,
             // reject
             return false;
         }
-    } else if (host.isPHost()
-               && root.registrationKey().getStatus() == RegistrationKey::Registered
-               && mission == config[config.ExtMissionsStartAt]() + Mission::pmsn_ScoopTorps)
+    } else if (root.registrationKey().getStatus() == RegistrationKey::Registered
+               && shipList.missions().isExtendedMission(mission, Mission::pmsn_ScoopTorps, config))
     {
         // PHost mission
         m_mineId           = towId;

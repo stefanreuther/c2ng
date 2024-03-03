@@ -11,6 +11,8 @@
 #include "interpreter/values.hpp"
 #include "util/string.hpp"
 
+using game::config::HostConfiguration;
+
 namespace {
     const char LOG_NAME[] = "game.spec.missionlist";
 
@@ -353,13 +355,23 @@ game::spec::MissionList::isMissionCloaking(int mission_id,
     // ex game/mission.cc:isMissionCloaking
     // ex shipacc.pas:ShipIsCloaking (...which checks ship abilities, too)
     // This is an instance function to allow some configurable logic later
-    const bool hasXM = config[config.AllowExtendedMissions]();
-    const int  emsa = config[config.ExtMissionsStartAt]();
     return (mission_id == Mission::msn_Cloak
-            || (hasXM && mission_id == emsa + Mission::pmsn_Cloak)
+            || (isExtendedMission(mission_id, Mission::pmsn_Cloak, config))
             || (config.getPlayerMissionNumber(owner) == 3
-                && (mission_id == Mission::msn_Special
-                    || (hasXM
-                        && (mission_id == emsa + Mission::pmsn_Special
-                            || mission_id == emsa + Mission::pmsn_StandardSuperSpy)))));
+                && (isSpecialMission(mission_id, config)
+                    || isExtendedMission(mission_id, Mission::pmsn_StandardSuperSpy, config))));
+}
+
+bool
+game::spec::MissionList::isExtendedMission(int shipMission, int checkFor, const game::config::HostConfiguration& config) const
+{
+    return (config[HostConfiguration::AllowExtendedMissions]() != 0)
+        && (shipMission == config[HostConfiguration::ExtMissionsStartAt]() + checkFor);
+}
+
+bool
+game::spec::MissionList::isSpecialMission(int shipMission, const game::config::HostConfiguration& config) const
+{
+    return shipMission == Mission::msn_Special
+        || isExtendedMission(shipMission, Mission::pmsn_Special, config);
 }

@@ -700,7 +700,7 @@ game::map::ShipPredictor::computeTurn()
     }
 
     // Training
-    if (m_ship.mission.orElse(0) == m_hostConfiguration[HostConfiguration::ExtMissionsStartAt]() + game::spec::Mission::pmsn_Training) {
+    if (m_shipList.missions().isExtendedMission(m_ship.mission.orElse(0), game::spec::Mission::pmsn_Training, m_hostConfiguration)) {
         m_ship.warpFactor = 0;
         m_ship.primaryEnemy = 0;
         m_usedProperties |= UsedMission;
@@ -725,9 +725,7 @@ game::map::ShipPredictor::computeTurn()
     const String_t shipFCode = m_ship.friendlyCode.orElse("");
     const bool shipFCAccepted = m_shipList.friendlyCodes().isAcceptedFriendlyCode(shipFCode, game::spec::FriendlyCode::Filter::fromShip(*real_ship, m_scoreDefinitions, m_shipList, m_hostConfiguration), m_key, FriendlyCodeList::DefaultAvailable);
     bool is_mkt_fc = (shipFCAccepted && shipFCode == "mkt");
-    if ((is_mkt_fc
-         || (m_hostVersion.isPHost()
-             && m_ship.mission.orElse(0) == m_hostConfiguration[m_hostConfiguration.ExtMissionsStartAt]() + game::spec::Mission::pmsn_BuildTorpsFromCargo))
+    if ((is_mkt_fc || m_shipList.missions().isExtendedMission(m_ship.mission.orElse(0), game::spec::Mission::pmsn_BuildTorpsFromCargo, m_hostConfiguration))
         && m_ship.numLaunchers.orElse(0) > 0
         && m_ship.neutronium.orElse(0) > 0)
     {

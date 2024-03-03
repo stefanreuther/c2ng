@@ -114,7 +114,7 @@ game::map::ChunnelMission::check(const Ship& sh, const Universe& univ,
                 m_failure |= checkChunnelFailures(*mate, univ, 0, root);
                 m_failure |= checkChunnelFailures(sh,    univ, minFuel, root) * (chf_Damaged/chf_MateDamaged);
                 const HostConfiguration& config = root.hostConfiguration();
-                if (config[HostConfiguration::AllowExtendedMissions]() != 0 && sh.getMission().orElse(0) == game::spec::Mission::pmsn_Training + config[HostConfiguration::ExtMissionsStartAt]()) {
+                if (shipList.missions().isExtendedMission(sh.getMission().orElse(0), game::spec::Mission::pmsn_Training, config)) {
                     m_failure |= chf_Training;
                 }
 
