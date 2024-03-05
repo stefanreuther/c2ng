@@ -204,7 +204,6 @@ game::spec::MissionList::loadFromFile(afl::io::Stream& in, afl::sys::LogListener
             try {
                 have_mission = addMission(Mission(mnum, line));
             }
-            // FIXME: was: catch (UserException& e) {
             catch (std::exception& e) {
                 log.write(log.Error, LOG_NAME, in.getName(), tf.getLineNumber(), e.what());
             }

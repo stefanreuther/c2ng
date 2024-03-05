@@ -179,7 +179,7 @@ ui::res::DirectoryProvider::loadAliases(afl::sys::LogListener& log, afl::string:
                 if (p != String_t::npos) {
                     m_aliasMap[afl::string::strTrim(line.substr(0, p))] = afl::string::strTrim(line.substr(p+1));
                 } else {
-                    log.write(LogListener::Error, LOG_NAME, Format(tx("%s:%d: file format error -- line ignored"), s->getName(), tf.getLineNumber()));
+                    log.write(LogListener::Warn, LOG_NAME, Format(tx("%s:%d: file format error -- line ignored"), s->getName(), tf.getLineNumber()));
                 }
             }
         }

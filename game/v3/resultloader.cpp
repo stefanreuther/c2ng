@@ -262,7 +262,7 @@ game::v3::ResultLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, ga
             loadTurnfile(turn, root, *file, player);
         }
         catch (afl::except::FileProblemException& e) {
-            m_log.write(afl::sys::LogListener::Error, LOG_NAME, m_translator("File has been ignored"), e);
+            m_log.write(afl::sys::LogListener::Warn, LOG_NAME, m_translator("File has been ignored"), e);
         }
     }
 
@@ -272,7 +272,7 @@ game::v3::ResultLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, ga
         game::db::FleetLoader(*m_charset, m_translator).load(root.gameDirectory(), turn.universe(), player);
     }
     catch (afl::except::FileProblemException& e) {
-        m_log.write(afl::sys::LogListener::Error, LOG_NAME, m_translator("File has been ignored"), e);
+        m_log.write(afl::sys::LogListener::Warn, LOG_NAME, m_translator("File has been ignored"), e);
     }
 
     // FLAK

@@ -107,13 +107,13 @@ interpreter::FileTable::closeAllFiles(afl::sys::LogListener& log, afl::string::T
                 p->textFile.flush();
             }
             catch (std::exception& e) {
-                log.write(afl::sys::LogListener::Error, LOG_NAME, String_t(), e);
+                log.write(afl::sys::LogListener::Warn, LOG_NAME, String_t(), e);
                 hadErrors = true;
             }
         }
     }
     if (hadErrors) {
-        log.write(afl::sys::LogListener::Error, LOG_NAME, tx("Error while closing files; written data may have been lost."));
+        log.write(afl::sys::LogListener::Warn, LOG_NAME, tx("Error while closing files; written data may have been lost."));
     }
 }
 

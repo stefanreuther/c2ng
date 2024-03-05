@@ -93,7 +93,7 @@ class game::pcc::BrowserHandler::LoginTask : public Task_t {
     void onPasswordResult(UserCallback::PasswordResponse resp)
         {
             if (resp.canceled) {
-                m_parent.log().write(LogListener::Error, LOG_NAME, m_parent.translator()("Login canceled"));
+                m_parent.log().write(LogListener::Warn, LOG_NAME, m_parent.translator()("Login canceled"));
                 m_then->call();
                 return;
             }
@@ -188,7 +188,7 @@ game::pcc::BrowserHandler::callServer(game::browser::Account& acc,
         log().write(LogListener::Error, LOG_NAME, Format(translator()("Malformed URL \"%s\""), url));
         return std::auto_ptr<afl::data::Value>();
     }
-    log().write(LogListener::Trace, LOG_NAME, Format(translator()("Calling \"%s\""), url));
+    log().write(LogListener::Trace, LOG_NAME, Format("Calling \"%s\"", url));
 
     // Build query
     String_t query;
@@ -214,7 +214,7 @@ game::pcc::BrowserHandler::callServerWithFile(game::browser::Account& acc, Strin
         log().write(LogListener::Error, LOG_NAME, Format(translator()("Malformed URL \"%s\""), url));
         return std::auto_ptr<afl::data::Value>();
     }
-    log().write(LogListener::Trace, LOG_NAME, Format(translator()("Calling \"%s\""), url));
+    log().write(LogListener::Trace, LOG_NAME, Format("Calling \"%s\"", url));
 
     // Build query
     afl::net::MimeBuilder builder("");
@@ -285,7 +285,7 @@ game::pcc::BrowserHandler::getFilePreAuthenticated(game::browser::Account& acc, 
         return;
     }
     fileUrl.mergeFrom(mainUrl);
-    log().write(LogListener::Trace, LOG_NAME, Format(translator()("Downloading \"%s\""), fileUrl.toString()));
+    log().write(LogListener::Trace, LOG_NAME, Format("Downloading \"%s\"", fileUrl.toString()));
 
     String_t token;
     if (acc.getEncoded("api_token").get(token)) {
@@ -495,7 +495,7 @@ game::pcc::BrowserHandler::processResult(const String_t& url, afl::net::http::Si
         afl::base::Bytes_t bytes(tmp);
         bytes.trim(buf.read(bytes));
 
-        log().write(LogListener::Trace, LOG_NAME, Format(translator()("at byte %d, \"%s\""), pos, afl::string::fromBytes(bytes)));
+        log().write(LogListener::Trace, LOG_NAME, Format("at byte %d, \"%s\"", pos, afl::string::fromBytes(bytes)));
         return std::auto_ptr<afl::data::Value>();
     }
 }

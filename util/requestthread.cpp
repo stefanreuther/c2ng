@@ -58,7 +58,7 @@ util::RequestThread::postNewRunnable(afl::base::Runnable* p)
 void
 util::RequestThread::run()
 {
-    m_log.write(m_log.Trace, m_name, m_translator("Thread started"));
+    m_log.write(m_log.Trace, m_name, "Thread started");
     while (1) {
         m_taskSemaphore.wait();
 
@@ -84,14 +84,14 @@ util::RequestThread::run()
                 tasks[i]->run();
             }
             catch (std::exception& e) {
-                m_log.write(m_log.Error, m_name, m_translator("Exception in background thread"), e);
+                m_log.write(m_log.Warn, m_name, m_translator("Exception in background thread"), e);
             }
 
             // Destroy in correct order
             tasks.replaceElementNew(i, 0);
         }
     }
-    m_log.write(m_log.Trace, m_name, m_translator("Thread terminates"));
+    m_log.write(m_log.Trace, m_name, "Thread terminates");
 }
 
 void

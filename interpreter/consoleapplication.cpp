@@ -108,7 +108,7 @@ namespace {
             sc.compileList(*bco, scc);
             sc.finishBCO(*bco, scc);
             result.push_back(bco.asPtr());
-            world.logListener().write(LogListener::Trace, LOG_NAME, Format(world.translator()("Compiled %d command%!1{s%}.").c_str(), params.job.size()));
+            world.logListener().write(LogListener::Debug, LOG_NAME, Format(world.translator()("Compiled %d command%!1{s%}.").c_str(), params.job.size()));
         } else {
             // Files: compile files into individual BCOs
             for (size_t i = 0, n = params.job.size(); i < n; ++i) {
@@ -152,7 +152,7 @@ namespace {
                     }
                 }
             }
-            world.logListener().write(LogListener::Trace, LOG_NAME, Format(world.translator()("Compiled %d file%!1{s%}.").c_str(), params.job.size()));
+            world.logListener().write(LogListener::Debug, LOG_NAME, Format(world.translator()("Compiled %d file%!1{s%}.").c_str(), params.job.size()));
         }
     }
 
@@ -182,7 +182,7 @@ namespace {
         interpreter::vmio::FileSaveContext fsc(*params.gameCharset);
         fsc.setDebugInformation(params.opt_debug);
         uint32_t bcoID = fsc.addBCO(*bco);
-        log.write(log.Trace, LOG_NAME, Format(tx("Writing '%s', %d object%!1{s%}...").c_str(), fileName, fsc.getNumPreparedObjects()));
+        log.write(LogListener::Debug, LOG_NAME, Format(tx("Writing '%s', %d object%!1{s%}...").c_str(), fileName, fsc.getNumPreparedObjects()));
 
         // Create output file
         Ref<afl::io::Stream> file = fs.openFile(fileName, FileSystem::Create);

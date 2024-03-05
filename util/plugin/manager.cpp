@@ -83,7 +83,7 @@ util::plugin::Manager::findPlugins(afl::io::Directory& dir)
                     ++count;
                 }
                 catch (std::exception& e) {
-                    m_log.write(afl::sys::LogListener::Error, LOG_NAME,
+                    m_log.write(afl::sys::LogListener::Warn, LOG_NAME,
                                 afl::string::Format(m_translator("Error loading plugin %s").c_str(), pluginName), e);
                 }
             }
@@ -91,11 +91,11 @@ util::plugin::Manager::findPlugins(afl::io::Directory& dir)
 
         // Sort for determinism
         m_plugins.sort(comparePlugins);
-        m_log.write(afl::sys::LogListener::Trace, LOG_NAME,
+        m_log.write(afl::sys::LogListener::Debug, LOG_NAME,
                     afl::string::Format(m_translator("Found %d plugin%!1{s%}").c_str(), count));
     }
     catch (std::exception& e) {
-        m_log.write(afl::sys::LogListener::Error, LOG_NAME,
+        m_log.write(afl::sys::LogListener::Warn, LOG_NAME,
                     m_translator("Cannot load plugins"), e);
     }
 }
@@ -153,7 +153,7 @@ util::plugin::Manager::enumPlugins(std::vector<Plugin*>& out, bool ordered) cons
     // Anything missing?
     for (size_t i = 0, n = m_plugins.size(); i < n; ++i) {
         if (!did[i]) {
-            m_log.write(afl::sys::LogListener::Error, LOG_NAME,
+            m_log.write(afl::sys::LogListener::Warn, LOG_NAME,
                         afl::string::Format(m_translator("Plugin %s cannot be loaded because of missing preconditions").c_str(), m_plugins[i]->getId()));
         }
     }

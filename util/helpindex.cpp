@@ -115,7 +115,7 @@ util::HelpIndex::scanNewFiles(afl::io::FileSystem& fs, afl::sys::LogListener& lo
                 log.write(log.Info, LOG_NAME, afl::string::Format(tx("Scanned help file %s.").c_str(), m_files[i]->name));
             }
             catch (std::exception& e) {
-                log.write(log.Error, LOG_NAME, tx("Error scanning help file"), e);
+                log.write(log.Warn, LOG_NAME, tx("Error scanning help file"), e);
             }
         }
     }

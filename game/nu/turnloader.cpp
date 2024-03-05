@@ -668,7 +668,7 @@ game::nu::TurnLoader::loadMinefields(game::map::Universe& univ, afl::data::Acces
             // FIXME: should we validate the .radius attribute against the .units?
             // FIXME: unhandled attribute: "friendlycode": "652"
         } else {
-            m_log.write(m_log.Error, LOG_NAME, afl::string::Format(m_translator.translateString("Invalid minefield Id #%d, minefield has been ignored").c_str(), id));
+            m_log.write(m_log.Warn, LOG_NAME, afl::string::Format(m_translator.translateString("Invalid minefield Id #%d, minefield has been ignored").c_str(), id));
         }
     }
 }

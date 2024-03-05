@@ -59,7 +59,7 @@ class game::proxy::ImperialStatsProxy::Trampoline {
                             bro.renderPage(page, m_result);
                         }
                         catch (std::exception& e) {
-                            session.log().write(afl::sys::LogListener::Error, LOG_NAME, "requestPageContent", e);
+                            session.log().write(afl::sys::LogListener::Warn, LOG_NAME, "requestPageContent", e);
                         }
                     }
                 virtual void handle(ImperialStatsProxy& proxy)

@@ -333,7 +333,7 @@ namespace {
 
                             m_session.getGame()->currentTurn().setCommandPlayers(commandPlayers);
                             m_session.getGame()->currentTurn().setLocalDataPlayers(localDataPlayers);
-                            m_session.log().write(afl::sys::LogListener::Error, LOG_NAME, m_session.translator()("Compiling starchart..."));
+                            m_session.log().write(afl::sys::LogListener::Info, LOG_NAME, m_session.translator()("Compiling starchart..."));
                             m_session.postprocessTurn(m_session.getGame()->currentTurn(), game::PlayerSet_t(m_player), game::PlayerSet_t(m_player), playability);
                             m_session.getGame()->currentTurn().alliances().postprocess();
 
@@ -344,7 +344,7 @@ namespace {
                                 game::interface::loadVM(m_session, m_player);
                             }
                             catch (std::exception& e) {
-                                m_session.log().write(afl::sys::LogListener::Error, LOG_NAME, m_session.translator()("Unable to scripts and auto-tasks"), e);
+                                m_session.log().write(afl::sys::LogListener::Warn, LOG_NAME, m_session.translator()("Unable to load scripts and auto-tasks"), e);
                             }
 
                             // Resume
@@ -595,18 +595,18 @@ namespace {
     };
 
 
-    afl::base::Ref<gfx::Canvas> generateGameBackground(afl::sys::LogListener& log, gfx::Point size, afl::string::Translator& tx)
+    afl::base::Ref<gfx::Canvas> generateGameBackground(afl::sys::LogListener& log, gfx::Point size)
     {
         uint32_t ticks = afl::sys::Time::getTickCounter();
         util::RandomNumberGenerator rng(ticks);
         gfx::gen::OrbitConfig config;
         config.setSize(size);
         afl::base::Ref<gfx::Canvas> result = config.render(rng)->makeCanvas();
-        log.write(log.Trace, LOG_NAME, afl::string::Format(tx("Rendered game background in %d ms"), afl::sys::Time::getTickCounter() - ticks));
+        log.write(log.Trace, LOG_NAME, afl::string::Format("Rendered game background in %d ms", afl::sys::Time::getTickCounter() - ticks));
         return result;
     }
 
-    afl::base::Ref<gfx::Canvas> generateBrowserBackground(afl::sys::LogListener& log, gfx::Point size, afl::string::Translator& tx)
+    afl::base::Ref<gfx::Canvas> generateBrowserBackground(afl::sys::LogListener& log, gfx::Point size)
     {
         uint32_t ticks = afl::sys::Time::getTickCounter();
         util::RandomNumberGenerator rng(ticks);
@@ -614,7 +614,7 @@ namespace {
         cfg.setSize(size);
         cfg.setNumSuns(0);
         afl::base::Ref<gfx::Canvas> result = cfg.render(rng)->makeCanvas();
-        log.write(log.Trace, LOG_NAME, afl::string::Format(tx("Rendered browser background in %d ms"), afl::sys::Time::getTickCounter() - ticks));
+        log.write(log.Trace, LOG_NAME, afl::string::Format("Rendered browser background in %d ms", afl::sys::Time::getTickCounter() - ticks));
         return result;
     }
 
@@ -622,7 +622,7 @@ namespace {
     {
         using client::si::OutputState;
         using client::si::InputState;
-        ui::PixmapColorScheme colorScheme(us.root(), generateGameBackground(us.mainLog(), us.root().getExtent().getSize(), us.translator()));
+        ui::PixmapColorScheme colorScheme(us.root(), generateGameBackground(us.mainLog(), us.root().getExtent().getSize()));
         OutputState::Target state = OutputState::PlayerScreen;
         InputState in;
         bool running = true;
@@ -874,7 +874,7 @@ client::Application::appMain(gfx::Engine& engine)
     // Start game browser
     // FIXME: wrap this loop in a try/catch
     // FIXME: create the background image in the background thread
-    ui::PixmapColorScheme docColors(root, generateBrowserBackground(log(), root.getExtent().getSize(), translator()));
+    ui::PixmapColorScheme docColors(root, generateBrowserBackground(log(), root.getExtent().getSize()));
     while (1) {
         // Helpful information
         ui::rich::DocumentView docView(root.getExtent().getSize(), 0, root.provider());

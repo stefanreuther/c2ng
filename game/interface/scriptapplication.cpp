@@ -107,7 +107,7 @@ namespace {
             sc.compileList(*bco, scc);
             sc.finishBCO(*bco, scc);
             result.push_back(bco.asPtr());
-            session.log().write(LogListener::Trace, LOG_NAME, Format(session.translator()("Compiled %d command%!1{s%}.").c_str(), params.job.size()));
+            session.log().write(LogListener::Debug, LOG_NAME, Format(session.translator()("Compiled %d command%!1{s%}.").c_str(), params.job.size()));
         } else {
             // Files: compile files into individual BCOs
             for (size_t i = 0, n = params.job.size(); i < n; ++i) {
@@ -151,7 +151,7 @@ namespace {
                     }
                 }
             }
-            session.log().write(LogListener::Trace, LOG_NAME, Format(session.translator()("Compiled %d file%!1{s%}.").c_str(), params.job.size()));
+            session.log().write(LogListener::Debug, LOG_NAME, Format(session.translator()("Compiled %d file%!1{s%}.").c_str(), params.job.size()));
         }
     }
 

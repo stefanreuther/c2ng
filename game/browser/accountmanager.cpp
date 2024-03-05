@@ -109,7 +109,7 @@ game::browser::AccountManager::load()
                 {
                     if (m_account.get() != 0) {
                         if (m_account->isValid()) {
-                            m_manager.m_log.write(LogListener::Trace,
+                            m_manager.m_log.write(LogListener::Debug,
                                                   LOG_NAME,
                                                   Format(m_manager.m_translator.translateString("Adding network account \"%s\"").c_str(), m_account->getName()));
                             m_manager.addNewAccount(m_account.release());

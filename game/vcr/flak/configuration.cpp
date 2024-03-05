@@ -97,7 +97,7 @@ void
 FlakConfigurationParser::handleError(const String_t& fileName, int lineNr, const String_t& message)
 {
     // ex FlakConfigParser::error
-    m_log.write(afl::sys::LogListener::Error, LOG_NAME, Format("%s:%d: %s", fileName, lineNr, message));
+    m_log.write(afl::sys::LogListener::Warn, LOG_NAME, Format("%s:%d: %s", fileName, lineNr, message));
 }
 
 void

@@ -413,7 +413,7 @@ game::v3::AttachmentUnpacker::dropUnchangedFiles(afl::io::Directory& dir, afl::s
             m_attachments.swapElements(i, o);
             ++o;
         } else {
-            log.write(LogListener::Trace, LOG_NAME, Format(tx("File \"%s\" is unchanged."), p->name));
+            log.write(LogListener::Debug, LOG_NAME, Format(tx("File \"%s\" is unchanged."), p->name));
         }
     }
     m_attachments.resize(o);

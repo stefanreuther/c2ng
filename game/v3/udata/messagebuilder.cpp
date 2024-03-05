@@ -93,7 +93,7 @@ game::v3::udata::MessageBuilder::loadDefinition(afl::io::Stream& in, afl::sys::L
         }
         String_t::size_type p = line.find_first_of(",=");
         if (p == String_t::npos) {
-            log.write(LogListener::Error, LOG_NAME, Format(m_translator("%s:%d: missing delimiter"), in.getName(), tf.getLineNumber()));
+            log.write(LogListener::Warn, LOG_NAME, Format(m_translator("%s:%d: missing delimiter"), in.getName(), tf.getLineNumber()));
         } else if (line[p] == '=') {
             // It's an assignment
             if (!current) {
@@ -122,13 +122,13 @@ game::v3::udata::MessageBuilder::loadDefinition(afl::io::Stream& in, afl::sys::L
             }
 
             if (!ok) {
-                log.write(LogListener::Error, LOG_NAME, Format(m_translator("%s:%d: invalid number"), in.getName(), tf.getLineNumber()));
+                log.write(LogListener::Warn, LOG_NAME, Format(m_translator("%s:%d: invalid number"), in.getName(), tf.getLineNumber()));
             }
         } else {
             // New record
             uint16_t id;
             if (!afl::string::strToInteger(afl::string::strTrim(line.substr(0, p)), id)) {
-                log.write(LogListener::Error, LOG_NAME, Format(m_translator("%s:%d: invalid number"), in.getName(), tf.getLineNumber()));
+                log.write(LogListener::Warn, LOG_NAME, Format(m_translator("%s:%d: invalid number"), in.getName(), tf.getLineNumber()));
                 current = 0;
             } else {
                 current = m_descriptions.pushBackNew(new Description(id, afl::string::strTrim(line.substr(p+1))));

@@ -263,7 +263,7 @@ game::interface::LabelExtra::setConfiguration(afl::base::Optional<String_t> ship
 void
 game::interface::LabelExtra::onConnectionChange()
 {
-    m_session.log().write(LogListener::Error, LOG_NAME, "-> onConnectionChange");
+    m_session.log().write(LogListener::Trace, LOG_NAME, "-> onConnectionChange");
 
     // Connect game/viewpoint turn
     Game* g = m_session.getGame().get();
@@ -446,7 +446,7 @@ game::interface::LabelExtra::runUpdater()
                 interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
                 int n = m_shipLabels.compileUpdater(*bco, ShipFunction(m_session),  SimpleProcedure<Session&>(m_session, IFCCSetShipLabel));
                 n += m_planetLabels.compileUpdater(*bco, PlanetFunction(m_session), SimpleProcedure<Session&>(m_session, IFCCSetPlanetLabel));
-                m_session.log().write(LogListener::Debug, LOG_NAME, Format("updating %d objects", n));
+                m_session.log().write(LogListener::Trace, LOG_NAME, Format("updating %d objects", n));
                 assert(!m_shipLabels.hasDirtyLabels());
                 assert(!m_planetLabels.hasDirtyLabels());
 

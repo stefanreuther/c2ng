@@ -195,13 +195,13 @@ void
 game::proxy::SpecBrowserProxy::Trampoline::sendList()
 {
     if (!m_browser.get()) {
-        log(m_session, Log::Error, "<= sendList: no browser");
+        log(m_session, Log::Warn, "<= sendList: no browser");
         return;
     }
 
     std::auto_ptr<game::spec::info::ListContent> content(m_browser->listItems(m_page, m_filter, m_sort));
     if (!content.get()) {
-        log(m_session, Log::Error, "<= sendList: no content");
+        log(m_session, Log::Trace, "<= sendList: no content");
         return;
     }
 
@@ -241,19 +241,19 @@ void
 game::proxy::SpecBrowserProxy::Trampoline::sendPage()
 {
     if (!m_browser.get()) {
-        log(m_session, Log::Error, "<= sendPage: no browser");
+        log(m_session, Log::Warn, "<= sendPage: no browser");
         return;
     }
 
     Id_t id;
     if (!m_id.get(id)) {
-        log(m_session, Log::Error, "<= sendPage: no id");
+        log(m_session, Log::Trace, "<= sendPage: no id");
         return;
     }
 
     std::auto_ptr<game::spec::info::PageContent> content(m_browser->describeItem(m_page, id, m_withCost));
     if (!content.get()) {
-        log(m_session, Log::Error, "<= sendPage: no content");
+        log(m_session, Log::Trace, "<= sendPage: no content");
         return;
     }
 
@@ -277,19 +277,19 @@ void
 game::proxy::SpecBrowserProxy::Trampoline::sendFilter()
 {
     if (!m_browser.get()) {
-        log(m_session, Log::Error, "<= sendFilter: no browser");
+        log(m_session, Log::Warn, "<= sendFilter: no browser");
         return;
     }
 
     std::auto_ptr<game::spec::info::FilterInfos_t> existing = m_browser->describeFilters(m_page, m_filter);
     if (!existing.get()) {
-        log(m_session, Log::Error, "<= sendFilter: no existing filter");
+        log(m_session, Log::Trace, "<= sendFilter: no existing filter");
         return;
     }
 
     std::auto_ptr<game::spec::info::FilterInfos_t> available = m_browser->getAvailableFilters(m_page, m_filter);
     if (!available.get()) {
-        log(m_session, Log::Error, "<= sendFilter: no available filter");
+        log(m_session, Log::Trace, "<= sendFilter: no available filter");
         return;
     }
 
@@ -313,7 +313,7 @@ void
 game::proxy::SpecBrowserProxy::Trampoline::sendSortOrder()
 {
     if (!m_browser.get()) {
-        log(m_session, Log::Error, "<= sendFilter: no browser");
+        log(m_session, Log::Warn, "<= sendFilter: no browser");
         return;
     }
 

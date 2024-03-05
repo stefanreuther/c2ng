@@ -413,11 +413,11 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
             gt::Util13Control control;
             fromObject(control).copyFrom(data);
             if (m_game.currentTurn().getTimestamp() != control.base.timestamp || m_game.currentTurn().getTurnNumber() != control.base.turnNumber) {
-                m_log.write(afl::sys::LogListener::Error, LOG_NAME, m_translator.translateString("util.dat is from a different turn. File will be ignored."));
+                m_log.write(afl::sys::LogListener::Warn, LOG_NAME, m_translator.translateString("util.dat is from a different turn. File will be ignored."));
                 return false;
             }
             if (m_player != control.base.playerId) {
-                m_log.write(afl::sys::LogListener::Error, LOG_NAME, m_translator.translateString("util.dat belongs to a different player. File will be ignored."));
+                m_log.write(afl::sys::LogListener::Warn, LOG_NAME, m_translator.translateString("util.dat belongs to a different player. File will be ignored."));
                 return false;
             }
 
@@ -427,7 +427,7 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
                - spec digests
                - game name */
         } else {
-            m_log.write(afl::sys::LogListener::Error, LOG_NAME, m_translator.translateString("util.dat control record too short. File is possibly damaged and will be ignored."));
+            m_log.write(afl::sys::LogListener::Warn, LOG_NAME, m_translator.translateString("util.dat control record too short. File is possibly damaged and will be ignored."));
             return false;
         }
         break;

@@ -64,7 +64,7 @@ class game::nu::BrowserHandler::LoginTask : public Task_t {
     void onPasswordResult(UserCallback::PasswordResponse resp)
         {
             if (resp.canceled) {
-                m_parent.log().write(LogListener::Error, LOG_NAME, m_parent.translator()("Login canceled"));
+                m_parent.log().write(LogListener::Warn, LOG_NAME, m_parent.translator()("Login canceled"));
                 m_then->call();
                 return;
             }
@@ -169,7 +169,7 @@ game::nu::BrowserHandler::callServer(game::browser::Account& acc,
         log().write(LogListener::Error, LOG_NAME, Format(translator()("Malformed URL \"%s\""), url));
         return std::auto_ptr<afl::data::Value>();
     }
-    log().write(LogListener::Trace, LOG_NAME, Format(translator()("Calling \"%s\""), url));
+    log().write(LogListener::Trace, LOG_NAME, Format("Calling \"%s\"", url));
 
     // Build query
     String_t query;
@@ -214,7 +214,7 @@ game::nu::BrowserHandler::callServer(game::browser::Account& acc,
         afl::base::Bytes_t bytes(tmp);
         bytes.trim(buf.read(bytes));
 
-        log().write(LogListener::Trace, LOG_NAME, Format(translator()("at byte %d, \"%s\""), pos, afl::string::fromBytes(bytes)));
+        log().write(LogListener::Trace, LOG_NAME, Format("at byte %d, \"%s\"", pos, afl::string::fromBytes(bytes)));
         return std::auto_ptr<afl::data::Value>();
     }
 }

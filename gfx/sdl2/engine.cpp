@@ -568,7 +568,7 @@ gfx::sdl2::Engine::convertEvent(const SDL_Event& se, gfx::EventConsumer& consume
                 return true;
             } else {
                 if (!isKnownIgnorableKey(se.key.keysym.sym)) {
-                    m_log.write(m_log.Trace, LOG_NAME, afl::string::Format(m_translator("Key not mapped: 0x%x").c_str(), int(se.key.keysym.sym)));
+                    m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator("Key not mapped: 0x%x").c_str(), int(se.key.keysym.sym)));
                 }
                 return false;
             }

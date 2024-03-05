@@ -403,7 +403,7 @@ game::v3::Loader::addTarget(game::map::Universe& univ, const game::v3::structure
     const int shipId = target.shipId;
     map::Ship* s = univ.ships().get(shipId);
     if (!s) {
-        m_log.write(LogListener::Error, LOG_NAME, afl::string::Format(m_translator("Invalid ship Id #%d for visual contact. Target will be ignored"), shipId));
+        m_log.write(LogListener::Warn, LOG_NAME, afl::string::Format(m_translator("Invalid ship Id #%d for visual contact. Target will be ignored"), shipId));
     } else {
         // Convert to message information
         namespace gp = game::parser;
@@ -479,7 +479,7 @@ game::v3::Loader::loadKoreIonStorms(game::map::Universe& univ, afl::io::Stream& 
         if (st.voltage > 0 && st.radius > 0) {
             game::map::IonStorm* s = univ.ionStorms().get(i);
             if (!s) {
-                m_log.write(LogListener::Error, LOG_NAME, afl::string::Format(m_translator("Invalid ion storm Id #%d. Storm will be ignored"), i));
+                m_log.write(LogListener::Warn, LOG_NAME, afl::string::Format(m_translator("Invalid ion storm Id #%d. Storm will be ignored"), i));
             } else {
                 s->setPosition(game::map::Point(st.x, st.y));
                 s->setRadius(st.radius);
@@ -556,7 +556,7 @@ game::v3::Loader::loadFlakBattles(game::Turn& turn, afl::io::Directory& gameDir,
     try {
         db->load(*s, m_charset, m_translator);
         if (db->getTimestamp() != turn.getTimestamp()) {
-            m_log.write(LogListener::Error, LOG_NAME, afl::string::Format("%s is from a different turn. File will be ignored.", fileName));
+            m_log.write(LogListener::Warn, LOG_NAME, afl::string::Format("%s is from a different turn. File will be ignored.", fileName));
             return;
         }
         if (db->getNumBattles() != 0) {
@@ -565,7 +565,7 @@ game::v3::Loader::loadFlakBattles(game::Turn& turn, afl::io::Directory& gameDir,
         }
     }
     catch (std::exception& e) {
-        m_log.write(LogListener::Error, LOG_NAME, m_translator("Error loading FLAK combat"), e);
+        m_log.write(LogListener::Warn, LOG_NAME, m_translator("Error loading FLAK combat"), e);
     }
 }
 

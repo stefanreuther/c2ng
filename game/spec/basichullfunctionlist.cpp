@@ -159,7 +159,7 @@ void
 BasicHullFunctionReader::handleError(const String_t& fileName, int lineNr, String_t message)
 {
     // ex GHullFunctionReader::error
-    m_log.write(m_log.Error, "game.spec.hullfunc", fileName, lineNr, message);
+    m_log.write(m_log.Warn, "game.spec.hullfunc", fileName, lineNr, message);
 }
 
 /************************* BasicHullFunctionList *************************/

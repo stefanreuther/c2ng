@@ -92,7 +92,7 @@ namespace {
                         }
 
                         // Do not try again
-                        session.log().write(afl::sys::LogListener::Error, "script.error",
+                        session.log().write(afl::sys::LogListener::Warn, "script.error",
                                             afl::string::Format(session.translator().translateString("Disabling update callback \"%s\" due to error").c_str(),
                                                                 m_command));
                         m_command.clear();

@@ -75,7 +75,7 @@ game::TurnLoader::loadCurrentDatabases(Turn& turn, Game& game, int player, Root&
         }
     }
     catch (afl::except::FileProblemException& e) {
-        log.write(afl::sys::LogListener::Error, LOG_NAME, tx("File has been ignored"), e);
+        log.write(afl::sys::LogListener::Warn, LOG_NAME, tx("File has been ignored"), e);
     }
 
     // Message configuration
@@ -86,7 +86,7 @@ game::TurnLoader::loadCurrentDatabases(Turn& turn, Game& game, int player, Root&
         game.teamSettings().load(root.gameDirectory(), player, charset, tx);
     }
     catch (afl::except::FileProblemException& e) {
-        log.write(afl::sys::LogListener::Error, LOG_NAME, tx("File has been ignored"), e);
+        log.write(afl::sys::LogListener::Warn, LOG_NAME, tx("File has been ignored"), e);
         game.teamSettings().clear();
     }
 }

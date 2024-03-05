@@ -171,7 +171,7 @@ ui::DefaultResourceProvider::run()
                 if (can.get() == 0) {
                     m_log.write(m_log.Warn, LOG_NAME, afl::string::Format(m_translator.translateString("Image \"%s\" not found").c_str(), todo));
                 } else {
-                    m_log.write(m_log.Trace, LOG_NAME, afl::string::Format(m_translator.translateString("Loaded \"%s\"").c_str(), todo));
+                    m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loaded \"%s\"").c_str(), todo));
                 }
             }
             catch (std::exception& e) {

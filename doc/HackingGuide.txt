@@ -639,6 +639,33 @@ Testing
   assertions is just to number them.
 
 
+Logging and Log Levels
+----------------------
+
+  Logging uses the Log/LogListener classes. Log can receive messages,
+  but also forward them to another instance. Each log message has a
+  log channel and a log level.
+
+  Log channel: roughly the namespace or class name, with a "." as
+  delimiter. Example: "game.v3".
+
+  Log levels:
+  - Error: user must take action. Messages of this type legitimize a
+    pop-up.
+  - Warn: user may want to take action. Example: file or items are
+    being ignored;
+  - Info: general status messages of interest to most users;
+  - Debug: extra status messages of interest to curious users, or uses
+    who try to debug a problem they're having;
+  - Trace: usually of interest to developers only. Can reference
+    source code.
+
+  Messages of level Debug or higher are internationalized, messages of
+  level Trace are not. Messages of level Info or higher are visible by
+  default (console in a GUI application, stdout in a console
+  application, log file in a server).
+
+
 Scripting
 =========
 
