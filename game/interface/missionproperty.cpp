@@ -185,6 +185,11 @@ game::interface::getMissionProperty(const game::spec::Mission& mission, MissionP
         } else {
             return 0;
         }
+     case impGroup:
+        /* @q Group:Str (Mission Property)
+           Group name.
+           A possibly empty, comma-delimited list of groups this mission belongs to. */
+        return makeStringValue(mission.getGroup());
     }
     return 0;
 }

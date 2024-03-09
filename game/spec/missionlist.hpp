@@ -6,13 +6,16 @@
 #define C2NG_GAME_SPEC_MISSIONLIST_HPP
 
 #include <vector>
+#include <map>
 #include "afl/base/optional.hpp"
 #include "afl/charset/charset.hpp"
 #include "afl/io/stream.hpp"
+#include "afl/string/translator.hpp"
 #include "afl/sys/loglistener.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/hostversion.hpp"
 #include "game/spec/mission.hpp"
+#include "util/stringlist.hpp"
 
 namespace game { namespace spec {
 
@@ -24,6 +27,16 @@ namespace game { namespace spec {
      public:
         typedef std::vector<Mission> Container_t;
         typedef Container_t::const_iterator Iterator_t;
+
+        /** Grouped missions. */
+        struct Grouped {
+            /** Name of the "all missions" group. */
+            String_t allName;
+
+            /** List of missions, by group. */
+            std::map<String_t, util::StringList> groups;
+        };
+
 
         /** Constructor.
             Make empty list. */
@@ -94,6 +107,11 @@ namespace game { namespace spec {
             \param in   Stream
             \param cs   Game character set */
         void loadFromIniFile(afl::io::Stream& in, afl::charset::Charset& cs);
+
+        /** Get missions, separated into groups.
+            \param [out] out   Result
+            \param [in]  tx    Translator */
+        void getGroupedMissions(Grouped& out, afl::string::Translator& tx) const;
 
         /*
          *  Utilities

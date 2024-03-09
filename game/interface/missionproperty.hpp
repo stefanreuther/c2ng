@@ -27,7 +27,8 @@ namespace game { namespace interface {
         impWarningExpression,   // Warning:Str
         impLabelExpression,     // Label:Str
         impSetCommand,          // Command:Str
-        impHotkey               // Key:Str
+        impHotkey,              // Key:Str
+        impGroup                // Group:Str
     };
 
     /** Get mission definition property.

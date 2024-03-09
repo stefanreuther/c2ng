@@ -5,12 +5,14 @@
 
 #include "game/spec/missionlist.hpp"
 #include "afl/io/textfile.hpp"
+#include "afl/string/format.hpp"
 #include "afl/string/parse.hpp"
 #include "game/limits.hpp"
 #include "game/v3/structures.hpp"
 #include "interpreter/values.hpp"
 #include "util/string.hpp"
 
+using afl::string::Format;
 using game::config::HostConfiguration;
 
 namespace {
@@ -235,6 +237,11 @@ game::spec::MissionList::loadFromFile(afl::io::Stream& in, afl::sys::LogListener
             } else if (util::stringMatch("Onset", lhs)) {
                 // OnSet hook: command to be called when mission is set
                 m_data.back().setSetCommand(line);
+            } else if (util::stringMatch("Group", lhs)) {
+                // Group name
+                m_data.back().setGroup(line);
+            } else {
+                // Ignore
             }
         }
     }
@@ -345,6 +352,27 @@ game::spec::MissionList::loadFromIniFile(afl::io::Stream& in, afl::charset::Char
     }
 }
 
+void
+game::spec::MissionList::getGroupedMissions(Grouped& out, afl::string::Translator& tx) const
+{
+    out.allName = tx("All");
+    for (size_t i = 0, n = m_data.size(); i < n; ++i) {
+        const Mission& msn = m_data[i];
+        const String_t title = Format("%c - %s", msn.getHotkey(), msn.getName());
+
+        const afl::data::StringList_t g = msn.getGroups();
+        bool hadAll = false;
+        for (size_t j = 0, m = g.size(); j < m; ++j) {
+            if (g[j] == out.allName) {
+                hadAll = true;
+            }
+            out.groups[g[j]].add(msn.getNumber(), title);
+        }
+        if (!hadAll) {
+            out.groups[out.allName].add(msn.getNumber(), title);
+        }
+    }
+}
 
 bool
 game::spec::MissionList::isMissionCloaking(int mission_id,

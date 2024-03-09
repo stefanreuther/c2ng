@@ -31,6 +31,8 @@ AFL_TEST("game.spec.Mission:basics", a)
     a.checkEqual("22. getWarningExpression",   testee.getWarningExpression(), "");
     a.checkEqual("23. getLabelExpression",     testee.getLabelExpression(), "");
     a.checkEqual("24. getSetCommand",          testee.getSetCommand(), "");
+    a.checkEqual("25. getGroup",               testee.getGroup(), "");
+    a.checkEqual("26. getGroups",              testee.getGroups().size(), 0U);
 
     // Set everything
     // Note: we cannot change the number!
@@ -49,6 +51,7 @@ AFL_TEST("game.spec.Mission:basics", a)
     testee.setWarningExpression("warn?");
     testee.setLabelExpression("label?");
     testee.setSetCommand("set!");
+    testee.setGroup("foo, bar");
 
     // Verify
     a.checkEqual("31. getNumber",              testee.getNumber(), 42);
@@ -70,6 +73,12 @@ AFL_TEST("game.spec.Mission:basics", a)
     a.checkEqual("52. getWarningExpression",   testee.getWarningExpression(), "warn?");
     a.checkEqual("53. getLabelExpression",     testee.getLabelExpression(), "label?");
     a.checkEqual("54. getSetCommand",          testee.getSetCommand(), "set!");
+    a.checkEqual("55. getGroup",               testee.getGroup(), "foo, bar");
+
+    afl::data::StringList_t gs = testee.getGroups();
+    a.checkEqual("61. size", gs.size(), 2U);
+    a.checkEqual("62. group 0", gs[0], "foo");
+    a.checkEqual("63. group 1", gs[1], "bar");
 }
 
 /** Test constructor. */

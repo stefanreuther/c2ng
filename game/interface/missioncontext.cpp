@@ -18,6 +18,7 @@ namespace {
         { "COMMAND",         game::interface::impSetCommand,          MissionPropertyDomain, interpreter::thString },
         { "CONDITION",       game::interface::impConditionExpression, MissionPropertyDomain, interpreter::thString },
         { "FLAGS",           game::interface::impFlags,               MissionPropertyDomain, interpreter::thString },
+        { "GROUP",           game::interface::impGroup,               MissionPropertyDomain, interpreter::thString },
         { "INTERCEPT.FLAGS", game::interface::impInterceptFlags,      MissionPropertyDomain, interpreter::thString },
         { "INTERCEPT.NAME",  game::interface::impInterceptName,       MissionPropertyDomain, interpreter::thString },
         { "INTERCEPT.TYPE",  game::interface::impInterceptType,       MissionPropertyDomain, interpreter::thString },

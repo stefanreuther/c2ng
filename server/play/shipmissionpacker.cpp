@@ -86,6 +86,7 @@ server::play::ShipMissionPacker::buildValue() const
             // Following attributes not in PCC2:
             hv->setNew("name", makeStringValue(m.getName()));
             hv->setNew("cond", makeStringValue(m.getConditionExpression()));
+            hv->setNew("group", makeStringValue(m.getGroup()));
 
             vv->pushBackNew(new afl::data::HashValue(hv));
         }

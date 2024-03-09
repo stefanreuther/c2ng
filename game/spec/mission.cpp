@@ -11,6 +11,7 @@
 #include "game/playerset.hpp"
 #include "game/registrationkey.hpp"
 #include "util/string.hpp"
+#include "util/stringparser.hpp"
 
 namespace {
     /** Parse list of players from list of letters.
@@ -45,6 +46,7 @@ game::spec::Mission::Mission()
       m_warningExpression(),
       m_labelExpression(),
       m_setCommand(),
+      m_group(),
       m_hotkey(0)
 {
     // ex GMission::GMission()
@@ -268,6 +270,34 @@ game::spec::Mission::setSetCommand(String_t cmd)
 {
     // ex GMission::setSetCommand
     m_setCommand = cmd;
+}
+
+String_t
+game::spec::Mission::getGroup() const
+{
+    return m_group;
+}
+
+void
+game::spec::Mission::setGroup(String_t g)
+{
+    m_group = g;
+}
+
+afl::data::StringList_t
+game::spec::Mission::getGroups() const
+{
+    afl::data::StringList_t result;
+    util::StringParser p(m_group);
+    String_t out;
+    while (!p.parseEnd() && p.parseDelim(",", out)) {
+        String_t trimmed = afl::string::strTrim(out);
+        if (!trimmed.empty()) {
+            result.push_back(trimmed);
+        }
+        p.parseCharacter(',');
+    }
+    return result;
 }
 
 

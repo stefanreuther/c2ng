@@ -20,6 +20,17 @@ using game::config::HostConfiguration;
 using game::spec::Mission;
 using game::spec::MissionList;
 
+namespace {
+    void checkEntry(afl::test::Assert a, const util::StringList& list, size_t index, int32_t expectKey, String_t expectText)
+    {
+        String_t s;
+        int32_t i;
+        a.check("get", list.get(index, i, s));
+        a.checkEqual("str", s, expectText);
+        a.checkEqual("key", i, expectKey);
+    }
+}
+
 /** Test mission.ini parsing. */
 AFL_TEST("game.spec.MissionList:loadFromIniFile", a)
 {
@@ -178,6 +189,32 @@ AFL_TEST("game.spec.MissionList:loadFromIniFile:races", a)
     a.checkEqual("67. getRaceMask", (list.at(6)->getRaceMask().toInteger() & 0xFFE), 0x804U);
 }
 
+/** Test mission.ini parsing, parentheses/parameter special cases. */
+AFL_TEST("game.spec.MissionList:loadFromIniFile:paren", a)
+{
+    // Generate a pseudo file
+    static const char data[] =
+        "10 one\n"
+        "11 two)\n"
+        "12 three (T\n";
+    afl::io::ConstMemoryStream ms(afl::string::toBytes(data));
+    afl::charset::CodepageCharset cp(afl::charset::g_codepageLatin1);
+
+    // Read it
+    MissionList list;
+    list.loadFromIniFile(ms, cp);
+
+    // Check
+    a.checkEqual("01. size", list.size(), 3U);
+    for (int i = 0; i < 3; ++i) {
+        a.checkEqual("02. getNumber", list.at(i)->getNumber(), 10+i);
+    }
+
+    a.checkEqual("11. getName", list.at(0)->getName(), "one");
+    a.checkEqual("12. getName", list.at(1)->getName(), "two)");
+    a.checkEqual("13. getName", list.at(2)->getName(), "three (T");
+}
+
 /** Test loading from mission.cc. */
 AFL_TEST("game.spec.MissionList:loadFromFile", a)
 {
@@ -196,6 +233,7 @@ AFL_TEST("game.spec.MissionList:loadFromFile", a)
         "w=Work2\n"
         "o=Set2\n"
         "y=Ignore2\n"
+        "g = special\n"
         "3,+5,Full\n"
         "I=Intercept3\n"
         " J = Tow3\n"
@@ -207,6 +245,7 @@ AFL_TEST("game.spec.MissionList:loadFromFile", a)
         "; Some ignored assignments:\n"
         "Textignore=Bad3\n"
         "Tet=Bad3\n"
+        "Group=more\n"
         " = Bad3\n";
     afl::io::ConstMemoryStream ms(afl::string::toBytes(file));
     afl::sys::Log log;
@@ -232,6 +271,7 @@ AFL_TEST("game.spec.MissionList:loadFromFile", a)
     a.checkEqual("17. getWarningExpression",   testee.at(0)->getWarningExpression(), "");
     a.checkEqual("18. getLabelExpression",     testee.at(0)->getLabelExpression(), "");
     a.checkEqual("19. getSetCommand",          testee.at(0)->getSetCommand(), "");
+    a.checkEqual("1A. getGroup",               testee.at(0)->getGroup(), "");
 
     // Mission 2: Short, everything assigned using one-letter names
     a.checkEqual("21. getNumber",              testee.at(1)->getNumber(), 2);
@@ -243,6 +283,7 @@ AFL_TEST("game.spec.MissionList:loadFromFile", a)
     a.checkEqual("27. getWarningExpression",   testee.at(1)->getWarningExpression(), "Work2");
     a.checkEqual("28. getLabelExpression",     testee.at(1)->getLabelExpression(), "Text2");
     a.checkEqual("29. getSetCommand",          testee.at(1)->getSetCommand(), "Set2");
+    a.checkEqual("2A. getGroup",               testee.at(1)->getGroup(), "special");
 
     // Mission 3: Full, everything assigned using full names
     a.checkEqual("31. getNumber",              testee.at(2)->getNumber(), 3);
@@ -254,6 +295,41 @@ AFL_TEST("game.spec.MissionList:loadFromFile", a)
     a.checkEqual("37. getWarningExpression",   testee.at(2)->getWarningExpression(), "Work3");
     a.checkEqual("38. getLabelExpression",     testee.at(2)->getLabelExpression(), "Text3");
     a.checkEqual("39. getSetCommand",          testee.at(2)->getSetCommand(), "Set3");
+    a.checkEqual("3A. getGroup",               testee.at(2)->getGroup(), "more");
+}
+
+/** Test loading from mission.cc, error case. */
+AFL_TEST("game.spec.MissionList:loadFromFile:error:no-delim", a)
+{
+    // File
+    static const char* file = "no delim";
+    afl::io::ConstMemoryStream ms(afl::string::toBytes(file));
+    afl::sys::Log log;
+    afl::string::NullTranslator tx;
+
+    // Load
+    MissionList testee;
+    testee.loadFromFile(ms, log, tx);
+
+    // Verify
+    a.checkEqual("01. size", testee.size(), 0U);
+}
+
+/** Test loading from mission.cc, error case: bad number. */
+AFL_TEST("game.spec.MissionList:loadFromFile:error:bad-num", a)
+{
+    // File
+    static const char* file = "9999999,,Name";
+    afl::io::ConstMemoryStream ms(afl::string::toBytes(file));
+    afl::sys::Log log;
+    afl::string::NullTranslator tx;
+
+    // Load
+    MissionList testee;
+    testee.loadFromFile(ms, log, tx);
+
+    // Verify
+    a.checkEqual("01. size", testee.size(), 0U);
 }
 
 /** Test addMission(), merge missions, and, implicitly, sort(). */
@@ -368,6 +444,72 @@ AFL_TEST("game.spec.MissionList:getHotkey:2", a)
 
     a.checkEqual("51", testee.at(35)->getHotkey(), 'z');
     a.checkEqual("52", testee.at(36)->getHotkey(), 'a');
+}
+
+/** Test getGroupedMissions(), base case. */
+AFL_TEST("game.spec.MissionList:getGroupedMissions:base", a)
+{
+    MissionList testee;
+    testee.addMission(Mission(1, ",one"));
+    testee.addMission(Mission(2, ",two"));
+    testee.addMission(Mission(3, ",three"));
+
+    afl::string::NullTranslator tx;
+    MissionList::Grouped g;
+    testee.getGroupedMissions(g, tx);
+    a.checkEqual("01", g.allName, "All");
+    a.checkEqual("02", g.groups.size(), 1U);
+    a.checkEqual("03", g.groups["All"].size(), 3U);
+
+    checkEntry(a("All.0"), g.groups["All"], 0, 1, "1 - one");
+    checkEntry(a("All.1"), g.groups["All"], 1, 2, "2 - two");
+    checkEntry(a("All.2"), g.groups["All"], 2, 3, "3 - three");
+}
+
+/** Test getGroupedMissions(), complex case. */
+AFL_TEST("game.spec.MissionList:getGroupedMissions:complex", a)
+{
+    // Missions
+    Mission m1(10, ",one");
+    m1.setGroup("g1");
+
+    Mission m2(20, ",two");
+    m2.setGroup("g2");
+
+    Mission m3(30, ",three");
+    m3.setGroup("g1,g2,All");
+
+    Mission m4(40, ",four");
+    m4.setGroup("All,g2");
+
+    // MissionList
+    MissionList testee;
+    testee.addMission(m1);
+    testee.addMission(m2);
+    testee.addMission(m3);
+    testee.addMission(m4);
+
+    // Test
+    afl::string::NullTranslator tx;
+    MissionList::Grouped g;
+    testee.getGroupedMissions(g, tx);
+    a.checkEqual("01", g.allName, "All");
+    a.checkEqual("02", g.groups.size(), 3U);
+    a.checkEqual("03", g.groups["All"].size(), 4U);
+    a.checkEqual("04", g.groups["g1"].size(), 2U);
+    a.checkEqual("05", g.groups["g2"].size(), 3U);
+
+    checkEntry(a("All.0"), g.groups["All"], 0, 10, "a - one");
+    checkEntry(a("All.1"), g.groups["All"], 1, 20, "b - two");
+    checkEntry(a("All.2"), g.groups["All"], 2, 30, "c - three");
+    checkEntry(a("All.3"), g.groups["All"], 3, 40, "d - four");
+
+    checkEntry(a("g1.0"), g.groups["g1"], 0, 10, "a - one");
+    checkEntry(a("g1.1"), g.groups["g1"], 1, 30, "c - three");
+
+    checkEntry(a("g2.0"), g.groups["g2"], 0, 20, "b - two");
+    checkEntry(a("g2.1"), g.groups["g2"], 1, 30, "c - three");
+    checkEntry(a("g2.2"), g.groups["g2"], 2, 40, "d - four");
 }
 
 /*

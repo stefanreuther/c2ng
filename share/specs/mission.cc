@@ -37,6 +37,7 @@
 ;               Defaults to same expression as "c=" if given
 ;   o=command   [onset] command to be run when the user sets this mission
 ;               using the mission setting dialog
+;   g=g1,g2     [group] group(s) the mission belongs to
 ;
 ; The difference between "c=" and "w=" is that "c" will determine whether
 ; the mission shall be offered on the mission selector while "w" will
@@ -89,12 +90,15 @@
                 c = System.Host$<>1
 2,,Mine Sweep
                 s = M-Sweep
+                g = Scan
 3,,Lay Mines
                 c = Torp
                 w = Torp.Count Or (FCode="mkt" And CCompare(Cargo.Str, Torpedo(Torp$).Cost.Str))
+                g = Lay
 4,,Kill
 5,,Sensor Sweep
                 s = Sensor
+                g = Scan
 6,,Land & Disassemble
                 s = L&D
 7,!h#,Tow a ship
@@ -113,6 +117,7 @@
                 c = Beam
 9,+3,Super Spy
                 s = S-Spy
+                g = Scan
 9,+4,Pillage Planet
 9,+5,Rob ship
                 c = Beam
@@ -123,11 +128,14 @@
                 c = Torp
                 w = Torp.Count Or (FCode="mkt" And CCompare(Cargo.Str, Torpedo(Torp$).Cost.Str))
                 s = LayWeb
+                g = Lay
 9,+8,Dark Sense
                 s = DkSense
+                g = Scan
 9,+9b,Build Fighters
                 c = Fighter.Bays
                 s = B-Ftr
+                g = Build
 9,+a,Rebel Ground Attack
                 s = RGA
 
@@ -138,18 +146,23 @@
 11,,Beam Up ~Fuel
                 s = BU Fuel
                 w = Orbit$
+                g = Gather
 12,,Beam Up ~Duranium
                 s = BU Dur
                 w = Orbit$
+                g = Gather
 13,,Beam Up ~Tritanium
                 s = BU Tri
                 w = Orbit$
+                g = Gather
 14,,Beam Up ~Molybdenum
                 s = BU Mol
                 w = Orbit$
+                g = Gather
 15,,Beam Up ~Supplies
                 s = BU Supp
                 w = Orbit$
+                g = Gather
 
 ;=== PHost Extended Missions ===
 ; comment these out to save memory
@@ -163,53 +176,63 @@
 20,,Build Torpedoes from Cargo
                 s = B-Torps
                 c = Torp AND Cfg("AllowExtendedMissions")
+                g = Build
 21,*y#,Lay Minefield
                 t = "Lay " # Z(Mission.Intercept) # " mines"
                 c = Torp AND Cfg("AllowExtendedMissions")
                 i = Torps
                 j = Player
                 w = Torp.Count Or (FCode="mkt" And CCompare(Cargo.Str, Torpedo(Torp$).Cost.Str))
+                g = Lay
 22,*y#+7,Lay Web Mines
                 t = "Lay " # Z(Mission.Intercept) # " web mines"
                 c = Torp AND Cfg("AllowExtendedMissions")
                 i = Torps
                 j = Player
                 w = Torp.Count Or (FCode="mkt" And CCompare(Cargo.Str, Torpedo(Torp$).Cost.Str))
+                g = Lay
 23,*#,Scoop Torpedoes
                 t = "Scoop " & Mission.Intercept & " torps" & (" from field #" # Z(Mission.Tow))
                 s = Scoop
                 c = Torp AND Beam AND Cfg("AllowExtendedMissions")
                 i = Torps
                 j = Mine Id
+                g = Scan
 24,*,Gather-Build Torpedoes
                 t = "Gather-Build " # Z(Mission.Intercept) # " torps"
                 s = GB-Torp
                 c = Torp AND Cfg("AllowExtendedMissions")
+                g = Build
 25,*,Beam Down Credits
                 t = "Beam down " # Z(Mission.Intercept) # " mc"
                 s = BD mc
                 c = Cfg("AllowExtendedMissions")
+                g = Unload
 26,#!h*,Transfer Torpedoes
                 t = "Transfer " # Mission.Tow # " torps to " # ShipNameAndId(Mission.Intercept)
                 s = XferTor
                 c = Torp AND Cfg("AllowExtendedMissions")
                 i = Target
                 j = Amount
+                g = Transfer
 27,#!h*,Transfer Fighters
                 t = "Transfer " # Mission.Tow # " fighters to " # ShipNameAndId(Mission.Intercept)
                 s = XferFtr
                 c = Fighter.Bays AND Cfg("AllowExtendedMissions")
                 i = Target
                 j = Amount
+                g = Transfer
 28,#!h*,Transfer Money
                 t = "Transfer " # Mission.Tow # " mc to " # ShipNameAndId(Mission.Intercept)
                 s = Xfer mc
                 c = Cfg("AllowExtendedMissions")
                 i = Target
                 j = Amount
+                g = Transfer
 29,+3,Standard Super Spy
                 s = Std Spy
                 c = Cfg("AllowExtendedMissions")
+                g = Scan
 30,,Cloak
                 c = False
                 w = True
@@ -220,18 +243,22 @@
                 t = "Gather-Build " # Z(Mission.Intercept) # " fighters"
                 s = GB-Ftrs
                 c = Fighter.Bays AND Cfg("AllowExtendedMissions")
+                g = Build
 33,*,Beam Up Credits
                 t = "Beam up " # Z(Mission.Intercept) # " mc"
                 s = BU mc
                 c = Cfg("AllowExtendedMissions")
+                g = Gather
 34,*,Beam Up Clans
                 t = "Beam up " # Z(Mission.Intercept) # " clans"
                 s = BU Clan
                 c = Cfg("AllowBeamUpClans") AND Cfg("AllowExtendedMissions")
+                g = Gather
 35,,Beam Up Multiple
                 s = BU Many
                 c = False
                 w = True
+                g = Gather
 36,*#,Add Mines to Field
                 t = "Add " & If(Mission.Intercept, Mission.Intercept, "all") & " torps" & (" to minefield #" # Mission.Tow)
                 s = Add Min
@@ -239,6 +266,7 @@
                 i = Amount
                 j = Mine Id
                 w = Torp.Count Or (FCode="mkt" And CCompare(Cargo.Str, Torpedo(Torp$).Cost.Str))
+                g = Lay
 37,*#+7,Add Web Mines to Field
                 t = "Add " & If(Mission.Intercept, Mission.Intercept, "all") & " torps to web #" # Mission.Tow
                 s = Add Web
@@ -246,6 +274,7 @@
                 i = Amount
                 j = Mine Id
                 w = Torp.Count Or (FCode="mkt" And CCompare(Cargo.Str, Torpedo(Torp$).Cost.Str))
+                g = Lay
 38,*,Training
                 t = "Training for " # Z(Mission.Intercept) # " supplies"
                 i = Supplies

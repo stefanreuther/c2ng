@@ -31,6 +31,7 @@ AFL_TEST("game.interface.MissionProperty:full", a)
     msn.setWarningExpression("Warn()");
     msn.setLabelExpression("Label()");
     msn.setSetCommand("Call It");
+    msn.setGroup("g");
 
     // Verify
     verifyNewString (a("impName"),                getMissionProperty(msn, game::interface::impName),                "The Name");
@@ -49,6 +50,7 @@ AFL_TEST("game.interface.MissionProperty:full", a)
     verifyNewString (a("impLabelExpression"),     getMissionProperty(msn, game::interface::impLabelExpression),     "Label()");
     verifyNewString (a("impSetCommand"),          getMissionProperty(msn, game::interface::impSetCommand),          "Call It");
     verifyNewString (a("impHotkey"),              getMissionProperty(msn, game::interface::impHotkey),              "q");
+    verifyNewString (a("impGroup"),               getMissionProperty(msn, game::interface::impGroup),               "g");
 }
 
 /** Test all the flag mappings. */

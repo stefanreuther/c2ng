@@ -6,6 +6,7 @@
 #define C2NG_GAME_SPEC_MISSION_HPP
 
 #include "afl/bits/smallset.hpp"
+#include "afl/data/stringlist.hpp"
 #include "afl/string/string.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/playerset.hpp"
@@ -199,6 +200,19 @@ namespace game { namespace spec {
             \param cmd Command */
         void setSetCommand(String_t cmd);
 
+        /** Get group.
+            \return group; comma-separated list of names */
+        String_t getGroup() const;
+
+        /** Set group.
+            \param g Group; comma-separated list of names */
+        void setGroup(String_t g);
+
+        /** Get groups as list.
+            \return list */
+        afl::data::StringList_t getGroups() const;
+
+
         /*
          *  Inquiry
          */
@@ -268,6 +282,7 @@ namespace game { namespace spec {
         String_t    m_warningExpression;         ///< Condition to check whether it will work.
         String_t    m_labelExpression;           ///< Expression for label on ship screen.
         String_t    m_setCommand;                ///< "on set" expression.
+        String_t    m_group;                     ///< Group name.
         char        m_hotkey;                    ///< Mission hot-key.
 
         void        parseDescription(const String_t& desc_line);
