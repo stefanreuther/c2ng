@@ -35,13 +35,19 @@ namespace {
     };
 }
 
-game::interface::MissionContext::MissionContext(size_t slot, afl::base::Ref<game::spec::ShipList> shipList)
+game::interface::MissionContext::MissionContext(size_t slot, const afl::base::Ref<game::spec::MissionList>& list)
     : m_slot(slot),
-      m_shipList(shipList)
+      m_list(list)
 { }
 
 game::interface::MissionContext::~MissionContext()
 { }
+
+const game::spec::Mission*
+game::interface::MissionContext::getMission() const
+{
+    return m_list->at(m_slot);
+}
 
 // Context:
 interpreter::Context::PropertyAccessor*
@@ -53,7 +59,7 @@ game::interface::MissionContext::lookup(const afl::data::NameQuery& name, Proper
 afl::data::Value*
 game::interface::MissionContext::get(PropertyIndex_t index)
 {
-    const game::spec::Mission* msn = m_shipList->missions().at(m_slot);
+    const game::spec::Mission* msn = getMission();
     if (msn != 0) {
         return getMissionProperty(*msn, MissionProperty(MISSION_MAPPING[index].index));
     } else {
@@ -65,7 +71,7 @@ bool
 game::interface::MissionContext::next()
 {
     size_t n = m_slot+1;
-    if (m_shipList->missions().at(n) != 0) {
+    if (m_list->at(n) != 0) {
         m_slot = n;
         return true;
     } else {
@@ -76,7 +82,7 @@ game::interface::MissionContext::next()
 game::interface::MissionContext*
 game::interface::MissionContext::clone() const
 {
-    return new MissionContext(m_slot, m_shipList);
+    return new MissionContext(m_slot, m_list);
 }
 
 afl::base::Deletable*

@@ -27,6 +27,7 @@
 #include "game/interface/mailboxcontext.hpp"
 #include "game/interface/minefieldfunction.hpp"
 #include "game/interface/missionfunction.hpp"
+#include "game/interface/missionlistcontext.hpp"
 #include "game/interface/notificationfunctions.hpp"
 #include "game/interface/planetfunction.hpp"
 #include "game/interface/playerfunction.hpp"
@@ -595,6 +596,7 @@ game::Session::initWorld()
     m_world.setNewGlobalValue("MINEFIELD",     new game::interface::MinefieldFunction(*this));
     m_world.setNewGlobalValue("MISSION",       new game::interface::MissionFunction(*this));
     m_world.setNewGlobalValue("OBJECTISAT",    new SessionFunction_t(*this, game::interface::IFObjectIsAt));
+    m_world.setNewGlobalValue("MISSIONDEFINITIONS", new SessionFunction_t(*this, game::interface::IFMissionDefinitions));
     m_world.setNewGlobalValue("PLANET",        new game::interface::PlanetFunction(*this));
     m_world.setNewGlobalValue("PLANETAT",      new SessionFunction_t(*this, game::interface::IFPlanetAt));
     m_world.setNewGlobalValue("PLAYER",        new game::interface::PlayerFunction(*this));
@@ -656,6 +658,8 @@ game::Session::initWorld()
 
     m_world.setNewGlobalValue("GLOBALACTIONCONTEXT", new interpreter::SimpleFunction<void>(game::interface::IFGlobalActionContext));
     m_world.setNewGlobalValue("CONFIGURATIONEDITORCONTEXT", new SessionFunction_t(*this, game::interface::IFConfigurationEditorContext));
+
+    m_world.setNewGlobalValue("MISSIONLIST", new interpreter::SimpleFunction<void>(game::interface::IFMissionList));
 
     // Add global context (=properties)
     m_world.addNewGlobalContext(new game::interface::GlobalContext(*this));

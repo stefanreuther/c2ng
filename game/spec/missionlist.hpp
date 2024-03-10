@@ -8,6 +8,8 @@
 #include <vector>
 #include <map>
 #include "afl/base/optional.hpp"
+#include "afl/base/ref.hpp"
+#include "afl/base/refcounted.hpp"
 #include "afl/charset/charset.hpp"
 #include "afl/io/stream.hpp"
 #include "afl/string/translator.hpp"
@@ -22,8 +24,8 @@ namespace game { namespace spec {
     /** List of Starship Missions.
         Contains and owns a list of Mission objects.
 
-        c2ng change: this class is not used any longer to make subset lists. */
-    class MissionList {
+        MissionList objects must be heap-allocated. */
+    class MissionList : public afl::base::RefCounted {
      public:
         typedef std::vector<Mission> Container_t;
         typedef Container_t::const_iterator Iterator_t;
@@ -39,8 +41,9 @@ namespace game { namespace spec {
 
 
         /** Constructor.
-            Make empty list. */
-        MissionList();
+            Make empty list.
+            \return newly-allocated list */
+        static afl::base::Ref<MissionList> create();
 
         /** Destructor. */
         ~MissionList();
@@ -139,6 +142,8 @@ namespace game { namespace spec {
         bool isSpecialMission(int shipMission, const game::config::HostConfiguration& config) const;
 
      private:
+        MissionList();
+
         Container_t m_data;
         uint32_t m_usedLetters;
     };

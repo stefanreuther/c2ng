@@ -57,7 +57,7 @@ game::interface::MissionFunction::get(interpreter::Arguments& args)
     if (!shipList->missions().findIndexByNumber(number, playerSet).get(slot)) {
         return 0;
     }
-    return new MissionContext(slot, *shipList);
+    return new MissionContext(slot, shipList->missions());
 }
 
 void
@@ -78,7 +78,7 @@ game::interface::MissionFunction::makeFirstContext()
 {
     game::spec::ShipList* shipList = m_session.getShipList().get();
     if (shipList != 0 && shipList->missions().at(0) != 0) {
-        return new MissionContext(0, *shipList);
+        return new MissionContext(0, shipList->missions());
     } else {
         return 0;
     }

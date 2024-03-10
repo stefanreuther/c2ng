@@ -13,6 +13,7 @@
 #include "afl/string/format.hpp"
 #include "game/config/booleanvalueparser.hpp"
 #include "game/game.hpp"
+#include "game/interface/missionlistcontext.hpp"
 #include "game/interface/taskeditorcontext.hpp"
 #include "game/map/circularobject.hpp"
 #include "game/root.hpp"
@@ -407,6 +408,22 @@ game::interface::IFIsSpecialFCode(game::Session& session, interpreter::Arguments
         str.erase(3);
     }
     return makeBooleanValue(sl->friendlyCodes().isSpecial(str, true));
+}
+
+/* @q MissionDefinitions():MissionList (Function)
+   Returns a handle to all current mission definitions.
+
+   @since PCC2 2.41.2 */
+afl::data::Value*
+game::interface::IFMissionDefinitions(game::Session& session, interpreter::Arguments& args)
+{
+    args.checkArgumentCount(0);
+
+    game::spec::ShipList* sl = session.getShipList().get();
+    if (sl == 0) {
+        return 0;
+    }
+    return new MissionListContext(sl->missions());
 }
 
 /* @q ObjectIsAt(obj:Any, x:Int, y:Int):Bool (Function)

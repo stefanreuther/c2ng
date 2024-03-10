@@ -53,6 +53,12 @@ namespace {
     }
 }
 
+afl::base::Ref<game::spec::MissionList>
+game::spec::MissionList::create()
+{
+    return *new MissionList();
+}
+
 game::spec::MissionList::MissionList()
     : m_data(),
       m_usedLetters(0)

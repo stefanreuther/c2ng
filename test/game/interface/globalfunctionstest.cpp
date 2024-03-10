@@ -867,6 +867,50 @@ AFL_TEST("game.interface.GlobalFunctions:IFIsSpecialFCode:error:no-shiplist", a)
 }
 
 /*
+ *  IFMissionDefinitions
+ */
+
+AFL_TEST("game.interface.GlobalFunctions:IFMissionDefinitions:null", a)
+{
+    Environment env;
+    afl::data::Segment seg;
+    interpreter::Arguments args(seg, 0, 0);
+    verifyNewNull(a, game::interface::IFMissionDefinitions(env.session, args));
+}
+
+AFL_TEST("game.interface.GlobalFunctions:IFMissionDefinitions:normal", a)
+{
+    Environment env;
+    addShipList(env);
+    env.session.getShipList()->missions().addMission(game::spec::Mission(1, ",Sensor Sweep"));
+
+    // Must be able to call MissionDefinitions()
+    afl::data::Segment seg;
+    interpreter::Arguments args(seg, 0, 0);
+    std::auto_ptr<afl::data::Value> val(game::interface::IFMissionDefinitions(env.session, args));
+    a.checkNonNull("01. value", val.get());
+
+    // Result must be a context
+    interpreter::Context* ctx = dynamic_cast<interpreter::Context*>(val.get());
+    a.checkNonNull("11. is context", ctx);
+    interpreter::test::ContextVerifier verif(*ctx, a("context"));
+    verif.verifyTypes();
+
+    // Context must have AddMission attribute
+    std::auto_ptr<afl::data::Value> func(verif.getValue("ADDMISSION"));
+    a.checkNonNull("21. AddMission", func.get());
+}
+
+AFL_TEST("game.interface.GlobalFunctions:IFMissionDefinitions:error:args", a)
+{
+    Environment env;
+    afl::data::Segment seg;
+    seg.pushBackInteger(1);
+    interpreter::Arguments args(seg, 0, 1);
+    AFL_CHECK_THROWS(a, game::interface::IFMissionDefinitions(env.session, args), interpreter::Error);
+}
+
+/*
  *  IFObjectIsAt
  */
 

@@ -18,7 +18,7 @@ game::spec::ShipList::ShipList()
       m_hullAssignments(),
       m_componentNamer(),
       m_friendlyCodes(),
-      m_missions()
+      m_missions(MissionList::create())
 { }
 
 // Destructor.

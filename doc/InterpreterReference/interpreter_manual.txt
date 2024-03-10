@@ -1105,6 +1105,15 @@ The following overview applies to PCC2 and, where appropriate, also for 1.x.
  <!--<tr><td>ShipBuildScreen(Global)</td>                                <td>Active on ship build screen.</td></tr>-->
 </table>
 --------------------------------------------------------------------------------
+@type MissionList
+A MissionList contains a list of missions.
+
+You can use {MissionList()} to create an empty %MissionList object,
+or {MissionDefinitions()} to access the game's mission definitions.
+
+For operations on the %MissionList object, see {@group MissionList Operation}.
+
+--------------------------------------------------------------------------------
 @type Num
 PCC supports integral and fractional numbers.
 They are entered like usual, for example
@@ -1476,6 +1485,9 @@ The %LastScan property can tell you how old the minefield is, decide for yoursel
 The following properties are available for mission definitions and can be accessed using the
 {Mission (Function)|Mission()} function.
 --------------------------------------------------------------------------------
+@group MissionList Operation
+The following operations are possible for mission definitions in a {@type MissionList}.
+--------------------------------------------------------------------------------
 @group Planet Command
 These commands are valid at planets and starbases, and can be used to manipulate these objects.
 
@@ -1616,6 +1628,8 @@ and {@group Global Command|global commands}.
 ===  Versions
 ===
 
+--------------------------------------------------------------------------------
+@version PCC2 2.41.2
 --------------------------------------------------------------------------------
 @version PCC2 2.41.1
 --------------------------------------------------------------------------------

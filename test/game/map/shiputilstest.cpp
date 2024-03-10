@@ -53,46 +53,46 @@ namespace {
 AFL_TEST("game.map.ShipUtils:getShipMission:unknown", a)
 {
     HostConfiguration config;
-    game::spec::MissionList missions;
+    afl::base::Ref<game::spec::MissionList> missions = game::spec::MissionList::create();
 
     Ship sh(10);
-    a.checkNull("", getShipMission(sh, config, missions));
+    a.checkNull("", getShipMission(sh, config, *missions));
 }
 
 // Mission known but not defined
 AFL_TEST("game.map.ShipUtils:getShipMission:undefined", a)
 {
     HostConfiguration config;
-    game::spec::MissionList missions;
+    afl::base::Ref<game::spec::MissionList> missions = game::spec::MissionList::create();
 
     Ship sh(10);
     sh.setMission(10, 0, 0);
-    a.checkNull("", getShipMission(sh, config, missions));
+    a.checkNull("", getShipMission(sh, config, *missions));
 }
 
 // Mission known and defined, but no owner
 AFL_TEST("game.map.ShipUtils:getShipMission:no-owner", a)
 {
     HostConfiguration config;
-    game::spec::MissionList missions;
-    prepareOneMission(missions);
+    afl::base::Ref<game::spec::MissionList> missions = game::spec::MissionList::create();
+    prepareOneMission(*missions);
 
     Ship sh(10);
     sh.setMission(5, 0, 0);
-    a.checkNull("", getShipMission(sh, config, missions));
+    a.checkNull("", getShipMission(sh, config, *missions));
 }
 
 // Mission known and defined
 AFL_TEST("game.map.ShipUtils:getShipMission:normal", a)
 {
     HostConfiguration config;
-    game::spec::MissionList missions;
-    prepareOneMission(missions);
+    afl::base::Ref<game::spec::MissionList> missions = game::spec::MissionList::create();
+    prepareOneMission(*missions);
     Ship sh(10);
     sh.setMission(5, 0, 0);
     sh.setOwner(3);
 
-    const game::spec::Mission* msn = getShipMission(sh, config, missions);
+    const game::spec::Mission* msn = getShipMission(sh, config, *missions);
     a.checkNonNull("getShipMission", msn);
     a.checkEqual("getNumber", msn->getNumber(), 5);
 }
@@ -115,35 +115,35 @@ namespace {
 AFL_TEST("game.map.ShipUtils:getShipMissionByNumber:unknown-owner", a)
 {
     HostConfiguration config;
-    game::spec::MissionList missions;
-    prepareThreeMissions(config, missions);
+    afl::base::Ref<game::spec::MissionList> missions = game::spec::MissionList::create();
+    prepareThreeMissions(config, *missions);
 
     Ship sh(10);
-    a.checkNull("", getShipMissionByNumber(5, sh, config, missions));
+    a.checkNull("", getShipMissionByNumber(5, sh, config, *missions));
 }
 
 // Mission not defined
 AFL_TEST("game.map.ShipUtils:getShipMissionByNumber:undefined", a)
 {
     HostConfiguration config;
-    game::spec::MissionList missions;
-    prepareThreeMissions(config, missions);
+    afl::base::Ref<game::spec::MissionList> missions = game::spec::MissionList::create();
+    prepareThreeMissions(config, *missions);
 
     Ship sh(10);
     sh.setOwner(4);
-    a.checkNull("", getShipMissionByNumber(7, sh, config, missions));
+    a.checkNull("", getShipMissionByNumber(7, sh, config, *missions));
 }
 
 // Mission known and defined
 AFL_TEST("game.map.ShipUtils:getShipMissionByNumber:normal", a)
 {
     HostConfiguration config;
-    game::spec::MissionList missions;
-    prepareThreeMissions(config, missions);
+    afl::base::Ref<game::spec::MissionList> missions = game::spec::MissionList::create();
+    prepareThreeMissions(config, *missions);
 
     Ship sh(10);
     sh.setOwner(4);
-    const game::spec::Mission* msn = getShipMissionByNumber(5, sh, config, missions);
+    const game::spec::Mission* msn = getShipMissionByNumber(5, sh, config, *missions);
     a.checkNonNull("getShipMissionByNumber", msn);
     a.checkEqual("getNumber", msn->getNumber(), 5);
 }
@@ -152,12 +152,12 @@ AFL_TEST("game.map.ShipUtils:getShipMissionByNumber:normal", a)
 AFL_TEST("game.map.ShipUtils:getShipMissionByNumber:race-mapping", a)
 {
     HostConfiguration config;
-    game::spec::MissionList missions;
-    prepareThreeMissions(config, missions);
+    afl::base::Ref<game::spec::MissionList> missions = game::spec::MissionList::create();
+    prepareThreeMissions(config, *missions);
 
     Ship sh(10);
     sh.setOwner(2);
-    const game::spec::Mission* msn = getShipMissionByNumber(9, sh, config, missions);
+    const game::spec::Mission* msn = getShipMissionByNumber(9, sh, config, *missions);
     a.checkNonNull("getShipMissionByNumber", msn);
     a.checkEqual("getNumber", msn->getNumber(), 9);
     a.checkEqual("getName", msn->getName(), "Five");

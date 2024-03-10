@@ -12,7 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/proxy/vcrexportadaptor.cpp \
+FILES_gamelib = game/interface/missionlistcontext.cpp \
+    game/interface/missionlistcontext.hpp game/proxy/vcrexportadaptor.cpp \
     game/proxy/vcrexportadaptor.hpp game/proxy/viewpointstarbaseadaptor.cpp \
     game/proxy/viewpointstarbaseadaptor.hpp game/proxy/listproxy.cpp \
     game/proxy/listproxy.hpp game/vcr/flak/visualizer.cpp \
@@ -1794,7 +1795,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/game/proxy/vcrexportadaptortest.cpp \
+FILES_testsuite = test/game/interface/missionlistcontexttest.cpp \
+    test/game/proxy/vcrexportadaptortest.cpp \
     test/server/talk/render/rendertest.cpp \
     test/game/proxy/viewpointstarbaseadaptortest.cpp \
     test/game/proxy/listproxytest.cpp test/util/syntax/segmenttest.cpp \

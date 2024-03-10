@@ -183,7 +183,7 @@ namespace game { namespace spec {
         HullAssignmentList m_hullAssignments;
         StandardComponentNameProvider m_componentNamer;
         FriendlyCodeList m_friendlyCodes;
-        MissionList m_missions;
+        afl::base::Ref<MissionList> m_missions;
     };
 
 } }
@@ -333,14 +333,14 @@ game::spec::ShipList::friendlyCodes() const
 inline game::spec::MissionList&
 game::spec::ShipList::missions()
 {
-    return m_missions;
+    return *m_missions;
 }
 
 // Get missions.
 inline const game::spec::MissionList&
 game::spec::ShipList::missions() const
 {
-    return m_missions;
+    return *m_missions;
 }
 
 #endif

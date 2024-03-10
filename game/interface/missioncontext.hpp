@@ -6,7 +6,7 @@
 #define C2NG_GAME_INTERFACE_MISSIONCONTEXT_HPP
 
 #include "afl/base/ref.hpp"
-#include "game/spec/shiplist.hpp"
+#include "game/spec/missionlist.hpp"
 #include "interpreter/simplecontext.hpp"
 
 namespace game { namespace interface {
@@ -17,12 +17,16 @@ namespace game { namespace interface {
     class MissionContext : public interpreter::SimpleContext, public interpreter::Context::ReadOnlyAccessor {
      public:
         /** Constructor.
-            @param slot      Index into ShipList's MissionList, see game::spec::MissionList::at().
-            @param shipList  Ship list */
-        MissionContext(size_t slot, afl::base::Ref<game::spec::ShipList> shipList);
+            @param slot  Index into MissionList, see game::spec::MissionList::at().
+            @param list  Mission list */
+        MissionContext(size_t slot, const afl::base::Ref<game::spec::MissionList>& list);
 
         /** Destructor. */
         ~MissionContext();
+
+        /** Get mission that this context is looking at.
+            @return Mission (null if slot out of range) */
+        const game::spec::Mission* getMission() const;
 
         // Context:
         virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
@@ -40,7 +44,7 @@ namespace game { namespace interface {
         size_t m_slot;
 
         // As of 20230404, intentionally not const to allow possible future modifications
-        afl::base::Ref<game::spec::ShipList> m_shipList;
+        afl::base::Ref<game::spec::MissionList> m_list;
     };
 
 } }
