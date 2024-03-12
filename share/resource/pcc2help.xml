@@ -657,7 +657,7 @@
 
       <kl>
         <ki key="N">Change ship's name;</ki>
-        <ki key="M">Change ship's mission;</ki>
+        <ki key="M"><a href="pcc2:shipmission">Change ship's mission</a>;</ki>
         <ki key="E">Change ship's primary enemy;</ki>
         <ki key="A">Change ship's waypoint using <a href="pcc2:navchart">Navigation Chart</a>;</ki>
         <ki key="C"><a href="pcc2:cargo">Cargo transfer</a>;</ki>
@@ -718,6 +718,37 @@
         <di term="Related command:"> <a href="int:name:ui.gotoscreen">UI.GotoScreen</a>;</di>
         <di term="Keymap:"> <a href="int:name:shipscreen">ShipScreen</a>;</di>
         <di term="Script context:"> <a href="int:name:ship:context">Ship()</a>.</di>
+      </dl>
+    </page>
+
+    <!-- Ship Missions -->
+    <page id="pcc2:shipmission">
+      <h1>Ship Missions</h1>
+
+      <p>This dialog allows choosing a mission for a starship.</p>
+
+      <p>Scroll around using the arrow keys, or use the key displayed next to the mission name,
+        and confirm using <kbd>Enter</kbd>; <kbd>ESC</kbd> cancels.</p>
+
+      <p>When using this dialog from a <a href="pcc2:shipscreen">ship</a> or <a href="pcc2:shiptaskscreen">ship task</a> screen,
+        this dialog will only show missions that the ship can actually perform.
+        For example, a freighter cannot lay mines.
+        Likewise, when used through the <a href="pcc2:globact">Global Actions</a>,
+        some missions will not be shown.
+        As an override, you can always select the "Extended Mission" entry at the end of the list,
+        to enter any mission as numerical values ("M.I.T. interface").</p>
+
+      <p>Missions are grouped by category.
+        Categories are displayed atop the mission list.
+        You can select a category for filterung using <kbd>&#x2190;</kbd>/<kbd>&#x2192;</kbd>,
+        by clicking the category, or by using <kbd>Alt</kbd> plus the category's first letter.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>M</kbd> from <a href="pcc2:shipscreen">Ship Screen</a>,
+          "Mission" menu on <a href="pcc2:shiptaskscreen">Ship Task Screen</a>,
+          <a href="pcc2:globact">Global Actions</a>;</di>
+        <di term="Related command:"> <a href="int:name:ui.choosemission">UI.ChooseMission</a>;</di>
       </dl>
     </page>
 

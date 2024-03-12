@@ -7,6 +7,7 @@ PCC2ng NEWS FILE
   Client features:
   - Build Queue Dialog: show build queue positions graphically;
   - Imperial Stats: show planets by experience;
+  - Ship Missions: filter by category;
   - Starchart: show actual (not estimated) flight times for distance
   - VCR: export and save
 

@@ -719,16 +719,15 @@ Function CCUI$Ship.ChooseMissionParameters (newM, args, sid)
 EndFunction
 
 % Prepare mission list for a ship
-% - a: Listbox
+% - a: MissionList
 % - i: ship Id
 Sub CCUI$Ship.PrepareMissionList (a, i)
   Local msn
   ForEach Global.Mission As msn Do
     If CCVP.MissionWorksOnShip(msn, Ship(i)) Then
-      Call a->AddItem msn->Number, Format("%s - %s", msn->Key, msn->Name)
+      Call a->AddMission msn
     EndIf
   Next
-  Call a->AddItem, -1, Translate("# - Extended Mission")
 EndSub
 
 % Complete mission selection by asking for parameters
@@ -865,9 +864,9 @@ Sub CCUI.Ship.SetMission
     EndIf
 
     % Build listbox
-    Local a := Listbox(_("Ship Mission"), Mission$, 340, 12, "pcc2:shipscreen")
+    Local a := MissionList()
     CCUI$Ship.PrepareMissionList a, i
-    Call a->Run
+    UI.ChooseMission a, _("Ship Mission"), Mission$, "pcc2:shipmission"
 
     % Process result
     Local r := CCUI$Ship.CompleteMissionSelection(UI.Result, i)
@@ -1878,9 +1877,9 @@ EndSub
 Sub CCUI.Task.AddSetShipMission
   % ex WShipAutoTaskCommandTile::createSetMissionCommand
   Local UI.Result
-  Local a := Listbox(Translate("Ship Mission"), Mission$, 340, 12, "pcc2:shiptaskscreen")
+  Local a := MissionList()
   CCUI$Ship.PrepareMissionList a, Id
-  Call a->Run
+  UI.ChooseMission a, Translate("Ship Mission"), Mission$, "pcc2:shipmission"
 
   % Process result
   Local r := CCUI$Ship.CompleteMissionSelection(UI.Result, 0)

@@ -48,6 +48,7 @@
 #include "client/dialogs/messageeditor.hpp"
 #include "client/dialogs/messagereceiver.hpp"
 #include "client/dialogs/minefieldinfo.hpp"
+#include "client/dialogs/missionselection.hpp"
 #include "client/dialogs/multitransfer.hpp"
 #include "client/dialogs/navchartdialog.hpp"
 #include "client/dialogs/notifications.hpp"
@@ -99,6 +100,7 @@
 #include "game/interface/configurationeditorcontext.hpp"
 #include "game/interface/globalactioncontext.hpp"
 #include "game/interface/mailboxcontext.hpp"
+#include "game/interface/missionlistcontext.hpp"
 #include "game/interface/planetmethod.hpp"
 #include "game/interface/plugincontext.hpp"
 #include "game/interface/referencelistcontext.hpp"
@@ -3282,6 +3284,69 @@ client::si::IFUIBattleSimulator(game::Session& session, ScriptSide& si, RequestL
     si.postNewTask(link, new Task());
 }
 
+/* @q UI.ChooseMission msn:MissionList, title:Str, [current:Int, help:Str] (Global Command)
+   Choose a ship mission from the given MissionList.
+   Offers a list box of missions, along with the category selection given by the mission's groups.
+   In addition to the given missions, the dialog will allow selection of "Extended Mission", producing result -1.
+
+   On success, the chosen mission Id is returned in {UI.Result}.
+   If the dialog is canceled, result is EMPTY.
+
+   @since PCC2 2.41.2 */
+void
+client::si::IFUIChooseMission(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    args.checkArgumentCount(2, 4);
+
+    // Mandatory args
+    String_t title;
+    afl::data::Value* msn = args.getNext();
+    bool titleOK = interpreter::checkStringArg(title, args.getNext());
+    if (msn == 0 || !titleOK) {
+        link.getProcess().setVariable("UI.RESULT", 0);
+        return;
+    }
+
+    // Optional args
+    int currentValue = 0;
+    String_t helpId;
+    interpreter::checkIntegerArg(currentValue, args.getNext());
+    interpreter::checkStringArg(helpId, args.getNext());
+
+    // Verify mission list
+    game::interface::MissionListContext* ctx = dynamic_cast<game::interface::MissionListContext*>(msn);
+    if (ctx == 0) {
+        throw Error::typeError(Error::ExpectNone);
+    }
+
+    // Forward to UI
+    class Task : public UserTask {
+     public:
+        Task(const game::spec::MissionList& list, int currentValue, String_t title, String_t helpId, afl::string::Translator& tx)
+            : m_groups(), m_currentValue(currentValue), m_title(title), m_helpId(helpId)
+            {
+                list.getGroupedMissions(m_groups, tx);
+            }
+
+        virtual void handle(Control& ctl, RequestLink2 link)
+            {
+                afl::base::Optional<int> result =
+                    client::dialogs::chooseMission(m_groups, m_currentValue, m_title, m_helpId,
+                                                   ctl.root(), ctl.translator(), ctl.interface().gameSender());
+                std::auto_ptr<afl::data::Value> userResult(interpreter::makeOptionalIntegerValue(result));
+                ctl.interface().setVariable(link, "UI.RESULT", userResult);
+                ctl.interface().continueProcess(link);
+            }
+
+     private:
+        game::spec::MissionList::Grouped m_groups;
+        int m_currentValue;
+        String_t m_title;
+        String_t m_helpId;
+    };
+    si.postNewTask(link, new Task(ctx->missions(), currentValue, title, helpId, session.translator()));
+}
+
 /* @q UI.ChooseObject screen:Int (Global Command)
    Choose game object.
    You specify a screen number to choose the object for:
@@ -5002,6 +5067,7 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("SYSTEM.EXITCLIENT",     new ScriptProcedure(s, &si, IFSystemExitClient));
                 s.world().setNewGlobalValue("SYSTEM.EXITRACE",       new ScriptProcedure(s, &si, IFSystemExitRace));
                 s.world().setNewGlobalValue("UI.BATTLESIMULATOR",    new ScriptProcedure(s, &si, IFUIBattleSimulator));
+                s.world().setNewGlobalValue("UI.CHOOSEMISSION",      new ScriptProcedure(s, &si, IFUIChooseMission));
                 s.world().setNewGlobalValue("UI.CHOOSEOBJECT",       new ScriptProcedure(s, &si, IFUIChooseObject));
                 s.world().setNewGlobalValue("UI.CHOOSETURN",         new ScriptProcedure(s, &si, IFUIChooseTurn));
                 s.world().setNewGlobalValue("UI.EDITALLIANCES",      new ScriptProcedure(s, &si, IFUIEditAlliances));

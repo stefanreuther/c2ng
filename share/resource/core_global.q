@@ -142,14 +142,13 @@ Function CCGA.SetShipMission.Init()
 
   % Build listbox
   Local UI.Result, a, msn
-  a := Listbox(Translate("Ship Mission"), 0, 340, 12, "pcc2:globact")
+  a := MissionList()
   ForEach Global.Mission As msn Do
     If CCVP.MissionWorksGlobally(msn) Then
-      Call a->AddItem msn->Number, Format("%s - %s", msn->Key, msn->Name)
+      Call a->AddMission msn
     EndIf
   Next
-  Call a->AddItem, -1, Translate("# - Extended Mission")
-  Call a->Run
+  UI.ChooseMission a, Translate("Ship Mission"), 0, "pcc2:shipmission"
 
   % Process result
   Local r := CCUI$Ship.CompleteMissionSelection(UI.Result, 0)

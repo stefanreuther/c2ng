@@ -785,12 +785,14 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = gfx/codec/custom.cpp gfx/codec/custom.hpp \
-    gfx/codec/application.cpp gfx/codec/application.hpp gfx/codec/bmp.cpp \
-    gfx/codec/bmp.hpp gfx/codec/codec.hpp gfx/colorquantizer.cpp \
-    gfx/colorquantizer.hpp gfx/threed/colortransformation.cpp \
-    gfx/threed/colortransformation.hpp gfx/threed/positionlist.cpp \
-    gfx/threed/positionlist.hpp gfx/threed/model.cpp gfx/threed/model.hpp \
+FILES_guilib = client/dialogs/missionselection.cpp \
+    client/dialogs/missionselection.hpp gfx/codec/custom.cpp \
+    gfx/codec/custom.hpp gfx/codec/application.cpp gfx/codec/application.hpp \
+    gfx/codec/bmp.cpp gfx/codec/bmp.hpp gfx/codec/codec.hpp \
+    gfx/colorquantizer.cpp gfx/colorquantizer.hpp \
+    gfx/threed/colortransformation.cpp gfx/threed/colortransformation.hpp \
+    gfx/threed/positionlist.cpp gfx/threed/positionlist.hpp \
+    gfx/threed/model.cpp gfx/threed/model.hpp \
     client/dialogs/attachmentselection.cpp \
     client/dialogs/attachmentselection.hpp \
     client/dialogs/exitconfirmation.cpp client/dialogs/exitconfirmation.hpp \
