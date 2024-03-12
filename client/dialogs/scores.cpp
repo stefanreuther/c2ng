@@ -40,6 +40,7 @@
 using game::proxy::ScoreProxy;
 using ui::Group;
 using ui::widgets::Button;
+using ui::widgets::IconBox;
 using ui::widgets::SimpleTable;
 using ui::widgets::StaticText;
 using util::DataTable;
@@ -309,8 +310,10 @@ namespace {
         ScoreIconBox(ui::Root& root, ScoreTabs_t& tabs, afl::string::Translator& tx);
         virtual ui::layout::Info getLayoutInfo() const;
         virtual int getItemWidth(size_t nr) const;
+        virtual bool isItemKey(size_t nr, util::Key_t key) const;
         virtual size_t getNumItems() const;
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state);
+        virtual void drawBlank(gfx::Canvas& can, gfx::Rectangle area);
      private:
         const ScoreTab* getTab(size_t nr) const;
         afl::base::Ref<gfx::Font> getTitleFont() const;
@@ -448,6 +451,13 @@ ScoreIconBox::getItemWidth(size_t nr) const
     }
 }
 
+bool
+ScoreIconBox::isItemKey(size_t nr, util::Key_t key) const
+{
+    const ScoreTab* t = getTab(nr);
+    return t != 0 && t->key == key;
+}
+
 size_t
 ScoreIconBox::getNumItems() const
 {
@@ -483,6 +493,13 @@ ScoreIconBox::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemS
         ctx.useFont(*getSubtitleFont());
         outTextF(ctx, area, getSubtitle(*tab));
     }
+}
+
+void
+ScoreIconBox::drawBlank(gfx::Canvas& can, gfx::Rectangle area)
+{
+    gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
+    drawBackground(ctx, area);
 }
 
 const ScoreTab*
@@ -549,7 +566,9 @@ ScoreDialog::ScoreDialog(ui::Root& root, util::RequestSender<game::Session> game
       m_tableMode(Normal),
       m_byTeam(false),
       m_cumulativeMode(false)
-{ }
+{
+    m_tabIcons.setKeys(IconBox::Tab + IconBox::Arrows);
+}
 
 bool
 ScoreDialog::init()
@@ -792,28 +811,6 @@ ScoreDialog::handleKey(util::Key_t key, int prefix)
 
     // Hard-coded keys
     switch (key) {
-     case util::Key_Tab:
-     case util::Key_Right:
-        // Tab: cycle forward
-        m_tabIcons.requestActive();
-        if (m_currentTab < m_tabs.size()-1) {
-            openTab(m_currentTab+1);
-        } else {
-            openTab(0);
-        }
-        return true;
-
-     case util::Key_Tab + util::KeyMod_Shift:
-     case util::Key_Left:
-        // Shift-Tab: cycle backward
-        m_tabIcons.requestActive();
-        if (m_currentTab > 0) {
-            openTab(m_currentTab-1);
-        } else {
-            openTab(m_tabs.size()-1);
-        }
-        return true;
-
      case util::Key_Up:
      case util::Key_PgUp:
      case util::Key_WheelUp:
@@ -892,19 +889,6 @@ ScoreDialog::handleKey(util::Key_t key, int prefix)
 
      default:
         break;
-    }
-
-    // Hot-keys to select individual pages
-    Matcher<size_t> matchTab;
-    for (size_t i = 0, n = m_tabs.size(); i < n; ++i) {
-        if (m_tabs[i].key == key && matchTab(i, i == m_currentTab)) {
-            break;
-        }
-    }
-    if (matchTab.isValid()) {
-        m_tabIcons.requestActive();
-        openTab(matchTab.getIndex());
-        return true;
     }
 
     // Hot-keys to sort a table

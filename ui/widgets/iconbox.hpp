@@ -22,6 +22,11 @@ namespace ui { namespace widgets {
         Note that as of 20210220, despite its name, this class does not use the ui::icons::Icon abstraction which it predates. */
     class IconBox : public SimpleWidget {
      public:
+        static const int Tab = 1;
+        static const int CtrlTab = 2;
+        static const int F6 = 4;
+        static const int Arrows = 8;
+
         /** State of an item. */
         enum ItemState {
             Normal,             /**< Normal (idle). */
@@ -30,6 +35,8 @@ namespace ui { namespace widgets {
         };
 
         explicit IconBox(ui::Root& root);
+
+        void setKeys(int keys);
 
         // SimpleWidget:
         virtual void draw(gfx::Canvas& can);
@@ -63,6 +70,12 @@ namespace ui { namespace widgets {
             \return width in pixels */
         virtual int getItemWidth(size_t nr) const = 0;
 
+        /** Check key for an item.
+            \param nr Item, [0,getNumberOfItems()).
+            \param key Key to check
+            \return true on match */
+        virtual bool isItemKey(size_t nr, util::Key_t key) const = 0;
+
         /** Return number of items.
             \return number of items, >= 0 */
         virtual size_t getNumItems() const = 0;
@@ -73,6 +86,12 @@ namespace ui { namespace widgets {
             \param item Item, [0,getNumberOfItems()).
             \param state Item state */
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state) = 0;
+
+        /** Draw blank area.
+            Blank area appears to the right of the icons if the widget does not fill everything.
+            \param can Canvas to draw on
+            \param area Position of background */
+        virtual void drawBlank(gfx::Canvas& can, gfx::Rectangle area) = 0;
 
         /** Handle structure change.
             Reinitializes this iconbox after a complete change to the content, and selects a new current item.
@@ -93,6 +112,7 @@ namespace ui { namespace widgets {
         bool adjustPosition();
 
         ui::Root& m_root;
+        int m_keys;
 
         afl::base::Ref<gfx::Timer> m_timer;
         void handleTimer();

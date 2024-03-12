@@ -3,9 +3,10 @@
   */
 
 #include "ui/widgets/simpleiconbox.hpp"
+#include "afl/charset/utf8.hpp"
+#include "gfx/complex.hpp"
 #include "gfx/context.hpp"
 #include "ui/draw.hpp"
-#include "gfx/complex.hpp"
 
 namespace {
     const int GAP_X = 4;
@@ -16,11 +17,18 @@ ui::widgets::SimpleIconBox::SimpleIconBox(gfx::Point size, ui::Root& root)
     : IconBox(root),
       m_items(),
       m_size(size),
-      m_root(root)
+      m_root(root),
+      m_itemKeys()
 { }
 
 ui::widgets::SimpleIconBox::~SimpleIconBox()
 { }
+
+void
+ui::widgets::SimpleIconBox::setItemKeys(int itemKeys)
+{
+    m_itemKeys = itemKeys;
+}
 
 ui::layout::Info
 ui::widgets::SimpleIconBox::getLayoutInfo() const
@@ -39,6 +47,21 @@ ui::widgets::SimpleIconBox::getItemWidth(size_t nr) const
         return font->getTextWidth(m_items[nr].text) + GAP_X*2;
     }
     return 0;
+}
+
+bool
+ui::widgets::SimpleIconBox::isItemKey(size_t nr, util::Key_t key) const
+{
+    util::Key_t k;
+    if (nr < m_items.size()) {
+        k = afl::charset::getLowerCase(afl::charset::Utf8().charAt(m_items[nr].text, 0));
+    } else {
+        k = 0;
+    }
+
+    return (k != 0)
+        && (((m_itemKeys & UsePlainKeys) != 0 && k == key)
+            || ((m_itemKeys & UseAltKeys) != 0 && (k + util::KeyMod_Alt) == key));
 }
 
 size_t
@@ -70,6 +93,13 @@ ui::widgets::SimpleIconBox::drawItem(gfx::Canvas& can, gfx::Rectangle area, size
 
         outText(ctx, gfx::Point(area.getLeftX() + GAP_X, area.getTopY() + GAP_Y), m_items[item].text);
     }
+}
+
+void
+ui::widgets::SimpleIconBox::drawBlank(gfx::Canvas& can, gfx::Rectangle area)
+{
+    gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
+    drawBackground(ctx, area);
 }
 
 void

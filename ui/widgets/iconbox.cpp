@@ -23,10 +23,17 @@ ui::widgets::IconBox::IconBox(ui::Root& root)
       m_mouseBlocked(false),
       m_changeOnClick(false),
       m_root(root),
+      m_keys(0),
       m_timer(root.engine().createTimer())
 {
     m_timer->sig_fire.add(this, &IconBox::handleTimer);
     m_timer->setInterval(20);
+}
+
+void
+ui::widgets::IconBox::setKeys(int keys)
+{
+    m_keys = keys;
 }
 
 void
@@ -53,8 +60,7 @@ ui::widgets::IconBox::draw(gfx::Canvas& can)
 
     int curx = getExtent().getLeftX() - m_leftX + x;
     if (curx < getExtent().getRightX()) {
-        gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
-        drawBackground(ctx, gfx::Rectangle(curx, getExtent().getTopY(), getExtent().getRightX() - curx, getExtent().getHeight()));
+        drawBlank(can, gfx::Rectangle(curx, getExtent().getTopY(), getExtent().getRightX() - curx, getExtent().getHeight()));
     }
 }
 
@@ -95,8 +101,59 @@ ui::widgets::IconBox::handlePositionChange()
 }
 
 bool
-ui::widgets::IconBox::handleKey(util::Key_t /*key*/, int /*prefix*/)
+ui::widgets::IconBox::handleKey(util::Key_t key, int /*prefix*/)
 {
+    bool handleTab     = (m_keys & Tab) != 0;
+    bool handleCtrlTab = (m_keys & CtrlTab) != 0;
+    bool handleF6      = (m_keys & F6) != 0;
+    bool handleArrows  = (m_keys & Arrows) != 0;
+
+    // Tab: next page
+    if ((handleTab && key == util::Key_Tab)
+        || (handleCtrlTab && key == util::Key_Tab + util::KeyMod_Ctrl)
+        || (handleF6 && key == util::Key_F6)
+        || (handleArrows && key == util::Key_Right))
+    {
+        size_t index = getCurrentItem() + 1;
+        if (index >= getNumItems()) {
+            index = 0;
+        }
+        requestActive();
+        setCurrentItem(index);
+        return true;
+    }
+
+    // Shift-Tab: previous page
+    if ((handleTab && key == util::Key_Tab + util::KeyMod_Shift)
+        || (handleCtrlTab && key == util::Key_Tab + util::KeyMod_Ctrl + util::KeyMod_Shift)
+        || (handleF6 && key == util::Key_F6 + util::KeyMod_Shift)
+        || (handleArrows && key == util::Key_Left))
+    {
+        size_t index = getCurrentItem();
+        if (index == 0) {
+            index = getNumItems();
+        }
+        requestActive();
+        setCurrentItem(index - 1);
+        return true;
+    }
+
+    // Per-page keys
+    // Check all keys except current page
+    size_t pos = getCurrentItem();
+    const size_t n = getNumItems();
+    for (size_t i = 1; i < n; ++i) {
+        ++pos;
+        if (pos >= n) {
+            pos = 0;
+        }
+        if (isItemKey(pos, key)) {
+            requestActive();
+            setCurrentItem(pos);
+            return true;
+        }
+    }
+
     return false;
 }
 

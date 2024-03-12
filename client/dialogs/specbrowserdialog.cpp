@@ -402,9 +402,9 @@ namespace {
                 }
             }
 
-        void onTabClick(size_t id)
+        void onTabClick(size_t /*id*/)
             {
-                m_proxy.setPage(static_cast<gsi::Page>(id));
+                m_proxy.setPage(static_cast<gsi::Page>(m_tabs.getCurrentTabId()));
             }
 
         void onFilterDelete(size_t index)
@@ -520,7 +520,7 @@ namespace {
             {
                 m_proxy.addCurrentAsFilter();
                 m_proxy.setPage(page);
-                m_tabs.setFocusedTab(page);
+                m_tabs.setCurrentTabId(page);
             }
 
         void addFilter(gsi::FilterInfo f)
@@ -607,7 +607,7 @@ namespace {
                 m_filterDisplay.sig_edit.add(this, &SpecBrowserDialog::onFilterEdit);
                 m_filterDisplay.sig_sort.add(this, &SpecBrowserDialog::onSort);
 
-                m_tabs.sig_tabClick.add(this, &SpecBrowserDialog::onTabClick);
+                m_tabs.sig_change.add(this, &SpecBrowserDialog::onTabClick);
                 m_tabs.addPage(gsi::PlayerPage,          m_translator("Races"),            '1');
                 m_tabs.addPage(gsi::RacialAbilitiesPage, m_translator("Racial Abilities"), '2');
                 m_tabs.addPage(gsi::HullPage,            m_translator("Ship Hulls"),       '3');

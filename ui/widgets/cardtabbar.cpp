@@ -13,7 +13,7 @@ ui::widgets::CardTabBar::CardTabBar(Root& root, CardGroup& g)
       conn_focusChange(g.sig_handleFocusChange.add(this, &CardTabBar::onFocusChange))
 {
     // ex UICardGroupTab::UICardGroupTab
-    sig_tabClick.add(this, &CardTabBar::setFocusedPage);
+    sig_change.add(this, &CardTabBar::setFocusedPage);
 }
 
 ui::widgets::CardTabBar::~CardTabBar()
@@ -43,7 +43,7 @@ ui::widgets::CardTabBar::setFocusedPage(size_t index)
 {
     if (index < m_tabs.size()) {
         m_tabs[index]->requestFocus();
-        TabBar::setFocusedTab(index);
+        TabBar::setCurrentItem(index);
     }
 }
 
@@ -52,7 +52,7 @@ ui::widgets::CardTabBar::onFocusChange()
 {
     for (size_t i = 0, n = m_tabs.size(); i < n; ++i) {
         if (m_tabs[i]->hasState(FocusedState)) {
-            TabBar::setFocusedTab(i);
+            TabBar::setCurrentItem(i);
         }
     }
 }
