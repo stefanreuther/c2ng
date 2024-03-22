@@ -12,7 +12,6 @@
 #include "client/tiles/basetasktile.hpp"
 #include "client/tiles/errortile.hpp"
 #include "client/tiles/planetscreenheadertile.hpp"
-#include "client/tiles/planettasktile.hpp"
 #include "client/tiles/selectionheadertile.hpp"
 #include "client/tiles/shipcargotile.hpp"
 #include "client/tiles/shipmovementtile.hpp"
@@ -597,15 +596,16 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
         return &tile;
     }
     if (name == "PLANETTASKCOMMAND") {
-        PlanetTaskTile& tile = deleter.addNew(new PlanetTaskTile(root, m_keys, tx));
+        BaseTaskTile& tile = deleter.addNew(new BaseTaskTile(BaseTaskTile::PlanetPersonality, root, m_keys, tx));
         tile.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
         if (m_pTaskEditor != 0) {
-            m_pTaskEditor->sig_messageChange.add(&tile, &PlanetTaskTile::setMessageStatus);
+            m_pTaskEditor->sig_messageChange.add(&tile, &BaseTaskTile::setMessageStatus);
+            m_pTaskEditor->sig_baseChange.add(&tile, &BaseTaskTile::setBaseStatus);
         }
         return &tile;
     }
     if (name == "BASETASKCOMMAND") {
-        BaseTaskTile& tile = deleter.addNew(new BaseTaskTile(root, m_keys, tx));
+        BaseTaskTile& tile = deleter.addNew(new BaseTaskTile(BaseTaskTile::BasePersonality, root, m_keys, tx));
         tile.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
         if (m_pTaskEditor != 0) {
             m_pTaskEditor->sig_messageChange.add(&tile, &BaseTaskTile::setMessageStatus);

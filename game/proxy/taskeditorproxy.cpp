@@ -5,8 +5,6 @@
 
 #include "game/proxy/taskeditorproxy.hpp"
 #include "afl/base/signalconnection.hpp"
-#include "game/actions/buildship.hpp"
-#include "game/actions/cargocostaction.hpp"
 #include "game/config/userconfiguration.hpp"
 #include "game/game.hpp"
 #include "game/interface/basetaskbuildcommandparser.hpp"
@@ -15,10 +13,13 @@
 #include "game/map/planetstorage.hpp"
 #include "game/root.hpp"
 #include "game/turn.hpp"
+#include "game/interface/buildcommandparser.hpp"
 
 using game::config::UserConfiguration;
+using game::interface::BuildCommandParser;
 using game::interface::NotificationStore;
 using game::interface::ShipTaskPredictor;
+using game::spec::Cost;
 using interpreter::Process;
 using interpreter::TaskEditor;
 
@@ -216,35 +217,23 @@ game::proxy::TaskEditorProxy::Trampoline::describeBase(BaseStatus& out) const
     Game*const g = m_session.getGame().get();
     Root*const r = m_session.getRoot().get();
     game::spec::ShipList*const sl = m_session.getShipList().get();
-    if (m_editor.get() != 0 && m_kind == Process::pkBaseTask && g != 0 && r != 0 && sl != 0) {
-        // Parse current command
-        game::interface::BaseTaskBuildCommandParser parser(*sl);
-        parser.predictStatement(*m_editor, m_editor->getCursor());
+    if (m_editor.get() != 0 && (m_kind == Process::pkBaseTask || m_kind == Process::pkPlanetTask) && g != 0 && r != 0 && sl != 0) {
+        if (game::map::Planet* pl = g->currentTurn().universe().planets().get(m_id)) {
+            BuildCommandParser parser(*pl, *sl, *r, m_session.translator());
+            parser.loadLimit(*m_editor, m_editor->getCursor());
+            parser.predictStatement(*m_editor, m_editor->getCursor());
 
-        if (parser.getOrder().getHullIndex() != 0) {
-            // It's a valid build order, report it
-            parser.getOrder().describe(out.buildOrder, *sl, m_session.translator());
+            std::auto_ptr<BuildCommandParser::Result> result(parser.getResult());
+            if (result.get() != 0) {
+                out.buildOrder = result->info;
+                out.isShipBuildOrder = (result->type == game::interface::BuildCommandParser::OrderType_Ship);
 
-            // Validate cost
-            game::map::Universe& univ = g->currentTurn().universe();
-            try {
-                if (game::map::Planet* pl = univ.planets().get(m_id)) {
-                    game::map::PlanetStorage storage(*pl, r->hostConfiguration());
-                    game::actions::BuildShip a(*pl, storage, *sl, *r);
-                    a.setUsePartsFromStorage(false);
-                    a.setBuildOrder(parser.getOrder());
-
-                    const game::actions::CargoCostAction& cca = a.costAction();
-                    util::NumberFormatter fmt = r->userConfiguration().getNumberFormatter();
-                    addMissingCargo(out.missingMinerals, "T",   cca.getMissingAmount(Element::Tritanium),  fmt);
-                    addMissingCargo(out.missingMinerals, "D",   cca.getMissingAmount(Element::Duranium),   fmt);
-                    addMissingCargo(out.missingMinerals, "M",   cca.getMissingAmount(Element::Molybdenum), fmt);
-                    addMissingCargo(out.missingMinerals, "mc",  cca.getMissingAmount(Element::Money),      fmt);
-                    addMissingCargo(out.missingMinerals, "sup", cca.getMissingAmount(Element::Supplies),   fmt);
-                }
-            }
-            catch (std::exception& e) {
-                // Ignore if planet is not played
+                util::NumberFormatter fmt = r->userConfiguration().getNumberFormatter();
+                addMissingCargo(out.missingMinerals, "T",   result->missingAmount.get(Cost::Tritanium),  fmt);
+                addMissingCargo(out.missingMinerals, "D",   result->missingAmount.get(Cost::Duranium),   fmt);
+                addMissingCargo(out.missingMinerals, "M",   result->missingAmount.get(Cost::Molybdenum), fmt);
+                addMissingCargo(out.missingMinerals, "mc",  result->missingAmount.get(Cost::Money),      fmt);
+                addMissingCargo(out.missingMinerals, "sup", result->missingAmount.get(Cost::Supplies),   fmt);
             }
         }
     }

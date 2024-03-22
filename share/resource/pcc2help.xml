@@ -740,7 +740,7 @@
 
       <p>Missions are grouped by category.
         Categories are displayed atop the mission list.
-        You can select a category for filterung using <kbd>&#x2190;</kbd>/<kbd>&#x2192;</kbd>,
+        You can select a category for filtering using <kbd>&#x2190;</kbd>/<kbd>&#x2192;</kbd>,
         by clicking the category, or by using <kbd>Alt</kbd> plus the category's first letter.</p>
 
       <h2>Reference</h2>
@@ -851,7 +851,10 @@
         <li>Order Commands:
         <ul>
           <li><tt>SetFCode</tt>: self-explanatory;</li>
-        </ul></li>
+          <li><tt>BuildBaseWait</tt>: build a starbase.
+            If there are insufficient resources, waits until it can be built;</li>
+          <li><tt>BuildFactoriesWait</tt>, <tt>BuildMinesWait</tt>, <tt>BuildDefenseWait</tt>: build planetary structures.
+            If there are insufficient resources, or the planet does not have enough colonists, waits until they are available.</li></ul></li>
         <li>Cargo Commands: <tt>CargoUnloadAllShips</tt>: unload Tritanium, Molybdenum, Duranium, colonists, supplies, and cash from all ships in orbit of this planet.
           You can edit the command using <kbd>Space</kbd> to fit your needs;</li>
         <li>Miscellaneous Commands:
@@ -862,6 +865,11 @@
           <li><tt>Restart</tt>: restart auto task from the beginning.</li>
         </ul></li>
       </ul>
+
+      <p>If the cursor is at a "build" command, and there are insufficient minerals, PCC2 will show the missing amounts.
+        Command like <tt>BuildFactoriesWait</tt> may already have been partially executed.
+        In this case, PCC2 will show how many items still need to be built
+        (e.g. "To build: 10/30": of the 30 ordered buildings, 20 have already been built, and 10 still need to be done).</p>
 
       <h2>Reference</h2>
       <dl>

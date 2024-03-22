@@ -24,11 +24,17 @@ namespace client { namespace tiles {
         - connect TaskEditorProxy::sig_messageChange to setMessageStatus */
     class BaseTaskTile : public TaskMessageTile {
      public:
+        enum Personality {
+            PlanetPersonality,
+            BasePersonality
+        };
+
         /** Constructor.
+            @param pers        Personality
             @param root        UI root
             @param keyHandler  Key handler to process button events
             @param tx          Translator */
-        BaseTaskTile(ui::Root& root, gfx::KeyEventConsumer& keyHandler, afl::string::Translator& tx);
+        BaseTaskTile(Personality pers, ui::Root& root, gfx::KeyEventConsumer& keyHandler, afl::string::Translator& tx);
         ~BaseTaskTile();
 
         /** Set base prediction status.
@@ -36,6 +42,7 @@ namespace client { namespace tiles {
         void setBaseStatus(const game::proxy::TaskEditorProxy::BaseStatus& st);
 
      private:
+        Personality m_personality;
         ui::rich::DocumentView m_statusView;
         ui::widgets::Button m_editButton;
     };

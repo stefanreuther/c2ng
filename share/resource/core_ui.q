@@ -1762,7 +1762,32 @@ Sub CCUI.Task.ToggleShowDistances
   AddPref "Task.ShowDistances = " & Not Pref("Task.ShowDistances")
 EndSub
 
+% @since PCC2 2.41.2
+Sub CCUI.Task.AddBuildBaseWait
+  CCUI.Task.AddCommand "BuildBaseWait"
+EndSub
 
+% @since PCC2 2.41.2
+Sub CCUI.Task.AddBuildDefenseWait
+  CCUI.Task.AddBuildStructuresCommand Translate("Build defense posts"), "BuildDefenseWait"
+EndSub
+
+% @since PCC2 2.41.2
+Sub CCUI.Task.AddBuildFactoriesWait
+  CCUI.Task.AddBuildStructuresCommand Translate("Build factories"), "BuildFactoriesWait"
+EndSub
+
+% @since PCC2 2.41.2
+Sub CCUI.Task.AddBuildMinesWait
+  CCUI.Task.AddBuildStructuresCommand Translate("Build mines"), "BuildMinesWait"
+EndSub
+
+% @since PCC2 2.41.2
+Sub CCUI.Task.AddBuildStructuresCommand (title, verb)
+  Local UI.Result
+  UI.InputNumber title, 0, 1000, 0
+  If UI.Result Then CCUI.Task.AddCommand Format("%s %d", verb, UI.Result)
+EndSub
 
 % @since PCC2 2.40.12
 Sub CCUI.Task.AddCargoCommand (title, verb, all)
@@ -2073,7 +2098,11 @@ On ShipTaskOptionsMenu Do
 EndOn
 
 On PlanetTaskOrdersMenu Do
-  AddItem Atom("CCUI.Task.AddSetFCode"), Translate("Set FCode")
+  AddItem Atom("CCUI.Task.AddSetFCode"),           Translate("Set FCode")
+  AddItem Atom("CCUI.Task.AddBuildBaseWait"),      Translate("Build starbase")
+  AddItem Atom("CCUI.Task.AddBuildFactoriesWait"), Translate("Build factories")
+  AddItem Atom("CCUI.Task.AddBuildMinesWait"),     Translate("Build mines")
+  AddItem Atom("CCUI.Task.AddBuildDefenseWait"),   Translate("Build defense posts")
 EndOn
 
 On PlanetTaskCargoMenu Do

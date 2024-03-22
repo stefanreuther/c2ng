@@ -12,7 +12,7 @@
 using util::rich::Text;
 using util::SkinColor;
 
-client::tiles::BaseTaskTile::BaseTaskTile(ui::Root& root, gfx::KeyEventConsumer& keyHandler, afl::string::Translator& tx)
+client::tiles::BaseTaskTile::BaseTaskTile(Personality pers, ui::Root& root, gfx::KeyEventConsumer& keyHandler, afl::string::Translator& tx)
     : TaskMessageTile(root, keyHandler, tx),
       m_statusView(gfx::Point(root.provider().getFont(gfx::FontRequest())->getCellSize().scaledBy(15, 7)), 0, root.provider()),
       m_editButton("E", 'e', root)
@@ -26,11 +26,13 @@ client::tiles::BaseTaskTile::BaseTaskTile(ui::Root& root, gfx::KeyEventConsumer&
     addCommandButton('3', tx("3 - Misc."));
     commandPart().add(deleter().addNew(new ui::Spacer()));
 
-    ui::Group& g = deleter().addNew(new ui::Group(ui::layout::HBox::instance5));
-    g.add(deleter().addNew(new ui::widgets::StaticText(tx("Edit"), SkinColor::Static, gfx::FontRequest(), root.provider(), gfx::RightAlign))
-          .setIsFlexible(true));
-    g.add(m_editButton);
-    commandPart().add(g);
+    if (m_personality == BasePersonality) {
+        ui::Group& g = deleter().addNew(new ui::Group(ui::layout::HBox::instance5));
+        g.add(deleter().addNew(new ui::widgets::StaticText(tx("Edit"), SkinColor::Static, gfx::FontRequest(), root.provider(), gfx::RightAlign))
+              .setIsFlexible(true));
+        g.add(m_editButton);
+        commandPart().add(g);
+    }
 
     setBaseStatus(game::proxy::TaskEditorProxy::BaseStatus());
 }
@@ -49,7 +51,7 @@ client::tiles::BaseTaskTile::setBaseStatus(const game::proxy::TaskEditorProxy::B
         afl::string::Translator& tx = translator();
 
         // Render build order
-        doc.add(Text(SkinColor::White, tx("Ship Build Order:")));
+        doc.add(Text(SkinColor::White, tx("Build Order:")));
         doc.addNewline();
         for (size_t i = 0; i < st.buildOrder.size(); ++i) {
             doc.add(pfx + st.buildOrder[i]);
@@ -69,5 +71,5 @@ client::tiles::BaseTaskTile::setBaseStatus(const game::proxy::TaskEditorProxy::B
     doc.finish();
     m_statusView.handleDocumentUpdate();
 
-    m_editButton.setState(DisabledState, st.buildOrder.empty());
+    m_editButton.setState(DisabledState, st.buildOrder.empty() || !st.isShipBuildOrder);
 }

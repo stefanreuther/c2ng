@@ -319,6 +319,18 @@ Sub BuildBaseDefenseWait (amount)
   Loop
 EndSub
 
+% @q BuildBaseWait (Planet Command)
+% Build a starbase, wait as necessary.
+% If the starbase cannot be built immediately due to lacking resources, this command waits.
+% Returns when the base has been built.
+% @since PCC2 2.0.16, PCC2 2.41.2
+Sub BuildBaseWait
+  Do While Not Base.YesNo
+    Try BuildBase
+    Stop
+  Loop
+EndSub
+
 % @q FixShipWait (Ship Command)
 % @q FixShipWait id:Int (Planet Command)
 % Fix ship at starbase when possible.

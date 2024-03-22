@@ -12,7 +12,9 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/interface/missionlistcontext.cpp \
+FILES_gamelib = game/interface/buildcommandparser.cpp \
+    game/interface/buildcommandparser.hpp \
+    game/interface/missionlistcontext.cpp \
     game/interface/missionlistcontext.hpp game/proxy/vcrexportadaptor.cpp \
     game/proxy/vcrexportadaptor.hpp game/proxy/viewpointstarbaseadaptor.cpp \
     game/proxy/viewpointstarbaseadaptor.hpp game/proxy/listproxy.cpp \
@@ -850,8 +852,7 @@ FILES_guilib = client/dialogs/missionselection.cpp \
     client/dialogs/shipcostcalculator.hpp client/dialogs/buildshiporder.cpp \
     client/dialogs/buildshiporder.hpp client/dialogs/buildshipmain.cpp \
     client/dialogs/buildshipmain.hpp client/dialogs/scriptcommanddialog.cpp \
-    client/dialogs/scriptcommanddialog.hpp client/tiles/planettasktile.cpp \
-    client/tiles/planettasktile.hpp client/tiles/basetasktile.cpp \
+    client/dialogs/scriptcommanddialog.hpp client/tiles/basetasktile.cpp \
     client/tiles/basetasktile.hpp client/tiles/shiptasktile.cpp \
     client/tiles/shiptasktile.hpp client/tiles/taskmessagetile.cpp \
     client/tiles/taskmessagetile.hpp client/map/shiptaskoverlay.cpp \
@@ -1797,7 +1798,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/game/interface/missionlistcontexttest.cpp \
+FILES_testsuite = test/game/interface/buildcommandparsertest.cpp \
+    test/game/interface/missionlistcontexttest.cpp \
     test/game/proxy/vcrexportadaptortest.cpp \
     test/server/talk/render/rendertest.cpp \
     test/game/proxy/viewpointstarbaseadaptortest.cpp \

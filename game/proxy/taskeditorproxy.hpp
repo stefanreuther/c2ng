@@ -63,8 +63,9 @@ namespace game { namespace proxy {
         struct BaseStatus {
             afl::data::StringList_t buildOrder;      ///< Build order in textual form. Empty if there is no build order. See ShipBuildOrder::describe().
             String_t missingMinerals;                ///< Missing minerals in textual form. Empty if there is nothing missing.
+            bool isShipBuildOrder;                   ///< True for ship build order.
             BaseStatus()
-                : buildOrder(), missingMinerals()
+                : buildOrder(), missingMinerals(), isShipBuildOrder()
                 { }
         };
 
