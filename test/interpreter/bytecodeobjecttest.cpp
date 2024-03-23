@@ -5,6 +5,7 @@
 
 #include "interpreter/bytecodeobject.hpp"
 
+#include <stdexcept>
 #include "afl/data/integervalue.hpp"
 #include "afl/data/stringvalue.hpp"
 #include "afl/io/nullfilesystem.hpp"
@@ -95,6 +96,37 @@ AFL_TEST("interpreter.BytecodeObject:args", a)
     a.check("34. hasLocalVariable", testee.hasLocalVariable("D"));
     a.check("35. hasLocalVariable", testee.hasLocalVariable("E"));
     a.check("36. hasLocalVariable", testee.hasLocalVariable("F"));
+}
+
+/** Test addLocalVariable(). */
+AFL_TEST("interpreter.BytecodeObject:addLocalVariable", a)
+{
+    interpreter::BytecodeObject testee;
+    uint16_t x = testee.addLocalVariable("X");
+    uint16_t y = testee.addLocalVariable("Y");
+    a.checkDifferent("01", x, y);
+    a.check("02", testee.hasLocalVariable("X"));
+    a.check("03", testee.hasLocalVariable("Y"));
+}
+
+/** Test addLocalVariable(), overflow. */
+AFL_TEST("interpreter.BytecodeObject:addLocalVariable:overflow", a)
+{
+    interpreter::BytecodeObject testee;
+
+    // The limit is 65536, but out-of-memory or size restrictions may mean we need to stop earlier
+    // (This requires at least 448k, most likely around 1.5 to 2M, for the NameMap.)
+    try {
+        for (int32_t i = 0; i < 65536; ++i) {
+            testee.addLocalVariable(afl::string::Format("V%d", i));
+        }
+    }
+    catch (...) {
+    }
+
+    // Adding next one must fail - either due to overflow,
+    // or due to getting into the same out-of-memory situation as before.
+    AFL_CHECK_THROWS(a, testee.addLocalVariable("X"), std::exception);
 }
 
 /** Test copyLocalVariablesFrom. */

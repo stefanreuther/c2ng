@@ -141,6 +141,14 @@ interpreter::BytecodeObject::addArgument(String_t name, bool optional)
     return result;
 }
 
+// Add local variable.
+uint16_t
+interpreter::BytecodeObject::addLocalVariable(const String_t& name)
+{
+    // ex IntBytecodeObject::addLocalVariable
+    return packIndex(m_localVariables.add(name));
+}
+
 // Get subroutine name.
 String_t
 interpreter::BytecodeObject::getSubroutineName() const

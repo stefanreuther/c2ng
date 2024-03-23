@@ -392,14 +392,6 @@ namespace interpreter {
 
 /**************************** Inline Functions ***************************/
 
-// Add local variable.
-inline uint16_t
-interpreter::BytecodeObject::addLocalVariable(const String_t& name)
-{
-    // ex IntBytecodeObject::addLocalVariable
-    return uint16_t(m_localVariables.add(name));
-}
-
 // Check whether local variable is present.
 inline bool
 interpreter::BytecodeObject::hasLocalVariable(const String_t& name)
