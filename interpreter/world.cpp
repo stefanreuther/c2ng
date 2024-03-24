@@ -275,7 +275,7 @@ interpreter::World::compileFile(afl::io::Stream& file, const String_t& origin, i
         return nbco;
     }
     catch (Error& e) {
-        fcs.addTraceTo(e, afl::string::Translator::getSystemInstance());
+        fcs.addTraceTo(e, m_translator);
         throw e;
     }
 }

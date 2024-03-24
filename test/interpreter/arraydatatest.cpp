@@ -291,6 +291,21 @@ AFL_TEST("interpreter.ArrayData:resize", a)
     }
 }
 
+AFL_TEST("interpreter.ArrayData:resize:in-place", a)
+{
+    interpreter::ArrayData testee;
+    a.check("01. addDimension", testee.addDimension(10));
+    testee.content().setNew(8, interpreter::makeIntegerValue(10));
+    testee.content().setNew(9, interpreter::makeIntegerValue(20));
+
+    // Reduce size
+    interpreter::ArrayData newSize;
+    a.check("11. addDimension", newSize.addDimension(9));
+    testee.resize(newSize);
+    a.checkNonNull("12. get", testee.content()[8]);
+    a.checkNull("13. get", testee.content()[9]);
+}
+
 /** Test dimensions. */
 
 // Maximum size
@@ -359,4 +374,11 @@ AFL_TEST("interpreter.ArrayData:addDimension:limit:half-squared", a)
     interpreter::ArrayData ad;
     a.check("01", ad.addDimension(50010001));
     a.check("02", !ad.addDimension(50010001));
+}
+
+// Negative
+AFL_TEST("interpreter.ArrayData:addDimension:negative", a)
+{
+    interpreter::ArrayData ad;
+    a.check("01", !ad.addDimension(-1));
 }

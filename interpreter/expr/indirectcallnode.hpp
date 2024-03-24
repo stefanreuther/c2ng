@@ -18,7 +18,6 @@ namespace interpreter { namespace expr {
         IndirectCallNode(const Node& func);
 
         // Node:
-        // FIXME: this overrides functions already implemented uptree in RValueNode (compileStore, compileRead, compileWrite)
         void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const;
         void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
         void compileStore(BytecodeObject& bco, const CompilationContext& cc, const Node& rhs) const;

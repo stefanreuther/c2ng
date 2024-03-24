@@ -8,9 +8,14 @@
 #include <stdexcept>
 #include "afl/data/access.hpp"
 #include "afl/data/booleanvalue.hpp"
+#include "afl/data/errorvalue.hpp"
 #include "afl/data/floatvalue.hpp"
+#include "afl/data/hash.hpp"
+#include "afl/data/hashvalue.hpp"
 #include "afl/data/integervalue.hpp"
 #include "afl/data/stringvalue.hpp"
+#include "afl/data/vector.hpp"
+#include "afl/data/vectorvalue.hpp"
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
@@ -18,6 +23,7 @@
 #include "afl/test/testrunner.hpp"
 #include "interpreter/arraydata.hpp"
 #include "interpreter/arrayvalue.hpp"
+#include "interpreter/bytecodeobject.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/filevalue.hpp"
 #include "interpreter/hashvalue.hpp"
@@ -31,7 +37,9 @@ using afl::data::Hash;
 using afl::data::IntegerValue;
 using afl::data::StringValue;
 using afl::data::Value;
+using afl::data::Vector;
 using interpreter::ArrayValue;
+using interpreter::BytecodeObject;
 using interpreter::FileValue;
 using interpreter::HashValue;
 using interpreter::KeymapValue;
@@ -1112,4 +1120,16 @@ AFL_TEST("interpreter.UnaryExecution:unLCase", a)
 
     // Type error
     AFL_CHECK_THROWS(a("21. type error"), p.reset(executeUnaryOperation(h.world, interpreter::unLCase, addr(IntegerValue(42)))), interpreter::Error);
+}
+
+/** Invalid types must be rejected. */
+AFL_TEST("interpreter.UnaryExecution:bad-types", a)
+{
+    TestHarness h;
+    std::auto_ptr<Value> p;
+
+    AFL_CHECK_THROWS(a("01. Hash"),   p.reset(executeUnaryOperation(h.world, interpreter::unNeg, addr(afl::data::HashValue(Hash::create())))),           interpreter::Error);
+    AFL_CHECK_THROWS(a("02. Vector"), p.reset(executeUnaryOperation(h.world, interpreter::unNeg, addr(afl::data::VectorValue(Vector::create())))),       interpreter::Error);
+    AFL_CHECK_THROWS(a("03. Subr"),   p.reset(executeUnaryOperation(h.world, interpreter::unNeg, addr(SubroutineValue(BytecodeObject::create(false))))), interpreter::Error);
+    AFL_CHECK_THROWS(a("04. Error"),  p.reset(executeUnaryOperation(h.world, interpreter::unNeg, addr(afl::data::ErrorValue("a", "b")))),                interpreter::Error);
 }

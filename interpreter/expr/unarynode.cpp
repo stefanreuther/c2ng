@@ -13,7 +13,7 @@ interpreter::expr::UnaryNode::compileValue(BytecodeObject& bco, const Compilatio
 }
 
 void
-interpreter::expr::UnaryNode::compileEffect(BytecodeObject& bco, const interpreter::CompilationContext& cc) const
+interpreter::expr::UnaryNode::compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
 {
     defaultCompileEffect(bco, cc);
 }

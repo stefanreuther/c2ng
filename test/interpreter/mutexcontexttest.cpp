@@ -64,7 +64,6 @@ AFL_TEST("interpreter.MutexContext:save", a)
     E: correct results */
 AFL_TEST("interpreter.MutexContext:basics", a)
 {
-    interpreter::MutexList list;
     interpreter::MutexContext testee("NAME", "long info");
 
     // lookup: always fails
@@ -91,4 +90,8 @@ AFL_TEST("interpreter.MutexContext:basics", a)
     // toString
     a.checkEqual("31. toString", testee.toString(false), "#<lock>");
     a.checkEqual("32. toString", testee.toString(true), "Lock(\"NAME\",\"long info\")");
+
+    // clone
+    std::auto_ptr<interpreter::MutexContext> clone(testee.clone());
+    a.checkNonNull("41. clone", clone.get());
 }

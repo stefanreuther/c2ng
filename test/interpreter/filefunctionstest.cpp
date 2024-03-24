@@ -101,12 +101,7 @@ namespace {
     {
         // Build a command source
         interpreter::MemoryCommandSource mcs;
-        const char* q = stmt;
-        while (const char* p = strchr(q, '\n')) {
-            mcs.addLine(String_t(q, p - q));
-            q = p+1;
-        }
-        mcs.addLine(q);
+        mcs.addLines(afl::string::toMemory(stmt));
 
         // Build compilation environment
         interpreter::Process exec(world, "checkStatement", 9);

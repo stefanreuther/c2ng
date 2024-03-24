@@ -155,11 +155,11 @@ interpreter::mustBeStringValue(const afl::data::Value* value)
 }
 
 int32_t
-interpreter::mustBeScalarValue(const afl::data::Value* value)
+interpreter::mustBeScalarValue(const afl::data::Value* value, Error::ExpectedType ty)
 {
     const afl::data::ScalarValue* sv = dynamic_cast<const afl::data::ScalarValue*>(value);
     if (sv == 0) {
-        throw interpreter::Error::typeError(interpreter::Error::ExpectInteger);
+        throw interpreter::Error::typeError(ty);
     }
     return sv->getValue();
 }

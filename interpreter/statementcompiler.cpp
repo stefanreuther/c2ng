@@ -37,6 +37,8 @@ namespace {
     using interpreter::Error;
     using interpreter::StatementCompilationContext;
     using interpreter::Tokenizer;
+    using interpreter::expr::Node;
+    using interpreter::expr::Parser;
 
     enum TypeKeyword {
         tkNone,
@@ -739,7 +741,7 @@ interpreter::StatementCompiler::compileAbort(BytecodeObject& bco, const Statemen
 
     /* Parse args */
     afl::base::Deleter del;
-    std::vector<const interpreter::expr::Node*> args;
+    std::vector<const Node*> args;
     m_commandSource.tokenizer().readNextToken();
     parseArgumentList(args, del);
     checkArgumentCount(args.size(), 0, 1);
@@ -834,7 +836,7 @@ interpreter::StatementCompiler::compileBind(BytecodeObject& bco, const Statement
     /* Parse assignments */
     while (1) {
         afl::base::Deleter del;
-        interpreter::expr::Parser(m_commandSource.tokenizer(), del).parseNA()
+        Parser(m_commandSource.tokenizer(), del).parseNA()
             .compileValue(bco, scc);
 
         /* Here, we only accept ":=", because "=" is swallowed by parseNA anyway. */
@@ -842,7 +844,7 @@ interpreter::StatementCompiler::compileBind(BytecodeObject& bco, const Statement
             throw Error::expectSymbol(":=");
         }
 
-        interpreter::expr::Parser(m_commandSource.tokenizer(), del).parseNA()
+        Parser(m_commandSource.tokenizer(), del).parseNA()
             .compileValue(bco, scc);
         bco.addInstruction(Opcode::maTernary, teKeyAdd, 0);
 
@@ -896,13 +898,13 @@ interpreter::StatementCompiler::compileCall(BytecodeObject& bco, const Statement
 
     /* Procedure */
     afl::base::Deleter del;
-    const interpreter::expr::Node& procedure(interpreter::expr::Parser(tok, del).parse());
+    const Node& procedure(Parser(tok, del).parse());
 
     /* Skip comma */
     tok.checkAdvance(tok.tComma);
 
     /* Arguments */
-    std::vector<const interpreter::expr::Node*> args;
+    std::vector<const Node*> args;
     parseArgumentList(args, del);
     for (size_t i = 0; i != args.size(); ++i) {
         args[i]->compileValue(bco, scc);
@@ -915,7 +917,7 @@ interpreter::StatementCompiler::compileCall(BytecodeObject& bco, const Statement
     if (const interpreter::expr::BinaryNode* n = dynamic_cast<const interpreter::expr::BinaryNode*>(&procedure)) {
         if (n->is(biConcat) || n->is(biAdd) || n->is(biSub)) {
             Error e("Binary operator in first operand to 'Call' is most likely not what you want");
-            m_commandSource.addTraceTo(e, afl::string::Translator::getSystemInstance());
+            m_commandSource.addTraceTo(e, scc.world().translator());
             scc.world().logError(afl::sys::LogListener::Warn, e);
         }
     }
@@ -1245,7 +1247,7 @@ interpreter::StatementCompiler::compileEval(BytecodeObject& bco, const Statement
 
     /* Read arguments */
     afl::base::Deleter del;
-    std::vector<const interpreter::expr::Node*> args;
+    std::vector<const Node*> args;
     parseArgumentList(args, del);
     if (args.size() == 0)
         throw Error::tooFewArguments("Eval");
@@ -1294,31 +1296,33 @@ interpreter::StatementCompiler::compileFor(BytecodeObject& bco, const StatementC
                                        BytecodeObject::Label_t lcontinue,
                                        BytecodeObject::Label_t lbreak)
             : StatementCompilationContext(parent),
-              mustdrop(mustdrop),
-              lcontinue(lcontinue),
-              lbreak(lbreak)
+              m_mustDrop(mustdrop),
+              m_continueLabel(lcontinue),
+              m_breakLabel(lbreak)
             {
                 withoutFlag(LinearExecution);
             }
         void compileBreak(BytecodeObject& bco) const
             {
-                if (mustdrop)
+                if (m_mustDrop) {
                     bco.addInstruction(Opcode::maStack, Opcode::miStackDrop, 1);
-                bco.addJump(Opcode::jAlways, lbreak);
+                }
+                bco.addJump(Opcode::jAlways, m_breakLabel);
             }
         void compileContinue(BytecodeObject& bco) const
             {
-                bco.addJump(Opcode::jAlways, lcontinue);
+                bco.addJump(Opcode::jAlways, m_continueLabel);
             }
         void compileCleanup(BytecodeObject& bco) const
             {
-                if (mustdrop)
+                if (m_mustDrop) {
                     bco.addInstruction(Opcode::maStack, Opcode::miStackDrop, 1);
+                }
                 defaultCompileCleanup(bco);
             }
 
-        bool mustdrop;
-        BytecodeObject::Label_t lcontinue, lbreak;
+        bool m_mustDrop;
+        BytecodeObject::Label_t m_continueLabel, m_breakLabel;
     };
 
     /* Parse it */
@@ -1338,13 +1342,13 @@ interpreter::StatementCompiler::compileFor(BytecodeObject& bco, const StatementC
 
     /* ...start expression... */
     afl::base::Deleter del;
-    const interpreter::expr::Node& start(interpreter::expr::Parser(tok, del).parse());
+    const Node& start(Parser(tok, del).parse());
     if (!tok.checkAdvance("TO")) {
         throw Error::expectKeyword("To");
     }
 
     /* ...end expression... */
-    const interpreter::expr::Node& end(interpreter::expr::Parser(tok, del).parse());
+    const Node& end(Parser(tok, del).parse());
 
     /* Generate code for head */
     /*
@@ -1493,7 +1497,7 @@ interpreter::StatementCompiler::compileForEach(BytecodeObject& bco, const Statem
 
     /* Compile scope expression */
     tok.readNextToken();
-    const interpreter::expr::Node& scope_expr(interpreter::expr::Parser(tok, del).parse());
+    const Node& scope_expr(Parser(tok, del).parse());
     if (tok.checkAdvance("AS")) {
         /* Named iteration variable */
         /*     <expr>             break: j end
@@ -1522,8 +1526,8 @@ interpreter::StatementCompiler::compileForEach(BytecodeObject& bco, const Statem
                                                BytecodeObject::Label_t lcontinue,
                                                BytecodeObject::Label_t lend)
                 : StatementCompilationContext(parent),
-                  lcontinue(lcontinue),
-                  lend(lend)
+                  m_continueLabel(lcontinue),
+                  m_endLabel(lend)
                 {
                     withoutFlag(LinearExecution);
                 }
@@ -1532,17 +1536,17 @@ interpreter::StatementCompiler::compileForEach(BytecodeObject& bco, const Statem
                     /* This will leave the induction variable set to the current value.
                        This is not an explicitly documented feature for now; leaving it anyway for
                        now because it may allow for something clever. */
-                    bco.addJump(Opcode::jAlways, lend);
+                    bco.addJump(Opcode::jAlways, m_endLabel);
                 }
             void compileContinue(BytecodeObject& bco) const
-                { bco.addJump(Opcode::jAlways, lcontinue); }
+                { bco.addJump(Opcode::jAlways, m_continueLabel); }
             void compileCleanup(BytecodeObject& bco) const
                 {
                     bco.addInstruction(Opcode::maStack, Opcode::miStackDrop, 1);
                     defaultCompileCleanup(bco);
                 }
          private:
-            BytecodeObject::Label_t lcontinue, lend;
+            BytecodeObject::Label_t m_continueLabel, m_endLabel;
         };
 
         ForEachStatementCompilationContext subcc(scc, lcontinue, lend);
@@ -1572,8 +1576,8 @@ interpreter::StatementCompiler::compileForEach(BytecodeObject& bco, const Statem
                                                BytecodeObject::Label_t lcontinue,
                                                BytecodeObject::Label_t lend)
                 : StatementCompilationContext(parent),
-                  lcontinue(lcontinue),
-                  lend(lend)
+                  m_continueLabel(lcontinue),
+                  m_endLabel(lend)
                 {
                     withoutFlag(LocalContext);
                     withoutFlag(LinearExecution);
@@ -1582,18 +1586,18 @@ interpreter::StatementCompiler::compileForEach(BytecodeObject& bco, const Statem
             void compileBreak(BytecodeObject& bco) const
                 {
                     bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialEndIndex, 0);
-                    bco.addJump(Opcode::jAlways, lend);
+                    bco.addJump(Opcode::jAlways, m_endLabel);
                 }
             void compileContinue(BytecodeObject& bco) const
                 {
-                    bco.addJump(Opcode::jAlways, lcontinue);
+                    bco.addJump(Opcode::jAlways, m_continueLabel);
                 }
             void compileCleanup(BytecodeObject& bco) const
                 {
                     defaultCompileCleanup(bco);
                 }
          private:
-            BytecodeObject::Label_t lcontinue, lend;
+            BytecodeObject::Label_t m_continueLabel, m_endLabel;
         };
 
         ForEachStatementCompilationContext subcc(scc, lcontinue, lend);
@@ -1752,7 +1756,7 @@ interpreter::StatementCompiler::compileLoad(BytecodeObject& bco, const Statement
     /* Parse it */
     m_commandSource.tokenizer().readNextToken();
     afl::base::Deleter del;
-    const interpreter::expr::Node& node(interpreter::expr::Parser(m_commandSource.tokenizer(), del).parse());
+    const Node& node(Parser(m_commandSource.tokenizer(), del).parse());
     parseEndOfLine();
 
     /* Precompilation */
@@ -2060,7 +2064,7 @@ interpreter::StatementCompiler::compilePrint(BytecodeObject& bco, const Statemen
        @since PCC2 1.99.9, PCC 1.0.6 */
 
     /* Parse it */
-    std::vector<const interpreter::expr::Node*> nodes;
+    std::vector<const Node*> nodes;
     afl::base::Deleter del;
     m_commandSource.tokenizer().readNextToken();
     parseArgumentList(nodes, del);
@@ -3007,7 +3011,7 @@ interpreter::StatementCompiler::compileExpressionStatement(BytecodeObject& bco, 
     // ex IntStatementCompiler::compileExpressionStatement(BytecodeObject& bco, const IntStatementCompilationContext& scc)
     /* Parse expression */
     afl::base::Deleter del;
-    const interpreter::expr::Node* node = &interpreter::expr::Parser(m_commandSource.tokenizer(), del).parse();
+    const Node* node = &Parser(m_commandSource.tokenizer(), del).parse();
     if (m_commandSource.tokenizer().getCurrentToken() != Tokenizer::tEnd) {
         throw Error::garbageAtEnd(true);
     }
@@ -3041,7 +3045,7 @@ interpreter::StatementCompiler::compileProcedureCall(BytecodeObject& bco, const 
 
     /* Compile args */
     afl::base::Deleter del;
-    std::vector<const interpreter::expr::Node*> args;
+    std::vector<const Node*> args;
     parseArgumentList(args, del);
     for (size_t i = 0; i != args.size(); ++i) {
         args[i]->compileValue(bco, scc);
@@ -3136,7 +3140,7 @@ interpreter::StatementCompiler::compileVariableDefinition(BytecodeObject& bco, c
                     bco.addInstruction(Opcode::maStack, Opcode::miStackDrop, 1);
                 }
                 Error e(afl::string::Format("Duplicate local variable name '%s'", name));
-                m_commandSource.addTraceTo(e, afl::string::Translator::getSystemInstance());
+                m_commandSource.addTraceTo(e, scc.world().translator());
                 scc.world().logError(afl::sys::LogListener::Warn, e);
             } else {
                 /* We know that this is a new variable, so initialize it */
@@ -3316,7 +3320,7 @@ interpreter::StatementCompiler::compileArgumentExpression(BytecodeObject& bco, c
 {
     // ex IntStatementCompiler::compileArgumentExpression
     afl::base::Deleter del;
-    interpreter::expr::Parser(m_commandSource.tokenizer(), del).parse()
+    Parser(m_commandSource.tokenizer(), del).parse()
         .compileValue(bco, scc);
 }
 
@@ -3332,7 +3336,7 @@ interpreter::StatementCompiler::compileArgumentCondition(BytecodeObject& bco, co
 {
     // ex IntStatementCompiler::compileArgumentCondition
     afl::base::Deleter del;
-    interpreter::expr::Parser(m_commandSource.tokenizer(), del).parse()
+    Parser(m_commandSource.tokenizer(), del).parse()
         .compileCondition(bco, scc, ift, iff);
 }
 
@@ -3418,7 +3422,7 @@ interpreter::StatementCompiler::compileNameString(BytecodeObject& bco, const Sta
         // ByName(expr) syntax
         tok.readNextToken();
         afl::base::Deleter del;
-        const interpreter::expr::Node& node(interpreter::expr::Parser(m_commandSource.tokenizer(), del).parse());
+        const Node& node(Parser(m_commandSource.tokenizer(), del).parse());
         if (!tok.checkAdvance(tok.tRParen)) {
             throw Error::expectSymbol(")");
         }
@@ -3516,7 +3520,7 @@ interpreter::parseCommandArgumentList(Tokenizer& tok, std::vector<const interpre
     if (tok.getCurrentToken() != tok.tEnd) {
         /* We have some arguments */
         while (1) {
-            args.push_back(&interpreter::expr::Parser(tok, del).parse());
+            args.push_back(&Parser(tok, del).parse());
             if (!parseNext(tok)) {
                 break;
             }

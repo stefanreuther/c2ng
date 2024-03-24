@@ -21,10 +21,10 @@ namespace interpreter { namespace expr {
         /** Get number of arguments.
             @return number */
         size_t getNumArgs() const
-            { return args.size(); }
+            { return m_args.size(); }
 
      protected:
-        std::vector<const Node*> args;
+        std::vector<const Node*> m_args;
     };
 
 } }

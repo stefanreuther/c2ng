@@ -21,7 +21,7 @@ interpreter::expr::LiteralNode::compileValue(BytecodeObject& bco, const Compilat
 }
 
 void
-interpreter::expr::LiteralNode::compileEffect(BytecodeObject& bco, const interpreter::CompilationContext& cc) const
+interpreter::expr::LiteralNode::compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
 {
     defaultCompileEffect(bco, cc);
 }

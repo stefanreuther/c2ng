@@ -89,11 +89,14 @@ AFL_TEST("interpreter.MutexList:basics", a)
     // Free the mutexes
     m2->removeReference();
     a.checkNull("71. M2", testee.query("M2"));
+    a.check("72. M2", !testee.hasLock("M2"));
 
     m1->removeReference();
     a.checkEqual("81. M1", testee.query("M1"), m1);
+    a.check("82. M2", testee.hasLock("M1"));
     m1->removeReference();
-    a.checkNull("82. M1", testee.query("M1"));
+    a.checkNull("85. M1", testee.query("M1"));
+    a.check("86. M2", !testee.hasLock("M1"));
 
     // Not a collision anymore
     m1 = 0;

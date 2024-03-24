@@ -1819,11 +1819,8 @@ interpreter::Process::handleNewArray(uint16_t ndim)
     // Create array object
     afl::base::Ref<ArrayData> ad = *new ArrayData();
     for (size_t i = 0; i < ndim; ++i) {
-        afl::data::ScalarValue* iv = dynamic_cast<afl::data::ScalarValue*>(m_valueStack.top(ndim - i - 1));
-        if (!iv) {
-            throw Error::typeError(Error::ExpectInteger);
-        }
-        if (!ad->addDimension(iv->getValue())) {
+        int32_t iv = mustBeScalarValue(m_valueStack.top(ndim - i - 1), Error::ExpectInteger);
+        if (!ad->addDimension(iv)) {
             throw Error::rangeError();
         }
     }
@@ -1846,11 +1843,8 @@ interpreter::Process::handleResizeArray(uint16_t ndim)
     // Create dummy array object
     ArrayData ad;
     for (size_t i = 0; i < ndim; ++i) {
-        afl::data::ScalarValue* iv = dynamic_cast<afl::data::ScalarValue*>(m_valueStack.top(ndim - i - 1));
-        if (!iv) {
-            throw Error::typeError(Error::ExpectInteger);
-        }
-        if (!ad.addDimension(iv->getValue())) {
+        int32_t iv = mustBeScalarValue(m_valueStack.top(ndim - i - 1), Error::ExpectInteger);
+        if (!ad.addDimension(iv)) {
             throw Error::rangeError();
         }
     }

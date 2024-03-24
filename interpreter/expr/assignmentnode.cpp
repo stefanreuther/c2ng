@@ -14,7 +14,7 @@ interpreter::expr::AssignmentNode::compileValue(BytecodeObject& bco, const Compi
 }
 
 void
-interpreter::expr::AssignmentNode::compileEffect(BytecodeObject& bco, const interpreter::CompilationContext& cc) const
+interpreter::expr::AssignmentNode::compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
 {
     defaultCompileEffect(bco, cc);
 }

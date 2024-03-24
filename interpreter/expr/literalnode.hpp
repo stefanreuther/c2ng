@@ -21,7 +21,7 @@ namespace interpreter { namespace expr {
 
         // Node:
         void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
-        void compileEffect(BytecodeObject& bco, const interpreter::CompilationContext& cc) const;
+        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const;
         void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const;
 
         /** Get value.

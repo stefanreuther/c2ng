@@ -595,7 +595,7 @@ AFL_TEST("interpreter.ProcessList:terminateProcess", a)
 
     interpreter::ProcessList testee;
 
-    // Two processes in one process group
+    // Two processes
     Process& p1 = testee.create(world, "1");
     Process& p2 = testee.create(world, "2");
     p1.pushFrame(makeEmptyBCO(), false);
@@ -626,7 +626,7 @@ AFL_TEST("interpreter.ProcessList:resumeSuspendedProcesses", a)
 
     interpreter::ProcessList testee;
 
-    // Two processes in one process group
+    // Two processes
     Process& p1 = testee.create(world, "1");
     Process& p2 = testee.create(world, "2");
     p1.pushFrame(makeEmptyBCO(), false);
@@ -657,7 +657,7 @@ AFL_TEST("interpreter.ProcessList:terminateAllProcesses", a)
 
     interpreter::ProcessList testee;
 
-    // Two processes in one process group
+    // Two processes
     Process& p1 = testee.create(world, "1");
     Process& p2 = testee.create(world, "2");
     p1.pushFrame(makeEmptyBCO(), false);

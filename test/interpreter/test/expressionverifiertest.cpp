@@ -95,7 +95,9 @@ AFL_TEST("interpreter.test.ExpressionVerifier:verifyParseError", a)
 {
     ExpressionVerifier testee(a);
     AFL_CHECK_SUCCEEDS(a("01. verifyParseError"), testee.verifyParseError("("));
-    AFL_CHECK_THROWS  (a("02. verifyParseError"), testee.verifyParseError("1"), AssertionFailedException);
+    AFL_CHECK_SUCCEEDS(a("02. verifyParseError"), testee.verifyParseError("a'"));
+    AFL_CHECK_SUCCEEDS(a("03. verifyParseError"), testee.verifyParseError("'"));
+    AFL_CHECK_THROWS  (a("04. verifyParseError"), testee.verifyParseError("1"), AssertionFailedException);
 }
 
 AFL_TEST("interpreter.test.ExpressionVerifier:verifyStatement", a)

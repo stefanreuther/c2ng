@@ -70,7 +70,7 @@ namespace {
 }
 
 /** Test all closure methods. */
-AFL_TEST("interpreter.Closure", a)
+AFL_TEST("interpreter.Closure:basics", a)
 {
     // ex IntCompoundTestSuite::testClosure
     // Create a test callable and make sure it works (yes, this leaks on failure)
@@ -167,4 +167,32 @@ AFL_TEST("interpreter.Closure", a)
         a.checkEqual("91. getState", base->getState(), "3,\"zz\",42,True,1,9,5,y");
         base->clear();
     }
+}
+
+/** Test closure: most dimensions bound. */
+AFL_TEST("interpreter.Closure:most-dimensions-bound", a)
+{
+    std::auto_ptr<interpreter::Closure> c(new interpreter::Closure());
+    c->setNewFunction(new MyCallable());
+    for (int i = 0; i < 5; ++i) {
+        c->addNewArgument(interpreter::makeIntegerValue(i));
+    }
+
+    a.checkEqual("01", c->getDimension(0), 2);
+    a.checkEqual("02", c->getDimension(1), 30);
+    a.checkEqual("03", c->getDimension(2), 35);
+    a.checkEqual("04", c->getDimension(3), 0);
+}
+
+/** Test closure: all dimensions bound. */
+AFL_TEST("interpreter.Closure:all-dimensions-bound", a)
+{
+    std::auto_ptr<interpreter::Closure> c(new interpreter::Closure());
+    c->setNewFunction(new MyCallable());
+    for (int i = 0; i < 7; ++i) {
+        c->addNewArgument(interpreter::makeIntegerValue(i));
+    }
+
+    a.checkEqual("01", c->getDimension(0), 0);
+    a.checkEqual("02", c->getDimension(1), 0);
 }

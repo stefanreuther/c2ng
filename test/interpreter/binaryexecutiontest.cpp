@@ -8,9 +8,14 @@
 #include <stdexcept>
 #include "afl/data/access.hpp"
 #include "afl/data/booleanvalue.hpp"
+#include "afl/data/errorvalue.hpp"
 #include "afl/data/floatvalue.hpp"
+#include "afl/data/hash.hpp"
+#include "afl/data/hashvalue.hpp"
 #include "afl/data/integervalue.hpp"
 #include "afl/data/stringvalue.hpp"
+#include "afl/data/vector.hpp"
+#include "afl/data/vectorvalue.hpp"
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
@@ -25,12 +30,15 @@
 #include "interpreter/world.hpp"
 
 using afl::data::BooleanValue;
+using afl::data::ErrorValue;
 using afl::data::FloatValue;
 using afl::data::Hash;
 using afl::data::IntegerValue;
 using afl::data::StringValue;
 using afl::data::Value;
+using afl::data::Vector;
 using interpreter::ArrayValue;
+using interpreter::BytecodeObject;
 using interpreter::FileValue;
 using interpreter::HashValue;
 using interpreter::KeymapValue;
@@ -1199,4 +1207,40 @@ AFL_TEST("interpreter.BinaryExecution:executeComparison", a)
 
     // Error - wrong opcode
     AFL_CHECK_THROWS(a("51. opcode"), interpreter::executeComparison(interpreter::biAdd, addr(IntegerValue(1)), addr(IntegerValue(1))), interpreter::Error);
+}
+
+/** Invalid types must be rejected: arithmetic. */
+AFL_TEST("interpreter.BinaryExecution:bad-types:arith", a)
+{
+    TestHarness h;
+
+    AFL_CHECK_THROWS(a("01. hash+int"), h.exec(interpreter::biSub, addr(afl::data::HashValue(Hash::create())), addr(IntegerValue(1))), interpreter::Error);
+    AFL_CHECK_THROWS(a("02. int+hash"), h.exec(interpreter::biSub, addr(IntegerValue(1)), addr(afl::data::HashValue(Hash::create()))), interpreter::Error);
+
+    AFL_CHECK_THROWS(a("11. vector+int"), h.exec(interpreter::biSub, addr(afl::data::VectorValue(Vector::create())), addr(IntegerValue(1))), interpreter::Error);
+    AFL_CHECK_THROWS(a("12. int+vector"), h.exec(interpreter::biSub, addr(IntegerValue(1)), addr(afl::data::VectorValue(Vector::create()))), interpreter::Error);
+
+    AFL_CHECK_THROWS(a("21. subr+int"), h.exec(interpreter::biSub, addr(SubroutineValue(BytecodeObject::create(false))), addr(IntegerValue(1))), interpreter::Error);
+    AFL_CHECK_THROWS(a("22. int+subr"), h.exec(interpreter::biSub, addr(IntegerValue(1)), addr(SubroutineValue(BytecodeObject::create(false)))), interpreter::Error);
+
+    AFL_CHECK_THROWS(a("31. error+int"), h.exec(interpreter::biSub, addr(ErrorValue("a", "b")), addr(IntegerValue(1))), interpreter::Error);
+    AFL_CHECK_THROWS(a("32. int+error"), h.exec(interpreter::biSub, addr(IntegerValue(1)), addr(ErrorValue("a", "b"))), interpreter::Error);
+}
+
+/** Invalid types must be rejected: comparison. */
+AFL_TEST("interpreter.BinaryExecution:bad-types:compare", a)
+{
+    TestHarness h;
+
+    AFL_CHECK_THROWS(a("01. hash+int"), h.exec(interpreter::biCompareEQ, addr(afl::data::HashValue(Hash::create())), addr(IntegerValue(1))), interpreter::Error);
+    AFL_CHECK_THROWS(a("02. int+hash"), h.exec(interpreter::biCompareEQ, addr(IntegerValue(1)), addr(afl::data::HashValue(Hash::create()))), interpreter::Error);
+
+    AFL_CHECK_THROWS(a("11. vector+int"), h.exec(interpreter::biCompareEQ, addr(afl::data::VectorValue(Vector::create())), addr(IntegerValue(1))), interpreter::Error);
+    AFL_CHECK_THROWS(a("12. int+vector"), h.exec(interpreter::biCompareEQ, addr(IntegerValue(1)), addr(afl::data::VectorValue(Vector::create()))), interpreter::Error);
+
+    AFL_CHECK_THROWS(a("21. subr+int"), h.exec(interpreter::biCompareEQ, addr(SubroutineValue(BytecodeObject::create(false))), addr(IntegerValue(1))), interpreter::Error);
+    AFL_CHECK_THROWS(a("22. int+subr"), h.exec(interpreter::biCompareEQ, addr(IntegerValue(1)), addr(SubroutineValue(BytecodeObject::create(false)))), interpreter::Error);
+
+    AFL_CHECK_THROWS(a("31. error+int"), h.exec(interpreter::biCompareEQ, addr(ErrorValue("a", "b")), addr(IntegerValue(1))), interpreter::Error);
+    AFL_CHECK_THROWS(a("32. int+error"), h.exec(interpreter::biCompareEQ, addr(IntegerValue(1)), addr(ErrorValue("a", "b"))), interpreter::Error);
 }

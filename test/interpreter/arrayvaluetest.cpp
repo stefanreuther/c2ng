@@ -74,6 +74,14 @@ AFL_TEST("interpreter.ArrayValue", a)
         a.check("51. checkIntegerArg", interpreter::checkIntegerArg(iv, p.get()));
         a.checkEqual("52. value", iv, 42);
     }
+    {
+        // Fetch (null,3). Must be null.
+        afl::data::Segment seg;
+        seg.pushBackNew(0);
+        seg.pushBackInteger(3);
+        interpreter::Arguments args(seg, 0, seg.size());
+        a.checkNull("53. get", testee.get(args));
+    }
 
     // Some bogus accesses
     {
@@ -110,6 +118,15 @@ AFL_TEST("interpreter.ArrayValue", a)
         interpreter::Arguments args(seg, 0, seg.size());
         AFL_CHECK_THROWS(a("67. type error get"), testee.get(args), interpreter::Error);
         AFL_CHECK_THROWS(a("68. type error set"), testee.set(args, 0), interpreter::Error);
+    }
+    {
+        // Null index
+        afl::data::Segment seg;
+        seg.pushBackNew(0);
+        seg.pushBackInteger(3);
+        interpreter::Arguments args(seg, 0, seg.size());
+        std::auto_ptr<afl::data::Value> value(interpreter::makeIntegerValue(42));
+        AFL_CHECK_THROWS(a("69. store null index"), testee.set(args, value.get()), interpreter::Error);
     }
 
     // Serialize

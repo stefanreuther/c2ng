@@ -160,32 +160,33 @@ AFL_TEST("interpreter.Values:toString:FloatValue", a)
 }
 
 /** Test some other toString. */
-AFL_TEST("interpreter.Values:toString:others", a)
+// Null
+AFL_TEST("interpreter.Values:toString:null", a)
 {
-    // Null
-    {
-        a.checkEqual("01", interpreter::toString(0, false), "");
-        a.checkEqual("02", interpreter::toString(0, true), "Z(0)");
-    }
+    a.checkEqual("01", interpreter::toString(0, false), "");
+    a.checkEqual("02", interpreter::toString(0, true), "Z(0)");
+}
 
-    // afl::data types
-    {
-        afl::data::HashValue hv(afl::data::Hash::create());
-        a.checkEqual("11", interpreter::toString(&hv, false), "#<hash>");
-        a.checkEqual("12", interpreter::toString(&hv, true), "#<hash>");
-    }
-    {
-        afl::data::VectorValue vv(afl::data::Vector::create());
-        a.checkEqual("13", interpreter::toString(&vv, false), "#<vector>");
-        a.checkEqual("14", interpreter::toString(&vv, true), "#<vector>");
-    }
+// afl::data types
+AFL_TEST("interpreter.Values:toString:HashValu", a)
+{
+    afl::data::HashValue hv(afl::data::Hash::create());
+    a.checkEqual("11", interpreter::toString(&hv, false), "#<hash>");
+    a.checkEqual("12", interpreter::toString(&hv, true), "#<hash>");
+}
+AFL_TEST("interpreter.Values:toString:VectorValue", a)
+{
+    afl::data::VectorValue vv(afl::data::Vector::create());
+    a.checkEqual("13", interpreter::toString(&vv, false), "#<vector>");
+    a.checkEqual("14", interpreter::toString(&vv, true), "#<vector>");
+}
 
-    // Error
-    {
-        afl::data::ErrorValue ev("source", "boom");
-        AFL_CHECK_THROWS(a("21. toString"), interpreter::toString(&ev, false), interpreter::Error);
-        AFL_CHECK_THROWS(a("22. toString"), interpreter::toString(&ev, true), interpreter::Error);
-    }
+// Error
+AFL_TEST("interpreter.Values:toString:ErrorValue", a)
+{
+    afl::data::ErrorValue ev("source", "boom");
+    AFL_CHECK_THROWS(a("21. toString"), interpreter::toString(&ev, false), interpreter::Error);
+    AFL_CHECK_THROWS(a("22. toString"), interpreter::toString(&ev, true), interpreter::Error);
 }
 
 /** Test make functions. */
@@ -276,6 +277,31 @@ AFL_TEST("interpreter.Values:make", a)
 
     p.reset(new afl::data::VectorValue(afl::data::Vector::create()));
     a.checkEqual("151", interpreter::getBooleanValue(p.get()), 1);
+
+    p.reset(new afl::data::ErrorValue("a", "b"));
+    a.checkEqual("161", interpreter::getBooleanValue(p.get()), -1);
+}
+
+/** Test makeSizeValue(). */
+AFL_TEST("interpreter.Values:makeSizeValue", a)
+{
+    std::auto_ptr<afl::data::Value> p;
+
+    // Small size
+    p.reset(interpreter::makeSizeValue(100));
+    a.checkNonNull("01", dynamic_cast<afl::data::IntegerValue*>(p.get()));
+    a.checkEqual("02", dynamic_cast<afl::data::IntegerValue*>(p.get())->getValue(), 100);
+    a.checkEqual("03", interpreter::getBooleanValue(p.get()), 1);
+
+    // Big size
+    uint64_t bigValue = 999999999999;
+    size_t bigSize = static_cast<size_t>(bigValue);
+    if (bigValue == bigSize) {
+        p.reset(interpreter::makeSizeValue(bigSize));
+        a.checkNonNull("11", dynamic_cast<afl::data::IntegerValue*>(p.get()));
+        a.checkEqual("12", dynamic_cast<afl::data::IntegerValue*>(p.get())->getValue(), 0x7FFFFFFF);
+        a.checkEqual("13", interpreter::getBooleanValue(p.get()), 1);
+    }
 }
 
 /** Test some hardcoded quoteString() values. */

@@ -732,6 +732,6 @@ AFL_TEST("interpreter.BytecodeObject:merge", a)
         a.checkEqual("01. getState", proc.getState(), interpreter::Process::Ended);
 
         // Result must equal the number of iterations
-        a.checkEqual("11. result", interpreter::mustBeScalarValue(proc.getResult()), i);
+        a.checkEqual("11. result", interpreter::mustBeScalarValue(proc.getResult(), interpreter::Error::ExpectInteger), i);
     }
 }

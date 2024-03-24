@@ -112,7 +112,7 @@ namespace {
     {
         const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(v);
         if (sv == 0) {
-            throw Error::typeError(Error::ExpectInteger);
+            throw Error::typeError(Error::ExpectString);
         }
         return sv->getValue();
     }
@@ -258,8 +258,7 @@ namespace {
 
             // Push frame into process.
             // Normally the BCO should be complete before this, but there's no reason we cannot push an incomplete BCO.
-            interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
-            bco->setIsProcedure(false);
+            interpreter::BCORef_t bco = interpreter::BytecodeObject::create(false);
             m_pProcess->pushFrame(bco, true);
 
 #ifdef DEBUG_DISASSEMBLY

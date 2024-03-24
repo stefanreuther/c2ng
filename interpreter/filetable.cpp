@@ -10,6 +10,7 @@
 #include "afl/except/fileproblemexception.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/filevalue.hpp"
+#include "interpreter/values.hpp"
 
 const char*const LOG_NAME = "interpreter";
 
@@ -155,12 +156,10 @@ interpreter::FileTable::checkFileArg(size_t& fd, const afl::data::Value* arg, bo
 
     // Check for file number
     int32_t value;
-    if (const afl::data::ScalarValue* sv = dynamic_cast<const afl::data::ScalarValue*>(arg)) {
-        value = sv->getValue();
-    } else if (const FileValue* fv = dynamic_cast<const FileValue*>(arg)) {
+    if (const FileValue* fv = dynamic_cast<const FileValue*>(arg)) {
         value = fv->getFileNumber();
     } else {
-        throw Error::typeError(Error::ExpectFile);
+        value = mustBeScalarValue(arg, Error::ExpectFile);
     }
 
     // Check range

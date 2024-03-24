@@ -14,7 +14,7 @@ interpreter::expr::BinaryNode::compileValue(BytecodeObject& bco, const Compilati
 }
 
 void
-interpreter::expr::BinaryNode::compileEffect(BytecodeObject& bco, const interpreter::CompilationContext& cc) const
+interpreter::expr::BinaryNode::compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
 {
     defaultCompileEffect(bco, cc);
 }

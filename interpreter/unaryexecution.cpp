@@ -101,12 +101,11 @@ namespace {
         // ex ccexpr.pas:TrigFunc
         // Fetch value
         double value;
-        if (const afl::data::ScalarValue* iv = dynamic_cast<const afl::data::ScalarValue*>(arg))
-            value = iv->getValue();
-        else if (const afl::data::FloatValue* fv = dynamic_cast<const afl::data::FloatValue*>(arg))
+        if (const afl::data::FloatValue* fv = dynamic_cast<const afl::data::FloatValue*>(arg)) {
             value = fv->getValue();
-        else
-            throw Error::typeError(Error::ExpectNumeric);
+        } else {
+            value = interpreter::mustBeScalarValue(arg, Error::ExpectNumeric);
+        }
 
         // Range check
         if (std::fabs(value) > 1.0E+6)
@@ -277,7 +276,7 @@ namespace {
         if (arg == 0) {
             return 0;
         }
-        return makeIntegerValue(~mustBeScalarValue(arg));
+        return makeIntegerValue(~mustBeScalarValue(arg, Error::ExpectInteger));
     }
 
     afl::data::Value* FIsEmpty(interpreter::World& /*world*/, const afl::data::Value* arg)
@@ -329,7 +328,7 @@ namespace {
             return 0;
         }
 
-        int32_t value = mustBeScalarValue(arg);
+        int32_t value = mustBeScalarValue(arg, Error::ExpectInteger);
         if (value < 0 || value > int32_t(afl::charset::UNICODE_MAX)) {
             throw interpreter::Error::rangeError();
         }
@@ -499,7 +498,7 @@ namespace {
         if (arg == 0)
             return 0;
 
-        int32_t iv = mustBeScalarValue(arg);
+        int32_t iv = mustBeScalarValue(arg, Error::ExpectInteger);
         return makeStringValue(world.atomTable().getStringFromAtom(iv));
     }
 
@@ -579,12 +578,11 @@ namespace {
             return 0;
 
         // integer?
-        if (const afl::data::ScalarValue* iv = dynamic_cast<const afl::data::ScalarValue*>(arg))
-            return new interpreter::FileValue(iv->getValue());
-        else if (const interpreter::FileValue* fv = dynamic_cast<const interpreter::FileValue*>(arg))
+        if (const interpreter::FileValue* fv = dynamic_cast<const interpreter::FileValue*>(arg)) {
             return new interpreter::FileValue(fv->getFileNumber());
-        else
-            throw Error::typeError(Error::ExpectInteger);
+        } else {
+            return new interpreter::FileValue(interpreter::mustBeScalarValue(arg, Error::ExpectInteger));
+        }
     }
 
     afl::data::Value* FIsArray(interpreter::World& /*world*/, const afl::data::Value* arg)

@@ -1847,6 +1847,18 @@ AFL_TEST("interpreter.Process:run:dimloc:exists", a)
     a.check("02. result", isNull(env));
 }
 
+/** Test instruction: dimloc.
+    Error: name is empty. */
+AFL_TEST("interpreter.Process:run:dimloc:error:empty", a)
+{
+    Environment env;
+    BCORef_t bco = makeBCO();
+    bco->addInstruction(Opcode::maPush, Opcode::sInteger, 7);
+    bco->addInstruction(Opcode::maDim, Opcode::sLocal, bco->addName(""));
+    runBCO(env, bco);
+    a.checkEqual("01. getState", env.proc.getState(), Process::Failed);
+}
+
 /** Test instruction: dimtop. */
 AFL_TEST("interpreter.Process:run:dimtop", a)
 {
@@ -2736,6 +2748,18 @@ AFL_TEST("interpreter.Process:run:snewarray:error:zero", a)
     a.check("02. isError", isError(env));
 }
 
+/** Test instruction: snewarray.
+    Error case: too large */
+AFL_TEST("interpreter.Process:run:snewarray:error:too-large", a)
+{
+    Environment env;
+    for (int i = 0; i < 10; ++i) {
+        env.proc.pushNewValue(interpreter::makeIntegerValue(1000));
+    }
+    runInstruction(env, Opcode::maSpecial, Opcode::miSpecialNewArray, 10);
+    a.checkEqual("01. getState", env.proc.getState(), Process::Failed);
+}
+
 /** Test instruction: smakelist.
     Normal case */
 AFL_TEST("interpreter.Process:run:smakelist", a)
@@ -2919,6 +2943,24 @@ AFL_TEST("interpreter.Process:run:sresizearray:error:zero", a)
     runInstruction(env, Opcode::maSpecial, Opcode::miSpecialResizeArray, 0);
     a.checkEqual("01. getState", env.proc.getState(), Process::Failed);
     a.check("02. isError", isError(env));
+}
+
+/** Test instruction: snewarray.
+    Error case: too large */
+AFL_TEST("interpreter.Process:run:sresizearray:error:too-large", a)
+{
+    const int NDIM = 10;
+    Environment env;
+    afl::base::Ref<ArrayData> ad(*new ArrayData());
+    for (int i = 0; i < NDIM; ++i) {
+        a.check("01. addDimension", ad->addDimension(1));
+    }
+    env.proc.pushNewValue(new ArrayValue(ad));
+    for (int i = 0; i < NDIM; ++i) {
+        env.proc.pushNewValue(interpreter::makeIntegerValue(1000));
+    }
+    runInstruction(env, Opcode::maSpecial, Opcode::miSpecialResizeArray, 10);
+    a.checkEqual("11. getState", env.proc.getState(), Process::Failed);
 }
 
 /** Test instruction: sbind.

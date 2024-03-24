@@ -84,11 +84,7 @@ interpreter::checkIntegerArg(int32_t& out, const afl::data::Value* value)
         return false;
     }
 
-    if (const afl::data::ScalarValue* iv = dynamic_cast<const afl::data::ScalarValue*>(value)) {
-        // Regular integer.
-        out = iv->getValue();
-        return true;
-    } else if (const afl::data::FloatValue* fv = dynamic_cast<const afl::data::FloatValue*>(value)) {
+    if (const afl::data::FloatValue* fv = dynamic_cast<const afl::data::FloatValue*>(value)) {
         // We truncate here. This is what PCC 1.x does. Let's hope that IEEE FP is precise
         // enough that we don't lose enough precision to get off-by-one results, like HOST.EXE.
         double v = fv->getValue();
@@ -97,7 +93,8 @@ interpreter::checkIntegerArg(int32_t& out, const afl::data::Value* value)
         out = int32_t(v);
         return true;
     } else {
-        throw Error::typeError(Error::ExpectInteger);
+        out = mustBeScalarValue(value, Error::ExpectInteger);
+        return true;
     }
 }
 
@@ -170,15 +167,7 @@ interpreter::checkFlagArg(int32_t& flagOut, int32_t* valueOut, const afl::data::
         return false;
     }
 
-    if (const afl::data::ScalarValue* iv = dynamic_cast<const afl::data::ScalarValue*>(value)) {
-        // An integer fills the valueOut, and specifies no flags
-        if (!valueOut) {
-            throw Error::typeError();
-        }
-        *valueOut = iv->getValue();
-        flagOut = 0;
-        return true;
-    } else if (const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(value)) {
+    if (const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(value)) {
         // Parse string
         const String_t& s = sv->getValue();
         uint32_t parsedValue = 0;
@@ -207,7 +196,14 @@ interpreter::checkFlagArg(int32_t& flagOut, int32_t* valueOut, const afl::data::
         }
         return true;
     } else {
-        throw Error::typeError();
+        // An integer fills the valueOut, and specifies no flags
+        int32_t iv = mustBeScalarValue(value, Error::ExpectNone);
+        if (!valueOut) {
+            throw Error::typeError();
+        }
+        *valueOut = iv;
+        flagOut = 0;
+        return true;
     }
 }
 
@@ -220,10 +216,8 @@ interpreter::checkCommandAtomArg(util::Atom_t& atomOut, const afl::data::Value* 
     } else if (const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(value)) {
         atomOut = table.getAtomFromString(sv->getValue());
         return true;
-    } else if (const afl::data::ScalarValue* iv = dynamic_cast<const afl::data::ScalarValue*>(value)) {
-        atomOut = iv->getValue();
-        return true;
     } else {
-        throw Error::typeError(Error::ExpectString);
+        atomOut = mustBeScalarValue(value, Error::ExpectString);
+        return true;
     }
 }

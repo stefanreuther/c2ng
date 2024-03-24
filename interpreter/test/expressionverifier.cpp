@@ -31,6 +31,8 @@
 
 using afl::test::Assert;
 using afl::except::AssertionFailedException;
+using interpreter::expr::Node;
+using interpreter::expr::Parser;
 
 class interpreter::test::ExpressionVerifier::TestContext : public SingleContext, public Context::PropertyAccessor {
  public:
@@ -156,7 +158,7 @@ interpreter::test::ExpressionVerifier::verifyFile(const char* expr, int result)
         afl::base::Deleter del;
 
         Tokenizer tok(expr);
-        const interpreter::expr::Node& node(interpreter::expr::Parser(tok, del).parse());
+        const Node& node(Parser(tok, del).parse());
         me.check("parse complete", tok.getCurrentToken() == tok.tEnd);
 
         BCORef_t bco = BytecodeObject::create(true);
@@ -199,7 +201,7 @@ interpreter::test::ExpressionVerifier::verifyNull(const char* expr)
         afl::base::Deleter del;
 
         Tokenizer tok(expr);
-        const interpreter::expr::Node& node(interpreter::expr::Parser(tok, del).parse());
+        const Node& node(Parser(tok, del).parse());
         me.check("parse complete", tok.getCurrentToken() == tok.tEnd);
 
         BCORef_t bco = BytecodeObject::create(true);
@@ -236,7 +238,7 @@ interpreter::test::ExpressionVerifier::verifyString(const char* expr, const char
         afl::base::Deleter del;
 
         Tokenizer tok(expr);
-        const interpreter::expr::Node& node(interpreter::expr::Parser(tok, del).parse());
+        const Node& node(Parser(tok, del).parse());
         me.check("parse complete", tok.getCurrentToken() == tok.tEnd);
 
         BCORef_t bco = BytecodeObject::create(true);
@@ -281,7 +283,7 @@ interpreter::test::ExpressionVerifier::verifyFloat(const char* expr, double resu
         afl::base::Deleter del;
 
         Tokenizer tok(expr);
-        const interpreter::expr::Node& node(interpreter::expr::Parser(tok, del).parse());
+        const Node& node(Parser(tok, del).parse());
         me.check("parse complete", tok.getCurrentToken() == tok.tEnd);
 
         BCORef_t bco = BytecodeObject::create(true);
@@ -326,7 +328,7 @@ interpreter::test::ExpressionVerifier::verifyExecutionError(const char* expr)
         afl::base::Deleter del;
 
         Tokenizer tok(expr);
-        const interpreter::expr::Node& node(interpreter::expr::Parser(tok, del).parse());
+        const Node& node(Parser(tok, del).parse());
         me.check("parse complete", tok.getCurrentToken() == tok.tEnd);
 
         BCORef_t bco = BytecodeObject::create(true);
@@ -359,15 +361,18 @@ interpreter::test::ExpressionVerifier::verifyCompileError(const char* expr)
     World world(logger, tx, fs);
     afl::base::Deleter del;
 
-    Tokenizer tok(expr);
-    const interpreter::expr::Node* node = 0;
+    const Node* node = 0;
     try {
-        node = &interpreter::expr::Parser(tok, del).parse();
+        Tokenizer tok(expr);
+        node = &Parser(tok, del).parse();
+        me.check("parse complete", tok.getCurrentToken() == tok.tEnd);
+    }
+    catch (AssertionFailedException&) {
+        throw;
     }
     catch (...) {
         me.fail("exception during parse");
     }
-    me.check("parse complete", tok.getCurrentToken() == tok.tEnd);
 
     BCORef_t bco = BytecodeObject::create(true);
     bool threw = false;
@@ -389,10 +394,10 @@ interpreter::test::ExpressionVerifier::verifyParseError(const char* expr)
     Assert me(m_assert(expr));
 
     afl::base::Deleter del;
-    Tokenizer tok(expr);
     bool threw = false;
     try {
-        interpreter::expr::Parser(tok, del).parse();
+        Tokenizer tok(expr);
+        Parser(tok, del).parse();
     }
     catch (Error&) {
         threw = true;
@@ -460,7 +465,7 @@ interpreter::test::ExpressionVerifier::verifyScalar(const char* expr, int result
         afl::base::Deleter del;
 
         Tokenizer tok(expr);
-        const interpreter::expr::Node& node(interpreter::expr::Parser(tok, del).parse());
+        const Node& node(Parser(tok, del).parse());
         me.check("parse complete", tok.getCurrentToken() == tok.tEnd);
 
         BCORef_t bco = BytecodeObject::create(true);

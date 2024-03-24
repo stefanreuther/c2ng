@@ -14,6 +14,8 @@
 #include "interpreter/values.hpp"
 #include <memory>
 
+using interpreter::test::ContextVerifier;
+
 /** Test basic operations on empty hash. */
 AFL_TEST("interpreter.HashValue:empty", a)
 {
@@ -82,13 +84,15 @@ AFL_TEST("interpreter.HashValue:unit", a)
     // Context access
     std::auto_ptr<interpreter::Context> p(testee.makeFirstContext());
     a.checkNonNull("31. makeFirstContext", p.get());
+    ContextVerifier(*p, a("32. basics")).verifyBasics();
+    ContextVerifier(*p, a("33. serializable")).verifyNotSerializable();
 
     // - verify the context
     a.checkNull("41. getObject", p->getObject());
 
     std::auto_ptr<interpreter::Context> pClone(p->clone());
     a.checkNonNull("51. clone", pClone.get());
-    interpreter::test::ContextVerifier(*pClone, a("52. clone")).verifyTypes();
+    ContextVerifier(*pClone, a("52. clone")).verifyTypes();
     a.checkEqual("53. toString", pClone->toString(false), p->toString(false));
     a.checkEqual("54. toString", pClone->toString(true), p->toString(true));
     a.checkDifferent("55. toString", pClone->toString(false), "");

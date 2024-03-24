@@ -22,7 +22,7 @@ namespace interpreter { namespace expr {
 
         // Node:
         void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
-        void compileEffect(BytecodeObject& bco, const interpreter::CompilationContext& cc) const;
+        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const;
         void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const;
 
         /** Try to convert to assignment.
@@ -35,7 +35,7 @@ namespace interpreter { namespace expr {
         const Node& convertToAssignment(afl::base::Deleter& del) const;
 
      private:
-        uint8_t minor;
+        uint8_t m_minor;
         const Node& m_left;
         const Node& m_right;
     };

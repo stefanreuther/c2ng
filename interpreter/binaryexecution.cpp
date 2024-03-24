@@ -157,6 +157,8 @@ namespace {
         };
 
         if (a == 0 || b == 0) {
+            // Separate check required for 'a' + null case
+            // (this means we will never hit the visitNull() branch)
             return ariNull;
         } else {
             VPair v(pair, b);
@@ -568,7 +570,7 @@ namespace {
             return 0;
 
         /* Second argument must be integer */
-        const int32_t bi = mustBeScalarValue(b);
+        const int32_t bi = mustBeScalarValue(b, Error::ExpectInteger);
 
         /* First argument must be integer or real */
         if (const afl::data::ScalarValue* ai = dynamic_cast<const afl::data::ScalarValue*>(a)) {
@@ -820,7 +822,7 @@ namespace {
         if (a == 0 || b == 0) {
             return 0;
         } else {
-            return makeIntegerValue(mustBeScalarValue(a) & mustBeScalarValue(b));
+            return makeIntegerValue(mustBeScalarValue(a, Error::ExpectInteger) & mustBeScalarValue(b, Error::ExpectInteger));
         }
     }
 
@@ -831,7 +833,7 @@ namespace {
         if (a == 0 || b == 0) {
             return 0;
         } else {
-            return makeIntegerValue(mustBeScalarValue(a) | mustBeScalarValue(b));
+            return makeIntegerValue(mustBeScalarValue(a, Error::ExpectInteger) | mustBeScalarValue(b, Error::ExpectInteger));
         }
     }
 
@@ -842,7 +844,7 @@ namespace {
         if (a == 0 || b == 0) {
             return 0;
         } else {
-            return makeIntegerValue(mustBeScalarValue(a) ^ mustBeScalarValue(b));
+            return makeIntegerValue(mustBeScalarValue(a, Error::ExpectInteger) ^ mustBeScalarValue(b, Error::ExpectInteger));
         }
     }
 
@@ -854,7 +856,7 @@ namespace {
             return 0;
 
         /* Check second arg */
-        int32_t bi = mustBeScalarValue(b);
+        int32_t bi = mustBeScalarValue(b, Error::ExpectInteger);
         if (bi < 0) {
             throw Error::rangeError();
         }
@@ -906,7 +908,7 @@ namespace {
             return 0;
 
         String_t ssa = mustBeStringValue(a);
-        int32_t  iib = mustBeScalarValue(b);
+        int32_t  iib = mustBeScalarValue(b, Error::ExpectInteger);
         if (iib > 0) {
             ssa = afl::charset::Utf8().substr(ssa, iib-1, String_t::npos);
         }
@@ -921,7 +923,7 @@ namespace {
             return 0;
 
         String_t ssa = mustBeStringValue(a);
-        int32_t  iib = mustBeScalarValue(b);
+        int32_t  iib = mustBeScalarValue(b, Error::ExpectInteger);
         if (iib > 0) {
             ssa = afl::charset::Utf8().substr(ssa, 0, iib);
         } else {
@@ -938,7 +940,7 @@ namespace {
             return 0;
 
         String_t ssa = mustBeStringValue(a);
-        int32_t  iib = mustBeScalarValue(b);
+        int32_t  iib = mustBeScalarValue(b, Error::ExpectInteger);
         if (iib > 0) {
             size_t have = afl::charset::Utf8().length(ssa);
             if (size_t(iib) < have)
@@ -956,7 +958,7 @@ namespace {
         if (a == 0 || b == 0)
             return 0;
 
-        int32_t iia = mustBeScalarValue(a);
+        int32_t iia = mustBeScalarValue(a, Error::ExpectInteger);
         const String_t& ssb = mustBeStringValue(b);
 
         // FIXME: we should have some kind of limits to avoid overloading
@@ -1021,7 +1023,7 @@ namespace {
         }
 
         // Index
-        int32_t n = mustBeScalarValue(b);
+        int32_t n = mustBeScalarValue(b, Error::ExpectInteger);
         if (n <= 0 || n > av->getDimension(0)) {
             throw Error::rangeError();
         }

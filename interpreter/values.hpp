@@ -14,6 +14,7 @@
 #include "afl/data/stringvalue.hpp"
 #include "afl/data/value.hpp"
 #include "afl/string/string.hpp"
+#include "interpreter/error.hpp"
 
 namespace interpreter {
 
@@ -88,9 +89,10 @@ namespace interpreter {
 
     /** Get required scalar (integer, boolean) value.
         \param value Value to check
+        \param ty    Expected type to report on error
         \return value from ScalarValue::getValue()
         \throw Error if value is not a ScalarValue */
-    int32_t mustBeScalarValue(const afl::data::Value* value);
+    int32_t mustBeScalarValue(const afl::data::Value* value, Error::ExpectedType ty);
 
     /** Convert to string representation.
         This function implements stringification for simple types.

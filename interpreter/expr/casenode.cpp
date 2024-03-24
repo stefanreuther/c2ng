@@ -9,7 +9,7 @@
 #include "interpreter/binaryoperation.hpp"
 
 interpreter::expr::CaseNode::CaseNode(uint8_t minor, const Node& left, const Node& right)
-    : minor(minor),
+    : m_minor(minor),
       m_left(left),
       m_right(right)
 { }
@@ -20,11 +20,11 @@ interpreter::expr::CaseNode::compileValue(BytecodeObject& bco, const Compilation
     // ex IntCaseExprNode::compileValue
     m_left.compileValue(bco, cc);
     m_right.compileValue(bco, cc);
-    bco.addInstruction(Opcode::maBinary, cc.hasFlag(CompilationContext::CaseBlind) ? uint8_t(minor+1) : minor, 0);
+    bco.addInstruction(Opcode::maBinary, cc.hasFlag(CompilationContext::CaseBlind) ? uint8_t(m_minor+1) : m_minor, 0);
 }
 
 void
-interpreter::expr::CaseNode::compileEffect(BytecodeObject& bco, const interpreter::CompilationContext& cc) const
+interpreter::expr::CaseNode::compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
 {
     defaultCompileEffect(bco, cc);
 }
@@ -39,7 +39,7 @@ const interpreter::expr::Node&
 interpreter::expr::CaseNode::convertToAssignment(afl::base::Deleter& del) const
 {
     // ex IntCaseExprNode::convertToAssignment()
-    if (minor == biCompareEQ) {
+    if (m_minor == biCompareEQ) {
         return del.addNew(new AssignmentNode(m_left, m_right));
     } else {
         return *this;

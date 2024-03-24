@@ -33,7 +33,7 @@ AFL_TEST("interpreter.SimpleFunction:value", a)
     afl::data::Segment seg;
     interpreter::Arguments args(seg, 0, 0);
     std::auto_ptr<afl::data::Value> p(testee.get(args));
-    a.checkEqual("01. get", interpreter::mustBeScalarValue(p.get()), 77);
+    a.checkEqual("01. get", interpreter::mustBeScalarValue(p.get(), interpreter::Error::ExpectInteger), 77);
 
     // clone()
     std::auto_ptr<interpreter::FunctionValue> clone(testee.clone());
@@ -49,7 +49,7 @@ AFL_TEST("interpreter.SimpleFunction:void", a)
     afl::data::Segment seg;
     interpreter::Arguments args(seg, 0, 0);
     std::auto_ptr<afl::data::Value> p(testee.get(args));
-    a.checkEqual("01. get", interpreter::mustBeScalarValue(p.get()), 42);
+    a.checkEqual("01. get", interpreter::mustBeScalarValue(p.get(), interpreter::Error::ExpectInteger), 42);
 
     // clone()
     std::auto_ptr<interpreter::FunctionValue> clone(testee.clone());

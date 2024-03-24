@@ -28,7 +28,7 @@ AFL_TEST("interpreter.expr.FunctionCallNode", a)
             { }
 
         const interpreter::expr::Node* get(size_t i) const
-            { return args[i]; }
+            { return m_args[i]; }
     };
 
     MyNode testee;
