@@ -212,6 +212,7 @@ class game::proxy::SimulationSetupProxy::Trampoline {
     Setup::Status copyFromGame(Slot_t from, Slot_t to);
     bool load(String_t fileName, String_t& errorMessage);
     bool save(String_t fileName, String_t& errorMessage);
+    bool isMatchingShipList();
 
     // Unit operations
     void setSlot(Slot_t slot);
@@ -263,7 +264,7 @@ class game::proxy::SimulationSetupProxy::Trampoline {
  private:
     Setup& getSetup() const;
     GameInterface* getGameInterface() const;
-    const game::spec::ShipList* getShipList() const;
+    const ShipList* getShipList() const;
     int getTorpedoPowerScale() const;
 
     void notifyListeners(bool blockList);
@@ -279,7 +280,7 @@ class game::proxy::SimulationSetupProxy::Trampoline {
 
     util::RequestSender<SimulationSetupProxy> m_reply;
     afl::base::Ref<game::sim::Session> m_sim;
-    afl::base::Ptr<game::spec::ShipList> m_shipList;
+    afl::base::Ptr<ShipList> m_shipList;
     afl::base::Ptr<Root> m_root;
     afl::string::Translator& m_translator;
     afl::io::FileSystem& m_fileSystem;
@@ -484,6 +485,9 @@ game::proxy::SimulationSetupProxy::Trampoline::addShip(Slot_t slot, int count, L
                 if (int n = shipList->beams().size()) {
                     sh->setBeamType(n);
                     sh->setNumBeams(1);
+                }
+                if (int n = shipList->engines().size()) {
+                    sh->setEngineType(n);
                 }
                 sh->setAggressiveness(Ship::agg_Kill);
                 sh->setDefaultName(m_translator);
@@ -692,6 +696,14 @@ game::proxy::SimulationSetupProxy::Trampoline::save(String_t fileName, String_t&
         errorMessage = "<uninitialized>";
         return false;
     }
+}
+
+inline bool
+game::proxy::SimulationSetupProxy::Trampoline::isMatchingShipList()
+{
+    const ShipList* sl = getShipList();
+    return sl != 0
+        && m_sim->setup().isMatchingShipList(*sl);
 }
 
 inline void
@@ -1646,6 +1658,27 @@ game::proxy::SimulationSetupProxy::save(WaitIndicator& ind, String_t fileName, S
     };
 
     Task t(fileName, errorMessage);
+    ind.call(m_trampoline, t);
+    return t.getResult();
+}
+
+bool
+game::proxy::SimulationSetupProxy::isMatchingShipList(WaitIndicator& ind)
+{
+    class Task : public Trampoline::Request_t {
+     public:
+        Task()
+            : m_result(false)
+            { }
+        virtual void handle(Trampoline& tpl)
+            { m_result = tpl.isMatchingShipList(); }
+        bool getResult() const
+            { return m_result; }
+     private:
+        bool m_result;
+    };
+
+    Task t;
     ind.call(m_trampoline, t);
     return t.getResult();
 }

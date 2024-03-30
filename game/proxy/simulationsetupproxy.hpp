@@ -284,6 +284,11 @@ namespace game { namespace proxy {
             \return true on success, false on error (message set) */
         bool save(WaitIndicator& ind, String_t fileName, String_t& errorMessage);
 
+        /** Check for matching ship list.
+            \param [in]  ind           WaitIndicator for UI synchronisation
+            \return false if mismatch detected; otherwise, true */
+        bool isMatchingShipList(WaitIndicator& ind);
+
 
         /*
          *  Unit Operations

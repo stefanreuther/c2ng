@@ -229,6 +229,15 @@ AFL_TEST("game.proxy.SimulationSetupProxy:addShip", a)
     a.checkEqual("27. isPlanet", list[1].isPlanet, false);
     a.checkEqual("28. name",     list[1].name, "Ship 2");
     a.checkEqual("29. info",     list[1].info, "Player 12 custom ship");
+
+    // Verify content
+    // Ship must have valid beams/engines
+    SimulationSetupProxy::ObjectInfo oi;
+    a.checkEqual("31. getObject", t.getObject(ind, 0, oi), true);
+    a.checkEqual("32. beam type", oi.beamType.first, 10);
+    a.checkEqual("33. beam name", oi.beamType.second, "Heavy Phaser");
+    a.checkEqual("34. engine type", oi.engineType.first, 9);
+    a.checkEqual("35. engine name", oi.engineType.second, "Transwarp Drive");
 }
 
 /** Test addPlanet().
@@ -2393,4 +2402,56 @@ AFL_TEST("game.proxy.SimulationSetupProxy:relations:disabled", a)
     // - get configuration status
     t.getConfiguration(ind, config);
     a.check("21. allianceSettings", !config.allianceSettings().get(3, 4));
+}
+
+/** Test isMatchingShipList(), empty.
+    A: set up empty simulation.
+    E: isMatchingShipList() reports true. */
+AFL_TEST("game.proxy.SimulationSetupProxy:isMatchingShipList:empty", a)
+{
+    SessionThread thread;
+    WaitIndicator ind;
+    prepare(thread);
+    prepareAlliances(thread);
+    SimulationSetupProxy t(thread.gameSender(), ind);
+
+    a.checkEqual("01. isMatchingShipList", t.isMatchingShipList(ind), true);
+}
+
+/** Test isMatchingShipList(), match.
+    A: set up a simulation with a matching ship (Outrider with no torpedoes).
+    E: isMatchingShipList() reports true. */
+AFL_TEST("game.proxy.SimulationSetupProxy:isMatchingShipList:match", a)
+{
+    SessionThread thread;
+    WaitIndicator ind;
+    prepare(thread);
+    prepareAlliances(thread);
+
+    SimulationSetupProxy t(thread.gameSender(), ind);
+    t.addShip(ind, 0, 1);
+    t.setHullType(0, game::test::OUTRIDER_HULL_ID, false);
+    t.setTorpedoType(0, 0);
+    t.setNumLaunchers(0, 0);
+
+    a.checkEqual("01. isMatchingShipList", t.isMatchingShipList(ind), true);
+}
+
+/** Test isMatchingShipList(), mismatch.
+    A: set up a simulation with not-matching ship (Outrider with torpedoes).
+    E: isMatchingShipList() reports true. */
+AFL_TEST("game.proxy.SimulationSetupProxy:isMatchingShipList:mismatch", a)
+{
+    SessionThread thread;
+    WaitIndicator ind;
+    prepare(thread);
+    prepareAlliances(thread);
+
+    SimulationSetupProxy t(thread.gameSender(), ind);
+    t.addShip(ind, 0, 1);
+    t.setHullType(0, game::test::OUTRIDER_HULL_ID, false);
+    t.setTorpedoType(0, 5);
+    t.setNumLaunchers(0, 3);
+
+    a.checkEqual("01. isMatchingShipList", t.isMatchingShipList(ind), false);
 }

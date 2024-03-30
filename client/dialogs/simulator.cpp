@@ -36,6 +36,7 @@
 #include "ui/widgets/combobox.hpp"
 #include "ui/widgets/decimalselector.hpp"
 #include "ui/widgets/focusiterator.hpp"
+#include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/inputline.hpp"
 #include "ui/widgets/keydispatcher.hpp"
 #include "ui/widgets/menuframe.hpp"
@@ -56,6 +57,7 @@ using game::sim::GameInterface;
 using game::sim::Setup;
 using game::Reference;
 using ui::dialogs::MessageBox;
+using ui::widgets::FrameGroup;
 
 namespace {
     /*
@@ -346,7 +348,7 @@ SimulatorDialog::run()
     ui::Window& win = del.addNew(new ui::Window(m_translator("Battle Simulator"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
 
     ui::Group& g1 = del.addNew(new ui::Group(ui::layout::HBox::instance5));
-    g1.add(del.addNew(new ui::widgets::ScrollbarContainer(m_list, m_root)));
+    g1.add(FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame, del.addNew(new ui::widgets::ScrollbarContainer(m_list, m_root))));
     g1.add(m_objectInfo);
     win.add(g1);
 
@@ -660,13 +662,18 @@ SimulatorDialog::onLoad()
             Format(m_translator("Unable to load simulation.\n%s"), errorMessage),
             m_translator("Load Simulation"),
             m_root).doOkDialog(m_translator);
+        return;
     }
-    // FIXME: check ship list
-    // if (!sim_state.isMatchingShipList())
-    //     messageBox(_("This simulation seems to have been set up with a different ship list. "
-    //                  "To regenerate the intended results, restart the Simulator from the correct "
-    //                  "game directory."),
-    //                _("Load Simulation"));
+
+    if (!m_proxy.isMatchingShipList(link)) {
+        MessageBox(
+            m_translator("This simulation seems to have been set up with a different ship list. "
+                         "To regenerate the intended results, restart the Simulator from the correct "
+                         "game directory."),
+            m_translator("Load Simulation"),
+            m_root).doOkDialog(m_translator);
+        return;
+    }
 }
 
 void
