@@ -1044,7 +1044,7 @@ game::map::Ship::hasSpecialFunction(int basicFunction,
 
     // Check class functions
     const game::spec::ModifiedHullFunctionList& mhf = shipList.modifiedHullFunctions();
-    if (hull->getHullFunctions(true).getPlayersThatCan(basicFunction, mhf, shipList.basicHullFunctions(), config, *hull, ExperienceLevelSet_t(expLevel), true).contains(owner)) {
+    if (shipList.getPlayersThatCan(basicFunction, hullNr, config, ExperienceLevelSet_t(expLevel)).contains(owner)) {
         return true;
     }
 
