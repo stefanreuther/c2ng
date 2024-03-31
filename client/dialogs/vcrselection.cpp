@@ -50,6 +50,7 @@ client::dialogs::VcrSelection::VcrSelection(ui::Root& root, afl::string::Transla
       m_kind()
 {
     m_proxy.sig_update.add(this, &VcrSelection::onUpdate);
+    m_info.sig_info.add(this, &VcrSelection::onInfo);
     m_info.sig_action.add(this, &VcrSelection::onAction);
     m_info.sig_showMap.add(this, &VcrSelection::onShowMap);
 }
