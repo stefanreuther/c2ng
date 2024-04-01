@@ -38,7 +38,7 @@ namespace {
             st.nativeClans.push_back(planet.getNatives().orElse(0));
         }
         if (set.useExperience) {
-            st.experiencePoints.push_back(planet.getScore(game::ScoreId_ExpPoints, planetScores).orElse(0));
+            st.experiencePoints.push_back(planet.unitScores().getScoreById(game::ScoreId_ExpPoints, planetScores).orElse(0));
             st.experienceLevel.push_back(config.getExperienceLevelFromPoints(st.experiencePoints.back()));
         }
     }
@@ -154,7 +154,7 @@ game::proxy::PlanetPredictorProxy::Trampoline::packPrediction(Status& st)
         set.useColonists = true;
         set.useNatives = m_planet->getNativeRace().orElse(0) != 0;
         set.useExperience = m_root->hostConfiguration()[HostConfiguration::NumExperienceLevels]() > 0
-            && m_planet->getScore(ScoreId_ExpPoints, m_game->planetScores()).isValid();
+            && m_planet->unitScores().getScoreById(ScoreId_ExpPoints, m_game->planetScores()).isValid();
 
         // Remember first turn
         packStatus(st, set, *m_planet, m_game->planetScores(), m_root->hostConfiguration());

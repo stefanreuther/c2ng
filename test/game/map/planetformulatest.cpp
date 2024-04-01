@@ -12,6 +12,7 @@
 #include <cstdio>
 #include <stdio.h>
 
+using game::Element;
 using game::HostVersion;
 using game::config::HostConfiguration;
 
@@ -25,10 +26,10 @@ AFL_TEST("game.map.PlanetFormula:getColonistChange", a)
     game::map::Planet p(39);
     p.setOwner(OWNER);
     p.setTemperature(TEMP);
-    p.setCargo(game::Element::Colonists, 10000);
+    p.setCargo(Element::Colonists, 10000);
     p.setColonistHappiness(100);
     p.setColonistTax(0);
-    p.setCargo(game::Element::Supplies, 0);
+    p.setCargo(Element::Supplies, 0);
     p.setNativeHappiness(100);
     p.setNativeRace(0);
     p.setNatives(0);
@@ -80,10 +81,10 @@ namespace {
             game::map::Planet p(66);
             p.setOwner(1);                  // test set is built for Feds
             p.setColonistHappiness(80);
-            p.setCargo(game::Element::Colonists, 100);
+            p.setCargo(Element::Colonists, 100);
             p.setColonistTax(tax);
-            p.setCargo(game::Element::Supplies, 0);
-            p.setCargo(game::Element::Money, 0);
+            p.setCargo(Element::Supplies, 0);
+            p.setCargo(Element::Money, 0);
             p.setTemperature(50);
             p.setNativeHappiness(80);
             p.setNumBuildings(game::FactoryBuilding, 0);
@@ -150,10 +151,10 @@ namespace {
             game::map::Planet p(12);
             p.setOwner(planetOwner);
             p.setColonistHappiness(80);
-            p.setCargo(game::Element::Colonists, 100);
+            p.setCargo(Element::Colonists, 100);
             p.setColonistTax(3);
-            p.setCargo(game::Element::Supplies, 0);
-            p.setCargo(game::Element::Money, 0);
+            p.setCargo(Element::Supplies, 0);
+            p.setCargo(Element::Money, 0);
             p.setTemperature(temp);
             p.setNumBuildings(game::MineBuilding, 0);
             p.setNumBuildings(game::FactoryBuilding, 0);
@@ -200,10 +201,10 @@ namespace {
             game::map::Planet p(99);
             p.setOwner(1);
             p.setColonistHappiness(80);
-            p.setCargo(game::Element::Colonists, 100);
+            p.setCargo(Element::Colonists, 100);
             p.setColonistTax(3);
-            p.setCargo(game::Element::Supplies, 0);
-            p.setCargo(game::Element::Money, 0);
+            p.setCargo(Element::Supplies, 0);
+            p.setCargo(Element::Money, 0);
             p.setTemperature(70);
 
             int half = n/2;
@@ -258,10 +259,10 @@ namespace {
             game::map::Planet p(66);
             p.setOwner(1);                  // test set is built for Feds
             p.setColonistHappiness(80);
-            p.setCargo(game::Element::Colonists, 100);
+            p.setCargo(Element::Colonists, 100);
             p.setColonistTax(0);
-            p.setCargo(game::Element::Supplies, 0);
-            p.setCargo(game::Element::Money, 0);
+            p.setCargo(Element::Supplies, 0);
+            p.setCargo(Element::Money, 0);
             p.setTemperature(50);
             p.setNativeHappiness(80);
             p.setNativeGovernment(2);
@@ -303,10 +304,10 @@ namespace {
             game::map::Planet p(99);
             p.setOwner(1);
             p.setColonistHappiness(80);
-            p.setCargo(game::Element::Colonists, 10000);
+            p.setCargo(Element::Colonists, 10000);
             p.setColonistTax(0);
-            p.setCargo(game::Element::Supplies, 0);
-            p.setCargo(game::Element::Money, 0);
+            p.setCargo(Element::Supplies, 0);
+            p.setCargo(Element::Money, 0);
             p.setTemperature(70);
             p.setNatives(100);
             p.setNativeHappiness(80);
@@ -392,7 +393,7 @@ AFL_TEST("game.map.PlanetFormula:getMaxBuildings", a)
 
         game::map::Planet p(42);
         p.setOwner(1);
-        p.setCargo(game::Element::Colonists, 10000);
+        p.setCargo(Element::Colonists, 10000);
 
         // 4-argument version
         a.checkEqual("01. MineBuilding/4",    game::map::getMaxBuildings(p, game::MineBuilding,    fig, clans).orElse(-1), EXPECT_MINES[i]);
@@ -400,7 +401,7 @@ AFL_TEST("game.map.PlanetFormula:getMaxBuildings", a)
         a.checkEqual("03. DefenseBuilding/4", game::map::getMaxBuildings(p, game::DefenseBuilding, fig, clans).orElse(-1), EXPECT_DEFENSE[i]);
 
         // 3-argument version
-        p.setCargo(game::Element::Colonists, clans);
+        p.setCargo(Element::Colonists, clans);
         a.checkEqual("11. MineBuilding/3",    game::map::getMaxBuildings(p, game::MineBuilding,    fig).orElse(-1), EXPECT_MINES[i]);
         a.checkEqual("12. FactoryBuilding/3", game::map::getMaxBuildings(p, game::FactoryBuilding, fig).orElse(-1), EXPECT_FACTORIES[i]);
         a.checkEqual("13. DefenseBuilding/3", game::map::getMaxBuildings(p, game::DefenseBuilding, fig).orElse(-1), EXPECT_DEFENSE[i]);
@@ -439,10 +440,10 @@ namespace {
             game::map::Planet p(99);
             p.setOwner(owner);
             p.setColonistHappiness(100);
-            p.setCargo(game::Element::Colonists, 99999);
+            p.setCargo(Element::Colonists, 99999);
             p.setColonistTax(0);
-            p.setCargo(game::Element::Supplies, 0);
-            p.setCargo(game::Element::Money, 0);
+            p.setCargo(Element::Supplies, 0);
+            p.setCargo(Element::Money, 0);
             p.setTemperature(temp);
             p.setNatives(0);
             p.setNativeHappiness(100);
@@ -610,4 +611,115 @@ AFL_TEST("game.map.PlanetFormula:getMaxSupportedColonists:crystal:phost:sinoid",
     config[HostConfiguration::CrystalSinTempBehavior].set(1);
 
     doMaxColonistSeries(a, HostVersion(HostVersion::PHost, MKVERSION(4,1,0)), config, 7, EXPECT);
+}
+
+/*
+ *  getExperienceGain
+ */
+
+namespace {
+    struct ExpEnvironment {
+        game::map::Planet planet;
+        HostConfiguration config;
+        HostVersion host;
+
+        ExpEnvironment()
+            : planet(77), config(), host(HostVersion::PHost, MKVERSION(4,0,0))
+            {
+                config[HostConfiguration::EPPlanetAging].set(20);
+                config[HostConfiguration::EPPlanetGovernment].set(50);
+            }
+    };
+}
+
+// Experience disabled: no result
+AFL_TEST("game.map.PlanetFormula:getExperienceGain:disabled", a)
+{
+    ExpEnvironment env;
+    env.config[HostConfiguration::NumExperienceLevels].set(0);
+    a.check("", !getExperienceGain(env.planet, env.config, env.host).isValid());
+}
+
+// Experience enabled, but planet has no attributes: no result
+AFL_TEST("game.map.PlanetFormula:getExperienceGain:empty", a)
+{
+    ExpEnvironment env;
+    env.config[HostConfiguration::NumExperienceLevels].set(4);
+    a.check("", !getExperienceGain(env.planet, env.config, env.host).isValid());
+}
+
+// Buildings known: default result
+AFL_TEST("game.map.PlanetFormula:getExperienceGain:building", a)
+{
+    ExpEnvironment env;
+    env.config[HostConfiguration::NumExperienceLevels].set(4);
+    env.planet.setNumBuildings(game::FactoryBuilding, 1);
+    env.planet.setNumBuildings(game::MineBuilding, 1);
+    a.checkEqual("", getExperienceGain(env.planet, env.config, env.host).orElse(-1), 70);
+}
+
+// Colonists known
+AFL_TEST("game.map.PlanetFormula:getExperienceGain:colonists", a)
+{
+    ExpEnvironment env;
+    env.config[HostConfiguration::NumExperienceLevels].set(4);
+    env.planet.setNumBuildings(game::FactoryBuilding, 1);
+    env.planet.setNumBuildings(game::MineBuilding, 1);
+    env.planet.setOwner(3);
+    env.planet.setCargo(Element::Colonists, 1);
+    env.planet.setColonistHappiness(80);
+    env.planet.setColonistTax(10);
+    env.planet.setTemperature(50);
+    a.checkEqual("change", getColonistChange(env.planet, env.config, env.host).orElse(-99), 1);
+    a.checkEqual("gain",   getExperienceGain(env.planet, env.config, env.host).orElse(-1), 60);
+}
+
+// Colonists known but very unhappy
+AFL_TEST("game.map.PlanetFormula:getExperienceGain:colonists:unhappy", a)
+{
+    ExpEnvironment env;
+    env.config[HostConfiguration::NumExperienceLevels].set(4);
+    env.planet.setNumBuildings(game::FactoryBuilding, 1);
+    env.planet.setNumBuildings(game::MineBuilding, 1);
+    env.planet.setOwner(3);
+    env.planet.setCargo(Element::Colonists, 1);
+    env.planet.setColonistHappiness(20);
+    env.planet.setColonistTax(10);
+    env.planet.setTemperature(50);
+    a.checkEqual("change", getColonistChange(env.planet, env.config, env.host).orElse(-99), 1); /* computed using tax=10 */
+    a.checkEqual("gain",   getExperienceGain(env.planet, env.config, env.host).orElse(-1), 34); /* computed using tax=0, using change=9, thus happy=29 */
+}
+
+// Natives known
+AFL_TEST("game.map.PlanetFormula:getExperienceGain:native", a)
+{
+    ExpEnvironment env;
+    env.config[HostConfiguration::NumExperienceLevels].set(4);
+    env.planet.setNumBuildings(game::FactoryBuilding, 1);
+    env.planet.setNumBuildings(game::MineBuilding, 1);
+    env.planet.setNativeRace(2);
+    env.planet.setNatives(100);
+    env.planet.setNativeGovernment(5);
+    env.planet.setNativeHappiness(80);
+    env.planet.setNativeTax(10);
+    env.planet.setTemperature(50);
+    a.checkEqual("change", getNativeChange(env.planet, env.host).orElse(-99), -1);
+    a.checkEqual("gain",   getExperienceGain(env.planet, env.config, env.host).orElse(-1), 59);
+}
+
+// Natives known
+AFL_TEST("game.map.PlanetFormula:getExperienceGain:native:unhappy", a)
+{
+    ExpEnvironment env;
+    env.config[HostConfiguration::NumExperienceLevels].set(4);
+    env.planet.setNumBuildings(game::FactoryBuilding, 1);
+    env.planet.setNumBuildings(game::MineBuilding, 1);
+    env.planet.setNativeRace(2);
+    env.planet.setNatives(100);
+    env.planet.setNativeGovernment(5);
+    env.planet.setNativeHappiness(10);
+    env.planet.setNativeTax(10);
+    env.planet.setTemperature(50);
+    a.checkEqual("change", getNativeChange(env.planet, env.host).orElse(-99), -1);
+    a.checkEqual("gain",   getExperienceGain(env.planet, env.config, env.host).orElse(-1), 28); /* computed using tax=0, using change=7, thus happy=17 */
 }

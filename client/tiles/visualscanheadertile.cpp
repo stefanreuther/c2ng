@@ -108,7 +108,7 @@ namespace {
             //         Experienced HULL CLASS
             result.type.clear();
             int level;
-            if (s->getScore(game::ScoreId_ExpLevel, pGame->shipScores()).get(level)) {
+            if (s->unitScores().getScoreById(game::ScoreId_ExpLevel, pGame->shipScores()).get(level)) {
                 util::addListItem(result.type, " ", pRoot->hostConfiguration().getExperienceLevelName(level, tx));
             }
             if (const game::spec::Hull* h = pShipList->hulls().get(hullId)) {

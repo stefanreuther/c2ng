@@ -694,3 +694,51 @@ game::map::getBaseTechCost(int player, int fromTech, int toTech, const game::con
     int toVal   = toTech   * (toTech-1);
     return config[config.BaseTechCost](player) * (toVal - fromVal) / 2;
 }
+
+
+/*
+ *  Experience
+ */
+
+game::IntegerProperty_t
+game::map::getExperienceGain(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host)
+{
+    // ex planint.pas:PlanetExperienceGain
+    // This is a special-purpose function, for now used in the Level.Gain property (ippLevelGain).
+    // Taxation dialog uses a full prediction.
+    if (config[HostConfiguration::NumExperienceLevels]() <= 0) {
+        return afl::base::Nothing;
+    }
+
+    int numMines, numFactories;
+    if (!pl.getNumBuildings(MineBuilding).get(numMines) || !pl.getNumBuildings(FactoryBuilding).get(numFactories)) {
+        return afl::base::Nothing;
+    }
+
+    // Determine effective happiness threshold
+    int effHappy = 100;
+    int mifa = numMines + numFactories;
+    if (pl.getOwner().isValid() && pl.getCargo(Element::Colonists).orElse(0) > 0) {
+        int tax = pl.getColonistTax().orElse(0);
+        int happy = pl.getColonistHappiness().orElse(0);
+        if (happy < 30) {
+            tax = 0;
+        }
+        effHappy = std::min(effHappy, happy + getColonistChange(pl, config, host, tax, mifa).orElse(0));
+    }
+    if (pl.getNativeRace().orElse(0) > 0 && pl.getNatives().orElse(0) > 0 && pl.getNativeGovernment().orElse(0) > 0) {
+        int tax = pl.getNativeTax().orElse(0);
+        int happy = pl.getNativeHappiness().orElse(0);
+        if (happy < 30) {
+            tax = 0;
+        }
+        effHappy = std::min(effHappy, happy + getNativeChange(pl, host, tax, mifa).orElse(0));
+    }
+
+    // Determine result
+    int result = config[HostConfiguration::EPPlanetAging]();
+    if (effHappy > 0) {
+        result += config[HostConfiguration::EPPlanetGovernment]() * effHappy / 100;
+    }
+    return result;
+}

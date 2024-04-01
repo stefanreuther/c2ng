@@ -137,7 +137,7 @@ namespace {
             { defaultHandlePositionChange(); }
         virtual ui::layout::Info getLayoutInfo() const
             {
-                gfx::Point sz = getFont()->getCellSize().scaledBy(30, 10);
+                gfx::Point sz = getFont()->getCellSize().scaledBy(36, 10);
                 return ui::layout::Info(sz, ui::layout::Info::GrowBoth);
             }
         virtual bool handleKey(util::Key_t key, int prefix)
@@ -168,7 +168,7 @@ namespace {
 
     class Dialog {
      public:
-        Dialog(const game::spec::info::AbilityDetails_t& content, ui::Root& root, afl::string::Translator& tx);
+        Dialog(const game::spec::info::AbilityDetails_t& content, const game::map::ShipExperienceInfo& expInfo, ui::Root& root, afl::string::Translator& tx);
 
         void run(util::RequestSender<game::Session> gameSender);
         void onScroll();
@@ -178,15 +178,17 @@ namespace {
         afl::string::Translator& m_translator;
         HullFunctionList m_listWidget;
         ui::rich::DocumentView m_infoWidget;
+        const game::map::ShipExperienceInfo& m_expInfo;
         afl::base::SignalConnection conn_imageChange;
     };
 }
 
-Dialog::Dialog(const game::spec::info::AbilityDetails_t& content, ui::Root& root, afl::string::Translator& tx)
+Dialog::Dialog(const game::spec::info::AbilityDetails_t& content, const game::map::ShipExperienceInfo& expInfo, ui::Root& root, afl::string::Translator& tx)
     : m_root(root),
       m_translator(tx),
       m_listWidget(root, content),
       m_infoWidget(root.provider().getFont(gfx::FontRequest())->getCellSize().scaledBy(30, 11), 0, m_root.provider()),
+      m_expInfo(expInfo),
       conn_imageChange(root.provider().sig_imageChange.add(this, &Dialog::onScroll))
 {
     m_listWidget.sig_change.add(this, &Dialog::onScroll);
@@ -268,13 +270,27 @@ Dialog::onScroll()
         // Availability information
         if (!d->playerLimit.empty()) {
             doc.add(afl::string::Format(m_translator("Available to %s"), d->playerLimit));
+            if (d->flags.contains(game::spec::info::ForeignAbility)) {
+                doc.add(util::rich::Text(util::SkinColor::Red, " " UTF_BALLOT_CROSS));
+            }
             doc.addNewline();
         }
         if (!d->levelLimit.empty()) {
             doc.add(afl::string::Format(m_translator("Available at %s"), d->levelLimit));
             if (d->minimumExperience > 0) {
                 doc.add(" ");
-                doc.add(afl::string::Format(m_translator("(%d EP)"), d->minimumExperience));
+                int numTurns = getNumTurnsUntil(d->minimumExperience, m_expInfo);
+                if (numTurns != 0) {
+                    doc.add(afl::string::Format(m_translator("(%d EP; in %d turn%!1{s%} at +%d/turn)"), d->minimumExperience, numTurns, m_expInfo.pointGrowth.orElse(0)));
+                } else {
+                    doc.add(afl::string::Format(m_translator("(%d EP)"), d->minimumExperience));
+                }
+            }
+            if (d->flags.contains(game::spec::info::ReachableAbility)) {
+                doc.add(util::rich::Text(util::SkinColor::Green, " " UTF_CHECK_MARK));
+            }
+            if (d->flags.contains(game::spec::info::OutgrownAbility)) {
+                doc.add(util::rich::Text(util::SkinColor::Red, " " UTF_BALLOT_CROSS));
             }
             doc.addNewline();
         }
@@ -318,10 +334,11 @@ Dialog::onScroll()
  */
 
 void
-client::dialogs::showHullFunctions(const game::spec::info::AbilityDetails_t& content, ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx)
+client::dialogs::showHullFunctions(const game::spec::info::AbilityDetails_t& content, const game::map::ShipExperienceInfo& expInfo,
+                                   ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx)
 {
     // ex showHullFunctions, shipspec.pas:ShowHullCapabilityList
     if (!content.empty()) {
-        Dialog(content, root, tx).run(gameSender);
+        Dialog(content, expInfo, root, tx).run(gameSender);
     }
 }

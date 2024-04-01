@@ -227,6 +227,18 @@ namespace game { namespace map {
         @param config Host configuration
         @return Cost in megacredits */
     int32_t getBaseTechCost(int player, int fromTech, int toTech, const game::config::HostConfiguration& config);
+
+
+    /*
+     *  Experience
+     */
+
+    /** Get planet experience gain.
+        @param pl Planet
+        @param config Host configuration
+        @param host Host version */
+    IntegerProperty_t getExperienceGain(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host);
+
 } }
 
 #endif

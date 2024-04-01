@@ -5,6 +5,7 @@
 
 #include "game/unitscorelist.hpp"
 #include "afl/test/testrunner.hpp"
+#include "game/unitscoredefinitionlist.hpp"
 
 /** Simple tests. */
 AFL_TEST("game.UnitScoreList:basics", a)
@@ -82,4 +83,20 @@ AFL_TEST("game.UnitScoreList:merge", a)
     a.check("21. get", testee.get(1, v, t));
     a.checkEqual("22. value", v, 400);
     a.checkEqual("23. turn", t, 11);
+}
+
+/** Test getScoreById(). */
+AFL_TEST("game.UnitScoreList:getScoreById", a)
+{
+    game::UnitScoreDefinitionList defs;
+    game::UnitScoreDefinitionList::Definition scoreDef;
+    scoreDef.name  = "Level";
+    scoreDef.id    = 77;
+    scoreDef.limit = -1;
+
+    game::UnitScoreList list;
+    list.set(defs.add(scoreDef), 3, 44);
+
+    a.checkEqual("01", list.getScoreById(77, defs).orElse(-1), 3);
+    a.checkEqual("02", list.getScoreById(78, defs).isValid(), false);
 }

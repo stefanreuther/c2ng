@@ -14,6 +14,7 @@
 #include "game/proxy/configurationproxy.hpp"
 #include "game/proxy/hullspecificationproxy.hpp"
 #include "game/proxy/playerproxy.hpp"
+#include "game/proxy/shipinfoproxy.hpp"
 #include "gfx/keyeventconsumer.hpp"
 #include "ui/dialogs/messagebox.hpp"
 #include "ui/group.hpp"
@@ -31,6 +32,7 @@ using afl::string::Format;
 using game::proxy::ConfigurationProxy;
 using game::proxy::HullSpecificationProxy;
 using game::proxy::PlayerProxy;
+using game::proxy::ShipInfoProxy;
 
 namespace {
     /** Dialog.
@@ -41,6 +43,8 @@ namespace {
      public:
         Dialog(HullSpecificationProxy& proxy, ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender,
                game::PlayerSet_t allPlayers, const game::PlayerArray<String_t>& playerNames, util::NumberFormatter fmt, bool useIcons);
+
+        void setShipId(game::Id_t shipId);
 
         void run(String_t title);
 
@@ -58,6 +62,7 @@ namespace {
 
         ui::EventLoop m_loop;
         client::widgets::HullSpecificationSheet m_widget;
+        game::Id_t m_shipId;
 
         afl::base::SignalConnection conn_update;
     };
@@ -157,8 +162,15 @@ Dialog::Dialog(HullSpecificationProxy& proxy, ui::Root& root, afl::string::Trans
       m_numberFormatter(fmt),
       m_loop(root),
       m_widget(root, tx, allPlayers, playerNames, fmt, useIcons),
+      m_shipId(),
       conn_update(m_proxy.sig_update.add(&m_widget, &client::widgets::HullSpecificationSheet::setContent))
 { }
+
+inline void
+Dialog::setShipId(game::Id_t shipId)
+{
+    m_shipId = shipId;
+}
 
 void
 Dialog::run(String_t title)
@@ -252,8 +264,13 @@ Dialog::showHullFunctionDetails()
     game::spec::info::AbilityDetails_t details;
     m_proxy.describeHullFunctionDetails(link, details, true);
 
+    game::map::ShipExperienceInfo expInfo;
+    if (m_shipId > 0) {
+        expInfo = ShipInfoProxy(m_gameSender).getExperienceInfo(link, m_shipId);
+    }
+
     // Show dialog
-    client::dialogs::showHullFunctions(details, m_root, m_gameSender, m_translator);
+    client::dialogs::showHullFunctions(details, expInfo, m_root, m_gameSender, m_translator);
 }
 
 void
@@ -268,6 +285,7 @@ client::dialogs::showHullSpecificationForShip(game::Id_t shipId, ui::Root& root,
                ConfigurationProxy(gameSender).getNumberFormatter(link),
                ConfigurationProxy(gameSender).getOption(link, game::config::UserConfiguration::Display_HullfuncImages));
     proxy.setExistingShipId(shipId);
+    dlg.setShipId(shipId);
     dlg.run(tx("Ship Specification"));
 }
 
@@ -282,5 +300,6 @@ client::dialogs::showHullSpecification(const game::ShipQuery& q, ui::Root& root,
                ConfigurationProxy(gameSender).getNumberFormatter(link),
                ConfigurationProxy(gameSender).getOption(link, game::config::UserConfiguration::Display_HullfuncImages));
     proxy.setQuery(q);
+    dlg.setShipId(q.getShipId());
     dlg.run(tx("Ship Specification"));
 }

@@ -13,6 +13,7 @@
 #include "game/interface/referencecontext.hpp"
 #include "game/map/fleet.hpp"
 #include "game/map/fleetmember.hpp"
+#include "game/map/shipinfo.hpp"
 #include "game/map/shippredictor.hpp"
 #include "game/map/shiputils.hpp"
 #include "game/root.hpp"
@@ -158,7 +159,7 @@ ShipArrayProperty::get(interpreter::Arguments& args)
            As of PHost 4.1, the following values are valid:
 
            - Score(1): experience level (same as {Level}).
-           - Score(2): experience points.
+           - Score(2): experience points (same as {Level.Points}.
 
            This property yields EMPTY if the respective score does not exist or is not known.
            @since PCC2 1.99.21, PCC 1.1.16 */
@@ -169,15 +170,7 @@ ShipArrayProperty::get(interpreter::Arguments& args)
                 return 0;
             }
 
-            game::UnitScoreDefinitionList::Index_t index;
-            int16_t value, turn;
-            if (m_game->shipScores().lookup(int16_t(id), index)
-                && m_ship.unitScores().get(index, value, turn))
-            {
-                return makeIntegerValue(value);
-            } else {
-                return 0;
-            }
+            return makeOptionalIntegerValue(m_ship.unitScores().getScoreById(int16_t(id), m_game->shipScores()));
         }
 
      case HasFunction:
@@ -495,15 +488,33 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
         /* @q Level:Int (Ship Property)
            Ship's experience level.
            If the experience system is not enabled, or the level is not known, yields EMPTY. */
-        {
-            UnitScoreList::Index_t index;
-            int16_t value, turn;
-            if (game->shipScores().lookup(ScoreId_ExpLevel, index) && sh.unitScores().get(index, value, turn)) {
-                return makeIntegerValue(value);
-            } else {
-                return 0;
-            }
+        return makeOptionalIntegerValue(sh.unitScores().getScoreById(ScoreId_ExpLevel, game->shipScores()));
+     case ispLevelGain:
+        /* @q Level.Gain:Int (Ship Property)
+           Ship's experience gain per turn.
+           Considers the EPShipAging option as well as a possible Training mission.
+           If the experience system is not enabled, yields EMPTY.
+           @since PCC 1.1.22, PCC2 2.0.16, PCC2 2.41.2 */
+        return makeOptionalIntegerValue(packShipExperienceInfo(sh, game->shipScores(), root->hostConfiguration(), root->hostVersion(), *shipList).pointGrowth);
+     case ispLevelName: {
+        /* @q Level.Name:Str (Ship Property, Planet Property)
+           Unit's experience level name (e.g. "Recruit").
+           If the experience system is not enabled, or the level is not known, yields EMPTY.
+           @since PCC 1.1.22, PCC2 2.0.16, PCC2 2.41.2 */
+        int level;
+        if (sh.unitScores().getScoreById(ScoreId_ExpLevel, game->shipScores()).get(level)) {
+            return makeStringValue(root->hostConfiguration().getExperienceLevelName(level, session.translator()));
+        } else {
+            return 0;
         }
+     }
+     case ispLevelPoints:
+        /* @q Level.Points:Int (Ship Property, Planet Property)
+           Unit's number of experience points.
+           The number of experience points defines the unit's level.
+           If the experience system is not enabled, or the points is not known, yields EMPTY.
+           @since PCC 1.1.22, PCC2 2.0.16, PCC2 2.41.2 */
+        return makeOptionalIntegerValue(sh.unitScores().getScoreById(ScoreId_ExpPoints, game->shipScores()));
      case ispLocX:
         /* @q Loc.X:Int (Ship Property)
            X location of ship. */

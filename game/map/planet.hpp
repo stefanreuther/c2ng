@@ -591,12 +591,6 @@ namespace game { namespace map {
             \return scores */
         const UnitScoreList& unitScores() const;
 
-        /** Get score value.
-            \param scoreId Score Id
-            \param scoreDefinitions Score definitions
-            \return Score as looked up in the scoreDefinitions; unknown if score value not known */
-        NegativeProperty_t getScore(int16_t scoreId, const UnitScoreDefinitionList& scoreDefinitions) const;
-
 
         /*
          *  Message link

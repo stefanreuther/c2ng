@@ -23,6 +23,7 @@
 #include "interpreter/test/valueverifier.hpp"
 
 using game::Reference;
+using game::config::HostConfiguration;
 using interpreter::test::verifyNewBoolean;
 using interpreter::test::verifyNewInteger;
 using interpreter::test::verifyNewNull;
@@ -65,6 +66,10 @@ AFL_TEST("game.interface.PlanetProperty:full", a)
     session.setGame(g);
 
     afl::base::Ptr<game::Root> r = game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,1,0))).asPtr();
+    r->hostConfiguration()[HostConfiguration::NumExperienceLevels].set(4);
+    r->hostConfiguration()[HostConfiguration::EPPlanetAging].set(42);
+    r->hostConfiguration()[HostConfiguration::EPPlanetGovernment].set(50);
+    r->hostConfiguration()[HostConfiguration::ExperienceLevelNames].set("Noob,Nieswurz,Brotfahrer,Ladehugo,Erdwurm");
     session.setRoot(r);
 
     // Planet
@@ -124,6 +129,12 @@ AFL_TEST("game.interface.PlanetProperty:full", a)
     levelDef.limit = -1;
     pl.unitScores().set(g->planetScores().add(levelDef), 3, TURN_NR);
 
+    game::UnitScoreDefinitionList::Definition pointDef;
+    pointDef.name  = "Point";
+    pointDef.id    = game::ScoreId_ExpPoints;
+    pointDef.limit = -1;
+    pl.unitScores().set(g->planetScores().add(pointDef), 3333, TURN_NR);
+
     // Player definition
     game::Player& player = *r->playerList().create(5);
     player.setName(game::Player::LongName, "The Orion Pirates");
@@ -167,6 +178,9 @@ AFL_TEST("game.interface.PlanetProperty:full", a)
     verifyNewString (a("ippIndustry"),          getPlanetProperty(pl, game::interface::ippIndustry,          session, *r, *g, g->currentTurn()), "light");
     verifyNewInteger(a("ippIndustryCode"),      getPlanetProperty(pl, game::interface::ippIndustryCode,      session, *r, *g, g->currentTurn()), 1);
     verifyNewInteger(a("ippLevel"),             getPlanetProperty(pl, game::interface::ippLevel,             session, *r, *g, g->currentTurn()), 3);
+    verifyNewInteger(a("ippLevelGain"),         getPlanetProperty(pl, game::interface::ippLevelGain,         session, *r, *g, g->currentTurn()), 78); /* 42 aging + 50% * 72 (= nhappy + nchange) */
+    verifyNewString (a("ippLevelName"),         getPlanetProperty(pl, game::interface::ippLevelName,         session, *r, *g, g->currentTurn()), "Ladehugo");
+    verifyNewInteger(a("ippLevelPoints"),       getPlanetProperty(pl, game::interface::ippLevelPoints,       session, *r, *g, g->currentTurn()), 3333);
     verifyNewInteger(a("ippLocX"),              getPlanetProperty(pl, game::interface::ippLocX,              session, *r, *g, g->currentTurn()), 1030);
     verifyNewInteger(a("ippLocY"),              getPlanetProperty(pl, game::interface::ippLocY,              session, *r, *g, g->currentTurn()), 2700);
     verifyNewBoolean(a("ippMarked"),            getPlanetProperty(pl, game::interface::ippMarked,            session, *r, *g, g->currentTurn()), false);
@@ -431,6 +445,9 @@ AFL_TEST("game.interface.PlanetProperty:empty", a)
     verifyNewNull   (a("ippIndustry"),          getPlanetProperty(pl, game::interface::ippIndustry,          session, *r, *g, g->currentTurn()));
     verifyNewNull   (a("ippIndustryCode"),      getPlanetProperty(pl, game::interface::ippIndustryCode,      session, *r, *g, g->currentTurn()));
     verifyNewNull   (a("ippLevel"),             getPlanetProperty(pl, game::interface::ippLevel,             session, *r, *g, g->currentTurn()));
+    verifyNewNull   (a("ippLevelGain"),         getPlanetProperty(pl, game::interface::ippLevelGain,         session, *r, *g, g->currentTurn()));
+    verifyNewNull   (a("ippLevelName"),         getPlanetProperty(pl, game::interface::ippLevelName,         session, *r, *g, g->currentTurn()));
+    verifyNewNull   (a("ippLevelPoints"),       getPlanetProperty(pl, game::interface::ippLevelPoints,       session, *r, *g, g->currentTurn()));
     verifyNewNull   (a("ippLocX"),              getPlanetProperty(pl, game::interface::ippLocX,              session, *r, *g, g->currentTurn()));
     verifyNewNull   (a("ippLocY"),              getPlanetProperty(pl, game::interface::ippLocY,              session, *r, *g, g->currentTurn()));
     verifyNewBoolean(a("ippMarked"),            getPlanetProperty(pl, game::interface::ippMarked,            session, *r, *g, g->currentTurn()), false);

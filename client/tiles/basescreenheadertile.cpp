@@ -47,9 +47,8 @@ client::tiles::BaseScreenHeaderTile::attach(game::proxy::ObjectObserver& oop)
                 afl::string::Translator& tx = session.translator();
                 if (p != 0 && g != 0 && r != 0) {
                     // ex WBaseScreenHeaderTile::getSubtitle
-                    game::UnitScoreList::Index_t index = 0;
-                    int16_t level = 0, turn = 0;
-                    bool levelKnown = (g->planetScores().lookup(game::ScoreId_ExpLevel, index) && p->unitScores().get(index, level, turn));
+                    int level = 0;
+                    bool levelKnown = p->unitScores().getScoreById(game::ScoreId_ExpLevel, g->planetScores()).get(level);
                     String_t fmt = (levelKnown
                                     ? tx.translateString("(Id #%d, %s)")
                                     : tx.translateString("(Id #%d)"));

@@ -66,7 +66,7 @@ namespace {
             }
 
             if (g != 0) {
-                level = pl->getScore(game::ScoreId_ExpLevel, g->planetScores());
+                level = pl->unitScores().getScoreById(game::ScoreId_ExpLevel, g->planetScores());
             }
         } else if (Ship* sh = dynamic_cast<Ship*>(obj)) {
             int hullNr;
@@ -83,7 +83,7 @@ namespace {
             }
 
             if (g != 0) {
-                level = sh->getScore(game::ScoreId_ExpLevel, g->shipScores());
+                level = sh->unitScores().getScoreById(game::ScoreId_ExpLevel, g->shipScores());
             }
 
             int mass;

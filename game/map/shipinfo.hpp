@@ -159,6 +159,42 @@ namespace game { namespace map {
                               const game::spec::ShipList& shipList,
                               afl::string::Translator& tx);
 
+    /** Information about a ship's experience. */
+    struct ShipExperienceInfo {
+        IntegerProperty_t level;              ///< Current level, if known.
+        IntegerProperty_t points;             ///< Current number of experience points, if known.
+        IntegerProperty_t pointGrowth;        ///< Current growth per turn, if known.
+    };
+
+    /** Describe a ship's experience status.
+        \param ship             Ship
+        \param scoreDefinitions Ship score definitions (used for hull functions)
+        \param config           Host configuration (for experience parameters)
+        \param host             Host version (for hull functions, experience support)
+        \param shipList         Ship list (for hulls, missions)
+        \return result */
+    ShipExperienceInfo packShipExperienceInfo(const Ship& ship,
+                                              const UnitScoreDefinitionList& scoreDefinitions,
+                                              const game::config::HostConfiguration& config,
+                                              const HostVersion& host,
+                                              const game::spec::ShipList& shipList);
+
+    /** Get training experience for a ship.
+        \param owner      Ship real owner
+        \param supplies   Number of supplies to use
+        \param isAcademy  true for academy ship
+        \param crew       Hull crew (see Hull::getMaxCrew())
+        \param config     Host configuration
+        \return Experience acquired by training */
+    int getShipTrainingExperience(int owner, int supplies, bool isAcademy, int crew, const game::config::HostConfiguration& config);
+
+    /** Get number of turns needed to reach an experience point target.
+        Takes as input the a ShipExperienceInfo structure prepared by packShipExperienceInfo().
+        \param target     Point target
+        \param info       Experience information
+        \return Number of turns. 0 if preconditions violated (target reached, growth unknown/negative, etc.) */
+    int getNumTurnsUntil(int target, const ShipExperienceInfo& info);
+
 } }
 
 #endif

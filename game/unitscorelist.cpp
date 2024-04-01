@@ -4,6 +4,7 @@
   */
 
 #include "game/unitscorelist.hpp"
+#include "game/unitscoredefinitionlist.hpp"
 
 // Constructor.
 game::UnitScoreList::UnitScoreList()
@@ -52,5 +53,19 @@ game::UnitScoreList::get(Index_t index, int16_t& value, int16_t& turn) const
         return true;
     } else {
         return false;
+    }
+}
+
+// Get score, given a Id.
+game::NegativeProperty_t
+game::UnitScoreList::getScoreById(int16_t id, const UnitScoreDefinitionList& defs) const
+{
+    // ex phost.pas:GetExperienceLevel (sort-of)
+    Index_t idx;
+    int16_t value, turn;
+    if (defs.lookup(id, idx) && get(idx, value, turn)) {
+        return value;
+    } else {
+        return afl::base::Nothing;
     }
 }

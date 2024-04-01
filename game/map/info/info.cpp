@@ -949,7 +949,7 @@ game::map::info::renderPlanetExperienceSummary(TagNode& tab,
     for (Id_t pid = type.findNextIndex(0); pid != 0; pid = type.findNextIndex(pid)) {
         if (const Planet* pl = type.getObjectByIndex(pid)) {
             int level;
-            if (pl->getScore(ScoreId_ExpLevel, planetScores).get(level) && level >= 0 && level <= MAX_EXPERIENCE_LEVELS) {
+            if (pl->unitScores().getScoreById(ScoreId_ExpLevel, planetScores).get(level) && level >= 0 && level <= MAX_EXPERIENCE_LEVELS) {
                 levelCounts.set(level, levelCounts.get(level) + 1);
             }
         }
@@ -1217,7 +1217,7 @@ game::map::info::renderShipExperienceSummary(TagNode& tab,
         if (const Ship* sh = type.getObjectByIndex(sid)) {
             if (withFreighters || sh->hasWeapons()) {
                 int level;
-                if (sh->getScore(ScoreId_ExpLevel, shipScores).get(level) && level >= 0 && level <= MAX_EXPERIENCE_LEVELS) {
+                if (sh->unitScores().getScoreById(ScoreId_ExpLevel, shipScores).get(level) && level >= 0 && level <= MAX_EXPERIENCE_LEVELS) {
                     levelCounts.set(level, levelCounts.get(level) + 1);
                 }
             }

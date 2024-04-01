@@ -69,9 +69,8 @@ client::tiles::ShipScreenHeaderTile::attach(game::proxy::ObjectObserver& oop)
                        "(ID race hull)" and (ID level hull)" cases different which some
                        languages may need. An alternative would have been to use the
                        %nn$ syntax to move the argument pointer. */
-                    game::UnitScoreList::Index_t index = 0;
-                    int16_t level = 0, turn = 0;
-                    bool levelKnown = (g->shipScores().lookup(game::ScoreId_ExpLevel, index) && sh->unitScores().get(index, level, turn));
+                    int level = 0;
+                    bool levelKnown = sh->unitScores().getScoreById(game::ScoreId_ExpLevel, g->shipScores()).get(level);
                     int owner = sh->getRealOwner().orElse(0);
                     String_t fmt = (owner != g->getViewpointPlayer()
                                     ? (levelKnown

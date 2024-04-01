@@ -1025,14 +1025,7 @@ void game::map::describePlanetDefenseEffects(DefenseEffectInfos_t& result,
                 }
             }
 
-            int level = 0;
-            {
-                UnitScoreList::Index_t index;
-                int16_t value, turn;
-                if (planetScores.lookup(ScoreId_ExpLevel, index) && pl.unitScores().get(index, value, turn)) {
-                    level = value;
-                }
-            }
+            const int level = pl.unitScores().getScoreById(ScoreId_ExpLevel, planetScores).orElse(0);
             const int ppt = config[HostConfiguration::PlanetaryTorpsPerTube](planetOwner) + config.getExperienceBonus(HostConfiguration::EModPlanetaryTorpsPerTube, level);
             total += ppt * n;
             if (ppt > 0) {

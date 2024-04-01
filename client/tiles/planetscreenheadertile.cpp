@@ -50,9 +50,8 @@ client::tiles::PlanetScreenHeaderTile::attach(game::proxy::ObjectObserver& oop)
                     int temp;
                     if (p->getTemperature().get(temp)) {
                         // ex WPlanetScreenHeaderTile::getSubtitle()
-                        game::UnitScoreList::Index_t index = 0;
-                        int16_t level = 0, turn = 0;
-                        bool levelKnown = (g->planetScores().lookup(game::ScoreId_ExpLevel, index) && p->unitScores().get(index, level, turn));
+                        int level = 0;
+                        bool levelKnown = p->unitScores().getScoreById(game::ScoreId_ExpLevel, g->planetScores()).get(level);
                         String_t fmt = (levelKnown
                                         ? tx.translateString("(Id #%d, %s - %d" "\xC2\xB0" "\x46, %s)")
                                         : tx.translateString("(Id #%d, %s - %d" "\xC2\xB0" "\x46)"));

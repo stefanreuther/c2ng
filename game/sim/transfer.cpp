@@ -84,7 +84,7 @@ game::sim::Transfer::copyShipFromGame(Ship& out, const game::map::Ship& in) cons
     out.setOwner(in.getRealOwner().orElse(owner));
 
     // Experience
-    out.setExperienceLevel(in.getScore(ScoreId_ExpLevel, m_shipScores).orElse(0));
+    out.setExperienceLevel(in.unitScores().getScoreById(ScoreId_ExpLevel, m_shipScores).orElse(0));
 
     // Crew
     out.setCrew(in.getCrew().orElse(pHull->getMaxCrew()));
@@ -285,7 +285,7 @@ game::sim::Transfer::copyPlanetFromGame(Planet& out, const game::map::Planet& in
     out.setOwner(owner);
 
     // Experience
-    out.setExperienceLevel(in.getScore(ScoreId_ExpLevel, m_planetScores).orElse(0));
+    out.setExperienceLevel(in.unitScores().getScoreById(ScoreId_ExpLevel, m_planetScores).orElse(0));
 
     // Flags: there are no flags relevant for planets so far
     out.setFlags(0);

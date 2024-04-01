@@ -442,7 +442,7 @@ EndSub
 
 Sub Tile$ShipEquipment.Common(forHistory)
   % ex WShipEquipmentTile::drawShipEquipmentTile
-  Local t, s
+  Local t, s, color, line
 
   % FIXME: UIColor::Color equipColor = (ship.getHistoryTimestamp(sts_ArmsDamage) == getCurrentTurn().getTurnNumber() ? UIColor::tc_Green : UIColor::tc_Yellow);
   Local equipColor = 'green'
@@ -588,44 +588,37 @@ Sub Tile$ShipEquipment.Common(forHistory)
   % Line 6: Crew
   t := RAdd(t, RAlign(Translate("Crew:"), 80))
   If IsEmpty(Crew) Then
-    t := RAdd(t, RStyle("yellow", Format(Translate("up to %d"), Crew.Normal)))
-  Else If Crew<>Crew.Normal Then
-    t := RAdd(t, RStyle(If(beingFixed Or Crew>Crew.Normal, "yellow", "red"), Format(Translate("%d of %d"), Crew, Crew.Normal)))
+    t := RAdd(t, RStyle("yellow", Format(Translate("up to %d"), CCVP.NumberToString(Crew.Normal))))
   Else
-    t := RAdd(t, RStyle(equipColor, CCVP.NumberToString(Crew)))
-  EndIf
+    If Crew<>Crew.Normal Then
+      color := If(beingFixed Or Crew>Crew.Normal, "yellow", "red")
+      line := Format(Translate("%d of %d"), CCVP.NumberToString(Crew), CCVP.NumberToString(Crew.Normal))
+    Else
+      color := equipColor
+      line := CCVP.NumberToString(Crew)
+    EndIf
 
-  % FIXME: exp!
-  %    int16_t exp = ship.unit_scores.getScore(ship_score_definitions.lookupScore(ScoreId_ExpPoints));
-  %    if (exp >= 0) {
-  %        if (ship.getMission().isKnown() && ship.getMission() == config.ExtMissionsStartAt() + GMission::pmsn_Training) {
-  %            // Ship is attempting to train
-  %            int sup = ship.getInterceptId().isKnown() ? ship.getInterceptId() : 0;
-  %            double points = sup < 25 ? sup : 25 + std::sqrt(8.0 * (sup - 25));
-  %            int32_t acaBonus = ship.canDoSpecial(hf_Academy) ? config.EPAcademyScale(ship.getRealOwner()) : 100;
-  %            int32_t rate = config.EPTrainingScale(ship.getRealOwner()) * acaBonus / 100;
-  %            int32_t added = int32_t(rate * points / (std::sqrt(double(hull.getCrew())) + 1));
-  %            line += format(_(" (%d EP, +%d)"), numToString(exp), numToString(added));
-  %
-  %            // Warning for mission failure if...
-  %            // ...not at a planet
-  %            // ...not enough supplies on played planet
-  %            int pid = ship.getOrbitPlanetId();
-  %            GUniverse* univ = getCurrentUniverse();
-  %            if (univ == 0
-  %                || !univ->isValidPlanetId(pid)
-  %                || (univ->ty_played_planets.isValidIndex(pid)
-  %                    && sup > univ->getPlanet(pid).getCargoRaw(el_Supplies)))
-  %            {
-  %                if (c == UIColor::tc_Green) {
-  %                    c = UIColor::tc_Yellow;
-  %                }
-  %            }
-  %        } else {
-  %            // Normal ship
-  %            line += format(_(" (%d EP)"), numToString(exp));
-  %        }
-  %    }
+    Local exp := Score(2)
+    If Not IsEmpty(exp) Then
+      Local added := Level.Gain
+      If added Then
+        % Ship is attempting to train
+        line := line & Format(Translate(" (%d EP, +%d)"), CCVP.NumberToString(exp), CCVP.NumberToString(added))
+
+        % Warning for mission failure if...
+        % ...training
+        % ...not at a planet
+        % ...not enough supplies on played planet
+        If Mission$=Cfg('ExtMissionsStartAt')+18 And (Not Orbit$ Or Global.Planet(Orbit$).Supplies < Mission.Intercept) Then
+          If color=equipColor Then color := 'yellow'
+        EndIf
+      Else
+        % Normal ship
+        line := line & Format(Translate(" (%d EP)"), CCVP.NumberToString(exp))
+      EndIf
+    EndIf
+    t := RAdd(t, RStyle(color, line))
+  EndIf
   t := RAdd(t, "\n")
 
   SetContent t

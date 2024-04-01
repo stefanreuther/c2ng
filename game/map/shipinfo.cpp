@@ -11,11 +11,15 @@
 #include "game/map/configuration.hpp"
 #include "game/map/ship.hpp"
 #include "game/map/universe.hpp"
+#include "util/math.hpp"
 #include "util/string.hpp"
 
 namespace {
-    using game::Element;
     using afl::string::Format;
+    using game::Element;
+    using game::config::HostConfiguration;
+    using game::spec::BasicHullFunction;
+    using game::spec::Mission;
     using util::formatAge;
 
     void addHeading(game::map::ShipCargoInfos_t& result, String_t heading)
@@ -403,4 +407,68 @@ game::map::packShipLocationInfo(ShipLocationInfos_t& result, const Ship& ship,
             out.warpFactor = now->speed;
         }
     }
+}
+
+game::map::ShipExperienceInfo
+game::map::packShipExperienceInfo(const Ship& ship,
+                                  const UnitScoreDefinitionList& scoreDefinitions,
+                                  const game::config::HostConfiguration& config,
+                                  const HostVersion& host,
+                                  const game::spec::ShipList& shipList)
+{
+    ShipExperienceInfo result;
+
+    // Level, Points
+    result.level  = ship.unitScores().getScoreById(ScoreId_ExpLevel, scoreDefinitions);
+    result.points = ship.unitScores().getScoreById(ScoreId_ExpPoints, scoreDefinitions);
+
+    // Growth
+    // We can only predict growth if we know the host supports it the same way as we do.
+    // We still report level/value in case someone uses an add-on that uses those.
+    int owner;
+    if (host.hasExperienceLevels() && ship.getRealOwner().get(owner) && config[HostConfiguration::NumExperienceLevels]() > 0) {
+        if (const game::spec::Hull* pHull = shipList.hulls().get(ship.getHull().orElse(0))) {
+            // Aging
+            int growth = config[HostConfiguration::EPShipAging]();
+
+            // Training
+            int mission;
+            if (ship.getMission().get(mission) && shipList.missions().isExtendedMission(mission, Mission::pmsn_Training, config)) {
+                growth += getShipTrainingExperience(owner, ship.getMissionParameter(InterceptParameter).orElse(0),
+                                                    ship.hasSpecialFunction(BasicHullFunction::Academy, scoreDefinitions, shipList, config),
+                                                    pHull->getMaxCrew(), config);
+            }
+
+            // Not considered: EPShipMovement100LY, EPShipHyperjump, EPShipChunnel, EPShipIonStorm100MEV, EPShipCombat..., EPShipAlchemy100KT, EPShipBuild10Fighters, EPShipBuild1000TorpUnits
+            result.pointGrowth = growth;
+        }
+    }
+
+    return result;
+}
+
+int
+game::map::getShipTrainingExperience(int owner, int supplies, bool isAcademy, int crew, const game::config::HostConfiguration& config)
+{
+    double points = supplies < 25 ? supplies : 25 + std::sqrt(8.0 * (supplies - 25));
+
+    int32_t acaBonus = isAcademy ? config[HostConfiguration::EPAcademyScale](owner) : 100;
+    int32_t rate = config[HostConfiguration::EPTrainingScale](owner) * acaBonus / 100;
+
+    return int32_t(rate * points / (std::sqrt(double(crew)) + 1));
+}
+
+int
+game::map::getNumTurnsUntil(int target, const ShipExperienceInfo& info)
+{
+    int points, pointGrowth;
+    if (!info.points.get(points) || !info.pointGrowth.get(pointGrowth)) {
+        return 0;
+    }
+
+    if (points >= target || pointGrowth <= 0) {
+        return 0;
+    }
+
+    return util::divideAndRoundUp(target - points, pointGrowth);
 }

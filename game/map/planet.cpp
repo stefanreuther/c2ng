@@ -1307,22 +1307,3 @@ game::map::Planet::applyAutobuildSettings(const AutobuildSettings& settings)
         }
     }
 }
-
-
-/*
- *  Unit score accessors:
- */
-
-game::NegativeProperty_t
-game::map::Planet::getScore(int16_t scoreId, const UnitScoreDefinitionList& scoreDefinitions) const
-{
-    // ex phost.pas:GetExperienceLevel (sort-of)
-    // FIXME: copied from Ship - can we share?
-    UnitScoreList::Index_t index;
-    int16_t value, turn;
-    if (scoreDefinitions.lookup(scoreId, index) && m_unitScores.get(index, value, turn)) {
-        return value;
-    } else {
-        return afl::base::Nothing;
-    }
-}

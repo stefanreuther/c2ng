@@ -24,6 +24,7 @@
 #include "interpreter/test/contextverifier.hpp"
 #include "interpreter/test/valueverifier.hpp"
 
+using game::config::HostConfiguration;
 using interpreter::test::verifyNewBoolean;
 using interpreter::test::verifyNewFloat;
 using interpreter::test::verifyNewInteger;
@@ -79,6 +80,9 @@ AFL_TEST("game.interface.ShipProperty:basics", a)
     for (int i = 0; i <= 10; ++i) {
         root->playerList().create(i);       // This will enable setting PE to 0..10
     }
+    root->hostConfiguration()[HostConfiguration::NumExperienceLevels].set(4);
+    root->hostConfiguration()[HostConfiguration::EPShipAging].set(32);
+    root->hostConfiguration()[HostConfiguration::ExperienceLevelNames].set("Noob,Nieswurz,Brotfahrer,Ladehugo,Erdwurm");
 
     // Ship List
     afl::base::Ref<game::spec::ShipList> shipList(*new game::spec::ShipList());
@@ -213,6 +217,9 @@ AFL_TEST("game.interface.ShipProperty:basics", a)
     verifyNewString (a("ispHullSpecial"),             getShipProperty(sh, game::interface::ispHullSpecial,             session, root, shipList, g, turn), "C");
     verifyNewInteger(a("ispId"),                      getShipProperty(sh, game::interface::ispId,                      session, root, shipList, g, turn), 77);
     verifyNewInteger(a("ispLevel"),                   getShipProperty(sh, game::interface::ispLevel,                   session, root, shipList, g, turn), 3);
+    verifyNewInteger(a("ispLevelGain"),               getShipProperty(sh, game::interface::ispLevelGain,               session, root, shipList, g, turn), 32);  // EPShipAging
+    verifyNewString (a("ispLevelName"),               getShipProperty(sh, game::interface::ispLevelName,               session, root, shipList, g, turn), "Ladehugo");
+    verifyNewNull   (a("ispLevelPoints"),             getShipProperty(sh, game::interface::ispLevelPoints,             session, root, shipList, g, turn));
     verifyNewInteger(a("ispLocX"),                    getShipProperty(sh, game::interface::ispLocX,                    session, root, shipList, g, turn), X);
     verifyNewInteger(a("ispLocY"),                    getShipProperty(sh, game::interface::ispLocY,                    session, root, shipList, g, turn), Y);
     verifyNewString (a("ispLoc"),                     getShipProperty(sh, game::interface::ispLoc,                     session, root, shipList, g, turn), "Marble (#99)");
@@ -491,6 +498,8 @@ AFL_TEST("game.interface.ShipProperty:carrier", a)
 
     // Root
     afl::base::Ref<game::Root> root(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,1,0))));
+    root->hostConfiguration()[HostConfiguration::NumExperienceLevels].set(4);
+    root->hostConfiguration()[HostConfiguration::EPShipAging].set(0);
 
     // Ship List
     afl::base::Ref<game::spec::ShipList> shipList(*new game::spec::ShipList());
@@ -562,6 +571,13 @@ AFL_TEST("game.interface.ShipProperty:carrier", a)
     sh.setFleetNumber(SHIP_ID);
     sh.setFleetName("Invader");
 
+    // Experience points
+    game::UnitScoreDefinitionList::Definition levelDef;
+    levelDef.name  = "Points";
+    levelDef.id    = game::ScoreId_ExpPoints;
+    levelDef.limit = -1;
+    sh.unitScores().set(g->shipScores().add(levelDef), 300, TURN_NR);
+
     // Test reading all scalar properties
     verifyNewInteger(a("ispAuxId"),                   getShipProperty(sh, game::interface::ispAuxId,                   session, root, shipList, g, turn), 11);
     verifyNewInteger(a("ispAuxAmmo"),                 getShipProperty(sh, game::interface::ispAuxAmmo,                 session, root, shipList, g, turn), 60);
@@ -598,6 +614,9 @@ AFL_TEST("game.interface.ShipProperty:carrier", a)
     verifyNewString (a("ispHullSpecial"),             getShipProperty(sh, game::interface::ispHullSpecial,             session, root, shipList, g, turn), "");
     verifyNewInteger(a("ispId"),                      getShipProperty(sh, game::interface::ispId,                      session, root, shipList, g, turn), 77);
     verifyNewNull   (a("ispLevel"),                   getShipProperty(sh, game::interface::ispLevel,                   session, root, shipList, g, turn));
+    verifyNewInteger(a("ispLevelGain"),               getShipProperty(sh, game::interface::ispLevelGain,               session, root, shipList, g, turn), 0);
+    verifyNewNull   (a("ispLevelName"),               getShipProperty(sh, game::interface::ispLevelName,               session, root, shipList, g, turn));
+    verifyNewInteger(a("ispLevelPoints"),             getShipProperty(sh, game::interface::ispLevelPoints,             session, root, shipList, g, turn), 300);
     verifyNewInteger(a("ispLocX"),                    getShipProperty(sh, game::interface::ispLocX,                    session, root, shipList, g, turn), X);
     verifyNewInteger(a("ispLocY"),                    getShipProperty(sh, game::interface::ispLocY,                    session, root, shipList, g, turn), Y);
     verifyNewString (a("ispLoc"),                     getShipProperty(sh, game::interface::ispLoc,                     session, root, shipList, g, turn), "(1100,1300)");

@@ -24,7 +24,6 @@
 #include "client/widgets/referencelistbox.hpp"
 #include "game/game.hpp"
 #include "game/map/ship.hpp"
-#include "game/map/shipinfo.hpp"
 #include "game/proxy/configurationproxy.hpp"
 #include "game/proxy/hullspecificationproxy.hpp"
 #include "game/proxy/inboxadaptor.hpp"
@@ -32,6 +31,7 @@
 #include "game/proxy/playerproxy.hpp"
 #include "game/proxy/referencelistproxy.hpp"
 #include "game/proxy/referenceobserverproxy.hpp"
+#include "game/proxy/shipinfoproxy.hpp"
 #include "game/spec/costsummary.hpp"
 #include "game/turn.hpp"
 #include "ui/dialogs/messagebox.hpp"
@@ -51,6 +51,7 @@
 using client::si::OutputState;
 using client::widgets::CostSummaryList;
 using game::Reference;
+using game::proxy::ShipInfoProxy;
 using game::spec::CostSummary;
 using ui::widgets::BaseButton;
 using ui::widgets::Button;
@@ -63,50 +64,6 @@ namespace {
         frame.setFrameWidth(2);
         return frame;
     }
-
-
-    /*
-     *  Game-side implementation of "cargo transfer/history" function
-     */
-
-    class CargoRequest : public util::Request<game::Session> {
-     public:
-        enum Action {
-            None,
-            Transfer,
-            Info
-        };
-        CargoRequest(Reference ref)
-            : m_reference(ref), m_result(None)
-            { }
-        virtual void handle(game::Session& session)
-            {
-                game::Root* pRoot = session.getRoot().get();
-                game::Game* pGame = session.getGame().get();
-                game::spec::ShipList* pList =  session.getShipList().get();
-                if (pRoot != 0 && pGame != 0) {
-                    game::Turn& turn = pGame->viewpointTurn();
-                    if (const game::map::Ship* ship = dynamic_cast<const game::map::Ship*>(turn.universe().getObject(m_reference))) {
-                        if (ship->isPlayable(game::map::Object::Playable)) {
-                            m_result = Transfer;
-                        } else {
-                            util::NumberFormatter fmt = pRoot->userConfiguration().getNumberFormatter();
-                            packShipLastKnownCargo(m_data, *ship, turn.getTurnNumber(), fmt, *pList, session.translator());
-                            packShipMassRanges    (m_data, *ship,                       fmt, *pList, session.translator());
-                            m_result = Info;
-                        }
-                    }
-                }
-            }
-        Action getResult() const
-            { return m_result; }
-        const game::map::ShipCargoInfos_t& getCargoInformation() const
-            { return m_data; }
-     private:
-        Reference m_reference;
-        Action m_result;
-        game::map::ShipCargoInfos_t m_data;
-    };
 
 
     /*
@@ -992,22 +949,25 @@ client::dialogs::VisualScanDialog::Window::showCargo()
     // ex WVisualScanWindow::showCargo
     // Determine status
     const Reference r = getCurrentReference();
-    CargoRequest req(r);
-    Downlink link(m_root, m_translator);
-    link.call(m_gameSender, req);
+    if (r.getType() == Reference::Ship) {
+        Downlink link(m_root, m_translator);
 
-    // Check action
-    switch (req.getResult()) {
-     case CargoRequest::None:
-        break;
-     case CargoRequest::Transfer:
-        if (m_proxy.isCurrent()) {
-            doShipCargoTransfer(m_root, m_gameSender, m_translator, r.getId());
+        game::map::ShipCargoInfos_t infos;
+        ShipInfoProxy::CargoStatus st = ShipInfoProxy(m_gameSender).getCargo(link, r.getId(), ShipInfoProxy::GetLastKnownCargo | ShipInfoProxy::GetMassRanges, infos);
+
+        // Check action
+        switch (st) {
+         case ShipInfoProxy::NoCargo:
+            break;
+         case ShipInfoProxy::CurrentShip:
+            if (m_proxy.isCurrent()) {
+                doShipCargoTransfer(m_root, m_gameSender, m_translator, r.getId());
+            }
+            break;
+         case ShipInfoProxy::HistoryCargo:
+            doCargoHistory(infos, m_root, m_translator);
+            break;
         }
-        break;
-     case CargoRequest::Info:
-        doCargoHistory(req.getCargoInformation(), m_root, m_translator);
-        break;
     }
 }
 

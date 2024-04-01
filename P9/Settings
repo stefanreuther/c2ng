@@ -12,7 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/interface/buildcommandparser.cpp \
+FILES_gamelib = game/proxy/shipinfoproxy.cpp game/proxy/shipinfoproxy.hpp \
+    game/interface/buildcommandparser.cpp \
     game/interface/buildcommandparser.hpp \
     game/interface/missionlistcontext.cpp \
     game/interface/missionlistcontext.hpp game/proxy/vcrexportadaptor.cpp \
@@ -1798,7 +1799,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/game/interface/buildcommandparsertest.cpp \
+FILES_testsuite = test/game/proxy/shipinfoproxytest.cpp \
+    test/game/interface/buildcommandparsertest.cpp \
     test/game/interface/missionlistcontexttest.cpp \
     test/game/proxy/vcrexportadaptortest.cpp \
     test/server/talk/render/rendertest.cpp \

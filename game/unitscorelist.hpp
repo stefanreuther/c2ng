@@ -7,8 +7,11 @@
 
 #include <vector>
 #include "afl/base/types.hpp"
+#include "game/types.hpp"
 
 namespace game {
+
+    class UnitScoreDefinitionList;
 
     /** Unit score list.
         Contains score values for one unit.
@@ -49,6 +52,14 @@ namespace game {
             \retval true Value was found
             \retval false Value not found, value/turn unchanged */
         bool get(Index_t index, int16_t& value, int16_t& turn) const;
+
+        /** Get score, given a Id.
+            Resolves the Id using the UnitScoreDefinitionList, and returns the value.
+            If the score does not exist, returns Nothing.
+            \param id   Score Id
+            \param defs Definitions
+            \return score */
+        NegativeProperty_t getScoreById(int16_t id, const UnitScoreDefinitionList& defs) const;
 
      private:
         struct Item {

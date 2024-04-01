@@ -1743,6 +1743,8 @@ First version of PCC2 that can execute commands.
 First version of PCC2 that can evaluate expressions,
 with <a href="pcc2:search">Search</a>, object labels, and <a href="pcc2:console">console</a>.
 --------------------------------------------------------------------------------
+@version PCC 1.1.22
+--------------------------------------------------------------------------------
 @version PCC 1.1.20
 --------------------------------------------------------------------------------
 @version PCC 1.1.19

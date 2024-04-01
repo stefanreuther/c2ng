@@ -23,6 +23,7 @@
 #include "interpreter/functionvalue.hpp"
 #include "interpreter/values.hpp"
 
+using game::config::HostConfiguration;
 using interpreter::Arguments;
 using interpreter::Error;
 using interpreter::checkIntegerArg;
@@ -79,19 +80,14 @@ PlanetArrayProperty::get(Arguments& args)
     switch (m_property) {
      case game::interface::ippScore: {
         // Documented in shipproperty.cpp
-        int32_t id;
-        game::UnitScoreList::Index_t index;
-        int16_t value, turn;
-        args.checkArgumentCount(1);
         // @change PCC 1.x returns null on range error, we fail the call
-        if (checkIntegerArg(id, args.getNext(), 0, 0x7FFF)
-            && m_game->planetScores().lookup(int16_t(id), index)
-            && m_planet.unitScores().get(index, value, turn))
-        {
-            return makeIntegerValue(value);
-        } else {
+        args.checkArgumentCount(1);
+        int32_t id;
+        if (!checkIntegerArg(id, args.getNext(), 0, 0x7FFF)) {
             return 0;
         }
+
+        return makeOptionalIntegerValue(m_planet.unitScores().getScoreById(int16_t(id), m_game->planetScores()));
      }
 
      default:
@@ -311,18 +307,30 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
             <tr><td>4</td><td>Heavy</td></tr>
            </table> */
         return makeOptionalIntegerValue(pl.getIndustryLevel(root->hostVersion()));
-     case ippLevel: {
+     case ippLevel:
         /* @q Level:Int (Planet Property)
            Planet's experience level.
            If the experience system is not enabled, or the level is not known, yields EMPTY. */
-        UnitScoreList::Index_t index;
-        int16_t value, turn;
-        if (game->planetScores().lookup(ScoreId_ExpLevel, index) && pl.unitScores().get(index, value, turn)) {
-            return makeIntegerValue(value);
+        return makeOptionalIntegerValue(pl.unitScores().getScoreById(ScoreId_ExpLevel, game->planetScores()));
+     case ippLevelGain:
+        /* @q Level.Gain:Int (Planet Property)
+           Planet's experience gain per turn.
+           Considers the EPPlanetAging and EPPlanetGovernment options.
+           If the experience system is not enabled, yields EMPTY.
+           @since PCC 1.1.22, PCC2 2.0.16, PCC2 2.41.2 */
+        return makeOptionalIntegerValue(getExperienceGain(pl, root->hostConfiguration(), root->hostVersion()));
+     case ippLevelName: {
+        // Documented in shipproperty.cpp
+        int level;
+        if (pl.unitScores().getScoreById(ScoreId_ExpLevel, game->planetScores()).get(level)) {
+            return makeStringValue(root->hostConfiguration().getExperienceLevelName(level, session.translator()));
         } else {
             return 0;
         }
      }
+     case ippLevelPoints:
+        // Documented in shipproperty.cpp
+        return makeOptionalIntegerValue(pl.unitScores().getScoreById(ScoreId_ExpPoints, game->planetScores()));
      case ippLocX: {
         /* @q Loc.X:Int (Planet Property)
            Planet X location. */
