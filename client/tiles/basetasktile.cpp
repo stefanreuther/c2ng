@@ -26,7 +26,7 @@ client::tiles::BaseTaskTile::BaseTaskTile(Personality pers, ui::Root& root, gfx:
     addCommandButton('3', tx("3 - Misc."));
     commandPart().add(deleter().addNew(new ui::Spacer()));
 
-    if (m_personality == BasePersonality) {
+    if (pers == BasePersonality) {
         ui::Group& g = deleter().addNew(new ui::Group(ui::layout::HBox::instance5));
         g.add(deleter().addNew(new ui::widgets::StaticText(tx("Edit"), SkinColor::Static, gfx::FontRequest(), root.provider(), gfx::RightAlign))
               .setIsFlexible(true));

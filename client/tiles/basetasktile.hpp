@@ -42,7 +42,6 @@ namespace client { namespace tiles {
         void setBaseStatus(const game::proxy::TaskEditorProxy::BaseStatus& st);
 
      private:
-        Personality m_personality;
         ui::rich::DocumentView m_statusView;
         ui::widgets::Button m_editButton;
     };
