@@ -350,6 +350,7 @@ namespace {
                 disp.add('/', this, &SpecBrowserDialog::onSearch);
                 disp.add(util::Key_F7, this, &SpecBrowserDialog::onSearch);
                 disp.add(util::Key_Insert, this, &SpecBrowserDialog::onFilterAdd);
+                disp.add('#', &m_filterDisplay, &client::widgets::FilterDisplay::requestFocus);
 
                 ui::widgets::FocusIterator& it = m_deleter.addNew(new ui::widgets::FocusIterator(ui::widgets::FocusIterator::Tab));
                 it.add(m_list);
