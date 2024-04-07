@@ -346,6 +346,7 @@ namespace {
                             catch (std::exception& e) {
                                 m_session.log().write(afl::sys::LogListener::Warn, LOG_NAME, m_session.translator()("Unable to load scripts and auto-tasks"), e);
                             }
+                            game::interface::terminateUnusableAutoTasks(m_session);
 
                             // Resume
                             // Make a copy of m_session.

@@ -31,15 +31,24 @@
 #include "game/root.hpp"
 #include "game/turn.hpp"
 #include "game/v3/structures.hpp"
+#include "interpreter/bytecodeobject.hpp"
+#include "interpreter/opcode.hpp"
 #include "interpreter/vmio/filesavecontext.hpp"
 #include "interpreter/vmio/objectloader.hpp"
 #include "interpreter/vmio/worldloadcontext.hpp"
 #include "interpreter/world.hpp"
 
+using game::Game;
+using game::Session;
+using game::map::Universe;
 using game::v3::structures::Timestamp_t;
 using game::v3::structures::UInt16_t;
 using game::v3::structures::UInt32_t;
+using interpreter::BCORef_t;
+using interpreter::BytecodeObject;
+using interpreter::Opcode;
 using interpreter::Process;
+using interpreter::World;
 
 namespace {
 
@@ -101,6 +110,35 @@ namespace {
         }
         return false;
     }
+
+    /** Determine whether we want to keep a loaded process.
+        We want to terminate auto-tasks refering to nonexistant objects,
+        which means either they do not have an associated object,
+        or that object is not playable in the given category. */
+    bool wantKeepProcess(const Process& p, Session& session)
+    {
+        const Game* g = session.getGame().get();
+        if (p.getState() != Process::Suspended || g == 0) {
+            // Strange state, better keep it
+            return true;
+        } else {
+            const game::map::Object* obj = dynamic_cast<game::map::Object*>(p.getInvokingObject());
+            const Universe& univ = g->viewpointTurn().universe();
+            switch (p.getProcessKind()) {
+             case Process::pkShipTask:
+                return obj != 0 && univ.playedShips().getObjectByIndex(obj->getId()) != 0;
+             case Process::pkPlanetTask:
+                return obj != 0 && univ.playedPlanets().getObjectByIndex(obj->getId()) != 0;
+             case Process::pkBaseTask:
+                return obj != 0 && univ.playedBases().getObjectByIndex(obj->getId()) != 0;
+             case Process::pkDefault:
+                break;
+            }
+
+            // Not an auto-task, keep it
+            return true;
+        }
+    }
 }
 
 // Load script VM file.
@@ -145,6 +183,24 @@ game::interface::loadVM(Session& session, int playerNr)
 
     // - do it!
     interpreter::vmio::ObjectLoader(pRoot->charset(), session.translator(), ctx2).load(*file);
+}
+
+// Remove unusuable auto tasks.
+void
+game::interface::terminateUnusableAutoTasks(Session& session)
+{
+    // Function to inject
+    BCORef_t code = BytecodeObject::create(true);
+    code->addInstruction(Opcode::maPush, Opcode::sNamedVariable, code->addName("CC$AUTOTERMINATE"));
+    code->addInstruction(Opcode::maIndirect, Opcode::miIMCall, 0);
+
+    // Do it
+    const interpreter::ProcessList::Vector_t& list = session.processList().getProcessList();
+    for (size_t i = 0, n = list.size(); i < n; ++i) {
+        if (list[i] != 0 && !wantKeepProcess(*list[i], session)) {
+            list[i]->pushFrame(code, false);
+        }
+    }
 }
 
 // Save script VM file.

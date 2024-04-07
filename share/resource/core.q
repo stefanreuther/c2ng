@@ -255,6 +255,15 @@ Sub CC$AutoExec(cmd)
   Loop
 EndSub
 
+% @q CC$AutoTerminate:void (Internal)
+% Terminate the auto-task.
+% Invoked automatically when an auto-task is restored, but the target object no longer exists.
+% @since PCC2 2.41.2
+Sub CC$AutoTerminate
+  AddNotify Translate("You do no longer play the unit that this Auto Task was controlling. Auto Task terminates.")
+  End
+EndSub
+
 
 %%% Internals
 

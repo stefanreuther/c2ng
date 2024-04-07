@@ -16,6 +16,11 @@ namespace game { namespace interface {
         @param [in]     playerNr Player number */
     void loadVM(Session& session, int playerNr);
 
+    /** Terminate unusuable auto tasks.
+        Tasks are terminated by injecting a call to CC$AutoTerminate.
+        @param [in,out] session  Session */
+    void terminateUnusableAutoTasks(Session& session);
+
     /** Save script VM file.
         Saves the current VM state into the given player's VM file in the session root's game directory.
 
