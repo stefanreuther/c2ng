@@ -151,14 +151,14 @@ game::spec::info::Browser::Browser(const PictureNamer& picNamer, const Root& roo
 }
 
 std::auto_ptr<game::spec::info::PageContent>
-game::spec::info::Browser::describeItem(Page p, Id_t id, bool withCost) const
+game::spec::info::Browser::describeItem(Page p, Id_t id, bool withCost, int forPlayer) const
 {
     std::auto_ptr<PageContent> result(new PageContent());
     switch (p) {
      case PlayerPage:          describePlayer       (*result, id);                                                                            break;
      case HullPage:            describeHull         (*result, id, m_shipList, withCost, m_picNamer, m_root, m_viewpointPlayer, m_translator); break;
      case RacialAbilitiesPage: describeRacialAbility(*result, id);                                                                            break;
-     case ShipAbilitiesPage:   describeShipAbility  (*result, id);                                                                            break;
+     case ShipAbilitiesPage:   describeShipAbility  (*result, id, forPlayer);                                                                 break;
      case EnginePage:          describeEngine       (*result, id, m_shipList, withCost, m_picNamer, m_root, m_viewpointPlayer, m_translator); break;
      case BeamPage:            describeBeam         (*result, id, m_shipList, withCost, m_picNamer, m_root, m_viewpointPlayer, m_translator); break;
      case TorpedoPage:         describeTorpedo      (*result, id, m_shipList, withCost, m_picNamer, m_root, m_viewpointPlayer, m_translator); break;
@@ -636,8 +636,9 @@ game::spec::info::Browser::getRacialAbilityAttribute(const RacialAbilityList::Ab
     }
 }
 
+#include <stdio.h>
 void
-game::spec::info::Browser::describeShipAbility(PageContent& content, Id_t id) const
+game::spec::info::Browser::describeShipAbility(PageContent& content, Id_t id, int forPlayer) const
 {
     if (const BasicHullFunction* fcn = m_shipList.basicHullFunctions().getFunctionByIndex(size_t(id))) {
         afl::string::Translator& tx = m_translator;
@@ -652,6 +653,17 @@ game::spec::info::Browser::describeShipAbility(PageContent& content, Id_t id) co
             if (checkPlayerShipAbility(pl, fcn->getId(), getLevelRange(m_root))) {
                 content.players += pl;
             }
+        }
+
+        PlayerSet_t specimenFilter;
+        if (forPlayer != 0) {
+            specimenFilter += forPlayer;
+        } else {
+            specimenFilter = m_root.playerList().getAllPlayers();
+        }
+
+        if (const Hull* pHull = m_shipList.findSpecimenHullForFunction(fcn->getId(), m_root.hostConfiguration(), specimenFilter, specimenFilter, false)) {
+            content.attributes.push_back(Attribute(tx("Sample hull"), pHull->getName(m_shipList.componentNamer())));
         }
     }
 

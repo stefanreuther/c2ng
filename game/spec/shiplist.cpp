@@ -161,21 +161,26 @@ game::spec::ShipList::enumerateHullFunctions(HullFunctionList& result,
 
 // Get specimen hull for a hull function.
 const game::spec::Hull*
-game::spec::ShipList::findSpecimenHullForFunction(int basicFunctionId, const game::config::HostConfiguration& config, PlayerSet_t playerLimit) const
+game::spec::ShipList::findSpecimenHullForFunction(int basicFunctionId, const game::config::HostConfiguration& config, PlayerSet_t playerLimit, PlayerSet_t buildLimit, bool unique) const
 {
     // ex client/dlg-tax.cc:findSpecimenHull
     const Hull* result = 0;
     for (const Hull* candidate = hulls().findNext(0); candidate != 0; candidate = hulls().findNext(candidate->getId())) {
-        PlayerSet_t set = candidate->getHullFunctions(true)
-            .getPlayersThatCan(basicFunctionId, modifiedHullFunctions(), basicHullFunctions(), config, *candidate, ExperienceLevelSet_t(0), true);
-        if (set.contains(playerLimit)) {
-            if (result == 0) {
-                // First candidate
-                result = candidate;
-            } else {
-                // Ambiguous
-                result = 0;
-                break;
+        if (buildLimit.empty() || hullAssignments().getPlayersForHull(config, candidate->getId()).containsAnyOf(buildLimit)) {
+            PlayerSet_t set = candidate->getHullFunctions(true)
+                .getPlayersThatCan(basicFunctionId, modifiedHullFunctions(), basicHullFunctions(), config, *candidate, ExperienceLevelSet_t(0), true);
+            if (set.contains(playerLimit)) {
+                if (result == 0) {
+                    // First candidate
+                    result = candidate;
+                    if (!unique) {
+                        break;
+                    }
+                } else {
+                    // Ambiguous
+                    result = 0;
+                    break;
+                }
             }
         }
     }

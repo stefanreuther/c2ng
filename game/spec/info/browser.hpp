@@ -39,8 +39,9 @@ namespace game { namespace spec { namespace info {
             \param p Page (object type)
             \param id Id (obtained from listItems())
             \param withCost true to include cost and tech level in textual output
+            \param forPlayer Tailor output for this player (0=generic)
             \return newly-allocated information */
-        std::auto_ptr<PageContent> describeItem(Page p, Id_t id, bool withCost) const;
+        std::auto_ptr<PageContent> describeItem(Page p, Id_t id, bool withCost, int forPlayer) const;
 
         /** List items.
             \param p Page (object type)
@@ -121,7 +122,7 @@ namespace game { namespace spec { namespace info {
         bool matchRacialAbilityName(const RacialAbilityList::Ability& a, const String_t& f) const;
         OptionalInt_t getRacialAbilityAttribute(const RacialAbilityList::Ability& a, FilterAttribute att) const;
 
-        void describeShipAbility(PageContent& content, Id_t id) const;
+        void describeShipAbility(PageContent& content, Id_t id, int forPlayer) const;
         void listShipAbilities(ListContent& content, const Filter& f) const;
         bool matchShipAbility(const BasicHullFunction& hf, const Filter& f) const;
         bool matchShipAbility(const BasicHullFunction& hf, const FilterElement& e) const;

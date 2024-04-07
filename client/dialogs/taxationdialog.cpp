@@ -154,7 +154,7 @@ namespace {
         const game::spec::ShipList* sl = session.getShipList().get();
         const game::Root* r = session.getRoot().get();
         if (sl != 0 && r != 0) {
-            if (const game::spec::Hull* h = sl->findSpecimenHullForFunction(basicFunctionId, r->hostConfiguration(), r->playerList().getAllPlayers())) {
+            if (const game::spec::Hull* h = sl->findSpecimenHullForFunction(basicFunctionId, r->hostConfiguration(), r->playerList().getAllPlayers(), game::PlayerSet_t(), true)) {
                 text += " (";
                 text += h->getShortName(sl->componentNamer());
                 text += ")";

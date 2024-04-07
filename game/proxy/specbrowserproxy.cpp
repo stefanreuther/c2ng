@@ -251,7 +251,7 @@ game::proxy::SpecBrowserProxy::Trampoline::sendPage()
         return;
     }
 
-    std::auto_ptr<game::spec::info::PageContent> content(m_browser->describeItem(m_page, id, m_withCost));
+    std::auto_ptr<game::spec::info::PageContent> content(m_browser->describeItem(m_page, id, m_withCost, m_filter.getPlayerFilter()));
     if (!content.get()) {
         log(m_session, Log::Trace, "<= sendPage: no content");
         return;

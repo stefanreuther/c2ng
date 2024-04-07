@@ -146,13 +146,14 @@ namespace game { namespace spec {
                                     bool includeRacialAbilities) const;
 
         /** Get specimen hull for a hull function.
-            If there is a unique hull with that function, returns it.
-            If there are multiple or no hulls, returns null.
             \param basicFunctionId Function
             \param config          Host configuration
-            \param playerLimit     Consider only these players
-            \return Hull */
-        const Hull* findSpecimenHullForFunction(int basicFunctionId, const game::config::HostConfiguration& config, PlayerSet_t playerLimit) const;
+            \param playerLimit     Consider only these players as potential users of the function
+            \param buildLimit      If nonempty, consider only ships that these players can build. If empty, check all ships.
+            \param unique          If true, return only unique results; if there are multiple, return null.
+                                   If false, return first matching.
+            \return Hull if any; otherwise, null */
+        const Hull* findSpecimenHullForFunction(int basicFunctionId, const game::config::HostConfiguration& config, PlayerSet_t playerLimit, PlayerSet_t buildLimit, bool unique) const;
 
         /** Get player mask for special function.
             \param basicFunctionId [in] basic function, hf_XXX (FIXME)

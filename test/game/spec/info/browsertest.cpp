@@ -86,7 +86,7 @@ AFL_TEST("game.spec.info.Browser:describeItem:PlayerPage", a)
 
     // Get it
     gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
-    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::PlayerPage, 7, true));
+    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::PlayerPage, 7, true, 0));
 
     // Verify
     a.check("11. get", c.get());
@@ -114,7 +114,7 @@ AFL_TEST("game.spec.info.Browser:describeItem:HullPage", a)
 
     // Get it
     gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
-    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::HullPage, HULL_NR, true));
+    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::HullPage, HULL_NR, true, 0));
 
     // Verify
     a.check("01. get", c.get());
@@ -136,7 +136,7 @@ AFL_TEST("game.spec.info.Browser:describeItem:RacialAbilitiesPage", a)
     h.root->playerList().create(1);
     h.root->playerList().create(2);
     gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
-    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::RacialAbilitiesPage, 0, true));
+    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::RacialAbilitiesPage, 0, true, 0));
 
     // Verify
     a.check("01. get", c.get());
@@ -161,6 +161,7 @@ AFL_TEST("game.spec.info.Browser:describeItem:ShipAbilitiesPage", a)
     // - function available to player 3 + 4
     // - hull buildable by 4 + 5
     game::spec::Hull* p = h.shipList.hulls().create(HULL_NR);
+    p->setName("Firefly");
     p->changeHullFunction(h.shipList.modifiedHullFunctions().getFunctionIdFromHostId(17), PlayerSet_t() + 3 + 4, PlayerSet_t(), true);
     h.shipList.hullAssignments().add(4, 1, HULL_NR);
     h.shipList.hullAssignments().add(5, 1, HULL_NR);
@@ -168,7 +169,7 @@ AFL_TEST("game.spec.info.Browser:describeItem:ShipAbilitiesPage", a)
     // Get it
     // This is index-based access, 1=second (hf2)
     gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
-    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::ShipAbilitiesPage, 1, true));
+    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::ShipAbilitiesPage, 1, true, 0));
 
     // Verify
     a.check("01. get", c.get());
@@ -182,6 +183,10 @@ AFL_TEST("game.spec.info.Browser:describeItem:ShipAbilitiesPage", a)
     att = findAttribute(*c, "Name");
     a.checkNonNull("21. Name", att);
     a.checkEqual("22. value", att->value, "PlayToo");
+
+    att = findAttribute(*c, "Sample hull");
+    a.checkNonNull("31. Sample hull", att);
+    a.checkEqual("32. value", att->value, "Firefly");
 }
 
 /** Test describe(EnginePage). */
@@ -193,7 +198,7 @@ AFL_TEST("game.spec.info.Browser:describeItem:EnginePage", a)
 
     // Get it
     gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
-    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::EnginePage, 8, true));
+    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::EnginePage, 8, true, 0));
 
     // Verify
     a.check("01. get", c.get());
@@ -214,7 +219,7 @@ AFL_TEST("game.spec.info.Browser:describeItem:BeamPage", a)
 
     // Get it
     gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
-    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::BeamPage, 2, true));
+    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::BeamPage, 2, true, 0));
 
     // Verify
     a.check("01. get", c.get());
@@ -235,7 +240,7 @@ AFL_TEST("game.spec.info.Browser:describeItem:TorpedoPage", a)
 
     // Get it
     gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
-    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::TorpedoPage, 7, true));
+    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::TorpedoPage, 7, true, 0));
 
     // Verify
     a.check("01. get", c.get());
@@ -259,7 +264,7 @@ AFL_TEST("game.spec.info.Browser:describeItem:FighterPage", a)
 
     // Get it
     gsi::Browser testee(h.picNamer, *h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
-    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::FighterPage, 3, true));
+    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::FighterPage, 3, true, 0));
 
     // Verify
     a.check("01. get", c.get());
