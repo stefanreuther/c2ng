@@ -48,12 +48,6 @@ interpreter::vmio::WorldLoadContext::loadContext(const TagNode& tag, afl::io::St
     return m_parent.loadContext(tag, aux);
 }
 
-interpreter::Context*
-interpreter::vmio::WorldLoadContext::loadMutex(const String_t& name, const String_t& note)
-{
-    return new MutexContext(name, note);
-}
-
 interpreter::Process*
 interpreter::vmio::WorldLoadContext::createProcess()
 {

@@ -240,7 +240,6 @@ AFL_TEST("game.interface.LoadContext:others", a)
     verifyNewNull(a("loadHash"),           testee.loadHash(55));
     verifyNewNull(a("loadStructureValue"), testee.loadStructureValue(66));
     verifyNewNull(a("loadStructureType"),  testee.loadStructureType(77));
-    verifyNewNull(a("loadMutex"),          testee.loadMutex("name", "note"));
 
     std::auto_ptr<interpreter::Process> p(testee.createProcess());
     a.checkNull("createProcess", p.get());

@@ -7,6 +7,7 @@
 #include "afl/base/growablememory.hpp"
 #include "afl/bits/uint32le.hpp"
 #include "afl/bits/value.hpp"
+#include "interpreter/mutexcontext.hpp"
 
 namespace {
     /** Load undelimited, unencoded string. */
@@ -19,7 +20,7 @@ namespace {
     }
 
     /** Load mutex. */
-    interpreter::Context* loadMutex(interpreter::vmio::LoadContext& ctx, afl::io::Stream& aux)
+    interpreter::Context* loadMutex(afl::io::Stream& aux)
     {
         // ex IntMutexContext::load
         afl::bits::Value<afl::bits::UInt32LE> header[2];
@@ -27,7 +28,7 @@ namespace {
 
         String_t name = loadString(aux, header[0]);
         String_t note = loadString(aux, header[1]);
-        return ctx.loadMutex(name, note);
+        return new interpreter::MutexContext(name, note);
     }
 }
 
@@ -72,7 +73,7 @@ interpreter::vmio::ProcessLoadContext::loadContext(const TagNode& tag, afl::io::
 {
     switch (tag.tag) {
      case TagNode::Tag_Mutex:
-        return ::loadMutex(*this, aux);
+        return ::loadMutex(aux);
 
      case TagNode::Tag_Frame:
         // Frame. Depends on current process.
@@ -81,12 +82,6 @@ interpreter::vmio::ProcessLoadContext::loadContext(const TagNode& tag, afl::io::
      default:
         return m_parent.loadContext(tag, aux);
     }
-}
-
-interpreter::Context*
-interpreter::vmio::ProcessLoadContext::loadMutex(const String_t& name, const String_t& note)
-{
-    return m_parent.loadMutex(name, note);
 }
 
 interpreter::Process*

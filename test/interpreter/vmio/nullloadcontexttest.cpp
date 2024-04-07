@@ -33,6 +33,5 @@ AFL_TEST("interpreter.vmio.NullLoadContext", a)
         node.value = 42;
         a.checkNull("11. loadContext", testee.loadContext(node, in));
     }
-    a.checkNull("12. loadMutex", testee.loadMutex("foo", "bar"));
     a.checkNull("13. createProcess", testee.createProcess());
 }

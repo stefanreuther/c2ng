@@ -57,7 +57,7 @@ AFL_TEST("interpreter.vmio.NullSaveContext:addStructureValue", a)
 AFL_TEST("interpreter.vmio.NullSaveContext:isCurrentProcess:null", a)
 {
     interpreter::vmio::NullSaveContext testee;
-    AFL_CHECK_THROWS(a, testee.isCurrentProcess(0), interpreter::Error);
+    a.checkEqual("", testee.isCurrentProcess(0), false);
 }
 
 AFL_TEST("interpreter.vmio.NullSaveContext:isCurrentProcess:non-null", a)
@@ -68,5 +68,5 @@ AFL_TEST("interpreter.vmio.NullSaveContext:isCurrentProcess:non-null", a)
     afl::io::NullFileSystem fs;
     interpreter::World w(log, tx, fs);
     interpreter::Process proc(w, a.getLocation(), 1234);
-    AFL_CHECK_THROWS(a, testee.isCurrentProcess(&proc), interpreter::Error);
+    a.checkEqual("", testee.isCurrentProcess(&proc), false);
 }

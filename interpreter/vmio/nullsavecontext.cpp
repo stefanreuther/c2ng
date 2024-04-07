@@ -46,5 +46,5 @@ interpreter::vmio::NullSaveContext::addStructureValue(const StructureValueData& 
 bool
 interpreter::vmio::NullSaveContext::isCurrentProcess(const Process* /*p*/)
 {
-    return fail();
+    return false;
 }

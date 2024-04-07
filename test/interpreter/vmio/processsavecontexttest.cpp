@@ -35,7 +35,7 @@ AFL_TEST("interpreter.vmio.ProcessSaveContext", a)
         virtual uint32_t addStructureValue(const interpreter::StructureValueData& /*value*/)
             { return 50; }
         virtual bool isCurrentProcess(const interpreter::Process* /*p*/)
-            { throw std::runtime_error("isCurrentProcess unexpected"); }
+            { return false; }
     };
     TestParent parent;
 

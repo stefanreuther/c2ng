@@ -22,14 +22,10 @@ namespace interpreter { namespace vmio {
         - the returned object may be a placeholder object that is not yet fully populated.
           This happens when forward references appear in a VM file.
 
-        Responsibilities for loading mutexes are split into two halves:
-        - the context knowing about the current process (ProcessLoadContext) implements loadContext() for mutexes
-          because it knows how to deserialize mutex data and associate it with a process; it calls loadMutex()
-          to actually create the mutex.
-          As of 20220801, this is no longer strictly needed as mutexes are implicitly associated with a process
-          by the time being added to a process' context stack.
-        - the context knowing about the script world (WorldLoadContext) implements loadMutex() to actually
-          create the mutex. */
+        Responsibility for loading mutexes is now solely with ProcessLoadContext.
+        ProcessLoadContext knows how to deserialize mutex data and associate it with a process.
+        We only end up within ProcessLoadContext if there actually is a process,
+        which is controlled by the WorldLoadContext. */
     class LoadContext : public afl::base::Deletable {
      public:
         /** Load BCO (SubroutineValue).
@@ -63,13 +59,6 @@ namespace interpreter { namespace vmio {
             \param aux Auxiliary data can be read here
             \return context value or null */
         virtual Context* loadContext(const TagNode& tag, afl::io::Stream& aux) = 0;
-
-        /** Load mutex context value.
-            May throw if there is a mutex conflict.
-            \param name Mutex name (identifier)
-            \param note Mutex note
-            \return context value or null */
-        virtual Context* loadMutex(const String_t& name, const String_t& note) = 0;
 
         /** Create a process.
             \return newly-created process or null */

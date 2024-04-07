@@ -44,12 +44,6 @@ interpreter::vmio::NullLoadContext::loadContext(const TagNode& /*tag*/, afl::io:
     return 0;
 }
 
-interpreter::Context*
-interpreter::vmio::NullLoadContext::loadMutex(const String_t& /*name*/, const String_t& /*note*/)
-{
-    return 0;
-}
-
 interpreter::Process*
 interpreter::vmio::NullLoadContext::createProcess()
 {
