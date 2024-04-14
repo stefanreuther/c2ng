@@ -171,7 +171,7 @@ namespace game { namespace v3 {
                 - Id: zero
                 - Arg: the command
                 ex phc_Other */
-            Other           
+            Other
         };
 
         /** "id" parameters for SetRaceName. */
@@ -203,7 +203,7 @@ namespace game { namespace v3 {
         const String_t& getArg() const;
 
         /** Set command parameter.
-            \return parameter. */
+            \param s parameter */
         void setArg(const String_t& s);
 
         /** Get affected ship Id.

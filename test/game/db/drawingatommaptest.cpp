@@ -11,10 +11,13 @@
 #include "afl/charset/utf8charset.hpp"
 #include "afl/io/constmemorystream.hpp"
 #include "afl/io/internalstream.hpp"
+#include "afl/string/format.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 #include "afl/test/testrunner.hpp"
 #include "util/atomtable.hpp"
+
+using util::AtomTable;
 
 namespace {
     // Image of the file for testSave().
@@ -28,7 +31,7 @@ namespace {
     };
     static_assert(sizeof(Image) == 10, "sizeof Image");
 
-    void fillAtomTable(util::AtomTable& tab)
+    void fillAtomTable(AtomTable& tab)
     {
         // Occupy some slots in atom table so external and internal disagree
         // and mismatches are detected.
@@ -56,7 +59,7 @@ AFL_TEST("game.db.DrawingAtomMap:save", a)
 {
     // Prepare
     game::db::DrawingAtomMap testee;
-    util::AtomTable tab;
+    AtomTable tab;
     fillAtomTable(tab);
     testee.add(tab.getAtomFromString("a"));
     testee.add(tab.getAtomFromString("b"));
@@ -114,7 +117,7 @@ AFL_TEST("game.db.DrawingAtomMap:load", a)
     image.charB = 'y';
 
     // Load
-    util::AtomTable tab;
+    AtomTable tab;
     afl::charset::Utf8Charset cs;
     afl::io::ConstMemoryStream ms(afl::base::fromObject(image));
     fillAtomTable(tab);
@@ -136,4 +139,71 @@ AFL_TEST("game.db.DrawingAtomMap:load", a)
 
     a.checkEqual("31. getExternalValue", testee.getExternalValue(0), 0U);
     a.checkEqual("32. getExternalValue", testee.getExternalValue(1000), 1000U);  // unmapped value is passed through
+}
+
+/** Test saving: too many atoms.
+    Result must be loadable. */
+AFL_TEST("game.db.DrawingAtomMap:save:too-many", a)
+{
+    // Prepare
+    game::db::DrawingAtomMap testee;
+    AtomTable tab;
+    fillAtomTable(tab);
+    for (int i = 0; i < 20000; ++i) {
+        testee.add(tab.getAtomFromString(afl::string::Format("a%d", i)));
+    }
+
+    // Save
+    afl::io::InternalStream stream;
+    afl::charset::Utf8Charset cs;
+    afl::sys::Log log;
+    afl::string::NullTranslator tx;
+    testee.save(stream, cs, tab, log, tx);
+
+    // Load
+    game::db::DrawingAtomMap loadedMap;
+    AtomTable loadedTable;
+    stream.setPos(0);
+    AFL_CHECK_SUCCEEDS(a("01. load"), loadedMap.load(stream, cs, loadedTable));
+
+    // Must have loaded some content.
+    // We're preserving the first, although that's not strictly contractual.
+    util::Atom_t origAtom = tab.getAtomFromStringNC("a0");
+    util::Atom_t loadedAtom = loadedTable.getAtomFromStringNC("a0");
+    a.checkDifferent("11. origAtom",   origAtom,   AtomTable::NULL_ATOM);
+    a.checkDifferent("12. loadedAtom", loadedAtom, AtomTable::NULL_ATOM);
+    a.checkEqual("13. atom map", loadedMap.getExternalValue(loadedAtom), testee.getExternalValue(origAtom));
+}
+
+/** Test saving: too long string.
+    Result must be loadable. */
+AFL_TEST("game.db.DrawingAtomMap:save:too-long", a)
+{
+    // Prepare
+    game::db::DrawingAtomMap testee;
+    AtomTable tab;
+    fillAtomTable(tab);
+
+    const String_t str(300, 'x');
+    testee.add(tab.getAtomFromString(str));
+    uint16_t externalAtom = testee.getExternalValue(tab.getAtomFromString(str));
+
+    // Save
+    afl::io::InternalStream stream;
+    afl::charset::Utf8Charset cs;
+    afl::sys::Log log;
+    afl::string::NullTranslator tx;
+    testee.save(stream, cs, tab, log, tx);
+
+    // Load
+    game::db::DrawingAtomMap loadedMap;
+    AtomTable loadedTable;
+    stream.setPos(0);
+    AFL_CHECK_SUCCEEDS(a("01. load"), loadedMap.load(stream, cs, loadedTable));
+
+    // Must have loaded some content.
+    util::Atom_t loadedAtom = loadedMap.get(externalAtom);
+    String_t loadedString = loadedTable.getStringFromAtom(loadedAtom);
+    a.checkEqual("11. loaded length", loadedString.size(), 255U);
+    a.checkEqual("12. loaded content", loadedString.find_first_not_of('x'), String_t::npos);
 }

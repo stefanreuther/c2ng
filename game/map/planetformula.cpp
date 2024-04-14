@@ -28,7 +28,7 @@ namespace {
     }
 
     /** Maximum number of structures.
-        \param clans      clans on planet
+        \param clansMaybe clans on planet
         \param threshold  below threshold, growth is linear; above it's rootic :-) */
     game::LongProperty_t getMaxBuildingsFormula(game::LongProperty_t clansMaybe, int threshold)
     {

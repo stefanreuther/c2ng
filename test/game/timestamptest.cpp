@@ -27,6 +27,7 @@ AFL_TEST("game.Timestamp:init:data", a)
     a.checkEqual("02. getTimestampAsString", ts.getTimestampAsString(), "12-24-198820:15:31");
     a.checkEqual("03. getTimeAsString", ts.getTimeAsString(), "20:15:31");
     a.checkEqual("04. getDateAsString", ts.getDateAsString(), "12-24-1988");
+    a.checkEqual("05. makePrintable", makePrintable(ts), "12-24-198820:15:31");
 
     // Compare with copy-out
     uint8_t data2[18];

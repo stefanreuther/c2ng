@@ -150,7 +150,7 @@ game::interface::DrawingContext::getObject()
 void
 game::interface::DrawingContext::enumProperties(interpreter::PropertyAcceptor& acceptor) const
 {
-    return acceptor.enumTable(drawing_mapping);
+    acceptor.enumTable(drawing_mapping);
 }
 
 // BaseValue:

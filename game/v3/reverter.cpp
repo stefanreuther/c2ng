@@ -153,7 +153,7 @@ game::v3::Reverter::getNumTorpedoesAllowedToSell(int planetId, int slot) const
     if (prepareUndoInformation(u, planetId)) {
         return u.getNumTorpedoesAllowedToSell(slot);
     } else {
-        return afl::base::Nothing;
+        return 0;
     }
 }
 
@@ -164,7 +164,7 @@ game::v3::Reverter::getNumFightersAllowedToSell(int planetId) const
     if (prepareUndoInformation(u, planetId)) {
         return u.getNumFightersAllowedToSell();
     } else {
-        return afl::base::Nothing;
+        return 0;
     }
 }
 

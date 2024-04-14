@@ -36,8 +36,7 @@ namespace game { namespace interface {
         For use with SimpleProcedure<Session&>.
         @param session Session
         @param proc    Process
-        @param args    Parameters
-        @return newly-allocated value */
+        @param args    Parameters */
     void IFSelectionSave(Session& session, interpreter::Process& proc, interpreter::Arguments& args);
 
 } }

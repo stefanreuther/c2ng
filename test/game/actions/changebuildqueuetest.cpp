@@ -14,6 +14,7 @@
 #include "game/session.hpp"
 #include "game/test/root.hpp"
 #include "game/turn.hpp"
+#include "interpreter/subroutinevalue.hpp"
 
 namespace {
     using afl::string::Format;
@@ -380,6 +381,7 @@ AFL_TEST("game.actions.ChangeBuildQueue:planned-build", a)
     };
     ed->addAtEnd(commands);
     ed->setPC(1);
+    // Keep the TaskEditor open.
 
     // Test
     game::actions::ChangeBuildQueue testee(univ, *session.getShipList(), session.getRoot()->hostVersion(), session.getRoot()->hostConfiguration(), session.rng(), PLAYER);
@@ -404,4 +406,115 @@ AFL_TEST("game.actions.ChangeBuildQueue:planned-build", a)
     a.checkEqual("24. hullNr", infos[0].hullNr, 1);
     a.checkEqual("25. hullNr", infos[1].hullNr, 1);
     a.checkEqual("26. hullNr", infos[2].hullNr, 4);
+}
+
+/** Test planned build, no editor.
+    Set up a situation with normal and planned builds (auto tasks).
+    Close the task editor to force ChangeBuildQueue to use its own!
+    Verify correct result. */
+AFL_TEST("game.actions.ChangeBuildQueue:planned-build:no-edit", a)
+{
+    // This needs a Session to be able to set up an auto-task!
+    // Therefore, set up by hand.
+    afl::io::NullFileSystem fs;
+    afl::string::NullTranslator tx;
+    game::Session session(tx, fs);
+
+    session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
+    session.setShipList(new game::spec::ShipList());
+    init(a, *session.getShipList());
+
+    session.setGame(new game::Game());
+    game::map::Universe& univ = session.getGame()->currentTurn().universe();
+    addPlanet(a("p6"),  univ,  6, PLAYER, "xyz");
+    addPlanet(a("p10"), univ, 10, PLAYER, "abc");
+    addPlanet(a("p20"), univ, 20, PLAYER, "xyz");
+    univ.postprocess(game::PlayerSet_t(PLAYER), game::PlayerSet_t(PLAYER), game::map::Object::Playable,
+                     session.getGame()->mapConfiguration(),
+                     session.getRoot()->hostVersion(), session.getRoot()->hostConfiguration(),
+                     77, *session.getShipList(), session.translator(), session.log());
+
+    // Releasing the autotask editor will invoke CC$AUTOEXEC, so make that possible
+    interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
+    bco->addArgument("A", false);
+    bco->addInstruction(interpreter::Opcode::maSpecial, interpreter::Opcode::miSpecialSuspend, 0);
+    session.world().setNewGlobalValue("CC$AUTOEXEC", new interpreter::SubroutineValue(bco));
+
+    // Cancel planet 10's build order and give him an auto-task instead
+    univ.planets().get(10)->setBaseBuildOrder(game::ShipBuildOrder());
+    afl::base::Ptr<interpreter::TaskEditor> ed(session.getAutoTaskEditor(10, interpreter::Process::pkBaseTask, true));
+    a.checkNonNull("01. getAutoTaskEditor", ed.get());
+    String_t commands[] = {
+        "enqueueship 3,8",
+        "enqueueship 4,7",
+        "enqueueship 5,6",
+    };
+    ed->addAtEnd(commands);
+    ed->setPC(1);
+    session.releaseAutoTaskEditor(ed);
+
+    // Test
+    game::actions::ChangeBuildQueue testee(univ, *session.getShipList(), session.getRoot()->hostVersion(), session.getRoot()->hostConfiguration(), session.rng(), PLAYER);
+    testee.addPlannedBuilds(session.processList());
+    game::actions::ChangeBuildQueue::Infos_t infos;
+    testee.describe(infos, tx);
+
+    // Verify
+    a.checkEqual("11. size", infos.size(), 3U);
+    a.checkEqual("12. actionName", infos[0].actionName, "Build Hull 1");
+    a.checkEqual("13. actionName", infos[1].actionName, "Build Hull 1");
+    a.checkEqual("14. actionName", infos[2].actionName, "Plan Hull 4");
+    a.checkEqual("15. action", infos[0].action, game::actions::ChangeBuildQueue::BuildShip);
+    a.checkEqual("16. action", infos[1].action, game::actions::ChangeBuildQueue::BuildShip);
+    a.checkEqual("17. action", infos[2].action, game::actions::ChangeBuildQueue::PlanShip);
+}
+
+/** Test planned build, conflict with actual build.
+    Set up a situation with normal and planned builds (auto tasks).
+    Planned build must be ignored. */
+AFL_TEST("game.actions.ChangeBuildQueue:planned-build:conflict", a)
+{
+    // This needs a Session to be able to set up an auto-task!
+    // Therefore, set up by hand.
+    afl::io::NullFileSystem fs;
+    afl::string::NullTranslator tx;
+    game::Session session(tx, fs);
+
+    session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
+    session.setShipList(new game::spec::ShipList());
+    init(a, *session.getShipList());
+
+    session.setGame(new game::Game());
+    game::map::Universe& univ = session.getGame()->currentTurn().universe();
+    addPlanet(a("p6"),  univ,  6, PLAYER, "xyz");
+    addPlanet(a("p10"), univ, 10, PLAYER, "abc");
+    addPlanet(a("p20"), univ, 20, PLAYER, "xyz");
+    univ.postprocess(game::PlayerSet_t(PLAYER), game::PlayerSet_t(PLAYER), game::map::Object::Playable,
+                     session.getGame()->mapConfiguration(),
+                     session.getRoot()->hostVersion(), session.getRoot()->hostConfiguration(),
+                     77, *session.getShipList(), session.translator(), session.log());
+
+    // Give planet 10 an auto-task
+    afl::base::Ptr<interpreter::TaskEditor> ed(session.getAutoTaskEditor(10, interpreter::Process::pkBaseTask, true));
+    a.checkNonNull("01. getAutoTaskEditor", ed.get());
+    String_t commands[] = {
+        "enqueueship 3,8",
+    };
+    ed->addAtEnd(commands);
+    ed->setPC(1);
+
+    // Test
+    game::actions::ChangeBuildQueue testee(univ, *session.getShipList(), session.getRoot()->hostVersion(), session.getRoot()->hostConfiguration(), session.rng(), PLAYER);
+    testee.addPlannedBuilds(session.processList());
+    game::actions::ChangeBuildQueue::Infos_t infos;
+    testee.describe(infos, tx);
+
+    // Verify
+    a.checkEqual("11. size", infos.size(), 3U);
+    a.checkEqual("12. actionName", infos[0].actionName, "Build Hull 1");
+    a.checkEqual("13. actionName", infos[1].actionName, "Build Hull 1");
+    a.checkEqual("14. actionName", infos[2].actionName, "Build Hull 1");
+    a.checkEqual("15. action", infos[0].action, game::actions::ChangeBuildQueue::BuildShip);
+    a.checkEqual("16. action", infos[1].action, game::actions::ChangeBuildQueue::BuildShip);
+    a.checkEqual("17. action", infos[2].action, game::actions::ChangeBuildQueue::BuildShip);
 }

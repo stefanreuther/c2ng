@@ -1,5 +1,6 @@
 /**
   *  \file game/test/simpleturn.hpp
+  *  \brief Class game::test::SimpleTurn
   */
 #ifndef C2NG_GAME_TEST_SIMPLETURN_HPP
 #define C2NG_GAME_TEST_SIMPLETURN_HPP

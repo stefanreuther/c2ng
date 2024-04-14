@@ -103,3 +103,26 @@ AFL_TEST("game.Reference:toString", a)
 
     a.checkEqual("31", Reference(game::map::Point(1234, 4567)).toString(tx), "<(1234,4567)>");
 }
+
+AFL_TEST("game.Reference:makePrintable", a)
+{
+    using game::Reference;
+
+    a.checkEqual("01", makePrintable(Reference()), "Null");
+
+    a.checkEqual("11", makePrintable(Reference(Reference::Null,       0)), "Null");
+    a.checkEqual("12", makePrintable(Reference(Reference::Special,    0)), "Special 0");
+    a.checkEqual("13", makePrintable(Reference(Reference::Player,     9)), "Player #9");
+    a.checkEqual("14", makePrintable(Reference(Reference::Ship,       9)), "Ship #9");
+    a.checkEqual("15", makePrintable(Reference(Reference::Planet,     9)), "Planet #9");
+    a.checkEqual("16", makePrintable(Reference(Reference::Starbase,   9)), "Starbase #9");
+    a.checkEqual("17", makePrintable(Reference(Reference::IonStorm,   9)), "Ion Storm #9");
+    a.checkEqual("18", makePrintable(Reference(Reference::Minefield,  9)), "Minefield #9");
+    a.checkEqual("19", makePrintable(Reference(Reference::Ufo,        9)), "Ufo #9");
+    a.checkEqual("20", makePrintable(Reference(Reference::Hull,       9)), "Hull #9");
+    a.checkEqual("21", makePrintable(Reference(Reference::Engine,     9)), "Engine #9");
+    a.checkEqual("22", makePrintable(Reference(Reference::Beam,       9)), "Beam Weapon #9");
+    a.checkEqual("23", makePrintable(Reference(Reference::Torpedo,    9)), "Torpedo Type #9");
+
+    a.checkEqual("31", makePrintable(Reference(game::map::Point(1234, 4567))), "(1234,4567)");
+}

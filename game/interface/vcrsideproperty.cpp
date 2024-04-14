@@ -14,8 +14,10 @@ using interpreter::makeStringValue;
 
 namespace {
     /** Convert status flags to script value.
-        \param status Status value
-        \param side Side to query */
+        \param battle Battle
+        \param side Side to query
+        \param config Host configuration
+        \param shipList Ship list */
     afl::data::Value* makeVcrResult(game::vcr::Battle& battle,
                                     size_t side,
                                     const game::config::HostConfiguration& config,

@@ -830,7 +830,7 @@ game::interface::IFHistoryLoadTurn(game::Session& session, interpreter::Process&
             // Load asynchronously; suspend this task until completion.
             class Task : public StatusTask_t {
              public:
-                Task(interpreter::Process& proc, Session& session, afl::base::Ref<Turn> turn, int turnNr, HistoryTurn* ht)
+                Task(interpreter::Process& proc, Session& session, const afl::base::Ref<Turn>& turn, int turnNr, HistoryTurn& ht)
                     : m_process(proc), m_session(session), m_turn(turn), m_turnNumber(turnNr), m_historyTurn(ht)
                     { }
                 void call(bool flag)
@@ -842,7 +842,7 @@ game::interface::IFHistoryLoadTurn(game::Session& session, interpreter::Process&
 
                                 int player = game.getViewpointPlayer();
                                 m_session.postprocessTurn(*m_turn, game::PlayerSet_t(player), game::PlayerSet_t(player), game::map::Object::ReadOnly);
-                                m_historyTurn->handleLoadSucceeded(*m_turn);
+                                m_historyTurn.handleLoadSucceeded(*m_turn);
                                 m_session.processList().continueProcess(m_process);
                             }
                             catch (std::exception& e) {
@@ -850,7 +850,7 @@ game::interface::IFHistoryLoadTurn(game::Session& session, interpreter::Process&
                             }
                         }
                         if (!ok) {
-                            m_historyTurn->handleLoadFailed();
+                            m_historyTurn.handleLoadFailed();
                             m_session.processList().continueProcessWithFailure(m_process, "Turn not available");
                         }
                     }
@@ -859,10 +859,10 @@ game::interface::IFHistoryLoadTurn(game::Session& session, interpreter::Process&
                 Session& m_session;
                 afl::base::Ref<Turn> m_turn;
                 const int m_turnNumber;
-                HistoryTurn* m_historyTurn;
+                HistoryTurn& m_historyTurn;
             };
             afl::base::Ref<Turn> turn = *new Turn();
-            proc.suspend(r->getTurnLoader()->loadHistoryTurn(*turn, *g, g->getViewpointPlayer(), turnNumber, *r, std::auto_ptr<StatusTask_t>(new Task(proc, session, turn, turnNumber, ht))));
+            proc.suspend(r->getTurnLoader()->loadHistoryTurn(*turn, *g, g->getViewpointPlayer(), turnNumber, *r, std::auto_ptr<StatusTask_t>(new Task(proc, session, turn, turnNumber, *ht))));
             return;
         }
 

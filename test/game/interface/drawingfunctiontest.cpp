@@ -17,7 +17,7 @@
 #include "interpreter/test/contextverifier.hpp"
 #include "interpreter/test/valueverifier.hpp"
 
-AFL_TEST("game.interface.DrawingFunction", a)
+AFL_TEST("game.interface.DrawingFunction:basics", a)
 {
     // Environment
     afl::string::NullTranslator tx;
@@ -44,4 +44,20 @@ AFL_TEST("game.interface.DrawingFunction", a)
     std::auto_ptr<game::interface::DrawingContext> ctx(testee.makeFirstContext());
     a.checkNonNull("21. makeFirstContext", ctx.get());
     interpreter::test::ContextVerifier(*ctx, a("ctx")).verifyInteger("LOC.Y", 1200);
+}
+
+AFL_TEST("game.interface.DrawingFunction:empty", a)
+{
+    // Environment
+    afl::string::NullTranslator tx;
+    afl::io::NullFileSystem fs;
+    game::Session session(tx, fs);
+    // No child objects
+
+    // Simple properties
+    game::interface::DrawingFunction testee(session);
+
+    // Empty iteration
+    std::auto_ptr<game::interface::DrawingContext> ctx(testee.makeFirstContext());
+    a.checkNull("21. makeFirstContext", ctx.get());
 }

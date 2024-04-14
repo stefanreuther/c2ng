@@ -1,5 +1,6 @@
 /**
   *  \file game/test/simpleturn.cpp
+  *  \brief Class game::test::SimpleTurn
   */
 
 #include "game/test/simpleturn.hpp"

@@ -20,6 +20,7 @@ AFL_TEST("game.ShipBuildOrder:basics", a)
     a.checkEqual("04. getNumBeams",     testee.getNumBeams(), 0);
     a.checkEqual("05. getTorpedoType",  testee.getTorpedoType(), 0);
     a.checkEqual("06. getNumLaunchers", testee.getNumLaunchers(), 0);
+    a.checkEqual("07. toScriptCommand", testee.toScriptCommand("Make", 0), "Make 0");
 
     // Configure
     testee.setHullIndex(15);

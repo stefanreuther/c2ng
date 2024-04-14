@@ -92,7 +92,7 @@ namespace {
     {
         // ex planint.pas:fetch_storage (part), GPlanet::getBaseAmmoStore
         int numLaunchers = shipList.launchers().size();
-        if (n > numLaunchers+1) {
+        if (n < 0 || n > numLaunchers+1) {
             return afl::base::Nothing;
         } else if (n > numLaunchers) {
             return p.getCargo(game::Element::Fighters);

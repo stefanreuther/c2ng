@@ -15,13 +15,20 @@
 #include "game/spec/shiplist.hpp"
 #include "game/test/interpreterinterface.hpp"
 #include "game/test/simpleturn.hpp"
+#include "game/v3/commandcontainer.hpp"
+#include "game/v3/command.hpp"
+#include "game/v3/commandextra.hpp"
 
 using game::Element;
 using game::actions::CargoTransfer;
 using game::actions::CargoTransferSetup;
+using game::config::HostConfiguration;
 using game::map::Object;
 using game::map::Ship;
 using game::test::SimpleTurn;
+using game::v3::Command;
+using game::v3::CommandContainer;
+using game::v3::CommandExtra;
 
 
 /** Test initial state.
@@ -404,6 +411,7 @@ AFL_TEST("game.actions.CargoTransferSetup:buildDirect:own-planet-ship", a)
 {
     SimpleTurn h;
     h.addShip(42, 5, Object::Playable);
+    h.addShip(100, 5, Object::Playable);
     h.addPlanet(99, 5, Object::Playable);
 
     CargoTransfer action;
@@ -411,6 +419,11 @@ AFL_TEST("game.actions.CargoTransferSetup:buildDirect:own-planet-ship", a)
     a.checkEqual("01. getStatus", testee.getStatus(), CargoTransferSetup::Ready);
     a.checkEqual("02. getConflictingTransferShipId", testee.getConflictingTransferShipId(h.universe()), 0);
     a.checkEqual("03. isDirect", testee.isDirect(), true);
+
+    // Proxy not required nor allowed
+    a.check("04. isValidProxy", !testee.isValidProxy(h.universe(), 100));
+
+    // Build
     testee.buildDirect(action, h.turn().universe(), h.config(), h.shipList());
 
     // Move
@@ -561,6 +574,18 @@ AFL_TEST("game.actions.CargoTransferSetup:build:foreign-ship-own-planet", a)
     a.checkEqual("45. getCargo",               h.universe().planets().get(99)->getCargo(Element::Neutronium).orElse(-1), 995);
 }
 
+/** Test creation of planet/ship transfer, foreign planet and ship.
+    This should fail. */
+AFL_TEST("game.actions.CargoTransferSetup:build:foreign-planet-foreign-ship", a)
+{
+    SimpleTurn h;
+    h.addShip(42, 5, Object::NotPlayable);
+    h.addPlanet(99, 8, Object::NotPlayable);      // note different owner and playability
+
+    CargoTransferSetup testee = CargoTransferSetup::fromPlanetShip(h.universe(), 99, 42);
+    a.checkEqual("01. getStatus", testee.getStatus(), CargoTransferSetup::Impossible);
+}
+
 /** Test creation of planet/ship transfer, foreign ship, conflict case.
     The unit we're playing is the ship, so this requires a proxy.
     The conflict must be detected. */
@@ -599,4 +624,72 @@ AFL_TEST("game.actions.CargoTransferSetup:build:own-planet-foreign-ship:proxy-co
     a.checkEqual("43. getTransporterTargetId", h.universe().ships().get(100)->getTransporterTargetId(Ship::TransferTransporter).orElse(-1), 42);
     a.checkEqual("44. getTransporterCargo",    h.universe().ships().get(100)->getTransporterCargo(Ship::TransferTransporter, Element::Neutronium).orElse(-1), 5);
     a.checkEqual("45. getCargo",               h.universe().planets().get(99)->getCargo(Element::Neutronium).orElse(-1), 995);
+}
+
+/** Test creation of beam-up request. */
+AFL_TEST("game.actions.CargoTransferSetup:build:beam-up", a)
+{
+    SimpleTurn h;
+    h.addShip(42, 5, Object::Playable);
+    h.addPlanet(99, 5, Object::Playable);
+
+    HostConfiguration config;
+    config[HostConfiguration::AllowBeamUpMultiple].set(1);
+
+    // Create transfer.
+    CargoTransfer action;
+    CargoTransferSetup testee = CargoTransferSetup::fromShipBeamUp(h.turn(), 42, config);
+    a.checkEqual("01. getStatus", testee.getStatus(), CargoTransferSetup::Ready);
+    a.checkEqual("02. getConflictingTransferShipId", testee.getConflictingTransferShipId(h.universe()), 0);
+    a.checkEqual("03. isDirect", testee.isDirect(), false);
+    testee.build(action, h.turn(), h.mapConfiguration(), h.config(), h.shipList(), h.version());
+
+    // Move
+    a.checkEqual("11. move", action.move(Element::Neutronium, 5, 1, 0, false, false), 5);
+    action.commit();
+
+    // Verify result of move: units unchanged
+    a.checkEqual("21. getCargo", h.universe().ships().get(42)->getCargo(Element::Neutronium).orElse(-1), 10);
+    a.checkEqual("22. getCargo", h.universe().planets().get(99)->getCargo(Element::Neutronium).orElse(-1), 1000);
+
+    // Must have a command
+    a.checkEqual("31. getMission", h.universe().ships().get(42)->getMission().orElse(-1), 35);
+
+    const CommandContainer* cc = CommandExtra::get(h.turn(), 5);
+    a.checkNonNull("41. CommandContainer", cc);
+
+    const Command* cmd = cc->getCommand(Command::BeamUp, 42);
+    a.checkNonNull("42. Command", cmd);
+    a.checkEqual("43. Command arg", cmd->getArg(), "N5");
+}
+
+/** Test creation of beam-up request, error case: disabled configuration */
+AFL_TEST("game.actions.CargoTransferSetup:build:beam-up:error:disabled", a)
+{
+    SimpleTurn h;
+    h.addShip(42, 5, Object::Playable);
+    h.addPlanet(99, 5, Object::Playable);
+
+    HostConfiguration config;
+    config[HostConfiguration::AllowBeamUpMultiple].set(0);
+
+    // Create transfer.
+    CargoTransfer action;
+    CargoTransferSetup testee = CargoTransferSetup::fromShipBeamUp(h.turn(), 42, config);
+    a.checkEqual("01. getStatus", testee.getStatus(), CargoTransferSetup::Impossible);
+}
+
+/** Test creation of beam-up request, error case: missing partner */
+AFL_TEST("game.actions.CargoTransferSetup:build:beam-up:error:missing", a)
+{
+    SimpleTurn h;
+    h.addShip(42, 5, Object::Playable);
+
+    HostConfiguration config;
+    config[HostConfiguration::AllowBeamUpMultiple].set(1);
+
+    // Create transfer.
+    CargoTransfer action;
+    CargoTransferSetup testee = CargoTransferSetup::fromShipBeamUp(h.turn(), 42, config);
+    a.checkEqual("01. getStatus", testee.getStatus(), CargoTransferSetup::Impossible);
 }

@@ -23,6 +23,7 @@ namespace {
     const int PLANET_OWNER = 3;
     const int PLANET_ID = 200;
     const int BEAM_TYPE = 4;
+    const int TORP_TYPE = 5;
 
     Planet& init(game::test::SimpleTurn& t)
     {
@@ -30,6 +31,7 @@ namespace {
         game::test::initStandardBeams(t.shipList());
         game::test::initStandardTorpedoes(t.shipList());
         game::test::addOutrider(t.shipList());
+        game::test::addAnnihilation(t.shipList());
         game::test::addNovaDrive(t.shipList());
 
         // Create a planet with minimum content
@@ -38,18 +40,26 @@ namespace {
         pl.setBaseTechLevel(game::BeamTech, 1);
         pl.setBaseTechLevel(game::EngineTech, 1);
         pl.setBaseTechLevel(game::TorpedoTech, 1);
-
-        // Preset hull number for convenience
-        t.setHull(game::test::OUTRIDER_HULL_ID);
         return pl;
     }
 
     Ship& addOutrider(game::test::SimpleTurn& t)
     {
+        t.setHull(game::test::OUTRIDER_HULL_ID);
         Ship& sh = t.addShip(100, PLANET_OWNER, Object::Playable);
         sh.setEngineType(game::test::NOVA_ENGINE_ID);
         sh.setNumBeams(1);
         sh.setBeamType(BEAM_TYPE);
+        return sh;
+    }
+
+    Ship& addTorper(game::test::SimpleTurn& t)
+    {
+        t.setHull(game::test::ANNIHILATION_HULL_ID);
+        Ship& sh = t.addShip(100, PLANET_OWNER, Object::Playable);
+        sh.setEngineType(game::test::NOVA_ENGINE_ID);
+        sh.setNumLaunchers(2);
+        sh.setTorpedoType(TORP_TYPE);
         return sh;
     }
 }
@@ -73,7 +83,7 @@ AFL_TEST("game.actions.CloneShip:normal", a)
     a.checkEqual("01. ship", &testee.ship(), &sh);
     a.checkEqual("02. planet", &testee.planet(), &pl);
 
-    // Tech upgrade cost: 1000$ for hull tech, 300$ for beam tech
+    // Tech upgrade cost: 1000$ for engine tech, 300$ for beam tech
     a.checkEqual("11. tech cost", testee.getTechUpgradeAction().getCost().toCargoSpecString(), "1300$");
 
     // Outrider:     40T 20D  5M 50$
@@ -102,6 +112,44 @@ AFL_TEST("game.actions.CloneShip:normal", a)
     a.checkEqual("54. beam tech",       pl.getBaseTechLevel(game::BeamTech).orElse(-1), 3);
     a.checkEqual("55. money",           pl.getCargo(game::Element::Money).orElse(-1), 170);
     a.checkEqual("56. supplies",        pl.getCargo(game::Element::Supplies).orElse(-1), 530);
+}
+
+/** Test normal ("happy") case with torper
+    A: prepare ship and planet
+    E: correct result reported, commits correctly */
+AFL_TEST("game.actions.CloneShip:normal:torper", a)
+{
+    // Environment
+    game::test::SimpleTurn t;
+    afl::base::Ref<game::Root> root = game::test::makeRoot(game::HostVersion(), game::RegistrationKey::Registered, 10);
+    game::UnitScoreDefinitionList shipScores;
+
+    // Units
+    Planet& pl = init(t);
+    Ship& sh = addTorper(t);
+
+    // Action
+    game::actions::CloneShip testee(pl, sh, t.universe(), shipScores, t.shipList(), *root);
+    a.checkEqual("01. ship", &testee.ship(), &sh);
+    a.checkEqual("02. planet", &testee.planet(), &pl);
+
+    // Tech upgrade cost: 4500$ for hull tech, 1000$ for engine tech, 600$ for torp tech
+    a.checkEqual("11. tech cost", testee.getTechUpgradeAction().getCost().toCargoSpecString(), "6100$");
+
+    // Annihilation:      343T 340D 550M  910$
+    // Nova drive x 6:     18T  18D  42M  150$
+    // Mark 3 Photon x 2:   2T   2D  10M   10$
+    // Total              363T 360D 602M 1070$ (x 2, + 6100 = 8240)
+    a.checkEqual("21. clone cost", testee.getCloneAction().getCost().toCargoSpecString(), "363T 360D 602M 8240$");
+
+    // Build order
+    a.checkEqual("31. getHullIndex",   testee.getBuildOrder().getHullIndex(), game::test::ANNIHILATION_HULL_ID);
+    a.checkEqual("32. getEngineType",  testee.getBuildOrder().getEngineType(), game::test::NOVA_ENGINE_ID);
+    a.checkEqual("33. getBeamType",    testee.getBuildOrder().getBeamType(), 0);
+    a.checkEqual("34. getTorpedoType", testee.getBuildOrder().getTorpedoType(), TORP_TYPE);
+
+    // Status
+    a.checkEqual("41. getOrderStatus",   testee.getOrderStatus(), game::actions::CloneShip::CanClone);
 }
 
 /** Test normal case, but can only pay tech.

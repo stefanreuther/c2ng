@@ -189,7 +189,7 @@ namespace {
 
 
     /** Perform refinery reaction.
-        \param [in/out] s    Ship
+        \param [in/out] ship Ship
         \param [in/out] ore  Ore to consume
         \param [in/out] sup  Supplies to consume
         \param [in]     hull Hull

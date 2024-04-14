@@ -4,14 +4,18 @@
   */
 
 #include "game/battleorderrule.hpp"
+
 #include "afl/test/testrunner.hpp"
+#include "game/map/minefield.hpp"
+#include "game/map/planet.hpp"
+#include "game/map/ship.hpp"
+
+using game::BattleOrderRule;
+using game::HostVersion;
 
 /** Test getShipBattleOrder() function. */
 AFL_TEST("game.BattleOrderRule:getShipBattleOrder", a)
 {
-    using game::BattleOrderRule;
-    using game::HostVersion;
-
     const BattleOrderRule tRule(HostVersion(HostVersion::Host,  MKVERSION(3, 22, 40)));
     const BattleOrderRule pRule(HostVersion(HostVersion::PHost, MKVERSION(3,  4,  7)));
 
@@ -190,9 +194,6 @@ AFL_TEST("game.BattleOrderRule:getShipBattleOrder", a)
 /** Test getPlanetBattleOrder() function. */
 AFL_TEST("game.BattleOrderRule:getPlanetBattleOrder", a)
 {
-    using game::BattleOrderRule;
-    using game::HostVersion;
-
     const BattleOrderRule tRule(HostVersion(HostVersion::Host,  MKVERSION(3, 22, 40)));
     const BattleOrderRule pRule(HostVersion(HostVersion::PHost, MKVERSION(3,  4,  7)));
 
@@ -230,8 +231,6 @@ AFL_TEST("game.BattleOrderRule:getPlanetBattleOrder", a)
 /** Test get(game::map::Ship). */
 AFL_TEST("game.BattleOrderRule:get:game-ship", a)
 {
-    using game::BattleOrderRule;
-    using game::HostVersion;
     using game::map::Ship;
 
     const BattleOrderRule tRule(HostVersion(HostVersion::Host,  MKVERSION(3, 22, 40)));
@@ -288,8 +287,6 @@ AFL_TEST("game.BattleOrderRule:get:game-ship", a)
 /** Test get(game::map::Planet&). */
 AFL_TEST("game.BattleOrderRule:get:game-planet", a)
 {
-    using game::BattleOrderRule;
-    using game::HostVersion;
     using game::map::Planet;
 
     const BattleOrderRule tRule(HostVersion(HostVersion::Host,  MKVERSION(3, 22, 40)));
@@ -325,11 +322,22 @@ AFL_TEST("game.BattleOrderRule:get:game-planet", a)
     }
 }
 
+/** Test get(game::map::Object), neither ship nor planet. */
+AFL_TEST("game.BattleOrderRule:get:game-other", a)
+{
+    using game::map::Minefield;
+
+    const BattleOrderRule tRule(HostVersion(HostVersion::Host,  MKVERSION(3, 22, 40)));
+    const BattleOrderRule pRule(HostVersion(HostVersion::PHost, MKVERSION(3,  4,  7)));
+
+    Minefield mf(99);
+    a.checkEqual("01", tRule.get(mf), BattleOrderRule::UNKNOWN);
+    a.checkEqual("02", pRule.get(mf), BattleOrderRule::UNKNOWN);
+}
+
 /** Test get(game::sim::Ship&). */
 AFL_TEST("game.BattleOrderRule:get:sim-ship", a)
 {
-    using game::BattleOrderRule;
-    using game::HostVersion;
     using game::sim::Ship;
 
     const BattleOrderRule tRule(HostVersion(HostVersion::Host,  MKVERSION(3, 22, 40)));
@@ -359,8 +367,6 @@ AFL_TEST("game.BattleOrderRule:get:sim-ship", a)
 /** Test get(game::sim::Planet&). */
 AFL_TEST("game.BattleOrderRule:get:sim-planet", a)
 {
-    using game::BattleOrderRule;
-    using game::HostVersion;
     using game::sim::Planet;
 
     const BattleOrderRule tRule(HostVersion(HostVersion::Host,  MKVERSION(3, 22, 40)));
@@ -377,4 +383,21 @@ AFL_TEST("game.BattleOrderRule:get:sim-planet", a)
         a.checkEqual("11", tRule.get(obj), BattleOrderRule::UNKNOWN);
         a.checkEqual("12", pRule.get(obj), 200);
     }
+}
+
+/** Test get(game::sim::Object), neither ship nor planet. */
+AFL_TEST("game.BattleOrderRule:get:sim-other", a)
+{
+    class Tester : public game::sim::Object {
+     public:
+        virtual bool hasImpliedAbility(game::sim::Ability /*which*/, const game::sim::Configuration& /*opts*/, const game::spec::ShipList& /*shipList*/, const game::config::HostConfiguration& /*config*/) const
+            { return false; }
+    };
+
+    const BattleOrderRule tRule(HostVersion(HostVersion::Host,  MKVERSION(3, 22, 40)));
+    const BattleOrderRule pRule(HostVersion(HostVersion::PHost, MKVERSION(3,  4,  7)));
+
+    Tester t;
+    a.checkEqual("01", tRule.get(t), BattleOrderRule::UNKNOWN);
+    a.checkEqual("02", pRule.get(t), BattleOrderRule::UNKNOWN);
 }

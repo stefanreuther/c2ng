@@ -509,6 +509,8 @@ AFL_TEST("game.actions.BuildAmmo:different-containers", a)
 AFL_TEST("game.actions.BuildAmmo:isValidCombination:planet-cases", a)
 {
     // Create some planets:
+    afl::string::NullTranslator tx;
+    afl::sys::Log log;
     game::map::Universe univ;
 
     // - my planet (base case)
@@ -527,6 +529,14 @@ AFL_TEST("game.actions.BuildAmmo:isValidCombination:planet-cases", a)
     game::map::Planet& unPlanet = *univ.planets().create(400);
     preparePlanet(unPlanet, X, Y, OWNER);
     unPlanet.setPlayability(game::map::Object::NotPlayable);
+
+    // - planet without base
+    game::map::Planet& noPlanet = *univ.planets().create(500);
+    noPlanet.setPosition(game::map::Point(X, Y));
+    noPlanet.addCurrentPlanetData(game::map::PlanetData(), game::PlayerSet_t(7));
+    noPlanet.setOwner(7);
+    noPlanet.internalCheck(game::map::Configuration(), game::PlayerSet_t(7), 12, tx, log);
+    noPlanet.setPlayability(game::map::Object::Playable);
 
     // Create own ship and check against all planets
     game::map::Ship& myShip = *univ.ships().create(1);
@@ -549,6 +559,11 @@ AFL_TEST("game.actions.BuildAmmo:isValidCombination:planet-cases", a)
         game::Exception ex("");
         a.checkEqual("06. isValidCombination", game::actions::BuildAmmo::isValidCombination(unPlanet, myShip, ex), false);
         a.checkDifferent("07. exception text", ex.what(), String_t());
+    }
+    {
+        game::Exception ex("");
+        a.checkEqual("08. isValidCombination", game::actions::BuildAmmo::isValidCombination(noPlanet, myShip, ex), false);
+        a.checkDifferent("09. exception text", ex.what(), String_t());
     }
 
     // Create unplayed ship and check against all planets
@@ -574,6 +589,11 @@ AFL_TEST("game.actions.BuildAmmo:isValidCombination:planet-cases", a)
         game::Exception ex("");
         a.checkEqual("17. isValidCombination", game::actions::BuildAmmo::isValidCombination(unPlanet, theirShip, ex), false);
         a.checkDifferent("18. exception text", ex.what(), String_t());
+    }
+    {
+        game::Exception ex("");
+        a.checkEqual("19. isValidCombination", game::actions::BuildAmmo::isValidCombination(noPlanet, theirShip, ex), false);
+        a.checkDifferent("20. exception text", ex.what(), String_t());
     }
 }
 

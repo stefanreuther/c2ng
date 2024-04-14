@@ -86,6 +86,10 @@ AFL_TEST("game.actions.ConvertSupplies:normal", a)
 
     // Cannot buy supplies because we have no reverter
     a.checkEqual("41. buySupplies", testee.buySupplies(100, true), 0);
+
+    // No-op for completeness
+    a.checkEqual("51. buySupplies", testee.buySupplies(0, true), 0);
+    a.checkEqual("52. buySupplies", testee.sellSupplies(0, true), 0);
 }
 
 /** Test behaviour with reserved supplies.

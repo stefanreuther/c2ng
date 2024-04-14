@@ -26,7 +26,7 @@ namespace interpreter {
             This implements "value(args) := a".
             \param args Parameters
             \param value Value to assign, owned by caller.
-            \return obtained value. Throws Error if request is invalid */
+            \throw Error if request is invalid */
         virtual void set(Arguments& args, const afl::data::Value* value) = 0;
 
         // CallableValue:

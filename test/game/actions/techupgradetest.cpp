@@ -240,6 +240,8 @@ AFL_TEST("game.actions.TechUpgrade:simple", a)
     a.checkEqual("46. getTechLevel", act.getTechLevel(game::HullTech), 5);
     // - revert
     a.check("47. setTechLevel", act.setTechLevel(game::HullTech, 4));
+    // - no-op for completeness
+    a.check("48. setTechLevel", act.setTechLevel(game::HullTech, 4));
 
     // Chance price configuration. This automatically updates.
     h.root->hostConfiguration()[game::config::HostConfiguration::BaseTechCost].set(150);

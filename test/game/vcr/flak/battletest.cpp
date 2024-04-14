@@ -298,4 +298,11 @@ AFL_TEST("game.vcr.flak.Battle", a)
         a.checkEqual("211. computeScores", testee.computeScores(s, 2, config, shipList), false);
         a.checkEqual("212. computeScores", testee.computeScores(s, 7, config, shipList), false);
     }
+
+    // - getAuxiliaryInformation
+    a.checkEqual("221. aiSeed",    testee.getAuxiliaryInformation(game::vcr::Battle::aiSeed).orElse(-1),    0x6D3D7AC9);
+    a.checkEqual("222. aiMagic",   testee.getAuxiliaryInformation(game::vcr::Battle::aiMagic).isValid(),    false);
+    a.checkEqual("223. aiType",    testee.getAuxiliaryInformation(game::vcr::Battle::aiType).isValid(),     false);
+    a.checkEqual("224. aiFlags",   testee.getAuxiliaryInformation(game::vcr::Battle::aiFlags).isValid(),    false);
+    a.checkEqual("225. aiAmbient", testee.getAuxiliaryInformation(game::vcr::Battle::aiAmbient).orElse(-1), 0);
 }

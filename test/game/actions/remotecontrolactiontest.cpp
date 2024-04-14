@@ -270,6 +270,32 @@ AFL_TEST("game.actions.RemoteControlAction:foreign-ship:drop", a)
     a.checkNull("32. getCommand", cc.getCommand(Command::RemoteControl, SHIP_ID));
 }
 
+/** Test own ship, invalid command
+    A: create own ship.
+    E: ship must be reported as normal; Forbid command can be given. */
+AFL_TEST("game.actions.RemoteControlAction:invalid", a)
+{
+    // Environment
+    SimpleTurn t;
+    CommandContainer& cc = CommandExtra::create(t.turn()).create(PLAYER);
+    cc.addCommand(Command::RemoteControl, SHIP_ID, "eat");
+    t.addShip(SHIP_ID, PLAYER, Object::Playable);
+    RemoteControlAction testee(t.turn(), SHIP_ID, PLAYER);
+
+    // Initial status, bad command does not confuse parser
+    a.checkEqual("01. getOldState", testee.getOldState(), RemoteControlAction::Normal);
+    a.checkEqual("02. getNewState", testee.getNewState(), RemoteControlAction::Normal);
+
+    // Forbid succeeds, overwriting bad command
+    a.checkEqual("11. setState", testee.setState(RemoteControlAction::Forbid), true);
+    a.checkEqual("12. getNewState", testee.getNewState(), RemoteControlAction::Forbidden);
+
+    // Command created
+    const Command* cmd = cc.getCommand(Command::RemoteControl, SHIP_ID);
+    a.checkNonNull("21. cmd", cmd);
+    a.checkEqual("22. getArg", cmd->getArg(), "forbid");
+}
+
 /** Test parseVerb(). */
 AFL_TEST("game.actions.RemoteControlAction:parseVerb", a)
 {

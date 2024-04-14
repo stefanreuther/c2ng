@@ -1,18 +1,19 @@
 /**
   *  \file ui/rich/document.cpp
+  *  \brief Class ui::rich::Document
   */
 
 #include <climits>
 #include <memory>
 #include "ui/rich/document.hpp"
 #include "afl/base/staticassert.hpp"
-#include "util/skincolor.hpp"
 #include "gfx/complex.hpp"
-#include "util/rich/visitor.hpp"
-#include "util/rich/styleattribute.hpp"
-#include "util/rich/linkattribute.hpp"
-#include "util/rich/colorattribute.hpp"
 #include "util/rich/alignmentattribute.hpp"
+#include "util/rich/colorattribute.hpp"
+#include "util/rich/linkattribute.hpp"
+#include "util/rich/styleattribute.hpp"
+#include "util/rich/visitor.hpp"
+#include "util/skincolor.hpp"
 
 namespace {
     void drawKeycap(gfx::BaseContext& ctx, int x, int y, int he, int wi)
@@ -220,17 +221,16 @@ ui::rich::Document::Splitter::process(const util::rich::Attribute& att, int delt
 }
 
 
-// /** Marker meaning "no link". */
 const ui::rich::Document::LinkId_t ui::rich::Document::nil;
 
-// /** Default constructor. Makes a blank document. */
+// Default constructor.
 ui::rich::Document::Document(gfx::ResourceProvider& provider)
     : m_provider(provider),
       m_deleter(),
       content(),
       last_chunk(),
       block_objs(),
-      render_options(0),
+      m_renderOptions(),
       x(0),
       y(0),
       first_this_line(0),
@@ -259,7 +259,7 @@ ui::rich::Document::deleter()
     return m_deleter;
 }
 
-// /** Clear this document. Resets everything except for the page width. */
+// Clear this document.
 void
 ui::rich::Document::clear()
 {
@@ -276,8 +276,7 @@ ui::rich::Document::clear()
     m_deleter.clear();
 }
 
-// /** Set this document's page width.
-//     \param width Page width in pixels */
+// Set this document's page width.
 void
 ui::rich::Document::setPageWidth(int width)
 {
@@ -285,8 +284,7 @@ ui::rich::Document::setPageWidth(int width)
     page_width = width;
 }
 
-// /** Set this document's left margin.
-//     \param lm Left margin in pixels. */
+// Set this document's left margin.
 void
 ui::rich::Document::setLeftMargin(int lm)
 {
@@ -296,8 +294,7 @@ ui::rich::Document::setLeftMargin(int lm)
     left_margin = lm;
 }
 
-// /** Set this document's right margin.
-//     \param rm Right margin in pixels. */
+// Set this document's right margin.
 void
 ui::rich::Document::setRightMargin(int rm)
 {
@@ -305,7 +302,7 @@ ui::rich::Document::setRightMargin(int rm)
     right_margin = rm;
 }
 
-// /** Get page width. */
+// Get page width.
 int
 ui::rich::Document::getPageWidth() const
 {
@@ -313,7 +310,7 @@ ui::rich::Document::getPageWidth() const
     return page_width;
 }
 
-// /** Get this document's current left margin. */
+// Get this document's current left margin.
 int
 ui::rich::Document::getLeftMargin() const
 {
@@ -321,7 +318,7 @@ ui::rich::Document::getLeftMargin() const
     return left_margin;
 }
 
-// /** Get this document's current right margin. */
+// Get this document's current right margin.
 int
 ui::rich::Document::getRightMargin() const
 {
@@ -329,9 +326,7 @@ ui::rich::Document::getRightMargin() const
     return right_margin;
 }
 
-
-// /** Add some text.
-//     \param text Text to add. */
+// Add rich text.
 void
 ui::rich::Document::add(const util::rich::Text& text)
 {
@@ -353,8 +348,7 @@ ui::rich::Document::add(const util::rich::Text& text)
     process();
 }
 
-// /** Add some text.
-//     \param text Text to add. */
+// Add plain text.
 void
 ui::rich::Document::add(const String_t& text)
 {
@@ -363,8 +357,7 @@ ui::rich::Document::add(const String_t& text)
     add(util::rich::Text(text));
 }
 
-// /** Add some text.
-//     \param text Text to add. */
+// Add plain text.
 void
 ui::rich::Document::add(const char* text)
 {
@@ -373,8 +366,7 @@ ui::rich::Document::add(const char* text)
     add(util::rich::Text(text));
 }
 
-// /** Add zero-width word separator. Flushes the current word and allows
-//     a new line to be begun. */
+// Add zero-width word separator.
 void
 ui::rich::Document::addWordSeparator()
 {
@@ -382,7 +374,7 @@ ui::rich::Document::addWordSeparator()
     flushWord();
 }
 
-// /** Add newline. Think of this like a HTML "br" tag. */
+// Add newline.
 void
 ui::rich::Document::addNewline()
 {
@@ -392,7 +384,7 @@ ui::rich::Document::addNewline()
         /* This line is empty, so just add some space */
         afl::base::Ref<gfx::Font> font = m_provider.getFont(gfx::FontRequest());
         int lineHeight = font->getLineHeight();
-        if ((render_options & FullLinesBetweenParagraphs) != 0) {
+        if (m_renderOptions.contains(FullLinesBetweenParagraphs)) {
             addY(lineHeight);
         } else {
             addY(lineHeight/2);
@@ -403,7 +395,7 @@ ui::rich::Document::addNewline()
     }
 }
 
-// /** Add new paragraph. Think of this like a HTML "p" tag. */
+// Add new paragraph.
 void
 ui::rich::Document::addParagraph()
 {
@@ -412,12 +404,7 @@ ui::rich::Document::addParagraph()
     addNewline();
 }
 
-// /** Add text at horizontal position. The position may be outside the
-//     margin. Further text will be produced after the just-added text.
-//     This can be used to produce bullets. If the position is before the
-//     current output position, this starts a new line.
-//     \param x Position
-//     \param text Text to add */
+// Add text at horizontal position.
 void
 ui::rich::Document::addAt(int x, const util::rich::Text& text)
 {
@@ -426,7 +413,7 @@ ui::rich::Document::addAt(int x, const util::rich::Text& text)
     add(text);
 }
 
-// /** Add right-justified column text. */
+// Add right-justified column text.
 void
 ui::rich::Document::addRight(int x, const util::rich::Text& text)
 {
@@ -458,7 +445,7 @@ ui::rich::Document::addRight(int x, const util::rich::Text& text)
     }
 }
 
-// /** Add centered text. */
+// Add centered text.
 void
 ui::rich::Document::addCentered(int x, const util::rich::Text& text)
 {
@@ -486,7 +473,7 @@ ui::rich::Document::addCentered(int x, const util::rich::Text& text)
     }
 }
 
-/** Add preformatted text. */
+// Add preformatted text.
 void
 ui::rich::Document::addPreformatted(const util::rich::Text& text)
 {
@@ -509,8 +496,7 @@ ui::rich::Document::addPreformatted(const util::rich::Text& text)
     tabTo(left_margin);
 }
 
-// /** Add floating object. The object will be placed at the left or
-//     right border. Text flows around it. */
+// Add floating object.
 void
 ui::rich::Document::addFloatObject(ui::icons::Icon& obj, bool left)
 {
@@ -529,8 +515,7 @@ ui::rich::Document::addFloatObject(ui::icons::Icon& obj, bool left)
     }
 }
 
-// /** Add centered object. The object will be placed in the center of
-//     the page. It will interrupt the text flow. */
+// Add centered object.
 void
 ui::rich::Document::addCenterObject(ui::icons::Icon& obj)
 {
@@ -549,11 +534,7 @@ ui::rich::Document::addCenterObject(ui::icons::Icon& obj)
     block_objs.pushBackNew(p.release());
 }
 
-// /** Move to horizontal position. Further text will be produced
-//     starting here. The position may be outside the margin. If the
-//     position is before the current output position, this starts a new
-//     line.
-//     \param x Position */
+// Move to horizontal position.
 void
 ui::rich::Document::tabTo(int x)
 {
@@ -567,7 +548,7 @@ ui::rich::Document::tabTo(int x)
     this->x = x;
 }
 
-// /** Finish this document. */
+// Finish this document.
 void
 ui::rich::Document::finish()
 {
@@ -588,7 +569,7 @@ ui::rich::Document::finish()
     }
 }
 
-// /** Get height of document. */
+// Get height of document.
 int
 ui::rich::Document::getDocumentHeight() const
 {
@@ -596,7 +577,7 @@ ui::rich::Document::getDocumentHeight() const
     return y;
 }
 
-// /** Get document width. */
+// Get document width.
 int
 ui::rich::Document::getDocumentWidth() const
 {
@@ -611,11 +592,7 @@ ui::rich::Document::getDocumentWidth() const
     return width;
 }
 
-
-// /** Draw document.
-//     \param ctx Context
-//     \param area Area to draw in
-//     \param skipY Skip this many pixels from the top of the document */
+// Draw document.
 void
 ui::rich::Document::draw(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, int skipY)
 {
@@ -672,12 +649,7 @@ ui::rich::Document::draw(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectang
     }
 }
 
-
-// /** Get link, given a position. Locates a link that appears at the specified
-//     position and returns its Id, an opaque value usable to query information
-//     about the link.
-//     \param pt Point to look up
-//     \return Link Id for that point, nil if none */
+// Get link, given a position.
 ui::rich::Document::LinkId_t
 ui::rich::Document::getLinkFromPos(gfx::Point pt) const
 {
@@ -696,7 +668,7 @@ ui::rich::Document::getLinkFromPos(gfx::Point pt) const
     return nil;
 }
 
-// /** Get link target (parameter to RichTextLinkAttribute) for a link. */
+// Get link target for a link.
 String_t
 ui::rich::Document::getLinkTarget(LinkId_t link) const
 {
@@ -706,10 +678,7 @@ ui::rich::Document::getLinkTarget(LinkId_t link) const
             : String_t());
 }
 
-// /** Change kind (=status) of a link.
-//     \param link Link Id
-//     \param kind New link status (must be one of Item::Link, Item::LinkHover, Item::LinkFocus),
-//                 otherwise the link will be destroyed. */
+// Change kind (=status) of a link.
 void
 ui::rich::Document::setLinkKind(LinkId_t link, ItemKind kind)
 {
@@ -719,22 +688,15 @@ ui::rich::Document::setLinkKind(LinkId_t link, ItemKind kind)
     }
 }
 
-
-// /** Get next link.
-//     \param id Link identifier. nil to get the first link.
-//     \return Link id of found link, nil if none */
+// Get next link.
 ui::rich::Document::LinkId_t
 ui::rich::Document::getNextLink(LinkId_t id) const
 {
     // ex RichDocument::getNextLink
-    // FIXME: this implementation sucks pretty much
-    return getNextLink(id, gfx::Rectangle(0, 0, 0xFFF0, 0xFFF0));
+    return getNextLink(id, gfx::Rectangle(0, 0, INT_MAX, INT_MAX));
 }
 
-// /** Get next link within range.
-//     \param id Link identifier. nil to get the first link.
-//     \param limit Return only links within this range
-//     \return Link id of found link, nil if none */
+// Get next link within range.
 ui::rich::Document::LinkId_t
 ui::rich::Document::getNextLink(LinkId_t id, gfx::Rectangle limit) const
 {
@@ -749,21 +711,15 @@ ui::rich::Document::getNextLink(LinkId_t id, gfx::Rectangle limit) const
     return nil;
 }
 
-// /** Get previous link.
-//     \param id Link identifier. nil to get the last link.
-//     \return Link id of found link, nil if none */
+// Get previous link.
 ui::rich::Document::LinkId_t
 ui::rich::Document::getPreviousLink(LinkId_t id) const
 {
     // ex RichDocument::getPreviousLink
-    // FIXME: this implementation sucks pretty much
-    return getPreviousLink(id, gfx::Rectangle(0, 0, 0xFFF0, 0xFFF0));
+    return getPreviousLink(id, gfx::Rectangle(0, 0, INT_MAX, INT_MAX));
 }
 
-// /** Get previous link within range.
-//     \param id Link identifier. nil to get the last link.
-//     \param limit Return only links within this range
-//     \return Link id of found link, nil if none */
+// Get previous link within range.
 ui::rich::Document::LinkId_t
 ui::rich::Document::getPreviousLink(LinkId_t id, gfx::Rectangle limit) const
 {
@@ -778,10 +734,7 @@ ui::rich::Document::getPreviousLink(LinkId_t id, gfx::Rectangle limit) const
     return nil;
 }
 
-// /** Check whether a link is visible.
-//     \param id Link identifier, non-nil
-//     \param limit Range to check
-//     \return true iff at least a part of this link is visible */
+// Check whether a link is visible.
 bool
 ui::rich::Document::isLinkVisible(LinkId_t id, gfx::Rectangle limit) const
 {
@@ -797,23 +750,23 @@ ui::rich::Document::isLinkVisible(LinkId_t id, gfx::Rectangle limit) const
     return false;
 }
 
-// /** Set rendering options. */
+// Set rendering options.
 void
-ui::rich::Document::setRenderOptions(int opts)
+ui::rich::Document::setRenderOptions(Flags_t opts)
 {
     // ex RichDocument::setRenderOptions
-    render_options = opts;
+    m_renderOptions = opts;
 }
 
-// /** Get rendering options. */
-int
+// Get rendering options.
+ui::rich::Document::Flags_t
 ui::rich::Document::getRenderOptions() const
 {
     // ex RichDocument::getRenderOptions
-    return render_options;
+    return m_renderOptions;
 }
 
-// /** Process pending input. */
+/** Process pending input. */
 void
 ui::rich::Document::process()
 {
@@ -951,9 +904,9 @@ ui::rich::Document::addY(int dy)
     }
 }
 
-// /** Advance index of specified side to next possible object for that side.
-//     If there is no such object, the pointer is placed at the end of the
-//     block_objs list. */
+/** Advance index of specified side to next possible object for that side.
+    If there is no such object, the pointer is placed at the end of the
+    block_objs list. */
 void
 ui::rich::Document::findNextObject(int side)
 {
@@ -963,8 +916,8 @@ ui::rich::Document::findNextObject(int side)
     }
 }
 
-// /** Place the current object of the given side.
-//     \pre bo_index[side] points to an object */
+/** Place the current object of the given side.
+    @pre bo_index[side] points to an object */
 void
 ui::rich::Document::startNextObject(int side)
 {
@@ -977,7 +930,7 @@ ui::rich::Document::startNextObject(int side)
     ++bo_index[side];
 }
 
-// /** Finish a line. Makes sure that content contains only fully-rendered text. */
+/** Finish a line. Makes sure that content contains only fully-rendered text. */
 void
 ui::rich::Document::flushLine()
 {

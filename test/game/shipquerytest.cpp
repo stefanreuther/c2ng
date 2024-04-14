@@ -6,12 +6,20 @@
 #include "game/shipquery.hpp"
 #include "afl/test/testrunner.hpp"
 
+using game::ExperienceLevelSet_t;
+using game::PlayerSet_t;
+using game::ShipQuery;
+using game::UnitScoreDefinitionList;
+using game::config::HostConfiguration;
+using game::map::Universe;
+using game::spec::ShipList;
+
 /** Test initialisation, setters, getters.
     A: create ShipQuery. Use setters.
     E: expected initial state is set. Setters affect corresponding getters. */
 AFL_TEST("game.ShipQuery:init", a)
 {
-    game::ShipQuery qa, qb;
+    ShipQuery qa, qb;
     a.checkEqual("01. eq", qa == qb, true);
     a.checkEqual("02. ne", qa != qb, false);
 
@@ -42,10 +50,10 @@ AFL_TEST("game.ShipQuery:init", a)
     a.checkEqual("52. getPlayerDisplaySet", qa.getPlayerDisplaySet().contains(0), false);
 
     // Modify and check success
-    game::PlayerSet_t ps1 = game::PlayerSet_t::fromInteger(2);
-    game::PlayerSet_t ps2 = game::PlayerSet_t::fromInteger(5);
-    game::ExperienceLevelSet_t ls1 = game::ExperienceLevelSet_t::fromInteger(7);
-    game::ExperienceLevelSet_t ls2 = game::ExperienceLevelSet_t::fromInteger(9);
+    PlayerSet_t ps1 = PlayerSet_t::fromInteger(2);
+    PlayerSet_t ps2 = PlayerSet_t::fromInteger(5);
+    ExperienceLevelSet_t ls1 = ExperienceLevelSet_t::fromInteger(7);
+    ExperienceLevelSet_t ls2 = ExperienceLevelSet_t::fromInteger(9);
 
     qa.setHullType(42);
     qa.setShipId(150);
@@ -76,7 +84,7 @@ AFL_TEST("game.ShipQuery:init", a)
 }
 
 /** Test initForExistingShip().
-    QA: create universe, shiplist with qa ship. Call initForExistingShip().
+    A: create universe, shiplist with a ship. Call initForExistingShip().
     E: all attributes of the ship are taken over */
 AFL_TEST("game.ShipQuery:initForExistingShip", a)
 {
@@ -85,8 +93,8 @@ AFL_TEST("game.ShipQuery:initForExistingShip", a)
     const int ENGINE_NR = 8;
     const int PLAYER_NR = 6;
 
-    // Universe with qa ship
-    game::map::Universe univ;
+    // Universe with a ship
+    Universe univ;
     game::map::Ship* sh = univ.ships().create(SHIP_ID);
 
     game::map::ShipData sd;
@@ -96,27 +104,27 @@ AFL_TEST("game.ShipQuery:initForExistingShip", a)
     sd.engineType = ENGINE_NR;
     sd.owner = PLAYER_NR;
     sd.damage = 7;
-    sh->addCurrentShipData(sd, game::PlayerSet_t(PLAYER_NR));
-    sh->internalCheck(game::PlayerSet_t(PLAYER_NR), 15);
+    sh->addCurrentShipData(sd, PlayerSet_t(PLAYER_NR));
+    sh->internalCheck(PlayerSet_t(PLAYER_NR), 15);
     sh->setPlayability(game::map::Object::Playable);
 
     // Ship list
-    game::spec::ShipList shipList;
+    ShipList shipList;
     game::spec::Hull* h = shipList.hulls().create(HULL_NR);
     h->setMass(500);
     h->setMaxCrew(99);
     shipList.engines().create(ENGINE_NR)->cost().set(game::spec::Cost::Money, 400);
 
     // Configuration
-    game::config::HostConfiguration config;
-    config[game::config::HostConfiguration::AllowEngineShieldBonus].set(1);
-    config[game::config::HostConfiguration::EngineShieldBonusRate].set(25);
+    HostConfiguration config;
+    config[HostConfiguration::AllowEngineShieldBonus].set(1);
+    config[HostConfiguration::EngineShieldBonusRate].set(25);
 
     // Score definitions
-    game::UnitScoreDefinitionList scoreDefs;
+    UnitScoreDefinitionList scoreDefs;
 
     // Testee
-    game::ShipQuery qa;
+    ShipQuery qa;
     qa.initForExistingShip(univ, SHIP_ID, shipList, config, scoreDefs);
 
     // Verify
@@ -127,9 +135,88 @@ AFL_TEST("game.ShipQuery:initForExistingShip", a)
     a.checkEqual("05. getUsedESBRate",      qa.getUsedESBRate(), 25);
     a.checkEqual("06. getCrew",             qa.getCrew(), 99);
     a.checkEqual("07. getOwner",            qa.getOwner(), PLAYER_NR);
-    a.checkEqual("08. getPlayerFilterSet",  qa.getPlayerFilterSet(), game::ShipQuery().getPlayerFilterSet());  // unmodified default
-    a.checkEqual("09. getPlayerDisplaySet", qa.getPlayerDisplaySet(), game::PlayerSet_t(PLAYER_NR));
-    a.checkEqual("10. getLevelFilterSet",   qa.getLevelFilterSet(), game::ShipQuery().getLevelFilterSet());    // unmodified default
-    a.checkEqual("11. getLevelDisplaySet",  qa.getLevelDisplaySet(), game::ExperienceLevelSet_t(0));           // unmodified default
+    a.checkEqual("08. getPlayerFilterSet",  qa.getPlayerFilterSet(), ShipQuery().getPlayerFilterSet());  // unmodified default
+    a.checkEqual("09. getPlayerDisplaySet", qa.getPlayerDisplaySet(), PlayerSet_t(PLAYER_NR));
+    a.checkEqual("10. getLevelFilterSet",   qa.getLevelFilterSet(), ShipQuery().getLevelFilterSet());    // unmodified default
+    a.checkEqual("11. getLevelDisplaySet",  qa.getLevelDisplaySet(), ExperienceLevelSet_t(0));           // unmodified default
     a.checkEqual("12. getDamage",           qa.getDamage(), 7);
+}
+
+/** Test initForExistingShip(), with experience.
+    A: create universe, shiplist with a ship. Call initForExistingShip().
+    E: all attributes of the ship are taken over */
+AFL_TEST("game.ShipQuery:initForExistingShip:exp", a)
+{
+    const int SHIP_ID = 17;
+    const int PLAYER_NR = 6;
+
+    // Universe with a ship
+    Universe univ;
+    game::map::Ship* sh = univ.ships().create(SHIP_ID);
+
+    game::map::ShipData sd;
+    sd.owner = PLAYER_NR;
+    sh->addCurrentShipData(sd, PlayerSet_t(PLAYER_NR));
+    sh->internalCheck(PlayerSet_t(PLAYER_NR), 15);
+    sh->setPlayability(game::map::Object::Playable);
+
+    // Ship list, config
+    ShipList shipList;
+    HostConfiguration config;
+
+    // Score definitions
+    UnitScoreDefinitionList scoreDefs;
+    UnitScoreDefinitionList::Definition def;
+    def.name = "Exp";
+    def.id = game::ScoreId_ExpLevel;
+    def.limit = 5;
+    sh->unitScores().set(scoreDefs.add(def), 3, 10);
+
+    // Testee
+    ShipQuery qa;
+    qa.initForExistingShip(univ, SHIP_ID, shipList, config, scoreDefs);
+
+    // Verify
+    a.checkEqual("01. getLevelFilterSet",   qa.getLevelFilterSet(), ShipQuery().getLevelFilterSet());    // unmodified default
+    a.checkEqual("02. getLevelDisplaySet",  qa.getLevelDisplaySet(), ExperienceLevelSet_t(3));           // from ship
+}
+
+/** Test initialisation of owner from display-set.
+    A: set no owner; set display-set attribute to single player.
+    E: owner attribute derived correctly */
+AFL_TEST("game.ShipQuery:complete:owner-from-display", a)
+{
+    ShipQuery q;
+    q.setHullType(42);
+    q.setPlayerFilterSet(PlayerSet_t(9));
+    q.setPlayerDisplaySet(PlayerSet_t(7));
+
+    Universe univ;
+    ShipList shipList;
+    HostConfiguration config;
+    UnitScoreDefinitionList scoreDefs;
+
+    q.complete(univ, shipList, config, scoreDefs, 3);
+
+    // Owner derived from display set
+    a.checkEqual("", q.getOwner(), 7);
+}
+
+/** Test initialisation of owner from display-set.
+    A: set no owner and no display-set
+    E: default owner used */
+AFL_TEST("game.ShipQuery:complete:default-owner", a)
+{
+    ShipQuery q;
+    q.setHullType(42);
+
+    Universe univ;
+    ShipList shipList;
+    HostConfiguration config;
+    UnitScoreDefinitionList scoreDefs;
+
+    q.complete(univ, shipList, config, scoreDefs, 3);
+
+    // Default owner
+    a.checkEqual("", q.getOwner(), 3);
 }

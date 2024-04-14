@@ -179,7 +179,7 @@ namespace interpreter {
 
         /** Set file name.
             \param fileName name
-            \see setFileName */
+            \see getFileName */
         void setFileName(String_t fileName);
 
         /** Remember current line number.

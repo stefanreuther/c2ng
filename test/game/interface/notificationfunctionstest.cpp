@@ -94,6 +94,7 @@ AFL_TEST("game.interface.NotificationFunctions:scenario", a)
     }
 
     // Check count
+    a.checkEqual("35. getNumMessages", session.notifications().getNumMessages(), 2U);
     {
         afl::data::Segment seg;
         interpreter::Arguments args(seg, 0, 0);

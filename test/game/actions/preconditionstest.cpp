@@ -67,6 +67,20 @@ AFL_TEST("game.actions.Preconditions:mustBePlayed(Ship):Playable", a)
     AFL_CHECK_SUCCEEDS(a, game::actions::mustBePlayed(ship));
 }
 
+// Existence check succeeds
+AFL_TEST("game.actions.Preconditions:mustExist(Ship):ok", a)
+{
+    game::map::Ship ship(42);
+    a.checkEqual("", &game::actions::mustExist(&ship), &ship);
+}
+
+// Existence check fails
+AFL_TEST("game.actions.Preconditions:mustExist(Ship):nok", a)
+{
+    game::map::Ship* pShip = 0;
+    AFL_CHECK_THROWS(a, game::actions::mustExist(pShip), game::Exception);
+}
+
 /*
  *  Planet
  */
@@ -92,6 +106,20 @@ AFL_TEST("game.actions.Preconditions:mustBePlayed(Planet):Playable", a)
     game::map::Planet planet(42);
     planet.setPlayability(planet.Playable);
     AFL_CHECK_SUCCEEDS(a, game::actions::mustBePlayed(planet));
+}
+
+// Existence check succeeds
+AFL_TEST("game.actions.Preconditions:mustExist(Planet):ok", a)
+{
+    game::map::Planet planet(42);
+    a.checkEqual("", &game::actions::mustExist(&planet), &planet);
+}
+
+// Existence check fails
+AFL_TEST("game.actions.Preconditions:mustExist(Planet):nok", a)
+{
+    game::map::Planet* pPlanet = 0;
+    AFL_CHECK_THROWS(a, game::actions::mustExist(pPlanet), game::Exception);
 }
 
 /*

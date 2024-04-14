@@ -73,6 +73,18 @@ AFL_TEST("game.PlayerArray:array-access", a)
     // check out-of-bounds write
     n.set(999999999, 9);
     n.set(-999999999, 9);
+
+    // Const
+    const game::PlayerArray<int>& cn = n;
+    a.check     ("71", !cn.at(-2));
+    a.check     ("72", !cn.at(-1));
+    a.checkEqual("73",  n.at(0), cn.at(0));
+    a.checkEqual("74",  n.at(12), cn.at(12));
+    a.check     ("75", !cn.at(1000));  // reconsider when we go MMORPG
+
+    a.checkEqual("81", cn.get(-2), 0);
+    a.checkEqual("82", cn.get(0), 42);
+    a.checkEqual("83", cn.get(999), 0);
 }
 
 /** Test initialisation. */

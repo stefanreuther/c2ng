@@ -50,6 +50,7 @@ AFL_TEST("game.interface.MissionListContext:basics", a)
     verif.verifyNotSerializable();
     verif.verifyTypes();
     a.checkNull("01. getObject", testee.getObject());
+    a.checkEqual("02. mission", &testee.missions(), &*list);
 }
 
 // MissionList().Mission() function, normal case

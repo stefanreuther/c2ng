@@ -52,6 +52,7 @@ AFL_TEST("game.Root", a)
     a.checkNonNull("06. stringVerifier",      dynamic_cast<const game::test::StringVerifier*>(&testee.stringVerifier()));
     a.checkNonNull("07. charset",             dynamic_cast<afl::charset::Utf8Charset*>(&testee.charset()));
     a.checkNull   ("08. turnLoader",          testee.getTurnLoader().get());
+    a.check       ("09. getPossibleActions",  testee.getPossibleActions().empty());
 
     // Verify accessors
     a.checkEqual  ("11. hostVersion",       &testee.hostVersion(), &croot.hostVersion());

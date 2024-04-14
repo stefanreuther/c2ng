@@ -556,7 +556,7 @@ game::v3::Loader::loadFlakBattles(game::Turn& turn, afl::io::Directory& gameDir,
     try {
         db->load(*s, m_charset, m_translator);
         if (db->getTimestamp() != turn.getTimestamp()) {
-            m_log.write(LogListener::Warn, LOG_NAME, afl::string::Format("%s is from a different turn. File will be ignored.", fileName));
+            m_log.write(LogListener::Warn, LOG_NAME, afl::string::Format(m_translator("%s is from a different turn. File will be ignored."), fileName));
             return;
         }
         if (db->getNumBattles() != 0) {

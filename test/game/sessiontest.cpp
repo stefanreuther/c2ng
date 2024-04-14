@@ -11,6 +11,7 @@
 #include "afl/io/internalfilesystem.hpp"
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
+#include "afl/test/loglistener.hpp"
 #include "afl/test/testrunner.hpp"
 #include "game/game.hpp"
 #include "game/map/planet.hpp"
@@ -23,17 +24,27 @@
 #include "game/test/stringverifier.hpp"
 #include "game/turn.hpp"
 #include "interpreter/subroutinevalue.hpp"
+#include "interpreter/values.hpp"
 #include <memory>
 
+using afl::base::Ptr;
+using afl::io::FileSystem;
+using afl::io::InternalFileSystem;
+using afl::io::NullFileSystem;
+using afl::string::NullTranslator;
 using game::Reference;
+using game::Root;
+using interpreter::Error;
+using interpreter::Process;
+using interpreter::World;
 
 /** Test initialisation.
     A: create a session
     E: verify initial values */
 AFL_TEST("game.Session:init", a)
 {
-    afl::io::NullFileSystem fs;
-    afl::string::NullTranslator tx;
+    NullFileSystem fs;
+    NullTranslator tx;
     game::Session testee(tx, fs);
 
     // Initial values
@@ -44,10 +55,17 @@ AFL_TEST("game.Session:init", a)
     a.checkDifferent("05. fileTable",              testee.world().fileTable().getFreeFile(), 0U);
     a.check         ("06. globalPropertyNames",    testee.world().globalPropertyNames().getIndexByName("HULL") != afl::data::NameMap::nil);
     a.checkEqual    ("07. getPluginDirectoryName", testee.getPluginDirectoryName(), "");
+    a.checkEqual    ("08. getSystemInformation",   testee.getSystemInformation().numProcessors, 1U);
 
     // Plugin directory is modifiable
     testee.setPluginDirectoryName("/pp");
     a.checkEqual("11. getPluginDirectoryName", testee.getPluginDirectoryName(), "/pp");
+
+    // System information is modifiable
+    util::SystemInformation sysInfo;
+    sysInfo.numProcessors = 3;
+    testee.setSystemInformation(sysInfo);
+    a.checkEqual("21. getSystemInformation", testee.getSystemInformation().numProcessors, 3U);
 }
 
 /** Test subobjects.
@@ -55,8 +73,8 @@ AFL_TEST("game.Session:init", a)
     E: subobject references match */
 AFL_TEST("game.Session:subobjects", a)
 {
-    afl::io::NullFileSystem fs;
-    afl::string::NullTranslator tx;
+    NullFileSystem fs;
+    NullTranslator tx;
     game::Session s(tx, fs);
     const game::Session& cs(s);
 
@@ -75,8 +93,8 @@ AFL_TEST("game.Session:subobjects", a)
 AFL_TEST("game.Session:getReferenceName:empty", a)
 {
 
-    afl::io::NullFileSystem fs;
-    afl::string::NullTranslator tx;
+    NullFileSystem fs;
+    NullTranslator tx;
     game::Session testee(tx, fs);
 
     String_t s;
@@ -100,12 +118,12 @@ AFL_TEST("game.Session:getReferenceName:empty", a)
     E: must report correct names for all objects */
 AFL_TEST("game.Session:getReferenceName:nonempty", a)
 {
-    afl::io::NullFileSystem fs;
-    afl::string::NullTranslator tx;
+    NullFileSystem fs;
+    NullTranslator tx;
     game::Session testee(tx, fs);
 
     // Populate ship list
-    afl::base::Ptr<game::spec::ShipList> shipList = new game::spec::ShipList();
+    Ptr<game::spec::ShipList> shipList = new game::spec::ShipList();
     shipList->hulls().create(15)->setName("SMALL FREIGHTER");
     shipList->engines().create(2)->setName("2-cyl. engine");
     shipList->beams().create(3)->setName("Pink Laser");
@@ -113,18 +131,24 @@ AFL_TEST("game.Session:getReferenceName:nonempty", a)
     testee.setShipList(shipList);
 
     // Populate root
-    afl::base::Ptr<game::Root> root = game::test::makeRoot(game::HostVersion()).asPtr();
+    Ptr<Root> root = game::test::makeRoot(game::HostVersion()).asPtr();
     root->playerList().create(3)->setName(game::Player::ShortName, "The Romulans");
     testee.setRoot(root);
 
     // Populate game
-    afl::base::Ptr<game::Game> g = new game::Game();
+    Ptr<game::Game> g = new game::Game();
     g->currentTurn().universe().planets().create(9)->setName("Pluto");
+    g->currentTurn().universe().planets().create(80)->setName("Sedna");
     g->currentTurn().universe().ships().create(17)->setName("Voyager");
+    g->currentTurn().universe().ships().create(50)->setName("Pioneer");
+    g->currentTurn().universe().ships().create(90);
     g->currentTurn().universe().ionStorms().create(4)->setName("Kathrina");
     g->currentTurn().universe().minefields().create(150);
     g->currentTurn().universe().ufos().addUfo(42, 1, 1)->setName("Hui");
     testee.setGame(g);
+
+    testee.world().shipProperties()  .create(50)->setNew(World::sp_Comment, interpreter::makeStringValue("com s50"));
+    testee.world().planetProperties().create(80)->setNew(World::pp_Comment, interpreter::makeStringValue("com p80"));
 
     // Query plain names
     a.checkEqual("01", testee.getReferenceName(Reference(),                            game::PlainName).isValid(), false);
@@ -155,6 +179,10 @@ AFL_TEST("game.Session:getReferenceName:nonempty", a)
     a.checkEqual("31", testee.getReferenceName(Reference(Reference::Engine, 2),        game::DetailedName).orElse(""), "Engine #2: 2-cyl. engine");
     a.checkEqual("32", testee.getReferenceName(Reference(Reference::Beam, 3),          game::DetailedName).orElse(""), "Beam Weapon #3: Pink Laser");
     a.checkEqual("33", testee.getReferenceName(Reference(Reference::Torpedo, 7),       game::DetailedName).orElse(""), "Torpedo Type #7: Mark 7 Torpedo");
+    a.checkEqual("34", testee.getReferenceName(Reference(Reference::Ship, 50),         game::DetailedName).orElse(""), "Ship #50: Pioneer: com s50");
+    a.checkEqual("35", testee.getReferenceName(Reference(Reference::Planet, 80),       game::DetailedName).orElse(""), "Planet #80: Sedna: com p80");
+    a.checkEqual("36", testee.getReferenceName(Reference(Reference::Starbase, 80),     game::DetailedName).orElse(""), "Starbase #80: Sedna: com p80");
+    a.checkEqual("37", testee.getReferenceName(Reference(Reference::Ship, 90),         game::DetailedName).orElse(""), "Ship #90"); // Object exists but has no name
 
     // Access off-by-one Ids (that is, container exists but object doesn't)
     a.checkEqual("41", testee.getReferenceName(Reference(),                            game::PlainName).isValid(), false);
@@ -169,6 +197,7 @@ AFL_TEST("game.Session:getReferenceName:nonempty", a)
     a.checkEqual("50", testee.getReferenceName(Reference(Reference::Engine, 3),        game::PlainName).isValid(), false);
     a.checkEqual("51", testee.getReferenceName(Reference(Reference::Beam, 4),          game::PlainName).isValid(), false);
     a.checkEqual("52", testee.getReferenceName(Reference(Reference::Torpedo, 8),       game::PlainName).isValid(), false);
+    a.checkEqual("53", testee.getReferenceName(Reference(Reference::Ship, 90),         game::PlainName).isValid(), false); // Object exists but has no name
 }
 
 /** Test InterpreterInterface implementation.
@@ -176,22 +205,22 @@ AFL_TEST("game.Session:getReferenceName:nonempty", a)
     E: correct results produced. */
 AFL_TEST("game.Session:InterpreterInterface", a)
 {
-    afl::io::NullFileSystem fs;
-    afl::string::NullTranslator tx;
+    NullFileSystem fs;
+    NullTranslator tx;
     game::Session testee(tx, fs);
 
     // Populate ship list
-    afl::base::Ptr<game::spec::ShipList> shipList = new game::spec::ShipList();
+    Ptr<game::spec::ShipList> shipList = new game::spec::ShipList();
     shipList->hulls().create(3)->setName("SCOUT");
     testee.setShipList(shipList);
 
     // Populate root
-    afl::base::Ptr<game::Root> root = game::test::makeRoot(game::HostVersion()).asPtr();
+    Ptr<Root> root = game::test::makeRoot(game::HostVersion()).asPtr();
     root->playerList().create(5)->setName(game::Player::AdjectiveName, "Pirate");
     testee.setRoot(root);
 
     // Populate game
-    afl::base::Ptr<game::Game> g = new game::Game();
+    Ptr<game::Game> g = new game::Game();
     g->currentTurn().universe().ships().create(17)->setName("Voyager");
     testee.setGame(g);
 
@@ -214,24 +243,24 @@ AFL_TEST("game.Session:InterpreterInterface", a)
 /** Test task handling/inquiry. */
 AFL_TEST("game.Session:tasks", a)
 {
-    afl::io::NullFileSystem fs;
-    afl::string::NullTranslator tx;
+    NullFileSystem fs;
+    NullTranslator tx;
     game::Session testee(tx, fs);
 
     // Populate root
-    afl::base::Ptr<game::Root> root = game::test::makeRoot(game::HostVersion()).asPtr();
+    Ptr<Root> root = game::test::makeRoot(game::HostVersion()).asPtr();
     testee.setRoot(root);
 
     // Populate game
-    afl::base::Ptr<game::Game> g = new game::Game();
+    Ptr<game::Game> g = new game::Game();
     game::map::Planet* p = g->currentTurn().universe().planets().create(17);
     testee.setGame(g);
 
     // Initial inquiry
-    a.checkEqual("01. getTaskStatus", testee.getTaskStatus(p, interpreter::Process::pkPlanetTask, false), game::Session::NoTask);
-    a.checkEqual("02. getTaskStatus", testee.getTaskStatus(p, interpreter::Process::pkBaseTask, false),   game::Session::NoTask);
-    a.checkEqual("03. getTaskStatus", testee.getTaskStatus(p, interpreter::Process::pkPlanetTask, true),  game::Session::NoTask);
-    a.checkEqual("04. getTaskStatus", testee.getTaskStatus(p, interpreter::Process::pkBaseTask, true),    game::Session::NoTask);
+    a.checkEqual("01. getTaskStatus", testee.getTaskStatus(p, Process::pkPlanetTask, false), game::Session::NoTask);
+    a.checkEqual("02. getTaskStatus", testee.getTaskStatus(p, Process::pkBaseTask, false),   game::Session::NoTask);
+    a.checkEqual("03. getTaskStatus", testee.getTaskStatus(p, Process::pkPlanetTask, true),  game::Session::NoTask);
+    a.checkEqual("04. getTaskStatus", testee.getTaskStatus(p, Process::pkBaseTask, true),    game::Session::NoTask);
 
     // Create CC$AUTOEXEC mock (we only want the process to suspend)
     interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
@@ -240,7 +269,7 @@ AFL_TEST("game.Session:tasks", a)
     testee.world().setNewGlobalValue("CC$AUTOEXEC", new interpreter::SubroutineValue(bco));
 
     // Create auto task (content doesn't matter; it's all given to CC$AUTOEXEC)
-    afl::base::Ptr<interpreter::TaskEditor> editor = testee.getAutoTaskEditor(17, interpreter::Process::pkPlanetTask, true);
+    Ptr<interpreter::TaskEditor> editor = testee.getAutoTaskEditor(17, Process::pkPlanetTask, true);
     a.checkNonNull("11. getAutoTaskEditor", editor.get());
     String_t command[] = { "whatever" };
     editor->addAtEnd(command);
@@ -248,17 +277,17 @@ AFL_TEST("game.Session:tasks", a)
     testee.releaseAutoTaskEditor(editor);
 
     // Inquiry
-    a.checkEqual("21. getTaskStatus", testee.getTaskStatus(p, interpreter::Process::pkPlanetTask, false), game::Session::ActiveTask);
-    a.checkEqual("22. getTaskStatus", testee.getTaskStatus(p, interpreter::Process::pkBaseTask, false),   game::Session::OtherTask);
-    a.checkEqual("23. getTaskStatus", testee.getTaskStatus(p, interpreter::Process::pkPlanetTask, true),  game::Session::NoTask);
-    a.checkEqual("24. getTaskStatus", testee.getTaskStatus(p, interpreter::Process::pkBaseTask, true),    game::Session::NoTask);
+    a.checkEqual("21. getTaskStatus", testee.getTaskStatus(p, Process::pkPlanetTask, false), game::Session::ActiveTask);
+    a.checkEqual("22. getTaskStatus", testee.getTaskStatus(p, Process::pkBaseTask, false),   game::Session::OtherTask);
+    a.checkEqual("23. getTaskStatus", testee.getTaskStatus(p, Process::pkPlanetTask, true),  game::Session::NoTask);
+    a.checkEqual("24. getTaskStatus", testee.getTaskStatus(p, Process::pkBaseTask, true),    game::Session::NoTask);
 }
 
 /** Test file character set handling. */
 AFL_TEST("game.Session:charset", a)
 {
-    afl::io::InternalFileSystem fs;
-    afl::string::NullTranslator tx;
+    InternalFileSystem fs;
+    NullTranslator tx;
     game::Session testee(tx, fs);
 
     // Initial file system content
@@ -273,21 +302,21 @@ AFL_TEST("game.Session:charset", a)
         "put #1, a, 20\n"
         "close #1\n";
     fs.createDirectory("/gd");
-    fs.openFile("/gd/t.q", afl::io::FileSystem::Create)->fullWrite(afl::string::toBytes(SCRIPT));
+    fs.openFile("/gd/t.q", FileSystem::Create)->fullWrite(afl::string::toBytes(SCRIPT));
 
     // Create a root. This sets the charset.
-    testee.setRoot(new game::Root(fs.openDirectory("/gd"),
-                                  *new game::test::SpecificationLoader(),
-                                  game::HostVersion(),
-                                  std::auto_ptr<game::RegistrationKey>(new game::test::RegistrationKey(game::RegistrationKey::Registered, 10)),
-                                  std::auto_ptr<game::StringVerifier>(new game::test::StringVerifier()),
-                                  std::auto_ptr<afl::charset::Charset>(new afl::charset::CodepageCharset(afl::charset::g_codepage437)),
-                                  game::Root::Actions_t()));
+    testee.setRoot(new Root(fs.openDirectory("/gd"),
+                            *new game::test::SpecificationLoader(),
+                            game::HostVersion(),
+                            std::auto_ptr<game::RegistrationKey>(new game::test::RegistrationKey(game::RegistrationKey::Registered, 10)),
+                            std::auto_ptr<game::StringVerifier>(new game::test::StringVerifier()),
+                            std::auto_ptr<afl::charset::Charset>(new afl::charset::CodepageCharset(afl::charset::g_codepage437)),
+                            Root::Actions_t()));
 
     // Build a script process
-    interpreter::World& w = testee.world();
-    interpreter::Process& p = testee.processList().create(w, "testFileCharsetHandling");
-    afl::base::Ptr<afl::io::Stream> in = w.openLoadFile("t.q");
+    World& w = testee.world();
+    Process& p = testee.processList().create(w, "testFileCharsetHandling");
+    Ptr<afl::io::Stream> in = w.openLoadFile("t.q");
     a.checkNonNull("01. openLoadFile", in.get());               // Fails if Session/Root does not correctly provide the load directory
     p.pushFrame(w.compileFile(*in, "origin", 1), false);
 
@@ -298,22 +327,37 @@ AFL_TEST("game.Session:charset", a)
     testee.processList().run();
 
     // Verify
-    a.checkEqual("11. getState", p.getState(), interpreter::Process::Ended);
+    a.checkEqual("11. getState", p.getState(), Process::Ended);
 
     // Verify file content
     uint8_t tmp[100];
     size_t n = 0;
 
     // - text file
-    AFL_CHECK_SUCCEEDS(a("21. openFile"), n = fs.openFile("/file.txt", afl::io::FileSystem::OpenRead)->read(tmp));
+    AFL_CHECK_SUCCEEDS(a("21. openFile"), n = fs.openFile("/file.txt", FileSystem::OpenRead)->read(tmp));
     a.checkGreaterEqual("22. size read", n, 2U); // at least two characters [first is payload, second (and more) for system newline]
     a.checkEqual("22. char", tmp[0], 0x94);      // 0x94 = U+00F6 in codepage 437, fails if Session/Root does not correctly provide the charset
 
     // - binary file
-    AFL_CHECK_SUCCEEDS(a("31. openFile"), n = fs.openFile("/data.dat", afl::io::FileSystem::OpenRead)->read(tmp));
+    AFL_CHECK_SUCCEEDS(a("31. openFile"), n = fs.openFile("/data.dat", FileSystem::OpenRead)->read(tmp));
     a.checkEqual("32. bytes read", n, 20U);
     a.checkEqual("33. content", tmp[0], 0x94);
     a.checkEqual("34. content", tmp[1], 0x20);
     a.checkEqual("35. content", tmp[2], 0x20);
     a.checkEqual("36. content", tmp[19], 0x20);
+}
+
+/** Test error logging. */
+AFL_TEST("game.Session:logError", a)
+{
+    InternalFileSystem fs;
+    NullTranslator tx;
+    game::Session testee(tx, fs);
+
+    afl::test::LogListener log;
+    testee.log().addListener(log);
+
+    testee.logError(Error::notAssignable());
+
+    a.checkDifferent("01", log.getNumErrors(), 0U);
 }

@@ -44,7 +44,7 @@ namespace interpreter { namespace expr {
 
             @param [out] bco Code output
             @param [in]  cc  Compilation context
-            @param [in]  rhs Node to */
+            @param [in]  rhs Node whose value to assign to this one */
         virtual void compileStore(BytecodeObject& bco, const CompilationContext& cc, const Node& rhs) const = 0;
 
         /** Compile as condition.

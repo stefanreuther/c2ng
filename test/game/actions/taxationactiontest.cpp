@@ -11,6 +11,7 @@
 #include "game/exception.hpp"
 #include "game/hostversion.hpp"
 #include "game/map/planet.hpp"
+#include "game/test/counter.hpp"
 #include "game/test/simpleturn.hpp"
 #include "util/numberformatter.hpp"
 
@@ -123,9 +124,16 @@ AFL_TEST("game.actions.TaxationAction:normal:phost", a)
     a.checkEqual("33. getHappinessChange", testee.getHappinessChange(TaxationAction::Colonists), 8);
     a.checkEqual("34. getColonistTax", pl.getColonistTax().orElse(-1), 1);
 
+    testee.setTax(TaxationAction::Natives, 1);
+    a.checkEqual("31. getTax", testee.getTax(TaxationAction::Natives), 1);
+    a.checkEqual("32. getDue", testee.getDueLimited(TaxationAction::Natives), 20);
+    a.checkEqual("33. getHappinessChange", testee.getHappinessChange(TaxationAction::Natives), 5);
+    a.checkEqual("34. getNAtiveTax", pl.getNativeTax().orElse(-1), 2);
+
     // Commit
     AFL_CHECK_SUCCEEDS(a("41. commit"), testee.commit());
     a.checkEqual("42. getColonistTax", pl.getColonistTax().orElse(-1), 2);
+    a.checkEqual("43. getNativeTax", pl.getNativeTax().orElse(-1), 1);
 }
 
 /** Test normal case (THost formulas). */
@@ -448,4 +456,30 @@ AFL_TEST("game.actions.TaxationAction:setEffectors:Hiss", a)
 
     // Verify
     a.checkEqual("11. describe", testee.describe(TaxationAction::Colonists, tx, fmt), "Colonists pay 1 mc.\nNew happiness: happy (108)");
+}
+
+/** Test normal case (PHost formulas). */
+AFL_TEST("game.actions.TaxationAction:background-modification", a)
+{
+    // Configure
+    game::test::SimpleTurn t;
+    Planet& pl = makePlanet(t);
+
+    // Testee
+    HostConfiguration config;
+    TaxationAction testee(pl, config, HostVersion(HostVersion::PHost, MKVERSION(3,4,0)));
+
+    // Check initial state
+    a.checkEqual("01. getTax", testee.getTax(TaxationAction::Colonists), 1);
+    a.checkEqual("02. getDue", testee.getDue(TaxationAction::Colonists), 1);
+
+    // Change number of clans and signal
+    game::test::Counter ctr;
+    testee.sig_change.add(&ctr, &game::test::Counter::increment);
+    pl.setCargo(Element::Colonists, 2000);
+    pl.notifyListeners();
+
+    // Verify
+    a.checkEqual("11. sig", ctr.get(), 1);
+    a.checkEqual("12. getDue", testee.getDue(TaxationAction::Colonists), 2);
 }

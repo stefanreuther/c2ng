@@ -134,7 +134,7 @@ namespace util {
 
     /** Format key code into string.
         \param key Keycode
-        \retval Key string so that parseKey(return) == key */
+        \return Key string so that parseKey(return) == key */
     String_t formatKey(Key_t key);
 
 

@@ -110,6 +110,25 @@ AFL_TEST("game.actions.BuildStructures:parallel-modification", a)
     a.checkEqual("23. getNumBuildings", h.planet.getNumBuildings(game::MineBuilding).orElse(0), 25);
 }
 
+/** Test modification in background.
+    If the planet is changed in the background, the action must recompute the cost on commit, even when not getting a listener notification. */
+AFL_TEST("game.actions.BuildStructures:parallel-modification:notify", a)
+{
+    TestHarness h;
+
+    // Action: build 15
+    game::actions::BuildStructures act(h.planet, h.container, h.config);
+    a.checkEqual("01. add", act.add(game::MineBuilding, 15, false), 15);
+    a.checkEqual("02. cost", act.costAction().getCost().toCargoSpecString(), "15S 60$");
+
+    // In the background, build 10
+    h.planet.setNumBuildings(game::MineBuilding, 20);
+    h.planet.notifyListeners();
+
+    // Cost has updated
+    a.checkEqual("02. cost", act.costAction().getCost().toCargoSpecString(), "5S 20$");
+}
+
 /** Test multiple builds.
     Multiple builds must be added, cost-wise. */
 AFL_TEST("game.actions.BuildStructures:multiple", a)

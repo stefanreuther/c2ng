@@ -42,6 +42,7 @@ namespace {
             : dir(afl::io::InternalDirectory::create("spec")),
               tx(), log(), fs(),
               scanner(*dir, tx, log),
+              env(),
               profile(env, fs, tx, log),
               testee(dir, dir, std::auto_ptr<afl::charset::Charset>(new afl::charset::Utf8Charset()), tx, log, scanner, fs, &profile, 0),
               root(dir, *new game::test::SpecificationLoader(),

@@ -216,12 +216,6 @@ AFL_TEST("game.interface.LabelVector:status:2", a)
 /** Test status management: markObjects(), markClean(). */
 AFL_TEST("game.interface.LabelVector:status:3", a)
 {
-    // Environment
-    afl::sys::Log log;
-    afl::string::NullTranslator tx;
-    afl::io::NullFileSystem fs;
-    interpreter::World world(log, tx, fs);
-
     // Some objects
     game::map::ObjectVector<TestObject> container;
     container.create(1);

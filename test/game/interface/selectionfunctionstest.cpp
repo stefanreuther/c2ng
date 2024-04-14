@@ -603,7 +603,7 @@ AFL_TEST("game.interface.SelectionFunctions:load:eof-marker", a)
     a.check("01. isShipMarked",   isShipMarked(env, 25));
     a.check("02. isPlanetMarked", isPlanetMarked(env, 35));
 
-    std::string line;
+    String_t line;
     a.check("11. readLine", env.session.world().fileTable().getFile(7)->readLine(line));
     a.checkEqual("12. content", line, "next");
 }

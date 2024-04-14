@@ -389,7 +389,6 @@ interpreter::expr::Parser::parsePrimary()
 }
 
 /** Parse argument list. Arguments will be read and added to \c fcn.
-    \c fcn must already be on the stack, for exception safety.
     \param fcn Function call node to receive arguments */
 void
 interpreter::expr::Parser::parseArglist(FunctionCallNode& fcn)

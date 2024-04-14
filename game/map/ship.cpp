@@ -22,8 +22,8 @@ namespace {
 
     /** Check for dummy name.
         PHost can filter out ship names; we detect such names to avoid overwriting a known name by a dummy.
-        \param name [in] Name, 20 bytes
-        \param ship_id [in] Ship Id
+        \param name Name
+        \param shipId Ship Id
         \return true iff it is a dummy name
         \todo maybe recognize other client's dummy names? */
     bool isDummyName(const String_t& name, int shipId)

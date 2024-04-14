@@ -134,11 +134,11 @@ namespace game { namespace map {
         void setKnownToNotExist(bool value);
 
         /** Get current planet data for storage.
-            \param [out] data */
+            \param [out] data data goes here */
         void getCurrentPlanetData(PlanetData& data) const;
 
         /** Get current starbase data for storage.
-            \param [out] data */
+            \param [out] data data goes here */
         void getCurrentBaseData(BaseData& data) const;
 
         /** Do internal checks for this planet.

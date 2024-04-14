@@ -40,6 +40,7 @@ interpreter::exporter::TextExporter::TextExporter(afl::io::TextWriter& file, boo
       m_line(),
       m_fieldNumber(0),
       m_widths(),
+      m_alignments(),
       m_totalWidth(0),
       m_lineNr()
 { }

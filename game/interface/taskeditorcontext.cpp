@@ -235,7 +235,6 @@ namespace {
         {
             return;
         }
-        const game::map::Point pt(x, y);
 
         // Optional args
         int flags = 0;

@@ -22,6 +22,13 @@ AFL_TEST("game.config.MarkerOption", a)
     a.checkEqual("13. note", testee().note, "x");
     a.checkEqual("14. toString", testee.toString(), "1,2,x");
 
+    // Const
+    const game::config::MarkerOption& ct = testee;
+    a.checkEqual("15. markerKind", ct().markerKind, 1);
+    a.checkEqual("16. color", ct().color, 2);
+    a.checkEqual("17. note", ct().note, "x");
+    a.checkEqual("18. toString", ct.toString(), "1,2,x");
+
     // Check public setter
     testee.set("4, 5, hi");
     a.checkEqual("21. markerKind", testee().markerKind, 4);

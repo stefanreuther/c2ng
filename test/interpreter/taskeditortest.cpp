@@ -48,6 +48,7 @@ AFL_TEST("interpreter.TaskEditor:empty", a)
 
     // Process needs to be unchanged
     a.checkEqual("21. getNumActiveFrames", h.proc.getNumActiveFrames(), 0U);
+    a.checkNull("22. getFreezer", h.proc.getFreezer());
 }
 
 /** Test adding to empty process.

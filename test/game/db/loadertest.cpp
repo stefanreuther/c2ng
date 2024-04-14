@@ -13,8 +13,19 @@
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 #include "afl/test/testrunner.hpp"
+#include "game/parser/messageinformation.hpp"
+#include "game/parser/messagevalue.hpp"
 #include "game/test/defaultshiplist.hpp"
 #include "interpreter/values.hpp"
+
+using game::PlayerSet_t;
+using game::map::Drawing;
+using game::map::DrawingContainer;
+using game::map::Minefield;
+using game::map::Point;
+using game::map::Ufo;
+using game::parser::MessageInformation;
+using interpreter::World;
 
 namespace {
     /* Titan 12, player 7, turn 7 [file written by PCC 2.0.7] */
@@ -522,67 +533,78 @@ namespace {
         0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
         0xff, 0xff, 0xff
     };
+
+    struct Environment {
+        afl::charset::CodepageCharset cs;
+        afl::sys::Log log;
+        afl::io::NullFileSystem fs;
+        afl::string::NullTranslator tx;
+        World world;
+        game::spec::ShipList sl;
+        game::config::HostConfiguration config;
+        game::Game g;
+        game::Turn t;
+
+        Environment(int turnNr, int nShips, int nPlanets)
+            : cs(afl::charset::g_codepage437),
+              log(), fs(), tx(),
+              world(log, tx, fs),
+              sl(), config(), g(), t()
+            {
+                game::test::initDefaultShipList(sl);
+                t.setTurnNumber(turnNr);
+                for (int i = 1; i <= nShips; ++i) {
+                    t.universe().ships().create(i);
+                }
+                for (int i = 1; i <= nPlanets; ++i) {
+                    t.universe().planets().create(i);
+                }
+            }
+    };
 }
 
 
-AFL_TEST("game.db.Loader", a)
+/** Test loading a prepared file. */
+AFL_TEST("game.db.Loader:prepared", a)
 {
-    // Environment
-    afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
-    afl::sys::Log log;
-    afl::io::NullFileSystem fs;
-    afl::string::NullTranslator tx;
-    interpreter::World world(log, tx, fs);
-    game::spec::ShipList sl;
-    game::test::initDefaultShipList(sl);
-
-    // Game
-    game::Game g;
-
-    // Turn (we do not use Game's currentTurn to detect correct assignment)
-    game::Turn t;
-    t.setTurnNumber(7);
-    for (int i = 1; i <= 900; ++i) {
-        t.universe().ships().create(i);
-    }
+    Environment env(7, 900, 500);
     for (int i = 1; i <= 500; ++i) {
-        game::map::Planet* pl = t.universe().planets().create(i);
+        game::map::Planet* pl = env.t.universe().planets().create(i);
         pl->setAutobuildGoal(game::FactoryBuilding, 0);          // reset to prove that the loader sets these
         pl->setAutobuildSpeed(game::FactoryBuilding, 1);
     }
 
     // Loader
-    game::db::Loader testee(cs, world, tx);
+    game::db::Loader testee(env.cs, env.world, env.tx);
 
     // Load
     afl::io::ConstMemoryStream inputStream(FILE_DATA);
-    testee.load(inputStream, t, g, true);
+    testee.load(inputStream, env.t, env.g, true);
 
     // Must postprocess to set types
-    game::config::HostConfiguration config;
-    t.universe().postprocess(game::PlayerSet_t(20), game::PlayerSet_t(20), game::map::Object::ReadOnly,
-                             g.mapConfiguration(), game::HostVersion(), config, 7, sl, tx, log);
+    env.t.universe().postprocess(PlayerSet_t(20), PlayerSet_t(20), game::map::Object::ReadOnly,
+                                 env.g.mapConfiguration(), game::HostVersion(), env.config, 7, env.sl, env.tx, env.log);
 
     // Verify
     // - autobuild
     {
-        a.checkEqual("01. getAutobuildGoal", t.universe().planets().get(100)->getAutobuildGoal(game::FactoryBuilding), 1000);
-        a.checkEqual("02. getAutobuildSpeed", t.universe().planets().get(100)->getAutobuildSpeed(game::FactoryBuilding), 10);
+        a.checkEqual("01. getAutobuildGoal",  env.t.universe().planets().get(100)->getAutobuildGoal(game::FactoryBuilding), 1000);
+        a.checkEqual("02. getAutobuildSpeed", env.t.universe().planets().get(100)->getAutobuildSpeed(game::FactoryBuilding), 10);
     }
 
     // - drawing
     {
-        const game::map::DrawingContainer& dc = t.universe().drawings();
+        const DrawingContainer& dc = env.t.universe().drawings();
 
         // A circle
-        game::map::DrawingContainer::Iterator_t it1 = dc.findNearestVisibleDrawing(game::map::Point(1466, 1466), g.mapConfiguration(), 100, afl::base::Nothing);
+        DrawingContainer::Iterator_t it1 = dc.findNearestVisibleDrawing(Point(1466, 1466), env.g.mapConfiguration(), 100, afl::base::Nothing);
         a.check("11. findNearestVisibleDrawing", it1 != dc.end());
-        a.checkEqual("12. getPos", (**it1).getPos(), game::map::Point(1479, 1456));
+        a.checkEqual("12. getPos", (**it1).getPos(), Point(1479, 1456));
         a.checkEqual("13. getCircleRadius", (**it1).getCircleRadius(), 10);
         a.checkEqual("14. getColor", (**it1).getColor(), 9);
 
         // A marker
-        game::map::DrawingContainer::Iterator_t it2 = dc.findMarkerAt(game::map::Point(1273, 1553), afl::base::Nothing);
+        DrawingContainer::Iterator_t it2 = dc.findMarkerAt(Point(1273, 1553), afl::base::Nothing);
         a.check("21. findMarkerAt", it2 != dc.end());
         a.checkEqual("22. getMarkerKind", (**it2).getMarkerKind(), 2);
         a.checkEqual("23. getColor", (**it2).getColor(), 9);
@@ -590,7 +612,7 @@ AFL_TEST("game.db.Loader", a)
 
     // - planet history
     {
-        const game::map::Planet* pl = t.universe().planets().get(96);
+        const game::map::Planet* pl = env.t.universe().planets().get(96);
         a.checkNonNull("31. planet", pl);
         a.checkEqual("32. getFriendlyCode", pl->getFriendlyCode().orElse(""), "157");
 
@@ -601,7 +623,7 @@ AFL_TEST("game.db.Loader", a)
         a.checkEqual("44. getTemperature", pl->getTemperature().orElse(-1), 40);
     }
     {
-        const game::map::Planet* pl = t.universe().planets().get(168);
+        const game::map::Planet* pl = env.t.universe().planets().get(168);
         a.checkNonNull("45. planet", pl);
         a.checkEqual("46. getFriendlyCode", pl->getFriendlyCode().orElse(""), "\\TC");
         int owner = -1;
@@ -613,16 +635,16 @@ AFL_TEST("game.db.Loader", a)
 
     // - planet property
     {
-        afl::data::NameMap::Index_t idx = world.planetPropertyNames().getIndexByName("COMMENT");
-        a.checkEqual("51. getIndexByName", idx, interpreter::World::pp_Comment);
-        afl::data::Value* p = world.planetProperties().get(489, idx);
+        afl::data::NameMap::Index_t idx = env.world.planetPropertyNames().getIndexByName("COMMENT");
+        a.checkEqual("51. getIndexByName", idx, World::pp_Comment);
+        afl::data::Value* p = env.world.planetProperties().get(489, idx);
         a.checkNonNull("52. value", p);
         a.checkEqual("53. toString", interpreter::toString(p, false), "Amp M |T:7");
     }
 
     // - ship track
     {
-        const game::map::Ship* sh = t.universe().ships().get(7);
+        const game::map::Ship* sh = env.t.universe().ships().get(7);
         a.checkNonNull("61. ship", sh);
 
         const game::map::ShipHistoryData::Track* t6 = sh->getHistoryLocation(6);
@@ -644,7 +666,7 @@ AFL_TEST("game.db.Loader", a)
 
     // - ship history
     {
-        const game::map::Ship* sh = t.universe().ships().get(81);
+        const game::map::Ship* sh = env.t.universe().ships().get(81);
         a.checkNonNull("91. ship", sh);
 
         int owner = -1;
@@ -658,9 +680,9 @@ AFL_TEST("game.db.Loader", a)
 
     // - ship property
     {
-        afl::data::NameMap::Index_t idx = world.shipPropertyNames().getIndexByName("COMMENT");
-        a.checkEqual("111. getIndexByName", idx, interpreter::World::sp_Comment);
-        afl::data::Value* p = world.shipProperties().get(12, idx);
+        afl::data::NameMap::Index_t idx = env.world.shipPropertyNames().getIndexByName("COMMENT");
+        a.checkEqual("111. getIndexByName", idx, World::sp_Comment);
+        afl::data::Value* p = env.world.shipProperties().get(12, idx);
         a.checkNonNull("112. value", p);
         a.checkEqual("113. toString", interpreter::toString(p, false), "Fed T6 |T:6");
     }
@@ -673,9 +695,146 @@ AFL_TEST("game.db.Loader", a)
 
     // Save
     afl::io::InternalStream out;
-    testee.save(out, t, g, sl);
+    testee.save(out, env.t, env.g, env.sl);
 
     // Verify
     a.check("121. file size", out.getSize() >= sizeof(FILE_DATA) - 10);
     a.check("122. file size", out.getSize() <= sizeof(FILE_DATA) + 10);
+}
+
+/** Test save/load roundtrip. */
+AFL_TEST("game.db.Loader:roundtrip", a)
+{
+    afl::io::InternalStream stream;
+
+    // Create a file exercising all properties
+    {
+        Environment env(10, 100, 100);
+
+        // Drawing with tag (rPaintingTags, rPainting)
+        {
+            std::auto_ptr<Drawing> d(new Drawing(Point(1200, 1400), Drawing::MarkerDrawing));
+            d->setColor(5);
+            d->setMarkerKind(2);
+            d->setTag(env.world.atomTable().getAtomFromString("a marker"));
+            d->setComment("a comment");
+            env.t.universe().drawings().addNew(d.release());
+        }
+
+        // Minefield (rMinefield)
+        {
+            MessageInformation info(MessageInformation::Minefield, 140, 10);
+            info.addValue(game::parser::mi_X, 900);
+            info.addValue(game::parser::mi_Y, 800);
+            info.addValue(game::parser::mi_Radius, 30);
+            info.addValue(game::parser::mi_Owner, 10);
+            env.t.universe().minefields().addMessageInformation(info);
+        }
+
+        // Autobuild (rAutoBuild)
+        env.t.universe().planets().get(10)->setAutobuildGoal(game::MineBuilding, 42);
+
+        // Planet (rPlanetHistory)
+        env.t.universe().planets().get(20)->setOwner(3);
+
+        // Ship (rShipHistory, rShipTrack)
+        env.t.universe().ships().get(50)->addShipXYData(Point(3000, 2000), 3, 200, PlayerSet_t(1));
+        env.t.universe().ships().get(50)->setHull(30);
+
+        // Properties (rPlanetProperty, rShipProperty)
+        env.world.shipProperties().create(5)->setNew(World::sp_Comment, interpreter::makeStringValue("ship comment"));
+        env.world.planetProperties().create(15)->setNew(World::pp_Comment, interpreter::makeStringValue("planet comment"));
+
+        // Planet scores (rPlanetScore)
+        {
+            game::UnitScoreDefinitionList::Definition def;
+            def.name = "Planet Exp";
+            def.id = game::ScoreId_ExpLevel;
+            def.limit = 5;
+
+            game::UnitScoreDefinitionList::Index_t idx = env.g.planetScores().add(def);
+            env.t.universe().planets().get(23)->unitScores().set(idx, 3, 10);
+        }
+
+        // Ship scores (rShipScore)
+        {
+            game::UnitScoreDefinitionList::Definition def;
+            def.name = "Ship Exp";
+            def.id = game::ScoreId_ExpLevel;
+            def.limit = 5;
+
+            game::UnitScoreDefinitionList::Index_t idx = env.g.shipScores().add(def);
+            env.t.universe().ships().get(42)->unitScores().set(idx, 4, 10);
+        }
+
+        // Ufos
+        {
+            Ufo* u = env.t.universe().ufos().addUfo(444, 10, 2);
+            u->setIsStoredInHistory(true);
+            u->setName("Flying Saucer");
+            u->setPosition(Point(1700, 1300));
+            u->setRadius(20);
+        }
+
+        // Postprocess to set finish
+        env.t.universe().postprocess(PlayerSet_t(20), PlayerSet_t(20), game::map::Object::ReadOnly,
+                                     env.g.mapConfiguration(), game::HostVersion(), env.config, 10, env.sl, env.tx, env.log);
+
+        // Save
+        game::db::Loader(env.cs, env.world, env.tx).save(stream, env.t, env.g, env.sl);
+    }
+
+    // Load that file again
+    {
+        Environment env(10, 100, 100);
+
+        stream.setPos(0);
+        game::db::Loader(env.cs, env.world, env.tx).load(stream, env.t, env.g, true);
+
+        // Verify
+        // Drawing with tag (rPaintingTags, rPainting)
+        {
+            a.check("01. drawing", env.t.universe().drawings().begin() != env.t.universe().drawings().end());
+
+            Drawing* d = *env.t.universe().drawings().begin();
+            a.checkNonNull("02. drawing", d);
+            a.checkEqual  ("03. type",    d->getType(), Drawing::MarkerDrawing);
+            a.checkEqual  ("04. color",   d->getColor(), 5);
+            a.checkEqual  ("05. tag",     env.world.atomTable().getStringFromAtom(d->getTag()), "a marker");
+            a.checkEqual  ("06. comment", d->getComment(), "a comment");
+        }
+
+        // Minefield (rMinefield)
+        {
+            Minefield* mf = env.t.universe().minefields().get(140);
+            a.checkNonNull("11. minefield", mf);
+            a.checkEqual("12. pos", mf->getPosition().orElse(Point()), Point(900, 800));
+        }
+
+        // Autobuild (rAutoBuild)
+        a.checkEqual("21. autobuild", env.t.universe().planets().get(10)->getAutobuildGoal(game::MineBuilding), 42);
+
+        // Planet (rPlanetHistory)
+        a.checkEqual("31. planet owner", env.t.universe().planets().get(20)->getOwner().orElse(-1), 3);
+
+        // Ship (rShipHistory, rShipTrack)
+        a.checkEqual("41. ship owner", env.t.universe().ships().get(50)->getOwner().orElse(-1), 3);
+        a.checkEqual("42. ship hull",  env.t.universe().ships().get(50)->getHull().orElse(-1), 30);
+
+        // Properties (rPlanetProperty, rShipProperty)
+        a.checkEqual("51. ship comment",   interpreter::toString(env.world.shipProperties().create(5)->get(World::sp_Comment), false), "ship comment");
+        a.checkEqual("52. planet comment", interpreter::toString(env.world.planetProperties().create(15)->get(World::pp_Comment), false), "planet comment");
+
+        // Unit scores (rPlanetScore, rShipScore)
+        a.checkEqual("61. planet exp", env.t.universe().planets().get(23)->unitScores().getScoreById(game::ScoreId_ExpLevel, env.g.planetScores()).orElse(-1), 3);
+        a.checkEqual("62. ship exp",   env.t.universe().ships().get(42)->unitScores().getScoreById(game::ScoreId_ExpLevel, env.g.planetScores()).orElse(-1), 4);
+
+        // Ufos
+        {
+            Ufo* u = env.t.universe().ufos().getUfoByIndex(env.t.universe().ufos().findUfoIndexById(444));
+            a.checkNonNull("71. ufo", u);
+            a.checkEqual("72. name",   u->getName(), "Flying Saucer");
+            a.checkEqual("73. radius", u->getRadius().orElse(-1), 20);
+        }
+    }
 }

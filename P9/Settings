@@ -1799,7 +1799,12 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/game/proxy/shipinfoproxytest.cpp \
+FILES_testsuite = test/game/vcr/flak/nullvisualizertest.cpp \
+    test/game/vcr/flak/visualizertest.cpp \
+    test/game/test/specificationloadertest.cpp \
+    test/game/test/simpleturntest.cpp \
+    test/game/test/interpreterinterfacetest.cpp \
+    test/game/test/countertest.cpp test/game/proxy/shipinfoproxytest.cpp \
     test/game/interface/buildcommandparsertest.cpp \
     test/game/interface/missionlistcontexttest.cpp \
     test/game/proxy/vcrexportadaptortest.cpp \

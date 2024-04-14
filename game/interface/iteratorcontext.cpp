@@ -61,7 +61,7 @@ namespace {
         { "NEXTINDEX",        iitNext,       0, interpreter::thArray },
         { "NEXTINDEXAT",      iitNextAt,     0, interpreter::thArray },
         { "OBJECT",           iitObject,     0, interpreter::thArray },
-        { "PREVIOUSINDEX",    iitPreviousAt, 0, interpreter::thArray },
+        { "PREVIOUSINDEX",    iitPrevious,   0, interpreter::thArray },
         { "PREVIOUSINDEXAT",  iitPreviousAt, 0, interpreter::thArray },
         { "SCREEN",           iitScreen,     0, interpreter::thInt },
     };
@@ -115,12 +115,7 @@ IteratorFunction::getFilteredType(afl::base::Deleter& del, int flags)
             game::Reference::Type refType = game::map::Cursors::getReferenceTypeByNumber(m_provider->getCursorNumber());
             if (refType != game::Reference::Null) {
                 // Build sort predicate
-                game::Session& session = m_provider->getSession();
-                game::ref::Configuration fig;
-                fetchConfiguration(session, game::ref::REGULAR, fig);
-                const game::ref::SortPredicate& firstPredicate    = game::ref::createSortPredicate(fig.order.first,  session, del);
-                const game::ref::SortPredicate& secondPredicate   = game::ref::createSortPredicate(fig.order.second, session, del);
-                const game::ref::SortPredicate& combinedPredicate = del.addNew(new game::ref::SortPredicate::CombinedPredicate(firstPredicate, secondPredicate));
+                const game::ref::SortPredicate& combinedPredicate = game::ref::createSortPredicate(game::ref::REGULAR, m_provider->getSession(), del);
 
                 // Sorted type
                 type = &type->sort(del, combinedPredicate, refType);
@@ -358,7 +353,7 @@ game::interface::IteratorContext::set(PropertyIndex_t index, const afl::data::Va
 {
     // ex IntIteratorContext::set
     int32_t v;
-    switch (IteratorProperty(index)) {
+    switch (IteratorProperty(ITERATOR_MAP[index].index)) {
      case iitCurrent:
         if (checkIntegerArg(v, value, 0, INT_MAX)) {
             if (game::map::ObjectCursor* cursor = m_provider->getCursor()) {
@@ -382,7 +377,7 @@ afl::data::Value*
 game::interface::IteratorContext::get(PropertyIndex_t index)
 {
     // ex IntIteratorContext::get
-    switch (IteratorProperty(index)) {
+    switch (IteratorProperty(ITERATOR_MAP[index].index)) {
      case iitCount:
         /* @q Count:Int (Iterator Property)
            Number of objects in this set (e.g. number of ships).
@@ -431,7 +426,7 @@ game::interface::IteratorContext::get(PropertyIndex_t index)
      case iitObject:
      case iitPrevious:
      case iitPreviousAt:
-        return new IteratorFunction(m_provider, IteratorProperty(index));
+        return new IteratorFunction(m_provider, IteratorProperty(ITERATOR_MAP[index].index));
     }
     return 0;
 }

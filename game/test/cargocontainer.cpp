@@ -1,5 +1,6 @@
 /**
   *  \file game/test/cargocontainer.cpp
+  *  \brief Class game::test::CargoContainer
   */
 
 #include "game/test/cargocontainer.hpp"
@@ -29,25 +30,25 @@ game::test::CargoContainer::getFlags() const
 }
 
 bool
-game::test::CargoContainer::canHaveElement(game::Element::Type /*type*/) const
+game::test::CargoContainer::canHaveElement(Element::Type /*type*/) const
 {
     return true;
 }
 
 int32_t
-game::test::CargoContainer::getMaxAmount(game::Element::Type /*type*/) const
+game::test::CargoContainer::getMaxAmount(Element::Type /*type*/) const
 {
     return 10000;
 }
 
 int32_t
-game::test::CargoContainer::getMinAmount(game::Element::Type /*type*/) const
+game::test::CargoContainer::getMinAmount(Element::Type /*type*/) const
 {
     return 0;
 }
 
 int32_t
-game::test::CargoContainer::getAmount(game::Element::Type /*type*/) const
+game::test::CargoContainer::getAmount(Element::Type /*type*/) const
 {
     return 5000;
 }
