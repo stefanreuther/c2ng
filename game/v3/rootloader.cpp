@@ -93,9 +93,9 @@ game::v3::RootLoader::load(afl::base::Ref<afl::io::Directory> gameDirectory,
 
         // Turn loader
         if (m_scanner.getDirectoryFlags().contains(DirectoryScanner::HaveUnpacked)) {
-            result->setTurnLoader(new DirectoryLoader(spec, m_defaultSpecificationDirectory, std::auto_ptr<afl::charset::Charset>(charset.clone()), m_translator, m_log, m_scanner, m_fileSystem, m_pProfile, m_pCallback));
+            result->setTurnLoader(new DirectoryLoader(spec, m_defaultSpecificationDirectory, std::auto_ptr<afl::charset::Charset>(charset.clone()), m_scanner, m_fileSystem, m_pProfile, m_pCallback));
         } else if (m_scanner.getDirectoryFlags().contains(DirectoryScanner::HaveResult)) {
-            result->setTurnLoader(new ResultLoader(spec, m_defaultSpecificationDirectory, std::auto_ptr<afl::charset::Charset>(charset.clone()), m_translator, m_log, m_scanner, m_fileSystem, m_pProfile, m_pCallback));
+            result->setTurnLoader(new ResultLoader(spec, m_defaultSpecificationDirectory, std::auto_ptr<afl::charset::Charset>(charset.clone()), m_scanner, m_fileSystem, m_pProfile, m_pCallback));
         } else {
             // nothing loadable
         }

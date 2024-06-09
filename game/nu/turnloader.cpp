@@ -11,13 +11,27 @@
 #include "game/game.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/ship.hpp"
+#include "game/session.hpp"
 #include "game/timestamp.hpp"
 #include "game/turn.hpp"
 #include "game/vcr/classic/battle.hpp"
 #include "game/vcr/classic/database.hpp"
 #include "game/vcr/object.hpp"
 
+using afl::data::Access;
+using afl::string::ConstStringMemory_t;
+using afl::string::Format;
+using afl::string::Translator;
 using afl::sys::LogListener;
+using game::Element;
+using game::PlayerSet_t;
+using game::Turn;
+using game::map::Minefield;
+using game::map::Planet;
+using game::map::Point;
+using game::map::Ship;
+using game::vcr::classic::Battle;
+using game::vcr::classic::Database;
 
 namespace {
 
@@ -26,7 +40,7 @@ namespace {
     /** Check for known planet.
         A planet is known (possibly as unowned) if we have a sensible value in any of its fields.
         There is no explicit flag regarding this fact in the data. */
-    bool isKnownPlanet(afl::data::Access p)
+    bool isKnownPlanet(Access p)
     {
         if (p("friendlycode").toString() != "?""?""?") {
             return true;
@@ -66,7 +80,7 @@ namespace {
         return false;
     }
 
-    size_t eatChar(afl::string::ConstStringMemory_t& mem, const char ch)
+    size_t eatChar(ConstStringMemory_t& mem, const char ch)
     {
         const char* p;
         size_t n = 0;
@@ -77,7 +91,7 @@ namespace {
         return n;
     }
 
-    bool eatNumber(afl::string::ConstStringMemory_t& mem, int& out)
+    bool eatNumber(ConstStringMemory_t& mem, int& out)
     {
         out = 0;
         const char* p;
@@ -90,7 +104,7 @@ namespace {
         return ok;
     }
 
-    bool eatMeridian(afl::string::ConstStringMemory_t& mem, bool& out)
+    bool eatMeridian(ConstStringMemory_t& mem, bool& out)
     {
         static const char AM[] = {'A','M'}, PM[] = {'P','M'};
         if (mem.equalContent(AM)) {
@@ -108,7 +122,7 @@ namespace {
     {
         // FIXME: this decodes "informaldate" format. Should we detect "formaldate" as well? So far that is only used in activities.
         // "6/22/2016 7:14:33 AM"
-        afl::string::ConstStringMemory_t mem = afl::string::toMemory(nuTime);
+        ConstStringMemory_t mem = afl::string::toMemory(nuTime);
 
         // Skip initial whitespace, for robustness
         eatChar(mem, ' ');
@@ -147,7 +161,7 @@ namespace {
         }
     }
 
-    game::vcr::Object unpackVcrObject(afl::data::Access p, bool isPlanet)
+    game::vcr::Object unpackVcrObject(Access p, bool isPlanet)
     {
         game::vcr::Object obj;
 
@@ -184,17 +198,312 @@ namespace {
 
         return obj;
     }
+
+
+    void loadPlanets(game::map::Universe& univ, Access planets, PlayerSet_t players, LogListener& log, Translator& tx)
+    {
+        const size_t n = planets.getArraySize();
+        log.write(LogListener::Debug, LOG_NAME, Format(tx("Loading %d planet%!1{s%}..."), n));
+        for (size_t i = 0; i < n; ++i) {
+            Access in = planets[i];
+            int id = in("id").toInteger();
+            Planet* out = univ.planets().create(id);
+            if (!out) {
+                throw afl::except::InvalidDataException(Format(tx("Invalid planet Id #%d"), id));
+            }
+
+            // Location and Name
+            out->setPosition(Point(in("x").toInteger(), in("y").toInteger()));
+            out->setName(in("name").toString());
+
+            // Is this planet known?
+            if (isKnownPlanet(in)) {
+                int owner = in("ownerid").toInteger();
+                if (players.contains(owner)) {
+                    out->addPlanetSource(players);
+                }
+                out->setFriendlyCode(in("friendlycode").toString());
+                out->setNumBuildings(game::MineBuilding, in("mines").toInteger());
+                out->setNumBuildings(game::FactoryBuilding, in("factories").toInteger());
+                out->setNumBuildings(game::DefenseBuilding, in("defense").toInteger());
+                // "targetmines": 0,
+                // "targetfactories": 0,
+                // "targetdefense": 0,
+                // "builtmines": 0,
+                // "builtfactories": 0,
+                // "builtdefense": 0,
+                out->setBuildBaseFlag(in("buildingstarbase").toInteger() != 0);
+                out->setCargo(Element::Money, in("megacredits").toInteger());
+                out->setCargo(Element::Supplies, in("supplies").toInteger());
+                // "suppliessold": 0,
+                out->setCargo(Element::Neutronium, in("neutronium").toInteger());
+                out->setCargo(Element::Molybdenum, in("molybdenum").toInteger());
+                out->setCargo(Element::Duranium, in("duranium").toInteger());
+                out->setCargo(Element::Tritanium, in("tritanium").toInteger());
+
+                out->setOreGround(Element::Neutronium, in("groundneutronium").toInteger());
+                out->setOreGround(Element::Molybdenum, in("groundmolybdenum").toInteger());
+                out->setOreGround(Element::Duranium,   in("groundduranium").toInteger());
+                out->setOreGround(Element::Tritanium,  in("groundtritanium").toInteger());
+                out->setOreDensity(Element::Neutronium, in("densityneutronium").toInteger());
+                out->setOreDensity(Element::Molybdenum, in("densitymolybdenum").toInteger());
+                out->setOreDensity(Element::Duranium,   in("densityduranium").toInteger());
+                out->setOreDensity(Element::Tritanium,  in("densitytritanium").toInteger());
+                // "totalneutronium": 0,
+                // "totalmolybdenum": 0,
+                // "totalduranium": 0,
+                // "totaltritanium": 0,
+                // "checkneutronium": 221,
+                // "checkmolybdenum": 625,
+                // "checkduranium": 3091,
+                // "checktritanium": 1010,
+                // "checkmegacredits": 34506,
+                // "checksupplies": 1661,
+                out->setTemperature(in("temp").toInteger());
+
+                out->setOwner(owner);
+
+                out->setCargo(Element::Colonists, in("clans").toInteger());
+                out->setColonistTax(in("colonisttaxrate").toInteger());
+                out->setColonistHappiness(in("colonisthappypoints").toInteger());
+                out->setNatives(in("nativeclans").toInteger());
+                out->setNativeGovernment(in("nativegovernment").toInteger());
+                // "nativetaxvalue": 100, <--- FIXME: goes in tax computation?
+                out->setNativeRace(in("nativetype").toInteger());
+                out->setNativeTax(in("nativetaxrate").toInteger());
+                out->setNativeHappiness(in("nativehappypoints").toInteger());
+
+                // Consiously ignored:
+                // "colchange": 0,
+                // "colhappychange": 8,
+                // "nativechange": 0,
+                // "nativehappychange": 3,
+                // "nativeracename": "Insectoid",
+                // "nativegovernmentname": "Feudal",
+
+                // "infoturn": 77,
+                // "debrisdisk": 0,
+                // "flag": 2,
+                // "readystatus": 0,
+                // "targetx": 2894,
+                // "targety": 2325,
+                // "podhullid": 0,
+                // "podspeed": 0,
+                // "podcargo": 0,
+                // "larva": 0,
+                // "larvaturns": 0,
+                // "img": "http:\/\/library.vgaplanets.nu\/planets\/46.png",
+            }
+        }
+    }
+
+    void loadStarbases(game::map::Universe& univ, Access bases, PlayerSet_t players, LogListener& log, Translator& tx)
+    {
+        const size_t n = bases.getArraySize();
+        log.write(LogListener::Debug, LOG_NAME, Format(tx("Loading %d starbase%!1{s%}..."), n));
+        for (size_t i = 0; i < n; ++i) {
+            Access in = bases[i];
+
+            // Get planet. This does not create planet objects!
+            int id = in("planetid").toInteger();
+            Planet* out = univ.planets().get(id);
+            if (!out) {
+                throw afl::except::InvalidDataException(Format(tx("Invalid planet Id #%d"), id));
+            }
+
+            int owner;
+            if (out->getOwner().get(owner) && players.contains(owner)) {
+                // It is an own base
+                out->addBaseSource(players);
+                out->setNumBuildings(game::BaseDefenseBuilding, in("defense").toInteger());
+                out->setBaseDamage(in("damage").toInteger());
+                out->setBaseTechLevel(game::EngineTech,  in("enginetechlevel").toInteger());
+                out->setBaseTechLevel(game::HullTech,    in("hulltechlevel").toInteger());
+                out->setBaseTechLevel(game::BeamTech,    in("beamtechlevel").toInteger());
+                out->setBaseTechLevel(game::TorpedoTech, in("torptechlevel").toInteger());
+                out->setCargo(Element::Fighters, in("fighters").toInteger());
+                out->setBaseShipyardOrder(in("shipmission").toInteger(), in("targetshipid").toInteger());
+                out->setBaseMission(in("mission").toInteger()); // FIXME: mission1target!
+
+                // "builtdefense": 0,
+                // "hulltechup": 0,
+                // "enginetechup": 0,
+                // "beamtechup": 0,
+                // "torptechup": 0,
+                // "builtfighters": 0,
+                // "mission1target": 0,
+                // "raceid": 0, <- unused?
+
+                // "buildbeamid": 0,
+                // "buildengineid": 0,
+                // "buildtorpedoid": 0,
+                // "buildhullid": 0,
+                // "buildbeamcount": 0,
+                // "buildtorpcount": 0,
+                // "isbuilding": false,
+                // "starbasetype": 0,
+                // "infoturn": 31,
+                // "readystatus": 0,
+            } else {
+                // FIXME: allied base? What to do with these?
+            }
+        }
+    }
+
+    void loadShips(game::map::Universe& univ, Access ships, PlayerSet_t players, LogListener& log, Translator& tx)
+    {
+        const size_t n = ships.getArraySize();
+        log.write(LogListener::Debug, LOG_NAME, Format(tx("Loading %d ship%!1{s%}..."), n));
+        for (size_t i = 0; i < n; ++i) {
+            Access in = ships[i];
+            int id = in("id").toInteger();
+            Ship* out = univ.ships().create(id);
+            if (!out) {
+                throw afl::except::InvalidDataException(Format(tx("Invalid ship Id #%d"), id));
+            }
+
+            int owner = in("ownerid").toInteger();
+            out->setName(in("name").toString());
+            out->setWarpFactor(in("warp").toInteger());
+
+            // Set SHIPXY data. This will make the ship visible.
+            out->addShipXYData(Point(in("x").toInteger(), in("y").toInteger()),
+                               owner,
+                               in("mass").toInteger(),
+                               players);
+
+            out->setHull(in("hullid").toInteger());
+
+            if (players.contains(owner)) {
+                out->addShipSource(players);
+                out->setFriendlyCode(in("friendlycode").toString());
+                out->setBeamType(in("beamid").toInteger());
+                out->setNumBeams(in("beams").toInteger());
+                out->setNumBays(in("bays").toInteger());
+                out->setTorpedoType(in("torpedoid").toInteger());
+                out->setNumLaunchers(in("torps").toInteger());
+                out->setEngineType(in("engineid").toInteger());
+
+                // Mission: we have mission1target and mission2target, but the latter is not used.
+                //   Mission           mission1target goes in
+                //     6 "Tow"           tow [ship id here]
+                //     7 "Intercept"     intercept [ship id]
+                //   [12 "Send fighters" intercept [ship id if [-999,+999], planet id otherwise] -- base mission]
+                //    15 "Repair ship"   intercept [ship id here]
+                //    18 "Send fighters" intercept [ship id if [-999,+999], 0=all, planet id otherwise]
+                //    20 "Cloak+Int"     intercept [ship id]
+                // Nu missions are off-by-one.
+                int mission = in("mission").toInteger();
+                int arg = in("mission1target").toInteger();
+                out->setMission(mission + 1,
+                                mission != 6 ? arg : 0,
+                                mission == 6 ? arg : 0);
+
+                out->setPrimaryEnemy(in("enemy").toInteger());
+                out->setDamage(in("damage").toInteger());
+                out->setCrew(in("crew").toInteger());
+                out->setCargo(Element::Colonists, in("clans").toInteger());
+                out->setCargo(Element::Neutronium, in("neutronium").toInteger());
+                out->setCargo(Element::Tritanium, in("tritanium").toInteger());
+                out->setCargo(Element::Duranium, in("duranium").toInteger());
+                out->setCargo(Element::Molybdenum, in("molybdenum").toInteger());
+                out->setCargo(Element::Supplies, in("supplies").toInteger());
+                out->setAmmo(in("ammo").toInteger());
+                out->setCargo(Element::Money, in("megacredits").toInteger());
+                out->setWaypoint(Point(in("targetx").toInteger(), in("targety").toInteger()));
+            } else {
+                // FIXME: can we report a subset?
+            }
+
+            // Not handled:
+            //     "mission2target": 0,
+
+            //     "transferclans": 0,
+            //     "transferneutronium": 0,
+            //     "transferduranium": 0,
+            //     "transfertritanium": 0,
+            //     "transfermolybdenum": 0,
+            //     "transfersupplies": 0,
+            //     "transferammo": 0,
+            //     "transfermegacredits": 0,
+            //     "transfertargetid": 0,
+            //     "transfertargettype": 0,
+
+            //     "heading": -1,
+            //     "turn": 0,
+            //     "turnkilled": 0,
+            //     "experience": 0,
+            //     "infoturn": 83,
+            //     "podhullid": 0,
+            //     "podcargo": 0,
+            //     "goal": 0,
+            //     "goaltarget": 0,
+            //     "goaltarget2": 0,
+            //     "waypoints": [],
+            //     "history": [],
+            //     "iscloaked": false,
+            //     "readystatus": 0,
+        }
+    }
+
+    void loadMinefields(game::map::Universe& univ, Access p, LogListener& log, Translator& tx)
+    {
+        const size_t n = p.getArraySize();
+        log.write(LogListener::Debug, LOG_NAME, Format(tx("Loading %d minefield%!1{s%}..."), n));
+        for (size_t i = 0; i < n; ++i) {
+            Access in = p[i];
+
+            int id = in("id").toInteger();
+            if (Minefield* out = univ.minefields().create(id)) {
+                out->addReport(Point(in("x").toInteger(), in("y").toInteger()),
+                               in("ownerid").toInteger(),
+                               in("isweb").toInteger() ? Minefield::IsWeb : Minefield::IsMine,
+                               Minefield::UnitsKnown,
+                               in("units").toInteger(),
+                               in("infoturn").toInteger(),
+                               Minefield::MinefieldScanned);
+                // FIXME: should we report old (infoturn < current turn) reports here?
+                // FIXME: should we validate the .radius attribute against the .units?
+                // FIXME: unhandled attribute: "friendlycode": "652"
+            } else {
+                log.write(LogListener::Warn, LOG_NAME, Format(tx("Invalid minefield Id #%d, minefield has been ignored"), id));
+            }
+        }
+    }
+
+    void loadVcrs(Turn& turn, Access p, LogListener& log, Translator& tx)
+    {
+        afl::base::Ptr<Database> db = new Database();
+
+        const size_t n = p.getArraySize();
+        for (size_t i = 0; i < n; ++i) {
+            Access in = p[i];
+
+            Battle* b = db->addNewBattle(new Battle(unpackVcrObject(in("left"),  false),
+                                                    unpackVcrObject(in("right"), in("battletype").toInteger() != 0),
+                                                    uint16_t(in("seed").toInteger()),
+                                                    0,      /* signature, not relevant */
+                                                    uint16_t(in("right")("temperature").toInteger())
+                                             ));
+            // "leftownerid": 7,
+            // "rightownerid": 6,
+            // "turn": 40,
+            // "id": 149,
+            b->setType(game::vcr::classic::NuHost, 0);
+            b->setPosition(Point(in("x").toInteger(), in("y").toInteger()));
+        }
+        if (db->getNumBattles() != 0) {
+            log.write(LogListener::Debug, LOG_NAME, Format(tx("Loaded %d combat recording%!1{s%}..."), db->getNumBattles()));
+            turn.setBattles(db);
+        }
+    }
 }
 
 
 game::nu::TurnLoader::TurnLoader(afl::base::Ref<GameState> gameState,
-                                 afl::string::Translator& tx,
-                                 afl::sys::LogListener& log,
                                  util::ProfileDirectory& profile,
                                  afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory)
     : m_gameState(gameState),
-      m_translator(tx),
-      m_log(log),
       m_profile(profile),
       m_defaultSpecificationDirectory(defaultSpecificationDirectory)
 { }
@@ -206,20 +515,20 @@ game::TurnLoader::PlayerStatusSet_t
 game::nu::TurnLoader::getPlayerStatus(int player, String_t& extra, afl::string::Translator& tx) const
 {
     PlayerStatusSet_t result;
-    afl::data::Access entry = m_gameState->loadGameListEntryPreAuthenticated();
+    Access entry = m_gameState->loadGameListEntryPreAuthenticated();
     if (player == entry("player")("id").toInteger()) {
         result += Available;
         result += Playable;
         result += Primary;
         switch (entry("player")("turnstatus").toInteger()) {
          case 1:
-            extra = tx.translateString("Turn viewed");
+            extra = tx("Turn viewed");
             break;
          case 2:
-            extra = tx.translateString("Turn submitted");
+            extra = tx("Turn submitted");
             break;
          default:
-            extra = tx.translateString("Result file available");
+            extra = tx("Result file available");
             break;
         }
     } else {
@@ -229,24 +538,24 @@ game::nu::TurnLoader::getPlayerStatus(int player, String_t& extra, afl::string::
 }
 
 std::auto_ptr<game::Task_t>
-game::nu::TurnLoader::loadCurrentTurn(Turn& turn, Game& game, int player, Root& /*root*/, Session& /*session*/, std::auto_ptr<StatusTask_t> then)
+game::nu::TurnLoader::loadCurrentTurn(Turn& turn, Game& game, int player, Root& /*root*/, Session& session, std::auto_ptr<StatusTask_t> then)
 {
     // FIXME: validate player
     class Task : public Task_t {
      public:
-        Task(TurnLoader& parent, Turn& turn, Game& game, int player, std::auto_ptr<StatusTask_t>& then)
-            : m_parent(parent), m_turn(turn), m_game(game), m_player(player), m_then(then)
+        Task(TurnLoader& parent, Turn& turn, Game& game, int player, afl::sys::LogListener& log, Translator& tx, std::auto_ptr<StatusTask_t>& then)
+            : m_parent(parent), m_turn(turn), m_game(game), m_player(player), m_log(log), m_translator(tx), m_then(then)
             { }
 
         virtual void call()
             {
-                m_parent.m_log.write(LogListener::Trace, LOG_NAME, "Task: loadCurrentTurn");
+                m_log.write(LogListener::Trace, LOG_NAME, "Task: loadCurrentTurn");
                 try {
-                    m_parent.doLoadCurrentTurn(m_turn, m_game, m_player);
+                    m_parent.doLoadCurrentTurn(m_turn, m_game, m_player, m_log, m_translator);
                     m_then->call(true);
                 }
                 catch (std::exception& e) {
-                    m_parent.m_log.write(LogListener::Error, LOG_NAME, String_t(), e);
+                    m_log.write(LogListener::Error, LOG_NAME, String_t(), e);
                     m_then->call(false);
                 }
             }
@@ -255,9 +564,11 @@ game::nu::TurnLoader::loadCurrentTurn(Turn& turn, Game& game, int player, Root& 
         Turn& m_turn;
         Game& m_game;
         int m_player;
+        afl::sys::LogListener& m_log;
+        Translator& m_translator;
         std::auto_ptr<StatusTask_t> m_then;
     };
-    return m_gameState->login(std::auto_ptr<Task_t>(new Task(*this, turn, game, player, then)));
+    return m_gameState->login(std::auto_ptr<Task_t>(new Task(*this, turn, game, player, session.log(), session.translator(), then)));
 }
 
 std::auto_ptr<game::Task_t>
@@ -268,9 +579,8 @@ game::nu::TurnLoader::saveCurrentTurn(const Turn& turn, const Game& game, Player
     (void) players;
     (void) opts;
     (void) root;
-    (void) session;
 
-    game.expressionLists().saveRecentFiles(m_profile, m_log, m_translator);
+    game.expressionLists().saveRecentFiles(m_profile, session.log(), session.translator());
 
     return makeConfirmationTask(true, then);
 }
@@ -285,7 +595,7 @@ game::nu::TurnLoader::getHistoryStatus(int /*player*/, int turn, afl::base::Memo
      */
 
     // Fetch the result. This should not produce a network access, we already have it.
-    afl::data::Access rst(m_gameState->loadResultPreAuthenticated());
+    Access rst(m_gameState->loadResultPreAuthenticated());
     if (rst.isNull() || rst("success").toInteger() == 0) {
         // Bad result
         status.fill(Negative);
@@ -304,21 +614,22 @@ game::nu::TurnLoader::getHistoryStatus(int /*player*/, int turn, afl::base::Memo
 }
 
 std::auto_ptr<game::Task_t>
-game::nu::TurnLoader::loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, std::auto_ptr<StatusTask_t> then)
+game::nu::TurnLoader::loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, Session& session, std::auto_ptr<StatusTask_t> then)
 {
     (void) turn;
     (void) game;
     (void) player;
     (void) turnNumber;
     (void) root;
-    m_log.write(LogListener::Error, LOG_NAME, "!FIXME: loadHistoryTurn not implemented");
+
+    session.log().write(LogListener::Error, LOG_NAME, "!FIXME: loadHistoryTurn not implemented");
     return makeConfirmationTask(false, then);
 }
 
 std::auto_ptr<game::Task_t>
-game::nu::TurnLoader::saveConfiguration(const Root& root, std::auto_ptr<Task_t> then)
+game::nu::TurnLoader::saveConfiguration(const Root& root, afl::sys::LogListener& log, afl::string::Translator& tx, std::auto_ptr<Task_t> then)
 {
-    return defaultSaveConfiguration(root, &m_profile, m_log, m_translator, then);
+    return defaultSaveConfiguration(root, &m_profile, log, tx, then);
 }
 
 String_t
@@ -338,12 +649,12 @@ game::nu::TurnLoader::getProperty(Property p)
 }
 
 void
-game::nu::TurnLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player)
+game::nu::TurnLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, afl::sys::LogListener& log, afl::string::Translator& tx)
 {
     // Load result
-    afl::data::Access rst(m_gameState->loadResultPreAuthenticated());
+    Access rst(m_gameState->loadResultPreAuthenticated());
     if (rst.isNull() || rst("success").toInteger() == 0) {
-        throw std::runtime_error(m_translator("Unable to download result file"));
+        throw std::runtime_error(tx("Unable to download result file"));
     }
 
     // rst attributes:
@@ -386,320 +697,12 @@ game::nu::TurnLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player)
     // must create all planets/ships before.
 
     // expression lists
-    game.expressionLists().loadRecentFiles(m_profile, m_log, m_translator);
-    game.expressionLists().loadPredefinedFiles(m_profile, *m_defaultSpecificationDirectory, m_log, m_translator);
+    game.expressionLists().loadRecentFiles(m_profile, log, tx);
+    game.expressionLists().loadPredefinedFiles(m_profile, *m_defaultSpecificationDirectory, log, tx);
 
-    loadPlanets(turn.universe(), rst("rst")("planets"), PlayerSet_t(player));
-    loadStarbases(turn.universe(), rst("rst")("starbases"), PlayerSet_t(player));
-    loadShips(turn.universe(), rst("rst")("ships"), PlayerSet_t(player));
-    loadMinefields(turn.universe(), rst("rst")("minefields"));
-    loadVcrs(turn, rst("rst")("vcrs"));
-}
-
-void
-game::nu::TurnLoader::loadPlanets(game::map::Universe& univ, afl::data::Access planets, PlayerSet_t players)
-{
-    const size_t n = planets.getArraySize();
-    m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d planet%!1{s%}...").c_str(), n));
-    for (size_t i = 0; i < n; ++i) {
-        afl::data::Access in = planets[i];
-        int id = in("id").toInteger();
-        game::map::Planet* out = univ.planets().create(id);
-        if (!out) {
-            throw afl::except::InvalidDataException(afl::string::Format(m_translator.translateString("Invalid planet Id #%d").c_str(), id));
-        }
-
-        // Location and Name
-        out->setPosition(game::map::Point(in("x").toInteger(), in("y").toInteger()));
-        out->setName(in("name").toString());
-
-        // Is this planet known?
-        if (isKnownPlanet(in)) {
-            int owner = in("ownerid").toInteger();
-            if (players.contains(owner)) {
-                out->addPlanetSource(players);
-            }
-            out->setFriendlyCode(in("friendlycode").toString());
-            out->setNumBuildings(MineBuilding, in("mines").toInteger());
-            out->setNumBuildings(FactoryBuilding, in("factories").toInteger());
-            out->setNumBuildings(DefenseBuilding, in("defense").toInteger());
-//             "targetmines": 0,
-//             "targetfactories": 0,
-//             "targetdefense": 0,
-//             "builtmines": 0,
-//             "builtfactories": 0,
-//             "builtdefense": 0,
-            out->setBuildBaseFlag(in("buildingstarbase").toInteger() != 0);
-            out->setCargo(Element::Money, in("megacredits").toInteger());
-            out->setCargo(Element::Supplies, in("supplies").toInteger());
-//             "suppliessold": 0,
-            out->setCargo(Element::Neutronium, in("neutronium").toInteger());
-            out->setCargo(Element::Molybdenum, in("molybdenum").toInteger());
-            out->setCargo(Element::Duranium, in("duranium").toInteger());
-            out->setCargo(Element::Tritanium, in("tritanium").toInteger());
-
-            out->setOreGround(Element::Neutronium, in("groundneutronium").toInteger());
-            out->setOreGround(Element::Molybdenum, in("groundmolybdenum").toInteger());
-            out->setOreGround(Element::Duranium,   in("groundduranium").toInteger());
-            out->setOreGround(Element::Tritanium,  in("groundtritanium").toInteger());
-            out->setOreDensity(Element::Neutronium, in("densityneutronium").toInteger());
-            out->setOreDensity(Element::Molybdenum, in("densitymolybdenum").toInteger());
-            out->setOreDensity(Element::Duranium,   in("densityduranium").toInteger());
-            out->setOreDensity(Element::Tritanium,  in("densitytritanium").toInteger());
-//             "totalneutronium": 0,
-//             "totalmolybdenum": 0,
-//             "totalduranium": 0,
-//             "totaltritanium": 0,
-//             "checkneutronium": 221,
-//             "checkmolybdenum": 625,
-//             "checkduranium": 3091,
-//             "checktritanium": 1010,
-//             "checkmegacredits": 34506,
-//             "checksupplies": 1661,
-            out->setTemperature(in("temp").toInteger());
-
-            out->setOwner(owner);
-
-            out->setCargo(Element::Colonists, in("clans").toInteger());
-//             "colchange": 0,
-            out->setColonistTax(in("colonisttaxrate").toInteger());
-            out->setColonistHappiness(in("colonisthappypoints").toInteger());
-//             "colhappychange": 8,
-            out->setNatives(in("nativeclans").toInteger());
-//             "nativechange": 0,
-            out->setNativeGovernment(in("nativegovernment").toInteger());
-//             "nativetaxvalue": 100, <--- FIXME: goes in tax computation?
-            out->setNativeRace(in("nativetype").toInteger());
-            out->setNativeTax(in("nativetaxrate").toInteger());
-            out->setNativeHappiness(in("nativehappypoints").toInteger());
-//             "nativehappychange": 3,
-//             "infoturn": 77,
-//             "debrisdisk": 0,
-//             "flag": 2,
-//             "readystatus": 0,
-//             "targetx": 2894,
-//             "targety": 2325,
-//             "podhullid": 0,
-//             "podspeed": 0,
-//             "podcargo": 0,
-//             "larva": 0,
-//             "larvaturns": 0,
-//             "img": "http:\/\/library.vgaplanets.nu\/planets\/46.png",
-//             "nativeracename": "Insectoid",
-//             "nativegovernmentname": "Feudal",
-        }
-    }
-}
-
-void
-game::nu::TurnLoader::loadStarbases(game::map::Universe& univ, afl::data::Access bases, PlayerSet_t players)
-{
-    using game::map::Planet;
-
-    const size_t n = bases.getArraySize();
-    m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d starbase%!1{s%}...").c_str(), n));
-    for (size_t i = 0; i < n; ++i) {
-        afl::data::Access in = bases[i];
-
-        // Get planet. This does not create planet objects!
-        int id = in("planetid").toInteger();
-        Planet* out = univ.planets().get(id);
-        if (!out) {
-            throw afl::except::InvalidDataException(afl::string::Format(m_translator.translateString("Invalid planet Id #%d").c_str(), id));
-        }
-
-        int owner;
-        if (out->getOwner().get(owner) && players.contains(owner)) {
-            // It is an own base
-            out->addBaseSource(players);
-            out->setNumBuildings(BaseDefenseBuilding, in("defense").toInteger());
-            out->setBaseDamage(in("damage").toInteger());
-            out->setBaseTechLevel(EngineTech,  in("enginetechlevel").toInteger());
-            out->setBaseTechLevel(HullTech,    in("hulltechlevel").toInteger());
-            out->setBaseTechLevel(BeamTech,    in("beamtechlevel").toInteger());
-            out->setBaseTechLevel(TorpedoTech, in("torptechlevel").toInteger());
-            out->setCargo(Element::Fighters, in("fighters").toInteger());
-            out->setBaseShipyardOrder(in("shipmission").toInteger(), in("targetshipid").toInteger());
-            out->setBaseMission(in("mission").toInteger()); // FIXME: mission1target!
-
-            // "builtdefense": 0,
-            // "hulltechup": 0,
-            // "enginetechup": 0,
-            // "beamtechup": 0,
-            // "torptechup": 0,
-            // "builtfighters": 0,
-            // "mission1target": 0,
-            // "raceid": 0, <- unused?
-
-            // "buildbeamid": 0,
-            // "buildengineid": 0,
-            // "buildtorpedoid": 0,
-            // "buildhullid": 0,
-            // "buildbeamcount": 0,
-            // "buildtorpcount": 0,
-            // "isbuilding": false,
-            // "starbasetype": 0,
-            // "infoturn": 31,
-            // "readystatus": 0,
-        } else {
-            // FIXME: allied base? What to do with these?
-        }
-    }
-}
-
-void
-game::nu::TurnLoader::loadShips(game::map::Universe& univ, afl::data::Access ships, PlayerSet_t players)
-{
-    const size_t n = ships.getArraySize();
-    m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d ship%!1{s%}...").c_str(), n));
-    for (size_t i = 0; i < n; ++i) {
-        afl::data::Access in = ships[i];
-        int id = in("id").toInteger();
-        game::map::Ship* out = univ.ships().create(id);
-        if (!out) {
-            throw afl::except::InvalidDataException(afl::string::Format(m_translator.translateString("Invalid ship Id #%d").c_str(), id));
-        }
-
-        int owner = in("ownerid").toInteger();
-        out->setName(in("name").toString());
-        out->setWarpFactor(in("warp").toInteger());
-
-        // Set SHIPXY data. This will make the ship visible.
-        out->addShipXYData(game::map::Point(in("x").toInteger(), in("y").toInteger()),
-                           owner,
-                           in("mass").toInteger(),
-                           players);
-
-        out->setHull(in("hullid").toInteger());
-
-        if (players.contains(owner)) {
-            out->addShipSource(players);
-            out->setFriendlyCode(in("friendlycode").toString());
-            out->setBeamType(in("beamid").toInteger());
-            out->setNumBeams(in("beams").toInteger());
-            out->setNumBays(in("bays").toInteger());
-            out->setTorpedoType(in("torpedoid").toInteger());
-            out->setNumLaunchers(in("torps").toInteger());
-            out->setEngineType(in("engineid").toInteger());
-
-            // Mission: we have mission1target and mission2target, but the latter is not used.
-            //   Mission           mission1target goes in
-            //     6 "Tow"           tow [ship id here]
-            //     7 "Intercept"     intercept [ship id]
-            //   [12 "Send fighters" intercept [ship id if [-999,+999], planet id otherwise] -- base mission]
-            //    15 "Repair ship"   intercept [ship id here]
-            //    18 "Send fighters" intercept [ship id if [-999,+999], 0=all, planet id otherwise]
-            //    20 "Cloak+Int"     intercept [ship id]
-            // Nu missions are off-by-one.
-            int mission = in("mission").toInteger();
-            int arg = in("mission1target").toInteger();
-            out->setMission(mission + 1,
-                            mission != 6 ? arg : 0,
-                            mission == 6 ? arg : 0);
-
-            out->setPrimaryEnemy(in("enemy").toInteger());
-            out->setDamage(in("damage").toInteger());
-            out->setCrew(in("crew").toInteger());
-            out->setCargo(Element::Colonists, in("clans").toInteger());
-            out->setCargo(Element::Neutronium, in("neutronium").toInteger());
-            out->setCargo(Element::Tritanium, in("tritanium").toInteger());
-            out->setCargo(Element::Duranium, in("duranium").toInteger());
-            out->setCargo(Element::Molybdenum, in("molybdenum").toInteger());
-            out->setCargo(Element::Supplies, in("supplies").toInteger());
-            out->setAmmo(in("ammo").toInteger());
-            out->setCargo(Element::Money, in("megacredits").toInteger());
-            out->setWaypoint(game::map::Point(in("targetx").toInteger(), in("targety").toInteger()));
-        } else {
-            // FIXME: can we report a subset?
-        }
-
-        // Not handled:
-        //     "mission2target": 0,
-
-        //     "transferclans": 0,
-        //     "transferneutronium": 0,
-        //     "transferduranium": 0,
-        //     "transfertritanium": 0,
-        //     "transfermolybdenum": 0,
-        //     "transfersupplies": 0,
-        //     "transferammo": 0,
-        //     "transfermegacredits": 0,
-        //     "transfertargetid": 0,
-        //     "transfertargettype": 0,
-
-        //     "heading": -1,
-        //     "turn": 0,
-        //     "turnkilled": 0,
-        //     "experience": 0,
-        //     "infoturn": 83,
-        //     "podhullid": 0,
-        //     "podcargo": 0,
-        //     "goal": 0,
-        //     "goaltarget": 0,
-        //     "goaltarget2": 0,
-        //     "waypoints": [],
-        //     "history": [],
-        //     "iscloaked": false,
-        //     "readystatus": 0,
-    }
-}
-
-
-void
-game::nu::TurnLoader::loadMinefields(game::map::Universe& univ, afl::data::Access p)
-{
-    using game::map::Minefield;
-
-    const size_t n = p.getArraySize();
-    m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d minefield%!1{s%}...").c_str(), n));
-    for (size_t i = 0; i < n; ++i) {
-        afl::data::Access in = p[i];
-
-        int id = in("id").toInteger();
-        if (Minefield* out = univ.minefields().create(id)) {
-            out->addReport(game::map::Point(in("x").toInteger(), in("y").toInteger()),
-                           in("ownerid").toInteger(),
-                           in("isweb").toInteger() ? Minefield::IsWeb : Minefield::IsMine,
-                           Minefield::UnitsKnown,
-                           in("units").toInteger(),
-                           in("infoturn").toInteger(),
-                           Minefield::MinefieldScanned);
-            // FIXME: should we report old (infoturn < current turn) reports here?
-            // FIXME: should we validate the .radius attribute against the .units?
-            // FIXME: unhandled attribute: "friendlycode": "652"
-        } else {
-            m_log.write(m_log.Warn, LOG_NAME, afl::string::Format(m_translator.translateString("Invalid minefield Id #%d, minefield has been ignored").c_str(), id));
-        }
-    }
-}
-
-void
-game::nu::TurnLoader::loadVcrs(Turn& turn, afl::data::Access p)
-{
-    using game::vcr::classic::Database;
-    using game::vcr::classic::Battle;
-
-    afl::base::Ptr<Database> db = new Database();
-
-    const size_t n = p.getArraySize();
-    for (size_t i = 0; i < n; ++i) {
-        afl::data::Access in = p[i];
-
-        Battle* b = db->addNewBattle(new Battle(unpackVcrObject(in("left"),  false),
-                                                unpackVcrObject(in("right"), in("battletype").toInteger() != 0),
-                                                uint16_t(in("seed").toInteger()),
-                                                0,      /* signature, not relevant */
-                                                uint16_t(in("right")("temperature").toInteger())
-                                         ));
-        // "leftownerid": 7,
-        // "rightownerid": 6,
-        // "turn": 40,
-        // "id": 149,
-        b->setType(game::vcr::classic::NuHost, 0);
-        b->setPosition(game::map::Point(in("x").toInteger(), in("y").toInteger()));
-    }
-    if (db->getNumBattles() != 0) {
-        m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loaded %d combat recording%!1{s%}...").c_str(), db->getNumBattles()));
-        turn.setBattles(db);
-    }
+    loadPlanets(turn.universe(), rst("rst")("planets"), PlayerSet_t(player), log, tx);
+    loadStarbases(turn.universe(), rst("rst")("starbases"), PlayerSet_t(player), log, tx);
+    loadShips(turn.universe(), rst("rst")("ships"), PlayerSet_t(player), log, tx);
+    loadMinefields(turn.universe(), rst("rst")("minefields"), log, tx);
+    loadVcrs(turn, rst("rst")("vcrs"), log, tx);
 }

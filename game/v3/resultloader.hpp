@@ -28,8 +28,6 @@ namespace game { namespace v3 {
             \param specificationDirectory Specification directory (union of game directory, default specification directory)
             \param defaultSpecificationDirectory Default specification directory (share/specs)
             \param charset Game character set
-            \param tx Translator
-            \param log Logger
             \param scanner Directory scanner (for initialisation)
             \param fs File System instance
             \param pProfile Profile directory (optional)
@@ -37,8 +35,6 @@ namespace game { namespace v3 {
         ResultLoader(afl::base::Ref<afl::io::Directory> specificationDirectory,
                      afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory,
                      std::auto_ptr<afl::charset::Charset> charset,
-                     afl::string::Translator& tx,
-                     afl::sys::LogListener& log,
                      const DirectoryScanner& scanner,
                      afl::io::FileSystem& fs,
                      util::ProfileDirectory* pProfile,
@@ -48,18 +44,16 @@ namespace game { namespace v3 {
         virtual std::auto_ptr<Task_t> loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
         virtual std::auto_ptr<Task_t> saveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t players, SaveOptions_t opts, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
         virtual void getHistoryStatus(int player, int turn, afl::base::Memory<HistoryStatus> status, const Root& root);
-        virtual std::auto_ptr<Task_t> loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, std::auto_ptr<StatusTask_t> then);
-        virtual std::auto_ptr<Task_t> saveConfiguration(const Root& root, std::auto_ptr<Task_t> then);
+        virtual std::auto_ptr<Task_t> loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
+        virtual std::auto_ptr<Task_t> saveConfiguration(const Root& root, afl::sys::LogListener& log, afl::string::Translator& tx, std::auto_ptr<Task_t> then);
         virtual String_t getProperty(Property p);
 
-        void loadTurnfile(Turn& trn, const Root& root, afl::io::Stream& file, int player) const;
+        void loadTurnfile(Turn& trn, const Root& root, afl::io::Stream& file, int player, afl::sys::LogListener& log, afl::string::Translator& tx) const;
 
      private:
         afl::base::Ref<afl::io::Directory> m_specificationDirectory;
         afl::base::Ref<afl::io::Directory> m_defaultSpecificationDirectory;
         std::auto_ptr<afl::charset::Charset> m_charset;
-        afl::string::Translator& m_translator;
-        afl::sys::LogListener& m_log;
         afl::io::FileSystem& m_fileSystem;
         util::ProfileDirectory* m_pProfile;
         game::browser::UserCallback* m_pCallback;
@@ -67,7 +61,7 @@ namespace game { namespace v3 {
         PlayerArray<DirectoryScanner::PlayerFlags_t> m_playerFlags;
 
         void doLoadCurrentTurn(Turn& turn, Game& game, int player, game::Root& root, Session& session);
-        void doLoadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root);
+        void doLoadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, afl::sys::LogListener& log, afl::string::Translator& tx);
         void doSaveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t players, const Root& root, Session& session);
     };
 

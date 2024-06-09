@@ -450,7 +450,7 @@ game::pcc::BrowserHandler::loadRoot(game::browser::Account& account, afl::data::
                                              serverDirectory,
                                              gameListEntry("game").toInteger(),
                                              std::auto_ptr<afl::charset::Charset>(charset.clone()),
-                                             tx, log,
+                                             log,
                                              availablePlayers,
                                              m_profile));
     }

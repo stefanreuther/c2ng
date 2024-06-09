@@ -114,12 +114,12 @@ namespace {
             }
         virtual void getHistoryStatus(int /*player*/, int /*turn*/, afl::base::Memory<HistoryStatus> status, const game::Root& /*root*/)
             { status.fill(WeaklyPositive); }
-        virtual std::auto_ptr<game::Task_t> loadHistoryTurn(game::Turn& /*turn*/, game::Game& /*game*/, int /*player*/, int /*turnNumber*/, game::Root& /*root*/, std::auto_ptr<game::StatusTask_t> then)
+        virtual std::auto_ptr<game::Task_t> loadHistoryTurn(game::Turn& /*turn*/, game::Game& /*game*/, int /*player*/, int /*turnNumber*/, game::Root& /*root*/, game::Session& /*session*/, std::auto_ptr<game::StatusTask_t> then)
             {
                 m_log += "loadHistoryTurn\n";
                 return game::makeConfirmationTask(m_status, then);
             }
-        virtual std::auto_ptr<game::Task_t> saveConfiguration(const game::Root& /*root*/, std::auto_ptr<game::Task_t> then)
+        virtual std::auto_ptr<game::Task_t> saveConfiguration(const game::Root& /*root*/, afl::sys::LogListener& /*log*/, afl::string::Translator& /*tx*/, std::auto_ptr<game::Task_t> then)
             { return then; }
         virtual String_t getProperty(Property /*p*/)
             { return String_t(); }

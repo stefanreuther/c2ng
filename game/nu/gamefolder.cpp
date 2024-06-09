@@ -165,7 +165,7 @@ game::nu::GameFolder::loadGameRoot(const game::config::UserConfiguration& config
                     }
 
                     // Turn loader
-                    root->setTurnLoader(new TurnLoader(m_state, m_handler.translator(), m_handler.log(), m_handler.browser().profile(), m_handler.getDefaultSpecificationDirectory()));
+                    root->setTurnLoader(new TurnLoader(m_state, m_handler.browser().profile(), m_handler.getDefaultSpecificationDirectory()));
 
                     // + playerList
 

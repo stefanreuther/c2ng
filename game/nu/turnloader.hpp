@@ -18,8 +18,6 @@ namespace game { namespace nu {
     class TurnLoader : public game::TurnLoader {
      public:
         TurnLoader(afl::base::Ref<GameState> gameState,
-                   afl::string::Translator& tx,
-                   afl::sys::LogListener& log,
                    util::ProfileDirectory& profile,
                    afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory);
         ~TurnLoader();
@@ -28,24 +26,16 @@ namespace game { namespace nu {
         virtual std::auto_ptr<Task_t> loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
         virtual std::auto_ptr<Task_t> saveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t player, SaveOptions_t opts, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
         virtual void getHistoryStatus(int player, int turn, afl::base::Memory<HistoryStatus> status, const Root& root);
-        virtual std::auto_ptr<Task_t> loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, std::auto_ptr<StatusTask_t> then);
-        virtual std::auto_ptr<Task_t> saveConfiguration(const Root& root, std::auto_ptr<Task_t> then);
+        virtual std::auto_ptr<Task_t> loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
+        virtual std::auto_ptr<Task_t> saveConfiguration(const Root& root, afl::sys::LogListener& log, afl::string::Translator& tx, std::auto_ptr<Task_t> then);
         virtual String_t getProperty(Property p);
 
      private:
         afl::base::Ref<GameState> m_gameState;
-        afl::string::Translator& m_translator;
-        afl::sys::LogListener& m_log;
         util::ProfileDirectory& m_profile;
         afl::base::Ref<afl::io::Directory> m_defaultSpecificationDirectory;
 
-        void doLoadCurrentTurn(Turn& turn, Game& game, int player);
-
-        void loadPlanets(game::map::Universe& univ, afl::data::Access planets, PlayerSet_t players);
-        void loadStarbases(game::map::Universe& univ, afl::data::Access bases, PlayerSet_t players);
-        void loadShips(game::map::Universe& univ, afl::data::Access ships, PlayerSet_t players);
-        void loadMinefields(game::map::Universe& univ, afl::data::Access p);
-        void loadVcrs(Turn& turn, afl::data::Access p);
+        void doLoadCurrentTurn(Turn& turn, Game& game, int player, afl::sys::LogListener& log, afl::string::Translator& tx);
     };
 
 } }

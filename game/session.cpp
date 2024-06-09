@@ -500,7 +500,7 @@ game::Session::saveConfiguration(std::auto_ptr<Task_t> then)
 {
     afl::base::Ptr<Root> pRoot = getRoot();
     if (pRoot.get() != 0 && pRoot->getTurnLoader().get() != 0) {
-        return pRoot->getTurnLoader()->saveConfiguration(*pRoot, then);
+        return pRoot->getTurnLoader()->saveConfiguration(*pRoot, log(), translator(), then);
     } else {
         return then;
     }

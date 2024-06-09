@@ -54,9 +54,9 @@ namespace {
             { return game::makeConfirmationTask(false, then); }
         virtual void getHistoryStatus(int /*player*/, int /*turn*/, afl::base::Memory<HistoryStatus> /*status*/, const Root& /*root*/)
             { }
-        virtual std::auto_ptr<Task_t> loadHistoryTurn(Turn& /*turn*/, Game& /*game*/, int /*player*/, int /*turnNumber*/, Root& /*root*/, std::auto_ptr<game::StatusTask_t> then)
+        virtual std::auto_ptr<Task_t> loadHistoryTurn(Turn& /*turn*/, Game& /*game*/, int /*player*/, int /*turnNumber*/, Root& /*root*/, Session& /*session*/, std::auto_ptr<game::StatusTask_t> then)
             { return game::makeConfirmationTask(false, then); }
-        virtual std::auto_ptr<Task_t> saveConfiguration(const Root& /*root*/, std::auto_ptr<Task_t> then)
+        virtual std::auto_ptr<Task_t> saveConfiguration(const Root& /*root*/, afl::sys::LogListener& /*log*/, afl::string::Translator& /*tx*/, std::auto_ptr<Task_t> then)
             { return then; }
         virtual String_t getProperty(Property /*p*/)
             { return String_t(); }
@@ -127,9 +127,9 @@ AFL_TEST("game.TurnLoader:getDefaultPlayer", a)
             { return game::makeConfirmationTask(false, then); }
         virtual void getHistoryStatus(int /*player*/, int /*turn*/, afl::base::Memory<HistoryStatus> /*status*/, const Root& /*root*/)
             { }
-        virtual std::auto_ptr<Task_t> loadHistoryTurn(Turn& /*turn*/, Game& /*game*/, int /*player*/, int /*turnNumber*/, Root& /*root*/, std::auto_ptr<game::StatusTask_t> then)
+        virtual std::auto_ptr<Task_t> loadHistoryTurn(Turn& /*turn*/, Game& /*game*/, int /*player*/, int /*turnNumber*/, Root& /*root*/, Session& /*session*/, std::auto_ptr<game::StatusTask_t> then)
             { return game::makeConfirmationTask(false, then); }
-        virtual std::auto_ptr<Task_t> saveConfiguration(const Root& /*root*/, std::auto_ptr<Task_t> then)
+        virtual std::auto_ptr<Task_t> saveConfiguration(const Root& /*root*/, afl::sys::LogListener& /*log*/, afl::string::Translator& /*tx*/, std::auto_ptr<Task_t> then)
             { return then; }
         virtual String_t getProperty(Property /*p*/)
             { return String_t(); }

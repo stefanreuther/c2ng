@@ -28,15 +28,26 @@
 #include "game/v3/writer.hpp"
 #include "util/backupfile.hpp"
 
+using afl::base::ConstBytes_t;
 using afl::base::Ptr;
 using afl::base::Ref;
+using afl::checksums::ByteSum;
+using afl::except::FileProblemException;
 using afl::except::checkAssertion;
 using afl::io::Directory;
 using afl::io::FileSystem;
 using afl::io::Stream;
 using afl::string::Format;
+using afl::string::Translator;
 using afl::sys::LogListener;
+using game::PlayerSet_t;
 using game::config::UserConfiguration;
+using game::map::BaseData;
+using game::map::Planet;
+using game::map::PlanetData;
+using game::map::Ship;
+using game::map::ShipData;
+using game::msg::Outbox;
 using game::v3::CommandContainer;
 
 namespace gt = game::v3::structures;
@@ -46,15 +57,15 @@ namespace {
 
     class LocalOutboxReader : public game::v3::OutboxReader {
      public:
-        LocalOutboxReader(game::msg::Outbox& outbox, int sender)
+        LocalOutboxReader(Outbox& outbox, int sender)
             : m_outbox(outbox), m_sender(sender)
             { }
 
-        virtual void addMessage(String_t text, game::PlayerSet_t receivers)
+        virtual void addMessage(String_t text, PlayerSet_t receivers)
             { m_outbox.addMessageFromFile(m_sender, text, receivers); }
 
      private:
-        game::msg::Outbox& m_outbox;
+        Outbox& m_outbox;
         int m_sender;
     };
 
@@ -69,22 +80,22 @@ namespace {
         uint8_t buffer[4096];
         uint32_t result = 0;
         while (size_t n = file->read(buffer)) {
-            result = afl::checksums::ByteSum().add(afl::base::ConstBytes_t(buffer).trim(n), result);
+            result = ByteSum().add(ConstBytes_t(buffer).trim(n), result);
         }
         return result;
     }
 
     /* Compute checksum over an array of bytes, shortcut. */
-    uint32_t computeChecksum(const afl::base::ConstBytes_t bytes)
+    uint32_t computeChecksum(const ConstBytes_t bytes)
     {
         // ex control.pas:Checksum (sort-of)
-        return afl::checksums::ByteSum().add(bytes, 0);
+        return ByteSum().add(bytes, 0);
     }
 
     /* Send commands.
        This appends commands to be sent through the message file to the specified Outbox object,
        and stores the others into the cmdX.txt file in the given directory. */
-    void saveCommands(Directory& dir, const CommandContainer& cc, game::msg::Outbox& out, int player, afl::string::Translator& tx, const game::Timestamp& ts)
+    void saveCommands(Directory& dir, const CommandContainer& cc, Outbox& out, int player, Translator& tx, const game::Timestamp& ts)
     {
         // ex phost.pas:MailPHostCommands, SavePHostCommandsI, SavePHostCommands, FreePHostCommands
         String_t fileAccum;
@@ -98,7 +109,7 @@ namespace {
                     // Send through message file
                     if (messageAccum.size() + commandText.size() > 500) {
                         if (!messageAccum.empty()) {
-                            out.addMessage(player, messageAccum, game::PlayerSet_t(player));
+                            out.addMessage(player, messageAccum, PlayerSet_t(player));
                         }
                         messageAccum.clear();
                     }
@@ -115,14 +126,14 @@ namespace {
         }
 
         if (!messageAccum.empty()) {
-            out.addMessage(player, messageAccum, game::PlayerSet_t(player));
+            out.addMessage(player, messageAccum, PlayerSet_t(player));
         }
 
         String_t fileName = Format("cmd%d.txt", player);
         if (!fileAccum.empty()) {
             Ref<Stream> file = dir.openFile(fileName, FileSystem::Create);
             afl::io::TextFile tf(*file);
-            tf.writeLine(tx.translateString("# Additional commands"));
+            tf.writeLine(tx("# Additional commands"));
             tf.writeLine(Format("$time %s", ts.getTimestampAsString()));
             tf.writeText(fileAccum);
             tf.flush();
@@ -136,8 +147,6 @@ namespace {
 game::v3::DirectoryLoader::DirectoryLoader(afl::base::Ref<afl::io::Directory> specificationDirectory,
                                            afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory,
                                            std::auto_ptr<afl::charset::Charset> charset,
-                                           afl::string::Translator& tx,
-                                           afl::sys::LogListener& log,
                                            const DirectoryScanner& scanner,
                                            afl::io::FileSystem& fs,
                                            util::ProfileDirectory* pProfile,
@@ -146,8 +155,6 @@ game::v3::DirectoryLoader::DirectoryLoader(afl::base::Ref<afl::io::Directory> sp
     : m_specificationDirectory(specificationDirectory),
       m_defaultSpecificationDirectory(defaultSpecificationDirectory),
       m_charset(charset),
-      m_translator(tx),
-      m_log(log),
       m_fileSystem(fs),
       m_pProfile(pProfile),
       m_pCallback(pCallback),
@@ -166,9 +173,9 @@ game::v3::DirectoryLoader::getPlayerStatus(int player, String_t& extra, afl::str
     DirectoryScanner::PlayerFlags_t flags = m_playerFlags.get(player);
     if (flags.contains(DirectoryScanner::HaveUnpacked)) {
         if (flags.contains(DirectoryScanner::HaveNewResult)) {
-            extra = tx.translateString("new RST");
+            extra = tx("new RST");
         } else {
-            extra = tx.translateString("unpacked");
+            extra = tx("unpacked");
         }
         result += Available;
         result += Playable;
@@ -223,7 +230,7 @@ game::v3::DirectoryLoader::saveCurrentTurn(const Turn& turn, const Game& game, P
         return makeConfirmationTask(true, then);
     }
     catch (std::exception& e) {
-        session.log().write(LogListener::Error, LOG_NAME, session.translator().translateString("Unable to save game"), e);
+        session.log().write(LogListener::Error, LOG_NAME, session.translator()("Unable to save game"), e);
         return makeConfirmationTask(false, then);
     }
 }
@@ -251,22 +258,22 @@ game::v3::DirectoryLoader::getHistoryStatus(int player, int turn, afl::base::Mem
 }
 
 std::auto_ptr<game::Task_t>
-game::v3::DirectoryLoader::loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, std::auto_ptr<StatusTask_t> then)
+game::v3::DirectoryLoader::loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, Session& session, std::auto_ptr<StatusTask_t> then)
 {
     class Task : public Task_t {
      public:
-        Task(DirectoryLoader& parent, Turn& turn, Game& game, int player, int turnNumber, Root& root, std::auto_ptr<StatusTask_t>& then)
-            : m_parent(parent), m_turn(turn), m_game(game), m_player(player), m_turnNumber(turnNumber), m_root(root), m_then(then)
+        Task(DirectoryLoader& parent, Turn& turn, Game& game, int player, int turnNumber, Root& root, Session& session, std::auto_ptr<StatusTask_t>& then)
+            : m_parent(parent), m_turn(turn), m_game(game), m_player(player), m_turnNumber(turnNumber), m_root(root), m_log(session.log()), m_translator(session.translator()), m_then(then)
             { }
         virtual void call()
             {
-                m_parent.m_log.write(LogListener::Trace, LOG_NAME, "Task: loadHistoryTurn");
+                m_log.write(LogListener::Trace, LOG_NAME, "Task: loadHistoryTurn");
                 try {
-                    m_parent.doLoadHistoryTurn(m_turn, m_game, m_player, m_turnNumber, m_root);
+                    m_parent.doLoadHistoryTurn(m_turn, m_game, m_player, m_turnNumber, m_root, m_log, m_translator);
                     m_then->call(true);
                 }
                 catch (std::exception& e) {
-                    m_parent.m_log.write(LogListener::Error, LOG_NAME, String_t(), e);
+                    m_log.write(LogListener::Error, LOG_NAME, String_t(), e);
                     m_then->call(false);
                 }
             }
@@ -277,15 +284,17 @@ game::v3::DirectoryLoader::loadHistoryTurn(Turn& turn, Game& game, int player, i
         int m_player;
         int m_turnNumber;
         Root& m_root;
+        LogListener& m_log;
+        Translator& m_translator;
         std::auto_ptr<StatusTask_t> m_then;
     };
-    return std::auto_ptr<Task_t>(new Task(*this, turn, game, player, turnNumber, root, then));
+    return std::auto_ptr<Task_t>(new Task(*this, turn, game, player, turnNumber, root, session, then));
 }
 
 std::auto_ptr<game::Task_t>
-game::v3::DirectoryLoader::saveConfiguration(const Root& root, std::auto_ptr<Task_t> then)
+game::v3::DirectoryLoader::saveConfiguration(const Root& root, afl::sys::LogListener& log, afl::string::Translator& tx, std::auto_ptr<Task_t> then)
 {
-    return defaultSaveConfiguration(root, m_pProfile, m_log, m_translator, then);
+    return defaultSaveConfiguration(root, m_pProfile, log, tx, then);
 }
 
 String_t
@@ -315,7 +324,9 @@ void
 game::v3::DirectoryLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session)
 {
     // ex game/load.h:loadDirectory
-    m_log.write(m_log.Info, LOG_NAME, Format(m_translator("Loading %s data...").c_str(), root.playerList().getPlayerName(player, Player::AdjectiveName, m_translator)));
+    Translator& tx = session.translator();
+    LogListener& log = session.log();
+    log.write(LogListener::Info, LOG_NAME, Format(tx("Loading %s data..."), root.playerList().getPlayerName(player, Player::AdjectiveName, tx)));
 
     // gen.dat
     Directory& dir = root.gameDirectory();
@@ -324,13 +335,13 @@ game::v3::DirectoryLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player,
         Ref<Stream> file = dir.openFile(Format("gen%d.dat", player), FileSystem::OpenRead);
         gen.loadFromFile(*file);
         if (gen.getPlayerId() != player) {
-            throw afl::except::FileProblemException(*file, Format(m_translator("File is owned by player %d, should be %d").c_str(), gen.getPlayerId(), player));
+            throw FileProblemException(*file, Format(tx("File is owned by player %d, should be %d"), gen.getPlayerId(), player));
         }
     }
     GenExtra::create(turn).create(player) = gen;
 
     // Initialize
-    Loader ldr(*m_charset, m_translator, m_log);
+    Loader ldr(*m_charset, tx, log);
     ldr.prepareUniverse(turn.universe());
     ldr.prepareTurn(turn, root, session, player);
 
@@ -342,8 +353,8 @@ game::v3::DirectoryLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player,
 
     // expression lists
     if (m_pProfile != 0) {
-        game.expressionLists().loadRecentFiles(*m_pProfile, m_log, m_translator);
-        game.expressionLists().loadPredefinedFiles(*m_pProfile, *m_specificationDirectory, m_log, m_translator);
+        game.expressionLists().loadRecentFiles(*m_pProfile, log, tx);
+        game.expressionLists().loadPredefinedFiles(*m_pProfile, *m_specificationDirectory, log, tx);
     }
 
     // FIXME->trn.setHaveData(player);
@@ -427,14 +438,14 @@ game::v3::DirectoryLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player,
 
     // Outbox
     {
-        afl::base::Ptr<Stream> s = dir.openFileNT(Format("mess35%d.dat", player), FileSystem::OpenRead);
+        Ptr<Stream> s = dir.openFileNT(Format("mess35%d.dat", player), FileSystem::OpenRead);
         if (s.get() != 0) {
-            LocalOutboxReader(turn.outbox(), player).loadOutbox35(*s, *m_charset, m_translator);
+            LocalOutboxReader(turn.outbox(), player).loadOutbox35(*s, *m_charset, tx);
             m_playersWithDosOutbox -= player;
         } else {
             s = dir.openFileNT(Format("mess%d.dat", player), FileSystem::OpenRead);
             if (s.get() != 0) {
-                LocalOutboxReader(turn.outbox(), player).loadOutbox(*s, *m_charset, m_translator);
+                LocalOutboxReader(turn.outbox(), player).loadOutbox(*s, *m_charset, tx);
                 m_playersWithDosOutbox += player;
             }
         }
@@ -443,7 +454,7 @@ game::v3::DirectoryLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player,
     // Commands
     // ex phost.pas:LoadPHostCommands
     {
-        afl::base::Ptr<Stream> s = dir.openFileNT(Format("cmd%d.txt", player), FileSystem::OpenRead);
+        Ptr<Stream> s = dir.openFileNT(Format("cmd%d.txt", player), FileSystem::OpenRead);
         if (s.get() != 0) {
             CommandExtra::create(turn).create(player).loadCommandFile(*s, gen.getTimestamp());
         }
@@ -451,36 +462,36 @@ game::v3::DirectoryLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player,
 
     // Kore
     {
-        afl::base::Ptr<Stream> s = dir.openFileNT(Format("kore%d.dat", player), FileSystem::OpenRead);
+        Ptr<Stream> s = dir.openFileNT(Format("kore%d.dat", player), FileSystem::OpenRead);
         if (s.get() != 0) {
-            loadKore(*s, turn, player);
+            loadKore(*s, turn, player, log, tx);
         }
     }
 
     // Skore
     {
-        afl::base::Ptr<Stream> s = dir.openFileNT(Format("skore%d.dat", player), FileSystem::OpenRead);
+        Ptr<Stream> s = dir.openFileNT(Format("skore%d.dat", player), FileSystem::OpenRead);
         if (s.get() != 0) {
-            loadSkore(*s, turn);
+            loadSkore(*s, turn, log, tx);
         }
     }
 
     // Load fleets.
     // Must be after loading main data because it requires shipsource flags
     try {
-        game::db::FleetLoader(*m_charset, m_translator).load(root.gameDirectory(), turn.universe(), player);
+        game::db::FleetLoader(*m_charset, tx).load(root.gameDirectory(), turn.universe(), player);
     }
-    catch (afl::except::FileProblemException& e) {
-        m_log.write(afl::sys::LogListener::Warn, LOG_NAME, m_translator("File has been ignored"), e);
+    catch (FileProblemException& e) {
+        log.write(LogListener::Warn, LOG_NAME, tx("File has been ignored"), e);
     }
 
     // FLAK
     ldr.loadFlakBattles(turn, dir, player);
 
     // Util
-    Parser mp(m_translator, m_log, game, player, root, game::actions::mustHaveShipList(session), session.world().atomTable());
+    Parser mp(tx, log, game, player, root, game::actions::mustHaveShipList(session), session.world().atomTable());
     {
-        afl::base::Ptr<Stream> s = dir.openFileNT(Format("util%d.dat", player), FileSystem::OpenRead);
+        Ptr<Stream> s = dir.openFileNT(Format("util%d.dat", player), FileSystem::OpenRead);
         if (s.get() != 0) {
             mp.loadUtilData(*s, *m_charset);
         } else {
@@ -490,7 +501,7 @@ game::v3::DirectoryLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player,
 
     // Message parser
     {
-        afl::base::Ptr<Stream> file = m_specificationDirectory->openFileNT("msgparse.ini", afl::io::FileSystem::OpenRead);
+        Ptr<Stream> file = m_specificationDirectory->openFileNT("msgparse.ini", FileSystem::OpenRead);
         if (file.get() != 0) {
             mp.parseMessages(*file, turn.inbox(), *m_charset);
         }
@@ -498,10 +509,10 @@ game::v3::DirectoryLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player,
 }
 
 void
-game::v3::DirectoryLoader::doLoadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root)
+game::v3::DirectoryLoader::doLoadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, afl::sys::LogListener& log, afl::string::Translator& tx)
 {
     // FIXME: same as ResultLoader?
-    Loader ldr(*m_charset, m_translator, m_log);
+    Loader ldr(*m_charset, tx, log);
     ldr.prepareUniverse(turn.universe());
 
     // FIXME: backup these files?
@@ -514,8 +525,8 @@ game::v3::DirectoryLoader::doLoadHistoryTurn(Turn& turn, Game& game, int player,
     tpl.setTurnNumber(turnNumber);
 
     {
-        Ref<Stream> file = tpl.openFile(m_fileSystem, root.userConfiguration()[UserConfiguration::Backup_Result](), m_translator);
-        m_log.write(m_log.Info, LOG_NAME, Format(m_translator("Loading %s backup file..."), root.playerList().getPlayerName(player, Player::AdjectiveName, m_translator)));
+        Ref<Stream> file = tpl.openFile(m_fileSystem, root.userConfiguration()[UserConfiguration::Backup_Result](), tx);
+        log.write(LogListener::Info, LOG_NAME, Format(tx("Loading %s backup file..."), root.playerList().getPlayerName(player, Player::AdjectiveName, tx)));
         ldr.loadResult(turn, root, game, *file, player);
     }
 
@@ -532,19 +543,21 @@ game::v3::DirectoryLoader::doLoadHistoryTurn(Turn& turn, Game& game, int player,
 void
 game::v3::DirectoryLoader::doSaveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t players, const Root& root, Session& session)
 {
+    Translator& tx = session.translator();
+    LogListener& log = session.log();
     Directory& dir = root.gameDirectory();
 
     FizzFile fizz;
     fizz.load(dir);
     if (!fizz.isValid()) {
-        m_log.write(m_log.Warn, LOG_NAME, m_translator("File \"fizz.bin\" not found. Game data may not be usable with other programs."));
+        log.write(LogListener::Warn, LOG_NAME, tx("File \"fizz.bin\" not found. Game data may not be usable with other programs."));
     }
 
     for (int player = 1; player <= MAX_PLAYERS; ++player) {
         if (players.contains(player)) {
-            m_log.write(m_log.Info, LOG_NAME, Format(m_translator("Writing %s data..."), root.playerList().getPlayerName(player, Player::AdjectiveName, m_translator)));
+            log.write(LogListener::Info, LOG_NAME, Format(tx("Writing %s data..."), root.playerList().getPlayerName(player, Player::AdjectiveName, tx)));
             ControlFile control;
-            control.load(dir, player, m_translator, m_log);
+            control.load(dir, player, tx, log);
 
             // Load GenFile
             GenFile gen;
@@ -580,23 +593,23 @@ game::v3::DirectoryLoader::doSaveCurrentTurn(const Turn& turn, const Game& game,
 
             // Messages and commands. We add the commands to the message box, save that, and remove them again.
             // FIXME: can we do without this modifying operation?
-            game::msg::Outbox& out = const_cast<game::msg::Outbox&>(turn.outbox());
+            Outbox& out = const_cast<Outbox&>(turn.outbox());
             size_t marker = out.getNumMessages();
             try {
                 // Commands
                 if (const CommandContainer* cc = CommandExtra::get(turn, player)) {
-                    saveCommands(dir, *cc, out, player, m_translator, turn.getTimestamp());
+                    saveCommands(dir, *cc, out, player, tx, turn.getTimestamp());
                 }
 
                 // Messages
                 if (!m_playersWithDosOutbox.contains(player)) {
                     // Windows
                     Ref<Stream> file = dir.openFile(Format("mess35%d.dat", player), FileSystem::Create);
-                    Writer(*m_charset, m_translator, m_log).saveOutbox35(out, player, *file);
+                    Writer(*m_charset, tx, log).saveOutbox35(out, player, *file);
                 } else {
                     // DOS
                     Ref<Stream> file = dir.openFile(Format("mess%d.dat", player), FileSystem::Create);
-                    Writer(*m_charset, m_translator, m_log).saveOutbox(out, player, root.playerList(), *file);
+                    Writer(*m_charset, tx, log).saveOutbox(out, player, root.playerList(), *file);
                 }
                 out.deleteMessagesAfter(marker);
             }
@@ -623,13 +636,13 @@ game::v3::DirectoryLoader::doSaveCurrentTurn(const Turn& turn, const Game& game,
             dir.openFile(Format("gen%d.dat", player), FileSystem::Create)
                 ->fullWrite(afl::base::fromObject(genData));
 
-            control.save(dir, m_translator, m_log);
+            control.save(dir, tx, log);
 
             // Database
             saveCurrentDatabases(turn, game, player, root, session, *m_charset);
 
             // Fleets
-            game::db::FleetLoader(*m_charset, m_translator).save(root.gameDirectory(), turn.universe(), player);
+            game::db::FleetLoader(*m_charset, tx).save(root.gameDirectory(), turn.universe(), player);
 
         }
     }
@@ -639,12 +652,12 @@ game::v3::DirectoryLoader::doSaveCurrentTurn(const Turn& turn, const Game& game,
 
     // Recent
     if (m_pProfile != 0) {
-        game.expressionLists().saveRecentFiles(*m_pProfile, m_log, m_translator);
+        game.expressionLists().saveRecentFiles(*m_pProfile, log, tx);
     }
 }
 
 void
-game::v3::DirectoryLoader::loadKore(afl::io::Stream& file, Turn& turn, int player) const
+game::v3::DirectoryLoader::loadKore(afl::io::Stream& file, Turn& turn, int player, afl::sys::LogListener& log, afl::string::Translator& tx) const
 {
     // ex game/load-dir.cc:loadKore, ccmain.pas:LoadObjects (part)
     // Header
@@ -653,7 +666,7 @@ game::v3::DirectoryLoader::loadKore(afl::io::Stream& file, Turn& turn, int playe
     if (headerSize != sizeof(header)) {
         // Some programs generate 0-length koreX.dat files. Ignore those.
         if (headerSize == 0) {
-            m_log.write(m_log.Info, LOG_NAME, Format(m_translator.translateString("File \"%s\" is empty and will be ignored.").c_str(), file.getName()));
+            log.write(LogListener::Info, LOG_NAME, Format(tx("File \"%s\" is empty and will be ignored."), file.getName()));
             return;
         } else {
             throw afl::except::FileTooShortException(file);
@@ -661,11 +674,11 @@ game::v3::DirectoryLoader::loadKore(afl::io::Stream& file, Turn& turn, int playe
     }
 
     if (header.turnNumber != turn.getTurnNumber()) {
-        m_log.write(m_log.Warn, LOG_NAME, Format(m_translator.translateString("File \"%s\" is stale and will be ignored.").c_str(), file.getName()));
+        log.write(LogListener::Warn, LOG_NAME, Format(tx("File \"%s\" is stale and will be ignored."), file.getName()));
         return;
     }
 
-    Loader ldr(*m_charset, m_translator, m_log);
+    Loader ldr(*m_charset, tx, log);
 
     // Minefields
     ldr.loadKoreMinefields(turn.universe(), file, 500, player, turn.getTurnNumber());
@@ -685,14 +698,14 @@ game::v3::DirectoryLoader::loadKore(afl::io::Stream& file, Turn& turn, int playe
     if (file.read(afl::base::fromObject(buffer)) == sizeof(buffer) && std::memcmp(buffer, "1120", 4) == 0) {
         int32_t count = buffer[5];
         if (count < 0 || count > gt::NUM_SHIPS) {
-            throw afl::except::FileFormatException(file, m_translator.translateString("Unbelievable number of visual contacts"));
+            throw afl::except::FileFormatException(file, tx("Unbelievable number of visual contacts"));
         }
         ldr.loadTargets(turn.universe(), file, count, Loader::TargetEncrypted, PlayerSet_t(player), turn.getTurnNumber());
     }
 }
 
 void
-game::v3::DirectoryLoader::loadSkore(afl::io::Stream& file, Turn& turn) const
+game::v3::DirectoryLoader::loadSkore(afl::io::Stream& file, Turn& turn, afl::sys::LogListener& log, afl::string::Translator& tx) const
 {
     // ex game/load-dir.cc:loadSkore, ccmain.pas:LoadObjects (part)
 
@@ -704,7 +717,7 @@ game::v3::DirectoryLoader::loadSkore(afl::io::Stream& file, Turn& turn) const
 
     // Do we have extended Ufos?
     if (std::memcmp(header.signature, "yAmsz", 5) == 0 && header.resultVersion > 0 && header.numUfos > 100) {
-        Loader(*m_charset, m_translator, m_log).loadUfos(turn.universe(), file, 101, header.numUfos - 100);
+        Loader(*m_charset, tx, log).loadUfos(turn.universe(), file, 101, header.numUfos - 100);
     }
 }
 
@@ -716,7 +729,7 @@ game::v3::DirectoryLoader::saveShips(afl::io::Stream& file, const game::map::Uni
     // Pass 1: count
     uint16_t count = 0;
     for (Id_t i = 1, n = univ.ships().size(); i <= n; ++i) {
-        if (const game::map::Ship* pShip = univ.ships().get(i)) {
+        if (const Ship* pShip = univ.ships().get(i)) {
             if (pShip->getShipSource().contains(player)) {
                 ++count;
             }
@@ -730,10 +743,10 @@ game::v3::DirectoryLoader::saveShips(afl::io::Stream& file, const game::map::Uni
 
     // Pass 2: data
     for (Id_t i = 1, n = univ.ships().size(); i <= n; ++i) {
-        if (const game::map::Ship* pShip = univ.ships().get(i)) {
+        if (const Ship* pShip = univ.ships().get(i)) {
             if (pShip->getShipSource().contains(player)) {
                 // Get ship data
-                game::map::ShipData shipData;
+                ShipData shipData;
                 pShip->getCurrentShipData(shipData);
 
                 // Serialize it
@@ -759,7 +772,7 @@ game::v3::DirectoryLoader::savePlanets(afl::io::Stream& file, const game::map::U
     // Pass 1: count
     uint16_t count = 0;
     for (Id_t i = 1, n = univ.planets().size(); i <= n; ++i) {
-        if (const game::map::Planet* pPlanet = univ.planets().get(i)) {
+        if (const Planet* pPlanet = univ.planets().get(i)) {
             if (pPlanet->getPlanetSource().contains(player)) {
                 ++count;
             }
@@ -773,10 +786,10 @@ game::v3::DirectoryLoader::savePlanets(afl::io::Stream& file, const game::map::U
 
     // Pass 2: data
     for (Id_t i = 1, n = univ.planets().size(); i <= n; ++i) {
-        if (const game::map::Planet* pPlanet = univ.planets().get(i)) {
+        if (const Planet* pPlanet = univ.planets().get(i)) {
             if (pPlanet->getPlanetSource().contains(player)) {
                 // Get planet data
-                game::map::PlanetData planetData;
+                PlanetData planetData;
                 pPlanet->getCurrentPlanetData(planetData);
 
                 // Serialize it
@@ -802,7 +815,7 @@ game::v3::DirectoryLoader::saveBases(afl::io::Stream& file, const game::map::Uni
     // Pass 1: count
     uint16_t count = 0;
     for (Id_t i = 1, n = univ.planets().size(); i <= n; ++i) {
-        if (const game::map::Planet* pPlanet = univ.planets().get(i)) {
+        if (const Planet* pPlanet = univ.planets().get(i)) {
             if (pPlanet->getBaseSource().contains(player)) {
                 ++count;
             }
@@ -816,10 +829,10 @@ game::v3::DirectoryLoader::saveBases(afl::io::Stream& file, const game::map::Uni
 
     // Pass 2: data
     for (Id_t i = 1, n = univ.planets().size(); i <= n; ++i) {
-        if (const game::map::Planet* pPlanet = univ.planets().get(i)) {
+        if (const Planet* pPlanet = univ.planets().get(i)) {
             if (pPlanet->getBaseSource().contains(player)) {
                 // Get base data
-                game::map::BaseData baseData;
+                BaseData baseData;
                 pPlanet->getCurrentBaseData(baseData);
 
                 // Owner

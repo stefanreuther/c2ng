@@ -61,7 +61,6 @@ game::pcc::TurnLoader::TurnLoader(afl::base::Ref<afl::io::Directory> localDirect
                                   afl::base::Ref<ServerDirectory> serverDirectory,
                                   int32_t hostGameNumber,
                                   std::auto_ptr<afl::charset::Charset> charset,
-                                  afl::string::Translator& tx,
                                   afl::sys::LogListener& log,
                                   PlayerSet_t availablePlayers,
                                   util::ProfileDirectory& profile)
@@ -70,7 +69,6 @@ game::pcc::TurnLoader::TurnLoader(afl::base::Ref<afl::io::Directory> localDirect
       m_serverDirectory(serverDirectory),
       m_hostGameNumber(hostGameNumber),
       m_charset(charset),
-      m_translator(tx),
       m_log(log),
       m_profile(profile),
       m_availablePlayers(availablePlayers)
@@ -100,7 +98,7 @@ game::pcc::TurnLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game:
      public:
         Task(TurnLoader& parent, Turn& turn, Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t>& then)
             : m_parent(parent), m_turn(turn), m_game(game), m_player(player), m_root(root), m_session(session), m_then(then),
-              m_checker(turn, &parent.m_serverDirectory->handler().callback(), parent.m_log, parent.m_translator)
+              m_checker(turn, &parent.m_serverDirectory->handler().callback(), parent.m_log, session.translator())
             { }
 
         virtual void call()
@@ -174,16 +172,16 @@ game::pcc::TurnLoader::getHistoryStatus(int /*player*/, int /*turn*/, afl::base:
 }
 
 std::auto_ptr<game::Task_t>
-game::pcc::TurnLoader::loadHistoryTurn(Turn& /*turn*/, Game& /*game*/, int /*player*/, int /*turnNumber*/, Root& /*root*/, std::auto_ptr<StatusTask_t> then)
+game::pcc::TurnLoader::loadHistoryTurn(Turn& /*turn*/, Game& /*game*/, int /*player*/, int /*turnNumber*/, Root& /*root*/, Session& /*session*/, std::auto_ptr<StatusTask_t> then)
 {
     // FIXME: implement
     return makeConfirmationTask(false, then);
 }
 
 std::auto_ptr<game::Task_t>
-game::pcc::TurnLoader::saveConfiguration(const Root& root, std::auto_ptr<Task_t> then)
+game::pcc::TurnLoader::saveConfiguration(const Root& root, afl::sys::LogListener& log, afl::string::Translator& tx, std::auto_ptr<Task_t> then)
 {
-    return defaultSaveConfiguration(root, &m_profile, m_log, m_translator, then);
+    return defaultSaveConfiguration(root, &m_profile, log, tx, then);
 }
 
 String_t
@@ -209,7 +207,8 @@ void
 game::pcc::TurnLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, game::Root& root, Session& session)
 {
     // Initialize
-    Loader ldr(*m_charset, m_translator, m_log);
+    afl::string::Translator& tx = session.translator();
+    Loader ldr(*m_charset, tx, m_log);
     ldr.prepareUniverse(turn.universe());
     ldr.prepareTurn(turn, root, session, player);
 
@@ -225,13 +224,13 @@ game::pcc::TurnLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, gam
     loadCurrentDatabases(turn, game, player, root, session);
 
     // Load expression lists from profile
-    game.expressionLists().loadRecentFiles(m_profile, m_log, m_translator);
-    game.expressionLists().loadPredefinedFiles(m_profile, *specDir, m_log, m_translator);
+    game.expressionLists().loadRecentFiles(m_profile, m_log, tx);
+    game.expressionLists().loadPredefinedFiles(m_profile, *specDir, m_log, tx);
 
     // Load result file from remote
     {
         Ref<Stream> file = m_serverDirectory->openFile(Format("player%d.rst", player), afl::io::FileSystem::OpenRead);
-        m_log.write(LogListener::Info, LOG_NAME, Format(m_translator("Loading %s RST file..."), root.playerList().getPlayerName(player, Player::AdjectiveName, m_translator)));
+        m_log.write(LogListener::Info, LOG_NAME, Format(tx("Loading %s RST file..."), root.playerList().getPlayerName(player, Player::AdjectiveName, tx)));
         ldr.loadResult(turn, root, game, *file, player);
 
         // TODO: backups?
@@ -241,28 +240,28 @@ game::pcc::TurnLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, gam
     try {
         Ptr<Stream> file = m_serverDirectory->openFileNT(Format("player%d.trn", player), afl::io::FileSystem::OpenRead);
         if (file.get() != 0) {
-            m_log.write(LogListener::Info, LOG_NAME, Format(m_translator("Loading %s TRN file..."), root.playerList().getPlayerName(player, Player::AdjectiveName, m_translator)));
-            Loader(*m_charset, m_translator, m_log).loadTurnfile(turn, root, *file, player);
+            m_log.write(LogListener::Info, LOG_NAME, Format(tx("Loading %s TRN file..."), root.playerList().getPlayerName(player, Player::AdjectiveName, tx)));
+            Loader(*m_charset, tx, m_log).loadTurnfile(turn, root, *file, player);
         }
     }
     catch (afl::except::FileProblemException& e) {
-        m_log.write(afl::sys::LogListener::Warn, LOG_NAME, m_translator("File has been ignored"), e);
+        m_log.write(afl::sys::LogListener::Warn, LOG_NAME, tx("File has been ignored"), e);
     }
 
     // Load fleets from local game directory
     // Must be after loading the result/turn because it requires shipsource flags
     try {
-        game::db::FleetLoader(*m_charset, m_translator).load(root.gameDirectory(), turn.universe(), player);
+        game::db::FleetLoader(*m_charset, tx).load(root.gameDirectory(), turn.universe(), player);
     }
     catch (afl::except::FileProblemException& e) {
-        m_log.write(afl::sys::LogListener::Warn, LOG_NAME, m_translator("File has been ignored"), e);
+        m_log.write(afl::sys::LogListener::Warn, LOG_NAME, tx("File has been ignored"), e);
     }
 
     // Load FLAK from remote
     ldr.loadFlakBattles(turn, *m_serverDirectory, player);
 
     // Load util from remote
-    Parser mp(m_translator, m_log, game, player, root, game::actions::mustHaveShipList(session), session.world().atomTable());
+    Parser mp(tx, m_log, game, player, root, game::actions::mustHaveShipList(session), session.world().atomTable());
     {
         Ptr<Stream> file = m_serverDirectory->openFileNT(Format("util%d.dat", player), afl::io::FileSystem::OpenRead);
         if (file.get() != 0) {
@@ -284,16 +283,17 @@ game::pcc::TurnLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, gam
 void
 game::pcc::TurnLoader::doSaveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t players, SaveOptions_t opts, const Root& root, Session& session)
 {
+    afl::string::Translator& tx = session.translator();
     if (turn.getCommandPlayers().containsAnyOf(players)) {
         game::v3::trn::FileSet turns(*m_serverDirectory, *m_charset);
-        m_log.write(LogListener::Info, LOG_NAME, m_translator("Generating turn commands..."));
+        m_log.write(LogListener::Info, LOG_NAME, tx("Generating turn commands..."));
 
         // Create turn files
         std::vector<TurnFile*> turnPtrs;
         for (int player = 1; player <= MAX_PLAYERS; ++player) {
             if (players.contains(player)) {
                 TurnFile& thisTurn = turns.create(player, turn.getTimestamp(), turn.getTurnNumber());
-                Loader(*m_charset, m_translator, m_log).saveTurnFile(thisTurn, turn, player, root);
+                Loader(*m_charset, tx, m_log).saveTurnFile(thisTurn, turn, player, root);
                 turnPtrs.push_back(&thisTurn);
             }
         }
@@ -307,7 +307,7 @@ game::pcc::TurnLoader::doSaveCurrentTurn(const Turn& turn, const Game& game, Pla
             TurnFile& thisTurn = *turnPtrs[i];
             int player = thisTurn.getPlayer();
             String_t fileName = Format("player%d.trn", player);
-            m_log.write(LogListener::Info, LOG_NAME, Format(m_translator("Uploading %s..."), fileName));
+            m_log.write(LogListener::Info, LOG_NAME, Format(tx("Uploading %s..."), fileName));
             afl::io::InternalStream sink;
             thisTurn.write(sink);
 
@@ -319,12 +319,12 @@ game::pcc::TurnLoader::doSaveCurrentTurn(const Turn& turn, const Game& game, Pla
                 afl::data::Access a(result);
                 if (a("result").toInteger()) {
                     // Turn status
-                    m_log.write(LogListener::Info, LOG_NAME, formatTurnStatus(a("status").toInteger(), m_translator));
+                    m_log.write(LogListener::Info, LOG_NAME, formatTurnStatus(a("status").toInteger(), tx));
 
                     // Turn checker output
                     String_t output = a("output").toString();
                     if (!output.empty()) {
-                        m_log.write(LogListener::Info, LOG_NAME, m_translator("Turn checker output:"));
+                        m_log.write(LogListener::Info, LOG_NAME, tx("Turn checker output:"));
                         String_t::size_type p = 0, n;
                         while ((n = output.find('\n', p)) != String_t::npos) {
                             m_log.write(LogListener::Info, LOG_NAME, "> " + output.substr(p, n-p));
@@ -338,10 +338,10 @@ game::pcc::TurnLoader::doSaveCurrentTurn(const Turn& turn, const Game& game, Pla
                     // Mark temporary
                     if (a("allowtemp").toInteger() && opts.contains(MarkTurnTemporary)) {
                         handler.markTurnTemporaryPreAuthenticated(account, m_hostGameNumber, player, 1);
-                        m_log.write(LogListener::Info, LOG_NAME, m_translator("Turn marked temporary."));
+                        m_log.write(LogListener::Info, LOG_NAME, tx("Turn marked temporary."));
                     }
                 } else {
-                    m_log.write(LogListener::Error, LOG_NAME, Format(m_translator("Error uploading turn: %s"), a("error").toString()));
+                    m_log.write(LogListener::Error, LOG_NAME, Format(tx("Error uploading turn: %s"), a("error").toString()));
                 }
             } else {
                 // Uploaded game: just upload the file
@@ -357,10 +357,10 @@ game::pcc::TurnLoader::doSaveCurrentTurn(const Turn& turn, const Game& game, Pla
                 saveCurrentDatabases(turn, game, player, root, session, *m_charset);
 
                 // Fleets
-                game::db::FleetLoader(*m_charset, m_translator).save(root.gameDirectory(), turn.universe(), player);
+                game::db::FleetLoader(*m_charset, tx).save(root.gameDirectory(), turn.universe(), player);
             }
         }
     }
 
-    game.expressionLists().saveRecentFiles(m_profile, m_log, m_translator);
+    game.expressionLists().saveRecentFiles(m_profile, m_log, tx);
 }

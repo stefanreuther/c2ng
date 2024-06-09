@@ -862,7 +862,7 @@ game::interface::IFHistoryLoadTurn(game::Session& session, interpreter::Process&
                 HistoryTurn& m_historyTurn;
             };
             afl::base::Ref<Turn> turn = *new Turn();
-            proc.suspend(r->getTurnLoader()->loadHistoryTurn(*turn, *g, g->getViewpointPlayer(), turnNumber, *r, std::auto_ptr<StatusTask_t>(new Task(proc, session, turn, turnNumber, *ht))));
+            proc.suspend(r->getTurnLoader()->loadHistoryTurn(*turn, *g, g->getViewpointPlayer(), turnNumber, *r, session, std::auto_ptr<StatusTask_t>(new Task(proc, session, turn, turnNumber, *ht))));
             return;
         }
 

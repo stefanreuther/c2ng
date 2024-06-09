@@ -44,7 +44,7 @@ namespace {
               scanner(*dir, tx, log),
               env(),
               profile(env, fs, tx, log),
-              testee(dir, dir, std::auto_ptr<afl::charset::Charset>(new afl::charset::Utf8Charset()), tx, log, scanner, fs, &profile, 0),
+              testee(dir, dir, std::auto_ptr<afl::charset::Charset>(new afl::charset::Utf8Charset()), scanner, fs, &profile, 0),
               root(dir, *new game::test::SpecificationLoader(),
                    game::HostVersion(),
                    std::auto_ptr<game::RegistrationKey>(new game::test::RegistrationKey(game::RegistrationKey::Unregistered, 5)),
@@ -131,7 +131,7 @@ AFL_TEST("game.v3.ResultLoader:loadTurnfile", a)
     afl::io::ConstMemoryStream file(THREE_COMMAND_TURN);
 
     // Test it
-    h.testee.loadTurnfile(h.turn, h.root, file, PLAYER);
+    h.testee.loadTurnfile(h.turn, h.root, file, PLAYER, h.log, h.tx);
 
     // Verify result
     a.checkEqual("11. getFriendlyCode", h.turn.universe().ships().get(9)->getFriendlyCode().orElse(""), "abc");
@@ -146,5 +146,5 @@ AFL_TEST("game.v3.ResultLoader:error:invalid-file", a)
     // (essentially, the same as TestGameV3Loader::testInvalidFile; this one was earlier.)
     TestHarness h;
     afl::io::ConstMemoryStream file(afl::base::Nothing);
-    AFL_CHECK_THROWS(a, h.testee.loadTurnfile(h.turn, h.root, file, PLAYER), afl::except::FileFormatException);
+    AFL_CHECK_THROWS(a, h.testee.loadTurnfile(h.turn, h.root, file, PLAYER, h.log, h.tx), afl::except::FileFormatException);
 }

@@ -161,12 +161,13 @@ namespace game {
             \param player [in] Player number
             \param turnNumber [in] Turn number
             \param root [in] Root object. Should not need updating.
+            \param session [in] Session. For translator.
             \param then [in] Task to execute after loading; never null.
 
             If the task produced by this function fails to load history data, it shall report failure through then \c then task.
 
             \return Newly-allocated task to perform the operation; never null. */
-        virtual std::auto_ptr<Task_t> loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, std::auto_ptr<StatusTask_t> then) = 0;
+        virtual std::auto_ptr<Task_t> loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, Session& session, std::auto_ptr<StatusTask_t> then) = 0;
 
         /** Save configuration.
             This should save both user-specific (user profile, ConfigurationOption::Source::User)
@@ -174,9 +175,11 @@ namespace game {
             of the UserConfiguration within the given Root.
             This configuration is loaded by the entity that creates the Root; therefore, no loadConfiguration is needed in TurnLoader.
             \param [in] root Root object
+            \param [in] log  Logger
+            \param [in] tx   Translator
             \param [in] then Task to save after saving; never null.
             \return Newly-allocated task to perform the operation; never null */
-        virtual std::auto_ptr<Task_t> saveConfiguration(const Root& root, std::auto_ptr<Task_t> then) = 0;
+        virtual std::auto_ptr<Task_t> saveConfiguration(const Root& root, afl::sys::LogListener& log, afl::string::Translator& tx, std::auto_ptr<Task_t> then) = 0;
 
         /** Get property for script interface.
             These values are published on the script interface (GlobalContext) and are not intended to be used in C++.

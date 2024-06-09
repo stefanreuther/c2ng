@@ -29,8 +29,6 @@ namespace game { namespace v3 {
             \param specificationDirectory Specification directory (union of game directory, default specification directory)
             \param defaultSpecificationDirectory Default specification directory (share/specs)
             \param charset Game character set
-            \param tx Translator
-            \param log Logger
             \param scanner Directory scanner (for initialisation)
             \param fs File System instance
             \param pProfile Profile directory (optional)
@@ -38,8 +36,6 @@ namespace game { namespace v3 {
         DirectoryLoader(afl::base::Ref<afl::io::Directory> specificationDirectory,
                         afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory,
                         std::auto_ptr<afl::charset::Charset> charset,
-                        afl::string::Translator& tx,
-                        afl::sys::LogListener& log,
                         const DirectoryScanner& scanner,
                         afl::io::FileSystem& fs,
                         util::ProfileDirectory* pProfile,
@@ -49,8 +45,8 @@ namespace game { namespace v3 {
         virtual std::auto_ptr<Task_t> loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
         virtual std::auto_ptr<Task_t> saveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t player, SaveOptions_t opts, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
         virtual void getHistoryStatus(int player, int turn, afl::base::Memory<HistoryStatus> status, const Root& root);
-        virtual std::auto_ptr<Task_t> loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, std::auto_ptr<StatusTask_t> then);
-        virtual std::auto_ptr<Task_t> saveConfiguration(const Root& root, std::auto_ptr<Task_t> then);
+        virtual std::auto_ptr<Task_t> loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
+        virtual std::auto_ptr<Task_t> saveConfiguration(const Root& root, afl::sys::LogListener& log, afl::string::Translator& tx, std::auto_ptr<Task_t> then);
         virtual String_t getProperty(Property p);
 
      private:
@@ -60,8 +56,6 @@ namespace game { namespace v3 {
         afl::base::Ref<afl::io::Directory> m_specificationDirectory;
         afl::base::Ref<afl::io::Directory> m_defaultSpecificationDirectory;
         std::auto_ptr<afl::charset::Charset> m_charset;
-        afl::string::Translator& m_translator;
-        afl::sys::LogListener& m_log;
         afl::io::FileSystem& m_fileSystem;
         util::ProfileDirectory* m_pProfile;
         game::browser::UserCallback* m_pCallback;
@@ -95,8 +89,10 @@ namespace game { namespace v3 {
             \param game Game
             \param player Player
             \param turnNumber Turn number to load
-            \param root Root */
-        void doLoadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root);
+            \param root Root
+            \param log Logger
+            \param tx Translator */
+        void doLoadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, afl::sys::LogListener& log, afl::string::Translator& tx);
 
         /** Implementation of saveCurrentTurn.
             Can throw on error.
@@ -110,13 +106,17 @@ namespace game { namespace v3 {
         /** Load KORE file.
             \param file File
             \param turn Target turn
-            \param player Player number */
-        void loadKore(afl::io::Stream& file, Turn& turn, int player) const;
+            \param player Player number
+            \param log Logger
+            \param tx Translator */
+        void loadKore(afl::io::Stream& file, Turn& turn, int player, afl::sys::LogListener& log, afl::string::Translator& tx) const;
 
         /** Load SKORE file.
             \param file File
-            \param turn Target turn */
-        void loadSkore(afl::io::Stream& file, Turn& turn) const;
+            \param turn Target turn
+            \param log Logger
+            \param tx Translator */
+        void loadSkore(afl::io::Stream& file, Turn& turn, afl::sys::LogListener& log, afl::string::Translator& tx) const;
 
         /** Save ships.
             Writes the count and the ships, but not the signature.

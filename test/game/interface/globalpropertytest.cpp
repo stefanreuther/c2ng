@@ -70,9 +70,9 @@ AFL_TEST("game.interface.GlobalProperty:full", a)
             { throw std::runtime_error("unexpected: saveCurrentTurn"); }
         virtual void getHistoryStatus(int /*player*/, int /*turn*/, afl::base::Memory<HistoryStatus> /*status*/, const game::Root& /*root*/)
             { throw std::runtime_error("unexpected: getHistoryStatus"); }
-        virtual std::auto_ptr<game::Task_t> loadHistoryTurn(game::Turn& /*turn*/, game::Game& /*game*/, int /*player*/, int /*turnNumber*/, game::Root& /*root*/, std::auto_ptr<game::StatusTask_t> /*then*/)
+        virtual std::auto_ptr<game::Task_t> loadHistoryTurn(game::Turn& /*turn*/, game::Game& /*game*/, int /*player*/, int /*turnNumber*/, game::Root& /*root*/, game::Session& /*session*/, std::auto_ptr<game::StatusTask_t> /*then*/)
             { throw std::runtime_error("unexpected: loadHistoryTurn"); }
-        virtual std::auto_ptr<game::Task_t> saveConfiguration(const game::Root& /*root*/, std::auto_ptr<game::Task_t> /*then*/)
+        virtual std::auto_ptr<game::Task_t> saveConfiguration(const game::Root& /*root*/, afl::sys::LogListener& /*log*/, afl::string::Translator& /*tx*/, std::auto_ptr<game::Task_t> /*then*/)
             { throw std::runtime_error("unexpected: saveConfiguration"); }
         virtual String_t getProperty(Property p)
             {

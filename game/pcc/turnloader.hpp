@@ -35,7 +35,6 @@ namespace game { namespace pcc {
             @param serverDirectory                 Server directory (RST, TRN, specs). Also provides access to BrowserHandler/Account.
             @param hostGameNumber                  Game number for hosted game (0 if not a hosted game)
             @param charset                         Game character set
-            @param tx                              Translator
             @param log                             Logger
             @param availablePlayers                Available players
             @param profile                         Profile directory (default configs) */
@@ -44,7 +43,6 @@ namespace game { namespace pcc {
                    afl::base::Ref<ServerDirectory> serverDirectory,
                    int32_t hostGameNumber,
                    std::auto_ptr<afl::charset::Charset> charset,
-                   afl::string::Translator& tx,
                    afl::sys::LogListener& log,
                    PlayerSet_t availablePlayers,
                    util::ProfileDirectory& profile);
@@ -54,8 +52,8 @@ namespace game { namespace pcc {
         virtual std::auto_ptr<Task_t> loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
         virtual std::auto_ptr<Task_t> saveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t player, SaveOptions_t opts, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
         virtual void getHistoryStatus(int player, int turn, afl::base::Memory<HistoryStatus> status, const Root& root);
-        virtual std::auto_ptr<Task_t> loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, std::auto_ptr<StatusTask_t> then);
-        virtual std::auto_ptr<Task_t> saveConfiguration(const Root& root, std::auto_ptr<Task_t> then);
+        virtual std::auto_ptr<Task_t> loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
+        virtual std::auto_ptr<Task_t> saveConfiguration(const Root& root, afl::sys::LogListener& log, afl::string::Translator& tx, std::auto_ptr<Task_t> then);
         virtual String_t getProperty(Property p);
 
      private:
@@ -64,7 +62,6 @@ namespace game { namespace pcc {
         afl::base::Ref<ServerDirectory> m_serverDirectory;
         int32_t m_hostGameNumber;
         std::auto_ptr<afl::charset::Charset> m_charset;
-        afl::string::Translator& m_translator;
         afl::sys::LogListener& m_log;
         util::ProfileDirectory& m_profile;
 
