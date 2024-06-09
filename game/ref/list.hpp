@@ -61,6 +61,10 @@ namespace game { namespace ref {
             @param ids  Ids to add */
         void add(Reference::Type type, const std::vector<Id_t>& ids);
 
+        /** Add content of another list.
+            @param other Other list to add */
+        void add(const List& other);
+
         /** Add all objects at a particular location.
             This is used for certain lists of ships.
             @param univ          Universe

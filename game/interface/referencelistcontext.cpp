@@ -281,6 +281,12 @@ game::interface::ReferenceListContext::getList() const
     return m_list->list;
 }
 
+game::ref::List&
+game::interface::ReferenceListContext::getList()
+{
+    return m_list->list;
+}
+
 /*
  *  Interface Functions
  */
@@ -293,12 +299,16 @@ void
 game::interface::IFReferenceList_Add(game::ref::List& list, Session& /*session*/, interpreter::Arguments& args)
 {
     args.checkArgumentCountAtLeast(1);
+
+    // Copy to a temporary list and append that, so if command errors, we do not produce a partial result
+    game::ref::List tmp;
     while (args.getNumArgs() > 0) {
         Reference r;
         if (checkReferenceArg(r, args.getNext())) {
-            list.add(r);
+            tmp.add(r);
         }
     }
+    list.add(tmp);
 }
 
 /* @q AddObjects kind:Str, id:Int, ... (Reference List Operation)

@@ -63,6 +63,15 @@ game::ref::List::add(Reference::Type type, const std::vector<Id_t>& ids)
 }
 
 void
+game::ref::List::add(const List& other)
+{
+    // Not using iterators makes self-append work here
+    for (size_t i = 0, n = other.size(); i < n; ++i) {
+        m_content.push_back(other[i]);
+    }
+}
+
+void
 game::ref::List::addObjectsAt(const game::map::Universe& univ, game::map::Point pt, Options_t options, Id_t excludeShipId)
 {
     // ex GObjectList::addObjectsAt

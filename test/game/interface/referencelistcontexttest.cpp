@@ -215,12 +215,16 @@ AFL_TEST("game.interface.ReferenceListContext:Add:error:type", a)
 {
     Environment env;
     ReferenceListContext ctx(*new ReferenceListContext::Data(), env.session);
+    ctx.getList().add(Reference(Reference::Ship, 22));
     NewCallable cv(a, ctx, "ADD");
 
     afl::data::Segment seg;
     seg.pushBackNew(new ReferenceContext(Reference(Reference::Planet, 33), env.session));
     seg.pushBackInteger(16);
     AFL_CHECK_THROWS(a, cv.callable.call(env.proc, seg, false), interpreter::Error);
+
+    // List should not be modified
+    a.checkEqual("01. size", ctx.getList().size(), 1U);
 }
 
 // Arity error: 'Add' with no args

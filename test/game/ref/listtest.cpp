@@ -85,6 +85,51 @@ AFL_TEST("game.ref.List:normal", a)
     a.checkEqual("31. size", testee.size(), 0U);
 }
 
+/** Test add(List). */
+AFL_TEST("game.ref.List:add:list", a)
+{
+    // Build a list
+    game::ref::List testee;
+    testee.add(Reference(Reference::Planet, 3));
+    testee.add(Reference(Reference::Planet, 1));
+    testee.add(Reference(Reference::Planet, 5));
+
+    // Another list
+    game::ref::List b;
+    b.add(Reference(Reference::Ship, 10));
+    b.add(Reference(Reference::Ship, 30));
+
+    // Add
+    testee.add(b);
+
+    // Verify
+    a.checkEqual("01. size", testee.size(), 5U);
+    a.checkEqual("02. item", testee[0], Reference(Reference::Planet, 3));
+    a.checkEqual("03. item", testee[1], Reference(Reference::Planet, 1));
+    a.checkEqual("04. item", testee[2], Reference(Reference::Planet, 5));
+    a.checkEqual("05. item", testee[3], Reference(Reference::Ship, 10));
+    a.checkEqual("06. item", testee[4], Reference(Reference::Ship, 30));
+}
+
+/** Test add(List), self-addition. */
+AFL_TEST("game.ref.List:add:list:self", a)
+{
+    // Build a list
+    game::ref::List testee;
+    testee.add(Reference(Reference::Planet, 3));
+    testee.add(Reference(Reference::Planet, 1));
+
+    // Add
+    testee.add(testee);
+
+    // Verify
+    a.checkEqual("01. size", testee.size(), 4U);
+    a.checkEqual("02. item", testee[0], Reference(Reference::Planet, 3));
+    a.checkEqual("03. item", testee[1], Reference(Reference::Planet, 1));
+    a.checkEqual("04. item", testee[2], Reference(Reference::Planet, 3));
+    a.checkEqual("05. item", testee[3], Reference(Reference::Planet, 1));
+}
+
 /** Test addObjectsAt(). */
 AFL_TEST("game.ref.List:addObjectsAt", a)
 {
