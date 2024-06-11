@@ -838,3 +838,16 @@ AFL_TEST("game.db.Loader:roundtrip", a)
         }
     }
 }
+
+/** Test loading a prepared file. */
+AFL_TEST("game.db.Loader:error:broken", a)
+{
+    Environment env(7, 900, 500);
+
+    // Loader
+    game::db::Loader testee(env.cs, env.world, env.tx);
+
+    // Load: this still succeeds
+    afl::io::ConstMemoryStream inputStream(afl::base::Nothing);
+    AFL_CHECK_SUCCEEDS(a, testee.load(inputStream, env.t, env.g, true));
+}

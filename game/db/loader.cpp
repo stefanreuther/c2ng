@@ -15,6 +15,7 @@
 #include "game/db/drawingatommap.hpp"
 #include "game/db/packer.hpp"
 #include "game/db/structures.hpp"
+#include "interpreter/error.hpp"
 #include "interpreter/savevisitor.hpp"
 #include "interpreter/vmio/nullloadcontext.hpp"
 #include "interpreter/vmio/nullsavecontext.hpp"
@@ -26,6 +27,9 @@ namespace {
     namespace gm = game::map;
     namespace gp = game::parser;
     namespace dt = game::db::structures;
+
+    using afl::string::Format;
+    using afl::sys::LogListener;
 
     const char LOG_NAME[] = "game.db";
 
@@ -170,193 +174,197 @@ void
 game::db::Loader::load(afl::io::Stream& in, Turn& turn, Game& game, bool acceptProperties)
 {
     // ex game/db.h:loadChartDatabase
-
     int ignored_entries = 0;
+    try {
+        // Read header
+        structures::Header header;
+        in.fullRead(afl::base::fromObject(header));
+        if (std::memcmp(header.signature, structures::SIGNATURE, sizeof(structures::SIGNATURE)) != 0) {
+            throw afl::except::FileFormatException(in, m_translator("File is missing required signature"));
+        }
+        log().write(LogListener::Debug, LOG_NAME, m_translator("Loading starchart database..."));
 
-    // Read header
-    structures::Header header;
-    in.fullRead(afl::base::fromObject(header));
-    if (std::memcmp(header.signature, structures::SIGNATURE, sizeof(structures::SIGNATURE)) != 0) {
-        throw afl::except::FileFormatException(in, m_translator("File is missing required signature"));
-    }
-    log().write(afl::sys::LogListener::Debug, LOG_NAME, m_translator("Loading starchart database..."));
+        // A ValueLoader
+        interpreter::vmio::NullLoadContext loadContext;
+        interpreter::vmio::ValueLoader valueLoader(m_charset, loadContext, m_translator);
 
-    // A ValueLoader
-    interpreter::vmio::NullLoadContext loadContext;
-    interpreter::vmio::ValueLoader valueLoader(m_charset, loadContext, m_translator);
+        // Read property names
+        afl::data::NameMap planetPropertyNames;
+        afl::data::NameMap shipPropertyNames;
+        valueLoader.loadNames(planetPropertyNames, in, header.numPlanetProperties);
+        valueLoader.loadNames(shipPropertyNames, in, header.numShipProperties);
 
-    // Read property names
-    afl::data::NameMap planetPropertyNames;
-    afl::data::NameMap shipPropertyNames;
-    valueLoader.loadNames(planetPropertyNames, in, header.numPlanetProperties);
-    valueLoader.loadNames(shipPropertyNames, in, header.numShipProperties);
-
-    // Set database turn number
-    // ex GGameTurn::addDatabaseTurn
-    if (header.turnNumber > turn.getDatabaseTurnNumber()) {
-        turn.setDatabaseTurnNumber(header.turnNumber);
-    }
-
-    // Read blocks, main loop
-    in.setPos(header.dataStart);
-    DrawingAtomMap atom_translation;
-    dt::BlockHeader blockHeader;
-    while (in.read(afl::base::fromObject(blockHeader)) == sizeof(blockHeader)) {
-        uint32_t size = blockHeader.size;        /* not const to allow count-down loops */
-        const afl::io::Stream::FileSize_t startPos = in.getPos();
-        const afl::io::Stream::FileSize_t endPos = startPos + blockHeader.size;
-
-        switch (blockHeader.blockType) {
-         case dt::rPlanetHistory: {
-            // A single planet record. Can have variable size, as we store more fields than PCC 1.x,
-            // and possibly extend it in the future. However, we expect a minimum size.
-            if (size >= 93) {
-                // 93 = size of planet data, plus timestamps */
-                dt::Planet planet;
-                afl::base::fromObject(planet).fill(0);
-                in.fullRead(afl::base::fromObject(planet).trim(size));
-
-                Packer(m_charset).addPlanet(turn, planet);
-            } else {
-                /* no known program writes these files */
-            }
-            break;
-         }
-
-         case dt::rShipHistory: {
-            if (size >= sizeof(dt::Ship)) {
-                // Single ship history entry
-                dt::Ship ship;
-                in.fullRead(afl::base::fromObject(ship));
-
-                Packer(m_charset).addShip(turn, ship);
-            }
-            break;
-         }
-
-         case dt::rShipTrack: {
-            if (size >= sizeof(dt::ShipTrackHeader)) {
-                // One header plus many entries
-                dt::ShipTrackHeader header;
-                dt::ShipTrackEntry entry;
-                in.fullRead(afl::base::fromObject(header));
-                size -= uint32_t(sizeof(dt::ShipTrackHeader));
-
-                int id = header.id;
-                int turnNumber = header.turn;
-                while (size >= sizeof(dt::ShipTrackEntry)) {
-                    in.fullRead(afl::base::fromObject(entry));
-                    size -= uint32_t(sizeof(dt::ShipTrackEntry));
-                    Packer(m_charset).addShipTrack(turn, id, turnNumber, entry);
-                    --turnNumber;
-                }
-            }
-            break;
-         }
-
-         case dt::rMinefield: {
-            dt::Minefield dbm;
-            while (size >= sizeof(dbm)) {
-                in.fullRead(afl::base::fromObject(dbm));
-                size -= uint32_t(sizeof(dbm));
-
-                // Add to database
-                if (gm::Minefield* mf = turn.universe().minefields().create(dbm.id)) {
-                    mf->addReport(gm::Point(dbm.x, dbm.y),
-                                  dbm.owner,
-                                  dbm.type != 0 ? gm::Minefield::IsWeb : gm::Minefield::IsMine,
-                                  gm::Minefield::UnitsKnown,
-                                  dbm.units,
-                                  dbm.turn,
-                                  gm::Minefield::NoReason);
-                }
-            }
-            break;
-         }
-
-         case dt::rPainting: {
-            afl::io::LimitedStream ss(in.createChild(), startPos, size);
-            loadDrawings(ss, turn.universe().drawings(), atom_translation);
-            atom_translation.clear();
-            break;
-         }
-
-         case dt::rAutoBuild: {
-            int id = 0;
-            while (size >= sizeof(dt::AutobuildSettings)) {
-                /* read it */
-                dt::AutobuildSettings abs;
-                in.fullRead(afl::base::fromObject(abs));
-                size -= uint32_t(sizeof(abs));
-
-                /* enter into database */
-                ++id;
-                if (gm::Planet* pl = turn.universe().planets().get(id)) {
-                    for (size_t i = 0; i < NUM_PLANETARY_BUILDING_TYPES; ++i) {
-                        pl->setAutobuildGoal(PlanetaryBuilding(i), abs.goal[i]);
-                        pl->setAutobuildSpeed(PlanetaryBuilding(i), abs.speed[i]);
-                    }
-                }
-            }
-            if (size != 0) {
-                log().write(afl::sys::LogListener::Warn, LOG_NAME, m_translator("Autobuild record has unexpected size"));
-            }
-            break;
-         }
-
-         case dt::rShipProperty:
-            if (acceptProperties) {
-                afl::io::LimitedStream ss(in.createChild(), startPos, size);
-                loadPropertyRecord(ss, ShipScope, turn.universe(), shipPropertyNames, m_world.shipPropertyNames(), valueLoader);
-            }
-            break;
-
-         case dt::rPlanetProperty:
-            if (acceptProperties) {
-                afl::io::LimitedStream ss(in.createChild(), startPos, size);
-                loadPropertyRecord(ss, PlanetScope, turn.universe(), planetPropertyNames, m_world.planetPropertyNames(), valueLoader);
-            }
-            break;
-
-         case dt::rShipScore: {
-            afl::io::LimitedStream ss(in.createChild(), startPos, size);
-            loadUnitScoreRecord(ss, ShipScope, turn.universe(), game.shipScores());
-            break;
-         }
-
-         case dt::rPlanetScore: {
-            afl::io::LimitedStream ss(in.createChild(), startPos, size);
-            loadUnitScoreRecord(ss, PlanetScope, turn.universe(), game.planetScores());
-            break;
-         }
-
-         case dt::rPaintingTags: {
-            if (!atom_translation.isEmpty()) {
-                log().write(afl::sys::LogListener::Warn, LOG_NAME, m_translator("Text record appears at unexpected place"));
-            }
-            afl::io::LimitedStream ss(in.createChild(), startPos, size);
-            atom_translation.clear();
-            atom_translation.load(ss, m_charset, m_world.atomTable());
-            break;
-         }
-
-         case dt::rUfoHistory: {
-            if (size >= sizeof(dt::Ufo)) {
-                dt::Ufo ufo;
-                in.fullRead(afl::base::fromObject(ufo));
-                Packer(m_charset).addUfo(turn, ufo);
-            }
-            break;
-         }
-
-         default:
-            ++ignored_entries;
+        // Set database turn number
+        // ex GGameTurn::addDatabaseTurn
+        if (header.turnNumber > turn.getDatabaseTurnNumber()) {
+            turn.setDatabaseTurnNumber(header.turnNumber);
         }
 
-        in.setPos(endPos);
+        // Read blocks, main loop
+        in.setPos(header.dataStart);
+        DrawingAtomMap atom_translation;
+        dt::BlockHeader blockHeader;
+        while (in.read(afl::base::fromObject(blockHeader)) == sizeof(blockHeader)) {
+            uint32_t size = blockHeader.size;        /* not const to allow count-down loops */
+            const afl::io::Stream::FileSize_t startPos = in.getPos();
+            const afl::io::Stream::FileSize_t endPos = startPos + blockHeader.size;
+
+            switch (blockHeader.blockType) {
+             case dt::rPlanetHistory: {
+                // A single planet record. Can have variable size, as we store more fields than PCC 1.x,
+                // and possibly extend it in the future. However, we expect a minimum size.
+                if (size >= 93) {
+                    // 93 = size of planet data, plus timestamps */
+                    dt::Planet planet;
+                    afl::base::fromObject(planet).fill(0);
+                    in.fullRead(afl::base::fromObject(planet).trim(size));
+
+                    Packer(m_charset).addPlanet(turn, planet);
+                } else {
+                    /* no known program writes these files */
+                }
+                break;
+             }
+
+             case dt::rShipHistory: {
+                if (size >= sizeof(dt::Ship)) {
+                    // Single ship history entry
+                    dt::Ship ship;
+                    in.fullRead(afl::base::fromObject(ship));
+
+                    Packer(m_charset).addShip(turn, ship);
+                }
+                break;
+             }
+
+             case dt::rShipTrack: {
+                if (size >= sizeof(dt::ShipTrackHeader)) {
+                    // One header plus many entries
+                    dt::ShipTrackHeader header;
+                    dt::ShipTrackEntry entry;
+                    in.fullRead(afl::base::fromObject(header));
+                    size -= uint32_t(sizeof(dt::ShipTrackHeader));
+
+                    int id = header.id;
+                    int turnNumber = header.turn;
+                    while (size >= sizeof(dt::ShipTrackEntry)) {
+                        in.fullRead(afl::base::fromObject(entry));
+                        size -= uint32_t(sizeof(dt::ShipTrackEntry));
+                        Packer(m_charset).addShipTrack(turn, id, turnNumber, entry);
+                        --turnNumber;
+                    }
+                }
+                break;
+             }
+
+             case dt::rMinefield: {
+                dt::Minefield dbm;
+                while (size >= sizeof(dbm)) {
+                    in.fullRead(afl::base::fromObject(dbm));
+                    size -= uint32_t(sizeof(dbm));
+
+                    // Add to database
+                    if (gm::Minefield* mf = turn.universe().minefields().create(dbm.id)) {
+                        mf->addReport(gm::Point(dbm.x, dbm.y),
+                                      dbm.owner,
+                                      dbm.type != 0 ? gm::Minefield::IsWeb : gm::Minefield::IsMine,
+                                      gm::Minefield::UnitsKnown,
+                                      dbm.units,
+                                      dbm.turn,
+                                      gm::Minefield::NoReason);
+                    }
+                }
+                break;
+             }
+
+             case dt::rPainting: {
+                afl::io::LimitedStream ss(in.createChild(), startPos, size);
+                loadDrawings(ss, turn.universe().drawings(), atom_translation);
+                atom_translation.clear();
+                break;
+             }
+
+             case dt::rAutoBuild: {
+                int id = 0;
+                while (size >= sizeof(dt::AutobuildSettings)) {
+                    /* read it */
+                    dt::AutobuildSettings abs;
+                    in.fullRead(afl::base::fromObject(abs));
+                    size -= uint32_t(sizeof(abs));
+
+                    /* enter into database */
+                    ++id;
+                    if (gm::Planet* pl = turn.universe().planets().get(id)) {
+                        for (size_t i = 0; i < NUM_PLANETARY_BUILDING_TYPES; ++i) {
+                            pl->setAutobuildGoal(PlanetaryBuilding(i), abs.goal[i]);
+                            pl->setAutobuildSpeed(PlanetaryBuilding(i), abs.speed[i]);
+                        }
+                    }
+                }
+                if (size != 0) {
+                    log().write(LogListener::Warn, LOG_NAME, m_translator("Autobuild record has unexpected size"));
+                }
+                break;
+             }
+
+             case dt::rShipProperty:
+                if (acceptProperties) {
+                    afl::io::LimitedStream ss(in.createChild(), startPos, size);
+                    loadPropertyRecord(ss, ShipScope, turn.universe(), shipPropertyNames, m_world.shipPropertyNames(), valueLoader);
+                }
+                break;
+
+             case dt::rPlanetProperty:
+                if (acceptProperties) {
+                    afl::io::LimitedStream ss(in.createChild(), startPos, size);
+                    loadPropertyRecord(ss, PlanetScope, turn.universe(), planetPropertyNames, m_world.planetPropertyNames(), valueLoader);
+                }
+                break;
+
+             case dt::rShipScore: {
+                afl::io::LimitedStream ss(in.createChild(), startPos, size);
+                loadUnitScoreRecord(ss, ShipScope, turn.universe(), game.shipScores());
+                break;
+             }
+
+             case dt::rPlanetScore: {
+                afl::io::LimitedStream ss(in.createChild(), startPos, size);
+                loadUnitScoreRecord(ss, PlanetScope, turn.universe(), game.planetScores());
+                break;
+             }
+
+             case dt::rPaintingTags: {
+                if (!atom_translation.isEmpty()) {
+                    log().write(LogListener::Warn, LOG_NAME, m_translator("Text record appears at unexpected place"));
+                }
+                afl::io::LimitedStream ss(in.createChild(), startPos, size);
+                atom_translation.clear();
+                atom_translation.load(ss, m_charset, m_world.atomTable());
+                break;
+             }
+
+             case dt::rUfoHistory: {
+                if (size >= sizeof(dt::Ufo)) {
+                    dt::Ufo ufo;
+                    in.fullRead(afl::base::fromObject(ufo));
+                    Packer(m_charset).addUfo(turn, ufo);
+                }
+                break;
+             }
+
+             default:
+                ++ignored_entries;
+            }
+
+            in.setPos(endPos);
+        }
     }
+    catch (afl::except::FileProblemException& e) {
+        log().write(LogListener::Warn, LOG_NAME, m_translator("Error reading starchart database"), e);
+    }
+
     if (ignored_entries != 0) {
-        log().write(afl::sys::LogListener::Info, LOG_NAME, afl::string::Format(m_translator("%d database record%!1{s have%| has%} been ignored").c_str(), ignored_entries));
+        log().write(LogListener::Info, LOG_NAME, Format(m_translator("%d database record%!1{s have%| has%} been ignored"), ignored_entries));
     }
 }
 
@@ -603,7 +611,7 @@ game::db::Loader::loadPropertyRecord(afl::io::Stream& in, Scope scope, const gam
     // Header: Id + count
     dt::PropertyHeader header;
     if (in.read(afl::base::fromObject(header)) != sizeof(header)) {
-        log().write(afl::sys::LogListener::Warn, LOG_NAME, m_translator("Property record has unexpected size and has been ignored"));
+        log().write(LogListener::Warn, LOG_NAME, m_translator("Property record has unexpected size and has been ignored"));
         return;
     }
 
@@ -624,13 +632,18 @@ game::db::Loader::loadPropertyRecord(afl::io::Stream& in, Scope scope, const gam
         break;
     }
     if (liveProperties == 0) {
-        log().write(afl::sys::LogListener::Warn, LOG_NAME, afl::string::Format(m_translator("Property record has invalid Id (%d) and has been ignored").c_str(), id));
+        log().write(LogListener::Warn, LOG_NAME, Format(m_translator("Property record has invalid Id (%d) and has been ignored"), id));
         return;
     }
 
     // Read data into temporary store first
     afl::data::Segment dbValues;
-    valueLoader.load(dbValues, in, 0, header.numProperties);
+    try {
+        valueLoader.load(dbValues, in, 0, header.numProperties);
+    }
+    catch (std::exception& e) {
+        log().write(LogListener::Warn, LOG_NAME, m_translator("Property record has invalid content and has been ignored"));
+    }
 
     // Copy to game object
     size_t limit = std::min(dbValues.size(), dbNames.getNumNames());
@@ -690,7 +703,7 @@ game::db::Loader::loadUnitScoreRecord(afl::io::Stream& in, Scope scope, game::ma
             }
         }
     } else {
-        log().write(afl::sys::LogListener::Warn, LOG_NAME, m_translator("Unit score record is invalid"));
+        log().write(LogListener::Warn, LOG_NAME, m_translator("Unit score record is invalid"));
     }
 }
 
@@ -752,7 +765,21 @@ game::db::Loader::savePropertyRecord(afl::io::Stream& out, uint16_t type, game::
             out.fullWrite(afl::base::fromObject(ph));
 
             interpreter::vmio::NullSaveContext ctx;
-            interpreter::SaveVisitor::save(out, *pData, n, m_charset, ctx);
+            try {
+                interpreter::SaveVisitor::save(out, *pData, n, m_charset, ctx);
+            }
+            catch (interpreter::Error& e) {
+                // If someone puts an unserializable value into a property (e.g. 'Comment := Ship'),
+                // saving properties will fail.
+                // However, we have already promised that we save a record of 'n' properties.
+                // Although we can now handle that problem, older versions cannot, so give them a dummy array.
+                // The easiest way to do that is to tell SaveVisitor to save 'n' slots of an empty segment,
+                // which will read as 'n' EMPTYs.
+                log().write(LogListener::Warn, LOG_NAME, m_translator("Properties cannot be saved and have been discarded"), e);
+
+                afl::data::Segment empty;
+                interpreter::SaveVisitor::save(out, empty, n, m_charset, ctx);
+            }
             endRecord(out, rs);
         }
     }
