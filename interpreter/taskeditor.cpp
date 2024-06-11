@@ -11,11 +11,14 @@
 #include "interpreter/opcode.hpp"
 #include "interpreter/process.hpp"
 #include "interpreter/tokenizer.hpp"
+#include "interpreter/world.hpp"
 
 using interpreter::BytecodeObject;
 using interpreter::Opcode;
 
 namespace {
+    const char*const LOG_NAME = "script.task";
+
     /* For decompilation: */
 
     /** Check for 'pushlit' instruction. */
@@ -454,58 +457,66 @@ void
 interpreter::TaskEditor::save() const
 {
     // ex IntAutoTaskEditor::saveToProcess
-    // Generate new BCO
-    BCORef_t bco = BytecodeObject::create(true);
-    bco->setSubroutineName(m_process.getName());
-    BytecodeObject::PC_t new_pc = 0;
-    for (size_t i = 0; i < m_code.size(); ++i) {
-        // Is this the new program counter?
-        if (i == m_PC) {
-            new_pc = bco->getNumInstructions() + m_localPC;
+    try {
+        // Generate new BCO
+        BCORef_t bco = BytecodeObject::create(true);
+        bco->setSubroutineName(m_process.getName());
+        BytecodeObject::PC_t new_pc = 0;
+        for (size_t i = 0; i < m_code.size(); ++i) {
+            // Is this the new program counter?
+            if (i == m_PC) {
+                new_pc = bco->getNumInstructions() + m_localPC;
+            }
+
+            // Generate code
+            if (isRestartCommand(m_code[i])) {
+                // Encode restart operation
+                bco->addInstruction(Opcode::maPush, Opcode::sNamedShared, bco->addName("CC$AUTORECHECK"));
+                bco->addInstruction(Opcode::maIndirect, Opcode::miIMCall, 0);
+                bco->addInstruction(Opcode::maJump, Opcode::jAlways, 0);
+            } else {
+                // Encode normal operation
+                afl::data::StringValue sv(m_code[i]);
+                bco->addPushLiteral(&sv);
+                bco->addInstruction(Opcode::maPush, Opcode::sNamedShared, bco->addName("CC$AUTOEXEC"));
+                bco->addInstruction(Opcode::maIndirect, Opcode::miIMCall, 1);
+            }
         }
 
-        // Generate code
-        if (isRestartCommand(m_code[i])) {
-            // Encode restart operation
-            bco->addInstruction(Opcode::maPush, Opcode::sNamedShared, bco->addName("CC$AUTORECHECK"));
-            bco->addInstruction(Opcode::maIndirect, Opcode::miIMCall, 0);
-            bco->addInstruction(Opcode::maJump, Opcode::jAlways, 0);
+        // PC could be after end of task
+        if (m_PC == m_code.size()) {
+            new_pc = bco->getNumInstructions();
+        }
+
+        // Check active frames
+        if (m_process.getNumActiveFrames() < 1) {
+            // No frame at all. This means the process was newly created.
+            m_process.pushFrame(bco, false);
+        } else if (m_process.getNumActiveFrames() > 1 && m_localPC == 0) {
+            // We're inside a call, but the new PC is outside. Drop all frames.
+            while (m_process.getNumActiveFrames() > 1) {
+                m_process.popFrame();
+            }
+            // popFrame does not pop the value stack. Since we're at the beginning
+            // of an instruction sequence, the stack ought to be empty.
+            while (m_process.getStackSize() > 0) {
+                m_process.dropValue();
+            }
         } else {
-            // Encode normal operation
-            afl::data::StringValue sv(m_code[i]);
-            bco->addPushLiteral(&sv);
-            bco->addInstruction(Opcode::maPush, Opcode::sNamedShared, bco->addName("CC$AUTOEXEC"));
-            bco->addInstruction(Opcode::maIndirect, Opcode::miIMCall, 1);
+            // Don't change the frame sequence
         }
-    }
 
-    // PC could be after end of task
-    if (m_PC == m_code.size()) {
-        new_pc = bco->getNumInstructions();
+        // Fix up outermost frame
+        Process::Frame* frame = m_process.getOutermostFrame();
+        frame->pc = new_pc;
+        frame->bco.reset(*bco);
     }
-
-    // Check active frames
-    if (m_process.getNumActiveFrames() < 1) {
-        // No frame at all. This means the process was newly created.
-        m_process.pushFrame(bco, false);
-    } else if (m_process.getNumActiveFrames() > 1 && m_localPC == 0) {
-        // We're inside a call, but the new PC is outside. Drop all frames.
-        while (m_process.getNumActiveFrames() > 1) {
-            m_process.popFrame();
-        }
-        // popFrame does not pop the value stack. Since we're at the beginning
-        // of an instruction sequence, the stack ought to be empty.
-        while (m_process.getStackSize() > 0) {
-            m_process.dropValue();
-        }
-    } else {
-        // Don't change the frame sequence
+    catch (Error& e) {
+        // We must not throw exceptions; we're doing this from the destructor.
+        // This could happen if the auto-task is very long (>64k literals).
+        // Given that auto-tasks are now scriptable, playful users can do this.
+        m_process.world().logListener().write(afl::sys::LogListener::Warn, LOG_NAME, "Error saving task", e);
     }
-
-    // Fix up outermost frame
-    Process::Frame* frame = m_process.getOutermostFrame();
-    frame->pc = new_pc;
-    frame->bco.reset(*bco);
 }
 
 /** Decompiler: Check and set program counter from parsed process.
