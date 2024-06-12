@@ -357,7 +357,6 @@ game::v3::DirectoryLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player,
         game.expressionLists().loadPredefinedFiles(*m_pProfile, *m_specificationDirectory, log, tx);
     }
 
-    // FIXME->trn.setHaveData(player);
     gen.copyScoresTo(game.scores());
     turn.setTurnNumber(gen.getTurnNumber());
     turn.setTimestamp(gen.getTimestamp());
@@ -456,7 +455,7 @@ game::v3::DirectoryLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player,
     {
         Ptr<Stream> s = dir.openFileNT(Format("cmd%d.txt", player), FileSystem::OpenRead);
         if (s.get() != 0) {
-            CommandExtra::create(turn).create(player).loadCommandFile(*s, gen.getTimestamp());
+            CommandExtra::create(turn).create(player).loadCommandFile(*s, gen.getTimestamp(), *m_charset);
         }
     }
 

@@ -79,7 +79,7 @@ game::TurnLoader::loadCurrentDatabases(Turn& turn, Game& game, int player, Root&
     }
 
     // Message configuration
-    game.messageConfiguration().load(root.gameDirectory(), player);
+    game.messageConfiguration().load(root.gameDirectory(), player, charset);
 
     // Teams
     try {
@@ -122,7 +122,7 @@ game::TurnLoader::saveCurrentDatabases(const Turn& turn, const Game& game, int p
     }
 
     // Save message configuration
-    game.messageConfiguration().save(root.gameDirectory(), player);
+    game.messageConfiguration().save(root.gameDirectory(), player, charset);
 
     // Teams
     game.teamSettings().save(root.gameDirectory(), player, charset);

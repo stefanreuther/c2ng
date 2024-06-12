@@ -21,12 +21,7 @@ namespace interpreter {
 
         Error messages are not internationalized.
 
-        Error is used for errors during compilation and execution.
-
-        FIXME: if a user process does
-           Try / ... / Else / Throw System.Error / EndTry
-        it would lose this meta-information because the error message is
-        converted to a string inbetween. */
+        Error is used for errors during compilation and execution. */
     class Error : public std::exception {
      public:
         /** Construct from string literal.

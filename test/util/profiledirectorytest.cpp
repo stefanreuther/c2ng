@@ -6,19 +6,15 @@
 #include "util/profiledirectory.hpp"
 
 #include "afl/io/internalfilesystem.hpp"
-#include "afl/string/nulltranslator.hpp"
 #include "afl/sys/internalenvironment.hpp"
-#include "afl/sys/log.hpp"
 #include "afl/test/testrunner.hpp"
 
 namespace {
     struct Environment {
         afl::sys::InternalEnvironment env;
         afl::io::InternalFileSystem fs;
-        afl::string::NullTranslator tx;
-        afl::sys::Log log;
         Environment()
-            : env(), fs(), tx(), log()
+            : env(), fs()
             {
                 env.setSettingsDirectoryName("/home/user/*");
             }
@@ -30,7 +26,7 @@ AFL_TEST("util.ProfileDirectory:open:file", a)
 {
     // Environment
     Environment env;
-    util::ProfileDirectory testee(env.env, env.fs, env.tx, env.log);
+    util::ProfileDirectory testee(env.env, env.fs);
 
     // Cannot open file
     a.checkNull("01", testee.openFileNT("pcc2.ini").get());
@@ -48,7 +44,7 @@ AFL_TEST("util.ProfileDirectory:open:dir", a)
 {
     // Environment
     Environment env;
-    util::ProfileDirectory testee(env.env, env.fs, env.tx, env.log);
+    util::ProfileDirectory testee(env.env, env.fs);
 
     // Open directory and create the file
     testee.open()->openFile("pcc2.ini", afl::io::FileSystem::Create)->fullWrite(afl::string::toBytes("content"));

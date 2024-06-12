@@ -373,6 +373,5 @@ game::actions::TaxationAction::onChange()
 void
 game::actions::TaxationAction::update()
 {
-    // FIXME: potential optimisation: compute everything here. Send signal only if a computed value changes.
     sig_change.raise();
 }

@@ -98,22 +98,22 @@ AFL_TEST("game.vcr.Overview:buildDiagram", a)
     // Database
     game::vcr::classic::Database db;
     // 120 captures 110 (first group)
-    db.addNewBattle(new game::vcr::classic::Battle(makeFreighter(110, 1), makeCaptor(120, 2), 1, 0, 0))
+    db.addNewBattle(new game::vcr::classic::Battle(makeFreighter(110, 1), makeCaptor(120, 2), 1, 0))
         ->setType(game::vcr::classic::Host, 0);
     // 130 captures 140 (second group)
-    db.addNewBattle(new game::vcr::classic::Battle(makeCaptor(130, 2), makeFreighter(140, 1), 1, 0, 0))
+    db.addNewBattle(new game::vcr::classic::Battle(makeCaptor(130, 2), makeFreighter(140, 1), 1, 0))
         ->setType(game::vcr::classic::Host, 0);
     // 150 captures 160 (third group)
-    db.addNewBattle(new game::vcr::classic::Battle(makeCaptor(150, 2), makeFreighter(160, 1), 1, 0, 0))
+    db.addNewBattle(new game::vcr::classic::Battle(makeCaptor(150, 2), makeFreighter(160, 1), 1, 0))
         ->setType(game::vcr::classic::Host, 0);
     // 170 captures 180 (fourth group)
-    db.addNewBattle(new game::vcr::classic::Battle(makeCaptor(170, 4), makeFreighter(180, 1), 1, 0, 0))
+    db.addNewBattle(new game::vcr::classic::Battle(makeCaptor(170, 4), makeFreighter(180, 1), 1, 0))
         ->setType(game::vcr::classic::Host, 0);
     // 120 captures 190 (join first group)
-    db.addNewBattle(new game::vcr::classic::Battle(makeCaptor(120, 2), makeFreighter(190, 7), 1, 0, 0))
+    db.addNewBattle(new game::vcr::classic::Battle(makeCaptor(120, 2), makeFreighter(190, 7), 1, 0))
         ->setType(game::vcr::classic::Host, 0);
     // 130 captures 180 (joins second and fourth group)
-    db.addNewBattle(new game::vcr::classic::Battle(makeCaptor(130, 2), makeFreighter(180, 1), 1, 0, 0))
+    db.addNewBattle(new game::vcr::classic::Battle(makeCaptor(130, 2), makeFreighter(180, 1), 1, 0))
         ->setType(game::vcr::classic::Host, 0);
 
     // Testee
@@ -191,7 +191,7 @@ AFL_TEST("game.vcr.Overview:buildDiagram:kill", a)
     // Database
     game::vcr::classic::Database db;
     // 30 destroys 31
-    db.addNewBattle(new game::vcr::classic::Battle(makeCaptor(30, 5), makeProbe(31, 6), 1, 0, 0))
+    db.addNewBattle(new game::vcr::classic::Battle(makeCaptor(30, 5), makeProbe(31, 6), 1, 0))
         ->setType(game::vcr::classic::Host, 0);
 
     // Testee
@@ -232,7 +232,7 @@ AFL_TEST("game.vcr.Overview:buildDiagram:stalemate", a)
     // Database
     game::vcr::classic::Database db;
     // Freighter 40 vs 41
-    db.addNewBattle(new game::vcr::classic::Battle(makeFreighter(41, 5), makeFreighter(40, 6), 1, 0, 0))
+    db.addNewBattle(new game::vcr::classic::Battle(makeFreighter(41, 5), makeFreighter(40, 6), 1, 0))
         ->setType(game::vcr::classic::Host, 0);
 
     // Testee
@@ -270,7 +270,7 @@ AFL_TEST("game.vcr.Overview:buildScoreSummary:kill", a)
     // Database
     game::vcr::classic::Database db;
     // 30 destroys 31
-    db.addNewBattle(new game::vcr::classic::Battle(makeCaptor(30, 5), makeProbe(31, 6), 1, 0, 0))
+    db.addNewBattle(new game::vcr::classic::Battle(makeCaptor(30, 5), makeProbe(31, 6), 1, 0))
         ->setType(game::vcr::classic::Host, 0);
 
     // Testee

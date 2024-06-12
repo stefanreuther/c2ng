@@ -26,8 +26,6 @@ AFL_TEST("ui.widgets.IconGrid:init", a)
     // We don't have any icons yet, so total size is 0
     a.checkEqual("11. getTotalSize",  testee.getTotalSize(), 0);
     a.checkEqual("12. getPageTop",    testee.getPageTop(), 0);
-    a.checkEqual("13. getCursorTop",  testee.getCursorTop(), 0);
-    a.checkEqual("14. getCursorSize", testee.getCursorSize(), 1);
 
     // Setting dimensions will make getPageSize() report the preferred height
     testee.setExtent(gfx::Rectangle(10, 10, 136, 52));

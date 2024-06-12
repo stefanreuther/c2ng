@@ -10,7 +10,6 @@
 using gfx::Rectangle;
 using gfx::Point;
 
-// FIXME: these probably belong elsewhere
 /** Colors used to display something on a light-gray background.
     Examples include a light-gray window, or a standard list box
     entry. */
@@ -62,7 +61,7 @@ const ui::ColorSet ui::BLACK_COLOR_SET = {
     Color_White,                // static
     Color_Green,                // green
     Color_Yellow,               // yellow
-    Color_Red,                  // red       // FIXME: darker?
+    Color_Red,                  // red
     Color_White,                // white
     Color_White,                // contrast
     Color_Gray,                 // input

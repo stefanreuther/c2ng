@@ -83,7 +83,6 @@ char
 game::PlayerList::getCharacterFromPlayer(int id)
 {
     // ex game/player.h:getPlayerChar
-    // FIXME: might be better in class Player? util?
     if (id >= 0 && id < 10) {
         return char('0' + id);
     } else if (id >= 10 && id < 36) {

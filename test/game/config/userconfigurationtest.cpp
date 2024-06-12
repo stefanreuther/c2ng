@@ -37,7 +37,7 @@ namespace {
 
         ProfileEnvironment()
             : tx(), log(), fs(), env(),
-              profile(prepareEnv(env), prepareFS(fs), tx, log)
+              profile(prepareEnv(env), prepareFS(fs))
             { }
     };
 }

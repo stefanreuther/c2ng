@@ -52,8 +52,18 @@ AFL_TEST("interpreter.HashValue:empty", a)
         std::auto_ptr<afl::data::Value> v(testee.get(args));
         a.checkNull("42. get(null)'", v.get());
     }
-
-    // FIXME: test argument count mismatch
+    {
+        afl::data::Segment seg;
+        interpreter::Arguments args(seg, 0, 0);
+        AFL_CHECK_THROWS(a("43. get()"), testee.get(args), interpreter::Error);
+    }
+    {
+        afl::data::Segment seg;
+        seg.pushBackString("x");
+        seg.pushBackString("y");
+        interpreter::Arguments args(seg, 0, 2);
+        AFL_CHECK_THROWS(a("44. get()"), testee.get(args), interpreter::Error);
+    }
 }
 
 /** Test basic operations on unit (one-element) hash. */

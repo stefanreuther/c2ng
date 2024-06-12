@@ -858,7 +858,7 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
      case 52:
         // Special functions assigned to ship
         // ex hullfunc.pas:AddShipFunctions
-        // FIXME: this relies on PHost sending the #57's before the #52's.
+        // This relies on PHost sending the #57's before the #52's.
         // We need to process the #57's first, because otherwise getFunctionIdFromHostId() will not know what we're talking about.
         if (Eater<gt::Int16_t> id = data) {
             if (game::map::Ship* pShip = m_game.currentTurn().universe().ships().get(*id)) {
@@ -1031,7 +1031,6 @@ void
 game::v3::udata::Parser::processAlliances(const game::v3::structures::Util22Alliance& allies)
 {
     // ex GPHostAllianceHandler::processAlliances
-    // FIXME: this duplicates the PHost alliance level names
     static const char*const MAIN_ID = "phost.ally";
     static const uint8_t MAIN_FLAG = 0x20;
     static const size_t NUM_LEVELS = 5;
@@ -1080,7 +1079,6 @@ void
 game::v3::udata::Parser::processEnemies(uint16_t enemies)
 {
     // ex GPHostAllianceHandler::processEnemies
-    // FIXME: this duplicates the PHost alliance level names
     Offer offer;
     for (int i = 1; i <= gt::NUM_PLAYERS; ++i) {
         Offer::Type what = (enemies & (1 << i)) != 0 ? Offer::Yes : Offer::No;

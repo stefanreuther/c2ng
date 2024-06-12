@@ -307,7 +307,6 @@ util::formatZoomLevel(int mul, int div)
 String_t
 util::encodeMimeHeader(String_t input, String_t charsetName)
 {
-    // FIXME: move elsewhere?
     // FIXME: RFC 2047 places some pretty tight limits on the format of lines containing
     // encoded words:
     // - max 75 chars per encoded word

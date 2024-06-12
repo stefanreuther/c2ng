@@ -94,7 +94,6 @@ ui::layout::Info
 client::widgets::TechBar::getLayoutInfo() const
 {
     // ex WTechBar::getLayoutInfo
-    // FIXME: this is a direct port. Make it smarter.
     return gfx::Point(2*20*10, 20);
 }
 

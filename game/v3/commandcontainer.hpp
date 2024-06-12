@@ -6,6 +6,7 @@
 #define C2NG_GAME_V3_COMMANDCONTAINER_HPP
 
 #include "afl/base/signal.hpp"
+#include "afl/charset/charset.hpp"
 #include "afl/container/ptrmultilist.hpp"
 #include "afl/io/stream.hpp"
 #include "afl/string/string.hpp"
@@ -108,8 +109,9 @@ namespace game { namespace v3 {
 
         /** Load command file (cmdX.txt).
             \param file File
-            \param time Current turn timestamp, for validating file timestamp */
-        void loadCommandFile(afl::io::Stream& file, const Timestamp& time);
+            \param time Current turn timestamp, for validating file timestamp
+            \param charset Character set */
+        void loadCommandFile(afl::io::Stream& file, const Timestamp& time, afl::charset::Charset& charset);
 
         /** Signal: single command changed.
             \param command Command that changed

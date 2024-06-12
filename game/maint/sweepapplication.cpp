@@ -85,7 +85,6 @@ game::maint::SweepApplication::appMain()
     }
 
     // Set up a directory
-    // FIXME: pedantery: "orElse(".")" violates the FileSystem abstraction
     afl::base::Ref<afl::io::Directory> dir = fileSystem().openDirectory(params.gameDir.orElse("."));
     afl::base::Ref<DirectoryWrapper> wrap = DirectoryWrapper::create(dir, standardOutput(), translator());
     if (params.opt_dryRun) {

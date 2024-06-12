@@ -8,6 +8,8 @@
 #include <vector>
 #include "afl/io/directory.hpp"
 #include "afl/io/stream.hpp"
+#include "afl/string/translator.hpp"
+#include "afl/sys/loglistener.hpp"
 #include "util/expressionlist.hpp"
 #include "util/profiledirectory.hpp"
 

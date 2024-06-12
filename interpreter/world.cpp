@@ -78,7 +78,6 @@ interpreter::World::getGlobalValue(const char* name)
 void
 interpreter::World::addNewSpecialCommand(const char* name, SpecialCommand* newCmd)
 {
-    // FIXME: exception safety...
     m_specialCommands.insertNew(name, newCmd);
 }
 

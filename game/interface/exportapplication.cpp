@@ -44,7 +44,7 @@ namespace {
 void
 game::interface::ExportApplication::appMain()
 {
-    util::ProfileDirectory profile(environment(), fileSystem(), translator(), log());
+    util::ProfileDirectory profile(environment(), fileSystem());
     afl::string::Translator& tx = translator();
 
     // Parse args

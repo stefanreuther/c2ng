@@ -1078,7 +1078,7 @@ game::v3::Unpacker::storeBaseData(int id, const Base_t& in, afl::charset::Charse
 void
 game::v3::Unpacker::addMessage(int to, String_t text)
 {
-    if (to == 12) {  // FIXME
+    if (to == gt::RECEIVER_IS_HOST) {
         to = 0;
     }
     m_outbox.addMessageFromFile(m_playerId, text, PlayerSet_t(to));

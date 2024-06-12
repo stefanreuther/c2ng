@@ -185,7 +185,6 @@ namespace {
         // Parse coordinates
         game::map::Point pt;
         if (!pt.parseCoordinates(query)) {
-            // FIXME: i18n
             throw interpreter::Error("Unable to parse coordinates");
         }
 

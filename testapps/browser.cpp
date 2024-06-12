@@ -63,7 +63,7 @@ int main(int, char** argv)
     afl::net::http::Manager httpManager(client);
 
     afl::io::FileSystem& fs = afl::io::FileSystem::getInstance();
-    util::ProfileDirectory profile(env, fs, tx, log);
+    util::ProfileDirectory profile(env, fs);
     game::browser::AccountManager acc(profile, tx, log);
     acc.load();
     game::browser::Browser b(fs, tx, log, acc, profile, userCB);

@@ -284,7 +284,6 @@ game::Id_t
 game::map::UfoType::findUfoIndexById(int id) const
 {
     // ex GUfoType::getFirstAt, sort-of
-    // FIXME: binary search?
     UfoList_t::iterator i = m_ufos.begin();
     while (i != m_ufos.end() && (*i)->getId() < id) {
         ++i;

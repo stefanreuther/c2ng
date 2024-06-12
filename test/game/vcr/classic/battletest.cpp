@@ -60,7 +60,7 @@ AFL_TEST("game.vcr.classic.Battle:sample", a)
     afl::string::NullTranslator tx;
 
     // Configure from pcc-v2/tests/vcr/vcr2.dat #1
-    game::vcr::classic::Battle t(makeLeftShip(), makeRightShip(), 42, 0, 0);
+    game::vcr::classic::Battle t(makeLeftShip(), makeRightShip(), 42, 0);
     t.setType(game::vcr::classic::Host, 0);
 
     // Verify
@@ -109,7 +109,7 @@ AFL_TEST("game.vcr.classic.Battle:sample", a)
 AFL_TEST("game.vcr.classic.Battle:getPosition", a)
 {
     // Configure from pcc-v2/tests/vcr/vcr2.dat #1
-    game::vcr::classic::Battle t(makeLeftShip(), makeRightShip(), 42, 0, 0);
+    game::vcr::classic::Battle t(makeLeftShip(), makeRightShip(), 42, 0);
     t.setPosition(game::map::Point(500, 600));
 
     // Verify
@@ -131,7 +131,7 @@ AFL_TEST("game.vcr.classic.Battle:points", a)
     afl::string::NullTranslator tx;
 
     // Configure from pcc-v2/tests/vcr/vcr2.dat #1
-    game::vcr::classic::Battle t(makeLeftShip(), makeRightShip(), 42, 0, 0);
+    game::vcr::classic::Battle t(makeLeftShip(), makeRightShip(), 42, 0);
     t.setType(game::vcr::classic::PHost4, 0);
     t.prepareResult(config, shipList, game::vcr::Battle::NeedCompleteResult);
     a.checkEqual("01. getResultSummary", t.getResultSummary(2, config, shipList, util::NumberFormatter(false, false), tx), "They have captured our ship (2 BP, 5 EP).");
@@ -177,7 +177,7 @@ AFL_TEST("game.vcr.classic.Battle:points:range", a)
 
     // Standard / role not known
     {
-        game::vcr::classic::Battle t(makeLeftShip(), makeRightShip(), 42, 0, 0);
+        game::vcr::classic::Battle t(makeLeftShip(), makeRightShip(), 42, 0);
         t.setType(game::vcr::classic::PHost4, 0);
         t.prepareResult(config, shipList, game::vcr::Battle::NeedCompleteResult);
         a.checkEqual("01", t.getResultSummary(3, config, shipList, fmt, tx), "We captured their ship (4 ... 19 BP, 5 EP).");
@@ -187,7 +187,7 @@ AFL_TEST("game.vcr.classic.Battle:points:range", a)
     {
         game::vcr::Object obj(makeRightShip());
         obj.setRole(game::vcr::Object::AggressorRole);
-        game::vcr::classic::Battle t(makeLeftShip(), obj, 42, 0, 0);
+        game::vcr::classic::Battle t(makeLeftShip(), obj, 42, 0);
         t.setType(game::vcr::classic::PHost4, 0);
         t.prepareResult(config, shipList, game::vcr::Battle::NeedCompleteResult);
         a.checkEqual("11", t.getResultSummary(3, config, shipList, fmt, tx), "We captured their ship (19 BP, 5 EP).");
@@ -197,7 +197,7 @@ AFL_TEST("game.vcr.classic.Battle:points:range", a)
     {
         game::vcr::Object obj(makeRightShip());
         obj.setRole(game::vcr::Object::OpponentRole);
-        game::vcr::classic::Battle t(makeLeftShip(), obj, 42, 0, 0);
+        game::vcr::classic::Battle t(makeLeftShip(), obj, 42, 0);
         t.setType(game::vcr::classic::PHost4, 0);
         t.prepareResult(config, shipList, game::vcr::Battle::NeedCompleteResult);
         a.checkEqual("21", t.getResultSummary(3, config, shipList, fmt, tx), "We captured their ship (4 BP, 5 EP).");

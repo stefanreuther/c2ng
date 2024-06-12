@@ -223,7 +223,7 @@ client::tiles::ShipMovementTile::attach(game::proxy::ObjectObserver& oop)
                         job->data.text[Data::Eta] = tx("at waypoint");
                         job->data.colors[Data::Eta] = SkinColor::Green;
                     } else if (is_hyper) {
-                        job->data.text[Data::Eta] = tx("unknown"); // FIXME?
+                        job->data.text[Data::Eta] = tx("hyperjump");
                         job->data.colors[Data::Eta] = SkinColor::Green;
                     } else if (sh->getWarpFactor().orElse(0) == 0) {
                         job->data.text[Data::Eta] = tx("not moving");

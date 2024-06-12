@@ -169,6 +169,7 @@ namespace game { namespace vcr { namespace flak {
         /* Host configuration options */
         const bool m_alternativeCombat;
         const bool m_fireOnAttackFighters;
+        const int m_standoffDistance;
 
         /* Pool of unused objects.
            New objects are taken from here to recycle object Ids. */

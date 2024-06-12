@@ -8,6 +8,7 @@
 #include "afl/test/testrunner.hpp"
 #include "game/v3/structures.hpp"
 
+using game::v3::structures::HConfig;
 using game::config::HostConfiguration;
 using game::config::Configuration;
 
@@ -15,7 +16,7 @@ using game::config::Configuration;
 AFL_TEST("game.v3.HConfig:pack", a)
 {
     // Prepare
-    game::v3::structures::HConfig fig;
+    HConfig fig;
     afl::base::Bytes_t bytes(afl::base::fromObject(fig));
     bytes.fill(0xE1);
 
@@ -61,7 +62,7 @@ AFL_TEST("game.v3.HConfig:roundtrip", a)
         0x01, 0x00, 0x01, 0x00, 0x02, 0x00, 0x01, 0x00, 0x01, 0x00, 0x07, 0x00,
         0x00, 0x00, 0x01, 0x00
     };
-    game::v3::structures::HConfig fig;
+    HConfig fig;
     static_assert(sizeof(FILE_DATA) == sizeof(fig), "sizeof fig");
     std::memcpy(&fig, FILE_DATA, sizeof(fig));
 
@@ -87,4 +88,168 @@ AFL_TEST("game.v3.HConfig:roundtrip", a)
     // Save hconfig again
     game::v3::packHConfig(fig, config);
     a.checkEqualContent("11. data", afl::base::ConstBytes_t(afl::base::fromObject(fig)), afl::base::ConstBytes_t(FILE_DATA));
+}
+
+/*
+ *  LokiDecloaksBirds scalar <> AntiCloakImmunity array
+ */
+
+AFL_TEST("game.v3.HConfig:LokiDecloaksBirds:on", a)
+{
+    HostConfiguration config;
+    HConfig fig;
+    afl::base::fromObject(fig).fill(0);
+
+    // Set
+    fig.LokiDecloaksBirds = 0;
+    game::v3::unpackHConfig(fig, sizeof(fig), config, game::config::ConfigurationOption::Game);
+
+    // Verify
+    a.checkEqual("01", config[HostConfiguration::AntiCloakImmunity](1), 0);
+    a.checkEqual("02", config[HostConfiguration::AntiCloakImmunity](2), 0);
+    a.checkEqual("03", config[HostConfiguration::AntiCloakImmunity](3), 1);
+    a.checkEqual("04", config[HostConfiguration::AntiCloakImmunity](4), 0);
+
+    // Store
+    game::v3::packHConfig(fig, config);
+    a.checkEqual("11", fig.LokiDecloaksBirds, 0);
+}
+
+AFL_TEST("game.v3.HConfig:LokiDecloaksBirds:on:PlayerRace", a)
+{
+    HostConfiguration config;
+    HConfig fig;
+    afl::base::fromObject(fig).fill(0);
+    config[HostConfiguration::PlayerRace].set("3,2,1,4");
+
+    // Set
+    fig.LokiDecloaksBirds = 0;
+    game::v3::unpackHConfig(fig, sizeof(fig), config, game::config::ConfigurationOption::Game);
+
+    // Verify
+    a.checkEqual("01", config[HostConfiguration::AntiCloakImmunity](1), 1);
+    a.checkEqual("02", config[HostConfiguration::AntiCloakImmunity](2), 0);
+    a.checkEqual("03", config[HostConfiguration::AntiCloakImmunity](3), 0);
+    a.checkEqual("04", config[HostConfiguration::AntiCloakImmunity](4), 0);
+
+    // Store
+    game::v3::packHConfig(fig, config);
+    a.checkEqual("11", fig.LokiDecloaksBirds, 0);
+}
+
+AFL_TEST("game.v3.HConfig:LokiDecloaksBirds:on:PlayerRace:none", a)
+{
+    HostConfiguration config;
+    HConfig fig;
+    afl::base::fromObject(fig).fill(0);
+    config[HostConfiguration::PlayerRace].set("1,1,1,4");
+
+    // Set
+    fig.LokiDecloaksBirds = 0;
+    game::v3::unpackHConfig(fig, sizeof(fig), config, game::config::ConfigurationOption::Game);
+
+    // Verify
+    a.checkEqual("01", config[HostConfiguration::AntiCloakImmunity](1), 0);
+    a.checkEqual("02", config[HostConfiguration::AntiCloakImmunity](2), 0);
+    a.checkEqual("03", config[HostConfiguration::AntiCloakImmunity](3), 0);
+    a.checkEqual("04", config[HostConfiguration::AntiCloakImmunity](4), 0);
+
+    // Store
+    game::v3::packHConfig(fig, config);
+    a.checkEqual("11", fig.LokiDecloaksBirds, 0);
+}
+
+AFL_TEST("game.v3.HConfig:LokiDecloaksBirds:off", a)
+{
+    HostConfiguration config;
+    HConfig fig;
+    afl::base::fromObject(fig).fill(0);
+
+    // Set
+    fig.LokiDecloaksBirds = 1;
+    game::v3::unpackHConfig(fig, sizeof(fig), config, game::config::ConfigurationOption::Game);
+
+    // Verify
+    a.checkEqual("01", config[HostConfiguration::AntiCloakImmunity](1), 0);
+    a.checkEqual("02", config[HostConfiguration::AntiCloakImmunity](2), 0);
+    a.checkEqual("03", config[HostConfiguration::AntiCloakImmunity](3), 0);
+    a.checkEqual("04", config[HostConfiguration::AntiCloakImmunity](4), 0);
+
+    // Store
+    game::v3::packHConfig(fig, config);
+    a.checkEqual("11", fig.LokiDecloaksBirds, 1);
+}
+
+/*
+ *  ColonialFighterSweepRate scalar <> FighterSweepRate array
+ */
+
+AFL_TEST("game.v3.HConfig:ColonialFighterSweepRate", a)
+{
+    HostConfiguration config;
+    HConfig fig;
+    afl::base::fromObject(fig).fill(0);
+
+    // Set
+    fig.ColonialFighterSweepRate = 15;
+    game::v3::unpackHConfig(fig, sizeof(fig), config, game::config::ConfigurationOption::Game);
+
+    // Verify
+    a.checkEqual("01", config[HostConfiguration::FighterSweepRate](1), 0);
+    a.checkEqual("02", config[HostConfiguration::FighterSweepRate](2), 0);
+    a.checkEqual("03", config[HostConfiguration::FighterSweepRate](10), 0);
+    a.checkEqual("04", config[HostConfiguration::FighterSweepRate](11), 15);
+    a.checkEqual("05", config[HostConfiguration::FighterSweepRate](12), 0);
+
+    // Store
+    game::v3::packHConfig(fig, config);
+    a.checkEqual("11", fig.ColonialFighterSweepRate, 15);
+}
+
+AFL_TEST("game.v3.HConfig:ColonialFighterSweepRate:PlayerRace", a)
+{
+    HostConfiguration config;
+    HConfig fig;
+    afl::base::fromObject(fig).fill(0);
+    config[HostConfiguration::PlayerRace].set("1,11,3");
+
+    // Set
+    fig.ColonialFighterSweepRate = 22;
+    game::v3::unpackHConfig(fig, sizeof(fig), config, game::config::ConfigurationOption::Game);
+
+    // Verify
+    a.checkEqual("01", config[HostConfiguration::FighterSweepRate](1), 0);
+    a.checkEqual("02", config[HostConfiguration::FighterSweepRate](2), 22);
+    a.checkEqual("03", config[HostConfiguration::FighterSweepRate](3), 0);
+    a.checkEqual("04", config[HostConfiguration::FighterSweepRate](10), 0);
+    a.checkEqual("05", config[HostConfiguration::FighterSweepRate](11), 0);
+    a.checkEqual("06", config[HostConfiguration::FighterSweepRate](12), 0);
+
+    // Store
+    game::v3::packHConfig(fig, config);
+    a.checkEqual("11", fig.ColonialFighterSweepRate, 22);
+}
+
+AFL_TEST("game.v3.HConfig:ColonialFighterSweepRate:PlayerRace:none", a)
+{
+    HostConfiguration config;
+    HConfig fig;
+    afl::base::fromObject(fig).fill(0);
+    config[HostConfiguration::PlayerRace].set("1,1,1");
+
+    // Set
+    fig.ColonialFighterSweepRate = 33;
+    game::v3::unpackHConfig(fig, sizeof(fig), config, game::config::ConfigurationOption::Game);
+
+    // Verify
+    a.checkEqual("01", config[HostConfiguration::FighterSweepRate](1), 0);
+    a.checkEqual("02", config[HostConfiguration::FighterSweepRate](2), 0);
+    a.checkEqual("03", config[HostConfiguration::FighterSweepRate](3), 0);
+    a.checkEqual("04", config[HostConfiguration::FighterSweepRate](10), 0);
+    a.checkEqual("05", config[HostConfiguration::FighterSweepRate](11), 0);
+    a.checkEqual("06", config[HostConfiguration::FighterSweepRate](12), 0);
+
+    // Store
+    game::v3::packHConfig(fig, config);
+    a.checkEqual("11", fig.ColonialFighterSweepRate, 20);   // default value chosen
 }

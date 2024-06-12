@@ -104,10 +104,78 @@ AFL_TEST("interpreter.vmio.AssemblerSaveContext:BytecodeObject:options", a)
 
     // Verify
     a.checkEqual("result", afl::string::fromMemory(out.getContent()),
-                 "Sub S (M, Optional O)\n"
-                 "  .local A\n"
+                 "Sub S (M, Optional O, A())\n"
                  "  .local B\n"
+                 "  .file t.q\n"
+                 "  label0:\n"
+                 "    .line 20\n"
+                 "    ssuspend\n"
+                 "    j               #0\n"
+                 "EndSub\n"
+                 "\n");
+}
+
+/** Test addBCO(), bad var-args. */
+AFL_TEST("interpreter.vmio.AssemblerSaveContext:BytecodeObject:bad-varargs", a)
+{
+    // Create a bytecode object
+    interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
+    bco->addArgument("M", false);
+    bco->addArgument("O", true);
+    bco->setIsVarargs(true);
+    bco->setFileName("t.q");
+    bco->addLineNumber(20);
+    bco->addInstruction(interpreter::Opcode::maSpecial, interpreter::Opcode::miSpecialSuspend, 0);
+    bco->addInstruction(interpreter::Opcode::maJump, interpreter::Opcode::jAlways, 0);
+    bco->setSubroutineName("S");
+
+    // Save it
+    interpreter::vmio::AssemblerSaveContext testee;
+    testee.addBCO(*bco);
+    testee.setDebugInformation(true);
+
+    afl::io::InternalTextWriter out;
+    testee.save(out);
+
+    // Verify
+    a.checkEqual("result", afl::string::fromMemory(out.getContent()),
+                 "Sub S (M, Optional O)\n"
                  "  .varargs\n"
+                 "  .file t.q\n"
+                 "  label0:\n"
+                 "    .line 20\n"
+                 "    ssuspend\n"
+                 "    j               #0\n"
+                 "EndSub\n"
+                 "\n");
+}
+
+/** Test addBCO(), bad regular args. */
+AFL_TEST("interpreter.vmio.AssemblerSaveContext:BytecodeObject:bad-args", a)
+{
+    // Create a bytecode object
+    interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
+    bco->setMinArgs(1);
+    bco->setMaxArgs(2);
+    bco->setFileName("t.q");
+    bco->addLineNumber(20);
+    bco->addInstruction(interpreter::Opcode::maSpecial, interpreter::Opcode::miSpecialSuspend, 0);
+    bco->addInstruction(interpreter::Opcode::maJump, interpreter::Opcode::jAlways, 0);
+    bco->setSubroutineName("S");
+
+    // Save it
+    interpreter::vmio::AssemblerSaveContext testee;
+    testee.addBCO(*bco);
+    testee.setDebugInformation(true);
+
+    afl::io::InternalTextWriter out;
+    testee.save(out);
+
+    // Verify
+    a.checkEqual("result", afl::string::fromMemory(out.getContent()),
+                 "Sub S\n"
+                 "  .min_args 1\n"
+                 "  .max_args 2\n"
                  "  .file t.q\n"
                  "  label0:\n"
                  "    .line 20\n"

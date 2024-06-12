@@ -54,7 +54,6 @@ game::maint::RaterApplication::appMain()
                 // report only one sub-rating
                 output = OneOnly;
 
-                // FIXME: original accepts abbreviations
                 String_t arg = commandLine.getRequiredParameter(p);
                 if (arg == "shiplist") {
                     output_one = DifficultyRater::ShiplistRating;

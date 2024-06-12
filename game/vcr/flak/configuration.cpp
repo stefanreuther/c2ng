@@ -31,7 +31,7 @@ namespace {
         afl::sys::LogListener& m_log;
         afl::string::Translator& m_translator;
 
-        void assignNumber(const String_t& fileName, int lineNr, const String_t& value, int& out);
+        void assignNumber(const String_t& fileName, int lineNr, const String_t& value, int32_t& out);
     };
 }
 
@@ -105,7 +105,7 @@ FlakConfigurationParser::handleIgnoredLine(const String_t& /*fileName*/, int /*l
 { }
 
 void
-FlakConfigurationParser::assignNumber(const String_t& fileName, int lineNr, const String_t& value, int& out)
+FlakConfigurationParser::assignNumber(const String_t& fileName, int lineNr, const String_t& value, int32_t& out)
 {
     // ex FlakConfigParser::assignNumber
     if (!afl::string::strToInteger(value, out)) {

@@ -141,7 +141,6 @@ game::map::MinefieldMission::checkLayMission(const Ship& ship, const Universe& u
 
     // Postprocess race and limit
     if (race <= 0 || race > MAX_PLAYERS) {
-        // FIXME: normally checks for NUM_PLAYERS=11
         race = owner;
     }
     if (torplimit > 0 && torplimit < torps) {

@@ -302,7 +302,7 @@ AFL_TEST("game.HostVersion:getColonistTaxRateLimit:PlayerRace", a)
     a.checkEqual("03", HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).getColonistTaxRateLimit(3, config), 75);
 }
 
-// isPHostRoundingMiningResults: PHost 4.1/3.5; does not apply to other-than-PHost (FIXME?)
+// isPHostRoundingMiningResults: PHost 4.1/3.5; does not apply to other-than-PHost.
 AFL_TEST("game.HostVersion:isPHostRoundingMiningResults", a)
 {
     a.check("01", !HostVersion(HostVersion::PHost,   MKVERSION(3,4,99)).isPHostRoundingMiningResults());

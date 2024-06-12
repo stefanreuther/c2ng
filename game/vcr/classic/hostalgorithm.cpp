@@ -455,7 +455,6 @@ int
 game::vcr::classic::HostAlgorithm::getBeamStatus(Side side, int id)
 {
     // ex VcrPlayerTHost::getBeamStatus
-    // FIXME: range check
     return m_status[side].m_beamStatus[id];
 }
 
@@ -464,7 +463,6 @@ game::vcr::classic::HostAlgorithm::getLauncherStatus(Side side, int id)
 {
     // ex VcrPlayerTHost::getTorpStatus
     // scale [0,40] to [0,100]
-    // FIXME: range check
     return m_status[side].m_launcherStatus[id] * 5 / 2;
 }
 
@@ -558,8 +556,6 @@ game::vcr::classic::HostAlgorithm::restoreStatus(const StatusToken& token)
     // ex VcrPlayerTHost::setStatus
     if (const HostStatusToken* t = dynamic_cast<const HostStatusToken*>(&token)) {
         t->restore(*this);
-    } else {
-        // FIXME: else what?
     }
 }
 
@@ -1008,10 +1004,6 @@ game::vcr::classic::HostAlgorithm::checkSide(Object& obj) const
 {
     // ex VcrPlayerTHost::checkVcrSide
     bool err = false;
-
-    if (obj.getOwner() <= 0 || obj.getOwner() > 12 /*FIXME*/) {
-        obj.setOwner(12);
-    }
 
     if (obj.getBeamType() != 0 && m_beams.get(obj.getBeamType()) == 0) {
         obj.setBeamType(0);

@@ -35,13 +35,11 @@ namespace game { namespace vcr { namespace classic {
             \param left Left unit (will be copied)
             \param right Right unit (will be copied)
             \param seed Random number seed
-            \param signature Signature
-            \param planetTemperatureCode Planet temperature code (FIXME: probably obsolete) */
+            \param signature Signature */
         Battle(const Object& left,
                const Object& right,
                uint16_t seed,
-               uint16_t signature,
-               uint16_t planetTemperatureCode);
+               uint16_t signature);
 
         /** Destructor. */
         ~Battle();
@@ -168,7 +166,6 @@ namespace game { namespace vcr { namespace classic {
         // Attributes from GClassicVcr:
         uint16_t m_seed;
         uint16_t m_signature;              // strictly speaking, redundant, but exported by script interface.
-        uint16_t m_planetTemperatureCode;  // obsolete?
         Object m_before[2];
         Object m_after[2];
 

@@ -118,9 +118,9 @@ namespace {
 
     void addBattles(Environment& env)
     {
-        env.battles->addNewBattle(new gvc::Battle(makeLeftShip(10), makeRightShip(20), 42, 0, 0))
+        env.battles->addNewBattle(new gvc::Battle(makeLeftShip(10), makeRightShip(20), 42, 0))
             ->setType(gvc::PHost4, 0);
-        env.battles->addNewBattle(new gvc::Battle(makeLeftShip(70), makeRightShip(60), 42, 0, 0))
+        env.battles->addNewBattle(new gvc::Battle(makeLeftShip(70), makeRightShip(60), 42, 0))
             ->setType(gvc::PHost4, 0);
     }
 }

@@ -26,10 +26,7 @@ namespace game { namespace msg {
           When looking at a message, we still need to know who originally got the message,
           to know whom "we are scanning our mines" refers to.
           We can therefore associate a player number with each message.
-          Otherwise, this number is not interpreted in any way by this class.
-
-        FIXME: this class interprets host-specific formats.
-        Does it make sense to move it into the implementation namespace? */
+          Otherwise, this number is not interpreted in any way by this class. */
     class Inbox : public Mailbox {
      public:
         Inbox();

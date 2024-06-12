@@ -30,13 +30,12 @@ namespace game { namespace score {
         /** Index of a turn in the score list. */
         typedef size_t Index_t;
 
-        // FIXME: here?
+        /** Packed description for a turn score. */
         struct Description {
             String_t name;               ///< Name of score. Identifies the score to humans.
-            ScoreId_t scoreId;   ///< Type of score. Identifies the score to programs.
+            ScoreId_t scoreId;           ///< Type of score. Identifies the score to programs.
             int16_t turnLimit;           ///< Turns to keep win limit.
             int32_t winLimit;            ///< Win limit. If somebody exceeds this limit for turn_limit turns, he wins. -1=no such limit.
-            // FIXME: replace winLimit by InlineOptional
 
             Description()
                 : name(), scoreId(0), turnLimit(0), winLimit(-1)

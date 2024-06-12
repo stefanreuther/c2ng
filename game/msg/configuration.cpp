@@ -19,7 +19,7 @@ namespace {
 
     const char*const FILTER_KEY = "FILTER";
 
-    void loadMessageConfiguration(afl::io::Directory& dir, int playerNr, ConfigurationFile& file)
+    void loadMessageConfiguration(afl::io::Directory& dir, int playerNr, ConfigurationFile& file, afl::charset::Charset& charset)
     {
         // Whitespace handling:
         // - PCC1: always significant
@@ -30,7 +30,7 @@ namespace {
         Ptr<Stream> in(dir.openFileNT(Format(MESSAGE_CONFIG_TEMPLATE, playerNr), FileSystem::OpenRead));
         if (in.get() != 0) {
             afl::io::TextFile tf(*in);
-            // FIXME ...setCharacterSet(getGameCharacterSet());
+            tf.setCharsetNew(charset.clone());
             file.load(tf);
         }
     }
@@ -89,12 +89,12 @@ game::msg::Configuration::clear()
 }
 
 void
-game::msg::Configuration::load(afl::io::Directory& dir, int playerNr)
+game::msg::Configuration::load(afl::io::Directory& dir, int playerNr, afl::charset::Charset& charset)
 {
     // ex loadMessageConfig
     // Load
     ConfigurationFile file;
-    loadMessageConfiguration(dir, playerNr, file);
+    loadMessageConfiguration(dir, playerNr, file, charset);
 
     // Process
     // FIXME: "signature" feature from PCC1 (missing in PCC2)
@@ -111,11 +111,11 @@ game::msg::Configuration::load(afl::io::Directory& dir, int playerNr)
 }
 
 void
-game::msg::Configuration::save(afl::io::Directory& dir, int playerNr) const
+game::msg::Configuration::save(afl::io::Directory& dir, int playerNr, afl::charset::Charset& charset) const
 {
     // ex saveMessageConfig
     ConfigurationFile file;
-    loadMessageConfiguration(dir, playerNr, file);
+    loadMessageConfiguration(dir, playerNr, file, charset);
 
     // Update filters
     while (file.remove(FILTER_KEY)) {
@@ -134,7 +134,7 @@ game::msg::Configuration::save(afl::io::Directory& dir, int playerNr) const
         Ptr<Stream> in(dir.openFileNT(fileName, FileSystem::Create));
         if (in.get() != 0) {
             afl::io::TextFile tf(*in);
-            // FIXME ...setCharacterSet(getGameCharacterSet());
+            tf.setCharsetNew(charset.clone());
             file.save(tf);
             tf.flush();
         }

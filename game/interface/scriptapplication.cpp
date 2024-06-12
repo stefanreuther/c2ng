@@ -255,7 +255,7 @@ game::interface::ScriptApplication::ScriptApplication(afl::sys::Environment& env
 void
 game::interface::ScriptApplication::appMain()
 {
-    util::ProfileDirectory profile(environment(), fileSystem(), translator(), log());
+    util::ProfileDirectory profile(environment(), fileSystem());
     Translator& tx = translator();
 
     // Parameters

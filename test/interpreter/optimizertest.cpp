@@ -13,6 +13,7 @@
 #include "interpreter/optimizer.hpp"
 
 #include "afl/data/floatvalue.hpp"
+#include "afl/data/integervalue.hpp"
 #include "afl/data/scalarvalue.hpp"
 #include "afl/data/stringvalue.hpp"
 #include "afl/io/nullfilesystem.hpp"
@@ -498,8 +499,6 @@ AFL_TEST("interpreter.Optimizer:invert-jumps:across-conditional", a)
     a.checkEqual("02. makeLabel", l1, 1U);
 
     // jtf #0, jtf #1, label #0: disappears completely
-    // (same thing with unconditional jumps is testInvertJumps1)
-    // FIXME: wrong!!!!1 pop changes conditional.
     s.bco.addInstruction(Opcode::maJump,  Opcode::jSymbolic | Opcode::jIfTrue | Opcode::jIfFalse, l0);
     s.bco.addInstruction(Opcode::maJump,  Opcode::jSymbolic | Opcode::jIfTrue | Opcode::jIfFalse, l1);
     s.bco.addInstruction(Opcode::maJump,  Opcode::jSymbolic,                                      l0);
@@ -2663,6 +2662,7 @@ AFL_TEST("interpreter.Optimizer:compare-nc:match:2", a)
     afl::data::StringValue bracketSV("[");
     afl::data::StringValue braceSV("}");
     afl::data::FloatValue oneFV(1.0);
+    afl::data::IntegerValue bigIV(999999);
 
     // Compare-inequal with different literals; all are accepted
     s.bco.addInstruction(Opcode::maPush,    Opcode::sInteger, 1);
@@ -2673,7 +2673,9 @@ AFL_TEST("interpreter.Optimizer:compare-nc:match:2", a)
     s.bco.addInstruction(Opcode::maBinary,  interpreter::biCompareNE_NC, 0);
     s.bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialPrint, 0);
 
-    // FIXME: PCC2 also tested the "pushlit 1" case here; BCO's public interface does not allow that.
+    s.bco.addPushLiteral(&bigIV);
+    s.bco.addInstruction(Opcode::maBinary,  interpreter::biCompareNE_NC, 0);
+    s.bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialPrint, 0);
 
     s.bco.addPushLiteral(&oneFV);
     s.bco.addInstruction(Opcode::maBinary,  interpreter::biCompareNE_NC, 0);
@@ -2696,8 +2698,8 @@ AFL_TEST("interpreter.Optimizer:compare-nc:match:2", a)
 
     optimize(s.world, s.bco, 2);
 
-    a.checkEqual("01. getNumInstructions", s.bco.getNumInstructions(), 20U);
-    for (size_t i = 0; i < 7; ++i) {
+    a.checkEqual("01. getNumInstructions", s.bco.getNumInstructions(), 23U);
+    for (size_t i = 0; i < 8; ++i) {
         a.check("02", isInstruction(s.bco(1 + 3*i), Opcode::maBinary, interpreter::biCompareNE, 0));
     }
 }

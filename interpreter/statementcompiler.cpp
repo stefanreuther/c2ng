@@ -592,8 +592,8 @@ interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileAmbiguousSingleWord(const String_t& name, BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileAmbiguousSingleWord
-    // FIXME: this evaluates the variable reference twice (runtime cost).
-    // A version that evaluates it only once would be
+    // Note that this evaluates the variable reference twice (runtime cost).
+    // A (longer) version that evaluates it only once would be
     //      push
     //      dup 0
     //      uisproc
@@ -679,7 +679,7 @@ interpreter::StatementCompiler::compileAmbiguousRuntimeSwitch(const String_t& na
                 "pushloc" due to an enclosing 'With', we'll know that it will
                 at runtime find something.
             */
-            // FIXME: this evaluates the variable reference twice (runtime cost).
+            // Note that this evaluates the variable reference twice (runtime cost).
             // To evaluate only once, we'd need to do rewrite the halves (replace push by dup).
             bool protect = paren
                 && interpreter::expr::lookupBuiltinFunction(name) != 0
@@ -1511,7 +1511,6 @@ interpreter::StatementCompiler::compileForEach(BytecodeObject& bco, const Statem
                j again
             end:
                drop 1 */
-        // FIXME: potential future extension: "ForEach Ship As Local S" --> automatic implied "Dim S"
         if (tok.getCurrentToken() != tok.tIdentifier) {
             throw Error::expectIdentifier("variable name");
         }
@@ -3468,7 +3467,7 @@ interpreter::StatementCompiler::compileSubroutineDefinition(BytecodeObject& bco,
         bco.addPushLiteral(0);
         bco.addInstruction(Opcode::maDim, scope, bco.addName(name));
 
-        // FIXME: We don't have a sNamedStatic, and we cannot refer to the variable by address
+        // We don't have a sNamedStatic, and we cannot refer to the variable by address
         // as would be required for sStatic/sLocal. Thus, all we can do is to pop and hope
         // that it ends up at the right place.
         bco.addInstruction(Opcode::maPop, Opcode::sNamedVariable, bco.addName(name));

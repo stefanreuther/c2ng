@@ -20,30 +20,32 @@ namespace game { namespace vcr { namespace flak {
         (PConfig / game::spec::HostConfiguration). */
     struct Configuration {
         // ex FlakConfig
-        int   RatingBeamScale;
-        int   RatingTorpScale;
-        int   RatingBayScale;
-        int   RatingMassScale;
-        int   RatingPEBonus;
-        int   RatingFullAttackBonus;
-        int   RatingRandomBonus;
+        // Using int32_t. Some values (namely: StartingDistanceShip, StartingDistancePlanet) are close to 16-bit limit.
+        // No need to optimize the others as we'll probably not build this for 16 bits ever.
+        int32_t RatingBeamScale;
+        int32_t RatingTorpScale;
+        int32_t RatingBayScale;
+        int32_t RatingMassScale;
+        int32_t RatingPEBonus;
+        int32_t RatingFullAttackBonus;
+        int32_t RatingRandomBonus;
 
-        int   StartingDistanceShip;        // FIXME: close to edge of 16-bit limit
-        int   StartingDistancePlanet;      // FIXME: close to edge of 16-bit limit
-        int   StartingDistancePerPlayer;
-        int   StartingDistancePerFleet;
+        int32_t StartingDistanceShip;
+        int32_t StartingDistancePlanet;
+        int32_t StartingDistancePerPlayer;
+        int32_t StartingDistancePerFleet;
 
-        int   CompensationShipScale;
-        int   CompensationBeamScale;
-        int   CompensationTorpScale;
-        int   CompensationFighterScale;
-        int   CompensationLimit;
-        int   CompensationMass100KTScale;
-        int   CompensationAdjust;
+        int32_t CompensationShipScale;
+        int32_t CompensationBeamScale;
+        int32_t CompensationTorpScale;
+        int32_t CompensationFighterScale;
+        int32_t CompensationLimit;
+        int32_t CompensationMass100KTScale;
+        int32_t CompensationAdjust;
 
-        int   CyborgDebrisRate;
+        int32_t CyborgDebrisRate;
 
-        int   MaximumFleetSize;
+        int32_t MaximumFleetSize;
 
         bool  SendUtilData;
 

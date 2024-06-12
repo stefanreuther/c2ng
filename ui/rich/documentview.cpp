@@ -133,18 +133,6 @@ ui::rich::DocumentView::getPageSize() const
 }
 
 int
-ui::rich::DocumentView::getCursorTop() const
-{
-    return getPageTop();
-}
-
-int
-ui::rich::DocumentView::getCursorSize() const
-{
-    return getPageSize();
-}
-
-int
 ui::rich::DocumentView::getTotalSize() const
 {
     return doc.getDocumentHeight();

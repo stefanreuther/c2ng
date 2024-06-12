@@ -66,7 +66,7 @@ namespace game { namespace vcr { namespace classic {
             \param side Firing side
             \param track Origin of the beam: >=0 for a fighter on the given track, <0 for the unit's beams ([-1,-N] for a unit with N beams)
             \param target Target of the beam: >=0 for a fighter on the given track, <0 for unit
-            \param hit Nonnegative for hit, negative for miss (FIXME: as of 20180306, only +1 and -1 used)
+            \param hit Nonnegative for hit, negative for miss
             \param damage Effective damage (Weapon::getDamagePower())
             \param kill Effective kill (Weapon::getKillPower()) */
         virtual void fireBeam(Algorithm& algo, Side side, int track, int target, int hit, int damage, int kill) = 0;

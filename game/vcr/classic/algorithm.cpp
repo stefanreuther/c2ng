@@ -40,7 +40,6 @@ void
 game::vcr::classic::Algorithm::playBattle(const Object& left, const Object& right, uint16_t seed)
 {
     // ex VcrPlayer::playVcr
-    // FIXME: what about initBattle() returning false? who does doneBattle()?
     initBattle(left, right, seed);
     playFastForward();
     while (playCycle()) {

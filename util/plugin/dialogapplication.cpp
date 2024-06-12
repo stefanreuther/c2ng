@@ -61,7 +61,7 @@ util::plugin::DialogApplication::doAdd(const std::vector<String_t>& items)
 {
     // ex c2pluginw.cc:doAdd
     // Create a profile
-    ProfileDirectory profile(environment(), fileSystem(), translator(), log());
+    ProfileDirectory profile(environment(), fileSystem());
 
     // Create plugin directory
     afl::base::Ref<afl::io::DirectoryEntry> pluginDirEntry = profile.open()->getDirectoryEntryByName("plugins");

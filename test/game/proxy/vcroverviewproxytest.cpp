@@ -117,7 +117,7 @@ AFL_TEST("game.proxy.VcrOverviewProxy:buildDiagram", a)
 
     // Battles
     afl::base::Ref<game::vcr::classic::Database> db = *new game::vcr::classic::Database();
-    db->addNewBattle(new game::vcr::classic::Battle(makeFreighter(110, 1), makeCaptor(120, 2), 1, 0, 0))
+    db->addNewBattle(new game::vcr::classic::Battle(makeFreighter(110, 1), makeCaptor(120, 2), 1, 0))
         ->setType(game::vcr::classic::Host, 0);
 
     // Adaptor in a (mock) thread
@@ -147,7 +147,7 @@ AFL_TEST("game.proxy.VcrOverviewProxy:buildScoreSummary", a)
 
     // Battles
     afl::base::Ref<game::vcr::classic::Database> db = *new game::vcr::classic::Database();
-    db->addNewBattle(new game::vcr::classic::Battle(makeFreighter(110, 1), makeCaptor(120, 2), 1, 0, 0))
+    db->addNewBattle(new game::vcr::classic::Battle(makeFreighter(110, 1), makeCaptor(120, 2), 1, 0))
         ->setType(game::vcr::classic::Host, 0);
 
     // Adaptor in a (mock) thread

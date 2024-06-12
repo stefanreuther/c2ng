@@ -7,6 +7,7 @@
 
 #include "afl/io/constmemorystream.hpp"
 #include "afl/test/testrunner.hpp"
+#include "afl/charset/utf8charset.hpp"
 
 /** Basic container test. */
 AFL_TEST("game.v3.CommandContainer:container", a)
@@ -160,13 +161,14 @@ AFL_TEST("game.v3.CommandContainer:addNewCommand:non-replaceable", a)
 /** Test loadCommandFile, normal case. */
 AFL_TEST("game.v3.CommandContainer:loadCommandFile:normal", a)
 {
+    afl::charset::Utf8Charset cs;
     afl::io::ConstMemoryStream ms(afl::string::toBytes("# test file\n"
                                                        "a c 3 +m\n"
                                                        "buy a vowel\n"
                                                        "$send-f lol.txt\n"
                                                        "a a 3\n"));
     game::v3::CommandContainer cmds;
-    cmds.loadCommandFile(ms, game::Timestamp(1999, 12, 31, 12, 0, 0));
+    cmds.loadCommandFile(ms, game::Timestamp(1999, 12, 31, 12, 0, 0), cs);
 
     // Verify sequence
     game::v3::CommandContainer::Iterator_t it = cmds.begin();
@@ -187,11 +189,12 @@ AFL_TEST("game.v3.CommandContainer:loadCommandFile:normal", a)
 
 AFL_TEST("game.v3.CommandContainer:loadCommandFile:time:match", a)
 {
+    afl::charset::Utf8Charset cs;
     afl::io::ConstMemoryStream ms(afl::string::toBytes("g s 1 5\n"
                                                        "$timestamp 12-31-199912:00:00\n"
                                                        "g s 2 7\n"));
     game::v3::CommandContainer cmds;
-    cmds.loadCommandFile(ms, game::Timestamp(1999, 12, 31, 12, 0, 0));
+    cmds.loadCommandFile(ms, game::Timestamp(1999, 12, 31, 12, 0, 0), cs);
 
     // Verify sequence: both commands accepted
     game::v3::CommandContainer::Iterator_t it = cmds.begin();
@@ -206,11 +209,12 @@ AFL_TEST("game.v3.CommandContainer:loadCommandFile:time:match", a)
 
 AFL_TEST("game.v3.CommandContainer:loadCommandFile:time:mismatch", a)
 {
+    afl::charset::Utf8Charset cs;
     afl::io::ConstMemoryStream ms(afl::string::toBytes("g s 1 5\n"
                                                        "$timestamp 01-01-200012:00:00\n"
                                                        "g s 2 7\n"));
     game::v3::CommandContainer cmds;
-    cmds.loadCommandFile(ms, game::Timestamp(1999, 12, 31, 12, 0, 0));
+    cmds.loadCommandFile(ms, game::Timestamp(1999, 12, 31, 12, 0, 0), cs);
 
     // Verify sequence: only first command accepted, subsequent rejected by timestamp
     game::v3::CommandContainer::Iterator_t it = cmds.begin();

@@ -124,7 +124,7 @@ game::ShipQuery::complete(const game::spec::ShipList& shipList,
 {
     // Do we have an owner?
     if (m_owner <= 0) {
-        // Try to derive from m_playerDisplaySet. FIXME: needed?
+        // Try to derive from m_playerDisplaySet
         for (int i = 1; i <= MAX_PLAYERS; ++i) {
             if (m_playerDisplaySet == PlayerSet_t(i)) {
                 m_owner = i;

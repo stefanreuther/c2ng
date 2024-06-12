@@ -930,7 +930,6 @@ void
 game::map::Renderer::renderShip(const State& st, const Ship& ship, Point shipPosition, int shipOwner, bool atPlanet, const String_t& label) const
 {
     // ex GChartViewport::drawShipMarker
-    // If not at planet, and draw risShowDot.
     const TeamSettings::Relation rel = m_viewport.teamSettings().getPlayerRelation(shipOwner);
 
     // If not at planet, and configured, draw risShowDot.

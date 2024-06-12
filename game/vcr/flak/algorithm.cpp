@@ -62,7 +62,6 @@ struct game::vcr::flak::Algorithm::Ship {
 
     /** Configuration for this ship, constant during fight. */
     struct Config {
-        int32_t StandoffDistance;
         int     BayRechargeRate;
         int     BeamRechargeRate;
         int     BeamHitOdds;
@@ -348,8 +347,7 @@ namespace {
  */
 
 game::vcr::flak::Algorithm::Ship::Config::Config(const game::vcr::flak::Object& d, const Environment& env)
-    : StandoffDistance    (env.getConfiguration(Environment::StandoffDistance)),
-      BayRechargeRate     (computeBayRechargeRate(d.getNumBays(), d.getExperienceLevel(), d.getOwner(), env)),
+    : BayRechargeRate     (computeBayRechargeRate(d.getNumBays(), d.getExperienceLevel(), d.getOwner(), env)),
       BeamRechargeRate    (d.getNumBeams()     ? computeBeamRechargeRate(d.getBeamType(),        d.getExperienceLevel(), d.getOwner(), env) : 0),
       BeamHitOdds         (d.getNumBeams()     ? computeBeamHitOdds     (d.getBeamType(),        d.getExperienceLevel(), d.getOwner(), env) : 0),
       TubeRechargeRate    (d.getNumLaunchers() ? computeTubeRechargeRate(d.getTorpedoType(),     d.getExperienceLevel(), d.getOwner(), env) : 0),
@@ -590,6 +588,7 @@ game::vcr::flak::Algorithm::Algorithm(const Setup& b, const Environment& env)
     : m_playerIndex(),
       m_alternativeCombat(env.getConfiguration(Environment::AllowAlternativeCombat)),
       m_fireOnAttackFighters(env.getConfiguration(Environment::FireOnAttackFighters)),
+      m_standoffDistance(env.getConfiguration(Environment::StandoffDistance)),
       m_unusedObjects(), m_objectId(),
       m_seed(b.getSeed()), m_originalSeed(b.getSeed()), m_time(0), m_isTerminated(false),
       m_fleetGCTorpedoes()
@@ -1665,9 +1664,7 @@ game::vcr::flak::Algorithm::computeNewPosition(Fleet& fleet, const Environment& 
         chooseEnemy(fleet, env, vis, fleetNr);
     }
 
-    /* FIXME: this is not quite clean because it gets the StandoffDistance
-       from the ship. Better idea? */
-    const int sod = m_ships[fleet.data.firstShipIndex]->config.StandoffDistance;
+    const int sod = m_standoffDistance;
     if (fleet.status.enemy_ptr) {
         /* move towards target */
         Position target = fleet.status.enemy_ptr->fleetLink.status.position;
@@ -1876,8 +1873,6 @@ game::vcr::flak::Algorithm::findNewBase(const Player& player, Object& fighter) c
     double min_dist = 1.0E+15;
     Ship*  min_ship = 0;
 
-    // FIXME: somehow, we should limit this search to the player's
-    // fleets to improve performance
     for (size_t i = 0; i < m_fleets.size(); ++i) {
         if (m_fleets[i]->data.player != player.number) {
             continue;

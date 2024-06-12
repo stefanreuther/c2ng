@@ -22,11 +22,8 @@ namespace ui {
         For a list box, we would have
         - getPageTop() = index of topmost item
         - getPageSize() = number of list items displayed on the widget
-        - getCursorTop() = index of item the cursor is on
-        - getCursorSize() = 1 (=the cursor covers one element)
         - getTotalSize() = number of items
 
-        FIXME: do we need getCursorTop(), getCursorSize() in the interface?
         FIXME: does this need to be a widget descendant or could this be a separate interface? */
     class ScrollableWidget : public SimpleWidget {
      public:
@@ -51,14 +48,6 @@ namespace ui {
         /** Get size of one page.
             \return size (number of items, pixels, ...) */
         virtual int getPageSize() const = 0;
-
-        /** Get position of cursor.
-            \return position (index, pixel position, ...) */
-        virtual int getCursorTop() const = 0;
-
-        /** Get size of cursor.
-            \return size (number of items, pixels, ...) */
-        virtual int getCursorSize() const = 0;
 
         /** Get total size of content.
             \return size (number of items, pixels, ...) */

@@ -253,6 +253,15 @@ namespace {
             return typa < typb;
         }
     }
+
+    void garble(game::v3::structures::String25_t (&str)[2], util::RandomNumberGenerator& rng)
+    {
+        for (size_t i = 0; i < sizeof(str[0]); ++i) {
+            uint8_t b = static_cast<uint8_t>(rng(256));
+            str[1].m_bytes[i] = b;
+            str[0].m_bytes[i] ^= b;
+        }
+    }
 }
 
 
@@ -418,12 +427,8 @@ game::v3::TurnFile::setRegistrationKey(const RegistrationKey& key, int turnNr)
         m_windowsTrailer.regstr1[0] = afl::string::toBytes(encodeString(key.getLine(RegistrationKey::Line1)));
         m_windowsTrailer.regstr2[0] = afl::string::toBytes(encodeString(key.getLine(RegistrationKey::Line2)));
 
-        for (size_t i = 0; i < sizeof(m_windowsTrailer.regstr1[0]); ++i) {
-            m_windowsTrailer.regstr1[0].m_bytes[i] ^= (m_windowsTrailer.regstr1[1].m_bytes[i] = uint8_t(rng(256)));
-        }
-        for (size_t i = 0; i < sizeof(m_windowsTrailer.regstr2[0]); ++i) {
-            m_windowsTrailer.regstr2[0].m_bytes[i] ^= (m_windowsTrailer.regstr2[1].m_bytes[i] = uint8_t(rng(256)));
-        }
+        garble(m_windowsTrailer.regstr1, rng);
+        garble(m_windowsTrailer.regstr2, rng);
 
         uint32_t randomNr = rng() << 16;
         randomNr |= rng();
@@ -473,7 +478,7 @@ game::v3::TurnFile::getTaccomHeader() const
 bool
 game::v3::TurnFile::getCommandCode(size_t index, CommandCode_t& out) const
 {
-    if (uint32_t* p = m_offsets.at(index)) {
+    if (size_t* p = m_offsets.at(index)) {
         int16_t result;
         if (get<afl::bits::Int16LE>(m_data, *p, result)) {
             out = CommandCode_t(result);
@@ -506,7 +511,7 @@ game::v3::TurnFile::getCommandLength(size_t index, int& out) const
     } else if (cmd == tcm_SendBack) {
         // Type, Size, Data --> 4 bytes, plus length
         int16_t size;
-        const uint32_t* p = m_offsets.at(index);
+        const size_t* p = m_offsets.at(index);
         if (p == 0) {
             return false;
         } else if (get<afl::bits::Int16LE>(m_data, *p + 6, size)) {
@@ -532,7 +537,7 @@ game::v3::TurnFile::getCommandLength(size_t index, int& out) const
 bool
 game::v3::TurnFile::getCommandId(size_t index, int& out) const
 {
-    if (const uint32_t* p = m_offsets.at(index)) {
+    if (const size_t* p = m_offsets.at(index)) {
         int16_t result;
         if (!get<afl::bits::Int16LE>(m_data, *p + 2, result)) {
             return false;
@@ -562,8 +567,8 @@ game::v3::TurnFile::getCommandType(size_t index, CommandType& type) const
 bool
 game::v3::TurnFile::getCommandPosition(size_t index, int32_t& out) const
 {
-    if (uint32_t* p = m_offsets.at(index)) {
-        out = *p;
+    if (size_t* p = m_offsets.at(index)) {
+        out = static_cast<int32_t>(*p);
         return true;
     } else {
         return false;
@@ -604,7 +609,7 @@ game::v3::TurnFile::findCommandRunLength(size_t index) const
 afl::base::ConstBytes_t
 game::v3::TurnFile::getCommandData(size_t index) const
 {
-    if (uint32_t* p = m_offsets.at(index)) {
+    if (size_t* p = m_offsets.at(index)) {
         return m_data.subrange(*p + 4);
     } else {
         return afl::base::ConstBytes_t();
@@ -617,7 +622,7 @@ game::v3::TurnFile::sendMessageData(int from, int to, afl::base::ConstBytes_t da
 {
     game::v3::structures::Int16_t header[2];
     header[0] = static_cast<int16_t>(from);
-    header[1] = static_cast<int16_t>(to == 0 ? 12 : to);
+    header[1] = static_cast<int16_t>(to == 0 ? game::v3::structures::RECEIVER_IS_HOST : to);
 
     addCommand(tcm_SendMessage, static_cast<int16_t>(data.size()), afl::base::fromObject(header));
     addData(data);
@@ -691,7 +696,7 @@ game::v3::TurnFile::addCommand(CommandCode_t cmd, int id)
 {
     // ex ccmkturn.pas:NewCommand
     afl::bits::Value<afl::bits::Int16LE> buf[2];
-    m_offsets.append(uint32_t(m_data.size()));
+    m_offsets.append(m_data.size());
     buf[0] = int16_t(cmd);
     buf[1] = int16_t(id);
     addData(afl::base::fromObject(buf));         // marks turn dirty
@@ -717,10 +722,8 @@ game::v3::TurnFile::addData(afl::base::ConstBytes_t data)
 void
 game::v3::TurnFile::deleteCommand(size_t index)
 {
-    // FIXME? this fails when commands are aliased.
-    // We do not generate that, but others might, and we don't block it.
-    // PHost wouldn't be able to read it, so it is probably not worth bothering with.
-    // However, a more solid version just adds a null and points the command there.
+    // Note that this fails when commands are aliased.
+    // (No known tool generates aliased commands, and PHost would not be able to read them.)
     int32_t pos;
     if (getCommandPosition(index, pos)) {
         put<afl::bits::Int16LE>(m_data, pos, 0);
@@ -774,7 +777,7 @@ void
 game::v3::TurnFile::update()
 {
     afl::base::GrowableMemory<uint8_t> newData;
-    afl::base::GrowableMemory<uint32_t> newOffsets;
+    afl::base::GrowableMemory<size_t> newOffsets;
 
     // Remove disallowed TRN commands.
     // We don't know how to copy them.
@@ -949,7 +952,6 @@ game::v3::TurnFile::init(afl::io::Stream& str, afl::string::Translator& tx, bool
     // ex GTurnfile::init
     if (fullParse) {
         readVector(str, m_data);
-        // FIXME: replace memcmp?
         if (m_data.size() > sizeof(m_taccomHeader) && std::memcmp(m_data.at(0), TACCOM_MAGIC, 10) == 0) {
             // Taccom-enhanced TRN
             afl::base::fromObject(m_taccomHeader).copyFrom(m_data);
@@ -974,7 +976,6 @@ game::v3::TurnFile::init(afl::io::Stream& str, afl::string::Translator& tx, bool
         str.fullRead(afl::base::fromObject(tmp));
         if (std::memcmp(tmp.magic, TACCOM_MAGIC, 10) == 0) {
             // it's a Taccom turn
-            // FIXME: validate ranges of turnAddress/turnSize
             parseTurnFileHeader(str, tmp.turnAddress - 1, tmp.turnSize);
         } else {
             // it's a real turn
@@ -1040,7 +1041,7 @@ game::v3::TurnFile::parseTurnFile(afl::io::Stream& stream, afl::string::Translat
     checkRange(stream, tx, sizeof(m_turnHeader)+1, 4*m_turnHeader.numCommands);
     afl::base::ConstBytes_t offsetTable = data.subrange(offset + sizeof(m_turnHeader) + 1, 4*m_turnHeader.numCommands);
     while (const Int32LE::Bytes_t* p = offsetTable.eatN<4>()) {
-        m_offsets.append(static_cast<uint32_t>(offset + Int32LE::unpack(*p) - 1));
+        m_offsets.append(static_cast<size_t>(offset + Int32LE::unpack(*p) - 1));
     }
     for (size_t i = 0, n = m_offsets.size(); i < n; ++i) {
         checkRange(stream, tx, *m_offsets.at(i), 4);      // each command is at least 4 bytes
@@ -1057,7 +1058,7 @@ game::v3::TurnFile::parseTurnFile(afl::io::Stream& stream, afl::string::Translat
     }
 
     // now read the trailers
-    // FIXME? In case the actual turn data contains "VER3.5nn", this will mis-interpret the turn file in the same way as host does.
+    // Note that in case the actual turn data contains "VER3.5nn", this will mis-interpret the turn file in the same way as host does.
     if (length >= sizeof(m_dosTrailer) + sizeof(m_windowsTrailer) + sizeof(m_turnHeader)) {
         afl::base::fromObject(m_windowsTrailer).copyFrom(data.subrange(offset + length - sizeof(m_dosTrailer) - sizeof(m_windowsTrailer)));
         if (std::memcmp(m_windowsTrailer.magic, V35_MAGIC, 6) == 0) {
@@ -1116,7 +1117,7 @@ game::v3::TurnFile::parseTurnFileHeader(afl::io::Stream& stream, afl::io::Stream
     \param data buffer that will receive the turn data (initially empty)
     \param offsets buffer that will receive the command offsets (initially empty) */
 void
-game::v3::TurnFile::updateTurnFile(afl::base::GrowableMemory<uint8_t>& data, afl::base::GrowableMemory<uint32_t>& offsets)
+game::v3::TurnFile::updateTurnFile(afl::base::GrowableMemory<uint8_t>& data, afl::base::GrowableMemory<size_t>& offsets)
 {
     // ex GTurnfile::updateTurnfile(Buffer<char>& buf, Buffer<int32_t>& offsets)
 
@@ -1143,7 +1144,7 @@ game::v3::TurnFile::updateTurnFile(afl::base::GrowableMemory<uint8_t>& data, afl
             }
 
             size_t thisCommandOffset = data.size();
-            offsets.append(static_cast<uint32_t>(thisCommandOffset));
+            offsets.append(thisCommandOffset);
             data.append(m_data.subrange(*m_offsets.at(i), length + 4));
             put<afl::bits::Int32LE>(data, turnDirOffset + 4*i, int32_t(thisCommandOffset - newTurnStart + 1));
         }

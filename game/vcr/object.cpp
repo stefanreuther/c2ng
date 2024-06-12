@@ -243,7 +243,6 @@ game::vcr::Object::describe(const TeamSettings* teamSettings, const Root* root, 
     // Environment
     if (root == 0 || shipList == 0) {
         // Low-fi version
-        // FIXME: consider removing this case
         result.text[0] = getName();
         return result;
     }

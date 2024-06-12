@@ -708,7 +708,6 @@ game::map::describePlanetNatives(afl::io::xml::Nodes_t& nodes,
         && race != 0
         && race != AmorphousNatives)
     {
-        // FIXME? If government is not known, PCC1 will assume feudalism. Does this happen?
         addBaseTax(list, pl, viewpointPlayer, tx("Base Tax Rate"), root,   0, tx);
         addBaseTax(list, pl, viewpointPlayer, tx("Max Tax Rate"),  root, -30, tx);
     }
@@ -902,9 +901,6 @@ void game::map::describePlanetDefenseEffects(DefenseEffectInfos_t& result,
                                              afl::string::Translator& tx)
 {
     // ex WPlanetDefenseEffectWidget::drawContent, CDefenseStrengthTile.DrawData
-    // FIXME: as of 20191227, we don't have a UI-independant table representation. When we have one, produce that instead of DefenseEffectInfos_t.
-    // FIXME: for now, do not try too hard to deal with partial information
-
     // Quick exit if owner not known to simplify following code
     int planetOwner;
     if (!pl.getOwner().get(planetOwner)) {

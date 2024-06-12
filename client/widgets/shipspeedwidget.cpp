@@ -76,7 +76,6 @@ client::widgets::ShipSpeedWidget::handleKey(util::Key_t key, int prefix)
 bool
 client::widgets::ShipSpeedWidget::handleMouse(gfx::Point pt, MouseButtons_t pressedButtons)
 {
-    // FIXME: this appears often
     if (!pressedButtons.empty() && getExtent().contains(pt)) {
         requestFocus();
         return true;

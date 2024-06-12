@@ -54,20 +54,7 @@ bool
 game::map::BeamUpPlanetTransfer::canHaveElement(Element::Type type) const
 {
     // ex GPlanetBumTransfer::canHaveCargo
-    // FIXME: duplicate of BeamUpShipTransfer::canHaveElement
-    switch (type) {
-     case Element::Neutronium:
-     case Element::Tritanium:
-     case Element::Duranium:
-     case Element::Molybdenum:
-     case Element::Money:
-     case Element::Supplies:
-        return true;
-     case Element::Colonists:
-        return m_config[m_config.AllowBeamUpClans]();
-     default:
-        return false;
-    }
+    return canBeamUpCargo(type, m_config);
 }
 
 int32_t

@@ -95,9 +95,8 @@ game::interface::getVcrSideProperty(game::vcr::Battle& battle, size_t side, VcrS
            - 1..10 for torpedoes
            - 11 for fighters
            - EMPTY if no secondary weapon. */
-        // FIXME: this totally fails when we have more than 10 torps...
         if (obj->getNumBays() > 0) {
-            return makeIntegerValue(11);
+            return makeIntegerValue(shipList.launchers().size()+1);
         } else if (obj->getNumLaunchers() > 0 && shipList.launchers().get(obj->getTorpedoType()) != 0) {
             return makeIntegerValue(obj->getTorpedoType());
         } else {

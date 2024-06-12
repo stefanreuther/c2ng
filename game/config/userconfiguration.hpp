@@ -7,11 +7,13 @@
 
 #include "afl/base/inlineoptional.hpp"
 #include "afl/io/directory.hpp"
+#include "afl/string/translator.hpp"
+#include "afl/sys/loglistener.hpp"
 #include "game/config/configuration.hpp"
 #include "game/config/integeroption.hpp"
 #include "game/config/stringoption.hpp"
-#include "util/profiledirectory.hpp"
 #include "util/numberformatter.hpp"
+#include "util/profiledirectory.hpp"
 
 namespace game { namespace config {
 

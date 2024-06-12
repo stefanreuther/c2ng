@@ -140,9 +140,8 @@ game::v3::Writer::saveOutbox35(game::msg::Outbox& outbox, int player, afl::io::S
     // Content
     for (size_t i = 0, n = outbox.getNumMessages(); i < n; ++i) {
         if (outbox.getMessageSender(i) == player) {
-            /* FIXME: Winplan has a limit of 600 characters. PCC 1.x allows
-               to exceed that limit if Winplan is not in use. Right now,
-               we enforce the limit. */
+            /* Winplan has a limit of 600 characters. PCC2 enforces this limit.
+               (PCC 1.x allows to exceed that limit if Winplan is not in use.) */
             // Encode
             afl::base::GrowableBytes_t rawText = MessageWriter::encodeMessage(outbox.getMessageRawText(i), m_charset);
 

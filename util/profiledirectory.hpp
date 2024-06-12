@@ -9,9 +9,7 @@
 #include "afl/io/directory.hpp"
 #include "afl/io/filesystem.hpp"
 #include "afl/io/stream.hpp"
-#include "afl/string/translator.hpp"
 #include "afl/sys/environment.hpp"
-#include "afl/sys/loglistener.hpp"
 
 namespace util {
 
@@ -22,10 +20,8 @@ namespace util {
      public:
         /** Constructor.
             \param env Environment
-            \param fileSystem File system to use
-            \param tx Translator (FIXME: needed?)
-            \param log Logger (FIXME: needed?) */
-        ProfileDirectory(afl::sys::Environment& env, afl::io::FileSystem& fileSystem, afl::string::Translator& tx, afl::sys::LogListener& log);
+            \param fileSystem File system to use */
+        ProfileDirectory(afl::sys::Environment& env, afl::io::FileSystem& fileSystem);
 
         /** Open file in profile directory for reading.
             If the file or the profile directory does not exist, returns 0.
@@ -51,8 +47,6 @@ namespace util {
         String_t m_name;
 
         afl::io::FileSystem& m_fileSystem;
-        afl::string::Translator& m_translator;
-        afl::sys::LogListener& m_log;
     };
 
 }

@@ -635,7 +635,6 @@ namespace {
              case OutputState::ExitProgram:
              case OutputState::ExitGame:
                 // FIXME: at this point, we may have a process in InputState. That one must be terminated.
-                // FIXME: save the game of course...
                 running = false;
                 break;
 
@@ -744,12 +743,12 @@ client::Application::appMain(gfx::Engine& engine)
     // Capture environment
     afl::io::FileSystem& fs = m_fileSystem;
 
-    // Infrastructure (FIXME).
+    // Infrastructure
     util::ConsoleLogger console;
     console.attachWriter(true, m_environment.attachTextWriterNT(m_environment.Error));
     console.attachWriter(false, m_environment.attachTextWriterNT(m_environment.Output));
     log().addListener(console);
-    util::ProfileDirectory profile(m_environment, m_fileSystem, translator(), log());
+    util::ProfileDirectory profile(m_environment, m_fileSystem);
 
     // At this point we are safely operable.
     // Start collecting messages.

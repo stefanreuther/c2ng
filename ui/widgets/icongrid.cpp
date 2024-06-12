@@ -173,18 +173,6 @@ ui::widgets::IconGrid::getPageSize() const
 }
 
 int
-ui::widgets::IconGrid::getCursorTop() const
-{
-    return m_currentLine;
-}
-
-int
-ui::widgets::IconGrid::getCursorSize() const
-{
-    return 1;
-}
-
-int
 ui::widgets::IconGrid::getTotalSize() const
 {
     return util::divideAndRoundUp(int(m_icons.size()), m_widthInCells);

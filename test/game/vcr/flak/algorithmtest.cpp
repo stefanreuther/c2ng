@@ -540,7 +540,6 @@ AFL_TEST("game.vcr.flak.Algorithm:setup", a)
 
     // Test
     game::vcr::flak::Setup testee;
-    afl::charset::Utf8Charset cs; // FIXME
 
     // - a Klingon warship
     game::vcr::flak::Setup::FleetIndex_t fleet1 = testee.addFleet(4);
@@ -664,7 +663,6 @@ AFL_TEST("game.vcr.flak.Algorithm:setup:fighters", a)
 
     // Test
     game::vcr::flak::Setup testee;
-    afl::charset::Utf8Charset cs; // FIXME
 
     // - a small carrier
     game::vcr::flak::Setup::FleetIndex_t fleet1 = testee.addFleet(6);
@@ -871,7 +869,6 @@ AFL_TEST("game.vcr.flak.Algorithm:setup:capture-back", a)
 
     // Test
     game::vcr::flak::Setup testee;
-    afl::charset::Utf8Charset cs; // FIXME
 
     // - a freighter
     game::vcr::flak::Setup::FleetIndex_t fleet1 = testee.addFleet(6);
@@ -990,7 +987,6 @@ AFL_TEST("game.vcr.flak.Algorithm:setup:capture-death-ray", a)
 
     // Test
     game::vcr::flak::Setup testee;
-    afl::charset::Utf8Charset cs; // FIXME
 
     // - a freighter
     game::vcr::flak::Setup::FleetIndex_t fleet1 = testee.addFleet(4);

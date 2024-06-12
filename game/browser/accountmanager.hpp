@@ -6,6 +6,8 @@
 
 #include "afl/container/ptrvector.hpp"
 #include "afl/string/string.hpp"
+#include "afl/string/translator.hpp"
+#include "afl/sys/loglistener.hpp"
 #include "util/profiledirectory.hpp"
 
 namespace game { namespace browser {

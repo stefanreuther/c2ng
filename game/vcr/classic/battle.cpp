@@ -19,11 +19,9 @@ using afl::string::Format;
 game::vcr::classic::Battle::Battle(const Object& left,
                                    const Object& right,
                                    uint16_t seed,
-                                   uint16_t signature,
-                                   uint16_t planetTemperatureCode)
+                                   uint16_t signature)
     : m_seed(seed),
       m_signature(signature),
-      m_planetTemperatureCode(planetTemperatureCode),
       m_result(),
       m_type(Unknown),
       m_capabilities(0),

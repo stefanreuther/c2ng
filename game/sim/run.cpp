@@ -1363,7 +1363,7 @@ namespace {
         }
 
         /* run it */
-        game::vcr::classic::Battle* vcr = db.addNewBattle(new game::vcr::classic::Battle(left, right, seed, 0 /* sig */, 0 /* planet temp */));
+        game::vcr::classic::Battle* vcr = db.addNewBattle(new game::vcr::classic::Battle(left, right, seed, 0 /* sig */));
         uint16_t cap = type == game::vcr::classic::PHost4
             ? game::v3::structures::DeathRayCapability | game::v3::structures::ExperienceCapability | game::v3::structures::BeamCapability
             : 0;
@@ -1481,7 +1481,7 @@ namespace {
 
         /* run it */
         game::vcr::Object origPlanet = right;
-        game::vcr::classic::Battle* vcr = db.addNewBattle(new game::vcr::classic::Battle(left, right, seed, 0 /* sig */, 0 /* planet temp */));
+        game::vcr::classic::Battle* vcr = db.addNewBattle(new game::vcr::classic::Battle(left, right, seed, 0 /* sig */));
         uint16_t cap = type == game::vcr::classic::PHost4
             ? game::v3::structures::DeathRayCapability | game::v3::structures::ExperienceCapability | game::v3::structures::BeamCapability
             : 0;

@@ -147,7 +147,6 @@ namespace {
 
         bool readLine(String_t& result)
             {
-                // FIXME: inefficient!!!
                 result.clear();
 
                 char ch;

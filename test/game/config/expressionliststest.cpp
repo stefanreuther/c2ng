@@ -124,7 +124,7 @@ AFL_TEST("game.config.ExpressionLists:loadRecentFiles", a)
     fs.openFile("/profile/lru.ini", FileSystem::Create)->fullWrite(afl::string::toBytes(LRU_INI));
     env.setSettingsDirectoryName("/profile");
 
-    util::ProfileDirectory profile(env, fs, tx, log);
+    util::ProfileDirectory profile(env, fs);
 
     // Testee
     game::config::ExpressionLists testee;
@@ -180,7 +180,7 @@ AFL_TEST("game.config.ExpressionLists:loadPredefinedFiles", a)
     fs.openFile("/profile/expr.ini", FileSystem::Create)->fullWrite(afl::string::toBytes(EXPR_INI));
     env.setSettingsDirectoryName("/profile");
 
-    util::ProfileDirectory profile(env, fs, tx, log);
+    util::ProfileDirectory profile(env, fs);
 
     // Testee
     game::config::ExpressionLists testee;
@@ -230,7 +230,7 @@ AFL_TEST("game.config.ExpressionLists:saveRecentFiles", a)
     afl::sys::InternalEnvironment env;
     env.setSettingsDirectoryName("/profile");     // Will be auto-created!
 
-    util::ProfileDirectory profile(env, fs, tx, log);
+    util::ProfileDirectory profile(env, fs);
 
     // Testee
     game::config::ExpressionLists testee;

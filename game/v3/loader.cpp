@@ -450,7 +450,7 @@ game::v3::Loader::loadKoreMinefields(game::map::Universe& univ, afl::io::Stream&
                 // Figure out type/owner. 12 is a Tholian web, for other races we don't know the type.
                 int owner;
                 game::map::Minefield::TypeReport type;
-                if (mf.ownerTypeFlag == 12) {
+                if (mf.ownerTypeFlag == gt::MINE_IS_THOLIAN_WEB) {
                     owner = 7;
                     type = game::map::Minefield::IsWeb;
                 } else {
@@ -634,7 +634,6 @@ void
 game::v3::Loader::loadHConfig(Root& root, afl::io::Stream& hconfig, game::config::ConfigurationOption::Source source)
 {
     // ex game/config.cc:loadHConfig, Config::assignFromHConfigImage
-    // FIXME: do host version guessing in this function
     if (hconfig.getSize() > 10*sizeof(gt::HConfig)) {
         // FIXME: log only?
         throw afl::except::FileFormatException(hconfig, m_translator("File has invalid size"));
@@ -726,7 +725,6 @@ game::v3::Loader::loadResult(Turn& turn, const Root& root, Game& game, afl::io::
         throw FileFormatException(file, Format(m_translator("File is owned by player %d, should be %d"), gen.getPlayerId(), player));
     }
     GenExtra::create(turn).create(player) = gen;
-    // FIXME:    trn.setHaveData(player);
     gen.copyScoresTo(game.scores());
     turn.setTurnNumber(gen.getTurnNumber());
     turn.setTimestamp(gen.getTimestamp());

@@ -482,9 +482,9 @@ game::map::Planet::internalCheck(const Configuration& config, PlayerSet_t availa
     // Check PDATA. If we have a PDATA entry, it must exist.
     if (!m_planetSource.empty() && !exists) {
         String_t fmt = (m_knownToNotExist
-                        ? tx.translateString("Planet #%d has data although it is reported as non-existant, host confused?")
-                        : tx.translateString("Planet #%d exists for Host, but is outside valid range"));
-        log.write(log.Warn, LOG_NAME, afl::string::Format(fmt.c_str(), getId()));
+                        ? tx("Planet #%d has data although it is reported as non-existant, host confused?")
+                        : tx("Planet #%d exists for Host, but is outside valid range"));
+        log.write(log.Warn, LOG_NAME, afl::string::Format(fmt, getId()));
         exists = true;
     }
 
@@ -506,7 +506,7 @@ game::map::Planet::internalCheck(const Configuration& config, PlayerSet_t availa
     // Check BDATA. If we have BDATA, we also must have PDATA.
     if (!m_baseSource.empty() && m_planetSource.empty()) {
         // FIXME this will make PCC2 write invalid files, i.e. where BDATA.DAT and BDATA.DIS disagree.
-        log.write(log.Warn, LOG_NAME, afl::string::Format(tx.translateString("Starbase #%d does not have a planet, deleting it").c_str(), getId()));
+        log.write(log.Warn, LOG_NAME, afl::string::Format(tx("Starbase #%d does not have a planet, deleting it"), getId()));
         m_currentBaseData = BaseData();
         m_baseSource = PlayerSet_t();
     }
@@ -565,7 +565,7 @@ game::map::Planet::getName(ObjectName which, afl::string::Translator& tx, const 
 
      case LongName:
      case DetailedName: {
-        String_t result = afl::string::Format(tx.translateString("Planet #%d: %s").c_str(), getId(), m_name);
+        String_t result = afl::string::Format(tx("Planet #%d: %s"), getId(), m_name);
         if (which == DetailedName) {
             String_t comment = iface.getComment(InterpreterInterface::Planet, getId());
             if (!comment.empty()) {
@@ -679,7 +679,6 @@ game::map::Planet::setNumBuildings(PlanetaryBuilding kind, IntegerProperty_t n)
         m_currentPlanetData.numDefensePosts = n;
         break;
      case BaseDefenseBuilding:
-        // FIXME: what to do if we do not have a base? PCC2 does that same as this:
         m_currentBaseData.numBaseDefensePosts = n;
         break;
     }
@@ -830,7 +829,6 @@ void
 game::map::Planet::setNatives(LongProperty_t natives)
 {
     // ex GPlanet::setNatives
-    // FIXME: rename?
     m_currentPlanetData.nativeClans = natives;
     markDirty();
 }
@@ -1219,7 +1217,6 @@ void
 game::map::Planet::setBaseBuildOrder(const ShipBuildOrder& order)
 {
     // ex GPlanet::setBaseBuildOrder. Note different semantic.
-    // FIXME: we refuse to set this on foreign bases. Reconsider.
     if (!m_baseSource.empty()) {
         m_currentBaseData.shipBuildOrder = order;
         markDirty();

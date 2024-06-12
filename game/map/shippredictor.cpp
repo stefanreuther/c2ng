@@ -98,7 +98,7 @@ namespace {
      *  Fighter production
      */
 
-    bool doBuildFightersFromCargo(game::map::ShipData& ship, int realOwner, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config)
+    bool doBuildFightersFromCargo(game::map::ShipData& ship, int realOwner, const game::spec::ShipList& shipList, const HostConfiguration& config)
     {
         // Check hull
         const game::spec::Hull* h = shipList.hulls().get(ship.hullType.orElse(0));
@@ -162,7 +162,7 @@ namespace {
     const int AlchemyDur = 2;
     const int AlchemyMol = 4;
 
-    int getAlchemyFCodeValue(const String_t fc, const game::HostVersion& host, const game::RegistrationKey& key, bool enable)
+    int getAlchemyFCodeValue(const String_t fc, const HostVersion& host, const game::RegistrationKey& key, bool enable)
     {
         // ex shipacc.pas:AlchemyFCValue
         // ex game/shippredictcc:getAlchemyFCodeValue
@@ -245,7 +245,7 @@ namespace {
         \param [in]     host      Host version
         \param [in]     key       Registration key
         \param [in/out] used_properties Used properties report; will be updated */
-    void doAlchemy(const String_t& shipFCode, bool handleFCode, game::map::ShipData& ship, const game::HostVersion& host, const game::RegistrationKey& key, game::map::ShipPredictor::UsedProperties_t& used_properties)
+    void doAlchemy(const String_t& shipFCode, bool handleFCode, game::map::ShipData& ship, const HostVersion& host, const game::RegistrationKey& key, game::map::ShipPredictor::UsedProperties_t& used_properties)
     {
         // ex game/shippredict.cc:doAlchemy
         // Merlin converts 3 Sup -> 1 Min
@@ -304,16 +304,9 @@ namespace {
         }
     }
 
-    int getCloakFuel(int turns,
-                     int realOwner,
-                     const game::config::HostConfiguration& config,
-                     const game::spec::Hull& hull)
+    int getCloakFuel(int turns, int realOwner, const HostConfiguration& config, const game::spec::Hull& hull)
     {
-        const int cfb = config[config.CloakFuelBurn](realOwner);
-        int fuel = hull.getMass() * cfb / 100;
-        if (fuel < cfb) {
-            fuel = cfb;
-        }
+        int fuel = hull.getCloakFuelUsage(realOwner, config);
         if (turns) {
             fuel *= turns;
         }
@@ -579,8 +572,8 @@ namespace {
                          const game::map::ShipData* towee_override,
                          bool grav_acc, double dist,
                          const game::spec::ShipList& shipList,
-                         const game::config::HostConfiguration& config,
-                         const game::HostVersion& host)
+                         const HostConfiguration& config,
+                         const HostVersion& host)
     {
         // ex shipacc.pas:ComputeFuelUsage
         int warp = ship.warpFactor.orElse(0);
@@ -602,7 +595,7 @@ namespace {
             return 0;
         }
 
-        bool isTHost = host.getKind() != game::HostVersion::PHost;
+        bool isTHost = host.getKind() != HostVersion::PHost;
         int load = getEngineLoad(univ, ship, towee_id, towee_override, isTHost, shipList);
 
         if (isTHost) {
@@ -631,18 +624,11 @@ namespace {
         }
     }
 
-    int computeTurnFuel(const game::map::Ship& ship,
-                        const game::config::HostConfiguration& config,
-                        const game::spec::ShipList& shipList,
-                        int eta)
+    int computeTurnFuel(const game::map::Ship& ship, const HostConfiguration& config, const game::spec::ShipList& shipList, int eta)
     {
-        // FIXME: do we have this elsewhere?
         // ex shipacc.pas:TurnFuelUsage (sort-of)
-        // FIXME: use Hull::getTurnFuelUsage
         const game::spec::Hull* hull = shipList.hulls().get(ship.getHull().orElse(0));
-        int fuel = (hull != 0
-                    ? (int32_t(config[config.FuelUsagePerTurnFor100KT](ship.getRealOwner().orElse(0))) * hull->getMass() + 99) / 100
-                    : 0);
+        int fuel = (hull != 0 ? hull->getTurnFuelUsage(ship.getRealOwner().orElse(0), false, config) : 0);
         if (eta != 0) {
             fuel *= eta;
         }

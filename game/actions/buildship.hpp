@@ -107,7 +107,6 @@ namespace game { namespace actions {
             \retval true we're re-using the base's build order
             \retval false this is a new build order
             \throw Exception Configuration does not allow this player to build */
-        // FIXME: check whether we need this guy in the public interface?
         static bool prepareBuildOrder(ShipBuildOrder& o,
                                       const game::map::Planet& pl,
                                       const game::config::HostConfiguration& config,

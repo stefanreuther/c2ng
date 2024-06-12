@@ -95,7 +95,6 @@ namespace game {
         /** Constructor.
 
             Note that the host configuration and player list must be initialized separately.
-            FIXME: reconsider.
 
             \param gameDirectory game directory, see m_gameDirectory. Must not be null.
             \param specLoader specification loader, see m_specificationLoader. Must not be null.
@@ -201,8 +200,7 @@ namespace game {
         game::vcr::flak::Configuration m_flakConfiguration;
 
         /** User configuration (preferences).
-            Must be initialized by the creator of the Root object for now.
-            FIXME: make more generic */
+            Must be initialized by the creator of the Root object for now. */
         game::config::UserConfiguration m_userConfiguration;
 
         /** Player list.

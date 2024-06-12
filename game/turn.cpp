@@ -26,7 +26,6 @@ game::Turn::~Turn()
 void
 game::Turn::setDatabaseTurnNumber(int turnNumber)
 {
-    // FIXME: consider whether we need this
     m_databaseTurnNumber = turnNumber;
 }
 

@@ -732,7 +732,6 @@ game::vcr::classic::PVCRAlgorithm::getDistance()
     return m_status[RightSide].r.m_objectX - m_status[LeftSide].r.m_objectX;
 }
 
-// FIXME: move
 struct game::vcr::classic::PVCRAlgorithm::PVCRStatusToken : public StatusToken {
     Status m_status[2];
     int32_t m_seed;
@@ -1627,10 +1626,6 @@ game::vcr::classic::PVCRAlgorithm::checkSide(Object& obj) const
 {
     // ex VcrPlayerPHost::checkVcrSide
     bool err = false;
-
-    if (obj.getOwner() <= 0 || obj.getOwner() > 12/*FIXME*/) {
-        obj.setOwner(12);
-    }
 
     if (obj.getBeamType() != 0 && m_beams.get(obj.getBeamType()) == 0) {
         obj.setBeamType(0);

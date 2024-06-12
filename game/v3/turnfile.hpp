@@ -21,7 +21,6 @@ namespace game { namespace v3 {
     /** TRN Command codes.
         The names are the same as in UN-TRN, the file format list, and some utilities inspired by the above.
         Those marked "<-" have been renamed, which does not mean the list would be consistent now.*/
-    // FIXME: can we define these command codes in a better way than an enum?
     enum {
         /* Ship commands */
         tcm_ShipFIRST              = 1,
@@ -360,9 +359,6 @@ namespace game { namespace v3 {
 
         /*
          *  Command definition accessors
-         *
-         *  FIXME: these names suck; can we do better?
-         *  (Consider making CommandCode_t a class with member functions.)
          */
 
         /** Get command type, given a command code.
@@ -504,7 +500,7 @@ namespace game { namespace v3 {
         structures::TurnDosTrailer m_dosTrailer;         ///< DOS trailer.
         structures::TurnWindowsTrailer m_windowsTrailer; ///< Windows trailer.
         afl::base::GrowableMemory<uint8_t> m_data;       ///< Miscellaneous data. The TRN, usually ;)
-        afl::base::GrowableMemory<uint32_t> m_offsets;   ///< Offsets of commands, pointing into data. zero-based. NOT the pointer array from the turn file! FIXME: should be size_t?
+        afl::base::GrowableMemory<size_t> m_offsets;     ///< Offsets of commands, pointing into data. zero-based. NOT the pointer array from the turn file!
         int m_version;                                   ///< TRN file sub-version (Winplan only).
         FeatureSet_t m_features;                         ///< TRN file features (bitfield trnf_Xxx).
         size_t m_turnPlacement;                          ///< Taccom: place TRN before Nth attachment.
@@ -512,13 +508,12 @@ namespace game { namespace v3 {
         /* Internal stuff */
         bool m_isDirty;                                  ///< True if data is dirty. If false, data is a valid turn file.
 
-        // FIXME: reconsider using FileSize_t here. size_t or uint32_t should be enough.
         void init(afl::io::Stream& str, afl::string::Translator& tx, bool fullParse);
         void checkRange(afl::io::Stream& stream, afl::string::Translator& tx, afl::io::Stream::FileSize_t offset, afl::io::Stream::FileSize_t length);
         void parseTurnFile(afl::io::Stream& stream, afl::string::Translator& tx, afl::io::Stream::FileSize_t offset, afl::io::Stream::FileSize_t length);
         void parseTurnFileHeader(afl::io::Stream& stream, afl::io::Stream::FileSize_t offset, afl::io::Stream::FileSize_t length);
 
-        void updateTurnFile(afl::base::GrowableMemory<uint8_t>& data, afl::base::GrowableMemory<uint32_t>& offsets);
+        void updateTurnFile(afl::base::GrowableMemory<uint8_t>& data, afl::base::GrowableMemory<size_t>& offsets);
         void makeCommands(int id, int low, int up, afl::base::ConstBytes_t oldObject, afl::base::ConstBytes_t newObject);
 
         String_t encodeString(const String_t& in) const;

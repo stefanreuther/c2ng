@@ -67,8 +67,6 @@ namespace util {
         /** Clear this StringInstructionList. */
         void clear();
 
-        // FIXME: cannot do that yet! void append(const StringInstructionList& other);
-
         using InstructionList::size;
 
         /** Read instructions.

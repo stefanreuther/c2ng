@@ -729,7 +729,6 @@ inline game::LongProperty_t
 game::map::Planet::getNatives() const
 {
     // ex GPlanet::getNatives
-    // FIXME: rename?
     return m_currentPlanetData.nativeClans;
 }
 

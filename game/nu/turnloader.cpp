@@ -482,8 +482,7 @@ namespace {
             Battle* b = db->addNewBattle(new Battle(unpackVcrObject(in("left"),  false),
                                                     unpackVcrObject(in("right"), in("battletype").toInteger() != 0),
                                                     uint16_t(in("seed").toInteger()),
-                                                    0,      /* signature, not relevant */
-                                                    uint16_t(in("right")("temperature").toInteger())
+                                                    0 /* signature, not relevant */
                                              ));
             // "leftownerid": 7,
             // "rightownerid": 6,

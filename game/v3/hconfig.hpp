@@ -14,7 +14,9 @@ namespace game { namespace v3 {
     /** Unpack HCONFIG.HST image into internal structure.
         \param data    [in] Data read from file
         \param size    [in] Number of valid bytes in \c data
-        \param config  [out] Target configuration structure
+        \param config  [in,out] Target configuration structure.
+                       Should contain up-to-date PlayerRace setting for decoding of scalar options
+                       that we use as arrays.
         \param source  [in] "source" to use for values read from file */
     void unpackHConfig(const structures::HConfig& data, size_t size,
                        game::config::HostConfiguration& config,

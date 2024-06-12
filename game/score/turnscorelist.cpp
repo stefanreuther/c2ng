@@ -247,7 +247,6 @@ game::score::TurnScoreList::addTurn(int turnNr, const Timestamp& time)
 const game::score::TurnScore*
 game::score::TurnScoreList::getTurn(int turnNr) const
 {
-    // FIXME: use binary intersection?
     for (Index_t i = m_turnScores.size(); i > 0; --i) {
         if (m_turnScores[i-1]->getTurnNumber() == turnNr) {
             return m_turnScores[i-1];

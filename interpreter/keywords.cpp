@@ -67,8 +67,6 @@ interpreter::Keyword
 interpreter::lookupKeyword(const String_t& s)
 {
     // ex lookupKeyword
-    // FIXME: use binary search....
-    // FIXME: use bool
     for (size_t i = 0; i < countof(KEYWORD_TABLE); ++i) {
         if (KEYWORD_TABLE[i] == s) {
             return Keyword(i+1);

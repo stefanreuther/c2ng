@@ -52,7 +52,6 @@ game::v3::check::Application::appMain()
             } else if (text == "h" || text == "help") {
                 help();
             } else {
-                // FIXME: text...
                 errorExit(Format("Invalid option \"%s\"", text));
             }
         } else {
@@ -64,7 +63,6 @@ game::v3::check::Application::appMain()
             } else if (!rootdir.isValid()) {
                 rootdir = text;
             } else {
-                // FIXME: text...
                 errorExit("Command line syntax error");
             }
         }

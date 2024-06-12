@@ -5,6 +5,7 @@
 
 #include "game/msg/configuration.hpp"
 
+#include "afl/charset/utf8charset.hpp"
 #include "afl/io/constmemorystream.hpp"
 #include "afl/io/filemapping.hpp"
 #include "afl/io/internaldirectory.hpp"
@@ -56,8 +57,9 @@ AFL_TEST("game.msg.Configuration:load", a)
     afl::base::Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("dir");
     dir->addStream("msg3.ini", *new afl::io::ConstMemoryStream(afl::string::toBytes(FILE_CONTENT)));
 
+    afl::charset::Utf8Charset cs;
     game::msg::Configuration testee;
-    testee.load(*dir, 3);
+    testee.load(*dir, 3, cs);
 
     a.check("01. isHeadingFiltered", testee.isHeadingFiltered("(-9) Sub Space Message"));
 }
@@ -68,9 +70,10 @@ AFL_TEST("game.msg.Configuration:load", a)
 AFL_TEST("game.msg.Configuration:save", a)
 {
     afl::base::Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("dir");
+    afl::charset::Utf8Charset cs;
     game::msg::Configuration testee;
     testee.setHeadingFiltered("(f)", true);
-    testee.save(*dir, 7);
+    testee.save(*dir, 7, cs);
 
     afl::base::Ptr<afl::io::Stream> s = dir->getStream("msg7.ini");
     a.checkNonNull("01. stream", s.get());
@@ -90,8 +93,9 @@ AFL_TEST("game.msg.Configuration:save:empty", a)
     afl::base::Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("dir");
     dir->addStream("msg5.ini", *new afl::io::ConstMemoryStream(afl::string::toBytes("whatever")));
 
+    afl::charset::Utf8Charset cs;
     game::msg::Configuration testee;
-    testee.save(*dir, 5);
+    testee.save(*dir, 5, cs);
 
     afl::base::Ptr<afl::io::Stream> s = dir->getStream("msg5.ini");
     a.checkNull("01. stream", s.get());

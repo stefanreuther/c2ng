@@ -105,7 +105,7 @@ struct util::plugin::ConsoleApplication::Command {
 
 util::plugin::ConsoleApplication::ConsoleApplication(afl::sys::Environment& env, afl::io::FileSystem& fs)
     : Application(env, fs),
-      profile(env, fs, translator(), log())
+      profile(env, fs)
 {
     consoleLogger().setConfiguration("*@-Debug=drop", translator());
 }

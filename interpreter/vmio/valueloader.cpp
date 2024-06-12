@@ -173,7 +173,8 @@ double
 interpreter::vmio::ValueLoader::loadFloat(uint32_t value)
 {
     // ex IntFloatValue::IntFloatValue (part)
-    // FIXME: portability. We now assume that floats have the same endianness as int32s.
+    // We assume that floats have the same endianness as int32s.
+    // Machines where this is not the case are probably rarer than files with float values in the wild.
     static_assert(sizeof(value) == sizeof(float), "sizeof float");
     float tmp;
     std::memcpy(&tmp, &value, sizeof(tmp));

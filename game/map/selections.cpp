@@ -191,7 +191,6 @@ void
 game::map::Selections::setCurrentLayer(LayerReference newLayer, Universe& u)
 {
     // ex GMultiSelection::setCurrentSelectionLayer
-    // FIXME: PCC2 would have a way to accept this call even when no turn loaded
     size_t effLayer = newLayer.resolve(*this);
     if (effLayer != m_currentLayer) {
         copyFrom(u, m_currentLayer);

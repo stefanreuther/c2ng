@@ -45,7 +45,7 @@ game::v3::OutboxReader::loadOutbox(afl::io::Stream& s, afl::charset::Charset& cs
 
         // Convert receiver. In the file, 12 means Host; internally, 0 means Host.
         int effectiveReceiver;
-        if (to == structures::NUM_OWNERS) {
+        if (to == structures::RECEIVER_IS_HOST) {
             effectiveReceiver = 0;
         } else if (to > 0 && to <= structures::NUM_PLAYERS) {
             effectiveReceiver = to;

@@ -437,7 +437,7 @@ client::dialogs::FileSelectionDialog::onEnter()
     // ex UIFileChooserDialog::onEnter
     if (m_fileList.hasState(ui::Widget::FocusedState)) {
         // Choose an item
-        onItemDoubleClick(m_fileList.getCursorTop());
+        onItemDoubleClick(m_fileList.getCurrentItem());
     } else {
         // User input
         handleUserInput(m_input.getText(), true);

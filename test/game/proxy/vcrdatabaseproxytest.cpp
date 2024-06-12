@@ -156,9 +156,9 @@ AFL_TEST("game.proxy.VcrDatabaseProxy:basics", a)
     game::test::initStandardBeams(*env.shipList);
     game::test::initStandardTorpedoes(*env.shipList);
     game::test::addAnnihilation(*env.shipList);
-    env.battles->addNewBattle(new game::vcr::classic::Battle(makeRightShip(), makeLeftShip(), 42, 0, 0))
+    env.battles->addNewBattle(new game::vcr::classic::Battle(makeRightShip(), makeLeftShip(), 42, 0))
         ->setType(game::vcr::classic::PHost4, 0);
-    env.battles->addNewBattle(new game::vcr::classic::Battle(makeLeftShip(), makeRightShip(), 42, 0, 0))
+    env.battles->addNewBattle(new game::vcr::classic::Battle(makeLeftShip(), makeRightShip(), 42, 0))
         ->setType(game::vcr::classic::PHost4, 0);
 
     // Set up tasking
@@ -335,7 +335,7 @@ AFL_TEST("game.proxy.VcrDatabaseProxy:save", a)
     game::test::initStandardBeams(*env.shipList);
     game::test::initStandardTorpedoes(*env.shipList);
     game::test::addAnnihilation(*env.shipList);
-    env.battles->addNewBattle(new game::vcr::classic::Battle(makeRightShip(), makeLeftShip(), 42, 0, 0))
+    env.battles->addNewBattle(new game::vcr::classic::Battle(makeRightShip(), makeLeftShip(), 42, 0))
         ->setType(game::vcr::classic::PHost4, 0);
     game::test::WaitIndicator ind;
     TestAdaptor ad(env);
@@ -361,7 +361,7 @@ AFL_TEST("game.proxy.VcrDatabaseProxy:save:error", a)
     game::test::initStandardBeams(*env.shipList);
     game::test::initStandardTorpedoes(*env.shipList);
     game::test::addAnnihilation(*env.shipList);
-    env.battles->addNewBattle(new game::vcr::classic::Battle(makeRightShip(), makeLeftShip(), 42, 0, 0))
+    env.battles->addNewBattle(new game::vcr::classic::Battle(makeRightShip(), makeLeftShip(), 42, 0))
         ->setType(game::vcr::classic::PHost4, 0);
     game::test::WaitIndicator ind;
     TestAdaptor ad(env);

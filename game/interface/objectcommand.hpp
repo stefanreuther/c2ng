@@ -21,10 +21,10 @@ namespace game { namespace interface {
         Like all interpreter objects, this object does not outlive its session.
         However, it might outlive its game.
         We therefore keep a smart pointer to Game to keep it alive.
+        The game object itself must not be ever deleted.
 
-        FIXME: we must also keep the object alive, see bug #308.
-        Alternatively, refer to the object by name somehow.
-        For minefields, this is now solved by a custom MinefieldMethod. */
+        For objects that can be deleted, we need to refer to the object by name;
+        see MinefieldMethod. */
     class ObjectCommand : public interpreter::ProcedureValue {
      public:
         /** Function to call.

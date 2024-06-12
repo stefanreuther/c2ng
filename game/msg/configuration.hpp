@@ -6,8 +6,9 @@
 #define C2NG_GAME_MSG_CONFIGURATION_HPP
 
 #include <set>
-#include "afl/string/string.hpp"
+#include "afl/charset/charset.hpp"
 #include "afl/io/directory.hpp"
+#include "afl/string/string.hpp"
 
 namespace game { namespace msg {
 
@@ -44,13 +45,15 @@ namespace game { namespace msg {
 
         /** Load configuration.
             \param dir      Directory to load from
-            \param playerNr Player number */
-        void load(afl::io::Directory& dir, int playerNr);
+            \param playerNr Player number
+            \param charset  Character set */
+        void load(afl::io::Directory& dir, int playerNr, afl::charset::Charset& charset);
 
         /** Save configuration.
             \param dir      Directory to save to
-            \param playerNr Player number */
-        void save(afl::io::Directory& dir, int playerNr) const;
+            \param playerNr Player number
+            \param charset  Character set */
+        void save(afl::io::Directory& dir, int playerNr, afl::charset::Charset& charset) const;
 
      private:
         // @change: we use a set<>, not a list<>

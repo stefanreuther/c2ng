@@ -151,7 +151,6 @@ MessageWriteCommand::call(interpreter::Process& proc, interpreter::Arguments& ar
     interpreter::checkFlagArg(flags, 0, args.getNext(), "R");
 
     if (flags == 0) {
-        // FIXME: PCC1 tracks the last "Turn" header written and omits duplicates
         tf->writeLine(Format("=== Turn %d ===", m_turnNumber));
         tf->writeLine(Format("--- Message %d ---", m_messageIndex+1));
     }
@@ -269,7 +268,6 @@ String_t
 game::interface::InboxContext::toString(bool /*readable*/) const
 {
     // ex IntMessageContext::toString
-    // FIXME: we can do better
     return "#<message>";
 }
 

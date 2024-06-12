@@ -145,7 +145,6 @@ void
 util::rich::Text::erase(size_type start, size_type length)
 {
     // ex RichText::erase
-    // FIXME: slow q+d solution
     if (start < m_text.size()) {
         if (length >= m_text.size() - start) {
             /* delete till eos */

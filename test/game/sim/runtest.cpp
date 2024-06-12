@@ -1768,7 +1768,7 @@ AFL_TEST("game.sim.Run:VcrFLAK", a)
     game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result
-    // FIXME? Other algos verify that rng has not been touched because we use seed control, but FLAK does touch it.
+    // Note that FLAK does not support seed control and will touch the RNG.
 
     // - a battle has been created
     a.checkNonNull("01. battles",           h.result.battles.get());
@@ -1821,7 +1821,7 @@ AFL_TEST("game.sim.Run:VcrFLAK:esb", a)
     game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result
-    // FIXME? Other algos verify that rng has not been touched because we use seed control, but FLAK does touch it.
+    // Note that FLAK does not support seed control and will touch the RNG.
 
     // - a battle has been created
     a.checkNonNull("01. battles",           h.result.battles.get());

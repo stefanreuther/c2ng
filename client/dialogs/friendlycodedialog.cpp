@@ -79,7 +79,7 @@ client::dialogs::FriendlyCodeDialog::run()
 
     g2.add(del.addNew(new ui::widgets::ScrollbarContainer(m_list, m_root)));
 
-    ui::Widget& helper = del.addNew(new client::widgets::HelpWidget(m_root, afl::string::Translator::getSystemInstance(), m_gameSender, "pcc2:fcode")); // FIXME: translator
+    ui::Widget& helper = del.addNew(new client::widgets::HelpWidget(m_root, m_translator, m_gameSender, "pcc2:fcode"));
 
     ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(m_translator("OK"),             util::Key_Return,       m_root));
     ui::widgets::Button& btnCancel = del.addNew(new ui::widgets::Button(m_translator("Cancel"),         util::Key_Escape,       m_root));

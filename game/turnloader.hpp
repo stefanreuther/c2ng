@@ -12,6 +12,7 @@
 #include "afl/bits/smallset.hpp"
 #include "afl/charset/charset.hpp"
 #include "afl/string/translator.hpp"
+#include "afl/sys/loglistener.hpp"
 #include "game/playerset.hpp"
 #include "game/task.hpp"
 #include "util/profiledirectory.hpp"

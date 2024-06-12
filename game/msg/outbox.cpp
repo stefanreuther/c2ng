@@ -188,7 +188,6 @@ game::msg::Mailbox::Metadata
 game::msg::Outbox::getMessageMetadata(size_t /*index*/, afl::string::Translator& /*tx*/, const PlayerList& /*players*/) const
 {
     Metadata md;
-    // FIXME
     return md;
 }
 
@@ -396,7 +395,7 @@ game::msg::Outbox::getHeadersForDisplay(int sender,
         text += UNIVERSAL_TEXT;
         text += '\n';
     } else if (!receivers.isUnitSet()) {
-        text += CC_PREFIX; // FIXME: i18n?
+        text += CC_PREFIX;
         text += receiverText;
         text += '\n';
     } else {
@@ -408,7 +407,6 @@ game::msg::Outbox::getHeadersForDisplay(int sender,
 game::Id_t
 game::msg::Outbox::allocateId()
 {
-    // FIXME: deal with overflow
     return ++m_idCounter;
 }
 

@@ -70,6 +70,13 @@ namespace game { namespace map {
         @param [in]  factor   Factor */
     void parseBeamUpCommand(util::Vector<int32_t,Element::Type>& out, const Turn& turn, const Ship& ship, int factor);
 
+    /** Check whether we can beam-up-multiple a particular type of cargo.
+        Assumes that beam-up-multiple is enabled in the first place.
+        @param type   Type
+        @param config Host Configuration
+        @return result */
+    bool canBeamUpCargo(Element::Type type, const game::config::HostConfiguration& config);
+
 } }
 
 #endif

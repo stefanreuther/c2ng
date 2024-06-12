@@ -309,9 +309,6 @@ void
 game::map::Ufo::setMovementVector(Point vec)
 {
     // ex GUfo::setMovementVector
-    // FIXME: PCC 1.x updates speed and heading when a movement vector is set.
-    // It also fakes speed and heading for wormholes, but not consistently.
-    // Make up some rules.
     if (vec != m_movementVector) {
         m_movementVector = vec;
         markDirty();
@@ -428,18 +425,6 @@ game::map::Ufo::postprocess(int turn, const Configuration& mapConfig)
         m_turnLastSeen = turn;
         m_posLastSeen = m_position;
     }
-
-    // FIXME: PCC 1.x translates between speed and heading here.
-    // Problem is that the guessed values will get stuck and turn off guessing next turn when we may have better data.
-    // IF (pu^.speed=0) AND (pu^.Heading<0) AND (pu^.movex OR pu^.movey<>0) THEN BEGIN
-    //   { Ufo moves. Fill in speed and heading. }
-    //   pu^.Heading := Round(ArcTan2(pu^.movex, pu^.movey));
-    //   pu^.Speed := Round(Sqrt(Sqr(LONGINT(pu^.movex)) + Sqr(LONGINT(pu^.movey))));
-    // END ELSE
-    // IF (pu^.speed>0) AND (pu^.speed<=22) AND (pu^.Heading>=0) THEN BEGIN
-    //   pu^.movex := Round(Sin(pu^.Heading * (pi/180)) * Sqr(pu^.speed));
-    //   pu^.movey := Round(Cos(pu^.Heading * (pi/180)) * Sqr(pu^.speed));
-    // END;
 }
 
 bool

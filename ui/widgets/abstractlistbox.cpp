@@ -39,18 +39,6 @@ ui::widgets::AbstractListbox::getPageSize() const
 }
 
 int
-ui::widgets::AbstractListbox::getCursorTop() const
-{
-    return getRelativeItemPosition(m_currentItem).getTopY();
-}
-
-int
-ui::widgets::AbstractListbox::getCursorSize() const
-{
-    return getItemHeight(m_currentItem);
-}
-
-int
 ui::widgets::AbstractListbox::getTotalSize() const
 {
     size_t n = getNumItems();

@@ -14,7 +14,6 @@ namespace util { namespace syntax {
     class Highlighter;
 
     /** Highlighter factory. */
-    // FIXME: make this a virtual interface?
     class Factory {
      public:
         /** Constructor.

@@ -426,7 +426,7 @@ game::sim::ConsoleApplication::loadSession(Session& session, const Parameters& p
 
         // Directories
         String_t defaultRoot = fs.makePathName(fs.makePathName(env.getInstallationDirectoryName(), "share"), "specs");
-        util::ProfileDirectory profile(environment(), fileSystem(), translator(), log());
+        util::ProfileDirectory profile(environment(), fileSystem());
         game::v3::RootLoader loader(fs.openDirectory(params.rootDirectoryName.orElse(defaultRoot)), &profile, 0 /* pCallback */, tx, consoleLogger(), fs);
 
         // Load root

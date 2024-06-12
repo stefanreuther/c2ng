@@ -68,9 +68,7 @@ namespace game { namespace vcr { namespace classic {
             \param seed [in/out] seed
             \retval false everything ok
             \retval true either parameter was modified.
-            If this is a host-generated fight, this means it is bogus and should not be played.
-
-            FIXME: change polarity of return value? */
+            If this is a host-generated fight, this means it is bogus and should not be played. */
         virtual bool checkBattle(Object& left, Object& right, uint16_t& seed) = 0;
 
         /** Initialize player.

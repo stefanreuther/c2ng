@@ -219,9 +219,6 @@ util::FileNamePattern::Impl::matchRecursive(afl::charset::Utf8Reader arg, size_t
                 return true;
             }
             /* simple, slow way */
-            /* FIXME: possible optimisations:
-               - optimise "*foo*" to use strstr / find / ...
-               - optimise "*foo" to just look at the end of the text */
             while (1) {
                 if (matchRecursive(arg, matchPos+1)) {
                     return true;

@@ -53,8 +53,6 @@ namespace ui { namespace rich {
         // ScrollableWidget:
         virtual int getPageTop() const;
         virtual int getPageSize() const;
-        virtual int getCursorTop() const;
-        virtual int getCursorSize() const;
         virtual int getTotalSize() const;
         virtual void setPageTop(int top);
         virtual void scroll(Operation op);

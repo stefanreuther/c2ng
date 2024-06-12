@@ -270,7 +270,7 @@ game::vcr::classic::Database::load(afl::io::Stream& file,
         // Remember it
         addNewBattle(new Battle(unpack(rawVcr, LeftSide, config, charset),
                                 unpack(rawVcr, RightSide, config, charset),
-                                rawVcr.randomSeed, rawVcr.signature, rawVcr.flags));
+                                rawVcr.randomSeed, rawVcr.signature));
     }
 
     // If it hasn't been detected as PHost 2, it might be 3 or newer

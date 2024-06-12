@@ -63,7 +63,7 @@ server::monitor::StatusPage::renderTemplate(const String_t& in, afl::io::DataSin
     String_t statusText = m_status.render(statusTime);
     String_t historyText = m_status.renderTimeSeries();
     afl::sys::Time serverTime = afl::sys::Time::getCurrentTime();
-    
+
     size_t pos = 0;
     size_t next;
     afl::base::ConstBytes_t stringAsBytes = toBytes(in);
@@ -92,7 +92,7 @@ server::monitor::StatusPage::renderTemplate(const String_t& in, afl::io::DataSin
             out.handleFullData(toBytes(afl::string::Format("%d", serverTime.getUnixTime())));
             pos = next+16;
         } else {
-            out.handleFullData(toBytes("FIXME: template error"));
+            out.handleFullData(toBytes("ERROR: unknown variable in template"));
             pos = next+1;
         }
     }

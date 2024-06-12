@@ -3144,7 +3144,7 @@ client::si::IFCCViewMailbox(game::Session& /*session*/, ScriptSide& si, RequestL
                 return p->mailbox();
             }
         virtual game::msg::Configuration* getConfiguration() const
-            { return 0; /* FIXME? */ }
+            { return 0; }
         virtual size_t getCurrentMessage() const
             { return 0; }
         virtual void setCurrentMessage(size_t /*n*/)

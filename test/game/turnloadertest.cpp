@@ -440,7 +440,7 @@ AFL_TEST("game.TurnLoader:defaultSaveConfiguration:profile", a)
     InternalFileSystem ifs;
     InternalEnvironment ienv;
     ienv.setSettingsDirectoryName("/settings");
-    util::ProfileDirectory profile(ienv, ifs, env.tx, env.session.log());
+    util::ProfileDirectory profile(ienv, ifs);
 
     // Test
     PublicTurnLoader testee;

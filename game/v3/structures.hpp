@@ -59,6 +59,9 @@ namespace game { namespace v3 { namespace structures {
     const int NUM_OWNERS           = 12;                        ///< Permitted range for owners: include Aliens.
     const int NUM_HULLS_PER_PLAYER = 20;                        ///< Number of hulls per player.
 
+    const int RECEIVER_IS_HOST     = 12;                        ///< This value as "message receiver" field means it's a message to host.
+    const int MINE_IS_THOLIAN_WEB  = 12;                        ///< This value as KoreMine::ownerTypeFlag means it's a tholian web.
+
     const size_t NUM_GAMESTAT_SLOTS = 8;                        ///< Number of slots in gamestat.dat file.
 
     const size_t MAX_TRN_ATTACHMENTS = 10;                      ///< Maximum attachments in a turn file.
@@ -643,7 +646,7 @@ namespace game { namespace v3 { namespace structures {
         // -- 186 bytes
         Int16_t     AllowEngineShieldBonus;
         Int16_t     EngineShieldBonusRate;
-        Int16_t     _ColonialFighterSweepRate; // FIXME: handle this option
+        Int16_t     ColonialFighterSweepRate;
         Int16_t     AllowColoniesSweepWebs;
         Int16_t     MineSweepRate;
         Int16_t     WebMineSweepRate;
@@ -690,7 +693,7 @@ namespace game { namespace v3 { namespace structures {
         Int16_t     AllowBioscanners;
         Int16_t     HullTechNotSlowedByMines;
         // -- 336 bytes
-        Int16_t     _LokiDecloaksBirds; // FIXME: handle this option
+        Int16_t     LokiDecloaksBirds; // FIXME: handle this option
         // -- 338 bytes
         Int16_t     AllowVPAFeatures;
         // -- 340 bytes

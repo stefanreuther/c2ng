@@ -17,6 +17,8 @@
 #include "interpreter/values.hpp"
 #include "interpreter/vmio/nullsavecontext.hpp"
 
+using afl::string::Format;
+
 namespace {
     String_t quoteName(const String_t& s)
     {
@@ -60,7 +62,7 @@ interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObjec
             { }
         virtual void writeDeclaration(AssemblerSaveContext& /*asc*/, afl::io::TextWriter& out)
             {
-                out.writeLine(afl::string::Format("Declare Sub %s", name));
+                out.writeLine(Format("Declare Sub %s", name));
             }
         virtual void writeBody(AssemblerSaveContext& asc, afl::io::TextWriter& out)
             {
@@ -71,19 +73,22 @@ interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObjec
                 String_t keyword = (m_bco.isProcedure() ? "Sub" : "Function");
                 size_t declareFrom;
                 bool declareArgs;
+                bool declareVarargs;
                 if (m_bco.getMinArgs() == 0 && m_bco.getMaxArgs() == 0 && !m_bco.isVarargs()) {
                     // Nullary function
-                    out.writeLine(afl::string::Format("%s %s", keyword, name));
+                    out.writeLine(Format("%s %s", keyword, name));
                     declareFrom = 0;
                     declareArgs = false;
+                    declareVarargs = true;
                 } else if (m_bco.getMaxArgs() < m_bco.getMinArgs() || locals.getNumNames() < m_bco.getMaxArgs()) {
                     // Invalid
-                    out.writeLine(afl::string::Format("%s %s", keyword, name));
+                    out.writeLine(Format("%s %s", keyword, name));
                     declareFrom = 0;
                     declareArgs = true;
+                    declareVarargs = true;
                 } else {
                     // Regular parameterized function
-                    out.writeText(afl::string::Format("%s %s (", keyword, name));
+                    out.writeText(Format("%s %s (", keyword, name));
                     for (size_t i = 0, n = m_bco.getMaxArgs(); i < n; ++i) {
                         // Separator
                         if (i != 0) {
@@ -101,32 +106,42 @@ interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObjec
                     declareFrom = m_bco.getMaxArgs();
                     declareArgs = false;
 
-                    // FIXME: deal with varargs
+                    if (m_bco.isVarargs() && locals.getNumNames() > m_bco.getMaxArgs()) {
+                        if (m_bco.getMaxArgs() != 0) {
+                            out.writeText(", ");
+                        }
+                        out.writeText(locals.getNameByIndex(m_bco.getMaxArgs()));
+                        out.writeText("()");
+                        declareVarargs = false;
+                        ++declareFrom;
+                    } else {
+                        declareVarargs = true;
+                    }
 
                     out.writeLine(")");
 
                 }
                 if (name != m_bco.getSubroutineName()) {
-                    out.writeLine(afl::string::Format("  .name %s", quoteName(m_bco.getSubroutineName())));
+                    out.writeLine(Format("  .name %s", quoteName(m_bco.getSubroutineName())));
                 }
 
                 // Locals
                 for (size_t i = declareFrom, n = locals.getNumNames(); i < n; ++i) {
-                    out.writeLine(afl::string::Format("  .local %s", quoteName(locals.getNameByIndex(i))));
+                    out.writeLine(Format("  .local %s", quoteName(locals.getNameByIndex(i))));
                 }
-                if (m_bco.isVarargs()) {
+                if (declareVarargs && m_bco.isVarargs()) {
                     out.writeLine("  .varargs");
                 }
 
                 // Argument limits
                 if (declareArgs) {
-                    out.writeLine(afl::string::Format("  .min_args %d", m_bco.getMinArgs()));
-                    out.writeLine(afl::string::Format("  .max_args %d", m_bco.getMaxArgs()));
+                    out.writeLine(Format("  .min_args %d", m_bco.getMinArgs()));
+                    out.writeLine(Format("  .max_args %d", m_bco.getMaxArgs()));
                 }
 
                 // Debug information: File name
                 if (asc.isDebugInformationEnabled() && !m_bco.getFileName().empty()) {
-                    out.writeLine(afl::string::Format("  .file %s", m_bco.getFileName()));
+                    out.writeLine(Format("  .file %s", m_bco.getFileName()));
                 }
 
                 // Debug information: Line numbers
@@ -154,12 +169,12 @@ interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObjec
                 for (size_t i = 0, n = m_bco.getNumInstructions(); i < n; ++i) {
                     // Label
                     if (labelIt != labels.end() && *labelIt == i) {
-                        out.writeLine(afl::string::Format("  label%d:", i));
+                        out.writeLine(Format("  label%d:", i));
                         ++labelIt;
                     }
                     // Line number
                     while (lineIndex < lineLimit && lineNumbers[lineIndex] == i) {
-                        out.writeLine(afl::string::Format("    .line %d", lineNumbers[lineIndex+1]));
+                        out.writeLine(Format("    .line %d", lineNumbers[lineIndex+1]));
                         lineIndex += 2;
                     }
                     // Instruction
@@ -170,16 +185,16 @@ interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObjec
 
                 // Potential label at end of subroutine
                 if (labelIt != labels.end()) {
-                    out.writeLine(afl::string::Format("  label%d:", *labelIt));
+                    out.writeLine(Format("  label%d:", *labelIt));
                 }
 
                 // Potential non-wellformed line number records
                 while (lineIndex < lineLimit) {
-                    out.writeLine(afl::string::Format("    .line %d, %d", lineNumbers[lineIndex+1], lineNumbers[lineIndex]));
+                    out.writeLine(Format("    .line %d, %d", lineNumbers[lineIndex+1], lineNumbers[lineIndex]));
                     lineIndex += 2;
                 }
 
-                out.writeLine(afl::string::Format("End%s", keyword));
+                out.writeLine(Format("End%s", keyword));
                 out.writeLine();
             }
         const interpreter::BytecodeObject& m_bco;
@@ -207,7 +222,7 @@ interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObjec
             p->name = bco.getSubroutineName();
         } else {
             do {
-                p->name = afl::string::Format("BCO%d", ++m_counter);
+                p->name = Format("BCO%d", ++m_counter);
             } while (m_usedNames.find(p->name) != m_usedNames.end());
         }
         m_usedNames.insert(p->name);
@@ -242,17 +257,17 @@ interpreter::vmio::AssemblerSaveContext::addStructureType(const interpreter::Str
             { }
         virtual void writeDeclaration(AssemblerSaveContext& /*asc*/, afl::io::TextWriter& out)
             {
-                out.writeLine(afl::string::Format("Declare Struct %s", name));
+                out.writeLine(Format("Declare Struct %s", name));
             }
         virtual void writeBody(AssemblerSaveContext& /*asc*/, afl::io::TextWriter& out)
             {
                 // Header
-                out.writeLine(afl::string::Format("Struct %s", name));
+                out.writeLine(Format("Struct %s", name));
 
                 // Content
                 const afl::data::NameMap& names = m_type.names();
                 for (afl::data::NameMap::Index_t i = 0, n = names.getNumNames(); i < n; ++i) {
-                    out.writeLine(afl::string::Format("    .field %s", names.getNameByIndex(i)));
+                    out.writeLine(Format("    .field %s", names.getNameByIndex(i)));
                 }
 
                 // End
@@ -273,7 +288,7 @@ interpreter::vmio::AssemblerSaveContext::addStructureType(const interpreter::Str
 
         // Assign a name
         do {
-            p->name = afl::string::Format("TYPE%d", ++m_counter);
+            p->name = Format("TYPE%d", ++m_counter);
         } while (m_usedNames.find(p->name) != m_usedNames.end());
         m_usedNames.insert(p->name);
     } else {
@@ -337,7 +352,7 @@ interpreter::vmio::AssemblerSaveContext::formatLiteral(const afl::data::Value* v
             }
         virtual void visitInteger(int32_t iv)
             {
-                m_result = afl::string::Format("%d", iv);
+                m_result = Format("%d", iv);
             }
         virtual void visitFloat(double fv)
             {
@@ -348,9 +363,15 @@ interpreter::vmio::AssemblerSaveContext::formatLiteral(const afl::data::Value* v
                 m_result = bv ? "true" : "false";
             }
         virtual void visitHash(const afl::data::Hash& /*hv*/)
-            { m_result = "FIXME-hash"; }
+            {
+                // Cannot happen with normal script code
+                m_result = "#<hash>    % WARNING: unsupported literal";
+            }
         virtual void visitVector(const afl::data::Vector& /*vv*/)
-            { m_result = "FIXME-vector"; }
+            {
+                // Cannot happen with normal script code
+                m_result = "#<vector>    % WARNING: unsupported literal";
+            }
         virtual void visitOther(const afl::data::Value& other)
             {
                 if (const SubroutineValue* sv = dynamic_cast<const SubroutineValue*>(&other)) {
@@ -366,17 +387,17 @@ interpreter::vmio::AssemblerSaveContext::formatLiteral(const afl::data::Value* v
                         afl::io::NullStream aux;
                         NullSaveContext ctx;
                         bv->store(tag, aux, ctx);
-                        if (aux.getSize() != 0) {
-                            // FIXME: log: tag with aux value
-                        }
 
-                        // First value is uppermost bits of tag; if those bits were nonzero,
-                        // this would be a float value, and we'd entered the visitFloat() case.
-                        m_result = afl::string::Format("(%d,%d)", tag.tag >> 8, tag.value);
+                        // First value is uppermost bits of tag, lower bits of tags are always zero.
+                        // If those bits were nonzero, this would be a float value, and we'd entered the visitFloat() case.
+                        m_result = Format("(%d,%d)", tag.tag >> 8, tag.value);
+
+                        if (aux.getSize() != 0) {
+                            m_result += Format("    % WARNING: unsupported literal with %d bytes payload", aux.getSize());
+                        }
                     }
-                    catch (interpreter::Error&) {
-                        // FIXME: log
-                        m_result = "#<unknown>";
+                    catch (interpreter::Error& e) {
+                        m_result = Format("#<unknown>    % WARNING: unserializable literal, %s", e.what());
                     }
                 } else {
                     m_result = "#<unknown>";
@@ -407,9 +428,9 @@ interpreter::vmio::AssemblerSaveContext::formatInstruction(const Opcode& opc, co
     String_t tpl = opc.getDisassemblyTemplate();
     if (tpl.find('?') != String_t::npos) {
         if (opc.arg != 0) {
-            return afl::string::Format("    genint%d.%d %d", opc.major, opc.minor, opc.arg);
+            return Format("    genint%d.%d %d", opc.major, opc.minor, opc.arg);
         } else {
-            return afl::string::Format("    gen%d.%d", opc.major, opc.minor, opc.arg);
+            return Format("    gen%d.%d", opc.major, opc.minor, opc.arg);
         }
     } else {
         String_t result = "    ";
@@ -428,7 +449,7 @@ interpreter::vmio::AssemblerSaveContext::formatInstruction(const Opcode& opc, co
                         addTab(result);
                         result += "% name ";
                     }
-                    result += afl::string::Format("#%d", arg);
+                    result += Format("#%d", arg);
                     break;
 
                  case 'l':
@@ -443,23 +464,23 @@ interpreter::vmio::AssemblerSaveContext::formatInstruction(const Opcode& opc, co
                         addTab(result);
                         result += "% local ";
                     }
-                    result += afl::string::Format("#%d", arg);
+                    result += Format("#%d", arg);
                     break;
 
                  case 'd':
                     // Decimal integer
-                    result += afl::string::Format("%d", int16_t(arg));
+                    result += Format("%d", int16_t(arg));
                     break;
 
                  case 'u':
                     // Unsigned integer
-                    result += afl::string::Format("%d", arg);
+                    result += Format("%d", arg);
                     break;
 
                  case 'T':  // Static by address
                  case 'G':  // Shared by address
                  default:
-                    result += afl::string::Format("#%d", arg);
+                    result += Format("#%d", arg);
                     break;
                 }
             } else {
@@ -476,8 +497,7 @@ interpreter::vmio::AssemblerSaveContext::formatSubroutineReference(BytecodeObjec
     if (MetaObject* p = find(&bco)) {
         return p->name;
     } else {
-        // FIXME: log
-        return "#<error>";
+        return "#<error>    % WARNING: invalid subroutine reference";
     }
 }
 
@@ -487,8 +507,7 @@ interpreter::vmio::AssemblerSaveContext::formatStructureTypeReference(StructureT
     if (MetaObject* p = find(&type)) {
         return p->name;
     } else {
-        // FIXME: log
-        return "#<error>";
+        return "#<error>    % WARNING: invalid structure type reference";
     }
 }
 

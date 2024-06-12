@@ -226,7 +226,7 @@ namespace {
                                                                root.provider()));
         WidgetWrapper& wrap = deleter.addNew(new WidgetWrapper(user, p, NAMES));
         wrap.attach(oop, name);
-        wrap.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
+        wrap.setState(DisabledState, true);
         return &wrap;
     }
 
@@ -253,7 +253,7 @@ namespace {
         configure(*p, user.root());
         WidgetWrapper& wrap = deleter.addNew(new WidgetWrapper(user, std::auto_ptr<ui::Widget>(p), NAMES));
         wrap.attach(oop, name);
-        wrap.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
+        wrap.setState(DisabledState, true);
         return &wrap;
     }
 
@@ -282,7 +282,7 @@ namespace {
         configure(*p);
         WidgetWrapper& wrap = deleter.addNew(new WidgetWrapper(user, std::auto_ptr<ui::Widget>(p), NAMES));
         wrap.attach(oop, name);
-        wrap.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
+        wrap.setState(DisabledState, true);
         return &wrap;
     }
 
@@ -484,7 +484,7 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
     if (name == "SHIPCARGO") {
         ShipCargoTile& tile = deleter.addNew(new ShipCargoTile(root, tx, m_keys));
         tile.attach(m_observer);
-        tile.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
+        tile.setState(DisabledState, true);
         return &tile;
     }
     if (name == "SHIPMISSION") {
@@ -504,7 +504,7 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
     if (name == "SHIPMOVEMENT") {
         ShipMovementTile& tile = deleter.addNew(new ShipMovementTile(root, tx, m_keys));
         tile.attach(m_observer);
-        tile.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
+        tile.setState(DisabledState, true);
         return &tile;
     }
     if (name == "SHIPOVERVIEW") {
@@ -588,7 +588,7 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
     // Tasks
     if (name == "SHIPTASKCOMMAND") {
         ShipTaskTile& tile = deleter.addNew(new ShipTaskTile(root, m_keys, tx));
-        tile.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
+        tile.setState(DisabledState, true);
         if (m_pTaskEditor != 0) {
             m_pTaskEditor->sig_messageChange.add(&tile, &ShipTaskTile::setMessageStatus);
             m_pTaskEditor->sig_shipChange.add(&tile, &ShipTaskTile::setShipStatus);
@@ -597,7 +597,7 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
     }
     if (name == "PLANETTASKCOMMAND") {
         BaseTaskTile& tile = deleter.addNew(new BaseTaskTile(BaseTaskTile::PlanetPersonality, root, m_keys, tx));
-        tile.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
+        tile.setState(DisabledState, true);
         if (m_pTaskEditor != 0) {
             m_pTaskEditor->sig_messageChange.add(&tile, &BaseTaskTile::setMessageStatus);
             m_pTaskEditor->sig_baseChange.add(&tile, &BaseTaskTile::setBaseStatus);
@@ -606,7 +606,7 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
     }
     if (name == "BASETASKCOMMAND") {
         BaseTaskTile& tile = deleter.addNew(new BaseTaskTile(BaseTaskTile::BasePersonality, root, m_keys, tx));
-        tile.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
+        tile.setState(DisabledState, true);
         if (m_pTaskEditor != 0) {
             m_pTaskEditor->sig_messageChange.add(&tile, &BaseTaskTile::setMessageStatus);
             m_pTaskEditor->sig_baseChange.add(&tile, &BaseTaskTile::setBaseStatus);
@@ -624,13 +624,13 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
     if (name == "NARROWHEADER") {
         StarchartHeaderTile& tile = deleter.addNew(new StarchartHeaderTile(root, false));
         tile.attach(m_observer);
-        tile.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
+        tile.setState(DisabledState, true);
         return &tile;
     }
     if (name == "NARROWBASEHEADER") {
         StarchartHeaderTile& tile = deleter.addNew(new StarchartHeaderTile(root, true));
         tile.attach(m_observer);
-        tile.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
+        tile.setState(DisabledState, true);
         return &tile;
     }
     if (name == "NARROWSHIPEQUIPMENT") {

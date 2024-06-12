@@ -152,15 +152,11 @@ game::interface::setDrawingProperty(game::map::Drawing& d, DrawingProperty idp, 
             d.setComment(s);
         }
         break;
-        // case idpEndX: - FIXME: could be assignable
-        // case idpEndY: - FIXME: could be assignable
      case idpExpire:
         if (checkIntegerArg(i, value, -1, 0x7FFF)) {
             d.setExpire(i);
         }
         break;
-        // case idpLocX: - FIXME: could be assignable
-        // case idpLocY: - FIXME: could be assignable
      case idpRadius:
         if (checkIntegerArg(i, value, 1, Drawing::MAX_CIRCLE_RADIUS)) {
             if (d.getType() != Drawing::CircleDrawing) {

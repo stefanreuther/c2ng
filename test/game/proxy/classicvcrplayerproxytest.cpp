@@ -202,7 +202,7 @@ AFL_TEST("game.proxy.ClassicVcrPlayerProxy:normal", a)
 {
     // Make simple environment
     Environment env;
-    env.battles->addNewBattle(new game::vcr::classic::Battle(makeLeftShip(), makeRightShip(), 42, 0, 0))
+    env.battles->addNewBattle(new game::vcr::classic::Battle(makeLeftShip(), makeRightShip(), 42, 0))
         ->setType(game::vcr::classic::PHost4, 0);
 
     // Set up tasking
@@ -262,7 +262,7 @@ AFL_TEST("game.proxy.ClassicVcrPlayerProxy:normal", a)
 AFL_TEST("game.proxy.ClassicVcrPlayerProxy:error:bad-algorithm", a)
 {
     Environment env;
-    env.battles->addNewBattle(new game::vcr::classic::Battle(makeLeftShip(), makeRightShip(), 42, 0, 0))
+    env.battles->addNewBattle(new game::vcr::classic::Battle(makeLeftShip(), makeRightShip(), 42, 0))
         ->setType(game::vcr::classic::UnknownPHost, 0);
 
     testError(a, env, 0);
@@ -276,7 +276,7 @@ AFL_TEST("game.proxy.ClassicVcrPlayerProxy:error:bad-content", a)
     Environment env;
     game::vcr::Object leftShip = makeLeftShip();
     leftShip.setNumBeams(77);
-    env.battles->addNewBattle(new game::vcr::classic::Battle(leftShip, makeRightShip(), 42, 0, 0))
+    env.battles->addNewBattle(new game::vcr::classic::Battle(leftShip, makeRightShip(), 42, 0))
         ->setType(game::vcr::classic::PHost4, 0);
 
     testError(a, env, 0);
@@ -299,7 +299,7 @@ AFL_TEST("game.proxy.ClassicVcrPlayerProxy:error:bad-capabilities", a)
     Environment env;
     game::vcr::Object leftShip = makeLeftShip();
     leftShip.setNumBeams(77);
-    env.battles->addNewBattle(new game::vcr::classic::Battle(leftShip, makeRightShip(), 42, 0, 0))
+    env.battles->addNewBattle(new game::vcr::classic::Battle(leftShip, makeRightShip(), 42, 0))
         ->setType(game::vcr::classic::PHost4, -1);    /* all bits set = lots of unknown capabilities */
 
     testError(a, env, 0);

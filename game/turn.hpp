@@ -177,6 +177,7 @@ game::Turn::getTurnNumber() const
 inline void
 game::Turn::setCommandPlayers(PlayerSet_t set)
 {
+    // ex GGameTurn::setHaveData (sort-of)
     m_commandPlayers = set;
 }
 

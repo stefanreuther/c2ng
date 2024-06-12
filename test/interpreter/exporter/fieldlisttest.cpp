@@ -33,8 +33,8 @@ AFL_TEST("interpreter.exporter.FieldList:add", a)
     a.checkEqual("42. name",  name, "QUX");
     a.checkEqual("43. width", width, 30);
 
-    a.checkEqual("51. getFieldName",  t.getFieldName(2), "QUX"); // FIXME: function is pending-delete
-    a.checkEqual("52. getFieldWidth", t.getFieldWidth(2), 30);   // FIXME: function is pending-delete
+    a.checkEqual("51. getFieldName",  t.getFieldName(2), "QUX");
+    a.checkEqual("52. getFieldWidth", t.getFieldWidth(2), 30);
 
     a.check("61. getField", !t.getField(3, name, width));
     a.check("62. getField", !t.getField(interpreter::exporter::FieldList::Index_t(-1), name, width));

@@ -80,19 +80,7 @@ bool
 game::map::BeamUpShipTransfer::canHaveElement(Element::Type type) const
 {
     // ex GShipBumTransfer::canHaveCargo
-    switch (type) {
-     case Element::Neutronium:
-     case Element::Tritanium:
-     case Element::Duranium:
-     case Element::Molybdenum:
-     case Element::Money:
-     case Element::Supplies:
-        return true;
-     case Element::Colonists:
-        return m_config[m_config.AllowBeamUpClans]();
-     default:
-        return false;
-    }
+    return canBeamUpCargo(type, m_config);
 }
 
 int32_t
@@ -179,5 +167,23 @@ game::map::parseBeamUpCommand(util::Vector<int32_t,Element::Type>& out, const Tu
             out.set(Element::Supplies,   factor * cs.get(CargoSpec::Supplies));
             out.set(Element::Money,      factor * cs.get(CargoSpec::Money));
         }
+    }
+}
+
+bool
+game::map::canBeamUpCargo(Element::Type type, const game::config::HostConfiguration& config)
+{
+    switch (type) {
+     case Element::Neutronium:
+     case Element::Tritanium:
+     case Element::Duranium:
+     case Element::Molybdenum:
+     case Element::Money:
+     case Element::Supplies:
+        return true;
+     case Element::Colonists:
+        return config[game::config::HostConfiguration::AllowBeamUpClans]();
+     default:
+        return false;
     }
 }

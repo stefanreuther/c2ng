@@ -19,7 +19,6 @@ namespace {
 }
 
 // Constructor.
-// FIXME: get rid of the "dir" parameter
 ui::DefaultResourceProvider::DefaultResourceProvider(ui::res::Manager& mgr,
                                                      afl::base::Ref<afl::io::Directory> dir,
                                                      util::RequestDispatcher& mainThreadDispatcher,

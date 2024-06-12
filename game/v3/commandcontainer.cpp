@@ -109,8 +109,6 @@ void
 game::v3::CommandContainer::removeCommand(const Command* cmd)
 {
     // ex GCommandContainer::removeCommand, phost.pas:RemovePHostCmdByPtr
-    // FIXME: this fails because PtrMultiList::iterator does not have required types (difference_type, iterator_category, etc.)
-    // Iterator_t i = std::find(cmds.begin(), cmds.end(), cmd);
     Iterator_t i = cmds.begin();
     while (i != cmds.end() && *i != cmd) {
         ++i;
@@ -159,14 +157,13 @@ game::v3::CommandContainer::setCommandPlayerSet(Command::Type typ, Id_t id, Play
 
 // Load command file (cmdX.txt).
 void
-game::v3::CommandContainer::loadCommandFile(afl::io::Stream& file, const Timestamp& time)
+game::v3::CommandContainer::loadCommandFile(afl::io::Stream& file, const Timestamp& time, afl::charset::Charset& charset)
 {
     // ex GCommandContainer::loadCommandFile
     // ex phost.pas:ParseCmdFileLine (sort-of)
     afl::io::TextFile tf(file);
-    // FIXME: tf.setCharacterSet(getGameCharacterSet());
+    tf.setCharsetNew(charset.clone());
     String_t line;
-    // FIXME: use FileParser
     while (tf.readLine(line)) {
         line = afl::string::strTrim(line);
         if (line.size() == 0 || line[0] == '#') {

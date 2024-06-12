@@ -65,6 +65,12 @@ client::widgets::FileListbox::setCurrentIndex(size_t n)
     }
 }
 
+size_t
+client::widgets::FileListbox::getCurrentItem() const
+{
+    return m_currentItem;
+}
+
 // ScrollableWidget:
 int
 client::widgets::FileListbox::getPageTop() const
@@ -76,18 +82,6 @@ int
 client::widgets::FileListbox::getPageSize() const
 {
     return m_currentColumns * m_currentLines;
-}
-
-int
-client::widgets::FileListbox::getCursorTop() const
-{
-    return int(m_currentItem);
-}
-
-int
-client::widgets::FileListbox::getCursorSize() const
-{
-    return 1;
 }
 
 int

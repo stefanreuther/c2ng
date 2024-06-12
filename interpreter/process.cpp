@@ -328,7 +328,6 @@ void
 interpreter::Process::pushContextsFrom(afl::container::PtrVector<Context>& ctxs)
 {
     // ex IntExecutionContext::pushContextsFrom
-    // FIXME: needed?
     for (size_t i = 0; i < ctxs.size(); ++i) {
         pushNewContext(ctxs.extractElement(i));
     }

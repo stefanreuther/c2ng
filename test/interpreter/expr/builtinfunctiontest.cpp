@@ -11,9 +11,15 @@
 #include "afl/test/testrunner.hpp"
 #include "interpreter/indexablevalue.hpp"
 #include "interpreter/singlecontext.hpp"
+#include "interpreter/structuretypedata.hpp"
+#include "interpreter/structurevalue.hpp"
+#include "interpreter/structurevaluedata.hpp"
 #include "interpreter/test/expressionverifier.hpp"
 #include "interpreter/values.hpp"
 
+using interpreter::StructureTypeData;
+using interpreter::StructureValue;
+using interpreter::StructureValueData;
 using interpreter::test::ExpressionVerifier;
 
 /** Test trig functions: Sin, Cos, Tan, ATan.
@@ -543,7 +549,6 @@ AFL_TEST("interpreter.expr.BuiltinFunction:string-find", a)
     h.verifyCompileError("strcase(rest('b','foobar')):=0");
 
     // Type errors
-    // FIXME: should these really be type errors, or should we implicitly stringify?
     h.verifyExecutionError("instr('a', 1)");
     h.verifyExecutionError("instr(1, 'a')");
     h.verifyExecutionError("instr(1, 2)");
@@ -580,7 +585,7 @@ AFL_TEST("interpreter.expr.BuiltinFunction:substring", a)
 
     h.verifyInteger("if(mid('foobar',3),8,2)",8);
     h.verifyInteger("if(mid('foobar',30);1,8,2)",8);
-    h.verifyCompileError("mid('foobar',2):='a'");                 // FIXME: This may get legalized someday
+    h.verifyCompileError("mid('foobar',2):='a'");
 
     // Mid, 3-arg
     h.verifyString("mid('foobar',-2,3)", "foo");
@@ -607,7 +612,7 @@ AFL_TEST("interpreter.expr.BuiltinFunction:substring", a)
 
     h.verifyInteger("if(mid('foobar',3,1),8,2)",8);
     h.verifyInteger("if(mid('foobar',30,1);1,8,2)",8);
-    h.verifyCompileError("mid('foobar',2,1):='a'");                 // FIXME: This may get legalized someday
+    h.verifyCompileError("mid('foobar',2,1):='a'");
 
     // Left
     h.verifyString("left('foobar',-3)", "");
@@ -629,7 +634,7 @@ AFL_TEST("interpreter.expr.BuiltinFunction:substring", a)
 
     h.verifyInteger("if(left('foobar',3),8,2)",8);
     h.verifyInteger("if(left('foobar',30);0,8,2)",2);
-    h.verifyCompileError("left('foobar',2):='a'");                 // FIXME: This may get legalized someday
+    h.verifyCompileError("left('foobar',2):='a'");
 
     // Right
     h.verifyString("right('foobar',-3)", "");
@@ -651,7 +656,7 @@ AFL_TEST("interpreter.expr.BuiltinFunction:substring", a)
 
     h.verifyInteger("if(right('foobar',3),8,2)",8);
     h.verifyInteger("if(right('foobar',30);0,8,2)",2);
-    h.verifyCompileError("right('foobar',2):='a'");                 // FIXME: This may get legalized someday
+    h.verifyCompileError("right('foobar',2):='a'");
 
     // Type errors
     h.verifyExecutionError("mid(10,1,1)");
@@ -854,8 +859,7 @@ AFL_TEST("interpreter.expr.BuiltinFunction:str", a)
     h.verifyString("str(123456789)", "123456789");
     h.verifyString("str(1.0)", "1");
     h.verifyString("str(1.01)", "1.01");
-    // FIXME: the following holds for PCC1, but not for PCC2:
-    // verifyString("str(1.001)", "1");
+    h.verifyString("str(1.001)", "1.001");      // @diff In PCC1, this yields "1"
     h.verifyString("str('a')", "a");
     h.verifyString("str(true)", "YES");
     h.verifyString("str(false)", "NO");
@@ -962,7 +966,7 @@ AFL_TEST("interpreter.expr.BuiltinFunction:len", a)
     h.verifyInteger("len('foobar')", 6);
     h.verifyNull("len(z(0))");
 
-    // FIXME: those yield 1 and 2, respectively, in PCC1:
+    // @diff In PCC1, those yield 1 and 2, respectively:
     h.verifyExecutionError("len(2)");
     h.verifyExecutionError("len(12)");
 
@@ -1099,9 +1103,37 @@ AFL_TEST("interpreter.expr.BuiltinFunction:eval", a)
     h.verifyCompileError("eval(1):=2");
 
     // Two-argument forms
-    // FIXME: cannot test the actual eval(expr,context) form yet
     h.verifyNull("eval('1',z(0))");
     h.verifyExecutionError("eval('1',1)");
+}
+
+/** Test Eval function with context.
+    Instructions: sevalx */
+AFL_TEST("interpreter.expr.BuiltinFunction:eval:context", a)
+{
+    // A structure having a single value 'A'.
+    // Serves as the context that the expression inside eval will evaluate in.
+    StructureTypeData::Ref_t innerType = *new StructureTypeData();
+    innerType->names().add("A");
+
+    StructureValueData::Ref_t inner = *new StructureValueData(innerType);
+    inner->data().setNew(0, interpreter::makeIntegerValue(42));
+
+    // A structure having a single value 'P'.
+    // Serves as the extra-context for the ValueVerifier, to make the above accessible.
+    StructureTypeData::Ref_t outerType = *new StructureTypeData();
+    outerType->names().add("P");
+
+    StructureValueData::Ref_t outer = *new StructureValueData(outerType);
+    outer->data().setNew(0, new StructureValue(inner));
+
+    // Operation
+    ExpressionVerifier h(a);
+    h.setNewExtraContext(new StructureValue(outer));
+    h.set(0, 10);
+
+    h.verifyInteger("eval('a')", 10);
+    h.verifyInteger("eval('a', p)", 42);
 }
 
 /** Test miscellaneous. */

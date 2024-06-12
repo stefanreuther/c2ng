@@ -131,9 +131,6 @@ game::db::DrawingAtomMap::load(afl::io::Stream& in, afl::charset::Charset& cs, u
     // load 'count' field
     structures::UInt16_t count;
     in.fullRead(count.m_bytes);
-    // FIXME:
-    // if (count.value < 0)
-    //     throw FileFormatException(in, _("Invalid value"));
 
     // load value array
     afl::base::GrowableMemory<structures::UInt16_t> valueBuffer;

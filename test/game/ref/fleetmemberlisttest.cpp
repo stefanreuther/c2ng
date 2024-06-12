@@ -109,7 +109,7 @@ AFL_TEST("game.ref.FleetMemberList:sort:fleet-member-predicate", a)
     testee.add(makeItem("i4", 5, "yyy", FleetMemberList::Flags_t(), 1200, 1100));
     testee.add(makeItem("i5", 3, "abc", FleetMemberList::Flags_t(), 1200, 1100));
 
-    // Sort by "is-here"
+    // Sort by friendly-code
     class Pred : public FleetMemberList::SortPredicate {
      public:
         virtual int compare(const FleetMemberList::Item& a, const FleetMemberList::Item& b) const
