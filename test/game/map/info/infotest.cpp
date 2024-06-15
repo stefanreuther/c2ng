@@ -260,9 +260,9 @@ AFL_TEST("game.map.info.Info:renderShipExperienceSummary", a)
 
         a.checkEqual("01. ScriptLinkBuilder", toString(tab),
                      "<table><tr><td width=\"17\"><font color=\"white\">Ships by Experience Level</font></td><td align=\"right\" width=\"3\"/></tr>"
-                     "<tr><td><a href=\"q:UI.Search &quot;Level=0 And Owner$=My.Race$&quot;,&quot;s2&quot;\">Noob</a></td><td align=\"right\"><font color=\"green\">5</font></td></tr>"
-                     "<tr><td><a href=\"q:UI.Search &quot;Level=2 And Owner$=My.Race$&quot;,&quot;s2&quot;\">Wizard</a></td><td align=\"right\"><font color=\"green\">2</font></td></tr>"
-                     "<tr><td><a href=\"q:UI.Search &quot;Level=3 And Owner$=My.Race$&quot;,&quot;s2&quot;\">God</a></td><td align=\"right\"><font color=\"green\">7</font></td></tr></table>");
+                     "<tr><td><a href=\"q:UI.Search &quot;Level=0 And Played&quot;,&quot;s2&quot;\">Noob</a></td><td align=\"right\"><font color=\"green\">5</font></td></tr>"
+                     "<tr><td><a href=\"q:UI.Search &quot;Level=2 And Played&quot;,&quot;s2&quot;\">Wizard</a></td><td align=\"right\"><font color=\"green\">2</font></td></tr>"
+                     "<tr><td><a href=\"q:UI.Search &quot;Level=3 And Played&quot;,&quot;s2&quot;\">God</a></td><td align=\"right\"><font color=\"green\">7</font></td></tr></table>");
     }
 
     // With NullLinkBuilder
@@ -300,9 +300,9 @@ AFL_TEST("game.map.info.Info:renderPlanetExperienceSummary", a)
 
         a.checkEqual("01. ScriptLinkBuilder", toString(tab),
                      "<table><tr><td width=\"17\"><font color=\"white\">Planets by Experience Level</font></td><td align=\"right\" width=\"3\"/></tr>"
-                     "<tr><td><a href=\"q:UI.Search &quot;Level=0 And Owner$=My.Race$&quot;,&quot;p2&quot;\">Noob</a></td><td align=\"right\"><font color=\"green\">3</font></td></tr>"
-                     "<tr><td><a href=\"q:UI.Search &quot;Level=2 And Owner$=My.Race$&quot;,&quot;p2&quot;\">Wizard</a></td><td align=\"right\"><font color=\"green\">4</font></td></tr>"
-                     "<tr><td><a href=\"q:UI.Search &quot;Level=3 And Owner$=My.Race$&quot;,&quot;p2&quot;\">God</a></td><td align=\"right\"><font color=\"green\">5</font></td></tr></table>");
+                     "<tr><td><a href=\"q:UI.Search &quot;Level=0 And Played&quot;,&quot;p2&quot;\">Noob</a></td><td align=\"right\"><font color=\"green\">3</font></td></tr>"
+                     "<tr><td><a href=\"q:UI.Search &quot;Level=2 And Played&quot;,&quot;p2&quot;\">Wizard</a></td><td align=\"right\"><font color=\"green\">4</font></td></tr>"
+                     "<tr><td><a href=\"q:UI.Search &quot;Level=3 And Played&quot;,&quot;p2&quot;\">God</a></td><td align=\"right\"><font color=\"green\">5</font></td></tr></table>");
     }
 
     // With NullLinkBuilder

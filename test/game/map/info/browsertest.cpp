@@ -435,23 +435,23 @@ AFL_TEST("game.map.info.Browser:PlanetsPage:sample", a)
     a.checkEqual("", toString(out),
                  "<h1>Planets</h1><table align=\"left\"><tr><td width=\"15\">Total:</td><td align=\"right\" width=\"3\"><font color=\"green\">35</font></td></tr></table>"
                  "<table align=\"left\"><tr><td width=\"12\"><font color=\"white\">Natives</font></td><td align=\"right\" width=\"6\">Planets</td><td align=\"right\" width=\"8\">Natives</td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=0&quot;,&quot;p2&quot;\">none</a></td><td align=\"right\"><font color=\"green\">16</font></td><td align=\"right\"><font color=\"green\">0</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=6&quot;,&quot;p2&quot;\">Insectoid</a></td><td align=\"right\"><font color=\"green\">5</font></td><td align=\"right\"><font color=\"green\">27,286,000</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=8&quot;,&quot;p2&quot;\">Ghipsoldal</a></td><td align=\"right\"><font color=\"green\">5</font></td><td align=\"right\"><font color=\"green\">14,416,200</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=3&quot;,&quot;p2&quot;\">Reptilian</a></td><td align=\"right\"><font color=\"green\">3</font></td><td align=\"right\"><font color=\"green\">11,736,700</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=4&quot;,&quot;p2&quot;\">Avian</a></td><td align=\"right\"><font color=\"green\">2</font></td><td align=\"right\"><font color=\"green\">4,097,700</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=1&quot;,&quot;p2&quot;\">Humanoid</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">4,544,500</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=2&quot;,&quot;p2&quot;\">Bovinoid</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">1,120,200</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=7&quot;,&quot;p2&quot;\">Amphibian</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">11,312,700</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=9&quot;,&quot;p2&quot;\">Siliconoid</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">1,193,200</font></td></tr></table>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=0&quot;,&quot;p2&quot;\">none</a></td><td align=\"right\"><font color=\"green\">16</font></td><td align=\"right\"><font color=\"green\">0</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=6&quot;,&quot;p2&quot;\">Insectoid</a></td><td align=\"right\"><font color=\"green\">5</font></td><td align=\"right\"><font color=\"green\">27,286,000</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=8&quot;,&quot;p2&quot;\">Ghipsoldal</a></td><td align=\"right\"><font color=\"green\">5</font></td><td align=\"right\"><font color=\"green\">14,416,200</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=3&quot;,&quot;p2&quot;\">Reptilian</a></td><td align=\"right\"><font color=\"green\">3</font></td><td align=\"right\"><font color=\"green\">11,736,700</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=4&quot;,&quot;p2&quot;\">Avian</a></td><td align=\"right\"><font color=\"green\">2</font></td><td align=\"right\"><font color=\"green\">4,097,700</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=1&quot;,&quot;p2&quot;\">Humanoid</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">4,544,500</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=2&quot;,&quot;p2&quot;\">Bovinoid</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">1,120,200</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=7&quot;,&quot;p2&quot;\">Amphibian</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">11,312,700</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=9&quot;,&quot;p2&quot;\">Siliconoid</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">1,193,200</font></td></tr></table>"
                  "<table align=\"left\"><tr><td width=\"12\"><font color=\"white\">Climate</font></td><td align=\"right\" width=\"6\">Planets</td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Temp$&gt;=0 And Temp$&lt;=14 And Owner$=My.Race$&quot;,&quot;p2&quot;\">arctic</a></td><td align=\"right\"><font color=\"green\">7</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Temp$&gt;=15 And Temp$&lt;=39 And Owner$=My.Race$&quot;,&quot;p2&quot;\">cool</a></td><td align=\"right\"><font color=\"green\">13</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Temp$&gt;=40 And Temp$&lt;=64 And Owner$=My.Race$&quot;,&quot;p2&quot;\">warm</a></td><td align=\"right\"><font color=\"green\">7</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Temp$&gt;=65 And Temp$&lt;=84 And Owner$=My.Race$&quot;,&quot;p2&quot;\">tropical</a></td><td align=\"right\"><font color=\"green\">3</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Temp$&gt;=85 And Temp$&lt;=100 And Owner$=My.Race$&quot;,&quot;p2&quot;\">desert</a></td><td align=\"right\"><font color=\"green\">5</font></td></tr></table>"
-                 "<table align=\"left\"><tr><td width=\"15\"><a href=\"q:UI.Search &quot;Defense&lt;10 And Owner$=My.Race$&quot;,&quot;p2&quot;\">Nearly undefended:</a></td><td align=\"right\" width=\"3\"><font color=\"green\">8</font></td></tr>"
-                 "<tr><td width=\"15\"><a href=\"q:UI.Search &quot;Defense&lt;15 And Owner$=My.Race$&quot;,&quot;p2&quot;\">Visible by sensor scan:</a></td><td align=\"right\" width=\"3\"><font color=\"green\">9</font></td></tr></table>");
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Temp$&gt;=0 And Temp$&lt;=14&quot;,&quot;p2&quot;\">arctic</a></td><td align=\"right\"><font color=\"green\">7</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Temp$&gt;=15 And Temp$&lt;=39&quot;,&quot;p2&quot;\">cool</a></td><td align=\"right\"><font color=\"green\">13</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Temp$&gt;=40 And Temp$&lt;=64&quot;,&quot;p2&quot;\">warm</a></td><td align=\"right\"><font color=\"green\">7</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Temp$&gt;=65 And Temp$&lt;=84&quot;,&quot;p2&quot;\">tropical</a></td><td align=\"right\"><font color=\"green\">3</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Temp$&gt;=85 And Temp$&lt;=100&quot;,&quot;p2&quot;\">desert</a></td><td align=\"right\"><font color=\"green\">5</font></td></tr></table>"
+                 "<table align=\"left\"><tr><td width=\"15\"><a href=\"q:UI.Search &quot;Defense&lt;10 And Played&quot;,&quot;p2&quot;\">Nearly undefended:</a></td><td align=\"right\" width=\"3\"><font color=\"green\">8</font></td></tr>"
+                 "<tr><td width=\"15\"><a href=\"q:UI.Search &quot;Defense&lt;15 And Played&quot;,&quot;p2&quot;\">Visible by sensor scan:</a></td><td align=\"right\" width=\"3\"><font color=\"green\">9</font></td></tr></table>");
 }
 
 AFL_TEST("game.map.info.Browser:PlanetsPage:experience", a)
@@ -481,25 +481,25 @@ AFL_TEST("game.map.info.Browser:PlanetsPage:experience", a)
     a.checkEqual("", toString(out),
                  "<h1>Planets</h1><table align=\"left\"><tr><td width=\"15\">Total:</td><td align=\"right\" width=\"3\"><font color=\"green\">35</font></td></tr></table>"
                  "<table align=\"left\"><tr><td width=\"12\"><font color=\"white\">Natives</font></td><td align=\"right\" width=\"6\">Planets</td><td align=\"right\" width=\"8\">Natives</td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=0&quot;,&quot;p2&quot;\">none</a></td><td align=\"right\"><font color=\"green\">16</font></td><td align=\"right\"><font color=\"green\">0</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=6&quot;,&quot;p2&quot;\">Insectoid</a></td><td align=\"right\"><font color=\"green\">5</font></td><td align=\"right\"><font color=\"green\">27,286,000</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=8&quot;,&quot;p2&quot;\">Ghipsoldal</a></td><td align=\"right\"><font color=\"green\">5</font></td><td align=\"right\"><font color=\"green\">14,416,200</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=3&quot;,&quot;p2&quot;\">Reptilian</a></td><td align=\"right\"><font color=\"green\">3</font></td><td align=\"right\"><font color=\"green\">11,736,700</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=4&quot;,&quot;p2&quot;\">Avian</a></td><td align=\"right\"><font color=\"green\">2</font></td><td align=\"right\"><font color=\"green\">4,097,700</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=1&quot;,&quot;p2&quot;\">Humanoid</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">4,544,500</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=2&quot;,&quot;p2&quot;\">Bovinoid</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">1,120,200</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=7&quot;,&quot;p2&quot;\">Amphibian</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">11,312,700</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=9&quot;,&quot;p2&quot;\">Siliconoid</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">1,193,200</font></td></tr></table>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=0&quot;,&quot;p2&quot;\">none</a></td><td align=\"right\"><font color=\"green\">16</font></td><td align=\"right\"><font color=\"green\">0</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=6&quot;,&quot;p2&quot;\">Insectoid</a></td><td align=\"right\"><font color=\"green\">5</font></td><td align=\"right\"><font color=\"green\">27,286,000</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=8&quot;,&quot;p2&quot;\">Ghipsoldal</a></td><td align=\"right\"><font color=\"green\">5</font></td><td align=\"right\"><font color=\"green\">14,416,200</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=3&quot;,&quot;p2&quot;\">Reptilian</a></td><td align=\"right\"><font color=\"green\">3</font></td><td align=\"right\"><font color=\"green\">11,736,700</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=4&quot;,&quot;p2&quot;\">Avian</a></td><td align=\"right\"><font color=\"green\">2</font></td><td align=\"right\"><font color=\"green\">4,097,700</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=1&quot;,&quot;p2&quot;\">Humanoid</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">4,544,500</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=2&quot;,&quot;p2&quot;\">Bovinoid</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">1,120,200</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=7&quot;,&quot;p2&quot;\">Amphibian</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">11,312,700</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=9&quot;,&quot;p2&quot;\">Siliconoid</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">1,193,200</font></td></tr></table>"
                  "<table align=\"left\"><tr><td width=\"12\"><font color=\"white\">Climate</font></td><td align=\"right\" width=\"6\">Planets</td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Temp$&gt;=0 And Temp$&lt;=14 And Owner$=My.Race$&quot;,&quot;p2&quot;\">arctic</a></td><td align=\"right\"><font color=\"green\">7</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Temp$&gt;=15 And Temp$&lt;=39 And Owner$=My.Race$&quot;,&quot;p2&quot;\">cool</a></td><td align=\"right\"><font color=\"green\">13</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Temp$&gt;=40 And Temp$&lt;=64 And Owner$=My.Race$&quot;,&quot;p2&quot;\">warm</a></td><td align=\"right\"><font color=\"green\">7</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Temp$&gt;=65 And Temp$&lt;=84 And Owner$=My.Race$&quot;,&quot;p2&quot;\">tropical</a></td><td align=\"right\"><font color=\"green\">3</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Temp$&gt;=85 And Temp$&lt;=100 And Owner$=My.Race$&quot;,&quot;p2&quot;\">desert</a></td><td align=\"right\"><font color=\"green\">5</font></td></tr></table>"
-                 "<table align=\"left\"><tr><td width=\"15\"><a href=\"q:UI.Search &quot;Defense&lt;10 And Owner$=My.Race$&quot;,&quot;p2&quot;\">Nearly undefended:</a></td><td align=\"right\" width=\"3\"><font color=\"green\">8</font></td></tr>"
-                 "<tr><td width=\"15\"><a href=\"q:UI.Search &quot;Defense&lt;15 And Owner$=My.Race$&quot;,&quot;p2&quot;\">Visible by sensor scan:</a></td><td align=\"right\" width=\"3\"><font color=\"green\">9</font></td></tr></table>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Temp$&gt;=0 And Temp$&lt;=14&quot;,&quot;p2&quot;\">arctic</a></td><td align=\"right\"><font color=\"green\">7</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Temp$&gt;=15 And Temp$&lt;=39&quot;,&quot;p2&quot;\">cool</a></td><td align=\"right\"><font color=\"green\">13</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Temp$&gt;=40 And Temp$&lt;=64&quot;,&quot;p2&quot;\">warm</a></td><td align=\"right\"><font color=\"green\">7</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Temp$&gt;=65 And Temp$&lt;=84&quot;,&quot;p2&quot;\">tropical</a></td><td align=\"right\"><font color=\"green\">3</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Temp$&gt;=85 And Temp$&lt;=100&quot;,&quot;p2&quot;\">desert</a></td><td align=\"right\"><font color=\"green\">5</font></td></tr></table>"
+                 "<table align=\"left\"><tr><td width=\"15\"><a href=\"q:UI.Search &quot;Defense&lt;10 And Played&quot;,&quot;p2&quot;\">Nearly undefended:</a></td><td align=\"right\" width=\"3\"><font color=\"green\">8</font></td></tr>"
+                 "<tr><td width=\"15\"><a href=\"q:UI.Search &quot;Defense&lt;15 And Played&quot;,&quot;p2&quot;\">Visible by sensor scan:</a></td><td align=\"right\" width=\"3\"><font color=\"green\">9</font></td></tr></table>"
                  "<table align=\"left\"><tr><td width=\"17\"><font color=\"white\">Planets by Experience Level</font></td>"
-                 "<td align=\"right\" width=\"3\"/></tr><tr><td><a href=\"q:UI.Search &quot;Level=1 And Owner$=My.Race$&quot;,&quot;p2&quot;\">Soldier</a></td><td align=\"right\"><font color=\"green\">35</font></td></tr></table>");
+                 "<td align=\"right\" width=\"3\"/></tr><tr><td><a href=\"q:UI.Search &quot;Level=1 And Played&quot;,&quot;p2&quot;\">Soldier</a></td><td align=\"right\"><font color=\"green\">35</font></td></tr></table>");
 }
 
 AFL_TEST("game.map.info.Browser:PlanetsPage:sample:SortByRace", a)
@@ -516,24 +516,24 @@ AFL_TEST("game.map.info.Browser:PlanetsPage:sample:SortByRace", a)
     a.checkEqual("", toString(out),
                  "<h1>Planets</h1><table align=\"left\"><tr><td width=\"15\">Total:</td><td align=\"right\" width=\"3\"><font color=\"green\">35</font></td></tr></table>"
                  "<table align=\"left\"><tr><td width=\"12\"><font color=\"white\">Natives</font></td><td align=\"right\" width=\"6\">Planets</td><td align=\"right\" width=\"8\">Natives</td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=0&quot;,&quot;p2&quot;\">none</a></td><td align=\"right\"><font color=\"green\">16</font></td><td align=\"right\"><font color=\"green\">0</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=1&quot;,&quot;p2&quot;\">Humanoid</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">4,544,500</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=2&quot;,&quot;p2&quot;\">Bovinoid</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">1,120,200</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=3&quot;,&quot;p2&quot;\">Reptilian</a></td><td align=\"right\"><font color=\"green\">3</font></td><td align=\"right\"><font color=\"green\">11,736,700</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=4&quot;,&quot;p2&quot;\">Avian</a></td><td align=\"right\"><font color=\"green\">2</font></td><td align=\"right\"><font color=\"green\">4,097,700</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=0&quot;,&quot;p2&quot;\">none</a></td><td align=\"right\"><font color=\"green\">16</font></td><td align=\"right\"><font color=\"green\">0</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=1&quot;,&quot;p2&quot;\">Humanoid</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">4,544,500</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=2&quot;,&quot;p2&quot;\">Bovinoid</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">1,120,200</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=3&quot;,&quot;p2&quot;\">Reptilian</a></td><td align=\"right\"><font color=\"green\">3</font></td><td align=\"right\"><font color=\"green\">11,736,700</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=4&quot;,&quot;p2&quot;\">Avian</a></td><td align=\"right\"><font color=\"green\">2</font></td><td align=\"right\"><font color=\"green\">4,097,700</font></td></tr>"
                  "<tr><td>Amorphous</td><td align=\"right\"><font color=\"green\">0</font></td><td align=\"right\"><font color=\"green\">0</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=6&quot;,&quot;p2&quot;\">Insectoid</a></td><td align=\"right\"><font color=\"green\">5</font></td><td align=\"right\"><font color=\"green\">27,286,000</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=7&quot;,&quot;p2&quot;\">Amphibian</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">11,312,700</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=8&quot;,&quot;p2&quot;\">Ghipsoldal</a></td><td align=\"right\"><font color=\"green\">5</font></td><td align=\"right\"><font color=\"green\">14,416,200</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Natives.Race$=9&quot;,&quot;p2&quot;\">Siliconoid</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">1,193,200</font></td></tr></table>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=6&quot;,&quot;p2&quot;\">Insectoid</a></td><td align=\"right\"><font color=\"green\">5</font></td><td align=\"right\"><font color=\"green\">27,286,000</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=7&quot;,&quot;p2&quot;\">Amphibian</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">11,312,700</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=8&quot;,&quot;p2&quot;\">Ghipsoldal</a></td><td align=\"right\"><font color=\"green\">5</font></td><td align=\"right\"><font color=\"green\">14,416,200</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Natives.Race$=9&quot;,&quot;p2&quot;\">Siliconoid</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">1,193,200</font></td></tr></table>"
                  "<table align=\"left\"><tr><td width=\"12\"><font color=\"white\">Climate</font></td><td align=\"right\" width=\"6\">Planets</td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Temp$&gt;=0 And Temp$&lt;=14 And Owner$=My.Race$&quot;,&quot;p2&quot;\">arctic</a></td><td align=\"right\"><font color=\"green\">7</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Temp$&gt;=15 And Temp$&lt;=39 And Owner$=My.Race$&quot;,&quot;p2&quot;\">cool</a></td><td align=\"right\"><font color=\"green\">13</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Temp$&gt;=40 And Temp$&lt;=64 And Owner$=My.Race$&quot;,&quot;p2&quot;\">warm</a></td><td align=\"right\"><font color=\"green\">7</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Temp$&gt;=65 And Temp$&lt;=84 And Owner$=My.Race$&quot;,&quot;p2&quot;\">tropical</a></td><td align=\"right\"><font color=\"green\">3</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Temp$&gt;=85 And Temp$&lt;=100 And Owner$=My.Race$&quot;,&quot;p2&quot;\">desert</a></td><td align=\"right\"><font color=\"green\">5</font></td></tr></table>"
-                 "<table align=\"left\"><tr><td width=\"15\"><a href=\"q:UI.Search &quot;Defense&lt;10 And Owner$=My.Race$&quot;,&quot;p2&quot;\">Nearly undefended:</a></td><td align=\"right\" width=\"3\"><font color=\"green\">8</font></td></tr>"
-                 "<tr><td width=\"15\"><a href=\"q:UI.Search &quot;Defense&lt;15 And Owner$=My.Race$&quot;,&quot;p2&quot;\">Visible by sensor scan:</a></td><td align=\"right\" width=\"3\"><font color=\"green\">9</font></td></tr></table>");
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Temp$&gt;=0 And Temp$&lt;=14&quot;,&quot;p2&quot;\">arctic</a></td><td align=\"right\"><font color=\"green\">7</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Temp$&gt;=15 And Temp$&lt;=39&quot;,&quot;p2&quot;\">cool</a></td><td align=\"right\"><font color=\"green\">13</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Temp$&gt;=40 And Temp$&lt;=64&quot;,&quot;p2&quot;\">warm</a></td><td align=\"right\"><font color=\"green\">7</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Temp$&gt;=65 And Temp$&lt;=84&quot;,&quot;p2&quot;\">tropical</a></td><td align=\"right\"><font color=\"green\">3</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Temp$&gt;=85 And Temp$&lt;=100&quot;,&quot;p2&quot;\">desert</a></td><td align=\"right\"><font color=\"green\">5</font></td></tr></table>"
+                 "<table align=\"left\"><tr><td width=\"15\"><a href=\"q:UI.Search &quot;Defense&lt;10 And Played&quot;,&quot;p2&quot;\">Nearly undefended:</a></td><td align=\"right\" width=\"3\"><font color=\"green\">8</font></td></tr>"
+                 "<tr><td width=\"15\"><a href=\"q:UI.Search &quot;Defense&lt;15 And Played&quot;,&quot;p2&quot;\">Visible by sensor scan:</a></td><td align=\"right\" width=\"3\"><font color=\"green\">9</font></td></tr></table>");
 }
 
 AFL_TEST("game.map.info.Browser:ColonyPage:sample", a)
@@ -642,19 +642,19 @@ AFL_TEST("game.map.info.Browser:StarshipPage:sample", a)
 
     a.checkEqual("", toString(out),
                  "<h1>Starships</h1><table align=\"left\"><tr><td width=\"17\">Total:</td><td align=\"right\" width=\"3\"><font color=\"green\">37</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Orbit$=0 And Owner$=My.Race$&quot;,&quot;s2&quot;\">In free space:</a></td><td align=\"right\"><font color=\"green\">15</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search \'Type.Short=&quot;T&quot; And Owner$=My.Race$\',&quot;s2&quot;\">Torpedo Ships:</a></td><td align=\"right\"><font color=\"green\">23</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Cargo.N=0 And Owner$=My.Race$&quot;,&quot;s2&quot;\">Ships w/o fuel:</a></td><td align=\"right\"><font color=\"green\">3</font></td></tr></table>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Orbit$=0 And Played&quot;,&quot;s2&quot;\">In free space:</a></td><td align=\"right\"><font color=\"green\">15</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search \'Type.Short=&quot;T&quot; And Played\',&quot;s2&quot;\">Torpedo Ships:</a></td><td align=\"right\"><font color=\"green\">23</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Cargo.N=0 And Played&quot;,&quot;s2&quot;\">Ships w/o fuel:</a></td><td align=\"right\"><font color=\"green\">3</font></td></tr></table>"
                  "<table align=\"left\"><tr><td width=\"20\"><font color=\"white\">Ships by Hull Type</font></td><td align=\"right\" width=\"4\"/></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Hull$=60&quot;,&quot;s2&quot;\">RUBY CLASS LIGHT CRUISER</a></td><td align=\"right\"><font color=\"green\">10</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Hull$=61&quot;,&quot;s2&quot;\">EMERALD CLASS BATTLECRUISER</a></td><td align=\"right\"><font color=\"green\">10</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Hull$=15&quot;,&quot;s2&quot;\">SMALL DEEP SPACE FREIGHTER</a></td><td align=\"right\"><font color=\"green\">4</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Hull$=16&quot;,&quot;s2&quot;\">MEDIUM DEEP SPACE FREIGHTER</a></td><td align=\"right\"><font color=\"green\">4</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Hull$=17&quot;,&quot;s2&quot;\">LARGE DEEP SPACE FREIGHTER</a></td><td align=\"right\"><font color=\"green\">4</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Hull$=14&quot;,&quot;s2&quot;\">NEUTRONIC FUEL CARRIER</a></td><td align=\"right\"><font color=\"green\">2</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Hull$=46&quot;,&quot;s2&quot;\">METEOR CLASS BLOCKADE RUNNER</a></td><td align=\"right\"><font color=\"green\">1</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Hull$=63&quot;,&quot;s2&quot;\">DIAMOND FLAME CLASS BATTLESHIP</a></td><td align=\"right\"><font color=\"green\">1</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Hull$=66&quot;,&quot;s2&quot;\">OPAL CLASS TORPEDO BOAT</a></td><td align=\"right\"><font color=\"green\">1</font></td></tr></table>");
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Hull$=60&quot;,&quot;s2&quot;\">RUBY CLASS LIGHT CRUISER</a></td><td align=\"right\"><font color=\"green\">10</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Hull$=61&quot;,&quot;s2&quot;\">EMERALD CLASS BATTLECRUISER</a></td><td align=\"right\"><font color=\"green\">10</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Hull$=15&quot;,&quot;s2&quot;\">SMALL DEEP SPACE FREIGHTER</a></td><td align=\"right\"><font color=\"green\">4</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Hull$=16&quot;,&quot;s2&quot;\">MEDIUM DEEP SPACE FREIGHTER</a></td><td align=\"right\"><font color=\"green\">4</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Hull$=17&quot;,&quot;s2&quot;\">LARGE DEEP SPACE FREIGHTER</a></td><td align=\"right\"><font color=\"green\">4</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Hull$=14&quot;,&quot;s2&quot;\">NEUTRONIC FUEL CARRIER</a></td><td align=\"right\"><font color=\"green\">2</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Hull$=46&quot;,&quot;s2&quot;\">METEOR CLASS BLOCKADE RUNNER</a></td><td align=\"right\"><font color=\"green\">1</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Hull$=63&quot;,&quot;s2&quot;\">DIAMOND FLAME CLASS BATTLESHIP</a></td><td align=\"right\"><font color=\"green\">1</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Hull$=66&quot;,&quot;s2&quot;\">OPAL CLASS TORPEDO BOAT</a></td><td align=\"right\"><font color=\"green\">1</font></td></tr></table>");
 }
 
 AFL_TEST("game.map.info.Browser:StarshipPage:sample:SortByName", a)
@@ -670,15 +670,15 @@ AFL_TEST("game.map.info.Browser:StarshipPage:sample:SortByName", a)
 
     a.checkEqual("", toString(out),
                  "<h1>Starships</h1><table align=\"left\"><tr><td width=\"20\"><font color=\"white\">Ships by Hull Type</font></td><td align=\"right\" width=\"4\"/></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Hull$=63&quot;,&quot;s2&quot;\">DIAMOND FLAME CLASS BATTLESHIP</a></td><td align=\"right\"><font color=\"green\">1</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Hull$=61&quot;,&quot;s2&quot;\">EMERALD CLASS BATTLECRUISER</a></td><td align=\"right\"><font color=\"green\">10</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Hull$=17&quot;,&quot;s2&quot;\">LARGE DEEP SPACE FREIGHTER</a></td><td align=\"right\"><font color=\"green\">4</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Hull$=16&quot;,&quot;s2&quot;\">MEDIUM DEEP SPACE FREIGHTER</a></td><td align=\"right\"><font color=\"green\">4</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Hull$=46&quot;,&quot;s2&quot;\">METEOR CLASS BLOCKADE RUNNER</a></td><td align=\"right\"><font color=\"green\">1</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Hull$=14&quot;,&quot;s2&quot;\">NEUTRONIC FUEL CARRIER</a></td><td align=\"right\"><font color=\"green\">2</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Hull$=66&quot;,&quot;s2&quot;\">OPAL CLASS TORPEDO BOAT</a></td><td align=\"right\"><font color=\"green\">1</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Hull$=60&quot;,&quot;s2&quot;\">RUBY CLASS LIGHT CRUISER</a></td><td align=\"right\"><font color=\"green\">10</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Hull$=15&quot;,&quot;s2&quot;\">SMALL DEEP SPACE FREIGHTER</a></td><td align=\"right\"><font color=\"green\">4</font></td></tr></table>");
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Hull$=63&quot;,&quot;s2&quot;\">DIAMOND FLAME CLASS BATTLESHIP</a></td><td align=\"right\"><font color=\"green\">1</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Hull$=61&quot;,&quot;s2&quot;\">EMERALD CLASS BATTLECRUISER</a></td><td align=\"right\"><font color=\"green\">10</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Hull$=17&quot;,&quot;s2&quot;\">LARGE DEEP SPACE FREIGHTER</a></td><td align=\"right\"><font color=\"green\">4</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Hull$=16&quot;,&quot;s2&quot;\">MEDIUM DEEP SPACE FREIGHTER</a></td><td align=\"right\"><font color=\"green\">4</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Hull$=46&quot;,&quot;s2&quot;\">METEOR CLASS BLOCKADE RUNNER</a></td><td align=\"right\"><font color=\"green\">1</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Hull$=14&quot;,&quot;s2&quot;\">NEUTRONIC FUEL CARRIER</a></td><td align=\"right\"><font color=\"green\">2</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Hull$=66&quot;,&quot;s2&quot;\">OPAL CLASS TORPEDO BOAT</a></td><td align=\"right\"><font color=\"green\">1</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Hull$=60&quot;,&quot;s2&quot;\">RUBY CLASS LIGHT CRUISER</a></td><td align=\"right\"><font color=\"green\">10</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Hull$=15&quot;,&quot;s2&quot;\">SMALL DEEP SPACE FREIGHTER</a></td><td align=\"right\"><font color=\"green\">4</font></td></tr></table>");
 }
 
 AFL_TEST("game.map.info.Browser:CapitalPage:sample", a)
@@ -693,15 +693,15 @@ AFL_TEST("game.map.info.Browser:CapitalPage:sample", a)
 
     a.checkEqual("", toString(out),
                  "<h1>Capital Ships</h1><table align=\"left\"><tr><td width=\"17\">Total:</td><td align=\"right\" width=\"3\"><font color=\"green\">23</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search \'Orbit$=0 And Owner$=My.Race$ And Type.Short&lt;&gt;&quot;F&quot;\',&quot;s2&quot;\">In free space:</a></td><td align=\"right\"><font color=\"green\">6</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search \'Type.Short=&quot;T&quot; And Owner$=My.Race$ And Type.Short&lt;&gt;&quot;F&quot;\',&quot;s2&quot;\">Torpedo Ships:</a></td><td align=\"right\"><font color=\"green\">23</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search \'Cargo.N=0 And Owner$=My.Race$ And Type.Short&lt;&gt;&quot;F&quot;\',&quot;s2&quot;\">Ships w/o fuel:</a></td><td align=\"right\"><font color=\"green\">2</font></td></tr></table>"
+                 "<tr><td><a href=\"q:UI.Search \'Orbit$=0 And Played And Type.Short&lt;&gt;&quot;F&quot;\',&quot;s2&quot;\">In free space:</a></td><td align=\"right\"><font color=\"green\">6</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search \'Type.Short=&quot;T&quot; And Played And Type.Short&lt;&gt;&quot;F&quot;\',&quot;s2&quot;\">Torpedo Ships:</a></td><td align=\"right\"><font color=\"green\">23</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search \'Cargo.N=0 And Played And Type.Short&lt;&gt;&quot;F&quot;\',&quot;s2&quot;\">Ships w/o fuel:</a></td><td align=\"right\"><font color=\"green\">2</font></td></tr></table>"
                  "<table align=\"left\"><tr><td width=\"20\"><font color=\"white\">Ships by Hull Type</font></td><td align=\"right\" width=\"4\"/></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Hull$=60&quot;,&quot;s2&quot;\">RUBY CLASS LIGHT CRUISER</a></td><td align=\"right\"><font color=\"green\">10</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Hull$=61&quot;,&quot;s2&quot;\">EMERALD CLASS BATTLECRUISER</a></td><td align=\"right\"><font color=\"green\">10</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Hull$=46&quot;,&quot;s2&quot;\">METEOR CLASS BLOCKADE RUNNER</a></td><td align=\"right\"><font color=\"green\">1</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Hull$=63&quot;,&quot;s2&quot;\">DIAMOND FLAME CLASS BATTLESHIP</a></td><td align=\"right\"><font color=\"green\">1</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Hull$=66&quot;,&quot;s2&quot;\">OPAL CLASS TORPEDO BOAT</a></td><td align=\"right\"><font color=\"green\">1</font></td></tr></table>");
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Hull$=60&quot;,&quot;s2&quot;\">RUBY CLASS LIGHT CRUISER</a></td><td align=\"right\"><font color=\"green\">10</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Hull$=61&quot;,&quot;s2&quot;\">EMERALD CLASS BATTLECRUISER</a></td><td align=\"right\"><font color=\"green\">10</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Hull$=46&quot;,&quot;s2&quot;\">METEOR CLASS BLOCKADE RUNNER</a></td><td align=\"right\"><font color=\"green\">1</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Hull$=63&quot;,&quot;s2&quot;\">DIAMOND FLAME CLASS BATTLESHIP</a></td><td align=\"right\"><font color=\"green\">1</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Hull$=66&quot;,&quot;s2&quot;\">OPAL CLASS TORPEDO BOAT</a></td><td align=\"right\"><font color=\"green\">1</font></td></tr></table>");
 }
 
 AFL_TEST("game.map.info.Browser:StarchartPage:sample", a)
@@ -743,20 +743,20 @@ AFL_TEST("game.map.info.Browser:WeaponsPage:sample", a)
 
     a.checkEqual("", toString(out),
                  "<h1>Weapons</h1><table align=\"left\"><tr><td width=\"16\"><font color=\"white\">Beams</font></td><td align=\"right\" width=\"4\">Ships</td><td align=\"right\" width=\"8\">Weapons</td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Beam$=0&quot;,&quot;s2&quot;\">No beams</a></td><td align=\"right\"><font color=\"green\">14</font></td><td align=\"right\"/></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Beam$=2&quot;,&quot;s2&quot;\">X-Ray Laser</a></td><td align=\"right\"><font color=\"green\">3</font></td><td align=\"right\"><font color=\"green\">12</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Beam$=3&quot;,&quot;s2&quot;\">Plasma Bolt</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">8</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Beam$=4&quot;,&quot;s2&quot;\">Blaster</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">4</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Beam$=5&quot;,&quot;s2&quot;\">Positron Beam</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">4</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Beam$=6&quot;,&quot;s2&quot;\">Disruptor</a></td><td align=\"right\"><font color=\"green\">16</font></td><td align=\"right\"><font color=\"green\">97</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Beam$=7&quot;,&quot;s2&quot;\">Heavy Blaster</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">10</font></td></tr></table>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Beam$=0&quot;,&quot;s2&quot;\">No beams</a></td><td align=\"right\"><font color=\"green\">14</font></td><td align=\"right\"/></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Beam$=2&quot;,&quot;s2&quot;\">X-Ray Laser</a></td><td align=\"right\"><font color=\"green\">3</font></td><td align=\"right\"><font color=\"green\">12</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Beam$=3&quot;,&quot;s2&quot;\">Plasma Bolt</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">8</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Beam$=4&quot;,&quot;s2&quot;\">Blaster</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">4</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Beam$=5&quot;,&quot;s2&quot;\">Positron Beam</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">4</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Beam$=6&quot;,&quot;s2&quot;\">Disruptor</a></td><td align=\"right\"><font color=\"green\">16</font></td><td align=\"right\"><font color=\"green\">97</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Beam$=7&quot;,&quot;s2&quot;\">Heavy Blaster</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">10</font></td></tr></table>"
                  "<table align=\"left\"><tr><td width=\"16\"><font color=\"white\">Torpedoes</font></td><td align=\"right\" width=\"4\">Ships</td><td align=\"right\" width=\"8\">Torpedoes</td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And IsEmpty(Aux)&quot;,&quot;s2&quot;\">No torps/fighters</a></td><td align=\"right\"><font color=\"green\">14</font></td><td align=\"right\"/></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Torp$=1&quot;,&quot;s2&quot;\">Mark 1 Photon</a></td><td align=\"right\"><font color=\"green\">2</font></td><td align=\"right\"><font color=\"green\">4</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Torp$=2&quot;,&quot;s2&quot;\">Proton torp</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">0</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Torp$=4&quot;,&quot;s2&quot;\">Gamma Bomb</a></td><td align=\"right\"><font color=\"green\">2</font></td><td align=\"right\"><font color=\"green\">45</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Torp$=6&quot;,&quot;s2&quot;\">Mark 4 Photon</a></td><td align=\"right\"><font color=\"green\">17</font></td><td align=\"right\"><font color=\"green\">204</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Torp$=7&quot;,&quot;s2&quot;\">Mark 5 Photon</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">0</font></td></tr></table>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And IsEmpty(Aux)&quot;,&quot;s2&quot;\">No torps/fighters</a></td><td align=\"right\"><font color=\"green\">14</font></td><td align=\"right\"/></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Torp$=1&quot;,&quot;s2&quot;\">Mark 1 Photon</a></td><td align=\"right\"><font color=\"green\">2</font></td><td align=\"right\"><font color=\"green\">4</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Torp$=2&quot;,&quot;s2&quot;\">Proton torp</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">0</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Torp$=4&quot;,&quot;s2&quot;\">Gamma Bomb</a></td><td align=\"right\"><font color=\"green\">2</font></td><td align=\"right\"><font color=\"green\">45</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Torp$=6&quot;,&quot;s2&quot;\">Mark 4 Photon</a></td><td align=\"right\"><font color=\"green\">17</font></td><td align=\"right\"><font color=\"green\">204</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Torp$=7&quot;,&quot;s2&quot;\">Mark 5 Photon</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">0</font></td></tr></table>"
                  "<table align=\"left\"><tr><td width=\"16\"><font color=\"white\">Others</font></td><td align=\"right\" width=\"4\"/></tr>"
                  "<tr><td>Carriers</td><td align=\"right\"><font color=\"green\">0</font></td></tr>"
                  "<tr><td>Unarmed ships</td><td align=\"right\"><font color=\"green\">14</font></td></tr></table>");
@@ -775,14 +775,14 @@ AFL_TEST("game.map.info.Browser:WeaponsPage:sample:ShowOnlyTorpedoes", a)
 
     a.checkEqual("", toString(out),
                  "<h1>Weapons</h1><table align=\"left\"><tr><td width=\"16\"><font color=\"white\">Torpedoes</font></td><td align=\"right\" width=\"4\">Ships</td><td align=\"right\" width=\"8\">Torpedoes</td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And IsEmpty(Aux)&quot;,&quot;s2&quot;\">No torps/fighters</a></td><td align=\"right\"><font color=\"green\">14</font></td><td align=\"right\"/></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Torp$=1&quot;,&quot;s2&quot;\">Mark 1 Photon</a></td><td align=\"right\"><font color=\"green\">2</font></td><td align=\"right\"><font color=\"green\">4</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Torp$=2&quot;,&quot;s2&quot;\">Proton torp</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">0</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And IsEmpty(Aux)&quot;,&quot;s2&quot;\">No torps/fighters</a></td><td align=\"right\"><font color=\"green\">14</font></td><td align=\"right\"/></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Torp$=1&quot;,&quot;s2&quot;\">Mark 1 Photon</a></td><td align=\"right\"><font color=\"green\">2</font></td><td align=\"right\"><font color=\"green\">4</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Torp$=2&quot;,&quot;s2&quot;\">Proton torp</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">0</font></td></tr>"
                  "<tr><td>Mark 2 Photon</td><td align=\"right\"><font color=\"green\">0</font></td><td align=\"right\"><font color=\"green\">0</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Torp$=4&quot;,&quot;s2&quot;\">Gamma Bomb</a></td><td align=\"right\"><font color=\"green\">2</font></td><td align=\"right\"><font color=\"green\">45</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Torp$=4&quot;,&quot;s2&quot;\">Gamma Bomb</a></td><td align=\"right\"><font color=\"green\">2</font></td><td align=\"right\"><font color=\"green\">45</font></td></tr>"
                  "<tr><td>Mark 3 Photon</td><td align=\"right\"><font color=\"green\">0</font></td><td align=\"right\"><font color=\"green\">0</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Torp$=6&quot;,&quot;s2&quot;\">Mark 4 Photon</a></td><td align=\"right\"><font color=\"green\">17</font></td><td align=\"right\"><font color=\"green\">204</font></td></tr>"
-                 "<tr><td><a href=\"q:UI.Search &quot;Owner$=My.Race$ And Torp$=7&quot;,&quot;s2&quot;\">Mark 5 Photon</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">0</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Torp$=6&quot;,&quot;s2&quot;\">Mark 4 Photon</a></td><td align=\"right\"><font color=\"green\">17</font></td><td align=\"right\"><font color=\"green\">204</font></td></tr>"
+                 "<tr><td><a href=\"q:UI.Search &quot;Played And Torp$=7&quot;,&quot;s2&quot;\">Mark 5 Photon</a></td><td align=\"right\"><font color=\"green\">1</font></td><td align=\"right\"><font color=\"green\">0</font></td></tr>"
                  "<tr><td>Mark 6 Photon</td><td align=\"right\"><font color=\"green\">0</font></td><td align=\"right\"><font color=\"green\">0</font></td></tr>"
                  "<tr><td>Mark 7 Photon</td><td align=\"right\"><font color=\"green\">0</font></td><td align=\"right\"><font color=\"green\">0</font></td></tr>"
                  "<tr><td>Mark 8 Photon</td><td align=\"right\"><font color=\"green\">0</font></td><td align=\"right\"><font color=\"green\">0</font></td></tr></table>");

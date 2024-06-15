@@ -49,8 +49,7 @@ namespace {
     const char*const INDENT = "\xC2\xA0 ";
 
     // Prefix for filtering own units
-    // FIXME: this is used the same way as in PCC1/2: not consistently, and should probably by 'Played And '.
-    const char*const LINK_PREFIX = "Owner$=My.Race$ And ";
+    const char*const LINK_PREFIX = "Played And ";
 
 
 
@@ -397,7 +396,7 @@ namespace {
 
     String_t makeQuerySuffix(bool withFreighters)
     {
-        String_t querySuffix = " And Owner$=My.Race$";
+        String_t querySuffix = " And Played";
         if (!withFreighters) {
             querySuffix += " And Type.Short<>\"F\"";
         }
@@ -834,7 +833,7 @@ game::map::info::renderPlanetNativeSummary(TagNode& tab, const Universe& univ,
                          game::tables::NativeRaceName(tx).get(race),
                          link.makeSearchLink(SearchQuery(SearchQuery::MatchTrue,
                                                          SearchQuery::SearchObjects_t(SearchQuery::SearchPlanets),
-                                                         Format("Owner$=My.Race$ And Natives.Race$=%d", race))),
+                                                         Format("%sNatives.Race$=%d", LINK_PREFIX, race))),
                          nativePlanets[race] > 0);
         makeText(makeGreen(makeRightCell(row)), fmt.formatNumber(nativePlanets[race]));
         makeText(makeGreen(makeRightCell(row)), fmt.formatPopulation(nativePop[race]));
@@ -881,7 +880,8 @@ game::map::info::renderPlanetClimateSummary(TagNode& tab, const Universe& univ,
                          game::tables::TemperatureName(tx).get(CLIMATE_LIMITS[i]),
                          link.makeSearchLink(SearchQuery(SearchQuery::MatchTrue,
                                                          SearchQuery::SearchObjects_t(SearchQuery::SearchPlanets),
-                                                         Format("Temp$>=%d And Temp$<=%d And Owner$=My.Race$",
+                                                         Format("%sTemp$>=%d And Temp$<=%d",
+                                                                LINK_PREFIX,
                                                                 i == 0 ? 0 : CLIMATE_LIMITS[i-1]+1,
                                                                 CLIMATE_LIMITS[i]))),
                          climatePlanets[i] > 0);
@@ -918,7 +918,7 @@ game::map::info::renderPlanetDefenseSummary(TagNode& tab, const Universe& univ, 
         makeOptionalLink(makeLeftCell(row, 15), tx("Nearly undefended:"),
                          link.makeSearchLink(SearchQuery(SearchQuery::MatchTrue,
                                                          SearchQuery::SearchObjects_t(SearchQuery::SearchPlanets),
-                                                         "Defense<10 And Owner$=My.Race$")),
+                                                         "Defense<10 And Played")),
                          nUndefended > 0);
         makeText(makeGreen(makeRightCell(row, 3)), fmt.formatNumber(nUndefended));
     }
@@ -927,7 +927,7 @@ game::map::info::renderPlanetDefenseSummary(TagNode& tab, const Universe& univ, 
         makeOptionalLink(makeLeftCell(row, 15), tx("Visible by sensor scan:"),
                          link.makeSearchLink(SearchQuery(SearchQuery::MatchTrue,
                                                          SearchQuery::SearchObjects_t(SearchQuery::SearchPlanets),
-                                                         Format("Defense<%d And Owner$=My.Race$", dfu))),
+                                                         Format("Defense<%d And Played", dfu))),
                          nVisible > 0);
         makeText(makeGreen(makeRightCell(row, 3)), fmt.formatNumber(nVisible));
     }
@@ -1260,7 +1260,7 @@ game::map::info::renderShipTypeSummary(TagNode& tab,
         makeText(makeWhite(makeLeftCell(row, 20)), tx("Ships by Hull Type"));
         makeRightCell(row, 4);
     }
-    renderHullList(tab, hullCounts, sortOrder, "Owner$=My.Race$ And Hull$=%d", shipList, fmt, link, SearchQuery::SearchObjects_t(SearchQuery::SearchShips));
+    renderHullList(tab, hullCounts, sortOrder, "Played And Hull$=%d", shipList, fmt, link, SearchQuery::SearchObjects_t(SearchQuery::SearchShips));
 }
 
 // Render starchart summary, own empire (part of StarchartPage).
