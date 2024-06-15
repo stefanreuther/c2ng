@@ -29,9 +29,11 @@
 #include "ui/widgets/simpletable.hpp"
 #include "ui/window.hpp"
 #include "util/math.hpp"
+#include "util/skincolor.hpp"
 
 using afl::string::Format;
 using game::proxy::UfoProxy;
+using util::SkinColor;
 
 namespace {
     const int NUM_LINES = 9;
@@ -327,7 +329,7 @@ UfoInfoDialog::initWidgets()
     const int RIGHT = 16*em;
 
     // ex WUfoInfoTile::drawData (part), CUfoView.Draw
-    m_infoTable.all().setColor(ui::Color_Black);
+    m_infoTable.all().setColor(SkinColor::Static);
     m_infoTable.cell(0, 0).setExtraColumns(1);
     m_infoTable.cell(0, 1).setExtraColumns(1);
     m_infoTable.cell(0, 2).setText(tx("Location:"));
@@ -340,7 +342,7 @@ UfoInfoDialog::initWidgets()
     m_infoTable.setColumnWidth(1, RIGHT);
 
     // ex WUfoSettingsTile::drawData (part)
-    m_configTable.all().setColor(ui::Color_Black);
+    m_configTable.all().setColor(SkinColor::Static);
     m_configTable.cell(0, 0).setText(tx("Keep:"));
     m_configTable.cell(0, 1).setText(tx("Other end:"));
     m_configTable.setColumnWidth(0, LEFT);

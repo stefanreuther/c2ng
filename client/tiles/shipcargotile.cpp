@@ -15,11 +15,13 @@
 #include "game/v3/command.hpp"
 #include "game/v3/commandcontainer.hpp"
 #include "game/v3/commandextra.hpp"
+#include "util/skincolor.hpp"
 #include "util/unicodechars.hpp"
 
 namespace {
     using gfx::Point;
     using gfx::Rectangle;
+    using util::SkinColor;
 
     enum {
         MineralLabel,
@@ -90,14 +92,13 @@ void
 client::tiles::ShipCargoTile::init(ui::Root& root, gfx::KeyEventConsumer& kmw)
 {
     // Configure the table
-    // FIXME: use skin colors
     int numberWidth = root.provider().getFont(gfx::FontRequest())->getTextWidth("999,999");
-    m_table.column(MineralLabel).setColor(ui::Color_Gray);
-    m_table.column(MineralValue).setColor(ui::Color_Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
-    m_table.column(MineralUnit).setColor(ui::Color_Green);
-    m_table.column(OtherLabel).setColor(ui::Color_Gray);
-    m_table.column(OtherValue).setColor(ui::Color_Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
-    m_table.column(OtherUnit).setColor(ui::Color_Green);
+    m_table.column(MineralLabel).setColor(SkinColor::Static);
+    m_table.column(MineralValue).setColor(SkinColor::Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
+    m_table.column(MineralUnit).setColor(SkinColor::Green);
+    m_table.column(OtherLabel).setColor(SkinColor::Static);
+    m_table.column(OtherValue).setColor(SkinColor::Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
+    m_table.column(OtherUnit).setColor(SkinColor::Green);
     m_table.setColumnWidth(MineralValue, numberWidth);
     m_table.setColumnPadding(MineralValue, HORIZONTAL_PAD);
     m_table.setColumnPadding(MineralUnit, 2*HORIZONTAL_PAD);
@@ -229,7 +230,7 @@ client::tiles::ShipCargoTile::setData(const Data& data)
         m_table.cell(OtherValue,   i).setText(data.formattedAmounts[i+NumLines]);
     }
 
-    uint8_t fuelWarningColor = data.noFuelWarning ? ui::Color_Red : ui::Color_Green;
+    SkinColor::Color fuelWarningColor = data.noFuelWarning ? SkinColor::Red : SkinColor::Green;
     m_table.cell(MineralValue, 0).setColor(fuelWarningColor);
     m_table.cell(MineralUnit,  0).setColor(fuelWarningColor);
 

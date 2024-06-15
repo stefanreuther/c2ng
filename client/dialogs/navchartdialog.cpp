@@ -418,7 +418,7 @@ NavChartDialog::run()
     //         "ESC"
     //         "Help"
     // FIXME: needs to be a BLUE_DARK_WINDOW because ScanResult is not currently skinnable
-    ui::Window& win = del.addNew(new ui::Window(m_state.title, m_root.provider(), m_root.colorScheme(), ui::BLUE_DARK_WINDOW, ui::layout::VBox::instance5));
+    ui::Window& win = del.addNew(new ui::Window(m_state.title, m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
 
     ui::Group& g2   = del.addNew(new ui::Group(ui::layout::HBox::instance5));
     ui::Group& g22  = del.addNew(new ui::Group(ui::layout::VBox::instance5));

@@ -185,7 +185,7 @@ Dialog::run()
     //   StandardDialogButtons
     const int em = m_root.provider().getFont(gfx::FontRequest())->getEmWidth();
     afl::base::Deleter del;
-    ui::Window& win = del.addNew(new ui::Window(m_translator("Build Torpedoes/Fighters"), m_root.provider(), m_root.colorScheme(), ui::BLUE_DARK_WINDOW, ui::layout::VBox::instance5));
+    ui::Window& win = del.addNew(new ui::Window(m_translator("Build Torpedoes/Fighters"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
 
     Group& topGroup = del.addNew(new Group(ui::layout::HBox::instance5));
     Group& leftGroup = del.addNew(new Group(ui::layout::VBox::instance5));

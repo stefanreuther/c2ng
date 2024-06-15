@@ -9,6 +9,7 @@
 #include "gfx/fontrequest.hpp"
 #include "ui/root.hpp"
 #include "ui/simplewidget.hpp"
+#include "util/skincolor.hpp"
 
 namespace ui { namespace widgets {
 
@@ -39,13 +40,14 @@ namespace ui { namespace widgets {
             Range& setTextAlign(gfx::HorizontalAlignment x, gfx::VerticalAlignment y);
 
             /** Set color of all cells in range.
-                \param color Color (ui::Color_xxx)
+                \param color Color
                 \return *this */
-            Range& setColor(uint8_t color);
+            Range& setColor(util::SkinColor::Color color);
 
             /** Set color string for all cells in range.
                 This is an ad-hoc mechanism for multi-colored cells; use sparingly.
-                \param colorString Color string. First (byte) character corresponds to first (UTF-8) character of text, etc.
+                \param colorString Color string. Each character (byte) contains a util::SkinColor::Color value.
+                                   First (byte) character corresponds to first (UTF-8) character of text, etc.
                                    If color string has fewer characters than text, the remainder uses the color set with setColor().
                                    In particular, if colorString is empty (default), setColor() applies to whole cell.
                 \return *this */
@@ -176,10 +178,10 @@ namespace ui { namespace widgets {
             gfx::HorizontalAlignment alignX;
             gfx::VerticalAlignment alignY;
             int extraColumns;
-            uint8_t color;
+            util::SkinColor::Color color;
             bool underlined;
             Cell()
-                : text(), colorString(), font(), alignX(gfx::LeftAlign), alignY(gfx::TopAlign), extraColumns(0), color(ui::Color_White), underlined(false)
+                : text(), colorString(), font(), alignX(gfx::LeftAlign), alignY(gfx::TopAlign), extraColumns(0), color(util::SkinColor::Static), underlined(false)
                 { }
         };
         struct Metric {

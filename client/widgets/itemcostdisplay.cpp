@@ -4,8 +4,10 @@
   */
 
 #include "client/widgets/itemcostdisplay.hpp"
+#include "util/skincolor.hpp"
 
 using game::spec::Cost;
+using util::SkinColor;
 
 namespace {
     /* Color scheme.
@@ -96,7 +98,7 @@ void
 client::widgets::ItemCostDisplay::buildTable(ui::Root& root, afl::string::Translator& tx)
 {
     // ex WItemCostDisplay::drawContent (part)
-    column(0).setColor(Color_Static);
+    column(0).setColor(SkinColor::Static);
     setColumnPadding(0, 5);
     cell(0, 1).setText(tx("Tritanium"));
     cell(0, 2).setText(tx("Duranium"));
@@ -105,9 +107,9 @@ client::widgets::ItemCostDisplay::buildTable(ui::Root& root, afl::string::Transl
     cell(0, 5).setText(tx("Supplies"));
     cell(0, 6).setText(tx("Tech Level"));
 
-    cell(1, 0).setText(tx("This Part")).setColor(Color_Header);
-    cell(2, 0).setText(tx("Total")).setColor(Color_Header);
-    cell(3, 0).setText(tx("Available")).setColor(Color_Header);
+    cell(1, 0).setText(tx("This Part")).setColor(SkinColor::Heading);
+    cell(2, 0).setText(tx("Total")).setColor(SkinColor::Heading);
+    cell(3, 0).setText(tx("Available")).setColor(SkinColor::Heading);
 
     int width = 5 * root.provider().getFont(gfx::FontRequest())->getEmWidth();
     for (int i = 1; i <= 3; ++i) {
@@ -116,7 +118,7 @@ client::widgets::ItemCostDisplay::buildTable(ui::Root& root, afl::string::Transl
         column(i).setTextAlign(gfx::RightAlign, gfx::TopAlign);
     }
 
-    column(4).setColor(Color_Green);
+    column(4).setColor(SkinColor::Green);
     cell(4, 1).setText(tx("kt"));
     cell(4, 2).setText(tx("kt"));
     cell(4, 3).setText(tx("kt"));
@@ -174,7 +176,7 @@ client::widgets::ItemCostDisplay::renderCost(int column, int row, int32_t need, 
 {
     // ex WItemCostDisplay::writeCost
     cell(column, row).setText(m_formatter.formatNumber(need))
-        .setColor(remain < 0 ? Color_Red : Color_Green);
+        .setColor(remain < 0 ? SkinColor::Red : SkinColor::Green);
 }
 
 void

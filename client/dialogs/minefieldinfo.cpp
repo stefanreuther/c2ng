@@ -32,8 +32,10 @@
 #include "ui/window.hpp"
 #include "util/math.hpp"
 #include "util/numberformatter.hpp"
+#include "util/skincolor.hpp"
 
 using game::proxy::MinefieldProxy;
+using util::SkinColor;
 
 namespace {
     const int NUM_LINES = 7;
@@ -418,7 +420,7 @@ MinefieldInfoDialog::initLabels()
     const int RIGHT = 16*em;
 
     // ex WMinefieldInfoTile::drawData (part)
-    m_minefieldTable.all().setColor(ui::Color_Black);
+    m_minefieldTable.all().setColor(SkinColor::Static);
     m_minefieldTable.cell(0, 0).setText(tx("Owner:"));
     m_minefieldTable.cell(0, 1).setText(tx("Size:"));
     m_minefieldTable.cell(0, 3).setText(tx("After decay:"));
@@ -428,7 +430,7 @@ MinefieldInfoDialog::initLabels()
     m_minefieldTable.setColumnWidth(1, RIGHT);
 
     // ex WMinefieldPassageTile::drawData (part)
-    m_passageTable.all().setColor(ui::Color_Black);
+    m_passageTable.all().setColor(SkinColor::Static);
     m_passageTable.cell(0, 0).setText(tx("Successful passage:"));
     m_passageTable.setColumnWidth(0, LEFT);
     m_passageTable.setColumnWidth(1, RIGHT);

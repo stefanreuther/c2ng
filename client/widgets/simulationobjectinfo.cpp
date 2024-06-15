@@ -8,6 +8,7 @@
 #include "game/sim/ability.hpp"
 #include "game/sim/object.hpp"
 #include "ui/group.hpp"
+#include "ui/layout/hbox.hpp"
 #include "ui/layout/vbox.hpp"
 #include "ui/res/resid.hpp"
 #include "ui/rich/statictext.hpp"
@@ -16,16 +17,14 @@
 #include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/imagebutton.hpp"
 #include "ui/widgets/simpletable.hpp"
-#include "util/rich/parser.hpp"
-#include "util/string.hpp"
-#include "ui/layout/hbox.hpp"
 #include "ui/widgets/statictext.hpp"
+#include "util/rich/parser.hpp"
+#include "util/skincolor.hpp"
+#include "util/string.hpp"
+
+using util::SkinColor;
 
 namespace {
-    const uint8_t LABEL_COLOR = ui::Color_Black;
-    const uint8_t GREEN_COLOR = ui::Color_GreenBlack;
-    const uint8_t YELLOW_COLOR = ui::Color_DarkYellow;
-
     int getButtonSize(ui::Root& root)
     {
         return root.provider().getFont("")->getLineHeight();
@@ -170,10 +169,10 @@ class client::widgets::SimulationObjectInfo::Header : public CollapsibleDataView
             if (!m_isPlanet) {
                 if ((info.flags & game::sim::Object::fl_RatingOverride) != 0) {
                     m_firstTable.cell(1, 5).setText(afl::string::Format("%d / %d", info.flakRatingOverride, info.flakCompensationOverride))
-                        .setColor(YELLOW_COLOR);
+                        .setColor(SkinColor::Yellow);
                 } else {
                     m_firstTable.cell(1, 5).setText(afl::string::Format("%d / %d", info.defaultFlakRating, info.defaultFlakCompensation))
-                        .setColor(GREEN_COLOR);
+                        .setColor(SkinColor::Green);
                 }
             }
 
@@ -186,9 +185,9 @@ class client::widgets::SimulationObjectInfo::Header : public CollapsibleDataView
                 }
                 for (size_t i = 0; i < 3; ++i) {
                     if ((which & (game::sim::Object::fl_RandomFC1 << i)) != 0) {
-                        fcColors += char(YELLOW_COLOR);
+                        fcColors += char(SkinColor::Yellow);
                     } else {
-                        fcColors += char(GREEN_COLOR);
+                        fcColors += char(SkinColor::Green);
                     }
                 }
             }
@@ -197,7 +196,7 @@ class client::widgets::SimulationObjectInfo::Header : public CollapsibleDataView
             if (m_isPlanet) {
                 m_secondTable.cell(1, 0).setText(afl::string::Format("%d", info.defense));
                 m_secondTable.cell(1, 1).setText(game::sim::toString(info.abilities, m_translator));
-                m_secondTable.cell(1, 1).setColor(info.hasAnyNonstandardAbility ? YELLOW_COLOR : GREEN_COLOR);
+                m_secondTable.cell(1, 1).setColor(info.hasAnyNonstandardAbility ? SkinColor::Yellow : SkinColor::Green);
                 m_secondTable.cell(1, 2).setText(info.experienceLevel.second);
                 m_imageButton.setImage(ui::res::PLANET);
             } else {
@@ -250,8 +249,8 @@ client::widgets::SimulationObjectInfo::Header::init(ui::Widget& keyHandler)
     setViewState(Complete);
 
     // Configure first table
-    m_firstTable.column(0).setColor(LABEL_COLOR);
-    m_firstTable.column(1).setColor(GREEN_COLOR);
+    m_firstTable.column(0).setColor(SkinColor::Static);
+    m_firstTable.column(1).setColor(SkinColor::Green);
     m_firstTable.cell(0, 0).setText(tx("Type:"));
     m_firstTable.cell(0, 1).setText(tx("Owner:"));
     m_firstTable.cell(0, 2).setText(tx("Name:"));
@@ -264,8 +263,8 @@ client::widgets::SimulationObjectInfo::Header::init(ui::Widget& keyHandler)
     m_firstTable.setColumnPadding(0, 5);
 
     // Configure second table
-    m_secondTable.column(0).setColor(LABEL_COLOR);
-    m_secondTable.column(1).setColor(GREEN_COLOR);
+    m_secondTable.column(0).setColor(SkinColor::Static);
+    m_secondTable.column(1).setColor(SkinColor::Green);
     if (m_isPlanet) {
         m_secondTable.cell(0, 0).setText(tx("Defense:"));
         m_secondTable.cell(0, 1).setText(tx("Abilities:"));
@@ -394,8 +393,8 @@ client::widgets::SimulationObjectInfo::ShipWeapons::init(ui::Widget& keyHandler)
     setViewState(Complete);
 
     // Configure table
-    m_table.column(0).setColor(LABEL_COLOR);
-    m_table.column(1).setColor(GREEN_COLOR);
+    m_table.column(0).setColor(SkinColor::Static);
+    m_table.column(1).setColor(SkinColor::Green);
     m_table.cell(0, 0).setText(tx("Primary:"));
     m_table.cell(0, 1).setText(tx("Secondary:"));
     m_table.setColumnWidth(1, 20*em);
@@ -458,7 +457,7 @@ class client::widgets::SimulationObjectInfo::ShipDetails : public CollapsibleDat
             m_table.cell(1, 1).setText(aggText);
 
             m_table.cell(1, 2).setText(game::sim::toString(info.abilities, m_translator));
-            m_table.cell(1, 2).setColor(info.hasAnyNonstandardAbility ? YELLOW_COLOR : GREEN_COLOR);
+            m_table.cell(1, 2).setColor(info.hasAnyNonstandardAbility ? SkinColor::Yellow : SkinColor::Green);
 
             m_table.cell(1, 3).setText(info.interceptId.second);
         }
@@ -484,8 +483,8 @@ client::widgets::SimulationObjectInfo::ShipDetails::init(ui::Widget& keyHandler)
     setViewState(Complete);
 
     // Configure table
-    m_table.column(0).setColor(LABEL_COLOR);
-    m_table.column(1).setColor(GREEN_COLOR);
+    m_table.column(0).setColor(SkinColor::Static);
+    m_table.column(1).setColor(SkinColor::Green);
     m_table.cell(0, 0).setText(tx("Engine:"));
     m_table.cell(0, 1).setText(tx("Aggressive:"));
     m_table.cell(0, 2).setText(tx("Abilities:"));
@@ -583,8 +582,8 @@ client::widgets::SimulationObjectInfo::BaseInfo::init(ui::Widget& keyHandler)
     setViewState(Complete);
 
     // Configure table
-    m_table.column(0).setColor(LABEL_COLOR);
-    m_table.column(1).setColor(GREEN_COLOR);
+    m_table.column(0).setColor(SkinColor::Static);
+    m_table.column(1).setColor(SkinColor::Green);
     m_table.cell(0, 0).setText(tx("Beam Tech:"));
     m_table.cell(0, 1).setText(tx("Fighters:"));
     m_table.cell(0, 2).setText(tx("Starbase Defense:"));

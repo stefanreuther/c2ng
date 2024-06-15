@@ -86,7 +86,7 @@ client::tiles::HistoryMovementTile::init()
     for (size_t i = 0; i < NumLines; ++i) {
         m_table.cell(LabelColumn, i).setText(m_translator(LABELS[i]));
     }
-    m_table.column(LabelColumn).setColor(ui::DARK_COLOR_SET[SkinColor::Static]);
+    m_table.column(LabelColumn).setColor(SkinColor::Static);
     m_table.setColumnPadding(LabelColumn, 5);
     addChild(m_table, 0);
 }
@@ -96,10 +96,6 @@ client::tiles::HistoryMovementTile::onTurnChange(HistoryAdaptor& adaptor)
 {
     // ex WHistoryShipMovementTile::drawData (sort-of), CHistoryMovementTile.DrawData
     if (const game::map::ShipLocationInfo* p = adaptor.getCurrentTurnInformation()) {
-        // Colors
-        const uint8_t green = ui::DARK_COLOR_SET[SkinColor::Green];
-        const uint8_t yellow = ui::DARK_COLOR_SET[SkinColor::Yellow];
-
         // Distance
         bool notMoved = false;
         double distance;
@@ -108,16 +104,16 @@ client::tiles::HistoryMovementTile::onTurnChange(HistoryAdaptor& adaptor)
                 notMoved = true;
                 m_table.cell(ValueColumn, DistanceRow)
                     .setText(m_translator("not moved"))
-                    .setColor(green);
+                    .setColor(SkinColor::Green);
             } else {
                 m_table.cell(ValueColumn, DistanceRow)
                     .setText(afl::string::Format(m_translator("%.2f ly"), distance))
-                    .setColor(green);
+                    .setColor(SkinColor::Green);
             }
         } else {
             m_table.cell(ValueColumn, DistanceRow)
                 .setText(m_translator("unknown"))
-                .setColor(yellow);
+                .setColor(SkinColor::Yellow);
         }
 
         // Heading
@@ -127,15 +123,15 @@ client::tiles::HistoryMovementTile::onTurnChange(HistoryAdaptor& adaptor)
                 .setText(afl::string::Format(m_translator("%d\xC2\xB0 (%s)"),
                                              heading,
                                              game::tables::HeadingName().get(heading)))
-                .setColor(green);
+                .setColor(SkinColor::Green);
         } else if (notMoved) {
             m_table.cell(ValueColumn, HeadingRow)
                 .setText(m_translator("not moved"))
-                .setColor(green);
+                .setColor(SkinColor::Green);
         } else {
             m_table.cell(ValueColumn, HeadingRow)
                 .setText(m_translator("unknown"))
-                .setColor(yellow);
+                .setColor(SkinColor::Yellow);
         }
 
         // Speed
@@ -144,16 +140,16 @@ client::tiles::HistoryMovementTile::onTurnChange(HistoryAdaptor& adaptor)
             if (warpFactor == 0 && notMoved) {
                 m_table.cell(ValueColumn, SpeedRow)
                     .setText(m_translator("not moved"))
-                    .setColor(green);
+                    .setColor(SkinColor::Green);
             } else {
                 m_table.cell(ValueColumn, SpeedRow)
                     .setText(afl::string::Format(m_translator("Warp %d"), warpFactor))
-                    .setColor(green);
+                    .setColor(SkinColor::Green);
             }
         } else {
             m_table.cell(ValueColumn, SpeedRow)
                 .setText(m_translator("unknown"))
-                .setColor(yellow);
+                .setColor(SkinColor::Yellow);
         }
     } else {
         m_table.column(ValueColumn).setText(String_t());

@@ -41,6 +41,7 @@
 #include "ui/widgets/statictext.hpp"
 #include "util/keystring.hpp"
 #include "util/numberformatter.hpp"
+#include "util/skincolor.hpp"
 #include "util/translation.hpp"
 
 using client::widgets::PlanetMineralInfo;
@@ -55,6 +56,7 @@ using ui::widgets::Button;
 using ui::widgets::FocusIterator;
 using util::KeyString;
 using util::NumberFormatter;
+using util::SkinColor;
 
 namespace {
     /*
@@ -271,17 +273,17 @@ namespace {
                 g2.add(m_del.addNew(new ui::Spacer()));
                 add(g2);
 
-                m_table.column(0).setColor(ui::Color_Gray);
+                m_table.column(0).setColor(SkinColor::Static);
                 m_table.column(0).subrange(0, 3).setExtraColumns(1);
                 m_table.cell(0, 0).setText(tx("Amount:"));
                 m_table.cell(0, 1).setText(tx("Auto-B. Goal:"));
                 m_table.cell(0, 2).setText(tx("Maximum:"));
 
                 // FIXME: fine-tune table layout so that all StructureWidget's use same column widths
-                m_table.column(2).subrange(0, 3).setColor(ui::Color_Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
+                m_table.column(2).subrange(0, 3).setColor(SkinColor::Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
 
                 m_table.cell(0, 3).setText(tx("Cost:"));
-                m_table.cell(1, 3).setExtraColumns(1).setColor(ui::Color_Green).setText(tx(desc.untranslatedBuildingCost)).setTextAlign(gfx::RightAlign, gfx::TopAlign);
+                m_table.cell(1, 3).setExtraColumns(1).setColor(SkinColor::Green).setText(tx(desc.untranslatedBuildingCost)).setTextAlign(gfx::RightAlign, gfx::TopAlign);
 
                 // Connect keys
                 ui::widgets::KeyDispatcher& disp = m_del.addNew(new ui::widgets::KeyDispatcher());
@@ -409,9 +411,9 @@ namespace {
                 setRowPadding(5, blockSpacing);
 
                 // Colors
-                column(0).setColor(ui::Color_Gray);
-                column(1).setColor(ui::Color_Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
-                column(2).setColor(ui::Color_Green);
+                column(0).setColor(SkinColor::Static);
+                column(1).setColor(SkinColor::Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
+                column(2).setColor(SkinColor::Green);
 
                 // Fixed text
                 cell(0, 0).setText(tx(LABELS[0]));
@@ -664,10 +666,10 @@ namespace {
                                 String_t prefix = infos[i].isDetail ? "  " : "";
                                 m_widget.cell(0, line)
                                     .setText(prefix + infos[i].name)
-                                    .setColor(ui::Color_Green);
+                                    .setColor(SkinColor::Green);
                                 m_widget.cell(1, line)
                                     .setText(infos[i].nextAt == 0 ? m_maxStr : String_t(afl::string::Format("+%d", infos[i].nextAt)))
-                                    .setColor(infos[i].isAchievable ? ui::Color_Green : ui::Color_Yellow);
+                                    .setColor(infos[i].isAchievable ? SkinColor::Green : SkinColor::Yellow);
                                 ++line;
                             }
                             while (line < NUM_LINES) {
@@ -684,11 +686,10 @@ namespace {
                 m_infoProxy.sig_change.addNewClosure(new Callback(result, m_infoProxy, m_translator("(max)")));
 
                 // Preconfigure layout
-                // FIXME: need to use skin colors!
                 afl::base::Ref<gfx::Font> font = m_root.provider().getFont(gfx::FontRequest());
                 result.all().setText(" ");
                 result.setColumnWidth(0, font->getEmWidth() * 22);   // FIXME: should be minimum width
-                result.row(0).setColor(ui::Color_Gray).setUnderline(true);
+                result.row(0).setColor(SkinColor::Static).setUnderline(true);
                 result.cell(0, 0).setText(m_translator("You have:"));
                 result.cell(1, 0).setText(m_translator("Next at:"));
                 return result;

@@ -27,9 +27,11 @@
 #include "ui/widgets/simpletable.hpp"
 #include "ui/window.hpp"
 #include "util/math.hpp"
+#include "util/skincolor.hpp"
 #include "util/string.hpp"
 
 using game::proxy::IonStormProxy;
+using util::SkinColor;
 
 namespace {
     const int NUM_LINES = 5;
@@ -300,7 +302,7 @@ IonStormInfoDialog::initLabels()
     const int RIGHT = 16*em;
 
     // ex WIonStormInfoTile::drawData (part), CIonWindow.DrawInterior
-    m_infoTable.all().setColor(ui::Color_Black);
+    m_infoTable.all().setColor(SkinColor::Static);
     m_infoTable.cell(0, 0).setText(tx("Centered at:"));
     m_infoTable.cell(0, 1).setText(tx("Radius:"));
     m_infoTable.cell(0, 3).setText(tx("Movement:"));

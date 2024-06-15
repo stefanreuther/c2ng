@@ -4,14 +4,16 @@
 
 #include <cmath>
 #include "client/widgets/scanresult.hpp"
-#include "util/request.hpp"
 #include "afl/string/format.hpp"
+#include "game/game.hpp"
 #include "game/root.hpp"
 #include "game/turn.hpp"
-#include "game/game.hpp"
+#include "util/request.hpp"
+#include "util/skincolor.hpp"
 
 using game::map::Point;
 using game::map::Universe;
+using util::SkinColor;
 
 namespace {
     const int GAP = 5;
@@ -30,8 +32,8 @@ client::widgets::ScanResult::ScanResult(ui::Root& root, util::RequestSender<game
       m_target()
 {
     addChild(m_table, 0);
-    m_table.column(0).setColor(ui::Color_Gray);
-    m_table.column(1).setColor(ui::Color_Green);
+    m_table.column(0).setColor(SkinColor::Static);
+    m_table.column(1).setColor(SkinColor::Green);
     m_table.cell(0, 0).setText(tx("Scan:"));
     m_table.cell(0, 1).setText(tx("Distance:"));
     m_table.setColumnPadding(0, GAP);

@@ -3,12 +3,14 @@
   */
 
 #include "client/widgets/costdisplay.hpp"
-#include "util/translation.hpp"
 #include "afl/base/countof.hpp"
 #include "afl/string/format.hpp"
+#include "util/skincolor.hpp"
+#include "util/translation.hpp"
 
-using game::spec::Cost;
 using afl::string::Format;
+using game::spec::Cost;
+using util::SkinColor;
 
 namespace {
     const Cost::Type TYPES[] = {
@@ -100,7 +102,7 @@ client::widgets::CostDisplay::init(ui::Root& root)
         + m_types.contains(Cost::Money);
     setNumRows(numRows);
 
-    row(0).setColor(ui::Color_Black);
+    row(0).setColor(SkinColor::Static);
     cell(0, 0).setText(m_translator("You need:")).setExtraColumns(1).setUnderline(true);
     cell(2, 0).setText(m_translator("You have:")).setExtraColumns(1).setUnderline(true);
     setRowPadding(0, 5);
@@ -116,7 +118,7 @@ client::widgets::CostDisplay::init(ui::Root& root)
     size_t r = 1;
     for (size_t i = 0; i < countof(TYPES); ++i) {
         if (m_types.contains(TYPES[i])) {
-            row(r).setColor(ui::Color_Black);
+            row(r).setColor(SkinColor::Static);
             cell(0, r).setText(String_t(m_translator(NAMES[i])) + ":");
             cell(1, r).setTextAlign(gfx::RightAlign, gfx::TopAlign);
             cell(2, r).setTextAlign(gfx::RightAlign, gfx::TopAlign);
@@ -146,11 +148,11 @@ client::widgets::CostDisplay::render()
             if (ty == Cost::Money && !needSupplies) {
                 // It's the Money line.
                 if (int32_t missing = m_missingAmount.get(Cost::Money) + m_missingAmount.get(Cost::Supplies)) {
-                    cell(3, r  ).setText(Format(m_translator(TEXTS[NeedFunds1]), m_formatter.formatNumber(missing))).setColor(ui::Color_Red);
-                    cell(3, r+1).setText(Format(m_translator(TEXTS[NeedFunds2]), m_formatter.formatNumber(missing))).setColor(ui::Color_Red);;
+                    cell(3, r  ).setText(Format(m_translator(TEXTS[NeedFunds1]), m_formatter.formatNumber(missing))).setColor(SkinColor::Red);
+                    cell(3, r+1).setText(Format(m_translator(TEXTS[NeedFunds2]), m_formatter.formatNumber(missing))).setColor(SkinColor::Red);;
                 } else {
-                    cell(3, r  ).setText(Format(m_translator(TEXTS[RemainingCash]),  m_formatter.formatNumber(m_remainingAmount.get(Cost::Money)))).setColor(ui::Color_GreenBlack);
-                    cell(3, r+1).setText(Format(m_translator(TEXTS[RemainingTons]), m_formatter.formatNumber(m_remainingAmount.get(Cost::Supplies)))).setColor(ui::Color_GreenBlack);
+                    cell(3, r  ).setText(Format(m_translator(TEXTS[RemainingCash]),  m_formatter.formatNumber(m_remainingAmount.get(Cost::Money)))).setColor(SkinColor::Green);
+                    cell(3, r+1).setText(Format(m_translator(TEXTS[RemainingTons]), m_formatter.formatNumber(m_remainingAmount.get(Cost::Supplies)))).setColor(SkinColor::Green);
                 }
             } else if (ty == Cost::Supplies && !needSupplies) {
                 // It's the Supplies line, but has already been accounted for by the Money line.
@@ -158,10 +160,10 @@ client::widgets::CostDisplay::render()
                 // Minerals (or: cost includes supplies)
                 if (int32_t missing = m_missingAmount.get(ty)) {
                     size_t index = (ty == Cost::Money ? MissingCash : MissingTons);
-                    cell(3, r).setText(Format(m_translator(TEXTS[index]), m_formatter.formatNumber(missing))).setColor(ui::Color_Red);
+                    cell(3, r).setText(Format(m_translator(TEXTS[index]), m_formatter.formatNumber(missing))).setColor(SkinColor::Red);
                 } else {
                     size_t index = (ty == Cost::Money ? RemainingCash : RemainingTons);
-                    cell(3, r).setText(Format(m_translator(TEXTS[index]), m_formatter.formatNumber(m_remainingAmount.get(ty)))).setColor(ui::Color_GreenBlack);
+                    cell(3, r).setText(Format(m_translator(TEXTS[index]), m_formatter.formatNumber(m_remainingAmount.get(ty)))).setColor(SkinColor::Green);
                 }
             }
             ++r;

@@ -448,13 +448,13 @@ namespace {
                      t.cell(0, 1).setText("Auto-B. Goal:");
                      t.cell(0, 2).setText("Maximum:");
 
-                     t.column(2).subrange(0, 3).setColor(ui::Color_Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
+                     t.column(2).subrange(0, 3).setColor(util::SkinColor::Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
                      t.cell(2, 0).setText("12");
                      t.cell(2, 1).setText("[max]");
                      t.cell(2, 2).setText("213");
 
                      t.cell(0, 3).setText("Cost:");
-                     t.cell(1, 3).setExtraColumns(1).setColor(ui::Color_Green).setText("4 mc + 1 supply").setTextAlign(gfx::RightAlign, gfx::TopAlign);
+                     t.cell(1, 3).setExtraColumns(1).setColor(util::SkinColor::Green).setText("4 mc + 1 supply").setTextAlign(gfx::RightAlign, gfx::TopAlign);
 
                      testWidget(t);
                      return true;

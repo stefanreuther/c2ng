@@ -32,6 +32,7 @@
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/widgets/statictext.hpp"
 #include "ui/window.hpp"
+#include "util/skincolor.hpp"
 #include "util/unicodechars.hpp"
 
 using game::proxy::TaxationProxy;
@@ -40,6 +41,7 @@ using game::proxy::ConfigurationProxy;
 using game::actions::TaxationAction;
 using game::map::PlanetEffectors;
 using ui::widgets::FocusIterator;
+using util::SkinColor;
 
 namespace {
     const int NUM_TURNS = 5;
@@ -439,7 +441,7 @@ TaxationKeyWidget::handleKey(util::Key_t key, int prefix)
 TaxationWidget::TaxationWidget(afl::base::Deleter& del, afl::string::Translator& tx, ui::Root& root, TaxationProxy& proxy, TaxationAction::Area area)
     : FocusableGroup(ui::layout::HBox::instance5, 5),
       m_translator(tx),
-      m_pTitle(&del.addNew(new ui::widgets::StaticText(String_t("?"), util::SkinColor::Static, gfx::FontRequest().addSize(1), root.provider()))),
+      m_pTitle(&del.addNew(new ui::widgets::StaticText(String_t("?"), SkinColor::Static, gfx::FontRequest().addSize(1), root.provider()))),
       m_pInfo(&del.addNew(new ui::rich::DocumentView(root.provider().getFont(gfx::FontRequest())->getCellSize().scaledBy(32, 5), 0, root.provider())))
 {
     // HBox
@@ -492,7 +494,7 @@ TaxationWidget::setContent(const TaxationProxy::AreaStatus& st)
     if (st.change != 0) {
         changeLabel += afl::string::Format(" (%d)", st.change);
     }
-    doc.add(util::rich::Text(st.change < 0 ? util::SkinColor::Red : util::SkinColor::Green, changeLabel));
+    doc.add(util::rich::Text(st.change < 0 ? SkinColor::Red : SkinColor::Green, changeLabel));
     doc.addParagraph();
     doc.add(st.description);
     doc.finish();
@@ -577,7 +579,7 @@ TaxationDialog::run(const TaxationProxy::Status& initialStatus, const PlanetPred
             table.column(i).setTextAlign(gfx::RightAlign, gfx::TopAlign);
             table.setColumnWidth(i, m_root.provider().getFont(gfx::FontRequest())->getTextWidth(" +99,999,999"));
         }
-        table.all().setColor(ui::Color_Black);
+        table.all().setColor(SkinColor::Static);
         m_pPredictionTable = &table;
         win.add(table);
         updatePrediction(initialPrediction);
@@ -586,7 +588,7 @@ TaxationDialog::run(const TaxationProxy::Status& initialStatus, const PlanetPred
     // Effectors/settings
     // ex WPlanetGrowthTile::WPlanetGrowthTile
     ui::Group& effGroup = del.addNew(new ui::Group(ui::layout::HBox::instance5));
-    ui::widgets::StaticText& effLabel = del.addNew(new ui::widgets::StaticText(String_t("?"), util::SkinColor::Static, gfx::FontRequest(), m_root.provider()));
+    ui::widgets::StaticText& effLabel = del.addNew(new ui::widgets::StaticText(String_t("?"), SkinColor::Static, gfx::FontRequest(), m_root.provider()));
     ui::widgets::Button& btnR = del.addNew(new ui::widgets::Button("R", 'r', m_root));
     ui::widgets::Button& btnW = del.addNew(new ui::widgets::Button("W", 'w', m_root));
     effLabel.setIsFlexible(true);

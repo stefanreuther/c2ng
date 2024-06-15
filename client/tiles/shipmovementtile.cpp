@@ -233,7 +233,7 @@ client::tiles::ShipMovementTile::attach(game::proxy::ObjectObserver& oop)
                         job->data.colors[Data::Eta] = SkinColor::Red;
                     } else if (crystal_ball.isAtTurnLimit()) {
                         job->data.text[Data::Eta] = tx("too long");
-                        job->data.colors[Data::Eta] = SkinColor::Green;
+                        job->data.colors[Data::Eta] = SkinColor::Yellow;
                     } else {
                         job->data.text[Data::Eta] = afl::string::Format(tx("%d turn%!1{s%}"), crystal_ball.getNumTurns());
                         job->data.colors[Data::Eta] = SkinColor::Green;
@@ -319,7 +319,7 @@ client::tiles::ShipMovementTile::setData(const Data& data)
     for (size_t i = 0; i < NumLines; ++i) {
         m_table.cell(ValueColumn, i).
             setText(data.text[i]).
-            setColor(ui::DARK_COLOR_SET[data.colors[i]]);
+            setColor(data.colors[i]);
     }
 
     m_fleetFrame.setType(data.fleetStatus);
@@ -364,7 +364,7 @@ client::tiles::ShipMovementTile::init(gfx::KeyEventConsumer& kmw)
     for (size_t i = 0; i < NumLines; ++i) {
         m_table.cell(LabelColumn, i).setText(m_translator(LABELS[i]));
     }
-    m_table.column(LabelColumn).setColor(ui::DARK_COLOR_SET[SkinColor::Static]);
+    m_table.column(LabelColumn).setColor(SkinColor::Static);
     m_table.setColumnPadding(LabelColumn, 5);
 
     // Add everything

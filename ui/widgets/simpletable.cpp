@@ -56,7 +56,7 @@ ui::widgets::SimpleTable::Range::setTextAlign(gfx::HorizontalAlignment x, gfx::V
 }
 
 ui::widgets::SimpleTable::Range&
-ui::widgets::SimpleTable::Range::setColor(uint8_t color)
+ui::widgets::SimpleTable::Range::setColor(util::SkinColor::Color color)
 {
     util::Updater up;
     for (size_t i = 0, pos = m_start; i < m_count; ++i, pos += m_stride) {
@@ -260,7 +260,7 @@ ui::widgets::SimpleTable::setNumRows(size_t numRows)
 void
 ui::widgets::SimpleTable::draw(gfx::Canvas& can)
 {
-    gfx::Context<uint8_t> ctx(can, m_root.colorScheme());
+    gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
     gfx::Rectangle area(getExtent());
     gfx::Rectangle rowArea;
 
@@ -307,7 +307,7 @@ ui::widgets::SimpleTable::draw(gfx::Canvas& can)
         while (colorIndex < c.colorString.size() && rdr.hasMore()) {
             String_t thisChar;
             afl::charset::Utf8(0).append(thisChar, rdr.eat());
-            ctx.setColor(uint8_t(c.colorString[colorIndex]));
+            ctx.setColor(util::SkinColor::Color(c.colorString[colorIndex]));
             outTextF(ctx, textArea.splitX(ctx.getFont()->getTextWidth(thisChar)), thisChar);
             ++colorIndex;
         }

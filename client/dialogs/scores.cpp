@@ -34,6 +34,7 @@
 #include "ui/widgets/stringlistbox.hpp"
 #include "ui/window.hpp"
 #include "util/numberformatter.hpp"
+#include "util/skincolor.hpp"
 #include "util/string.hpp"
 #include "util/unicodechars.hpp"
 
@@ -44,6 +45,7 @@ using ui::widgets::IconBox;
 using ui::widgets::SimpleTable;
 using ui::widgets::StaticText;
 using util::DataTable;
+using util::SkinColor;
 
 namespace {
     /*
@@ -68,11 +70,6 @@ namespace {
     // Icon Ids (arbitrary)
     const int CHART_MODE_ICON_ID = 40;
 
-    const uint8_t COLOR_NORMAL   = ui::Color_Black;
-    const uint8_t COLOR_GOOD     = ui::Color_GreenBlack;
-    const uint8_t COLOR_BAD      = ui::Color_Red;
-    const uint8_t COLOR_FADED    = ui::Color_Dark;
-    const uint8_t COLOR_SELECTED = ui::Color_Blue;
     const uint8_t COLOR_GRID     = ui::Color_Dark;
     const uint8_t COLOR_WINLIMIT = ui::Color_Black;
 
@@ -633,7 +630,7 @@ ScoreDialog::init()
         m_pTable->setRowPadding(i, em/4);
         m_pTable->row(i).subrange(1, COLUMNS_PER_TABLE).setTextAlign(gfx::RightAlign, gfx::MiddleAlign);
     }
-    m_pTable->all().setColor(COLOR_NORMAL);
+    m_pTable->all().setColor(SkinColor::Static);
     m_pTable->sig_cellClick.add(this, &ScoreDialog::onTableCellClick);
 
     // Chart
@@ -1439,12 +1436,12 @@ ScoreDialog::renderTableRow(SimpleTable::Range row, size_t startingIndex, TableM
             int32_t compareValue;
             if (data.get(index).get(value)) {
                 String_t text;
-                uint8_t color = m_highlightedPlayer == data.getId() ? COLOR_SELECTED : COLOR_NORMAL;
+                SkinColor::Color color = m_highlightedPlayer == data.getId() ? SkinColor::Blue : SkinColor::Static;
                 switch (mode) {
                  case Normal:
                     text = m_formatter.formatNumber(value);
                     if (value == 0) {
-                        color = COLOR_FADED;
+                        color = SkinColor::Faded;
                     } else {
                         hasAnyValue = true;
                     }
@@ -1454,10 +1451,10 @@ ScoreDialog::renderTableRow(SimpleTable::Range row, size_t startingIndex, TableM
                  case DifferenceToPrevious:
                     text = m_formatter.formatDifference(value);
                     if (value > 0) {
-                        color = COLOR_GOOD;
+                        color = SkinColor::Green;
                     }
                     if (value < 0) {
-                        color = COLOR_BAD;
+                        color = SkinColor::Red;
                     }
                     hasAnyValue = true;
                     break;
@@ -1475,7 +1472,7 @@ ScoreDialog::renderTableRow(SimpleTable::Range row, size_t startingIndex, TableM
                         text = m_formatter.formatNumber(value);
                     }
                     if (value == 0) {
-                        color = COLOR_FADED;
+                        color = SkinColor::Faded;
                     } else {
                         hasAnyValue = true;
                     }
@@ -1485,17 +1482,17 @@ ScoreDialog::renderTableRow(SimpleTable::Range row, size_t startingIndex, TableM
                     .setColor(color);
             } else {
                 row.cell(c+1).setText("-")
-                    .setColor(COLOR_FADED);
+                    .setColor(SkinColor::Faded);
             }
         } else {
             row.cell(c+1).setText(String_t());
         }
     }
     row.cell(0).setColor(m_highlightedPlayer == data.getId()
-                 ? COLOR_SELECTED
-                 : hasAnyValue
-                 ? COLOR_NORMAL
-                 : COLOR_FADED);
+                         ? SkinColor::Blue
+                         : hasAnyValue
+                         ? SkinColor::Static
+                         : SkinColor::Faded);
 }
 
 

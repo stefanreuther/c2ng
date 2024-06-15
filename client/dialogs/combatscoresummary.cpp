@@ -14,8 +14,10 @@
 #include "ui/layout/vbox.hpp"
 #include "ui/widgets/simpletable.hpp"
 #include "ui/widgets/statictext.hpp"
+#include "util/skincolor.hpp"
 
 using game::vcr::Score;
+using util::SkinColor;
 
 namespace {
     enum Column {
@@ -51,7 +53,7 @@ namespace {
     {
         if (exists) {
             tab.setColumnPadding(col-1, 5);
-            tab.cell(col, row).setText(label).setTextAlign(gfx::CenterAlign, gfx::TopAlign).setUnderline(true).setColor(ui::Color_Black).setFont("b");
+            tab.cell(col, row).setText(label).setTextAlign(gfx::CenterAlign, gfx::TopAlign).setUnderline(true).setColor(SkinColor::Static).setFont("b");
             if (hasRange) {
                 // Two columns
                 tab.cell(col, row).setExtraColumns(1);
@@ -70,17 +72,17 @@ namespace {
             int32_t max = range.max() / scale;
             if (hasRange) {
                 if (max == 0) {
-                    tab.cell(col, row).setText("- ").setTextAlign(gfx::RightAlign, gfx::TopAlign).setColor(ui::Color_Dark);
+                    tab.cell(col, row).setText("- ").setTextAlign(gfx::RightAlign, gfx::TopAlign).setColor(SkinColor::Faded);
                 } else {
-                    tab.cell(col, row).setText(fmt.formatNumber(min) + " ... ").setTextAlign(gfx::RightAlign, gfx::TopAlign).setColor(ui::Color_Black);
-                    tab.cell(col+1, row).setText(fmt.formatNumber(max)).setColor(ui::Color_Black);
+                    tab.cell(col, row).setText(fmt.formatNumber(min) + " ... ").setTextAlign(gfx::RightAlign, gfx::TopAlign).setColor(SkinColor::Static);
+                    tab.cell(col+1, row).setText(fmt.formatNumber(max)).setColor(SkinColor::Static);
                 }
                 col += 2;
             } else {
                 if (max == 0) {
-                    tab.cell(col, row).setText("-").setTextAlign(gfx::RightAlign, gfx::TopAlign).setColor(ui::Color_Dark);
+                    tab.cell(col, row).setText("-").setTextAlign(gfx::RightAlign, gfx::TopAlign).setColor(SkinColor::Faded);
                 } else {
-                    tab.cell(col, row).setText(fmt.formatNumber(max)).setTextAlign(gfx::RightAlign, gfx::TopAlign).setColor(ui::Color_Black);
+                    tab.cell(col, row).setText(fmt.formatNumber(max)).setTextAlign(gfx::RightAlign, gfx::TopAlign).setColor(SkinColor::Static);
                 }
                 ++col;
             }
@@ -89,7 +91,7 @@ namespace {
 
     void renderScores(ui::widgets::SimpleTable& tab, size_t row, String_t playerName, const Score& score, Columns_t columns, const util::NumberFormatter& fmt)
     {
-        tab.cell(0, row).setText(playerName).setColor(ui::Color_Black);
+        tab.cell(0, row).setText(playerName).setColor(SkinColor::Static);
 
         size_t c = 1;
         renderRange(tab, c, row, score.getExperience(),          1, columns.contains(ExperienceExists), columns.contains(ExperienceRange), fmt);

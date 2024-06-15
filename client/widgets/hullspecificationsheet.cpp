@@ -11,8 +11,10 @@
 #include "ui/res/resid.hpp"
 #include "ui/spacer.hpp"
 #include "ui/widgets/framegroup.hpp"
+#include "util/skincolor.hpp"
 
 using afl::string::Format;
+using util::SkinColor;
 
 namespace {
     const int PAD = 5;
@@ -22,9 +24,9 @@ namespace {
     void initBaseTable(ui::widgets::SimpleTable& tab, int em, afl::string::Translator& tx)
     {
         // ex WSpecBaseInfo::drawContent (part)
-        tab.column(0).setColor(ui::Color_Gray);
-        tab.column(1).setColor(ui::Color_Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
-        tab.column(2).setColor(ui::Color_Green);
+        tab.column(0).setColor(SkinColor::Static);
+        tab.column(1).setColor(SkinColor::Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
+        tab.column(2).setColor(SkinColor::Green);
         tab.setColumnPadding(1, PAD);
         tab.setColumnPadding(2, PAD);
         tab.setColumnWidth(1, 5*em);
@@ -54,13 +56,13 @@ namespace {
     void initBuildTable(ui::widgets::SimpleTable& tab, int em, afl::string::Translator& tx)
     {
         // WSpecBuildInfo::drawContent (part)
-        tab.column(0).setColor(ui::Color_Gray);
-        tab.column(1).setColor(ui::Color_Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
-        tab.column(2).setColor(ui::Color_Green);
-        tab.column(3).setColor(ui::Color_Gray);
-        tab.column(4).setColor(ui::Color_Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
+        tab.column(0).setColor(SkinColor::Static);
+        tab.column(1).setColor(SkinColor::Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
+        tab.column(2).setColor(SkinColor::Green);
+        tab.column(3).setColor(SkinColor::Static);
+        tab.column(4).setColor(SkinColor::Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
 
-        tab.row(0).setColor(ui::Color_White);
+        tab.row(0).setColor(SkinColor::Heading);
 
         tab.setColumnPadding(0, PAD);
         tab.setColumnPadding(1, PAD);
@@ -112,7 +114,7 @@ namespace {
     {
         doc.add(label);
         doc.add(": ");
-        doc.add(util::rich::Text(util::SkinColor::Green, value));
+        doc.add(util::rich::Text(SkinColor::Green, value));
         doc.addNewline();
     }
 
@@ -223,7 +225,7 @@ client::widgets::HullSpecificationSheet::init()
     const int em = cellSize.getX();
 
     // Title
-    m_pTitle = &m_deleter.addNew(new ui::widgets::StaticText(String_t(), util::SkinColor::Heading, gfx::FontRequest().addSize(1), m_root.provider()));
+    m_pTitle = &m_deleter.addNew(new ui::widgets::StaticText(String_t(), SkinColor::Heading, gfx::FontRequest().addSize(1), m_root.provider()));
     m_pTitle->setIsFlexible(true);
     add(*m_pTitle);
 
@@ -255,7 +257,7 @@ client::widgets::HullSpecificationSheet::initPlayerLists(game::PlayerSet_t allPl
     Group& outer = m_deleter.addNew(new Group(ui::layout::VBox::instance0));
 
     // Player lists
-    outer.add(m_deleter.addNew(new ui::widgets::StaticText(m_translator("Players"), util::SkinColor::Heading, gfx::FontRequest(), m_root.provider())));
+    outer.add(m_deleter.addNew(new ui::widgets::StaticText(m_translator("Players"), SkinColor::Heading, gfx::FontRequest(), m_root.provider())));
 
     // - Count the players
     int numPlayers = 0;

@@ -9,6 +9,9 @@
 #include "game/limits.hpp"
 #include "ui/dialogs/messagebox.hpp"
 #include "ui/widgets/simpletable.hpp"
+#include "util/skincolor.hpp"
+
+using util::SkinColor;
 
 namespace {
     /* Check whether to display a player row.
@@ -38,7 +41,7 @@ client::dialogs::doGroundDefenseDialog(ui::Root& root, const game::map::GroundDe
     // Build table
     afl::base::Deleter del;
     ui::widgets::SimpleTable& tab = del.addNew(new ui::widgets::SimpleTable(root, 2, numRows));
-    tab.all().setColor(ui::Color_Black);
+    tab.all().setColor(SkinColor::Static);
     tab.column(1).setTextAlign(gfx::RightAlign, gfx::TopAlign);
     tab.row(0).setUnderline(true);
     tab.cell(0, 0).setText(tx("Attacker"));
@@ -52,7 +55,7 @@ client::dialogs::doGroundDefenseDialog(ui::Root& root, const game::map::GroundDe
             tab.cell(0, row).setText(info.name.get(i));
             if (i == info.defender) {
                 tab.cell(1, row).setText(afl::string::Format(tx("(defense) %d"), fmt.formatNumber(info.strength.get(i))));
-                tab.row(row).setColor(ui::Color_GreenBlack);
+                tab.row(row).setColor(SkinColor::Green);
             } else {
                 tab.cell(1, row).setText(fmt.formatNumber(info.strength.get(i)));
             }
