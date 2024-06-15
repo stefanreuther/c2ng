@@ -54,6 +54,8 @@ using game::vcr::Statistic;
 using util::RandomNumberGenerator;
 using util::roundToInt;
 
+namespace gt = game::v3::structures;
+
 namespace {
 
     template<typename T>
@@ -104,6 +106,14 @@ namespace {
         }
     }
 
+    uint16_t getCapabilities(game::vcr::classic::Type type)
+    {
+        if (type == game::vcr::classic::PHost4) {
+            return gt::DeathRayCapability | gt::ExperienceCapability | gt::BeamCapability;
+        } else {
+            return 0;
+        }
+    }
 
     struct GlobalModificators {
         // Commander level base: a Commander ship of level X gives each ship with a lower level a +1 boost.
@@ -1362,23 +1372,27 @@ namespace {
             applyMasterBonus(left, right, result, opts, rng);
         }
 
-        /* run it */
+        // Create player
+        game::vcr::classic::NullVisualizer vis;
+        std::auto_ptr<game::vcr::classic::Algorithm> player(game::vcr::classic::Battle::createAlgorithmForType(type, vis, config, list));
+        checkAssertion(player.get(), "create VCR player");
+
+        // Check to limit ranges (e.g. max 10 beams in THost)
+        const uint16_t cap = getCapabilities(type);
+        player->setCapabilities(cap);
+        player->checkBattle(left, right, seed);
+
+        // Create battle that we will save with the updated sides
         game::vcr::classic::Battle* vcr = db.addNewBattle(new game::vcr::classic::Battle(left, right, seed, 0 /* sig */));
-        uint16_t cap = type == game::vcr::classic::PHost4
-            ? game::v3::structures::DeathRayCapability | game::v3::structures::ExperienceCapability | game::v3::structures::BeamCapability
-            : 0;
         vcr->setType(type, cap);
 
-        game::vcr::classic::NullVisualizer vis;
-        std::auto_ptr<game::vcr::classic::Algorithm> player(vcr->createAlgorithm(vis, config, list));
-        checkAssertion(player.get(), "create VCR player");
+        // Player settings must now pass
         checkAssertion(player->setCapabilities(cap), "VCR player refuses capabilities");
         checkAssertion(!player->checkBattle(left, right, seed), "VCR player refuses battle");
 
         player->playBattle(left, right, seed);
         player->doneBattle(left, right);
-
-        // FIXME -> e.setResultFromPlayer(*player);
+        vcr->setResult(left, right, player->getResult());
 
         /* copy back */
         unpackShip(left,  *one, mods);
@@ -1479,24 +1493,28 @@ namespace {
         applyPlanetModificators(right, rightPlanet, opts, list, config, mods);
         setRoles(left, right, type, aggressorSide);
 
-        /* run it */
+        // Create player
         game::vcr::Object origPlanet = right;
+        game::vcr::classic::NullVisualizer vis;
+        std::auto_ptr<game::vcr::classic::Algorithm> player(game::vcr::classic::Battle::createAlgorithmForType(type, vis, config, list));
+        checkAssertion(player.get(), "create VCR player");
+
+        // Check to limit range
+        const uint16_t cap = getCapabilities(type);
+        player->setCapabilities(cap);
+        player->checkBattle(left, right, seed);
+
+        // Create battle that we will save with the updated sides
         game::vcr::classic::Battle* vcr = db.addNewBattle(new game::vcr::classic::Battle(left, right, seed, 0 /* sig */));
-        uint16_t cap = type == game::vcr::classic::PHost4
-            ? game::v3::structures::DeathRayCapability | game::v3::structures::ExperienceCapability | game::v3::structures::BeamCapability
-            : 0;
         vcr->setType(type, cap);
 
-        game::vcr::classic::NullVisualizer vis;
-        std::auto_ptr<game::vcr::classic::Algorithm> player(vcr->createAlgorithm(vis, config, list));
-        checkAssertion(player.get(), "create VCR player");
+        // Player settings must now pass
         checkAssertion(player->setCapabilities(cap), "VCR player refuses capabilities");
         checkAssertion(!player->checkBattle(left, right, seed), "VCR player refuses battle");
 
         player->playBattle(left, right, seed);
         player->doneBattle(left, right);
-
-        // FIXME -> e.setResultFromPlayer(*player);
+        vcr->setResult(left, right, player->getResult());
 
         /* copy back */
         unpackShip(left, leftShip, mods);

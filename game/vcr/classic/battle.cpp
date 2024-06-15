@@ -391,10 +391,23 @@ game::vcr::classic::Battle::formatResult(int player, const String_t& annotation,
                               tx);
 }
 
+// Get result.
 game::vcr::classic::BattleResult_t
 game::vcr::classic::Battle::getResult() const
 {
     return m_result;
+}
+
+// Set result.
+void
+game::vcr::classic::Battle::setResult(const Object& left, const Object& right, BattleResult_t result)
+{
+    // ex VcrPlayer::setResultFromPlayer(VcrPlayer& player);
+    if (m_result.empty()) {
+        m_after[0] = left;
+        m_after[1] = right;
+        m_result = result;
+    }
 }
 
 // Create a player algorithm that can play this battle.

@@ -105,12 +105,15 @@ namespace game { namespace vcr { namespace classic {
         String_t formatResult(int player, const String_t& annotation, afl::string::Translator& tx) const;
 
         /** Get result.
-            FIXME: do we need this? Right now, it simplifies some things,
-            but it violates our abstractions. */
+            \return overall result */
         BattleResult_t getResult() const;
 
-        // FIXME: need this method?
-        // void setResultFromPlayer(VcrPlayer& player);
+        /** Set result.
+            The result must have been produced by running this battle to the end.
+            \param left Left object status
+            \param right Right object status
+            \param result Overall result */
+        void setResult(const Object& left, const Object& right, BattleResult_t result);
 
         /** Create a player algorithm that can play this battle.
             \param vis Visualizer to use
