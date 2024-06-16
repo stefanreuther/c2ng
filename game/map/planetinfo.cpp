@@ -30,6 +30,7 @@ namespace {
     using afl::io::xml::TextNode;
     using game::config::HostConfiguration;
     using game::Root;
+    using game::map::DefenseEffectInfo;
     using game::map::Planet;
     using game::spec::Cost;
     using game::spec::TorpedoLauncher;
@@ -507,10 +508,13 @@ namespace {
      *  DefenseEffectInfos_t
      */
 
-    void addLine(game::map::DefenseEffectInfos_t& result, const String_t& name, int next, int have, int max, bool isDetail)
+    void addLine(game::map::DefenseEffectInfos_t& result, const String_t& name, int next, int have, int max, DefenseEffectInfo::Flags_t flags)
     {
         // ex WPlanetDefenseEffectWidget::showLine (part)
-        result.push_back(game::map::DefenseEffectInfo(name, next, (next + have <= max), isDetail));
+        if (next + have <= max) {
+            flags += DefenseEffectInfo::IsAchievable;
+        }
+        result.push_back(DefenseEffectInfo(name, next, flags));
     }
 
     bool canDoFighterPrediction(const game::HostVersion& host, const HostConfiguration& config)
@@ -930,7 +934,8 @@ void game::map::describePlanetDefenseEffects(DefenseEffectInfos_t& result,
             next = n*(n+1)*3+1 - totalWant;
         }
 
-        addLine(result, afl::string::Format(tx("%d beam%!1{s%}"), n), next, totalWant, totalMax, false);
+        addLine(result, afl::string::Format(tx("%d beam%!1{s%}"), n), next, totalWant, totalMax,
+                DefenseEffectInfo::Flags_t() + DefenseEffectInfo::UsesPlanetDefense + DefenseEffectInfo::UsesBaseDefense);
     }
 
     // Beam type
@@ -949,7 +954,8 @@ void game::map::describePlanetDefenseEffects(DefenseEffectInfos_t& result,
             }
 
             if (const Beam* pBeam = shipList.beams().get(n)) {
-                addLine(result, pBeam->getName(shipList.componentNamer()), next, defenseWant, defenseMax, true);
+                addLine(result, pBeam->getName(shipList.componentNamer()), next, defenseWant, defenseMax,
+                        DefenseEffectInfo::Flags_t() + DefenseEffectInfo::UsesPlanetDefense + DefenseEffectInfo::UsesBaseTech + DefenseEffectInfo::IsDetail);
             }
         }
     }
@@ -963,7 +969,8 @@ void game::map::describePlanetDefenseEffects(DefenseEffectInfos_t& result,
         if (pl.hasBase()) {
             pl.getCargo(Element::Fighters).get(add);
         }
-        addLine(result, afl::string::Format(tx("%d fighter%!1{s%}"), n + add), next, defenseWant, defenseMax, false);
+        addLine(result, afl::string::Format(tx("%d fighter%!1{s%}"), n + add), next, defenseWant, defenseMax,
+                DefenseEffectInfo::Flags_t() + DefenseEffectInfo::UsesPlanetDefense + DefenseEffectInfo::UsesBaseStorage);
 
         // Bays
         if (pl.hasBase() && host.isPHost()) {
@@ -973,7 +980,8 @@ void game::map::describePlanetDefenseEffects(DefenseEffectInfos_t& result,
             n = MAX_BAY_LIMIT;
             next = 0;
         }
-        addLine(result, afl::string::Format(tx("%d fighter bay%!1{s%}"), n), next, defenseWant, defenseMax, false);
+        addLine(result, afl::string::Format(tx("%d fighter bay%!1{s%}"), n), next, defenseWant, defenseMax,
+                DefenseEffectInfo::Flags_t() + DefenseEffectInfo::UsesPlanetDefense);
     }
 
     // Torpedoes
@@ -987,7 +995,8 @@ void game::map::describePlanetDefenseEffects(DefenseEffectInfos_t& result,
         } else {
             next = n*(n+1)*4+1 - totalWant;
         }
-        addLine(result, afl::string::Format(tx("%d torpedo launcher%!1{s%}"), n), next, totalWant, totalMax, false);
+        addLine(result, afl::string::Format(tx("%d torpedo launcher%!1{s%}"), n), next, totalWant, totalMax,
+                DefenseEffectInfo::Flags_t() + DefenseEffectInfo::UsesPlanetDefense + DefenseEffectInfo::UsesBaseDefense);
 
         if (n > 0) {
             // Type
@@ -1003,11 +1012,13 @@ void game::map::describePlanetDefenseEffects(DefenseEffectInfos_t& result,
             }
 
             if (const TorpedoLauncher* pTorp = shipList.launchers().get(tech)) {
-                addLine(result, pTorp->getName(shipList.componentNamer()), next, defenseWant, defenseMax, true);
+                addLine(result, pTorp->getName(shipList.componentNamer()), next, defenseWant, defenseMax,
+                        DefenseEffectInfo::Flags_t() + DefenseEffectInfo::UsesPlanetDefense + DefenseEffectInfo::UsesBaseTech + DefenseEffectInfo::IsDetail);
             }
 
             // Torpedoes
             int32_t total = 0;
+            DefenseEffectInfo::Flags_t torpFlags;
             if (pl.hasBase() && config[HostConfiguration::UseBaseTorpsInCombat](planetOwner)) {
                 int32_t totalCost = 0;
                 for (const TorpedoLauncher* pTorp = shipList.launchers().findNext(0); pTorp != 0; pTorp = shipList.launchers().findNext(pTorp->getId())) {
@@ -1019,6 +1030,7 @@ void game::map::describePlanetDefenseEffects(DefenseEffectInfos_t& result,
                         total = totalCost / cost;
                     }
                 }
+                torpFlags += DefenseEffectInfo::UsesBaseStorage;
             }
 
             const int level = pl.unitScores().getScoreById(ScoreId_ExpLevel, planetScores).orElse(0);
@@ -1026,11 +1038,13 @@ void game::map::describePlanetDefenseEffects(DefenseEffectInfos_t& result,
             total += ppt * n;
             if (ppt > 0) {
                 next = n*(n+1)*4+1 - totalWant;
+                torpFlags += DefenseEffectInfo::UsesPlanetDefense;
+                torpFlags += DefenseEffectInfo::UsesBaseDefense;
             } else {
                 next = 0;
             }
 
-            addLine(result, afl::string::Format(tx("%d torpedo%!1{es%}"), total), next, totalWant, totalMax, false);
+            addLine(result, afl::string::Format(tx("%d torpedo%!1{es%}"), total), next, totalWant, totalMax, torpFlags);
         }
     }
 
@@ -1064,8 +1078,11 @@ void game::map::describePlanetDefenseEffects(DefenseEffectInfos_t& result,
         }
 
         // Show it
-        addLine(result, afl::string::Format(tx("%d%% shield loss from enemy fighter"), shield), shieldWant, totalWant, totalMax, false);
-        addLine(result, afl::string::Format(tx("%d%% damage from enemy fighter"), damage), damageWant, totalWant, totalMax, false);
+        DefenseEffectInfo::Flags_t ftrFlags;
+        ftrFlags += DefenseEffectInfo::UsesBaseDefense;
+        ftrFlags += DefenseEffectInfo::UsesPlanetDefense;
+        addLine(result, afl::string::Format(tx("%d%% shield loss from enemy fighter"), shield), shieldWant, totalWant, totalMax, ftrFlags);
+        addLine(result, afl::string::Format(tx("%d%% damage from enemy fighter"), damage), damageWant, totalWant, totalMax, ftrFlags);
     }
 
     // Update MAX_DEFENSE_EFFECT_LINES when adding stuff.

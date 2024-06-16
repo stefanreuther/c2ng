@@ -27,6 +27,7 @@ using afl::string::NullTranslator;
 using game::Element;
 using game::HostVersion;
 using game::config::HostConfiguration;
+using game::map::DefenseEffectInfo;
 using game::map::Planet;
 using game::map::PlanetMineralInfo;
 namespace gp = game::parser;
@@ -209,12 +210,12 @@ namespace {
     {
         String_t result;
         for (size_t i = 0, n = list.size(); i < n; ++i) {
-            const game::map::DefenseEffectInfo& e = list[i];
-            if (e.isDetail) {
+            const DefenseEffectInfo& e = list[i];
+            if (e.flags.contains(DefenseEffectInfo::IsDetail)) {
                 result += "  ";
             }
             result += Format("%s (+%d)", e.name, e.nextAt);
-            if (!e.isAchievable) {
+            if (!e.flags.contains(DefenseEffectInfo::IsAchievable)) {
                 result += " (unachievable)";
             }
             result += "\n";

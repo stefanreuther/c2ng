@@ -22,6 +22,7 @@
 #include "util/simplerequestdispatcher.hpp"
 
 namespace gp = game::parser;
+using game::map::DefenseEffectInfo;
 using game::test::Counter;
 
 namespace {
@@ -160,8 +161,8 @@ AFL_TEST("game.proxy.PlanetInfoProxy:normal", a)
         a.check("61. empty", !info.empty());
         a.checkEqual("62. name", info[0].name, "2 beams");
         a.checkEqual("63. nextAt", info[0].nextAt, 4);
-        a.checkEqual("64. isAchievable", info[0].isAchievable, true);
-        a.checkEqual("65. isDetail", info[0].isDetail, false);
+        a.checkEqual("64. isAchievable", info[0].flags.contains(DefenseEffectInfo::IsAchievable), true);
+        a.checkEqual("65. isDetail", info[0].flags.contains(DefenseEffectInfo::IsDetail), false);
     }
 
     // - getUnloadInfo

@@ -46,6 +46,7 @@
 
 using client::widgets::PlanetMineralInfo;
 using game::actions::BuildStructures;
+using game::map::DefenseEffectInfo;
 using game::proxy::BuildStructuresProxy;
 using game::proxy::PlanetInfoProxy;
 using game::spec::Cost;
@@ -663,13 +664,37 @@ namespace {
                             const game::map::DefenseEffectInfos_t& infos = m_proxy.getDefenseEffectsInfo();
                             size_t line = 1;
                             for (size_t i = 0; i < infos.size(); ++i) {
-                                String_t prefix = infos[i].isDetail ? "  " : "";
+                                String_t prefix = infos[i].flags.contains(DefenseEffectInfo::IsDetail) ? "  " : "";
                                 m_widget.cell(0, line)
                                     .setText(prefix + infos[i].name)
                                     .setColor(SkinColor::Green);
                                 m_widget.cell(1, line)
                                     .setText(infos[i].nextAt == 0 ? m_maxStr : String_t(afl::string::Format("+%d", infos[i].nextAt)))
-                                    .setColor(infos[i].isAchievable ? SkinColor::Green : SkinColor::Yellow);
+                                    .setColor(infos[i].flags.contains(DefenseEffectInfo::IsAchievable) ? SkinColor::Green : SkinColor::Yellow);
+
+                                String_t info, color;
+                                if (infos[i].flags.contains(DefenseEffectInfo::UsesPlanetDefense)) {
+                                    info += 'p';
+                                    color += char(SkinColor::Static);
+                                }
+                                if (infos[i].flags.contains(DefenseEffectInfo::UsesBaseDefense)) {
+                                    info += 'b';
+                                    color += char(SkinColor::Blue);
+                                }
+                                if (infos[i].flags.contains(DefenseEffectInfo::UsesBaseTech)) {
+                                    info += 't';
+                                    color += char(SkinColor::Yellow);
+                                }
+                                if (infos[i].flags.contains(DefenseEffectInfo::UsesBaseStorage)) {
+                                    info += 's';
+                                    color += char(SkinColor::Red);
+                                }
+                                m_widget.cell(2, line)
+                                    .setText(info)
+                                    .setColorString(color)
+                                    //.setFont("-")
+                                    ;
+
                                 ++line;
                             }
                             while (line < NUM_LINES) {
@@ -682,16 +707,17 @@ namespace {
                     PlanetInfoProxy& m_proxy;
                     String_t m_maxStr;
                 };
-                ui::widgets::SimpleTable& result = m_del.addNew(new ui::widgets::SimpleTable(m_root, 2, NUM_LINES));
+                ui::widgets::SimpleTable& result = m_del.addNew(new ui::widgets::SimpleTable(m_root, 3, NUM_LINES));
                 m_infoProxy.sig_change.addNewClosure(new Callback(result, m_infoProxy, m_translator("(max)")));
 
                 // Preconfigure layout
                 afl::base::Ref<gfx::Font> font = m_root.provider().getFont(gfx::FontRequest());
                 result.all().setText(" ");
                 result.setColumnWidth(0, font->getEmWidth() * 22);   // FIXME: should be minimum width
-                result.row(0).setColor(SkinColor::Static).setUnderline(true);
-                result.cell(0, 0).setText(m_translator("You have:"));
-                result.cell(1, 0).setText(m_translator("Next at:"));
+                result.row(0).setColor(SkinColor::Static);
+                result.setColumnPadding(1, font->getEmWidth());
+                result.cell(0, 0).setText(m_translator("You have:")).setUnderline(true);
+                result.cell(1, 0).setText(m_translator("Next at:")).setUnderline(true);
                 return result;
             }
 

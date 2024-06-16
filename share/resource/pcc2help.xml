@@ -2722,6 +2722,26 @@
         <ki key="ESC">Cancel.</ki>
       </kl>
 
+      <h2>Building Effects</h2>
+
+      <p>On all screens, PCC2 will show the sensor visibility (chance that enemy ship with "Sensor Sweep" mission scans this planet).
+        More buildings will increase the sensor visibility, more planetary defense posts will reduce it.</p>
+      <p>PCC2 will also show the tax rate and happiness change.
+        Large amounts of mines and factories will reduce happiness.</p>
+      <p>On the mining screen, PCC2 will show the production of the mines,
+        including the estimated time until the planet is mined out.</p>
+      <p>On the defense screen, PCC2 will show the resulting weapons of the planet.
+        For each item, it will show the number of defense posts required to achieve the next best value.
+        The value will be highlighted in yellow if you cannot achieve that.
+        It will show "(max)" if you already have the best possible value.</p>
+      <p>After each line, PCC2 shows what affects the given value:</p>
+      <ul class="compact">
+        <li>p - value is affected by planetary defense;</li>
+        <li>b - value is affected by starbase defense;</li>
+        <li>t - value is affected by starbase tech level;</li>
+        <li>s - value is affected by starbase storage.</li>
+      </ul>
+
       <h2>Reference</h2>
       <dl>
         <di term="Keys:"> <kbd>B</kbd>, <kbd>D</kbd>, <kbd>M</kbd> from <a href="pcc2:planetscreen">planet screen</a>,
