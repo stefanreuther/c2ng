@@ -13,8 +13,6 @@ AFL_TEST_NOARG("interpreter.expr.Node")
     using interpreter::CompilationContext;
     class Tester : public interpreter::expr::Node {
      public:
-        virtual void compileEffect(BytecodeObject& /*bco*/, const CompilationContext& /*cc*/) const
-            { }
         virtual void compileValue(BytecodeObject& /*bco*/, const CompilationContext& /*cc*/) const
             { }
         virtual void compileStore(BytecodeObject& /*bco*/, const CompilationContext& /*cc*/, const Node& /*rhs*/) const

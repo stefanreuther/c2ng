@@ -14,8 +14,6 @@ AFL_TEST("interpreter.expr.FunctionCallNode", a)
     using interpreter::CompilationContext;
     class MyNode : public interpreter::expr::FunctionCallNode {
      public:
-        virtual void compileEffect(BytecodeObject& /*bco*/, const CompilationContext& /*cc*/) const
-            { }
         virtual void compileValue(BytecodeObject& /*bco*/, const CompilationContext& /*cc*/) const
             { }
         virtual void compileStore(BytecodeObject& /*bco*/, const CompilationContext& /*cc*/, const Node& /*rhs*/) const

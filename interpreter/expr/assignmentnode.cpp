@@ -14,12 +14,6 @@ interpreter::expr::AssignmentNode::compileValue(BytecodeObject& bco, const Compi
 }
 
 void
-interpreter::expr::AssignmentNode::compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
-{
-    defaultCompileEffect(bco, cc);
-}
-
-void
 interpreter::expr::AssignmentNode::compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
 {
     defaultCompileCondition(bco, cc, ift, iff);

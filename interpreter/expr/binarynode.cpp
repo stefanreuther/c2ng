@@ -14,12 +14,6 @@ interpreter::expr::BinaryNode::compileValue(BytecodeObject& bco, const Compilati
 }
 
 void
-interpreter::expr::BinaryNode::compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
-{
-    defaultCompileEffect(bco, cc);
-}
-
-void
 interpreter::expr::BinaryNode::compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
 {
     defaultCompileCondition(bco, cc, ift, iff);

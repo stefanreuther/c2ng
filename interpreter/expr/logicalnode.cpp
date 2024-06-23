@@ -45,14 +45,6 @@ interpreter::expr::LogicalNode::compileValue(BytecodeObject& bco, const Compilat
 }
 
 void
-interpreter::expr::LogicalNode::compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
-{
-    BytecodeObject::Label_t lab = bco.makeLabel();
-    compileCondition(bco, cc, lab, lab);
-    bco.addLabel(lab);
-}
-
-void
 interpreter::expr::LogicalNode::compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
 {
     // ex IntLogicalNode::compileCondition

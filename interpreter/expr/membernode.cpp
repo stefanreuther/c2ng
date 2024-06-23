@@ -17,12 +17,6 @@ interpreter::expr::MemberNode::~MemberNode()
 }
 
 void
-interpreter::expr::MemberNode::compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
-{
-    defaultCompileEffect(bco, cc);
-}
-
-void
 interpreter::expr::MemberNode::compileValue(BytecodeObject& bco, const CompilationContext& cc) const
 {
     // PUSHMEM nn      rr:R => rr:R.name[nn]

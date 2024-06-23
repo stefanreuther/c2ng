@@ -19,7 +19,6 @@ namespace interpreter { namespace expr {
             : m_a(a), m_b(b)
             { }
         void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const;
         void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const;
      private:
         const Node& m_a;

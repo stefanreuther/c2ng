@@ -24,12 +24,6 @@ interpreter::expr::CaseNode::compileValue(BytecodeObject& bco, const Compilation
 }
 
 void
-interpreter::expr::CaseNode::compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
-{
-    defaultCompileEffect(bco, cc);
-}
-
-void
 interpreter::expr::CaseNode::compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
 {
     defaultCompileCondition(bco, cc, ift, iff);

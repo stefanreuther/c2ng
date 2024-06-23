@@ -15,13 +15,6 @@ interpreter::expr::SequenceNode::compileValue(BytecodeObject& bco, const Compila
 }
 
 void
-interpreter::expr::SequenceNode::compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
-{
-    m_a.compileEffect(bco, cc);
-    m_b.compileEffect(bco, cc);
-}
-
-void
 interpreter::expr::SequenceNode::compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
 {
     m_a.compileEffect(bco, cc);

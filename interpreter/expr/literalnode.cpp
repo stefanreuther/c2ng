@@ -21,12 +21,6 @@ interpreter::expr::LiteralNode::compileValue(BytecodeObject& bco, const Compilat
 }
 
 void
-interpreter::expr::LiteralNode::compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
-{
-    defaultCompileEffect(bco, cc);
-}
-
-void
 interpreter::expr::LiteralNode::compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
 {
     defaultCompileCondition(bco, cc, ift, iff);

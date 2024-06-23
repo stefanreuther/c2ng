@@ -17,12 +17,6 @@ interpreter::expr::IdentifierNode::~IdentifierNode()
 }
 
 void
-interpreter::expr::IdentifierNode::compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
-{
-    defaultCompileEffect(bco, cc);
-}
-
-void
 interpreter::expr::IdentifierNode::compileValue(BytecodeObject& bco, const CompilationContext& cc) const
 {
     // ex IntIdentifierNode::compileValue

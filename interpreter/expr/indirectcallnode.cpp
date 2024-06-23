@@ -12,12 +12,6 @@ interpreter::expr::IndirectCallNode::IndirectCallNode(const Node& func)
 }
 
 void
-interpreter::expr::IndirectCallNode::compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
-{
-    defaultCompileEffect(bco, cc);
-}
-
-void
 interpreter::expr::IndirectCallNode::compileValue(BytecodeObject& bco, const CompilationContext& cc) const
 {
     // PUSHIND nargs    rr:args:R => rr:result

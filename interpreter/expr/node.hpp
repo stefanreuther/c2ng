@@ -26,11 +26,12 @@ namespace interpreter { namespace expr {
 
         /** Compile effect of this expression.
             Execution stack must be unchanged afterwards.
-            The default can be invoked as defaultCompileEffect(): do compileValue() and drop the result.
+
+            As of 20240623, this is now a non-virtual method that is the same as before.
 
             @param [out] bco Code output
             @param [in]  cc  Compilation context */
-        virtual void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const = 0;
+        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const;
 
         /** Compile value of this expression.
             Must leave result on stack.
@@ -77,12 +78,6 @@ namespace interpreter { namespace expr {
         virtual void compileWrite(BytecodeObject& bco, const CompilationContext& cc) const = 0;
 
      protected:
-        /** Default implementation for compileEffect(): compileValue() and drop result.
-
-            @param [out] bco Code output
-            @param [in]  cc  Compilation context */
-        void defaultCompileEffect(BytecodeObject& bco, const CompilationContext& cc) const;
-
         /** Default implementation for compileCondition(): compileValue() and two jumps.
 
             @param [out] bco Code output

@@ -39,8 +39,6 @@ namespace {
     class IfFunctionCallNode : public RValueFunctionCallNode {
      public:
         void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
-            { defaultCompileEffect(bco, cc); }
         void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
             { defaultCompileCondition(bco, cc, ift, iff); }
     };
@@ -59,8 +57,6 @@ namespace {
             : m_minor(minor)
             { }
         void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
-            { defaultCompileEffect(bco, cc); }
         void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
             { defaultCompileCondition(bco, cc, ift, iff); }
     };
@@ -74,8 +70,6 @@ namespace {
             : m_minor(minor)
             { }
         void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
-            { defaultCompileEffect(bco, cc); }
         void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
             { defaultCompileCondition(bco, cc, ift, iff); }
     };
@@ -89,8 +83,6 @@ namespace {
             : m_minor(minor)
             { }
         void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
-            { defaultCompileEffect(bco, cc); }
         void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
             { defaultCompileCondition(bco, cc, ift, iff); }
     };
@@ -105,8 +97,6 @@ namespace {
             : m_which(which)
             { }
         void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
-            { defaultCompileEffect(bco, cc); }
         void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
             { defaultCompileCondition(bco, cc, ift, iff); }
     };
@@ -121,8 +111,6 @@ namespace {
             : m_which(which)
             { }
         void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
-            { defaultCompileEffect(bco, cc); }
         void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
             { defaultCompileCondition(bco, cc, ift, iff); }
     };
@@ -136,8 +124,6 @@ namespace {
             : m_minor(minor)
             { }
         void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
-            { defaultCompileEffect(bco, cc); }
         void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
             { defaultCompileCondition(bco, cc, ift, iff); }
     };
@@ -147,8 +133,6 @@ namespace {
     class MidFunctionCallNode : public RValueFunctionCallNode {
      public:
         void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
-            { defaultCompileEffect(bco, cc); }
         void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
             { defaultCompileCondition(bco, cc, ift, iff); }
     };
@@ -158,8 +142,6 @@ namespace {
     class StrCaseFunctionCallNode : public RValueFunctionCallNode {
      public:
         void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
-            { defaultCompileEffect(bco, cc); }
         void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
             { defaultCompileCondition(bco, cc, ift, iff); }
     };
@@ -169,8 +151,6 @@ namespace {
     class KeyFunctionCallNode : public RValueFunctionCallNode {
      public:
         void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
-            { defaultCompileEffect(bco, cc); }
         void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
             { defaultCompileCondition(bco, cc, ift, iff); }
     };
@@ -180,8 +160,6 @@ namespace {
     class ByNameFunctionCallNode : public RValueFunctionCallNode {
      public:
         void compileValue(BytecodeObject& /*bco*/, const CompilationContext& /*cc*/) const
-            { throw Error("\"ByName\" not allowed here"); }
-        void compileEffect(BytecodeObject& /*bco*/, const CompilationContext& /*cc*/) const
             { throw Error("\"ByName\" not allowed here"); }
         void compileCondition(BytecodeObject& /*bco*/, const CompilationContext& /*cc*/, BytecodeObject::Label_t /*ift*/, BytecodeObject::Label_t /*iff*/) const
             { throw Error("\"ByName\" not allowed here"); }
@@ -197,8 +175,6 @@ namespace {
     class EvalFunctionCallNode : public RValueFunctionCallNode {
      public:
         void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
-            { defaultCompileEffect(bco, cc); }
         void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
             { defaultCompileCondition(bco, cc, ift, iff); }
     };

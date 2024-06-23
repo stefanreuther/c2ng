@@ -20,7 +20,6 @@ namespace interpreter { namespace expr {
         ~IdentifierNode();
 
         // Node:
-        void compileEffect(BytecodeObject& bco, const CompilationContext& cc) const;
         void compileValue(BytecodeObject& bco, const CompilationContext& cc) const;
         void compileStore(BytecodeObject& bco, const CompilationContext& cc, const Node& rhs) const;
         void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const;

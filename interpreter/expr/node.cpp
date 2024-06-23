@@ -6,12 +6,16 @@
 #include "interpreter/expr/node.hpp"
 
 void
-interpreter::expr::Node::defaultCompileEffect(BytecodeObject& bco, const CompilationContext& cc) const
+interpreter::expr::Node::compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
 {
     // ex IntExprNode::compileEffect
-    // Compute value and discard it
-    compileValue(bco, cc);
-    bco.addInstruction(Opcode::maStack, Opcode::miStackDrop, 1);
+    // Compile to conditional jump.
+    // The alternative is to do compileValue() + miStackDrop.
+    // That would generate equivalent code after optimisation for most expressions,
+    // but less efficient efficient code for LogicalNode.
+    BytecodeObject::Label_t lbl = bco.makeLabel();
+    compileCondition(bco, cc, lbl, lbl);
+    bco.addLabel(lbl);
 }
 
 void

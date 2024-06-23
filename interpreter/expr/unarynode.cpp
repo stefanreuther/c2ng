@@ -13,12 +13,6 @@ interpreter::expr::UnaryNode::compileValue(BytecodeObject& bco, const Compilatio
 }
 
 void
-interpreter::expr::UnaryNode::compileEffect(BytecodeObject& bco, const CompilationContext& cc) const
-{
-    defaultCompileEffect(bco, cc);
-}
-
-void
 interpreter::expr::UnaryNode::compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff) const
 {
     defaultCompileCondition(bco, cc, ift, iff);
