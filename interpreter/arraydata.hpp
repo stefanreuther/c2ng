@@ -53,6 +53,11 @@ namespace interpreter {
             \throw Error The template does not have the same number of dimensions as this array */
         void resize(const ArrayData& tpl);
 
+        /** Add value to one-dimensional array.
+            Unspecified behaviour for multi-dimensional array.
+            \param value Value; ArrayData takes ownership */
+        void pushBackNew(afl::data::Value* value);
+
         /** Access content.
             \return content segment */
         afl::data::Segment& content()

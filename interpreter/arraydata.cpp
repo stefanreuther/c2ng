@@ -162,3 +162,17 @@ interpreter::ArrayData::resize(const ArrayData& tpl)
     m_totalSize = tpl.m_totalSize;
     m_dimensions = tpl.m_dimensions;
 }
+
+// Add value.
+void
+interpreter::ArrayData::pushBackNew(afl::data::Value* value)
+{
+    // Add to array
+    m_content.pushBackNew(value);
+
+    // Update dimensions
+    if (m_dimensions.size() == 1) {
+        m_dimensions[0] = m_content.size();
+        m_totalSize = m_content.size();
+    }
+}

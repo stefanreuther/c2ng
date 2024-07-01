@@ -12,6 +12,7 @@
 #include "afl/data/scalarvalue.hpp"
 #include "afl/string/format.hpp"
 #include "interpreter/arguments.hpp"
+#include "interpreter/arrayvalue.hpp"
 #include "interpreter/indexablevalue.hpp"
 #include "interpreter/values.hpp"
 
@@ -54,11 +55,15 @@ namespace {
             return false;
         }
 
+        // This is a hack. Regular arrays (such as InMsg().Partner) start at zero,
+        // built-in ones start at one.
+        int32_t start = (dynamic_cast<interpreter::ArrayValue*>(value) != 0 ? 0 : 1);
+
         // OK, looks like an array. Write as one.
         int32_t dim = iv->getDimension(1);
         tf.writeText("[");
-        for (int32_t i = 1; i < dim; ++i) {
-            if (i != 1) {
+        for (int32_t i = start; i < dim; ++i) {
+            if (i != start) {
                 tf.writeText(",");
             }
             try {

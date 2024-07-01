@@ -156,7 +156,7 @@ AFL_TEST("interpreter.exporter.JsonExporter:array", a)
     {
         afl::base::Ref<interpreter::ArrayData> vec = *new interpreter::ArrayData();
         vec->addDimension(3);
-        vec->content().pushBackNew(new IntegerValue(7));   // Index 0, NOT shown!
+        vec->content().pushBackNew(new IntegerValue(7));   // As of 20240630, index 0 is shown for arrays!
         vec->content().pushBackNew(new StringValue("s"));
         IntegerValue iv(42);
         interpreter::ArrayValue vv(vec);
@@ -179,6 +179,6 @@ AFL_TEST("interpreter.exporter.JsonExporter:array", a)
     // Verify
     outputText.flush();
     a.checkEqual("result", trimNewlines(afl::string::fromBytes(outputStream.getContent())),
-                 "[{\"a\":42,\"b\":[\"s\",null]},"
+                 "[{\"a\":42,\"b\":[7,\"s\",null]},"
                  "{\"a\":43,\"b\":[1,2,3,4]}]");
 }
