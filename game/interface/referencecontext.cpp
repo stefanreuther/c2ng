@@ -5,6 +5,7 @@
 
 #include "game/interface/referencecontext.hpp"
 #include "afl/base/countof.hpp"
+#include "afl/string/format.hpp"
 #include "game/interface/beamcontext.hpp"
 #include "game/interface/enginecontext.hpp"
 #include "game/interface/hullcontext.hpp"
@@ -15,11 +16,12 @@
 #include "game/interface/shipcontext.hpp"
 #include "game/interface/torpedocontext.hpp"
 #include "game/interface/ufocontext.hpp"
+#include "interpreter/basevalue.hpp"
 #include "interpreter/nametable.hpp"
 #include "interpreter/propertyacceptor.hpp"
 #include "interpreter/values.hpp"
-#include "interpreter/basevalue.hpp"
 
+using afl::string::Format;
 using game::Reference;
 using interpreter::checkIntegerArg;
 using interpreter::checkStringArg;
@@ -117,7 +119,14 @@ game::interface::ReferenceContext::enumProperties(interpreter::PropertyAcceptor&
 String_t
 game::interface::ReferenceContext::toString(bool /*readable*/) const
 {
-    return "#<reference>";
+    afl::base::Optional<game::map::Point> pt = m_ref.getPosition();
+    if (game::map::Point* pp = pt.get()) {
+        return Format("LocationReference(%d,%d)", pp->getX(), pp->getY());
+    } else if (const char* type = getReferenceTypeName(m_ref.getType())) {
+        return Format("Reference(%s,%d)", interpreter::quoteString(type), m_ref.getId());
+    } else {
+        return "#<reference>";
+    }
 }
 
 void

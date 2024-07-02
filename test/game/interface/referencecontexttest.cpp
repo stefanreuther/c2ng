@@ -26,6 +26,7 @@
 #include "interpreter/test/valueverifier.hpp"
 
 using game::Reference;
+using game::interface::ReferenceContext;
 using interpreter::test::verifyNewInteger;
 using interpreter::test::verifyNewNull;
 using interpreter::test::verifyNewString;
@@ -89,6 +90,8 @@ AFL_TEST("game.interface.ReferenceContext:getReferenceProperty", a)
         NewContextVerifier v(a("ship object"), getReferenceProperty(ref, game::interface::irpObject, session));
         v.verif.verifyString("NAME", "Twenty-Two");
         v.verif.verifyInteger("LOC.X", 1000);
+
+        a.checkEqual("ship toString", ReferenceContext(ref, session).toString(false), "Reference(\"ship\",22)");
     }
 
     // Reference to a beam
@@ -105,6 +108,8 @@ AFL_TEST("game.interface.ReferenceContext:getReferenceProperty", a)
         NewContextVerifier v(a("beam object"), getReferenceProperty(ref, game::interface::irpObject, session));
         v.verif.verifyString("NAME", "Positron Beam");
         v.verif.verifyInteger("DAMAGE", 29);
+
+        a.checkEqual("beam toString", ReferenceContext(ref, session).toString(false), "Reference(\"beam\",5)");
     }
 
     // Reference to a location
@@ -118,9 +123,11 @@ AFL_TEST("game.interface.ReferenceContext:getReferenceProperty", a)
         verifyNewString (a("loc irpDetailedName"),  getReferenceProperty(ref, game::interface::irpDetailedName,  session), "(2500,1300)");
         verifyNewString (a("loc irpKind"),          getReferenceProperty(ref, game::interface::irpKind,          session), "location");
         verifyNewNull   (a("loc irpObject"),        getReferenceProperty(ref, game::interface::irpObject,        session));
+
+        a.checkEqual("loc toString", ReferenceContext(ref, session).toString(false), "LocationReference(2500,1300)");
     }
 
-    // Null reference to a location
+    // Null reference
     {
         Reference ref;
         verifyNewNull   (a("null irpLocX"),          getReferenceProperty(ref, game::interface::irpLocX,          session));
@@ -131,6 +138,9 @@ AFL_TEST("game.interface.ReferenceContext:getReferenceProperty", a)
         verifyNewNull   (a("null irpDetailedName"),  getReferenceProperty(ref, game::interface::irpDetailedName,  session));
         verifyNewNull   (a("null irpKind"),          getReferenceProperty(ref, game::interface::irpKind,          session));
         verifyNewNull   (a("null irpObject"),        getReferenceProperty(ref, game::interface::irpObject,        session));
+
+        // Null reference cannot normally be constructed, and stringifies to default.
+        a.checkEqual("null toString", ReferenceContext(ref, session).toString(false).substr(0, 1), "#");
     }
 }
 
@@ -386,7 +396,7 @@ AFL_TEST("game.interface.ReferenceContext:basics", a)
     session.setShipList(sl);
 
     // Test object
-    game::interface::ReferenceContext testee(Reference(Reference::IonStorm, 7), session);
+    ReferenceContext testee(Reference(Reference::IonStorm, 7), session);
     interpreter::test::ContextVerifier verif(testee, a);
     verif.verifyBasics();
     verif.verifyNotSerializable();
@@ -589,7 +599,7 @@ AFL_TEST("game.interface.ReferenceContext:checkReferenceArg:normal", a)
     afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
     game::Session session(tx, fs);
-    game::interface::ReferenceContext ctx(Reference(Reference::Planet, 77), session);
+    ReferenceContext ctx(Reference(Reference::Planet, 77), session);
     Reference out;
     a.checkEqual("status", game::interface::checkReferenceArg(out, &ctx), true);
     a.checkEqual("result", out, Reference(Reference::Planet, 77));
