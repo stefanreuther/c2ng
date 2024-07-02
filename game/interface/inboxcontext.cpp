@@ -6,6 +6,9 @@
 #include "game/interface/inboxcontext.hpp"
 #include "afl/io/textfile.hpp"
 #include "afl/string/format.hpp"
+#include "game/game.hpp"
+#include "game/interface/globalcommands.hpp"
+#include "game/interface/referencecontext.hpp"
 #include "game/root.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/indexablevalue.hpp"
@@ -16,7 +19,10 @@
 #include "interpreter/values.hpp"
 #include "interpreter/world.hpp"
 
+using afl::base::Ptr;
 using afl::string::Format;
+using game::msg::Mailbox;
+using interpreter::Arguments;
 
 namespace {
     enum MessageProperty {
@@ -27,18 +33,33 @@ namespace {
         impText,
         impFullText,
 
+        impTurn,
+        impPrimaryLink,
+        impSecondaryLink,
+        impReplySet,
+        impReplyAllSet,
+        impDataStatus,
+        impConfirmed,
+
         immWrite
     };
     enum { MessagePropertyDomain };
 
     const interpreter::NameTable MSG_MAPPING[] = {
-        { "FULLTEXT", impFullText, MessagePropertyDomain, interpreter::thString },
-        { "GROUP",    impGroup,    MessagePropertyDomain, interpreter::thString },
-        { "ID",       impId,       MessagePropertyDomain, interpreter::thInt },
-        { "KILLED",   impKilled,   MessagePropertyDomain, interpreter::thBool },
-        { "LINES",    impLines,    MessagePropertyDomain, interpreter::thInt },
-        { "TEXT",     impText,     MessagePropertyDomain, interpreter::thArray },
-        { "WRITE",    immWrite,    MessagePropertyDomain, interpreter::thProcedure },
+        { "CONFIRMED",   impConfirmed,       MessagePropertyDomain, interpreter::thBool },
+        { "DATASTATUS",  impDataStatus,      MessagePropertyDomain, interpreter::thString },
+        { "FULLTEXT",    impFullText,        MessagePropertyDomain, interpreter::thString },
+        { "GROUP",       impGroup,           MessagePropertyDomain, interpreter::thString },
+        { "ID",          impId,              MessagePropertyDomain, interpreter::thInt },
+        { "KILLED",      impKilled,          MessagePropertyDomain, interpreter::thBool },
+        { "LINES",       impLines,           MessagePropertyDomain, interpreter::thInt },
+        { "LINK",        impPrimaryLink,     MessagePropertyDomain, interpreter::thNone },
+        { "LINK2",       impSecondaryLink,   MessagePropertyDomain, interpreter::thNone },
+        { "PARTNER",     impReplySet,        MessagePropertyDomain, interpreter::thArray },
+        { "PARTNER.ALL", impReplyAllSet,     MessagePropertyDomain, interpreter::thArray },
+        { "TEXT",        impText,            MessagePropertyDomain, interpreter::thArray },
+        { "TURN",        impTurn,            MessagePropertyDomain, interpreter::thInt },
+        { "WRITE",       immWrite,           MessagePropertyDomain, interpreter::thProcedure },
     };
 
     /*
@@ -48,12 +69,12 @@ namespace {
     class MessageTextValue : public interpreter::IndexableValue {
         // ex IntMessageText
      public:
-        MessageTextValue(afl::base::Ptr<game::parser::MessageLines_t> lines)
+        MessageTextValue(const Ptr<game::parser::MessageLines_t>& lines)
             : m_lines(lines)
             { }
 
         // IndexableValue:
-        virtual afl::data::Value* get(interpreter::Arguments& args)
+        virtual afl::data::Value* get(Arguments& args)
             {
                 args.checkArgumentCount(1);
 
@@ -64,7 +85,7 @@ namespace {
                 return interpreter::makeStringValue((*m_lines)[index]);
             }
 
-        virtual void set(interpreter::Arguments& args, const afl::data::Value* value)
+        virtual void set(Arguments& args, const afl::data::Value* value)
             { rejectSet(args, value); }
 
         // CallableValue:
@@ -91,7 +112,7 @@ namespace {
             { return new MessageTextValue(m_lines); }
 
      private:
-        afl::base::Ptr<game::parser::MessageLines_t> m_lines;
+        const Ptr<game::parser::MessageLines_t> m_lines;
     };
 
 
@@ -102,27 +123,49 @@ namespace {
     class MessageWriteCommand : public interpreter::ProcedureValue {
         // ex IntMessageWriteProcedure
      public:
-        MessageWriteCommand(int turnNumber, size_t messageIndex,
-                            afl::base::Ptr<game::parser::MessageLines_t> lines)
+        MessageWriteCommand(int turnNumber, size_t messageIndex, Ptr<game::parser::MessageLines_t> lines)
             : m_lines(lines),
               m_turnNumber(turnNumber),
               m_messageIndex(messageIndex)
             { }
 
-        virtual void call(interpreter::Process& proc, interpreter::Arguments& args);
+        virtual void call(interpreter::Process& proc, Arguments& args);
 
         virtual ProcedureValue* clone() const
             { return new MessageWriteCommand(m_turnNumber, m_messageIndex, m_lines); }
 
      private:
-        afl::base::Ptr<game::parser::MessageLines_t> m_lines;
-        int m_turnNumber;
-        size_t m_messageIndex;
+        const Ptr<game::parser::MessageLines_t> m_lines;
+        const int m_turnNumber;
+        const size_t m_messageIndex;
     };
+
+    afl::data::Value* makeReferenceValue(game::Reference ref, game::Session& session)
+    {
+        if (ref.isSet()) {
+            return new game::interface::ReferenceContext(ref, session);
+        } else {
+            return 0;
+        }
+    }
+
+    afl::data::Value* makeDataStatus(Mailbox::DataStatus st)
+    {
+        switch (st) {
+         case Mailbox::NoData:              break;
+         case Mailbox::DataReceivable:      return interpreter::makeStringValue("receivable");
+         case Mailbox::DataReceived:        return interpreter::makeStringValue("received");
+         case Mailbox::DataExpired:         return interpreter::makeStringValue("expired");
+         case Mailbox::DataWrongPasscode:   return interpreter::makeStringValue("wrong-passcode");
+         case Mailbox::DataWrongChecksum:   return interpreter::makeStringValue("wrong-checksum");
+         case Mailbox::DataFailed:          return interpreter::makeStringValue("failed");
+        }
+        return 0;
+    }
 }
 
 void
-MessageWriteCommand::call(interpreter::Process& proc, interpreter::Arguments& args)
+MessageWriteCommand::call(interpreter::Process& proc, Arguments& args)
 {
     // ex IntMessageWriteProcedure::call
     // ex fileint.pas:ScriptWriteMessage, msgint.pas:Mailbox_Write
@@ -160,15 +203,9 @@ MessageWriteCommand::call(interpreter::Process& proc, interpreter::Arguments& ar
 }
 
 
-game::interface::InboxContext::InboxContext(size_t index,
-                                            afl::string::Translator& tx,
-                                            const afl::base::Ref<const Root>& root,
-                                            const afl::base::Ref<const Game>& game,
-                                            const afl::base::Ref<const Turn>& turn)
+game::interface::InboxContext::InboxContext(size_t index, game::Session& session, const afl::base::Ref<const Turn>& turn)
     : m_index(index),
-      m_translator(tx),
-      m_root(root),
-      m_game(game),
+      m_session(session),
       m_turn(turn),
       m_lineCache()
 { }
@@ -188,43 +225,126 @@ game::interface::InboxContext::get(PropertyIndex_t index)
 {
     // ex IntMessageContext::get
     // ex msgint.pas:CMailboxContext.ResolveValue, CMailboxContext.ResolveFuncall
-    switch (MessageProperty(MSG_MAPPING[index].index)) {
-     case impId:
-        /* @q Id:Int (Incoming Message Property)
-           Id of message.
-           This is the index into {InMsg()} to access this very message. */
-        return interpreter::makeSizeValue(m_index+1);
+    if (const Root* root = m_session.getRoot().get()) {
+        switch (MessageProperty(MSG_MAPPING[index].index)) {
+         case impId:
+            /* @q Id:Int (Incoming Message Property)
+               Id of message.
+               This is the index into {InMsg()} to access this very message. */
+            return interpreter::makeSizeValue(m_index+1);
 
-     case impLines:
-        /* @q Lines:Int (Incoming Message Property)
-           Number of lines in message. */
-        return interpreter::makeSizeValue(getLineCache()->size());
+         case impLines:
+            /* @q Lines:Int (Incoming Message Property)
+               Number of lines in message. */
+            return interpreter::makeSizeValue(getLineCache()->size());
 
-     case impGroup:
-        /* @q Group:Str (Incoming Message Property)
-           Group of this message.
-           Similar messages are grouped using this string for the message list.
-           The message filter also operates based on this string. */
-        return interpreter::makeStringValue(mailbox().getMessageHeading(m_index, m_translator, m_root->playerList()));
+         case impGroup:
+            /* @q Group:Str (Incoming Message Property)
+               Group of this message.
+               Similar messages are grouped using this string for the message list.
+               The message filter also operates based on this string. */
+            return interpreter::makeStringValue(mailbox().getMessageHeading(m_index, m_session.translator(), root->playerList()));
 
-     case impKilled:
-        /* @q Killed:Bool (Incoming Message Property)
-           True if this message is filtered and skipped by default. */
-        return interpreter::makeBooleanValue(m_game->messageConfiguration().isHeadingFiltered(mailbox().getMessageHeading(m_index, m_translator, m_root->playerList())));
+         case impKilled:
+            /* @q Killed:Bool (Incoming Message Property)
+               True if this message is filtered and skipped by default. */
+            if (const Game* g = m_session.getGame().get()) {
+                return interpreter::makeBooleanValue(g->messageConfiguration().isHeadingFiltered(mailbox().getMessageHeading(m_index, m_session.translator(), root->playerList())));
+            } else {
+                return 0;
+            }
 
-     case impText:
-        /* @q Text:Str() (Incoming Message Property)
-           Message text, line by line. */
-        return new MessageTextValue(getLineCache());
+         case impText:
+            /* @q Text:Str() (Incoming Message Property)
+               Message text, line by line. */
+            return new MessageTextValue(getLineCache());
 
-     case impFullText:
-        /* @q FullText:Str (Incoming Message Property)
-           Message text, in one big string. */
-        return interpreter::makeStringValue(mailbox().getMessageBodyText(m_index, m_translator, m_root->playerList()));
+         case impFullText:
+            /* @q FullText:Str (Incoming Message Property)
+               Message text, in one big string. */
+            return interpreter::makeStringValue(mailbox().getMessageBodyText(m_index, m_session.translator(), root->playerList()));
 
-     case immWrite:
-        // @change PCC2 uses the game's turn number; we have a message turn number
-        return new MessageWriteCommand(mailbox().getMessageMetadata(m_index, m_translator, m_root->playerList()).turnNumber, m_index, getLineCache());
+         case impTurn:
+            /* @q Turn:Int (Incoming Message Property)
+               Message turn number. */
+            if (int turnNr = getCurrentMetadata(*root).turnNumber) {
+                return interpreter::makeIntegerValue(turnNr);
+            } else {
+                return 0;
+            }
+
+         case impPrimaryLink:
+            /* @q Link:Reference (Incoming Message Property)
+               First object or location linked by message.
+               In messages from host, the object sending the message if recognized correctly
+               (e.g. in a message from a planet reporting overtemperature, the planet).
+               EMPTY if none.
+               @since PCC2 2.41.2
+               @see Link2 (Incoming Message Property) */
+            return makeReferenceValue(getCurrentMetadata(*root).primaryLink, m_session);
+
+         case impSecondaryLink:
+            /* @q Link2:Reference (Incoming Message Property)
+               Second object or location linked by message.
+               Typically, first X,Y coordinate mentioned in message.
+               EMPTY if none.
+               @since PCC2 2.41.2
+               @see Link (Incoming Message Property) */
+            return makeReferenceValue(getCurrentMetadata(*root).secondaryLink, m_session);
+
+         case impReplySet:
+            /* @q Partner:Int() (Incoming Message Property)
+               List of players to send a "reply-to-sender" message to.
+               For normal player-to-player messages, sender of the message;
+               for anonymous messages, all players.
+
+               The return value is an array containing player numbers,
+               compatible with the first parameter of {SendMessage}.
+               Value is EMPTY if there are no players.
+               @since PCC2 2.41.2
+               @see Partner.All (Incoming Message Property) */
+            return makePlayerSet(getCurrentMetadata(*root).reply);
+
+         case impReplyAllSet:
+            /* @q Partner.All:Int() (Incoming Message Property)
+               List of players to send a "reply-to-all" message to.
+               If a message to multiple players has been recognized,
+               this includes the sender of the message and all other receivers.
+
+               The return value is an array containing player numbers,
+               compatible with the first parameter of {SendMessage}.
+               Value is EMPTY if there are no players.
+               @since PCC2 2.41.2
+               @see Partner (Incoming Message Property) */
+            return makePlayerSet(getCurrentMetadata(*root).replyAll);
+
+         case impDataStatus:
+            /* @q DataStatus:Str (Incoming Message Property)
+               Status of data-transmission message.
+               One of:
+               - receivable
+               - received
+               - expired
+               - wrong-passcode
+               - wrong-checksum
+               - failed
+
+               EMPTY if message does not contain a data transmission.
+               @since PCC2 2.41.2 */
+            return makeDataStatus(getCurrentMetadata(*root).dataStatus);
+
+         case impConfirmed:
+            /* @q Confirmed:Bool (Incoming Message Property)
+               If message represents a {Notify (Global Command)|notification message},
+               its confirmation status.
+
+               @since PCC2 2.41.2 */
+            return interpreter::makeBooleanValue(getCurrentMetadata(*root).flags.contains(Mailbox::Confirmed));
+
+         case immWrite:
+            // @change PCC2 uses the game's turn number; we have a message turn number
+            return new MessageWriteCommand(getCurrentMetadata(*root).turnNumber, m_index, getLineCache());
+        }
     }
     return 0;
 }
@@ -247,7 +367,7 @@ game::interface::InboxContext*
 game::interface::InboxContext::clone() const
 {
     // ex IntMessageContext::clone
-    return new InboxContext(m_index, m_translator, m_root, m_game, m_turn);
+    return new InboxContext(m_index, m_session, m_turn);
 }
 
 afl::base::Deletable*
@@ -296,7 +416,15 @@ game::interface::InboxContext::getLineCache()
     // ex IntMessageContext::createLineCache
     if (m_lineCache.get() == 0) {
         m_lineCache = new game::parser::MessageLines_t();
-        game::parser::splitMessage(*m_lineCache, mailbox().getMessageBodyText(m_index, m_translator, m_root->playerList()));
+        if (const Root* r = m_session.getRoot().get()) {
+            game::parser::splitMessage(*m_lineCache, mailbox().getMessageBodyText(m_index, m_session.translator(), r->playerList()));
+        }
     }
     return m_lineCache;
+}
+
+game::msg::Mailbox::Metadata
+game::interface::InboxContext::getCurrentMetadata(const Root& root)
+{
+    return mailbox().getMessageMetadata(m_index, m_session.translator(), root.playerList());
 }

@@ -18,8 +18,11 @@
 #include "game/root.hpp"
 #include "game/turn.hpp"
 #include "game/turnloader.hpp"
+#include "interpreter/arraydata.hpp"
+#include "interpreter/arrayvalue.hpp"
 #include "interpreter/exporter/configuration.hpp"
 #include "interpreter/indexablevalue.hpp"
+#include "interpreter/values.hpp"
 
 using interpreter::checkIntegerArg;
 using interpreter::checkStringArg;
@@ -174,6 +177,23 @@ game::interface::checkPlayerSetArg(PlayerSet_t& result, afl::data::Value* value)
         } else {
             return false;
         }
+    }
+}
+
+afl::data::Value*
+game::interface::makePlayerSet(PlayerSet_t set)
+{
+    if (set.empty()) {
+        return 0;
+    } else {
+        afl::base::Ref<interpreter::ArrayData> ad = *new interpreter::ArrayData();
+        ad->addDimension(0);
+        for (int i = 0; i <= MAX_PLAYERS; ++i) {
+            if (set.contains(i)) {
+                ad->pushBackNew(interpreter::makeIntegerValue(i));
+            }
+        }
+        return new interpreter::ArrayValue(ad);
     }
 }
 

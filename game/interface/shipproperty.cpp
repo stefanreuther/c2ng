@@ -555,7 +555,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            Individual messages have the same form as the inbox messages (InMsg()).
            @see int:index:group:incomingmessageproperty|Incoming Message Properties
            @since PCC2 2.0.3, PCC2 2.40.10 */
-        return InboxSubsetValue::create(sh.messages().get(), session.translator(), root, game, turn);
+        return InboxSubsetValue::create(sh.messages().get(), session, turn);
      case ispMissionId:
         /* @q Mission$:Int (Ship Property)
            Mission number.

@@ -8,8 +8,8 @@
 #include <vector>
 #include <cstddef>
 #include "afl/string/translator.hpp"
-#include "game/game.hpp"
-#include "game/root.hpp"
+#include "game/session.hpp"
+#include "game/turn.hpp"
 #include "interpreter/indexablevalue.hpp"
 
 namespace game { namespace interface {
@@ -28,13 +28,10 @@ namespace game { namespace interface {
      public:
         /** Constructor.
             @param indexes   Indexes (0-based)
-            @param tx        Translator
-            @param root      Root
-            @param game      Game */
+            @param session   Session
+            @param turn      Turn */
         InboxSubsetValue(const std::vector<size_t>& indexes,
-                         afl::string::Translator& tx,
-                         const afl::base::Ref<const Root>& root,
-                         const afl::base::Ref<const Game>& game,
+                         game::Session& session,
                          const afl::base::Ref<const Turn>& turn);
 
         /** Destructor. */
@@ -50,21 +47,17 @@ namespace game { namespace interface {
 
         /** Constructor.
             @param indexes   Indexes (0-based)
-            @param tx        Translator
-            @param root      Root
-            @param game      Game
+            @param session   Session
+            @param turn      Turn
             @return newly-allocated InboxSubsetValue. Null if indexes is empty. */
-        static InboxSubsetValue* create(const std::vector<size_t>& indexes, afl::string::Translator& tx,
-                                        const afl::base::Ref<const Root>& root,
-                                        const afl::base::Ref<const Game>& game,
+        static InboxSubsetValue* create(const std::vector<size_t>& indexes,
+                                        game::Session& session,
                                         const afl::base::Ref<const Turn>& turn);
 
      private:
-        std::vector<size_t> m_indexes;
-        afl::string::Translator& m_translator;
-        afl::base::Ref<const Root> m_root;
-        afl::base::Ref<const Game> m_game;
-        afl::base::Ref<const Turn> m_turn;
+        const std::vector<size_t> m_indexes;
+        game::Session& m_session;
+        const afl::base::Ref<const Turn> m_turn;
     };
 
 } }

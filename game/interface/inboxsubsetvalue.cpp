@@ -14,9 +14,7 @@ namespace {
      public:
         InboxSubsetContext(size_t index,
                            const std::vector<size_t>& indexes,
-                           afl::string::Translator& tx,
-                           const Ref<const game::Root>& root,
-                           const Ref<const game::Game>& game,
+                           game::Session& session,
                            const Ref<const game::Turn>& turn);
         ~InboxSubsetContext();
 
@@ -30,22 +28,19 @@ namespace {
 
      private:
         size_t m_index;
-        std::vector<size_t> m_indexes;
-        afl::string::Translator& m_translator;
-        Ref<const game::Root> m_root;
-        Ref<const game::Game> m_game;
-        Ref<const game::Turn> m_turn;
+        const std::vector<size_t> m_indexes;
+        game::Session& m_session;
+        const Ref<const game::Turn> m_turn;
         mutable std::auto_ptr<interpreter::Context> m_child;
 
         interpreter::Context& child() const;
     };
 }
 
-InboxSubsetContext::InboxSubsetContext(size_t index, const std::vector<size_t>& indexes, afl::string::Translator& tx,
-                                       const Ref<const game::Root>& root,
-                                       const Ref<const game::Game>& game,
+InboxSubsetContext::InboxSubsetContext(size_t index, const std::vector<size_t>& indexes,
+                                       game::Session& session,
                                        const Ref<const game::Turn>& turn)
-    : SimpleContext(), m_index(index), m_indexes(indexes), m_translator(tx), m_root(root), m_game(game), m_turn(turn), m_child()
+    : SimpleContext(), m_index(index), m_indexes(indexes), m_session(session), m_turn(turn), m_child()
 { }
 
 InboxSubsetContext::~InboxSubsetContext()
@@ -73,7 +68,7 @@ InboxSubsetContext::next()
 InboxSubsetContext*
 InboxSubsetContext::clone() const
 {
-    return new InboxSubsetContext(m_index, m_indexes, m_translator, m_root, m_game, m_turn);
+    return new InboxSubsetContext(m_index, m_indexes, m_session, m_turn);
 }
 
 afl::base::Deletable*
@@ -105,7 +100,7 @@ InboxSubsetContext::child() const
 {
     if (!m_child.get()) {
         assert(m_index < m_indexes.size());
-        m_child.reset(new game::interface::InboxContext(m_indexes[m_index], m_translator, m_root, m_game, m_turn));
+        m_child.reset(new game::interface::InboxContext(m_indexes[m_index], m_session, m_turn));
     }
     return *m_child;
 }
@@ -115,11 +110,10 @@ InboxSubsetContext::child() const
  *  InboxSubsetValue
  */
 
-game::interface::InboxSubsetValue::InboxSubsetValue(const std::vector<size_t>& indexes, afl::string::Translator& tx,
-                                                    const afl::base::Ref<const Root>& root,
-                                                    const afl::base::Ref<const Game>& game,
+game::interface::InboxSubsetValue::InboxSubsetValue(const std::vector<size_t>& indexes,
+                                                    game::Session& session,
                                                     const afl::base::Ref<const Turn>& turn)
-    : IndexableValue(), m_indexes(indexes), m_translator(tx), m_root(root), m_game(game), m_turn(turn)
+    : IndexableValue(), m_indexes(indexes), m_session(session), m_turn(turn)
 {
     // ex IntMappedMessageValue::IntMappedMessageValue
 }
@@ -140,7 +134,7 @@ game::interface::InboxSubsetValue::get(interpreter::Arguments& args)
 
     // In theory, we could return a InboxContext here,
     // but for now, let's preserve the identity as coming from a Inbox subset.
-    return new InboxSubsetContext(n, m_indexes, m_translator, m_root, m_game, m_turn);
+    return new InboxSubsetContext(n, m_indexes, m_session, m_turn);
 }
 
 void
@@ -168,7 +162,7 @@ game::interface::InboxSubsetValue::makeFirstContext()
     if (m_indexes.empty()) {
         return 0;
     } else {
-        return new InboxSubsetContext(0, m_indexes, m_translator, m_root, m_game, m_turn);
+        return new InboxSubsetContext(0, m_indexes, m_session, m_turn);
     }
 }
 
@@ -177,7 +171,7 @@ game::interface::InboxSubsetValue::clone() const
 {
     // This copies the vector.
     // Since the vectors are short, this is acceptable and simpler than some reference counting scheme.
-    return new InboxSubsetValue(m_indexes, m_translator, m_root, m_game, m_turn);
+    return new InboxSubsetValue(m_indexes, m_session, m_turn);
 }
 
 String_t
@@ -193,9 +187,8 @@ game::interface::InboxSubsetValue::store(interpreter::TagNode& out, afl::io::Dat
 }
 
 game::interface::InboxSubsetValue*
-game::interface::InboxSubsetValue::create(const std::vector<size_t>& indexes, afl::string::Translator& tx,
-                                          const afl::base::Ref<const Root>& root,
-                                          const afl::base::Ref<const Game>& game,
+game::interface::InboxSubsetValue::create(const std::vector<size_t>& indexes,
+                                          game::Session& session,
                                           const afl::base::Ref<const Turn>& turn)
 {
     // ex IntMappedMessageValue::create
@@ -204,6 +197,6 @@ game::interface::InboxSubsetValue::create(const std::vector<size_t>& indexes, af
     if (indexes.empty()) {
         return 0;
     } else {
-        return new InboxSubsetValue(indexes, tx, root, game, turn);
+        return new InboxSubsetValue(indexes, session, turn);
     }
 }

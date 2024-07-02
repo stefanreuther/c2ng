@@ -13,6 +13,7 @@
 #include "game/game.hpp"
 #include "game/msg/inbox.hpp"
 #include "game/root.hpp"
+#include "game/session.hpp"
 #include "game/test/root.hpp"
 #include "game/turn.hpp"
 #include "interpreter/arguments.hpp"
@@ -29,9 +30,11 @@ namespace {
         afl::io::NullFileSystem fs;
         afl::base::Ref<game::Root> root;
         afl::base::Ref<game::Game> game;
+        game::Session session;
 
         TestHarness()
-            : tx(), fs(), root(game::test::makeRoot(game::HostVersion())), game(*new game::Game())
+            : tx(), fs(), root(game::test::makeRoot(game::HostVersion())), game(*new game::Game()),
+              session(tx, fs)
             { }
     };
 
@@ -48,6 +51,9 @@ namespace {
         a.checkEqual("prepare > getMessageText",     in.getMessageText(0, h.tx, h.root->playerList()), "(-a000)<<< First >>>\nThis is the first message.");
         a.checkEqual("prepare > getMessageHeading",  in.getMessageHeading(0, h.tx, h.root->playerList()), "(a) First");
         a.checkEqual("prepare > getMessageMetadata", in.getMessageMetadata(0, h.tx, h.root->playerList()).turnNumber, 10);
+
+        h.session.setGame(h.game.asPtr());
+        h.session.setRoot(h.root.asPtr());
     }
 }
 
@@ -57,7 +63,7 @@ AFL_TEST("game.interface.InboxContext:properties", a)
     TestHarness h;
     prepare(a, h);
 
-    game::interface::InboxContext testee(2, h.tx, h.root, h.game, h.game->currentTurn());
+    game::interface::InboxContext testee(2, h.session, h.game->currentTurn());
 
     // Values (lookup, get)
     interpreter::test::ContextVerifier v(testee, a);
@@ -88,7 +94,7 @@ AFL_TEST("game.interface.InboxContext:write", a)
     prepare(a, h);
 
     // Fetch 'WRITE' property
-    game::interface::InboxContext testee(2, h.tx, h.root, h.game, h.game->currentTurn());
+    game::interface::InboxContext testee(2, h.session, h.game->currentTurn());
     std::auto_ptr<afl::data::Value> write(interpreter::test::ContextVerifier(testee, a).getValue("WRITE"));
     a.checkNonNull("01. write", write.get());
 
@@ -139,7 +145,7 @@ AFL_TEST("game.interface.InboxContext:text", a)
     prepare(a, h);
 
     // Fetch 'TEXT' property
-    game::interface::InboxContext testee(2, h.tx, h.root, h.game, h.game->currentTurn());
+    game::interface::InboxContext testee(2, h.session, h.game->currentTurn());
     std::auto_ptr<afl::data::Value> text(interpreter::test::ContextVerifier(testee, a).getValue("TEXT"));
     a.checkNonNull("01. text", text.get());
 
@@ -206,7 +212,7 @@ AFL_TEST("game.interface.InboxContext:iteration", a)
     TestHarness h;
     prepare(a, h);
 
-    game::interface::InboxContext testee(0, h.tx, h.root, h.game, h.game->currentTurn());
+    game::interface::InboxContext testee(0, h.session, h.game->currentTurn());
     interpreter::test::ContextVerifier v(testee, a);
     v.verifyInteger("ID", 1);
 

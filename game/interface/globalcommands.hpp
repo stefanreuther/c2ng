@@ -23,6 +23,11 @@ namespace game { namespace interface {
         @throw interpreter::Error on type error */
     bool checkPlayerSetArg(PlayerSet_t& result, afl::data::Value* value);
 
+    /** Make player-set value.
+        @param set Set
+        @return newly-allocated list. Null if set is empty. */
+    afl::data::Value* makePlayerSet(PlayerSet_t set);
+
 
     /*
      *  Global Commands, provided to the script world using SimpleProcedure
