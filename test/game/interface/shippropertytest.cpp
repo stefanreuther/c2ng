@@ -83,6 +83,7 @@ AFL_TEST("game.interface.ShipProperty:basics", a)
     root->hostConfiguration()[HostConfiguration::NumExperienceLevels].set(4);
     root->hostConfiguration()[HostConfiguration::EPShipAging].set(32);
     root->hostConfiguration()[HostConfiguration::ExperienceLevelNames].set("Noob,Nieswurz,Brotfahrer,Ladehugo,Erdwurm");
+    session.setRoot(root.asPtr());
 
     // Ship List
     afl::base::Ref<game::spec::ShipList> shipList(*new game::spec::ShipList());
@@ -108,6 +109,7 @@ AFL_TEST("game.interface.ShipProperty:basics", a)
     afl::base::Ref<game::Game> g(*new game::Game());
     afl::base::Ref<game::Turn> turn(g->currentTurn());
     g->setViewpointPlayer(PLAYER);
+    session.setGame(g.asPtr());
 
     // - related units
     addPlanetXY(session, *g, PLANET_ID,    X,    Y,                      "Marble");
@@ -500,6 +502,7 @@ AFL_TEST("game.interface.ShipProperty:carrier", a)
     afl::base::Ref<game::Root> root(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,1,0))));
     root->hostConfiguration()[HostConfiguration::NumExperienceLevels].set(4);
     root->hostConfiguration()[HostConfiguration::EPShipAging].set(0);
+    session.setRoot(root.asPtr());
 
     // Ship List
     afl::base::Ref<game::spec::ShipList> shipList(*new game::spec::ShipList());
@@ -515,6 +518,7 @@ AFL_TEST("game.interface.ShipProperty:carrier", a)
     afl::base::Ref<game::Game> g(*new game::Game());
     afl::base::Ref<game::Turn> turn(g->currentTurn());
     g->setViewpointPlayer(PLAYER);
+    session.setGame(g.asPtr());
 
     // Ship under test
     game::map::ShipData sd;
@@ -701,6 +705,7 @@ AFL_TEST("game.interface.ShipProperty:empty", a)
 
     // Root
     afl::base::Ref<game::Root> root(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,1,0))));
+    session.setRoot(root.asPtr());
 
     // Ship List
     afl::base::Ref<game::spec::ShipList> shipList(*new game::spec::ShipList());
@@ -708,6 +713,7 @@ AFL_TEST("game.interface.ShipProperty:empty", a)
     // Game/Turn
     afl::base::Ref<game::Game> g(*new game::Game());
     afl::base::Ref<game::Turn> turn(g->currentTurn());
+    session.setGame(g.asPtr());
 
     // Create ship. Must be part of the universe because MovementPredictor resolves it through it.
     game::map::Ship& sh = *turn->universe().ships().create(SHIP_ID);
@@ -830,6 +836,7 @@ AFL_TEST("game.interface.ShipProperty:freighter", a)
 
     // Root
     afl::base::Ref<game::Root> root(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,1,0))));
+    session.setRoot(root.asPtr());
 
     // Ship List
     afl::base::Ref<game::spec::ShipList> shipList(*new game::spec::ShipList());
@@ -847,6 +854,7 @@ AFL_TEST("game.interface.ShipProperty:freighter", a)
     afl::base::Ref<game::Game> g(*new game::Game());
     afl::base::Ref<game::Turn> turn(g->currentTurn());
     g->setViewpointPlayer(PLAYER);
+    session.setGame(g.asPtr());
 
     // Ship under test
     game::map::ShipData sd;
@@ -1007,6 +1015,7 @@ AFL_TEST("game.interface.ShipProperty:intercept", a)
 
     // Root
     afl::base::Ref<game::Root> root(game::test::makeRoot(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,1,0))));
+    session.setRoot(root.asPtr());
 
     // Ship List
     afl::base::Ref<game::spec::ShipList> shipList(*new game::spec::ShipList());
@@ -1015,6 +1024,7 @@ AFL_TEST("game.interface.ShipProperty:intercept", a)
     afl::base::Ref<game::Game> g(*new game::Game());
     afl::base::Ref<game::Turn> turn(g->currentTurn());
     g->setViewpointPlayer(PLAYER);
+    session.setGame(g.asPtr());
 
     // Ship under test
     game::map::ShipData sd;

@@ -5,10 +5,12 @@
 
 #include "game/interface/inboxsubsetvalue.hpp"
 
+#include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/test/testrunner.hpp"
 #include "game/game.hpp"
 #include "game/msg/inbox.hpp"
+#include "game/session.hpp"
 #include "game/test/root.hpp"
 #include "game/turn.hpp"
 #include "interpreter/arguments.hpp"
@@ -20,11 +22,14 @@ using game::interface::InboxSubsetValue;
 namespace {
     struct TestHarness {
         afl::string::NullTranslator tx;
+        afl::io::NullFileSystem fs;
         afl::base::Ref<game::Root> root;
         afl::base::Ref<game::Game> game;
+        game::Session session;
 
         TestHarness()
-            : tx(), root(game::test::makeRoot(game::HostVersion())), game(*new game::Game())
+            : tx(), fs(), root(game::test::makeRoot(game::HostVersion())), game(*new game::Game()),
+              session(tx, fs)
             { }
     };
 
@@ -36,6 +41,9 @@ namespace {
         in.addMessage("(-a000)<<< Third >>>\nThis is the third message.", 11);
         in.addMessage("(-a000)<<< Fourth >>>\nThis is the fourth message.", 11);
         in.addMessage("(-a000)<<< Fifth >>>\nThis is the fifth message.", 11);
+
+        h.session.setRoot(h.root.asPtr());
+        h.session.setGame(h.game.asPtr());
     }
 }
 
@@ -47,13 +55,13 @@ AFL_TEST("game.interface.InboxSubsetValue:empty", a)
 
     // Factory method
     {
-        std::auto_ptr<InboxSubsetValue> value(InboxSubsetValue::create(indexes, h.tx, h.root, h.game, h.game->currentTurn()));
+        std::auto_ptr<InboxSubsetValue> value(InboxSubsetValue::create(indexes, h.session, h.game->currentTurn()));
         a.checkNull("01. factory method", value.get());
     }
 
     // Explicit creation
     {
-        InboxSubsetValue value(indexes, h.tx, h.root, h.game, h.game->currentTurn());
+        InboxSubsetValue value(indexes, h.session, h.game->currentTurn());
         a.checkNull("11. explicit", value.makeFirstContext());
     }
 }
@@ -68,7 +76,7 @@ AFL_TEST("game.interface.InboxSubsetValue:iteration", a)
     indexes.push_back(3);                 // "Fourth"
     indexes.push_back(0);                 // "First"
 
-    std::auto_ptr<InboxSubsetValue> value(InboxSubsetValue::create(indexes, h.tx, h.root, h.game, h.game->currentTurn()));
+    std::auto_ptr<InboxSubsetValue> value(InboxSubsetValue::create(indexes, h.session, h.game->currentTurn()));
     a.checkNonNull("01. create", value.get());
 
     // Basic properties
@@ -107,7 +115,7 @@ AFL_TEST("game.interface.InboxSubsetValue:indexing", a)
     indexes.push_back(3);                 // "Fourth"
     indexes.push_back(0);                 // "First"
 
-    std::auto_ptr<InboxSubsetValue> value(InboxSubsetValue::create(indexes, h.tx, h.root, h.game, h.game->currentTurn()));
+    std::auto_ptr<InboxSubsetValue> value(InboxSubsetValue::create(indexes, h.session, h.game->currentTurn()));
     a.checkNonNull("01. create", value.get());
 
     // Success case

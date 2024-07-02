@@ -5,10 +5,11 @@
 
 #include "game/interface/inboxfunction.hpp"
 #include "game/actions/preconditions.hpp"
+#include "game/game.hpp"
 #include "game/interface/inboxcontext.hpp"
-#include "interpreter/arguments.hpp"
-#include "game/turn.hpp"
 #include "game/root.hpp"
+#include "game/turn.hpp"
+#include "interpreter/arguments.hpp"
 
 /* @q InMsg(n:Int):Obj (Function, Context)
    Access incoming message.
@@ -37,8 +38,7 @@ game::interface::InboxFunction::get(interpreter::Arguments& args)
     args.checkArgumentCount(1);
 
     afl::base::Ptr<Game> g = m_session.getGame();
-    afl::base::Ptr<Root> r = m_session.getRoot();
-    if (g.get() == 0 || r.get() == 0) {
+    if (g.get() == 0) {
         return 0;
     }
 
@@ -47,7 +47,7 @@ game::interface::InboxFunction::get(interpreter::Arguments& args)
         return 0;
     }
 
-    return new InboxContext(index, m_session.translator(), *r, *g, g->viewpointTurn());
+    return new InboxContext(index, m_session, g->viewpointTurn());
 }
 
 void
@@ -77,13 +77,12 @@ game::interface::InboxFunction::makeFirstContext()
 {
     // ex IFInmsgMake
     afl::base::Ptr<Game> g = m_session.getGame();
-    afl::base::Ptr<Root> r = m_session.getRoot();
-    if (g.get() == 0 || r.get() == 0) {
+    if (g.get() == 0) {
         return 0;
     } else if (g->viewpointTurn().inbox().getNumMessages() == 0) {
         return 0;
     } else {
-        return new InboxContext(0, m_session.translator(), *r, *g, g->viewpointTurn());
+        return new InboxContext(0, m_session, g->viewpointTurn());
     }
 }
 

@@ -361,7 +361,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
            Individual messages have the same form as the inbox messages (InMsg()).
            @see int:index:group:incomingmessageproperty|Incoming Message Properties
            @since PCC2 2.0.3, PCC2 2.40.10 */
-        return InboxSubsetValue::create(pl.messages().get(), session.translator(), root, game, turn);
+        return InboxSubsetValue::create(pl.messages().get(), session, turn);
      case ippMinedD:
         /* @q Mined.D:Int (Planet Property)
            Mined Duranium, in kilotons. */

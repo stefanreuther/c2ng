@@ -6,10 +6,9 @@
 #define C2NG_GAME_INTERFACE_INBOXCONTEXT_HPP
 
 #include "afl/base/ref.hpp"
-#include "afl/string/translator.hpp"
-#include "game/game.hpp"
 #include "game/msg/inbox.hpp"
 #include "game/parser/messagetemplate.hpp"
+#include "game/session.hpp"
 #include "game/turn.hpp"
 #include "interpreter/simplecontext.hpp"
 
@@ -21,15 +20,9 @@ namespace game { namespace interface {
      public:
         /** Constructor.
             \param index Message index (0-based)
-            \param tx    Translator
-            \param root  Root (for playerList())
-            \param game  Game (for messageConfiguration())
+            \param session Session (for Game::messageConfiguration(), reference resolution, translator, Root::playerList())
             \param turn  Turn (for messages) */
-        InboxContext(size_t index,
-                     afl::string::Translator& tx,
-                     const afl::base::Ref<const Root>& root,
-                     const afl::base::Ref<const Game>& game,
-                     const afl::base::Ref<const Turn>& turn);
+        InboxContext(size_t index, game::Session& session, const afl::base::Ref<const Turn>& turn);
 
         /** Destructor. */
         ~InboxContext();
@@ -47,12 +40,11 @@ namespace game { namespace interface {
         const game::msg::Mailbox& mailbox();
         void clearLineCache();
         afl::base::Ptr<game::parser::MessageLines_t> getLineCache();
+        game::msg::Mailbox::Metadata getCurrentMetadata(const Root& root);
 
         size_t m_index;
-        afl::string::Translator& m_translator;
-        afl::base::Ref<const Root> m_root;
-        afl::base::Ref<const Game> m_game;
-        afl::base::Ref<const Turn> m_turn;
+        game::Session& m_session;
+        const afl::base::Ref<const Turn> m_turn;
 
         afl::base::Ptr<game::parser::MessageLines_t> m_lineCache;
     };
