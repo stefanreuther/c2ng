@@ -7,6 +7,12 @@
 #include "interpreter/arguments.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/savecontext.hpp"
+#include "interpreter/values.hpp"
+
+namespace {
+    // Arbitrary length limit:
+    const size_t TOSTRING_MAX = 200;
+}
 
 // Constructor.
 interpreter::ArrayValue::ArrayValue(afl::base::Ref<ArrayData> data)
@@ -75,6 +81,22 @@ String_t
 interpreter::ArrayValue::toString(bool /*readable*/) const
 {
     // ex IntArray::toString
+    if (m_data->getNumDimensions() == 1) {
+        String_t result = "Array(";
+        for (size_t i = 0, n = m_data->getDimension(0); i < n; ++i) {
+            if (i != 0) {
+                result += ",";
+            }
+            result += interpreter::toString(m_data->content()[i], true);
+            if (result.size() > TOSTRING_MAX) {
+                break;
+            }
+        }
+        if (result.size() <= TOSTRING_MAX) {
+            result += ")";
+            return result;
+        }
+    }
     return "#<array>";
 }
 

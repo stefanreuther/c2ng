@@ -155,3 +155,71 @@ AFL_TEST("interpreter.ArrayValue", a)
         a.checkEqual("73. value", out.value, 222U);
     }
 }
+
+/** Test toString on empty 1-D array. */
+AFL_TEST("interpreter.ArrayValue:toString:empty", a)
+{
+    // Create data object
+    afl::base::Ref<interpreter::ArrayData> content = *new interpreter::ArrayData();
+    content->addDimension(3);
+
+    // Create value
+    interpreter::ArrayValue testee(content);
+
+    // String
+    a.checkEqual("01. toString", testee.toString(false), "Array(Z(0),Z(0),Z(0))");
+    a.checkEqual("02. toString", testee.toString(true),  "Array(Z(0),Z(0),Z(0))");
+}
+
+/** Test toString on populated 1-D array. */
+AFL_TEST("interpreter.ArrayValue:toString:1d:small", a)
+{
+    // Create data object
+    afl::base::Ref<interpreter::ArrayData> content = *new interpreter::ArrayData();
+    content->addDimension(3);
+    content->content().pushBackInteger(32);
+    content->content().pushBackInteger(16);
+    content->content().pushBackInteger(8);
+
+    // Create value
+    interpreter::ArrayValue testee(content);
+
+    // String
+    a.checkEqual("01. toString", testee.toString(false), "Array(32,16,8)");
+    a.checkEqual("02. toString", testee.toString(true),  "Array(32,16,8)");
+}
+
+/** Test toString on overlong 1-D array: too long, falls back to default. */
+AFL_TEST("interpreter.ArrayValue:toString:1d:big", a)
+{
+    // Create data object
+    afl::base::Ref<interpreter::ArrayData> content = *new interpreter::ArrayData();
+    content->addDimension(500);
+
+    // Create value
+    interpreter::ArrayValue testee(content);
+
+    // String
+    a.checkEqual("21. toString", testee.toString(false).substr(0, 2), "#<");
+    a.checkEqual("22. toString", testee.toString(true).substr(0, 2), "#<");
+}
+
+/** Test toString on populated 2-D array. Those are not stringified */
+AFL_TEST("interpreter.ArrayValue:toString:2d:small", a)
+{
+    // Create data object
+    afl::base::Ref<interpreter::ArrayData> content = *new interpreter::ArrayData();
+    content->addDimension(2);
+    content->addDimension(2);
+    content->content().pushBackInteger(32);
+    content->content().pushBackInteger(16);
+    content->content().pushBackInteger(8);
+    content->content().pushBackInteger(89);
+
+    // Create value
+    interpreter::ArrayValue testee(content);
+
+    // String
+    a.checkEqual("21. toString", testee.toString(false).substr(0, 2), "#<");
+    a.checkEqual("22. toString", testee.toString(true).substr(0, 2), "#<");
+}
