@@ -1799,7 +1799,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/game/vcr/flak/nullvisualizertest.cpp \
+FILES_testsuite = test/server/play/messagepackertest.cpp \
+    test/game/vcr/flak/nullvisualizertest.cpp \
     test/game/vcr/flak/visualizertest.cpp \
     test/game/test/specificationloadertest.cpp \
     test/game/test/simpleturntest.cpp \

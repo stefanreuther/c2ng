@@ -53,6 +53,19 @@ namespace server { namespace play {
             \param value      [in] Newly-allocated value
             \param jsonName   [in] Name of property in hv to create */
         static void addValueNew(afl::data::Hash& hv, Value_t* value, const char* jsonName);
+
+        /** Flatten a value for serialisation as JSON.
+            JSON cannot publish most of our structured values.
+            This converts those that are used in the built-in interface to types that can
+            (afl::data::HashValue, afl::data::VectorValue).
+
+            Takes ownership of the parameter, and returns newly-allocated value.
+            If value can be used as-is, takes the shortcut of returning it as-is.
+            Otherwise, allocates new value and frees old one.
+
+            \param value Value
+            \return Result */
+        static Value_t* flattenNew(Value_t* value);
     };
 
 } }

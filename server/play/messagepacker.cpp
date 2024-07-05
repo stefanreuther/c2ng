@@ -1,5 +1,6 @@
 /**
   *  \file server/play/messagepacker.cpp
+  *  \brief Class server::play::MessagePacker
   */
 
 #include <stdexcept>
@@ -9,6 +10,7 @@
 #include "afl/string/format.hpp"
 #include "game/actions/preconditions.hpp"
 #include "game/game.hpp"
+#include "game/interface/inboxcontext.hpp"
 #include "game/msg/inbox.hpp"
 #include "game/playerlist.hpp"
 #include "game/root.hpp"
@@ -36,10 +38,18 @@ server::play::MessagePacker::buildValue() const
         throw std::runtime_error(ITEM_NOT_FOUND);
     }
     size_t realIndex = size_t(m_index - 1);
-    
+
+    // Build result
     afl::base::Ref<afl::data::Hash> hv(afl::data::Hash::create());
-    addValueNew(*hv, makeStringValue(inbox.getMessageHeading(realIndex, tx, pl)), "GROUP");
-    addValueNew(*hv, makeStringValue(inbox.getMessageText(realIndex, tx, pl)), "TEXT");
+    game::interface::InboxContext ctx(realIndex, m_session, g.currentTurn());
+
+    addValue(*hv, ctx, "GROUP", "GROUP");
+    addValue(*hv, ctx, "FULLTEXT", "TEXT");
+    addValue(*hv, ctx, "LINK", "LINK");
+    addValue(*hv, ctx, "LINK2", "LINK2");
+    addValue(*hv, ctx, "PARTNER", "PARTNER");
+    addValue(*hv, ctx, "PARTNER.ALL", "PARTNER.ALL");
+    addValue(*hv, ctx, "DATASTATUS", "DATASTATUS");
 
     return new afl::data::HashValue(hv);
 }
