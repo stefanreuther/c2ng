@@ -118,6 +118,12 @@ server::talk::TalkPM::create(String_t receivers, String_t subject, String_t text
     // ex doPMNew
     m_session.checkUser();
 
+    // PM permission?
+    const String_t sender = m_session.getUser();
+    if (!User(m_root, sender).isAllowedToSendPMs()) {
+        throw std::runtime_error(PERMISSION_DENIED);
+    }
+
     // Execute
     std::set<String_t> recv;
     parseReceivers(receivers, recv, m_root);
@@ -129,7 +135,6 @@ server::talk::TalkPM::create(String_t receivers, String_t subject, String_t text
     int32_t pmid = UserPM::allocatePM(m_root);
     UserPM pm(m_root, pmid);
 
-    const String_t sender = m_session.getUser();
     pm.author().set(sender);
     pm.receivers().set(receivers);
     pm.subject().set(subject);

@@ -25,6 +25,25 @@ server::talk::User::getPMMailType()
     return toString(value.get());
 }
 
+// Get PM permission (profile access).
+bool
+server::talk::User::isAllowedToSendPMs()
+{
+    // Unset means yes
+    std::auto_ptr<afl::data::Value> value(getProfileRaw("allowpm"));
+    return value.get() == 0 || toInteger(value.get()) != 0;
+}
+
+
+// Get forum permission (profile access).
+bool
+server::talk::User::isAllowedToPost()
+{
+    // Unset means yes
+    std::auto_ptr<afl::data::Value> value(getProfileRaw("allowpost"));
+    return value.get() == 0 || toInteger(value.get()) != 0;
+}
+
 // Get autowatch flag (profile access).
 bool
 server::talk::User::isAutoWatch()

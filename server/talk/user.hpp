@@ -30,6 +30,16 @@ namespace server { namespace talk {
             \return Value from profile */
         String_t getPMMailType();
 
+        /** Get PM permission (profile access).
+            If set, the user is allowed to send PMs.
+            \return Value */
+        bool isAllowedToSendPMs();
+
+        /** Get post permission (profile access).
+            If set, the user is allowed to post to forums.
+            \return Value */
+        bool isAllowedToPost();
+
         /** Get autowatch flag (profile access).
             If set, the user automatically watches topic he posts in.
             \return Value */

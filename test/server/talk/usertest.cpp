@@ -15,6 +15,18 @@
 #include "server/talk/root.hpp"
 #include <memory>
 
+namespace {
+    struct Environment {
+        afl::net::NullCommandHandler mail;
+        afl::net::redis::InternalDatabase db;
+        server::talk::Root root;
+
+        Environment()
+            : mail(), db(), root(db, mail, server::talk::Configuration())
+            { }
+    };
+}
+
 /** Test basic properties. */
 AFL_TEST("server.talk.User:basics", a)
 {
@@ -77,56 +89,46 @@ AFL_TEST("server.talk.User:basics", a)
 // Not set
 AFL_TEST("server.talk.User:getPMMailType:not-set", a)
 {
-    afl::net::NullCommandHandler mail;
-    afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mail, server::talk::Configuration());
-    server::talk::User testee(root, "1001");
+    Environment env;
+    server::talk::User testee(env.root, "1001");
     a.checkEqual("", testee.getPMMailType(), "");
 }
 
 // Set in user profile
 AFL_TEST("server.talk.User:getPMMailType:user-profile", a)
 {
-    afl::net::NullCommandHandler mail;
-    afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mail, server::talk::Configuration());
-    root.userRoot().subtree("1001").hashKey("profile").stringField("mailpmtype").set("a");
-    server::talk::User testee(root, "1001");
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").stringField("mailpmtype").set("a");
+    server::talk::User testee(env.root, "1001");
     a.checkEqual("", testee.getPMMailType(), "a");
 }
 
 // Set in default profile
 AFL_TEST("server.talk.User:getPMMailType:default-profile", a)
 {
-    afl::net::NullCommandHandler mail;
-    afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mail, server::talk::Configuration());
-    root.defaultProfile().stringField("mailpmtype").set("b");
-    server::talk::User testee(root, "1001");
+    Environment env;
+    env.root.defaultProfile().stringField("mailpmtype").set("b");
+    server::talk::User testee(env.root, "1001");
     a.checkEqual("", testee.getPMMailType(), "b");
 }
 
 // Set in both
 AFL_TEST("server.talk.User:getPMMailType:both", a)
 {
-    afl::net::NullCommandHandler mail;
-    afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mail, server::talk::Configuration());
-    root.userRoot().subtree("1001").hashKey("profile").stringField("mailpmtype").set("a");
-    root.defaultProfile().stringField("mailpmtype").set("b");
-    server::talk::User testee(root, "1001");
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").stringField("mailpmtype").set("a");
+    env.root.defaultProfile().stringField("mailpmtype").set("b");
+    server::talk::User testee(env.root, "1001");
     a.checkEqual("", testee.getPMMailType(), "a");
 }
 
 // Set in both, blank in user profile
 AFL_TEST("server.talk.User:getPMMailType:blank-in-user-profile", a)
 {
-    afl::net::NullCommandHandler mail;
-    afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mail, server::talk::Configuration());
-    root.userRoot().subtree("1001").hashKey("profile").stringField("mailpmtype").set("");
-    root.defaultProfile().stringField("mailpmtype").set("b");
-    server::talk::User testee(root, "1001");
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").stringField("mailpmtype").set("");
+    env.root.defaultProfile().stringField("mailpmtype").set("b");
+    server::talk::User testee(env.root, "1001");
     a.checkEqual("", testee.getPMMailType(), "");
 }
 
@@ -134,83 +136,206 @@ AFL_TEST("server.talk.User:getPMMailType:blank-in-user-profile", a)
  *  Test isAutoWatch().
  */
 
-
 // Not set; default means yes
 AFL_TEST("server.talk.User:isAutoWatch:not-set", a)
 {
-    afl::net::NullCommandHandler mail;
-    afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mail, server::talk::Configuration());
-    server::talk::User testee(root, "1001");
+    Environment env;
+    server::talk::User testee(env.root, "1001");
     a.check("", testee.isAutoWatch());
 }
 
 // Enabled in user profile
 AFL_TEST("server.talk.User:isAutoWatch:enabled-in-profile", a)
 {
-    afl::net::NullCommandHandler mail;
-    afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mail, server::talk::Configuration());
-    root.userRoot().subtree("1001").hashKey("profile").intField("talkautowatch").set(1);
-    server::talk::User testee(root, "1001");
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").intField("talkautowatch").set(1);
+    server::talk::User testee(env.root, "1001");
     a.check("", testee.isAutoWatch());
 }
 
 // Disabled in user profile
 AFL_TEST("server.talk.User:isAutoWatch:disabled-in-profile", a)
 {
-    afl::net::NullCommandHandler mail;
-    afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mail, server::talk::Configuration());
-    root.userRoot().subtree("1001").hashKey("profile").intField("talkautowatch").set(0);
-    server::talk::User testee(root, "1001");
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").intField("talkautowatch").set(0);
+    server::talk::User testee(env.root, "1001");
     a.check("", !testee.isAutoWatch());
 }
 
 // Enabled in default profile
 AFL_TEST("server.talk.User:isAutoWatch:enabled-in-default", a)
 {
-    afl::net::NullCommandHandler mail;
-    afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mail, server::talk::Configuration());
-    root.defaultProfile().intField("talkautowatch").set(1);
-    server::talk::User testee(root, "1001");
+    Environment env;
+    env.root.defaultProfile().intField("talkautowatch").set(1);
+    server::talk::User testee(env.root, "1001");
     a.check("", testee.isAutoWatch());
 }
 
 // Disabled in default profile
 AFL_TEST("server.talk.User:isAutoWatch:disabled-in-default", a)
 {
-    afl::net::NullCommandHandler mail;
-    afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mail, server::talk::Configuration());
-    root.defaultProfile().intField("talkautowatch").set(0);
-    server::talk::User testee(root, "1001");
+    Environment env;
+    env.root.defaultProfile().intField("talkautowatch").set(0);
+    server::talk::User testee(env.root, "1001");
     a.check("", !testee.isAutoWatch());
 }
 
 // Enabled in user, disabled in default
 AFL_TEST("server.talk.User:isAutoWatch:enabled-in-profile-disabled-in-default", a)
 {
-    afl::net::NullCommandHandler mail;
-    afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mail, server::talk::Configuration());
-    root.userRoot().subtree("1001").hashKey("profile").intField("talkautowatch").set(1);
-    root.defaultProfile().intField("talkautowatch").set(0);
-    server::talk::User testee(root, "1001");
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").intField("talkautowatch").set(1);
+    env.root.defaultProfile().intField("talkautowatch").set(0);
+    server::talk::User testee(env.root, "1001");
     a.check("", testee.isAutoWatch());
 }
 
 // Disabled in user, enabled in default
 AFL_TEST("server.talk.User:isAutoWatch:disabled-in-profile-enabled-in-default", a)
 {
-    afl::net::NullCommandHandler mail;
-    afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mail, server::talk::Configuration());
-    root.userRoot().subtree("1001").hashKey("profile").intField("talkautowatch").set(0);
-    root.defaultProfile().intField("talkautowatch").set(1);
-    server::talk::User testee(root, "1001");
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").intField("talkautowatch").set(0);
+    env.root.defaultProfile().intField("talkautowatch").set(1);
+    server::talk::User testee(env.root, "1001");
     a.check("", !testee.isAutoWatch());
+}
+
+
+/*
+ *  Test isAllowedToPost().
+ */
+
+// Not set; default means yes
+AFL_TEST("server.talk.User:isAllowedToPost:not-set", a)
+{
+    Environment env;
+    server::talk::User testee(env.root, "1001");
+    a.check("", testee.isAllowedToPost());
+}
+
+// Enabled in user profile
+AFL_TEST("server.talk.User:isAllowedToPost:enabled-in-profile", a)
+{
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").intField("allowpost").set(1);
+    server::talk::User testee(env.root, "1001");
+    a.check("", testee.isAllowedToPost());
+}
+
+// Disabled in user profile
+AFL_TEST("server.talk.User:isAllowedToPost:disabled-in-profile", a)
+{
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").intField("allowpost").set(0);
+    server::talk::User testee(env.root, "1001");
+    a.check("", !testee.isAllowedToPost());
+}
+
+// Enabled in default profile
+AFL_TEST("server.talk.User:isAllowedToPost:enabled-in-default", a)
+{
+    Environment env;
+    env.root.defaultProfile().intField("allowpost").set(1);
+    server::talk::User testee(env.root, "1001");
+    a.check("", testee.isAllowedToPost());
+}
+
+// Disabled in default profile
+AFL_TEST("server.talk.User:isAllowedToPost:disabled-in-default", a)
+{
+    Environment env;
+    env.root.defaultProfile().intField("allowpost").set(0);
+    server::talk::User testee(env.root, "1001");
+    a.check("", !testee.isAllowedToPost());
+}
+
+// Enabled in user, disabled in default
+AFL_TEST("server.talk.User:isAllowedToPost:enabled-in-profile-disabled-in-default", a)
+{
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").intField("allowpost").set(1);
+    env.root.defaultProfile().intField("allowpost").set(0);
+    server::talk::User testee(env.root, "1001");
+    a.check("", testee.isAllowedToPost());
+}
+
+// Disabled in user, enabled in default
+AFL_TEST("server.talk.User:isAllowedToPost:disabled-in-profile-enabled-in-default", a)
+{
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").intField("allowpost").set(0);
+    env.root.defaultProfile().intField("allowpost").set(1);
+    server::talk::User testee(env.root, "1001");
+    a.check("", !testee.isAllowedToPost());
+}
+
+
+/*
+ *  Test isAllowedToSendPMs().
+ */
+
+// Not set; default means yes
+AFL_TEST("server.talk.User:isAllowedToSendPMs:not-set", a)
+{
+    Environment env;
+    server::talk::User testee(env.root, "1001");
+    a.check("", testee.isAllowedToSendPMs());
+}
+
+// Enabled in user profile
+AFL_TEST("server.talk.User:isAllowedToSendPMs:enabled-in-profile", a)
+{
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").intField("allowpm").set(1);
+    server::talk::User testee(env.root, "1001");
+    a.check("", testee.isAllowedToSendPMs());
+}
+
+// Disabled in user profile
+AFL_TEST("server.talk.User:isAllowedToSendPMs:disabled-in-profile", a)
+{
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").intField("allowpm").set(0);
+    server::talk::User testee(env.root, "1001");
+    a.check("", !testee.isAllowedToSendPMs());
+}
+
+// Enabled in default profile
+AFL_TEST("server.talk.User:isAllowedToSendPMs:enabled-in-default", a)
+{
+    Environment env;
+    env.root.defaultProfile().intField("allowpm").set(1);
+    server::talk::User testee(env.root, "1001");
+    a.check("", testee.isAllowedToSendPMs());
+}
+
+// Disabled in default profile
+AFL_TEST("server.talk.User:isAllowedToSendPMs:disabled-in-default", a)
+{
+    Environment env;
+    env.root.defaultProfile().intField("allowpm").set(0);
+    server::talk::User testee(env.root, "1001");
+    a.check("", !testee.isAllowedToSendPMs());
+}
+
+// Enabled in user, disabled in default
+AFL_TEST("server.talk.User:isAllowedToSendPMs:enabled-in-profile-disabled-in-default", a)
+{
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").intField("allowpm").set(1);
+    env.root.defaultProfile().intField("allowpm").set(0);
+    server::talk::User testee(env.root, "1001");
+    a.check("", testee.isAllowedToSendPMs());
+}
+
+// Disabled in user, enabled in default
+AFL_TEST("server.talk.User:isAllowedToSendPMs:disabled-in-profile-enabled-in-default", a)
+{
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").intField("allowpm").set(0);
+    env.root.defaultProfile().intField("allowpm").set(1);
+    server::talk::User testee(env.root, "1001");
+    a.check("", !testee.isAllowedToSendPMs());
 }
 
 
@@ -221,77 +346,63 @@ AFL_TEST("server.talk.User:isAutoWatch:disabled-in-profile-enabled-in-default", 
 // Not set; default means no
 AFL_TEST("server.talk.User:isWatchIndividual:not-set", a)
 {
-    afl::net::NullCommandHandler mail;
-    afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mail, server::talk::Configuration());
-    server::talk::User testee(root, "1001");
+    Environment env;
+    server::talk::User testee(env.root, "1001");
     a.check("", !testee.isWatchIndividual());
 }
 
 // Enabled in user profile
 AFL_TEST("server.talk.User:isWatchIndividual:enabled-in-profile", a)
 {
-    afl::net::NullCommandHandler mail;
-    afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mail, server::talk::Configuration());
-    root.userRoot().subtree("1001").hashKey("profile").intField("talkwatchindividual").set(1);
-    server::talk::User testee(root, "1001");
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").intField("talkwatchindividual").set(1);
+    server::talk::User testee(env.root, "1001");
     a.check("", testee.isWatchIndividual());
 }
 
 // Disabled in user profile
 AFL_TEST("server.talk.User:isWatchIndividual:disabled-in-profile", a)
 {
-    afl::net::NullCommandHandler mail;
-    afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mail, server::talk::Configuration());
-    root.userRoot().subtree("1001").hashKey("profile").intField("talkwatchindividual").set(0);
-    server::talk::User testee(root, "1001");
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").intField("talkwatchindividual").set(0);
+    server::talk::User testee(env.root, "1001");
     a.check("", !testee.isWatchIndividual());
 }
 
 // Enabled in default profile
 AFL_TEST("server.talk.User:isWatchIndividual:enabled-in-default", a)
 {
-    afl::net::NullCommandHandler mail;
-    afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mail, server::talk::Configuration());
-    root.defaultProfile().intField("talkwatchindividual").set(1);
-    server::talk::User testee(root, "1001");
+    Environment env;
+    env.root.defaultProfile().intField("talkwatchindividual").set(1);
+    server::talk::User testee(env.root, "1001");
     a.check("", testee.isWatchIndividual());
 }
 
 // Disabled in default profile
 AFL_TEST("server.talk.User:isWatchIndividual:disabled-in-default", a)
 {
-    afl::net::NullCommandHandler mail;
-    afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mail, server::talk::Configuration());
-    root.defaultProfile().intField("talkwatchindividual").set(0);
-    server::talk::User testee(root, "1001");
+    Environment env;
+    env.root.defaultProfile().intField("talkwatchindividual").set(0);
+    server::talk::User testee(env.root, "1001");
     a.check("", !testee.isWatchIndividual());
 }
 
 // Enabled in user, disabled in default
 AFL_TEST("server.talk.User:isWatchIndividual:enabled-in-profile-disabled-in-default", a)
 {
-    afl::net::NullCommandHandler mail;
-    afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mail, server::talk::Configuration());
-    root.userRoot().subtree("1001").hashKey("profile").intField("talkwatchindividual").set(1);
-    root.defaultProfile().intField("talkwatchindividual").set(0);
-    server::talk::User testee(root, "1001");
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").intField("talkwatchindividual").set(1);
+    env.root.defaultProfile().intField("talkwatchindividual").set(0);
+    server::talk::User testee(env.root, "1001");
     a.check("", testee.isWatchIndividual());
 }
 
 // Disabled in user, enabled in default
 AFL_TEST("server.talk.User:isWatchIndividual:disabled-in-profile-enabled-in-default", a)
 {
-    afl::net::NullCommandHandler mail;
-    afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mail, server::talk::Configuration());
-    root.userRoot().subtree("1001").hashKey("profile").intField("talkwatchindividual").set(0);
-    root.defaultProfile().intField("talkwatchindividual").set(1);
-    server::talk::User testee(root, "1001");
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").intField("talkwatchindividual").set(0);
+    env.root.defaultProfile().intField("talkwatchindividual").set(1);
+    server::talk::User testee(env.root, "1001");
     a.check("", !testee.isWatchIndividual());
 }

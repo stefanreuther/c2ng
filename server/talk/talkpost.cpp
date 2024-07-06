@@ -63,6 +63,9 @@ server::talk::TalkPost::create(int32_t forumId, String_t subject, String_t text,
     User u(m_root, user);
 
     // Spam check
+    if (!u.isAllowedToPost()) {
+        throw std::runtime_error(PERMISSION_DENIED);
+    }
     if (checkSpam(subject, text, time, u, m_root.recognizer(), m_root.log())) {
         // Mark it
         isSpam = true;
@@ -166,11 +169,16 @@ server::talk::TalkPost::reply(int32_t parentPostId, String_t subject, String_t t
     }
     m_session.checkPermission(answerperm, m_root);
 
+    // Permission check
+    User u(m_root, user);
+    if (!u.isAllowedToPost()) {
+        throw std::runtime_error(PERMISSION_DENIED);
+    }
+
     // All preconditions fulfilled, operate!
     const int32_t mid = ++m_root.lastMessageId();
     const int32_t time = m_root.getTime();
     Message msg(m_root, mid);
-    User u(m_root, user);
 
     // Configure message
     msg.topicId().set(tid);

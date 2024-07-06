@@ -19,14 +19,24 @@
 #include "server/talk/userfolder.hpp"
 #include "server/talk/userpm.hpp"
 
+using afl::net::NullCommandHandler;
+using afl::net::redis::InternalDatabase;
+using server::talk::Configuration;
+using server::talk::Root;
+using server::talk::Session;
+using server::talk::TalkPM;
+using server::talk::User;
+using server::talk::UserFolder;
+using server::talk::UserPM;
+
 /** Test rendering (bug #336). */
 AFL_TEST("server.talk.TalkPM:render", a)
 {
     // Infrastructure
-    afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mq;
-    server::talk::Root root(db, mq, server::talk::Configuration());
-    server::talk::Session session;
+    InternalDatabase db;
+    NullCommandHandler mq;
+    Root root(db, mq, Configuration());
+    Session session;
 
     // Configure db - just what is needed
     root.userRoot().subtree("1001").intSetKey("pm:folder:1:messages").add(10);
@@ -40,7 +50,7 @@ AFL_TEST("server.talk.TalkPM:render", a)
     session.renderOptions().setFormat("quote:forum");
 
     // Test it
-    server::talk::TalkPM testee(session, root);
+    TalkPM testee(session, root);
     const char EXPECT[] = "[quote=b]\nlet's test this[/quote]";
 
     a.checkEqual("01. render", testee.render(1, 10, server::interface::TalkPM::Options()), EXPECT);
@@ -56,13 +66,10 @@ AFL_TEST("server.talk.TalkPM:render", a)
 /** Command tests. */
 AFL_TEST("server.talk.TalkPM:basics", a)
 {
-    using server::talk::TalkPM;
-    using server::talk::Session;
-
     // Infrastructure
-    afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mq;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    InternalDatabase db;
+    NullCommandHandler mq;
+    Root root(db, mq, Configuration());
 
     Session aSession;
     Session bSession;
@@ -138,8 +145,8 @@ AFL_TEST("server.talk.TalkPM:basics", a)
         // Verify that refcount is not broken.
         // Message #1 is in A's outbox and B's inbox.
         // Message #2 is in A's in+outbox and B's outbox.
-        a.checkEqual("91. referenceCounter", server::talk::UserPM(root, 1).referenceCounter().get(), 2);
-        a.checkEqual("92. referenceCounter", server::talk::UserPM(root, 2).referenceCounter().get(), 3);
+        a.checkEqual("91. referenceCounter", UserPM(root, 1).referenceCounter().get(), 2);
+        a.checkEqual("92. referenceCounter", UserPM(root, 2).referenceCounter().get(), 3);
     }
 
     // Multi-get
@@ -168,13 +175,13 @@ AFL_TEST("server.talk.TalkPM:basics", a)
         // Verify that refcount is not broken.
         // Message #1 is in A's outbox and B's inbox.
         // Message #2 is in A's outbox and B's outbox.
-        a.checkEqual("131. referenceCounter", server::talk::UserPM(root, 1).referenceCounter().get(), 2);
-        a.checkEqual("132. referenceCounter", server::talk::UserPM(root, 2).referenceCounter().get(), 2);
+        a.checkEqual("131. referenceCounter", UserPM(root, 1).referenceCounter().get(), 2);
+        a.checkEqual("132. referenceCounter", UserPM(root, 2).referenceCounter().get(), 2);
 
         // Self-move is a no-op.
         a.checkEqual("141. copy", TalkPM(aSession, root).copy(2, 2, mids), 2);
-        a.checkEqual("142. referenceCounter", server::talk::UserPM(root, 1).referenceCounter().get(), 2);
-        a.checkEqual("143. referenceCounter", server::talk::UserPM(root, 2).referenceCounter().get(), 2);
+        a.checkEqual("142. referenceCounter", UserPM(root, 1).referenceCounter().get(), 2);
+        a.checkEqual("143. referenceCounter", UserPM(root, 2).referenceCounter().get(), 2);
     }
 
     // Remove
@@ -186,7 +193,7 @@ AFL_TEST("server.talk.TalkPM:basics", a)
         a.checkEqual("152. remove", TalkPM(aSession, root).remove(2, mids), 1);
         a.checkEqual("153. remove", TalkPM(bSession, root).remove(1, mids), 1);
         a.checkEqual("154. remove", TalkPM(bSession, root).remove(2, mids), 0);
-        a.checkEqual("155. referenceCounter", server::talk::UserPM(root, 1).referenceCounter().get(), 0);
+        a.checkEqual("155. referenceCounter", UserPM(root, 1).referenceCounter().get(), 0);
     }
 
     // Render
@@ -228,13 +235,11 @@ AFL_TEST("server.talk.TalkPM:basics", a)
 /** Command tests for root. Must all fail. */
 AFL_TEST("server.talk.TalkPM:admin", a)
 {
-    using server::talk::TalkPM;
-
     // Infrastructure
-    afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mq;
-    server::talk::Root root(db, mq, server::talk::Configuration());
-    server::talk::Session session;
+    InternalDatabase db;
+    NullCommandHandler mq;
+    Root root(db, mq, Configuration());
+    Session session;
 
     // Make a system folders (not required, commands hopefully fail before looking here)
     root.defaultFolderRoot().subtree("1").hashKey("header").stringField("name").set("Inbox");
@@ -264,19 +269,17 @@ AFL_TEST("server.talk.TalkPM:admin", a)
 /** Test receiver handling. */
 AFL_TEST("server.talk.TalkPM:receivers", a)
 {
-    using server::talk::UserFolder;
-
     // Infrastructure
-    afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mq;
-    server::talk::Root root(db, mq, server::talk::Configuration());
-    server::talk::Session session;
+    InternalDatabase db;
+    NullCommandHandler mq;
+    Root root(db, mq, Configuration());
+    Session session;
     session.setUser("a");
-    server::talk::TalkPM testee(session, root);
-    server::talk::User ua(root, "a");
-    server::talk::User ub(root, "b");
-    server::talk::User uc(root, "c");
-    server::talk::User ud(root, "d");
+    TalkPM testee(session, root);
+    User ua(root, "a");
+    User ub(root, "b");
+    User uc(root, "c");
+    User ud(root, "d");
 
     // Preload database
     // - users b,c,d are on game 3
@@ -341,15 +344,13 @@ AFL_TEST("server.talk.TalkPM:receivers", a)
 /** Test receiver errors. */
 AFL_TEST("server.talk.TalkPM:receivers:error", a)
 {
-    using server::talk::UserFolder;
-
     // Infrastructure
-    afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mq;
-    server::talk::Root root(db, mq, server::talk::Configuration());
-    server::talk::Session session;
+    InternalDatabase db;
+    NullCommandHandler mq;
+    Root root(db, mq, Configuration());
+    Session session;
     session.setUser("a");
-    server::talk::TalkPM testee(session, root);
+    TalkPM testee(session, root);
 
     // Preload database
     root.gameRoot().intSetKey("all").add(3);
@@ -375,13 +376,10 @@ AFL_TEST("server.talk.TalkPM:receivers:error", a)
 /** Test suggested folders. */
 AFL_TEST("server.talk.TalkPM:suggestedFolder", a)
 {
-    using server::talk::TalkPM;
-    using server::talk::Session;
-
     // Infrastructure
-    afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mq;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    InternalDatabase db;
+    NullCommandHandler mq;
+    Root root(db, mq, Configuration());
 
     Session aSession;
     Session bSession;
@@ -421,4 +419,83 @@ AFL_TEST("server.talk.TalkPM:suggestedFolder", a)
     a.checkEqual("18. parentFolderName",    i.parentFolderName.orElse(""), "Inbox");
     a.checkEqual("19. suggestedFolder",     i.suggestedFolder.orElse(-1), folderId);
     a.checkEqual("20. suggestedFolderName", i.suggestedFolderName.orElse(""), "User");
+}
+
+/** Test permission to post: default (success) case. */
+AFL_TEST("server.talk.TalkPM:perm:success", a)
+{
+    // Infrastructure
+    InternalDatabase db;
+    NullCommandHandler mq;
+    Root root(db, mq, Configuration());
+    Session session;
+    session.setUser("a");
+    TalkPM testee(session, root);
+
+    a.checkDifferent("", testee.create("u:b", "subj", "text", afl::base::Nothing), 0);
+}
+
+/** Test permission to post: disabled for user. */
+AFL_TEST("server.talk.TalkPM:perm:disabled:user", a)
+{
+    // Infrastructure
+    InternalDatabase db;
+    NullCommandHandler mq;
+    Root root(db, mq, Configuration());
+    Session session;
+    session.setUser("a");
+    TalkPM testee(session, root);
+
+    User(root, "a").profile().intField("allowpm").set(0);
+
+    AFL_CHECK_THROWS(a, testee.create("u:b", "subj", "text", afl::base::Nothing), std::runtime_error);
+}
+
+/** Test permission to post: disabled globally. */
+AFL_TEST("server.talk.TalkPM:perm:disabled:global", a)
+{
+    // Infrastructure
+    InternalDatabase db;
+    NullCommandHandler mq;
+    Root root(db, mq, Configuration());
+    Session session;
+    session.setUser("a");
+    TalkPM testee(session, root);
+
+    root.defaultProfile().intField("allowpm").set(0);
+
+    AFL_CHECK_THROWS(a, testee.create("u:b", "subj", "text", afl::base::Nothing), std::runtime_error);
+}
+
+/** Test permission to post: disabled globally, but enabled per-user. */
+AFL_TEST("server.talk.TalkPM:perm:enabled:re-enabled", a)
+{
+    // Infrastructure
+    InternalDatabase db;
+    NullCommandHandler mq;
+    Root root(db, mq, Configuration());
+    Session session;
+    session.setUser("a");
+    TalkPM testee(session, root);
+
+    root.defaultProfile().intField("allowpm").set(0);
+    User(root, "a").profile().intField("allowpm").set(1);
+
+    a.checkDifferent("", testee.create("u:b", "subj", "text", afl::base::Nothing), 0);
+}
+
+/** Test permission to post: explicitly enabled. */
+AFL_TEST("server.talk.TalkPM:perm:enabled:explicit", a)
+{
+    // Infrastructure
+    InternalDatabase db;
+    NullCommandHandler mq;
+    Root root(db, mq, Configuration());
+    Session session;
+    session.setUser("a");
+    TalkPM testee(session, root);
+
+    User(root, "a").profile().intField("allowpm").set(1);
+
+    a.checkDifferent("", testee.create("u:b", "subj", "text", afl::base::Nothing), 0);
 }

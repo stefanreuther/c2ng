@@ -116,6 +116,60 @@ AFL_TEST("server.talk.TalkPost:create:error", a)
     AFL_CHECK_THROWS(a("21. bad forum"), testee.create(FORUM_ID+1, "subj", "text", server::talk::TalkPost::CreateOptions()), std::exception);
 }
 
+/** Test create(), forbidden. */
+AFL_TEST("server.talk.TalkPost:create:forbidden", a)
+{
+    // Infrastructure
+    afl::net::NullCommandHandler mq;
+    afl::net::redis::InternalDatabase db;
+    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Session session;
+
+    // Set up database
+    // - make a forum
+    const int32_t FORUM_ID = 42;
+    root.allForums().add(FORUM_ID);
+    server::talk::Forum f(root, FORUM_ID);
+    f.name().set("Foorum");
+    f.writePermissions().set("all");
+    f.readPermissions().set("all");
+
+    // Make a user
+    server::talk::User user(root, "b");
+    user.profile().intField("allowpost").set(0);
+
+    session.setUser("b");
+    server::talk::TalkPost testee(session, root);
+    AFL_CHECK_THROWS(a("01. create"), testee.create(FORUM_ID, "subj", "forum:text", server::talk::TalkPost::CreateOptions()), std::exception);
+}
+
+/** Test create(), globally forbidden. */
+AFL_TEST("server.talk.TalkPost:create:forbidden:global", a)
+{
+    // Infrastructure
+    afl::net::NullCommandHandler mq;
+    afl::net::redis::InternalDatabase db;
+    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Session session;
+
+    // Set up database
+    // - make a forum
+    const int32_t FORUM_ID = 42;
+    root.allForums().add(FORUM_ID);
+    server::talk::Forum f(root, FORUM_ID);
+    f.name().set("Foorum");
+    f.writePermissions().set("all");
+    f.readPermissions().set("all");
+
+    // Make a user
+    server::talk::User user(root, "b");
+    root.defaultProfile().intField("allowpost").set(0);
+
+    session.setUser("b");
+    server::talk::TalkPost testee(session, root);
+    AFL_CHECK_THROWS(a("01. create"), testee.create(FORUM_ID, "subj", "forum:text", server::talk::TalkPost::CreateOptions()), std::exception);
+}
+
 /** Test create(), spam case. */
 AFL_TEST("server.talk.TalkPost:create:spam", a)
 {
@@ -149,6 +203,82 @@ AFL_TEST("server.talk.TalkPost:create:spam", a)
     int32_t topicId = server::talk::Message(root, id).topicId().get();
     a.checkEqual("02. spam", server::talk::User(root, "a").profile().intField("spam").get(), 1);
     a.checkEqual("03. perm", server::talk::Topic(root, topicId).readPermissions().get(), "p:spam");
+}
+
+/** Test reply(), forbidden. */
+AFL_TEST("server.talk.TalkPost:reply:forbidden", a)
+{
+    // Infrastructure
+    afl::net::NullCommandHandler mq;
+    afl::net::redis::InternalDatabase db;
+    server::talk::Root root(db, mq, server::talk::Configuration());
+
+    // Set up database
+    // - make a forum
+    const int32_t FORUM_ID = 42;
+    root.allForums().add(FORUM_ID);
+    server::talk::Forum f(root, FORUM_ID);
+    f.name().set("Foorum");
+    f.writePermissions().set("all");
+    f.readPermissions().set("all");
+
+    // Create a posting
+    int32_t postId;
+    {
+        server::talk::Session session;
+        session.setUser("a");
+        server::talk::TalkPost testee(session, root);
+        postId = testee.create(FORUM_ID, "subj", "forum:text", server::talk::TalkPost::CreateOptions());
+    }
+
+    // Make a user that is forbidden
+    server::talk::User user(root, "b");
+    user.profile().intField("allowpost").set(0);
+
+    {
+        server::talk::Session session;
+        session.setUser("b");
+        server::talk::TalkPost testee(session, root);
+        AFL_CHECK_THROWS(a("01. reply"), testee.reply(postId, "reply", "forum:reply text", server::talk::TalkPost::ReplyOptions()), std::exception);
+    }
+}
+
+/** Test reply(), forbidden globally. */
+AFL_TEST("server.talk.TalkPost:reply:forbidden:global", a)
+{
+    // Infrastructure
+    afl::net::NullCommandHandler mq;
+    afl::net::redis::InternalDatabase db;
+    server::talk::Root root(db, mq, server::talk::Configuration());
+
+    // Set up database
+    // - make a forum
+    const int32_t FORUM_ID = 42;
+    root.allForums().add(FORUM_ID);
+    server::talk::Forum f(root, FORUM_ID);
+    f.name().set("Foorum");
+    f.writePermissions().set("all");
+    f.readPermissions().set("all");
+
+    // Create a posting
+    int32_t postId;
+    {
+        server::talk::Session session;
+        session.setUser("a");
+        server::talk::TalkPost testee(session, root);
+        postId = testee.create(FORUM_ID, "subj", "forum:text", server::talk::TalkPost::CreateOptions());
+    }
+
+    // Make a user that is forbidden
+    server::talk::User user(root, "b");
+    root.defaultProfile().intField("allowpost").set(0);
+
+    {
+        server::talk::Session session;
+        session.setUser("b");
+        server::talk::TalkPost testee(session, root);
+        AFL_CHECK_THROWS(a("01. reply"), testee.reply(postId, "reply", "forum:reply text", server::talk::TalkPost::ReplyOptions()), std::exception);
+    }
 }
 
 /** Test permissions in create(), reply(), edit(). */
