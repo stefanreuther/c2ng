@@ -499,3 +499,30 @@ AFL_TEST("server.talk.TalkPM:perm:enabled:explicit", a)
 
     a.checkDifferent("", testee.create("u:b", "subj", "text", afl::base::Nothing), 0);
 }
+
+/** Test rate limiting: a fresh user can send at least 10 messages, but not more than 50.
+    Actual limit as of 20240706: 24 with default config. */
+AFL_TEST("server.talk.TalkPM:ratelimit", a)
+{
+    // Infrastructure
+    InternalDatabase db;
+    NullCommandHandler mq;
+    Root root(db, mq, Configuration());
+    Session session;
+    session.setUser("a");
+    TalkPM testee(session, root);
+
+    int i = 0;
+    while (i < 100) {
+        try {
+            testee.create("u:b", "subj", "text", afl::base::Nothing);
+        }
+        catch (std::runtime_error& e) {
+            break;
+        }
+        ++i;
+    }
+
+    a.checkGreaterEqual("count", i, 10);
+    a.checkGreaterEqual("count", 50, i);
+}

@@ -102,6 +102,8 @@ Upon account creation, {default:profilecopy} is copied into the user profile.
 @key talkwatchindividual:Int         Nonzero: Send mails for individual messages
 @key talkautolink:Int                Nonzero: Link auto-tag option
 @key talkautosmiley:Int              Nonzero: Smiley auto-tag option
+@key talkratescore:Int               Rate-limiting score
+@key talkratetime:Int                Nonzero: time when rate-limiting score was set
 
 <h2>Antispam</h2>
 @key spam:Int                        1=identified as spammer, 0=not a spammer, 2=not a spammer but can see spam

@@ -6,6 +6,7 @@
 #define C2NG_SERVER_TALK_USER_HPP
 
 #include "afl/net/redis/hashkey.hpp"
+#include "afl/net/redis/integerfield.hpp"
 #include "afl/net/redis/integerkey.hpp"
 #include "afl/net/redis/integersetkey.hpp"
 #include "afl/net/redis/subtree.hpp"
@@ -97,6 +98,14 @@ namespace server { namespace talk {
             a topic is marked notified when a notification has been sent until they visit the topic again.
             \return Forum Ids of notified forums */
         afl::net::redis::IntegerSetKey notifiedTopics();
+
+        /** Rate limiting: score.
+            \return Score */
+        afl::net::redis::IntegerField rateScore();
+
+        /** Rate limiting: time.
+            \return Timestamp (reads 0 if never set) */
+        afl::net::redis::IntegerField rateTime();
     };
 
 } }

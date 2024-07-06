@@ -9,6 +9,7 @@
 #include "server/talk/forum.hpp"
 #include "server/talk/message.hpp"
 #include "server/talk/notify.hpp"
+#include "server/talk/ratelimit.hpp"
 #include "server/talk/render/context.hpp"
 #include "server/talk/render/render.hpp"
 #include "server/talk/root.hpp"
@@ -69,6 +70,12 @@ server::talk::TalkPost::create(int32_t forumId, String_t subject, String_t text,
     if (checkSpam(subject, text, time, u, m_root.recognizer(), m_root.log())) {
         // Mark it
         isSpam = true;
+    }
+
+    // Rate limiting
+    const Configuration& config = m_root.config();
+    if (!checkRateLimit(config.rateCostPerPost, time, config, u, m_root.log())) {
+        throw std::runtime_error(PERMISSION_DENIED);
     }
 
     // All preconditions fulfilled, operate!
@@ -175,9 +182,16 @@ server::talk::TalkPost::reply(int32_t parentPostId, String_t subject, String_t t
         throw std::runtime_error(PERMISSION_DENIED);
     }
 
+    // Rate limiting
+    const int32_t time = m_root.getTime();
+    const Configuration& config = m_root.config();
+    if (!checkRateLimit(config.rateCostPerPost, time, config, u, m_root.log())) {
+        throw std::runtime_error(PERMISSION_DENIED);
+    }
+
+
     // All preconditions fulfilled, operate!
     const int32_t mid = ++m_root.lastMessageId();
-    const int32_t time = m_root.getTime();
     Message msg(m_root, mid);
 
     // Configure message

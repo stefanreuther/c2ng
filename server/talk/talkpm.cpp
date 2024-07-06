@@ -6,22 +6,23 @@
 #include <set>
 #include <stdexcept>
 #include "server/talk/talkpm.hpp"
-#include "afl/string/parse.hpp"
-#include "server/errors.hpp"
 #include "afl/data/stringlist.hpp"
-#include "afl/net/redis/integersetkey.hpp"
 #include "afl/net/redis/hashkey.hpp"
-#include "game/v3/structures.hpp"
+#include "afl/net/redis/integersetkey.hpp"
 #include "afl/net/redis/subtree.hpp"
-#include "server/talk/root.hpp"
-#include "server/talk/userpm.hpp"
-#include "server/talk/session.hpp"
-#include "server/talk/user.hpp"
-#include "server/talk/userfolder.hpp"
+#include "afl/string/parse.hpp"
+#include "game/v3/structures.hpp"
+#include "server/errors.hpp"
+#include "server/talk/notify.hpp"
+#include "server/talk/ratelimit.hpp"
 #include "server/talk/render/context.hpp"
 #include "server/talk/render/options.hpp"
 #include "server/talk/render/render.hpp"
-#include "server/talk/notify.hpp"
+#include "server/talk/root.hpp"
+#include "server/talk/session.hpp"
+#include "server/talk/user.hpp"
+#include "server/talk/userfolder.hpp"
+#include "server/talk/userpm.hpp"
 
 namespace {
     const int32_t PMSystemInboxFolder  = 1;
@@ -120,15 +121,24 @@ server::talk::TalkPM::create(String_t receivers, String_t subject, String_t text
 
     // PM permission?
     const String_t sender = m_session.getUser();
-    if (!User(m_root, sender).isAllowedToSendPMs()) {
+    User user(m_root, sender);
+    if (!user.isAllowedToSendPMs()) {
         throw std::runtime_error(PERMISSION_DENIED);
     }
 
-    // Execute
+    // Check receivers
     std::set<String_t> recv;
     parseReceivers(receivers, recv, m_root);
     if (recv.empty()) {
         throw std::runtime_error(NO_RECEIVERS);
+    }
+
+    // Rate limit
+    const Time_t time = m_root.getTime();
+    const Configuration& config = m_root.config();
+    const int32_t cost = config.rateCostPerMail + config.rateCostPerReceiver * int32_t(recv.size());
+    if (!checkRateLimit(cost, time, config, user, m_root.log())) {
+        throw std::runtime_error(PERMISSION_DENIED);
     }
 
     // Create the message
@@ -138,7 +148,7 @@ server::talk::TalkPM::create(String_t receivers, String_t subject, String_t text
     pm.author().set(sender);
     pm.receivers().set(receivers);
     pm.subject().set(subject);
-    pm.time().set(m_root.getTime());
+    pm.time().set(time);
     pm.text().set(text);
     pm.flags(sender).set(PMStateRead);
     if (const int32_t* p = parent.get()) {
@@ -148,11 +158,8 @@ server::talk::TalkPM::create(String_t receivers, String_t subject, String_t text
     // Distribute the message
     afl::data::StringList_t notifyIndividual;
     afl::data::StringList_t notifyGroup;
-    {
-        User u(m_root, sender);
-        if (UserFolder(u, PMSystemOutboxFolder).messages().add(pmid)) {
-            pm.addReference();
-        }
+    if (UserFolder(user, PMSystemOutboxFolder).messages().add(pmid)) {
+        pm.addReference();
     }
 
     for (std::set<String_t>::const_iterator i = recv.begin(); i != recv.end(); ++i) {

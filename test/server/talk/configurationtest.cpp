@@ -15,4 +15,11 @@ AFL_TEST("server.talk.Configuration", a)
     a.check("02", testee.baseUrl.size() > 0);
     a.check("03", testee.messageIdSuffix.size() > 0);
     a.check("04", testee.messageIdSuffix.find('@') != String_t::npos);
+    a.check("05", testee.rateMinimum < 0);
+    a.check("06", testee.rateMaximum > testee.rateMinimum);
+    a.check("07", testee.rateCooldown > 0);
+    a.check("08", testee.rateInterval > 0);
+    a.check("09", testee.rateCostPerMail >= 0);
+    a.check("10", testee.rateCostPerReceiver >= 0);
+    a.check("11", testee.rateCostPerPost >= 0);
 }

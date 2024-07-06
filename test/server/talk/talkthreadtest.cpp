@@ -27,7 +27,9 @@ AFL_TEST("server.talk.TalkThread", a)
     // Infrastructure
     afl::net::redis::InternalDatabase db;
     afl::net::NullCommandHandler mq;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Configuration config;
+    config.rateCostPerPost = 0;
+    server::talk::Root root(db, mq, config);
 
     // Create some forums
     {

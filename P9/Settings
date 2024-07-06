@@ -1230,11 +1230,11 @@ DEPEND_guilib = afl
 PROJ_AUTO += guilib:gfx/*.cpp,gfx/*.hpp,ui/*.cpp,ui/*.hpp,client/*.cpp,client/*.hpp
 
 TARGETS += serverlib
-FILES_serverlib = server/play/racenamepacker.cpp \
-    server/play/racenamepacker.hpp server/host/spec/directory.cpp \
-    server/host/spec/directory.hpp server/host/spec/publisherimpl.cpp \
-    server/host/spec/publisherimpl.hpp server/host/spec/publisher.hpp \
-    server/host/hostspecificationimpl.cpp \
+FILES_serverlib = server/talk/ratelimit.cpp server/talk/ratelimit.hpp \
+    server/play/racenamepacker.cpp server/play/racenamepacker.hpp \
+    server/host/spec/directory.cpp server/host/spec/directory.hpp \
+    server/host/spec/publisherimpl.cpp server/host/spec/publisherimpl.hpp \
+    server/host/spec/publisher.hpp server/host/hostspecificationimpl.cpp \
     server/host/hostspecificationimpl.hpp \
     server/interface/hostspecificationserver.cpp \
     server/interface/hostspecificationserver.hpp \
@@ -1799,7 +1799,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/server/play/messagepackertest.cpp \
+FILES_testsuite = test/server/talk/ratelimittest.cpp \
+    test/server/play/messagepackertest.cpp \
     test/game/vcr/flak/nullvisualizertest.cpp \
     test/game/vcr/flak/visualizertest.cpp \
     test/game/test/specificationloadertest.cpp \

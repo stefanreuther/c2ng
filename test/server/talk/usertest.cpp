@@ -80,6 +80,11 @@ AFL_TEST("server.talk.User:basics", a)
     a.checkEqual("23. defaultfield", Access(p).toString(), "defaultvalue");
     p.reset(testee.getProfileRaw("defaultint"));
     a.checkEqual("24. defaultint", Access(p).toInteger(), 2);
+
+    testee.rateTime().set(99);
+    testee.rateScore().set(77);
+    a.checkEqual("31. rateTime", testee.rateTime().get(), 99);
+    a.checkEqual("32. rateScore", testee.rateScore().get(), 77);
 }
 
 /*

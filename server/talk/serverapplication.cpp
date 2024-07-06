@@ -5,9 +5,11 @@
 
 #include "server/talk/serverapplication.hpp"
 #include "afl/async/controller.hpp"
+#include "afl/except/commandlineexception.hpp"
 #include "afl/net/resp/protocolhandler.hpp"
 #include "afl/net/server.hpp"
 #include "afl/string/format.hpp"
+#include "afl/string/parse.hpp"
 #include "afl/sys/thread.hpp"
 #include "server/common/sessionprotocolhandlerfactory.hpp"
 #include "server/ports.hpp"
@@ -21,6 +23,15 @@ using afl::async::InterruptOperation;
 
 namespace {
     const char LOG_NAME[] = "talk";
+
+    int32_t parseInt(const String_t& key, const String_t& value)
+    {
+        int32_t n;
+        if (!afl::string::strToInteger(value, n)) {
+            throw afl::except::CommandLineException(afl::string::Format("Invalid number for '%s'", key));
+        }
+        return n;
+    }
 }
 
 server::talk::ServerApplication::ServerApplication(afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net, afl::async::Interrupt& intr)
@@ -122,6 +133,46 @@ server::talk::ServerApplication::handleConfiguration(const String_t& key, const 
            Name of file with syntax database.
            If not specified, the syntax database will be empty ({SYNTAXGET} will always fail). */
         m_keywordTableName = value;
+        return true;
+    } else if (key == "TALK.RLS.MIN") {
+        /* @q Talk.RLS.Min:Int (Config)
+           Rate Limiting: minimum score.
+           Score is not allowed to go below this value, even if cooldown would allow more. */
+        m_config.rateMinimum = parseInt(key, value);
+        return true;
+    } else if (key == "TALK.RLS.MAX") {
+        /* @q Talk.RLS.Max:Int (Config)
+           Rate Limiting: maximum score.
+           If this score is exceeded, posting/mailing is no longer allowed. */
+        m_config.rateMaximum = parseInt(key, value);
+        return true;
+    } else if (key == "TALK.RLS.COOLDOWN") {
+        /* @q Talk.RLS.Cooldown:Int (Config)
+           Rate Limiting: cooldown per time interval.
+           Score is reduced by this value per {Talk.RLS.Cooldown}. */
+        m_config.rateCooldown = parseInt(key, value);
+        return true;
+    } else if (key == "TALK.RLS.INTERVAL") {
+        /* @q Talk.RLS.Interval:Int (Config)
+           Rate Limiting: cooldown time interval.
+           During this time interval, score is reduced by {Talk.RLS.Cooldown}. */
+        m_config.rateInterval = parseInt(key, value);
+        return true;
+    } else if (key == "TALK.RLS.COST.MAIL") {
+        /* @q Talk.RLS.Cost.Mail:Int (Config)
+           Rate Limiting: cost (score increase) per mail ({PMNEW}).
+           Cost (score increase) per mail ({PMNEW}). */
+        m_config.rateCostPerMail = parseInt(key, value);
+        return true;
+    } else if (key == "TALK.RLS.COST.RECEIVER") {
+        /* @q Talk.RLS.Cost.Receiver:Int (Config)
+           Rate Limiting: cost (score increase) per mail receiver ({PMNEW}). */
+        m_config.rateCostPerReceiver = parseInt(key, value);
+        return true;
+    } else if (key == "TALK.RLS.COST.POST") {
+        /* @q Talk.RLS.Cost.Post:Int (Config)
+           Rate Limiting: cost (score increase) per forum post ({POSTNEW}, {POSTREPLY}). */
+        m_config.rateCostPerPost = parseInt(key, value);
         return true;
     } else if (key == "REDIS.HOST") {
         m_dbAddress.setName(value);

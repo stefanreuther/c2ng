@@ -26,10 +26,18 @@
 #include "server/types.hpp"
 
 server::common::User::User(Root& root, String_t userId)
-    : m_user(root.userRoot().subtree(userId)),
+    : m_userId(userId),
+      m_user(root.userRoot().subtree(userId)),
       m_defaultProfile(root.defaultProfile())
 {
     // ex User::User
+}
+
+// Get user Id.
+const String_t&
+server::common::User::getUserId() const
+{
+    return m_userId;
 }
 
 // Get user's screen name.

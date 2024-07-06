@@ -144,3 +144,16 @@ server::talk::User::notifiedTopics()
     return forumData().intSetKey("notifiedThreads");
 }
 
+// Rate limiting: score.
+afl::net::redis::IntegerField
+server::talk::User::rateScore()
+{
+    return profile().intField("talkratescore");
+}
+
+// Rate limiting: time.
+afl::net::redis::IntegerField
+server::talk::User::rateTime()
+{
+    return profile().intField("talkratetime");
+}

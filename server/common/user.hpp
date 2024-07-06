@@ -21,6 +21,10 @@ namespace server { namespace common {
             \param userId User Id ("1001") */
         User(Root& root, String_t userId);
 
+        /** Get user Id.
+            \return user Id */
+        const String_t& getUserId() const;
+
         /** Get user's screen name.
             This value is stored in the user's profile.
             \return Screen Name */
@@ -67,6 +71,7 @@ namespace server { namespace common {
         static bool exists(Root& root, String_t userId);
 
      private:
+        const std::string m_userId;
         afl::net::redis::Subtree m_user;
         afl::net::redis::HashKey m_defaultProfile;
     };

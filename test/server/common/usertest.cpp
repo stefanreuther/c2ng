@@ -14,6 +14,19 @@
 #include "server/common/root.hpp"
 
 /*
+ *  getUserId()
+ */
+
+// No real name set
+AFL_TEST("server.common.User:getUserId", a)
+{
+    afl::net::redis::InternalDatabase db;
+    server::common::Root root(db);
+    server::common::User testee(root, "1001");
+    a.checkEqual("getUserId", testee.getUserId(), "1001");
+}
+
+/*
  *  getRealName()
  */
 

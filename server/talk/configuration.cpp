@@ -9,5 +9,12 @@
 server::talk::Configuration::Configuration()
     : messageIdSuffix("@localhost"),
       baseUrl("http://localhost/"),
-      pathHost("localhost")
+      pathHost("localhost"),
+      rateMinimum(-100),
+      rateMaximum(50),
+      rateCooldown(50),
+      rateInterval(1440),
+      rateCostPerReceiver(1),
+      rateCostPerMail(1),
+      rateCostPerPost(5)
 { }

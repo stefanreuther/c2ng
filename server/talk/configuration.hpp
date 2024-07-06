@@ -24,6 +24,27 @@ namespace server { namespace talk {
 
         /// Path host. Hostname of this server to use in RfC "Path" and "Xref" headers.
         String_t pathHost;
+
+        /// Rate limiting: minimum score.
+        int32_t rateMinimum;
+
+        /// Rate limiting: maximum score.
+        int32_t rateMaximum;
+
+        /// Rate limiting: cooldown per interval.
+        int32_t rateCooldown;
+
+        /// Rate limiting: cooldown interval.
+        int32_t rateInterval;
+
+        /// Rate limiting: cost per mail receiver.
+        int32_t rateCostPerReceiver;
+
+        /// Rate limiting: fixed cost per mail.
+        int32_t rateCostPerMail;
+
+        /// Rate limiting: fixed cost per posting.
+        int32_t rateCostPerPost;
     };
 
 } }
