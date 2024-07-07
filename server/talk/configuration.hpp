@@ -45,6 +45,9 @@ namespace server { namespace talk {
 
         /// Rate limiting: fixed cost per posting.
         int32_t rateCostPerPost;
+
+        /// Maximum number of postings to check for TalkPost::getNewest (POSTLSNEW).
+        int32_t getNewestLimit;
     };
 
 } }

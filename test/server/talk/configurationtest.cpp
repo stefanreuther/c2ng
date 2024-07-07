@@ -22,4 +22,5 @@ AFL_TEST("server.talk.Configuration", a)
     a.check("09", testee.rateCostPerMail >= 0);
     a.check("10", testee.rateCostPerReceiver >= 0);
     a.check("11", testee.rateCostPerPost >= 0);
+    a.check("12", testee.getNewestLimit > 0);
 }

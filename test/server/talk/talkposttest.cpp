@@ -837,6 +837,59 @@ AFL_TEST("server.talk.TalkPost:getNewest", a)
     }
 }
 
+/** Test getNewest, with limit config. */
+AFL_TEST("server.talk.TalkPost:getNewest:limit", a)
+{
+    // Infrastructure
+    NullCommandHandler mq;
+    InternalDatabase db;
+    Configuration config;
+    config.rateCostPerPost = 0;
+    config.getNewestLimit = 5;
+    Root root(db, mq, config);
+
+    // Set up database
+    // - make a forum
+    const int32_t FORUM_ID = 42;
+    root.allForums().add(FORUM_ID);
+    Forum f(root, FORUM_ID);
+    f.name().set("Foorum");
+    f.writePermissions().set("all");
+    f.readPermissions().set("-u:b,all");
+
+    // Initial postings
+    for (int i = 0; i < 100; ++i) {
+        // 1, 3, 5, 7, ...., 199: public
+        // 2,4,6,8, ..., 200: non-public
+        Session session;
+        TalkPost testee(session, root);
+        {
+            TalkPost::CreateOptions opts;
+            opts.readPermissions = "all";
+            opts.userId = "a";
+            testee.create(FORUM_ID, "subj", "text:text", opts);
+        }
+        {
+            TalkPost::CreateOptions opts;
+            opts.userId = "a";
+            testee.create(FORUM_ID, "subj", "text:text", opts);
+        }
+    }
+
+    // List as 'b' who sees only the odd ones
+    // Limit is set to 5, so we check 196..200.
+    {
+        Session session;
+        TalkPost testee(session, root);
+        session.setUser("b");
+        afl::data::IntegerList_t result;
+        testee.getNewest(5, result);
+        a.checkEqual("01. size", result.size(), 2U);
+        a.checkEqual("02. result", result[0], 199);
+        a.checkEqual("03. result", result[1], 197);
+    }
+}
+
 /** Test getNewest() for a user who cannot see anything. */
 AFL_TEST("server.talk.TalkPost:getNewest:invisible", a)
 {

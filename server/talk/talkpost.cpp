@@ -381,7 +381,7 @@ server::talk::TalkPost::getNewest(int count, afl::data::IntegerList_t& postIds)
     // ex planetscentral/talk/cmdpost.cc:doPostListNew
     // Do not check more than this number of postings.
     // This is to avoid checking the whole database for a user who cannot see anything.
-    const int32_t MAX_POSTS_TO_CHECK = 200;
+    const int32_t MAX_POSTS_TO_CHECK = m_root.config().getNewestLimit;
 
     // Do it
     int32_t mid = m_root.lastMessageId().get();

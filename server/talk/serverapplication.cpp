@@ -174,6 +174,13 @@ server::talk::ServerApplication::handleConfiguration(const String_t& key, const 
            Rate Limiting: cost (score increase) per forum post ({POSTNEW}, {POSTREPLY}). */
         m_config.rateCostPerPost = parseInt(key, value);
         return true;
+    } else if (key == "TALK.POSTLSNEW.LIMIT") {
+        /* @q Talk.POSTLSNEW.Limit:Int (Config)
+           Maximum number of posts to check for {POSTLSNEW} command.
+           Default limit is set to anticipate a few invisible/deleted posts.
+           Increase if you have a high ratio. */
+        m_config.getNewestLimit = parseInt(key, value);
+        return true;
     } else if (key == "REDIS.HOST") {
         m_dbAddress.setName(value);
         return true;
