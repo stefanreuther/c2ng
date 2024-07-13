@@ -1,5 +1,6 @@
 /**
   *  \file server/play/shipmissionpacker.cpp
+  *  \brief Class server::play::ShipMissionPacker
   */
 
 #include <stdexcept>
@@ -87,6 +88,18 @@ server::play::ShipMissionPacker::buildValue() const
             hv->setNew("name", makeStringValue(m.getName()));
             hv->setNew("cond", makeStringValue(m.getConditionExpression()));
             hv->setNew("group", makeStringValue(m.getGroup()));
+            if (char ch = m.getHotkey()) {
+                hv->setNew("key", makeStringValue(String_t(1, ch)));
+            }
+
+            // Following attributes not published for now:
+            // - getRaceMask [checked by worksOn]
+            // - getFlags [partially checked by worksOn]
+            // - getShortName
+            // - getWarningExpression()
+            // - getLabelExpression()
+            // - getSetCommand()
+            // These would be reconsidered when we switch to client-side mission processing.
 
             vv->pushBackNew(new afl::data::HashValue(hv));
         }
