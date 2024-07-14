@@ -1,5 +1,6 @@
 /**
   *  \file server/talk/commandhandler.cpp
+  *  \brief Class server::talk::CommandHandler
   */
 
 #include <stdexcept>
@@ -128,7 +129,7 @@ server::talk::CommandHandler::handleCommand(const String_t& upcasedCommand, inte
 }
 
 String_t
-server::talk::CommandHandler::getHelp(String_t topic) const
+server::talk::CommandHandler::getHelp(String_t topic)
 {
     // ex planetscentral/talk/talkconnection.cc:getHelp
     if (topic == "GROUP") {

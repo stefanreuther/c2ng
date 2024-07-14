@@ -1,25 +1,10 @@
 /**
   *  \file server/talk/group.cpp
+  *  \brief Class server::talk::Group
   */
 
 #include "server/talk/group.hpp"
 #include "server/talk/render/render.hpp"
-
-// group:$GRID:header : hash
-//         - name                          Name
-//         - description                   Description
-//         - parent                        If present, GRID of parent group
-//         - key                           Sort key for displaying groups
-                             
-//         Well-known GRIDs:    
-//         - root               
-//         - active                        Active/joining games
-//         - finished                      Finished games
-
-// group:$GRID:groups : set
-// group:$GRID:forums : set
-//         - GRIDs of subgroups
-//         - FIDs of forums
 
 server::talk::Group::Group(Root& root, String_t groupId)
     : m_group(root.groupRoot().subtree(groupId)),
@@ -123,8 +108,6 @@ server::talk::Group::describe(const server::talk::render::Context& ctx, const se
        @key parent:GRID      (Parent group)
        @key unlisted:Int     (If nonzero, group is unlistable) */
 
-    // FIXME: can we use HMGET?
-    // FIXME: this traditionally does not report "key" although it could now.
     server::interface::TalkGroup::Description result;
     result.name = name().get();
     result.description = server::talk::render::renderText(description().get(), ctx, opts, root);

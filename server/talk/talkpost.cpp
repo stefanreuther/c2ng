@@ -20,10 +20,10 @@
 
 namespace {
     /** Read permissions that are assigned to topics identified as being spam. */
-    const char* SPAM_READ_PERM = "p:spam";
+    const char*const SPAM_READ_PERM = "p:spam";
 
     /** Answer permissions that are assigned to topics identified as being spam. */
-    const char* SPAM_ANSWER_PERM = "p:spam";
+    const char*const SPAM_ANSWER_PERM = "p:spam";
 }
 
 // Constructor.
@@ -243,7 +243,6 @@ server::talk::TalkPost::edit(int32_t postId, String_t subject, String_t text)
         throw std::runtime_error(NOT_AUTHOR);
     }
     if (msg.subject().get() == subject && msg.text().get() == text) {
-        // FIXME: was 'conn.sendSuccess("OK, unchanged");'
         return;
     }
 

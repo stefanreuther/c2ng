@@ -1,5 +1,6 @@
 /**
   *  \file server/talk/talkthread.hpp
+  *  \brief Class server::talk::TalkThread
   */
 #ifndef C2NG_SERVER_TALK_TALKTHREAD_HPP
 #define C2NG_SERVER_TALK_TALKTHREAD_HPP
@@ -11,8 +12,12 @@ namespace server { namespace talk {
     class Session;
     class Root;
 
+    /** Implementation of THREAD commands. */
     class TalkThread : public server::interface::TalkThread {
      public:
+        /** Constructor.
+            @param session Session
+            @param root Service root */
         TalkThread(Session& session, Root& root);
 
         virtual Info getInfo(int32_t threadId);

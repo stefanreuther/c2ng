@@ -14,6 +14,7 @@
 #include "afl/test/testrunner.hpp"
 #include "server/errors.hpp"
 #include "server/interface/composablecommandhandler.hpp"
+#include "server/test/mailmock.hpp"
 #include "server/types.hpp"
 #include <map>
 #include <stdexcept>
@@ -23,6 +24,7 @@ using afl::data::HashValue;
 using afl::net::MimeParser;
 using server::makeIntegerValue;
 using server::makeStringValue;
+using server::test::MailMock;
 
 namespace {
     /*
@@ -52,50 +54,6 @@ namespace {
         int32_t m_state;
         String_t m_user;
         String_t m_error;
-    };
-
-    /*
-     *  Mail Mock
-     *
-     *  This simulates a mail queue.
-     *  It verifies the command sequence.
-     *  It stashes away received messages.
-     *  It takes a few simplifications for our purposes.
-     */
-    class MailMock : public server::interface::MailQueue {
-     public:
-        struct Message {
-            String_t templateName;
-            std::map<String_t, String_t> parameters;
-            String_t receiver;
-        };
-        MailMock(afl::test::Assert a)
-            : m_assert(a), m_current(), m_queue()
-            { }
-        // MailQueue methods:
-        virtual void startMessage(String_t templateName, afl::base::Optional<String_t> uniqueId);
-        virtual void addParameter(String_t parameterName, String_t value);
-        virtual void addAttachment(String_t /*url*/)
-            { throw std::runtime_error("addAttachment unexpected"); }
-        virtual void send(afl::base::Memory<const String_t> receivers);
-        virtual void cancelMessage(String_t /*uniqueId*/)
-            { throw std::runtime_error("cancelMessage unexpected"); }
-        virtual void confirmAddress(String_t /*address*/, String_t /*key*/, afl::base::Optional<String_t> /*info*/)
-            { throw std::runtime_error("confirmAddress unexpected"); }
-        virtual void requestAddress(String_t /*user*/)
-            { throw std::runtime_error("requestAddress unexpected"); }
-        virtual void runQueue()
-            { throw std::runtime_error("runQueue unexpected"); }
-        virtual UserStatus getUserStatus(String_t /*user*/)
-            { throw std::runtime_error("getUserStatus unexpected"); }
-
-        Message* extract();
-        bool empty() const;
-
-     private:
-        afl::test::Assert m_assert;
-        std::auto_ptr<Message> m_current;
-        afl::container::PtrQueue<Message> m_queue;
     };
 
     /*
@@ -191,47 +149,6 @@ HostMock::handleCommand(const String_t& upcasedCommand, interpreter::Arguments& 
 }
 
 /*
- *  MailMock
- */
-
-void
-MailMock::startMessage(String_t templateName, afl::base::Optional<String_t> /*uniqueId*/)
-{
-    m_assert.checkNull("startMessage: message", m_current.get());
-    m_current.reset(new Message());
-    m_current->templateName = templateName;
-}
-
-void
-MailMock::addParameter(String_t parameterName, String_t value)
-{
-    m_assert.checkNonNull("addParameter: message", m_current.get());
-    m_assert.check("addParameter: unique parameter", m_current->parameters.find(parameterName) == m_current->parameters.end());
-    m_current->parameters.insert(std::make_pair(parameterName, value));
-}
-
-void
-MailMock::send(afl::base::Memory<const String_t> receivers)
-{
-    m_assert.checkNonNull("send: message", m_current.get());
-    m_assert.checkEqual("send: receivers", receivers.size(), 1U);
-    m_current->receiver = *receivers.at(0);
-    m_queue.pushBackNew(m_current.release());
-}
-
-MailMock::Message*
-MailMock::extract()
-{
-    return m_queue.extractFront();
-}
-
-bool
-MailMock::empty() const
-{
-    return m_queue.empty() && m_current.get() == 0;
-}
-
-/*
  *  Helper
  */
 
@@ -283,10 +200,11 @@ AFL_TEST("server.mailin.MailProcessor:turn", a)
     a.check("01. processMail", processMail(getSimpleTurnMail(), mail, host));
 
     // Verify result
-    std::auto_ptr<MailMock::Message> m(mail.extract());
+    std::auto_ptr<MailMock::Message> m(mail.extractFirst());
     a.checkNonNull("11. mail", m.get());
     a.checkEqual("12. templateName", m->templateName, "turn");
-    a.checkEqual("13. receiver",     m->receiver, "user:uu");
+    a.checkEqual("13. receiver",     m->receivers.size(), 1U);
+    a.checkEqual("13a. receiver",   *m->receivers.begin(), "user:uu");
     a.checkEqual("14. trn_status",   m->parameters["trn_status"], "1");
     a.checkEqual("15. trn_output",   m->parameters["trn_output"], "output...");
     a.checkEqual("16. gameid",       m->parameters["gameid"], "32");
@@ -309,10 +227,11 @@ AFL_TEST("server.mailin.MailProcessor:error:407", a)
     a.check("01. processMail", processMail(getSimpleTurnMail(), mail, host));
 
     // Verify result
-    std::auto_ptr<MailMock::Message> m(mail.extract());
+    std::auto_ptr<MailMock::Message> m(mail.extractFirst());
     a.checkNonNull("11. mail", m.get());
     a.checkEqual("12. templateName", m->templateName, "turn-mismatch");
-    a.checkEqual("13. receiver",     m->receiver, "mail:stefan@localhost");
+    a.checkEqual("13. receiver",     m->receivers.size(), 1U);
+    a.checkEqual("13a. receiver",   *m->receivers.begin(), "mail:stefan@localhost");
     a.checkEqual("14. mail_subject", m->parameters["mail_subject"], "test");
 
     // No more mail
@@ -330,10 +249,11 @@ AFL_TEST("server.mailin.MailProcessor:error:404", a)
     a.check("01. processMail", processMail(getSimpleTurnMail(), mail, host));
 
     // Verify result
-    std::auto_ptr<MailMock::Message> m(mail.extract());
+    std::auto_ptr<MailMock::Message> m(mail.extractFirst());
     a.checkNonNull("11. mail", m.get());
     a.checkEqual("12. templateName", m->templateName, "turn-stale");
-    a.checkEqual("13. receiver",     m->receiver, "mail:stefan@localhost");
+    a.checkEqual("13. receiver",     m->receivers.size(), 1U);
+    a.checkEqual("13a. receiver",   *m->receivers.begin(), "mail:stefan@localhost");
     a.checkEqual("14. mail_subject", m->parameters["mail_subject"], "test");
 
     // No more mail
@@ -351,10 +271,11 @@ AFL_TEST("server.mailin.MailProcessor:error:412", a)
     a.check("01. processMail", processMail(getSimpleTurnMail(), mail, host));
 
     // Verify result
-    std::auto_ptr<MailMock::Message> m(mail.extract());
+    std::auto_ptr<MailMock::Message> m(mail.extractFirst());
     a.checkNonNull("11. mail", m.get());
     a.checkEqual("12. templateName", m->templateName, "turn-stale");
-    a.checkEqual("13. receiver",     m->receiver, "mail:stefan@localhost");
+    a.checkEqual("13. receiver",     m->receivers.size(), 1U);
+    a.checkEqual("13a. receiver",   *m->receivers.begin(), "mail:stefan@localhost");
     a.checkEqual("14. mail_subject", m->parameters["mail_subject"], "test");
 
     // No more mail
@@ -372,10 +293,11 @@ AFL_TEST("server.mailin.MailProcessor:error:422", a)
     a.check("01. processMail", processMail(getSimpleTurnMail(), mail, host));
 
     // Verify result
-    std::auto_ptr<MailMock::Message> m(mail.extract());
+    std::auto_ptr<MailMock::Message> m(mail.extractFirst());
     a.checkNonNull("11. mail", m.get());
     a.checkEqual("12. templateName", m->templateName, "turn-error");
-    a.checkEqual("13. receiver",     m->receiver, "mail:stefan@localhost");
+    a.checkEqual("13. receiver",     m->receivers.size(), 1U);
+    a.checkEqual("13a. receiver",   *m->receivers.begin(), "mail:stefan@localhost");
     a.checkEqual("14. mail_subject", m->parameters["mail_subject"], "test");
 
     // No more mail
@@ -432,20 +354,22 @@ AFL_TEST("server.mailin.MailProcessor:multiple", a)
                                            mail, host));
 
     // Verify
-    std::auto_ptr<MailMock::Message> m(mail.extract());
+    std::auto_ptr<MailMock::Message> m(mail.extractFirst());
     a.checkNonNull("11. mail", m.get());
     a.checkEqual("12. templateName", m->templateName, "turn");
-    a.checkEqual("13. receiver",     m->receiver, "user:uu");
+    a.checkEqual("13. receiver",     m->receivers.size(), 1U);
+    a.checkEqual("13a. receiver",   *m->receivers.begin(), "user:uu");
     a.checkEqual("14. gameid",       m->parameters["gameid"], "47");
     a.checkEqual("15. gamename",     m->parameters["gamename"], "Game 47");
     a.checkEqual("16. mail_subject", m->parameters["mail_subject"], "multi");
     a.checkEqual("17. mail_path",    m->parameters["mail_path"], "/part1/player2.trn");
 
     // Second part
-    m.reset(mail.extract());
+    m = mail.extractFirst();
     a.checkNonNull("21. mail", m.get());
     a.checkEqual("22. templateName", m->templateName, "turn");
-    a.checkEqual("23. receiver",     m->receiver, "user:uu");
+    a.checkEqual("23. receiver",     m->receivers.size(), 1U);
+    a.checkEqual("13a. receiver",   *m->receivers.begin(), "user:uu");
     a.checkEqual("24. mail_path",    m->parameters["mail_path"], "/part3/player4.trn");  // name is normalized
 
     // No more parts
@@ -562,10 +486,11 @@ AFL_TEST("server.mailin.MailProcessor:nested", a)
                         mail, host));
 
     // Verify
-    std::auto_ptr<MailMock::Message> m(mail.extract());
+    std::auto_ptr<MailMock::Message> m(mail.extractFirst());
     a.checkNonNull("11. mail", m.get());
     a.checkEqual("12. templateName", m->templateName, "turn");
-    a.checkEqual("13. receiver",     m->receiver, "user:qq");
+    a.checkEqual("13. receiver",     m->receivers.size(), 1U);
+    a.checkEqual("13a. receiver",   *m->receivers.begin(), "user:qq");
     a.checkEqual("14. gameid",       m->parameters["gameid"], "47");
     a.checkEqual("15. gamename",     m->parameters["gamename"], "Game 47");
     a.checkEqual("16. mail_subject", m->parameters["mail_subject"], "3");

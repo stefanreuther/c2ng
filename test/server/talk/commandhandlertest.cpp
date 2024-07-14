@@ -86,3 +86,44 @@ AFL_TEST("server.talk.CommandHandler", a)
     AFL_CHECK_THROWS(a("123. bad verb"), testee.callVoid(Segment().pushBackString("huh?")), std::exception);
     AFL_CHECK_THROWS(a("124. no verb"), testee.callVoid(empty), std::exception);
 }
+
+/** Help coverage. */
+AFL_TEST("server.talk.CommandHandler:help", a)
+{
+    // Infrastructure
+    afl::net::redis::InternalDatabase db;
+    afl::net::NullCommandHandler mq;
+    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Session session;
+
+    // Testee
+    server::talk::CommandHandler testee(root, session);
+
+    // Test that all help pages are different
+    static const char*const PAGES[] = {
+        "addr",
+        "folder",
+        "forum",
+        "group",
+        "nntp",
+        "options",
+        "pm",
+        "post",
+        "render",
+        "syntax",
+        "thread",
+        "uid",
+        "user",
+    };
+
+    std::vector<String_t> results;
+    results.push_back(testee.callString(Segment().pushBackString("HELP")));
+
+    for (size_t i = 0; i < sizeof(PAGES)/sizeof(PAGES[0]); ++i) {
+        String_t txt = testee.callString(Segment().pushBackString("HELP").pushBackString(PAGES[i]));
+        for (size_t j = 0; j < results.size(); ++j) {
+            a.checkDifferent("", results[i], txt);
+        }
+        results.push_back(txt);
+    }
+}

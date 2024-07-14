@@ -59,6 +59,11 @@ AFL_TEST("server.talk.AccessChecker:basics", a)
         a.check("02", testee.isAllowed(m21));
         a.check("03", testee.isAllowed(m22));
         a.check("04", testee.isAllowed(t12));
+
+        AFL_CHECK_SUCCEEDS(a("05. t11"), testee.checkTopic(t11));
+        AFL_CHECK_SUCCEEDS(a("06. m21"), testee.checkMessage(m21));
+        AFL_CHECK_SUCCEEDS(a("07. m22"), testee.checkMessage(m22));
+        AFL_CHECK_SUCCEEDS(a("08. t12"), testee.checkTopic(t12));
     }
 
     // Check user 1001 access: can read the second topic
@@ -70,6 +75,11 @@ AFL_TEST("server.talk.AccessChecker:basics", a)
         a.check("12", !testee.isAllowed(m21));
         a.check("13", testee.isAllowed(m22));
         a.check("14", testee.isAllowed(t12));
+
+        AFL_CHECK_THROWS(a("15. t11"), testee.checkTopic(t11), std::runtime_error);
+        AFL_CHECK_THROWS(a("16. m21"), testee.checkMessage(m21), std::runtime_error);
+        AFL_CHECK_SUCCEEDS(a("17. m22"), testee.checkMessage(m22));
+        AFL_CHECK_SUCCEEDS(a("18. t12"), testee.checkTopic(t12));
     }
 
     // Check user 1002 access: can read the second topic

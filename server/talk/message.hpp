@@ -19,8 +19,6 @@ namespace server { namespace talk {
     class Root;
     class Topic;
 
-    // FIXME: rename to Post for consistency with network interface?
-
     /** Message.
         Represents a message in a forum thread.
         A message contains a header with metainformation and the message body.

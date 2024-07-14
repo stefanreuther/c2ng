@@ -1,5 +1,6 @@
 /**
   *  \file server/talk/talkrender.cpp
+  *  \brief Class server::talk::TalkRender
   */
 
 #include "server/talk/talkrender.hpp"

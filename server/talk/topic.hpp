@@ -21,8 +21,6 @@ namespace server { namespace talk {
     class Root;
     class Forum;
 
-    // FIXME: rename to 'Thread' now that we've namespaces?
-
     /** A discussion thread.
         Called "Topic" because operating systems also have threads.
 

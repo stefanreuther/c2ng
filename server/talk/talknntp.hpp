@@ -1,5 +1,6 @@
 /**
   *  \file server/talk/talknntp.hpp
+  *  \brief Class server::talk::TalkNNTP
   */
 #ifndef C2NG_SERVER_TALK_TALKNNTP_HPP
 #define C2NG_SERVER_TALK_TALKNNTP_HPP
@@ -11,10 +12,13 @@ namespace server { namespace talk {
     class Session;
     class Root;
 
+    /** Implementation of NNTP commands. */
     class TalkNNTP : public server::interface::TalkNNTP {
      public:
+        /** Constructor.
+            @param session Session
+            @param root Service root */
         TalkNNTP(Session& session, Root& root);
-        ~TalkNNTP();
 
         virtual void listNewsgroups(afl::container::PtrVector<Info>& result);
         virtual Info findNewsgroup(String_t newsgroupName);

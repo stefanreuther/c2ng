@@ -1,5 +1,6 @@
 /**
   *  \file server/talk/notify.hpp
+  *  \brief Notification Generation
   */
 #ifndef C2NG_SERVER_TALK_NOTIFY_HPP
 #define C2NG_SERVER_TALK_NOTIFY_HPP

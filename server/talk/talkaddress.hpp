@@ -1,5 +1,6 @@
 /**
   *  \file server/talk/talkaddress.hpp
+  *  \brief Class server::talk::TalkAddress
   */
 #ifndef C2NG_SERVER_TALK_TALKADDRESS_HPP
 #define C2NG_SERVER_TALK_TALKADDRESS_HPP
@@ -12,6 +13,7 @@ namespace server { namespace talk {
     class Root;
     class TextNode;
 
+    /** Implementation of ADDR commands. */
     class TalkAddress : public server::interface::TalkAddress {
      public:
         /** Constructor.
@@ -19,6 +21,7 @@ namespace server { namespace talk {
             \param root Root */
         TalkAddress(Session& session, Root& root);
 
+        // TalkAddress:
         virtual void parse(afl::base::Memory<const String_t> in, afl::data::StringList_t& out);
         virtual void render(afl::base::Memory<const String_t> in, afl::data::StringList_t& out);
 
@@ -30,7 +33,6 @@ namespace server { namespace talk {
         bool renderReceiver(const String_t& in, TextNode& out);
         String_t renderRawReceiver(const String_t& in);
     };
-    
 
 } }
 

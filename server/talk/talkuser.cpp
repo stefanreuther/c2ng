@@ -1,5 +1,6 @@
 /**
   *  \file server/talk/talkuser.cpp
+  *  \brief Class server::talk::TalkUser
   */
 
 #include "server/talk/talkuser.hpp"
@@ -14,7 +15,6 @@
 #include "server/errors.hpp"
 
 namespace {
-    // FIXME: this class is copied from PCC2 c2talk and needs a little love.
     class NewsrcAction {
      public:
         NewsrcAction(afl::net::redis::Subtree n);
@@ -32,8 +32,6 @@ namespace {
      private:
         server::talk::Newsrc n;
 
-        // FIXME: every 8-bit microcontroller programmer would be proud of this
-        // zoo of bools. Can we do better?
         bool get;               // we want to get the values
         server::interface::TalkUser::Modification m_modification : 8;
         bool find;              // we want to find items (requires get)

@@ -1,5 +1,6 @@
 /**
   *  \file server/talk/linkformatter.cpp
+  *  \brief Class server::talk::LinkFormatter
   */
 
 #include "server/talk/linkformatter.hpp"

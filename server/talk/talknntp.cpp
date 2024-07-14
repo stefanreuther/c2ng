@@ -1,5 +1,6 @@
 /**
   *  \file server/talk/talknntp.cpp
+  *  \brief Class server::talk::TalkNNTP
   */
 
 #include <stdexcept>
@@ -19,9 +20,6 @@
 
 server::talk::TalkNNTP::TalkNNTP(Session& session, Root& root)
     : m_session(session), m_root(root)
-{ }
-
-server::talk::TalkNNTP::~TalkNNTP()
 { }
 
 void

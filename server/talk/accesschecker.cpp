@@ -1,5 +1,6 @@
 /**
   *  \file server/talk/accesschecker.cpp
+  *  \brief Class server::talk::AccessChecker
   */
 
 #include <stdexcept>

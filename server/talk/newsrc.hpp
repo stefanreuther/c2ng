@@ -49,14 +49,14 @@ namespace server { namespace talk {
         void loadCache(int32_t index);
         void doLoad(int32_t index);
 
-        afl::net::redis::Subtree root;
+        afl::net::redis::Subtree m_root;
 
-        int32_t readAllBelowLine;
+        int32_t m_readAllBelowLine;
 
         /** Cache. */
-        String_t cache;
-        int32_t cacheIndex;
-        bool cacheDirty;
+        String_t m_cache;
+        int32_t m_cacheIndex;
+        bool m_cacheDirty;
     };
 
 } }

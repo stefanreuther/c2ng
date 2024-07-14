@@ -146,7 +146,7 @@ afl::net::redis::IntegerSetKey
 server::talk::Root::allForums()
 {
     // ex Forum::exists (sort-of)
-    return forumRoot().intSetKey("all");    
+    return forumRoot().intSetKey("all");
 }
 
 afl::net::redis::HashKey
@@ -193,7 +193,6 @@ server::talk::Root::checkUserPermission(String_t privString, String_t user)
     }
 
     // Process
-    // FIXME: implement using StringParser
     do {
         String_t me(afl::string::strFirst(privString, ","));
         bool result = true;
@@ -227,4 +226,3 @@ server::talk::Root::checkUserPermission(String_t privString, String_t user)
     } while (afl::string::strRemove(privString, ","));
     return false;
 }
-

@@ -1,5 +1,6 @@
 /**
   *  \file server/talk/textnode.cpp
+  *  \brief Class server::talk::TextNode
   */
 
 #include "server/talk/textnode.hpp"

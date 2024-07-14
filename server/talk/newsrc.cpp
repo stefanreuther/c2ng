@@ -12,8 +12,6 @@
   *          - treat all lines < index as "all-1"
   *          - otherwise, look into the hash
   *          - if line is missing, treat as "all-0"
-  *
-  *  FIXME: this needs a little love; it has been taken over verbatim.
   */
 
 #include "server/talk/newsrc.hpp"
@@ -37,37 +35,37 @@ namespace {
 }
 
 server::talk::Newsrc::Newsrc(afl::net::redis::Subtree root)
-    : root(root),
-      readAllBelowLine(index().get()),
-      cache(),
-      cacheIndex(-1),
-      cacheDirty(false)
+    : m_root(root),
+      m_readAllBelowLine(index().get()),
+      m_cache(),
+      m_cacheIndex(-1),
+      m_cacheDirty(false)
 {
     // ex Newsrc::Newsrc
 }
-    
+
 void
 server::talk::Newsrc::save()
 {
     // ex Newsrc::save
     // Remove entirely-read lines.
-    while (cacheIndex == readAllBelowLine && cache.find_first_not_of(char(0xFF)) == String_t::npos) {
+    while (m_cacheIndex == m_readAllBelowLine && m_cache.find_first_not_of(char(0xFF)) == String_t::npos) {
         // This line is entirely read, remove it.
-        data().field(itoa(cacheIndex)).remove();
-        ++readAllBelowLine;
-        index().set(readAllBelowLine);
+        data().field(itoa(m_cacheIndex)).remove();
+        ++m_readAllBelowLine;
+        index().set(m_readAllBelowLine);
 
         // Load next one.
-        doLoad(cacheIndex+1);
+        doLoad(m_cacheIndex+1);
     }
 
     // If a dirty line remains, save it
-    if (cacheDirty) {
-        if (cache.find_first_not_of(char(0)) == String_t::npos) {
-            data().field(itoa(cacheIndex)).remove();
+    if (m_cacheDirty) {
+        if (m_cache.find_first_not_of(char(0)) == String_t::npos) {
+            data().field(itoa(m_cacheIndex)).remove();
         } else {
-            data().stringField(itoa(cacheIndex)).set(cache);
-            cacheDirty = false;
+            data().stringField(itoa(m_cacheIndex)).set(m_cache);
+            m_cacheDirty = false;
         }
     }
 }
@@ -81,7 +79,7 @@ server::talk::Newsrc::get(int32_t messageId)
     int32_t column = messageId & LineMask;
 
     // Quick handling?
-    if (line < readAllBelowLine) {
+    if (line < m_readAllBelowLine) {
         return true;
     }
 
@@ -89,7 +87,7 @@ server::talk::Newsrc::get(int32_t messageId)
     loadCache(line);
     int32_t byte = column >> 3;
     int32_t bit = (column & 7);
-    return ((uint8_t(cache[byte]) & (1 << bit)) != 0);
+    return ((uint8_t(m_cache[byte]) & (1 << bit)) != 0);
 }
 
 void
@@ -101,15 +99,15 @@ server::talk::Newsrc::set(int32_t messageId)
     int32_t column = messageId & LineMask;
 
     // Anything to do?
-    if (line >= readAllBelowLine) {
+    if (line >= m_readAllBelowLine) {
         // Use cache
         loadCache(line);
         int32_t byte = column >> 3;
         int32_t bit = (column & 7);
         uint8_t mask = uint8_t(1 << bit);
-        if ((uint8_t(cache[byte]) & mask) == 0) {
-            cache[byte] = uint8_t(cache[byte] | mask);
-            cacheDirty = true;
+        if ((uint8_t(m_cache[byte]) & mask) == 0) {
+            m_cache[byte] = uint8_t(m_cache[byte] | mask);
+            m_cacheDirty = true;
         }
     }
 }
@@ -123,14 +121,14 @@ server::talk::Newsrc::clear(int32_t messageId)
     int32_t column = messageId & LineMask;
 
     // Is the line we need actually available?
-    while (line < readAllBelowLine) {
+    while (line < m_readAllBelowLine) {
         // No, we have to create a new all-FF line
         save();
-        --readAllBelowLine;
-        cache.assign(size_t(LineSize), char(0xFF));
-        cacheIndex = readAllBelowLine;
-        cacheDirty = true;
-        index().set(readAllBelowLine);
+        --m_readAllBelowLine;
+        m_cache.assign(size_t(LineSize), char(0xFF));
+        m_cacheIndex = m_readAllBelowLine;
+        m_cacheDirty = true;
+        index().set(m_readAllBelowLine);
     }
 
     // Regular operation through cache
@@ -138,9 +136,9 @@ server::talk::Newsrc::clear(int32_t messageId)
     int32_t byte = column >> 3;
     int32_t bit = (column & 7);
     uint8_t mask = uint8_t(1 << bit);
-    if ((uint8_t(cache[byte]) & mask) != 0) {
-        cache[byte] = uint8_t(cache[byte] & ~mask);
-        cacheDirty = true;
+    if ((uint8_t(m_cache[byte]) & mask) != 0) {
+        m_cache[byte] = uint8_t(m_cache[byte] & ~mask);
+        m_cacheDirty = true;
     }
 }
 
@@ -148,25 +146,25 @@ afl::net::redis::IntegerKey
 server::talk::Newsrc::index()
 {
     // ex Newsrc::index
-    return root.intKey("index");
+    return m_root.intKey("index");
 }
 
 afl::net::redis::HashKey
 server::talk::Newsrc::data()
 {
     // ex Newsrc::data
-    return root.hashKey("data");
+    return m_root.hashKey("data");
 }
 
 void
 server::talk::Newsrc::loadCache(int32_t index)
 {
     // ex Newsrc::loadCache
-    if (index != cacheIndex) {
+    if (index != m_cacheIndex) {
         // Save old value
         save();
     }
-    if (index != cacheIndex) {
+    if (index != m_cacheIndex) {
         // Load new value. 'save' could have caused the new line to be loaded
         // already.
         doLoad(index);
@@ -177,15 +175,15 @@ void
 server::talk::Newsrc::doLoad(int32_t index)
 {
     // ex Newsrc::doLoad
-    cache      = data().stringField(itoa(index)).get();
-    cacheIndex = index;
-    cacheDirty = false;
+    m_cache      = data().stringField(itoa(index)).get();
+    m_cacheIndex = index;
+    m_cacheDirty = false;
 
     // Make cache value canonical
-    if (cache.size() > LineBytes) {
-        cache.erase(LineBytes);
+    if (m_cache.size() > LineBytes) {
+        m_cache.erase(LineBytes);
     }
-    if (cache.size() < LineBytes) {
-        cache.append(LineBytes - cache.size(), char(0));
+    if (m_cache.size() < LineBytes) {
+        m_cache.append(LineBytes - m_cache.size(), char(0));
     }
 }

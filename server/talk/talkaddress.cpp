@@ -1,5 +1,6 @@
 /**
   *  \file server/talk/talkaddress.cpp
+  *  \brief Class server::talk::TalkAddress
   */
 
 #include <memory>

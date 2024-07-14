@@ -20,6 +20,7 @@
 #include "server/host/root.hpp"
 #include "server/interface/filebaseclient.hpp"
 #include "server/interface/mailqueue.hpp"
+#include "server/test/mailmock.hpp"
 #include "util/processrunner.hpp"
 #include <map>
 #include <memory>
@@ -31,54 +32,9 @@ using afl::net::redis::StringSetKey;
 using afl::string::Format;
 using server::host::Game;
 using server::interface::FileBaseClient;
+using server::test::MailMock;
 
 namespace {
-    /*
-     *  Mail Mock
-     *
-     *  This simulates a mail queue.
-     *  It verifies the command sequence.
-     *  It stashes away received messages.
-     *  We mainly want to track which users recieve which attachments, so this is what we mainly track.
-     */
-    class MailMock : public server::interface::MailQueue {
-     public:
-        struct Message {
-            String_t templateName;
-            std::map<String_t, String_t> parameters;
-            std::set<String_t> attachments;
-            std::set<String_t> receivers;
-
-            bool hasAttachment(String_t what) const
-                { return attachments.find(what) != attachments.end(); }
-        };
-        MailMock(afl::test::Assert a)
-            : m_assert(a), m_current(), m_queue()
-            { }
-        // MailQueue methods:
-        virtual void startMessage(String_t templateName, afl::base::Optional<String_t> uniqueId);
-        virtual void addParameter(String_t parameterName, String_t value);
-        virtual void addAttachment(String_t url);
-        virtual void send(afl::base::Memory<const String_t> receivers);
-        virtual void cancelMessage(String_t /*uniqueId*/)
-            { }
-        virtual void confirmAddress(String_t /*address*/, String_t /*key*/, afl::base::Optional<String_t> /*info*/)
-            { m_assert.fail("confirmAddress unexpected"); }
-        virtual void requestAddress(String_t /*user*/)
-            { m_assert.fail("requestAddress unexpected"); }
-        virtual void runQueue()
-            { m_assert.fail("runQueue unexpected"); }
-        virtual UserStatus getUserStatus(String_t /*user*/)
-            { m_assert.fail("getUserStatus unexpected"); return UserStatus(); }
-
-        Message* extract(String_t receiver);
-        bool empty() const;
-
-     private:
-        afl::test::Assert m_assert;
-        std::auto_ptr<Message> m_current;
-        afl::container::PtrVector<Message> m_queue;
-    };
 
     /*
      *  Main Test Harness
@@ -115,64 +71,6 @@ namespace {
         afl::io::NullFileSystem m_fs;
         server::host::Root m_root;
     };
-}
-
-void
-MailMock::startMessage(String_t templateName, afl::base::Optional<String_t> /*uniqueId*/)
-{
-    m_assert.checkNull("startMessage > m_current", m_current.get());
-    m_current.reset(new Message());
-    m_current->templateName = templateName;
-}
-
-void
-MailMock::addParameter(String_t parameterName, String_t value)
-{
-    m_assert.checkNonNull("addParameter > m_current", m_current.get());
-    m_assert.check("addParameter > new parameter", m_current->parameters.find(parameterName) == m_current->parameters.end());
-    m_current->parameters.insert(std::make_pair(parameterName, value));
-}
-
-void
-MailMock::addAttachment(String_t url)
-{
-    m_assert.checkNonNull("addAttachment > m_current", m_current.get());
-    m_current->attachments.insert(url);
-}
-
-void
-MailMock::send(afl::base::Memory<const String_t> receivers)
-{
-    m_assert.checkNonNull("send > m_current", m_current.get());
-    while (const String_t* p = receivers.eat()) {
-        m_current->receivers.insert(*p);
-    }
-    m_queue.pushBackNew(m_current.release());
-}
-
-MailMock::Message*
-MailMock::extract(String_t receiver)
-{
-    for (size_t i = 0; i < m_queue.size(); ++i) {
-        Message* p = m_queue[i];
-        std::set<String_t>::iterator it = p->receivers.find(receiver);
-        if (it != p->receivers.end()) {
-            p->receivers.erase(it);
-            return p;
-        }
-    }
-    return 0;
-}
-
-bool
-MailMock::empty() const
-{
-    for (size_t i = 0; i < m_queue.size(); ++i) {
-        if (!m_queue[i]->receivers.empty()) {
-            return false;
-        }
-    }
-    return true;
 }
 
 

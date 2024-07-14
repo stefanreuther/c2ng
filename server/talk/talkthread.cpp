@@ -1,5 +1,6 @@
 /**
   *  \file server/talk/talkthread.cpp
+  *  \brief Class server::talk::TalkThread
   */
 
 #include <stdexcept>

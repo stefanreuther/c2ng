@@ -81,23 +81,74 @@ namespace server { namespace talk {
          *  Database Layout
          */
 
+        /** Access root of "group" tree.
+            \return tree
+            \see Group */
         afl::net::redis::Subtree groupRoot();
+
+        /** Access root of "message" tree.
+            \return tree
+            \see Message */
         afl::net::redis::Subtree messageRoot();
+
+        /** Access last message Id.
+            Contains newest message Id and is incremented for each new message.
+            \return key */
         afl::net::redis::IntegerKey lastMessageId();
 
+        /** Access root of "topic" tree.
+            \return tree
+            \see Topic */
         afl::net::redis::Subtree topicRoot();
+
+        /** Access last topic Id.
+            Contains newest message Id and is incremented for each new topic.
+            \return key */
         afl::net::redis::IntegerKey lastTopicId();
 
+        /** Access root of "forum" tree.
+            \return tree
+            \see Forum */
         afl::net::redis::Subtree forumRoot();
+
+        /** Access last forum Id.
+            Contains newest forum Id and is incremented for each new forum.
+            \return key */
         afl::net::redis::IntegerKey lastForumId();
+
+        /** Access set of all forums.
+            \return key */
         afl::net::redis::IntegerSetKey allForums();
+
+        /** Access newsgroup-to-forum map.
+            Maps newsgroup names (string) to forum Ids (integers).
+            \return key */
         afl::net::redis::HashKey newsgroupMap();
+
+        /** Access well-known-forum map.
+            Maps well-known forum names (string) to forum Ids (integers).
+            \return key
+            \see TalkForum::findForum() */
         afl::net::redis::HashKey forumMap();
 
+        /** Access root of "email" tree.
+            This tree is used for generating email addressess on NNTP.
+            \return tree */
         afl::net::redis::Subtree emailRoot();
 
+        /** Access default folder definitions.
+            Default folder definitions can be overridden by user definitions (User::pmFolderData()).
+            \return tree */
         afl::net::redis::Subtree defaultFolderRoot();
+
+        /** Access root of PM tree.
+            \return tree
+            \see UserPM */
         afl::net::redis::Subtree pmRoot();
+
+        /** Access root of RfC message-Id tree.
+            Contains a StringKey for each RfC message-Id.
+            \return tree */
         afl::net::redis::Subtree rfcMessageIdRoot();
 
         /** Check a user's permissions.

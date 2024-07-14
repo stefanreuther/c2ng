@@ -175,7 +175,6 @@ void
 server::talk::UserPM::PMSorter::applySortKey(afl::net::redis::SortOperation& op, const String_t& keyName) const
 {
     // ex ListParams::pmSortKeys
-    // FIXME: we can now also do this one: { "FLAGS",  PM_ROOT "*:header->flags/$USER" },
     if (keyName == "AUTHOR") {
         op.by(m_root.pmRoot().subtree("*").hashKey("header").field("author")).sortLexicographical();
     } else if (keyName == "SUBJECT") {

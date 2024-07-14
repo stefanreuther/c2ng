@@ -1,5 +1,6 @@
 /**
   *  \file server/talk/talkrender.hpp
+  *  \brief Class server::talk::TalkRender
   */
 #ifndef C2NG_SERVER_TALK_TALKRENDER_HPP
 #define C2NG_SERVER_TALK_TALKRENDER_HPP
@@ -10,8 +11,12 @@
 
 namespace server { namespace talk {
 
+    /** Implementation of RENDER commands. */
     class TalkRender : public server::interface::TalkRender {
      public:
+        /** Constructor.
+            @param session Session
+            @param root Service root */
         TalkRender(Session& session, Root& root);
 
         virtual void setOptions(const Options& opts);

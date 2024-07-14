@@ -1,5 +1,6 @@
 /**
   *  \file server/talk/notify.cpp
+  *  \brief Notification Generation
   */
 
 #include <algorithm>

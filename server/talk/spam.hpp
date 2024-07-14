@@ -1,5 +1,6 @@
 /**
   *  \file server/talk/spam.hpp
+  *  \brief Anti-Spam
   */
 #ifndef C2NG_SERVER_TALK_SPAM_HPP
 #define C2NG_SERVER_TALK_SPAM_HPP

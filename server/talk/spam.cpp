@@ -1,5 +1,6 @@
 /**
   *  \file server/talk/spam.cpp
+  *  \brief Anti-Spam
   */
 
 #include "server/talk/spam.hpp"

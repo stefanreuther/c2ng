@@ -1,5 +1,6 @@
 /**
   *  \file server/talk/textnode.hpp
+  *  \brief Class server::talk::TextNode
   */
 #ifndef C2NG_SERVER_TALK_TEXTNODE_HPP
 #define C2NG_SERVER_TALK_TEXTNODE_HPP

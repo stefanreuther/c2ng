@@ -336,12 +336,11 @@ server::talk::Message::getRfcHeader(Root& root)
     head->setNew("X-PCC-User", makeStringValue(userName));
     head->setNew("X-PCC-Posting-Id", makeIntegerValue(m_messageId));
 
-    return head;    
+    return head;
 }
 
 
 // Remove RfC Message Id.
-// FIXME: here?
 void
 server::talk::Message::removeRfcMessageId(Root& root, String_t id)
 {
@@ -352,7 +351,6 @@ server::talk::Message::removeRfcMessageId(Root& root, String_t id)
 }
 
 // Add RfC Message Id.
-// FIXME: here?
 void
 server::talk::Message::addRfcMessageId(Root& root, String_t id, int32_t messageId)
 {
@@ -363,7 +361,6 @@ server::talk::Message::addRfcMessageId(Root& root, String_t id, int32_t messageI
 }
 
 // Look up a RfC Message Id.
-// FIXME: here?
 int32_t
 server::talk::Message::lookupRfcMessageId(Root& root, String_t rfcMsgId)
 {
@@ -432,6 +429,5 @@ server::talk::Message::MessageSorter::applySortKey(afl::net::redis::SortOperatio
         op.by(m_root.messageRoot().subtree("*").hashKey("header").field("time"));
     } else {
         throw std::runtime_error(INVALID_SORT_KEY);
-    }    
+    }
 }
-
