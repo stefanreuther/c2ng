@@ -25,20 +25,30 @@ namespace {
 }
 
 // Constructor.
-server::talk::Root::Root(afl::net::CommandHandler& db, afl::net::CommandHandler& mail, const Configuration& config)
+server::talk::Root::Root(afl::net::CommandHandler& db, const Configuration& config)
     : server::common::Root(db),
+      m_mutex(),
       m_log(),
       m_keywordTable(),
       m_recognizer(),
       m_linkFormatter(),
       m_db(db),
-      m_mailQueue(mail),
-      m_config(config)
+      m_config(config),
+      m_pNotifier()
 { }
 
 // Destructor.
 server::talk::Root::~Root()
-{ }
+{
+    m_pNotifier.reset();
+}
+
+// Access mutex.
+afl::sys::Mutex&
+server::talk::Root::mutex()
+{
+    return m_mutex;
+}
 
 // Access logger.
 afl::sys::Log&
@@ -75,13 +85,6 @@ server::talk::Root::config() const
     return m_config;
 }
 
-// Access mail queue service.
-server::interface::MailQueue&
-server::talk::Root::mailQueue()
-{
-    return m_mailQueue;
-}
-
 // Get current time.
 server::Time_t
 server::talk::Root::getTime()
@@ -95,6 +98,19 @@ server::talk::Root::getTime()
     return packTime(afl::sys::Time::getCurrentTime());
 }
 
+// Get notifier.
+server::talk::Notifier*
+server::talk::Root::getNotifier()
+{
+    return m_pNotifier.get();
+}
+
+// Set notifier.
+void
+server::talk::Root::setNewNotifier(Notifier* p)
+{
+    m_pNotifier.reset(p);
+}
 
 afl::net::redis::Subtree
 server::talk::Root::groupRoot()
@@ -114,6 +130,12 @@ server::talk::Root::lastMessageId()
     // ex Message::allocateMessage (sort-of)
     // ex Message::getLastId
     return messageRoot().intKey("id");
+}
+
+afl::net::redis::IntegerSetKey
+server::talk::Root::messageNotificationQueue()
+{
+    return messageRoot().intSetKey("notif-queue");
 }
 
 afl::net::redis::Subtree

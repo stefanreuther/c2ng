@@ -5,7 +5,6 @@
 
 #include "server/talk/topic.hpp"
 
-#include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
 #include "afl/net/redis/sortoperation.hpp"
 #include "afl/test/testrunner.hpp"
@@ -17,9 +16,8 @@
 AFL_TEST("server.talk.Topic:basics", a)
 {
     // Infrastructure
-    afl::net::NullCommandHandler mq;
     afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     // Topic
     server::talk::Topic testee(root, 38);
@@ -87,9 +85,8 @@ AFL_TEST("server.talk.Topic:remove", a)
 {
     for (int sticky = 0; sticky < 2; ++sticky) {
         // Infrastructure
-        afl::net::NullCommandHandler mq;
         afl::net::redis::InternalDatabase db;
-        server::talk::Root root(db, mq, server::talk::Configuration());
+        server::talk::Root root(db, server::talk::Configuration());
 
         const int FORUM_ID = 12;
         const int TOPIC_ID = 55;
@@ -142,9 +139,8 @@ AFL_TEST("server.talk.Topic:remove", a)
 AFL_TEST("server.talk.Topic:sort", a)
 {
     // Infrastructure
-    afl::net::NullCommandHandler mq;
     afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     // Preloaded database
     const int N = 5;

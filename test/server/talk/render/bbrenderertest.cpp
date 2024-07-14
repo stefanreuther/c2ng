@@ -5,7 +5,6 @@
 
 #include "server/talk/render/bbrenderer.hpp"
 
-#include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
 #include "afl/test/testrunner.hpp"
 #include "server/talk/configuration.hpp"
@@ -25,8 +24,7 @@ AFL_TEST("server.talk.render.BBRenderer:plaintext", a)
     const server::talk::render::Options opts;       // options [not required?]
 
     afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mail;
-    server::talk::Root root(db, mail, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     const InlineRecognizer::Kinds_t noKinds;
     const InlineRecognizer::Kinds_t allKinds = InlineRecognizer::Kinds_t() + InlineRecognizer::Smiley + InlineRecognizer::Link;
@@ -147,8 +145,7 @@ AFL_TEST("server.talk.render.BBRenderer:complex", a)
     const server::talk::render::Options opts;       // options [not required?]
 
     afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mail;
-    server::talk::Root root(db, mail, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     const InlineRecognizer::Kinds_t noKinds;
 
@@ -321,8 +318,7 @@ AFL_TEST("server.talk.render.BBRenderer:link", a)
     const server::talk::render::Options opts;       // options [not required?]
 
     afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mail;
-    server::talk::Root root(db, mail, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     const InlineRecognizer::Kinds_t noKinds;
 
@@ -406,8 +402,7 @@ AFL_TEST("server.talk.render.BBRenderer:special", a)
     const server::talk::render::Options opts;       // options [not required?]
 
     afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mail;
-    server::talk::Root root(db, mail, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     const InlineRecognizer::Kinds_t noKinds;
     const InlineRecognizer::Kinds_t allKinds = InlineRecognizer::Kinds_t() + InlineRecognizer::Smiley + InlineRecognizer::Link;

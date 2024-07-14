@@ -10,7 +10,6 @@
 #include "afl/data/value.hpp"
 #include "afl/data/vector.hpp"
 #include "afl/data/vectorvalue.hpp"
-#include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/hashkey.hpp"
 #include "afl/net/redis/integerfield.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
@@ -135,8 +134,7 @@ AFL_TEST("server.talk.TalkForum:basics", a)
 
     // Infrastructure
     afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mq;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
     server::talk::Session rootSession;
     server::talk::Session userSession;
     userSession.setUser("a");
@@ -337,8 +335,7 @@ AFL_TEST("server.talk.TalkForum:findForum", a)
 
     // Infrastructure
     afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mq;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
     server::talk::Session rootSession;
     server::talk::Session userSession;
     userSession.setUser("a");

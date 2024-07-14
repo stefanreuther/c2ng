@@ -5,7 +5,6 @@
 
 #include "server/talk/userpm.hpp"
 
-#include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/integersetkey.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
 #include "afl/net/redis/sortoperation.hpp"
@@ -16,9 +15,8 @@
 AFL_TEST("server.talk.UserPM:basics", a)
 {
     // Infrastructure
-    afl::net::NullCommandHandler mq;
     afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     // Verify properties of a new message
     server::talk::UserPM testee(root, 1);
@@ -83,9 +81,8 @@ AFL_TEST("server.talk.UserPM:basics", a)
 AFL_TEST("server.talk.UserPM:allocatePM", a)
 {
     // Infrastructure
-    afl::net::NullCommandHandler mq;
     afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     // Test
     int32_t aa = server::talk::UserPM::allocatePM(root);
@@ -99,9 +96,8 @@ AFL_TEST("server.talk.UserPM:allocatePM", a)
 AFL_TEST("server.talk.UserPM:sort", a)
 {
     // Infrastructure
-    afl::net::NullCommandHandler mq;
     afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     // Preload database
     static const int N = 3;

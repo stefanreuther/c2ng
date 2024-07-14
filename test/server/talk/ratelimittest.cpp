@@ -5,7 +5,6 @@
 
 #include "server/talk/ratelimit.hpp"
 
-#include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
 #include "afl/sys/log.hpp"
 #include "afl/test/testrunner.hpp"
@@ -13,7 +12,6 @@
 #include "server/talk/root.hpp"
 #include "server/talk/user.hpp"
 
-using afl::net::NullCommandHandler;
 using afl::net::redis::InternalDatabase;
 using afl::sys::Log;
 using server::talk::Configuration;
@@ -24,13 +22,12 @@ namespace {
     struct Environment {
         Configuration& config;
         Log log;
-        NullCommandHandler mq;
         InternalDatabase db;
         Root root;
         User user;
 
         Environment(Configuration& config)
-            : config(config), log(), mq(), db(), root(db, mq, config), user(root, "1001")
+            : config(config), log(), db(), root(db, config), user(root, "1001")
             { }
     };
 }

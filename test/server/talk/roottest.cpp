@@ -5,7 +5,6 @@
 
 #include "server/talk/root.hpp"
 
-#include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
 #include "afl/test/testrunner.hpp"
 #include <memory>
@@ -28,8 +27,7 @@ AFL_TEST("server.talk.Root:checkUserPermission", a)
     db.callVoid(Segment().pushBackString("hset").pushBackString("game:42:users").pushBackString("1004").pushBackString("1"));
 
     // Test
-    afl::net::NullCommandHandler null;
-    server::talk::Root testee(db, null, server::talk::Configuration());
+    server::talk::Root testee(db, server::talk::Configuration());
     a.check("01",  testee.checkUserPermission("all", "1003"));
     a.check("02", !testee.checkUserPermission("-all", "1003"));
 
@@ -99,8 +97,7 @@ AFL_TEST("server.talk.Root:getUserIdFromLogin", a)
     db.callVoid(Segment().pushBackString("set").pushBackString("user:1002:name").pushBackString("a_b"));
 
     // Test
-    afl::net::NullCommandHandler null;
-    server::talk::Root testee(db, null, server::talk::Configuration());
+    server::talk::Root testee(db, server::talk::Configuration());
 
     a.checkEqual("01", testee.getUserIdFromLogin(""), "");
     a.checkEqual("02", testee.getUserIdFromLogin("0"), "");

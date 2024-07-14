@@ -7,6 +7,7 @@
 #include "server/talk/commandhandler.hpp"
 #include "afl/string/char.hpp"
 #include "afl/string/string.hpp"
+#include "afl/sys/mutexguard.hpp"
 #include "interpreter/arguments.hpp"
 #include "server/errors.hpp"
 #include "server/interface/talkaddressserver.hpp"
@@ -44,6 +45,9 @@ server::talk::CommandHandler::CommandHandler(Root& root, Session& session)
 bool
 server::talk::CommandHandler::handleCommand(const String_t& upcasedCommand, interpreter::Arguments& args, std::auto_ptr<Value_t>& result)
 {
+    // Mutex to protect against parallel access (from notifier)
+    afl::sys::MutexGuard g(m_root.mutex());
+
     // Log it
     logCommand(upcasedCommand, args);
 

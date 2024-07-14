@@ -5,7 +5,6 @@
 
 #include "server/talk/talkgroup.hpp"
 
-#include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
 #include "afl/test/testrunner.hpp"
 #include "server/talk/group.hpp"
@@ -19,8 +18,7 @@ AFL_TEST("server.talk.TalkGroup:basics", a)
 
     // Infrastructure
     afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mq;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
     server::talk::Session rootSession;
     server::talk::Session userSession;
     userSession.setUser("a");

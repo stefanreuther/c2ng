@@ -5,7 +5,6 @@
 
 #include "server/talk/userfolder.hpp"
 
-#include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
 #include "afl/net/redis/stringfield.hpp"
 #include "afl/test/testrunner.hpp"
@@ -18,9 +17,8 @@
 AFL_TEST("server.talk.UserFolder:basics", a)
 {
     // Infrastructure
-    afl::net::NullCommandHandler mq;
     afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     // User
     server::talk::User u(root, "1002");
@@ -55,9 +53,8 @@ AFL_TEST("server.talk.UserFolder:basics", a)
 AFL_TEST("server.talk.UserFolder:allocateFolder", a)
 {
     // Infrastructure
-    afl::net::NullCommandHandler mq;
     afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     // User
     server::talk::User u(root, "1002");
@@ -92,9 +89,8 @@ AFL_TEST("server.talk.UserFolder:allocateFolder", a)
 AFL_TEST("server.talk.UserFolder:mixed-properties", a)
 {
     // Infrastructure
-    afl::net::NullCommandHandler mq;
     afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     // Make two system folders
     root.defaultFolderRoot().subtree("1").hashKey("header").stringField("name").set("Inbox");
@@ -136,9 +132,8 @@ AFL_TEST("server.talk.UserFolder:mixed-properties", a)
 AFL_TEST("server.talk.UserFolder:findFolder", a)
 {
     // Infrastructure
-    afl::net::NullCommandHandler mq;
     afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     // Make two system folders
     const int SYSFOLDER1 = 1, SYSFOLDER2 = 2;
@@ -179,9 +174,8 @@ AFL_TEST("server.talk.UserFolder:findFolder", a)
 AFL_TEST("server.talk.UserFolder:findSuggestedFolder", a)
 {
     // Infrastructure
-    afl::net::NullCommandHandler mq;
     afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     // Make two system folders
     const int SYSFOLDER1 = 1, SYSFOLDER2 = 2;

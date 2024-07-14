@@ -6,7 +6,6 @@
 #include "server/talk/group.hpp"
 
 #include "afl/data/segment.hpp"
-#include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
 #include "afl/test/testrunner.hpp"
 
@@ -25,8 +24,7 @@ AFL_TEST("server.talk.Group", a)
                 pushBackString("key").pushBackString("root").
                 pushBackString("name").pushBackString("All forums"));
 
-    afl::net::NullCommandHandler mq;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     // Test it
     server::talk::Group t(root, "root");
@@ -64,8 +62,7 @@ AFL_TEST("server.talk.Group:setParent", a)
 {
     using afl::data::Segment;
     afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mq;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     // Create two root groups
     db.callVoid(Segment().pushBackString("hmset").pushBackString("group:r1:header").pushBackString("name").pushBackString("Root One"));

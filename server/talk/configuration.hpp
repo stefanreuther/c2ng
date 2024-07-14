@@ -48,6 +48,9 @@ namespace server { namespace talk {
 
         /// Maximum number of postings to check for TalkPost::getNewest (POSTLSNEW).
         int32_t getNewestLimit;
+
+        /// Notification delay in minutes.
+        int32_t notificationDelay;
     };
 
 } }

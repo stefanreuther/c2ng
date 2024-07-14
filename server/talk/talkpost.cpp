@@ -8,7 +8,7 @@
 #include "server/talk/accesschecker.hpp"
 #include "server/talk/forum.hpp"
 #include "server/talk/message.hpp"
-#include "server/talk/notify.hpp"
+#include "server/talk/notifier.hpp"
 #include "server/talk/ratelimit.hpp"
 #include "server/talk/render/context.hpp"
 #include "server/talk/render/render.hpp"
@@ -123,7 +123,9 @@ server::talk::TalkPost::create(int32_t forumId, String_t subject, String_t text,
 
     // Notify
     if (!isSpam) {
-        notifyMessage(msg, topic, f, m_root);
+        if (Notifier* p = m_root.getNotifier()) {
+            p->notifyMessage(msg);
+        }
     }
 
     // Auto-watch
@@ -220,7 +222,9 @@ server::talk::TalkPost::reply(int32_t parentPostId, String_t subject, String_t t
     u.postedMessages().add(mid);
 
     // Notify
-    notifyMessage(msg, topic, f, m_root);
+    if (Notifier* p = m_root.getNotifier()) {
+        p->notifyMessage(msg);
+    }
 
     // Auto-watch
     if (u.isAutoWatch()) {

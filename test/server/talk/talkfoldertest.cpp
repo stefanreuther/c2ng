@@ -6,7 +6,6 @@
 #include "server/talk/talkfolder.hpp"
 
 #include "afl/data/access.hpp"
-#include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
 #include "afl/net/redis/stringfield.hpp"
 #include "afl/test/testrunner.hpp"
@@ -36,8 +35,7 @@ AFL_TEST("server.talk.TalkFolder:basics", a)
 
     // Infrastructure
     afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mq;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
     server::talk::Session session;
     session.setUser("a");
 
@@ -145,8 +143,7 @@ AFL_TEST("server.talk.TalkFolder:admin", a)
 
     // Infrastructure
     afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mq;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
     server::talk::Session session;
 
     // Make a system folders (not required, commands hopefully fail before looking here)
@@ -187,8 +184,7 @@ AFL_TEST("server.talk.TalkFolder:message-flags", a)
 
     // Infrastructure
     afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mq;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
     makeSystemFolders(root);
 
     // Sessions

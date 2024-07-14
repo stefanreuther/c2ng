@@ -5,17 +5,19 @@
 #ifndef C2NG_SERVER_TALK_ROOT_HPP
 #define C2NG_SERVER_TALK_ROOT_HPP
 
+#include <memory>
 #include "afl/net/commandhandler.hpp"
 #include "afl/net/redis/integerkey.hpp"
 #include "afl/net/redis/subtree.hpp"
 #include "afl/sys/log.hpp"
-#include "server/interface/mailqueueclient.hpp"
+#include "afl/sys/mutex.hpp"
+#include "server/common/root.hpp"
 #include "server/talk/configuration.hpp"
 #include "server/talk/inlinerecognizer.hpp"
 #include "server/talk/linkformatter.hpp"
+#include "server/talk/notifier.hpp"
 #include "server/types.hpp"
 #include "util/syntax/keywordtable.hpp"
-#include "server/common/root.hpp"
 
 namespace server { namespace talk {
 
@@ -36,9 +38,8 @@ namespace server { namespace talk {
      public:
         /** Constructor.
             \param db Database connection
-            \param mail Mail connection
             \param config Configuration. Will be copied. */
-        Root(afl::net::CommandHandler& db, afl::net::CommandHandler& mail, const Configuration& config);
+        Root(afl::net::CommandHandler& db, const Configuration& config);
 
         /** Destructor. */
         ~Root();
@@ -46,6 +47,11 @@ namespace server { namespace talk {
         /*
          *  Nested Objects
          */
+
+        /** Access mutex.
+            Take this mutex before working on other subobjects (in particular, database).
+            \return mutex */
+        afl::sys::Mutex& mutex();
 
         /** Access logger.
             Attach a listener to receive log messages.
@@ -68,14 +74,18 @@ namespace server { namespace talk {
             \return configuration */
         const Configuration& config() const;
 
-        /** Access mail queue service.
-            \return mail queue service */
-        server::interface::MailQueue& mailQueue();
-
         /** Get current time.
             The time is specified in minutes-since-epoch.
             \return time */
         Time_t getTime();
+
+        /** Get notifier.
+            \return notifier instance. Can be null. */
+        Notifier* getNotifier();
+
+        /** Set notifier.
+            \param p Notifier. Root takes ownership. Can be null. */
+        void setNewNotifier(Notifier* p);
 
         /*
          *  Database Layout
@@ -95,6 +105,11 @@ namespace server { namespace talk {
             Contains newest message Id and is incremented for each new message.
             \return key */
         afl::net::redis::IntegerKey lastMessageId();
+
+        /** Access queue of forum messages to be notified.
+            Contains a set of un-notified messages.
+            \return key */
+        afl::net::redis::IntegerSetKey messageNotificationQueue();
 
         /** Access root of "topic" tree.
             \return tree
@@ -165,6 +180,7 @@ namespace server { namespace talk {
         bool checkUserPermission(String_t privString, String_t user);
 
      private:
+        afl::sys::Mutex m_mutex;
         afl::sys::Log m_log;
 
         util::syntax::KeywordTable m_keywordTable;
@@ -172,9 +188,9 @@ namespace server { namespace talk {
         LinkFormatter m_linkFormatter;
 
         afl::net::CommandHandler& m_db;
-        server::interface::MailQueueClient m_mailQueue;
 
         Configuration m_config;
+        std::auto_ptr<Notifier> m_pNotifier;
     };
 
 } }

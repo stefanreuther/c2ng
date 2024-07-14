@@ -5,7 +5,6 @@
 
 #include "server/talk/spam.hpp"
 
-#include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/integerfield.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
 #include "afl/net/redis/stringfield.hpp"
@@ -64,8 +63,7 @@ AFL_TEST("server.talk.Spam", a)
     // Infrastructure
     afl::sys::Log log;
     afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mq;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
     server::talk::User u(root, "1003");
     server::talk::InlineRecognizer recog;
 

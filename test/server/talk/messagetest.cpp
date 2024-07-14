@@ -5,7 +5,6 @@
 
 #include "server/talk/message.hpp"
 
-#include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
 #include "afl/test/testrunner.hpp"
 #include "server/talk/root.hpp"
@@ -16,9 +15,8 @@
 AFL_TEST("server.talk.Message:basics", a)
 {
     // Infrastructure
-    afl::net::NullCommandHandler mq;
     afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     // Message
     server::talk::Message testee(root, 98);
@@ -78,11 +76,10 @@ AFL_TEST("server.talk.Message:basics", a)
 AFL_TEST("server.talk.Message:message-ids", a)
 {
     // Infrastructure
-    afl::net::NullCommandHandler mq;
     afl::net::redis::InternalDatabase db;
     server::talk::Configuration config;
     config.messageIdSuffix = "@suf";
-    server::talk::Root root(db, mq, config);
+    server::talk::Root root(db, config);
 
     // Database content
     // - message that was created on the web side and never edited
@@ -186,11 +183,10 @@ AFL_TEST("server.talk.Message:message-ids", a)
 AFL_TEST("server.talk.Message:email", a)
 {
     // Infrastructure
-    afl::net::NullCommandHandler mq;
     afl::net::redis::InternalDatabase db;
     server::talk::Configuration config;
     config.messageIdSuffix = "@suf";
-    server::talk::Root root(db, mq, config);
+    server::talk::Root root(db, config);
 
     // Confirmed, enabled email, screen name only
     {
@@ -323,11 +319,10 @@ AFL_TEST("server.talk.Message:parent", a)
     using server::talk::Message;
 
     // Infrastructure
-    afl::net::NullCommandHandler mq;
     afl::net::redis::InternalDatabase db;
     server::talk::Configuration config;
     config.messageIdSuffix = "@suf";
-    server::talk::Root root(db, mq, config);
+    server::talk::Root root(db, config);
 
     // Database: 20 messages, each referring to their parent, in a thread
     server::talk::Topic t(root, 42);
@@ -365,9 +360,8 @@ AFL_TEST("server.talk.Message:parent", a)
 AFL_TEST("server.talk.Message:sort", a)
 {
     // Infrastructure
-    afl::net::NullCommandHandler mq;
     afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     // Database
     struct Data {

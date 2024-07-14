@@ -296,6 +296,12 @@ Message header
 Message text.
 ---
 
+@q msg:notif-queue : IntSet (Database)
+Messages to be notified.
+When a message is posted, it is added.
+When the notification is processed, it is removed.
+---
+
 @q thread:id : Int (Database)
 Last used thread Id ({@type TID})
 ---

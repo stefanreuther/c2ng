@@ -5,7 +5,6 @@
 
 #include "server/talk/forum.hpp"
 
-#include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
 #include "afl/test/testrunner.hpp"
 #include "server/talk/root.hpp"
@@ -15,9 +14,8 @@
 AFL_TEST("server.talk.Forum:basics", a)
 {
     // Infrastructure
-    afl::net::NullCommandHandler mq;
     afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     // Forum
     server::talk::Forum testee(root, 3);
@@ -115,9 +113,8 @@ AFL_TEST("server.talk.Forum:basics", a)
 AFL_TEST("server.talk.Forum:newsgroup", a)
 {
     // Infrastructure
-    afl::net::NullCommandHandler mq;
     afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     // 2 forums
     server::talk::Forum fa(root, 3);
@@ -173,9 +170,8 @@ AFL_TEST("server.talk.Forum:newsgroup", a)
 AFL_TEST("server.talk.Forum:sort", a)
 {
     // Infrastructure
-    afl::net::NullCommandHandler mq;
     afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     // Create three forums
     server::talk::Forum fa(root, 3);

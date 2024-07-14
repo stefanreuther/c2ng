@@ -5,7 +5,6 @@
 
 #include "server/talk/session.hpp"
 
-#include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
 #include "afl/test/testrunner.hpp"
 #include "server/talk/root.hpp"
@@ -22,8 +21,7 @@ AFL_TEST("server.talk.Session:permissions", a)
     db.callVoid(Segment().pushBackString("hset").pushBackString("user:1003:profile").pushBackString("userProfile0").pushBackString("0"));
 
     // Surroundings
-    afl::net::NullCommandHandler null;
-    server::talk::Root root(db, null, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     // Test admin
     {

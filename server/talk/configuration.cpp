@@ -17,5 +17,6 @@ server::talk::Configuration::Configuration()
       rateCostPerReceiver(1),
       rateCostPerMail(1),
       rateCostPerPost(5),
-      getNewestLimit(200)
+      getNewestLimit(200),
+      notificationDelay(6)
 { }

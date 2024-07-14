@@ -7,7 +7,6 @@
 
 #include "afl/data/access.hpp"
 #include "afl/data/segment.hpp"
-#include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
 #include "afl/net/redis/stringfield.hpp"
 #include "afl/test/testrunner.hpp"
@@ -23,8 +22,7 @@ AFL_TEST("server.talk.CommandHandler", a)
 {
     // Infrastructure
     afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mq;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
     server::talk::Session session;
 
     // Preload
@@ -92,8 +90,7 @@ AFL_TEST("server.talk.CommandHandler:help", a)
 {
     // Infrastructure
     afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mq;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
     server::talk::Session session;
 
     // Testee

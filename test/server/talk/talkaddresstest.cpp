@@ -5,7 +5,6 @@
 
 #include "server/talk/talkaddress.hpp"
 
-#include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/hashkey.hpp"
 #include "afl/net/redis/integerfield.hpp"
 #include "afl/net/redis/integersetkey.hpp"
@@ -20,12 +19,11 @@
 namespace {
     struct TestHarness {
         afl::net::redis::InternalDatabase db;
-        afl::net::NullCommandHandler mailout;
         server::talk::Session session;
         server::talk::Root root;
 
         TestHarness()
-            : db(), mailout(), session(), root(db, mailout, server::talk::Configuration())
+            : db(), session(), root(db, server::talk::Configuration())
             {
                 using afl::net::redis::StringKey;
                 using afl::net::redis::HashKey;

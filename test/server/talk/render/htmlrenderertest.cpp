@@ -21,7 +21,7 @@ AFL_TEST("server.talk.render.HTMLRenderer:code", a)
     using server::talk::TextNode;
 
     afl::net::NullCommandHandler nch;
-    server::talk::Root root(nch, nch, server::talk::Configuration());
+    server::talk::Root root(nch, server::talk::Configuration());
     server::talk::render::Context ctx("u");
     server::talk::render::Options opts;
 
@@ -55,7 +55,7 @@ AFL_TEST("server.talk.render.HTMLRenderer:plaintext", a)
     const server::talk::render::Options opts;       // options [not required?]
 
     afl::net::NullCommandHandler nch;
-    server::talk::Root root(nch, nch, server::talk::Configuration());
+    server::talk::Root root(nch, server::talk::Configuration());
 
     // A single paragraph containing just text
     TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
@@ -93,7 +93,7 @@ AFL_TEST("server.talk.render.HTMLRenderer:complex", a)
     const server::talk::render::Options opts;       // options [not required?]
 
     afl::net::NullCommandHandler nch;
-    server::talk::Root root(nch, nch, server::talk::Configuration());
+    server::talk::Root root(nch, server::talk::Configuration());
 
     // Two paragraphs
     {
@@ -276,7 +276,7 @@ AFL_TEST("server.talk.render.HTMLRenderer:link", a)
     const server::talk::render::Options opts;       // options [not required?]
 
     afl::net::NullCommandHandler nch;
-    server::talk::Root root(nch, nch, server::talk::Configuration());
+    server::talk::Root root(nch, server::talk::Configuration());
 
     // A link with differing content and target
     {
@@ -326,7 +326,7 @@ AFL_TEST("server.talk.render.HTMLRenderer:special", a)
     opts.setBaseUrl("http://base/path/");
 
     afl::net::NullCommandHandler nch;
-    server::talk::Root root(nch, nch, server::talk::Configuration());
+    server::talk::Root root(nch, server::talk::Configuration());
 
     // Image link
     {
@@ -376,9 +376,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:link:user", a)
     server::talk::render::Options opts;
     opts.setBaseUrl("http://base/path/");
 
-    afl::net::NullCommandHandler nch;
     afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, nch, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     // Create two users
     StringKey(db, "uid:fred").set("1000");
@@ -446,9 +445,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:link:other", a)
     server::talk::render::Options opts;
     opts.setBaseUrl("http://base/path/");
 
-    afl::net::NullCommandHandler nch;
     afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, nch, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     // Create environment
     // - a game

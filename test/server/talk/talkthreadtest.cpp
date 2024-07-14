@@ -6,7 +6,6 @@
 #include "server/talk/talkthread.hpp"
 
 #include "afl/data/access.hpp"
-#include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
 #include "afl/test/testrunner.hpp"
 #include "server/talk/configuration.hpp"
@@ -26,10 +25,9 @@ AFL_TEST("server.talk.TalkThread", a)
 
     // Infrastructure
     afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mq;
     server::talk::Configuration config;
     config.rateCostPerPost = 0;
-    server::talk::Root root(db, mq, config);
+    server::talk::Root root(db, config);
 
     // Create some forums
     {

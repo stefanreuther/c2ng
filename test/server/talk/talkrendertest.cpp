@@ -5,7 +5,6 @@
 
 #include "server/talk/talkrender.hpp"
 
-#include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
 #include "afl/test/testrunner.hpp"
 #include "server/talk/root.hpp"
@@ -16,8 +15,7 @@ AFL_TEST("server.talk.TalkRender", a)
 {
     // Environment
     afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mail;
-    server::talk::Root root(db, mail, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
     server::talk::Session session;
     session.renderOptions().setFormat("raw");
     session.renderOptions().setBaseUrl("u");

@@ -20,10 +20,12 @@
 using afl::data::StringList_t;
 
 void
-server::talk::notifyMessage(Message& msg, Topic& topic, Forum& forum, Root& root)
+server::talk::notifyMessage(Message& msg, Root& root, server::interface::MailQueue& mq)
 {
     // ex planetscentral/talk/notify.h:notifyMessage
-    server::interface::MailQueue& mq = root.mailQueue();
+    // Obtain parents
+    Topic topic(root, msg.topicId().get());
+    Forum forum(root, topic.forumId().get());
 
     // Get sender
     const String_t author = msg.author().get();
@@ -143,10 +145,8 @@ server::talk::notifyMessage(Message& msg, Topic& topic, Forum& forum, Root& root
 
 // Notify a private message.
 void
-server::talk::notifyPM(UserPM& msg, const afl::data::StringList_t& notifyIndividual, const afl::data::StringList_t& notifyGroup, Root& root)
+server::talk::notifyPM(UserPM& msg, const afl::data::StringList_t& notifyIndividual, const afl::data::StringList_t& notifyGroup, Root& root, server::interface::MailQueue& mq)
 {
-    server::interface::MailQueue& mq = root.mailQueue();
-
     // Send notification with message
     if (!notifyIndividual.empty()) {
         const String_t author = msg.author().get();

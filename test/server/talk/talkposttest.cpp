@@ -5,9 +5,10 @@
 
 #include "server/talk/talkpost.hpp"
 
-#include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/integerfield.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
+#include "afl/string/format.hpp"
+#include "afl/test/callreceiver.hpp"
 #include "afl/test/commandhandler.hpp"
 #include "afl/test/testrunner.hpp"
 #include "server/talk/forum.hpp"
@@ -19,8 +20,9 @@
 
 #include "spamtest.hpp"
 
-using afl::net::NullCommandHandler;
 using afl::net::redis::InternalDatabase;
+using afl::string::Format;
+using afl::test::CallReceiver;
 using server::talk::Configuration;
 using server::talk::Forum;
 using server::talk::Root;
@@ -29,13 +31,30 @@ using server::talk::TalkPost;
 using server::talk::Topic;
 using server::talk::User;
 
+namespace {
+    class NotifierMock : public server::talk::Notifier {
+     public:
+        NotifierMock(CallReceiver& recv)
+            : Notifier(), m_receiver(recv)
+            { }
+        virtual void notifyMessage(server::talk::Message& msg)
+            { m_receiver.checkCall(Format("notifyMessage(%d)", msg.getId())); }
+        virtual void notifyPM(server::talk::UserPM& /*msg*/, const afl::data::StringList_t& /*notifyIndividual*/, const afl::data::StringList_t& /*notifyGroup*/)
+            { m_receiver.checkCall("notifyPM()"); }
+     private:
+        CallReceiver& m_receiver;
+    };
+}
+
+
 /** Test create(), regular case, including notification. */
 AFL_TEST("server.talk.TalkPost:create", a)
 {
     // Infrastructure
-    afl::test::CommandHandler mq(a);
+    CallReceiver notifierMock(a);
     InternalDatabase db;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
+    root.setNewNotifier(new NotifierMock(notifierMock));
     Session session;
 
     // Set up database
@@ -64,19 +83,10 @@ AFL_TEST("server.talk.TalkPost:create", a)
     userC.profile().intField("talkwatchindividual").set(0);
     f.watchers().add("c");
 
-    // Write a posting as user "b".
-    // This must create a message to "a" (because b is the author and c is already notified).
-    mq.expectCall("MAIL, talk-forum");
-    mq.provideNewResult(0);
-    mq.expectCall("PARAM, forum, Foorum");
-    mq.provideNewResult(0);
-    mq.expectCall("PARAM, subject, subj");
-    mq.provideNewResult(0);
-    mq.expectCall("PARAM, posturl, talk/thread.cgi/1-subj#p1");
-    mq.provideNewResult(0);
-    mq.expectCall("SEND, user:a");
-    mq.provideNewResult(0);
+    // Expect notification
+    notifierMock.expectCall("notifyMessage(1)");
 
+    // Post it
     session.setUser("b");
     TalkPost testee(session, root);
     int32_t i = testee.create(FORUM_ID, "subj", "forum:text", TalkPost::CreateOptions());
@@ -86,16 +96,15 @@ AFL_TEST("server.talk.TalkPost:create", a)
     a.checkEqual("02. subj", msg.subject().get(), "subj");
     a.checkEqual("03. text", msg.text().get(), "forum:text");
 
-    mq.checkFinish();
+    notifierMock.checkFinish();
 }
 
 /** Test create(), error cases. */
 AFL_TEST("server.talk.TalkPost:create:error", a)
 {
     // Infrastructure
-    NullCommandHandler mq;
     InternalDatabase db;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
     Session session;
 
     // Set up database
@@ -130,9 +139,8 @@ AFL_TEST("server.talk.TalkPost:create:error", a)
 AFL_TEST("server.talk.TalkPost:create:forbidden", a)
 {
     // Infrastructure
-    NullCommandHandler mq;
     InternalDatabase db;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
     Session session;
 
     // Set up database
@@ -157,9 +165,8 @@ AFL_TEST("server.talk.TalkPost:create:forbidden", a)
 AFL_TEST("server.talk.TalkPost:create:forbidden:global", a)
 {
     // Infrastructure
-    NullCommandHandler mq;
     InternalDatabase db;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
     Session session;
 
     // Set up database
@@ -184,9 +191,8 @@ AFL_TEST("server.talk.TalkPost:create:forbidden:global", a)
 AFL_TEST("server.talk.TalkPost:create:spam", a)
 {
     // Infrastructure
-    NullCommandHandler mq;
     InternalDatabase db;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
     Session session;
 
     // Set up database
@@ -219,9 +225,8 @@ AFL_TEST("server.talk.TalkPost:create:spam", a)
 AFL_TEST("server.talk.TalkPost:reply:forbidden", a)
 {
     // Infrastructure
-    NullCommandHandler mq;
     InternalDatabase db;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
 
     // Set up database
     // - make a forum
@@ -257,9 +262,8 @@ AFL_TEST("server.talk.TalkPost:reply:forbidden", a)
 AFL_TEST("server.talk.TalkPost:reply:forbidden:global", a)
 {
     // Infrastructure
-    NullCommandHandler mq;
     InternalDatabase db;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
 
     // Set up database
     // - make a forum
@@ -295,9 +299,8 @@ AFL_TEST("server.talk.TalkPost:reply:forbidden:global", a)
 AFL_TEST("server.talk.TalkPost:permissions", a)
 {
     // Infrastructure
-    NullCommandHandler mq;
     InternalDatabase db;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
 
     // Set up database
     // - make a forum
@@ -512,9 +515,8 @@ AFL_TEST("server.talk.TalkPost:permissions", a)
 AFL_TEST("server.talk.TalkPost:render", a)
 {
     // Infrastructure
-    NullCommandHandler mq;
     InternalDatabase db;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
 
     // Set up database
     // - make a forum
@@ -646,9 +648,8 @@ AFL_TEST("server.talk.TalkPost:render", a)
 AFL_TEST("server.talk.TalkPost:getInfo", a)
 {
     // Infrastructure
-    NullCommandHandler mq;
     InternalDatabase db;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
 
     // Set up database
     // - make a forum
@@ -773,11 +774,10 @@ AFL_TEST("server.talk.TalkPost:getInfo", a)
 AFL_TEST("server.talk.TalkPost:getNewest", a)
 {
     // Infrastructure
-    NullCommandHandler mq;
     InternalDatabase db;
     Configuration config;
     config.rateCostPerPost = 0;
-    Root root(db, mq, config);
+    Root root(db, config);
 
     // Set up database
     // - make a forum
@@ -841,12 +841,11 @@ AFL_TEST("server.talk.TalkPost:getNewest", a)
 AFL_TEST("server.talk.TalkPost:getNewest:limit", a)
 {
     // Infrastructure
-    NullCommandHandler mq;
     InternalDatabase db;
     Configuration config;
     config.rateCostPerPost = 0;
     config.getNewestLimit = 5;
-    Root root(db, mq, config);
+    Root root(db, config);
 
     // Set up database
     // - make a forum
@@ -894,11 +893,10 @@ AFL_TEST("server.talk.TalkPost:getNewest:limit", a)
 AFL_TEST("server.talk.TalkPost:getNewest:invisible", a)
 {
     // Infrastructure
-    NullCommandHandler mq;
     InternalDatabase db;
     Configuration config;
     config.rateCostPerPost = 0;
-    Root root(db, mq, config);
+    Root root(db, config);
 
     // Set up database
     // - make a forum
@@ -961,11 +959,10 @@ AFL_TEST("server.talk.TalkPost:getNewest:invisible", a)
 AFL_TEST("server.talk.TalkPost:getHeaderField", a)
 {
     // Infrastructure
-    NullCommandHandler mq;
     InternalDatabase db;
     Configuration config;
     config.messageIdSuffix = "@suf";
-    Root root(db, mq, config);
+    Root root(db, config);
 
     // Set up database
     // - make a forum
@@ -1027,9 +1024,8 @@ AFL_TEST("server.talk.TalkPost:getHeaderField", a)
 AFL_TEST("server.talk.TalkPost:remove", a)
 {
     // Infrastructure
-    NullCommandHandler mq;
     InternalDatabase db;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
 
     // Set up database
     // - make a forum
@@ -1105,9 +1101,8 @@ AFL_TEST("server.talk.TalkPost:remove", a)
 AFL_TEST("server.talk.TalkPM:ratelimit:create", a)
 {
     // Infrastructure
-    NullCommandHandler mq;
     InternalDatabase db;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
     Session session;
 
     // Set up database with a forum
@@ -1140,9 +1135,8 @@ AFL_TEST("server.talk.TalkPM:ratelimit:create", a)
 AFL_TEST("server.talk.TalkPM:ratelimit:reply", a)
 {
     // Infrastructure
-    NullCommandHandler mq;
     InternalDatabase db;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
     Session session;
 
     // Set up database with a forum

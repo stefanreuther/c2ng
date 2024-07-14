@@ -12,8 +12,10 @@
 #include "afl/string/parse.hpp"
 #include "afl/sys/thread.hpp"
 #include "server/common/sessionprotocolhandlerfactory.hpp"
+#include "server/interface/mailqueueclient.hpp"
 #include "server/ports.hpp"
 #include "server/talk/commandhandler.hpp"
+#include "server/talk/notificationthread.hpp"
 #include "server/talk/root.hpp"
 #include "server/talk/session.hpp"
 #include "util/string.hpp"
@@ -64,11 +66,15 @@ server::talk::ServerApplication::serverMain()
     afl::net::CommandHandler& mail(createClient(m_mailAddress, del, true));
 
     // Set up root (global data)
-    Root root(db, mail, m_config);
+    Root root(db, m_config);
     root.log().addListener(log());
     if (!m_keywordTableName.empty()) {
         root.keywordTable().load(*fileSystem().openFile(m_keywordTableName, afl::io::FileSystem::OpenRead), log());
     }
+
+    // Mail queue
+    server::interface::MailQueueClient mailQueue(mail);
+    root.setNewNotifier(new NotificationThread(root, mailQueue));
 
     // Protocol Handler
     server::common::SessionProtocolHandlerFactory<Root, Session, afl::net::resp::ProtocolHandler, CommandHandler> factory(root);
@@ -180,6 +186,13 @@ server::talk::ServerApplication::handleConfiguration(const String_t& key, const 
            Default limit is set to anticipate a few invisible/deleted posts.
            Increase if you have a high ratio. */
         m_config.getNewestLimit = parseInt(key, value);
+        return true;
+    } else if (key == "TALK.NOTIFICATIONDELAY") {
+        /* @q Talk.NotificationDelay:Int (Config)
+           Delay for forum post notifications, in minutes.
+           0 means notify as quickly as possible, 1 means 0..1 minute, 2 means 1..2 minutes, etc.
+           To guarantee a minimum delay of N minutes, use N+1. */
+        m_config.notificationDelay = parseInt(key, value);
         return true;
     } else if (key == "REDIS.HOST") {
         m_dbAddress.setName(value);

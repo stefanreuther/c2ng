@@ -5,7 +5,6 @@
 
 #include "server/talk/talkpm.hpp"
 
-#include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/integersetkey.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
 #include "afl/net/redis/stringfield.hpp"
@@ -19,7 +18,6 @@
 #include "server/talk/userfolder.hpp"
 #include "server/talk/userpm.hpp"
 
-using afl::net::NullCommandHandler;
 using afl::net::redis::InternalDatabase;
 using server::talk::Configuration;
 using server::talk::Root;
@@ -34,8 +32,7 @@ AFL_TEST("server.talk.TalkPM:render", a)
 {
     // Infrastructure
     InternalDatabase db;
-    NullCommandHandler mq;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
     Session session;
 
     // Configure db - just what is needed
@@ -68,8 +65,7 @@ AFL_TEST("server.talk.TalkPM:basics", a)
 {
     // Infrastructure
     InternalDatabase db;
-    NullCommandHandler mq;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
 
     Session aSession;
     Session bSession;
@@ -237,8 +233,7 @@ AFL_TEST("server.talk.TalkPM:admin", a)
 {
     // Infrastructure
     InternalDatabase db;
-    NullCommandHandler mq;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
     Session session;
 
     // Make a system folders (not required, commands hopefully fail before looking here)
@@ -271,8 +266,7 @@ AFL_TEST("server.talk.TalkPM:receivers", a)
 {
     // Infrastructure
     InternalDatabase db;
-    NullCommandHandler mq;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
     Session session;
     session.setUser("a");
     TalkPM testee(session, root);
@@ -346,8 +340,7 @@ AFL_TEST("server.talk.TalkPM:receivers:error", a)
 {
     // Infrastructure
     InternalDatabase db;
-    NullCommandHandler mq;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
     Session session;
     session.setUser("a");
     TalkPM testee(session, root);
@@ -378,8 +371,7 @@ AFL_TEST("server.talk.TalkPM:suggestedFolder", a)
 {
     // Infrastructure
     InternalDatabase db;
-    NullCommandHandler mq;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
 
     Session aSession;
     Session bSession;
@@ -426,8 +418,7 @@ AFL_TEST("server.talk.TalkPM:perm:success", a)
 {
     // Infrastructure
     InternalDatabase db;
-    NullCommandHandler mq;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
     Session session;
     session.setUser("a");
     TalkPM testee(session, root);
@@ -440,8 +431,7 @@ AFL_TEST("server.talk.TalkPM:perm:disabled:user", a)
 {
     // Infrastructure
     InternalDatabase db;
-    NullCommandHandler mq;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
     Session session;
     session.setUser("a");
     TalkPM testee(session, root);
@@ -456,8 +446,7 @@ AFL_TEST("server.talk.TalkPM:perm:disabled:global", a)
 {
     // Infrastructure
     InternalDatabase db;
-    NullCommandHandler mq;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
     Session session;
     session.setUser("a");
     TalkPM testee(session, root);
@@ -472,8 +461,7 @@ AFL_TEST("server.talk.TalkPM:perm:enabled:re-enabled", a)
 {
     // Infrastructure
     InternalDatabase db;
-    NullCommandHandler mq;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
     Session session;
     session.setUser("a");
     TalkPM testee(session, root);
@@ -489,8 +477,7 @@ AFL_TEST("server.talk.TalkPM:perm:enabled:explicit", a)
 {
     // Infrastructure
     InternalDatabase db;
-    NullCommandHandler mq;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
     Session session;
     session.setUser("a");
     TalkPM testee(session, root);
@@ -506,8 +493,7 @@ AFL_TEST("server.talk.TalkPM:ratelimit", a)
 {
     // Infrastructure
     InternalDatabase db;
-    NullCommandHandler mq;
-    Root root(db, mq, Configuration());
+    Root root(db, Configuration());
     Session session;
     session.setUser("a");
     TalkPM testee(session, root);

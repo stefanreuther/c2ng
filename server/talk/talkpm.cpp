@@ -13,7 +13,7 @@
 #include "afl/string/parse.hpp"
 #include "game/v3/structures.hpp"
 #include "server/errors.hpp"
-#include "server/talk/notify.hpp"
+#include "server/talk/notifier.hpp"
 #include "server/talk/ratelimit.hpp"
 #include "server/talk/render/context.hpp"
 #include "server/talk/render/options.hpp"
@@ -186,7 +186,9 @@ server::talk::TalkPM::create(String_t receivers, String_t subject, String_t text
     }
 
     // Send notifications
-    notifyPM(pm, notifyIndividual, notifyGroup, m_root);
+    if (Notifier* p = m_root.getNotifier()) {
+        p->notifyPM(pm, notifyIndividual, notifyGroup);
+    }
 
     // Result is message Id. Might be useful.
     return pmid;

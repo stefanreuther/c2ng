@@ -17,7 +17,7 @@ namespace {
         afl::net::NullCommandHandler cmdh;
         server::talk::Root root;
         Environment()
-            : ctx("user"), opts(), cmdh(), root(cmdh, cmdh, server::talk::Configuration())
+            : ctx("user"), opts(), cmdh(), root(cmdh, server::talk::Configuration())
             { }
     };
 }

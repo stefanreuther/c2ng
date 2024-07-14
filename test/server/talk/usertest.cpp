@@ -6,7 +6,6 @@
 #include "server/talk/user.hpp"
 
 #include "afl/data/access.hpp"
-#include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/hashkey.hpp"
 #include "afl/net/redis/integerfield.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
@@ -17,12 +16,11 @@
 
 namespace {
     struct Environment {
-        afl::net::NullCommandHandler mail;
         afl::net::redis::InternalDatabase db;
         server::talk::Root root;
 
         Environment()
-            : mail(), db(), root(db, mail, server::talk::Configuration())
+            : db(), root(db, server::talk::Configuration())
             { }
     };
 }
@@ -34,8 +32,7 @@ AFL_TEST("server.talk.User:basics", a)
 
     // Prepare database
     afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mail;
-    server::talk::Root root(db, mail, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     const char* UID = "1009";
     afl::net::redis::Subtree userTree = root.userRoot().subtree(UID);

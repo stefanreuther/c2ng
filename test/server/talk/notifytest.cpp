@@ -14,7 +14,6 @@
 #include "server/talk/topic.hpp"
 #include "server/talk/forum.hpp"
 #include "server/talk/user.hpp"
-#include "server/interface/mailqueueserver.hpp"
 
 using afl::net::redis::InternalDatabase;
 using server::talk::Configuration;
@@ -24,15 +23,13 @@ using server::talk::Root;
 using server::talk::Topic;
 using server::test::MailMock;
 using server::talk::User;
-using server::interface::MailQueueServer;
 
 /** Notify message, initial message (topic creation). */
 AFL_TEST("server.talk.Notify:notifyMessage:initial", a)
 {
     InternalDatabase db;
     MailMock mq(a);
-    MailQueueServer mail(mq);
-    Root root(db, mail, Configuration());
+    Root root(db, Configuration());
 
     // IDs
     const int32_t forumId = 99;
@@ -82,7 +79,7 @@ AFL_TEST("server.talk.Notify:notifyMessage:initial", a)
     post.subject().set("post sub");
 
     // Test it
-    notifyMessage(post, topic, forum, root);
+    notifyMessage(post, root, mq);
 
     // Verify
     MailMock::Message* msg;
@@ -112,8 +109,7 @@ AFL_TEST("server.talk.Notify:notifyMessage:reply", a)
 {
     InternalDatabase db;
     MailMock mq(a);
-    MailQueueServer mail(mq);
-    Root root(db, mail, Configuration());
+    Root root(db, Configuration());
 
     // IDs
     const int32_t forumId = 99;
@@ -176,7 +172,7 @@ AFL_TEST("server.talk.Notify:notifyMessage:reply", a)
     post.subject().set("post sub");
 
     // Test it
-    notifyMessage(post, topic, forum, root);
+    notifyMessage(post, root, mq);
 
     // Verify
     MailMock::Message* msg;
@@ -205,4 +201,75 @@ AFL_TEST("server.talk.Notify:notifyMessage:reply", a)
     a.checkEqual("33. o subject",  msg->parameters.at("subject"), "post sub");
 
     a.check("99. empty", mq.empty());
+}
+
+AFL_TEST("server.talk.Notify:already-notified", a)
+{
+    // Infrastructure
+    InternalDatabase db;
+    MailMock mq(a);
+    Root root(db, Configuration());
+
+    // IDs
+    const int32_t forumId = 99;
+    const int32_t topicId = 42;
+    const int32_t postId = 123;
+
+    // Set up database
+    // - make a forum
+    root.allForums().add(forumId);
+    Forum forum(root, forumId);
+    forum.name().set("Foorum");
+    forum.writePermissions().set("all");
+    forum.readPermissions().set("all");
+
+    // - make a user who watches the forum
+    User userA(root, "a");
+    userA.watchedForums().add(forumId);
+    forum.watchers().add("a");
+
+    // - make another user who watches the forum
+    User userB(root, "b");
+    userB.watchedForums().add(forumId);
+    forum.watchers().add("b");
+
+    // - finally a user user who watches the forum but was already notified
+    User userC(root, "c");
+    userC.watchedForums().add(forumId);
+    userC.notifiedForums().add(forumId);
+    userC.profile().intField("talkwatchindividual").set(0);
+    forum.watchers().add("c");
+
+    // Topic
+    Topic topic(root, topicId);
+    forum.topics().add(topicId);
+    topic.subject().set("topic sub");
+    topic.forumId().set(forumId);
+    topic.firstPostingId().set(postId);
+
+    // Post
+    Message post(root, postId);
+    topic.messages().add(postId);
+    forum.messages().add(postId);
+    post.topicId().set(topicId);
+    post.author().set("b");
+    post.text().set("forum:text");
+    post.subject().set("subj");
+
+    // Test it
+    notifyMessage(post, root, mq);
+
+    // This must create a message to "a" (because b is the author and c is already notified).
+    MailMock::Message* msg;
+
+    msg = mq.extract("user:a");
+    a.checkNonNull("01. a", msg);
+    a.checkEqual("02. a template", msg->templateName, "talk-forum");
+    a.checkEqual("03. a subject",  msg->parameters.at("subject"), "subj");
+
+    msg = mq.extract("user:b");
+    a.checkNull("01. b", msg);
+
+    msg = mq.extract("user:c");
+    a.checkNull("01. c", msg);
 }

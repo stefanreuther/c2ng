@@ -6,7 +6,6 @@
 #include "server/talk/talkuser.hpp"
 
 #include "afl/data/access.hpp"
-#include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
 #include "afl/net/redis/stringfield.hpp"
 #include "afl/test/testrunner.hpp"
@@ -26,9 +25,8 @@ AFL_TEST("server.talk.TalkUser:accessNewsrc", a)
 
     // Infrastructure
     afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mq;
     server::talk::Session session;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
     session.setUser("1004");
 
     // Prepare database. We only need the message counter to pass limit checks.
@@ -185,9 +183,8 @@ AFL_TEST("server.talk.TalkUser:accessNewsrc:error", a)
 
     // Infrastructure
     afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mq;
     server::talk::Session session;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
     session.setUser("1004");
 
     // Prepare database. We only need the message counter to pass limit checks.
@@ -214,9 +211,8 @@ AFL_TEST("server.talk.TalkUser:accessNewsrc:single", a)
 
     // Infrastructure
     afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mq;
     server::talk::Session session;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
     session.setUser("1004");
     server::talk::TalkUser testee(session, root);
 
@@ -252,9 +248,8 @@ AFL_TEST("server.talk.TalkUser:accessNewsrc:set", a)
 
     // Infrastructure
     afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mq;
     server::talk::Session session;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
     session.setUser("1004");
     server::talk::TalkUser testee(session, root);
 
@@ -319,9 +314,8 @@ AFL_TEST("server.talk.TalkUser:admin", a)
 
     // Infrastructure
     afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mq;
     server::talk::Session session;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
     server::talk::TalkUser testee(session, root);
 
     // Test must fail
@@ -344,9 +338,8 @@ AFL_TEST("server.talk.TalkUser:watch", a)
 
     // Infrastructure
     afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mq;
     server::talk::Session session;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
     session.setUser("1004");
 
     // Populate database
@@ -445,8 +438,7 @@ AFL_TEST("server.talk.TalkUser:getPostedMessages", a)
 
     // Infrastructure
     afl::net::redis::InternalDatabase db;
-    afl::net::NullCommandHandler mq;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
 
     // Preload DB
     User(root, "1002").postedMessages().add(9);

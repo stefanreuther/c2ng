@@ -6,7 +6,6 @@
 #include "server/talk/talknntp.hpp"
 
 #include "afl/data/access.hpp"
-#include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
 #include "afl/net/redis/subtree.hpp"
 #include "afl/test/testrunner.hpp"
@@ -27,9 +26,8 @@ using afl::data::Access;
 AFL_TEST("server.talk.TalkNNTP:groups", a)
 {
     // Environment
-    afl::net::NullCommandHandler mq;
     afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Root root(db, server::talk::Configuration());
     server::talk::Session rootSession;
     server::talk::Session userSession;
     server::talk::Session otherSession;
@@ -121,11 +119,10 @@ AFL_TEST("server.talk.TalkNNTP:groups", a)
 AFL_TEST("server.talk.TalkNNTP:findMessage", a)
 {
     // Environment
-    afl::net::NullCommandHandler mq;
     afl::net::redis::InternalDatabase db;
     server::talk::Configuration config;
     config.messageIdSuffix = "@host";
-    server::talk::Root root(db, mq, config);
+    server::talk::Root root(db, config);
     server::talk::Session session;
 
     // Create a forum and messages in it
@@ -157,11 +154,10 @@ AFL_TEST("server.talk.TalkNNTP:findMessage", a)
 AFL_TEST("server.talk.TalkNNTP:listMessages", a)
 {
     // Environment
-    afl::net::NullCommandHandler mq;
     afl::net::redis::InternalDatabase db;
     server::talk::Configuration config;
     config.messageIdSuffix = "@host";
-    server::talk::Root root(db, mq, config);
+    server::talk::Root root(db, config);
     server::talk::Session rootSession;
     server::talk::Session userSession;
     userSession.setUser("a");
@@ -205,11 +201,10 @@ AFL_TEST("server.talk.TalkNNTP:listMessages", a)
 AFL_TEST("server.talk.TalkNNTP:getMessageHeader", a)
 {
     // Environment
-    afl::net::NullCommandHandler mq;
     afl::net::redis::InternalDatabase db;
     server::talk::Configuration config;
     config.messageIdSuffix = "@host";
-    server::talk::Root root(db, mq, config);
+    server::talk::Root root(db, config);
     server::talk::Session rootSession;
     server::talk::Session userSession;
     userSession.setUser("a");
