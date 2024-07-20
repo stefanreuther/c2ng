@@ -14,7 +14,14 @@ namespace game { namespace map { namespace info {
     typedef afl::io::xml::Nodes_t Nodes_t;
     using afl::io::xml::TagNode;
 
-    /* Pages */
+    /*
+     *  Note that both Pages and Page Options are part of the external interface
+     *  through ImperialStatsPacker.
+     */
+
+    /*
+     *  Pages
+     */
     enum Page {
         TotalsPage,
         MineralsPage,

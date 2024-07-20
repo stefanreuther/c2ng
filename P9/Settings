@@ -1230,7 +1230,8 @@ DEPEND_guilib = afl
 PROJ_AUTO += guilib:gfx/*.cpp,gfx/*.hpp,ui/*.cpp,ui/*.hpp,client/*.cpp,client/*.hpp
 
 TARGETS += serverlib
-FILES_serverlib = server/talk/notifier.hpp \
+FILES_serverlib = server/play/imperialstatspacker.cpp \
+    server/play/imperialstatspacker.hpp server/talk/notifier.hpp \
     server/talk/notificationthread.cpp server/talk/notificationthread.hpp \
     server/test/mailmock.cpp server/test/mailmock.hpp \
     server/talk/ratelimit.cpp server/talk/ratelimit.hpp \
@@ -1802,7 +1803,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/server/talk/notificationthreadtest.cpp \
+FILES_testsuite = test/server/play/imperialstatspackertest.cpp \
+    test/server/talk/notificationthreadtest.cpp \
     test/server/talk/notifiertest.cpp test/server/test/mailmocktest.cpp \
     test/server/talk/notifytest.cpp \
     test/server/play/shipmissionpackertest.cpp \

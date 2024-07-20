@@ -18,6 +18,7 @@
 #include "server/play/flakconfigurationpacker.hpp"
 #include "server/play/friendlycodepacker.hpp"
 #include "server/play/hullpacker.hpp"
+#include "server/play/imperialstatspacker.hpp"
 #include "server/play/ionstormpacker.hpp"
 #include "server/play/maincommandhandler.hpp"
 #include "server/play/mainpacker.hpp"
@@ -258,13 +259,15 @@ server::play::Packer*
 server::play::GameAccess::createQueryPacker(util::StringParser& p, game::Session& session)
 {
     // ex createQueryWriter
-    int n;
+    int n, m;
     if (p.parseString("shipfc") && p.parseInt(n)) {
         return new ShipFriendlyCodePacker(session, n);
     } else if (p.parseString("planetfc") && p.parseInt(n)) {
         return new PlanetFriendlyCodePacker(session, n);
     } else if (p.parseString("shipmsn") && p.parseInt(n)) {
         return new ShipMissionPacker(session, n);
+    } else if (p.parseString("istat") && p.parseInt(n) && p.parseString(".") && p.parseInt(m)) {
+        return new ImperialStatsPacker(session, n, m);
     } else {
         return 0;
     }
