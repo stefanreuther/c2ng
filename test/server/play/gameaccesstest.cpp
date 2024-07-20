@@ -9,6 +9,7 @@
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/test/testrunner.hpp"
+#include "game/game.hpp"
 #include "game/session.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/test/root.hpp"
@@ -173,4 +174,23 @@ AFL_TEST("server.play.GameAccess:get:multiple", a)
     a.checkNonNull("01", ap("beam").getValue());
     a.checkNonNull("02", ap("hull1").getValue());
     a.checkNonNull("03", ap("engine").getValue());
+}
+
+/** Test get(), parser mixup.
+    A: 'GET obj/shipplanet1'
+    E: error result returned */
+AFL_TEST("server.play.GameAccess:get:error", a)
+{
+    Environment env;
+    env.session.setGame(new game::Game());
+    AFL_CHECK_THROWS(a("t1"), env.testee.get("obj/hullcfg0"),           std::exception);
+    AFL_CHECK_THROWS(a("t2"), env.testee.get("obj/shipcfg0"),           std::exception);
+    AFL_CHECK_THROWS(a("t3"), env.testee.get("obj/planetcfg0"),         std::exception);
+    AFL_CHECK_THROWS(a("t4"), env.testee.get("obj/msgcfg0"),            std::exception);
+    AFL_CHECK_THROWS(a("t5"), env.testee.get("obj/outmsgcfg0"),         std::exception);
+    AFL_CHECK_THROWS(a("t6"), env.testee.get("obj/cfgflakconfig"),      std::exception);
+
+    AFL_CHECK_THROWS(a("q1"), env.testee.get("query/shipfcistat1.1"),   std::exception);
+    AFL_CHECK_THROWS(a("q2"), env.testee.get("query/shipmsnistat1.1"),  std::exception);
+    AFL_CHECK_THROWS(a("q3"), env.testee.get("query/planetfcistat1.1"), std::exception);
 }

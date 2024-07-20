@@ -236,18 +236,42 @@ server::play::GameAccess::createPacker(util::StringParser& p)
         return new FriendlyCodePacker(mustHaveShipList(session), mustHaveRoot(session), session.translator());
     } else if (p.parseString("outidx")) {
         return new OutMessageIndexPacker(session);
-    } else if (p.parseString("hull") && p.parseInt(n)) {
-        return new HullPacker(mustHaveShipList(session), mustHaveRoot(session), n);
-    } else if (p.parseString("ship") && p.parseInt(n)) {
-        return new ShipPacker(session, n);
-    } else if (p.parseString("planet") && p.parseInt(n)) {
-        return new PlanetPacker(session, n);
-    } else if (p.parseString("msg") && p.parseInt(n)) {
-        return new MessagePacker(session, n);
-    } else if (p.parseString("outmsg") && p.parseInt(n)) {
-        return new OutMessagePacker(session, n);
-    } else if (p.parseString("cfg") && p.parseInt(n)) {
-        return new ConfigurationPacker(mustHaveRoot(session), n);
+    } else if (p.parseString("hull")) {
+        if (p.parseInt(n)) {
+            return new HullPacker(mustHaveShipList(session), mustHaveRoot(session), n);
+        } else {
+            return 0;
+        }
+    } else if (p.parseString("ship")) {
+        if (p.parseInt(n)) {
+            return new ShipPacker(session, n);
+        } else {
+            return 0;
+        }
+    } else if (p.parseString("planet")) {
+        if (p.parseInt(n)) {
+            return new PlanetPacker(session, n);
+        } else {
+            return 0;
+        }
+    } else if (p.parseString("msg")) {
+        if (p.parseInt(n)) {
+            return new MessagePacker(session, n);
+        } else {
+            return 0;
+        }
+    } else if (p.parseString("outmsg")) {
+        if (p.parseInt(n)) {
+            return new OutMessagePacker(session, n);
+        } else {
+            return 0;
+        }
+    } else if (p.parseString("cfg")) {
+        if (p.parseInt(n)) {
+            return new ConfigurationPacker(mustHaveRoot(session), n);
+        } else {
+            return 0;
+        }
     } else if (p.parseString("flakconfig")) {
         return new FlakConfigurationPacker(mustHaveRoot(session));
     } else {
@@ -260,14 +284,30 @@ server::play::GameAccess::createQueryPacker(util::StringParser& p, game::Session
 {
     // ex createQueryWriter
     int n, m;
-    if (p.parseString("shipfc") && p.parseInt(n)) {
-        return new ShipFriendlyCodePacker(session, n);
-    } else if (p.parseString("planetfc") && p.parseInt(n)) {
-        return new PlanetFriendlyCodePacker(session, n);
-    } else if (p.parseString("shipmsn") && p.parseInt(n)) {
-        return new ShipMissionPacker(session, n);
-    } else if (p.parseString("istat") && p.parseInt(n) && p.parseString(".") && p.parseInt(m)) {
-        return new ImperialStatsPacker(session, n, m);
+    if (p.parseString("shipfc")) {
+        if (p.parseInt(n)) {
+            return new ShipFriendlyCodePacker(session, n);
+        } else {
+            return 0;
+        }
+    } else if (p.parseString("planetfc")) {
+        if (p.parseInt(n)) {
+            return new PlanetFriendlyCodePacker(session, n);
+        } else {
+            return 0;
+        }
+    } else if (p.parseString("shipmsn")) {
+        if (p.parseInt(n)) {
+            return new ShipMissionPacker(session, n);
+        } else {
+            return 0;
+        }
+    } else if (p.parseString("istat")) {
+        if (p.parseInt(n) && p.parseString(".") && p.parseInt(m)) {
+            return new ImperialStatsPacker(session, n, m);
+        } else {
+            return 0;
+        }
     } else {
         return 0;
     }
@@ -278,14 +318,26 @@ server::play::GameAccess::createCommandHandler(util::StringParser& p, game::Sess
 {
     // ex createCommandHandler
     int n;
-    if (p.parseString("obj/ship") && p.parseInt(n)) {
-        return new ShipCommandHandler(session, n);
-    } else if (p.parseString("obj/planet") && p.parseInt(n)) {
-        return new PlanetCommandHandler(session, n);
+    if (p.parseString("obj/ship")) {
+        if (p.parseInt(n)) {
+            return new ShipCommandHandler(session, n);
+        } else {
+            return 0;
+        }
+    } else if (p.parseString("obj/planet")) {
+        if (p.parseInt(n)) {
+            return new PlanetCommandHandler(session, n);
+        } else {
+            return 0;
+        }
     } else if (p.parseString("obj/main")) {
         return new MainCommandHandler(session);
-    } else if (p.parseString("obj/outmsg") && p.parseInt(n)) {
-        return new OutMessageCommandHandler(session, n);
+    } else if (p.parseString("obj/outmsg")) {
+        if (p.parseInt(n)) {
+            return new OutMessageCommandHandler(session, n);
+        } else {
+            return 0;
+        }
     } else {
         return 0;
     }
