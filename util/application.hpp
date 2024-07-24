@@ -8,9 +8,9 @@
 #include "afl/base/deletable.hpp"
 #include "afl/io/filesystem.hpp"
 #include "afl/io/textwriter.hpp"
-#include "afl/string/nulltranslator.hpp"
 #include "afl/sys/environment.hpp"
-#include "consolelogger.hpp"
+#include "util/consolelogger.hpp"
+#include "util/translator.hpp"
 
 namespace util {
 
@@ -99,7 +99,7 @@ namespace util {
      private:
         afl::sys::Environment& m_environment;
         afl::io::FileSystem& m_fileSystem;
-        afl::string::NullTranslator m_translator;
+        Translator m_translator;
         ConsoleLogger m_logger;
         afl::base::Ref<afl::io::TextWriter> m_errorOutput;
         afl::base::Ref<afl::io::TextWriter> m_standardOutput;

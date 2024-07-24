@@ -21,7 +21,6 @@
 #include "afl/net/tunnel/tunnelablenetworkstack.hpp"
 #include "afl/string/format.hpp"
 #include "afl/string/messages.hpp"
-#include "afl/string/nulltranslator.hpp"
 #include "afl/string/parse.hpp"
 #include "afl/string/proxytranslator.hpp"
 #include "afl/sys/dialog.hpp"

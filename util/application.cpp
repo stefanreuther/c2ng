@@ -41,6 +41,7 @@ util::Application::Application(afl::sys::Environment& env, afl::io::FileSystem& 
       m_errorOutput(getWriter(env, env.Error)),
       m_standardOutput(getWriter(env, env.Output))
 {
+    m_translator.loadDefaultTranslation(fs, env);
     m_logger.attachWriter(false, m_standardOutput.asPtr());
     m_logger.attachWriter(true, m_errorOutput.asPtr());
 }

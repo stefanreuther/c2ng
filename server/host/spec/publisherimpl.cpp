@@ -10,7 +10,6 @@
 #include "afl/data/vector.hpp"
 #include "afl/data/vectorvalue.hpp"
 #include "afl/io/multidirectory.hpp"
-#include "afl/string/nulltranslator.hpp"
 #include "game/root.hpp"
 #include "game/task.hpp"
 #include "game/v3/loader.hpp"

@@ -12,7 +12,6 @@
 #include "gfx/complex.hpp"
 #include "ui/colorscheme.hpp"
 #include "game/vcr/classic/algorithm.hpp"
-#include "afl/string/nulltranslator.hpp"
 #include "game/vcr/classic/utils.hpp"
 #include "gfx/scan.hpp"
 

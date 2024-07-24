@@ -45,11 +45,13 @@ my $bindir;
 my $prefix = get_variable('prefix');
 
 # Targets (previously maintained in P9/Settings as 'TARGETS' variable)
+my @GUI_APPS     = qw(c2ng c2pluginw);
+my @SERVER_APPS  = qw(c2file-server c2format-server c2host-server c2talk-server c2fileclient c2mailin c2console c2dbexport c2nntp-server c2mailout-server c2monitor-server c2play-server c2router-server c2doc-server c2user-server c2logger);
+my @CONSOLE_APPS = qw(c2check c2compiler c2configtool c2docmanager c2export c2mgrep c2mkturn c2plugin c2rater c2restool c2script c2simtool c2sweep c2unpack c2untrn c2gfxgen c2gfxcodec);
+my @LIBS         = qw(guilib serverlib gamelib);
+my $settings     = load_variables("$IN/P9/Settings");
+
 if (get_variable('ENABLE_BUILD')) {
-    my @GUI_APPS     = qw(c2ng c2pluginw);
-    my @SERVER_APPS  = qw(c2file-server c2format-server c2host-server c2talk-server c2fileclient c2mailin c2console c2dbexport c2nntp-server c2mailout-server c2monitor-server c2play-server c2router-server c2doc-server c2user-server c2logger);
-    my @CONSOLE_APPS = qw(c2check c2compiler c2configtool c2docmanager c2export c2mgrep c2mkturn c2plugin c2rater c2restool c2script c2simtool c2sweep c2unpack c2untrn c2gfxgen c2gfxcodec);
-    my @LIBS         = qw(guilib serverlib gamelib);
 
     # Find afl
     find_directory('AFL_DIR',
@@ -147,8 +149,6 @@ if (get_variable('ENABLE_BUILD')) {
 
     compile_add_prebuilt_library(afl => "$V{AFL_DIR}/lib/libafl.a",
                                  [split /\s+/, $afl_config->{CONFIG_AFL_LIBS}]);
-
-    my $settings = load_variables("$IN/P9/Settings");
 
     # Libraries
     my $opts = {
@@ -271,6 +271,39 @@ if (get_variable('ENABLE_BUILD')) {
 if ($V{ENABLE_DOC}) {
     load_directory('doc');
 }
+
+##
+##  Language
+##
+
+# messages.po: this file is NOT part of the build, it is used for updating the source .po files.
+# Note that this will generate a ~130k command line. Linux x64 limit is 2M, so we're safe *for now*.
+my $msgextract = normalize_filename($V{IN}, "scripts/msgextract.pl");
+my $message_po = normalize_filename($V{OUT}, "messages.po");
+my @all_sources = map {split /\s+/, $settings->{"FILES_$_"}} @GUI_APPS, @SERVER_APPS, @CONSOLE_APPS, @LIBS;
+push @all_sources, grep {/\.q$/} split /\s+/, $settings->{FILES_extra};
+generate($message_po, [$msgextract, map {normalize_filename($V{IN}, $_)} @all_sources],
+         "$V{PERL} $msgextract -C $V{IN} " . join(' ', @all_sources) . " > $message_po");
+rule_add_info($message_po, 'Extracting message strings');
+
+# Actual language file(s). From the po/XX.po file, we create a language file.
+my @languages = qw(de);
+my $msgcompile = normalize_filename($V{IN}, "scripts/msgcompile.pl");
+foreach my $lang (@languages) {
+    # Build the language file
+    my $langfile = normalize_filename($V{OUT}, "share/resource/$lang.lang");
+    my $pofile = normalize_filename($V{IN}, "po/$lang.po");
+    generate($langfile, [$msgcompile, $pofile], "$V{PERL} $msgcompile $pofile $langfile");
+    rule_add_info($langfile, 'Compiling language '.$lang);
+    generate('resources', $langfile);
+    generate('install', generate_copy("$prefix/share/resource/$lang.lang", $langfile));
+
+    # Phony rule to update source
+    rule_set_phony(generate("update-$lang", [$message_po],
+                            "msgmerge $pofile $message_po > $pofile.t",
+                            "mv $pofile.t $pofile"));
+}
+
 
 ##
 ##  Additional Stuff

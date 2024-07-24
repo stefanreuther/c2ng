@@ -12,6 +12,7 @@
 #include "afl/sys/environment.hpp"
 #include "afl/test/translator.hpp"
 #include "client/application.hpp"
+#include "util/translator.hpp"
 
 int main(int, char** argv)
 {
@@ -22,7 +23,10 @@ int main(int, char** argv)
     afl::net::NetworkStack& net = afl::net::NetworkStack::getInstance();
 
     // Infrastructure (FIXME).
-#if 0
+#if 1
+    util::Translator tx;
+    tx.loadDefaultTranslation(fs, env);
+#elif 0
     afl::test::Translator tx("\xC2\xAB", "\xC2\xBB");
 #else
     afl::string::NullTranslator tx;

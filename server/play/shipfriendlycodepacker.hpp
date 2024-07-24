@@ -4,7 +4,6 @@
 #ifndef C2NG_SERVER_PLAY_SHIPFRIENDLYCODEPACKER_HPP
 #define C2NG_SERVER_PLAY_SHIPFRIENDLYCODEPACKER_HPP
 
-#include "afl/string/nulltranslator.hpp"
 #include "game/session.hpp"
 #include "game/spec/friendlycodelist.hpp"
 #include "server/play/packer.hpp"

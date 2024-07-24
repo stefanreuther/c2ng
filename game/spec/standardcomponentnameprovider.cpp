@@ -150,7 +150,7 @@ game::spec::StandardComponentNameProvider::load(afl::io::Directory& dir, afl::st
     afl::base::Ptr<afl::io::Stream> file;
 
     // Load user files. Language-specific file first
-    String_t code = tx("{languageCode}");
+    String_t code = tx("{lang}en");
     if (!code.empty() && code[0] != '{') {
         file = dir.openFileNT(Format("names_%s.usr", code), afl::io::FileSystem::OpenRead);
         if (file.get() != 0) {

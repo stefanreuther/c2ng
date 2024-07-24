@@ -91,11 +91,11 @@ server::host::HostTurn::submit(const String_t& blob,
     // ex doTurnUpload
 
     // Parse the turn file and complete the parameters
+    afl::string::NullTranslator tx;
     std::auto_ptr<game::v3::TurnFile> trn;
     afl::charset::CodepageCharset charset(afl::charset::g_codepageLatin1);
     try {
         afl::io::ConstMemoryStream ms(afl::string::toBytes(blob));
-        afl::string::NullTranslator tx;
         trn.reset(new game::v3::TurnFile(charset, tx, ms, false));
     }
     catch (std::exception& e) {

@@ -40,7 +40,6 @@ using afl::io::FileSystem;
 using afl::io::Stream;
 using afl::io::TextFile;
 using afl::string::Format;
-using afl::string::Translator;
 using afl::sys::CommandLineParser;
 
 namespace {
@@ -158,7 +157,7 @@ namespace {
     /* Process a script file. */
     void processFile(CreateStatus& st, const String_t& fileName)
     {
-        Translator& tx = st.app.translator();
+        afl::string::Translator& tx = st.app.translator();
         Ref<Stream> file(st.app.fileSystem().openFile(fileName, FileSystem::OpenRead));
         TextFile script(*file);
 
@@ -290,7 +289,7 @@ void
 util::ResourceFileApplication::appMain()
 {
     // Parse args
-    Translator& tx = translator();
+    afl::string::Translator& tx = translator();
     afl::sys::StandardCommandLineParser cmdl(environment().getCommandLine());
     afl::base::Optional<String_t> arg_command;
     String_t text;
@@ -333,7 +332,7 @@ util::ResourceFileApplication::appMain()
 void
 util::ResourceFileApplication::help()
 {
-    Translator& tx = translator();
+    afl::string::Translator& tx = translator();
     afl::io::TextWriter& out = standardOutput();
     out.writeLine(Format(tx("PCC2 Resource File Utility v%s - (c) 2023-2024 Stefan Reuther"), PCC2_VERSION));
     out.writeLine();
@@ -378,7 +377,7 @@ util::ResourceFileApplication::doCreate(afl::sys::CommandLineParser& cmdl)
     parseParameters(param, cmdl, *this, true);
 
     // Command line validation
-    Translator& tx = translator();
+    afl::string::Translator& tx = translator();
     if (param.fileNames.size() < 2) {
         errorExit(tx("command requires at least 2 parameters"));
     }
@@ -432,7 +431,7 @@ util::ResourceFileApplication::doExtract(afl::sys::CommandLineParser& cmdl)
     parseParameters(param, cmdl, *this, false);
 
     // Command line validation
-    Translator& tx = translator();
+    afl::string::Translator& tx = translator();
     if (param.fileNames.size() != 3) {
         errorExit(tx("command requires 3 parameters"));
     }
@@ -465,7 +464,7 @@ util::ResourceFileApplication::doExtractAll(afl::sys::CommandLineParser& cmdl)
     parseParameters(param, cmdl, *this, false);
 
     // Command line validation
-    Translator& tx = translator();
+    afl::string::Translator& tx = translator();
     if (param.fileNames.size() < 1 || param.fileNames.size() > 2) {
         errorExit(tx("command requires 1 or 2 parameters"));
     }

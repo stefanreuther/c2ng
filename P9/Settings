@@ -12,7 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/proxy/shipinfoproxy.cpp game/proxy/shipinfoproxy.hpp \
+FILES_gamelib = util/translator.cpp util/translator.hpp \
+    game/proxy/shipinfoproxy.cpp game/proxy/shipinfoproxy.hpp \
     game/interface/buildcommandparser.cpp \
     game/interface/buildcommandparser.hpp \
     game/interface/missionlistcontext.cpp \
@@ -1803,7 +1804,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/server/play/imperialstatspackertest.cpp \
+FILES_testsuite = test/util/translatortest.cpp \
+    test/server/play/imperialstatspackertest.cpp \
     test/server/talk/notificationthreadtest.cpp \
     test/server/talk/notifiertest.cpp test/server/test/mailmocktest.cpp \
     test/server/talk/notifytest.cpp \

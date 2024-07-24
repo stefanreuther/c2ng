@@ -52,7 +52,6 @@ using afl::io::xml::Nodes_t;
 using afl::io::xml::Parser;
 using afl::io::xml::Reader;
 using afl::string::Format;
-using afl::string::Translator;
 using afl::sys::StandardCommandLineParser;
 
 /*
@@ -101,7 +100,7 @@ void
 util::doc::Application::appMain()
 {
     StandardCommandLineParser parser(environment().getCommandLine());
-    Translator& tx = translator();
+    afl::string::Translator& tx = translator();
     String_t text;
     bool option;
     Optional<String_t> command;
@@ -182,7 +181,7 @@ void
 util::doc::Application::loadData(DataReference& ref, const DataParameters& data)
 {
     // Obtain directory name
-    Translator& tx = translator();
+    afl::string::Translator& tx = translator();
     const String_t* dirName = data.dirName.get();
     if (dirName == 0) {
         errorExit(Format(tx("repository location not specified. Use \"%s -h\" for help"), environment().getInvocationName()));
@@ -214,7 +213,7 @@ void
 util::doc::Application::saveData(DataReference& ref, const DataParameters& data)
 {
     // Obtain directory name
-    Translator& tx = translator();
+    afl::string::Translator& tx = translator();
     const String_t* dirName = data.dirName.get();
     if (dirName == 0) {
         errorExit(Format(tx("repository location not specified. Use \"%s -h\" for help"), environment().getInvocationName()));
@@ -619,7 +618,7 @@ void
 util::doc::Application::help()
 {
     TextWriter& out = standardOutput();
-    Translator& tx = translator();
+    afl::string::Translator& tx = translator();
     out.writeLine(Format(tx("PCC2 Documentation Manager v%s - (c) 2021-2024 Stefan Reuther"), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(tx("Usage:\n"
@@ -671,14 +670,14 @@ util::doc::Application::help()
 void
 util::doc::Application::errorExitBadOption()
 {
-    Translator& tx = translator();
+    afl::string::Translator& tx = translator();
     errorExit(Format(tx("invalid option specified. Use \"%s -h\" for help"), environment().getInvocationName()));
 }
 
 void
 util::doc::Application::errorExitBadNonoption()
 {
-    Translator& tx = translator();
+    afl::string::Translator& tx = translator();
     errorExit(Format(tx("non-option unexpected. Use \"%s -h\" for help"), environment().getInvocationName()));
 }
 

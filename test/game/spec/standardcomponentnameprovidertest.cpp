@@ -91,7 +91,7 @@ AFL_TEST("game.spec.StandardComponentNameProvider:language", a)
         virtual String_t translate(afl::string::ConstStringMemory_t in) const
             {
                 String_t result = afl::string::fromMemory(in);
-                if (result == "{languageCode}") {
+                if (result == "{lang}en") {
                     result = "de";
                 }
                 return result;
