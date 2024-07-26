@@ -279,7 +279,7 @@ game::interface::InboxContext::get(PropertyIndex_t index)
                In messages from host, the object sending the message if recognized correctly
                (e.g. in a message from a planet reporting overtemperature, the planet).
                EMPTY if none.
-               @since PCC2 2.41.2
+               @since PCC2 2.41.3
                @see Link2 (Incoming Message Property) */
             return makeReferenceValue(getCurrentMetadata(*root).primaryLink, m_session);
 
@@ -288,7 +288,7 @@ game::interface::InboxContext::get(PropertyIndex_t index)
                Second object or location linked by message.
                Typically, first X,Y coordinate mentioned in message.
                EMPTY if none.
-               @since PCC2 2.41.2
+               @since PCC2 2.41.3
                @see Link (Incoming Message Property) */
             return makeReferenceValue(getCurrentMetadata(*root).secondaryLink, m_session);
 
@@ -301,7 +301,7 @@ game::interface::InboxContext::get(PropertyIndex_t index)
                The return value is an array containing player numbers,
                compatible with the first parameter of {SendMessage}.
                Value is EMPTY if there are no players.
-               @since PCC2 2.41.2
+               @since PCC2 2.41.3
                @see Partner.All (Incoming Message Property) */
             return makePlayerSet(getCurrentMetadata(*root).reply);
 
@@ -314,7 +314,7 @@ game::interface::InboxContext::get(PropertyIndex_t index)
                The return value is an array containing player numbers,
                compatible with the first parameter of {SendMessage}.
                Value is EMPTY if there are no players.
-               @since PCC2 2.41.2
+               @since PCC2 2.41.3
                @see Partner (Incoming Message Property) */
             return makePlayerSet(getCurrentMetadata(*root).replyAll);
 
@@ -330,7 +330,7 @@ game::interface::InboxContext::get(PropertyIndex_t index)
                - failed
 
                EMPTY if message does not contain a data transmission.
-               @since PCC2 2.41.2 */
+               @since PCC2 2.41.3 */
             return makeDataStatus(getCurrentMetadata(*root).dataStatus);
 
          case impConfirmed:
@@ -338,7 +338,7 @@ game::interface::InboxContext::get(PropertyIndex_t index)
                If message represents a {Notify (Global Command)|notification message},
                its confirmation status.
 
-               @since PCC2 2.41.2 */
+               @since PCC2 2.41.3 */
             return interpreter::makeBooleanValue(getCurrentMetadata(*root).flags.contains(Mailbox::Confirmed));
 
          case immWrite:

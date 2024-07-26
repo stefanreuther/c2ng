@@ -188,7 +188,8 @@ game::interface::getMissionProperty(const game::spec::Mission& mission, MissionP
      case impGroup:
         /* @q Group:Str (Mission Property)
            Group name.
-           A possibly empty, comma-delimited list of groups this mission belongs to. */
+           A possibly empty, comma-delimited list of groups this mission belongs to.
+           @since PCC2 2.41.2 */
         return makeStringValue(mission.getGroup());
     }
     return 0;

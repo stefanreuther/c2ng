@@ -1,6 +1,16 @@
 PCC2ng NEWS FILE
 ================
 
+2.41.3
+------
+
+  Add translation.
+
+  Added some more attributes to script objects (e.g. InMsg().Link), to
+  allow the c2play-server to publish those, and eventually allow
+  adding more features to the Web client.
+
+
 2.41.2
 ------
 

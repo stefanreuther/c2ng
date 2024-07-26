@@ -52,10 +52,6 @@ PCC1 FEATURES MISSING IN PCC2.
 - data transmission settings.
 - history management.
 
-I18N.
-- Create .po files (custom extractor).
-- Read .po files. We can probably do without compiling them now.
-
 
 MISC
 =====
