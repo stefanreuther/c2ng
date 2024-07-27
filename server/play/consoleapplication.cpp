@@ -8,6 +8,7 @@
 #include "afl/charset/codepagecharset.hpp"
 #include "afl/net/line/linesink.hpp"
 #include "afl/net/url.hpp"
+#include "afl/string/char.hpp"
 #include "afl/string/format.hpp"
 #include "afl/string/parse.hpp"
 #include "afl/sys/standardcommandlineparser.hpp"
@@ -28,14 +29,36 @@
 #include "util/charsetfactory.hpp"
 #include "util/messagecollector.hpp"
 #include "util/string.hpp"
+#include "util/translator.hpp"
 #include "version.hpp"
 
+using afl::base::Optional;
+using afl::charset::Charset;
 using afl::string::Format;
 
+namespace {
+    /* Sanity check for language code.
+       A language code must not be empty, and must not contain invalid characters.
+       For now, we accept numerics, "_" and ".". */
+    bool isValidLanguageCode(const String_t& s)
+    {
+        if (s.empty()) {
+            return false;
+        }
+        for (size_t i = 0, n = s.size(); i < n; ++i) {
+            if (!afl::string::charIsAlphanumeric(s[i]) && s[i] != '_' && s[i] != '.') {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
 struct server::play::ConsoleApplication::Parameters {
-    afl::base::Optional<String_t> arg_gamedir;  // -G
-    afl::base::Optional<String_t> arg_rootdir;  // -R
-    std::auto_ptr<afl::charset::Charset> gameCharset;
+    Optional<String_t> arg_gamedir;  // -G
+    Optional<String_t> arg_rootdir;  // -R
+    Optional<String_t> arg_language; // --language
+    std::auto_ptr<Charset> gameCharset;
     int playerNumber;
 
     Parameters()
@@ -49,13 +72,16 @@ struct server::play::ConsoleApplication::Parameters {
 
 server::play::ConsoleApplication::ConsoleApplication(afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net)
     : Application(env, fs),
-      m_network(net)
+      m_network(net),
+      m_properties(),
+      m_nullFileSystem()
 { }
 
 void
 server::play::ConsoleApplication::appMain()
 {
     afl::string::Translator& tx = translator();
+    util::Translator sessionTranslator;
 
     // Parameters
     Parameters params;
@@ -70,7 +96,7 @@ server::play::ConsoleApplication::appMain()
                 help();
             } else if (p == "C") {
                 // character set
-                if (afl::charset::Charset* cs = util::CharsetFactory().createCharset(commandLine.getRequiredParameter(p))) {
+                if (Charset* cs = util::CharsetFactory().createCharset(commandLine.getRequiredParameter(p))) {
                     params.gameCharset.reset(cs);
                 } else {
                     errorExit(tx("the specified character set is not known"));
@@ -88,6 +114,8 @@ server::play::ConsoleApplication::appMain()
                     key.erase(eq);
                 }
                 m_properties[key] = value;
+            } else if (p == "language") {
+                params.arg_language = commandLine.getRequiredParameter(p);
             } else {
                 errorExit(Format(tx("invalid option '%s' specified. Use '%s -h' for help."), p, environment().getInvocationName()));
             }
@@ -117,11 +145,19 @@ server::play::ConsoleApplication::appMain()
         errorExit(tx("missing directory name"));
     }
 
+    // Language
+    if (const String_t* p = params.arg_language.get()) {
+        if (!isValidLanguageCode(*p)) {
+            errorExit(tx("invalid language code"));
+        }
+        sessionTranslator.loadTranslation(fileSystem(), environment(), afl::string::LanguageCode(*p));
+    }
+
     // Central logger
     util::MessageCollector logCollector;
 
     // Make a session
-    game::Session session(tx, fileSystem());
+    game::Session session(sessionTranslator, fileSystem());
     session.log().addListener(logCollector);
 
     // Check game data
@@ -132,7 +168,7 @@ server::play::ConsoleApplication::appMain()
 
     String_t extra;
     if (!root->getTurnLoader()->getPlayerStatus(params.playerNumber, extra, tx).contains(game::TurnLoader::Available)) {
-        errorExit(Format(tx.translateString("no game data available for player %d").c_str(), params.playerNumber));
+        errorExit(Format(tx("no game data available for player %d").c_str(), params.playerNumber));
     }
 
     // Make a session and load it
@@ -200,7 +236,8 @@ server::play::ConsoleApplication::help()
         util::formatOptions(tx("Options:\n"
                                "-Ccs\tSet game character set\n"
                                "-Rkey, -Wkey\tIgnored; used for session conflict resolution\n"
-                               "-Dkey=value\tDefine a property\n"));
+                               "-Dkey=value\tDefine a property\n"
+                               "--language=CODE\tLanguage to use for game\n"));
 
     afl::io::TextWriter& out = standardOutput();
     out.writeLine(Format(tx("PCC2 Play Server v%s - (c) 2019-2024 Stefan Reuther").c_str(), PCC2_VERSION));
@@ -230,7 +267,7 @@ server::play::ConsoleApplication::loadRoot(const String_t& gameDir, const Parame
     afl::net::Url url;
     if (url.parse(gameDir)) {
         if (url.getScheme() == "c2file") {
-            afl::base::Ref<server::play::fs::Session> session(server::play::fs::Session::create(m_network, url.getName(afl::string::Format("%d", FILE_PORT)), url.getUser()));
+            afl::base::Ref<server::play::fs::Session> session(server::play::fs::Session::create(m_network, url.getName(Format("%d", FILE_PORT)), url.getUser()));
             return session->createRoot(url.getPath(), tx, log, m_nullFileSystem, rootDir, *params.gameCharset);
         }
     }

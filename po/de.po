@@ -1,7 +1,7 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2024-07-27 10:56+0200\n"
+"PO-Revision-Date: 2024-07-27 11:20+0200\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
 #: util/plugin/consoleapplication.cpp:386
@@ -963,7 +963,7 @@ msgstr "(%d,%d)"
 msgid "(%s, %d byte%!1{s%})"
 msgstr "(%s, %d Byte%!1{s%})"
 
-#: client/dialogs/specbrowserdialog.cpp:851
+#: client/dialogs/specbrowserdialog.cpp:859
 msgid "(+%d more)"
 msgstr "(+%d weitere)"
 
@@ -2098,7 +2098,7 @@ msgid "Beam up multiple"
 msgstr "Heraufbeamen (Beam up multiple)"
 
 #: client/dialogs/buildshipmain.cpp:225
-#: client/dialogs/specbrowserdialog.cpp:617 game/map/info/info.cpp:1456
+#: client/dialogs/specbrowserdialog.cpp:625 game/map/info/info.cpp:1456
 #: game/spec/info/utils.cpp:23
 msgid "Beams"
 msgstr "Geschütze"
@@ -3319,9 +3319,12 @@ msgid ""
 "individually using <kbd>R</kbd> on the ship screen. The recommended setting "
 "is <b>No</b>.</small>"
 msgstr ""
-"Sollen neu gebaute Schiffe für die Fernsteuerung durch Verbündete (Remote Control) zur Verfügung stehen?\n"
+"Sollen neu gebaute Schiffe für die Fernsteuerung durch Verbündete (Remote "
+"Control) zur Verfügung stehen?\n"
 "\n"
-"<small>Du kannst diese Genehmigung auch mit der Taste <kbd>R</kbd> im Schiffsmenü für jedes Schiff individuell erteilen. Die empfohlene Einstellung ist <b>Nein</b>.</small>"
+"<small>Du kannst diese Genehmigung auch mit der Taste <kbd>R</kbd> im "
+"Schiffsmenü für jedes Schiff individuell erteilen. Die empfohlene "
+"Einstellung ist <b>Nein</b>.</small>"
 
 #: share/resource/core_config.q:130
 msgid ""
@@ -3335,9 +3338,14 @@ msgid ""
 msgstr ""
 "Soll der Host Routine-Nachrichten ausfiltern?\n"
 "\n"
-"<small>Wenn der Filter aktiv ist, werden Nachrichten wie Sensor-Ergebnisse aus der Result-Datei entfernt, was deren Größe verringert. PCC2 zeigt die entsprechenden Informationen weiterhin an, da sie auch in der Datei <tt>util.dat</tt> übertragen werden.</small>\n"
+"<small>Wenn der Filter aktiv ist, werden Nachrichten wie Sensor-Ergebnisse "
+"aus der Result-Datei entfernt, was deren Größe verringert. PCC2 zeigt die "
+"entsprechenden Informationen weiterhin an, da sie auch in der Datei <tt>util."
+"dat</tt> übertragen werden.</small>\n"
 "\n"
-"<small>Die empfohlene Einstellung ist <b>Nein</b>, um die Nachrichten zu behalten. Mit PCC2s eingebautem Filter kannst du genauer einstellen, was du sehen willst.</small>"
+"<small>Die empfohlene Einstellung ist <b>Nein</b>, um die Nachrichten zu "
+"behalten. Mit PCC2s eingebautem Filter kannst du genauer einstellen, was du "
+"sehen willst.</small>"
 
 #: client/dialogs/selectionmanager.cpp:420
 msgid "Do you want to clear all selection layers?"
@@ -3639,7 +3647,7 @@ msgid "Engine/Shield bonus rate"
 msgstr "Triebwerk-Schild-Bonus-Rate"
 
 #: client/dialogs/buildshipmain.cpp:217
-#: client/dialogs/specbrowserdialog.cpp:616
+#: client/dialogs/specbrowserdialog.cpp:624
 #: client/dialogs/techupgradedialog.cpp:100
 #: client/widgets/hullspecificationsheet.cpp:34
 #: client/widgets/vcrobjectinfo.cpp:82 game/spec/info/info.cpp:134
@@ -4114,7 +4122,7 @@ msgid "Fighter sweep rate"
 msgstr "Jäger Räum-Rate"
 
 #: client/dialogs/simulator.cpp:1098 client/dialogs/simulator.cpp:907
-#: client/dialogs/simulator.cpp:989 client/dialogs/specbrowserdialog.cpp:619
+#: client/dialogs/simulator.cpp:989 client/dialogs/specbrowserdialog.cpp:627
 #: client/widgets/simulationobjectinfo.cpp:588 game/element.cpp:75
 #: game/map/info/info.cpp:1597 share/resource/core_tiles.q:1178
 msgid "Fighters"
@@ -6416,7 +6424,7 @@ msgstr "N - Name"
 
 #: client/dialogs/chartconfig.cpp:556 client/dialogs/processlistdialog.cpp:301
 #: client/dialogs/referencesortorder.cpp:37 client/dialogs/simulator.cpp:1226
-#: client/dialogs/specbrowserdialog.cpp:582
+#: client/dialogs/specbrowserdialog.cpp:590
 #: client/widgets/simulationobjectinfo.cpp:256
 #: game/parser/messagevalue.cpp:133 game/spec/info/browser.cpp:272
 #: game/spec/info/browser.cpp:649 game/spec/info/filter.cpp:83
@@ -6930,17 +6938,19 @@ msgstr ""
 "json\tJSON (JavaScript)\n"
 "html\tHTML"
 
-#: server/play/consoleapplication.cpp:200
+#: server/play/consoleapplication.cpp:236
 msgid ""
 "Options:\n"
 "-Ccs\tSet game character set\n"
 "-Rkey, -Wkey\tIgnored; used for session conflict resolution\n"
-"-Dkey=value\tDefine a property"
+"-Dkey=value\tDefine a property\n"
+"--language=CODE\tLanguage to use for game"
 msgstr ""
 "Optionen:\n"
 "-Czs\tSpiel-Zeichensatz setzen\n"
 "-Rkey, -Wkey\tIgnoriert; für Auflösung von Sitzungskonflikten\n"
-"-Dkey=value\tEigenschaft setzen"
+"-Dkey=value\tEigenschaft setzen\n"
+"--language=CODE\tSprache für Spiel"
 
 #: game/v3/maketurnapplication.cpp:143
 msgid ""
@@ -7139,7 +7149,7 @@ msgstr "PCC2 Grafik-Codecs v%s - (c) 2024 Stefan Reuther"
 msgid "PCC2 Message Search v%s - (c) 2011-2024 Stefan Reuther"
 msgstr "PCC2 Nachrichten-Suche v%s - (c) 2011-2024 Stefan Reuther"
 
-#: server/play/consoleapplication.cpp:206
+#: server/play/consoleapplication.cpp:243
 msgid "PCC2 Play Server v%s - (c) 2019-2024 Stefan Reuther"
 msgstr "PCC2 Spiel-Server v%s - (c) 2019-2024 Stefan Reuther"
 
@@ -7636,11 +7646,11 @@ msgstr "Rasse"
 msgid "Race Names"
 msgstr "Völkernamen"
 
-#: client/dialogs/specbrowserdialog.cpp:612
+#: client/dialogs/specbrowserdialog.cpp:620
 msgid "Races"
 msgstr "Rassen"
 
-#: client/dialogs/specbrowserdialog.cpp:613
+#: client/dialogs/specbrowserdialog.cpp:621
 msgid "Racial Abilities"
 msgstr "Rassen-Eigenschaften"
 
@@ -8551,7 +8561,7 @@ msgstr ""
 "einem Schiff auf einmal transferieren.\n"
 "Existierenden Transfer stornieren?"
 
-#: client/dialogs/specbrowserdialog.cpp:615
+#: client/dialogs/specbrowserdialog.cpp:623
 msgid "Ship Abilities"
 msgstr "Schiffsfähigkeiten"
 
@@ -8573,7 +8583,7 @@ msgstr "Schiffs-Aufzeichnungen"
 msgid "Ship History #%d: %s"
 msgstr "Schiffs-Aufzeichnungen #%d: %s"
 
-#: client/dialogs/specbrowserdialog.cpp:614
+#: client/dialogs/specbrowserdialog.cpp:622
 msgid "Ship Hulls"
 msgstr "Schiffstypen"
 
@@ -9628,7 +9638,9 @@ msgstr "Keine andere Einheit an dieser Stelle kann %s tragen."
 
 #: share/resource/core_ui.q:2057
 msgid "There is no ship at this starbase which could be fixed or recycled."
-msgstr "An dieser Sternenbasis halten sich keine Schiffe auf, die repariert oder verschrottet werden können."
+msgstr ""
+"An dieser Sternenbasis halten sich keine Schiffe auf, die repariert oder "
+"verschrottet werden können."
 
 #: client/dialogs/visualscandialog.cpp:1133
 msgid "There is no ship of ours at that position."
@@ -9854,7 +9866,8 @@ msgid ""
 "overridden by PHost.\n"
 "Continue anyway?"
 msgstr ""
-"Dieses Schiff hat einen aktiven \"Heraufbeamen (Beam Up Multiple)\"-Auftrag. PHost wird seine Mission überschreiben.\n"
+"Dieses Schiff hat einen aktiven \"Heraufbeamen (Beam Up Multiple)\"-Auftrag. "
+"PHost wird seine Mission überschreiben.\n"
 "Dennoch fortsetzen?"
 
 #: share/resource/core_ui.q:1180 share/resource/core_ui.q:740
@@ -9872,20 +9885,25 @@ msgid ""
 "mission will lose the intercept lock.\n"
 "Leave the fleet and continue?"
 msgstr ""
-"Dieses Schiff ist Mitglied einer Flotte, die auf einem Abfangkurs ist. Ändern der Mission wird den Abfangkurs verlassen.\n"
+"Dieses Schiff ist Mitglied einer Flotte, die auf einem Abfangkurs ist. "
+"Ändern der Mission wird den Abfangkurs verlassen.\n"
 "Flotte verlassen?"
 
 #: share/resource/core_ui.q:1150
 msgid ""
 "This ship is member of a fleet which is on a intercept course. You cannot "
 "tow and intercept at the same time."
-msgstr "Dieses Schiff ist Mitglied einer Flotte, die auf einem Abfangkurs ist. Abfangen und Abschleppen gleichzeitig ist nicht möglich."
+msgstr ""
+"Dieses Schiff ist Mitglied einer Flotte, die auf einem Abfangkurs ist. "
+"Abfangen und Abschleppen gleichzeitig ist nicht möglich."
 
 #: share/resource/core_ui.q:797
 msgid ""
 "This ship is member of a fleet. Do you want to set the waypoint of the whole "
 "fleet, or do you want to leave the fleet?"
-msgstr "Dieses Schiff ist Mitglied einer Flotte. Möchtest du den Kurs für die gesamte Flotte setzen, oder die Flotte verlassen?"
+msgstr ""
+"Dieses Schiff ist Mitglied einer Flotte. Möchtest du den Kurs für die "
+"gesamte Flotte setzen, oder die Flotte verlassen?"
 
 #: client/dialogs/cloneship.cpp:160
 msgid ""
@@ -9932,7 +9950,9 @@ msgstr ""
 msgid ""
 "This starbase is already recycling %s. If you continue, this order will be "
 "replaced. Continue?"
-msgstr "Diese Sternenbasis verschrottet bereits %s. Wenn du fortsetzt, wird dieser Auftrag ersetzt. Fortsetzen?"
+msgstr ""
+"Diese Sternenbasis verschrottet bereits %s. Wenn du fortsetzt, wird dieser "
+"Auftrag ersetzt. Fortsetzen?"
 
 #: share/resource/core_ui.q:909
 msgid ""
@@ -10050,7 +10070,9 @@ msgstr ""
 msgid ""
 "To split a fleet, please select the ships which should go into one fleet "
 "using <kbd>.</kbd>, and unselect those which should go into the other."
-msgstr "Um eine Flotte zu teilen, wähle die Schiffe, die in die eine Flotte sollen, mit <kbd>.</kbd>, und deselektiere die, die in die andere sollen."
+msgstr ""
+"Um eine Flotte zu teilen, wähle die Schiffe, die in die eine Flotte sollen, "
+"mit <kbd>.</kbd>, und deselektiere die, die in die andere sollen."
 
 #: client/dialogs/minefieldinfo.cpp:534
 msgid "To sweep %d mines, use..."
@@ -10129,7 +10151,7 @@ msgid "Torpedo tech upgrade"
 msgstr "Torpedo-Tech-Upgrade"
 
 #: client/dialogs/buildshipmain.cpp:233
-#: client/dialogs/specbrowserdialog.cpp:618
+#: client/dialogs/specbrowserdialog.cpp:626
 #: client/dialogs/techupgradedialog.cpp:103
 #: client/widgets/simulationobjectinfo.cpp:591 game/map/info/info.cpp:1529
 #: game/map/info/info.cpp:1531 share/resource/core_tiles.q:1180
@@ -11022,7 +11044,7 @@ msgstr ""
 "%s\n"
 "Fehler bitte melden an <Streu@gmx.de>"
 
-#: server/play/consoleapplication.cpp:208
+#: server/play/consoleapplication.cpp:245
 msgid ""
 "Usage:\n"
 "  %s [-h]\n"
@@ -11457,7 +11479,9 @@ msgstr "Warnung: doppelte Adresse"
 msgid ""
 "Warning: executing this action produced %d error%!1{s%}, last was \"%s\". "
 "This should not have happened and indicates a bug in PCC2."
-msgstr "Warnung: Ausführen dieser Aktion erzeugte %d Fehler, der letzte war \"%s\". Das sollte nicht passieren und deutet auf einen Fehler in PCC2 hin."
+msgstr ""
+"Warnung: Ausführen dieser Aktion erzeugte %d Fehler, der letzte war \"%s\". "
+"Das sollte nicht passieren und deutet auf einen Fehler in PCC2 hin."
 
 #: util/doc/verifier.cpp:246
 msgid "Warning: nesting error (child node of page is not a page)"
@@ -11927,7 +11951,10 @@ msgstr ""
 msgid ""
 "You have not yet set up a fleet to join. Use the \"Start New Fleet\" command "
 "on the <kbd>F10</kbd> menu to start one."
-msgstr "Du hast noch keine Flotte definiert, der du beitreten könntest. Nutze den Befehl \"Beginne neue Flotte\" auf dem <kbd>F10</kbd>-Menü, um eine Flotte zu beginnen."
+msgstr ""
+"Du hast noch keine Flotte definiert, der du beitreten könntest. Nutze den "
+"Befehl \"Beginne neue Flotte\" auf dem <kbd>F10</kbd>-Menü, um eine Flotte "
+"zu beginnen."
 
 #: client/dialogs/attachmentselection.cpp:269
 msgid ""
@@ -12435,6 +12462,10 @@ msgstr "Ungültiger Bearbeitungs-Befehl \"%s\""
 msgid "invalid engine/shield bonus, '%s'"
 msgstr "Ungültiger Triebwerk-Schild-Bonus, '%s'"
 
+#: server/play/consoleapplication.cpp:151
+msgid "invalid language code"
+msgstr "Ungültiger Sprachcode"
+
 #: game/spec/missionlist.cpp:206
 msgid "invalid mission number"
 msgstr "Ungültige Missions-Nummer"
@@ -12454,7 +12485,7 @@ msgstr "Ungültige Anzahl Threads, '%s'"
 #: game/interface/scriptapplication.cpp:366
 #: game/sim/consoleapplication.cpp:335 interpreter/consoleapplication.cpp:333
 #: interpreter/consoleapplication.cpp:372
-#: server/play/consoleapplication.cpp:92 util/resourcefileapplication.cpp:303
+#: server/play/consoleapplication.cpp:120 util/resourcefileapplication.cpp:303
 #: util/resourcefileapplication.cpp:86
 msgid "invalid option '%s' specified. Use '%s -h' for help."
 msgstr "Ungültige Option '%s' angegeben. Mit '%s -h' erhalten Sie Hilfe."
@@ -12600,7 +12631,7 @@ msgstr "minimal"
 msgid "missing delimiter"
 msgstr "fehlendes Trennzeichen"
 
-#: server/play/consoleapplication.cpp:117
+#: server/play/consoleapplication.cpp:145
 msgid "missing directory name"
 msgstr "fehlender Verzeichnisname"
 
@@ -12626,7 +12657,7 @@ msgstr "fehlende Knoten-Id"
 msgid "missing output file name"
 msgstr "fehlender Ausgabedatei-Name"
 
-#: server/play/consoleapplication.cpp:112
+#: server/play/consoleapplication.cpp:140
 msgid "missing player number"
 msgstr "fehlende Spielernummer"
 
@@ -12724,12 +12755,12 @@ msgstr "kein Filter angegeben. Zum Löschen (\"-d\") wird ein Filter benötigt"
 
 #: game/interface/exportapplication.cpp:156
 #: game/interface/scriptapplication.cpp:190
-#: server/play/consoleapplication.cpp:135
+#: server/play/consoleapplication.cpp:171
 msgid "no game data available for player %d"
 msgstr "keine Spieldaten für Spieler %d verfügbar"
 
 #: game/interface/scriptapplication.cpp:181
-#: game/sim/consoleapplication.cpp:437 server/play/consoleapplication.cpp:130
+#: game/sim/consoleapplication.cpp:437 server/play/consoleapplication.cpp:166
 msgid "no game data found"
 msgstr "keine Spieldaten gefunden"
 
@@ -12877,7 +12908,7 @@ msgstr "einmal pro Schiff"
 msgid "one"
 msgstr "einer"
 
-#: server/play/consoleapplication.cpp:98
+#: server/play/consoleapplication.cpp:126
 msgid "only one player number allowed"
 msgstr "nur eine Spielernummer zulässig"
 
@@ -13101,7 +13132,7 @@ msgstr "für das gewählte Format muss eine Ausgabedatei angegeben werden ('-o')
 #: game/sim/consoleapplication.cpp:213 game/v3/trn/dumperapplication.cpp:71
 #: interpreter/consoleapplication.cpp:343
 #: interpreter/exporter/configuration.cpp:84
-#: server/play/consoleapplication.cpp:76 util/doc/application.cpp:390
+#: server/play/consoleapplication.cpp:102 util/doc/application.cpp:390
 msgid "the specified character set is not known"
 msgstr "der angegebene Zeichensatz ist nicht bekannt"
 
@@ -13133,7 +13164,7 @@ msgstr "zu lange"
 #: game/interface/exportapplication.cpp:118 game/maint/sweepapplication.cpp:78
 #: game/v3/maketurnapplication.cpp:79 game/v3/trn/dumperapplication.cpp:104
 #: game/v3/unpackapplication.cpp:111 gfx/codec/application.cpp:160
-#: server/play/consoleapplication.cpp:106 util/doc/application.cpp:398
+#: server/play/consoleapplication.cpp:134 util/doc/application.cpp:398
 #: util/doc/application.cpp:592
 msgid "too many arguments"
 msgstr "zu viele Parameter"
@@ -13172,13 +13203,13 @@ msgstr "Ufos"
 
 #: game/interface/exportapplication.cpp:173
 #: game/interface/scriptapplication.cpp:208
-#: game/sim/consoleapplication.cpp:445 server/play/consoleapplication.cpp:145
+#: game/sim/consoleapplication.cpp:445 server/play/consoleapplication.cpp:181
 msgid "unable to load ship list"
 msgstr "Kann Schiffsliste nicht laden"
 
 #: game/interface/exportapplication.cpp:179
 #: game/interface/scriptapplication.cpp:214
-#: server/play/consoleapplication.cpp:151
+#: server/play/consoleapplication.cpp:187
 msgid "unable to load turn"
 msgstr "Kann Zug nicht laden"
 
