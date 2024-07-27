@@ -79,7 +79,7 @@ namespace {
         PlayerScreen(client::si::UserSide& us)
             : Control(us),
               m_loop(us.root()),
-              m_docView(gfx::Point(200, 200), 0, us.root().provider()),
+              m_docView(gfx::Point(200, 50), 0, us.root().provider()),
               m_receiver(us.root().engine().dispatcher(), *this),
               m_updateTrampoline(us.gameSender().makeTemporary(new TrampolineFromSession(m_receiver.getSender()))),
               m_outputState()

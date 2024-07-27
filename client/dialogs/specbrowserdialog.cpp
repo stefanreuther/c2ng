@@ -360,6 +360,14 @@ namespace {
                 m_list.requestFocus();
 
                 m_window.pack();
+
+                // Limit to screen size
+                gfx::Rectangle winSize = m_window.getExtent();
+                gfx::Rectangle screenSize = m_root.getExtent();
+                winSize.setWidth(std::min(winSize.getWidth(), screenSize.getWidth()-10));
+                winSize.setHeight(std::min(winSize.getHeight(), screenSize.getHeight()-10));
+                m_window.setExtent(winSize);
+
                 m_root.centerWidget(m_window);
                 m_root.add(m_window);
                 m_loop.run();
