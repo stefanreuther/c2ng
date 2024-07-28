@@ -3,7 +3,6 @@
   *  \brief Class gfx::Point
   */
 
-#include <ostream>
 #include <algorithm>
 #include "gfx/point.hpp"
 #include "afl/string/format.hpp"
@@ -27,9 +26,4 @@ String_t
 gfx::makePrintable(const Point& pt)
 {
     return afl::string::Format("%d,%d", pt.getX(), pt.getY());
-}
-
-std::ostream& operator<<(std::ostream& os, const gfx::Point& pt)
-{
-    return os << pt.getX() << "," << pt.getY();
 }

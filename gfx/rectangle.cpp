@@ -6,7 +6,6 @@
   *  This is now a class, not a structure.
   */
 
-#include <ostream>
 #include "gfx/rectangle.hpp"
 #include "afl/string/format.hpp"
 
@@ -273,10 +272,4 @@ String_t
 gfx::makePrintable(const Rectangle& r)
 {
     return afl::string::Format("%dx%d+%d+%d", r.getWidth(), r.getHeight(), r.getLeftX(), r.getTopY());
-}
-
-// Output rectangle.
-std::ostream& operator<<(std::ostream& os, const gfx::Rectangle& r)
-{
-    return os << r.getWidth() << "x" << r.getHeight() << "+" << r.getLeftX() << "+" << r.getTopY();
 }

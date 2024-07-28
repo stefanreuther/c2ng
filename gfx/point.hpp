@@ -5,7 +5,6 @@
 #ifndef C2NG_GFX_POINT_HPP
 #define C2NG_GFX_POINT_HPP
 
-#include <iosfwd>
 #include "afl/string/string.hpp"
 
 namespace gfx {
@@ -132,11 +131,5 @@ namespace gfx {
     String_t makePrintable(const Point& pt);
 
 }
-
-/** Output point to a stream.
-    \param os Stream
-    \param pt Point
-    \return os */
-std::ostream& operator<<(std::ostream& os, const gfx::Point& pt);
 
 #endif

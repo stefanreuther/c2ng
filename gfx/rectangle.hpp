@@ -5,7 +5,6 @@
 #ifndef C2NG_GFX_RECTANGLE_HPP
 #define C2NG_GFX_RECTANGLE_HPP
 
-#include <iosfwd>
 #include "afl/string/string.hpp"
 #include "gfx/point.hpp"
 #include "gfx/types.hpp"
@@ -290,12 +289,5 @@ namespace gfx {
         \param pt Point */
     String_t makePrintable(const Rectangle& r);
 }
-
-/** Output rectangle.
-    Generates the X11 geometry format (WxH+X+Y).
-    \param os Output stream
-    \param r Rectangle to output
-    \return os */
-std::ostream& operator<<(std::ostream& os, const gfx::Rectangle& r);
 
 #endif

@@ -6,7 +6,6 @@
 #include "gfx/point.hpp"
 
 #include "afl/test/testrunner.hpp"
-#include <sstream>
 
 using gfx::Point;
 
@@ -60,11 +59,6 @@ AFL_TEST("gfx.Point:basics", a)
 
     a.checkEqual("71. dec", &(p -= pb), &p);
     a.checkEqual("72. dec", p, Point(18, 20));
-
-    // stream
-    std::stringstream ss;
-    a.checkEqual("81. shift", &(ss << p), &ss);
-    a.checkEqual("82. str", ss.str(), "18,20");
 }
 
 /** Test extendRight, extendBelow. */

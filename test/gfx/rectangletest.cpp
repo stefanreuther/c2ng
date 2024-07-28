@@ -6,7 +6,6 @@
 #include "gfx/rectangle.hpp"
 
 #include "afl/test/testrunner.hpp"
-#include <sstream>
 
 /** Basic tests. */
 AFL_TEST("gfx.Rectangle:basics", a)
@@ -232,14 +231,6 @@ AFL_TEST("gfx.Rectangle:consumeY:overflow", a)
     gfx::Rectangle t(0, 0, 100, 100);
     t.consumeY(102);
     a.check("", !t.exists());
-}
-
-/** Test formatting. */
-AFL_TEST("gfx.Rectangle:format", a)
-{
-    std::stringstream os;
-    os << gfx::Rectangle(10, 20, 30, 40);
-    a.checkEqual("01. str", os.str(), "30x40+10+20");
 }
 
 /*
