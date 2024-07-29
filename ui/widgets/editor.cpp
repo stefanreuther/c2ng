@@ -278,8 +278,8 @@ ui::widgets::Editor::onEditorChange(size_t firstLine, size_t lastLine)
             const size_t x = m_editor.getCurrentColumn();
             if (x < m_firstColumn) {
                 setFirstColumn(x);
-            } else if (x - m_firstColumn >= numColumns) {
-                setFirstColumn(x - numColumns - 1);
+            } else if (numColumns > 0 && x - m_firstColumn >= numColumns-1) {
+                setFirstColumn(x - numColumns + 1);
             }
 
             const size_t y = m_editor.getCurrentLine();
