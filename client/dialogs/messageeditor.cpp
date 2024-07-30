@@ -109,7 +109,9 @@ client::dialogs::MessageEditor::MessageEditor(ui::Root& root, game::proxy::Outbo
       m_receivers(),
       m_sender(0),
       m_numHeaderLines()
-{ }
+{
+    m_editor.setLengthLimit(MAX_LINE_LENGTH);
+}
 
 client::dialogs::MessageEditor::~MessageEditor()
 { }
@@ -189,6 +191,7 @@ client::dialogs::MessageEditor::run()
     editor.setPreferredSizeInCells(MAX_LINE_LENGTH, MAX_MESSAGE_LINES);
     editor.setHighlighter(&highl);
     editor.setCharacterFilter(&filter);
+    editor.setFlag(util::editor::WordWrap, true);
 
     // Buttons
     ui::widgets::Button& btnHelp   = del.addNew(new ui::widgets::Button(m_translator("Help"),   'h',              m_root));
