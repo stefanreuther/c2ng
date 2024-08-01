@@ -891,8 +891,14 @@ EndSub
 % @since PCC2 2.40.1
 Sub Tile.PlanetColonists
   % ex WPlanetColonistTile::drawPlanetColonistTile, CPlanetaryColonistsTile
-  Local t
-  t := RAdd(   RAlign(Translate("Population:"), 80), RStyle("green", CCVP.ClansToString(Colonists)), "\n")
+  Local t, exp, expStr
+  exp := Score(2)
+  If Not IsEmpty(exp) Then
+    expStr := Format(Translate(" (%d EP)"), CCVP.NumberToString(exp))
+  Else
+    expStr := ''
+  EndIf
+  t := RAdd(   RAlign(Translate("Population:"), 80), RStyle("green", CCVP.ClansToString(Colonists) & expStr), "\n")
   t := RAdd(t, RAlign(Translate("Tax Rate:"),   80), RStyle("green", Format("%d%%", Colonists.Tax)), "\n")
   t := RAdd(t, Translate("Colonists are"), " ", RStyle(CCVP.HappyColor(Colonists.Happy$), Format("%s (%d)", Colonists.Happy, Colonists.Happy$)), "\n")
   SetContent t
