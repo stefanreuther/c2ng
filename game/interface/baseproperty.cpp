@@ -251,6 +251,8 @@ BaseArrayProperty::performArrayReference(Function_t func, int limit, int32_t arg
         if (m_planet.getOwner().get(owner)) {
             if (int slot = m_shipList->hullAssignments().getIndexFromHull(m_root->hostConfiguration(), owner, arg)) {
                 return makeOptionalIntegerValue(func(m_planet, *m_shipList, slot));
+            } else if (m_shipList->hulls().get(arg) == 0) {
+                return 0;
             } else {
                 return makeIntegerValue(0);
             }

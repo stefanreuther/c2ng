@@ -46,6 +46,9 @@ namespace {
                 game::test::addAnnihilation(*shipList);
                 shipList->hullAssignments().add(PLAYER, HULL_SLOT, game::test::ANNIHILATION_HULL_ID);
                 shipList->hulls().get(game::test::ANNIHILATION_HULL_ID)->setShortName("Anni");
+                for (int i = 1; i < 100; ++i) {
+                    shipList->hulls().create(i);
+                }
             }
     };
 
@@ -241,13 +244,14 @@ AFL_TEST("game.interface.BaseProperty:normal", a)
         verifyNewInteger(a("ibpHullStorage(ANNI)"), verif.getUnary(interpreter::makeIntegerValue(game::test::ANNIHILATION_HULL_ID)), 23);
         verifyNewInteger(a("ibpHullStorage(0)"),    verif.getUnary(interpreter::makeIntegerValue(0)), 66);     // 21+22+23, because getMaxIndex() == HULL_SLOT
         verifyNewNull   (a("ibpHullStorage(null)"), verif.getUnary(0));
-        verifyNewInteger(a("ibpHullStorage(777)"),  verif.getUnary(interpreter::makeIntegerValue(777)), 0);    // Not null, because we know to have zero of unbuildable hull
+        verifyNewInteger(a("ibpHullStorage(77)"),   verif.getUnary(interpreter::makeIntegerValue(77)), 0);     // Not null, because we know to have zero of this hull
+        verifyNewNull   (a("ibpHullStorage(777)"),  verif.getUnary(interpreter::makeIntegerValue(777)));       // Null, because this is not a valid hull
         AFL_CHECK_THROWS(a("ibpHullStorage('X')"),  verif.getUnary(interpreter::makeStringValue("X")), interpreter::Error);
         AFL_CHECK_THROWS(a("ibpHullStorage()"),     verif.getNullary(), interpreter::Error);
         AFL_CHECK_THROWS(a("set ibpHullStorage"),   verif.setUnary(interpreter::makeIntegerValue(9), 1), interpreter::Error);
         AFL_CHECK_THROWS(a("first ibpHullStorage"), verif.indexable().makeFirstContext(), interpreter::Error);
         a.checkEqual("ibpHullStorage dim(0)",       verif.indexable().getDimension(0), 1);
-        a.checkEqual("ibpHullStorage dim(1)",       verif.indexable().getDimension(1), game::test::ANNIHILATION_HULL_ID+1);
+        a.checkEqual("ibpHullStorage dim(1)",       verif.indexable().getDimension(1), 100);                  // We have added 1..99
     }
 
     // ibpBeamStorage
