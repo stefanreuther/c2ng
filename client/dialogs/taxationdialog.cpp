@@ -826,11 +826,18 @@ client::dialogs::doTaxationDialog(game::Id_t planetId,
 
     ConfigurationProxy cfgProxy(gameSender);
 
+    // Configuration
+    // We must not wait between creation of the TaxationDialog and run(),
+    // because this could mean that a game-side update could arrive before run(),
+    // and therefore be overridden by it.
+    bool relative = cfgProxy.getOption(link, game::config::UserConfiguration::Tax_PredictRelative);
+    bool ratio = cfgProxy.getOption(link, game::config::UserConfiguration::Tax_PredictRatio);
+
     // Build dialog
     TaxationDialog dlg(tx, root, proxy, ppProxy, gameSender, cfgProxy.getNumberFormatter(link));
     dlg.setEffectors(eff);
-    dlg.setRelative(cfgProxy.getOption(link, game::config::UserConfiguration::Tax_PredictRelative));
-    dlg.setRatio(cfgProxy.getOption(link, game::config::UserConfiguration::Tax_PredictRatio));
+    dlg.setRelative(relative);
+    dlg.setRatio(ratio);
     if (dlg.run(st, ppStatus)) {
         proxy.commit();
     }
