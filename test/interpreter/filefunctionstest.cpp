@@ -189,8 +189,8 @@ AFL_TEST("interpreter.FileFunctions:file-position-functions", a)
     world.fileTable().openFile(1, stream);
 
     // Test
-    // - program: set A to position, B to size; catch error in B (to simplify testing overflow case)
-    const char*const STATEMENT = "a:=fpos(#1)\nb:=7\ntry b:=fsize(#1)\n";
+    // - program: set A to position, B to size
+    const char*const STATEMENT = "a:=fpos(#1)\nb:=7\nb:=fsize(#1)\n";
 
     // - initial state
     {
@@ -227,6 +227,6 @@ AFL_TEST("interpreter.FileFunctions:file-position-functions", a)
         stream->setSize(9007199254740993ULL);
         checkStatement(aa, world, STATEMENT);
         checkFloat(aa, world, "A", 9007199254740992.0);
-        checkInteger(aa, world, "B", 7);
+        checkFloat(aa, world, "B", 9007199254740992.0); // Note imprecision because of float
     }
 }

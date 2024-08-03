@@ -35,10 +35,9 @@ namespace interpreter {
     afl::data::Value* makeSizeValue(size_t value);
 
     /** Make file size value.
-        The value is returned as integer or float if it fits, otherwise an error is generated.
+        The value is returned as integer if it fits; otherwise a float.
         \param value Size value
-        \return newly-created value
-        \throw Error if value is too large */
+        \return newly-created value */
     afl::data::Value* makeFileSizeValue(uint64_t value);
 
     /** Make float value.

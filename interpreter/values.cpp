@@ -52,10 +52,8 @@ interpreter::makeFileSizeValue(uint64_t value)
 {
     if (value <= 0x7FFFFFFF) {
         return makeIntegerValue(static_cast<int32_t>(value));
-    } else if (value <= 0x20000000000000ULL) {
-        return makeFloatValue(static_cast<double>(value));
     } else {
-        throw Error::rangeError();
+        return makeFloatValue(static_cast<double>(value));
     }
 }
 
