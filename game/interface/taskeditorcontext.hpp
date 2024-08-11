@@ -39,7 +39,8 @@ namespace game { namespace interface {
         itmAddMovement,           // Add movement command
         itmConfirmMessage,        // Confirm this task's message
         itmInsert,                // Insert at position
-        itmDelete                 // Delete range
+        itmDelete,                // Delete range
+        itmMove                   // Move range
     };
 
 

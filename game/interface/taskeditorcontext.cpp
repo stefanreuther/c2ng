@@ -329,6 +329,29 @@ namespace {
         edit.replace(index, count, afl::base::Nothing, TaskEditor::DefaultCursor, TaskEditor::DefaultPC);
     }
 
+    /* @q Move from:Int, to:Int, Optional count:Int (Auto Task Command)
+       Move lines within the auto-task.
+       The %from parameter is the 0-based position of the first line to move.
+       The %to parameter is the 0-based position of the move target; moved lines will be inserted before that.
+       The number of lines is given as %count, it defaults to 1 if not specified.
+       @since PCC2 2.41.3 */
+    void IFTaskEditor_Move(TaskEditor& edit, interpreter::Arguments& args)
+    {
+        args.checkArgumentCount(2, 3);
+
+        // Parse args
+        size_t from = 0, to = 0, count = 1;
+        if (!interpreter::checkIndexArg(from, args.getNext(), 0, edit.getNumInstructions()+1)
+            || !interpreter::checkIndexArg(to, args.getNext(), 0, edit.getNumInstructions()+1))
+        {
+            return;
+        }
+        interpreter::checkIndexArg(count, args.getNext(), 0, size_t(-1));
+
+        // Do it
+        edit.move(from, to, count);
+    }
+
     /*
      *  Implementation of Predicted.XXX properties
      */
@@ -440,6 +463,8 @@ namespace {
            @assignable
            @since PCC2 2.40.7 */
         { "LINES",           game::interface::iteLines,          TaskEditorPropertyDomain, interpreter::thArray },
+
+        { "MOVE",            game::interface::itmMove,         TaskEditorMethodDomain,   interpreter::thProcedure },
 
         /* @q Predicted.FCode:Str (Auto Task Property)
            Predicted friendly code at current position.
@@ -727,6 +752,9 @@ game::interface::callTaskEditorMethod(interpreter::TaskEditor& edit, TaskEditorM
         break;
      case itmDelete:
         IFTaskEditor_Delete(edit, args);
+        break;
+     case itmMove:
+        IFTaskEditor_Move(edit, args);
         break;
     }
 }

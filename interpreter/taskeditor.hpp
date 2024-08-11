@@ -114,6 +114,18 @@ namespace interpreter {
             \param pc Program counter behaviour */
         void replace(size_t pos, size_t nold, Commands_t lines, CursorBehaviour cursor, PCBehaviour pc);
 
+        /** Move commands.
+            Moves the given lines.
+            If the given range includes the cursor, moves that as well.
+
+            \param from  Index of first element to move [0,getNumInstructions()]
+            \param to    Insert moved elements before this index [0,getNumInstructions()]
+            \param n     Number of elements to move
+
+            If a position is out of range, call is ignored.
+            If number is out of range, it is limited to maximum possible. */
+        void move(size_t from, size_t to, size_t n);
+
         /** Set program counter.
             This will set the PC to the beginning (!isInSubroutineCall()) the specified instruction.
             \param newPC new PC [0,getNumInstructions()) */

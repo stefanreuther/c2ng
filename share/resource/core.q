@@ -447,6 +447,8 @@ Bind AutoTaskScreen   "del"    := "CCUI.Task.DeleteCurrent"
 Bind AutoTaskScreen   "c-del"  := "CCUI.Task.DeleteAll"
 Bind AutoTaskScreen   "ins"    := "CCUI.Task.InsertCommand"
 Bind AutoTaskScreen   "spc"    := "CCUI.Task.EditCommand"
+Bind AutoTaskScreen   "c-up"   := "CCUI.Task.MoveUp"
+Bind AutoTaskScreen   "c-down" := "CCUI.Task.MoveDown"
 
 Bind Ship             "c"      := "CC$ShipCargo"
 Bind Ship             "e"      := "CCUI.Ship.SetEnemy"

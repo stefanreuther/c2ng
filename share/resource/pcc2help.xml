@@ -630,6 +630,7 @@
         <ki key="Ctrl-Del">Delete all commands;</ki>
         <ki key="%, K">Disable/enable a command temporarily (comment it out);</ki>
         <ki key="Ctrl-N">Set next command to execute;</ki>
+        <ki key="Ctrl-Up, Ctrl-Down">Move current command up/down;</ki>
         <ki key="1..4">Depending on actual screen, insert commands;</ki>
         <ki key="M">Confirm <a href="pcc2:notify">Notification Message</a> produced by this task (cause task to continue);</ki>
         <ki key="Ctrl-S">Save task as text file;</ki>

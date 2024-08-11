@@ -63,6 +63,44 @@ namespace {
             && opc.minor == Opcode::jAlways
             && opc.arg == 0;
     }
+
+    /** Update address for moving. */
+    size_t updateAddress(size_t addr, size_t from, size_t to, size_t n)
+    {
+        if (from >= to) {
+            //          aaaa                aaaa
+            // to>      bbbb     becomes    cccc
+            // from>    cccc                bbbb
+            // from+n>  dddd                dddd
+            if (addr >= from && addr < from+n) {
+                // in 'cccc' range
+                addr -= from;
+                addr += to;
+            } else if (addr >= to && addr < from) {
+                // in 'bbbb' range
+                addr += n;
+            } else {
+                // 'aaaa' or 'dddd', unaffected
+            }
+        } else {
+            //          aaaa               aaaa
+            // from>    bbbb     becomes   cccc
+            // from+n>  cccc               bbbb
+            // to>      dddd               dddd
+            if (addr >= from && addr < from+n) {
+                // in 'bbbb' range
+                addr -= from;
+                addr += to;
+                addr -= n;
+            } else if (addr >= from+n && addr < to) {
+                // in 'cccc' range
+                addr -= n;
+            } else {
+                // 'aaaa' or 'dddd', unaffected
+            }
+        }
+        return addr;
+    }
 }
 
 // Constructor.
@@ -229,6 +267,45 @@ interpreter::TaskEditor::replace(size_t pos, size_t nold, Commands_t lines, Curs
         m_cursor = pos + nnew;
         break;
     }
+
+    m_changed = true;
+    sig_change.raise();
+}
+
+// Move commands.
+void
+interpreter::TaskEditor::move(size_t from, size_t to, size_t n)
+{
+    // Limit positions
+    if (to > m_code.size() || from > m_code.size()) {
+        return;
+    }
+
+    if (from <= to) {
+        // Cannot move more than distance between from and to
+        n = std::min(n, to - from);
+    } else {
+        // Cannot move more than remaining size
+        n = std::min(n, m_code.size() - from);
+    }
+
+    // No-op?
+    if (n == 0 || from == to) {
+        return;
+    }
+
+    // Do it
+    std::vector<String_t> tmp(m_code.begin() + from, m_code.begin() + (from+n));
+    m_code.insert(m_code.begin() + to, tmp.begin(), tmp.end());
+    if (from <= to) {
+        m_code.erase(m_code.begin() + from, m_code.begin() + (from+n));
+    } else {
+        m_code.erase(m_code.begin() + (from+n), m_code.begin() + (from+2*n));
+    }
+
+    // Update PC
+    m_PC = updateAddress(m_PC, from, to, n);
+    m_cursor = updateAddress(m_cursor, from, to, n);
 
     m_changed = true;
     sig_change.raise();

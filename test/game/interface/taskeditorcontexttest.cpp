@@ -1125,6 +1125,158 @@ AFL_TEST("game.interface.TaskEditorContext:itmDelete:error:arity", a)
     a.checkEqual("getNumInstructions", edit->getNumInstructions(), 5U);
 }
 
+
+/*
+ *  callTaskEditorMethod(itmMove)
+ */
+
+// Move line down
+AFL_TEST("game.interface.TaskEditorContext:itmMove:move-down", a)
+{
+    Environment env;
+    afl::base::Ptr<interpreter::TaskEditor> edit = prepareShipTask(a, env, 10);
+    edit->addAsCurrent(five_cmds);
+
+    afl::data::Segment seg;
+    seg.pushBackInteger(1);
+    seg.pushBackInteger(3);
+    callMethod(env, *edit, game::interface::itmMove, seg);
+
+    a.checkEqual("getNumInstructions", edit->getNumInstructions(), 5U);
+    a.checkEqual("line 0", (*edit)[0], "a");
+    a.checkEqual("line 1", (*edit)[1], "c");
+    a.checkEqual("line 2", (*edit)[2], "b");
+    a.checkEqual("line 3", (*edit)[3], "d");
+    a.checkEqual("line 4", (*edit)[4], "e");
+}
+
+// Move line up
+AFL_TEST("game.interface.TaskEditorContext:itmMove:move-up", a)
+{
+    Environment env;
+    afl::base::Ptr<interpreter::TaskEditor> edit = prepareShipTask(a, env, 10);
+    edit->addAsCurrent(five_cmds);
+
+    afl::data::Segment seg;
+    seg.pushBackInteger(3);
+    seg.pushBackInteger(2);
+    callMethod(env, *edit, game::interface::itmMove, seg);
+
+    a.checkEqual("getNumInstructions", edit->getNumInstructions(), 5U);
+    a.checkEqual("line 0", (*edit)[0], "a");
+    a.checkEqual("line 1", (*edit)[1], "b");
+    a.checkEqual("line 2", (*edit)[2], "d");
+    a.checkEqual("line 3", (*edit)[3], "c");
+    a.checkEqual("line 4", (*edit)[4], "e");
+}
+
+// Move multiple
+AFL_TEST("game.interface.TaskEditorContext:itmMove:move-multiple", a)
+{
+    Environment env;
+    afl::base::Ptr<interpreter::TaskEditor> edit = prepareShipTask(a, env, 10);
+    edit->addAsCurrent(five_cmds);
+
+    afl::data::Segment seg;
+    seg.pushBackInteger(1);
+    seg.pushBackInteger(4);
+    seg.pushBackInteger(2);
+    callMethod(env, *edit, game::interface::itmMove, seg);
+
+    a.checkEqual("getNumInstructions", edit->getNumInstructions(), 5U);
+    a.checkEqual("line 0", (*edit)[0], "a");
+    a.checkEqual("line 1", (*edit)[1], "d");
+    a.checkEqual("line 2", (*edit)[2], "b");
+    a.checkEqual("line 3", (*edit)[3], "c");
+    a.checkEqual("line 4", (*edit)[4], "e");
+}
+
+// Null from
+AFL_TEST("game.interface.TaskEditorContext:itmMove:null:from", a)
+{
+    Environment env;
+    afl::base::Ptr<interpreter::TaskEditor> edit = prepareShipTask(a, env, 10);
+    edit->addAsCurrent(five_cmds);
+
+    afl::data::Segment seg;
+    seg.pushBackNew(0);
+    seg.pushBackInteger(4);
+    seg.pushBackInteger(2);
+    callMethod(env, *edit, game::interface::itmMove, seg);
+
+    a.checkEqual("getNumInstructions", edit->getNumInstructions(), 5U);
+    a.checkEqual("line 0", (*edit)[0], "a");
+    a.checkEqual("line 1", (*edit)[1], "b");
+    a.checkEqual("line 2", (*edit)[2], "c");
+    a.checkEqual("line 3", (*edit)[3], "d");
+    a.checkEqual("line 4", (*edit)[4], "e");
+}
+
+// Null to
+AFL_TEST("game.interface.TaskEditorContext:itmMove:null:to", a)
+{
+    Environment env;
+    afl::base::Ptr<interpreter::TaskEditor> edit = prepareShipTask(a, env, 10);
+    edit->addAsCurrent(five_cmds);
+
+    afl::data::Segment seg;
+    seg.pushBackInteger(1);
+    seg.pushBackNew(0);
+    seg.pushBackInteger(2);
+    callMethod(env, *edit, game::interface::itmMove, seg);
+
+    a.checkEqual("getNumInstructions", edit->getNumInstructions(), 5U);
+    a.checkEqual("line 0", (*edit)[0], "a");
+    a.checkEqual("line 1", (*edit)[1], "b");
+    a.checkEqual("line 2", (*edit)[2], "c");
+    a.checkEqual("line 3", (*edit)[3], "d");
+    a.checkEqual("line 4", (*edit)[4], "e");
+}
+
+// Range error
+AFL_TEST("game.interface.TaskEditorContext:itmMove:error:range", a)
+{
+    Environment env;
+    afl::base::Ptr<interpreter::TaskEditor> edit = prepareShipTask(a, env, 10);
+    edit->addAsCurrent(five_cmds);
+
+    afl::data::Segment seg;
+    seg.pushBackInteger(1);
+    seg.pushBackInteger(6);
+    seg.pushBackInteger(2);
+    AFL_CHECK_THROWS(a, callMethod(env, *edit, game::interface::itmMove, seg), interpreter::Error);
+    a.checkEqual("getNumInstructions", edit->getNumInstructions(), 5U);
+}
+
+// Type error
+AFL_TEST("game.interface.TaskEditorContext:itmMove:error:type", a)
+{
+    Environment env;
+    afl::base::Ptr<interpreter::TaskEditor> edit = prepareShipTask(a, env, 10);
+    edit->addAsCurrent(five_cmds);
+
+    afl::data::Segment seg;
+    seg.pushBackInteger(1);
+    seg.pushBackString("x");
+    seg.pushBackInteger(2);
+    AFL_CHECK_THROWS(a, callMethod(env, *edit, game::interface::itmMove, seg), interpreter::Error);
+    a.checkEqual("getNumInstructions", edit->getNumInstructions(), 5U);
+}
+
+// Arity error
+AFL_TEST("game.interface.TaskEditorContext:itmMove:error:type", a)
+{
+    Environment env;
+    afl::base::Ptr<interpreter::TaskEditor> edit = prepareShipTask(a, env, 10);
+    edit->addAsCurrent(five_cmds);
+
+    afl::data::Segment seg;
+    seg.pushBackInteger(1);
+    AFL_CHECK_THROWS(a, callMethod(env, *edit, game::interface::itmMove, seg), interpreter::Error);
+    a.checkEqual("getNumInstructions", edit->getNumInstructions(), 5U);
+}
+
+
 /*
  *  TaskEditorContext
  */

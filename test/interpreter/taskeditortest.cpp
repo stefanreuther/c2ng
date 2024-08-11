@@ -117,6 +117,187 @@ AFL_TEST("interpreter.TaskEditor:conflict", a)
     AFL_CHECK_THROWS(a, other.reset(new interpreter::TaskEditor(h.proc)), interpreter::Error);
 }
 
+/** Test move(): forward. */
+AFL_TEST("interpreter.TaskEditor:move:forward", a)
+{
+    TestHarness h;
+    interpreter::TaskEditor ed(h.proc);
+    ed.addAtEnd(Commands_t::fromSingleObject("one"));
+    ed.addAtEnd(Commands_t::fromSingleObject("two"));
+    ed.addAtEnd(Commands_t::fromSingleObject("three"));
+    ed.addAtEnd(Commands_t::fromSingleObject("four"));
+    ed.addAtEnd(Commands_t::fromSingleObject("five"));
+    ed.setPC(1);
+    ed.setCursor(4);
+
+    // Move
+    //    three
+    //    four
+    //    one
+    // => two
+    // c. five
+    ed.move(0, 4, 2);
+    a.checkEqual("01. getPC",              ed.getPC(), 3U);
+    a.checkEqual("02. getCursor",          ed.getCursor(), 4U);
+    a.checkEqual("03. getNumInstructions", ed.getNumInstructions(), 5U);
+
+    a.checkEqual("11. content", ed[0], "three");
+    a.checkEqual("12. content", ed[1], "four");
+    a.checkEqual("13. content", ed[2], "one");
+    a.checkEqual("14. content", ed[3], "two");
+    a.checkEqual("15. content", ed[4], "five");
+}
+
+/** Test move(): forward, including counter. */
+AFL_TEST("interpreter.TaskEditor:move:forward-counter", a)
+{
+    TestHarness h;
+    interpreter::TaskEditor ed(h.proc);
+    ed.addAtEnd(Commands_t::fromSingleObject("one"));
+    ed.addAtEnd(Commands_t::fromSingleObject("two"));
+    ed.addAtEnd(Commands_t::fromSingleObject("three"));
+    ed.addAtEnd(Commands_t::fromSingleObject("four"));
+    ed.addAtEnd(Commands_t::fromSingleObject("five"));
+    ed.setPC(3);
+    ed.setCursor(4);
+
+    // Move
+    //    one
+    //    two
+    // => four
+    //    three
+    // c. five
+    ed.move(2, 4, 1);
+    a.checkEqual("01. getPC",              ed.getPC(), 2U);
+    a.checkEqual("02. getCursor",          ed.getCursor(), 4U);
+    a.checkEqual("03. getNumInstructions", ed.getNumInstructions(), 5U);
+
+    a.checkEqual("11. content", ed[0], "one");
+    a.checkEqual("12. content", ed[1], "two");
+    a.checkEqual("13. content", ed[2], "four");
+    a.checkEqual("14. content", ed[3], "three");
+    a.checkEqual("15. content", ed[4], "five");
+}
+
+/** Test move(): forward, range limit.
+    If distance between from and to is less than n, n is adjusted accordingly.
+    This means the operation becomes a no-op. */
+AFL_TEST("interpreter.TaskEditor:move:forward-limit", a)
+{
+    TestHarness h;
+    interpreter::TaskEditor ed(h.proc);
+    ed.addAtEnd(Commands_t::fromSingleObject("one"));
+    ed.addAtEnd(Commands_t::fromSingleObject("two"));
+    ed.addAtEnd(Commands_t::fromSingleObject("three"));
+    ed.addAtEnd(Commands_t::fromSingleObject("four"));
+    ed.addAtEnd(Commands_t::fromSingleObject("five"));
+    ed.setPC(3);
+    ed.setCursor(1);
+
+    // Move
+    //    one
+    // c. two
+    //    three
+    // => four
+    //    five
+    ed.move(2, 4, 4);
+    a.checkEqual("01. getPC",              ed.getPC(), 3U);
+    a.checkEqual("02. getCursor",          ed.getCursor(), 1U);
+    a.checkEqual("03. getNumInstructions", ed.getNumInstructions(), 5U);
+
+    a.checkEqual("11. content", ed[0], "one");
+    a.checkEqual("12. content", ed[1], "two");
+    a.checkEqual("13. content", ed[2], "three");
+    a.checkEqual("14. content", ed[3], "four");
+    a.checkEqual("15. content", ed[4], "five");
+}
+
+/** Test move(): backward. */
+AFL_TEST("interpreter.TaskEditor:move:backward", a)
+{
+    TestHarness h;
+    interpreter::TaskEditor ed(h.proc);
+    ed.addAtEnd(Commands_t::fromSingleObject("one"));
+    ed.addAtEnd(Commands_t::fromSingleObject("two"));
+    ed.addAtEnd(Commands_t::fromSingleObject("three"));
+    ed.addAtEnd(Commands_t::fromSingleObject("four"));
+    ed.addAtEnd(Commands_t::fromSingleObject("five"));
+    ed.setPC(4);
+    ed.setCursor(2);
+
+    // Move
+    //    one
+    // c. three
+    //    four
+    //    two
+    // => five
+    ed.move(2, 1, 2);
+    a.checkEqual("01. getPC",              ed.getPC(), 4U);
+    a.checkEqual("02. getCursor",          ed.getCursor(), 1U);
+    a.checkEqual("03. getNumInstructions", ed.getNumInstructions(), 5U);
+
+    a.checkEqual("11. content", ed[0], "one");
+    a.checkEqual("12. content", ed[1], "three");
+    a.checkEqual("13. content", ed[2], "four");
+    a.checkEqual("14. content", ed[3], "two");
+    a.checkEqual("15. content", ed[4], "five");
+}
+
+/** Test move(): backward across PC. */
+AFL_TEST("interpreter.TaskEditor:move:backward:pc", a)
+{
+    TestHarness h;
+    interpreter::TaskEditor ed(h.proc);
+    ed.addAtEnd(Commands_t::fromSingleObject("one"));
+    ed.addAtEnd(Commands_t::fromSingleObject("two"));
+    ed.addAtEnd(Commands_t::fromSingleObject("three"));
+    ed.setPC(1);
+    ed.setCursor(2);
+
+    // Move
+    //    one
+    // c. three
+    // => two
+    ed.move(2, 1, 1);
+    a.checkEqual("01. getPC",              ed.getPC(), 2U);
+    a.checkEqual("02. getCursor",          ed.getCursor(), 1U);
+    a.checkEqual("03. getNumInstructions", ed.getNumInstructions(), 3U);
+
+    a.checkEqual("11. content", ed[0], "one");
+    a.checkEqual("12. content", ed[1], "three");
+    a.checkEqual("13. content", ed[2], "two");
+}
+
+/** Test move(): out-of-range from. */
+AFL_TEST("interpreter.TaskEditor:move:range:from", a)
+{
+    TestHarness h;
+    interpreter::TaskEditor ed(h.proc);
+    ed.addAtEnd(Commands_t::fromSingleObject("one"));
+    ed.addAtEnd(Commands_t::fromSingleObject("two"));
+
+    // Move
+    ed.move(2, 1, 2);
+    a.checkEqual("01. getNumInstructions", ed.getNumInstructions(), 2U);
+    a.checkEqual("02. content", ed[0], "one");
+    a.checkEqual("03. content", ed[1], "two");
+}
+
+/** Test move(): out-of-range to. */
+AFL_TEST("interpreter.TaskEditor:move:range:to", a)
+{
+    TestHarness h;
+    interpreter::TaskEditor ed(h.proc);
+    ed.addAtEnd(Commands_t::fromSingleObject("one"));
+    ed.addAtEnd(Commands_t::fromSingleObject("two"));
+
+    // Move
+    ed.move(1, 2, 2);
+    a.checkEqual("01. getNumInstructions", ed.getNumInstructions(), 2U);
+    a.checkEqual("02. content", ed[0], "one");
+    a.checkEqual("03. content", ed[1], "two");
+}
+
 /** Test format error.
     Test error handling if process cannot be parsed. */
 AFL_TEST("interpreter.TaskEditor:process-format", a)

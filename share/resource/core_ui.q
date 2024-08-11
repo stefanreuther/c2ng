@@ -1669,6 +1669,22 @@ Sub CCUI.Task.EditCommand
   EndIf
 EndSub
 
+% @since PCC2 2.41.3
+Sub CCUI.Task.MoveUp
+  Local c := UI.AutoTask->Cursor
+  If c > 0 Then
+    Call UI.AutoTask->Move c, c-1, 1
+  EndIf
+EndSub
+
+% @since PCC2 2.41.3
+Sub CCUI.Task.MoveDown
+  Local c := UI.AutoTask->Cursor
+  If c < Dim(UI.AutoTask->Lines)-1 Then
+    Call UI.AutoTask->Move c, c+2, 1
+  EndIf
+EndSub
+
 % @since PCC2 2.40.7
 Sub CCUI.Task.DeleteAll
   % ex WAutoTaskScreen::handleEvent / case ss_Ctrl + SDLK_DELETE
