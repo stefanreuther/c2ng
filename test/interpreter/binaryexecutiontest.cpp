@@ -665,6 +665,16 @@ AFL_TEST("interpreter.BinaryExecution:biCompare", a)
     h.exec(interpreter::biCompareLT_NC, addr(StringValue("B")), addr(StringValue("a")));
     a.checkEqual("262", h.toBoolean(), false);
 
+    // Bool comparisons
+    h.exec(interpreter::biCompareEQ, addr(BooleanValue(true)), addr(BooleanValue(true)));
+    a.checkEqual("265", h.toBoolean(), true);
+    h.exec(interpreter::biCompareEQ, addr(BooleanValue(false)), addr(BooleanValue(true)));
+    a.checkEqual("266", h.toBoolean(), false);
+    h.exec(interpreter::biCompareEQ, addr(BooleanValue(true)), addr(IntegerValue(1)));
+    a.checkEqual("267", h.toBoolean(), true);
+    h.exec(interpreter::biCompareGT_NC, addr(IntegerValue(2)), addr(BooleanValue(false)));
+    a.checkEqual("268", h.toBoolean(), true);
+
     // Errors
     AFL_CHECK_THROWS(a("271. str=int"), h.exec(interpreter::biCompareEQ, addr(StringValue("a")), addr(IntegerValue(1))), interpreter::Error);
     AFL_CHECK_THROWS(a("272. str=hash"), h.exec(interpreter::biCompareEQ, addr(StringValue("a")), addr(HashValue(Hash::create()))), interpreter::Error);
