@@ -375,6 +375,20 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
         /* @q Cargo.T:Int (Ship Property)
            Tritanium aboard this ship, kilotons. */
         return makeOptionalIntegerValue(sh.getCargo(Element::Tritanium));
+     case ispCloaked: {
+        /* @q Cloaked:Bool (Ship Property)
+           True if ship is cloaked.
+           @since PCC2 2.0.16, PCC2 2.41.3 */
+        int mission, owner;
+        if (sh.getOwner().get(owner) && sh.getMission().get(mission)) {
+            bool canCloak
+                =  sh.hasSpecialFunction(game::spec::BasicHullFunction::Cloak,         game->shipScores(), *shipList, root->hostConfiguration())
+                || sh.hasSpecialFunction(game::spec::BasicHullFunction::AdvancedCloak, game->shipScores(), *shipList, root->hostConfiguration());
+            return makeBooleanValue(canCloak && shipList->missions().isMissionCloaking(mission, owner, root->hostConfiguration()));
+        } else {
+            return 0;
+        }
+     }
      case ispCrew:
         /* @q Crew:Int (Ship Property)
            Current crew size. */

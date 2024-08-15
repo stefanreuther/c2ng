@@ -54,6 +54,7 @@ namespace {
         { "CARGOTRANSFER",             game::interface::ismCargoTransfer,             ShipMethodDomain,        interpreter::thProcedure},
         { "CARGOUNLOAD",               game::interface::ismCargoUnload,               ShipMethodDomain,        interpreter::thProcedure },
         { "CARGOUPLOAD",               game::interface::ismCargoUpload,               ShipMethodDomain,        interpreter::thProcedure },
+        { "CLOAKED",                   game::interface::ispCloaked,                   ShipPropertyDomain,      interpreter::thBool },
         { "CREW",                      game::interface::ispCrew,                      ShipPropertyDomain,      interpreter::thInt },
         { "CREW.NORMAL",               game::interface::ihpMaxCrew,                   HullPropertyDomain,      interpreter::thInt },
         { "DAMAGE",                    game::interface::ispDamage,                    ShipPropertyDomain,      interpreter::thInt },

@@ -202,6 +202,7 @@ AFL_TEST("game.interface.ShipProperty:basics", a)
     verifyNewString (a("ispCargoStr"),                getShipProperty(sh, game::interface::ispCargoStr,                session, root, shipList, g, turn), "50N 10T 9D 8M 30C 7S 2000$ 200W");
     verifyNewInteger(a("ispCargoSupplies"),           getShipProperty(sh, game::interface::ispCargoSupplies,           session, root, shipList, g, turn), 7);
     verifyNewInteger(a("ispCargoT"),                  getShipProperty(sh, game::interface::ispCargoT,                  session, root, shipList, g, turn), 10);
+    verifyNewBoolean(a("ispCloaked"),                 getShipProperty(sh, game::interface::ispCloaked,                 session, root, shipList, g, turn), false);
     verifyNewInteger(a("ispCrew"),                    getShipProperty(sh, game::interface::ispCrew,                    session, root, shipList, g, turn), 200);
     verifyNewInteger(a("ispDamage"),                  getShipProperty(sh, game::interface::ispDamage,                  session, root, shipList, g, turn), 5);
     verifyNewInteger(a("ispEnemyId"),                 getShipProperty(sh, game::interface::ispEnemyId,                 session, root, shipList, g, turn), 1);
@@ -465,6 +466,14 @@ AFL_TEST("game.interface.ShipProperty:basics", a)
         a.checkEqual("set ispEnemyId", sh.getPrimaryEnemy().orElse(-1), 10);
     }
 
+    // Cloaking
+    {
+        afl::data::IntegerValue iv(10);
+        setShipProperty(sh, game::interface::ispMissionId, &iv, *root, *shipList, g->mapConfiguration(), turn->universe());
+        a.checkEqual("set ispMissionId cloak",        sh.getMission().orElse(-1), 10);
+        verifyNewBoolean(a("get ispMissionId cloak"), getShipProperty(sh, game::interface::ispCloaked, session, root, shipList, g, turn), true);
+    }
+
     // Error case: not assignable
     {
         afl::data::IntegerValue iv(10);
@@ -601,6 +610,7 @@ AFL_TEST("game.interface.ShipProperty:carrier", a)
     verifyNewString (a("ispCargoStr"),                getShipProperty(sh, game::interface::ispCargoStr,                session, root, shipList, g, turn), "10N 20T 30D 40M 60F 30C 50S 1000$");
     verifyNewInteger(a("ispCargoSupplies"),           getShipProperty(sh, game::interface::ispCargoSupplies,           session, root, shipList, g, turn), 50);
     verifyNewInteger(a("ispCargoT"),                  getShipProperty(sh, game::interface::ispCargoT,                  session, root, shipList, g, turn), 20);
+    verifyNewBoolean(a("ispCloaked"),                 getShipProperty(sh, game::interface::ispCloaked,                 session, root, shipList, g, turn), false);
     verifyNewInteger(a("ispCrew"),                    getShipProperty(sh, game::interface::ispCrew,                    session, root, shipList, g, turn), 200);
     verifyNewInteger(a("ispDamage"),                  getShipProperty(sh, game::interface::ispDamage,                  session, root, shipList, g, turn), 0);
     verifyNewInteger(a("ispEnemyId"),                 getShipProperty(sh, game::interface::ispEnemyId,                 session, root, shipList, g, turn), 0);
@@ -739,6 +749,7 @@ AFL_TEST("game.interface.ShipProperty:empty", a)
     verifyNewNull   (a("ispCargoStr"),                getShipProperty(sh, game::interface::ispCargoStr,                session, root, shipList, g, turn));
     verifyNewNull   (a("ispCargoSupplies"),           getShipProperty(sh, game::interface::ispCargoSupplies,           session, root, shipList, g, turn));
     verifyNewNull   (a("ispCargoT"),                  getShipProperty(sh, game::interface::ispCargoT,                  session, root, shipList, g, turn));
+    verifyNewNull   (a("ispCloaked"),                 getShipProperty(sh, game::interface::ispCloaked,                 session, root, shipList, g, turn));
     verifyNewNull   (a("ispCrew"),                    getShipProperty(sh, game::interface::ispCrew,                    session, root, shipList, g, turn));
     verifyNewNull   (a("ispDamage"),                  getShipProperty(sh, game::interface::ispDamage,                  session, root, shipList, g, turn));
     verifyNewNull   (a("ispEnemyId"),                 getShipProperty(sh, game::interface::ispEnemyId,                 session, root, shipList, g, turn));
@@ -925,6 +936,7 @@ AFL_TEST("game.interface.ShipProperty:freighter", a)
     verifyNewString (a("ispCargoStr"),                getShipProperty(sh, game::interface::ispCargoStr,                session, root, shipList, g, turn), "10N");
     verifyNewInteger(a("ispCargoSupplies"),           getShipProperty(sh, game::interface::ispCargoSupplies,           session, root, shipList, g, turn), 0);
     verifyNewInteger(a("ispCargoT"),                  getShipProperty(sh, game::interface::ispCargoT,                  session, root, shipList, g, turn), 0);
+    verifyNewBoolean(a("ispCloaked"),                 getShipProperty(sh, game::interface::ispCloaked,                 session, root, shipList, g, turn), false);
     verifyNewInteger(a("ispCrew"),                    getShipProperty(sh, game::interface::ispCrew,                    session, root, shipList, g, turn), 10);
     verifyNewInteger(a("ispDamage"),                  getShipProperty(sh, game::interface::ispDamage,                  session, root, shipList, g, turn), 0);
     verifyNewInteger(a("ispEnemyId"),                 getShipProperty(sh, game::interface::ispEnemyId,                 session, root, shipList, g, turn), 0);

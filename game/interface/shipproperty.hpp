@@ -33,6 +33,7 @@ namespace game { namespace interface {
         ispCargoStr,
         ispCargoSupplies,
         ispCargoT,
+        ispCloaked,
         ispCrew,
         ispDamage,
         ispEnemyId,
