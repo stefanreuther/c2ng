@@ -10,6 +10,7 @@
 #include "game/cargospec.hpp"
 #include "game/exception.hpp"
 #include "game/spec/shiplist.hpp"
+#include "game/test/shiplist.hpp"
 
 using game::Element;
 using game::CargoSpec;
@@ -234,6 +235,43 @@ AFL_TEST("game.actions.CargoTransfer:unload:supply-sale", a)
     AFL_CHECK_SUCCEEDS(a("03. commit"), testee.commit());
     a.checkEqual("04. cargo p", p.toCargoSpecString(), "100T 1D 80$");
     a.checkEqual("05. cargo s", s.toCargoSpecString(), "20N");
+}
+
+/** Test moving torpedoes. */
+AFL_TEST("game.actions.CargoTransfer:cargospec-torps", a)
+{
+    class TorpContainer : public game::CargoContainer {
+     public:
+        virtual String_t getName(afl::string::Translator& /*tx*/) const
+            { return "<Test>"; }
+        virtual String_t getInfo1(afl::string::Translator& /*tx*/) const
+            { return String_t(); }
+        virtual String_t getInfo2(afl::string::Translator& /*tx*/) const
+            { return String_t(); }
+        virtual Flags_t getFlags() const
+            { return Flags_t(); }
+        virtual bool canHaveElement(Element::Type type) const
+            { return type == Element::fromTorpedoType(10); }
+        virtual int32_t getMaxAmount(Element::Type /*type*/) const
+            { return 1000; }
+        virtual int32_t getMinAmount(Element::Type /*type*/) const
+            { return 0; }
+        virtual int32_t getAmount(Element::Type /*type*/) const
+            { return 100; }
+        virtual void commit()
+            { }
+    };
+
+    game::actions::CargoTransfer testee;
+    testee.addNew(new TorpContainer());
+    testee.addNew(new TorpContainer());
+
+    game::spec::ShipList shipList;
+    game::test::initStandardTorpedoes(shipList);
+
+    CargoSpec cs("10W", false);
+    testee.move(cs, shipList, 0, 1, false);
+    a.check("01. empty", cs.isZero());
 }
 
 /** Test with limited room.

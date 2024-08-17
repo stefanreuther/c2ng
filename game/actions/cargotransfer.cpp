@@ -260,7 +260,7 @@ game::actions::CargoTransfer::move(CargoSpec& amount, const game::spec::ShipList
     // This is a hack, but it's the same one as used in PCC 1.x :-)
     // Because we can only move exact torpedo types, but we know that the user wants torpedoes, just try them all.
     // Only one of them will work (or none if the units are incompatible).
-    for (int i = 1; i < shipList.launchers().size(); ++i) {
+    for (int i = 1; i <= shipList.launchers().size(); ++i) {
         amount.add(CargoSpec::Torpedoes, -move(Element::fromTorpedoType(i), amount.get(CargoSpec::Torpedoes), from, to, true, sellSupplies));
     }
 }
