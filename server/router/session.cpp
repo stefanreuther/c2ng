@@ -14,6 +14,9 @@
 #include "util/string.hpp"
 
 namespace {
+    using afl::string::Format;
+    using afl::sys::LogListener;
+
     const char*const LOG_NAME = "router.session";
 
     bool isConflictMarker(const String_t& s)
@@ -181,19 +184,19 @@ server::router::Session::start(const String_t& serverPath)
         String_t greeting;
         if (readLine(greeting) && greeting.compare(0, 3, "100", 3) == 0) {
             // Looks like a success message
-            logProcess(afl::sys::LogListener::Info, "started");
+            logProcess(LogListener::Info, "started");
         } else {
             // Looks like a failure message
-            logProcess(afl::sys::LogListener::Warn, "failed to start");
+            logProcess(LogListener::Warn, "failed to start");
             do {
                 util::removeTrailingCharacter(greeting, '\n');
-                m_log.write(afl::sys::LogListener::Trace, LOG_NAME, greeting);
+                m_log.write(LogListener::Trace, LOG_NAME, greeting);
             } while (readLine(greeting));
             stop();
             ok = false;
         }
     } else {
-        m_log.write(afl::sys::LogListener::Warn, LOG_NAME, afl::string::Format("[%s] failed to start: %s", m_id, m_process->getStatus()));
+        m_log.write(LogListener::Warn, LOG_NAME, Format("[%s] failed to start: %s", m_id, m_process->getStatus()));
     }
     return ok;
 }
@@ -205,9 +208,9 @@ server::router::Session::stop()
     // ex RouterSession::stop
     if (m_process->isActive()) {
         uint32_t savedPID = m_process->getProcessId();
-        logProcess(afl::sys::LogListener::Info, "stopping...", savedPID);
+        logProcess(LogListener::Info, "stopping...", savedPID);
         bool ok = m_process->stop();
-        logProcess(ok ? afl::sys::LogListener::Info : afl::sys::LogListener::Warn, m_process->getStatus(), savedPID);
+        logProcess(ok ? LogListener::Info : LogListener::Warn, m_process->getStatus(), savedPID);
         notifyFileServer();
     }
 }
@@ -222,7 +225,7 @@ server::router::Session::save(bool notify)
         m_isUsed = true;
         if (m_isModified) {
             // When we're here, the session was modified and can be saved
-            logProcess(afl::sys::LogListener::Trace, "'SAVE' (from router)");
+            logProcess(LogListener::Trace, "'SAVE' (from router)");
 
             // Save
             if (!m_process->writeLine("SAVE\n")) {
@@ -254,8 +257,8 @@ server::router::Session::talk(String_t command)
             command += ".\n";
         }
 
-        String_t::size_type n = command.find('\n');
-        logProcess(afl::sys::LogListener::Trace, afl::string::Format("'%s'", command.substr(0, n)));
+        const String_t::size_type n = command.find('\n');
+        logProcess(LogListener::Trace, Format("'%s'", command.substr(0, n)));
 
         m_isUsed = true;
         m_isModified = !server::interface::SessionRouterSingleServer::isSAVE(command);
@@ -268,6 +271,17 @@ server::router::Session::talk(String_t command)
         String_t header, body;
         readResponse(header, body);
 
+        if (!header.empty() && header[0] != '2') {
+            String_t h = header;
+            util::removeTrailingCharacter(h, '\n');
+            logProcess(LogListener::Warn, h);
+            if (n == String_t::npos) {
+                logProcess(LogListener::Warn, "(empty payload)");
+            } else {
+                logProcess(LogListener::Warn, Format("Payload: %s", command.substr(n+1)));
+            }
+        }
+
         // FIXME: what should be the proper response format?
         return header + body;
     } else {
@@ -278,12 +292,12 @@ server::router::Session::talk(String_t command)
 void
 server::router::Session::logCommandLine()
 {
-    String_t msg = afl::string::Format("[%s] starting:", m_id);
+    String_t msg = Format("[%s] starting:", m_id);
     for (size_t i = 0, n = m_args.size(); i < n; ++i) {
         msg += " ";
         msg += m_args[i];
     }
-    m_log.write(afl::sys::LogListener::Info, LOG_NAME, msg);
+    m_log.write(LogListener::Info, LOG_NAME, msg);
 }
 
 void
@@ -295,7 +309,7 @@ server::router::Session::logProcess(afl::sys::LogListener::Level level, const St
 void
 server::router::Session::logProcess(afl::sys::LogListener::Level level, const String_t& msg, uint32_t pid)
 {
-    m_log.write(level, LOG_NAME, afl::string::Format("[%s:%d] %s", m_id.substr(0, 10), pid, msg));
+    m_log.write(level, LOG_NAME, Format("[%s:%d] %s", m_id.substr(0, 10), pid, msg));
 }
 
 void
@@ -358,7 +372,7 @@ server::router::Session::notifyFileServer()
 void
 server::router::Session::handleError(const char* reason)
 {
-    logProcess(afl::sys::LogListener::Warn, reason);
+    logProcess(LogListener::Warn, reason);
     stop();
     throw std::runtime_error(SESSION_TIMED_OUT);
 }
