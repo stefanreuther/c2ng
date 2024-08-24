@@ -164,6 +164,16 @@ AFL_TEST("interpreter.Tokenizer:basics", a)
         a.checkEqual("201. readNextToken", tok.readNextToken(), tok.tEnd);
     }
 
+    // Overlong identifiers
+    {
+        String_t id10 = "a123456789";
+        String_t id80 = id10+id10+id10+id10+id10+id10+id10+id10;
+        String_t id240 = id80+id80+id80;
+
+        AFL_CHECK_THROWS(a("205. overlong"), interpreter::Tokenizer(id240+id10+id10).readNextToken(), interpreter::Error);
+        AFL_CHECK_THROWS(a("206. overlong"), interpreter::Tokenizer(id240+id10+"....................").readNextToken(), interpreter::Error);
+    }
+
     // Invalid
     {
         interpreter::Tokenizer tok("a`b");

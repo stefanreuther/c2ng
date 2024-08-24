@@ -462,6 +462,8 @@ AFL_TEST("interpreter.UnaryExecution:unIsString", a)
     // Numbers
     p.reset(executeUnaryOperation(h.world, interpreter::unIsString, addr(StringValue("3"))));
     a.checkEqual("11", toBoolean(p), true);
+    p.reset(executeUnaryOperation(h.world, interpreter::unIsString, addr(StringValue(""))));
+    a.checkEqual("12", toBoolean(p), true);
 
     // Others
     p.reset(executeUnaryOperation(h.world, interpreter::unIsString, addr(IntegerValue(0))));
@@ -494,6 +496,8 @@ AFL_TEST("interpreter.UnaryExecution:unAsc", a)
     a.checkEqual("14", toInteger(p), 214);
     p.reset(executeUnaryOperation(h.world, interpreter::unAsc, addr(StringValue("\xC3\x96XYZ"))));
     a.checkEqual("15", toInteger(p), 214);
+    p.reset(executeUnaryOperation(h.world, interpreter::unAsc, addr(StringValue("\xD0\x84XYZ"))));
+    a.checkEqual("16", toInteger(p), 1028);
 
     // Not-strings: stringify
     p.reset(executeUnaryOperation(h.world, interpreter::unAsc, addr(IntegerValue(42))));
@@ -530,6 +534,8 @@ AFL_TEST("interpreter.UnaryExecution:unChr", a)
     // Range error
     AFL_CHECK_THROWS(a("21. range error"), p.reset(executeUnaryOperation(h.world, interpreter::unChr, addr(IntegerValue(-1)))), interpreter::Error);
     AFL_CHECK_THROWS(a("22. range error"), p.reset(executeUnaryOperation(h.world, interpreter::unChr, addr(IntegerValue(2000000)))), interpreter::Error);
+    AFL_CHECK_THROWS(a("23. range error"), p.reset(executeUnaryOperation(h.world, interpreter::unChr, addr(FloatValue(32.5)))), interpreter::Error);
+    AFL_CHECK_THROWS(a("24. range error"), p.reset(executeUnaryOperation(h.world, interpreter::unChr, addr(FloatValue(65535.1)))), interpreter::Error);
 
     // Type error
     AFL_CHECK_THROWS(a("31. type error"), p.reset(executeUnaryOperation(h.world, interpreter::unChr, addr(StringValue("")))), interpreter::Error);
@@ -757,9 +763,17 @@ AFL_TEST("interpreter.UnaryExecution:unVal", a)
     a.checkNull("23", p.get());
     p.reset(executeUnaryOperation(h.world, interpreter::unVal, addr(StringValue("1.0e5"))));
     a.checkNull("24", p.get());
+    p.reset(executeUnaryOperation(h.world, interpreter::unVal, addr(StringValue("."))));
+    a.checkNull("25", p.get());
+    p.reset(executeUnaryOperation(h.world, interpreter::unVal, addr(StringValue("-."))));
+    a.checkNull("26", p.get());
+    p.reset(executeUnaryOperation(h.world, interpreter::unVal, addr(StringValue("--2"))));
+    a.checkNull("27", p.get());
+    p.reset(executeUnaryOperation(h.world, interpreter::unVal, addr(StringValue("++2"))));
+    a.checkNull("28", p.get());
 
     // Type error
-    AFL_CHECK_THROWS(a("31. tpey error"), p.reset(executeUnaryOperation(h.world, interpreter::unVal, addr(IntegerValue(3)))), interpreter::Error);
+    AFL_CHECK_THROWS(a("31. type error"), p.reset(executeUnaryOperation(h.world, interpreter::unVal, addr(IntegerValue(3)))), interpreter::Error);
 }
 
 /** Test unTrace: write a log message. */
@@ -856,7 +870,8 @@ AFL_TEST("interpreter.UnaryExecution:unAtomStr", a)
 
     // Type error
     AFL_CHECK_THROWS(a("21. type error"), p.reset(executeUnaryOperation(h.world, interpreter::unAtomStr, addr(FloatValue(7.0)))), interpreter::Error);
-    AFL_CHECK_THROWS(a("22. type error"), p.reset(executeUnaryOperation(h.world, interpreter::unAtomStr, addr(StringValue("")))), interpreter::Error);
+    AFL_CHECK_THROWS(a("22. type error"), p.reset(executeUnaryOperation(h.world, interpreter::unAtomStr, addr(StringValue("x")))), interpreter::Error);
+    AFL_CHECK_THROWS(a("23. type error"), p.reset(executeUnaryOperation(h.world, interpreter::unAtomStr, addr(StringValue("")))), interpreter::Error);
 }
 
 /** Test unKeyCreate: create keymap from string. */

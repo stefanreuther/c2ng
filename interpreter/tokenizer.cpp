@@ -235,9 +235,6 @@ interpreter::Tokenizer::read()
                 if (isIdentifierCharacter(c)) {
                     m_currentString += c;
                     ++m_pos;
-                    if (c != '.' && m_currentString.size() > 255) {
-                        throw Error("Identifier too long");
-                    }
                 } else {
                     break;
                 }
@@ -247,6 +244,11 @@ interpreter::Tokenizer::read()
             if (m_currentString[m_currentString.size()-1] == '.') {
                 m_currentString.erase(m_currentString.size()-1);
                 --m_pos;
+            }
+
+            // Check length
+            if (m_currentString.size() > 255) {
+                throw Error("Identifier too long");
             }
 
             // Handle special keywords
