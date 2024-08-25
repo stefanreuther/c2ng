@@ -141,20 +141,11 @@ game::interface::checkPlayerSetArg(PlayerSet_t& result, afl::data::Value* value)
     if (interpreter::IndexableValue* iv = dynamic_cast<interpreter::IndexableValue*>(value)) {
         // We need to use IndexableValue because that allows retrieving values without having a process.
         // In contrast, FArrayDim checks CallableValue.
-        if (iv->getDimension(0) != 1) {
-            throw interpreter::Error::typeError(interpreter::Error::ExpectIterable);
-        }
-
-        int32_t dim = iv->getDimension(1);
-        for (int32_t i = 0; i < dim; ++i) {
-            afl::data::Segment seg;
-            seg.pushBackInteger(i);
-            interpreter::Arguments args(seg, 0, 1);
-
-            std::auto_ptr<afl::data::Value> val(iv->get(args));
-
+        afl::data::Segment seg;
+        iv->getAll(seg, 0);
+        for (size_t i = 0, n = seg.size(); i < n; ++i) {
             int playerNr = 0;
-            if (interpreter::checkIntegerArg(playerNr, val.get(), 0, MAX_PLAYERS)) {
+            if (interpreter::checkIntegerArg(playerNr, seg[i], 0, MAX_PLAYERS)) {
                 result += playerNr;
             }
         }

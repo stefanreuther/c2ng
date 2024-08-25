@@ -11,8 +11,8 @@ interpreter::FunctionValue::set(Arguments& args, const afl::data::Value* value)
     rejectSet(args, value);
 }
 
-int32_t
-interpreter::FunctionValue::getDimension(int32_t /*which*/) const
+size_t
+interpreter::FunctionValue::getDimension(size_t /*which*/) const
 {
     return 0;
 }

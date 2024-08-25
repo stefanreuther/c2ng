@@ -33,7 +33,7 @@ AFL_TEST("game.interface.FriendlyCodeFunction:basics", a)
     verif.verifyBasics();
     verif.verifyNotSerializable();
 
-    a.checkEqual("01. getDimension", testee.getDimension(0), 0);
+    a.checkEqual("01. getDimension", testee.getDimension(0), 0U);
 
     // Test successful invocation
     {

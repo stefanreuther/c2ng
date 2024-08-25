@@ -53,8 +53,8 @@ game::interface::UfoFunction::set(interpreter::Arguments& args, const afl::data:
 }
 
 // CallableValue:
-int32_t
-game::interface::UfoFunction::getDimension(int32_t which) const
+size_t
+game::interface::UfoFunction::getDimension(size_t which) const
 {
     // ex int/if/ufoif.h:IFUfoDim
     return which == 0 ? 1 : 32768;

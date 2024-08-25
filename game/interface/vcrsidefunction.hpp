@@ -35,7 +35,7 @@ namespace game { namespace interface {
         virtual void set(interpreter::Arguments& args, const afl::data::Value* value);
 
         // CallableValue:
-        virtual int32_t getDimension(int32_t which) const;
+        virtual size_t getDimension(size_t which) const;
         virtual VcrSideContext* makeFirstContext();
         virtual VcrSideFunction* clone() const;
 
@@ -44,7 +44,7 @@ namespace game { namespace interface {
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
      private:
-        int32_t getNumObjects() const;
+        size_t getNumObjects() const;
 
         const size_t m_battleNumber;
         afl::string::Translator& m_translator;

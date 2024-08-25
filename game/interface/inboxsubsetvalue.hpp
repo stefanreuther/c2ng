@@ -39,7 +39,7 @@ namespace game { namespace interface {
 
         virtual afl::data::Value* get(interpreter::Arguments& args);
         virtual void set(interpreter::Arguments& args, const afl::data::Value* value);
-        virtual int32_t getDimension(int32_t which) const;
+        virtual size_t getDimension(size_t which) const;
         virtual interpreter::Context* makeFirstContext();
         virtual InboxSubsetValue* clone() const;
         virtual String_t toString(bool readable) const;

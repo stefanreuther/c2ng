@@ -285,8 +285,8 @@ AFL_TEST("game.interface.ShipProperty:basics", a)
         interpreter::test::ValueVerifier verif(*ix, a("ispMessages"));
         verif.verifyBasics();
         verif.verifyNotSerializable();
-        a.checkEqual("ispMessages dim 0", ix->getDimension(0), 1);
-        a.checkEqual("ispMessages dim 1", ix->getDimension(1), 3);   // 2 messages
+        a.checkEqual("ispMessages dim 0", ix->getDimension(0), 1U);
+        a.checkEqual("ispMessages dim 1", ix->getDimension(1), 3U);   // 2 messages
 
         // Quick test that messages can be retrieved
         std::auto_ptr<interpreter::Context> ctx(ix->makeFirstContext());
@@ -312,7 +312,7 @@ AFL_TEST("game.interface.ShipProperty:basics", a)
         interpreter::test::ValueVerifier verif(*ix, a("ispScore"));
         verif.verifyBasics();
         verif.verifyNotSerializable();
-        a.checkEqual("ispScore dim", ix->getDimension(0), 0);
+        a.checkEqual("ispScore dim", ix->getDimension(0), 0U);
         AFL_CHECK_THROWS(a("ispScore makeFirstContext"), ix->makeFirstContext(), interpreter::Error);
 
         // Retrieve existing score value
@@ -370,7 +370,7 @@ AFL_TEST("game.interface.ShipProperty:basics", a)
         interpreter::test::ValueVerifier verif(*ix, a("ispHasFunction"));
         verif.verifyBasics();
         verif.verifyNotSerializable();
-        a.checkEqual("ispHasFunction dim", ix->getDimension(0), 0);
+        a.checkEqual("ispHasFunction dim", ix->getDimension(0), 0U);
         AFL_CHECK_THROWS(a("ispHasFunction makeFirstContext"), ix->makeFirstContext(), interpreter::Error);
 
         // Retrieve existing value - true

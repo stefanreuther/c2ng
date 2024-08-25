@@ -144,14 +144,14 @@ game::interface::InboxSubsetValue::set(interpreter::Arguments& args, const afl::
     rejectSet(args, value);
 }
 
-int32_t
-game::interface::InboxSubsetValue::getDimension(int32_t which) const
+size_t
+game::interface::InboxSubsetValue::getDimension(size_t which) const
 {
     // ex IntMappedMessageValue::getDimension
     if (which == 0) {
         return 1;
     } else {
-        return static_cast<int32_t>(m_indexes.size()) + 1;
+        return m_indexes.size() + 1;
     }
 }
 

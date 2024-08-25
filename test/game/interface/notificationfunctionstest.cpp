@@ -32,7 +32,7 @@ AFL_TEST("game.interface.NotificationFunctions:NotifyConfirmedFunction", a)
     verif.verifyBasics();
     verif.verifyNotSerializable();
     a.checkEqual("01. isProcedureCall", testee.isProcedureCall(), false);
-    a.checkEqual("02. getDimension", testee.getDimension(0), 0);
+    a.checkEqual("02. getDimension", testee.getDimension(0), 0U);
     AFL_CHECK_THROWS(a("03. makeFirstContext"), testee.makeFirstContext(), interpreter::Error);
 
     // Sample invocation

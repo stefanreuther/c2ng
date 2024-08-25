@@ -590,7 +590,7 @@ namespace {
         if (!arg)
             return 0;
         else if (const interpreter::CallableValue* a = dynamic_cast<const interpreter::CallableValue*>(arg))
-            return makeIntegerValue(a->getDimension(0));
+            return makeSizeValue(a->getDimension(0));
         else
             return makeIntegerValue(0);
     }

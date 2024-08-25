@@ -43,8 +43,8 @@ AFL_TEST("interpreter.ProcedureValue", a)
     a.check("21. isProcedureCall", t.isProcedureCall());
 
     // - getDimension
-    a.checkEqual("31. getDimension", t.getDimension(0), 0);
-    a.checkEqual("32. getDimension", t.getDimension(1), 0);
+    a.checkEqual("31. getDimension", t.getDimension(0), 0U);
+    a.checkEqual("32. getDimension", t.getDimension(1), 0U);
 
     // - makeFirstContext
     AFL_CHECK_THROWS(a("41. makeFirstContext"), t.makeFirstContext(), interpreter::Error);

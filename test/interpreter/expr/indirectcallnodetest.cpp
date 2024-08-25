@@ -46,7 +46,7 @@ namespace {
                 interpreter::checkIntegerArg(iv, value);
                 m_data[packArgs(args)] = iv;
             }
-        virtual int32_t getDimension(int32_t /*which*/) const
+        virtual size_t getDimension(size_t /*which*/) const
             { return 0; }
         virtual interpreter::Context* makeFirstContext()
             { return 0; }

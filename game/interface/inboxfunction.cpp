@@ -57,8 +57,8 @@ game::interface::InboxFunction::set(interpreter::Arguments& args, const afl::dat
 }
 
 // CallableValue:
-int32_t
-game::interface::InboxFunction::getDimension(int32_t which) const
+size_t
+game::interface::InboxFunction::getDimension(size_t which) const
 {
     // ex IFInmsgDim
     afl::base::Ptr<Game> g = m_session.getGame();
@@ -68,7 +68,7 @@ game::interface::InboxFunction::getDimension(int32_t which) const
     } else if (g.get() == 0 || r.get() == 0) {
         return 0;
     } else {
-        return int32_t(g->viewpointTurn().inbox().getNumMessages()) + 1;
+        return g->viewpointTurn().inbox().getNumMessages() + 1;
     }
 }
 

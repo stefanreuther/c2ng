@@ -32,7 +32,7 @@ AFL_TEST("game.interface.DrawingFunction:basics", a)
     interpreter::test::ValueVerifier verif(testee, a);
     verif.verifyBasics();
     verif.verifyNotSerializable();
-    a.checkEqual("01. getDimension", testee.getDimension(0), 0);
+    a.checkEqual("01. getDimension", testee.getDimension(0), 0U);
 
     // Cannot invoke or assign to
     afl::data::Segment seg;

@@ -41,7 +41,7 @@ namespace {
             { return afl::data::Value::cloneOf(args.getNext()); }
         virtual void set(interpreter::Arguments& args, const afl::data::Value* value)
             { rejectSet(args, value); }
-        virtual int32_t getDimension(int32_t which) const
+        virtual size_t getDimension(size_t which) const
             { return which == 0 ? 1 : 5; }
         virtual interpreter::Context* makeFirstContext()
             { return 0; }

@@ -23,7 +23,7 @@ namespace game { namespace interface {
         virtual void set(interpreter::Arguments& args, const afl::data::Value* value);
 
         // CallableValue:
-        virtual int32_t getDimension(int32_t which) const;
+        virtual size_t getDimension(size_t which) const;
         virtual interpreter::Context* makeFirstContext();
         virtual TorpedoFunction* clone() const;
 

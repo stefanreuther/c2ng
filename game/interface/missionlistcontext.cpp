@@ -60,7 +60,7 @@ namespace {
         virtual void set(interpreter::Arguments& args, const afl::data::Value* value);
 
         // CallableValue:
-        virtual int32_t getDimension(int32_t which) const;
+        virtual size_t getDimension(size_t which) const;
         virtual MissionContext* makeFirstContext();
         virtual ListFunction* clone() const;
 
@@ -129,13 +129,13 @@ ListFunction::set(interpreter::Arguments& args, const afl::data::Value* value)
 }
 
 // CallableValue:
-int32_t
-ListFunction::getDimension(int32_t which) const
+size_t
+ListFunction::getDimension(size_t which) const
 {
     if (which == 0) {
         return 1;
     } else {
-        return static_cast<int32_t>(m_data->size());
+        return m_data->size();
     }
 }
 

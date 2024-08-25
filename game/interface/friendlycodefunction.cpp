@@ -53,8 +53,8 @@ game::interface::FriendlyCodeFunction::set(interpreter::Arguments& args, const a
 }
 
 // CallableValue:
-int32_t
-game::interface::FriendlyCodeFunction::getDimension(int32_t /*which*/) const
+size_t
+game::interface::FriendlyCodeFunction::getDimension(size_t /*which*/) const
 {
     return 0;
 }

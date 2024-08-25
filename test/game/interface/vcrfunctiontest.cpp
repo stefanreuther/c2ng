@@ -58,8 +58,8 @@ AFL_TEST("game.interface.VcrFunction:basics", a)
     verif.verifyBasics();
     verif.verifyNotSerializable();
 
-    a.checkEqual("01. getDimension 0", testee.getDimension(0), 1);
-    a.checkEqual("02. getDimension 1", testee.getDimension(1), 4);    // 3 battles
+    a.checkEqual("01. getDimension 0", testee.getDimension(0), 1U);
+    a.checkEqual("02. getDimension 1", testee.getDimension(1), 4U);    // 3 battles
 
     // Test successful invocation
     {

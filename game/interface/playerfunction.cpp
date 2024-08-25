@@ -47,14 +47,14 @@ game::interface::PlayerFunction::set(interpreter::Arguments& args, const afl::da
 }
 
 // CallableValue:
-int32_t
-game::interface::PlayerFunction::getDimension(int32_t which) const
+size_t
+game::interface::PlayerFunction::getDimension(size_t which) const
 {
     // \change: This reports DIM(PLAYER)=13 in a v3 game, not 12 as PCC2.
     return which == 0
         ? 1
         : m_session.getRoot().get() != 0
-        ? m_session.getRoot()->playerList().size()
+        ? size_t(m_session.getRoot()->playerList().size())
         : 0;
 }
 

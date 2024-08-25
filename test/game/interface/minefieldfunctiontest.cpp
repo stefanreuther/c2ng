@@ -51,8 +51,8 @@ AFL_TEST("game.interface.MinefieldFunction:basics", a)
     verif.verifyBasics();
     verif.verifyNotSerializable();
 
-    a.checkEqual("01. getDimension 0", testee.getDimension(0), 1);
-    a.checkEqual("02. getDimension 1", testee.getDimension(1), 201);
+    a.checkEqual("01. getDimension 0", testee.getDimension(0), 1U);
+    a.checkEqual("02. getDimension 1", testee.getDimension(1), 201U);
 
     // Test successful invocation
     {
@@ -125,7 +125,7 @@ AFL_TEST("game.interface.MinefieldFunction:makeFirstContext:no-game", a)
     a.checkNull("get", result.get());
 
     // No dimension because no game
-    a.checkEqual("getDimension", testee.getDimension(1), 0);
+    a.checkEqual("getDimension", testee.getDimension(1), 0U);
 }
 
 // Session populated with empty objects
@@ -142,5 +142,5 @@ AFL_TEST("game.interface.MinefieldFunction:makeFirstContext:no-objects", a)
     a.checkNull("get", result.get());
 
     // Slot 0 is present (but empty)
-    a.checkEqual("getDimension", testee.getDimension(1), 1);
+    a.checkEqual("getDimension", testee.getDimension(1), 1U);
 }

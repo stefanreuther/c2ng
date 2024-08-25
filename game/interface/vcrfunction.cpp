@@ -26,14 +26,14 @@ game::interface::VcrContext*
 game::interface::VcrFunction::get(interpreter::Arguments& args)
 {
     args.checkArgumentCount(1);
-    int32_t i;
-    if (!interpreter::checkIntegerArg(i, args.getNext(), 1, getNumBattles())) {
+    size_t i;
+    if (!interpreter::checkIndexArg(i, args.getNext(), 1, getNumBattles())) {
         return 0;
     }
 
     // OK, build result. Note that the user indexes are 1-based!
     if (Game* g = m_session.getGame().get()) {
-        return VcrContext::create(i-1, m_session, g->viewpointTurn().getBattles());
+        return VcrContext::create(i, m_session, g->viewpointTurn().getBattles());
     } else {
         return 0;
     }
@@ -46,8 +46,8 @@ game::interface::VcrFunction::set(interpreter::Arguments& args, const afl::data:
 }
 
 // CallableValue:
-int32_t
-game::interface::VcrFunction::getDimension(int32_t which) const
+size_t
+game::interface::VcrFunction::getDimension(size_t which) const
 {
     if (which == 0) {
         return 1;
@@ -85,12 +85,12 @@ game::interface::VcrFunction::store(interpreter::TagNode& out, afl::io::DataSink
     rejectStore(out, aux, ctx);
 }
 
-int32_t
+size_t
 game::interface::VcrFunction::getNumBattles() const
 {
     if (Game* g = m_session.getGame().get()) {
         if (game::vcr::Database* db = g->viewpointTurn().getBattles().get()) {
-            return int32_t(std::min(db->getNumBattles(), size_t(0x7FFFFFFE)));
+            return db->getNumBattles();
         }
     }
     return 0;

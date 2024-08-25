@@ -31,7 +31,7 @@ AFL_TEST("interpreter.FunctionValue", a)
     AFL_CHECK_THROWS(a("01. set"), t.set(setArgs, seg[0]), interpreter::Error);
 
     // - getDimension
-    a.checkEqual("11. getDimension", t.getDimension(0), 0);
+    a.checkEqual("11. getDimension", t.getDimension(0), 0U);
 
     // - makeFirstContext
     AFL_CHECK_THROWS(a("21. makeFirstContext"), t.makeFirstContext(), interpreter::Error);

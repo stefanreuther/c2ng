@@ -28,7 +28,7 @@ namespace game { namespace interface {
         // CallableValue:
         virtual void call(interpreter::Process& proc, afl::data::Segment& args, bool want_result);
         virtual bool isProcedureCall() const;
-        virtual int32_t getDimension(int32_t which) const;
+        virtual size_t getDimension(size_t which) const;
         virtual interpreter::Context* makeFirstContext();
         virtual NotifyConfirmedFunction* clone() const;
 

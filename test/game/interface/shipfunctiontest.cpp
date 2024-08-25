@@ -48,8 +48,8 @@ AFL_TEST("game.interface.ShipFunction:basics", a)
     verif.verifyBasics();
     verif.verifyNotSerializable();
 
-    a.checkEqual("01. getDimension 0", testee.getDimension(0), 1);
-    a.checkEqual("02. getDimension 1", testee.getDimension(1), 101);     // last ship Id, plus 1
+    a.checkEqual("01. getDimension 0", testee.getDimension(0), 1U);
+    a.checkEqual("02. getDimension 1", testee.getDimension(1), 101U);     // last ship Id, plus 1
 
     // Test successful invocation
     {
@@ -128,8 +128,8 @@ AFL_TEST("game.interface.ShipFunction:empty-session", a)
     std::auto_ptr<interpreter::Context> result(testee.makeFirstContext());
     a.checkNull("01. get", result.get());
 
-    a.checkEqual("11. getDimension 0", testee.getDimension(0), 1);
-    a.checkEqual("12. getDimension 1", testee.getDimension(1), 0);
+    a.checkEqual("11. getDimension 0", testee.getDimension(0), 1U);
+    a.checkEqual("12. getDimension 1", testee.getDimension(1), 0U);
 }
 
 // Session populated with empty objects
@@ -146,6 +146,6 @@ AFL_TEST("game.interface.ShipFunction:empty-universe", a)
     std::auto_ptr<interpreter::Context> result(testee.makeFirstContext());
     a.checkNull("01. get", result.get());
 
-    a.checkEqual("11. getDimension 0", testee.getDimension(0), 1);
-    a.checkEqual("12. getDimension 1", testee.getDimension(1), 1);
+    a.checkEqual("11. getDimension 0", testee.getDimension(0), 1U);
+    a.checkEqual("12. getDimension 1", testee.getDimension(1), 1U);
 }

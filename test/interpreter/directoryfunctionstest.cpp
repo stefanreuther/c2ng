@@ -68,7 +68,7 @@ AFL_TEST("interpreter.DirectoryFunctions:DirectoryEntry:normal", a)
     interpreter::test::ValueVerifier callaVerif(*calla, a("DirectoryEntry(/dir)"));
     callaVerif.verifyBasics();
     callaVerif.verifyNotSerializable();
-    a.checkEqual("21. getDimension", calla->getDimension(0), 0);
+    a.checkEqual("21. getDimension", calla->getDimension(0), 0U);
     a.check("22. isProcedureCall", !calla->isProcedureCall());
 
     // Verify content

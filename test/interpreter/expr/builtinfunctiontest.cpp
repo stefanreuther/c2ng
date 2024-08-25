@@ -1209,7 +1209,7 @@ AFL_TEST("interpreter.expr.BuiltinFunction:iteration", a)
             { throw interpreter::Error("not invokable"); }
         virtual void set(interpreter::Arguments& /*args*/, const afl::data::Value* /*value*/)
             { throw interpreter::Error("not assignable"); }
-        virtual int32_t getDimension(int32_t /*which*/) const
+        virtual size_t getDimension(size_t /*which*/) const
             { return 0; }
         virtual interpreter::Context* makeFirstContext()
             { return new ElementMock(); }

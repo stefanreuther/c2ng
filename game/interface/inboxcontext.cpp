@@ -89,12 +89,12 @@ namespace {
             { rejectSet(args, value); }
 
         // CallableValue:
-        virtual int32_t getDimension(int32_t which) const
+        virtual size_t getDimension(size_t which) const
             {
                 if (which == 0) {
                     return 1;
                 } else {
-                    return int32_t(m_lines->size()) + 1;
+                    return m_lines->size() + 1;
                 }
             }
 

@@ -42,7 +42,7 @@ namespace {
             }
         virtual bool isProcedureCall() const
             { return false; }
-        virtual int32_t getDimension(int32_t which) const
+        virtual size_t getDimension(size_t which) const
             {
                 if (which == 0) {
                     return 7;
@@ -75,9 +75,9 @@ AFL_TEST("interpreter.Closure:basics", a)
     // ex IntCompoundTestSuite::testClosure
     // Create a test callable and make sure it works (yes, this leaks on failure)
     MyCallable* base = new MyCallable();
-    a.checkEqual("01. getDimension", base->getDimension(0), 7);
-    a.checkEqual("02. getDimension", base->getDimension(1), 5);
-    a.checkEqual("03. getDimension", base->getDimension(7), 35);
+    a.checkEqual("01. getDimension", base->getDimension(0), 7U);
+    a.checkEqual("02. getDimension", base->getDimension(1), 5U);
+    a.checkEqual("03. getDimension", base->getDimension(7), 35U);
     a.checkEqual("04. num_instances", MyCallable::num_instances, 1);
 
     // Try cloning
@@ -93,9 +93,9 @@ AFL_TEST("interpreter.Closure:basics", a)
     std::auto_ptr<interpreter::Closure> c(new interpreter::Closure());
     c->setNewFunction(base);
     a.checkEqual("21. num_instances", MyCallable::num_instances, 1);
-    a.checkEqual("22. getDimension", c->getDimension(0), 7);
-    a.checkEqual("23. getDimension", c->getDimension(1), 5);
-    a.checkEqual("24. getDimension", c->getDimension(7), 35);
+    a.checkEqual("22. getDimension", c->getDimension(0), 7U);
+    a.checkEqual("23. getDimension", c->getDimension(1), 5U);
+    a.checkEqual("24. getDimension", c->getDimension(7), 35U);
 
     // Closure properties
     a.check("31. isProcedureCall", !c->isProcedureCall());
@@ -132,9 +132,9 @@ AFL_TEST("interpreter.Closure:basics", a)
     // Bind some args
     c->addNewArgument(interpreter::makeIntegerValue(3));
     c->addNewArgument(interpreter::makeStringValue("zz"));
-    a.checkEqual("61. getDimension", c->getDimension(0), 5);
-    a.checkEqual("62. getDimension", c->getDimension(1), 15);
-    a.checkEqual("63. getDimension", c->getDimension(5), 35);
+    a.checkEqual("61. getDimension", c->getDimension(0), 5U);
+    a.checkEqual("62. getDimension", c->getDimension(1), 15U);
+    a.checkEqual("63. getDimension", c->getDimension(5), 35U);
 
     {
         afl::data::Segment dseg;
@@ -154,9 +154,9 @@ AFL_TEST("interpreter.Closure:basics", a)
         a.pushBackNew(interpreter::makeBooleanValue(1));
         c->addNewArgumentsFrom(a, 2);
     }
-    a.checkEqual("81. getDimension", c->getDimension(0), 3);
-    a.checkEqual("82. getDimension", c->getDimension(1), 25);
-    a.checkEqual("83. getDimension", c->getDimension(3), 35);
+    a.checkEqual("81. getDimension", c->getDimension(0), 3U);
+    a.checkEqual("82. getDimension", c->getDimension(1), 25U);
+    a.checkEqual("83. getDimension", c->getDimension(3), 35U);
 
     {
         afl::data::Segment dseg;
@@ -178,10 +178,10 @@ AFL_TEST("interpreter.Closure:most-dimensions-bound", a)
         c->addNewArgument(interpreter::makeIntegerValue(i));
     }
 
-    a.checkEqual("01", c->getDimension(0), 2);
-    a.checkEqual("02", c->getDimension(1), 30);
-    a.checkEqual("03", c->getDimension(2), 35);
-    a.checkEqual("04", c->getDimension(3), 0);
+    a.checkEqual("01", c->getDimension(0), 2U);
+    a.checkEqual("02", c->getDimension(1), 30U);
+    a.checkEqual("03", c->getDimension(2), 35U);
+    a.checkEqual("04", c->getDimension(3), 0U);
 }
 
 /** Test closure: all dimensions bound. */
@@ -193,6 +193,6 @@ AFL_TEST("interpreter.Closure:all-dimensions-bound", a)
         c->addNewArgument(interpreter::makeIntegerValue(i));
     }
 
-    a.checkEqual("01", c->getDimension(0), 0);
-    a.checkEqual("02", c->getDimension(1), 0);
+    a.checkEqual("01", c->getDimension(0), 0U);
+    a.checkEqual("02", c->getDimension(1), 0U);
 }

@@ -26,8 +26,8 @@ game::interface::DrawingFunction::set(interpreter::Arguments& args, const afl::d
 }
 
 // CallableValue:
-int32_t
-game::interface::DrawingFunction::getDimension(int32_t /*which*/) const
+size_t
+game::interface::DrawingFunction::getDimension(size_t /*which*/) const
 {
     return 0;
 }

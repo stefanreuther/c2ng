@@ -80,7 +80,7 @@ AFL_TEST("game.interface.VcrProperty", a)
     std::auto_ptr<afl::data::Value> units(getVcrProperty(0, game::interface::ivpUnits,   tx, r, db, sl));
     interpreter::CallableValue* cv = dynamic_cast<interpreter::CallableValue*>(units.get());
     a.checkNonNull("ivpUnits callable", cv);
-    a.checkEqual("ivpUnits getDimension", cv->getDimension(1), 4);
+    a.checkEqual("ivpUnits getDimension", cv->getDimension(1), 4U);
 
     // Out-of-range access
     verifyNewNull(a("ivpSeed range"),  getVcrProperty(1, game::interface::ivpSeed,  tx, r, db, sl));

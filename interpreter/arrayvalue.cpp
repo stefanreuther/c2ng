@@ -45,8 +45,8 @@ interpreter::ArrayValue::set(Arguments& args, const afl::data::Value* value)
 }
 
 // CallableValue:
-int32_t
-interpreter::ArrayValue::getDimension(int32_t which) const
+size_t
+interpreter::ArrayValue::getDimension(size_t which) const
 {
     // ex IntArray::getDimension
     size_t value;
@@ -55,11 +55,7 @@ interpreter::ArrayValue::getDimension(int32_t which) const
     } else {
         value = m_data->getDimension(which-1);
     }
-    if (value > 0x7FFFFFFF) {
-        return 0x7FFFFFFF;
-    } else {
-        return static_cast<int32_t>(value);
-    }
+    return value;
 }
 
 interpreter::Context*

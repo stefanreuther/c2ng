@@ -85,20 +85,10 @@ namespace {
             afl::data::Value* p = args.getNext();
             if (interpreter::IndexableValue* iv = dynamic_cast<interpreter::IndexableValue*>(p)) {
                 // It's an array
-                if (iv->getDimension(0) != 1) {
-                    throw Error::typeError(Error::ExpectArray);
-                }
-                for (int32_t i = 0, n = iv->getDimension(1); i < n; ++i) {
-                    // Construct "(i)" arguments
-                    afl::data::Segment argSeg;
-                    argSeg.pushBackInteger(i);
-                    interpreter::Arguments args(argSeg, 0, 1);
-
-                    // Fetch value. This may throw.
-                    std::auto_ptr<afl::data::Value> value(iv->get(args));
-
-                    // Add
-                    addCommandListArg(list, value.get());
+                afl::data::Segment seg;
+                iv->getAll(seg, 0);
+                for (size_t i = 0, n = seg.size(); i < n; ++i) {
+                    addCommandListArg(list, seg[i]);
                 }
             } else {
                 // Not an array, just stringify
@@ -147,8 +137,8 @@ namespace {
             }
 
         // CallableValue:
-        virtual int32_t getDimension(int32_t which) const
-            { return which == 0 ? 1 : limitRange(m_edit->getNumInstructions()); }
+        virtual size_t getDimension(size_t which) const
+            { return which == 0 ? 1 : m_edit->getNumInstructions(); }
         virtual interpreter::Context* makeFirstContext()
             { return rejectFirstContext(); }
 

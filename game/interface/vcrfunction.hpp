@@ -22,7 +22,7 @@ namespace game { namespace interface {
         virtual void set(interpreter::Arguments& args, const afl::data::Value* value);
 
         // CallableValue:
-        virtual int32_t getDimension(int32_t which) const;
+        virtual size_t getDimension(size_t which) const;
         virtual VcrContext* makeFirstContext();
         virtual VcrFunction* clone() const;
 
@@ -31,7 +31,7 @@ namespace game { namespace interface {
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
      private:
-        int32_t getNumBattles() const;
+        size_t getNumBattles() const;
 
         Session& m_session;
     };

@@ -54,15 +54,15 @@ game::interface::PlanetFunction::set(interpreter::Arguments& args, const afl::da
 
 
 // CallableValue:
-int32_t
-game::interface::PlanetFunction::getDimension(int32_t which) const
+size_t
+game::interface::PlanetFunction::getDimension(size_t which) const
 {
     // ex int/if/planetif.h:IFPlanetDim
     if (which == 0) {
         return 1;
     } else {
         if (Game* game = m_session.getGame().get()) {
-            return game->viewpointTurn().universe().planets().size() + 1;
+            return size_t(game->viewpointTurn().universe().planets().size() + 1);
         } else {
             return 0;
         }

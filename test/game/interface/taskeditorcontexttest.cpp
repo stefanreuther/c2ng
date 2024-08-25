@@ -324,8 +324,8 @@ AFL_TEST("game.interface.TaskEditorContext:iteLines", a)
     verif.verifyBasics();
     verif.verifyNotSerializable();
     a.checkEqual("12. isProcedureCall", lines->isProcedureCall(), false);
-    a.checkEqual("13. getDimension 0", lines->getDimension(0), 1);
-    a.checkEqual("14. getDimension 1", lines->getDimension(1), 2);
+    a.checkEqual("13. getDimension 0", lines->getDimension(0), 1U);
+    a.checkEqual("14. getDimension 1", lines->getDimension(1), 2U);
     AFL_CHECK_THROWS(a("15. makeFirstContext"), lines->makeFirstContext(), interpreter::Error);
 
     afl::data::StringValue sv("setmission 5");
@@ -1320,7 +1320,7 @@ AFL_TEST("game.interface.TaskEditorContext:context", a)
         vv.verifyBasics();
         vv.verifyNotSerializable();
         a.check("41. isProcedureCall", cv->isProcedureCall());
-        a.checkEqual("42. getDimension", cv->getDimension(0), 0);
+        a.checkEqual("42. getDimension", cv->getDimension(0), 0U);
 
         interpreter::Process proc(env.session.world(), "tester", 777);
         afl::data::Segment seg;

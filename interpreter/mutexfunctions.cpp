@@ -29,7 +29,7 @@ namespace interpreter { namespace {
         // CallableValue:
         virtual void call(Process& proc, afl::data::Segment& args, bool want_result);
         virtual bool isProcedureCall() const;
-        virtual int32_t getDimension(int32_t which) const;
+        virtual size_t getDimension(size_t which) const;
         virtual Context* makeFirstContext();
         virtual LockFunction* clone() const;
 
@@ -162,8 +162,8 @@ interpreter::LockFunction::isProcedureCall() const
     return false;
 }
 
-int32_t
-interpreter::LockFunction::getDimension(int32_t /*which*/) const
+size_t
+interpreter::LockFunction::getDimension(size_t /*which*/) const
 {
     // ex IntLock::getDimension
     return 0;

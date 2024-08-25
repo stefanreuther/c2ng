@@ -81,8 +81,8 @@ AFL_TEST("game.interface.InboxSubsetValue:iteration", a)
 
     // Basic properties
     a.checkDifferent("11. toString", value->toString(false), "");
-    a.checkEqual("12. getDimension 0", value->getDimension(0), 1);
-    a.checkEqual("13. getDimension 1", value->getDimension(1), 3);
+    a.checkEqual("12. getDimension 0", value->getDimension(0), 1U);
+    a.checkEqual("13. getDimension 1", value->getDimension(1), 3U);
     interpreter::test::ValueVerifier vv(*value, a("values"));
     vv.verifyBasics();
     vv.verifyNotSerializable();

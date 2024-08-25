@@ -54,14 +54,14 @@ game::interface::IonStormFunction::set(interpreter::Arguments& args, const afl::
 }
 
 // CallableValue:
-int32_t
-game::interface::IonStormFunction::getDimension(int32_t which) const
+size_t
+game::interface::IonStormFunction::getDimension(size_t which) const
 {
     // ex int/if/ionif.h:IFIonDim
     if (which == 0) {
         return 1;
     } else if (Game* g = m_session.getGame().get()) {
-        return g->viewpointTurn().universe().ionStorms().size()+1;
+        return size_t(g->viewpointTurn().universe().ionStorms().size()+1);
     } else {
         return 0;
     }

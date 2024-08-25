@@ -2446,9 +2446,9 @@ AFL_TEST("interpreter.StatementCompiler:ReDim", a)
                "redim ar(4,5)\n");
     const interpreter::ArrayValue* av = dynamic_cast<const interpreter::ArrayValue*>(h.globalValue("AR"));
     a.check("01. ArrayValue", av);
-    a.checkEqual("02. getDimension 0", av->getDimension(0), 2);
-    a.checkEqual("03. getDimension 1", av->getDimension(1), 4);
-    a.checkEqual("04. getDimension 2", av->getDimension(2), 5);
+    a.checkEqual("02. getDimension 0", av->getDimension(0), 2U);
+    a.checkEqual("03. getDimension 1", av->getDimension(1), 4U);
+    a.checkEqual("04. getDimension 2", av->getDimension(2), 5U);
 }
 
 // Multiple re-dims at once
@@ -2459,16 +2459,16 @@ AFL_TEST("interpreter.StatementCompiler:ReDim:multiple", a)
                "redim a1(4,5), a2(6,7,8)\n");
     const interpreter::ArrayValue* a1 = dynamic_cast<const interpreter::ArrayValue*>(h.globalValue("A1"));
     a.check("01. ArrayValue", a1);
-    a.checkEqual("02. getDimension 0", a1->getDimension(0), 2);
-    a.checkEqual("03. getDimension 1", a1->getDimension(1), 4);
-    a.checkEqual("04. getDimension 2", a1->getDimension(2), 5);
+    a.checkEqual("02. getDimension 0", a1->getDimension(0), 2U);
+    a.checkEqual("03. getDimension 1", a1->getDimension(1), 4U);
+    a.checkEqual("04. getDimension 2", a1->getDimension(2), 5U);
 
     const interpreter::ArrayValue* a2 = dynamic_cast<const interpreter::ArrayValue*>(h.globalValue("A2"));
     a.check("11. ArrayValue", a2);
-    a.checkEqual("12. getDimension 0", a2->getDimension(0), 3);
-    a.checkEqual("13. getDimension 1", a2->getDimension(1), 6);
-    a.checkEqual("14. getDimension 2", a2->getDimension(2), 7);
-    a.checkEqual("15. getDimension 3", a2->getDimension(3), 8);
+    a.checkEqual("12. getDimension 0", a2->getDimension(0), 3U);
+    a.checkEqual("13. getDimension 1", a2->getDimension(1), 6U);
+    a.checkEqual("14. getDimension 2", a2->getDimension(2), 7U);
+    a.checkEqual("15. getDimension 3", a2->getDimension(3), 8U);
 }
 
 // Errors

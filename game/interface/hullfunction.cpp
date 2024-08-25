@@ -31,7 +31,7 @@ game::interface::HullFunction::get(interpreter::Arguments& args)
     // ex int/if/hullif.h:IFHullGet
     int32_t id;
     args.checkArgumentCount(1);
-    if (!interpreter::checkIntegerArg(id, args.getNext(), 1, getDimension(1)-1)) {
+    if (!interpreter::checkIntegerArg(id, args.getNext(), 1, int32_t(getDimension(1)-1))) {
         return 0;
     }
     return HullContext::create(id, m_session);
@@ -44,14 +44,14 @@ game::interface::HullFunction::set(interpreter::Arguments& args, const afl::data
 }
 
 // CallableValue:
-int32_t
-game::interface::HullFunction::getDimension(int32_t which) const
+size_t
+game::interface::HullFunction::getDimension(size_t which) const
 {
     // ex int/if/hullif.h:IFHullDim
     return (which == 0
             ? 1
             : (m_session.getShipList().get() != 0
-               ? m_session.getShipList()->hulls().size()+1
+               ? size_t(m_session.getShipList()->hulls().size()+1)
                : 0));
 }
 

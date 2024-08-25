@@ -40,7 +40,7 @@ AFL_TEST("game.interface.MissionFunction:basics", a)
     interpreter::test::ValueVerifier verif(testee, a);
     verif.verifyBasics();
     verif.verifyNotSerializable();
-    a.checkEqual("01. getDimension", testee.getDimension(0), 0);
+    a.checkEqual("01. getDimension", testee.getDimension(0), 0U);
 
     // Good case: "Mission(8)" -> intercept
     {

@@ -25,7 +25,7 @@ namespace interpreter {
         // CallableValue:
         virtual void call(Process& proc, afl::data::Segment& args, bool wantResult);
         virtual bool isProcedureCall() const;
-        virtual int32_t getDimension(int32_t which) const;
+        virtual size_t getDimension(size_t which) const;
         virtual Context* makeFirstContext();
 
         // BaseValue:

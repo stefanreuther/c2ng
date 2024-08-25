@@ -23,14 +23,14 @@ game::interface::VcrSideContext*
 game::interface::VcrSideFunction::get(interpreter::Arguments& args)
 {
     // Parse argument
-    int32_t i;
+    size_t i;
     args.checkArgumentCount(1);
-    if (!interpreter::checkIntegerArg(i, args.getNext(), 1, getNumObjects())) {
+    if (!interpreter::checkIndexArg(i, args.getNext(), 1, getNumObjects())) {
         return 0;
     }
 
     // OK, build result. Note that the user indexes are 1-based!
-    return new VcrSideContext(m_battleNumber, i-1, m_translator, m_root, m_battles, m_shipList);
+    return new VcrSideContext(m_battleNumber, i, m_translator, m_root, m_battles, m_shipList);
 }
 
 void
@@ -41,8 +41,8 @@ game::interface::VcrSideFunction::set(interpreter::Arguments& args, const afl::d
 }
 
 // CallableValue:
-int32_t
-game::interface::VcrSideFunction::getDimension(int32_t which) const
+size_t
+game::interface::VcrSideFunction::getDimension(size_t which) const
 {
     if (which == 0) {
         return 1;
@@ -83,13 +83,12 @@ game::interface::VcrSideFunction::store(interpreter::TagNode& out, afl::io::Data
     rejectStore(out, aux, ctx);
 }
 
-int32_t
+size_t
 game::interface::VcrSideFunction::getNumObjects() const
 {
     if (game::vcr::Database* db = m_battles.get()) {
         if (game::vcr::Battle* battle = db->getBattle(m_battleNumber)) {
-            // yay!
-            return int32_t(std::min(battle->getNumObjects(), size_t(0x7FFFFFFE)));
+            return battle->getNumObjects();
         } else {
             return 0;
         }

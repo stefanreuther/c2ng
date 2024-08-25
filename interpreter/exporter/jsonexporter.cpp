@@ -60,25 +60,22 @@ namespace {
         int32_t start = (dynamic_cast<interpreter::ArrayValue*>(value) != 0 ? 0 : 1);
 
         // OK, looks like an array. Write as one.
-        int32_t dim = iv->getDimension(1);
-        tf.writeText("[");
-        for (int32_t i = start; i < dim; ++i) {
-            if (i != start) {
-                tf.writeText(",");
-            }
-            try {
-                afl::data::Segment argSeg;
-                argSeg.pushBackNew(interpreter::makeIntegerValue(i));
-                interpreter::Arguments argBlock(argSeg, 0, 1);
+        afl::data::Segment seg;
+        try {
+            iv->getAll(seg, start);
 
-                std::auto_ptr<afl::data::Value> element(iv->get(argBlock));
-                writeValue(tf, element.get(), depth);
+            tf.writeText("[");
+            for (size_t i = 0, n = seg.size(); i < n; ++i) {
+                if (i != 0) {
+                    tf.writeText(",");
+                }
+                writeValue(tf, seg[i], depth);
             }
-            catch (...) {
-                writeQuotedString(tf, "#<error>");
-            }
+            tf.writeText("]");
         }
-        tf.writeText("]");
+        catch (...) {
+            writeQuotedString(tf, "#<error>");
+        }
         return true;
     }
 

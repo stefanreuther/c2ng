@@ -65,12 +65,12 @@ interpreter::Closure::isProcedureCall() const
     return m_function->isProcedureCall();
 }
 
-int32_t
-interpreter::Closure::getDimension(int32_t which) const
+size_t
+interpreter::Closure::getDimension(size_t which) const
 {
     // ex IntClosure::getDimension
-    int32_t totalDimensions = m_function->getDimension(0);
-    int32_t fixedDimensions = int32_t(m_fixedArgs->size());
+    size_t totalDimensions = m_function->getDimension(0);
+    size_t fixedDimensions = m_fixedArgs->size();
     if (fixedDimensions >= totalDimensions) {
         // All arguments fixed; no way this has any dimensions
         return 0;

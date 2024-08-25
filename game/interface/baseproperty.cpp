@@ -48,7 +48,7 @@ namespace {
         virtual void set(Arguments& args, const afl::data::Value* value);
 
         // CallableValue:
-        virtual int32_t getDimension(int32_t which) const;
+        virtual size_t getDimension(size_t which) const;
         virtual interpreter::Context* makeFirstContext();
 
         // BaseValue:
@@ -164,8 +164,8 @@ BaseArrayProperty::set(Arguments& args, const afl::data::Value* value)
 
 
 // CallableValue:
-int32_t
-BaseArrayProperty::getDimension(int32_t which) const
+size_t
+BaseArrayProperty::getDimension(size_t which) const
 {
     // ex IntBaseArrayProperty::getDimension
     if (which == 0) {

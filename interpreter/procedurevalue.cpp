@@ -23,8 +23,8 @@ interpreter::ProcedureValue::isProcedureCall() const
     return true;
 }
 
-int32_t
-interpreter::ProcedureValue::getDimension(int32_t /*which*/) const
+size_t
+interpreter::ProcedureValue::getDimension(size_t /*which*/) const
 {
     return 0;
 }

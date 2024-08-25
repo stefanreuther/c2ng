@@ -37,8 +37,8 @@ game::interface::ExplosionFunction::set(interpreter::Arguments& args, const afl:
 }
 
 // CallableValue:
-int32_t
-game::interface::ExplosionFunction::getDimension(int32_t /*which*/) const
+size_t
+game::interface::ExplosionFunction::getDimension(size_t /*which*/) const
 {
     return 0;
 }

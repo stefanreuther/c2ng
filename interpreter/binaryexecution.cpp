@@ -13,6 +13,7 @@
 #include "afl/data/stringvalue.hpp"
 #include "afl/data/visitor.hpp"
 #include "afl/string/format.hpp"
+#include "interpreter/arguments.hpp"
 #include "interpreter/binaryoperation.hpp"
 #include "interpreter/callablevalue.hpp"
 #include "interpreter/error.hpp"
@@ -26,6 +27,7 @@ using interpreter::getBooleanValue;
 using interpreter::makeBooleanValue;
 using interpreter::makeFloatValue;
 using interpreter::makeIntegerValue;
+using interpreter::makeSizeValue;
 using interpreter::makeStringValue;
 using interpreter::mustBeScalarValue;
 using interpreter::mustBeStringValue;
@@ -1013,8 +1015,9 @@ namespace {
 
     afl::data::Value* FArrayDim(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
-        if (a == 0 || b == 0)
+        if (a == 0) {
             return 0;
+        }
 
         // Array
         const interpreter::CallableValue* av = dynamic_cast<const interpreter::CallableValue*>(a);
@@ -1023,12 +1026,12 @@ namespace {
         }
 
         // Index
-        int32_t n = mustBeScalarValue(b, Error::ExpectInteger);
-        if (n <= 0 || n > av->getDimension(0)) {
-            throw Error::rangeError();
+        size_t n;
+        if (!interpreter::checkIndexArg(n, b, 1, av->getDimension(0))) {
+            return 0;
+        } else {
+            return makeSizeValue(av->getDimension(n+1));
         }
-
-        return makeIntegerValue(av->getDimension(n));
     }
 
     template<afl::data::Value* (*Func)(const afl::data::Value*, const afl::data::Value*, bool), bool Value>

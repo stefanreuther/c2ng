@@ -67,8 +67,8 @@ game::interface::MissionFunction::set(interpreter::Arguments& args, const afl::d
 }
 
 // CallableValue:
-int32_t
-game::interface::MissionFunction::getDimension(int32_t /*which*/) const
+size_t
+game::interface::MissionFunction::getDimension(size_t /*which*/) const
 {
     return 0;
 }

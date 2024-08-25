@@ -42,7 +42,7 @@ namespace {
                 }
             virtual bool isProcedureCall() const
                 { return false; }
-            virtual int32_t getDimension(int32_t) const
+            virtual size_t getDimension(size_t) const
                 { return 0; }
             virtual interpreter::Context* makeFirstContext()
                 { return 0; }

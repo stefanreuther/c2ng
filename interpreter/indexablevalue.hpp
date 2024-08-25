@@ -33,6 +33,13 @@ namespace interpreter {
         virtual bool isProcedureCall() const;
         virtual void call(Process& proc, afl::data::Segment& args, bool want_result);
 
+        /** Get all elements.
+            Requires that this IndexableValue represents a one-dimensional array.
+            \param [out] out      Result goes here
+            \param [in]  startAt  First index
+            \throw Error if this is not a one-dimensional array, or it is too big */
+        void getAll(afl::data::Segment& out, size_t startAt);
+
      protected:
         /** Reject set().
             Throws an Error::notAssignable().

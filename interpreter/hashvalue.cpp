@@ -141,8 +141,8 @@ interpreter::HashValue::set(Arguments& args, const afl::data::Value* value)
 }
 
 // CallableValue:
-int32_t
-interpreter::HashValue::getDimension(int32_t /*which*/) const
+size_t
+interpreter::HashValue::getDimension(size_t /*which*/) const
 {
     // ex IntHash::getDimension
     return 0;

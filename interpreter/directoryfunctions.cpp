@@ -82,7 +82,7 @@ namespace {
 
         virtual void call(interpreter::Process& proc, afl::data::Segment& args, bool want_result);
         virtual bool isProcedureCall() const;
-        virtual int32_t getDimension(int32_t which) const;
+        virtual size_t getDimension(size_t which) const;
         virtual interpreter::Context* makeFirstContext();
 
         String_t toString(bool readable) const;
@@ -255,7 +255,7 @@ namespace {
         return false;
     }
 
-    int32_t DirectoryCallable::getDimension(int32_t /*which*/) const
+    size_t DirectoryCallable::getDimension(size_t /*which*/) const
     {
         return 0;
     }

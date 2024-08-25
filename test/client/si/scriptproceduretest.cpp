@@ -41,8 +41,8 @@ AFL_TEST("client.si.ScriptProcedure:normal", a)
 
     // Verify basic properties
     a.check("01. isProcedureCall", testee.isProcedureCall());
-    a.checkEqual("02. getDimension", testee.getDimension(0), 0);
-    a.checkEqual("03. getDimension", testee.getDimension(1), 0);
+    a.checkEqual("02. getDimension", testee.getDimension(0), 0U);
+    a.checkEqual("03. getDimension", testee.getDimension(1), 0U);
     AFL_CHECK_THROWS(a("04. makeFirstContext"), testee.makeFirstContext(), interpreter::Error);
     a.checkEqual("05. toString", testee.toString(false).substr(0, 2), "#<");
     a.checkEqual("06. toString", testee.toString(true).substr(0, 2), "#<");
@@ -73,8 +73,8 @@ AFL_TEST("client.si.ScriptProcedure:null", a)
 
     // Verify basic properties
     a.check("01. isProcedureCall", testee.isProcedureCall());
-    a.checkEqual("02. getDimension", testee.getDimension(0), 0);
-    a.checkEqual("03. getDimension", testee.getDimension(1), 0);
+    a.checkEqual("02. getDimension", testee.getDimension(0), 0U);
+    a.checkEqual("03. getDimension", testee.getDimension(1), 0U);
     AFL_CHECK_THROWS(a("04. makeFirstContext"), testee.makeFirstContext(), interpreter::Error);         // "Not iterable"
     a.checkEqual("05. toString", testee.toString(false).substr(0, 2), "#<");
     a.checkEqual("06. toString", testee.toString(true).substr(0, 2), "#<");

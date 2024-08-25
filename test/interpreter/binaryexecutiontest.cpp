@@ -1145,7 +1145,7 @@ AFL_TEST("interpreter.BinaryExecution:biArrayDim", a)
             { throw std::runtime_error("call unexpected"); }
         virtual bool isProcedureCall() const
             { return false; }
-        virtual int32_t getDimension(int32_t which) const
+        virtual size_t getDimension(size_t which) const
             { return which + 2; }
         virtual interpreter::Context* makeFirstContext()
             { throw std::runtime_error("makeFirstContext unexpected"); }

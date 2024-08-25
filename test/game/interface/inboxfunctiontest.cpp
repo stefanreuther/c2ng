@@ -50,8 +50,8 @@ AFL_TEST("game.interface.InboxFunction:basics", a)
     interpreter::test::ValueVerifier verif(testee, a);
     verif.verifyBasics();
     verif.verifyNotSerializable();
-    a.checkEqual("01. getDimension 0", testee.getDimension(0), 1);
-    a.checkEqual("02. getDimension 1", testee.getDimension(1), 4);
+    a.checkEqual("01. getDimension 0", testee.getDimension(0), 1U);
+    a.checkEqual("02. getDimension 1", testee.getDimension(1), 4U);
 
     // Invoke successfully
     {
@@ -128,8 +128,8 @@ AFL_TEST("game.interface.InboxFunction:empty", a)
         game::Session session(tx, fs);
         game::interface::InboxFunction testee(session);
         interpreter::test::ValueVerifier verif(testee, a("empty session"));
-        a.checkEqual("01. getDimension 0", testee.getDimension(0), 1);
-        a.checkEqual("02. getDimension 1", testee.getDimension(1), 0);
+        a.checkEqual("01. getDimension 0", testee.getDimension(0), 1U);
+        a.checkEqual("02. getDimension 1", testee.getDimension(1), 0U);
 
         // Invoke with null
         interpreter::Arguments args(seg, 0, 1);
@@ -147,8 +147,8 @@ AFL_TEST("game.interface.InboxFunction:empty", a)
 
         game::interface::InboxFunction testee(session);
         interpreter::test::ValueVerifier verif(testee, a("empty inbox"));
-        a.checkEqual("11. getDimension 0", testee.getDimension(0), 1);
-        a.checkEqual("12. getDimension 1", testee.getDimension(1), 1);
+        a.checkEqual("11. getDimension 0", testee.getDimension(0), 1U);
+        a.checkEqual("12. getDimension 1", testee.getDimension(1), 1U);
 
         // Invoke with null
         interpreter::Arguments args(seg, 0, 1);

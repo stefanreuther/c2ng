@@ -24,7 +24,7 @@ AFL_TEST("interpreter.SubroutineValue", a)
     a.check("02. toString", testee.toString(false).find("SUB") != String_t::npos);
 
     a.checkEqual("11. getBytecodeObject", &*testee.getBytecodeObject(), &*bco);
-    a.checkEqual("12. getDimension", testee.getDimension(0), 0);
+    a.checkEqual("12. getDimension", testee.getDimension(0), 0U);
     AFL_CHECK_THROWS(a("13. makeFirstContext"), testee.makeFirstContext(), interpreter::Error);
 
     // Cloning

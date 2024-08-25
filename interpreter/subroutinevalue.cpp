@@ -38,8 +38,8 @@ interpreter::SubroutineValue::isProcedureCall() const
     return m_bco->isProcedure();
 }
 
-int32_t
-interpreter::SubroutineValue::getDimension(int32_t /*which*/) const
+size_t
+interpreter::SubroutineValue::getDimension(size_t /*which*/) const
 {
     // ex IntSubroutineValue::getDimension
     return 0;

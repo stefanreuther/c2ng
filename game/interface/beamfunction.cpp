@@ -31,7 +31,7 @@ game::interface::BeamFunction::get(interpreter::Arguments& args)
     // ex int/if/specif.h:IFBeamGet
     int32_t id;
     args.checkArgumentCount(1);
-    if (!interpreter::checkIntegerArg(id, args.getNext(), 1, getDimension(1)-1)) {
+    if (!interpreter::checkIntegerArg(id, args.getNext(), 1, int32_t(getDimension(1)-1))) {
         return 0;
     }
 
@@ -45,14 +45,14 @@ game::interface::BeamFunction::set(interpreter::Arguments& args, const afl::data
 }
 
 // CallableValue:
-int32_t
-game::interface::BeamFunction::getDimension(int32_t which) const
+size_t
+game::interface::BeamFunction::getDimension(size_t which) const
 {
     // ex int/if/specif.h:IFBeamDim
     return (which == 0
             ? 1
             : (m_session.getShipList().get() != 0
-               ? m_session.getShipList()->beams().size()+1
+               ? size_t(m_session.getShipList()->beams().size()+1)
                : 0));
 }
 

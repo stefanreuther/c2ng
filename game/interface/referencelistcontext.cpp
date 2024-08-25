@@ -192,8 +192,8 @@ class game::interface::ReferenceListContext::ObjectArrayValue : public interpret
         }
 
     // CallableValue:
-    virtual int32_t getDimension(int32_t which) const
-        { return (which == 0 ? 1 : int32_t(m_list->list.size())); }
+    virtual size_t getDimension(size_t which) const
+        { return (which == 0 ? 1 : m_list->list.size()); }
     virtual Context* makeFirstContext()
         { return m_list->list.size() != 0 ? new IterableReferenceContext(m_list, m_session, 0) : 0; }
     virtual CallableValue* clone() const

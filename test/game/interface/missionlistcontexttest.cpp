@@ -72,8 +72,8 @@ AFL_TEST("game.interface.MissionListContext:Mission", a)
     verif.verifyNotSerializable();
 
     // Dimension
-    a.checkEqual("21. dim 0", fcn->getDimension(0), 1);
-    a.checkEqual("22. dim 1", fcn->getDimension(1), 2);
+    a.checkEqual("21. dim 0", fcn->getDimension(0), 1U);
+    a.checkEqual("22. dim 1", fcn->getDimension(1), 2U);
 
     // Iteration
     {
@@ -151,8 +151,8 @@ AFL_TEST("game.interface.MissionListContext:Mission:empty", a)
     verif.verifyNotSerializable();
 
     // Dimension
-    a.checkEqual("21. dim 0", fcn->getDimension(0), 1);
-    a.checkEqual("22. dim 1", fcn->getDimension(1), 0);
+    a.checkEqual("21. dim 0", fcn->getDimension(0), 1U);
+    a.checkEqual("22. dim 1", fcn->getDimension(1), 0U);
 
     // Iteration
     {
@@ -240,7 +240,7 @@ AFL_TEST("game.interface.MissionListContext:factory", a)
     std::auto_ptr<Value> val2(ContextVerifier(*ctx, a).getValue("MISSION"));
     IndexableValue* fcn = dynamic_cast<IndexableValue*>(val2.get());
     a.checkNonNull("11. IndexableValue", fcn);
-    a.checkEqual("12. dim 1", fcn->getDimension(1), 0);
+    a.checkEqual("12. dim 1", fcn->getDimension(1), 0U);
 }
 
 // Factory function, arity error

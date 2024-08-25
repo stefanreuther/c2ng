@@ -23,8 +23,8 @@ AFL_TEST("interpreter.HashValue:empty", a)
     interpreter::HashValue testee(afl::data::Hash::create());
 
     // Verify dimensions: this is not an array, so dimensions are 0
-    a.checkEqual("01. getDimension", testee.getDimension(0), 0);
-    a.checkEqual("02. getDimension", testee.getDimension(1), 0);
+    a.checkEqual("01. getDimension", testee.getDimension(0), 0U);
+    a.checkEqual("02. getDimension", testee.getDimension(1), 0U);
 
     // Context: empty, does not create an iterator
     std::auto_ptr<interpreter::Context> p(testee.makeFirstContext());
@@ -80,8 +80,8 @@ AFL_TEST("interpreter.HashValue:unit", a)
     }
 
     // Verify dimensions: this is not an array, so dimensions are 0
-    a.checkEqual("01. getDimension", testee.getDimension(0), 0);
-    a.checkEqual("02. getDimension", testee.getDimension(1), 0);
+    a.checkEqual("01. getDimension", testee.getDimension(0), 0U);
+    a.checkEqual("02. getDimension", testee.getDimension(1), 0U);
 
     // String
     a.check("11. toString", !testee.toString(false).empty());

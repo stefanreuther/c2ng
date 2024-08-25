@@ -32,8 +32,8 @@ AFL_TEST("game.interface.BeamFunction:general", a)
     verif.verifyBasics();
     verif.verifyNotSerializable();
 
-    a.checkEqual("01. getDimension", testee.getDimension(0), 1);
-    a.checkEqual("02. getDimension", testee.getDimension(1), 6);
+    a.checkEqual("01. getDimension", testee.getDimension(0), 1U);
+    a.checkEqual("02. getDimension", testee.getDimension(1), 6U);
 
     // Test successful invocation
     {

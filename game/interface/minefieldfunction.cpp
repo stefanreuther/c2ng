@@ -51,14 +51,14 @@ game::interface::MinefieldFunction::set(interpreter::Arguments& args, const afl:
 }
 
 // CallableValue:
-int32_t
-game::interface::MinefieldFunction::getDimension(int32_t which) const
+size_t
+game::interface::MinefieldFunction::getDimension(size_t which) const
 {
     if (which == 0) {
         return 1;
     } else {
         if (Game* game = m_session.getGame().get()) {
-            return game->viewpointTurn().universe().minefields().size()+1;
+            return size_t(game->viewpointTurn().universe().minefields().size()+1);
         } else {
             return 0;
         }

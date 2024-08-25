@@ -55,8 +55,8 @@ game::interface::NotifyConfirmedFunction::isProcedureCall() const
     return false;
 }
 
-int32_t
-game::interface::NotifyConfirmedFunction::getDimension(int32_t /*which*/) const
+size_t
+game::interface::NotifyConfirmedFunction::getDimension(size_t /*which*/) const
 {
     // ex IntCCNotifyConfirmed::getDimension
     return 0;

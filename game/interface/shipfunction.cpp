@@ -53,15 +53,15 @@ game::interface::ShipFunction::set(interpreter::Arguments& args, const afl::data
 
 
 // CallableValue:
-int32_t
-game::interface::ShipFunction::getDimension(int32_t which) const
+size_t
+game::interface::ShipFunction::getDimension(size_t which) const
 {
     // ex int/if/shipif.h:IFShipDim
     if (which == 0) {
         return 1;
     } else {
         if (Game* game = m_session.getGame().get()) {
-            return game->viewpointTurn().universe().ships().size() + 1;
+            return size_t(game->viewpointTurn().universe().ships().size() + 1);
         } else {
             return 0;
         }

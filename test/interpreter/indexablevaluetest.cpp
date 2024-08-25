@@ -28,7 +28,7 @@ AFL_TEST("interpreter.IndexableValue", a)
         virtual void set(interpreter::Arguments& args, const afl::data::Value* value)
             { rejectSet(args, value); }
 
-        virtual int32_t getDimension(int32_t /*which*/) const
+        virtual size_t getDimension(size_t /*which*/) const
             { return 0; }
         virtual interpreter::Context* makeFirstContext()
             { return 0; }

@@ -982,7 +982,7 @@ AFL_TEST("interpreter.UnaryExecution:unIsProcedure", a)
             { throw std::runtime_error("call"); }
         virtual bool isProcedureCall() const
             { return m_isProc; }
-        virtual int getDimension(int32_t) const
+        virtual size_t getDimension(size_t) const
             { return 0; }
         virtual interpreter::Context* makeFirstContext()
             { throw std::runtime_error("makeFirstContext"); }
@@ -1053,14 +1053,14 @@ AFL_TEST("interpreter.UnaryExecution:unIsArray", a)
     // A mock CallableValue
     class TestCV : public interpreter::CallableValue {
      public:
-        TestCV(int32_t numDims)
+        TestCV(size_t numDims)
             : m_numDims(numDims)
             { }
         virtual void call(interpreter::Process& /*proc*/, afl::data::Segment& /*args*/, bool /*want_result*/)
             { throw std::runtime_error("call"); }
         virtual bool isProcedureCall() const
             { return false; }
-        virtual int getDimension(int32_t n) const
+        virtual size_t getDimension(size_t n) const
             { return n == 0 ? m_numDims : 1; }
         virtual interpreter::Context* makeFirstContext()
             { throw std::runtime_error("makeFirstContext"); }
@@ -1071,7 +1071,7 @@ AFL_TEST("interpreter.UnaryExecution:unIsArray", a)
         virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, interpreter::SaveContext& /*ctx*/) const
             { throw std::runtime_error("store"); }
      private:
-        int32_t m_numDims;
+        size_t m_numDims;
     };
 
     // A real array

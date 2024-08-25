@@ -46,7 +46,7 @@ game::interface::TorpedoFunction::get(interpreter::Arguments& args)
     int32_t id;
     args.checkArgumentCount(1);
 
-    if (!interpreter::checkIntegerArg(id, args.getNext(), 1, getDimension(1)-1)) {
+    if (!interpreter::checkIntegerArg(id, args.getNext(), 1, int32_t(getDimension(1))-1)) {
         return 0;
     }
     return TorpedoContext::create(m_useLauncher, id, m_session);
@@ -59,14 +59,14 @@ game::interface::TorpedoFunction::set(interpreter::Arguments& args, const afl::d
 }
 
 // CallableValue:
-int32_t
-game::interface::TorpedoFunction::getDimension(int32_t which) const
+size_t
+game::interface::TorpedoFunction::getDimension(size_t which) const
 {
     // ex int/if/specif.h:IFTorpedoDim
     return (which == 0
             ? 1
             : (m_session.getShipList().get() != 0
-               ? m_session.getShipList()->launchers().size()+1
+               ? size_t(m_session.getShipList()->launchers().size()+1)
                : 0));
 }
 

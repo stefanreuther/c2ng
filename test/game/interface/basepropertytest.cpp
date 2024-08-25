@@ -234,8 +234,8 @@ AFL_TEST("game.interface.BaseProperty:normal", a)
         AFL_CHECK_THROWS(a("ibpEngineStorage()"),     verif.getNullary(), interpreter::Error);
         AFL_CHECK_THROWS(a("set ibpEngineStorage"),   verif.setUnary(interpreter::makeIntegerValue(9), 1), interpreter::Error);
         AFL_CHECK_THROWS(a("first ibpEngineStorage"), verif.indexable().makeFirstContext(), interpreter::Error);
-        a.checkEqual("ibpEngineStorage dim(0)",       verif.indexable().getDimension(0), 1);
-        a.checkEqual("ibpEngineStorage dim(1)",       verif.indexable().getDimension(1), 10);
+        a.checkEqual("ibpEngineStorage dim(0)",       verif.indexable().getDimension(0), 1U);
+        a.checkEqual("ibpEngineStorage dim(1)",       verif.indexable().getDimension(1), 10U);
     }
 
     // ibpHullStorage
@@ -250,8 +250,8 @@ AFL_TEST("game.interface.BaseProperty:normal", a)
         AFL_CHECK_THROWS(a("ibpHullStorage()"),     verif.getNullary(), interpreter::Error);
         AFL_CHECK_THROWS(a("set ibpHullStorage"),   verif.setUnary(interpreter::makeIntegerValue(9), 1), interpreter::Error);
         AFL_CHECK_THROWS(a("first ibpHullStorage"), verif.indexable().makeFirstContext(), interpreter::Error);
-        a.checkEqual("ibpHullStorage dim(0)",       verif.indexable().getDimension(0), 1);
-        a.checkEqual("ibpHullStorage dim(1)",       verif.indexable().getDimension(1), 100);                  // We have added 1..99
+        a.checkEqual("ibpHullStorage dim(0)",       verif.indexable().getDimension(0), 1U);
+        a.checkEqual("ibpHullStorage dim(1)",       verif.indexable().getDimension(1), 100U);                  // We have added 1..99
     }
 
     // ibpBeamStorage
@@ -265,8 +265,8 @@ AFL_TEST("game.interface.BaseProperty:normal", a)
         AFL_CHECK_THROWS(a("ibpBeamStorage()"),     verif.getNullary(), interpreter::Error);
         AFL_CHECK_THROWS(a("set ibpBeamStorage"),   verif.setUnary(interpreter::makeIntegerValue(9), 1), interpreter::Error);
         AFL_CHECK_THROWS(a("first ibpBeamStorage"), verif.indexable().makeFirstContext(), interpreter::Error);
-        a.checkEqual("ibpBeamStorage dim(0)",       verif.indexable().getDimension(0), 1);
-        a.checkEqual("ibpBeamStorage dim(1)",       verif.indexable().getDimension(1), 11);
+        a.checkEqual("ibpBeamStorage dim(0)",       verif.indexable().getDimension(0), 1U);
+        a.checkEqual("ibpBeamStorage dim(1)",       verif.indexable().getDimension(1), 11U);
     }
 
     // ibpLauncherStorage
@@ -280,8 +280,8 @@ AFL_TEST("game.interface.BaseProperty:normal", a)
         AFL_CHECK_THROWS(a("ibpLauncherStorage()"),     verif.getNullary(), interpreter::Error);
         AFL_CHECK_THROWS(a("set ibpLauncherStorage"),   verif.setUnary(interpreter::makeIntegerValue(9), 1), interpreter::Error);
         AFL_CHECK_THROWS(a("first ibpLauncherStorage"), verif.indexable().makeFirstContext(), interpreter::Error);
-        a.checkEqual("ibpLauncherStorage dim(0)",       verif.indexable().getDimension(0), 1);
-        a.checkEqual("ibpLauncherStorage dim(1)",       verif.indexable().getDimension(1), 11);
+        a.checkEqual("ibpLauncherStorage dim(0)",       verif.indexable().getDimension(0), 1U);
+        a.checkEqual("ibpLauncherStorage dim(1)",       verif.indexable().getDimension(1), 11U);
     }
 
     // ibpAmmoStorage
@@ -296,8 +296,8 @@ AFL_TEST("game.interface.BaseProperty:normal", a)
         AFL_CHECK_THROWS(a("ibpAmmoStorage()"),     verif.getNullary(), interpreter::Error);
         AFL_CHECK_THROWS(a("set ibpAmmoStorage"),   verif.setUnary(interpreter::makeIntegerValue(9), 1), interpreter::Error);
         AFL_CHECK_THROWS(a("first ibpAmmoStorage"), verif.indexable().makeFirstContext(), interpreter::Error);
-        a.checkEqual("ibpAmmoStorage dim(0)",       verif.indexable().getDimension(0), 1);
-        a.checkEqual("ibpAmmoStorage dim(1)",       verif.indexable().getDimension(1), 12);
+        a.checkEqual("ibpAmmoStorage dim(0)",       verif.indexable().getDimension(0), 1U);
+        a.checkEqual("ibpAmmoStorage dim(1)",       verif.indexable().getDimension(1), 12U);
     }
 }
 

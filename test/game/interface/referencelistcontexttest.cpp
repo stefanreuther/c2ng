@@ -511,8 +511,8 @@ AFL_TEST("game.interface.ReferenceListContext:Objects", a)
     interpreter::test::ValueVerifier verif(*ix, a("Objects"));
     verif.verifyBasics();
     verif.verifyNotSerializable();
-    a.checkEqual("11. getDimension 0", ix->getDimension(0), 1);
-    a.checkEqual("12. getDimension 1", ix->getDimension(1), 3);      // 3 elements, starting at 0
+    a.checkEqual("11. getDimension 0", ix->getDimension(0), 1U);
+    a.checkEqual("12. getDimension 1", ix->getDimension(1), 3U);      // 3 elements, starting at 0
 
     // Test iteration
     {

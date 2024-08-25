@@ -27,9 +27,9 @@ AFL_TEST("interpreter.ArrayValue", a)
     interpreter::ArrayValue testee(content);
 
     // Verify dimensions
-    a.checkEqual("01. getDimension", testee.getDimension(0), 2);
-    a.checkEqual("02. getDimension", testee.getDimension(1), 3);
-    a.checkEqual("03. getDimension", testee.getDimension(2), 5);
+    a.checkEqual("01. getDimension", testee.getDimension(0), 2U);
+    a.checkEqual("02. getDimension", testee.getDimension(1), 3U);
+    a.checkEqual("03. getDimension", testee.getDimension(2), 5U);
 
     // Context: not iterable
     AFL_CHECK_THROWS(a("11. makeFirstContext"), testee.makeFirstContext(), interpreter::Error);

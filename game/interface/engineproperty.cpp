@@ -39,7 +39,7 @@ namespace {
             { rejectSet(args, value); }
 
         // CallableValue:
-        virtual int32_t getDimension(int32_t which) const
+        virtual size_t getDimension(size_t which) const
             { return which==0 ? 1 : m_engine.MAX_WARP+1; }
         virtual interpreter::Context* makeFirstContext()
             { return rejectFirstContext(); }

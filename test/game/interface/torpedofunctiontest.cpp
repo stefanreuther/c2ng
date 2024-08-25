@@ -46,8 +46,8 @@ AFL_TEST("game.interface.TorpedoFunction:basics", a)
     launVerif.verifyBasics();
     launVerif.verifyNotSerializable();
 
-    a.checkEqual("01. getDimension 0", torpFunc.getDimension(0), 1);
-    a.checkEqual("02. getDimension 1", torpFunc.getDimension(1), 6);
+    a.checkEqual("01. getDimension 0", torpFunc.getDimension(0), 1U);
+    a.checkEqual("02. getDimension 1", torpFunc.getDimension(1), 6U);
 
     // Test successful invocation
     {

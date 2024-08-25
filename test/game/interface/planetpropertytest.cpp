@@ -238,8 +238,8 @@ AFL_TEST("game.interface.PlanetProperty:full", a)
         interpreter::test::ValueVerifier verif(*ix, a("ippMessages"));
         verif.verifyBasics();
         verif.verifyNotSerializable();
-        a.checkEqual("ippMessages: dim 0", ix->getDimension(0), 1);
-        a.checkEqual("ippMessages: dim 1", ix->getDimension(1), 3);   // 2 messages
+        a.checkEqual("ippMessages: dim 0", ix->getDimension(0), 1U);
+        a.checkEqual("ippMessages: dim 1", ix->getDimension(1), 3U);   // 2 messages
 
         // Quick test that messages can be retrieved
         std::auto_ptr<interpreter::Context> ctx(ix->makeFirstContext());
@@ -265,7 +265,7 @@ AFL_TEST("game.interface.PlanetProperty:full", a)
         interpreter::test::ValueVerifier verif(*ix, a("ippScore"));
         verif.verifyBasics();
         verif.verifyNotSerializable();
-        a.checkEqual("ippScore: dim 0", ix->getDimension(0), 0);
+        a.checkEqual("ippScore: dim 0", ix->getDimension(0), 0U);
         AFL_CHECK_THROWS(a("ippScore: makeFirstContext"), ix->makeFirstContext(), interpreter::Error);
 
         // Retrieve existing score value
@@ -516,7 +516,7 @@ AFL_TEST("game.interface.PlanetProperty:empty", a)
         interpreter::test::ValueVerifier verif(*ix, a("ippScore"));
         verif.verifyBasics();
         verif.verifyNotSerializable();
-        a.checkEqual("ippScore: dim", ix->getDimension(0), 0);
+        a.checkEqual("ippScore: dim", ix->getDimension(0), 0U);
         AFL_CHECK_THROWS(a("ippScore: makeFirstContext"), ix->makeFirstContext(), interpreter::Error);
 
         // Score is null

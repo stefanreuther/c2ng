@@ -44,8 +44,8 @@ AFL_TEST("game.interface.EngineProperty:get", a)
     a.checkNonNull("21. iepFuelFactor", iv);
 
     // - self-description
-    a.checkEqual("31. iepFuelFactor dim(0)",   iv->getDimension(0), 1);
-    a.checkEqual("32. iepFuelFactor dim(1)",   iv->getDimension(1), e.MAX_WARP+1);
+    a.checkEqual("31. iepFuelFactor dim(0)",   iv->getDimension(0), 1U);
+    a.checkEqual("32. iepFuelFactor dim(1)",   iv->getDimension(1), size_t(e.MAX_WARP+1));
     a.checkEqual("33. iepFuelFactor toString", iv->toString(false), "#<array>");
 
     // - not iterable, not serializable

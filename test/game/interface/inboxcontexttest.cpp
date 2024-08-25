@@ -102,7 +102,7 @@ AFL_TEST("game.interface.InboxContext:write", a)
     interpreter::CallableValue* cv = dynamic_cast<interpreter::CallableValue*>(write.get());
     a.checkNonNull("11. CallableValue", cv);
     a.check("12. isProcedureCall", cv->isProcedureCall());
-    a.checkEqual("13. getDimension", cv->getDimension(0), 0);
+    a.checkEqual("13. getDimension", cv->getDimension(0), 0U);
     AFL_CHECK_THROWS(a("14. makeFirstContext"), cv->makeFirstContext(), interpreter::Error);
     a.checkDifferent("15. toString", cv->toString(false), "");
 
@@ -153,8 +153,8 @@ AFL_TEST("game.interface.InboxContext:text", a)
     interpreter::IndexableValue* iv = dynamic_cast<interpreter::IndexableValue*>(text.get());
     a.checkNonNull("11. IndexableValue", iv);
     a.check("12. isProcedureCall", !iv->isProcedureCall());
-    a.checkEqual("13. getDimension 0", iv->getDimension(0), 1);
-    a.checkEqual("14. getDimension 1", iv->getDimension(1), 3);    /* 2 lines */
+    a.checkEqual("13. getDimension 0", iv->getDimension(0), 1U);
+    a.checkEqual("14. getDimension 1", iv->getDimension(1), 3U);    /* 2 lines */
     AFL_CHECK_THROWS(a("15. makeFirstContext"), iv->makeFirstContext(), interpreter::Error);
     a.checkDifferent("16. toString", iv->toString(false), "");
 
