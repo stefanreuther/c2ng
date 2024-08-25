@@ -91,8 +91,7 @@ namespace game { namespace vcr { namespace flak {
         Changes_t setCameraRaiseTarget(int t);
 
         /** Set raise speed.
-            \param n speed (units per tick)
-            \return changes */
+            \param n speed (units per tick) */
         void setCameraRaiseSpeed(int n);
 
         /** Get camera azimuth (angle).

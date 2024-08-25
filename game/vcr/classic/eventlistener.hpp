@@ -151,7 +151,6 @@ namespace game { namespace vcr { namespace classic {
 
         /** Update fighter after discontinuity.
             \param side Side
-            \param side Owning side
             \param track Fighter track
             \param position New position [FIXME: range]
             \param distance Distance to base unit
