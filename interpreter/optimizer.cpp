@@ -14,6 +14,7 @@
 #include "afl/data/value.hpp"
 #include "afl/string/char.hpp"
 #include "interpreter/bytecodeobject.hpp"
+#include "interpreter/error.hpp"
 #include "interpreter/fusion.hpp"
 #include "interpreter/opcode.hpp"
 #include "interpreter/unaryexecution.hpp"
@@ -955,7 +956,7 @@ OptimizerState::doCompareNC(PC_t pc)
             /* accept if valid */
             String_t v = sv->getValue();
             for (String_t::size_type i = 0; i < v.size(); ++i)
-                if (afl::string::charIsAlphanumeric(v[i]))
+                if (afl::string::charIsUpper(v[i]) || afl::string::charIsLower(v[i]))
                     return false;
         } else {
             /* reject */
@@ -1042,7 +1043,8 @@ OptimizerState::doTailMerge(PC_t pc)
 
     // Determine common instructions
     while (source > 0 && m_bco(source-1).major != Opcode::maJump && m_bco(source-1) == m_bco(target-1)) {
-        clearInstruction(source);
+        // No need to clear instructions. Dead-code elimination will remove those!
+        // Bonus: this means failure to execute insertLabel() will not damage the code.
         --source;
         --target;
     }
@@ -1057,8 +1059,14 @@ OptimizerState::doTailMerge(PC_t pc)
     if (m_bco(target-1).isLabel()) {
         label = m_bco(target-1).arg;
     } else {
-        label = m_bco.makeLabel();
-        m_bco.insertLabel(label, target);
+        try {
+            // This can fail if BytecodeObject cannot create more labels
+            label = m_bco.makeLabel();
+            m_bco.insertLabel(label, target);
+        }
+        catch (interpreter::Error& e) {
+            return false;
+        }
     }
     m_bco(source).major = Opcode::maJump;
     m_bco(source).minor = Opcode::jAlways + Opcode::jSymbolic;

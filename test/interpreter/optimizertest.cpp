@@ -2639,16 +2639,16 @@ AFL_TEST("interpreter.Optimizer:compare-nc:mismatch", a)
 
     // Note that push+binary gets fused into fusedbinary (pushlit(b)).
     a.checkEqual("01. getNumInstructions", s.bco.getNumInstructions(), 11U);
-    a.check("02. insn 0", isInstruction(s.bco(0),  Opcode::maFusedBinary, Opcode::sLiteral));
-    a.check("03. insn 1", isInstruction(s.bco(1),  Opcode::maBinary,      interpreter::biCompareGE_NC, 0));
-    a.check("04. insn 2", isInstruction(s.bco(2),  Opcode::maSpecial,     Opcode::miSpecialPrint, 0));
-    a.check("05. insn 3", isInstruction(s.bco(3),  Opcode::maFusedBinary, Opcode::sLiteral));
-    a.check("06. insn 4", isInstruction(s.bco(4),  Opcode::maBinary,      interpreter::biCompareGT_NC, 0));
-    a.check("07. insn 5", isInstruction(s.bco(5),  Opcode::maSpecial,     Opcode::miSpecialPrint, 0));
-    a.check("08. insn 6", isInstruction(s.bco(6),  Opcode::maFusedBinary, Opcode::sLiteral));
-    a.check("09. insn 7", isInstruction(s.bco(7),  Opcode::maBinary,      interpreter::biCompareLE_NC, 0));
-    a.check("10. insn 8", isInstruction(s.bco(8),  Opcode::maSpecial,     Opcode::miSpecialPrint, 0));
-    a.check("11. insn 9", isInstruction(s.bco(9),  Opcode::maFusedBinary, Opcode::sLiteral));
+    a.check("02. insn 0",  isInstruction(s.bco(0),  Opcode::maFusedBinary, Opcode::sLiteral));
+    a.check("03. insn 1",  isInstruction(s.bco(1),  Opcode::maBinary,      interpreter::biCompareGE_NC, 0));
+    a.check("04. insn 2",  isInstruction(s.bco(2),  Opcode::maSpecial,     Opcode::miSpecialPrint, 0));
+    a.check("05. insn 3",  isInstruction(s.bco(3),  Opcode::maFusedBinary, Opcode::sLiteral));
+    a.check("06. insn 4",  isInstruction(s.bco(4),  Opcode::maBinary,      interpreter::biCompareGT_NC, 0));
+    a.check("07. insn 5",  isInstruction(s.bco(5),  Opcode::maSpecial,     Opcode::miSpecialPrint, 0));
+    a.check("08. insn 6",  isInstruction(s.bco(6),  Opcode::maFusedBinary, Opcode::sLiteral));
+    a.check("09. insn 7",  isInstruction(s.bco(7),  Opcode::maBinary,      interpreter::biCompareLE_NC, 0));
+    a.check("10. insn 8",  isInstruction(s.bco(8),  Opcode::maSpecial,     Opcode::miSpecialPrint, 0));
+    a.check("11. insn 9",  isInstruction(s.bco(9),  Opcode::maFusedBinary, Opcode::sLiteral));
     a.check("12. insn 10", isInstruction(s.bco(10), Opcode::maBinary,      interpreter::biCompareLT_NC, 0));
 }
 
@@ -2661,6 +2661,7 @@ AFL_TEST("interpreter.Optimizer:compare-nc:match:2", a)
     afl::data::StringValue dotSV(".");
     afl::data::StringValue bracketSV("[");
     afl::data::StringValue braceSV("}");
+    afl::data::StringValue numSV("9");
     afl::data::FloatValue oneFV(1.0);
     afl::data::IntegerValue bigIV(999999);
 
@@ -2689,6 +2690,10 @@ AFL_TEST("interpreter.Optimizer:compare-nc:match:2", a)
     s.bco.addInstruction(Opcode::maBinary,  interpreter::biCompareNE_NC, 0);
     s.bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialPrint, 0);
 
+    s.bco.addPushLiteral(&numSV);
+    s.bco.addInstruction(Opcode::maBinary,  interpreter::biCompareNE_NC, 0);
+    s.bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialPrint, 0);
+
     s.bco.addPushLiteral(&bracketSV);
     s.bco.addInstruction(Opcode::maBinary,  interpreter::biCompareNE_NC, 0);
     s.bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialPrint, 0);
@@ -2698,8 +2703,8 @@ AFL_TEST("interpreter.Optimizer:compare-nc:match:2", a)
 
     optimize(s.world, s.bco, 2);
 
-    a.checkEqual("01. getNumInstructions", s.bco.getNumInstructions(), 23U);
-    for (size_t i = 0; i < 8; ++i) {
+    a.checkEqual("01. getNumInstructions", s.bco.getNumInstructions(), 26U);
+    for (size_t i = 0; i < 9; ++i) {
         a.check("02", isInstruction(s.bco(1 + 3*i), Opcode::maBinary, interpreter::biCompareNE, 0));
     }
 }
@@ -2920,6 +2925,37 @@ AFL_TEST("interpreter.Optimizer:tail-merge", a)
     a.check("16. insn 5", isInstruction(s.bco(5), Opcode::maPush, Opcode::sNamedVariable));
     a.check("17. insn 6", isInstruction(s.bco(6), Opcode::maJump, Opcode::jSymbolic));
     a.check("18. insn 7", isInstruction(s.bco(7), Opcode::maUnary, interpreter::unInc));
+}
+
+/** Test doTailMerge(), failure case. */
+AFL_TEST("interpreter.Optimizer:tail-merge:fail", a)
+{
+    // Verify pattern: 'if (a, b+1, c+1)'
+    Stuff s;
+    s.bco.setNumLabels(0xFFFF);
+    s.bco.addInstruction(Opcode::maPush, Opcode::sNamedVariable, s.bco.addName("A"));
+    s.bco.addJump(Opcode::jIfFalse + Opcode::jPopAlways, 9000);
+    s.bco.addInstruction(Opcode::maPush, Opcode::sInteger, 10);
+    s.bco.addInstruction(Opcode::maPop,  Opcode::sNamedVariable, s.bco.addName("A"));
+    s.bco.addJump(Opcode::jAlways, 7000);
+    s.bco.addLabel(9000);
+    s.bco.addInstruction(Opcode::maPush, Opcode::sInteger, 20);
+    s.bco.addInstruction(Opcode::maPop,  Opcode::sNamedVariable, s.bco.addName("A"));
+    s.bco.addLabel(7000);
+
+    optimize(s.world, s.bco, 2);
+
+    a.checkEqual("01. getNumInstructions", s.bco.getNumInstructions(), 9U);
+
+    a.check("11. insn 0", isInstruction(s.bco(0), Opcode::maPush, Opcode::sNamedVariable));
+    a.check("12. insn 1", isInstruction(s.bco(1), Opcode::maJump, Opcode::jSymbolic + Opcode::jIfFalse + Opcode::jPopAlways, 9000));
+    a.check("13. insn 2", isInstruction(s.bco(2), Opcode::maPush, Opcode::sInteger, 10));
+    a.check("14. insn 3", isInstruction(s.bco(3), Opcode::maPop,  Opcode::sNamedVariable));
+    a.check("15. insn 4", isInstruction(s.bco(4), Opcode::maJump, Opcode::jSymbolic + Opcode::jAlways, 7000));
+    a.check("16. insn 5", isInstruction(s.bco(5), Opcode::maJump, Opcode::jSymbolic));
+    a.check("17. insn 6", isInstruction(s.bco(6), Opcode::maPush, Opcode::sInteger, 20));
+    a.check("18. insn 7", isInstruction(s.bco(7), Opcode::maPop,  Opcode::sNamedVariable));
+    a.check("19. insn 8", isInstruction(s.bco(8), Opcode::maJump, Opcode::jSymbolic));
 }
 
 /** Test failure to optimize because of label inconsistencies:
