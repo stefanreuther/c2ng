@@ -459,6 +459,7 @@ server::host::HostGame::getTools(int32_t gameId, std::vector<server::interface::
     // Operate
     afl::data::StringList_t tools;
     game.tools().getAll(tools);
+    std::sort(tools.begin(), tools.end());
     for (size_t i = 0, n = tools.size(); i < n; ++i) {
         // FIXME: this DB-to-Info conversion is duplicated in HostTool::getAll()
         const String_t& id = tools[i];
