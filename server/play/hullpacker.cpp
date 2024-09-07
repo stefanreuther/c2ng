@@ -42,8 +42,10 @@ server::play::HullPacker::buildValue() const
     addValue(*hv, ctx, "ENGINE.COUNT", "ENGINE.COUNT");
     addValue(*hv, ctx, "FIGHTER.BAYS", "FIGHTER.BAYS");
     addValue(*hv, ctx, "IMAGE", "IMAGE");
+    addValue(*hv, ctx, "IMAGE$", "IMAGE$");
     addValue(*hv, ctx, "MASS", "MASS");
     addValue(*hv, ctx, "NAME", "NAME");
+    addValue(*hv, ctx, "NAME.SHORT", "NAME.SHORT");
     addValue(*hv, ctx, "TECH", "TECH");
     addValue(*hv, ctx, "TORP.LMAX", "TORP.LMAX");
 

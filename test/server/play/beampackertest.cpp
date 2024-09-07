@@ -20,6 +20,8 @@ AFL_TEST("server.play.BeamPacker:basics", a)
     afl::base::Ref<game::Root> r = game::test::makeRoot(game::HostVersion());
     afl::base::Ref<game::spec::ShipList> sl = *new game::spec::ShipList();
     game::test::initStandardBeams(*sl);
+    sl->beams().get(1)->setShortName("Las");
+    sl->beams().get(10)->setShortName("HPh");
 
     // Testee
     server::play::BeamPacker testee(*sl, *r, 0);
@@ -36,6 +38,7 @@ AFL_TEST("server.play.BeamPacker:basics", a)
 
     // Verify all attributes of #1
     a.checkEqual("21", ap[1]("NAME").toString(), "Laser");
+    a.checkEqual("21a", ap[1]("NAME.SHORT").toString(), "Las");
     a.checkEqual("22", ap[1]("COST")("MC").toInteger(), 1);
     a.checkEqual("23", ap[1]("COST")("T").toInteger(), 1);
     a.checkEqual("24", ap[1]("COST")("D").toInteger(), 0);
@@ -47,6 +50,7 @@ AFL_TEST("server.play.BeamPacker:basics", a)
 
     // Verify all attributes of #10
     a.checkEqual("31", ap[10]("NAME").toString(), "Heavy Phaser");
+    a.checkEqual("31a", ap[10]("NAME.SHORT").toString(), "HPh");
     a.checkEqual("32", ap[10]("COST")("MC").toInteger(), 54);
     a.checkEqual("33", ap[10]("COST")("T").toInteger(), 1);
     a.checkEqual("34", ap[10]("COST")("D").toInteger(), 12);

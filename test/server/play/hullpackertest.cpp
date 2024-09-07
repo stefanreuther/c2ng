@@ -49,12 +49,15 @@ AFL_TEST("server.play.HullPacker", a)
     // Define a hull
     game::spec::Hull* h = sl->hulls().create(HULL_NR);
     h->setName("BEETLE");
+    h->setShortName("Bee");
     h->setTechLevel(2);
     h->setMaxBeams(3);
     h->setNumEngines(1);
     h->setMaxCargo(120);
     h->changeHullFunction(1, game::PlayerSet_t(4), game::PlayerSet_t(), true);
     h->changeHullFunction(9, game::PlayerSet_t(2), game::PlayerSet_t(), false);
+    h->setInternalPictureNumber(5);
+    h->setExternalPictureNumber(6);
 
     // Verify constructor
     server::play::HullPacker testee(*sl, *r, HULL_NR);
@@ -67,6 +70,9 @@ AFL_TEST("server.play.HullPacker", a)
     a.checkEqual("12", ap("BEAM.MAX").toInteger(), 3);
     a.checkEqual("13", ap("ENGINE.COUNT").toInteger(), 1);
     a.checkEqual("14", ap("CARGO.MAX").toInteger(), 120);
+    a.checkEqual("15", ap("NAME.SHORT").toString(), "Bee");
+    a.checkEqual("16", ap("IMAGE").toInteger(), 5);
+    a.checkEqual("17", ap("IMAGE$").toInteger(), 6);
 
     // Note that the order in which these two are output is not currently contractual
     a.checkEqual("21", ap("FUNC").getArraySize(), 2U);

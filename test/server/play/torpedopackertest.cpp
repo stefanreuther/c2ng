@@ -20,6 +20,8 @@ AFL_TEST("server.play.TorpedoPacker:basics", a)
     afl::base::Ref<game::Root> r = game::test::makeRoot(game::HostVersion());
     afl::base::Ref<game::spec::ShipList> sl = *new game::spec::ShipList();
     game::test::initStandardTorpedoes(*sl);
+    sl->launchers().get(1)->setShortName("Mk1");
+    sl->launchers().get(10)->setShortName("Mk8");
 
     // Testee
     server::play::TorpedoPacker testee(*sl, *r, 0);
@@ -35,6 +37,7 @@ AFL_TEST("server.play.TorpedoPacker:basics", a)
     a.check("14. result", !ap[10].isNull());
 
     a.checkEqual("21", ap[1]("NAME").toString(), "Mark 1 Photon");
+    a.checkEqual("21a", ap[1]("NAME.SHORT").toString(), "Mk1");
     a.checkEqual("22", ap[1]("TORPCOST")("MC").toInteger(), 1);
     a.checkEqual("23", ap[1]("TORPCOST")("T").toInteger(), 1);
     a.checkEqual("24", ap[1]("TORPCOST")("D").toInteger(), 1);
@@ -51,6 +54,7 @@ AFL_TEST("server.play.TorpedoPacker:basics", a)
     a.checkEqual("35", ap[1]("MASS").toInteger(), 2);
 
     a.checkEqual("41", ap[10]("NAME").toString(), "Mark 8 Photon");
+    a.checkEqual("41a", ap[10]("NAME.SHORT").toString(), "Mk8");
     a.checkEqual("42", ap[10]("TORPCOST")("MC").toInteger(), 54);
     a.checkEqual("43", ap[10]("TORPCOST")("T").toInteger(), 1);
     a.checkEqual("44", ap[10]("TORPCOST")("D").toInteger(), 1);

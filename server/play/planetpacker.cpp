@@ -1,5 +1,6 @@
 /**
   *  \file server/play/planetpacker.cpp
+  *  \brief Class server::play::PlanetPacker
   */
 
 #include <stdexcept>
@@ -43,13 +44,16 @@ server::play::PlanetPacker::buildValue() const
     addValue(*hv, ctx, "DAMAGE", "DAMAGE");
     addValue(*hv, ctx, "DEFENSE", "DEFENSE");
     addValue(*hv, ctx, "DEFENSE.BASE", "DEFENSE.BASE");
+    addValue(*hv, ctx, "DEFENSE.BASE.SPEED", "DEFENSE.BASE.SPEED");
     addValue(*hv, ctx, "DEFENSE.BASE.WANT", "DEFENSE.BASE.WANT");
+    addValue(*hv, ctx, "DEFENSE.SPEED", "DEFENSE.SPEED");
     addValue(*hv, ctx, "DEFENSE.WANT", "DEFENSE.WANT");
     addValue(*hv, ctx, "DENSITY.D", "DENSITY.D");
     addValue(*hv, ctx, "DENSITY.M", "DENSITY.M");
     addValue(*hv, ctx, "DENSITY.N", "DENSITY.N");
     addValue(*hv, ctx, "DENSITY.T", "DENSITY.T");
     addValue(*hv, ctx, "FACTORIES", "FACTORIES");
+    addValue(*hv, ctx, "FACTORIES.SPEED", "FACTORIES.SPEED");
     addValue(*hv, ctx, "FACTORIES.WANT", "FACTORIES.WANT");
     addValue(*hv, ctx, "FCODE", "FCODE");
     addValue(*hv, ctx, "FIGHTERS", "FIGHTERS");
@@ -60,6 +64,7 @@ server::play::PlanetPacker::buildValue() const
     addValue(*hv, ctx, "INDUSTRY$", "INDUSTRY");
     addValue(*hv, ctx, "LEVEL", "LEVEL");
     addValue(*hv, ctx, "MINES", "MINES");
+    addValue(*hv, ctx, "MINES.SPEED", "MINES.SPEED");
     addValue(*hv, ctx, "MINES.WANT", "MINES.WANT");
     addValue(*hv, ctx, "MISSION$", "MISSION");
     addValue(*hv, ctx, "NATIVES", "NATIVES");

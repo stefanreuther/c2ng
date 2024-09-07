@@ -39,6 +39,7 @@ server::play::TorpedoPacker::buildValue() const
             addValue(*hv, tctx, "DAMAGE", "DAMAGE");
             addValue(*hv, tctx, "KILL", "KILL");
             addValue(*hv, tctx, "NAME", "NAME");
+            addValue(*hv, tctx, "NAME.SHORT", "NAME.SHORT");
             addValue(*hv, tctx, "TECH", "TECH");
             addValue(*hv, lctx, "MASS", "MASS");
 

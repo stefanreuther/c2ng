@@ -1,5 +1,6 @@
 /**
   *  \file server/play/playerpacker.cpp
+  *  \brief Class server::play::PlayerPacker
   */
 
 #include "server/play/playerpacker.hpp"
@@ -34,6 +35,7 @@ server::play::PlayerPacker::buildValue() const
             afl::base::Ref<afl::data::Hash> hv(afl::data::Hash::create());
             game::interface::PlayerContext ctx(i, g, r, m_session.translator());
             addValue(*hv, ctx, "BASES", "BASES");
+            addValue(*hv, ctx, "PBPS", "PBPS");
             addValue(*hv, ctx, "PLANETS", "PLANETS");
             addValue(*hv, ctx, "RACE", "RACE");
             addValue(*hv, ctx, "RACE$", "RACE$");
@@ -45,6 +47,7 @@ server::play::PlayerPacker::buildValue() const
             addValue(*hv, ctx, "SHIPS", "SHIPS");
             addValue(*hv, ctx, "SHIPS.CAPITAL", "SHIPS.CAPITAL");
             addValue(*hv, ctx, "SHIPS.FREIGHTERS", "SHIPS.FREIGHTERS");
+            addValue(*hv, ctx, "TEAM", "TEAM");
             vv->pushBackNew(new afl::data::HashValue(hv));
         } else {
             vv->pushBackNew(0);

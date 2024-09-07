@@ -38,6 +38,7 @@ server::play::BeamPacker::buildValue() const
             addValue(*hv, ctx, "KILL", "KILL");
             addValue(*hv, ctx, "MASS", "MASS");
             addValue(*hv, ctx, "NAME", "NAME");
+            addValue(*hv, ctx, "NAME.SHORT", "NAME.SHORT");
             addValue(*hv, ctx, "TECH", "TECH");
 
             vv->pushBackNew(new afl::data::HashValue(hv));

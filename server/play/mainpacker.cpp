@@ -1,5 +1,6 @@
 /**
   *  \file server/play/mainpacker.cpp
+  *  \brief Class server::play::MainPacker
   */
 
 #include "server/play/mainpacker.hpp"
@@ -36,11 +37,13 @@ server::play::MainPacker::buildValue() const
     addValue(*hv, ctx, "MY.RACE.MISSION", "MY.RACE.MISSION");
     addValue(*hv, ctx, "MY.VCRS", "MY.VCRS");
     addValue(*hv, ctx, "SYSTEM.GAMETYPE$", "SYSTEM.GAMETYPE");
+    addValue(*hv, ctx, "SYSTEM.LOCAL", "SYSTEM.LOCAL");
     addValue(*hv, ctx, "SYSTEM.HOST", "SYSTEM.HOST");
     addValue(*hv, ctx, "SYSTEM.HOST$", "SYSTEM.HOST$");
     addValue(*hv, ctx, "SYSTEM.HOSTVERSION", "SYSTEM.HOSTVERSION");
     addValue(*hv, ctx, "SYSTEM.REGSTR1", "SYSTEM.REGSTR1");
     addValue(*hv, ctx, "SYSTEM.REGSTR2", "SYSTEM.REGSTR2");
+    addValue(*hv, ctx, "SYSTEM.REMOTE", "SYSTEM.REMOTE");
     addValue(*hv, ctx, "SYSTEM.VERSION", "SYSTEM.VERSION");
     addValue(*hv, ctx, "SYSTEM.VERSION$", "SYSTEM.VERSION$");
     addValue(*hv, ctx, "TURN", "TURN");

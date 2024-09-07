@@ -48,6 +48,7 @@ server::play::EnginePacker::buildValue() const
 
             // Remainder
             addValue(*hv, ctx, "NAME", "NAME");
+            addValue(*hv, ctx, "NAME.SHORT", "NAME.SHORT");
             addValue(*hv, ctx, "SPEED$", "SPEED");
             addValue(*hv, ctx, "TECH", "TECH");
             vv->pushBackNew(new afl::data::HashValue(hv));

@@ -1,5 +1,6 @@
 /**
   *  \file server/play/planetcommandhandler.cpp
+  *  \brief Class server::play::PlanetCommandHandler
   */
 
 #include <stdexcept>
@@ -19,6 +20,23 @@
 #include "server/play/shippacker.hpp"
 
 namespace gi = game::interface;
+
+namespace {
+    void handleSetBuildGoals(game::map::Planet& pl, interpreter::Arguments& args)
+    {
+        args.checkArgumentCount(game::NUM_PLANETARY_BUILDING_TYPES * 2);
+        for (size_t i = 0; i < game::NUM_PLANETARY_BUILDING_TYPES; ++i) {
+            game::PlanetaryBuilding type = game::PlanetaryBuilding(i);
+            int32_t tmp;
+            if (interpreter::checkIntegerArg(tmp, args.getNext(), 0, game::MAX_AUTOBUILD_GOAL)) {
+                pl.setAutobuildGoal(type, tmp);
+            }
+            if (interpreter::checkIntegerArg(tmp, args.getNext(), 0, game::MAX_AUTOBUILD_SPEED)) {
+                pl.setAutobuildSpeed(type, tmp);
+            }
+        }
+    }
+}
 
 server::play::PlanetCommandHandler::PlanetCommandHandler(game::Session& session, game::Id_t id)
     : m_session(session),
@@ -41,7 +59,6 @@ server::play::PlanetCommandHandler::processCommand(const String_t& cmd, interpre
     // Temporary process
     interpreter::Process process(m_session.world(), "PlanetCommandHandler", 0);
 
-    // Missing: mark, unmark
     if (cmd == "setcomment") {
         gi::callPlanetMethod(*pPlanet, gi::ipmSetComment, args, process, m_session, g.mapConfiguration(), turn, root);
         objs.addNew(new PlanetPacker(m_session, m_id));
@@ -127,6 +144,9 @@ server::play::PlanetCommandHandler::processCommand(const String_t& cmd, interpre
                 objs.addNew(new ShipPacker(m_session, shipId));
             }
         }
+    } else if (cmd == "setbuildgoals") {
+        handleSetBuildGoals(*pPlanet, args);
+        objs.addNew(new PlanetPacker(m_session, m_id));
     } else {
         throw std::runtime_error(UNKNOWN_COMMAND);
     }

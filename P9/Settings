@@ -1804,7 +1804,11 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/util/translatortest.cpp \
+FILES_testsuite = test/server/play/planetcommandhandlertest.cpp \
+    test/server/play/planetpackertest.cpp \
+    test/server/play/shipxypackertest.cpp \
+    test/server/play/mainpackertest.cpp \
+    test/server/play/playerpackertest.cpp test/util/translatortest.cpp \
     test/server/play/imperialstatspackertest.cpp \
     test/server/talk/notificationthreadtest.cpp \
     test/server/talk/notifiertest.cpp test/server/test/mailmocktest.cpp \

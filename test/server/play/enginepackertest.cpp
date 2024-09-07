@@ -18,6 +18,8 @@ AFL_TEST("server.play.EnginePacker:basics", a)
     afl::base::Ref<game::spec::ShipList> sl = *new game::spec::ShipList();
     game::test::addTranswarp(*sl);
     game::test::addNovaDrive(*sl);
+    sl->engines().get(5)->setShortName("Nova");
+    sl->engines().get(9)->setShortName("TWD");
 
     // Testee
     server::play::EnginePacker testee(*sl, 0);
@@ -33,9 +35,11 @@ AFL_TEST("server.play.EnginePacker:basics", a)
 
     // Verify all attributes of #5
     a.checkEqual("21", ap[5]("NAME").toString(), "Nova Drive 5");
+    a.checkEqual("21a", ap[5]("NAME.SHORT").toString(), "Nova");
 
     // Verify all attributes of #9
     a.checkEqual("31", ap[9]("NAME").toString(), "Transwarp Drive");
+    a.checkEqual("31a", ap[9]("NAME.SHORT").toString(), "TWD");
     a.checkEqual("32", ap[9]("COST")("MC").toInteger(), 300);
     a.checkEqual("33", ap[9]("COST")("T").toInteger(), 3);
     a.checkEqual("34", ap[9]("COST")("D").toInteger(), 16);
