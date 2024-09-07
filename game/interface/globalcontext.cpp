@@ -70,12 +70,12 @@ namespace {
         { "SYSTEM.HOST$",          game::interface::igpSystemHostCode,    GlobalPropertyDomain,   interpreter::thInt },
         { "SYSTEM.HOSTVERSION",    game::interface::igpSystemHostVersion, GlobalPropertyDomain,   interpreter::thInt },
         { "SYSTEM.LANGUAGE",       game::interface::igpSystemLanguage,    GlobalPropertyDomain,   interpreter::thString },
-        { "SYSTEM.LOCAL",          game::interface::igpFileFormatLocal,   GlobalPropertyDomain,   interpreter::thInt },
+        { "SYSTEM.LOCAL",          game::interface::igpFileFormatLocal,   GlobalPropertyDomain,   interpreter::thString },
         { "SYSTEM.PROGRAM",        game::interface::igpSystemProgram,     GlobalPropertyDomain,   interpreter::thString },
         { "SYSTEM.RANDOMSEED",     game::interface::igpRandomSeed,        GlobalPropertyDomain,   interpreter::thInt },
         { "SYSTEM.REGSTR1",        game::interface::igpRegStr1,           GlobalPropertyDomain,   interpreter::thString },
         { "SYSTEM.REGSTR2",        game::interface::igpRegStr2,           GlobalPropertyDomain,   interpreter::thString },
-        { "SYSTEM.REMOTE",         game::interface::igpFileFormatRemote,  GlobalPropertyDomain,   interpreter::thInt },
+        { "SYSTEM.REMOTE",         game::interface::igpFileFormatRemote,  GlobalPropertyDomain,   interpreter::thString },
         { "SYSTEM.ROOTDIRECTORY",  game::interface::igpRootDirectory,     GlobalPropertyDomain,   interpreter::thString },
         /* @q System.Sim:Bool (Global Property)
            True if the combat simulator is currently in use, otherwise false.

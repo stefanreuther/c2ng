@@ -9,7 +9,6 @@
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 #include "afl/test/testrunner.hpp"
-#include "game/session.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/process.hpp"
 #include "interpreter/simplefunction.hpp"
@@ -158,7 +157,6 @@ AFL_TEST("game.SearchQuery:compileExpression:MatchLocation", a)
     afl::io::NullFileSystem fs;
     afl::string::NullTranslator tx;
     interpreter::World world(log, tx, fs);
-    game::Session session(tx, fs);              // required for SimpleFunction, not otherwise needed
     world.setNewGlobalValue("OBJECTISAT", new interpreter::SimpleFunction<afl::test::Assert>(a("IFObjectIsAtMock"), IFObjectIsAtMock));
 
     // Verify
