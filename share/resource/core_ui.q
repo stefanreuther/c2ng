@@ -1925,7 +1925,8 @@ Sub CCUI.Task.AddSetShipMission
   % Process result
   Local r := CCUI$Ship.CompleteMissionSelection(UI.Result, 0)
   If Not IsEmpty(r) Then
-    CCUI.Task.AddCommand Format(If(r(2), "SetMission %d, %d, %d", If(r(1), "SetMission %d, %d", "SetMission %d")), r(0), r(1), r(2))
+    Local suffix := "   % " # Global.Mission(r(0), Owner.Real).Name
+    CCUI.Task.AddCommand Format(If(r(2), "SetMission %d, %d, %d", If(r(1), "SetMission %d, %d", "SetMission %d")), r(0), r(1), r(2)) & suffix
   EndIf
 EndSub
 
