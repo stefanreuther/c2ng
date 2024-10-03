@@ -481,6 +481,7 @@ AFL_TEST("game.interface.ReferenceListContext:AddObjectsAt:error:type", a)
     NewCallable cv(a, ctx, "ADDOBJECTSAT");
 
     afl::data::Segment seg;
+    seg.pushBackInteger(DEFAULT_X);
     seg.pushBackString("X");
     AFL_CHECK_THROWS(a, cv.callable.call(env.proc, seg, false), interpreter::Error);
 }
