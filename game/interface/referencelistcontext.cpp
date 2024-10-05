@@ -119,7 +119,7 @@ class game::interface::ReferenceListContext::IterableReferenceContext : public i
     virtual String_t toString(bool readable) const
         { return m_child->toString(readable); }
     virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const
-        { return m_child->store(out, aux, ctx); }
+        { rejectStore(out, aux, ctx); }
 
     /* Implementation of next() to iterate through the ref::List */
     virtual bool next()
