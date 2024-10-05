@@ -86,6 +86,7 @@ namespace {
                       {227, 1, "Crete",                 0,  31, 106, 2,  1, 0, 8, 7, 0, 16, 0, 0, 31, 0, 100, 1,1,35,1,0}}},
         {105, 0, 48, {{113, 0, "STR Dauthi Slayer",     0, 240, 470, 3, 61, 0, 4, 6, 0, 0, 10, 24, 0, 4, 100, 1,1,35,1,0},
                       {157, 1, "Tniacth",               0,   8, 483, 2,  1, 0, 5, 4, 0, 8,  0, 0,  8, 0, 100, 1,1,35,1,0}}},
+        // This is part of vcr2.dat, but also pcc-v2/tests/vcr/bugsim.dat, which hits the "bug emulation" branch:
         {52,  0, 50, {{113, 0, "DSC Nether Shadow >#",  0, 240, 374, 3, 61, 0, 5, 6, 0, 0,  7, 20, 0, 4, 100, 1,1,35,1,0},
                       {227, 1, "Crete",                 0,  14, 106, 2,  1, 0, 8, 7, 0, 16, 0, 0, 14, 0, 100, 1,1,35,1,0}}},
         {6,   0, 77, {{113, 0, "HKF Panther Eness",     0, 240,  58, 3, 61, 0, 5, 6, 0, 0, 10, 28, 0, 4, 100, 1,1,35,1,0},
@@ -97,7 +98,11 @@ namespace {
 
         // This is pcc-v2/tests/vcr/deadfire.vcr, a carrier/carrier fight:
         {107, 0, 47, {{625, 0, "Carota", 0, 1858, 496, 11, 144, 0, 7, 10, 0, 8, 0, 0, 122, 0, 100, 1,1,35,1,0},
-                      {370, 1, "Vendor", 0, 62,   32,  1,  1,   0, 6, 9, 0, 13, 0, 0, 62,  0, 100, 1,1,35,1,0}}}
+                      {370, 1, "Vendor", 0, 62,   32,  1,  1,   0, 6, 9, 0, 13, 0, 0, 62,  0, 100, 1,1,35,1,0}}},
+
+        // This is pcc-v2/tests/vcr/rng.dat
+        {42,  0, 96, {{250, 0, "SUPER STAR CARRIER 2",  0, 352, 201, 8,114, 0, 6, 6, 0, 4,  0,  0,85, 0,  91, 1,1,35,1,0},
+                      {372, 1, "New Georgia",           0,  21, 459, 6,  1, 0, 8,10, 0,16,  0,  0,21, 0, 100, 1,1,35,1,0}}},
     };
 
     game::vcr::Object convertObject(const Object& in)
@@ -258,6 +263,86 @@ AFL_TEST("game.vcr.classic.HostAlgorithm:torper-vs-planet", a)
     a.checkEqual("19. getDamage", right.getDamage(), 220);
     a.checkEqual("20. getCrew", left.getCrew(), 240);
     a.checkEqual("21. getCrew", right.getCrew(), 5);
+}
+
+/** Test "bug emulation" case: if unit gets too much damage, it gets opponent's weapons. */
+AFL_TEST("game.vcr.classic.HostAlgorithm:bug-emulation", a)
+{
+    // Surroundings
+    game::vcr::classic::NullVisualizer vis;
+    game::config::HostConfiguration config;
+    game::spec::ShipList list;
+    initShipList(list);
+
+    // Final recording (ship/planet)
+    game::vcr::classic::HostAlgorithm testee(false, vis, config, list.beams(), list.launchers());
+    game::vcr::Object left(convertObject(battles[13].object[0]));
+    game::vcr::Object right(convertObject(battles[13].object[1]));
+    uint16_t seed = battles[13].seed;
+    bool result = testee.checkBattle(left, right, seed);
+    a.check("01. result", !result);
+
+    testee.initBattle(left, right, seed);
+    while (testee.playCycle()) {
+        // nix
+    }
+    testee.doneBattle(left, right);
+
+    // Record #13:
+    //         Ending time 467 (7:47)
+    //         left-destroyed right-destroyed
+    //   S:  0  D:100  C:194  A:  0   |     S:  0  D:139  C: 14  A:  0
+    a.checkEqual("11. getTime", testee.getTime(), 467);
+    a.check("12. LeftCaptured", !testee.getResult().contains(game::vcr::classic::LeftCaptured));
+    a.check("13. LeftDestroyed", testee.getResult().contains(game::vcr::classic::LeftDestroyed));
+    a.check("14. RightCaptured", !testee.getResult().contains(game::vcr::classic::RightCaptured));
+    a.check("15. RightDestroyed", testee.getResult().contains(game::vcr::classic::RightDestroyed));
+    a.checkEqual("16. getShield", left.getShield(), 0);
+    a.checkEqual("17. getShield", right.getShield(), 0);
+    a.checkEqual("18. getDamage", left.getDamage(), 100);
+    a.checkEqual("19. getDamage", right.getDamage(), 139);
+    a.checkEqual("20. getCrew", left.getCrew(), 194);
+    a.checkEqual("21. getCrew", right.getCrew(), 14);
+}
+
+/** Test "RNG bug" case: a former bug in PCC's RNG implementation. */
+AFL_TEST("game.vcr.classic.HostAlgorithm:rng-bug", a)
+{
+    // Surroundings
+    game::vcr::classic::NullVisualizer vis;
+    game::config::HostConfiguration config;
+    game::spec::ShipList list;
+    initShipList(list);
+
+    // Final recording (ship/planet)
+    game::vcr::classic::HostAlgorithm testee(false, vis, config, list.beams(), list.launchers());
+    game::vcr::Object left(convertObject(battles[18].object[0]));
+    game::vcr::Object right(convertObject(battles[18].object[1]));
+    uint16_t seed = battles[18].seed;
+    bool result = testee.checkBattle(left, right, seed);
+    a.check("01. result", !result);
+
+    testee.initBattle(left, right, seed);
+    while (testee.playCycle()) {
+        // nix
+    }
+    testee.doneBattle(left, right);
+
+    // Record #9:
+    //       Ending time 341 (5:41)
+    //       right-destroyed
+    // S: 16  D:  0  C:352  A: 44   |     S:  0  D:103  C: 21  A:  0
+    a.checkEqual("11. getTime", testee.getTime(), 341);
+    a.check("12. LeftCaptured", !testee.getResult().contains(game::vcr::classic::LeftCaptured));
+    a.check("13. LeftDestroyed", !testee.getResult().contains(game::vcr::classic::LeftDestroyed));
+    a.check("14. RightCaptured", !testee.getResult().contains(game::vcr::classic::RightCaptured));
+    a.check("15. RightDestroyed", testee.getResult().contains(game::vcr::classic::RightDestroyed));
+    a.checkEqual("16. getShield", left.getShield(), 16);
+    a.checkEqual("17. getShield", right.getShield(), 0);
+    a.checkEqual("18. getDamage", left.getDamage(), 0);
+    a.checkEqual("19. getDamage", right.getDamage(), 103);
+    a.checkEqual("20. getCrew", left.getCrew(), 352);
+    a.checkEqual("21. getCrew", right.getCrew(), 21);
 }
 
 /** Test fighter/fighter, normal playback.

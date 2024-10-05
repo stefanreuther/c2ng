@@ -525,10 +525,14 @@ namespace {
         // ex IFPlanetAutoTaxNatives
         game::actions::mustBePlayed(pl);
         int mines, factories;
-        if (pl.getNumBuildings(game::MineBuilding).get(mines) && pl.getNumBuildings(game::FactoryBuilding).get(factories)) {
-            int tax;
-            if (game::map::getNativeSafeTax(pl, root.hostConfiguration(), root.hostVersion(), mines + factories).get(tax)) {
-                pl.setNativeTax(tax);
+        if (pl.getNativeRace().orElse(-1) <= 0 || pl.getNatives().orElse(-1) <= 0) {
+            throw Exception(Exception::eNotPlaying);
+        } else {
+            if (pl.getNumBuildings(game::MineBuilding).get(mines) && pl.getNumBuildings(game::FactoryBuilding).get(factories)) {
+                int tax;
+                if (game::map::getNativeSafeTax(pl, root.hostConfiguration(), root.hostVersion(), mines + factories).get(tax)) {
+                    pl.setNativeTax(tax);
+                }
             }
         }
     }

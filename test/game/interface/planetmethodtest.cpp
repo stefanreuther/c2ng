@@ -1026,7 +1026,7 @@ AFL_TEST("game.interface.PlanetMethod:ipmBuildDefense:error:not-played", a)
  */
 
 // Success case
-AFL_TEST("game.interface.PlanetMethod:ipmBuildFactories:succes", a)
+AFL_TEST("game.interface.PlanetMethod:ipmBuildFactories:success", a)
 {
     Environment env;
     Planet pl(111);
@@ -1071,6 +1071,21 @@ AFL_TEST("game.interface.PlanetMethod:ipmBuildFactories:partial", a)
     a.checkEqual("11. FactoryBuilding", pl.getNumBuildings(game::FactoryBuilding).orElse(-1), 90);
     a.checkEqual("12. Money", pl.getCargo(Element::Money).orElse(-1), 14820);
     interpreter::test::verifyNewInteger(a("13. remainder"), env.proc.getVariable("BUILD.REMAINDER").release(), 140);
+}
+
+// Null
+AFL_TEST("game.interface.PlanetMethod:ipmBuildFactories:null", a)
+{
+    Environment env;
+    Planet pl(111);
+    configurePlayablePlanet(env, pl);
+
+    afl::data::Segment seg;
+    seg.pushBackNew(0);
+    call(env, pl, game::interface::ipmBuildFactories, seg);
+
+    a.checkEqual("01. FactoryBuilding", pl.getNumBuildings(game::FactoryBuilding).orElse(-1), 30);
+    a.checkEqual("02. Money",           pl.getCargo(Element::Money).orElse(-1), 15000);
 }
 
 // Type error
@@ -3136,6 +3151,15 @@ AFL_TEST("game.interface.PlanetMethod:ipmAutoTaxColonists:error:arity", a)
     AFL_CHECK_THROWS(a, call(env, pl, game::interface::ipmAutoTaxColonists, seg), interpreter::Error);
 }
 
+// Planet not played
+AFL_TEST("game.interface.PlanetMethod:ipmAutoTaxColonists:error:unplayed", a)
+{
+    Environment env;
+    Planet pl(77);
+    afl::data::Segment seg;
+    AFL_CHECK_THROWS(a, call(env, pl, game::interface::ipmAutoTaxColonists, seg), game::Exception);
+}
+
 /*
  *  ipmAutoTaxNatives
  */
@@ -3160,6 +3184,27 @@ AFL_TEST("game.interface.PlanetMethod:ipmAutoTaxNatives:error:arity", a)
     afl::data::Segment seg;
     seg.pushBackNew(0);
     AFL_CHECK_THROWS(a, call(env, pl, game::interface::ipmAutoTaxNatives, seg), interpreter::Error);
+}
+
+// No natives
+AFL_TEST("game.interface.PlanetMethod:ipmAutoTaxNatives:error:no-natives", a)
+{
+    Environment env;
+    Planet pl(77);
+    configurePlayablePlanet(env, pl);
+    pl.setNatives(0);
+    pl.setNativeRace(0);
+    afl::data::Segment seg;
+    AFL_CHECK_THROWS(a, call(env, pl, game::interface::ipmAutoTaxNatives, seg), game::Exception);
+}
+
+// Planet not played
+AFL_TEST("game.interface.PlanetMethod:ipmAutoTaxNatives:error:unplayed", a)
+{
+    Environment env;
+    Planet pl(77);
+    afl::data::Segment seg;
+    AFL_CHECK_THROWS(a, call(env, pl, game::interface::ipmAutoTaxNatives, seg), game::Exception);
 }
 
 /*
