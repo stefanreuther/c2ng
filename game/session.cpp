@@ -250,7 +250,8 @@ game::Session::getTaskStatus(const game::map::Object* obj, interpreter::Process:
     using game::interface::NotificationStore;
     if (waitOnly) {
         if (const Process* proc = m_processList.findProcessByObject(obj, kind)) {
-            if (m_notifications.isMessageConfirmed(m_notifications.findMessageByProcessId(proc->getProcessId()))) {
+            const NotificationStore::Message* msg = m_notifications.findMessageByProcessId(proc->getProcessId());
+            if (msg != 0 && !m_notifications.isMessageConfirmed(msg)) {
                 return WaitingTask;
             } else {
                 return NoTask;
@@ -276,7 +277,8 @@ game::Session::getTaskStatus(const game::map::Object* obj, interpreter::Process:
                     any = true;
                     if (proc->getProcessKind() == kind) {
                         // Found the auto task
-                        if (m_notifications.isMessageConfirmed(m_notifications.findMessageByProcessId(proc->getProcessId()))) {
+                        const NotificationStore::Message* msg = m_notifications.findMessageByProcessId(proc->getProcessId());
+                        if (msg != 0 && !m_notifications.isMessageConfirmed(msg)) {
                             return WaitingTask;
                         } else {
                             return ActiveTask;

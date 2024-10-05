@@ -274,7 +274,7 @@ game::interface::NotificationStore::getMessageActions(size_t index) const
 {
     Actions_t result;
     const Message* msg = getMessageByIndex(index);
-    if (!isMessageConfirmed(msg)) {
+    if (msg != 0 && !isMessageConfirmed(msg)) {
         result += ToggleConfirmed;
     }
     return result;
