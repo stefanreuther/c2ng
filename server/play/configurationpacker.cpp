@@ -11,6 +11,7 @@
 #include "afl/string/format.hpp"
 #include "afl/string/string.hpp"
 #include "game/config/hostconfiguration.hpp"
+#include "game/config/stringarrayoption.hpp"
 
 using afl::base::Ref;
 using afl::data::Hash;
@@ -48,6 +49,8 @@ namespace {
                 vec->pushBackNew(new HashValue(hv));
             }
             return new VectorValue(vec);
+        } else if (const game::config::StringArrayOption* sao = dynamic_cast<const game::config::StringArrayOption*>(&opt)) {
+            return server::makeStringValue(sao->toString());
         } else {
             // what?
             return 0;

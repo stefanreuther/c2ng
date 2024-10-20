@@ -21,6 +21,7 @@ namespace {
         config.setOption("maximumfightersonbase", "30", game::config::ConfigurationOption::Game);
         config.setOption("strikesperfighter", "12",     game::config::ConfigurationOption::Game);
         config.setOption("terraformrate", "3,4,5",      game::config::ConfigurationOption::Game);
+        config.setOption("experiencelevelnames", "Noob,Nieswurz,Brotfahrer,Ladehugo,Erdwurm", game::config::ConfigurationOption::Game);
 
         // Produce value
         server::play::ConfigurationPacker testee(*r, n);
@@ -48,6 +49,9 @@ AFL_TEST("server.play.ConfigurationPacker:basics", a)
 
     // IntegerOption
     a.checkEqual("31", ap("CPENABLEALLIES").toInteger(), 1);
+
+    // StringArrayOption
+    a.checkEqual("41", ap("EXPERIENCELEVELNAMES").toString(), "Noob,Nieswurz,Brotfahrer,Ladehugo,Erdwurm");
 
     afl::data::StringList_t list;
     ap.getHashKeys(list);
