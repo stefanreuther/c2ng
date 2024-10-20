@@ -2874,8 +2874,8 @@
 
       <h2>Reference</h2>
       <dl>
-        <di term="Keys:"> <kbd>B</kbd> or <kbd>S</kbd> from <a href="pcc2:buildings">build screen</a>,
-          <kbd>E</kbd> from <a href="pcc2:shiptaskscreen">ship auto task screen</a>.</di>
+        <di term="Keys:"> <kbd>B</kbd> or <kbd>S</kbd> from <a href="pcc2:basescreen">bae screen</a>,
+          <kbd>E</kbd> from <a href="pcc2:basetaskscreen">base auto task screen</a>.</di>
       </dl>
     </page>
 

@@ -1,7 +1,7 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2024-07-27 11:20+0200\n"
+"PO-Revision-Date: 2024-10-13 21:21+0200\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
 #: util/plugin/consoleapplication.cpp:386
@@ -10207,7 +10207,7 @@ msgstr "Neutronium gesamt"
 
 #: game/map/info/info.cpp:1315
 msgid "Total Planets"
-msgstr "Planetsn insgesamt"
+msgstr "Planeten insgesamt"
 
 #: game/score/chartbuilder.cpp:116
 msgid "Total Ships"
