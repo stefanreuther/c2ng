@@ -173,7 +173,7 @@ AFL_TEST("game.interface.CargoFunctions:CCompare:str-gt", a)
     CF_ASSERT_INTEGER(a, game::interface::IFCCompare(args), 1);
 }
 
-// CCompare("10T", "11T") = true
+// CCompare("10T", "11T") = false
 AFL_TEST("game.interface.CargoFunctions:CCompare:str-lt", a)
 {
     afl::data::Segment seg;

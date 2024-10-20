@@ -1500,7 +1500,7 @@ AFL_TEST("game.interface.GlobalFunctions:IFRandom:unit-interval", a)
 }
 
 // Error/abnormal cases
-// - null error
+// - null first arg
 AFL_TEST("game.interface.GlobalFunctions:IFRandom:null", a)
 {
     Environment env;
@@ -1509,7 +1509,7 @@ AFL_TEST("game.interface.GlobalFunctions:IFRandom:null", a)
     verifyNewNull(a, game::interface::IFRandom(env.session, args));
 }
 
-// - null error
+// - null second arg
 AFL_TEST("game.interface.GlobalFunctions:IFRandom:null:2", a)
 {
     Environment env;
@@ -1557,6 +1557,20 @@ AFL_TEST("game.interface.GlobalFunctions:IFRandomFCode:normal", a)
     afl::data::StringValue* sv = dynamic_cast<afl::data::StringValue*>(p.get());
     a.checkNonNull("01. type", sv);
     a.checkEqual("02. size", sv->getValue().size(), 3U);
+}
+
+// Error: arity
+AFL_TEST("game.interface.GlobalFunctions:IFRandomFCode:error:arity", a)
+{
+    Environment env;
+    addRoot(env);
+    addShipList(env);
+
+    afl::data::Segment seg;
+    seg.pushBackInteger(1);
+    interpreter::Arguments args(seg, 0, 1);
+
+    AFL_CHECK_THROWS(a, game::interface::IFRandomFCode(env.session, args), interpreter::Error);
 }
 
 // Missing root
