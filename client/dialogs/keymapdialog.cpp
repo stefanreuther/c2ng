@@ -57,6 +57,7 @@ namespace {
 
         KeymapInformation m_info;
         KeymapInformation::Index_t m_infoIndex;
+        bool m_isESC;
 
         ui::rich::StaticText m_treeText;
         ui::rich::StaticText m_responseText;
@@ -90,6 +91,7 @@ KeymapDialog::KeymapDialog(ui::Root& root, afl::string::Translator& tx, util::Re
       m_keys(),
       m_info(),
       m_infoIndex(KeymapInformation::nil),
+      m_isESC(false),
       m_treeText(Text(), 0, root.provider()),
       m_responseText(Text(), 0, root.provider()),
       m_loop(root)
@@ -166,7 +168,7 @@ KeymapDialog::handleKey(util::Key_t key)
 {
     // ex WKeymapDebugger::handleEvent
     // Shift-Escape always stops
-    if (key == util::KeyMod_Shift + util::Key_Escape) {
+    if (key == util::KeyMod_Shift + util::Key_Escape || (m_isESC && key == util::Key_Escape)) {
         m_loop.stop(0);
         return true;
     }
@@ -219,7 +221,9 @@ KeymapDialog::handleKey(util::Key_t key)
     }
 
     // Process result
+    m_isESC = false;
     if (key == util::Key_Escape) {
+        m_isESC = true;
         if (used) {
             // ESC handled by keymap; give users advice how to proceed
             message += m_translator("Press Shift-ESC to close this window.\n");
