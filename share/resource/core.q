@@ -521,6 +521,7 @@ Bind HistoryScreen    "alt-h"  := "UI.Help 'pcc2:historyscreen'"
 Bind HistoryScreen    "x"      := "CCUI.Ship.Exchange"
 Bind HistoryScreen    "f1"     := "CCUI$ShipScreenFromHistory"
 Bind HistoryScreen    "f6"     := "CCUI.GotoScreen 6"
+Bind HistoryScreen    "f8"     := "CCUI.GotoBaseHere"
 
 Bind FleetScreen      "a"      := "CC$WithFleetWaypoint 'CC$ChangeWaypoint', False"
 Bind FleetScreen      "b"      := "CCUI.Fleet.ChangeLeader"
