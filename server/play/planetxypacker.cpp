@@ -1,5 +1,6 @@
 /**
   *  \file server/play/planetxypacker.cpp
+  *  \brief Class server::play::PlanetXYPacker
   */
 
 #include "server/play/planetxypacker.hpp"

@@ -1,5 +1,6 @@
 /**
   *  \file server/play/shippacker.cpp
+  *  \brief Class server::play::ShipPacker
   */
 
 #include <stdexcept>

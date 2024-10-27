@@ -1,5 +1,6 @@
 /**
   *  \file server/play/shipcommandhandler.cpp
+  *  \brief Class server::play::ShipCommandHandler
   */
 
 #include <stdexcept>

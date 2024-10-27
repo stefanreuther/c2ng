@@ -210,7 +210,7 @@ AFL_TEST("server.play.PlanetCommandHandler:setcomment", a)
     a.checkEqual("01. comment", interpreter::toString(env.session.world().planetProperties().get(100, interpreter::World::pp_Comment), false), "hi");
 }
 
-/** Test 'setcomment'. */
+/** Test 'setfcode'. */
 AFL_TEST("server.play.PlanetCommandHandler:setfcode", a)
 {
     Environment env;
@@ -265,7 +265,7 @@ AFL_TEST("server.play.PlanetCommandHandler:recycleship", a)
     a.checkEqual("02. id",     pl.getBaseShipyardId().orElse(-1), 40);
 }
 
-/** Test 'recycleship'. */
+/** Test 'buildbase'. */
 AFL_TEST("server.play.PlanetCommandHandler:buildbase", a)
 {
     Environment env;
