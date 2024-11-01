@@ -57,34 +57,43 @@ namespace game { namespace pcc {
         std::auto_ptr<Task_t> login(game::browser::Account& acc, std::auto_ptr<Task_t> then);
 
         /** Call server.
+
             @param acc      Account (for API endpoint address)
             @param endpoint Endpoint name (e.g. 'file')
             @param args     Parameters to pass (including `api_key` etc.)
+
             @return Raw result; null on error */
         std::auto_ptr<afl::data::Value> callServer(game::browser::Account& acc, String_t endpoint, const afl::net::HeaderTable& args);
 
         /** Call server with a file attachment.
+
             @param acc         Account (for API endpoint address)
             @param endpoint    Endpoint name (e.g. 'file')
             @param args        Parameters to pass (including `api_key` etc.)
             @param fileParam   File parameter
             @param fileName    File name
             @param fileContent File content
+
             @return Raw result; null on error */
         std::auto_ptr<afl::data::Value> callServerWithFile(game::browser::Account& acc, String_t endpoint, const afl::net::HeaderTable& args, String_t fileParam, String_t fileName, afl::base::ConstBytes_t fileContent);
 
         /** Get game list, pre-authenticated.
+
             The account must have been logged in already.
             If the account is not or no longer logged in, the request will fail.
+
             @param acc      Account
             @return Result tree from API, hash. Null on error. Owned by BrowserHandler and valid until the next call. */
         afl::data::Access getGameListPreAuthenticated(game::browser::Account& acc);
 
         /** Get directory content, pre-authenticated.
+
             The account must have been logged in already.
             If the account is not or no longer logged in, the request will fail.
+
             @param acc      Account
             @param dirName  Path name of directory
+
             @return Result tree from API, hash:
             - result (success flag)
             - reply (on success, list of items)
@@ -93,28 +102,74 @@ namespace game { namespace pcc {
         std::auto_ptr<afl::data::Value> getDirectoryContentPreAuthenticated(game::browser::Account& acc, String_t dirName);
 
         /** Download a file, pre-authenticated.
+
             The account must have been logged in already.
             If the account is not or no longer logged in, the request will fail.
+
             @param acc      Account
             @param fileName Path name of file
-            @param listener Receives result
-            @throw FileProblemException on error */
+            @param listener Receives result */
         void getFilePreAuthenticated(game::browser::Account& acc, String_t fileName, afl::net::http::DownloadListener& listener);
 
-        /** Download a file, pre-authenticated.
+        /** Upload a file, pre-authenticated.
+
             The account must have been logged in already.
             If the account is not or no longer logged in, the request will fail.
+
             @param acc      Account
             @param fileName Path name of file
             @param content  Content
+
             @return Result tree from API, hash:
             - result (success flag)
             - error (on failure, error message)
             If not logged in, null. */
         std::auto_ptr<afl::data::Value> putFilePreAuthenticated(game::browser::Account& acc, String_t fileName, afl::base::ConstBytes_t content);
 
+        /** Erase a file, pre-authenticated.
+
+            The account must have been logged in already.
+            If the account is not or no longer logged in, the request will fail.
+
+            @param acc      Account
+            @param fileName Path name of file
+
+            @return Result tree from API, hash:
+            - result (success flag)
+            - error (on failure, error message)
+            If not logged in, null. */
+        std::auto_ptr<afl::data::Value> eraseFilePreAuthenticated(game::browser::Account& acc, String_t fileName);
+
+        /** Upload a turn file, pre-authenticated.
+
+            The account must have been logged in already.
+            If the account is not or no longer logged in, the request will fail.
+
+            @param acc            Account
+            @param hostGameNumber Game number
+            @param slot           Player slot
+            @param content        Content
+
+            @return Result tree from API, hash:
+            - result (success flag)
+            - status (on success, turn status, see server::interface::HostTurn)
+            - output (on success, turn checker output)
+            - allowtemp (on success, permission to mark turn temporary)
+            - error (on failure, error message)
+            If not logged in, null. */
         std::auto_ptr<afl::data::Value> uploadTurnPreAuthenticated(game::browser::Account& acc, int32_t hostGameNumber, int slot, afl::base::ConstBytes_t content);
 
+        /** Mark turn temporary, pre-authenticated.
+
+            The account must have been logged in already.
+            If the account is not or no longer logged in, the request will fail.
+
+            @param acc            Account
+            @param hostGameNumber Game number
+            @param slot           Player slot
+            @param flag           "temporary" flag
+
+            This call does not produce a result; on error, the call is most likely ignored by the server. */
         void markTurnTemporaryPreAuthenticated(game::browser::Account& acc, int32_t hostGameNumber, int slot, int flag);
 
         /** Access translator.
@@ -129,6 +184,11 @@ namespace game { namespace pcc {
             @return user callback */
         game::browser::UserCallback& callback();
 
+        /** Create game root.
+
+            @param account        Account
+            @param gameListEntry  Game list entry with game metadata
+            @param config         Global user configuration (merged with game-specific) */
         afl::base::Ptr<Root> loadRoot(game::browser::Account& account,
                                       afl::data::Access gameListEntry,
                                       const game::config::UserConfiguration& config);

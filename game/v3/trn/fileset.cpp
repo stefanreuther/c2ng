@@ -107,6 +107,20 @@ game::v3::trn::FileSet::saveAll(afl::sys::LogListener& log, const PlayerList& pl
         tpl.copyFile(fs, config[UserConfiguration::Maketurn_Target](), *file);
     }
 }
+// Save all turn files, no backup.
+void
+game::v3::trn::FileSet::saveAll(afl::sys::LogListener& log, const PlayerList& players, afl::string::Translator& tx)
+{
+    for (size_t i = 0, n = m_turnFiles.size(); i < n; ++i) {
+        const int player = m_turnFiles[i]->getPlayer();
+        afl::base::Ref<afl::io::Stream> file = m_directory.openFile(afl::string::Format("player%d.trn", player), afl::io::FileSystem::Create);
+        log.write(afl::sys::LogListener::Info, LOG_NAME,
+                  afl::string::Format(tx("Writing %s turn file (%d command%!1{s%})..."),
+                                      players.getPlayerName(player, Player::AdjectiveName, tx),
+                                      m_turnFiles[i]->getNumCommands()));
+        m_turnFiles[i]->write(*file);
+    }
+}
 
 // Get number of turn files.
 size_t

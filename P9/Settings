@@ -12,9 +12,10 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = util/translator.cpp util/translator.hpp \
-    game/proxy/shipinfoproxy.cpp game/proxy/shipinfoproxy.hpp \
-    game/interface/buildcommandparser.cpp \
+FILES_gamelib = game/pcc/servertransport.cpp game/pcc/servertransport.hpp \
+    util/serverdirectory.cpp util/serverdirectory.hpp util/translator.cpp \
+    util/translator.hpp game/proxy/shipinfoproxy.cpp \
+    game/proxy/shipinfoproxy.hpp game/interface/buildcommandparser.cpp \
     game/interface/buildcommandparser.hpp \
     game/interface/missionlistcontext.cpp \
     game/interface/missionlistcontext.hpp game/proxy/vcrexportadaptor.cpp \
@@ -499,8 +500,7 @@ FILES_gamelib = util/translator.cpp util/translator.hpp \
     game/interface/friendlycodeproperty.cpp \
     game/interface/friendlycodeproperty.hpp game/pcc/accountfolder.cpp \
     game/pcc/accountfolder.hpp game/pcc/gamefolder.cpp \
-    game/pcc/gamefolder.hpp game/pcc/serverdirectory.cpp \
-    game/pcc/serverdirectory.hpp game/pcc/browserhandler.cpp \
+    game/pcc/gamefolder.hpp game/pcc/browserhandler.cpp \
     game/pcc/browserhandler.hpp game/interface/globalcommands.cpp \
     game/interface/globalcommands.hpp game/historyturnlist.cpp \
     game/historyturnlist.hpp game/historyturn.cpp game/historyturn.hpp \
@@ -1804,7 +1804,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/server/play/shipcommandhandlertest.cpp \
+FILES_testsuite = test/util/serverdirectorytest.cpp \
+    test/server/play/shipcommandhandlertest.cpp \
     test/server/play/shippackertest.cpp \
     test/server/play/planetxypackertest.cpp \
     test/server/play/planetcommandhandlertest.cpp \

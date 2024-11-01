@@ -26,7 +26,6 @@
 #include "game/v3/passwordchecker.hpp"
 #include "game/v3/trn/fileset.hpp"
 #include "game/v3/turnfile.hpp"
-#include "server/interface/hostturn.hpp"
 
 using afl::base::Ptr;
 using afl::base::Ref;
@@ -37,37 +36,21 @@ using game::v3::Loader;
 using game::v3::Parser;
 using game::v3::PasswordChecker;
 using game::v3::TurnFile;
-using server::interface::HostTurn;
 
 namespace {
     const char LOG_NAME[] = "game.pcc";
-
-    String_t formatTurnStatus(int32_t result, afl::string::Translator& tx)
-    {
-        // MissingTurn, NeedlessTurn cannot be results of a turn submission.
-        switch (result & ~HostTurn::TemporaryTurnFlag) {
-         case HostTurn::GreenTurn:  return Format(tx("Turn was accepted"));
-         case HostTurn::YellowTurn: return Format(tx("Turn was accepted with warnings (yellow)"));
-         case HostTurn::RedTurn:    return Format(tx("Turn was rejected (red)"));
-         case HostTurn::BadTurn:    return Format(tx("Turn was rejected (invalid)"));
-         case HostTurn::StaleTurn:  return Format(tx("Turn was stale"));
-         default:                   return Format(tx("Unknown turn status (%d)"), result);
-        }
-    }
 }
 
-game::pcc::TurnLoader::TurnLoader(afl::base::Ref<afl::io::Directory> localDirectory,
+game::pcc::TurnLoader::TurnLoader(afl::base::Ref<ServerTransport> serverTransport,
                                   afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory,
-                                  afl::base::Ref<ServerDirectory> serverDirectory,
-                                  int32_t hostGameNumber,
+                                  afl::base::Ref<util::ServerDirectory> serverDirectory,
                                   std::auto_ptr<afl::charset::Charset> charset,
                                   afl::sys::LogListener& log,
                                   PlayerSet_t availablePlayers,
                                   util::ProfileDirectory& profile)
-    : m_localDirectory(localDirectory),
+    : m_serverTransport(serverTransport),
       m_defaultSpecificationDirectory(defaultSpecificationDirectory),
       m_serverDirectory(serverDirectory),
-      m_hostGameNumber(hostGameNumber),
       m_charset(charset),
       m_log(log),
       m_profile(profile),
@@ -98,7 +81,7 @@ game::pcc::TurnLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game:
      public:
         Task(TurnLoader& parent, Turn& turn, Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t>& then)
             : m_parent(parent), m_turn(turn), m_game(game), m_player(player), m_root(root), m_session(session), m_then(then),
-              m_checker(turn, &parent.m_serverDirectory->handler().callback(), parent.m_log, session.translator())
+              m_checker(turn, &parent.m_serverTransport->handler().callback(), parent.m_log, session.translator())
             { }
 
         virtual void call()
@@ -109,7 +92,7 @@ game::pcc::TurnLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game:
                     m_checker.checkPassword(m_player, m_session.authCache(), m_then);
                 }
                 catch (std::exception& e) {
-                    m_session.log().write(afl::sys::LogListener::Error, LOG_NAME, String_t(), e);
+                    m_session.log().write(LogListener::Error, LOG_NAME, String_t(), e);
                     m_then->call(false);
                 }
             }
@@ -123,7 +106,7 @@ game::pcc::TurnLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game:
         std::auto_ptr<StatusTask_t> m_then;
         PasswordChecker m_checker;
     };
-    return m_serverDirectory->handler().login(m_serverDirectory->account(),
+    return m_serverTransport->handler().login(m_serverTransport->account(),
                                               std::auto_ptr<Task_t>(new Task(*this, turn, game, player, root, session, then)));
 }
 
@@ -159,7 +142,7 @@ game::pcc::TurnLoader::saveCurrentTurn(const Turn& turn, const Game& game, Playe
         Session& m_session;
         std::auto_ptr<StatusTask_t> m_then;
     };
-    return m_serverDirectory->handler().login(m_serverDirectory->account(),
+    return m_serverTransport->handler().login(m_serverTransport->account(),
                                               std::auto_ptr<Task_t>(new Task(*this, turn, game, players, opts, root, session, then)));
 }
 
@@ -220,7 +203,7 @@ game::pcc::TurnLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, gam
     // Load common files
     ldr.loadCommonFiles(*m_serverDirectory, *specDir, turn.universe(), player);
 
-    // Load database from local game directory (=root.gameDirectory())
+    // Load database
     loadCurrentDatabases(turn, game, player, root, session);
 
     // Load expression lists from profile
@@ -232,8 +215,6 @@ game::pcc::TurnLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, gam
         Ref<Stream> file = m_serverDirectory->openFile(Format("player%d.rst", player), afl::io::FileSystem::OpenRead);
         m_log.write(LogListener::Info, LOG_NAME, Format(tx("Loading %s RST file..."), root.playerList().getPlayerName(player, Player::AdjectiveName, tx)));
         ldr.loadResult(turn, root, game, *file, player);
-
-        // TODO: backups?
     }
 
     // Try to load turn from remote
@@ -245,16 +226,16 @@ game::pcc::TurnLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, gam
         }
     }
     catch (afl::except::FileProblemException& e) {
-        m_log.write(afl::sys::LogListener::Warn, LOG_NAME, tx("File has been ignored"), e);
+        m_log.write(LogListener::Warn, LOG_NAME, tx("File has been ignored"), e);
     }
 
-    // Load fleets from local game directory
+    // Load fleets
     // Must be after loading the result/turn because it requires shipsource flags
     try {
         game::db::FleetLoader(*m_charset, tx).load(root.gameDirectory(), turn.universe(), player);
     }
     catch (afl::except::FileProblemException& e) {
-        m_log.write(afl::sys::LogListener::Warn, LOG_NAME, tx("File has been ignored"), e);
+        m_log.write(LogListener::Warn, LOG_NAME, tx("File has been ignored"), e);
     }
 
     // Load FLAK from remote
@@ -285,16 +266,16 @@ game::pcc::TurnLoader::doSaveCurrentTurn(const Turn& turn, const Game& game, Pla
 {
     afl::string::Translator& tx = session.translator();
     if (turn.getCommandPlayers().containsAnyOf(players)) {
-        game::v3::trn::FileSet turns(*m_serverDirectory, *m_charset);
-        m_log.write(LogListener::Info, LOG_NAME, tx("Generating turn commands..."));
+        // Request temporary turns if desired
+        m_serverTransport->setTemporaryTurn(opts.contains(MarkTurnTemporary));
 
-        // Create turn files
-        std::vector<TurnFile*> turnPtrs;
+        // Build all the turns
+        m_log.write(LogListener::Info, LOG_NAME, tx("Generating turn commands..."));
+        game::v3::trn::FileSet turns(*m_serverDirectory, *m_charset);
         for (int player = 1; player <= MAX_PLAYERS; ++player) {
             if (players.contains(player)) {
                 TurnFile& thisTurn = turns.create(player, turn.getTimestamp(), turn.getTurnNumber());
                 Loader(*m_charset, tx, m_log).saveTurnFile(thisTurn, turn, player, root);
-                turnPtrs.push_back(&thisTurn);
             }
         }
 
@@ -302,52 +283,7 @@ game::pcc::TurnLoader::doSaveCurrentTurn(const Turn& turn, const Game& game, Pla
         turns.updateTrailers();
 
         // Upload all files
-        for (size_t i = 0; i < turnPtrs.size(); ++i) {
-            // Create image
-            TurnFile& thisTurn = *turnPtrs[i];
-            int player = thisTurn.getPlayer();
-            String_t fileName = Format("player%d.trn", player);
-            m_log.write(LogListener::Info, LOG_NAME, Format(tx("Uploading %s..."), fileName));
-            afl::io::InternalStream sink;
-            thisTurn.write(sink);
-
-            if (m_hostGameNumber != 0) {
-                // Hosted game: submit to host
-                BrowserHandler& handler = m_serverDirectory->handler();
-                game::browser::Account& account = m_serverDirectory->account();
-                std::auto_ptr<afl::data::Value> result(handler.uploadTurnPreAuthenticated(account, m_hostGameNumber, player, sink.getContent()));
-                afl::data::Access a(result);
-                if (a("result").toInteger()) {
-                    // Turn status
-                    m_log.write(LogListener::Info, LOG_NAME, formatTurnStatus(a("status").toInteger(), tx));
-
-                    // Turn checker output
-                    String_t output = a("output").toString();
-                    if (!output.empty()) {
-                        m_log.write(LogListener::Info, LOG_NAME, tx("Turn checker output:"));
-                        String_t::size_type p = 0, n;
-                        while ((n = output.find('\n', p)) != String_t::npos) {
-                            m_log.write(LogListener::Info, LOG_NAME, "> " + output.substr(p, n-p));
-                            p = n+1;
-                        }
-                        if (p < output.size()) {
-                            m_log.write(LogListener::Info, LOG_NAME, "> " + output.substr(p));
-                        }
-                    }
-
-                    // Mark temporary
-                    if (a("allowtemp").toInteger() && opts.contains(MarkTurnTemporary)) {
-                        handler.markTurnTemporaryPreAuthenticated(account, m_hostGameNumber, player, 1);
-                        m_log.write(LogListener::Info, LOG_NAME, tx("Turn marked temporary."));
-                    }
-                } else {
-                    m_log.write(LogListener::Error, LOG_NAME, Format(tx("Error uploading turn: %s"), a("error").toString()));
-                }
-            } else {
-                // Uploaded game: just upload the file
-                m_serverDirectory->putFile(fileName, sink.getContent());
-            }
-        }
+        turns.saveAll(session.log(), root.playerList(), tx);
     }
 
     for (int player = 1; player <= MAX_PLAYERS; ++player) {
@@ -363,4 +299,7 @@ game::pcc::TurnLoader::doSaveCurrentTurn(const Turn& turn, const Game& game, Pla
     }
 
     game.expressionLists().saveRecentFiles(m_profile, m_log, tx);
+
+    m_log.write(LogListener::Info, LOG_NAME, tx("Uploading data..."));
+    m_serverDirectory->flush();
 }

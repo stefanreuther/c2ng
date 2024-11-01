@@ -12,11 +12,12 @@
 #include "afl/string/translator.hpp"
 #include "afl/sys/loglistener.hpp"
 #include "game/map/universe.hpp"
-#include "game/pcc/serverdirectory.hpp"
+#include "game/pcc/servertransport.hpp"
 #include "game/playerarray.hpp"
 #include "game/playerset.hpp"
 #include "game/turnloader.hpp"
 #include "util/profiledirectory.hpp"
+#include "util/serverdirectory.hpp"
 
 namespace game { namespace pcc {
 
@@ -30,18 +31,16 @@ namespace game { namespace pcc {
     class TurnLoader : public game::TurnLoader {
      public:
         /** Constructor.
-            @param localDirectory                  Local directory (chart, fleet, etc.; used as Root::gameDirectory())
+            @param serverTransport                 ServerTransport matching serverDirectory. Also provides access to BrowserHandler/Account.
             @param defaultSpecificationDirectory   Default specification directory (share/specs)
-            @param serverDirectory                 Server directory (RST, TRN, specs). Also provides access to BrowserHandler/Account.
-            @param hostGameNumber                  Game number for hosted game (0 if not a hosted game)
+            @param serverDirectory                 Server directory (RST, TRN, specs).
             @param charset                         Game character set
             @param log                             Logger
             @param availablePlayers                Available players
             @param profile                         Profile directory (default configs) */
-        TurnLoader(afl::base::Ref<afl::io::Directory> localDirectory,
+        TurnLoader(afl::base::Ref<ServerTransport> serverTransport,
                    afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory,
-                   afl::base::Ref<ServerDirectory> serverDirectory,
-                   int32_t hostGameNumber,
+                   afl::base::Ref<util::ServerDirectory> serverDirectory,
                    std::auto_ptr<afl::charset::Charset> charset,
                    afl::sys::LogListener& log,
                    PlayerSet_t availablePlayers,
@@ -57,10 +56,9 @@ namespace game { namespace pcc {
         virtual String_t getProperty(Property p);
 
      private:
-        afl::base::Ref<afl::io::Directory> m_localDirectory;
+        afl::base::Ref<ServerTransport> m_serverTransport;
         afl::base::Ref<afl::io::Directory> m_defaultSpecificationDirectory;
-        afl::base::Ref<ServerDirectory> m_serverDirectory;
-        int32_t m_hostGameNumber;
+        afl::base::Ref<util::ServerDirectory> m_serverDirectory;
         std::auto_ptr<afl::charset::Charset> m_charset;
         afl::sys::LogListener& m_log;
         util::ProfileDirectory& m_profile;

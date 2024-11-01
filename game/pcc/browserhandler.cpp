@@ -21,7 +21,7 @@
 #include "game/browser/account.hpp"
 #include "game/browser/usercallback.hpp"
 #include "game/pcc/accountfolder.hpp"
-#include "game/pcc/serverdirectory.hpp"
+#include "game/pcc/servertransport.hpp"
 #include "game/pcc/turnloader.hpp"
 #include "game/v3/loader.hpp"
 #include "game/v3/registrationkey.hpp"
@@ -29,13 +29,15 @@
 #include "game/v3/specificationloader.hpp"
 #include "game/v3/stringverifier.hpp"
 #include "game/v3/utils.hpp"
+#include "util/serverdirectory.hpp"
 
 using afl::base::Ref;
 using afl::io::Directory;
+using afl::net::http::SimpleDownloadListener;
 using afl::string::Format;
 using afl::sys::LogListener;
 using game::browser::UserCallback;
-using afl::net::http::SimpleDownloadListener;
+using util::ServerDirectory;
 
 namespace {
     const char LOG_NAME[] = "game.pcc";
@@ -319,6 +321,21 @@ game::pcc::BrowserHandler::putFilePreAuthenticated(game::browser::Account& acc, 
 }
 
 std::auto_ptr<afl::data::Value>
+game::pcc::BrowserHandler::eraseFilePreAuthenticated(game::browser::Account& acc, String_t fileName)
+{
+    String_t token;
+    std::auto_ptr<afl::data::Value> result;
+    if (acc.getEncoded("api_token").get(token)) {
+        afl::net::HeaderTable tab;
+        tab.set("api_token", token);
+        tab.set("file", fileName);
+        tab.set("action", "rm");
+        result = callServer(acc, "file", tab);
+    }
+    return result;
+}
+
+std::auto_ptr<afl::data::Value>
 game::pcc::BrowserHandler::uploadTurnPreAuthenticated(game::browser::Account& acc, int32_t hostGameNumber, int slot, afl::base::ConstBytes_t content)
 {
     String_t token;
@@ -398,10 +415,8 @@ game::pcc::BrowserHandler::loadRoot(game::browser::Account& account, afl::data::
     afl::base::Ptr<Root> result;
     if (!availablePlayers.empty()) {
         // Server directory
-        Ref<ServerDirectory> serverDirectory(*new ServerDirectory(*this, account, gameListEntry("path").toString()));
-
-        // Local directory
-        Ref<Directory> localDirectory(afl::io::InternalDirectory::create("<internal>"));
+        Ref<ServerTransport> transport(*new ServerTransport(*this, account, gameListEntry("path").toString(), gameListEntry("game").toInteger()));
+        Ref<ServerDirectory> serverDirectory(ServerDirectory::create(transport, gameListEntry("path").toString(), 0));
 
         // Specification directory
         Ref<afl::io::MultiDirectory> spec = afl::io::MultiDirectory::create();
@@ -417,18 +432,20 @@ game::pcc::BrowserHandler::loadRoot(game::browser::Account& account, afl::data::
 
         // Actions
         Root::Actions_t actions;
-        actions += Root::aLoadEditable;         // TODO...
+        actions += Root::aLoadEditable;            // Means we provide a game directory for chartX.cc etc.
         actions += Root::aConfigureCharset;
         actions += Root::aConfigureFinished;
-        actions += Root::aConfigureReadOnly;
+        if (gameListEntry("finished").toInteger() == 0) {
+            actions += Root::aConfigureReadOnly;   // Means user decides read-only or not
+        }
         actions += Root::aSweep;
 
-        // Host version: default to PHost 4.0
+        // Host version: parse from server; default to PHost 4.0
         HostVersion host(HostVersion::PHost, MKVERSION(4, 0, 0));
         host.fromString(gameListEntry("hostversion").toString());
 
         // Produce result
-        result = new Root(localDirectory, specLoader, host,
+        result = new Root(serverDirectory, specLoader, host,
                           std::auto_ptr<game::RegistrationKey>(key),
                           std::auto_ptr<game::StringVerifier>(new game::v3::StringVerifier(std::auto_ptr<afl::charset::Charset>(charset.clone()))),
                           std::auto_ptr<afl::charset::Charset>(charset.clone()),
@@ -445,10 +462,9 @@ game::pcc::BrowserHandler::loadRoot(game::browser::Account& account, afl::data::
         result->userConfiguration().merge(config);
 
         // Turn loader
-        result->setTurnLoader(new TurnLoader(localDirectory,
+        result->setTurnLoader(new TurnLoader(transport,
                                              m_defaultSpecificationDirectory,
                                              serverDirectory,
-                                             gameListEntry("game").toInteger(),
                                              std::auto_ptr<afl::charset::Charset>(charset.clone()),
                                              log,
                                              availablePlayers,

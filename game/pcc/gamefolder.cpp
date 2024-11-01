@@ -8,7 +8,6 @@
 #include "afl/charset/codepagecharset.hpp"
 #include "afl/string/format.hpp"
 #include "game/pcc/browserhandler.hpp"
-#include "game/pcc/serverdirectory.hpp"
 
 using afl::sys::LogListener;
 using game::Task_t;
@@ -63,14 +62,7 @@ game::pcc::GameFolder::loadGameRoot(const game::config::UserConfiguration& confi
                 m_handler.log().write(LogListener::Trace, LOG_NAME, "Task: GameFolder.loadGameRoot");
                 afl::base::Ptr<Root> result;
                 try {
-#if 0
-                    // Quick and dirty solution: pretend this to be a local folder and work with that.
-                    // FIXME: this needs a lot of optimisation (and quite a number of protocol improvements on server side).
-                    afl::charset::CodepageCharset cs(afl::charset::g_codepageLatin1);
-                    result = m_handler.loader().load(*new ServerDirectory(m_handler, m_account, m_pathName), cs, m_config, false);
-#else
                     result = m_handler.loadRoot(m_account, GameFolder(m_handler, m_account, m_pathName, m_hint).getGameListEntry(), m_config);
-#endif
                 }
                 catch (std::exception& e) {
                     m_handler.log().write(LogListener::Error, LOG_NAME, String_t(), e);

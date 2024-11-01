@@ -64,6 +64,13 @@ namespace game { namespace v3 { namespace trn {
             \param tx Translator (for logging) */
         void saveAll(afl::sys::LogListener& log, const PlayerList& players, afl::io::FileSystem& fs, const game::config::UserConfiguration& config, afl::string::Translator& tx);
 
+        /** Save all turn files, no backup.
+            This will save the files but not create backup copies.
+            \param log Logger
+            \param players Player list (for logging)
+            \param tx Translator (for logging) */
+        void saveAll(afl::sys::LogListener& log, const PlayerList& players, afl::string::Translator& tx);
+
         /** Get number of turn files.
             \return number of turn files */
         size_t getNumFiles() const;
