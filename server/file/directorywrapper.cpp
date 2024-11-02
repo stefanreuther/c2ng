@@ -5,124 +5,71 @@
 
 #include "server/file/directorywrapper.hpp"
 #include "afl/except/fileproblemexception.hpp"
-#include "afl/io/constmemorystream.hpp"
-#include "afl/io/directoryentry.hpp"
-#include "afl/io/unchangeabledirectoryentry.hpp"
 #include "afl/string/messages.hpp"
 #include "server/file/directoryitem.hpp"
 #include "server/file/fileitem.hpp"
+#include "util/serverdirectory.hpp"
 
-/** Implementation of a file for DirectoryWrapper.
-    This is just a ConstMemoryStream, but we need a way to keep the FileMapping alive. */
-class server::file::DirectoryWrapper::File : public afl::io::ConstMemoryStream {
- public:
-    File(afl::base::Ref<afl::io::FileMapping> map)
-        : ConstMemoryStream(map->get()),
-          m_map(map)
-        { }
-    ~File()
-        { }
- private:
-    afl::base::Ref<afl::io::FileMapping> m_map;
-};
-
-/** Implementation of DirectoryEntry for DirectoryWrapper. */
-class server::file::DirectoryWrapper::Entry : public afl::io::UnchangeableDirectoryEntry {
- public:
-    Entry(afl::base::Ref<DirectoryWrapper> parent, server::file::FileItem& item)
-        : UnchangeableDirectoryEntry(afl::string::Messages::cannotWrite()), m_parent(parent), m_item(item)
-        { }
-    virtual String_t getTitle()
-        { return m_item.getName(); }
-    virtual String_t getPathName()
-        { return String_t(); }
-    virtual afl::base::Ref<afl::io::Stream> openFileForReading()
-        { return *new File(m_parent->m_item.getFileContent(m_item)); }
-    virtual afl::base::Ref<afl::io::Directory> openDirectory()
-        { throw afl::except::FileProblemException(getTitle(), afl::string::Messages::cannotAccessDirectories()); }
-    virtual afl::base::Ref<afl::io::Directory> openContainingDirectory()
-        { return m_parent; }
-    virtual void updateInfo(uint32_t /*requested*/)
-        {
-            setFileType(tFile);
-            if (const int32_t* p = m_item.getInfo().size.get()) {
-                setFileSize(*p);
-            }
-        }
- private:
-    afl::base::Ref<DirectoryWrapper> m_parent;
-    server::file::FileItem& m_item;
-};
-
-/** Implementation of Enum for DirectoryWrapper. */
-class server::file::DirectoryWrapper::Enum : public afl::base::Enumerator<afl::base::Ptr<afl::io::DirectoryEntry> > {
- public:
-    Enum(afl::base::Ref<DirectoryWrapper> parent)
-        : m_parent(parent),
-          m_index(0)
-        { }
-    virtual bool getNextElement(afl::base::Ptr<afl::io::DirectoryEntry>& result)
-        {
-            if (server::file::FileItem* p = m_parent->m_item.getFileByIndex(m_index)) {
-                ++m_index;
-                result = new Entry(m_parent, *p);
-                return true;
-            } else {
-                result = 0;
-                return false;
-            }
-        }
- private:
-    afl::base::Ref<DirectoryWrapper> m_parent;
-    size_t m_index;
-};
-
-/**************************** DirectoryWrapper ***************************/
-
-afl::base::Ref<server::file::DirectoryWrapper>
-server::file::DirectoryWrapper::create(DirectoryItem& item)
-{
-    return *new DirectoryWrapper(item);
-}
-
+inline
 server::file::DirectoryWrapper::DirectoryWrapper(DirectoryItem& item)
     : m_item(item)
 { }
 
-server::file::DirectoryWrapper::~DirectoryWrapper()
-{ }
-
-afl::base::Ref<afl::io::DirectoryEntry>
-server::file::DirectoryWrapper::getDirectoryEntryByName(String_t name)
+// Get file content.
+void
+server::file::DirectoryWrapper::getFile(String_t name, afl::base::GrowableBytes_t& data)
 {
-    if (server::file::FileItem* p = m_item.findFile(name)) {
-        return *new Entry(*this, *p);
+    if (FileItem* p = m_item.findFile(name)) {
+        afl::base::Ref<afl::io::FileMapping> map = m_item.getFileContent(*p);
+        data.append(map->get());
     } else {
-        throw afl::except::FileProblemException(name, afl::string::Messages::cannotAccessFiles());
+        // Should not happen
+        throw afl::except::FileProblemException(name, afl::string::Messages::fileNotFound());
     }
 }
 
+// Store file content.
+void
+server::file::DirectoryWrapper::putFile(String_t /*name*/, afl::base::ConstBytes_t /*data*/)
+{ }
 
-afl::base::Ref<afl::base::Enumerator<afl::base::Ptr<afl::io::DirectoryEntry> > >
-server::file::DirectoryWrapper::getDirectoryEntries()
+// Erase a file.
+void
+server::file::DirectoryWrapper::eraseFile(String_t /*name*/)
+{ }
+
+// Get content of directory.
+void
+server::file::DirectoryWrapper::getContent(std::vector<util::ServerDirectory::FileInfo>& result)
 {
-    return *new Enum(*this);
+    size_t index = 0;
+    while (FileItem* p = m_item.getFileByIndex(index)) {
+        result.push_back(util::ServerDirectory::FileInfo(p->getName(), p->getInfo().size.orElse(0), true));
+        ++index;
+    }
 }
 
-afl::base::Ptr<afl::io::Directory>
-server::file::DirectoryWrapper::getParentDirectory()
+// Check validity of a file name.
+bool
+server::file::DirectoryWrapper::isValidFileName(String_t /*name*/) const
 {
-    return 0;
+    return true;
 }
 
-String_t
-server::file::DirectoryWrapper::getDirectoryName()
+// Check permission to write.
+bool
+server::file::DirectoryWrapper::isWritable() const
 {
-    return String_t();
+    return false;
 }
 
-String_t
-server::file::DirectoryWrapper::getTitle()
+/*
+ *  Main entry point
+ */
+
+// Create Directory object wrapping the given item.
+afl::base::Ref<afl::io::Directory>
+server::file::DirectoryWrapper::create(DirectoryItem& item)
 {
-    return m_item.getName();
+    return util::ServerDirectory::create(*new DirectoryWrapper(item), item.getName(), 0);
 }

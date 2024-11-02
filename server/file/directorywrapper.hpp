@@ -6,6 +6,7 @@
 #define C2NG_SERVER_FILE_DIRECTORYWRAPPER_HPP
 
 #include "afl/io/directory.hpp"
+#include "util/serverdirectory.hpp"
 
 namespace server { namespace file {
 
@@ -18,27 +19,27 @@ namespace server { namespace file {
         but assumes reading and access checking to have been performed before.
 
         DirectoryWrapper only allows access to files in the directory, not to subdirectories
-        (which might have different access permissions). */
-    class DirectoryWrapper : public afl::io::Directory {
-     public:
-        static afl::base::Ref<DirectoryWrapper> create(DirectoryItem& item);
+        (which might have different access permissions).
 
-        virtual ~DirectoryWrapper();
-        virtual afl::base::Ref<afl::io::DirectoryEntry> getDirectoryEntryByName(String_t name);
-        virtual afl::base::Ref<afl::base::Enumerator<afl::base::Ptr<afl::io::DirectoryEntry> > > getDirectoryEntries();
-        virtual afl::base::Ptr<Directory> getParentDirectory();
-        virtual String_t getDirectoryName();
-        virtual String_t getTitle();
+        DirectoryWrapper now implements util::ServerDirectory::Transport, not afl::io::Directory.
+        Users only use the create() function. */
+    class DirectoryWrapper : public util::ServerDirectory::Transport {
+     public:
+        /** Create Directory object wrapping the given item.
+            @param item Item. Lifetime must exceed that of the resulting object.
+            @return Directory */
+        static afl::base::Ref<afl::io::Directory> create(DirectoryItem& item);
+
+        // Transport:
+        virtual void getFile(String_t name, afl::base::GrowableBytes_t& data);
+        virtual void putFile(String_t name, afl::base::ConstBytes_t data);
+        virtual void eraseFile(String_t name);
+        virtual void getContent(std::vector<util::ServerDirectory::FileInfo>& result);
+        virtual bool isValidFileName(String_t name) const;
+        virtual bool isWritable() const;
 
      private:
-        /** Constructor.
-            \param item Directory to access.
-            \pre item.wasRead() */
-        explicit DirectoryWrapper(DirectoryItem& item);
-
-        class File;
-        class Entry;
-        class Enum;
+        DirectoryWrapper(DirectoryItem& item);
 
         DirectoryItem& m_item;
     };

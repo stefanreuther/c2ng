@@ -45,7 +45,7 @@ server::file::GameStatus::load(Root& root, DirectoryItem& dir)
 {
     // ex DirInfo::init (sort-of)
     dir.readContent(root);
-    Ref<DirectoryWrapper> dirWrapper(DirectoryWrapper::create(dir));
+    Ref<afl::io::Directory> dirWrapper(DirectoryWrapper::create(dir));
 
     try {
         // Step 1: Load registration

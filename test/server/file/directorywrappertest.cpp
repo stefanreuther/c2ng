@@ -30,7 +30,7 @@ AFL_TEST("server.file.DirectoryWrapper:basics", a)
     item.readContent(root);
 
     // Testee
-    afl::base::Ref<server::file::DirectoryWrapper> testee(server::file::DirectoryWrapper::create(item));
+    afl::base::Ref<afl::io::Directory> testee(server::file::DirectoryWrapper::create(item));
 
     // Metadata
     a.checkEqual("01. getTitle", testee->getTitle(), "itemName");
@@ -83,7 +83,7 @@ AFL_TEST("server.file.DirectoryWrapper:getDirectoryEntries", a)
     item.readContent(root);
 
     // Testee
-    afl::base::Ref<server::file::DirectoryWrapper> testee(server::file::DirectoryWrapper::create(item));
+    afl::base::Ref<afl::io::Directory> testee(server::file::DirectoryWrapper::create(item));
 
     // Iteration
     afl::base::Ref<afl::base::Enumerator<afl::base::Ptr<afl::io::DirectoryEntry> > > e = testee->getDirectoryEntries();
@@ -130,7 +130,7 @@ AFL_TEST("server.file.DirectoryWrapper:getDirectoryEntryByName", a)
     item.readContent(root);
 
     // Testee
-    afl::base::Ref<server::file::DirectoryWrapper> testee(server::file::DirectoryWrapper::create(item));
+    afl::base::Ref<afl::io::Directory> testee(server::file::DirectoryWrapper::create(item));
 
     // Same things, using directory entry
     afl::base::Ref<afl::io::DirectoryEntry> e(testee->getDirectoryEntryByName("f1"));
