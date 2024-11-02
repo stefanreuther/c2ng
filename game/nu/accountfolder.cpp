@@ -30,7 +30,7 @@ game::nu::AccountFolder::loadContent(std::auto_ptr<game::browser::LoadContentTas
                 afl::container::PtrVector<Folder> result;
                 afl::data::Access parsedResult = m_handler.getGameListPreAuthenticated(m_account);
                 for (size_t i = 0, n = parsedResult("games").getArraySize(); i < n; ++i) {
-                    result.pushBackNew(new GameFolder(m_handler, m_account, parsedResult("games")[i]("game")("id").toInteger(), 0*i));
+                    result.pushBackNew(new GameFolder(m_handler, m_account, parsedResult("games")[i]("game")("id").toInteger(), i));
                 }
                 m_then->call(result);
             }

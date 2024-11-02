@@ -5,7 +5,11 @@
 #ifndef C2NG_UTIL_IO_HPP
 #define C2NG_UTIL_IO_HPP
 
+#include <memory>
 #include "afl/charset/charset.hpp"
+#include "afl/data/access.hpp"
+#include "afl/data/integerlist.hpp"
+#include "afl/data/value.hpp"
 #include "afl/io/datasink.hpp"
 #include "afl/io/directory.hpp"
 #include "afl/io/filesystem.hpp"
@@ -73,6 +77,35 @@ namespace util {
         \param dirNames List of directory names
         \return Directory instance */
     afl::base::Ref<afl::io::Directory> makeSearchDirectory(afl::io::FileSystem& fs, afl::base::Memory<const String_t> dirNames);
+
+    /** Parse JSON, given a byte array.
+        On error, throws std::exception.
+        \param data Data
+        \return Newly-allocated parse result */
+    std::auto_ptr<afl::data::Value> parseJSON(afl::base::ConstBytes_t data);
+
+    /** Find array item in a list of objects.
+        If array refers to an array (vector) of objects,
+        returns handle to the first object that has the specific value in the given key.
+        If none exists, or the parameter is not an actual array, returns null.
+
+        \param array Array
+        \param key   Key
+        \param value Expected value
+        \return Found value */
+    afl::data::Access findArrayItemById(afl::data::Access array, String_t key, int value);
+
+    /** Retrieve list of integers.
+        If the given value is one of the supported formats,
+        - an array of integers [1,2,3]
+        - a string containing integers "1,2,3"
+        - a single integer
+        appends the values to the given list.
+        Otherwise, does nothing.
+
+        \param [in,out] list  List
+        \param [in]     value Value */
+    void toIntegerList(afl::data::IntegerList_t& list, afl::data::Access value);
 
 }
 

@@ -103,6 +103,7 @@ game::nu::GameFolder::loadGameRoot(const game::config::UserConfiguration& config
                 try {
                     // Current data
                     afl::data::Access a = m_state->loadGameListEntryPreAuthenticated();
+                    afl::data::Access ai = m_handler.getAccountInfoPreAuthenticated(m_account);
 
                     // Actions
                     Root::Actions_t actions;
@@ -128,19 +129,19 @@ game::nu::GameFolder::loadGameRoot(const game::config::UserConfiguration& config
                     actions += Root::aConfigureReadOnly;
 
                     // Root
-                    afl::base::Ptr<Root> root = new Root(*dir,
-                                                     *new SpecificationLoader(m_state, m_handler.translator(), m_handler.log()),
-                                                     HostVersion(HostVersion::NuHost, MKVERSION(3,2,0)),
-                                                     std::auto_ptr<game::RegistrationKey>(new RegistrationKey(a("player"))),
-                                                     std::auto_ptr<game::StringVerifier>(new StringVerifier()),
-                                                     std::auto_ptr<afl::charset::Charset>(new afl::charset::Utf8Charset()),
-                                                     actions);
+                    afl::base::Ptr<Root> root =
+                        new Root(*dir,
+                                 *new SpecificationLoader(m_handler.getDefaultSpecificationDirectory(), m_state, m_handler.translator(), m_handler.log()),
+                                 HostVersion(HostVersion::NuHost, MKVERSION(3,2,0)),
+                                 std::auto_ptr<game::RegistrationKey>(new RegistrationKey(ai)),
+                                 std::auto_ptr<game::StringVerifier>(new StringVerifier()),
+                                 std::auto_ptr<afl::charset::Charset>(new afl::charset::Utf8Charset()),
+                                 actions);
 
                     // FIXME -> root->userConfiguration().loadUserConfiguration(m_parent.m_profile, m_parent.m_log, m_parent.m_translator);
                     root->userConfiguration().merge(m_config);
 
-                    // FIXME:
-                    // + hostConfiguration()
+                    // Host configuration loaded by SpecificationLoader
 
                     // Player list: from the game list entry, we know
                     // - how many players there are (.game.slots)
@@ -166,8 +167,6 @@ game::nu::GameFolder::loadGameRoot(const game::config::UserConfiguration& config
 
                     // Turn loader
                     root->setTurnLoader(new TurnLoader(m_state, m_handler.browser().profile(), m_handler.getDefaultSpecificationDirectory()));
-
-                    // + playerList
 
                     result = root;
                 }

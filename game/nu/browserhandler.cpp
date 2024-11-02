@@ -103,7 +103,9 @@ game::nu::BrowserHandler::BrowserHandler(game::browser::Browser& b, afl::net::ht
       m_manager(mgr),
       m_defaultSpecificationDirectory(defaultSpecificationDirectory),
       m_gameList(),
-      m_gameListAccount()
+      m_gameListAccount(),
+      m_accountInfo(),
+      m_accountInfoAccount()
 { }
 
 bool
@@ -236,6 +238,25 @@ game::nu::BrowserHandler::getGameListPreAuthenticated(game::browser::Account& ac
         m_gameList = callServer(acc, "/account/mygames?version=2", tab);
     }
     return m_gameList;
+}
+
+afl::data::Access
+game::nu::BrowserHandler::getAccountInfoPreAuthenticated(game::browser::Account& acc)
+{
+    // Cached?
+    if (m_accountInfo.get() != 0 && m_accountInfoAccount == &acc) {
+        return m_accountInfo;
+    }
+
+    // Not cached -> load it
+    m_accountInfo.reset();
+    m_accountInfoAccount = &acc;
+    if (const String_t* key = acc.get("api_key")) {
+        afl::net::HeaderTable tab;
+        tab.add("apikey", *key);
+        m_accountInfo = callServer(acc, "/account/load?version=2", tab);
+    }
+    return m_accountInfo;
 }
 
 afl::string::Translator&

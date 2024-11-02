@@ -5,16 +5,21 @@
 
 #include "util/io.hpp"
 
+#include <stdexcept>
 #include "afl/charset/codepage.hpp"
 #include "afl/charset/codepagecharset.hpp"
 #include "afl/charset/utf8.hpp"
 #include "afl/charset/utf8charset.hpp"
+#include "afl/data/access.hpp"
+#include "afl/data/value.hpp"
 #include "afl/except/fileproblemexception.hpp"
 #include "afl/io/constmemorystream.hpp"
 #include "afl/io/internalfilesystem.hpp"
 #include "afl/io/internalsink.hpp"
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/test/testrunner.hpp"
+
+using afl::data::Access;
 
 /*
  *  Test storePascalString.
@@ -332,4 +337,114 @@ AFL_TEST("util.IO:makeSearchDirectory", a)
         a.checkEqual("22. open multi", tmp[0], '3');
         AFL_CHECK_THROWS(a("23. fail multi"), dir->openFile("fx", afl::io::FileSystem::OpenRead), afl::except::FileProblemException);
     }
+}
+
+AFL_TEST("util.IO:parseJSON", a)
+{
+    // Success case
+    {
+        std::auto_ptr<afl::data::Value> p(util::parseJSON(afl::string::toBytes("{\"foo\":[1,3,4]}")));
+        a.checkEqual("01", Access(p)("foo")[2].toInteger(), 4);
+    }
+
+    // Error cases
+    AFL_CHECK_THROWS(a("11. fail"), util::parseJSON(afl::string::toBytes("")),     std::exception);
+    AFL_CHECK_THROWS(a("12. fail"), util::parseJSON(afl::string::toBytes("{}{}")), std::exception);
+    AFL_CHECK_THROWS(a("13. fail"), util::parseJSON(afl::string::toBytes("{9}")),  std::exception);
+}
+
+/*
+ *  findArrayItemById
+ */
+
+AFL_TEST("util.IO:findArrayItemById", a)
+{
+    std::auto_ptr<afl::data::Value> p(util::parseJSON(afl::string::toBytes("[{\"id\":1,\"value\":10},{\"id\":3,\"value\":11},{\"id\":2,\"value\":12}]")));
+
+    // Find by Id
+    a.checkEqual("search id 1", util::findArrayItemById(p, "id", 1)("value").toInteger(), 10);
+    a.checkEqual("search id 2", util::findArrayItemById(p, "id", 2)("value").toInteger(), 12);
+    a.checkEqual("search id 3", util::findArrayItemById(p, "id", 3)("value").toInteger(), 11);
+    a.checkNull ("search id 4", util::findArrayItemById(p, "id", 4).getValue());
+
+    // Find by Value
+    a.checkEqual("search value 10", util::findArrayItemById(p, "value", 10)("id").toInteger(), 1);
+    a.checkEqual("search value 11", util::findArrayItemById(p, "value", 11)("id").toInteger(), 3);
+    a.checkEqual("search value 12", util::findArrayItemById(p, "value", 12)("id").toInteger(), 2);
+    a.checkNull ("search value 13", util::findArrayItemById(p, "value", 13).getValue());
+
+    // Find by missing key
+    a.checkNull("search missing 1", util::findArrayItemById(p, "missing", 1).getValue());
+
+    // Special case: missing key matches 0
+    a.checkNull("search missing 0", util::findArrayItemById(p, "missing", 0).getValue());
+}
+
+/*
+ *  toIntegerList
+ */
+
+AFL_TEST("util.IO.toIntegerList:int-list", a)
+{
+    std::auto_ptr<afl::data::Value> p(util::parseJSON(afl::string::toBytes("[3,1,4]")));
+    afl::data::IntegerList_t result;
+    util::toIntegerList(result, p);
+
+    a.checkEqual("size", result.size(), 3U);
+    a.checkEqual("value[0]", result[0], 3);
+    a.checkEqual("value[1]", result[1], 1);
+    a.checkEqual("value[2]", result[2], 4);
+}
+
+AFL_TEST("util.IO.toIntegerList:int", a)
+{
+    std::auto_ptr<afl::data::Value> p(util::parseJSON(afl::string::toBytes("4711")));
+    afl::data::IntegerList_t result;
+    util::toIntegerList(result, p);
+
+    a.checkEqual("size", result.size(), 1U);
+    a.checkEqual("value[0]", result[0], 4711);
+}
+
+AFL_TEST("util.IO.toIntegerList:string", a)
+{
+    std::auto_ptr<afl::data::Value> p(util::parseJSON(afl::string::toBytes("\"69,23\"")));
+    afl::data::IntegerList_t result;
+    util::toIntegerList(result, p);
+
+    a.checkEqual("size", result.size(), 2U);
+    a.checkEqual("value[0]", result[0], 69);
+    a.checkEqual("value[1]", result[1], 23);
+}
+
+AFL_TEST("util.IO.toIntegerList:string-sep", a)
+{
+    std::auto_ptr<afl::data::Value> p(util::parseJSON(afl::string::toBytes("\"-69, +23 42\"")));
+    afl::data::IntegerList_t result;
+    util::toIntegerList(result, p);
+
+    a.checkEqual("size", result.size(), 3U);
+    a.checkEqual("value[0]", result[0], -69);
+    a.checkEqual("value[1]", result[1], 23);
+    a.checkEqual("value[2]", result[2], 42);
+}
+
+AFL_TEST("util.IO.toIntegerList:string-list", a)
+{
+    std::auto_ptr<afl::data::Value> p(util::parseJSON(afl::string::toBytes("[3,\"9\",27]")));
+    afl::data::IntegerList_t result;
+    util::toIntegerList(result, p);
+
+    a.checkEqual("size", result.size(), 3U);
+    a.checkEqual("value[0]", result[0], 3);
+    a.checkEqual("value[1]", result[1], 9);
+    a.checkEqual("value[2]", result[2], 27);
+}
+
+AFL_TEST("util.IO.toIntegerList:null", a)
+{
+    afl::data::IntegerList_t result;
+    util::toIntegerList(result, afl::data::Access());
+
+    a.checkEqual("size", result.size(), 0U);
 }

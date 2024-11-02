@@ -1,21 +1,29 @@
 /**
   *  \file game/nu/specificationloader.cpp
+  *  \brief Class game::nu::SpecificationLoader
   */
 
 #include "game/nu/specificationloader.hpp"
+#include "afl/data/access.hpp"
 #include "afl/except/fileproblemexception.hpp"
 #include "afl/string/format.hpp"
 #include "afl/string/messages.hpp"
 #include "afl/string/parse.hpp"
+#include "game/config/hostconfiguration.hpp"
 #include "game/root.hpp"
 #include "game/spec/beam.hpp"
 #include "game/spec/engine.hpp"
 #include "game/spec/hull.hpp"
 #include "game/spec/torpedolauncher.hpp"
+#include "util/io.hpp"
 
 namespace gs = game::spec;
+
+using afl::data::Access;
 using afl::string::Format;
 using afl::sys::LogListener;
+using game::config::ConfigurationOption;
+using game::config::HostConfiguration;
 
 namespace {
     /*
@@ -70,12 +78,55 @@ namespace {
      private:
         const game::spec::HullVector_t& m_hulls;
     };
+
+    void addAllOptions(HostConfiguration& out, Access in, String_t prefix)
+    {
+        afl::data::StringList_t settingNames;
+        in.getHashKeys(settingNames);
+        for (size_t i = 0, n = settingNames.size(); i < n; ++i) {
+            if (settingNames[i] != "id") {
+                out.setOption(prefix + settingNames[i], in(settingNames[i]).toString(), ConfigurationOption::Game);
+            }
+        }
+    }
+
+    void loadConfig(HostConfiguration& config, Access rst)
+    {
+        // From game:
+        const Access game = rst("game");
+        config[HostConfiguration::GameName].set(game("name").toString());
+
+        // From settings:
+        const Access settings = rst("settings");
+        config[HostConfiguration::AllowGravityWells]      .set(!settings("nowarpwells").toInteger());
+        config[HostConfiguration::AllowMinefields]        .set(!settings("nominefields").toInteger());
+        config[HostConfiguration::AllowShipCloning]       .set( settings("cloningenabled").toInteger());
+        config[HostConfiguration::AllowWraparoundMap]     .set( settings("sphere").toInteger());
+        config[HostConfiguration::CloakFailureRate]       .set( settings("cloakfail").toInteger());
+        config[HostConfiguration::IonStormActivity]       .set( settings("maxions").toInteger());
+        config[HostConfiguration::NumShips]               .set( settings("shiplimit").toInteger());
+        config[HostConfiguration::ScanRange]              .set( settings("shipscanrange").toInteger());
+        config[HostConfiguration::StructureDecayOnUnowned].set( settings("structuredecayrate").toInteger());
+        config[HostConfiguration::StructureDecayPerTurn]  .set( settings("structuredecayrate").toInteger());
+
+        // Hardcoded
+        config[HostConfiguration::MaxPlanetaryIncome].set(5000);
+
+        // Map all Nu settings under their original names
+        addAllOptions(config, game, "nu.game.");
+        addAllOptions(config, settings, "nu.");
+
+        // Mark everything as sourced in game
+        config.setAllOptionsSource(ConfigurationOption::Game);
+    }
 }
 
-game::nu::SpecificationLoader::SpecificationLoader(afl::base::Ref<GameState> gameState,
+game::nu::SpecificationLoader::SpecificationLoader(afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory,
+                                                   afl::base::Ref<GameState> gameState,
                                                    afl::string::Translator& tx,
                                                    afl::sys::LogListener& log)
-    : m_gameState(gameState),
+    : m_defaultSpecificationDirectory(defaultSpecificationDirectory),
+      m_gameState(gameState),
       m_translator(tx),
       m_log(log)
 { }
@@ -97,8 +148,11 @@ game::nu::SpecificationLoader::loadShipList(game::spec::ShipList& list, Root& ro
                     m_parent.m_log.write(LogListener::Trace, LOG_NAME, "Task: loadShipList");
                     afl::data::Access rst(m_parent.m_gameState->loadResultPreAuthenticated());
 
+                    loadConfig(m_root.hostConfiguration(), rst("rst"));
+
                     m_parent.loadRaceNames(m_root, rst("rst")("players"), rst("rst")("races"));
 
+                    m_parent.loadHullFunctionDefinitions(m_shipList);
                     m_parent.loadHulls    (m_shipList, rst("rst")("hulls"));
                     m_parent.loadBeams    (m_shipList, rst("rst")("beams"));
                     m_parent.loadTorpedoes(m_shipList, rst("rst")("torpedos"));
@@ -108,8 +162,6 @@ game::nu::SpecificationLoader::loadShipList(game::spec::ShipList& list, Root& ro
                     m_parent.loadRaceHullAssignments   (m_shipList, rst("rst")("racehulls"), rst("rst")("player")("id").toInteger());
 
                     // FIXME: process these attributes:
-                    // BasicHullFunctionList& basicHullFunctions();
-                    // ModifiedHullFunctionList& modifiedHullFunctions();
                     // HullFunctionAssignmentList& racialAbilities();
                     // StandardComponentNameProvider& componentNamer();
                     // FriendlyCodeList& friendlyCodes();
@@ -134,7 +186,24 @@ game::nu::SpecificationLoader::loadShipList(game::spec::ShipList& list, Root& ro
 afl::base::Ref<afl::io::Stream>
 game::nu::SpecificationLoader::openSpecificationFile(const String_t& fileName)
 {
-    throw afl::except::FileProblemException(fileName, afl::string::Messages::fileNotFound());
+    return m_defaultSpecificationDirectory->openFile(fileName, afl::io::FileSystem::OpenRead);
+}
+
+void
+game::nu::SpecificationLoader::loadHullFunctionDefinitions(game::spec::ShipList& list)
+{
+    // We load the basic function definitions in the same way as for V3.
+    // This enables subsequent code to use it, in particular, the hull "cancloak" flag.
+    // We do not ever define modified functions.
+    list.basicHullFunctions().clear();
+    afl::base::Ptr<afl::io::Stream> ps = m_defaultSpecificationDirectory->openFileNT("hullfunc.usr", afl::io::FileSystem::OpenRead);
+    if (ps.get()) {
+        list.basicHullFunctions().load(*ps, m_translator, m_log);
+    }
+    ps = m_defaultSpecificationDirectory->openFileNT("hullfunc.cc", afl::io::FileSystem::OpenRead);
+    if (ps.get()) {
+        list.basicHullFunctions().load(*ps, m_translator, m_log);
+    }
 }
 
 void
@@ -149,25 +218,27 @@ game::nu::SpecificationLoader::loadHulls(game::spec::ShipList& list, afl::data::
             // Component:
             out->setMass(in("mass").toInteger());
             out->setTechLevel(in("techlevel").toInteger());
-            out->cost().set(gs::Cost::Money, in("cost").toInteger());
-            out->cost().set(gs::Cost::Tritanium, in("tritanium").toInteger());
-            out->cost().set(gs::Cost::Duranium, in("duranium").toInteger());
+            out->cost().set(gs::Cost::Money,      in("cost").toInteger());
+            out->cost().set(gs::Cost::Tritanium,  in("tritanium").toInteger());
+            out->cost().set(gs::Cost::Duranium,   in("duranium").toInteger());
             out->cost().set(gs::Cost::Molybdenum, in("molybdenum").toInteger());
             out->setName(in("name").toString());
 
             // Hull:
             out->setExternalPictureNumber(1); // FIXME!
             out->setInternalPictureNumber(1); // FIXME!
-            out->setMaxFuel(in("fueltank").toInteger());
-            out->setMaxCrew(in("crew").toInteger());
-            out->setNumEngines(in("engines").toInteger());
-            out->setMaxCargo(in("cargo").toInteger());
-            out->setNumBays(in("fighterbays").toInteger());
+            out->setMaxFuel     (in("fueltank").toInteger());
+            out->setMaxCrew     (in("crew").toInteger());
+            out->setNumEngines  (in("engines").toInteger());
+            out->setMaxCargo    (in("cargo").toInteger());
+            out->setNumBays     (in("fighterbays").toInteger());
             out->setMaxLaunchers(in("launchers").toInteger());
-            out->setMaxBeams(in("beams").toInteger());
+            out->setMaxBeams    (in("beams").toInteger());
 
-            // FIXME: process these attributes:
-            //             "cancloak":false,
+            if (in("cancloak").toInteger() != 0) {
+                out->changeHullFunction(list.modifiedHullFunctions().getFunctionIdFromHostId(game::spec::BasicHullFunction::Cloak),
+                                        PlayerSet_t::allUpTo(MAX_PLAYERS), PlayerSet_t(), true);
+            }
 
             // Other abilities:
             //  29,31,3033,1047: adv cloak (no fuel usage)
@@ -218,14 +289,14 @@ game::nu::SpecificationLoader::loadBeams(game::spec::ShipList& list, afl::data::
             // Component:
             out->setMass(in("mass").toInteger());
             out->setTechLevel(in("techlevel").toInteger());
-            out->cost().set(gs::Cost::Money, in("cost").toInteger());
-            out->cost().set(gs::Cost::Tritanium, in("tritanium").toInteger());
-            out->cost().set(gs::Cost::Duranium, in("duranium").toInteger());
+            out->cost().set(gs::Cost::Money,      in("cost").toInteger());
+            out->cost().set(gs::Cost::Tritanium,  in("tritanium").toInteger());
+            out->cost().set(gs::Cost::Duranium,   in("duranium").toInteger());
             out->cost().set(gs::Cost::Molybdenum, in("molybdenum").toInteger());
             out->setName(in("name").toString());
 
             // Weapon:
-            out->setKillPower(in("crewkill").toInteger());
+            out->setKillPower  (in("crewkill").toInteger());
             out->setDamagePower(in("damage").toInteger());
         } else {
             m_log.write(LogListener::Warn, LOG_NAME, Format(m_translator("Invalid beam number %d, component has been ignored"), nr));
@@ -245,9 +316,9 @@ game::nu::SpecificationLoader::loadTorpedoes(game::spec::ShipList& list, afl::da
             // Component:
             out->setMass(in("mass").toInteger());
             out->setTechLevel(in("techlevel").toInteger());
-            out->cost().set(gs::Cost::Money, in("launchercost").toInteger());
-            out->cost().set(gs::Cost::Tritanium, in("tritanium").toInteger());
-            out->cost().set(gs::Cost::Duranium, in("duranium").toInteger());
+            out->cost().set(gs::Cost::Money,      in("launchercost").toInteger());
+            out->cost().set(gs::Cost::Tritanium,  in("tritanium").toInteger());
+            out->cost().set(gs::Cost::Duranium,   in("duranium").toInteger());
             out->cost().set(gs::Cost::Molybdenum, in("molybdenum").toInteger());
             out->setName(in("name").toString());
 
@@ -260,6 +331,8 @@ game::nu::SpecificationLoader::loadTorpedoes(game::spec::ShipList& list, afl::da
             out->torpedoCost().set(gs::Cost::Tritanium, 1);
             out->torpedoCost().set(gs::Cost::Duranium, 1);
             out->torpedoCost().set(gs::Cost::Molybdenum, 1);
+
+            // FIXME: deal with combatrange field (300 for normal, 340 for Quantum Torpedo, but may be not present)
         } else {
             m_log.write(LogListener::Warn, LOG_NAME, Format(m_translator("Invalid torpedo number %d, component has been ignored"), nr));
         }
@@ -278,9 +351,9 @@ game::nu::SpecificationLoader::loadEngines(game::spec::ShipList& list, afl::data
             // Component:
             out->setMass(0);
             out->setTechLevel(in("techlevel").toInteger());
-            out->cost().set(gs::Cost::Money, in("cost").toInteger());
-            out->cost().set(gs::Cost::Tritanium, in("tritanium").toInteger());
-            out->cost().set(gs::Cost::Duranium, in("duranium").toInteger());
+            out->cost().set(gs::Cost::Money,      in("cost").toInteger());
+            out->cost().set(gs::Cost::Tritanium,  in("tritanium").toInteger());
+            out->cost().set(gs::Cost::Duranium,   in("duranium").toInteger());
             out->cost().set(gs::Cost::Molybdenum, in("molybdenum").toInteger());
             out->setName(in("name").toString());
 
@@ -294,6 +367,9 @@ game::nu::SpecificationLoader::loadEngines(game::spec::ShipList& list, afl::data
     }
 }
 
+/* Load default hull assignments.
+   Nu does not provide a truehull record for each player; we only see the default race definitions.
+   This populates the HullAssignmentList with the given defaults. */
 void
 game::nu::SpecificationLoader::loadDefaultHullAssignments(game::spec::ShipList& list, afl::data::Access players, afl::data::Access races)
 {
@@ -304,28 +380,16 @@ game::nu::SpecificationLoader::loadDefaultHullAssignments(game::spec::ShipList& 
         int playerId = p("id").toInteger();
 
         // Get associated race
-        afl::data::Access r;
-        for (size_t race = 0, nraces = races.getArraySize(); race < nraces; ++race) {
-            if (races[race]("id").toInteger() == raceId) {
-                r = races[race];
-                break;
-            }
-        }
+        afl::data::Access r = util::findArrayItemById(races, "id", raceId);
 
         // Get base hulls which are cleverly encoded as a string
-        String_t hullsAsString = r("basehulls").toString();
-        std::vector<int> hulls;
-        do {
-            int n;
-            if (afl::string::strToInteger(afl::string::strFirst(hullsAsString, ","), n)) {
-                hulls.push_back(n);
-            }
-        } while (afl::string::strRemove(hullsAsString, ","));
+        afl::data::IntegerList_t hulls;
+        util::toIntegerList(hulls, r("basehulls"));
 
         // Sort into sensible order (for users; not required for turn file validity)
         std::sort(hulls.begin(), hulls.end(), CompareHulls(list.hulls()));
 
-        // Populate one entry
+        // Populate this player's entry
         for (size_t i = 0, n = hulls.size(); i < n; ++i) {
             list.hullAssignments().add(playerId, int(i+1), hulls[i]);
         }
@@ -349,53 +413,17 @@ game::nu::SpecificationLoader::loadRaceNames(Root& root, afl::data::Access playe
         int nr = in("id").toInteger();
         if (Player* out = root.playerList().get(nr)) {
             // Update race name (if it fails, keep the dummy set up by GameFolder).
-            afl::data::Access race;
-            int raceNr = in("raceid").toInteger();
-            for (size_t j = 0, n = races.getArraySize(); j < n; ++j) {
-                if (races[j]("id").toInteger() == raceNr) {
-                    race = races[j];
-                    break;
-                }
-            }
+            afl::data::Access race = util::findArrayItemById(races, "id", in("raceid").toInteger());
             if (!race.isNull()) {
-                out->setName(Player::LongName, race("name").toString());
-                out->setName(Player::ShortName, race("shortname").toString());
+                out->setName(Player::LongName,      race("name").toString());
+                out->setName(Player::ShortName,     race("shortname").toString());
                 out->setName(Player::AdjectiveName, race("adjective").toString());
                 out->setOriginalNames();
             }
 
             // Other names
-            out->setName(Player::UserName, in("username").toString());
+            out->setName(Player::UserName,     in("username").toString());
             out->setName(Player::EmailAddress, in("email").toString());
-
-            // Other attributes:
-            // "status":1,
-            // "statusturn":0,
-            // "accountid":860,
-            // "teamid":0,
-            // "prioritypoints":0,
-            // "joinrank":0,
-            // "finishrank":0,
-            // "turnjoined":1,
-            // "turnready":false,
-            // "turnreadydate":"",
-            // "turnstatus":1,
-            // "turnsmissed":0,
-            // "turnsmissedtotal":0,
-            // "turnsholiday":0,
-            // "turnsearly":0,
-            // "turn":1,
-            // "timcontinuum":0,
-            // "activehulls":"",
-            // "activeadvantages":"",
-            // "savekey":"",
-            // "tutorialid":1,
-            // "tutorialtaskid":0,
-            // "megacredits":0,
-            // "duranium":0,
-            // "tritanium":0,
-            // "molybdenum":0,
-            // "id":1
         } else {
             m_log.write(LogListener::Warn, LOG_NAME, Format(m_translator("Invalid player number %d, entry has been ignored"), nr));
         }

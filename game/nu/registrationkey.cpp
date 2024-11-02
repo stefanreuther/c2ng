@@ -1,22 +1,18 @@
 /**
   *  \file game/nu/registrationkey.cpp
+  *  \brief Class game::nu::RegistrationKey
   */
 
 #include "game/nu/registrationkey.hpp"
 #include "afl/string/format.hpp"
+#include "util/string.hpp"
 
-game::nu::RegistrationKey::RegistrationKey(afl::data::Access playerObject)
-    : m_status(Unknown),
-      m_line1(playerObject("username").toString()),
-      m_line2(afl::string::Format("Account #%d", playerObject("accountid").toString()))
+game::nu::RegistrationKey::RegistrationKey(afl::data::Access accountObject)
+    : m_status(accountObject("isregistered").toInteger() ? Registered : Unregistered),
+      m_line1(accountObject("account")("username").toString()),
+      m_line2(afl::string::Format("Account #%d", accountObject("account")("id").toString()))
 {
-    String_t email = playerObject("email").toString();
-    if (!email.empty()) {
-        if (!m_line1.empty()) {
-            m_line1 += ", ";
-        }
-        m_line1 += email;
-    }
+    util::addListItem(m_line1, ", ", accountObject("account")("email").toString());
 }
 
 game::nu::RegistrationKey::~RegistrationKey()
@@ -53,10 +49,4 @@ int
 game::nu::RegistrationKey::getMaxTechLevel(TechLevel /*area*/) const
 {
     return (getStatus() == Registered ? 10 : 7);
-}
-
-void
-game::nu::RegistrationKey::setStatus(Status st)
-{
-    m_status = st;
 }

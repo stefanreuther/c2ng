@@ -18,7 +18,7 @@ namespace game { namespace nu {
     /** planets.nu server integration entrypoint.
         Provides functionality for accounts of type "nu" talking to <https://planets.nu/>.
 
-        Basic logic: the asynchronous login() flow is used to obtain an API key using the user/whoami endpoint.
+        Basic logic: the asynchronous login() flow is used to obtain an API key using the /account/login endpoint.
         This will perform user interaction.
         When the API key is known, future commands use that key only.
         If the key expires, operations start to fail.
@@ -61,12 +61,20 @@ namespace game { namespace nu {
         std::auto_ptr<afl::data::Value> callServer(game::browser::Account& acc,
                                                    String_t endpoint,
                                                    const afl::net::HeaderTable& args);
+
         /** Get game list, pre-authenticated.
             The account must have been logged in already.
             If the account is not or no longer logged in, the request will fail.
             @param acc      Account
             @return Result tree from API, hash. Null on error. Owned by BrowserHandler and valid until the next call. */
         afl::data::Access getGameListPreAuthenticated(game::browser::Account& acc);
+
+        /** Get account info, pre-authenticated.
+            The account must have been logged in already.
+            If the account is not or no longer logged in, the request will fail.
+            @param acc      Account
+            @return Result tree from API, hash. Null on error. Owned by BrowserHandler and valid until the next call. */
+        afl::data::Access getAccountInfoPreAuthenticated(game::browser::Account& acc);
 
         /** Access translator.
             @return translator */
@@ -94,6 +102,9 @@ namespace game { namespace nu {
         // Cache:
         std::auto_ptr<afl::data::Value> m_gameList;
         game::browser::Account* m_gameListAccount;
+
+        std::auto_ptr<afl::data::Value> m_accountInfo;
+        game::browser::Account* m_accountInfoAccount;
     };
 
 } }

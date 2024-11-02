@@ -5,10 +5,15 @@
 
 #include "util/io.hpp"
 #include "afl/base/growablememory.hpp"
+#include "afl/data/defaultvaluefactory.hpp"
 #include "afl/except/fileproblemexception.hpp"
+#include "afl/io/bufferedstream.hpp"
+#include "afl/io/constmemorystream.hpp"
 #include "afl/io/directory.hpp"
 #include "afl/io/directoryentry.hpp"
+#include "afl/io/json/parser.hpp"
 #include "afl/io/multidirectory.hpp"
+#include "util/stringparser.hpp"
 
 bool
 util::storePascalString(afl::io::DataSink& out, const String_t& str, afl::charset::Charset& charset)
@@ -139,5 +144,48 @@ util::makeSearchDirectory(afl::io::FileSystem& fs, afl::base::Memory<const Strin
             dir->addDirectory(fs.openDirectory(*p));
         }
         return dir;
+    }
+}
+
+std::auto_ptr<afl::data::Value>
+util::parseJSON(afl::base::ConstBytes_t data)
+{
+    afl::data::DefaultValueFactory factory;
+    afl::io::ConstMemoryStream cms(data);
+    afl::io::BufferedStream buf(cms);
+    return std::auto_ptr<afl::data::Value>(afl::io::json::Parser(buf, factory).parseComplete());
+}
+
+afl::data::Access
+util::findArrayItemById(afl::data::Access array, String_t key, int value)
+{
+    for (size_t i = 0, n = array.getArraySize(); i < n; ++i) {
+        afl::data::Access ele = array[i], thisKey = ele(key);
+        if (thisKey.getValue() != 0 && thisKey.toInteger() == value) {
+            return ele;
+        }
+    }
+    return afl::data::Access();
+}
+
+void
+util::toIntegerList(afl::data::IntegerList_t& list, afl::data::Access value)
+{
+    if (size_t n = value.getArraySize()) {
+        // Array
+        for (size_t i = 0; i < n; ++i) {
+            list.push_back(value[i].toInteger());
+        }
+    } else {
+        // String (also handles integer case)
+        StringParser p(value.toString());
+        while (!p.parseEnd()) {
+            int i = 0;
+            if (p.parseInt(i)) {
+                list.push_back(i);
+            } else {
+                p.consumeCharacter();
+            }
+        }
     }
 }
