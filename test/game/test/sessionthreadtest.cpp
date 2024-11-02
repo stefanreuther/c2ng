@@ -5,7 +5,7 @@
 
 #include "game/test/sessionthread.hpp"
 
-#include "afl/io/nullfilesystem.hpp"
+#include "afl/io/internalfilesystem.hpp"
 #include "afl/sys/semaphore.hpp"
 #include "afl/test/testrunner.hpp"
 
@@ -47,7 +47,8 @@ AFL_TEST("game.test.SessionThread:basics", a)
     E: file system is published in session */
 AFL_TEST("game.test.SessionThread:fileSystem", a)
 {
-    afl::io::NullFileSystem fs;
+    afl::io::InternalFileSystem fs;
+    fs.openFile("/x", afl::io::FileSystem::Create);
     game::test::SessionThread testee(fs);
-    a.checkEqual("01. fileSystem", &testee.session().world().fileSystem(), &fs);
+    AFL_CHECK_SUCCEEDS(a("01. fileSystem"), testee.session().world().fileSystem().openFile("/x", afl::io::FileSystem::OpenRead));
 }

@@ -254,7 +254,8 @@ namespace game {
         afl::base::Ptr<game::spec::ShipList> m_shipList;
         afl::base::Ptr<Game> m_game;
         game::interface::UserInterfacePropertyStack m_uiPropertyStack;
-        interpreter::World m_world;
+        std::auto_ptr<afl::io::FileSystem> m_fileSystem;
+        std::auto_ptr<interpreter::World> m_world;
 
         /** System information. */
         util::SystemInformation m_systemInformation;
@@ -306,13 +307,13 @@ game::Session::log()
 inline void
 game::Session::logError(const interpreter::Error& e)
 {
-    m_world.logError(m_log.Error, e);
+    m_world->logError(m_log.Error, e);
 }
 
 inline afl::string::Translator&
 game::Session::translator() const
 {
-    return m_world.translator();
+    return m_world->translator();
 }
 
 inline const afl::base::Ptr<game::Root>&
@@ -336,7 +337,7 @@ game::Session::getGame()
 inline interpreter::World&
 game::Session::world()
 {
-    return m_world;
+    return *m_world;
 }
 
 #endif

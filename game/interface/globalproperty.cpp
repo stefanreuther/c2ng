@@ -86,6 +86,9 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
 
            The game directory is the directory containing the current game's files.
 
+           For virtual directories (network game), contains the value "game:";
+           using that in a file name will cause the virtual game directory to be used.
+
            @diff In PCC 1.x, it is possible to concatenate this property with a file name
            to access a file in the game directory.
            This does no longer work in PCC2.
@@ -93,12 +96,12 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
            | Open MakeFileName(System.GameDirectory, "file.txt") For Input As #1
            to access files in the game directory.
 
-           @diff In c2ng, this value may be EMPTY if a game is loaded,
+           @diff In c2ng up to 2.41.2, this value is EMPTY if a game is loaded,
            but the game directory is a virtual directory (e.g. network game). */
         if (Root* root = session.getRoot().get()) {
             String_t dirName = root->gameDirectory().getDirectoryName();
             if (dirName.empty()) {
-                return 0;
+                return makeStringValue("game:");
             } else {
                 return makeStringValue(dirName);
             }

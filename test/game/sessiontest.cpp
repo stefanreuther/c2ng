@@ -7,7 +7,10 @@
 
 #include "afl/charset/codepage.hpp"
 #include "afl/charset/codepagecharset.hpp"
+#include "afl/charset/utf8charset.hpp"
 #include "afl/data/access.hpp"
+#include "afl/except/fileproblemexception.hpp"
+#include "afl/io/internaldirectory.hpp"
 #include "afl/io/internalfilesystem.hpp"
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
@@ -28,7 +31,10 @@
 #include <memory>
 
 using afl::base::Ptr;
+using afl::base::Ref;
+using afl::except::FileProblemException;
 using afl::io::FileSystem;
+using afl::io::InternalDirectory;
 using afl::io::InternalFileSystem;
 using afl::io::NullFileSystem;
 using afl::string::NullTranslator;
@@ -79,12 +85,114 @@ AFL_TEST("game.Session:subobjects", a)
     const game::Session& cs(s);
 
     a.checkEqual("01. translator", &s.translator(), &tx);
-    a.checkEqual("02. fileSystem", &s.world().fileSystem(), &fs);
+    // a.checkEqual("02. fileSystem", &s.world().fileSystem(), &fs); -- moved to next test
 
     a.checkEqual("11. uiPropertyStack", &s.uiPropertyStack(), &cs.uiPropertyStack());
     a.checkEqual("12. notifications", &s.notifications(), &cs.notifications());
     // a.checkEqual("13", &s.world(), &cs.world());
     a.checkEqual("14. processList", &s.processList(), &cs.processList());
+}
+
+/** Test file system subobject, metadata operations.
+    Session now provides a virtualized file system.
+    Verify its correct operation.
+    A: create a session. Check FileSystem methods.
+    E: correct result */
+AFL_TEST("game.Session:filesystem:meta", a)
+{
+    InternalFileSystem fs;
+    NullTranslator tx;
+    game::Session s(tx, fs);
+
+    FileSystem& sfs = s.world().fileSystem();
+
+    // isPathSeparator
+    a.check("01. isPathSeparator",  sfs.isPathSeparator('/'));
+    a.check("02. isPathSeparator", !sfs.isPathSeparator('a'));
+
+    // makePathName
+    a.checkEqual("11. makePathName", sfs.makePathName("a",       "b"),  "a/b");
+    a.checkEqual("12. makePathName", sfs.makePathName("a/",      "b"),  "a/b");
+    a.checkEqual("13. makePathName", sfs.makePathName("game:a/", "b"),  "game:a/b");
+    a.checkEqual("14. makePathName", sfs.makePathName("game:",   "b"),  "game:b");
+    a.checkEqual("15. makePathName", sfs.makePathName("game:",   "/b"), "/b");
+    a.checkEqual("16. makePathName", sfs.makePathName("game:.",  "c"),  "game:c");
+
+    // getCanonicalPathName
+    a.checkEqual("21. getCanonicalPathName", sfs.getCanonicalPathName("a/b/../c"),      "a/c");
+    a.checkEqual("22. getCanonicalPathName", sfs.getCanonicalPathName("game:a/b/../c"), "game:a/c");
+
+    // getAbsolutePathName
+    a.checkEqual("21. getAbsolutePathName", sfs.getAbsolutePathName("a/b/../c"),      "/a/c");
+    a.checkEqual("22. getAbsolutePathName", sfs.getAbsolutePathName("game:a/b/../c"), "game:a/c");
+
+    // getFileName
+    a.checkEqual("31. getFileName", sfs.getFileName("a/b/c"),    "c");
+    a.checkEqual("32. getFileName", sfs.getFileName("a"),        "a");
+    a.checkEqual("33. getFileName", sfs.getFileName("game:x"),   "x");
+    a.checkEqual("34. getFileName", sfs.getFileName("game:x/y"), "y");
+
+    // getDirectoryName
+    a.checkEqual("41. getDirectoryName", sfs.getDirectoryName("a/b/c"),    "a/b");
+    a.checkEqual("42. getDirectoryName", sfs.getDirectoryName("a"),        ".");
+    a.checkEqual("43. getDirectoryName", sfs.getDirectoryName("game:x"),   "game:.");
+    a.checkEqual("44. getDirectoryName", sfs.getDirectoryName("game:x/y"), "game:x");
+
+    // getWorkingDirectoryName
+    a.checkEqual("51. getWorkingDirectoryName", sfs.getWorkingDirectoryName(), fs.getWorkingDirectoryName());
+}
+
+/** Test opening files.
+    A: create a session. Use open() methods
+    E: calls targeted at FileSystem succeed, targeted at game fail */
+AFL_TEST("game.Session:filesystem:open:no-game", a)
+{
+    InternalFileSystem fs;
+    fs.openFile("/x", FileSystem::Create);
+    fs.openFile("game:", FileSystem::Create);
+    NullTranslator tx;
+    game::Session s(tx, fs);
+
+    FileSystem& sfs = s.world().fileSystem();
+
+    // Success cases
+    AFL_CHECK_SUCCEEDS(a("01. open root"), sfs.openFile("/x", FileSystem::OpenRead));
+    AFL_CHECK_SUCCEEDS(a("02. read dir"),  sfs.openDirectory("/")->getDirectoryEntries());
+    AFL_CHECK_SUCCEEDS(a("03. read root"), sfs.openRootDirectory()->getDirectoryEntries());
+
+    // Error cases
+    AFL_CHECK_THROWS(a("11. open root"), sfs.openFile("game:", FileSystem::OpenRead), FileProblemException);
+    AFL_CHECK_THROWS(a("12. read dir"),  sfs.openDirectory("game:")->getDirectoryEntries(), FileProblemException);
+}
+
+/** Test opening files, with game present.
+    A: create a session. Add root with game directory. Use open() methods
+    E: calls targeted at game succeed */
+AFL_TEST("game.Session:filesystem:open:game", a)
+{
+    InternalFileSystem fs;
+    NullTranslator tx;
+    game::Session s(tx, fs);
+
+    // Root with game directory
+    Ref<InternalDirectory> dir = InternalDirectory::create("gamedir");
+    dir->openFile("a", FileSystem::Create);
+    s.setRoot(new game::Root(dir,
+                             *new game::test::SpecificationLoader(),
+                             game::HostVersion(),
+                             std::auto_ptr<game::RegistrationKey>(new game::test::RegistrationKey(game::RegistrationKey::Registered, 9)),
+                             std::auto_ptr<game::StringVerifier>(new game::test::StringVerifier()),
+                             std::auto_ptr<afl::charset::Charset>(new afl::charset::Utf8Charset()),
+                             game::Root::Actions_t()));
+
+    FileSystem& sfs = s.world().fileSystem();
+
+    // These now succeed
+    AFL_CHECK_SUCCEEDS(a("01. open file"), sfs.openFile("game:a", FileSystem::OpenRead));
+    AFL_CHECK_SUCCEEDS(a("02. open file"), sfs.openFile("game:/a", FileSystem::OpenRead));
+    AFL_CHECK_SUCCEEDS(a("03. read dir"),  sfs.openDirectory("game:")->getDirectoryEntries());
+    AFL_CHECK_SUCCEEDS(a("04. read dir"),  sfs.openDirectory("game:.")->getDirectoryEntries());
+    AFL_CHECK_SUCCEEDS(a("05. read dir"),  sfs.openDirectory("game:/")->getDirectoryEntries());
 }
 
 /** Test getReferenceName().

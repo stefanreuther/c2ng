@@ -137,6 +137,9 @@ namespace {
 
        Operations with this file will use <a href="int:index:type:file">file number</a> %file.
        If that number already referred to an existing file before, that one will be closed first.
+
+       @see int:basic:fileio|Accessing Files
+
        @since PCC2 1.99.12, PCC 1.0.13, PCC2 2.40.1 */
     class SFOpen : public interpreter::SpecialCommand {
      public:

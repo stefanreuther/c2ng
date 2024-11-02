@@ -196,7 +196,7 @@ AFL_TEST("game.interface.GlobalProperty:half", a)
     // Verify
     verifyNewNull   (a("igpFileFormatLocal"),   getGlobalProperty(game::interface::igpFileFormatLocal,   session));
     verifyNewNull   (a("igpFileFormatRemote"),  getGlobalProperty(game::interface::igpFileFormatRemote,  session));
-    verifyNewNull   (a("igpGameDirectory"),     getGlobalProperty(game::interface::igpGameDirectory,     session));
+    verifyNewString (a("igpGameDirectory"),     getGlobalProperty(game::interface::igpGameDirectory,     session), "game:");
     verifyNewInteger(a("igpMyInMsgs"),          getGlobalProperty(game::interface::igpMyInMsgs,          session), 0);
     verifyNewInteger(a("igpMyOutMsgs"),         getGlobalProperty(game::interface::igpMyOutMsgs,         session), 0);
     verifyNewInteger(a("igpMyVCRs"),            getGlobalProperty(game::interface::igpMyVCRs,            session), 0);

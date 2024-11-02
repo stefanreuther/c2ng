@@ -40,7 +40,7 @@ AFL_TEST("game.proxy.ObjectListExportAdaptor:normal", a)
     game::proxy::ObjectListExportAdaptor testee(s, game::proxy::ObjectListExportAdaptor::Planets, ids);
 
     // Verify links
-    a.checkEqual("01. fileSystem", &testee.fileSystem(), &fs);
+    a.checkEqual("01. fileSystem", &testee.fileSystem(), &s.world().fileSystem());
     a.checkEqual("02. translator", &testee.translator(), &tx);
 
     // Verify configuration access

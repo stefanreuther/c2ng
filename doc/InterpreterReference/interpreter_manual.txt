@@ -267,7 +267,14 @@ If you wish to build a file name, you should therefore use the {MakeFileName} fu
 to split a file name into components, use {GetFileName} and {GetDirectoryName}.
 
 In PCC 1.x, you could just concatenate a directory name such as {System.GameDirectory} and a file name.
-This does no longer work in PCC2!
+This does no longer work reliably in PCC2!
+
+<h2>Network Play</h2>
+
+PCC2NG also supports network play, where your game directory is on a server.
+Since version 2.41.3, files in the server-side game directory can also be accessed using regular file operations.
+Therefore, all functions accept the special syntax "game:XYZ" to refer to a file "XYZ" in the game directory,
+no matter where it is located.
 
 <h2>Pitfalls</h2>
 
@@ -279,6 +286,8 @@ File I/O is buffered.
 When you write something to a file, the change may not immediately show up on the disk.
 If you open the same file on another file number, that other file number will also not immediately see the changes.
 Changes will be written out when you call <tt>{Close}</tt>.
+
+For network play, files will appear on the network side after <tt>{SaveGame}</tt>.
 --------------------------------------------------------------------------------
 
 

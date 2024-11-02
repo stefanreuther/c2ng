@@ -10,6 +10,10 @@ PCC2ng NEWS FILE
   allow the c2play-server to publish those, and eventually allow
   adding more features to the Web client.
 
+  Reworked network play. For PlanetsCentral, the whole game directory
+  is now taken from the server, and can be accessed by scripts as
+  using file name "game:whatever.txt".
+
 
 2.41.2
 ------

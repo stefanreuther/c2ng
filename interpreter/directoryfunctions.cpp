@@ -303,6 +303,8 @@ namespace {
        The "." and ".." entries are not returned.
 
        @see int:index:group:fileproperty|File Properties
+       @see int:basic:fileio|Accessing Files
+
        @since PCC2 2.0.4, PCC2 2.41.1 */
     afl::data::Value* IFDirectoryEntry(World& world, Arguments& args)
     {

@@ -4,8 +4,10 @@
   */
 
 #include "game/session.hpp"
+#include "afl/except/fileproblemexception.hpp"
 #include "afl/io/textfile.hpp"
 #include "afl/string/format.hpp"
+#include "afl/string/messages.hpp"
 #include "afl/sys/time.hpp"
 #include "game/game.hpp"
 #include "game/interface/beamfunction.hpp"
@@ -59,6 +61,7 @@
 #include "interpreter/taskeditor.hpp"
 #include "interpreter/tokenizer.hpp"
 #include "interpreter/values.hpp"
+#include "util/string.hpp"
 
 namespace {
     using afl::string::Format;
@@ -69,7 +72,159 @@ namespace {
         - PCC2: 101, defining a range of allowing 0..100, which are all accessible to the user
           (but slot 0 is never returned by FreeFile()) */
     const size_t MAX_SCRIPT_FILES = 101;
+
+    const char* checkGamePath(const String_t& fn)
+    {
+        if (const char* p = util::strStartsWith(fn, "game:")) {
+            while (*p == '/') {
+                ++p;
+            }
+            return p;
+        } else {
+            return 0;
+        }
+    }
+
+    /*
+     *  FileSystem adapter
+     *
+     *  This implements the "game:" syntax for file names.
+     *  Implementing it at this place makes it available everywhere,
+     *  not just in interpreted code.
+     */
+
+    class SessionFSAdapter : public afl::io::FileSystem {
+     public:
+        SessionFSAdapter(afl::io::FileSystem& fs, game::Session& session)
+            : m_base(fs),
+              m_session(session)
+            { }
+        virtual afl::base::Ref<afl::io::Stream> openFile(FileName_t fileName, OpenMode mode);
+        virtual afl::base::Ref<afl::io::Directory> openDirectory(FileName_t dirName);
+        virtual afl::base::Ref<afl::io::Directory> openRootDirectory();
+        virtual bool isAbsolutePathName(FileName_t path);
+        virtual bool isPathSeparator(char c);
+        virtual FileName_t makePathName(FileName_t path, FileName_t name);
+        virtual FileName_t getCanonicalPathName(FileName_t name);
+        virtual FileName_t getAbsolutePathName(FileName_t name);
+        virtual FileName_t getFileName(FileName_t name);
+        virtual FileName_t getDirectoryName(FileName_t name);
+        virtual FileName_t getWorkingDirectoryName();
+
+     private:
+        afl::io::FileSystem& m_base;
+        game::Session& m_session;
+    };
+
+    /*
+     *  Out-of-line implementation.
+     *  Some gcc versions overdo it with inlining and blow up the code size 2-10x per function
+     *  ("if m_base is a SessionFSAdapter as well, we can save the virtual dispatch").
+     */
+
+    afl::base::Ref<afl::io::Stream> SessionFSAdapter::openFile(FileName_t fileName, OpenMode mode)
+    {
+        if (const char* p = checkGamePath(fileName)) {
+            if (game::Root* r = m_session.getRoot().get()) {
+                return r->gameDirectory().openFile(p, mode);
+            } else {
+                throw afl::except::FileProblemException(fileName, afl::string::Messages::fileNotFound());
+            }
+        } else {
+            return m_base.openFile(fileName, mode);
+        }
+    }
+
+    afl::base::Ref<afl::io::Directory> SessionFSAdapter::openDirectory(FileName_t dirName)
+    {
+        if (const char* p = checkGamePath(dirName)) {
+            if (game::Root* r = m_session.getRoot().get()) {
+                if (std::strcmp(p, "") == 0 || std::strcmp(p, ".") == 0) {
+                    // This supports "openDirectory("game:")" without requiring the game directory to support openDirectory() itself.
+                    return r->gameDirectory();
+                } else {
+                    return r->gameDirectory().openDirectory(p);
+                }
+            } else {
+                throw afl::except::FileProblemException(dirName, afl::string::Messages::fileNotFound());
+            }
+        } else {
+            return m_base.openDirectory(dirName);
+        }
+    }
+
+    afl::base::Ref<afl::io::Directory> SessionFSAdapter::openRootDirectory()
+    {
+        return m_base.openRootDirectory();
+    }
+
+    bool SessionFSAdapter::isAbsolutePathName(FileName_t path)
+    {
+        return checkGamePath(path) != 0
+            || m_base.isAbsolutePathName(path);
+    }
+
+    bool SessionFSAdapter::isPathSeparator(char c)
+    {
+        return m_base.isPathSeparator(c);
+    }
+
+    SessionFSAdapter::FileName_t SessionFSAdapter::makePathName(FileName_t path, FileName_t name)
+    {
+        if (isAbsolutePathName(name)) {
+            return name;
+        } else if (const char* p = checkGamePath(path)) {
+            return "game:" + m_base.makePathName(p, name);
+        } else {
+            return m_base.makePathName(path, name);
+        }
+    }
+
+    SessionFSAdapter::FileName_t SessionFSAdapter::getCanonicalPathName(FileName_t name)
+    {
+        if (const char* p = checkGamePath(name)) {
+            return "game:" + m_base.getCanonicalPathName(p);
+        } else {
+            return m_base.getCanonicalPathName(name);
+        }
+    }
+
+    SessionFSAdapter::FileName_t SessionFSAdapter::getAbsolutePathName(FileName_t name)
+    {
+        if (const char* p = checkGamePath(name)) {
+            return "game:" + m_base.getCanonicalPathName(p);
+        } else {
+            return m_base.getAbsolutePathName(name);
+        }
+    }
+
+    SessionFSAdapter::FileName_t SessionFSAdapter::getFileName(FileName_t name)
+    {
+        if (const char* p = checkGamePath(name)) {
+            return m_base.getFileName(p);
+        } else {
+            return m_base.getFileName(name);
+        }
+    }
+
+    SessionFSAdapter::FileName_t SessionFSAdapter::getDirectoryName(FileName_t name)
+    {
+        if (const char* p = checkGamePath(name)) {
+            return "game:" + m_base.getDirectoryName(p);
+        } else {
+            return m_base.getDirectoryName(name);
+        }
+    }
+
+    SessionFSAdapter::FileName_t SessionFSAdapter::getWorkingDirectoryName()
+    {
+        return m_base.getWorkingDirectoryName();
+    }
 }
+
+/*
+ *  Session
+ */
 
 game::Session::Session(afl::string::Translator& tx, afl::io::FileSystem& fs)
     : sig_runRequest(),
@@ -79,7 +234,8 @@ game::Session::Session(afl::string::Translator& tx, afl::io::FileSystem& fs)
       m_shipList(),
       m_game(),
       m_uiPropertyStack(),
-      m_world(m_log, tx, fs),
+      m_fileSystem(),
+      m_world(),
       m_systemInformation(),
       m_processList(),
       m_rng(afl::sys::Time::getTickCounter()),
@@ -91,6 +247,8 @@ game::Session::Session(afl::string::Translator& tx, afl::io::FileSystem& fs)
       conn_hostConfigToMap(),
       conn_userConfigToMap()
 {
+    m_fileSystem.reset(new SessionFSAdapter(fs, *this));
+    m_world.reset(new interpreter::World(m_log, tx, *m_fileSystem));
     initWorld();
 }
 
@@ -181,7 +339,7 @@ game::Session::getAutoTaskEditor(Id_t id, interpreter::Process::ProcessKind kind
                         : kind == Process::pkPlanetTask
                         ? translator()("Auto Task Planet %d")
                         : translator()("Auto Task Starbase %d"));
-        proc = &processList().create(m_world, afl::string::Format(fmt, id));
+        proc = &processList().create(*m_world, afl::string::Format(fmt, id));
 
         // Place in appropriate context
         // (Note that this fails if the Session is not fully-populated, e.g. has no ship list.)
@@ -374,7 +532,7 @@ game::Session::notifyListeners()
     if (Game* g = m_game.get()) {
         g->notifyListeners();
     }
-    m_world.notifyListeners();
+    m_world->notifyListeners();
 }
 
 afl::base::Optional<String_t>
@@ -513,11 +671,11 @@ game::Session::getComment(Scope scope, int id) const
 {
     switch (scope) {
      case Ship:
-        return interpreter::toString(m_world.shipProperties().get(id, interpreter::World::sp_Comment), false);
+        return interpreter::toString(m_world->shipProperties().get(id, interpreter::World::sp_Comment), false);
 
      case Planet:
      case Base:
-        return interpreter::toString(m_world.planetProperties().get(id, interpreter::World::pp_Comment), false);
+        return interpreter::toString(m_world->planetProperties().get(id, interpreter::World::pp_Comment), false);
     }
     return String_t();
 }
@@ -572,102 +730,102 @@ game::Session::initWorld()
     typedef interpreter::SimpleFunction<Session&> SessionFunction_t;
     typedef interpreter::SimpleProcedure<Session&> SessionProcedure_t;
     typedef interpreter::SimpleFunction<void> GlobalFunction_t;
-    m_world.setNewGlobalValue("AUTOTASK",      new SessionFunction_t(*this, game::interface::IFAutoTask));
-    m_world.setNewGlobalValue("BEAM",          new game::interface::BeamFunction(*this));
-    m_world.setNewGlobalValue("CADD",          new GlobalFunction_t(game::interface::IFCAdd));
-    m_world.setNewGlobalValue("CC$NOTIFYCONFIRMED", new game::interface::NotifyConfirmedFunction(*this));
-    m_world.setNewGlobalValue("CCOMPARE",      new GlobalFunction_t(game::interface::IFCCompare));
-    m_world.setNewGlobalValue("CDIV",          new GlobalFunction_t(game::interface::IFCDiv));
-    m_world.setNewGlobalValue("CEXTRACT",      new GlobalFunction_t(game::interface::IFCExtract));
-    m_world.setNewGlobalValue("CFG",           new SessionFunction_t(*this, game::interface::IFCfg));
-    m_world.setNewGlobalValue("CMUL",          new GlobalFunction_t(game::interface::IFCMul));
-    m_world.setNewGlobalValue("CREMOVE",       new GlobalFunction_t(game::interface::IFCRemove));
-    m_world.setNewGlobalValue("CSUB",          new GlobalFunction_t(game::interface::IFCSub));
-    m_world.setNewGlobalValue("DISTANCE",      new SessionFunction_t(*this, game::interface::IFDistance));
-    m_world.setNewGlobalValue("ENGINE",        new game::interface::EngineFunction(*this));
-    m_world.setNewGlobalValue("EXPLOSION",     new game::interface::ExplosionFunction(*this));
-    m_world.setNewGlobalValue("FORMAT",        new SessionFunction_t(*this, game::interface::IFFormat));
-    m_world.setNewGlobalValue("FCODE",         new game::interface::FriendlyCodeFunction(*this));
-    m_world.setNewGlobalValue("GETCOMMAND",    new SessionFunction_t(*this, game::interface::IFGetCommand));
-    m_world.setNewGlobalValue("HULL",          new game::interface::HullFunction(*this));
-    m_world.setNewGlobalValue("INMSG",         new game::interface::InboxFunction(*this));
-    m_world.setNewGlobalValue("ISSPECIALFCODE", new SessionFunction_t(*this, game::interface::IFIsSpecialFCode));
-    m_world.setNewGlobalValue("ITERATOR",      new SessionFunction_t(*this, game::interface::IFIterator));
-    m_world.setNewGlobalValue("LAUNCHER",      new game::interface::TorpedoFunction(true, *this));
-    m_world.setNewGlobalValue("MARKER" ,       new game::interface::DrawingFunction(*this));
-    m_world.setNewGlobalValue("MINEFIELD",     new game::interface::MinefieldFunction(*this));
-    m_world.setNewGlobalValue("MISSION",       new game::interface::MissionFunction(*this));
-    m_world.setNewGlobalValue("OBJECTISAT",    new SessionFunction_t(*this, game::interface::IFObjectIsAt));
-    m_world.setNewGlobalValue("MISSIONDEFINITIONS", new SessionFunction_t(*this, game::interface::IFMissionDefinitions));
-    m_world.setNewGlobalValue("PLANET",        new game::interface::PlanetFunction(*this));
-    m_world.setNewGlobalValue("PLANETAT",      new SessionFunction_t(*this, game::interface::IFPlanetAt));
-    m_world.setNewGlobalValue("PLAYER",        new game::interface::PlayerFunction(*this));
-    m_world.setNewGlobalValue("PREF",          new SessionFunction_t(*this, game::interface::IFPref));
-    m_world.setNewGlobalValue("QUOTE",         new SessionFunction_t(*this, game::interface::IFQuote));
-    m_world.setNewGlobalValue("RANDOM",        new SessionFunction_t(*this, game::interface::IFRandom));
-    m_world.setNewGlobalValue("RANDOMFCODE",   new SessionFunction_t(*this, game::interface::IFRandomFCode));
-    m_world.setNewGlobalValue("SHIP",          new game::interface::ShipFunction(*this));
-    m_world.setNewGlobalValue("STORM",         new game::interface::IonStormFunction(*this));
-    m_world.setNewGlobalValue("SYSTEM.PLUGIN", new SessionFunction_t(*this, game::interface::IFSystemPlugin));
-    m_world.setNewGlobalValue("TORPEDO",       new game::interface::TorpedoFunction(false, *this));
-    m_world.setNewGlobalValue("TRANSLATE",     new SessionFunction_t(*this, game::interface::IFTranslate));
-    m_world.setNewGlobalValue("TRUEHULL",      new SessionFunction_t(*this, game::interface::IFTruehull));
-    m_world.setNewGlobalValue("UFO",           new game::interface::UfoFunction(*this));
-    m_world.setNewGlobalValue("VCR",           new game::interface::VcrFunction(*this));
+    m_world->setNewGlobalValue("AUTOTASK",      new SessionFunction_t(*this, game::interface::IFAutoTask));
+    m_world->setNewGlobalValue("BEAM",          new game::interface::BeamFunction(*this));
+    m_world->setNewGlobalValue("CADD",          new GlobalFunction_t(game::interface::IFCAdd));
+    m_world->setNewGlobalValue("CC$NOTIFYCONFIRMED", new game::interface::NotifyConfirmedFunction(*this));
+    m_world->setNewGlobalValue("CCOMPARE",      new GlobalFunction_t(game::interface::IFCCompare));
+    m_world->setNewGlobalValue("CDIV",          new GlobalFunction_t(game::interface::IFCDiv));
+    m_world->setNewGlobalValue("CEXTRACT",      new GlobalFunction_t(game::interface::IFCExtract));
+    m_world->setNewGlobalValue("CFG",           new SessionFunction_t(*this, game::interface::IFCfg));
+    m_world->setNewGlobalValue("CMUL",          new GlobalFunction_t(game::interface::IFCMul));
+    m_world->setNewGlobalValue("CREMOVE",       new GlobalFunction_t(game::interface::IFCRemove));
+    m_world->setNewGlobalValue("CSUB",          new GlobalFunction_t(game::interface::IFCSub));
+    m_world->setNewGlobalValue("DISTANCE",      new SessionFunction_t(*this, game::interface::IFDistance));
+    m_world->setNewGlobalValue("ENGINE",        new game::interface::EngineFunction(*this));
+    m_world->setNewGlobalValue("EXPLOSION",     new game::interface::ExplosionFunction(*this));
+    m_world->setNewGlobalValue("FORMAT",        new SessionFunction_t(*this, game::interface::IFFormat));
+    m_world->setNewGlobalValue("FCODE",         new game::interface::FriendlyCodeFunction(*this));
+    m_world->setNewGlobalValue("GETCOMMAND",    new SessionFunction_t(*this, game::interface::IFGetCommand));
+    m_world->setNewGlobalValue("HULL",          new game::interface::HullFunction(*this));
+    m_world->setNewGlobalValue("INMSG",         new game::interface::InboxFunction(*this));
+    m_world->setNewGlobalValue("ISSPECIALFCODE", new SessionFunction_t(*this, game::interface::IFIsSpecialFCode));
+    m_world->setNewGlobalValue("ITERATOR",      new SessionFunction_t(*this, game::interface::IFIterator));
+    m_world->setNewGlobalValue("LAUNCHER",      new game::interface::TorpedoFunction(true, *this));
+    m_world->setNewGlobalValue("MARKER" ,       new game::interface::DrawingFunction(*this));
+    m_world->setNewGlobalValue("MINEFIELD",     new game::interface::MinefieldFunction(*this));
+    m_world->setNewGlobalValue("MISSION",       new game::interface::MissionFunction(*this));
+    m_world->setNewGlobalValue("OBJECTISAT",    new SessionFunction_t(*this, game::interface::IFObjectIsAt));
+    m_world->setNewGlobalValue("MISSIONDEFINITIONS", new SessionFunction_t(*this, game::interface::IFMissionDefinitions));
+    m_world->setNewGlobalValue("PLANET",        new game::interface::PlanetFunction(*this));
+    m_world->setNewGlobalValue("PLANETAT",      new SessionFunction_t(*this, game::interface::IFPlanetAt));
+    m_world->setNewGlobalValue("PLAYER",        new game::interface::PlayerFunction(*this));
+    m_world->setNewGlobalValue("PREF",          new SessionFunction_t(*this, game::interface::IFPref));
+    m_world->setNewGlobalValue("QUOTE",         new SessionFunction_t(*this, game::interface::IFQuote));
+    m_world->setNewGlobalValue("RANDOM",        new SessionFunction_t(*this, game::interface::IFRandom));
+    m_world->setNewGlobalValue("RANDOMFCODE",   new SessionFunction_t(*this, game::interface::IFRandomFCode));
+    m_world->setNewGlobalValue("SHIP",          new game::interface::ShipFunction(*this));
+    m_world->setNewGlobalValue("STORM",         new game::interface::IonStormFunction(*this));
+    m_world->setNewGlobalValue("SYSTEM.PLUGIN", new SessionFunction_t(*this, game::interface::IFSystemPlugin));
+    m_world->setNewGlobalValue("TORPEDO",       new game::interface::TorpedoFunction(false, *this));
+    m_world->setNewGlobalValue("TRANSLATE",     new SessionFunction_t(*this, game::interface::IFTranslate));
+    m_world->setNewGlobalValue("TRUEHULL",      new SessionFunction_t(*this, game::interface::IFTruehull));
+    m_world->setNewGlobalValue("UFO",           new game::interface::UfoFunction(*this));
+    m_world->setNewGlobalValue("VCR",           new game::interface::VcrFunction(*this));
 
-    m_world.setNewGlobalValue("RADD",          new GlobalFunction_t(game::interface::IFRAdd));
-    m_world.setNewGlobalValue("RALIGN",        new GlobalFunction_t(game::interface::IFRAlign));
-    m_world.setNewGlobalValue("RLEN",          new GlobalFunction_t(game::interface::IFRLen));
-    m_world.setNewGlobalValue("RLINK",         new GlobalFunction_t(game::interface::IFRLink));
-    m_world.setNewGlobalValue("RMID",          new GlobalFunction_t(game::interface::IFRMid));
-    m_world.setNewGlobalValue("RSTRING",       new GlobalFunction_t(game::interface::IFRString));
-    m_world.setNewGlobalValue("RSTYLE",        new GlobalFunction_t(game::interface::IFRStyle));
-    m_world.setNewGlobalValue("RXML",          new GlobalFunction_t(game::interface::IFRXml));
+    m_world->setNewGlobalValue("RADD",          new GlobalFunction_t(game::interface::IFRAdd));
+    m_world->setNewGlobalValue("RALIGN",        new GlobalFunction_t(game::interface::IFRAlign));
+    m_world->setNewGlobalValue("RLEN",          new GlobalFunction_t(game::interface::IFRLen));
+    m_world->setNewGlobalValue("RLINK",         new GlobalFunction_t(game::interface::IFRLink));
+    m_world->setNewGlobalValue("RMID",          new GlobalFunction_t(game::interface::IFRMid));
+    m_world->setNewGlobalValue("RSTRING",       new GlobalFunction_t(game::interface::IFRString));
+    m_world->setNewGlobalValue("RSTYLE",        new GlobalFunction_t(game::interface::IFRStyle));
+    m_world->setNewGlobalValue("RXML",          new GlobalFunction_t(game::interface::IFRXml));
 
-    m_world.setNewGlobalValue("REFERENCE",         new SessionFunction_t(*this, game::interface::IFReference));
-    m_world.setNewGlobalValue("LOCATIONREFERENCE", new SessionFunction_t(*this, game::interface::IFLocationReference));
-    m_world.setNewGlobalValue("REFERENCELIST",     new SessionFunction_t(*this, game::interface::IFReferenceList));
-    m_world.setNewGlobalValue("MAILBOX"      ,     new SessionFunction_t(*this, game::interface::IFMailbox));
+    m_world->setNewGlobalValue("REFERENCE",         new SessionFunction_t(*this, game::interface::IFReference));
+    m_world->setNewGlobalValue("LOCATIONREFERENCE", new SessionFunction_t(*this, game::interface::IFLocationReference));
+    m_world->setNewGlobalValue("REFERENCELIST",     new SessionFunction_t(*this, game::interface::IFReferenceList));
+    m_world->setNewGlobalValue("MAILBOX"      ,     new SessionFunction_t(*this, game::interface::IFMailbox));
 
-    m_world.setNewGlobalValue("CC$SELREADHEADER",  new SessionFunction_t(*this, game::interface::IFCCSelReadHeader));
-    m_world.setNewGlobalValue("CC$SELREADCONTENT", new SessionFunction_t(*this, game::interface::IFCCSelReadContent));
-    m_world.setNewGlobalValue("CC$SELGETQUESTION", new SessionFunction_t(*this, game::interface::IFCCSelGetQuestion));
-    m_world.setNewGlobalValue("SELECTIONSAVE",     new SessionProcedure_t(*this, game::interface::IFSelectionSave));
+    m_world->setNewGlobalValue("CC$SELREADHEADER",  new SessionFunction_t(*this, game::interface::IFCCSelReadHeader));
+    m_world->setNewGlobalValue("CC$SELREADCONTENT", new SessionFunction_t(*this, game::interface::IFCCSelReadContent));
+    m_world->setNewGlobalValue("CC$SELGETQUESTION", new SessionFunction_t(*this, game::interface::IFCCSelGetQuestion));
+    m_world->setNewGlobalValue("SELECTIONSAVE",     new SessionProcedure_t(*this, game::interface::IFSelectionSave));
 
-    m_world.setNewGlobalValue("ADDCOMMAND",       new SessionProcedure_t(*this, game::interface::IFAddCommand));
-    m_world.setNewGlobalValue("ADDCONFIG",        new SessionProcedure_t(*this, game::interface::IFAddConfig));
-    m_world.setNewGlobalValue("ADDFCODE",         new SessionProcedure_t(*this, game::interface::IFAddFCode));
-    m_world.setNewGlobalValue("ADDPREF",          new SessionProcedure_t(*this, game::interface::IFAddPref));
-    m_world.setNewGlobalValue("AUTHPLAYER",       new SessionProcedure_t(*this, game::interface::IFAuthPlayer));
-    m_world.setNewGlobalValue("CC$HISTORY.SHOWTURN", new SessionProcedure_t(*this, game::interface::IFCCHistoryShowTurn));
-    m_world.setNewGlobalValue("CC$NOTIFY",        new SessionProcedure_t(*this, game::interface::IFCCNotify));
-    m_world.setNewGlobalValue("CC$NUMNOTIFICATIONS", new SessionFunction_t(*this, game::interface::IFCCNumNotifications));
-    m_world.setNewGlobalValue("CC$SELECTIONEXEC", new SessionProcedure_t(*this, game::interface::IFCCSelectionExec));
-    m_world.setNewGlobalValue("CREATECONFIGOPTION", new SessionProcedure_t(*this, game::interface::IFCreateConfigOption));
-    m_world.setNewGlobalValue("CREATEPREFOPTION", new SessionProcedure_t(*this, game::interface::IFCreatePrefOption));
-    m_world.setNewGlobalValue("DELETECOMMAND",    new SessionProcedure_t(*this, game::interface::IFDeleteCommand));
-    m_world.setNewGlobalValue("EXPORT",           new SessionProcedure_t(*this, game::interface::IFExport));
-    m_world.setNewGlobalValue("HISTORY.LOADTURN", new SessionProcedure_t(*this, game::interface::IFHistoryLoadTurn));
-    m_world.setNewGlobalValue("NEWCANNEDMARKER",  new SessionProcedure_t(*this, game::interface::IFNewCannedMarker));
-    m_world.setNewGlobalValue("NEWCIRCLE",        new SessionProcedure_t(*this, game::interface::IFNewCircle));
-    m_world.setNewGlobalValue("NEWLINE",          new SessionProcedure_t(*this, game::interface::IFNewLine));
-    m_world.setNewGlobalValue("NEWLINERAW",       new SessionProcedure_t(*this, game::interface::IFNewLineRaw));
-    m_world.setNewGlobalValue("NEWMARKER",        new SessionProcedure_t(*this, game::interface::IFNewMarker));
-    m_world.setNewGlobalValue("NEWRECTANGLE",     new SessionProcedure_t(*this, game::interface::IFNewRectangle));
-    m_world.setNewGlobalValue("NEWRECTANGLERAW",  new SessionProcedure_t(*this, game::interface::IFNewRectangleRaw));
-    m_world.setNewGlobalValue("SAVEGAME",         new SessionProcedure_t(*this, game::interface::IFSaveGame));
-    m_world.setNewGlobalValue("SENDMESSAGE",      new SessionProcedure_t(*this, game::interface::IFSendMessage));
+    m_world->setNewGlobalValue("ADDCOMMAND",       new SessionProcedure_t(*this, game::interface::IFAddCommand));
+    m_world->setNewGlobalValue("ADDCONFIG",        new SessionProcedure_t(*this, game::interface::IFAddConfig));
+    m_world->setNewGlobalValue("ADDFCODE",         new SessionProcedure_t(*this, game::interface::IFAddFCode));
+    m_world->setNewGlobalValue("ADDPREF",          new SessionProcedure_t(*this, game::interface::IFAddPref));
+    m_world->setNewGlobalValue("AUTHPLAYER",       new SessionProcedure_t(*this, game::interface::IFAuthPlayer));
+    m_world->setNewGlobalValue("CC$HISTORY.SHOWTURN", new SessionProcedure_t(*this, game::interface::IFCCHistoryShowTurn));
+    m_world->setNewGlobalValue("CC$NOTIFY",        new SessionProcedure_t(*this, game::interface::IFCCNotify));
+    m_world->setNewGlobalValue("CC$NUMNOTIFICATIONS", new SessionFunction_t(*this, game::interface::IFCCNumNotifications));
+    m_world->setNewGlobalValue("CC$SELECTIONEXEC", new SessionProcedure_t(*this, game::interface::IFCCSelectionExec));
+    m_world->setNewGlobalValue("CREATECONFIGOPTION", new SessionProcedure_t(*this, game::interface::IFCreateConfigOption));
+    m_world->setNewGlobalValue("CREATEPREFOPTION", new SessionProcedure_t(*this, game::interface::IFCreatePrefOption));
+    m_world->setNewGlobalValue("DELETECOMMAND",    new SessionProcedure_t(*this, game::interface::IFDeleteCommand));
+    m_world->setNewGlobalValue("EXPORT",           new SessionProcedure_t(*this, game::interface::IFExport));
+    m_world->setNewGlobalValue("HISTORY.LOADTURN", new SessionProcedure_t(*this, game::interface::IFHistoryLoadTurn));
+    m_world->setNewGlobalValue("NEWCANNEDMARKER",  new SessionProcedure_t(*this, game::interface::IFNewCannedMarker));
+    m_world->setNewGlobalValue("NEWCIRCLE",        new SessionProcedure_t(*this, game::interface::IFNewCircle));
+    m_world->setNewGlobalValue("NEWLINE",          new SessionProcedure_t(*this, game::interface::IFNewLine));
+    m_world->setNewGlobalValue("NEWLINERAW",       new SessionProcedure_t(*this, game::interface::IFNewLineRaw));
+    m_world->setNewGlobalValue("NEWMARKER",        new SessionProcedure_t(*this, game::interface::IFNewMarker));
+    m_world->setNewGlobalValue("NEWRECTANGLE",     new SessionProcedure_t(*this, game::interface::IFNewRectangle));
+    m_world->setNewGlobalValue("NEWRECTANGLERAW",  new SessionProcedure_t(*this, game::interface::IFNewRectangleRaw));
+    m_world->setNewGlobalValue("SAVEGAME",         new SessionProcedure_t(*this, game::interface::IFSaveGame));
+    m_world->setNewGlobalValue("SENDMESSAGE",      new SessionProcedure_t(*this, game::interface::IFSendMessage));
 
-    m_world.setNewGlobalValue("GLOBALACTIONCONTEXT", new interpreter::SimpleFunction<void>(game::interface::IFGlobalActionContext));
-    m_world.setNewGlobalValue("CONFIGURATIONEDITORCONTEXT", new SessionFunction_t(*this, game::interface::IFConfigurationEditorContext));
+    m_world->setNewGlobalValue("GLOBALACTIONCONTEXT", new interpreter::SimpleFunction<void>(game::interface::IFGlobalActionContext));
+    m_world->setNewGlobalValue("CONFIGURATIONEDITORCONTEXT", new SessionFunction_t(*this, game::interface::IFConfigurationEditorContext));
 
-    m_world.setNewGlobalValue("MISSIONLIST", new interpreter::SimpleFunction<void>(game::interface::IFMissionList));
+    m_world->setNewGlobalValue("MISSIONLIST", new interpreter::SimpleFunction<void>(game::interface::IFMissionList));
 
     // Add global context (=properties)
-    m_world.addNewGlobalContext(new game::interface::GlobalContext(*this));
+    m_world->addNewGlobalContext(new game::interface::GlobalContext(*this));
 
     // Configure files
-    m_world.fileTable().setMaxFiles(MAX_SCRIPT_FILES);
+    m_world->fileTable().setMaxFiles(MAX_SCRIPT_FILES);
 
     // Listener
     m_processList.sig_processStateChange.add(this, &Session::onProcessStateChange);
@@ -698,11 +856,11 @@ game::Session::connectSignals()
     }
 
     if (m_root.get() != 0) {
-        m_world.setLocalLoadDirectory(&m_root->gameDirectory());
-        m_world.fileTable().setFileCharsetNew(std::auto_ptr<afl::charset::Charset>(m_root->charset().clone()));
+        m_world->setLocalLoadDirectory(&m_root->gameDirectory());
+        m_world->fileTable().setFileCharsetNew(std::auto_ptr<afl::charset::Charset>(m_root->charset().clone()));
     } else {
-        m_world.setLocalLoadDirectory(0);
-        m_world.fileTable().setFileCharsetNew(std::auto_ptr<afl::charset::Charset>());
+        m_world->setLocalLoadDirectory(0);
+        m_world->fileTable().setFileCharsetNew(std::auto_ptr<afl::charset::Charset>());
     }
 
     sig_connectionChange.raise();
