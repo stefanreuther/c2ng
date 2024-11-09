@@ -54,6 +54,9 @@ AFL_TEST("game.spec.ShipList:basics", a)
 
     a.checkEqual("101. missions", &sl.missions(), &csl.missions());
     a.checkEqual("102. missions", csl.missions().size(), 0U);
+
+    a.checkEqual("111. advantages", &sl.advantages(), &csl.advantages());
+    a.checkEqual("112. advantages", sl.advantages().getNumAdvantages(), 0U);
 }
 
 /** Test racial abilities, simple case.

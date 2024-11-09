@@ -89,6 +89,7 @@ namespace {
         { "GROUND.M",                  game::interface::ippGroundM,           PlanetPropertyDomain, interpreter::thInt },
         { "GROUND.N",                  game::interface::ippGroundN,           PlanetPropertyDomain, interpreter::thInt },
         { "GROUND.T",                  game::interface::ippGroundT,           PlanetPropertyDomain, interpreter::thInt },
+        { "HASADVANTAGE",              game::interface::ippHasAdvantage,      PlanetPropertyDomain, interpreter::thArray },
         { "ID",                        game::interface::ippId,                PlanetPropertyDomain, interpreter::thInt },
         { "INDUSTRY",                  game::interface::ippIndustry,          PlanetPropertyDomain, interpreter::thString },
         { "INDUSTRY$",                 game::interface::ippIndustryCode,      PlanetPropertyDomain, interpreter::thInt },

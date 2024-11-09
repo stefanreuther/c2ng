@@ -72,6 +72,7 @@ namespace {
         { "FLEET$",                    game::interface::ispFleetId,                   ShipPropertyDomain,      interpreter::thInt },
         { "FLEET.NAME",                game::interface::ispFleetName,                 ShipPropertyDomain,      interpreter::thString },
         { "FLEET.STATUS",              game::interface::ispFleetStatus,               ShipPropertyDomain,      interpreter::thString },
+        { "HASADVANTAGE",              game::interface::ispHasAdvantage,              ShipPropertyDomain,      interpreter::thArray },
         { "HASFUNCTION",               game::interface::ispHasFunction,               ShipPropertyDomain,      interpreter::thArray },
         { "HEADING",                   game::interface::ispHeadingName,               ShipPropertyDomain,      interpreter::thString },
         { "HEADING$",                  game::interface::ispHeadingAngle,              ShipPropertyDomain,      interpreter::thInt },

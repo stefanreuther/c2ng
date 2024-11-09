@@ -42,6 +42,7 @@ namespace {
      public:
         enum Type {
             Score,
+            HasAdvantage,
             HasFunction
         };
         ShipArrayProperty(Type type,
@@ -171,6 +172,33 @@ ShipArrayProperty::get(interpreter::Arguments& args)
             }
 
             return makeOptionalIntegerValue(m_ship.unitScores().getScoreById(int16_t(id), m_game->shipScores()));
+        }
+
+     case HasAdvantage:
+        /* Documented in globalfunctions.cpp */
+        {
+            args.checkArgumentCount(1, 2);
+
+            // Advantage Id
+            int advId;
+            if (!checkIntegerArg(advId, args.getNext())) {
+                return 0;
+            }
+
+            // Player
+            int playerId;
+            if (args.getNumArgs() > 0) {
+                if (!checkIntegerArg(playerId, args.getNext(), 1, game::MAX_PLAYERS)) {
+                    return 0;
+                }
+            } else {
+                if (!m_ship.getRealOwner().get(playerId)) {
+                    return 0;
+                }
+            }
+
+            // Result
+            return makeBooleanValue(m_shipList->advantages().getPlayers(m_shipList->advantages().find(advId)).contains(playerId));
         }
 
      case HasFunction:
@@ -931,6 +959,9 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
 
      case ispScore:
         return new ShipArrayProperty(ShipArrayProperty::Score, sh, game, root, shipList);
+
+     case ispHasAdvantage:
+        return new ShipArrayProperty(ShipArrayProperty::HasAdvantage, sh, game, root, shipList);
 
      case ispHasFunction:
         return new ShipArrayProperty(ShipArrayProperty::HasFunction, sh, game, root, shipList);

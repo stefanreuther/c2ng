@@ -179,6 +179,11 @@ game::interface::IFAutoTask(game::Session& session, interpreter::Arguments& args
    If the option is an array option, the second parameter can be specified to determine which player's value to get.
    When the second parameter is not specified for an array option, the return value is the value for your race.
 
+   For planets.nu games, PCC2 translates the game configuration to the <tt>pconfig.src</tt> format as good as possible,
+   e.g. <tt>GameName</tt> will show the game name, and <tt>AllowShipCloning</tt> will show the "cloning enabled" setting.
+   In addition, settings from the <tt>game</tt> object will be available as "nu.game.X" (e.g. <tt>Cfg("nu.game.name")</tt> for the game name).
+   Settings from the <tt>settings</tt> object will be available as "nu.X" (e.g. <tt>Cfg("nu.cloakfail")</tt> for the cloak failure rate).
+
    @diff This function was available with a different, more complicated definition in PCC 0.98.5 up to 1.0.8,
    under the names %Cfg and %CfgL.
 
@@ -374,6 +379,58 @@ game::interface::IFFormat(game::Session& /*session*/, interpreter::Arguments& ar
 
     // Format
     return makeStringValue(formatter);
+}
+
+/* @q HasAdvantage(id:Int, Optional player:Int):Bool (Function, Ship Property, Planet Property)
+   Check availability of an advantage.
+
+   Advantages are a method to represent racial advantages/abilities, used by planets.nu.
+   Where possible, PCC2 converts them into normal host configuration options.
+   For example, advantage 7 "15X Ground Defense" is represented as GroundDefenseFactor=15
+   and advantage advantage 16 "Tow Capture" is represented as TowCapture ship ability.
+   However, many advantages cannot be mapped this way.
+
+   With HasAdvantage(), you can directly check for availability of an advantage.
+   The first parameter is the advantage Id, the second parameter is the player number to check.
+
+   The second parameter is optional.
+   If HasAdvantage() is used as a global function, it defaults to your player number ({My.Race$}).
+   If HasAdvantage() is used as a ship or planet property, it defaults to the unit's owner.
+
+   @see Cfg (Function)
+   @see HasFunction (Ship Property)
+   @since PCC2 2.41.3 */
+afl::data::Value*
+game::interface::IFHasAdvantage(game::Session& session, interpreter::Arguments& args)
+{
+    args.checkArgumentCount(1, 2);
+
+    // Advantage Id
+    int advId;
+    if (!checkIntegerArg(advId, args.getNext())) {
+        return 0;
+    }
+
+    // Player
+    int playerId;
+    if (args.getNumArgs() > 0) {
+        if (!checkIntegerArg(playerId, args.getNext(), 1, MAX_PLAYERS)) {
+            return 0;
+        }
+    } else {
+        if (const Game* g = session.getGame().get()) {
+            playerId = g->getViewpointPlayer();
+        } else {
+            return 0;
+        }
+    }
+
+    // Result
+    if (const game::spec::ShipList* sl = session.getShipList().get()) {
+        return makeBooleanValue(sl->advantages().getPlayers(sl->advantages().find(advId)).contains(playerId));
+    } else {
+        return 0;
+    }
 }
 
 /* @q IsSpecialFCode(fc:Str):Bool (Function)

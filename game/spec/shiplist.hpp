@@ -8,6 +8,7 @@
 #include "afl/base/refcounted.hpp"
 #include "afl/base/signal.hpp"
 #include "game/reference.hpp"
+#include "game/spec/advantagelist.hpp"
 #include "game/spec/basichullfunctionlist.hpp"
 #include "game/spec/beam.hpp"
 #include "game/spec/componentvector.hpp"
@@ -34,7 +35,8 @@ namespace game { namespace spec {
           - with modified hull function definitions ("cloak at level 2")
           - with hull function assigned as racial abilities and assigned to hulls
         - component namer
-        - friendly codes */
+        - friendly codes
+        - advantages */
     class ShipList : public afl::base::RefCounted {
      public:
         /** Constructor. */
@@ -84,6 +86,11 @@ namespace game { namespace spec {
             \return HullFunctionAssignmentList */
         HullFunctionAssignmentList& racialAbilities();
         const HullFunctionAssignmentList& racialAbilities() const;
+
+        /** Access advantages.
+            \return AdvantageList */
+        AdvantageList& advantages();
+        const AdvantageList& advantages() const;
 
         /** Access hull assignments.
             Stores the list of hulls each player is allowed to build.
@@ -181,6 +188,7 @@ namespace game { namespace spec {
         BasicHullFunctionList m_basicHullFunctions;
         ModifiedHullFunctionList m_modifiedHullFunctions;
         HullFunctionAssignmentList m_racialAbilities;
+        AdvantageList m_advantages;
         HullAssignmentList m_hullAssignments;
         StandardComponentNameProvider m_componentNamer;
         FriendlyCodeList m_friendlyCodes;
@@ -286,6 +294,20 @@ inline const game::spec::HullFunctionAssignmentList&
 game::spec::ShipList::racialAbilities() const
 {
     return m_racialAbilities;
+}
+
+// Access advantages.
+inline game::spec::AdvantageList&
+game::spec::ShipList::advantages()
+{
+    return m_advantages;
+}
+
+// Access advantages.
+inline const game::spec::AdvantageList&
+game::spec::ShipList::advantages() const
+{
+    return m_advantages;
 }
 
 // Get hull function assignments.

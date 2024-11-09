@@ -11,9 +11,12 @@
 #include "afl/string/parse.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/root.hpp"
+#include "game/spec/advantagelist.hpp"
+#include "game/spec/basichullfunction.hpp"
 #include "game/spec/beam.hpp"
 #include "game/spec/engine.hpp"
 #include "game/spec/hull.hpp"
+#include "game/spec/modifiedhullfunctionlist.hpp"
 #include "game/spec/torpedolauncher.hpp"
 #include "util/io.hpp"
 
@@ -22,8 +25,14 @@ namespace gs = game::spec;
 using afl::data::Access;
 using afl::string::Format;
 using afl::sys::LogListener;
+using game::PlayerSet_t;
 using game::config::ConfigurationOption;
 using game::config::HostConfiguration;
+using game::spec::AdvantageList;
+using game::spec::BasicHullFunction;
+using game::spec::Hull;
+using game::spec::ModifiedHullFunctionList;
+using game::spec::ShipList;
 
 namespace {
     /*
@@ -79,6 +88,95 @@ namespace {
         const game::spec::HullVector_t& m_hulls;
     };
 
+    void loadAdvantages(ShipList& sl, Access rst)
+    {
+        const Access in = rst("advantages");
+        AdvantageList& out = sl.advantages();
+
+        for (size_t i = 0, n = in.getArraySize(); i < n; ++i) {
+            const Access a = in[i];
+            AdvantageList::Item* p = out.add(a("id").toInteger());
+            out.setName       (p, a("name").toString());
+            out.setDescription(p, a("description").toString());
+
+            // Consciously ignored:
+            //   dur
+            //   isbase
+            //   locked
+            //   mc
+            //   mol
+            //   tri
+            //   value
+            // As far as I can tell, these all deal with race design/custom advantages.
+        }
+    }
+
+    void loadPlayerAdvantages(ShipList& sl, Access rst)
+    {
+        // Our logic:
+        //   use players[].activeadvantages
+        //   if that is not known, use races[players[].raceid].baseadvantages
+        //   add hardcoded values
+        // Nu has an additional check (campaignmode || presetadvantages) before using activeadvantages.
+        // Also, Nu hardcodes not only addition, but also removal of advantages
+        // (e.g. 79 is always taken from settings, never from activeadvantages/baseadvantages).
+        // I believe this implementation is more flexible because it trusts the server;
+        // if it sends a value, we expect that to be a correct one.
+        const Access players = rst("players");
+        const Access settings = rst("settings");
+        AdvantageList& out = sl.advantages();
+
+        for (size_t playerIndex = 0, numPlayers = players.getArraySize(); playerIndex < numPlayers; ++playerIndex) {
+            const Access thisPlayer = players[playerIndex];
+            const int playerNr = thisPlayer("id").toInteger();
+            const int raceNr = thisPlayer("raceid").toInteger();
+
+            // Fetch activeadvantages
+            afl::data::IntegerList_t adv;
+            util::toIntegerList(adv, thisPlayer("activeadvantages"));
+
+            // If still empty, fetch from spec
+            if (adv.empty()) {
+                util::toIntegerList(adv, util::findArrayItemById(rst("races"), "id", raceNr)("baseadvantages"));
+            }
+
+            // Hardcoded
+            switch (raceNr) {
+             case 1:
+                if (settings("quantumtorpedos").toInteger()) {
+                    adv.push_back(79);
+                }
+                break;
+             case 3:
+                if (settings("superspyadvanced").toInteger()) {
+                    adv.push_back(62);
+                }
+                if (settings("cloakandintercept").toInteger()) {
+                    adv.push_back(63);
+                }
+                break;
+             case 4:
+                if (settings("fascistdoublebeams").toInteger()) {
+                    adv.push_back(36);
+                }
+                break;
+             case 8:
+                if (settings("starbasefightertransfer").toInteger()) {
+                    adv.push_back(57);
+                }
+                if (settings("galacticpower").toInteger()) {
+                    adv.push_back(77);
+                }
+                break;
+            }
+
+            // Mark them
+            for (size_t i = 0, n = adv.size(); i < n; ++i) {
+                out.addPlayer(out.find(adv[i]), playerNr);
+            }
+        }
+    }
+
     void addAllOptions(HostConfiguration& out, Access in, String_t prefix)
     {
         afl::data::StringList_t settingNames;
@@ -92,6 +190,17 @@ namespace {
 
     void loadConfig(HostConfiguration& config, Access rst)
     {
+        // PlayerRace:
+        const Access players = rst("players");
+        for (size_t i = 0, n = players.getArraySize(); i < n; ++i) {
+            const int playerId = players[i]("id").toInteger();
+            const int raceId = players[i]("raceid").toInteger();
+            if (playerId != 0 && raceId != 0) {
+                config[HostConfiguration::PlayerRace].set(playerId, raceId);
+                config[HostConfiguration::PlayerSpecialMission].set(playerId, raceId);
+            }
+        }
+
         // From game:
         const Access game = rst("game");
         config[HostConfiguration::GameName].set(game("name").toString());
@@ -111,6 +220,10 @@ namespace {
 
         // Hardcoded
         config[HostConfiguration::MaxPlanetaryIncome].set(5000);
+        config[HostConfiguration::AllowSuperRefit].set(1);              // Configured by Advantage #3
+        config[HostConfiguration::MaximumWebMinefieldRadius].set(150);  // Advantage 20 (Web Mines) says limit is always 150
+        config[HostConfiguration::SensorRange].set(200);
+        config[HostConfiguration::DarkSenseRange].set(200);
 
         // Map all Nu settings under their original names
         addAllOptions(config, game, "nu.game.");
@@ -118,6 +231,204 @@ namespace {
 
         // Mark everything as sourced in game
         config.setAllOptionsSource(ConfigurationOption::Game);
+    }
+
+    void setConfigValue(HostConfiguration::StandardOption_t& opt, PlayerSet_t players, int value)
+    {
+        for (int i = 1; i <= game::MAX_PLAYERS; ++i) {
+            if (players.contains(i)) {
+                opt.set(i, value);
+            }
+        }
+    }
+
+    void setImplicitConfiguration(HostConfiguration& config, const AdvantageList& advList)
+    {
+        /* It is unclear to what extent these abilities serve just for documentation or actually affect the configuration
+           (i.e. is the 200% ColonistTaxRate actually triggered by advantage 2, or by raceid=1?).
+           The choice of mapping is therefore more or less arbitrary/guesswork. */
+
+        // ColonistTaxRate
+        //   2 -> 200% Taxing (Fed)
+        config[HostConfiguration::ColonistTaxRate].set(100);
+        setConfigValue(config[HostConfiguration::ColonistTaxRate], advList.getPlayers(advList.find(2)), 200);
+        config[HostConfiguration::NativeTaxRate].copyFrom(config[HostConfiguration::ColonistTaxRate]);
+
+        // RaceMiningRate
+        //   4 -> 70% (Fed)
+        //   31 -> 200% (Lizard) or settings.mining200adjustment <-FIXME
+        config[HostConfiguration::RaceMiningRate].set(100);
+        setConfigValue(config[HostConfiguration::RaceMiningRate], advList.getPlayers(advList.find(4)), 70);
+        setConfigValue(config[HostConfiguration::RaceMiningRate], advList.getPlayers(advList.find(31)), 200);
+
+        // GroundKillFactor
+        //   80 -> 5X ("Shock Troops")
+        //   12 -> 15X (Klingon)
+        //   6 -> 30X (Lizard)
+        config[HostConfiguration::GroundKillFactor].set(1);
+        setConfigValue(config[HostConfiguration::GroundKillFactor], advList.getPlayers(advList.find(80)), 5);
+        setConfigValue(config[HostConfiguration::GroundKillFactor], advList.getPlayers(advList.find(12)), 15);
+        setConfigValue(config[HostConfiguration::GroundKillFactor], advList.getPlayers(advList.find(6)), 30);
+
+        // GroundDefenseFactor
+        //   81 -> 5X ("Fortress")
+        //   13 -> 5X (Klingon)
+        //   7 -> 15X (Lizard)
+        config[HostConfiguration::GroundDefenseFactor].set(1);
+        setConfigValue(config[HostConfiguration::GroundDefenseFactor], advList.getPlayers(advList.find(81)), 5);
+        setConfigValue(config[HostConfiguration::GroundDefenseFactor], advList.getPlayers(advList.find(13)), 5);
+        setConfigValue(config[HostConfiguration::GroundDefenseFactor], advList.getPlayers(advList.find(7)), 15);
+
+        // PlayerSpecialMission
+        //   3 -> Super Refit
+        //   8 -> Hiss
+        //   9 -> Super Spy
+        //   11 -> Pillage
+        //   14 -> Rob
+        //   19 -> Self repair
+        //   20 -> Lay web
+        //   22 -> Dark Sense
+        //   26 -> RGA
+        // No setting for race 9/11?
+        setConfigValue(config[HostConfiguration::PlayerSpecialMission], advList.getPlayers(advList.find(3)), 1);
+        setConfigValue(config[HostConfiguration::PlayerSpecialMission], advList.getPlayers(advList.find(8)), 2);
+        setConfigValue(config[HostConfiguration::PlayerSpecialMission], advList.getPlayers(advList.find(9)), 3);
+        setConfigValue(config[HostConfiguration::PlayerSpecialMission], advList.getPlayers(advList.find(11)), 4);
+        setConfigValue(config[HostConfiguration::PlayerSpecialMission], advList.getPlayers(advList.find(14)), 5);
+        setConfigValue(config[HostConfiguration::PlayerSpecialMission], advList.getPlayers(advList.find(19)), 6);
+        setConfigValue(config[HostConfiguration::PlayerSpecialMission], advList.getPlayers(advList.find(20)), 7);
+        setConfigValue(config[HostConfiguration::PlayerSpecialMission], advList.getPlayers(advList.find(22)), 8);
+        setConfigValue(config[HostConfiguration::PlayerSpecialMission], advList.getPlayers(advList.find(26)), 10);
+
+        // PlayerRace
+        // These are mostly set from players.raceid already
+        //   1 -> Fed Crew Bonus
+        //   5 -> Lizard 150% bonus
+        //   15 -> Privateer Triple Beam Kill
+        //   17 -> Assimilation
+        PlayerSet_t adv1Set = advList.getPlayers(advList.find(1));
+        setConfigValue(config[HostConfiguration::PlayerRace], adv1Set, 1);
+        setConfigValue(config[HostConfiguration::PlayerRace], advList.getPlayers(advList.find(5)), 2);
+        setConfigValue(config[HostConfiguration::PlayerRace], advList.getPlayers(advList.find(15)), 5);
+        setConfigValue(config[HostConfiguration::PlayerRace], advList.getPlayers(advList.find(17)), 6);
+
+        // AllowFedCombatBonus
+        config[HostConfiguration::AllowFedCombatBonus].set(!adv1Set.empty());
+
+        // AllowDeluxeSuperSpy
+        config[HostConfiguration::AllowDeluxeSuperSpy].set(!advList.getPlayers(advList.find(10)).empty());
+
+        // FreeFighters
+        //   56 -> 1
+        //   55 -> 2
+        //   54 -> 3
+        //   53 -> 4
+        //   23 -> 5
+        config[HostConfiguration::FreeFighters].set(0);
+        setConfigValue(config[HostConfiguration::FreeFighters], advList.getPlayers(advList.find(56)), 1);
+        setConfigValue(config[HostConfiguration::FreeFighters], advList.getPlayers(advList.find(55)), 2);
+        setConfigValue(config[HostConfiguration::FreeFighters], advList.getPlayers(advList.find(54)), 3);
+        setConfigValue(config[HostConfiguration::FreeFighters], advList.getPlayers(advList.find(53)), 4);
+        setConfigValue(config[HostConfiguration::FreeFighters], advList.getPlayers(advList.find(23)), 5);
+
+        // CrystalsPreferDeserts
+        config[HostConfiguration::CrystalsPreferDeserts].set(!advList.getPlayers(advList.find(21)).empty());
+
+        // UnitsPerTorpRate
+        config[HostConfiguration::UnitsPerTorpRate].set(100);
+        setConfigValue(config[HostConfiguration::UnitsPerTorpRate], advList.getPlayers(advList.find(24)), 400);
+
+        // AllowBuildFighters
+        config[HostConfiguration::AllowBuildFighters].set(0);
+        setConfigValue(config[HostConfiguration::AllowBuildFighters], advList.getPlayers(advList.find(25)), 1);
+
+        // FighterSweepRate/Range
+        const PlayerSet_t adv29Set = advList.getPlayers(advList.find(29));
+        config[HostConfiguration::FighterSweepRate].set(0);
+        config[HostConfiguration::FighterSweepRange].set(0);
+        setConfigValue(config[HostConfiguration::FighterSweepRate], adv29Set, 20);
+        setConfigValue(config[HostConfiguration::FighterSweepRange], adv29Set, 100);
+
+        // AntiCloakImmunity
+        config[HostConfiguration::AntiCloakImmunity].set(0);
+        setConfigValue(config[HostConfiguration::AntiCloakImmunity], advList.getPlayers(advList.find(32)), 1);
+
+        // MaximumMinefieldRadius
+        //   47 -> 100 ly
+        //   48 -> 150 ly
+        config[HostConfiguration::MaximumMinefieldRadius].set(0);
+        setConfigValue(config[HostConfiguration::MaximumMinefieldRadius], advList.getPlayers(advList.find(49)), 100);
+        setConfigValue(config[HostConfiguration::MaximumMinefieldRadius], advList.getPlayers(advList.find(48)), 150);
+        config[HostConfiguration::MaximumWebMinefieldRadius].copyFrom(config[HostConfiguration::MaximumMinefieldRadius]);
+
+        // AllowShipCloning
+        // (alternatively map to Unclonable ability?)
+        config[HostConfiguration::AllowShipCloning].set(!advList.getPlayers(advList.find(51)).empty());
+
+        // Intentionally not handled for now:
+        //   18 (Recover Minerals)
+        //   21 (Desert Worlds)
+        //   27 (Dark Sense Defense)
+        //   30 (Arctic Planet Colonists)
+        //   33 (Diplomatic Spies)
+        //   34 (Red Storm Cloud)
+        //   35 (Plunder Planet) -> increase efficiency of pillage
+        //   36 (2X Faster Beams)
+        //   37 (Ion Starbase Shield)
+        //   38 (Starbase Money Transfer) -> unlocks SB mission 7=send, 8=receive
+        //   39 (Starbase Mine Laying) -> unlocks SB mission 9=lay, 10=lay web
+        //   40 (Starbase Mine Sweeping) -> unlocks SB mission 11=sweep
+        //   41 (Starbase Fighter Sweeping) -> unlocks SB mission 11=sweep
+        //   42 (Energy Defense Field) -> unlocks "edf" fcode
+        //   43 (Fighter Patrol Routes)
+        //   44 (Destroy Planet)
+        //   45 (Star Cluster Radiation Immunity)
+        //   46 (Debris Disk Defense)
+        //   47 (Improved Desert Habitation)
+        //   50 (Super Spy Command)
+        //   52 (Advanced Cloning)
+        //   57 (Starbase Fighter Transfer)
+        //   61 (Dark Detection)
+        //   62 (Super Spy Advanced)
+        //   63 (Cloak and Intercept)
+        //   64 (Ship Building Planets)
+        //   65 (Swarming)
+        //   66 (Rock Attacks)
+        //   67 (Reduced Diplomacy)
+        //   68 (Psychic Scanning)
+        //   69 (Rob Fighters)
+        //   70 (Hardened Mines)
+        //   71 (Build Clans) -> unlock mission 27=build robots
+        //   72 (Dense Minefields)
+        //   73 (Hide In Warp Well) -> unlock mission 28=hide
+        //   74 (Enhanced Recycle) -> can probably be mapped through PALRecyclingPer10KT?
+        //   75 (Pleasure Planets)
+        //   76 (Internal Temp Regulation) -> array-ized ClimateLimitsPopulation?
+        //   77 (Galactic Power)
+        //   78 (Minefields Save Fuel)
+        //   79 (Quantum Torpedos)
+        //   83 -> something with larva
+        //   85 -> unlocks mission 29=lay hidden minefield, hardwired to privateer only
+        //   86 -> unlocks mission 30=call to this hive, hardwired to hull 115, race 12
+        //   87 -> something with build points / combineable ships
+    }
+
+    void addAbilityToAllHulls(game::spec::HullVector_t& hulls, PlayerSet_t players, ModifiedHullFunctionList::Function_t ability)
+    {
+        if (!players.empty()) {
+            for (Hull* p = hulls.findNext(0); p != 0; p = hulls.findNext(p->getId())) {
+                p->changeHullFunction(ability, players, PlayerSet_t(), true);
+            }
+        }
+    }
+
+    void setImplicitHullFunctions(game::spec::HullVector_t& hulls, const game::spec::ModifiedHullFunctionList& modList, const AdvantageList& advList)
+    {
+        // Boarding
+        addAbilityToAllHulls(hulls, advList.getPlayers(advList.find(16)), modList.getFunctionIdFromHostId(BasicHullFunction::Boarding));
+
+        // Planet Immunity
+        addAbilityToAllHulls(hulls, advList.getPlayers(advList.find(28)), modList.getFunctionIdFromHostId(BasicHullFunction::PlanetImmunity));
     }
 }
 
@@ -148,7 +459,11 @@ game::nu::SpecificationLoader::loadShipList(game::spec::ShipList& list, Root& ro
                     m_parent.m_log.write(LogListener::Trace, LOG_NAME, "Task: loadShipList");
                     afl::data::Access rst(m_parent.m_gameState->loadResultPreAuthenticated());
 
+                    loadAdvantages(m_shipList, rst("rst"));
+                    loadPlayerAdvantages(m_shipList, rst("rst"));
                     loadConfig(m_root.hostConfiguration(), rst("rst"));
+                    setImplicitConfiguration(m_root.hostConfiguration(), m_shipList.advantages());
+                    setImplicitHullFunctions(m_shipList.hulls(), m_shipList.modifiedHullFunctions(), m_shipList.advantages());
 
                     m_parent.loadRaceNames(m_root, rst("rst")("players"), rst("rst")("races"));
 

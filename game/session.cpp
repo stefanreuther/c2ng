@@ -747,6 +747,7 @@ game::Session::initWorld()
     m_world->setNewGlobalValue("FORMAT",        new SessionFunction_t(*this, game::interface::IFFormat));
     m_world->setNewGlobalValue("FCODE",         new game::interface::FriendlyCodeFunction(*this));
     m_world->setNewGlobalValue("GETCOMMAND",    new SessionFunction_t(*this, game::interface::IFGetCommand));
+    m_world->setNewGlobalValue("HASADVANTAGE",  new SessionFunction_t(*this, game::interface::IFHasAdvantage));
     m_world->setNewGlobalValue("HULL",          new game::interface::HullFunction(*this));
     m_world->setNewGlobalValue("INMSG",         new game::interface::InboxFunction(*this));
     m_world->setNewGlobalValue("ISSPECIALFCODE", new SessionFunction_t(*this, game::interface::IFIsSpecialFCode));

@@ -32,6 +32,7 @@ namespace {
        These have no real-world equivalent, but better should not clash. */
     const uint32_t FIRST_CONFIG = 1;
     const uint32_t FIRST_HULL_FUNCTION = 100000;
+    const uint32_t FIRST_ADVANTAGE = 200000;
 
     /* Placeholders for explanations/pictures to be filled in */
     const char*const NO_EXPLANATION = "";
@@ -617,6 +618,18 @@ game::spec::RacialAbilityList::addConfigRacialAbilities(const game::config::Host
     b.addCombatAbilities();
 }
 
+// Add abilities derived from advantages.
+void
+game::spec::RacialAbilityList::addAdvantages(const AdvantageList& advList)
+{
+    uint32_t uniqueId = FIRST_ADVANTAGE;
+    for (size_t i = 0, n = advList.getNumAdvantages(); i < n; ++i) {
+        if (AdvantageList::Item* p = advList.getAdvantageByIndex(i)) {
+            m_data.push_back(Ability(FromAdvantages, Unclassified, ++uniqueId, 0, advList.getName(p), advList.getDescription(p), String_t(), advList.getPlayers(p)));
+        }
+    }
+}
+
 // Filter players.
 void
 game::spec::RacialAbilityList::filterPlayers(PlayerSet_t players)
@@ -666,6 +679,7 @@ String_t
 game::spec::toString(RacialAbilityList::Category cat, afl::string::Translator& tx)
 {
     switch (cat) {
+     case RacialAbilityList::Unclassified: return tx("Unclassified");
      case RacialAbilityList::Combat:       return tx("Combat");
      case RacialAbilityList::Economy:      return tx("Economy");
      case RacialAbilityList::Minefield:    return tx("Minefields");
@@ -682,6 +696,7 @@ game::spec::toString(RacialAbilityList::Origin origin, afl::string::Translator& 
     switch (origin) {
      case RacialAbilityList::FromHullFunction:  return tx("Ship functions");
      case RacialAbilityList::FromConfiguration: return tx("Host configuration");
+     case RacialAbilityList::FromAdvantages:    return tx("Racial Advantages");
     }
     return String_t();
 }

@@ -21,6 +21,8 @@
 #include "interpreter/indexablevalue.hpp"
 #include "interpreter/test/contextverifier.hpp"
 #include "interpreter/test/valueverifier.hpp"
+#include "game/spec/shiplist.hpp"
+#include "game/spec/advantagelist.hpp"
 
 using game::Reference;
 using game::config::HostConfiguration;
@@ -52,6 +54,7 @@ namespace {
 AFL_TEST("game.interface.PlanetProperty:full", a)
 {
     const int PLAYER = 5;
+    const int ADV_ID = 77;
 
     // Environment
     afl::string::NullTranslator tx;
@@ -71,6 +74,12 @@ AFL_TEST("game.interface.PlanetProperty:full", a)
     r->hostConfiguration()[HostConfiguration::EPPlanetGovernment].set(50);
     r->hostConfiguration()[HostConfiguration::ExperienceLevelNames].set("Noob,Nieswurz,Brotfahrer,Ladehugo,Erdwurm");
     session.setRoot(r);
+
+    afl::base::Ptr<game::spec::ShipList> sl = new game::spec::ShipList();
+    game::spec::AdvantageList& advList = sl->advantages();
+    game::spec::AdvantageList::Item* advItem = advList.add(ADV_ID);
+    advList.addPlayer(advItem, PLAYER);
+    session.setShipList(sl);
 
     // Planet
     game::map::PlanetData pd;
@@ -315,6 +324,79 @@ AFL_TEST("game.interface.PlanetProperty:full", a)
             AFL_CHECK_THROWS(a("ippScore: set"), ix->set(args, &iv), interpreter::Error);
         }
     }
+    {
+        // ippHasAdvantage - function (not iterable)
+        std::auto_ptr<afl::data::Value> p(getPlanetProperty(pl, game::interface::ippHasAdvantage, session, *r, *g, g->currentTurn()));
+        interpreter::IndexableValue* ix = dynamic_cast<interpreter::IndexableValue*>(p.get());
+        a.checkNonNull("ippHasAdvantage", ix);
+        interpreter::test::ValueVerifier verif(*ix, a("ippHasAdvantage"));
+        verif.verifyBasics();
+        verif.verifyNotSerializable();
+        a.checkEqual("ippHasAdvantage: dim 0", ix->getDimension(0), 0U);
+        AFL_CHECK_THROWS(a("ippHasAdvantage: makeFirstContext"), ix->makeFirstContext(), interpreter::Error);
+
+        // Unary access
+        {
+            afl::data::Segment seg;
+            seg.pushBackInteger(ADV_ID);
+            interpreter::Arguments args(seg, 0, 1);
+            verifyNewBoolean(a("ippHasAdvantage(adv)"), ix->get(args), true);
+        }
+        {
+            afl::data::Segment seg;
+            seg.pushBackInteger(ADV_ID+1);
+            interpreter::Arguments args(seg, 0, 1);
+            verifyNewBoolean(a("ippHasAdvantage(adv+1)"), ix->get(args), false);
+        }
+
+        // Binary access
+        {
+            afl::data::Segment seg;
+            seg.pushBackInteger(ADV_ID);
+            seg.pushBackInteger(PLAYER+1);
+            interpreter::Arguments args(seg, 0, 2);
+            verifyNewBoolean(a("ippHasAdvantage(adv,player+1)"), ix->get(args), false);
+        }
+
+        // Null index
+        {
+            afl::data::Segment seg;
+            seg.pushBackNew(0);
+            interpreter::Arguments args(seg, 0, 1);
+            verifyNewNull(a("ippHasAdvantage(null)"), ix->get(args));
+        }
+        {
+            afl::data::Segment seg;
+            seg.pushBackInteger(ADV_ID);
+            seg.pushBackNew(0);
+            interpreter::Arguments args(seg, 0, 2);
+            verifyNewNull(a("ippHasAdvantage(adv,null)"), ix->get(args));
+        }
+
+        // Arity error
+        {
+            afl::data::Segment seg;
+            interpreter::Arguments args(seg, 0, 0);
+            AFL_CHECK_THROWS(a("ippHasAdvantage: arity error"), ix->get(args), interpreter::Error);
+        }
+
+        // Type error
+        {
+            afl::data::Segment seg;
+            seg.pushBackString("X");
+            interpreter::Arguments args(seg, 0, 1);
+            AFL_CHECK_THROWS(a("ippHasAdvantage: type error"), ix->get(args), interpreter::Error);
+        }
+
+        // Not assignable
+        {
+            afl::data::Segment seg;
+            seg.pushBackInteger(ADV_ID);
+            interpreter::Arguments args(seg, 0, 1);
+            afl::data::IntegerValue iv(5);
+            AFL_CHECK_THROWS(a("ippHasAdvantage: set"), ix->set(args, &iv), interpreter::Error);
+        }
+    }
 
     // Writable properties
     {
@@ -525,6 +607,25 @@ AFL_TEST("game.interface.PlanetProperty:empty", a)
             seg.pushBackInteger(game::ScoreId_ExpLevel);
             interpreter::Arguments args(seg, 0, 1);
             verifyNewNull(a("ippScore(Level)"), ix->get(args));
+        }
+    }
+    {
+        // ippHasAdvantage - function (not iterable)
+        std::auto_ptr<afl::data::Value> p(getPlanetProperty(pl, game::interface::ippHasAdvantage, session, *r, *g, g->currentTurn()));
+        interpreter::IndexableValue* ix = dynamic_cast<interpreter::IndexableValue*>(p.get());
+        a.checkNonNull("ippHasAdvantage", ix);
+        interpreter::test::ValueVerifier verif(*ix, a("ippHasAdvantage"));
+        verif.verifyBasics();
+        verif.verifyNotSerializable();
+        a.checkEqual("ippHasAdvantage: dim 0", ix->getDimension(0), 0U);
+        AFL_CHECK_THROWS(a("ippHasAdvantage: makeFirstContext"), ix->makeFirstContext(), interpreter::Error);
+
+        // Value is null
+        {
+            afl::data::Segment seg;
+            seg.pushBackInteger(7);
+            interpreter::Arguments args(seg, 0, 1);
+            verifyNewNull(a("ippHasAdvantage(adv)"), ix->get(args));
         }
     }
 

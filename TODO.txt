@@ -14,9 +14,6 @@ Minor Concept Verification
 MAKETURN/SAVE.
 - Still missing for Nu.
 
-ABILITIES/ADVANTAGES.
-- Map Nu advantages to racial abilities or configuration.
-
 LOCAL/NETWORK WORKSPLIT.
 - Set up complete game directories for network v3 games.
 - Cache Nu history results locally.

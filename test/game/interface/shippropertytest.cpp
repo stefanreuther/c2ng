@@ -70,6 +70,7 @@ AFL_TEST("game.interface.ShipProperty:basics", a)
     const int DY = 200;
     const int BEAM_NR = 5;
     const int TORP_NR = 7;
+    const int ADV_ID = 77;
 
     afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
@@ -104,6 +105,11 @@ AFL_TEST("game.interface.ShipProperty:basics", a)
     // - basic hull functions
     shipList->basicHullFunctions().addFunction(game::spec::BasicHullFunction::Cloak, "Cloaking");
     shipList->basicHullFunctions().addFunction(game::spec::BasicHullFunction::MerlinAlchemy, "Alchemy");
+
+    // - advantage
+    game::spec::AdvantageList& advList = shipList->advantages();
+    game::spec::AdvantageList::Item* advItem = advList.add(ADV_ID);
+    advList.addPlayer(advItem, PLAYER);
 
     // Game/Turn
     afl::base::Ref<game::Game> g(*new game::Game());
@@ -360,6 +366,79 @@ AFL_TEST("game.interface.ShipProperty:basics", a)
             interpreter::Arguments args(seg, 0, 1);
             afl::data::IntegerValue iv(5);
             AFL_CHECK_THROWS(a("ispScore not assignable"), ix->set(args, &iv), interpreter::Error);
+        }
+    }
+    {
+        // ispHasAdvantage - function (not iterable)
+        std::auto_ptr<afl::data::Value> p(getShipProperty(sh, game::interface::ispHasAdvantage, session, root, shipList, g, turn));
+        interpreter::IndexableValue* ix = dynamic_cast<interpreter::IndexableValue*>(p.get());
+        a.checkNonNull("ispHasAdvantage", ix);
+        interpreter::test::ValueVerifier verif(*ix, a("ispHasAdvantage"));
+        verif.verifyBasics();
+        verif.verifyNotSerializable();
+        a.checkEqual("ispHasAdvantage dim", ix->getDimension(0), 0U);
+        AFL_CHECK_THROWS(a("ispHasAdvantage makeFirstContext"), ix->makeFirstContext(), interpreter::Error);
+
+        // Unary access
+        {
+            afl::data::Segment seg;
+            seg.pushBackInteger(ADV_ID);
+            interpreter::Arguments args(seg, 0, 1);
+            verifyNewBoolean(a("ispHasAdvantage(adv)"), ix->get(args), true);
+        }
+        {
+            afl::data::Segment seg;
+            seg.pushBackInteger(ADV_ID+1);
+            interpreter::Arguments args(seg, 0, 1);
+            verifyNewBoolean(a("ispHasAdvantage(adv+1)"), ix->get(args), false);
+        }
+
+        // Binary access
+        {
+            afl::data::Segment seg;
+            seg.pushBackInteger(ADV_ID);
+            seg.pushBackInteger(PLAYER+1);
+            interpreter::Arguments args(seg, 0, 2);
+            verifyNewBoolean(a("ispHasAdvantage(adv,player+1)"), ix->get(args), false);
+        }
+
+        // Null index
+        {
+            afl::data::Segment seg;
+            seg.pushBackNew(0);
+            interpreter::Arguments args(seg, 0, 1);
+            verifyNewNull(a("ispHasAdvantage(null)"), ix->get(args));
+        }
+        {
+            afl::data::Segment seg;
+            seg.pushBackInteger(ADV_ID);
+            seg.pushBackNew(0);
+            interpreter::Arguments args(seg, 0, 2);
+            verifyNewNull(a("ispHasAdvantage(adv,null)"), ix->get(args));
+        }
+
+        // Arity error
+        {
+            afl::data::Segment seg;
+            interpreter::Arguments args(seg, 0, 0);
+            AFL_CHECK_THROWS(a("ispHasAdvantage: arity error"), ix->get(args), interpreter::Error);
+        }
+
+        // Type error
+        {
+            afl::data::Segment seg;
+            seg.pushBackString("X");
+            interpreter::Arguments args(seg, 0, 1);
+            AFL_CHECK_THROWS(a("ispHasAdvantage: type error"), ix->get(args), interpreter::Error);
+        }
+
+        // Not assignable
+        {
+            afl::data::Segment seg;
+            seg.pushBackInteger(ADV_ID);
+            interpreter::Arguments args(seg, 0, 1);
+            afl::data::IntegerValue iv(5);
+            AFL_CHECK_THROWS(a("ispHasAdvantage: set"), ix->set(args, &iv), interpreter::Error);
         }
     }
     {
@@ -821,6 +900,21 @@ AFL_TEST("game.interface.ShipProperty:empty", a)
     verifyNewNull   (a("ispWaypointName"),            getShipProperty(sh, game::interface::ispWaypointName,            session, root, shipList, g, turn));
 
     verifyNewNull   (a("ispMessages"),                getShipProperty(sh, game::interface::ispMessages,                session, root, shipList, g, turn));
+
+    {
+        // ispHasAdvantage - function (not iterable)
+        std::auto_ptr<afl::data::Value> p(getShipProperty(sh, game::interface::ispHasAdvantage, session, root, shipList, g, turn));
+        interpreter::IndexableValue* ix = dynamic_cast<interpreter::IndexableValue*>(p.get());
+        a.checkNonNull("ispHasAdvantage", ix);
+
+        // Unary access with unknown owner
+        {
+            afl::data::Segment seg;
+            seg.pushBackInteger(7);
+            interpreter::Arguments args(seg, 0, 1);
+            verifyNewNull(a("ispHasAdvantage(adv)"), ix->get(args));
+        }
+    }
 
     // Writable properties
     {

@@ -147,6 +147,7 @@ game::spec::info::Browser::Browser(const PictureNamer& picNamer, const Root& roo
 {
     m_racialAbilities.addShipRacialAbilities(list);
     m_racialAbilities.addConfigRacialAbilities(root.hostConfiguration(), root.userConfiguration().getNumberFormatter(), tx);
+    m_racialAbilities.addAdvantages(list.advantages());
     m_racialAbilities.filterPlayers(root.playerList().getAllPlayers());
 }
 

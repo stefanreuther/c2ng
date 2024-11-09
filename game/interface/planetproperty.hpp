@@ -51,6 +51,7 @@ namespace game { namespace interface {
         ippGroundM,
         ippGroundN,
         ippGroundT,
+        ippHasAdvantage,
         ippId,
         ippIndustry,
         ippIndustryCode,

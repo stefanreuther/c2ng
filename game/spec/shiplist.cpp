@@ -15,6 +15,7 @@ game::spec::ShipList::ShipList()
       m_basicHullFunctions(),
       m_modifiedHullFunctions(),
       m_racialAbilities(),
+      m_advantages(),
       m_hullAssignments(),
       m_componentNamer(),
       m_friendlyCodes(),

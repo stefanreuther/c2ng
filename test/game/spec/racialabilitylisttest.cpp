@@ -8,6 +8,7 @@
 #include "afl/string/nulltranslator.hpp"
 #include "afl/string/string.hpp"
 #include "afl/test/testrunner.hpp"
+#include "game/spec/advantagelist.hpp"
 
 namespace {
     using game::config::HostConfiguration;
@@ -89,6 +90,11 @@ AFL_TEST("game.spec.RacialAbilityList:addConfigRacialAbilities", a)
 AFL_TEST("game.spec.RacialAbilityList:addConfigRacialAbilities:categories", a)
 {
     // Build object to test
+    game::spec::AdvantageList advList;
+    game::spec::AdvantageList::Item* p = advList.add(77);
+    advList.setName(p, "AdName");
+    advList.addPlayer(p, 1);
+
     HostConfiguration config;
     config.setOption("SensorRange", "100,200", ConfigurationOption::Game);   // default config does not generate a Sensor element
     afl::string::NullTranslator tx;
@@ -99,6 +105,7 @@ AFL_TEST("game.spec.RacialAbilityList:addConfigRacialAbilities:categories", a)
     int n = 0;
     for (RacialAbilityList::Iterator_t i = list.begin(); i != list.end(); ++i) {
         a.check("01. toString", !toString(i->category, tx).empty());
+        a.check("01. toString", !toString(i->origin, tx).empty());
         ++n;
     }
 
@@ -125,6 +132,30 @@ AFL_TEST("game.spec.RacialAbilityList:addShipRacialAbilities", a)
     a.checkNonNull("02. get", testee.get(0));
     a.checkEqual("03. name", testee.get(0)->name, "Eat stuff");
     a.checkDifferent("04. explanation", testee.get(0)->explanation.find("Drink, too"), String_t::npos);
+}
+
+/** Test addAdvantages(). */
+AFL_TEST("game.spec.RacialAbilityList:addAdvantages", a)
+{
+    // Prepare
+    game::spec::AdvantageList advList;
+    game::spec::AdvantageList::Item* p = advList.add(77);
+    advList.setName(p, "AdName");
+    advList.setDescription(p, "AdInfo");
+    advList.addPlayer(p, 1);
+    advList.addPlayer(p, 5);
+
+    // Present as RacialAbilityList
+    game::spec::RacialAbilityList testee;
+    testee.addAdvantages(advList);
+
+    // Verify
+    a.checkEqual("01. size", testee.size(), 1U);
+    a.checkNonNull("02. get", testee.get(0));
+    a.checkEqual("03. name", testee.get(0)->name, "AdName");
+    a.checkDifferent("04. explanation", testee.get(0)->explanation.find("AdInfo"), String_t::npos);
+    a.checkEqual("05. player", testee.get(0)->players, game::PlayerSet_t() + 1 + 5);
+    a.checkEqual("06. origin", testee.get(0)->origin, game::spec::RacialAbilityList::FromAdvantages);
 }
 
 /** Test filterPlayers(). */

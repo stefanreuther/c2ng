@@ -30,6 +30,7 @@
 
 using game::config::HostConfiguration;
 using game::config::UserConfiguration;
+using game::spec::AdvantageList;
 using interpreter::test::verifyNewBoolean;
 using interpreter::test::verifyNewFloat;
 using interpreter::test::verifyNewInteger;
@@ -786,6 +787,127 @@ AFL_TEST("game.interface.GlobalFunctions:IFFormat:error:type", a)
     seg.pushBackNew(new interpreter::StructureType(*new interpreter::StructureTypeData()));
     interpreter::Arguments args(seg, 0, 2);
     AFL_CHECK_THROWS(a, game::interface::IFFormat(env.session, args), interpreter::Error);
+}
+
+/*
+ *  IFHasAdvantage
+ */
+
+namespace {
+    void prepareHasAdvantage(Environment& env, int player)
+    {
+        addShipList(env);
+        AdvantageList& advList = env.session.getShipList()->advantages();
+        AdvantageList::Item* p = advList.add(34);
+        advList.addPlayer(p, 3);
+        advList.addPlayer(p, 9);
+
+        if (player != 0) {
+            addGame(env);
+            env.session.getGame()->setViewpointPlayer(player);
+        }
+    }
+}
+
+// Normal, true result
+AFL_TEST("game.interface.GlobalFunctions:IFHasAdvantage:unary:true", a)
+{
+    Environment env;
+    prepareHasAdvantage(env, 3);
+    afl::data::Segment seg;
+    seg.pushBackInteger(34);
+    interpreter::Arguments args(seg, 0, 1);
+    verifyNewBoolean(a, game::interface::IFHasAdvantage(env.session, args), true);
+}
+
+// Normal, false result
+AFL_TEST("game.interface.GlobalFunctions:IFHasAdvantage:unary:false", a)
+{
+    Environment env;
+    prepareHasAdvantage(env, 2);
+    afl::data::Segment seg;
+    seg.pushBackInteger(34);
+    interpreter::Arguments args(seg, 0, 1);
+    verifyNewBoolean(a, game::interface::IFHasAdvantage(env.session, args), false);
+}
+
+// Invocation with null
+AFL_TEST("game.interface.GlobalFunctions:IFHasAdvantage:unary:null", a)
+{
+    Environment env;
+    prepareHasAdvantage(env, 2);
+    afl::data::Segment seg;
+    seg.pushBackNew(0);
+    interpreter::Arguments args(seg, 0, 1);
+    verifyNewNull(a, game::interface::IFHasAdvantage(env.session, args));
+}
+
+// Unary invocation without game
+AFL_TEST("game.interface.GlobalFunctions:IFHasAdvantage:unary:no-game", a)
+{
+    Environment env;
+    addShipList(env);
+    afl::data::Segment seg;
+    seg.pushBackInteger(34);
+    interpreter::Arguments args(seg, 0, 1);
+    verifyNewNull(a, game::interface::IFHasAdvantage(env.session, args));
+}
+
+// Normal, binary operation
+AFL_TEST("game.interface.GlobalFunctions:IFHasAdvantage:binary", a)
+{
+    Environment env;
+    prepareHasAdvantage(env, 2);
+    afl::data::Segment seg;
+    seg.pushBackInteger(34);
+    seg.pushBackInteger(9);
+    interpreter::Arguments args(seg, 0, 2);
+    verifyNewBoolean(a, game::interface::IFHasAdvantage(env.session, args), true);
+}
+
+// Binary invocation with null
+AFL_TEST("game.interface.GlobalFunctions:IFHasAdvantage:binary:null", a)
+{
+    Environment env;
+    prepareHasAdvantage(env, 2);
+    afl::data::Segment seg;
+    seg.pushBackInteger(34);
+    seg.pushBackNew(0);
+    interpreter::Arguments args(seg, 0, 2);
+    verifyNewNull(a, game::interface::IFHasAdvantage(env.session, args));
+}
+
+// Binary operation with no ship list
+AFL_TEST("game.interface.GlobalFunctions:IFHasAdvantage:binary:no-shiplist", a)
+{
+    Environment env;
+    addGame(env);
+    afl::data::Segment seg;
+    seg.pushBackInteger(34);
+    seg.pushBackInteger(9);
+    interpreter::Arguments args(seg, 0, 2);
+    verifyNewNull(a, game::interface::IFHasAdvantage(env.session, args));
+}
+
+// Arity error
+AFL_TEST("game.interface.GlobalFunctions:IFHasAdvantage:error:arity", a)
+{
+    Environment env;
+    prepareHasAdvantage(env, 3);
+    afl::data::Segment seg;
+    interpreter::Arguments args(seg, 0, 0);
+    AFL_CHECK_THROWS(a, game::interface::IFHasAdvantage(env.session, args), interpreter::Error);
+}
+
+// Type error
+AFL_TEST("game.interface.GlobalFunctions:IFHasAdvantage:error:type", a)
+{
+    Environment env;
+    prepareHasAdvantage(env, 3);
+    afl::data::Segment seg;
+    seg.pushBackString("a");
+    interpreter::Arguments args(seg, 0, 1);
+    AFL_CHECK_THROWS(a, game::interface::IFHasAdvantage(env.session, args), interpreter::Error);
 }
 
 /*

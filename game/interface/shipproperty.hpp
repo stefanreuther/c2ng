@@ -46,6 +46,7 @@ namespace game { namespace interface {
         ispFleetName,
         ispFleetStatus,
         ispFleet,
+        ispHasAdvantage,
         ispHasFunction,
         ispHeadingAngle,
         ispHeadingName,

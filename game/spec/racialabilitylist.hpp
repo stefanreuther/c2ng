@@ -10,6 +10,7 @@
 #include "game/playerset.hpp"
 #include "game/spec/shiplist.hpp"
 #include "util/numberformatter.hpp"
+#include "game/spec/advantagelist.hpp"
 
 namespace game { namespace spec {
 
@@ -26,11 +27,13 @@ namespace game { namespace spec {
         /** Origin of an ability. */
         enum Origin {
             FromHullFunction,              ///< From hull function (ShipList::racialAbilities())
-            FromConfiguration              ///< From configuration (array-ized option).
+            FromConfiguration,             ///< From configuration (array-ized option).
+            FromAdvantages                 ///< From advantages.
         };
 
         /** Category of an ability. */
         enum Category {
+            Unclassified,                  ///< Unclassified.
             Combat,                        ///< Combat.
             Economy,                       ///< Economy/planets.
             Minefield,                     ///< Minefield (laying, sweeping).
@@ -95,6 +98,10 @@ namespace game { namespace spec {
             \param fmt Number formatter
             \param tx Translator */
         void addConfigRacialAbilities(const game::config::HostConfiguration& config, util::NumberFormatter fmt, afl::string::Translator& tx);
+
+        /** Add abilities derived from advantages.
+            \param advList Advantage list */
+        void addAdvantages(const AdvantageList& advList);
 
         /** Filter players.
             Keeps only abilities that are available to a player in the given set.

@@ -43,13 +43,14 @@ namespace {
      */
     class PlanetArrayProperty : public interpreter::FunctionValue {
      public:
-        PlanetArrayProperty(const game::map::Planet& planet, afl::base::Ref<game::Game> game, game::interface::PlanetProperty property);
+        PlanetArrayProperty(const game::map::Planet& planet, game::Session& session, afl::base::Ref<game::Game> game, game::interface::PlanetProperty property);
 
         virtual afl::data::Value* get(Arguments& args);
         virtual PlanetArrayProperty* clone() const;
 
      private:
         const game::map::Planet& m_planet;
+        game::Session& m_session;
         afl::base::Ref<game::Game> m_game;
         const game::interface::PlanetProperty m_property;
     };
@@ -64,9 +65,10 @@ namespace {
     }
 }
 
-PlanetArrayProperty::PlanetArrayProperty(const game::map::Planet& planet, afl::base::Ref<game::Game> game, game::interface::PlanetProperty property)
+PlanetArrayProperty::PlanetArrayProperty(const game::map::Planet& planet, game::Session& session, afl::base::Ref<game::Game> game, game::interface::PlanetProperty property)
     : interpreter::FunctionValue(),
       m_planet(planet),
+      m_session(session),
       m_game(game),
       m_property(property)
 { }
@@ -78,6 +80,36 @@ PlanetArrayProperty::get(Arguments& args)
     // ex PlanetArrayProperty::get
     // ex planint.pas:ResolveScoreFunction
     switch (m_property) {
+     case game::interface::ippHasAdvantage: {
+        // Documented in globalfunctions.cpp
+        args.checkArgumentCount(1, 2);
+
+        // Advantage Id
+        int advId;
+        if (!checkIntegerArg(advId, args.getNext())) {
+            return 0;
+        }
+
+        // Player
+        int playerId;
+        if (args.getNumArgs() > 0) {
+            if (!checkIntegerArg(playerId, args.getNext(), 1, game::MAX_PLAYERS)) {
+                return 0;
+            }
+        } else {
+            if (!m_planet.getOwner().get(playerId)) {
+                return 0;
+            }
+        }
+
+        // Result
+        if (game::spec::ShipList* sl = m_session.getShipList().get()) {
+            return makeBooleanValue(sl->advantages().getPlayers(sl->advantages().find(advId)).contains(playerId));
+        } else {
+            return 0;
+        }
+     }
+
      case game::interface::ippScore: {
         // Documented in shipproperty.cpp
         // @change PCC 1.x returns null on range error, we fail the call
@@ -100,7 +132,7 @@ PlanetArrayProperty*
 PlanetArrayProperty::clone() const
 {
     // ex PlanetArrayProperty::clone
-    return new PlanetArrayProperty(m_planet, m_game, m_property);
+    return new PlanetArrayProperty(m_planet, m_session, m_game, m_property);
 }
 
 
@@ -286,6 +318,8 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
         /* @q Ground.T:Int (Planet Property)
            Amount of Tritanium in ground, kilotons. */
         return makeOptionalIntegerValue(pl.getOreGround(Element::Tritanium));
+     case ippHasAdvantage:
+        return new PlanetArrayProperty(pl, session, game, ipp);
      case ippId:
         /* @q Id:Int (Planet Property)
            Planet Id. */
@@ -611,7 +645,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
         return makeStringValue("Planet");
 
      case ippScore:
-        return new PlanetArrayProperty(pl, game, ipp);
+        return new PlanetArrayProperty(pl, session, game, ipp);
     }
     return 0;
 }
