@@ -138,7 +138,7 @@ game::nu::GameFolder::loadGameRoot(const game::config::UserConfiguration& config
                                  std::auto_ptr<afl::charset::Charset>(new afl::charset::Utf8Charset()),
                                  actions);
 
-                    // FIXME -> root->userConfiguration().loadUserConfiguration(m_parent.m_profile, m_parent.m_log, m_parent.m_translator);
+                    root->userConfiguration().loadUserConfiguration(m_handler.browser().profile(), m_handler.log(), m_handler.translator());
                     root->userConfiguration().merge(m_config);
 
                     // Host configuration loaded by SpecificationLoader
