@@ -153,7 +153,7 @@
 
       <h2>Reference</h2>
       <dl>
-        <di term="See also:"> <a href="toc">Table of Content</a>, <a href="pcc2:invoke">Invoking PCC2</a>.</di>
+        <di term="See also:"> <a href="toc">Table of Content</a>, <a href="pcc2:invoke">Invoking PCC2</a>, <a href="pcc2:gametypes">Game Types</a>.</di>
       </dl>
     </page>
 
@@ -166,9 +166,57 @@
       <p>To define an account, enter your user name and choose the server type (PlanetsCentral or planets.nu).
         The account will now appear on the top level of the <a href="pcc2:gamesel">Game Selection screen</a>.</p>
 
+      <p>For some details, see <a href="pcc2:gametypes">Game Types</a>.</p>
+
       <h2>Reference</h2>
       <dl>
         <di term="Keys:"><kbd>Ins</kbd> from <a href="pcc2:gamesel">PCC2 Game Selection</a>.</di>
+      </dl>
+    </page>
+
+    <page id="pcc2:gametypes">
+      <h1>Game Types</h1>
+
+      <h2>Local Game</h2>
+      <p>PCC2 supports "classic" VGA Planets 3 gameplay using RST and TRN files.
+        In this mode of play, it is your responsibility to receive RST and ship list files from your host,
+        and to upload TRN files after playing your turn.
+        Each game you play needs to be in a different directory on your computer;
+        PCC2 will use it to store additional data files such as the starchart database.</p>
+      <p><b>Classic:</b> You can unpack your result using the built-in <a href="pcc2:unpack">Unpack</a> feature (or any other Unpack implementation).
+        This play mode is compatible with all other VGAP3 client utilities such as VPA, EchoView, BSim, PCC1, etc.
+        You need to manually run Maketurn from the <a href="pcc2:gamesel">Game Selection</a> (or use any other Maketurn implementation).
+        If PCC2 detects a new result file, it will suggest to unpack it.</p>
+      <p><b>Simple:</b> You do not have to unpack your result file.
+        PCC2 can play directly from a result file.
+        In that case, it will automatically save a turn file each time you exit.
+        This mode is supported by all PCC2 versions, but, at the time of this writing, few other tools.</p>
+
+      <h2>PlanetsCentral.com</h2>
+      <p>PCC2 can play directly from a game directory stored on the PlanetsCentral server.
+        This makes most sense if the game directory is managed by the PlanetsCentral host.
+        To set this up, use the "Set up &amp; Play" option on the website.
+        PCC2 will then use the server directory in the same way as it would use it for a local game.
+        You can then use PCC2 and PCC2 Web alternatively.</p>
+      <p>PlanetsCentral game directories always use the "Simple" mode (no unpack).</p>
+
+      <h2>Planets Nu</h2>
+      <p>PCC2 can play games hosted by the planets.nu site.
+        Those games use different, incompatible file formats, but very similar rules.
+        PCC2 will ask you to <a href="pcc2:gamedirsetup">set up a game directory</a> anyway to store its local files
+        (starchart database, auto-tasks).</p>
+      <p>Despite being similar, Planets Nu introduced some new rules and features,
+        such as new hull types or formula differences.
+        PCC2 tries to adapt to these where possible.</p>
+      <p>There is an earlier implementation of a planets.nu-to-PCC2 connector (c2nu),
+        which converts a Planets Nu result file into a classic VGAP3 result file.
+        PCC2 will cooperate with that tool.
+        However, many new rules and features cannot be supported by VGAP3 file formats,
+        so you should prefer the direct Nu support in PCC2.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="See also:"> <a href="pcc2:gamesel">PCC2 Game Selection</a>, <a href="pcc2:addaccount">Add Account</a>.</di>
       </dl>
     </page>
 
