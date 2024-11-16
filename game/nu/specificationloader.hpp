@@ -45,14 +45,6 @@ namespace game { namespace nu {
         afl::sys::LogListener& m_log;
 
         void loadHullFunctionDefinitions(game::spec::ShipList& list);
-        void loadHulls(game::spec::ShipList& list, afl::data::Access p);
-        void loadBeams(game::spec::ShipList& list, afl::data::Access p);
-        void loadTorpedoes(game::spec::ShipList& list, afl::data::Access p);
-        void loadEngines(game::spec::ShipList& list, afl::data::Access p);
-        void loadDefaultHullAssignments(game::spec::ShipList& list, afl::data::Access players, afl::data::Access races);
-        void loadRaceHullAssignments(game::spec::ShipList& list, afl::data::Access racehulls, int player);
-
-        void loadRaceNames(Root& root, afl::data::Access players, afl::data::Access races);
     };
 
 } }
