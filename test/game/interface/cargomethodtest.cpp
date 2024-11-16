@@ -154,7 +154,7 @@ AFL_TEST("game.interface.CargoMethod:planet-ship:supply-sale", a)
 AFL_TEST("game.interface.CargoMethod:planet-ship:overload-fail", a)
 {
     Environment env;
-    Ship& sh = addShip(env, 17, 1, Object::Playable);
+    /*Ship& sh =*/ addShip(env, 17, 1, Object::Playable);
     Planet& pl = addPlanet(env, 100, 1, Object::Playable);
 
     afl::data::Segment seg;
@@ -209,7 +209,7 @@ AFL_TEST("game.interface.CargoMethod:planet-ship:proxy", a)
 {
     Environment env;
     Ship& proxy = addShip(env, 17, 1, Object::Playable);
-    Ship& sh = addShip(env, 222, 2, Object::NotPlayable);
+    /*Ship& sh =*/ addShip(env, 222, 2, Object::NotPlayable);
     Planet& pl = addPlanet(env, 100, 1, Object::Playable);
 
     afl::data::Segment seg;
@@ -338,7 +338,7 @@ AFL_TEST("game.interface.CargoMethod:ship-ship:underflow", a)
 {
     Environment env;
     Ship& from = addShip(env, 17, 1, Object::Playable);
-    Ship& to   = addShip(env, 34, 1, Object::Playable);
+    /*Ship& to =*/ addShip(env, 34, 1, Object::Playable);
 
     afl::data::Segment seg;
     seg.pushBackString("t50");
@@ -414,7 +414,7 @@ AFL_TEST("game.interface.CargoMethod:ship-ship:null-amount", a)
 {
     Environment env;
     Ship& from = addShip(env, 17, 1, Object::Playable);
-    Ship& to   = addShip(env, 34, 1, Object::Playable);
+    /*Ship& to =*/ addShip(env, 34, 1, Object::Playable);
 
     afl::data::Segment seg;
     seg.pushBackNew(0);
@@ -429,7 +429,7 @@ AFL_TEST("game.interface.CargoMethod:ship-ship:null-target", a)
 {
     Environment env;
     Ship& from = addShip(env, 17, 1, Object::Playable);
-    Ship& to   = addShip(env, 34, 1, Object::Playable);
+    /*Ship& to =*/ addShip(env, 34, 1, Object::Playable);
 
     afl::data::Segment seg;
     seg.pushBackString("t7");
@@ -525,7 +525,7 @@ AFL_TEST("game.interface.CargoMethod:upload:overflow", a)
 {
     Environment env;
     Ship& sh = addShip(env, 17, 1, Object::Playable);
-    Planet& pl = addPlanet(env, 100, 1, Object::Playable);
+    /*Planet& pl =*/ addPlanet(env, 100, 1, Object::Playable);
 
     afl::data::Segment seg;
     seg.pushBackString("500n");
@@ -644,8 +644,8 @@ AFL_TEST("game.interface.CargoMethod:upload:proxy:invalid", a)
 {
     Environment env;
     Ship& them = addShip(env, 17, 2, Object::NotPlayable);
-    Ship& me = addShip(env, 20, 3, Object::Playable);
-    Planet& pl = addPlanet(env, 100, 1, Object::Playable);
+    /*Ship& me =*/ addShip(env, 20, 3, Object::Playable);
+    /*Planet& pl =*/ addPlanet(env, 100, 1, Object::Playable);
 
     afl::data::Segment seg;
     seg.pushBackString("t10");

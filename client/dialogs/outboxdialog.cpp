@@ -208,7 +208,6 @@ client::dialogs::OutboxDialog::updateButton(client::widgets::MessageActionPanel:
 void
 client::dialogs::OutboxDialog::onAction(client::widgets::MessageActionPanel::Action a, int arg)
 {
-    afl::string::Translator& tx = translator();
     switch (a) {
      case MessageActionPanel::GoTo1:
         if (m_data.goto1.isSet()) {

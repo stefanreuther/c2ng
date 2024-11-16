@@ -37,9 +37,9 @@ AFL_TEST("gfx.threed.PositionList:init", a)
     gfx::threed::PositionList testee;
     a.checkEqual("01. getNumPositions",    testee.getNumPositions(), 0U);
     a.checkEqual("02. getIdByIndex",       testee.getIdByIndex(0), 0U);
-    a.checkEqual("03. getPositionByIndex", testee.getPositionByIndex(0)(0), 0);
-    a.checkEqual("04. getPositionByIndex", testee.getPositionByIndex(0)(1), 0);
-    a.checkEqual("05. getPositionByIndex", testee.getPositionByIndex(0)(2), 0);
+    a.checkEqual("03. getPositionByIndex", testee.getPositionByIndex(0)(0), 0.0f);
+    a.checkEqual("04. getPositionByIndex", testee.getPositionByIndex(0)(1), 0.0f);
+    a.checkEqual("05. getPositionByIndex", testee.getPositionByIndex(0)(2), 0.0f);
 }
 
 
@@ -56,14 +56,14 @@ AFL_TEST("gfx.threed.PositionList:basics", a)
     a.checkEqual("01. getNumPositions", testee.getNumPositions(), 5U);
 
     a.checkEqual("11. getIdByIndex",       testee.getIdByIndex(0), 1U);
-    a.checkEqual("12. getPositionByIndex", testee.getPositionByIndex(0)(0), 1);
-    a.checkEqual("13. getPositionByIndex", testee.getPositionByIndex(0)(1), 2);
-    a.checkEqual("14. getPositionByIndex", testee.getPositionByIndex(0)(2), 3);
+    a.checkEqual("12. getPositionByIndex", testee.getPositionByIndex(0)(0), 1.0f);
+    a.checkEqual("13. getPositionByIndex", testee.getPositionByIndex(0)(1), 2.0f);
+    a.checkEqual("14. getPositionByIndex", testee.getPositionByIndex(0)(2), 3.0f);
 
     a.checkEqual("21. getIdByIndex",       testee.getIdByIndex(2), 3U);
-    a.checkEqual("22. getPositionByIndex", testee.getPositionByIndex(2)(0), 100);
-    a.checkEqual("23. getPositionByIndex", testee.getPositionByIndex(2)(1), 2);
-    a.checkEqual("24. getPositionByIndex", testee.getPositionByIndex(2)(2), 3);
+    a.checkEqual("22. getPositionByIndex", testee.getPositionByIndex(2)(0), 100.0f);
+    a.checkEqual("23. getPositionByIndex", testee.getPositionByIndex(2)(1), 2.0f);
+    a.checkEqual("24. getPositionByIndex", testee.getPositionByIndex(2)(2), 3.0f);
 
     a.checkEqual("31. findId", testee.findId(1).orElse(77),    0U);
     a.checkEqual("32. findId", testee.findId(1, 1).orElse(77), 3U);

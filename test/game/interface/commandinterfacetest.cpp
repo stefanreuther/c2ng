@@ -102,7 +102,7 @@ AFL_TEST("game.interface.CommandInterface:IFAddCommand:null", a)
 AFL_TEST("game.interface.CommandInterface:IFAddCommand:bad-command", a)
 {
     Environment env;
-    CommandExtra& ex = addCommandExtra(env);
+    addCommandExtra(env);
 
     afl::data::Segment seg;
     seg.pushBackString("buy a vowel");
@@ -182,7 +182,7 @@ AFL_TEST("game.interface.CommandInterface:IFDeleteCommand:null", a)
 AFL_TEST("game.interface.CommandInterface:IFDeleteCommand:error:bad-command", a)
 {
     Environment env;
-    CommandExtra& ex = addCommandExtra(env);
+    addCommandExtra(env);
 
     // Execute command
     afl::data::Segment seg;

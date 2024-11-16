@@ -26,7 +26,7 @@ namespace util {
     class DataTable {
      public:
         /** Type for value. */
-        typedef afl::base::InlineOptional<int32_t,0x80000000> Value_t;
+        typedef afl::base::InlineOptional<int32_t,int32_t(0x80000000)> Value_t;
 
         /** Row.
             Rows are created using DataTable::addRow(); users cannot create rows on their own. */

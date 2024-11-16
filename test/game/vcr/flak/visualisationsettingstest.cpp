@@ -26,7 +26,7 @@ AFL_TEST("game.vcr.flak.VisualisationSettings:init", a)
     VisualisationSettings testee;
     a.checkEqual("01. getFollowedFleet", testee.getFollowedFleet(), Visualizer::NO_ENEMY);
     a.checkEqual("02. isAutoCamera", testee.isAutoCamera(), true);
-    a.checkGreaterThan("03. getCameraDistance", testee.getCameraDistance(), 0);
+    a.checkGreaterThan("03. getCameraDistance", testee.getCameraDistance(), 0.0f);
     a.checkEqual("04. getCameraAzimuth", testee.getCameraAzimuth(), 0.0);
     a.checkEqual("05. getCameraRaise", testee.getCameraRaise(), 0);
 }

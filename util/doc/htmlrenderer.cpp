@@ -232,11 +232,11 @@ HtmlRenderer::renderImage(const TagNode& t)
 {
     String_t link = t.getAttributeByName("src");
     if (!link.empty()) {
-        int width, height;
+        int width = 0, height = 0;
         if (afl::string::strToInteger(t.getAttributeByName("width"), width)
             && afl::string::strToInteger(t.getAttributeByName("height"), height))
         {
-            int left, top;
+            int left = 0, top = 0;
             if (afl::string::strToInteger(t.getAttributeByName("left"), left)
                 && afl::string::strToInteger(t.getAttributeByName("top"), top))
             {

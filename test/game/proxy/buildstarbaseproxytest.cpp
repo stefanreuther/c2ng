@@ -106,7 +106,7 @@ AFL_TEST_NOARG("game.proxy.BuildStarbaseProxy:lifetime")
 {
     SessionThread h;
     prepare(h);
-    Planet& p = addPlanet(h);
+    addPlanet(h);
 
     BuildStarbaseProxy testee(h.gameSender());
 

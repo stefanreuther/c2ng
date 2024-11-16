@@ -216,7 +216,7 @@ AFL_TEST("game.map.ShipUtils:setInterceptWaypoint:unknown-target", a)
     sa.setPosition(Point(1100, 1200));
     sa.setMission(8, 30, 0);
 
-    Ship& sb = *univ.ships().create(30);
+    /*Ship& sb =*/ univ.ships().create(30);
 
     setInterceptWaypoint(univ, sa, mapConfig);
 

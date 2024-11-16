@@ -120,7 +120,7 @@ namespace util {
     //   1 SDLK_MODE
 
 
-    const Key_t KeyMod_Mask        = 0xFE000000;
+    const Key_t KeyMod_Mask        = static_cast<Key_t>(0xFE000000);
     const Key_t KeyMod_Shift       = 0x02000000;
     const Key_t KeyMod_Ctrl        = 0x04000000;
     const Key_t KeyMod_Alt         = 0x08000000;

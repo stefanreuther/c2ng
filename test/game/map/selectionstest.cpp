@@ -296,9 +296,9 @@ AFL_TEST("game.map.Selections:markList:current", a)
     // Setup
     game::map::Universe u;
     game::map::Planet& p1  = createPlanet(u, 1);
-    game::map::Planet& p2  = createPlanet(u, 2);
-    game::map::Planet& p3  = createPlanet(u, 3);
-    game::map::Ship& s1  = createShip(u, 1);
+    /*game::map::Planet& p2 =*/ createPlanet(u, 2);
+    /*game::map::Planet& p3 =*/ createPlanet(u, 3);
+    /*game::map::Ship& s1 =*/ createShip(u, 1);
     game::map::Ship& s2  = createShip(u, 2);
 
     // List
@@ -339,9 +339,9 @@ AFL_TEST("game.map.Selections:markList:other", a)
     // Setup
     game::map::Universe u;
     game::map::Planet& p1  = createPlanet(u, 1);
-    game::map::Planet& p2  = createPlanet(u, 2);
-    game::map::Planet& p3  = createPlanet(u, 3);
-    game::map::Ship& s1  = createShip(u, 1);
+    /*game::map::Planet& p2 =*/ createPlanet(u, 2);
+    /*game::map::Planet& p3 =*/ createPlanet(u, 3);
+    /*game::map::Ship& s1 =*/ createShip(u, 1);
     game::map::Ship& s2  = createShip(u, 2);
 
     // List

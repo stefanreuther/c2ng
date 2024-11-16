@@ -37,8 +37,6 @@ client::tiles::FleetScreenHeaderTile::attach(game::proxy::ObjectObserver& oop)
               m_image(),
               m_marked(obj != 0 && obj->isMarked())
             {
-                afl::string::Translator& tx = session.translator();
-
                 // ex WShipScreenHeaderTile::getSubtitle
                 const game::map::Ship* sh = dynamic_cast<game::map::Ship*>(obj);
                 game::Game* g = session.getGame().get();

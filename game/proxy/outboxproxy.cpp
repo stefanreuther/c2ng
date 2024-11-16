@@ -280,7 +280,6 @@ game::proxy::OutboxProxy::loadMessageTextFromFile(WaitIndicator& ind, String_t& 
                 try {
                     // Objects
                     afl::io::FileSystem& fs = session.world().fileSystem();
-                    afl::string::Translator& tx = session.translator();
                     Root* r = session.getRoot().get();
 
                     // Open file for reading

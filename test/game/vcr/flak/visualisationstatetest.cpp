@@ -38,7 +38,7 @@ AFL_TEST("game.vcr.flak.VisualisationState:init", a)
     a.check("11. animate", !testee.animate());
 
     // Sensible arena size
-    a.checkGreaterThan("21. getArenaSize", testee.getArenaSize(), 100);
+    a.checkGreaterThan("21. getArenaSize", testee.getArenaSize(), 100.0f);
     a.checkGreaterThan("22. getGridSize", testee.getGridSize(), 100);
 }
 
@@ -97,8 +97,8 @@ AFL_TEST("game.vcr.flak.VisualisationState:ship", a)
     a.checkEqual("14. pos z",    testee.ships().at(2)->pos.z, 250);        // ZSCALE has been applied
     a.checkEqual("15. isPlanet", testee.ships().at(2)->isPlanet, true);
 
-    a.checkGreaterEqual("21. getArenaSize", testee.getArenaSize(), 5000);
-    a.checkLessEqual   ("22. getArenaSize", testee.getArenaSize(), 10000);
+    a.checkGreaterEqual("21. getArenaSize", testee.getArenaSize(), 5000.0f);
+    a.checkLessEqual   ("22. getArenaSize", testee.getArenaSize(), 10000.0f);
 
     a.checkEqual("31. getGridSize", testee.getGridSize(), 5000);
 
@@ -145,8 +145,8 @@ AFL_TEST("game.vcr.flak.VisualisationState:fleet", a)
     a.checkEqual("25. x",         testee.fleets().at(1)->x, 1000);
     a.checkEqual("26. y",         testee.fleets().at(1)->y, -5000);
 
-    a.checkGreaterEqual("31. getArenaSize", testee.getArenaSize(), 5000);
-    a.checkLessEqual   ("32. getArenaSize", testee.getArenaSize(), 10000);
+    a.checkGreaterEqual("31. getArenaSize", testee.getArenaSize(), 5000.0f);
+    a.checkLessEqual   ("32. getArenaSize", testee.getArenaSize(), 10000.0f);
 
     // Set enemy and verify
     testee.setEnemy(0, 2);

@@ -224,7 +224,7 @@ AFL_TEST("game.proxy.CargoTransferProxy:lifetime", a)
     SessionThread h;
     prepare(h);
     Ship& sh = addShip(a, h, SHIP_ID);
-    Planet& pl = addPlanet(a, h, PLANET_ID);
+    addPlanet(a, h, PLANET_ID);
     CargoTransferSetup setup = CargoTransferSetup::fromPlanetShip(h.session().getGame()->currentTurn().universe(), PLANET_ID, SHIP_ID);
 
     // Testee

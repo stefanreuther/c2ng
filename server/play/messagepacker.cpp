@@ -28,10 +28,7 @@ server::play::MessagePacker::buildValue() const
     // ex ServerMessageWriter::write
     // Preconditions
     game::Game& g = game::actions::mustHaveGame(m_session);
-    game::Root& r = game::actions::mustHaveRoot(m_session);
     game::msg::Inbox& inbox = g.currentTurn().inbox();
-    afl::string::Translator& tx = m_session.translator();
-    game::PlayerList& pl = r.playerList();
 
     // Validate number
     if (m_index <= 0 || size_t(m_index) > inbox.getNumMessages()) {

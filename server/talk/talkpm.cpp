@@ -63,7 +63,7 @@ namespace {
                 }
             } else {
                 // Parse
-                int32_t gameId, slotId;
+                int32_t gameId = 0, slotId = 0;
                 if (!afl::string::strToInteger(String_t(in, 2, divi-2), gameId)
                     || !afl::string::strToInteger(String_t(in, divi+1), slotId)
                     || slotId <= 0 || slotId > game::v3::structures::NUM_PLAYERS)

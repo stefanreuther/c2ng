@@ -120,7 +120,7 @@ AFL_TEST("game.interface.IonStormContext:create:success", a)
 AFL_TEST("game.interface.IonStormContext:create:bad-id", a)
 {
     Environment env;
-    game::map::IonStorm& st = addStorm(env, ID, "Fred");
+    addStorm(env, ID, "Fred");
     std::auto_ptr<game::interface::IonStormContext> ctx(game::interface::IonStormContext::create(ID+1, env.session, env.session.getGame()->viewpointTurn()));
     a.checkNull("ctx", ctx.get());
 }

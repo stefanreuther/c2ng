@@ -215,8 +215,9 @@ game::actions::BuildParts::computeMinParts(TechLevel area, int slot) const
     // Take minimum parts from reverter, if known; otherwise, don't go below what we currently have.
     if (m_pUniverse != 0) {
         if (game::map::Reverter* pRev = m_pUniverse->getReverter()) {
-            if (const int* p = pRev->getMinBaseStorage(planet().getId(), area, slot).get()) {
-                return std::max(0, *p);
+            int n;
+            if (pRev->getMinBaseStorage(planet().getId(), area, slot).get(n)) {
+                return std::max(0, n);
             }
         }
     }

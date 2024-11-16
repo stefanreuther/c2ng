@@ -131,7 +131,7 @@ client::widgets::TurnListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, si
         ctx.setColor(subColor);
         outTextF(ctx, textArea, pItem->time);
 
-        uint8_t c;
+        uint8_t c = 0;
         if (boxColor.get(c)) {
             gfx::Context<uint8_t> ctx(can, m_root.colorScheme());
             drawSolidBar(ctx, area, c);

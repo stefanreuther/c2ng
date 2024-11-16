@@ -159,7 +159,7 @@ namespace {
 AFL_TEST("server.play.ShipCommandHandler:setcomment", a)
 {
     Environment env;
-    Ship& sh = makeShip(env, 77);
+    makeShip(env, 77);
 
     server::play::ShipCommandHandler testee(env.session, 77);
     Segment args;
