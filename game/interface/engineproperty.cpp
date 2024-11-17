@@ -28,12 +28,7 @@ namespace {
                     return 0;
                 }
 
-                int32_t ff;
-                if (m_engine.getFuelFactor(warp, ff)) {
-                    return makeIntegerValue(ff);
-                } else {
-                    return 0;
-                }
+                return interpreter::makeOptionalIntegerValue(m_engine.getFuelFactor(warp));
             }
         virtual void set(interpreter::Arguments& args, const afl::data::Value* value)
             { rejectSet(args, value); }

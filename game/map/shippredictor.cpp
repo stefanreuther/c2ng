@@ -591,7 +591,7 @@ namespace {
             return 0;
         }
         int32_t ff;
-        if (!pEngine->getFuelFactor(warp, ff)) {
+        if (!pEngine->getFuelFactor(warp).get(ff)) {
             return 0;
         }
 

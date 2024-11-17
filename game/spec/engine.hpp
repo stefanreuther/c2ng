@@ -6,6 +6,7 @@
 #define C2NG_GAME_SPEC_ENGINE_HPP
 
 #include "game/spec/component.hpp"
+#include "afl/base/optional.hpp"
 
 namespace game { namespace spec {
 
@@ -29,10 +30,8 @@ namespace game { namespace spec {
         /** Get fuel factor.
             The fuel factor is used in fuel usage computations.
             \param warp [in] Warp factor [0, MAX_WARP]
-            \param fuelFactor [out] Fuel factor
-            \retval true warp factor was valid; fuel factor has been updated
-            \retval false warp factor was out of range */
-        bool getFuelFactor(int warp, int32_t& fuelFactor) const;
+            \return Fuel factor if known; nothing if warp factor was out of range */
+        afl::base::Optional<int32_t> getFuelFactor(int warp) const;
 
         /** Set fuel factor.
             \param warp Warp factor [0, MAX_WARP]. Out-of-range values are ignored.
@@ -59,17 +58,15 @@ namespace game { namespace spec {
 } }
 
 // Get fuel factor.
-inline bool
-game::spec::Engine::getFuelFactor(int warp, int32_t& fuelFactor) const
+inline afl::base::Optional<int32_t>
+game::spec::Engine::getFuelFactor(int warp) const
 {
     if (warp <= 0) {
-        fuelFactor = 0;
-        return true;
+        return 0;
     } else if (warp <= MAX_WARP) {
-        fuelFactor = m_fuelFactors[warp-1];
-        return true;
+        return m_fuelFactors[warp-1];
     } else {
-        return false;
+        return afl::base::Nothing;
     }
 }
 

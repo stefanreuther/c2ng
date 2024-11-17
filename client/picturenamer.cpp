@@ -27,7 +27,7 @@ client::PictureNamer::getEnginePicture(const game::spec::Engine& e) const
     String_t result = ui::res::makeResourceId(RESOURCE_ID("engine"), e.getId());
 
     int32_t factor;
-    for (int i = 1; i <= game::spec::Engine::MAX_WARP && e.getFuelFactor(i, factor); ++i) {
+    for (int i = 1; i <= game::spec::Engine::MAX_WARP && e.getFuelFactor(i).get(factor); ++i) {
         result += afl::string::Format("%c%d",
                                       i == 1 ? '.' : '|',
                                       factor / (i*i));

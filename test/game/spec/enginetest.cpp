@@ -15,20 +15,15 @@ AFL_TEST("game.spec.Engine:fuel:defaults", a)
     a.checkEqual("01. MAX_WARP", e.MAX_WARP, 9);
 
     // Default values
-    int32_t ff;
-    a.check("11. getFuelFactor", e.getFuelFactor(-1, ff));    // not explicitly documented, but robust choice
-    a.checkEqual("12. fuel factor", ff, 0);
+    a.checkEqual("11. getFuelFactor", e.getFuelFactor(-1).orElse(-1), 0);    // not explicitly documented, but robust choice
 
-    a.check("21. getFuelFactor", e.getFuelFactor(0, ff));
-    a.checkEqual("22. fuel factor", ff, 0);
+    a.checkEqual("21. getFuelFactor", e.getFuelFactor(0).orElse(-1), 0);
 
-    a.check("31. getFuelFactor", e.getFuelFactor(1, ff));
-    a.checkEqual("32. fuel factor", ff, 0);
+    a.checkEqual("31. getFuelFactor", e.getFuelFactor(1).orElse(-1), 0);
 
-    a.check("41. getFuelFactor", e.getFuelFactor(9, ff));
-    a.checkEqual("42. fuel factor", ff, 0);
+    a.checkEqual("41. getFuelFactor", e.getFuelFactor(9).orElse(-1), 0);
 
-    a.check("51. getFuelFactor", !e.getFuelFactor(10, ff));
+    a.check("51. getFuelFactor", !e.getFuelFactor(10).isValid());
 
     // Because we have no fuel factors, max efficient warp is 9
     a.checkEqual("61. getMaxEfficientWarp", e.getMaxEfficientWarp(), 9);
@@ -45,17 +40,13 @@ AFL_TEST("game.spec.Engine:fuel:values", a)
     }
 
     // Verify
-    int32_t ff;
-    a.check("01. getFuelFactor", e.getFuelFactor(0, ff));
-    a.checkEqual("02. fuel factor", ff, 0);
+    a.checkEqual("01. getFuelFactor", e.getFuelFactor(0).orElse(1), 0);
 
-    a.check("11. getFuelFactor", e.getFuelFactor(1, ff));
-    a.checkEqual("12. fuel factor", ff, 100);
+    a.checkEqual("11. getFuelFactor", e.getFuelFactor(1).orElse(-1), 100);
 
-    a.check("21. getFuelFactor", e.getFuelFactor(9, ff));
-    a.checkEqual("22. fuel factor", ff, 8100);
+    a.checkEqual("21. getFuelFactor", e.getFuelFactor(9).orElse(-1), 8100);
 
-    a.check("31", !e.getFuelFactor(10, ff));
+    a.check("31", !e.getFuelFactor(10).isValid());
 
     a.checkEqual("41. getMaxEfficientWarp", e.getMaxEfficientWarp(), 9);
 

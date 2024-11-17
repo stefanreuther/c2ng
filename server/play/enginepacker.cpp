@@ -38,7 +38,7 @@ server::play::EnginePacker::buildValue() const
             afl::base::Ref<afl::data::Vector> ff(afl::data::Vector::create());
             for (int i = 0; i <= game::spec::Engine::MAX_WARP; ++i) {
                 int32_t value;
-                if (p->getFuelFactor(i, value)) {
+                if (p->getFuelFactor(i).get(value)) {
                     ff->pushBackInteger(value);
                 } else {
                     ff->pushBackNew(0);

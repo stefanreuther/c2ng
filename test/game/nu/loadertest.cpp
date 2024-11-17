@@ -493,18 +493,15 @@ AFL_TEST("game.nu.Loader:loadShipList", a)
     // -- engines --
     a.checkEqual("e01", shipList.engines().size(), 2);
 
-    int32_t vv = 0;
     a.checkEqual("e11", shipList.engines().get(1)->getName(shipList.componentNamer()), "StarDrive 1");
     a.checkEqual("e12", shipList.engines().get(1)->cost().get(Cost::Tritanium), 5);
     a.checkEqual("e13", shipList.engines().get(1)->cost().get(Cost::Duranium), 1);
-    a.checkEqual("e14", shipList.engines().get(1)->getFuelFactor(2, vv), true);
-    a.checkEqual("e15", vv, 800);
+    a.checkEqual("e14", shipList.engines().get(1)->getFuelFactor(2).orElse(-1), 800);
 
     a.checkEqual("e21", shipList.engines().get(2)->getName(shipList.componentNamer()), "StarDrive 2");
     a.checkEqual("e22", shipList.engines().get(2)->cost().get(Cost::Tritanium), 5);
     a.checkEqual("e23", shipList.engines().get(2)->cost().get(Cost::Duranium), 2);
-    a.checkEqual("e24", shipList.engines().get(2)->getFuelFactor(2, vv), true);
-    a.checkEqual("e25", vv, 430);
+    a.checkEqual("e24", shipList.engines().get(2)->getFuelFactor(2).orElse(-1), 430);
 
     // -- hull assignments --
     a.checkEqual("x11", shipList.hullAssignments().getHullFromIndex(root->hostConfiguration(), 1, 1), 1);
