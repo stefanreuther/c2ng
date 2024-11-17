@@ -641,13 +641,23 @@ namespace {
                 out->setKillPower(in("crewkill").toInteger());
                 out->setDamagePower(in("damage").toInteger());
 
+                int range = in("combatrange").toInteger();
+                if (range != 0) {
+                    // Normal for new RSTs
+                    out->setFiringRangeBonus(range - 300);
+                } else if (nr == 11) {
+                    // Old RST that is missing the parameter, but has the Quantum Torpedos
+                    out->setFiringRangeBonus(40);
+                } else {
+                    // Normal
+                    out->setFiringRangeBonus(0);
+                }
+
                 // Torpedo:
                 out->torpedoCost().set(Cost::Money, in("torpedocost").toInteger());
                 out->torpedoCost().set(Cost::Tritanium, 1);
                 out->torpedoCost().set(Cost::Duranium, 1);
                 out->torpedoCost().set(Cost::Molybdenum, 1);
-
-                // FIXME: deal with combatrange field (300 for normal, 340 for Quantum Torpedo, but may be not present)
             } else {
                 log.write(LogListener::Warn, LOG_NAME, Format(tx("Invalid torpedo number %d, component has been ignored"), nr));
             }

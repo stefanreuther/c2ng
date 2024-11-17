@@ -512,3 +512,43 @@ AFL_TEST("game.vcr.classic.HostAlgorithm:torper-vs-torper:partial", a)
     a.checkEqual("122. getNumTorpedoes", left.getNumTorpedoes(), 16);
     a.checkEqual("123. getNumTorpedoes", right.getNumTorpedoes(), 10);
 }
+
+/** Test handling of quantum torps (firing range bonus). */
+AFL_TEST("game.vcr.classic.HostAlgorithm:firing-range-bonus", a)
+{
+    // Surroundings
+    game::vcr::classic::NullVisualizer vis;
+    game::config::HostConfiguration config;
+    game::spec::ShipList list;
+    for (int i = 1; i <= 10; ++i) {
+        list.beams().create(i);
+        list.launchers().create(i);
+    }
+    list.launchers().get(1)->setDamagePower(100);
+    list.launchers().get(2)->setDamagePower(100);
+    list.launchers().get(2)->setFiringRangeBonus(100);
+
+    //                mass pl name    da  crw    id pl  im hu bt nb xp bay tt nt  nf  nl  sh  nuConfig
+    static const Battle def =
+        {42,  0, 0,  {{20, 0, "Lefty", 0, 1000,  10, 6, 10, 0, 0, 0, 0, 0,  1, 10, 0, 1, 100, 1,1,0,1,0},
+                      {20, 0, "Right", 0, 1000,  20, 7, 10, 0, 0, 0, 0, 0,  2, 10, 0, 1, 100, 1,1,0,1,0}}};
+
+    // Final recording (ship/planet)
+    game::vcr::classic::HostAlgorithm testee(true, vis, config, list.beams(), list.launchers());
+    game::vcr::Object left(convertObject(def.object[0]));
+    game::vcr::Object right(convertObject(def.object[1]));
+    uint16_t seed = def.seed;
+    bool result = testee.checkBattle(left, right, seed);
+    a.check("01. result", !result);
+
+    // We start at distance 610-30 = 580, fire at 400, so we need to cover 180 units at 2 units/s, plus charge time.
+    testee.initBattle(left, right, seed);
+    while (testee.playCycle()) {
+        a.check("11. count", testee.getTime() < 120);
+    }
+    testee.doneBattle(left, right);
+
+    // Verify result
+    a.checkEqual("21. result", testee.getResult(), game::vcr::classic::BattleResult_t(game::vcr::classic::LeftDestroyed));
+    a.checkEqual("22. torps", right.getNumTorpedoes(), 9);
+}

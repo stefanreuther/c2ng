@@ -321,6 +321,7 @@ AFL_TEST("game.nu.Loader:loadShipList", a)
         "        \"techlevel\": 2,"
         "        \"crewkill\": 6,"
         "        \"damage\": 8,"
+        "        \"combatrange\": 350,"      // Manually added for testing
         "        \"id\": 2"
         "      }"
         "    ],"
@@ -482,6 +483,7 @@ AFL_TEST("game.nu.Loader:loadShipList", a)
     a.checkEqual("t14", shipList.launchers().get(1)->torpedoCost().get(Cost::Tritanium), 1);
     a.checkEqual("t15", shipList.launchers().get(1)->torpedoCost().get(Cost::Money), 1);
     a.checkEqual("t16", shipList.launchers().get(1)->getKillPower(), 4);
+    a.checkEqual("t17", shipList.launchers().get(1)->getFiringRangeBonus(), 0);
 
     a.checkEqual("t21", shipList.launchers().get(2)->getName(shipList.componentNamer()), "Proton Torp");
     a.checkEqual("t22", shipList.launchers().get(2)->cost().get(Cost::Money), 4);
@@ -489,6 +491,7 @@ AFL_TEST("game.nu.Loader:loadShipList", a)
     a.checkEqual("t24", shipList.launchers().get(2)->torpedoCost().get(Cost::Tritanium), 1);
     a.checkEqual("t25", shipList.launchers().get(2)->torpedoCost().get(Cost::Money), 2);
     a.checkEqual("t26", shipList.launchers().get(2)->getKillPower(), 6);
+    a.checkEqual("t27", shipList.launchers().get(2)->getFiringRangeBonus(), 50);
 
     // -- engines --
     a.checkEqual("e01", shipList.engines().size(), 2);
@@ -659,7 +662,91 @@ AFL_TEST("game.nu.Loader:loadShipList:hullfunc", a)
     a.checkEqual("h2 cloak", getPlayersThatCan(*shipList.hulls().get(2), shipList, *root, BasicHullFunction::Cloak),          PlayerSet_t::allUpTo(game::MAX_PLAYERS));
 }
 
-/* Coarse general test for turn */
+/* Test torps, combatrange field unset */
+AFL_TEST("game.nu.Loader:loadShipList:torps:blank", a)
+{
+    // Define some torps with different specs
+    const char*const MIN_FILE =
+        "{"
+        "  \"success\": true,"
+        "  \"rst\": {"
+        "    \"torpedos\": ["
+        "      {\"id\":1},"
+        "      {\"id\":10},"
+        "      {\"id\":11}"
+        "   ]"
+        " }"
+        "}";
+
+    // Environment
+    afl::string::NullTranslator tx;
+    afl::sys::Log log;
+    game::nu::Loader testee(tx, log);
+
+    // Target objects
+    afl::base::Ref<game::Root> root(game::test::makeRoot(game::HostVersion()));
+    game::spec::ShipList shipList;
+
+    // Test data
+    std::auto_ptr<afl::data::Value> v(util::parseJSON(afl::string::toBytes(MIN_FILE)));
+
+    // Do it
+    testee.loadShipList(shipList, *root, v);
+
+    // Verify
+    a.checkNonNull("t01", shipList.launchers().get(1));
+    a.checkEqual("t02", shipList.launchers().get(1)->getFiringRangeBonus(), 0);
+
+    a.checkNonNull("t11", shipList.launchers().get(10));
+    a.checkEqual("t12", shipList.launchers().get(10)->getFiringRangeBonus(), 0);
+
+    a.checkNonNull("t21", shipList.launchers().get(11));
+    a.checkEqual("t22", shipList.launchers().get(11)->getFiringRangeBonus(), 40);
+}
+
+/* Test torps, combatrange field set */
+AFL_TEST("game.nu.Loader:loadShipList:torps:set", a)
+{
+    // Define some torps with different specs
+    const char*const MIN_FILE =
+        "{"
+        "  \"success\": true,"
+        "  \"rst\": {"
+        "    \"torpedos\": ["
+        "      {\"id\":1,\"combatrange\":100},"
+        "      {\"id\":10,\"combatrange\":300},"
+        "      {\"id\":11,\"combatrange\":400}"
+        "   ]"
+        " }"
+        "}";
+
+    // Environment
+    afl::string::NullTranslator tx;
+    afl::sys::Log log;
+    game::nu::Loader testee(tx, log);
+
+    // Target objects
+    afl::base::Ref<game::Root> root(game::test::makeRoot(game::HostVersion()));
+    game::spec::ShipList shipList;
+
+    // Test data
+    std::auto_ptr<afl::data::Value> v(util::parseJSON(afl::string::toBytes(MIN_FILE)));
+
+    // Do it
+    testee.loadShipList(shipList, *root, v);
+
+    // Verify
+    a.checkNonNull("t01", shipList.launchers().get(1));
+    a.checkEqual("t02", shipList.launchers().get(1)->getFiringRangeBonus(), -200);
+
+    a.checkNonNull("t11", shipList.launchers().get(10));
+    a.checkEqual("t12", shipList.launchers().get(10)->getFiringRangeBonus(), 0);
+
+    a.checkNonNull("t21", shipList.launchers().get(11));
+    a.checkEqual("t22", shipList.launchers().get(11)->getFiringRangeBonus(), 100);
+}
+
+/* Coarse general test for loadTurn */
 AFL_TEST("game.nu.Loader:loadTurn", a)
 {
     const char* const FILE =

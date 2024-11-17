@@ -9,7 +9,8 @@ using game::config::HostConfiguration;
 
 game::spec::TorpedoLauncher::TorpedoLauncher(int id)
     : Weapon(ComponentNameProvider::Torpedo, id),
-      m_torpedoCost()
+      m_torpedoCost(),
+      m_firingRangeBonus(0)
 { }
 
 game::spec::Cost&
@@ -22,6 +23,18 @@ const game::spec::Cost&
 game::spec::TorpedoLauncher::torpedoCost() const
 {
     return m_torpedoCost;
+}
+
+void
+game::spec::TorpedoLauncher::setFiringRangeBonus(int n)
+{
+    m_firingRangeBonus = n;
+}
+
+int
+game::spec::TorpedoLauncher::getFiringRangeBonus() const
+{
+    return m_firingRangeBonus;
 }
 
 int

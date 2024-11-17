@@ -417,6 +417,13 @@ game::vcr::classic::PVCRAlgorithm::initBattle(const Object& left, const Object& 
         st.f.CrewKillScaling =
             divideAndRound((100-st.r.obj.getCrewDefenseRate()) * getExperienceModifiedValue(m_config[m_config.CrewKillScaling], m_config[m_config.EModCrewKillScaling], st.r.obj, 0, 32767),
                   100);
+
+        // Firing range bonus. This is a Nu thing, but we're a simulator for hypothetical stuff, right?
+        if (st.r.obj.getNumLaunchers() > 0) {
+            if (const game::spec::TorpedoLauncher* t = m_launchers.get(st.r.obj.getTorpedoType())) {
+                st.f.TorpFiringRange += 100 * t->getFiringRangeBonus();
+            }
+        }
     }
 
     // pre-compute fighter intercept probabilities

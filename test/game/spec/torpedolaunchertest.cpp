@@ -31,14 +31,17 @@ AFL_TEST("game.spec.TorpedoLauncher:basics", a)
     // Check Id
     game::spec::TorpedoLauncher testee(4);
     a.checkEqual("11. getId", testee.getId(), 4);
+    a.checkEqual("12. getFiringRangeBonus", testee.getFiringRangeBonus(), 0);
 
     // Check type using the ComponentNameProvider
     testee.setName("torpedo name");
     testee.setShortName("trpd nm");
+    testee.setFiringRangeBonus(50);
 
     TestComponentNameProvider cnp(a);
     a.checkEqual("21. getName", testee.getName(cnp), "torpedo name");
     a.checkEqual("22. getShortName", testee.getShortName(cnp), "trpd nm");
+    a.checkEqual("23. getFiringRangeBonus", testee.getFiringRangeBonus(), 50);
 
     // Check cost
     testee.cost().set(game::spec::Cost::Tritanium, 3);

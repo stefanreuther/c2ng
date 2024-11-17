@@ -471,3 +471,44 @@ AFL_TEST("game.vcr.classic.PVCRAlgorithm:asymmetric-fighters", a)
     a.checkEqual("33. getNumFighters", left.getNumFighters(), 880);
     a.checkEqual("34. getNumFighters", right.getNumFighters(), 963);
 }
+
+/** Test handling of quantum torps (firing range bonus). */
+AFL_TEST("game.vcr.classic.PVCRAlgorithm:firing-range-bonus", a)
+{
+    // Surroundings
+    game::vcr::classic::NullVisualizer vis;
+    game::config::HostConfiguration config;
+    game::spec::ShipList list;
+    for (int i = 1; i <= 10; ++i) {
+        list.beams().create(i);
+        list.launchers().create(i);
+    }
+    list.launchers().get(1)->setDamagePower(100);
+    list.launchers().get(2)->setDamagePower(100);
+    list.launchers().get(2)->setFiringRangeBonus(100);
+    config[game::config::HostConfiguration::TorpHitOdds].set(100);
+    config[game::config::HostConfiguration::TorpHitBonus].set(0);
+
+    static const Battle def =
+        {0,42,0,"P", {{0, 0, 1000, 0, 0, 0, 0, 1, 10, 0, 20, "Lefty", 6, 100, 1, 10, 1, 0, 1,1,0,1,0},
+                      {0, 0, 1000, 0, 0, 0, 0, 1, 10, 0, 20, "Right", 7, 100, 2, 10, 1, 0, 1,1,0,1,0}}};
+
+    // Final recording (ship/planet)
+    game::vcr::classic::PVCRAlgorithm testee(true, vis, config, list.beams(), list.launchers());
+    game::vcr::Object left(convertObject(def.object[0]));
+    game::vcr::Object right(convertObject(def.object[1]));
+    uint16_t seed = def.seed;
+    bool result = testee.checkBattle(left, right, seed);
+    a.check("01. result", !result);
+
+    // Start at distance 58000, delta speed 2*75, to distance 40000
+    testee.initBattle(left, right, seed);
+    while (testee.playCycle()) {
+        a.check("11. count", testee.getTime() < 130);
+    }
+    testee.doneBattle(left, right);
+
+    // Verify result
+    a.checkEqual("21. result", testee.getResult(), game::vcr::classic::BattleResult_t(game::vcr::classic::LeftDestroyed));
+    a.checkEqual("22. torps", right.getNumTorpedoes(), 9);
+}

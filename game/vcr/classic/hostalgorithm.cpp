@@ -176,9 +176,11 @@ game::vcr::classic::HostAlgorithm::Status::init(const Object& obj, Side side, co
     // Shield adjustments now in applyClassicLimits
 
     if (const game::spec::TorpedoLauncher* t = launchers.get(obj.getTorpedoType())) {
+        m_torpFiringRange = 300 + t->getFiringRangeBonus();
         m_torpKillPower = 2*t->getKillPower();
         m_torpDamagePower = 2*t->getDamagePower();
     } else {
+        m_torpFiringRange = 10000;
         m_torpKillPower = 0;
         m_torpDamagePower = 0;
     }
@@ -402,8 +404,10 @@ game::vcr::classic::HostAlgorithm::playCycle()
     }
 
     // Torpedoes
-    if (distance < 300) {
+    if (distance < m_status[LeftSide].m_torpFiringRange) {
         fireTorpedoes(m_status[LeftSide], m_status[RightSide]);
+    }
+    if (distance < m_status[RightSide].m_torpFiringRange) {
         fireTorpedoes(m_status[RightSide], m_status[LeftSide]);
     }
 

@@ -84,6 +84,7 @@ namespace game { namespace vcr { namespace classic {
             int16_t m_objectX;
             int16_t m_damageLimit;
             int16_t m_numFightersOut;
+            int m_torpFiringRange;
             int m_torpKillPower, m_torpDamagePower;
             int m_beamKillPower, m_beamDamagePower;
             Side m_side;

@@ -32,6 +32,22 @@ namespace game { namespace spec {
             \overload */
         const Cost& torpedoCost() const;
 
+        /** Set firing range bonus.
+            Default us 0.
+            Positive values increase the torpedo firing range:
+            - HostAlgorithm: unscaled
+            - PVCRAlgorithm: *100
+
+            (This is an attempt to map the Planets.nu "combatrange" field,
+            which has value 300 for most torps, and 340 for Quantum Torpedoes.)
+
+            \param n Bonus */
+        void setFiringRangeBonus(int n);
+
+        /** Get firing range bonus.
+            \return value */
+        int getFiringRangeBonus() const;
+
         /** Get average recharge time.
             This is an estimation for spec displays.
             Combat algorithms will implement this internally.
@@ -62,6 +78,7 @@ namespace game { namespace spec {
 
      private:
         Cost m_torpedoCost;
+        int m_firingRangeBonus;
     };
 
 } }
