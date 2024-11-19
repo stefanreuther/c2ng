@@ -22,6 +22,7 @@ AFL_TEST("game.interface.ComponentProperty:getComponentProperty", a)
     comp.setShortName("Twelve Short");
     comp.setMass(140);
     comp.setTechLevel(7);
+    comp.setDescription("de");
     comp.cost().set(Cost::Tritanium, 20);
     comp.cost().set(Cost::Duranium, 30);
     comp.cost().set(Cost::Molybdenum, 40);
@@ -29,17 +30,18 @@ AFL_TEST("game.interface.ComponentProperty:getComponentProperty", a)
     comp.cost().set(Cost::Supplies, 60);
 
     // Check
-    verifyNewInteger(a("Mass"),  getComponentProperty(comp, game::interface::icpMass,      list), 140);
-    verifyNewInteger(a("Tech"),  getComponentProperty(comp, game::interface::icpTech,      list), 7);
-    verifyNewInteger(a("T"),     getComponentProperty(comp, game::interface::icpCostT,     list), 20);
-    verifyNewInteger(a("D"),     getComponentProperty(comp, game::interface::icpCostD,     list), 30);
-    verifyNewInteger(a("M"),     getComponentProperty(comp, game::interface::icpCostM,     list), 40);
-    verifyNewInteger(a("MC"),    getComponentProperty(comp, game::interface::icpCostMC,    list), 50);
-    verifyNewInteger(a("Sup"),   getComponentProperty(comp, game::interface::icpCostSup,   list), 60);
-    verifyNewString (a("Str"),   getComponentProperty(comp, game::interface::icpCostStr,   list), "20T 30D 40M 60S 50$");
-    verifyNewString (a("Name"),  getComponentProperty(comp, game::interface::icpName,      list), "Twelve Long");
-    verifyNewString (a("Short"), getComponentProperty(comp, game::interface::icpNameShort, list), "Twelve Short");
-    verifyNewInteger(a("Id"),    getComponentProperty(comp, game::interface::icpId,        list), 12);
+    verifyNewInteger(a("Mass"),  getComponentProperty(comp, game::interface::icpMass,        list), 140);
+    verifyNewInteger(a("Tech"),  getComponentProperty(comp, game::interface::icpTech,        list), 7);
+    verifyNewInteger(a("T"),     getComponentProperty(comp, game::interface::icpCostT,       list), 20);
+    verifyNewInteger(a("D"),     getComponentProperty(comp, game::interface::icpCostD,       list), 30);
+    verifyNewInteger(a("M"),     getComponentProperty(comp, game::interface::icpCostM,       list), 40);
+    verifyNewInteger(a("MC"),    getComponentProperty(comp, game::interface::icpCostMC,      list), 50);
+    verifyNewInteger(a("Sup"),   getComponentProperty(comp, game::interface::icpCostSup,     list), 60);
+    verifyNewString (a("Str"),   getComponentProperty(comp, game::interface::icpCostStr,     list), "20T 30D 40M 60S 50$");
+    verifyNewString (a("Name"),  getComponentProperty(comp, game::interface::icpName,        list), "Twelve Long");
+    verifyNewString (a("Short"), getComponentProperty(comp, game::interface::icpNameShort,   list), "Twelve Short");
+    verifyNewInteger(a("Id"),    getComponentProperty(comp, game::interface::icpId,          list), 12);
+    verifyNewString (a("Desc"),  getComponentProperty(comp, game::interface::icpDescription, list), "de");
 }
 
 AFL_TEST("game.interface.ComponentProperty:setComponentProperty", a)
@@ -51,12 +53,15 @@ AFL_TEST("game.interface.ComponentProperty:setComponentProperty", a)
 
     std::auto_ptr<afl::data::Value> sv1(interpreter::makeStringValue("one"));
     std::auto_ptr<afl::data::Value> sv2(interpreter::makeStringValue("two"));
+    std::auto_ptr<afl::data::Value> sv3(interpreter::makeStringValue("three"));
 
     // Successful set operations; verify
-    AFL_CHECK_SUCCEEDS(a("icpName"),      setComponentProperty(comp, game::interface::icpName,      sv1.get(), list));
-    AFL_CHECK_SUCCEEDS(a("icpNameShort"), setComponentProperty(comp, game::interface::icpNameShort, sv2.get(), list));
+    AFL_CHECK_SUCCEEDS(a("icpName"),        setComponentProperty(comp, game::interface::icpName,        sv1.get(), list));
+    AFL_CHECK_SUCCEEDS(a("icpNameShort"),   setComponentProperty(comp, game::interface::icpNameShort,   sv2.get(), list));
+    AFL_CHECK_SUCCEEDS(a("icpDescription"), setComponentProperty(comp, game::interface::icpDescription, sv3.get(), list));
     a.checkEqual("getName",      comp.getName(list.componentNamer()), "one");
     a.checkEqual("getShortName", comp.getShortName(list.componentNamer()), "two");
+    a.checkEqual("getDescription", comp.getDescription(), "three");
 
     // Failing operation
     std::auto_ptr<afl::data::Value> iv(interpreter::makeIntegerValue(99));

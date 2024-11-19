@@ -31,6 +31,7 @@ AFL_TEST("game.interface.BeamContext:basics", a)
     b.cost().set(Cost::Molybdenum, 9);
     b.cost().set(Cost::Money, 11);
     b.cost().set(Cost::Supplies, 13);
+    b.setDescription("Fzzz!");
 
     // Instance
     game::interface::BeamContext testee(3, shipList, root);
@@ -46,6 +47,7 @@ AFL_TEST("game.interface.BeamContext:basics", a)
     verif.verifyInteger("COST.D", 7);
     verif.verifyInteger("DAMAGE", 99);
     verif.verifyString("NAME", "Death ray");
+    verif.verifyString("DESCRIPTION", "Fzzz!");
 }
 
 /** Test iteration. */

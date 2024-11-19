@@ -23,6 +23,7 @@ namespace game { namespace interface {
         icpCostStr,
         icpName,
         icpNameShort,
+        icpDescription,
         icpId
     };
 

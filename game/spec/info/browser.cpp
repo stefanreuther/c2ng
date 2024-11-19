@@ -637,7 +637,6 @@ game::spec::info::Browser::getRacialAbilityAttribute(const RacialAbilityList::Ab
     }
 }
 
-#include <stdio.h>
 void
 game::spec::info::Browser::describeShipAbility(PageContent& content, Id_t id, int forPlayer) const
 {

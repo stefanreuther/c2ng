@@ -159,8 +159,8 @@ AFL_TEST("game.nu.Loader:loadShipList", a)
         "        \"beams\": 1,"
         "        \"cancloak\": false,"
         "        \"cost\": 50,"
-        "        \"special\": \"\","
-        "        \"description\": \"\","
+        "        \"special\": \"special\","
+        "        \"description\": \"desc\","
         "        \"advantage\": 0,"
         "        \"isbase\": true,"
         "        \"dur\": 0,"
@@ -438,6 +438,7 @@ AFL_TEST("game.nu.Loader:loadShipList", a)
     a.checkEqual("h18", shipList.hulls().get(1)->getMaxLaunchers(), 0);
     a.checkEqual("h19", shipList.hulls().get(1)->getNumBays(), 0);
     a.checkEqual("h1a", shipList.hulls().get(1)->getNumEngines(), 1);
+    a.checkEqual("h1b", shipList.hulls().get(1)->getDescription(), "desc\nspecial");
 
     a.checkNonNull("h21", shipList.hulls().get(15));
     a.checkEqual("h22", shipList.hulls().get(15)->getName(shipList.componentNamer()), "Small Deep Space Freighter");

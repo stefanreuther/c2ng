@@ -74,6 +74,7 @@ namespace {
         hull.setNumBays(0);
         hull.setMaxLaunchers(0);
         hull.setMaxBeams(5);
+        hull.setDescription("this is a gunship");
 
         // Hull functions. Give it at least a cloaking device
         const int FUNC_ID = 3;
@@ -184,6 +185,7 @@ AFL_TEST("game.spec.info.Info:describeHull", a)
     a.checkEqual("01. title", c.title, "BR4 CLASS GUNSHIP");
     a.checkEqual("02. pictureName", c.pictureName, "");                // would be set by PictureNamer
     a.checkEqual("03. attributes", toString(c.attributes),
+                 "this is a gunship:\n"
                  "Mass:55 kt\n"
                  "Cargo:20 kt\n"
                  "Fuel:80 kt\n"

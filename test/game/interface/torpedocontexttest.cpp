@@ -38,6 +38,7 @@ AFL_TEST("game.interface.TorpedoContext:basics", a)
     tl.torpedoCost().set(Cost::Molybdenum, 3);
     tl.torpedoCost().set(Cost::Money, 4);
     tl.torpedoCost().set(Cost::Supplies, 5);
+    tl.setDescription("dirty");
 
     // Torpedo instance
     {
@@ -53,6 +54,7 @@ AFL_TEST("game.interface.TorpedoContext:basics", a)
         verif.verifyInteger("COST.D", 2);
         verif.verifyInteger("DAMAGE", 88);       // doubled, default host-config is non-alternative combat
         verif.verifyString("NAME", "Mudball");
+        verif.verifyString("DESCRIPTION", "dirty");
     }
 
     // Launcher instance
@@ -69,6 +71,7 @@ AFL_TEST("game.interface.TorpedoContext:basics", a)
         verif.verifyInteger("COST.D", 7);
         verif.verifyInteger("DAMAGE", 88);       // doubled, default host-config is non-alternative combat
         verif.verifyString("NAME", "Mudball");
+        verif.verifyString("DESCRIPTION", "dirty");
     }
 }
 

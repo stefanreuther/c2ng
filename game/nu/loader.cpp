@@ -27,6 +27,7 @@
 #include "game/vcr/classic/battle.hpp"
 #include "game/vcr/classic/database.hpp"
 #include "util/io.hpp"
+#include "util/string.hpp"
 
 using afl::data::Access;
 using afl::string::ConstStringMemory_t;
@@ -557,6 +558,10 @@ namespace {
                                             PlayerSet_t::allUpTo(game::MAX_PLAYERS), PlayerSet_t(), true);
                 }
 
+                String_t desc = in("description").toString();
+                util::addListItem(desc, "\n", in("special").toString());
+                out->setDescription(desc);
+
                 // Other abilities:
                 //  29,31,3033,1047: adv cloak (no fuel usage)
                 //  109,1023,1049: chamaeleon
@@ -585,7 +590,6 @@ namespace {
                 // Other attributes:
                 //   dur, tri, mol, mc, advantage - cost of optional hulls during race building
                 //   parentid                     - if improved version, link to original
-                //   special, description         - plaintext hullfuncs
                 //   isbase                       - true if default hull of any race
                 //   academy                      - available in "academy game" (?)
             } else {

@@ -13,7 +13,8 @@ game::spec::Component::Component(ComponentNameProvider::Type type, int id)
       m_techLevel(1),
       m_cost(),
       m_name(),
-      m_shortName()
+      m_shortName(),
+      m_description()
 { }
 
 // Set name of this component.
@@ -28,4 +29,11 @@ void
 game::spec::Component::setShortName(String_t shortName)
 {
     m_shortName = shortName;
+}
+
+// Set description/flavor text.
+void
+game::spec::Component::setDescription(String_t text)
+{
+    m_description = text;
 }

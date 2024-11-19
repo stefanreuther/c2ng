@@ -24,6 +24,7 @@ namespace {
         { "COST.STR",      game::interface::icpCostStr,   ComponentPropertyDomain, interpreter::thString },
         { "COST.T",        game::interface::icpCostT,     ComponentPropertyDomain, interpreter::thInt },
         { "DAMAGE",        game::interface::iwpDamage,    WeaponPropertyDomain,    interpreter::thInt },
+        { "DESCRIPTION",   game::interface::icpDescription, ComponentPropertyDomain, interpreter::thString },
         { "ID",            game::interface::icpId,        ComponentPropertyDomain, interpreter::thInt },
         { "KILL",          game::interface::iwpKill,      WeaponPropertyDomain,    interpreter::thInt },
         { "MASS",          game::interface::icpMass,      ComponentPropertyDomain, interpreter::thInt },

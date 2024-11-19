@@ -31,6 +31,7 @@ namespace {
         { "COST.STR",         game::interface::icpCostStr,          ComponentPropertyDomain, interpreter::thString },
         { "COST.T",           game::interface::icpCostT,            ComponentPropertyDomain, interpreter::thInt },
         { "CREW.NORMAL",      game::interface::ihpMaxCrew,          HullPropertyDomain,      interpreter::thInt },
+        { "DESCRIPTION",      game::interface::icpDescription,      ComponentPropertyDomain, interpreter::thString },
         { "ENGINE.COUNT",     game::interface::ihpNumEngines,       HullPropertyDomain,      interpreter::thInt },
         { "FIGHTER.BAYS",     game::interface::ihpNumFighterBays,   HullPropertyDomain,      interpreter::thInt },
         { "ID",               game::interface::icpId,               ComponentPropertyDomain, interpreter::thInt },

@@ -69,6 +69,12 @@ game::interface::getComponentProperty(const game::spec::Component& comp,
         /* @q Hull.Short:Str (Ship Property)
            Short name of the hull. */
         return makeStringValue(comp.getShortName(list.componentNamer()));
+     case icpDescription:
+        /* @q Description:Str (Hull Property, Engine Property, Beam Property, Torpedo Property)
+           Description,
+           @assignable
+           @since PCC2 2.41.2 */
+        return makeStringValue(comp.getDescription());
      case icpId:
         /* @q Id:Str (Hull Property, Engine Property, Beam Property, Torpedo Property)
            Component Id. */
@@ -96,6 +102,12 @@ game::interface::setComponentProperty(game::spec::Component& comp,
      case icpNameShort:
         if (checkStringArg(n, value)) {
             comp.setShortName(n);
+            list.sig_change.raise();
+        }
+        break;
+     case icpDescription:
+        if (checkStringArg(n, value)) {
+            comp.setDescription(n);
             list.sig_change.raise();
         }
         break;

@@ -13,6 +13,8 @@
 namespace {
     using afl::string::Format;
     using game::config::HostConfiguration;
+    using game::spec::info::Attribute;
+    using game::spec::info::PageContent;
     using game::spec::info::WeaponEffect;
     using util::addListItem;
 
@@ -83,6 +85,14 @@ namespace {
 
         return WeaponEffect(name, shieldEff, hullEff, crewEff);
     }
+
+    void renderDescription(PageContent& content, const game::spec::Component& comp)
+    {
+        String_t desc = comp.getDescription();
+        if (!desc.empty()) {
+            content.attributes.push_back(Attribute(desc, String_t()));
+        }
+    }
 }
 
 game::spec::info::AbilityFlags_t
@@ -126,6 +136,7 @@ game::spec::info::describeHull(PageContent& content, Id_t id, const ShipList& sh
         // Header
         content.title = h->getName(shipList.componentNamer());
         content.pictureName = picNamer.getHullPicture(*h);
+        renderDescription(content, *h);
 
         // Content
         content.attributes.push_back(Attribute(tx("Mass"),          Format(tx("%d kt"), fmt.formatNumber(h->getMass()))));
@@ -289,6 +300,7 @@ game::spec::info::describeEngine(PageContent& content, Id_t id, const ShipList& 
         util::NumberFormatter fmt = root.userConfiguration().getNumberFormatter();
         content.title = e->getName(shipList.componentNamer());
         content.pictureName = picNamer.getEnginePicture(*e);
+        renderDescription(content, *e);
         content.attributes.push_back(Attribute(tx("Max Efficient Warp"), Format("%d", e->getMaxEfficientWarp())));
 
         int esbRate = root.hostConfiguration()[HostConfiguration::AllowEngineShieldBonus]()
@@ -312,6 +324,7 @@ game::spec::info::describeBeam(PageContent& content, Id_t id, const ShipList& sh
         util::NumberFormatter fmt = root.userConfiguration().getNumberFormatter();
         content.title = b->getName(shipList.componentNamer());
         content.pictureName = picNamer.getBeamPicture(*b);
+        renderDescription(content, *b);
         if (root.hostVersion().hasDeathRays()) {
             content.attributes.push_back(Attribute(tx("Type"), b->isDeathRay(root.hostVersion()) ? tx("death ray") : tx("normal")));
         }
@@ -344,6 +357,7 @@ game::spec::info::describeTorpedo(PageContent& content, Id_t id, const ShipList&
         int factor = getTorpDamageScale(root);
         content.title = p->getName(shipList.componentNamer());
         content.pictureName = picNamer.getLauncherPicture(*p);
+        renderDescription(content, *p);
         if (root.hostVersion().hasDeathRays()) {
             content.attributes.push_back(Attribute(tx("Type"), p->isDeathRay(root.hostVersion()) ? tx("death ray") : tx("normal")));
         }

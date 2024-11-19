@@ -48,6 +48,11 @@ AFL_TEST("game.spec.Component:basics", a)
     a.check("32. cost", !testee.cost().isZero());
     a.check("33. cost", !alias.cost().isZero());
 
+    // Description
+    a.checkEqual("36. desc", testee.getDescription(), "");
+    testee.setDescription("d");
+    a.checkEqual("37. desc", testee.getDescription(), "d");
+
     // Copying
     game::spec::Component copy(alias);
     a.checkEqual("41. getMass", copy.getMass(), testee.getMass());

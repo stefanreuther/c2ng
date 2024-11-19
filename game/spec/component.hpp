@@ -81,6 +81,14 @@ namespace game { namespace spec {
             \param shortName New short name */
         void setShortName(String_t shortName);
 
+        /** Get description/flavor text.
+            \return text */
+        String_t getDescription() const;
+
+        /** Set description/flavor text.
+            \param text New text. Can contain "\n" for newline. */
+        void setDescription(String_t text);
+
      private:
         const ComponentNameProvider::Type m_type;
         const int m_id;
@@ -90,6 +98,7 @@ namespace game { namespace spec {
         Cost m_cost;
         String_t m_name;
         String_t m_shortName;
+        String_t m_description;
     };
 
 } }
@@ -156,6 +165,13 @@ inline String_t
 game::spec::Component::getShortName(const ComponentNameProvider& provider) const
 {
     return provider.getShortName(m_type, m_id, m_name, m_shortName);
+}
+
+// Get description/flavor text.
+inline String_t
+game::spec::Component::getDescription() const
+{
+    return m_description;
 }
 
 #endif

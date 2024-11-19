@@ -24,6 +24,7 @@ AFL_TEST("game.interface.EngineContext:basics", a)
     eng->setName("The Kettle");
     eng->setTechLevel(3);
     eng->cost().set(game::spec::Cost::Money, 500);
+    eng->setDescription("12 cylinders");
 
     // Verify
     game::interface::EngineContext ctx(NR, shipList);
@@ -39,6 +40,7 @@ AFL_TEST("game.interface.EngineContext:basics", a)
     v.verifyInteger("TECH", 3);
     v.verifyInteger("COST.MC", 500);
     v.verifyString("NAME", "The Kettle");
+    v.verifyString("DESCRIPTION", "12 cylinders");
 }
 
 /** Test iteration. */

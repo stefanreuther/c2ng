@@ -38,6 +38,7 @@ AFL_TEST("game.interface.HullContext:basics", a)
     h.cost().set(Cost::Molybdenum, 9);
     h.cost().set(Cost::Money, 11);
     h.cost().set(Cost::Supplies, 13);
+    h.setDescription("oops");
 
     // Instance
     game::interface::HullContext testee(3, shipList, root);
@@ -53,6 +54,7 @@ AFL_TEST("game.interface.HullContext:basics", a)
     verif.verifyInteger("COST.D", 7);
     verif.verifyString("NAME", "Orville");
     verif.verifyString("SPECIAL", "");
+    verif.verifyString("DESCRIPTION", "oops");
 }
 
 /** Test iteration. */
@@ -136,8 +138,11 @@ AFL_TEST("game.interface.HullContext:set", a)
     interpreter::test::ContextVerifier verif(testee, a);
     AFL_CHECK_SUCCEEDS(a("01. set NAME"), verif.setStringValue("NAME", "New"));
     AFL_CHECK_SUCCEEDS(a("02. set IMAGE"), verif.setIntegerValue("IMAGE", 555));
-    a.checkEqual("03. getName", shipList->hulls().get(3)->getName(shipList->componentNamer()), "New");
-    a.checkEqual("04. getInternalPictureNumber", shipList->hulls().get(3)->getInternalPictureNumber(), 555);
+    AFL_CHECK_SUCCEEDS(a("03. set DESCRIPTION"), verif.setStringValue("DESCRIPTION", "info"));
+
+    a.checkEqual("06. getName", shipList->hulls().get(3)->getName(shipList->componentNamer()), "New");
+    a.checkEqual("07. getInternalPictureNumber", shipList->hulls().get(3)->getInternalPictureNumber(), 555);
+    a.checkEqual("08. getDescription", shipList->hulls().get(3)->getDescription(), "info");
 
     // ...but not the Id or other properties.
     AFL_CHECK_THROWS(a("11. set ID"), verif.setIntegerValue("ID", 8), interpreter::Error);

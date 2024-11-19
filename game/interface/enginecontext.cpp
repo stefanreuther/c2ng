@@ -22,6 +22,7 @@ namespace {
         { "COST.MC",       game::interface::icpCostMC,        ComponentPropertyDomain, interpreter::thInt },
         { "COST.STR",      game::interface::icpCostStr,       ComponentPropertyDomain, interpreter::thString },
         { "COST.T",        game::interface::icpCostT,         ComponentPropertyDomain, interpreter::thInt },
+        { "DESCRIPTION",   game::interface::icpDescription,   ComponentPropertyDomain, interpreter::thString },
         { "FUELFACTOR",    game::interface::iepFuelFactor,    EnginePropertyDomain,    interpreter::thArray },
         { "ID",            game::interface::icpId,            ComponentPropertyDomain, interpreter::thInt },
         { "NAME",          game::interface::icpName,          ComponentPropertyDomain, interpreter::thString },
