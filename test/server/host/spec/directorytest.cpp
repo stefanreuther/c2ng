@@ -58,6 +58,7 @@ AFL_TEST("server.host.spec.Directory:file-access", a)
     AFL_CHECK_THROWS(a("42. renameTo"), e->renameTo("file2"), afl::except::FileProblemException);
     AFL_CHECK_THROWS(a("43. setFlag"), e->setFlag(afl::io::DirectoryEntry::Hidden, true), afl::except::FileProblemException);
     AFL_CHECK_THROWS(a("44. getDirectoryEntryByName"), dir->getDirectoryEntryByName("other")->createAsDirectory(), afl::except::FileProblemException);
+    AFL_CHECK_THROWS(a("45. moveTo"), e->moveTo(*dir, "file3"), afl::except::FileProblemException);
 }
 
 /** Test file access when access is disabled. */

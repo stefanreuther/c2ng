@@ -165,6 +165,7 @@ class server::play::fs::Directory::Entry : public afl::io::DirectoryEntry {
     virtual void doErase();
     virtual void doCreateAsDirectory();
     virtual void doSetFlag(FileFlag flag, bool value);
+    virtual void doMoveTo(afl::io::Directory& dir, String_t name);
 
     void setInfo(const FileBase::Info& info);
     void throwUnsupported();
@@ -258,6 +259,12 @@ server::play::fs::Directory::Entry::doCreateAsDirectory()
 
 void
 server::play::fs::Directory::Entry::doSetFlag(FileFlag /*flag*/, bool /*value*/)
+{
+    throwUnsupported();
+}
+
+void
+server::play::fs::Directory::Entry::doMoveTo(afl::io::Directory& /*dir*/, String_t /*name*/)
 {
     throwUnsupported();
 }

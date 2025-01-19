@@ -69,6 +69,8 @@ namespace {
                 { }
             virtual void doSetFlag(FileFlag /*flag*/, bool /*value*/)
                 { }
+            virtual void doMoveTo(afl::io::Directory& /*dir*/, String_t /*name*/)
+                { }
          private:
             String_t m_name;
             afl::base::Ref<afl::io::Directory> m_parent;

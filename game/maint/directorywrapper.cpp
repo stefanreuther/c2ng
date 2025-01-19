@@ -30,6 +30,7 @@ class game::maint::DirectoryWrapper::Entry : public DirectoryEntry {
     virtual void doErase();
     virtual void doCreateAsDirectory();
     virtual void doSetFlag(FileFlag flag, bool value);
+    virtual void doMoveTo(Directory& dir, String_t name);
 
  private:
     afl::base::Ref<DirectoryEntry> m_parentEntry;
@@ -143,6 +144,13 @@ void
 game::maint::DirectoryWrapper::Entry::doSetFlag(FileFlag /*flag*/, bool /*value*/)
 {
     // We do not support changing. This is not required for our applications, so just refuse it.
+    throw afl::except::FileProblemException(getPathName(), afl::string::Messages::cannotAccessFiles());
+}
+
+void
+game::maint::DirectoryWrapper::Entry::doMoveTo(Directory& /*dir*/, String_t /*name*/)
+{
+    // We do not support move. This is not required for our applications, so just refuse it.
     throw afl::except::FileProblemException(getPathName(), afl::string::Messages::cannotAccessFiles());
 }
 

@@ -722,6 +722,9 @@ AFL_TEST("util.ServerDirectory:dummy", a)
 
     // Cannot create invalid file name
     AFL_CHECK_THROWS(a("51. create invalid"), testee->openFile("x/y", FileSystem::Create), FileProblemException);
+
+    // Cannot move
+    AFL_CHECK_THROWS(a("61. move"), testee->getDirectoryEntryByName("x")->moveTo(*testee, "y"), FileProblemException);
 }
 
 /*

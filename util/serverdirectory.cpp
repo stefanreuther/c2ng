@@ -91,6 +91,7 @@ class util::ServerDirectory::Entry : public DirectoryEntry {
     virtual void doErase();
     virtual void doCreateAsDirectory();
     virtual void doSetFlag(FileFlag flag, bool value);
+    virtual void doMoveTo(Directory& dir, String_t name);
 
  private:
     Ref<ServerDirectory> m_container;
@@ -234,6 +235,12 @@ util::ServerDirectory::Entry::doCreateAsDirectory()
 
 void
 util::ServerDirectory::Entry::doSetFlag(FileFlag /*flag*/, bool /*value*/)
+{
+    throw FileProblemException(m_name, Messages::cannotWrite());
+}
+
+void
+util::ServerDirectory::Entry::doMoveTo(Directory& /*dir*/, String_t /*name*/)
 {
     throw FileProblemException(m_name, Messages::cannotWrite());
 }
