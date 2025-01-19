@@ -14,6 +14,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 #include <sys/socket.h>         // everything sockets
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -355,7 +356,7 @@ checkExistingProcess()
             return;
         }
     }
-    
+
     // pidfile exists. Read pid.
     char buffer[100];
     ssize_t n = read(fd, buffer, sizeof(buffer)-1);
