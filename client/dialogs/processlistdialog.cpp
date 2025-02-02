@@ -24,6 +24,7 @@
 #include "ui/widgets/abstractlistbox.hpp"
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/decimalselector.hpp"
+#include "ui/widgets/scrollbarcontainer.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/widgets/statictext.hpp"
 #include "ui/window.hpp"
@@ -394,6 +395,7 @@ ProcessListWidget::setContent(const ProcessListProxy::Infos_t& other)
     if (pidOK) {
         scrollToProcess(pid);
     }
+    sig_change.raise();
 }
 
 void
@@ -695,7 +697,7 @@ ProcessListDialog::run()
     ui::Widget& keyHandler = del.addNew(new ProcessListKeyHandler(m_root, interface().gameSender(), tx, m_proxy, m_mutexProxy, m_list, *this));
 
     ui::Window& win = del.addNew(new ui::Window(tx("Process Manager"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
-    win.add(m_list);
+    win.add(del.addNew(new ui::widgets::ScrollbarContainer(m_list, m_root)));
 
     ui::Group& g1 = del.addNew(new ui::Group(ui::layout::HBox::instance5));
     addButton(m_root, del, g1, keyHandler, "R", 'r');
