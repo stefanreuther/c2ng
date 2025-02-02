@@ -476,8 +476,8 @@ String_t
 client::vcr::classic::Renderer::formatResult() const
 {
     return game::vcr::classic::formatBattleResult(m_result,
-                                                  m_objectInfo[0].object.getName(), m_objectInfo[0].relation,
-                                                  m_objectInfo[1].object.getName(), m_objectInfo[1].relation,
+                                                  m_objectInfo[0].object.getNonEmptyName(m_translator), m_objectInfo[0].relation,
+                                                  m_objectInfo[1].object.getNonEmptyName(m_translator), m_objectInfo[1].relation,
                                                   String_t(), m_translator);
 }
 

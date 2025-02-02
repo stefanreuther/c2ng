@@ -29,10 +29,18 @@ namespace {
     String_t getObjectName(const game::vcr::Object& obj, afl::string::Translator& tx)
     {
         // ex WCombatDiagramWidget::getObjectName
-        if (obj.isPlanet()) {
-            return afl::string::Format(tx("%s (planet #%d)"), obj.getName(), obj.getId());
+        if (obj.getName().empty()) {
+            if (obj.isPlanet()) {
+                return afl::string::Format(tx("Planet #%d"), obj.getId());
+            } else {
+                return afl::string::Format(tx("Ship #%d"), obj.getId());
+            }
         } else {
-            return afl::string::Format(tx("%s (ship #%d)"), obj.getName(), obj.getId());
+            if (obj.isPlanet()) {
+                return afl::string::Format(tx("%s (planet #%d)"), obj.getName(), obj.getId());
+            } else {
+                return afl::string::Format(tx("%s (ship #%d)"), obj.getName(), obj.getId());
+            }
         }
     }
 }

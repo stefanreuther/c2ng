@@ -40,8 +40,8 @@ game::vcr::Battle::getDescription(const game::PlayerList& players, afl::string::
     if (leftRace == 0 || rightRace == 0) {
         return tx("Unknown");
     } else {
-        String_t leftName  = (leftSlot  != 0 ? leftSlot->getName()  : players.getPlayerName(leftRace,  Player::ShortName, tx));
-        String_t rightName = (rightSlot != 0 ? rightSlot->getName() : players.getPlayerName(rightRace, Player::ShortName, tx));
+        String_t leftName  = (leftSlot  != 0 ? leftSlot->getNonEmptyName(tx)  : players.getPlayerName(leftRace,  Player::ShortName, tx));
+        String_t rightName = (rightSlot != 0 ? rightSlot->getNonEmptyName(tx) : players.getPlayerName(rightRace, Player::ShortName, tx));
         return afl::string::Format(tx("%s vs. %s"), leftName, rightName);
     }
 }

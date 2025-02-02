@@ -85,7 +85,7 @@ game::proxy::VcrDatabaseProxy::Trampoline::requestSideInfo(size_t index, size_t 
     if (game::vcr::Battle* b = m_adaptor.getBattles()->getBattle(index)) {
         if (const game::vcr::Object* obj = b->getObject(side, false)) {
             // Name and header information
-            info.name = obj->getName();
+            info.name = obj->getNonEmptyName(tx);
             info.subtitle = obj->getSubtitle(m_adaptor.getTeamSettings(), root, shipList, tx);
             info.isPlanet = obj->isPlanet();
             if (m_adaptor.isGameObject(*obj)) {

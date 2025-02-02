@@ -383,9 +383,9 @@ game::vcr::classic::Battle::formatResult(int player, const String_t& annotation,
 {
     // ex VcrPlayer::getResultString
     return formatBattleResult(m_result,
-                              m_before[0].getName(),
+                              m_before[0].getNonEmptyName(tx),
                               (m_before[0].getOwner() == player ? TeamSettings::ThisPlayer : TeamSettings::EnemyPlayer),
-                              m_before[1].getName(),
+                              m_before[1].getNonEmptyName(tx),
                               (m_before[1].getOwner() == player ? TeamSettings::ThisPlayer : TeamSettings::EnemyPlayer),
                               annotation,
                               tx);

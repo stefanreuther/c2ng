@@ -7,6 +7,7 @@
 
 #include "afl/base/deletable.hpp"
 #include "afl/string/string.hpp"
+#include "afl/string/translator.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/root.hpp"
 #include "game/spec/componentvector.hpp"
@@ -138,6 +139,11 @@ namespace game { namespace vcr {
         /** Get name.
             \return name */
         const String_t& getName() const;
+
+        /** Get name, filling in default if name is empty.
+            \param tx Translator
+            \return name */
+        String_t getNonEmptyName(afl::string::Translator& tx) const;
 
         /** Get role.
             \return role */

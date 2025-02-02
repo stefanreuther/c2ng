@@ -102,6 +102,28 @@ AFL_TEST("game.vcr.Object:basics", a)
     a.checkEqual("241. getName", t.getName(), "NSEA Protector");
 }
 
+/* Test getNonEmptyName, ship */
+AFL_TEST("game.vcr.Object:name:ship", a)
+{
+    afl::string::NullTranslator tx;
+    game::vcr::Object t;
+    t.setIsPlanet(false);
+    t.setName("");
+    t.setId(42);
+    a.checkEqual("getNonEmptyName", t.getNonEmptyName(tx), "Ship 42");
+}
+
+/* Test getNonEmptyName, planet */
+AFL_TEST("game.vcr.Object:name:planet", a)
+{
+    afl::string::NullTranslator tx;
+    game::vcr::Object t;
+    t.setIsPlanet(true);
+    t.setName("");
+    t.setId(363);
+    a.checkEqual("getNonEmptyName", t.getNonEmptyName(tx), "Planet 363");
+}
+
 /** Test "add" methods. */
 AFL_TEST("game.vcr.Object:add", a)
 {
@@ -394,6 +416,16 @@ AFL_TEST("game.vcr.Object:describe", a)
         game::vcr::ObjectInfo info = obj.describe(0, 0, 0, tx);
 
         a.checkEqual("01", info.text[0], "N1");
+    }
+
+    // Ultra lo-fi case
+    {
+        game::vcr::Object obj;
+        obj.setOwner(1);
+        obj.setId(77);
+        game::vcr::ObjectInfo info = obj.describe(0, 0, 0, tx);
+
+        a.checkEqual("01", info.text[0], "Ship 77");
     }
 
     // Standard case, no team settings

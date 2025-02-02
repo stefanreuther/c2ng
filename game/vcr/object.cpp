@@ -31,6 +31,21 @@ game::vcr::Object::~Object()
     // ex GVcrObject::~GVcrObject
 }
 
+// Get name, filling in default if name is empty.
+String_t
+game::vcr::Object::getNonEmptyName(afl::string::Translator& tx) const
+{
+    String_t result = getName();
+    if (result.empty()) {
+        if (isPlanet()) {
+            result = Format(tx("Planet %d"), getId());
+        } else {
+            result = Format(tx("Ship %d"), getId());
+        }
+    }
+    return result;
+}
+
 // Remember guessed hull.
 void
 game::vcr::Object::setGuessedHull(const game::spec::HullVector_t& hulls)
@@ -243,12 +258,12 @@ game::vcr::Object::describe(const TeamSettings* teamSettings, const Root* root, 
     // Environment
     if (root == 0 || shipList == 0) {
         // Low-fi version
-        result.text[0] = getName();
+        result.text[0] = getNonEmptyName(tx);
         return result;
     }
 
     size_t line = 0;
-    result.text[line] = Format(tx("%s (%s)"), getName(), getSubtitle(teamSettings, *root, *shipList, tx));
+    result.text[line] = Format(tx("%s (%s)"), getNonEmptyName(tx), getSubtitle(teamSettings, *root, *shipList, tx));
     result.color[line] = teamSettings != 0 ? teamSettings->getPlayerColor(getOwner()) : util::SkinColor::Static;
     ++line;
 
