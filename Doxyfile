@@ -1,5 +1,5 @@
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "PCC2NG"
+PROJECT_NAME           = PCC2NG
 PROJECT_NUMBER         = 2.40
 PROJECT_BRIEF          = "Planets Command Center Next Generation"
 OUTPUT_DIRECTORY       = doxy_docs
@@ -12,6 +12,7 @@ EXTRACT_PRIVATE        = YES
 INTERNAL_DOCS          = YES
 QUIET                  = YES
 WARNINGS               = YES
+WARN_NO_PARAMDOC       = YES
 WARN_LOGFILE           = doxy_docs/Warnings
 INPUT                  = client game gfx interpreter main server ui util
 RECURSIVE              = YES
@@ -19,13 +20,13 @@ GENERATE_HTML          = YES
 GENERATE_LATEX         = NO
 TAGFILES               = ../afl/doxy_docs/Tagfile=../../../afl/doxy_docs/html
 GENERATE_TAGFILE       = doxy_docs/Tagfile
-CLASS_DIAGRAMS         = YES
+CLASS_GRAPH            = YES
 HAVE_DOT               = YES
 
 # We must preprocess static_assert statements because Doxygen's parser explodes otherwise (ignores everything after such a statement)
 ENABLE_PREPROCESSING   = YES
 MACRO_EXPANSION        = YES
 EXPAND_ONLY_PREDEF     = YES
-PREDEFINED             = static_assert(a,b)=
+PREDEFINED             = "static_assert(a,b)="
 
-ALIASES               += change="\par PCC2/c2ng change:\n"
+ALIASES                = "change=\par PCC2/c2ng change:\n"
