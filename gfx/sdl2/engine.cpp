@@ -165,10 +165,28 @@ namespace {
          case SDLK_KP_9:      return shifted ? '9' : util::Key_PgUp;
          case SDLK_KP_PERIOD: return shifted ? '.' : util::Key_Delete;
 
-         case SDLK_KP_PLUS:   return '+';
-         case SDLK_KP_MINUS:  return '-';
-         case SDLK_KP_MULTIPLY: return '*';
-         case SDLK_KP_DIVIDE: return '/';
+         case SDLK_KP_PLUS:        return '+';
+         case SDLK_KP_MINUS:       return '-';
+         case SDLK_KP_MULTIPLY:    return '*';
+         case SDLK_KP_DIVIDE:      return '/';
+         case SDLK_KP_EQUALS:      return '=';
+         case SDLK_KP_COMMA:       return ',';
+         case SDLK_KP_LEFTPAREN:   return '(';
+         case SDLK_KP_RIGHTPAREN:  return ')';
+         case SDLK_KP_LEFTBRACE:   return '{';
+         case SDLK_KP_RIGHTBRACE:  return '}';
+         case SDLK_KP_TAB:         return util::Key_Tab;
+         case SDLK_KP_BACKSPACE:   return util::Key_Backspace;
+         case SDLK_KP_PERCENT:     return '%';
+         case SDLK_KP_LESS:        return '<';
+         case SDLK_KP_GREATER:     return '>';
+         case SDLK_KP_AMPERSAND:   return '&';
+         case SDLK_KP_VERTICALBAR: return '|';
+         case SDLK_KP_COLON:       return ':';
+         case SDLK_KP_HASH:        return '#';
+         case SDLK_KP_SPACE:       return ' ';
+         case SDLK_KP_AT:          return '@';
+         case SDLK_KP_EXCLAM:      return '!';
 
          case SDLK_F1:        return util::Key_F1;
          case SDLK_F2:        return util::Key_F2;
@@ -185,6 +203,11 @@ namespace {
          case SDLK_F13:       return util::Key_F13;
          case SDLK_F14:       return util::Key_F14;
          case SDLK_F15:       return util::Key_F15;
+         case SDLK_F16:       return util::Key_F16;
+         case SDLK_F17:       return util::Key_F17;
+         case SDLK_F18:       return util::Key_F18;
+         case SDLK_F19:       return util::Key_F19;
+         case SDLK_F20:       return util::Key_F20;
          case SDLK_UP:        return util::Key_Up;
          case SDLK_DOWN:      return util::Key_Down;
          case SDLK_LEFT:      return util::Key_Left;
@@ -202,6 +225,44 @@ namespace {
          case SDLK_PRINTSCREEN: return util::Key_Print;
          case SDLK_PAUSE:     return util::Key_Pause;
          case SDLK_MENU:      return util::Key_Menu;
+
+         case SDLK_HELP:             return util::Key_Help;
+         case SDLK_EXECUTE:          return util::Key_Execute;
+         case SDLK_CUT:              return util::Key_Cut;
+         case SDLK_COPY:             return util::Key_Copy;
+         case SDLK_PASTE:            return util::Key_Paste;
+         case SDLK_FIND:             return util::Key_Find;
+         case SDLK_AC_SEARCH:        return util::Key_Find;
+         case SDLK_MUTE:             return util::Key_Mute;
+         case SDLK_VOLUMEUP:         return util::Key_VolumeUp;
+         case SDLK_VOLUMEDOWN:       return util::Key_VolumeDown;
+         case SDLK_AGAIN:            return util::Key_Redo;
+         case SDLK_UNDO:             return util::Key_Undo;
+         case SDLK_AUDIONEXT:        return util::Key_Next;
+         case SDLK_AUDIOPREV:        return util::Key_Previous;
+         case SDLK_AUDIOSTOP:        return util::Key_Stop;
+         case SDLK_AUDIOPLAY:        return util::Key_Play;
+         case SDLK_AUDIOMUTE:        return util::Key_Mute;
+         case SDLK_AC_HOME:          return util::Key_NavHome;
+         case SDLK_AC_BACK:          return util::Key_NavBack;
+         case SDLK_AC_FORWARD:       return util::Key_NavForward;
+         case SDLK_AUDIOREWIND:      return util::Key_FastRewind;
+         case SDLK_AUDIOFASTFORWARD: return util::Key_FastForward;
+
+            // Further keys recognized by SDL2: F21..F24, KP_A..KP_F
+            // (too rare to support, would need special shift
+            // handling), APPLICATION, POWER, SELECT, STOP, ALTERASE,
+            // CANCEL, CLEAR, PRIOR, RETURN2, SEPARATOR, OUT, OPER,
+            // CLEARAGAIN, CRSEL, EXSEL, 00, 000, THOUSANDSSEPARATOR,
+            // DECIMALSEPARATOR, CURRENCYUNIT, CURRENCY_SUBUNIT,
+            // KP_XOR, KP_POWER, KP_DBLAMPERSAND, KP_DBLVERTICALBAR,
+            // KP_MEMSTORE, KP_MEMRECALL, KP_MEMCLEAR, KP_MEMADD,
+            // KP_MEMSUBTRACT, KP_MEMMULTIPLY, KP_MEMDIVIDE,
+            // KP_PLUSMINUS, KP_CLEAR, KP_CLEARENTRY, KP_BINARY,
+            // KP_OCTAL, KP_DECIMAL, KP_HEXADECIMAL, MODE, MEDIASELECT, WWW, MAIL, CALCULATOR, COMPUTER, AC_STOP, AC_REFRESH, AC_BOOKMARKS,
+            // BRIGHTNESSDOWN, BRIGHTNESSUP, DISPLAYSWITCH, KBDILLUMTOGGLE, KBDILLUMDOWN, KBDILLUMUP, EJECT, SLEEP, APP1, APP2,
+            // SOFTLEFT, SOFTRIGHT, CALL, ENDCALL
+
          default:
             if (sym >= ' ' && sym < 127) {
                 return sym;
@@ -477,9 +538,9 @@ gfx::sdl2::Engine::createTimer()
     return m_timerQueue.createTimer();
 }
 
-// /*
-//  *  Privates
-//  */
+/*
+ *  Privates
+ */
 
 void
 gfx::sdl2::Engine::setWindowStuff(SDL_Window* win, SDL_Texture* tex, SDL_Renderer* renderer)

@@ -106,19 +106,35 @@ namespace util {
     const Key_t Key_Print          = Key_Escape+1;
     const Key_t Key_Pause          = Key_Escape+2;
     const Key_t Key_Menu           = Key_Escape+3;
+    const Key_t Key_Help           = Key_Escape+4;
+    const Key_t Key_Execute        = Key_Escape+5;
+    const Key_t Key_Cut            = Key_Escape+6;
+    const Key_t Key_Copy           = Key_Escape+7;
+    const Key_t Key_Paste          = Key_Escape+8;
+    const Key_t Key_Find           = Key_Escape+9;
+    const Key_t Key_Mute           = Key_Escape+10;
+    const Key_t Key_VolumeUp       = Key_Escape+11;
+    const Key_t Key_VolumeDown     = Key_Escape+12;
+    const Key_t Key_Undo           = Key_Escape+13;
+    const Key_t Key_Redo           = Key_Escape+14;
+    const Key_t Key_Next           = Key_Escape+15;
+    const Key_t Key_Previous       = Key_Escape+16;
+    const Key_t Key_Stop           = Key_Escape+17;
+    const Key_t Key_Play           = Key_Escape+18;
+    const Key_t Key_FastRewind     = Key_Escape+19;
+    const Key_t Key_FastForward    = Key_Escape+20;
+    const Key_t Key_NavHome        = Key_Escape+21;
+    const Key_t Key_NavBack        = Key_Escape+22;
+    const Key_t Key_NavForward     = Key_Escape+23;
+
 
     // Special
-    const Key_t Key_WheelUp        = Key_Escape+4;
+    const Key_t Key_WheelUp        = Key_Escape+24;
     const Key_t Key_WheelDown      = Key_WheelUp+1;
     const Key_t Key_Quit           = Key_WheelUp+2;
     const Key_t Key_DoubleClick    = Key_WheelUp+3;
     const Key_t KeyRange_FirstVirtual = Key_WheelUp;
     const Key_t KeyRange_LastVirtual  = Key_DoubleClick;
-
-    // Unmapped:
-    //   4 SDLK_SPACE
-    //   1 SDLK_MODE
-
 
     const Key_t KeyMod_Mask        = static_cast<Key_t>(0xFE000000);
     const Key_t KeyMod_Shift       = 0x02000000;

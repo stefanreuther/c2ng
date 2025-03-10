@@ -97,7 +97,7 @@ AFL_TEST("util.Key:formatKey", a)
 AFL_TEST_NOARG("util.Key:unique")
 {
     // Test uniqueness of key assignments.
-    switch (0) {
+    switch (util::Key_t(0)) {
      case util::Key_F1:
      case util::Key_F2:
      case util::Key_F3:
@@ -170,6 +170,26 @@ AFL_TEST_NOARG("util.Key:unique")
      case util::Key_NumPeriod:
      case util::Key_NumEnter:
      case util::Key_NumEquals:
+     case util::Key_Help:
+     case util::Key_Execute:
+     case util::Key_Cut:
+     case util::Key_Copy:
+     case util::Key_Paste:
+     case util::Key_Find:
+     case util::Key_Mute:
+     case util::Key_VolumeUp:
+     case util::Key_VolumeDown:
+     case util::Key_Undo:
+     case util::Key_Redo:
+     case util::Key_Next:
+     case util::Key_Previous:
+     case util::Key_Stop:
+     case util::Key_Play:
+     case util::Key_FastRewind:
+     case util::Key_FastForward:
+     case util::Key_NavHome:
+     case util::Key_NavBack:
+     case util::Key_NavForward:
 
         // Misc
      case util::Key_Escape:

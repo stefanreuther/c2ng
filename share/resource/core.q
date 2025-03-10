@@ -397,6 +397,7 @@ Bind Global           "a-bs"   := "CC$ListScreenHistory"
 Bind Global           "a-."    := "UI.SelectionManager"
 Bind Global           "a-left" := "CC$PreviousSelection"
 Bind Global           "a-right" := "CC$NextSelection"
+Bind Global           "navhome" := "UI.GotoScreen 0"
 
 % Control Screen Bindings
 Bind ControlScreen    "."      := "CCUI.ToggleSelection"
@@ -436,6 +437,7 @@ Bind ControlScreen    "l"      := "CCUI.ListShips UI.X, UI.Y, 'a'"
 Bind ControlScreen    "a-q"    := "CC$ProcessManager"
 Bind ControlScreen    "a-r"    := "CC$Reset Loc.X, Loc.Y"
 Bind ControlScreen    "y"      := "UI.ScanKeyboardMode"
+Bind ControlScreen    "find"   := "UI.Search"
 
 Bind AutoTaskScreen   "%"      := "CCUI.Task.ToggleComment"
 Bind AutoTaskScreen   "k"      := "CCUI.Task.ToggleComment"
@@ -697,6 +699,7 @@ Bind RaceScreen       "t"      := "UI.EditTeams"
 Bind RaceScreen       "alt-u"  := "CCUI.Messages.ViewUtilData"
 Bind RaceScreen       "v"      := "CC$ViewCombat"
 Bind RaceScreen       "w"      := "CC$SendMessage"
+Bind RaceScreen       "find"   := "UI.Search"
 
 % Selection Dialog Bindings
 % ex WObjectSelectionControl::handleEvent
