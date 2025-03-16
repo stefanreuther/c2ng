@@ -3,9 +3,11 @@
   */
 
 #include "client/dialogs/sellsuppliesdialog.hpp"
+
 #include "afl/string/format.hpp"
 #include "client/downlink.hpp"
 #include "client/widgets/helpwidget.hpp"
+#include "game/proxy/configurationproxy.hpp"
 #include "game/proxy/convertsuppliesproxy.hpp"
 #include "ui/dialogs/messagebox.hpp"
 #include "ui/eventloop.hpp"
@@ -17,21 +19,25 @@
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/decimalselector.hpp"
 #include "ui/widgets/quit.hpp"
+#include "util/numberformatter.hpp"
 
 using afl::string::Format;
+using game::proxy::ConfigurationProxy;
 using game::proxy::ConvertSuppliesProxy;
 using ui::Group;
 using ui::widgets::Button;
+using util::NumberFormatter;
 
 namespace {
     class SellSuppliesDialog {
      public:
-        SellSuppliesDialog(ui::Root& root, int32_t maxSuppliesToSell, ConvertSuppliesProxy& proxy, afl::string::Translator& tx)
+        SellSuppliesDialog(ui::Root& root, int32_t maxSuppliesToSell, ConvertSuppliesProxy& proxy, NumberFormatter fmt, afl::string::Translator& tx)
             : m_root(root),
               m_loop(root),
               m_value(0),
               m_select(root, tx, m_value, 0, maxSuppliesToSell, 10),
               m_proxy(proxy),
+              m_formatter(fmt),
               m_translator(tx)
             { }
 
@@ -43,8 +49,7 @@ namespace {
                 win.add(del.addNew(new ui::rich::StaticText(String_t(Format(m_translator("You have %d kt supplies. You'll get 1 mc per kiloton. "
                                                                                          "Remember that PCC automatically sells supplies when needed.\n"
                                                                                          "Enter amount to sell:"),
-                                                                            // FIXME: use formatNumber()
-                                                                            m_select.getMax())),
+                                                                            m_formatter.formatNumber(m_select.getMax()))),
                                                             400,
                                                             m_root.provider())));
                 win.add(m_select);
@@ -105,6 +110,7 @@ namespace {
         afl::base::Observable<int32_t> m_value;
         ui::widgets::DecimalSelector m_select;
         ConvertSuppliesProxy& m_proxy;
+        NumberFormatter m_formatter;
         afl::string::Translator& m_translator;
     };
 }
@@ -116,13 +122,14 @@ client::dialogs::doSellSuppliesDialog(ui::Root& root, util::RequestSender<game::
     ConvertSuppliesProxy proxy(gameSender);
     Downlink link(root, tx);
 
+    NumberFormatter fmt = ConfigurationProxy(gameSender).getNumberFormatter(link);
     ConvertSuppliesProxy::Status st = proxy.init(link, planetId, reservedSupplies, reservedMoney);
     if (st.maxSuppliesToSell == 0) {
         ui::dialogs::MessageBox(tx("You do not have any supplies on this planet."),
                                 tx("Sell Supplies"),
                                 root).doOkDialog(tx);
     } else {
-        SellSuppliesDialog(root, st.maxSuppliesToSell, proxy, tx).run(gameSender);
+        SellSuppliesDialog(root, st.maxSuppliesToSell, proxy, fmt, tx).run(gameSender);
     }
 }
 
