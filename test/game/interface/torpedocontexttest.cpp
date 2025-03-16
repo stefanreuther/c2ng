@@ -52,6 +52,8 @@ AFL_TEST("game.interface.TorpedoContext:basics", a)
         a.checkEqual("11. toString", testee.toString(true), "Torpedo(8)");
         verif.verifyInteger("TECH", 7);
         verif.verifyInteger("COST.D", 2);
+        verif.verifyInteger("COST.SUP", 5);
+        verif.verifyString("COST.STR", "1T 2D 3M 5S 4$");
         verif.verifyInteger("DAMAGE", 88);       // doubled, default host-config is non-alternative combat
         verif.verifyString("NAME", "Mudball");
         verif.verifyString("DESCRIPTION", "dirty");
@@ -69,6 +71,8 @@ AFL_TEST("game.interface.TorpedoContext:basics", a)
         a.checkEqual("31. toString", testee.toString(true), "Launcher(8)");
         verif.verifyInteger("TECH", 7);
         verif.verifyInteger("COST.D", 7);
+        verif.verifyInteger("COST.SUP", 13);
+        verif.verifyString("COST.STR", "5T 7D 9M 13S 11$");
         verif.verifyInteger("DAMAGE", 88);       // doubled, default host-config is non-alternative combat
         verif.verifyString("NAME", "Mudball");
         verif.verifyString("DESCRIPTION", "dirty");

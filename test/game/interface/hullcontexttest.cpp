@@ -52,6 +52,7 @@ AFL_TEST("game.interface.HullContext:basics", a)
     a.checkEqual("11. toString", testee.toString(true), "Hull(3)");
     verif.verifyInteger("TECH", 9);
     verif.verifyInteger("COST.D", 7);
+    verif.verifyInteger("COST.SUP", 13);
     verif.verifyString("NAME", "Orville");
     verif.verifyString("SPECIAL", "");
     verif.verifyString("DESCRIPTION", "oops");

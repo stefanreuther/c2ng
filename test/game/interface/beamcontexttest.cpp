@@ -45,6 +45,7 @@ AFL_TEST("game.interface.BeamContext:basics", a)
     a.checkEqual("toString", testee.toString(true), "Beam(3)");
     verif.verifyInteger("TECH", 3);
     verif.verifyInteger("COST.D", 7);
+    verif.verifyInteger("COST.SUP", 13);
     verif.verifyInteger("DAMAGE", 99);
     verif.verifyString("NAME", "Death ray");
     verif.verifyString("DESCRIPTION", "Fzzz!");

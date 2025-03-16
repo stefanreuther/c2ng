@@ -49,7 +49,10 @@ game::interface::getComponentProperty(const game::spec::Component& comp,
            Money cost of this component. */
         return makeIntegerValue(comp.cost().get(game::spec::Cost::Money));
      case icpCostSup:
-        // FIXME: not referenced!
+        /* @q Cost.Sup:Int (Hull Property, Engine Property, Beam Property, Torpedo Property)
+           Supplies cost of this component.
+           Note that this value exists for symmetry and is usually 0.
+           @since PCC2 2.41.3, PCC2 2.0.17 */
         return makeIntegerValue(comp.cost().get(game::spec::Cost::Supplies));
      case icpCostStr:
         /* @q Cost.Str:Cargo (Hull Property, Engine Property, Beam Property, Torpedo Property)

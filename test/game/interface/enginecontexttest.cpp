@@ -39,6 +39,7 @@ AFL_TEST("game.interface.EngineContext:basics", a)
     v.verifyInteger("ID", NR);
     v.verifyInteger("TECH", 3);
     v.verifyInteger("COST.MC", 500);
+    v.verifyInteger("COST.SUP", 0);
     v.verifyString("NAME", "The Kettle");
     v.verifyString("DESCRIPTION", "12 cylinders");
 }
