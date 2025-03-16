@@ -36,35 +36,31 @@ ui::widgets::DecimalSelector::draw(gfx::Canvas& can)
     ctx.useFont(*font);
 
     String_t post, val;
+    int cursorWidth = 0;
 
     if (getFocusState() != NoFocus) {
-        post = "_";              // FIXME: replace by proper cursor
+        cursorWidth = font->getEmWidth() / 2;
     }
 
     if (m_flags.contains(ShowMaximum)) {
-        // FIXME: NumberFormatter
-        post += afl::string::Format(m_translator(" (max. %d)"), /*numToString*/(getMax()));
+        post = afl::string::Format(m_translator(" (max. %d)"), formatValue(getMax()));
     }
 
     if (getMode() != Zeroed) {
-        if (Peer* p = getPeer()) {
-            val = p->toString(*this, getValue());
-        } else {
-            // FIXME: NumberFormatter
-            val = afl::string::Format("%d", getValue());
-        }
+        val = formatValue(getValue());
     }
 
     int val_width  = font->getTextWidth(val);
     int post_width = font->getTextWidth(post);
 
     val_width = std::min(val_width, getExtent().getWidth());
-    post_width = std::min(post_width, getExtent().getWidth() - val_width);
+    cursorWidth = std::min(cursorWidth, getExtent().getWidth() - val_width);
+    post_width = std::min(post_width, getExtent().getWidth() - val_width - cursorWidth);
 
-    int remain = getExtent().getWidth() - post_width - val_width;
+    int remain = getExtent().getWidth() - post_width - val_width - cursorWidth;
 
-    /* Left-justify:  | val_width | post_width | suffix |
-       Right-justify: | prefix | val_width | post_width | */
+    /* Left-justify:  | val_width | cursorWidth | post_width | suffix |
+       Right-justify: | prefix | val_width | cursorWidth | post_width | */
 
     int pre_width, suf_width;
     if (m_flags.contains(RightJustified)) {
@@ -80,7 +76,7 @@ ui::widgets::DecimalSelector::draw(gfx::Canvas& can)
     if (getMode() == TypeErase) {
         // Focused and type-erase
         drawBackground(ctx, gfx::Rectangle(x, y, pre_width, h));
-        drawBackground(ctx, gfx::Rectangle(x + pre_width + val_width, y, suf_width + post_width, h));
+        drawBackground(ctx, gfx::Rectangle(x + pre_width + cursorWidth + val_width, y, suf_width + post_width, h));
         drawSolidBar(ctx, gfx::Rectangle(x + pre_width, y, val_width, h), util::SkinColor::Input);
         ctx.setColor(util::SkinColor::Background);
     } else {
@@ -92,7 +88,15 @@ ui::widgets::DecimalSelector::draw(gfx::Canvas& can)
     outTextF(ctx, gfx::Point(x + pre_width, y), val_width, val);
 
     ctx.setColor(util::SkinColor::Static);
-    outTextF(ctx, gfx::Point(x + pre_width + val_width, y), post_width, post);
+    outTextF(ctx, gfx::Point(x + pre_width + val_width + cursorWidth, y), post_width, post);
+
+    if (cursorWidth != 0) {
+        drawSolidBar(ctx, gfx::Rectangle(x + pre_width + val_width,
+                                         y + font->getLineHeight()*9/10,
+                                         cursorWidth,
+                                         std::max(font->getLineHeight()/10, 1)),
+                     util::SkinColor::Static);
+    }
 }
 
 ui::layout::Info

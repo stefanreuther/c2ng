@@ -71,6 +71,11 @@ namespace ui { namespace widgets {
             \return peer, if any */
         Peer* getPeer() const;
 
+        /** Get value formatted as a string.
+            \param value Value to format
+            \return formatted value */
+        String_t formatValue(int32_t value) const;
+
         // SimpleWidget:
         // virtual void draw(gfx::Canvas& can); -> child
         virtual void handleStateChange(State st, bool enable);

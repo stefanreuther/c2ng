@@ -25,8 +25,6 @@ namespace ui { namespace widgets {
      private:
         Root& m_root;
         String_t m_label;
-
-        String_t getValueAsString(int32_t value) const;
     };
 
 } }

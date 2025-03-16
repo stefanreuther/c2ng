@@ -3,6 +3,7 @@
   */
 
 #include "ui/widgets/basedecimalselector.hpp"
+#include "afl/string/format.hpp"
 #include "util/updater.hpp"
 
 ui::widgets::BaseDecimalSelector::BaseDecimalSelector(afl::base::Observable<int32_t>& value, int32_t min, int32_t max, int32_t step)
@@ -42,6 +43,17 @@ ui::widgets::BaseDecimalSelector::Peer*
 ui::widgets::BaseDecimalSelector::getPeer() const
 {
     return m_pPeer;
+}
+
+String_t
+ui::widgets::BaseDecimalSelector::formatValue(int32_t value) const
+{
+    if (Peer* p = getPeer()) {
+        return p->toString(*this, value);
+    } else {
+        // If support for NumberFormatter is desired, use an appropriate peer.
+        return afl::string::Format("%d", value);
+    }
 }
 
 void

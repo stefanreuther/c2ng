@@ -35,7 +35,7 @@ ui::widgets::ListLikeDecimalSelector::draw(gfx::Canvas& can)
     ctx.setColor(util::SkinColor::Static);
 
     if (getMode() != Zeroed) {
-        String_t value = getValueAsString(getValue());
+        String_t value = formatValue(getValue());
         outTextF(ctx, area.splitRightX(ctx.getFont()->getTextWidth(value)), value);
     }
     outTextF(ctx, area, m_label);
@@ -47,21 +47,9 @@ ui::widgets::ListLikeDecimalSelector::getLayoutInfo() const
     // ex UIListLikeNumberSelector::getLayoutInfo
     afl::base::Ref<gfx::Font> font = m_root.provider().getFont(gfx::FontRequest());
     const int width = font->getTextWidth(m_label)
-        + font->getTextWidth(getValueAsString(getMax()))
+        + font->getTextWidth(formatValue(getMax()))
         + 2*font->getEmWidth();
     const int height = font->getLineHeight();
     const gfx::Point size(width, height);
     return ui::layout::Info(size, ui::layout::Info::GrowHorizontal);
-}
-
-
-String_t
-ui::widgets::ListLikeDecimalSelector::getValueAsString(int32_t value) const
-{
-    if (Peer* p = getPeer()) {
-        return p->toString(*this, value);
-    } else {
-        // FIXME: NumberSelector
-        return afl::string::Format("%d", value);
-    }
 }
