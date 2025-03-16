@@ -936,7 +936,8 @@ namespace {
 
         void onGoalDialog()
             {
-                client::dialogs::GoalDialog dlg(m_root, m_translator, false);
+                client::widgets::HelpWidget help(m_root, m_translator, m_gameSender, "pcc2:autobuild");
+                client::dialogs::GoalDialog dlg(m_root, m_translator, false, &help);
                 for (size_t i = 0; i < game::NUM_PLANETARY_BUILDING_TYPES; ++i) {
                     game::PlanetaryBuilding bb = game::PlanetaryBuilding(i);
                     dlg.setGoal(bb, m_status.buildings[i].want);

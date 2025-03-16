@@ -15,7 +15,7 @@ namespace client { namespace dialogs {
 
     class GoalDialog {
      public:
-        GoalDialog(ui::Root& root, afl::string::Translator& tx, bool allowUnchanged);
+        GoalDialog(ui::Root& root, afl::string::Translator& tx, bool allowUnchanged, ui::Widget* pHelp);
         ~GoalDialog();
 
         void setGoal(game::PlanetaryBuilding building, int goal);
@@ -41,9 +41,9 @@ namespace client { namespace dialogs {
         InputComponent* m_speedInputs[game::NUM_PLANETARY_BUILDING_TYPES];
         ui::Widget* m_pWindow;
 
-        void init();
+        void init(ui::Widget* pHelp);
     };
-    
+
 } }
 
 #endif

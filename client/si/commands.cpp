@@ -1693,7 +1693,8 @@ client::si::IFCCEditAutobuildSettings(game::Session& /*session*/, ScriptSide& si
         virtual void handle(Control& ctl, RequestLink2 link)
             {
                 UserSide& iface = ctl.interface();
-                client::dialogs::GoalDialog dlg(ctl.root(), ctl.translator(), true);
+                client::widgets::HelpWidget help(ctl.root(), ctl.translator(), iface.gameSender(), "pcc2:autobuild");
+                client::dialogs::GoalDialog dlg(ctl.root(), ctl.translator(), true, &help);
                 std::auto_ptr<afl::data::Value> result;
                 if (dlg.run()) {
                     result.reset(new game::interface::AutobuildSettingsValue_t(dlg.getResult()));

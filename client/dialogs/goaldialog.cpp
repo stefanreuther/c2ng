@@ -116,7 +116,7 @@ client::dialogs::GoalDialog::InputComponent::init(bool isGoal)
  *  GoalDialog
  */
 
-client::dialogs::GoalDialog::GoalDialog(ui::Root& root, afl::string::Translator& tx, bool allowUnchanged)
+client::dialogs::GoalDialog::GoalDialog(ui::Root& root, afl::string::Translator& tx, bool allowUnchanged, ui::Widget* pHelp)
     : m_root(root),
       m_translator(tx),
       m_deleter(),
@@ -124,7 +124,7 @@ client::dialogs::GoalDialog::GoalDialog(ui::Root& root, afl::string::Translator&
       m_allowUnchanged(allowUnchanged),
       m_pWindow(0)
 {
-    init();
+    init(pHelp);
 }
 
 client::dialogs::GoalDialog::~GoalDialog()
@@ -191,7 +191,7 @@ client::dialogs::GoalDialog::run()
 
 
 void
-client::dialogs::GoalDialog::init()
+client::dialogs::GoalDialog::init(ui::Widget* pHelp)
 {
     // Window [VBox]
     //   Group [Grid]
@@ -267,7 +267,12 @@ client::dialogs::GoalDialog::init()
 
     buttonGroup.add(m_deleter.addNew(new ui::Spacer()));
 
-    // FIXME: ui::widgets::Button& btnHelp = m_deleter.addNew(new ui::widgets::Button(m_translator("Help"), 'h', m_root));
+    if (pHelp != 0) {
+        ui::widgets::Button& btnHelp = m_deleter.addNew(new ui::widgets::Button(m_translator("Help"), 'h', m_root));
+        buttonGroup.add(btnHelp);
+        buttonGroup.add(*pHelp);
+        btnHelp.dispatchKeyTo(*pHelp);
+    }
     win.add(buttonGroup);
     win.pack();
 
