@@ -101,16 +101,27 @@ ui::widgets::SimpleTable::Range::setExtraColumns(int n)
 ui::widgets::SimpleTable::Range&
 ui::widgets::SimpleTable::Range::setUnderline(bool flag)
 {
-    // FIXME: different underline modes:
-    // - whole cell (this one)
-    // - just the text
-    // - in the pad area (as cell divider)
     util::Updater up;
     for (size_t i = 0, pos = m_start; i < m_count; ++i, pos += m_stride) {
         assert(pos < m_table.m_cells.size());
         up.set(m_table.m_cells[pos].underlined, flag);
     }
     if (up) {
+        m_table.requestRedraw();
+    }
+    return *this;
+}
+
+ui::widgets::SimpleTable::Range&
+ui::widgets::SimpleTable::Range::setCellWidth(int width)
+{
+    util::Updater up;
+    for (size_t i = 0, pos = m_start; i < m_count; ++i, pos += m_stride) {
+        assert(pos < m_table.m_cells.size());
+        up.set(m_table.m_cells[pos].cellWidth, width);
+    }
+    if (up) {
+        m_table.requestUpdateMetrics();
         m_table.requestRedraw();
     }
     return *this;
@@ -400,7 +411,7 @@ ui::widgets::SimpleTable::updateMetrics()
         updateAutoMetric(m_rowMetrics, row, font->getTextHeight(c.text));
         if (c.extraColumns == 0) {
             // Single cell: update column metric
-            updateAutoMetric(m_columnMetrics, column, font->getTextWidth(c.text));
+            updateAutoMetric(m_columnMetrics, column, getCellWidth(c, *font));
             ++column;
         } else {
             // Multi cell: skip extra cells
@@ -452,7 +463,7 @@ ui::widgets::SimpleTable::updateMetrics()
 
             // If we don't have enough space, expand the chosen column by the missing room.
             afl::base::Ref<gfx::Font> font = m_root.provider().getFont(c.font);
-            int textWidth = font->getTextWidth(c.text);
+            int textWidth = getCellWidth(c, *font);
             if (textWidth > size) {
                 updateAutoMetric(m_columnMetrics, bestColumn, textWidth - size + bestMetric.size);
             }
@@ -540,5 +551,15 @@ ui::widgets::SimpleTable::getMetricPtr(std::vector<Metric>& m, size_t index)
         return &m[index];
     } else {
         return 0;
+    }
+}
+
+int
+ui::widgets::SimpleTable::getCellWidth(const Cell& cell, gfx::Font& font)
+{
+    if (cell.cellWidth > 0) {
+        return cell.cellWidth;
+    } else {
+        return font.getTextWidth(cell.text);
     }
 }

@@ -33,6 +33,7 @@
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/focusablegroup.hpp"
 #include "ui/widgets/focusiterator.hpp"
+#include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/imagebutton.hpp"
 #include "ui/widgets/keydispatcher.hpp"
 #include "ui/widgets/panel.hpp"
@@ -55,6 +56,7 @@ using ui::Spacer;
 using ui::Widget;
 using ui::widgets::Button;
 using ui::widgets::FocusIterator;
+using ui::widgets::FrameGroup;
 using util::KeyString;
 using util::NumberFormatter;
 using util::SkinColor;
@@ -229,6 +231,16 @@ namespace {
         int m_displayWidth;
     };
 
+    int getCostLabelWidth(ui::Root& root, afl::string::Translator& tx)
+    {
+        int w = 0;
+        afl::base::Ref<gfx::Font> font = root.provider().getFont(gfx::FontRequest());
+        for (size_t i = 0; i < game::NUM_PLANETARY_BUILDING_TYPES; ++i) {
+            w = std::max(w, font->getTextWidth(tx(BuildStructures::describe(static_cast<game::PlanetaryBuilding>(i)).untranslatedBuildingCost)));
+        }
+        return w;
+    }
+
 
     /*
      *  Structure builder widget
@@ -259,7 +271,7 @@ namespace {
                 //     Button -
                 //     Spacer
                 const BuildStructures::Description& desc = BuildStructures::describe(m_type);
-                add(m_del.addNew(new ui::widgets::ImageButton(desc.imageName, 0, root, gfx::Point(105, 93))));
+                add(FrameGroup::wrapWidget(m_del, root.colorScheme(), ui::LoweredFrame, m_del.addNew(new ui::widgets::ImageButton(desc.imageName, 0, root, gfx::Point(105, 93)))));
 
                 Group& g1 = m_del.addNew(new Group(ui::layout::VBox::instance5));
                 ui::widgets::StaticText& txt = m_del.addNew(new ui::widgets::StaticText(tx(desc.untranslatedBuildingName), util::SkinColor::Heading, gfx::FontRequest().addSize(1), root.provider()));
@@ -280,11 +292,15 @@ namespace {
                 m_table.cell(0, 1).setText(tx("Auto-B. Goal:"));
                 m_table.cell(0, 2).setText(tx("Maximum:"));
 
-                // FIXME: fine-tune table layout so that all StructureWidget's use same column widths
                 m_table.column(2).subrange(0, 3).setColor(SkinColor::Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
 
                 m_table.cell(0, 3).setText(tx("Cost:"));
-                m_table.cell(1, 3).setExtraColumns(1).setColor(SkinColor::Green).setText(tx(desc.untranslatedBuildingCost)).setTextAlign(gfx::RightAlign, gfx::TopAlign);
+                m_table.cell(1, 3)
+                    .setExtraColumns(1)
+                    .setColor(SkinColor::Green)
+                    .setText(tx(desc.untranslatedBuildingCost))
+                    .setCellWidth(getCostLabelWidth(m_root, tx))
+                    .setTextAlign(gfx::RightAlign, gfx::TopAlign);
 
                 // Connect keys
                 ui::widgets::KeyDispatcher& disp = m_del.addNew(new ui::widgets::KeyDispatcher());
@@ -713,7 +729,7 @@ namespace {
                 // Preconfigure layout
                 afl::base::Ref<gfx::Font> font = m_root.provider().getFont(gfx::FontRequest());
                 result.all().setText(" ");
-                result.setColumnWidth(0, font->getEmWidth() * 22);   // FIXME: should be minimum width
+                result.setColumnWidth(0, font->getEmWidth() * 22);
                 result.row(0).setColor(SkinColor::Static);
                 result.setColumnPadding(1, font->getEmWidth());
                 result.cell(0, 0).setText(m_translator("You have:")).setUnderline(true);
@@ -859,9 +875,6 @@ namespace {
                 //         WPlanetStructureGroup x 2
                 //         WPlanetDefenseEffectWidget
                 //     HBox "OK" "ESC" "H" "Auto" "Goals" "Ground Combat"
-
-                // FIXME: this forces the WPlanetStructureGroup to the same size
-                // as the WPlanetDefenseEffectWidget.
 
                 Group& group1    = m_del.addNew(new Group(ui::layout::VBox::instance5));
                 Group& group11   = m_del.addNew(new Group(ui::layout::HBox::instance0));

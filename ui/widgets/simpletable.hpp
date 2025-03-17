@@ -67,6 +67,14 @@ namespace ui { namespace widgets {
                 \return *this */
             Range& setUnderline(bool flag);
 
+            /** Set cell width.
+                If nonzero, overrides the cell's text width computation.
+                Unlike SimpleTable::setColumnWidth() which forces a column size,
+                this value just provides input to column width computation, and plays nicely with multi-column cells.
+                \param width Width
+                \return *this */
+            Range& setCellWidth(int width);
+
             /** Get subrange.
                 \param start 0-based index
                 \param count Number of cells
@@ -178,10 +186,11 @@ namespace ui { namespace widgets {
             gfx::HorizontalAlignment alignX;
             gfx::VerticalAlignment alignY;
             int extraColumns;
+            int cellWidth;
             util::SkinColor::Color color;
             bool underlined;
             Cell()
-                : text(), colorString(), font(), alignX(gfx::LeftAlign), alignY(gfx::TopAlign), extraColumns(0), color(util::SkinColor::Static), underlined(false)
+                : text(), colorString(), font(), alignX(gfx::LeftAlign), alignY(gfx::TopAlign), extraColumns(0), cellWidth(0), color(util::SkinColor::Static), underlined(false)
                 { }
         };
         struct Metric {
@@ -213,6 +222,7 @@ namespace ui { namespace widgets {
         static int sumMetric(const std::vector<Metric>& m);
         static Metric getMetric(const std::vector<Metric>& m, size_t index);
         static Metric* getMetricPtr(std::vector<Metric>& m, size_t index);
+        static int getCellWidth(const Cell& cell, gfx::Font& font);
     };
 
 } }
