@@ -9,7 +9,7 @@
 #include "afl/base/growablememory.hpp"
 #include "afl/base/memory.hpp"
 #include "afl/base/types.hpp"
-#include "afl/container/ptrvector.hpp"
+#include "afl/data/namemap.hpp"
 #include "afl/string/string.hpp"
 
 namespace util {
@@ -84,28 +84,10 @@ namespace util {
         bool isAtom(Atom_t atom) const;
 
      private:
-        /** Manifest constants. */
-        enum {
-            ATOMS_PER_CHUNK = 128,      /** Atoms per memory chunk. */
-            ATOM_HASH       = 128       /** Number of hash-table slots. */
-        };
-
-        struct AtomChunk {
-            /** All atoms of this chunk in one block */
-            afl::base::GrowableBytes_t data;
-            /** Positions of each atom */
-            size_t pos[ATOMS_PER_CHUNK];
-            size_t length[ATOMS_PER_CHUNK];
-            /** Hash links for each atom */
-            Atom_t hashNext[ATOMS_PER_CHUNK];
-        };
-
-        afl::container::PtrVector<AtomChunk> m_entries;
-        Atom_t m_hashFirst[ATOM_HASH];
-        Atom_t m_nextAtom;
-
-        afl::base::ConstBytes_t atomStrLookup(Atom_t atom) const;
+        String_t atomStrLookup(Atom_t atom) const;
         Atom_t atomLookup(afl::base::ConstBytes_t a, bool add);
+
+        afl::data::NameMap m_content;
     };
 
 }

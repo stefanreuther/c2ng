@@ -64,3 +64,23 @@ AFL_TEST("util.AtomTable:many-atoms", a)
         a.checkEqual("02", testee.getStringFromAtom(atoms[i]), toString(i));
     }
 }
+
+/** Test clear(). */
+AFL_TEST("util.AtomTable:clear", a)
+{
+    // ex UtilAtomTestSuite::testAtom
+    util::AtomTable testee;
+
+    // Create an atom and observe how it comes to existence
+    a.checkEqual    ("01", testee.getAtomFromStringNC("foo"), util::AtomTable::NULL_ATOM);
+    a.checkDifferent("02", testee.getAtomFromString  ("foo"), util::AtomTable::NULL_ATOM);
+    a.checkDifferent("03", testee.getAtomFromStringNC("foo"), util::AtomTable::NULL_ATOM);
+
+    // Clear
+    testee.clear();
+
+    // Observe creation again
+    a.checkEqual    ("11", testee.getAtomFromStringNC("foo"), util::AtomTable::NULL_ATOM);
+    a.checkDifferent("12", testee.getAtomFromString  ("foo"), util::AtomTable::NULL_ATOM);
+    a.checkDifferent("13", testee.getAtomFromStringNC("foo"), util::AtomTable::NULL_ATOM);
+}
