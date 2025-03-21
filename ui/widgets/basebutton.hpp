@@ -138,4 +138,39 @@ namespace ui { namespace widgets {
 
 } }
 
+// Get associated key.
+inline util::Key_t
+ui::widgets::BaseButton::getKey() const
+{
+    return m_key;
+}
+
+// Set associated key.
+inline void
+ui::widgets::BaseButton::setKey(util::Key_t key)
+{
+    m_key = key;
+}
+
+// Make this button focusable.
+inline void
+ui::widgets::BaseButton::setIsFocusable(bool flag)
+{
+    m_focusable = flag;
+}
+
+// Set growth behaviour.
+inline void
+ui::widgets::BaseButton::setGrowthBehaviour(ui::layout::Info::Growth growth)
+{
+    m_growthBehaviour = growth;
+}
+
+// Get associated root.
+inline ui::Root&
+ui::widgets::BaseButton::root() const
+{
+    return m_root;
+}
+
 #endif

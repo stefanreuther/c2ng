@@ -53,7 +53,7 @@ ui::widgets::BaseButton::getFlags() const
 {
     ButtonFlags_t result = m_flags;
     result.set(DisabledButton, hasState(DisabledState));
-    result.set(FocusedButton,  hasState(FocusedState));    // FIXME: or check PrimaryFocus?
+    result.set(FocusedButton,  hasState(FocusedState));
     return result;
 }
 
@@ -104,8 +104,11 @@ ui::widgets::BaseButton::handleKey(util::Key_t key, int prefix)
         fire(prefix, key);
         return true;
     } else if (!hasState(DisabledState) && m_key != 0) {
-        // FIXME: && !hasState(bf_Key)
-        // FIXME: PCC2 checks Alt and #/\ only on second pass
+        // Change to PCC2:
+        // - We always handle keys. PCC2 does not handle keys if this button emits keys (bf_Key).
+        //   We emit keys to specific consumer, so we don't receive them ourselves.
+        // - PCC2 checks Alt and "\" only on second pass to avoid consuming it from a focused widget.
+        //   We have better-defined focus handling so this is not an issue.
         if (key == m_key
             || key == util::KeyMod_Alt + m_key
             || (key == '\\' && m_key == '#'))
@@ -175,8 +178,6 @@ ui::widgets::BaseButton::dispatchKeyTo(gfx::KeyEventConsumer& target)
             { }
         void call(int prefix, util::Key_t key)
             { m_target.handleKey(key, prefix); }
-        Handler* clone() const
-            { return new Handler(*this); }
      private:
         gfx::KeyEventConsumer& m_target;
     };
@@ -197,47 +198,10 @@ ui::widgets::BaseButton::dispatchKeyAndFocus(Widget& target)
                 m_target.requestFocus();
                 m_target.handleKey(key, prefix);
             }
-        Handler* clone() const
-            { return new Handler(*this); }
      private:
         Widget& m_target;
     };
     sig_fireKey.addNewClosure(new Handler(target));
-}
-
-// Get associated key.
-util::Key_t
-ui::widgets::BaseButton::getKey() const
-{
-    return m_key;
-}
-
-// Set associated key.
-void
-ui::widgets::BaseButton::setKey(util::Key_t key)
-{
-    m_key = key;
-}
-
-// Make this button focusable.
-void
-ui::widgets::BaseButton::setIsFocusable(bool flag)
-{
-    m_focusable = flag;
-}
-
-// Set growth behaviour.
-void
-ui::widgets::BaseButton::setGrowthBehaviour(ui::layout::Info::Growth growth)
-{
-    m_growthBehaviour = growth;
-}
-
-// Get associated root.
-ui::Root&
-ui::widgets::BaseButton::root() const
-{
-    return m_root;
 }
 
 void

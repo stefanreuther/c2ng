@@ -1,12 +1,13 @@
 /**
   *  \file ui/widgets/stringlistbox.cpp
+  *  \brief Class ui::widgets::StringListbox
   */
 
 #include "ui/widgets/stringlistbox.hpp"
-#include "gfx/context.hpp"
-#include "ui/draw.hpp"
 #include "afl/charset/unicode.hpp"
 #include "afl/charset/utf8.hpp"
+#include "gfx/context.hpp"
+#include "ui/draw.hpp"
 
 ui::widgets::StringListbox::StringListbox(gfx::ResourceProvider& provider, ui::ColorScheme& scheme)
     : AbstractListbox(),
@@ -182,7 +183,6 @@ ui::widgets::StringListbox::addItems(const afl::functional::StringTable_t& tab)
 void
 ui::widgets::StringListbox::sortItemsAlphabetically()
 {
-    // FIXME: preserve current key
     m_content.sortAlphabetically();
     handleModelChange();
 }
@@ -190,7 +190,6 @@ ui::widgets::StringListbox::sortItemsAlphabetically()
 void
 ui::widgets::StringListbox::swapItems(util::StringList& other)
 {
-    // FIXME: preserve current key
     m_content.swap(other);
     clearMetrics();
     updateMetrics(0, m_content.size());
@@ -200,7 +199,6 @@ ui::widgets::StringListbox::swapItems(util::StringList& other)
 void
 ui::widgets::StringListbox::setItems(const util::StringList& other)
 {
-    // FIXME: preserve current key
     m_content = other;
     clearMetrics();
     updateMetrics(0, m_content.size());
@@ -229,7 +227,6 @@ void
 ui::widgets::StringListbox::setCurrentKey(int32_t key)
 {
     // ex UIStandardListbox::scrollToKey
-    // FIXME: PCC2 has a way to mark items inaccessible
     size_t pos;
     if (m_content.find(key).get(pos)) {
         setCurrentItem(pos);

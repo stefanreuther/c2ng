@@ -1,5 +1,6 @@
 /**
   *  \file ui/widgets/numberselector.cpp
+  *  \brief Class ui::widgets::NumberSelector
   */
 
 #include <algorithm>
@@ -29,62 +30,26 @@ ui::widgets::NumberSelector::setValue(int32_t value)
     m_value.set(std::max(m_min, std::min(m_max, value)));
 }
 
-int32_t
-ui::widgets::NumberSelector::getValue() const
-{
-    return m_value.get();
-}
-
-int32_t
-ui::widgets::NumberSelector::getMin() const
-{
-    return m_min;
-}
-
-int32_t
-ui::widgets::NumberSelector::getMax() const
-{
-    return m_max;
-}
-
-int32_t
-ui::widgets::NumberSelector::getStep() const
-{
-    return m_step;
-}
-
-// /** Set range. Clips value into range if it is outside. */
-void
-ui::widgets::NumberSelector::setRange(int32_t min, int32_t max)
-{
-    // ex UINumberSelector::setRange
-    m_min = min;
-    m_max = max;
-    setValue(getValue());
-}
-
 void
 ui::widgets::NumberSelector::increment(int32_t n)
 {
     // ex UINumberSelector::increment
-    // FIXME: deal with overflow
-    if (n == 0) {
+    if (n <= 0) {
         n = 1;
     }
     requestActive();
-    setValue(getValue() + n);
+    setValue(getValue() + std::min(m_max - getValue(), n));
 }
 
 void
 ui::widgets::NumberSelector::decrement(int32_t n)
 {
     // ex UINumberSelector::decrement
-    // FIXME: deal with overflow
-    if (n == 0) {
+    if (n <= 0) {
         n = 1;
     }
     requestActive();
-    setValue(getValue() - n);
+    setValue(getValue() - std::min(getValue() - m_min, n));
 }
 
 bool
@@ -137,12 +102,6 @@ ui::widgets::NumberSelector::defaultHandleKey(util::Key_t key, int prefix)
         }
     }
     return false;
-}
-
-afl::base::Observable<int32_t>&
-ui::widgets::NumberSelector::value()
-{
-    return m_value;
 }
 
 ui::Widget&
