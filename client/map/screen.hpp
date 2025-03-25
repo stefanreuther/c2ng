@@ -143,6 +143,7 @@ namespace client { namespace map {
 
         Location m_location;
         int m_locationCycleBreaker;
+        bool m_haveInitialPosition;
 
         game::map::MovementController m_movement;
         gfx::Point m_pendingMovement;

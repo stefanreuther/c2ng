@@ -243,6 +243,7 @@ client::map::Screen::Screen(client::si::UserSide& userSide,
       m_effectTimer(root.engine().createTimer()),
       m_location(*this, userSide.mainLog()),
       m_locationCycleBreaker(0),
+      m_haveInitialPosition(false),
       m_movement(),
       m_pendingMovement(),
       m_mouseStickyness(5),
@@ -879,14 +880,18 @@ client::map::Screen::run(client::si::InputState& in, client::si::OutputState& ou
 void
 client::map::Screen::updateCenter()
 {
-    if (m_movement.update(m_location.configuration(), 1)) {
-        m_widget.setCenter(m_movement.getCurrentPosition());
+    if (m_haveInitialPosition) {
+        if (m_movement.update(m_location.configuration(), 1)) {
+            m_widget.setCenter(m_movement.getCurrentPosition());
+        }
     }
 }
 
 void
 client::map::Screen::onLocationResult(game::Reference ref, game::map::Point pt, game::map::Configuration config)
 {
+    // m_locationProxy.sig_locationResult as response to postQueryLocation()
+    m_haveInitialPosition = true;
     m_location.setConfiguration(config);
     m_location.setPosition(pt);
     m_location.setFocusedObject(ref);
@@ -895,12 +900,14 @@ client::map::Screen::onLocationResult(game::Reference ref, game::map::Point pt, 
 void
 client::map::Screen::onMapConfigChange(game::map::Configuration config)
 {
+    // m_locationProxy.sig_configChange as response to config changes
     m_location.setConfiguration(config);
 }
 
 void
 client::map::Screen::onPositionChange(game::map::Point pt)
 {
+    // m_location.sig_positionChange as response to nether position change
     if (pt != m_location.getPosition()) {
         ++m_locationCycleBreaker;
         m_location.setPosition(pt);
@@ -910,6 +917,7 @@ client::map::Screen::onPositionChange(game::map::Point pt)
 void
 client::map::Screen::onBrowseResult(game::Reference ref, game::map::Point pt)
 {
+    // m_location.sig_browseResult as response to browse()
     m_location.setPosition(pt);
     if (ref.isSet()) {
         m_location.setFocusedObject(ref);
@@ -919,6 +927,8 @@ client::map::Screen::onBrowseResult(game::Reference ref, game::map::Point pt)
 void
 client::map::Screen::onListChange(const game::ref::UserList& list)
 {
+    // m_refListProxy.sig_listChange as response to explicit or implicit list change
+
     // Stash away list. We may get any number of onListChange callbacks (including none at all) for each request.
     m_refList = list;
 
@@ -931,12 +941,14 @@ client::map::Screen::onListChange(const game::ref::UserList& list)
 void
 client::map::Screen::onListFinish()
 {
+    // m_refListProxy.sig_finish as confirmation for explicit list change
     m_location.setObjectList(m_refList);
 }
 
 void
 client::map::Screen::onLocationChange(game::map::Point pt)
 {
+    // m_location.sig_positionChange
     m_movement.setTargetPosition(pt);
     updateCenter();
 
@@ -958,6 +970,8 @@ client::map::Screen::onLocationChange(game::map::Point pt)
 void
 client::map::Screen::onObjectChanged(game::Reference ref)
 {
+    // m_location.sig_objectChange
+
     // ex WStandardChartMode::onMove (sort-of)
     m_currentObject = ref;
     setContextFromObject();
@@ -984,12 +998,14 @@ client::map::Screen::onObjectChanged(game::Reference ref)
 void
 client::map::Screen::onLockResult(game::map::Point pt)
 {
+    // m_lockProxy.sig_result
     m_location.setPosition(pt);
 }
 
 void
 client::map::Screen::onEffectTimer()
 {
+    // m_effectTimer.sig_fire
     updateCenter();
     sig_effectTimer.raise();
     m_effectTimer->setInterval(EFFECT_TIMER_INTERVAL);
@@ -998,6 +1014,7 @@ client::map::Screen::onEffectTimer()
 void
 client::map::Screen::onConfigChange(int id, int32_t value)
 {
+    // m_configProxy.sig_intOptionChange: just take over config
     switch (id) {
      case IdMouseStickiness:
         if (value >= 0 && value <= 1000) {
