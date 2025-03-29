@@ -148,4 +148,39 @@ namespace game {
 
 }
 
+// Check validity.
+inline bool
+game::Reference::isSet() const
+{
+    return m_type != Null;
+}
+
+// Get type.
+inline game::Reference::Type
+game::Reference::getType() const
+{
+    return m_type;
+}
+
+// Get Id.
+inline int
+game::Reference::getId() const
+{
+    return m_x;
+}
+
+// Compare inequality.
+inline bool
+game::Reference::operator!=(const Reference& other) const
+{
+    return !operator==(other);
+}
+
+// Select valid reference.
+inline game::Reference
+game::Reference::orElse(Reference other) const
+{
+    return isSet() ? *this : other;
+}
+
 #endif

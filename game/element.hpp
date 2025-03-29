@@ -85,4 +85,34 @@ game::Element::begin()
     return Neutronium;
 }
 
+inline game::Element::Type&
+game::operator++(Element::Type& t)
+{
+    t = static_cast<Element::Type>(t + 1);
+    return t;
+}
+
+inline game::Element::Type&
+game::operator--(Element::Type& t)
+{
+    t = static_cast<Element::Type>(t - 1);
+    return t;
+}
+
+inline game::Element::Type
+game::operator++(Element::Type& t, int)
+{
+    Element::Type result = t;
+    ++t;
+    return result;
+}
+
+inline game::Element::Type
+game::operator--(Element::Type& t, int)
+{
+    Element::Type result = t;
+    --t;
+    return result;
+}
+
 #endif

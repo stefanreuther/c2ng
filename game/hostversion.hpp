@@ -254,4 +254,167 @@ namespace game {
     };
 }
 
+
+// Default constructor.
+inline
+game::HostVersion::HostVersion()
+    : m_kind(Unknown),
+      m_version(0)
+{ }
+
+// Constructor.
+inline
+game::HostVersion::HostVersion(Kind kind, int32_t version)
+    : m_kind(kind),
+      m_version(version)
+{ }
+
+// Set specific host version.
+inline void
+game::HostVersion::set(Kind kind, int32_t version)
+{
+    m_kind = kind;
+    m_version = version;
+}
+
+// Get host type.
+inline game::HostVersion::Kind
+game::HostVersion::getKind() const
+{
+    return m_kind;
+}
+
+// Get host version.
+inline int32_t
+game::HostVersion::getVersion() const
+{
+    return m_version;
+}
+
+// Check for PHost.
+inline bool
+game::HostVersion::isPHost() const
+{
+    return m_kind == PHost;
+}
+
+// Get post-taxation happiness limit.
+inline int
+game::HostVersion::getPostTaxationHappinessLimit() const
+{
+    // ex pdata.pas:TaxLimit
+    return m_kind == PHost ? 30 : 31;
+}
+
+// Check whether host has case-insensitive universal minefield friendly codes.
+inline bool
+game::HostVersion::hasCaseInsensitiveUniversalMinefieldFCodes() const
+{
+    return m_kind != PHost;
+}
+
+// Get minimum hyperjump distance, squared.
+inline int32_t
+game::HostVersion::getMinimumHyperjumpDistance2() const
+{
+    if (m_kind == PHost) {
+        // PHost has no minimum distance other than the waypoint needs to be nonzero
+        return 1;
+    } else {
+        // Host requires >20
+        return 20*20+1;
+    }
+}
+
+// Check whether host automatically resets friendly codes after a hyperjump.
+inline bool
+game::HostVersion::hasAutomaticHyperjumpReset() const
+{
+    // PHost automatically resets friendly codes, Tim-Host does not. NuHost is unknown.
+    return (m_kind == PHost);
+}
+
+// Check mission.
+inline bool
+game::HostVersion::isMissionAllowed(int mission) const
+{
+    // ex GHost::isMissionAllowed
+    // SRace cannot have mission 1
+    // FIXME: NuHost also has some limits here
+    if (mission == 1 && m_kind == SRace) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+// Check for Minefield-Center bug.
+inline bool
+game::HostVersion::hasMinefieldCenterBug() const
+{
+    return m_kind != PHost;
+}
+
+// Check whether mine laying is before or after decay.
+inline bool
+game::HostVersion::isMineLayingAfterMineDecay() const
+{
+    return m_kind == PHost;
+}
+
+// Check whether mine decay uses rounding.
+inline bool
+game::HostVersion::isRoundingMineDecay() const
+{
+    return m_kind != PHost;
+}
+
+// Check whether beams are required for mine scooping.
+inline bool
+game::HostVersion::isBeamRequiredForMineScooping() const
+{
+    return m_kind == PHost;
+}
+
+// Check for ability to do two cargo transfers from a ship.
+inline bool
+game::HostVersion::hasParallelShipTransfers() const
+{
+    return m_kind != NuHost;
+}
+
+// Check for alchemy exclusion friendly codes ("naX"). */
+inline bool
+game::HostVersion::hasAlchemyExclusionFCodes() const
+{
+    return m_kind == PHost;
+}
+
+// Check for rounding in "alX" alchemy.
+inline bool
+game::HostVersion::isAlchemyRounding() const
+{
+    // It was originally believed that THost converts with 9->3 granularity, not 3->1, with "alX" friendly codes.
+    // It turns out that no host version that I can find actually does that.
+    return false;
+}
+
+// Get minimum fuel to initiate a chunnel.
+inline int
+game::HostVersion::getMinimumFuelToInitiateChunnel() const
+{
+    if (m_kind == PHost) {
+        return 51;
+    } else {
+        return 50;
+    }
+}
+
+// Check for premissive climate population limits.
+inline bool
+game::HostVersion::hasPermissiveClimateLimits() const
+{
+    return m_kind == Host || m_kind == SRace;
+}
+
 #endif

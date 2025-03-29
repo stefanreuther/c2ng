@@ -32,27 +32,6 @@ game::Reference::Reference(game::map::Point pt)
       m_y(pt.getY())
 { }
 
-// Check validity.
-bool
-game::Reference::isSet() const
-{
-    return m_type != Null;
-}
-
-// Get type.
-game::Reference::Type
-game::Reference::getType() const
-{
-    return m_type;
-}
-
-// Get Id.
-int
-game::Reference::getId() const
-{
-    return m_x;
-}
-
 // Get position.
 afl::base::Optional<game::map::Point>
 game::Reference::getPosition() const
@@ -121,18 +100,4 @@ game::Reference::operator==(const Reference& other) const
     return (m_type == other.m_type
             && m_x == other.m_x
             && m_y == other.m_y);
-}
-
-// Compare inequality.
-bool
-game::Reference::operator!=(const Reference& other) const
-{
-    return !operator==(other);
-}
-
-// Select valid reference.
-game::Reference
-game::Reference::orElse(Reference other) const
-{
-    return isSet() ? *this : other;
 }

@@ -26,37 +26,6 @@ game::Element::isTorpedoType(Type t, int& torpedoType)
     }
 }
 
-game::Element::Type&
-game::operator++(Element::Type& t)
-{
-    t = static_cast<Element::Type>(t + 1);
-    return t;
-}
-
-game::Element::Type&
-game::operator--(Element::Type& t)
-{
-    t = static_cast<Element::Type>(t - 1);
-    return t;
-}
-
-game::Element::Type
-game::operator++(Element::Type& t, int)
-{
-    Element::Type result = t;
-    ++t;
-    return result;
-}
-
-game::Element::Type
-game::operator--(Element::Type& t, int)
-{
-    Element::Type result = t;
-    --t;
-    return result;
-}
-
-
 // Get name of an element type.
 String_t
 game::Element::getName(Type t, afl::string::Translator& tx, const game::spec::ShipList& shipList)

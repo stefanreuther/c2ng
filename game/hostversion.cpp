@@ -72,48 +72,6 @@ namespace {
     }
 }
 
-// Default constructor.
-game::HostVersion::HostVersion()
-    : m_kind(Unknown),
-      m_version(0)
-{ }
-
-// Constructor.
-game::HostVersion::HostVersion(Kind kind, int32_t version)
-    : m_kind(kind),
-      m_version(version)
-{ }
-
-// Set specific host version.
-void
-game::HostVersion::set(Kind kind, int32_t version)
-{
-    m_kind = kind;
-    m_version = version;
-}
-
-// Get host type.
-game::HostVersion::Kind
-game::HostVersion::getKind() const
-{
-    return m_kind;
-}
-
-// Get host version.
-int32_t
-game::HostVersion::getVersion() const
-{
-    return m_version;
-}
-
-// Check for PHost.
-bool
-game::HostVersion::isPHost() const
-{
-    return m_kind == PHost;
-}
-
-
 // Format as string.
 String_t
 game::HostVersion::toString() const
@@ -258,14 +216,6 @@ game::HostVersion::hasAutomaticMineIdentity() const
     return (m_kind == PHost && m_version >= MKVERSION(3,4,3));
 }
 
-// Get post-taxation happiness limit.
-int
-game::HostVersion::getPostTaxationHappinessLimit() const
-{
-    // ex pdata.pas:TaxLimit
-    return m_kind == PHost ? 30 : 31;
-}
-
 // Check whether host allows negative numeric friendly codes.
 bool
 game::HostVersion::hasNegativeFCodes() const
@@ -281,13 +231,6 @@ game::HostVersion::hasSpacePaddedFCodes() const
         (m_version >= MKVERSION(4,0,8)
          || (m_version < MKVERSION(4,0,0)
              && m_version >= MKVERSION(3,4,10)));
-}
-
-// Check whether host has case-insensitive universal minefield friendly codes.
-bool
-game::HostVersion::hasCaseInsensitiveUniversalMinefieldFCodes() const
-{
-    return m_kind != PHost;
 }
 
 // Get the maximum tax for this race.
@@ -349,76 +292,6 @@ game::HostVersion::isExactHyperjumpDistance2(int32_t distSquared) const
     }
 }
 
-// Get minimum hyperjump distance, squared.
-int32_t
-game::HostVersion::getMinimumHyperjumpDistance2() const
-{
-    if (m_kind == PHost) {
-        // PHost has no minimum distance other than the waypoint needs to be nonzero
-        return 1;
-    } else {
-        // Host requires >20
-        return 20*20+1;
-    }
-}
-
-// Check whether host automatically resets friendly codes after a hyperjump.
-bool
-game::HostVersion::hasAutomaticHyperjumpReset() const
-{
-    // PHost automatically resets friendly codes, Tim-Host does not. NuHost is unknown.
-    return (m_kind == PHost);
-}
-
-// Check mission.
-bool
-game::HostVersion::isMissionAllowed(int mission) const
-{
-    // ex GHost::isMissionAllowed
-    // SRace cannot have mission 1
-    // FIXME: NuHost also has some limits here
-    if (mission == 1 && m_kind == SRace) {
-        return false;
-    } else {
-        return true;
-    }
-}
-
-// Check for Minefield-Center bug.
-bool
-game::HostVersion::hasMinefieldCenterBug() const
-{
-    return m_kind != PHost;
-}
-
-// Check whether mine laying is before or after decay.
-bool
-game::HostVersion::isMineLayingAfterMineDecay() const
-{
-    return m_kind == PHost;
-}
-
-// Check whether mine decay uses rounding.
-bool
-game::HostVersion::isRoundingMineDecay() const
-{
-    return m_kind != PHost;
-}
-
-// Check whether beams are required for mine scooping.
-bool
-game::HostVersion::isBeamRequiredForMineScooping() const
-{
-    return m_kind == PHost;
-}
-
-// Check for ability to do two cargo transfers from a ship.
-bool
-game::HostVersion::hasParallelShipTransfers() const
-{
-    return m_kind != NuHost;
-}
-
 // Check for bug in UseAccurateFuelModel computation.
 bool
 game::HostVersion::hasAccurateFuelModelBug() const
@@ -449,22 +322,6 @@ game::HostVersion::hasRefineryFCodes() const
                 && m_version >= MKVERSION(3,4,13)));   // 3.4m
 }
 
-// Check for alchemy exclusion friendly codes ("naX"). */
-bool
-game::HostVersion::hasAlchemyExclusionFCodes() const
-{
-    return m_kind == PHost;
-}
-
-// Check for rounding in "alX" alchemy.
-bool
-game::HostVersion::isAlchemyRounding() const
-{
-    // It was originally believed that THost converts with 9->3 granularity, not 3->1, with "alX" friendly codes.
-    // It turns out that no host version that I can find actually does that.
-    return false;
-}
-
 // Check for valid chunnel distance.
 bool
 game::HostVersion::isValidChunnelDistance2(int32_t dist2, const game::config::HostConfiguration& config) const
@@ -477,24 +334,6 @@ game::HostVersion::isValidChunnelDistance2(int32_t dist2, const game::config::Ho
         // Host bug: up to 3.22.25, host forgot the Sqrt() and compares "dist2 >= 100", making the limit 10 ly; however, it has always been documented as 100 ly.
         return dist2 >= 9901;
     }
-}
-
-// Get minimum fuel to initiate a chunnel.
-int
-game::HostVersion::getMinimumFuelToInitiateChunnel() const
-{
-    if (m_kind == PHost) {
-        return 51;
-    } else {
-        return 50;
-    }
-}
-
-// Check for premissive climate population limits.
-bool
-game::HostVersion::hasPermissiveClimateLimits() const
-{
-    return m_kind == Host || m_kind == SRace;
 }
 
 // Set configuration options implied by this host version.

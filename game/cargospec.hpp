@@ -179,4 +179,32 @@ namespace game {
 
 }
 
+// Compare for inequality.
+inline bool
+game::CargoSpec::operator!=(const CargoSpec& other) const
+{
+    return !operator==(other);
+}
+
+// Set component value.
+inline void
+game::CargoSpec::set(Type type, int32_t n)
+{
+    m_amounts[type] = n;
+}
+
+// Get component value.
+inline int32_t
+game::CargoSpec::get(Type type) const
+{
+    return m_amounts[type];
+}
+
+// Add component.
+inline void
+game::CargoSpec::add(Type type, int32_t n)
+{
+    m_amounts[type] += n;
+}
+
 #endif

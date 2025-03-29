@@ -124,4 +124,11 @@ namespace game {
 
 }
 
+// Get player number.
+inline int
+game::Player::getId() const
+{
+    return m_id;
+}
+
 #endif

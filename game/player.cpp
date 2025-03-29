@@ -16,13 +16,6 @@ game::Player::Player(int id)
       m_names()
 { }
 
-// Get player number.
-int
-game::Player::getId() const
-{
-    return m_id;
-}
-
 // Set player status.
 void
 game::Player::setIsReal(bool flag)

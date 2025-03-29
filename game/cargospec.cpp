@@ -147,14 +147,6 @@ game::CargoSpec::operator==(const CargoSpec& other) const
     return true;
 }
 
-// Compare for inequality.
-bool
-game::CargoSpec::operator!=(const CargoSpec& other) const
-{
-    return !operator==(other);
-}
-
-
 // Convert to PHost string.
 String_t
 game::CargoSpec::toPHostString() const
@@ -278,27 +270,6 @@ game::CargoSpec::parse(const String_t& str, bool acceptMax)
         }
     }
     return true;
-}
-
-// Set component value.
-void
-game::CargoSpec::set(Type type, int32_t n)
-{
-    m_amounts[type] = n;
-}
-
-// Get component value.
-int32_t
-game::CargoSpec::get(Type type) const
-{
-    return m_amounts[type];
-}
-
-// Add component.
-void
-game::CargoSpec::add(Type type, int32_t n)
-{
-    m_amounts[type] += n;
 }
 
 // Clear.
