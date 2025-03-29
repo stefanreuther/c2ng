@@ -81,7 +81,7 @@ game::spec::TorpedoLauncher::getRechargeTime(int forPlayer, const HostVersion& h
 int
 game::spec::TorpedoLauncher::getHitOdds(int forPlayer, const HostVersion& host, const game::config::HostConfiguration& config) const
 {
-    if (host.getKind() == HostVersion::Host) {
+    if (!host.isPHost()) {
         // Default TorpMissRate=35, which is nominally a 65% hit rate.
         // Actual rate is 66.6% due to the random number distribution (80/120).
         return 66;

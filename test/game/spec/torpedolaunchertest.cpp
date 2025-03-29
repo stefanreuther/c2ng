@@ -81,4 +81,11 @@ AFL_TEST("game.spec.TorpedoLauncher:derived-information", a)
         a.checkEqual("31. getRechargeTime", t.getRechargeTime(1, h, config), 44);
         a.checkEqual("32. getHitOdds", t.getHitOdds(1, h, config), 65);
     }
+
+    // SRace
+    {
+        game::HostVersion h(game::HostVersion::SRace, MKVERSION(3, 22, 40));
+        a.checkEqual("41. getRechargeTime", t.getRechargeTime(1, h, config), 32);
+        a.checkEqual("42. getHitOdds", t.getHitOdds(1, h, config), 66);
+    }
 }

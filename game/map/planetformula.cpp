@@ -93,7 +93,7 @@ game::map::getColonistChange(const Planet& pl, const game::config::HostConfigura
     if (pl.getCargo(Element::Colonists).get(colos) && pl.getOwner().get(owner) && pl.getTemperature().get(temp)) {
         double common = 1000 - 80*tax - std::sqrt(double(colos));
         bool crystal = (config.getPlayerRaceNumber(owner) == 7) && config[config.CrystalsPreferDeserts]();
-        if (host.getKind() == HostVersion::PHost) {
+        if (host.isPHost()) {
             if (crystal) {
                 return (int32_t(common - mifa/3.0 - (100-temp)/0.66) / 100);
             } else {
@@ -134,7 +134,7 @@ game::map::getColonistDue(const Planet& pl, const game::config::HostConfiguratio
     int32_t colos;
     if (pl.getOwner().get(owner) && pl.getCargo(Element::Colonists).get(colos)) {
         const int rate = config[config.ColonistTaxRate](owner);
-        if (host.getKind() == HostVersion::PHost) {
+        if (host.isPHost()) {
             return util::divideAndRound(util::divideAndRound(colos * tax, 1000) * rate, 100);
         } else {
             return util::divideAndRoundToEven(util::divideAndRoundToEven(colos * tax, 1000, 0) * rate, 100, 0);
@@ -226,7 +226,7 @@ game::map::getMaxSupportedColonists(const Planet& pl, const game::config::HostCo
     bool crystal = (race == 7 && config[config.CrystalsPreferDeserts]());
     int32_t limit;
     int temp;
-    if (host.getKind() == HostVersion::PHost) {
+    if (host.isPHost()) {
         if (!config[config.ClimateLimitsPopulation]()) {
             return 250000;
         }
@@ -317,7 +317,7 @@ game::map::getNativeChange(const Planet& pl, const HostVersion& host, int tax, i
     if (pl.getNativeGovernment().get(gov) && pl.getNatives().get(pop) && pl.getNativeRace().get(race)) {
         if (pop > 0) {
             double industryTerm;
-            if (host.getKind() == HostVersion::PHost) {
+            if (host.isPHost()) {
                 industryTerm = 0.5 * mifa;    // float division
             } else {
                 industryTerm = mifa / 2;      // integer division
@@ -367,7 +367,7 @@ game::map::getNativeDue(int tax, int race, int gov, int32_t pop, int owner, cons
     // ex game/planetform.h:getNativeDue
     // ex planacc.pas:NativesDue
     int32_t due;
-    if (host.getKind() == HostVersion::PHost) {
+    if (host.isPHost()) {
         due = util::divideAndRound(util::divideAndRound(tax * gov * pop, 5000) * config[config.NativeTaxRate](owner), 100);
     } else {
         due = util::divideAndRoundToEven(util::divideAndRoundToEven(tax * gov * pop, 5000, 0) * config[config.ColonistTaxRate](owner), 100, 0);
@@ -405,7 +405,7 @@ game::map::getNativeDueLimited(const Planet& pl, const game::config::HostConfigu
             return afl::base::Nothing;
         }
 
-        if (host.getKind() == HostVersion::PHost) {
+        if (host.isPHost()) {
             if (race == InsectoidNatives) {
                 colos *= 2;
             }
@@ -596,7 +596,7 @@ int32_t
 game::map::getAmorphousBreakfast(const HostVersion& host, int happy)
 {
     // ex game/planetform.h:getAmorphousBreakfast, planacc.pas:AmorphousBreakfast
-    if (host.getKind() == HostVersion::PHost) {
+    if (host.isPHost()) {
         if (happy >= 70)
             return 5;
         else if (happy >= 50)
@@ -640,7 +640,7 @@ game::map::getMiningCapacity(const Planet& pl, const game::config::HostConfigura
         }
 
         // Host-dependant formula
-        if (host.getKind() != HostVersion::PHost) {
+        if (!host.isPHost()) {
             // Tim
             return util::divideAndRoundToEven(util::divideAndRoundToEven(density * int32_t(mines), 100, 0) * mining_rate, 100, 0) * reptile_factor;
         } else {

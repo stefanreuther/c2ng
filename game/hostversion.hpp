@@ -60,10 +60,6 @@ namespace game {
         int32_t getVersion() const;
 
         /** Check for PHost.
-
-            DEPRECATED: try to not have dependencies of this type.
-            However, especially in porting old code this is pretty convenient.
-
             \return true if host is PHost */
         bool isPHost() const;
 

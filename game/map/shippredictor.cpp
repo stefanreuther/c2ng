@@ -47,7 +47,7 @@ namespace {
 
         if (result.distance > way) {
             int dx, dy;
-            if (host.getKind() != HostVersion::PHost) {
+            if (!host.isPHost()) {
                 // THost movement formulas, from Donovan's
                 if (std::abs(mx) > std::abs(my)) {
                     dx = int(double(way) * std::abs(mx) / result.distance + 0.5);
@@ -595,7 +595,7 @@ namespace {
             return 0;
         }
 
-        bool isTHost = host.getKind() != HostVersion::PHost;
+        bool isTHost = !host.isPHost();
         int load = getEngineLoad(univ, ship, towee_id, towee_override, isTHost, shipList);
 
         if (isTHost) {
@@ -977,7 +977,7 @@ game::map::ShipPredictor::computeTurn()
     int shipSpeed = m_ship.warpFactor.orElse(0);
     if (shipDamage > 0 && shipSpeed > 0 && !real_ship->hasSpecialFunction(BasicHullFunction::HardenedEngines, m_scoreDefinitions, m_shipList, m_hostConfiguration)) {
         int limit = (m_hostConfiguration.getPlayerRaceNumber(m_ship.owner.orElse(0)) == 2
-                     ? (m_hostVersion.getKind() == HostVersion::PHost
+                     ? (m_hostVersion.isPHost()
                         ? 15 - shipDamage/10
                         : 14 - shipDamage/10)
                      : 10 - shipDamage/10);
