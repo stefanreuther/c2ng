@@ -63,7 +63,7 @@ namespace gfx {
             \param color Desired color
             \param pat Line pattern
             \param alpha Transparency */
-        void doHLine(int x1, int y1, int x2, Pixel_t color, LinePattern_t pat, Alpha_t alpha);
+        void doHLine(int x1, int y1, int x2, Color_t color, LinePattern_t pat, Alpha_t alpha);
 
         /** Draw vertical Line.
             \param x1,y1 Origin position
@@ -71,7 +71,7 @@ namespace gfx {
             \param color Desired color
             \param pat Line pattern
             \param alpha Transparency */
-        void doVLine(int x1, int y1, int y2, Pixel_t color, uint8_t pat, Alpha_t alpha);
+        void doVLine(int x1, int y1, int y2, Color_t color, uint8_t pat, Alpha_t alpha);
 
         /** Draw bar (filled rectangle).
             \param rect Area
@@ -140,7 +140,7 @@ gfx::Primitives<T>::readPixels(int x, int y, afl::base::Memory<Color_t> pixels)
 // Draw horizontal Line.
 template<typename T>
 void
-gfx::Primitives<T>::doHLine(int x1, int y1, int x2, Pixel_t color, LinePattern_t pat, Alpha_t alpha)
+gfx::Primitives<T>::doHLine(int x1, int y1, int x2, Color_t color, LinePattern_t pat, Alpha_t alpha)
 {
     if (pat == 0 || alpha == TRANSPARENT_ALPHA) {
         /* nothing */
@@ -150,7 +150,7 @@ gfx::Primitives<T>::doHLine(int x1, int y1, int x2, Pixel_t color, LinePattern_t
             if (pat == 255) {
                 /* solid line */
                 while (x1 < x2) {
-                    m_traits.poke(p, color);
+                    m_traits.poke(p, static_cast<Pixel_t>(color));
                     p = m_traits.add(p, 1, 0);
                     ++x1;
                 }
@@ -159,7 +159,7 @@ gfx::Primitives<T>::doHLine(int x1, int y1, int x2, Pixel_t color, LinePattern_t
                 uint8_t mask = afl::bits::rotateRight8(0x80, x1);
                 while (x1 < x2) {
                     if (mask & pat) {
-                        m_traits.poke(p, color);
+                        m_traits.poke(p, static_cast<Pixel_t>(color));
                     }
                     p = m_traits.add(p, 1, 0);
                     ++x1;
@@ -170,7 +170,7 @@ gfx::Primitives<T>::doHLine(int x1, int y1, int x2, Pixel_t color, LinePattern_t
             if (pat == 255) {
                 /* solid line */
                 while (x1 < x2) {
-                    m_traits.poke(p, m_traits.mix(m_traits.peek(p), color, alpha));
+                    m_traits.poke(p, m_traits.mix(m_traits.peek(p), static_cast<Pixel_t>(color), alpha));
                     p = m_traits.add(p, 1, 0);
                     ++x1;
                 }
@@ -179,7 +179,7 @@ gfx::Primitives<T>::doHLine(int x1, int y1, int x2, Pixel_t color, LinePattern_t
                 uint8_t mask = afl::bits::rotateRight8(0x80, x1);
                 while (x1 < x2) {
                     if (mask & pat) {
-                        m_traits.poke(p, m_traits.mix(m_traits.peek(p), color, alpha));
+                        m_traits.poke(p, m_traits.mix(m_traits.peek(p), static_cast<Pixel_t>(color), alpha));
                     }
                     p = m_traits.add(p, 1, 0);
                     ++x1;
@@ -193,7 +193,7 @@ gfx::Primitives<T>::doHLine(int x1, int y1, int x2, Pixel_t color, LinePattern_t
 // Draw vertical Line.
 template<typename T>
 void
-gfx::Primitives<T>::doVLine(int x1, int y1, int y2, Pixel_t color, uint8_t pat, Alpha_t alpha)
+gfx::Primitives<T>::doVLine(int x1, int y1, int y2, Color_t color, uint8_t pat, Alpha_t alpha)
 {
     if (pat == 0 || alpha == TRANSPARENT_ALPHA) {
         /* nothing */
@@ -202,7 +202,7 @@ gfx::Primitives<T>::doVLine(int x1, int y1, int y2, Pixel_t color, uint8_t pat, 
         if (alpha == OPAQUE_ALPHA) {
             if (pat == 255) {
                 while (y1 < y2) {
-                    m_traits.poke(p, color);
+                    m_traits.poke(p, static_cast<Pixel_t>(color));
                     p = m_traits.add(p, 0, 1);
                     ++y1;
                 }
@@ -210,7 +210,7 @@ gfx::Primitives<T>::doVLine(int x1, int y1, int y2, Pixel_t color, uint8_t pat, 
                 uint8_t mask = afl::bits::rotateRight8(0x80, y1);
                 while (y1 < y2) {
                     if (mask & pat) {
-                        m_traits.poke(p, color);
+                        m_traits.poke(p, static_cast<Pixel_t>(color));
                     }
                     p = m_traits.add(p, 0, 1);
                     ++y1;
@@ -220,7 +220,7 @@ gfx::Primitives<T>::doVLine(int x1, int y1, int y2, Pixel_t color, uint8_t pat, 
         } else {
             if (pat == 255) {
                 while (y1 < y2) {
-                    m_traits.poke(p, m_traits.mix(m_traits.peek(p), color, alpha));
+                    m_traits.poke(p, m_traits.mix(m_traits.peek(p), static_cast<Pixel_t>(color), alpha));
                     p = m_traits.add(p, 0, 1);
                     ++y1;
                 }
@@ -228,7 +228,7 @@ gfx::Primitives<T>::doVLine(int x1, int y1, int y2, Pixel_t color, uint8_t pat, 
                 uint8_t mask = afl::bits::rotateRight8(0x80, y1);
                 while (y1 < y2) {
                     if (mask & pat) {
-                        m_traits.poke(p, m_traits.mix(m_traits.peek(p), color, alpha));
+                        m_traits.poke(p, m_traits.mix(m_traits.peek(p), static_cast<Pixel_t>(color), alpha));
                     }
                     p = m_traits.add(p, 0, 1);
                     ++y1;
@@ -247,13 +247,13 @@ gfx::Primitives<T>::doBar(Rectangle rect, Color_t color, Color_t bg, const FillP
     int x1 = rect.getLeftX(), y1 = rect.getTopY(), x2 = rect.getRightX(), h = rect.getHeight();
     if (bg == TRANSPARENT_COLOR) {
         while (h > 0) {
-            doHLine(x1, y1, x2, Pixel_t(color), pat[y1], alpha);
+            doHLine(x1, y1, x2, color, pat[y1], alpha);
             ++y1; --h;
         }
     } else {
         while (h > 0) {
-            doHLine(x1, y1, x2, Pixel_t(color), pat[y1], alpha);
-            doHLine(x1, y1, x2, Pixel_t(bg), uint8_t(~pat[y1]), alpha);
+            doHLine(x1, y1, x2, color, pat[y1], alpha);
+            doHLine(x1, y1, x2, bg, uint8_t(~pat[y1]), alpha);
             ++y1; --h;
         }
     }
