@@ -18,8 +18,24 @@ load_module ('Configure.pl');
 find_compiler();
 find_compiler_options("-I".normalize_filename($V{IN}),
                       "-I".normalize_filename($V{OUT}),
-                      qw(-g -O2 -ansi -pedantic -fmessage-length=0 -Wno-long-long -Wconversion -mthreads -W -Wall));
+                      qw(-g -O2 -ansi -pedantic -fmessage-length=0 -Wno-long-long -Wconversion -W -Wall));
 find_archiver();
+
+# Compiler-specific hacks
+my $compiler_version = `$V{CXX} --version`;
+if ($compiler_version =~ /(gcc|g\+\+).* 12\b/) {
+    # False positive, e.g. https://github.com/scylladb/seastar/issues/1037
+    # Appears for example in playerscreen.cpp
+    find_compiler_options('-Wno-use-after-free');
+}
+if ($compiler_version =~ /mingw|win32/) {
+    # MinGW wants '-mthreads'
+    find_compiler_options('-mthreads');
+}
+if ($compiler_version =~ /clang/) {
+    # False-positive, e.g. https://stackoverflow.com/questions/68751682/
+    find_compiler_options('-Wno-dtor-name');
+}
 
 # Variables
 add_variable(RUN             => '');
