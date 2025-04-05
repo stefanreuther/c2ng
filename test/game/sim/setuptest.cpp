@@ -11,6 +11,7 @@
 #include "game/sim/planet.hpp"
 #include "game/sim/ship.hpp"
 #include "game/test/counter.hpp"
+#include "util/randomnumbergenerator.hpp"
 #include <map>
 
 namespace {
@@ -25,6 +26,7 @@ using game::sim::Object;
 using game::sim::Planet;
 using game::sim::Setup;
 using game::sim::Ship;
+using util::RandomNumberGenerator;
 
 /** Test object management. */
 AFL_TEST("game.sim.Setup:object-management", a)
@@ -750,8 +752,9 @@ AFL_TEST("game.sim.Setup:copyToGame:unknown", a)
 AFL_TEST("game.sim.Setup:setSequentialFriendlyCode:single-ship", a)
 {
     Setup t;
+    RandomNumberGenerator rng(77);
     Ship* sh = t.addShip();
-    t.setSequentialFriendlyCode(0);
+    t.setSequentialFriendlyCode(0, rng);
 
     a.checkEqual("01", sh->getFriendlyCode().size(), 3U);
     a.check("02", sh->getFriendlyCode()[0] >= '0');
@@ -766,8 +769,9 @@ AFL_TEST("game.sim.Setup:setSequentialFriendlyCode:single-ship", a)
 AFL_TEST("game.sim.Setup:setSequentialFriendlyCode:single-planet", a)
 {
     Setup t;
+    RandomNumberGenerator rng(77);
     Planet* pl = t.addPlanet();
-    t.setSequentialFriendlyCode(0);
+    t.setSequentialFriendlyCode(0, rng);
 
     a.checkEqual("01", pl->getFriendlyCode().size(), 3U);
     a.check("02", pl->getFriendlyCode()[0] >= '0');
@@ -782,6 +786,7 @@ AFL_TEST("game.sim.Setup:setSequentialFriendlyCode:single-planet", a)
 AFL_TEST("game.sim.Setup:setSequentialFriendlyCode:normal", a)
 {
     Setup t;
+    RandomNumberGenerator rng(77);
     Ship* s1 = t.addShip();
     Ship* s2 = t.addShip();
     Ship* s3 = t.addShip();
@@ -789,10 +794,10 @@ AFL_TEST("game.sim.Setup:setSequentialFriendlyCode:normal", a)
     s2->setFriendlyCode("abc");
     s3->setFriendlyCode("110");
 
-    t.setSequentialFriendlyCode(1);
+    t.setSequentialFriendlyCode(1, rng);
     a.checkEqual("01. getFriendlyCode", s2->getFriendlyCode(), "111");
 
-    t.setSequentialFriendlyCode(2);
+    t.setSequentialFriendlyCode(2, rng);
     a.checkEqual("02. getFriendlyCode", s3->getFriendlyCode(), "112");
 }
 
@@ -800,12 +805,13 @@ AFL_TEST("game.sim.Setup:setSequentialFriendlyCode:normal", a)
 AFL_TEST("game.sim.Setup:setSequentialFriendlyCode:non-numeric", a)
 {
     Setup t;
+    RandomNumberGenerator rng(77);
     Ship* s1 = t.addShip();
     Ship* s2 = t.addShip();
     s1->setFriendlyCode("x27");
     s2->setFriendlyCode("abc");
 
-    t.setSequentialFriendlyCode(1);
+    t.setSequentialFriendlyCode(1, rng);
     a.checkEqual("01", s2->getFriendlyCode().size(), 3U);
     a.check("02", s2->getFriendlyCode()[0] >= '0');
     a.check("03", s2->getFriendlyCode()[0] <= '9');
@@ -817,6 +823,7 @@ AFL_TEST("game.sim.Setup:setSequentialFriendlyCode:non-numeric", a)
 AFL_TEST("game.sim.Setup:setSequentialFriendlyCode:random", a)
 {
     Setup t;
+    RandomNumberGenerator rng(77);
     Ship* s1 = t.addShip();
     Ship* s2 = t.addShip();
     s1->setFriendlyCode("x27");
@@ -824,7 +831,7 @@ AFL_TEST("game.sim.Setup:setSequentialFriendlyCode:random", a)
     s2->setFriendlyCode("abc");
     s2->setFlags(Ship::fl_RandomFC);
 
-    t.setSequentialFriendlyCode(1);
+    t.setSequentialFriendlyCode(1, rng);
     a.checkEqual("01", s2->getFriendlyCode().size(), 3U);
     a.check("02", s2->getFriendlyCode()[0] >= '0');
     a.check("03", s2->getFriendlyCode()[0] <= '9');

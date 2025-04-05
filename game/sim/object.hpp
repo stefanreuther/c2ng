@@ -253,6 +253,12 @@ namespace game { namespace sim {
             \return Description */
         static AbilityInfo getAbilityInfo(Ability a);
 
+        /** Check whether the given friendly-code position should be randomized.
+            \param flags Flags
+            \param pos   Position (0..2)
+            \return true if position should be randomized */
+        static bool shouldRandomize(int32_t flags, size_t pos);
+
      private:
         // common
         Id_t m_id;                       // id

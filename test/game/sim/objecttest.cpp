@@ -176,8 +176,8 @@ AFL_TEST("game.sim.Object:setRandomFriendlyCode", a)
         String_t s = t.getFriendlyCode();
         a.checkEqual("21. size", s.size(), 3U);
         a.checkEqual("22. s[0]", s[0], 'a');
-        a.check("23. s[1]", '0' <= s[1]);
-        a.check("24. s[2]", s[1] <= '9');
+        a.checkLessEqual("23. s[1]", '0', s[1]);
+        a.checkLessEqual("24. s[2]", s[1], '9');
         a.checkEqual("25. s[2]", s[2], 'c');
     }
 
@@ -189,9 +189,9 @@ AFL_TEST("game.sim.Object:setRandomFriendlyCode", a)
         String_t s = t.getFriendlyCode();
         a.checkEqual("31. size", s.size(), 3U);
         a.checkEqual("32. s[0]", s[0], 'a');
-        a.check("12. s[1]", '0' <= s[1]);
-        a.check("12. s[1]", s[1] <= '9');
-        a.checkEqual("33. s[2]", s[2], ' ');
+        a.checkLessEqual("33. s[1]", '0', s[1]);
+        a.checkLessEqual("34. s[1]", s[1], '9');
+        a.checkEqual("35. s[2]", s[2], ' ');
     }
 }
 

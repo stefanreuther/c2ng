@@ -420,11 +420,9 @@ game::sim::Setup::setRandomFriendlyCodes(util::RandomNumberGenerator& rng)
 
 // Set a sequential friendly code.
 void
-game::sim::Setup::setSequentialFriendlyCode(Slot_t slot)
+game::sim::Setup::setSequentialFriendlyCode(Slot_t slot, util::RandomNumberGenerator& rng)
 {
     // ex WSimListWithHandler::incrFCode, ccsim.pas:IncrFCode
-    // FIXME: pass a RNG!
-    // FIXME: the handling of fl_RandomDigits is strange? (but same as in PCC2 and PCC1)
     if (Object* p = getObject(slot)) {
         // Determine previous friendly code
         String_t friendlyCode;
@@ -444,12 +442,9 @@ game::sim::Setup::setSequentialFriendlyCode(Slot_t slot)
         }
 
         // Make it numeric by randomizing random digits (if any) and non-numerics
-        for (int i = 0; i < 3; ++i) {
-            if (((newFlags & Object::fl_RandomFC) != 0
-                 && (newFlags & (Object::fl_RandomFC1 << i)) != 0)
-                || (friendlyCode[i] < '0' || friendlyCode[i] > '9'))
-            {
-                friendlyCode[i] = static_cast<char>('0' + (std::rand() % 10));
+        for (size_t i = 0; i < 3; ++i) {
+            if (Object::shouldRandomize(newFlags, i) || (friendlyCode[i] < '0' || friendlyCode[i] > '9')) {
+                friendlyCode[i] = static_cast<char>('0' + rng(10));
             }
         }
 

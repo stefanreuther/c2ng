@@ -277,15 +277,11 @@ game::sim::Object::setRandomFriendlyCode(util::RandomNumberGenerator& rng)
 {
     // ex GSimObject::assignRandomFCode, ccsim.pas:AssignRandomFCs
     if (m_flags & fl_RandomFC) {
-        int32_t which = m_flags & fl_RandomDigits;
-        if (which == 0) {
-            which = fl_RandomDigits;
-        }
         for (size_t i = 0; i < 3; ++i) {
             if (m_friendlyCode.size() <= i) {
                 m_friendlyCode += ' ';
             }
-            if ((which & (fl_RandomFC1 << i)) != 0) {
+            if (shouldRandomize(m_flags, i)) {
                 m_friendlyCode[i] = static_cast<char>('0' + rng(10));
             }
         }
@@ -391,4 +387,19 @@ game::sim::Object::getAbilityInfo(Ability a)
      case CloakedBaysAbility:          return AbilityInfo(fl_CloakedBaysSet,      fl_CloakedBays);
     }
     return AbilityInfo(0, 0);
+}
+
+bool
+game::sim::Object::shouldRandomize(int32_t flags, size_t pos)
+{
+    if ((flags & fl_RandomFC) != 0) {
+        int32_t which = (flags & fl_RandomDigits);
+        if (which == 0) {
+            return true;
+        } else {
+            return ((which & (fl_RandomFC1 << pos)) != 0);
+        }
+    } else {
+        return false;
+    }
 }

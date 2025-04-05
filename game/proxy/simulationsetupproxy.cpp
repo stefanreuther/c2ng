@@ -284,6 +284,7 @@ class game::proxy::SimulationSetupProxy::Trampoline {
     afl::base::Ptr<Root> m_root;
     afl::string::Translator& m_translator;
     afl::io::FileSystem& m_fileSystem;
+    util::RandomNumberGenerator& m_rng;
     afl::base::SignalConnection conn_structureChange;
     afl::base::SignalConnection conn_planetChange;
     afl::base::SignalConnection conn_shipChange;
@@ -311,6 +312,7 @@ game::proxy::SimulationSetupProxy::Trampoline::Trampoline(util::RequestSender<Si
       m_root(session.getRoot()),
       m_translator(session.translator()),
       m_fileSystem(session.world().fileSystem()),
+      m_rng(session.rng()),
       conn_structureChange(), conn_planetChange(), conn_shipChange(),
       m_observedSlot(),
       m_suppressStructureChanges(false),
@@ -795,7 +797,7 @@ game::proxy::SimulationSetupProxy::Trampoline::setSequentialFriendlyCode(Slot_t 
 {
     Setup& setup = getSetup();
     if (Object* obj = setup.getObject(slot)) {
-        setup.setSequentialFriendlyCode(slot);
+        setup.setSequentialFriendlyCode(slot, m_rng);
         update(setup, *obj, 0);
     }
 }

@@ -228,8 +228,9 @@ namespace game { namespace sim {
 
         /** Set a sequential friendly code.
             Makes the friendly code in the given slot larger than the one in the slot above.
-            \param slot Slot */
-        void setSequentialFriendlyCode(Slot_t slot);
+            \param slot Slot
+            \param rng Random number generator */
+        void setSequentialFriendlyCode(Slot_t slot, util::RandomNumberGenerator& rng);
 
         /** Modify flags globally for all units.
             \param clear   Flags to clear
