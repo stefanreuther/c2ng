@@ -481,8 +481,11 @@ namespace {
     /*
      *  Experience Summary
      */
+
+    typedef int ExperienceSummary_t[game::MAX_EXPERIENCE_LEVELS+1];
+
     void renderExperienceSummary(TagNode& tab,
-                                 const util::Vector<int, int>& levelCounts,
+                                 ExperienceSummary_t& levelCounts,
                                  SearchQuery::SearchObjects_t searchObjs,
                                  String_t querySuffix,
                                  const HostConfiguration& config,
@@ -491,7 +494,7 @@ namespace {
                                  const LinkBuilder& link)
     {
         for (int i = 0; i <= game::MAX_EXPERIENCE_LEVELS; ++i) {
-            int n = levelCounts.get(i);
+            int n = levelCounts[i];
             if (n > 0) {
                 TagNode& row = makeRow(tab);
                 makeLink(makeLeftCell(row), config.getExperienceLevelName(i, tx),
@@ -944,13 +947,14 @@ game::map::info::renderPlanetExperienceSummary(TagNode& tab,
                                                const LinkBuilder& link)
 {
     // Acquire data
-    util::Vector<int, int> levelCounts;
+    ExperienceSummary_t levelCounts;
+    std::fill_n(levelCounts, countof(levelCounts), 0);
     const PlayedPlanetType& type = univ.playedPlanets();
     for (Id_t pid = type.findNextIndex(0); pid != 0; pid = type.findNextIndex(pid)) {
         if (const Planet* pl = type.getObjectByIndex(pid)) {
             int level;
             if (pl->unitScores().getScoreById(ScoreId_ExpLevel, planetScores).get(level) && level >= 0 && level <= MAX_EXPERIENCE_LEVELS) {
-                levelCounts.set(level, levelCounts.get(level) + 1);
+                ++levelCounts[level];
             }
         }
     }
@@ -1141,7 +1145,7 @@ game::map::info::renderShipSummary(TagNode& tab,
     const PlayedShipType& type = univ.playedShips();
     for (Id_t sid = type.findNextIndex(0); sid != 0; sid = type.findNextIndex(sid)) {
         if (const Ship* sh = type.getObjectByIndex(sid)) {
-            if (withFreighters || sh->getNumBeams().orElse(0) > 0 || sh->getNumBays().orElse(0) > 0 || sh->getNumLaunchers().orElse(0) > 0) {
+            if (withFreighters || sh->hasWeapons()) {
                 ++count;
                 if (sh->getNumLaunchers().orElse(0) > 0) {
                     ++counts[2];
@@ -1211,14 +1215,15 @@ game::map::info::renderShipExperienceSummary(TagNode& tab,
 {
     // ex drawStarshipPage(RichDocument& d, GUniverse& univ, const int opts, const bool withFreighters), part
     // Acquire data
-    util::Vector<int, int> levelCounts;
+    ExperienceSummary_t levelCounts;
+    std::fill_n(levelCounts, countof(levelCounts), 0);
     const PlayedShipType& type = univ.playedShips();
     for (Id_t sid = type.findNextIndex(0); sid != 0; sid = type.findNextIndex(sid)) {
         if (const Ship* sh = type.getObjectByIndex(sid)) {
             if (withFreighters || sh->hasWeapons()) {
                 int level;
                 if (sh->unitScores().getScoreById(ScoreId_ExpLevel, shipScores).get(level) && level >= 0 && level <= MAX_EXPERIENCE_LEVELS) {
-                    levelCounts.set(level, levelCounts.get(level) + 1);
+                    ++levelCounts[level];
                 }
             }
         }
