@@ -22,8 +22,6 @@ AFL_TEST_NOARG("gfx.Canvas")
             { }
         virtual void drawVLine(const Point& /*pt*/, int /*npix*/, Color_t /*color*/, LinePattern_t /*pat*/, Alpha_t /*alpha*/)
             { }
-        virtual void drawPixel(const Point& /*pt*/, Color_t /*color*/, Alpha_t /*alpha*/)
-            { }
         virtual void drawPixels(const Point& /*pt*/, afl::base::Memory<const Color_t> /*colors*/, Alpha_t /*alpha*/)
             { }
         virtual void drawBar(Rectangle /*rect*/, Color_t /*color*/, Color_t /*bg*/, const FillPattern& /*pat*/, Alpha_t /*alpha*/)

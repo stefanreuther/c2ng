@@ -19,8 +19,6 @@ namespace {
             { checkCall("drawHLine"); }
         virtual void drawVLine(const gfx::Point& /*pt*/, int /*npix*/, gfx::Color_t /*color*/, gfx::LinePattern_t /*pat*/, gfx::Alpha_t /*alpha*/)
             { checkCall("drawVLine"); }
-        virtual void drawPixel(const gfx::Point& /*pt*/, gfx::Color_t /*color*/, gfx::Alpha_t /*alpha*/)
-            { checkCall("drawPixel"); }
         virtual void drawPixels(const gfx::Point& /*pt*/, afl::base::Memory<const gfx::Color_t> /*colors*/, gfx::Alpha_t /*alpha*/)
             { checkCall("drawPixels"); }
         virtual void drawBar(gfx::Rectangle /*rect*/, gfx::Color_t /*color*/, gfx::Color_t /*bg*/, const gfx::FillPattern& /*pat*/, gfx::Alpha_t /*alpha*/)
@@ -55,8 +53,6 @@ namespace {
             { checkCall("drawHLine"); }
         virtual void drawVLine(const gfx::Point& /*pt*/, int /*npix*/, gfx::Color_t /*color*/, gfx::LinePattern_t /*pat*/, gfx::Alpha_t /*alpha*/)
             { checkCall("drawVLine"); }
-        virtual void drawPixel(const gfx::Point& /*pt*/, gfx::Color_t /*color*/, gfx::Alpha_t /*alpha*/)
-            { checkCall("drawPixel"); }
         virtual void drawPixels(const gfx::Point& /*pt*/, afl::base::Memory<const gfx::Color_t> /*colors*/, gfx::Alpha_t /*alpha*/)
             { checkCall("drawPixels"); }
         virtual void drawBar(gfx::Rectangle /*rect*/, gfx::Color_t /*color*/, gfx::Color_t /*bg*/, const gfx::FillPattern& /*pat*/, gfx::Alpha_t /*alpha*/)

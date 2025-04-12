@@ -17,7 +17,6 @@ AFL_TEST("gfx.NullCanvas", a)
     static const gfx::Color_t colors[] = {1,5,9};
     AFL_CHECK_SUCCEEDS(a("01. drawHLine"),  testee.drawHLine(gfx::Point(1, 1), 5, 0, 0xFF, gfx::OPAQUE_ALPHA));
     AFL_CHECK_SUCCEEDS(a("02. drawVLine"),  testee.drawVLine(gfx::Point(1, 1), 5, 0, 0xFF, gfx::OPAQUE_ALPHA));
-    AFL_CHECK_SUCCEEDS(a("03. drawPixel"),  testee.drawPixel(gfx::Point(9, 2), 0x123, gfx::OPAQUE_ALPHA));
     AFL_CHECK_SUCCEEDS(a("04. drawPixels"), testee.drawPixels(gfx::Point(9, 2), colors, gfx::OPAQUE_ALPHA));
     AFL_CHECK_SUCCEEDS(a("05. drawBar"),    testee.drawBar(gfx::Rectangle(1,2,3,4), 0x99, 0x77, gfx::FillPattern::SOLID, gfx::OPAQUE_ALPHA));
     AFL_CHECK_SUCCEEDS(a("06. blit"),       testee.blit(gfx::Point(9, 9), testee, gfx::Rectangle(0, 0, 77, 77)));

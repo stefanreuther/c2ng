@@ -63,12 +63,6 @@ namespace gfx {
             \param alpha alpha value for transparency. */
         virtual void drawVLine(const Point& pt, int npix, Color_t color, LinePattern_t pat, Alpha_t alpha) = 0;
 
-        /** Draw single pixel.
-            \param pt    position.
-            \param color color, in target format.
-            \param alpha alpha value for transparency. */
-        virtual void drawPixel(const Point& pt, Color_t color, Alpha_t alpha) = 0;
-
         /** Draw sequence of pixels.
             \param pt position.
             \param colors color, in target format.

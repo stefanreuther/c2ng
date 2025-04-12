@@ -22,7 +22,7 @@ namespace {
                 afl::base::Ptr<gfx::Canvas> result;
                 if (name == m_name) {
                     result = gfx::RGBAPixmap::create(1, 1)->makeCanvas().asPtr();
-                    result->drawPixel(gfx::Point(0, 0), m_color, gfx::OPAQUE_ALPHA);
+                    result->drawPixels(gfx::Point(0, 0), afl::base::Memory<const gfx::Color_t>::fromSingleObject(m_color), gfx::OPAQUE_ALPHA);
                 }
                 return result;
             }

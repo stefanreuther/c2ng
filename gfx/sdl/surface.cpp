@@ -88,20 +88,6 @@ gfx::sdl::Surface::drawVLine(const Point& pt, int npix, Color_t color, LinePatte
     m_updateRegion.include(Rectangle(x1, y1, 1, y2-y1));
 }
 
-// FIXME: retire
-void
-gfx::sdl::Surface::drawPixel(const Point& pt, Color_t color, Alpha_t alpha)
-{
-    if (pt.getX() < 0 || pt.getX() >= m_surface->w || pt.getY() < 0 || pt.getY() >= m_surface->h) {
-        return;
-    }
-
-    ensureLocked();
-    Color_t c[1] = {color};
-    GFX_MODE_SWITCH(m_surface, writePixels(pt.getX(), pt.getY(), c, alpha));
-    m_updateRegion.include(Rectangle(pt, Point(1, 1)));
-}
-
 void
 gfx::sdl::Surface::drawPixels(const Point& pt, afl::base::Memory<const Color_t> colors, Alpha_t alpha)
 {

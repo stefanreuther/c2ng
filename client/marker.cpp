@@ -10,6 +10,9 @@
 #include "gfx/complex.hpp"
 #include "gfx/canvas.hpp"
 
+using afl::base::Memory;
+using gfx::Color_t;
+
 struct client::Marker {
     int height;
     const int8_t* data;
@@ -205,8 +208,10 @@ client::drawMarker(gfx::BaseContext& ctx, const Marker& marker, gfx::Point pt)
 {
     // ex client/marks.h:drawMarker, chart.pas:DrawMarker
     const int8_t* ptr = marker.data;
+    const Color_t color = ctx.getRawColor();
+    const Memory<const Color_t> colorMem = Memory<const Color_t>::fromSingleObject(color);
     while (*ptr != END) {
-        ctx.canvas().drawPixel(pt + gfx::Point(ptr[0], ptr[1]), ctx.getRawColor(), ctx.getAlpha());
+        ctx.canvas().drawPixels(pt + gfx::Point(ptr[0], ptr[1]), colorMem, ctx.getAlpha());
         ptr += 2;
     }
 }

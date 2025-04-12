@@ -9,6 +9,8 @@
 #include "gfx/canvas.hpp"
 #include "gfx/complex.hpp"
 
+using afl::base::Memory;
+
 // Draw line, with anti-aliasing.
 void
 gfx::drawLineAA(BaseContext& ctx, Point p1, Point p2)
@@ -40,6 +42,7 @@ gfx::drawLineAA(BaseContext& ctx, Point p1, Point p2)
 
     Canvas& can = ctx.canvas();
     const Color_t color = ctx.getRawColor();
+    const Memory<const Color_t> colorMem = Memory<const Color_t>::fromSingleObject(color);
 
     /* Vanilla Bresenham */
     int dx = x2 - x1;
@@ -78,8 +81,8 @@ gfx::drawLineAA(BaseContext& ctx, Point p1, Point p2)
 
         while (y1 <= y2) {
             // draw pixel
-            can.drawPixel(Point(x1,      y1), color, static_cast<uint8_t>(~alpha));
-            can.drawPixel(Point(x1+addx, y1), color,                       alpha);
+            can.drawPixels(Point(x1,      y1), colorMem, static_cast<uint8_t>(~alpha));
+            can.drawPixels(Point(x1+addx, y1), colorMem,                       alpha);
 
             // increment y, and error term (fractional X position)
             y1++;
@@ -117,8 +120,8 @@ gfx::drawLineAA(BaseContext& ctx, Point p1, Point p2)
         int     alpha_fract_inc =                      255 * dy % dx;
 
         while(x1 <= x2) {
-            can.drawPixel(Point(x1, y1),      color, static_cast<uint8_t>(~alpha));
-            can.drawPixel(Point(x1, y1+addy), color,                       alpha);
+            can.drawPixels(Point(x1, y1),      colorMem, static_cast<uint8_t>(~alpha));
+            can.drawPixels(Point(x1, y1+addy), colorMem,                       alpha);
             x1++;
             error += dy;
             alpha = static_cast<uint8_t>(alpha + alpha_inc);
@@ -170,6 +173,7 @@ gfx::drawCircleAA(BaseContext& ctx, Point pt, int r)
        interested in one octant, we filter out cases where w<x. */
     Canvas& can = ctx.canvas();
     const Color_t color = ctx.getRawColor();
+    const Memory<const Color_t> colorMem = Memory<const Color_t>::fromSingleObject(color);
     while (x >= 0) {
         while (z < y2) {
             z += k;
@@ -184,29 +188,29 @@ gfx::drawCircleAA(BaseContext& ctx, Point pt, int r)
             uint8_t alpha = static_cast<uint8_t>((z - y2) * 255 / k);
             uint8_t nalpha = static_cast<uint8_t>(~alpha);
 
-            can.drawPixel(Point(x0 - x, y0 - w), color, nalpha);
-            can.drawPixel(Point(x0 - x, y0 - w+1), color, alpha);
+            can.drawPixels(Point(x0 - x, y0 - w), colorMem, nalpha);
+            can.drawPixels(Point(x0 - x, y0 - w+1), colorMem, alpha);
 
-            can.drawPixel(Point(x0 + x, y0 - w), color, nalpha);
-            can.drawPixel(Point(x0 + x, y0 - w+1), color, alpha);
+            can.drawPixels(Point(x0 + x, y0 - w), colorMem, nalpha);
+            can.drawPixels(Point(x0 + x, y0 - w+1), colorMem, alpha);
 
-            can.drawPixel(Point(x0 - w, y0 - x), color, nalpha);
-            can.drawPixel(Point(x0 - w+1, y0 - x), color, alpha);
+            can.drawPixels(Point(x0 - w, y0 - x), colorMem, nalpha);
+            can.drawPixels(Point(x0 - w+1, y0 - x), colorMem, alpha);
 
-            can.drawPixel(Point(x0 + w, y0 - x), color, nalpha);
-            can.drawPixel(Point(x0 + w-1, y0 - x), color, alpha);
+            can.drawPixels(Point(x0 + w, y0 - x), colorMem, nalpha);
+            can.drawPixels(Point(x0 + w-1, y0 - x), colorMem, alpha);
 
-            can.drawPixel(Point(x0 - w, y0 + x), color, nalpha);
-            can.drawPixel(Point(x0 - w+1, y0 + x), color, alpha);
+            can.drawPixels(Point(x0 - w, y0 + x), colorMem, nalpha);
+            can.drawPixels(Point(x0 - w+1, y0 + x), colorMem, alpha);
 
-            can.drawPixel(Point(x0 + w, y0 + x), color, nalpha);
-            can.drawPixel(Point(x0 + w-1, y0 + x), color, alpha);
+            can.drawPixels(Point(x0 + w, y0 + x), colorMem, nalpha);
+            can.drawPixels(Point(x0 + w-1, y0 + x), colorMem, alpha);
 
-            can.drawPixel(Point(x0 - x, y0 + w), color, nalpha);
-            can.drawPixel(Point(x0 - x, y0 + w-1), color, alpha);
+            can.drawPixels(Point(x0 - x, y0 + w), colorMem, nalpha);
+            can.drawPixels(Point(x0 - x, y0 + w-1), colorMem, alpha);
 
-            can.drawPixel(Point(x0 + x, y0 + w), color, nalpha);
-            can.drawPixel(Point(x0 + x, y0 + w-1), color, alpha);
+            can.drawPixels(Point(x0 + x, y0 + w), colorMem, nalpha);
+            can.drawPixels(Point(x0 + x, y0 + w-1), colorMem, alpha);
         }
         y2 += xk;
         xk -= 2;

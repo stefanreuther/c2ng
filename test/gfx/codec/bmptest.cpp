@@ -12,6 +12,9 @@
 #include "afl/test/testrunner.hpp"
 #include "gfx/palettizedpixmap.hpp"
 
+using afl::base::Memory;
+using gfx::Color_t;
+
 namespace {
     /* convert share/resource/ability/gravitonic.png -compress none -alpha off -colors 256 -depth 8 g8.bmp */
     const uint8_t PALETTIZED_BITMAP[] = {
@@ -361,7 +364,7 @@ namespace {
 
     gfx::ColorQuad_t getRGBAPixel(gfx::Canvas& can, int x, int y)
     {
-        gfx::Color_t color[1];
+        Color_t color[1];
         can.getPixels(gfx::Point(x, y), color);
 
         gfx::ColorQuad_t decoded[1];
@@ -387,7 +390,7 @@ AFL_TEST("gfx.codec.BMP:save", a)
         COLORQUAD_FROM_RGB(10, 48, 10),
         COLORQUAD_FROM_RGB(10, 10, 64)
     };
-    gfx::Color_t colors[NUM_COLORS];
+    Color_t colors[NUM_COLORS];
     can->setPalette(0, palette, colors);
 
     // Verify that we got a palettized pixmap
@@ -397,8 +400,8 @@ AFL_TEST("gfx.codec.BMP:save", a)
 
     // Draw some pixels
     can->drawBar(gfx::Rectangle(0, 0, 100, 100), 0, 0, gfx::FillPattern::SOLID, gfx::OPAQUE_ALPHA);
-    can->drawPixel(gfx::Point(1, 1), 1, gfx::OPAQUE_ALPHA);
-    can->drawPixel(gfx::Point(1, 3), 2, gfx::OPAQUE_ALPHA);
+    can->drawPixels(gfx::Point(1, 1), Memory<const Color_t>::fromSingleObject(1), gfx::OPAQUE_ALPHA);
+    can->drawPixels(gfx::Point(1, 3), Memory<const Color_t>::fromSingleObject(2), gfx::OPAQUE_ALPHA);
 
     // Save it
     afl::io::InternalStream result;

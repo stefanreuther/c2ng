@@ -17,10 +17,6 @@ gfx::NullCanvas::drawVLine(const Point& /*pt*/, int /*npix*/, Color_t /*color*/,
 { }
 
 void
-gfx::NullCanvas::drawPixel(const Point& /*pt*/, Color_t /*color*/, Alpha_t /*alpha*/)
-{ }
-
-void
 gfx::NullCanvas::drawPixels(const Point& /*pt*/, afl::base::Memory<const Color_t> /*colors*/, Alpha_t /*alpha*/)
 { }
 

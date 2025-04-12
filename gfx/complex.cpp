@@ -12,13 +12,15 @@
 #include "gfx/fillpattern.hpp"
 #include "util/math.hpp"
 
+using afl::base::Memory;
+
 namespace {
 #define LINE_PATTERN1(parm, t) ((parm).getLinePattern() & (0x80 >> (t & 7)))
 
     /// Helper function for 1-wide lines.
     void linePixel(const gfx::BaseContext& c, int x1, int y1)
     {
-        c.canvas().drawPixel(gfx::Point(x1, y1), c.getRawColor(), c.getAlpha());
+        gfx::drawPixel(c, gfx::Point(x1, y1));
     }
 
     /// Helper function for general lines in north-south direction.
@@ -216,8 +218,9 @@ gfx::drawCircle(const BaseContext& ctx, const Point pt, int r)
     register int xk = 2*r-1;
     register int x = r;
     Canvas& can = ctx.canvas();
-    Color_t color = ctx.getRawColor();
-    Alpha_t alpha = ctx.getAlpha();
+    const Color_t color = ctx.getRawColor();
+    const Memory<const Color_t> colorMem = Memory<const Color_t>::fromSingleObject(color);
+    const Alpha_t alpha = ctx.getAlpha();
     while (x >= 0) {
         while (z < y2) {
             z += k;
@@ -225,14 +228,14 @@ gfx::drawCircle(const BaseContext& ctx, const Point pt, int r)
             k += 2;
         }
         if (w >= x) {
-            can.drawPixel(Point(x0 - x, y0 - w), color, alpha);
-            can.drawPixel(Point(x0 + x, y0 - w), color, alpha);
-            can.drawPixel(Point(x0 - w, y0 - x), color, alpha);
-            can.drawPixel(Point(x0 + w, y0 - x), color, alpha);
-            can.drawPixel(Point(x0 - w, y0 + x), color, alpha);
-            can.drawPixel(Point(x0 + w, y0 + x), color, alpha);
-            can.drawPixel(Point(x0 - x, y0 + w), color, alpha);
-            can.drawPixel(Point(x0 + x, y0 + w), color, alpha);
+            can.drawPixels(Point(x0 - x, y0 - w), colorMem, alpha);
+            can.drawPixels(Point(x0 + x, y0 - w), colorMem, alpha);
+            can.drawPixels(Point(x0 - w, y0 - x), colorMem, alpha);
+            can.drawPixels(Point(x0 + w, y0 - x), colorMem, alpha);
+            can.drawPixels(Point(x0 - w, y0 + x), colorMem, alpha);
+            can.drawPixels(Point(x0 + w, y0 + x), colorMem, alpha);
+            can.drawPixels(Point(x0 - x, y0 + w), colorMem, alpha);
+            can.drawPixels(Point(x0 + x, y0 + w), colorMem, alpha);
         }
         y2 += xk;
         xk -= 2;
@@ -364,7 +367,9 @@ gfx::drawArrow(const BaseContext& ctx, const Point p1, const Point p2, int ptsiz
 void
 gfx::drawPixel(const BaseContext& ctx, const Point pt)
 {
-    ctx.canvas().drawPixel(pt, ctx.getRawColor(), ctx.getAlpha());
+    const Color_t color = ctx.getRawColor();
+    const Memory<const Color_t> colorMem = Memory<const Color_t>::fromSingleObject(color);
+    ctx.canvas().drawPixels(pt, colorMem, ctx.getAlpha());
 }
 
 void

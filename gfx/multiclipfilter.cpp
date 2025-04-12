@@ -38,14 +38,6 @@ gfx::MultiClipFilter::drawVLine(const Point& pt, int npix, Color_t color, LinePa
 }
 
 void
-gfx::MultiClipFilter::drawPixel(const Point& pt, Color_t color, Alpha_t alpha)
-{
-    if (m_set.contains(pt)) {
-        parent().drawPixel(pt, color, alpha);
-    }
-}
-
-void
 gfx::MultiClipFilter::drawPixels(const Point& pt, afl::base::Memory<const Color_t> colors, Alpha_t alpha)
 {
     for (RectangleSet::Iterator_t i = m_set.begin(); i != m_set.end(); ++i) {

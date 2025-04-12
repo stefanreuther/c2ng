@@ -9,6 +9,8 @@
 #include "afl/test/testrunner.hpp"
 #include "gfx/palettizedpixmap.hpp"
 
+using afl::base::Memory;
+using gfx::Color_t;
 using gfx::codec::Custom;
 
 /* Tests for loading are in CCImageLoader. */
@@ -36,9 +38,9 @@ AFL_TEST("gfx.codec.Custom:save", a)
 
     // Draw some pixels
     can->drawBar(gfx::Rectangle(0, 0, 100, 100), 0, 0, gfx::FillPattern::SOLID, gfx::OPAQUE_ALPHA);
-    can->drawPixel(gfx::Point(1, 1), 1, gfx::OPAQUE_ALPHA);
-    can->drawPixel(gfx::Point(1, 3), 2, gfx::OPAQUE_ALPHA);
-    can->drawPixel(gfx::Point(1, 4), 2, gfx::OPAQUE_ALPHA);
+    can->drawPixels(gfx::Point(1, 1), Memory<const Color_t>::fromSingleObject(1), gfx::OPAQUE_ALPHA);
+    can->drawPixels(gfx::Point(1, 3), Memory<const Color_t>::fromSingleObject(2), gfx::OPAQUE_ALPHA);
+    can->drawPixels(gfx::Point(1, 4), Memory<const Color_t>::fromSingleObject(2), gfx::OPAQUE_ALPHA);
 
     // Shape:
     //    000

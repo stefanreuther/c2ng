@@ -7,6 +7,8 @@
 #include "gfx/context.hpp"
 #include "gfx/canvas.hpp"
 
+using afl::base::Memory;
+
 // Construct a blank glyph of a given size.
 gfx::BitmapGlyph::BitmapGlyph(uint16_t width, uint16_t height)
     : m_width(width),
@@ -73,8 +75,10 @@ gfx::BitmapGlyph::draw(BaseContext& ctx, Point pt) const
 
         // AA hints
         const Alpha_t halfIntensity = static_cast<Alpha_t>((ctx.getAlpha()+1)/2);
+        const Color_t color = ctx.getRawColor();
+        const Memory<const Color_t> colorMem = Memory<const Color_t>::fromSingleObject(color);
         for (size_t i = 0, n = m_aaData.size(); i < n; i += 2) {
-            ctx.canvas().drawPixel(pt + Point(m_aaData[i], m_aaData[i+1]), ctx.getRawColor(), halfIntensity);
+            ctx.canvas().drawPixels(pt + Point(m_aaData[i], m_aaData[i+1]), colorMem, halfIntensity);
         }
     }
 }
@@ -96,8 +100,9 @@ gfx::BitmapGlyph::drawColored(Canvas& can, Point pt, Color_t pixel_color, Color_
                         OPAQUE_ALPHA);
 
         // AA hints
+        const Memory<const Color_t> colorMem = Memory<const Color_t>::fromSingleObject(aa_color);
         for (size_t i = 0, n = m_aaData.size(); i < n; i += 2) {
-            can.drawPixel(pt + Point(m_aaData[i], m_aaData[i+1]), aa_color, OPAQUE_ALPHA);
+            can.drawPixels(pt + Point(m_aaData[i], m_aaData[i+1]), colorMem, OPAQUE_ALPHA);
         }
     }
 }

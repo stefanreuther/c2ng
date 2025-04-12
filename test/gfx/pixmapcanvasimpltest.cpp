@@ -139,11 +139,11 @@ AFL_TEST("gfx.PixmapCanvasImpl", a)
         a.checkEqualContent<uint8_t>("02. drawVLine", p->pixels().subrange(0, 6*10), EXPECTED);
     }
 
-    // drawPixel(s)
+    // drawPixels
     {
         static const gfx::Color_t pixels[] = {1,2,3};
-        testee.drawPixel(gfx::Point(6, 6), 6, gfx::OPAQUE_ALPHA);
-        testee.drawPixel(gfx::Point(7, 6), 6, 128);
+        testee.drawPixels(gfx::Point(6, 6), afl::base::Memory<const gfx::Color_t>::fromSingleObject(6), gfx::OPAQUE_ALPHA);
+        testee.drawPixels(gfx::Point(7, 6), afl::base::Memory<const gfx::Color_t>::fromSingleObject(6), 128);
         testee.drawPixels(gfx::Point(6, 7), pixels, gfx::OPAQUE_ALPHA);
         testee.drawPixels(gfx::Point(6, 8), pixels, 128);
 
