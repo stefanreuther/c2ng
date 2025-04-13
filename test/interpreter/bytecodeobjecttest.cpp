@@ -310,8 +310,8 @@ AFL_TEST("interpreter.BytecodeObject:addName:normal", a)
     a.check("04. hasName", testee.hasName("A"));
     a.check("05. hasName", testee.hasName("B"));
     a.check("06. hasName", !testee.hasName("C"));
-    a.checkEqual("07. getName", testee.getName(aa), "A");
-    a.checkEqual("08. getName", testee.getName(bb), "B");
+    a.checkEqual("07. getName", *testee.getNameByIndex(aa), "A");
+    a.checkEqual("08. getName", *testee.getNameByIndex(bb), "B");
 
     // const vs. mutable
     a.checkEqual("11. names", &testee.names(), &const_cast<interpreter::BytecodeObject&>(testee).names());
@@ -627,7 +627,7 @@ AFL_TEST("interpreter.BytecodeObject:append", a)
 
     a.checkEqual("21", aa(1).major, Opcode::maPush);
     a.checkEqual("22", aa(1).minor, Opcode::sNamedVariable);
-    a.checkEqual("23", aa.getName(aa(1).arg), "N");
+    a.checkEqual("23", *aa.getNameByIndex(aa(1).arg), "N");
 
     a.checkEqual("31", aa(2).major, Opcode::maPush);
     a.checkEqual("32", aa(2).minor, Opcode::sLocal);
@@ -652,14 +652,41 @@ AFL_TEST("interpreter.BytecodeObject:append", a)
 
     a.checkEqual("91", aa(8).major, Opcode::maMemref);
     a.checkEqual("92", aa(8).minor, Opcode::miIMLoad);
-    a.checkEqual("93", aa.getName(aa(8).arg), "HI");
+    a.checkEqual("93", *aa.getNameByIndex(aa(8).arg), "HI");
 
     a.checkEqual("101", aa(9).major, Opcode::maSpecial);
     a.checkEqual("102", aa(9).minor, Opcode::miSpecialNewHash);
 
     a.checkEqual("111", aa(10).major, Opcode::maSpecial);
     a.checkEqual("112", aa(10).minor, Opcode::miSpecialDefShipProperty);
-    a.checkEqual("113", aa.getName(aa(10).arg), "HO");
+    a.checkEqual("113", *aa.getNameByIndex(aa(10).arg), "HO");
+}
+
+AFL_TEST("interpreter.BytecodeObject:append:error:pushvar", a)
+{
+    interpreter::BytecodeObject aa;
+    interpreter::BytecodeObject bb;
+    bb.addInstruction(Opcode::maPush, Opcode::sNamedVariable, 99);
+
+    AFL_CHECK_THROWS(a, aa.append(bb), interpreter::Error);
+}
+
+AFL_TEST("interpreter.BytecodeObject:append:error:dim", a)
+{
+    interpreter::BytecodeObject aa;
+    interpreter::BytecodeObject bb;
+    bb.addInstruction(Opcode::maDim, Opcode::sLocal, 99);
+
+    AFL_CHECK_THROWS(a, aa.append(bb), interpreter::Error);
+}
+
+AFL_TEST("interpreter.BytecodeObject:append:error:defsub", a)
+{
+    interpreter::BytecodeObject aa;
+    interpreter::BytecodeObject bb;
+    bb.addInstruction(Opcode::maSpecial, Opcode::miSpecialDefSub, 99);
+
+    AFL_CHECK_THROWS(a, aa.append(bb), interpreter::Error);
 }
 
 AFL_TEST("interpreter.BytecodeObject:getDisassembly", a)

@@ -333,8 +333,9 @@ namespace interpreter {
         afl::data::Value* getLiteral(uint16_t index) const;
 
         /** Get name from referenced-name table.
-            \param index Index [0,names().getNumNames()) */
-        const String_t& getName(uint16_t index) const;
+            \param index Index [0,names().getNumNames())
+            \return name if any; null if out of range */
+        const String_t* getNameByIndex(uint16_t index) const;
 
         /** Access local variable names.
             \return names */
@@ -513,14 +514,6 @@ interpreter::BytecodeObject::getLiteral(uint16_t index) const
     // ex IntBytecodeObject::getLiteral
     // No range check required; it is done by Segment
     return m_literals[index];
-}
-
-// Get name from referenced-name table.
-inline const String_t&
-interpreter::BytecodeObject::getName(uint16_t index) const
-{
-    // FIXME: deal with out-of-range somehow!
-    return m_names.getNameByIndex(index);
 }
 
 // Access local variable names.

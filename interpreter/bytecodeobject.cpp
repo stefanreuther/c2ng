@@ -524,14 +524,19 @@ interpreter::BytecodeObject::append(const BytecodeObject& other)
              case Opcode::sNamedVariable:
              case Opcode::sNamedShared:
                 // Adjust name reference
-                addInstruction(maj, o.minor, addName(other.getName(o.arg)));
+                if (const String_t* name = other.getNameByIndex(o.arg)) {
+                    addInstruction(maj, o.minor, addName(*name));
+                } else {
+                    throw Error::tooComplex();
+                }
                 break;
              case Opcode::sLocal:
                 // Adjust local by name
-                // FIXME: this works as long as all locals are unique or compatible.
-                // It will fail when we have overlapping locals that were intended to be unique, which could happen when inlining.
-                // We should make up some rules about how the two BCOs have to be related.
-                addInstruction(maj, o.minor, packIndex(m_localVariables.addMaybe(other.m_localVariables.getNameByIndex(o.arg))));
+                if (o.arg < other.m_localVariables.getNumNames()) {
+                    addInstruction(maj, o.minor, packIndex(m_localVariables.addMaybe(other.m_localVariables.getNameByIndex(o.arg))));
+                } else {
+                    throw Error::tooComplex();
+                }
                 break;
              case Opcode::sLiteral:
                 // Adjust literal
@@ -566,7 +571,11 @@ interpreter::BytecodeObject::append(const BytecodeObject& other)
          case Opcode::maMemref:
          case Opcode::maDim:
             // Adjust name reference
-            addInstruction(maj, o.minor, addName(other.getName(o.arg)));
+            if (const String_t* name = other.getNameByIndex(o.arg)) {
+                addInstruction(maj, o.minor, addName(*name));
+            } else {
+                throw Error::tooComplex();
+            }
             break;
          case Opcode::maSpecial:
             switch (Opcode::Special(o.minor)) {
@@ -601,7 +610,11 @@ interpreter::BytecodeObject::append(const BytecodeObject& other)
              case Opcode::miSpecialDefShipProperty:
              case Opcode::miSpecialDefPlanetProperty:
                 // Adjust name reference
-                addInstruction(maj, o.minor, addName(other.getName(o.arg)));
+                if (const String_t* name = other.getNameByIndex(o.arg)) {
+                    addInstruction(maj, o.minor, addName(*name));
+                } else {
+                    throw Error::tooComplex();
+                }
                 break;
             }
             break;
@@ -655,9 +668,9 @@ interpreter::BytecodeObject::getDisassembly(PC_t index, const World& w) const
             /* If we have a hint, append that as well */
             switch (mode) {
              case 'n':
-                if (arg < m_names.getNumNames()) {
+                if (const String_t* name = getNameByIndex(arg)) {
                     result += " <";
-                    result += getName(arg);
+                    result += *name;
                     result += ">";
                 } else {
                     result += " !invalid";
@@ -693,6 +706,16 @@ interpreter::BytecodeObject::getDisassembly(PC_t index, const World& w) const
     }
 
     return result;
+}
+
+const String_t*
+interpreter::BytecodeObject::getNameByIndex(uint16_t index) const
+{
+    if (index < m_names.getNumNames()) {
+        return &m_names.getNameByIndex(index);
+    } else {
+        return 0;
+    }
 }
 
 interpreter::BCORef_t

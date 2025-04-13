@@ -3413,3 +3413,121 @@ AFL_TEST("interpreter.Process:context-callback:refuse", a)
 
     a.checkEqual("11. trace", trace, "(enter)");
 }
+
+namespace {
+    struct Insn {
+        Opcode::Major major;
+        uint8_t minor;
+        uint16_t arg;
+    };
+
+    void doNameErrorTest(afl::test::Assert a, afl::base::Memory<const Insn> opc)
+    {
+        Environment env;
+        BCORef_t bco = makeBCO();
+        while (const Insn* p = opc.eat()) {
+            bco->addInstruction(p->major, p->minor, p->arg);
+        }
+        runBCO(env, bco);
+        a.checkEqual("getState", env.proc.getState(), Process::Failed);
+    }
+}
+
+/*
+ *  Out-of-range names.
+ *  Check that we correctly verify the "name" parameter of parameters that use local names.
+ */
+
+AFL_TEST("interpreter.Process:name-error:pushvar", a)
+{
+    static const Insn code[] = {{ Opcode::maPush, Opcode::sNamedVariable, 99 }};
+    doNameErrorTest(a, code);
+}
+
+AFL_TEST("interpreter.Process:name-error:pushgvar", a)
+{
+    static const Insn code[] = {{ Opcode::maPush, Opcode::sNamedShared, 99 }};
+    doNameErrorTest(a, code);
+}
+
+AFL_TEST("interpreter.Process:name-error:storevar", a)
+{
+    static const Insn code[] = {{ Opcode::maPush, Opcode::sInteger, 1 },
+                                { Opcode::maStore, Opcode::sNamedVariable, 99 }};
+    doNameErrorTest(a, code);
+}
+
+AFL_TEST("interpreter.Process:name-error:storegvar", a)
+{
+    static const Insn code[] = {{ Opcode::maPush, Opcode::sInteger, 1 },
+                                { Opcode::maStore, Opcode::sNamedShared, 99 }};
+    doNameErrorTest(a, code);
+}
+
+AFL_TEST("interpreter.Process:name-error:popvar", a)
+{
+    static const Insn code[] = {{ Opcode::maPush, Opcode::sInteger, 1 },
+                                { Opcode::maPop, Opcode::sNamedVariable, 99 }};
+    doNameErrorTest(a, code);
+}
+
+AFL_TEST("interpreter.Process:name-error:popgvar", a)
+{
+    static const Insn code[] = {{ Opcode::maPush, Opcode::sInteger, 1 },
+                                { Opcode::maPop, Opcode::sNamedShared, 99 }};
+    doNameErrorTest(a, code);
+}
+
+AFL_TEST("interpreter.Process:name-error:loadmem", a)
+{
+    // Note: to trigger the original problem, this would have to push a context
+    static const Insn code[] = {{ Opcode::maPush, Opcode::sInteger, 1 },
+                                { Opcode::maMemref, Opcode::miIMLoad, 99 }};
+    doNameErrorTest(a, code);
+}
+
+AFL_TEST("interpreter.Process:name-error:storemem", a)
+{
+    // Note: to trigger the original problem, this would have to push a context
+    static const Insn code[] = {{ Opcode::maPush, Opcode::sInteger, 1 },
+                                { Opcode::maPush, Opcode::sInteger, 1 },
+                                { Opcode::maMemref, Opcode::miIMStore, 99 }};
+    doNameErrorTest(a, code);
+}
+
+AFL_TEST("interpreter.Process:name-error:sdefsub", a)
+{
+    static const Insn code[] = {{ Opcode::maPush, Opcode::sInteger, 1 },
+                                { Opcode::maSpecial, Opcode::miSpecialDefSub, 99 }};
+    doNameErrorTest(a, code);
+}
+
+AFL_TEST("interpreter.Process:name-error:sdefsp", a)
+{
+    static const Insn code[] = {{ Opcode::maPush, Opcode::sInteger, 1 },
+                                { Opcode::maSpecial, Opcode::miSpecialDefShipProperty, 99 }};
+    doNameErrorTest(a, code);
+}
+
+AFL_TEST("interpreter.Process:name-error:sdefpp", a)
+{
+    static const Insn code[] = {{ Opcode::maPush, Opcode::sInteger, 1 },
+                                { Opcode::maSpecial, Opcode::miSpecialDefPlanetProperty, 99 }};
+    doNameErrorTest(a, code);
+}
+
+AFL_TEST("interpreter.Process:name-error:dim", a)
+{
+    static const Insn code[] = {{ Opcode::maPush, Opcode::sInteger, 1 },
+                                { Opcode::maDim, Opcode::sLocal, 99 }};
+    doNameErrorTest(a, code);
+}
+
+AFL_TEST("interpreter.Process:name-error:fusedunary", a)
+{
+    static const Insn code[] = {{ Opcode::maPush, Opcode::sInteger, 1 },
+                                { Opcode::maFusedUnary, Opcode::sNamedShared, 99 },
+                                { Opcode::maUnary, interpreter::unInc, 0 }};
+    doNameErrorTest(a, code);
+}
+

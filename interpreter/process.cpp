@@ -734,15 +734,17 @@ interpreter::Process::executeInstruction()
         /* Push value */
         switch (op.minor) {
          case Opcode::sNamedVariable:
-         {
-             Context::PropertyIndex_t index;
-             if (Context::PropertyAccessor* ctx = lookup(f.bco->getName(op.arg), index)) {
-                 valueStack.pushBackNew(ctx->get(index));
-             } else {
-                 throw Error::unknownIdentifier(f.bco->getName(op.arg));
-             }
-             break;
-         }
+            if (const String_t* name = f.bco->getNameByIndex(op.arg)) {
+                Context::PropertyIndex_t index;
+                if (Context::PropertyAccessor* ctx = lookup(*name, index)) {
+                    valueStack.pushBackNew(ctx->get(index));
+                } else {
+                    throw Error::unknownIdentifier(*name);
+                }
+            } else {
+                handleInvalidOpcode();
+            }
+            break;
          case Opcode::sLocal:
             valueStack.pushBack(f.localValues[op.arg]);
             break;
@@ -753,15 +755,17 @@ interpreter::Process::executeInstruction()
             valueStack.pushBack(m_world.globalValues()[op.arg]);
             break;
          case Opcode::sNamedShared:
-         {
-             NameMap_t::Index_t index = m_world.globalPropertyNames().getIndexByName(f.bco->getName(op.arg));
-             if (index != NameMap_t::nil) {
-                 valueStack.pushBack(m_world.globalValues()[index]);
-             } else {
-                 throw Error::unknownIdentifier(f.bco->getName(op.arg));
-             }
-             break;
-         }
+            if (const String_t* name = f.bco->getNameByIndex(op.arg)) {
+                NameMap_t::Index_t index = m_world.globalPropertyNames().getIndexByName(*name);
+                if (index != NameMap_t::nil) {
+                    valueStack.pushBack(m_world.globalValues()[index]);
+                } else {
+                    throw Error::unknownIdentifier(*name);
+                }
+            } else {
+                handleInvalidOpcode();
+            }
+            break;
          case Opcode::sLiteral:
             valueStack.pushBack(f.bco->getLiteral(op.arg));
             break;
@@ -954,15 +958,17 @@ interpreter::Process::executeInstruction()
         checkStack(1);
         switch (op.minor) {
          case Opcode::sNamedVariable:
-         {
-             Context::PropertyIndex_t index;
-             if (Context::PropertyAccessor* ctx = lookup(f.bco->getName(op.arg), index)) {
-                 ctx->set(index, valueStack.top());
-             } else {
-                 throw Error::unknownIdentifier(f.bco->getName(op.arg));
-             }
-             break;
-         }
+            if (const String_t* name = f.bco->getNameByIndex(op.arg)) {
+                Context::PropertyIndex_t index;
+                if (Context::PropertyAccessor* ctx = lookup(*name, index)) {
+                    ctx->set(index, valueStack.top());
+                } else {
+                    throw Error::unknownIdentifier(*name);
+                }
+            } else {
+                handleInvalidOpcode();
+            }
+            break;
          case Opcode::sLocal:
             f.localValues.set(op.arg, valueStack.top());
             break;
@@ -973,15 +979,17 @@ interpreter::Process::executeInstruction()
             m_world.globalValues().set(op.arg, valueStack.top());
             break;
          case Opcode::sNamedShared:
-         {
-             NameMap_t::Index_t index = m_world.globalPropertyNames().getIndexByName(f.bco->getName(op.arg));
-             if (index != NameMap_t::nil) {
-                 m_world.globalValues().set(index, valueStack.top());
-             } else {
-                 throw Error::unknownIdentifier(f.bco->getName(op.arg));
-             }
-             break;
-         }
+            if (const String_t* name = f.bco->getNameByIndex(op.arg)) {
+                NameMap_t::Index_t index = m_world.globalPropertyNames().getIndexByName(*name);
+                if (index != NameMap_t::nil) {
+                    m_world.globalValues().set(index, valueStack.top());
+                } else {
+                    throw Error::unknownIdentifier(*name);
+                }
+            } else {
+                handleInvalidOpcode();
+            }
+            break;
          default:
             handleInvalidOpcode();
         }
@@ -992,16 +1000,18 @@ interpreter::Process::executeInstruction()
         checkStack(1);
         switch (op.minor) {
          case Opcode::sNamedVariable:
-         {
-             Context::PropertyIndex_t index;
-             if (Context::PropertyAccessor* ctx = lookup(f.bco->getName(op.arg), index)) {
-                 ctx->set(index, valueStack.top());
-                 valueStack.popBack();
-             } else {
-                 throw Error::unknownIdentifier(f.bco->getName(op.arg));
-             }
-             break;
-         }
+            if (const String_t* name = f.bco->getNameByIndex(op.arg)) {
+                Context::PropertyIndex_t index;
+                if (Context::PropertyAccessor* ctx = lookup(*name, index)) {
+                    ctx->set(index, valueStack.top());
+                    valueStack.popBack();
+                } else {
+                    throw Error::unknownIdentifier(*name);
+                }
+            } else {
+                handleInvalidOpcode();
+            }
+            break;
          case Opcode::sLocal:
             f.localValues.setNew(op.arg, valueStack.extractTop());
             break;
@@ -1012,15 +1022,17 @@ interpreter::Process::executeInstruction()
             m_world.globalValues().setNew(op.arg, valueStack.extractTop());
             break;
          case Opcode::sNamedShared:
-         {
-             NameMap_t::Index_t index = m_world.globalPropertyNames().getIndexByName(f.bco->getName(op.arg));
-             if (index != NameMap_t::nil) {
-                 m_world.globalValues().setNew(index, valueStack.extractTop());
-             } else {
-                 throw Error::unknownIdentifier(f.bco->getName(op.arg));
-             }
-             break;
-         }
+            if (const String_t* name = f.bco->getNameByIndex(op.arg)) {
+                NameMap_t::Index_t index = m_world.globalPropertyNames().getIndexByName(*name);
+                if (index != NameMap_t::nil) {
+                    m_world.globalValues().setNew(index, valueStack.extractTop());
+                } else {
+                    throw Error::unknownIdentifier(*name);
+                }
+            } else {
+                handleInvalidOpcode();
+            }
+            break;
          default:
             handleInvalidOpcode();
         }
@@ -1032,30 +1044,34 @@ interpreter::Process::executeInstruction()
          case Opcode::miIMLoad:
             /* Load/Evaluate TOS.field */
             checkStack(1);
-            if (!valueStack.top()) {
-                /* Dereferencing null stays null, no change to stack */
-                if (op.minor == Opcode::miIMCall) {
-                    valueStack.popBack();
-                }
-            } else if (Context* cv = dynamic_cast<Context*>(valueStack.top())) {
-                /* It's a context */
-                Context::PropertyIndex_t index;
-                if (Context::PropertyAccessor* foundContext = cv->lookup(f.bco->getName(op.arg), index)) {
-                    /* Load permitted */
-                    afl::data::Value* v = foundContext->get(index);
-                    valueStack.popBack();
+            if (const String_t* name = f.bco->getNameByIndex(op.arg)) {
+                if (!valueStack.top()) {
+                    /* Dereferencing null stays null, no change to stack */
                     if (op.minor == Opcode::miIMCall) {
-                        delete v;
+                        valueStack.popBack();
+                    }
+                } else if (Context* cv = dynamic_cast<Context*>(valueStack.top())) {
+                    /* It's a context */
+                    Context::PropertyIndex_t index;
+                    if (Context::PropertyAccessor* foundContext = cv->lookup(*name, index)) {
+                        /* Load permitted */
+                        afl::data::Value* v = foundContext->get(index);
+                        valueStack.popBack();
+                        if (op.minor == Opcode::miIMCall) {
+                            delete v;
+                        } else {
+                            valueStack.pushBackNew(v);
+                        }
                     } else {
-                        valueStack.pushBackNew(v);
+                        /* Name not found */
+                        throw Error::unknownIdentifier(*name);
                     }
                 } else {
-                    /* Name not found */
-                    throw Error::unknownIdentifier(f.bco->getName(op.arg));
+                    /* Not a context */
+                    throw Error::typeError(Error::ExpectRecord);
                 }
             } else {
-                /* Not a context */
-                throw Error::typeError(Error::ExpectRecord);
+                handleInvalidOpcode();
             }
             break;
 
@@ -1063,23 +1079,27 @@ interpreter::Process::executeInstruction()
          case Opcode::miIMPop:
             /* Store/Pop into TOS.field */
             checkStack(2);
-            if (Context* cv = dynamic_cast<Context*>(valueStack.top())) {
-                /* It's a context */
-                Context::PropertyIndex_t index;
-                if (Context::PropertyAccessor* foundContext = cv->lookup(f.bco->getName(op.arg), index)) {
-                    /* Assignment permitted */
-                    foundContext->set(index, valueStack.top(1));
+            if (const String_t* name = f.bco->getNameByIndex(op.arg)) {
+                if (Context* cv = dynamic_cast<Context*>(valueStack.top())) {
+                    /* It's a context */
+                    Context::PropertyIndex_t index;
+                    if (Context::PropertyAccessor* foundContext = cv->lookup(*name, index)) {
+                        /* Assignment permitted */
+                        foundContext->set(index, valueStack.top(1));
+                    } else {
+                        /* Name not found */
+                        throw Error::unknownIdentifier(*name);
+                    }
                 } else {
-                    /* Name not found */
-                    throw Error::unknownIdentifier(f.bco->getName(op.arg));
+                    /* Not a context */
+                    throw Error::typeError(Error::ExpectRecord);
+                }
+                valueStack.popBack();            // context
+                if (op.minor == Opcode::miIMPop) {
+                    valueStack.popBack();        // value
                 }
             } else {
-                /* Not a context */
-                throw Error::typeError(Error::ExpectRecord);
-            }
-            valueStack.popBack();            // context
-            if (op.minor == Opcode::miIMPop) {
-                valueStack.popBack();        // value
+                handleInvalidOpcode();
             }
             break;
          default:
@@ -1182,17 +1202,27 @@ interpreter::Process::executeInstruction()
             break;
          case Opcode::miSpecialDefSub:
             /* Define subroutine */
-            {
+            if (const String_t* name = f.bco->getNameByIndex(op.arg)) {
                 checkStack(1);
-                NameMap_t::Index_t index = m_world.globalPropertyNames().addMaybe(f.bco->getName(op.arg));
+                NameMap_t::Index_t index = m_world.globalPropertyNames().addMaybe(*name);
                 m_world.globalValues().setNew(index, valueStack.extractTop());
+            } else {
+                handleInvalidOpcode();
             }
             break;
          case Opcode::miSpecialDefShipProperty:
-            m_world.shipPropertyNames().addMaybe(f.bco->getName(op.arg));
+            if (const String_t* name = f.bco->getNameByIndex(op.arg)) {
+                m_world.shipPropertyNames().addMaybe(*name);
+            } else {
+                handleInvalidOpcode();
+            }
             break;
          case Opcode::miSpecialDefPlanetProperty:
-            m_world.planetPropertyNames().addMaybe(f.bco->getName(op.arg));
+            if (const String_t* name = f.bco->getNameByIndex(op.arg)) {
+                m_world.planetPropertyNames().addMaybe(*name);
+            } else {
+                handleInvalidOpcode();
+            }
             break;
          case Opcode::miSpecialLoad:
             checkStack(1);
@@ -1663,16 +1693,16 @@ interpreter::Process::handleDim(Segment_t& values, NameMap_t& names, uint16_t in
     checkStack(1);
 
     // Check name. Must not be blank.
-    const String_t name = m_frames.back()->bco->getName(index);
-    if (name.size() == 0) {
+    const String_t* name = m_frames.back()->bco->getNameByIndex(index);
+    if (name == 0 || name->size() == 0) {
         handleInvalidOpcode();
     }
 
     // Does it already exist?
-    NameMap_t::Index_t existing = names.getIndexByName(name);
+    NameMap_t::Index_t existing = names.getIndexByName(*name);
     if (existing == NameMap_t::nil) {
         // No, add it
-        values.set(names.add(name), m_valueStack.top());
+        values.set(names.add(*name), m_valueStack.top());
     }
 
     m_valueStack.popBack();
@@ -1946,14 +1976,17 @@ interpreter::Process::getReferencedValue(const Opcode& op)
      case Opcode::sShared:
         return m_world.globalValues()[op.arg];
      case Opcode::sNamedShared:
-     {
-         NameMap_t::Index_t index = m_world.globalPropertyNames().getIndexByName(m_frames.back()->bco->getName(op.arg));
-         if (index != NameMap_t::nil) {
-             return m_world.globalValues()[index];
-         } else {
-             throw Error::unknownIdentifier(m_frames.back()->bco->getName(op.arg));
-         }
-     }
+        if (const String_t* name = m_frames.back()->bco->getNameByIndex(op.arg)) {
+            NameMap_t::Index_t index = m_world.globalPropertyNames().getIndexByName(*name);
+            if (index != NameMap_t::nil) {
+                return m_world.globalValues()[index];
+            } else {
+                throw Error::unknownIdentifier(*name);
+            }
+        } else {
+            handleInvalidOpcode();
+            return 0;
+        }
      case Opcode::sLiteral:
         return m_frames.back()->bco->getLiteral(op.arg);
      default:

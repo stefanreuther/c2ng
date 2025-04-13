@@ -77,7 +77,7 @@ AFL_TEST("interpreter.vmio.ObjectLoader:load:BytecodeObject", a)
     a.checkEqual("27. arg",              (*bco)(5).arg,   0);
 
     a.checkEqual("31. getNumNames",        bco->names().getNumNames(), 1U);
-    a.checkEqual("32. getName",            bco->getName(0), "I");
+    a.checkEqual("32. getName",           *bco->getNameByIndex(0), "I");
 
     a.checkEqual("41. literals",           bco->literals().size(), 1U);
     a.checkEqual("42. getLiteral",         interpreter::toString(bco->getLiteral(0), true), "\"hello\"");

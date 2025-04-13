@@ -40,10 +40,12 @@ namespace {
     bool isPushGlobal(const BytecodeObject& bco, BytecodeObject::PC_t pc, const char* name)
     {
         const Opcode& opc = bco(pc);
+        const String_t* foundName;
         return opc.major == Opcode::maPush
-            && (((opc.minor == Opcode::sNamedVariable
-                  || opc.minor == Opcode::sNamedShared)
-                 && bco.getName(opc.arg) == name));
+            && (opc.minor == Opcode::sNamedVariable
+                || opc.minor == Opcode::sNamedShared)
+            && (foundName = bco.getNameByIndex(opc.arg)) != 0
+            && *foundName == name;
     }
 
     /** Check for 'callind NARGS' instruction. */
