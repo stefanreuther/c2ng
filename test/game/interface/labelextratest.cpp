@@ -43,7 +43,6 @@ namespace {
         h.session.setRoot(game::test::makeRoot(game::HostVersion()).asPtr());
         h.session.setGame(new game::Game());
         h.session.setShipList(new game::spec::ShipList());
-        h.session.sig_runRequest.add(&h.session.processList(), &interpreter::ProcessList::run);
     }
 
     /* Add planet. It doesn't need any specific status, it just needs to be visible on the map. */

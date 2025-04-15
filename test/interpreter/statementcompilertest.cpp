@@ -168,7 +168,7 @@ namespace {
             {
                 checkCompile(stmt);
                 m_assert.checkNonNull("checkRun: m_pProcess", m_pProcess.get());
-                m_pProcess->run();
+                m_pProcess->run(0);
                 if (!ignoreState) {
                     m_assert.checkEqual("getState", m_pProcess->getState(), Process::Ended);
                 }
@@ -178,7 +178,7 @@ namespace {
             {
                 checkCompileExpression(stmt);
                 m_assert.checkNonNull("checkRunExpression: m_pProcess", m_pProcess.get());
-                m_pProcess->run();
+                m_pProcess->run(0);
             }
 
         void checkIntegerExpressionStatement(const char* stmt, int expectedResult)
@@ -2571,7 +2571,7 @@ AFL_TEST("interpreter.StatementCompiler:Load:pre-exec", a)
     // Execute, but without load directory
     world.setSystemLoadDirectory(0);
     p.pushFrame(bco, false);
-    p.run();
+    p.run(0);
     a.checkEqual("11. getState", p.getState(), Process::Ended);
 
     NameMap::Index_t i = world.globalPropertyNames().getIndexByName("A");
@@ -2834,7 +2834,7 @@ AFL_TEST("interpreter.StatementCompiler:compileList", a)
     // Run
     interpreter::Process proc(world, "testCompileList", 9);
     proc.pushFrame(bco, false);
-    proc.run();
+    proc.run(0);
     a.checkEqual("11. getState", proc.getState(), Process::Ended);
     a.checkEqual("12. getStackSize", proc.getStackSize(), 0U);
 }

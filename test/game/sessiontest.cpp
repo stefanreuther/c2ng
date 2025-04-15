@@ -432,7 +432,7 @@ AFL_TEST("game.Session:charset", a)
     uint32_t pgid = testee.processList().allocateProcessGroup();
     testee.processList().resumeProcess(p, pgid);
     testee.processList().startProcessGroup(pgid);
-    testee.processList().run();
+    testee.processList().run(0);
 
     // Verify
     a.checkEqual("11. getState", p.getState(), Process::Ended);

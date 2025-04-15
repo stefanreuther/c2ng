@@ -44,7 +44,7 @@ namespace {
         Process& proc = session.processList().create(session.world(), "p");
         proc.pushFrame(bco, false);
         proc.pushNewContext(ctx.clone());
-        proc.run();
+        proc.run(0);
         a.checkEqual("code execution result", proc.getState(), expectedState);
     }
 
@@ -163,7 +163,7 @@ AFL_TEST("game.interface.ConfigurationEditorContext:sequence", a)
     interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
     ctx.compileEditor(*bco, ConfigurationEditorContext::getEditorIndexFromTreeId(key));
     proc.pushFrame(bco, false);
-    proc.run();
+    proc.run(0);
     a.checkEqual("61. getState", proc.getState(), Process::Ended);
 
     // Verify updated value

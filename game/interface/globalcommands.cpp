@@ -44,7 +44,7 @@ namespace {
                 } else {
                     s.processList().continueProcess(m_process);
                 }
-                s.sig_runRequest.raise();
+                s.runScripts();
             }
 
      private:

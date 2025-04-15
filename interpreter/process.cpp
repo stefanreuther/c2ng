@@ -646,7 +646,7 @@ interpreter::Process::addTraceTo(Error& err) const
 
 // Run process (set state to Running).
 void
-interpreter::Process::run()
+interpreter::Process::run(Observer* pObserver)
 {
     // ex IntExecutionContext::run()
     // unsigned counter = 0;
@@ -675,11 +675,9 @@ interpreter::Process::run()
             // We no longer distinguish those.
             handleException(e.what(), String_t());
         }
-        // FIXME: port this
-        // if (++counter == 10000) {
-        //     counter = 0;
-        //     checkForBreak();
-        // }
+        if (pObserver != 0) {
+            pObserver->checkProcess(*this);
+        }
     }
     logProcessState("end");
 }

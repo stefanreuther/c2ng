@@ -51,7 +51,7 @@ AFL_TEST("interpreter.expr.AssignmentNode:compileValue", a)
 
     // Run
     env.proc.pushFrame(bco, true);
-    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
     // Verify
     const afl::data::Value* pv = env.proc.getResult();
@@ -76,7 +76,7 @@ AFL_TEST("interpreter.expr.AssignmentNode:compileEffect", a)
 
     // Run
     env.proc.pushFrame(bco, true);
-    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
     // Verify
     const afl::data::Value* pv = env.proc.getResult();

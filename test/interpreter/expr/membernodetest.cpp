@@ -96,7 +96,7 @@ AFL_TEST("interpreter.expr.MemberNode:compileValue", a)
     // Run
     env.data = 42;
     env.proc.pushFrame(bco, true);
-    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
     // Verify
     const afl::data::Value* pv = env.proc.getResult();
@@ -118,7 +118,7 @@ AFL_TEST("interpreter.expr.MemberNode:compileStore", a)
     // Run
     env.data = 42;
     env.proc.pushFrame(bco, true);
-    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
     // Verify
     // - updated value must remain on stack
@@ -155,7 +155,7 @@ AFL_TEST("interpreter.expr.MemberNode:compileCondition", a)
     // Run
     env.data = 10;
     env.proc.pushFrame(bco, true);
-    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
     // Verify
     const afl::data::Value* pv = env.proc.getResult();
@@ -178,7 +178,7 @@ AFL_TEST("interpreter.expr.MemberNode:read+write", a)
     // Run
     env.data = 23;
     env.proc.pushFrame(bco, true);
-    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
     // Verify
     const afl::data::Value* pv = env.proc.getResult();

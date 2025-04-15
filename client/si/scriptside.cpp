@@ -22,13 +22,14 @@ client::si::ScriptSide::ScriptSide(util::RequestSender<UserSide> reply, game::Se
       m_waits()
 {
     conn_processGroupFinish = session.processList().sig_processGroupFinish.add(this, &ScriptSide::onProcessGroupFinish);
-    conn_runRequest = session.sig_runRequest.add(this, &ScriptSide::runProcesses);
-    // FIXME: set break handler?
+    session.setNewScriptRunner(afl::base::Closure<void()>::makeBound(this, &ScriptSide::runProcesses));
 }
 
 // Destructor.
 client::si::ScriptSide::~ScriptSide()
-{ }
+{
+    m_session.setNewScriptRunner(0);
+}
 
 // Access the underlying RequestSender.
 util::RequestSender<client::si::UserSide>
@@ -321,7 +322,8 @@ client::si::ScriptSide::runProcesses()
     interpreter::ProcessList& processList = m_session.processList();
 
     // Run processes. This will execute onProcessGroupFinish() callbacks that process waits.
-    processList.run();
+    // TODO: add break handling here
+    processList.run(0);
     processList.removeTerminatedProcesses();
 
     // Clean up messages

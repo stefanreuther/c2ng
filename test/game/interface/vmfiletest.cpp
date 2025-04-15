@@ -246,7 +246,7 @@ namespace {
         uint32_t pgid = pl.allocateProcessGroup();
         pl.resumeSuspendedProcesses(pgid);
         pl.startProcessGroup(pgid);
-        pl.run();
+        pl.run(0);
     }
 }
 

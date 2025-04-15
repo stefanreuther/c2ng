@@ -35,7 +35,7 @@ namespace {
             {
                 // FIXME: can we log errors if this process fails?
                 session.processList().startProcessGroup(m_pgid);
-                session.sig_runRequest.raise();
+                session.runScripts();
             }
      private:
         const uint32_t m_pgid;

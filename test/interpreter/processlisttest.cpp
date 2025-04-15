@@ -107,7 +107,7 @@ namespace {
 AFL_TEST_NOARG("interpreter.ProcessList:run:empty")
 {
     interpreter::ProcessList testee;
-    testee.run();
+    testee.run(0);
     testee.removeTerminatedProcesses();
 }
 
@@ -121,12 +121,12 @@ AFL_TEST("interpreter.ProcessList:run:empty-process-group", a)
     testee.sig_processGroupFinish.add(&c, &Counter::increment);
 
     // Just running does nothing
-    testee.run();
+    testee.run(0);
     a.checkEqual("11. signal count", c.get(), 0);
 
     // Running an empty process group signals once
     testee.startProcessGroup(testee.allocateProcessGroup());
-    testee.run();
+    testee.run(0);
     a.checkEqual("21. signal count", c.get(), 1);
 }
 
@@ -179,7 +179,7 @@ AFL_TEST("interpreter.ProcessList:suspend", a)
     testee.sig_processGroupFinish.add(&c, &Counter::increment);
 
     // Nothing scheduled yet
-    testee.run();
+    testee.run(0);
     a.checkEqual("21. signal count", c.get(), 0);
     a.checkEqual("22. getState", p.getState(), Process::Suspended);
 
@@ -187,13 +187,13 @@ AFL_TEST("interpreter.ProcessList:suspend", a)
     uint32_t pgid = testee.allocateProcessGroup();
     testee.resumeProcess(p, pgid);
     a.checkEqual("31. getState", p.getState(), Process::Runnable);
-    testee.run();
+    testee.run(0);
     a.checkEqual("32. signal count", c.get(), 0);
     a.checkEqual("33. getState", p.getState(), Process::Runnable);
 
     // Start it! This must run the process until it suspends
     testee.startProcessGroup(pgid);
-    testee.run();
+    testee.run(0);
     a.checkEqual("41. signal count", c.get(), 1);
     a.checkEqual("42. getState", p.getState(), Process::Suspended);
 }
@@ -230,7 +230,7 @@ AFL_TEST("interpreter.ProcessList:joinProcess", a)
 
     // Run
     testee.startProcessGroup(pgB);
-    testee.run();
+    testee.run(0);
 
     // All processes terminated now
     a.checkEqual("01. getState", p1.getState(), Process::Ended);
@@ -273,7 +273,7 @@ AFL_TEST("interpreter.ProcessList:process-failure", a)
     a.checkEqual("12. getState", p2.getState(), Process::Runnable);
 
     // Run
-    testee.run();
+    testee.run(0);
     a.checkEqual("21. getState", p1.getState(), Process::Failed);
     a.checkEqual("22. getState", p2.getState(), Process::Ended);
 
@@ -318,7 +318,7 @@ AFL_TEST("interpreter.ProcessList:termination", a)
     a.checkEqual("22. getState", p2.getState(), Process::Running);
 
     // Run
-    testee.run();
+    testee.run(0);
     a.checkEqual("31. getState", p1.getState(), Process::Terminated);
     a.checkEqual("32. getState", p2.getState(), Process::Ended);
 
@@ -426,7 +426,7 @@ AFL_TEST("interpreter.ProcessList:end-signal", a)
     testee.resumeProcess(p1, pgid);
     testee.resumeProcess(p2, pgid);
     testee.startProcessGroup(pgid);
-    testee.run();
+    testee.run(0);
 
     a.checkEqual("01. finalizeCount", finalizeCount, 2);
     a.checkEqual("02. signal count", pgCount.get(), 1);
@@ -456,12 +456,12 @@ AFL_TEST("interpreter.ProcessList:continueProcess", a)
     int32_t pgid = testee.allocateProcessGroup();
     testee.resumeProcess(p, pgid);
     testee.startProcessGroup(pgid);
-    testee.run();
+    testee.run(0);
     a.checkEqual("01. getState", p.getState(), Process::Waiting);
     a.checkEqual("02. get", pgCount.get(), 0);
 
     testee.continueProcess(p);
-    testee.run();
+    testee.run(0);
 
     // Process now terminated
     a.checkEqual("11. getState", p.getState(), Process::Ended);
@@ -492,12 +492,12 @@ AFL_TEST("interpreter.ProcessList:continueProcessWithFailure", a)
     int32_t pgid = testee.allocateProcessGroup();
     testee.resumeProcess(p, pgid);
     testee.startProcessGroup(pgid);
-    testee.run();
+    testee.run(0);
     a.checkEqual("01. getState", p.getState(), Process::Waiting);
     a.checkEqual("02. get", pgCount.get(), 0);
 
     testee.continueProcessWithFailure(p, "boom");
-    testee.run();
+    testee.run(0);
 
     // Process now terminated
     a.checkEqual("11. getState", p.getState(), Process::Failed);
@@ -535,12 +535,12 @@ AFL_TEST("interpreter.ProcessList:continueProcessWithFailure:catch", a)
     int32_t pgid = testee.allocateProcessGroup();
     testee.resumeProcess(p, pgid);
     testee.startProcessGroup(pgid);
-    testee.run();
+    testee.run(0);
     a.checkEqual("01. getState", p.getState(), Process::Waiting);
     a.checkEqual("02. get", pgCount.get(), 0);
 
     testee.continueProcessWithFailure(p, "boom");
-    testee.run();
+    testee.run(0);
 
     // Process now terminated
     a.checkEqual("11. getState", p.getState(), Process::Ended);
@@ -570,7 +570,7 @@ AFL_TEST("interpreter.ProcessList:terminateProcess:while-waiting", a)
 
     // Start one
     testee.startProcessGroup(pgA);
-    testee.run();
+    testee.run(0);
     a.checkEqual("01. getState", p1.getState(), Process::Waiting);
     a.checkEqual("02. getState", p2.getState(), Process::Runnable);
 
@@ -580,7 +580,7 @@ AFL_TEST("interpreter.ProcessList:terminateProcess:while-waiting", a)
     a.checkEqual("12. getState", p2.getState(), Process::Running);
 
     // Run
-    testee.run();
+    testee.run(0);
     a.checkEqual("21. getState", p1.getState(), Process::Terminated);
     a.checkEqual("22. getState", p2.getState(), Process::Ended);
 }
@@ -642,7 +642,7 @@ AFL_TEST("interpreter.ProcessList:resumeSuspendedProcesses", a)
 
     // Start & run
     testee.startProcessGroup(pgid);
-    testee.run();
+    testee.run(0);
     a.checkEqual("11. getState", p1.getState(), Process::Frozen);
     a.checkEqual("12. getState", p2.getState(), Process::Ended);
 }
@@ -801,7 +801,7 @@ AFL_TEST("interpreter.ProcessList:process-freezes-itself", a)
     a.checkEqual("12. getState", p2.getState(), Process::Runnable);
 
     // Run
-    testee.run();
+    testee.run(0);
     a.checkEqual("21. getState", p1.getState(), Process::Frozen);
     a.checkEqual("22. getState", p2.getState(), Process::Ended);
 }

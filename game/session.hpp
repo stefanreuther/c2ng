@@ -238,12 +238,14 @@ namespace game {
             \return Save action; never null */
         std::auto_ptr<Task_t> saveConfiguration(std::auto_ptr<Task_t> then);
 
-        /** Signal: request ProcessList::run() to be run.
-            Code that sets a process to runnable should raise this signal.
-            This signal will be handled by a component that can pick a good point to run processes
-            and perform necessary pre- and post-processing.
-            As a minimum implementation, this signal can be hooked to ProcessList::run(). */
-        afl::base::Signal<void()> sig_runRequest;
+        /** Run scripts.
+            Runs the script runner set with setNewScriptRunner(); if none is set, ProcessList::run().
+            Do not use ProcessList::run() directly. */
+        void runScripts();
+
+        /** Set script runner.
+            \param pRunner Newly-allocated runner, Session takes ownership. Null to revert to default. */
+        void setNewScriptRunner(afl::base::Closure<void()>* pRunner);
 
         /** Signal: change of a connected object (Root, Game, ShipList). */
         afl::base::Signal<void()> sig_connectionChange;
@@ -256,6 +258,7 @@ namespace game {
         game::interface::UserInterfacePropertyStack m_uiPropertyStack;
         std::auto_ptr<afl::io::FileSystem> m_fileSystem;
         std::auto_ptr<interpreter::World> m_world;
+        std::auto_ptr<afl::base::Closure<void()> > m_pScriptRunner;
 
         /** System information. */
         util::SystemInformation m_systemInformation;

@@ -46,7 +46,7 @@ AFL_TEST("interpreter.expr.IdentifierNode:compileValue", a)
 
     // Run
     env.proc.pushFrame(bco, true);
-    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
     // Verify
     const afl::data::Value* pv = env.proc.getResult();
@@ -74,7 +74,7 @@ AFL_TEST("interpreter.expr.IdentifierNode:compileStore", a)
 
     // Run
     env.proc.pushFrame(bco, true);
-    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
     // Verify
     const afl::data::Value* pv = env.proc.getResult();
@@ -112,7 +112,7 @@ AFL_TEST("interpreter.expr.IdentifierNode:compileCondition", a)
 
     // Run
     env.proc.pushFrame(bco, true);
-    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
     // Verify
     const afl::data::Value* pv = env.proc.getResult();
@@ -141,7 +141,7 @@ AFL_TEST("interpreter.expr.IdentifierNode:read+write", a)
 
     // Run
     env.proc.pushFrame(bco, true);
-    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
     // Verify
     const afl::data::Value* pv = env.proc.getResult();

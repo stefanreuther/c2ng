@@ -99,7 +99,7 @@ namespace {
 
         interpreter::Process exec(world, "checkExpression", 9);
         exec.pushFrame(bco, false);
-        exec.run();
+        exec.run(0);
         a(expr).checkEqual("checkExpression: execution succeeded", exec.getState(), interpreter::Process::Ended);
 
         const afl::data::ScalarValue* resv = dynamic_cast<const afl::data::ScalarValue*>(exec.getResult());

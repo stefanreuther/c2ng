@@ -287,7 +287,7 @@ namespace {
                             game::Session& session = m_session;
                             session.log().write(afl::sys::LogListener::Trace, LOG_NAME, "LoadRequest.Fail");
                             session.processList().continueProcessWithFailure(m_process, "Load error");
-                            session.sig_runRequest.raise();
+                            session.runScripts();
                         }
                  private:
                     interpreter::Process& m_process;
@@ -352,7 +352,7 @@ namespace {
                             // The continueProcessWithFailure() will destroy the Task.
                             game::Session& session = m_session;
                             session.processList().continueProcess(m_process);
-                            session.sig_runRequest.raise();
+                            session.runScripts();
                         }
                  private:
                     interpreter::Process& m_process;
@@ -423,8 +423,7 @@ namespace {
                             uint32_t pgid = session.processList().allocateProcessGroup();
                             session.processList().resumeProcess(proc, pgid);
                             session.processList().startProcessGroup(pgid);
-                            session.processList().run();
-                            session.processList().removeTerminatedProcesses();
+                            session.runScripts();
                         } else {
                             // Don't have a turn loader
                             ok = false;

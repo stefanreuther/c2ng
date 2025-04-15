@@ -49,7 +49,7 @@ AFL_TEST("interpreter.expr.LogicalNode:compileValue", a)
 
     // Run
     env.proc.pushFrame(bco, true);
-    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
     // Verify: result must be integral '1'
     const afl::data::Value* pv = env.proc.getResult();
@@ -77,7 +77,7 @@ AFL_TEST("interpreter.expr.LogicalNode:compileEffect", a)
 
     // Run
     env.proc.pushFrame(bco, true);
-    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
     // Verify: result must be 42 (assignment to Y has been executed)
     const afl::data::Value* pv = env.proc.getResult();
@@ -112,7 +112,7 @@ AFL_TEST("interpreter.expr.LogicalNode:compileCondition", a)
 
     // Run
     env.proc.pushFrame(bco, true);
-    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
     // Verify: result must be integral '1'
     const afl::data::Value* pv = env.proc.getResult();

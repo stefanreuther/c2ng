@@ -211,7 +211,7 @@ AFL_TEST("game.interface.GlobalActions:normal", a)
 
     // Run it
     // (For the test, don't use process groups etc., we don't need that synchronisation for now.)
-    proc.run();
+    proc.run(0);
 
     // Verify result
     a.checkEqual("01. getState", proc.getState(), Process::Ended);
@@ -241,7 +241,7 @@ AFL_TEST("game.interface.GlobalActions:compileGlobalAction:ExcludeShips", a)
                    false);
 
     // Run it
-    proc.run();
+    proc.run(0);
 
     // Verify result
     a.checkEqual("01. getState", proc.getState(), Process::Ended);
@@ -270,7 +270,7 @@ AFL_TEST("game.interface.GlobalActions:compileGlobalAction:ExcludePlanets", a)
                    false);
 
     // Run it
-    proc.run();
+    proc.run(0);
 
     // Verify result
     a.checkEqual("01. getState", proc.getState(), Process::Ended);
@@ -302,7 +302,7 @@ AFL_TEST("game.interface.GlobalActions:compileGlobalAction:ExcludeUnmarkedObject
                    false);
 
     // Run it
-    proc.run();
+    proc.run(0);
 
     // Verify result
     a.checkEqual("01. getState", proc.getState(), Process::Ended);
@@ -338,7 +338,7 @@ AFL_TEST("game.interface.GlobalActions:compileGlobalAction:ExcludeNumericFriendl
                    false);
 
     // Run it
-    proc.run();
+    proc.run(0);
 
     // Verify result
     a.checkEqual("01. getState", proc.getState(), Process::Ended);
@@ -377,7 +377,7 @@ AFL_TEST("game.interface.GlobalActions:compileGlobalAction:ExcludeSpecialFriendl
                    false);
 
     // Run it
-    proc.run();
+    proc.run(0);
 
     // Verify result
     a.checkEqual("01. getState", proc.getState(), Process::Ended);
@@ -408,7 +408,7 @@ AFL_TEST("game.interface.GlobalActions:compileListAction", a)
                    false);
 
     // Run it
-    proc.run();
+    proc.run(0);
 
     // Verify result
     a.checkEqual("01. getState", proc.getState(), Process::Ended);
@@ -440,7 +440,7 @@ AFL_TEST("game.interface.GlobalActions:compileListAction:ExcludeShips", a)
                    false);
 
     // Run it
-    proc.run();
+    proc.run(0);
 
     // Verify result
     a.checkEqual("01. getState", proc.getState(), Process::Ended);
@@ -470,7 +470,7 @@ AFL_TEST("game.interface.GlobalActions:compileListAction:ExcludePlanets", a)
                    false);
 
     // Run it
-    proc.run();
+    proc.run(0);
 
     // Verify result
     a.checkEqual("01. getState", proc.getState(), Process::Ended);
@@ -502,7 +502,7 @@ AFL_TEST("game.interface.GlobalActions:cancel", a)
                    false);
 
     // Run it
-    proc.run();
+    proc.run(0);
 
     // Verify result
     a.checkEqual("11. getState", proc.getState(), Process::Ended);
@@ -525,7 +525,7 @@ AFL_TEST("game.interface.GlobalActions:locked", a)
     TestUniverse h;
     Process& taker = h.session.processList().create(h.session.world(), "t");
     taker.pushFrame(makeTakeLockBCO("p23"), false);
-    taker.run();
+    taker.run(0);
 
     // Create process
     Process& proc = h.session.processList().create(h.session.world(), "p");
@@ -535,7 +535,7 @@ AFL_TEST("game.interface.GlobalActions:locked", a)
                    false);
 
     // Run it
-    proc.run();
+    proc.run(0);
 
     // Verify result
     a.checkEqual("11. getState", proc.getState(), Process::Ended);
@@ -558,7 +558,7 @@ AFL_TEST("game.interface.GlobalActions:locked:OverrideLocks", a)
     TestUniverse h;
     Process& taker = h.session.processList().create(h.session.world(), "t");
     taker.pushFrame(makeTakeLockBCO("p23"), false);
-    taker.run();
+    taker.run(0);
 
     // Create process
     Process& proc = h.session.processList().create(h.session.world(), "p");
@@ -568,7 +568,7 @@ AFL_TEST("game.interface.GlobalActions:locked:OverrideLocks", a)
                    false);
 
     // Run it
-    proc.run();
+    proc.run(0);
 
     // Verify result
     a.checkEqual("11. getState", proc.getState(), Process::Ended);

@@ -56,7 +56,7 @@ AFL_TEST("game.interface.Plugins:createPluginLoader:ResourceFile", a)
     // Test code
     interpreter::Process proc(env.session.world(), "testLoadResource", 99);
     proc.pushFrame(game::interface::createPluginLoader(*plug), false);
-    proc.run();
+    proc.run(0);
 
     // Verify
     a.checkEqual("01. getState", proc.getState(), interpreter::Process::Ended);
@@ -82,7 +82,7 @@ AFL_TEST("game.interface.Plugins:createPluginLoader:HelpFile", a)
     // Test code
     interpreter::Process proc(env.session.world(), "testLoadHelpFile", 99);
     proc.pushFrame(game::interface::createPluginLoader(*plug), false);
-    proc.run();
+    proc.run(0);
 
     // Verify
     a.checkEqual("01. getState", proc.getState(), interpreter::Process::Ended);
@@ -113,7 +113,7 @@ AFL_TEST("game.interface.Plugins:createPluginLoader:ScriptFile", a)
     // Test code
     interpreter::Process proc(env.session.world(), "testLoadScript", 99);
     proc.pushFrame(game::interface::createPluginLoader(*plug), false);
-    proc.run();
+    proc.run(0);
 
     // Verify
     a.checkEqual("01. getState", proc.getState(), interpreter::Process::Ended);
@@ -139,7 +139,7 @@ AFL_TEST("game.interface.Plugins:createPluginLoader:Command", a)
     // Test code
     interpreter::Process proc(env.session.world(), "testExecScript", 99);
     proc.pushFrame(game::interface::createPluginLoader(*plug), false);
-    proc.run();
+    proc.run(0);
 
     // Verify
     a.checkEqual("01. getState", proc.getState(), interpreter::Process::Ended);
@@ -204,7 +204,7 @@ AFL_TEST("game.interface.Plugins:createLoaderForUnloadedPlugins", a)
     // Test code
     interpreter::Process proc(env.session.world(), "testUnloaded", 99);
     proc.pushFrame(game::interface::createLoaderForUnloadedPlugins(env.session.plugins()), false);
-    proc.run();
+    proc.run(0);
 
     // Verify
     a.checkEqual("01. getState", proc.getState(), interpreter::Process::Ended);
@@ -231,7 +231,7 @@ AFL_TEST("game.interface.Plugins:createFileLoader:success", a)
     // Test code
     interpreter::Process proc(env.session.world(), "testUnloaded", 99);
     proc.pushFrame(game::interface::createFileLoader("x.q", "origin"), false);
-    proc.run();
+    proc.run(0);
 
     // Verify
     a.checkEqual("01. getState", proc.getState(), interpreter::Process::Ended);
@@ -252,7 +252,7 @@ AFL_TEST("game.interface.Plugins:createFileLoader:failure", a)
     // Test code
     interpreter::Process proc(env.session.world(), "testUnloaded", 99);
     proc.pushFrame(game::interface::createFileLoader("x.q", "origin"), false);
-    proc.run();
+    proc.run(0);
 
     // Verify
     a.checkEqual("01. getState", proc.getState(), interpreter::Process::Ended);

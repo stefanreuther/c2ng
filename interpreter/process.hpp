@@ -111,6 +111,16 @@ namespace interpreter {
             virtual void finalizeProcess(Process& p) = 0;
         };
 
+        /** Observer.
+            An optional observer can inspect or manipulate a process as it executes. */
+        class Observer : public afl::base::Deletable {
+         public:
+            /** Observe process.
+                \param p Process
+                \see Process::run() */
+            virtual void checkProcess(Process& p) = 0;
+        };
+
         /** Freezer.
             If a process is in state Frozen, the Freezer links to the component that froze it.
             So far, this is just a tag interface. */
@@ -380,8 +390,14 @@ namespace interpreter {
             - Terminated
             - Failed
             - Suspended
-            - Waiting */
-        void run();
+            - Waiting
+
+            \param pObserver Optional observer.
+                             Called after every instruction that executes.
+                             Can modify the process' state by modifying frames, or using setState() to stop it.
+                             Note that this is also called if the process changed its status voluntarily,
+                             in which case getState() != Running already. */
+        void run(Observer* pObserver);
 
         /** Execute a single instruction.
             Does not catch errors; caller needs to do that. */

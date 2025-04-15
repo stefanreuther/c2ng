@@ -37,7 +37,7 @@ namespace {
         {
             interpreter::Process p(world, "name", 22);
             p.pushFrame(q.compileExpression(world), true).localValues.pushBackNew(new StructureValue(value));
-            AFL_CHECK_SUCCEEDS(a("01. run"), p.run());
+            AFL_CHECK_SUCCEEDS(a("01. run"), p.run(0));
             a.checkEqual("02. result", interpreter::getBooleanValue(p.getResult()), expect);
         }
 
@@ -47,7 +47,7 @@ namespace {
             SearchQuery q2(q);
             q2.setOptimisationLevel(-1);
             p.pushFrame(q2.compileExpression(world), true).localValues.pushBackNew(new StructureValue(value));
-            AFL_CHECK_SUCCEEDS(a("11. run"), p.run());
+            AFL_CHECK_SUCCEEDS(a("11. run"), p.run(0));
             a.checkEqual("12. result", interpreter::getBooleanValue(p.getResult()), expect);
         }
     }
@@ -165,7 +165,7 @@ AFL_TEST("game.SearchQuery:compileExpression:MatchLocation", a)
         SearchQuery q1(SearchQuery::MatchLocation, SearchQuery::allObjects(), "777, 888");
         interpreter::Process p(world, "name", 22);
         p.pushFrame(q1.compileExpression(world), true).localValues.pushBackNew(new StructureValue(value));
-        AFL_CHECK_SUCCEEDS(a("11. run"), p.run());
+        AFL_CHECK_SUCCEEDS(a("11. run"), p.run(0));
         a.checkEqual("12. result", interpreter::getBooleanValue(p.getResult()), true);
     }
     // - mismatch
@@ -173,7 +173,7 @@ AFL_TEST("game.SearchQuery:compileExpression:MatchLocation", a)
         SearchQuery q2(SearchQuery::MatchLocation, SearchQuery::allObjects(), "666, 888");
         interpreter::Process p(world, "name", 22);
         p.pushFrame(q2.compileExpression(world), true).localValues.pushBackNew(new StructureValue(value));
-        AFL_CHECK_SUCCEEDS(a("21. run"), p.run());
+        AFL_CHECK_SUCCEEDS(a("21. run"), p.run(0));
         a.checkEqual("22. result", interpreter::getBooleanValue(p.getResult()), false);
     }
 }
@@ -261,7 +261,7 @@ AFL_TEST("game.SearchQuery:compile", a)
     // Compile and run
     interpreter::Process p(world, "name", 22);
     p.pushFrame(testee.compile(world), true);
-    AFL_CHECK_SUCCEEDS(a("01. run"), p.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), p.run(0));
 
     int32_t iv;
     a.checkEqual("11. result", interpreter::checkIntegerArg(iv, p.getResult()), true);

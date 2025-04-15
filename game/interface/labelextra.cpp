@@ -462,7 +462,7 @@ game::interface::LabelExtra::runUpdater()
                 uint32_t pgid = processList.allocateProcessGroup();
                 processList.resumeProcess(proc, pgid);
                 processList.startProcessGroup(pgid);
-                m_session.sig_runRequest.raise();
+                m_session.runScripts();
                 return true;
             }
         } else {

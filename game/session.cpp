@@ -227,8 +227,7 @@ namespace {
  */
 
 game::Session::Session(afl::string::Translator& tx, afl::io::FileSystem& fs)
-    : sig_runRequest(),
-      sig_connectionChange(),
+    : sig_connectionChange(),
       m_log(),
       m_root(),
       m_shipList(),
@@ -395,7 +394,7 @@ game::Session::releaseAutoTaskEditor(afl::base::Ptr<interpreter::TaskEditor>& pt
             uint32_t pgid = pl.allocateProcessGroup();
             pl.resumeProcess(proc, pgid);
             pl.startProcessGroup(pgid);
-            pl.run();
+            runScripts();
         }
     }
 }
@@ -664,6 +663,22 @@ game::Session::saveConfiguration(std::auto_ptr<Task_t> then)
     } else {
         return then;
     }
+}
+
+void
+game::Session::runScripts()
+{
+    if (m_pScriptRunner.get() != 0) {
+        m_pScriptRunner->call();
+    } else {
+        processList().run(0);
+    }
+}
+
+void
+game::Session::setNewScriptRunner(afl::base::Closure<void()>* pRunner)
+{
+    m_pScriptRunner.reset(pRunner);
 }
 
 String_t

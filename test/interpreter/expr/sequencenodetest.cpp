@@ -49,7 +49,7 @@ AFL_TEST("interpreter.expr.SequenceNode:compileValue", a)
 
     // Run
     env.proc.pushFrame(bco, true);
-    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
     // Verify: keymap
     a.checkNonNull("11. getKeymapByName", env.world.keymaps().getKeymapByName("X"));
@@ -76,7 +76,7 @@ AFL_TEST("interpreter.expr.SequenceNode:compileEffect", a)
 
     // Run
     env.proc.pushFrame(bco, true);
-    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
     // Verify
     a.checkNonNull("11. getKeymapByName", env.world.keymaps().getKeymapByName("X"));
@@ -108,7 +108,7 @@ AFL_TEST("interpreter.expr.SequenceNode:compileCondition", a)
 
     // Run
     env.proc.pushFrame(bco, true);
-    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
     // Verify: keymap
     a.checkNonNull("11. getKeymapByName", env.world.keymaps().getKeymapByName("X"));

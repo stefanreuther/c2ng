@@ -58,7 +58,7 @@ game::proxy::SearchProxy::Responder::finalizeProcess(interpreter::Process& p)
      case interpreter::Process::Waiting:
         // Unexpected state (should not happen)
         break;
-                        
+
      case interpreter::Process::Ended:
         // Success
         if (const game::interface::ReferenceListContext* ctx = dynamic_cast<const game::interface::ReferenceListContext*>(p.getResult())) {
@@ -187,8 +187,7 @@ game::proxy::SearchProxy::search(const SearchQuery& q, bool saveQuery)
                     uint32_t pgid = processList.allocateProcessGroup();
                     processList.resumeProcess(proc, pgid);
                     processList.startProcessGroup(pgid);
-                    processList.run();
-                    // FIXME: removeTerminatedProcesses()?
+                    session.runScripts();
                 }
                 catch (std::exception& e) {
                     Responder(m_reply, tx).signalError(afl::string::Format(tx("Invalid search query: %s"), e.what()));

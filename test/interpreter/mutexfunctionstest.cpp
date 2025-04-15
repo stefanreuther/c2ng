@@ -175,7 +175,7 @@ AFL_TEST("interpreter.MutexFunctions:take-lock", a)
     // Run process
     Process p(env.world, "pro", 42);
     p.pushFrame(makeTakeLockBCO("LNAME"), true);
-    p.run();
+    p.run(0);
     a.checkEqual("01. getState", p.getState(), Process::Suspended);
 
     // Verify lock status
@@ -195,14 +195,14 @@ AFL_TEST("interpreter.MutexFunctions:locking-conflict", a)
     // Run process
     Process p1(env.world, "pro", 42);
     p1.pushFrame(makeTakeLockBCO("LNAME"), true);
-    p1.run();
+    p1.run(0);
     a.checkEqual("01. getState", p1.getState(), Process::Suspended);
 
     // Run another process that wishes to take that lock
     {
         Process p2(env.world, "bro", 44);
         p2.pushFrame(makeTakeLockBCO("LNAME"), true);
-        p2.run();
+        p2.run(0);
         a.checkEqual("11. getState", p2.getState(), Process::Failed);
     }
 
@@ -210,7 +210,7 @@ AFL_TEST("interpreter.MutexFunctions:locking-conflict", a)
     {
         Process p2(env.world, "bro", 44);
         p2.pushFrame(makeDummyBCO(makeTakeLockBCO("LNAME")), true);
-        p2.run();
+        p2.run(0);
         a.checkEqual("21. getState", p2.getState(), Process::Suspended);
     }
 }
@@ -227,7 +227,7 @@ AFL_TEST("interpreter.MutexFunctions:implicit-lock-release", a)
     {
         Process p(env.world, "pro", 42);
         p.pushFrame(makeTakeLockBCO("LNAME"), true);
-        p.run();
+        p.run(0);
         a.checkEqual("01. getState", p.getState(), Process::Suspended);
 
         // Verify lock status
@@ -250,13 +250,13 @@ AFL_TEST("interpreter.MutexFunctions:GetLockInfo:0", a)
     Environment env;
     Process taker(env.world, "pro", 42);
     taker.pushFrame(makeTakeLockBCO("LNAME"), true);
-    taker.run();
+    taker.run(0);
 
     // Real
     {
         Process querier(env.world, "q", 77);
         querier.pushFrame(makeGetLockInfoBCO("LNAME", 0), true);
-        querier.run();
+        querier.run(0);
         a.checkEqual("01. getState", querier.getState(), Process::Ended);
         a.checkEqual("02. result", toBoolean(querier), true);
     }
@@ -265,7 +265,7 @@ AFL_TEST("interpreter.MutexFunctions:GetLockInfo:0", a)
     {
         Process querier(env.world, "q", 77);
         querier.pushFrame(makeDummyBCO(makeGetLockInfoBCO("LNAME", 0)), true);
-        querier.run();
+        querier.run(0);
         a.checkEqual("11. getState", querier.getState(), Process::Ended);
         a.checkEqual("12. result", toBoolean(querier), false);
     }
@@ -280,13 +280,13 @@ AFL_TEST("interpreter.MutexFunctions:GetLockInfo:1", a)
     Environment env;
     Process taker(env.world, "pro", 42);
     taker.pushFrame(makeTakeLockBCO("LNAME"), true);
-    taker.run();
+    taker.run(0);
 
     // Real
     {
         Process querier(env.world, "q", 77);
         querier.pushFrame(makeGetLockInfoBCO("LNAME", 1), true);
-        querier.run();
+        querier.run(0);
         a.checkEqual("01. getState", querier.getState(), Process::Ended);
         a.checkEqual("02. result", toString(querier), "pro");
     }
@@ -295,7 +295,7 @@ AFL_TEST("interpreter.MutexFunctions:GetLockInfo:1", a)
     {
         Process querier(env.world, "q", 77);
         querier.pushFrame(makeDummyBCO(makeGetLockInfoBCO("LNAME", 1)), true);
-        querier.run();
+        querier.run(0);
         a.checkEqual("11. getState", querier.getState(), Process::Ended);
         a.checkNull("12. result", querier.getResult());
     }
@@ -310,13 +310,13 @@ AFL_TEST("interpreter.MutexFunctions:GetLockInfo:2", a)
     Environment env;
     Process taker(env.world, "pro", 42);
     taker.pushFrame(makeTakeLockWithHintBCO("HNAME", "Hint!"), true);
-    taker.run();
+    taker.run(0);
 
     // Real
     {
         Process querier(env.world, "q", 77);
         querier.pushFrame(makeGetLockInfoBCO("HNAME", 2), true);
-        querier.run();
+        querier.run(0);
         a.checkEqual("01. getState", querier.getState(), Process::Ended);
         a.checkEqual("02. result", toString(querier), "Hint!");
     }
@@ -325,7 +325,7 @@ AFL_TEST("interpreter.MutexFunctions:GetLockInfo:2", a)
     {
         Process querier(env.world, "q", 77);
         querier.pushFrame(makeDummyBCO(makeGetLockInfoBCO("HNAME", 2)), true);
-        querier.run();
+        querier.run(0);
         a.checkEqual("11. getState", querier.getState(), Process::Ended);
         a.checkNull("12. result", querier.getResult());
     }
@@ -340,7 +340,7 @@ AFL_TEST("interpreter.MutexFunctions:GetLockInfo:0:fail", a)
     Environment env;
     Process querier(env.world, "q", 77);
     querier.pushFrame(makeGetLockInfoBCO("LNAME", 0), true);
-    querier.run();
+    querier.run(0);
     a.checkEqual("01. getState", querier.getState(), Process::Ended);
     a.checkEqual("02. result", toBoolean(querier), false);
 }
@@ -354,7 +354,7 @@ AFL_TEST("interpreter.MutexFunctions:GetLockInfo:1:fail", a)
     Environment env;
     Process querier(env.world, "q", 77);
     querier.pushFrame(makeGetLockInfoBCO("LNAME", 1), true);
-    querier.run();
+    querier.run(0);
     a.checkEqual("01. getState", querier.getState(), Process::Ended);
     a.checkNull("02. result", querier.getResult());
 }
@@ -368,7 +368,7 @@ AFL_TEST("interpreter.MutexFunctions:GetLockInfo:2:fail", a)
     Environment env;
     Process querier(env.world, "q", 77);
     querier.pushFrame(makeGetLockInfoBCO("LNAME", 2), true);
-    querier.run();
+    querier.run(0);
     a.checkEqual("01. getState", querier.getState(), Process::Ended);
     a.checkNull("02. result", querier.getResult());
 }
@@ -390,7 +390,7 @@ AFL_TEST("interpreter.MutexFunctions:Lock:null", a)
     {
         Process p(env.world, "p", 1);
         p.pushFrame(bco, true);
-        p.run();
+        p.run(0);
         a.checkEqual("01. getState", p.getState(), Process::Failed);
     }
 
@@ -398,7 +398,7 @@ AFL_TEST("interpreter.MutexFunctions:Lock:null", a)
     {
         Process p(env.world, "p", 1);
         p.pushFrame(makeDummyBCO(bco), true);
-        p.run();
+        p.run(0);
         a.checkEqual("11. getState", p.getState(), Process::Failed);
     }
 }
@@ -419,7 +419,7 @@ AFL_TEST("interpreter.MutexFunctions:Lock:loop", a)
     {
         Process p(env.world, "p", 1);
         p.pushFrame(bco, true);
-        p.run();
+        p.run(0);
         a.checkEqual("01. getState", p.getState(), Process::Failed);
     }
 
@@ -427,7 +427,7 @@ AFL_TEST("interpreter.MutexFunctions:Lock:loop", a)
     {
         Process p(env.world, "p", 1);
         p.pushFrame(makeDummyBCO(bco), true);
-        p.run();
+        p.run(0);
         a.checkEqual("11. getState", p.getState(), Process::Failed);
     }
 }
@@ -449,7 +449,7 @@ AFL_TEST("interpreter.MutexFunctions:Lock:Dim", a)
     {
         Process p(env.world, "p", 1);
         p.pushFrame(bco, true);
-        p.run();
+        p.run(0);
         a.checkEqual("01. getState", p.getState(), Process::Failed);
     }
 
@@ -457,7 +457,7 @@ AFL_TEST("interpreter.MutexFunctions:Lock:Dim", a)
     {
         Process p(env.world, "p", 1);
         p.pushFrame(makeDummyBCO(bco), true);
-        p.run();
+        p.run(0);
         a.checkEqual("11. getState", p.getState(), Process::Failed);
     }
 }
@@ -475,7 +475,7 @@ AFL_TEST("interpreter.MutexFunctions:Lock:Str", a)
     bco->addPushLiteral(env.world.getGlobalValue("LOCK"));
     bco->addInstruction(Opcode::maUnary, interpreter::unStr, 0);
     p.pushFrame(bco, true);
-    p.run();
+    p.run(0);
 
     a.checkEqual("01. getState", p.getState(), Process::Ended);
     a.checkEqual("02. result", toString(p), "Lock");

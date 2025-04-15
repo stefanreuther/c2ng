@@ -755,7 +755,7 @@ AFL_TEST("interpreter.BytecodeObject:merge", a)
 
         proc.pushNewValue(interpreter::makeIntegerValue(0));
         proc.pushFrame(bco, false);
-        proc.run();
+        proc.run(0);
         a.checkEqual("01. getState", proc.getState(), interpreter::Process::Ended);
 
         // Result must equal the number of iterations

@@ -45,7 +45,7 @@ AFL_TEST("interpreter.expr.UnaryNode:compileValue", a)
 
     // Run
     env.proc.pushFrame(bco, true);
-    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
     // Verify
     const afl::data::Value* pv = env.proc.getResult();
@@ -69,7 +69,7 @@ AFL_TEST("interpreter.expr.UnaryNode:compileEffect", a)
 
     // Run
     env.proc.pushFrame(bco, true);
-    AFL_CHECK_SUCCEEDS(a("11. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("11. run"), env.proc.run(0));
 
     // Verify
     a.checkNonNull("21. getKeymapByName", env.world.keymaps().getKeymapByName("K"));

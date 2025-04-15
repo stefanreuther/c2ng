@@ -167,7 +167,7 @@ interpreter::test::ExpressionVerifier::verifyFile(const char* expr, int result)
         Process exec(world, "verifyFile", 9);
         setupContexts(exec);
         exec.pushFrame(bco, false);
-        exec.run();
+        exec.run(0);
         me.check("run succeeds", exec.getState() == Process::Ended);
 
         const afl::data::Value* resv = exec.getResult();
@@ -210,7 +210,7 @@ interpreter::test::ExpressionVerifier::verifyNull(const char* expr)
         Process exec(world, "verifyNull", 9);
         setupContexts(exec);
         exec.pushFrame(bco, false);
-        exec.run();
+        exec.run(0);
         me.check("run succeeds", exec.getState() == Process::Ended);
         me.check("null result", exec.getResult() == 0);
     }
@@ -247,7 +247,7 @@ interpreter::test::ExpressionVerifier::verifyString(const char* expr, const char
         Process exec(world, "verifyString", 9);
         setupContexts(exec);
         exec.pushFrame(bco, false);
-        exec.run();
+        exec.run(0);
         me.check("run succeeds", exec.getState() == Process::Ended);
 
         const afl::data::Value* resv = exec.getResult();
@@ -292,7 +292,7 @@ interpreter::test::ExpressionVerifier::verifyFloat(const char* expr, double resu
         Process exec(world, "verifyFloat", 9);
         setupContexts(exec);
         exec.pushFrame(bco, false);
-        exec.run();
+        exec.run(0);
         me.check("run succeeds", exec.getState() == Process::Ended);
 
         const afl::data::Value* resv = exec.getResult();
@@ -338,7 +338,7 @@ interpreter::test::ExpressionVerifier::verifyExecutionError(const char* expr)
         Process exec(world, "verifyExecutionError", 9);
         setupContexts(exec);
         exec.pushFrame(bco, false);
-        exec.run();
+        exec.run(0);
         me.check("run fails", exec.getState() == Process::Failed);
     }
     catch (AssertionFailedException&) {
@@ -438,7 +438,7 @@ interpreter::test::ExpressionVerifier::verifyStatement(const char* stmt)
         me.check("compile result", result != StatementCompiler::CompiledExpression);
 
         exec.pushFrame(bco, false);
-        exec.run();
+        exec.run(0);
         me.check("run ok", exec.getState() == Process::Ended);
     }
     catch (AssertionFailedException&) {
@@ -474,7 +474,7 @@ interpreter::test::ExpressionVerifier::verifyScalar(const char* expr, int result
         Process exec(world, "verifyScalar", 9);
         setupContexts(exec);
         exec.pushFrame(bco, false);
-        exec.run();
+        exec.run(0);
         me.check("run ok", exec.getState() == Process::Ended);
 
         const afl::data::Value* resv = exec.getResult();

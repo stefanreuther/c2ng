@@ -51,7 +51,7 @@ AFL_TEST("interpreter.expr.CaseNode:enabled", a)
 
     // Run
     env.proc.pushFrame(bco, true);
-    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
     // Verify
     a.checkEqual("11. getBooleanValue", interpreter::getBooleanValue(env.proc.getResult()), true);
@@ -72,7 +72,7 @@ AFL_TEST("interpreter.expr.CaseNode:disabled", a)
 
     // Run
     env.proc.pushFrame(bco, true);
-    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
     // Verify
     a.checkEqual("11. getBooleanValue", interpreter::getBooleanValue(env.proc.getResult()), false);
@@ -97,7 +97,7 @@ AFL_TEST("interpreter.expr.CaseNode:convertToAssignment:success", a)
 
     // Run
     env.proc.pushFrame(bco, true);
-    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
     // Verify: returned value is 10, newly-assigned values
     const afl::data::Value* pv = env.proc.getResult();
@@ -125,7 +125,7 @@ AFL_TEST("interpreter.expr.CaseNode:convertToAssignment:failure", a)
 
     // Run
     env.proc.pushFrame(bco, true);
-    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
     // Verify: returned value is null, initial value of local variable
     const afl::data::Value* pv = env.proc.getResult();

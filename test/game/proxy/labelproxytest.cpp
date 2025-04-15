@@ -65,7 +65,6 @@ namespace {
         t.session().setRoot(r.asPtr());
         t.session().setGame(g.asPtr());
         t.session().setShipList(new game::spec::ShipList());
-        t.session().sig_runRequest.add(&t.session().processList(), &interpreter::ProcessList::run);
 
         // Add objects
         addPlanet(t, 1, 1000, 1001, "Romulus");

@@ -225,7 +225,7 @@ namespace {
         uint32_t pgid = processList.allocateProcessGroup();
         processList.resumeProcess(proc, pgid);
         processList.startProcessGroup(pgid);
-        processList.run();
+        session.runScripts();
 
         int returnCode = 0;
         if (proc.getState() == interpreter::Process::Failed) {
@@ -275,7 +275,6 @@ game::interface::ScriptApplication::appMain()
     FileSystem& fs = fileSystem();
     Session session(tx, fs);
     session.log().addListener(log());
-    session.sig_runRequest.add(&session.processList(), &interpreter::ProcessList::run);
 
     // If we are in exec mode, inject core.q
     if (!params.opt_nostdlib) {

@@ -8,10 +8,10 @@
 #include "afl/base/signal.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "afl/string/string.hpp"
+#include "interpreter/process.hpp"
 
 namespace interpreter {
 
-    class Process;
     class World;
 
     /** Process list.
@@ -157,8 +157,10 @@ namespace interpreter {
         /** Run selected processes.
             Runs as many processes as it possibly can, in priority order:
             - processes started with startProcessGroup()
-            - processes that got selected because their predecessor in their process group terminated */
-        void run();
+            - processes that got selected because their predecessor in their process group terminated
+
+            \param pObserver Process observer; see Process::run() */
+        void run(Process::Observer* pObserver);
 
         /** Terminate all processes.
             Marks all processes terminated, excluding frozen ones. Call removeTerminatedProcesses() to actually remove the objects.

@@ -285,7 +285,7 @@ interpreter::ProcessList::continueProcessWithFailure(Process& proc, String_t err
 
 // Run selected processes.
 void
-interpreter::ProcessList::run()
+interpreter::ProcessList::run(Process::Observer* pObserver)
 {
     // ex int/process.h:runRunnableProcesses, sort-of
     // ex ccexec.pas:RunRunnableProcesses, sort-of
@@ -294,7 +294,7 @@ interpreter::ProcessList::run()
         m_running = true;
         try {
             while (Process* proc = findRunningProcess()) {
-                proc->run();
+                proc->run(pObserver);
                 sig_processStateChange.raise(*proc, false);
 
                 bool handled = false;

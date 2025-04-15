@@ -55,7 +55,7 @@ AFL_TEST("interpreter.ProcessObserverContext", a)
     // Create a process and run it
     interpreter::Process p1(world, "p1", 999);
     p1.pushFrame(bco, false);
-    p1.run();
+    p1.run(0);
     a.checkEqual("01. getState", p1.getState(), interpreter::Process::Suspended);
     a.checkEqual("02. getIntegerValue A", getIntegerValue(p1, "A"), 42);
 
@@ -84,7 +84,7 @@ AFL_TEST("interpreter.ProcessObserverContext", a)
     a.checkEqual("31. getIntegerValue A", getIntegerValue(p2, "A"), 42);
 
     // Run the first process; this will disconnect the second one
-    p1.run();
+    p1.run(0);
     a.checkEqual("41. getState", p1.getState(), interpreter::Process::Suspended);
     a.checkEqual("42. getIntegerValue A", getIntegerValue(p1, "A"), 42);
 

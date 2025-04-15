@@ -116,7 +116,7 @@ namespace {
         a.checkDifferent("result", result, interpreter::StatementCompiler::CompiledExpression);
 
         exec.pushFrame(bco, false);
-        exec.run();
+        exec.run(0);
         a.checkEqual("getState", exec.getState(), interpreter::Process::Ended);
         a.checkEqual("getError", exec.getError().what(), String_t());
     }

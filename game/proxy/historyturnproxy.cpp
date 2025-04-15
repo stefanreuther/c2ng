@@ -204,8 +204,7 @@ class game::proxy::HistoryTurnProxy::LoadRequest : public util::Request<Session>
             uint32_t pgid = s.processList().allocateProcessGroup();
             s.processList().resumeProcess(proc, pgid);
             s.processList().startProcessGroup(pgid);
-            s.processList().run();
-            s.processList().removeTerminatedProcesses();
+            s.runScripts();
         }
  private:
     util::RequestSender<HistoryTurnProxy> m_response;

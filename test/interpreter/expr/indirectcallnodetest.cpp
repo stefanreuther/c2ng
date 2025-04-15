@@ -103,7 +103,7 @@ AFL_TEST("interpreter.expr.IndirectCallNode:compileValue", a)
     // Run
     env.proc.pushFrame(bco, true);
     env.data["10,20"] = 42;
-    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
     // Verify
     const afl::data::Value* pv = env.proc.getResult();
@@ -134,7 +134,7 @@ AFL_TEST("interpreter.expr.IndirectCallNode:compileStore", a)
 
     // Run
     env.proc.pushFrame(bco, true);
-    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
     // Verify
     // - Value must remain on stack
@@ -179,7 +179,7 @@ AFL_TEST("interpreter.expr.IndirectCallNode:compileCondition", a)
     {
         env.data["8,9"] = 77;
         env.proc.pushFrame(bco, true);
-        AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+        AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
         const afl::data::Value* pv = env.proc.getResult();
         int32_t iv = 0;
@@ -191,7 +191,7 @@ AFL_TEST("interpreter.expr.IndirectCallNode:compileCondition", a)
     {
         env.data["8,9"] = 0;
         env.proc.pushFrame(bco, true);
-        AFL_CHECK_SUCCEEDS(a("21. run"), env.proc.run());
+        AFL_CHECK_SUCCEEDS(a("21. run"), env.proc.run(0));
 
         const afl::data::Value* pv = env.proc.getResult();
         int32_t iv = 0;
@@ -222,7 +222,7 @@ AFL_TEST("interpreter.expr.IndirectCallNode:read+write", a)
     // Run
     env.proc.pushFrame(bco, true);
     env.data["31,41"] = 10;
-    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run());
+    AFL_CHECK_SUCCEEDS(a("01. run"), env.proc.run(0));
 
     // Verify
     // - Updated value must remain on stack

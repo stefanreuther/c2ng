@@ -66,7 +66,7 @@ namespace {
         Process& proc = session.processList().create(session.world(), "p");
         proc.pushFrame(bco, false);
         proc.pushNewContext(ctx.clone());
-        proc.run();
+        proc.run(0);
         a.checkEqual("process state", proc.getState(), expectedState);
     }
 
@@ -124,7 +124,7 @@ AFL_TEST("game.interface.GlobalActionContext:basics", a)
     // Run the action
     Process& proc = u.session.processList().create(u.session.world(), "p");
     proc.pushFrame(ctx.data()->actions.compileGlobalAction(p, u.session.world(), GlobalActions::Flags_t()), false);
-    proc.run();
+    proc.run(0);
     a.checkEqual("51. run action", proc.getState(), Process::Ended);
 
     // Verify result

@@ -322,7 +322,7 @@ namespace {
     void runBCO(Environment& env, BCORef_t bco)
     {
         env.proc.pushFrame(bco, true);
-        env.proc.run();
+        env.proc.run(0);
     }
 
     void runInstruction(Environment& env, uint8_t major, uint8_t minor, uint16_t arg)
@@ -676,7 +676,7 @@ AFL_TEST("interpreter.Process:run:pushloc", a)
     Process::Frame& f = env.proc.pushFrame(bco, true);
     f.localValues.setNew(3, interpreter::makeStringValue("local"));
 
-    env.proc.run();
+    env.proc.run(0);
 
     a.checkEqual("01. getState", env.proc.getState(), Process::Ended);
     a.checkEqual("02. result", toString(env), "local");
@@ -697,7 +697,7 @@ AFL_TEST("interpreter.Process:run:pushtop", a)
     Process::Frame& innerFrame = env.proc.pushFrame(innerBCO, true);
     innerFrame.localValues.setNew(7, interpreter::makeStringValue("inner"));
 
-    env.proc.run();
+    env.proc.run(0);
 
     a.checkEqual("01. getState", env.proc.getState(), Process::Ended);
     a.checkEqual("02. result", toString(env), "outer");
@@ -1423,7 +1423,7 @@ AFL_TEST("interpreter.Process:run:storeloc", a)
     Process::Frame& f = env.proc.pushFrame(bco, true);
     f.localValues.setNew(3, interpreter::makeStringValue("local"));  // will immediately be overwritten
 
-    env.proc.run();
+    env.proc.run(0);
 
     a.checkEqual("01. getState", env.proc.getState(), Process::Ended);
     a.checkEqual("02. result", toInteger(env), 21);
@@ -1449,7 +1449,7 @@ AFL_TEST("interpreter.Process:run:storetop", a)
     Process::Frame& innerFrame = env.proc.pushFrame(innerBCO, true);
     innerFrame.localValues.setNew(7, interpreter::makeStringValue("inner"));
 
-    env.proc.run();
+    env.proc.run(0);
 
     a.checkEqual("01. getState", env.proc.getState(), Process::Ended);
     a.checkEqual("02. result", toInteger(env), 12);
@@ -1551,7 +1551,7 @@ AFL_TEST("interpreter.Process:run:poploc", a)
     Process::Frame& f = env.proc.pushFrame(bco, true);
     f.localValues.setNew(3, interpreter::makeStringValue("local"));  // will immediately be overwritten
 
-    env.proc.run();
+    env.proc.run(0);
 
     a.checkEqual("01. getState", env.proc.getState(), Process::Ended);
     a.checkEqual("02. result", toInteger(env), 16);
@@ -1576,7 +1576,7 @@ AFL_TEST("interpreter.Process:run:poptop", a)
     Process::Frame& innerFrame = env.proc.pushFrame(innerBCO, true);
     innerFrame.localValues.setNew(7, interpreter::makeStringValue("inner"));
 
-    env.proc.run();
+    env.proc.run(0);
 
     a.checkEqual("01. getState", env.proc.getState(), Process::Ended);
     a.checkEqual("02. result", toInteger(env), 12);
@@ -1874,7 +1874,7 @@ AFL_TEST("interpreter.Process:run:dimtop", a)
     innerBCO->addInstruction(Opcode::maDim, Opcode::sStatic, innerBCO->addName("TV"));
     env.proc.pushFrame(innerBCO, true);
 
-    env.proc.run();
+    env.proc.run(0);
     a.checkEqual("01. getState", env.proc.getState(), Process::Ended);
     a.checkEqual("02. result", toInteger(env), 7);
 }
@@ -2984,7 +2984,7 @@ AFL_TEST("interpreter.Process:run:sbind", a)
     firstProcess.pushNewValue(new SubroutineValue(innerBCO));               // function to bind
     firstBCO->addInstruction(Opcode::maSpecial, Opcode::miSpecialBind, 1);  // produces bound function
     firstProcess.pushFrame(firstBCO, true);
-    firstProcess.run();
+    firstProcess.run(0);
 
     // Result must be valid and callable
     a.checkEqual("01. getState", firstProcess.getState(), Process::Ended);
@@ -3285,7 +3285,7 @@ AFL_TEST("interpreter.Process:run:inplace-unary", a)
         Environment env;
         Process::Frame& frame = env.proc.pushFrame(incBCO, true);
         frame.localValues.setNew(12, interpreter::makeIntegerValue(4));
-        env.proc.run();
+        env.proc.run(0);
 
         a.checkEqual("01. getState", env.proc.getState(), Process::Ended);
         a.checkEqual("02. result", toInteger(env), 5);
@@ -3296,7 +3296,7 @@ AFL_TEST("interpreter.Process:run:inplace-unary", a)
         Environment env;
         Process::Frame& frame = env.proc.pushFrame(decBCO, true);
         frame.localValues.setNew(12, interpreter::makeFloatValue(2.5));
-        env.proc.run();
+        env.proc.run(0);
 
         a.checkEqual("11. getState", env.proc.getState(), Process::Ended);
         a.checkEqual("12. result", toFloat(env), 1.5);
@@ -3307,7 +3307,7 @@ AFL_TEST("interpreter.Process:run:inplace-unary", a)
         Environment env;
         Process::Frame& frame = env.proc.pushFrame(incBCO, true);
         frame.localValues.setNew(12, interpreter::makeBooleanValue(1));
-        env.proc.run();
+        env.proc.run(0);
 
         a.checkEqual("21. getState", env.proc.getState(), Process::Ended);
         a.checkEqual("22. result", toInteger(env), 2);
@@ -3317,7 +3317,7 @@ AFL_TEST("interpreter.Process:run:inplace-unary", a)
     {
         Environment env;
         /*Process::Frame& frame =*/ env.proc.pushFrame(decBCO, true);
-        env.proc.run();
+        env.proc.run(0);
 
         a.checkEqual("31. getState", env.proc.getState(), Process::Ended);
         a.check("32. result", isNull(env));

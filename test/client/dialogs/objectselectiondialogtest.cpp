@@ -101,7 +101,7 @@ namespace {
                     proc.pushFrame(bco, false);
                     processList.resumeProcess(proc, pgid);
                     processList.startProcessGroup(pgid);
-                    processList.run();
+                    processList.run(0);
                     processList.removeTerminatedProcesses();
                 }
 

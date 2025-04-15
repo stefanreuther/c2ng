@@ -221,9 +221,6 @@ namespace client { namespace si {
         /** SignalConnection for interpreter::ProcessList::sig_processGroupFinish */
         afl::base::SignalConnection conn_processGroupFinish;
 
-        /** SignalConnection for game::Session::sig_runRequest */
-        afl::base::SignalConnection conn_runRequest;
-
         /** Sender to UserSide. */
         util::RequestSender<UserSide> m_reply;
 
